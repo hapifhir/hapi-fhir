@@ -1,4 +1,4 @@
-package ca.uhn.fhir.model.api;
+package ca.uhn.fhir.model.api.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

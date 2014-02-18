@@ -1,4 +1,4 @@
-package ca.uhn.fhir.model.api;
+package ca.uhn.fhir.model.api.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -7,7 +7,7 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(value= {ElementType.FIELD})
-public @interface ResourceElement {
+public @interface Child {
 
 	/**
 	 * Constant value to supply for {@link #order()} when the order is defined
@@ -23,6 +23,6 @@ public @interface ResourceElement {
 
 	int max() default 1;
 
-	ResourceChoiceElement choice() default @ResourceChoiceElement();
+	Choice choice() default @Choice();
 	
 }

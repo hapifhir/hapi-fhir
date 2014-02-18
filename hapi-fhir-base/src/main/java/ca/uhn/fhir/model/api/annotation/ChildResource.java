@@ -1,14 +1,16 @@
-package ca.uhn.fhir.model.api;
+package ca.uhn.fhir.model.api.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import ca.uhn.fhir.model.api.IResource;
+
 @Retention(RetentionPolicy.RUNTIME)
 @Target(value= {ElementType.FIELD})
-public @interface ResourceChoiceElement {
+public @interface ChildResource {
 
-	Class<? extends IDatatype>[] types() default {};
-	
+	Class<? extends IResource>[] types();
+
 }

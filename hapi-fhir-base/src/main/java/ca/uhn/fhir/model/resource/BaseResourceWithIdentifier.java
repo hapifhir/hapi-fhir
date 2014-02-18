@@ -1,14 +1,14 @@
 package ca.uhn.fhir.model.resource;
 
-import ca.uhn.fhir.model.api.ResourceElement;
+import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.datatype.IdentifierDt;
 
 /**
  * Classes extending this class must be annotated with 
  */
-public class BaseResourceWithIdentifier extends BaseResource {
+public abstract class BaseResourceWithIdentifier extends BaseResource {
 
-	@ResourceElement(name="identifier", order=ResourceElement.ORDER_UNKNOWN)
+	@Child(name="identifier", order=Child.ORDER_UNKNOWN)
 	private IdentifierDt myIdentifier;
 	
 }

@@ -2,12 +2,9 @@ package ca.uhn.fhir.context;
 
 import static org.apache.commons.lang3.StringUtils.*;
 
-import java.beans.BeanDescriptor;
-import java.beans.IntrospectionException;
-import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -15,13 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.StringUtils;
-
-import com.ctc.wstx.util.StringUtil;
-
 import ca.uhn.fhir.model.api.CodeableConceptElement;
-import ca.uhn.fhir.model.api.DatatypeDefinition;
 import ca.uhn.fhir.model.api.ICodeEnum;
 import ca.uhn.fhir.model.api.ICompositeDatatype;
 import ca.uhn.fhir.model.api.ICompositeElement;
@@ -29,21 +20,27 @@ import ca.uhn.fhir.model.api.IDatatype;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IPrimitiveDatatype;
 import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.api.ResourceChoiceElement;
-import ca.uhn.fhir.model.api.ResourceElement;
 import ca.uhn.fhir.model.api.ResourceReference;
-import ca.uhn.fhir.model.api.ResourceReferenceElement;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildResource;
+import ca.uhn.fhir.model.api.annotation.Datatype;
+import ca.uhn.fhir.model.api.annotation.Choice;
 import ca.uhn.fhir.model.resource.ResourceDefinition;
 
 class ModelScanner {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ModelScanner.class);
 
 	private Map<Class<? extends IElement>, BaseRuntimeElementDefinition<?>> myClassToResourceDefinitions = new HashMap<Class<? extends IElement>, BaseRuntimeElementDefinition<?>>();
-	private Map<String, BaseRuntimeElementDefinition<?>> myNameToResourceDefinitions = new HashMap<String, BaseRuntimeElementDefinition<?>>();
-
+	private Map<String, RuntimeResourceDefinition> myNameToElementDefinitions = new HashMap<String, RuntimeResourceDefinition>();
+	private Set<Class<? extends IElement>> myScanAlso = new HashSet<Class<? extends IElement>>();
+	
 	// private Map<String, RuntimeResourceDefinition>
 	// myNameToDatatypeDefinitions = new HashMap<String,
 	// RuntimeDatatypeDefinition>();
+
+	public Map<String, RuntimeResourceDefinition> getNameToResourceDefinitions() {
+		return (myNameToElementDefinitions);
+	}
 
 	ModelScanner(Class<? extends IResource>... theResourceTypes) throws ConfigurationException {
 		for (Class<? extends IResource> nextClass : theResourceTypes) {
@@ -67,7 +64,7 @@ class ModelScanner {
 			return scanResource(resClass, resourceDefinition);
 		}
 
-		DatatypeDefinition datatypeDefinition = theClass.getAnnotation(DatatypeDefinition.class);
+		Datatype datatypeDefinition = theClass.getAnnotation(Datatype.class);
 		if (datatypeDefinition != null) {
 			if (ICompositeDatatype.class.isAssignableFrom(theClass)) {
 				@SuppressWarnings("unchecked")
@@ -78,14 +75,14 @@ class ModelScanner {
 				Class<? extends IPrimitiveDatatype> resClass = (Class<? extends IPrimitiveDatatype>) theClass;
 				return scanPrimitiveDatatype(resClass, datatypeDefinition);
 			} else {
-				throw new ConfigurationException("Resource type contains a @" + DatatypeDefinition.class.getSimpleName() + " annotation but does not implement " + IDatatype.class.getCanonicalName() + ": " + theClass.getCanonicalName());
+				throw new ConfigurationException("Resource type contains a @" + Datatype.class.getSimpleName() + " annotation but does not implement " + IDatatype.class.getCanonicalName() + ": " + theClass.getCanonicalName());
 			}
 		}
 
-		throw new ConfigurationException("Resource type does not contain a @" + ResourceDefinition.class.getSimpleName() + " annotation or a @" + DatatypeDefinition.class.getSimpleName() + " annotation: " + theClass.getCanonicalName());
+		throw new ConfigurationException("Resource type does not contain a @" + ResourceDefinition.class.getSimpleName() + " annotation or a @" + Datatype.class.getSimpleName() + " annotation: " + theClass.getCanonicalName());
 	}
 
-	private String scanCompositeDatatype(Class<? extends ICompositeDatatype> theClass, DatatypeDefinition theDatatypeDefinition) {
+	private String scanCompositeDatatype(Class<? extends ICompositeDatatype> theClass, Datatype theDatatypeDefinition) {
 		ourLog.debug("Scanning resource class: {}", theClass.getName());
 
 		String resourceName = theDatatypeDefinition.name();
@@ -93,23 +90,23 @@ class ModelScanner {
 			throw new ConfigurationException("Resource type @" + ResourceDefinition.class.getSimpleName() + " annotation contains no resource name: " + theClass.getCanonicalName());
 		}
 
-		if (myNameToResourceDefinitions.containsKey(resourceName)) {
-			if (!myNameToResourceDefinitions.get(resourceName).getImplementingClass().equals(theClass)) {
-				throw new ConfigurationException("Detected duplicate element name '" + resourceName + "' in types '" + theClass.getCanonicalName() + "' and '" + myNameToResourceDefinitions.get(resourceName).getImplementingClass() + "'");
+		if (myNameToElementDefinitions.containsKey(resourceName)) {
+			if (!myNameToElementDefinitions.get(resourceName).getImplementingClass().equals(theClass)) {
+				throw new ConfigurationException("Detected duplicate element name '" + resourceName + "' in types '" + theClass.getCanonicalName() + "' and '" + myNameToElementDefinitions.get(resourceName).getImplementingClass() + "'");
 			}
 			return resourceName;
 		}
 
 		RuntimeCompositeDatatypeDefinition resourceDef = new RuntimeCompositeDatatypeDefinition(resourceName, theClass);
 		myClassToResourceDefinitions.put(theClass, resourceDef);
-		myNameToResourceDefinitions.put(resourceName, resourceDef);
+		myNameToElementDefinitions.put(resourceName, resourceDef);
 
 		scanCompositeElementForChildren(theClass, resourceDef);
 
 		return resourceName;
 	}
 
-	private String scanPrimitiveDatatype(Class<? extends IPrimitiveDatatype> theClass, DatatypeDefinition theDatatypeDefinition) {
+	private String scanPrimitiveDatatype(Class<? extends IPrimitiveDatatype> theClass, Datatype theDatatypeDefinition) {
 		ourLog.debug("Scanning resource class: {}", theClass.getName());
 
 		String resourceName = theDatatypeDefinition.name();
@@ -117,16 +114,16 @@ class ModelScanner {
 			throw new ConfigurationException("Resource type @" + ResourceDefinition.class.getSimpleName() + " annotation contains no resource name: " + theClass.getCanonicalName());
 		}
 
-		if (myNameToResourceDefinitions.containsKey(resourceName)) {
-			if (!myNameToResourceDefinitions.get(resourceName).getImplementingClass().equals(theClass)) {
-				throw new ConfigurationException("Detected duplicate element name '" + resourceName + "' in types '" + theClass.getCanonicalName() + "' and '" + myNameToResourceDefinitions.get(resourceName).getImplementingClass() + "'");
+		if (myNameToElementDefinitions.containsKey(resourceName)) {
+			if (!myNameToElementDefinitions.get(resourceName).getImplementingClass().equals(theClass)) {
+				throw new ConfigurationException("Detected duplicate element name '" + resourceName + "' in types '" + theClass.getCanonicalName() + "' and '" + myNameToElementDefinitions.get(resourceName).getImplementingClass() + "'");
 			}
 			return resourceName;
 		}
 
 		RuntimePrimitiveDatatypeDefinition resourceDef = new RuntimePrimitiveDatatypeDefinition(resourceName, theClass);
 		myClassToResourceDefinitions.put(theClass, resourceDef);
-		myNameToResourceDefinitions.put(resourceName, resourceDef);
+		myNameToElementDefinitions.put(resourceName, resourceDef);
 
 		return resourceName;
 	}
@@ -139,27 +136,27 @@ class ModelScanner {
 			throw new ConfigurationException("Resource type @" + ResourceDefinition.class.getSimpleName() + " annotation contains no resource name: " + theClass.getCanonicalName());
 		}
 
-		if (myNameToResourceDefinitions.containsKey(resourceName)) {
-			if (!myNameToResourceDefinitions.get(resourceName).getImplementingClass().equals(theClass)) {
-				throw new ConfigurationException("Detected duplicate element name '" + resourceName + "' in types '" + theClass.getCanonicalName() + "' and '" + myNameToResourceDefinitions.get(resourceName).getImplementingClass() + "'");
+		if (myNameToElementDefinitions.containsKey(resourceName)) {
+			if (!myNameToElementDefinitions.get(resourceName).getImplementingClass().equals(theClass)) {
+				throw new ConfigurationException("Detected duplicate element name '" + resourceName + "' in types '" + theClass.getCanonicalName() + "' and '" + myNameToElementDefinitions.get(resourceName).getImplementingClass() + "'");
 			}
 			return resourceName;
 		}
 
 		RuntimeResourceDefinition resourceDef = new RuntimeResourceDefinition(theClass, resourceName);
 		myClassToResourceDefinitions.put(theClass, resourceDef);
-		myNameToResourceDefinitions.put(resourceName, resourceDef);
+		myNameToElementDefinitions.put(resourceName, resourceDef);
 
 		scanCompositeElementForChildren(theClass, resourceDef);
 
 		return resourceName;
 	}
 
-	private void scanCompositeElementForChildren(Class<? extends ICompositeElement> theClass, BaseRuntimeCompositeElementDefinition<?> theDefinition) {
+	private void scanCompositeElementForChildren(Class<? extends ICompositeElement> theClass, BaseRuntimeElementCompositeDefinition<?> theDefinition) {
 		Set<String> elementNames = new HashSet<String>();
 		Map<Integer, BaseRuntimeChildDefinition> orderToElementDef = new HashMap<Integer, BaseRuntimeChildDefinition>();
 		for (Field next : theClass.getFields()) {
-			ResourceElement element = next.getAnnotation(ResourceElement.class);
+			Child element = next.getAnnotation(Child.class);
 			if (element == null) {
 				ourLog.debug("Ignoring non-type field: " + next.getName());
 				continue;
@@ -170,7 +167,7 @@ class ModelScanner {
 			int min = element.min();
 			int max = element.max();
 
-			ResourceChoiceElement choiceAttr = element.choice();
+			Choice choiceAttr = element.choice();
 			List<Class<? extends IElement>> choiceTypes = new ArrayList<Class<? extends IElement>>();
 			for (Class<? extends IElement> nextChoiceType : choiceAttr.types()) {
 				choiceTypes.add(nextChoiceType);
@@ -184,54 +181,64 @@ class ModelScanner {
 				throw new ConfigurationException("Detected duplicate field name '" + elementName + "' in type '" + theClass.getCanonicalName() + "'");
 			}
 
-			ResourceReferenceElement resRefAnnotation = next.getAnnotation(ResourceReferenceElement.class);
+			ChildResource resRefAnnotation = next.getAnnotation(ChildResource.class);
 			if (choiceTypes.isEmpty() == false) {
-
-				List<String> choiceNames = new ArrayList<String>();
-				for (Class<? extends IElement> nextChoiceType : choiceTypes) {
-					choiceNames.add(scan(nextChoiceType));
-				}
-
-				RuntimeChildChoiceDefinition def = new RuntimeChildChoiceDefinition(next, elementName, min, max, choiceNames);
+				/*
+				 * Child is a choice element
+				 */
+				myScanAlso.addAll(choiceTypes);
+				RuntimeChildChoiceDefinition def = new RuntimeChildChoiceDefinition(next, elementName, min, max, choiceTypes);
 				orderToElementDef.put(order, def);
 
 			} else if (ResourceReference.class.isAssignableFrom(next.getType())) {
+				/*
+				 * Child is a resource reference
+				 */
 				if (resRefAnnotation == null) {
-					throw new ConfigurationException("Field '" + elementName + "' in type '" + theClass.getCanonicalName() + "' is a resource reference but does not have a @" + ResourceReferenceElement.class.getSimpleName() + " annotation");
+					throw new ConfigurationException("Field '" + elementName + "' in type '" + theClass.getCanonicalName() + "' is a resource reference but does not have a @" + ChildResource.class.getSimpleName() + " annotation");
 				}
 
-				Class<? extends IResource> refType = resRefAnnotation.type();
-				String elementResourceName = scan(refType);
-
-				if (!(myNameToResourceDefinitions.get(elementResourceName) instanceof IResource)) {
-					throw new ConfigurationException("Resource reference '" + elementName + "' in type '" + theClass.getCanonicalName() + "' is a resource reference but references a non-resource type: "
-							+ myNameToResourceDefinitions.get(elementResourceName).getClass().getCanonicalName());
-				}
-
-				RuntimeChildResourceDefinition def = new RuntimeChildResourceDefinition(next, elementName, elementResourceName, min, max);
+				Class<? extends IResource>[] refType = resRefAnnotation.types();
+				List<Class<? extends IResource>> refTypesList = Arrays.asList(refType);
+				myScanAlso.addAll(refTypesList);
+				RuntimeChildResourceDefinition def = new RuntimeChildResourceDefinition(next, elementName, min, max, refTypesList);
 				orderToElementDef.put(order, def);
+				
 			} else {
 				if (resRefAnnotation != null) {
-					throw new ConfigurationException("Field '" + elementName + "' in type '" + theClass.getCanonicalName() + "' is not a resource reference but has a @" + ResourceReferenceElement.class.getSimpleName() + " annotation");
+					throw new ConfigurationException("Field '" + elementName + "' in type '" + theClass.getCanonicalName() + "' is not a resource reference but has a @" + ChildResource.class.getSimpleName() + " annotation");
 				}
 				if (!IDatatype.class.isAssignableFrom(next.getType())) {
 					throw new ConfigurationException("Field '" + elementName + "' in type '" + theClass.getCanonicalName() + "' is not a resource reference and is not an instance of type " + IDatatype.class.getName());
 				}
 
+				@SuppressWarnings("unchecked")
+				Class<? extends IDatatype> nextDatatype = (Class<? extends IDatatype>) next.getType();
+
 				CodeableConceptElement concept = next.getAnnotation(CodeableConceptElement.class);
-				if (concept != null) {
-					Class<? extends ICodeEnum> codeType = concept.type();
-					String codeTableName = scanCodeTable(codeType);
+				
+				if (IPrimitiveDatatype.class.isAssignableFrom(next.getType())) {
+					myScanAlso.add(nextDatatype);
+					RuntimeChildPrimitiveDatatypeDefinition def = new RuntimeChildPrimitiveDatatypeDefinition(next, elementName, datatypeName, min, max);
+				}else {
 					@SuppressWarnings("unchecked")
-					String datatypeName = scan((Class<? extends IDatatype>) next.getType());
-					RuntimeChildDatatypeDefinition def = new RuntimeChildCodedDatatypeDefinition(next, elementName, datatypeName, min, max, codeTableName);
-					orderToElementDef.put(order, def);
-				} else {
-					@SuppressWarnings("unchecked")
-					String datatypeName = scan((Class<? extends IDatatype>) next.getType());
-					RuntimeChildDatatypeDefinition def = new RuntimeChildDatatypeDefinition(next, elementName, datatypeName, min, max);
+					String datatypeName = scan(nextDatatype);
+					RuntimeChildCompositeDatatypeDefinition def = new RuntimeChildCompositeDatatypeDefinition(next, elementName, datatypeName, min, max, datatypeName);
 					orderToElementDef.put(order, def);
 				}
+
+//				TODO: handle codes
+//				if (concept != null) {
+//					Class<? extends ICodeEnum> codeType = concept.type();
+//					String codeTableName = scanCodeTable(codeType);
+//					@SuppressWarnings("unchecked")
+//					String datatypeName = scan((Class<? extends IDatatype>) next.getType());
+//					RuntimeChildCompositeDatatypeDefinition def = new RuntimeChildCompositeDatatypeDefinition(next, elementName, datatypeName, min, max, codeTableName);
+//					orderToElementDef.put(order, def);
+//				} else {
+//					@SuppressWarnings("unchecked")
+//					orderToElementDef.put(order, def);
+//				}
 			}
 
 			elementNames.add(elementName);

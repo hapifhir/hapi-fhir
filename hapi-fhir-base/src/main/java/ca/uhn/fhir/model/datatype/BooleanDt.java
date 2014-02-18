@@ -1,9 +1,9 @@
 package ca.uhn.fhir.model.datatype;
 
 import ca.uhn.fhir.model.api.BasePrimitiveDatatype;
-import ca.uhn.fhir.model.api.DatatypeDefinition;
+import ca.uhn.fhir.model.api.annotation.Datatype;
 
-@DatatypeDefinition(name="boolean")
+@Datatype(name="boolean")
 public class BooleanDt extends BasePrimitiveDatatype {
 
 	private boolean myValue;

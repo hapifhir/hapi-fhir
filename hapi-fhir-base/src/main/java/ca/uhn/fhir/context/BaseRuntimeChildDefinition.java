@@ -3,21 +3,19 @@ package ca.uhn.fhir.context;
 import static org.apache.commons.lang3.StringUtils.*;
 
 import java.lang.reflect.Field;
+import java.util.Set;
 
-public class BaseRuntimeChildDefinition {
+public abstract class BaseRuntimeChildDefinition {
 
-	private String myElementName;
 	private Field myField;
 	private int myMin;
 	private int myMax;
+	private String myElementName;
 
-	BaseRuntimeChildDefinition(Field theField, String theElementName, int theMin, int theMax) throws ConfigurationException {
+	BaseRuntimeChildDefinition(Field theField, int theMin, int theMax, String theElementName) throws ConfigurationException {
 		super();
 		if (theField == null) {
 			throw new IllegalArgumentException("No field speficied");
-		}
-		if (isBlank(theElementName)) {
-			throw new ConfigurationException("Element name can not be blank");
 		}
 		if (theMin < 0) {
 			throw new ConfigurationException("Min must be >= 0");
@@ -25,11 +23,18 @@ public class BaseRuntimeChildDefinition {
 		if (theMax != -1 && theMax < theMin) {
 			throw new ConfigurationException("Max must be >= Min (unless it is -1 / unlimited)");
 		}
+		if (isBlank(theElementName)) {
+			throw new ConfigurationException("Element name must not be blank");
+		}
 		
 		myField=theField;
-		myElementName = theElementName;
 		myMin=theMin;
 		myMax=theMax;
+		myElementName = theElementName;
+	}
+
+	public String getElementName() {
+		return myElementName;
 	}
 
 	public int getMin() {
@@ -43,9 +48,9 @@ public class BaseRuntimeChildDefinition {
 	public Field getField() {
 		return myField;
 	}
-
-	public String getElementName() {
-		return myElementName;
-	}
+	
+	public abstract Set<String> getValidChildNames();
+	
+	public abstract BaseRuntimeElementDefinition<?> getChildByName(String theName);
 	
 }

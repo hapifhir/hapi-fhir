@@ -1,33 +1,33 @@
 package ca.uhn.fhir.model.datatype;
 
 import ca.uhn.fhir.model.api.BaseCompositeDatatype;
-import ca.uhn.fhir.model.api.DatatypeDefinition;
 import ca.uhn.fhir.model.api.Description;
-import ca.uhn.fhir.model.api.ResourceElement;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Datatype;
 
-@DatatypeDefinition(name="Attachment")
+@Datatype(name="Attachment")
 public class AttachmentDt extends BaseCompositeDatatype {
 
-	@ResourceElement(name="contentType", order=0, min=1)
+	@Child(name="contentType", order=0, min=1)
 	private CodeDt myContentType;
 	
-	@ResourceElement(name="language", order=1)
+	@Child(name="language", order=1)
 	private CodeDt myLanguage;
 	
-	@ResourceElement(name="data", order=2)
+	@Child(name="data", order=2)
 	private Base64BinaryDt myData;
 
-	@ResourceElement(name="url", order=3)
+	@Child(name="url", order=3)
 	private UriDt myUrl;
 
-	@ResourceElement(name="size", order=4)
+	@Child(name="size", order=4)
 	private IntegerDt mySize;
 	
-	@ResourceElement(name="hash", order=5)
+	@Child(name="hash", order=5)
 	@Description("Hash of the data (sha-1, base64ed )")
 	private Base64BinaryDt myHash;
 
-	@ResourceElement(name="title", order=5)
+	@Child(name="title", order=5)
 	@Description("Label to display in place of the data")
 	private StringDt myLabel;
 
