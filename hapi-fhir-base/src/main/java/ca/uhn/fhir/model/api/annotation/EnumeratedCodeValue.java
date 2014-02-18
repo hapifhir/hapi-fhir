@@ -1,4 +1,4 @@
-package ca.uhn.fhir.model.api;
+package ca.uhn.fhir.model.api.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -6,15 +6,10 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
-@Target(value= {ElementType.TYPE})
-public @interface EnumeratedValueSet {
+@Target(value= {ElementType.FIELD})
+public @interface EnumeratedCodeValue {
 
-	int tableId();
-
-	String name();
-
-	int[] restrictedToSnomedIsA() default {};
-
+	String value();
 	
-	
+	String system() default "";
 }

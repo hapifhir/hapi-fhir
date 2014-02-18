@@ -1,5 +1,7 @@
 package ca.uhn.fhir.context;
 
+import java.util.Map;
+
 import ca.uhn.fhir.model.api.IElement;
 
 public abstract class BaseRuntimeElementDefinition<T extends IElement> {
@@ -24,4 +26,16 @@ public abstract class BaseRuntimeElementDefinition<T extends IElement> {
 		return myImplementingClass;
 	}
 
+	/**
+	 * Invoked prior to use to perform any initialization and make object mutable 
+	 */
+	abstract void sealAndInitialize(Map<Class<? extends IElement>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions);
+
+	public abstract ChildTypeEnum getChildType();
+	
+	public enum ChildTypeEnum {
+		COMPOSITE_DATATYPE, PRIMITIVE_DATATYPE, RESOURCE
+		
+	}
+	
 }

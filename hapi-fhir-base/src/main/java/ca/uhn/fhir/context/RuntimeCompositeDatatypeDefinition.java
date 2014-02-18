@@ -8,5 +8,10 @@ public class RuntimeCompositeDatatypeDefinition extends BaseRuntimeElementCompos
 		super(theName, theImplementingClass);
 	}
 
+	@Override
+	public ca.uhn.fhir.context.BaseRuntimeElementDefinition.ChildTypeEnum getChildType() {
+		return ChildTypeEnum.COMPOSITE_DATATYPE;
+	}
+
 
 }

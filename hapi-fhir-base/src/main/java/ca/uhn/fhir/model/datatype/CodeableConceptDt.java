@@ -5,10 +5,10 @@ import java.util.List;
 import ca.uhn.fhir.model.api.BaseCompositeDatatype;
 import ca.uhn.fhir.model.api.ICodeEnum;
 import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Datatype;
+import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 
-@Datatype(name="CodeableConcept")
-public class CodeableConceptDt<T extends ICodeEnum> extends BaseCompositeDatatype {
+@DatatypeDef(name="CodeableConcept")
+public class CodeableConceptDt<T extends ICodeEnum> extends BaseCompositeDatatype implements ICodedDatatype {
 
 	@Child(name="coding", order=0)
     private List<CodingDt> myCoding;

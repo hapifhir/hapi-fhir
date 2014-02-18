@@ -1,11 +1,11 @@
 package ca.uhn.fhir.model.enm;
 
-import ca.uhn.fhir.model.api.Description;
-import ca.uhn.fhir.model.api.EnumeratedCodeValue;
-import ca.uhn.fhir.model.api.EnumeratedValueSet;
 import ca.uhn.fhir.model.api.ICodeEnum;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.EnumeratedCodeValue;
+import ca.uhn.fhir.model.api.annotation.CodeTableDef;
 
-@EnumeratedValueSet(tableId=7, name="observation-status")
+@CodeTableDef(tableId=7, name="observation-status")
 public enum ObservationStatusEnum implements ICodeEnum {
 	
     @Description("The existence of the observation is registered, but there is no result yet available")

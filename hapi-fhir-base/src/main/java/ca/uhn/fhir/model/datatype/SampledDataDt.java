@@ -1,11 +1,11 @@
 package ca.uhn.fhir.model.datatype;
 
 import ca.uhn.fhir.model.api.BaseCompositeDatatype;
-import ca.uhn.fhir.model.api.Description;
 import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Datatype;
+import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+import ca.uhn.fhir.model.api.annotation.Description;
 
-@Datatype(name="SampledData")
+@DatatypeDef(name="SampledData")
 public class SampledDataDt extends BaseCompositeDatatype {
 
 	@Child(name="origin", order=0, min=1)

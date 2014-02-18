@@ -16,7 +16,7 @@ class ParserState {
 	}
 
 	public static ParserState getResourceInstance(FhirContext theContext, String theLocalPart) throws DataFormatException {
-		BaseRuntimeElementDefinition<?> definition = theContext.getNameToElementDefinition().get(theLocalPart);
+		BaseRuntimeElementDefinition<?> definition = theContext.getNameToResourceDefinition().get(theLocalPart);
 		if (!(definition instanceof RuntimeResourceDefinition)) {
 			throw new DataFormatException("Element '" + theLocalPart + "' is not a resource, expected a resource at this position");
 		}
@@ -55,20 +55,17 @@ class ParserState {
 
 		@Override
 		public void enteringNewElement(String theChildName) throws DataFormatException {
-//			BaseRuntimeChildDefinition child = myResourceDefinition.getChildByNameOrThrowDataFormatException(theChildName);
-//			switch (child.getChildType()) {
-//			case CHOICE:
-//				break;
-//			case COMPOSITE:
-//				break;
-//			case PRIMITIVE:
-//				break;
-//			case RESOURCE:
-//				break;
-//			default:
-//				break;
-//			
-//			}
+			BaseRuntimeElementDefinition<?> child = myResourceDefinition.getChildByNameOrThrowDataFormatException(theChildName);
+			switch (child.getChildType()) {
+			case COMPOSITE_DATATYPE:
+				break;
+			case PRIMITIVE_DATATYPE:
+				break;
+			case RESOURCE:
+			default:
+				throw new DataFormatException("Illegal resource position"); 
+			}
+			
 		}
 		
 	}

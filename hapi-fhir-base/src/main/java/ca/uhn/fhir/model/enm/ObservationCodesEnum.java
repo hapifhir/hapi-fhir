@@ -1,9 +1,9 @@
 package ca.uhn.fhir.model.enm;
 
-import ca.uhn.fhir.model.api.EnumeratedValueSet;
 import ca.uhn.fhir.model.api.ICodeEnum;
+import ca.uhn.fhir.model.api.annotation.CodeTableDef;
 
-@EnumeratedValueSet(name="observation-codes", tableId=115)
+@CodeTableDef(name="observation-codes", tableId=115)
 public enum ObservationCodesEnum implements ICodeEnum {
 
 }

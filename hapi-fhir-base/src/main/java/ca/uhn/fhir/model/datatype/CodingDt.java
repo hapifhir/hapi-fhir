@@ -4,11 +4,11 @@ import ca.uhn.fhir.model.api.BaseCompositeDatatype;
 import ca.uhn.fhir.model.api.ResourceReference;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.ChildResource;
-import ca.uhn.fhir.model.api.annotation.Datatype;
+import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.resource.ValueSet;
 
 
-@Datatype(name="Coding")
+@DatatypeDef(name="Coding")
 public class CodingDt extends BaseCompositeDatatype {
 
 	@Child(name="system", order=0)

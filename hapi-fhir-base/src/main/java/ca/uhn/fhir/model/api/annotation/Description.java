@@ -6,9 +6,9 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
-@Target(value= {ElementType.TYPE})
-public @interface Datatype {
+@Target(value= {ElementType.FIELD, ElementType.TYPE})
+public @interface Description {
 
-	String name();
+	String value();
 	
 }

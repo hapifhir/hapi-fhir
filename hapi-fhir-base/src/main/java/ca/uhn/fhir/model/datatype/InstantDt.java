@@ -3,9 +3,9 @@ package ca.uhn.fhir.model.datatype;
 import java.util.Date;
 
 import ca.uhn.fhir.model.api.BasePrimitiveDatatype;
-import ca.uhn.fhir.model.api.annotation.Datatype;
+import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 
-@Datatype(name="instant")
+@DatatypeDef(name="instant")
 public class InstantDt extends BasePrimitiveDatatype {
 
 	private Date myValue;

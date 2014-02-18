@@ -18,4 +18,9 @@ public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefini
 		}
 	}
 
+	@Override
+	public ca.uhn.fhir.context.BaseRuntimeElementDefinition.ChildTypeEnum getChildType() {
+		return ChildTypeEnum.RESOURCE;
+	}
+
 }

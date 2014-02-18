@@ -3,12 +3,16 @@ package ca.uhn.fhir.context;
 import java.lang.reflect.Field;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
+import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IResource;
 
 public class RuntimeChildResourceDefinition extends BaseRuntimeChildDefinition {
 
+	private static final String REFERENCE = "reference";
+	
 	private String myResourceName;
 	private Set<String> myValidChildNames;
 	private List<Class<? extends IResource>> myChildTypes;
@@ -25,14 +29,21 @@ public class RuntimeChildResourceDefinition extends BaseRuntimeChildDefinition {
 
 	@Override
 	public Set<String> getValidChildNames() {
-		return myValidChildNames;
+		return Collections.singleton(REFERENCE);
 	}
 
 	@Override
 	public BaseRuntimeElementDefinition<?> getChildByName(String theName) {
-		if (myElementName.equals(theName)) {
+		if (REFERENCE.equals(theName)) {
+			return null; // TODO: implement
 		}
 		return null;
+	}
+
+	@Override
+	void sealAndInitialize(Map<Class<? extends IElement>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
+		// TODO Auto-generated method stub
+		
 	}
 
 

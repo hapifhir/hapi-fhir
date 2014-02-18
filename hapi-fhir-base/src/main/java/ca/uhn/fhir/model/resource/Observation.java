@@ -6,6 +6,7 @@ import ca.uhn.fhir.model.api.ResourceReference;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.ChildResource;
 import ca.uhn.fhir.model.api.annotation.Choice;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.datatype.AttachmentDt;
 import ca.uhn.fhir.model.datatype.CodeableConceptDt;
 import ca.uhn.fhir.model.datatype.DateTimeDt;
@@ -21,7 +22,7 @@ import ca.uhn.fhir.model.enm.ObservationInterpretationEnum;
 import ca.uhn.fhir.model.enm.ObservationMethodEnum;
 import ca.uhn.fhir.model.enm.ObservationStatusEnum;
 
-@ResourceDefinition(name="Observation", identifierOrder=10)
+@ResourceDef(name="Observation", identifierOrder=10)
 public class Observation extends BaseResourceWithIdentifier {
 
 	@Child(name="name", order=0, min=1, max=1)

@@ -5,11 +5,11 @@ import ca.uhn.fhir.model.api.CodeableConceptElement;
 import ca.uhn.fhir.model.api.ResourceReference;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.ChildResource;
-import ca.uhn.fhir.model.api.annotation.Datatype;
+import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.enm.IdentifierUseEnum;
 import ca.uhn.fhir.model.resource.Organization;
 
-@Datatype(name="identifier")
+@DatatypeDef(name="identifier")
 public class IdentifierDt extends BaseCompositeDatatype {
 
 	@Child(name="use", order=0)

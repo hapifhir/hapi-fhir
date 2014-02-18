@@ -7,14 +7,14 @@ import ca.uhn.fhir.model.api.IResource;
 
 public class FhirContext {
 
-	private final Map<String, BaseRuntimeElementDefinition<?>> myNameToElementDefinition;
+	private final Map<String, RuntimeResourceDefinition> myNameToElementDefinition;
 
 	public FhirContext(Class<? extends IResource>... theResourceTypes) {
 		ModelScanner scanner = new ModelScanner(theResourceTypes);
-		myNameToElementDefinition = Collections.unmodifiableMap(scanner.getNameToElementDefinitions());
+		myNameToElementDefinition = Collections.unmodifiableMap(scanner.getNameToResourceDefinitions());
 	}
 
-	public Map<String, BaseRuntimeElementDefinition<?>> getNameToElementDefinition() {
+	public Map<String, RuntimeResourceDefinition> getNameToResourceDefinition() {
 		return myNameToElementDefinition;
 	}
 

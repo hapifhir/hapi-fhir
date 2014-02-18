@@ -4,9 +4,9 @@ import java.util.GregorianCalendar;
 
 import ca.uhn.fhir.model.api.BaseDatatype;
 import ca.uhn.fhir.model.api.IPrimitiveDatatype;
-import ca.uhn.fhir.model.api.annotation.Datatype;
+import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 
-@Datatype(name="date")
+@DatatypeDef(name="date")
 public class DateDt extends BaseDatatype implements IPrimitiveDatatype {
 
 	private GregorianCalendar myValue;

@@ -3,10 +3,10 @@ package ca.uhn.fhir.model.datatype;
 import ca.uhn.fhir.model.api.BaseCompositeDatatype;
 import ca.uhn.fhir.model.api.annotation.Constraint;
 import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Datatype;
+import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.enm.QuantityComparator;
 
-@Datatype(name="Quantity")
+@DatatypeDef(name="Quantity")
 public class QuantityDt extends BaseCompositeDatatype {
 
 	@Child(name="value",order=0, min=0, max=1)

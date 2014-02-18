@@ -1,11 +1,11 @@
 package ca.uhn.fhir.model.enm;
 
-import ca.uhn.fhir.model.api.Description;
-import ca.uhn.fhir.model.api.EnumeratedCodeValue;
-import ca.uhn.fhir.model.api.EnumeratedValueSet;
 import ca.uhn.fhir.model.api.ICodeEnum;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.EnumeratedCodeValue;
+import ca.uhn.fhir.model.api.annotation.CodeTableDef;
 
-@EnumeratedValueSet(tableId=14, name="quantity-comparator")
+@CodeTableDef(tableId=14, name="quantity-comparator")
 public enum QuantityComparator implements ICodeEnum {
 
 	@EnumeratedCodeValue("<")

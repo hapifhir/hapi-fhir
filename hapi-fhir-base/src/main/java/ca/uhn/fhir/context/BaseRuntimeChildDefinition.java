@@ -1,16 +1,19 @@
 package ca.uhn.fhir.context;
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 import java.lang.reflect.Field;
+import java.util.Map;
 import java.util.Set;
+
+import ca.uhn.fhir.model.api.IElement;
 
 public abstract class BaseRuntimeChildDefinition {
 
-	private Field myField;
-	private int myMin;
-	private int myMax;
-	private String myElementName;
+	private final Field myField;
+	private final int myMin;
+	private final int myMax;
+	private final String myElementName;
 
 	BaseRuntimeChildDefinition(Field theField, int theMin, int theMax, String theElementName) throws ConfigurationException {
 		super();
@@ -52,5 +55,8 @@ public abstract class BaseRuntimeChildDefinition {
 	public abstract Set<String> getValidChildNames();
 	
 	public abstract BaseRuntimeElementDefinition<?> getChildByName(String theName);
+
+	abstract void sealAndInitialize(Map<Class<? extends IElement>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions);
+	
 	
 }

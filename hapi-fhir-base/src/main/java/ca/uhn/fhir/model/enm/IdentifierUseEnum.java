@@ -1,11 +1,11 @@
 package ca.uhn.fhir.model.enm;
 
-import ca.uhn.fhir.model.api.Description;
-import ca.uhn.fhir.model.api.EnumeratedCodeValue;
-import ca.uhn.fhir.model.api.EnumeratedValueSet;
 import ca.uhn.fhir.model.api.ICodeEnum;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.EnumeratedCodeValue;
+import ca.uhn.fhir.model.api.annotation.CodeTableDef;
 
-@EnumeratedValueSet(name="identifier-use", tableId=13)
+@CodeTableDef(name="identifier-use", tableId=13)
 public enum IdentifierUseEnum implements ICodeEnum {
 	@EnumeratedCodeValue("usual")
 	@Description("the identifier recommended for display and use in real-world interactions.")
