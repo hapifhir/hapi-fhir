@@ -16,4 +16,21 @@ public class PeriodDt extends BaseCompositeDatatype {
 	@Constraint(greaterThan= {"start"})
 	private DateTimeDt myEnd;
 
+	public DateTimeDt getStart() {
+		return myStart;
+	}
+
+	public void setStart(DateTimeDt theStart) {
+		myStart = theStart;
+	}
+
+	public DateTimeDt getEnd() {
+		return myEnd;
+	}
+
+	public void setEnd(DateTimeDt theEnd) {
+		myEnd = theEnd;
+	}
+
+	
 }

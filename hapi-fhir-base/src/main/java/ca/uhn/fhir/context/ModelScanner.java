@@ -3,8 +3,10 @@ package ca.uhn.fhir.context;
 import static org.apache.commons.lang3.StringUtils.*;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -67,7 +69,7 @@ class ModelScanner {
 			toScan.clear();
 			toScan.addAll(myScanAlso);
 			myScanAlso.clear();
-		} while (!myScanAlso.isEmpty());
+		} while (!toScan.isEmpty());
 
 		for (BaseRuntimeElementDefinition<?> next : myClassToElementDefinitions.values()) {
 			next.sealAndInitialize(myClassToElementDefinitions);
@@ -130,17 +132,10 @@ class ModelScanner {
 			throw new ConfigurationException("Resource type @" + ResourceDef.class.getSimpleName() + " annotation contains no resource name: " + theClass.getCanonicalName());
 		}
 
-		if (myNameToResourceDefinitions.containsKey(resourceName)) {
-			if (!myNameToResourceDefinitions.get(resourceName).getImplementingClass().equals(theClass)) {
-				throw new ConfigurationException("Detected duplicate element name '" + resourceName + "' in types '" + theClass.getCanonicalName() + "' and '" + myNameToResourceDefinitions.get(resourceName).getImplementingClass() + "'");
-			}
-			return resourceName;
-		}
-
 		RuntimeCompositeDatatypeDefinition resourceDef = new RuntimeCompositeDatatypeDefinition(resourceName, theClass);
 		myClassToElementDefinitions.put(theClass, resourceDef);
 
-		scanCompositeElementForChildren(theClass, resourceDef);
+		scanCompositeElementForChildren(theClass, resourceDef, null);
 
 		return resourceName;
 	}
@@ -151,13 +146,6 @@ class ModelScanner {
 		String resourceName = theDatatypeDefinition.name();
 		if (isBlank(resourceName)) {
 			throw new ConfigurationException("Resource type @" + ResourceDef.class.getSimpleName() + " annotation contains no resource name: " + theClass.getCanonicalName());
-		}
-
-		if (myNameToResourceDefinitions.containsKey(resourceName)) {
-			if (!myNameToResourceDefinitions.get(resourceName).getImplementingClass().equals(theClass)) {
-				throw new ConfigurationException("Detected duplicate element name '" + resourceName + "' in types '" + theClass.getCanonicalName() + "' and '" + myNameToResourceDefinitions.get(resourceName).getImplementingClass() + "'");
-			}
-			return resourceName;
 		}
 
 		RuntimePrimitiveDatatypeDefinition resourceDef = new RuntimePrimitiveDatatypeDefinition(resourceName, theClass);
@@ -185,13 +173,13 @@ class ModelScanner {
 		myClassToElementDefinitions.put(theClass, resourceDef);
 		myNameToResourceDefinitions.put(resourceName, resourceDef);
 
-		scanCompositeElementForChildren(theClass, resourceDef);
+		scanCompositeElementForChildren(theClass, resourceDef, resourceDefinition.identifierOrder());
 
 		return resourceName;
 	}
 
 	@SuppressWarnings("unchecked")
-	private void scanCompositeElementForChildren(Class<? extends ICompositeElement> theClass, BaseRuntimeElementCompositeDefinition<?> theDefinition) {
+	private void scanCompositeElementForChildren(Class<? extends ICompositeElement> theClass, BaseRuntimeElementCompositeDefinition<?> theDefinition, Integer theIdentifierOrder) {
 		Set<String> elementNames = new HashSet<String>();
 		TreeMap<Integer, BaseRuntimeChildDefinition> orderToElementDef = new TreeMap<Integer, BaseRuntimeChildDefinition>();
 
@@ -210,7 +198,14 @@ class ModelScanner {
 			scanCompositeElementForChildren(next, theDefinition, elementNames, orderToElementDef);
 		}
 
-		dealwithnegative
+		while (orderToElementDef.firstKey() < 0) {
+			BaseRuntimeChildDefinition elementDef = orderToElementDef.remove(orderToElementDef.firstKey());
+			if (elementDef.getElementName().equals("identifier")) {
+				orderToElementDef.put(theIdentifierOrder, elementDef);
+			}else {
+				throw new ConfigurationException("Don't know how to handle element: " + elementDef.getElementName());
+			}
+		}
 		
 		for (int i = 0; i < orderToElementDef.size(); i++) {
 			if (!orderToElementDef.containsKey(i)) {
@@ -222,6 +217,7 @@ class ModelScanner {
 
 	}
 
+	@SuppressWarnings("unchecked")
 	private void scanCompositeElementForChildren(Class<? extends ICompositeElement> theClass, BaseRuntimeElementCompositeDefinition<?> theDefinition, Set<String> elementNames, TreeMap<Integer, BaseRuntimeChildDefinition> orderToElementDef) {
 		for (Field next : theClass.getDeclaredFields()) {
 			
@@ -292,12 +288,25 @@ class ModelScanner {
 				if (resRefAnnotation != null) {
 					throw new ConfigurationException("Field '" + elementName + "' in type '" + theClass.getCanonicalName() + "' is not a resource reference but has a @" + ChildResource.class.getSimpleName() + " annotation");
 				}
-				if (!IDatatype.class.isAssignableFrom(next.getType())) {
-					throw new ConfigurationException("Field '" + elementName + "' in type '" + theClass.getCanonicalName() + "' is not a resource reference and is not an instance of type " + IDatatype.class.getName());
+
+				Class<? extends IDatatype> nextDatatype;
+
+				if (IDatatype.class.isAssignableFrom(next.getType())) {
+					nextDatatype = (Class<? extends IDatatype>) next.getType();
+				} else {
+					if (Collection.class.isAssignableFrom(next.getType())) {
+						Class<?> type = (Class<?>) ((ParameterizedType) next.getType().getGenericSuperclass()).getActualTypeArguments()[0];
+						if (IDatatype.class.isAssignableFrom(type)) {
+							nextDatatype=(Class<? extends IDatatype>) type;
+						}else {
+							throw new ConfigurationException("Field '" + elementName + "' in type '" + theClass.getCanonicalName() + "' is not a resource reference and is not an instance of type " + IDatatype.class.getName());
+						}
+					}else {
+						throw new ConfigurationException("Field '" + elementName + "' in type '" + theClass.getCanonicalName() + "' is not a resource reference and is not an instance of type " + IDatatype.class.getName());
+					}
 				}
 
-				@SuppressWarnings("unchecked")
-				Class<? extends IDatatype> nextDatatype = (Class<? extends IDatatype>) next.getType();
+				
 				myScanAlso.add(nextDatatype);
 
 				BaseRuntimeChildDatatypeDefinition def;

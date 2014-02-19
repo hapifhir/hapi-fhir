@@ -32,4 +32,53 @@ public class IdentifierDt extends BaseCompositeDatatype {
 	@ChildResource(types= {Organization.class})
 	private ResourceReference myAssigner;
 
+	public CodeDt<IdentifierUseEnum> getUse() {
+		return myUse;
+	}
+
+	public void setUse(CodeDt<IdentifierUseEnum> theUse) {
+		myUse = theUse;
+	}
+
+	public StringDt getLabel() {
+		return myLabel;
+	}
+
+	public void setLabel(StringDt theLabel) {
+		myLabel = theLabel;
+	}
+
+	public UriDt getSystem() {
+		return mySystem;
+	}
+
+	public void setSystem(UriDt theSystem) {
+		mySystem = theSystem;
+	}
+
+	public StringDt getValue() {
+		return myValue;
+	}
+
+	public void setValue(StringDt theValue) {
+		myValue = theValue;
+	}
+
+	public PeriodDt getPeriod() {
+		return myPeriod;
+	}
+
+	public void setPeriod(PeriodDt thePeriod) {
+		myPeriod = thePeriod;
+	}
+
+	public ResourceReference getAssigner() {
+		return myAssigner;
+	}
+
+	public void setAssigner(ResourceReference theAssigner) {
+		myAssigner = theAssigner;
+	}
+
+	
 }

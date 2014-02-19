@@ -6,7 +6,7 @@ import ca.uhn.fhir.model.api.annotation.EnumeratedCodeValue;
 import ca.uhn.fhir.model.api.annotation.CodeTableDef;
 
 @CodeTableDef(tableId=14, name="quantity-comparator")
-public enum QuantityComparator implements ICodeEnum {
+public enum QuantityComparatorEnum implements ICodeEnum {
 
 	@EnumeratedCodeValue("<")
 	@Description("The actual value is less than the given value.")
