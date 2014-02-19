@@ -8,16 +8,6 @@ public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefini
 		super(theName, theClass);
 	}
 
-	public IResource newInstance() {
-		try {
-			return getImplementingClass().newInstance();
-		} catch (InstantiationException e) {
-			throw new ConfigurationException("Failed to instantiate type:"+getImplementingClass().getName(), e);
-		} catch (IllegalAccessException e) {
-			throw new ConfigurationException("Failed to instantiate type:"+getImplementingClass().getName(), e);
-		}
-	}
-
 	@Override
 	public ca.uhn.fhir.context.BaseRuntimeElementDefinition.ChildTypeEnum getChildType() {
 		return ChildTypeEnum.RESOURCE;

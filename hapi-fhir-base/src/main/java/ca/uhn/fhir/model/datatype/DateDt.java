@@ -1,15 +1,23 @@
 package ca.uhn.fhir.model.datatype;
 
-import java.util.GregorianCalendar;
+import java.util.Calendar;
 
-import ca.uhn.fhir.model.api.BaseDatatype;
-import ca.uhn.fhir.model.api.IPrimitiveDatatype;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 
-@DatatypeDef(name="date")
-public class DateDt extends BaseDatatype implements IPrimitiveDatatype {
+@DatatypeDef(name = "date")
+public class DateDt extends BaseDateTimeDt {
 
-	private GregorianCalendar myValue;
-	private int myPrecision;
-	
+	@Override
+	boolean isPrecisionAllowed(int thePrecision) {
+		switch (thePrecision) {
+		case Calendar.YEAR:
+		case Calendar.MONTH:
+		case Calendar.DATE:
+			return true;
+		default:
+			return false;
+		}
+	}
+
+
 }

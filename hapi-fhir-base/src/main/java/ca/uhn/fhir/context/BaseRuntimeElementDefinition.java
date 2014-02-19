@@ -22,6 +22,16 @@ public abstract class BaseRuntimeElementDefinition<T extends IElement> {
 		return myName;
 	}
 
+	public T newInstance() {
+		try {
+			return getImplementingClass().newInstance();
+		} catch (InstantiationException e) {
+			throw new ConfigurationException("Failed to instantiate type:"+getImplementingClass().getName(), e);
+		} catch (IllegalAccessException e) {
+			throw new ConfigurationException("Failed to instantiate type:"+getImplementingClass().getName(), e);
+		}
+	}
+
 	public Class<? extends T> getImplementingClass() {
 		return myImplementingClass;
 	}

@@ -1,6 +1,8 @@
 package ca.uhn.fhir.model.api;
 
 
-public class BasePrimitiveDatatype extends BaseDatatype implements IPrimitiveDatatype {
+public abstract class BasePrimitiveDatatype<T> extends BaseDatatype implements IPrimitiveDatatype<T> {
 
+	// nothing yet
+	
 }

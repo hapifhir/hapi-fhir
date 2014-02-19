@@ -1,5 +1,14 @@
 package ca.uhn.fhir.model.api;
 
-public interface IPrimitiveDatatype extends IDatatype {
+import ca.uhn.fhir.parser.DataFormatException;
 
+public interface IPrimitiveDatatype<T> extends IDatatype {
+
+	void setValueAsString(String theValue) throws DataFormatException;
+
+	String getValueAsString();
+
+	T getValue();
+	
+	void setValue(T theValue) throws DataFormatException;
 }

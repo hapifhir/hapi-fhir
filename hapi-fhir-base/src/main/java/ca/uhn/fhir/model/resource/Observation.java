@@ -6,11 +6,13 @@ import ca.uhn.fhir.model.api.ResourceReference;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.ChildResource;
 import ca.uhn.fhir.model.api.annotation.Choice;
+import ca.uhn.fhir.model.api.annotation.Narrative;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.datatype.AttachmentDt;
 import ca.uhn.fhir.model.datatype.CodeableConceptDt;
 import ca.uhn.fhir.model.datatype.DateTimeDt;
 import ca.uhn.fhir.model.datatype.InstantDt;
+import ca.uhn.fhir.model.datatype.NarrativeDt;
 import ca.uhn.fhir.model.datatype.PeriodDt;
 import ca.uhn.fhir.model.datatype.QuantityDt;
 import ca.uhn.fhir.model.datatype.RatioDt;
@@ -77,6 +79,96 @@ public class Observation extends BaseResourceWithIdentifier {
 			Patient.class, Group.class // TODO: add device, location
 	})
 	private ResourceReference mySubject;
+
+	public CodeableConceptDt<ObservationCodesEnum> getName() {
+		return myName;
+	}
+
+	public void setName(CodeableConceptDt<ObservationCodesEnum> theName) {
+		myName = theName;
+	}
+
+	public IDatatype getValue() {
+		return myValue;
+	}
+
+	public void setValue(IDatatype theValue) {
+		myValue = theValue;
+	}
+
+	public CodeableConceptDt<ObservationInterpretationEnum> getInterpretation() {
+		return myInterpretation;
+	}
+
+	public void setInterpretation(CodeableConceptDt<ObservationInterpretationEnum> theInterpretation) {
+		myInterpretation = theInterpretation;
+	}
+
+	public StringDt getComments() {
+		return myComments;
+	}
+
+	public void setComments(StringDt theComments) {
+		myComments = theComments;
+	}
+
+	public IDatatype getApplies() {
+		return myApplies;
+	}
+
+	public void setApplies(IDatatype theApplies) {
+		myApplies = theApplies;
+	}
+
+	public InstantDt getIssued() {
+		return myIssued;
+	}
+
+	public void setIssued(InstantDt theIssued) {
+		myIssued = theIssued;
+	}
+
+	public CodeableConceptDt<ObservationStatusEnum> getStatus() {
+		return myStatus;
+	}
+
+	public void setStatus(CodeableConceptDt<ObservationStatusEnum> theStatus) {
+		myStatus = theStatus;
+	}
+
+	public CodeableConceptDt<ObservationStatusEnum> getReliability() {
+		return myReliability;
+	}
+
+	public void setReliability(CodeableConceptDt<ObservationStatusEnum> theReliability) {
+		myReliability = theReliability;
+	}
+
+	public CodeableConceptDt<BodySiteEnum> getBodySite() {
+		return myBodySite;
+	}
+
+	public void setBodySite(CodeableConceptDt<BodySiteEnum> theBodySite) {
+		myBodySite = theBodySite;
+	}
+
+	public CodeableConceptDt<ObservationMethodEnum> getMethod() {
+		return myMethod;
+	}
+
+	public void setMethod(CodeableConceptDt<ObservationMethodEnum> theMethod) {
+		myMethod = theMethod;
+	}
+
+	public ResourceReference getSubject() {
+		return mySubject;
+	}
+
+	public void setSubject(ResourceReference theSubject) {
+		mySubject = theSubject;
+	}
+	
+	
 	
 	
 }

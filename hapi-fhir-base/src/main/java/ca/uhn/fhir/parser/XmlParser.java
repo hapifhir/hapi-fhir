@@ -7,6 +7,8 @@ import javax.xml.stream.XMLEventFactory;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.events.Attribute;
+import javax.xml.stream.events.EndElement;
 import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
 
@@ -51,6 +53,30 @@ public class XmlParser {
 						parserState = ParserState.getResourceInstance(myContext, elem.getName().getLocalPart());
 					} else {
 						parserState.enteringNewElement(elem.getName().getLocalPart());
+					}
+				} else if (nextEvent.isAttribute()) {
+					Attribute elem = (Attribute) nextEvent;
+					if (!FHIR_NS.equals(elem.getName().getNamespaceURI())) {
+						continue;
+					}
+					if (!"value".equals(elem.getName().getLocalPart())) {
+						continue;
+					}
+					if (parserState == null) {
+						throw new DataFormatException("Detected attribute before element");
+					}
+					parserState.attributeValue(elem.getValue());
+				} else if (nextEvent.isEndElement()) {
+					EndElement elem = nextEvent.asEndElement();
+					if (!FHIR_NS.equals(elem.getName().getNamespaceURI())) {
+						continue;
+					}
+					if (parserState == null) {
+						throw new DataFormatException("Detected unexpected end-element");
+					}
+					parserState.endingElement(elem.getName().getLocalPart());
+					if (parserState.isComplete()) {
+						return (IResource) parserState.getObject();
 					}
 				}
 				

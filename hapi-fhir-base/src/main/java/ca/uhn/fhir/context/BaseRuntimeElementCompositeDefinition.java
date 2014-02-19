@@ -23,8 +23,8 @@ public abstract class BaseRuntimeElementCompositeDefinition<T extends IComposite
 		myChildren.add(theNext);
 	}
 
-	public BaseRuntimeElementDefinition<?> getChildByNameOrThrowDataFormatException(String theName) throws DataFormatException {
-		BaseRuntimeElementDefinition<?> retVal = myNameToChild.get(theName);
+	public BaseRuntimeChildDefinition getChildByNameOrThrowDataFormatException(String theName) throws DataFormatException {
+		BaseRuntimeChildDefinition retVal = myNameToChild.get(theName);
 		if (retVal == null) {
 			throw new DataFormatException("Unknown child name: " + theName);
 		}
@@ -37,7 +37,7 @@ public abstract class BaseRuntimeElementCompositeDefinition<T extends IComposite
 			next.sealAndInitialize(theClassToElementDefinitions);
 		}
 
-		myNameToChild = new HashMap<String, BaseRuntimeElementDefinition<?>>();
+		myNameToChild = new HashMap<String, BaseRuntimeChildDefinition>();
 		for (BaseRuntimeChildDefinition next : myChildren) {
 			for (String nextName : next.getValidChildNames()) {
 				if (myNameToChild.containsKey(nextName)) {
