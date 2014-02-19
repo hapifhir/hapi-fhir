@@ -14,6 +14,11 @@ public @interface Child {
 	 * elsewhere
 	 */
 	int ORDER_UNKNOWN = -1;
+	
+	/**
+	 * COnstant value to supply for {@link #max()} to indicate '*' (no maximum)
+	 */
+	int MAX_UNLIMITED = -1;
 
 	String name();
 	

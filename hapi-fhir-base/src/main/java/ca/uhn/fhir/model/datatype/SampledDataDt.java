@@ -29,4 +29,62 @@ public class SampledDataDt extends BaseCompositeDatatype {
 	@Child(name="data", order=6, min=1)
 	@Description("Decimal values with spaces, or \"E\" | \"U\" | \"L\"")
 	private StringDt myData;
+
+	public QuantityDt getOrigin() {
+		return myOrigin;
+	}
+
+	public void setOrigin(QuantityDt theOrigin) {
+		myOrigin = theOrigin;
+	}
+
+	public DecimalDt getPeriod() {
+		return myPeriod;
+	}
+
+	public void setPeriod(DecimalDt thePeriod) {
+		myPeriod = thePeriod;
+	}
+
+	public DecimalDt getFactor() {
+		return myFactor;
+	}
+
+	public void setFactor(DecimalDt theFactor) {
+		myFactor = theFactor;
+	}
+
+	public DecimalDt getLowerLimit() {
+		return myLowerLimit;
+	}
+
+	public void setLowerLimit(DecimalDt theLowerLimit) {
+		myLowerLimit = theLowerLimit;
+	}
+
+	public DecimalDt getUpperLimit() {
+		return myUpperLimit;
+	}
+
+	public void setUpperLimit(DecimalDt theUpperLimit) {
+		myUpperLimit = theUpperLimit;
+	}
+
+	public IntegerDt getDimensions() {
+		return myDimensions;
+	}
+
+	public void setDimensions(IntegerDt theDimensions) {
+		myDimensions = theDimensions;
+	}
+
+	public StringDt getData() {
+		return myData;
+	}
+
+	public void setData(StringDt theData) {
+		myData = theData;
+	}
+	
+	
 }

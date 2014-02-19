@@ -6,13 +6,69 @@ import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimePrimitiveDatatypeDefinition;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.model.api.BaseCompositeDatatype;
+import ca.uhn.fhir.context.RuntimeResourceReferenceDefinition;
 import ca.uhn.fhir.model.api.ICompositeDatatype;
 import ca.uhn.fhir.model.api.ICompositeElement;
 import ca.uhn.fhir.model.api.IPrimitiveDatatype;
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.ResourceReference;
 
 class ParserState {
+
+	private enum ResourceReferenceSubState {
+		INITIAL, REFERENCE, DISPLAY
+	}
+
+	private class ResourceReferenceState extends BaseState {
+
+		private ResourceReferenceSubState mySubState;
+		private RuntimeResourceReferenceDefinition myDefinition;
+		private ResourceReference myInstance;
+
+		public ResourceReferenceState(RuntimeResourceReferenceDefinition theDefinition, ResourceReference theInstance) {
+			myDefinition=theDefinition;
+			myInstance = theInstance;
+			mySubState = ResourceReferenceSubState.INITIAL;
+		}
+
+		@Override
+		public void attributeValue(String theValue) throws DataFormatException {
+			switch (mySubState) {
+			case DISPLAY:
+				myInstance.setDisplay(theValue);
+				break;
+			case INITIAL:
+				throw new DataFormatException("Unexpected attribute: "+theValue);
+			case REFERENCE:
+				myInstance.setReference(theValue);
+				break;
+			}
+		}
+
+		@Override
+		public void enteringNewElement(String theLocalPart) throws DataFormatException {
+			switch (mySubState) {
+			case INITIAL:
+				if ("display".equals(theLocalPart)) {
+					mySubState = ResourceReferenceSubState.DISPLAY;
+					break;
+				} else if ("reference".equals(theLocalPart)) {
+					mySubState = ResourceReferenceSubState.REFERENCE;
+					break;
+				}
+				// ...else fall through...
+			case DISPLAY:
+			case REFERENCE:
+				throw new DataFormatException("Unexpected element: "+theLocalPart);
+			}
+		}
+
+		@Override
+		public void endingElement(String theLocalPart) {
+			mySubState=ResourceReferenceSubState.INITIAL;
+		}
+
+	}
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ParserState.class);
 	private FhirContext myContext;
@@ -106,11 +162,17 @@ private abstract class BaseState {
 				push(newState);
 				break;
 			}
-			case RESOURCE: {
+			case RESOURCE_REF: {
+				RuntimeResourceReferenceDefinition resourceRefTarget = (RuntimeResourceReferenceDefinition) target;
+				ResourceReference newChildInstance = new ResourceReference();
+				child.getMutator().addValue(myInstance, newChildInstance);
+				ResourceReferenceState newState = new ResourceReferenceState(resourceRefTarget, newChildInstance);
+				push(newState);
 				break;
 			}
+			case RESOURCE:
 			default:
-				throw new DataFormatException("Illegal resource position");
+				throw new DataFormatException("Illegal resource position: " + target.getChildType());
 			}
 
 		}

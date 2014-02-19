@@ -15,4 +15,22 @@ public class RatioDt extends BaseCompositeDatatype {
 	@Child(name="denominator", order=1)
 	@Constraint(coRequirements= {"numerator"})
 	private QuantityDt myDenominator;
+
+	public QuantityDt getNumerator() {
+		return myNumerator;
+	}
+
+	public void setNumerator(QuantityDt theNumerator) {
+		myNumerator = theNumerator;
+	}
+
+	public QuantityDt getDenominator() {
+		return myDenominator;
+	}
+
+	public void setDenominator(QuantityDt theDenominator) {
+		myDenominator = theDenominator;
+	}
+	
+	
 }

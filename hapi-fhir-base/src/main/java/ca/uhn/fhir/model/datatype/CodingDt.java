@@ -26,8 +26,58 @@ public class CodingDt extends BaseCompositeDatatype {
 	@Child(name="primary", order=4)
     private BooleanDt myPrimary;
 	
-	@Child(name="valueSet", order=5)
+	@Child(name="assigner", order=5)
 	@ChildResource(types= {ValueSet.class})
 	private ResourceReference myAssigner;
 
+	public UriDt getSystem() {
+		return mySystem;
+	}
+
+	public void setSystem(UriDt theSystem) {
+		mySystem = theSystem;
+	}
+
+	public StringDt getVersion() {
+		return myVersion;
+	}
+
+	public void setVersion(StringDt theVersion) {
+		myVersion = theVersion;
+	}
+
+	public CodeDt<?> getCode() {
+		return myCode;
+	}
+
+	public void setCode(CodeDt<?> theCode) {
+		myCode = theCode;
+	}
+
+	public StringDt getDisplay() {
+		return myDisplay;
+	}
+
+	public void setDisplay(StringDt theDisplay) {
+		myDisplay = theDisplay;
+	}
+
+	public BooleanDt getPrimary() {
+		return myPrimary;
+	}
+
+	public void setPrimary(BooleanDt thePrimary) {
+		myPrimary = thePrimary;
+	}
+
+	public ResourceReference getAssigner() {
+		return myAssigner;
+	}
+
+	public void setAssigner(ResourceReference theAssigner) {
+		myAssigner = theAssigner;
+	}
+
+	
+	
 }

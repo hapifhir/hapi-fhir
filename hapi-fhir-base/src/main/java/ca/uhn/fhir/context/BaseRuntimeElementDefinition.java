@@ -44,7 +44,7 @@ public abstract class BaseRuntimeElementDefinition<T extends IElement> {
 	public abstract ChildTypeEnum getChildType();
 	
 	public enum ChildTypeEnum {
-		COMPOSITE_DATATYPE, PRIMITIVE_DATATYPE, RESOURCE
+		COMPOSITE_DATATYPE, PRIMITIVE_DATATYPE, RESOURCE, RESOURCE_REF
 		
 	}
 	

@@ -7,6 +7,7 @@ import org.junit.Test;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.resource.Observation;
 
 public class XmlParserTest {
@@ -17,7 +18,9 @@ public class XmlParserTest {
 		FhirContext ctx = new FhirContext(Observation.class);
 		XmlParser p = new XmlParser(ctx);
 		
-		p.parseResource(IOUtils.toString(XmlParserTest.class.getResourceAsStream("/observation-example-eeg.xml")));
+		IResource resource = p.parseResource(IOUtils.toString(XmlParserTest.class.getResourceAsStream("/observation-example-eeg.xml")));
+		
+		System.out.println(resource);
 		
 	}
 	
