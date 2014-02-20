@@ -32,6 +32,7 @@ public abstract class BaseRuntimeElementCompositeDefinition<T extends IComposite
 	}
 
 	@Override
+	public
 	void sealAndInitialize(Map<Class<? extends IElement>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
 		for (BaseRuntimeChildDefinition next : myChildren) {
 			next.sealAndInitialize(theClassToElementDefinitions);

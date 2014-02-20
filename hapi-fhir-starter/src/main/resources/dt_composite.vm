@@ -1,0 +1,57 @@
+package ca.uhn.fhir.model.datatype;
+
+import java.util.*;
+import ca.uhn.fhir.model.api.*;
+import ca.uhn.fhir.model.api.annotation.*;
+import ca.uhn.fhir.model.datatype.*;
+
+/**
+ * HAPI/FHIR <b>${resourceName}</b> Datatype
+ * (${shortName})
+ *
+ * <p>
+ * <b>Definition:</b>
+ * ${definition}
+ * </p> 
+ *
+ * <p>
+ * <b>Requirements:</b>
+ * ${requirements}
+ * </p> 
+ */
+@DatatypeDef(name="${className}") 
+public class ${className}Dt extends BaseCompositeDatatype {
+
+#foreach ( $child in $children )
+	@Child(name="${child.elementName}", order=${foreach.index}, min=${child.cardMin}, max=${child.cardMaxForChildAnnotation})	
+	private ${child.referenceType} ${child.variableName};
+	
+#end
+#foreach ( $child in $children )
+	/**
+	 * Gets the value(s) for ${child.elementName} (${child.shortName})
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * ${child.definition}
+     * </p> 
+	 */
+	public ${child.referenceType} get${child.methodName}() {
+		return ${child.variableName};
+	}
+
+	/**
+	 * Sets the value(s) for ${child.elementName} (${child.shortName})
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * ${child.definition}
+     * </p> 
+	 */
+	public void set${child.methodName}(${child.referenceType} theValue) {
+		${child.variableName} = theValue;
+	}
+	
+#end
+
+}

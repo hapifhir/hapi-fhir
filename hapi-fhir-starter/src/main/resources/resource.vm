@@ -1,0 +1,65 @@
+package ca.uhn.fhir.model.resource;
+
+import java.util.*;
+import ca.uhn.fhir.model.api.*;
+import ca.uhn.fhir.model.api.annotation.*;
+import ca.uhn.fhir.model.datatype.*;
+
+/**
+ * HAPI/FHIR <b>${className}</b> Resource
+ * (${shortName})
+ *
+ * <p>
+ * <b>Definition:</b>
+ * ${definition}
+ * </p> 
+ *
+ * <p>
+ * <b>Requirements:</b>
+ * ${requirements}
+ * </p> 
+ */
+@ResourceDef(name="${resourceName}")
+public class ${className} extends BaseResource {
+
+#foreach ( $child in $children )
+	@Child(name="${child.elementName}", order=${foreach.index}, min=${child.cardMin}, max=${child.cardMaxForChildAnnotation})	
+	private ${child.referenceType} ${child.variableName};
+	
+#end
+
+#foreach ( $child in $children )
+	/**
+	 * Gets the value(s) for ${child.elementName} (${child.shortName})
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * ${child.definition}
+     * </p> 
+	 */
+	public ${child.referenceType} get${child.methodName}() {
+		return ${child.variableName};
+	}
+
+	/**
+	 * Sets the value(s) for ${child.elementName} (${child.shortName})
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * ${child.definition}
+     * </p> 
+	 */
+	public void set${child.methodName}(${child.referenceType} theValue) {
+		${child.variableName} = theValue;
+	}
+	
+#end
+
+#foreach ( $child in $resourceBlockChildren )
+	@Block(name="${child.name}")	
+	public static class ${child.className} {
+	}
+
+#end
+
+}

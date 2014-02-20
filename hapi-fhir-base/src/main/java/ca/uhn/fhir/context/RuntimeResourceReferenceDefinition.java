@@ -2,6 +2,7 @@ package ca.uhn.fhir.context;
 
 import java.util.Map;
 
+import ca.uhn.fhir.context.BaseRuntimeElementDefinition.ChildTypeEnum;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IResource;
 

@@ -13,7 +13,7 @@ public class RuntimeChildResourceBlockDefinition extends BaseRuntimeChildDefinit
 	private RuntimeResourceBlockDefinition myElementDef;
 	private Class<? extends IResourceBlock> myResourceBlockType;
 
-	RuntimeChildResourceBlockDefinition(Field theField, int theMin, int theMax, String theElementName, Class<? extends IResourceBlock> theResourceBlockType) throws ConfigurationException {
+	public RuntimeChildResourceBlockDefinition(Field theField, int theMin, int theMax, String theElementName, Class<? extends IResourceBlock> theResourceBlockType) throws ConfigurationException {
 		super(theField, theMin, theMax, theElementName);
 		myResourceBlockType = theResourceBlockType;
 	}
