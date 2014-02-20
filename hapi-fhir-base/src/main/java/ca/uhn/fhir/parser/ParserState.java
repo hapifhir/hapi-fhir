@@ -5,12 +5,14 @@ import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimePrimitiveDatatypeDefinition;
+import ca.uhn.fhir.context.RuntimeResourceBlockDefinition;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeResourceReferenceDefinition;
 import ca.uhn.fhir.model.api.ICompositeDatatype;
 import ca.uhn.fhir.model.api.ICompositeElement;
 import ca.uhn.fhir.model.api.IPrimitiveDatatype;
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.IResourceBlock;
 import ca.uhn.fhir.model.api.ResourceReference;
 
 class ParserState {
@@ -26,7 +28,7 @@ class ParserState {
 		private ResourceReference myInstance;
 
 		public ResourceReferenceState(RuntimeResourceReferenceDefinition theDefinition, ResourceReference theInstance) {
-			myDefinition=theDefinition;
+			myDefinition = theDefinition;
 			myInstance = theInstance;
 			mySubState = ResourceReferenceSubState.INITIAL;
 		}
@@ -38,7 +40,7 @@ class ParserState {
 				myInstance.setDisplay(theValue);
 				break;
 			case INITIAL:
-				throw new DataFormatException("Unexpected attribute: "+theValue);
+				throw new DataFormatException("Unexpected attribute: " + theValue);
 			case REFERENCE:
 				myInstance.setReference(theValue);
 				break;
@@ -56,16 +58,23 @@ class ParserState {
 					mySubState = ResourceReferenceSubState.REFERENCE;
 					break;
 				}
-				// ...else fall through...
+				//$FALL-THROUGH$
 			case DISPLAY:
 			case REFERENCE:
-				throw new DataFormatException("Unexpected element: "+theLocalPart);
+				throw new DataFormatException("Unexpected element: " + theLocalPart);
 			}
 		}
 
 		@Override
 		public void endingElement(String theLocalPart) {
-			mySubState=ResourceReferenceSubState.INITIAL;
+			switch (mySubState) {
+			case INITIAL:
+				pop();
+				break;
+			case DISPLAY:
+			case REFERENCE:
+				mySubState = ResourceReferenceSubState.INITIAL;
+			}
 		}
 
 	}
@@ -111,20 +120,22 @@ class ParserState {
 
 		return retVal;
 	}
-private abstract class BaseState {
-	private BaseState myStack;
 
-	public abstract void attributeValue(String theValue) throws DataFormatException;
+	private abstract class BaseState {
+		private BaseState myStack;
 
-	public abstract void enteringNewElement(String theLocalPart) throws DataFormatException;
+		public abstract void attributeValue(String theValue) throws DataFormatException;
 
-	public void setStack(BaseState theState) {
-		myStack = theState;
+		public abstract void enteringNewElement(String theLocalPart) throws DataFormatException;
+
+		public void setStack(BaseState theState) {
+			myStack = theState;
+		}
+
+		public abstract void endingElement(String theLocalPart);
+
 	}
 
-	public abstract void endingElement(String theLocalPart);
-
-}
 	private class ContainerState extends BaseState {
 
 		private BaseRuntimeElementCompositeDefinition<?> myDefinition;
@@ -152,15 +163,15 @@ private abstract class BaseState {
 				child.getMutator().addValue(myInstance, newChildInstance);
 				ContainerState newState = new ContainerState(compositeTarget, newChildInstance);
 				push(newState);
-				break;
+				return;
 			}
 			case PRIMITIVE_DATATYPE: {
 				RuntimePrimitiveDatatypeDefinition primitiveTarget = (RuntimePrimitiveDatatypeDefinition) target;
 				IPrimitiveDatatype<?> newChildInstance = primitiveTarget.newInstance();
 				child.getMutator().addValue(myInstance, newChildInstance);
-				PrimitiveState newState = new PrimitiveState(primitiveTarget, newChildInstance);
+				PrimitiveState newState = new PrimitiveState(newChildInstance);
 				push(newState);
-				break;
+				return;
 			}
 			case RESOURCE_REF: {
 				RuntimeResourceReferenceDefinition resourceRefTarget = (RuntimeResourceReferenceDefinition) target;
@@ -168,13 +179,22 @@ private abstract class BaseState {
 				child.getMutator().addValue(myInstance, newChildInstance);
 				ResourceReferenceState newState = new ResourceReferenceState(resourceRefTarget, newChildInstance);
 				push(newState);
-				break;
+				return;
+			}
+			case RESOURCE_BLOCK: {
+				RuntimeResourceBlockDefinition blockTarget = (RuntimeResourceBlockDefinition) target;
+				IResourceBlock newBlockInstance = blockTarget.newInstance();
+				child.getMutator().addValue(myInstance, newBlockInstance);
+				ContainerState newState = new ContainerState(blockTarget, newBlockInstance);
+				push(newState);
+				return;
 			}
 			case RESOURCE:
-			default:
-				throw new DataFormatException("Illegal resource position: " + target.getChildType());
+				// Throw an exception because this shouldn't happen here
+				break;
 			}
 
+			throw new DataFormatException("Illegal resource position: " + target.getChildType());
 		}
 
 		@Override
@@ -188,12 +208,10 @@ private abstract class BaseState {
 	}
 
 	private class PrimitiveState extends BaseState {
-		private RuntimePrimitiveDatatypeDefinition myDefinition;
 		private IPrimitiveDatatype<?> myInstance;
 
-		public PrimitiveState(RuntimePrimitiveDatatypeDefinition theDefinition, IPrimitiveDatatype<?> theInstance) {
+		public PrimitiveState(IPrimitiveDatatype<?> theInstance) {
 			super();
-			myDefinition = theDefinition;
 			myInstance = theInstance;
 		}
 

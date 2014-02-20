@@ -1,9 +1,9 @@
 package ca.uhn.fhir.parser;
 
 import java.io.StringReader;
+import java.util.Iterator;
 
 import javax.xml.stream.FactoryConfigurationError;
-import javax.xml.stream.XMLEventFactory;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
@@ -18,15 +18,14 @@ import ca.uhn.fhir.model.api.IResource;
 
 public class XmlParser {
 	private static final String FHIR_NS = "http://hl7.org/fhir";
-
+	@SuppressWarnings("unused")
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(XmlParser.class);
 	private FhirContext myContext;
 	private XMLInputFactory myXmlInputFactory;
-	private XMLEventFactory myEventFactory;
 
 	public XmlParser(FhirContext theContext) {
 		myContext = theContext;
 		myXmlInputFactory = XMLInputFactory.newInstance();
-		myEventFactory = XMLEventFactory.newInstance();
 	}
 
 	public IResource parseResource(String theXml) throws ConfigurationException, DataFormatException {
@@ -54,6 +53,15 @@ public class XmlParser {
 					} else {
 						parserState.enteringNewElement(elem.getName().getLocalPart());
 					}
+
+					for (@SuppressWarnings("unchecked")
+					Iterator<Attribute> iter = elem.getAttributes(); iter.hasNext();) {
+						Attribute next = iter.next();
+						if (next.getName().getLocalPart().equals("value")) {
+							parserState.attributeValue(next.getValue());
+						}
+					}
+
 				} else if (nextEvent.isAttribute()) {
 					Attribute elem = (Attribute) nextEvent;
 					if (!FHIR_NS.equals(elem.getName().getNamespaceURI())) {
@@ -79,10 +87,9 @@ public class XmlParser {
 						return (IResource) parserState.getObject();
 					}
 				}
-				
 
 			}
-			
+
 			return null;
 		} catch (XMLStreamException e) {
 			throw new DataFormatException(e);
