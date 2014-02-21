@@ -31,11 +31,19 @@ public class Child extends BaseElement {
 	}
 
 	public String getMethodName() {
+		String elementName = getElementNameSimplified();
+		elementName = elementName.substring(0,1).toUpperCase() + elementName.substring(1);
+		return elementName;
+	}
+
+	/**
+	 * Strips off "[x]"
+	 */
+	public String getElementNameSimplified() {
 		String elementName = getElementName();
 		if (elementName.endsWith("[x]")) {
 			elementName = elementName.substring(0, elementName.length() - 3);
 		}
-		elementName = elementName.substring(0,1).toUpperCase() + elementName.substring(1);
 		return elementName;
 	}
 

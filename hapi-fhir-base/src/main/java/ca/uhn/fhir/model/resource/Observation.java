@@ -27,6 +27,7 @@ import ca.uhn.fhir.model.enm.ObservationCodesEnum;
 import ca.uhn.fhir.model.enm.ObservationInterpretationEnum;
 import ca.uhn.fhir.model.enm.ObservationMethodEnum;
 import ca.uhn.fhir.model.enm.ObservationRelationshipTypeEnum;
+import ca.uhn.fhir.model.enm.ObservationReliabilityEnum;
 import ca.uhn.fhir.model.enm.ObservationStatusEnum;
 import ca.uhn.fhir.model.enm.ReferenceRangeMeaningEnum;
 
@@ -35,7 +36,7 @@ public class Observation extends BaseResourceWithIdentifier {
 
 	@Child(name="name", order=0, min=1, max=1)
 	@CodeableConceptElement(type=ObservationCodesEnum.class)
-	private CodeableConceptDt<ObservationCodesEnum> myName;
+	private CodeableConceptDt myName;
 	
 	@Child(name="value", order=1, min=0, max=1, choice=@Choice(types= {
 			QuantityDt.class,
@@ -50,7 +51,7 @@ public class Observation extends BaseResourceWithIdentifier {
 	
 	@Child(name="interpretation", order=2)
 	@CodeableConceptElement(type=ObservationInterpretationEnum.class)
-	private CodeableConceptDt<ObservationInterpretationEnum> myInterpretation;
+	private CodeableConceptDt myInterpretation;
 	
 	@Child(name="comments", order=3)
 	private StringDt myComments;
@@ -66,19 +67,19 @@ public class Observation extends BaseResourceWithIdentifier {
 	
 	@Child(name="status", order=6, min=1)
 	@CodeableConceptElement(type=ObservationStatusEnum.class)
-	private CodeableConceptDt<ObservationStatusEnum> myStatus;
+	private CodeableConceptDt myStatus;
 
 	@Child(name="reliability", order=7, min=1)
-	@CodeableConceptElement(type=ObservationStatusEnum.class)
-	private CodeableConceptDt<ObservationStatusEnum> myReliability;
+	@CodeableConceptElement(type=ObservationReliabilityEnum.class)
+	private CodeableConceptDt myReliability;
 
 	@Child(name="bodySite", order=8)
 	@CodeableConceptElement(type=BodySiteEnum.class)
-	private CodeableConceptDt<BodySiteEnum> myBodySite;
+	private CodeableConceptDt myBodySite;
 
 	@Child(name="method", order=9)
 	@CodeableConceptElement(type=ObservationMethodEnum.class)
-	private CodeableConceptDt<ObservationMethodEnum> myMethod;
+	private CodeableConceptDt myMethod;
 	
 	@Child(name="subject", order=11)
 	@ChildResource(types= {
@@ -109,7 +110,7 @@ public class Observation extends BaseResourceWithIdentifier {
 	{
 		@Child(name="type", order = 0)
 		@CodeableConceptElement(type=ObservationRelationshipTypeEnum.class)
-		private CodeDt<ObservationRelationshipTypeEnum> myType;
+		private CodeDt myType;
 		
 		@Child(name="target", order = 1)
 		@ChildResource(types= {
@@ -117,11 +118,11 @@ public class Observation extends BaseResourceWithIdentifier {
 		})
 		private ResourceReference myTarget;
 
-		public CodeDt<ObservationRelationshipTypeEnum> getType() {
+		public CodeDt getType() {
 			return myType;
 		}
 
-		public void setType(CodeDt<ObservationRelationshipTypeEnum> theType) {
+		public void setType(CodeDt theType) {
 			myType = theType;
 		}
 
@@ -147,7 +148,7 @@ public class Observation extends BaseResourceWithIdentifier {
 		
 		@Child(name="meaning", order=2)
 		@CodeableConceptElement(type=ReferenceRangeMeaningEnum.class)
-		private CodeableConceptDt<ReferenceRangeMeaningEnum> myMeaning;
+		private CodeableConceptDt myMeaning;
 
 		@Child(name="age", order=3)
 		private RangeDt myAge;
@@ -168,11 +169,11 @@ public class Observation extends BaseResourceWithIdentifier {
 			myHigh = theHigh;
 		}
 
-		public CodeableConceptDt<ReferenceRangeMeaningEnum> getMeaning() {
+		public CodeableConceptDt getMeaning() {
 			return myMeaning;
 		}
 
-		public void setMeaning(CodeableConceptDt<ReferenceRangeMeaningEnum> theMeaning) {
+		public void setMeaning(CodeableConceptDt theMeaning) {
 			myMeaning = theMeaning;
 		}
 
@@ -187,11 +188,11 @@ public class Observation extends BaseResourceWithIdentifier {
 	}
 	
 	
-	public CodeableConceptDt<ObservationCodesEnum> getName() {
+	public CodeableConceptDt getName() {
 		return myName;
 	}
 
-	public void setName(CodeableConceptDt<ObservationCodesEnum> theName) {
+	public void setName(CodeableConceptDt theName) {
 		myName = theName;
 	}
 
@@ -203,11 +204,11 @@ public class Observation extends BaseResourceWithIdentifier {
 		myValue = theValue;
 	}
 
-	public CodeableConceptDt<ObservationInterpretationEnum> getInterpretation() {
+	public CodeableConceptDt getInterpretation() {
 		return myInterpretation;
 	}
 
-	public void setInterpretation(CodeableConceptDt<ObservationInterpretationEnum> theInterpretation) {
+	public void setInterpretation(CodeableConceptDt theInterpretation) {
 		myInterpretation = theInterpretation;
 	}
 
@@ -235,35 +236,35 @@ public class Observation extends BaseResourceWithIdentifier {
 		myIssued = theIssued;
 	}
 
-	public CodeableConceptDt<ObservationStatusEnum> getStatus() {
+	public CodeableConceptDt getStatus() {
 		return myStatus;
 	}
 
-	public void setStatus(CodeableConceptDt<ObservationStatusEnum> theStatus) {
+	public void setStatus(CodeableConceptDt theStatus) {
 		myStatus = theStatus;
 	}
 
-	public CodeableConceptDt<ObservationStatusEnum> getReliability() {
+	public CodeableConceptDt getReliability() {
 		return myReliability;
 	}
 
-	public void setReliability(CodeableConceptDt<ObservationStatusEnum> theReliability) {
+	public void setReliability(CodeableConceptDt theReliability) {
 		myReliability = theReliability;
 	}
 
-	public CodeableConceptDt<BodySiteEnum> getBodySite() {
+	public CodeableConceptDt getBodySite() {
 		return myBodySite;
 	}
 
-	public void setBodySite(CodeableConceptDt<BodySiteEnum> theBodySite) {
+	public void setBodySite(CodeableConceptDt theBodySite) {
 		myBodySite = theBodySite;
 	}
 
-	public CodeableConceptDt<ObservationMethodEnum> getMethod() {
+	public CodeableConceptDt getMethod() {
 		return myMethod;
 	}
 
-	public void setMethod(CodeableConceptDt<ObservationMethodEnum> theMethod) {
+	public void setMethod(CodeableConceptDt theMethod) {
 		myMethod = theMethod;
 	}
 

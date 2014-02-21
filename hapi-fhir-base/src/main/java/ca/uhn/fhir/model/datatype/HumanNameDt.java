@@ -1,3 +1,5 @@
+
+
 package ca.uhn.fhir.model.datatype;
 
 import java.util.*;
@@ -6,7 +8,7 @@ import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.model.datatype.*;
 
 /**
- * HAPI/FHIR <b>${resourceName}</b> Datatype
+ * HAPI/FHIR <b>HumanName</b> Datatype
  * (Name of a human - parts and usage)
  *
  * <p>
@@ -16,7 +18,7 @@ import ca.uhn.fhir.model.datatype.*;
  *
  * <p>
  * <b>Requirements:</b>
- * Name of a human - parts and usage
+ * Need to be able to record names, along with notes about their use
  * </p> 
  */
 @DatatypeDef(name="HumanName") 
@@ -26,22 +28,22 @@ public class HumanNameDt extends BaseCompositeDatatype {
 	private CodeDt myUse;
 	
 	@Child(name="text", order=1, min=0, max=1)	
-	private String myText;
+	private StringDt myText;
 	
 	@Child(name="family", order=2, min=0, max=Child.MAX_UNLIMITED)	
-	private List<String> myFamily;
+	private List<StringDt> myFamily;
 	
 	@Child(name="given", order=3, min=0, max=Child.MAX_UNLIMITED)	
-	private List<String> myGiven;
+	private List<StringDt> myGiven;
 	
 	@Child(name="prefix", order=4, min=0, max=Child.MAX_UNLIMITED)	
-	private List<String> myPrefix;
+	private List<StringDt> myPrefix;
 	
 	@Child(name="suffix", order=5, min=0, max=Child.MAX_UNLIMITED)	
-	private List<String> mySuffix;
+	private List<StringDt> mySuffix;
 	
 	@Child(name="period", order=6, min=0, max=1)	
-	private Period myPeriod;
+	private PeriodDt myPeriod;
 	
 	/**
 	 * Gets the value(s) for use (usual | official | temp | nickname | anonymous | old | maiden)
@@ -75,7 +77,7 @@ public class HumanNameDt extends BaseCompositeDatatype {
      * A full text representation of the name
      * </p> 
 	 */
-	public String getText() {
+	public StringDt getText() {
 		return myText;
 	}
 
@@ -87,7 +89,7 @@ public class HumanNameDt extends BaseCompositeDatatype {
      * A full text representation of the name
      * </p> 
 	 */
-	public void setText(String theValue) {
+	public void setText(StringDt theValue) {
 		myText = theValue;
 	}
 	
@@ -99,7 +101,7 @@ public class HumanNameDt extends BaseCompositeDatatype {
      * The part of a name that links to the genealogy. In some cultures (e.g. Eritrea) the family name of a son is the first name of his father.
      * </p> 
 	 */
-	public List<String> getFamily() {
+	public List<StringDt> getFamily() {
 		return myFamily;
 	}
 
@@ -111,7 +113,7 @@ public class HumanNameDt extends BaseCompositeDatatype {
      * The part of a name that links to the genealogy. In some cultures (e.g. Eritrea) the family name of a son is the first name of his father.
      * </p> 
 	 */
-	public void setFamily(List<String> theValue) {
+	public void setFamily(List<StringDt> theValue) {
 		myFamily = theValue;
 	}
 	
@@ -123,7 +125,7 @@ public class HumanNameDt extends BaseCompositeDatatype {
      * Given name
      * </p> 
 	 */
-	public List<String> getGiven() {
+	public List<StringDt> getGiven() {
 		return myGiven;
 	}
 
@@ -135,7 +137,7 @@ public class HumanNameDt extends BaseCompositeDatatype {
      * Given name
      * </p> 
 	 */
-	public void setGiven(List<String> theValue) {
+	public void setGiven(List<StringDt> theValue) {
 		myGiven = theValue;
 	}
 	
@@ -147,7 +149,7 @@ public class HumanNameDt extends BaseCompositeDatatype {
      * Part of the name that is acquired as a title due to academic, legal, employment or nobility status, etc. and that appears at the start of the name
      * </p> 
 	 */
-	public List<String> getPrefix() {
+	public List<StringDt> getPrefix() {
 		return myPrefix;
 	}
 
@@ -159,7 +161,7 @@ public class HumanNameDt extends BaseCompositeDatatype {
      * Part of the name that is acquired as a title due to academic, legal, employment or nobility status, etc. and that appears at the start of the name
      * </p> 
 	 */
-	public void setPrefix(List<String> theValue) {
+	public void setPrefix(List<StringDt> theValue) {
 		myPrefix = theValue;
 	}
 	
@@ -171,7 +173,7 @@ public class HumanNameDt extends BaseCompositeDatatype {
      * Part of the name that is acquired as a title due to academic, legal, employment or nobility status, etc. and that appears at the end of the name
      * </p> 
 	 */
-	public List<String> getSuffix() {
+	public List<StringDt> getSuffix() {
 		return mySuffix;
 	}
 
@@ -183,7 +185,7 @@ public class HumanNameDt extends BaseCompositeDatatype {
      * Part of the name that is acquired as a title due to academic, legal, employment or nobility status, etc. and that appears at the end of the name
      * </p> 
 	 */
-	public void setSuffix(List<String> theValue) {
+	public void setSuffix(List<StringDt> theValue) {
 		mySuffix = theValue;
 	}
 	
@@ -195,7 +197,7 @@ public class HumanNameDt extends BaseCompositeDatatype {
      * Indicates the period of time when this name was valid for the named person.
      * </p> 
 	 */
-	public Period getPeriod() {
+	public PeriodDt getPeriod() {
 		return myPeriod;
 	}
 
@@ -207,7 +209,7 @@ public class HumanNameDt extends BaseCompositeDatatype {
      * Indicates the period of time when this name was valid for the named person.
      * </p> 
 	 */
-	public void setPeriod(Period theValue) {
+	public void setPeriod(PeriodDt theValue) {
 		myPeriod = theValue;
 	}
 	

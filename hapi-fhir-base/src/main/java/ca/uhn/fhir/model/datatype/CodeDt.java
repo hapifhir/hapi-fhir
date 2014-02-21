@@ -6,7 +6,7 @@ import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.parser.DataFormatException;
 
 @DatatypeDef(name = "code")
-public class CodeDt<T extends ICodeEnum> extends BasePrimitiveDatatype<String> implements ICodedDatatype {
+public class CodeDt extends BasePrimitiveDatatype<String> implements ICodedDatatype {
 
 	private String myValue;
 

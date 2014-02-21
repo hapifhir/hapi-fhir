@@ -9,10 +9,10 @@ import ca.uhn.fhir.model.api.annotation.Description;
 public class AttachmentDt extends BaseCompositeDatatype {
 
 	@Child(name="contentType", order=0, min=1)
-	private CodeDt<?> myContentType;
+	private CodeDt myContentType;
 	
 	@Child(name="language", order=1)
-	private CodeDt<?> myLanguage;
+	private CodeDt myLanguage;
 	
 	@Child(name="data", order=2)
 	private Base64BinaryDt myData;
@@ -31,19 +31,19 @@ public class AttachmentDt extends BaseCompositeDatatype {
 	@Description("Label to display in place of the data")
 	private StringDt myTitle;
 
-	public CodeDt<?> getContentType() {
+	public CodeDt getContentType() {
 		return myContentType;
 	}
 
-	public void setContentType(CodeDt<?> theContentType) {
+	public void setContentType(CodeDt theContentType) {
 		myContentType = theContentType;
 	}
 
-	public CodeDt<?> getLanguage() {
+	public CodeDt getLanguage() {
 		return myLanguage;
 	}
 
-	public void setLanguage(CodeDt<?> theLanguage) {
+	public void setLanguage(CodeDt theLanguage) {
 		myLanguage = theLanguage;
 	}
 

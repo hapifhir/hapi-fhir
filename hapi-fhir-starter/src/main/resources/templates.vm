@@ -1,0 +1,51 @@
+#macro ( childVars $childElements )
+#foreach ( $child in $children )
+#if ($child.resourceRef) 
+	@Child(name="${child.elementNameSimplified}", order=${foreach.index}, min=${child.cardMin}, max=${child.cardMaxForChildAnnotation})
+	@ChildResource(types= {
+#foreach ($nextType in ${child.type})
+		${nextType}.class,
+#end
+	})	
+#elseif ($!child.hasMultipleTypes)
+	@Child(name="${child.elementNameSimplified}", order=${foreach.index}, min=${child.cardMin}, max=${child.cardMaxForChildAnnotation}, choice=@Choice(types= {
+#foreach ($nextType in ${child.type})
+		${nextType}.class,
+#end
+	}))	
+#else
+	@Child(name="${child.elementNameSimplified}", order=${foreach.index}, min=${child.cardMin}, max=${child.cardMaxForChildAnnotation})	
+#end
+	private ${child.referenceType} ${child.variableName};
+	
+#end
+#end
+
+#macro ( childAccessors $childElements )
+#foreach ( $child in $children )
+	/**
+	 * Gets the value(s) for ${child.elementName} (${child.shortName})
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * ${child.definition}
+     * </p> 
+	 */
+	public ${child.referenceType} get${child.methodName}() {
+		return ${child.variableName};
+	}
+
+	/**
+	 * Sets the value(s) for ${child.elementName} (${child.shortName})
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * ${child.definition}
+     * </p> 
+	 */
+	public void set${child.methodName}(${child.referenceType} theValue) {
+		${child.variableName} = theValue;
+	}
+	
+#end
+#end

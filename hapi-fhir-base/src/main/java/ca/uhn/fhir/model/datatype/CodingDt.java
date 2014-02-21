@@ -18,7 +18,7 @@ public class CodingDt extends BaseCompositeDatatype {
     private StringDt myVersion;
 
 	@Child(name="code", order=2)
-    private CodeDt<?> myCode;
+    private CodeDt myCode;
     
 	@Child(name="display", order=3)
     private StringDt myDisplay;
@@ -46,11 +46,11 @@ public class CodingDt extends BaseCompositeDatatype {
 		myVersion = theVersion;
 	}
 
-	public CodeDt<?> getCode() {
+	public CodeDt getCode() {
 		return myCode;
 	}
 
-	public void setCode(CodeDt<?> theCode) {
+	public void setCode(CodeDt theCode) {
 		myCode = theCode;
 	}
 

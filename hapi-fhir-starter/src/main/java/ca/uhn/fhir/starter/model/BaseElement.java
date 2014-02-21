@@ -1,13 +1,13 @@
 package ca.uhn.fhir.starter.model;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
 public abstract class BaseElement {
 
+	private String myBinding;
 	private String myCardMax;
 	private String myCardMin;
 	private List<BaseElement> myChildren;
@@ -17,20 +17,17 @@ public abstract class BaseElement {
 	private String myElementParentName;
 	private String myName;
 	private String myRequirement;
+	private boolean myResourceRef = false;
 	private String myShortName;
+
 	private List<String> myType;
+
 	private String myV2Mapping;
 
-	public List<ResourceBlock> getResourceBlockChildren() {
-		ArrayList<ResourceBlock> retVal = new ArrayList<ResourceBlock>();
-		for (BaseElement next : getChildren()) {
-			if (next instanceof ResourceBlock) {
-				retVal.add((ResourceBlock) next);
-			}
-		}
-		return retVal;
+	public String getBinding() {
+		return myBinding;
 	}
-	
+
 	public String getCardMax() {
 		return myCardMax;
 	}
@@ -70,19 +67,41 @@ public abstract class BaseElement {
 		return myRequirement;
 	}
 
+	public List<ResourceBlock> getResourceBlockChildren() {
+		ArrayList<ResourceBlock> retVal = new ArrayList<ResourceBlock>();
+		for (BaseElement next : getChildren()) {
+			if (next instanceof ResourceBlock) {
+				retVal.add((ResourceBlock) next);
+			}
+		}
+		return retVal;
+	}
+
 	public String getShortName() {
 		return myShortName;
 	}
 
 	public List<String> getType() {
-		if (myType==null) {
-			myType=new ArrayList<String>();
+		if (myType == null) {
+			myType = new ArrayList<String>();
 		}
 		return myType;
 	}
 
 	public String getV2Mapping() {
 		return myV2Mapping;
+	}
+
+	public boolean isHasMultipleTypes() {
+		return myType.size() > 1;
+	}
+
+	public boolean isResourceRef() {
+		return myResourceRef;
+	}
+
+	public void setBinding(String theCellValue) {
+		myBinding = theCellValue;
 	}
 
 	public void setCardMax(String theCardMax) {
@@ -121,24 +140,14 @@ public abstract class BaseElement {
 		myShortName = theShortName;
 	}
 
-	public void setV2Mapping(String theV2Mapping) {
-		myV2Mapping = theV2Mapping;
-	}
-
-	private boolean myResourceRef = false;
-	
-	public boolean isResourceRef() {
-		return myResourceRef;
-	}
-
 	public void setTypeFromString(String theType) {
-		if (theType==null) {
+		if (theType == null) {
 			return;
 		}
 		String typeString = theType;
 		if (typeString.startsWith("Resource(")) {
 			typeString = typeString.substring("Resource(".length(), typeString.length() - 1);
-			myResourceRef=true;
+			myResourceRef = true;
 		}
 		if (StringUtils.isNotBlank(typeString)) {
 			String[] types = typeString.replace("=", "").split("\\|");
@@ -146,7 +155,11 @@ public abstract class BaseElement {
 				getType().add(string.trim());
 			}
 		}
-		
+
+	}
+
+	public void setV2Mapping(String theV2Mapping) {
+		myV2Mapping = theV2Mapping;
 	}
 
 }

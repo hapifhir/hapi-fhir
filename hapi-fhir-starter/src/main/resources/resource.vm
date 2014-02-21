@@ -1,3 +1,5 @@
+#parse ( "templates.vm" )
+
 package ca.uhn.fhir.model.resource;
 
 import java.util.*;
@@ -19,41 +21,11 @@ import ca.uhn.fhir.model.datatype.*;
  * ${requirements}
  * </p> 
  */
-@ResourceDef(name="${resourceName}")
+@ResourceDef(name="${className}")
 public class ${className} extends BaseResource {
 
-#foreach ( $child in $children )
-	@Child(name="${child.elementName}", order=${foreach.index}, min=${child.cardMin}, max=${child.cardMaxForChildAnnotation})	
-	private ${child.referenceType} ${child.variableName};
-	
-#end
-
-#foreach ( $child in $children )
-	/**
-	 * Gets the value(s) for ${child.elementName} (${child.shortName})
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * ${child.definition}
-     * </p> 
-	 */
-	public ${child.referenceType} get${child.methodName}() {
-		return ${child.variableName};
-	}
-
-	/**
-	 * Sets the value(s) for ${child.elementName} (${child.shortName})
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * ${child.definition}
-     * </p> 
-	 */
-	public void set${child.methodName}(${child.referenceType} theValue) {
-		${child.variableName} = theValue;
-	}
-	
-#end
+#childVars( $children )
+#childAccessors( $children )
 
 #foreach ( $child in $resourceBlockChildren )
 	/**
@@ -66,37 +38,8 @@ public class ${className} extends BaseResource {
 	 */
 	@Block(name="${child.name}")	
 	public static class ${child.className} {
-#foreach ( $subChild in $child.children )
-		@Child(name="${subChild.elementName}", order=${foreach.index}, min=${subChild.cardMin}, max=${subChild.cardMaxForChildAnnotation})	
-		private ${subChild.referenceType} ${subChild.variableName};
-
-#end
-#foreach ( $subChild in $child.children )
-		/**
-		 * Gets the value(s) for ${subChild.elementName} (${subChild.shortName})
-		 *
-	     * <p>
-	     * <b>Definition:</b>
-	     * ${subChild.definition}
-	     * </p> 
-		 */
-		public ${subChild.referenceType} get${subChild.methodName}() {
-			return ${subChild.variableName};
-		}
-	
-		/**
-		 * Sets the value(s) for ${subChild.elementName} (${subChild.shortName})
-		 *
-	     * <p>
-	     * <b>Definition:</b>
-	     * ${subChild.definition}
-	     * </p> 
-		 */
-		public void set${subChild.methodName}(${subChild.referenceType} theValue) {
-			${subChild.variableName} = theValue;
-		}
-	
-#end
+#childVars( $child.children )
+#childAccessors( $child.children )
 	}
 
 #end

@@ -1,12 +1,13 @@
 package ca.uhn.fhir.starter;
 
+import static org.apache.commons.lang.StringUtils.*;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -18,8 +19,11 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import ch.qos.logback.core.db.dialect.MySQLDialect;
 import ca.uhn.fhir.model.api.IDatatype;
 import ca.uhn.fhir.model.api.ResourceReference;
+import ca.uhn.fhir.model.datatype.CodeDt;
+import ca.uhn.fhir.model.datatype.CodeableConceptDt;
 import ca.uhn.fhir.starter.model.BaseElement;
 import ca.uhn.fhir.starter.model.Child;
 import ca.uhn.fhir.starter.model.Resource;
@@ -30,6 +34,15 @@ public abstract class BaseParser {
 
 	private String myDirectory;
 	private String myOutputFile;
+	private int myColName;
+	private int myColCard;
+	private int myColType;
+	private int myColBinding;
+	private int myColShortName;
+	private int myColDefinition;
+	private int myColV2Mapping;
+	private int myColRequirements;
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseParser.class);
 
 	public void parse() throws Exception {
 		File baseDir = new File(myDirectory);
@@ -49,6 +62,9 @@ public abstract class BaseParser {
 
 		NodeList rows = table.getElementsByTagName("Row");
 
+		Element defRow = (Element) rows.item(0);
+		parseFirstRow(defRow);
+
 		Element resourceRow = (Element) rows.item(1);
 		Resource resource = new Resource();
 		parseBasicElements(resourceRow, resource);
@@ -63,7 +79,7 @@ public abstract class BaseParser {
 				continue;
 			}
 
-			String type = cellValue(nextRow, 5);
+			String type = cellValue(nextRow, myColType);
 
 			Child elem;
 			if (StringUtils.isBlank(type) || type.startsWith("=")) {
@@ -81,15 +97,35 @@ public abstract class BaseParser {
 				elemName = elemName.substring(0, 1).toUpperCase() + elemName.substring(1);
 				if (elem instanceof ResourceBlock) {
 					elem.setReferenceType(elemName);
-				}else {
+				} else {
 					elem.setReferenceType(elemName + "Dt");
 				}
+
+				// if
+				// (elem.getReferenceType().equals(CodeDt.class.getSimpleName())
+				// ||
+				// elem.getReferenceType().equals(CodeableConceptDt.class.getSimpleName()))
+				// {
+				// elem.setReferenceType(elemName + "Dt<" + elem.getBinding() +
+				// "Enum>");
+				// }
+
 			} else {
 				elem.setReferenceType(IDatatype.class.getSimpleName());
 			}
 
 			if (elem.isRepeatable()) {
 				elem.setReferenceType("List<" + elem.getReferenceType() + ">");
+			}
+
+			for (int childIdx = 0; childIdx < elem.getType().size(); childIdx++) {
+				String nextType = elem.getType().get(childIdx);
+				if (elem.isResourceRef()) {
+					nextType = nextType.substring(0, 1).toUpperCase() + nextType.substring(1);
+				} else {
+					nextType = nextType.substring(0, 1).toUpperCase() + nextType.substring(1) + "Dt";
+				}
+				elem.getType().set(childIdx, nextType);
 			}
 
 			elements.put(elem.getName(), elem);
@@ -104,8 +140,6 @@ public abstract class BaseParser {
 		write(resource);
 
 	}
-
-	protected abstract void parseBasicElements(Element theResourceRow, BaseElement theElem);
 
 	public void setDirectory(String theDirectory) {
 		myDirectory = theDirectory;
@@ -142,20 +176,24 @@ public abstract class BaseParser {
 		return null;
 	}
 
-
 	private void write(Resource theResource) throws IOException {
 		File f = new File(myOutputFile);
 		FileWriter w = new FileWriter(f, false);
 
+		ourLog.info("Writing file: {}", f.getAbsolutePath());
+
 		VelocityContext ctx = new VelocityContext();
 		ctx.put("className", theResource.getName());
-		ctx.put("shortName", theResource.getShortName());
-		ctx.put("definition", theResource.getDefinition());
-		ctx.put("requirements", theResource.getRequirement());
+		ctx.put("shortName", defaultString(theResource.getShortName()));
+		ctx.put("definition", defaultString(theResource.getDefinition()));
+		ctx.put("requirements", defaultString(theResource.getRequirement()));
 		ctx.put("children", theResource.getChildren());
 		ctx.put("resourceBlockChildren", theResource.getResourceBlockChildren());
 
 		VelocityEngine v = new VelocityEngine();
+		v.setProperty("resource.loader", "cp");
+		v.setProperty("cp.resource.loader.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
+
 		InputStream templateIs = ResourceParser.class.getResourceAsStream(getTemplate());
 		InputStreamReader templateReader = new InputStreamReader(templateIs);
 		v.evaluate(ctx, w, "", templateReader);
@@ -166,5 +204,63 @@ public abstract class BaseParser {
 	protected abstract String getFilename();
 
 	protected abstract String getTemplate();
+
+	private void parseFirstRow(Element theDefRow) {
+		for (int i = 0; i < 20; i++) {
+			String nextName = cellValue(theDefRow, i);
+			if (nextName == null) {
+				continue;
+			}
+			nextName = nextName.toLowerCase().trim().replace(".", "");
+			if ("element".equals(nextName)) {
+				myColName = i;
+			} else if ("card".equals(nextName)) {
+				myColCard = i;
+			} else if ("type".equals(nextName)) {
+				myColType = i;
+			} else if ("binding".equals(nextName)) {
+				myColBinding = i;
+			} else if ("short name".equals(nextName)) {
+				myColShortName = i;
+			} else if ("definition".equals(nextName)) {
+				myColDefinition = i;
+			} else if ("requirements".equals(nextName)) {
+				myColRequirements = i;
+			} else if ("v2 mapping".equals(nextName)) {
+				myColV2Mapping = i;
+			}
+		}
+	}
+
+	protected void parseBasicElements(Element theRowXml, BaseElement theTarget) {
+		String name = cellValue(theRowXml, myColName);
+		theTarget.setName(name);
+
+		int lastDot = name.lastIndexOf('.');
+		if (lastDot == -1) {
+			theTarget.setElementName(name);
+		} else {
+			String elementName = name.substring(lastDot + 1);
+			String elementParentName = name.substring(0, lastDot);
+			theTarget.setElementName(elementName);
+			theTarget.setElementParentName(elementParentName);
+		}
+
+		String cardValue = cellValue(theRowXml, myColCard);
+		if (cardValue != null && cardValue.contains("..")) {
+			String[] split = cardValue.split("\\.\\.");
+			theTarget.setCardMin(split[0]);
+			theTarget.setCardMax(split[1]);
+		}
+
+		String type = cellValue(theRowXml, myColType);
+		theTarget.setTypeFromString(type);
+
+		theTarget.setBinding(cellValue(theRowXml, myColBinding));
+		theTarget.setShortName(cellValue(theRowXml, myColShortName));
+		theTarget.setDefinition(cellValue(theRowXml, myColDefinition));
+		theTarget.setRequirement(cellValue(theRowXml, myColRequirements));
+		theTarget.setV2Mapping(cellValue(theRowXml, myColV2Mapping));
+	}
 
 }

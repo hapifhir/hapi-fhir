@@ -1,3 +1,5 @@
+
+
 package ca.uhn.fhir.model.datatype;
 
 import java.util.*;
@@ -6,7 +8,7 @@ import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.model.datatype.*;
 
 /**
- * HAPI/FHIR <b>${resourceName}</b> Datatype
+ * HAPI/FHIR <b>Contact</b> Datatype
  * (Technology mediated contact details (phone, fax, email, etc))
  *
  * <p>
@@ -16,7 +18,7 @@ import ca.uhn.fhir.model.datatype.*;
  *
  * <p>
  * <b>Requirements:</b>
- * Technology mediated contact details (phone, fax, email, etc)
+ * Need to track phone, fax, mobile, sms numbers, email addresses, twitter tags, etc.
  * </p> 
  */
 @DatatypeDef(name="Contact") 
@@ -26,13 +28,13 @@ public class ContactDt extends BaseCompositeDatatype {
 	private CodeDt mySystem;
 	
 	@Child(name="value", order=1, min=0, max=1)	
-	private String myValue;
+	private StringDt myValue;
 	
 	@Child(name="use", order=2, min=0, max=1)	
 	private CodeDt myUse;
 	
 	@Child(name="period", order=3, min=0, max=1)	
-	private Period myPeriod;
+	private PeriodDt myPeriod;
 	
 	/**
 	 * Gets the value(s) for system (phone | fax | email | url)
@@ -66,7 +68,7 @@ public class ContactDt extends BaseCompositeDatatype {
      * The actual contact details, in a form that is meaningful to the designated communication system (i.e. phone number or email address).
      * </p> 
 	 */
-	public String getValue() {
+	public StringDt getValue() {
 		return myValue;
 	}
 
@@ -78,7 +80,7 @@ public class ContactDt extends BaseCompositeDatatype {
      * The actual contact details, in a form that is meaningful to the designated communication system (i.e. phone number or email address).
      * </p> 
 	 */
-	public void setValue(String theValue) {
+	public void setValue(StringDt theValue) {
 		myValue = theValue;
 	}
 	
@@ -114,7 +116,7 @@ public class ContactDt extends BaseCompositeDatatype {
      * Time period when the contact was/is in use
      * </p> 
 	 */
-	public Period getPeriod() {
+	public PeriodDt getPeriod() {
 		return myPeriod;
 	}
 
@@ -126,7 +128,7 @@ public class ContactDt extends BaseCompositeDatatype {
      * Time period when the contact was/is in use
      * </p> 
 	 */
-	public void setPeriod(Period theValue) {
+	public void setPeriod(PeriodDt theValue) {
 		myPeriod = theValue;
 	}
 	

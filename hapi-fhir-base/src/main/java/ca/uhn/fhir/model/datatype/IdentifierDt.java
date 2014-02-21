@@ -14,7 +14,7 @@ public class IdentifierDt extends BaseCompositeDatatype {
 
 	@Child(name="use", order=0)
 	@CodeableConceptElement(type=IdentifierUseEnum.class)
-	private CodeDt<IdentifierUseEnum> myUse;
+	private CodeDt myUse;
 	
 	@Child(name="label", order=1)
 	private StringDt myLabel;
@@ -32,11 +32,11 @@ public class IdentifierDt extends BaseCompositeDatatype {
 	@ChildResource(types= {Organization.class})
 	private ResourceReference myAssigner;
 
-	public CodeDt<IdentifierUseEnum> getUse() {
+	public CodeDt getUse() {
 		return myUse;
 	}
 
-	public void setUse(CodeDt<IdentifierUseEnum> theUse) {
+	public void setUse(CodeDt theUse) {
 		myUse = theUse;
 	}
 

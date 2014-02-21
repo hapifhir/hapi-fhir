@@ -1,3 +1,5 @@
+
+
 package ca.uhn.fhir.model.datatype;
 
 import java.util.*;
@@ -6,7 +8,7 @@ import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.model.datatype.*;
 
 /**
- * HAPI/FHIR <b>${resourceName}</b> Datatype
+ * HAPI/FHIR <b>Address</b> Datatype
  * (A postal address)
  *
  * <p>
@@ -16,7 +18,7 @@ import ca.uhn.fhir.model.datatype.*;
  *
  * <p>
  * <b>Requirements:</b>
- * A postal address
+ * Need to be able to record postal addresses, along with notes about their use
  * </p> 
  */
 @DatatypeDef(name="Address") 
@@ -26,25 +28,25 @@ public class AddressDt extends BaseCompositeDatatype {
 	private CodeDt myUse;
 	
 	@Child(name="text", order=1, min=0, max=1)	
-	private String myText;
+	private StringDt myText;
 	
 	@Child(name="line", order=2, min=0, max=Child.MAX_UNLIMITED)	
-	private List<String> myLine;
+	private List<StringDt> myLine;
 	
 	@Child(name="city", order=3, min=0, max=1)	
-	private String myCity;
+	private StringDt myCity;
 	
 	@Child(name="state", order=4, min=0, max=1)	
-	private String myState;
+	private StringDt myState;
 	
 	@Child(name="zip", order=5, min=0, max=1)	
-	private String myZip;
+	private StringDt myZip;
 	
 	@Child(name="country", order=6, min=0, max=1)	
-	private String myCountry;
+	private StringDt myCountry;
 	
 	@Child(name="period", order=7, min=0, max=1)	
-	private Period myPeriod;
+	private PeriodDt myPeriod;
 	
 	/**
 	 * Gets the value(s) for use (home | work | temp | old - purpose of this address)
@@ -78,7 +80,7 @@ public class AddressDt extends BaseCompositeDatatype {
      * A full text representation of the address
      * </p> 
 	 */
-	public String getText() {
+	public StringDt getText() {
 		return myText;
 	}
 
@@ -90,7 +92,7 @@ public class AddressDt extends BaseCompositeDatatype {
      * A full text representation of the address
      * </p> 
 	 */
-	public void setText(String theValue) {
+	public void setText(StringDt theValue) {
 		myText = theValue;
 	}
 	
@@ -103,7 +105,7 @@ public class AddressDt extends BaseCompositeDatatype {
 P.O. Box number, delivery hints, and similar address information
      * </p> 
 	 */
-	public List<String> getLine() {
+	public List<StringDt> getLine() {
 		return myLine;
 	}
 
@@ -116,7 +118,7 @@ P.O. Box number, delivery hints, and similar address information
 P.O. Box number, delivery hints, and similar address information
      * </p> 
 	 */
-	public void setLine(List<String> theValue) {
+	public void setLine(List<StringDt> theValue) {
 		myLine = theValue;
 	}
 	
@@ -128,7 +130,7 @@ P.O. Box number, delivery hints, and similar address information
      * The name of the city, town, village or other community or delivery center.
      * </p> 
 	 */
-	public String getCity() {
+	public StringDt getCity() {
 		return myCity;
 	}
 
@@ -140,7 +142,7 @@ P.O. Box number, delivery hints, and similar address information
      * The name of the city, town, village or other community or delivery center.
      * </p> 
 	 */
-	public void setCity(String theValue) {
+	public void setCity(StringDt theValue) {
 		myCity = theValue;
 	}
 	
@@ -152,7 +154,7 @@ P.O. Box number, delivery hints, and similar address information
      * Sub-unit of a country with limited sovereignty in a federally organized country. A code may be used if codes are in common use (i.e. US 2 letter state codes).
      * </p> 
 	 */
-	public String getState() {
+	public StringDt getState() {
 		return myState;
 	}
 
@@ -164,7 +166,7 @@ P.O. Box number, delivery hints, and similar address information
      * Sub-unit of a country with limited sovereignty in a federally organized country. A code may be used if codes are in common use (i.e. US 2 letter state codes).
      * </p> 
 	 */
-	public void setState(String theValue) {
+	public void setState(StringDt theValue) {
 		myState = theValue;
 	}
 	
@@ -176,7 +178,7 @@ P.O. Box number, delivery hints, and similar address information
      * A postal code designating a region defined by the postal service.
      * </p> 
 	 */
-	public String getZip() {
+	public StringDt getZip() {
 		return myZip;
 	}
 
@@ -188,7 +190,7 @@ P.O. Box number, delivery hints, and similar address information
      * A postal code designating a region defined by the postal service.
      * </p> 
 	 */
-	public void setZip(String theValue) {
+	public void setZip(StringDt theValue) {
 		myZip = theValue;
 	}
 	
@@ -200,7 +202,7 @@ P.O. Box number, delivery hints, and similar address information
      * Country - a nation as commonly understood or generally accepted
      * </p> 
 	 */
-	public String getCountry() {
+	public StringDt getCountry() {
 		return myCountry;
 	}
 
@@ -212,7 +214,7 @@ P.O. Box number, delivery hints, and similar address information
      * Country - a nation as commonly understood or generally accepted
      * </p> 
 	 */
-	public void setCountry(String theValue) {
+	public void setCountry(StringDt theValue) {
 		myCountry = theValue;
 	}
 	
@@ -224,7 +226,7 @@ P.O. Box number, delivery hints, and similar address information
      * Time period when address was/is in use
      * </p> 
 	 */
-	public Period getPeriod() {
+	public PeriodDt getPeriod() {
 		return myPeriod;
 	}
 
@@ -236,7 +238,7 @@ P.O. Box number, delivery hints, and similar address information
      * Time period when address was/is in use
      * </p> 
 	 */
-	public void setPeriod(Period theValue) {
+	public void setPeriod(PeriodDt theValue) {
 		myPeriod = theValue;
 	}
 	
