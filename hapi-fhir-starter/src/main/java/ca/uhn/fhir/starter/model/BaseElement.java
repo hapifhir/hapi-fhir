@@ -138,6 +138,7 @@ public abstract class BaseElement {
 		String typeString = theType;
 		if (typeString.startsWith("Resource(")) {
 			typeString = typeString.substring("Resource(".length(), typeString.length() - 1);
+			myResourceRef=true;
 		}
 		if (StringUtils.isNotBlank(typeString)) {
 			String[] types = typeString.replace("=", "").split("\\|");

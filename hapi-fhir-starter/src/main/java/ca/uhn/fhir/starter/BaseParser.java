@@ -18,6 +18,8 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import ca.uhn.fhir.model.api.IDatatype;
+import ca.uhn.fhir.model.api.ResourceReference;
 import ca.uhn.fhir.starter.model.BaseElement;
 import ca.uhn.fhir.starter.model.Child;
 import ca.uhn.fhir.starter.model.Resource;
@@ -72,7 +74,9 @@ public abstract class BaseParser {
 
 			parseBasicElements(nextRow, elem);
 
-			if (elem.getType().size() == 1) {
+			if (elem.isResourceRef()) {
+				elem.setReferenceType(ResourceReference.class.getSimpleName());
+			} else if (elem.getType().size() == 1) {
 				String elemName = elem.getType().get(0);
 				elemName = elemName.substring(0, 1).toUpperCase() + elemName.substring(1);
 				if (elem instanceof ResourceBlock) {
@@ -81,7 +85,7 @@ public abstract class BaseParser {
 					elem.setReferenceType(elemName + "Dt");
 				}
 			} else {
-				elem.setReferenceType("IDatatype");
+				elem.setReferenceType(IDatatype.class.getSimpleName());
 			}
 
 			if (elem.isRepeatable()) {

@@ -254,5 +254,6 @@
 	</classpathentry>
 	<classpathentry kind="var" path="M2_REPO/xml-apis/xml-apis/1.0.b2/xml-apis-1.0.b2.jar" sourcepath="M2_REPO/xml-apis/xml-apis/1.0.b2/xml-apis-1.0.b2-sources.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/apache/xmlbeans/xmlbeans/2.3.0/xmlbeans-2.3.0.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/hapi-fhir-base"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

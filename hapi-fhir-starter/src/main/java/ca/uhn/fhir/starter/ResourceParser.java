@@ -1,8 +1,5 @@
 package ca.uhn.fhir.starter;
 
-import java.util.Arrays;
-
-import org.apache.commons.lang3.StringUtils;
 import org.w3c.dom.Element;
 
 import ca.uhn.fhir.starter.model.BaseElement;
@@ -26,7 +23,7 @@ public class ResourceParser extends BaseParser {
 
 	public static void main(String[] args) throws Exception {
 		ResourceParser p = new ResourceParser();
-		p.setDirectory("src/test/resources");
+		p.setDirectory("src/test/resources/res");
 		p.setResourceName("patient");
 		p.setOutputFile("../hapi-fhir-base/src/main/java/ca/uhn/fhir/model/resource/Patient.java");
 		p.parse();

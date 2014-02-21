@@ -62,10 +62,10 @@ public class Patient extends BaseResource {
 	private List<CodeableConceptDt> myCommunication;
 	
 	@Child(name="careProvider", order=13, min=0, max=Child.MAX_UNLIMITED)	
-	private List<IDatatype> myCareProvider;
+	private List<ResourceReference> myCareProvider;
 	
 	@Child(name="managingOrganization", order=14, min=0, max=1)	
-	private OrganizationDt myManagingOrganization;
+	private ResourceReference myManagingOrganization;
 	
 	@Child(name="link", order=15, min=0, max=Child.MAX_UNLIMITED)	
 	private List<IDatatype> myLink;
@@ -394,7 +394,7 @@ public class Patient extends BaseResource {
      * Patient's nominated care provider
      * </p> 
 	 */
-	public List<IDatatype> getCareProvider() {
+	public List<ResourceReference> getCareProvider() {
 		return myCareProvider;
 	}
 
@@ -406,7 +406,7 @@ public class Patient extends BaseResource {
      * Patient's nominated care provider
      * </p> 
 	 */
-	public void setCareProvider(List<IDatatype> theValue) {
+	public void setCareProvider(List<ResourceReference> theValue) {
 		myCareProvider = theValue;
 	}
 	
@@ -418,7 +418,7 @@ public class Patient extends BaseResource {
      * Organization that is the custodian of the patient record
      * </p> 
 	 */
-	public OrganizationDt getManagingOrganization() {
+	public ResourceReference getManagingOrganization() {
 		return myManagingOrganization;
 	}
 
@@ -430,7 +430,7 @@ public class Patient extends BaseResource {
      * Organization that is the custodian of the patient record
      * </p> 
 	 */
-	public void setManagingOrganization(OrganizationDt theValue) {
+	public void setManagingOrganization(ResourceReference theValue) {
 		myManagingOrganization = theValue;
 	}
 	
@@ -483,16 +483,337 @@ public class Patient extends BaseResource {
 	}
 	
 
+	/**
+	 * Block class for child element: <b>Patient.contact</b> (A contact party (e.g. guardian, partner, friend) for the patient)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A contact party (e.g. guardian, partner, friend) for the patient
+     * </p> 
+	 */
 	@Block(name="Patient.contact")	
 	public static class Contact {
+		@Child(name="relationship", order=0, min=0, max=Child.MAX_UNLIMITED)	
+		private List<CodeableConceptDt> myRelationship;
+
+		@Child(name="name", order=1, min=0, max=1)	
+		private HumanNameDt myName;
+
+		@Child(name="telecom", order=2, min=0, max=Child.MAX_UNLIMITED)	
+		private List<ContactDt> myTelecom;
+
+		@Child(name="address", order=3, min=0, max=1)	
+		private AddressDt myAddress;
+
+		@Child(name="gender", order=4, min=0, max=1)	
+		private CodeableConceptDt myGender;
+
+		@Child(name="organization", order=5, min=0, max=1)	
+		private ResourceReference myOrganization;
+
+		/**
+		 * Gets the value(s) for relationship (The kind of relationship)
+		 *
+	     * <p>
+	     * <b>Definition:</b>
+	     * The nature of the relationship between the patient and the contact person
+	     * </p> 
+		 */
+		public List<CodeableConceptDt> getRelationship() {
+			return myRelationship;
+		}
+	
+		/**
+		 * Sets the value(s) for relationship (The kind of relationship)
+		 *
+	     * <p>
+	     * <b>Definition:</b>
+	     * The nature of the relationship between the patient and the contact person
+	     * </p> 
+		 */
+		public void setRelationship(List<CodeableConceptDt> theValue) {
+			myRelationship = theValue;
+		}
+	
+		/**
+		 * Gets the value(s) for name (A name associated with the person)
+		 *
+	     * <p>
+	     * <b>Definition:</b>
+	     * A name associated with the person
+	     * </p> 
+		 */
+		public HumanNameDt getName() {
+			return myName;
+		}
+	
+		/**
+		 * Sets the value(s) for name (A name associated with the person)
+		 *
+	     * <p>
+	     * <b>Definition:</b>
+	     * A name associated with the person
+	     * </p> 
+		 */
+		public void setName(HumanNameDt theValue) {
+			myName = theValue;
+		}
+	
+		/**
+		 * Gets the value(s) for telecom (A contact detail for the person)
+		 *
+	     * <p>
+	     * <b>Definition:</b>
+	     * A contact detail for the person, e.g. a telephone number or an email address.
+	     * </p> 
+		 */
+		public List<ContactDt> getTelecom() {
+			return myTelecom;
+		}
+	
+		/**
+		 * Sets the value(s) for telecom (A contact detail for the person)
+		 *
+	     * <p>
+	     * <b>Definition:</b>
+	     * A contact detail for the person, e.g. a telephone number or an email address.
+	     * </p> 
+		 */
+		public void setTelecom(List<ContactDt> theValue) {
+			myTelecom = theValue;
+		}
+	
+		/**
+		 * Gets the value(s) for address (Address for the contact person)
+		 *
+	     * <p>
+	     * <b>Definition:</b>
+	     * Address for the contact person
+	     * </p> 
+		 */
+		public AddressDt getAddress() {
+			return myAddress;
+		}
+	
+		/**
+		 * Sets the value(s) for address (Address for the contact person)
+		 *
+	     * <p>
+	     * <b>Definition:</b>
+	     * Address for the contact person
+	     * </p> 
+		 */
+		public void setAddress(AddressDt theValue) {
+			myAddress = theValue;
+		}
+	
+		/**
+		 * Gets the value(s) for gender (Gender for administrative purposes)
+		 *
+	     * <p>
+	     * <b>Definition:</b>
+	     * Administrative Gender - the gender that the person is considered to have for administration and record keeping purposes. 
+	     * </p> 
+		 */
+		public CodeableConceptDt getGender() {
+			return myGender;
+		}
+	
+		/**
+		 * Sets the value(s) for gender (Gender for administrative purposes)
+		 *
+	     * <p>
+	     * <b>Definition:</b>
+	     * Administrative Gender - the gender that the person is considered to have for administration and record keeping purposes. 
+	     * </p> 
+		 */
+		public void setGender(CodeableConceptDt theValue) {
+			myGender = theValue;
+		}
+	
+		/**
+		 * Gets the value(s) for organization (Organization that is associated with the contact)
+		 *
+	     * <p>
+	     * <b>Definition:</b>
+	     * Organization on behalf of which the contact is acting or for which the contact is working.
+	     * </p> 
+		 */
+		public ResourceReference getOrganization() {
+			return myOrganization;
+		}
+	
+		/**
+		 * Sets the value(s) for organization (Organization that is associated with the contact)
+		 *
+	     * <p>
+	     * <b>Definition:</b>
+	     * Organization on behalf of which the contact is acting or for which the contact is working.
+	     * </p> 
+		 */
+		public void setOrganization(ResourceReference theValue) {
+			myOrganization = theValue;
+		}
+	
 	}
 
+	/**
+	 * Block class for child element: <b>Patient.animal</b> (If this patient is an animal (non-human))
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * This element has a value if the patient is an animal
+     * </p> 
+	 */
 	@Block(name="Patient.animal")	
 	public static class Animal {
+		@Child(name="species", order=0, min=1, max=1)	
+		private CodeableConceptDt mySpecies;
+
+		@Child(name="breed", order=1, min=0, max=1)	
+		private CodeableConceptDt myBreed;
+
+		@Child(name="genderStatus", order=2, min=0, max=1)	
+		private CodeableConceptDt myGenderStatus;
+
+		/**
+		 * Gets the value(s) for species (E.g. Dog, Cow)
+		 *
+	     * <p>
+	     * <b>Definition:</b>
+	     * Identifies the high level categorization of the kind of animal
+	     * </p> 
+		 */
+		public CodeableConceptDt getSpecies() {
+			return mySpecies;
+		}
+	
+		/**
+		 * Sets the value(s) for species (E.g. Dog, Cow)
+		 *
+	     * <p>
+	     * <b>Definition:</b>
+	     * Identifies the high level categorization of the kind of animal
+	     * </p> 
+		 */
+		public void setSpecies(CodeableConceptDt theValue) {
+			mySpecies = theValue;
+		}
+	
+		/**
+		 * Gets the value(s) for breed (E.g. Poodle, Angus)
+		 *
+	     * <p>
+	     * <b>Definition:</b>
+	     * Identifies the detailed categorization of the kind of animal.
+	     * </p> 
+		 */
+		public CodeableConceptDt getBreed() {
+			return myBreed;
+		}
+	
+		/**
+		 * Sets the value(s) for breed (E.g. Poodle, Angus)
+		 *
+	     * <p>
+	     * <b>Definition:</b>
+	     * Identifies the detailed categorization of the kind of animal.
+	     * </p> 
+		 */
+		public void setBreed(CodeableConceptDt theValue) {
+			myBreed = theValue;
+		}
+	
+		/**
+		 * Gets the value(s) for genderStatus (E.g. Neutered, Intact)
+		 *
+	     * <p>
+	     * <b>Definition:</b>
+	     * Indicates the current state of the animal's reproductive organs
+	     * </p> 
+		 */
+		public CodeableConceptDt getGenderStatus() {
+			return myGenderStatus;
+		}
+	
+		/**
+		 * Sets the value(s) for genderStatus (E.g. Neutered, Intact)
+		 *
+	     * <p>
+	     * <b>Definition:</b>
+	     * Indicates the current state of the animal's reproductive organs
+	     * </p> 
+		 */
+		public void setGenderStatus(CodeableConceptDt theValue) {
+			myGenderStatus = theValue;
+		}
+	
 	}
 
+	/**
+	 * Block class for child element: <b>Patient.link</b> (Link to another patient resource that concerns the same actual person)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Link to another patient resource that concerns the same actual person
+     * </p> 
+	 */
 	@Block(name="Patient.link")	
 	public static class Link {
+		@Child(name="other", order=0, min=1, max=1)	
+		private ResourceReference myOther;
+
+		@Child(name="type", order=1, min=1, max=1)	
+		private CodeDt myType;
+
+		/**
+		 * Gets the value(s) for other (The other patient resource that the link refers to)
+		 *
+	     * <p>
+	     * <b>Definition:</b>
+	     * The other patient resource that the link refers to
+	     * </p> 
+		 */
+		public ResourceReference getOther() {
+			return myOther;
+		}
+	
+		/**
+		 * Sets the value(s) for other (The other patient resource that the link refers to)
+		 *
+	     * <p>
+	     * <b>Definition:</b>
+	     * The other patient resource that the link refers to
+	     * </p> 
+		 */
+		public void setOther(ResourceReference theValue) {
+			myOther = theValue;
+		}
+	
+		/**
+		 * Gets the value(s) for type (replace | refer | seealso - type of link)
+		 *
+	     * <p>
+	     * <b>Definition:</b>
+	     * The type of link between this patient resource and another patient resource.
+	     * </p> 
+		 */
+		public CodeDt getType() {
+			return myType;
+		}
+	
+		/**
+		 * Sets the value(s) for type (replace | refer | seealso - type of link)
+		 *
+	     * <p>
+	     * <b>Definition:</b>
+	     * The type of link between this patient resource and another patient resource.
+	     * </p> 
+		 */
+		public void setType(CodeDt theValue) {
+			myType = theValue;
+		}
+	
 	}
 
 

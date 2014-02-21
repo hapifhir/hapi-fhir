@@ -56,8 +56,47 @@ public class ${className} extends BaseResource {
 #end
 
 #foreach ( $child in $resourceBlockChildren )
+	/**
+	 * Block class for child element: <b>${child.name}</b> (${child.shortName})
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * ${child.definition}
+     * </p> 
+	 */
 	@Block(name="${child.name}")	
 	public static class ${child.className} {
+#foreach ( $subChild in $child.children )
+		@Child(name="${subChild.elementName}", order=${foreach.index}, min=${subChild.cardMin}, max=${subChild.cardMaxForChildAnnotation})	
+		private ${subChild.referenceType} ${subChild.variableName};
+
+#end
+#foreach ( $subChild in $child.children )
+		/**
+		 * Gets the value(s) for ${subChild.elementName} (${subChild.shortName})
+		 *
+	     * <p>
+	     * <b>Definition:</b>
+	     * ${subChild.definition}
+	     * </p> 
+		 */
+		public ${subChild.referenceType} get${subChild.methodName}() {
+			return ${subChild.variableName};
+		}
+	
+		/**
+		 * Sets the value(s) for ${subChild.elementName} (${subChild.shortName})
+		 *
+	     * <p>
+	     * <b>Definition:</b>
+	     * ${subChild.definition}
+	     * </p> 
+		 */
+		public void set${subChild.methodName}(${subChild.referenceType} theValue) {
+			${subChild.variableName} = theValue;
+		}
+	
+#end
 	}
 
 #end
