@@ -1,5 +1,15 @@
 
 
+
+
+
+
+
+
+
+
+
+
 package ca.uhn.fhir.model.datatype;
 
 import java.util.*;
@@ -159,5 +169,6 @@ public class QuantityDt extends BaseCompositeDatatype {
 		myCode = theValue;
 	}
 	
+
 
 }

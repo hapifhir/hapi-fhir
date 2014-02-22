@@ -24,6 +24,7 @@ import ca.uhn.fhir.model.datatype.*;
 @ResourceDef(name="${className}")
 public class ${className} extends BaseResource {
 
+#childExtensionFields( $childExtensionTypes )
 #childVars( $children )
 #childAccessors( $children )
 
@@ -43,5 +44,7 @@ public class ${className} extends BaseResource {
 	}
 
 #end
+
+#childExtensionTypes( $childExtensionTypes )
 
 }

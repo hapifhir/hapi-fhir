@@ -1,5 +1,15 @@
 
 
+
+
+
+
+
+
+
+
+
+
 package ca.uhn.fhir.model.datatype;
 
 import java.util.*;
@@ -132,5 +142,6 @@ public class ContactDt extends BaseCompositeDatatype {
 		myPeriod = theValue;
 	}
 	
+
 
 }

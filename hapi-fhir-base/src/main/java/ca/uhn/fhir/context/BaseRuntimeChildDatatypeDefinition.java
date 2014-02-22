@@ -9,7 +9,7 @@ import ca.uhn.fhir.model.api.ICodeEnum;
 import ca.uhn.fhir.model.api.IDatatype;
 import ca.uhn.fhir.model.api.IElement;
 
-public abstract class BaseRuntimeChildDatatypeDefinition extends BaseRuntimeChildDefinition {
+public abstract class BaseRuntimeChildDatatypeDefinition extends BaseRuntimeUndeclaredChildDefinition {
 
 	private Class<? extends ICodeEnum> myCodeType;
 	private Class<? extends IDatatype> myDatatype;

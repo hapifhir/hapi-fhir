@@ -24,7 +24,10 @@ import ca.uhn.fhir.model.datatype.*;
 @DatatypeDef(name="${className}") 
 public class ${className}Dt extends BaseCompositeDatatype {
 
+#childExtensionFields( $childExtensionTypes )
 #childVars( $children )
 #childAccessors( $children )
+
+#childExtensionTypes( $childExtensionTypes )
 
 }

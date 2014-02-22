@@ -8,6 +8,7 @@ import org.junit.Test;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.datatype.DateDt;
 import ca.uhn.fhir.model.resource.Observation;
 
 public class XmlParserTest {

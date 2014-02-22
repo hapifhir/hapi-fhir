@@ -1,5 +1,15 @@
 
 
+
+
+
+
+
+
+
+
+
+
 package ca.uhn.fhir.model.resource;
 
 import java.util.*;
@@ -24,6 +34,10 @@ import ca.uhn.fhir.model.datatype.*;
 @ResourceDef(name="Patient")
 public class Patient extends BaseResource {
 
+	@Child()
+	private Foo1 myFoo1;
+	@Child()
+	private Bar1 myBar1;
 	@Child(name="identifier", order=0, min=0, max=Child.MAX_UNLIMITED)	
 	private List<IdentifierDt> myIdentifier;
 	
@@ -1949,5 +1963,36 @@ public class Patient extends BaseResource {
 	
 	}
 
+
+	@ExtensionBlock(url="http://foo/1")
+	public class Foo1 implements IExtension {
+		
+		@Child(name="value", order=0)
+		private StringDt myValue;
+
+		/**
+		 * Gets the value 
+		 */
+		public StringDt getValue() {
+			return myValue;
+		}
+	
+		/**
+		 * Sets the value
+		 */
+		public void setValue(StringDt theValue) {
+			myValue = theValue;
+		}
+
+
+	}
+	
+	@ExtensionBlock(url="http://bar/1")
+	public class Bar1 implements IExtension {
+		
+
+
+	}
+	
 
 }

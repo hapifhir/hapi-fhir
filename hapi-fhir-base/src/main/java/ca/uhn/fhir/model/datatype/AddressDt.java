@@ -1,5 +1,15 @@
 
 
+
+
+
+
+
+
+
+
+
+
 package ca.uhn.fhir.model.datatype;
 
 import java.util.*;
@@ -242,5 +252,6 @@ P.O. Box number, delivery hints, and similar address information
 		myPeriod = theValue;
 	}
 	
+
 
 }

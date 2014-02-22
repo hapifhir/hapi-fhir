@@ -1,11 +1,8 @@
 package ca.uhn.fhir.parser;
 
-import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.List;
 
-import javax.xml.stream.XMLEventFactory;
-import javax.xml.stream.XMLEventWriter;
-import javax.xml.stream.XMLOutputFactory;
-import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.Attribute;
 import javax.xml.stream.events.EndElement;
 import javax.xml.stream.events.StartElement;
@@ -16,15 +13,20 @@ import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimePrimitiveDatatypeDefinition;
+import ca.uhn.fhir.context.RuntimePrimitiveDatatypeNarrativeDefinition;
 import ca.uhn.fhir.context.RuntimeResourceBlockDefinition;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeResourceReferenceDefinition;
+import ca.uhn.fhir.model.api.ISupportsUndeclaredExtensions;
 import ca.uhn.fhir.model.api.ICompositeDatatype;
 import ca.uhn.fhir.model.api.ICompositeElement;
+import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IPrimitiveDatatype;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.IResourceBlock;
 import ca.uhn.fhir.model.api.ResourceReference;
+import ca.uhn.fhir.model.api.UndeclaredExtension;
+import ca.uhn.fhir.model.datatype.XhtmlDt;
 
 class ParserState {
 
@@ -51,12 +53,20 @@ class ParserState {
 		myState.enteringNewElement(theElement, theName);
 	}
 
+	public void enteringNewElementExtension(StartElement theElem, String theUrlAttr) {
+		myState.enteringNewElementExtension(theElem, theUrlAttr);
+	}
+
 	public Object getObject() {
 		return myObject;
 	}
 
 	public boolean isComplete() {
 		return myObject != null;
+	}
+
+	public void otherEvent(XMLEvent theEvent) throws DataFormatException {
+		myState.otherEvent(theEvent);
 	}
 
 	private void pop() {
@@ -96,11 +106,25 @@ class ParserState {
 
 		public abstract void enteringNewElement(StartElement theElement, String theLocalPart) throws DataFormatException;
 
+		public void enteringNewElementExtension(@SuppressWarnings("unused") StartElement theElement, String theUrlAttr) {
+			// TODO: handle predefined extensions
+
+			if (getCurrentElement() instanceof ISupportsUndeclaredExtensions) {
+				UndeclaredExtension newExtension = new UndeclaredExtension();
+				newExtension.setUrl(theUrlAttr);
+				((ISupportsUndeclaredExtensions) getCurrentElement()).getUndeclaredExtensions().add(newExtension);
+				ExtensionState newState = new ExtensionState(newExtension);
+				push(newState);
+			}
+		}
+
+		public abstract void otherEvent(XMLEvent theEvent) throws DataFormatException;
+
 		public void setStack(BaseState theState) {
 			myStack = theState;
 		}
 
-		public abstract void otherEvent(XMLEvent theEvent);
+		protected abstract IElement getCurrentElement();
 
 	}
 
@@ -165,16 +189,105 @@ class ParserState {
 				push(newState);
 				return;
 			}
+			case PRIMITIVE_XHTML: {
+				RuntimePrimitiveDatatypeNarrativeDefinition xhtmlTarget = (RuntimePrimitiveDatatypeNarrativeDefinition) target;
+				XhtmlDt newDt = xhtmlTarget.newInstance();
+				child.getMutator().addValue(myInstance, newDt);
+				XhtmlState state = new XhtmlState(newDt, theElement);
+				push(state);
+				return;
+			}
+			case UNDECL_EXT:
 			case RESOURCE: {
 				// Throw an exception because this shouldn't happen here
 				break;
 			}
-			case PRIMITIVE_XHTML: {
-
-			}
 			}
 
 			throw new DataFormatException("Illegal resource position: " + target.getChildType());
+		}
+
+		@Override
+		public void otherEvent(XMLEvent theEvent) {
+			// ignore
+		}
+
+		@Override
+		protected IElement getCurrentElement() {
+			return myInstance;
+		}
+
+	}
+
+	private class ExtensionState extends BaseState {
+
+		private UndeclaredExtension myExtension;
+
+		public ExtensionState(UndeclaredExtension theExtension) {
+			myExtension = theExtension;
+		}
+
+		@Override
+		public void attributeValue(Attribute theAttribute, String theValue) throws DataFormatException {
+			throw new DataFormatException("'value' attribute is invalid in 'extension' element");
+		}
+
+		@Override
+		public void endingElement(EndElement theElem) throws DataFormatException {
+			if (myExtension.getValue() != null && myExtension.getUndeclaredExtensions().size() > 0) {
+				throw new DataFormatException("Extension must not have both a value and other contained extensions");
+			}
+			pop();
+		}
+
+		@Override
+		public void enteringNewElement(StartElement theElement, String theLocalPart) throws DataFormatException {
+			BaseRuntimeElementDefinition<?> target = myContext.getRuntimeChildUndeclaredExtensionDefinition().getChildByName(theLocalPart);
+			if (target == null) {
+				throw new DataFormatException("Unknown extension element name: " + theLocalPart);
+			}
+
+			switch (target.getChildType()) {
+			case COMPOSITE_DATATYPE: {
+				BaseRuntimeElementCompositeDefinition<?> compositeTarget = (BaseRuntimeElementCompositeDefinition<?>) target;
+				ICompositeDatatype newChildInstance = (ICompositeDatatype) compositeTarget.newInstance();
+				myExtension.setValue(newChildInstance);
+				ContainerState newState = new ContainerState(compositeTarget, newChildInstance);
+				push(newState);
+				return;
+			}
+			case PRIMITIVE_DATATYPE: {
+				RuntimePrimitiveDatatypeDefinition primitiveTarget = (RuntimePrimitiveDatatypeDefinition) target;
+				IPrimitiveDatatype<?> newChildInstance = primitiveTarget.newInstance();
+				myExtension.setValue(newChildInstance);
+				PrimitiveState newState = new PrimitiveState(newChildInstance);
+				push(newState);
+				return;
+			}
+			case RESOURCE_REF: {
+				RuntimeResourceReferenceDefinition resourceRefTarget = (RuntimeResourceReferenceDefinition) target;
+				ResourceReference newChildInstance = new ResourceReference();
+				myExtension.setValue(newChildInstance);
+				ResourceReferenceState newState = new ResourceReferenceState(resourceRefTarget, newChildInstance);
+				push(newState);
+				return;
+			}
+			case PRIMITIVE_XHTML:
+			case RESOURCE:
+			case RESOURCE_BLOCK:
+			case UNDECL_EXT:
+				break;
+			}
+		}
+
+		@Override
+		public void otherEvent(XMLEvent theEvent) throws DataFormatException {
+			// ignore
+		}
+
+		@Override
+		protected IElement getCurrentElement() {
+			return myExtension;
 		}
 
 	}
@@ -200,6 +313,16 @@ class ParserState {
 		@Override
 		public void enteringNewElement(StartElement theElement, String theLocalPart) throws DataFormatException {
 			throw new Error("?? can this happen?"); // TODO: can this happen?
+		}
+
+		@Override
+		public void otherEvent(XMLEvent theEvent) {
+			// ignore
+		}
+
+		@Override
+		protected IElement getCurrentElement() {
+			return myInstance;
 		}
 
 	}
@@ -260,6 +383,16 @@ class ParserState {
 			}
 		}
 
+		@Override
+		public void otherEvent(XMLEvent theEvent) {
+			// ignore
+		}
+
+		@Override
+		protected IElement getCurrentElement() {
+			return myInstance;
+		}
+
 	}
 
 	private enum ResourceReferenceSubState {
@@ -267,47 +400,47 @@ class ParserState {
 	}
 
 	private class XhtmlState extends BaseState {
-		private StringWriter myStringWriter;
-		private XMLEventWriter myEventWriter;
-		private XMLEventFactory myEventFactory;
+		private int myDepth;
+		private XhtmlDt myDt;
+		private List<XMLEvent> myEvents = new ArrayList<XMLEvent>();
 
-		private XhtmlState() throws DataFormatException {
-			try {
-				XMLOutputFactory xmlFactory = XMLOutputFactory.newInstance();
-				myStringWriter = new StringWriter();
-				myEventWriter = xmlFactory.createXMLEventWriter(myStringWriter);
-			} catch (XMLStreamException e) {
-				throw new DataFormatException(e);
-			}
+		private XhtmlState(XhtmlDt theXhtmlDt, StartElement theXhtmlStartElement) throws DataFormatException {
+			myDepth = 1;
+			myDt = theXhtmlDt;
+			myEvents.add(theXhtmlStartElement);
 		}
 
 		@Override
 		public void attributeValue(Attribute theAttr, String theValue) throws DataFormatException {
-			try {
-				myEventWriter.add(theAttr);
-			} catch (XMLStreamException e) {
-				throw new DataFormatException(e);
-			}
+			myEvents.add(theAttr);
 		}
 
 		@Override
 		public void endingElement(EndElement theElement) throws DataFormatException {
-			try {
-				myEventWriter.add(theElement);
-			} catch (XMLStreamException e) {
-				throw new DataFormatException(e);
+			myEvents.add(theElement);
+
+			myDepth--;
+			if (myDepth == 0) {
+				myDt.setValue(myEvents);
+				pop();
 			}
 		}
 
 		@Override
 		public void enteringNewElement(StartElement theElem, String theLocalPart) throws DataFormatException {
-			// TODO Auto-generated method stub
-
+			myDepth++;
+			myEvents.add(theElem);
 		}
-	}
 
-	public void otherEvent(XMLEvent theEvent) {
-		myState.otherEvent(theEvent);
+		@Override
+		public void otherEvent(XMLEvent theEvent) throws DataFormatException {
+			myEvents.add(theEvent);
+		}
+
+		@Override
+		protected IElement getCurrentElement() {
+			return myDt;
+		}
 	}
 
 }

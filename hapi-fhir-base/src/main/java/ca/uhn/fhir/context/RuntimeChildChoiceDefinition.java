@@ -10,7 +10,7 @@ import java.util.Set;
 import ca.uhn.fhir.model.api.IDatatype;
 import ca.uhn.fhir.model.api.IElement;
 
-public class RuntimeChildChoiceDefinition extends BaseRuntimeChildDefinition {
+public class RuntimeChildChoiceDefinition extends BaseRuntimeUndeclaredChildDefinition {
 
 	private List<Class<? extends IElement>> myChoiceTypes;
 	private Map<String, BaseRuntimeElementDefinition<?>> myNameToChildDefinition;

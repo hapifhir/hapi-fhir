@@ -11,7 +11,7 @@ import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceReference;
 
-public class RuntimeChildResourceDefinition extends BaseRuntimeChildDefinition {
+public class RuntimeChildResourceDefinition extends BaseRuntimeUndeclaredChildDefinition {
 
 	private BaseRuntimeElementDefinition<?> myRuntimeDef;
 	private List<Class<? extends IResource>> myResourceTypes;
@@ -49,6 +49,6 @@ public class RuntimeChildResourceDefinition extends BaseRuntimeChildDefinition {
 
 	@Override
 	void sealAndInitialize(Map<Class<? extends IElement>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
-		myRuntimeDef = new RuntimeResourceReferenceDefinition(getElementName(), myResourceTypes);
+		myRuntimeDef = new RuntimeResourceReferenceDefinition(getElementName());
 	}
 }

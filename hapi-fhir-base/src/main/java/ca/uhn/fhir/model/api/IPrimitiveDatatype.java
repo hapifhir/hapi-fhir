@@ -6,7 +6,7 @@ public interface IPrimitiveDatatype<T> extends IDatatype {
 
 	void setValueAsString(String theValue) throws DataFormatException;
 
-	String getValueAsString();
+	String getValueAsString() throws DataFormatException;
 
 	T getValue();
 	

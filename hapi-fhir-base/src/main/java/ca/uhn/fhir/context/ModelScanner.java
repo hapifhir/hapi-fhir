@@ -1,6 +1,6 @@
 package ca.uhn.fhir.context;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
@@ -34,6 +34,8 @@ import ca.uhn.fhir.model.api.annotation.CodeTableDef;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.Narrative;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.datatype.CodeDt;
+import ca.uhn.fhir.model.datatype.DateDt;
 import ca.uhn.fhir.model.datatype.ICodedDatatype;
 import ca.uhn.fhir.model.datatype.NarrativeDt;
 import ca.uhn.fhir.model.datatype.XhtmlDt;
@@ -42,22 +44,24 @@ class ModelScanner {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ModelScanner.class);
 
 	private Map<Class<? extends IElement>, BaseRuntimeElementDefinition<?>> myClassToElementDefinitions = new HashMap<Class<? extends IElement>, BaseRuntimeElementDefinition<?>>();
+	private Map<String, BaseRuntimeElementDefinition<?>> myDatatypeAttributeNameToDefinition = new HashMap<String, BaseRuntimeElementDefinition<?>>();
 	private Map<String, RuntimeResourceDefinition> myNameToResourceDefinitions = new HashMap<String, RuntimeResourceDefinition>();
 	private Set<Class<? extends IElement>> myScanAlso = new HashSet<Class<? extends IElement>>();
-	private Set<Class<? extends ICodeEnum>> myScanAlsoCodeTable = new HashSet<Class<? extends ICodeEnum>>();
 
 	// private Map<String, RuntimeResourceDefinition>
 	// myNameToDatatypeDefinitions = new HashMap<String,
 	// RuntimeDatatypeDefinition>();
 
-	public Map<String, RuntimeResourceDefinition> getNameToResourceDefinitions() {
-		return (myNameToResourceDefinitions);
-	}
+	private Set<Class<? extends ICodeEnum>> myScanAlsoCodeTable = new HashSet<Class<? extends ICodeEnum>>();
+
+	private RuntimeChildUndeclaredExtensionDefinition myRuntimeChildUndeclaredExtensionDefinition;
 
 	ModelScanner(Class<? extends IResource>... theResourceTypes) throws ConfigurationException {
 
 		Set<Class<? extends IElement>> toScan = new HashSet<Class<? extends IElement>>(Arrays.asList(theResourceTypes));
 		toScan.add(NarrativeDt.class);
+		toScan.add(DateDt.class);
+		toScan.add(CodeDt.class);
 
 		do {
 			for (Class<? extends IElement> nextClass : toScan) {
@@ -77,8 +81,39 @@ class ModelScanner {
 			next.sealAndInitialize(myClassToElementDefinitions);
 		}
 
+		myRuntimeChildUndeclaredExtensionDefinition = new RuntimeChildUndeclaredExtensionDefinition(myDatatypeAttributeNameToDefinition);
+		
 		ourLog.info("Done scanning FHIR library, found {} model entries", myClassToElementDefinitions.size());
 
+	}
+
+	public RuntimeChildUndeclaredExtensionDefinition getRuntimeChildUndeclaredExtensionDefinition() {
+		return myRuntimeChildUndeclaredExtensionDefinition;
+	}
+
+	public Map<Class<? extends IElement>, BaseRuntimeElementDefinition<?>> getClassToElementDefinitions() {
+		return myClassToElementDefinitions;
+	}
+
+	public Map<String, RuntimeResourceDefinition> getNameToResourceDefinitions() {
+		return (myNameToResourceDefinitions);
+	}
+
+	private void addDatatype(BaseRuntimeElementDefinition<?> theResourceDef) {
+		String attrName = theResourceDef.getName();
+		attrName = "value" + attrName.substring(0, 1).toUpperCase() + attrName.substring(1);
+		myDatatypeAttributeNameToDefinition.put(attrName, theResourceDef);
+	}
+
+	private void addScanAlso(Class<? extends IElement> theType) {
+		if (theType.isInterface()) {
+			return;
+		}
+		myScanAlso.add(theType);
+	}
+
+	public Map<String, BaseRuntimeElementDefinition<?>> getDatatypeAttributeNameToDefinition() {
+		return myDatatypeAttributeNameToDefinition;
 	}
 
 	private void scan(Class<? extends IElement> theClass) throws ConfigurationException {
@@ -153,6 +188,10 @@ class ModelScanner {
 		scanCompositeElementForChildren(theClass, resourceDef, null);
 	}
 
+	private String scanCodeTable(Class<? extends ICodeEnum> theCodeType, CodeTableDef theCodeTableDefinition) {
+		return null; // TODO: implement
+	}
+
 	private void scanCompositeDatatype(Class<? extends ICompositeDatatype> theClass, DatatypeDef theDatatypeDefinition) {
 		ourLog.debug("Scanning resource class: {}", theClass.getName());
 
@@ -163,57 +202,15 @@ class ModelScanner {
 
 		RuntimeCompositeDatatypeDefinition resourceDef = new RuntimeCompositeDatatypeDefinition(resourceName, theClass);
 		myClassToElementDefinitions.put(theClass, resourceDef);
+		addDatatype(resourceDef);
 
 		scanCompositeElementForChildren(theClass, resourceDef, null);
-	}
-
-	private String scanPrimitiveDatatype(Class<? extends IPrimitiveDatatype<?>> theClass, DatatypeDef theDatatypeDefinition) {
-		ourLog.debug("Scanning resource class: {}", theClass.getName());
-
-		String resourceName = theDatatypeDefinition.name();
-		if (isBlank(resourceName)) {
-			throw new ConfigurationException("Resource type @" + ResourceDef.class.getSimpleName() + " annotation contains no resource name: " + theClass.getCanonicalName());
-		}
-
-		RuntimePrimitiveDatatypeDefinition resourceDef;
-		if (theClass.equals(XhtmlDt.class)) {
-			resourceDef = new RuntimePrimitiveDatatypeNarrativeDefinition(resourceName, theClass);
-		} else {
-			resourceDef = new RuntimePrimitiveDatatypeDefinition(resourceName, theClass);
-		}
-		myClassToElementDefinitions.put(theClass, resourceDef);
-
-		return resourceName;
-	}
-
-	private String scanResource(Class<? extends IResource> theClass, ResourceDef resourceDefinition) {
-		ourLog.debug("Scanning resource class: {}", theClass.getName());
-
-		String resourceName = resourceDefinition.name();
-		if (isBlank(resourceName)) {
-			throw new ConfigurationException("Resource type @" + ResourceDef.class.getSimpleName() + " annotation contains no resource name: " + theClass.getCanonicalName());
-		}
-
-		if (myNameToResourceDefinitions.containsKey(resourceName)) {
-			if (!myNameToResourceDefinitions.get(resourceName).getImplementingClass().equals(theClass)) {
-				throw new ConfigurationException("Detected duplicate element name '" + resourceName + "' in types '" + theClass.getCanonicalName() + "' and '" + myNameToResourceDefinitions.get(resourceName).getImplementingClass() + "'");
-			}
-			return resourceName;
-		}
-
-		RuntimeResourceDefinition resourceDef = new RuntimeResourceDefinition(theClass, resourceName);
-		myClassToElementDefinitions.put(theClass, resourceDef);
-		myNameToResourceDefinitions.put(resourceName, resourceDef);
-
-		scanCompositeElementForChildren(theClass, resourceDef, resourceDefinition.identifierOrder());
-
-		return resourceName;
 	}
 
 	@SuppressWarnings("unchecked")
 	private void scanCompositeElementForChildren(Class<? extends ICompositeElement> theClass, BaseRuntimeElementCompositeDefinition<?> theDefinition, Integer theIdentifierOrder) {
 		Set<String> elementNames = new HashSet<String>();
-		TreeMap<Integer, BaseRuntimeChildDefinition> orderToElementDef = new TreeMap<Integer, BaseRuntimeChildDefinition>();
+		TreeMap<Integer, BaseRuntimeUndeclaredChildDefinition> orderToElementDef = new TreeMap<Integer, BaseRuntimeUndeclaredChildDefinition>();
 
 		LinkedList<Class<? extends ICompositeElement>> classes = new LinkedList<Class<? extends ICompositeElement>>();
 		Class<? extends ICompositeElement> current = theClass;
@@ -231,7 +228,7 @@ class ModelScanner {
 		}
 
 		while (orderToElementDef.size() > 0 && orderToElementDef.firstKey() < 0) {
-			BaseRuntimeChildDefinition elementDef = orderToElementDef.remove(orderToElementDef.firstKey());
+			BaseRuntimeUndeclaredChildDefinition elementDef = orderToElementDef.remove(orderToElementDef.firstKey());
 			if (elementDef.getElementName().equals("identifier")) {
 				orderToElementDef.put(theIdentifierOrder, elementDef);
 			} else {
@@ -250,7 +247,7 @@ class ModelScanner {
 	}
 
 	@SuppressWarnings("unchecked")
-	private void scanCompositeElementForChildren(Class<? extends ICompositeElement> theClass, BaseRuntimeElementCompositeDefinition<?> theDefinition, Set<String> elementNames, TreeMap<Integer, BaseRuntimeChildDefinition> orderToElementDef) {
+	private void scanCompositeElementForChildren(Class<? extends ICompositeElement> theClass, BaseRuntimeElementCompositeDefinition<?> theDefinition, Set<String> elementNames, TreeMap<Integer, BaseRuntimeUndeclaredChildDefinition> orderToElementDef) {
 		for (Field next : theClass.getDeclaredFields()) {
 
 			Narrative hasNarrative = next.getAnnotation(Narrative.class);
@@ -377,11 +374,50 @@ class ModelScanner {
 		}
 	}
 
-	private void addScanAlso(Class<? extends IElement> theType) {
-		if (theType.isInterface()) {
-			return;
+	private String scanPrimitiveDatatype(Class<? extends IPrimitiveDatatype<?>> theClass, DatatypeDef theDatatypeDefinition) {
+		ourLog.debug("Scanning resource class: {}", theClass.getName());
+
+		String resourceName = theDatatypeDefinition.name();
+		if (isBlank(resourceName)) {
+			throw new ConfigurationException("Resource type @" + ResourceDef.class.getSimpleName() + " annotation contains no resource name: " + theClass.getCanonicalName());
 		}
-		myScanAlso.add(theType);
+
+		BaseRuntimeElementDefinition<?> resourceDef;
+		if (theClass.equals(XhtmlDt.class)) {
+			@SuppressWarnings("unchecked")
+			Class<XhtmlDt> clazz = (Class<XhtmlDt>) theClass;
+			resourceDef = new RuntimePrimitiveDatatypeNarrativeDefinition(resourceName, clazz);
+		} else {
+			resourceDef = new RuntimePrimitiveDatatypeDefinition(resourceName, theClass);
+		}
+		myClassToElementDefinitions.put(theClass, resourceDef);
+		addDatatype(resourceDef);
+
+		return resourceName;
+	}
+
+	private String scanResource(Class<? extends IResource> theClass, ResourceDef resourceDefinition) {
+		ourLog.debug("Scanning resource class: {}", theClass.getName());
+
+		String resourceName = resourceDefinition.name();
+		if (isBlank(resourceName)) {
+			throw new ConfigurationException("Resource type @" + ResourceDef.class.getSimpleName() + " annotation contains no resource name: " + theClass.getCanonicalName());
+		}
+
+		if (myNameToResourceDefinitions.containsKey(resourceName)) {
+			if (!myNameToResourceDefinitions.get(resourceName).getImplementingClass().equals(theClass)) {
+				throw new ConfigurationException("Detected duplicate element name '" + resourceName + "' in types '" + theClass.getCanonicalName() + "' and '" + myNameToResourceDefinitions.get(resourceName).getImplementingClass() + "'");
+			}
+			return resourceName;
+		}
+
+		RuntimeResourceDefinition resourceDef = new RuntimeResourceDefinition(theClass, resourceName);
+		myClassToElementDefinitions.put(theClass, resourceDef);
+		myNameToResourceDefinitions.put(resourceName, resourceDef);
+
+		scanCompositeElementForChildren(theClass, resourceDef, resourceDefinition.identifierOrder());
+
+		return resourceName;
 	}
 
 	private static Class<?> getGenericCollectionTypeOfField(Field next) {
@@ -396,14 +432,6 @@ class ModelScanner {
 		// type = (Class<?>) actualTypeArguments[0];
 		// }
 		return type;
-	}
-
-	private String scanCodeTable(Class<? extends ICodeEnum> theCodeType, CodeTableDef theCodeTableDefinition) {
-		return null; // TODO: implement
-	}
-
-	public Map<Class<? extends IElement>, BaseRuntimeElementDefinition<?>> getClassToElementDefinitions() {
-		return myClassToElementDefinitions;
 	}
 
 }

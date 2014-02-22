@@ -2,13 +2,12 @@ package ca.uhn.fhir.context;
 
 import java.util.Map;
 
-import ca.uhn.fhir.context.BaseRuntimeElementDefinition.ChildTypeEnum;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IPrimitiveDatatype;
 
-public class RuntimePrimitiveDatatypeDefinition extends BaseRuntimeElementDefinition<IPrimitiveDatatype>{
+public class RuntimePrimitiveDatatypeDefinition extends BaseRuntimeElementDefinition<IPrimitiveDatatype<?>>{
 
-	public RuntimePrimitiveDatatypeDefinition(String theName, Class<? extends IPrimitiveDatatype> theImplementingClass) {
+	public RuntimePrimitiveDatatypeDefinition(String theName, Class<? extends IPrimitiveDatatype<?>> theImplementingClass) {
 		super(theName, theImplementingClass);
 	}
 

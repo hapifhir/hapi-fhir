@@ -1,3 +1,7 @@
+##################################################################
+## childVars
+##################################################################
+
 #macro ( childVars $childElements )
 #foreach ( $child in $children )
 #if ($child.resourceRef) 
@@ -20,6 +24,11 @@
 	
 #end
 #end
+
+
+##################################################################
+## childAccessors
+##################################################################
 
 #macro ( childAccessors $childElements )
 #foreach ( $child in $children )
@@ -49,3 +58,53 @@
 	
 #end
 #end
+
+##################################################################
+## childExtensionFields
+##################################################################
+
+#macro ( childExtensionFields $childExtensionTypes )
+#foreach ( $extensionType in $childExtensionTypes )
+	@Child()
+	private ${extensionType.nameType} my${extensionType.nameType};
+
+#end
+#end
+
+
+##################################################################
+## childExtensionTypes
+##################################################################
+
+#macro ( childExtensionTypes $childExtensionTypes )
+#foreach ( $extensionType in $childExtensionTypes )
+	@ExtensionBlock(url="${extensionType.url}")
+	public class ${extensionType.nameType} implements IExtension {
+		
+#if(${extensionType.hasDatatype})
+		@Child(name="value", order=0)
+		private ${extensionType.datatypeSimpleName} myValue;
+
+		/**
+		 * Gets the value 
+		 */
+		public ${extensionType.datatypeSimpleName} getValue() {
+			return myValue;
+		}
+	
+		/**
+		 * Sets the value
+		 */
+		public void setValue(${extensionType.datatypeSimpleName} theValue) {
+			myValue = theValue;
+		}
+#else
+#end
+
+
+	}
+	
+#end
+#end
+
+

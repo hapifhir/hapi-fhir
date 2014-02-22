@@ -17,7 +17,7 @@ public abstract class BaseDateTimeDt extends BasePrimitiveDatatype<Date> {
 	private static final FastDateFormat ourYearMonthDayFormat = FastDateFormat.getInstance("yyyy-MM-dd");
 	private static final FastDateFormat ourYearMonthFormat = FastDateFormat.getInstance("yyyy-MM");
 	private static final FastDateFormat ourYearMonthDayTimeFormat = FastDateFormat.getInstance("yyyy-MM-dd'T'HH:mm:ss");
-	private static final FastDateFormat ourYearMonthDayTimeZoneFormat = FastDateFormat.getInstance("yyyy-MM-dd'T'HH:mm:ssX");
+	private static final FastDateFormat ourYearMonthDayTimeZoneFormat = FastDateFormat.getInstance("yyyy-MM-dd'T'HH:mm:ssZZ");
 
 	private int myPrecision = Calendar.SECOND;
 	private Date myValue;
@@ -114,7 +114,7 @@ public abstract class BaseDateTimeDt extends BasePrimitiveDatatype<Date> {
 				setValue(ourYearMonthFormat.parse(theValue));
 				setPrecision(Calendar.MONTH);
 				clearTimeZone();
-			} else if (theValue.length() == 9 && isPrecisionAllowed(Calendar.DAY_OF_MONTH)) {
+			} else if (theValue.length() == 10 && isPrecisionAllowed(Calendar.DAY_OF_MONTH)) {
 				setValue(ourYearMonthDayFormat.parse(theValue));
 				setPrecision(Calendar.DAY_OF_MONTH);
 				clearTimeZone();
