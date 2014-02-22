@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import ca.uhn.fhir.model.api.IDatatype;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.util.BeanUtils;
 
@@ -92,6 +93,10 @@ public abstract class BaseRuntimeChildDefinition {
 
 	public abstract Set<String> getValidChildNames();
 
+	public abstract String getChildNameByDatatype(Class<? extends IElement> theDatatype);
+
+	public abstract BaseRuntimeElementDefinition<?> getChildElementDefinitionByDatatype(Class<? extends IElement> theType);
+
 	abstract void sealAndInitialize(Map<Class<? extends IElement>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions);
 
 	private final class ListMutator implements IMutator {
@@ -102,10 +107,10 @@ public abstract class BaseRuntimeChildDefinition {
 		}
 
 		@Override
-		public void addValue(Object theTarget, Object theValue) {
-			List<Object> existingList = myAccessor.getValues(theTarget);
+		public void addValue(Object theTarget, IElement theValue) {
+			List<IElement> existingList = myAccessor.getValues(theTarget);
 			if (existingList == null) {
-				existingList = new ArrayList<Object>();
+				existingList = new ArrayList<IElement>();
 				try {
 					myMutator.invoke(theTarget, existingList);
 				} catch (IllegalAccessException e) {
@@ -129,9 +134,9 @@ public abstract class BaseRuntimeChildDefinition {
 
 		@SuppressWarnings("unchecked")
 		@Override
-		public List<Object> getValues(Object theTarget) {
+		public List<IElement> getValues(Object theTarget) {
 			try {
-				return (List<Object>) myAccessor.invoke(theTarget);
+				return (List<IElement>) myAccessor.invoke(theTarget);
 			} catch (IllegalAccessException e) {
 				throw new ConfigurationException("Failed to get value", e);
 			} catch (IllegalArgumentException e) {
@@ -152,7 +157,7 @@ public abstract class BaseRuntimeChildDefinition {
 		}
 
 		@Override
-		public void addValue(Object theTarget, Object theValue) {
+		public void addValue(Object theTarget, IElement theValue) {
 			try {
 				if (theValue != null && !myTargetReturnType.isAssignableFrom(theValue.getClass())) {
 					throw new ConfigurationException("Value for field " + myElementName + " expects type " + myTargetReturnType + " but got " + theValue.getClass());
@@ -176,9 +181,9 @@ public abstract class BaseRuntimeChildDefinition {
 		}
 
 		@Override
-		public List<Object> getValues(Object theTarget) {
+		public List<IElement> getValues(Object theTarget) {
 			try {
-				return Collections.singletonList(myAccessor.invoke(theTarget));
+				return Collections.singletonList((IElement)myAccessor.invoke(theTarget));
 			} catch (IllegalAccessException e) {
 				throw new ConfigurationException("Failed to get value", e);
 			} catch (IllegalArgumentException e) {
@@ -190,10 +195,10 @@ public abstract class BaseRuntimeChildDefinition {
 	}
 
 	public interface IMutator {
-		void addValue(Object theTarget, Object theValue);
+		void addValue(Object theTarget, IElement theValue);
 	}
 
 	public interface IAccessor {
-		List<Object> getValues(Object theTarget);
+		List<IElement> getValues(Object theTarget);
 	}
 }

@@ -37,7 +37,7 @@ public class ${className} extends BaseResource {
      * </p> 
 	 */
 	@Block(name="${child.name}")	
-	public static class ${child.className} {
+	public static class ${child.className} implements IResourceBlock {
 #childVars( $child.children )
 #childAccessors( $child.children )
 	}

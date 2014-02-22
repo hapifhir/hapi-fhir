@@ -20,8 +20,8 @@ public class XmlParserTest {
 		
 		IResource resource = p.parseResource(IOUtils.toString(XmlParserTest.class.getResourceAsStream("/observation-example-eeg.xml")));
 		
-		System.out.println(resource);
-		
+		String result = p.encodeResourceToString(resource);
+		ourLog.info(result);
 	}
-	
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(XmlParserTest.class);
 }

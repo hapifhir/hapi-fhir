@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
+import ca.uhn.fhir.model.api.IDatatype;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IResourceBlock;
 
@@ -25,6 +26,22 @@ public class RuntimeChildResourceBlockDefinition extends BaseRuntimeChildDefinit
 		}else {
 			return null;
 		}
+	}
+
+	@Override
+	public String getChildNameByDatatype(Class<? extends IElement> theDatatype) {
+		if (myResourceBlockType.equals(theDatatype)) {
+			return getElementName();
+		}
+		return null;
+	}
+
+	@Override
+	public BaseRuntimeElementDefinition<?> getChildElementDefinitionByDatatype(Class<? extends IElement> theDatatype) {
+		if (myResourceBlockType.equals(theDatatype)) {
+			return myElementDef;
+		}
+		return null;
 	}
 
 	@Override

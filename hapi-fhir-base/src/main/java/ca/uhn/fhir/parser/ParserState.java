@@ -1,5 +1,16 @@
 package ca.uhn.fhir.parser;
 
+import java.io.StringWriter;
+
+import javax.xml.stream.XMLEventFactory;
+import javax.xml.stream.XMLEventWriter;
+import javax.xml.stream.XMLOutputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.events.Attribute;
+import javax.xml.stream.events.EndElement;
+import javax.xml.stream.events.StartElement;
+import javax.xml.stream.events.XMLEvent;
+
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
@@ -17,84 +28,39 @@ import ca.uhn.fhir.model.api.ResourceReference;
 
 class ParserState {
 
-	private enum ResourceReferenceSubState {
-		INITIAL, REFERENCE, DISPLAY
-	}
-
-	private class ResourceReferenceState extends BaseState {
-
-		private ResourceReferenceSubState mySubState;
-		private RuntimeResourceReferenceDefinition myDefinition;
-		private ResourceReference myInstance;
-
-		public ResourceReferenceState(RuntimeResourceReferenceDefinition theDefinition, ResourceReference theInstance) {
-			myDefinition = theDefinition;
-			myInstance = theInstance;
-			mySubState = ResourceReferenceSubState.INITIAL;
-		}
-
-		@Override
-		public void attributeValue(String theValue) throws DataFormatException {
-			switch (mySubState) {
-			case DISPLAY:
-				myInstance.setDisplay(theValue);
-				break;
-			case INITIAL:
-				throw new DataFormatException("Unexpected attribute: " + theValue);
-			case REFERENCE:
-				myInstance.setReference(theValue);
-				break;
-			}
-		}
-
-		@Override
-		public void enteringNewElement(String theLocalPart) throws DataFormatException {
-			switch (mySubState) {
-			case INITIAL:
-				if ("display".equals(theLocalPart)) {
-					mySubState = ResourceReferenceSubState.DISPLAY;
-					break;
-				} else if ("reference".equals(theLocalPart)) {
-					mySubState = ResourceReferenceSubState.REFERENCE;
-					break;
-				}
-				//$FALL-THROUGH$
-			case DISPLAY:
-			case REFERENCE:
-				throw new DataFormatException("Unexpected element: " + theLocalPart);
-			}
-		}
-
-		@Override
-		public void endingElement(String theLocalPart) {
-			switch (mySubState) {
-			case INITIAL:
-				pop();
-				break;
-			case DISPLAY:
-			case REFERENCE:
-				mySubState = ResourceReferenceSubState.INITIAL;
-			}
-		}
-
-	}
-
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ParserState.class);
+
 	private FhirContext myContext;
 
-	private BaseState myState;
 	private Object myObject;
+	private BaseState myState;
 
 	public ParserState(FhirContext theContext) {
 		myContext = theContext;
 	}
 
-	public void attributeValue(String theValue) throws DataFormatException {
-		myState.attributeValue(theValue);
+	public void attributeValue(Attribute theAttribute, String theValue) throws DataFormatException {
+		myState.attributeValue(theAttribute, theValue);
 	}
 
-	public void enteringNewElement(String theLocalPart) throws DataFormatException {
-		myState.enteringNewElement(theLocalPart);
+	public void endingElement(EndElement theElem) throws DataFormatException {
+		myState.endingElement(theElem);
+	}
+
+	public void enteringNewElement(StartElement theElement, String theName) throws DataFormatException {
+		myState.enteringNewElement(theElement, theName);
+	}
+
+	public Object getObject() {
+		return myObject;
+	}
+
+	public boolean isComplete() {
+		return myObject != null;
+	}
+
+	private void pop() {
+		myState = myState.myStack;
 	}
 
 	private void push(BaseState theState) {
@@ -124,15 +90,17 @@ class ParserState {
 	private abstract class BaseState {
 		private BaseState myStack;
 
-		public abstract void attributeValue(String theValue) throws DataFormatException;
+		public abstract void attributeValue(Attribute theAttribute, String theValue) throws DataFormatException;
 
-		public abstract void enteringNewElement(String theLocalPart) throws DataFormatException;
+		public abstract void endingElement(EndElement theElem) throws DataFormatException;
+
+		public abstract void enteringNewElement(StartElement theElement, String theLocalPart) throws DataFormatException;
 
 		public void setStack(BaseState theState) {
 			myStack = theState;
 		}
 
-		public abstract void endingElement(String theLocalPart);
+		public abstract void otherEvent(XMLEvent theEvent);
 
 	}
 
@@ -147,12 +115,20 @@ class ParserState {
 		}
 
 		@Override
-		public void attributeValue(String theValue) {
+		public void attributeValue(Attribute theAttribute, String theValue) {
 			ourLog.debug("Ignoring attribute value: {}", theValue);
 		}
 
 		@Override
-		public void enteringNewElement(String theChildName) throws DataFormatException {
+		public void endingElement(EndElement theElem) {
+			pop();
+			if (myState == null) {
+				myObject = myInstance;
+			}
+		}
+
+		@Override
+		public void enteringNewElement(StartElement theElement, String theChildName) throws DataFormatException {
 			BaseRuntimeChildDefinition child = myDefinition.getChildByNameOrThrowDataFormatException(theChildName);
 			BaseRuntimeElementDefinition<?> target = child.getChildByName(theChildName);
 
@@ -189,20 +165,16 @@ class ParserState {
 				push(newState);
 				return;
 			}
-			case RESOURCE:
+			case RESOURCE: {
 				// Throw an exception because this shouldn't happen here
 				break;
 			}
+			case PRIMITIVE_XHTML: {
+
+			}
+			}
 
 			throw new DataFormatException("Illegal resource position: " + target.getChildType());
-		}
-
-		@Override
-		public void endingElement(String theLocalPart) {
-			pop();
-			if (myState == null) {
-				myObject = myInstance;
-			}
 		}
 
 	}
@@ -216,36 +188,126 @@ class ParserState {
 		}
 
 		@Override
-		public void attributeValue(String theValue) throws DataFormatException {
+		public void attributeValue(Attribute theAttribute, String theValue) throws DataFormatException {
 			myInstance.setValueAsString(theValue);
 		}
 
 		@Override
-		public void enteringNewElement(String theLocalPart) throws DataFormatException {
-			throw new Error("?? can this happen?"); // TODO: can this happen?
-		}
-
-		@Override
-		public void endingElement(String theLocalPart) {
+		public void endingElement(EndElement theElem) {
 			pop();
 		}
 
+		@Override
+		public void enteringNewElement(StartElement theElement, String theLocalPart) throws DataFormatException {
+			throw new Error("?? can this happen?"); // TODO: can this happen?
+		}
+
 	}
 
-	public Object getObject() {
-		return myObject;
+	private class ResourceReferenceState extends BaseState {
+
+		private RuntimeResourceReferenceDefinition myDefinition;
+		private ResourceReference myInstance;
+		private ResourceReferenceSubState mySubState;
+
+		public ResourceReferenceState(RuntimeResourceReferenceDefinition theDefinition, ResourceReference theInstance) {
+			myDefinition = theDefinition;
+			myInstance = theInstance;
+			mySubState = ResourceReferenceSubState.INITIAL;
+		}
+
+		@Override
+		public void attributeValue(Attribute theAttribute, String theValue) throws DataFormatException {
+			switch (mySubState) {
+			case DISPLAY:
+				myInstance.setDisplay(theValue);
+				break;
+			case INITIAL:
+				throw new DataFormatException("Unexpected attribute: " + theValue);
+			case REFERENCE:
+				myInstance.setReference(theValue);
+				break;
+			}
+		}
+
+		@Override
+		public void endingElement(EndElement theElement) {
+			switch (mySubState) {
+			case INITIAL:
+				pop();
+				break;
+			case DISPLAY:
+			case REFERENCE:
+				mySubState = ResourceReferenceSubState.INITIAL;
+			}
+		}
+
+		@Override
+		public void enteringNewElement(StartElement theElem, String theLocalPart) throws DataFormatException {
+			switch (mySubState) {
+			case INITIAL:
+				if ("display".equals(theLocalPart)) {
+					mySubState = ResourceReferenceSubState.DISPLAY;
+					break;
+				} else if ("reference".equals(theLocalPart)) {
+					mySubState = ResourceReferenceSubState.REFERENCE;
+					break;
+				}
+				//$FALL-THROUGH$
+			case DISPLAY:
+			case REFERENCE:
+				throw new DataFormatException("Unexpected element: " + theLocalPart);
+			}
+		}
+
 	}
 
-	private void pop() {
-		myState = myState.myStack;
+	private enum ResourceReferenceSubState {
+		DISPLAY, INITIAL, REFERENCE
 	}
 
-	public boolean isComplete() {
-		return myObject != null;
+	private class XhtmlState extends BaseState {
+		private StringWriter myStringWriter;
+		private XMLEventWriter myEventWriter;
+		private XMLEventFactory myEventFactory;
+
+		private XhtmlState() throws DataFormatException {
+			try {
+				XMLOutputFactory xmlFactory = XMLOutputFactory.newInstance();
+				myStringWriter = new StringWriter();
+				myEventWriter = xmlFactory.createXMLEventWriter(myStringWriter);
+			} catch (XMLStreamException e) {
+				throw new DataFormatException(e);
+			}
+		}
+
+		@Override
+		public void attributeValue(Attribute theAttr, String theValue) throws DataFormatException {
+			try {
+				myEventWriter.add(theAttr);
+			} catch (XMLStreamException e) {
+				throw new DataFormatException(e);
+			}
+		}
+
+		@Override
+		public void endingElement(EndElement theElement) throws DataFormatException {
+			try {
+				myEventWriter.add(theElement);
+			} catch (XMLStreamException e) {
+				throw new DataFormatException(e);
+			}
+		}
+
+		@Override
+		public void enteringNewElement(StartElement theElem, String theLocalPart) throws DataFormatException {
+			// TODO Auto-generated method stub
+
+		}
 	}
 
-	public void endingElement(String theLocalPart) {
-		myState.endingElement(theLocalPart);
+	public void otherEvent(XMLEvent theEvent) {
+		myState.otherEvent(theEvent);
 	}
 
 }

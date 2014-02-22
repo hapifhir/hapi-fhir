@@ -1,6 +1,5 @@
 package ca.uhn.fhir.context;
 
-import ca.uhn.fhir.context.BaseRuntimeElementDefinition.ChildTypeEnum;
 import ca.uhn.fhir.model.api.IResource;
 
 public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefinition<IResource> {

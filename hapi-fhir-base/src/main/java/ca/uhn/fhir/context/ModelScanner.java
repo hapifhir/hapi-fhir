@@ -36,6 +36,7 @@ import ca.uhn.fhir.model.api.annotation.Narrative;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.datatype.ICodedDatatype;
 import ca.uhn.fhir.model.datatype.NarrativeDt;
+import ca.uhn.fhir.model.datatype.XhtmlDt;
 
 class ModelScanner {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ModelScanner.class);
@@ -89,8 +90,7 @@ class ModelScanner {
 		ResourceDef resourceDefinition = theClass.getAnnotation(ResourceDef.class);
 		if (resourceDefinition != null) {
 			if (!IResource.class.isAssignableFrom(theClass)) {
-				throw new ConfigurationException("Resource type contains a @" + ResourceDef.class.getSimpleName() + " annotation but does not implement " + IResource.class.getCanonicalName() + ": "
-						+ theClass.getCanonicalName());
+				throw new ConfigurationException("Resource type contains a @" + ResourceDef.class.getSimpleName() + " annotation but does not implement " + IResource.class.getCanonicalName() + ": " + theClass.getCanonicalName());
 			}
 			@SuppressWarnings("unchecked")
 			Class<? extends IResource> resClass = (Class<? extends IResource>) theClass;
@@ -108,8 +108,7 @@ class ModelScanner {
 				Class<? extends IPrimitiveDatatype<?>> resClass = (Class<? extends IPrimitiveDatatype<?>>) theClass;
 				scanPrimitiveDatatype(resClass, datatypeDefinition);
 			} else {
-				throw new ConfigurationException("Resource type contains a @" + DatatypeDef.class.getSimpleName() + " annotation but does not implement " + IDatatype.class.getCanonicalName() + ": "
-						+ theClass.getCanonicalName());
+				throw new ConfigurationException("Resource type contains a @" + DatatypeDef.class.getSimpleName() + " annotation but does not implement " + IDatatype.class.getCanonicalName() + ": " + theClass.getCanonicalName());
 			}
 		}
 
@@ -120,26 +119,23 @@ class ModelScanner {
 				Class<? extends ICodeEnum> resClass = (Class<? extends ICodeEnum>) theClass;
 				scanCodeTable(resClass, codeTableDefinition);
 			} else {
-				throw new ConfigurationException("Type contains a @" + CodeTableDef.class.getSimpleName() + " annotation but does not implement " + ICodeEnum.class.getCanonicalName() + ": "
-						+ theClass.getCanonicalName());
+				throw new ConfigurationException("Type contains a @" + CodeTableDef.class.getSimpleName() + " annotation but does not implement " + ICodeEnum.class.getCanonicalName() + ": " + theClass.getCanonicalName());
 			}
 		}
-		
+
 		Block blockDefinition = theClass.getAnnotation(Block.class);
 		if (blockDefinition != null) {
 			if (IResourceBlock.class.isAssignableFrom(theClass)) {
 				@SuppressWarnings("unchecked")
 				Class<? extends IResourceBlock> blockClass = (Class<? extends IResourceBlock>) theClass;
 				scanBlock(blockClass, blockDefinition);
-			}else {
-				throw new ConfigurationException("Type contains a @" + Block.class.getSimpleName() + " annotation but does not implement " + IResourceBlock.class.getCanonicalName() + ": "
-						+ theClass.getCanonicalName());
+			} else {
+				throw new ConfigurationException("Type contains a @" + Block.class.getSimpleName() + " annotation but does not implement " + IResourceBlock.class.getCanonicalName() + ": " + theClass.getCanonicalName());
 			}
 		}
 
 		if (blockDefinition == null && codeTableDefinition == null && datatypeDefinition == null && resourceDefinition == null) {
-			throw new ConfigurationException("Resource type does not contain any valid HAPI-FHIR annotations: "
-					+ theClass.getCanonicalName());
+			throw new ConfigurationException("Resource type does not contain any valid HAPI-FHIR annotations: " + theClass.getCanonicalName());
 		}
 	}
 
@@ -179,7 +175,12 @@ class ModelScanner {
 			throw new ConfigurationException("Resource type @" + ResourceDef.class.getSimpleName() + " annotation contains no resource name: " + theClass.getCanonicalName());
 		}
 
-		RuntimePrimitiveDatatypeDefinition resourceDef = new RuntimePrimitiveDatatypeDefinition(resourceName, theClass);
+		RuntimePrimitiveDatatypeDefinition resourceDef;
+		if (theClass.equals(XhtmlDt.class)) {
+			resourceDef = new RuntimePrimitiveDatatypeNarrativeDefinition(resourceName, theClass);
+		} else {
+			resourceDef = new RuntimePrimitiveDatatypeDefinition(resourceName, theClass);
+		}
 		myClassToElementDefinitions.put(theClass, resourceDef);
 
 		return resourceName;
@@ -195,8 +196,7 @@ class ModelScanner {
 
 		if (myNameToResourceDefinitions.containsKey(resourceName)) {
 			if (!myNameToResourceDefinitions.get(resourceName).getImplementingClass().equals(theClass)) {
-				throw new ConfigurationException("Detected duplicate element name '" + resourceName + "' in types '" + theClass.getCanonicalName() + "' and '"
-						+ myNameToResourceDefinitions.get(resourceName).getImplementingClass() + "'");
+				throw new ConfigurationException("Detected duplicate element name '" + resourceName + "' in types '" + theClass.getCanonicalName() + "' and '" + myNameToResourceDefinitions.get(resourceName).getImplementingClass() + "'");
 			}
 			return resourceName;
 		}
@@ -241,8 +241,7 @@ class ModelScanner {
 
 		for (int i = 0; i < orderToElementDef.size(); i++) {
 			if (!orderToElementDef.containsKey(i)) {
-				throw new ConfigurationException("Type '" + theClass.getCanonicalName() + "' does not have a child with order " + i
-						+ " (in other words, there are gaps between specified child orders)");
+				throw new ConfigurationException("Type '" + theClass.getCanonicalName() + "' does not have a child with order " + i + " (in other words, there are gaps between specified child orders)");
 			}
 			BaseRuntimeChildDefinition next = orderToElementDef.get(i);
 			theDefinition.addChild(next);
@@ -251,8 +250,7 @@ class ModelScanner {
 	}
 
 	@SuppressWarnings("unchecked")
-	private void scanCompositeElementForChildren(Class<? extends ICompositeElement> theClass, BaseRuntimeElementCompositeDefinition<?> theDefinition, Set<String> elementNames,
-			TreeMap<Integer, BaseRuntimeChildDefinition> orderToElementDef) {
+	private void scanCompositeElementForChildren(Class<? extends ICompositeElement> theClass, BaseRuntimeElementCompositeDefinition<?> theDefinition, Set<String> elementNames, TreeMap<Integer, BaseRuntimeChildDefinition> orderToElementDef) {
 		for (Field next : theClass.getDeclaredFields()) {
 
 			Narrative hasNarrative = next.getAnnotation(Narrative.class);
@@ -279,8 +277,9 @@ class ModelScanner {
 			int max = element.max();
 
 			/*
-			 * Anything that's marked as unknown is given a new ID that is <0 so that
-			 * it doesn't conflict wityh any given IDs and can be figured out later
+			 * Anything that's marked as unknown is given a new ID that is <0 so
+			 * that it doesn't conflict wityh any given IDs and can be figured
+			 * out later
 			 */
 			while (order == Child.ORDER_UNKNOWN && orderToElementDef.containsKey(order)) {
 				order--;
@@ -306,13 +305,15 @@ class ModelScanner {
 			} else if (Collection.class.isAssignableFrom(nextElementType)) {
 				throw new ConfigurationException("Field '" + elementName + "' in type '" + theClass.getCanonicalName() + "' is a Collection - Only java.util.List curently supported");
 			}
-			
+
 			ChildResource resRefAnnotation = next.getAnnotation(ChildResource.class);
 			if (choiceTypes.isEmpty() == false) {
 				/*
 				 * Child is a choice element
 				 */
-				myScanAlso.addAll(choiceTypes);
+				for (Class<? extends IElement> nextType : choiceTypes) {
+					addScanAlso(nextType);
+				}
 				RuntimeChildChoiceDefinition def = new RuntimeChildChoiceDefinition(next, elementName, min, max, choiceTypes);
 				orderToElementDef.put(order, def);
 
@@ -321,13 +322,14 @@ class ModelScanner {
 				 * Child is a resource reference
 				 */
 				if (resRefAnnotation == null) {
-					throw new ConfigurationException("Field '" + elementName + "' in type '" + theClass.getCanonicalName() + "' is a resource reference but does not have a @"
-							+ ChildResource.class.getSimpleName() + " annotation");
+					throw new ConfigurationException("Field '" + elementName + "' in type '" + theClass.getCanonicalName() + "' is a resource reference but does not have a @" + ChildResource.class.getSimpleName() + " annotation");
 				}
 
 				Class<? extends IResource>[] refType = resRefAnnotation.types();
 				List<Class<? extends IResource>> refTypesList = Arrays.asList(refType);
-				myScanAlso.addAll(refTypesList);
+				for (Class<? extends IElement> nextType : refTypesList) {
+					addScanAlso(nextType);
+				}
 				RuntimeChildResourceDefinition def = new RuntimeChildResourceDefinition(next, elementName, min, max, refTypesList);
 				orderToElementDef.put(order, def);
 
@@ -336,16 +338,16 @@ class ModelScanner {
 				 * Child is a resource block (i.e. a sub-tag within a resource)
 				 * TODO: do these have a better name according to HL7?
 				 */
-				
-				Class<? extends IResourceBlock> blockDef = (Class<? extends IResourceBlock>)nextElementType;
-				myScanAlso.add(blockDef);
+
+				Class<? extends IResourceBlock> blockDef = (Class<? extends IResourceBlock>) nextElementType;
+				addScanAlso(blockDef);
 				RuntimeChildResourceBlockDefinition def = new RuntimeChildResourceBlockDefinition(next, min, max, elementName, blockDef);
 				orderToElementDef.put(order, def);
-				
+
 			} else if (IDatatype.class.isAssignableFrom(nextElementType)) {
 				Class<? extends IDatatype> nextDatatype = (Class<? extends IDatatype>) nextElementType;
 
-				myScanAlso.add(nextDatatype);
+				addScanAlso(nextDatatype);
 				BaseRuntimeChildDatatypeDefinition def;
 				if (IPrimitiveDatatype.class.isAssignableFrom(nextElementType)) {
 					def = new RuntimeChildPrimitiveDatatypeDefinition(next, elementName, min, max, nextDatatype);
@@ -356,8 +358,7 @@ class ModelScanner {
 				CodeableConceptElement concept = next.getAnnotation(CodeableConceptElement.class);
 				if (concept != null) {
 					if (!ICodedDatatype.class.isAssignableFrom(nextDatatype)) {
-						throw new ConfigurationException("Field '" + elementName + "' in type '" + theClass.getCanonicalName() + "' is marked as @" + CodeableConceptElement.class.getCanonicalName()
-								+ " but type is not a subtype of " + ICodedDatatype.class.getName());
+						throw new ConfigurationException("Field '" + elementName + "' in type '" + theClass.getCanonicalName() + "' is marked as @" + CodeableConceptElement.class.getCanonicalName() + " but type is not a subtype of " + ICodedDatatype.class.getName());
 					} else {
 						Class<? extends ICodeEnum> type = concept.type();
 						myScanAlsoCodeTable.add(type);
@@ -376,21 +377,33 @@ class ModelScanner {
 		}
 	}
 
+	private void addScanAlso(Class<? extends IElement> theType) {
+		if (theType.isInterface()) {
+			return;
+		}
+		myScanAlso.add(theType);
+	}
+
 	private static Class<?> getGenericCollectionTypeOfField(Field next) {
-//		Type genericSuperclass = next.getType().getGenericSuperclass();
+		// Type genericSuperclass = next.getType().getGenericSuperclass();
 		Class<?> type;
-//		if (genericSuperclass == null) {
-			ParameterizedType collectionType = (ParameterizedType) next.getGenericType();
-		    type = (Class<?>) collectionType.getActualTypeArguments()[0];
-//		}else {
-//			Type[] actualTypeArguments = ((ParameterizedType) genericSuperclass).getActualTypeArguments();
-//			type = (Class<?>) actualTypeArguments[0];
-//		}
+		// if (genericSuperclass == null) {
+		ParameterizedType collectionType = (ParameterizedType) next.getGenericType();
+		type = (Class<?>) collectionType.getActualTypeArguments()[0];
+		// }else {
+		// Type[] actualTypeArguments = ((ParameterizedType)
+		// genericSuperclass).getActualTypeArguments();
+		// type = (Class<?>) actualTypeArguments[0];
+		// }
 		return type;
 	}
 
 	private String scanCodeTable(Class<? extends ICodeEnum> theCodeType, CodeTableDef theCodeTableDefinition) {
 		return null; // TODO: implement
+	}
+
+	public Map<Class<? extends IElement>, BaseRuntimeElementDefinition<?>> getClassToElementDefinitions() {
+		return myClassToElementDefinitions;
 	}
 
 }

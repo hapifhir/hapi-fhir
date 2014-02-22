@@ -1,0 +1,1879 @@
+<?xml version="1.0"?>
+<?mso-application progid="Excel.Sheet"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:o="urn:schemas-microsoft-com:office:office"
+ xmlns:x="urn:schemas-microsoft-com:office:excel"
+ xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:html="http://www.w3.org/TR/REC-html40">
+ <DocumentProperties xmlns="urn:schemas-microsoft-com:office:office">
+  <Author>Grahame</Author>
+  <LastAuthor>Grahame</LastAuthor>
+  <Created>2012-03-19T11:12:07Z</Created>
+  <LastSaved>2014-01-30T02:30:59Z</LastSaved>
+  <Version>14.00</Version>
+ </DocumentProperties>
+ <OfficeDocumentSettings xmlns="urn:schemas-microsoft-com:office:office">
+  <AllowPNG/>
+ </OfficeDocumentSettings>
+ <ExcelWorkbook xmlns="urn:schemas-microsoft-com:office:excel">
+  <WindowHeight>12735</WindowHeight>
+  <WindowWidth>10005</WindowWidth>
+  <WindowTopX>480</WindowTopX>
+  <WindowTopY>90</WindowTopY>
+  <ProtectStructure>False</ProtectStructure>
+  <ProtectWindows>False</ProtectWindows>
+ </ExcelWorkbook>
+ <Styles>
+  <Style ss:ID="Default" ss:Name="Normal">
+   <Alignment ss:Vertical="Bottom"/>
+   <Borders/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"/>
+   <Interior/>
+   <NumberFormat/>
+   <Protection/>
+  </Style>
+  <Style ss:ID="s62" ss:Name="Hyperlink">
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#0000FF"
+    ss:Underline="Single"/>
+  </Style>
+  <Style ss:ID="s63" ss:Name="Normal 2">
+   <Alignment ss:Vertical="Bottom"/>
+   <Borders/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"/>
+   <Interior/>
+   <NumberFormat/>
+   <Protection/>
+  </Style>
+  <Style ss:ID="s64" ss:Name="Normal 3">
+   <Alignment ss:Vertical="Bottom"/>
+   <Borders/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"/>
+   <Interior/>
+   <NumberFormat/>
+   <Protection/>
+  </Style>
+  <Style ss:ID="s65" ss:Name="Normal 4">
+   <Alignment ss:Vertical="Bottom"/>
+   <Borders/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"/>
+   <Interior/>
+   <NumberFormat/>
+   <Protection/>
+  </Style>
+  <Style ss:ID="s66">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:ShrinkToFit="1"
+    ss:WrapText="1"/>
+  </Style>
+  <Style ss:ID="s67">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:ShrinkToFit="1"
+    ss:WrapText="1"/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"
+    ss:Bold="1"/>
+  </Style>
+  <Style ss:ID="s68">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:ShrinkToFit="1"
+    ss:WrapText="1"/>
+   <Borders>
+    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1"/>
+   </Borders>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"
+    ss:Bold="1"/>
+   <Interior ss:Color="#EEECE1" ss:Pattern="Solid"/>
+  </Style>
+  <Style ss:ID="s69">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:ShrinkToFit="1"
+    ss:WrapText="1"/>
+   <Interior ss:Color="#D9D9D9" ss:Pattern="Solid"/>
+  </Style>
+  <Style ss:ID="s70">
+   <Alignment ss:Vertical="Top"/>
+   <Borders/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"/>
+   <Interior/>
+   <NumberFormat/>
+   <Protection/>
+  </Style>
+  <Style ss:ID="s71">
+   <Alignment ss:Vertical="Top" ss:WrapText="1"/>
+   <Borders/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"/>
+   <Interior/>
+   <NumberFormat/>
+   <Protection/>
+  </Style>
+  <Style ss:ID="s74" ss:Parent="s64">
+   <Alignment ss:Vertical="Top" ss:WrapText="1"/>
+   <Interior/>
+  </Style>
+  <Style ss:ID="s76" ss:Parent="s65">
+   <Alignment ss:Vertical="Top" ss:WrapText="1"/>
+   <Interior/>
+  </Style>
+  <Style ss:ID="s77" ss:Parent="s65">
+   <Alignment ss:Vertical="Top" ss:WrapText="1"/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"/>
+   <Interior/>
+  </Style>
+  <Style ss:ID="s78">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top"/>
+   <Font ss:FontName="Verdana" x:Family="Swiss" ss:Size="9" ss:Color="#000000"/>
+  </Style>
+  <Style ss:ID="s80">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:ShrinkToFit="1"
+    ss:WrapText="1"/>
+   <Borders/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"/>
+   <Interior/>
+   <NumberFormat/>
+   <Protection/>
+  </Style>
+  <Style ss:ID="s81">
+   <Alignment ss:Vertical="Bottom" ss:ShrinkToFit="1" ss:WrapText="1"/>
+  </Style>
+  <Style ss:ID="s82">
+   <Alignment ss:Vertical="Top" ss:WrapText="1"/>
+  </Style>
+  <Style ss:ID="s83">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:ShrinkToFit="1"
+    ss:WrapText="1"/>
+   <Borders/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"
+    ss:Bold="1"/>
+   <Interior ss:Color="#EEECE1" ss:Pattern="Solid"/>
+  </Style>
+  <Style ss:ID="s84">
+   <Alignment ss:Vertical="Top"/>
+  </Style>
+  <Style ss:ID="s86" ss:Parent="s62">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:WrapText="1"/>
+   <Borders>
+    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="2"
+     ss:Color="#000000"/>
+    <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="2"
+     ss:Color="#000000"/>
+    <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="2"
+     ss:Color="#000000"/>
+    <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="2"
+     ss:Color="#000000"/>
+   </Borders>
+   <Interior ss:Color="#FFFFFF" ss:Pattern="Solid"/>
+  </Style>
+  <Style ss:ID="s87">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:ShrinkToFit="1"
+    ss:WrapText="1"/>
+   <Borders>
+    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1"/>
+   </Borders>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"
+    ss:Bold="1"/>
+   <Interior ss:Color="#FFFFFF" ss:Pattern="Solid"/>
+  </Style>
+  <Style ss:ID="s88">
+   <Interior ss:Color="#FFFFFF" ss:Pattern="Solid"/>
+  </Style>
+  <Style ss:ID="s89">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Bottom"/>
+  </Style>
+  <Style ss:ID="s90">
+   <Alignment ss:Vertical="Top" ss:ShrinkToFit="1" ss:WrapText="1"/>
+   <Borders>
+    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1"/>
+   </Borders>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"
+    ss:Bold="1"/>
+   <Interior ss:Color="#EEECE1" ss:Pattern="Solid"/>
+  </Style>
+  <Style ss:ID="s92" ss:Parent="s63">
+   <Alignment ss:Vertical="Top" ss:WrapText="1"/>
+   <Borders/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"/>
+   <Interior/>
+   <NumberFormat/>
+   <Protection/>
+  </Style>
+ </Styles>
+ <Worksheet ss:Name="Data Elements">
+  <Table ss:ExpandedColumnCount="40" ss:ExpandedRowCount="25" x:FullColumns="1"
+   x:FullRows="1" ss:StyleID="s66" ss:DefaultRowHeight="15">
+   <Column ss:StyleID="s67" ss:Width="198"/>
+   <Column ss:StyleID="s66" ss:Width="29.25"/>
+   <Column ss:StyleID="s66" ss:Width="22.5"/>
+   <Column ss:StyleID="s66" ss:Width="60"/>
+   <Column ss:StyleID="s66" ss:Width="27"/>
+   <Column ss:StyleID="s66" ss:AutoFitWidth="0" ss:Width="173.25"/>
+   <Column ss:StyleID="s66" ss:Width="164.25"/>
+   <Column ss:StyleID="s66" ss:Width="148.5"/>
+   <Column ss:StyleID="s66" ss:AutoFitWidth="0" ss:Width="161.25"/>
+   <Column ss:StyleID="s66" ss:AutoFitWidth="0" ss:Width="77.25"/>
+   <Column ss:StyleID="s66" ss:AutoFitWidth="0" ss:Width="114"/>
+   <Column ss:StyleID="s66" ss:AutoFitWidth="0" ss:Width="216.75"/>
+   <Column ss:StyleID="s66" ss:AutoFitWidth="0" ss:Width="135" ss:Span="1"/>
+   <Column ss:Index="15" ss:StyleID="s66" ss:AutoFitWidth="0" ss:Width="258"/>
+   <Column ss:Index="17" ss:StyleID="s66" ss:Width="88.5"/>
+   <Row ss:AutoFitHeight="0" ss:Height="105" ss:StyleID="s68">
+    <Cell><Data ss:Type="String">Element</Data></Cell>
+    <Cell><Data ss:Type="String">Card.</Data></Cell>
+    <Cell><Data ss:Type="String">Inv.</Data></Cell>
+    <Cell><Data ss:Type="String">Is Modifier</Data></Cell>
+    <Cell><Data ss:Type="String">UML</Data></Cell>
+    <Cell><Data ss:Type="String">Type</Data></Cell>
+    <Cell><Data ss:Type="String">Binding</Data></Cell>
+    <Cell><Data ss:Type="String">Short Name</Data></Cell>
+    <Cell><Data ss:Type="String">Definition</Data></Cell>
+    <Cell><Data ss:Type="String">Aliases</Data></Cell>
+    <Cell><Data ss:Type="String">Requirements</Data></Cell>
+    <Cell><Data ss:Type="String">Comments</Data></Cell>
+    <Cell><Data ss:Type="String">RIM Mapping</Data></Cell>
+    <Cell><Data ss:Type="String">RIM Mapping (old)</Data></Cell>
+    <Cell><Data ss:Type="String">v2 Mapping</Data></Cell>
+    <Cell><Data ss:Type="String">To Do</Data></Cell>
+    <Cell><Data ss:Type="String">Committee Notes</Data></Cell>
+    <Cell><Data ss:Type="String">Prov Mapping</Data></Cell>
+    <Cell><Data ss:Type="String">CCDA: Age Observation</Data></Cell>
+    <Cell><Data ss:Type="String">CCDA: Assessment Scale Observation</Data></Cell>
+    <Cell><Data ss:Type="String">CCDA: Assessment Scale Supporting Observation</Data></Cell>
+    <Cell><Data ss:Type="String">CCDA: Caregiver Characteristics</Data></Cell>
+    <Cell><Data ss:Type="String">CCDA: Code Observations</Data></Cell>
+    <Cell><Data ss:Type="String">CCDA: Cognitive Status Result Observation</Data></Cell>
+    <Cell><Data ss:Type="String">CCDA: Comment Activity</Data></Cell>
+    <Cell><Data ss:Type="String">CCDA: Deceased Observation</Data></Cell>
+    <Cell><Data ss:Type="String">CCDA: Estimated Date of Delivery</Data></Cell>
+    <Cell><Data ss:Type="String">CCDA: Functional Status Result Observation</Data></Cell>
+    <Cell><Data ss:Type="String">CCDA: Health Status Observation</Data></Cell>
+    <Cell><Data ss:Type="String">CCDA: Highest Pressure Ulcer Stage</Data></Cell>
+    <Cell><Data ss:Type="String">CCDA: Number of Presure Ulcers Observation</Data></Cell>
+    <Cell><Data ss:Type="String">CCDA: Pregnancy Observation</Data></Cell>
+    <Cell><Data ss:Type="String">CCDA: Pressure Ulcer Observation</Data></Cell>
+    <Cell><Data ss:Type="String">CCDA: Quantity Measurement Observation</Data></Cell>
+    <Cell><Data ss:Type="String">CCDA: Result Observation</Data></Cell>
+    <Cell><Data ss:Type="String">CCDA: Smoking Status Observation</Data></Cell>
+    <Cell><Data ss:Type="String">CCDA: Social History Observation</Data></Cell>
+    <Cell><Data ss:Type="String">CCDA: Text Observation</Data></Cell>
+    <Cell><Data ss:Type="String">CCDA: Tobacco Use</Data></Cell>
+    <Cell><Data ss:Type="String">CCDA: Vital Sign Observation</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="105">
+    <Cell><Data ss:Type="String">Observation</Data></Cell>
+    <Cell ss:StyleID="s69"/>
+    <Cell ss:StyleID="s69"/>
+    <Cell ss:StyleID="s69"/>
+    <Cell ss:StyleID="s69"/>
+    <Cell><Data ss:Type="String">Resource</Data></Cell>
+    <Cell ss:StyleID="s70"/>
+    <Cell><Data ss:Type="String">Measurements and simple assertions</Data></Cell>
+    <Cell><Data ss:Type="String">Measurements and simple assertions made about a patient, device or other subject</Data></Cell>
+    <Cell><Data ss:Type="String">Vital Signs, Measurement, Results, Tests</Data></Cell>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">Observations are a key aspect of healthcare.  This resource is used to capture those that do not require more sophisticated mechanisms.</Data></Cell>
+    <Cell><Data ss:Type="String">Used for simple observations such as device measurements, laboratory atomic results, vital signs, height, weight, smoking status, comments, etc.  Other resources are used to provide context for observations such as Lab reports, etc</Data></Cell>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">Observation[classCode=OBS, moodCode=EVN]</Data></Cell>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">Observation[isNormalAct() and subsumesCode(&quot;ActClass#OBS&quot;, classCode) and moodCode=&quot;EVN&quot; and domainMember(&quot;SimpleObservationType&quot;, code)]</Data></Cell>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">OBX</Data></Cell>
+    <Cell ss:StyleID="s71"/>
+    <Cell ss:Index="18" ss:StyleID="s70"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">y</Data></Cell>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">y</Data></Cell>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">y</Data></Cell>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">y</Data></Cell>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">y</Data></Cell>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">y</Data></Cell>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">y</Data></Cell>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">y</Data></Cell>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">y</Data></Cell>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">y</Data></Cell>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">y</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="75">
+    <Cell><Data ss:Type="String">Observation.name</Data></Cell>
+    <Cell><Data ss:Type="String">1..1</Data></Cell>
+    <Cell ss:StyleID="s70"/>
+    <Cell ss:StyleID="s70"/>
+    <Cell ss:StyleID="s70"/>
+    <Cell><Data ss:Type="String">CodeableConcept</Data></Cell>
+    <Cell ss:StyleID="s70"><Data ss:Type="String">ObservationType</Data></Cell>
+    <Cell><Data ss:Type="String">Type of observation (code / type)</Data></Cell>
+    <Cell><Data ss:Type="String">Describes what was observed. Sometimes this is called the observation &quot;code&quot;</Data></Cell>
+    <Cell ss:Index="11" ss:StyleID="s71"><Data ss:Type="String">Knowing what kind of observation is being made is essential to understanding the observation.</Data></Cell>
+    <Cell ss:Index="13" ss:StyleID="s71"><Data ss:Type="String">code</Data></Cell>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">./code</Data></Cell>
+    <Cell ss:StyleID="s76"><Data ss:Type="String">OBX-3-observation identifier</Data></Cell>
+    <Cell ss:StyleID="s71"/>
+    <Cell ss:Index="18" ss:StyleID="s70"/>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">PQ (unit=1)</Data></Cell>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">y</Data></Cell>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">y</Data></Cell>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">y</Data></Cell>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">y</Data></Cell>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">y</Data></Cell>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">ED</Data></Cell>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">Fixed</Data></Cell>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">TS</Data></Cell>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">y</Data></Cell>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">y</Data></Cell>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">y</Data></Cell>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">INT</Data></Cell>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">Fixed</Data></Cell>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">Fixed</Data></Cell>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">PQ</Data></Cell>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">y</Data></Cell>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">y</Data></Cell>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">y</Data></Cell>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">ED</Data></Cell>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">y</Data></Cell>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">y</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="300">
+    <Cell><Data ss:Type="String">Observation.value[x]</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:StyleID="s70"/>
+    <Cell ss:StyleID="s70"/>
+    <Cell ss:StyleID="s70"/>
+    <Cell><Data ss:Type="String">Quantity|CodeableConcept|Attachment|Ratio|Period|SampledData|string</Data></Cell>
+    <Cell ss:StyleID="s70"/>
+    <Cell><Data ss:Type="String">Actual result</Data></Cell>
+    <Cell><Data ss:Type="String">The information determined as a result of making the observation, if the information has a simple value</Data></Cell>
+    <Cell ss:Index="11" ss:StyleID="s71"><Data ss:Type="String">An observation exists to have a value, though it may not if it is in error, or it represents a group of observations</Data></Cell>
+    <Cell><Data ss:Type="String">Normally, an observation will have either a value or a set of related observations. A few observations (e.g. apgar store) may have both a value and related observations (for apgar, the observations from which the measure is derived). If a value is present, the datatype for this element should be determined by Observation.name. A CodeableConcept with just a text would be used instead of a string if the field was usually coded, or if the type associated with the Observation.name defines a coded value. The element, Observation.value[x], has a variable name depending on the type as follows: valueQuantity, valueCodeableConcept, valueRatio, valueChoice, valuePeriod, valueSampleData, or valueString (The name format is &quot;'value' + the type name&quot; with a capital on the first letter of the type).</Data></Cell>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">value</Data></Cell>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">./value</Data></Cell>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">OBX.2, OBX.5, OBX.6</Data></Cell>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">Should have Range as a valid data type here</Data></Cell>
+    <Cell ss:Index="18" ss:StyleID="s70"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">y</Data></Cell>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">y</Data></Cell>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">y</Data></Cell>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">y</Data></Cell>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">y</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="105">
+    <Cell><Data ss:Type="String">Observation.interpretation</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:StyleID="s70"/>
+    <Cell ss:StyleID="s70"/>
+    <Cell ss:StyleID="s70"/>
+    <Cell><Data ss:Type="String">CodeableConcept</Data></Cell>
+    <Cell ss:StyleID="s70"><Data ss:Type="String">ObservationInterpretation</Data></Cell>
+    <Cell><Data ss:Type="String">High, low, normal, etc.</Data></Cell>
+    <Cell><Data ss:Type="String">The assessment made based on the result of the observation.</Data></Cell>
+    <Cell ss:Index="11" ss:StyleID="s71"><Data ss:Type="String">For some results, particularly numeric results, an interpretation is necessary to fully understand the significance of a result.</Data></Cell>
+    <Cell ss:Index="13" ss:StyleID="s71"><Data ss:Type="String">interpretationCode</Data></Cell>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">unique(./interpretationCode)</Data></Cell>
+    <Cell ss:StyleID="s76"><Data ss:Type="String">OBX-8-interpretation codes</Data></Cell>
+    <Cell ss:StyleID="s71"/>
+    <Cell ss:Index="18" ss:StyleID="s70"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">y</Data></Cell>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">y</Data></Cell>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">y</Data></Cell>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">y</Data></Cell>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="105">
+    <Cell><Data ss:Type="String">Observation.comments</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:StyleID="s70"/>
+    <Cell ss:StyleID="s70"/>
+    <Cell ss:StyleID="s70"/>
+    <Cell><Data ss:Type="String">string</Data></Cell>
+    <Cell ss:StyleID="s70"/>
+    <Cell><Data ss:Type="String">Comments about result</Data></Cell>
+    <Cell><Data ss:Type="String">May include statements about significant, unexpected or unreliable values, or information about the source of the value where this may be relevant to the interpretation of the result.</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Need to be able to provide free text additional information</Data></Cell>
+    <Cell ss:Index="13" ss:StyleID="s71"><Data ss:Type="String">subjectOf.observationEvent[code=&quot;annotation&quot;].value</Data></Cell>
+    <Cell ss:StyleID="s71"/>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">NTE.3 (partner NTE to OBX, or sometimes another (child?) OBX)</Data></Cell>
+    <Cell ss:StyleID="s71"/>
+    <Cell ss:Index="18" ss:StyleID="s70"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s74"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s74"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s74"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s74"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="165">
+    <Cell><Data ss:Type="String">Observation.applies[x]</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:StyleID="s70"/>
+    <Cell ss:StyleID="s70"/>
+    <Cell ss:StyleID="s70"/>
+    <Cell><Data ss:Type="String">dateTime | Period</Data></Cell>
+    <Cell ss:StyleID="s70"/>
+    <Cell><Data ss:Type="String">Physiologically Relevant time/time-period for observation</Data></Cell>
+    <Cell><Data ss:Type="String">The time or time-period the observed value is asserted as being true. For biological subjects - e.g. human patients - this is usually called the &quot;physiologically relevant time&quot;. This is usually either the time of the procedure or of specimen collection, but very often the source of the date/time is not known, only the date/time itself</Data></Cell>
+    <Cell ss:Index="11" ss:StyleID="s71"><Data ss:Type="String">Knowing when an observation was deemed true is important to its relevance as well as determining trends</Data></Cell>
+    <Cell><Data ss:Type="String">At least a date should be present unless this observation is a historical report</Data></Cell>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">effectiveTime</Data></Cell>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">./effectiveTime[type='IVL_TS' or type='TS']</Data></Cell>
+    <Cell ss:StyleID="s77"><Data ss:Type="String">OBX-14-date/time of the observation, and/or OBX-19 after v2.4  (depends on who observation made)</Data></Cell>
+    <Cell ss:StyleID="s71"/>
+    <Cell ss:Index="18" ss:StyleID="s70"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="30">
+    <Cell><Data ss:Type="String">Observation.issued</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:StyleID="s70"/>
+    <Cell ss:StyleID="s70"/>
+    <Cell ss:StyleID="s70"/>
+    <Cell><Data ss:Type="String">instant</Data></Cell>
+    <Cell ss:StyleID="s70"/>
+    <Cell><Data ss:Type="String">Date/Time this was made available</Data></Cell>
+    <Cell ss:Index="11" ss:StyleID="s71"/>
+    <Cell><Data ss:Type="String">Updated when the result is updated</Data></Cell>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">participation[typeCode=AUT].time</Data></Cell>
+    <Cell ss:StyleID="s71"/>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">OBR.22 (or MSH.7), or perhaps OBX-19 (depends on who observation made)</Data></Cell>
+    <Cell ss:StyleID="s71"/>
+    <Cell ss:Index="18" ss:StyleID="s70"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="105">
+    <Cell><Data ss:Type="String">Observation.status</Data></Cell>
+    <Cell><Data ss:Type="String">1..1</Data></Cell>
+    <Cell ss:StyleID="s70"/>
+    <Cell ss:StyleID="s70"><Data ss:Type="String">y</Data></Cell>
+    <Cell ss:StyleID="s70"/>
+    <Cell><Data ss:Type="String">code</Data></Cell>
+    <Cell><Data ss:Type="String">ObservationStatus</Data></Cell>
+    <Cell><Data ss:Type="String">registered | preliminary | final | amended +</Data></Cell>
+    <Cell><Data ss:Type="String">The status of the result value</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Need to track the status of individual results - some results are finalised before the whole report is finalised</Data></Cell>
+    <Cell ss:Index="13" ss:StyleID="s71"><Data ss:Type="String">status&#10;&#10;Amended &amp; Final are differentiated by whether it is the subject of a ControlAct event with a type of &quot;revise&quot;</Data></Cell>
+    <Cell ss:StyleID="s71"/>
+    <Cell ss:StyleID="s76"><Data ss:Type="String">OBX-11-observation result status</Data></Cell>
+    <Cell ss:StyleID="s71"/>
+    <Cell ss:Index="18" ss:StyleID="s70"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="135">
+    <Cell><Data ss:Type="String">Observation.reliability</Data></Cell>
+    <Cell><Data ss:Type="String">1..1</Data></Cell>
+    <Cell ss:StyleID="s70"/>
+    <Cell ss:StyleID="s70"><Data ss:Type="String">y</Data></Cell>
+    <Cell ss:StyleID="s70"/>
+    <Cell><Data ss:Type="String">code</Data></Cell>
+    <Cell><Data ss:Type="String">ObservationReliability</Data></Cell>
+    <Cell><Data ss:Type="String">ok | ongoing | early | questionable | calibrating | error + </Data></Cell>
+    <Cell><Data ss:Type="String">An estimate of the degree to which quality issues have impacted on the value reported</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Not all results are completely reliable, and some are still reported anyway.</Data></Cell>
+    <Cell><Data ss:Type="String">Note that in most contexts, unreliable results are not recorded, deleted, or otherwise excluded, but it's not always possible to exclude them from the record. Interpreters of a result, whether human or machine, SHALL always either be aware of the status, or prevented from using the observation without being unaware that the reliability is not &quot;ok&quot;</Data></Cell>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">uncertaintyCode</Data></Cell>
+    <Cell ss:StyleID="s71"/>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">Maybe OBX.8/OBX.9</Data></Cell>
+    <Cell ss:StyleID="s71"/>
+    <Cell ss:Index="18" ss:StyleID="s70"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="75">
+    <Cell><Data ss:Type="String">Observation.bodySite</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:StyleID="s70"/>
+    <Cell ss:StyleID="s70"/>
+    <Cell ss:StyleID="s70"/>
+    <Cell><Data ss:Type="String">CodeableConcept</Data></Cell>
+    <Cell ss:StyleID="s78"><Data ss:Type="String">BodySite</Data></Cell>
+    <Cell><Data ss:Type="String">Observed body part</Data></Cell>
+    <Cell><Data ss:Type="String">Indicates where on the subject's body the observation was made.</Data></Cell>
+    <Cell ss:Index="11" ss:StyleID="s71"><Data ss:Type="String">Knowing where the observation is made is important for tracking if multiple sites are possible.</Data></Cell>
+    <Cell><Data ss:Type="String">Only used if not implicit in code found in Observation.name</Data></Cell>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">targetSiteCode</Data></Cell>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">unique(./targetSiteCode)</Data></Cell>
+    <Cell ss:StyleID="s76"><Data ss:Type="String">OBX-20-observation site</Data></Cell>
+    <Cell ss:StyleID="s71"/>
+    <Cell><Data ss:Type="String">Is this in the 80%?</Data></Cell>
+    <Cell ss:StyleID="s70"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">y</Data></Cell>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">y</Data></Cell>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">y</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="105">
+    <Cell><Data ss:Type="String">Observation.method</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:StyleID="s70"/>
+    <Cell ss:StyleID="s70"/>
+    <Cell ss:StyleID="s70"/>
+    <Cell><Data ss:Type="String">CodeableConcept</Data></Cell>
+    <Cell ss:StyleID="s70"><Data ss:Type="String">ObservationMethod</Data></Cell>
+    <Cell><Data ss:Type="String">How it was done</Data></Cell>
+    <Cell><Data ss:Type="String">Indicates the mechanism used to perform the observation</Data></Cell>
+    <Cell ss:Index="11" ss:StyleID="s71"><Data ss:Type="String">In some cases, method can impact results and is thus for determining whether results can be compared or determining significance of results</Data></Cell>
+    <Cell><Data ss:Type="String">Only used if not implicit in code for Observation.name</Data></Cell>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">methodCode</Data></Cell>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">unique(./methodCode)</Data></Cell>
+    <Cell ss:StyleID="s76"><Data ss:Type="String">OBX-17-observation method</Data></Cell>
+    <Cell ss:StyleID="s71"/>
+    <Cell><Data ss:Type="String">Is this in the 80%?</Data></Cell>
+    <Cell ss:StyleID="s70"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="45">
+    <Cell><Data ss:Type="String">Observation.identifier</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:StyleID="s70"/>
+    <Cell ss:StyleID="s70"/>
+    <Cell ss:StyleID="s70"/>
+    <Cell><Data ss:Type="String">Identifier</Data></Cell>
+    <Cell ss:StyleID="s70"/>
+    <Cell><Data ss:Type="String">Unique Id for this particular observation</Data></Cell>
+    <Cell><Data ss:Type="String">A unique identifier for the simple observation</Data></Cell>
+    <Cell ss:Index="11" ss:StyleID="s71"><Data ss:Type="String">Allows observations to be distinguished and referenced</Data></Cell>
+    <Cell ss:Index="13" ss:StyleID="s71"><Data ss:Type="String">id</Data></Cell>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">unique(./id[displayable=&quot;true&quot; and scope=&quot;OBJ&quot;])</Data></Cell>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">OBX.21</Data></Cell>
+    <Cell ss:StyleID="s71"/>
+    <Cell ss:Index="18" ss:StyleID="s70"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">y</Data></Cell>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">y</Data></Cell>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">y</Data></Cell>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">y</Data></Cell>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">y</Data></Cell>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">y</Data></Cell>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">Y</Data></Cell>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">y</Data></Cell>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">y</Data></Cell>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">y</Data></Cell>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">y</Data></Cell>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">y</Data></Cell>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">y</Data></Cell>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">y</Data></Cell>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">y</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="165">
+    <Cell><Data ss:Type="String">Observation.subject</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:StyleID="s70"/>
+    <Cell ss:StyleID="s70"/>
+    <Cell ss:StyleID="s70"/>
+    <Cell><Data ss:Type="String">Resource(Patient|Group|Device|Location)</Data></Cell>
+    <Cell ss:StyleID="s70"/>
+    <Cell><Data ss:Type="String">Who and/or what this is about</Data></Cell>
+    <Cell><Data ss:Type="String">The thing the observation is being made about</Data></Cell>
+    <Cell ss:Index="11" ss:StyleID="s71"><Data ss:Type="String">Observations have no value if you don't know who or what they're about.</Data></Cell>
+    <Cell><Data ss:Type="String">The only circumstance in which the subject can be missing is when the observation is made by a device that does not know the patient. In this case, the observation SHALL be matched to a patient through some context/channel matching technique, and at this point, the observation should be updated</Data></Cell>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">participation[typeCode=SBJ]</Data></Cell>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">unique(./participation[isHighest(priorityCode) and typeCode=&quot;SBJ&quot; and isNormalParticipation()]/role&#10;or ./participation[isHighest(priorityCode) and typeCode=&quot;SBJ&quot; and isNormalParticipation()]/role/entity)</Data></Cell>
+    <Cell ss:StyleID="s76"><Data ss:Type="String">PID-3-patient ID list</Data></Cell>
+    <Cell ss:StyleID="s71"/>
+    <Cell ss:Index="18" ss:StyleID="s70"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">y</Data></Cell>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">y</Data></Cell>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">y</Data></Cell>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">y</Data></Cell>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">y</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="135">
+    <Cell><Data ss:Type="String">Observation.specimen</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:StyleID="s70"/>
+    <Cell ss:StyleID="s70"/>
+    <Cell ss:StyleID="s70"/>
+    <Cell><Data ss:Type="String">Resource(Specimen)</Data></Cell>
+    <Cell ss:StyleID="s70"/>
+    <Cell><Data ss:Type="String">Specimen used for this observation</Data></Cell>
+    <Cell><Data ss:Type="String">The specimen that was used when this observation was made </Data></Cell>
+    <Cell ss:Index="11" ss:StyleID="s71"/>
+    <Cell><Data ss:Type="String">Observations are not made on specimens themselves; they are made on a subject, but usually by the means of a specimen. Note that although specimens are often involved, they are not always tracked and reported explicitly. Also note that observation resources are often used in contexts that track the specimen explicity (e.g. Diagnostic Report)</Data></Cell>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">participation[typeCode=SPC].specimen</Data></Cell>
+    <Cell ss:StyleID="s71"/>
+    <Cell ss:StyleID="s76"/>
+    <Cell ss:StyleID="s71"/>
+    <Cell ss:Index="18" ss:StyleID="s70"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s74"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s74"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s74"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s74"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s74"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="165">
+    <Cell><Data ss:Type="String">Observation.performer</Data></Cell>
+    <Cell><Data ss:Type="String">0..*</Data></Cell>
+    <Cell ss:StyleID="s70"/>
+    <Cell ss:StyleID="s70"/>
+    <Cell ss:StyleID="s70"/>
+    <Cell><Data ss:Type="String">Resource(Practitioner|Device|Organization)</Data></Cell>
+    <Cell ss:StyleID="s70"/>
+    <Cell><Data ss:Type="String">Who did the observation</Data></Cell>
+    <Cell><Data ss:Type="String">Who was responsible for asserting the observed value as &quot;true&quot;</Data></Cell>
+    <Cell ss:Index="11" ss:StyleID="s71"><Data ss:Type="String">May give a degree of confidence in the observation and also indicates where follow-up questions should be directed.</Data></Cell>
+    <Cell><Data ss:Type="String">This would only be &quot;Device&quot; if the device is responsible for the measurement, not to capture the device used by a human to make the measurement.  (The latter could be captured as an extension.)</Data></Cell>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">participation[typeCode=PRF]</Data></Cell>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">unique(./participation[isHighest(priorityCode) and typeCode=&quot;PRF&quot; and isNormalParticipation()]/role&#10;or&#10;./participation[isHighest(priorityCode) and typeCode=&quot;PRF&quot; and isNormalParticipation()]/role/entity]</Data></Cell>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">OBX.15 / (Practitioner)  OBX-16-responsible observer,  PRT-5-participation person:PRT-4-participation='RO' / &#10;(Device)  OBX-18-equipment instance identifier , PRT-10-participation device:PRT-4-participation='EQUIP' / (Organization)  OBX-23-performing organization name,  PRT-8-participation organization:PRT-4-participation='PO'&#10;</Data></Cell>
+    <Cell ss:StyleID="s71"/>
+    <Cell ss:Index="18" ss:StyleID="s70"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">y</Data></Cell>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">y</Data></Cell>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">y (with qualifiers)</Data></Cell>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">y</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="180">
+    <Cell><Data ss:Type="String">!Observation.normalValue[x]</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:StyleID="s70"><Data ss:Type="Number">2</Data></Cell>
+    <Cell ss:StyleID="s70"/>
+    <Cell ss:StyleID="s70"/>
+    <Cell><Data ss:Type="String">Range|string</Data></Cell>
+    <Cell ss:StyleID="s70"/>
+    <Cell><Data ss:Type="String">Expected value range - guide for interpretation</Data></Cell>
+    <Cell ss:Index="12"><Data ss:Type="String">This </Data></Cell>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">outboundRelationship[typeCode=REFV]/target[classCode=OBS, moodCode=EVN,  interpretationCode=ObservationInterpretationNormality:N].value&#10;</Data></Cell>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">./outboundRelationship[typeCode=&quot;REFV&quot; and isNormalActRelationship()]/target[subsumesCode(&quot;ActClass#OBS&quot;, classCode) and moodCode=&quot;EVN&quot; and isCriterionInd=&quot;true&quot; and isNormalAct() and interpretationCode=&quot;ObservationInterpretationNormality#N&quot;]&#10;</Data></Cell>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">OBX.7</Data></Cell>
+    <Cell ss:StyleID="s71"/>
+    <Cell ss:Index="18" ss:StyleID="s70"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">y</Data></Cell>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">Caregiver Characteristics or Assessment Scale Observation</Data></Cell>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">Caregiver Characteristics or Assessment Scale Observation</Data></Cell>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">Wound Length, Width &amp; Depth</Data></Cell>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="165">
+    <Cell><Data ss:Type="String">Observation.referenceRange</Data></Cell>
+    <Cell><Data ss:Type="String">0..*</Data></Cell>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:Index="5" ss:StyleID="Default"><Data ss:Type="String">400;120</Data></Cell>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+    <Cell><Data ss:Type="String">Provides guide for interpretation</Data></Cell>
+    <Cell><Data ss:Type="String">Guidance on how to interpret the value by comparison to a normal or recommended range</Data></Cell>
+    <Cell ss:Index="11" ss:StyleID="s71"><Data ss:Type="String">Knowing what values are considered &quot;normal&quot; can help evaluate the significance of a particular result. Need to be able to provide multiple reference ranges for different contexts</Data></Cell>
+    <Cell><Data ss:Type="String">Most observations only have one generic reference range. Systems MAY choose to restrict to only supplying the relevant reference range based on knowledge about the patient (e.g. specific to the patient's age, gender, weight and other factors), but this may not be possible or appropriate. Whenever more than one reference range is supplied, the differences between them SHOULD be provided in the reference range and/or age properties</Data></Cell>
+    <Cell><Data ss:Type="String">outboundRelationship[typeCode=REFV]/target[classCode=OBS, moodCode=EVN]</Data></Cell>
+    <Cell><Data ss:Type="String">./outboundRelationship[typeCode=&quot;REFV&quot; and isNormalActRelationship()]/target[subsumesCode(&quot;ActClass#OBS&quot;, classCode) and moodCode=&quot;EVN&quot; and isCriterionInd=&quot;true&quot; and isNormalAct()]</Data></Cell>
+    <Cell ss:Index="16" ss:StyleID="Default"/>
+    <Cell ss:Index="18" ss:StyleID="s70"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s74"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s74"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s74"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s74"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="75">
+    <Cell><Data ss:Type="String">Observation.referenceRange.low</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:StyleID="Default"><Data ss:Type="Number">3</Data></Cell>
+    <Cell ss:Index="5" ss:StyleID="Default"/>
+    <Cell ss:StyleID="s80"><Data ss:Type="String">Quantity</Data></Cell>
+    <Cell ss:StyleID="Default"/>
+    <Cell><Data ss:Type="String">Low Range, if relevant</Data></Cell>
+    <Cell><Data ss:Type="String">The value of the low bound of the reference range. If this is omitted, the low bound of the reference range is assumed to be meaningless. E.g. &lt;2.3</Data></Cell>
+    <Cell ss:Index="11" ss:StyleID="s71"/>
+    <Cell><Data ss:Type="String">Do not use the comparator for &lt; or &gt;</Data></Cell>
+    <Cell><Data ss:Type="String">value:IVL_PQ.low</Data></Cell>
+    <Cell ss:Index="15" ss:StyleID="s76"><Data ss:Type="String">OBX-7-references range</Data></Cell>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:Index="18" ss:StyleID="s70"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s74"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s74"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s74"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s74"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="75">
+    <Cell><Data ss:Type="String">Observation.referenceRange.high</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:StyleID="Default"><Data ss:Type="Number">3</Data></Cell>
+    <Cell ss:Index="5" ss:StyleID="Default"/>
+    <Cell ss:StyleID="s80"><Data ss:Type="String">Quantity</Data></Cell>
+    <Cell ss:StyleID="Default"/>
+    <Cell><Data ss:Type="String">High Range, if relevant</Data></Cell>
+    <Cell><Data ss:Type="String">The value of the high bound of the reference range. If this is omitted, the high bound of the reference range is assumed to be meaningless. E.g. &gt;5</Data></Cell>
+    <Cell ss:Index="11" ss:StyleID="s71"/>
+    <Cell><Data ss:Type="String">Do not use the comparator for &lt; or &gt;</Data></Cell>
+    <Cell><Data ss:Type="String">value:IVL_PQ.high</Data></Cell>
+    <Cell ss:Index="15" ss:StyleID="s76"><Data ss:Type="String">OBX-7-references range</Data></Cell>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:Index="18" ss:StyleID="s70"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s74"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s74"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s74"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s74"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="135">
+    <Cell><Data ss:Type="String">Observation.referenceRange.meaning</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+    <Cell><Data ss:Type="String">CodeableConcept</Data></Cell>
+    <Cell><Data ss:Type="String">ObservationRangeMeaning</Data></Cell>
+    <Cell><Data ss:Type="String">Indicates the meaning/use of this range of this range</Data></Cell>
+    <Cell><Data ss:Type="String">Code for the meaning of the reference range</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Need to be able to say what kind of reference range this is - normal, recommended, therapeutic, or perhaps what state this reference range applies to (i.e. age, hormonal cycles, etc.)</Data></Cell>
+    <Cell><Data ss:Type="String">This SHOULD be populated if there is more than one range</Data></Cell>
+    <Cell><Data ss:Type="String">interpretationCode</Data></Cell>
+    <Cell><Data ss:Type="String">./interpretationCode</Data></Cell>
+    <Cell ss:StyleID="s76"><Data ss:Type="String">OBX-10-nature of abnormal test?</Data></Cell>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:Index="18" ss:StyleID="s70"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s74"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s74"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s74"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s74"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="75">
+    <Cell><Data ss:Type="String">Observation.referenceRange.age</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+    <Cell><Data ss:Type="String">Range</Data></Cell>
+    <Cell ss:StyleID="Default"/>
+    <Cell><Data ss:Type="String">Applicable age range, if relevant</Data></Cell>
+    <Cell><Data ss:Type="String">The age at which this reference range is applicable. This is a neonatal age (e.g. number of weeks at term) if the meaning says so</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Some analytes vary greatly over age</Data></Cell>
+    <Cell ss:Index="13"><Data ss:Type="String">outboundRelationship[typeCode=PRCN].targetObservationCriterion[code=&quot;age&quot;].value</Data></Cell>
+    <Cell ss:Index="16" ss:StyleID="Default"/>
+    <Cell ss:Index="18" ss:StyleID="s70"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s74"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s74"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s74"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s74"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="135">
+    <Cell><Data ss:Type="String">Observation.related</Data></Cell>
+    <Cell><Data ss:Type="String">0..*</Data></Cell>
+    <Cell ss:Index="5" ss:StyleID="Default"><Data ss:Type="String">400;40</Data></Cell>
+    <Cell ss:Index="8"><Data ss:Type="String">Observations related to this observation</Data></Cell>
+    <Cell><Data ss:Type="String">Related observations - either components, or previous observations, or statements of derivation</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Some observations have important relationships to other observations (e.g Blood Pressure = systolic + diastolic), or are derived from other observations (e.g. calculated apgar score)</Data></Cell>
+    <Cell><Data ss:Type="String">Normally, an observation will have either a value or a set of related observations. A few observations (e.g. apgar store) may have both a value and related observations (for apgar, the observations from which the measure is derived)</Data></Cell>
+    <Cell><Data ss:Type="String">outBoundRelationship</Data></Cell>
+    <Cell ss:Index="15"><Data ss:Type="String">Relationships established by OBX-4 usage</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="90">
+    <Cell><Data ss:Type="String">Observation.related.type</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">code</Data></Cell>
+    <Cell><Data ss:Type="String">ObservationRelationshipType</Data></Cell>
+    <Cell><Data ss:Type="String">has-component | has-member | derived-from | sequel-to | replaces | qualified-by | interfered-by</Data></Cell>
+    <Cell><Data ss:Type="String">A code specifying the kind of relationship that exists with the target observation</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">May need to indicate whether this observation is composed of others, or merely derived from them</Data></Cell>
+    <Cell><Data ss:Type="String">A relationship type SHOULD be provided. If the relationship type is &quot;COMP&quot; (composed), then the observation should not be displayed/interpreted in the absence of the related observations</Data></Cell>
+    <Cell><Data ss:Type="String">.typeCode</Data></Cell>
+    <Cell ss:Index="15"><Data ss:Type="String">N/A</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="45">
+    <Cell><Data ss:Type="String">Observation.related.target</Data></Cell>
+    <Cell><Data ss:Type="String">1..1</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">Resource(Observation)</Data></Cell>
+    <Cell ss:Index="8"><Data ss:Type="String">Observation that is related to this one</Data></Cell>
+    <Cell><Data ss:Type="String">A reference to the observation that is related to this observation</Data></Cell>
+    <Cell ss:Index="13"><Data ss:Type="String">.targetObservation</Data></Cell>
+   </Row>
+  </Table>
+  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+   <PageSetup>
+    <Header x:Margin="0.3"/>
+    <Footer x:Margin="0.3"/>
+    <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
+   </PageSetup>
+   <Unsynced/>
+   <Selected/>
+   <FreezePanes/>
+   <FrozenNoSplit/>
+   <SplitHorizontal>1</SplitHorizontal>
+   <TopRowBottomPane>20</TopRowBottomPane>
+   <SplitVertical>1</SplitVertical>
+   <LeftColumnRightPane>1</LeftColumnRightPane>
+   <ActivePane>0</ActivePane>
+   <Panes>
+    <Pane>
+     <Number>3</Number>
+    </Pane>
+    <Pane>
+     <Number>1</Number>
+    </Pane>
+    <Pane>
+     <Number>2</Number>
+     <ActiveRow>1</ActiveRow>
+    </Pane>
+    <Pane>
+     <Number>0</Number>
+     <ActiveRow>23</ActiveRow>
+     <ActiveCol>7</ActiveCol>
+    </Pane>
+   </Panes>
+   <ProtectObjects>False</ProtectObjects>
+   <ProtectScenarios>False</ProtectScenarios>
+  </WorksheetOptions>
+ </Worksheet>
+ <Worksheet ss:Name="Invariants">
+  <Table ss:ExpandedColumnCount="6" ss:ExpandedRowCount="4" x:FullColumns="1"
+   x:FullRows="1" ss:StyleID="s81" ss:DefaultRowHeight="15">
+   <Column ss:StyleID="s81" ss:Width="14.25"/>
+   <Column ss:StyleID="s81" ss:Width="126"/>
+   <Column ss:StyleID="s81" ss:Width="96"/>
+   <Column ss:StyleID="s81" ss:Width="234.75"/>
+   <Column ss:StyleID="s81" ss:AutoFitWidth="0" ss:Width="139.5"/>
+   <Column ss:StyleID="s81" ss:Width="320.25"/>
+   <Row ss:AutoFitHeight="0" ss:StyleID="s68">
+    <Cell><Data ss:Type="String">Id</Data></Cell>
+    <Cell><Data ss:Type="String">Name</Data></Cell>
+    <Cell><Data ss:Type="String">Context</Data></Cell>
+    <Cell><Data ss:Type="String">English</Data></Cell>
+    <Cell><Data ss:Type="String">OCL</Data></Cell>
+    <Cell><Data ss:Type="String">XPath</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="Default"><Data ss:Type="Number">2</Data></Cell>
+    <Cell ss:StyleID="Default"><Data ss:Type="String">reference range for quantity</Data></Cell>
+    <Cell ss:StyleID="s67"><Data ss:Type="String">Observation</Data></Cell>
+    <Cell ss:StyleID="Default"><Data ss:Type="String">Can only have normal range if value is a quantity</Data></Cell>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"><Data ss:Type="String">exists(f:valueQuantity) or not(exists(f:normalRange))</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="Default"><Data ss:Type="Number">3</Data></Cell>
+    <Cell ss:StyleID="Default"><Data ss:Type="String">reference range</Data></Cell>
+    <Cell ss:StyleID="s67"><Data ss:Type="String">Observation.referenceRange</Data></Cell>
+    <Cell ss:StyleID="Default"><Data ss:Type="String">Must have at least a low or a high (and no comparators)</Data></Cell>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"><Data ss:Type="String">(exists(f:low) or exists(f:high)) and not(exists(f:low/f:comparator)) and not(exists(f:high/f:comparator))</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="s67"/>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+   </Row>
+  </Table>
+  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+   <PageSetup>
+    <Header x:Margin="0.3"/>
+    <Footer x:Margin="0.3"/>
+    <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
+   </PageSetup>
+   <Unsynced/>
+   <FreezePanes/>
+   <FrozenNoSplit/>
+   <SplitHorizontal>1</SplitHorizontal>
+   <TopRowBottomPane>1</TopRowBottomPane>
+   <SplitVertical>2</SplitVertical>
+   <LeftColumnRightPane>2</LeftColumnRightPane>
+   <ActivePane>0</ActivePane>
+   <Panes>
+    <Pane>
+     <Number>3</Number>
+    </Pane>
+    <Pane>
+     <Number>1</Number>
+    </Pane>
+    <Pane>
+     <Number>2</Number>
+    </Pane>
+    <Pane>
+     <Number>0</Number>
+     <ActiveRow>3</ActiveRow>
+     <ActiveCol>3</ActiveCol>
+    </Pane>
+   </Panes>
+   <ProtectObjects>False</ProtectObjects>
+   <ProtectScenarios>False</ProtectScenarios>
+  </WorksheetOptions>
+ </Worksheet>
+ <Worksheet ss:Name="Events">
+  <Table ss:ExpandedColumnCount="8" ss:ExpandedRowCount="2" x:FullColumns="1"
+   x:FullRows="1" ss:DefaultRowHeight="15">
+   <Column ss:AutoFitWidth="0" ss:Width="82.5" ss:Span="1"/>
+   <Column ss:Index="3" ss:AutoFitWidth="0" ss:Width="198.75"/>
+   <Column ss:AutoFitWidth="0" ss:Width="157.5"/>
+   <Column ss:AutoFitWidth="0" ss:Width="162.75" ss:Span="1"/>
+   <Column ss:Index="7" ss:AutoFitWidth="0" ss:Width="195.75"/>
+   <Column ss:AutoFitWidth="0" ss:Width="74.25"/>
+   <Row ss:AutoFitHeight="0" ss:Height="33">
+    <Cell ss:StyleID="s68"><Data ss:Type="String">Event Code</Data></Cell>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">Category</Data></Cell>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">Description</Data></Cell>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">Notes</Data></Cell>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">Request Resources</Data></Cell>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">Request Aggregations</Data></Cell>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">Response Resources</Data></Cell>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">Follow Ups</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="135">
+    <Cell ss:StyleID="s82"><Data ss:Type="String">observation-provide</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="String">Notification</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="String">Provide a simple observation or update a previously provided simple observation</Data></Cell>
+    <Cell ss:Index="5" ss:StyleID="s82"><Data ss:Type="String">Observation</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="String">.subjectPatient&#10;.subjectPatient.person&#10;.subjectGroup&#10;.subjectDevice&#10;.subjectAnimal&#10;.performerAgent&#10;.performerAgent.person&#10;.performerPatient&#10;.performerPerson</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+   </Row>
+  </Table>
+  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+   <PageSetup>
+    <Header x:Margin="0.3"/>
+    <Footer x:Margin="0.3"/>
+    <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
+   </PageSetup>
+   <Unsynced/>
+   <FreezePanes/>
+   <FrozenNoSplit/>
+   <SplitHorizontal>1</SplitHorizontal>
+   <TopRowBottomPane>1</TopRowBottomPane>
+   <SplitVertical>1</SplitVertical>
+   <LeftColumnRightPane>1</LeftColumnRightPane>
+   <ActivePane>0</ActivePane>
+   <Panes>
+    <Pane>
+     <Number>3</Number>
+    </Pane>
+    <Pane>
+     <Number>1</Number>
+    </Pane>
+    <Pane>
+     <Number>2</Number>
+    </Pane>
+    <Pane>
+     <Number>0</Number>
+     <ActiveRow>2</ActiveRow>
+    </Pane>
+   </Panes>
+   <ProtectObjects>False</ProtectObjects>
+   <ProtectScenarios>False</ProtectScenarios>
+  </WorksheetOptions>
+ </Worksheet>
+ <Worksheet ss:Name="Search">
+  <Table ss:ExpandedColumnCount="8" ss:ExpandedRowCount="39" x:FullColumns="1"
+   x:FullRows="1" ss:DefaultRowHeight="15">
+   <Column ss:AutoFitWidth="0" ss:Width="70.5"/>
+   <Column ss:AutoFitWidth="0" ss:Width="382.5"/>
+   <Column ss:AutoFitWidth="0" ss:Width="121.5"/>
+   <Column ss:Width="122.25"/>
+   <Row ss:AutoFitHeight="0" ss:Height="16.5" ss:StyleID="s68">
+    <Cell><Data ss:Type="String">Name</Data></Cell>
+    <Cell><Data ss:Type="String">Description</Data></Cell>
+    <Cell><Data ss:Type="String">Type</Data></Cell>
+    <Cell><Data ss:Type="String">Path</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">name</Data></Cell>
+    <Cell><Data ss:Type="String">The name of the observation type</Data></Cell>
+    <Cell><Data ss:Type="String">token</Data></Cell>
+    <Cell><Data ss:Type="String">Observation.name</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">value-quantity</Data></Cell>
+    <Cell><Data ss:Type="String">The value of the observation, if the value is a Quantity, or a SampledData (just search on the bounds of the values in sampled data)</Data></Cell>
+    <Cell><Data ss:Type="String">quantity</Data></Cell>
+    <Cell><Data ss:Type="String">Observation.value[x]</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">value-concept</Data></Cell>
+    <Cell><Data ss:Type="String">The value of the observation, if the value is a CodeableConcept</Data></Cell>
+    <Cell><Data ss:Type="String">token</Data></Cell>
+    <Cell><Data ss:Type="String">Observation.value[x]</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">value-date</Data></Cell>
+    <Cell><Data ss:Type="String">The value of the observation, if the value is a Period</Data></Cell>
+    <Cell><Data ss:Type="String">date</Data></Cell>
+    <Cell><Data ss:Type="String">Observation.value[x]</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">value-string</Data></Cell>
+    <Cell><Data ss:Type="String">The value of the observation, if the value is a string, and also searches in CodeableConcept.text</Data></Cell>
+    <Cell><Data ss:Type="String">string</Data></Cell>
+    <Cell><Data ss:Type="String">Observation.value[x]</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">name-value-[x]</Data></Cell>
+    <Cell><Data ss:Type="String">Both name and one of the value parameters</Data></Cell>
+    <Cell><Data ss:Type="String">composite</Data></Cell>
+    <Cell><Data ss:Type="String">name &amp; value-[x]</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">date</Data></Cell>
+    <Cell><Data ss:Type="String">Obtained date/time. If the obtained element is a period, a date that falls in the period</Data></Cell>
+    <Cell><Data ss:Type="String">date</Data></Cell>
+    <Cell><Data ss:Type="String">Observation.applies[x]</Data></Cell>
+    <Cell ss:Index="8" ss:StyleID="s67"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">status</Data></Cell>
+    <Cell><Data ss:Type="String">The status of the observation</Data></Cell>
+    <Cell><Data ss:Type="String">token</Data></Cell>
+    <Cell><Data ss:Type="String">Observation.status</Data></Cell>
+    <Cell ss:Index="8" ss:StyleID="s67"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">reliability</Data></Cell>
+    <Cell><Data ss:Type="String">The reliability of the observation</Data></Cell>
+    <Cell><Data ss:Type="String">token</Data></Cell>
+    <Cell><Data ss:Type="String">Observation.reliability</Data></Cell>
+    <Cell ss:Index="8" ss:StyleID="s67"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">subject</Data></Cell>
+    <Cell><Data ss:Type="String">The subject that the observation is about</Data></Cell>
+    <Cell><Data ss:Type="String">reference</Data></Cell>
+    <Cell><Data ss:Type="String">Observation.subject</Data></Cell>
+    <Cell ss:Index="8" ss:StyleID="s67"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">performer</Data></Cell>
+    <Cell><Data ss:Type="String">Who and/or what performed the observation</Data></Cell>
+    <Cell><Data ss:Type="String">reference</Data></Cell>
+    <Cell><Data ss:Type="String">Observation.performer</Data></Cell>
+    <Cell ss:Index="8" ss:StyleID="s67"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">specimen</Data></Cell>
+    <Cell ss:Index="3"><Data ss:Type="String">reference</Data></Cell>
+    <Cell><Data ss:Type="String">Observation.specimen</Data></Cell>
+    <Cell ss:Index="8" ss:StyleID="s67"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">related-type</Data></Cell>
+    <Cell ss:Index="3"><Data ss:Type="String">token</Data></Cell>
+    <Cell><Data ss:Type="String">Observation.related.type</Data></Cell>
+    <Cell ss:Index="8" ss:StyleID="s67"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">related-target</Data></Cell>
+    <Cell ss:Index="3"><Data ss:Type="String">reference</Data></Cell>
+    <Cell><Data ss:Type="String">Observation.related.target</Data></Cell>
+    <Cell ss:Index="8" ss:StyleID="s67"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">related</Data></Cell>
+    <Cell><Data ss:Type="String">Related Observations - search on related-type and related-target together</Data></Cell>
+    <Cell><Data ss:Type="String">composite</Data></Cell>
+    <Cell><Data ss:Type="String">related-target &amp; related-type</Data></Cell>
+    <Cell ss:Index="8" ss:StyleID="s67"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:Index="8" ss:StyleID="s67"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:Index="8" ss:StyleID="s67"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:Index="8" ss:StyleID="s67"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:Index="8" ss:StyleID="s67"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:Index="8" ss:StyleID="s67"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:Index="8" ss:StyleID="s67"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:Index="8" ss:StyleID="s67"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:Index="8" ss:StyleID="s67"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:Index="8" ss:StyleID="s67"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:Index="8" ss:StyleID="s67"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:Index="8" ss:StyleID="s67"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:Index="8" ss:StyleID="s67"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:Index="8" ss:StyleID="s67"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:Index="8" ss:StyleID="s67"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:Index="8" ss:StyleID="s67"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:Index="8" ss:StyleID="s67"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:Index="8" ss:StyleID="s67"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:Index="8" ss:StyleID="s67"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:Index="8" ss:StyleID="s67"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:Index="8" ss:StyleID="s67"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:Index="8" ss:StyleID="s67"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:Index="8" ss:StyleID="s67"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:Index="8" ss:StyleID="s67"/>
+   </Row>
+  </Table>
+  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+   <PageSetup>
+    <Header x:Margin="0.3"/>
+    <Footer x:Margin="0.3"/>
+    <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
+   </PageSetup>
+   <Unsynced/>
+   <FreezePanes/>
+   <FrozenNoSplit/>
+   <SplitHorizontal>1</SplitHorizontal>
+   <TopRowBottomPane>1</TopRowBottomPane>
+   <SplitVertical>1</SplitVertical>
+   <LeftColumnRightPane>1</LeftColumnRightPane>
+   <ActivePane>0</ActivePane>
+   <Panes>
+    <Pane>
+     <Number>3</Number>
+    </Pane>
+    <Pane>
+     <Number>1</Number>
+    </Pane>
+    <Pane>
+     <Number>2</Number>
+    </Pane>
+    <Pane>
+     <Number>0</Number>
+     <ActiveRow>5</ActiveRow>
+     <ActiveCol>3</ActiveCol>
+    </Pane>
+   </Panes>
+   <ProtectObjects>False</ProtectObjects>
+   <ProtectScenarios>False</ProtectScenarios>
+  </WorksheetOptions>
+ </Worksheet>
+ <Worksheet ss:Name="Bindings">
+  <Table ss:ExpandedColumnCount="8" ss:ExpandedRowCount="9" x:FullColumns="1"
+   x:FullRows="1" ss:DefaultRowHeight="15">
+   <Column ss:AutoFitWidth="0" ss:Width="179.25"/>
+   <Column ss:Width="249.75"/>
+   <Column ss:AutoFitWidth="0" ss:Width="65.25"/>
+   <Column ss:AutoFitWidth="0" ss:Width="47.25"/>
+   <Column ss:Width="178.5"/>
+   <Column ss:AutoFitWidth="0" ss:Width="274.5"/>
+   <Column ss:Index="8" ss:AutoFitWidth="0" ss:Width="242.25"/>
+   <Row ss:AutoFitHeight="0" ss:Height="15.75">
+    <Cell ss:StyleID="s68"><Data ss:Type="String">Binding Name</Data></Cell>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">Definition</Data></Cell>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">Binding</Data></Cell>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">Example</Data></Cell>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">Reference</Data></Cell>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">Description</Data></Cell>
+    <Cell ss:StyleID="s83"><Data ss:Type="String">Comments</Data></Cell>
+    <Cell ss:StyleID="s83"><Data ss:Type="String">v3</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">ObservationMethod</Data></Cell>
+    <Cell ss:StyleID="s66"><Data ss:Type="String">Methods for simple observations</Data></Cell>
+    <Cell ss:StyleID="s84"><Data ss:Type="String">value set</Data></Cell>
+    <Cell ss:StyleID="s84"><Data ss:Type="String">y</Data></Cell>
+    <Cell ss:StyleID="s84"><Data ss:Type="String">valueset-observation-methods</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">ObservationType</Data></Cell>
+    <Cell ss:StyleID="s66"><Data ss:Type="String">Codes identifying types of simple observations</Data></Cell>
+    <Cell ss:StyleID="s84"><Data ss:Type="String">value set</Data></Cell>
+    <Cell ss:StyleID="s84"><Data ss:Type="String">y</Data></Cell>
+    <Cell ss:StyleID="s84"><Data ss:Type="String">valueset-observation-codes</Data></Cell>
+    <Cell ss:StyleID="s84"><Data ss:Type="String">LOINC codes filtered to exclude panel codes</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">ObservationInterpretation</Data></Cell>
+    <Cell ss:StyleID="s66"><Data ss:Type="String">Codes identifying interpretations of observations</Data></Cell>
+    <Cell ss:StyleID="s84"><Data ss:Type="String">value set</Data></Cell>
+    <Cell ss:StyleID="s84"/>
+    <Cell><Data ss:Type="String">valueset-observation-interpretation</Data></Cell>
+    <Cell ss:Index="7"><Data ss:Type="String">Need to use v2 codes</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">ObservationReliability</Data></Cell>
+    <Cell ss:StyleID="s66"><Data ss:Type="String">Codes that provide an estimate of the degree to which quality issues have impacted on the value of an observation</Data></Cell>
+    <Cell ss:StyleID="s84"><Data ss:Type="String">code list</Data></Cell>
+    <Cell ss:StyleID="s84"/>
+    <Cell><Data ss:Type="String">#observation-reliability</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s66"><Data ss:Type="String">ObservationRangeMeaning</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="String">Code for the meaning of a reference range</Data></Cell>
+    <Cell ss:StyleID="s84"><Data ss:Type="String">value set</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="String">y</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="String">valueset-referencerange-meaning</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:StyleID="s82">
+    <Cell><Data ss:Type="String">ObservationStatus</Data></Cell>
+    <Cell><Data ss:Type="String">Codes providing the status of an observation</Data></Cell>
+    <Cell><Data ss:Type="String">code list</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="String">#observation-status</Data></Cell>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:Index="8" ss:StyleID="Default"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s66"><Data ss:Type="String">ObservationRelationshipType</Data></Cell>
+    <Cell ss:StyleID="s66"><Data ss:Type="String">Codes specifying how two observations are related</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="String">code list</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="String">#observation-relationshiptypes</Data></Cell>
+    <Cell ss:Index="8"><Data ss:Type="String">http://hl7.org/fhir/v3/vs/ActRelationshipType</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:Index="8" ss:StyleID="s86"/>
+   </Row>
+  </Table>
+  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+   <PageSetup>
+    <Header x:Margin="0.3"/>
+    <Footer x:Margin="0.3"/>
+    <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
+   </PageSetup>
+   <Unsynced/>
+   <Print>
+    <ValidPrinterInfo/>
+    <PaperSizeIndex>9</PaperSizeIndex>
+    <HorizontalResolution>300</HorizontalResolution>
+    <VerticalResolution>300</VerticalResolution>
+   </Print>
+   <FreezePanes/>
+   <FrozenNoSplit/>
+   <SplitHorizontal>1</SplitHorizontal>
+   <TopRowBottomPane>1</TopRowBottomPane>
+   <SplitVertical>1</SplitVertical>
+   <LeftColumnRightPane>1</LeftColumnRightPane>
+   <ActivePane>0</ActivePane>
+   <Panes>
+    <Pane>
+     <Number>3</Number>
+    </Pane>
+    <Pane>
+     <Number>1</Number>
+    </Pane>
+    <Pane>
+     <Number>2</Number>
+    </Pane>
+    <Pane>
+     <Number>0</Number>
+     <ActiveRow>5</ActiveRow>
+     <ActiveCol>7</ActiveCol>
+    </Pane>
+   </Panes>
+   <ProtectObjects>False</ProtectObjects>
+   <ProtectScenarios>False</ProtectScenarios>
+  </WorksheetOptions>
+ </Worksheet>
+ <Worksheet ss:Name="observation-reliability">
+  <Table ss:ExpandedColumnCount="4" ss:ExpandedRowCount="8" x:FullColumns="1"
+   x:FullRows="1" ss:DefaultRowHeight="15">
+   <Column ss:Index="2" ss:AutoFitWidth="0" ss:Width="81.75"/>
+   <Column ss:AutoFitWidth="0" ss:Width="366.75"/>
+   <Row ss:AutoFitHeight="0" ss:StyleID="s68">
+    <Cell><Data ss:Type="String">Id</Data></Cell>
+    <Cell><Data ss:Type="String">Code</Data></Cell>
+    <Cell><Data ss:Type="String">Definition</Data></Cell>
+    <Cell><Data ss:Type="String">Comments</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">ok</Data></Cell>
+    <Cell><Data ss:Type="String">The result has no reliability concerns</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="Number">2</Data></Cell>
+    <Cell><Data ss:Type="String">ongoing</Data></Cell>
+    <Cell><Data ss:Type="String">An early estimate of value; measurement is still occurring</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="Number">3</Data></Cell>
+    <Cell><Data ss:Type="String">early</Data></Cell>
+    <Cell><Data ss:Type="String">An early estimate of value; processing is still occurring</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="Number">4</Data></Cell>
+    <Cell><Data ss:Type="String">questionable</Data></Cell>
+    <Cell><Data ss:Type="String">The observation value should be treated with care</Data></Cell>
+    <Cell><Data ss:Type="String">This code is used when there are features of the measurement process that raise concerns about the validity of a result. In some circumstances, what is available is reported anyway</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="Number">5</Data></Cell>
+    <Cell><Data ss:Type="String">calibrating</Data></Cell>
+    <Cell><Data ss:Type="String">The result has been generated while calibration is occurring</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="Number">6</Data></Cell>
+    <Cell><Data ss:Type="String">error</Data></Cell>
+    <Cell><Data ss:Type="String">The observation could not be completed because of an error</Data></Cell>
+    <Cell><Data ss:Type="String">In this case, value must be missing</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="String">unknown</Data></Cell>
+    <Cell><Data ss:Type="String">No observation value was available</Data></Cell>
+    <Cell><Data ss:Type="String">In this case, value must be missing</Data></Cell>
+   </Row>
+  </Table>
+  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+   <PageSetup>
+    <Header x:Margin="0.3"/>
+    <Footer x:Margin="0.3"/>
+    <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
+   </PageSetup>
+   <Unsynced/>
+   <Panes>
+    <Pane>
+     <Number>3</Number>
+     <ActiveRow>1</ActiveRow>
+     <ActiveCol>1</ActiveCol>
+     <RangeSelection>R2C2:R8C2</RangeSelection>
+    </Pane>
+   </Panes>
+   <ProtectObjects>False</ProtectObjects>
+   <ProtectScenarios>False</ProtectScenarios>
+  </WorksheetOptions>
+ </Worksheet>
+ <Worksheet ss:Name="Profiles">
+  <Table ss:ExpandedColumnCount="5" ss:ExpandedRowCount="1" x:FullColumns="1"
+   x:FullRows="1" ss:DefaultRowHeight="15">
+   <Column ss:AutoFitWidth="0" ss:Width="108"/>
+   <Column ss:AutoFitWidth="0" ss:Width="237"/>
+   <Column ss:AutoFitWidth="0" ss:Width="179.25"/>
+   <Column ss:AutoFitWidth="0" ss:Width="99"/>
+   <Column ss:AutoFitWidth="0" ss:Width="258.75"/>
+   <Row ss:AutoFitHeight="0" ss:Height="30">
+    <Cell ss:StyleID="s68"><Data ss:Type="String">Name</Data></Cell>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">Description</Data></Cell>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">Filename</Data></Cell>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">Type</Data></Cell>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">Example</Data></Cell>
+   </Row>
+  </Table>
+  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+   <PageSetup>
+    <Header x:Margin="0.3"/>
+    <Footer x:Margin="0.3"/>
+    <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
+   </PageSetup>
+   <Unsynced/>
+   <Panes>
+    <Pane>
+     <Number>3</Number>
+     <ActiveRow>3</ActiveRow>
+    </Pane>
+   </Panes>
+   <ProtectObjects>False</ProtectObjects>
+   <ProtectScenarios>False</ProtectScenarios>
+  </WorksheetOptions>
+ </Worksheet>
+ <Worksheet ss:Name="Examples">
+  <Table ss:ExpandedColumnCount="6" ss:ExpandedRowCount="15" x:FullColumns="1"
+   x:FullRows="1" ss:DefaultColumnWidth="65.25" ss:DefaultRowHeight="15">
+   <Column ss:Width="60.75"/>
+   <Column ss:Width="356.25"/>
+   <Column ss:Index="4" ss:AutoFitWidth="0" ss:Width="273.75"/>
+   <Row ss:AutoFitHeight="0" ss:Height="30">
+    <Cell ss:StyleID="s87"><Data ss:Type="String">Name</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="String">Description</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="String">Identity</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="String">Filename</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="String">Type</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="String">In Book</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">Example</Data></Cell>
+    <Cell><Data ss:Type="String">Simple Weight Example</Data></Cell>
+    <Cell><Data ss:Type="String">example</Data></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">observation-example.xml</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">y</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">Blood pressure</Data></Cell>
+    <Cell><Data ss:Type="String">Blood Pressure Measurement</Data></Cell>
+    <Cell><Data ss:Type="String">blood-pressure</Data></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">observation-example-bloodpressure.xml</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">n</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:Index="2"><Data ss:Type="String">EEG Example</Data></Cell>
+    <Cell><Data ss:Type="String">example-eeg</Data></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">observation-example-eeg.xml</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">n</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">Glucose</Data></Cell>
+    <Cell><Data ss:Type="String">Real-world patient - glucose</Data></Cell>
+    <Cell ss:StyleID="s89"><Data ss:Type="String">f001</Data></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">observation-example-f001-glucose.xml</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">n</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">Excess</Data></Cell>
+    <Cell><Data ss:Type="String">Real-world patient - excess</Data></Cell>
+    <Cell ss:StyleID="s89"><Data ss:Type="String">f002</Data></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">observation-example-f002-excess.xml</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">n</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">Carbon Dioxide</Data></Cell>
+    <Cell><Data ss:Type="String">Real-world patient - CO2</Data></Cell>
+    <Cell><Data ss:Type="String">f003</Data></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">observation-example-f003-co2.xml</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">n</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">Erytrocyte Hemoglobin </Data></Cell>
+    <Cell><Data ss:Type="String">Real-world patient - hemoglobin</Data></Cell>
+    <Cell><Data ss:Type="String">f004</Data></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">observation-example-f004-hemoglobin.xml</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">n</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">Hemoglobin</Data></Cell>
+    <Cell><Data ss:Type="String">Real-world patient - hemoglobin</Data></Cell>
+    <Cell><Data ss:Type="String">f005</Data></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">observation-example-f005-hemoglobin.xml</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">n</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">BMI</Data></Cell>
+    <Cell><Data ss:Type="String">Real-world patient - bmi</Data></Cell>
+    <Cell><Data ss:Type="String">f201</Data></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">observation-example-f201-bmi.xml</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">n</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">Temperature</Data></Cell>
+    <Cell><Data ss:Type="String">Real-world patient - temperature</Data></Cell>
+    <Cell><Data ss:Type="String">f202</Data></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">observation-example-f202-temperature.xml</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">n</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">Bicarbonate</Data></Cell>
+    <Cell><Data ss:Type="String">Real-world patient - CO2</Data></Cell>
+    <Cell><Data ss:Type="String">f203</Data></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">observation-example-f203-bicarbonate.xml</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">n</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">Creatinine</Data></Cell>
+    <Cell><Data ss:Type="String">Real-world patient - creatinine</Data></Cell>
+    <Cell><Data ss:Type="String">f204</Data></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">observation-example-f204-creatinine.xml</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">n</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">eGFR</Data></Cell>
+    <Cell><Data ss:Type="String">Real-world patient - egfr</Data></Cell>
+    <Cell><Data ss:Type="String">f205</Data></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">observation-example-f205-egfr.xml</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">n</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">Staphylococcus</Data></Cell>
+    <Cell><Data ss:Type="String">Real-world patient - staphylococcus</Data></Cell>
+    <Cell><Data ss:Type="String">f206</Data></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">observation-example-f206-staphylococcus.xml</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">n</Data></Cell>
+   </Row>
+  </Table>
+  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+   <PageSetup>
+    <Header x:Margin="0.3"/>
+    <Footer x:Margin="0.3"/>
+    <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
+   </PageSetup>
+   <Unsynced/>
+   <Panes>
+    <Pane>
+     <Number>3</Number>
+     <ActiveRow>3</ActiveRow>
+     <ActiveCol>5</ActiveCol>
+    </Pane>
+   </Panes>
+   <ProtectObjects>False</ProtectObjects>
+   <ProtectScenarios>False</ProtectScenarios>
+  </WorksheetOptions>
+ </Worksheet>
+ <Worksheet ss:Name="observation-status">
+  <Table ss:ExpandedColumnCount="4" ss:ExpandedRowCount="7" x:FullColumns="1"
+   x:FullRows="1" ss:DefaultRowHeight="15">
+   <Column ss:Index="2" ss:AutoFitWidth="0" ss:Width="65.25"/>
+   <Column ss:AutoFitWidth="0" ss:Width="594"/>
+   <Column ss:AutoFitWidth="0" ss:Width="563.25"/>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s90"><Data ss:Type="String">Id</Data></Cell>
+    <Cell ss:StyleID="s90"><Data ss:Type="String">Code</Data></Cell>
+    <Cell ss:StyleID="s90"><Data ss:Type="String">Definition</Data></Cell>
+    <Cell ss:StyleID="s90"><Data ss:Type="String">Comments</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="18.75">
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s92"><Data ss:Type="String">registered</Data></Cell>
+    <Cell ss:StyleID="s92"><Data ss:Type="String">The existence of the observation is registered, but there is no result yet available</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="String">This is used where an observation record is created before it is made as a place holder. Some times called &quot;To Follow&quot;</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="Number">2</Data></Cell>
+    <Cell ss:StyleID="s92"><Data ss:Type="String">preliminary</Data></Cell>
+    <Cell ss:StyleID="s92"><Data ss:Type="String">This is an initial or interim observation: data may be incomplete or unverified</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="Number">3</Data></Cell>
+    <Cell ss:StyleID="s92"><Data ss:Type="String">final</Data></Cell>
+    <Cell ss:StyleID="s92"><Data ss:Type="String">The observation is complete and verified by an authorized person</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="Number">4</Data></Cell>
+    <Cell ss:StyleID="s92"><Data ss:Type="String">amended</Data></Cell>
+    <Cell ss:StyleID="s92"><Data ss:Type="String">The observation has been modified subsequent to being Final, and is complete and verified by an authorized person</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="19.5">
+    <Cell><Data ss:Type="Number">5</Data></Cell>
+    <Cell ss:StyleID="s92"><Data ss:Type="String">cancelled</Data></Cell>
+    <Cell ss:StyleID="s92"><Data ss:Type="String">The observation is unavailable because the measurement was not started or not completed (also sometimes called &quot;aborted&quot;)</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="Number">6</Data></Cell>
+    <Cell ss:StyleID="s92"><Data ss:Type="String">entered in error</Data></Cell>
+    <Cell ss:StyleID="s92"><Data ss:Type="String">The observation has been withdrawn following previous Final release</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="String">Usually this is because some error has been detected in the measurement</Data></Cell>
+   </Row>
+  </Table>
+  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+   <PageSetup>
+    <Header x:Margin="0.3"/>
+    <Footer x:Margin="0.3"/>
+    <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
+   </PageSetup>
+   <Unsynced/>
+   <Panes>
+    <Pane>
+     <Number>3</Number>
+     <RangeSelection>R1:R2</RangeSelection>
+    </Pane>
+   </Panes>
+   <ProtectObjects>False</ProtectObjects>
+   <ProtectScenarios>False</ProtectScenarios>
+  </WorksheetOptions>
+ </Worksheet>
+ <Worksheet ss:Name="observation-relationshiptypes">
+  <Table ss:ExpandedColumnCount="4" ss:ExpandedRowCount="8" x:FullColumns="1"
+   x:FullRows="1" ss:StyleID="s82" ss:DefaultRowHeight="15">
+   <Column ss:StyleID="s82" ss:AutoFitWidth="0" ss:Width="51.75"/>
+   <Column ss:StyleID="s82" ss:AutoFitWidth="0" ss:Width="101.25"/>
+   <Column ss:StyleID="s82" ss:AutoFitWidth="0" ss:Width="654"/>
+   <Column ss:StyleID="s82" ss:AutoFitWidth="0" ss:Width="177"/>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s90"><Data ss:Type="String">Id</Data></Cell>
+    <Cell ss:StyleID="s90"><Data ss:Type="String">Code</Data></Cell>
+    <Cell ss:StyleID="s90"><Data ss:Type="String">Definition</Data></Cell>
+    <Cell ss:StyleID="s90"><Data ss:Type="String">v3</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s92"><Data ss:Type="String">has-component</Data></Cell>
+    <Cell><Data ss:Type="String">The target observation is a component of this observation (e.g. Systolic and Diastolic Blood Pressure)</Data></Cell>
+    <Cell><Data ss:Type="String" x:Ticked="1">=ActRrelationshipType.COMP</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="Number">2</Data></Cell>
+    <Cell><Data ss:Type="String">has-member</Data></Cell>
+    <Cell><Data ss:Type="String">This observation is a group observation (e.g. a battery, a panel of tests, a set of vital sign measurements) that includes the target as a member of the group</Data></Cell>
+    <Cell><Data ss:Type="String" x:Ticked="1">=ActRrelationshipType.MBR</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="Number">3</Data></Cell>
+    <Cell><Data ss:Type="String">derived-from</Data></Cell>
+    <Cell><Data ss:Type="String">The target observation is part of the information from which this observation value is derived (e.g. calculated anion gap, Apgar score)</Data></Cell>
+    <Cell><Data ss:Type="String" x:Ticked="1">=ActRrelationshipType.DRIV</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="Number">4</Data></Cell>
+    <Cell><Data ss:Type="String">sequel-to</Data></Cell>
+    <Cell><Data ss:Type="String">This observation follows the target observation (e.g. timed tests such as Glucose Tolerance Test)</Data></Cell>
+    <Cell><Data ss:Type="String" x:Ticked="1">=ActRrelationshipType.SEQL</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="Number">5</Data></Cell>
+    <Cell><Data ss:Type="String">replaces</Data></Cell>
+    <Cell><Data ss:Type="String">This observation replaces a previous observation (i.e. a revised value). The target observation is now obsolete</Data></Cell>
+    <Cell><Data ss:Type="String" x:Ticked="1">=ActRrelationshipType.RPLC</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="30">
+    <Cell><Data ss:Type="Number">6</Data></Cell>
+    <Cell><Data ss:Type="String">qualified-by</Data></Cell>
+    <Cell><Data ss:Type="String">The value of the target observation qualifies (refines) the semantics of the source observation (e.g. a lipaemia measure target from a plasma measure)</Data></Cell>
+    <Cell><Data ss:Type="String" x:Ticked="1">=ActRrelationshipType.QUALF</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="30">
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="String">interfered-by</Data></Cell>
+    <Cell><Data ss:Type="String">The value of the target observation interferes (degardes quality, or prevents valid observation) with the semantics of the source observation (e.g. a hemolysis measure target from a plasma potassium measure which has no value)</Data></Cell>
+    <Cell><Data ss:Type="String" x:Ticked="1">=ActRrelationshipType.INTF</Data></Cell>
+   </Row>
+  </Table>
+  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+   <PageSetup>
+    <Header x:Margin="0.3"/>
+    <Footer x:Margin="0.3"/>
+    <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
+   </PageSetup>
+   <Unsynced/>
+   <Print>
+    <ValidPrinterInfo/>
+    <PaperSizeIndex>9</PaperSizeIndex>
+    <HorizontalResolution>300</HorizontalResolution>
+    <VerticalResolution>300</VerticalResolution>
+   </Print>
+   <Panes>
+    <Pane>
+     <Number>3</Number>
+     <ActiveRow>3</ActiveRow>
+     <ActiveCol>2</ActiveCol>
+    </Pane>
+   </Panes>
+   <ProtectObjects>False</ProtectObjects>
+   <ProtectScenarios>False</ProtectScenarios>
+  </WorksheetOptions>
+ </Worksheet>
+</Workbook>

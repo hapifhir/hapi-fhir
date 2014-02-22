@@ -52,4 +52,8 @@ public abstract class BaseRuntimeElementCompositeDefinition<T extends IComposite
 		myChildren = Collections.unmodifiableList(myChildren);
 		myNameToChild = Collections.unmodifiableMap(myNameToChild);
 	}
+
+	public List<BaseRuntimeChildDefinition> getChildren() {
+		return myChildren;
+	}
 }

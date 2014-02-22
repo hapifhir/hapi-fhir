@@ -57,6 +57,10 @@ public class ResourceParser extends BaseParser {
 		p.setOutputFile("../hapi-fhir-base/src/main/java/ca/uhn/fhir/model/resource/Patient.java");
 		p.parse();
 
+		p.setResourceName("observation");
+		p.setOutputFile("../hapi-fhir-base/src/main/java/ca/uhn/fhir/model/resource/Observation.java");
+		p.parse();
+
 		DatatypeParser d = new DatatypeParser();
 		d.setDirectory("src/test/resources/dt");
 		d.setDatatypeName("humanname");

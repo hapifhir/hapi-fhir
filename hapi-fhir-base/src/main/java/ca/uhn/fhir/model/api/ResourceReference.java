@@ -1,7 +1,7 @@
 package ca.uhn.fhir.model.api;
 
 
-public class ResourceReference {
+public class ResourceReference implements IElement {
 
 	private String myDisplay;
 	private String myReference;

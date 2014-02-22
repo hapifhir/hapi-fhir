@@ -2,6 +2,8 @@ package ca.uhn.fhir.context;
 
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
+
 import ca.uhn.fhir.model.api.IElement;
 
 public abstract class BaseRuntimeElementDefinition<T extends IElement> {
@@ -10,6 +12,9 @@ public abstract class BaseRuntimeElementDefinition<T extends IElement> {
 	private Class<? extends T> myImplementingClass;
 
 	public BaseRuntimeElementDefinition(String theName, Class<? extends T> theImplementingClass) {
+		assert StringUtils.isNotBlank(theName);
+		assert theImplementingClass != null;
+		
 		myName = theName;
 		myImplementingClass=theImplementingClass;
 	}
@@ -44,7 +49,7 @@ public abstract class BaseRuntimeElementDefinition<T extends IElement> {
 	public abstract ChildTypeEnum getChildType();
 	
 	public enum ChildTypeEnum {
-		COMPOSITE_DATATYPE, PRIMITIVE_DATATYPE, RESOURCE, RESOURCE_REF, RESOURCE_BLOCK
+		COMPOSITE_DATATYPE, PRIMITIVE_DATATYPE, RESOURCE, RESOURCE_REF, RESOURCE_BLOCK, PRIMITIVE_XHTML
 		
 	}
 	

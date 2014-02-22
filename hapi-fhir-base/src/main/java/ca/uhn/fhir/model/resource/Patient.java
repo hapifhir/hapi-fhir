@@ -506,7 +506,7 @@ public class Patient extends BaseResource {
      * </p> 
 	 */
 	@Block(name="Patient.contact")	
-	public static class Contact {
+	public static class Contact implements IResourceBlock {
 	@Child(name="identifier", order=0, min=0, max=Child.MAX_UNLIMITED)	
 	private List<IdentifierDt> myIdentifier;
 	
@@ -990,7 +990,7 @@ public class Patient extends BaseResource {
      * </p> 
 	 */
 	@Block(name="Patient.animal")	
-	public static class Animal {
+	public static class Animal implements IResourceBlock {
 	@Child(name="identifier", order=0, min=0, max=Child.MAX_UNLIMITED)	
 	private List<IdentifierDt> myIdentifier;
 	
@@ -1474,7 +1474,7 @@ public class Patient extends BaseResource {
      * </p> 
 	 */
 	@Block(name="Patient.link")	
-	public static class Link {
+	public static class Link implements IResourceBlock {
 	@Child(name="identifier", order=0, min=0, max=Child.MAX_UNLIMITED)	
 	private List<IdentifierDt> myIdentifier;
 	

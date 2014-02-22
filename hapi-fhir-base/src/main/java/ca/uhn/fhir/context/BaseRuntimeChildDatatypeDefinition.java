@@ -23,6 +23,22 @@ public abstract class BaseRuntimeChildDatatypeDefinition extends BaseRuntimeChil
 	}
 
 	@Override
+	public String getChildNameByDatatype(Class<? extends IElement> theDatatype) {
+		if (myDatatype.equals(theDatatype)) {
+			return getElementName();
+		}
+		return null;
+	}
+
+	@Override
+	public BaseRuntimeElementDefinition<?> getChildElementDefinitionByDatatype(Class<? extends IElement> theDatatype) {
+		if (myDatatype.equals(theDatatype)) {
+			return myElementDefinition;
+		}
+		return null;
+	}
+
+	@Override
 	public BaseRuntimeElementDefinition<?> getChildByName(String theName) {
 		if (getElementName().equals(theName)) {
 			return myElementDefinition;

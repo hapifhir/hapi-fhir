@@ -1,8 +1,10 @@
 package ca.uhn.fhir.model.datatype;
 
 import ca.uhn.fhir.model.api.IPrimitiveDatatype;
+import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.parser.DataFormatException;
 
+@DatatypeDef(name = "xhtml")
 public class XhtmlDt implements IPrimitiveDatatype<String> {
 
 	private String myValue;
