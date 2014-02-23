@@ -60,11 +60,11 @@ public class ResourceParser extends BaseParser {
 		ResourceParser p = new ResourceParser();
 		p.setDirectory("src/test/resources/res");
 		p.setResourceName("patient");
-		p.setOutputFile("../hapi-fhir-base/src/main/java/ca/uhn/fhir/model/resource/Patient.java");
+		p.setOutputFile("../hapi-fhir-base/src/main/java/ca/uhn/fhir/model/resource/ResourceWithExtensionsA.java");
 		ArrayList<Extension> exts = new ArrayList<Extension>();
-		Extension ext1 = new Extension("foo1", "http://foo/1", StringDt.class);
+		Extension ext1 = new Extension("foo1", "http://foo/1", "string");
 		exts.add(ext1);
-		Extension ext2 = new Extension("bar1", "http://bar/1", new Extension("bar11", "http://bar/1/1", DateDt.class), new Extension("bar12", "http://bar/1/2", DateDt.class));
+		Extension ext2 = new Extension("bar1", "http://bar/1", new Extension("bar11", "http://bar/1/1", "date"), new Extension("bar12", "http://bar/1/2", "date"));
 		exts.add(ext2);
 		p.setExtensions(exts);
 		p.parse();

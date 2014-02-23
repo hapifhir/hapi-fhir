@@ -12,7 +12,7 @@ import java.util.List;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.util.BeanUtils;
 
-public abstract class BaseRuntimeUndeclaredChildDefinition extends BaseRuntimeChildDefinition {
+public abstract class BaseRuntimeDeclaredChildDefinition extends BaseRuntimeChildDefinition {
 
 	private final IAccessor myAccessor;
 	private final String myElementName;
@@ -21,7 +21,7 @@ public abstract class BaseRuntimeUndeclaredChildDefinition extends BaseRuntimeCh
 	private final int myMin;
 	private final IMutator myMutator;
 
-	BaseRuntimeUndeclaredChildDefinition(Field theField, int theMin, int theMax, String theElementName) throws ConfigurationException {
+	BaseRuntimeDeclaredChildDefinition(Field theField, int theMin, int theMax, String theElementName) throws ConfigurationException {
 		super();
 		if (theField == null) {
 			throw new IllegalArgumentException("No field speficied");

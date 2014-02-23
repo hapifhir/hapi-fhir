@@ -11,7 +11,7 @@ import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceReference;
 
-public class RuntimeChildResourceDefinition extends BaseRuntimeUndeclaredChildDefinition {
+public class RuntimeChildResourceDefinition extends BaseRuntimeDeclaredChildDefinition {
 
 	private BaseRuntimeElementDefinition<?> myRuntimeDef;
 	private List<Class<? extends IResource>> myResourceTypes;

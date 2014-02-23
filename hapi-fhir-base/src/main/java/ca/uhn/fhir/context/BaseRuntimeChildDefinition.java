@@ -29,4 +29,12 @@ public abstract class BaseRuntimeChildDefinition {
 	public interface IMutator {
 		void addValue(Object theTarget, IElement theValue);
 	}
+
+	public String getExtensionUrl() {
+		return null;
+	}
+
+//	public String getExtensionUrl() {
+//		return null;
+//	}
 }

@@ -34,7 +34,7 @@ import ca.uhn.fhir.model.datatype.*;
 @ResourceDef(name="Observation")
 public class Observation extends BaseResource {
 
-	@Child(name="name", order=0, min=1, max=1)	
+	@Child(name="name", type=CodeableConceptDt.class, order=0, min=1, max=1)	
 	private CodeableConceptDt myName;
 	
 	@Child(name="value", order=1, min=0, max=1, choice=@Choice(types= {
@@ -48,10 +48,10 @@ public class Observation extends BaseResource {
 	}))	
 	private IDatatype myValue;
 	
-	@Child(name="interpretation", order=2, min=0, max=1)	
+	@Child(name="interpretation", type=CodeableConceptDt.class, order=2, min=0, max=1)	
 	private CodeableConceptDt myInterpretation;
 	
-	@Child(name="comments", order=3, min=0, max=1)	
+	@Child(name="comments", type=StringDt.class, order=3, min=0, max=1)	
 	private StringDt myComments;
 	
 	@Child(name="applies", order=4, min=0, max=1, choice=@Choice(types= {
@@ -60,22 +60,22 @@ public class Observation extends BaseResource {
 	}))	
 	private IDatatype myApplies;
 	
-	@Child(name="issued", order=5, min=0, max=1)	
+	@Child(name="issued", type=InstantDt.class, order=5, min=0, max=1)	
 	private InstantDt myIssued;
 	
-	@Child(name="status", order=6, min=1, max=1)	
+	@Child(name="status", type=CodeDt.class, order=6, min=1, max=1)	
 	private CodeDt myStatus;
 	
-	@Child(name="reliability", order=7, min=1, max=1)	
+	@Child(name="reliability", type=CodeDt.class, order=7, min=1, max=1)	
 	private CodeDt myReliability;
 	
-	@Child(name="bodySite", order=8, min=0, max=1)	
+	@Child(name="bodySite", type=CodeableConceptDt.class, order=8, min=0, max=1)	
 	private CodeableConceptDt myBodySite;
 	
-	@Child(name="method", order=9, min=0, max=1)	
+	@Child(name="method", type=CodeableConceptDt.class, order=9, min=0, max=1)	
 	private CodeableConceptDt myMethod;
 	
-	@Child(name="identifier", order=10, min=0, max=1)	
+	@Child(name="identifier", type=IdentifierDt.class, order=10, min=0, max=1)	
 	private IdentifierDt myIdentifier;
 	
 	@Child(name="subject", order=11, min=0, max=1)
@@ -502,7 +502,7 @@ public class Observation extends BaseResource {
 	 */
 	@Block(name="Observation.referenceRange")	
 	public static class ReferenceRange implements IResourceBlock {
-	@Child(name="name", order=0, min=1, max=1)	
+	@Child(name="name", type=CodeableConceptDt.class, order=0, min=1, max=1)	
 	private CodeableConceptDt myName;
 	
 	@Child(name="value", order=1, min=0, max=1, choice=@Choice(types= {
@@ -516,10 +516,10 @@ public class Observation extends BaseResource {
 	}))	
 	private IDatatype myValue;
 	
-	@Child(name="interpretation", order=2, min=0, max=1)	
+	@Child(name="interpretation", type=CodeableConceptDt.class, order=2, min=0, max=1)	
 	private CodeableConceptDt myInterpretation;
 	
-	@Child(name="comments", order=3, min=0, max=1)	
+	@Child(name="comments", type=StringDt.class, order=3, min=0, max=1)	
 	private StringDt myComments;
 	
 	@Child(name="applies", order=4, min=0, max=1, choice=@Choice(types= {
@@ -528,22 +528,22 @@ public class Observation extends BaseResource {
 	}))	
 	private IDatatype myApplies;
 	
-	@Child(name="issued", order=5, min=0, max=1)	
+	@Child(name="issued", type=InstantDt.class, order=5, min=0, max=1)	
 	private InstantDt myIssued;
 	
-	@Child(name="status", order=6, min=1, max=1)	
+	@Child(name="status", type=CodeDt.class, order=6, min=1, max=1)	
 	private CodeDt myStatus;
 	
-	@Child(name="reliability", order=7, min=1, max=1)	
+	@Child(name="reliability", type=CodeDt.class, order=7, min=1, max=1)	
 	private CodeDt myReliability;
 	
-	@Child(name="bodySite", order=8, min=0, max=1)	
+	@Child(name="bodySite", type=CodeableConceptDt.class, order=8, min=0, max=1)	
 	private CodeableConceptDt myBodySite;
 	
-	@Child(name="method", order=9, min=0, max=1)	
+	@Child(name="method", type=CodeableConceptDt.class, order=9, min=0, max=1)	
 	private CodeableConceptDt myMethod;
 	
-	@Child(name="identifier", order=10, min=0, max=1)	
+	@Child(name="identifier", type=IdentifierDt.class, order=10, min=0, max=1)	
 	private IdentifierDt myIdentifier;
 	
 	@Child(name="subject", order=11, min=0, max=1)
@@ -971,7 +971,7 @@ public class Observation extends BaseResource {
 	 */
 	@Block(name="Observation.related")	
 	public static class Related implements IResourceBlock {
-	@Child(name="name", order=0, min=1, max=1)	
+	@Child(name="name", type=CodeableConceptDt.class, order=0, min=1, max=1)	
 	private CodeableConceptDt myName;
 	
 	@Child(name="value", order=1, min=0, max=1, choice=@Choice(types= {
@@ -985,10 +985,10 @@ public class Observation extends BaseResource {
 	}))	
 	private IDatatype myValue;
 	
-	@Child(name="interpretation", order=2, min=0, max=1)	
+	@Child(name="interpretation", type=CodeableConceptDt.class, order=2, min=0, max=1)	
 	private CodeableConceptDt myInterpretation;
 	
-	@Child(name="comments", order=3, min=0, max=1)	
+	@Child(name="comments", type=StringDt.class, order=3, min=0, max=1)	
 	private StringDt myComments;
 	
 	@Child(name="applies", order=4, min=0, max=1, choice=@Choice(types= {
@@ -997,22 +997,22 @@ public class Observation extends BaseResource {
 	}))	
 	private IDatatype myApplies;
 	
-	@Child(name="issued", order=5, min=0, max=1)	
+	@Child(name="issued", type=InstantDt.class, order=5, min=0, max=1)	
 	private InstantDt myIssued;
 	
-	@Child(name="status", order=6, min=1, max=1)	
+	@Child(name="status", type=CodeDt.class, order=6, min=1, max=1)	
 	private CodeDt myStatus;
 	
-	@Child(name="reliability", order=7, min=1, max=1)	
+	@Child(name="reliability", type=CodeDt.class, order=7, min=1, max=1)	
 	private CodeDt myReliability;
 	
-	@Child(name="bodySite", order=8, min=0, max=1)	
+	@Child(name="bodySite", type=CodeableConceptDt.class, order=8, min=0, max=1)	
 	private CodeableConceptDt myBodySite;
 	
-	@Child(name="method", order=9, min=0, max=1)	
+	@Child(name="method", type=CodeableConceptDt.class, order=9, min=0, max=1)	
 	private CodeableConceptDt myMethod;
 	
-	@Child(name="identifier", order=10, min=0, max=1)	
+	@Child(name="identifier", type=IdentifierDt.class, order=10, min=0, max=1)	
 	private IdentifierDt myIdentifier;
 	
 	@Child(name="subject", order=11, min=0, max=1)

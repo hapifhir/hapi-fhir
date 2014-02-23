@@ -1,30 +1,74 @@
 package ca.uhn.fhir.starter.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import ca.uhn.fhir.model.api.IDatatype;
+import ca.uhn.fhir.model.api.ResourceReference;
 
 public class Child extends BaseElement {
 
-	private String myReferenceType;
-	
+	public boolean isBlock() {
+		return false;
+	}
+
 	public String getCardMaxForChildAnnotation() {
 		if (getCardMax().equals("*")) {
 			return "Child.MAX_UNLIMITED";
-		}else {
+		} else {
 			return getCardMax();
 		}
 	}
 
-	public String getReferenceType() {
-		return myReferenceType;
+	public List<String> getReferenceTypesForMultiple() {
+		ArrayList<String> retVal = new ArrayList<String>();
+		for (String next : getType()) {
+			retVal.add(next + "Dt");
+		}
+		return retVal;
 	}
 
-	public void setReferenceType(String theReferenceType) {
-		myReferenceType = theReferenceType;
+	public String getAnnotationType() {
+		return getSingleType();
+	}
+
+	public String getReferenceType() {
+		String retVal;
+		if (this.isResourceRef()) {
+			retVal = (ResourceReference.class.getSimpleName());
+		} else if (this.getType().size() == 1) {
+			retVal = getSingleType();
+		} else {
+			if (this instanceof Extension && ((Extension) this).getChildExtensions().size() > 0) {
+				retVal = ((Extension) this).getNameType();
+			} else {
+				retVal = IDatatype.class.getSimpleName();
+			}
+		}
+
+		if (this.isRepeatable()) {
+			retVal = ("List<" + retVal + ">");
+		}
+
+		return retVal;
+	}
+
+	protected String getSingleType() {
+		String retVal;
+		String elemName = this.getType().get(0);
+		elemName = elemName.substring(0, 1).toUpperCase() + elemName.substring(1);
+		if (this instanceof ResourceBlock) {
+			retVal = (elemName);
+		} else {
+			retVal = (elemName + "Dt");
+		}
+		return retVal;
 	}
 
 	public boolean isRepeatable() {
 		return "1".equals(getCardMax()) == false;
 	}
-	
+
 	public String getVariableName() {
 		String elementName = getMethodName();
 		return "my" + elementName;
@@ -32,7 +76,7 @@ public class Child extends BaseElement {
 
 	public String getMethodName() {
 		String elementName = getElementNameSimplified();
-		elementName = elementName.substring(0,1).toUpperCase() + elementName.substring(1);
+		elementName = elementName.substring(0, 1).toUpperCase() + elementName.substring(1);
 		return elementName;
 	}
 
@@ -47,5 +91,4 @@ public class Child extends BaseElement {
 		return elementName;
 	}
 
-	
 }

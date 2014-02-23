@@ -34,10 +34,10 @@ import ca.uhn.fhir.model.datatype.*;
 @DatatypeDef(name="Narrative") 
 public class NarrativeDt extends BaseCompositeDatatype {
 
-	@Child(name="status", order=0, min=1, max=1)	
+	@Child(name="status", type=CodeDt.class, order=0, min=1, max=1)	
 	private CodeDt myStatus;
 	
-	@Child(name="div", order=1, min=1, max=1)	
+	@Child(name="div", type=XhtmlDt.class, order=1, min=1, max=1)	
 	private XhtmlDt myDiv;
 	
 	/**

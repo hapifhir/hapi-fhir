@@ -33,11 +33,10 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeChildUndeclaredExtensionDefinition;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.model.api.IExtension;
-import ca.uhn.fhir.model.api.ISupportsUndeclaredExtensions;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IPrimitiveDatatype;
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.ISupportsUndeclaredExtensions;
 import ca.uhn.fhir.model.api.ResourceReference;
 import ca.uhn.fhir.model.api.UndeclaredExtension;
 import ca.uhn.fhir.model.datatype.XhtmlDt;
@@ -80,9 +79,15 @@ public class XmlParser {
 		return stringWriter.toString();
 	}
 
-	private void encodeCompositeElementToStreamWriter(IElement theElement, XMLStreamWriter theEventWriter,BaseRuntimeElementCompositeDefinition<?> resDef) throws XMLStreamException, DataFormatException {
+	private void encodeCompositeElementToStreamWriter(IElement theElement, XMLStreamWriter theEventWriter, BaseRuntimeElementCompositeDefinition<?> resDef) throws XMLStreamException, DataFormatException {
 		encodeExtensionsIfPresent(theEventWriter, theElement);
-		for (BaseRuntimeChildDefinition nextChild : resDef.getChildren()) {
+		
+		encodeCompositeElementChildrenToStreamWriter(theElement, theEventWriter, resDef.getExtensions());
+		encodeCompositeElementChildrenToStreamWriter(theElement, theEventWriter, resDef.getChildren());
+	}
+
+	private void encodeCompositeElementChildrenToStreamWriter(IElement theElement, XMLStreamWriter theEventWriter, List<? extends BaseRuntimeChildDefinition> children) throws XMLStreamException, DataFormatException {
+		for (BaseRuntimeChildDefinition nextChild : children) {
 			List<? extends IElement> values = nextChild.getAccessor().getValues(theElement);
 			if (values == null || values.isEmpty()) {
 				continue;
@@ -94,14 +99,25 @@ public class XmlParser {
 				}
 				Class<? extends IElement> type = nextValue.getClass();
 				String childName = nextChild.getChildNameByDatatype(type);
+				String extensionUrl = nextChild.getExtensionUrl();
 				BaseRuntimeElementDefinition<?> childDef = nextChild.getChildElementDefinitionByDatatype(type);
+				if (childDef == null) {
+					throw new IllegalStateException(nextChild + " has no child of type " + type);
+				}
 
-				encodeChildElementToStreamWriter(theEventWriter, nextValue, childName, childDef);
+				if (extensionUrl != null && childName.equals("extension") == false) {
+					theEventWriter.writeStartElement("extension");
+					theEventWriter.writeAttribute("url", extensionUrl);
+					encodeChildElementToStreamWriter(theEventWriter, nextValue, childName, childDef, null);
+					theEventWriter.writeEndElement();
+				} else {
+					encodeChildElementToStreamWriter(theEventWriter, nextValue, childName, childDef, extensionUrl);
+				}
 			}
 		}
 	}
 
-	private void encodeChildElementToStreamWriter(XMLStreamWriter theEventWriter, IElement nextValue, String childName, BaseRuntimeElementDefinition<?> childDef) throws XMLStreamException, DataFormatException {
+	private void encodeChildElementToStreamWriter(XMLStreamWriter theEventWriter, IElement nextValue, String childName, BaseRuntimeElementDefinition<?> childDef, String theExtensionUrl) throws XMLStreamException, DataFormatException {
 		switch (childDef.getChildType()) {
 		case PRIMITIVE_DATATYPE: {
 			theEventWriter.writeStartElement(childName);
@@ -114,8 +130,11 @@ public class XmlParser {
 		case RESOURCE_BLOCK:
 		case COMPOSITE_DATATYPE: {
 			theEventWriter.writeStartElement(childName);
+			if (isNotBlank(theExtensionUrl)) {
+				theEventWriter.writeAttribute("url", theExtensionUrl);
+			}
 			BaseRuntimeElementCompositeDefinition<?> childCompositeDef = (BaseRuntimeElementCompositeDefinition<?>) childDef;
-			encodeCompositeElementToStreamWriter(nextValue, theEventWriter,  childCompositeDef);
+			encodeCompositeElementToStreamWriter(nextValue, theEventWriter, childCompositeDef);
 			encodeExtensionsIfPresent(theEventWriter, nextValue);
 			theEventWriter.writeEndElement();
 			break;
@@ -146,18 +165,18 @@ public class XmlParser {
 			for (UndeclaredExtension next : ((ISupportsUndeclaredExtensions) theResource).getUndeclaredExtensions()) {
 				theWriter.writeStartElement("extension");
 				theWriter.writeAttribute("url", next.getUrl());
-				
+
 				if (next.getValue() != null) {
 					IElement nextValue = next.getValue();
 					RuntimeChildUndeclaredExtensionDefinition extDef = myContext.getRuntimeChildUndeclaredExtensionDefinition();
 					String childName = extDef.getChildNameByDatatype(nextValue.getClass());
 					BaseRuntimeElementDefinition<?> childDef = extDef.getChildElementDefinitionByDatatype(nextValue.getClass());
-					encodeChildElementToStreamWriter(theWriter, nextValue, childName, childDef);
+					encodeChildElementToStreamWriter(theWriter, nextValue, childName, childDef, null);
 				}
-				
+
 				// child extensions
 				encodeExtensionsIfPresent(theWriter, next);
-				
+
 				theWriter.writeEndElement();
 			}
 		}
@@ -274,7 +293,7 @@ public class XmlParser {
 						parserState = ParserState.getResourceInstance(myContext, elem.getName().getLocalPart());
 					} else if ("extension".equals(elem.getName().getLocalPart())) {
 						Attribute urlAttr = elem.getAttributeByName(new QName("url"));
-						if (urlAttr==null||isBlank(urlAttr.getValue())) {
+						if (urlAttr == null || isBlank(urlAttr.getValue())) {
 							throw new DataFormatException("Extension element has no 'url' attribute");
 						}
 						parserState.enteringNewElementExtension(elem, urlAttr.getValue());

@@ -1,84 +1,108 @@
 package ca.uhn.fhir.starter.model;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import ca.uhn.fhir.model.api.IDatatype;
+import org.apache.commons.lang3.StringUtils;
 
-public class Extension {
+public class Extension extends Child {
 
 	private List<Extension> myChildExtensions;
-	private Class<? extends IDatatype> myDatatype;
-	private String myName;
+
 	private String myUrl;
 
 	public Extension() {
 		super();
 	}
 
-	public boolean isHasDatatype() {
-		return myDatatype != null;
+	public List<Extension> getChildExtensionsWithChildren() {
+		ArrayList<Extension> retVal = new ArrayList<Extension>();
+		for (Extension next : getChildExtensions()) {
+			if (next.getChildExtensions().size() > 0) {
+				retVal.add(next);
+			}
+		}
+		return retVal;
 	}
 	
-	public String getDatatypeSimpleName() {
-		return myDatatype.getSimpleName();
-	}
-	
-	public String getNameType() {
-		return getName().substring(0, 1).toUpperCase()+getName().substring(1);
-	}
-	
-	public Extension(String theName, String theUrl, Class<? extends IDatatype> theDatatype) {
-		setName(theName);
-		setUrl(theUrl);
-		setDatatype(theDatatype);
-	}
-
 	public Extension(String theName, String theUrl, Extension... theChildExtensions) {
 		setName(theName);
 		setUrl(theUrl);
+		setCardMin("0");
+		setCardMax("*");
 		if (theChildExtensions != null) {
 			setChildExtensions(Arrays.asList(theChildExtensions));
 		}
 	}
 
+	public Extension(String theName, String theUrl, String theDatatype) {
+		setName(theName);
+		setUrl(theUrl);
+		setTypeFromString(theDatatype);
+		setCardMin("0");
+		setCardMax("*");
+	}
+
 	public List<Extension> getChildExtensions() {
+		if (myChildExtensions == null) {
+			myChildExtensions = new ArrayList<Extension>();
+		}
 		return myChildExtensions;
 	}
 
-	public Class<? extends IDatatype> getDatatype() {
-		return myDatatype;
-	}
-
-	public String getName() {
-		return myName;
+	public String getNameType() {
+		return getName().substring(0, 1).toUpperCase() + getName().substring(1);
 	}
 
 	public String getUrl() {
 		return myUrl;
 	}
 
+	public boolean isHasChildExtensions() {
+		return getChildExtensions().size() > 0;
+	}
+
 	public void setChildExtensions(List<Extension> theChildExtensions) {
-		if (theChildExtensions != null && theChildExtensions.size() > 0 && myDatatype != null) {
+		if (theChildExtensions != null && theChildExtensions.size() > 0 && getType().size() > 0) {
 			throw new IllegalArgumentException("Extension may not have a datatype AND child extensions");
 		}
 		myChildExtensions = theChildExtensions;
 	}
 
-	public void setDatatype(Class<? extends IDatatype> theDatatype) {
-		if (myChildExtensions != null && myChildExtensions.size() > 0 && theDatatype != null) {
-			throw new IllegalArgumentException("Extension may not have a datatype AND child extensions");
+	@Override
+	public void setElementName(String theName) {
+		super.setElementName(theName);
+		if (getName() == null) {
+			super.setName(theName);
 		}
-		myDatatype = theDatatype;
 	}
 
+	@Override
 	public void setName(String theName) {
-		// TODO: validate that this is a valid name (no punctuation, spaces,
-		// etc.)
-		myName = theName;
+		super.setName(theName);
+		if (getElementName() == null) {
+			super.setElementName(theName);
+		}
+	}
+
+	@Override
+	public void setTypeFromString(String theType) {
+		if (myChildExtensions != null && myChildExtensions.size() > 0 && StringUtils.isNotBlank(theType)) {
+			throw new IllegalArgumentException("Extension may not have a datatype AND child extensions");
+		}
+		super.setTypeFromString(theType);
 	}
 
 	public void setUrl(String theUrl) {
 		myUrl = theUrl;
+	}
+
+	@Override
+	protected String getSingleType() {
+		if (isHasChildExtensions()) {
+			return getNameType();
+		}
+		return super.getSingleType();
 	}
 }

@@ -9,7 +9,7 @@ import ca.uhn.fhir.model.api.IDatatype;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IResourceBlock;
 
-public class RuntimeChildResourceBlockDefinition extends BaseRuntimeUndeclaredChildDefinition {
+public class RuntimeChildResourceBlockDefinition extends BaseRuntimeDeclaredChildDefinition {
 
 	private RuntimeResourceBlockDefinition myElementDef;
 	private Class<? extends IResourceBlock> myResourceBlockType;

@@ -12,6 +12,7 @@ import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeChildDeclaredExtensionDefinition;
 import ca.uhn.fhir.context.RuntimePrimitiveDatatypeDefinition;
 import ca.uhn.fhir.context.RuntimePrimitiveDatatypeNarrativeDefinition;
 import ca.uhn.fhir.context.RuntimeResourceBlockDefinition;
@@ -29,6 +30,96 @@ import ca.uhn.fhir.model.api.UndeclaredExtension;
 import ca.uhn.fhir.model.datatype.XhtmlDt;
 
 class ParserState {
+
+	public class DeclaredExtensionState extends BaseState {
+
+		private RuntimeChildDeclaredExtensionDefinition myDefinition;
+		private IElement myParentInstance;
+		private IElement myChildInstance;
+
+		public DeclaredExtensionState(RuntimeChildDeclaredExtensionDefinition theDefinition, IElement theParentInstance) {
+			myDefinition = theDefinition;
+			myParentInstance = theParentInstance;
+		}
+
+		@Override
+		public void attributeValue(Attribute theAttribute, String theValue) throws DataFormatException {
+			throw new DataFormatException("'value' attribute is invalid in 'extension' element");
+		}
+
+		@Override
+		public void endingElement(EndElement theElem) throws DataFormatException {
+			pop();
+		}
+
+		@Override
+		public void enteringNewElementExtension(StartElement theElement, String theUrlAttr) {
+			RuntimeChildDeclaredExtensionDefinition declaredExtension = myDefinition.getChildExtensionForUrl(theUrlAttr);
+			if (declaredExtension != null) {
+				if (myChildInstance == null) {
+					myChildInstance = myDefinition.newInstance();
+					myDefinition.getMutator().addValue(myParentInstance, myChildInstance);
+				}
+				BaseState newState = new DeclaredExtensionState(declaredExtension, myChildInstance);
+				push(newState);
+			}else {
+				super.enteringNewElementExtension(theElement, theUrlAttr);
+			}
+		}
+
+		@Override
+		public void enteringNewElement(StartElement theElement, String theLocalPart) throws DataFormatException {
+			BaseRuntimeElementDefinition<?> target = myDefinition.getChildByName(theLocalPart);
+			if (target == null) {
+				throw new DataFormatException("Unknown extension element name: " + theLocalPart);
+			}
+
+			switch (target.getChildType()) {
+			case COMPOSITE_DATATYPE: {
+				BaseRuntimeElementCompositeDefinition<?> compositeTarget = (BaseRuntimeElementCompositeDefinition<?>) target;
+				ICompositeDatatype newChildInstance = (ICompositeDatatype) compositeTarget.newInstance();
+				myDefinition.getMutator().addValue(myParentInstance, newChildInstance);
+				ContainerState newState = new ContainerState(compositeTarget, newChildInstance);
+				push(newState);
+				return;
+			}
+			case PRIMITIVE_DATATYPE: {
+				RuntimePrimitiveDatatypeDefinition primitiveTarget = (RuntimePrimitiveDatatypeDefinition) target;
+				IPrimitiveDatatype<?> newChildInstance = primitiveTarget.newInstance();
+				myDefinition.getMutator().addValue(myParentInstance, newChildInstance);
+				PrimitiveState newState = new PrimitiveState(newChildInstance);
+				push(newState);
+				return;
+			}
+			case RESOURCE_REF: {
+				RuntimeResourceReferenceDefinition resourceRefTarget = (RuntimeResourceReferenceDefinition) target;
+				ResourceReference newChildInstance = new ResourceReference();
+				myDefinition.getMutator().addValue(myParentInstance, newChildInstance);
+				ResourceReferenceState newState = new ResourceReferenceState(resourceRefTarget, newChildInstance);
+				push(newState);
+				return;
+			}
+			case PRIMITIVE_XHTML:
+			case RESOURCE:
+			case RESOURCE_BLOCK:
+			case UNDECL_EXT:
+			case EXTENSION_DECLARED:
+			default:
+				break;
+			}
+		}
+
+		@Override
+		public void otherEvent(XMLEvent theEvent) throws DataFormatException {
+			// ignore
+		}
+
+		@Override
+		protected IElement getCurrentElement() {
+			return myParentInstance;
+		}
+
+	}
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ParserState.class);
 
@@ -106,12 +197,14 @@ class ParserState {
 
 		public abstract void enteringNewElement(StartElement theElement, String theLocalPart) throws DataFormatException;
 
+		/**
+		 * Default implementation just handles undeclared extensions
+		 */
 		public void enteringNewElementExtension(@SuppressWarnings("unused") StartElement theElement, String theUrlAttr) {
-			// TODO: handle predefined extensions
-
 			if (getCurrentElement() instanceof ISupportsUndeclaredExtensions) {
 				UndeclaredExtension newExtension = new UndeclaredExtension();
 				newExtension.setUrl(theUrlAttr);
+				// TODO: fail if we don't support undeclared extensions
 				((ISupportsUndeclaredExtensions) getCurrentElement()).getUndeclaredExtensions().add(newExtension);
 				ExtensionState newState = new ExtensionState(newExtension);
 				push(newState);
@@ -148,6 +241,17 @@ class ParserState {
 			pop();
 			if (myState == null) {
 				myObject = myInstance;
+			}
+		}
+
+		@Override
+		public void enteringNewElementExtension(StartElement theElement, String theUrlAttr) {
+			RuntimeChildDeclaredExtensionDefinition declaredExtension = myDefinition.getDeclaredExtension(theUrlAttr);
+			if (declaredExtension != null) {
+				BaseState newState = new DeclaredExtensionState(declaredExtension, myInstance);
+				push(newState);
+			}else {
+				super.enteringNewElementExtension(theElement, theUrlAttr);
 			}
 		}
 

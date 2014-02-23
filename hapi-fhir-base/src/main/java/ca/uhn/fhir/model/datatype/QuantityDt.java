@@ -34,19 +34,19 @@ import ca.uhn.fhir.model.datatype.*;
 @DatatypeDef(name="Quantity") 
 public class QuantityDt extends BaseCompositeDatatype {
 
-	@Child(name="value", order=0, min=0, max=1)	
+	@Child(name="value", type=DecimalDt.class, order=0, min=0, max=1)	
 	private DecimalDt myValue;
 	
-	@Child(name="comparator", order=1, min=0, max=1)	
+	@Child(name="comparator", type=CodeDt.class, order=1, min=0, max=1)	
 	private CodeDt myComparator;
 	
-	@Child(name="units", order=2, min=0, max=1)	
+	@Child(name="units", type=StringDt.class, order=2, min=0, max=1)	
 	private StringDt myUnits;
 	
-	@Child(name="system", order=3, min=0, max=1)	
+	@Child(name="system", type=UriDt.class, order=3, min=0, max=1)	
 	private UriDt mySystem;
 	
-	@Child(name="code", order=4, min=0, max=1)	
+	@Child(name="code", type=CodeDt.class, order=4, min=0, max=1)	
 	private CodeDt myCode;
 	
 	/**

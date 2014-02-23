@@ -34,28 +34,28 @@ import ca.uhn.fhir.model.datatype.*;
 @DatatypeDef(name="Address") 
 public class AddressDt extends BaseCompositeDatatype {
 
-	@Child(name="use", order=0, min=0, max=1)	
+	@Child(name="use", type=CodeDt.class, order=0, min=0, max=1)	
 	private CodeDt myUse;
 	
-	@Child(name="text", order=1, min=0, max=1)	
+	@Child(name="text", type=StringDt.class, order=1, min=0, max=1)	
 	private StringDt myText;
 	
-	@Child(name="line", order=2, min=0, max=Child.MAX_UNLIMITED)	
+	@Child(name="line", type=StringDt.class, order=2, min=0, max=Child.MAX_UNLIMITED)	
 	private List<StringDt> myLine;
 	
-	@Child(name="city", order=3, min=0, max=1)	
+	@Child(name="city", type=StringDt.class, order=3, min=0, max=1)	
 	private StringDt myCity;
 	
-	@Child(name="state", order=4, min=0, max=1)	
+	@Child(name="state", type=StringDt.class, order=4, min=0, max=1)	
 	private StringDt myState;
 	
-	@Child(name="zip", order=5, min=0, max=1)	
+	@Child(name="zip", type=StringDt.class, order=5, min=0, max=1)	
 	private StringDt myZip;
 	
-	@Child(name="country", order=6, min=0, max=1)	
+	@Child(name="country", type=StringDt.class, order=6, min=0, max=1)	
 	private StringDt myCountry;
 	
-	@Child(name="period", order=7, min=0, max=1)	
+	@Child(name="period", type=PeriodDt.class, order=7, min=0, max=1)	
 	private PeriodDt myPeriod;
 	
 	/**

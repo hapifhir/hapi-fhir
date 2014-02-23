@@ -34,25 +34,25 @@ import ca.uhn.fhir.model.datatype.*;
 @DatatypeDef(name="HumanName") 
 public class HumanNameDt extends BaseCompositeDatatype {
 
-	@Child(name="use", order=0, min=0, max=1)	
+	@Child(name="use", type=CodeDt.class, order=0, min=0, max=1)	
 	private CodeDt myUse;
 	
-	@Child(name="text", order=1, min=0, max=1)	
+	@Child(name="text", type=StringDt.class, order=1, min=0, max=1)	
 	private StringDt myText;
 	
-	@Child(name="family", order=2, min=0, max=Child.MAX_UNLIMITED)	
+	@Child(name="family", type=StringDt.class, order=2, min=0, max=Child.MAX_UNLIMITED)	
 	private List<StringDt> myFamily;
 	
-	@Child(name="given", order=3, min=0, max=Child.MAX_UNLIMITED)	
+	@Child(name="given", type=StringDt.class, order=3, min=0, max=Child.MAX_UNLIMITED)	
 	private List<StringDt> myGiven;
 	
-	@Child(name="prefix", order=4, min=0, max=Child.MAX_UNLIMITED)	
+	@Child(name="prefix", type=StringDt.class, order=4, min=0, max=Child.MAX_UNLIMITED)	
 	private List<StringDt> myPrefix;
 	
-	@Child(name="suffix", order=5, min=0, max=Child.MAX_UNLIMITED)	
+	@Child(name="suffix", type=StringDt.class, order=5, min=0, max=Child.MAX_UNLIMITED)	
 	private List<StringDt> mySuffix;
 	
-	@Child(name="period", order=6, min=0, max=1)	
+	@Child(name="period", type=PeriodDt.class, order=6, min=0, max=1)	
 	private PeriodDt myPeriod;
 	
 	/**

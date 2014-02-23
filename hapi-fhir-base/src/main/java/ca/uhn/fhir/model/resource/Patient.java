@@ -18,7 +18,7 @@ import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.model.datatype.*;
 
 /**
- * HAPI/FHIR <b>Patient</b> Resource
+ * HAPI/FHIR <b>ResourceWithExtensionsA</b> Resource
  * (Information about a person or animal receiving health care services)
  *
  * <p>
@@ -31,26 +31,30 @@ import ca.uhn.fhir.model.datatype.*;
  * Tracking patient is the center of the healthcare process
  * </p> 
  */
-@ResourceDef(name="Patient")
+@ResourceDef(name="ResourceWithExtensionsA")
 public class Patient extends BaseResource {
 
-	@Child()
-	private Foo1 myFoo1;
-	@Child()
-	private Bar1 myBar1;
-	@Child(name="identifier", order=0, min=0, max=Child.MAX_UNLIMITED)	
+	@Child(name="foo1", type=StringDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)
+	@Extension(url="http://foo/1") 
+	private List<StringDt> myFoo1;
+
+	@Child(name="bar1", type=Bar1.class, order=1, min=0, max=Child.MAX_UNLIMITED)
+	@Extension(url="http://bar/1") 
+	private List<Bar1> myBar1;
+
+	@Child(name="identifier", type=IdentifierDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)	
 	private List<IdentifierDt> myIdentifier;
 	
-	@Child(name="name", order=1, min=0, max=Child.MAX_UNLIMITED)	
+	@Child(name="name", type=HumanNameDt.class, order=1, min=0, max=Child.MAX_UNLIMITED)	
 	private List<HumanNameDt> myName;
 	
-	@Child(name="telecom", order=2, min=0, max=Child.MAX_UNLIMITED)	
+	@Child(name="telecom", type=ContactDt.class, order=2, min=0, max=Child.MAX_UNLIMITED)	
 	private List<ContactDt> myTelecom;
 	
-	@Child(name="gender", order=3, min=0, max=1)	
+	@Child(name="gender", type=CodeableConceptDt.class, order=3, min=0, max=1)	
 	private CodeableConceptDt myGender;
 	
-	@Child(name="birthDate", order=4, min=0, max=1)	
+	@Child(name="birthDate", type=DateTimeDt.class, order=4, min=0, max=1)	
 	private DateTimeDt myBirthDate;
 	
 	@Child(name="deceased", order=5, min=0, max=1, choice=@Choice(types= {
@@ -59,10 +63,10 @@ public class Patient extends BaseResource {
 	}))	
 	private IDatatype myDeceased;
 	
-	@Child(name="address", order=6, min=0, max=Child.MAX_UNLIMITED)	
+	@Child(name="address", type=AddressDt.class, order=6, min=0, max=Child.MAX_UNLIMITED)	
 	private List<AddressDt> myAddress;
 	
-	@Child(name="maritalStatus", order=7, min=0, max=1)	
+	@Child(name="maritalStatus", type=CodeableConceptDt.class, order=7, min=0, max=1)	
 	private CodeableConceptDt myMaritalStatus;
 	
 	@Child(name="multipleBirth", order=8, min=0, max=1, choice=@Choice(types= {
@@ -71,7 +75,7 @@ public class Patient extends BaseResource {
 	}))	
 	private IDatatype myMultipleBirth;
 	
-	@Child(name="photo", order=9, min=0, max=Child.MAX_UNLIMITED)	
+	@Child(name="photo", type=AttachmentDt.class, order=9, min=0, max=Child.MAX_UNLIMITED)	
 	private List<AttachmentDt> myPhoto;
 	
 	@Child(name="contact", order=10, min=0, max=Child.MAX_UNLIMITED)	
@@ -80,7 +84,7 @@ public class Patient extends BaseResource {
 	@Child(name="animal", order=11, min=0, max=1)	
 	private Animal myAnimal;
 	
-	@Child(name="communication", order=12, min=0, max=Child.MAX_UNLIMITED)	
+	@Child(name="communication", type=CodeableConceptDt.class, order=12, min=0, max=Child.MAX_UNLIMITED)	
 	private List<CodeableConceptDt> myCommunication;
 	
 	@Child(name="careProvider", order=13, min=0, max=Child.MAX_UNLIMITED)
@@ -99,7 +103,7 @@ public class Patient extends BaseResource {
 	@Child(name="link", order=15, min=0, max=Child.MAX_UNLIMITED)	
 	private List<IDatatype> myLink;
 	
-	@Child(name="active", order=16, min=0, max=1)	
+	@Child(name="active", type=BooleanDt.class, order=16, min=0, max=1)	
 	private BooleanDt myActive;
 	
 	/**
@@ -415,11 +419,11 @@ public class Patient extends BaseResource {
 	}
 	
 	/**
-	 * Gets the value(s) for careProvider (Patient's nominated care provider)
+	 * Gets the value(s) for careProvider (ResourceWithExtensionsA's nominated care provider)
 	 *
      * <p>
      * <b>Definition:</b>
-     * Patient's nominated care provider
+     * ResourceWithExtensionsA's nominated care provider
      * </p> 
 	 */
 	public List<ResourceReference> getCareProvider() {
@@ -427,11 +431,11 @@ public class Patient extends BaseResource {
 	}
 
 	/**
-	 * Sets the value(s) for careProvider (Patient's nominated care provider)
+	 * Sets the value(s) for careProvider (ResourceWithExtensionsA's nominated care provider)
 	 *
      * <p>
      * <b>Definition:</b>
-     * Patient's nominated care provider
+     * ResourceWithExtensionsA's nominated care provider
      * </p> 
 	 */
 	public void setCareProvider(List<ResourceReference> theValue) {
@@ -512,28 +516,28 @@ public class Patient extends BaseResource {
 	
 
 	/**
-	 * Block class for child element: <b>Patient.contact</b> (A contact party (e.g. guardian, partner, friend) for the patient)
+	 * Block class for child element: <b>ResourceWithExtensionsA.contact</b> (A contact party (e.g. guardian, partner, friend) for the patient)
 	 *
      * <p>
      * <b>Definition:</b>
      * A contact party (e.g. guardian, partner, friend) for the patient
      * </p> 
 	 */
-	@Block(name="Patient.contact")	
+	@Block(name="ResourceWithExtensionsA.contact")	
 	public static class Contact implements IResourceBlock {
-	@Child(name="identifier", order=0, min=0, max=Child.MAX_UNLIMITED)	
+	@Child(name="identifier", type=IdentifierDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)	
 	private List<IdentifierDt> myIdentifier;
 	
-	@Child(name="name", order=1, min=0, max=Child.MAX_UNLIMITED)	
+	@Child(name="name", type=HumanNameDt.class, order=1, min=0, max=Child.MAX_UNLIMITED)	
 	private List<HumanNameDt> myName;
 	
-	@Child(name="telecom", order=2, min=0, max=Child.MAX_UNLIMITED)	
+	@Child(name="telecom", type=ContactDt.class, order=2, min=0, max=Child.MAX_UNLIMITED)	
 	private List<ContactDt> myTelecom;
 	
-	@Child(name="gender", order=3, min=0, max=1)	
+	@Child(name="gender", type=CodeableConceptDt.class, order=3, min=0, max=1)	
 	private CodeableConceptDt myGender;
 	
-	@Child(name="birthDate", order=4, min=0, max=1)	
+	@Child(name="birthDate", type=DateTimeDt.class, order=4, min=0, max=1)	
 	private DateTimeDt myBirthDate;
 	
 	@Child(name="deceased", order=5, min=0, max=1, choice=@Choice(types= {
@@ -542,10 +546,10 @@ public class Patient extends BaseResource {
 	}))	
 	private IDatatype myDeceased;
 	
-	@Child(name="address", order=6, min=0, max=Child.MAX_UNLIMITED)	
+	@Child(name="address", type=AddressDt.class, order=6, min=0, max=Child.MAX_UNLIMITED)	
 	private List<AddressDt> myAddress;
 	
-	@Child(name="maritalStatus", order=7, min=0, max=1)	
+	@Child(name="maritalStatus", type=CodeableConceptDt.class, order=7, min=0, max=1)	
 	private CodeableConceptDt myMaritalStatus;
 	
 	@Child(name="multipleBirth", order=8, min=0, max=1, choice=@Choice(types= {
@@ -554,7 +558,7 @@ public class Patient extends BaseResource {
 	}))	
 	private IDatatype myMultipleBirth;
 	
-	@Child(name="photo", order=9, min=0, max=Child.MAX_UNLIMITED)	
+	@Child(name="photo", type=AttachmentDt.class, order=9, min=0, max=Child.MAX_UNLIMITED)	
 	private List<AttachmentDt> myPhoto;
 	
 	@Child(name="contact", order=10, min=0, max=Child.MAX_UNLIMITED)	
@@ -563,7 +567,7 @@ public class Patient extends BaseResource {
 	@Child(name="animal", order=11, min=0, max=1)	
 	private Animal myAnimal;
 	
-	@Child(name="communication", order=12, min=0, max=Child.MAX_UNLIMITED)	
+	@Child(name="communication", type=CodeableConceptDt.class, order=12, min=0, max=Child.MAX_UNLIMITED)	
 	private List<CodeableConceptDt> myCommunication;
 	
 	@Child(name="careProvider", order=13, min=0, max=Child.MAX_UNLIMITED)
@@ -582,7 +586,7 @@ public class Patient extends BaseResource {
 	@Child(name="link", order=15, min=0, max=Child.MAX_UNLIMITED)	
 	private List<IDatatype> myLink;
 	
-	@Child(name="active", order=16, min=0, max=1)	
+	@Child(name="active", type=BooleanDt.class, order=16, min=0, max=1)	
 	private BooleanDt myActive;
 	
 	/**
@@ -898,11 +902,11 @@ public class Patient extends BaseResource {
 	}
 	
 	/**
-	 * Gets the value(s) for careProvider (Patient's nominated care provider)
+	 * Gets the value(s) for careProvider (ResourceWithExtensionsA's nominated care provider)
 	 *
      * <p>
      * <b>Definition:</b>
-     * Patient's nominated care provider
+     * ResourceWithExtensionsA's nominated care provider
      * </p> 
 	 */
 	public List<ResourceReference> getCareProvider() {
@@ -910,11 +914,11 @@ public class Patient extends BaseResource {
 	}
 
 	/**
-	 * Sets the value(s) for careProvider (Patient's nominated care provider)
+	 * Sets the value(s) for careProvider (ResourceWithExtensionsA's nominated care provider)
 	 *
      * <p>
      * <b>Definition:</b>
-     * Patient's nominated care provider
+     * ResourceWithExtensionsA's nominated care provider
      * </p> 
 	 */
 	public void setCareProvider(List<ResourceReference> theValue) {
@@ -996,28 +1000,28 @@ public class Patient extends BaseResource {
 	}
 
 	/**
-	 * Block class for child element: <b>Patient.animal</b> (If this patient is an animal (non-human))
+	 * Block class for child element: <b>ResourceWithExtensionsA.animal</b> (If this patient is an animal (non-human))
 	 *
      * <p>
      * <b>Definition:</b>
      * This element has a value if the patient is an animal
      * </p> 
 	 */
-	@Block(name="Patient.animal")	
+	@Block(name="ResourceWithExtensionsA.animal")	
 	public static class Animal implements IResourceBlock {
-	@Child(name="identifier", order=0, min=0, max=Child.MAX_UNLIMITED)	
+	@Child(name="identifier", type=IdentifierDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)	
 	private List<IdentifierDt> myIdentifier;
 	
-	@Child(name="name", order=1, min=0, max=Child.MAX_UNLIMITED)	
+	@Child(name="name", type=HumanNameDt.class, order=1, min=0, max=Child.MAX_UNLIMITED)	
 	private List<HumanNameDt> myName;
 	
-	@Child(name="telecom", order=2, min=0, max=Child.MAX_UNLIMITED)	
+	@Child(name="telecom", type=ContactDt.class, order=2, min=0, max=Child.MAX_UNLIMITED)	
 	private List<ContactDt> myTelecom;
 	
-	@Child(name="gender", order=3, min=0, max=1)	
+	@Child(name="gender", type=CodeableConceptDt.class, order=3, min=0, max=1)	
 	private CodeableConceptDt myGender;
 	
-	@Child(name="birthDate", order=4, min=0, max=1)	
+	@Child(name="birthDate", type=DateTimeDt.class, order=4, min=0, max=1)	
 	private DateTimeDt myBirthDate;
 	
 	@Child(name="deceased", order=5, min=0, max=1, choice=@Choice(types= {
@@ -1026,10 +1030,10 @@ public class Patient extends BaseResource {
 	}))	
 	private IDatatype myDeceased;
 	
-	@Child(name="address", order=6, min=0, max=Child.MAX_UNLIMITED)	
+	@Child(name="address", type=AddressDt.class, order=6, min=0, max=Child.MAX_UNLIMITED)	
 	private List<AddressDt> myAddress;
 	
-	@Child(name="maritalStatus", order=7, min=0, max=1)	
+	@Child(name="maritalStatus", type=CodeableConceptDt.class, order=7, min=0, max=1)	
 	private CodeableConceptDt myMaritalStatus;
 	
 	@Child(name="multipleBirth", order=8, min=0, max=1, choice=@Choice(types= {
@@ -1038,7 +1042,7 @@ public class Patient extends BaseResource {
 	}))	
 	private IDatatype myMultipleBirth;
 	
-	@Child(name="photo", order=9, min=0, max=Child.MAX_UNLIMITED)	
+	@Child(name="photo", type=AttachmentDt.class, order=9, min=0, max=Child.MAX_UNLIMITED)	
 	private List<AttachmentDt> myPhoto;
 	
 	@Child(name="contact", order=10, min=0, max=Child.MAX_UNLIMITED)	
@@ -1047,7 +1051,7 @@ public class Patient extends BaseResource {
 	@Child(name="animal", order=11, min=0, max=1)	
 	private Animal myAnimal;
 	
-	@Child(name="communication", order=12, min=0, max=Child.MAX_UNLIMITED)	
+	@Child(name="communication", type=CodeableConceptDt.class, order=12, min=0, max=Child.MAX_UNLIMITED)	
 	private List<CodeableConceptDt> myCommunication;
 	
 	@Child(name="careProvider", order=13, min=0, max=Child.MAX_UNLIMITED)
@@ -1066,7 +1070,7 @@ public class Patient extends BaseResource {
 	@Child(name="link", order=15, min=0, max=Child.MAX_UNLIMITED)	
 	private List<IDatatype> myLink;
 	
-	@Child(name="active", order=16, min=0, max=1)	
+	@Child(name="active", type=BooleanDt.class, order=16, min=0, max=1)	
 	private BooleanDt myActive;
 	
 	/**
@@ -1382,11 +1386,11 @@ public class Patient extends BaseResource {
 	}
 	
 	/**
-	 * Gets the value(s) for careProvider (Patient's nominated care provider)
+	 * Gets the value(s) for careProvider (ResourceWithExtensionsA's nominated care provider)
 	 *
      * <p>
      * <b>Definition:</b>
-     * Patient's nominated care provider
+     * ResourceWithExtensionsA's nominated care provider
      * </p> 
 	 */
 	public List<ResourceReference> getCareProvider() {
@@ -1394,11 +1398,11 @@ public class Patient extends BaseResource {
 	}
 
 	/**
-	 * Sets the value(s) for careProvider (Patient's nominated care provider)
+	 * Sets the value(s) for careProvider (ResourceWithExtensionsA's nominated care provider)
 	 *
      * <p>
      * <b>Definition:</b>
-     * Patient's nominated care provider
+     * ResourceWithExtensionsA's nominated care provider
      * </p> 
 	 */
 	public void setCareProvider(List<ResourceReference> theValue) {
@@ -1480,28 +1484,28 @@ public class Patient extends BaseResource {
 	}
 
 	/**
-	 * Block class for child element: <b>Patient.link</b> (Link to another patient resource that concerns the same actual person)
+	 * Block class for child element: <b>ResourceWithExtensionsA.link</b> (Link to another patient resource that concerns the same actual person)
 	 *
      * <p>
      * <b>Definition:</b>
      * Link to another patient resource that concerns the same actual person
      * </p> 
 	 */
-	@Block(name="Patient.link")	
+	@Block(name="ResourceWithExtensionsA.link")	
 	public static class Link implements IResourceBlock {
-	@Child(name="identifier", order=0, min=0, max=Child.MAX_UNLIMITED)	
+	@Child(name="identifier", type=IdentifierDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)	
 	private List<IdentifierDt> myIdentifier;
 	
-	@Child(name="name", order=1, min=0, max=Child.MAX_UNLIMITED)	
+	@Child(name="name", type=HumanNameDt.class, order=1, min=0, max=Child.MAX_UNLIMITED)	
 	private List<HumanNameDt> myName;
 	
-	@Child(name="telecom", order=2, min=0, max=Child.MAX_UNLIMITED)	
+	@Child(name="telecom", type=ContactDt.class, order=2, min=0, max=Child.MAX_UNLIMITED)	
 	private List<ContactDt> myTelecom;
 	
-	@Child(name="gender", order=3, min=0, max=1)	
+	@Child(name="gender", type=CodeableConceptDt.class, order=3, min=0, max=1)	
 	private CodeableConceptDt myGender;
 	
-	@Child(name="birthDate", order=4, min=0, max=1)	
+	@Child(name="birthDate", type=DateTimeDt.class, order=4, min=0, max=1)	
 	private DateTimeDt myBirthDate;
 	
 	@Child(name="deceased", order=5, min=0, max=1, choice=@Choice(types= {
@@ -1510,10 +1514,10 @@ public class Patient extends BaseResource {
 	}))	
 	private IDatatype myDeceased;
 	
-	@Child(name="address", order=6, min=0, max=Child.MAX_UNLIMITED)	
+	@Child(name="address", type=AddressDt.class, order=6, min=0, max=Child.MAX_UNLIMITED)	
 	private List<AddressDt> myAddress;
 	
-	@Child(name="maritalStatus", order=7, min=0, max=1)	
+	@Child(name="maritalStatus", type=CodeableConceptDt.class, order=7, min=0, max=1)	
 	private CodeableConceptDt myMaritalStatus;
 	
 	@Child(name="multipleBirth", order=8, min=0, max=1, choice=@Choice(types= {
@@ -1522,7 +1526,7 @@ public class Patient extends BaseResource {
 	}))	
 	private IDatatype myMultipleBirth;
 	
-	@Child(name="photo", order=9, min=0, max=Child.MAX_UNLIMITED)	
+	@Child(name="photo", type=AttachmentDt.class, order=9, min=0, max=Child.MAX_UNLIMITED)	
 	private List<AttachmentDt> myPhoto;
 	
 	@Child(name="contact", order=10, min=0, max=Child.MAX_UNLIMITED)	
@@ -1531,7 +1535,7 @@ public class Patient extends BaseResource {
 	@Child(name="animal", order=11, min=0, max=1)	
 	private Animal myAnimal;
 	
-	@Child(name="communication", order=12, min=0, max=Child.MAX_UNLIMITED)	
+	@Child(name="communication", type=CodeableConceptDt.class, order=12, min=0, max=Child.MAX_UNLIMITED)	
 	private List<CodeableConceptDt> myCommunication;
 	
 	@Child(name="careProvider", order=13, min=0, max=Child.MAX_UNLIMITED)
@@ -1550,7 +1554,7 @@ public class Patient extends BaseResource {
 	@Child(name="link", order=15, min=0, max=Child.MAX_UNLIMITED)	
 	private List<IDatatype> myLink;
 	
-	@Child(name="active", order=16, min=0, max=1)	
+	@Child(name="active", type=BooleanDt.class, order=16, min=0, max=1)	
 	private BooleanDt myActive;
 	
 	/**
@@ -1866,11 +1870,11 @@ public class Patient extends BaseResource {
 	}
 	
 	/**
-	 * Gets the value(s) for careProvider (Patient's nominated care provider)
+	 * Gets the value(s) for careProvider (ResourceWithExtensionsA's nominated care provider)
 	 *
      * <p>
      * <b>Definition:</b>
-     * Patient's nominated care provider
+     * ResourceWithExtensionsA's nominated care provider
      * </p> 
 	 */
 	public List<ResourceReference> getCareProvider() {
@@ -1878,11 +1882,11 @@ public class Patient extends BaseResource {
 	}
 
 	/**
-	 * Sets the value(s) for careProvider (Patient's nominated care provider)
+	 * Sets the value(s) for careProvider (ResourceWithExtensionsA's nominated care provider)
 	 *
      * <p>
      * <b>Definition:</b>
-     * Patient's nominated care provider
+     * ResourceWithExtensionsA's nominated care provider
      * </p> 
 	 */
 	public void setCareProvider(List<ResourceReference> theValue) {
@@ -1964,32 +1968,17 @@ public class Patient extends BaseResource {
 	}
 
 
-	@ExtensionBlock(url="http://foo/1")
-	public class Foo1 implements IExtension {
+	@Block(name="Bar1")
+	public static class Bar1 implements IExtension {
 		
-		@Child(name="value", order=0)
-		private StringDt myValue;
+		@Child(name="bar11", type=DateDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)
+		@Extension(url="http://bar/1/1") 
+		private List<DateDt> myBar11;
 
-		/**
-		 * Gets the value 
-		 */
-		public StringDt getValue() {
-			return myValue;
-		}
-	
-		/**
-		 * Sets the value
-		 */
-		public void setValue(StringDt theValue) {
-			myValue = theValue;
-		}
+		@Child(name="bar12", type=DateDt.class, order=1, min=0, max=Child.MAX_UNLIMITED)
+		@Extension(url="http://bar/1/2") 
+		private List<DateDt> myBar12;
 
-
-	}
-	
-	@ExtensionBlock(url="http://bar/1")
-	public class Bar1 implements IExtension {
-		
 
 
 	}

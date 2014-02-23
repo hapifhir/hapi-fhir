@@ -5,5 +5,9 @@ public class ResourceBlock extends Child {
 	public String getClassName() {
 		return getElementName().substring(0,1).toUpperCase() + getElementName().substring(1);
 	}
-	
+
+	public boolean isBlock() {
+		return true;
+	}
+
 }

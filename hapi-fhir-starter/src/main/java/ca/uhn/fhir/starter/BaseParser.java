@@ -21,8 +21,6 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import ca.uhn.fhir.model.api.IDatatype;
-import ca.uhn.fhir.model.api.ResourceReference;
 import ca.uhn.fhir.starter.model.BaseElement;
 import ca.uhn.fhir.starter.model.Child;
 import ca.uhn.fhir.starter.model.Extension;
@@ -91,41 +89,9 @@ public abstract class BaseParser {
 
 			parseBasicElements(nextRow, elem);
 
-			if (elem.isResourceRef()) {
-				elem.setReferenceType(ResourceReference.class.getSimpleName());
-			} else if (elem.getType().size() == 1) {
-				String elemName = elem.getType().get(0);
-				elemName = elemName.substring(0, 1).toUpperCase() + elemName.substring(1);
-				if (elem instanceof ResourceBlock) {
-					elem.setReferenceType(elemName);
-				} else {
-					elem.setReferenceType(elemName + "Dt");
-				}
-
-				// if
-				// (elem.getReferenceType().equals(CodeDt.class.getSimpleName())
-				// ||
-				// elem.getReferenceType().equals(CodeableConceptDt.class.getSimpleName()))
-				// {
-				// elem.setReferenceType(elemName + "Dt<" + elem.getBinding() +
-				// "Enum>");
-				// }
-
-			} else {
-				elem.setReferenceType(IDatatype.class.getSimpleName());
-			}
-
-			if (elem.isRepeatable()) {
-				elem.setReferenceType("List<" + elem.getReferenceType() + ">");
-			}
-
 			for (int childIdx = 0; childIdx < elem.getType().size(); childIdx++) {
 				String nextType = elem.getType().get(childIdx);
-				if (elem.isResourceRef()) {
-					nextType = nextType.substring(0, 1).toUpperCase() + nextType.substring(1);
-				} else {
-					nextType = nextType.substring(0, 1).toUpperCase() + nextType.substring(1) + "Dt";
-				}
+				nextType = nextType.substring(0, 1).toUpperCase() + nextType.substring(1);
 				elem.getType().set(childIdx, nextType);
 			}
 

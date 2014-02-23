@@ -142,10 +142,11 @@ public abstract class BaseElement {
 
 	public void setTypeFromString(String theType) {
 		if (theType == null) {
+			myType=null;
 			return;
 		}
 		String typeString = theType;
-		if (typeString.startsWith("Resource(")) {
+		if (typeString.toLowerCase().startsWith("resource(")) {
 			typeString = typeString.substring("Resource(".length(), typeString.length() - 1);
 			myResourceRef = true;
 		}

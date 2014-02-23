@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 import ca.uhn.fhir.model.api.CodeableConceptElement;
 import ca.uhn.fhir.model.api.ICodeEnum;
@@ -32,6 +33,7 @@ import ca.uhn.fhir.model.api.annotation.ChildResource;
 import ca.uhn.fhir.model.api.annotation.Choice;
 import ca.uhn.fhir.model.api.annotation.CodeTableDef;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+import ca.uhn.fhir.model.api.annotation.Extension;
 import ca.uhn.fhir.model.api.annotation.Narrative;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.datatype.CodeDt;
@@ -44,7 +46,6 @@ class ModelScanner {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ModelScanner.class);
 
 	private Map<Class<? extends IElement>, BaseRuntimeElementDefinition<?>> myClassToElementDefinitions = new HashMap<Class<? extends IElement>, BaseRuntimeElementDefinition<?>>();
-	private Map<String, BaseRuntimeElementDefinition<?>> myDatatypeAttributeNameToDefinition = new HashMap<String, BaseRuntimeElementDefinition<?>>();
 	private Map<String, RuntimeResourceDefinition> myNameToResourceDefinitions = new HashMap<String, RuntimeResourceDefinition>();
 	private Set<Class<? extends IElement>> myScanAlso = new HashSet<Class<? extends IElement>>();
 
@@ -81,7 +82,8 @@ class ModelScanner {
 			next.sealAndInitialize(myClassToElementDefinitions);
 		}
 
-		myRuntimeChildUndeclaredExtensionDefinition = new RuntimeChildUndeclaredExtensionDefinition(myDatatypeAttributeNameToDefinition);
+		myRuntimeChildUndeclaredExtensionDefinition = new RuntimeChildUndeclaredExtensionDefinition();
+		myRuntimeChildUndeclaredExtensionDefinition.sealAndInitialize(myClassToElementDefinitions);
 		
 		ourLog.info("Done scanning FHIR library, found {} model entries", myClassToElementDefinitions.size());
 
@@ -99,21 +101,11 @@ class ModelScanner {
 		return (myNameToResourceDefinitions);
 	}
 
-	private void addDatatype(BaseRuntimeElementDefinition<?> theResourceDef) {
-		String attrName = theResourceDef.getName();
-		attrName = "value" + attrName.substring(0, 1).toUpperCase() + attrName.substring(1);
-		myDatatypeAttributeNameToDefinition.put(attrName, theResourceDef);
-	}
-
 	private void addScanAlso(Class<? extends IElement> theType) {
 		if (theType.isInterface()) {
 			return;
 		}
 		myScanAlso.add(theType);
-	}
-
-	public Map<String, BaseRuntimeElementDefinition<?>> getDatatypeAttributeNameToDefinition() {
-		return myDatatypeAttributeNameToDefinition;
 	}
 
 	private void scan(Class<? extends IElement> theClass) throws ConfigurationException {
@@ -174,6 +166,7 @@ class ModelScanner {
 		}
 	}
 
+
 	private void scanBlock(Class<? extends IResourceBlock> theClass, Block theBlockDefinition) {
 		ourLog.debug("Scanning resource block class: {}", theClass.getName());
 
@@ -202,15 +195,14 @@ class ModelScanner {
 
 		RuntimeCompositeDatatypeDefinition resourceDef = new RuntimeCompositeDatatypeDefinition(resourceName, theClass);
 		myClassToElementDefinitions.put(theClass, resourceDef);
-		addDatatype(resourceDef);
-
 		scanCompositeElementForChildren(theClass, resourceDef, null);
 	}
 
 	@SuppressWarnings("unchecked")
 	private void scanCompositeElementForChildren(Class<? extends ICompositeElement> theClass, BaseRuntimeElementCompositeDefinition<?> theDefinition, Integer theIdentifierOrder) {
 		Set<String> elementNames = new HashSet<String>();
-		TreeMap<Integer, BaseRuntimeUndeclaredChildDefinition> orderToElementDef = new TreeMap<Integer, BaseRuntimeUndeclaredChildDefinition>();
+		TreeMap<Integer, BaseRuntimeDeclaredChildDefinition> orderToElementDef = new TreeMap<Integer, BaseRuntimeDeclaredChildDefinition>();
+		TreeMap<Integer, BaseRuntimeDeclaredChildDefinition> orderToExtensionDef = new TreeMap<Integer, BaseRuntimeDeclaredChildDefinition>();
 
 		LinkedList<Class<? extends ICompositeElement>> classes = new LinkedList<Class<? extends ICompositeElement>>();
 		Class<? extends ICompositeElement> current = theClass;
@@ -224,11 +216,11 @@ class ModelScanner {
 		} while (current != null);
 
 		for (Class<? extends ICompositeElement> next : classes) {
-			scanCompositeElementForChildren(next, theDefinition, elementNames, orderToElementDef);
+			scanCompositeElementForChildren(next, theDefinition, elementNames, orderToElementDef, orderToExtensionDef);
 		}
 
 		while (orderToElementDef.size() > 0 && orderToElementDef.firstKey() < 0) {
-			BaseRuntimeUndeclaredChildDefinition elementDef = orderToElementDef.remove(orderToElementDef.firstKey());
+			BaseRuntimeDeclaredChildDefinition elementDef = orderToElementDef.remove(orderToElementDef.firstKey());
 			if (elementDef.getElementName().equals("identifier")) {
 				orderToElementDef.put(theIdentifierOrder, elementDef);
 			} else {
@@ -236,18 +228,25 @@ class ModelScanner {
 			}
 		}
 
-		for (int i = 0; i < orderToElementDef.size(); i++) {
-			if (!orderToElementDef.containsKey(i)) {
-				throw new ConfigurationException("Type '" + theClass.getCanonicalName() + "' does not have a child with order " + i + " (in other words, there are gaps between specified child orders)");
+		TreeSet<Integer> orders = new TreeSet<Integer>();
+		orders.addAll(orderToElementDef.keySet());
+		orders.addAll(orderToExtensionDef.keySet());
+		
+		for (Integer i : orders) {
+			BaseRuntimeChildDefinition nextChild = orderToElementDef.get(i);
+			if (nextChild != null) {
+				theDefinition.addChild(nextChild);
 			}
-			BaseRuntimeChildDefinition next = orderToElementDef.get(i);
-			theDefinition.addChild(next);
+			BaseRuntimeDeclaredChildDefinition nextExt = orderToExtensionDef.get(i);
+			if (nextExt != null) {
+				theDefinition.addExtension((RuntimeChildDeclaredExtensionDefinition)nextExt);
+			}
 		}
 
 	}
 
 	@SuppressWarnings("unchecked")
-	private void scanCompositeElementForChildren(Class<? extends ICompositeElement> theClass, BaseRuntimeElementCompositeDefinition<?> theDefinition, Set<String> elementNames, TreeMap<Integer, BaseRuntimeUndeclaredChildDefinition> orderToElementDef) {
+	private void scanCompositeElementForChildren(Class<? extends ICompositeElement> theClass, BaseRuntimeElementCompositeDefinition<?> theDefinition, Set<String> elementNames, TreeMap<Integer, BaseRuntimeDeclaredChildDefinition> theOrderToElementDef, TreeMap<Integer,BaseRuntimeDeclaredChildDefinition> theOrderToExtensionDef) {
 		for (Field next : theClass.getDeclaredFields()) {
 
 			Narrative hasNarrative = next.getAnnotation(Narrative.class);
@@ -272,13 +271,19 @@ class ModelScanner {
 			int order = element.order();
 			int min = element.min();
 			int max = element.max();
-
+			TreeMap<Integer, BaseRuntimeDeclaredChildDefinition> orderMap = theOrderToElementDef;
+			
+			Extension extensionAttr = next.getAnnotation(Extension.class);
+			if (extensionAttr != null) {
+				orderMap = theOrderToExtensionDef;
+			}
+			
 			/*
 			 * Anything that's marked as unknown is given a new ID that is <0 so
 			 * that it doesn't conflict wityh any given IDs and can be figured
 			 * out later
 			 */
-			while (order == Child.ORDER_UNKNOWN && orderToElementDef.containsKey(order)) {
+			while (order == Child.ORDER_UNKNOWN && orderMap.containsKey(order)) {
 				order--;
 			}
 
@@ -288,20 +293,15 @@ class ModelScanner {
 				choiceTypes.add(nextChoiceType);
 			}
 
-			if (orderToElementDef.containsKey(order)) {
-				throw new ConfigurationException("Detected duplicate field order '" + order + "' in type '" + theClass.getCanonicalName() + "'");
+			if (orderMap.containsKey(order)) {
+				throw new ConfigurationException("Detected duplicate field order '" + order + "' for element named '" + elementName + "' in type '" + theClass.getCanonicalName() + "'");
 			}
 
 			if (elementNames.contains(elementName)) {
 				throw new ConfigurationException("Detected duplicate field name '" + elementName + "' in type '" + theClass.getCanonicalName() + "'");
 			}
 
-			Class<?> nextElementType = next.getType();
-			if (List.class.equals(nextElementType)) {
-				nextElementType = getGenericCollectionTypeOfField(next);
-			} else if (Collection.class.isAssignableFrom(nextElementType)) {
-				throw new ConfigurationException("Field '" + elementName + "' in type '" + theClass.getCanonicalName() + "' is a Collection - Only java.util.List curently supported");
-			}
+			Class<?> nextElementType = determineElementType(next);
 
 			ChildResource resRefAnnotation = next.getAnnotation(ChildResource.class);
 			if (choiceTypes.isEmpty() == false) {
@@ -312,8 +312,18 @@ class ModelScanner {
 					addScanAlso(nextType);
 				}
 				RuntimeChildChoiceDefinition def = new RuntimeChildChoiceDefinition(next, elementName, min, max, choiceTypes);
-				orderToElementDef.put(order, def);
+				orderMap.put(order, def);
 
+			} else if (extensionAttr != null) {
+				/*
+				 * Child is an extension
+				 */
+				Class<? extends IElement> et = (Class<? extends IElement>) nextElementType;
+				RuntimeChildDeclaredExtensionDefinition def = new RuntimeChildDeclaredExtensionDefinition(next, min, max, elementName, extensionAttr.url(), et);
+				orderMap.put(order, def);
+				if (IElement.class.isAssignableFrom(nextElementType )) {
+					addScanAlso((Class<? extends IElement>) nextElementType);
+				}
 			} else if (ResourceReference.class.isAssignableFrom(nextElementType)) {
 				/*
 				 * Child is a resource reference
@@ -328,7 +338,7 @@ class ModelScanner {
 					addScanAlso(nextType);
 				}
 				RuntimeChildResourceDefinition def = new RuntimeChildResourceDefinition(next, elementName, min, max, refTypesList);
-				orderToElementDef.put(order, def);
+				orderMap.put(order, def);
 
 			} else if (IResourceBlock.class.isAssignableFrom(nextElementType)) {
 				/*
@@ -339,7 +349,7 @@ class ModelScanner {
 				Class<? extends IResourceBlock> blockDef = (Class<? extends IResourceBlock>) nextElementType;
 				addScanAlso(blockDef);
 				RuntimeChildResourceBlockDefinition def = new RuntimeChildResourceBlockDefinition(next, min, max, elementName, blockDef);
-				orderToElementDef.put(order, def);
+				orderMap.put(order, def);
 
 			} else if (IDatatype.class.isAssignableFrom(nextElementType)) {
 				Class<? extends IDatatype> nextDatatype = (Class<? extends IDatatype>) nextElementType;
@@ -363,7 +373,7 @@ class ModelScanner {
 					}
 				}
 
-				orderToElementDef.put(order, def);
+				orderMap.put(order, def);
 
 				// TODO: handle codes
 			} else {
@@ -372,6 +382,16 @@ class ModelScanner {
 
 			elementNames.add(elementName);
 		}
+	}
+
+	private Class<?> determineElementType(Field next) {
+		Class<?> nextElementType = next.getType();
+		if (List.class.equals(nextElementType)) {
+			nextElementType = getGenericCollectionTypeOfField(next);
+		} else if (Collection.class.isAssignableFrom(nextElementType)) {
+			throw new ConfigurationException("Field '" + next.getName() + "' in type '" + next.getClass().getCanonicalName() + "' is a Collection - Only java.util.List curently supported");
+		}
+		return nextElementType;
 	}
 
 	private String scanPrimitiveDatatype(Class<? extends IPrimitiveDatatype<?>> theClass, DatatypeDef theDatatypeDefinition) {
@@ -391,7 +411,6 @@ class ModelScanner {
 			resourceDef = new RuntimePrimitiveDatatypeDefinition(resourceName, theClass);
 		}
 		myClassToElementDefinitions.put(theClass, resourceDef);
-		addDatatype(resourceDef);
 
 		return resourceName;
 	}

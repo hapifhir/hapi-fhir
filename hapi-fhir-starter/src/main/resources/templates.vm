@@ -13,12 +13,14 @@
 	})	
 #elseif ($!child.hasMultipleTypes)
 	@Child(name="${child.elementNameSimplified}", order=${foreach.index}, min=${child.cardMin}, max=${child.cardMaxForChildAnnotation}, choice=@Choice(types= {
-#foreach ($nextType in ${child.type})
+#foreach ($nextType in ${child.referenceTypesForMultiple})
 		${nextType}.class,
 #end
 	}))	
-#else
+#elseif ($!child.block)
 	@Child(name="${child.elementNameSimplified}", order=${foreach.index}, min=${child.cardMin}, max=${child.cardMaxForChildAnnotation})	
+#else
+	@Child(name="${child.elementNameSimplified}", type=${child.annotationType}.class, order=${foreach.index}, min=${child.cardMin}, max=${child.cardMaxForChildAnnotation})	
 #end
 	private ${child.referenceType} ${child.variableName};
 	
@@ -65,8 +67,9 @@
 
 #macro ( childExtensionFields $childExtensionTypes )
 #foreach ( $extensionType in $childExtensionTypes )
-	@Child()
-	private ${extensionType.nameType} my${extensionType.nameType};
+	@Child(name="$extensionType.name", type=${extensionType.annotationType}.class, order=${foreach.index}, min=${extensionType.cardMin}, max=${extensionType.cardMaxForChildAnnotation})
+	@Extension(url="${extensionType.url}") 
+	private ${extensionType.referenceType} ${extensionType.variableName};
 
 #end
 #end
@@ -78,32 +81,24 @@
 
 #macro ( childExtensionTypes $childExtensionTypes )
 #foreach ( $extensionType in $childExtensionTypes )
-	@ExtensionBlock(url="${extensionType.url}")
-	public class ${extensionType.nameType} implements IExtension {
+#if ( $extensionType.hasChildExtensions )
+	@Block(name="${extensionType.name}")
+	public static class ${extensionType.nameType} implements IExtension {
 		
-#if(${extensionType.hasDatatype})
-		@Child(name="value", order=0)
-		private ${extensionType.datatypeSimpleName} myValue;
+#foreach ( $childExtensionSubtype in $extensionType.childExtensions )		
+		@Child(name="$childExtensionSubtype.name", type=${childExtensionSubtype.annotationType}.class, order=${foreach.index}, min=${childExtensionSubtype.cardMin}, max=${childExtensionSubtype.cardMaxForChildAnnotation})
+		@Extension(url="${childExtensionSubtype.url}") 
+		private ${childExtensionSubtype.referenceType} ${childExtensionSubtype.variableName};
 
-		/**
-		 * Gets the value 
-		 */
-		public ${extensionType.datatypeSimpleName} getValue() {
-			return myValue;
-		}
-	
-		/**
-		 * Sets the value
-		 */
-		public void setValue(${extensionType.datatypeSimpleName} theValue) {
-			myValue = theValue;
-		}
-#else
 #end
 
 
 	}
 	
+#foreach ( $extensionSubType in $extensionTypes.childExtensionsWithChildren )
+#childExtensionTypes( $extensionSubType )
+#end
+#end
 #end
 #end
 

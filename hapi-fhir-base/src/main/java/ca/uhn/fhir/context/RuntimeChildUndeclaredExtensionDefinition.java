@@ -19,25 +19,8 @@ public class RuntimeChildUndeclaredExtensionDefinition extends BaseRuntimeChildD
 	private Map<Class<? extends IElement>,String> myDatatypeToAttributeName;
 	private Map<Class<? extends IElement>,BaseRuntimeElementDefinition<?>> myDatatypeToDefinition;
 
-	public RuntimeChildUndeclaredExtensionDefinition(Map<String, BaseRuntimeElementDefinition<?>> theDatatypeAttributeNameToDefinition) {
-		myAttributeNameToDefinition=theDatatypeAttributeNameToDefinition;
-		
-		myDatatypeToAttributeName = new HashMap<Class<? extends IElement>, String>();
-		myDatatypeToDefinition = new HashMap<Class<? extends IElement>, BaseRuntimeElementDefinition<?>>();
-
-		for (Entry<String, BaseRuntimeElementDefinition<?>> next : myAttributeNameToDefinition.entrySet()) {
-			@SuppressWarnings("unchecked")
-			Class<? extends IDatatype> type = (Class<? extends IDatatype>) next.getValue().getImplementingClass();
-			myDatatypeToAttributeName.put(type, next.getKey());
-			myDatatypeToDefinition.put(type, next.getValue());
-		}
-		
-		// Resource Reference
-		myDatatypeToAttributeName.put(ResourceReference.class, "valueReference");
-		RuntimeResourceReferenceDefinition def = new RuntimeResourceReferenceDefinition("valueResource");
-		myAttributeNameToDefinition.put("valueResource", def);
-		myDatatypeToDefinition.put(ResourceReference.class, def);
-		
+	public RuntimeChildUndeclaredExtensionDefinition() {
+		// nothing
 	}
 
 	
@@ -63,7 +46,32 @@ public class RuntimeChildUndeclaredExtensionDefinition extends BaseRuntimeChildD
 
 	@Override
 	void sealAndInitialize(Map<Class<? extends IElement>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
-		// nothing
+		Map<String, BaseRuntimeElementDefinition<?>> datatypeAttributeNameToDefinition=new HashMap<String, BaseRuntimeElementDefinition<?>>();
+		
+		for (BaseRuntimeElementDefinition<?> next : theClassToElementDefinitions.values()) {
+			if (next instanceof RuntimePrimitiveDatatypeDefinition || next instanceof RuntimeCompositeDatatypeDefinition) {
+				String attrName = "value" + next.getName().substring(0, 1).toUpperCase() + next.getName().substring(1);
+				datatypeAttributeNameToDefinition.put(attrName, next);
+			}
+		}
+		
+		myAttributeNameToDefinition=datatypeAttributeNameToDefinition;
+		
+		myDatatypeToAttributeName = new HashMap<Class<? extends IElement>, String>();
+		myDatatypeToDefinition = new HashMap<Class<? extends IElement>, BaseRuntimeElementDefinition<?>>();
+
+		for (Entry<String, BaseRuntimeElementDefinition<?>> next : myAttributeNameToDefinition.entrySet()) {
+			@SuppressWarnings("unchecked")
+			Class<? extends IDatatype> type = (Class<? extends IDatatype>) next.getValue().getImplementingClass();
+			myDatatypeToAttributeName.put(type, next.getKey());
+			myDatatypeToDefinition.put(type, next.getValue());
+		}
+		
+		// Resource Reference
+		myDatatypeToAttributeName.put(ResourceReference.class, "valueReference");
+		RuntimeResourceReferenceDefinition def = new RuntimeResourceReferenceDefinition("valueResource");
+		myAttributeNameToDefinition.put("valueResource", def);
+		myDatatypeToDefinition.put(ResourceReference.class, def);
 	}
 
 
@@ -94,5 +102,6 @@ public class RuntimeChildUndeclaredExtensionDefinition extends BaseRuntimeChildD
 				}
 			}};
 	}
+
 
 }

@@ -34,16 +34,16 @@ import ca.uhn.fhir.model.datatype.*;
 @DatatypeDef(name="Contact") 
 public class ContactDt extends BaseCompositeDatatype {
 
-	@Child(name="system", order=0, min=0, max=1)	
+	@Child(name="system", type=CodeDt.class, order=0, min=0, max=1)	
 	private CodeDt mySystem;
 	
-	@Child(name="value", order=1, min=0, max=1)	
+	@Child(name="value", type=StringDt.class, order=1, min=0, max=1)	
 	private StringDt myValue;
 	
-	@Child(name="use", order=2, min=0, max=1)	
+	@Child(name="use", type=CodeDt.class, order=2, min=0, max=1)	
 	private CodeDt myUse;
 	
-	@Child(name="period", order=3, min=0, max=1)	
+	@Child(name="period", type=PeriodDt.class, order=3, min=0, max=1)	
 	private PeriodDt myPeriod;
 	
 	/**

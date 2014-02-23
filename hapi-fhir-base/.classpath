@@ -49,16 +49,15 @@
       <attribute value="jar:file:/Users/james/.m2/repository/org/slf4j/slf4j-api/1.7.6/slf4j-api-1.7.6-javadoc.jar!/" name="javadoc_location"/>
     </attributes>
   </classpathentry>
-  <classpathentry kind="var" path="M2_REPO/stax/stax-api/1.0.1/stax-api-1.0.1.jar"/>
   <classpathentry kind="var" path="M2_REPO/org/codehaus/woodstox/stax2-api/3.1.1/stax2-api-3.1.1.jar" sourcepath="M2_REPO/org/codehaus/woodstox/stax2-api/3.1.1/stax2-api-3.1.1-sources.jar"/>
-  <classpathentry kind="var" path="M2_REPO/com/fasterxml/staxmate/staxmate/2.2.0/staxmate-2.2.0.jar" sourcepath="M2_REPO/com/fasterxml/staxmate/staxmate/2.2.0/staxmate-2.2.0-sources.jar">
-    <attributes>
-      <attribute value="jar:file:/Users/james/.m2/repository/com/fasterxml/staxmate/staxmate/2.2.0/staxmate-2.2.0-javadoc.jar!/" name="javadoc_location"/>
-    </attributes>
-  </classpathentry>
   <classpathentry kind="var" path="M2_REPO/org/codehaus/woodstox/woodstox-core-asl/4.2.0/woodstox-core-asl-4.2.0.jar" sourcepath="M2_REPO/org/codehaus/woodstox/woodstox-core-asl/4.2.0/woodstox-core-asl-4.2.0-sources.jar">
     <attributes>
       <attribute value="jar:file:/Users/james/.m2/repository/org/codehaus/woodstox/woodstox-core-asl/4.2.0/woodstox-core-asl-4.2.0-javadoc.jar!/" name="javadoc_location"/>
+    </attributes>
+  </classpathentry>
+  <classpathentry kind="var" path="M2_REPO/xmlunit/xmlunit/1.5/xmlunit-1.5.jar" sourcepath="M2_REPO/xmlunit/xmlunit/1.5/xmlunit-1.5-sources.jar">
+    <attributes>
+      <attribute value="jar:file:/Users/james/.m2/repository/xmlunit/xmlunit/1.5/xmlunit-1.5-javadoc.jar!/" name="javadoc_location"/>
     </attributes>
   </classpathentry>
   <classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>

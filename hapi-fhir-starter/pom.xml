@@ -22,10 +22,10 @@
 			<version>3.10-FINAL</version>
 		</dependency>
 		<dependency>
-		    <groupId>org.apache.poi</groupId>
-			     <artifactId>poi-ooxml</artifactId>
-				      <version>3.10-FINAL</version>
-						</dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi-ooxml</artifactId>
+			<version>3.10-FINAL</version>
+		</dependency>
 
 		<dependency>
 			<groupId>org.apache.velocity</groupId>
@@ -112,7 +112,7 @@
 	</properties>
 
 	<build>
-		
+
 		<plugins>
 		</plugins>
 	</build>
