@@ -27,7 +27,7 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.IResourceBlock;
 import ca.uhn.fhir.model.api.ResourceReference;
 import ca.uhn.fhir.model.api.UndeclaredExtension;
-import ca.uhn.fhir.model.datatype.XhtmlDt;
+import ca.uhn.fhir.model.primitive.XhtmlDt;
 
 class ParserState {
 

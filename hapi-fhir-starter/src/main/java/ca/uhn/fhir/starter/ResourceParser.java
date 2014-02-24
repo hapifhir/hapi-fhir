@@ -2,8 +2,8 @@ package ca.uhn.fhir.starter;
 
 import java.util.ArrayList;
 
-import ca.uhn.fhir.model.datatype.DateDt;
-import ca.uhn.fhir.model.datatype.StringDt;
+import ca.uhn.fhir.model.primitive.DateDt;
+import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.starter.model.Extension;
 
 public class ResourceParser extends BaseParser {
@@ -58,43 +58,81 @@ public class ResourceParser extends BaseParser {
 
 	public static void main(String[] args) throws Exception {
 		ResourceParser p = new ResourceParser();
+//		p.setDirectory("src/test/resources/res");
+//		p.setResourceName("patient");
+//		p.setOutputFile("../hapi-fhir-base/src/main/java/ca/uhn/fhir/model/dstu/resource/ResourceWithExtensionsA.java");
+//		ArrayList<Extension> exts = new ArrayList<Extension>();
+//		Extension ext1 = new Extension("foo1", "http://foo/1", "string");
+//		exts.add(ext1);
+//		Extension ext2 = new Extension("bar1", "http://bar/1", new Extension("bar11", "http://bar/1/1", "date"), new Extension("bar12", "http://bar/1/2", "date"));
+//		exts.add(ext2);
+//		p.setExtensions(exts);
+//		p.parse();
+
+		
 		p.setDirectory("src/test/resources/res");
-		p.setResourceName("patient");
-		p.setOutputFile("../hapi-fhir-base/src/main/java/ca/uhn/fhir/model/resource/ResourceWithExtensionsA.java");
-		ArrayList<Extension> exts = new ArrayList<Extension>();
-		Extension ext1 = new Extension("foo1", "http://foo/1", "string");
-		exts.add(ext1);
-		Extension ext2 = new Extension("bar1", "http://bar/1", new Extension("bar11", "http://bar/1/1", "date"), new Extension("bar12", "http://bar/1/2", "date"));
-		exts.add(ext2);
-		p.setExtensions(exts);
+		p.setResourceName("valueset");
+		p.setOutputFile("../hapi-fhir-base/src/main/java/ca/uhn/fhir/model/dstu/resource/ValueSet.java");
 		p.parse();
 
 		p = new ResourceParser();
 		p.setDirectory("src/test/resources/res");
 		p.setResourceName("observation");
-		p.setOutputFile("../hapi-fhir-base/src/main/java/ca/uhn/fhir/model/resource/Observation.java");
+		p.setOutputFile("../hapi-fhir-base/src/main/java/ca/uhn/fhir/model/dstu/resource/Observation.java");
+		p.parse();
+
+		p.setResourceName("profile");
+		p.setOutputFile("../hapi-fhir-base/src/main/java/ca/uhn/fhir/model/dstu/resource/Profile.java");
+		p.parse();
+
+		p.setResourceName("device");
+		p.setOutputFile("../hapi-fhir-base/src/main/java/ca/uhn/fhir/model/dstu/resource/Device.java");
+		p.parse();
+
+		p.setResourceName("group");
+		p.setOutputFile("../hapi-fhir-base/src/main/java/ca/uhn/fhir/model/dstu/resource/Group.java");
+		p.parse();
+		
+		p.setResourceName("location");
+		p.setOutputFile("../hapi-fhir-base/src/main/java/ca/uhn/fhir/model/dstu/resource/Location.java");
+		p.parse();
+
+		p.setResourceName("organization");
+		p.setOutputFile("../hapi-fhir-base/src/main/java/ca/uhn/fhir/model/dstu/resource/Organization.java");
+		p.parse();
+
+		p.setResourceName("patient");
+		p.setOutputFile("../hapi-fhir-base/src/main/java/ca/uhn/fhir/model/dstu/resource/Patient.java");
+		p.parse();
+
+		p.setResourceName("specimen");
+		p.setOutputFile("../hapi-fhir-base/src/main/java/ca/uhn/fhir/model/dstu/resource/Specimen.java");
+		p.parse();
+
+		p.setResourceName("practitioner");
+		p.setOutputFile("../hapi-fhir-base/src/main/java/ca/uhn/fhir/model/dstu/resource/Practitioner.java");
 		p.parse();
 
 		DatatypeParser d = new DatatypeParser();
 		d.setDirectory("src/test/resources/dt");
 		d.setDatatypeName("humanname");
-		d.setOutputFile("../hapi-fhir-base/src/main/java/ca/uhn/fhir/model/datatype/HumanNameDt.java");
+		d.setOutputFile("../hapi-fhir-base/src/main/java/ca/uhn/fhir/model/dstu/composite/HumanNameDt.java");
 		d.parse();
 
 		d.setDatatypeName("contact");
-		d.setOutputFile("../hapi-fhir-base/src/main/java/ca/uhn/fhir/model/datatype/ContactDt.java");
+		d.setOutputFile("../hapi-fhir-base/src/main/java/ca/uhn/fhir/model/dstu/composite/ContactDt.java");
 		d.parse();
 
 		d.setDatatypeName("address");
-		d.setOutputFile("../hapi-fhir-base/src/main/java/ca/uhn/fhir/model/datatype/AddressDt.java");
+		d.setOutputFile("../hapi-fhir-base/src/main/java/ca/uhn/fhir/model/dstu/composite/AddressDt.java");
 		d.parse();
 
 		d.setDatatypeName("narrative");
-		d.setOutputFile("../hapi-fhir-base/src/main/java/ca/uhn/fhir/model/datatype/NarrativeDt.java");
+		d.setOutputFile("../hapi-fhir-base/src/main/java/ca/uhn/fhir/model/dstu/composite/NarrativeDt.java");
 		d.parse();
 
 		d.setDatatypeName("quantity");
-		d.setOutputFile("../hapi-fhir-base/src/main/java/ca/uhn/fhir/model/datatype/QuantityDt.java");
+		d.setOutputFile("../hapi-fhir-base/src/main/java/ca/uhn/fhir/model/dstu/composite/QuantityDt.java");
 		d.parse();
 
 	}

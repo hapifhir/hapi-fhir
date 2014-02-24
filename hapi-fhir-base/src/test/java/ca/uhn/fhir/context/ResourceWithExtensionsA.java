@@ -3,17 +3,17 @@ package ca.uhn.fhir.context;
 import java.util.List;
 
 import ca.uhn.fhir.model.api.IExtension;
+import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.annotation.Block;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Extension;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.model.datatype.DateDt;
-import ca.uhn.fhir.model.datatype.IdentifierDt;
-import ca.uhn.fhir.model.datatype.StringDt;
-import ca.uhn.fhir.model.resource.BaseResource;
+import ca.uhn.fhir.model.primitive.DateDt;
+import ca.uhn.fhir.model.primitive.IdentifierDt;
+import ca.uhn.fhir.model.primitive.StringDt;
 
 @ResourceDef(name = "ResourceWithExtensionsA")
-public class ResourceWithExtensionsA extends BaseResource {
+public class ResourceWithExtensionsA implements IResource {
 
 	@Child(name = "bar1", type = Bar1.class, order = 2, min = 1, max = Child.MAX_UNLIMITED)
 	@Extension(url = "http://bar/1")

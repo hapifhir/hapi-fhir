@@ -39,7 +39,7 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ISupportsUndeclaredExtensions;
 import ca.uhn.fhir.model.api.ResourceReference;
 import ca.uhn.fhir.model.api.UndeclaredExtension;
-import ca.uhn.fhir.model.datatype.XhtmlDt;
+import ca.uhn.fhir.model.primitive.XhtmlDt;
 import ca.uhn.fhir.util.PrettyPrintWriterWrapper;
 
 public class XmlParser {

@@ -2,7 +2,7 @@ package ca.uhn.fhir.context;
 
 import java.lang.reflect.Field;
 
-import ca.uhn.fhir.model.datatype.NarrativeDt;
+import ca.uhn.fhir.model.primitive.NarrativeDt;
 
 public class RuntimeChildNarrativeDefinition extends BaseRuntimeChildDatatypeDefinition {
 

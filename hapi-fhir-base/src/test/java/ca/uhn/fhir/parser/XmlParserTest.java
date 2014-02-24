@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.io.StringReader;
 
 import org.apache.commons.io.IOUtils;
-import org.custommonkey.xmlunit.DetailedDiff;
 import org.custommonkey.xmlunit.Diff;
 import org.custommonkey.xmlunit.XMLUnit;
 import org.junit.BeforeClass;
@@ -17,8 +16,7 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.ResourceWithExtensionsA;
 import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.datatype.DateDt;
-import ca.uhn.fhir.model.resource.Observation;
+import ca.uhn.fhir.model.dstu.resource.Observation;
 
 public class XmlParserTest {
 

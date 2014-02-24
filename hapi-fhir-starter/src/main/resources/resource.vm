@@ -1,11 +1,12 @@
 #parse ( "templates.vm" )
 
-package ca.uhn.fhir.model.resource;
+package ca.uhn.fhir.model.dstu.resource;
 
 import java.util.*;
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.api.annotation.*;
-import ca.uhn.fhir.model.datatype.*;
+import ca.uhn.fhir.model.primitive.*;
+import ca.uhn.fhir.model.dstu.composite.*;
 
 /**
  * HAPI/FHIR <b>${className}</b> Resource
@@ -22,7 +23,7 @@ import ca.uhn.fhir.model.datatype.*;
  * </p> 
  */
 @ResourceDef(name="${className}")
-public class ${className} extends BaseResource {
+public class ${className} implements IResource {
 
 #childExtensionFields( $childExtensionTypes )
 #childVars( $children )

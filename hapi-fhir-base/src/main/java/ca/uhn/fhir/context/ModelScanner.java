@@ -36,11 +36,11 @@ import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.Extension;
 import ca.uhn.fhir.model.api.annotation.Narrative;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.model.datatype.CodeDt;
-import ca.uhn.fhir.model.datatype.DateDt;
-import ca.uhn.fhir.model.datatype.ICodedDatatype;
-import ca.uhn.fhir.model.datatype.NarrativeDt;
-import ca.uhn.fhir.model.datatype.XhtmlDt;
+import ca.uhn.fhir.model.primitive.CodeDt;
+import ca.uhn.fhir.model.primitive.DateDt;
+import ca.uhn.fhir.model.primitive.ICodedDatatype;
+import ca.uhn.fhir.model.primitive.NarrativeDt;
+import ca.uhn.fhir.model.primitive.XhtmlDt;
 
 class ModelScanner {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ModelScanner.class);

@@ -3,7 +3,7 @@ package ca.uhn.fhir.context;
 import java.util.Map;
 
 import ca.uhn.fhir.model.api.IElement;
-import ca.uhn.fhir.model.datatype.XhtmlDt;
+import ca.uhn.fhir.model.primitive.XhtmlDt;
 
 public class RuntimePrimitiveDatatypeNarrativeDefinition  extends BaseRuntimeElementDefinition<XhtmlDt> {
 
