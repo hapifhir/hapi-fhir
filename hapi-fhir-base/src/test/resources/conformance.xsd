@@ -1,0 +1,779 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+  Copyright (c) 2011-2013, HL7, Inc.
+  All rights reserved.
+  
+  Redistribution and use in source and binary forms, with or without modification, 
+  are permitted provided that the following conditions are met:
+  
+   * Redistributions of source code must retain the above copyright notice, this 
+     list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above copyright notice, 
+     this list of conditions and the following disclaimer in the documentation 
+     and/or other materials provided with the distribution.
+   * Neither the name of HL7 nor the names of its contributors may be used to 
+     endorse or promote products derived from this software without specific 
+     prior written permission.
+  
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
+  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED 
+  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. 
+  IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, 
+  INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT 
+  NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR 
+  PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
+  WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
+  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
+  POSSIBILITY OF SUCH DAMAGE.
+  
+
+  Generated on Mon, Feb 3, 2014 23:47+1100 for FHIR v0.80 
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://hl7.org/fhir" xmlns:xhtml="http://www.w3.org/1999/xhtml" targetNamespace="http://hl7.org/fhir" elementFormDefault="qualified" version="0.80">
+  <xs:include schemaLocation="fhir-base.xsd"/>
+  <xs:element name="Conformance" type="Conformance">
+    <xs:annotation>
+      <xs:documentation>A conformance statement is a set of requirements for a desired implementation or a description of how a target application fulfills those requirements in a particular implementation.</xs:documentation>
+    </xs:annotation>
+  </xs:element>
+  <xs:complexType name="Conformance">
+    <xs:annotation>
+      <xs:documentation>A conformance statement is a set of requirements for a desired implementation or a description of how a target application fulfills those requirements in a particular implementation.</xs:documentation>
+      <xs:documentation>If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="Resource">
+        <xs:sequence>
+          <xs:element name="identifier" minOccurs="0" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation>The identifier that is used to identify this conformance statement when it is referenced in a specification, model, design or an instance (should be globally unique OID, UUID, or URI).</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="version" minOccurs="0" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation>The identifier that is used to identify this version of the conformance statement when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the profile author manually and the value should be a timestamp.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="name" minOccurs="0" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation>A free text natural language name identifying the conformance statement.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="publisher" minOccurs="1" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation>Name of Organization publishing this conformance statement.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="telecom" minOccurs="0" maxOccurs="unbounded" type="Contact">
+            <xs:annotation>
+              <xs:documentation>Contacts for Organization relevant to this conformance statement.  The contacts may be a website, email, phone numbers, etc.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="description" minOccurs="0" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation>A free text natural language description of the conformance statement and its use. Typically, this is used when the profile describes a desired rather than an actual solution, for example as a formal expression of requirements as part of an RFP.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="status" minOccurs="0" maxOccurs="1" type="ConformanceStatementStatus">
+            <xs:annotation>
+              <xs:documentation>The status of this conformance statement.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="experimental" minOccurs="0" maxOccurs="1" type="boolean">
+            <xs:annotation>
+              <xs:documentation>A flag to indicate that this conformance statement is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="date" minOccurs="1" maxOccurs="1" type="dateTime">
+            <xs:annotation>
+              <xs:documentation>The date when the conformance statement was published.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="software" type="Conformance.Software" minOccurs="0" maxOccurs="1">
+            <xs:annotation>
+              <xs:documentation>Software that is covered by this conformance statement.  It is used when the profile describes the capabilities of a particular software version, independent of an installation.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="implementation" type="Conformance.Implementation" minOccurs="0" maxOccurs="1">
+            <xs:annotation>
+              <xs:documentation>Identifies a specific implementation instance that is described by the conformance statement - i.e. a particular installation, rather than the capabilities of a software program.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="fhirVersion" minOccurs="1" maxOccurs="1" type="id">
+            <xs:annotation>
+              <xs:documentation>The version of the FHIR specification on which this conformance statement is based.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="acceptUnknown" minOccurs="1" maxOccurs="1" type="boolean">
+            <xs:annotation>
+              <xs:documentation>A flag that indicates whether the application accepts unknown elements as part of a resource.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="format" minOccurs="1" maxOccurs="unbounded" type="code">
+            <xs:annotation>
+              <xs:documentation>A list of the formats supported by this implementation.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="profile" minOccurs="0" maxOccurs="unbounded" type="ResourceReference">
+            <xs:annotation>
+              <xs:documentation>A list of profiles supported by the system. For a server, &quot;supported by the system&quot; means the system hosts/produces a set of recourses, conformant to a particular profile, and allows its clients to search using this profile and to find appropriate data. For a client, it means the system will search by this profile and process data according to the guidance implicit in the profile.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="rest" type="Conformance.Rest" minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation>A definition of the restful capabilities of the solution, if any.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="messaging" type="Conformance.Messaging" minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation>A description of the messaging capabilities of the solution.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="document" type="Conformance.Document" minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation>A document definition.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="Conformance.Software">
+    <xs:annotation>
+      <xs:documentation>A conformance statement is a set of requirements for a desired implementation or a description of how a target application fulfills those requirements in a particular implementation.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="BackboneElement">
+        <xs:sequence>
+          <xs:element name="name" minOccurs="1" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation>Name software is known by.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="version" minOccurs="0" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation>The version identifier for the software covered by this statement.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="releaseDate" minOccurs="0" maxOccurs="1" type="dateTime">
+            <xs:annotation>
+              <xs:documentation>Date this version of the software released.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="Conformance.Implementation">
+    <xs:annotation>
+      <xs:documentation>A conformance statement is a set of requirements for a desired implementation or a description of how a target application fulfills those requirements in a particular implementation.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="BackboneElement">
+        <xs:sequence>
+          <xs:element name="description" minOccurs="1" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation>Information about the specific installation that this conformance statement relates to.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="url" minOccurs="0" maxOccurs="1" type="uri">
+            <xs:annotation>
+              <xs:documentation>A base URL for the implementation.  This forms the base for REST interfaces as well as the mailbox and document interfaces.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="Conformance.Rest">
+    <xs:annotation>
+      <xs:documentation>A conformance statement is a set of requirements for a desired implementation or a description of how a target application fulfills those requirements in a particular implementation.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="BackboneElement">
+        <xs:sequence>
+          <xs:element name="mode" minOccurs="1" maxOccurs="1" type="RestfulConformanceMode">
+            <xs:annotation>
+              <xs:documentation>Identifies whether this portion of the statement is describing ability to initiate or receive restful operations.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="documentation" minOccurs="0" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation>Information about the system's restful capabilities that apply across all applications, such as security.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="security" type="Conformance.Security" minOccurs="0" maxOccurs="1">
+            <xs:annotation>
+              <xs:documentation>Information about security of implementation.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="resource" type="Conformance.Resource" minOccurs="1" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation>A specification of the restful capabilities of the solution for a specific resource type.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="operation" type="Conformance.Operation1" minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation>A specification of restful operations supported by the system.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="query" type="Conformance.Query" minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation>Definition of a named query and its parameters and their meaning.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="documentMailbox" minOccurs="0" maxOccurs="unbounded" type="uri">
+            <xs:annotation>
+              <xs:documentation>A list of profiles that this server implements for accepting documents in the mailbox. If this list is empty, then documents are not accepted. The base specification has the profile identifier &quot;http://hl7.org/fhir/documents/mailbox&quot;. Other specifications can declare their own identifier for this purpose.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="Conformance.Security">
+    <xs:annotation>
+      <xs:documentation>A conformance statement is a set of requirements for a desired implementation or a description of how a target application fulfills those requirements in a particular implementation.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="BackboneElement">
+        <xs:sequence>
+          <xs:element name="cors" minOccurs="0" maxOccurs="1" type="boolean">
+            <xs:annotation>
+              <xs:documentation>Server adds CORS headers when responding to requests - this enables javascript applications to yuse the server.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="service" minOccurs="0" maxOccurs="unbounded" type="CodeableConcept">
+            <xs:annotation>
+              <xs:documentation>Types of security services are supported/required by the system.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="description" minOccurs="0" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation>General description of how security works.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="certificate" type="Conformance.Certificate" minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation>Certificates associated with security profiles.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="Conformance.Certificate">
+    <xs:annotation>
+      <xs:documentation>A conformance statement is a set of requirements for a desired implementation or a description of how a target application fulfills those requirements in a particular implementation.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="BackboneElement">
+        <xs:sequence>
+          <xs:element name="type" minOccurs="0" maxOccurs="1" type="code">
+            <xs:annotation>
+              <xs:documentation>Mime type for certificate.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="blob" minOccurs="0" maxOccurs="1" type="base64Binary">
+            <xs:annotation>
+              <xs:documentation>Actual certificate.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="Conformance.Resource">
+    <xs:annotation>
+      <xs:documentation>A conformance statement is a set of requirements for a desired implementation or a description of how a target application fulfills those requirements in a particular implementation.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="BackboneElement">
+        <xs:sequence>
+          <xs:element name="type" minOccurs="1" maxOccurs="1" type="code">
+            <xs:annotation>
+              <xs:documentation>A type of resource exposed via the restful interface.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="profile" minOccurs="0" maxOccurs="1" type="ResourceReference">
+            <xs:annotation>
+              <xs:documentation>A specification of the profile that describes the solution's support for the resource, including any constraints on cardinality, bindings, lengths or other limitations.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="operation" type="Conformance.Operation" minOccurs="1" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation>Identifies a restful operation supported by the solution.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="readHistory" minOccurs="0" maxOccurs="1" type="boolean">
+            <xs:annotation>
+              <xs:documentation>A flag for whether the server is able to return past versions as part of the vRead operation.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="updateCreate" minOccurs="0" maxOccurs="1" type="boolean">
+            <xs:annotation>
+              <xs:documentation>A flag to indicate that the server allows the client to create new identities on the server. If the update operation is used (client) or allowed (server) to a new location where a resource doesn't already exist. This means that the server allows the client to create new identities on the server.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="searchInclude" minOccurs="0" maxOccurs="unbounded" type="string">
+            <xs:annotation>
+              <xs:documentation>A list of _include values supported by the server.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="searchParam" type="Conformance.SearchParam" minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation>Additional search parameters for implementations to support and/or make use of.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="Conformance.Operation">
+    <xs:annotation>
+      <xs:documentation>A conformance statement is a set of requirements for a desired implementation or a description of how a target application fulfills those requirements in a particular implementation.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="BackboneElement">
+        <xs:sequence>
+          <xs:element name="code" minOccurs="1" maxOccurs="1" type="RestfulOperationType">
+            <xs:annotation>
+              <xs:documentation>Coded identifier of the operation, supported by the system resource.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="documentation" minOccurs="0" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation>Guidance specific to the implementation of this operation, such as 'delete is a logical delete' or 'updates are only allowed with version id' or 'creates permitted from pre-authorized certificates only'.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="Conformance.SearchParam">
+    <xs:annotation>
+      <xs:documentation>A conformance statement is a set of requirements for a desired implementation or a description of how a target application fulfills those requirements in a particular implementation.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="BackboneElement">
+        <xs:sequence>
+          <xs:element name="name" minOccurs="1" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation>The name of the search parameter used in the interface.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="definition" minOccurs="0" maxOccurs="1" type="uri">
+            <xs:annotation>
+              <xs:documentation>A formal reference to where this parameter was first defined, so that a client can be confident of the meaning of the search parameter.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="type" minOccurs="1" maxOccurs="1" type="SearchParamType">
+            <xs:annotation>
+              <xs:documentation>The type of value a search parameter refers to, and how the content is interpreted.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="documentation" minOccurs="0" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation>This allows documentation of any distinct behaviors about how the search parameter is used.  For example, text matching algorithms.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="target" minOccurs="0" maxOccurs="unbounded" type="code">
+            <xs:annotation>
+              <xs:documentation>Types of resource (if a resource is referenced).</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="chain" minOccurs="0" maxOccurs="unbounded" type="string">
+            <xs:annotation>
+              <xs:documentation>Chained names supported.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="Conformance.Operation1">
+    <xs:annotation>
+      <xs:documentation>A conformance statement is a set of requirements for a desired implementation or a description of how a target application fulfills those requirements in a particular implementation.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="BackboneElement">
+        <xs:sequence>
+          <xs:element name="code" minOccurs="1" maxOccurs="1" type="RestfulOperationSystem">
+            <xs:annotation>
+              <xs:documentation>A coded identifier of the operation, supported by the system.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="documentation" minOccurs="0" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation>Guidance specific to the implementation of this operation, such as limitations on the kind of transactions allowed, or information about system wide search is implemented.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="Conformance.Query">
+    <xs:annotation>
+      <xs:documentation>A conformance statement is a set of requirements for a desired implementation or a description of how a target application fulfills those requirements in a particular implementation.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="BackboneElement">
+        <xs:sequence>
+          <xs:element name="name" minOccurs="1" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation>The name of a query, which is used in the _query parameter when the query is called.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="definition" minOccurs="1" maxOccurs="1" type="uri">
+            <xs:annotation>
+              <xs:documentation>Identifies the custom query, defined either in FHIR core or another profile.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="documentation" minOccurs="0" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation>Additional information about how the query functions in this particular implementation.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="parameter" type="Conformance.SearchParam" minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation>Identifies which of the parameters for the named query are supported.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="Conformance.Messaging">
+    <xs:annotation>
+      <xs:documentation>A conformance statement is a set of requirements for a desired implementation or a description of how a target application fulfills those requirements in a particular implementation.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="BackboneElement">
+        <xs:sequence>
+          <xs:element name="endpoint" minOccurs="0" maxOccurs="1" type="uri">
+            <xs:annotation>
+              <xs:documentation>An address to which messages and/or replies are to be sent.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="reliableCache" minOccurs="0" maxOccurs="1" type="integer">
+            <xs:annotation>
+              <xs:documentation>Length if the receiver's reliable messaging cache (if a receiver) or how long the cache length on the receiver should be (if a sender).</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="documentation" minOccurs="0" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation>Documentation about the system's messaging capabilities for this endpoint not otherwise documented by the conformance statement.  For example, process for becoming an authorized messaging exchange partner.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="event" type="Conformance.Event" minOccurs="1" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation>A description of the solution's support for an event at this end point.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="Conformance.Event">
+    <xs:annotation>
+      <xs:documentation>A conformance statement is a set of requirements for a desired implementation or a description of how a target application fulfills those requirements in a particular implementation.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="BackboneElement">
+        <xs:sequence>
+          <xs:element name="code" minOccurs="1" maxOccurs="1" type="Coding">
+            <xs:annotation>
+              <xs:documentation>A coded identifier of a supported messaging event.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="category" minOccurs="0" maxOccurs="1" type="MessageSignificanceCategory">
+            <xs:annotation>
+              <xs:documentation>The impact of the content of the message.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="mode" minOccurs="1" maxOccurs="1" type="ConformanceEventMode">
+            <xs:annotation>
+              <xs:documentation>The mode of this event declaration - whether application is sender or receiver.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="protocol" minOccurs="0" maxOccurs="unbounded" type="Coding">
+            <xs:annotation>
+              <xs:documentation>A list of the messaging transport protocol(s) identifiers, supported by this endpoint.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="focus" minOccurs="1" maxOccurs="1" type="code">
+            <xs:annotation>
+              <xs:documentation>A resource associated with the event.  This is the resource that defines the event.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="request" minOccurs="1" maxOccurs="1" type="ResourceReference">
+            <xs:annotation>
+              <xs:documentation>Information about the request for this event.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="response" minOccurs="1" maxOccurs="1" type="ResourceReference">
+            <xs:annotation>
+              <xs:documentation>Information about the response for this event.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="documentation" minOccurs="0" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation>Guidance on how this event is handled, such as internal system trigger points, business rules, etc.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="Conformance.Document">
+    <xs:annotation>
+      <xs:documentation>A conformance statement is a set of requirements for a desired implementation or a description of how a target application fulfills those requirements in a particular implementation.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="BackboneElement">
+        <xs:sequence>
+          <xs:element name="mode" minOccurs="1" maxOccurs="1" type="DocumentMode">
+            <xs:annotation>
+              <xs:documentation>Mode of this document declaration - whether application is producer or consumer.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="documentation" minOccurs="0" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation>A description of how the application supports or uses the specified document profile.  For example, when are documents created, what action is taken with consumed documents, etc.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="profile" minOccurs="1" maxOccurs="1" type="ResourceReference">
+            <xs:annotation>
+              <xs:documentation>A constraint on a resource used in the document.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:simpleType name="DocumentMode-list">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="producer">
+        <xs:annotation>
+          <xs:documentation>The application produces documents of the specified type.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="consumer">
+        <xs:annotation>
+          <xs:documentation>The application consumes documents of the specified type.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="DocumentMode">
+    <xs:annotation>
+      <xs:documentation>Whether the application produces or consumes documents</xs:documentation>
+      <xs:documentation>If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="Element">
+        <xs:attribute name="value" type="DocumentMode-list" use="optional"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:simpleType name="RestfulConformanceMode-list">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="client">
+        <xs:annotation>
+          <xs:documentation>The application acts as a server for this resource.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="server">
+        <xs:annotation>
+          <xs:documentation>The application acts as a client for this resource.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="RestfulConformanceMode">
+    <xs:annotation>
+      <xs:documentation>The mode of a RESTful conformance statement</xs:documentation>
+      <xs:documentation>If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="Element">
+        <xs:attribute name="value" type="RestfulConformanceMode-list" use="optional"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:simpleType name="ConformanceEventMode-list">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="sender">
+        <xs:annotation>
+          <xs:documentation>The application sends requests and receives responses.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="receiver">
+        <xs:annotation>
+          <xs:documentation>The application receives requests and sends responses.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="ConformanceEventMode">
+    <xs:annotation>
+      <xs:documentation>The mode of a message conformance statement</xs:documentation>
+      <xs:documentation>If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="Element">
+        <xs:attribute name="value" type="ConformanceEventMode-list" use="optional"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:simpleType name="MessageSignificanceCategory-list">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Consequence">
+        <xs:annotation>
+          <xs:documentation>The message represents/requests a change that should not be processed more than once. E.g. Making a booking for an appointment.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Currency">
+        <xs:annotation>
+          <xs:documentation>The message represents a response to query for current information. Retrospective processing is wrong and/or wasteful.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Notification">
+        <xs:annotation>
+          <xs:documentation>The content is not necessarily intended to be current, and it can be reprocessed, though there may be version issues created by processing old notifications.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="MessageSignificanceCategory">
+    <xs:annotation>
+      <xs:documentation>The impact of the content of a message</xs:documentation>
+      <xs:documentation>If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="Element">
+        <xs:attribute name="value" type="MessageSignificanceCategory-list" use="optional"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:simpleType name="RestfulOperationType-list">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="read">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="vread">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="update">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="delete">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="history-instance">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="validate">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="history-type">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="create">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="search-type">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="RestfulOperationType">
+    <xs:annotation>
+      <xs:documentation>Operations supported by REST at the type or instance level</xs:documentation>
+      <xs:documentation>If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="Element">
+        <xs:attribute name="value" type="RestfulOperationType-list" use="optional"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:simpleType name="ConformanceStatementStatus-list">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="draft">
+        <xs:annotation>
+          <xs:documentation>This conformance statement is still under development.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="active">
+        <xs:annotation>
+          <xs:documentation>This conformance statement is ready for use in production systems.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="retired">
+        <xs:annotation>
+          <xs:documentation>This conformance statement has been withdrawn or superceded and should no longer be used.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="ConformanceStatementStatus">
+    <xs:annotation>
+      <xs:documentation>The status of this conformance statement</xs:documentation>
+      <xs:documentation>If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="Element">
+        <xs:attribute name="value" type="ConformanceStatementStatus-list" use="optional"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:simpleType name="RestfulOperationSystem-list">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="transaction">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="search-system">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="history-system">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="RestfulOperationSystem">
+    <xs:annotation>
+      <xs:documentation>Operations supported by REST at the system level</xs:documentation>
+      <xs:documentation>If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="Element">
+        <xs:attribute name="value" type="RestfulOperationSystem-list" use="optional"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+</xs:schema>
