@@ -46,7 +46,7 @@ public abstract class BaseRuntimeElementCompositeDefinition<T extends IComposite
 	public BaseRuntimeChildDefinition getChildByNameOrThrowDataFormatException(String theName) throws DataFormatException {
 		BaseRuntimeChildDefinition retVal = myNameToChild.get(theName);
 		if (retVal == null) {
-			throw new DataFormatException("Unknown child name: " + theName);
+			throw new DataFormatException("Unknown child name '" + theName + "' in element " + getName());
 		}
 		return retVal;
 	}

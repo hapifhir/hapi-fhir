@@ -2,6 +2,7 @@
 <!-- This example is taken from the v3 data types (SLIST) -->
 
 <Observation xmlns="http://hl7.org/fhir" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://hl7.org/fhir ..\..\schema\observation.xsd">
+	<!--
 	<extension url="http://acme.org/fhir/Profile/main#trial-status">
 		<extension url="http://acme.org/fhir/Profile/main#trial-status-code">
 			<valueCode value="unsure" />
@@ -15,10 +16,13 @@
 			</valueResource>
 		</extension>
 	</extension>
+	 -->
+	 <!-- 
 	<text>
 		<status value="generated" />
 		<div xmlns="http://www.w3.org/1999/xhtml">Sept 17, 2012: Systolic Blood pressure 107 mmHg (normal)</div>
 	</text>
+	 -->
 	<name>
 		<!-- Actually, this is not a vull EEG. A todo is to turn it into one -->
 		<coding>
