@@ -1,10 +1,5 @@
 package ca.uhn.fhir.starter;
 
-import java.util.ArrayList;
-
-import ca.uhn.fhir.model.primitive.DateDt;
-import ca.uhn.fhir.model.primitive.StringDt;
-import ca.uhn.fhir.starter.model.Extension;
 
 public class ResourceParser extends BaseParser {
 	private String myResourceName;

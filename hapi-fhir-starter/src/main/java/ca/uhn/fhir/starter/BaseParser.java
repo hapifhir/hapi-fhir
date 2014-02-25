@@ -8,6 +8,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -21,11 +23,13 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import ca.uhn.fhir.model.api.annotation.SimpleSetter;
 import ca.uhn.fhir.starter.model.BaseElement;
 import ca.uhn.fhir.starter.model.Child;
 import ca.uhn.fhir.starter.model.Extension;
 import ca.uhn.fhir.starter.model.Resource;
 import ca.uhn.fhir.starter.model.ResourceBlock;
+import ca.uhn.fhir.starter.model.SimpleSetter.Parameter;
 import ca.uhn.fhir.starter.util.XMLUtils;
 
 public abstract class BaseParser {
@@ -102,10 +106,59 @@ public abstract class BaseParser {
 			}
 			parent.getChildren().add(elem);
 
+			/*
+			 * Find simple setters
+			 */
+			if (elem instanceof Child) {
+				scanForSimpleSetters(elem);
+			}
+
 		}
 
 		write(resource);
 
+	}
+
+	private void scanForSimpleSetters(Child theElem) {
+		Class<?> childDt;
+		if (theElem.getReferenceTypesForMultiple().size() == 1) {
+			try {
+				childDt = Class.forName("ca.uhn.fhir.model.primitive." + theElem.getReferenceTypesForMultiple().get(0));
+			} catch (ClassNotFoundException e) {
+				return;
+			}
+		} else {
+			return;
+		}
+
+		for (Constructor<?> nextConstructor : childDt.getConstructors()) {
+			SimpleSetter simpleSetter = nextConstructor.getAnnotation(SimpleSetter.class);
+			if (simpleSetter == null) {
+				continue;
+			}
+
+			ca.uhn.fhir.starter.model.SimpleSetter ss = new ca.uhn.fhir.starter.model.SimpleSetter();
+			ss.setDatatype(childDt.getSimpleName());
+			theElem.getSimpleSetters().add(ss);
+			
+			Annotation[][] paramAnn = nextConstructor.getParameterAnnotations();
+			Class<?>[] paramTypes = nextConstructor.getParameterTypes();
+			for (int i = 0; i < paramTypes.length; i++) {
+				Parameter p = new Parameter();
+				p.setDatatype(paramTypes[0].getSimpleName());
+				p.setParameter(findAnnotation(childDt, paramAnn[i], SimpleSetter.Parameter.class).name());
+				ss.getParameters().add(p);
+			}
+		}
+	}
+
+	private ca.uhn.fhir.model.api.annotation.SimpleSetter.Parameter findAnnotation(Class<?> theBase, Annotation[] theAnnotations, Class<ca.uhn.fhir.model.api.annotation.SimpleSetter.Parameter> theClass) {
+		for (Annotation next : theAnnotations) {
+			if (theClass.equals(next.annotationType())) {
+				return (ca.uhn.fhir.model.api.annotation.SimpleSetter.Parameter) next;
+			}
+		}
+		throw new IllegalArgumentException(theBase.getCanonicalName() + " has @" + SimpleSetter.class.getCanonicalName() + " constructor with no/invalid parameter annotation");
 	}
 
 	public void setDirectory(String theDirectory) {
@@ -165,6 +218,7 @@ public abstract class BaseParser {
 		VelocityEngine v = new VelocityEngine();
 		v.setProperty("resource.loader", "cp");
 		v.setProperty("cp.resource.loader.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
+		v.setProperty("runtime.references.strict", Boolean.TRUE);
 
 		InputStream templateIs = ResourceParser.class.getResourceAsStream(getTemplate());
 		InputStreamReader templateReader = new InputStreamReader(templateIs);

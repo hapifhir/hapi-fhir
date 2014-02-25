@@ -8,8 +8,10 @@ import ca.uhn.fhir.model.api.ResourceReference;
 
 public class Child extends BaseElement {
 
-	public boolean isBlock() {
-		return false;
+	private List<SimpleSetter> mySimpleStters = new ArrayList<SimpleSetter>();
+
+	public String getAnnotationType() {
+		return getSingleType();
 	}
 
 	public String getCardMaxForChildAnnotation() {
@@ -20,16 +22,21 @@ public class Child extends BaseElement {
 		}
 	}
 
-	public List<String> getReferenceTypesForMultiple() {
-		ArrayList<String> retVal = new ArrayList<String>();
-		for (String next : getType()) {
-			retVal.add(next + "Dt");
+	/**
+	 * Strips off "[x]"
+	 */
+	public String getElementNameSimplified() {
+		String elementName = getElementName();
+		if (elementName.endsWith("[x]")) {
+			elementName = elementName.substring(0, elementName.length() - 3);
 		}
-		return retVal;
+		return elementName;
 	}
 
-	public String getAnnotationType() {
-		return getSingleType();
+	public String getMethodName() {
+		String elementName = getElementNameSimplified();
+		elementName = elementName.substring(0, 1).toUpperCase() + elementName.substring(1);
+		return elementName;
 	}
 
 	public String getReferenceType() {
@@ -53,6 +60,35 @@ public class Child extends BaseElement {
 		return retVal;
 	}
 
+	public String getReferenceTypeForConstructor() {
+		return getReferenceType().replaceAll("^List<", "ArrayList<");
+	}
+
+	public List<String> getReferenceTypesForMultiple() {
+		ArrayList<String> retVal = new ArrayList<String>();
+		for (String next : getType()) {
+			retVal.add(next + "Dt");
+		}
+		return retVal;
+	}
+
+	public List<SimpleSetter> getSimpleSetters() {
+		return mySimpleStters;
+	}
+
+	public String getVariableName() {
+		String elementName = getMethodName();
+		return "my" + elementName;
+	}
+
+	public boolean isBlock() {
+		return false;
+	}
+
+	public boolean isRepeatable() {
+		return "1".equals(getCardMax()) == false;
+	}
+
 	protected String getSingleType() {
 		String retVal;
 		String elemName = this.getType().get(0);
@@ -63,32 +99,6 @@ public class Child extends BaseElement {
 			retVal = (elemName + "Dt");
 		}
 		return retVal;
-	}
-
-	public boolean isRepeatable() {
-		return "1".equals(getCardMax()) == false;
-	}
-
-	public String getVariableName() {
-		String elementName = getMethodName();
-		return "my" + elementName;
-	}
-
-	public String getMethodName() {
-		String elementName = getElementNameSimplified();
-		elementName = elementName.substring(0, 1).toUpperCase() + elementName.substring(1);
-		return elementName;
-	}
-
-	/**
-	 * Strips off "[x]"
-	 */
-	public String getElementNameSimplified() {
-		String elementName = getElementName();
-		if (elementName.endsWith("[x]")) {
-			elementName = elementName.substring(0, elementName.length() - 3);
-		}
-		return elementName;
 	}
 
 }

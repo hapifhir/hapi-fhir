@@ -35,7 +35,8 @@
 #macro ( childAccessors $childElements )
 #foreach ( $child in $children )
 	/**
-	 * Gets the value(s) for ${child.elementName} (${child.shortName})
+	 * Gets the value(s) for <b>${child.elementName}</b>, creating it if it does
+	 * not exist (${child.shortName}). Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
@@ -43,11 +44,16 @@
      * </p> 
 	 */
 	public ${child.referenceType} get${child.methodName}() {
+#if ( $!child.hasMultipleTypes )
+		if (${child.variableName} == null) {
+			${child.variableName} = new ${child.referenceTypeForConstructor}();
+		}
+#end
 		return ${child.variableName};
 	}
 
 	/**
-	 * Sets the value(s) for ${child.elementName} (${child.shortName})
+	 * Sets the value(s) for <b>${child.elementName}</b> (${child.shortName})
 	 *
      * <p>
      * <b>Definition:</b>
@@ -58,6 +64,20 @@
 		${child.variableName} = theValue;
 	}
 	
+#foreach ( $ss in $child.simpleSetters )
+	/**
+	 * Sets the value(s) for <b>${child.elementName}</b> (${child.shortName})
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * ${child.definition}
+     * </p> 
+	 */
+	public void set${child.methodName}(#{foreach}($param in $ss.parameters) ${param.datatype} ${param.parameter}#{if}( $foreach.hasNext ), #{end}#{end}) {
+		${child.variableName} = new ${ss.datatype}(#{foreach}($param in $ss.parameters) ${param.parameter}#{if}( $foreach.hasNext ), #{end}#{end}); 
+	}
+	
+#end
 #end
 #end
 

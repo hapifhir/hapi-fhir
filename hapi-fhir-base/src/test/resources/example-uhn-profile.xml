@@ -1,12 +1,16 @@
 <Profile xmlns="http://hl7.org/fhir" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://hl7.org/fhir ./fhir-single.xsd">
 
-	<identifier value="urn:uhn:fhir:profile:sail" />
+	<identifier value="urn:uhn:fhir:profile:cgta" />
+	<version value="0.1" />
 	<name value="SAIL Object Profile" />
 	<status value="draft" />
 	
 	<structure>
 		<type value="Patient" />
+		<element>
+			<path value="Patient.identifier"/>
+		</element>
 	</structure>
 
 

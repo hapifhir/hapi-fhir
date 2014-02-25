@@ -1,5 +1,7 @@
 package ca.uhn.fhir.starter.model;
 
+import static org.apache.commons.lang.StringUtils.*;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,7 +50,7 @@ public abstract class BaseElement {
 	}
 
 	public String getDefinition() {
-		return myDefinition;
+		return defaultString(myDefinition, "");
 	}
 
 	public String getElementName() {
