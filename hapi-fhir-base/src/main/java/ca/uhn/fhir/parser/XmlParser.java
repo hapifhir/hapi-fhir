@@ -5,11 +5,9 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.xml.bind.DatatypeConverter;
 import javax.xml.namespace.QName;
 import javax.xml.stream.FactoryConfigurationError;
 import javax.xml.stream.XMLEventReader;
@@ -28,7 +26,6 @@ import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.time.DateUtils;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
@@ -45,16 +42,18 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ISupportsUndeclaredExtensions;
 import ca.uhn.fhir.model.api.ResourceReference;
 import ca.uhn.fhir.model.api.UndeclaredExtension;
+import ca.uhn.fhir.model.primitive.InstantDt;
+import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.XhtmlDt;
 import ca.uhn.fhir.util.PrettyPrintWriterWrapper;
 
 public class XmlParser {
-	private static final String XHTML_NS = "http://www.w3.org/1999/xhtml";
+	private static final String ATOM_NS = "http://www.w3.org/2005/Atom";
 	private static final String FHIR_NS = "http://hl7.org/fhir";
+	private static final String OPENSEARCH_NS = "http://a9.com/-/spec/opensearch/1.1/";
 	@SuppressWarnings("unused")
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(XmlParser.class);
-	private static final String ATOM_NS = "http://www.w3.org/2005/Atom";
-	private static final String OPENSEARCH_NS = "http://a9.com/-/spec/opensearch/1.1/";
+	private static final String XHTML_NS = "http://www.w3.org/1999/xhtml";
 
 	private FhirContext myContext;
 	private XMLInputFactory myXmlInputFactory;
@@ -66,74 +65,67 @@ public class XmlParser {
 		myXmlOutputFactory = XMLOutputFactory.newInstance();
 	}
 
-	public String encodeResourceToString(IResource theResource) throws DataFormatException {
+	private XMLStreamWriter decorateStreamWriter(XMLStreamWriter eventWriter) {
+		PrettyPrintWriterWrapper retVal = new PrettyPrintWriterWrapper(eventWriter);
+		return retVal;
+	}
+
+	public String encodeBundleToString(Bundle theBundle) throws DataFormatException {
 		XMLStreamWriter eventWriter;
 		StringWriter stringWriter = new StringWriter();
 		try {
 			eventWriter = myXmlOutputFactory.createXMLStreamWriter(stringWriter);
 			eventWriter = decorateStreamWriter(eventWriter);
 
-			encodeResourceToStreamWriter(theResource, eventWriter);
+			eventWriter.writeStartElement("feed");
+			eventWriter.writeDefaultNamespace(ATOM_NS);
+
+			writeTagWithTextNode(eventWriter, "title", theBundle.getTitle());
+			writeTagWithTextNode(eventWriter, "id", theBundle.getId());
+
+			writeAtomLink(eventWriter, "self", theBundle.getLinkSelf());
+			writeAtomLink(eventWriter, "first", theBundle.getLinkFirst());
+			writeAtomLink(eventWriter, "previous", theBundle.getLinkPrevious());
+			writeAtomLink(eventWriter, "next", theBundle.getLinkNext());
+			writeAtomLink(eventWriter, "last", theBundle.getLinkLast());
+			writeAtomLink(eventWriter, "fhir-base", theBundle.getLinkBase());
+
+			if (theBundle.getTotalResults() != null) {
+				eventWriter.writeNamespace("os", OPENSEARCH_NS);
+				eventWriter.writeStartElement(OPENSEARCH_NS, "totalResults");
+				eventWriter.writeCharacters(theBundle.getTotalResults().toString());
+				eventWriter.writeEndElement();
+			}
+
+			writeOptionalTagWithTextNode(eventWriter, "updated", theBundle.getUpdated());
+			writeOptionalTagWithTextNode(eventWriter, "published", theBundle.getPublished());
+
+			if (StringUtils.isNotBlank(theBundle.getAuthorName().getValue())) {
+				eventWriter.writeStartElement("author");
+				writeTagWithTextNode(eventWriter, "name", theBundle.getAuthorName());
+				writeOptionalTagWithTextNode(eventWriter, "device", theBundle.getAuthorDevice());
+			}
+
+			for (BundleEntry nextEntry : theBundle.getEntries()) {
+				eventWriter.writeStartElement("entry");
+
+				eventWriter.writeStartElement("content");
+				eventWriter.writeAttribute("type", "text/xml");
+
+				IResource resource = nextEntry.getResource();
+				encodeResourceToStreamWriter(resource, eventWriter);
+
+				eventWriter.writeEndElement(); // content
+				eventWriter.writeEndElement(); // entry
+			}
+
+			eventWriter.writeEndElement();
+			eventWriter.close();
 		} catch (XMLStreamException e) {
 			throw new ConfigurationException("Failed to initialize STaX event factory", e);
 		}
 
 		return stringWriter.toString();
-	}
-
-	public void encodeResourceToStreamWriter(IResource theResource, XMLStreamWriter eventWriter) throws XMLStreamException, DataFormatException {
-		RuntimeResourceDefinition resDef = myContext.getResourceDefinition(theResource);
-		eventWriter.writeStartElement(resDef.getName());
-		eventWriter.writeDefaultNamespace(FHIR_NS);
-
-		encodeCompositeElementToStreamWriter(theResource, eventWriter, resDef);
-
-		eventWriter.writeEndElement();
-		eventWriter.close();
-	}
-
-	private XMLStreamWriter decorateStreamWriter(XMLStreamWriter eventWriter) {
-		PrettyPrintWriterWrapper retVal = new PrettyPrintWriterWrapper(eventWriter);
-		return retVal;
-	}
-
-	private void encodeCompositeElementToStreamWriter(IElement theElement, XMLStreamWriter theEventWriter, BaseRuntimeElementCompositeDefinition<?> resDef) throws XMLStreamException,
-			DataFormatException {
-		encodeExtensionsIfPresent(theEventWriter, theElement);
-		encodeCompositeElementChildrenToStreamWriter(theElement, theEventWriter, resDef.getExtensions());
-		encodeCompositeElementChildrenToStreamWriter(theElement, theEventWriter, resDef.getChildren());
-	}
-
-	private void encodeCompositeElementChildrenToStreamWriter(IElement theElement, XMLStreamWriter theEventWriter, List<? extends BaseRuntimeChildDefinition> children) throws XMLStreamException,
-			DataFormatException {
-		for (BaseRuntimeChildDefinition nextChild : children) {
-			List<? extends IElement> values = nextChild.getAccessor().getValues(theElement);
-			if (values == null || values.isEmpty()) {
-				continue;
-			}
-
-			for (IElement nextValue : values) {
-				if (nextValue == null) {
-					continue;
-				}
-				Class<? extends IElement> type = nextValue.getClass();
-				String childName = nextChild.getChildNameByDatatype(type);
-				String extensionUrl = nextChild.getExtensionUrl();
-				BaseRuntimeElementDefinition<?> childDef = nextChild.getChildElementDefinitionByDatatype(type);
-				if (childDef == null) {
-					throw new IllegalStateException(nextChild + " has no child of type " + type);
-				}
-
-				if (extensionUrl != null && childName.equals("extension") == false) {
-					theEventWriter.writeStartElement("extension");
-					theEventWriter.writeAttribute("url", extensionUrl);
-					encodeChildElementToStreamWriter(theEventWriter, nextValue, childName, childDef, null);
-					theEventWriter.writeEndElement();
-				} else {
-					encodeChildElementToStreamWriter(theEventWriter, nextValue, childName, childDef, extensionUrl);
-				}
-			}
-		}
 	}
 
 	private void encodeChildElementToStreamWriter(XMLStreamWriter theEventWriter, IElement nextValue, String childName, BaseRuntimeElementDefinition<?> childDef, String theExtensionUrl)
@@ -180,6 +172,45 @@ public class XmlParser {
 		}
 	}
 
+	private void encodeCompositeElementChildrenToStreamWriter(IElement theElement, XMLStreamWriter theEventWriter, List<? extends BaseRuntimeChildDefinition> children) throws XMLStreamException,
+			DataFormatException {
+		for (BaseRuntimeChildDefinition nextChild : children) {
+			List<? extends IElement> values = nextChild.getAccessor().getValues(theElement);
+			if (values == null || values.isEmpty()) {
+				continue;
+			}
+
+			for (IElement nextValue : values) {
+				if (nextValue == null) {
+					continue;
+				}
+				Class<? extends IElement> type = nextValue.getClass();
+				String childName = nextChild.getChildNameByDatatype(type);
+				String extensionUrl = nextChild.getExtensionUrl();
+				BaseRuntimeElementDefinition<?> childDef = nextChild.getChildElementDefinitionByDatatype(type);
+				if (childDef == null) {
+					throw new IllegalStateException(nextChild + " has no child of type " + type);
+				}
+
+				if (extensionUrl != null && childName.equals("extension") == false) {
+					theEventWriter.writeStartElement("extension");
+					theEventWriter.writeAttribute("url", extensionUrl);
+					encodeChildElementToStreamWriter(theEventWriter, nextValue, childName, childDef, null);
+					theEventWriter.writeEndElement();
+				} else {
+					encodeChildElementToStreamWriter(theEventWriter, nextValue, childName, childDef, extensionUrl);
+				}
+			}
+		}
+	}
+
+	private void encodeCompositeElementToStreamWriter(IElement theElement, XMLStreamWriter theEventWriter, BaseRuntimeElementCompositeDefinition<?> resDef) throws XMLStreamException,
+			DataFormatException {
+		encodeExtensionsIfPresent(theEventWriter, theElement);
+		encodeCompositeElementChildrenToStreamWriter(theElement, theEventWriter, resDef.getExtensions());
+		encodeCompositeElementChildrenToStreamWriter(theElement, theEventWriter, resDef.getChildren());
+	}
+
 	private void encodeExtensionsIfPresent(XMLStreamWriter theWriter, IElement theResource) throws XMLStreamException, DataFormatException {
 		if (theResource instanceof ISupportsUndeclaredExtensions) {
 			for (UndeclaredExtension next : ((ISupportsUndeclaredExtensions) theResource).getUndeclaredExtensions()) {
@@ -202,95 +233,43 @@ public class XmlParser {
 		}
 	}
 
-	public String encodeBundleToString(Bundle theBundle) throws DataFormatException {
+	private void encodeResourceReferenceToStreamWriter(XMLStreamWriter theEventWriter, ResourceReference theRef) throws XMLStreamException {
+		if (StringUtils.isNotBlank(theRef.getDisplay())) {
+			theEventWriter.writeStartElement("display");
+			theEventWriter.writeAttribute("value", theRef.getDisplay());
+			theEventWriter.writeEndElement();
+		}
+		if (StringUtils.isNotBlank(theRef.getReference())) {
+			theEventWriter.writeStartElement("reference");
+			theEventWriter.writeAttribute("value", theRef.getReference());
+			theEventWriter.writeEndElement();
+		}
+	}
+
+	public void encodeResourceToStreamWriter(IResource theResource, XMLStreamWriter eventWriter) throws XMLStreamException, DataFormatException {
+		RuntimeResourceDefinition resDef = myContext.getResourceDefinition(theResource);
+		eventWriter.writeStartElement(resDef.getName());
+		eventWriter.writeDefaultNamespace(FHIR_NS);
+
+		encodeCompositeElementToStreamWriter(theResource, eventWriter, resDef);
+
+		eventWriter.writeEndElement();
+		eventWriter.close();
+	}
+
+	public String encodeResourceToString(IResource theResource) throws DataFormatException {
 		XMLStreamWriter eventWriter;
 		StringWriter stringWriter = new StringWriter();
 		try {
 			eventWriter = myXmlOutputFactory.createXMLStreamWriter(stringWriter);
 			eventWriter = decorateStreamWriter(eventWriter);
 
-			eventWriter.writeStartElement("feed");
-			eventWriter.writeDefaultNamespace(ATOM_NS);
-
-			writeTagWithTextNode(eventWriter, "title", theBundle.getTitle());
-			writeTagWithTextNode(eventWriter, "id", theBundle.getId());
-
-			writeAtomLink(eventWriter, "self", theBundle.getLinkSelf());
-			writeAtomLink(eventWriter, "first", theBundle.getLinkFirst());
-			writeAtomLink(eventWriter, "previous", theBundle.getLinkPrevious());
-			writeAtomLink(eventWriter, "next", theBundle.getLinkNext());
-			writeAtomLink(eventWriter, "last", theBundle.getLinkLast());
-			writeAtomLink(eventWriter, "fhir-base", theBundle.getLinkBase());
-
-			if (theBundle.getTotalResults() != null) {
-				eventWriter.writeNamespace("os", OPENSEARCH_NS);
-				eventWriter.writeStartElement(OPENSEARCH_NS, "totalResults");
-				eventWriter.writeCharacters(theBundle.getTotalResults().toString());
-				eventWriter.writeEndElement();
-			}
-
-			writeOptionalTagWithTextNode(eventWriter, "updated", theBundle.getUpdated());
-			writeOptionalTagWithTextNode(eventWriter, "published", theBundle.getPublished());
-
-			if (StringUtils.isNotBlank(theBundle.getAuthorName())) {
-				eventWriter.writeStartElement("author");
-				writeTagWithTextNode(eventWriter, "name", theBundle.getAuthorName());
-				writeOptionalTagWithTextNode(eventWriter, "device", theBundle.getAuthorDevice());
-			}
-
-			for (BundleEntry nextEntry : theBundle.getEntries()) {
-				eventWriter.writeStartElement("entry");
-
-				eventWriter.writeStartElement("content");
-				eventWriter.writeAttribute("type", "text/xml");
-				
-				IResource resource = nextEntry.getResource();
-				encodeResourceToStreamWriter(resource, eventWriter);
-				
-				eventWriter.writeEndElement(); // content
-				
-				eventWriter.writeEndElement(); // entry
-			}
-			
-			eventWriter.writeEndElement();
-			eventWriter.close();
+			encodeResourceToStreamWriter(theResource, eventWriter);
 		} catch (XMLStreamException e) {
 			throw new ConfigurationException("Failed to initialize STaX event factory", e);
 		}
 
 		return stringWriter.toString();
-	}
-
-	private void writeOptionalTagWithTextNode(XMLStreamWriter theEventWriter, String theTagName, Date theNodeValue) throws XMLStreamException {
-		if (theNodeValue != null) {
-			theEventWriter.writeStartElement(theTagName);
-			theEventWriter.writeCharacters(DatatypeConverter.printDateTime(DateUtils.toCalendar(theNodeValue)));
-			theEventWriter.writeEndElement();
-		}
-	}
-
-	private void writeAtomLink(XMLStreamWriter theEventWriter, String theRel, String theLink) throws XMLStreamException {
-		if (StringUtils.isNotBlank(theLink)) {
-			theEventWriter.writeStartElement("link");
-			theEventWriter.writeAttribute("rel", theRel);
-			theEventWriter.writeAttribute("href", theLink);
-		}
-	}
-
-	private void writeTagWithTextNode(XMLStreamWriter theEventWriter, String theElementName, String theTextValue) throws XMLStreamException {
-		theEventWriter.writeStartElement(theElementName);
-		if (StringUtils.isNotBlank(theTextValue)) {
-			theEventWriter.writeCharacters(theTextValue);
-		}
-		theEventWriter.writeEndElement();
-	}
-
-	private void writeOptionalTagWithTextNode(XMLStreamWriter theEventWriter, String theElementName, String theTextValue) throws XMLStreamException {
-		if (StringUtils.isNotBlank(theTextValue)) {
-			theEventWriter.writeStartElement(theElementName);
-			theEventWriter.writeCharacters(theTextValue);
-			theEventWriter.writeEndElement();
-		}
 	}
 
 	private void encodeXhtml(XhtmlDt theDt, XMLStreamWriter theEventWriter) throws XMLStreamException {
@@ -365,19 +344,6 @@ public class XmlParser {
 		}
 	}
 
-	private void encodeResourceReferenceToStreamWriter(XMLStreamWriter theEventWriter, ResourceReference theRef) throws XMLStreamException {
-		if (StringUtils.isNotBlank(theRef.getDisplay())) {
-			theEventWriter.writeStartElement("display");
-			theEventWriter.writeAttribute("value", theRef.getDisplay());
-			theEventWriter.writeEndElement();
-		}
-		if (StringUtils.isNotBlank(theRef.getReference())) {
-			theEventWriter.writeStartElement("reference");
-			theEventWriter.writeAttribute("value", theRef.getReference());
-			theEventWriter.writeEndElement();
-		}
-	}
-
 	public IResource parseResource(String theXml) throws ConfigurationException, DataFormatException {
 		XMLEventReader streamReader;
 		try {
@@ -388,8 +354,32 @@ public class XmlParser {
 			throw new ConfigurationException("Failed to initialize STaX event factory", e);
 		}
 
+		return parseResource(streamReader);
+	}
+
+	public Bundle parseBundle(String theXml) throws ConfigurationException, DataFormatException {
+		XMLEventReader streamReader;
 		try {
-			ParserState parserState = null;
+			streamReader = myXmlInputFactory.createXMLEventReader(new StringReader(theXml));
+		} catch (XMLStreamException e) {
+			throw new DataFormatException(e);
+		} catch (FactoryConfigurationError e) {
+			throw new ConfigurationException("Failed to initialize STaX event factory", e);
+		}
+
+		return parseBundle(streamReader);
+	}
+
+	private Bundle parseBundle(XMLEventReader theStreamReader) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public IResource parseResource(XMLEventReader streamReader) {
+
+		try {
+			ParserState parserState = ParserState.getPreResourceInstance(myContext);
+
 			while (streamReader.hasNext()) {
 				XMLEvent nextEvent = streamReader.nextEvent();
 				if (nextEvent.isStartElement()) {
@@ -400,9 +390,7 @@ public class XmlParser {
 						continue;
 					}
 
-					if (parserState == null) {
-						parserState = ParserState.getResourceInstance(myContext, elem.getName().getLocalPart());
-					} else if ("extension".equals(elem.getName().getLocalPart())) {
+					if ("extension".equals(elem.getName().getLocalPart())) {
 						Attribute urlAttr = elem.getAttributeByName(new QName("url"));
 						if (urlAttr == null || isBlank(urlAttr.getValue())) {
 							throw new DataFormatException("Extension element has no 'url' attribute");
@@ -428,9 +416,6 @@ public class XmlParser {
 					if (!"value".equals(elem.getName().getLocalPart())) {
 						continue;
 					}
-					if (parserState == null) {
-						throw new DataFormatException("Detected attribute before element");
-					}
 					parserState.attributeValue(elem, elem.getValue());
 				} else if (nextEvent.isEndElement()) {
 					EndElement elem = nextEvent.asEndElement();
@@ -439,17 +424,12 @@ public class XmlParser {
 						continue;
 					}
 
-					if (parserState == null) {
-						throw new DataFormatException("Detected unexpected end-element");
-					}
 					parserState.endingElement(elem);
 					if (parserState.isComplete()) {
 						return (IResource) parserState.getObject();
 					}
 				} else {
-					if (parserState != null) {
-						parserState.otherEvent(nextEvent);
-					}
+					parserState.otherEvent(nextEvent);
 				}
 
 			}
@@ -458,5 +438,37 @@ public class XmlParser {
 		} catch (XMLStreamException e) {
 			throw new DataFormatException(e);
 		}
+	}
+
+	private void writeAtomLink(XMLStreamWriter theEventWriter, String theRel, StringDt theStringDt) throws XMLStreamException {
+		if (StringUtils.isNotBlank(theStringDt.getValue())) {
+			theEventWriter.writeStartElement("link");
+			theEventWriter.writeAttribute("rel", theRel);
+			theEventWriter.writeAttribute("href", theStringDt.getValue());
+		}
+	}
+
+	private void writeOptionalTagWithTextNode(XMLStreamWriter theEventWriter, String theTagName, InstantDt theInstantDt) throws XMLStreamException {
+		if (theInstantDt.getValue() != null) {
+			theEventWriter.writeStartElement(theTagName);
+			theEventWriter.writeCharacters(theInstantDt.getValueAsString());
+			theEventWriter.writeEndElement();
+		}
+	}
+
+	private void writeOptionalTagWithTextNode(XMLStreamWriter theEventWriter, String theElementName, StringDt theTextValue) throws XMLStreamException {
+		if (StringUtils.isNotBlank(theTextValue.getValue())) {
+			theEventWriter.writeStartElement(theElementName);
+			theEventWriter.writeCharacters(theTextValue.getValue());
+			theEventWriter.writeEndElement();
+		}
+	}
+
+	private void writeTagWithTextNode(XMLStreamWriter theEventWriter, String theElementName, StringDt theStringDt) throws XMLStreamException {
+		theEventWriter.writeStartElement(theElementName);
+		if (StringUtils.isNotBlank(theStringDt.getValue())) {
+			theEventWriter.writeCharacters(theStringDt.getValue());
+		}
+		theEventWriter.writeEndElement();
 	}
 }

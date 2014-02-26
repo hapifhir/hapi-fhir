@@ -1,0 +1,805 @@
+<?xml version="1.0"?>
+<?mso-application progid="Excel.Sheet"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:o="urn:schemas-microsoft-com:office:office"
+ xmlns:x="urn:schemas-microsoft-com:office:excel"
+ xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:html="http://www.w3.org/TR/REC-html40">
+ <DocumentProperties xmlns="urn:schemas-microsoft-com:office:office">
+  <Author>Grahame</Author>
+  <LastAuthor>Brian Postlethwaite</LastAuthor>
+  <Created>2012-03-19T11:25:18Z</Created>
+  <LastSaved>2013-12-09T04:14:32Z</LastSaved>
+  <Version>14.00</Version>
+ </DocumentProperties>
+ <OfficeDocumentSettings xmlns="urn:schemas-microsoft-com:office:office">
+  <AllowPNG/>
+ </OfficeDocumentSettings>
+ <ExcelWorkbook xmlns="urn:schemas-microsoft-com:office:excel">
+  <WindowHeight>12240</WindowHeight>
+  <WindowWidth>19440</WindowWidth>
+  <WindowTopX>480</WindowTopX>
+  <WindowTopY>90</WindowTopY>
+  <ProtectStructure>False</ProtectStructure>
+  <ProtectWindows>False</ProtectWindows>
+ </ExcelWorkbook>
+ <Styles>
+  <Style ss:ID="Default" ss:Name="Normal">
+   <Alignment ss:Vertical="Bottom"/>
+   <Borders/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"/>
+   <Interior/>
+   <NumberFormat/>
+   <Protection/>
+  </Style>
+  <Style ss:ID="s62" ss:Name="Goed">
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="12" ss:Color="#008000"/>
+   <Interior ss:Color="#CCFFCC" ss:Pattern="Solid"/>
+  </Style>
+  <Style ss:ID="s63" ss:Name="Normal 2">
+   <Alignment ss:Vertical="Bottom"/>
+   <Borders/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"/>
+   <Interior/>
+   <NumberFormat/>
+   <Protection/>
+  </Style>
+  <Style ss:ID="s64">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:ShrinkToFit="1"
+    ss:WrapText="1"/>
+  </Style>
+  <Style ss:ID="s65">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:ShrinkToFit="1"
+    ss:WrapText="1"/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"
+    ss:Bold="1"/>
+  </Style>
+  <Style ss:ID="s66">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:ShrinkToFit="1"
+    ss:WrapText="1"/>
+   <Borders>
+    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1"/>
+   </Borders>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"
+    ss:Bold="1"/>
+   <Interior ss:Color="#EEECE1" ss:Pattern="Solid"/>
+  </Style>
+  <Style ss:ID="s67">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:ShrinkToFit="1"
+    ss:WrapText="1"/>
+   <Interior ss:Color="#D9D9D9" ss:Pattern="Solid"/>
+  </Style>
+  <Style ss:ID="s68">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:WrapText="1"/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"
+    ss:Bold="1"/>
+  </Style>
+  <Style ss:ID="s70" ss:Parent="s62">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:ShrinkToFit="1"
+    ss:WrapText="1"/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="12" ss:Color="#000000"/>
+   <Interior/>
+  </Style>
+  <Style ss:ID="s71">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:ShrinkToFit="1"
+    ss:WrapText="1"/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"/>
+   <Interior/>
+  </Style>
+  <Style ss:ID="s74" ss:Parent="s63">
+   <Alignment ss:Vertical="Top" ss:WrapText="1"/>
+   <Interior/>
+  </Style>
+  <Style ss:ID="s75" ss:Parent="s63">
+   <Alignment ss:Vertical="Top" ss:WrapText="1"/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"/>
+   <Interior/>
+  </Style>
+  <Style ss:ID="s76">
+   <Alignment ss:Vertical="Bottom" ss:ShrinkToFit="1" ss:WrapText="1"/>
+  </Style>
+  <Style ss:ID="s77">
+   <Alignment ss:Vertical="Top"/>
+  </Style>
+  <Style ss:ID="s78">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:ShrinkToFit="1"
+    ss:WrapText="1"/>
+   <Borders/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"
+    ss:Bold="1"/>
+   <Interior ss:Color="#EEECE1" ss:Pattern="Solid"/>
+  </Style>
+  <Style ss:ID="s79">
+   <Alignment ss:Vertical="Top" ss:WrapText="1"/>
+  </Style>
+  <Style ss:ID="s80">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Bottom"/>
+  </Style>
+ </Styles>
+ <Worksheet ss:Name="Data Elements">
+  <Table ss:ExpandedColumnCount="19" ss:ExpandedRowCount="19" x:FullColumns="1"
+   x:FullRows="1" ss:StyleID="s64" ss:DefaultRowHeight="15">
+   <Column ss:StyleID="s65" ss:AutoFitWidth="0" ss:Width="340.5"/>
+   <Column ss:StyleID="s64" ss:AutoFitWidth="0" ss:Width="33.75"/>
+   <Column ss:StyleID="s64" ss:AutoFitWidth="0" ss:Width="33" ss:Span="2"/>
+   <Column ss:Index="6" ss:StyleID="s64" ss:AutoFitWidth="0" ss:Width="120"/>
+   <Column ss:StyleID="s64" ss:AutoFitWidth="0" ss:Width="102"/>
+   <Column ss:StyleID="s64" ss:AutoFitWidth="0" ss:Width="213.75" ss:Span="1"/>
+   <Column ss:Index="10" ss:StyleID="s64" ss:AutoFitWidth="0" ss:Width="161.25"
+    ss:Span="1"/>
+   <Column ss:Index="12" ss:StyleID="s64" ss:AutoFitWidth="0" ss:Width="69"/>
+   <Column ss:StyleID="s64" ss:AutoFitWidth="0" ss:Width="114"/>
+   <Column ss:StyleID="s64" ss:AutoFitWidth="0" ss:Width="135"/>
+   <Column ss:StyleID="s64" ss:AutoFitWidth="0" ss:Width="249.75"/>
+   <Column ss:StyleID="s64" ss:AutoFitWidth="0" ss:Width="135"/>
+   <Column ss:StyleID="s64" ss:AutoFitWidth="0" ss:Width="180.75"/>
+   <Row ss:AutoFitHeight="0" ss:Height="30" ss:StyleID="s66">
+    <Cell><Data ss:Type="String">Element</Data></Cell>
+    <Cell><Data ss:Type="String">Card.</Data></Cell>
+    <Cell><Data ss:Type="String">Inv.</Data></Cell>
+    <Cell><Data ss:Type="String">Is Modifier</Data></Cell>
+    <Cell><Data ss:Type="String">UML</Data></Cell>
+    <Cell><Data ss:Type="String">Type</Data></Cell>
+    <Cell><Data ss:Type="String">Binding</Data></Cell>
+    <Cell><Data ss:Type="String">Short Name</Data></Cell>
+    <Cell><Data ss:Type="String">Definition</Data></Cell>
+    <Cell><Data ss:Type="String">Requirements</Data></Cell>
+    <Cell><Data ss:Type="String">Comments</Data></Cell>
+    <Cell><Data ss:Type="String">Summary</Data></Cell>
+    <Cell><Data ss:Type="String">RIM Mapping</Data></Cell>
+    <Cell><Data ss:Type="String">v2 Mapping</Data></Cell>
+    <Cell><Data ss:Type="String">ServD Mapping</Data></Cell>
+    <Cell><Data ss:Type="String">To Do</Data></Cell>
+    <Cell><Data ss:Type="String">Committee Notes</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="45">
+    <Cell><Data ss:Type="String">Practitioner</Data></Cell>
+    <Cell ss:StyleID="s67"/>
+    <Cell ss:StyleID="s67"/>
+    <Cell ss:StyleID="s67"/>
+    <Cell ss:StyleID="s67"/>
+    <Cell><Data ss:Type="String">Resource</Data></Cell>
+    <Cell ss:Index="8"><Data ss:Type="String">A person with a  formal responsibility in the provisioning of healthcare or related services</Data></Cell>
+    <Cell><Data ss:Type="String">A person who is directly or indirectly involved in the provisioning of healthcare</Data></Cell>
+    <Cell><Data ss:Type="String">Need to track doctors, staff, locums etc. for both healthcare practitioners, funders, etc.</Data></Cell>
+    <Cell><Data ss:Type="String">Note that a cab driver no longer fits the bill. You probably would be interested in the organization rather than the individual?</Data></Cell>
+    <Cell ss:Index="13"><Data ss:Type="String">Role</Data></Cell>
+    <Cell><Data ss:Type="String">PRD (as one example)</Data></Cell>
+    <Cell><Data ss:Type="String">Provider</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="45">
+    <Cell><Data ss:Type="String">Practitioner.identifier</Data></Cell>
+    <Cell><Data ss:Type="String">0..*</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">Identifier</Data></Cell>
+    <Cell ss:Index="8"><Data ss:Type="String">A identifier for the person as this agent</Data></Cell>
+    <Cell><Data ss:Type="String">An identifier that applies to this person in this role</Data></Cell>
+    <Cell><Data ss:Type="String">Often, specific identities are assigned for the agent</Data></Cell>
+    <Cell ss:Index="12"><Data ss:Type="String">y</Data></Cell>
+    <Cell><Data ss:Type="String">./id</Data></Cell>
+    <Cell><Data ss:Type="String">PRD-7 (or XCN.1 Person Identifier)</Data></Cell>
+    <Cell><Data ss:Type="String">./Identifiers</Data></Cell>
+    <Cell ss:Index="17"><Data ss:Type="String">Under &quot;Comments&quot; it said: &quot;The identifier changes when a new/different person steps into the same role&quot;. This depends on business rules, I would assume a new instance is created instead.  did keep the text here just in case.</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="45">
+    <Cell ss:StyleID="s68"><Data ss:Type="String">Practitioner.name</Data></Cell>
+    <Cell ss:StyleID="s70"><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:StyleID="s71"/>
+    <Cell ss:StyleID="s70"/>
+    <Cell ss:StyleID="s70"/>
+    <Cell ss:StyleID="s70"><Data ss:Type="String">HumanName</Data></Cell>
+    <Cell ss:StyleID="s70"/>
+    <Cell ss:StyleID="s70"><Data ss:Type="String">A name associated with the person</Data></Cell>
+    <Cell ss:StyleID="s70"><Data ss:Type="String">A name associated with the person</Data></Cell>
+    <Cell ss:StyleID="s70"><Data ss:Type="String">Contact persons need to be identified by name, but it is uncommon to need details about multiple other names for that person</Data></Cell>
+    <Cell ss:StyleID="s71"/>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">y</Data></Cell>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">./name</Data></Cell>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">XCN Components</Data></Cell>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">./PreferredName (GivenNames, FamilyName, TitleCode)</Data></Cell>
+    <Cell ss:StyleID="s71"/>
+    <Cell ss:StyleID="s71"/>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="45">
+    <Cell ss:StyleID="s68"><Data ss:Type="String">Practitioner.telecom</Data></Cell>
+    <Cell ss:StyleID="s70"><Data ss:Type="String">0..*</Data></Cell>
+    <Cell ss:StyleID="s71"/>
+    <Cell ss:StyleID="s70"/>
+    <Cell ss:StyleID="s70"/>
+    <Cell ss:StyleID="s70"><Data ss:Type="String">Contact</Data></Cell>
+    <Cell ss:StyleID="s71"/>
+    <Cell ss:StyleID="s70"><Data ss:Type="String">A contact detail for the practitioner</Data></Cell>
+    <Cell ss:StyleID="s70"><Data ss:Type="String">A contact detail for the practitioner, e.g. a telephone number or an email address.</Data></Cell>
+    <Cell ss:StyleID="s70"><Data ss:Type="String">Need to know how to reach a practitioner</Data></Cell>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">Person may have multiple ways to be contacted with different uses or applicable periods. &#13;May need to have options for contacting the person urgently, and also to help with identification</Data></Cell>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">y</Data></Cell>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">./telecom</Data></Cell>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">PRT-15, STF-10, ROL-12</Data></Cell>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">./ContactPoints</Data></Cell>
+    <Cell ss:StyleID="s71"/>
+    <Cell ss:StyleID="s71"/>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="45">
+    <Cell ss:StyleID="s68"><Data ss:Type="String">Practitioner.address</Data></Cell>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:StyleID="s71"/>
+    <Cell ss:StyleID="s71"/>
+    <Cell ss:StyleID="s71"/>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">Address</Data></Cell>
+    <Cell ss:StyleID="s71"/>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">Where practitioner can be found/visited</Data></Cell>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">The postal address where the practitioner can be found or visited or to which mail can be delivered</Data></Cell>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">Need to keep track where the practitioner can found during work or for directing mail</Data></Cell>
+    <Cell ss:StyleID="s71"/>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">y</Data></Cell>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">./addr</Data></Cell>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">ORC-24, STF-11, ROL-11, PRT-14</Data></Cell>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">./Addresses</Data></Cell>
+    <Cell ss:StyleID="s71"/>
+    <Cell ss:StyleID="s71"/>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="45">
+    <Cell ss:StyleID="s68"><Data ss:Type="String">Practitioner.gender</Data></Cell>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:StyleID="s71"/>
+    <Cell ss:StyleID="s71"/>
+    <Cell ss:StyleID="s71"/>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">CodeableConcept</Data></Cell>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">AdministrativeGender</Data></Cell>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">Gender for administrative purposes</Data></Cell>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">Administrative Gender - the gender that the person is considered to have for administration and record keeping purposes. </Data></Cell>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">Needed to address the person correctly</Data></Cell>
+    <Cell ss:StyleID="s71"/>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">y</Data></Cell>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">./administrativeGender</Data></Cell>
+    <Cell ss:StyleID="s71"><Data ss:Type="String"> STF-5</Data></Cell>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">./GenderCode</Data></Cell>
+    <Cell ss:StyleID="s71"/>
+    <Cell ss:StyleID="s71"/>
+    <Cell ss:StyleID="s71"/>
+    <Cell ss:StyleID="s71"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="45">
+    <Cell ss:StyleID="s68"><Data ss:Type="String">Practitioner.birthDate</Data></Cell>
+    <Cell ss:StyleID="s70"><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:StyleID="s71"/>
+    <Cell ss:StyleID="s70"/>
+    <Cell ss:StyleID="s70"/>
+    <Cell ss:StyleID="s70"><Data ss:Type="String">dateTime</Data></Cell>
+    <Cell ss:StyleID="s71"/>
+    <Cell ss:StyleID="s70"><Data ss:Type="String">The date and time of birth for the practitioner</Data></Cell>
+    <Cell ss:StyleID="s70"><Data ss:Type="String">The date and time of birth for the practitioner</Data></Cell>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">Needed for identification</Data></Cell>
+    <Cell ss:StyleID="s71"/>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">y</Data></Cell>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">./birthTime</Data></Cell>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">STF-6</Data></Cell>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">(not represented in ServD)</Data></Cell>
+    <Cell ss:Index="17" ss:StyleID="Default"/>
+    <Cell ss:StyleID="s71"/>
+    <Cell ss:StyleID="Default"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="45">
+    <Cell ss:StyleID="s68"><Data ss:Type="String">Practitioner.photo</Data></Cell>
+    <Cell ss:StyleID="s70"><Data ss:Type="String">0..*</Data></Cell>
+    <Cell ss:StyleID="s71"/>
+    <Cell ss:StyleID="s70"/>
+    <Cell ss:StyleID="s70"/>
+    <Cell ss:StyleID="s70"><Data ss:Type="String">Attachment</Data></Cell>
+    <Cell ss:StyleID="s71"/>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">Image of the person</Data></Cell>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">Image of the person</Data></Cell>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">Many EHR systems have the capability to capture an image of patients and personnel. Fits with newer social media usage too.</Data></Cell>
+    <Cell ss:StyleID="s71"/>
+    <Cell ss:StyleID="s71"/>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">./subjectOf/ObservationEvent[code=&quot;photo&quot;]/value</Data></Cell>
+    <Cell ss:StyleID="s71"/>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">./ImageURI (only supports the URI reference)</Data></Cell>
+    <Cell ss:Index="17" ss:StyleID="Default"/>
+    <Cell ss:StyleID="s71"/>
+    <Cell ss:StyleID="Default"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="45">
+    <Cell><Data ss:Type="String">Practitioner.organization</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">Resource(Organization)</Data></Cell>
+    <Cell ss:Index="8"><Data ss:Type="String">The represented organization</Data></Cell>
+    <Cell><Data ss:Type="String">The organization that the practitioner represents</Data></Cell>
+    <Cell><Data ss:Type="String">Need to be able to track the represented organization separately, if any.</Data></Cell>
+    <Cell ss:Index="12"><Data ss:Type="String">y</Data></Cell>
+    <Cell><Data ss:Type="String">./scoper</Data></Cell>
+    <Cell><Data ss:Type="String">PRD-10 (-&gt; 14) / PRA-9-Institution / PRT-8-Participation Organization for person participation</Data></Cell>
+    <Cell><Data ss:Type="String">(ServD maps Practitioners and Organizations via another entity, so this concept is not available)</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="60">
+    <Cell><Data ss:Type="String">Practitioner.role</Data></Cell>
+    <Cell><Data ss:Type="String">0..*</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">CodeableConcept</Data></Cell>
+    <Cell><Data ss:Type="String">PractitionerRole</Data></Cell>
+    <Cell><Data ss:Type="String">Roles which this practitioner may perform</Data></Cell>
+    <Cell><Data ss:Type="String">Roles which this practitioner is authorized to perform for the organization</Data></Cell>
+    <Cell><Data ss:Type="String">Need to know what authority the practitioner has - what can they do?</Data></Cell>
+    <Cell><Data ss:Type="String">A person may have more than one role. At least one role is required.</Data></Cell>
+    <Cell><Data ss:Type="String">y</Data></Cell>
+    <Cell><Data ss:Type="String">./code</Data></Cell>
+    <Cell><Data ss:Type="String">PRD-1 / STF-18-job title / PRA-3-practitioner category  / PRT-4-Participation / ROL-3-role-ROL / ORC-12-ordering provider / OBR-16-ordering provider / PV1-7-attending doctor / PV1-8-referring doctor / PV1-9-consulting doctor / PV1-17-admitting doctor&#10;</Data></Cell>
+    <Cell><Data ss:Type="String">(ServD maps Practitioners and Organizations via another entity, so this concept is not available)</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="60">
+    <Cell><Data ss:Type="String">Practitioner.specialty</Data></Cell>
+    <Cell><Data ss:Type="String">0..*</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">CodeableConcept</Data></Cell>
+    <Cell><Data ss:Type="String">PractitionerSpecialty</Data></Cell>
+    <Cell><Data ss:Type="String">Specific specialty of the practitioner</Data></Cell>
+    <Cell><Data ss:Type="String">Specific specialty of the practitioner</Data></Cell>
+    <Cell ss:Index="12"><Data ss:Type="String">y</Data></Cell>
+    <Cell><Data ss:Type="String">indirectAuthority/QualifiedEntity[code &lt; Speciality]/code</Data></Cell>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">PRA-5-specialty</Data></Cell>
+    <Cell ss:StyleID="s75"><Data ss:Type="String">./Specialty</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="75">
+    <Cell><Data ss:Type="String">Practitioner.period</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">Period</Data></Cell>
+    <Cell ss:Index="8"><Data ss:Type="String">The period during which the practitioner is authorized to perform in these role(s)</Data></Cell>
+    <Cell><Data ss:Type="String">The period during which the person is authorized to act as a practitioner in these role(s) for the organization</Data></Cell>
+    <Cell><Data ss:Type="String">Even after the agencies is revoked, the fact that it existed must still be recorded</Data></Cell>
+    <Cell ss:Index="12"><Data ss:Type="String">y</Data></Cell>
+    <Cell><Data ss:Type="String">./effectiveTime</Data></Cell>
+    <Cell><Data ss:Type="String">PRD-8/9 / PRA-5.4-date of certification&#10;</Data></Cell>
+    <Cell><Data ss:Type="String">(ServD maps Practitioners and Organizations via another entity, so this concept is not available)</Data></Cell>
+    <Cell ss:Index="17"><Data ss:Type="String">Is this separate from the period of validity of the qualification?</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="75">
+    <Cell><Data ss:Type="String">Practitioner.location</Data></Cell>
+    <Cell><Data ss:Type="String">0..*</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">Resource(Location)</Data></Cell>
+    <Cell ss:Index="8"><Data ss:Type="String">The location(s) at which this practitioner provides care</Data></Cell>
+    <Cell><Data ss:Type="String">The location(s) at which this practitioner provides care</Data></Cell>
+    <Cell ss:Index="13"><Data ss:Type="String">./target[classCode=&quot;indirectAuthority].source[classCode=SDLOC]</Data></Cell>
+    <Cell ss:Index="15"><Data ss:Type="String">(ServD maps Practitioners and Organizations via another entity, so this concept is not available)&lt;br/&gt;&#10;However these are accessed via the Site.ServiceSite.ServiceSiteProvider record. (The Site has the location)</Data></Cell>
+   </Row>
+   <Row ss:Height="45">
+    <Cell><Data ss:Type="String">Practitioner.qualification</Data></Cell>
+    <Cell><Data ss:Type="String">0..*</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="String">right</Data></Cell>
+    <Cell ss:Index="8"><Data ss:Type="String">Qualifications obtained by training and certification</Data></Cell>
+    <Cell ss:Index="13"><Data ss:Type="String">./indirectAuthority/QualifiedEntity[code &lt; qualifiedEntity]</Data></Cell>
+    <Cell><Data ss:Type="String">CER?</Data></Cell>
+    <Cell><Data ss:Type="String">./Qualifications</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">Practitioner.qualification.code</Data></Cell>
+    <Cell><Data ss:Type="String">1..1</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">CodeableConcept</Data></Cell>
+    <Cell><Data ss:Type="String">Qualification</Data></Cell>
+    <Cell><Data ss:Type="String">Coded representation of the qualification</Data></Cell>
+    <Cell ss:Index="13"><Data ss:Type="String">./code</Data></Cell>
+    <Cell ss:StyleID="s74"/>
+    <Cell ss:StyleID="s75"><Data ss:Type="String">./Qualifications.Value</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="45">
+    <Cell><Data ss:Type="String">Practitioner.qualification.period</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">Period</Data></Cell>
+    <Cell ss:Index="8"><Data ss:Type="String">Period during which the qualification is valid</Data></Cell>
+    <Cell><Data ss:Type="String">Period during which the qualification is valid</Data></Cell>
+    <Cell><Data ss:Type="String">Qualifications are often for a limited period of time, and can be revoked.</Data></Cell>
+    <Cell ss:Index="13"><Data ss:Type="String">./effectiveTime</Data></Cell>
+    <Cell ss:Index="15"><Data ss:Type="String">./Qualifications.StartDate and ./Qualifications.EndDate</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">Practitioner.qualification.issuer</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">Resource(Organization)</Data></Cell>
+    <Cell ss:Index="8"><Data ss:Type="String">Organization that regulates and issues the qualification</Data></Cell>
+    <Cell><Data ss:Type="String">Organization that regulates and issues the qualification</Data></Cell>
+    <Cell ss:Index="13"><Data ss:Type="String">./scoper</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">Practitioner.communication</Data></Cell>
+    <Cell ss:StyleID="s70"><Data ss:Type="String">0..*</Data></Cell>
+    <Cell ss:StyleID="s71"/>
+    <Cell ss:StyleID="s71"/>
+    <Cell ss:StyleID="s71"/>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">CodeableConcept</Data></Cell>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">Language</Data></Cell>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">A language the practitioner is able to use in patient communication</Data></Cell>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">A language the practitioner is able to use in patient communication</Data></Cell>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">Knowing which language a practitioner speaks can help in facilitating communication with patients</Data></Cell>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">The structure aa-BB with this exact casing is one the most widely used notations for locale. However not all systems actually code this but instead have it as free text. Hence CodeableConcept instead of code as the data type</Data></Cell>
+    <Cell ss:StyleID="s71"/>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">./languageCode</Data></Cell>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">PID-15, NK1-20, LAN-2</Data></Cell>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">./Languages.LanguageSpokenCode</Data></Cell>
+    <Cell ss:Index="17" ss:StyleID="s71"><Data ss:Type="String">Note: cannot be named &quot;language&quot; because of technical reasons</Data></Cell>
+   </Row>
+  </Table>
+  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+   <PageSetup>
+    <Header x:Margin="0.3"/>
+    <Footer x:Margin="0.3"/>
+    <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
+   </PageSetup>
+   <Unsynced/>
+   <Print>
+    <ValidPrinterInfo/>
+    <PaperSizeIndex>9</PaperSizeIndex>
+    <HorizontalResolution>600</HorizontalResolution>
+    <VerticalResolution>600</VerticalResolution>
+   </Print>
+   <Selected/>
+   <FreezePanes/>
+   <FrozenNoSplit/>
+   <SplitHorizontal>1</SplitHorizontal>
+   <TopRowBottomPane>1</TopRowBottomPane>
+   <SplitVertical>1</SplitVertical>
+   <LeftColumnRightPane>1</LeftColumnRightPane>
+   <ActivePane>0</ActivePane>
+   <Panes>
+    <Pane>
+     <Number>3</Number>
+    </Pane>
+    <Pane>
+     <Number>1</Number>
+    </Pane>
+    <Pane>
+     <Number>2</Number>
+    </Pane>
+    <Pane>
+     <Number>0</Number>
+    </Pane>
+   </Panes>
+   <ProtectObjects>False</ProtectObjects>
+   <ProtectScenarios>False</ProtectScenarios>
+  </WorksheetOptions>
+ </Worksheet>
+ <Worksheet ss:Name="Invariants">
+  <Table ss:ExpandedColumnCount="3" ss:ExpandedRowCount="1" x:FullColumns="1"
+   x:FullRows="1" ss:StyleID="s76" ss:DefaultRowHeight="15">
+   <Row ss:AutoFitHeight="0" ss:StyleID="s66">
+    <Cell><Data ss:Type="String">Name</Data></Cell>
+    <Cell><Data ss:Type="String">English</Data></Cell>
+    <Cell><Data ss:Type="String">OCL</Data></Cell>
+   </Row>
+  </Table>
+  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+   <PageSetup>
+    <Header x:Margin="0.3"/>
+    <Footer x:Margin="0.3"/>
+    <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
+   </PageSetup>
+   <Unsynced/>
+   <Panes>
+    <Pane>
+     <Number>3</Number>
+     <RangeSelection>R1</RangeSelection>
+    </Pane>
+   </Panes>
+   <ProtectObjects>False</ProtectObjects>
+   <ProtectScenarios>False</ProtectScenarios>
+  </WorksheetOptions>
+ </Worksheet>
+ <Worksheet ss:Name="Search">
+  <Table ss:ExpandedColumnCount="4" ss:ExpandedRowCount="10" x:FullColumns="1"
+   x:FullRows="1" ss:DefaultRowHeight="15">
+   <Column ss:AutoFitWidth="0" ss:Width="94.5"/>
+   <Column ss:AutoFitWidth="0" ss:Width="408.75"/>
+   <Column ss:Width="51"/>
+   <Column ss:AutoFitWidth="0" ss:Width="214.5"/>
+   <Row ss:AutoFitHeight="0" ss:StyleID="s66">
+    <Cell><Data ss:Type="String">Name</Data></Cell>
+    <Cell><Data ss:Type="String">Description</Data></Cell>
+    <Cell><Data ss:Type="String">Type</Data></Cell>
+    <Cell><Data ss:Type="String">Path</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">identifier</Data></Cell>
+    <Cell><Data ss:Type="String">A practitioner's Identifier</Data></Cell>
+    <Cell><Data ss:Type="String">token</Data></Cell>
+    <Cell><Data ss:Type="String">Practitioner.identifier</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">name</Data></Cell>
+    <Cell><Data ss:Type="String">A portion of either family or given name</Data></Cell>
+    <Cell><Data ss:Type="String">string</Data></Cell>
+    <Cell><Data ss:Type="String">Practitioner.name</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">family</Data></Cell>
+    <Cell><Data ss:Type="String">A portion of the family name</Data></Cell>
+    <Cell><Data ss:Type="String">string</Data></Cell>
+    <Cell><Data ss:Type="String">Practitioner.name</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">given</Data></Cell>
+    <Cell><Data ss:Type="String">A portion of the given name</Data></Cell>
+    <Cell><Data ss:Type="String">string</Data></Cell>
+    <Cell><Data ss:Type="String">Practitioner.name</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">phonetic</Data></Cell>
+    <Cell><Data ss:Type="String">A portion of either family or given name using some kind of phonetic matching algorithm</Data></Cell>
+    <Cell><Data ss:Type="String">string</Data></Cell>
+    <Cell><Data ss:Type="String">Practitioner.name</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">telecom</Data></Cell>
+    <Cell><Data ss:Type="String">The value in any kind of contact</Data></Cell>
+    <Cell><Data ss:Type="String">string</Data></Cell>
+    <Cell><Data ss:Type="String">Practitioner.telecom</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">address</Data></Cell>
+    <Cell><Data ss:Type="String">An address in any kind of address/part</Data></Cell>
+    <Cell><Data ss:Type="String">string</Data></Cell>
+    <Cell><Data ss:Type="String">Practitioner.address</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">gender</Data></Cell>
+    <Cell><Data ss:Type="String">Gender of the practitioner</Data></Cell>
+    <Cell><Data ss:Type="String">token</Data></Cell>
+    <Cell><Data ss:Type="String">Practitioner.gender</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">organization</Data></Cell>
+    <Cell><Data ss:Type="String">The identity of the organization the practitioner represents / acts on behalf of</Data></Cell>
+    <Cell><Data ss:Type="String">reference</Data></Cell>
+    <Cell><Data ss:Type="String">Practitioner.organization</Data></Cell>
+   </Row>
+  </Table>
+  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+   <PageSetup>
+    <Header x:Margin="0.3"/>
+    <Footer x:Margin="0.3"/>
+    <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
+   </PageSetup>
+   <Unsynced/>
+   <Panes>
+    <Pane>
+     <Number>3</Number>
+     <ActiveRow>9</ActiveRow>
+     <ActiveCol>1</ActiveCol>
+    </Pane>
+   </Panes>
+   <ProtectObjects>False</ProtectObjects>
+   <ProtectScenarios>False</ProtectScenarios>
+  </WorksheetOptions>
+ </Worksheet>
+ <Worksheet ss:Name="Bindings">
+  <Table ss:ExpandedColumnCount="7" ss:ExpandedRowCount="4" x:FullColumns="1"
+   x:FullRows="1" ss:StyleID="s77" ss:DefaultRowHeight="15">
+   <Column ss:StyleID="s77" ss:AutoFitWidth="0" ss:Width="132"/>
+   <Column ss:StyleID="s77" ss:Width="436.5"/>
+   <Column ss:StyleID="s77" ss:AutoFitWidth="0" ss:Width="52.5"/>
+   <Column ss:StyleID="s77" ss:AutoFitWidth="0" ss:Width="120.75"/>
+   <Column ss:StyleID="s77" ss:AutoFitWidth="0" ss:Width="222.75"/>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s66"><Data ss:Type="String">Binding Name</Data></Cell>
+    <Cell ss:StyleID="s66"><Data ss:Type="String">Definition</Data></Cell>
+    <Cell ss:StyleID="s66"><Data ss:Type="String">Binding</Data></Cell>
+    <Cell ss:StyleID="s66"><Data ss:Type="String">Example</Data></Cell>
+    <Cell ss:StyleID="s66"><Data ss:Type="String">Reference</Data></Cell>
+    <Cell ss:StyleID="s66"><Data ss:Type="String">Description</Data></Cell>
+    <Cell ss:StyleID="s78"><Data ss:Type="String">Comments</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="30">
+    <Cell ss:StyleID="s79"><Data ss:Type="String">PractitionerRole</Data></Cell>
+    <Cell ss:StyleID="s79"><Data ss:Type="String">The role a person plays representing an organization</Data></Cell>
+    <Cell ss:StyleID="s79"><Data ss:Type="String">value set</Data></Cell>
+    <Cell><Data ss:Type="String">y</Data></Cell>
+    <Cell><Data ss:Type="String">valueset-practitioner-role</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s64"><Data ss:Type="String">PractitionerSpecialty</Data></Cell>
+    <Cell ss:StyleID="s64"><Data ss:Type="String">Specific specialty associated with the agency</Data></Cell>
+    <Cell><Data ss:Type="String">value set</Data></Cell>
+    <Cell><Data ss:Type="String">y</Data></Cell>
+    <Cell><Data ss:Type="String">valueset-practitioner-specialty</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">Qualification</Data></Cell>
+    <Cell><Data ss:Type="String">Specific qualification the practitioner has to provide a service</Data></Cell>
+    <Cell><Data ss:Type="String">value set</Data></Cell>
+    <Cell><Data ss:Type="String">y</Data></Cell>
+    <Cell><Data ss:Type="String">valueset-anzsco-occupations</Data></Cell>
+   </Row>
+  </Table>
+  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+   <PageSetup>
+    <Header x:Margin="0.3"/>
+    <Footer x:Margin="0.3"/>
+    <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
+   </PageSetup>
+   <Unsynced/>
+   <Panes>
+    <Pane>
+     <Number>3</Number>
+     <ActiveRow>4</ActiveRow>
+     <ActiveCol>4</ActiveCol>
+    </Pane>
+   </Panes>
+   <ProtectObjects>False</ProtectObjects>
+   <ProtectScenarios>False</ProtectScenarios>
+  </WorksheetOptions>
+ </Worksheet>
+ <Worksheet ss:Name="Examples">
+  <Table ss:ExpandedColumnCount="6" ss:ExpandedRowCount="15" x:FullColumns="1"
+   x:FullRows="1" ss:DefaultRowHeight="15">
+   <Column ss:AutoFitWidth="0" ss:Width="77.25"/>
+   <Column ss:AutoFitWidth="0" ss:Width="127.5"/>
+   <Column ss:AutoFitWidth="0" ss:Width="69"/>
+   <Column ss:AutoFitWidth="0" ss:Width="210.75"/>
+   <Row ss:AutoFitHeight="0" ss:Height="30">
+    <Cell ss:StyleID="s66"><Data ss:Type="String">Name</Data></Cell>
+    <Cell ss:StyleID="s66"><Data ss:Type="String">Description</Data></Cell>
+    <Cell ss:StyleID="s66"><Data ss:Type="String">Identity</Data></Cell>
+    <Cell ss:StyleID="s66"><Data ss:Type="String">Filename</Data></Cell>
+    <Cell ss:StyleID="s66"><Data ss:Type="String">Type</Data></Cell>
+    <Cell ss:StyleID="s66"><Data ss:Type="String">In Book</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">General</Data></Cell>
+    <Cell><Data ss:Type="String">General Person Example</Data></Cell>
+    <Cell><Data ss:Type="String">example</Data></Cell>
+    <Cell><Data ss:Type="String">practitioner-example.xml</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">y</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">cda author</Data></Cell>
+    <Cell><Data ss:Type="String">CDA Example Author</Data></Cell>
+    <Cell ss:StyleID="s80"><Data ss:Type="String">xcda-author</Data></Cell>
+    <Cell><Data ss:Type="String">practitioner-example-xcda-author.xml</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">y</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">HL7</Data></Cell>
+    <Cell><Data ss:Type="String">HL7 Defined Practitioner Examples</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">practitioner-examples.xml</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">n</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">Dr. van den Broek</Data></Cell>
+    <Cell><Data ss:Type="String">Fictive KNO-physician</Data></Cell>
+    <Cell><Data ss:Type="String">f001</Data></Cell>
+    <Cell><Data ss:Type="String">practitioner-example-f001-evdb.xml</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">n</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">Dr. Voight</Data></Cell>
+    <Cell><Data ss:Type="String">Fictive Cardiothoracal surgeon</Data></Cell>
+    <Cell><Data ss:Type="String">f002</Data></Cell>
+    <Cell><Data ss:Type="String">practitioner-example-f002-pv.xml</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">n</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">Dr. Versteegh</Data></Cell>
+    <Cell><Data ss:Type="String">Fictive Cardiothoracal surgeon</Data></Cell>
+    <Cell><Data ss:Type="String">f003</Data></Cell>
+    <Cell><Data ss:Type="String">practitioner-example-f003-mv.xml</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">n</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">Dr. Briet</Data></Cell>
+    <Cell><Data ss:Type="String">Fictive KNO-physician</Data></Cell>
+    <Cell><Data ss:Type="String">f004</Data></Cell>
+    <Cell><Data ss:Type="String">practitioner-example-f004-rb.xml</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">n</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">Dr. Langeveld</Data></Cell>
+    <Cell><Data ss:Type="String">Fictive KNO-physician</Data></Cell>
+    <Cell><Data ss:Type="String">f005</Data></Cell>
+    <Cell><Data ss:Type="String">practitioner-example-f005-al.xml</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">n</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">Dr. Bronsig</Data></Cell>
+    <Cell><Data ss:Type="String">Fictive Oncologist/Pulmonologist</Data></Cell>
+    <Cell><Data ss:Type="String">f201</Data></Cell>
+    <Cell><Data ss:Type="String">practitioner-example-f201-ab.xml</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">n</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">Luigi Maas</Data></Cell>
+    <Cell><Data ss:Type="String">Fictive Lab worker</Data></Cell>
+    <Cell><Data ss:Type="String">f202</Data></Cell>
+    <Cell><Data ss:Type="String">practitioner-example-f202-lm.xml</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">n</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">Juri van Gelder</Data></Cell>
+    <Cell><Data ss:Type="String">Fictive Physiotherapist</Data></Cell>
+    <Cell><Data ss:Type="String">f203</Data></Cell>
+    <Cell><Data ss:Type="String">practitioner-example-f203-jvg.xml</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">n</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">Carla Espinosa</Data></Cell>
+    <Cell><Data ss:Type="String">Fictive Nurse</Data></Cell>
+    <Cell><Data ss:Type="String">f204</Data></Cell>
+    <Cell><Data ss:Type="String">practitioner-example-f204-ce.xml</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">n</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">Dr. van den Berk</Data></Cell>
+    <Cell><Data ss:Type="String">Fictive Pharmacist</Data></Cell>
+    <Cell><Data ss:Type="String">f006</Data></Cell>
+    <Cell><Data ss:Type="String">practitioner-example-f006-rvdb.xml</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">n</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">Dr. Heps</Data></Cell>
+    <Cell><Data ss:Type="String">Fictive physician</Data></Cell>
+    <Cell><Data ss:Type="String">f007</Data></Cell>
+    <Cell><Data ss:Type="String">practitioner-example-f007-sh.xml</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">n</Data></Cell>
+   </Row>
+  </Table>
+  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+   <PageSetup>
+    <Header x:Margin="0.3"/>
+    <Footer x:Margin="0.3"/>
+    <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
+   </PageSetup>
+   <Unsynced/>
+   <Panes>
+    <Pane>
+     <Number>3</Number>
+     <ActiveRow>6</ActiveRow>
+     <ActiveCol>1</ActiveCol>
+    </Pane>
+   </Panes>
+   <ProtectObjects>False</ProtectObjects>
+   <ProtectScenarios>False</ProtectScenarios>
+  </WorksheetOptions>
+ </Worksheet>
+ <Worksheet ss:Name="Events">
+  <Table ss:ExpandedColumnCount="7" ss:ExpandedRowCount="2" x:FullColumns="1"
+   x:FullRows="1" ss:DefaultRowHeight="15">
+   <Column ss:AutoFitWidth="0" ss:Width="69.75" ss:Span="1"/>
+   <Column ss:Index="3" ss:AutoFitWidth="0" ss:Width="93.75" ss:Span="1"/>
+   <Column ss:Index="5" ss:AutoFitWidth="0" ss:Width="101.25"/>
+   <Column ss:AutoFitWidth="0" ss:Width="111"/>
+   <Column ss:AutoFitWidth="0" ss:Width="69"/>
+   <Row ss:AutoFitHeight="0" ss:Height="22.5">
+    <Cell ss:StyleID="s79"><Data ss:Type="String">Event Code</Data></Cell>
+    <Cell ss:StyleID="s79"><Data ss:Type="String">Category</Data></Cell>
+    <Cell ss:StyleID="s79"><Data ss:Type="String">Description</Data></Cell>
+    <Cell ss:StyleID="s79"><Data ss:Type="String">Notes</Data></Cell>
+    <Cell ss:StyleID="s79"><Data ss:Type="String">Request Resources</Data></Cell>
+    <Cell ss:StyleID="s79"><Data ss:Type="String">Response Resources</Data></Cell>
+    <Cell ss:StyleID="s79"><Data ss:Type="String">Follow Ups</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s79"><Data ss:Type="String">admin-notify</Data></Cell>
+    <Cell ss:StyleID="s79"><Data ss:Type="String">Notification</Data></Cell>
+    <Cell ss:StyleID="s79"><Data ss:Type="String">(see Patient)</Data></Cell>
+    <Cell ss:StyleID="s79"/>
+    <Cell ss:StyleID="s79"><Data ss:Type="String">Practitioner</Data></Cell>
+   </Row>
+  </Table>
+  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+   <PageSetup>
+    <Header x:Margin="0.3"/>
+    <Footer x:Margin="0.3"/>
+    <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
+   </PageSetup>
+   <Unsynced/>
+   <Panes>
+    <Pane>
+     <Number>3</Number>
+     <ActiveRow>2</ActiveRow>
+     <ActiveCol>4</ActiveCol>
+    </Pane>
+   </Panes>
+   <ProtectObjects>False</ProtectObjects>
+   <ProtectScenarios>False</ProtectScenarios>
+  </WorksheetOptions>
+ </Worksheet>
+</Workbook>

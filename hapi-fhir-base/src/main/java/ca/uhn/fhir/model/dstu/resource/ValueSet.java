@@ -601,7 +601,7 @@ public class ValueSet implements IResource {
 	private BooleanDt myCaseSensitive;
 	
 	@Child(name="concept", order=3, min=0, max=Child.MAX_UNLIMITED)	
-	private List<Concept> myConcept;
+	private List<DefineConcept> myConcept;
 	
 	/**
 	 * Gets the value(s) for <b>system</b> (URI to identify the code system).
@@ -714,9 +714,9 @@ public class ValueSet implements IResource {
      * 
      * </p> 
 	 */
-	public List<Concept> getConcept() {  
+	public List<DefineConcept> getConcept() {  
 		if (myConcept == null) {
-			myConcept = new ArrayList<Concept>();
+			myConcept = new ArrayList<DefineConcept>();
 		}
 		return myConcept;
 	}
@@ -729,11 +729,12 @@ public class ValueSet implements IResource {
      * 
      * </p> 
 	 */
-	public void setConcept(List<Concept> theValue) {
+	public void setConcept(List<DefineConcept> theValue) {
 		myConcept = theValue;
 	}
 	
  
+
 	}
 
 	/**
@@ -745,7 +746,7 @@ public class ValueSet implements IResource {
      * </p> 
 	 */
 	@Block(name="ValueSet.define.concept")	
-	public static class Concept implements IResourceBlock {
+	public static class DefineConcept implements IResourceBlock {
 	
 	@Child(name="code", type=CodeDt.class, order=0, min=1, max=1)	
 	private CodeDt myCode;
@@ -759,8 +760,8 @@ public class ValueSet implements IResource {
 	@Child(name="definition", type=StringDt.class, order=3, min=0, max=1)	
 	private StringDt myDefinition;
 	
-	@Child(name="concept", type=Concept.class, order=4, min=0, max=Child.MAX_UNLIMITED)	
-	private List<Concept> myConcept;
+	@Child(name="concept", type=DefineConcept.class, order=4, min=0, max=Child.MAX_UNLIMITED)	
+	private List<DefineConcept> myConcept;
 	
 	/**
 	 * Gets the value(s) for <b>code</b> (Code that identifies concept).
@@ -914,9 +915,9 @@ public class ValueSet implements IResource {
      * 
      * </p> 
 	 */
-	public List<Concept> getConcept() {  
+	public List<DefineConcept> getConcept() {  
 		if (myConcept == null) {
-			myConcept = new ArrayList<Concept>();
+			myConcept = new ArrayList<DefineConcept>();
 		}
 		return myConcept;
 	}
@@ -929,12 +930,15 @@ public class ValueSet implements IResource {
      * 
      * </p> 
 	 */
-	public void setConcept(List<Concept> theValue) {
+	public void setConcept(List<DefineConcept> theValue) {
 		myConcept = theValue;
 	}
 	
  
+
 	}
+
+
 
 	/**
 	 * Block class for child element: <b>ValueSet.compose</b> (When value set includes codes from elsewhere)
@@ -951,10 +955,10 @@ public class ValueSet implements IResource {
 	private List<UriDt> myImport;
 	
 	@Child(name="include", order=1, min=0, max=Child.MAX_UNLIMITED)	
-	private List<Include> myInclude;
+	private List<ComposeInclude> myInclude;
 	
-	@Child(name="exclude", type=Include.class, order=2, min=0, max=Child.MAX_UNLIMITED)	
-	private List<Include> myExclude;
+	@Child(name="exclude", type=ComposeInclude.class, order=2, min=0, max=Child.MAX_UNLIMITED)	
+	private List<ComposeInclude> myExclude;
 	
 	/**
 	 * Gets the value(s) for <b>import</b> (Import the contents of another value set).
@@ -996,9 +1000,9 @@ public class ValueSet implements IResource {
      * Include one or more codes from a code system
      * </p> 
 	 */
-	public List<Include> getInclude() {  
+	public List<ComposeInclude> getInclude() {  
 		if (myInclude == null) {
-			myInclude = new ArrayList<Include>();
+			myInclude = new ArrayList<ComposeInclude>();
 		}
 		return myInclude;
 	}
@@ -1011,7 +1015,7 @@ public class ValueSet implements IResource {
      * Include one or more codes from a code system
      * </p> 
 	 */
-	public void setInclude(List<Include> theValue) {
+	public void setInclude(List<ComposeInclude> theValue) {
 		myInclude = theValue;
 	}
 	
@@ -1026,9 +1030,9 @@ public class ValueSet implements IResource {
      * Exclude one or more codes from the value set
      * </p> 
 	 */
-	public List<Include> getExclude() {  
+	public List<ComposeInclude> getExclude() {  
 		if (myExclude == null) {
-			myExclude = new ArrayList<Include>();
+			myExclude = new ArrayList<ComposeInclude>();
 		}
 		return myExclude;
 	}
@@ -1041,11 +1045,12 @@ public class ValueSet implements IResource {
      * Exclude one or more codes from the value set
      * </p> 
 	 */
-	public void setExclude(List<Include> theValue) {
+	public void setExclude(List<ComposeInclude> theValue) {
 		myExclude = theValue;
 	}
 	
  
+
 	}
 
 	/**
@@ -1057,7 +1062,7 @@ public class ValueSet implements IResource {
      * </p> 
 	 */
 	@Block(name="ValueSet.compose.include")	
-	public static class Include implements IResourceBlock {
+	public static class ComposeInclude implements IResourceBlock {
 	
 	@Child(name="system", type=UriDt.class, order=0, min=1, max=1)	
 	private UriDt mySystem;
@@ -1069,7 +1074,7 @@ public class ValueSet implements IResource {
 	private List<CodeDt> myCode;
 	
 	@Child(name="filter", order=3, min=0, max=Child.MAX_UNLIMITED)	
-	private List<Filter> myFilter;
+	private List<ComposeIncludeFilter> myFilter;
 	
 	/**
 	 * Gets the value(s) for <b>system</b> (The system the codes come from).
@@ -1182,9 +1187,9 @@ public class ValueSet implements IResource {
      * Select concepts by specify a matching criteria based on the properties (including relationships) defined by the system. If multiple filters are specified, they SHALL all be true.
      * </p> 
 	 */
-	public List<Filter> getFilter() {  
+	public List<ComposeIncludeFilter> getFilter() {  
 		if (myFilter == null) {
-			myFilter = new ArrayList<Filter>();
+			myFilter = new ArrayList<ComposeIncludeFilter>();
 		}
 		return myFilter;
 	}
@@ -1197,11 +1202,12 @@ public class ValueSet implements IResource {
      * Select concepts by specify a matching criteria based on the properties (including relationships) defined by the system. If multiple filters are specified, they SHALL all be true.
      * </p> 
 	 */
-	public void setFilter(List<Filter> theValue) {
+	public void setFilter(List<ComposeIncludeFilter> theValue) {
 		myFilter = theValue;
 	}
 	
  
+
 	}
 
 	/**
@@ -1213,7 +1219,7 @@ public class ValueSet implements IResource {
      * </p> 
 	 */
 	@Block(name="ValueSet.compose.include.filter")	
-	public static class Filter implements IResourceBlock {
+	public static class ComposeIncludeFilter implements IResourceBlock {
 	
 	@Child(name="property", type=CodeDt.class, order=0, min=1, max=1)	
 	private CodeDt myProperty;
@@ -1314,7 +1320,11 @@ public class ValueSet implements IResource {
 	}
 	
  
+
 	}
+
+
+
 
 	/**
 	 * Block class for child element: <b>ValueSet.expansion</b> (When value set is an expansion)
@@ -1334,7 +1344,7 @@ public class ValueSet implements IResource {
 	private InstantDt myTimestamp;
 	
 	@Child(name="contains", order=2, min=0, max=Child.MAX_UNLIMITED)	
-	private List<Contains> myContains;
+	private List<ExpansionContains> myContains;
 	
 	/**
 	 * Gets the value(s) for <b>identifier</b> (Uniquely identifies this expansion).
@@ -1406,9 +1416,9 @@ public class ValueSet implements IResource {
      * 
      * </p> 
 	 */
-	public List<Contains> getContains() {  
+	public List<ExpansionContains> getContains() {  
 		if (myContains == null) {
-			myContains = new ArrayList<Contains>();
+			myContains = new ArrayList<ExpansionContains>();
 		}
 		return myContains;
 	}
@@ -1421,11 +1431,12 @@ public class ValueSet implements IResource {
      * 
      * </p> 
 	 */
-	public void setContains(List<Contains> theValue) {
+	public void setContains(List<ExpansionContains> theValue) {
 		myContains = theValue;
 	}
 	
  
+
 	}
 
 	/**
@@ -1437,7 +1448,7 @@ public class ValueSet implements IResource {
      * </p> 
 	 */
 	@Block(name="ValueSet.expansion.contains")	
-	public static class Contains implements IResourceBlock {
+	public static class ExpansionContains implements IResourceBlock {
 	
 	@Child(name="system", type=UriDt.class, order=0, min=0, max=1)	
 	private UriDt mySystem;
@@ -1448,8 +1459,8 @@ public class ValueSet implements IResource {
 	@Child(name="display", type=StringDt.class, order=2, min=0, max=1)	
 	private StringDt myDisplay;
 	
-	@Child(name="contains", type=Contains.class, order=3, min=0, max=Child.MAX_UNLIMITED)	
-	private List<Contains> myContains;
+	@Child(name="contains", type=ExpansionContains.class, order=3, min=0, max=Child.MAX_UNLIMITED)	
+	private List<ExpansionContains> myContains;
 	
 	/**
 	 * Gets the value(s) for <b>system</b> (System value for the code).
@@ -1562,9 +1573,9 @@ public class ValueSet implements IResource {
      * 
      * </p> 
 	 */
-	public List<Contains> getContains() {  
+	public List<ExpansionContains> getContains() {  
 		if (myContains == null) {
-			myContains = new ArrayList<Contains>();
+			myContains = new ArrayList<ExpansionContains>();
 		}
 		return myContains;
 	}
@@ -1577,12 +1588,15 @@ public class ValueSet implements IResource {
      * 
      * </p> 
 	 */
-	public void setContains(List<Contains> theValue) {
+	public void setContains(List<ExpansionContains> theValue) {
 		myContains = theValue;
 	}
 	
  
+
 	}
+
+
 
 
 

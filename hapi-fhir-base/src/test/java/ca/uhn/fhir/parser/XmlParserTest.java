@@ -15,11 +15,76 @@ import org.xml.sax.SAXException;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.ResourceWithExtensionsA;
+import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.resource.Observation;
+import ca.uhn.fhir.model.dstu.resource.ValueSet;
 
 public class XmlParserTest {
 
+	@Test
+	public void testParseBundle() {
+		
+		//@formatter:off
+		String msg = "<feed xmlns=\"http://www.w3.org/2005/Atom\">\n" + 
+				"  <title>FHIR Core Valuesets</title>\n" + 
+				"  <id>http://hl7.org/fhir/profile/valuesets</id>\n" + 
+				"  <link href=\"http://hl7.org/implement/standards/fhir/valuesets.xml\" rel=\"self\"/>\n" + 
+				"  <updated>2014-02-10T04:11:24.435-00:00</updated>\n" + 
+				"  <entry>\n" + 
+				"    <title>Valueset &quot;256a5231-a2bb-49bd-9fea-f349d428b70d&quot; to support automated processing</title>\n" + 
+				"    <id>http://hl7.org/fhir/valueset/256a5231-a2bb-49bd-9fea-f349d428b70d</id>\n" + 
+				"    <link href=\"http://hl7.org/implement/standards/fhir/valueset/256a5231-a2bb-49bd-9fea-f349d428b70d\" rel=\"self\"/>\n" + 
+				"    <updated>2014-02-10T04:10:46.987-00:00</updated>\n" + 
+				"    <author>\n" + 
+				"      <name>HL7, Inc (FHIR Project)</name>\n" + 
+				"      <uri>http://hl7.org/fhir</uri>\n" + 
+				"    </author>\n" + 
+				"    <published>2014-02-10T04:10:46.987-00:00</published>\n" + 
+				"    <content type=\"text/xml\">\n" + 
+				"      <ValueSet xmlns=\"http://hl7.org/fhir\">\n" + 
+				"        <text>\n" + 
+				"          <status value=\"generated\"/>" +
+				"        </text>\n" + 
+				"        <identifier value=\"256a5231-a2bb-49bd-9fea-f349d428b70d\"/>\n" + 
+				"        <version value=\"20120613\"/>\n" + 
+				"        <name value=\"LOINC Codes for Cholesterol\"/>\n" + 
+				"        <publisher value=\"FHIR project team (example)\"/>\n" + 
+				"        <telecom>\n" + 
+				"          <system value=\"url\"/>\n" + 
+				"          <value value=\"http://hl7.org/fhir\"/>\n" + 
+				"        </telecom>\n" + 
+				"        <description value=\"This is an example value set that includes        all the LOINC codes for serum cholesterol from v2.36\"/>\n" + 
+				"        <status value=\"draft\"/>\n" + 
+				"        <experimental value=\"true\"/>\n" + 
+				"        <date value=\"2012-06-13\"/>\n" + 
+				"        <compose>\n" + 
+				"          <include>\n" + 
+				"            <system value=\"http://loinc.org\"/>\n" + 
+				"            <version value=\"2.36\"/>\n" + 
+				"            <code value=\"14647-2\"/>\n" + 
+				"            <code value=\"2093-3\"/>\n" + 
+				"            <code value=\"35200-5\"/>\n" + 
+				"            <code value=\"9342-7\"/>\n" + 
+				"          </include>\n" + 
+				"        </compose>\n" + 
+				"      </ValueSet>\n" + 
+				"    </content>\n" + 
+				"    <summary type=\"xhtml\"><div xmlns=\"http://www.w3.org/1999/xhtml\">\n" + 
+				"      <p>Value set &quot;LOINC Codes for Cholesterol&quot;: This is an example value set that includes \n" + 
+				"        all the LOINC codes for serum cholesterol from v2.36. \n" + 
+				"        Developed by: FHIR project team (example)</p>\n" + 
+				"    </summary>\n" + 
+				"  </entry>" +
+				"</feed>";
+		//@formatter:on
+		
+		XmlParser p = new FhirContext(ValueSet.class).newXmlParser();
+		Bundle bundle = p.parseBundle(msg);
+		
+		
+	}
+	
 	@Test
 	public void testLoadAndEncodeExtensions() throws ConfigurationException, DataFormatException, SAXException, IOException {
 		FhirContext ctx = new FhirContext(ResourceWithExtensionsA.class);

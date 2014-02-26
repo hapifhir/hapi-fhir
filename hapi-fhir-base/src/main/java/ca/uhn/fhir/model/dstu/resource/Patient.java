@@ -10,6 +10,10 @@
 
 
 
+
+
+
+
 package ca.uhn.fhir.model.dstu.resource;
 
 import java.util.*;
@@ -611,7 +615,6 @@ public class Patient implements IResource {
 	}
 	
  
-
 	/**
 	 * Block class for child element: <b>Patient.contact</b> (A contact party (e.g. guardian, partner, friend) for the patient)
 	 *
@@ -622,138 +625,96 @@ public class Patient implements IResource {
 	 */
 	@Block(name="Patient.contact")	
 	public static class Contact implements IResourceBlock {
-	@Child(name="identifier", type=IdentifierDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)	
-	private List<IdentifierDt> myIdentifier;
 	
-	@Child(name="name", type=HumanNameDt.class, order=1, min=0, max=Child.MAX_UNLIMITED)	
-	private List<HumanNameDt> myName;
+	@Child(name="relationship", type=CodeableConceptDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)	
+	private List<CodeableConceptDt> myRelationship;
+	
+	@Child(name="name", type=HumanNameDt.class, order=1, min=0, max=1)	
+	private HumanNameDt myName;
 	
 	@Child(name="telecom", type=ContactDt.class, order=2, min=0, max=Child.MAX_UNLIMITED)	
 	private List<ContactDt> myTelecom;
 	
-	@Child(name="gender", type=CodeableConceptDt.class, order=3, min=0, max=1)	
+	@Child(name="address", type=AddressDt.class, order=3, min=0, max=1)	
+	private AddressDt myAddress;
+	
+	@Child(name="gender", type=CodeableConceptDt.class, order=4, min=0, max=1)	
 	private CodeableConceptDt myGender;
 	
-	@Child(name="birthDate", type=DateTimeDt.class, order=4, min=0, max=1)	
-	private DateTimeDt myBirthDate;
-	
-	@Child(name="deceased", order=5, min=0, max=1, choice=@Choice(types= {
-		BooleanDt.class,
-		DateTimeDt.class,
-	}))	
-	private IDatatype myDeceased;
-	
-	@Child(name="address", type=AddressDt.class, order=6, min=0, max=Child.MAX_UNLIMITED)	
-	private List<AddressDt> myAddress;
-	
-	@Child(name="maritalStatus", type=CodeableConceptDt.class, order=7, min=0, max=1)	
-	private CodeableConceptDt myMaritalStatus;
-	
-	@Child(name="multipleBirth", order=8, min=0, max=1, choice=@Choice(types= {
-		BooleanDt.class,
-		IntegerDt.class,
-	}))	
-	private IDatatype myMultipleBirth;
-	
-	@Child(name="photo", type=AttachmentDt.class, order=9, min=0, max=Child.MAX_UNLIMITED)	
-	private List<AttachmentDt> myPhoto;
-	
-	@Child(name="contact", order=10, min=0, max=Child.MAX_UNLIMITED)	
-	private List<Contact> myContact;
-	
-	@Child(name="animal", order=11, min=0, max=1)	
-	private Animal myAnimal;
-	
-	@Child(name="communication", type=CodeableConceptDt.class, order=12, min=0, max=Child.MAX_UNLIMITED)	
-	private List<CodeableConceptDt> myCommunication;
-	
-	@Child(name="careProvider", order=13, min=0, max=Child.MAX_UNLIMITED)
-	@ChildResource(types= {
-		Organization.class,
-		Practitioner.class,
-	})	
-	private List<ResourceReference> myCareProvider;
-	
-	@Child(name="managingOrganization", order=14, min=0, max=1)
+	@Child(name="organization", order=5, min=0, max=1)
 	@ChildResource(types= {
 		Organization.class,
 	})	
-	private ResourceReference myManagingOrganization;
-	
-	@Child(name="link", order=15, min=0, max=Child.MAX_UNLIMITED)	
-	private List<Link> myLink;
-	
-	@Child(name="active", type=BooleanDt.class, order=16, min=0, max=1)	
-	private BooleanDt myActive;
+	private ResourceReference myOrganization;
 	
 	/**
-	 * Gets the value(s) for <b>identifier</b> (An identifier for the person as this patient).
+	 * Gets the value(s) for <b>relationship</b> (The kind of relationship).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
-     * An identifier that applies to this person as a patient
+     * The nature of the relationship between the patient and the contact person
      * </p> 
 	 */
-	public List<IdentifierDt> getIdentifier() {  
-		if (myIdentifier == null) {
-			myIdentifier = new ArrayList<IdentifierDt>();
+	public List<CodeableConceptDt> getRelationship() {  
+		if (myRelationship == null) {
+			myRelationship = new ArrayList<CodeableConceptDt>();
 		}
-		return myIdentifier;
+		return myRelationship;
 	}
 
 	/**
-	 * Sets the value(s) for <b>identifier</b> (An identifier for the person as this patient)
+	 * Sets the value(s) for <b>relationship</b> (The kind of relationship)
 	 *
      * <p>
      * <b>Definition:</b>
-     * An identifier that applies to this person as a patient
+     * The nature of the relationship between the patient and the contact person
      * </p> 
 	 */
-	public void setIdentifier(List<IdentifierDt> theValue) {
-		myIdentifier = theValue;
+	public void setRelationship(List<CodeableConceptDt> theValue) {
+		myRelationship = theValue;
 	}
 	
  
 	/**
-	 * Gets the value(s) for <b>name</b> (A name associated with the patient).
+	 * Gets the value(s) for <b>name</b> (A name associated with the person).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
-     * A name associated with the individual. 
+     * A name associated with the person
      * </p> 
 	 */
-	public List<HumanNameDt> getName() {  
+	public HumanNameDt getName() {  
 		if (myName == null) {
-			myName = new ArrayList<HumanNameDt>();
+			myName = new HumanNameDt();
 		}
 		return myName;
 	}
 
 	/**
-	 * Sets the value(s) for <b>name</b> (A name associated with the patient)
+	 * Sets the value(s) for <b>name</b> (A name associated with the person)
 	 *
      * <p>
      * <b>Definition:</b>
-     * A name associated with the individual. 
+     * A name associated with the person
      * </p> 
 	 */
-	public void setName(List<HumanNameDt> theValue) {
+	public void setName(HumanNameDt theValue) {
 		myName = theValue;
 	}
 	
  
 	/**
-	 * Gets the value(s) for <b>telecom</b> (A contact detail for the individual).
+	 * Gets the value(s) for <b>telecom</b> (A contact detail for the person).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
-     * A contact detail (e.g. a telephone number or an email address) by which the individual may be contacted. 
+     * A contact detail for the person, e.g. a telephone number or an email address.
      * </p> 
 	 */
 	public List<ContactDt> getTelecom() {  
@@ -764,15 +725,45 @@ public class Patient implements IResource {
 	}
 
 	/**
-	 * Sets the value(s) for <b>telecom</b> (A contact detail for the individual)
+	 * Sets the value(s) for <b>telecom</b> (A contact detail for the person)
 	 *
      * <p>
      * <b>Definition:</b>
-     * A contact detail (e.g. a telephone number or an email address) by which the individual may be contacted. 
+     * A contact detail for the person, e.g. a telephone number or an email address.
      * </p> 
 	 */
 	public void setTelecom(List<ContactDt> theValue) {
 		myTelecom = theValue;
+	}
+	
+ 
+	/**
+	 * Gets the value(s) for <b>address</b> (Address for the contact person).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Address for the contact person
+     * </p> 
+	 */
+	public AddressDt getAddress() {  
+		if (myAddress == null) {
+			myAddress = new AddressDt();
+		}
+		return myAddress;
+	}
+
+	/**
+	 * Sets the value(s) for <b>address</b> (Address for the contact person)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Address for the contact person
+     * </p> 
+	 */
+	public void setAddress(AddressDt theValue) {
+		myAddress = theValue;
 	}
 	
  
@@ -783,7 +774,7 @@ public class Patient implements IResource {
 	 *
      * <p>
      * <b>Definition:</b>
-     * Administrative Gender - the gender that the patient is considered to have for administration and record keeping purposes. 
+     * Administrative Gender - the gender that the person is considered to have for administration and record keeping purposes. 
      * </p> 
 	 */
 	public CodeableConceptDt getGender() {  
@@ -798,7 +789,7 @@ public class Patient implements IResource {
 	 *
      * <p>
      * <b>Definition:</b>
-     * Administrative Gender - the gender that the patient is considered to have for administration and record keeping purposes. 
+     * Administrative Gender - the gender that the person is considered to have for administration and record keeping purposes. 
      * </p> 
 	 */
 	public void setGender(CodeableConceptDt theValue) {
@@ -807,398 +798,38 @@ public class Patient implements IResource {
 	
  
 	/**
-	 * Gets the value(s) for <b>birthDate</b> (The date and time of birth for the individual).
+	 * Gets the value(s) for <b>organization</b> (Organization that is associated with the contact).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
-     * The date and time of birth for the individual
+     * Organization on behalf of which the contact is acting or for which the contact is working.
      * </p> 
 	 */
-	public DateTimeDt getBirthDate() {  
-		if (myBirthDate == null) {
-			myBirthDate = new DateTimeDt();
+	public ResourceReference getOrganization() {  
+		if (myOrganization == null) {
+			myOrganization = new ResourceReference();
 		}
-		return myBirthDate;
+		return myOrganization;
 	}
 
 	/**
-	 * Sets the value(s) for <b>birthDate</b> (The date and time of birth for the individual)
+	 * Sets the value(s) for <b>organization</b> (Organization that is associated with the contact)
 	 *
      * <p>
      * <b>Definition:</b>
-     * The date and time of birth for the individual
+     * Organization on behalf of which the contact is acting or for which the contact is working.
      * </p> 
 	 */
-	public void setBirthDate(DateTimeDt theValue) {
-		myBirthDate = theValue;
+	public void setOrganization(ResourceReference theValue) {
+		myOrganization = theValue;
 	}
 	
-	/**
-	 * Sets the value(s) for <b>birthDate</b> (The date and time of birth for the individual)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * The date and time of birth for the individual
-     * </p> 
-	 */
-	public void setBirthDateWithSecondsPrecision( Date theDate) {
-		myBirthDate = new DateTimeDt(theDate); 
-	}
  
-	/**
-	 * Gets the value(s) for <b>deceased[x]</b> (Indicates if the individual is deceased or not).
-	 * creating it if it does
-	 * not exist. Will not return <code>null</code>.
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * Indicates if the individual is deceased or not
-     * </p> 
-	 */
-	public IDatatype getDeceased() {  
-		return myDeceased;
+
 	}
 
-	/**
-	 * Sets the value(s) for <b>deceased[x]</b> (Indicates if the individual is deceased or not)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * Indicates if the individual is deceased or not
-     * </p> 
-	 */
-	public void setDeceased(IDatatype theValue) {
-		myDeceased = theValue;
-	}
-	
- 
-	/**
-	 * Gets the value(s) for <b>address</b> (Addresses for the individual).
-	 * creating it if it does
-	 * not exist. Will not return <code>null</code>.
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * Addresses for the individual
-     * </p> 
-	 */
-	public List<AddressDt> getAddress() {  
-		if (myAddress == null) {
-			myAddress = new ArrayList<AddressDt>();
-		}
-		return myAddress;
-	}
-
-	/**
-	 * Sets the value(s) for <b>address</b> (Addresses for the individual)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * Addresses for the individual
-     * </p> 
-	 */
-	public void setAddress(List<AddressDt> theValue) {
-		myAddress = theValue;
-	}
-	
- 
-	/**
-	 * Gets the value(s) for <b>maritalStatus</b> (Marital (civil) status of a person).
-	 * creating it if it does
-	 * not exist. Will not return <code>null</code>.
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * This field contains a patient's most recent marital (civil) status.
-     * </p> 
-	 */
-	public CodeableConceptDt getMaritalStatus() {  
-		if (myMaritalStatus == null) {
-			myMaritalStatus = new CodeableConceptDt();
-		}
-		return myMaritalStatus;
-	}
-
-	/**
-	 * Sets the value(s) for <b>maritalStatus</b> (Marital (civil) status of a person)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * This field contains a patient's most recent marital (civil) status.
-     * </p> 
-	 */
-	public void setMaritalStatus(CodeableConceptDt theValue) {
-		myMaritalStatus = theValue;
-	}
-	
- 
-	/**
-	 * Gets the value(s) for <b>multipleBirth[x]</b> (Whether patient is part of a multiple birth).
-	 * creating it if it does
-	 * not exist. Will not return <code>null</code>.
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * Indicates whether the patient is part of a multiple or indicates the actual birth order.
-     * </p> 
-	 */
-	public IDatatype getMultipleBirth() {  
-		return myMultipleBirth;
-	}
-
-	/**
-	 * Sets the value(s) for <b>multipleBirth[x]</b> (Whether patient is part of a multiple birth)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * Indicates whether the patient is part of a multiple or indicates the actual birth order.
-     * </p> 
-	 */
-	public void setMultipleBirth(IDatatype theValue) {
-		myMultipleBirth = theValue;
-	}
-	
- 
-	/**
-	 * Gets the value(s) for <b>photo</b> (Image of the person).
-	 * creating it if it does
-	 * not exist. Will not return <code>null</code>.
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * Image of the person
-     * </p> 
-	 */
-	public List<AttachmentDt> getPhoto() {  
-		if (myPhoto == null) {
-			myPhoto = new ArrayList<AttachmentDt>();
-		}
-		return myPhoto;
-	}
-
-	/**
-	 * Sets the value(s) for <b>photo</b> (Image of the person)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * Image of the person
-     * </p> 
-	 */
-	public void setPhoto(List<AttachmentDt> theValue) {
-		myPhoto = theValue;
-	}
-	
- 
-	/**
-	 * Gets the value(s) for <b>contact</b> (A contact party (e.g. guardian, partner, friend) for the patient).
-	 * creating it if it does
-	 * not exist. Will not return <code>null</code>.
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * A contact party (e.g. guardian, partner, friend) for the patient
-     * </p> 
-	 */
-	public List<Contact> getContact() {  
-		if (myContact == null) {
-			myContact = new ArrayList<Contact>();
-		}
-		return myContact;
-	}
-
-	/**
-	 * Sets the value(s) for <b>contact</b> (A contact party (e.g. guardian, partner, friend) for the patient)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * A contact party (e.g. guardian, partner, friend) for the patient
-     * </p> 
-	 */
-	public void setContact(List<Contact> theValue) {
-		myContact = theValue;
-	}
-	
- 
-	/**
-	 * Gets the value(s) for <b>animal</b> (If this patient is an animal (non-human)).
-	 * creating it if it does
-	 * not exist. Will not return <code>null</code>.
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * This element has a value if the patient is an animal
-     * </p> 
-	 */
-	public Animal getAnimal() {  
-		if (myAnimal == null) {
-			myAnimal = new Animal();
-		}
-		return myAnimal;
-	}
-
-	/**
-	 * Sets the value(s) for <b>animal</b> (If this patient is an animal (non-human))
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * This element has a value if the patient is an animal
-     * </p> 
-	 */
-	public void setAnimal(Animal theValue) {
-		myAnimal = theValue;
-	}
-	
- 
-	/**
-	 * Gets the value(s) for <b>communication</b> (Languages which may be used to communicate with the patient about his or her health).
-	 * creating it if it does
-	 * not exist. Will not return <code>null</code>.
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * Languages which may be used to communicate with the patient about his or her health
-     * </p> 
-	 */
-	public List<CodeableConceptDt> getCommunication() {  
-		if (myCommunication == null) {
-			myCommunication = new ArrayList<CodeableConceptDt>();
-		}
-		return myCommunication;
-	}
-
-	/**
-	 * Sets the value(s) for <b>communication</b> (Languages which may be used to communicate with the patient about his or her health)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * Languages which may be used to communicate with the patient about his or her health
-     * </p> 
-	 */
-	public void setCommunication(List<CodeableConceptDt> theValue) {
-		myCommunication = theValue;
-	}
-	
- 
-	/**
-	 * Gets the value(s) for <b>careProvider</b> (Patient's nominated care provider).
-	 * creating it if it does
-	 * not exist. Will not return <code>null</code>.
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * Patient's nominated care provider
-     * </p> 
-	 */
-	public List<ResourceReference> getCareProvider() {  
-		return myCareProvider;
-	}
-
-	/**
-	 * Sets the value(s) for <b>careProvider</b> (Patient's nominated care provider)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * Patient's nominated care provider
-     * </p> 
-	 */
-	public void setCareProvider(List<ResourceReference> theValue) {
-		myCareProvider = theValue;
-	}
-	
- 
-	/**
-	 * Gets the value(s) for <b>managingOrganization</b> (Organization that is the custodian of the patient record).
-	 * creating it if it does
-	 * not exist. Will not return <code>null</code>.
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * Organization that is the custodian of the patient record
-     * </p> 
-	 */
-	public ResourceReference getManagingOrganization() {  
-		if (myManagingOrganization == null) {
-			myManagingOrganization = new ResourceReference();
-		}
-		return myManagingOrganization;
-	}
-
-	/**
-	 * Sets the value(s) for <b>managingOrganization</b> (Organization that is the custodian of the patient record)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * Organization that is the custodian of the patient record
-     * </p> 
-	 */
-	public void setManagingOrganization(ResourceReference theValue) {
-		myManagingOrganization = theValue;
-	}
-	
- 
-	/**
-	 * Gets the value(s) for <b>link</b> (Link to another patient resource that concerns the same actual person).
-	 * creating it if it does
-	 * not exist. Will not return <code>null</code>.
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * Link to another patient resource that concerns the same actual person
-     * </p> 
-	 */
-	public List<Link> getLink() {  
-		if (myLink == null) {
-			myLink = new ArrayList<Link>();
-		}
-		return myLink;
-	}
-
-	/**
-	 * Sets the value(s) for <b>link</b> (Link to another patient resource that concerns the same actual person)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * Link to another patient resource that concerns the same actual person
-     * </p> 
-	 */
-	public void setLink(List<Link> theValue) {
-		myLink = theValue;
-	}
-	
- 
-	/**
-	 * Gets the value(s) for <b>active</b> (Whether this patient's record is in active use).
-	 * creating it if it does
-	 * not exist. Will not return <code>null</code>.
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * Whether this patient record is in active use
-     * </p> 
-	 */
-	public BooleanDt getActive() {  
-		if (myActive == null) {
-			myActive = new BooleanDt();
-		}
-		return myActive;
-	}
-
-	/**
-	 * Sets the value(s) for <b>active</b> (Whether this patient's record is in active use)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * Whether this patient record is in active use
-     * </p> 
-	 */
-	public void setActive(BooleanDt theValue) {
-		myActive = theValue;
-	}
-	
- 
-	}
 
 	/**
 	 * Block class for child element: <b>Patient.animal</b> (If this patient is an animal (non-human))
@@ -1210,583 +841,109 @@ public class Patient implements IResource {
 	 */
 	@Block(name="Patient.animal")	
 	public static class Animal implements IResourceBlock {
-	@Child(name="identifier", type=IdentifierDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)	
-	private List<IdentifierDt> myIdentifier;
 	
-	@Child(name="name", type=HumanNameDt.class, order=1, min=0, max=Child.MAX_UNLIMITED)	
-	private List<HumanNameDt> myName;
+	@Child(name="species", type=CodeableConceptDt.class, order=0, min=1, max=1)	
+	private CodeableConceptDt mySpecies;
 	
-	@Child(name="telecom", type=ContactDt.class, order=2, min=0, max=Child.MAX_UNLIMITED)	
-	private List<ContactDt> myTelecom;
+	@Child(name="breed", type=CodeableConceptDt.class, order=1, min=0, max=1)	
+	private CodeableConceptDt myBreed;
 	
-	@Child(name="gender", type=CodeableConceptDt.class, order=3, min=0, max=1)	
-	private CodeableConceptDt myGender;
-	
-	@Child(name="birthDate", type=DateTimeDt.class, order=4, min=0, max=1)	
-	private DateTimeDt myBirthDate;
-	
-	@Child(name="deceased", order=5, min=0, max=1, choice=@Choice(types= {
-		BooleanDt.class,
-		DateTimeDt.class,
-	}))	
-	private IDatatype myDeceased;
-	
-	@Child(name="address", type=AddressDt.class, order=6, min=0, max=Child.MAX_UNLIMITED)	
-	private List<AddressDt> myAddress;
-	
-	@Child(name="maritalStatus", type=CodeableConceptDt.class, order=7, min=0, max=1)	
-	private CodeableConceptDt myMaritalStatus;
-	
-	@Child(name="multipleBirth", order=8, min=0, max=1, choice=@Choice(types= {
-		BooleanDt.class,
-		IntegerDt.class,
-	}))	
-	private IDatatype myMultipleBirth;
-	
-	@Child(name="photo", type=AttachmentDt.class, order=9, min=0, max=Child.MAX_UNLIMITED)	
-	private List<AttachmentDt> myPhoto;
-	
-	@Child(name="contact", order=10, min=0, max=Child.MAX_UNLIMITED)	
-	private List<Contact> myContact;
-	
-	@Child(name="animal", order=11, min=0, max=1)	
-	private Animal myAnimal;
-	
-	@Child(name="communication", type=CodeableConceptDt.class, order=12, min=0, max=Child.MAX_UNLIMITED)	
-	private List<CodeableConceptDt> myCommunication;
-	
-	@Child(name="careProvider", order=13, min=0, max=Child.MAX_UNLIMITED)
-	@ChildResource(types= {
-		Organization.class,
-		Practitioner.class,
-	})	
-	private List<ResourceReference> myCareProvider;
-	
-	@Child(name="managingOrganization", order=14, min=0, max=1)
-	@ChildResource(types= {
-		Organization.class,
-	})	
-	private ResourceReference myManagingOrganization;
-	
-	@Child(name="link", order=15, min=0, max=Child.MAX_UNLIMITED)	
-	private List<Link> myLink;
-	
-	@Child(name="active", type=BooleanDt.class, order=16, min=0, max=1)	
-	private BooleanDt myActive;
+	@Child(name="genderStatus", type=CodeableConceptDt.class, order=2, min=0, max=1)	
+	private CodeableConceptDt myGenderStatus;
 	
 	/**
-	 * Gets the value(s) for <b>identifier</b> (An identifier for the person as this patient).
+	 * Gets the value(s) for <b>species</b> (E.g. Dog, Cow).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
-     * An identifier that applies to this person as a patient
+     * Identifies the high level categorization of the kind of animal
      * </p> 
 	 */
-	public List<IdentifierDt> getIdentifier() {  
-		if (myIdentifier == null) {
-			myIdentifier = new ArrayList<IdentifierDt>();
+	public CodeableConceptDt getSpecies() {  
+		if (mySpecies == null) {
+			mySpecies = new CodeableConceptDt();
 		}
-		return myIdentifier;
+		return mySpecies;
 	}
 
 	/**
-	 * Sets the value(s) for <b>identifier</b> (An identifier for the person as this patient)
+	 * Sets the value(s) for <b>species</b> (E.g. Dog, Cow)
 	 *
      * <p>
      * <b>Definition:</b>
-     * An identifier that applies to this person as a patient
+     * Identifies the high level categorization of the kind of animal
      * </p> 
 	 */
-	public void setIdentifier(List<IdentifierDt> theValue) {
-		myIdentifier = theValue;
+	public void setSpecies(CodeableConceptDt theValue) {
+		mySpecies = theValue;
 	}
 	
  
 	/**
-	 * Gets the value(s) for <b>name</b> (A name associated with the patient).
+	 * Gets the value(s) for <b>breed</b> (E.g. Poodle, Angus).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
-     * A name associated with the individual. 
+     * Identifies the detailed categorization of the kind of animal.
      * </p> 
 	 */
-	public List<HumanNameDt> getName() {  
-		if (myName == null) {
-			myName = new ArrayList<HumanNameDt>();
+	public CodeableConceptDt getBreed() {  
+		if (myBreed == null) {
+			myBreed = new CodeableConceptDt();
 		}
-		return myName;
+		return myBreed;
 	}
 
 	/**
-	 * Sets the value(s) for <b>name</b> (A name associated with the patient)
+	 * Sets the value(s) for <b>breed</b> (E.g. Poodle, Angus)
 	 *
      * <p>
      * <b>Definition:</b>
-     * A name associated with the individual. 
+     * Identifies the detailed categorization of the kind of animal.
      * </p> 
 	 */
-	public void setName(List<HumanNameDt> theValue) {
-		myName = theValue;
+	public void setBreed(CodeableConceptDt theValue) {
+		myBreed = theValue;
 	}
 	
  
 	/**
-	 * Gets the value(s) for <b>telecom</b> (A contact detail for the individual).
+	 * Gets the value(s) for <b>genderStatus</b> (E.g. Neutered, Intact).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
-     * A contact detail (e.g. a telephone number or an email address) by which the individual may be contacted. 
+     * Indicates the current state of the animal's reproductive organs
      * </p> 
 	 */
-	public List<ContactDt> getTelecom() {  
-		if (myTelecom == null) {
-			myTelecom = new ArrayList<ContactDt>();
+	public CodeableConceptDt getGenderStatus() {  
+		if (myGenderStatus == null) {
+			myGenderStatus = new CodeableConceptDt();
 		}
-		return myTelecom;
+		return myGenderStatus;
 	}
 
 	/**
-	 * Sets the value(s) for <b>telecom</b> (A contact detail for the individual)
+	 * Sets the value(s) for <b>genderStatus</b> (E.g. Neutered, Intact)
 	 *
      * <p>
      * <b>Definition:</b>
-     * A contact detail (e.g. a telephone number or an email address) by which the individual may be contacted. 
+     * Indicates the current state of the animal's reproductive organs
      * </p> 
 	 */
-	public void setTelecom(List<ContactDt> theValue) {
-		myTelecom = theValue;
+	public void setGenderStatus(CodeableConceptDt theValue) {
+		myGenderStatus = theValue;
 	}
 	
  
-	/**
-	 * Gets the value(s) for <b>gender</b> (Gender for administrative purposes).
-	 * creating it if it does
-	 * not exist. Will not return <code>null</code>.
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * Administrative Gender - the gender that the patient is considered to have for administration and record keeping purposes. 
-     * </p> 
-	 */
-	public CodeableConceptDt getGender() {  
-		if (myGender == null) {
-			myGender = new CodeableConceptDt();
-		}
-		return myGender;
+
 	}
 
-	/**
-	 * Sets the value(s) for <b>gender</b> (Gender for administrative purposes)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * Administrative Gender - the gender that the patient is considered to have for administration and record keeping purposes. 
-     * </p> 
-	 */
-	public void setGender(CodeableConceptDt theValue) {
-		myGender = theValue;
-	}
-	
- 
-	/**
-	 * Gets the value(s) for <b>birthDate</b> (The date and time of birth for the individual).
-	 * creating it if it does
-	 * not exist. Will not return <code>null</code>.
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * The date and time of birth for the individual
-     * </p> 
-	 */
-	public DateTimeDt getBirthDate() {  
-		if (myBirthDate == null) {
-			myBirthDate = new DateTimeDt();
-		}
-		return myBirthDate;
-	}
-
-	/**
-	 * Sets the value(s) for <b>birthDate</b> (The date and time of birth for the individual)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * The date and time of birth for the individual
-     * </p> 
-	 */
-	public void setBirthDate(DateTimeDt theValue) {
-		myBirthDate = theValue;
-	}
-	
-	/**
-	 * Sets the value(s) for <b>birthDate</b> (The date and time of birth for the individual)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * The date and time of birth for the individual
-     * </p> 
-	 */
-	public void setBirthDateWithSecondsPrecision( Date theDate) {
-		myBirthDate = new DateTimeDt(theDate); 
-	}
- 
-	/**
-	 * Gets the value(s) for <b>deceased[x]</b> (Indicates if the individual is deceased or not).
-	 * creating it if it does
-	 * not exist. Will not return <code>null</code>.
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * Indicates if the individual is deceased or not
-     * </p> 
-	 */
-	public IDatatype getDeceased() {  
-		return myDeceased;
-	}
-
-	/**
-	 * Sets the value(s) for <b>deceased[x]</b> (Indicates if the individual is deceased or not)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * Indicates if the individual is deceased or not
-     * </p> 
-	 */
-	public void setDeceased(IDatatype theValue) {
-		myDeceased = theValue;
-	}
-	
- 
-	/**
-	 * Gets the value(s) for <b>address</b> (Addresses for the individual).
-	 * creating it if it does
-	 * not exist. Will not return <code>null</code>.
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * Addresses for the individual
-     * </p> 
-	 */
-	public List<AddressDt> getAddress() {  
-		if (myAddress == null) {
-			myAddress = new ArrayList<AddressDt>();
-		}
-		return myAddress;
-	}
-
-	/**
-	 * Sets the value(s) for <b>address</b> (Addresses for the individual)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * Addresses for the individual
-     * </p> 
-	 */
-	public void setAddress(List<AddressDt> theValue) {
-		myAddress = theValue;
-	}
-	
- 
-	/**
-	 * Gets the value(s) for <b>maritalStatus</b> (Marital (civil) status of a person).
-	 * creating it if it does
-	 * not exist. Will not return <code>null</code>.
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * This field contains a patient's most recent marital (civil) status.
-     * </p> 
-	 */
-	public CodeableConceptDt getMaritalStatus() {  
-		if (myMaritalStatus == null) {
-			myMaritalStatus = new CodeableConceptDt();
-		}
-		return myMaritalStatus;
-	}
-
-	/**
-	 * Sets the value(s) for <b>maritalStatus</b> (Marital (civil) status of a person)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * This field contains a patient's most recent marital (civil) status.
-     * </p> 
-	 */
-	public void setMaritalStatus(CodeableConceptDt theValue) {
-		myMaritalStatus = theValue;
-	}
-	
- 
-	/**
-	 * Gets the value(s) for <b>multipleBirth[x]</b> (Whether patient is part of a multiple birth).
-	 * creating it if it does
-	 * not exist. Will not return <code>null</code>.
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * Indicates whether the patient is part of a multiple or indicates the actual birth order.
-     * </p> 
-	 */
-	public IDatatype getMultipleBirth() {  
-		return myMultipleBirth;
-	}
-
-	/**
-	 * Sets the value(s) for <b>multipleBirth[x]</b> (Whether patient is part of a multiple birth)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * Indicates whether the patient is part of a multiple or indicates the actual birth order.
-     * </p> 
-	 */
-	public void setMultipleBirth(IDatatype theValue) {
-		myMultipleBirth = theValue;
-	}
-	
- 
-	/**
-	 * Gets the value(s) for <b>photo</b> (Image of the person).
-	 * creating it if it does
-	 * not exist. Will not return <code>null</code>.
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * Image of the person
-     * </p> 
-	 */
-	public List<AttachmentDt> getPhoto() {  
-		if (myPhoto == null) {
-			myPhoto = new ArrayList<AttachmentDt>();
-		}
-		return myPhoto;
-	}
-
-	/**
-	 * Sets the value(s) for <b>photo</b> (Image of the person)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * Image of the person
-     * </p> 
-	 */
-	public void setPhoto(List<AttachmentDt> theValue) {
-		myPhoto = theValue;
-	}
-	
- 
-	/**
-	 * Gets the value(s) for <b>contact</b> (A contact party (e.g. guardian, partner, friend) for the patient).
-	 * creating it if it does
-	 * not exist. Will not return <code>null</code>.
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * A contact party (e.g. guardian, partner, friend) for the patient
-     * </p> 
-	 */
-	public List<Contact> getContact() {  
-		if (myContact == null) {
-			myContact = new ArrayList<Contact>();
-		}
-		return myContact;
-	}
-
-	/**
-	 * Sets the value(s) for <b>contact</b> (A contact party (e.g. guardian, partner, friend) for the patient)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * A contact party (e.g. guardian, partner, friend) for the patient
-     * </p> 
-	 */
-	public void setContact(List<Contact> theValue) {
-		myContact = theValue;
-	}
-	
- 
-	/**
-	 * Gets the value(s) for <b>animal</b> (If this patient is an animal (non-human)).
-	 * creating it if it does
-	 * not exist. Will not return <code>null</code>.
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * This element has a value if the patient is an animal
-     * </p> 
-	 */
-	public Animal getAnimal() {  
-		if (myAnimal == null) {
-			myAnimal = new Animal();
-		}
-		return myAnimal;
-	}
-
-	/**
-	 * Sets the value(s) for <b>animal</b> (If this patient is an animal (non-human))
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * This element has a value if the patient is an animal
-     * </p> 
-	 */
-	public void setAnimal(Animal theValue) {
-		myAnimal = theValue;
-	}
-	
- 
-	/**
-	 * Gets the value(s) for <b>communication</b> (Languages which may be used to communicate with the patient about his or her health).
-	 * creating it if it does
-	 * not exist. Will not return <code>null</code>.
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * Languages which may be used to communicate with the patient about his or her health
-     * </p> 
-	 */
-	public List<CodeableConceptDt> getCommunication() {  
-		if (myCommunication == null) {
-			myCommunication = new ArrayList<CodeableConceptDt>();
-		}
-		return myCommunication;
-	}
-
-	/**
-	 * Sets the value(s) for <b>communication</b> (Languages which may be used to communicate with the patient about his or her health)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * Languages which may be used to communicate with the patient about his or her health
-     * </p> 
-	 */
-	public void setCommunication(List<CodeableConceptDt> theValue) {
-		myCommunication = theValue;
-	}
-	
- 
-	/**
-	 * Gets the value(s) for <b>careProvider</b> (Patient's nominated care provider).
-	 * creating it if it does
-	 * not exist. Will not return <code>null</code>.
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * Patient's nominated care provider
-     * </p> 
-	 */
-	public List<ResourceReference> getCareProvider() {  
-		return myCareProvider;
-	}
-
-	/**
-	 * Sets the value(s) for <b>careProvider</b> (Patient's nominated care provider)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * Patient's nominated care provider
-     * </p> 
-	 */
-	public void setCareProvider(List<ResourceReference> theValue) {
-		myCareProvider = theValue;
-	}
-	
- 
-	/**
-	 * Gets the value(s) for <b>managingOrganization</b> (Organization that is the custodian of the patient record).
-	 * creating it if it does
-	 * not exist. Will not return <code>null</code>.
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * Organization that is the custodian of the patient record
-     * </p> 
-	 */
-	public ResourceReference getManagingOrganization() {  
-		if (myManagingOrganization == null) {
-			myManagingOrganization = new ResourceReference();
-		}
-		return myManagingOrganization;
-	}
-
-	/**
-	 * Sets the value(s) for <b>managingOrganization</b> (Organization that is the custodian of the patient record)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * Organization that is the custodian of the patient record
-     * </p> 
-	 */
-	public void setManagingOrganization(ResourceReference theValue) {
-		myManagingOrganization = theValue;
-	}
-	
- 
-	/**
-	 * Gets the value(s) for <b>link</b> (Link to another patient resource that concerns the same actual person).
-	 * creating it if it does
-	 * not exist. Will not return <code>null</code>.
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * Link to another patient resource that concerns the same actual person
-     * </p> 
-	 */
-	public List<Link> getLink() {  
-		if (myLink == null) {
-			myLink = new ArrayList<Link>();
-		}
-		return myLink;
-	}
-
-	/**
-	 * Sets the value(s) for <b>link</b> (Link to another patient resource that concerns the same actual person)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * Link to another patient resource that concerns the same actual person
-     * </p> 
-	 */
-	public void setLink(List<Link> theValue) {
-		myLink = theValue;
-	}
-	
- 
-	/**
-	 * Gets the value(s) for <b>active</b> (Whether this patient's record is in active use).
-	 * creating it if it does
-	 * not exist. Will not return <code>null</code>.
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * Whether this patient record is in active use
-     * </p> 
-	 */
-	public BooleanDt getActive() {  
-		if (myActive == null) {
-			myActive = new BooleanDt();
-		}
-		return myActive;
-	}
-
-	/**
-	 * Sets the value(s) for <b>active</b> (Whether this patient's record is in active use)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * Whether this patient record is in active use
-     * </p> 
-	 */
-	public void setActive(BooleanDt theValue) {
-		myActive = theValue;
-	}
-	
- 
-	}
 
 	/**
 	 * Block class for child element: <b>Patient.link</b> (Link to another patient resource that concerns the same actual person)
@@ -1798,583 +955,79 @@ public class Patient implements IResource {
 	 */
 	@Block(name="Patient.link")	
 	public static class Link implements IResourceBlock {
-	@Child(name="identifier", type=IdentifierDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)	
-	private List<IdentifierDt> myIdentifier;
 	
-	@Child(name="name", type=HumanNameDt.class, order=1, min=0, max=Child.MAX_UNLIMITED)	
-	private List<HumanNameDt> myName;
-	
-	@Child(name="telecom", type=ContactDt.class, order=2, min=0, max=Child.MAX_UNLIMITED)	
-	private List<ContactDt> myTelecom;
-	
-	@Child(name="gender", type=CodeableConceptDt.class, order=3, min=0, max=1)	
-	private CodeableConceptDt myGender;
-	
-	@Child(name="birthDate", type=DateTimeDt.class, order=4, min=0, max=1)	
-	private DateTimeDt myBirthDate;
-	
-	@Child(name="deceased", order=5, min=0, max=1, choice=@Choice(types= {
-		BooleanDt.class,
-		DateTimeDt.class,
-	}))	
-	private IDatatype myDeceased;
-	
-	@Child(name="address", type=AddressDt.class, order=6, min=0, max=Child.MAX_UNLIMITED)	
-	private List<AddressDt> myAddress;
-	
-	@Child(name="maritalStatus", type=CodeableConceptDt.class, order=7, min=0, max=1)	
-	private CodeableConceptDt myMaritalStatus;
-	
-	@Child(name="multipleBirth", order=8, min=0, max=1, choice=@Choice(types= {
-		BooleanDt.class,
-		IntegerDt.class,
-	}))	
-	private IDatatype myMultipleBirth;
-	
-	@Child(name="photo", type=AttachmentDt.class, order=9, min=0, max=Child.MAX_UNLIMITED)	
-	private List<AttachmentDt> myPhoto;
-	
-	@Child(name="contact", order=10, min=0, max=Child.MAX_UNLIMITED)	
-	private List<Contact> myContact;
-	
-	@Child(name="animal", order=11, min=0, max=1)	
-	private Animal myAnimal;
-	
-	@Child(name="communication", type=CodeableConceptDt.class, order=12, min=0, max=Child.MAX_UNLIMITED)	
-	private List<CodeableConceptDt> myCommunication;
-	
-	@Child(name="careProvider", order=13, min=0, max=Child.MAX_UNLIMITED)
+	@Child(name="other", order=0, min=1, max=1)
 	@ChildResource(types= {
-		Organization.class,
-		Practitioner.class,
+		Patient.class,
 	})	
-	private List<ResourceReference> myCareProvider;
+	private ResourceReference myOther;
 	
-	@Child(name="managingOrganization", order=14, min=0, max=1)
-	@ChildResource(types= {
-		Organization.class,
-	})	
-	private ResourceReference myManagingOrganization;
-	
-	@Child(name="link", order=15, min=0, max=Child.MAX_UNLIMITED)	
-	private List<Link> myLink;
-	
-	@Child(name="active", type=BooleanDt.class, order=16, min=0, max=1)	
-	private BooleanDt myActive;
+	@Child(name="type", type=CodeDt.class, order=1, min=1, max=1)	
+	private CodeDt myType;
 	
 	/**
-	 * Gets the value(s) for <b>identifier</b> (An identifier for the person as this patient).
+	 * Gets the value(s) for <b>other</b> (The other patient resource that the link refers to).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
-     * An identifier that applies to this person as a patient
+     * The other patient resource that the link refers to
      * </p> 
 	 */
-	public List<IdentifierDt> getIdentifier() {  
-		if (myIdentifier == null) {
-			myIdentifier = new ArrayList<IdentifierDt>();
+	public ResourceReference getOther() {  
+		if (myOther == null) {
+			myOther = new ResourceReference();
 		}
-		return myIdentifier;
+		return myOther;
 	}
 
 	/**
-	 * Sets the value(s) for <b>identifier</b> (An identifier for the person as this patient)
+	 * Sets the value(s) for <b>other</b> (The other patient resource that the link refers to)
 	 *
      * <p>
      * <b>Definition:</b>
-     * An identifier that applies to this person as a patient
+     * The other patient resource that the link refers to
      * </p> 
 	 */
-	public void setIdentifier(List<IdentifierDt> theValue) {
-		myIdentifier = theValue;
+	public void setOther(ResourceReference theValue) {
+		myOther = theValue;
 	}
 	
  
 	/**
-	 * Gets the value(s) for <b>name</b> (A name associated with the patient).
+	 * Gets the value(s) for <b>type</b> (replace | refer | seealso - type of link).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
-     * A name associated with the individual. 
+     * The type of link between this patient resource and another patient resource.
      * </p> 
 	 */
-	public List<HumanNameDt> getName() {  
-		if (myName == null) {
-			myName = new ArrayList<HumanNameDt>();
+	public CodeDt getType() {  
+		if (myType == null) {
+			myType = new CodeDt();
 		}
-		return myName;
+		return myType;
 	}
 
 	/**
-	 * Sets the value(s) for <b>name</b> (A name associated with the patient)
+	 * Sets the value(s) for <b>type</b> (replace | refer | seealso - type of link)
 	 *
      * <p>
      * <b>Definition:</b>
-     * A name associated with the individual. 
+     * The type of link between this patient resource and another patient resource.
      * </p> 
 	 */
-	public void setName(List<HumanNameDt> theValue) {
-		myName = theValue;
+	public void setType(CodeDt theValue) {
+		myType = theValue;
 	}
 	
  
-	/**
-	 * Gets the value(s) for <b>telecom</b> (A contact detail for the individual).
-	 * creating it if it does
-	 * not exist. Will not return <code>null</code>.
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * A contact detail (e.g. a telephone number or an email address) by which the individual may be contacted. 
-     * </p> 
-	 */
-	public List<ContactDt> getTelecom() {  
-		if (myTelecom == null) {
-			myTelecom = new ArrayList<ContactDt>();
-		}
-		return myTelecom;
+
 	}
 
-	/**
-	 * Sets the value(s) for <b>telecom</b> (A contact detail for the individual)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * A contact detail (e.g. a telephone number or an email address) by which the individual may be contacted. 
-     * </p> 
-	 */
-	public void setTelecom(List<ContactDt> theValue) {
-		myTelecom = theValue;
-	}
-	
- 
-	/**
-	 * Gets the value(s) for <b>gender</b> (Gender for administrative purposes).
-	 * creating it if it does
-	 * not exist. Will not return <code>null</code>.
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * Administrative Gender - the gender that the patient is considered to have for administration and record keeping purposes. 
-     * </p> 
-	 */
-	public CodeableConceptDt getGender() {  
-		if (myGender == null) {
-			myGender = new CodeableConceptDt();
-		}
-		return myGender;
-	}
-
-	/**
-	 * Sets the value(s) for <b>gender</b> (Gender for administrative purposes)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * Administrative Gender - the gender that the patient is considered to have for administration and record keeping purposes. 
-     * </p> 
-	 */
-	public void setGender(CodeableConceptDt theValue) {
-		myGender = theValue;
-	}
-	
- 
-	/**
-	 * Gets the value(s) for <b>birthDate</b> (The date and time of birth for the individual).
-	 * creating it if it does
-	 * not exist. Will not return <code>null</code>.
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * The date and time of birth for the individual
-     * </p> 
-	 */
-	public DateTimeDt getBirthDate() {  
-		if (myBirthDate == null) {
-			myBirthDate = new DateTimeDt();
-		}
-		return myBirthDate;
-	}
-
-	/**
-	 * Sets the value(s) for <b>birthDate</b> (The date and time of birth for the individual)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * The date and time of birth for the individual
-     * </p> 
-	 */
-	public void setBirthDate(DateTimeDt theValue) {
-		myBirthDate = theValue;
-	}
-	
-	/**
-	 * Sets the value(s) for <b>birthDate</b> (The date and time of birth for the individual)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * The date and time of birth for the individual
-     * </p> 
-	 */
-	public void setBirthDateWithSecondsPrecision( Date theDate) {
-		myBirthDate = new DateTimeDt(theDate); 
-	}
- 
-	/**
-	 * Gets the value(s) for <b>deceased[x]</b> (Indicates if the individual is deceased or not).
-	 * creating it if it does
-	 * not exist. Will not return <code>null</code>.
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * Indicates if the individual is deceased or not
-     * </p> 
-	 */
-	public IDatatype getDeceased() {  
-		return myDeceased;
-	}
-
-	/**
-	 * Sets the value(s) for <b>deceased[x]</b> (Indicates if the individual is deceased or not)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * Indicates if the individual is deceased or not
-     * </p> 
-	 */
-	public void setDeceased(IDatatype theValue) {
-		myDeceased = theValue;
-	}
-	
- 
-	/**
-	 * Gets the value(s) for <b>address</b> (Addresses for the individual).
-	 * creating it if it does
-	 * not exist. Will not return <code>null</code>.
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * Addresses for the individual
-     * </p> 
-	 */
-	public List<AddressDt> getAddress() {  
-		if (myAddress == null) {
-			myAddress = new ArrayList<AddressDt>();
-		}
-		return myAddress;
-	}
-
-	/**
-	 * Sets the value(s) for <b>address</b> (Addresses for the individual)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * Addresses for the individual
-     * </p> 
-	 */
-	public void setAddress(List<AddressDt> theValue) {
-		myAddress = theValue;
-	}
-	
- 
-	/**
-	 * Gets the value(s) for <b>maritalStatus</b> (Marital (civil) status of a person).
-	 * creating it if it does
-	 * not exist. Will not return <code>null</code>.
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * This field contains a patient's most recent marital (civil) status.
-     * </p> 
-	 */
-	public CodeableConceptDt getMaritalStatus() {  
-		if (myMaritalStatus == null) {
-			myMaritalStatus = new CodeableConceptDt();
-		}
-		return myMaritalStatus;
-	}
-
-	/**
-	 * Sets the value(s) for <b>maritalStatus</b> (Marital (civil) status of a person)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * This field contains a patient's most recent marital (civil) status.
-     * </p> 
-	 */
-	public void setMaritalStatus(CodeableConceptDt theValue) {
-		myMaritalStatus = theValue;
-	}
-	
- 
-	/**
-	 * Gets the value(s) for <b>multipleBirth[x]</b> (Whether patient is part of a multiple birth).
-	 * creating it if it does
-	 * not exist. Will not return <code>null</code>.
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * Indicates whether the patient is part of a multiple or indicates the actual birth order.
-     * </p> 
-	 */
-	public IDatatype getMultipleBirth() {  
-		return myMultipleBirth;
-	}
-
-	/**
-	 * Sets the value(s) for <b>multipleBirth[x]</b> (Whether patient is part of a multiple birth)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * Indicates whether the patient is part of a multiple or indicates the actual birth order.
-     * </p> 
-	 */
-	public void setMultipleBirth(IDatatype theValue) {
-		myMultipleBirth = theValue;
-	}
-	
- 
-	/**
-	 * Gets the value(s) for <b>photo</b> (Image of the person).
-	 * creating it if it does
-	 * not exist. Will not return <code>null</code>.
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * Image of the person
-     * </p> 
-	 */
-	public List<AttachmentDt> getPhoto() {  
-		if (myPhoto == null) {
-			myPhoto = new ArrayList<AttachmentDt>();
-		}
-		return myPhoto;
-	}
-
-	/**
-	 * Sets the value(s) for <b>photo</b> (Image of the person)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * Image of the person
-     * </p> 
-	 */
-	public void setPhoto(List<AttachmentDt> theValue) {
-		myPhoto = theValue;
-	}
-	
- 
-	/**
-	 * Gets the value(s) for <b>contact</b> (A contact party (e.g. guardian, partner, friend) for the patient).
-	 * creating it if it does
-	 * not exist. Will not return <code>null</code>.
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * A contact party (e.g. guardian, partner, friend) for the patient
-     * </p> 
-	 */
-	public List<Contact> getContact() {  
-		if (myContact == null) {
-			myContact = new ArrayList<Contact>();
-		}
-		return myContact;
-	}
-
-	/**
-	 * Sets the value(s) for <b>contact</b> (A contact party (e.g. guardian, partner, friend) for the patient)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * A contact party (e.g. guardian, partner, friend) for the patient
-     * </p> 
-	 */
-	public void setContact(List<Contact> theValue) {
-		myContact = theValue;
-	}
-	
- 
-	/**
-	 * Gets the value(s) for <b>animal</b> (If this patient is an animal (non-human)).
-	 * creating it if it does
-	 * not exist. Will not return <code>null</code>.
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * This element has a value if the patient is an animal
-     * </p> 
-	 */
-	public Animal getAnimal() {  
-		if (myAnimal == null) {
-			myAnimal = new Animal();
-		}
-		return myAnimal;
-	}
-
-	/**
-	 * Sets the value(s) for <b>animal</b> (If this patient is an animal (non-human))
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * This element has a value if the patient is an animal
-     * </p> 
-	 */
-	public void setAnimal(Animal theValue) {
-		myAnimal = theValue;
-	}
-	
- 
-	/**
-	 * Gets the value(s) for <b>communication</b> (Languages which may be used to communicate with the patient about his or her health).
-	 * creating it if it does
-	 * not exist. Will not return <code>null</code>.
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * Languages which may be used to communicate with the patient about his or her health
-     * </p> 
-	 */
-	public List<CodeableConceptDt> getCommunication() {  
-		if (myCommunication == null) {
-			myCommunication = new ArrayList<CodeableConceptDt>();
-		}
-		return myCommunication;
-	}
-
-	/**
-	 * Sets the value(s) for <b>communication</b> (Languages which may be used to communicate with the patient about his or her health)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * Languages which may be used to communicate with the patient about his or her health
-     * </p> 
-	 */
-	public void setCommunication(List<CodeableConceptDt> theValue) {
-		myCommunication = theValue;
-	}
-	
- 
-	/**
-	 * Gets the value(s) for <b>careProvider</b> (Patient's nominated care provider).
-	 * creating it if it does
-	 * not exist. Will not return <code>null</code>.
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * Patient's nominated care provider
-     * </p> 
-	 */
-	public List<ResourceReference> getCareProvider() {  
-		return myCareProvider;
-	}
-
-	/**
-	 * Sets the value(s) for <b>careProvider</b> (Patient's nominated care provider)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * Patient's nominated care provider
-     * </p> 
-	 */
-	public void setCareProvider(List<ResourceReference> theValue) {
-		myCareProvider = theValue;
-	}
-	
- 
-	/**
-	 * Gets the value(s) for <b>managingOrganization</b> (Organization that is the custodian of the patient record).
-	 * creating it if it does
-	 * not exist. Will not return <code>null</code>.
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * Organization that is the custodian of the patient record
-     * </p> 
-	 */
-	public ResourceReference getManagingOrganization() {  
-		if (myManagingOrganization == null) {
-			myManagingOrganization = new ResourceReference();
-		}
-		return myManagingOrganization;
-	}
-
-	/**
-	 * Sets the value(s) for <b>managingOrganization</b> (Organization that is the custodian of the patient record)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * Organization that is the custodian of the patient record
-     * </p> 
-	 */
-	public void setManagingOrganization(ResourceReference theValue) {
-		myManagingOrganization = theValue;
-	}
-	
- 
-	/**
-	 * Gets the value(s) for <b>link</b> (Link to another patient resource that concerns the same actual person).
-	 * creating it if it does
-	 * not exist. Will not return <code>null</code>.
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * Link to another patient resource that concerns the same actual person
-     * </p> 
-	 */
-	public List<Link> getLink() {  
-		if (myLink == null) {
-			myLink = new ArrayList<Link>();
-		}
-		return myLink;
-	}
-
-	/**
-	 * Sets the value(s) for <b>link</b> (Link to another patient resource that concerns the same actual person)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * Link to another patient resource that concerns the same actual person
-     * </p> 
-	 */
-	public void setLink(List<Link> theValue) {
-		myLink = theValue;
-	}
-	
- 
-	/**
-	 * Gets the value(s) for <b>active</b> (Whether this patient's record is in active use).
-	 * creating it if it does
-	 * not exist. Will not return <code>null</code>.
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * Whether this patient record is in active use
-     * </p> 
-	 */
-	public BooleanDt getActive() {  
-		if (myActive == null) {
-			myActive = new BooleanDt();
-		}
-		return myActive;
-	}
-
-	/**
-	 * Sets the value(s) for <b>active</b> (Whether this patient's record is in active use)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * Whether this patient record is in active use
-     * </p> 
-	 */
-	public void setActive(BooleanDt theValue) {
-		myActive = theValue;
-	}
-	
- 
-	}
 
 
 

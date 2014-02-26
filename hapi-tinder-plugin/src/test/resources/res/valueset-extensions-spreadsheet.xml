@@ -1,0 +1,357 @@
+<?xml version="1.0"?>
+<?mso-application progid="Excel.Sheet"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:o="urn:schemas-microsoft-com:office:office"
+ xmlns:x="urn:schemas-microsoft-com:office:excel"
+ xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:html="http://www.w3.org/TR/REC-html40">
+ <DocumentProperties xmlns="urn:schemas-microsoft-com:office:office">
+  <Author>Grahame</Author>
+  <LastAuthor>Lloyd McKenzie</LastAuthor>
+  <Created>2012-03-19T11:17:14Z</Created>
+  <LastSaved>2013-04-29T04:13:21Z</LastSaved>
+  <Version>14.00</Version>
+ </DocumentProperties>
+ <OfficeDocumentSettings xmlns="urn:schemas-microsoft-com:office:office">
+  <AllowPNG/>
+ </OfficeDocumentSettings>
+ <ExcelWorkbook xmlns="urn:schemas-microsoft-com:office:excel">
+  <WindowHeight>5970</WindowHeight>
+  <WindowWidth>15570</WindowWidth>
+  <WindowTopX>5520</WindowTopX>
+  <WindowTopY>6255</WindowTopY>
+  <ActiveSheet>2</ActiveSheet>
+  <ProtectStructure>False</ProtectStructure>
+  <ProtectWindows>False</ProtectWindows>
+ </ExcelWorkbook>
+ <Styles>
+  <Style ss:ID="Default" ss:Name="Normal">
+   <Alignment ss:Vertical="Bottom"/>
+   <Borders/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"/>
+   <Interior/>
+   <NumberFormat/>
+   <Protection/>
+  </Style>
+  <Style ss:ID="s62" ss:Name="Hyperlink">
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#0000FF"
+    ss:Underline="Single"/>
+  </Style>
+  <Style ss:ID="s63">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Bottom"/>
+   <Borders>
+    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1"/>
+   </Borders>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"
+    ss:Bold="1"/>
+   <Interior ss:Color="#F2F2F2" ss:Pattern="Solid"/>
+  </Style>
+  <Style ss:ID="s64">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Bottom"/>
+  </Style>
+  <Style ss:ID="s66" ss:Parent="s62">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Bottom"/>
+  </Style>
+  <Style ss:ID="s67">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Bottom"/>
+   <NumberFormat ss:Format="Short Date"/>
+  </Style>
+  <Style ss:ID="s69">
+   <Alignment ss:Vertical="Top" ss:WrapText="1"/>
+  </Style>
+  <Style ss:ID="s70">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:ShrinkToFit="1"
+    ss:WrapText="1"/>
+   <Borders>
+    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1"/>
+   </Borders>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"
+    ss:Bold="1"/>
+   <Interior ss:Color="#EEECE1" ss:Pattern="Solid"/>
+  </Style>
+  <Style ss:ID="s71">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:ShrinkToFit="1"
+    ss:WrapText="1"/>
+   <Borders/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"
+    ss:Bold="1"/>
+   <Interior ss:Color="#EEECE1" ss:Pattern="Solid"/>
+  </Style>
+  <Style ss:ID="s72">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:ShrinkToFit="1"
+    ss:WrapText="1"/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11"/>
+  </Style>
+  <Style ss:ID="s73">
+   <Alignment ss:Vertical="Top" ss:WrapText="1"/>
+   <Borders/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"/>
+   <Interior/>
+   <NumberFormat/>
+   <Protection/>
+  </Style>
+  <Style ss:ID="s74">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:ShrinkToFit="1"
+    ss:WrapText="1"/>
+  </Style>
+  <Style ss:ID="s75">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:ShrinkToFit="1"
+    ss:WrapText="1"/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"
+    ss:Bold="1"/>
+  </Style>
+  <Style ss:ID="s76">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:ShrinkToFit="1"
+    ss:WrapText="1"/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"/>
+  </Style>
+ </Styles>
+ <Worksheet ss:Name="Metadata">
+  <Table ss:ExpandedColumnCount="2" ss:ExpandedRowCount="14" x:FullColumns="1"
+   x:FullRows="1" ss:DefaultRowHeight="15">
+   <Column ss:Width="85.5"/>
+   <Column ss:AutoFitWidth="0" ss:Width="808.5"/>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">Name</Data></Cell>
+    <Cell ss:StyleID="s63"><Data ss:Type="String">Value</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s64"><Data ss:Type="String">id</Data></Cell>
+    <Cell ss:StyleID="s64"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s64"><Data ss:Type="String">name</Data></Cell>
+    <Cell ss:StyleID="s64"><Data ss:Type="String">ValueSet HL7 Extensions</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s64"><Data ss:Type="String">author.name</Data></Cell>
+    <Cell ss:StyleID="s64"><Data ss:Type="String">HL7</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s64"><Data ss:Type="String">author.reference</Data></Cell>
+    <Cell ss:StyleID="s66"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s64"><Data ss:Type="String">code</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s64"><Data ss:Type="String">description</Data></Cell>
+    <Cell ss:StyleID="s64"><Data ss:Type="String">Defines common extensions used with or related to the ValueSet resource</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s64"><Data ss:Type="String">status</Data></Cell>
+    <Cell ss:StyleID="s64"><Data ss:Type="String">draft</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s64"><Data ss:Type="String">date</Data></Cell>
+    <Cell ss:StyleID="s67"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s64"><Data ss:Type="String">profile</Data></Cell>
+    <Cell ss:StyleID="s64"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s64"><Data ss:Type="String">resource</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s64"><Data ss:Type="String">binding</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s64"><Data ss:Type="String">version</Data></Cell>
+    <Cell><Data ss:Type="String" x:Ticked="1">0.01</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s64"><Data ss:Type="String">extension.uri</Data></Cell>
+    <Cell ss:StyleID="s66" ss:HRef="http://hl7.org/fhir/extensions/ValueSet"><Data
+      ss:Type="String">http://hl7.org/fhir/extensions/ValueSet</Data></Cell>
+   </Row>
+  </Table>
+  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+   <PageSetup>
+    <Header x:Margin="0.3"/>
+    <Footer x:Margin="0.3"/>
+    <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
+   </PageSetup>
+   <Unsynced/>
+   <Panes>
+    <Pane>
+     <Number>3</Number>
+     <ActiveRow>13</ActiveRow>
+     <ActiveCol>1</ActiveCol>
+    </Pane>
+   </Panes>
+   <ProtectObjects>False</ProtectObjects>
+   <ProtectScenarios>False</ProtectScenarios>
+  </WorksheetOptions>
+ </Worksheet>
+ <Worksheet ss:Name="Bindings">
+  <Table ss:ExpandedColumnCount="7" ss:ExpandedRowCount="4" x:FullColumns="1"
+   x:FullRows="1" ss:StyleID="s69" ss:DefaultRowHeight="15">
+   <Column ss:StyleID="s69" ss:AutoFitWidth="0" ss:Width="112.5"/>
+   <Column ss:StyleID="s69" ss:AutoFitWidth="0" ss:Width="144.75"/>
+   <Column ss:StyleID="s69" ss:AutoFitWidth="0" ss:Width="65.25"/>
+   <Column ss:StyleID="s69" ss:AutoFitWidth="0" ss:Width="71.25"/>
+   <Column ss:StyleID="s69" ss:AutoFitWidth="0" ss:Width="219.75"/>
+   <Column ss:StyleID="s69" ss:AutoFitWidth="0" ss:Width="126.75"/>
+   <Column ss:StyleID="s69" ss:AutoFitWidth="0" ss:Width="168.75"/>
+   <Row ss:AutoFitHeight="0" ss:Height="30">
+    <Cell ss:StyleID="s70"><Data ss:Type="String">Binding Name</Data></Cell>
+    <Cell ss:StyleID="s70"><Data ss:Type="String">Definition</Data></Cell>
+    <Cell ss:StyleID="s70"><Data ss:Type="String">Binding</Data></Cell>
+    <Cell ss:StyleID="s70"><Data ss:Type="String">Binding Strength</Data></Cell>
+    <Cell ss:StyleID="s70"><Data ss:Type="String">Reference</Data></Cell>
+    <Cell ss:StyleID="s70"><Data ss:Type="String">Description</Data></Cell>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">Comments</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s72"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s73"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s74"/>
+   </Row>
+  </Table>
+  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+   <PageSetup>
+    <Header x:Margin="0.3"/>
+    <Footer x:Margin="0.3"/>
+    <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
+   </PageSetup>
+   <Unsynced/>
+   <Print>
+    <ValidPrinterInfo/>
+    <HorizontalResolution>600</HorizontalResolution>
+    <VerticalResolution>600</VerticalResolution>
+   </Print>
+   <Panes>
+    <Pane>
+     <Number>3</Number>
+     <ActiveRow>1</ActiveRow>
+     <RangeSelection>R2C1:R2C5</RangeSelection>
+    </Pane>
+   </Panes>
+   <ProtectObjects>False</ProtectObjects>
+   <ProtectScenarios>False</ProtectScenarios>
+  </WorksheetOptions>
+ </Worksheet>
+ <Worksheet ss:Name="Extensions">
+  <Table ss:ExpandedColumnCount="15" ss:ExpandedRowCount="6" x:FullColumns="1"
+   x:FullRows="1" ss:DefaultRowHeight="15">
+   <Column ss:Width="112.5"/>
+   <Column ss:AutoFitWidth="0" ss:Width="102.75"/>
+   <Column ss:AutoFitWidth="0" ss:Width="177.75"/>
+   <Column ss:AutoFitWidth="0" ss:Width="39"/>
+   <Column ss:Width="60"/>
+   <Column ss:Width="105"/>
+   <Column ss:AutoFitWidth="0" ss:Width="64.5"/>
+   <Column ss:AutoFitWidth="0" ss:Width="155.25"/>
+   <Column ss:AutoFitWidth="0" ss:Width="171"/>
+   <Column ss:Index="11" ss:AutoFitWidth="0" ss:Width="187.5"/>
+   <Row ss:AutoFitHeight="0" ss:Height="30">
+    <Cell ss:StyleID="s70"><Data ss:Type="String">Code</Data></Cell>
+    <Cell ss:StyleID="s70"><Data ss:Type="String">Context Type</Data></Cell>
+    <Cell ss:StyleID="s70"><Data ss:Type="String">Context</Data></Cell>
+    <Cell ss:StyleID="s70"><Data ss:Type="String">Card.</Data></Cell>
+    <Cell ss:StyleID="s70"><Data ss:Type="String">Type</Data></Cell>
+    <Cell ss:StyleID="s70"><Data ss:Type="String">Binding</Data></Cell>
+    <Cell ss:StyleID="s70"><Data ss:Type="String">Is Modifier</Data></Cell>
+    <Cell ss:StyleID="s70"><Data ss:Type="String">Short Name</Data></Cell>
+    <Cell ss:StyleID="s70"><Data ss:Type="String">Definition</Data></Cell>
+    <Cell ss:StyleID="s70"><Data ss:Type="String">Requirements</Data></Cell>
+    <Cell ss:StyleID="s70"><Data ss:Type="String">Comments</Data></Cell>
+    <Cell ss:StyleID="s70"><Data ss:Type="String">RIM Mapping</Data></Cell>
+    <Cell ss:StyleID="s70"><Data ss:Type="String">v2 Mapping</Data></Cell>
+    <Cell ss:StyleID="s70"><Data ss:Type="String">To Do</Data></Cell>
+    <Cell ss:StyleID="s70"><Data ss:Type="String">Committee Notes</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s75"><Data ss:Type="String">ordinalValue</Data></Cell>
+    <Cell ss:StyleID="s76"><Data ss:Type="String">Resource</Data></Cell>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">ValueSet.compose.include.code</Data></Cell>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">integer</Data></Cell>
+    <Cell ss:StyleID="s74"/>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">N</Data></Cell>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">Comparison value for ordinal codes</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s75"><Data ss:Type="String">conceptOrder</Data></Cell>
+    <Cell ss:StyleID="s76"><Data ss:Type="String">Resource</Data></Cell>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">ValueSet.compose.include.code</Data></Cell>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">integer</Data></Cell>
+    <Cell ss:StyleID="s74"/>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">N</Data></Cell>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">Appearance order for user selection</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s75"><Data ss:Type="String">display</Data></Cell>
+    <Cell ss:StyleID="s76"><Data ss:Type="String">Resource</Data></Cell>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">ValueSet.compose.include.code</Data></Cell>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">0..*</Data></Cell>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">string</Data></Cell>
+    <Cell ss:StyleID="s74"/>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">N</Data></Cell>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">Display value for the code</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s75"><Data ss:Type="String">systemName</Data></Cell>
+    <Cell ss:StyleID="s76"><Data ss:Type="String">Resource</Data></Cell>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">ValueSet.compose.include</Data></Cell>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">string</Data></Cell>
+    <Cell ss:Index="7" ss:StyleID="s74"><Data ss:Type="String">N</Data></Cell>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">Code system name</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s75"><Data ss:Type="String">systemRef</Data></Cell>
+    <Cell ss:StyleID="s76"><Data ss:Type="String">Resource</Data></Cell>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">ValueSet.compose.include</Data></Cell>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">uri</Data></Cell>
+    <Cell ss:Index="7" ss:StyleID="s74"><Data ss:Type="String">N</Data></Cell>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">Where to find code system</Data></Cell>
+   </Row>
+  </Table>
+  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+   <PageSetup>
+    <Header x:Margin="0.3"/>
+    <Footer x:Margin="0.3"/>
+    <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
+   </PageSetup>
+   <Unsynced/>
+   <Print>
+    <ValidPrinterInfo/>
+    <PaperSizeIndex>9</PaperSizeIndex>
+    <HorizontalResolution>-3</HorizontalResolution>
+    <VerticalResolution>-3</VerticalResolution>
+   </Print>
+   <Selected/>
+   <FreezePanes/>
+   <FrozenNoSplit/>
+   <SplitHorizontal>1</SplitHorizontal>
+   <TopRowBottomPane>1</TopRowBottomPane>
+   <SplitVertical>1</SplitVertical>
+   <LeftColumnRightPane>1</LeftColumnRightPane>
+   <ActivePane>0</ActivePane>
+   <Panes>
+    <Pane>
+     <Number>3</Number>
+    </Pane>
+    <Pane>
+     <Number>1</Number>
+    </Pane>
+    <Pane>
+     <Number>2</Number>
+    </Pane>
+    <Pane>
+     <Number>0</Number>
+    </Pane>
+   </Panes>
+   <ProtectObjects>False</ProtectObjects>
+   <ProtectScenarios>False</ProtectScenarios>
+  </WorksheetOptions>
+ </Worksheet>
+</Workbook>

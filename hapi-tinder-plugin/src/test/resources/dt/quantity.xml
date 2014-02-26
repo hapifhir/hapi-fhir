@@ -1,0 +1,408 @@
+<?xml version="1.0"?>
+<?mso-application progid="Excel.Sheet"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:o="urn:schemas-microsoft-com:office:office"
+ xmlns:x="urn:schemas-microsoft-com:office:excel"
+ xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:html="http://www.w3.org/TR/REC-html40">
+ <DocumentProperties xmlns="urn:schemas-microsoft-com:office:office">
+  <Author>Grahame</Author>
+  <LastAuthor>Grahame</LastAuthor>
+  <Created>2012-03-19T11:20:53Z</Created>
+  <LastSaved>2013-01-21T03:40:20Z</LastSaved>
+  <Version>14.00</Version>
+ </DocumentProperties>
+ <OfficeDocumentSettings xmlns="urn:schemas-microsoft-com:office:office">
+  <AllowPNG/>
+ </OfficeDocumentSettings>
+ <ExcelWorkbook xmlns="urn:schemas-microsoft-com:office:excel">
+  <WindowHeight>6510</WindowHeight>
+  <WindowWidth>23355</WindowWidth>
+  <WindowTopX>3405</WindowTopX>
+  <WindowTopY>2175</WindowTopY>
+  <ProtectStructure>False</ProtectStructure>
+  <ProtectWindows>False</ProtectWindows>
+ </ExcelWorkbook>
+ <Styles>
+  <Style ss:ID="Default" ss:Name="Normal">
+   <Alignment ss:Vertical="Bottom"/>
+   <Borders/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"/>
+   <Interior/>
+   <NumberFormat/>
+   <Protection/>
+  </Style>
+  <Style ss:ID="s62" ss:Name="Normal 2">
+   <Alignment ss:Vertical="Bottom"/>
+   <Borders/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"/>
+   <Interior/>
+   <NumberFormat/>
+   <Protection/>
+  </Style>
+  <Style ss:ID="s63">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:ShrinkToFit="1"
+    ss:WrapText="1"/>
+  </Style>
+  <Style ss:ID="s64">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:ShrinkToFit="1"
+    ss:WrapText="1"/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"
+    ss:Bold="1"/>
+  </Style>
+  <Style ss:ID="s65">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:ShrinkToFit="1"
+    ss:WrapText="1"/>
+   <Borders>
+    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1"/>
+   </Borders>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"
+    ss:Bold="1"/>
+   <Interior ss:Color="#EEECE1" ss:Pattern="Solid"/>
+  </Style>
+  <Style ss:ID="s66">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:ShrinkToFit="1"
+    ss:WrapText="1"/>
+   <Interior ss:Color="#D9D9D9" ss:Pattern="Solid"/>
+  </Style>
+  <Style ss:ID="s67">
+   <Alignment ss:Vertical="Top" ss:ShrinkToFit="1" ss:WrapText="1"/>
+  </Style>
+  <Style ss:ID="s68">
+   <Alignment ss:Vertical="Top" ss:WrapText="1"/>
+  </Style>
+  <Style ss:ID="s69">
+   <Alignment ss:Vertical="Top"/>
+  </Style>
+ </Styles>
+ <Worksheet ss:Name="Data Elements">
+  <Table ss:ExpandedColumnCount="14" ss:ExpandedRowCount="7" x:FullColumns="1"
+   x:FullRows="1" ss:StyleID="s63" ss:DefaultRowHeight="15">
+   <Column ss:StyleID="s64" ss:AutoFitWidth="0" ss:Width="150.75"/>
+   <Column ss:StyleID="s63" ss:AutoFitWidth="0" ss:Width="30.75"/>
+   <Column ss:StyleID="s63" ss:AutoFitWidth="0" ss:Width="24"/>
+   <Column ss:StyleID="s63" ss:AutoFitWidth="0" ss:Width="31.5"/>
+   <Column ss:StyleID="s63" ss:AutoFitWidth="0" ss:Width="56.25"/>
+   <Column ss:StyleID="s63" ss:AutoFitWidth="0" ss:Width="82.5"/>
+   <Column ss:StyleID="s63" ss:AutoFitWidth="0" ss:Width="213.75" ss:Span="1"/>
+   <Column ss:Index="9" ss:StyleID="s63" ss:AutoFitWidth="0" ss:Width="161.25"/>
+   <Column ss:StyleID="s63" ss:AutoFitWidth="0" ss:Width="114"/>
+   <Column ss:StyleID="s63" ss:AutoFitWidth="0" ss:Width="135" ss:Span="1"/>
+   <Row ss:AutoFitHeight="0" ss:Height="30" ss:StyleID="s65">
+    <Cell><Data ss:Type="String">Element</Data></Cell>
+    <Cell><Data ss:Type="String">Card.</Data></Cell>
+    <Cell><Data ss:Type="String">Inv.</Data></Cell>
+    <Cell><Data ss:Type="String">Is Modifier</Data></Cell>
+    <Cell><Data ss:Type="String">Type</Data></Cell>
+    <Cell><Data ss:Type="String">Binding</Data></Cell>
+    <Cell><Data ss:Type="String">Short Name</Data></Cell>
+    <Cell><Data ss:Type="String">Definition</Data></Cell>
+    <Cell><Data ss:Type="String">Requirements</Data></Cell>
+    <Cell><Data ss:Type="String">Comments</Data></Cell>
+    <Cell><Data ss:Type="String">RIM Mapping</Data></Cell>
+    <Cell><Data ss:Type="String">v2 Mapping</Data></Cell>
+    <Cell><Data ss:Type="String">To Do</Data></Cell>
+    <Cell><Data ss:Type="String">Committee Notes</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="120">
+    <Cell><Data ss:Type="String">Quantity</Data></Cell>
+    <Cell ss:StyleID="s66"/>
+    <Cell ss:StyleID="s66"/>
+    <Cell ss:StyleID="s66"/>
+    <Cell><Data ss:Type="String">Type</Data></Cell>
+    <Cell ss:Index="7"><Data ss:Type="String">A measured or measurable amount</Data></Cell>
+    <Cell><Data ss:Type="String">A measured amount (or an amount that can potentially be measured). Note that measured amounts include amounts that are not precisely quantified, including amounts involving arbitrary units and floating currencies</Data></Cell>
+    <Cell><Data ss:Type="String">Need to able to capture all sorts of measured values, even if the measured value are not precisely quantified. Values include exact measures such as 3.51g, customary units such as 3 tablets, and currencies such as $100.32USD</Data></Cell>
+    <Cell><Data ss:Type="String">The context of use may frequently define what kind of quantity this is and therefore what kind of units can be used. The context of use may also restrict the values for the comparator</Data></Cell>
+    <Cell><Data ss:Type="String">PQ, IVL&lt;PQ&gt;, MO, CO, depending on the values</Data></Cell>
+    <Cell><Data ss:Type="String">SN (see also Range) or CQ</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="81">
+    <Cell><Data ss:Type="String">Quantity.value</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="String">decimal</Data></Cell>
+    <Cell ss:Index="7"><Data ss:Type="String">Numerical value (with implicit precision)</Data></Cell>
+    <Cell><Data ss:Type="String">The value of the measured amount. The value includes an implicit precision in the presentation of the value</Data></Cell>
+    <Cell><Data ss:Type="String">Precision is handled implicitly in almost all cases of measurement</Data></Cell>
+    <Cell><Data ss:Type="String">The implicit precision in the value should always be honored. Monetary values have their own rules for handling precision (refer to standard accounting text books)</Data></Cell>
+    <Cell><Data ss:Type="String">PQ.value, CO.value, MO.value, IVL.high or IVL.low depending on the value</Data></Cell>
+    <Cell><Data ss:Type="String">SN.2  / CQ - N/A</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="75">
+    <Cell><Data ss:Type="String">Quantity.comparator</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Y</Data></Cell>
+    <Cell><Data ss:Type="String">code</Data></Cell>
+    <Cell><Data ss:Type="String">QuantityCompararator</Data></Cell>
+    <Cell><Data ss:Type="String">&lt; | &lt;= | &gt;= | &gt; - how to understand the value</Data></Cell>
+    <Cell><Data ss:Type="String">How the value should be understood and represented - whether the actual value is greater or less than the stated value due to measurement issues. E.g. if the comparator is &quot;&lt;&quot; , then the real value is &lt; stated value</Data></Cell>
+    <Cell><Data ss:Type="String">Need a framework for handling measures where the value is &lt;5ug/L or &gt;400mg/L due to the limitations of measuring methodology.  </Data></Cell>
+    <Cell><Data ss:Type="String">This is labeled as &quot;Is Modifier&quot; because the comparator modifies the interpretation of the value significantly. If there is no comparator, then there is no modification of the value</Data></Cell>
+    <Cell><Data ss:Type="String">IVL properties</Data></Cell>
+    <Cell><Data ss:Type="String">SN.1  / CQ.1</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="90">
+    <Cell><Data ss:Type="String">Quantity.units</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="String">string</Data></Cell>
+    <Cell ss:Index="7"><Data ss:Type="String">Unit representation</Data></Cell>
+    <Cell><Data ss:Type="String">A human-readable form of the units</Data></Cell>
+    <Cell><Data ss:Type="String">There are many representations for units and in many contexts, particular representations are fixed and required. I.e. mcg for micrograms</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">PQ.unit</Data></Cell>
+    <Cell><Data ss:Type="String">(see OBX.6 etc) / CQ.2</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="45">
+    <Cell><Data ss:Type="String">Quantity.system</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell><Data ss:Type="Number">3</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="String">uri</Data></Cell>
+    <Cell ss:Index="7"><Data ss:Type="String">System that defines coded unit form</Data></Cell>
+    <Cell><Data ss:Type="String">The identification of the system that provides the coded form of the unit</Data></Cell>
+    <Cell><Data ss:Type="String">Need to know the system that defines the coded form of the unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">CO.codeSystem, PQ.translation.codeSystem</Data></Cell>
+    <Cell><Data ss:Type="String">(see OBX.6 etc) / CQ.2</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="90">
+    <Cell><Data ss:Type="String">Quantity.code</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="String">code</Data></Cell>
+    <Cell ss:Index="7"><Data ss:Type="String">Coded form of the unit</Data></Cell>
+    <Cell><Data ss:Type="String">A computer processable form of the units in some unit representation system</Data></Cell>
+    <Cell><Data ss:Type="String">Need a computable form of the units that is fixed across all forms. UCUM provides this for quantities, but SNOMED CT provides many units of interest</Data></Cell>
+    <Cell><Data ss:Type="String">The preferred system is UCUM, but SNOMED CT can also be used (for customary units) or ISO 4217 for currency.&#10;&#10;The context of use may additionally require a code from a particular system (Unless the Quantity element has a dataAbsentReason flag)</Data></Cell>
+    <Cell><Data ss:Type="String">PQ.code, MO.currency, PQ.translation.code</Data></Cell>
+    <Cell><Data ss:Type="String">(see OBX.6 etc) / CQ.2</Data></Cell>
+   </Row>
+  </Table>
+  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+   <PageSetup>
+    <Header x:Margin="0.3"/>
+    <Footer x:Margin="0.3"/>
+    <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
+   </PageSetup>
+   <Unsynced/>
+   <Selected/>
+   <Panes>
+    <Pane>
+     <Number>3</Number>
+     <ActiveRow>6</ActiveRow>
+     <ActiveCol>9</ActiveCol>
+    </Pane>
+   </Panes>
+   <ProtectObjects>False</ProtectObjects>
+   <ProtectScenarios>False</ProtectScenarios>
+  </WorksheetOptions>
+ </Worksheet>
+ <Worksheet ss:Name="Invariants">
+  <Table ss:ExpandedColumnCount="6" ss:ExpandedRowCount="2" x:FullColumns="1"
+   x:FullRows="1" ss:StyleID="s67" ss:DefaultRowHeight="15">
+   <Column ss:StyleID="s67" ss:AutoFitWidth="0" ss:Width="30.75"/>
+   <Column ss:StyleID="s67" ss:Width="97.5"/>
+   <Column ss:StyleID="s67" ss:Width="45.75"/>
+   <Column ss:StyleID="s67" ss:AutoFitWidth="0" ss:Width="350.25"/>
+   <Column ss:StyleID="s67" ss:AutoFitWidth="0" ss:Width="346.5"/>
+   <Column ss:StyleID="s67" ss:AutoFitWidth="0" ss:Width="383.25"/>
+   <Row ss:AutoFitHeight="0" ss:StyleID="s65">
+    <Cell><Data ss:Type="String">Id</Data></Cell>
+    <Cell><Data ss:Type="String">Name</Data></Cell>
+    <Cell><Data ss:Type="String">Context</Data></Cell>
+    <Cell><Data ss:Type="String">English</Data></Cell>
+    <Cell><Data ss:Type="String">OCL</Data></Cell>
+    <Cell><Data ss:Type="String">XPath</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="Number">3</Data></Cell>
+    <Cell><Data ss:Type="String">SHALL have a system </Data></Cell>
+    <Cell><Data ss:Type="String">Quantity</Data></Cell>
+    <Cell><Data ss:Type="String">If a code for the units is present, the system SHALL also be present</Data></Cell>
+    <Cell><Data ss:Type="String">code.oclIsDefined implies system.oclIsDefined</Data></Cell>
+    <Cell><Data ss:Type="String">not(exists(f:code)) or exists(f:system)</Data></Cell>
+   </Row>
+  </Table>
+  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+   <PageSetup>
+    <Header x:Margin="0.3"/>
+    <Footer x:Margin="0.3"/>
+    <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
+   </PageSetup>
+   <Unsynced/>
+   <Panes>
+    <Pane>
+     <Number>3</Number>
+     <ActiveRow>1</ActiveRow>
+     <RangeSelection>R2:R3</RangeSelection>
+    </Pane>
+   </Panes>
+   <ProtectObjects>False</ProtectObjects>
+   <ProtectScenarios>False</ProtectScenarios>
+  </WorksheetOptions>
+ </Worksheet>
+ <Worksheet ss:Name="Restrictions">
+  <Table ss:ExpandedColumnCount="4" ss:ExpandedRowCount="7" x:FullColumns="1"
+   x:FullRows="1" ss:StyleID="s68" ss:DefaultRowHeight="15">
+   <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="91.5"/>
+   <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="493.5"/>
+   <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="528.75"/>
+   <Row ss:AutoFitHeight="0" ss:StyleID="s65">
+    <Cell><Data ss:Type="String">Name</Data></Cell>
+    <Cell><Data ss:Type="String">Rules</Data></Cell>
+    <Cell><Data ss:Type="String">XPath</Data></Cell>
+    <Cell><Data ss:Type="String">OCL</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="30">
+    <Cell><Data ss:Type="String">Duration</Data></Cell>
+    <Cell><Data ss:Type="String">There SHALL be a code if there is a value and it SHALL be an expression of time.  If system is present, it SHALL be UCUM.</Data></Cell>
+    <Cell><Data ss:Type="String">(f:code or not(f:value)) and (not(exists(f:system)) or f:system/@value='http://unitsofmeasure.org')</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="30">
+    <Cell><Data ss:Type="String">Distance</Data></Cell>
+    <Cell><Data ss:Type="String">There SHALL be a code if there is a value and it SHALL be an expression of length.  If system is present, it SHALL be UCUM.</Data></Cell>
+    <Cell><Data ss:Type="String">(f:code or not(f:value)) and (not(exists(f:system)) or f:system/@value='http://unitsofmeasure.org')</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="30">
+    <Cell><Data ss:Type="String">Count</Data></Cell>
+    <Cell><Data ss:Type="String">There SHALL be a code with a value of &quot;1&quot; if there is a value and it SHALL be an expression of length.  If system is present, it SHALL be UCUM.  If present, the value SHALL a whole number.</Data></Cell>
+    <Cell><Data ss:Type="String">(f:code or not(f:value)) and (not(exists(f:system)) or (f:system/@value='http://unitsofmeasure.org' and f:code/@value='1' )) and not(contains(f:value/@value, '.')) </Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="30">
+    <Cell><Data ss:Type="String">Money</Data></Cell>
+    <Cell><Data ss:Type="String">There SHALL be a code if there is a value and it SHALL be an expression of currency.  If system is present, it SHALL be ISO 4217 (system = &quot;urn:std:iso:4217&quot; - currency).</Data></Cell>
+    <Cell><Data ss:Type="String">(f:code or not(f:value)) and (not(exists(f:system)) or f:system/@value='urn:std:iso:4217')</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">CodedQuantity</Data></Cell>
+    <Cell><Data ss:Type="String">There SHALL be a code if there is a value.  If system is present, it SHALL be UCUM.</Data></Cell>
+    <Cell><Data ss:Type="String">(f:code or not(f:value)) and (not(exists(f:system)) or f:system/@value='http://unitsofmeasure.org')</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="30">
+    <Cell><Data ss:Type="String">Age</Data></Cell>
+    <Cell><Data ss:Type="String">There SHALL be a code if there is a value and it SHALL be an expression of time.  If system is present, it SHALL be UCUM.  If value is present, it SHALL be positive.</Data></Cell>
+    <Cell><Data ss:Type="String">(f:code or not(f:value)) and (not(exists(f:system)) or f:system/@value='http://unitsofmeasure.org') and not(contains(f:value/@value, '-'))</Data></Cell>
+   </Row>
+  </Table>
+  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+   <PageSetup>
+    <Header x:Margin="0.3"/>
+    <Footer x:Margin="0.3"/>
+    <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
+   </PageSetup>
+   <Unsynced/>
+   <FreezePanes/>
+   <FrozenNoSplit/>
+   <SplitHorizontal>1</SplitHorizontal>
+   <TopRowBottomPane>1</TopRowBottomPane>
+   <SplitVertical>1</SplitVertical>
+   <LeftColumnRightPane>1</LeftColumnRightPane>
+   <ActivePane>0</ActivePane>
+   <Panes>
+    <Pane>
+     <Number>3</Number>
+    </Pane>
+    <Pane>
+     <Number>1</Number>
+    </Pane>
+    <Pane>
+     <Number>2</Number>
+    </Pane>
+    <Pane>
+     <Number>0</Number>
+     <ActiveRow>5</ActiveRow>
+    </Pane>
+   </Panes>
+   <ProtectObjects>False</ProtectObjects>
+   <ProtectScenarios>False</ProtectScenarios>
+  </WorksheetOptions>
+ </Worksheet>
+ <Worksheet ss:Name="Bindings">
+  <Table ss:ExpandedColumnCount="5" ss:ExpandedRowCount="2" x:FullColumns="1"
+   x:FullRows="1" ss:StyleID="s69" ss:DefaultColumnWidth="120"
+   ss:DefaultRowHeight="15">
+   <Column ss:StyleID="s69" ss:Width="75"/>
+   <Column ss:StyleID="s69" ss:Width="108.75"/>
+   <Column ss:StyleID="s69" ss:Width="44.25"/>
+   <Column ss:StyleID="s69" ss:Width="81.75"/>
+   <Column ss:StyleID="s69" ss:Width="58.5"/>
+   <Row ss:AutoFitHeight="0" ss:Height="30">
+    <Cell ss:StyleID="s65"><Data ss:Type="String">Binding Name</Data></Cell>
+    <Cell ss:StyleID="s65"><Data ss:Type="String">Definition</Data></Cell>
+    <Cell ss:StyleID="s65"><Data ss:Type="String">Binding</Data></Cell>
+    <Cell ss:StyleID="s65"><Data ss:Type="String">Reference</Data></Cell>
+    <Cell ss:StyleID="s65"><Data ss:Type="String">Description</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="45">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">QuantityCompararator</Data></Cell>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">How the Quantity should be understood and represented</Data></Cell>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">code list</Data></Cell>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">#quantity-comparator</Data></Cell>
+   </Row>
+  </Table>
+  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+   <PageSetup>
+    <Header x:Margin="0.3"/>
+    <Footer x:Margin="0.3"/>
+    <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
+   </PageSetup>
+   <Unsynced/>
+   <Panes>
+    <Pane>
+     <Number>3</Number>
+     <ActiveRow>2</ActiveRow>
+     <ActiveCol>1</ActiveCol>
+    </Pane>
+   </Panes>
+   <ProtectObjects>False</ProtectObjects>
+   <ProtectScenarios>False</ProtectScenarios>
+  </WorksheetOptions>
+ </Worksheet>
+ <Worksheet ss:Name="quantity-comparator">
+  <Table ss:ExpandedColumnCount="7" ss:ExpandedRowCount="5" x:FullColumns="1"
+   x:FullRows="1" ss:DefaultRowHeight="15">
+   <Column ss:Index="3" ss:AutoFitWidth="0" ss:Width="569.25"/>
+   <Row ss:AutoFitHeight="0" ss:Height="30">
+    <Cell><Data ss:Type="String">Id</Data></Cell>
+    <Cell ss:StyleID="s65"><Data ss:Type="String">Code</Data></Cell>
+    <Cell ss:StyleID="s65"><Data ss:Type="String">Definition</Data></Cell>
+    <Cell ss:StyleID="s65"/>
+    <Cell ss:StyleID="s65"/>
+    <Cell ss:StyleID="s65"/>
+    <Cell ss:StyleID="s65"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s62"><Data ss:Type="String">&lt;</Data></Cell>
+    <Cell ss:StyleID="s62"><Data ss:Type="String">The actual value is less than the given value</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="Number">2</Data></Cell>
+    <Cell ss:StyleID="s62"><Data ss:Type="String">&lt;=</Data></Cell>
+    <Cell ss:StyleID="s62"><Data ss:Type="String">The actual value is less than or equal to the given value</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="Number">3</Data></Cell>
+    <Cell ss:StyleID="s62"><Data ss:Type="String">&gt;=</Data></Cell>
+    <Cell ss:StyleID="s62"><Data ss:Type="String">The actual value is greater than or equal to the given value</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="Number">4</Data></Cell>
+    <Cell ss:StyleID="s62"><Data ss:Type="String">&gt;</Data></Cell>
+    <Cell ss:StyleID="s62"><Data ss:Type="String">The actual value is greater than the given value</Data></Cell>
+   </Row>
+  </Table>
+  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+   <PageSetup>
+    <Header x:Margin="0.3"/>
+    <Footer x:Margin="0.3"/>
+    <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
+   </PageSetup>
+   <Unsynced/>
+   <Panes>
+    <Pane>
+     <Number>3</Number>
+     <ActiveRow>3</ActiveRow>
+    </Pane>
+   </Panes>
+   <ProtectObjects>False</ProtectObjects>
+   <ProtectScenarios>False</ProtectScenarios>
+  </WorksheetOptions>
+ </Worksheet>
+</Workbook>

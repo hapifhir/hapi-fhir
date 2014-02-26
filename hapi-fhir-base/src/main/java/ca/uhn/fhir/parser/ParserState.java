@@ -18,117 +18,29 @@ import ca.uhn.fhir.context.RuntimePrimitiveDatatypeNarrativeDefinition;
 import ca.uhn.fhir.context.RuntimeResourceBlockDefinition;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeResourceReferenceDefinition;
-import ca.uhn.fhir.model.api.ISupportsUndeclaredExtensions;
+import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.ICompositeDatatype;
 import ca.uhn.fhir.model.api.ICompositeElement;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IPrimitiveDatatype;
-import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.IResourceBlock;
+import ca.uhn.fhir.model.api.ISupportsUndeclaredExtensions;
 import ca.uhn.fhir.model.api.ResourceReference;
 import ca.uhn.fhir.model.api.UndeclaredExtension;
+import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.XhtmlDt;
 
 class ParserState {
-
-	public class DeclaredExtensionState extends BaseState {
-
-		private RuntimeChildDeclaredExtensionDefinition myDefinition;
-		private IElement myParentInstance;
-		private IElement myChildInstance;
-
-		public DeclaredExtensionState(RuntimeChildDeclaredExtensionDefinition theDefinition, IElement theParentInstance) {
-			myDefinition = theDefinition;
-			myParentInstance = theParentInstance;
-		}
-
-		@Override
-		public void attributeValue(Attribute theAttribute, String theValue) throws DataFormatException {
-			throw new DataFormatException("'value' attribute is invalid in 'extension' element");
-		}
-
-		@Override
-		public void endingElement(EndElement theElem) throws DataFormatException {
-			pop();
-		}
-
-		@Override
-		public void enteringNewElementExtension(StartElement theElement, String theUrlAttr) {
-			RuntimeChildDeclaredExtensionDefinition declaredExtension = myDefinition.getChildExtensionForUrl(theUrlAttr);
-			if (declaredExtension != null) {
-				if (myChildInstance == null) {
-					myChildInstance = myDefinition.newInstance();
-					myDefinition.getMutator().addValue(myParentInstance, myChildInstance);
-				}
-				BaseState newState = new DeclaredExtensionState(declaredExtension, myChildInstance);
-				push(newState);
-			}else {
-				super.enteringNewElementExtension(theElement, theUrlAttr);
-			}
-		}
-
-		@Override
-		public void enteringNewElement(StartElement theElement, String theLocalPart) throws DataFormatException {
-			BaseRuntimeElementDefinition<?> target = myDefinition.getChildByName(theLocalPart);
-			if (target == null) {
-				throw new DataFormatException("Unknown extension element name: " + theLocalPart);
-			}
-
-			switch (target.getChildType()) {
-			case COMPOSITE_DATATYPE: {
-				BaseRuntimeElementCompositeDefinition<?> compositeTarget = (BaseRuntimeElementCompositeDefinition<?>) target;
-				ICompositeDatatype newChildInstance = (ICompositeDatatype) compositeTarget.newInstance();
-				myDefinition.getMutator().addValue(myParentInstance, newChildInstance);
-				ContainerState newState = new ContainerState(compositeTarget, newChildInstance);
-				push(newState);
-				return;
-			}
-			case PRIMITIVE_DATATYPE: {
-				RuntimePrimitiveDatatypeDefinition primitiveTarget = (RuntimePrimitiveDatatypeDefinition) target;
-				IPrimitiveDatatype<?> newChildInstance = primitiveTarget.newInstance();
-				myDefinition.getMutator().addValue(myParentInstance, newChildInstance);
-				PrimitiveState newState = new PrimitiveState(newChildInstance);
-				push(newState);
-				return;
-			}
-			case RESOURCE_REF: {
-				RuntimeResourceReferenceDefinition resourceRefTarget = (RuntimeResourceReferenceDefinition) target;
-				ResourceReference newChildInstance = new ResourceReference();
-				myDefinition.getMutator().addValue(myParentInstance, newChildInstance);
-				ResourceReferenceState newState = new ResourceReferenceState(resourceRefTarget, newChildInstance);
-				push(newState);
-				return;
-			}
-			case PRIMITIVE_XHTML:
-			case RESOURCE:
-			case RESOURCE_BLOCK:
-			case UNDECL_EXT:
-			case EXTENSION_DECLARED:
-			default:
-				break;
-			}
-		}
-
-		@Override
-		public void otherEvent(XMLEvent theEvent) throws DataFormatException {
-			// ignore
-		}
-
-		@Override
-		protected IElement getCurrentElement() {
-			return myParentInstance;
-		}
-
-	}
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ParserState.class);
 
 	private FhirContext myContext;
 
 	private Object myObject;
+
 	private BaseState myState;
 
-	public ParserState(FhirContext theContext) {
+	private ParserState(FhirContext theContext) {
 		myContext = theContext;
 	}
 
@@ -162,6 +74,7 @@ class ParserState {
 
 	private void pop() {
 		myState = myState.myStack;
+		myState.wereBack();
 	}
 
 	private void push(BaseState theState) {
@@ -169,26 +82,142 @@ class ParserState {
 		myState = theState;
 	}
 
-	private void setState(BaseState theState) {
-		myState = theState;
-	}
-
-	public static ParserState getResourceInstance(FhirContext theContext, String theLocalPart) throws DataFormatException {
-		BaseRuntimeElementDefinition<?> definition = theContext.getNameToResourceDefinition().get(theLocalPart);
-		if (!(definition instanceof RuntimeResourceDefinition)) {
-			throw new DataFormatException("Element '" + theLocalPart + "' is not a resource, expected a resource at this position");
-		}
-
-		RuntimeResourceDefinition def = (RuntimeResourceDefinition) definition;
-		IResource instance = def.newInstance();
-
+	public static ParserState getPreResourceInstance(FhirContext theContext) throws DataFormatException {
 		ParserState retVal = new ParserState(theContext);
-		retVal.setState(retVal.new ContainerState(def, instance));
-
+		retVal.push(retVal.new PreResourceState());
 		return retVal;
 	}
 
+	private class AtomPrimitiveState extends BaseState{
+
+		private IPrimitiveDatatype<?> myPrimitive;
+		private String myData;
+
+		public AtomPrimitiveState(IPrimitiveDatatype<?> thePrimitive) {
+			myPrimitive = thePrimitive;
+		}
+
+		@Override
+		public void attributeValue(Attribute theAttribute, String theValue) throws DataFormatException {
+			// ignore
+		}
+
+		@Override
+		public void endingElement(EndElement theElem) throws DataFormatException {
+			myPrimitive.setValueAsString(myData);
+			pop();
+		}
+
+		@Override
+		public void enteringNewElement(StartElement theElement, String theLocalPart) throws DataFormatException {
+			throw new DataFormatException("Unexpected nested element in atom tag ");
+		}
+
+		@Override
+		protected IElement getCurrentElement() {
+			return null;
+		}
+
+		@Override
+		public void otherEvent(XMLEvent theEvent) throws DataFormatException {
+			if (theEvent.isCharacters()) {
+				String data = theEvent.asCharacters().getData();
+				if (myData == null) {
+					myData = data;
+				}else {
+					// this shouldn't generally happen so it's ok that it's inefficient
+					myData = myData + data; 
+				}
+			}
+		}
+		
+	}
+	
+	private class AtomState extends BaseState {
+
+		private Bundle myInstance;
+
+		public AtomState(Bundle theInstance) {
+			myInstance = theInstance;
+		}
+
+		@Override
+		public void attributeValue(Attribute theAttribute, String theValue) throws DataFormatException {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void endingElement(EndElement theElem) throws DataFormatException {
+			pop();
+		}
+
+		@Override
+		public void enteringNewElement(StartElement theElement, String theLocalPart) throws DataFormatException {
+			if (theLocalPart.equals("title")) {
+				push(new AtomPrimitiveState(myInstance.getTitle()));
+			}
+		}
+
+		@Override
+		protected IElement getCurrentElement() {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public void otherEvent(XMLEvent theEvent) throws DataFormatException {
+			// TODO Auto-generated method stub
+			
+		}
+		
+	}
+	
+	private class PreAtomState extends BaseState {
+
+		private Bundle myInstance;
+
+		@Override
+		public void attributeValue(Attribute theAttribute, String theValue) throws DataFormatException {
+			// ignore
+		}
+
+		@Override
+		public void endingElement(EndElement theElem) throws DataFormatException {
+			// ignore
+		}
+
+		@Override
+		public void enteringNewElement(StartElement theElement, String theLocalPart) throws DataFormatException {
+			if (!"feed".equals(theLocalPart)) {
+				throw new DataFormatException("Expecting outer element called 'feed', found: "+theLocalPart);
+			}
+			
+			myInstance = new Bundle();
+			push(new AtomState(myInstance));
+			
+		}
+
+		@Override
+		protected IElement getCurrentElement() {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public void wereBack() {
+			myObject = myInstance;
+		}
+
+		@Override
+		public void otherEvent(XMLEvent theEvent) throws DataFormatException {
+			// ignore
+		}
+		
+	}
+	
 	private abstract class BaseState {
+
 		private BaseState myStack;
 
 		public abstract void attributeValue(Attribute theAttribute, String theValue) throws DataFormatException;
@@ -211,22 +240,116 @@ class ParserState {
 			}
 		}
 
+		protected abstract IElement getCurrentElement();
+
 		public abstract void otherEvent(XMLEvent theEvent) throws DataFormatException;
 
 		public void setStack(BaseState theState) {
 			myStack = theState;
 		}
 
-		protected abstract IElement getCurrentElement();
+		public void wereBack() {
+			// allow an implementor to override
+		}
 
 	}
 
-	private class ContainerState extends BaseState {
+	private class DeclaredExtensionState extends BaseState {
+
+		private IElement myChildInstance;
+		private RuntimeChildDeclaredExtensionDefinition myDefinition;
+		private IElement myParentInstance;
+
+		public DeclaredExtensionState(RuntimeChildDeclaredExtensionDefinition theDefinition, IElement theParentInstance) {
+			myDefinition = theDefinition;
+			myParentInstance = theParentInstance;
+		}
+
+		@Override
+		public void attributeValue(Attribute theAttribute, String theValue) throws DataFormatException {
+			throw new DataFormatException("'value' attribute is invalid in 'extension' element");
+		}
+
+		@Override
+		public void endingElement(EndElement theElem) throws DataFormatException {
+			pop();
+		}
+
+		@Override
+		public void enteringNewElement(StartElement theElement, String theLocalPart) throws DataFormatException {
+			BaseRuntimeElementDefinition<?> target = myDefinition.getChildByName(theLocalPart);
+			if (target == null) {
+				throw new DataFormatException("Unknown extension element name: " + theLocalPart);
+			}
+
+			switch (target.getChildType()) {
+			case COMPOSITE_DATATYPE: {
+				BaseRuntimeElementCompositeDefinition<?> compositeTarget = (BaseRuntimeElementCompositeDefinition<?>) target;
+				ICompositeDatatype newChildInstance = (ICompositeDatatype) compositeTarget.newInstance();
+				myDefinition.getMutator().addValue(myParentInstance, newChildInstance);
+				ElementCompositeState newState = new ElementCompositeState(compositeTarget, newChildInstance);
+				push(newState);
+				return;
+			}
+			case PRIMITIVE_DATATYPE: {
+				RuntimePrimitiveDatatypeDefinition primitiveTarget = (RuntimePrimitiveDatatypeDefinition) target;
+				IPrimitiveDatatype<?> newChildInstance = primitiveTarget.newInstance();
+				myDefinition.getMutator().addValue(myParentInstance, newChildInstance);
+				PrimitiveState newState = new PrimitiveState(newChildInstance);
+				push(newState);
+				return;
+			}
+			case RESOURCE_REF: {
+				RuntimeResourceReferenceDefinition resourceRefTarget = (RuntimeResourceReferenceDefinition) target;
+				ResourceReference newChildInstance = new ResourceReference();
+				myDefinition.getMutator().addValue(myParentInstance, newChildInstance);
+				ResourceReferenceState newState = new ResourceReferenceState(resourceRefTarget, newChildInstance);
+				push(newState);
+				return;
+			}
+			case PRIMITIVE_XHTML:
+			case RESOURCE:
+			case RESOURCE_BLOCK:
+			case UNDECL_EXT:
+			case EXTENSION_DECLARED:
+			default:
+				break;
+			}
+		}
+
+		@Override
+		public void enteringNewElementExtension(StartElement theElement, String theUrlAttr) {
+			RuntimeChildDeclaredExtensionDefinition declaredExtension = myDefinition.getChildExtensionForUrl(theUrlAttr);
+			if (declaredExtension != null) {
+				if (myChildInstance == null) {
+					myChildInstance = myDefinition.newInstance();
+					myDefinition.getMutator().addValue(myParentInstance, myChildInstance);
+				}
+				BaseState newState = new DeclaredExtensionState(declaredExtension, myChildInstance);
+				push(newState);
+			} else {
+				super.enteringNewElementExtension(theElement, theUrlAttr);
+			}
+		}
+
+		@Override
+		protected IElement getCurrentElement() {
+			return myParentInstance;
+		}
+
+		@Override
+		public void otherEvent(XMLEvent theEvent) throws DataFormatException {
+			// ignore
+		}
+
+	}
+
+	private class ElementCompositeState extends BaseState {
 
 		private BaseRuntimeElementCompositeDefinition<?> myDefinition;
 		private ICompositeElement myInstance;
 
-		public ContainerState(BaseRuntimeElementCompositeDefinition<?> theDef, ICompositeElement theInstance) {
+		public ElementCompositeState(BaseRuntimeElementCompositeDefinition<?> theDef, ICompositeElement theInstance) {
 			myDefinition = theDef;
 			myInstance = theInstance;
 		}
@@ -245,30 +368,19 @@ class ParserState {
 		}
 
 		@Override
-		public void enteringNewElementExtension(StartElement theElement, String theUrlAttr) {
-			RuntimeChildDeclaredExtensionDefinition declaredExtension = myDefinition.getDeclaredExtension(theUrlAttr);
-			if (declaredExtension != null) {
-				BaseState newState = new DeclaredExtensionState(declaredExtension, myInstance);
-				push(newState);
-			}else {
-				super.enteringNewElementExtension(theElement, theUrlAttr);
-			}
-		}
-
-		@Override
 		public void enteringNewElement(StartElement theElement, String theChildName) throws DataFormatException {
 			BaseRuntimeChildDefinition child = myDefinition.getChildByNameOrThrowDataFormatException(theChildName);
 			BaseRuntimeElementDefinition<?> target = child.getChildByName(theChildName);
 			if (target == null) {
 				throw new DataFormatException("Found unexpected element '" + theChildName + "' in parent element '" + myDefinition.getName() + "'. Valid names are: " + child.getValidChildNames());
 			}
-			
+
 			switch (target.getChildType()) {
 			case COMPOSITE_DATATYPE: {
 				BaseRuntimeElementCompositeDefinition<?> compositeTarget = (BaseRuntimeElementCompositeDefinition<?>) target;
 				ICompositeDatatype newChildInstance = (ICompositeDatatype) compositeTarget.newInstance();
 				child.getMutator().addValue(myInstance, newChildInstance);
-				ContainerState newState = new ContainerState(compositeTarget, newChildInstance);
+				ElementCompositeState newState = new ElementCompositeState(compositeTarget, newChildInstance);
 				push(newState);
 				return;
 			}
@@ -292,7 +404,7 @@ class ParserState {
 				RuntimeResourceBlockDefinition blockTarget = (RuntimeResourceBlockDefinition) target;
 				IResourceBlock newBlockInstance = blockTarget.newInstance();
 				child.getMutator().addValue(myInstance, newBlockInstance);
-				ContainerState newState = new ContainerState(blockTarget, newBlockInstance);
+				ElementCompositeState newState = new ElementCompositeState(blockTarget, newBlockInstance);
 				push(newState);
 				return;
 			}
@@ -315,13 +427,24 @@ class ParserState {
 		}
 
 		@Override
-		public void otherEvent(XMLEvent theEvent) {
-			// ignore
+		public void enteringNewElementExtension(StartElement theElement, String theUrlAttr) {
+			RuntimeChildDeclaredExtensionDefinition declaredExtension = myDefinition.getDeclaredExtension(theUrlAttr);
+			if (declaredExtension != null) {
+				BaseState newState = new DeclaredExtensionState(declaredExtension, myInstance);
+				push(newState);
+			} else {
+				super.enteringNewElementExtension(theElement, theUrlAttr);
+			}
 		}
 
 		@Override
 		protected IElement getCurrentElement() {
 			return myInstance;
+		}
+
+		@Override
+		public void otherEvent(XMLEvent theEvent) {
+			// ignore
 		}
 
 	}
@@ -359,7 +482,7 @@ class ParserState {
 				BaseRuntimeElementCompositeDefinition<?> compositeTarget = (BaseRuntimeElementCompositeDefinition<?>) target;
 				ICompositeDatatype newChildInstance = (ICompositeDatatype) compositeTarget.newInstance();
 				myExtension.setValue(newChildInstance);
-				ContainerState newState = new ContainerState(compositeTarget, newChildInstance);
+				ElementCompositeState newState = new ElementCompositeState(compositeTarget, newChildInstance);
 				push(newState);
 				return;
 			}
@@ -388,13 +511,57 @@ class ParserState {
 		}
 
 		@Override
+		protected IElement getCurrentElement() {
+			return myExtension;
+		}
+
+		@Override
+		public void otherEvent(XMLEvent theEvent) throws DataFormatException {
+			// ignore
+		}
+
+	}
+
+	private class PreResourceState extends BaseState {
+
+		private ICompositeElement myInstance;
+
+		@Override
+		public void attributeValue(Attribute theAttribute, String theValue) throws DataFormatException {
+			// ignore
+		}
+
+		@Override
+		public void endingElement(EndElement theElem) throws DataFormatException {
+			// ignore
+		}
+
+		@Override
+		public void enteringNewElement(StartElement theElement, String theLocalPart) throws DataFormatException {
+			BaseRuntimeElementDefinition<?> definition = myContext.getNameToResourceDefinition().get(theLocalPart);
+			if (!(definition instanceof RuntimeResourceDefinition)) {
+				throw new DataFormatException("Element '" + theLocalPart + "' is not a resource, expected a resource at this position");
+			}
+
+			RuntimeResourceDefinition def = (RuntimeResourceDefinition) definition;
+			myInstance = def.newInstance();
+
+			push(new ElementCompositeState(def, myInstance));
+		}
+
+		@Override
+		protected IElement getCurrentElement() {
+			return myInstance;
+		}
+
+		@Override
 		public void otherEvent(XMLEvent theEvent) throws DataFormatException {
 			// ignore
 		}
 
 		@Override
-		protected IElement getCurrentElement() {
-			return myExtension;
+		public void wereBack() {
+			myObject = myInstance;
 		}
 
 	}
@@ -423,13 +590,13 @@ class ParserState {
 		}
 
 		@Override
-		public void otherEvent(XMLEvent theEvent) {
-			// ignore
+		protected IElement getCurrentElement() {
+			return myInstance;
 		}
 
 		@Override
-		protected IElement getCurrentElement() {
-			return myInstance;
+		public void otherEvent(XMLEvent theEvent) {
+			// ignore
 		}
 
 	}
@@ -491,13 +658,13 @@ class ParserState {
 		}
 
 		@Override
-		public void otherEvent(XMLEvent theEvent) {
-			// ignore
+		protected IElement getCurrentElement() {
+			return myInstance;
 		}
 
 		@Override
-		protected IElement getCurrentElement() {
-			return myInstance;
+		public void otherEvent(XMLEvent theEvent) {
+			// ignore
 		}
 
 	}
@@ -540,13 +707,13 @@ class ParserState {
 		}
 
 		@Override
-		public void otherEvent(XMLEvent theEvent) throws DataFormatException {
-			myEvents.add(theEvent);
+		protected IElement getCurrentElement() {
+			return myDt;
 		}
 
 		@Override
-		protected IElement getCurrentElement() {
-			return myDt;
+		public void otherEvent(XMLEvent theEvent) throws DataFormatException {
+			myEvents.add(theEvent);
 		}
 	}
 

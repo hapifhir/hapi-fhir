@@ -10,6 +10,10 @@
 
 
 
+
+
+
+
 package ca.uhn.fhir.model.dstu.resource;
 
 import java.util.*;
@@ -528,7 +532,6 @@ public class Device implements IResource {
 	}
 	
  
-
 
 
 }

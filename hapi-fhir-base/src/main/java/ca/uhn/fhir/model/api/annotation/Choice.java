@@ -5,12 +5,12 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import ca.uhn.fhir.model.api.IDatatype;
+import ca.uhn.fhir.model.api.IElement;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(value= {ElementType.FIELD})
 public @interface Choice {
 
-	Class<? extends IDatatype>[] types() default {};
+	Class<? extends IElement>[] types() default {};
 	
 }

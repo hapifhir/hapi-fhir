@@ -1,0 +1,35 @@
+#parse ( "templates.vm" )
+
+package ca.uhn.fhir.model.dstu.resource;
+
+import java.util.*;
+import ca.uhn.fhir.model.api.*;
+import ca.uhn.fhir.model.api.annotation.*;
+import ca.uhn.fhir.model.primitive.*;
+import ca.uhn.fhir.model.dstu.composite.*;
+
+/**
+ * HAPI/FHIR <b>${className}</b> Resource
+ * (${shortName})
+ *
+ * <p>
+ * <b>Definition:</b>
+ * ${definition}
+ * </p> 
+ *
+ * <p>
+ * <b>Requirements:</b>
+ * ${requirements}
+ * </p> 
+ */
+@ResourceDef(name="${className}")
+public class ${className} implements IResource {
+
+#childExtensionFields( $childExtensionTypes )
+#childVars( $children )
+#childAccessors( $children )
+#childResourceBlocks($resourceBlockChildren)
+
+#childExtensionTypes( $childExtensionTypes )
+
+}

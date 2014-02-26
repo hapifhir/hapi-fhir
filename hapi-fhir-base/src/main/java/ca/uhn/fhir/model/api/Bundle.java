@@ -1,31 +1,40 @@
 package ca.uhn.fhir.model.api;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
-public class Bundle {
+import ca.uhn.fhir.model.primitive.InstantDt;
+import ca.uhn.fhir.model.primitive.IntegerDt;
+import ca.uhn.fhir.model.primitive.StringDt;
 
-	private String myAuthorDevice;
-	private String myAuthorName;
+public class Bundle implements IElement {
+
+	private StringDt myAuthorDevice;
+	private StringDt myAuthorName;
 	private List<BundleEntry> myEntries;
-	private String myId;
-	private String myLinkBase;
-	private String myLinkFirst;
-	private String myLinkLast;
-	private String myLinkNext;
-	private String myLinkPrevious;
-	private String myLinkSelf;
-	private Date myPublished;
-	private String myTitle;
-	private Integer myTotalResults;
-	private Date myUpdated;
+	private StringDt myId;
+	private StringDt myLinkBase;
+	private StringDt myLinkFirst;
+	private StringDt myLinkLast;
+	private StringDt myLinkNext;
+	private StringDt myLinkPrevious;
+	private StringDt myLinkSelf;
+	private InstantDt myPublished;
+	private StringDt myTitle;
+	private IntegerDt myTotalResults;
+	private InstantDt  myUpdated;
 
-	public String getAuthorDevice() {
+	public StringDt getAuthorDevice() {
+		if (myAuthorDevice == null) {
+			myAuthorDevice = new StringDt();
+		}
 		return myAuthorDevice;
 	}
 
-	public String getAuthorName() {
+	public StringDt getAuthorName() {
+		if (myAuthorName == null) {
+			myAuthorName = new StringDt();
+		}
 		return myAuthorName;
 	}
 
@@ -36,100 +45,83 @@ public class Bundle {
 		return myEntries;
 	}
 
-	public String getId() {
+	public StringDt getId() {
+		if (myId == null) {
+			myId = new StringDt();
+		}
 		return myId;
 	}
 
-	public String getLinkBase() {
+	public StringDt getLinkBase() {
+		if (myLinkBase == null) {
+			myLinkBase = new StringDt();
+		}
 		return myLinkBase;
 	}
 
-	public String getLinkFirst() {
+	public StringDt getLinkFirst() {
+		if (myLinkFirst == null) {
+			myLinkFirst = new StringDt();
+		}
 		return myLinkFirst;
 	}
 
-	public String getLinkLast() {
+	public StringDt getLinkLast() {
+		if (myLinkLast == null) {
+			myLinkLast = new StringDt();
+		}
 		return myLinkLast;
 	}
 
-	public String getLinkNext() {
+	public StringDt getLinkNext() {
+		if (myLinkNext == null) {
+			myLinkNext = new StringDt();
+		}
 		return myLinkNext;
 	}
 
-	public String getLinkPrevious() {
+	public StringDt getLinkPrevious() {
+		if (myLinkPrevious == null) {
+			myLinkPrevious = new StringDt();
+		}
 		return myLinkPrevious;
 	}
 
-	public String getLinkSelf() {
+	public StringDt getLinkSelf() {
+		if (myLinkSelf == null) {
+			myLinkSelf = new StringDt();
+		}
 		return myLinkSelf;
 	}
 
-	public Date getPublished() {
+	public InstantDt getPublished() {
+		if (myPublished == null) {
+			myPublished = new InstantDt();
+		}
 		return myPublished;
 	}
 
-	public String getTitle() {
+	public StringDt getTitle() {
+		if (myTitle == null) {
+			myTitle= new StringDt();
+		}
 		return myTitle;
 	}
 
-	public Integer getTotalResults() {
+	public IntegerDt getTotalResults() {
+		if (myTotalResults== null) {
+			myTotalResults= new IntegerDt();
+		}
 		return myTotalResults;
 	}
 
-	public Date getUpdated() {
+	public InstantDt getUpdated() {
+		if (myUpdated == null) {
+			myUpdated= new InstantDt();
+		}
 		return myUpdated;
 	}
 
-	public void setAuthorDevice(String theAuthorDevice) {
-		myAuthorDevice = theAuthorDevice;
-	}
-
-	public void setAuthorName(String theAuthorName) {
-		myAuthorName = theAuthorName;
-	}
-
-	public void setId(String theId) {
-		myId = theId;
-	}
-
-	public void setLinkBase(String theLinkBase) {
-		myLinkBase = theLinkBase;
-	}
-
-	public void setLinkFirst(String theLinkFirst) {
-		myLinkFirst = theLinkFirst;
-	}
-
-	public void setLinkLast(String theLinkLast) {
-		myLinkLast = theLinkLast;
-	}
-
-	public void setLinkNext(String theLinkNext) {
-		myLinkNext = theLinkNext;
-	}
-
-	public void setLinkPrevious(String theLinkPrevious) {
-		myLinkPrevious = theLinkPrevious;
-	}
-
-	public void setLinkSelf(String theLinkSelf) {
-		myLinkSelf = theLinkSelf;
-	}
-
-	public void setPublished(Date thePublished) {
-		myPublished = thePublished;
-	}
-
-	public void setTitle(String theTitle) {
-		myTitle = theTitle;
-	}
-
-	public void setTotalResults(Integer theTotalResults) {
-		myTotalResults = theTotalResults;
-	}
-
-	public void setUpdated(Date theUpdated) {
-		myUpdated = theUpdated;
-	}
+	
 
 }
