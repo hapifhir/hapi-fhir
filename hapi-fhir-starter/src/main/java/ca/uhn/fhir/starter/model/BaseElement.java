@@ -21,9 +21,7 @@ public abstract class BaseElement {
 	private String myRequirement;
 	private boolean myResourceRef = false;
 	private String myShortName;
-
 	private List<String> myType;
-
 	private String myV2Mapping;
 
 	public String getBinding() {
@@ -45,6 +43,8 @@ public abstract class BaseElement {
 		return myChildren;
 	}
 
+	
+	
 	public String getComments() {
 		return myComments;
 	}
@@ -80,7 +80,7 @@ public abstract class BaseElement {
 	}
 
 	public String getShortName() {
-		return myShortName;
+		return defaultString(myShortName);
 	}
 
 	public List<String> getType() {
@@ -95,7 +95,7 @@ public abstract class BaseElement {
 	}
 
 	public boolean isHasMultipleTypes() {
-		return myType.size() > 1;
+		return getType().size() > 1;
 	}
 
 	public boolean isResourceRef() {
@@ -144,18 +144,25 @@ public abstract class BaseElement {
 
 	public void setTypeFromString(String theType) {
 		if (theType == null) {
-			myType=null;
+			myType = null;
 			return;
 		}
 		String typeString = theType;
 		if (typeString.toLowerCase().startsWith("resource(")) {
 			typeString = typeString.substring("Resource(".length(), typeString.length() - 1);
 			myResourceRef = true;
+		}else if (typeString.startsWith("@")) {
+			typeString = typeString.substring(typeString.lastIndexOf('.')+1);
 		}
+		
 		if (StringUtils.isNotBlank(typeString)) {
 			String[] types = typeString.replace("=", "").split("\\|");
-			for (String string : types) {
-				getType().add(string.trim());
+			for (String nextType : types) {
+				nextType = nextType.trim();
+				nextType = nextType.substring(0, 1).toUpperCase() + nextType.substring(1);
+				if (isNotBlank(nextType)) {
+					getType().add(nextType);
+				}
 			}
 		}
 
@@ -163,6 +170,13 @@ public abstract class BaseElement {
 
 	public void setV2Mapping(String theV2Mapping) {
 		myV2Mapping = theV2Mapping;
+	}
+
+	public void addChild(Child theElem) {
+		if(myChildren==null) {
+			myChildren=new ArrayList<BaseElement>();
+		}
+		myChildren.add(theElem);
 	}
 
 }

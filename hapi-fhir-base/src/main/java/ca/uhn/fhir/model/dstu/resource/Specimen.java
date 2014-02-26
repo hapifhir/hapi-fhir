@@ -42,14 +42,14 @@ public class Specimen implements IResource {
 	private CodeableConceptDt myType;
 	
 	@Child(name="source", order=2, min=0, max=Child.MAX_UNLIMITED)	
-	private List<IDatatype> mySource;
+	private List<Source> mySource;
 	
 	@Child(name="subject", order=3, min=1, max=1)
 	@ChildResource(types= {
 		Patient.class,
 		Group.class,
 		Device.class,
-		
+		Substance.class,
 	})	
 	private ResourceReference mySubject;
 	
@@ -60,28 +60,33 @@ public class Specimen implements IResource {
 	private DateTimeDt myReceivedTime;
 	
 	@Child(name="collection", order=6, min=1, max=1)	
-	private IDatatype myCollection;
+	private Collection myCollection;
 	
 	@Child(name="treatment", order=7, min=0, max=Child.MAX_UNLIMITED)	
-	private List<IDatatype> myTreatment;
+	private List<Treatment> myTreatment;
 	
 	@Child(name="container", order=8, min=0, max=Child.MAX_UNLIMITED)	
-	private List<IDatatype> myContainer;
+	private List<Container> myContainer;
 	
 	/**
-	 * Gets the value(s) for identifier (External Identifier)
+	 * Gets the value(s) for <b>identifier</b> (External Identifier).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Id for specimen
      * </p> 
 	 */
-	public List<IdentifierDt> getIdentifier() {
+	public List<IdentifierDt> getIdentifier() {  
+		if (myIdentifier == null) {
+			myIdentifier = new ArrayList<IdentifierDt>();
+		}
 		return myIdentifier;
 	}
 
 	/**
-	 * Sets the value(s) for identifier (External Identifier)
+	 * Sets the value(s) for <b>identifier</b> (External Identifier)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -92,20 +97,26 @@ public class Specimen implements IResource {
 		myIdentifier = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for type (Kind of material that forms the specimen)
+	 * Gets the value(s) for <b>type</b> (Kind of material that forms the specimen).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Kind of material that forms the specimen
      * </p> 
 	 */
-	public CodeableConceptDt getType() {
+	public CodeableConceptDt getType() {  
+		if (myType == null) {
+			myType = new CodeableConceptDt();
+		}
 		return myType;
 	}
 
 	/**
-	 * Sets the value(s) for type (Kind of material that forms the specimen)
+	 * Sets the value(s) for <b>type</b> (Kind of material that forms the specimen)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -116,68 +127,83 @@ public class Specimen implements IResource {
 		myType = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for source (Parent of specimen)
+	 * Gets the value(s) for <b>source</b> (Parent of specimen).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Parent specimen from which the focal specimen was a component
      * </p> 
 	 */
-	public List<IDatatype> getSource() {
+	public List<Source> getSource() {  
+		if (mySource == null) {
+			mySource = new ArrayList<Source>();
+		}
 		return mySource;
 	}
 
 	/**
-	 * Sets the value(s) for source (Parent of specimen)
+	 * Sets the value(s) for <b>source</b> (Parent of specimen)
 	 *
      * <p>
      * <b>Definition:</b>
      * Parent specimen from which the focal specimen was a component
      * </p> 
 	 */
-	public void setSource(List<IDatatype> theValue) {
+	public void setSource(List<Source> theValue) {
 		mySource = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for subject (Where the specimen came from. This may be the patient(s) or from the environment or  a device)
+	 * Gets the value(s) for <b>subject</b> (Where the specimen came from. This may be the patient(s) or from the environment or  a device).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
-     * ${child.definition}
+     * 
      * </p> 
 	 */
-	public ResourceReference getSubject() {
+	public ResourceReference getSubject() {  
 		return mySubject;
 	}
 
 	/**
-	 * Sets the value(s) for subject (Where the specimen came from. This may be the patient(s) or from the environment or  a device)
+	 * Sets the value(s) for <b>subject</b> (Where the specimen came from. This may be the patient(s) or from the environment or  a device)
 	 *
      * <p>
      * <b>Definition:</b>
-     * ${child.definition}
+     * 
      * </p> 
 	 */
 	public void setSubject(ResourceReference theValue) {
 		mySubject = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for accessionIdentifier (Identifier assigned by the lab)
+	 * Gets the value(s) for <b>accessionIdentifier</b> (Identifier assigned by the lab).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * The identifier assigned by the lab when accessioning specimen(s). This is not necessarily the same as the specimen identifier, depending on local lab procedures. 
      * </p> 
 	 */
-	public IdentifierDt getAccessionIdentifier() {
+	public IdentifierDt getAccessionIdentifier() {  
+		if (myAccessionIdentifier == null) {
+			myAccessionIdentifier = new IdentifierDt();
+		}
 		return myAccessionIdentifier;
 	}
 
 	/**
-	 * Sets the value(s) for accessionIdentifier (Identifier assigned by the lab)
+	 * Sets the value(s) for <b>accessionIdentifier</b> (Identifier assigned by the lab)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -188,20 +214,26 @@ public class Specimen implements IResource {
 		myAccessionIdentifier = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for receivedTime (The time when specimen was received for processing)
+	 * Gets the value(s) for <b>receivedTime</b> (The time when specimen was received for processing).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Time when specimen was received for processing or testing
      * </p> 
 	 */
-	public DateTimeDt getReceivedTime() {
+	public DateTimeDt getReceivedTime() {  
+		if (myReceivedTime == null) {
+			myReceivedTime = new DateTimeDt();
+		}
 		return myReceivedTime;
 	}
 
 	/**
-	 * Sets the value(s) for receivedTime (The time when specimen was received for processing)
+	 * Sets the value(s) for <b>receivedTime</b> (The time when specimen was received for processing)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -213,77 +245,107 @@ public class Specimen implements IResource {
 	}
 	
 	/**
-	 * Gets the value(s) for collection (Collection details)
+	 * Sets the value(s) for <b>receivedTime</b> (The time when specimen was received for processing)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Time when specimen was received for processing or testing
+     * </p> 
+	 */
+	public void setReceivedTimeWithSecondsPrecision( Date theDate) {
+		myReceivedTime = new DateTimeDt(theDate); 
+	}
+ 
+	/**
+	 * Gets the value(s) for <b>collection</b> (Collection details).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Details concerning the specimen collection
      * </p> 
 	 */
-	public IDatatype getCollection() {
+	public Collection getCollection() {  
+		if (myCollection == null) {
+			myCollection = new Collection();
+		}
 		return myCollection;
 	}
 
 	/**
-	 * Sets the value(s) for collection (Collection details)
+	 * Sets the value(s) for <b>collection</b> (Collection details)
 	 *
      * <p>
      * <b>Definition:</b>
      * Details concerning the specimen collection
      * </p> 
 	 */
-	public void setCollection(IDatatype theValue) {
+	public void setCollection(Collection theValue) {
 		myCollection = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for treatment (Treatment and processing step details)
+	 * Gets the value(s) for <b>treatment</b> (Treatment and processing step details).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Details concerning treatment and processing steps for the specimen
      * </p> 
 	 */
-	public List<IDatatype> getTreatment() {
+	public List<Treatment> getTreatment() {  
+		if (myTreatment == null) {
+			myTreatment = new ArrayList<Treatment>();
+		}
 		return myTreatment;
 	}
 
 	/**
-	 * Sets the value(s) for treatment (Treatment and processing step details)
+	 * Sets the value(s) for <b>treatment</b> (Treatment and processing step details)
 	 *
      * <p>
      * <b>Definition:</b>
      * Details concerning treatment and processing steps for the specimen
      * </p> 
 	 */
-	public void setTreatment(List<IDatatype> theValue) {
+	public void setTreatment(List<Treatment> theValue) {
 		myTreatment = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for container (Direct container of specimen (tube/slide, etc))
+	 * Gets the value(s) for <b>container</b> (Direct container of specimen (tube/slide, etc)).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * The container holding the specimen.  The recursive nature of containers; i.e. blood in tube in tray in rack is not addressed here. 
      * </p> 
 	 */
-	public List<IDatatype> getContainer() {
+	public List<Container> getContainer() {  
+		if (myContainer == null) {
+			myContainer = new ArrayList<Container>();
+		}
 		return myContainer;
 	}
 
 	/**
-	 * Sets the value(s) for container (Direct container of specimen (tube/slide, etc))
+	 * Sets the value(s) for <b>container</b> (Direct container of specimen (tube/slide, etc))
 	 *
      * <p>
      * <b>Definition:</b>
      * The container holding the specimen.  The recursive nature of containers; i.e. blood in tube in tray in rack is not addressed here. 
      * </p> 
 	 */
-	public void setContainer(List<IDatatype> theValue) {
+	public void setContainer(List<Container> theValue) {
 		myContainer = theValue;
 	}
 	
+ 
 
 	/**
 	 * Block class for child element: <b>Specimen.source</b> (Parent of specimen)
@@ -302,13 +364,14 @@ public class Specimen implements IResource {
 	private CodeableConceptDt myType;
 	
 	@Child(name="source", order=2, min=0, max=Child.MAX_UNLIMITED)	
-	private List<IDatatype> mySource;
+	private List<Source> mySource;
 	
 	@Child(name="subject", order=3, min=1, max=1)
 	@ChildResource(types= {
 		Patient.class,
 		Group.class,
 		Device.class,
+		Substance.class,
 	})	
 	private ResourceReference mySubject;
 	
@@ -319,28 +382,33 @@ public class Specimen implements IResource {
 	private DateTimeDt myReceivedTime;
 	
 	@Child(name="collection", order=6, min=1, max=1)	
-	private IDatatype myCollection;
+	private Collection myCollection;
 	
 	@Child(name="treatment", order=7, min=0, max=Child.MAX_UNLIMITED)	
-	private List<IDatatype> myTreatment;
+	private List<Treatment> myTreatment;
 	
 	@Child(name="container", order=8, min=0, max=Child.MAX_UNLIMITED)	
-	private List<IDatatype> myContainer;
+	private List<Container> myContainer;
 	
 	/**
-	 * Gets the value(s) for identifier (External Identifier)
+	 * Gets the value(s) for <b>identifier</b> (External Identifier).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Id for specimen
      * </p> 
 	 */
-	public List<IdentifierDt> getIdentifier() {
+	public List<IdentifierDt> getIdentifier() {  
+		if (myIdentifier == null) {
+			myIdentifier = new ArrayList<IdentifierDt>();
+		}
 		return myIdentifier;
 	}
 
 	/**
-	 * Sets the value(s) for identifier (External Identifier)
+	 * Sets the value(s) for <b>identifier</b> (External Identifier)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -351,20 +419,26 @@ public class Specimen implements IResource {
 		myIdentifier = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for type (Kind of material that forms the specimen)
+	 * Gets the value(s) for <b>type</b> (Kind of material that forms the specimen).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Kind of material that forms the specimen
      * </p> 
 	 */
-	public CodeableConceptDt getType() {
+	public CodeableConceptDt getType() {  
+		if (myType == null) {
+			myType = new CodeableConceptDt();
+		}
 		return myType;
 	}
 
 	/**
-	 * Sets the value(s) for type (Kind of material that forms the specimen)
+	 * Sets the value(s) for <b>type</b> (Kind of material that forms the specimen)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -375,68 +449,83 @@ public class Specimen implements IResource {
 		myType = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for source (Parent of specimen)
+	 * Gets the value(s) for <b>source</b> (Parent of specimen).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Parent specimen from which the focal specimen was a component
      * </p> 
 	 */
-	public List<IDatatype> getSource() {
+	public List<Source> getSource() {  
+		if (mySource == null) {
+			mySource = new ArrayList<Source>();
+		}
 		return mySource;
 	}
 
 	/**
-	 * Sets the value(s) for source (Parent of specimen)
+	 * Sets the value(s) for <b>source</b> (Parent of specimen)
 	 *
      * <p>
      * <b>Definition:</b>
      * Parent specimen from which the focal specimen was a component
      * </p> 
 	 */
-	public void setSource(List<IDatatype> theValue) {
+	public void setSource(List<Source> theValue) {
 		mySource = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for subject (Where the specimen came from. This may be the patient(s) or from the environment or  a device)
+	 * Gets the value(s) for <b>subject</b> (Where the specimen came from. This may be the patient(s) or from the environment or  a device).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
-     * ${child.definition}
+     * 
      * </p> 
 	 */
-	public ResourceReference getSubject() {
+	public ResourceReference getSubject() {  
 		return mySubject;
 	}
 
 	/**
-	 * Sets the value(s) for subject (Where the specimen came from. This may be the patient(s) or from the environment or  a device)
+	 * Sets the value(s) for <b>subject</b> (Where the specimen came from. This may be the patient(s) or from the environment or  a device)
 	 *
      * <p>
      * <b>Definition:</b>
-     * ${child.definition}
+     * 
      * </p> 
 	 */
 	public void setSubject(ResourceReference theValue) {
 		mySubject = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for accessionIdentifier (Identifier assigned by the lab)
+	 * Gets the value(s) for <b>accessionIdentifier</b> (Identifier assigned by the lab).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * The identifier assigned by the lab when accessioning specimen(s). This is not necessarily the same as the specimen identifier, depending on local lab procedures. 
      * </p> 
 	 */
-	public IdentifierDt getAccessionIdentifier() {
+	public IdentifierDt getAccessionIdentifier() {  
+		if (myAccessionIdentifier == null) {
+			myAccessionIdentifier = new IdentifierDt();
+		}
 		return myAccessionIdentifier;
 	}
 
 	/**
-	 * Sets the value(s) for accessionIdentifier (Identifier assigned by the lab)
+	 * Sets the value(s) for <b>accessionIdentifier</b> (Identifier assigned by the lab)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -447,20 +536,26 @@ public class Specimen implements IResource {
 		myAccessionIdentifier = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for receivedTime (The time when specimen was received for processing)
+	 * Gets the value(s) for <b>receivedTime</b> (The time when specimen was received for processing).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Time when specimen was received for processing or testing
      * </p> 
 	 */
-	public DateTimeDt getReceivedTime() {
+	public DateTimeDt getReceivedTime() {  
+		if (myReceivedTime == null) {
+			myReceivedTime = new DateTimeDt();
+		}
 		return myReceivedTime;
 	}
 
 	/**
-	 * Sets the value(s) for receivedTime (The time when specimen was received for processing)
+	 * Sets the value(s) for <b>receivedTime</b> (The time when specimen was received for processing)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -472,77 +567,107 @@ public class Specimen implements IResource {
 	}
 	
 	/**
-	 * Gets the value(s) for collection (Collection details)
+	 * Sets the value(s) for <b>receivedTime</b> (The time when specimen was received for processing)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Time when specimen was received for processing or testing
+     * </p> 
+	 */
+	public void setReceivedTimeWithSecondsPrecision( Date theDate) {
+		myReceivedTime = new DateTimeDt(theDate); 
+	}
+ 
+	/**
+	 * Gets the value(s) for <b>collection</b> (Collection details).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Details concerning the specimen collection
      * </p> 
 	 */
-	public IDatatype getCollection() {
+	public Collection getCollection() {  
+		if (myCollection == null) {
+			myCollection = new Collection();
+		}
 		return myCollection;
 	}
 
 	/**
-	 * Sets the value(s) for collection (Collection details)
+	 * Sets the value(s) for <b>collection</b> (Collection details)
 	 *
      * <p>
      * <b>Definition:</b>
      * Details concerning the specimen collection
      * </p> 
 	 */
-	public void setCollection(IDatatype theValue) {
+	public void setCollection(Collection theValue) {
 		myCollection = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for treatment (Treatment and processing step details)
+	 * Gets the value(s) for <b>treatment</b> (Treatment and processing step details).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Details concerning treatment and processing steps for the specimen
      * </p> 
 	 */
-	public List<IDatatype> getTreatment() {
+	public List<Treatment> getTreatment() {  
+		if (myTreatment == null) {
+			myTreatment = new ArrayList<Treatment>();
+		}
 		return myTreatment;
 	}
 
 	/**
-	 * Sets the value(s) for treatment (Treatment and processing step details)
+	 * Sets the value(s) for <b>treatment</b> (Treatment and processing step details)
 	 *
      * <p>
      * <b>Definition:</b>
      * Details concerning treatment and processing steps for the specimen
      * </p> 
 	 */
-	public void setTreatment(List<IDatatype> theValue) {
+	public void setTreatment(List<Treatment> theValue) {
 		myTreatment = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for container (Direct container of specimen (tube/slide, etc))
+	 * Gets the value(s) for <b>container</b> (Direct container of specimen (tube/slide, etc)).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * The container holding the specimen.  The recursive nature of containers; i.e. blood in tube in tray in rack is not addressed here. 
      * </p> 
 	 */
-	public List<IDatatype> getContainer() {
+	public List<Container> getContainer() {  
+		if (myContainer == null) {
+			myContainer = new ArrayList<Container>();
+		}
 		return myContainer;
 	}
 
 	/**
-	 * Sets the value(s) for container (Direct container of specimen (tube/slide, etc))
+	 * Sets the value(s) for <b>container</b> (Direct container of specimen (tube/slide, etc))
 	 *
      * <p>
      * <b>Definition:</b>
      * The container holding the specimen.  The recursive nature of containers; i.e. blood in tube in tray in rack is not addressed here. 
      * </p> 
 	 */
-	public void setContainer(List<IDatatype> theValue) {
+	public void setContainer(List<Container> theValue) {
 		myContainer = theValue;
 	}
 	
+ 
 	}
 
 	/**
@@ -562,13 +687,14 @@ public class Specimen implements IResource {
 	private CodeableConceptDt myType;
 	
 	@Child(name="source", order=2, min=0, max=Child.MAX_UNLIMITED)	
-	private List<IDatatype> mySource;
+	private List<Source> mySource;
 	
 	@Child(name="subject", order=3, min=1, max=1)
 	@ChildResource(types= {
 		Patient.class,
 		Group.class,
 		Device.class,
+		Substance.class,
 	})	
 	private ResourceReference mySubject;
 	
@@ -579,28 +705,33 @@ public class Specimen implements IResource {
 	private DateTimeDt myReceivedTime;
 	
 	@Child(name="collection", order=6, min=1, max=1)	
-	private IDatatype myCollection;
+	private Collection myCollection;
 	
 	@Child(name="treatment", order=7, min=0, max=Child.MAX_UNLIMITED)	
-	private List<IDatatype> myTreatment;
+	private List<Treatment> myTreatment;
 	
 	@Child(name="container", order=8, min=0, max=Child.MAX_UNLIMITED)	
-	private List<IDatatype> myContainer;
+	private List<Container> myContainer;
 	
 	/**
-	 * Gets the value(s) for identifier (External Identifier)
+	 * Gets the value(s) for <b>identifier</b> (External Identifier).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Id for specimen
      * </p> 
 	 */
-	public List<IdentifierDt> getIdentifier() {
+	public List<IdentifierDt> getIdentifier() {  
+		if (myIdentifier == null) {
+			myIdentifier = new ArrayList<IdentifierDt>();
+		}
 		return myIdentifier;
 	}
 
 	/**
-	 * Sets the value(s) for identifier (External Identifier)
+	 * Sets the value(s) for <b>identifier</b> (External Identifier)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -611,20 +742,26 @@ public class Specimen implements IResource {
 		myIdentifier = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for type (Kind of material that forms the specimen)
+	 * Gets the value(s) for <b>type</b> (Kind of material that forms the specimen).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Kind of material that forms the specimen
      * </p> 
 	 */
-	public CodeableConceptDt getType() {
+	public CodeableConceptDt getType() {  
+		if (myType == null) {
+			myType = new CodeableConceptDt();
+		}
 		return myType;
 	}
 
 	/**
-	 * Sets the value(s) for type (Kind of material that forms the specimen)
+	 * Sets the value(s) for <b>type</b> (Kind of material that forms the specimen)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -635,68 +772,83 @@ public class Specimen implements IResource {
 		myType = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for source (Parent of specimen)
+	 * Gets the value(s) for <b>source</b> (Parent of specimen).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Parent specimen from which the focal specimen was a component
      * </p> 
 	 */
-	public List<IDatatype> getSource() {
+	public List<Source> getSource() {  
+		if (mySource == null) {
+			mySource = new ArrayList<Source>();
+		}
 		return mySource;
 	}
 
 	/**
-	 * Sets the value(s) for source (Parent of specimen)
+	 * Sets the value(s) for <b>source</b> (Parent of specimen)
 	 *
      * <p>
      * <b>Definition:</b>
      * Parent specimen from which the focal specimen was a component
      * </p> 
 	 */
-	public void setSource(List<IDatatype> theValue) {
+	public void setSource(List<Source> theValue) {
 		mySource = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for subject (Where the specimen came from. This may be the patient(s) or from the environment or  a device)
+	 * Gets the value(s) for <b>subject</b> (Where the specimen came from. This may be the patient(s) or from the environment or  a device).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
-     * ${child.definition}
+     * 
      * </p> 
 	 */
-	public ResourceReference getSubject() {
+	public ResourceReference getSubject() {  
 		return mySubject;
 	}
 
 	/**
-	 * Sets the value(s) for subject (Where the specimen came from. This may be the patient(s) or from the environment or  a device)
+	 * Sets the value(s) for <b>subject</b> (Where the specimen came from. This may be the patient(s) or from the environment or  a device)
 	 *
      * <p>
      * <b>Definition:</b>
-     * ${child.definition}
+     * 
      * </p> 
 	 */
 	public void setSubject(ResourceReference theValue) {
 		mySubject = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for accessionIdentifier (Identifier assigned by the lab)
+	 * Gets the value(s) for <b>accessionIdentifier</b> (Identifier assigned by the lab).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * The identifier assigned by the lab when accessioning specimen(s). This is not necessarily the same as the specimen identifier, depending on local lab procedures. 
      * </p> 
 	 */
-	public IdentifierDt getAccessionIdentifier() {
+	public IdentifierDt getAccessionIdentifier() {  
+		if (myAccessionIdentifier == null) {
+			myAccessionIdentifier = new IdentifierDt();
+		}
 		return myAccessionIdentifier;
 	}
 
 	/**
-	 * Sets the value(s) for accessionIdentifier (Identifier assigned by the lab)
+	 * Sets the value(s) for <b>accessionIdentifier</b> (Identifier assigned by the lab)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -707,20 +859,26 @@ public class Specimen implements IResource {
 		myAccessionIdentifier = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for receivedTime (The time when specimen was received for processing)
+	 * Gets the value(s) for <b>receivedTime</b> (The time when specimen was received for processing).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Time when specimen was received for processing or testing
      * </p> 
 	 */
-	public DateTimeDt getReceivedTime() {
+	public DateTimeDt getReceivedTime() {  
+		if (myReceivedTime == null) {
+			myReceivedTime = new DateTimeDt();
+		}
 		return myReceivedTime;
 	}
 
 	/**
-	 * Sets the value(s) for receivedTime (The time when specimen was received for processing)
+	 * Sets the value(s) for <b>receivedTime</b> (The time when specimen was received for processing)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -732,77 +890,107 @@ public class Specimen implements IResource {
 	}
 	
 	/**
-	 * Gets the value(s) for collection (Collection details)
+	 * Sets the value(s) for <b>receivedTime</b> (The time when specimen was received for processing)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Time when specimen was received for processing or testing
+     * </p> 
+	 */
+	public void setReceivedTimeWithSecondsPrecision( Date theDate) {
+		myReceivedTime = new DateTimeDt(theDate); 
+	}
+ 
+	/**
+	 * Gets the value(s) for <b>collection</b> (Collection details).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Details concerning the specimen collection
      * </p> 
 	 */
-	public IDatatype getCollection() {
+	public Collection getCollection() {  
+		if (myCollection == null) {
+			myCollection = new Collection();
+		}
 		return myCollection;
 	}
 
 	/**
-	 * Sets the value(s) for collection (Collection details)
+	 * Sets the value(s) for <b>collection</b> (Collection details)
 	 *
      * <p>
      * <b>Definition:</b>
      * Details concerning the specimen collection
      * </p> 
 	 */
-	public void setCollection(IDatatype theValue) {
+	public void setCollection(Collection theValue) {
 		myCollection = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for treatment (Treatment and processing step details)
+	 * Gets the value(s) for <b>treatment</b> (Treatment and processing step details).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Details concerning treatment and processing steps for the specimen
      * </p> 
 	 */
-	public List<IDatatype> getTreatment() {
+	public List<Treatment> getTreatment() {  
+		if (myTreatment == null) {
+			myTreatment = new ArrayList<Treatment>();
+		}
 		return myTreatment;
 	}
 
 	/**
-	 * Sets the value(s) for treatment (Treatment and processing step details)
+	 * Sets the value(s) for <b>treatment</b> (Treatment and processing step details)
 	 *
      * <p>
      * <b>Definition:</b>
      * Details concerning treatment and processing steps for the specimen
      * </p> 
 	 */
-	public void setTreatment(List<IDatatype> theValue) {
+	public void setTreatment(List<Treatment> theValue) {
 		myTreatment = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for container (Direct container of specimen (tube/slide, etc))
+	 * Gets the value(s) for <b>container</b> (Direct container of specimen (tube/slide, etc)).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * The container holding the specimen.  The recursive nature of containers; i.e. blood in tube in tray in rack is not addressed here. 
      * </p> 
 	 */
-	public List<IDatatype> getContainer() {
+	public List<Container> getContainer() {  
+		if (myContainer == null) {
+			myContainer = new ArrayList<Container>();
+		}
 		return myContainer;
 	}
 
 	/**
-	 * Sets the value(s) for container (Direct container of specimen (tube/slide, etc))
+	 * Sets the value(s) for <b>container</b> (Direct container of specimen (tube/slide, etc))
 	 *
      * <p>
      * <b>Definition:</b>
      * The container holding the specimen.  The recursive nature of containers; i.e. blood in tube in tray in rack is not addressed here. 
      * </p> 
 	 */
-	public void setContainer(List<IDatatype> theValue) {
+	public void setContainer(List<Container> theValue) {
 		myContainer = theValue;
 	}
 	
+ 
 	}
 
 	/**
@@ -822,13 +1010,14 @@ public class Specimen implements IResource {
 	private CodeableConceptDt myType;
 	
 	@Child(name="source", order=2, min=0, max=Child.MAX_UNLIMITED)	
-	private List<IDatatype> mySource;
+	private List<Source> mySource;
 	
 	@Child(name="subject", order=3, min=1, max=1)
 	@ChildResource(types= {
 		Patient.class,
 		Group.class,
 		Device.class,
+		Substance.class,
 	})	
 	private ResourceReference mySubject;
 	
@@ -839,28 +1028,33 @@ public class Specimen implements IResource {
 	private DateTimeDt myReceivedTime;
 	
 	@Child(name="collection", order=6, min=1, max=1)	
-	private IDatatype myCollection;
+	private Collection myCollection;
 	
 	@Child(name="treatment", order=7, min=0, max=Child.MAX_UNLIMITED)	
-	private List<IDatatype> myTreatment;
+	private List<Treatment> myTreatment;
 	
 	@Child(name="container", order=8, min=0, max=Child.MAX_UNLIMITED)	
-	private List<IDatatype> myContainer;
+	private List<Container> myContainer;
 	
 	/**
-	 * Gets the value(s) for identifier (External Identifier)
+	 * Gets the value(s) for <b>identifier</b> (External Identifier).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Id for specimen
      * </p> 
 	 */
-	public List<IdentifierDt> getIdentifier() {
+	public List<IdentifierDt> getIdentifier() {  
+		if (myIdentifier == null) {
+			myIdentifier = new ArrayList<IdentifierDt>();
+		}
 		return myIdentifier;
 	}
 
 	/**
-	 * Sets the value(s) for identifier (External Identifier)
+	 * Sets the value(s) for <b>identifier</b> (External Identifier)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -871,20 +1065,26 @@ public class Specimen implements IResource {
 		myIdentifier = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for type (Kind of material that forms the specimen)
+	 * Gets the value(s) for <b>type</b> (Kind of material that forms the specimen).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Kind of material that forms the specimen
      * </p> 
 	 */
-	public CodeableConceptDt getType() {
+	public CodeableConceptDt getType() {  
+		if (myType == null) {
+			myType = new CodeableConceptDt();
+		}
 		return myType;
 	}
 
 	/**
-	 * Sets the value(s) for type (Kind of material that forms the specimen)
+	 * Sets the value(s) for <b>type</b> (Kind of material that forms the specimen)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -895,68 +1095,83 @@ public class Specimen implements IResource {
 		myType = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for source (Parent of specimen)
+	 * Gets the value(s) for <b>source</b> (Parent of specimen).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Parent specimen from which the focal specimen was a component
      * </p> 
 	 */
-	public List<IDatatype> getSource() {
+	public List<Source> getSource() {  
+		if (mySource == null) {
+			mySource = new ArrayList<Source>();
+		}
 		return mySource;
 	}
 
 	/**
-	 * Sets the value(s) for source (Parent of specimen)
+	 * Sets the value(s) for <b>source</b> (Parent of specimen)
 	 *
      * <p>
      * <b>Definition:</b>
      * Parent specimen from which the focal specimen was a component
      * </p> 
 	 */
-	public void setSource(List<IDatatype> theValue) {
+	public void setSource(List<Source> theValue) {
 		mySource = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for subject (Where the specimen came from. This may be the patient(s) or from the environment or  a device)
+	 * Gets the value(s) for <b>subject</b> (Where the specimen came from. This may be the patient(s) or from the environment or  a device).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
-     * ${child.definition}
+     * 
      * </p> 
 	 */
-	public ResourceReference getSubject() {
+	public ResourceReference getSubject() {  
 		return mySubject;
 	}
 
 	/**
-	 * Sets the value(s) for subject (Where the specimen came from. This may be the patient(s) or from the environment or  a device)
+	 * Sets the value(s) for <b>subject</b> (Where the specimen came from. This may be the patient(s) or from the environment or  a device)
 	 *
      * <p>
      * <b>Definition:</b>
-     * ${child.definition}
+     * 
      * </p> 
 	 */
 	public void setSubject(ResourceReference theValue) {
 		mySubject = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for accessionIdentifier (Identifier assigned by the lab)
+	 * Gets the value(s) for <b>accessionIdentifier</b> (Identifier assigned by the lab).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * The identifier assigned by the lab when accessioning specimen(s). This is not necessarily the same as the specimen identifier, depending on local lab procedures. 
      * </p> 
 	 */
-	public IdentifierDt getAccessionIdentifier() {
+	public IdentifierDt getAccessionIdentifier() {  
+		if (myAccessionIdentifier == null) {
+			myAccessionIdentifier = new IdentifierDt();
+		}
 		return myAccessionIdentifier;
 	}
 
 	/**
-	 * Sets the value(s) for accessionIdentifier (Identifier assigned by the lab)
+	 * Sets the value(s) for <b>accessionIdentifier</b> (Identifier assigned by the lab)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -967,20 +1182,26 @@ public class Specimen implements IResource {
 		myAccessionIdentifier = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for receivedTime (The time when specimen was received for processing)
+	 * Gets the value(s) for <b>receivedTime</b> (The time when specimen was received for processing).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Time when specimen was received for processing or testing
      * </p> 
 	 */
-	public DateTimeDt getReceivedTime() {
+	public DateTimeDt getReceivedTime() {  
+		if (myReceivedTime == null) {
+			myReceivedTime = new DateTimeDt();
+		}
 		return myReceivedTime;
 	}
 
 	/**
-	 * Sets the value(s) for receivedTime (The time when specimen was received for processing)
+	 * Sets the value(s) for <b>receivedTime</b> (The time when specimen was received for processing)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -992,77 +1213,107 @@ public class Specimen implements IResource {
 	}
 	
 	/**
-	 * Gets the value(s) for collection (Collection details)
+	 * Sets the value(s) for <b>receivedTime</b> (The time when specimen was received for processing)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Time when specimen was received for processing or testing
+     * </p> 
+	 */
+	public void setReceivedTimeWithSecondsPrecision( Date theDate) {
+		myReceivedTime = new DateTimeDt(theDate); 
+	}
+ 
+	/**
+	 * Gets the value(s) for <b>collection</b> (Collection details).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Details concerning the specimen collection
      * </p> 
 	 */
-	public IDatatype getCollection() {
+	public Collection getCollection() {  
+		if (myCollection == null) {
+			myCollection = new Collection();
+		}
 		return myCollection;
 	}
 
 	/**
-	 * Sets the value(s) for collection (Collection details)
+	 * Sets the value(s) for <b>collection</b> (Collection details)
 	 *
      * <p>
      * <b>Definition:</b>
      * Details concerning the specimen collection
      * </p> 
 	 */
-	public void setCollection(IDatatype theValue) {
+	public void setCollection(Collection theValue) {
 		myCollection = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for treatment (Treatment and processing step details)
+	 * Gets the value(s) for <b>treatment</b> (Treatment and processing step details).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Details concerning treatment and processing steps for the specimen
      * </p> 
 	 */
-	public List<IDatatype> getTreatment() {
+	public List<Treatment> getTreatment() {  
+		if (myTreatment == null) {
+			myTreatment = new ArrayList<Treatment>();
+		}
 		return myTreatment;
 	}
 
 	/**
-	 * Sets the value(s) for treatment (Treatment and processing step details)
+	 * Sets the value(s) for <b>treatment</b> (Treatment and processing step details)
 	 *
      * <p>
      * <b>Definition:</b>
      * Details concerning treatment and processing steps for the specimen
      * </p> 
 	 */
-	public void setTreatment(List<IDatatype> theValue) {
+	public void setTreatment(List<Treatment> theValue) {
 		myTreatment = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for container (Direct container of specimen (tube/slide, etc))
+	 * Gets the value(s) for <b>container</b> (Direct container of specimen (tube/slide, etc)).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * The container holding the specimen.  The recursive nature of containers; i.e. blood in tube in tray in rack is not addressed here. 
      * </p> 
 	 */
-	public List<IDatatype> getContainer() {
+	public List<Container> getContainer() {  
+		if (myContainer == null) {
+			myContainer = new ArrayList<Container>();
+		}
 		return myContainer;
 	}
 
 	/**
-	 * Sets the value(s) for container (Direct container of specimen (tube/slide, etc))
+	 * Sets the value(s) for <b>container</b> (Direct container of specimen (tube/slide, etc))
 	 *
      * <p>
      * <b>Definition:</b>
      * The container holding the specimen.  The recursive nature of containers; i.e. blood in tube in tray in rack is not addressed here. 
      * </p> 
 	 */
-	public void setContainer(List<IDatatype> theValue) {
+	public void setContainer(List<Container> theValue) {
 		myContainer = theValue;
 	}
 	
+ 
 	}
 
 	/**
@@ -1082,13 +1333,14 @@ public class Specimen implements IResource {
 	private CodeableConceptDt myType;
 	
 	@Child(name="source", order=2, min=0, max=Child.MAX_UNLIMITED)	
-	private List<IDatatype> mySource;
+	private List<Source> mySource;
 	
 	@Child(name="subject", order=3, min=1, max=1)
 	@ChildResource(types= {
 		Patient.class,
 		Group.class,
 		Device.class,
+		Substance.class,
 	})	
 	private ResourceReference mySubject;
 	
@@ -1099,28 +1351,33 @@ public class Specimen implements IResource {
 	private DateTimeDt myReceivedTime;
 	
 	@Child(name="collection", order=6, min=1, max=1)	
-	private IDatatype myCollection;
+	private Collection myCollection;
 	
 	@Child(name="treatment", order=7, min=0, max=Child.MAX_UNLIMITED)	
-	private List<IDatatype> myTreatment;
+	private List<Treatment> myTreatment;
 	
 	@Child(name="container", order=8, min=0, max=Child.MAX_UNLIMITED)	
-	private List<IDatatype> myContainer;
+	private List<Container> myContainer;
 	
 	/**
-	 * Gets the value(s) for identifier (External Identifier)
+	 * Gets the value(s) for <b>identifier</b> (External Identifier).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Id for specimen
      * </p> 
 	 */
-	public List<IdentifierDt> getIdentifier() {
+	public List<IdentifierDt> getIdentifier() {  
+		if (myIdentifier == null) {
+			myIdentifier = new ArrayList<IdentifierDt>();
+		}
 		return myIdentifier;
 	}
 
 	/**
-	 * Sets the value(s) for identifier (External Identifier)
+	 * Sets the value(s) for <b>identifier</b> (External Identifier)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1131,20 +1388,26 @@ public class Specimen implements IResource {
 		myIdentifier = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for type (Kind of material that forms the specimen)
+	 * Gets the value(s) for <b>type</b> (Kind of material that forms the specimen).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Kind of material that forms the specimen
      * </p> 
 	 */
-	public CodeableConceptDt getType() {
+	public CodeableConceptDt getType() {  
+		if (myType == null) {
+			myType = new CodeableConceptDt();
+		}
 		return myType;
 	}
 
 	/**
-	 * Sets the value(s) for type (Kind of material that forms the specimen)
+	 * Sets the value(s) for <b>type</b> (Kind of material that forms the specimen)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1155,68 +1418,83 @@ public class Specimen implements IResource {
 		myType = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for source (Parent of specimen)
+	 * Gets the value(s) for <b>source</b> (Parent of specimen).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Parent specimen from which the focal specimen was a component
      * </p> 
 	 */
-	public List<IDatatype> getSource() {
+	public List<Source> getSource() {  
+		if (mySource == null) {
+			mySource = new ArrayList<Source>();
+		}
 		return mySource;
 	}
 
 	/**
-	 * Sets the value(s) for source (Parent of specimen)
+	 * Sets the value(s) for <b>source</b> (Parent of specimen)
 	 *
      * <p>
      * <b>Definition:</b>
      * Parent specimen from which the focal specimen was a component
      * </p> 
 	 */
-	public void setSource(List<IDatatype> theValue) {
+	public void setSource(List<Source> theValue) {
 		mySource = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for subject (Where the specimen came from. This may be the patient(s) or from the environment or  a device)
+	 * Gets the value(s) for <b>subject</b> (Where the specimen came from. This may be the patient(s) or from the environment or  a device).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
-     * ${child.definition}
+     * 
      * </p> 
 	 */
-	public ResourceReference getSubject() {
+	public ResourceReference getSubject() {  
 		return mySubject;
 	}
 
 	/**
-	 * Sets the value(s) for subject (Where the specimen came from. This may be the patient(s) or from the environment or  a device)
+	 * Sets the value(s) for <b>subject</b> (Where the specimen came from. This may be the patient(s) or from the environment or  a device)
 	 *
      * <p>
      * <b>Definition:</b>
-     * ${child.definition}
+     * 
      * </p> 
 	 */
 	public void setSubject(ResourceReference theValue) {
 		mySubject = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for accessionIdentifier (Identifier assigned by the lab)
+	 * Gets the value(s) for <b>accessionIdentifier</b> (Identifier assigned by the lab).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * The identifier assigned by the lab when accessioning specimen(s). This is not necessarily the same as the specimen identifier, depending on local lab procedures. 
      * </p> 
 	 */
-	public IdentifierDt getAccessionIdentifier() {
+	public IdentifierDt getAccessionIdentifier() {  
+		if (myAccessionIdentifier == null) {
+			myAccessionIdentifier = new IdentifierDt();
+		}
 		return myAccessionIdentifier;
 	}
 
 	/**
-	 * Sets the value(s) for accessionIdentifier (Identifier assigned by the lab)
+	 * Sets the value(s) for <b>accessionIdentifier</b> (Identifier assigned by the lab)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1227,20 +1505,26 @@ public class Specimen implements IResource {
 		myAccessionIdentifier = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for receivedTime (The time when specimen was received for processing)
+	 * Gets the value(s) for <b>receivedTime</b> (The time when specimen was received for processing).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Time when specimen was received for processing or testing
      * </p> 
 	 */
-	public DateTimeDt getReceivedTime() {
+	public DateTimeDt getReceivedTime() {  
+		if (myReceivedTime == null) {
+			myReceivedTime = new DateTimeDt();
+		}
 		return myReceivedTime;
 	}
 
 	/**
-	 * Sets the value(s) for receivedTime (The time when specimen was received for processing)
+	 * Sets the value(s) for <b>receivedTime</b> (The time when specimen was received for processing)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1252,77 +1536,107 @@ public class Specimen implements IResource {
 	}
 	
 	/**
-	 * Gets the value(s) for collection (Collection details)
+	 * Sets the value(s) for <b>receivedTime</b> (The time when specimen was received for processing)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Time when specimen was received for processing or testing
+     * </p> 
+	 */
+	public void setReceivedTimeWithSecondsPrecision( Date theDate) {
+		myReceivedTime = new DateTimeDt(theDate); 
+	}
+ 
+	/**
+	 * Gets the value(s) for <b>collection</b> (Collection details).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Details concerning the specimen collection
      * </p> 
 	 */
-	public IDatatype getCollection() {
+	public Collection getCollection() {  
+		if (myCollection == null) {
+			myCollection = new Collection();
+		}
 		return myCollection;
 	}
 
 	/**
-	 * Sets the value(s) for collection (Collection details)
+	 * Sets the value(s) for <b>collection</b> (Collection details)
 	 *
      * <p>
      * <b>Definition:</b>
      * Details concerning the specimen collection
      * </p> 
 	 */
-	public void setCollection(IDatatype theValue) {
+	public void setCollection(Collection theValue) {
 		myCollection = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for treatment (Treatment and processing step details)
+	 * Gets the value(s) for <b>treatment</b> (Treatment and processing step details).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Details concerning treatment and processing steps for the specimen
      * </p> 
 	 */
-	public List<IDatatype> getTreatment() {
+	public List<Treatment> getTreatment() {  
+		if (myTreatment == null) {
+			myTreatment = new ArrayList<Treatment>();
+		}
 		return myTreatment;
 	}
 
 	/**
-	 * Sets the value(s) for treatment (Treatment and processing step details)
+	 * Sets the value(s) for <b>treatment</b> (Treatment and processing step details)
 	 *
      * <p>
      * <b>Definition:</b>
      * Details concerning treatment and processing steps for the specimen
      * </p> 
 	 */
-	public void setTreatment(List<IDatatype> theValue) {
+	public void setTreatment(List<Treatment> theValue) {
 		myTreatment = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for container (Direct container of specimen (tube/slide, etc))
+	 * Gets the value(s) for <b>container</b> (Direct container of specimen (tube/slide, etc)).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * The container holding the specimen.  The recursive nature of containers; i.e. blood in tube in tray in rack is not addressed here. 
      * </p> 
 	 */
-	public List<IDatatype> getContainer() {
+	public List<Container> getContainer() {  
+		if (myContainer == null) {
+			myContainer = new ArrayList<Container>();
+		}
 		return myContainer;
 	}
 
 	/**
-	 * Sets the value(s) for container (Direct container of specimen (tube/slide, etc))
+	 * Sets the value(s) for <b>container</b> (Direct container of specimen (tube/slide, etc))
 	 *
      * <p>
      * <b>Definition:</b>
      * The container holding the specimen.  The recursive nature of containers; i.e. blood in tube in tray in rack is not addressed here. 
      * </p> 
 	 */
-	public void setContainer(List<IDatatype> theValue) {
+	public void setContainer(List<Container> theValue) {
 		myContainer = theValue;
 	}
 	
+ 
 	}
 
 

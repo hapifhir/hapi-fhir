@@ -259,7 +259,10 @@ class ParserState {
 		public void enteringNewElement(StartElement theElement, String theChildName) throws DataFormatException {
 			BaseRuntimeChildDefinition child = myDefinition.getChildByNameOrThrowDataFormatException(theChildName);
 			BaseRuntimeElementDefinition<?> target = child.getChildByName(theChildName);
-
+			if (target == null) {
+				throw new DataFormatException("Found unexpected element '" + theChildName + "' in parent element '" + myDefinition.getName() + "'. Valid names are: " + child.getValidChildNames());
+			}
+			
 			switch (target.getChildType()) {
 			case COMPOSITE_DATATYPE: {
 				BaseRuntimeElementCompositeDefinition<?> compositeTarget = (BaseRuntimeElementCompositeDefinition<?>) target;

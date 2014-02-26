@@ -50,19 +50,24 @@ public class QuantityDt extends BaseCompositeDatatype {
 	private CodeDt myCode;
 	
 	/**
-	 * Gets the value(s) for value (Numerical value (with implicit precision))
+	 * Gets the value(s) for <b>value</b> (Numerical value (with implicit precision)).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * The value of the measured amount. The value includes an implicit precision in the presentation of the value
      * </p> 
 	 */
-	public DecimalDt getValue() {
+	public DecimalDt getValue() {  
+		if (myValue == null) {
+			myValue = new DecimalDt();
+		}
 		return myValue;
 	}
 
 	/**
-	 * Sets the value(s) for value (Numerical value (with implicit precision))
+	 * Sets the value(s) for <b>value</b> (Numerical value (with implicit precision))
 	 *
      * <p>
      * <b>Definition:</b>
@@ -73,20 +78,26 @@ public class QuantityDt extends BaseCompositeDatatype {
 		myValue = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for comparator (< | <= | >= | > - how to understand the value)
+	 * Gets the value(s) for <b>comparator</b> (< | <= | >= | > - how to understand the value).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * How the value should be understood and represented - whether the actual value is greater or less than the stated value due to measurement issues. E.g. if the comparator is "<" , then the real value is < stated value
      * </p> 
 	 */
-	public CodeDt getComparator() {
+	public CodeDt getComparator() {  
+		if (myComparator == null) {
+			myComparator = new CodeDt();
+		}
 		return myComparator;
 	}
 
 	/**
-	 * Sets the value(s) for comparator (< | <= | >= | > - how to understand the value)
+	 * Sets the value(s) for <b>comparator</b> (< | <= | >= | > - how to understand the value)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -97,20 +108,26 @@ public class QuantityDt extends BaseCompositeDatatype {
 		myComparator = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for units (Unit representation)
+	 * Gets the value(s) for <b>units</b> (Unit representation).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * A human-readable form of the units
      * </p> 
 	 */
-	public StringDt getUnits() {
+	public StringDt getUnits() {  
+		if (myUnits == null) {
+			myUnits = new StringDt();
+		}
 		return myUnits;
 	}
 
 	/**
-	 * Sets the value(s) for units (Unit representation)
+	 * Sets the value(s) for <b>units</b> (Unit representation)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -122,19 +139,36 @@ public class QuantityDt extends BaseCompositeDatatype {
 	}
 	
 	/**
-	 * Gets the value(s) for system (System that defines coded unit form)
+	 * Sets the value(s) for <b>units</b> (Unit representation)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A human-readable form of the units
+     * </p> 
+	 */
+	public void setUnits( String theString) {
+		myUnits = new StringDt(theString); 
+	}
+ 
+	/**
+	 * Gets the value(s) for <b>system</b> (System that defines coded unit form).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * The identification of the system that provides the coded form of the unit
      * </p> 
 	 */
-	public UriDt getSystem() {
+	public UriDt getSystem() {  
+		if (mySystem == null) {
+			mySystem = new UriDt();
+		}
 		return mySystem;
 	}
 
 	/**
-	 * Sets the value(s) for system (System that defines coded unit form)
+	 * Sets the value(s) for <b>system</b> (System that defines coded unit form)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -145,20 +179,26 @@ public class QuantityDt extends BaseCompositeDatatype {
 		mySystem = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for code (Coded form of the unit)
+	 * Gets the value(s) for <b>code</b> (Coded form of the unit).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * A computer processable form of the units in some unit representation system
      * </p> 
 	 */
-	public CodeDt getCode() {
+	public CodeDt getCode() {  
+		if (myCode == null) {
+			myCode = new CodeDt();
+		}
 		return myCode;
 	}
 
 	/**
-	 * Sets the value(s) for code (Coded form of the unit)
+	 * Sets the value(s) for <b>code</b> (Coded form of the unit)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -169,6 +209,7 @@ public class QuantityDt extends BaseCompositeDatatype {
 		myCode = theValue;
 	}
 	
+ 
 
 
 }

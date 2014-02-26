@@ -2,12 +2,28 @@ package ca.uhn.fhir.model.primitive;
 
 import ca.uhn.fhir.model.api.BasePrimitiveDatatype;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+import ca.uhn.fhir.model.api.annotation.SimpleSetter;
 import ca.uhn.fhir.parser.DataFormatException;
 
 @DatatypeDef(name = "string")
 public class StringDt extends BasePrimitiveDatatype<String> {
 
 	private String myValue;
+
+	/**
+	 * Create a new String
+	 */
+	public StringDt() {
+		super();
+	}
+
+	/**
+	 * Create a new String
+	 */
+	@SimpleSetter
+	public StringDt(@SimpleSetter.Parameter(name="theString") String theValue) {
+		myValue=theValue;
+	}
 
 	@Override
 	public String getValue() {
@@ -28,5 +44,6 @@ public class StringDt extends BasePrimitiveDatatype<String> {
 	public void setValueAsString(String theValue) throws DataFormatException {
 		myValue = theValue;
 	}
+	
 
 }

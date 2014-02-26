@@ -43,7 +43,7 @@ public class Child extends BaseElement {
 		String retVal;
 		if (this.isResourceRef()) {
 			retVal = (ResourceReference.class.getSimpleName());
-		} else if (this.getType().size() == 1) {
+		} else if (this.getType().size() == 1 || this instanceof ResourceBlock) {
 			retVal = getSingleType();
 		} else {
 			if (this instanceof Extension && ((Extension) this).getChildExtensions().size() > 0) {
@@ -67,7 +67,7 @@ public class Child extends BaseElement {
 	public List<String> getReferenceTypesForMultiple() {
 		ArrayList<String> retVal = new ArrayList<String>();
 		for (String next : getType()) {
-			retVal.add(next + "Dt");
+			retVal.add(next + getTypeSuffix());
 		}
 		return retVal;
 	}
@@ -96,9 +96,13 @@ public class Child extends BaseElement {
 		if (this instanceof ResourceBlock) {
 			retVal = (elemName);
 		} else {
-			retVal = (elemName + "Dt");
+			retVal = (elemName + getTypeSuffix());
 		}
 		return retVal;
+	}
+
+	public String getTypeSuffix() {
+		return "Dt";
 	}
 
 }

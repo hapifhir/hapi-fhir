@@ -54,30 +54,37 @@ public class Group implements IResource {
 	private IntegerDt myQuantity;
 	
 	@Child(name="characteristic", order=6, min=0, max=Child.MAX_UNLIMITED)	
-	private List<IDatatype> myCharacteristic;
+	private List<Characteristic> myCharacteristic;
 	
 	@Child(name="member", order=7, min=0, max=Child.MAX_UNLIMITED)
 	@ChildResource(types= {
 		Patient.class,
 		Practitioner.class,
 		Device.class,
+		Medication.class,
+		Substance.class,
 	})	
 	private List<ResourceReference> myMember;
 	
 	/**
-	 * Gets the value(s) for identifier (Unique id)
+	 * Gets the value(s) for <b>identifier</b> (Unique id).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * A unique business identifier for this group
      * </p> 
 	 */
-	public IdentifierDt getIdentifier() {
+	public IdentifierDt getIdentifier() {  
+		if (myIdentifier == null) {
+			myIdentifier = new IdentifierDt();
+		}
 		return myIdentifier;
 	}
 
 	/**
-	 * Sets the value(s) for identifier (Unique id)
+	 * Sets the value(s) for <b>identifier</b> (Unique id)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -88,20 +95,26 @@ public class Group implements IResource {
 		myIdentifier = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for type (person | animal | practitioner | device | medication | substance)
+	 * Gets the value(s) for <b>type</b> (person | animal | practitioner | device | medication | substance).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Identifies the broad classification of the kind of resources the group includes
      * </p> 
 	 */
-	public CodeDt getType() {
+	public CodeDt getType() {  
+		if (myType == null) {
+			myType = new CodeDt();
+		}
 		return myType;
 	}
 
 	/**
-	 * Sets the value(s) for type (person | animal | practitioner | device | medication | substance)
+	 * Sets the value(s) for <b>type</b> (person | animal | practitioner | device | medication | substance)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -112,20 +125,26 @@ public class Group implements IResource {
 		myType = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for actual (Descriptive or actual)
+	 * Gets the value(s) for <b>actual</b> (Descriptive or actual).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * If true, indicates that the resource refers to a specific group of real individuals.  If false, the group defines a set of intended individuals
      * </p> 
 	 */
-	public BooleanDt getActual() {
+	public BooleanDt getActual() {  
+		if (myActual == null) {
+			myActual = new BooleanDt();
+		}
 		return myActual;
 	}
 
 	/**
-	 * Sets the value(s) for actual (Descriptive or actual)
+	 * Sets the value(s) for <b>actual</b> (Descriptive or actual)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -136,20 +155,26 @@ public class Group implements IResource {
 		myActual = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for code (Kind of Group members)
+	 * Gets the value(s) for <b>code</b> (Kind of Group members).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Provides a specific type of resource the group includes.  E.g. "cow", "syringe", etc.
      * </p> 
 	 */
-	public CodeableConceptDt getCode() {
+	public CodeableConceptDt getCode() {  
+		if (myCode == null) {
+			myCode = new CodeableConceptDt();
+		}
 		return myCode;
 	}
 
 	/**
-	 * Sets the value(s) for code (Kind of Group members)
+	 * Sets the value(s) for <b>code</b> (Kind of Group members)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -160,20 +185,26 @@ public class Group implements IResource {
 		myCode = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for name (Label for Group)
+	 * Gets the value(s) for <b>name</b> (Label for Group).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * A label assigned to the group for human identification and communication
      * </p> 
 	 */
-	public StringDt getName() {
+	public StringDt getName() {  
+		if (myName == null) {
+			myName = new StringDt();
+		}
 		return myName;
 	}
 
 	/**
-	 * Sets the value(s) for name (Label for Group)
+	 * Sets the value(s) for <b>name</b> (Label for Group)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -185,19 +216,36 @@ public class Group implements IResource {
 	}
 	
 	/**
-	 * Gets the value(s) for quantity (Number of members)
+	 * Sets the value(s) for <b>name</b> (Label for Group)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A label assigned to the group for human identification and communication
+     * </p> 
+	 */
+	public void setName( String theString) {
+		myName = new StringDt(theString); 
+	}
+ 
+	/**
+	 * Gets the value(s) for <b>quantity</b> (Number of members).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * A count of the number of resource instances that are part of the group
      * </p> 
 	 */
-	public IntegerDt getQuantity() {
+	public IntegerDt getQuantity() {  
+		if (myQuantity == null) {
+			myQuantity = new IntegerDt();
+		}
 		return myQuantity;
 	}
 
 	/**
-	 * Sets the value(s) for quantity (Number of members)
+	 * Sets the value(s) for <b>quantity</b> (Number of members)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -208,44 +256,53 @@ public class Group implements IResource {
 		myQuantity = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for characteristic (Trait of group members)
+	 * Gets the value(s) for <b>characteristic</b> (Trait of group members).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Identifies the traits shared by members of the group
      * </p> 
 	 */
-	public List<IDatatype> getCharacteristic() {
+	public List<Characteristic> getCharacteristic() {  
+		if (myCharacteristic == null) {
+			myCharacteristic = new ArrayList<Characteristic>();
+		}
 		return myCharacteristic;
 	}
 
 	/**
-	 * Sets the value(s) for characteristic (Trait of group members)
+	 * Sets the value(s) for <b>characteristic</b> (Trait of group members)
 	 *
      * <p>
      * <b>Definition:</b>
      * Identifies the traits shared by members of the group
      * </p> 
 	 */
-	public void setCharacteristic(List<IDatatype> theValue) {
+	public void setCharacteristic(List<Characteristic> theValue) {
 		myCharacteristic = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for member (Who is in group)
+	 * Gets the value(s) for <b>member</b> (Who is in group).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Identifies the resource instances that are members of the group.
      * </p> 
 	 */
-	public List<ResourceReference> getMember() {
+	public List<ResourceReference> getMember() {  
 		return myMember;
 	}
 
 	/**
-	 * Sets the value(s) for member (Who is in group)
+	 * Sets the value(s) for <b>member</b> (Who is in group)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -256,6 +313,7 @@ public class Group implements IResource {
 		myMember = theValue;
 	}
 	
+ 
 
 	/**
 	 * Block class for child element: <b>Group.characteristic</b> (Trait of group members)
@@ -286,30 +344,37 @@ public class Group implements IResource {
 	private IntegerDt myQuantity;
 	
 	@Child(name="characteristic", order=6, min=0, max=Child.MAX_UNLIMITED)	
-	private List<IDatatype> myCharacteristic;
+	private List<Characteristic> myCharacteristic;
 	
 	@Child(name="member", order=7, min=0, max=Child.MAX_UNLIMITED)
 	@ChildResource(types= {
 		Patient.class,
 		Practitioner.class,
 		Device.class,
+		Medication.class,
+		Substance.class,
 	})	
 	private List<ResourceReference> myMember;
 	
 	/**
-	 * Gets the value(s) for identifier (Unique id)
+	 * Gets the value(s) for <b>identifier</b> (Unique id).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * A unique business identifier for this group
      * </p> 
 	 */
-	public IdentifierDt getIdentifier() {
+	public IdentifierDt getIdentifier() {  
+		if (myIdentifier == null) {
+			myIdentifier = new IdentifierDt();
+		}
 		return myIdentifier;
 	}
 
 	/**
-	 * Sets the value(s) for identifier (Unique id)
+	 * Sets the value(s) for <b>identifier</b> (Unique id)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -320,20 +385,26 @@ public class Group implements IResource {
 		myIdentifier = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for type (person | animal | practitioner | device | medication | substance)
+	 * Gets the value(s) for <b>type</b> (person | animal | practitioner | device | medication | substance).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Identifies the broad classification of the kind of resources the group includes
      * </p> 
 	 */
-	public CodeDt getType() {
+	public CodeDt getType() {  
+		if (myType == null) {
+			myType = new CodeDt();
+		}
 		return myType;
 	}
 
 	/**
-	 * Sets the value(s) for type (person | animal | practitioner | device | medication | substance)
+	 * Sets the value(s) for <b>type</b> (person | animal | practitioner | device | medication | substance)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -344,20 +415,26 @@ public class Group implements IResource {
 		myType = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for actual (Descriptive or actual)
+	 * Gets the value(s) for <b>actual</b> (Descriptive or actual).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * If true, indicates that the resource refers to a specific group of real individuals.  If false, the group defines a set of intended individuals
      * </p> 
 	 */
-	public BooleanDt getActual() {
+	public BooleanDt getActual() {  
+		if (myActual == null) {
+			myActual = new BooleanDt();
+		}
 		return myActual;
 	}
 
 	/**
-	 * Sets the value(s) for actual (Descriptive or actual)
+	 * Sets the value(s) for <b>actual</b> (Descriptive or actual)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -368,20 +445,26 @@ public class Group implements IResource {
 		myActual = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for code (Kind of Group members)
+	 * Gets the value(s) for <b>code</b> (Kind of Group members).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Provides a specific type of resource the group includes.  E.g. "cow", "syringe", etc.
      * </p> 
 	 */
-	public CodeableConceptDt getCode() {
+	public CodeableConceptDt getCode() {  
+		if (myCode == null) {
+			myCode = new CodeableConceptDt();
+		}
 		return myCode;
 	}
 
 	/**
-	 * Sets the value(s) for code (Kind of Group members)
+	 * Sets the value(s) for <b>code</b> (Kind of Group members)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -392,20 +475,26 @@ public class Group implements IResource {
 		myCode = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for name (Label for Group)
+	 * Gets the value(s) for <b>name</b> (Label for Group).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * A label assigned to the group for human identification and communication
      * </p> 
 	 */
-	public StringDt getName() {
+	public StringDt getName() {  
+		if (myName == null) {
+			myName = new StringDt();
+		}
 		return myName;
 	}
 
 	/**
-	 * Sets the value(s) for name (Label for Group)
+	 * Sets the value(s) for <b>name</b> (Label for Group)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -417,19 +506,36 @@ public class Group implements IResource {
 	}
 	
 	/**
-	 * Gets the value(s) for quantity (Number of members)
+	 * Sets the value(s) for <b>name</b> (Label for Group)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A label assigned to the group for human identification and communication
+     * </p> 
+	 */
+	public void setName( String theString) {
+		myName = new StringDt(theString); 
+	}
+ 
+	/**
+	 * Gets the value(s) for <b>quantity</b> (Number of members).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * A count of the number of resource instances that are part of the group
      * </p> 
 	 */
-	public IntegerDt getQuantity() {
+	public IntegerDt getQuantity() {  
+		if (myQuantity == null) {
+			myQuantity = new IntegerDt();
+		}
 		return myQuantity;
 	}
 
 	/**
-	 * Sets the value(s) for quantity (Number of members)
+	 * Sets the value(s) for <b>quantity</b> (Number of members)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -440,44 +546,53 @@ public class Group implements IResource {
 		myQuantity = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for characteristic (Trait of group members)
+	 * Gets the value(s) for <b>characteristic</b> (Trait of group members).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Identifies the traits shared by members of the group
      * </p> 
 	 */
-	public List<IDatatype> getCharacteristic() {
+	public List<Characteristic> getCharacteristic() {  
+		if (myCharacteristic == null) {
+			myCharacteristic = new ArrayList<Characteristic>();
+		}
 		return myCharacteristic;
 	}
 
 	/**
-	 * Sets the value(s) for characteristic (Trait of group members)
+	 * Sets the value(s) for <b>characteristic</b> (Trait of group members)
 	 *
      * <p>
      * <b>Definition:</b>
      * Identifies the traits shared by members of the group
      * </p> 
 	 */
-	public void setCharacteristic(List<IDatatype> theValue) {
+	public void setCharacteristic(List<Characteristic> theValue) {
 		myCharacteristic = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for member (Who is in group)
+	 * Gets the value(s) for <b>member</b> (Who is in group).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Identifies the resource instances that are members of the group.
      * </p> 
 	 */
-	public List<ResourceReference> getMember() {
+	public List<ResourceReference> getMember() {  
 		return myMember;
 	}
 
 	/**
-	 * Sets the value(s) for member (Who is in group)
+	 * Sets the value(s) for <b>member</b> (Who is in group)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -488,6 +603,7 @@ public class Group implements IResource {
 		myMember = theValue;
 	}
 	
+ 
 	}
 
 

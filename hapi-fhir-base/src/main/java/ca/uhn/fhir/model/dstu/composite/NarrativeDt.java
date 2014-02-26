@@ -41,19 +41,24 @@ public class NarrativeDt extends BaseCompositeDatatype {
 	private XhtmlDt myDiv;
 	
 	/**
-	 * Gets the value(s) for status (generated | extensions | additional)
+	 * Gets the value(s) for <b>status</b> (generated | extensions | additional).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * The status of the narrative - whether it's entirely generated (from just the defined data or the extensions too), or whether a human authored it and it may contain additional data
      * </p> 
 	 */
-	public CodeDt getStatus() {
+	public CodeDt getStatus() {  
+		if (myStatus == null) {
+			myStatus = new CodeDt();
+		}
 		return myStatus;
 	}
 
 	/**
-	 * Sets the value(s) for status (generated | extensions | additional)
+	 * Sets the value(s) for <b>status</b> (generated | extensions | additional)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -64,20 +69,26 @@ public class NarrativeDt extends BaseCompositeDatatype {
 		myStatus = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for div (Limited xhtml content)
+	 * Gets the value(s) for <b>div</b> (Limited xhtml content).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * The actual narrative content, a stripped down version of XHTML
      * </p> 
 	 */
-	public XhtmlDt getDiv() {
+	public XhtmlDt getDiv() {  
+		if (myDiv == null) {
+			myDiv = new XhtmlDt();
+		}
 		return myDiv;
 	}
 
 	/**
-	 * Sets the value(s) for div (Limited xhtml content)
+	 * Sets the value(s) for <b>div</b> (Limited xhtml content)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -88,6 +99,7 @@ public class NarrativeDt extends BaseCompositeDatatype {
 		myDiv = theValue;
 	}
 	
+ 
 
 
 }

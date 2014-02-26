@@ -28,23 +28,7 @@ public class ${className} implements IResource {
 #childExtensionFields( $childExtensionTypes )
 #childVars( $children )
 #childAccessors( $children )
-
-#foreach ( $child in $resourceBlockChildren )
-	/**
-	 * Block class for child element: <b>${child.name}</b> (${child.shortName})
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * ${child.definition}
-     * </p> 
-	 */
-	@Block(name="${child.name}")	
-	public static class ${child.className} implements IResourceBlock {
-#childVars( $child.children )
-#childAccessors( $child.children )
-	}
-
-#end
+#childResourceBlocks($resourceBlockChildren)
 
 #childExtensionTypes( $childExtensionTypes )
 

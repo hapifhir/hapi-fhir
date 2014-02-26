@@ -21,7 +21,7 @@ public class RuntimeChildResourceBlockDefinition extends BaseRuntimeDeclaredChil
 
 	@Override
 	public RuntimeResourceBlockDefinition getChildByName(String theName) {
-		if (!getElementName().equals(theName)) {
+		if (getElementName().equals(theName)) {
 			return myElementDef;
 		}else {
 			return null;

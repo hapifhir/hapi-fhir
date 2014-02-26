@@ -78,25 +78,30 @@ public class Practitioner implements IResource {
 	private List<ResourceReference> myLocation;
 	
 	@Child(name="qualification", order=12, min=0, max=Child.MAX_UNLIMITED)	
-	private List<IDatatype> myQualification;
+	private List<Qualification> myQualification;
 	
 	@Child(name="communication", type=CodeableConceptDt.class, order=13, min=0, max=Child.MAX_UNLIMITED)	
 	private List<CodeableConceptDt> myCommunication;
 	
 	/**
-	 * Gets the value(s) for identifier (A identifier for the person as this agent)
+	 * Gets the value(s) for <b>identifier</b> (A identifier for the person as this agent).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * An identifier that applies to this person in this role
      * </p> 
 	 */
-	public List<IdentifierDt> getIdentifier() {
+	public List<IdentifierDt> getIdentifier() {  
+		if (myIdentifier == null) {
+			myIdentifier = new ArrayList<IdentifierDt>();
+		}
 		return myIdentifier;
 	}
 
 	/**
-	 * Sets the value(s) for identifier (A identifier for the person as this agent)
+	 * Sets the value(s) for <b>identifier</b> (A identifier for the person as this agent)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -107,20 +112,26 @@ public class Practitioner implements IResource {
 		myIdentifier = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for name (A name associated with the person)
+	 * Gets the value(s) for <b>name</b> (A name associated with the person).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * A name associated with the person
      * </p> 
 	 */
-	public HumanNameDt getName() {
+	public HumanNameDt getName() {  
+		if (myName == null) {
+			myName = new HumanNameDt();
+		}
 		return myName;
 	}
 
 	/**
-	 * Sets the value(s) for name (A name associated with the person)
+	 * Sets the value(s) for <b>name</b> (A name associated with the person)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -131,20 +142,26 @@ public class Practitioner implements IResource {
 		myName = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for telecom (A contact detail for the practitioner)
+	 * Gets the value(s) for <b>telecom</b> (A contact detail for the practitioner).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * A contact detail for the practitioner, e.g. a telephone number or an email address.
      * </p> 
 	 */
-	public List<ContactDt> getTelecom() {
+	public List<ContactDt> getTelecom() {  
+		if (myTelecom == null) {
+			myTelecom = new ArrayList<ContactDt>();
+		}
 		return myTelecom;
 	}
 
 	/**
-	 * Sets the value(s) for telecom (A contact detail for the practitioner)
+	 * Sets the value(s) for <b>telecom</b> (A contact detail for the practitioner)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -155,20 +172,26 @@ public class Practitioner implements IResource {
 		myTelecom = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for address (Where practitioner can be found/visited)
+	 * Gets the value(s) for <b>address</b> (Where practitioner can be found/visited).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * The postal address where the practitioner can be found or visited or to which mail can be delivered
      * </p> 
 	 */
-	public AddressDt getAddress() {
+	public AddressDt getAddress() {  
+		if (myAddress == null) {
+			myAddress = new AddressDt();
+		}
 		return myAddress;
 	}
 
 	/**
-	 * Sets the value(s) for address (Where practitioner can be found/visited)
+	 * Sets the value(s) for <b>address</b> (Where practitioner can be found/visited)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -179,20 +202,26 @@ public class Practitioner implements IResource {
 		myAddress = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for gender (Gender for administrative purposes)
+	 * Gets the value(s) for <b>gender</b> (Gender for administrative purposes).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Administrative Gender - the gender that the person is considered to have for administration and record keeping purposes. 
      * </p> 
 	 */
-	public CodeableConceptDt getGender() {
+	public CodeableConceptDt getGender() {  
+		if (myGender == null) {
+			myGender = new CodeableConceptDt();
+		}
 		return myGender;
 	}
 
 	/**
-	 * Sets the value(s) for gender (Gender for administrative purposes)
+	 * Sets the value(s) for <b>gender</b> (Gender for administrative purposes)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -203,20 +232,26 @@ public class Practitioner implements IResource {
 		myGender = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for birthDate (The date and time of birth for the practitioner)
+	 * Gets the value(s) for <b>birthDate</b> (The date and time of birth for the practitioner).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * The date and time of birth for the practitioner
      * </p> 
 	 */
-	public DateTimeDt getBirthDate() {
+	public DateTimeDt getBirthDate() {  
+		if (myBirthDate == null) {
+			myBirthDate = new DateTimeDt();
+		}
 		return myBirthDate;
 	}
 
 	/**
-	 * Sets the value(s) for birthDate (The date and time of birth for the practitioner)
+	 * Sets the value(s) for <b>birthDate</b> (The date and time of birth for the practitioner)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -228,19 +263,36 @@ public class Practitioner implements IResource {
 	}
 	
 	/**
-	 * Gets the value(s) for photo (Image of the person)
+	 * Sets the value(s) for <b>birthDate</b> (The date and time of birth for the practitioner)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The date and time of birth for the practitioner
+     * </p> 
+	 */
+	public void setBirthDateWithSecondsPrecision( Date theDate) {
+		myBirthDate = new DateTimeDt(theDate); 
+	}
+ 
+	/**
+	 * Gets the value(s) for <b>photo</b> (Image of the person).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Image of the person
      * </p> 
 	 */
-	public List<AttachmentDt> getPhoto() {
+	public List<AttachmentDt> getPhoto() {  
+		if (myPhoto == null) {
+			myPhoto = new ArrayList<AttachmentDt>();
+		}
 		return myPhoto;
 	}
 
 	/**
-	 * Sets the value(s) for photo (Image of the person)
+	 * Sets the value(s) for <b>photo</b> (Image of the person)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -251,20 +303,26 @@ public class Practitioner implements IResource {
 		myPhoto = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for organization (The represented organization)
+	 * Gets the value(s) for <b>organization</b> (The represented organization).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * The organization that the practitioner represents
      * </p> 
 	 */
-	public ResourceReference getOrganization() {
+	public ResourceReference getOrganization() {  
+		if (myOrganization == null) {
+			myOrganization = new ResourceReference();
+		}
 		return myOrganization;
 	}
 
 	/**
-	 * Sets the value(s) for organization (The represented organization)
+	 * Sets the value(s) for <b>organization</b> (The represented organization)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -275,20 +333,26 @@ public class Practitioner implements IResource {
 		myOrganization = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for role (Roles which this practitioner may perform)
+	 * Gets the value(s) for <b>role</b> (Roles which this practitioner may perform).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Roles which this practitioner is authorized to perform for the organization
      * </p> 
 	 */
-	public List<CodeableConceptDt> getRole() {
+	public List<CodeableConceptDt> getRole() {  
+		if (myRole == null) {
+			myRole = new ArrayList<CodeableConceptDt>();
+		}
 		return myRole;
 	}
 
 	/**
-	 * Sets the value(s) for role (Roles which this practitioner may perform)
+	 * Sets the value(s) for <b>role</b> (Roles which this practitioner may perform)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -299,20 +363,26 @@ public class Practitioner implements IResource {
 		myRole = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for specialty (Specific specialty of the practitioner)
+	 * Gets the value(s) for <b>specialty</b> (Specific specialty of the practitioner).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Specific specialty of the practitioner
      * </p> 
 	 */
-	public List<CodeableConceptDt> getSpecialty() {
+	public List<CodeableConceptDt> getSpecialty() {  
+		if (mySpecialty == null) {
+			mySpecialty = new ArrayList<CodeableConceptDt>();
+		}
 		return mySpecialty;
 	}
 
 	/**
-	 * Sets the value(s) for specialty (Specific specialty of the practitioner)
+	 * Sets the value(s) for <b>specialty</b> (Specific specialty of the practitioner)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -323,20 +393,26 @@ public class Practitioner implements IResource {
 		mySpecialty = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for period (The period during which the practitioner is authorized to perform in these role(s))
+	 * Gets the value(s) for <b>period</b> (The period during which the practitioner is authorized to perform in these role(s)).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * The period during which the person is authorized to act as a practitioner in these role(s) for the organization
      * </p> 
 	 */
-	public PeriodDt getPeriod() {
+	public PeriodDt getPeriod() {  
+		if (myPeriod == null) {
+			myPeriod = new PeriodDt();
+		}
 		return myPeriod;
 	}
 
 	/**
-	 * Sets the value(s) for period (The period during which the practitioner is authorized to perform in these role(s))
+	 * Sets the value(s) for <b>period</b> (The period during which the practitioner is authorized to perform in these role(s))
 	 *
      * <p>
      * <b>Definition:</b>
@@ -347,20 +423,26 @@ public class Practitioner implements IResource {
 		myPeriod = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for location (The location(s) at which this practitioner provides care)
+	 * Gets the value(s) for <b>location</b> (The location(s) at which this practitioner provides care).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * The location(s) at which this practitioner provides care
      * </p> 
 	 */
-	public List<ResourceReference> getLocation() {
+	public List<ResourceReference> getLocation() {  
+		if (myLocation == null) {
+			myLocation = new ArrayList<ResourceReference>();
+		}
 		return myLocation;
 	}
 
 	/**
-	 * Sets the value(s) for location (The location(s) at which this practitioner provides care)
+	 * Sets the value(s) for <b>location</b> (The location(s) at which this practitioner provides care)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -371,44 +453,56 @@ public class Practitioner implements IResource {
 		myLocation = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for qualification (Qualifications obtained by training and certification)
+	 * Gets the value(s) for <b>qualification</b> (Qualifications obtained by training and certification).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
-     * ${child.definition}
+     * 
      * </p> 
 	 */
-	public List<IDatatype> getQualification() {
+	public List<Qualification> getQualification() {  
+		if (myQualification == null) {
+			myQualification = new ArrayList<Qualification>();
+		}
 		return myQualification;
 	}
 
 	/**
-	 * Sets the value(s) for qualification (Qualifications obtained by training and certification)
+	 * Sets the value(s) for <b>qualification</b> (Qualifications obtained by training and certification)
 	 *
      * <p>
      * <b>Definition:</b>
-     * ${child.definition}
+     * 
      * </p> 
 	 */
-	public void setQualification(List<IDatatype> theValue) {
+	public void setQualification(List<Qualification> theValue) {
 		myQualification = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for communication (A language the practitioner is able to use in patient communication)
+	 * Gets the value(s) for <b>communication</b> (A language the practitioner is able to use in patient communication).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * A language the practitioner is able to use in patient communication
      * </p> 
 	 */
-	public List<CodeableConceptDt> getCommunication() {
+	public List<CodeableConceptDt> getCommunication() {  
+		if (myCommunication == null) {
+			myCommunication = new ArrayList<CodeableConceptDt>();
+		}
 		return myCommunication;
 	}
 
 	/**
-	 * Sets the value(s) for communication (A language the practitioner is able to use in patient communication)
+	 * Sets the value(s) for <b>communication</b> (A language the practitioner is able to use in patient communication)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -419,13 +513,14 @@ public class Practitioner implements IResource {
 		myCommunication = theValue;
 	}
 	
+ 
 
 	/**
 	 * Block class for child element: <b>Practitioner.qualification</b> (Qualifications obtained by training and certification)
 	 *
      * <p>
      * <b>Definition:</b>
-     * ${child.definition}
+     * 
      * </p> 
 	 */
 	@Block(name="Practitioner.qualification")	
@@ -473,25 +568,30 @@ public class Practitioner implements IResource {
 	private List<ResourceReference> myLocation;
 	
 	@Child(name="qualification", order=12, min=0, max=Child.MAX_UNLIMITED)	
-	private List<IDatatype> myQualification;
+	private List<Qualification> myQualification;
 	
 	@Child(name="communication", type=CodeableConceptDt.class, order=13, min=0, max=Child.MAX_UNLIMITED)	
 	private List<CodeableConceptDt> myCommunication;
 	
 	/**
-	 * Gets the value(s) for identifier (A identifier for the person as this agent)
+	 * Gets the value(s) for <b>identifier</b> (A identifier for the person as this agent).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * An identifier that applies to this person in this role
      * </p> 
 	 */
-	public List<IdentifierDt> getIdentifier() {
+	public List<IdentifierDt> getIdentifier() {  
+		if (myIdentifier == null) {
+			myIdentifier = new ArrayList<IdentifierDt>();
+		}
 		return myIdentifier;
 	}
 
 	/**
-	 * Sets the value(s) for identifier (A identifier for the person as this agent)
+	 * Sets the value(s) for <b>identifier</b> (A identifier for the person as this agent)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -502,20 +602,26 @@ public class Practitioner implements IResource {
 		myIdentifier = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for name (A name associated with the person)
+	 * Gets the value(s) for <b>name</b> (A name associated with the person).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * A name associated with the person
      * </p> 
 	 */
-	public HumanNameDt getName() {
+	public HumanNameDt getName() {  
+		if (myName == null) {
+			myName = new HumanNameDt();
+		}
 		return myName;
 	}
 
 	/**
-	 * Sets the value(s) for name (A name associated with the person)
+	 * Sets the value(s) for <b>name</b> (A name associated with the person)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -526,20 +632,26 @@ public class Practitioner implements IResource {
 		myName = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for telecom (A contact detail for the practitioner)
+	 * Gets the value(s) for <b>telecom</b> (A contact detail for the practitioner).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * A contact detail for the practitioner, e.g. a telephone number or an email address.
      * </p> 
 	 */
-	public List<ContactDt> getTelecom() {
+	public List<ContactDt> getTelecom() {  
+		if (myTelecom == null) {
+			myTelecom = new ArrayList<ContactDt>();
+		}
 		return myTelecom;
 	}
 
 	/**
-	 * Sets the value(s) for telecom (A contact detail for the practitioner)
+	 * Sets the value(s) for <b>telecom</b> (A contact detail for the practitioner)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -550,20 +662,26 @@ public class Practitioner implements IResource {
 		myTelecom = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for address (Where practitioner can be found/visited)
+	 * Gets the value(s) for <b>address</b> (Where practitioner can be found/visited).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * The postal address where the practitioner can be found or visited or to which mail can be delivered
      * </p> 
 	 */
-	public AddressDt getAddress() {
+	public AddressDt getAddress() {  
+		if (myAddress == null) {
+			myAddress = new AddressDt();
+		}
 		return myAddress;
 	}
 
 	/**
-	 * Sets the value(s) for address (Where practitioner can be found/visited)
+	 * Sets the value(s) for <b>address</b> (Where practitioner can be found/visited)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -574,20 +692,26 @@ public class Practitioner implements IResource {
 		myAddress = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for gender (Gender for administrative purposes)
+	 * Gets the value(s) for <b>gender</b> (Gender for administrative purposes).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Administrative Gender - the gender that the person is considered to have for administration and record keeping purposes. 
      * </p> 
 	 */
-	public CodeableConceptDt getGender() {
+	public CodeableConceptDt getGender() {  
+		if (myGender == null) {
+			myGender = new CodeableConceptDt();
+		}
 		return myGender;
 	}
 
 	/**
-	 * Sets the value(s) for gender (Gender for administrative purposes)
+	 * Sets the value(s) for <b>gender</b> (Gender for administrative purposes)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -598,20 +722,26 @@ public class Practitioner implements IResource {
 		myGender = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for birthDate (The date and time of birth for the practitioner)
+	 * Gets the value(s) for <b>birthDate</b> (The date and time of birth for the practitioner).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * The date and time of birth for the practitioner
      * </p> 
 	 */
-	public DateTimeDt getBirthDate() {
+	public DateTimeDt getBirthDate() {  
+		if (myBirthDate == null) {
+			myBirthDate = new DateTimeDt();
+		}
 		return myBirthDate;
 	}
 
 	/**
-	 * Sets the value(s) for birthDate (The date and time of birth for the practitioner)
+	 * Sets the value(s) for <b>birthDate</b> (The date and time of birth for the practitioner)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -623,19 +753,36 @@ public class Practitioner implements IResource {
 	}
 	
 	/**
-	 * Gets the value(s) for photo (Image of the person)
+	 * Sets the value(s) for <b>birthDate</b> (The date and time of birth for the practitioner)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The date and time of birth for the practitioner
+     * </p> 
+	 */
+	public void setBirthDateWithSecondsPrecision( Date theDate) {
+		myBirthDate = new DateTimeDt(theDate); 
+	}
+ 
+	/**
+	 * Gets the value(s) for <b>photo</b> (Image of the person).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Image of the person
      * </p> 
 	 */
-	public List<AttachmentDt> getPhoto() {
+	public List<AttachmentDt> getPhoto() {  
+		if (myPhoto == null) {
+			myPhoto = new ArrayList<AttachmentDt>();
+		}
 		return myPhoto;
 	}
 
 	/**
-	 * Sets the value(s) for photo (Image of the person)
+	 * Sets the value(s) for <b>photo</b> (Image of the person)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -646,20 +793,26 @@ public class Practitioner implements IResource {
 		myPhoto = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for organization (The represented organization)
+	 * Gets the value(s) for <b>organization</b> (The represented organization).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * The organization that the practitioner represents
      * </p> 
 	 */
-	public ResourceReference getOrganization() {
+	public ResourceReference getOrganization() {  
+		if (myOrganization == null) {
+			myOrganization = new ResourceReference();
+		}
 		return myOrganization;
 	}
 
 	/**
-	 * Sets the value(s) for organization (The represented organization)
+	 * Sets the value(s) for <b>organization</b> (The represented organization)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -670,20 +823,26 @@ public class Practitioner implements IResource {
 		myOrganization = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for role (Roles which this practitioner may perform)
+	 * Gets the value(s) for <b>role</b> (Roles which this practitioner may perform).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Roles which this practitioner is authorized to perform for the organization
      * </p> 
 	 */
-	public List<CodeableConceptDt> getRole() {
+	public List<CodeableConceptDt> getRole() {  
+		if (myRole == null) {
+			myRole = new ArrayList<CodeableConceptDt>();
+		}
 		return myRole;
 	}
 
 	/**
-	 * Sets the value(s) for role (Roles which this practitioner may perform)
+	 * Sets the value(s) for <b>role</b> (Roles which this practitioner may perform)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -694,20 +853,26 @@ public class Practitioner implements IResource {
 		myRole = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for specialty (Specific specialty of the practitioner)
+	 * Gets the value(s) for <b>specialty</b> (Specific specialty of the practitioner).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Specific specialty of the practitioner
      * </p> 
 	 */
-	public List<CodeableConceptDt> getSpecialty() {
+	public List<CodeableConceptDt> getSpecialty() {  
+		if (mySpecialty == null) {
+			mySpecialty = new ArrayList<CodeableConceptDt>();
+		}
 		return mySpecialty;
 	}
 
 	/**
-	 * Sets the value(s) for specialty (Specific specialty of the practitioner)
+	 * Sets the value(s) for <b>specialty</b> (Specific specialty of the practitioner)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -718,20 +883,26 @@ public class Practitioner implements IResource {
 		mySpecialty = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for period (The period during which the practitioner is authorized to perform in these role(s))
+	 * Gets the value(s) for <b>period</b> (The period during which the practitioner is authorized to perform in these role(s)).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * The period during which the person is authorized to act as a practitioner in these role(s) for the organization
      * </p> 
 	 */
-	public PeriodDt getPeriod() {
+	public PeriodDt getPeriod() {  
+		if (myPeriod == null) {
+			myPeriod = new PeriodDt();
+		}
 		return myPeriod;
 	}
 
 	/**
-	 * Sets the value(s) for period (The period during which the practitioner is authorized to perform in these role(s))
+	 * Sets the value(s) for <b>period</b> (The period during which the practitioner is authorized to perform in these role(s))
 	 *
      * <p>
      * <b>Definition:</b>
@@ -742,20 +913,26 @@ public class Practitioner implements IResource {
 		myPeriod = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for location (The location(s) at which this practitioner provides care)
+	 * Gets the value(s) for <b>location</b> (The location(s) at which this practitioner provides care).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * The location(s) at which this practitioner provides care
      * </p> 
 	 */
-	public List<ResourceReference> getLocation() {
+	public List<ResourceReference> getLocation() {  
+		if (myLocation == null) {
+			myLocation = new ArrayList<ResourceReference>();
+		}
 		return myLocation;
 	}
 
 	/**
-	 * Sets the value(s) for location (The location(s) at which this practitioner provides care)
+	 * Sets the value(s) for <b>location</b> (The location(s) at which this practitioner provides care)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -766,44 +943,56 @@ public class Practitioner implements IResource {
 		myLocation = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for qualification (Qualifications obtained by training and certification)
+	 * Gets the value(s) for <b>qualification</b> (Qualifications obtained by training and certification).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
-     * ${child.definition}
+     * 
      * </p> 
 	 */
-	public List<IDatatype> getQualification() {
+	public List<Qualification> getQualification() {  
+		if (myQualification == null) {
+			myQualification = new ArrayList<Qualification>();
+		}
 		return myQualification;
 	}
 
 	/**
-	 * Sets the value(s) for qualification (Qualifications obtained by training and certification)
+	 * Sets the value(s) for <b>qualification</b> (Qualifications obtained by training and certification)
 	 *
      * <p>
      * <b>Definition:</b>
-     * ${child.definition}
+     * 
      * </p> 
 	 */
-	public void setQualification(List<IDatatype> theValue) {
+	public void setQualification(List<Qualification> theValue) {
 		myQualification = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for communication (A language the practitioner is able to use in patient communication)
+	 * Gets the value(s) for <b>communication</b> (A language the practitioner is able to use in patient communication).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * A language the practitioner is able to use in patient communication
      * </p> 
 	 */
-	public List<CodeableConceptDt> getCommunication() {
+	public List<CodeableConceptDt> getCommunication() {  
+		if (myCommunication == null) {
+			myCommunication = new ArrayList<CodeableConceptDt>();
+		}
 		return myCommunication;
 	}
 
 	/**
-	 * Sets the value(s) for communication (A language the practitioner is able to use in patient communication)
+	 * Sets the value(s) for <b>communication</b> (A language the practitioner is able to use in patient communication)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -814,6 +1003,7 @@ public class Practitioner implements IResource {
 		myCommunication = theValue;
 	}
 	
+ 
 	}
 
 

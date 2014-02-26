@@ -12,7 +12,8 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(value= {ElementType.CONSTRUCTOR})
 public @interface SimpleSetter {
-	// nothing for now
+	
+	String suffix() default "";
 	
 	
 	@Retention(RetentionPolicy.RUNTIME)

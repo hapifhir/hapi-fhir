@@ -103,25 +103,30 @@ public class Observation implements IResource {
 	private List<ResourceReference> myPerformer;
 	
 	@Child(name="referenceRange", order=14, min=0, max=Child.MAX_UNLIMITED)	
-	private List<IDatatype> myReferenceRange;
+	private List<ReferenceRange> myReferenceRange;
 	
 	@Child(name="related", order=15, min=0, max=Child.MAX_UNLIMITED)	
-	private List<IDatatype> myRelated;
+	private List<Related> myRelated;
 	
 	/**
-	 * Gets the value(s) for name (Type of observation (code / type))
+	 * Gets the value(s) for <b>name</b> (Type of observation (code / type)).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Describes what was observed. Sometimes this is called the observation "code"
      * </p> 
 	 */
-	public CodeableConceptDt getName() {
+	public CodeableConceptDt getName() {  
+		if (myName == null) {
+			myName = new CodeableConceptDt();
+		}
 		return myName;
 	}
 
 	/**
-	 * Sets the value(s) for name (Type of observation (code / type))
+	 * Sets the value(s) for <b>name</b> (Type of observation (code / type))
 	 *
      * <p>
      * <b>Definition:</b>
@@ -132,20 +137,23 @@ public class Observation implements IResource {
 		myName = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for value[x] (Actual result)
+	 * Gets the value(s) for <b>value[x]</b> (Actual result).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * The information determined as a result of making the observation, if the information has a simple value
      * </p> 
 	 */
-	public IDatatype getValue() {
+	public IDatatype getValue() {  
 		return myValue;
 	}
 
 	/**
-	 * Sets the value(s) for value[x] (Actual result)
+	 * Sets the value(s) for <b>value[x]</b> (Actual result)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -156,20 +164,26 @@ public class Observation implements IResource {
 		myValue = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for interpretation (High, low, normal, etc.)
+	 * Gets the value(s) for <b>interpretation</b> (High, low, normal, etc.).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * The assessment made based on the result of the observation.
      * </p> 
 	 */
-	public CodeableConceptDt getInterpretation() {
+	public CodeableConceptDt getInterpretation() {  
+		if (myInterpretation == null) {
+			myInterpretation = new CodeableConceptDt();
+		}
 		return myInterpretation;
 	}
 
 	/**
-	 * Sets the value(s) for interpretation (High, low, normal, etc.)
+	 * Sets the value(s) for <b>interpretation</b> (High, low, normal, etc.)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -180,20 +194,26 @@ public class Observation implements IResource {
 		myInterpretation = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for comments (Comments about result)
+	 * Gets the value(s) for <b>comments</b> (Comments about result).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * May include statements about significant, unexpected or unreliable values, or information about the source of the value where this may be relevant to the interpretation of the result.
      * </p> 
 	 */
-	public StringDt getComments() {
+	public StringDt getComments() {  
+		if (myComments == null) {
+			myComments = new StringDt();
+		}
 		return myComments;
 	}
 
 	/**
-	 * Sets the value(s) for comments (Comments about result)
+	 * Sets the value(s) for <b>comments</b> (Comments about result)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -205,19 +225,33 @@ public class Observation implements IResource {
 	}
 	
 	/**
-	 * Gets the value(s) for applies[x] (Physiologically Relevant time/time-period for observation)
+	 * Sets the value(s) for <b>comments</b> (Comments about result)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * May include statements about significant, unexpected or unreliable values, or information about the source of the value where this may be relevant to the interpretation of the result.
+     * </p> 
+	 */
+	public void setComments( String theString) {
+		myComments = new StringDt(theString); 
+	}
+ 
+	/**
+	 * Gets the value(s) for <b>applies[x]</b> (Physiologically Relevant time/time-period for observation).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * The time or time-period the observed value is asserted as being true. For biological subjects - e.g. human patients - this is usually called the "physiologically relevant time". This is usually either the time of the procedure or of specimen collection, but very often the source of the date/time is not known, only the date/time itself
      * </p> 
 	 */
-	public IDatatype getApplies() {
+	public IDatatype getApplies() {  
 		return myApplies;
 	}
 
 	/**
-	 * Sets the value(s) for applies[x] (Physiologically Relevant time/time-period for observation)
+	 * Sets the value(s) for <b>applies[x]</b> (Physiologically Relevant time/time-period for observation)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -228,44 +262,56 @@ public class Observation implements IResource {
 		myApplies = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for issued (Date/Time this was made available)
+	 * Gets the value(s) for <b>issued</b> (Date/Time this was made available).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
-     * ${child.definition}
+     * 
      * </p> 
 	 */
-	public InstantDt getIssued() {
+	public InstantDt getIssued() {  
+		if (myIssued == null) {
+			myIssued = new InstantDt();
+		}
 		return myIssued;
 	}
 
 	/**
-	 * Sets the value(s) for issued (Date/Time this was made available)
+	 * Sets the value(s) for <b>issued</b> (Date/Time this was made available)
 	 *
      * <p>
      * <b>Definition:</b>
-     * ${child.definition}
+     * 
      * </p> 
 	 */
 	public void setIssued(InstantDt theValue) {
 		myIssued = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for status (registered | preliminary | final | amended +)
+	 * Gets the value(s) for <b>status</b> (registered | preliminary | final | amended +).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * The status of the result value
      * </p> 
 	 */
-	public CodeDt getStatus() {
+	public CodeDt getStatus() {  
+		if (myStatus == null) {
+			myStatus = new CodeDt();
+		}
 		return myStatus;
 	}
 
 	/**
-	 * Sets the value(s) for status (registered | preliminary | final | amended +)
+	 * Sets the value(s) for <b>status</b> (registered | preliminary | final | amended +)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -276,20 +322,26 @@ public class Observation implements IResource {
 		myStatus = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for reliability (ok | ongoing | early | questionable | calibrating | error + )
+	 * Gets the value(s) for <b>reliability</b> (ok | ongoing | early | questionable | calibrating | error + ).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * An estimate of the degree to which quality issues have impacted on the value reported
      * </p> 
 	 */
-	public CodeDt getReliability() {
+	public CodeDt getReliability() {  
+		if (myReliability == null) {
+			myReliability = new CodeDt();
+		}
 		return myReliability;
 	}
 
 	/**
-	 * Sets the value(s) for reliability (ok | ongoing | early | questionable | calibrating | error + )
+	 * Sets the value(s) for <b>reliability</b> (ok | ongoing | early | questionable | calibrating | error + )
 	 *
      * <p>
      * <b>Definition:</b>
@@ -300,20 +352,26 @@ public class Observation implements IResource {
 		myReliability = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for bodySite (Observed body part)
+	 * Gets the value(s) for <b>bodySite</b> (Observed body part).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Indicates where on the subject's body the observation was made.
      * </p> 
 	 */
-	public CodeableConceptDt getBodySite() {
+	public CodeableConceptDt getBodySite() {  
+		if (myBodySite == null) {
+			myBodySite = new CodeableConceptDt();
+		}
 		return myBodySite;
 	}
 
 	/**
-	 * Sets the value(s) for bodySite (Observed body part)
+	 * Sets the value(s) for <b>bodySite</b> (Observed body part)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -324,20 +382,26 @@ public class Observation implements IResource {
 		myBodySite = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for method (How it was done)
+	 * Gets the value(s) for <b>method</b> (How it was done).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Indicates the mechanism used to perform the observation
      * </p> 
 	 */
-	public CodeableConceptDt getMethod() {
+	public CodeableConceptDt getMethod() {  
+		if (myMethod == null) {
+			myMethod = new CodeableConceptDt();
+		}
 		return myMethod;
 	}
 
 	/**
-	 * Sets the value(s) for method (How it was done)
+	 * Sets the value(s) for <b>method</b> (How it was done)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -348,20 +412,26 @@ public class Observation implements IResource {
 		myMethod = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for identifier (Unique Id for this particular observation)
+	 * Gets the value(s) for <b>identifier</b> (Unique Id for this particular observation).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * A unique identifier for the simple observation
      * </p> 
 	 */
-	public IdentifierDt getIdentifier() {
+	public IdentifierDt getIdentifier() {  
+		if (myIdentifier == null) {
+			myIdentifier = new IdentifierDt();
+		}
 		return myIdentifier;
 	}
 
 	/**
-	 * Sets the value(s) for identifier (Unique Id for this particular observation)
+	 * Sets the value(s) for <b>identifier</b> (Unique Id for this particular observation)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -372,20 +442,23 @@ public class Observation implements IResource {
 		myIdentifier = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for subject (Who and/or what this is about)
+	 * Gets the value(s) for <b>subject</b> (Who and/or what this is about).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * The thing the observation is being made about
      * </p> 
 	 */
-	public ResourceReference getSubject() {
+	public ResourceReference getSubject() {  
 		return mySubject;
 	}
 
 	/**
-	 * Sets the value(s) for subject (Who and/or what this is about)
+	 * Sets the value(s) for <b>subject</b> (Who and/or what this is about)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -396,20 +469,26 @@ public class Observation implements IResource {
 		mySubject = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for specimen (Specimen used for this observation)
+	 * Gets the value(s) for <b>specimen</b> (Specimen used for this observation).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * The specimen that was used when this observation was made 
      * </p> 
 	 */
-	public ResourceReference getSpecimen() {
+	public ResourceReference getSpecimen() {  
+		if (mySpecimen == null) {
+			mySpecimen = new ResourceReference();
+		}
 		return mySpecimen;
 	}
 
 	/**
-	 * Sets the value(s) for specimen (Specimen used for this observation)
+	 * Sets the value(s) for <b>specimen</b> (Specimen used for this observation)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -420,20 +499,23 @@ public class Observation implements IResource {
 		mySpecimen = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for performer (Who did the observation)
+	 * Gets the value(s) for <b>performer</b> (Who did the observation).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Who was responsible for asserting the observed value as "true"
      * </p> 
 	 */
-	public List<ResourceReference> getPerformer() {
+	public List<ResourceReference> getPerformer() {  
 		return myPerformer;
 	}
 
 	/**
-	 * Sets the value(s) for performer (Who did the observation)
+	 * Sets the value(s) for <b>performer</b> (Who did the observation)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -444,54 +526,67 @@ public class Observation implements IResource {
 		myPerformer = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for referenceRange (Provides guide for interpretation)
+	 * Gets the value(s) for <b>referenceRange</b> (Provides guide for interpretation).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Guidance on how to interpret the value by comparison to a normal or recommended range
      * </p> 
 	 */
-	public List<IDatatype> getReferenceRange() {
+	public List<ReferenceRange> getReferenceRange() {  
+		if (myReferenceRange == null) {
+			myReferenceRange = new ArrayList<ReferenceRange>();
+		}
 		return myReferenceRange;
 	}
 
 	/**
-	 * Sets the value(s) for referenceRange (Provides guide for interpretation)
+	 * Sets the value(s) for <b>referenceRange</b> (Provides guide for interpretation)
 	 *
      * <p>
      * <b>Definition:</b>
      * Guidance on how to interpret the value by comparison to a normal or recommended range
      * </p> 
 	 */
-	public void setReferenceRange(List<IDatatype> theValue) {
+	public void setReferenceRange(List<ReferenceRange> theValue) {
 		myReferenceRange = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for related (Observations related to this observation)
+	 * Gets the value(s) for <b>related</b> (Observations related to this observation).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Related observations - either components, or previous observations, or statements of derivation
      * </p> 
 	 */
-	public List<IDatatype> getRelated() {
+	public List<Related> getRelated() {  
+		if (myRelated == null) {
+			myRelated = new ArrayList<Related>();
+		}
 		return myRelated;
 	}
 
 	/**
-	 * Sets the value(s) for related (Observations related to this observation)
+	 * Sets the value(s) for <b>related</b> (Observations related to this observation)
 	 *
      * <p>
      * <b>Definition:</b>
      * Related observations - either components, or previous observations, or statements of derivation
      * </p> 
 	 */
-	public void setRelated(List<IDatatype> theValue) {
+	public void setRelated(List<Related> theValue) {
 		myRelated = theValue;
 	}
 	
+ 
 
 	/**
 	 * Block class for child element: <b>Observation.referenceRange</b> (Provides guide for interpretation)
@@ -571,25 +666,30 @@ public class Observation implements IResource {
 	private List<ResourceReference> myPerformer;
 	
 	@Child(name="referenceRange", order=14, min=0, max=Child.MAX_UNLIMITED)	
-	private List<IDatatype> myReferenceRange;
+	private List<ReferenceRange> myReferenceRange;
 	
 	@Child(name="related", order=15, min=0, max=Child.MAX_UNLIMITED)	
-	private List<IDatatype> myRelated;
+	private List<Related> myRelated;
 	
 	/**
-	 * Gets the value(s) for name (Type of observation (code / type))
+	 * Gets the value(s) for <b>name</b> (Type of observation (code / type)).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Describes what was observed. Sometimes this is called the observation "code"
      * </p> 
 	 */
-	public CodeableConceptDt getName() {
+	public CodeableConceptDt getName() {  
+		if (myName == null) {
+			myName = new CodeableConceptDt();
+		}
 		return myName;
 	}
 
 	/**
-	 * Sets the value(s) for name (Type of observation (code / type))
+	 * Sets the value(s) for <b>name</b> (Type of observation (code / type))
 	 *
      * <p>
      * <b>Definition:</b>
@@ -600,20 +700,23 @@ public class Observation implements IResource {
 		myName = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for value[x] (Actual result)
+	 * Gets the value(s) for <b>value[x]</b> (Actual result).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * The information determined as a result of making the observation, if the information has a simple value
      * </p> 
 	 */
-	public IDatatype getValue() {
+	public IDatatype getValue() {  
 		return myValue;
 	}
 
 	/**
-	 * Sets the value(s) for value[x] (Actual result)
+	 * Sets the value(s) for <b>value[x]</b> (Actual result)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -624,20 +727,26 @@ public class Observation implements IResource {
 		myValue = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for interpretation (High, low, normal, etc.)
+	 * Gets the value(s) for <b>interpretation</b> (High, low, normal, etc.).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * The assessment made based on the result of the observation.
      * </p> 
 	 */
-	public CodeableConceptDt getInterpretation() {
+	public CodeableConceptDt getInterpretation() {  
+		if (myInterpretation == null) {
+			myInterpretation = new CodeableConceptDt();
+		}
 		return myInterpretation;
 	}
 
 	/**
-	 * Sets the value(s) for interpretation (High, low, normal, etc.)
+	 * Sets the value(s) for <b>interpretation</b> (High, low, normal, etc.)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -648,20 +757,26 @@ public class Observation implements IResource {
 		myInterpretation = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for comments (Comments about result)
+	 * Gets the value(s) for <b>comments</b> (Comments about result).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * May include statements about significant, unexpected or unreliable values, or information about the source of the value where this may be relevant to the interpretation of the result.
      * </p> 
 	 */
-	public StringDt getComments() {
+	public StringDt getComments() {  
+		if (myComments == null) {
+			myComments = new StringDt();
+		}
 		return myComments;
 	}
 
 	/**
-	 * Sets the value(s) for comments (Comments about result)
+	 * Sets the value(s) for <b>comments</b> (Comments about result)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -673,19 +788,33 @@ public class Observation implements IResource {
 	}
 	
 	/**
-	 * Gets the value(s) for applies[x] (Physiologically Relevant time/time-period for observation)
+	 * Sets the value(s) for <b>comments</b> (Comments about result)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * May include statements about significant, unexpected or unreliable values, or information about the source of the value where this may be relevant to the interpretation of the result.
+     * </p> 
+	 */
+	public void setComments( String theString) {
+		myComments = new StringDt(theString); 
+	}
+ 
+	/**
+	 * Gets the value(s) for <b>applies[x]</b> (Physiologically Relevant time/time-period for observation).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * The time or time-period the observed value is asserted as being true. For biological subjects - e.g. human patients - this is usually called the "physiologically relevant time". This is usually either the time of the procedure or of specimen collection, but very often the source of the date/time is not known, only the date/time itself
      * </p> 
 	 */
-	public IDatatype getApplies() {
+	public IDatatype getApplies() {  
 		return myApplies;
 	}
 
 	/**
-	 * Sets the value(s) for applies[x] (Physiologically Relevant time/time-period for observation)
+	 * Sets the value(s) for <b>applies[x]</b> (Physiologically Relevant time/time-period for observation)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -696,44 +825,56 @@ public class Observation implements IResource {
 		myApplies = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for issued (Date/Time this was made available)
+	 * Gets the value(s) for <b>issued</b> (Date/Time this was made available).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
-     * ${child.definition}
+     * 
      * </p> 
 	 */
-	public InstantDt getIssued() {
+	public InstantDt getIssued() {  
+		if (myIssued == null) {
+			myIssued = new InstantDt();
+		}
 		return myIssued;
 	}
 
 	/**
-	 * Sets the value(s) for issued (Date/Time this was made available)
+	 * Sets the value(s) for <b>issued</b> (Date/Time this was made available)
 	 *
      * <p>
      * <b>Definition:</b>
-     * ${child.definition}
+     * 
      * </p> 
 	 */
 	public void setIssued(InstantDt theValue) {
 		myIssued = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for status (registered | preliminary | final | amended +)
+	 * Gets the value(s) for <b>status</b> (registered | preliminary | final | amended +).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * The status of the result value
      * </p> 
 	 */
-	public CodeDt getStatus() {
+	public CodeDt getStatus() {  
+		if (myStatus == null) {
+			myStatus = new CodeDt();
+		}
 		return myStatus;
 	}
 
 	/**
-	 * Sets the value(s) for status (registered | preliminary | final | amended +)
+	 * Sets the value(s) for <b>status</b> (registered | preliminary | final | amended +)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -744,20 +885,26 @@ public class Observation implements IResource {
 		myStatus = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for reliability (ok | ongoing | early | questionable | calibrating | error + )
+	 * Gets the value(s) for <b>reliability</b> (ok | ongoing | early | questionable | calibrating | error + ).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * An estimate of the degree to which quality issues have impacted on the value reported
      * </p> 
 	 */
-	public CodeDt getReliability() {
+	public CodeDt getReliability() {  
+		if (myReliability == null) {
+			myReliability = new CodeDt();
+		}
 		return myReliability;
 	}
 
 	/**
-	 * Sets the value(s) for reliability (ok | ongoing | early | questionable | calibrating | error + )
+	 * Sets the value(s) for <b>reliability</b> (ok | ongoing | early | questionable | calibrating | error + )
 	 *
      * <p>
      * <b>Definition:</b>
@@ -768,20 +915,26 @@ public class Observation implements IResource {
 		myReliability = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for bodySite (Observed body part)
+	 * Gets the value(s) for <b>bodySite</b> (Observed body part).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Indicates where on the subject's body the observation was made.
      * </p> 
 	 */
-	public CodeableConceptDt getBodySite() {
+	public CodeableConceptDt getBodySite() {  
+		if (myBodySite == null) {
+			myBodySite = new CodeableConceptDt();
+		}
 		return myBodySite;
 	}
 
 	/**
-	 * Sets the value(s) for bodySite (Observed body part)
+	 * Sets the value(s) for <b>bodySite</b> (Observed body part)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -792,20 +945,26 @@ public class Observation implements IResource {
 		myBodySite = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for method (How it was done)
+	 * Gets the value(s) for <b>method</b> (How it was done).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Indicates the mechanism used to perform the observation
      * </p> 
 	 */
-	public CodeableConceptDt getMethod() {
+	public CodeableConceptDt getMethod() {  
+		if (myMethod == null) {
+			myMethod = new CodeableConceptDt();
+		}
 		return myMethod;
 	}
 
 	/**
-	 * Sets the value(s) for method (How it was done)
+	 * Sets the value(s) for <b>method</b> (How it was done)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -816,20 +975,26 @@ public class Observation implements IResource {
 		myMethod = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for identifier (Unique Id for this particular observation)
+	 * Gets the value(s) for <b>identifier</b> (Unique Id for this particular observation).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * A unique identifier for the simple observation
      * </p> 
 	 */
-	public IdentifierDt getIdentifier() {
+	public IdentifierDt getIdentifier() {  
+		if (myIdentifier == null) {
+			myIdentifier = new IdentifierDt();
+		}
 		return myIdentifier;
 	}
 
 	/**
-	 * Sets the value(s) for identifier (Unique Id for this particular observation)
+	 * Sets the value(s) for <b>identifier</b> (Unique Id for this particular observation)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -840,20 +1005,23 @@ public class Observation implements IResource {
 		myIdentifier = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for subject (Who and/or what this is about)
+	 * Gets the value(s) for <b>subject</b> (Who and/or what this is about).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * The thing the observation is being made about
      * </p> 
 	 */
-	public ResourceReference getSubject() {
+	public ResourceReference getSubject() {  
 		return mySubject;
 	}
 
 	/**
-	 * Sets the value(s) for subject (Who and/or what this is about)
+	 * Sets the value(s) for <b>subject</b> (Who and/or what this is about)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -864,20 +1032,26 @@ public class Observation implements IResource {
 		mySubject = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for specimen (Specimen used for this observation)
+	 * Gets the value(s) for <b>specimen</b> (Specimen used for this observation).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * The specimen that was used when this observation was made 
      * </p> 
 	 */
-	public ResourceReference getSpecimen() {
+	public ResourceReference getSpecimen() {  
+		if (mySpecimen == null) {
+			mySpecimen = new ResourceReference();
+		}
 		return mySpecimen;
 	}
 
 	/**
-	 * Sets the value(s) for specimen (Specimen used for this observation)
+	 * Sets the value(s) for <b>specimen</b> (Specimen used for this observation)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -888,20 +1062,23 @@ public class Observation implements IResource {
 		mySpecimen = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for performer (Who did the observation)
+	 * Gets the value(s) for <b>performer</b> (Who did the observation).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Who was responsible for asserting the observed value as "true"
      * </p> 
 	 */
-	public List<ResourceReference> getPerformer() {
+	public List<ResourceReference> getPerformer() {  
 		return myPerformer;
 	}
 
 	/**
-	 * Sets the value(s) for performer (Who did the observation)
+	 * Sets the value(s) for <b>performer</b> (Who did the observation)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -912,54 +1089,67 @@ public class Observation implements IResource {
 		myPerformer = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for referenceRange (Provides guide for interpretation)
+	 * Gets the value(s) for <b>referenceRange</b> (Provides guide for interpretation).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Guidance on how to interpret the value by comparison to a normal or recommended range
      * </p> 
 	 */
-	public List<IDatatype> getReferenceRange() {
+	public List<ReferenceRange> getReferenceRange() {  
+		if (myReferenceRange == null) {
+			myReferenceRange = new ArrayList<ReferenceRange>();
+		}
 		return myReferenceRange;
 	}
 
 	/**
-	 * Sets the value(s) for referenceRange (Provides guide for interpretation)
+	 * Sets the value(s) for <b>referenceRange</b> (Provides guide for interpretation)
 	 *
      * <p>
      * <b>Definition:</b>
      * Guidance on how to interpret the value by comparison to a normal or recommended range
      * </p> 
 	 */
-	public void setReferenceRange(List<IDatatype> theValue) {
+	public void setReferenceRange(List<ReferenceRange> theValue) {
 		myReferenceRange = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for related (Observations related to this observation)
+	 * Gets the value(s) for <b>related</b> (Observations related to this observation).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Related observations - either components, or previous observations, or statements of derivation
      * </p> 
 	 */
-	public List<IDatatype> getRelated() {
+	public List<Related> getRelated() {  
+		if (myRelated == null) {
+			myRelated = new ArrayList<Related>();
+		}
 		return myRelated;
 	}
 
 	/**
-	 * Sets the value(s) for related (Observations related to this observation)
+	 * Sets the value(s) for <b>related</b> (Observations related to this observation)
 	 *
      * <p>
      * <b>Definition:</b>
      * Related observations - either components, or previous observations, or statements of derivation
      * </p> 
 	 */
-	public void setRelated(List<IDatatype> theValue) {
+	public void setRelated(List<Related> theValue) {
 		myRelated = theValue;
 	}
 	
+ 
 	}
 
 	/**
@@ -1040,25 +1230,30 @@ public class Observation implements IResource {
 	private List<ResourceReference> myPerformer;
 	
 	@Child(name="referenceRange", order=14, min=0, max=Child.MAX_UNLIMITED)	
-	private List<IDatatype> myReferenceRange;
+	private List<ReferenceRange> myReferenceRange;
 	
 	@Child(name="related", order=15, min=0, max=Child.MAX_UNLIMITED)	
-	private List<IDatatype> myRelated;
+	private List<Related> myRelated;
 	
 	/**
-	 * Gets the value(s) for name (Type of observation (code / type))
+	 * Gets the value(s) for <b>name</b> (Type of observation (code / type)).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Describes what was observed. Sometimes this is called the observation "code"
      * </p> 
 	 */
-	public CodeableConceptDt getName() {
+	public CodeableConceptDt getName() {  
+		if (myName == null) {
+			myName = new CodeableConceptDt();
+		}
 		return myName;
 	}
 
 	/**
-	 * Sets the value(s) for name (Type of observation (code / type))
+	 * Sets the value(s) for <b>name</b> (Type of observation (code / type))
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1069,20 +1264,23 @@ public class Observation implements IResource {
 		myName = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for value[x] (Actual result)
+	 * Gets the value(s) for <b>value[x]</b> (Actual result).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * The information determined as a result of making the observation, if the information has a simple value
      * </p> 
 	 */
-	public IDatatype getValue() {
+	public IDatatype getValue() {  
 		return myValue;
 	}
 
 	/**
-	 * Sets the value(s) for value[x] (Actual result)
+	 * Sets the value(s) for <b>value[x]</b> (Actual result)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1093,20 +1291,26 @@ public class Observation implements IResource {
 		myValue = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for interpretation (High, low, normal, etc.)
+	 * Gets the value(s) for <b>interpretation</b> (High, low, normal, etc.).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * The assessment made based on the result of the observation.
      * </p> 
 	 */
-	public CodeableConceptDt getInterpretation() {
+	public CodeableConceptDt getInterpretation() {  
+		if (myInterpretation == null) {
+			myInterpretation = new CodeableConceptDt();
+		}
 		return myInterpretation;
 	}
 
 	/**
-	 * Sets the value(s) for interpretation (High, low, normal, etc.)
+	 * Sets the value(s) for <b>interpretation</b> (High, low, normal, etc.)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1117,20 +1321,26 @@ public class Observation implements IResource {
 		myInterpretation = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for comments (Comments about result)
+	 * Gets the value(s) for <b>comments</b> (Comments about result).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * May include statements about significant, unexpected or unreliable values, or information about the source of the value where this may be relevant to the interpretation of the result.
      * </p> 
 	 */
-	public StringDt getComments() {
+	public StringDt getComments() {  
+		if (myComments == null) {
+			myComments = new StringDt();
+		}
 		return myComments;
 	}
 
 	/**
-	 * Sets the value(s) for comments (Comments about result)
+	 * Sets the value(s) for <b>comments</b> (Comments about result)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1142,19 +1352,33 @@ public class Observation implements IResource {
 	}
 	
 	/**
-	 * Gets the value(s) for applies[x] (Physiologically Relevant time/time-period for observation)
+	 * Sets the value(s) for <b>comments</b> (Comments about result)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * May include statements about significant, unexpected or unreliable values, or information about the source of the value where this may be relevant to the interpretation of the result.
+     * </p> 
+	 */
+	public void setComments( String theString) {
+		myComments = new StringDt(theString); 
+	}
+ 
+	/**
+	 * Gets the value(s) for <b>applies[x]</b> (Physiologically Relevant time/time-period for observation).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * The time or time-period the observed value is asserted as being true. For biological subjects - e.g. human patients - this is usually called the "physiologically relevant time". This is usually either the time of the procedure or of specimen collection, but very often the source of the date/time is not known, only the date/time itself
      * </p> 
 	 */
-	public IDatatype getApplies() {
+	public IDatatype getApplies() {  
 		return myApplies;
 	}
 
 	/**
-	 * Sets the value(s) for applies[x] (Physiologically Relevant time/time-period for observation)
+	 * Sets the value(s) for <b>applies[x]</b> (Physiologically Relevant time/time-period for observation)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1165,44 +1389,56 @@ public class Observation implements IResource {
 		myApplies = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for issued (Date/Time this was made available)
+	 * Gets the value(s) for <b>issued</b> (Date/Time this was made available).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
-     * ${child.definition}
+     * 
      * </p> 
 	 */
-	public InstantDt getIssued() {
+	public InstantDt getIssued() {  
+		if (myIssued == null) {
+			myIssued = new InstantDt();
+		}
 		return myIssued;
 	}
 
 	/**
-	 * Sets the value(s) for issued (Date/Time this was made available)
+	 * Sets the value(s) for <b>issued</b> (Date/Time this was made available)
 	 *
      * <p>
      * <b>Definition:</b>
-     * ${child.definition}
+     * 
      * </p> 
 	 */
 	public void setIssued(InstantDt theValue) {
 		myIssued = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for status (registered | preliminary | final | amended +)
+	 * Gets the value(s) for <b>status</b> (registered | preliminary | final | amended +).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * The status of the result value
      * </p> 
 	 */
-	public CodeDt getStatus() {
+	public CodeDt getStatus() {  
+		if (myStatus == null) {
+			myStatus = new CodeDt();
+		}
 		return myStatus;
 	}
 
 	/**
-	 * Sets the value(s) for status (registered | preliminary | final | amended +)
+	 * Sets the value(s) for <b>status</b> (registered | preliminary | final | amended +)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1213,20 +1449,26 @@ public class Observation implements IResource {
 		myStatus = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for reliability (ok | ongoing | early | questionable | calibrating | error + )
+	 * Gets the value(s) for <b>reliability</b> (ok | ongoing | early | questionable | calibrating | error + ).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * An estimate of the degree to which quality issues have impacted on the value reported
      * </p> 
 	 */
-	public CodeDt getReliability() {
+	public CodeDt getReliability() {  
+		if (myReliability == null) {
+			myReliability = new CodeDt();
+		}
 		return myReliability;
 	}
 
 	/**
-	 * Sets the value(s) for reliability (ok | ongoing | early | questionable | calibrating | error + )
+	 * Sets the value(s) for <b>reliability</b> (ok | ongoing | early | questionable | calibrating | error + )
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1237,20 +1479,26 @@ public class Observation implements IResource {
 		myReliability = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for bodySite (Observed body part)
+	 * Gets the value(s) for <b>bodySite</b> (Observed body part).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Indicates where on the subject's body the observation was made.
      * </p> 
 	 */
-	public CodeableConceptDt getBodySite() {
+	public CodeableConceptDt getBodySite() {  
+		if (myBodySite == null) {
+			myBodySite = new CodeableConceptDt();
+		}
 		return myBodySite;
 	}
 
 	/**
-	 * Sets the value(s) for bodySite (Observed body part)
+	 * Sets the value(s) for <b>bodySite</b> (Observed body part)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1261,20 +1509,26 @@ public class Observation implements IResource {
 		myBodySite = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for method (How it was done)
+	 * Gets the value(s) for <b>method</b> (How it was done).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Indicates the mechanism used to perform the observation
      * </p> 
 	 */
-	public CodeableConceptDt getMethod() {
+	public CodeableConceptDt getMethod() {  
+		if (myMethod == null) {
+			myMethod = new CodeableConceptDt();
+		}
 		return myMethod;
 	}
 
 	/**
-	 * Sets the value(s) for method (How it was done)
+	 * Sets the value(s) for <b>method</b> (How it was done)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1285,20 +1539,26 @@ public class Observation implements IResource {
 		myMethod = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for identifier (Unique Id for this particular observation)
+	 * Gets the value(s) for <b>identifier</b> (Unique Id for this particular observation).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * A unique identifier for the simple observation
      * </p> 
 	 */
-	public IdentifierDt getIdentifier() {
+	public IdentifierDt getIdentifier() {  
+		if (myIdentifier == null) {
+			myIdentifier = new IdentifierDt();
+		}
 		return myIdentifier;
 	}
 
 	/**
-	 * Sets the value(s) for identifier (Unique Id for this particular observation)
+	 * Sets the value(s) for <b>identifier</b> (Unique Id for this particular observation)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1309,20 +1569,23 @@ public class Observation implements IResource {
 		myIdentifier = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for subject (Who and/or what this is about)
+	 * Gets the value(s) for <b>subject</b> (Who and/or what this is about).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * The thing the observation is being made about
      * </p> 
 	 */
-	public ResourceReference getSubject() {
+	public ResourceReference getSubject() {  
 		return mySubject;
 	}
 
 	/**
-	 * Sets the value(s) for subject (Who and/or what this is about)
+	 * Sets the value(s) for <b>subject</b> (Who and/or what this is about)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1333,20 +1596,26 @@ public class Observation implements IResource {
 		mySubject = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for specimen (Specimen used for this observation)
+	 * Gets the value(s) for <b>specimen</b> (Specimen used for this observation).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * The specimen that was used when this observation was made 
      * </p> 
 	 */
-	public ResourceReference getSpecimen() {
+	public ResourceReference getSpecimen() {  
+		if (mySpecimen == null) {
+			mySpecimen = new ResourceReference();
+		}
 		return mySpecimen;
 	}
 
 	/**
-	 * Sets the value(s) for specimen (Specimen used for this observation)
+	 * Sets the value(s) for <b>specimen</b> (Specimen used for this observation)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1357,20 +1626,23 @@ public class Observation implements IResource {
 		mySpecimen = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for performer (Who did the observation)
+	 * Gets the value(s) for <b>performer</b> (Who did the observation).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Who was responsible for asserting the observed value as "true"
      * </p> 
 	 */
-	public List<ResourceReference> getPerformer() {
+	public List<ResourceReference> getPerformer() {  
 		return myPerformer;
 	}
 
 	/**
-	 * Sets the value(s) for performer (Who did the observation)
+	 * Sets the value(s) for <b>performer</b> (Who did the observation)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1381,54 +1653,67 @@ public class Observation implements IResource {
 		myPerformer = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for referenceRange (Provides guide for interpretation)
+	 * Gets the value(s) for <b>referenceRange</b> (Provides guide for interpretation).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Guidance on how to interpret the value by comparison to a normal or recommended range
      * </p> 
 	 */
-	public List<IDatatype> getReferenceRange() {
+	public List<ReferenceRange> getReferenceRange() {  
+		if (myReferenceRange == null) {
+			myReferenceRange = new ArrayList<ReferenceRange>();
+		}
 		return myReferenceRange;
 	}
 
 	/**
-	 * Sets the value(s) for referenceRange (Provides guide for interpretation)
+	 * Sets the value(s) for <b>referenceRange</b> (Provides guide for interpretation)
 	 *
      * <p>
      * <b>Definition:</b>
      * Guidance on how to interpret the value by comparison to a normal or recommended range
      * </p> 
 	 */
-	public void setReferenceRange(List<IDatatype> theValue) {
+	public void setReferenceRange(List<ReferenceRange> theValue) {
 		myReferenceRange = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for related (Observations related to this observation)
+	 * Gets the value(s) for <b>related</b> (Observations related to this observation).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Related observations - either components, or previous observations, or statements of derivation
      * </p> 
 	 */
-	public List<IDatatype> getRelated() {
+	public List<Related> getRelated() {  
+		if (myRelated == null) {
+			myRelated = new ArrayList<Related>();
+		}
 		return myRelated;
 	}
 
 	/**
-	 * Sets the value(s) for related (Observations related to this observation)
+	 * Sets the value(s) for <b>related</b> (Observations related to this observation)
 	 *
      * <p>
      * <b>Definition:</b>
      * Related observations - either components, or previous observations, or statements of derivation
      * </p> 
 	 */
-	public void setRelated(List<IDatatype> theValue) {
+	public void setRelated(List<Related> theValue) {
 		myRelated = theValue;
 	}
 	
+ 
 	}
 
 

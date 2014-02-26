@@ -5,6 +5,7 @@ import java.util.Map;
 
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.parser.XmlParser;
 
 public class FhirContext {
 
@@ -33,6 +34,10 @@ public class FhirContext {
 
 	public RuntimeResourceDefinition getResourceDefinition(IResource theResource) {
 		return (RuntimeResourceDefinition) myClassToElementDefinition.get(theResource.getClass());
+	}
+
+	public XmlParser newXmlParser() {
+		return new XmlParser(this);
 	}
 
 }

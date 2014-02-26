@@ -47,19 +47,24 @@ public class ContactDt extends BaseCompositeDatatype {
 	private PeriodDt myPeriod;
 	
 	/**
-	 * Gets the value(s) for system (phone | fax | email | url)
+	 * Gets the value(s) for <b>system</b> (phone | fax | email | url).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Telecommunications form for contact - what communications system is required to make use of the contact
      * </p> 
 	 */
-	public CodeDt getSystem() {
+	public CodeDt getSystem() {  
+		if (mySystem == null) {
+			mySystem = new CodeDt();
+		}
 		return mySystem;
 	}
 
 	/**
-	 * Sets the value(s) for system (phone | fax | email | url)
+	 * Sets the value(s) for <b>system</b> (phone | fax | email | url)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -70,20 +75,26 @@ public class ContactDt extends BaseCompositeDatatype {
 		mySystem = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for value (The actual contact details)
+	 * Gets the value(s) for <b>value</b> (The actual contact details).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * The actual contact details, in a form that is meaningful to the designated communication system (i.e. phone number or email address).
      * </p> 
 	 */
-	public StringDt getValue() {
+	public StringDt getValue() {  
+		if (myValue == null) {
+			myValue = new StringDt();
+		}
 		return myValue;
 	}
 
 	/**
-	 * Sets the value(s) for value (The actual contact details)
+	 * Sets the value(s) for <b>value</b> (The actual contact details)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -95,19 +106,36 @@ public class ContactDt extends BaseCompositeDatatype {
 	}
 	
 	/**
-	 * Gets the value(s) for use (home | work | temp | old | mobile - purpose of this address)
+	 * Sets the value(s) for <b>value</b> (The actual contact details)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The actual contact details, in a form that is meaningful to the designated communication system (i.e. phone number or email address).
+     * </p> 
+	 */
+	public void setValue( String theString) {
+		myValue = new StringDt(theString); 
+	}
+ 
+	/**
+	 * Gets the value(s) for <b>use</b> (home | work | temp | old | mobile - purpose of this address).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Identifies the purpose for the address
      * </p> 
 	 */
-	public CodeDt getUse() {
+	public CodeDt getUse() {  
+		if (myUse == null) {
+			myUse = new CodeDt();
+		}
 		return myUse;
 	}
 
 	/**
-	 * Sets the value(s) for use (home | work | temp | old | mobile - purpose of this address)
+	 * Sets the value(s) for <b>use</b> (home | work | temp | old | mobile - purpose of this address)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -118,20 +146,26 @@ public class ContactDt extends BaseCompositeDatatype {
 		myUse = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for period (Time period when the contact was/is in use)
+	 * Gets the value(s) for <b>period</b> (Time period when the contact was/is in use).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Time period when the contact was/is in use
      * </p> 
 	 */
-	public PeriodDt getPeriod() {
+	public PeriodDt getPeriod() {  
+		if (myPeriod == null) {
+			myPeriod = new PeriodDt();
+		}
 		return myPeriod;
 	}
 
 	/**
-	 * Sets the value(s) for period (Time period when the contact was/is in use)
+	 * Sets the value(s) for <b>period</b> (Time period when the contact was/is in use)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -142,6 +176,7 @@ public class ContactDt extends BaseCompositeDatatype {
 		myPeriod = theValue;
 	}
 	
+ 
 
 
 }

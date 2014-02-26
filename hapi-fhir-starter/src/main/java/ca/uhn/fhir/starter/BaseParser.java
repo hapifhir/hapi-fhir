@@ -29,6 +29,7 @@ import ca.uhn.fhir.starter.model.Child;
 import ca.uhn.fhir.starter.model.Extension;
 import ca.uhn.fhir.starter.model.Resource;
 import ca.uhn.fhir.starter.model.ResourceBlock;
+import ca.uhn.fhir.starter.model.ResourceBlockCopy;
 import ca.uhn.fhir.starter.model.SimpleSetter.Parameter;
 import ca.uhn.fhir.starter.util.XMLUtils;
 
@@ -87,24 +88,21 @@ public abstract class BaseParser {
 			Child elem;
 			if (StringUtils.isBlank(type) || type.startsWith("=")) {
 				elem = new ResourceBlock();
+			} else if (type.startsWith("@")) {
+				type = type.substring(type.lastIndexOf('.')+1);
+				elem=new ResourceBlockCopy();
 			} else {
 				elem = new Child();
 			}
 
 			parseBasicElements(nextRow, elem);
 
-			for (int childIdx = 0; childIdx < elem.getType().size(); childIdx++) {
-				String nextType = elem.getType().get(childIdx);
-				nextType = nextType.substring(0, 1).toUpperCase() + nextType.substring(1);
-				elem.getType().set(childIdx, nextType);
-			}
-
 			elements.put(elem.getName(), elem);
 			BaseElement parent = elements.get(elem.getElementParentName());
 			if (parent == null) {
 				throw new Exception("Can't find element " + elem.getElementParentName() + "  -  Valid values are: " + elements.keySet());
 			}
-			parent.getChildren().add(elem);
+			parent.addChild(elem);
 
 			/*
 			 * Find simple setters
@@ -139,6 +137,7 @@ public abstract class BaseParser {
 
 			ca.uhn.fhir.starter.model.SimpleSetter ss = new ca.uhn.fhir.starter.model.SimpleSetter();
 			ss.setDatatype(childDt.getSimpleName());
+			ss.setSuffix(simpleSetter.suffix());
 			theElem.getSimpleSetters().add(ss);
 			
 			Annotation[][] paramAnn = nextConstructor.getParameterAnnotations();

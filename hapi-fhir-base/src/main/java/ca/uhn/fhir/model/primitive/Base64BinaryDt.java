@@ -10,6 +10,20 @@ public class Base64BinaryDt extends BasePrimitiveDatatype<byte[]> {
 
 	private byte[] myValue;
 
+	/**
+	 * Constructor
+	 */
+	public Base64BinaryDt() {
+		super();
+	}
+	
+	/**
+	 * Constructor
+	 */
+	public Base64BinaryDt(byte[] theValue) {
+		myValue=theValue;
+	}
+
 	@Override
 	public void setValueAsString(String theValue) {
 		if (theValue == null) {

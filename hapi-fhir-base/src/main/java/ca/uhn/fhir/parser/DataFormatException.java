@@ -1,6 +1,6 @@
 package ca.uhn.fhir.parser;
 
-public class DataFormatException extends Exception {
+public class DataFormatException extends RuntimeException {
 
 	private static final long serialVersionUID = 1L;
 

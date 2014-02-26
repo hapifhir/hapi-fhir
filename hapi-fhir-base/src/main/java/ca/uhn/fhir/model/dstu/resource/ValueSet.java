@@ -10,6 +10,10 @@
 
 
 
+
+
+
+
 package ca.uhn.fhir.model.dstu.resource;
 
 import java.util.*;
@@ -69,28 +73,33 @@ public class ValueSet implements IResource {
 	private DateTimeDt myDate;
 	
 	@Child(name="define", order=11, min=0, max=1)	
-	private IDatatype myDefine;
+	private Define myDefine;
 	
 	@Child(name="compose", order=12, min=0, max=1)	
-	private IDatatype myCompose;
+	private Compose myCompose;
 	
 	@Child(name="expansion", order=13, min=0, max=1)	
-	private IDatatype myExpansion;
+	private Expansion myExpansion;
 	
 	/**
-	 * Gets the value(s) for identifier (Logical id to reference this value set)
+	 * Gets the value(s) for <b>identifier</b> (Logical id to reference this value set).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * The identifier that is used to identify this value set when it is referenced in a specification, model, design or an instance (should be globally unique OID, UUID, or URI)
      * </p> 
 	 */
-	public StringDt getIdentifier() {
+	public StringDt getIdentifier() {  
+		if (myIdentifier == null) {
+			myIdentifier = new StringDt();
+		}
 		return myIdentifier;
 	}
 
 	/**
-	 * Sets the value(s) for identifier (Logical id to reference this value set)
+	 * Sets the value(s) for <b>identifier</b> (Logical id to reference this value set)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -102,19 +111,36 @@ public class ValueSet implements IResource {
 	}
 	
 	/**
-	 * Gets the value(s) for version (Logical id for this version of the value set)
+	 * Sets the value(s) for <b>identifier</b> (Logical id to reference this value set)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The identifier that is used to identify this value set when it is referenced in a specification, model, design or an instance (should be globally unique OID, UUID, or URI)
+     * </p> 
+	 */
+	public void setIdentifier( String theString) {
+		myIdentifier = new StringDt(theString); 
+	}
+ 
+	/**
+	 * Gets the value(s) for <b>version</b> (Logical id for this version of the value set).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * The identifier that is used to identify this version of the value set when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the profile author manually and the value should be a timestamp
      * </p> 
 	 */
-	public StringDt getVersion() {
+	public StringDt getVersion() {  
+		if (myVersion == null) {
+			myVersion = new StringDt();
+		}
 		return myVersion;
 	}
 
 	/**
-	 * Sets the value(s) for version (Logical id for this version of the value set)
+	 * Sets the value(s) for <b>version</b> (Logical id for this version of the value set)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -126,19 +152,36 @@ public class ValueSet implements IResource {
 	}
 	
 	/**
-	 * Gets the value(s) for name (Informal name for this value set)
+	 * Sets the value(s) for <b>version</b> (Logical id for this version of the value set)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The identifier that is used to identify this version of the value set when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the profile author manually and the value should be a timestamp
+     * </p> 
+	 */
+	public void setVersion( String theString) {
+		myVersion = new StringDt(theString); 
+	}
+ 
+	/**
+	 * Gets the value(s) for <b>name</b> (Informal name for this value set).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * A free text natural language name describing the value set
      * </p> 
 	 */
-	public StringDt getName() {
+	public StringDt getName() {  
+		if (myName == null) {
+			myName = new StringDt();
+		}
 		return myName;
 	}
 
 	/**
-	 * Sets the value(s) for name (Informal name for this value set)
+	 * Sets the value(s) for <b>name</b> (Informal name for this value set)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -150,19 +193,36 @@ public class ValueSet implements IResource {
 	}
 	
 	/**
-	 * Gets the value(s) for publisher (Name of the publisher (Organization or individual))
+	 * Sets the value(s) for <b>name</b> (Informal name for this value set)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A free text natural language name describing the value set
+     * </p> 
+	 */
+	public void setName( String theString) {
+		myName = new StringDt(theString); 
+	}
+ 
+	/**
+	 * Gets the value(s) for <b>publisher</b> (Name of the publisher (Organization or individual)).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * The name of the individual or organization that published the value set
      * </p> 
 	 */
-	public StringDt getPublisher() {
+	public StringDt getPublisher() {  
+		if (myPublisher == null) {
+			myPublisher = new StringDt();
+		}
 		return myPublisher;
 	}
 
 	/**
-	 * Sets the value(s) for publisher (Name of the publisher (Organization or individual))
+	 * Sets the value(s) for <b>publisher</b> (Name of the publisher (Organization or individual))
 	 *
      * <p>
      * <b>Definition:</b>
@@ -174,19 +234,36 @@ public class ValueSet implements IResource {
 	}
 	
 	/**
-	 * Gets the value(s) for telecom (Contact information of the publisher)
+	 * Sets the value(s) for <b>publisher</b> (Name of the publisher (Organization or individual))
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The name of the individual or organization that published the value set
+     * </p> 
+	 */
+	public void setPublisher( String theString) {
+		myPublisher = new StringDt(theString); 
+	}
+ 
+	/**
+	 * Gets the value(s) for <b>telecom</b> (Contact information of the publisher).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Contacts of the publisher to assist a user in finding and communicating with the publisher
      * </p> 
 	 */
-	public List<ContactDt> getTelecom() {
+	public List<ContactDt> getTelecom() {  
+		if (myTelecom == null) {
+			myTelecom = new ArrayList<ContactDt>();
+		}
 		return myTelecom;
 	}
 
 	/**
-	 * Sets the value(s) for telecom (Contact information of the publisher)
+	 * Sets the value(s) for <b>telecom</b> (Contact information of the publisher)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -197,20 +274,26 @@ public class ValueSet implements IResource {
 		myTelecom = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for description (Human language description of the value set)
+	 * Gets the value(s) for <b>description</b> (Human language description of the value set).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * A free text natural language description of the use of the value set - reason for definition, conditions of use, etc.
      * </p> 
 	 */
-	public StringDt getDescription() {
+	public StringDt getDescription() {  
+		if (myDescription == null) {
+			myDescription = new StringDt();
+		}
 		return myDescription;
 	}
 
 	/**
-	 * Sets the value(s) for description (Human language description of the value set)
+	 * Sets the value(s) for <b>description</b> (Human language description of the value set)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -222,19 +305,36 @@ public class ValueSet implements IResource {
 	}
 	
 	/**
-	 * Gets the value(s) for copyright (About the value set or its content)
+	 * Sets the value(s) for <b>description</b> (Human language description of the value set)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A free text natural language description of the use of the value set - reason for definition, conditions of use, etc.
+     * </p> 
+	 */
+	public void setDescription( String theString) {
+		myDescription = new StringDt(theString); 
+	}
+ 
+	/**
+	 * Gets the value(s) for <b>copyright</b> (About the value set or its content).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * A copyright statement relating to the value set and/or its contents
      * </p> 
 	 */
-	public StringDt getCopyright() {
+	public StringDt getCopyright() {  
+		if (myCopyright == null) {
+			myCopyright = new StringDt();
+		}
 		return myCopyright;
 	}
 
 	/**
-	 * Sets the value(s) for copyright (About the value set or its content)
+	 * Sets the value(s) for <b>copyright</b> (About the value set or its content)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -246,20 +346,37 @@ public class ValueSet implements IResource {
 	}
 	
 	/**
-	 * Gets the value(s) for status (draft | active | retired
-)
+	 * Sets the value(s) for <b>copyright</b> (About the value set or its content)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A copyright statement relating to the value set and/or its contents
+     * </p> 
+	 */
+	public void setCopyright( String theString) {
+		myCopyright = new StringDt(theString); 
+	}
+ 
+	/**
+	 * Gets the value(s) for <b>status</b> (draft | active | retired
+).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * The status of the value set
      * </p> 
 	 */
-	public CodeDt getStatus() {
+	public CodeDt getStatus() {  
+		if (myStatus == null) {
+			myStatus = new CodeDt();
+		}
 		return myStatus;
 	}
 
 	/**
-	 * Sets the value(s) for status (draft | active | retired
+	 * Sets the value(s) for <b>status</b> (draft | active | retired
 )
 	 *
      * <p>
@@ -271,20 +388,26 @@ public class ValueSet implements IResource {
 		myStatus = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for experimental (If for testing purposes, not real usage)
+	 * Gets the value(s) for <b>experimental</b> (If for testing purposes, not real usage).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * This valueset was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage
      * </p> 
 	 */
-	public BooleanDt getExperimental() {
+	public BooleanDt getExperimental() {  
+		if (myExperimental == null) {
+			myExperimental = new BooleanDt();
+		}
 		return myExperimental;
 	}
 
 	/**
-	 * Sets the value(s) for experimental (If for testing purposes, not real usage)
+	 * Sets the value(s) for <b>experimental</b> (If for testing purposes, not real usage)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -295,20 +418,26 @@ public class ValueSet implements IResource {
 		myExperimental = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for extensible (Whether this is intended to be used with an extensible binding)
+	 * Gets the value(s) for <b>extensible</b> (Whether this is intended to be used with an extensible binding).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Whether this is intended to be used with an extensible binding or not
      * </p> 
 	 */
-	public BooleanDt getExtensible() {
+	public BooleanDt getExtensible() {  
+		if (myExtensible == null) {
+			myExtensible = new BooleanDt();
+		}
 		return myExtensible;
 	}
 
 	/**
-	 * Sets the value(s) for extensible (Whether this is intended to be used with an extensible binding)
+	 * Sets the value(s) for <b>extensible</b> (Whether this is intended to be used with an extensible binding)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -319,20 +448,26 @@ public class ValueSet implements IResource {
 		myExtensible = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for date (Date for given status)
+	 * Gets the value(s) for <b>date</b> (Date for given status).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * The date that the value set status was last changed
      * </p> 
 	 */
-	public DateTimeDt getDate() {
+	public DateTimeDt getDate() {  
+		if (myDate == null) {
+			myDate = new DateTimeDt();
+		}
 		return myDate;
 	}
 
 	/**
-	 * Sets the value(s) for date (Date for given status)
+	 * Sets the value(s) for <b>date</b> (Date for given status)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -344,172 +479,183 @@ public class ValueSet implements IResource {
 	}
 	
 	/**
-	 * Gets the value(s) for define (When value set defines its own codes)
+	 * Sets the value(s) for <b>date</b> (Date for given status)
 	 *
      * <p>
      * <b>Definition:</b>
-     * ${child.definition}
+     * The date that the value set status was last changed
      * </p> 
 	 */
-	public IDatatype getDefine() {
+	public void setDateWithSecondsPrecision( Date theDate) {
+		myDate = new DateTimeDt(theDate); 
+	}
+ 
+	/**
+	 * Gets the value(s) for <b>define</b> (When value set defines its own codes).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * 
+     * </p> 
+	 */
+	public Define getDefine() {  
+		if (myDefine == null) {
+			myDefine = new Define();
+		}
 		return myDefine;
 	}
 
 	/**
-	 * Sets the value(s) for define (When value set defines its own codes)
+	 * Sets the value(s) for <b>define</b> (When value set defines its own codes)
 	 *
      * <p>
      * <b>Definition:</b>
-     * ${child.definition}
+     * 
      * </p> 
 	 */
-	public void setDefine(IDatatype theValue) {
+	public void setDefine(Define theValue) {
 		myDefine = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for compose (When value set includes codes from elsewhere)
+	 * Gets the value(s) for <b>compose</b> (When value set includes codes from elsewhere).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
-     * ${child.definition}
+     * 
      * </p> 
 	 */
-	public IDatatype getCompose() {
+	public Compose getCompose() {  
+		if (myCompose == null) {
+			myCompose = new Compose();
+		}
 		return myCompose;
 	}
 
 	/**
-	 * Sets the value(s) for compose (When value set includes codes from elsewhere)
+	 * Sets the value(s) for <b>compose</b> (When value set includes codes from elsewhere)
 	 *
      * <p>
      * <b>Definition:</b>
-     * ${child.definition}
+     * 
      * </p> 
 	 */
-	public void setCompose(IDatatype theValue) {
+	public void setCompose(Compose theValue) {
 		myCompose = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for expansion (When value set is an expansion)
+	 * Gets the value(s) for <b>expansion</b> (When value set is an expansion).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
-     * ${child.definition}
+     * 
      * </p> 
 	 */
-	public IDatatype getExpansion() {
+	public Expansion getExpansion() {  
+		if (myExpansion == null) {
+			myExpansion = new Expansion();
+		}
 		return myExpansion;
 	}
 
 	/**
-	 * Sets the value(s) for expansion (When value set is an expansion)
+	 * Sets the value(s) for <b>expansion</b> (When value set is an expansion)
 	 *
      * <p>
      * <b>Definition:</b>
-     * ${child.definition}
+     * 
      * </p> 
 	 */
-	public void setExpansion(IDatatype theValue) {
+	public void setExpansion(Expansion theValue) {
 		myExpansion = theValue;
 	}
 	
-
+ 
 	/**
 	 * Block class for child element: <b>ValueSet.define</b> (When value set defines its own codes)
 	 *
      * <p>
      * <b>Definition:</b>
-     * ${child.definition}
+     * 
      * </p> 
 	 */
 	@Block(name="ValueSet.define")	
 	public static class Define implements IResourceBlock {
-	@Child(name="identifier", type=StringDt.class, order=0, min=0, max=1)	
-	private StringDt myIdentifier;
+	
+	@Child(name="system", type=UriDt.class, order=0, min=1, max=1)	
+	private UriDt mySystem;
 	
 	@Child(name="version", type=StringDt.class, order=1, min=0, max=1)	
 	private StringDt myVersion;
 	
-	@Child(name="name", type=StringDt.class, order=2, min=1, max=1)	
-	private StringDt myName;
+	@Child(name="caseSensitive", type=BooleanDt.class, order=2, min=0, max=1)	
+	private BooleanDt myCaseSensitive;
 	
-	@Child(name="publisher", type=StringDt.class, order=3, min=0, max=1)	
-	private StringDt myPublisher;
-	
-	@Child(name="telecom", type=ContactDt.class, order=4, min=0, max=Child.MAX_UNLIMITED)	
-	private List<ContactDt> myTelecom;
-	
-	@Child(name="description", type=StringDt.class, order=5, min=1, max=1)	
-	private StringDt myDescription;
-	
-	@Child(name="copyright", type=StringDt.class, order=6, min=0, max=1)	
-	private StringDt myCopyright;
-	
-	@Child(name="status", type=CodeDt.class, order=7, min=1, max=1)	
-	private CodeDt myStatus;
-	
-	@Child(name="experimental", type=BooleanDt.class, order=8, min=0, max=1)	
-	private BooleanDt myExperimental;
-	
-	@Child(name="extensible", type=BooleanDt.class, order=9, min=0, max=1)	
-	private BooleanDt myExtensible;
-	
-	@Child(name="date", type=DateTimeDt.class, order=10, min=0, max=1)	
-	private DateTimeDt myDate;
-	
-	@Child(name="define", order=11, min=0, max=1)	
-	private IDatatype myDefine;
-	
-	@Child(name="compose", order=12, min=0, max=1)	
-	private IDatatype myCompose;
-	
-	@Child(name="expansion", order=13, min=0, max=1)	
-	private IDatatype myExpansion;
+	@Child(name="concept", order=3, min=0, max=Child.MAX_UNLIMITED)	
+	private List<Concept> myConcept;
 	
 	/**
-	 * Gets the value(s) for identifier (Logical id to reference this value set)
+	 * Gets the value(s) for <b>system</b> (URI to identify the code system).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
-     * The identifier that is used to identify this value set when it is referenced in a specification, model, design or an instance (should be globally unique OID, UUID, or URI)
+     * 
      * </p> 
 	 */
-	public StringDt getIdentifier() {
-		return myIdentifier;
+	public UriDt getSystem() {  
+		if (mySystem == null) {
+			mySystem = new UriDt();
+		}
+		return mySystem;
 	}
 
 	/**
-	 * Sets the value(s) for identifier (Logical id to reference this value set)
+	 * Sets the value(s) for <b>system</b> (URI to identify the code system)
 	 *
      * <p>
      * <b>Definition:</b>
-     * The identifier that is used to identify this value set when it is referenced in a specification, model, design or an instance (should be globally unique OID, UUID, or URI)
+     * 
      * </p> 
 	 */
-	public void setIdentifier(StringDt theValue) {
-		myIdentifier = theValue;
+	public void setSystem(UriDt theValue) {
+		mySystem = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for version (Logical id for this version of the value set)
+	 * Gets the value(s) for <b>version</b> (Version of this system).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
-     * The identifier that is used to identify this version of the value set when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the profile author manually and the value should be a timestamp
+     * The version of this code system that defines the codes. Note that the version is optional because a well maintained code system does not suffer from versioning, and therefore the version does not need to be maintained. However many code systems are not well maintained, and the version needs to be defined and tracked
      * </p> 
 	 */
-	public StringDt getVersion() {
+	public StringDt getVersion() {  
+		if (myVersion == null) {
+			myVersion = new StringDt();
+		}
 		return myVersion;
 	}
 
 	/**
-	 * Sets the value(s) for version (Logical id for this version of the value set)
+	 * Sets the value(s) for <b>version</b> (Version of this system)
 	 *
      * <p>
      * <b>Definition:</b>
-     * The identifier that is used to identify this version of the value set when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the profile author manually and the value should be a timestamp
+     * The version of this code system that defines the codes. Note that the version is optional because a well maintained code system does not suffer from versioning, and therefore the version does not need to be maintained. However many code systems are not well maintained, and the version needs to be defined and tracked
      * </p> 
 	 */
 	public void setVersion(StringDt theValue) {
@@ -517,295 +663,277 @@ public class ValueSet implements IResource {
 	}
 	
 	/**
-	 * Gets the value(s) for name (Informal name for this value set)
+	 * Sets the value(s) for <b>version</b> (Version of this system)
 	 *
      * <p>
      * <b>Definition:</b>
-     * A free text natural language name describing the value set
+     * The version of this code system that defines the codes. Note that the version is optional because a well maintained code system does not suffer from versioning, and therefore the version does not need to be maintained. However many code systems are not well maintained, and the version needs to be defined and tracked
      * </p> 
 	 */
-	public StringDt getName() {
-		return myName;
+	public void setVersion( String theString) {
+		myVersion = new StringDt(theString); 
+	}
+ 
+	/**
+	 * Gets the value(s) for <b>caseSensitive</b> (If code comparison is case sensitive).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * If code comparison is case sensitive when codes within this system are compared to each other
+     * </p> 
+	 */
+	public BooleanDt getCaseSensitive() {  
+		if (myCaseSensitive == null) {
+			myCaseSensitive = new BooleanDt();
+		}
+		return myCaseSensitive;
 	}
 
 	/**
-	 * Sets the value(s) for name (Informal name for this value set)
+	 * Sets the value(s) for <b>caseSensitive</b> (If code comparison is case sensitive)
 	 *
      * <p>
      * <b>Definition:</b>
-     * A free text natural language name describing the value set
+     * If code comparison is case sensitive when codes within this system are compared to each other
      * </p> 
 	 */
-	public void setName(StringDt theValue) {
-		myName = theValue;
+	public void setCaseSensitive(BooleanDt theValue) {
+		myCaseSensitive = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for publisher (Name of the publisher (Organization or individual))
+	 * Gets the value(s) for <b>concept</b> (Concepts in the code system).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
-     * The name of the individual or organization that published the value set
+     * 
      * </p> 
 	 */
-	public StringDt getPublisher() {
-		return myPublisher;
+	public List<Concept> getConcept() {  
+		if (myConcept == null) {
+			myConcept = new ArrayList<Concept>();
+		}
+		return myConcept;
 	}
 
 	/**
-	 * Sets the value(s) for publisher (Name of the publisher (Organization or individual))
+	 * Sets the value(s) for <b>concept</b> (Concepts in the code system)
 	 *
      * <p>
      * <b>Definition:</b>
-     * The name of the individual or organization that published the value set
+     * 
      * </p> 
 	 */
-	public void setPublisher(StringDt theValue) {
-		myPublisher = theValue;
+	public void setConcept(List<Concept> theValue) {
+		myConcept = theValue;
 	}
 	
-	/**
-	 * Gets the value(s) for telecom (Contact information of the publisher)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * Contacts of the publisher to assist a user in finding and communicating with the publisher
-     * </p> 
-	 */
-	public List<ContactDt> getTelecom() {
-		return myTelecom;
+ 
 	}
 
 	/**
-	 * Sets the value(s) for telecom (Contact information of the publisher)
+	 * Block class for child element: <b>ValueSet.define.concept</b> (Concepts in the code system)
 	 *
      * <p>
      * <b>Definition:</b>
-     * Contacts of the publisher to assist a user in finding and communicating with the publisher
+     * 
      * </p> 
 	 */
-	public void setTelecom(List<ContactDt> theValue) {
-		myTelecom = theValue;
-	}
+	@Block(name="ValueSet.define.concept")	
+	public static class Concept implements IResourceBlock {
+	
+	@Child(name="code", type=CodeDt.class, order=0, min=1, max=1)	
+	private CodeDt myCode;
+	
+	@Child(name="abstract", type=BooleanDt.class, order=1, min=0, max=1)	
+	private BooleanDt myAbstract;
+	
+	@Child(name="display", type=StringDt.class, order=2, min=0, max=1)	
+	private StringDt myDisplay;
+	
+	@Child(name="definition", type=StringDt.class, order=3, min=0, max=1)	
+	private StringDt myDefinition;
+	
+	@Child(name="concept", type=Concept.class, order=4, min=0, max=Child.MAX_UNLIMITED)	
+	private List<Concept> myConcept;
 	
 	/**
-	 * Gets the value(s) for description (Human language description of the value set)
+	 * Gets the value(s) for <b>code</b> (Code that identifies concept).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
-     * A free text natural language description of the use of the value set - reason for definition, conditions of use, etc.
+     * 
      * </p> 
 	 */
-	public StringDt getDescription() {
-		return myDescription;
+	public CodeDt getCode() {  
+		if (myCode == null) {
+			myCode = new CodeDt();
+		}
+		return myCode;
 	}
 
 	/**
-	 * Sets the value(s) for description (Human language description of the value set)
+	 * Sets the value(s) for <b>code</b> (Code that identifies concept)
 	 *
      * <p>
      * <b>Definition:</b>
-     * A free text natural language description of the use of the value set - reason for definition, conditions of use, etc.
+     * 
      * </p> 
 	 */
-	public void setDescription(StringDt theValue) {
-		myDescription = theValue;
+	public void setCode(CodeDt theValue) {
+		myCode = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for copyright (About the value set or its content)
+	 * Gets the value(s) for <b>abstract</b> (If this code is not for use as a real concept).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
-     * A copyright statement relating to the value set and/or its contents
+     * If this code is not for use as a real concept
      * </p> 
 	 */
-	public StringDt getCopyright() {
-		return myCopyright;
+	public BooleanDt getAbstract() {  
+		if (myAbstract == null) {
+			myAbstract = new BooleanDt();
+		}
+		return myAbstract;
 	}
 
 	/**
-	 * Sets the value(s) for copyright (About the value set or its content)
+	 * Sets the value(s) for <b>abstract</b> (If this code is not for use as a real concept)
 	 *
      * <p>
      * <b>Definition:</b>
-     * A copyright statement relating to the value set and/or its contents
+     * If this code is not for use as a real concept
      * </p> 
 	 */
-	public void setCopyright(StringDt theValue) {
-		myCopyright = theValue;
+	public void setAbstract(BooleanDt theValue) {
+		myAbstract = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for status (draft | active | retired
-)
+	 * Gets the value(s) for <b>display</b> (Text to Display to the user).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
-     * The status of the value set
+     * 
      * </p> 
 	 */
-	public CodeDt getStatus() {
-		return myStatus;
+	public StringDt getDisplay() {  
+		if (myDisplay == null) {
+			myDisplay = new StringDt();
+		}
+		return myDisplay;
 	}
 
 	/**
-	 * Sets the value(s) for status (draft | active | retired
-)
+	 * Sets the value(s) for <b>display</b> (Text to Display to the user)
 	 *
      * <p>
      * <b>Definition:</b>
-     * The status of the value set
+     * 
      * </p> 
 	 */
-	public void setStatus(CodeDt theValue) {
-		myStatus = theValue;
+	public void setDisplay(StringDt theValue) {
+		myDisplay = theValue;
 	}
 	
 	/**
-	 * Gets the value(s) for experimental (If for testing purposes, not real usage)
+	 * Sets the value(s) for <b>display</b> (Text to Display to the user)
 	 *
      * <p>
      * <b>Definition:</b>
-     * This valueset was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage
+     * 
      * </p> 
 	 */
-	public BooleanDt getExperimental() {
-		return myExperimental;
+	public void setDisplay( String theString) {
+		myDisplay = new StringDt(theString); 
+	}
+ 
+	/**
+	 * Gets the value(s) for <b>definition</b> (Formal Definition).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The formal definition of the concept. Formal definitions are not required, because of the prevalence of legacy systems without them, but they are highly recommended, as without them there is no formal meaning associated with the concept
+     * </p> 
+	 */
+	public StringDt getDefinition() {  
+		if (myDefinition == null) {
+			myDefinition = new StringDt();
+		}
+		return myDefinition;
 	}
 
 	/**
-	 * Sets the value(s) for experimental (If for testing purposes, not real usage)
+	 * Sets the value(s) for <b>definition</b> (Formal Definition)
 	 *
      * <p>
      * <b>Definition:</b>
-     * This valueset was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage
+     * The formal definition of the concept. Formal definitions are not required, because of the prevalence of legacy systems without them, but they are highly recommended, as without them there is no formal meaning associated with the concept
      * </p> 
 	 */
-	public void setExperimental(BooleanDt theValue) {
-		myExperimental = theValue;
+	public void setDefinition(StringDt theValue) {
+		myDefinition = theValue;
 	}
 	
 	/**
-	 * Gets the value(s) for extensible (Whether this is intended to be used with an extensible binding)
+	 * Sets the value(s) for <b>definition</b> (Formal Definition)
 	 *
      * <p>
      * <b>Definition:</b>
-     * Whether this is intended to be used with an extensible binding or not
+     * The formal definition of the concept. Formal definitions are not required, because of the prevalence of legacy systems without them, but they are highly recommended, as without them there is no formal meaning associated with the concept
      * </p> 
 	 */
-	public BooleanDt getExtensible() {
-		return myExtensible;
+	public void setDefinition( String theString) {
+		myDefinition = new StringDt(theString); 
+	}
+ 
+	/**
+	 * Gets the value(s) for <b>concept</b> (Child Concepts (is-a / contains)).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * 
+     * </p> 
+	 */
+	public List<Concept> getConcept() {  
+		if (myConcept == null) {
+			myConcept = new ArrayList<Concept>();
+		}
+		return myConcept;
 	}
 
 	/**
-	 * Sets the value(s) for extensible (Whether this is intended to be used with an extensible binding)
+	 * Sets the value(s) for <b>concept</b> (Child Concepts (is-a / contains))
 	 *
      * <p>
      * <b>Definition:</b>
-     * Whether this is intended to be used with an extensible binding or not
+     * 
      * </p> 
 	 */
-	public void setExtensible(BooleanDt theValue) {
-		myExtensible = theValue;
+	public void setConcept(List<Concept> theValue) {
+		myConcept = theValue;
 	}
 	
-	/**
-	 * Gets the value(s) for date (Date for given status)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * The date that the value set status was last changed
-     * </p> 
-	 */
-	public DateTimeDt getDate() {
-		return myDate;
-	}
-
-	/**
-	 * Sets the value(s) for date (Date for given status)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * The date that the value set status was last changed
-     * </p> 
-	 */
-	public void setDate(DateTimeDt theValue) {
-		myDate = theValue;
-	}
-	
-	/**
-	 * Gets the value(s) for define (When value set defines its own codes)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * ${child.definition}
-     * </p> 
-	 */
-	public IDatatype getDefine() {
-		return myDefine;
-	}
-
-	/**
-	 * Sets the value(s) for define (When value set defines its own codes)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * ${child.definition}
-     * </p> 
-	 */
-	public void setDefine(IDatatype theValue) {
-		myDefine = theValue;
-	}
-	
-	/**
-	 * Gets the value(s) for compose (When value set includes codes from elsewhere)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * ${child.definition}
-     * </p> 
-	 */
-	public IDatatype getCompose() {
-		return myCompose;
-	}
-
-	/**
-	 * Sets the value(s) for compose (When value set includes codes from elsewhere)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * ${child.definition}
-     * </p> 
-	 */
-	public void setCompose(IDatatype theValue) {
-		myCompose = theValue;
-	}
-	
-	/**
-	 * Gets the value(s) for expansion (When value set is an expansion)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * ${child.definition}
-     * </p> 
-	 */
-	public IDatatype getExpansion() {
-		return myExpansion;
-	}
-
-	/**
-	 * Sets the value(s) for expansion (When value set is an expansion)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * ${child.definition}
-     * </p> 
-	 */
-	public void setExpansion(IDatatype theValue) {
-		myExpansion = theValue;
-	}
-	
+ 
 	}
 
 	/**
@@ -813,95 +941,189 @@ public class ValueSet implements IResource {
 	 *
      * <p>
      * <b>Definition:</b>
-     * ${child.definition}
+     * 
      * </p> 
 	 */
 	@Block(name="ValueSet.compose")	
 	public static class Compose implements IResourceBlock {
-	@Child(name="identifier", type=StringDt.class, order=0, min=0, max=1)	
-	private StringDt myIdentifier;
+	
+	@Child(name="import", type=UriDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)	
+	private List<UriDt> myImport;
+	
+	@Child(name="include", order=1, min=0, max=Child.MAX_UNLIMITED)	
+	private List<Include> myInclude;
+	
+	@Child(name="exclude", type=Include.class, order=2, min=0, max=Child.MAX_UNLIMITED)	
+	private List<Include> myExclude;
+	
+	/**
+	 * Gets the value(s) for <b>import</b> (Import the contents of another value set).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Includes the contents of the referenced value set as a part of the contents of this value set
+     * </p> 
+	 */
+	public List<UriDt> getImport() {  
+		if (myImport == null) {
+			myImport = new ArrayList<UriDt>();
+		}
+		return myImport;
+	}
+
+	/**
+	 * Sets the value(s) for <b>import</b> (Import the contents of another value set)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Includes the contents of the referenced value set as a part of the contents of this value set
+     * </p> 
+	 */
+	public void setImport(List<UriDt> theValue) {
+		myImport = theValue;
+	}
+	
+ 
+	/**
+	 * Gets the value(s) for <b>include</b> (Include one or more codes from a code system).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Include one or more codes from a code system
+     * </p> 
+	 */
+	public List<Include> getInclude() {  
+		if (myInclude == null) {
+			myInclude = new ArrayList<Include>();
+		}
+		return myInclude;
+	}
+
+	/**
+	 * Sets the value(s) for <b>include</b> (Include one or more codes from a code system)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Include one or more codes from a code system
+     * </p> 
+	 */
+	public void setInclude(List<Include> theValue) {
+		myInclude = theValue;
+	}
+	
+ 
+	/**
+	 * Gets the value(s) for <b>exclude</b> (Explicitly exclude codes).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Exclude one or more codes from the value set
+     * </p> 
+	 */
+	public List<Include> getExclude() {  
+		if (myExclude == null) {
+			myExclude = new ArrayList<Include>();
+		}
+		return myExclude;
+	}
+
+	/**
+	 * Sets the value(s) for <b>exclude</b> (Explicitly exclude codes)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Exclude one or more codes from the value set
+     * </p> 
+	 */
+	public void setExclude(List<Include> theValue) {
+		myExclude = theValue;
+	}
+	
+ 
+	}
+
+	/**
+	 * Block class for child element: <b>ValueSet.compose.include</b> (Include one or more codes from a code system)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Include one or more codes from a code system
+     * </p> 
+	 */
+	@Block(name="ValueSet.compose.include")	
+	public static class Include implements IResourceBlock {
+	
+	@Child(name="system", type=UriDt.class, order=0, min=1, max=1)	
+	private UriDt mySystem;
 	
 	@Child(name="version", type=StringDt.class, order=1, min=0, max=1)	
 	private StringDt myVersion;
 	
-	@Child(name="name", type=StringDt.class, order=2, min=1, max=1)	
-	private StringDt myName;
+	@Child(name="code", type=CodeDt.class, order=2, min=0, max=Child.MAX_UNLIMITED)	
+	private List<CodeDt> myCode;
 	
-	@Child(name="publisher", type=StringDt.class, order=3, min=0, max=1)	
-	private StringDt myPublisher;
-	
-	@Child(name="telecom", type=ContactDt.class, order=4, min=0, max=Child.MAX_UNLIMITED)	
-	private List<ContactDt> myTelecom;
-	
-	@Child(name="description", type=StringDt.class, order=5, min=1, max=1)	
-	private StringDt myDescription;
-	
-	@Child(name="copyright", type=StringDt.class, order=6, min=0, max=1)	
-	private StringDt myCopyright;
-	
-	@Child(name="status", type=CodeDt.class, order=7, min=1, max=1)	
-	private CodeDt myStatus;
-	
-	@Child(name="experimental", type=BooleanDt.class, order=8, min=0, max=1)	
-	private BooleanDt myExperimental;
-	
-	@Child(name="extensible", type=BooleanDt.class, order=9, min=0, max=1)	
-	private BooleanDt myExtensible;
-	
-	@Child(name="date", type=DateTimeDt.class, order=10, min=0, max=1)	
-	private DateTimeDt myDate;
-	
-	@Child(name="define", order=11, min=0, max=1)	
-	private IDatatype myDefine;
-	
-	@Child(name="compose", order=12, min=0, max=1)	
-	private IDatatype myCompose;
-	
-	@Child(name="expansion", order=13, min=0, max=1)	
-	private IDatatype myExpansion;
+	@Child(name="filter", order=3, min=0, max=Child.MAX_UNLIMITED)	
+	private List<Filter> myFilter;
 	
 	/**
-	 * Gets the value(s) for identifier (Logical id to reference this value set)
+	 * Gets the value(s) for <b>system</b> (The system the codes come from).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
-     * The identifier that is used to identify this value set when it is referenced in a specification, model, design or an instance (should be globally unique OID, UUID, or URI)
+     * The code system from which the selected codes come from
      * </p> 
 	 */
-	public StringDt getIdentifier() {
-		return myIdentifier;
+	public UriDt getSystem() {  
+		if (mySystem == null) {
+			mySystem = new UriDt();
+		}
+		return mySystem;
 	}
 
 	/**
-	 * Sets the value(s) for identifier (Logical id to reference this value set)
+	 * Sets the value(s) for <b>system</b> (The system the codes come from)
 	 *
      * <p>
      * <b>Definition:</b>
-     * The identifier that is used to identify this value set when it is referenced in a specification, model, design or an instance (should be globally unique OID, UUID, or URI)
+     * The code system from which the selected codes come from
      * </p> 
 	 */
-	public void setIdentifier(StringDt theValue) {
-		myIdentifier = theValue;
+	public void setSystem(UriDt theValue) {
+		mySystem = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for version (Logical id for this version of the value set)
+	 * Gets the value(s) for <b>version</b> (Specific version of the code system referred to).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
-     * The identifier that is used to identify this version of the value set when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the profile author manually and the value should be a timestamp
+     * The version of the code system that the codes are selected from
      * </p> 
 	 */
-	public StringDt getVersion() {
+	public StringDt getVersion() {  
+		if (myVersion == null) {
+			myVersion = new StringDt();
+		}
 		return myVersion;
 	}
 
 	/**
-	 * Sets the value(s) for version (Logical id for this version of the value set)
+	 * Sets the value(s) for <b>version</b> (Specific version of the code system referred to)
 	 *
      * <p>
      * <b>Definition:</b>
-     * The identifier that is used to identify this version of the value set when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the profile author manually and the value should be a timestamp
+     * The version of the code system that the codes are selected from
      * </p> 
 	 */
 	public void setVersion(StringDt theValue) {
@@ -909,295 +1131,189 @@ public class ValueSet implements IResource {
 	}
 	
 	/**
-	 * Gets the value(s) for name (Informal name for this value set)
+	 * Sets the value(s) for <b>version</b> (Specific version of the code system referred to)
 	 *
      * <p>
      * <b>Definition:</b>
-     * A free text natural language name describing the value set
+     * The version of the code system that the codes are selected from
      * </p> 
 	 */
-	public StringDt getName() {
-		return myName;
+	public void setVersion( String theString) {
+		myVersion = new StringDt(theString); 
+	}
+ 
+	/**
+	 * Gets the value(s) for <b>code</b> (Code or concept from system).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Specifies a code or concept to be included or excluded. The list of codes is considered ordered, though the order may not have any particular significance
+     * </p> 
+	 */
+	public List<CodeDt> getCode() {  
+		if (myCode == null) {
+			myCode = new ArrayList<CodeDt>();
+		}
+		return myCode;
 	}
 
 	/**
-	 * Sets the value(s) for name (Informal name for this value set)
+	 * Sets the value(s) for <b>code</b> (Code or concept from system)
 	 *
      * <p>
      * <b>Definition:</b>
-     * A free text natural language name describing the value set
+     * Specifies a code or concept to be included or excluded. The list of codes is considered ordered, though the order may not have any particular significance
      * </p> 
 	 */
-	public void setName(StringDt theValue) {
-		myName = theValue;
+	public void setCode(List<CodeDt> theValue) {
+		myCode = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for publisher (Name of the publisher (Organization or individual))
+	 * Gets the value(s) for <b>filter</b> (Select codes/concepts by their properties (including relationships)).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
-     * The name of the individual or organization that published the value set
+     * Select concepts by specify a matching criteria based on the properties (including relationships) defined by the system. If multiple filters are specified, they SHALL all be true.
      * </p> 
 	 */
-	public StringDt getPublisher() {
-		return myPublisher;
+	public List<Filter> getFilter() {  
+		if (myFilter == null) {
+			myFilter = new ArrayList<Filter>();
+		}
+		return myFilter;
 	}
 
 	/**
-	 * Sets the value(s) for publisher (Name of the publisher (Organization or individual))
+	 * Sets the value(s) for <b>filter</b> (Select codes/concepts by their properties (including relationships))
 	 *
      * <p>
      * <b>Definition:</b>
-     * The name of the individual or organization that published the value set
+     * Select concepts by specify a matching criteria based on the properties (including relationships) defined by the system. If multiple filters are specified, they SHALL all be true.
      * </p> 
 	 */
-	public void setPublisher(StringDt theValue) {
-		myPublisher = theValue;
+	public void setFilter(List<Filter> theValue) {
+		myFilter = theValue;
 	}
 	
-	/**
-	 * Gets the value(s) for telecom (Contact information of the publisher)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * Contacts of the publisher to assist a user in finding and communicating with the publisher
-     * </p> 
-	 */
-	public List<ContactDt> getTelecom() {
-		return myTelecom;
+ 
 	}
 
 	/**
-	 * Sets the value(s) for telecom (Contact information of the publisher)
+	 * Block class for child element: <b>ValueSet.compose.include.filter</b> (Select codes/concepts by their properties (including relationships))
 	 *
      * <p>
      * <b>Definition:</b>
-     * Contacts of the publisher to assist a user in finding and communicating with the publisher
+     * Select concepts by specify a matching criteria based on the properties (including relationships) defined by the system. If multiple filters are specified, they SHALL all be true.
      * </p> 
 	 */
-	public void setTelecom(List<ContactDt> theValue) {
-		myTelecom = theValue;
-	}
+	@Block(name="ValueSet.compose.include.filter")	
+	public static class Filter implements IResourceBlock {
+	
+	@Child(name="property", type=CodeDt.class, order=0, min=1, max=1)	
+	private CodeDt myProperty;
+	
+	@Child(name="op", type=CodeDt.class, order=1, min=1, max=1)	
+	private CodeDt myOp;
+	
+	@Child(name="value", type=CodeDt.class, order=2, min=1, max=1)	
+	private CodeDt myValue;
 	
 	/**
-	 * Gets the value(s) for description (Human language description of the value set)
+	 * Gets the value(s) for <b>property</b> ().
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
-     * A free text natural language description of the use of the value set - reason for definition, conditions of use, etc.
+     * A code that identifies a property defined in the code system
      * </p> 
 	 */
-	public StringDt getDescription() {
-		return myDescription;
+	public CodeDt getProperty() {  
+		if (myProperty == null) {
+			myProperty = new CodeDt();
+		}
+		return myProperty;
 	}
 
 	/**
-	 * Sets the value(s) for description (Human language description of the value set)
+	 * Sets the value(s) for <b>property</b> ()
 	 *
      * <p>
      * <b>Definition:</b>
-     * A free text natural language description of the use of the value set - reason for definition, conditions of use, etc.
+     * A code that identifies a property defined in the code system
      * </p> 
 	 */
-	public void setDescription(StringDt theValue) {
-		myDescription = theValue;
+	public void setProperty(CodeDt theValue) {
+		myProperty = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for copyright (About the value set or its content)
+	 * Gets the value(s) for <b>op</b> (= | is-a | is-not-a | regex | in | not in).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
-     * A copyright statement relating to the value set and/or its contents
+     * The kind of operation to perform as a part of the filter criteria
      * </p> 
 	 */
-	public StringDt getCopyright() {
-		return myCopyright;
+	public CodeDt getOp() {  
+		if (myOp == null) {
+			myOp = new CodeDt();
+		}
+		return myOp;
 	}
 
 	/**
-	 * Sets the value(s) for copyright (About the value set or its content)
+	 * Sets the value(s) for <b>op</b> (= | is-a | is-not-a | regex | in | not in)
 	 *
      * <p>
      * <b>Definition:</b>
-     * A copyright statement relating to the value set and/or its contents
+     * The kind of operation to perform as a part of the filter criteria
      * </p> 
 	 */
-	public void setCopyright(StringDt theValue) {
-		myCopyright = theValue;
+	public void setOp(CodeDt theValue) {
+		myOp = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for status (draft | active | retired
-)
+	 * Gets the value(s) for <b>value</b> (Code from the system, or regex criteria).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
-     * The status of the value set
+     * The match value may be either a code defined by the system, or a string value which is used a regex match on the literal string of the property value
      * </p> 
 	 */
-	public CodeDt getStatus() {
-		return myStatus;
+	public CodeDt getValue() {  
+		if (myValue == null) {
+			myValue = new CodeDt();
+		}
+		return myValue;
 	}
 
 	/**
-	 * Sets the value(s) for status (draft | active | retired
-)
+	 * Sets the value(s) for <b>value</b> (Code from the system, or regex criteria)
 	 *
      * <p>
      * <b>Definition:</b>
-     * The status of the value set
+     * The match value may be either a code defined by the system, or a string value which is used a regex match on the literal string of the property value
      * </p> 
 	 */
-	public void setStatus(CodeDt theValue) {
-		myStatus = theValue;
+	public void setValue(CodeDt theValue) {
+		myValue = theValue;
 	}
 	
-	/**
-	 * Gets the value(s) for experimental (If for testing purposes, not real usage)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * This valueset was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage
-     * </p> 
-	 */
-	public BooleanDt getExperimental() {
-		return myExperimental;
-	}
-
-	/**
-	 * Sets the value(s) for experimental (If for testing purposes, not real usage)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * This valueset was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage
-     * </p> 
-	 */
-	public void setExperimental(BooleanDt theValue) {
-		myExperimental = theValue;
-	}
-	
-	/**
-	 * Gets the value(s) for extensible (Whether this is intended to be used with an extensible binding)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * Whether this is intended to be used with an extensible binding or not
-     * </p> 
-	 */
-	public BooleanDt getExtensible() {
-		return myExtensible;
-	}
-
-	/**
-	 * Sets the value(s) for extensible (Whether this is intended to be used with an extensible binding)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * Whether this is intended to be used with an extensible binding or not
-     * </p> 
-	 */
-	public void setExtensible(BooleanDt theValue) {
-		myExtensible = theValue;
-	}
-	
-	/**
-	 * Gets the value(s) for date (Date for given status)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * The date that the value set status was last changed
-     * </p> 
-	 */
-	public DateTimeDt getDate() {
-		return myDate;
-	}
-
-	/**
-	 * Sets the value(s) for date (Date for given status)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * The date that the value set status was last changed
-     * </p> 
-	 */
-	public void setDate(DateTimeDt theValue) {
-		myDate = theValue;
-	}
-	
-	/**
-	 * Gets the value(s) for define (When value set defines its own codes)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * ${child.definition}
-     * </p> 
-	 */
-	public IDatatype getDefine() {
-		return myDefine;
-	}
-
-	/**
-	 * Sets the value(s) for define (When value set defines its own codes)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * ${child.definition}
-     * </p> 
-	 */
-	public void setDefine(IDatatype theValue) {
-		myDefine = theValue;
-	}
-	
-	/**
-	 * Gets the value(s) for compose (When value set includes codes from elsewhere)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * ${child.definition}
-     * </p> 
-	 */
-	public IDatatype getCompose() {
-		return myCompose;
-	}
-
-	/**
-	 * Sets the value(s) for compose (When value set includes codes from elsewhere)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * ${child.definition}
-     * </p> 
-	 */
-	public void setCompose(IDatatype theValue) {
-		myCompose = theValue;
-	}
-	
-	/**
-	 * Gets the value(s) for expansion (When value set is an expansion)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * ${child.definition}
-     * </p> 
-	 */
-	public IDatatype getExpansion() {
-		return myExpansion;
-	}
-
-	/**
-	 * Sets the value(s) for expansion (When value set is an expansion)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * ${child.definition}
-     * </p> 
-	 */
-	public void setExpansion(IDatatype theValue) {
-		myExpansion = theValue;
-	}
-	
+ 
 	}
 
 	/**
@@ -1205,391 +1321,267 @@ public class ValueSet implements IResource {
 	 *
      * <p>
      * <b>Definition:</b>
-     * ${child.definition}
+     * 
      * </p> 
 	 */
 	@Block(name="ValueSet.expansion")	
 	public static class Expansion implements IResourceBlock {
-	@Child(name="identifier", type=StringDt.class, order=0, min=0, max=1)	
-	private StringDt myIdentifier;
 	
-	@Child(name="version", type=StringDt.class, order=1, min=0, max=1)	
-	private StringDt myVersion;
+	@Child(name="identifier", type=IdentifierDt.class, order=0, min=0, max=1)	
+	private IdentifierDt myIdentifier;
 	
-	@Child(name="name", type=StringDt.class, order=2, min=1, max=1)	
-	private StringDt myName;
+	@Child(name="timestamp", type=InstantDt.class, order=1, min=1, max=1)	
+	private InstantDt myTimestamp;
 	
-	@Child(name="publisher", type=StringDt.class, order=3, min=0, max=1)	
-	private StringDt myPublisher;
-	
-	@Child(name="telecom", type=ContactDt.class, order=4, min=0, max=Child.MAX_UNLIMITED)	
-	private List<ContactDt> myTelecom;
-	
-	@Child(name="description", type=StringDt.class, order=5, min=1, max=1)	
-	private StringDt myDescription;
-	
-	@Child(name="copyright", type=StringDt.class, order=6, min=0, max=1)	
-	private StringDt myCopyright;
-	
-	@Child(name="status", type=CodeDt.class, order=7, min=1, max=1)	
-	private CodeDt myStatus;
-	
-	@Child(name="experimental", type=BooleanDt.class, order=8, min=0, max=1)	
-	private BooleanDt myExperimental;
-	
-	@Child(name="extensible", type=BooleanDt.class, order=9, min=0, max=1)	
-	private BooleanDt myExtensible;
-	
-	@Child(name="date", type=DateTimeDt.class, order=10, min=0, max=1)	
-	private DateTimeDt myDate;
-	
-	@Child(name="define", order=11, min=0, max=1)	
-	private IDatatype myDefine;
-	
-	@Child(name="compose", order=12, min=0, max=1)	
-	private IDatatype myCompose;
-	
-	@Child(name="expansion", order=13, min=0, max=1)	
-	private IDatatype myExpansion;
+	@Child(name="contains", order=2, min=0, max=Child.MAX_UNLIMITED)	
+	private List<Contains> myContains;
 	
 	/**
-	 * Gets the value(s) for identifier (Logical id to reference this value set)
+	 * Gets the value(s) for <b>identifier</b> (Uniquely identifies this expansion).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
-     * The identifier that is used to identify this value set when it is referenced in a specification, model, design or an instance (should be globally unique OID, UUID, or URI)
+     * An identifier that uniquely identifies this expansion of the valueset. Systems may re-use the same identifier as long as the expansion and the definition remain the same, but are not required to do so
      * </p> 
 	 */
-	public StringDt getIdentifier() {
+	public IdentifierDt getIdentifier() {  
+		if (myIdentifier == null) {
+			myIdentifier = new IdentifierDt();
+		}
 		return myIdentifier;
 	}
 
 	/**
-	 * Sets the value(s) for identifier (Logical id to reference this value set)
+	 * Sets the value(s) for <b>identifier</b> (Uniquely identifies this expansion)
 	 *
      * <p>
      * <b>Definition:</b>
-     * The identifier that is used to identify this value set when it is referenced in a specification, model, design or an instance (should be globally unique OID, UUID, or URI)
+     * An identifier that uniquely identifies this expansion of the valueset. Systems may re-use the same identifier as long as the expansion and the definition remain the same, but are not required to do so
      * </p> 
 	 */
-	public void setIdentifier(StringDt theValue) {
+	public void setIdentifier(IdentifierDt theValue) {
 		myIdentifier = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for version (Logical id for this version of the value set)
+	 * Gets the value(s) for <b>timestamp</b> (Time valueset expansion happened).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
-     * The identifier that is used to identify this version of the value set when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the profile author manually and the value should be a timestamp
+     * 
      * </p> 
 	 */
-	public StringDt getVersion() {
-		return myVersion;
+	public InstantDt getTimestamp() {  
+		if (myTimestamp == null) {
+			myTimestamp = new InstantDt();
+		}
+		return myTimestamp;
 	}
 
 	/**
-	 * Sets the value(s) for version (Logical id for this version of the value set)
+	 * Sets the value(s) for <b>timestamp</b> (Time valueset expansion happened)
 	 *
      * <p>
      * <b>Definition:</b>
-     * The identifier that is used to identify this version of the value set when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the profile author manually and the value should be a timestamp
+     * 
      * </p> 
 	 */
-	public void setVersion(StringDt theValue) {
-		myVersion = theValue;
+	public void setTimestamp(InstantDt theValue) {
+		myTimestamp = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for name (Informal name for this value set)
+	 * Gets the value(s) for <b>contains</b> (Codes in the value set).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
-     * A free text natural language name describing the value set
+     * 
      * </p> 
 	 */
-	public StringDt getName() {
-		return myName;
+	public List<Contains> getContains() {  
+		if (myContains == null) {
+			myContains = new ArrayList<Contains>();
+		}
+		return myContains;
 	}
 
 	/**
-	 * Sets the value(s) for name (Informal name for this value set)
+	 * Sets the value(s) for <b>contains</b> (Codes in the value set)
 	 *
      * <p>
      * <b>Definition:</b>
-     * A free text natural language name describing the value set
+     * 
      * </p> 
 	 */
-	public void setName(StringDt theValue) {
-		myName = theValue;
+	public void setContains(List<Contains> theValue) {
+		myContains = theValue;
 	}
 	
-	/**
-	 * Gets the value(s) for publisher (Name of the publisher (Organization or individual))
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * The name of the individual or organization that published the value set
-     * </p> 
-	 */
-	public StringDt getPublisher() {
-		return myPublisher;
+ 
 	}
 
 	/**
-	 * Sets the value(s) for publisher (Name of the publisher (Organization or individual))
+	 * Block class for child element: <b>ValueSet.expansion.contains</b> (Codes in the value set)
 	 *
      * <p>
      * <b>Definition:</b>
-     * The name of the individual or organization that published the value set
+     * 
      * </p> 
 	 */
-	public void setPublisher(StringDt theValue) {
-		myPublisher = theValue;
-	}
+	@Block(name="ValueSet.expansion.contains")	
+	public static class Contains implements IResourceBlock {
+	
+	@Child(name="system", type=UriDt.class, order=0, min=0, max=1)	
+	private UriDt mySystem;
+	
+	@Child(name="code", type=CodeDt.class, order=1, min=0, max=1)	
+	private CodeDt myCode;
+	
+	@Child(name="display", type=StringDt.class, order=2, min=0, max=1)	
+	private StringDt myDisplay;
+	
+	@Child(name="contains", type=Contains.class, order=3, min=0, max=Child.MAX_UNLIMITED)	
+	private List<Contains> myContains;
 	
 	/**
-	 * Gets the value(s) for telecom (Contact information of the publisher)
+	 * Gets the value(s) for <b>system</b> (System value for the code).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
-     * Contacts of the publisher to assist a user in finding and communicating with the publisher
+     * 
      * </p> 
 	 */
-	public List<ContactDt> getTelecom() {
-		return myTelecom;
+	public UriDt getSystem() {  
+		if (mySystem == null) {
+			mySystem = new UriDt();
+		}
+		return mySystem;
 	}
 
 	/**
-	 * Sets the value(s) for telecom (Contact information of the publisher)
+	 * Sets the value(s) for <b>system</b> (System value for the code)
 	 *
      * <p>
      * <b>Definition:</b>
-     * Contacts of the publisher to assist a user in finding and communicating with the publisher
+     * 
      * </p> 
 	 */
-	public void setTelecom(List<ContactDt> theValue) {
-		myTelecom = theValue;
+	public void setSystem(UriDt theValue) {
+		mySystem = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for description (Human language description of the value set)
+	 * Gets the value(s) for <b>code</b> (Code - if blank, this is not a choosable code).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
-     * A free text natural language description of the use of the value set - reason for definition, conditions of use, etc.
+     * 
      * </p> 
 	 */
-	public StringDt getDescription() {
-		return myDescription;
+	public CodeDt getCode() {  
+		if (myCode == null) {
+			myCode = new CodeDt();
+		}
+		return myCode;
 	}
 
 	/**
-	 * Sets the value(s) for description (Human language description of the value set)
+	 * Sets the value(s) for <b>code</b> (Code - if blank, this is not a choosable code)
 	 *
      * <p>
      * <b>Definition:</b>
-     * A free text natural language description of the use of the value set - reason for definition, conditions of use, etc.
+     * 
      * </p> 
 	 */
-	public void setDescription(StringDt theValue) {
-		myDescription = theValue;
+	public void setCode(CodeDt theValue) {
+		myCode = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for copyright (About the value set or its content)
+	 * Gets the value(s) for <b>display</b> (User display for the concept).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
-     * A copyright statement relating to the value set and/or its contents
+     * 
      * </p> 
 	 */
-	public StringDt getCopyright() {
-		return myCopyright;
+	public StringDt getDisplay() {  
+		if (myDisplay == null) {
+			myDisplay = new StringDt();
+		}
+		return myDisplay;
 	}
 
 	/**
-	 * Sets the value(s) for copyright (About the value set or its content)
+	 * Sets the value(s) for <b>display</b> (User display for the concept)
 	 *
      * <p>
      * <b>Definition:</b>
-     * A copyright statement relating to the value set and/or its contents
+     * 
      * </p> 
 	 */
-	public void setCopyright(StringDt theValue) {
-		myCopyright = theValue;
+	public void setDisplay(StringDt theValue) {
+		myDisplay = theValue;
 	}
 	
 	/**
-	 * Gets the value(s) for status (draft | active | retired
-)
+	 * Sets the value(s) for <b>display</b> (User display for the concept)
 	 *
      * <p>
      * <b>Definition:</b>
-     * The status of the value set
+     * 
      * </p> 
 	 */
-	public CodeDt getStatus() {
-		return myStatus;
+	public void setDisplay( String theString) {
+		myDisplay = new StringDt(theString); 
+	}
+ 
+	/**
+	 * Gets the value(s) for <b>contains</b> (Codes contained in this concept).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * 
+     * </p> 
+	 */
+	public List<Contains> getContains() {  
+		if (myContains == null) {
+			myContains = new ArrayList<Contains>();
+		}
+		return myContains;
 	}
 
 	/**
-	 * Sets the value(s) for status (draft | active | retired
-)
+	 * Sets the value(s) for <b>contains</b> (Codes contained in this concept)
 	 *
      * <p>
      * <b>Definition:</b>
-     * The status of the value set
+     * 
      * </p> 
 	 */
-	public void setStatus(CodeDt theValue) {
-		myStatus = theValue;
+	public void setContains(List<Contains> theValue) {
+		myContains = theValue;
 	}
 	
-	/**
-	 * Gets the value(s) for experimental (If for testing purposes, not real usage)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * This valueset was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage
-     * </p> 
-	 */
-	public BooleanDt getExperimental() {
-		return myExperimental;
-	}
-
-	/**
-	 * Sets the value(s) for experimental (If for testing purposes, not real usage)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * This valueset was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage
-     * </p> 
-	 */
-	public void setExperimental(BooleanDt theValue) {
-		myExperimental = theValue;
-	}
-	
-	/**
-	 * Gets the value(s) for extensible (Whether this is intended to be used with an extensible binding)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * Whether this is intended to be used with an extensible binding or not
-     * </p> 
-	 */
-	public BooleanDt getExtensible() {
-		return myExtensible;
-	}
-
-	/**
-	 * Sets the value(s) for extensible (Whether this is intended to be used with an extensible binding)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * Whether this is intended to be used with an extensible binding or not
-     * </p> 
-	 */
-	public void setExtensible(BooleanDt theValue) {
-		myExtensible = theValue;
-	}
-	
-	/**
-	 * Gets the value(s) for date (Date for given status)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * The date that the value set status was last changed
-     * </p> 
-	 */
-	public DateTimeDt getDate() {
-		return myDate;
-	}
-
-	/**
-	 * Sets the value(s) for date (Date for given status)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * The date that the value set status was last changed
-     * </p> 
-	 */
-	public void setDate(DateTimeDt theValue) {
-		myDate = theValue;
-	}
-	
-	/**
-	 * Gets the value(s) for define (When value set defines its own codes)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * ${child.definition}
-     * </p> 
-	 */
-	public IDatatype getDefine() {
-		return myDefine;
-	}
-
-	/**
-	 * Sets the value(s) for define (When value set defines its own codes)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * ${child.definition}
-     * </p> 
-	 */
-	public void setDefine(IDatatype theValue) {
-		myDefine = theValue;
-	}
-	
-	/**
-	 * Gets the value(s) for compose (When value set includes codes from elsewhere)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * ${child.definition}
-     * </p> 
-	 */
-	public IDatatype getCompose() {
-		return myCompose;
-	}
-
-	/**
-	 * Sets the value(s) for compose (When value set includes codes from elsewhere)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * ${child.definition}
-     * </p> 
-	 */
-	public void setCompose(IDatatype theValue) {
-		myCompose = theValue;
-	}
-	
-	/**
-	 * Gets the value(s) for expansion (When value set is an expansion)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * ${child.definition}
-     * </p> 
-	 */
-	public IDatatype getExpansion() {
-		return myExpansion;
-	}
-
-	/**
-	 * Sets the value(s) for expansion (When value set is an expansion)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * ${child.definition}
-     * </p> 
-	 */
-	public void setExpansion(IDatatype theValue) {
-		myExpansion = theValue;
-	}
-	
+ 
 	}
 
 

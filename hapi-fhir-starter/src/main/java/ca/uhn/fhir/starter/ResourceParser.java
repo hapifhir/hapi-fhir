@@ -65,70 +65,81 @@ public class ResourceParser extends BaseParser {
 //		p.parse();
 
 		
+//		p.setDirectory("src/test/resources/res");
+//		p.setResourceName("medication");
+//		p.setOutputFile("../hapi-fhir-base/src/main/java/ca/uhn/fhir/model/dstu/resource/Medication.java");
+//		p.parse();
+//
+//		p.setDirectory("src/test/resources/res");
+//		p.setResourceName("substance");
+//		p.setOutputFile("../hapi-fhir-base/src/main/java/ca/uhn/fhir/model/dstu/resource/Substance.java");
+//		p.parse();
+
+		
 		p.setDirectory("src/test/resources/res");
 		p.setResourceName("valueset");
 		p.setOutputFile("../hapi-fhir-base/src/main/java/ca/uhn/fhir/model/dstu/resource/ValueSet.java");
 		p.parse();
 
-		p = new ResourceParser();
-		p.setDirectory("src/test/resources/res");
-		p.setResourceName("observation");
-		p.setOutputFile("../hapi-fhir-base/src/main/java/ca/uhn/fhir/model/dstu/resource/Observation.java");
-		p.parse();
-
-		p.setResourceName("profile");
-		p.setOutputFile("../hapi-fhir-base/src/main/java/ca/uhn/fhir/model/dstu/resource/Profile.java");
-		p.parse();
-
-		p.setResourceName("device");
-		p.setOutputFile("../hapi-fhir-base/src/main/java/ca/uhn/fhir/model/dstu/resource/Device.java");
-		p.parse();
-
-		p.setResourceName("group");
-		p.setOutputFile("../hapi-fhir-base/src/main/java/ca/uhn/fhir/model/dstu/resource/Group.java");
-		p.parse();
-		
-		p.setResourceName("location");
-		p.setOutputFile("../hapi-fhir-base/src/main/java/ca/uhn/fhir/model/dstu/resource/Location.java");
-		p.parse();
-
-		p.setResourceName("organization");
-		p.setOutputFile("../hapi-fhir-base/src/main/java/ca/uhn/fhir/model/dstu/resource/Organization.java");
-		p.parse();
-
-		p.setResourceName("patient");
-		p.setOutputFile("../hapi-fhir-base/src/main/java/ca/uhn/fhir/model/dstu/resource/Patient.java");
-		p.parse();
-
-		p.setResourceName("specimen");
-		p.setOutputFile("../hapi-fhir-base/src/main/java/ca/uhn/fhir/model/dstu/resource/Specimen.java");
-		p.parse();
-
-		p.setResourceName("practitioner");
-		p.setOutputFile("../hapi-fhir-base/src/main/java/ca/uhn/fhir/model/dstu/resource/Practitioner.java");
-		p.parse();
-
-		DatatypeParser d = new DatatypeParser();
-		d.setDirectory("src/test/resources/dt");
-		d.setDatatypeName("humanname");
-		d.setOutputFile("../hapi-fhir-base/src/main/java/ca/uhn/fhir/model/dstu/composite/HumanNameDt.java");
-		d.parse();
-
-		d.setDatatypeName("contact");
-		d.setOutputFile("../hapi-fhir-base/src/main/java/ca/uhn/fhir/model/dstu/composite/ContactDt.java");
-		d.parse();
-
-		d.setDatatypeName("address");
-		d.setOutputFile("../hapi-fhir-base/src/main/java/ca/uhn/fhir/model/dstu/composite/AddressDt.java");
-		d.parse();
-
-		d.setDatatypeName("narrative");
-		d.setOutputFile("../hapi-fhir-base/src/main/java/ca/uhn/fhir/model/dstu/composite/NarrativeDt.java");
-		d.parse();
-
-		d.setDatatypeName("quantity");
-		d.setOutputFile("../hapi-fhir-base/src/main/java/ca/uhn/fhir/model/dstu/composite/QuantityDt.java");
-		d.parse();
+//		p = new ResourceParser();
+//		p.setDirectory("src/test/resources/res");
+//		p.setResourceName("observation");
+//		p.setOutputFile("../hapi-fhir-base/src/main/java/ca/uhn/fhir/model/dstu/resource/Observation.java");
+//		p.parse();
+//
+//		p.setResourceName("profile");
+//		p.setOutputFile("../hapi-fhir-base/src/main/java/ca/uhn/fhir/model/dstu/resource/Profile.java");
+//		p.parse();
+//
+//		p.setResourceName("device");
+//		p.setOutputFile("../hapi-fhir-base/src/main/java/ca/uhn/fhir/model/dstu/resource/Device.java");
+//		p.parse();
+//
+//		p.setResourceName("group");
+//		p.setOutputFile("../hapi-fhir-base/src/main/java/ca/uhn/fhir/model/dstu/resource/Group.java");
+//		p.parse();
+//		
+//		p.setResourceName("location");
+//		p.setOutputFile("../hapi-fhir-base/src/main/java/ca/uhn/fhir/model/dstu/resource/Location.java");
+//		p.parse();
+//
+//		p.setResourceName("organization");
+//		p.setOutputFile("../hapi-fhir-base/src/main/java/ca/uhn/fhir/model/dstu/resource/Organization.java");
+//		p.parse();
+//
+//		p.setResourceName("patient");
+//		p.setOutputFile("../hapi-fhir-base/src/main/java/ca/uhn/fhir/model/dstu/resource/Patient.java");
+//		p.parse();
+//
+//		p.setResourceName("specimen");
+//		p.setOutputFile("../hapi-fhir-base/src/main/java/ca/uhn/fhir/model/dstu/resource/Specimen.java");
+//		p.parse();
+//
+//		p.setResourceName("practitioner");
+//		p.setOutputFile("../hapi-fhir-base/src/main/java/ca/uhn/fhir/model/dstu/resource/Practitioner.java");
+//		p.parse();
+//
+//		DatatypeParser d = new DatatypeParser();
+//		d.setDirectory("src/test/resources/dt");
+//		d.setDatatypeName("humanname");
+//		d.setOutputFile("../hapi-fhir-base/src/main/java/ca/uhn/fhir/model/dstu/composite/HumanNameDt.java");
+//		d.parse();
+//
+//		d.setDatatypeName("contact");
+//		d.setOutputFile("../hapi-fhir-base/src/main/java/ca/uhn/fhir/model/dstu/composite/ContactDt.java");
+//		d.parse();
+//
+//		d.setDatatypeName("address");
+//		d.setOutputFile("../hapi-fhir-base/src/main/java/ca/uhn/fhir/model/dstu/composite/AddressDt.java");
+//		d.parse();
+//
+//		d.setDatatypeName("narrative");
+//		d.setOutputFile("../hapi-fhir-base/src/main/java/ca/uhn/fhir/model/dstu/composite/NarrativeDt.java");
+//		d.parse();
+//
+//		d.setDatatypeName("quantity");
+//		d.setOutputFile("../hapi-fhir-base/src/main/java/ca/uhn/fhir/model/dstu/composite/QuantityDt.java");
+//		d.parse();
 
 	}
 }

@@ -94,25 +94,30 @@ public class Patient implements IResource {
 	private ResourceReference myManagingOrganization;
 	
 	@Child(name="link", order=15, min=0, max=Child.MAX_UNLIMITED)	
-	private List<IDatatype> myLink;
+	private List<Link> myLink;
 	
 	@Child(name="active", type=BooleanDt.class, order=16, min=0, max=1)	
 	private BooleanDt myActive;
 	
 	/**
-	 * Gets the value(s) for identifier (An identifier for the person as this patient)
+	 * Gets the value(s) for <b>identifier</b> (An identifier for the person as this patient).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * An identifier that applies to this person as a patient
      * </p> 
 	 */
-	public List<IdentifierDt> getIdentifier() {
+	public List<IdentifierDt> getIdentifier() {  
+		if (myIdentifier == null) {
+			myIdentifier = new ArrayList<IdentifierDt>();
+		}
 		return myIdentifier;
 	}
 
 	/**
-	 * Sets the value(s) for identifier (An identifier for the person as this patient)
+	 * Sets the value(s) for <b>identifier</b> (An identifier for the person as this patient)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -123,20 +128,26 @@ public class Patient implements IResource {
 		myIdentifier = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for name (A name associated with the patient)
+	 * Gets the value(s) for <b>name</b> (A name associated with the patient).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * A name associated with the individual. 
      * </p> 
 	 */
-	public List<HumanNameDt> getName() {
+	public List<HumanNameDt> getName() {  
+		if (myName == null) {
+			myName = new ArrayList<HumanNameDt>();
+		}
 		return myName;
 	}
 
 	/**
-	 * Sets the value(s) for name (A name associated with the patient)
+	 * Sets the value(s) for <b>name</b> (A name associated with the patient)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -147,20 +158,26 @@ public class Patient implements IResource {
 		myName = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for telecom (A contact detail for the individual)
+	 * Gets the value(s) for <b>telecom</b> (A contact detail for the individual).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * A contact detail (e.g. a telephone number or an email address) by which the individual may be contacted. 
      * </p> 
 	 */
-	public List<ContactDt> getTelecom() {
+	public List<ContactDt> getTelecom() {  
+		if (myTelecom == null) {
+			myTelecom = new ArrayList<ContactDt>();
+		}
 		return myTelecom;
 	}
 
 	/**
-	 * Sets the value(s) for telecom (A contact detail for the individual)
+	 * Sets the value(s) for <b>telecom</b> (A contact detail for the individual)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -171,20 +188,26 @@ public class Patient implements IResource {
 		myTelecom = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for gender (Gender for administrative purposes)
+	 * Gets the value(s) for <b>gender</b> (Gender for administrative purposes).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Administrative Gender - the gender that the patient is considered to have for administration and record keeping purposes. 
      * </p> 
 	 */
-	public CodeableConceptDt getGender() {
+	public CodeableConceptDt getGender() {  
+		if (myGender == null) {
+			myGender = new CodeableConceptDt();
+		}
 		return myGender;
 	}
 
 	/**
-	 * Sets the value(s) for gender (Gender for administrative purposes)
+	 * Sets the value(s) for <b>gender</b> (Gender for administrative purposes)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -195,20 +218,26 @@ public class Patient implements IResource {
 		myGender = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for birthDate (The date and time of birth for the individual)
+	 * Gets the value(s) for <b>birthDate</b> (The date and time of birth for the individual).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * The date and time of birth for the individual
      * </p> 
 	 */
-	public DateTimeDt getBirthDate() {
+	public DateTimeDt getBirthDate() {  
+		if (myBirthDate == null) {
+			myBirthDate = new DateTimeDt();
+		}
 		return myBirthDate;
 	}
 
 	/**
-	 * Sets the value(s) for birthDate (The date and time of birth for the individual)
+	 * Sets the value(s) for <b>birthDate</b> (The date and time of birth for the individual)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -220,19 +249,33 @@ public class Patient implements IResource {
 	}
 	
 	/**
-	 * Gets the value(s) for deceased[x] (Indicates if the individual is deceased or not)
+	 * Sets the value(s) for <b>birthDate</b> (The date and time of birth for the individual)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The date and time of birth for the individual
+     * </p> 
+	 */
+	public void setBirthDateWithSecondsPrecision( Date theDate) {
+		myBirthDate = new DateTimeDt(theDate); 
+	}
+ 
+	/**
+	 * Gets the value(s) for <b>deceased[x]</b> (Indicates if the individual is deceased or not).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Indicates if the individual is deceased or not
      * </p> 
 	 */
-	public IDatatype getDeceased() {
+	public IDatatype getDeceased() {  
 		return myDeceased;
 	}
 
 	/**
-	 * Sets the value(s) for deceased[x] (Indicates if the individual is deceased or not)
+	 * Sets the value(s) for <b>deceased[x]</b> (Indicates if the individual is deceased or not)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -243,20 +286,26 @@ public class Patient implements IResource {
 		myDeceased = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for address (Addresses for the individual)
+	 * Gets the value(s) for <b>address</b> (Addresses for the individual).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Addresses for the individual
      * </p> 
 	 */
-	public List<AddressDt> getAddress() {
+	public List<AddressDt> getAddress() {  
+		if (myAddress == null) {
+			myAddress = new ArrayList<AddressDt>();
+		}
 		return myAddress;
 	}
 
 	/**
-	 * Sets the value(s) for address (Addresses for the individual)
+	 * Sets the value(s) for <b>address</b> (Addresses for the individual)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -267,20 +316,26 @@ public class Patient implements IResource {
 		myAddress = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for maritalStatus (Marital (civil) status of a person)
+	 * Gets the value(s) for <b>maritalStatus</b> (Marital (civil) status of a person).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * This field contains a patient's most recent marital (civil) status.
      * </p> 
 	 */
-	public CodeableConceptDt getMaritalStatus() {
+	public CodeableConceptDt getMaritalStatus() {  
+		if (myMaritalStatus == null) {
+			myMaritalStatus = new CodeableConceptDt();
+		}
 		return myMaritalStatus;
 	}
 
 	/**
-	 * Sets the value(s) for maritalStatus (Marital (civil) status of a person)
+	 * Sets the value(s) for <b>maritalStatus</b> (Marital (civil) status of a person)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -291,20 +346,23 @@ public class Patient implements IResource {
 		myMaritalStatus = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for multipleBirth[x] (Whether patient is part of a multiple birth)
+	 * Gets the value(s) for <b>multipleBirth[x]</b> (Whether patient is part of a multiple birth).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Indicates whether the patient is part of a multiple or indicates the actual birth order.
      * </p> 
 	 */
-	public IDatatype getMultipleBirth() {
+	public IDatatype getMultipleBirth() {  
 		return myMultipleBirth;
 	}
 
 	/**
-	 * Sets the value(s) for multipleBirth[x] (Whether patient is part of a multiple birth)
+	 * Sets the value(s) for <b>multipleBirth[x]</b> (Whether patient is part of a multiple birth)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -315,20 +373,26 @@ public class Patient implements IResource {
 		myMultipleBirth = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for photo (Image of the person)
+	 * Gets the value(s) for <b>photo</b> (Image of the person).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Image of the person
      * </p> 
 	 */
-	public List<AttachmentDt> getPhoto() {
+	public List<AttachmentDt> getPhoto() {  
+		if (myPhoto == null) {
+			myPhoto = new ArrayList<AttachmentDt>();
+		}
 		return myPhoto;
 	}
 
 	/**
-	 * Sets the value(s) for photo (Image of the person)
+	 * Sets the value(s) for <b>photo</b> (Image of the person)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -339,20 +403,26 @@ public class Patient implements IResource {
 		myPhoto = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for contact (A contact party (e.g. guardian, partner, friend) for the patient)
+	 * Gets the value(s) for <b>contact</b> (A contact party (e.g. guardian, partner, friend) for the patient).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * A contact party (e.g. guardian, partner, friend) for the patient
      * </p> 
 	 */
-	public List<Contact> getContact() {
+	public List<Contact> getContact() {  
+		if (myContact == null) {
+			myContact = new ArrayList<Contact>();
+		}
 		return myContact;
 	}
 
 	/**
-	 * Sets the value(s) for contact (A contact party (e.g. guardian, partner, friend) for the patient)
+	 * Sets the value(s) for <b>contact</b> (A contact party (e.g. guardian, partner, friend) for the patient)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -363,20 +433,26 @@ public class Patient implements IResource {
 		myContact = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for animal (If this patient is an animal (non-human))
+	 * Gets the value(s) for <b>animal</b> (If this patient is an animal (non-human)).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * This element has a value if the patient is an animal
      * </p> 
 	 */
-	public Animal getAnimal() {
+	public Animal getAnimal() {  
+		if (myAnimal == null) {
+			myAnimal = new Animal();
+		}
 		return myAnimal;
 	}
 
 	/**
-	 * Sets the value(s) for animal (If this patient is an animal (non-human))
+	 * Sets the value(s) for <b>animal</b> (If this patient is an animal (non-human))
 	 *
      * <p>
      * <b>Definition:</b>
@@ -387,20 +463,26 @@ public class Patient implements IResource {
 		myAnimal = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for communication (Languages which may be used to communicate with the patient about his or her health)
+	 * Gets the value(s) for <b>communication</b> (Languages which may be used to communicate with the patient about his or her health).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Languages which may be used to communicate with the patient about his or her health
      * </p> 
 	 */
-	public List<CodeableConceptDt> getCommunication() {
+	public List<CodeableConceptDt> getCommunication() {  
+		if (myCommunication == null) {
+			myCommunication = new ArrayList<CodeableConceptDt>();
+		}
 		return myCommunication;
 	}
 
 	/**
-	 * Sets the value(s) for communication (Languages which may be used to communicate with the patient about his or her health)
+	 * Sets the value(s) for <b>communication</b> (Languages which may be used to communicate with the patient about his or her health)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -411,20 +493,23 @@ public class Patient implements IResource {
 		myCommunication = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for careProvider (Patient's nominated care provider)
+	 * Gets the value(s) for <b>careProvider</b> (Patient's nominated care provider).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Patient's nominated care provider
      * </p> 
 	 */
-	public List<ResourceReference> getCareProvider() {
+	public List<ResourceReference> getCareProvider() {  
 		return myCareProvider;
 	}
 
 	/**
-	 * Sets the value(s) for careProvider (Patient's nominated care provider)
+	 * Sets the value(s) for <b>careProvider</b> (Patient's nominated care provider)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -435,20 +520,26 @@ public class Patient implements IResource {
 		myCareProvider = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for managingOrganization (Organization that is the custodian of the patient record)
+	 * Gets the value(s) for <b>managingOrganization</b> (Organization that is the custodian of the patient record).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Organization that is the custodian of the patient record
      * </p> 
 	 */
-	public ResourceReference getManagingOrganization() {
+	public ResourceReference getManagingOrganization() {  
+		if (myManagingOrganization == null) {
+			myManagingOrganization = new ResourceReference();
+		}
 		return myManagingOrganization;
 	}
 
 	/**
-	 * Sets the value(s) for managingOrganization (Organization that is the custodian of the patient record)
+	 * Sets the value(s) for <b>managingOrganization</b> (Organization that is the custodian of the patient record)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -459,44 +550,56 @@ public class Patient implements IResource {
 		myManagingOrganization = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for link (Link to another patient resource that concerns the same actual person)
+	 * Gets the value(s) for <b>link</b> (Link to another patient resource that concerns the same actual person).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Link to another patient resource that concerns the same actual person
      * </p> 
 	 */
-	public List<IDatatype> getLink() {
+	public List<Link> getLink() {  
+		if (myLink == null) {
+			myLink = new ArrayList<Link>();
+		}
 		return myLink;
 	}
 
 	/**
-	 * Sets the value(s) for link (Link to another patient resource that concerns the same actual person)
+	 * Sets the value(s) for <b>link</b> (Link to another patient resource that concerns the same actual person)
 	 *
      * <p>
      * <b>Definition:</b>
      * Link to another patient resource that concerns the same actual person
      * </p> 
 	 */
-	public void setLink(List<IDatatype> theValue) {
+	public void setLink(List<Link> theValue) {
 		myLink = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for active (Whether this patient's record is in active use)
+	 * Gets the value(s) for <b>active</b> (Whether this patient's record is in active use).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Whether this patient record is in active use
      * </p> 
 	 */
-	public BooleanDt getActive() {
+	public BooleanDt getActive() {  
+		if (myActive == null) {
+			myActive = new BooleanDt();
+		}
 		return myActive;
 	}
 
 	/**
-	 * Sets the value(s) for active (Whether this patient's record is in active use)
+	 * Sets the value(s) for <b>active</b> (Whether this patient's record is in active use)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -507,6 +610,7 @@ public class Patient implements IResource {
 		myActive = theValue;
 	}
 	
+ 
 
 	/**
 	 * Block class for child element: <b>Patient.contact</b> (A contact party (e.g. guardian, partner, friend) for the patient)
@@ -577,25 +681,30 @@ public class Patient implements IResource {
 	private ResourceReference myManagingOrganization;
 	
 	@Child(name="link", order=15, min=0, max=Child.MAX_UNLIMITED)	
-	private List<IDatatype> myLink;
+	private List<Link> myLink;
 	
 	@Child(name="active", type=BooleanDt.class, order=16, min=0, max=1)	
 	private BooleanDt myActive;
 	
 	/**
-	 * Gets the value(s) for identifier (An identifier for the person as this patient)
+	 * Gets the value(s) for <b>identifier</b> (An identifier for the person as this patient).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * An identifier that applies to this person as a patient
      * </p> 
 	 */
-	public List<IdentifierDt> getIdentifier() {
+	public List<IdentifierDt> getIdentifier() {  
+		if (myIdentifier == null) {
+			myIdentifier = new ArrayList<IdentifierDt>();
+		}
 		return myIdentifier;
 	}
 
 	/**
-	 * Sets the value(s) for identifier (An identifier for the person as this patient)
+	 * Sets the value(s) for <b>identifier</b> (An identifier for the person as this patient)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -606,20 +715,26 @@ public class Patient implements IResource {
 		myIdentifier = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for name (A name associated with the patient)
+	 * Gets the value(s) for <b>name</b> (A name associated with the patient).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * A name associated with the individual. 
      * </p> 
 	 */
-	public List<HumanNameDt> getName() {
+	public List<HumanNameDt> getName() {  
+		if (myName == null) {
+			myName = new ArrayList<HumanNameDt>();
+		}
 		return myName;
 	}
 
 	/**
-	 * Sets the value(s) for name (A name associated with the patient)
+	 * Sets the value(s) for <b>name</b> (A name associated with the patient)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -630,20 +745,26 @@ public class Patient implements IResource {
 		myName = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for telecom (A contact detail for the individual)
+	 * Gets the value(s) for <b>telecom</b> (A contact detail for the individual).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * A contact detail (e.g. a telephone number or an email address) by which the individual may be contacted. 
      * </p> 
 	 */
-	public List<ContactDt> getTelecom() {
+	public List<ContactDt> getTelecom() {  
+		if (myTelecom == null) {
+			myTelecom = new ArrayList<ContactDt>();
+		}
 		return myTelecom;
 	}
 
 	/**
-	 * Sets the value(s) for telecom (A contact detail for the individual)
+	 * Sets the value(s) for <b>telecom</b> (A contact detail for the individual)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -654,20 +775,26 @@ public class Patient implements IResource {
 		myTelecom = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for gender (Gender for administrative purposes)
+	 * Gets the value(s) for <b>gender</b> (Gender for administrative purposes).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Administrative Gender - the gender that the patient is considered to have for administration and record keeping purposes. 
      * </p> 
 	 */
-	public CodeableConceptDt getGender() {
+	public CodeableConceptDt getGender() {  
+		if (myGender == null) {
+			myGender = new CodeableConceptDt();
+		}
 		return myGender;
 	}
 
 	/**
-	 * Sets the value(s) for gender (Gender for administrative purposes)
+	 * Sets the value(s) for <b>gender</b> (Gender for administrative purposes)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -678,20 +805,26 @@ public class Patient implements IResource {
 		myGender = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for birthDate (The date and time of birth for the individual)
+	 * Gets the value(s) for <b>birthDate</b> (The date and time of birth for the individual).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * The date and time of birth for the individual
      * </p> 
 	 */
-	public DateTimeDt getBirthDate() {
+	public DateTimeDt getBirthDate() {  
+		if (myBirthDate == null) {
+			myBirthDate = new DateTimeDt();
+		}
 		return myBirthDate;
 	}
 
 	/**
-	 * Sets the value(s) for birthDate (The date and time of birth for the individual)
+	 * Sets the value(s) for <b>birthDate</b> (The date and time of birth for the individual)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -703,19 +836,33 @@ public class Patient implements IResource {
 	}
 	
 	/**
-	 * Gets the value(s) for deceased[x] (Indicates if the individual is deceased or not)
+	 * Sets the value(s) for <b>birthDate</b> (The date and time of birth for the individual)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The date and time of birth for the individual
+     * </p> 
+	 */
+	public void setBirthDateWithSecondsPrecision( Date theDate) {
+		myBirthDate = new DateTimeDt(theDate); 
+	}
+ 
+	/**
+	 * Gets the value(s) for <b>deceased[x]</b> (Indicates if the individual is deceased or not).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Indicates if the individual is deceased or not
      * </p> 
 	 */
-	public IDatatype getDeceased() {
+	public IDatatype getDeceased() {  
 		return myDeceased;
 	}
 
 	/**
-	 * Sets the value(s) for deceased[x] (Indicates if the individual is deceased or not)
+	 * Sets the value(s) for <b>deceased[x]</b> (Indicates if the individual is deceased or not)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -726,20 +873,26 @@ public class Patient implements IResource {
 		myDeceased = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for address (Addresses for the individual)
+	 * Gets the value(s) for <b>address</b> (Addresses for the individual).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Addresses for the individual
      * </p> 
 	 */
-	public List<AddressDt> getAddress() {
+	public List<AddressDt> getAddress() {  
+		if (myAddress == null) {
+			myAddress = new ArrayList<AddressDt>();
+		}
 		return myAddress;
 	}
 
 	/**
-	 * Sets the value(s) for address (Addresses for the individual)
+	 * Sets the value(s) for <b>address</b> (Addresses for the individual)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -750,20 +903,26 @@ public class Patient implements IResource {
 		myAddress = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for maritalStatus (Marital (civil) status of a person)
+	 * Gets the value(s) for <b>maritalStatus</b> (Marital (civil) status of a person).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * This field contains a patient's most recent marital (civil) status.
      * </p> 
 	 */
-	public CodeableConceptDt getMaritalStatus() {
+	public CodeableConceptDt getMaritalStatus() {  
+		if (myMaritalStatus == null) {
+			myMaritalStatus = new CodeableConceptDt();
+		}
 		return myMaritalStatus;
 	}
 
 	/**
-	 * Sets the value(s) for maritalStatus (Marital (civil) status of a person)
+	 * Sets the value(s) for <b>maritalStatus</b> (Marital (civil) status of a person)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -774,20 +933,23 @@ public class Patient implements IResource {
 		myMaritalStatus = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for multipleBirth[x] (Whether patient is part of a multiple birth)
+	 * Gets the value(s) for <b>multipleBirth[x]</b> (Whether patient is part of a multiple birth).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Indicates whether the patient is part of a multiple or indicates the actual birth order.
      * </p> 
 	 */
-	public IDatatype getMultipleBirth() {
+	public IDatatype getMultipleBirth() {  
 		return myMultipleBirth;
 	}
 
 	/**
-	 * Sets the value(s) for multipleBirth[x] (Whether patient is part of a multiple birth)
+	 * Sets the value(s) for <b>multipleBirth[x]</b> (Whether patient is part of a multiple birth)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -798,20 +960,26 @@ public class Patient implements IResource {
 		myMultipleBirth = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for photo (Image of the person)
+	 * Gets the value(s) for <b>photo</b> (Image of the person).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Image of the person
      * </p> 
 	 */
-	public List<AttachmentDt> getPhoto() {
+	public List<AttachmentDt> getPhoto() {  
+		if (myPhoto == null) {
+			myPhoto = new ArrayList<AttachmentDt>();
+		}
 		return myPhoto;
 	}
 
 	/**
-	 * Sets the value(s) for photo (Image of the person)
+	 * Sets the value(s) for <b>photo</b> (Image of the person)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -822,20 +990,26 @@ public class Patient implements IResource {
 		myPhoto = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for contact (A contact party (e.g. guardian, partner, friend) for the patient)
+	 * Gets the value(s) for <b>contact</b> (A contact party (e.g. guardian, partner, friend) for the patient).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * A contact party (e.g. guardian, partner, friend) for the patient
      * </p> 
 	 */
-	public List<Contact> getContact() {
+	public List<Contact> getContact() {  
+		if (myContact == null) {
+			myContact = new ArrayList<Contact>();
+		}
 		return myContact;
 	}
 
 	/**
-	 * Sets the value(s) for contact (A contact party (e.g. guardian, partner, friend) for the patient)
+	 * Sets the value(s) for <b>contact</b> (A contact party (e.g. guardian, partner, friend) for the patient)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -846,20 +1020,26 @@ public class Patient implements IResource {
 		myContact = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for animal (If this patient is an animal (non-human))
+	 * Gets the value(s) for <b>animal</b> (If this patient is an animal (non-human)).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * This element has a value if the patient is an animal
      * </p> 
 	 */
-	public Animal getAnimal() {
+	public Animal getAnimal() {  
+		if (myAnimal == null) {
+			myAnimal = new Animal();
+		}
 		return myAnimal;
 	}
 
 	/**
-	 * Sets the value(s) for animal (If this patient is an animal (non-human))
+	 * Sets the value(s) for <b>animal</b> (If this patient is an animal (non-human))
 	 *
      * <p>
      * <b>Definition:</b>
@@ -870,20 +1050,26 @@ public class Patient implements IResource {
 		myAnimal = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for communication (Languages which may be used to communicate with the patient about his or her health)
+	 * Gets the value(s) for <b>communication</b> (Languages which may be used to communicate with the patient about his or her health).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Languages which may be used to communicate with the patient about his or her health
      * </p> 
 	 */
-	public List<CodeableConceptDt> getCommunication() {
+	public List<CodeableConceptDt> getCommunication() {  
+		if (myCommunication == null) {
+			myCommunication = new ArrayList<CodeableConceptDt>();
+		}
 		return myCommunication;
 	}
 
 	/**
-	 * Sets the value(s) for communication (Languages which may be used to communicate with the patient about his or her health)
+	 * Sets the value(s) for <b>communication</b> (Languages which may be used to communicate with the patient about his or her health)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -894,20 +1080,23 @@ public class Patient implements IResource {
 		myCommunication = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for careProvider (Patient's nominated care provider)
+	 * Gets the value(s) for <b>careProvider</b> (Patient's nominated care provider).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Patient's nominated care provider
      * </p> 
 	 */
-	public List<ResourceReference> getCareProvider() {
+	public List<ResourceReference> getCareProvider() {  
 		return myCareProvider;
 	}
 
 	/**
-	 * Sets the value(s) for careProvider (Patient's nominated care provider)
+	 * Sets the value(s) for <b>careProvider</b> (Patient's nominated care provider)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -918,20 +1107,26 @@ public class Patient implements IResource {
 		myCareProvider = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for managingOrganization (Organization that is the custodian of the patient record)
+	 * Gets the value(s) for <b>managingOrganization</b> (Organization that is the custodian of the patient record).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Organization that is the custodian of the patient record
      * </p> 
 	 */
-	public ResourceReference getManagingOrganization() {
+	public ResourceReference getManagingOrganization() {  
+		if (myManagingOrganization == null) {
+			myManagingOrganization = new ResourceReference();
+		}
 		return myManagingOrganization;
 	}
 
 	/**
-	 * Sets the value(s) for managingOrganization (Organization that is the custodian of the patient record)
+	 * Sets the value(s) for <b>managingOrganization</b> (Organization that is the custodian of the patient record)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -942,44 +1137,56 @@ public class Patient implements IResource {
 		myManagingOrganization = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for link (Link to another patient resource that concerns the same actual person)
+	 * Gets the value(s) for <b>link</b> (Link to another patient resource that concerns the same actual person).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Link to another patient resource that concerns the same actual person
      * </p> 
 	 */
-	public List<IDatatype> getLink() {
+	public List<Link> getLink() {  
+		if (myLink == null) {
+			myLink = new ArrayList<Link>();
+		}
 		return myLink;
 	}
 
 	/**
-	 * Sets the value(s) for link (Link to another patient resource that concerns the same actual person)
+	 * Sets the value(s) for <b>link</b> (Link to another patient resource that concerns the same actual person)
 	 *
      * <p>
      * <b>Definition:</b>
      * Link to another patient resource that concerns the same actual person
      * </p> 
 	 */
-	public void setLink(List<IDatatype> theValue) {
+	public void setLink(List<Link> theValue) {
 		myLink = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for active (Whether this patient's record is in active use)
+	 * Gets the value(s) for <b>active</b> (Whether this patient's record is in active use).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Whether this patient record is in active use
      * </p> 
 	 */
-	public BooleanDt getActive() {
+	public BooleanDt getActive() {  
+		if (myActive == null) {
+			myActive = new BooleanDt();
+		}
 		return myActive;
 	}
 
 	/**
-	 * Sets the value(s) for active (Whether this patient's record is in active use)
+	 * Sets the value(s) for <b>active</b> (Whether this patient's record is in active use)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -990,6 +1197,7 @@ public class Patient implements IResource {
 		myActive = theValue;
 	}
 	
+ 
 	}
 
 	/**
@@ -1061,25 +1269,30 @@ public class Patient implements IResource {
 	private ResourceReference myManagingOrganization;
 	
 	@Child(name="link", order=15, min=0, max=Child.MAX_UNLIMITED)	
-	private List<IDatatype> myLink;
+	private List<Link> myLink;
 	
 	@Child(name="active", type=BooleanDt.class, order=16, min=0, max=1)	
 	private BooleanDt myActive;
 	
 	/**
-	 * Gets the value(s) for identifier (An identifier for the person as this patient)
+	 * Gets the value(s) for <b>identifier</b> (An identifier for the person as this patient).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * An identifier that applies to this person as a patient
      * </p> 
 	 */
-	public List<IdentifierDt> getIdentifier() {
+	public List<IdentifierDt> getIdentifier() {  
+		if (myIdentifier == null) {
+			myIdentifier = new ArrayList<IdentifierDt>();
+		}
 		return myIdentifier;
 	}
 
 	/**
-	 * Sets the value(s) for identifier (An identifier for the person as this patient)
+	 * Sets the value(s) for <b>identifier</b> (An identifier for the person as this patient)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1090,20 +1303,26 @@ public class Patient implements IResource {
 		myIdentifier = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for name (A name associated with the patient)
+	 * Gets the value(s) for <b>name</b> (A name associated with the patient).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * A name associated with the individual. 
      * </p> 
 	 */
-	public List<HumanNameDt> getName() {
+	public List<HumanNameDt> getName() {  
+		if (myName == null) {
+			myName = new ArrayList<HumanNameDt>();
+		}
 		return myName;
 	}
 
 	/**
-	 * Sets the value(s) for name (A name associated with the patient)
+	 * Sets the value(s) for <b>name</b> (A name associated with the patient)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1114,20 +1333,26 @@ public class Patient implements IResource {
 		myName = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for telecom (A contact detail for the individual)
+	 * Gets the value(s) for <b>telecom</b> (A contact detail for the individual).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * A contact detail (e.g. a telephone number or an email address) by which the individual may be contacted. 
      * </p> 
 	 */
-	public List<ContactDt> getTelecom() {
+	public List<ContactDt> getTelecom() {  
+		if (myTelecom == null) {
+			myTelecom = new ArrayList<ContactDt>();
+		}
 		return myTelecom;
 	}
 
 	/**
-	 * Sets the value(s) for telecom (A contact detail for the individual)
+	 * Sets the value(s) for <b>telecom</b> (A contact detail for the individual)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1138,20 +1363,26 @@ public class Patient implements IResource {
 		myTelecom = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for gender (Gender for administrative purposes)
+	 * Gets the value(s) for <b>gender</b> (Gender for administrative purposes).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Administrative Gender - the gender that the patient is considered to have for administration and record keeping purposes. 
      * </p> 
 	 */
-	public CodeableConceptDt getGender() {
+	public CodeableConceptDt getGender() {  
+		if (myGender == null) {
+			myGender = new CodeableConceptDt();
+		}
 		return myGender;
 	}
 
 	/**
-	 * Sets the value(s) for gender (Gender for administrative purposes)
+	 * Sets the value(s) for <b>gender</b> (Gender for administrative purposes)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1162,20 +1393,26 @@ public class Patient implements IResource {
 		myGender = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for birthDate (The date and time of birth for the individual)
+	 * Gets the value(s) for <b>birthDate</b> (The date and time of birth for the individual).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * The date and time of birth for the individual
      * </p> 
 	 */
-	public DateTimeDt getBirthDate() {
+	public DateTimeDt getBirthDate() {  
+		if (myBirthDate == null) {
+			myBirthDate = new DateTimeDt();
+		}
 		return myBirthDate;
 	}
 
 	/**
-	 * Sets the value(s) for birthDate (The date and time of birth for the individual)
+	 * Sets the value(s) for <b>birthDate</b> (The date and time of birth for the individual)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1187,19 +1424,33 @@ public class Patient implements IResource {
 	}
 	
 	/**
-	 * Gets the value(s) for deceased[x] (Indicates if the individual is deceased or not)
+	 * Sets the value(s) for <b>birthDate</b> (The date and time of birth for the individual)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The date and time of birth for the individual
+     * </p> 
+	 */
+	public void setBirthDateWithSecondsPrecision( Date theDate) {
+		myBirthDate = new DateTimeDt(theDate); 
+	}
+ 
+	/**
+	 * Gets the value(s) for <b>deceased[x]</b> (Indicates if the individual is deceased or not).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Indicates if the individual is deceased or not
      * </p> 
 	 */
-	public IDatatype getDeceased() {
+	public IDatatype getDeceased() {  
 		return myDeceased;
 	}
 
 	/**
-	 * Sets the value(s) for deceased[x] (Indicates if the individual is deceased or not)
+	 * Sets the value(s) for <b>deceased[x]</b> (Indicates if the individual is deceased or not)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1210,20 +1461,26 @@ public class Patient implements IResource {
 		myDeceased = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for address (Addresses for the individual)
+	 * Gets the value(s) for <b>address</b> (Addresses for the individual).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Addresses for the individual
      * </p> 
 	 */
-	public List<AddressDt> getAddress() {
+	public List<AddressDt> getAddress() {  
+		if (myAddress == null) {
+			myAddress = new ArrayList<AddressDt>();
+		}
 		return myAddress;
 	}
 
 	/**
-	 * Sets the value(s) for address (Addresses for the individual)
+	 * Sets the value(s) for <b>address</b> (Addresses for the individual)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1234,20 +1491,26 @@ public class Patient implements IResource {
 		myAddress = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for maritalStatus (Marital (civil) status of a person)
+	 * Gets the value(s) for <b>maritalStatus</b> (Marital (civil) status of a person).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * This field contains a patient's most recent marital (civil) status.
      * </p> 
 	 */
-	public CodeableConceptDt getMaritalStatus() {
+	public CodeableConceptDt getMaritalStatus() {  
+		if (myMaritalStatus == null) {
+			myMaritalStatus = new CodeableConceptDt();
+		}
 		return myMaritalStatus;
 	}
 
 	/**
-	 * Sets the value(s) for maritalStatus (Marital (civil) status of a person)
+	 * Sets the value(s) for <b>maritalStatus</b> (Marital (civil) status of a person)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1258,20 +1521,23 @@ public class Patient implements IResource {
 		myMaritalStatus = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for multipleBirth[x] (Whether patient is part of a multiple birth)
+	 * Gets the value(s) for <b>multipleBirth[x]</b> (Whether patient is part of a multiple birth).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Indicates whether the patient is part of a multiple or indicates the actual birth order.
      * </p> 
 	 */
-	public IDatatype getMultipleBirth() {
+	public IDatatype getMultipleBirth() {  
 		return myMultipleBirth;
 	}
 
 	/**
-	 * Sets the value(s) for multipleBirth[x] (Whether patient is part of a multiple birth)
+	 * Sets the value(s) for <b>multipleBirth[x]</b> (Whether patient is part of a multiple birth)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1282,20 +1548,26 @@ public class Patient implements IResource {
 		myMultipleBirth = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for photo (Image of the person)
+	 * Gets the value(s) for <b>photo</b> (Image of the person).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Image of the person
      * </p> 
 	 */
-	public List<AttachmentDt> getPhoto() {
+	public List<AttachmentDt> getPhoto() {  
+		if (myPhoto == null) {
+			myPhoto = new ArrayList<AttachmentDt>();
+		}
 		return myPhoto;
 	}
 
 	/**
-	 * Sets the value(s) for photo (Image of the person)
+	 * Sets the value(s) for <b>photo</b> (Image of the person)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1306,20 +1578,26 @@ public class Patient implements IResource {
 		myPhoto = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for contact (A contact party (e.g. guardian, partner, friend) for the patient)
+	 * Gets the value(s) for <b>contact</b> (A contact party (e.g. guardian, partner, friend) for the patient).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * A contact party (e.g. guardian, partner, friend) for the patient
      * </p> 
 	 */
-	public List<Contact> getContact() {
+	public List<Contact> getContact() {  
+		if (myContact == null) {
+			myContact = new ArrayList<Contact>();
+		}
 		return myContact;
 	}
 
 	/**
-	 * Sets the value(s) for contact (A contact party (e.g. guardian, partner, friend) for the patient)
+	 * Sets the value(s) for <b>contact</b> (A contact party (e.g. guardian, partner, friend) for the patient)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1330,20 +1608,26 @@ public class Patient implements IResource {
 		myContact = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for animal (If this patient is an animal (non-human))
+	 * Gets the value(s) for <b>animal</b> (If this patient is an animal (non-human)).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * This element has a value if the patient is an animal
      * </p> 
 	 */
-	public Animal getAnimal() {
+	public Animal getAnimal() {  
+		if (myAnimal == null) {
+			myAnimal = new Animal();
+		}
 		return myAnimal;
 	}
 
 	/**
-	 * Sets the value(s) for animal (If this patient is an animal (non-human))
+	 * Sets the value(s) for <b>animal</b> (If this patient is an animal (non-human))
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1354,20 +1638,26 @@ public class Patient implements IResource {
 		myAnimal = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for communication (Languages which may be used to communicate with the patient about his or her health)
+	 * Gets the value(s) for <b>communication</b> (Languages which may be used to communicate with the patient about his or her health).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Languages which may be used to communicate with the patient about his or her health
      * </p> 
 	 */
-	public List<CodeableConceptDt> getCommunication() {
+	public List<CodeableConceptDt> getCommunication() {  
+		if (myCommunication == null) {
+			myCommunication = new ArrayList<CodeableConceptDt>();
+		}
 		return myCommunication;
 	}
 
 	/**
-	 * Sets the value(s) for communication (Languages which may be used to communicate with the patient about his or her health)
+	 * Sets the value(s) for <b>communication</b> (Languages which may be used to communicate with the patient about his or her health)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1378,20 +1668,23 @@ public class Patient implements IResource {
 		myCommunication = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for careProvider (Patient's nominated care provider)
+	 * Gets the value(s) for <b>careProvider</b> (Patient's nominated care provider).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Patient's nominated care provider
      * </p> 
 	 */
-	public List<ResourceReference> getCareProvider() {
+	public List<ResourceReference> getCareProvider() {  
 		return myCareProvider;
 	}
 
 	/**
-	 * Sets the value(s) for careProvider (Patient's nominated care provider)
+	 * Sets the value(s) for <b>careProvider</b> (Patient's nominated care provider)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1402,20 +1695,26 @@ public class Patient implements IResource {
 		myCareProvider = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for managingOrganization (Organization that is the custodian of the patient record)
+	 * Gets the value(s) for <b>managingOrganization</b> (Organization that is the custodian of the patient record).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Organization that is the custodian of the patient record
      * </p> 
 	 */
-	public ResourceReference getManagingOrganization() {
+	public ResourceReference getManagingOrganization() {  
+		if (myManagingOrganization == null) {
+			myManagingOrganization = new ResourceReference();
+		}
 		return myManagingOrganization;
 	}
 
 	/**
-	 * Sets the value(s) for managingOrganization (Organization that is the custodian of the patient record)
+	 * Sets the value(s) for <b>managingOrganization</b> (Organization that is the custodian of the patient record)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1426,44 +1725,56 @@ public class Patient implements IResource {
 		myManagingOrganization = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for link (Link to another patient resource that concerns the same actual person)
+	 * Gets the value(s) for <b>link</b> (Link to another patient resource that concerns the same actual person).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Link to another patient resource that concerns the same actual person
      * </p> 
 	 */
-	public List<IDatatype> getLink() {
+	public List<Link> getLink() {  
+		if (myLink == null) {
+			myLink = new ArrayList<Link>();
+		}
 		return myLink;
 	}
 
 	/**
-	 * Sets the value(s) for link (Link to another patient resource that concerns the same actual person)
+	 * Sets the value(s) for <b>link</b> (Link to another patient resource that concerns the same actual person)
 	 *
      * <p>
      * <b>Definition:</b>
      * Link to another patient resource that concerns the same actual person
      * </p> 
 	 */
-	public void setLink(List<IDatatype> theValue) {
+	public void setLink(List<Link> theValue) {
 		myLink = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for active (Whether this patient's record is in active use)
+	 * Gets the value(s) for <b>active</b> (Whether this patient's record is in active use).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Whether this patient record is in active use
      * </p> 
 	 */
-	public BooleanDt getActive() {
+	public BooleanDt getActive() {  
+		if (myActive == null) {
+			myActive = new BooleanDt();
+		}
 		return myActive;
 	}
 
 	/**
-	 * Sets the value(s) for active (Whether this patient's record is in active use)
+	 * Sets the value(s) for <b>active</b> (Whether this patient's record is in active use)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1474,6 +1785,7 @@ public class Patient implements IResource {
 		myActive = theValue;
 	}
 	
+ 
 	}
 
 	/**
@@ -1545,25 +1857,30 @@ public class Patient implements IResource {
 	private ResourceReference myManagingOrganization;
 	
 	@Child(name="link", order=15, min=0, max=Child.MAX_UNLIMITED)	
-	private List<IDatatype> myLink;
+	private List<Link> myLink;
 	
 	@Child(name="active", type=BooleanDt.class, order=16, min=0, max=1)	
 	private BooleanDt myActive;
 	
 	/**
-	 * Gets the value(s) for identifier (An identifier for the person as this patient)
+	 * Gets the value(s) for <b>identifier</b> (An identifier for the person as this patient).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * An identifier that applies to this person as a patient
      * </p> 
 	 */
-	public List<IdentifierDt> getIdentifier() {
+	public List<IdentifierDt> getIdentifier() {  
+		if (myIdentifier == null) {
+			myIdentifier = new ArrayList<IdentifierDt>();
+		}
 		return myIdentifier;
 	}
 
 	/**
-	 * Sets the value(s) for identifier (An identifier for the person as this patient)
+	 * Sets the value(s) for <b>identifier</b> (An identifier for the person as this patient)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1574,20 +1891,26 @@ public class Patient implements IResource {
 		myIdentifier = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for name (A name associated with the patient)
+	 * Gets the value(s) for <b>name</b> (A name associated with the patient).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * A name associated with the individual. 
      * </p> 
 	 */
-	public List<HumanNameDt> getName() {
+	public List<HumanNameDt> getName() {  
+		if (myName == null) {
+			myName = new ArrayList<HumanNameDt>();
+		}
 		return myName;
 	}
 
 	/**
-	 * Sets the value(s) for name (A name associated with the patient)
+	 * Sets the value(s) for <b>name</b> (A name associated with the patient)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1598,20 +1921,26 @@ public class Patient implements IResource {
 		myName = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for telecom (A contact detail for the individual)
+	 * Gets the value(s) for <b>telecom</b> (A contact detail for the individual).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * A contact detail (e.g. a telephone number or an email address) by which the individual may be contacted. 
      * </p> 
 	 */
-	public List<ContactDt> getTelecom() {
+	public List<ContactDt> getTelecom() {  
+		if (myTelecom == null) {
+			myTelecom = new ArrayList<ContactDt>();
+		}
 		return myTelecom;
 	}
 
 	/**
-	 * Sets the value(s) for telecom (A contact detail for the individual)
+	 * Sets the value(s) for <b>telecom</b> (A contact detail for the individual)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1622,20 +1951,26 @@ public class Patient implements IResource {
 		myTelecom = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for gender (Gender for administrative purposes)
+	 * Gets the value(s) for <b>gender</b> (Gender for administrative purposes).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Administrative Gender - the gender that the patient is considered to have for administration and record keeping purposes. 
      * </p> 
 	 */
-	public CodeableConceptDt getGender() {
+	public CodeableConceptDt getGender() {  
+		if (myGender == null) {
+			myGender = new CodeableConceptDt();
+		}
 		return myGender;
 	}
 
 	/**
-	 * Sets the value(s) for gender (Gender for administrative purposes)
+	 * Sets the value(s) for <b>gender</b> (Gender for administrative purposes)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1646,20 +1981,26 @@ public class Patient implements IResource {
 		myGender = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for birthDate (The date and time of birth for the individual)
+	 * Gets the value(s) for <b>birthDate</b> (The date and time of birth for the individual).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * The date and time of birth for the individual
      * </p> 
 	 */
-	public DateTimeDt getBirthDate() {
+	public DateTimeDt getBirthDate() {  
+		if (myBirthDate == null) {
+			myBirthDate = new DateTimeDt();
+		}
 		return myBirthDate;
 	}
 
 	/**
-	 * Sets the value(s) for birthDate (The date and time of birth for the individual)
+	 * Sets the value(s) for <b>birthDate</b> (The date and time of birth for the individual)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1671,19 +2012,33 @@ public class Patient implements IResource {
 	}
 	
 	/**
-	 * Gets the value(s) for deceased[x] (Indicates if the individual is deceased or not)
+	 * Sets the value(s) for <b>birthDate</b> (The date and time of birth for the individual)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The date and time of birth for the individual
+     * </p> 
+	 */
+	public void setBirthDateWithSecondsPrecision( Date theDate) {
+		myBirthDate = new DateTimeDt(theDate); 
+	}
+ 
+	/**
+	 * Gets the value(s) for <b>deceased[x]</b> (Indicates if the individual is deceased or not).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Indicates if the individual is deceased or not
      * </p> 
 	 */
-	public IDatatype getDeceased() {
+	public IDatatype getDeceased() {  
 		return myDeceased;
 	}
 
 	/**
-	 * Sets the value(s) for deceased[x] (Indicates if the individual is deceased or not)
+	 * Sets the value(s) for <b>deceased[x]</b> (Indicates if the individual is deceased or not)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1694,20 +2049,26 @@ public class Patient implements IResource {
 		myDeceased = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for address (Addresses for the individual)
+	 * Gets the value(s) for <b>address</b> (Addresses for the individual).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Addresses for the individual
      * </p> 
 	 */
-	public List<AddressDt> getAddress() {
+	public List<AddressDt> getAddress() {  
+		if (myAddress == null) {
+			myAddress = new ArrayList<AddressDt>();
+		}
 		return myAddress;
 	}
 
 	/**
-	 * Sets the value(s) for address (Addresses for the individual)
+	 * Sets the value(s) for <b>address</b> (Addresses for the individual)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1718,20 +2079,26 @@ public class Patient implements IResource {
 		myAddress = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for maritalStatus (Marital (civil) status of a person)
+	 * Gets the value(s) for <b>maritalStatus</b> (Marital (civil) status of a person).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * This field contains a patient's most recent marital (civil) status.
      * </p> 
 	 */
-	public CodeableConceptDt getMaritalStatus() {
+	public CodeableConceptDt getMaritalStatus() {  
+		if (myMaritalStatus == null) {
+			myMaritalStatus = new CodeableConceptDt();
+		}
 		return myMaritalStatus;
 	}
 
 	/**
-	 * Sets the value(s) for maritalStatus (Marital (civil) status of a person)
+	 * Sets the value(s) for <b>maritalStatus</b> (Marital (civil) status of a person)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1742,20 +2109,23 @@ public class Patient implements IResource {
 		myMaritalStatus = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for multipleBirth[x] (Whether patient is part of a multiple birth)
+	 * Gets the value(s) for <b>multipleBirth[x]</b> (Whether patient is part of a multiple birth).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Indicates whether the patient is part of a multiple or indicates the actual birth order.
      * </p> 
 	 */
-	public IDatatype getMultipleBirth() {
+	public IDatatype getMultipleBirth() {  
 		return myMultipleBirth;
 	}
 
 	/**
-	 * Sets the value(s) for multipleBirth[x] (Whether patient is part of a multiple birth)
+	 * Sets the value(s) for <b>multipleBirth[x]</b> (Whether patient is part of a multiple birth)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1766,20 +2136,26 @@ public class Patient implements IResource {
 		myMultipleBirth = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for photo (Image of the person)
+	 * Gets the value(s) for <b>photo</b> (Image of the person).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Image of the person
      * </p> 
 	 */
-	public List<AttachmentDt> getPhoto() {
+	public List<AttachmentDt> getPhoto() {  
+		if (myPhoto == null) {
+			myPhoto = new ArrayList<AttachmentDt>();
+		}
 		return myPhoto;
 	}
 
 	/**
-	 * Sets the value(s) for photo (Image of the person)
+	 * Sets the value(s) for <b>photo</b> (Image of the person)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1790,20 +2166,26 @@ public class Patient implements IResource {
 		myPhoto = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for contact (A contact party (e.g. guardian, partner, friend) for the patient)
+	 * Gets the value(s) for <b>contact</b> (A contact party (e.g. guardian, partner, friend) for the patient).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * A contact party (e.g. guardian, partner, friend) for the patient
      * </p> 
 	 */
-	public List<Contact> getContact() {
+	public List<Contact> getContact() {  
+		if (myContact == null) {
+			myContact = new ArrayList<Contact>();
+		}
 		return myContact;
 	}
 
 	/**
-	 * Sets the value(s) for contact (A contact party (e.g. guardian, partner, friend) for the patient)
+	 * Sets the value(s) for <b>contact</b> (A contact party (e.g. guardian, partner, friend) for the patient)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1814,20 +2196,26 @@ public class Patient implements IResource {
 		myContact = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for animal (If this patient is an animal (non-human))
+	 * Gets the value(s) for <b>animal</b> (If this patient is an animal (non-human)).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * This element has a value if the patient is an animal
      * </p> 
 	 */
-	public Animal getAnimal() {
+	public Animal getAnimal() {  
+		if (myAnimal == null) {
+			myAnimal = new Animal();
+		}
 		return myAnimal;
 	}
 
 	/**
-	 * Sets the value(s) for animal (If this patient is an animal (non-human))
+	 * Sets the value(s) for <b>animal</b> (If this patient is an animal (non-human))
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1838,20 +2226,26 @@ public class Patient implements IResource {
 		myAnimal = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for communication (Languages which may be used to communicate with the patient about his or her health)
+	 * Gets the value(s) for <b>communication</b> (Languages which may be used to communicate with the patient about his or her health).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Languages which may be used to communicate with the patient about his or her health
      * </p> 
 	 */
-	public List<CodeableConceptDt> getCommunication() {
+	public List<CodeableConceptDt> getCommunication() {  
+		if (myCommunication == null) {
+			myCommunication = new ArrayList<CodeableConceptDt>();
+		}
 		return myCommunication;
 	}
 
 	/**
-	 * Sets the value(s) for communication (Languages which may be used to communicate with the patient about his or her health)
+	 * Sets the value(s) for <b>communication</b> (Languages which may be used to communicate with the patient about his or her health)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1862,20 +2256,23 @@ public class Patient implements IResource {
 		myCommunication = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for careProvider (Patient's nominated care provider)
+	 * Gets the value(s) for <b>careProvider</b> (Patient's nominated care provider).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Patient's nominated care provider
      * </p> 
 	 */
-	public List<ResourceReference> getCareProvider() {
+	public List<ResourceReference> getCareProvider() {  
 		return myCareProvider;
 	}
 
 	/**
-	 * Sets the value(s) for careProvider (Patient's nominated care provider)
+	 * Sets the value(s) for <b>careProvider</b> (Patient's nominated care provider)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1886,20 +2283,26 @@ public class Patient implements IResource {
 		myCareProvider = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for managingOrganization (Organization that is the custodian of the patient record)
+	 * Gets the value(s) for <b>managingOrganization</b> (Organization that is the custodian of the patient record).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Organization that is the custodian of the patient record
      * </p> 
 	 */
-	public ResourceReference getManagingOrganization() {
+	public ResourceReference getManagingOrganization() {  
+		if (myManagingOrganization == null) {
+			myManagingOrganization = new ResourceReference();
+		}
 		return myManagingOrganization;
 	}
 
 	/**
-	 * Sets the value(s) for managingOrganization (Organization that is the custodian of the patient record)
+	 * Sets the value(s) for <b>managingOrganization</b> (Organization that is the custodian of the patient record)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1910,44 +2313,56 @@ public class Patient implements IResource {
 		myManagingOrganization = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for link (Link to another patient resource that concerns the same actual person)
+	 * Gets the value(s) for <b>link</b> (Link to another patient resource that concerns the same actual person).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Link to another patient resource that concerns the same actual person
      * </p> 
 	 */
-	public List<IDatatype> getLink() {
+	public List<Link> getLink() {  
+		if (myLink == null) {
+			myLink = new ArrayList<Link>();
+		}
 		return myLink;
 	}
 
 	/**
-	 * Sets the value(s) for link (Link to another patient resource that concerns the same actual person)
+	 * Sets the value(s) for <b>link</b> (Link to another patient resource that concerns the same actual person)
 	 *
      * <p>
      * <b>Definition:</b>
      * Link to another patient resource that concerns the same actual person
      * </p> 
 	 */
-	public void setLink(List<IDatatype> theValue) {
+	public void setLink(List<Link> theValue) {
 		myLink = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for active (Whether this patient's record is in active use)
+	 * Gets the value(s) for <b>active</b> (Whether this patient's record is in active use).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Whether this patient record is in active use
      * </p> 
 	 */
-	public BooleanDt getActive() {
+	public BooleanDt getActive() {  
+		if (myActive == null) {
+			myActive = new BooleanDt();
+		}
 		return myActive;
 	}
 
 	/**
-	 * Sets the value(s) for active (Whether this patient's record is in active use)
+	 * Sets the value(s) for <b>active</b> (Whether this patient's record is in active use)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1958,6 +2373,7 @@ public class Patient implements IResource {
 		myActive = theValue;
 	}
 	
+ 
 	}
 
 

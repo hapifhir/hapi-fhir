@@ -4,7 +4,7 @@ import ca.uhn.fhir.model.api.BasePrimitiveDatatype;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.parser.DataFormatException;
 
-@DatatypeDef(name="boolean")
+@DatatypeDef(name = "boolean")
 public class BooleanDt extends BasePrimitiveDatatype<Boolean> {
 
 	private Boolean myValue;
@@ -13,16 +13,23 @@ public class BooleanDt extends BasePrimitiveDatatype<Boolean> {
 	public void setValueAsString(String theValue) throws DataFormatException {
 		if ("true".equals(theValue)) {
 			myValue = Boolean.TRUE;
-		}else if ("false".equals(theValue)) {
-			myValue=Boolean.FALSE;
-		}else {
+		} else if ("false".equals(theValue)) {
+			myValue = Boolean.FALSE;
+		} else {
 			throw new DataFormatException("Invalid boolean string: '" + theValue + "'");
 		}
 	}
 
 	@Override
 	public String getValueAsString() {
-		return null;
+		if (myValue == null) {
+			return null;
+		} else if (Boolean.TRUE.equals(myValue)) {
+			return "true";
+		} else {
+			return "false";
+		}
+
 	}
 
 	@Override
@@ -35,4 +42,7 @@ public class BooleanDt extends BasePrimitiveDatatype<Boolean> {
 		return myValue;
 	}
 	
+	
+	
+
 }

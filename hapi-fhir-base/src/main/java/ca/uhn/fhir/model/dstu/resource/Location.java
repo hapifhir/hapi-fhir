@@ -57,7 +57,7 @@ public class Location implements IResource {
 	private CodeableConceptDt myPhysicalType;
 	
 	@Child(name="position", order=7, min=0, max=1)	
-	private IDatatype myPosition;
+	private Position myPosition;
 	
 	@Child(name="managingOrganization", order=8, min=0, max=1)
 	@ChildResource(types= {
@@ -78,19 +78,24 @@ public class Location implements IResource {
 	private CodeDt myMode;
 	
 	/**
-	 * Gets the value(s) for identifier (Unique code or number identifying the location to its users)
+	 * Gets the value(s) for <b>identifier</b> (Unique code or number identifying the location to its users).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Unique code or number identifying the location to its users
      * </p> 
 	 */
-	public IdentifierDt getIdentifier() {
+	public IdentifierDt getIdentifier() {  
+		if (myIdentifier == null) {
+			myIdentifier = new IdentifierDt();
+		}
 		return myIdentifier;
 	}
 
 	/**
-	 * Sets the value(s) for identifier (Unique code or number identifying the location to its users)
+	 * Sets the value(s) for <b>identifier</b> (Unique code or number identifying the location to its users)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -101,20 +106,26 @@ public class Location implements IResource {
 		myIdentifier = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for name (Name of the location as used by humans)
+	 * Gets the value(s) for <b>name</b> (Name of the location as used by humans).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Name of the location as used by humans. Does not need to be unique.
      * </p> 
 	 */
-	public StringDt getName() {
+	public StringDt getName() {  
+		if (myName == null) {
+			myName = new StringDt();
+		}
 		return myName;
 	}
 
 	/**
-	 * Sets the value(s) for name (Name of the location as used by humans)
+	 * Sets the value(s) for <b>name</b> (Name of the location as used by humans)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -126,19 +137,36 @@ public class Location implements IResource {
 	}
 	
 	/**
-	 * Gets the value(s) for description (Description of the Location, which helps in finding or referencing the place)
+	 * Sets the value(s) for <b>name</b> (Name of the location as used by humans)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Name of the location as used by humans. Does not need to be unique.
+     * </p> 
+	 */
+	public void setName( String theString) {
+		myName = new StringDt(theString); 
+	}
+ 
+	/**
+	 * Gets the value(s) for <b>description</b> (Description of the Location, which helps in finding or referencing the place).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Description of the Location, which helps in finding or referencing the place
      * </p> 
 	 */
-	public StringDt getDescription() {
+	public StringDt getDescription() {  
+		if (myDescription == null) {
+			myDescription = new StringDt();
+		}
 		return myDescription;
 	}
 
 	/**
-	 * Sets the value(s) for description (Description of the Location, which helps in finding or referencing the place)
+	 * Sets the value(s) for <b>description</b> (Description of the Location, which helps in finding or referencing the place)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -150,19 +178,36 @@ public class Location implements IResource {
 	}
 	
 	/**
-	 * Gets the value(s) for type (Indicates the type of function performed at the location)
+	 * Sets the value(s) for <b>description</b> (Description of the Location, which helps in finding or referencing the place)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Description of the Location, which helps in finding or referencing the place
+     * </p> 
+	 */
+	public void setDescription( String theString) {
+		myDescription = new StringDt(theString); 
+	}
+ 
+	/**
+	 * Gets the value(s) for <b>type</b> (Indicates the type of function performed at the location).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Indicates the type of function performed at the location
      * </p> 
 	 */
-	public CodeableConceptDt getType() {
+	public CodeableConceptDt getType() {  
+		if (myType == null) {
+			myType = new CodeableConceptDt();
+		}
 		return myType;
 	}
 
 	/**
-	 * Sets the value(s) for type (Indicates the type of function performed at the location)
+	 * Sets the value(s) for <b>type</b> (Indicates the type of function performed at the location)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -173,20 +218,26 @@ public class Location implements IResource {
 		myType = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for telecom (Contact details of the location)
+	 * Gets the value(s) for <b>telecom</b> (Contact details of the location).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * The contact details of communication devices available at the location. This can include phone numbers, fax numbers, mobile numbers, email addresses and web sites
      * </p> 
 	 */
-	public List<ContactDt> getTelecom() {
+	public List<ContactDt> getTelecom() {  
+		if (myTelecom == null) {
+			myTelecom = new ArrayList<ContactDt>();
+		}
 		return myTelecom;
 	}
 
 	/**
-	 * Sets the value(s) for telecom (Contact details of the location)
+	 * Sets the value(s) for <b>telecom</b> (Contact details of the location)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -197,44 +248,56 @@ public class Location implements IResource {
 		myTelecom = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for address (Physical location)
+	 * Gets the value(s) for <b>address</b> (Physical location).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
-     * ${child.definition}
+     * 
      * </p> 
 	 */
-	public AddressDt getAddress() {
+	public AddressDt getAddress() {  
+		if (myAddress == null) {
+			myAddress = new AddressDt();
+		}
 		return myAddress;
 	}
 
 	/**
-	 * Sets the value(s) for address (Physical location)
+	 * Sets the value(s) for <b>address</b> (Physical location)
 	 *
      * <p>
      * <b>Definition:</b>
-     * ${child.definition}
+     * 
      * </p> 
 	 */
 	public void setAddress(AddressDt theValue) {
 		myAddress = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for physicalType (Physical form of the location)
+	 * Gets the value(s) for <b>physicalType</b> (Physical form of the location).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Physical form of the location, e.g. building, room, vehicle, road
      * </p> 
 	 */
-	public CodeableConceptDt getPhysicalType() {
+	public CodeableConceptDt getPhysicalType() {  
+		if (myPhysicalType == null) {
+			myPhysicalType = new CodeableConceptDt();
+		}
 		return myPhysicalType;
 	}
 
 	/**
-	 * Sets the value(s) for physicalType (Physical form of the location)
+	 * Sets the value(s) for <b>physicalType</b> (Physical form of the location)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -245,116 +308,146 @@ public class Location implements IResource {
 		myPhysicalType = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for position (The absolute geographic location )
+	 * Gets the value(s) for <b>position</b> (The absolute geographic location ).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * The absolute geographic location of the Location, expressed in a KML compatible manner (see notes below for KML)
      * </p> 
 	 */
-	public IDatatype getPosition() {
+	public Position getPosition() {  
+		if (myPosition == null) {
+			myPosition = new Position();
+		}
 		return myPosition;
 	}
 
 	/**
-	 * Sets the value(s) for position (The absolute geographic location )
+	 * Sets the value(s) for <b>position</b> (The absolute geographic location )
 	 *
      * <p>
      * <b>Definition:</b>
      * The absolute geographic location of the Location, expressed in a KML compatible manner (see notes below for KML)
      * </p> 
 	 */
-	public void setPosition(IDatatype theValue) {
+	public void setPosition(Position theValue) {
 		myPosition = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for managingOrganization (The organization that is responsible for the provisioning and upkeep of the location)
+	 * Gets the value(s) for <b>managingOrganization</b> (The organization that is responsible for the provisioning and upkeep of the location).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
-     * ${child.definition}
+     * 
      * </p> 
 	 */
-	public ResourceReference getManagingOrganization() {
+	public ResourceReference getManagingOrganization() {  
+		if (myManagingOrganization == null) {
+			myManagingOrganization = new ResourceReference();
+		}
 		return myManagingOrganization;
 	}
 
 	/**
-	 * Sets the value(s) for managingOrganization (The organization that is responsible for the provisioning and upkeep of the location)
+	 * Sets the value(s) for <b>managingOrganization</b> (The organization that is responsible for the provisioning and upkeep of the location)
 	 *
      * <p>
      * <b>Definition:</b>
-     * ${child.definition}
+     * 
      * </p> 
 	 */
 	public void setManagingOrganization(ResourceReference theValue) {
 		myManagingOrganization = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for status (active | suspended | inactive)
+	 * Gets the value(s) for <b>status</b> (active | suspended | inactive).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
-     * ${child.definition}
+     * 
      * </p> 
 	 */
-	public CodeDt getStatus() {
+	public CodeDt getStatus() {  
+		if (myStatus == null) {
+			myStatus = new CodeDt();
+		}
 		return myStatus;
 	}
 
 	/**
-	 * Sets the value(s) for status (active | suspended | inactive)
+	 * Sets the value(s) for <b>status</b> (active | suspended | inactive)
 	 *
      * <p>
      * <b>Definition:</b>
-     * ${child.definition}
+     * 
      * </p> 
 	 */
 	public void setStatus(CodeDt theValue) {
 		myStatus = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for partOf (Another Location which this Location is physically part of)
+	 * Gets the value(s) for <b>partOf</b> (Another Location which this Location is physically part of).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
-     * ${child.definition}
+     * 
      * </p> 
 	 */
-	public ResourceReference getPartOf() {
+	public ResourceReference getPartOf() {  
+		if (myPartOf == null) {
+			myPartOf = new ResourceReference();
+		}
 		return myPartOf;
 	}
 
 	/**
-	 * Sets the value(s) for partOf (Another Location which this Location is physically part of)
+	 * Sets the value(s) for <b>partOf</b> (Another Location which this Location is physically part of)
 	 *
      * <p>
      * <b>Definition:</b>
-     * ${child.definition}
+     * 
      * </p> 
 	 */
 	public void setPartOf(ResourceReference theValue) {
 		myPartOf = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for mode (instance | kind)
+	 * Gets the value(s) for <b>mode</b> (instance | kind).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Indicates whether a resource instance represents a specific location or a class of locations
      * </p> 
 	 */
-	public CodeDt getMode() {
+	public CodeDt getMode() {  
+		if (myMode == null) {
+			myMode = new CodeDt();
+		}
 		return myMode;
 	}
 
 	/**
-	 * Sets the value(s) for mode (instance | kind)
+	 * Sets the value(s) for <b>mode</b> (instance | kind)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -365,6 +458,7 @@ public class Location implements IResource {
 		myMode = theValue;
 	}
 	
+ 
 
 	/**
 	 * Block class for child element: <b>Location.position</b> (The absolute geographic location )
@@ -398,7 +492,7 @@ public class Location implements IResource {
 	private CodeableConceptDt myPhysicalType;
 	
 	@Child(name="position", order=7, min=0, max=1)	
-	private IDatatype myPosition;
+	private Position myPosition;
 	
 	@Child(name="managingOrganization", order=8, min=0, max=1)
 	@ChildResource(types= {
@@ -419,19 +513,24 @@ public class Location implements IResource {
 	private CodeDt myMode;
 	
 	/**
-	 * Gets the value(s) for identifier (Unique code or number identifying the location to its users)
+	 * Gets the value(s) for <b>identifier</b> (Unique code or number identifying the location to its users).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Unique code or number identifying the location to its users
      * </p> 
 	 */
-	public IdentifierDt getIdentifier() {
+	public IdentifierDt getIdentifier() {  
+		if (myIdentifier == null) {
+			myIdentifier = new IdentifierDt();
+		}
 		return myIdentifier;
 	}
 
 	/**
-	 * Sets the value(s) for identifier (Unique code or number identifying the location to its users)
+	 * Sets the value(s) for <b>identifier</b> (Unique code or number identifying the location to its users)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -442,20 +541,26 @@ public class Location implements IResource {
 		myIdentifier = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for name (Name of the location as used by humans)
+	 * Gets the value(s) for <b>name</b> (Name of the location as used by humans).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Name of the location as used by humans. Does not need to be unique.
      * </p> 
 	 */
-	public StringDt getName() {
+	public StringDt getName() {  
+		if (myName == null) {
+			myName = new StringDt();
+		}
 		return myName;
 	}
 
 	/**
-	 * Sets the value(s) for name (Name of the location as used by humans)
+	 * Sets the value(s) for <b>name</b> (Name of the location as used by humans)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -467,19 +572,36 @@ public class Location implements IResource {
 	}
 	
 	/**
-	 * Gets the value(s) for description (Description of the Location, which helps in finding or referencing the place)
+	 * Sets the value(s) for <b>name</b> (Name of the location as used by humans)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Name of the location as used by humans. Does not need to be unique.
+     * </p> 
+	 */
+	public void setName( String theString) {
+		myName = new StringDt(theString); 
+	}
+ 
+	/**
+	 * Gets the value(s) for <b>description</b> (Description of the Location, which helps in finding or referencing the place).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Description of the Location, which helps in finding or referencing the place
      * </p> 
 	 */
-	public StringDt getDescription() {
+	public StringDt getDescription() {  
+		if (myDescription == null) {
+			myDescription = new StringDt();
+		}
 		return myDescription;
 	}
 
 	/**
-	 * Sets the value(s) for description (Description of the Location, which helps in finding or referencing the place)
+	 * Sets the value(s) for <b>description</b> (Description of the Location, which helps in finding or referencing the place)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -491,19 +613,36 @@ public class Location implements IResource {
 	}
 	
 	/**
-	 * Gets the value(s) for type (Indicates the type of function performed at the location)
+	 * Sets the value(s) for <b>description</b> (Description of the Location, which helps in finding or referencing the place)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Description of the Location, which helps in finding or referencing the place
+     * </p> 
+	 */
+	public void setDescription( String theString) {
+		myDescription = new StringDt(theString); 
+	}
+ 
+	/**
+	 * Gets the value(s) for <b>type</b> (Indicates the type of function performed at the location).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Indicates the type of function performed at the location
      * </p> 
 	 */
-	public CodeableConceptDt getType() {
+	public CodeableConceptDt getType() {  
+		if (myType == null) {
+			myType = new CodeableConceptDt();
+		}
 		return myType;
 	}
 
 	/**
-	 * Sets the value(s) for type (Indicates the type of function performed at the location)
+	 * Sets the value(s) for <b>type</b> (Indicates the type of function performed at the location)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -514,20 +653,26 @@ public class Location implements IResource {
 		myType = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for telecom (Contact details of the location)
+	 * Gets the value(s) for <b>telecom</b> (Contact details of the location).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * The contact details of communication devices available at the location. This can include phone numbers, fax numbers, mobile numbers, email addresses and web sites
      * </p> 
 	 */
-	public List<ContactDt> getTelecom() {
+	public List<ContactDt> getTelecom() {  
+		if (myTelecom == null) {
+			myTelecom = new ArrayList<ContactDt>();
+		}
 		return myTelecom;
 	}
 
 	/**
-	 * Sets the value(s) for telecom (Contact details of the location)
+	 * Sets the value(s) for <b>telecom</b> (Contact details of the location)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -538,44 +683,56 @@ public class Location implements IResource {
 		myTelecom = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for address (Physical location)
+	 * Gets the value(s) for <b>address</b> (Physical location).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
-     * ${child.definition}
+     * 
      * </p> 
 	 */
-	public AddressDt getAddress() {
+	public AddressDt getAddress() {  
+		if (myAddress == null) {
+			myAddress = new AddressDt();
+		}
 		return myAddress;
 	}
 
 	/**
-	 * Sets the value(s) for address (Physical location)
+	 * Sets the value(s) for <b>address</b> (Physical location)
 	 *
      * <p>
      * <b>Definition:</b>
-     * ${child.definition}
+     * 
      * </p> 
 	 */
 	public void setAddress(AddressDt theValue) {
 		myAddress = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for physicalType (Physical form of the location)
+	 * Gets the value(s) for <b>physicalType</b> (Physical form of the location).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Physical form of the location, e.g. building, room, vehicle, road
      * </p> 
 	 */
-	public CodeableConceptDt getPhysicalType() {
+	public CodeableConceptDt getPhysicalType() {  
+		if (myPhysicalType == null) {
+			myPhysicalType = new CodeableConceptDt();
+		}
 		return myPhysicalType;
 	}
 
 	/**
-	 * Sets the value(s) for physicalType (Physical form of the location)
+	 * Sets the value(s) for <b>physicalType</b> (Physical form of the location)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -586,116 +743,146 @@ public class Location implements IResource {
 		myPhysicalType = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for position (The absolute geographic location )
+	 * Gets the value(s) for <b>position</b> (The absolute geographic location ).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * The absolute geographic location of the Location, expressed in a KML compatible manner (see notes below for KML)
      * </p> 
 	 */
-	public IDatatype getPosition() {
+	public Position getPosition() {  
+		if (myPosition == null) {
+			myPosition = new Position();
+		}
 		return myPosition;
 	}
 
 	/**
-	 * Sets the value(s) for position (The absolute geographic location )
+	 * Sets the value(s) for <b>position</b> (The absolute geographic location )
 	 *
      * <p>
      * <b>Definition:</b>
      * The absolute geographic location of the Location, expressed in a KML compatible manner (see notes below for KML)
      * </p> 
 	 */
-	public void setPosition(IDatatype theValue) {
+	public void setPosition(Position theValue) {
 		myPosition = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for managingOrganization (The organization that is responsible for the provisioning and upkeep of the location)
+	 * Gets the value(s) for <b>managingOrganization</b> (The organization that is responsible for the provisioning and upkeep of the location).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
-     * ${child.definition}
+     * 
      * </p> 
 	 */
-	public ResourceReference getManagingOrganization() {
+	public ResourceReference getManagingOrganization() {  
+		if (myManagingOrganization == null) {
+			myManagingOrganization = new ResourceReference();
+		}
 		return myManagingOrganization;
 	}
 
 	/**
-	 * Sets the value(s) for managingOrganization (The organization that is responsible for the provisioning and upkeep of the location)
+	 * Sets the value(s) for <b>managingOrganization</b> (The organization that is responsible for the provisioning and upkeep of the location)
 	 *
      * <p>
      * <b>Definition:</b>
-     * ${child.definition}
+     * 
      * </p> 
 	 */
 	public void setManagingOrganization(ResourceReference theValue) {
 		myManagingOrganization = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for status (active | suspended | inactive)
+	 * Gets the value(s) for <b>status</b> (active | suspended | inactive).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
-     * ${child.definition}
+     * 
      * </p> 
 	 */
-	public CodeDt getStatus() {
+	public CodeDt getStatus() {  
+		if (myStatus == null) {
+			myStatus = new CodeDt();
+		}
 		return myStatus;
 	}
 
 	/**
-	 * Sets the value(s) for status (active | suspended | inactive)
+	 * Sets the value(s) for <b>status</b> (active | suspended | inactive)
 	 *
      * <p>
      * <b>Definition:</b>
-     * ${child.definition}
+     * 
      * </p> 
 	 */
 	public void setStatus(CodeDt theValue) {
 		myStatus = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for partOf (Another Location which this Location is physically part of)
+	 * Gets the value(s) for <b>partOf</b> (Another Location which this Location is physically part of).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
-     * ${child.definition}
+     * 
      * </p> 
 	 */
-	public ResourceReference getPartOf() {
+	public ResourceReference getPartOf() {  
+		if (myPartOf == null) {
+			myPartOf = new ResourceReference();
+		}
 		return myPartOf;
 	}
 
 	/**
-	 * Sets the value(s) for partOf (Another Location which this Location is physically part of)
+	 * Sets the value(s) for <b>partOf</b> (Another Location which this Location is physically part of)
 	 *
      * <p>
      * <b>Definition:</b>
-     * ${child.definition}
+     * 
      * </p> 
 	 */
 	public void setPartOf(ResourceReference theValue) {
 		myPartOf = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for mode (instance | kind)
+	 * Gets the value(s) for <b>mode</b> (instance | kind).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Indicates whether a resource instance represents a specific location or a class of locations
      * </p> 
 	 */
-	public CodeDt getMode() {
+	public CodeDt getMode() {  
+		if (myMode == null) {
+			myMode = new CodeDt();
+		}
 		return myMode;
 	}
 
 	/**
-	 * Sets the value(s) for mode (instance | kind)
+	 * Sets the value(s) for <b>mode</b> (instance | kind)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -706,6 +893,7 @@ public class Location implements IResource {
 		myMode = theValue;
 	}
 	
+ 
 	}
 
 

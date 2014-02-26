@@ -84,19 +84,24 @@ public class Device implements IResource {
 	private UriDt myUrl;
 	
 	/**
-	 * Gets the value(s) for identifier (Instance id from manufacturer, owner and others)
+	 * Gets the value(s) for <b>identifier</b> (Instance id from manufacturer, owner and others).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Identifiers assigned to this device by various organizations. The most likely organizations to assign identifiers are the manufacturer and the owner, though regulatory agencies may also assign an identifier. The identifiers identify the particular device, not the kind of device
      * </p> 
 	 */
-	public List<IdentifierDt> getIdentifier() {
+	public List<IdentifierDt> getIdentifier() {  
+		if (myIdentifier == null) {
+			myIdentifier = new ArrayList<IdentifierDt>();
+		}
 		return myIdentifier;
 	}
 
 	/**
-	 * Sets the value(s) for identifier (Instance id from manufacturer, owner and others)
+	 * Sets the value(s) for <b>identifier</b> (Instance id from manufacturer, owner and others)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -107,20 +112,26 @@ public class Device implements IResource {
 		myIdentifier = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for type (What kind of device this is)
+	 * Gets the value(s) for <b>type</b> (What kind of device this is).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * A kind of this device
      * </p> 
 	 */
-	public CodeableConceptDt getType() {
+	public CodeableConceptDt getType() {  
+		if (myType == null) {
+			myType = new CodeableConceptDt();
+		}
 		return myType;
 	}
 
 	/**
-	 * Sets the value(s) for type (What kind of device this is)
+	 * Sets the value(s) for <b>type</b> (What kind of device this is)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -131,20 +142,26 @@ public class Device implements IResource {
 		myType = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for manufacturer (Name of device manufacturer)
+	 * Gets the value(s) for <b>manufacturer</b> (Name of device manufacturer).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * A name of the manufacturer
      * </p> 
 	 */
-	public StringDt getManufacturer() {
+	public StringDt getManufacturer() {  
+		if (myManufacturer == null) {
+			myManufacturer = new StringDt();
+		}
 		return myManufacturer;
 	}
 
 	/**
-	 * Sets the value(s) for manufacturer (Name of device manufacturer)
+	 * Sets the value(s) for <b>manufacturer</b> (Name of device manufacturer)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -156,19 +173,36 @@ public class Device implements IResource {
 	}
 	
 	/**
-	 * Gets the value(s) for model (Model id assigned by the manufacturer)
+	 * Sets the value(s) for <b>manufacturer</b> (Name of device manufacturer)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A name of the manufacturer
+     * </p> 
+	 */
+	public void setManufacturer( String theString) {
+		myManufacturer = new StringDt(theString); 
+	}
+ 
+	/**
+	 * Gets the value(s) for <b>model</b> (Model id assigned by the manufacturer).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * The "model" - an identifier assigned by the manufacturer to identify the product by its type. This number is shared by the all devices sold as the same type
      * </p> 
 	 */
-	public StringDt getModel() {
+	public StringDt getModel() {  
+		if (myModel == null) {
+			myModel = new StringDt();
+		}
 		return myModel;
 	}
 
 	/**
-	 * Sets the value(s) for model (Model id assigned by the manufacturer)
+	 * Sets the value(s) for <b>model</b> (Model id assigned by the manufacturer)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -180,19 +214,36 @@ public class Device implements IResource {
 	}
 	
 	/**
-	 * Gets the value(s) for version (Version number (i.e. software))
+	 * Sets the value(s) for <b>model</b> (Model id assigned by the manufacturer)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The "model" - an identifier assigned by the manufacturer to identify the product by its type. This number is shared by the all devices sold as the same type
+     * </p> 
+	 */
+	public void setModel( String theString) {
+		myModel = new StringDt(theString); 
+	}
+ 
+	/**
+	 * Gets the value(s) for <b>version</b> (Version number (i.e. software)).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * The version of the device, if the device has multiple releases under the same model, or if the device is software or carries firmware
      * </p> 
 	 */
-	public StringDt getVersion() {
+	public StringDt getVersion() {  
+		if (myVersion == null) {
+			myVersion = new StringDt();
+		}
 		return myVersion;
 	}
 
 	/**
-	 * Sets the value(s) for version (Version number (i.e. software))
+	 * Sets the value(s) for <b>version</b> (Version number (i.e. software))
 	 *
      * <p>
      * <b>Definition:</b>
@@ -204,19 +255,36 @@ public class Device implements IResource {
 	}
 	
 	/**
-	 * Gets the value(s) for expiry (Date of expiry of this device (if applicable))
+	 * Sets the value(s) for <b>version</b> (Version number (i.e. software))
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The version of the device, if the device has multiple releases under the same model, or if the device is software or carries firmware
+     * </p> 
+	 */
+	public void setVersion( String theString) {
+		myVersion = new StringDt(theString); 
+	}
+ 
+	/**
+	 * Gets the value(s) for <b>expiry</b> (Date of expiry of this device (if applicable)).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Date of expiry of this device (if applicable)
      * </p> 
 	 */
-	public DateDt getExpiry() {
+	public DateDt getExpiry() {  
+		if (myExpiry == null) {
+			myExpiry = new DateDt();
+		}
 		return myExpiry;
 	}
 
 	/**
-	 * Sets the value(s) for expiry (Date of expiry of this device (if applicable))
+	 * Sets the value(s) for <b>expiry</b> (Date of expiry of this device (if applicable))
 	 *
      * <p>
      * <b>Definition:</b>
@@ -227,20 +295,26 @@ public class Device implements IResource {
 		myExpiry = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for udi (FDA Mandated Unique Device Identifier)
+	 * Gets the value(s) for <b>udi</b> (FDA Mandated Unique Device Identifier).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * FDA Mandated Unique Device Identifier. Use the human readable information (the content that the user sees, which is sometimes different to the exact syntax represented in the barcode)  - see http://www.fda.gov/MedicalDevices/DeviceRegulationandGuidance/UniqueDeviceIdentification/default.htm
      * </p> 
 	 */
-	public StringDt getUdi() {
+	public StringDt getUdi() {  
+		if (myUdi == null) {
+			myUdi = new StringDt();
+		}
 		return myUdi;
 	}
 
 	/**
-	 * Sets the value(s) for udi (FDA Mandated Unique Device Identifier)
+	 * Sets the value(s) for <b>udi</b> (FDA Mandated Unique Device Identifier)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -252,19 +326,36 @@ public class Device implements IResource {
 	}
 	
 	/**
-	 * Gets the value(s) for lotNumber (Lot number of manufacture)
+	 * Sets the value(s) for <b>udi</b> (FDA Mandated Unique Device Identifier)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * FDA Mandated Unique Device Identifier. Use the human readable information (the content that the user sees, which is sometimes different to the exact syntax represented in the barcode)  - see http://www.fda.gov/MedicalDevices/DeviceRegulationandGuidance/UniqueDeviceIdentification/default.htm
+     * </p> 
+	 */
+	public void setUdi( String theString) {
+		myUdi = new StringDt(theString); 
+	}
+ 
+	/**
+	 * Gets the value(s) for <b>lotNumber</b> (Lot number of manufacture).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Lot number assigned by the manufacturer
      * </p> 
 	 */
-	public StringDt getLotNumber() {
+	public StringDt getLotNumber() {  
+		if (myLotNumber == null) {
+			myLotNumber = new StringDt();
+		}
 		return myLotNumber;
 	}
 
 	/**
-	 * Sets the value(s) for lotNumber (Lot number of manufacture)
+	 * Sets the value(s) for <b>lotNumber</b> (Lot number of manufacture)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -276,19 +367,36 @@ public class Device implements IResource {
 	}
 	
 	/**
-	 * Gets the value(s) for owner (Organization responsible for device)
+	 * Sets the value(s) for <b>lotNumber</b> (Lot number of manufacture)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Lot number assigned by the manufacturer
+     * </p> 
+	 */
+	public void setLotNumber( String theString) {
+		myLotNumber = new StringDt(theString); 
+	}
+ 
+	/**
+	 * Gets the value(s) for <b>owner</b> (Organization responsible for device).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * An organization that is responsible for the provision and ongoing maintenance of the device
      * </p> 
 	 */
-	public ResourceReference getOwner() {
+	public ResourceReference getOwner() {  
+		if (myOwner == null) {
+			myOwner = new ResourceReference();
+		}
 		return myOwner;
 	}
 
 	/**
-	 * Sets the value(s) for owner (Organization responsible for device)
+	 * Sets the value(s) for <b>owner</b> (Organization responsible for device)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -299,20 +407,26 @@ public class Device implements IResource {
 		myOwner = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for location (Where the resource is found)
+	 * Gets the value(s) for <b>location</b> (Where the resource is found).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * The resource may be found in a literal location (i.e. GPS coordinates), a logical place (i.e. "in/with the patient"), or a coded location
      * </p> 
 	 */
-	public ResourceReference getLocation() {
+	public ResourceReference getLocation() {  
+		if (myLocation == null) {
+			myLocation = new ResourceReference();
+		}
 		return myLocation;
 	}
 
 	/**
-	 * Sets the value(s) for location (Where the resource is found)
+	 * Sets the value(s) for <b>location</b> (Where the resource is found)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -323,20 +437,26 @@ public class Device implements IResource {
 		myLocation = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for patient (If the resource is affixed to a person)
+	 * Gets the value(s) for <b>patient</b> (If the resource is affixed to a person).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Patient information, if the resource is affixed to a person
      * </p> 
 	 */
-	public ResourceReference getPatient() {
+	public ResourceReference getPatient() {  
+		if (myPatient == null) {
+			myPatient = new ResourceReference();
+		}
 		return myPatient;
 	}
 
 	/**
-	 * Sets the value(s) for patient (If the resource is affixed to a person)
+	 * Sets the value(s) for <b>patient</b> (If the resource is affixed to a person)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -347,20 +467,26 @@ public class Device implements IResource {
 		myPatient = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for contact (Details for human/organization for support)
+	 * Gets the value(s) for <b>contact</b> (Details for human/organization for support).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * Contact details for an organization or a particular human that is responsible for the device
      * </p> 
 	 */
-	public List<ContactDt> getContact() {
+	public List<ContactDt> getContact() {  
+		if (myContact == null) {
+			myContact = new ArrayList<ContactDt>();
+		}
 		return myContact;
 	}
 
 	/**
-	 * Sets the value(s) for contact (Details for human/organization for support)
+	 * Sets the value(s) for <b>contact</b> (Details for human/organization for support)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -371,20 +497,26 @@ public class Device implements IResource {
 		myContact = theValue;
 	}
 	
+ 
 	/**
-	 * Gets the value(s) for url (Network address to contact device)
+	 * Gets the value(s) for <b>url</b> (Network address to contact device).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
      * A network address on which the device may be contacted directly
      * </p> 
 	 */
-	public UriDt getUrl() {
+	public UriDt getUrl() {  
+		if (myUrl == null) {
+			myUrl = new UriDt();
+		}
 		return myUrl;
 	}
 
 	/**
-	 * Sets the value(s) for url (Network address to contact device)
+	 * Sets the value(s) for <b>url</b> (Network address to contact device)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -395,6 +527,7 @@ public class Device implements IResource {
 		myUrl = theValue;
 	}
 	
+ 
 
 
 
