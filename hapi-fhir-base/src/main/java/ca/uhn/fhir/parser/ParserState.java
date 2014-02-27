@@ -3,10 +3,13 @@ package ca.uhn.fhir.parser;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.xml.namespace.QName;
 import javax.xml.stream.events.Attribute;
 import javax.xml.stream.events.EndElement;
 import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
+
+import com.ctc.wstx.sw.BaseStreamWriter;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
@@ -93,7 +96,7 @@ class ParserState<T extends IElement> {
 		return retVal;
 	}
 
-	private class AtomPrimitiveState extends BaseState{
+	private class AtomPrimitiveState extends BaseState {
 
 		private IPrimitiveDatatype<?> myPrimitive;
 		private String myData;
@@ -129,15 +132,47 @@ class ParserState<T extends IElement> {
 				String data = theEvent.asCharacters().getData();
 				if (myData == null) {
 					myData = data;
-				}else {
+				} else {
 					// this shouldn't generally happen so it's ok that it's inefficient
-					myData = myData + data; 
+					myData = myData + data;
 				}
 			}
 		}
-		
+
 	}
-	
+
+	private class ExpectEndElementState extends BaseState {
+
+		@Override
+		public void attributeValue(Attribute theAttribute, String theValue) throws DataFormatException {
+			throw new DataFormatException("Found unexpected element content");
+		}
+
+		@Override
+		public void endingElement(EndElement theElem) throws DataFormatException {
+			pop();
+		}
+
+		@Override
+		public void enteringNewElement(StartElement theElement, String theLocalPart) throws DataFormatException {
+			throw new DataFormatException("Found unexpected element content");
+		}
+
+		@Override
+		protected IElement getCurrentElement() {
+			return null;
+		}
+
+		@Override
+		public void otherEvent(XMLEvent theEvent) throws DataFormatException {
+			throw new DataFormatException("Found unexpected element content");
+		}
+
+	}
+
+	private static final QName ATOM_LINK_REL_ATTRIBUTE = new QName("rel");
+	private static final QName ATOM_LINK_HREF_ATTRIBUTE = new QName("href");
+
 	private class AtomState extends BaseState {
 
 		private Bundle myInstance;
@@ -149,7 +184,7 @@ class ParserState<T extends IElement> {
 		@Override
 		public void attributeValue(Attribute theAttribute, String theValue) throws DataFormatException {
 			// TODO Auto-generated method stub
-			
+
 		}
 
 		@Override
@@ -161,27 +196,47 @@ class ParserState<T extends IElement> {
 		public void enteringNewElement(StartElement theElement, String theLocalPart) throws DataFormatException {
 			if (theLocalPart.equals("title")) {
 				push(new AtomPrimitiveState(myInstance.getTitle()));
-			}else if ("id".equals(theLocalPart)) {
+			} else if ("id".equals(theLocalPart)) {
 				push(new AtomPrimitiveState(myInstance.getId()));
-			}else if ("link".equals(theLocalPart)) {
-				
+			} else if ("link".equals(theLocalPart)) {
+				Attribute rel = theElement.getAttributeByName(ATOM_LINK_REL_ATTRIBUTE);
+				Attribute href = theElement.getAttributeByName(ATOM_LINK_HREF_ATTRIBUTE);
+				if (rel != null && href != null) {
+					if ("self".equals(rel.getValue())) {
+						myInstance.getLinkSelf().setValueAsString(href.getValue());
+						push(new ExpectEndElementState());
+					} else if ("first".equals(rel.getValue())) {
+						myInstance.getLinkFirst().setValueAsString(href.getValue());
+						push(new ExpectEndElementState());
+					} else if ("previous".equals(rel.getValue())) {
+						myInstance.getLinkPrevious().setValueAsString(href.getValue());
+						push(new ExpectEndElementState());
+					} else if ("next".equals(rel.getValue())) {
+						myInstance.getLinkNext().setValueAsString(href.getValue());
+						push(new ExpectEndElementState());
+					} else if ("last".equals(rel.getValue())) {
+						myInstance.getLinkLast().setValueAsString(href.getValue());
+						push(new ExpectEndElementState());
+					} else if ("fhir-base".equals(rel.getValue())) {
+						myInstance.getLinkBase().setValueAsString(href.getValue());
+						push(new ExpectEndElementState());
+					}
+				}
 			}
 		}
 
 		@Override
 		protected IElement getCurrentElement() {
-			// TODO Auto-generated method stub
-			return null;
+			return myInstance;
 		}
 
 		@Override
 		public void otherEvent(XMLEvent theEvent) throws DataFormatException {
-			// TODO Auto-generated method stub
-			
+			// ignore
 		}
-		
+
 	}
-	
+
 	private class PreAtomState extends BaseState {
 
 		private Bundle myInstance;
@@ -199,12 +254,12 @@ class ParserState<T extends IElement> {
 		@Override
 		public void enteringNewElement(StartElement theElement, String theLocalPart) throws DataFormatException {
 			if (!"feed".equals(theLocalPart)) {
-				throw new DataFormatException("Expecting outer element called 'feed', found: "+theLocalPart);
+				throw new DataFormatException("Expecting outer element called 'feed', found: " + theLocalPart);
 			}
-			
+
 			myInstance = new Bundle();
 			push(new AtomState(myInstance));
-			
+
 		}
 
 		@Override
@@ -223,9 +278,9 @@ class ParserState<T extends IElement> {
 		public void otherEvent(XMLEvent theEvent) throws DataFormatException {
 			// ignore
 		}
-		
+
 	}
-	
+
 	private abstract class BaseState {
 
 		private BaseState myStack;
