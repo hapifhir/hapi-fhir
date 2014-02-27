@@ -49,12 +49,12 @@ import ca.uhn.fhir.model.primitive.XhtmlDt;
 import ca.uhn.fhir.util.PrettyPrintWriterWrapper;
 
 public class XmlParser {
-	private static final String ATOM_NS = "http://www.w3.org/2005/Atom";
-	private static final String FHIR_NS = "http://hl7.org/fhir";
-	private static final String OPENSEARCH_NS = "http://a9.com/-/spec/opensearch/1.1/";
+	static final String ATOM_NS = "http://www.w3.org/2005/Atom";
+	static final String FHIR_NS = "http://hl7.org/fhir";
+	static final String OPENSEARCH_NS = "http://a9.com/-/spec/opensearch/1.1/";
 	@SuppressWarnings("unused")
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(XmlParser.class);
-	private static final String XHTML_NS = "http://www.w3.org/1999/xhtml";
+	static final String XHTML_NS = "http://www.w3.org/1999/xhtml";
 
 	// private static final Set<String> RESOURCE_NAMESPACES;
 
@@ -106,7 +106,7 @@ public class XmlParser {
 			if (StringUtils.isNotBlank(theBundle.getAuthorName().getValue())) {
 				eventWriter.writeStartElement("author");
 				writeTagWithTextNode(eventWriter, "name", theBundle.getAuthorName());
-				writeOptionalTagWithTextNode(eventWriter, "device", theBundle.getAuthorDevice());
+				writeOptionalTagWithTextNode(eventWriter, "uri", theBundle.getAuthorUri());
 			}
 
 			for (BundleEntry nextEntry : theBundle.getEntries()) {
@@ -131,15 +131,21 @@ public class XmlParser {
 		return stringWriter.toString();
 	}
 
-	private void encodeChildElementToStreamWriter(XMLStreamWriter theEventWriter, IElement nextValue, String childName, BaseRuntimeElementDefinition<?> childDef, String theExtensionUrl) throws XMLStreamException, DataFormatException {
+	private boolean encodeChildElementToStreamWriter(XMLStreamWriter theEventWriter, IElement nextValue, String childName, BaseRuntimeElementDefinition<?> childDef, String theExtensionUrl)
+			throws XMLStreamException, DataFormatException {
 		switch (childDef.getChildType()) {
 		case PRIMITIVE_DATATYPE: {
-			theEventWriter.writeStartElement(childName);
 			IPrimitiveDatatype<?> pd = (IPrimitiveDatatype<?>) nextValue;
-			theEventWriter.writeAttribute("value", pd.getValueAsString());
-			encodeExtensionsIfPresent(theEventWriter, nextValue);
-			theEventWriter.writeEndElement();
-			break;
+			String value = pd.getValueAsString();
+			if (value != null) {
+				theEventWriter.writeStartElement(childName);
+				theEventWriter.writeAttribute("value", value);
+				encodeExtensionsIfPresent(theEventWriter, nextValue);
+				theEventWriter.writeEndElement();
+				return true;
+			} else {
+				return false;
+			}
 		}
 		case RESOURCE_BLOCK:
 		case COMPOSITE_DATATYPE: {
@@ -151,30 +157,41 @@ public class XmlParser {
 			encodeCompositeElementToStreamWriter(nextValue, theEventWriter, childCompositeDef);
 			encodeExtensionsIfPresent(theEventWriter, nextValue);
 			theEventWriter.writeEndElement();
-			break;
+			return true;
 		}
 		case RESOURCE_REF: {
-			theEventWriter.writeStartElement(childName);
 			ResourceReference ref = (ResourceReference) nextValue;
-			encodeResourceReferenceToStreamWriter(theEventWriter, ref);
-			theEventWriter.writeEndElement();
-			break;
+			if (ref.hasContent()) {
+				theEventWriter.writeStartElement(childName);
+				encodeResourceReferenceToStreamWriter(theEventWriter, ref);
+				theEventWriter.writeEndElement();
+				return true;
+			} else {
+				return false;
+			}
 		}
 		case RESOURCE: {
 			throw new IllegalStateException(); // should not happen
 		}
 		case PRIMITIVE_XHTML: {
 			XhtmlDt dt = (XhtmlDt) nextValue;
-			encodeXhtml(dt, theEventWriter);
-			break;
+			if (dt.hasContent()) {
+				encodeXhtml(dt, theEventWriter);
+				return true;
+			} else {
+				return false;
+			}
 		}
 		case UNDECL_EXT: {
 			throw new IllegalStateException("should not happen");
 		}
 		}
+		
+		return false;
 	}
 
-	private void encodeCompositeElementChildrenToStreamWriter(IElement theElement, XMLStreamWriter theEventWriter, List<? extends BaseRuntimeChildDefinition> children) throws XMLStreamException, DataFormatException {
+	private void encodeCompositeElementChildrenToStreamWriter(IElement theElement, XMLStreamWriter theEventWriter, List<? extends BaseRuntimeChildDefinition> children) throws XMLStreamException,
+			DataFormatException {
 		for (BaseRuntimeChildDefinition nextChild : children) {
 			List<? extends IElement> values = nextChild.getAccessor().getValues(theElement);
 			if (values == null || values.isEmpty()) {
@@ -205,15 +222,18 @@ public class XmlParser {
 		}
 	}
 
-	private void encodeCompositeElementToStreamWriter(IElement theElement, XMLStreamWriter theEventWriter, BaseRuntimeElementCompositeDefinition<?> resDef) throws XMLStreamException, DataFormatException {
+	private void encodeCompositeElementToStreamWriter(IElement theElement, XMLStreamWriter theEventWriter, BaseRuntimeElementCompositeDefinition<?> resDef) throws XMLStreamException,
+			DataFormatException {
 		encodeExtensionsIfPresent(theEventWriter, theElement);
 		encodeCompositeElementChildrenToStreamWriter(theElement, theEventWriter, resDef.getExtensions());
 		encodeCompositeElementChildrenToStreamWriter(theElement, theEventWriter, resDef.getChildren());
 	}
 
 	private void encodeExtensionsIfPresent(XMLStreamWriter theWriter, IElement theResource) throws XMLStreamException, DataFormatException {
+		boolean retVal = false;
 		if (theResource instanceof ISupportsUndeclaredExtensions) {
 			for (UndeclaredExtension next : ((ISupportsUndeclaredExtensions) theResource).getUndeclaredExtensions()) {
+				retVal =true;
 				theWriter.writeStartElement("extension");
 				theWriter.writeAttribute("url", next.getUrl());
 
@@ -388,9 +408,6 @@ public class XmlParser {
 					StartElement elem = nextEvent.asStartElement();
 
 					String namespaceURI = elem.getName().getNamespaceURI();
-					if (!FHIR_NS.equals(namespaceURI) && !XHTML_NS.equals(namespaceURI)) {
-						continue;
-					}
 
 					if ("extension".equals(elem.getName().getLocalPart())) {
 						Attribute urlAttr = elem.getAttributeByName(new QName("url"));
@@ -399,7 +416,10 @@ public class XmlParser {
 						}
 						parserState.enteringNewElementExtension(elem, urlAttr.getValue());
 					} else {
-						parserState.enteringNewElement(elem, elem.getName().getLocalPart());
+
+						String elementName = elem.getName().getLocalPart();
+						parserState.enteringNewElement(namespaceURI, elementName);
+
 					}
 
 					for (@SuppressWarnings("unchecked")
@@ -430,9 +450,11 @@ public class XmlParser {
 					if (parserState.isComplete()) {
 						return parserState.getObject();
 					}
-				} else {
-					parserState.otherEvent(nextEvent);
+				} else if (nextEvent.isCharacters()) {
+					parserState.string(nextEvent.asCharacters().getData());
 				}
+
+				parserState.xmlEvent(nextEvent);
 
 			}
 

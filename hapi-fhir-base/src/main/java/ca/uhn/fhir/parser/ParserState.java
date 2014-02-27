@@ -9,6 +9,8 @@ import javax.xml.stream.events.EndElement;
 import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.ctc.wstx.sw.BaseStreamWriter;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
@@ -36,6 +38,34 @@ import ca.uhn.fhir.model.primitive.XhtmlDt;
 
 class ParserState<T extends IElement> {
 
+	public class AtomAuthorState extends BaseState {
+
+		private Bundle myInstance;
+
+		public AtomAuthorState(Bundle theInstance) {
+			myInstance = theInstance;
+		}
+
+		@Override
+		public void endingElement(EndElement theElem) throws DataFormatException {
+			pop();
+		}
+
+		@Override
+		public void enteringNewElement(String theNamespaceURI, String theLocalPart) throws DataFormatException {
+			if ("name".equals(theLocalPart)) {
+				push(new AtomPrimitiveState(myInstance.getAuthorName()));
+			}else if ("uri".equals(theLocalPart)) {
+				push(new AtomPrimitiveState(myInstance.getAuthorUri()));
+			}else {
+				throw new DataFormatException("Unexpected element: " + theLocalPart);
+			}
+		}
+
+		
+
+	}
+
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ParserState.class);
 
 	private FhirContext myContext;
@@ -54,8 +84,8 @@ class ParserState<T extends IElement> {
 		myState.endingElement(theElem);
 	}
 
-	public void enteringNewElement(StartElement theElement, String theName) throws DataFormatException {
-		myState.enteringNewElement(theElement, theName);
+	public void enteringNewElement(String theNamespaceURI, String theName) throws DataFormatException {
+		myState.enteringNewElement(theNamespaceURI, theName);
 	}
 
 	public void enteringNewElementExtension(StartElement theElem, String theUrlAttr) {
@@ -68,10 +98,6 @@ class ParserState<T extends IElement> {
 
 	public boolean isComplete() {
 		return myObject != null;
-	}
-
-	public void otherEvent(XMLEvent theEvent) throws DataFormatException {
-		myState.otherEvent(theEvent);
 	}
 
 	private void pop() {
@@ -105,10 +131,6 @@ class ParserState<T extends IElement> {
 			myPrimitive = thePrimitive;
 		}
 
-		@Override
-		public void attributeValue(Attribute theAttribute, String theValue) throws DataFormatException {
-			// ignore
-		}
 
 		@Override
 		public void endingElement(EndElement theElem) throws DataFormatException {
@@ -117,7 +139,7 @@ class ParserState<T extends IElement> {
 		}
 
 		@Override
-		public void enteringNewElement(StartElement theElement, String theLocalPart) throws DataFormatException {
+		public void enteringNewElement(String theNamespaceURI, String theLocalPart) throws DataFormatException {
 			throw new DataFormatException("Unexpected nested element in atom tag ");
 		}
 
@@ -127,49 +149,65 @@ class ParserState<T extends IElement> {
 		}
 
 		@Override
-		public void otherEvent(XMLEvent theEvent) throws DataFormatException {
-			if (theEvent.isCharacters()) {
-				String data = theEvent.asCharacters().getData();
-				if (myData == null) {
-					myData = data;
-				} else {
-					// this shouldn't generally happen so it's ok that it's inefficient
-					myData = myData + data;
-				}
+		public void string(String theData) {
+			if (myData == null) {
+				myData = theData;
+			} else {
+				// this shouldn't generally happen so it's ok that it's inefficient
+				myData = myData + theData;
 			}
 		}
 
 	}
 
-	private class ExpectEndElementState extends BaseState {
+	private class AtomLinkState extends BaseState {
+
+		private String myRel;
+		private String myHref;
+		private Bundle myInstance;
+
+		public AtomLinkState(Bundle theInstance) {
+			myInstance = theInstance;
+		}
 
 		@Override
 		public void attributeValue(Attribute theAttribute, String theValue) throws DataFormatException {
-			throw new DataFormatException("Found unexpected element content");
+			String name = theAttribute.getName().getLocalPart();
+			if ("rel".equals(name)) {
+				myRel = theValue;
+			} else if ("href".equals(name)) {
+				myHref = theValue;
+			}
 		}
 
 		@Override
 		public void endingElement(EndElement theElem) throws DataFormatException {
+			if ("self".equals(myRel)) {
+				myInstance.getLinkSelf().setValueAsString(myHref);
+			} else if ("first".equals(myRel)) {
+				myInstance.getLinkFirst().setValueAsString(myHref);
+			} else if ("previous".equals(myRel)) {
+				myInstance.getLinkPrevious().setValueAsString(myHref);
+			} else if ("next".equals(myRel)) {
+				myInstance.getLinkNext().setValueAsString(myHref);
+			} else if ("last".equals(myRel)) {
+				myInstance.getLinkLast().setValueAsString(myHref);
+			} else if ("fhir-base".equals(myRel)) {
+				myInstance.getLinkBase().setValueAsString(myHref);
+			}
+
 			pop();
 		}
 
 		@Override
-		public void enteringNewElement(StartElement theElement, String theLocalPart) throws DataFormatException {
+		public void enteringNewElement(String theNamespaceURI, String theLocalPart) throws DataFormatException {
 			throw new DataFormatException("Found unexpected element content");
 		}
 
-		@Override
-		protected IElement getCurrentElement() {
-			return null;
-		}
-
-		@Override
-		public void otherEvent(XMLEvent theEvent) throws DataFormatException {
-			throw new DataFormatException("Found unexpected element content");
-		}
 
 	}
 
+	
 	private static final QName ATOM_LINK_REL_ATTRIBUTE = new QName("rel");
 	private static final QName ATOM_LINK_HREF_ATTRIBUTE = new QName("href");
 
@@ -193,46 +231,27 @@ class ParserState<T extends IElement> {
 		}
 
 		@Override
-		public void enteringNewElement(StartElement theElement, String theLocalPart) throws DataFormatException {
+		public void enteringNewElement(String theNamespaceURI, String theLocalPart) throws DataFormatException {
 			if (theLocalPart.equals("title")) {
 				push(new AtomPrimitiveState(myInstance.getTitle()));
 			} else if ("id".equals(theLocalPart)) {
 				push(new AtomPrimitiveState(myInstance.getId()));
 			} else if ("link".equals(theLocalPart)) {
-				Attribute rel = theElement.getAttributeByName(ATOM_LINK_REL_ATTRIBUTE);
-				Attribute href = theElement.getAttributeByName(ATOM_LINK_HREF_ATTRIBUTE);
-				if (rel != null && href != null) {
-					if ("self".equals(rel.getValue())) {
-						myInstance.getLinkSelf().setValueAsString(href.getValue());
-						push(new ExpectEndElementState());
-					} else if ("first".equals(rel.getValue())) {
-						myInstance.getLinkFirst().setValueAsString(href.getValue());
-						push(new ExpectEndElementState());
-					} else if ("previous".equals(rel.getValue())) {
-						myInstance.getLinkPrevious().setValueAsString(href.getValue());
-						push(new ExpectEndElementState());
-					} else if ("next".equals(rel.getValue())) {
-						myInstance.getLinkNext().setValueAsString(href.getValue());
-						push(new ExpectEndElementState());
-					} else if ("last".equals(rel.getValue())) {
-						myInstance.getLinkLast().setValueAsString(href.getValue());
-						push(new ExpectEndElementState());
-					} else if ("fhir-base".equals(rel.getValue())) {
-						myInstance.getLinkBase().setValueAsString(href.getValue());
-						push(new ExpectEndElementState());
-					}
-				}
-			}
+				push(new AtomLinkState(myInstance));
+			} else if ("totalresults".equals(theLocalPart) && verifyNamespace(XmlParser.OPENSEARCH_NS, theNamespaceURI)) {
+				push(new AtomPrimitiveState(myInstance.getTotalResults()));
+			} else if ("updated".equals(theLocalPart)) {
+				push(new AtomPrimitiveState(myInstance.getUpdated()));
+			} else if ("author".equals(theLocalPart)) {
+				push(new AtomAuthorState(myInstance));
+			} 
+			
+			// TODO: handle category and DSig
 		}
 
 		@Override
 		protected IElement getCurrentElement() {
 			return myInstance;
-		}
-
-		@Override
-		public void otherEvent(XMLEvent theEvent) throws DataFormatException {
-			// ignore
 		}
 
 	}
@@ -252,7 +271,7 @@ class ParserState<T extends IElement> {
 		}
 
 		@Override
-		public void enteringNewElement(StartElement theElement, String theLocalPart) throws DataFormatException {
+		public void enteringNewElement(String theNamespaceURI, String theLocalPart) throws DataFormatException {
 			if (!"feed".equals(theLocalPart)) {
 				throw new DataFormatException("Expecting outer element called 'feed', found: " + theLocalPart);
 			}
@@ -274,22 +293,26 @@ class ParserState<T extends IElement> {
 			myObject = (T) myInstance;
 		}
 
-		@Override
-		public void otherEvent(XMLEvent theEvent) throws DataFormatException {
-			// ignore
-		}
-
 	}
 
 	private abstract class BaseState {
 
 		private BaseState myStack;
 
-		public abstract void attributeValue(Attribute theAttribute, String theValue) throws DataFormatException;
+		@SuppressWarnings("unused")
+		public void attributeValue(Attribute theAttribute, String theValue) throws DataFormatException {
+			// ignore by default
+		}
 
-		public abstract void endingElement(EndElement theElem) throws DataFormatException;
+		@SuppressWarnings("unused")
+		public void endingElement(EndElement theElem) throws DataFormatException {
+			// ignore by default
+		}
 
-		public abstract void enteringNewElement(StartElement theElement, String theLocalPart) throws DataFormatException;
+		@SuppressWarnings("unused")
+		public void enteringNewElement(String theNamespaceURI, String theLocalPart) throws DataFormatException {
+			// ignore by default
+		}
 
 		/**
 		 * Default implementation just handles undeclared extensions
@@ -305,9 +328,9 @@ class ParserState<T extends IElement> {
 			}
 		}
 
-		protected abstract IElement getCurrentElement();
-
-		public abstract void otherEvent(XMLEvent theEvent) throws DataFormatException;
+		protected IElement getCurrentElement() {
+			return null;
+		}
 
 		public void setStack(BaseState theState) {
 			myStack = theState;
@@ -315,6 +338,14 @@ class ParserState<T extends IElement> {
 
 		public void wereBack() {
 			// allow an implementor to override
+		}
+
+		public void string(@SuppressWarnings("unused") String theData) {
+			// ignore by default
+		}
+
+		public void xmlEvent(@SuppressWarnings("unused") XMLEvent theNextEvent) {
+			// ignore
 		}
 
 	}
@@ -341,7 +372,7 @@ class ParserState<T extends IElement> {
 		}
 
 		@Override
-		public void enteringNewElement(StartElement theElement, String theLocalPart) throws DataFormatException {
+		public void enteringNewElement(String theNamespaceURI, String theLocalPart) throws DataFormatException {
 			BaseRuntimeElementDefinition<?> target = myDefinition.getChildByName(theLocalPart);
 			if (target == null) {
 				throw new DataFormatException("Unknown extension element name: " + theLocalPart);
@@ -402,11 +433,6 @@ class ParserState<T extends IElement> {
 			return myParentInstance;
 		}
 
-		@Override
-		public void otherEvent(XMLEvent theEvent) throws DataFormatException {
-			// ignore
-		}
-
 	}
 
 	private class ElementCompositeState extends BaseState {
@@ -434,7 +460,7 @@ class ParserState<T extends IElement> {
 		}
 
 		@Override
-		public void enteringNewElement(StartElement theElement, String theChildName) throws DataFormatException {
+		public void enteringNewElement(String theNamespace, String theChildName) throws DataFormatException {
 			BaseRuntimeChildDefinition child = myDefinition.getChildByNameOrThrowDataFormatException(theChildName);
 			BaseRuntimeElementDefinition<?> target = child.getChildByName(theChildName);
 			if (target == null) {
@@ -478,7 +504,7 @@ class ParserState<T extends IElement> {
 				RuntimePrimitiveDatatypeNarrativeDefinition xhtmlTarget = (RuntimePrimitiveDatatypeNarrativeDefinition) target;
 				XhtmlDt newDt = xhtmlTarget.newInstance();
 				child.getMutator().addValue(myInstance, newDt);
-				XhtmlState state = new XhtmlState(newDt, theElement);
+				XhtmlState state = new XhtmlState(newDt);
 				push(state);
 				return;
 			}
@@ -508,11 +534,6 @@ class ParserState<T extends IElement> {
 			return myInstance;
 		}
 
-		@Override
-		public void otherEvent(XMLEvent theEvent) {
-			// ignore
-		}
-
 	}
 
 	private class ExtensionState extends BaseState {
@@ -537,7 +558,7 @@ class ParserState<T extends IElement> {
 		}
 
 		@Override
-		public void enteringNewElement(StartElement theElement, String theLocalPart) throws DataFormatException {
+		public void enteringNewElement(String theNamespaceURI, String theLocalPart) throws DataFormatException {
 			BaseRuntimeElementDefinition<?> target = myContext.getRuntimeChildUndeclaredExtensionDefinition().getChildByName(theLocalPart);
 			if (target == null) {
 				throw new DataFormatException("Unknown extension element name: " + theLocalPart);
@@ -581,11 +602,6 @@ class ParserState<T extends IElement> {
 			return myExtension;
 		}
 
-		@Override
-		public void otherEvent(XMLEvent theEvent) throws DataFormatException {
-			// ignore
-		}
-
 	}
 
 	private class PreResourceState extends BaseState {
@@ -603,7 +619,7 @@ class ParserState<T extends IElement> {
 		}
 
 		@Override
-		public void enteringNewElement(StartElement theElement, String theLocalPart) throws DataFormatException {
+		public void enteringNewElement(String theNamespaceURI, String theLocalPart) throws DataFormatException {
 			BaseRuntimeElementDefinition<?> definition = myContext.getNameToResourceDefinition().get(theLocalPart);
 			if (!(definition instanceof RuntimeResourceDefinition)) {
 				throw new DataFormatException("Element '" + theLocalPart + "' is not a resource, expected a resource at this position");
@@ -618,11 +634,6 @@ class ParserState<T extends IElement> {
 		@Override
 		protected IElement getCurrentElement() {
 			return myInstance;
-		}
-
-		@Override
-		public void otherEvent(XMLEvent theEvent) throws DataFormatException {
-			// ignore
 		}
 
 		@SuppressWarnings("unchecked")
@@ -652,18 +663,13 @@ class ParserState<T extends IElement> {
 		}
 
 		@Override
-		public void enteringNewElement(StartElement theElement, String theLocalPart) throws DataFormatException {
+		public void enteringNewElement(String theNamespaceURI, String theLocalPart) throws DataFormatException {
 			throw new Error("?? can this happen?"); // TODO: can this happen?
 		}
 
 		@Override
 		protected IElement getCurrentElement() {
 			return myInstance;
-		}
-
-		@Override
-		public void otherEvent(XMLEvent theEvent) {
-			// ignore
 		}
 
 	}
@@ -707,7 +713,7 @@ class ParserState<T extends IElement> {
 		}
 
 		@Override
-		public void enteringNewElement(StartElement theElem, String theLocalPart) throws DataFormatException {
+		public void enteringNewElement(String theNamespaceURI, String theLocalPart) throws DataFormatException {
 			switch (mySubState) {
 			case INITIAL:
 				if ("display".equals(theLocalPart)) {
@@ -729,11 +735,6 @@ class ParserState<T extends IElement> {
 			return myInstance;
 		}
 
-		@Override
-		public void otherEvent(XMLEvent theEvent) {
-			// ignore
-		}
-
 	}
 
 	private enum ResourceReferenceSubState {
@@ -745,32 +746,9 @@ class ParserState<T extends IElement> {
 		private XhtmlDt myDt;
 		private List<XMLEvent> myEvents = new ArrayList<XMLEvent>();
 
-		private XhtmlState(XhtmlDt theXhtmlDt, StartElement theXhtmlStartElement) throws DataFormatException {
+		private XhtmlState(XhtmlDt theXhtmlDt) throws DataFormatException {
 			myDepth = 1;
 			myDt = theXhtmlDt;
-			myEvents.add(theXhtmlStartElement);
-		}
-
-		@Override
-		public void attributeValue(Attribute theAttr, String theValue) throws DataFormatException {
-			myEvents.add(theAttr);
-		}
-
-		@Override
-		public void endingElement(EndElement theElement) throws DataFormatException {
-			myEvents.add(theElement);
-
-			myDepth--;
-			if (myDepth == 0) {
-				myDt.setValue(myEvents);
-				pop();
-			}
-		}
-
-		@Override
-		public void enteringNewElement(StartElement theElem, String theLocalPart) throws DataFormatException {
-			myDepth++;
-			myEvents.add(theElem);
 		}
 
 		@Override
@@ -779,9 +757,36 @@ class ParserState<T extends IElement> {
 		}
 
 		@Override
-		public void otherEvent(XMLEvent theEvent) throws DataFormatException {
+		public void xmlEvent(XMLEvent theEvent) {
 			myEvents.add(theEvent);
+
+			if (theEvent.isStartElement()) {
+				myDepth++;
+			}
+			if (theEvent.isEndElement()) {
+				myDepth--;
+				if (myDepth == 0) {
+					myDt.setValue(myEvents);
+					pop();
+				}
+			}
 		}
+
+	}
+
+	public void string(String theData) {
+		myState.string(theData);
+	}
+
+	public boolean verifyNamespace(String theExpect, String theActual) {
+		return StringUtils.equals(theExpect, theActual);
+	}
+
+	/**
+	 * Invoked after any new XML event is individually processed, containing a copy of the XML event. This is basically intended for embedded XHTML content
+	 */
+	public void xmlEvent(XMLEvent theNextEvent) {
+		myState.xmlEvent(theNextEvent);
 	}
 
 }
