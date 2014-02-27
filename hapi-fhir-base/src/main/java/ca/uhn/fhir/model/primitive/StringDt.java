@@ -44,6 +44,14 @@ public class StringDt extends BasePrimitiveDatatype<String> {
 	public void setValueAsString(String theValue) throws DataFormatException {
 		myValue = theValue;
 	}
+
+	/**
+	 * Returns the value of this string, or <code>null</code>
+	 */
+	@Override
+	public String toString() {
+		return myValue;
+	}
 	
 
 }

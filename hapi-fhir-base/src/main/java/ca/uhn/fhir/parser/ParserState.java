@@ -11,8 +11,6 @@ import javax.xml.stream.events.XMLEvent;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.ctc.wstx.sw.BaseStreamWriter;
-
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
@@ -23,7 +21,9 @@ import ca.uhn.fhir.context.RuntimePrimitiveDatatypeNarrativeDefinition;
 import ca.uhn.fhir.context.RuntimeResourceBlockDefinition;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeResourceReferenceDefinition;
+import ca.uhn.fhir.model.api.BaseBundle;
 import ca.uhn.fhir.model.api.Bundle;
+import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.api.ICompositeDatatype;
 import ca.uhn.fhir.model.api.ICompositeElement;
 import ca.uhn.fhir.model.api.IElement;
@@ -33,49 +33,26 @@ import ca.uhn.fhir.model.api.IResourceBlock;
 import ca.uhn.fhir.model.api.ISupportsUndeclaredExtensions;
 import ca.uhn.fhir.model.api.ResourceReference;
 import ca.uhn.fhir.model.api.UndeclaredExtension;
-import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.XhtmlDt;
 
 class ParserState<T extends IElement> {
 
-	public class AtomAuthorState extends BaseState {
+	private static final QName ATOM_LINK_HREF_ATTRIBUTE = new QName("href");
 
-		private Bundle myInstance;
-
-		public AtomAuthorState(Bundle theInstance) {
-			myInstance = theInstance;
-		}
-
-		@Override
-		public void endingElement(EndElement theElem) throws DataFormatException {
-			pop();
-		}
-
-		@Override
-		public void enteringNewElement(String theNamespaceURI, String theLocalPart) throws DataFormatException {
-			if ("name".equals(theLocalPart)) {
-				push(new AtomPrimitiveState(myInstance.getAuthorName()));
-			} else if ("uri".equals(theLocalPart)) {
-				push(new AtomPrimitiveState(myInstance.getAuthorUri()));
-			} else {
-				throw new DataFormatException("Unexpected element: " + theLocalPart);
-			}
-		}
-
-	}
+	private static final QName ATOM_LINK_REL_ATTRIBUTE = new QName("rel");
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ParserState.class);
-
 	private FhirContext myContext;
 	private T myObject;
+
 	private BaseState myState;
 
 	private ParserState(FhirContext theContext) {
 		myContext = theContext;
 	}
 
-	public void attributeValue(Attribute theAttribute, String theValue) throws DataFormatException {
-		myState.attributeValue(theAttribute, theValue);
+	public void attributeValue(String theName, String theValue) throws DataFormatException {
+		myState.attributeValue(theName, theValue);
 	}
 
 	public void endingElement(EndElement theElem) throws DataFormatException {
@@ -98,6 +75,23 @@ class ParserState<T extends IElement> {
 		return myObject != null;
 	}
 
+	public void string(String theData) {
+		myState.string(theData);
+	}
+
+	public boolean verifyNamespace(String theExpect, String theActual) {
+		return StringUtils.equals(theExpect, theActual);
+	}
+
+	/**
+	 * Invoked after any new XML event is individually processed, containing a
+	 * copy of the XML event. This is basically intended for embedded XHTML
+	 * content
+	 */
+	public void xmlEvent(XMLEvent theNextEvent) {
+		myState.xmlEvent(theNextEvent);
+	}
+
 	private void pop() {
 		myState = myState.myStack;
 		myState.wereBack();
@@ -108,24 +102,145 @@ class ParserState<T extends IElement> {
 		myState = theState;
 	}
 
-	public static ParserState<IResource> getPreResourceInstance(FhirContext theContext) throws DataFormatException {
-		ParserState<IResource> retVal = new ParserState<IResource>(theContext);
-		retVal.push(retVal.new PreResourceState());
-		return retVal;
-	}
-
 	public static ParserState<Bundle> getPreAtomInstance(FhirContext theContext) throws DataFormatException {
 		ParserState<Bundle> retVal = new ParserState<Bundle>(theContext);
 		retVal.push(retVal.new PreAtomState());
 		return retVal;
 	}
 
+	public static ParserState<IResource> getPreResourceInstance(FhirContext theContext) throws DataFormatException {
+		ParserState<IResource> retVal = new ParserState<IResource>(theContext);
+		retVal.push(retVal.new PreResourceState());
+		return retVal;
+	}
+
+	public class AtomAuthorState extends BaseState {
+
+		private BaseBundle myInstance;
+
+		public AtomAuthorState(BaseBundle theEntry) {
+			myInstance = theEntry;
+		}
+
+		@Override
+		public void endingElement(EndElement theElem) throws DataFormatException {
+			pop();
+		}
+
+		@Override
+		public void enteringNewElement(String theNamespaceURI, String theLocalPart) throws DataFormatException {
+			if ("name".equals(theLocalPart)) {
+				push(new AtomPrimitiveState(myInstance.getAuthorName()));
+			} else if ("uri".equals(theLocalPart)) {
+				push(new AtomPrimitiveState(myInstance.getAuthorUri()));
+			} else {
+				throw new DataFormatException("Unexpected element: " + theLocalPart);
+			}
+		}
+
+	}
+
+	public class AtomEntryState extends BaseState {
+
+		private BundleEntry myEntry;
+
+		public AtomEntryState(Bundle theInstance) {
+			myEntry = new BundleEntry();
+			theInstance.getEntries().add(myEntry);
+		}
+
+		@Override
+		public void endingElement(EndElement theElem) throws DataFormatException {
+			pop();
+		}
+
+		@Override
+		public void enteringNewElement(String theNamespaceURI, String theLocalPart) throws DataFormatException {
+			if ("title".equals(theLocalPart)) {
+				push(new AtomPrimitiveState(myEntry.getTitle()));
+			} else if ("id".equals(theLocalPart)) {
+				push(new AtomPrimitiveState(myEntry.getId()));
+			} else if ("link".equals(theLocalPart)) {
+				push(new AtomLinkState(myEntry));
+			} else if ("updated".equals(theLocalPart)) {
+				push(new AtomPrimitiveState(myEntry.getUpdated()));
+			} else if ("published".equals(theLocalPart)) {
+				push(new AtomPrimitiveState(myEntry.getPublished()));
+			} else if ("author".equals(theLocalPart)) {
+				push(new AtomAuthorState(myEntry));
+			} else if ("content".equals(theLocalPart)) {
+				push(new PreResourceState(myEntry));
+			} else if ("summary".equals(theLocalPart)) {
+				push(new XhtmlState(myEntry.getSummary(),false));
+			} else {
+				throw new DataFormatException("Unexpected element in entry: " + theLocalPart);
+			}
+
+			// TODO: handle category
+		}
+
+	}
+
+	private class AtomLinkState extends BaseState {
+
+		private BundleEntry myEntry;
+		private String myHref;
+		private Bundle myInstance;
+		private String myRel;
+
+		public AtomLinkState(Bundle theInstance) {
+			myInstance = theInstance;
+		}
+
+		public AtomLinkState(BundleEntry theEntry) {
+			myEntry = theEntry;
+		}
+
+		@Override
+		public void attributeValue(String theName, String theValue) throws DataFormatException {
+			if ("rel".equals(theName)) {
+				myRel = theValue;
+			} else if ("href".equals(theName)) {
+				myHref = theValue;
+			}
+		}
+
+		@Override
+		public void endingElement(EndElement theElem) throws DataFormatException {
+			if (myInstance != null) {
+				if ("self".equals(myRel)) {
+					myInstance.getLinkSelf().setValueAsString(myHref);
+				} else if ("first".equals(myRel)) {
+					myInstance.getLinkFirst().setValueAsString(myHref);
+				} else if ("previous".equals(myRel)) {
+					myInstance.getLinkPrevious().setValueAsString(myHref);
+				} else if ("next".equals(myRel)) {
+					myInstance.getLinkNext().setValueAsString(myHref);
+				} else if ("last".equals(myRel)) {
+					myInstance.getLinkLast().setValueAsString(myHref);
+				} else if ("fhir-base".equals(myRel)) {
+					myInstance.getLinkBase().setValueAsString(myHref);
+				}
+			} else {
+				myEntry.getLinkSelf().setValueAsString(myHref);
+			}
+			pop();
+		}
+
+		@Override
+		public void enteringNewElement(String theNamespaceURI, String theLocalPart) throws DataFormatException {
+			throw new DataFormatException("Found unexpected element content");
+		}
+
+	}
+
 	private class AtomPrimitiveState extends BaseState {
 
-		private IPrimitiveDatatype<?> myPrimitive;
 		private String myData;
+		private IPrimitiveDatatype<?> myPrimitive;
 
 		public AtomPrimitiveState(IPrimitiveDatatype<?> thePrimitive) {
+			assert thePrimitive != null;
 			myPrimitive = thePrimitive;
 		}
 
@@ -137,12 +252,7 @@ class ParserState<T extends IElement> {
 
 		@Override
 		public void enteringNewElement(String theNamespaceURI, String theLocalPart) throws DataFormatException {
-			throw new DataFormatException("Unexpected nested element in atom tag ");
-		}
-
-		@Override
-		protected IElement getCurrentElement() {
-			return null;
+			throw new DataFormatException("Unexpected nested element in atom tag: " + theLocalPart);
 		}
 
 		@Override
@@ -150,61 +260,18 @@ class ParserState<T extends IElement> {
 			if (myData == null) {
 				myData = theData;
 			} else {
-				// this shouldn't generally happen so it's ok that it's inefficient
+				// this shouldn't generally happen so it's ok that it's
+				// inefficient
 				myData = myData + theData;
 			}
 		}
 
-	}
-
-	private class AtomLinkState extends BaseState {
-
-		private String myRel;
-		private String myHref;
-		private Bundle myInstance;
-
-		public AtomLinkState(Bundle theInstance) {
-			myInstance = theInstance;
-		}
-
 		@Override
-		public void attributeValue(Attribute theAttribute, String theValue) throws DataFormatException {
-			String name = theAttribute.getName().getLocalPart();
-			if ("rel".equals(name)) {
-				myRel = theValue;
-			} else if ("href".equals(name)) {
-				myHref = theValue;
-			}
-		}
-
-		@Override
-		public void endingElement(EndElement theElem) throws DataFormatException {
-			if ("self".equals(myRel)) {
-				myInstance.getLinkSelf().setValueAsString(myHref);
-			} else if ("first".equals(myRel)) {
-				myInstance.getLinkFirst().setValueAsString(myHref);
-			} else if ("previous".equals(myRel)) {
-				myInstance.getLinkPrevious().setValueAsString(myHref);
-			} else if ("next".equals(myRel)) {
-				myInstance.getLinkNext().setValueAsString(myHref);
-			} else if ("last".equals(myRel)) {
-				myInstance.getLinkLast().setValueAsString(myHref);
-			} else if ("fhir-base".equals(myRel)) {
-				myInstance.getLinkBase().setValueAsString(myHref);
-			}
-
-			pop();
-		}
-
-		@Override
-		public void enteringNewElement(String theNamespaceURI, String theLocalPart) throws DataFormatException {
-			throw new DataFormatException("Found unexpected element content");
+		protected IElement getCurrentElement() {
+			return null;
 		}
 
 	}
-
-	private static final QName ATOM_LINK_REL_ATTRIBUTE = new QName("rel");
-	private static final QName ATOM_LINK_HREF_ATTRIBUTE = new QName("href");
 
 	private class AtomState extends BaseState {
 
@@ -214,11 +281,7 @@ class ParserState<T extends IElement> {
 			myInstance = theInstance;
 		}
 
-		@Override
-		public void attributeValue(Attribute theAttribute, String theValue) throws DataFormatException {
-			// TODO Auto-generated method stub
-
-		}
+	
 
 		@Override
 		public void endingElement(EndElement theElem) throws DataFormatException {
@@ -228,7 +291,7 @@ class ParserState<T extends IElement> {
 		@Override
 		public void enteringNewElement(String theNamespaceURI, String theLocalPart) throws DataFormatException {
 			if ("entry".equals(theLocalPart) && verifyNamespace(XmlParser.ATOM_NS, theNamespaceURI)) {
-				
+				push(new AtomEntryState(myInstance));
 			} else if (theLocalPart.equals("title")) {
 				push(new AtomPrimitiveState(myInstance.getTitle()));
 			} else if ("id".equals(theLocalPart)) {
@@ -241,6 +304,8 @@ class ParserState<T extends IElement> {
 				push(new AtomPrimitiveState(myInstance.getUpdated()));
 			} else if ("author".equals(theLocalPart)) {
 				push(new AtomAuthorState(myInstance));
+			} else {
+				throw new DataFormatException("Unexpected element: "+ theLocalPart);
 			}
 
 			// TODO: handle category and DSig
@@ -253,51 +318,12 @@ class ParserState<T extends IElement> {
 
 	}
 
-	private class PreAtomState extends BaseState {
-
-		private Bundle myInstance;
-
-		@Override
-		public void attributeValue(Attribute theAttribute, String theValue) throws DataFormatException {
-			// ignore
-		}
-
-		@Override
-		public void endingElement(EndElement theElem) throws DataFormatException {
-			// ignore
-		}
-
-		@Override
-		public void enteringNewElement(String theNamespaceURI, String theLocalPart) throws DataFormatException {
-			if (!"feed".equals(theLocalPart)) {
-				throw new DataFormatException("Expecting outer element called 'feed', found: " + theLocalPart);
-			}
-
-			myInstance = new Bundle();
-			push(new AtomState(myInstance));
-
-		}
-
-		@Override
-		protected IElement getCurrentElement() {
-			// TODO Auto-generated method stub
-			return null;
-		}
-
-		@SuppressWarnings("unchecked")
-		@Override
-		public void wereBack() {
-			myObject = (T) myInstance;
-		}
-
-	}
-
 	private abstract class BaseState {
 
 		private BaseState myStack;
 
 		@SuppressWarnings("unused")
-		public void attributeValue(Attribute theAttribute, String theValue) throws DataFormatException {
+		public void attributeValue(String theName, String theValue) throws DataFormatException {
 			// ignore by default
 		}
 
@@ -325,24 +351,24 @@ class ParserState<T extends IElement> {
 			}
 		}
 
-		protected IElement getCurrentElement() {
-			return null;
-		}
-
 		public void setStack(BaseState theState) {
 			myStack = theState;
-		}
-
-		public void wereBack() {
-			// allow an implementor to override
 		}
 
 		public void string(@SuppressWarnings("unused") String theData) {
 			// ignore by default
 		}
 
+		public void wereBack() {
+			// allow an implementor to override
+		}
+
 		public void xmlEvent(@SuppressWarnings("unused") XMLEvent theNextEvent) {
 			// ignore
+		}
+
+		protected IElement getCurrentElement() {
+			return null;
 		}
 
 	}
@@ -358,10 +384,6 @@ class ParserState<T extends IElement> {
 			myParentInstance = theParentInstance;
 		}
 
-		@Override
-		public void attributeValue(Attribute theAttribute, String theValue) throws DataFormatException {
-			throw new DataFormatException("'value' attribute is invalid in 'extension' element");
-		}
 
 		@Override
 		public void endingElement(EndElement theElem) throws DataFormatException {
@@ -442,11 +464,6 @@ class ParserState<T extends IElement> {
 			myInstance = theInstance;
 		}
 
-		@Override
-		public void attributeValue(Attribute theAttribute, String theValue) {
-			ourLog.debug("Ignoring attribute value: {}", theValue);
-		}
-
 		@SuppressWarnings("unchecked")
 		@Override
 		public void endingElement(EndElement theElem) {
@@ -501,7 +518,7 @@ class ParserState<T extends IElement> {
 				RuntimePrimitiveDatatypeNarrativeDefinition xhtmlTarget = (RuntimePrimitiveDatatypeNarrativeDefinition) target;
 				XhtmlDt newDt = xhtmlTarget.newInstance();
 				child.getMutator().addValue(myInstance, newDt);
-				XhtmlState state = new XhtmlState(newDt);
+				XhtmlState state = new XhtmlState(newDt,true);
 				push(state);
 				return;
 			}
@@ -541,10 +558,6 @@ class ParserState<T extends IElement> {
 			myExtension = theExtension;
 		}
 
-		@Override
-		public void attributeValue(Attribute theAttribute, String theValue) throws DataFormatException {
-			throw new DataFormatException("'value' attribute is invalid in 'extension' element");
-		}
 
 		@Override
 		public void endingElement(EndElement theElem) throws DataFormatException {
@@ -601,18 +614,58 @@ class ParserState<T extends IElement> {
 
 	}
 
-	private class PreResourceState extends BaseState {
+	private class PreAtomState extends BaseState {
 
-		private ICompositeElement myInstance;
+		private Bundle myInstance;
 
-		@Override
-		public void attributeValue(Attribute theAttribute, String theValue) throws DataFormatException {
-			// ignore
-		}
 
 		@Override
 		public void endingElement(EndElement theElem) throws DataFormatException {
 			// ignore
+		}
+
+		@Override
+		public void enteringNewElement(String theNamespaceURI, String theLocalPart) throws DataFormatException {
+			if (!"feed".equals(theLocalPart)) {
+				throw new DataFormatException("Expecting outer element called 'feed', found: " + theLocalPart);
+			}
+
+			myInstance = new Bundle();
+			push(new AtomState(myInstance));
+
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public void wereBack() {
+			myObject = (T) myInstance;
+		}
+
+		@Override
+		protected IElement getCurrentElement() {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+	}
+
+	private class PreResourceState extends BaseState {
+
+		private IResource myInstance;
+		private BundleEntry myEntry;
+
+		public PreResourceState() {
+			// nothing
+		}
+
+		public PreResourceState(BundleEntry theEntry) {
+			myEntry = theEntry;
+		}
+
+
+		@Override
+		public void endingElement(EndElement theElem) throws DataFormatException {
+			pop();
 		}
 
 		@Override
@@ -624,19 +677,24 @@ class ParserState<T extends IElement> {
 
 			RuntimeResourceDefinition def = (RuntimeResourceDefinition) definition;
 			myInstance = def.newInstance();
+			if (myEntry != null) {
+				myEntry.setResource(myInstance);
+			}
 
 			push(new ElementCompositeState(def, myInstance));
-		}
-
-		@Override
-		protected IElement getCurrentElement() {
-			return myInstance;
 		}
 
 		@SuppressWarnings("unchecked")
 		@Override
 		public void wereBack() {
-			myObject = (T) myInstance;
+			if (myEntry == null) {
+				myObject = (T) myInstance;
+			}
+		}
+
+		@Override
+		protected IElement getCurrentElement() {
+			return myInstance;
 		}
 
 	}
@@ -650,8 +708,10 @@ class ParserState<T extends IElement> {
 		}
 
 		@Override
-		public void attributeValue(Attribute theAttribute, String theValue) throws DataFormatException {
-			myInstance.setValueAsString(theValue);
+		public void attributeValue(String theName, String theValue) throws DataFormatException {
+			if ("value".equals(theName)) {
+				myInstance.setValueAsString(theValue);
+			}
 		}
 
 		@Override
@@ -684,7 +744,11 @@ class ParserState<T extends IElement> {
 		}
 
 		@Override
-		public void attributeValue(Attribute theAttribute, String theValue) throws DataFormatException {
+		public void attributeValue(String theName, String theValue) throws DataFormatException {
+			if (!"value".equals(theName)) {
+				return;
+			}
+			
 			switch (mySubState) {
 			case DISPLAY:
 				myInstance.setDisplay(theValue);
@@ -742,26 +806,29 @@ class ParserState<T extends IElement> {
 		private int myDepth;
 		private XhtmlDt myDt;
 		private List<XMLEvent> myEvents = new ArrayList<XMLEvent>();
+		private boolean myIncludeOuterEvent;
 
-		private XhtmlState(XhtmlDt theXhtmlDt) throws DataFormatException {
-			myDepth = 1;
+		private XhtmlState(XhtmlDt theXhtmlDt, boolean theIncludeOuterEvent) throws DataFormatException {
+			myDepth = 0;
 			myDt = theXhtmlDt;
-		}
-
-		@Override
-		protected IElement getCurrentElement() {
-			return myDt;
+			myIncludeOuterEvent = theIncludeOuterEvent;
 		}
 
 		@Override
 		public void xmlEvent(XMLEvent theEvent) {
-			myEvents.add(theEvent);
+			if (theEvent.isEndElement()) {
+				myDepth--;
+			}
+
+			if (myIncludeOuterEvent || myDepth > 0) {
+				myEvents.add(theEvent);
+			}
 
 			if (theEvent.isStartElement()) {
 				myDepth++;
 			}
+			
 			if (theEvent.isEndElement()) {
-				myDepth--;
 				if (myDepth == 0) {
 					myDt.setValue(myEvents);
 					pop();
@@ -769,21 +836,11 @@ class ParserState<T extends IElement> {
 			}
 		}
 
-	}
+		@Override
+		protected IElement getCurrentElement() {
+			return myDt;
+		}
 
-	public void string(String theData) {
-		myState.string(theData);
-	}
-
-	public boolean verifyNamespace(String theExpect, String theActual) {
-		return StringUtils.equals(theExpect, theActual);
-	}
-
-	/**
-	 * Invoked after any new XML event is individually processed, containing a copy of the XML event. This is basically intended for embedded XHTML content
-	 */
-	public void xmlEvent(XMLEvent theNextEvent) {
-		myState.xmlEvent(theNextEvent);
 	}
 
 }

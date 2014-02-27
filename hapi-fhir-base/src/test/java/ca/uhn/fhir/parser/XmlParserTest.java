@@ -16,6 +16,7 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.ResourceWithExtensionsA;
 import ca.uhn.fhir.model.api.Bundle;
+import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.resource.Observation;
 import ca.uhn.fhir.model.dstu.resource.ValueSet;
@@ -26,6 +27,12 @@ public class XmlParserTest {
 	public void testParseBundle() {
 		
 		//@formatter:off
+		String summaryText = 				
+				"<div xmlns=\"http://www.w3.org/1999/xhtml\">\n" + 
+				"      <p>Value set \"LOINC Codes for Cholesterol\": This is an example value set that includes \n" + 
+				"        all the LOINC codes for serum cholesterol from v2.36. \n" + 
+				"        Developed by: FHIR project team (example)</p></div>"; 
+
 		String msg = "<feed xmlns=\"http://www.w3.org/2005/Atom\">\n" + 
 				"  <title>FHIR Core Valuesets</title>\n" + 
 				"  <id>http://hl7.org/fhir/profile/valuesets</id>\n" + 
@@ -70,10 +77,8 @@ public class XmlParserTest {
 				"        </compose>\n" + 
 				"      </ValueSet>\n" + 
 				"    </content>\n" + 
-				"    <summary type=\"xhtml\"><div xmlns=\"http://www.w3.org/1999/xhtml\">\n" + 
-				"      <p>Value set &quot;LOINC Codes for Cholesterol&quot;: This is an example value set that includes \n" + 
-				"        all the LOINC codes for serum cholesterol from v2.36. \n" + 
-				"        Developed by: FHIR project team (example)</p>\n" + 
+				"    <summary type=\"xhtml\">"+
+				summaryText +
 				"    </summary>\n" + 
 				"  </entry>" +
 				"</feed>";
@@ -83,7 +88,17 @@ public class XmlParserTest {
 		Bundle bundle = p.parseBundle(msg);
 		
 		assertEquals("FHIR Core Valuesets", bundle.getTitle().getValue());
+		assertEquals("http://hl7.org/implement/standards/fhir/valuesets.xml", bundle.getLinkSelf().getValue());
+		assertEquals("2014-02-10T04:11:24.435+00:00", bundle.getUpdated().getValueAsString());
+		assertEquals(1, bundle.getEntries().size());
 		
+		BundleEntry entry = bundle.getEntries().get(0);
+		assertEquals("HL7, Inc (FHIR Project)", entry.getAuthorName().getValue());
+		assertEquals("http://hl7.org/fhir/valueset/256a5231-a2bb-49bd-9fea-f349d428b70d", entry.getId().getValue());
+		
+		ValueSet resource = (ValueSet) entry.getResource();
+		assertEquals("LOINC Codes for Cholesterol", resource.getName().getValue());
+		assertEquals(summaryText.trim(), entry.getSummary().getValueAsString().trim());
 	}
 	
 	@Test

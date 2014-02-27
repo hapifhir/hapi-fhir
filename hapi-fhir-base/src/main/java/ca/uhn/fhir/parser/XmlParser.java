@@ -1,13 +1,11 @@
 package ca.uhn.fhir.parser;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.FactoryConfigurationError;
@@ -425,26 +423,23 @@ public class XmlParser {
 					for (@SuppressWarnings("unchecked")
 					Iterator<Attribute> iter = elem.getAttributes(); iter.hasNext();) {
 						Attribute next = iter.next();
-						if (next.getName().getLocalPart().equals("value")) {
-							parserState.attributeValue(next, next.getValue());
-						}
+//						if (next.getName().getLocalPart().equals("value")) {
+							parserState.attributeValue(next.getName().getLocalPart(), next.getValue());
+//						}
 					}
 
 				} else if (nextEvent.isAttribute()) {
 					Attribute elem = (Attribute) nextEvent;
-					if (!FHIR_NS.equals(elem.getName().getNamespaceURI())) {
-						continue;
-					}
-					if (!"value".equals(elem.getName().getLocalPart())) {
-						continue;
-					}
-					parserState.attributeValue(elem, elem.getValue());
+					String name = (elem.getName().getLocalPart());
+					parserState.attributeValue(name, elem.getValue());
 				} else if (nextEvent.isEndElement()) {
 					EndElement elem = nextEvent.asEndElement();
+					
+					String name = elem.getName().getLocalPart();
 					String namespaceURI = elem.getName().getNamespaceURI();
-					if (!FHIR_NS.equals(namespaceURI) && !XHTML_NS.equals(namespaceURI)) {
-						continue;
-					}
+//					if (!FHIR_NS.equals(namespaceURI) && !XHTML_NS.equals(namespaceURI)) {
+//						continue;
+//					}
 
 					parserState.endingElement(elem);
 					if (parserState.isComplete()) {

@@ -7,10 +7,8 @@ import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 
-public class Bundle implements IElement {
+public class Bundle extends BaseBundle implements IElement {
 
-	private StringDt myAuthorUri;
-	private StringDt myAuthorName;
 	private List<BundleEntry> myEntries;
 	private StringDt myId;
 	private StringDt myLinkBase;
@@ -23,20 +21,6 @@ public class Bundle implements IElement {
 	private StringDt myTitle;
 	private IntegerDt myTotalResults;
 	private InstantDt  myUpdated;
-
-	public StringDt getAuthorUri() {
-		if (myAuthorUri == null) {
-			myAuthorUri = new StringDt();
-		}
-		return myAuthorUri;
-	}
-
-	public StringDt getAuthorName() {
-		if (myAuthorName == null) {
-			myAuthorName = new StringDt();
-		}
-		return myAuthorName;
-	}
 
 	public List<BundleEntry> getEntries() {
 		if (myEntries == null) {

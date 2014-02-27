@@ -81,6 +81,21 @@ public class ValueSet implements IResource {
 	@Child(name="expansion", order=13, min=0, max=1)	
 	private Expansion myExpansion;
 	
+	@Child(name="text", order=14, min=0, max=1)	
+	private NarrativeDt myText;
+	
+	
+	public NarrativeDt getText() {
+		if(myText==null) {
+			myText=new NarrativeDt();
+		}
+		return myText;
+	}
+
+	public void setText(NarrativeDt theText) {
+		myText = theText;
+	}
+
 	/**
 	 * Gets the value(s) for <b>identifier</b> (Logical id to reference this value set).
 	 * creating it if it does

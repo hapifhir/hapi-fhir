@@ -140,6 +140,9 @@ public abstract class BaseRuntimeDeclaredChildDefinition extends BaseRuntimeChil
 		private final Method myMutator;
 
 		private PlainMutator(Class<?> theTargetReturnType, Method theMutator) {
+			assert theTargetReturnType != null;
+			assert theMutator != null;
+			
 			myTargetReturnType = theTargetReturnType;
 			myMutator = theMutator;
 		}

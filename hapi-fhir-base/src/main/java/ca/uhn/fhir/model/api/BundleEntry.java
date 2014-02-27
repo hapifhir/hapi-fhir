@@ -1,70 +1,73 @@
 package ca.uhn.fhir.model.api;
 
-import java.util.Date;
+import ca.uhn.fhir.model.primitive.InstantDt;
+import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.model.primitive.XhtmlDt;
 
-public class BundleEntry {
-	private String myTitle;
-	private String myId;
-	private Date myUpdated;
-	private Date myPublished;
-	private String myAuthorName;
-	private String myAuthorUri;
+public class BundleEntry extends BaseBundle {
+	private StringDt myId;
+	private StringDt myLinkSelf;
+	private InstantDt myPublished;
 	private IResource myResource;
+	private StringDt myTitle;
+	private InstantDt myUpdated;
+	private XhtmlDt mySummary;
 
-	public String getTitle() {
-		return myTitle;
-	}
-
-	public void setTitle(String theTitle) {
-		myTitle = theTitle;
-	}
-
-	public String getId() {
+	public StringDt getId() {
+		if (myId == null) {
+			myId = new StringDt();
+		}
 		return myId;
 	}
 
-	public void setId(String theId) {
-		myId = theId;
+	public StringDt getLinkSelf() {
+		if (myLinkSelf == null) {
+			myLinkSelf = new StringDt();
+		}
+		return myLinkSelf;
 	}
 
-	public Date getUpdated() {
-		return myUpdated;
-	}
-
-	public void setUpdated(Date theUpdated) {
-		myUpdated = theUpdated;
-	}
-
-	public Date getPublished() {
+	public InstantDt getPublished() {
+		if (myPublished == null) {
+			myPublished = new InstantDt();
+		}
 		return myPublished;
-	}
-
-	public void setPublished(Date thePublished) {
-		myPublished = thePublished;
-	}
-
-	public String getAuthorName() {
-		return myAuthorName;
-	}
-
-	public void setAuthorName(String theAuthorName) {
-		myAuthorName = theAuthorName;
-	}
-
-	public String getAuthorUri() {
-		return myAuthorUri;
-	}
-
-	public void setAuthorUri(String theAuthorUri) {
-		myAuthorUri = theAuthorUri;
 	}
 
 	public IResource getResource() {
 		return myResource;
 	}
 
+	public StringDt getTitle() {
+		if (myTitle == null) {
+			myTitle = new StringDt();
+		}
+		return myTitle;
+	}
+
+	public InstantDt getUpdated() {
+		if (myUpdated == null) {
+			myUpdated = new InstantDt();
+		}
+		return myUpdated;
+	}
+
+	public void setLinkSelf(StringDt theLinkSelf) {
+		if (myLinkSelf == null) {
+			myLinkSelf = new StringDt();
+		}
+		myLinkSelf = theLinkSelf;
+	}
+
 	public void setResource(IResource theResource) {
 		myResource = theResource;
+	}
+
+	public XhtmlDt getSummary() {
+		if (mySummary == null) {
+			mySummary = new XhtmlDt();
+		}
+		return mySummary;
 	}
 
 }
