@@ -9,7 +9,7 @@ import ca.uhn.fhir.model.primitive.StringDt;
 
 public class Bundle implements IElement {
 
-	private StringDt myAuthorDevice;
+	private StringDt myAuthorUri;
 	private StringDt myAuthorName;
 	private List<BundleEntry> myEntries;
 	private StringDt myId;
@@ -24,11 +24,11 @@ public class Bundle implements IElement {
 	private IntegerDt myTotalResults;
 	private InstantDt  myUpdated;
 
-	public StringDt getAuthorDevice() {
-		if (myAuthorDevice == null) {
-			myAuthorDevice = new StringDt();
+	public StringDt getAuthorUri() {
+		if (myAuthorUri == null) {
+			myAuthorUri = new StringDt();
 		}
-		return myAuthorDevice;
+		return myAuthorUri;
 	}
 
 	public StringDt getAuthorName() {

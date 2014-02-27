@@ -83,4 +83,8 @@ public class XhtmlDt implements IPrimitiveDatatype<List<XMLEvent>> {
 		myValue = theValue;
 	}
 
+	public boolean hasContent() {
+		return myValue != null && myValue.size() > 0;
+	}
+
 }
