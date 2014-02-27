@@ -82,6 +82,7 @@ public class XmlParserTest {
 		XmlParser p = new FhirContext(ValueSet.class).newXmlParser();
 		Bundle bundle = p.parseBundle(msg);
 		
+		assertEquals("FHIR Core Valuesets", bundle.getTitle().getValue());
 		
 	}
 	

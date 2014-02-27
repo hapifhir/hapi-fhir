@@ -7,6 +7,7 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.FactoryConfigurationError;
@@ -54,6 +55,8 @@ public class XmlParser {
 	@SuppressWarnings("unused")
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(XmlParser.class);
 	private static final String XHTML_NS = "http://www.w3.org/1999/xhtml";
+
+	// private static final Set<String> RESOURCE_NAMESPACES;
 
 	private FhirContext myContext;
 	private XMLInputFactory myXmlInputFactory;
@@ -128,8 +131,7 @@ public class XmlParser {
 		return stringWriter.toString();
 	}
 
-	private void encodeChildElementToStreamWriter(XMLStreamWriter theEventWriter, IElement nextValue, String childName, BaseRuntimeElementDefinition<?> childDef, String theExtensionUrl)
-			throws XMLStreamException, DataFormatException {
+	private void encodeChildElementToStreamWriter(XMLStreamWriter theEventWriter, IElement nextValue, String childName, BaseRuntimeElementDefinition<?> childDef, String theExtensionUrl) throws XMLStreamException, DataFormatException {
 		switch (childDef.getChildType()) {
 		case PRIMITIVE_DATATYPE: {
 			theEventWriter.writeStartElement(childName);
@@ -172,8 +174,7 @@ public class XmlParser {
 		}
 	}
 
-	private void encodeCompositeElementChildrenToStreamWriter(IElement theElement, XMLStreamWriter theEventWriter, List<? extends BaseRuntimeChildDefinition> children) throws XMLStreamException,
-			DataFormatException {
+	private void encodeCompositeElementChildrenToStreamWriter(IElement theElement, XMLStreamWriter theEventWriter, List<? extends BaseRuntimeChildDefinition> children) throws XMLStreamException, DataFormatException {
 		for (BaseRuntimeChildDefinition nextChild : children) {
 			List<? extends IElement> values = nextChild.getAccessor().getValues(theElement);
 			if (values == null || values.isEmpty()) {
@@ -204,8 +205,7 @@ public class XmlParser {
 		}
 	}
 
-	private void encodeCompositeElementToStreamWriter(IElement theElement, XMLStreamWriter theEventWriter, BaseRuntimeElementCompositeDefinition<?> resDef) throws XMLStreamException,
-			DataFormatException {
+	private void encodeCompositeElementToStreamWriter(IElement theElement, XMLStreamWriter theEventWriter, BaseRuntimeElementCompositeDefinition<?> resDef) throws XMLStreamException, DataFormatException {
 		encodeExtensionsIfPresent(theEventWriter, theElement);
 		encodeCompositeElementChildrenToStreamWriter(theElement, theEventWriter, resDef.getExtensions());
 		encodeCompositeElementChildrenToStreamWriter(theElement, theEventWriter, resDef.getChildren());
@@ -371,15 +371,17 @@ public class XmlParser {
 	}
 
 	private Bundle parseBundle(XMLEventReader theStreamReader) {
-		// TODO Auto-generated method stub
-		return null;
+		ParserState<Bundle> parserState = ParserState.getPreAtomInstance(myContext);
+		return doXmlLoop(theStreamReader, parserState);
 	}
 
-	public IResource parseResource(XMLEventReader streamReader) {
+	public IResource parseResource(XMLEventReader theStreamReader) {
+		ParserState<IResource> parserState = ParserState.getPreResourceInstance(myContext);
+		return doXmlLoop(theStreamReader, parserState);
+	}
 
+	private <T extends IElement> T doXmlLoop(XMLEventReader streamReader, ParserState<T> parserState) {
 		try {
-			ParserState parserState = ParserState.getPreResourceInstance(myContext);
-
 			while (streamReader.hasNext()) {
 				XMLEvent nextEvent = streamReader.nextEvent();
 				if (nextEvent.isStartElement()) {
@@ -426,7 +428,7 @@ public class XmlParser {
 
 					parserState.endingElement(elem);
 					if (parserState.isComplete()) {
-						return (IResource) parserState.getObject();
+						return parserState.getObject();
 					}
 				} else {
 					parserState.otherEvent(nextEvent);

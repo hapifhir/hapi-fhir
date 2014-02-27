@@ -23,6 +23,7 @@ import ca.uhn.fhir.model.api.ICompositeDatatype;
 import ca.uhn.fhir.model.api.ICompositeElement;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IPrimitiveDatatype;
+import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.IResourceBlock;
 import ca.uhn.fhir.model.api.ISupportsUndeclaredExtensions;
 import ca.uhn.fhir.model.api.ResourceReference;
@@ -30,14 +31,12 @@ import ca.uhn.fhir.model.api.UndeclaredExtension;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.XhtmlDt;
 
-class ParserState {
+class ParserState<T extends IElement> {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ParserState.class);
 
 	private FhirContext myContext;
-
-	private Object myObject;
-
+	private T myObject;
 	private BaseState myState;
 
 	private ParserState(FhirContext theContext) {
@@ -60,7 +59,7 @@ class ParserState {
 		myState.enteringNewElementExtension(theElem, theUrlAttr);
 	}
 
-	public Object getObject() {
+	public T getObject() {
 		return myObject;
 	}
 
@@ -82,9 +81,15 @@ class ParserState {
 		myState = theState;
 	}
 
-	public static ParserState getPreResourceInstance(FhirContext theContext) throws DataFormatException {
-		ParserState retVal = new ParserState(theContext);
+	public static ParserState<IResource> getPreResourceInstance(FhirContext theContext) throws DataFormatException {
+		ParserState<IResource> retVal = new ParserState<IResource>(theContext);
 		retVal.push(retVal.new PreResourceState());
+		return retVal;
+	}
+
+	public static ParserState<Bundle> getPreAtomInstance(FhirContext theContext) throws DataFormatException {
+		ParserState<Bundle> retVal = new ParserState<Bundle>(theContext);
+		retVal.push(retVal.new PreAtomState());
 		return retVal;
 	}
 
@@ -156,6 +161,10 @@ class ParserState {
 		public void enteringNewElement(StartElement theElement, String theLocalPart) throws DataFormatException {
 			if (theLocalPart.equals("title")) {
 				push(new AtomPrimitiveState(myInstance.getTitle()));
+			}else if ("id".equals(theLocalPart)) {
+				push(new AtomPrimitiveState(myInstance.getId()));
+			}else if ("link".equals(theLocalPart)) {
+				
 			}
 		}
 
@@ -204,9 +213,10 @@ class ParserState {
 			return null;
 		}
 
+		@SuppressWarnings("unchecked")
 		@Override
 		public void wereBack() {
-			myObject = myInstance;
+			myObject = (T) myInstance;
 		}
 
 		@Override
@@ -359,11 +369,12 @@ class ParserState {
 			ourLog.debug("Ignoring attribute value: {}", theValue);
 		}
 
+		@SuppressWarnings("unchecked")
 		@Override
 		public void endingElement(EndElement theElem) {
 			pop();
 			if (myState == null) {
-				myObject = myInstance;
+				myObject = (T) myInstance;
 			}
 		}
 
@@ -559,9 +570,10 @@ class ParserState {
 			// ignore
 		}
 
+		@SuppressWarnings("unchecked")
 		@Override
 		public void wereBack() {
-			myObject = myInstance;
+			myObject = (T) myInstance;
 		}
 
 	}
