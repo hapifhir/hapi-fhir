@@ -1,21 +1,26 @@
 package ca.uhn.fhir.ws;
 
-import junit.framework.TestCase;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
-import org.apache.commons.httpclient.methods.PostMethod;
-import org.apache.commons.httpclient.methods.StringRequestEntity;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
-import org.junit.Before;
-import org.junit.Test;
-
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
+
+import junit.framework.TestCase;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.conn.PoolingClientConnectionManager;
+import org.apache.http.impl.conn.SchemeRegistryFactory;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.servlet.ServletHandler;
+import org.eclipse.jetty.servlet.ServletHolder;
+import org.junit.Before;
+import org.junit.Test;
 
 /**
  * Created by dsotnikov on 2/25/2014.
@@ -52,13 +57,13 @@ public class ResourceTest extends TestCase {
         server.setHandler(proxyHandler);
         server.start();
 
-        MultiThreadedHttpConnectionManager connectionManager = new MultiThreadedHttpConnectionManager();
-        HttpClient client = new HttpClient(connectionManager);
+        PoolingClientConnectionManager connectionManager = new PoolingClientConnectionManager(SchemeRegistryFactory.createDefault(), 5000, TimeUnit.MILLISECONDS);
+        HttpClient client = new DefaultHttpClient(connectionManager);
+        
 
-
-        PostMethod httpPost = new PostMethod("http://localhost:3000/foo/bar?bar=123&more=params");
-        httpPost.setRequestEntity(new StringRequestEntity("test", "application/json", "UTF-8"));
-        int status = client.executeMethod(httpPost);
+        HttpPost httpPost = new HttpPost("http://localhost:3000/foo/bar?bar=123&more=params");
+        httpPost.setEntity(new StringEntity("test", "application/json", "UTF-8"));
+        HttpResponse status = client.execute(httpPost);
         System.out.println(status);
 
 //        server.join();

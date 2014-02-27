@@ -57,6 +57,14 @@
 			<optional>true</optional>
 		</dependency>
 
+		<!-- Client -->
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient</artifactId>
+			<version>4.2.3</version>
+		</dependency>
+
+
 		<!-- Testing -->
 		<dependency>
 			<groupId>junit</groupId>
@@ -76,6 +84,19 @@
 			<version>1.5</version>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-servlets</artifactId>
+			<version>9.1.1.v20140108</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-servlet</artifactId>
+			<version>9.1.1.v20140108</version>
+			<scope>test</scope>
+		</dependency>
+
 	</dependencies>
 
 	<build>

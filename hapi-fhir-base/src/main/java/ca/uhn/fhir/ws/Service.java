@@ -1,14 +1,15 @@
 package ca.uhn.fhir.ws;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.dstu.resource.Observation;
-import ca.uhn.fhir.parser.XmlParser;
-import ca.uhn.fhir.ws.exceptions.MethodNotFoundException;
-import ca.uhn.fhir.ws.operations.DELETE;
-import ca.uhn.fhir.ws.operations.GET;
-import ca.uhn.fhir.ws.operations.POST;
-import ca.uhn.fhir.ws.operations.PUT;
-import org.apache.log4j.Logger;
+import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -17,16 +18,21 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.File;
-import java.io.IOException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.net.URL;
-import java.util.*;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.XmlParser;
+import ca.uhn.fhir.ws.exceptions.MethodNotFoundException;
+import ca.uhn.fhir.ws.operations.DELETE;
+import ca.uhn.fhir.ws.operations.GET;
+import ca.uhn.fhir.ws.operations.POST;
+import ca.uhn.fhir.ws.operations.PUT;
 
 public class Service extends HttpServlet {
 
-    private static final Logger log = Logger.getLogger(Service.class);
+    private static final Logger log = LoggerFactory.getLogger(Service.class);
     private static final String handlerPackage = "ca.uhn.rest.handlers";
 
     //map of request handler resources keyed by resource name
@@ -53,7 +59,7 @@ public class Service extends HttpServlet {
                 log.debug("Looking up:: " + name);
                 handlerPackage = (String) env.lookup(name);
             } catch (NamingException ne) {
-                log.debug(ne);
+                log.debug("NamingException", ne);
             }
             if (handlerPackage != null) {
                 log.debug("Found:: " + name);
