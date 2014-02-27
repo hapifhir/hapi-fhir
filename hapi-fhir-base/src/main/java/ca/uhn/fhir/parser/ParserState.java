@@ -55,14 +55,12 @@ class ParserState<T extends IElement> {
 		public void enteringNewElement(String theNamespaceURI, String theLocalPart) throws DataFormatException {
 			if ("name".equals(theLocalPart)) {
 				push(new AtomPrimitiveState(myInstance.getAuthorName()));
-			}else if ("uri".equals(theLocalPart)) {
+			} else if ("uri".equals(theLocalPart)) {
 				push(new AtomPrimitiveState(myInstance.getAuthorUri()));
-			}else {
+			} else {
 				throw new DataFormatException("Unexpected element: " + theLocalPart);
 			}
 		}
-
-		
 
 	}
 
@@ -130,7 +128,6 @@ class ParserState<T extends IElement> {
 		public AtomPrimitiveState(IPrimitiveDatatype<?> thePrimitive) {
 			myPrimitive = thePrimitive;
 		}
-
 
 		@Override
 		public void endingElement(EndElement theElem) throws DataFormatException {
@@ -204,10 +201,8 @@ class ParserState<T extends IElement> {
 			throw new DataFormatException("Found unexpected element content");
 		}
 
-
 	}
 
-	
 	private static final QName ATOM_LINK_REL_ATTRIBUTE = new QName("rel");
 	private static final QName ATOM_LINK_HREF_ATTRIBUTE = new QName("href");
 
@@ -232,7 +227,9 @@ class ParserState<T extends IElement> {
 
 		@Override
 		public void enteringNewElement(String theNamespaceURI, String theLocalPart) throws DataFormatException {
-			if (theLocalPart.equals("title")) {
+			if ("entry".equals(theLocalPart) && verifyNamespace(XmlParser.ATOM_NS, theNamespaceURI)) {
+				
+			} else if (theLocalPart.equals("title")) {
 				push(new AtomPrimitiveState(myInstance.getTitle()));
 			} else if ("id".equals(theLocalPart)) {
 				push(new AtomPrimitiveState(myInstance.getId()));
@@ -244,8 +241,8 @@ class ParserState<T extends IElement> {
 				push(new AtomPrimitiveState(myInstance.getUpdated()));
 			} else if ("author".equals(theLocalPart)) {
 				push(new AtomAuthorState(myInstance));
-			} 
-			
+			}
+
 			// TODO: handle category and DSig
 		}
 
