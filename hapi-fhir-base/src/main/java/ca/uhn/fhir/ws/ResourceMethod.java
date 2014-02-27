@@ -36,8 +36,8 @@ public class ResourceMethod {
         this.resourceType = resourceType;
     }
 
-    public IResource getResourceType() throws IllegalAccessException, InstantiationException {
-        return (IResource)resourceType.newInstance();
+    public Class getResourceType() throws IllegalAccessException, InstantiationException {
+        return resourceType.getClass();
     }
 
     public RequestType getRequestType() {

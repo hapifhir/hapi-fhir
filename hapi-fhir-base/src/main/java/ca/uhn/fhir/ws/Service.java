@@ -171,7 +171,7 @@ public class Service extends HttpServlet {
             ResourceMethod resourceMethod = resource.getMethod(params.keySet());
             if (null == resourceMethod) throw new MethodNotFoundException("No resource method available for the supplied parameters " + params);
 
-            FhirContext ctx = new FhirContext(resourceMethod.getResourceType().getClass());
+            FhirContext ctx = new FhirContext(resourceMethod.getResourceType());
             XmlParser p = new XmlParser(ctx);
             response.getWriter().write(p.encodeResourceToString(resourceMethod.invoke(params)));
         } catch (Throwable t) {
