@@ -6,21 +6,11 @@ import ca.uhn.fhir.starter.model.BaseElement;
 
 public class DatatypeParser extends BaseParser {
 
-	private String myDatatypeName;
-
 	@Override
 	protected String getTemplate() {
 		return "/dt_composite.vm";
 	}
 
-	public void setDatatypeName(String theString) {
-		myDatatypeName=theString;
-	}
-
-	@Override
-	protected String getFilename() {
-		return myDatatypeName.toLowerCase() + ".xml";
-	}
 
 //	@Override
 //	protected void parseBasicElements(Element theRowXml, BaseElement theTarget) {

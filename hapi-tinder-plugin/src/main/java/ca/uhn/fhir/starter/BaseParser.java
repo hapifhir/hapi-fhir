@@ -12,6 +12,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.ObjectUtils;
@@ -48,6 +49,7 @@ public abstract class BaseParser {
 	private String myDirectory;
 	private ArrayList<Extension> myExtensions;
 	private String myOutputFile;
+	private List<Resource> myResources = new ArrayList<Resource>();
 
 	public void parse() throws Exception {
 		File baseDir = new File(myDirectory);
@@ -55,75 +57,82 @@ public abstract class BaseParser {
 			throw new Exception(myDirectory + " does not exist or is not a directory");
 		}
 
-		File resourceSpreadsheetFile = new File(baseDir, getFilename());
-		if (resourceSpreadsheetFile.exists() == false) {
-			throw new Exception(resourceSpreadsheetFile.getAbsolutePath() + " does not exist");
+		for (File nextFile : baseDir.listFiles()) {
+			if (isSpreadsheet(nextFile.getAbsolutePath())) {
+				ourLog.info("Scanning file: {}", nextFile.getAbsolutePath());
+				
+				File resourceSpreadsheetFile = nextFile;
+				if (resourceSpreadsheetFile.exists() == false) {
+					throw new Exception(resourceSpreadsheetFile.getAbsolutePath() + " does not exist");
+				}
+
+				Document file = XMLUtils.parse(new FileInputStream(resourceSpreadsheetFile), false);
+				Element dataElementsSheet = (Element) file.getElementsByTagName("Worksheet").item(0);
+				NodeList tableList = dataElementsSheet.getElementsByTagName("Table");
+				Element table = (Element) tableList.item(0);
+
+				NodeList rows = table.getElementsByTagName("Row");
+
+				Element defRow = (Element) rows.item(0);
+				parseFirstRow(defRow);
+
+				Element resourceRow = (Element) rows.item(1);
+				Resource resource = new Resource();
+				myResources.add(resource);
+				
+				parseBasicElements(resourceRow, resource);
+
+				Map<String, BaseElement> elements = new HashMap<String, BaseElement>();
+				elements.put(resource.getElementName(), resource);
+
+				// Map<String,String> blockFullNameToShortName = new HashMap<String,String>();
+
+				for (int i = 2; i < rows.getLength(); i++) {
+					Element nextRow = (Element) rows.item(i);
+					String name = cellValue(nextRow, 0);
+					if (name == null || name.startsWith("!")) {
+						continue;
+					}
+
+					String type = cellValue(nextRow, myColType);
+
+					Child elem;
+					if (StringUtils.isBlank(type) || type.startsWith("=")) {
+						elem = new ResourceBlock();
+					} else if (type.startsWith("@")) {
+						// type = type.substring(type.lastIndexOf('.')+1);
+						elem = new ResourceBlockCopy();
+					} else if (type.equals("*")) {
+						elem = new AnyChild();
+					} else {
+						elem = new Child();
+					}
+
+					parseBasicElements(nextRow, elem);
+
+					elements.put(elem.getName(), elem);
+					BaseElement parent = elements.get(elem.getElementParentName());
+					if (parent == null) {
+						throw new Exception("Can't find element " + elem.getElementParentName() + "  -  Valid values are: " + elements.keySet());
+					}
+					parent.addChild(elem);
+
+					/*
+					 * Find simple setters
+					 */
+					if (elem instanceof Child) {
+						scanForSimpleSetters(elem);
+					}
+
+				}
+
+			}
 		}
 
-		Document file = XMLUtils.parse(new FileInputStream(resourceSpreadsheetFile), false);
-		Element dataElementsSheet = (Element) file.getElementsByTagName("Worksheet").item(0);
-		NodeList tableList = dataElementsSheet.getElementsByTagName("Table");
-		Element table = (Element) tableList.item(0);
-
-		NodeList rows = table.getElementsByTagName("Row");
-
-		Element defRow = (Element) rows.item(0);
-		parseFirstRow(defRow);
-
-		Element resourceRow = (Element) rows.item(1);
-		Resource resource = new Resource();
-		parseBasicElements(resourceRow, resource);
-
-		Map<String, BaseElement> elements = new HashMap<String, BaseElement>();
-		elements.put(resource.getElementName(), resource);
-
-//		Map<String,String> blockFullNameToShortName = new HashMap<String,String>();
+		ourLog.info("Parsed {} resources", myResources.size());
 		
-		
-		for (int i = 2; i < rows.getLength(); i++) {
-			Element nextRow = (Element) rows.item(i);
-			String name = cellValue(nextRow, 0);
-			if (name == null || name.startsWith("!")) {
-				continue;
-			}
-
-			String type = cellValue(nextRow, myColType);
-			
-			Child elem;
-			if (StringUtils.isBlank(type) || type.startsWith("=")) {
-				elem = new ResourceBlock();
-			} else if (type.startsWith("@")) {
-//				type = type.substring(type.lastIndexOf('.')+1);
-				elem=new ResourceBlockCopy();
-			} else if (type.equals("*")) {
-				elem = new AnyChild();
-			} else {
-				elem = new Child();
-			}
-
-			parseBasicElements(nextRow, elem);
-
-			elements.put(elem.getName(), elem);
-			BaseElement parent = elements.get(elem.getElementParentName());
-			if (parent == null) {
-				throw new Exception("Can't find element " + elem.getElementParentName() + "  -  Valid values are: " + elements.keySet());
-			}
-			parent.addChild(elem);
-
-			/*
-			 * Find simple setters
-			 */
-			if (elem instanceof Child) {
-				scanForSimpleSetters(elem);
-			}
-
-		}
-
-		write(resource);
-
 	}
-	
-	
+
 	
 
 	private void scanForSimpleSetters(Child theElem) {
@@ -148,7 +157,7 @@ public abstract class BaseParser {
 			ss.setDatatype(childDt.getSimpleName());
 			ss.setSuffix(simpleSetter.suffix());
 			theElem.getSimpleSetters().add(ss);
-			
+
 			Annotation[][] paramAnn = nextConstructor.getParameterAnnotations();
 			Class<?>[] paramTypes = nextConstructor.getParameterTypes();
 			for (int i = 0; i < paramTypes.length; i++) {
@@ -160,7 +169,8 @@ public abstract class BaseParser {
 		}
 	}
 
-	private ca.uhn.fhir.model.api.annotation.SimpleSetter.Parameter findAnnotation(Class<?> theBase, Annotation[] theAnnotations, Class<ca.uhn.fhir.model.api.annotation.SimpleSetter.Parameter> theClass) {
+	private ca.uhn.fhir.model.api.annotation.SimpleSetter.Parameter findAnnotation(Class<?> theBase, Annotation[] theAnnotations,
+			Class<ca.uhn.fhir.model.api.annotation.SimpleSetter.Parameter> theClass) {
 		for (Annotation next : theAnnotations) {
 			if (theClass.equals(next.annotationType())) {
 				return (ca.uhn.fhir.model.api.annotation.SimpleSetter.Parameter) next;
@@ -235,8 +245,6 @@ public abstract class BaseParser {
 		w.close();
 	}
 
-	protected abstract String getFilename();
-
 	protected abstract String getTemplate();
 
 	protected void parseBasicElements(Element theRowXml, BaseElement theTarget) {
@@ -244,7 +252,6 @@ public abstract class BaseParser {
 		theTarget.setName(name);
 
 		theTarget.setElementName(name);
-		
 
 		String cardValue = cellValue(theRowXml, myColCard);
 		if (cardValue != null && cardValue.contains("..")) {
@@ -288,6 +295,10 @@ public abstract class BaseParser {
 		}
 
 		return null;
+	}
+
+	protected boolean isSpreadsheet(String theFileName) {
+		return true;
 	}
 
 }

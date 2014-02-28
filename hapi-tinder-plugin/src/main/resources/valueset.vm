@@ -9,13 +9,13 @@ public class ${valueSet.className} extends ValueSetEnumeration {
 	 * Identifier for this Value Set:
 	 * ${valueSet.id}
 	 */
-	public static final String IDENTIFIER = "${valueSet.id}";
+	public static final String VALUESET_IDENTIFIER = "${valueSet.id}";
 
 	/**
 	 * Constructor - should not be called directly
 	 */
 	protected ${valueSet.className}(String theCode) {
-		super(theCode, IDENTIFIER);
+		super(theCode, VALUESET_IDENTIFIER);
 	}
 
 #foreach ($code in $valueSet.codes)

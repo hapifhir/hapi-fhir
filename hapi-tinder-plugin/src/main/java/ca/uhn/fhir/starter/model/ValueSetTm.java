@@ -65,7 +65,7 @@ public class ValueSetTm {
 		private String myDisplay;
 
 		public Code(String theCode, String theDisplay, String theDefinition) {
-			myCode =theCode.trim();
+			myCode = theCode.trim();
 			myDisplay = theDisplay;
 			myDefinition = theDefinition;
 		}
@@ -75,10 +75,27 @@ public class ValueSetTm {
 		}
 
 		public String getCodeEnumValue() {
-			String retVal = myCode.toUpperCase().replace(' ', '_');
+			String retVal = myCode.toUpperCase().replace(' ', '_').replace('-', '_').replace('/', '_').replace('.', '_');
+			if ("=".equals(retVal)) {
+				retVal = "EQUALS";
+			}
+			if ("<=".equals(retVal)) {
+				retVal = "LESSTHAN_OR_EQUALS";
+			}
+			if ("<".equals(retVal)) {
+				retVal = "LESSTHAN";
+			}
+			if (">=".equals(retVal)) {
+				retVal = "GREATERTHAN_OR_EQUALS";
+			}
+			if (">".equals(retVal)) {
+				retVal = "GREATERTHAN";
+			}
+
 			if (!Character.isJavaIdentifierStart(retVal.charAt(0))) {
 				retVal = '_' + retVal;
 			}
+
 			return retVal;
 		}
 

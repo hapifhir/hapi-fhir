@@ -34,23 +34,21 @@ public class ValueSetParser {
 
 	public static void main(String[] args) throws FileNotFoundException, IOException {
 
-		ValueSetParser p = new ValueSetParser();
-		p.setDirectory("src/test/resources/vs/");
 //		p.setOutputDirectory("../hapi-fhir-base/src/main/java/ca/uhn/fhir/model/dstu/valueset/");
-		p.setOutputDirectory("target/generated/valuesets/ca/uhn/fhir/model/dstu/valueset");
-		p.parse();
+//		p.setOutputDirectory("target/generated/valuesets/ca/uhn/fhir/model/dstu/valueset");
+//		p.parse();
 
 	}
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ValueSetParser.class);
 
-	private void parse() throws FileNotFoundException, IOException {
+	public void parse() throws FileNotFoundException, IOException {
 		String string = IOUtils.toString(new FileReader(myDirectory + "valuesets.xml"));
 		Bundle bundle = new FhirContext(ValueSet.class).newXmlParser().parseBundle(string);
 
 		int vsCount = 0;
 		int conceptCount = 0;
-		List<ca.uhn.fhir.starter.model.ValueSetTm> valueSets = new ArrayList<>();
+		List<ca.uhn.fhir.starter.model.ValueSetTm> valueSets = new ArrayList<ValueSetTm>();
 		for (BundleEntry next : bundle.getEntries()) {
 			ValueSet nextVs = (ValueSet) next.getResource();
 			conceptCount += nextVs.getDefine().getConcept().size();
@@ -74,16 +72,14 @@ public class ValueSetParser {
 				vs.getCodes().add(new Code(nextCodeValue, nextCodeDisplay, nextCodeDefinition));
 			}
 
-			if (vsCount > 5) {
-				break;
-			}
+//			if (vsCount > 5) {
+//				break;
+//			}
 		}
-
-		write(valueSets);
 
 	}
 
-	private void write(List<ValueSetTm> theValueSets) throws IOException {
+	public void write(List<ValueSetTm> theValueSets) throws IOException {
 		for (ValueSetTm nextValueSetTm : theValueSets) {
 			write(nextValueSetTm);
 		}
@@ -128,10 +124,14 @@ public class ValueSetParser {
 			if (next.startsWith("(") && next.endsWith(")")) {
 				continue;
 			}
-			if (StringUtils.isAllUpperCase(next)) {
-				next = WordUtils.capitalize(next);
+			next = next.replace("/", "");
+			next = next.replace("-", "");
+			next = next.replace(',', '_');
+			next = next.replace('.', '_');
+			if (next.contains(" ")) {
+				next = WordUtils.capitalizeFully(next);
 			}
-			b.append(WordUtils.capitalize(next));
+			b.append(next);
 		}
 		return b.toString();
 	}
