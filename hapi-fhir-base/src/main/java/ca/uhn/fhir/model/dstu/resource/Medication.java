@@ -37,7 +37,7 @@ import ca.uhn.fhir.model.dstu.composite.*;
  * </p> 
  */
 @ResourceDef(name="Medication")
-public class Medication implements IResource {
+public class Medication extends BaseElement implements IResource {
 
 	@Child(name="name", type=StringDt.class, order=0, min=0, max=1)	
 	private StringDt myName;
@@ -293,7 +293,7 @@ public class Medication implements IResource {
      * </p> 
 	 */
 	@Block(name="Medication.product")	
-	public static class Product implements IResourceBlock {
+	public static class Product extends BaseElement implements IResourceBlock {
 	
 	@Child(name="form", type=CodeableConceptDt.class, order=0, min=0, max=1)	
 	private CodeableConceptDt myForm;
@@ -373,7 +373,7 @@ public class Medication implements IResource {
      * </p> 
 	 */
 	@Block(name="Medication.product.ingredient")	
-	public static class ProductIngredient implements IResourceBlock {
+	public static class ProductIngredient extends BaseElement implements IResourceBlock {
 	
 	@Child(name="item", order=0, min=1, max=1)
 	@ChildResource(types= {

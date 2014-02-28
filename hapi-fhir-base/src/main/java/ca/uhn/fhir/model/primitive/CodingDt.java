@@ -1,6 +1,7 @@
 package ca.uhn.fhir.model.primitive;
 
-import ca.uhn.fhir.model.api.BaseCompositeDatatype;
+import ca.uhn.fhir.model.api.BaseElement;
+import ca.uhn.fhir.model.api.ICompositeDatatype;
 import ca.uhn.fhir.model.api.ResourceReference;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.ChildResource;
@@ -9,7 +10,7 @@ import ca.uhn.fhir.model.dstu.resource.ValueSet;
 
 
 @DatatypeDef(name="Coding")
-public class CodingDt extends BaseCompositeDatatype {
+public class CodingDt extends BaseElement implements ICompositeDatatype {
 
 	@Child(name="system", order=0)
 	private UriDt mySystem;

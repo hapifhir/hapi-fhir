@@ -37,7 +37,7 @@ import ca.uhn.fhir.model.dstu.composite.*;
  * </p> 
  */
 @ResourceDef(name="Organization")
-public class Organization implements IResource {
+public class Organization extends BaseElement implements IResource {
 
 	@Child(name="identifier", type=IdentifierDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)	
 	private List<IdentifierDt> myIdentifier;
@@ -362,7 +362,7 @@ public class Organization implements IResource {
      * </p> 
 	 */
 	@Block(name="Organization.contact")	
-	public static class Contact implements IResourceBlock {
+	public static class Contact extends BaseElement implements IResourceBlock {
 	
 	@Child(name="purpose", type=CodeableConceptDt.class, order=0, min=0, max=1)	
 	private CodeableConceptDt myPurpose;

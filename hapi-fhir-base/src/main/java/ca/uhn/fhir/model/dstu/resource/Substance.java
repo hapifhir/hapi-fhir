@@ -37,7 +37,7 @@ import ca.uhn.fhir.model.dstu.composite.*;
  * </p> 
  */
 @ResourceDef(name="Substance")
-public class Substance implements IResource {
+public class Substance extends BaseElement implements IResource {
 
 	@Child(name="type", type=CodeableConceptDt.class, order=0, min=1, max=1)	
 	private CodeableConceptDt myType;
@@ -191,7 +191,7 @@ public class Substance implements IResource {
      * </p> 
 	 */
 	@Block(name="Substance.instance")	
-	public static class Instance implements IResourceBlock {
+	public static class Instance extends BaseElement implements IResourceBlock {
 	
 	@Child(name="identifier", type=IdentifierDt.class, order=0, min=0, max=1)	
 	private IdentifierDt myIdentifier;
@@ -316,7 +316,7 @@ public class Substance implements IResource {
      * </p> 
 	 */
 	@Block(name="Substance.ingredient")	
-	public static class Ingredient implements IResourceBlock {
+	public static class Ingredient extends BaseElement implements IResourceBlock {
 	
 	@Child(name="quantity", type=RatioDt.class, order=0, min=0, max=1)	
 	private RatioDt myQuantity;

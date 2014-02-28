@@ -22,7 +22,7 @@ import ca.uhn.fhir.model.primitive.*;
  * </p> 
  */
 @DatatypeDef(name="${className}") 
-public class ${className}Dt extends BaseCompositeDatatype {
+public class ${className}Dt extends BaseElement implements ICompositeDatatype {
 
 #childExtensionFields( $childExtensionTypes )
 #childVars( $children )

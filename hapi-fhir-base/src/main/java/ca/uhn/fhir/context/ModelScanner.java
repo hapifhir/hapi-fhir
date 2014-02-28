@@ -219,14 +219,14 @@ class ModelScanner {
 			scanCompositeElementForChildren(next, theDefinition, elementNames, orderToElementDef, orderToExtensionDef);
 		}
 
-		while (orderToElementDef.size() > 0 && orderToElementDef.firstKey() < 0) {
-			BaseRuntimeDeclaredChildDefinition elementDef = orderToElementDef.remove(orderToElementDef.firstKey());
-			if (elementDef.getElementName().equals("identifier")) {
-				orderToElementDef.put(theIdentifierOrder, elementDef);
-			} else {
-				throw new ConfigurationException("Don't know how to handle element: " + elementDef.getElementName());
-			}
-		}
+//		while (orderToElementDef.size() > 0 && orderToElementDef.firstKey() < 0) {
+//			BaseRuntimeDeclaredChildDefinition elementDef = orderToElementDef.remove(orderToElementDef.firstKey());
+//			if (elementDef.getElementName().equals("identifier")) {
+//				orderToElementDef.put(theIdentifierOrder, elementDef);
+//			} else {
+//				throw new ConfigurationException("Don't know how to handle element: " + elementDef.getElementName());
+//			}
+//		}
 
 		TreeSet<Integer> orders = new TreeSet<Integer>();
 		orders.addAll(orderToElementDef.keySet());
@@ -247,6 +247,8 @@ class ModelScanner {
 
 	@SuppressWarnings("unchecked")
 	private void scanCompositeElementForChildren(Class<? extends ICompositeElement> theClass, BaseRuntimeElementCompositeDefinition<?> theDefinition, Set<String> elementNames, TreeMap<Integer, BaseRuntimeDeclaredChildDefinition> theOrderToElementDef, TreeMap<Integer,BaseRuntimeDeclaredChildDefinition> theOrderToExtensionDef) {
+		int baseElementOrder = theOrderToElementDef.isEmpty() ? 0 : theOrderToElementDef.lastEntry().getKey() + 1;
+		
 		for (Field next : theClass.getDeclaredFields()) {
 
 			Narrative hasNarrative = next.getAnnotation(Narrative.class);
@@ -268,7 +270,7 @@ class ModelScanner {
 			}
 
 			String elementName = element.name();
-			int order = element.order();
+			int order = element.order() + baseElementOrder;
 			int min = element.min();
 			int max = element.max();
 			TreeMap<Integer, BaseRuntimeDeclaredChildDefinition> orderMap = theOrderToElementDef;
@@ -294,7 +296,7 @@ class ModelScanner {
 			}
 
 			if (orderMap.containsKey(order)) {
-				throw new ConfigurationException("Detected duplicate field order '" + order + "' for element named '" + elementName + "' in type '" + theClass.getCanonicalName() + "'");
+				throw new ConfigurationException("Detected duplicate field order '" + element.order() + "' for element named '" + elementName + "' in type '" + theClass.getCanonicalName() + "'");
 			}
 
 			if (elementNames.contains(elementName)) {

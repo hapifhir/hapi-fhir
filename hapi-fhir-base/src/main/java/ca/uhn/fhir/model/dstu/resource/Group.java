@@ -37,7 +37,7 @@ import ca.uhn.fhir.model.dstu.composite.*;
  * </p> 
  */
 @ResourceDef(name="Group")
-public class Group implements IResource {
+public class Group extends BaseElement implements IResource {
 
 	@Child(name="identifier", type=IdentifierDt.class, order=0, min=0, max=1)	
 	private IdentifierDt myIdentifier;
@@ -327,7 +327,7 @@ public class Group implements IResource {
      * </p> 
 	 */
 	@Block(name="Group.characteristic")	
-	public static class Characteristic implements IResourceBlock {
+	public static class Characteristic extends BaseElement implements IResourceBlock {
 	
 	@Child(name="code", type=CodeableConceptDt.class, order=0, min=1, max=1)	
 	private CodeableConceptDt myCode;

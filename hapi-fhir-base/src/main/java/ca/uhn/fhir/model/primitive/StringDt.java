@@ -1,12 +1,13 @@
 package ca.uhn.fhir.model.primitive;
 
-import ca.uhn.fhir.model.api.BasePrimitiveDatatype;
+import ca.uhn.fhir.model.api.BaseElement;
+import ca.uhn.fhir.model.api.IPrimitiveDatatype;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.SimpleSetter;
 import ca.uhn.fhir.parser.DataFormatException;
 
 @DatatypeDef(name = "string")
-public class StringDt extends BasePrimitiveDatatype<String> {
+public class StringDt  extends BaseElement implements IPrimitiveDatatype<String> {
 
 	private String myValue;
 

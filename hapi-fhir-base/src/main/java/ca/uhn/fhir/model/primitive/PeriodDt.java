@@ -1,12 +1,13 @@
 package ca.uhn.fhir.model.primitive;
 
-import ca.uhn.fhir.model.api.BaseCompositeDatatype;
-import ca.uhn.fhir.model.api.annotation.Constraint;
+import ca.uhn.fhir.model.api.BaseElement;
+import ca.uhn.fhir.model.api.ICompositeDatatype;
 import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Constraint;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 
 @DatatypeDef(name="Period")
-public class PeriodDt extends BaseCompositeDatatype {
+public class PeriodDt extends BaseElement implements ICompositeDatatype {
 
 	@Child(name="start", order=0)
 	@Constraint(lessThan= {"end"})

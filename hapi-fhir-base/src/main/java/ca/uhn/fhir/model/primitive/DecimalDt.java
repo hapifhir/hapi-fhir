@@ -2,12 +2,13 @@ package ca.uhn.fhir.model.primitive;
 
 import java.math.BigDecimal;
 
-import ca.uhn.fhir.model.api.BasePrimitiveDatatype;
+import ca.uhn.fhir.model.api.BaseElement;
+import ca.uhn.fhir.model.api.IPrimitiveDatatype;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.parser.DataFormatException;
 
 @DatatypeDef(name = "decimal")
-public class DecimalDt extends BasePrimitiveDatatype<BigDecimal> {
+public class DecimalDt  extends BaseElement implements IPrimitiveDatatype<BigDecimal> {
 
 	private BigDecimal myValue;
 

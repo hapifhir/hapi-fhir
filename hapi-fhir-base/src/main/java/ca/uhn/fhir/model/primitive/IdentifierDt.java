@@ -1,7 +1,8 @@
 package ca.uhn.fhir.model.primitive;
 
-import ca.uhn.fhir.model.api.BaseCompositeDatatype;
+import ca.uhn.fhir.model.api.BaseElement;
 import ca.uhn.fhir.model.api.CodeableConceptElement;
+import ca.uhn.fhir.model.api.ICompositeDatatype;
 import ca.uhn.fhir.model.api.ResourceReference;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.ChildResource;
@@ -10,7 +11,7 @@ import ca.uhn.fhir.model.dstu.resource.Organization;
 import ca.uhn.fhir.model.enm.IdentifierUseEnum;
 
 @DatatypeDef(name="identifier")
-public class IdentifierDt extends BaseCompositeDatatype {
+public class IdentifierDt extends BaseElement implements ICompositeDatatype {
 
 	@Child(name="use", order=0)
 	@CodeableConceptElement(type=IdentifierUseEnum.class)

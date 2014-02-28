@@ -129,8 +129,7 @@ public class XmlParser {
 		return stringWriter.toString();
 	}
 
-	private boolean encodeChildElementToStreamWriter(XMLStreamWriter theEventWriter, IElement nextValue, String childName, BaseRuntimeElementDefinition<?> childDef, String theExtensionUrl)
-			throws XMLStreamException, DataFormatException {
+	private boolean encodeChildElementToStreamWriter(XMLStreamWriter theEventWriter, IElement nextValue, String childName, BaseRuntimeElementDefinition<?> childDef, String theExtensionUrl) throws XMLStreamException, DataFormatException {
 		switch (childDef.getChildType()) {
 		case PRIMITIVE_DATATYPE: {
 			IPrimitiveDatatype<?> pd = (IPrimitiveDatatype<?>) nextValue;
@@ -184,12 +183,11 @@ public class XmlParser {
 			throw new IllegalStateException("should not happen");
 		}
 		}
-		
+
 		return false;
 	}
 
-	private void encodeCompositeElementChildrenToStreamWriter(IElement theElement, XMLStreamWriter theEventWriter, List<? extends BaseRuntimeChildDefinition> children) throws XMLStreamException,
-			DataFormatException {
+	private void encodeCompositeElementChildrenToStreamWriter(IElement theElement, XMLStreamWriter theEventWriter, List<? extends BaseRuntimeChildDefinition> children) throws XMLStreamException, DataFormatException {
 		for (BaseRuntimeChildDefinition nextChild : children) {
 			List<? extends IElement> values = nextChild.getAccessor().getValues(theElement);
 			if (values == null || values.isEmpty()) {
@@ -220,8 +218,7 @@ public class XmlParser {
 		}
 	}
 
-	private void encodeCompositeElementToStreamWriter(IElement theElement, XMLStreamWriter theEventWriter, BaseRuntimeElementCompositeDefinition<?> resDef) throws XMLStreamException,
-			DataFormatException {
+	private void encodeCompositeElementToStreamWriter(IElement theElement, XMLStreamWriter theEventWriter, BaseRuntimeElementCompositeDefinition<?> resDef) throws XMLStreamException, DataFormatException {
 		encodeExtensionsIfPresent(theEventWriter, theElement);
 		encodeCompositeElementChildrenToStreamWriter(theElement, theEventWriter, resDef.getExtensions());
 		encodeCompositeElementChildrenToStreamWriter(theElement, theEventWriter, resDef.getChildren());
@@ -231,7 +228,7 @@ public class XmlParser {
 		boolean retVal = false;
 		if (theResource instanceof ISupportsUndeclaredExtensions) {
 			for (UndeclaredExtension next : ((ISupportsUndeclaredExtensions) theResource).getUndeclaredExtensions()) {
-				retVal =true;
+				retVal = true;
 				theWriter.writeStartElement("extension");
 				theWriter.writeAttribute("url", next.getUrl());
 
@@ -402,57 +399,62 @@ public class XmlParser {
 		try {
 			while (streamReader.hasNext()) {
 				XMLEvent nextEvent = streamReader.nextEvent();
-				if (nextEvent.isStartElement()) {
-					StartElement elem = nextEvent.asStartElement();
+				try {
+					if (nextEvent.isStartElement()) {
+						StartElement elem = nextEvent.asStartElement();
 
-					String namespaceURI = elem.getName().getNamespaceURI();
+						String namespaceURI = elem.getName().getNamespaceURI();
 
-					if ("extension".equals(elem.getName().getLocalPart())) {
-						Attribute urlAttr = elem.getAttributeByName(new QName("url"));
-						if (urlAttr == null || isBlank(urlAttr.getValue())) {
-							throw new DataFormatException("Extension element has no 'url' attribute");
+						if ("extension".equals(elem.getName().getLocalPart())) {
+							Attribute urlAttr = elem.getAttributeByName(new QName("url"));
+							if (urlAttr == null || isBlank(urlAttr.getValue())) {
+								throw new DataFormatException("Extension element has no 'url' attribute");
+							}
+							parserState.enteringNewElementExtension(elem, urlAttr.getValue());
+						} else {
+
+							String elementName = elem.getName().getLocalPart();
+							parserState.enteringNewElement(namespaceURI, elementName);
+
 						}
-						parserState.enteringNewElementExtension(elem, urlAttr.getValue());
-					} else {
 
-						String elementName = elem.getName().getLocalPart();
-						parserState.enteringNewElement(namespaceURI, elementName);
-
-					}
-
-					for (@SuppressWarnings("unchecked")
-					Iterator<Attribute> iter = elem.getAttributes(); iter.hasNext();) {
-						Attribute next = iter.next();
-//						if (next.getName().getLocalPart().equals("value")) {
+						for (@SuppressWarnings("unchecked")
+						Iterator<Attribute> iter = elem.getAttributes(); iter.hasNext();) {
+							Attribute next = iter.next();
+							// if
+							// (next.getName().getLocalPart().equals("value")) {
 							parserState.attributeValue(next.getName().getLocalPart(), next.getValue());
-//						}
+							// }
+						}
+
+					} else if (nextEvent.isAttribute()) {
+						Attribute elem = (Attribute) nextEvent;
+						String name = (elem.getName().getLocalPart());
+						parserState.attributeValue(name, elem.getValue());
+					} else if (nextEvent.isEndElement()) {
+						EndElement elem = nextEvent.asEndElement();
+
+						String name = elem.getName().getLocalPart();
+						String namespaceURI = elem.getName().getNamespaceURI();
+						// if (!FHIR_NS.equals(namespaceURI) &&
+						// !XHTML_NS.equals(namespaceURI)) {
+						// continue;
+						// }
+
+						parserState.endingElement(elem);
+						if (parserState.isComplete()) {
+							return parserState.getObject();
+						}
+					} else if (nextEvent.isCharacters()) {
+						parserState.string(nextEvent.asCharacters().getData());
 					}
 
-				} else if (nextEvent.isAttribute()) {
-					Attribute elem = (Attribute) nextEvent;
-					String name = (elem.getName().getLocalPart());
-					parserState.attributeValue(name, elem.getValue());
-				} else if (nextEvent.isEndElement()) {
-					EndElement elem = nextEvent.asEndElement();
-					
-					String name = elem.getName().getLocalPart();
-					String namespaceURI = elem.getName().getNamespaceURI();
-//					if (!FHIR_NS.equals(namespaceURI) && !XHTML_NS.equals(namespaceURI)) {
-//						continue;
-//					}
+					parserState.xmlEvent(nextEvent);
 
-					parserState.endingElement(elem);
-					if (parserState.isComplete()) {
-						return parserState.getObject();
-					}
-				} else if (nextEvent.isCharacters()) {
-					parserState.string(nextEvent.asCharacters().getData());
+				} catch (DataFormatException e) {
+					throw new DataFormatException("DataFormatException at [" + nextEvent.getLocation().toString() + "]: "+e.getMessage(), e);
 				}
-
-				parserState.xmlEvent(nextEvent);
-
 			}
-
 			return null;
 		} catch (XMLStreamException e) {
 			throw new DataFormatException(e);

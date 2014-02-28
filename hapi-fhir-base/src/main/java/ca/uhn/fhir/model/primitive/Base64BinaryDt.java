@@ -2,11 +2,12 @@ package ca.uhn.fhir.model.primitive;
 
 import org.apache.commons.codec.binary.Base64;
 
-import ca.uhn.fhir.model.api.BasePrimitiveDatatype;
+import ca.uhn.fhir.model.api.BaseElement;
+import ca.uhn.fhir.model.api.IPrimitiveDatatype;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 
 @DatatypeDef(name = "base64Binary")
-public class Base64BinaryDt extends BasePrimitiveDatatype<byte[]> {
+public class Base64BinaryDt extends BaseElement implements IPrimitiveDatatype<byte[]> {
 
 	private byte[] myValue;
 

@@ -1,0 +1,32 @@
+
+package ca.uhn.fhir.model.dstu.valueset;
+
+import ca.uhn.fhir.model.api.*;
+
+public class ${valueSet.className} extends ValueSetEnumeration {
+
+	/**
+	 * Identifier for this Value Set:
+	 * ${valueSet.id}
+	 */
+	public static final String IDENTIFIER = "${valueSet.id}";
+
+	/**
+	 * Constructor - should not be called directly
+	 */
+	protected ${valueSet.className}(String theCode) {
+		super(theCode, IDENTIFIER);
+	}
+
+#foreach ($code in $valueSet.codes)
+	/**
+	 * ${code.code}
+	 * ${code.display}
+	 *
+	 * ${code.definition}
+	 */
+	public static final ${valueSet.className} ${code.codeEnumValue} = new ${valueSet.className}("${code.code}");
+	
+#end
+
+}

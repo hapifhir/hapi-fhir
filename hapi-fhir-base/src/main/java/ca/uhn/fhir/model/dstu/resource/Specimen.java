@@ -37,7 +37,7 @@ import ca.uhn.fhir.model.dstu.composite.*;
  * </p> 
  */
 @ResourceDef(name="Specimen")
-public class Specimen implements IResource {
+public class Specimen extends BaseElement implements IResource {
 
 	@Child(name="identifier", type=IdentifierDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)	
 	private List<IdentifierDt> myIdentifier;
@@ -359,7 +359,7 @@ public class Specimen implements IResource {
      * </p> 
 	 */
 	@Block(name="Specimen.source")	
-	public static class Source implements IResourceBlock {
+	public static class Source extends BaseElement implements IResourceBlock {
 	
 	@Child(name="relationship", type=CodeDt.class, order=0, min=1, max=1)	
 	private CodeDt myRelationship;
@@ -443,7 +443,7 @@ public class Specimen implements IResource {
      * </p> 
 	 */
 	@Block(name="Specimen.collection")	
-	public static class Collection implements IResourceBlock {
+	public static class Collection extends BaseElement implements IResourceBlock {
 	
 	@Child(name="collector", order=0, min=0, max=1)
 	@ChildResource(types= {
@@ -673,7 +673,7 @@ public class Specimen implements IResource {
      * </p> 
 	 */
 	@Block(name="Specimen.treatment")	
-	public static class Treatment implements IResourceBlock {
+	public static class Treatment extends BaseElement implements IResourceBlock {
 	
 	@Child(name="description", type=StringDt.class, order=0, min=0, max=1)	
 	private StringDt myDescription;
@@ -801,7 +801,7 @@ public class Specimen implements IResource {
      * </p> 
 	 */
 	@Block(name="Specimen.container")	
-	public static class Container implements IResourceBlock {
+	public static class Container extends BaseElement implements IResourceBlock {
 	
 	@Child(name="identifier", type=IdentifierDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)	
 	private List<IdentifierDt> myIdentifier;

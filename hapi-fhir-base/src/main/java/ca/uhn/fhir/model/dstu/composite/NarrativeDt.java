@@ -36,7 +36,7 @@ import ca.uhn.fhir.model.primitive.*;
  * </p> 
  */
 @DatatypeDef(name="Narrative") 
-public class NarrativeDt extends BaseCompositeDatatype {
+public class NarrativeDt extends BaseElement implements ICompositeDatatype {
 
 	@Child(name="status", type=CodeDt.class, order=0, min=1, max=1)	
 	private CodeDt myStatus;

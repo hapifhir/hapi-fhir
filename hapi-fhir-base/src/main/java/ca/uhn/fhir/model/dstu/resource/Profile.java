@@ -37,7 +37,7 @@ import ca.uhn.fhir.model.dstu.composite.*;
  * </p> 
  */
 @ResourceDef(name="Profile")
-public class Profile implements IResource {
+public class Profile extends BaseElement implements IResource {
 
 	@Child(name="identifier", type=StringDt.class, order=0, min=0, max=1)	
 	private StringDt myIdentifier;
@@ -664,7 +664,7 @@ public class Profile implements IResource {
      * </p> 
 	 */
 	@Block(name="Profile.mapping")	
-	public static class Mapping implements IResourceBlock {
+	public static class Mapping extends BaseElement implements IResourceBlock {
 	
 	@Child(name="identity", type=IdDt.class, order=0, min=1, max=1)	
 	private IdDt myIdentity;
@@ -844,7 +844,7 @@ public class Profile implements IResource {
      * </p> 
 	 */
 	@Block(name="Profile.structure")	
-	public static class Structure implements IResourceBlock {
+	public static class Structure extends BaseElement implements IResourceBlock {
 	
 	@Child(name="type", type=CodeDt.class, order=0, min=1, max=1)	
 	private CodeDt myType;
@@ -1078,7 +1078,7 @@ public class Profile implements IResource {
      * </p> 
 	 */
 	@Block(name="Profile.structure.element")	
-	public static class StructureElement implements IResourceBlock {
+	public static class StructureElement extends BaseElement implements IResourceBlock {
 	
 	@Child(name="path", type=StringDt.class, order=0, min=1, max=1)	
 	private StringDt myPath;
@@ -1279,7 +1279,7 @@ public class Profile implements IResource {
      * </p> 
 	 */
 	@Block(name="Profile.structure.element.slicing")	
-	public static class StructureElementSlicing implements IResourceBlock {
+	public static class StructureElementSlicing extends BaseElement implements IResourceBlock {
 	
 	@Child(name="discriminator", type=IdDt.class, order=0, min=1, max=1)	
 	private IdDt myDiscriminator;
@@ -1404,7 +1404,7 @@ public class Profile implements IResource {
      * </p> 
 	 */
 	@Block(name="Profile.structure.element.definition")	
-	public static class StructureElementDefinition implements IResourceBlock {
+	public static class StructureElementDefinition extends BaseElement implements IResourceBlock {
 	
 	@Child(name="short", type=StringDt.class, order=0, min=1, max=1)	
 	private StringDt myShort;
@@ -2100,7 +2100,7 @@ public class Profile implements IResource {
      * </p> 
 	 */
 	@Block(name="Profile.structure.element.definition.type")	
-	public static class StructureElementDefinitionType implements IResourceBlock {
+	public static class StructureElementDefinitionType extends BaseElement implements IResourceBlock {
 	
 	@Child(name="code", type=CodeDt.class, order=0, min=1, max=1)	
 	private CodeDt myCode;
@@ -2214,7 +2214,7 @@ public class Profile implements IResource {
      * </p> 
 	 */
 	@Block(name="Profile.structure.element.definition.constraint")	
-	public static class StructureElementDefinitionConstraint implements IResourceBlock {
+	public static class StructureElementDefinitionConstraint extends BaseElement implements IResourceBlock {
 	
 	@Child(name="key", type=IdDt.class, order=0, min=1, max=1)	
 	private IdDt myKey;
@@ -2438,7 +2438,7 @@ public class Profile implements IResource {
      * </p> 
 	 */
 	@Block(name="Profile.structure.element.definition.binding")	
-	public static class StructureElementDefinitionBinding implements IResourceBlock {
+	public static class StructureElementDefinitionBinding extends BaseElement implements IResourceBlock {
 	
 	@Child(name="name", type=StringDt.class, order=0, min=1, max=1)	
 	private StringDt myName;
@@ -2640,7 +2640,7 @@ public class Profile implements IResource {
      * </p> 
 	 */
 	@Block(name="Profile.structure.element.definition.mapping")	
-	public static class StructureElementDefinitionMapping implements IResourceBlock {
+	public static class StructureElementDefinitionMapping extends BaseElement implements IResourceBlock {
 	
 	@Child(name="identity", type=IdDt.class, order=0, min=1, max=1)	
 	private IdDt myIdentity;
@@ -2745,7 +2745,7 @@ public class Profile implements IResource {
      * </p> 
 	 */
 	@Block(name="Profile.structure.searchParam")	
-	public static class StructureSearchParam implements IResourceBlock {
+	public static class StructureSearchParam extends BaseElement implements IResourceBlock {
 	
 	@Child(name="name", type=StringDt.class, order=0, min=1, max=1)	
 	private StringDt myName;
@@ -2959,7 +2959,7 @@ public class Profile implements IResource {
      * </p> 
 	 */
 	@Block(name="Profile.extensionDefn")	
-	public static class ExtensionDefn implements IResourceBlock {
+	public static class ExtensionDefn extends BaseElement implements IResourceBlock {
 	
 	@Child(name="code", type=CodeDt.class, order=0, min=1, max=1)	
 	private CodeDt myCode;
@@ -3164,7 +3164,7 @@ public class Profile implements IResource {
      * </p> 
 	 */
 	@Block(name="Profile.query")	
-	public static class Query implements IResourceBlock {
+	public static class Query extends BaseElement implements IResourceBlock {
 	
 	@Child(name="name", type=StringDt.class, order=0, min=1, max=1)	
 	private StringDt myName;

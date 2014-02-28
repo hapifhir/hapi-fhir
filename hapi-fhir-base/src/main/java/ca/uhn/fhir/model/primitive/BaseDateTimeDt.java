@@ -12,11 +12,12 @@ import javax.xml.bind.DatatypeConverter;
 
 import org.apache.commons.lang3.time.FastDateFormat;
 
-import ca.uhn.fhir.model.api.BasePrimitiveDatatype;
+import ca.uhn.fhir.model.api.BaseElement;
+import ca.uhn.fhir.model.api.IPrimitiveDatatype;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.parser.DataFormatException;
 
-public abstract class BaseDateTimeDt extends BasePrimitiveDatatype<Date> {
+public abstract class BaseDateTimeDt  extends BaseElement implements IPrimitiveDatatype<Date> {
 
 	private static final FastDateFormat ourYearFormat = FastDateFormat.getInstance("yyyy");
 	private static final FastDateFormat ourYearMonthDayFormat = FastDateFormat.getInstance("yyyy-MM-dd");
@@ -135,7 +136,7 @@ public abstract class BaseDateTimeDt extends BasePrimitiveDatatype<Date> {
 				if (dotIndex == -1 && !isPrecisionAllowed(SECOND)) {
 					throw new DataFormatException("Invalid date/time string (data type does not support SECONDS precision)");
 				} else if (dotIndex > -1 && !isPrecisionAllowed(MILLI)) {
-					throw new DataFormatException("Invalid date/time string (data type does not support MILLIS precision)");
+					throw new DataFormatException("Invalid date/time string (data type " + getClass().getSimpleName() + " does not support MILLIS precision)");
 				}
 
 				Calendar cal;

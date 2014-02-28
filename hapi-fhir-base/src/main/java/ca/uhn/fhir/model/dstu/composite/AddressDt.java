@@ -36,7 +36,7 @@ import ca.uhn.fhir.model.primitive.*;
  * </p> 
  */
 @DatatypeDef(name="Address") 
-public class AddressDt extends BaseCompositeDatatype {
+public class AddressDt extends BaseElement implements ICompositeDatatype {
 
 	@Child(name="use", type=CodeDt.class, order=0, min=0, max=1)	
 	private CodeDt myUse;

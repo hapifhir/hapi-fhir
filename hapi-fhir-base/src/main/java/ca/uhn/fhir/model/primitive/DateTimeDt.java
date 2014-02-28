@@ -32,6 +32,7 @@ public class DateTimeDt extends BaseDateTimeDt {
 		case MONTH:
 		case DAY:
 		case SECOND:
+		case MILLI:
 			return true;
 		default:
 			return false;

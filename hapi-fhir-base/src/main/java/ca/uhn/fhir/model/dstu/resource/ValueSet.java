@@ -37,7 +37,7 @@ import ca.uhn.fhir.model.dstu.composite.*;
  * </p> 
  */
 @ResourceDef(name="ValueSet")
-public class ValueSet implements IResource {
+public class ValueSet extends BaseResource implements IResource {
 
 	@Child(name="identifier", type=StringDt.class, order=0, min=0, max=1)	
 	private StringDt myIdentifier;
@@ -81,21 +81,6 @@ public class ValueSet implements IResource {
 	@Child(name="expansion", order=13, min=0, max=1)	
 	private Expansion myExpansion;
 	
-	@Child(name="text", order=14, min=0, max=1)	
-	private NarrativeDt myText;
-	
-	
-	public NarrativeDt getText() {
-		if(myText==null) {
-			myText=new NarrativeDt();
-		}
-		return myText;
-	}
-
-	public void setText(NarrativeDt theText) {
-		myText = theText;
-	}
-
 	/**
 	 * Gets the value(s) for <b>identifier</b> (Logical id to reference this value set).
 	 * creating it if it does
@@ -604,7 +589,7 @@ public class ValueSet implements IResource {
      * </p> 
 	 */
 	@Block(name="ValueSet.define")	
-	public static class Define implements IResourceBlock {
+	public static class Define extends BaseElement implements IResourceBlock {
 	
 	@Child(name="system", type=UriDt.class, order=0, min=1, max=1)	
 	private UriDt mySystem;
@@ -761,7 +746,7 @@ public class ValueSet implements IResource {
      * </p> 
 	 */
 	@Block(name="ValueSet.define.concept")	
-	public static class DefineConcept implements IResourceBlock {
+	public static class DefineConcept extends BaseElement implements IResourceBlock {
 	
 	@Child(name="code", type=CodeDt.class, order=0, min=1, max=1)	
 	private CodeDt myCode;
@@ -964,7 +949,7 @@ public class ValueSet implements IResource {
      * </p> 
 	 */
 	@Block(name="ValueSet.compose")	
-	public static class Compose implements IResourceBlock {
+	public static class Compose extends BaseElement implements IResourceBlock {
 	
 	@Child(name="import", type=UriDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)	
 	private List<UriDt> myImport;
@@ -1077,7 +1062,7 @@ public class ValueSet implements IResource {
      * </p> 
 	 */
 	@Block(name="ValueSet.compose.include")	
-	public static class ComposeInclude implements IResourceBlock {
+	public static class ComposeInclude extends BaseElement implements IResourceBlock {
 	
 	@Child(name="system", type=UriDt.class, order=0, min=1, max=1)	
 	private UriDt mySystem;
@@ -1234,7 +1219,7 @@ public class ValueSet implements IResource {
      * </p> 
 	 */
 	@Block(name="ValueSet.compose.include.filter")	
-	public static class ComposeIncludeFilter implements IResourceBlock {
+	public static class ComposeIncludeFilter extends BaseElement implements IResourceBlock {
 	
 	@Child(name="property", type=CodeDt.class, order=0, min=1, max=1)	
 	private CodeDt myProperty;
@@ -1350,7 +1335,7 @@ public class ValueSet implements IResource {
      * </p> 
 	 */
 	@Block(name="ValueSet.expansion")	
-	public static class Expansion implements IResourceBlock {
+	public static class Expansion extends BaseElement implements IResourceBlock {
 	
 	@Child(name="identifier", type=IdentifierDt.class, order=0, min=0, max=1)	
 	private IdentifierDt myIdentifier;
@@ -1463,7 +1448,7 @@ public class ValueSet implements IResource {
      * </p> 
 	 */
 	@Block(name="ValueSet.expansion.contains")	
-	public static class ExpansionContains implements IResourceBlock {
+	public static class ExpansionContains extends BaseElement implements IResourceBlock {
 	
 	@Child(name="system", type=UriDt.class, order=0, min=0, max=1)	
 	private UriDt mySystem;

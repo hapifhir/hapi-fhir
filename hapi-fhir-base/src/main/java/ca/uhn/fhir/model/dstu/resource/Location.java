@@ -37,7 +37,7 @@ import ca.uhn.fhir.model.dstu.composite.*;
  * </p> 
  */
 @ResourceDef(name="Location")
-public class Location implements IResource {
+public class Location extends BaseElement implements IResource {
 
 	@Child(name="identifier", type=IdentifierDt.class, order=0, min=0, max=1)	
 	private IdentifierDt myIdentifier;
@@ -472,7 +472,7 @@ public class Location implements IResource {
      * </p> 
 	 */
 	@Block(name="Location.position")	
-	public static class Position implements IResourceBlock {
+	public static class Position extends BaseElement implements IResourceBlock {
 	
 	@Child(name="longitude", type=DecimalDt.class, order=0, min=1, max=1)	
 	private DecimalDt myLongitude;

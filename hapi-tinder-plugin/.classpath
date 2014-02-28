@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry excluding="**/*.java" kind="src" output="target/test-classes" path="src/test/resources"/>
+	<classpathentry kind="src" path="target/generated/valuesets"/>
 	<classpathentry including="**/*.java" kind="src" path="src/main/java"/>
 	<classpathentry kind="src" path="src/main/resources"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
 	<classpathentry kind="var" path="M2_REPO/javax/enterprise/cdi-api/1.0/cdi-api-1.0.jar" sourcepath="M2_REPO/javax/enterprise/cdi-api/1.0/cdi-api-1.0-sources.jar">
 		<attributes>
 			<attribute name="javadoc_location" value="jar:file:/Users/james/.m2/repository/javax/enterprise/cdi-api/1.0/cdi-api-1.0-javadoc.jar!/"/>

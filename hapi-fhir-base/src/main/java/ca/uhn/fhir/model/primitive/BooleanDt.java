@@ -1,11 +1,12 @@
 package ca.uhn.fhir.model.primitive;
 
-import ca.uhn.fhir.model.api.BasePrimitiveDatatype;
+import ca.uhn.fhir.model.api.BaseElement;
+import ca.uhn.fhir.model.api.IPrimitiveDatatype;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.parser.DataFormatException;
 
 @DatatypeDef(name = "boolean")
-public class BooleanDt extends BasePrimitiveDatatype<Boolean> {
+public class BooleanDt  extends BaseElement implements IPrimitiveDatatype<Boolean> {
 
 	private Boolean myValue;
 

@@ -1,13 +1,14 @@
 package ca.uhn.fhir.model.primitive;
 
-import ca.uhn.fhir.model.api.BaseCompositeDatatype;
+import ca.uhn.fhir.model.api.BaseElement;
+import ca.uhn.fhir.model.api.ICompositeDatatype;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Constraint;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.dstu.composite.QuantityDt;
 
 @DatatypeDef(name="Range")
-public class RangeDt extends BaseCompositeDatatype {
+public class RangeDt extends BaseElement implements ICompositeDatatype {
 
 	@Child(name="low", order=0)
 	@Constraint(lessThan= {"high"})

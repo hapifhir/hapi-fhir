@@ -1,12 +1,13 @@
 package ca.uhn.fhir.model.primitive;
 
-import ca.uhn.fhir.model.api.BaseCompositeDatatype;
+import ca.uhn.fhir.model.api.BaseElement;
+import ca.uhn.fhir.model.api.ICompositeDatatype;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.Description;
 
 @DatatypeDef(name="Attachment")
-public class AttachmentDt extends BaseCompositeDatatype {
+public class AttachmentDt extends BaseElement implements ICompositeDatatype {
 
 	@Child(name="contentType", order=0, min=1)
 	private CodeDt myContentType;

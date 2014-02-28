@@ -1,12 +1,12 @@
 package ca.uhn.fhir.model.primitive;
 
-import ca.uhn.fhir.model.api.BasePrimitiveDatatype;
+import ca.uhn.fhir.model.api.BaseElement;
 import ca.uhn.fhir.model.api.IPrimitiveDatatype;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.parser.DataFormatException;
 
 @DatatypeDef(name = "code")
-public class CodeDt extends BasePrimitiveDatatype<String> implements ICodedDatatype, IPrimitiveDatatype<String> {
+public class CodeDt  extends BaseElement implements IPrimitiveDatatype<String>, ICodedDatatype {
 
 	private String myValue;
 
@@ -18,13 +18,8 @@ public class CodeDt extends BasePrimitiveDatatype<String> implements ICodedDatat
 		if (theValue == null) {
 			myValue = null;
 		} else {
-			if (theValue.length() == 0) {
-				throw new DataFormatException("Value can not be empty");
-			}
-			if (Character.isWhitespace(theValue.charAt(0)) || Character.isWhitespace(theValue.charAt(theValue.length()-1))){
-				throw new DataFormatException("Value must not contain trailing or leading whitespace");
-			}
-			myValue = theValue;
+			String newValue = theValue.trim();
+			myValue = newValue;
 		}
 	}
 

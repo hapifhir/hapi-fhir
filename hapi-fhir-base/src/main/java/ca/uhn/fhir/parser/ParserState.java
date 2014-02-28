@@ -342,12 +342,13 @@ class ParserState<T extends IElement> {
 		 */
 		public void enteringNewElementExtension(@SuppressWarnings("unused") StartElement theElement, String theUrlAttr) {
 			if (getCurrentElement() instanceof ISupportsUndeclaredExtensions) {
-				UndeclaredExtension newExtension = new UndeclaredExtension();
-				newExtension.setUrl(theUrlAttr);
+				UndeclaredExtension newExtension = new UndeclaredExtension(theUrlAttr);
 				// TODO: fail if we don't support undeclared extensions
 				((ISupportsUndeclaredExtensions) getCurrentElement()).getUndeclaredExtensions().add(newExtension);
 				ExtensionState newState = new ExtensionState(newExtension);
 				push(newState);
+			} else {
+				throw new DataFormatException("Extension is not supported at this position");
 			}
 		}
 
@@ -718,6 +719,15 @@ class ParserState<T extends IElement> {
 		public void endingElement(EndElement theElem) {
 			pop();
 		}
+
+//		@Override
+//		public void enteringNewElementExtension(StartElement theElement, String theUrlAttr) {
+//			if (myInstance instanceof ISupportsUndeclaredExtensions) {
+//				UndeclaredExtension ext = new UndeclaredExtension(theUrlAttr);
+//				((ISupportsUndeclaredExtensions) myInstance).getUndeclaredExtensions().add(ext);
+//				push(new ExtensionState(ext));
+//			}
+//		}
 
 		@Override
 		public void enteringNewElement(String theNamespaceURI, String theLocalPart) throws DataFormatException {

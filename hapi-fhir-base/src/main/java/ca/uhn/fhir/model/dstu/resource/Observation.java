@@ -37,7 +37,7 @@ import ca.uhn.fhir.model.dstu.composite.*;
  * </p> 
  */
 @ResourceDef(name="Observation")
-public class Observation implements IResource {
+public class Observation extends BaseElement implements IResource {
 
 	@Child(name="name", type=CodeableConceptDt.class, order=0, min=1, max=1)	
 	private CodeableConceptDt myName;
@@ -600,7 +600,7 @@ public class Observation implements IResource {
      * </p> 
 	 */
 	@Block(name="Observation.referenceRange")	
-	public static class ReferenceRange implements IResourceBlock {
+	public static class ReferenceRange extends BaseElement implements IResourceBlock {
 	
 	@Child(name="low", type=QuantityDt.class, order=0, min=0, max=1)	
 	private QuantityDt myLow;
@@ -747,7 +747,7 @@ public class Observation implements IResource {
      * </p> 
 	 */
 	@Block(name="Observation.related")	
-	public static class Related implements IResourceBlock {
+	public static class Related extends BaseElement implements IResourceBlock {
 	
 	@Child(name="type", type=CodeDt.class, order=0, min=0, max=1)	
 	private CodeDt myType;

@@ -37,7 +37,7 @@ import ca.uhn.fhir.model.dstu.composite.*;
  * </p> 
  */
 @ResourceDef(name="Practitioner")
-public class Practitioner implements IResource {
+public class Practitioner extends BaseElement implements IResource {
 
 	@Child(name="identifier", type=IdentifierDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)	
 	private List<IdentifierDt> myIdentifier;
@@ -527,7 +527,7 @@ public class Practitioner implements IResource {
      * </p> 
 	 */
 	@Block(name="Practitioner.qualification")	
-	public static class Qualification implements IResourceBlock {
+	public static class Qualification extends BaseElement implements IResourceBlock {
 	
 	@Child(name="code", type=CodeableConceptDt.class, order=0, min=1, max=1)	
 	private CodeableConceptDt myCode;

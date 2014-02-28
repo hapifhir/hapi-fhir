@@ -94,7 +94,7 @@ public class ResourceParser extends BaseParser {
 		
 		p.setDirectory("src/test/resources/res");
 		p.setResourceName("valueset");
-		p.setOutputFile("../hapi-fhir-base/src/main/java/ca/uhn/fhir/model/dstu/resource/ValueSet.java");
+		p.setOutputFile("../hapi-fhir-base/src/main/java/ca/uhn/fhir/model/dstu/resource/ValueSetTm.java");
 		p.parse();
 
 		p.setDirectory("src/test/resources/res");

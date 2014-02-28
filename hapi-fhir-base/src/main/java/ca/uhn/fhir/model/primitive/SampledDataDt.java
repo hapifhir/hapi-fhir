@@ -1,13 +1,14 @@
 package ca.uhn.fhir.model.primitive;
 
-import ca.uhn.fhir.model.api.BaseCompositeDatatype;
+import ca.uhn.fhir.model.api.BaseElement;
+import ca.uhn.fhir.model.api.ICompositeDatatype;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.dstu.composite.QuantityDt;
 
 @DatatypeDef(name="SampledData")
-public class SampledDataDt extends BaseCompositeDatatype {
+public class SampledDataDt extends BaseElement implements ICompositeDatatype {
 
 	@Child(name="origin", order=0, min=1)
 	private QuantityDt myOrigin;

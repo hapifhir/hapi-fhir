@@ -9,12 +9,10 @@ public abstract class BaseElement implements IElement, ISupportsUndeclaredExtens
 
 	@Override
 	public List<UndeclaredExtension> getUndeclaredExtensions() {
-		if (myUndeclaredExtensions==null) {
-			myUndeclaredExtensions=new ArrayList<UndeclaredExtension>();
+		if (myUndeclaredExtensions == null) {
+			myUndeclaredExtensions = new ArrayList<UndeclaredExtension>();
 		}
 		return myUndeclaredExtensions;
 	}
 
-	
-	
 }

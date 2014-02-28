@@ -23,7 +23,7 @@ import ca.uhn.fhir.model.dstu.composite.*;
  * </p> 
  */
 @ResourceDef(name="${className}")
-public class ${className} implements IResource {
+public class ${className} extends BaseElement implements IResource {
 
 #childExtensionFields( $childExtensionTypes )
 #childVars( $children )

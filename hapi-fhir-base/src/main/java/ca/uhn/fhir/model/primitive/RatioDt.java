@@ -1,13 +1,14 @@
 package ca.uhn.fhir.model.primitive;
 
-import ca.uhn.fhir.model.api.BaseCompositeDatatype;
+import ca.uhn.fhir.model.api.BaseElement;
+import ca.uhn.fhir.model.api.ICompositeDatatype;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Constraint;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.dstu.composite.QuantityDt;
 
 @DatatypeDef(name="Ratio")
-public class RatioDt extends BaseCompositeDatatype {
+public class RatioDt extends BaseElement implements ICompositeDatatype {
 
 	@Child(name="numerator", order=0)
 	@Constraint(coRequirements= {"denominator"})

@@ -5,6 +5,14 @@ public class UndeclaredExtension extends BaseElement {
 	private String myUrl;
 	private IElement myValue;
 
+	public UndeclaredExtension() {
+		super();
+	}
+	
+	public UndeclaredExtension(String theUrl) {
+		myUrl=theUrl;
+	}
+
 	public String getUrl() {
 		return myUrl;
 	}

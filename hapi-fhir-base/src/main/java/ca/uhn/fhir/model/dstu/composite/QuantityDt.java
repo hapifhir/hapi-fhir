@@ -36,7 +36,7 @@ import ca.uhn.fhir.model.primitive.*;
  * </p> 
  */
 @DatatypeDef(name="Quantity") 
-public class QuantityDt extends BaseCompositeDatatype {
+public class QuantityDt extends BaseElement implements ICompositeDatatype {
 
 	@Child(name="value", type=DecimalDt.class, order=0, min=0, max=1)	
 	private DecimalDt myValue;

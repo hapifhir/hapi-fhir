@@ -37,7 +37,7 @@ import ca.uhn.fhir.model.dstu.composite.*;
  * </p> 
  */
 @ResourceDef(name="Patient")
-public class Patient implements IResource {
+public class Patient extends BaseElement implements IResource {
 
 	@Child(name="identifier", type=IdentifierDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)	
 	private List<IdentifierDt> myIdentifier;
@@ -624,7 +624,7 @@ public class Patient implements IResource {
      * </p> 
 	 */
 	@Block(name="Patient.contact")	
-	public static class Contact implements IResourceBlock {
+	public static class Contact extends BaseElement implements IResourceBlock {
 	
 	@Child(name="relationship", type=CodeableConceptDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)	
 	private List<CodeableConceptDt> myRelationship;
@@ -840,7 +840,7 @@ public class Patient implements IResource {
      * </p> 
 	 */
 	@Block(name="Patient.animal")	
-	public static class Animal implements IResourceBlock {
+	public static class Animal extends BaseElement implements IResourceBlock {
 	
 	@Child(name="species", type=CodeableConceptDt.class, order=0, min=1, max=1)	
 	private CodeableConceptDt mySpecies;
@@ -954,7 +954,7 @@ public class Patient implements IResource {
      * </p> 
 	 */
 	@Block(name="Patient.link")	
-	public static class Link implements IResourceBlock {
+	public static class Link extends BaseElement implements IResourceBlock {
 	
 	@Child(name="other", order=0, min=1, max=1)
 	@ChildResource(types= {
