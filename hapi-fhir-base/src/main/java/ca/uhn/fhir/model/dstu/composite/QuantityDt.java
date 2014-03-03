@@ -20,6 +20,7 @@ import java.util.*;
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.model.primitive.*;
+import ca.uhn.fhir.model.dstu.valueset.*;
 
 /**
  * HAPI/FHIR <b>Quantity</b> Datatype
@@ -42,7 +43,7 @@ public class QuantityDt extends BaseElement implements ICompositeDatatype {
 	private DecimalDt myValue;
 	
 	@Child(name="comparator", type=CodeDt.class, order=1, min=0, max=1)	
-	private CodeDt myComparator;
+	private BoundCodeDt<QuantityCompararatorEnum> myComparator;
 	
 	@Child(name="units", type=StringDt.class, order=2, min=0, max=1)	
 	private StringDt myUnits;
@@ -81,8 +82,8 @@ public class QuantityDt extends BaseElement implements ICompositeDatatype {
 	public void setValue(DecimalDt theValue) {
 		myValue = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>comparator</b> (< | <= | >= | > - how to understand the value).
 	 * creating it if it does
@@ -93,9 +94,9 @@ public class QuantityDt extends BaseElement implements ICompositeDatatype {
      * How the value should be understood and represented - whether the actual value is greater or less than the stated value due to measurement issues. E.g. if the comparator is "<" , then the real value is < stated value
      * </p> 
 	 */
-	public CodeDt getComparator() {  
+	public BoundCodeDt<QuantityCompararatorEnum> getComparator() {  
 		if (myComparator == null) {
-			myComparator = new CodeDt();
+			myComparator = new BoundCodeDt<QuantityCompararatorEnum>(QuantityCompararatorEnum.VALUESET_BINDER);
 		}
 		return myComparator;
 	}
@@ -108,11 +109,23 @@ public class QuantityDt extends BaseElement implements ICompositeDatatype {
      * How the value should be understood and represented - whether the actual value is greater or less than the stated value due to measurement issues. E.g. if the comparator is "<" , then the real value is < stated value
      * </p> 
 	 */
-	public void setComparator(CodeDt theValue) {
+	public void setComparator(BoundCodeDt<QuantityCompararatorEnum> theValue) {
 		myComparator = theValue;
 	}
-	
- 
+
+	/**
+	 * Sets the value(s) for <b>comparator</b> (< | <= | >= | > - how to understand the value)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * How the value should be understood and represented - whether the actual value is greater or less than the stated value due to measurement issues. E.g. if the comparator is "<" , then the real value is < stated value
+     * </p> 
+	 */
+	public void setComparator(QuantityCompararatorEnum theValue) {
+		getComparator().setValueAsEnum(theValue);
+	}
+
+  
 	/**
 	 * Gets the value(s) for <b>units</b> (Unit representation).
 	 * creating it if it does
@@ -141,8 +154,8 @@ public class QuantityDt extends BaseElement implements ICompositeDatatype {
 	public void setUnits(StringDt theValue) {
 		myUnits = theValue;
 	}
-	
-	/**
+
+ 	/**
 	 * Sets the value(s) for <b>units</b> (Unit representation)
 	 *
      * <p>
@@ -182,8 +195,8 @@ public class QuantityDt extends BaseElement implements ICompositeDatatype {
 	public void setSystem(UriDt theValue) {
 		mySystem = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>code</b> (Coded form of the unit).
 	 * creating it if it does
@@ -212,8 +225,8 @@ public class QuantityDt extends BaseElement implements ICompositeDatatype {
 	public void setCode(CodeDt theValue) {
 		myCode = theValue;
 	}
-	
- 
+
+  
 
 
 }

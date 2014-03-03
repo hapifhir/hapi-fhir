@@ -17,10 +17,12 @@
 package ca.uhn.fhir.model.dstu.resource;
 
 import java.util.*;
+
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.model.primitive.*;
 import ca.uhn.fhir.model.dstu.composite.*;
+import ca.uhn.fhir.model.dstu.valueset.*;
 
 /**
  * HAPI/FHIR <b>Medication</b> Resource
@@ -37,7 +39,7 @@ import ca.uhn.fhir.model.dstu.composite.*;
  * </p> 
  */
 @ResourceDef(name="Medication")
-public class Medication extends BaseElement implements IResource {
+public class Medication extends BaseResource implements IResource {
 
 	@Child(name="name", type=StringDt.class, order=0, min=0, max=1)	
 	private StringDt myName;
@@ -55,7 +57,7 @@ public class Medication extends BaseElement implements IResource {
 	private ResourceReference myManufacturer;
 	
 	@Child(name="kind", type=CodeDt.class, order=4, min=0, max=1)	
-	private CodeDt myKind;
+	private BoundCodeDt<MedicationKindEnum> myKind;
 	
 	@Child(name="product", order=5, min=0, max=1)	
 	private Product myProduct;
@@ -91,8 +93,8 @@ public class Medication extends BaseElement implements IResource {
 	public void setName(StringDt theValue) {
 		myName = theValue;
 	}
-	
-	/**
+
+ 	/**
 	 * Sets the value(s) for <b>name</b> (Common / Commercial name)
 	 *
      * <p>
@@ -132,8 +134,8 @@ public class Medication extends BaseElement implements IResource {
 	public void setCode(CodeableConceptDt theValue) {
 		myCode = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>isBrand</b> (True if a brand).
 	 * creating it if it does
@@ -162,8 +164,8 @@ public class Medication extends BaseElement implements IResource {
 	public void setIsBrand(BooleanDt theValue) {
 		myIsBrand = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>manufacturer</b> (Manufacturer of the item).
 	 * creating it if it does
@@ -192,8 +194,8 @@ public class Medication extends BaseElement implements IResource {
 	public void setManufacturer(ResourceReference theValue) {
 		myManufacturer = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>kind</b> (product | package).
 	 * creating it if it does
@@ -204,9 +206,9 @@ public class Medication extends BaseElement implements IResource {
      * Medications are either a single administrable product or a package that contains one or more products.
      * </p> 
 	 */
-	public CodeDt getKind() {  
+	public BoundCodeDt<MedicationKindEnum> getKind() {  
 		if (myKind == null) {
-			myKind = new CodeDt();
+			myKind = new BoundCodeDt<MedicationKindEnum>(MedicationKindEnum.VALUESET_BINDER);
 		}
 		return myKind;
 	}
@@ -219,11 +221,23 @@ public class Medication extends BaseElement implements IResource {
      * Medications are either a single administrable product or a package that contains one or more products.
      * </p> 
 	 */
-	public void setKind(CodeDt theValue) {
+	public void setKind(BoundCodeDt<MedicationKindEnum> theValue) {
 		myKind = theValue;
 	}
-	
- 
+
+	/**
+	 * Sets the value(s) for <b>kind</b> (product | package)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Medications are either a single administrable product or a package that contains one or more products.
+     * </p> 
+	 */
+	public void setKind(MedicationKindEnum theValue) {
+		getKind().setValueAsEnum(theValue);
+	}
+
+  
 	/**
 	 * Gets the value(s) for <b>product</b> (Administrable medication details).
 	 * creating it if it does
@@ -252,8 +266,8 @@ public class Medication extends BaseElement implements IResource {
 	public void setProduct(Product theValue) {
 		myProduct = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>package</b> (Details about packaged medications).
 	 * creating it if it does
@@ -282,8 +296,8 @@ public class Medication extends BaseElement implements IResource {
 	public void setPackage(CodeDt theValue) {
 		myPackage = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Block class for child element: <b>Medication.product</b> (Administrable medication details)
 	 *
@@ -329,8 +343,8 @@ public class Medication extends BaseElement implements IResource {
 	public void setForm(CodeableConceptDt theValue) {
 		myForm = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>ingredient</b> (Active or inactive ingredient).
 	 * creating it if it does
@@ -359,8 +373,8 @@ public class Medication extends BaseElement implements IResource {
 	public void setIngredient(List<ProductIngredient> theValue) {
 		myIngredient = theValue;
 	}
-	
- 
+
+  
 
 	}
 
@@ -410,8 +424,8 @@ public class Medication extends BaseElement implements IResource {
 	public void setItem(ResourceReference theValue) {
 		myItem = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>amount</b> (How much ingredient in product).
 	 * creating it if it does
@@ -440,8 +454,8 @@ public class Medication extends BaseElement implements IResource {
 	public void setAmount(RatioDt theValue) {
 		myAmount = theValue;
 	}
-	
- 
+
+  
 
 	}
 

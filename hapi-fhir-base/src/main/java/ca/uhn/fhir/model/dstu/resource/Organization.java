@@ -21,6 +21,7 @@ import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.model.primitive.*;
 import ca.uhn.fhir.model.dstu.composite.*;
+import ca.uhn.fhir.model.dstu.valueset.*;
 
 /**
  * HAPI/FHIR <b>Organization</b> Resource
@@ -37,7 +38,7 @@ import ca.uhn.fhir.model.dstu.composite.*;
  * </p> 
  */
 @ResourceDef(name="Organization")
-public class Organization extends BaseElement implements IResource {
+public class Organization extends BaseResource implements IResource {
 
 	@Child(name="identifier", type=IdentifierDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)	
 	private List<IdentifierDt> myIdentifier;
@@ -100,8 +101,8 @@ public class Organization extends BaseElement implements IResource {
 	public void setIdentifier(List<IdentifierDt> theValue) {
 		myIdentifier = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>name</b> (Name used for the organization).
 	 * creating it if it does
@@ -130,8 +131,8 @@ public class Organization extends BaseElement implements IResource {
 	public void setName(StringDt theValue) {
 		myName = theValue;
 	}
-	
-	/**
+
+ 	/**
 	 * Sets the value(s) for <b>name</b> (Name used for the organization)
 	 *
      * <p>
@@ -171,8 +172,8 @@ public class Organization extends BaseElement implements IResource {
 	public void setType(CodeableConceptDt theValue) {
 		myType = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>telecom</b> (A contact detail for the organization).
 	 * creating it if it does
@@ -201,8 +202,8 @@ public class Organization extends BaseElement implements IResource {
 	public void setTelecom(List<ContactDt> theValue) {
 		myTelecom = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>address</b> (An address for the organization).
 	 * creating it if it does
@@ -231,8 +232,8 @@ public class Organization extends BaseElement implements IResource {
 	public void setAddress(List<AddressDt> theValue) {
 		myAddress = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>partOf</b> (The organization of which this organization forms a part).
 	 * creating it if it does
@@ -261,8 +262,8 @@ public class Organization extends BaseElement implements IResource {
 	public void setPartOf(ResourceReference theValue) {
 		myPartOf = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>contact</b> (Contact for the organization for a certain purpose).
 	 * creating it if it does
@@ -291,8 +292,8 @@ public class Organization extends BaseElement implements IResource {
 	public void setContact(List<Contact> theValue) {
 		myContact = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>location</b> (Location(s) the organization uses to provide services).
 	 * creating it if it does
@@ -321,8 +322,8 @@ public class Organization extends BaseElement implements IResource {
 	public void setLocation(List<ResourceReference> theValue) {
 		myLocation = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>active</b> (Whether the organization's record is still in active use).
 	 * creating it if it does
@@ -351,8 +352,8 @@ public class Organization extends BaseElement implements IResource {
 	public void setActive(BooleanDt theValue) {
 		myActive = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Block class for child element: <b>Organization.contact</b> (Contact for the organization for a certain purpose)
 	 *
@@ -407,8 +408,8 @@ public class Organization extends BaseElement implements IResource {
 	public void setPurpose(CodeableConceptDt theValue) {
 		myPurpose = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>name</b> (A name associated with the contact).
 	 * creating it if it does
@@ -437,8 +438,8 @@ public class Organization extends BaseElement implements IResource {
 	public void setName(HumanNameDt theValue) {
 		myName = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>telecom</b> (Contact details (telephone, email, etc)  for a contact).
 	 * creating it if it does
@@ -467,8 +468,8 @@ public class Organization extends BaseElement implements IResource {
 	public void setTelecom(List<ContactDt> theValue) {
 		myTelecom = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>address</b> (Visiting or postal addresses for the contact).
 	 * creating it if it does
@@ -497,8 +498,8 @@ public class Organization extends BaseElement implements IResource {
 	public void setAddress(AddressDt theValue) {
 		myAddress = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>gender</b> (Gender for administrative purposes).
 	 * creating it if it does
@@ -527,8 +528,8 @@ public class Organization extends BaseElement implements IResource {
 	public void setGender(CodeableConceptDt theValue) {
 		myGender = theValue;
 	}
-	
- 
+
+  
 
 	}
 

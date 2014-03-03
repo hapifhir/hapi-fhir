@@ -27,6 +27,7 @@ public abstract class BaseElement {
 	private String myShortName;
 	private List<String> myType;
 	private String myV2Mapping;
+	private String myExtensionUrl;
 
 	public void addChild(Child theElem) {
 		if (myChildren == null) {
@@ -150,6 +151,10 @@ public abstract class BaseElement {
 	}
 
 	public void setElementName(String theName) {
+		myElementName = theName;
+	}
+	
+	public void setElementNameAndDeriveParentElementName(String theName) {
 		int lastDot = theName.lastIndexOf('.');
 		if (lastDot == -1) {
 			myElementName = (theName);
@@ -215,6 +220,18 @@ public abstract class BaseElement {
 
 	public void setV2Mapping(String theV2Mapping) {
 		myV2Mapping = theV2Mapping;
+	}
+
+	public void setExtensionUrl(String theExtensionUrl) {
+		myExtensionUrl = theExtensionUrl;
+	}
+
+	public boolean isHasExtensionUrl() {
+		return StringUtils.isNotBlank(myExtensionUrl);
+	}
+
+	public String getExtensionUrl() {
+		return myExtensionUrl;
 	}
 
 }

@@ -1,6 +1,7 @@
 package ca.uhn.fhir.parser;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -135,6 +136,7 @@ public class XmlParserTest {
 				"	</extension>\n" + 
 				"	<identifier>\n" + 
 				"		<label value=\"IdentifierLabel\"/>\n" + 
+				"		<period />\n" + // this line can be removed once the parser encoding doesn't spit it out 
 				"	</identifier>\n" + 
 				"</ResourceWithExtensionsA>";
 		//@formatter:on

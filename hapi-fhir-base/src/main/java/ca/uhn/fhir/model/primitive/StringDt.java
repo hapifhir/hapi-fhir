@@ -1,5 +1,7 @@
 package ca.uhn.fhir.model.primitive;
 
+import org.apache.commons.lang3.StringUtils;
+
 import ca.uhn.fhir.model.api.BaseElement;
 import ca.uhn.fhir.model.api.IPrimitiveDatatype;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
@@ -29,6 +31,10 @@ public class StringDt  extends BaseElement implements IPrimitiveDatatype<String>
 	@Override
 	public String getValue() {
 		return myValue;
+	}
+
+	public String getValueNotNull() {
+		return StringUtils.defaultString(myValue);
 	}
 
 	@Override

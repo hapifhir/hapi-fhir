@@ -44,6 +44,7 @@
 		</element>
 		<element>
 			<path value="Organization.extension" />
+			<name value="providerIdPool"/>
 			<definition>
 				<short value="Provider ID system pool" />
 				<formal value="An OID which serves as a namespace (ID root in HL7v3, identifier.system in FHIR) for a provider identifier" />
@@ -564,7 +565,7 @@
 			<min value="0" />
 			<max value="*" />
 			<type>
-				<code value="coding" />
+				<code value="code" />
 			</type>
 			<mustSupport value="false" />
 			<isModifier value="false" />

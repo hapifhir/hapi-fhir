@@ -35,7 +35,7 @@ public class ModelScannerTest {
 		assertNotNull(valueDate);
 		childExt = ext.getChildExtensionForUrl("http://bar/1/2");
 		assertNotNull(childExt);
-		childExt = childExt.getChildExtensionForUrl("http://baz/1/2/1");
+		childExt = childExt.getChildExtensionForUrl("http://bar/1/2/1");
 		assertNotNull(childExt);
 		valueDate = childExt.getChildByName("valueDate");
 		assertNotNull(valueDate);

@@ -1,0 +1,36 @@
+#parse ( "/vm/templates.vm" )
+
+package ${packageBase}.composite;
+
+import java.util.*;
+import ca.uhn.fhir.model.api.*;
+import ca.uhn.fhir.model.api.annotation.*;
+import ca.uhn.fhir.model.primitive.*;
+import ${packageBase}.valueset.*;
+import ${packageBase}.resource.*;
+
+/**
+ * HAPI/FHIR <b>${className}</b> Datatype
+ * (${shortName})
+ *
+ * <p>
+ * <b>Definition:</b>
+ * ${definition}
+ * </p> 
+ *
+ * <p>
+ * <b>Requirements:</b>
+ * ${requirements}
+ * </p> 
+ */
+@DatatypeDef(name="${className}") 
+public class ${className}Dt extends BaseElement implements ICompositeDatatype {
+
+#childExtensionFields( $childExtensionTypes )
+#childVars( $children )
+#childAccessors( $children )
+#childResourceBlocks($resourceBlockChildren)
+
+#childExtensionTypes( $childExtensionTypes )
+
+}

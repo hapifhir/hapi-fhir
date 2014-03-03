@@ -17,10 +17,12 @@
 package ca.uhn.fhir.model.dstu.resource;
 
 import java.util.*;
+
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.model.primitive.*;
 import ca.uhn.fhir.model.dstu.composite.*;
+import ca.uhn.fhir.model.dstu.valueset.*;
 
 /**
  * HAPI/FHIR <b>Group</b> Resource
@@ -37,13 +39,13 @@ import ca.uhn.fhir.model.dstu.composite.*;
  * </p> 
  */
 @ResourceDef(name="Group")
-public class Group extends BaseElement implements IResource {
+public class Group extends BaseResource implements IResource {
 
 	@Child(name="identifier", type=IdentifierDt.class, order=0, min=0, max=1)	
 	private IdentifierDt myIdentifier;
 	
 	@Child(name="type", type=CodeDt.class, order=1, min=1, max=1)	
-	private CodeDt myType;
+	private BoundCodeDt<GroupTypeEnum> myType;
 	
 	@Child(name="actual", type=BooleanDt.class, order=2, min=1, max=1)	
 	private BooleanDt myActual;
@@ -98,8 +100,8 @@ public class Group extends BaseElement implements IResource {
 	public void setIdentifier(IdentifierDt theValue) {
 		myIdentifier = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>type</b> (person | animal | practitioner | device | medication | substance).
 	 * creating it if it does
@@ -110,9 +112,9 @@ public class Group extends BaseElement implements IResource {
      * Identifies the broad classification of the kind of resources the group includes
      * </p> 
 	 */
-	public CodeDt getType() {  
+	public BoundCodeDt<GroupTypeEnum> getType() {  
 		if (myType == null) {
-			myType = new CodeDt();
+			myType = new BoundCodeDt<GroupTypeEnum>(GroupTypeEnum.VALUESET_BINDER);
 		}
 		return myType;
 	}
@@ -125,11 +127,23 @@ public class Group extends BaseElement implements IResource {
      * Identifies the broad classification of the kind of resources the group includes
      * </p> 
 	 */
-	public void setType(CodeDt theValue) {
+	public void setType(BoundCodeDt<GroupTypeEnum> theValue) {
 		myType = theValue;
 	}
-	
- 
+
+	/**
+	 * Sets the value(s) for <b>type</b> (person | animal | practitioner | device | medication | substance)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Identifies the broad classification of the kind of resources the group includes
+     * </p> 
+	 */
+	public void setType(GroupTypeEnum theValue) {
+		getType().setValueAsEnum(theValue);
+	}
+
+  
 	/**
 	 * Gets the value(s) for <b>actual</b> (Descriptive or actual).
 	 * creating it if it does
@@ -158,8 +172,8 @@ public class Group extends BaseElement implements IResource {
 	public void setActual(BooleanDt theValue) {
 		myActual = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>code</b> (Kind of Group members).
 	 * creating it if it does
@@ -188,8 +202,8 @@ public class Group extends BaseElement implements IResource {
 	public void setCode(CodeableConceptDt theValue) {
 		myCode = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>name</b> (Label for Group).
 	 * creating it if it does
@@ -218,8 +232,8 @@ public class Group extends BaseElement implements IResource {
 	public void setName(StringDt theValue) {
 		myName = theValue;
 	}
-	
-	/**
+
+ 	/**
 	 * Sets the value(s) for <b>name</b> (Label for Group)
 	 *
      * <p>
@@ -259,8 +273,8 @@ public class Group extends BaseElement implements IResource {
 	public void setQuantity(IntegerDt theValue) {
 		myQuantity = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>characteristic</b> (Trait of group members).
 	 * creating it if it does
@@ -289,8 +303,8 @@ public class Group extends BaseElement implements IResource {
 	public void setCharacteristic(List<Characteristic> theValue) {
 		myCharacteristic = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>member</b> (Who is in group).
 	 * creating it if it does
@@ -316,8 +330,8 @@ public class Group extends BaseElement implements IResource {
 	public void setMember(List<ResourceReference> theValue) {
 		myMember = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Block class for child element: <b>Group.characteristic</b> (Trait of group members)
 	 *
@@ -371,8 +385,8 @@ public class Group extends BaseElement implements IResource {
 	public void setCode(CodeableConceptDt theValue) {
 		myCode = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>value[x]</b> (Value held by characteristic).
 	 * creating it if it does
@@ -398,8 +412,8 @@ public class Group extends BaseElement implements IResource {
 	public void setValue(IDatatype theValue) {
 		myValue = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>exclude</b> (Group includes or excludes).
 	 * creating it if it does
@@ -428,8 +442,8 @@ public class Group extends BaseElement implements IResource {
 	public void setExclude(BooleanDt theValue) {
 		myExclude = theValue;
 	}
-	
- 
+
+  
 
 	}
 

@@ -21,6 +21,7 @@ import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.model.primitive.*;
 import ca.uhn.fhir.model.dstu.composite.*;
+import ca.uhn.fhir.model.dstu.valueset.*;
 
 /**
  * HAPI/FHIR <b>Location</b> Resource
@@ -37,7 +38,7 @@ import ca.uhn.fhir.model.dstu.composite.*;
  * </p> 
  */
 @ResourceDef(name="Location")
-public class Location extends BaseElement implements IResource {
+public class Location extends BaseResource implements IResource {
 
 	@Child(name="identifier", type=IdentifierDt.class, order=0, min=0, max=1)	
 	private IdentifierDt myIdentifier;
@@ -70,7 +71,7 @@ public class Location extends BaseElement implements IResource {
 	private ResourceReference myManagingOrganization;
 	
 	@Child(name="status", type=CodeDt.class, order=9, min=0, max=1)	
-	private CodeDt myStatus;
+	private BoundCodeDt<LocationStatusEnum> myStatus;
 	
 	@Child(name="partOf", order=10, min=0, max=1)
 	@ChildResource(types= {
@@ -79,7 +80,7 @@ public class Location extends BaseElement implements IResource {
 	private ResourceReference myPartOf;
 	
 	@Child(name="mode", type=CodeDt.class, order=11, min=0, max=1)	
-	private CodeDt myMode;
+	private BoundCodeDt<LocationModeEnum> myMode;
 	
 	/**
 	 * Gets the value(s) for <b>identifier</b> (Unique code or number identifying the location to its users).
@@ -109,8 +110,8 @@ public class Location extends BaseElement implements IResource {
 	public void setIdentifier(IdentifierDt theValue) {
 		myIdentifier = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>name</b> (Name of the location as used by humans).
 	 * creating it if it does
@@ -139,8 +140,8 @@ public class Location extends BaseElement implements IResource {
 	public void setName(StringDt theValue) {
 		myName = theValue;
 	}
-	
-	/**
+
+ 	/**
 	 * Sets the value(s) for <b>name</b> (Name of the location as used by humans)
 	 *
      * <p>
@@ -180,8 +181,8 @@ public class Location extends BaseElement implements IResource {
 	public void setDescription(StringDt theValue) {
 		myDescription = theValue;
 	}
-	
-	/**
+
+ 	/**
 	 * Sets the value(s) for <b>description</b> (Description of the Location, which helps in finding or referencing the place)
 	 *
      * <p>
@@ -221,8 +222,8 @@ public class Location extends BaseElement implements IResource {
 	public void setType(CodeableConceptDt theValue) {
 		myType = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>telecom</b> (Contact details of the location).
 	 * creating it if it does
@@ -251,8 +252,8 @@ public class Location extends BaseElement implements IResource {
 	public void setTelecom(List<ContactDt> theValue) {
 		myTelecom = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>address</b> (Physical location).
 	 * creating it if it does
@@ -281,8 +282,8 @@ public class Location extends BaseElement implements IResource {
 	public void setAddress(AddressDt theValue) {
 		myAddress = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>physicalType</b> (Physical form of the location).
 	 * creating it if it does
@@ -311,8 +312,8 @@ public class Location extends BaseElement implements IResource {
 	public void setPhysicalType(CodeableConceptDt theValue) {
 		myPhysicalType = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>position</b> (The absolute geographic location ).
 	 * creating it if it does
@@ -341,8 +342,8 @@ public class Location extends BaseElement implements IResource {
 	public void setPosition(Position theValue) {
 		myPosition = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>managingOrganization</b> (The organization that is responsible for the provisioning and upkeep of the location).
 	 * creating it if it does
@@ -371,8 +372,8 @@ public class Location extends BaseElement implements IResource {
 	public void setManagingOrganization(ResourceReference theValue) {
 		myManagingOrganization = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>status</b> (active | suspended | inactive).
 	 * creating it if it does
@@ -383,9 +384,9 @@ public class Location extends BaseElement implements IResource {
      * 
      * </p> 
 	 */
-	public CodeDt getStatus() {  
+	public BoundCodeDt<LocationStatusEnum> getStatus() {  
 		if (myStatus == null) {
-			myStatus = new CodeDt();
+			myStatus = new BoundCodeDt<LocationStatusEnum>(LocationStatusEnum.VALUESET_BINDER);
 		}
 		return myStatus;
 	}
@@ -398,11 +399,23 @@ public class Location extends BaseElement implements IResource {
      * 
      * </p> 
 	 */
-	public void setStatus(CodeDt theValue) {
+	public void setStatus(BoundCodeDt<LocationStatusEnum> theValue) {
 		myStatus = theValue;
 	}
-	
- 
+
+	/**
+	 * Sets the value(s) for <b>status</b> (active | suspended | inactive)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * 
+     * </p> 
+	 */
+	public void setStatus(LocationStatusEnum theValue) {
+		getStatus().setValueAsEnum(theValue);
+	}
+
+  
 	/**
 	 * Gets the value(s) for <b>partOf</b> (Another Location which this Location is physically part of).
 	 * creating it if it does
@@ -431,8 +444,8 @@ public class Location extends BaseElement implements IResource {
 	public void setPartOf(ResourceReference theValue) {
 		myPartOf = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>mode</b> (instance | kind).
 	 * creating it if it does
@@ -443,9 +456,9 @@ public class Location extends BaseElement implements IResource {
      * Indicates whether a resource instance represents a specific location or a class of locations
      * </p> 
 	 */
-	public CodeDt getMode() {  
+	public BoundCodeDt<LocationModeEnum> getMode() {  
 		if (myMode == null) {
-			myMode = new CodeDt();
+			myMode = new BoundCodeDt<LocationModeEnum>(LocationModeEnum.VALUESET_BINDER);
 		}
 		return myMode;
 	}
@@ -458,11 +471,23 @@ public class Location extends BaseElement implements IResource {
      * Indicates whether a resource instance represents a specific location or a class of locations
      * </p> 
 	 */
-	public void setMode(CodeDt theValue) {
+	public void setMode(BoundCodeDt<LocationModeEnum> theValue) {
 		myMode = theValue;
 	}
-	
- 
+
+	/**
+	 * Sets the value(s) for <b>mode</b> (instance | kind)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Indicates whether a resource instance represents a specific location or a class of locations
+     * </p> 
+	 */
+	public void setMode(LocationModeEnum theValue) {
+		getMode().setValueAsEnum(theValue);
+	}
+
+  
 	/**
 	 * Block class for child element: <b>Location.position</b> (The absolute geographic location )
 	 *
@@ -511,8 +536,8 @@ public class Location extends BaseElement implements IResource {
 	public void setLongitude(DecimalDt theValue) {
 		myLongitude = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>latitude</b> (Latitude as expressed in KML).
 	 * creating it if it does
@@ -541,8 +566,8 @@ public class Location extends BaseElement implements IResource {
 	public void setLatitude(DecimalDt theValue) {
 		myLatitude = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>altitude</b> (Altitude as expressed in KML).
 	 * creating it if it does
@@ -571,8 +596,8 @@ public class Location extends BaseElement implements IResource {
 	public void setAltitude(DecimalDt theValue) {
 		myAltitude = theValue;
 	}
-	
- 
+
+  
 
 	}
 

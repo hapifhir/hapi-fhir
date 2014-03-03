@@ -1,32 +1,118 @@
 package ca.uhn.fhir.tinder;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.List;
 
-public class TinderMojo {
+import org.apache.commons.lang3.StringUtils;
+import org.apache.maven.plugin.AbstractMojo;
+import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.Component;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.project.MavenProject;
 
-	public static void main(String[] args) throws Exception {
+@Mojo(name = "generate", defaultPhase = LifecyclePhase.GENERATE_SOURCES)
+public class TinderMojo extends AbstractMojo {
+
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TinderMojo.class);
+
+	@Parameter(alias = "package", required = true)
+	private String myPackage;
+
+	@Parameter(alias = "targetDirectory", required = true, defaultValue = "${project.build.directory}/generated-sources/tinder")
+	private String myTargetDirectory;
+
+	@Parameter(property = "generate.valueSetResourceXmlDirectory", required = false)
+	private String myValueSetResourceXmlDirectory;
+
+	@Parameter(alias = "baseResourceNames", required = true)
+	private List<String> myBaseResourceNames;
+
+	@Component
+	private MavenProject myProject;
+
+	@Override
+	public void execute() throws MojoExecutionException, MojoFailureException {
+		if (StringUtils.isBlank(myPackage)) {
+			throw new MojoFailureException("Package not specified");
+		}
+		if (myPackage.contains("..") || myPackage.endsWith(".")) {
+			throw new MojoFailureException("Invalid package specified");
+		}
 		
-		ValueSetParser vsp = new ValueSetParser();
-		vsp.setDirectory("src/test/resources/vs/");
-		vsp.parse();
+		ourLog.info("Beginning HAPI-FHIR Tinder Code Generation...");
 		
-		DatatypeSpreadsheetParser dtp = new DatatypeSpreadsheetParser();
-		dtp.setDirectory("src/test/resources/dt");
-		dtp.parse();
+		ourLog.info(" * Output Package: " + myPackage);
+		File directoryBase = new File(new File(myTargetDirectory), myPackage.replace('.', File.separatorChar)); 
+		directoryBase.mkdirs();
+		ourLog.info(" * Output Directory: " + directoryBase.getAbsolutePath());
+		
+		ValueSetGenerator vsp = new ValueSetGenerator();
+		vsp.setDirectory(myValueSetResourceXmlDirectory);
+		try {
+			vsp.parse();
+		} catch (Exception e) {
+			throw new MojoFailureException("Failed to load valuesets", e);
+		}
+
+		ourLog.info("Loading Datatypes...");
+
+		DatatypeGeneratorUsingSpreadsheet dtp = new DatatypeGeneratorUsingSpreadsheet();
+		try {
+			dtp.parse();
+		} catch (Exception e) {
+			throw new MojoFailureException("Failed to load datatypes", e);
+		}
 		dtp.bindValueSets(vsp);
-		
-		String dtOutputDir = "target/generated/valuesets/ca/uhn/fhir/model/dstu/composite";
-		dtp.writeAll(dtOutputDir);
-		
-		ResourceSpreadsheetParser rp = new ResourceSpreadsheetParser();
-		rp.setDirectory("src/test/resources/res");
-		rp.parse();
-		rp.bindValueSets(vsp);
 
-		String rpOutputDir = "target/generated/valuesets/ca/uhn/fhir/model/dstu/resource";
-		rp.writeAll(rpOutputDir);
+		ourLog.info("Loading Resources...");
+		ResourceGeneratorUsingSpreadsheet rp = new ResourceGeneratorUsingSpreadsheet();
+		try {
+			rp.setBaseResourceNames(myBaseResourceNames);
+			rp.parse();
+		} catch (Exception e) {
+			throw new MojoFailureException("Failed to load resources", e);
+		}
+		rp.bindValueSets(vsp);
 		
-		String vsOutputDir = "target/generated/valuesets/ca/uhn/fhir/model/dstu/valueset";
-		vsp.writeMarkedValueSets(vsOutputDir);
+		ourLog.info("Writing Resources...");
+		rp.writeAll(new File(directoryBase, "resource"), myPackage);
+
+		ourLog.info("Writing Composite Datatypes...");
+		dtp.writeAll(new File(directoryBase, "composite"), myPackage);
+		
+		ourLog.info("Writing ValueSet Enums...");
+		vsp.writeMarkedValueSets(new File(directoryBase, "valueset"), myPackage);
+
+		myProject.addCompileSourceRoot(myTargetDirectory);
 	}
 	
+	public static void main(String[] args) throws Exception {
+
+//		ValueSetGenerator vsp = new ValueSetGenerator();
+//		vsp.setDirectory("src/test/resources/vs/");
+//		vsp.parse();
+//
+//		DatatypeGeneratorUsingSpreadsheet dtp = new DatatypeGeneratorUsingSpreadsheet();
+//		dtp.parse();
+//		dtp.bindValueSets(vsp);
+//
+//		String dtOutputDir = "target/generated/valuesets/ca/uhn/fhir/model/dstu/composite";
+//		dtp.writeAll(dtOutputDir);
+//
+//		ResourceGeneratorUsingSpreadsheet rp = new ResourceGeneratorUsingSpreadsheet();
+//		rp.parse();
+//		rp.bindValueSets(vsp);
+//
+//		String rpOutputDir = "target/generated/valuesets/ca/uhn/fhir/model/dstu/resource";
+//		rp.writeAll(rpOutputDir);
+//
+//		String vsOutputDir = "target/generated/valuesets/ca/uhn/fhir/model/dstu/valueset";
+//		vsp.writeMarkedValueSets(vsOutputDir);
+	}
+
 }

@@ -21,6 +21,7 @@ import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.model.primitive.*;
 import ca.uhn.fhir.model.dstu.composite.*;
+import ca.uhn.fhir.model.dstu.valueset.*;
 
 /**
  * HAPI/FHIR <b>Device</b> Resource
@@ -37,7 +38,7 @@ import ca.uhn.fhir.model.dstu.composite.*;
  * </p> 
  */
 @ResourceDef(name="Device")
-public class Device extends BaseElement implements IResource {
+public class Device extends BaseResource implements IResource {
 
 	@Child(name="identifier", type=IdentifierDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)	
 	private List<IdentifierDt> myIdentifier;
@@ -115,8 +116,8 @@ public class Device extends BaseElement implements IResource {
 	public void setIdentifier(List<IdentifierDt> theValue) {
 		myIdentifier = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>type</b> (What kind of device this is).
 	 * creating it if it does
@@ -145,8 +146,8 @@ public class Device extends BaseElement implements IResource {
 	public void setType(CodeableConceptDt theValue) {
 		myType = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>manufacturer</b> (Name of device manufacturer).
 	 * creating it if it does
@@ -175,8 +176,8 @@ public class Device extends BaseElement implements IResource {
 	public void setManufacturer(StringDt theValue) {
 		myManufacturer = theValue;
 	}
-	
-	/**
+
+ 	/**
 	 * Sets the value(s) for <b>manufacturer</b> (Name of device manufacturer)
 	 *
      * <p>
@@ -216,8 +217,8 @@ public class Device extends BaseElement implements IResource {
 	public void setModel(StringDt theValue) {
 		myModel = theValue;
 	}
-	
-	/**
+
+ 	/**
 	 * Sets the value(s) for <b>model</b> (Model id assigned by the manufacturer)
 	 *
      * <p>
@@ -257,8 +258,8 @@ public class Device extends BaseElement implements IResource {
 	public void setVersion(StringDt theValue) {
 		myVersion = theValue;
 	}
-	
-	/**
+
+ 	/**
 	 * Sets the value(s) for <b>version</b> (Version number (i.e. software))
 	 *
      * <p>
@@ -298,8 +299,8 @@ public class Device extends BaseElement implements IResource {
 	public void setExpiry(DateDt theValue) {
 		myExpiry = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>udi</b> (FDA Mandated Unique Device Identifier).
 	 * creating it if it does
@@ -328,8 +329,8 @@ public class Device extends BaseElement implements IResource {
 	public void setUdi(StringDt theValue) {
 		myUdi = theValue;
 	}
-	
-	/**
+
+ 	/**
 	 * Sets the value(s) for <b>udi</b> (FDA Mandated Unique Device Identifier)
 	 *
      * <p>
@@ -369,8 +370,8 @@ public class Device extends BaseElement implements IResource {
 	public void setLotNumber(StringDt theValue) {
 		myLotNumber = theValue;
 	}
-	
-	/**
+
+ 	/**
 	 * Sets the value(s) for <b>lotNumber</b> (Lot number of manufacture)
 	 *
      * <p>
@@ -410,8 +411,8 @@ public class Device extends BaseElement implements IResource {
 	public void setOwner(ResourceReference theValue) {
 		myOwner = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>location</b> (Where the resource is found).
 	 * creating it if it does
@@ -440,8 +441,8 @@ public class Device extends BaseElement implements IResource {
 	public void setLocation(ResourceReference theValue) {
 		myLocation = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>patient</b> (If the resource is affixed to a person).
 	 * creating it if it does
@@ -470,8 +471,8 @@ public class Device extends BaseElement implements IResource {
 	public void setPatient(ResourceReference theValue) {
 		myPatient = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>contact</b> (Details for human/organization for support).
 	 * creating it if it does
@@ -500,8 +501,8 @@ public class Device extends BaseElement implements IResource {
 	public void setContact(List<ContactDt> theValue) {
 		myContact = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>url</b> (Network address to contact device).
 	 * creating it if it does
@@ -530,8 +531,8 @@ public class Device extends BaseElement implements IResource {
 	public void setUrl(UriDt theValue) {
 		myUrl = theValue;
 	}
-	
- 
+
+  
 
 
 }

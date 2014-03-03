@@ -1,0 +1,36 @@
+#parse ( "/vm/templates.vm" )
+
+package ${packageBase}.resource;
+
+import java.util.*;
+import ca.uhn.fhir.model.api.*;
+import ca.uhn.fhir.model.api.annotation.*;
+import ca.uhn.fhir.model.primitive.*;
+import ${packageBase}.composite.*;
+import ${packageBase}.valueset.*;
+
+/**
+ * HAPI/FHIR <b>${className}</b> Resource
+ * (${shortName})
+ *
+ * <p>
+ * <b>Definition:</b>
+ * ${definition}
+ * </p> 
+ *
+ * <p>
+ * <b>Requirements:</b>
+ * ${requirements}
+ * </p> 
+ */
+@ResourceDef(name="${className}")
+public class ${className} extends BaseResource implements IResource {
+
+#childExtensionFields( $childExtensionTypes )
+#childVars( $children )
+#childAccessors( $children )
+#childResourceBlocks($resourceBlockChildren)
+
+#childExtensionTypes( $childExtensionTypes )
+
+}

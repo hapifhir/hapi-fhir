@@ -17,10 +17,12 @@
 package ca.uhn.fhir.model.dstu.resource;
 
 import java.util.*;
+
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.model.primitive.*;
 import ca.uhn.fhir.model.dstu.composite.*;
+import ca.uhn.fhir.model.dstu.valueset.*;
 
 /**
  * HAPI/FHIR <b>Observation</b> Resource
@@ -37,7 +39,7 @@ import ca.uhn.fhir.model.dstu.composite.*;
  * </p> 
  */
 @ResourceDef(name="Observation")
-public class Observation extends BaseElement implements IResource {
+public class Observation extends BaseResource implements IResource {
 
 	@Child(name="name", type=CodeableConceptDt.class, order=0, min=1, max=1)	
 	private CodeableConceptDt myName;
@@ -69,10 +71,10 @@ public class Observation extends BaseElement implements IResource {
 	private InstantDt myIssued;
 	
 	@Child(name="status", type=CodeDt.class, order=6, min=1, max=1)	
-	private CodeDt myStatus;
+	private BoundCodeDt<ObservationStatusEnum> myStatus;
 	
 	@Child(name="reliability", type=CodeDt.class, order=7, min=1, max=1)	
-	private CodeDt myReliability;
+	private BoundCodeDt<ObservationReliabilityEnum> myReliability;
 	
 	@Child(name="bodySite", type=CodeableConceptDt.class, order=8, min=0, max=1)	
 	private CodeableConceptDt myBodySite;
@@ -140,8 +142,8 @@ public class Observation extends BaseElement implements IResource {
 	public void setName(CodeableConceptDt theValue) {
 		myName = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>value[x]</b> (Actual result).
 	 * creating it if it does
@@ -167,8 +169,8 @@ public class Observation extends BaseElement implements IResource {
 	public void setValue(IDatatype theValue) {
 		myValue = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>interpretation</b> (High, low, normal, etc.).
 	 * creating it if it does
@@ -197,8 +199,8 @@ public class Observation extends BaseElement implements IResource {
 	public void setInterpretation(CodeableConceptDt theValue) {
 		myInterpretation = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>comments</b> (Comments about result).
 	 * creating it if it does
@@ -227,8 +229,8 @@ public class Observation extends BaseElement implements IResource {
 	public void setComments(StringDt theValue) {
 		myComments = theValue;
 	}
-	
-	/**
+
+ 	/**
 	 * Sets the value(s) for <b>comments</b> (Comments about result)
 	 *
      * <p>
@@ -265,8 +267,8 @@ public class Observation extends BaseElement implements IResource {
 	public void setApplies(IDatatype theValue) {
 		myApplies = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>issued</b> (Date/Time this was made available).
 	 * creating it if it does
@@ -295,8 +297,8 @@ public class Observation extends BaseElement implements IResource {
 	public void setIssued(InstantDt theValue) {
 		myIssued = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>status</b> (registered | preliminary | final | amended +).
 	 * creating it if it does
@@ -307,9 +309,9 @@ public class Observation extends BaseElement implements IResource {
      * The status of the result value
      * </p> 
 	 */
-	public CodeDt getStatus() {  
+	public BoundCodeDt<ObservationStatusEnum> getStatus() {  
 		if (myStatus == null) {
-			myStatus = new CodeDt();
+			myStatus = new BoundCodeDt<ObservationStatusEnum>(ObservationStatusEnum.VALUESET_BINDER);
 		}
 		return myStatus;
 	}
@@ -322,11 +324,23 @@ public class Observation extends BaseElement implements IResource {
      * The status of the result value
      * </p> 
 	 */
-	public void setStatus(CodeDt theValue) {
+	public void setStatus(BoundCodeDt<ObservationStatusEnum> theValue) {
 		myStatus = theValue;
 	}
-	
- 
+
+	/**
+	 * Sets the value(s) for <b>status</b> (registered | preliminary | final | amended +)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The status of the result value
+     * </p> 
+	 */
+	public void setStatus(ObservationStatusEnum theValue) {
+		getStatus().setValueAsEnum(theValue);
+	}
+
+  
 	/**
 	 * Gets the value(s) for <b>reliability</b> (ok | ongoing | early | questionable | calibrating | error + ).
 	 * creating it if it does
@@ -337,9 +351,9 @@ public class Observation extends BaseElement implements IResource {
      * An estimate of the degree to which quality issues have impacted on the value reported
      * </p> 
 	 */
-	public CodeDt getReliability() {  
+	public BoundCodeDt<ObservationReliabilityEnum> getReliability() {  
 		if (myReliability == null) {
-			myReliability = new CodeDt();
+			myReliability = new BoundCodeDt<ObservationReliabilityEnum>(ObservationReliabilityEnum.VALUESET_BINDER);
 		}
 		return myReliability;
 	}
@@ -352,11 +366,23 @@ public class Observation extends BaseElement implements IResource {
      * An estimate of the degree to which quality issues have impacted on the value reported
      * </p> 
 	 */
-	public void setReliability(CodeDt theValue) {
+	public void setReliability(BoundCodeDt<ObservationReliabilityEnum> theValue) {
 		myReliability = theValue;
 	}
-	
- 
+
+	/**
+	 * Sets the value(s) for <b>reliability</b> (ok | ongoing | early | questionable | calibrating | error + )
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * An estimate of the degree to which quality issues have impacted on the value reported
+     * </p> 
+	 */
+	public void setReliability(ObservationReliabilityEnum theValue) {
+		getReliability().setValueAsEnum(theValue);
+	}
+
+  
 	/**
 	 * Gets the value(s) for <b>bodySite</b> (Observed body part).
 	 * creating it if it does
@@ -385,8 +411,8 @@ public class Observation extends BaseElement implements IResource {
 	public void setBodySite(CodeableConceptDt theValue) {
 		myBodySite = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>method</b> (How it was done).
 	 * creating it if it does
@@ -415,8 +441,8 @@ public class Observation extends BaseElement implements IResource {
 	public void setMethod(CodeableConceptDt theValue) {
 		myMethod = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>identifier</b> (Unique Id for this particular observation).
 	 * creating it if it does
@@ -445,8 +471,8 @@ public class Observation extends BaseElement implements IResource {
 	public void setIdentifier(IdentifierDt theValue) {
 		myIdentifier = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>subject</b> (Who and/or what this is about).
 	 * creating it if it does
@@ -472,8 +498,8 @@ public class Observation extends BaseElement implements IResource {
 	public void setSubject(ResourceReference theValue) {
 		mySubject = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>specimen</b> (Specimen used for this observation).
 	 * creating it if it does
@@ -502,8 +528,8 @@ public class Observation extends BaseElement implements IResource {
 	public void setSpecimen(ResourceReference theValue) {
 		mySpecimen = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>performer</b> (Who did the observation).
 	 * creating it if it does
@@ -529,8 +555,8 @@ public class Observation extends BaseElement implements IResource {
 	public void setPerformer(List<ResourceReference> theValue) {
 		myPerformer = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>referenceRange</b> (Provides guide for interpretation).
 	 * creating it if it does
@@ -559,8 +585,8 @@ public class Observation extends BaseElement implements IResource {
 	public void setReferenceRange(List<ReferenceRange> theValue) {
 		myReferenceRange = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>related</b> (Observations related to this observation).
 	 * creating it if it does
@@ -589,8 +615,8 @@ public class Observation extends BaseElement implements IResource {
 	public void setRelated(List<Related> theValue) {
 		myRelated = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Block class for child element: <b>Observation.referenceRange</b> (Provides guide for interpretation)
 	 *
@@ -642,8 +668,8 @@ public class Observation extends BaseElement implements IResource {
 	public void setLow(QuantityDt theValue) {
 		myLow = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>high</b> (High Range, if relevant).
 	 * creating it if it does
@@ -672,8 +698,8 @@ public class Observation extends BaseElement implements IResource {
 	public void setHigh(QuantityDt theValue) {
 		myHigh = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>meaning</b> (Indicates the meaning/use of this range of this range).
 	 * creating it if it does
@@ -702,8 +728,8 @@ public class Observation extends BaseElement implements IResource {
 	public void setMeaning(CodeableConceptDt theValue) {
 		myMeaning = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>age</b> (Applicable age range, if relevant).
 	 * creating it if it does
@@ -732,8 +758,8 @@ public class Observation extends BaseElement implements IResource {
 	public void setAge(RangeDt theValue) {
 		myAge = theValue;
 	}
-	
- 
+
+  
 
 	}
 
@@ -750,7 +776,7 @@ public class Observation extends BaseElement implements IResource {
 	public static class Related extends BaseElement implements IResourceBlock {
 	
 	@Child(name="type", type=CodeDt.class, order=0, min=0, max=1)	
-	private CodeDt myType;
+	private BoundCodeDt<ObservationRelationshipTypeEnum> myType;
 	
 	@Child(name="target", order=1, min=1, max=1)
 	@ChildResource(types= {
@@ -768,9 +794,9 @@ public class Observation extends BaseElement implements IResource {
      * A code specifying the kind of relationship that exists with the target observation
      * </p> 
 	 */
-	public CodeDt getType() {  
+	public BoundCodeDt<ObservationRelationshipTypeEnum> getType() {  
 		if (myType == null) {
-			myType = new CodeDt();
+			myType = new BoundCodeDt<ObservationRelationshipTypeEnum>(ObservationRelationshipTypeEnum.VALUESET_BINDER);
 		}
 		return myType;
 	}
@@ -783,11 +809,23 @@ public class Observation extends BaseElement implements IResource {
      * A code specifying the kind of relationship that exists with the target observation
      * </p> 
 	 */
-	public void setType(CodeDt theValue) {
+	public void setType(BoundCodeDt<ObservationRelationshipTypeEnum> theValue) {
 		myType = theValue;
 	}
-	
- 
+
+	/**
+	 * Sets the value(s) for <b>type</b> (has-component | has-member | derived-from | sequel-to | replaces | qualified-by | interfered-by)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A code specifying the kind of relationship that exists with the target observation
+     * </p> 
+	 */
+	public void setType(ObservationRelationshipTypeEnum theValue) {
+		getType().setValueAsEnum(theValue);
+	}
+
+  
 	/**
 	 * Gets the value(s) for <b>target</b> (Observation that is related to this one).
 	 * creating it if it does
@@ -816,8 +854,8 @@ public class Observation extends BaseElement implements IResource {
 	public void setTarget(ResourceReference theValue) {
 		myTarget = theValue;
 	}
-	
- 
+
+  
 
 	}
 

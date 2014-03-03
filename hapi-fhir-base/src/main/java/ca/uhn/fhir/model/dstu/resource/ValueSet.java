@@ -21,6 +21,7 @@ import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.model.primitive.*;
 import ca.uhn.fhir.model.dstu.composite.*;
+import ca.uhn.fhir.model.dstu.valueset.*;
 
 /**
  * HAPI/FHIR <b>ValueSet</b> Resource
@@ -61,7 +62,7 @@ public class ValueSet extends BaseResource implements IResource {
 	private StringDt myCopyright;
 	
 	@Child(name="status", type=CodeDt.class, order=7, min=1, max=1)	
-	private CodeDt myStatus;
+	private BoundCodeDt<ValueSetStatusEnum> myStatus;
 	
 	@Child(name="experimental", type=BooleanDt.class, order=8, min=0, max=1)	
 	private BooleanDt myExperimental;
@@ -109,8 +110,8 @@ public class ValueSet extends BaseResource implements IResource {
 	public void setIdentifier(StringDt theValue) {
 		myIdentifier = theValue;
 	}
-	
-	/**
+
+ 	/**
 	 * Sets the value(s) for <b>identifier</b> (Logical id to reference this value set)
 	 *
      * <p>
@@ -150,8 +151,8 @@ public class ValueSet extends BaseResource implements IResource {
 	public void setVersion(StringDt theValue) {
 		myVersion = theValue;
 	}
-	
-	/**
+
+ 	/**
 	 * Sets the value(s) for <b>version</b> (Logical id for this version of the value set)
 	 *
      * <p>
@@ -191,8 +192,8 @@ public class ValueSet extends BaseResource implements IResource {
 	public void setName(StringDt theValue) {
 		myName = theValue;
 	}
-	
-	/**
+
+ 	/**
 	 * Sets the value(s) for <b>name</b> (Informal name for this value set)
 	 *
      * <p>
@@ -232,8 +233,8 @@ public class ValueSet extends BaseResource implements IResource {
 	public void setPublisher(StringDt theValue) {
 		myPublisher = theValue;
 	}
-	
-	/**
+
+ 	/**
 	 * Sets the value(s) for <b>publisher</b> (Name of the publisher (Organization or individual))
 	 *
      * <p>
@@ -273,8 +274,8 @@ public class ValueSet extends BaseResource implements IResource {
 	public void setTelecom(List<ContactDt> theValue) {
 		myTelecom = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>description</b> (Human language description of the value set).
 	 * creating it if it does
@@ -303,8 +304,8 @@ public class ValueSet extends BaseResource implements IResource {
 	public void setDescription(StringDt theValue) {
 		myDescription = theValue;
 	}
-	
-	/**
+
+ 	/**
 	 * Sets the value(s) for <b>description</b> (Human language description of the value set)
 	 *
      * <p>
@@ -344,8 +345,8 @@ public class ValueSet extends BaseResource implements IResource {
 	public void setCopyright(StringDt theValue) {
 		myCopyright = theValue;
 	}
-	
-	/**
+
+ 	/**
 	 * Sets the value(s) for <b>copyright</b> (About the value set or its content)
 	 *
      * <p>
@@ -368,9 +369,9 @@ public class ValueSet extends BaseResource implements IResource {
      * The status of the value set
      * </p> 
 	 */
-	public CodeDt getStatus() {  
+	public BoundCodeDt<ValueSetStatusEnum> getStatus() {  
 		if (myStatus == null) {
-			myStatus = new CodeDt();
+			myStatus = new BoundCodeDt<ValueSetStatusEnum>(ValueSetStatusEnum.VALUESET_BINDER);
 		}
 		return myStatus;
 	}
@@ -384,11 +385,24 @@ public class ValueSet extends BaseResource implements IResource {
      * The status of the value set
      * </p> 
 	 */
-	public void setStatus(CodeDt theValue) {
+	public void setStatus(BoundCodeDt<ValueSetStatusEnum> theValue) {
 		myStatus = theValue;
 	}
-	
- 
+
+	/**
+	 * Sets the value(s) for <b>status</b> (draft | active | retired
+)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The status of the value set
+     * </p> 
+	 */
+	public void setStatus(ValueSetStatusEnum theValue) {
+		getStatus().setValueAsEnum(theValue);
+	}
+
+  
 	/**
 	 * Gets the value(s) for <b>experimental</b> (If for testing purposes, not real usage).
 	 * creating it if it does
@@ -417,8 +431,8 @@ public class ValueSet extends BaseResource implements IResource {
 	public void setExperimental(BooleanDt theValue) {
 		myExperimental = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>extensible</b> (Whether this is intended to be used with an extensible binding).
 	 * creating it if it does
@@ -447,8 +461,8 @@ public class ValueSet extends BaseResource implements IResource {
 	public void setExtensible(BooleanDt theValue) {
 		myExtensible = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>date</b> (Date for given status).
 	 * creating it if it does
@@ -477,8 +491,8 @@ public class ValueSet extends BaseResource implements IResource {
 	public void setDate(DateTimeDt theValue) {
 		myDate = theValue;
 	}
-	
-	/**
+
+ 	/**
 	 * Sets the value(s) for <b>date</b> (Date for given status)
 	 *
      * <p>
@@ -518,8 +532,8 @@ public class ValueSet extends BaseResource implements IResource {
 	public void setDefine(Define theValue) {
 		myDefine = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>compose</b> (When value set includes codes from elsewhere).
 	 * creating it if it does
@@ -548,8 +562,8 @@ public class ValueSet extends BaseResource implements IResource {
 	public void setCompose(Compose theValue) {
 		myCompose = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>expansion</b> (When value set is an expansion).
 	 * creating it if it does
@@ -578,8 +592,8 @@ public class ValueSet extends BaseResource implements IResource {
 	public void setExpansion(Expansion theValue) {
 		myExpansion = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Block class for child element: <b>ValueSet.define</b> (When value set defines its own codes)
 	 *
@@ -631,8 +645,8 @@ public class ValueSet extends BaseResource implements IResource {
 	public void setSystem(UriDt theValue) {
 		mySystem = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>version</b> (Version of this system).
 	 * creating it if it does
@@ -661,8 +675,8 @@ public class ValueSet extends BaseResource implements IResource {
 	public void setVersion(StringDt theValue) {
 		myVersion = theValue;
 	}
-	
-	/**
+
+ 	/**
 	 * Sets the value(s) for <b>version</b> (Version of this system)
 	 *
      * <p>
@@ -702,8 +716,8 @@ public class ValueSet extends BaseResource implements IResource {
 	public void setCaseSensitive(BooleanDt theValue) {
 		myCaseSensitive = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>concept</b> (Concepts in the code system).
 	 * creating it if it does
@@ -732,8 +746,8 @@ public class ValueSet extends BaseResource implements IResource {
 	public void setConcept(List<DefineConcept> theValue) {
 		myConcept = theValue;
 	}
-	
- 
+
+  
 
 	}
 
@@ -791,8 +805,8 @@ public class ValueSet extends BaseResource implements IResource {
 	public void setCode(CodeDt theValue) {
 		myCode = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>abstract</b> (If this code is not for use as a real concept).
 	 * creating it if it does
@@ -821,8 +835,8 @@ public class ValueSet extends BaseResource implements IResource {
 	public void setAbstract(BooleanDt theValue) {
 		myAbstract = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>display</b> (Text to Display to the user).
 	 * creating it if it does
@@ -851,8 +865,8 @@ public class ValueSet extends BaseResource implements IResource {
 	public void setDisplay(StringDt theValue) {
 		myDisplay = theValue;
 	}
-	
-	/**
+
+ 	/**
 	 * Sets the value(s) for <b>display</b> (Text to Display to the user)
 	 *
      * <p>
@@ -892,8 +906,8 @@ public class ValueSet extends BaseResource implements IResource {
 	public void setDefinition(StringDt theValue) {
 		myDefinition = theValue;
 	}
-	
-	/**
+
+ 	/**
 	 * Sets the value(s) for <b>definition</b> (Formal Definition)
 	 *
      * <p>
@@ -933,8 +947,8 @@ public class ValueSet extends BaseResource implements IResource {
 	public void setConcept(List<DefineConcept> theValue) {
 		myConcept = theValue;
 	}
-	
- 
+
+  
 
 	}
 
@@ -988,8 +1002,8 @@ public class ValueSet extends BaseResource implements IResource {
 	public void setImport(List<UriDt> theValue) {
 		myImport = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>include</b> (Include one or more codes from a code system).
 	 * creating it if it does
@@ -1018,8 +1032,8 @@ public class ValueSet extends BaseResource implements IResource {
 	public void setInclude(List<ComposeInclude> theValue) {
 		myInclude = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>exclude</b> (Explicitly exclude codes).
 	 * creating it if it does
@@ -1048,8 +1062,8 @@ public class ValueSet extends BaseResource implements IResource {
 	public void setExclude(List<ComposeInclude> theValue) {
 		myExclude = theValue;
 	}
-	
- 
+
+  
 
 	}
 
@@ -1104,8 +1118,8 @@ public class ValueSet extends BaseResource implements IResource {
 	public void setSystem(UriDt theValue) {
 		mySystem = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>version</b> (Specific version of the code system referred to).
 	 * creating it if it does
@@ -1134,8 +1148,8 @@ public class ValueSet extends BaseResource implements IResource {
 	public void setVersion(StringDt theValue) {
 		myVersion = theValue;
 	}
-	
-	/**
+
+ 	/**
 	 * Sets the value(s) for <b>version</b> (Specific version of the code system referred to)
 	 *
      * <p>
@@ -1175,8 +1189,8 @@ public class ValueSet extends BaseResource implements IResource {
 	public void setCode(List<CodeDt> theValue) {
 		myCode = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>filter</b> (Select codes/concepts by their properties (including relationships)).
 	 * creating it if it does
@@ -1205,8 +1219,8 @@ public class ValueSet extends BaseResource implements IResource {
 	public void setFilter(List<ComposeIncludeFilter> theValue) {
 		myFilter = theValue;
 	}
-	
- 
+
+  
 
 	}
 
@@ -1225,7 +1239,7 @@ public class ValueSet extends BaseResource implements IResource {
 	private CodeDt myProperty;
 	
 	@Child(name="op", type=CodeDt.class, order=1, min=1, max=1)	
-	private CodeDt myOp;
+	private BoundCodeDt<FilterOperatorEnum> myOp;
 	
 	@Child(name="value", type=CodeDt.class, order=2, min=1, max=1)	
 	private CodeDt myValue;
@@ -1258,8 +1272,8 @@ public class ValueSet extends BaseResource implements IResource {
 	public void setProperty(CodeDt theValue) {
 		myProperty = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>op</b> (= | is-a | is-not-a | regex | in | not in).
 	 * creating it if it does
@@ -1270,9 +1284,9 @@ public class ValueSet extends BaseResource implements IResource {
      * The kind of operation to perform as a part of the filter criteria
      * </p> 
 	 */
-	public CodeDt getOp() {  
+	public BoundCodeDt<FilterOperatorEnum> getOp() {  
 		if (myOp == null) {
-			myOp = new CodeDt();
+			myOp = new BoundCodeDt<FilterOperatorEnum>(FilterOperatorEnum.VALUESET_BINDER);
 		}
 		return myOp;
 	}
@@ -1285,11 +1299,23 @@ public class ValueSet extends BaseResource implements IResource {
      * The kind of operation to perform as a part of the filter criteria
      * </p> 
 	 */
-	public void setOp(CodeDt theValue) {
+	public void setOp(BoundCodeDt<FilterOperatorEnum> theValue) {
 		myOp = theValue;
 	}
-	
- 
+
+	/**
+	 * Sets the value(s) for <b>op</b> (= | is-a | is-not-a | regex | in | not in)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The kind of operation to perform as a part of the filter criteria
+     * </p> 
+	 */
+	public void setOp(FilterOperatorEnum theValue) {
+		getOp().setValueAsEnum(theValue);
+	}
+
+  
 	/**
 	 * Gets the value(s) for <b>value</b> (Code from the system, or regex criteria).
 	 * creating it if it does
@@ -1318,8 +1344,8 @@ public class ValueSet extends BaseResource implements IResource {
 	public void setValue(CodeDt theValue) {
 		myValue = theValue;
 	}
-	
- 
+
+  
 
 	}
 
@@ -1374,8 +1400,8 @@ public class ValueSet extends BaseResource implements IResource {
 	public void setIdentifier(IdentifierDt theValue) {
 		myIdentifier = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>timestamp</b> (Time valueset expansion happened).
 	 * creating it if it does
@@ -1404,8 +1430,8 @@ public class ValueSet extends BaseResource implements IResource {
 	public void setTimestamp(InstantDt theValue) {
 		myTimestamp = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>contains</b> (Codes in the value set).
 	 * creating it if it does
@@ -1434,8 +1460,8 @@ public class ValueSet extends BaseResource implements IResource {
 	public void setContains(List<ExpansionContains> theValue) {
 		myContains = theValue;
 	}
-	
- 
+
+  
 
 	}
 
@@ -1490,8 +1516,8 @@ public class ValueSet extends BaseResource implements IResource {
 	public void setSystem(UriDt theValue) {
 		mySystem = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>code</b> (Code - if blank, this is not a choosable code).
 	 * creating it if it does
@@ -1520,8 +1546,8 @@ public class ValueSet extends BaseResource implements IResource {
 	public void setCode(CodeDt theValue) {
 		myCode = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>display</b> (User display for the concept).
 	 * creating it if it does
@@ -1550,8 +1576,8 @@ public class ValueSet extends BaseResource implements IResource {
 	public void setDisplay(StringDt theValue) {
 		myDisplay = theValue;
 	}
-	
-	/**
+
+ 	/**
 	 * Sets the value(s) for <b>display</b> (User display for the concept)
 	 *
      * <p>
@@ -1591,8 +1617,8 @@ public class ValueSet extends BaseResource implements IResource {
 	public void setContains(List<ExpansionContains> theValue) {
 		myContains = theValue;
 	}
-	
- 
+
+  
 
 	}
 

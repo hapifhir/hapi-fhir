@@ -1,20 +1,24 @@
 package ca.uhn.fhir.tinder;
 
-import static org.apache.commons.lang.StringUtils.*;
+import static org.apache.commons.lang.StringUtils.capitalize;
+import static org.apache.commons.lang.StringUtils.isBlank;
 
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.xslf.model.geom.AddSubtractExpression;
+import org.apache.maven.plugin.MojoFailureException;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
+import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.dstu.resource.Profile;
 import ca.uhn.fhir.model.dstu.resource.Profile.ExtensionDefn;
 import ca.uhn.fhir.model.dstu.resource.Profile.Structure;
@@ -22,39 +26,41 @@ import ca.uhn.fhir.model.dstu.resource.Profile.StructureElement;
 import ca.uhn.fhir.model.dstu.resource.Profile.StructureElementDefinition;
 import ca.uhn.fhir.model.dstu.resource.Profile.StructureElementDefinitionType;
 import ca.uhn.fhir.model.dstu.valueset.DataTypeEnum;
+import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.XmlParser;
-import ca.uhn.fhir.tinder.model.AnyChild;
 import ca.uhn.fhir.tinder.model.BaseElement;
 import ca.uhn.fhir.tinder.model.Child;
 import ca.uhn.fhir.tinder.model.Resource;
 import ca.uhn.fhir.tinder.model.ResourceBlock;
-import ca.uhn.fhir.tinder.model.ResourceBlockCopy;
 import ca.uhn.fhir.tinder.model.Slicing;
 
 public class ProfileParser extends BaseStructureParser {
 	
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ProfileParser.class);
 	
+	
+
 	public static void main(String[] args) throws Exception {
 
-		FhirContext fhirContext = new FhirContext(Profile.class);
-		XmlParser parser = fhirContext.newXmlParser();
-
-		String file = IOUtils.toString(new FileReader("src/test/resources/prof/organization.xml"));
-		Profile text = (Profile) parser.parseResource(file);
-
-		ValueSetParser vsp = new ValueSetParser();
-		vsp.setDirectory("src/test/resources/vs/");
-		vsp.parse();
-
-		ProfileParser p = new ProfileParser();
-		p.parseSingleProfile(text);
-		p.bindValueSets(vsp);
-		p.writeAll("target/generated/valuesets/ca/uhn/fhir/model/dstu/resource");
-
+//		FhirContext fhirContext = new FhirContext(Profile.class);
+//		XmlParser parser = fhirContext.newXmlParser();
+//
+//		String file = IOUtils.toString(new FileReader("src/test/resources/prof/organization.xml"));
+//		Profile text = (Profile) parser.parseResource(file);
+//
+//		ValueSetGenerator vsp = new ValueSetGenerator();
+//		vsp.setDirectory("src/test/resources/vs/");
+//		vsp.parse();
+//
+//		ProfileParser p = new ProfileParser();
+//		p.parseSingleProfile(text, "http://fhir.connectinggta.ca/static/Profile/organization.xml");
+//		p.bindValueSets(vsp);
+//		p.writeAll("target/generated/valuesets/ca/uhn/fhir/model/dstu/resource");
+//
+//		vsp.writeMarkedValueSets("target/generated/valuesets/ca/uhn/fhir/model/dstu/valueset");
 	}
 
-	public void parseSingleProfile(Profile theProfile) throws Exception {
+	public void parseSingleProfile(Profile theProfile, String theUrlTOThisProfile) throws Exception {
 		for (Structure nextStructure : theProfile.getStructure()) {
 
 			int elemIdx = 0;
@@ -78,7 +84,7 @@ public class ProfileParser extends BaseStructureParser {
 				}
 
 				elem.setName(next.getPath().getValue());
-				elem.setElementName(next.getPath().getValue());
+				elem.setElementNameAndDeriveParentElementName(next.getPath().getValue());
 
 				boolean allResourceReferences = next.getDefinition().getType().size() > 0;
 				for (StructureElementDefinitionType nextType : next.getDefinition().getType()) {
@@ -123,6 +129,12 @@ public class ProfileParser extends BaseStructureParser {
 						if (next.getDefinition().getType().size() != 1 || next.getDefinition().getType().get(0).getCode().getValueAsEnum() != DataTypeEnum.EXTENSION) {
 							throw new ConfigurationException("Extension slices must have a single type with a code of 'Extension'");
 						}
+						String name = next.getName().getValue();
+						if (StringUtils.isBlank(name)) {
+							throw new ConfigurationException("Extension slices must have a 'name' defined, none found at path: " + next.getPath());
+						}
+						elem.setName(name);
+						elem.setElementName(name);
 						String profile = next.getDefinition().getType().get(0).getProfile().getValueAsString();
 						if (isBlank(profile)) {
 							throw new ConfigurationException("Extension slice for " + next.getPath().getValue() + " has no profile specified in its type");
@@ -134,6 +146,8 @@ public class ProfileParser extends BaseStructureParser {
 							}
 							ourLog.info("Element at path {} is using extension {}", next.getPath(), profile);
 							definition = extension.getDefinition();
+							String extensionUrl = theUrlTOThisProfile + profile;
+							elem.setExtensionUrl(extensionUrl);
 						} else {
 							// TODO: implement this
 							throw new ConfigurationException("Extensions specified outside of the given profile are not yet supported");
@@ -207,7 +221,32 @@ public class ProfileParser extends BaseStructureParser {
 
 	@Override
 	protected String getTemplate() {
-		return "/resource.vm";
+		return "/vm/resource.vm";
+	}
+
+	public void parseBaseResources(List<String> theBaseResourceNames) throws MojoFailureException {
+		for (int i = 0; i < theBaseResourceNames.size(); i++) {
+			theBaseResourceNames.set(i, theBaseResourceNames.get(i).toLowerCase());
+		}
+		
+		FhirContext fhirContext = new FhirContext(Profile.class);
+		try {
+			
+			Bundle bundle = fhirContext.newXmlParser().parseBundle(IOUtils.toString(getClass().getResourceAsStream("/prof/allprofiles.xml")));
+			TreeSet<String> allProfiles = new TreeSet<String>();
+			for (BundleEntry nextResource : bundle.getEntries() ) {
+				Profile nextProfile = (Profile) nextResource.getResource();
+				allProfiles.add(nextProfile.getName().getValue());
+				if (theBaseResourceNames.contains(nextProfile.getName().getValue().toLowerCase())){
+					parseSingleProfile(nextProfile, bundle.getLinkBase().getValueNotNull());
+				}
+			}
+			
+			ourLog.info("Base profiles found: {}", allProfiles);
+			
+		} catch (Exception e) {
+			throw new MojoFailureException("Failed to load base resources", e);
+		}
 	}
 
 }

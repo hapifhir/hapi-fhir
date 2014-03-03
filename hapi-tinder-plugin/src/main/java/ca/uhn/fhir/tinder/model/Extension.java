@@ -71,8 +71,8 @@ public class Extension extends Child {
 	}
 
 	@Override
-	public void setElementName(String theName) {
-		super.setElementName(theName);
+	public void setElementNameAndDeriveParentElementName(String theName) {
+		super.setElementNameAndDeriveParentElementName(theName);
 		if (getName() == null) {
 			super.setName(theName);
 		}
@@ -82,7 +82,7 @@ public class Extension extends Child {
 	public void setName(String theName) {
 		super.setName(theName);
 		if (getElementName() == null) {
-			super.setElementName(theName);
+			super.setElementNameAndDeriveParentElementName(theName);
 		}
 	}
 

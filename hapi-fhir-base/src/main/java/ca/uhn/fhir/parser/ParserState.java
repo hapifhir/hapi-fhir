@@ -298,7 +298,7 @@ class ParserState<T extends IElement> {
 				push(new AtomPrimitiveState(myInstance.getId()));
 			} else if ("link".equals(theLocalPart)) {
 				push(new AtomLinkState(myInstance));
-			} else if ("totalresults".equals(theLocalPart) && verifyNamespace(XmlParser.OPENSEARCH_NS, theNamespaceURI)) {
+			} else if ("totalResults".equals(theLocalPart) && verifyNamespace(XmlParser.OPENSEARCH_NS, theNamespaceURI)) {
 				push(new AtomPrimitiveState(myInstance.getTotalResults()));
 			} else if ("updated".equals(theLocalPart)) {
 				push(new AtomPrimitiveState(myInstance.getUpdated()));

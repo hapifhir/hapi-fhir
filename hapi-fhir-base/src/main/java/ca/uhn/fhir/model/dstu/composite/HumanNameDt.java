@@ -17,9 +17,11 @@
 package ca.uhn.fhir.model.dstu.composite;
 
 import java.util.*;
+
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.model.primitive.*;
+import ca.uhn.fhir.model.dstu.valueset.*;
 
 /**
  * HAPI/FHIR <b>HumanName</b> Datatype
@@ -39,7 +41,7 @@ import ca.uhn.fhir.model.primitive.*;
 public class HumanNameDt extends BaseElement implements ICompositeDatatype {
 
 	@Child(name="use", type=CodeDt.class, order=0, min=0, max=1)	
-	private CodeDt myUse;
+	private BoundCodeDt<NameUseEnum> myUse;
 	
 	@Child(name="text", type=StringDt.class, order=1, min=0, max=1)	
 	private StringDt myText;
@@ -69,9 +71,9 @@ public class HumanNameDt extends BaseElement implements ICompositeDatatype {
      * Identifies the purpose for this name
      * </p> 
 	 */
-	public CodeDt getUse() {  
+	public BoundCodeDt<NameUseEnum> getUse() {  
 		if (myUse == null) {
-			myUse = new CodeDt();
+			myUse = new BoundCodeDt<NameUseEnum>(NameUseEnum.VALUESET_BINDER);
 		}
 		return myUse;
 	}
@@ -84,11 +86,23 @@ public class HumanNameDt extends BaseElement implements ICompositeDatatype {
      * Identifies the purpose for this name
      * </p> 
 	 */
-	public void setUse(CodeDt theValue) {
+	public void setUse(BoundCodeDt<NameUseEnum> theValue) {
 		myUse = theValue;
 	}
-	
- 
+
+	/**
+	 * Sets the value(s) for <b>use</b> (usual | official | temp | nickname | anonymous | old | maiden)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Identifies the purpose for this name
+     * </p> 
+	 */
+	public void setUse(NameUseEnum theValue) {
+		getUse().setValueAsEnum(theValue);
+	}
+
+  
 	/**
 	 * Gets the value(s) for <b>text</b> (Text representation of the full name).
 	 * creating it if it does
@@ -117,8 +131,8 @@ public class HumanNameDt extends BaseElement implements ICompositeDatatype {
 	public void setText(StringDt theValue) {
 		myText = theValue;
 	}
-	
-	/**
+
+ 	/**
 	 * Sets the value(s) for <b>text</b> (Text representation of the full name)
 	 *
      * <p>
@@ -158,8 +172,8 @@ public class HumanNameDt extends BaseElement implements ICompositeDatatype {
 	public void setFamily(List<StringDt> theValue) {
 		myFamily = theValue;
 	}
-	
-	/**
+
+ 	/**
 	 * Sets the value(s) for <b>family</b> (Family name (often called 'Surname'))
 	 *
      * <p>
@@ -202,8 +216,8 @@ public class HumanNameDt extends BaseElement implements ICompositeDatatype {
 	public void setGiven(List<StringDt> theValue) {
 		myGiven = theValue;
 	}
-	
-	/**
+
+ 	/**
 	 * Sets the value(s) for <b>given</b> (Given names (not always 'first'). Includes middle names)
 	 *
      * <p>
@@ -246,8 +260,8 @@ public class HumanNameDt extends BaseElement implements ICompositeDatatype {
 	public void setPrefix(List<StringDt> theValue) {
 		myPrefix = theValue;
 	}
-	
-	/**
+
+ 	/**
 	 * Sets the value(s) for <b>prefix</b> (Parts that come before the name)
 	 *
      * <p>
@@ -290,8 +304,8 @@ public class HumanNameDt extends BaseElement implements ICompositeDatatype {
 	public void setSuffix(List<StringDt> theValue) {
 		mySuffix = theValue;
 	}
-	
-	/**
+
+ 	/**
 	 * Sets the value(s) for <b>suffix</b> (Parts that come after the name)
 	 *
      * <p>
@@ -334,8 +348,8 @@ public class HumanNameDt extends BaseElement implements ICompositeDatatype {
 	public void setPeriod(PeriodDt theValue) {
 		myPeriod = theValue;
 	}
-	
- 
+
+  
 
 
 }

@@ -1,0 +1,493 @@
+<?xml version="1.0"?>
+<?mso-application progid="Excel.Sheet"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:o="urn:schemas-microsoft-com:office:office"
+ xmlns:x="urn:schemas-microsoft-com:office:excel"
+ xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:html="http://www.w3.org/TR/REC-html40">
+ <DocumentProperties xmlns="urn:schemas-microsoft-com:office:office">
+  <Author>Grahame</Author>
+  <LastAuthor>Grahame</LastAuthor>
+  <Created>2012-03-19T11:19:41Z</Created>
+  <LastSaved>2012-10-07T09:34:16Z</LastSaved>
+  <Version>14.00</Version>
+ </DocumentProperties>
+ <OfficeDocumentSettings xmlns="urn:schemas-microsoft-com:office:office">
+  <AllowPNG/>
+ </OfficeDocumentSettings>
+ <ExcelWorkbook xmlns="urn:schemas-microsoft-com:office:excel">
+  <WindowHeight>5940</WindowHeight>
+  <WindowWidth>22875</WindowWidth>
+  <WindowTopX>5100</WindowTopX>
+  <WindowTopY>6180</WindowTopY>
+  <ProtectStructure>False</ProtectStructure>
+  <ProtectWindows>False</ProtectWindows>
+ </ExcelWorkbook>
+ <Styles>
+  <Style ss:ID="Default" ss:Name="Normal">
+   <Alignment ss:Vertical="Bottom"/>
+   <Borders/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"/>
+   <Interior/>
+   <NumberFormat/>
+   <Protection/>
+  </Style>
+  <Style ss:ID="s62" ss:Name="Normal 2">
+   <Alignment ss:Vertical="Bottom"/>
+   <Borders/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"/>
+   <Interior/>
+   <NumberFormat/>
+   <Protection/>
+  </Style>
+  <Style ss:ID="s63">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:ShrinkToFit="1"
+    ss:WrapText="1"/>
+  </Style>
+  <Style ss:ID="s64">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:ShrinkToFit="1"
+    ss:WrapText="1"/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"
+    ss:Bold="1"/>
+  </Style>
+  <Style ss:ID="s65">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:ShrinkToFit="1"
+    ss:WrapText="1"/>
+   <Borders>
+    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1"/>
+   </Borders>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"
+    ss:Bold="1"/>
+   <Interior ss:Color="#EEECE1" ss:Pattern="Solid"/>
+  </Style>
+  <Style ss:ID="s66">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:ShrinkToFit="1"
+    ss:WrapText="1"/>
+   <Interior ss:Color="#D9D9D9" ss:Pattern="Solid"/>
+  </Style>
+  <Style ss:ID="s67">
+   <Alignment ss:Vertical="Bottom" ss:ShrinkToFit="1" ss:WrapText="1"/>
+  </Style>
+  <Style ss:ID="s70">
+   <Alignment ss:Vertical="Top"/>
+  </Style>
+  <Style ss:ID="s71">
+   <Alignment ss:Vertical="Top" ss:WrapText="1"/>
+  </Style>
+ </Styles>
+ <Worksheet ss:Name="Data Elements">
+  <Table ss:ExpandedColumnCount="15" ss:ExpandedRowCount="10" x:FullColumns="1"
+   x:FullRows="1" ss:StyleID="s63" ss:DefaultRowHeight="15">
+   <Column ss:StyleID="s64" ss:AutoFitWidth="0" ss:Width="135.75"/>
+   <Column ss:StyleID="s63" ss:AutoFitWidth="0" ss:Width="32.25"/>
+   <Column ss:StyleID="s63" ss:AutoFitWidth="0" ss:Width="41.25"/>
+   <Column ss:StyleID="s63" ss:AutoFitWidth="0" ss:Width="33.75" ss:Span="1"/>
+   <Column ss:Index="6" ss:StyleID="s63" ss:AutoFitWidth="0" ss:Width="62.25"/>
+   <Column ss:StyleID="s63" ss:AutoFitWidth="0" ss:Width="63"/>
+   <Column ss:StyleID="s63" ss:AutoFitWidth="0" ss:Width="213.75" ss:Span="1"/>
+   <Column ss:Index="10" ss:StyleID="s63" ss:AutoFitWidth="0" ss:Width="161.25"
+    ss:Span="1"/>
+   <Column ss:Index="12" ss:StyleID="s63" ss:AutoFitWidth="0" ss:Width="135"
+    ss:Span="1"/>
+   <Row ss:AutoFitHeight="0" ss:Height="30" ss:StyleID="s65">
+    <Cell><Data ss:Type="String">Element</Data></Cell>
+    <Cell><Data ss:Type="String">Card.</Data></Cell>
+    <Cell><Data ss:Type="String">Inv.</Data></Cell>
+    <Cell><Data ss:Type="String">Must Understand</Data></Cell>
+    <Cell><Data ss:Type="String">UML</Data></Cell>
+    <Cell><Data ss:Type="String">Type</Data></Cell>
+    <Cell><Data ss:Type="String">Binding</Data></Cell>
+    <Cell><Data ss:Type="String">Short Name</Data></Cell>
+    <Cell><Data ss:Type="String">Definition</Data></Cell>
+    <Cell><Data ss:Type="String">Requirements</Data></Cell>
+    <Cell><Data ss:Type="String">Comments</Data></Cell>
+    <Cell><Data ss:Type="String">RIM Mapping</Data></Cell>
+    <Cell><Data ss:Type="String">v2 Mapping</Data></Cell>
+    <Cell><Data ss:Type="String">To Do</Data></Cell>
+    <Cell><Data ss:Type="String">Committee Notes</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="105">
+    <Cell><Data ss:Type="String">Schedule</Data></Cell>
+    <Cell ss:StyleID="s66"/>
+    <Cell ss:StyleID="s66"/>
+    <Cell ss:StyleID="s66"/>
+    <Cell ss:StyleID="s66"/>
+    <Cell><Data ss:Type="String">Structure</Data></Cell>
+    <Cell ss:Index="8"><Data ss:Type="String">A schedule that specifies an event that may occur multiple times</Data></Cell>
+    <Cell><Data ss:Type="String">Specifies an event that may occur multiple times. Schedules are used for to reord when things are expected or requested to occur.</Data></Cell>
+    <Cell><Data ss:Type="String">Need to able to track schedules. There are several different ways to do scheduling: one or more specified times, a simple rules like three times a day, or  before/after meals</Data></Cell>
+    <Cell><Data ss:Type="String">  A schedule can be either a list of events - intervals on which the event occurs, or a single event with repeating criteria or just repeating criteria with no actual event. </Data></Cell>
+    <Cell><Data ss:Type="String">QSET&lt;TS&gt; (GTS)</Data></Cell>
+    <Cell><Data ss:Type="String">N/A</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="45">
+    <Cell><Data ss:Type="String">Schedule.event</Data></Cell>
+    <Cell><Data ss:Type="String">0..*</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">Period</Data></Cell>
+    <Cell ss:Index="8"><Data ss:Type="String">When the event occurs</Data></Cell>
+    <Cell><Data ss:Type="String">Identifies specific time periods when the event should occur</Data></Cell>
+    <Cell><Data ss:Type="String">Some schedules are just explicit lists of times</Data></Cell>
+    <Cell ss:Index="12"><Data ss:Type="String">QLIST&lt;TS&gt; or PIVL.offset</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="60">
+    <Cell><Data ss:Type="String">Schedule.repeat</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="String">right</Data></Cell>
+    <Cell ss:Index="8"><Data ss:Type="String">Only if there is none or one event</Data></Cell>
+    <Cell><Data ss:Type="String">Identifies a repeating pattern to the intended time periods. </Data></Cell>
+    <Cell><Data ss:Type="String">Many schedules are determined by regular repetitions</Data></Cell>
+    <Cell><Data ss:Type="String">If present, the Schedule.event indicates the time of the first occurrence.</Data></Cell>
+    <Cell><Data ss:Type="String">Implies PIVL or EIVL</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="45">
+    <Cell><Data ss:Type="String">Schedule.repeat.frequency</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell><Data ss:Type="Number">2</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">integer</Data></Cell>
+    <Cell ss:Index="8"><Data ss:Type="String">Event occurs frequency times per duration</Data></Cell>
+    <Cell><Data ss:Type="String">Indicates how often the event should occur.</Data></Cell>
+    <Cell ss:Index="12"><Data ss:Type="String">PIVL.phase</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="45">
+    <Cell><Data ss:Type="String">Schedule.repeat.when</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell><Data ss:Type="Number">2</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">code</Data></Cell>
+    <Cell><Data ss:Type="String">EventTiming</Data></Cell>
+    <Cell><Data ss:Type="String">HS | WAKE | AC | ACM | ACD | ACV | PC | PCM | PCD | PCV - common life events</Data></Cell>
+    <Cell><Data ss:Type="String">Identifies the occurrence of daily life that determines timing</Data></Cell>
+    <Cell><Data ss:Type="String">Timings are frequently determined by occurrences such as waking, eating and sleep</Data></Cell>
+    <Cell ss:Index="12"><Data ss:Type="String">EIVL.event</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="45">
+    <Cell><Data ss:Type="String">Schedule.repeat.duration</Data></Cell>
+    <Cell><Data ss:Type="String">1..1</Data></Cell>
+    <Cell><Data ss:Type="Number">4</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">decimal</Data></Cell>
+    <Cell ss:Index="8"><Data ss:Type="String">Repeating or event-related duration</Data></Cell>
+    <Cell><Data ss:Type="String">How long each repetition should last</Data></Cell>
+    <Cell><Data ss:Type="String">Some activities are not instantaneous and need to be maintained for a period of time</Data></Cell>
+    <Cell ss:Index="12"><Data ss:Type="String">PIVL.phase / EIVL.offset</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="45">
+    <Cell><Data ss:Type="String">Schedule.repeat.units</Data></Cell>
+    <Cell><Data ss:Type="String">1..1</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">code</Data></Cell>
+    <Cell><Data ss:Type="String">UnitsOfTime</Data></Cell>
+    <Cell><Data ss:Type="String">s | min | h | d | wk | mo | a - unit of time (UCUM)</Data></Cell>
+    <Cell><Data ss:Type="String">The units of time for the duration</Data></Cell>
+    <Cell ss:Index="12"><Data ss:Type="String">PIVL.phase.unit</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="30">
+    <Cell><Data ss:Type="String">Schedule.repeat.count</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell><Data ss:Type="Number">3</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">integer</Data></Cell>
+    <Cell ss:Index="8"><Data ss:Type="String">Number of times to repeat</Data></Cell>
+    <Cell><Data ss:Type="String">A total count of the desired number of repetitions</Data></Cell>
+    <Cell><Data ss:Type="String">Repetitions may be limited by end time or total occurrences</Data></Cell>
+    <Cell><Data ss:Type="String">An end need not be specified</Data></Cell>
+    <Cell><Data ss:Type="String">PIVL.count</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="30">
+    <Cell><Data ss:Type="String">Schedule.repeat.end</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell><Data ss:Type="Number">3</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">dateTime</Data></Cell>
+    <Cell ss:Index="8"><Data ss:Type="String">When to stop repeats</Data></Cell>
+    <Cell><Data ss:Type="String">When to stop repeating the schedule</Data></Cell>
+    <Cell><Data ss:Type="String">Repetitions may be limited by end time or total occurrences</Data></Cell>
+    <Cell><Data ss:Type="String">An end need not be specified</Data></Cell>
+    <Cell><Data ss:Type="String">N/A</Data></Cell>
+   </Row>
+  </Table>
+  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+   <PageSetup>
+    <Header x:Margin="0.3"/>
+    <Footer x:Margin="0.3"/>
+    <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
+   </PageSetup>
+   <Unsynced/>
+   <Selected/>
+   <Panes>
+    <Pane>
+     <Number>3</Number>
+     <ActiveRow>10</ActiveRow>
+     <ActiveCol>8</ActiveCol>
+    </Pane>
+   </Panes>
+   <ProtectObjects>False</ProtectObjects>
+   <ProtectScenarios>False</ProtectScenarios>
+  </WorksheetOptions>
+ </Worksheet>
+ <Worksheet ss:Name="Invariants">
+  <Table ss:ExpandedColumnCount="6" ss:ExpandedRowCount="5" x:FullColumns="1"
+   x:FullRows="1" ss:StyleID="s67" ss:DefaultRowHeight="15">
+   <Column ss:Index="2" ss:StyleID="s67" ss:AutoFitWidth="0" ss:Width="144.75"
+    ss:Span="1"/>
+   <Column ss:Index="4" ss:StyleID="s67" ss:AutoFitWidth="0" ss:Width="324.75"/>
+   <Column ss:StyleID="s67" ss:AutoFitWidth="0" ss:Width="319.5"/>
+   <Column ss:StyleID="s67" ss:AutoFitWidth="0" ss:Width="312.75"/>
+   <Row ss:AutoFitHeight="0" ss:StyleID="s65">
+    <Cell><Data ss:Type="String">Id</Data></Cell>
+    <Cell><Data ss:Type="String">Name</Data></Cell>
+    <Cell><Data ss:Type="String">Context</Data></Cell>
+    <Cell><Data ss:Type="String">English</Data></Cell>
+    <Cell><Data ss:Type="String">OCL</Data></Cell>
+    <Cell><Data ss:Type="String">XPath</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Multiple or repeating events</Data></Cell>
+    <Cell><Data ss:Type="String">Schedule</Data></Cell>
+    <Cell ss:StyleID="s63"><Data ss:Type="String">There can only be a repeat element if there is none or one event</Data></Cell>
+    <Cell><Data ss:Type="String">repeat.oclIsDefined implies event.count &lt; 2</Data></Cell>
+    <Cell><Data ss:Type="String">not(exists(f:repeat)) or count(f:event) &lt; 2</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="Number">2</Data></Cell>
+    <Cell><Data ss:Type="String">Repeat cycle</Data></Cell>
+    <Cell><Data ss:Type="String">Schedule.repeat</Data></Cell>
+    <Cell ss:StyleID="s63"><ss:Data ss:Type="String"
+      xmlns="http://www.w3.org/TR/REC-html40"><Font html:Color="#000000">Either </Font><I><Font
+        html:Color="#000000">frequency</Font></I><Font html:Color="#000000"> or </Font><I><Font
+        html:Color="#000000">when</Font></I><Font html:Color="#000000"> SHALL be present, but not both</Font></ss:Data></Cell>
+    <Cell><Data ss:Type="String">frequency.oclIsDefined xor when.oclIsDefined</Data></Cell>
+    <Cell><Data ss:Type="String">exists(f:frequency) != exists(f:when)</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="Number">3</Data></Cell>
+    <Cell><Data ss:Type="String">End condition</Data></Cell>
+    <Cell><Data ss:Type="String">Schedule.repeat</Data></Cell>
+    <Cell ss:StyleID="s63"><ss:Data ss:Type="String"
+      xmlns="http://www.w3.org/TR/REC-html40"><Font html:Color="#000000">At most, only one of </Font><I><Font
+        html:Color="#000000">count</Font></I><Font html:Color="#000000"> or </Font><I><Font
+        html:Color="#000000">end</Font></I><Font html:Color="#000000"> can be present</Font></ss:Data></Cell>
+    <Cell><Data ss:Type="String">not count.oclIsDefined and end.oclIsDefined</Data></Cell>
+    <Cell><Data ss:Type="String">not(exists(f:count) and exists(f:end))</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="Number">4</Data></Cell>
+    <Cell><Data ss:Type="String">Duration Positive</Data></Cell>
+    <Cell><Data ss:Type="String">Schedule.repeat.duration</Data></Cell>
+    <Cell ss:StyleID="Default"><Data ss:Type="String">duration SHALL be a positive value</Data></Cell>
+    <Cell><Data ss:Type="String">duration &gt; 0</Data></Cell>
+    <Cell><Data ss:Type="String" x:Ticked="1">@value &gt; 0 or not(@value)</Data></Cell>
+   </Row>
+  </Table>
+  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+   <PageSetup>
+    <Header x:Margin="0.3"/>
+    <Footer x:Margin="0.3"/>
+    <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
+   </PageSetup>
+   <Unsynced/>
+   <Print>
+    <ValidPrinterInfo/>
+    <HorizontalResolution>600</HorizontalResolution>
+    <VerticalResolution>600</VerticalResolution>
+   </Print>
+   <Panes>
+    <Pane>
+     <Number>3</Number>
+     <ActiveRow>4</ActiveRow>
+     <ActiveCol>3</ActiveCol>
+    </Pane>
+   </Panes>
+   <ProtectObjects>False</ProtectObjects>
+   <ProtectScenarios>False</ProtectScenarios>
+  </WorksheetOptions>
+ </Worksheet>
+ <Worksheet ss:Name="Bindings">
+  <Table ss:ExpandedColumnCount="5" ss:ExpandedRowCount="3" x:FullColumns="1"
+   x:FullRows="1" ss:StyleID="s70" ss:DefaultRowHeight="15">
+   <Column ss:StyleID="s70" ss:AutoFitWidth="0" ss:Width="77.25"/>
+   <Column ss:StyleID="s70" ss:AutoFitWidth="0" ss:Width="190.5"/>
+   <Column ss:StyleID="s70" ss:AutoFitWidth="0" ss:Width="78.75"/>
+   <Column ss:StyleID="s70" ss:AutoFitWidth="0" ss:Width="173.25"/>
+   <Column ss:StyleID="s70" ss:AutoFitWidth="0" ss:Width="283.5"/>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s65"><Data ss:Type="String">Binding Name</Data></Cell>
+    <Cell ss:StyleID="s65"><Data ss:Type="String">Definition</Data></Cell>
+    <Cell ss:StyleID="s65"><Data ss:Type="String">Binding</Data></Cell>
+    <Cell ss:StyleID="s65"><Data ss:Type="String">Reference</Data></Cell>
+    <Cell ss:StyleID="s65"><Data ss:Type="String">Description</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="30">
+    <Cell ss:StyleID="s71"><Data ss:Type="String">EventTiming</Data></Cell>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">Real world event that the schedule relates to</Data></Cell>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">code list</Data></Cell>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">#event-timing</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">UnitsOfTime</Data></Cell>
+    <Cell><Data ss:Type="String">A unit of time (units from UCUM)</Data></Cell>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">code list</Data></Cell>
+    <Cell><Data ss:Type="String">#units-of-time</Data></Cell>
+   </Row>
+  </Table>
+  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+   <PageSetup>
+    <Header x:Margin="0.3"/>
+    <Footer x:Margin="0.3"/>
+    <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
+   </PageSetup>
+   <Unsynced/>
+   <Panes>
+    <Pane>
+     <Number>3</Number>
+     <ActiveRow>6</ActiveRow>
+     <ActiveCol>3</ActiveCol>
+    </Pane>
+   </Panes>
+   <ProtectObjects>False</ProtectObjects>
+   <ProtectScenarios>False</ProtectScenarios>
+  </WorksheetOptions>
+ </Worksheet>
+ <Worksheet ss:Name="event-timing">
+  <Table ss:ExpandedColumnCount="3" ss:ExpandedRowCount="11" x:FullColumns="1"
+   x:FullRows="1" ss:DefaultRowHeight="15">
+   <Column ss:AutoFitWidth="0" ss:Width="191.25"/>
+   <Column ss:Index="3" ss:AutoFitWidth="0" ss:Width="453"/>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">System</Data></Cell>
+    <Cell ss:StyleID="s62"><Data ss:Type="String">Code</Data></Cell>
+    <Cell ss:StyleID="s62"><Data ss:Type="String">Definition</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://hl7.org/fhir/v3/TimingEvent</Data></Cell>
+    <Cell ss:StyleID="s62"><Data ss:Type="String">HS</Data></Cell>
+    <Cell ss:StyleID="s62"><Data ss:Type="String">event occurs [duration] before the hour of sleep (or trying to)</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://hl7.org/fhir/v3/TimingEvent</Data></Cell>
+    <Cell ss:StyleID="s62"><Data ss:Type="String">WAKE</Data></Cell>
+    <Cell ss:StyleID="s62"><Data ss:Type="String">event occurs [duration] after waking</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://hl7.org/fhir/v3/TimingEvent</Data></Cell>
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AC</Data></Cell>
+    <Cell ss:StyleID="s62"><Data ss:Type="String">event occurs [duration] before a meal (from the Latin ante cibus)</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://hl7.org/fhir/v3/TimingEvent</Data></Cell>
+    <Cell ss:StyleID="s62"><Data ss:Type="String">ACM</Data></Cell>
+    <Cell ss:StyleID="s62"><Data ss:Type="String">event occurs [duration] before breakfast (from the Latin ante cibus matutinus)</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://hl7.org/fhir/v3/TimingEvent</Data></Cell>
+    <Cell ss:StyleID="s62"><Data ss:Type="String">ACD</Data></Cell>
+    <Cell ss:StyleID="s62"><Data ss:Type="String">event occurs [duration] before lunch (from the Latin ante cibus diurnus)</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://hl7.org/fhir/v3/TimingEvent</Data></Cell>
+    <Cell ss:StyleID="s62"><Data ss:Type="String">ACV</Data></Cell>
+    <Cell ss:StyleID="s62"><Data ss:Type="String">event occurs [duration] before dinner (from the Latin ante cibus vespertinus)</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://hl7.org/fhir/v3/TimingEvent</Data></Cell>
+    <Cell ss:StyleID="s62"><Data ss:Type="String">PC</Data></Cell>
+    <Cell ss:StyleID="s62"><Data ss:Type="String">event occurs [duration] after a meal (from the Latin post cibus)</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://hl7.org/fhir/v3/TimingEvent</Data></Cell>
+    <Cell ss:StyleID="s62"><Data ss:Type="String">PCM</Data></Cell>
+    <Cell ss:StyleID="s62"><Data ss:Type="String">event occurs [duration] after breakfast (from the Latin post cibus matutinus)</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://hl7.org/fhir/v3/TimingEvent</Data></Cell>
+    <Cell ss:StyleID="s62"><Data ss:Type="String">PCD</Data></Cell>
+    <Cell ss:StyleID="s62"><Data ss:Type="String">event occurs [duration] after lunch (from the Latin post cibus diurnus)</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://hl7.org/fhir/v3/TimingEvent</Data></Cell>
+    <Cell ss:StyleID="s62"><Data ss:Type="String">PCV</Data></Cell>
+    <Cell ss:StyleID="s62"><Data ss:Type="String">event occurs [duration] after dinner (from the Latin post cibus vespertinus) </Data></Cell>
+   </Row>
+  </Table>
+  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+   <PageSetup>
+    <Header x:Margin="0.3"/>
+    <Footer x:Margin="0.3"/>
+    <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
+   </PageSetup>
+   <Unsynced/>
+   <Panes>
+    <Pane>
+     <Number>3</Number>
+     <ActiveRow>1</ActiveRow>
+     <ActiveCol>1</ActiveCol>
+     <RangeSelection>R2C2:R11C2</RangeSelection>
+    </Pane>
+   </Panes>
+   <ProtectObjects>False</ProtectObjects>
+   <ProtectScenarios>False</ProtectScenarios>
+  </WorksheetOptions>
+ </Worksheet>
+ <Worksheet ss:Name="units-of-time">
+  <Table ss:ExpandedColumnCount="3" ss:ExpandedRowCount="8" x:FullColumns="1"
+   x:FullRows="1" ss:DefaultRowHeight="15">
+   <Column ss:AutoFitWidth="0" ss:Width="142.5"/>
+   <Column ss:Index="3" ss:AutoFitWidth="0" ss:Width="260.25"/>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">System</Data></Cell>
+    <Cell ss:StyleID="s62"><Data ss:Type="String">Code</Data></Cell>
+    <Cell ss:StyleID="s62"><Data ss:Type="String">Definition</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://unitsofmeasure.org</Data></Cell>
+    <Cell><Data ss:Type="String">s</Data></Cell>
+    <Cell><Data ss:Type="String">second</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://unitsofmeasure.org</Data></Cell>
+    <Cell><Data ss:Type="String">min</Data></Cell>
+    <Cell><Data ss:Type="String">minute</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://unitsofmeasure.org</Data></Cell>
+    <Cell><Data ss:Type="String">h</Data></Cell>
+    <Cell><Data ss:Type="String">hour</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://unitsofmeasure.org</Data></Cell>
+    <Cell><Data ss:Type="String">d</Data></Cell>
+    <Cell><Data ss:Type="String">day</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://unitsofmeasure.org</Data></Cell>
+    <Cell><Data ss:Type="String">wk</Data></Cell>
+    <Cell><Data ss:Type="String">week</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://unitsofmeasure.org</Data></Cell>
+    <Cell><Data ss:Type="String">mo</Data></Cell>
+    <Cell><Data ss:Type="String">month</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://unitsofmeasure.org</Data></Cell>
+    <Cell><Data ss:Type="String">a</Data></Cell>
+    <Cell><Data ss:Type="String">year</Data></Cell>
+   </Row>
+  </Table>
+  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+   <PageSetup>
+    <Header x:Margin="0.3"/>
+    <Footer x:Margin="0.3"/>
+    <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
+   </PageSetup>
+   <Unsynced/>
+   <Panes>
+    <Pane>
+     <Number>3</Number>
+     <ActiveRow>1</ActiveRow>
+     <ActiveCol>1</ActiveCol>
+     <RangeSelection>R2C2:R8C2</RangeSelection>
+    </Pane>
+   </Panes>
+   <ProtectObjects>False</ProtectObjects>
+   <ProtectScenarios>False</ProtectScenarios>
+  </WorksheetOptions>
+ </Worksheet>
+</Workbook>

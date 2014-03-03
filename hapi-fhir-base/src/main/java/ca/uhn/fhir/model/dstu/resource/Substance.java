@@ -17,10 +17,12 @@
 package ca.uhn.fhir.model.dstu.resource;
 
 import java.util.*;
+
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.model.primitive.*;
 import ca.uhn.fhir.model.dstu.composite.*;
+import ca.uhn.fhir.model.dstu.valueset.*;
 
 /**
  * HAPI/FHIR <b>Substance</b> Resource
@@ -37,7 +39,7 @@ import ca.uhn.fhir.model.dstu.composite.*;
  * </p> 
  */
 @ResourceDef(name="Substance")
-public class Substance extends BaseElement implements IResource {
+public class Substance extends BaseResource implements IResource {
 
 	@Child(name="type", type=CodeableConceptDt.class, order=0, min=1, max=1)	
 	private CodeableConceptDt myType;
@@ -79,8 +81,8 @@ public class Substance extends BaseElement implements IResource {
 	public void setType(CodeableConceptDt theValue) {
 		myType = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>description</b> (Textual description of the substance, comments).
 	 * creating it if it does
@@ -109,8 +111,8 @@ public class Substance extends BaseElement implements IResource {
 	public void setDescription(StringDt theValue) {
 		myDescription = theValue;
 	}
-	
-	/**
+
+ 	/**
 	 * Sets the value(s) for <b>description</b> (Textual description of the substance, comments)
 	 *
      * <p>
@@ -150,8 +152,8 @@ public class Substance extends BaseElement implements IResource {
 	public void setInstance(Instance theValue) {
 		myInstance = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>ingredient</b> (Composition information about the substance).
 	 * creating it if it does
@@ -180,8 +182,8 @@ public class Substance extends BaseElement implements IResource {
 	public void setIngredient(List<Ingredient> theValue) {
 		myIngredient = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Block class for child element: <b>Substance.instance</b> (If this describes a specific package/container of the substance)
 	 *
@@ -230,8 +232,8 @@ public class Substance extends BaseElement implements IResource {
 	public void setIdentifier(IdentifierDt theValue) {
 		myIdentifier = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>expiry</b> (When no longer valid to use).
 	 * creating it if it does
@@ -260,8 +262,8 @@ public class Substance extends BaseElement implements IResource {
 	public void setExpiry(DateTimeDt theValue) {
 		myExpiry = theValue;
 	}
-	
-	/**
+
+ 	/**
 	 * Sets the value(s) for <b>expiry</b> (When no longer valid to use)
 	 *
      * <p>
@@ -301,8 +303,8 @@ public class Substance extends BaseElement implements IResource {
 	public void setQuantity(QuantityDt theValue) {
 		myQuantity = theValue;
 	}
-	
- 
+
+  
 
 	}
 
@@ -355,8 +357,8 @@ public class Substance extends BaseElement implements IResource {
 	public void setQuantity(RatioDt theValue) {
 		myQuantity = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>substance</b> (A component of the substance).
 	 * creating it if it does
@@ -385,8 +387,8 @@ public class Substance extends BaseElement implements IResource {
 	public void setSubstance(ResourceReference theValue) {
 		mySubstance = theValue;
 	}
-	
- 
+
+  
 
 	}
 

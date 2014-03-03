@@ -17,9 +17,11 @@
 package ca.uhn.fhir.model.dstu.composite;
 
 import java.util.*;
+
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.model.primitive.*;
+import ca.uhn.fhir.model.dstu.valueset.*;
 
 /**
  * HAPI/FHIR <b>Address</b> Datatype
@@ -39,7 +41,7 @@ import ca.uhn.fhir.model.primitive.*;
 public class AddressDt extends BaseElement implements ICompositeDatatype {
 
 	@Child(name="use", type=CodeDt.class, order=0, min=0, max=1)	
-	private CodeDt myUse;
+	private BoundCodeDt<AddressUseEnum> myUse;
 	
 	@Child(name="text", type=StringDt.class, order=1, min=0, max=1)	
 	private StringDt myText;
@@ -72,9 +74,9 @@ public class AddressDt extends BaseElement implements ICompositeDatatype {
      * The purpose of this address
      * </p> 
 	 */
-	public CodeDt getUse() {  
+	public BoundCodeDt<AddressUseEnum> getUse() {  
 		if (myUse == null) {
-			myUse = new CodeDt();
+			myUse = new BoundCodeDt<AddressUseEnum>(AddressUseEnum.VALUESET_BINDER);
 		}
 		return myUse;
 	}
@@ -87,11 +89,23 @@ public class AddressDt extends BaseElement implements ICompositeDatatype {
      * The purpose of this address
      * </p> 
 	 */
-	public void setUse(CodeDt theValue) {
+	public void setUse(BoundCodeDt<AddressUseEnum> theValue) {
 		myUse = theValue;
 	}
-	
- 
+
+	/**
+	 * Sets the value(s) for <b>use</b> (home | work | temp | old - purpose of this address)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The purpose of this address
+     * </p> 
+	 */
+	public void setUse(AddressUseEnum theValue) {
+		getUse().setValueAsEnum(theValue);
+	}
+
+  
 	/**
 	 * Gets the value(s) for <b>text</b> (Text representation of the address).
 	 * creating it if it does
@@ -120,8 +134,8 @@ public class AddressDt extends BaseElement implements ICompositeDatatype {
 	public void setText(StringDt theValue) {
 		myText = theValue;
 	}
-	
-	/**
+
+ 	/**
 	 * Sets the value(s) for <b>text</b> (Text representation of the address)
 	 *
      * <p>
@@ -163,8 +177,8 @@ P.O. Box number, delivery hints, and similar address information
 	public void setLine(List<StringDt> theValue) {
 		myLine = theValue;
 	}
-	
-	/**
+
+ 	/**
 	 * Sets the value(s) for <b>line</b> (Street name, number, direction & P.O. Box etc )
 	 *
      * <p>
@@ -208,8 +222,8 @@ P.O. Box number, delivery hints, and similar address information
 	public void setCity(StringDt theValue) {
 		myCity = theValue;
 	}
-	
-	/**
+
+ 	/**
 	 * Sets the value(s) for <b>city</b> (Name of city, town etc.)
 	 *
      * <p>
@@ -249,8 +263,8 @@ P.O. Box number, delivery hints, and similar address information
 	public void setState(StringDt theValue) {
 		myState = theValue;
 	}
-	
-	/**
+
+ 	/**
 	 * Sets the value(s) for <b>state</b> (Sub-unit of country (abreviations ok))
 	 *
      * <p>
@@ -290,8 +304,8 @@ P.O. Box number, delivery hints, and similar address information
 	public void setZip(StringDt theValue) {
 		myZip = theValue;
 	}
-	
-	/**
+
+ 	/**
 	 * Sets the value(s) for <b>zip</b> (Postal code for area)
 	 *
      * <p>
@@ -331,8 +345,8 @@ P.O. Box number, delivery hints, and similar address information
 	public void setCountry(StringDt theValue) {
 		myCountry = theValue;
 	}
-	
-	/**
+
+ 	/**
 	 * Sets the value(s) for <b>country</b> (Country (can be ISO 3166 3 letter code))
 	 *
      * <p>
@@ -372,8 +386,8 @@ P.O. Box number, delivery hints, and similar address information
 	public void setPeriod(PeriodDt theValue) {
 		myPeriod = theValue;
 	}
-	
- 
+
+  
 
 
 }

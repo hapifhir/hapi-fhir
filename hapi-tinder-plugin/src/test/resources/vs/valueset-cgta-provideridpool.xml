@@ -8,7 +8,7 @@
 	<identifier value="urn:cgta:valueset:providerIdPool" />
 	<name value="ConnectingGTA Provider ID Namespaces" />
 	<publisher value="ConnectingGTA" />
-	<description value="" />
+	<description value="Provider ID namespaces for various ID authorities and organizations" />
 	<status value="active" />
 	<date value="2013-12-07" />
 	<define>

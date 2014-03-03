@@ -14,6 +14,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.maven.plugin.MojoFailureException;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.w3c.dom.Element;
@@ -30,11 +31,10 @@ import ca.uhn.fhir.tinder.model.SimpleSetter.Parameter;
 public abstract class BaseStructureParser {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseStructureParser.class);
-	private String myDirectory;
 	private ArrayList<Extension> myExtensions;
 	private List<Resource> myResources = new ArrayList<Resource>();
 
-	public void bindValueSets(ValueSetParser theVsp) {
+	public void bindValueSets(ValueSetGenerator theVsp) {
 		for (Resource next : myResources) {
 			bindValueSets(next, theVsp);
 		}
@@ -44,11 +44,8 @@ public abstract class BaseStructureParser {
 		myResources.add(theResource);
 	}
 	
-	public String getDirectory() {
-		return myDirectory;
-	}
 
-	private void bindValueSets(BaseElement theResource, ValueSetParser theVsp) {
+	private void bindValueSets(BaseElement theResource, ValueSetGenerator theVsp) {
 		if (isNotBlank(theResource.getBinding())) {
 			String bindingClass = theVsp.getClassForValueSetIdAndMarkAsNeeded(theResource.getBinding());
 			if (bindingClass!= null) {
@@ -108,38 +105,39 @@ public abstract class BaseStructureParser {
 		throw new IllegalArgumentException(theBase.getCanonicalName() + " has @" + SimpleSetter.class.getCanonicalName() + " constructor with no/invalid parameter annotation");
 	}
 
-	public void setDirectory(String theDirectory) {
-		myDirectory = theDirectory;
-	}
 
 	public void setExtensions(ArrayList<Extension> theExts) {
 		myExtensions = theExts;
 	}
 
 
-	public void writeAll(String theOutputDirectory) throws IOException {
-		File targetDir = new File(theOutputDirectory);
-		if (!targetDir.exists()) {
-			targetDir.mkdirs();
+	public void writeAll(File theOutputDirectory, String thePackageBase) throws MojoFailureException {
+		if (!theOutputDirectory.exists()) {
+			theOutputDirectory.mkdirs();
 		}
-		if (!targetDir.isDirectory()) {
-			throw new IOException(theOutputDirectory + " is not a directory");
+		if (!theOutputDirectory.isDirectory()) {
+			throw new MojoFailureException(theOutputDirectory + " is not a directory");
 		}
 
 		for (Resource next : myResources) {
 			File f = new File(theOutputDirectory, next.getName() + getFilenameSuffix() + ".java");
-			write(next, f);
+			try {
+				write(next, f, thePackageBase);
+			} catch (IOException e) {
+				throw new MojoFailureException("Failed to write structure", e);
+			}
 		}
 	}
 
 	protected abstract String getFilenameSuffix();
 	
-	private void write(Resource theResource, File theFile) throws IOException {
+	private void write(Resource theResource, File theFile, String thePackageBase) throws IOException {
 		FileWriter w = new FileWriter(theFile, false);
 
 		ourLog.info("Writing file: {}", theFile.getAbsolutePath());
 
 		VelocityContext ctx = new VelocityContext();
+		ctx.put("packageBase", thePackageBase);
 		ctx.put("className", theResource.getName());
 		ctx.put("shortName", defaultString(theResource.getShortName()));
 		ctx.put("definition", defaultString(theResource.getDefinition()));
@@ -153,7 +151,7 @@ public abstract class BaseStructureParser {
 		v.setProperty("cp.resource.loader.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
 		v.setProperty("runtime.references.strict", Boolean.TRUE);
 
-		InputStream templateIs = ResourceSpreadsheetParser.class.getResourceAsStream(getTemplate());
+		InputStream templateIs = ResourceGeneratorUsingSpreadsheet.class.getResourceAsStream(getTemplate());
 		InputStreamReader templateReader = new InputStreamReader(templateIs);
 		v.evaluate(ctx, w, "", templateReader);
 

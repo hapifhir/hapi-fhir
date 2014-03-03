@@ -1,0 +1,211 @@
+##################################################################
+## childVars
+##################################################################
+
+#macro ( childVars $childElements )
+#foreach ( $child in $childElements )
+#if ($child.resourceRef) 
+	@Child(name="${child.elementNameSimplified}", order=${foreach.index}, min=${child.cardMin}, max=${child.cardMaxForChildAnnotation})
+	@ChildResource(types= {
+#foreach ($nextType in ${child.type})
+		${nextType}.class,
+#end
+	})	
+#elseif ($!child.hasMultipleTypes)
+	@Child(name="${child.elementNameSimplified}", order=${foreach.index}, min=${child.cardMin}, max=${child.cardMaxForChildAnnotation}, choice=@Choice(types= {
+#foreach ($nextType in ${child.referenceTypesForMultiple})
+		${nextType}.class,
+#end
+	}))	
+#elseif ($!child.block)
+	@Child(name="${child.elementNameSimplified}", order=${foreach.index}, min=${child.cardMin}, max=${child.cardMaxForChildAnnotation})	
+#else
+	@Child(name="${child.elementNameSimplified}", type=${child.annotationType}.class, order=${foreach.index}, min=${child.cardMin}, max=${child.cardMaxForChildAnnotation})	
+#end
+#if ( $child.hasExtensionUrl )
+	@Extension(url = "${child.extensionUrl}")
+#end
+	private ${child.referenceType} ${child.variableName};
+	
+#end
+#end
+
+
+##################################################################
+## childAccessors
+##################################################################
+
+#macro ( childAccessors $childElements )
+#foreach ( $child in $childElements )
+	/**
+	 * Gets the value(s) for <b>${child.elementName}</b> (${child.shortName}).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * ${child.definition}
+     * </p> 
+	 */
+	public ${child.referenceType} get${child.methodName}() {  
+#if ( ${child.hasMultipleTypes} == false && ${child.singleChildInstantiable} == true )
+		if (${child.variableName} == null) {
+#if ( ${child.boundCode} && ${child.repeatable} == false )
+			${child.variableName} = new ${child.referenceTypeForConstructor}(${child.bindingClass}.VALUESET_BINDER);
+#else
+			${child.variableName} = new ${child.referenceTypeForConstructor}();
+#end
+		}
+#end
+		return ${child.variableName};
+	}
+
+	/**
+	 * Sets the value(s) for <b>${child.elementName}</b> (${child.shortName})
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * ${child.definition}
+     * </p> 
+	 */
+	public void set${child.methodName}(${child.referenceType} theValue) {
+		${child.variableName} = theValue;
+	}
+
+#if ( ${child.boundCode} && ${child.repeatable} )
+	/**
+	 * Add a value for <b>${child.elementName}</b> (${child.shortName})
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * ${child.definition}
+     * </p> 
+	 */
+	public void add${child.methodName}(${child.bindingClass} theValue) {
+		get${child.methodName}().add(new BoundCodeDt<${child.bindingClass}>(${child.bindingClass}.VALUESET_BINDER, theValue));
+	}
+
+	/**
+	 * Sets the value(s), and clears any existing value(s) for <b>${child.elementName}</b> (${child.shortName})
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * ${child.definition}
+     * </p> 
+	 */
+	public void set${child.methodName}(${child.bindingClass} theValue) {
+		get${child.methodName}().clear();
+		add${child.methodName}(theValue);
+	}
+
+#elseif ( ${child.boundCode} )
+	/**
+	 * Sets the value(s) for <b>${child.elementName}</b> (${child.shortName})
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * ${child.definition}
+     * </p> 
+	 */
+	public void set${child.methodName}(${child.bindingClass} theValue) {
+		get${child.methodName}().setValueAsEnum(theValue);
+	}
+
+#end ##if (child.boundCode)
+#foreach ( $ss in $child.simpleSetters )
+	/**
+	 * Sets the value(s) for <b>${child.elementName}</b> (${child.shortName})
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * ${child.definition}
+     * </p> 
+	 */
+#if(${child.repeatable})
+	public void add${child.methodName}(#{foreach}($param in $ss.parameters) ${param.datatype} ${param.parameter}#{if}( $foreach.hasNext ), #{end}#{end}) {
+		if (${child.variableName} == null) {
+			${child.variableName} = new ${child.referenceTypeForConstructor}();
+		}
+		${child.variableName}.add(new ${ss.datatype}(#{foreach}($param in $ss.parameters)${param.parameter}#{if}( $foreach.hasNext ), #{end}#{end})); 
+	}
+#else
+	public void set${child.methodName}${ss.suffix}(#{foreach}($param in $ss.parameters) ${param.datatype} ${param.parameter}#{if}( $foreach.hasNext ), #{end}#{end}) {
+		${child.variableName} = new ${ss.datatype}(#{foreach}($param in $ss.parameters)${param.parameter}#{if}( $foreach.hasNext ), #{end}#{end}); 
+	}
+#end
+#end ##foreach-child-in-simplesetters
+
+#end
+#end
+
+##################################################################
+## childExtensionFields
+##################################################################
+
+#macro ( childExtensionFields $childExtensionTypes )
+#foreach ( $extensionType in $childExtensionTypes )
+	@Child(name="$extensionType.name", type=${extensionType.annotationType}.class, order=${foreach.index}, min=${extensionType.cardMin}, max=${extensionType.cardMaxForChildAnnotation})
+	@Extension(url="${extensionType.url}") 
+	private ${extensionType.referenceType} ${extensionType.variableName};
+
+#end
+#end
+
+
+##################################################################
+## childExtensionTypes
+##################################################################
+
+#macro ( childExtensionTypes $childExtensionTypes )
+#foreach ( $extensionType in $childExtensionTypes )
+#if ( $extensionType.hasChildExtensions )
+	@Block(name="${extensionType.name}")
+	public static class ${extensionType.nameType} implements IExtension {
+		
+#foreach ( $childExtensionSubtype in $extensionType.childExtensions )		
+		@Child(name="$childExtensionSubtype.name", type=${childExtensionSubtype.annotationType}.class, order=${foreach.index}, min=${childExtensionSubtype.cardMin}, max=${childExtensionSubtype.cardMaxForChildAnnotation})
+		@Extension(url="${childExtensionSubtype.url}") 
+		private ${childExtensionSubtype.referenceType} ${childExtensionSubtype.variableName};
+
+#end
+
+
+	}
+	
+#foreach ( $extensionSubType in $extensionTypes.childExtensionsWithChildren )
+#childExtensionTypes( $extensionSubType )
+#end
+#end
+#end
+#end
+
+
+
+##################################################################
+## childResourceBlocks
+##################################################################
+
+#macro ( childResourceBlocks $resourceBlockChildren )
+#foreach ( $blockChild in $resourceBlockChildren )
+	/**
+	 * Block class for child element: <b>${blockChild.name}</b> (${blockChild.shortName})
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * ${blockChild.definition}
+     * </p> 
+	 */
+	@Block(name="${blockChild.name}")	
+	public static class ${blockChild.className} extends BaseElement implements IResourceBlock {
+	
+#childVars( $blockChild.children )
+#childAccessors( $blockChild.children )
+
+	}
+
+#childResourceBlocks( $blockChild.resourceBlockChildren )
+
+#end
+#end
+
+

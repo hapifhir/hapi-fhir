@@ -3,6 +3,7 @@ package ca.uhn.fhir.tinder.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.validator.ISBNValidator;
 import org.codehaus.plexus.util.StringUtils;
 
 public class ValueSetTm {
@@ -99,7 +100,11 @@ public class ValueSetTm {
 		}
 
 		public String getCodeEnumValue() {
-			String retVal = myCode.toUpperCase().replace(' ', '_').replace('-', '_').replace('/', '_').replace('.', '_');
+			String retVal = myDisplay;
+			if (StringUtils.isBlank(retVal)) {
+				retVal = myCode;
+			}
+			retVal = retVal.toUpperCase().replace(' ', '_').replace('-', '_').replace('/', '_').replace('.', '_').replace(':', '_').replace("'", "");
 			if ("=".equals(retVal)) {
 				retVal = "EQUALS";
 			}
@@ -129,6 +134,14 @@ public class ValueSetTm {
 
 		public String getDisplay() {
 			return myDisplay;
+		}
+
+		public boolean isHasDefinition() {
+			return StringUtils.isNotBlank(myDefinition);
+		}
+
+		public boolean isHasDisplay() {
+			return StringUtils.isNotBlank(myDisplay);
 		}
 
 	}

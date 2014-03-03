@@ -17,10 +17,12 @@
 package ca.uhn.fhir.model.dstu.resource;
 
 import java.util.*;
+
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.model.primitive.*;
 import ca.uhn.fhir.model.dstu.composite.*;
+import ca.uhn.fhir.model.dstu.valueset.*;
 
 /**
  * HAPI/FHIR <b>Practitioner</b> Resource
@@ -37,7 +39,7 @@ import ca.uhn.fhir.model.dstu.composite.*;
  * </p> 
  */
 @ResourceDef(name="Practitioner")
-public class Practitioner extends BaseElement implements IResource {
+public class Practitioner extends BaseResource implements IResource {
 
 	@Child(name="identifier", type=IdentifierDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)	
 	private List<IdentifierDt> myIdentifier;
@@ -115,8 +117,8 @@ public class Practitioner extends BaseElement implements IResource {
 	public void setIdentifier(List<IdentifierDt> theValue) {
 		myIdentifier = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>name</b> (A name associated with the person).
 	 * creating it if it does
@@ -145,8 +147,8 @@ public class Practitioner extends BaseElement implements IResource {
 	public void setName(HumanNameDt theValue) {
 		myName = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>telecom</b> (A contact detail for the practitioner).
 	 * creating it if it does
@@ -175,8 +177,8 @@ public class Practitioner extends BaseElement implements IResource {
 	public void setTelecom(List<ContactDt> theValue) {
 		myTelecom = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>address</b> (Where practitioner can be found/visited).
 	 * creating it if it does
@@ -205,8 +207,8 @@ public class Practitioner extends BaseElement implements IResource {
 	public void setAddress(AddressDt theValue) {
 		myAddress = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>gender</b> (Gender for administrative purposes).
 	 * creating it if it does
@@ -235,8 +237,8 @@ public class Practitioner extends BaseElement implements IResource {
 	public void setGender(CodeableConceptDt theValue) {
 		myGender = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>birthDate</b> (The date and time of birth for the practitioner).
 	 * creating it if it does
@@ -265,8 +267,8 @@ public class Practitioner extends BaseElement implements IResource {
 	public void setBirthDate(DateTimeDt theValue) {
 		myBirthDate = theValue;
 	}
-	
-	/**
+
+ 	/**
 	 * Sets the value(s) for <b>birthDate</b> (The date and time of birth for the practitioner)
 	 *
      * <p>
@@ -306,8 +308,8 @@ public class Practitioner extends BaseElement implements IResource {
 	public void setPhoto(List<AttachmentDt> theValue) {
 		myPhoto = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>organization</b> (The represented organization).
 	 * creating it if it does
@@ -336,8 +338,8 @@ public class Practitioner extends BaseElement implements IResource {
 	public void setOrganization(ResourceReference theValue) {
 		myOrganization = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>role</b> (Roles which this practitioner may perform).
 	 * creating it if it does
@@ -366,8 +368,8 @@ public class Practitioner extends BaseElement implements IResource {
 	public void setRole(List<CodeableConceptDt> theValue) {
 		myRole = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>specialty</b> (Specific specialty of the practitioner).
 	 * creating it if it does
@@ -396,8 +398,8 @@ public class Practitioner extends BaseElement implements IResource {
 	public void setSpecialty(List<CodeableConceptDt> theValue) {
 		mySpecialty = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>period</b> (The period during which the practitioner is authorized to perform in these role(s)).
 	 * creating it if it does
@@ -426,8 +428,8 @@ public class Practitioner extends BaseElement implements IResource {
 	public void setPeriod(PeriodDt theValue) {
 		myPeriod = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>location</b> (The location(s) at which this practitioner provides care).
 	 * creating it if it does
@@ -456,8 +458,8 @@ public class Practitioner extends BaseElement implements IResource {
 	public void setLocation(List<ResourceReference> theValue) {
 		myLocation = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>qualification</b> (Qualifications obtained by training and certification).
 	 * creating it if it does
@@ -486,8 +488,8 @@ public class Practitioner extends BaseElement implements IResource {
 	public void setQualification(List<Qualification> theValue) {
 		myQualification = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>communication</b> (A language the practitioner is able to use in patient communication).
 	 * creating it if it does
@@ -516,8 +518,8 @@ public class Practitioner extends BaseElement implements IResource {
 	public void setCommunication(List<CodeableConceptDt> theValue) {
 		myCommunication = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Block class for child element: <b>Practitioner.qualification</b> (Qualifications obtained by training and certification)
 	 *
@@ -569,8 +571,8 @@ public class Practitioner extends BaseElement implements IResource {
 	public void setCode(CodeableConceptDt theValue) {
 		myCode = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>period</b> (Period during which the qualification is valid).
 	 * creating it if it does
@@ -599,8 +601,8 @@ public class Practitioner extends BaseElement implements IResource {
 	public void setPeriod(PeriodDt theValue) {
 		myPeriod = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>issuer</b> (Organization that regulates and issues the qualification).
 	 * creating it if it does
@@ -629,8 +631,8 @@ public class Practitioner extends BaseElement implements IResource {
 	public void setIssuer(ResourceReference theValue) {
 		myIssuer = theValue;
 	}
-	
- 
+
+  
 
 	}
 

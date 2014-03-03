@@ -17,10 +17,12 @@
 package ca.uhn.fhir.model.dstu.resource;
 
 import java.util.*;
+
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.model.primitive.*;
 import ca.uhn.fhir.model.dstu.composite.*;
+import ca.uhn.fhir.model.dstu.valueset.*;
 
 /**
  * HAPI/FHIR <b>Specimen</b> Resource
@@ -37,7 +39,7 @@ import ca.uhn.fhir.model.dstu.composite.*;
  * </p> 
  */
 @ResourceDef(name="Specimen")
-public class Specimen extends BaseElement implements IResource {
+public class Specimen extends BaseResource implements IResource {
 
 	@Child(name="identifier", type=IdentifierDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)	
 	private List<IdentifierDt> myIdentifier;
@@ -100,8 +102,8 @@ public class Specimen extends BaseElement implements IResource {
 	public void setIdentifier(List<IdentifierDt> theValue) {
 		myIdentifier = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>type</b> (Kind of material that forms the specimen).
 	 * creating it if it does
@@ -130,8 +132,8 @@ public class Specimen extends BaseElement implements IResource {
 	public void setType(CodeableConceptDt theValue) {
 		myType = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>source</b> (Parent of specimen).
 	 * creating it if it does
@@ -160,8 +162,8 @@ public class Specimen extends BaseElement implements IResource {
 	public void setSource(List<Source> theValue) {
 		mySource = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>subject</b> (Where the specimen came from. This may be the patient(s) or from the environment or  a device).
 	 * creating it if it does
@@ -187,8 +189,8 @@ public class Specimen extends BaseElement implements IResource {
 	public void setSubject(ResourceReference theValue) {
 		mySubject = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>accessionIdentifier</b> (Identifier assigned by the lab).
 	 * creating it if it does
@@ -217,8 +219,8 @@ public class Specimen extends BaseElement implements IResource {
 	public void setAccessionIdentifier(IdentifierDt theValue) {
 		myAccessionIdentifier = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>receivedTime</b> (The time when specimen was received for processing).
 	 * creating it if it does
@@ -247,8 +249,8 @@ public class Specimen extends BaseElement implements IResource {
 	public void setReceivedTime(DateTimeDt theValue) {
 		myReceivedTime = theValue;
 	}
-	
-	/**
+
+ 	/**
 	 * Sets the value(s) for <b>receivedTime</b> (The time when specimen was received for processing)
 	 *
      * <p>
@@ -288,8 +290,8 @@ public class Specimen extends BaseElement implements IResource {
 	public void setCollection(Collection theValue) {
 		myCollection = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>treatment</b> (Treatment and processing step details).
 	 * creating it if it does
@@ -318,8 +320,8 @@ public class Specimen extends BaseElement implements IResource {
 	public void setTreatment(List<Treatment> theValue) {
 		myTreatment = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>container</b> (Direct container of specimen (tube/slide, etc)).
 	 * creating it if it does
@@ -348,8 +350,8 @@ public class Specimen extends BaseElement implements IResource {
 	public void setContainer(List<Container> theValue) {
 		myContainer = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Block class for child element: <b>Specimen.source</b> (Parent of specimen)
 	 *
@@ -362,7 +364,7 @@ public class Specimen extends BaseElement implements IResource {
 	public static class Source extends BaseElement implements IResourceBlock {
 	
 	@Child(name="relationship", type=CodeDt.class, order=0, min=1, max=1)	
-	private CodeDt myRelationship;
+	private BoundCodeDt<HierarchicalRelationshipTypeEnum> myRelationship;
 	
 	@Child(name="target", order=1, min=0, max=Child.MAX_UNLIMITED)
 	@ChildResource(types= {
@@ -380,9 +382,9 @@ public class Specimen extends BaseElement implements IResource {
      * Whether this relationship is to a parent or to a child
      * </p> 
 	 */
-	public CodeDt getRelationship() {  
+	public BoundCodeDt<HierarchicalRelationshipTypeEnum> getRelationship() {  
 		if (myRelationship == null) {
-			myRelationship = new CodeDt();
+			myRelationship = new BoundCodeDt<HierarchicalRelationshipTypeEnum>(HierarchicalRelationshipTypeEnum.VALUESET_BINDER);
 		}
 		return myRelationship;
 	}
@@ -395,11 +397,23 @@ public class Specimen extends BaseElement implements IResource {
      * Whether this relationship is to a parent or to a child
      * </p> 
 	 */
-	public void setRelationship(CodeDt theValue) {
+	public void setRelationship(BoundCodeDt<HierarchicalRelationshipTypeEnum> theValue) {
 		myRelationship = theValue;
 	}
-	
- 
+
+	/**
+	 * Sets the value(s) for <b>relationship</b> (parent | child)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Whether this relationship is to a parent or to a child
+     * </p> 
+	 */
+	public void setRelationship(HierarchicalRelationshipTypeEnum theValue) {
+		getRelationship().setValueAsEnum(theValue);
+	}
+
+  
 	/**
 	 * Gets the value(s) for <b>target</b> (The subject of the relationship).
 	 * creating it if it does
@@ -428,8 +442,8 @@ public class Specimen extends BaseElement implements IResource {
 	public void setTarget(List<ResourceReference> theValue) {
 		myTarget = theValue;
 	}
-	
- 
+
+  
 
 	}
 
@@ -497,8 +511,8 @@ public class Specimen extends BaseElement implements IResource {
 	public void setCollector(ResourceReference theValue) {
 		myCollector = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>comment</b> (Collector comments).
 	 * creating it if it does
@@ -527,8 +541,8 @@ public class Specimen extends BaseElement implements IResource {
 	public void setComment(List<StringDt> theValue) {
 		myComment = theValue;
 	}
-	
-	/**
+
+ 	/**
 	 * Sets the value(s) for <b>comment</b> (Collector comments)
 	 *
      * <p>
@@ -568,8 +582,8 @@ public class Specimen extends BaseElement implements IResource {
 	public void setCollected(IDatatype theValue) {
 		myCollected = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>quantity</b> (The quantity of specimen collected).
 	 * creating it if it does
@@ -598,8 +612,8 @@ public class Specimen extends BaseElement implements IResource {
 	public void setQuantity(QuantityDt theValue) {
 		myQuantity = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>method</b> (Technique used to perform collection).
 	 * creating it if it does
@@ -628,8 +642,8 @@ public class Specimen extends BaseElement implements IResource {
 	public void setMethod(CodeableConceptDt theValue) {
 		myMethod = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>sourceSite</b> (Anatomical collection site).
 	 * creating it if it does
@@ -658,8 +672,8 @@ public class Specimen extends BaseElement implements IResource {
 	public void setSourceSite(CodeableConceptDt theValue) {
 		mySourceSite = theValue;
 	}
-	
- 
+
+  
 
 	}
 
@@ -715,8 +729,8 @@ public class Specimen extends BaseElement implements IResource {
 	public void setDescription(StringDt theValue) {
 		myDescription = theValue;
 	}
-	
-	/**
+
+ 	/**
 	 * Sets the value(s) for <b>description</b> (Textual description of procedure)
 	 *
      * <p>
@@ -756,8 +770,8 @@ public class Specimen extends BaseElement implements IResource {
 	public void setProcedure(CodeableConceptDt theValue) {
 		myProcedure = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>additive</b> (Material used in the processing step).
 	 * creating it if it does
@@ -786,8 +800,8 @@ public class Specimen extends BaseElement implements IResource {
 	public void setAdditive(List<ResourceReference> theValue) {
 		myAdditive = theValue;
 	}
-	
- 
+
+  
 
 	}
 
@@ -852,8 +866,8 @@ public class Specimen extends BaseElement implements IResource {
 	public void setIdentifier(List<IdentifierDt> theValue) {
 		myIdentifier = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>description</b> (Textual description of the container).
 	 * creating it if it does
@@ -882,8 +896,8 @@ public class Specimen extends BaseElement implements IResource {
 	public void setDescription(StringDt theValue) {
 		myDescription = theValue;
 	}
-	
-	/**
+
+ 	/**
 	 * Sets the value(s) for <b>description</b> (Textual description of the container)
 	 *
      * <p>
@@ -923,8 +937,8 @@ public class Specimen extends BaseElement implements IResource {
 	public void setType(CodeableConceptDt theValue) {
 		myType = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>capacity</b> (Container volume or size).
 	 * creating it if it does
@@ -953,8 +967,8 @@ public class Specimen extends BaseElement implements IResource {
 	public void setCapacity(QuantityDt theValue) {
 		myCapacity = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>specimenQuantity</b> (Quantity of specimen within container).
 	 * creating it if it does
@@ -983,8 +997,8 @@ public class Specimen extends BaseElement implements IResource {
 	public void setSpecimenQuantity(QuantityDt theValue) {
 		mySpecimenQuantity = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>additive</b> (Additive associated with container ).
 	 * creating it if it does
@@ -1013,8 +1027,8 @@ public class Specimen extends BaseElement implements IResource {
 	public void setAdditive(ResourceReference theValue) {
 		myAdditive = theValue;
 	}
-	
- 
+
+  
 
 	}
 

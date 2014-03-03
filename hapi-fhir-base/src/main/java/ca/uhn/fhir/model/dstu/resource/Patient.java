@@ -17,10 +17,12 @@
 package ca.uhn.fhir.model.dstu.resource;
 
 import java.util.*;
+
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.model.primitive.*;
 import ca.uhn.fhir.model.dstu.composite.*;
+import ca.uhn.fhir.model.dstu.valueset.*;
 
 /**
  * HAPI/FHIR <b>Patient</b> Resource
@@ -37,7 +39,7 @@ import ca.uhn.fhir.model.dstu.composite.*;
  * </p> 
  */
 @ResourceDef(name="Patient")
-public class Patient extends BaseElement implements IResource {
+public class Patient extends BaseResource implements IResource {
 
 	@Child(name="identifier", type=IdentifierDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)	
 	private List<IdentifierDt> myIdentifier;
@@ -131,8 +133,8 @@ public class Patient extends BaseElement implements IResource {
 	public void setIdentifier(List<IdentifierDt> theValue) {
 		myIdentifier = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>name</b> (A name associated with the patient).
 	 * creating it if it does
@@ -161,8 +163,8 @@ public class Patient extends BaseElement implements IResource {
 	public void setName(List<HumanNameDt> theValue) {
 		myName = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>telecom</b> (A contact detail for the individual).
 	 * creating it if it does
@@ -191,8 +193,8 @@ public class Patient extends BaseElement implements IResource {
 	public void setTelecom(List<ContactDt> theValue) {
 		myTelecom = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>gender</b> (Gender for administrative purposes).
 	 * creating it if it does
@@ -221,8 +223,8 @@ public class Patient extends BaseElement implements IResource {
 	public void setGender(CodeableConceptDt theValue) {
 		myGender = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>birthDate</b> (The date and time of birth for the individual).
 	 * creating it if it does
@@ -251,8 +253,8 @@ public class Patient extends BaseElement implements IResource {
 	public void setBirthDate(DateTimeDt theValue) {
 		myBirthDate = theValue;
 	}
-	
-	/**
+
+ 	/**
 	 * Sets the value(s) for <b>birthDate</b> (The date and time of birth for the individual)
 	 *
      * <p>
@@ -289,8 +291,8 @@ public class Patient extends BaseElement implements IResource {
 	public void setDeceased(IDatatype theValue) {
 		myDeceased = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>address</b> (Addresses for the individual).
 	 * creating it if it does
@@ -319,8 +321,8 @@ public class Patient extends BaseElement implements IResource {
 	public void setAddress(List<AddressDt> theValue) {
 		myAddress = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>maritalStatus</b> (Marital (civil) status of a person).
 	 * creating it if it does
@@ -349,8 +351,8 @@ public class Patient extends BaseElement implements IResource {
 	public void setMaritalStatus(CodeableConceptDt theValue) {
 		myMaritalStatus = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>multipleBirth[x]</b> (Whether patient is part of a multiple birth).
 	 * creating it if it does
@@ -376,8 +378,8 @@ public class Patient extends BaseElement implements IResource {
 	public void setMultipleBirth(IDatatype theValue) {
 		myMultipleBirth = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>photo</b> (Image of the person).
 	 * creating it if it does
@@ -406,8 +408,8 @@ public class Patient extends BaseElement implements IResource {
 	public void setPhoto(List<AttachmentDt> theValue) {
 		myPhoto = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>contact</b> (A contact party (e.g. guardian, partner, friend) for the patient).
 	 * creating it if it does
@@ -436,8 +438,8 @@ public class Patient extends BaseElement implements IResource {
 	public void setContact(List<Contact> theValue) {
 		myContact = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>animal</b> (If this patient is an animal (non-human)).
 	 * creating it if it does
@@ -466,8 +468,8 @@ public class Patient extends BaseElement implements IResource {
 	public void setAnimal(Animal theValue) {
 		myAnimal = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>communication</b> (Languages which may be used to communicate with the patient about his or her health).
 	 * creating it if it does
@@ -496,8 +498,8 @@ public class Patient extends BaseElement implements IResource {
 	public void setCommunication(List<CodeableConceptDt> theValue) {
 		myCommunication = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>careProvider</b> (Patient's nominated care provider).
 	 * creating it if it does
@@ -523,8 +525,8 @@ public class Patient extends BaseElement implements IResource {
 	public void setCareProvider(List<ResourceReference> theValue) {
 		myCareProvider = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>managingOrganization</b> (Organization that is the custodian of the patient record).
 	 * creating it if it does
@@ -553,8 +555,8 @@ public class Patient extends BaseElement implements IResource {
 	public void setManagingOrganization(ResourceReference theValue) {
 		myManagingOrganization = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>link</b> (Link to another patient resource that concerns the same actual person).
 	 * creating it if it does
@@ -583,8 +585,8 @@ public class Patient extends BaseElement implements IResource {
 	public void setLink(List<Link> theValue) {
 		myLink = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>active</b> (Whether this patient's record is in active use).
 	 * creating it if it does
@@ -613,8 +615,8 @@ public class Patient extends BaseElement implements IResource {
 	public void setActive(BooleanDt theValue) {
 		myActive = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Block class for child element: <b>Patient.contact</b> (A contact party (e.g. guardian, partner, friend) for the patient)
 	 *
@@ -675,8 +677,8 @@ public class Patient extends BaseElement implements IResource {
 	public void setRelationship(List<CodeableConceptDt> theValue) {
 		myRelationship = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>name</b> (A name associated with the person).
 	 * creating it if it does
@@ -705,8 +707,8 @@ public class Patient extends BaseElement implements IResource {
 	public void setName(HumanNameDt theValue) {
 		myName = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>telecom</b> (A contact detail for the person).
 	 * creating it if it does
@@ -735,8 +737,8 @@ public class Patient extends BaseElement implements IResource {
 	public void setTelecom(List<ContactDt> theValue) {
 		myTelecom = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>address</b> (Address for the contact person).
 	 * creating it if it does
@@ -765,8 +767,8 @@ public class Patient extends BaseElement implements IResource {
 	public void setAddress(AddressDt theValue) {
 		myAddress = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>gender</b> (Gender for administrative purposes).
 	 * creating it if it does
@@ -795,8 +797,8 @@ public class Patient extends BaseElement implements IResource {
 	public void setGender(CodeableConceptDt theValue) {
 		myGender = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>organization</b> (Organization that is associated with the contact).
 	 * creating it if it does
@@ -825,8 +827,8 @@ public class Patient extends BaseElement implements IResource {
 	public void setOrganization(ResourceReference theValue) {
 		myOrganization = theValue;
 	}
-	
- 
+
+  
 
 	}
 
@@ -879,8 +881,8 @@ public class Patient extends BaseElement implements IResource {
 	public void setSpecies(CodeableConceptDt theValue) {
 		mySpecies = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>breed</b> (E.g. Poodle, Angus).
 	 * creating it if it does
@@ -909,8 +911,8 @@ public class Patient extends BaseElement implements IResource {
 	public void setBreed(CodeableConceptDt theValue) {
 		myBreed = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>genderStatus</b> (E.g. Neutered, Intact).
 	 * creating it if it does
@@ -939,8 +941,8 @@ public class Patient extends BaseElement implements IResource {
 	public void setGenderStatus(CodeableConceptDt theValue) {
 		myGenderStatus = theValue;
 	}
-	
- 
+
+  
 
 	}
 
@@ -963,7 +965,7 @@ public class Patient extends BaseElement implements IResource {
 	private ResourceReference myOther;
 	
 	@Child(name="type", type=CodeDt.class, order=1, min=1, max=1)	
-	private CodeDt myType;
+	private BoundCodeDt<LinkTypeEnum> myType;
 	
 	/**
 	 * Gets the value(s) for <b>other</b> (The other patient resource that the link refers to).
@@ -993,8 +995,8 @@ public class Patient extends BaseElement implements IResource {
 	public void setOther(ResourceReference theValue) {
 		myOther = theValue;
 	}
-	
- 
+
+  
 	/**
 	 * Gets the value(s) for <b>type</b> (replace | refer | seealso - type of link).
 	 * creating it if it does
@@ -1005,9 +1007,9 @@ public class Patient extends BaseElement implements IResource {
      * The type of link between this patient resource and another patient resource.
      * </p> 
 	 */
-	public CodeDt getType() {  
+	public BoundCodeDt<LinkTypeEnum> getType() {  
 		if (myType == null) {
-			myType = new CodeDt();
+			myType = new BoundCodeDt<LinkTypeEnum>(LinkTypeEnum.VALUESET_BINDER);
 		}
 		return myType;
 	}
@@ -1020,11 +1022,23 @@ public class Patient extends BaseElement implements IResource {
      * The type of link between this patient resource and another patient resource.
      * </p> 
 	 */
-	public void setType(CodeDt theValue) {
+	public void setType(BoundCodeDt<LinkTypeEnum> theValue) {
 		myType = theValue;
 	}
-	
- 
+
+	/**
+	 * Sets the value(s) for <b>type</b> (replace | refer | seealso - type of link)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The type of link between this patient resource and another patient resource.
+     * </p> 
+	 */
+	public void setType(LinkTypeEnum theValue) {
+		getType().setValueAsEnum(theValue);
+	}
+
+  
 
 	}
 

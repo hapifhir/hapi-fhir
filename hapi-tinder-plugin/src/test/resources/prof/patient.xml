@@ -130,14 +130,6 @@
 					<code value="Identifier" />
 				</type>
 				<isModifier value="false" />
-				<mapping>
-					<identity value="rim" />
-					<map value="id" />
-				</mapping>
-				<mapping>
-					<identity value="v2" />
-					<map value="PID-3" />
-				</mapping>
 			</definition>
 		</element>
 		<element>

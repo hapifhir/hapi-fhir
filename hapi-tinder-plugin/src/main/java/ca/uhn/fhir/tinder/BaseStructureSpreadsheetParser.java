@@ -1,7 +1,7 @@
 package ca.uhn.fhir.tinder;
 
-import java.io.File;
-import java.io.FileInputStream;
+import java.io.InputStream;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -30,87 +30,77 @@ public abstract class BaseStructureSpreadsheetParser extends BaseStructureParser
 	private int myColV2Mapping;
 
 	public void parse() throws Exception {
-		File baseDir = new File(getDirectory());
-		if (baseDir.exists() == false || baseDir.isDirectory() == false) {
-			throw new Exception(getDirectory() + " does not exist or is not a directory");
-		}
 
-		for (File nextFile : baseDir.listFiles()) {
-			if (isSpreadsheet(nextFile.getAbsolutePath())) {
-				ourLog.info("Scanning file: {}", nextFile.getAbsolutePath());
+		for (InputStream nextInputStream : getInputStreams()) {
+			
+			Document file = XMLUtils.parse(nextInputStream, false);
+			Element dataElementsSheet = (Element) file.getElementsByTagName("Worksheet").item(0);
+			NodeList tableList = dataElementsSheet.getElementsByTagName("Table");
+			Element table = (Element) tableList.item(0);
 
-				File resourceSpreadsheetFile = nextFile;
-				if (resourceSpreadsheetFile.exists() == false) {
-					throw new Exception(resourceSpreadsheetFile.getAbsolutePath() + " does not exist");
+			NodeList rows = table.getElementsByTagName("Row");
+
+			Element defRow = (Element) rows.item(0);
+			parseFirstRow(defRow);
+
+			Element resourceRow = (Element) rows.item(1);
+			Resource resource = new Resource();
+			addResource(resource);
+
+			parseBasicElements(resourceRow, resource);
+
+			Map<String, BaseElement> elements = new HashMap<String, BaseElement>();
+			elements.put(resource.getElementName(), resource);
+
+			// Map<String,String> blockFullNameToShortName = new
+			// HashMap<String,String>();
+
+			for (int i = 2; i < rows.getLength(); i++) {
+				Element nextRow = (Element) rows.item(i);
+				String name = cellValue(nextRow, 0);
+				if (name == null || name.startsWith("!")) {
+					continue;
 				}
 
-				Document file = XMLUtils.parse(new FileInputStream(resourceSpreadsheetFile), false);
-				Element dataElementsSheet = (Element) file.getElementsByTagName("Worksheet").item(0);
-				NodeList tableList = dataElementsSheet.getElementsByTagName("Table");
-				Element table = (Element) tableList.item(0);
+				String type = cellValue(nextRow, myColType);
 
-				NodeList rows = table.getElementsByTagName("Row");
+				Child elem;
+				if (StringUtils.isBlank(type) || type.startsWith("=")) {
+					elem = new ResourceBlock();
+				} else if (type.startsWith("@")) {
+					// type = type.substring(type.lastIndexOf('.')+1);
+					elem = new ResourceBlockCopy();
+				} else if (type.equals("*")) {
+					elem = new AnyChild();
+				} else {
+					elem = new Child();
+				}
 
-				Element defRow = (Element) rows.item(0);
-				parseFirstRow(defRow);
+				parseBasicElements(nextRow, elem);
 
-				Element resourceRow = (Element) rows.item(1);
-				Resource resource = new Resource();
-				addResource(resource);
+				elements.put(elem.getName(), elem);
+				BaseElement parent = elements.get(elem.getElementParentName());
+				if (parent == null) {
+					throw new Exception("Can't find element " + elem.getElementParentName() + "  -  Valid values are: " + elements.keySet());
+				}
+				parent.addChild(elem);
 
-				parseBasicElements(resourceRow, resource);
-
-				Map<String, BaseElement> elements = new HashMap<String, BaseElement>();
-				elements.put(resource.getElementName(), resource);
-
-				// Map<String,String> blockFullNameToShortName = new
-				// HashMap<String,String>();
-
-				for (int i = 2; i < rows.getLength(); i++) {
-					Element nextRow = (Element) rows.item(i);
-					String name = cellValue(nextRow, 0);
-					if (name == null || name.startsWith("!")) {
-						continue;
-					}
-
-					String type = cellValue(nextRow, myColType);
-
-					Child elem;
-					if (StringUtils.isBlank(type) || type.startsWith("=")) {
-						elem = new ResourceBlock();
-					} else if (type.startsWith("@")) {
-						// type = type.substring(type.lastIndexOf('.')+1);
-						elem = new ResourceBlockCopy();
-					} else if (type.equals("*")) {
-						elem = new AnyChild();
-					} else {
-						elem = new Child();
-					}
-
-					parseBasicElements(nextRow, elem);
-
-					elements.put(elem.getName(), elem);
-					BaseElement parent = elements.get(elem.getElementParentName());
-					if (parent == null) {
-						throw new Exception("Can't find element " + elem.getElementParentName() + "  -  Valid values are: " + elements.keySet());
-					}
-					parent.addChild(elem);
-
-					/*
-					 * Find simple setters
-					 */
-					if (elem instanceof Child) {
-						scanForSimpleSetters(elem);
-					}
-
+				/*
+				 * Find simple setters
+				 */
+				if (elem instanceof Child) {
+					scanForSimpleSetters(elem);
 				}
 
 			}
+
 		}
 
-		ourLog.info("Parsed {} resources", getResources().size());
+		ourLog.info("Parsed {} spreadsheet structures", getResources().size());
 
 	}
+
+	protected abstract Collection<InputStream> getInputStreams();
 
 	private void parseFirstRow(Element theDefRow) {
 		for (int i = 0; i < 20; i++) {
@@ -143,7 +133,7 @@ public abstract class BaseStructureSpreadsheetParser extends BaseStructureParser
 		String name = cellValue(theRowXml, myColName);
 		theTarget.setName(name);
 
-		theTarget.setElementName(name);
+		theTarget.setElementNameAndDeriveParentElementName(name);
 
 		String cardValue = cellValue(theRowXml, myColCard);
 		if (cardValue != null && cardValue.contains("..")) {

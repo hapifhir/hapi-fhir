@@ -20,6 +20,7 @@ import java.util.*;
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.model.primitive.*;
+import ca.uhn.fhir.model.dstu.valueset.*;
 
 /**
  * HAPI/FHIR <b>Narrative</b> Datatype
@@ -39,7 +40,7 @@ import ca.uhn.fhir.model.primitive.*;
 public class NarrativeDt extends BaseElement implements ICompositeDatatype {
 
 	@Child(name="status", type=CodeDt.class, order=0, min=1, max=1)	
-	private CodeDt myStatus;
+	private BoundCodeDt<NarrativeStatusEnum> myStatus;
 	
 	@Child(name="div", type=XhtmlDt.class, order=1, min=1, max=1)	
 	private XhtmlDt myDiv;
@@ -54,9 +55,9 @@ public class NarrativeDt extends BaseElement implements ICompositeDatatype {
      * The status of the narrative - whether it's entirely generated (from just the defined data or the extensions too), or whether a human authored it and it may contain additional data
      * </p> 
 	 */
-	public CodeDt getStatus() {  
+	public BoundCodeDt<NarrativeStatusEnum> getStatus() {  
 		if (myStatus == null) {
-			myStatus = new CodeDt();
+			myStatus = new BoundCodeDt<NarrativeStatusEnum>(NarrativeStatusEnum.VALUESET_BINDER);
 		}
 		return myStatus;
 	}
@@ -69,11 +70,23 @@ public class NarrativeDt extends BaseElement implements ICompositeDatatype {
      * The status of the narrative - whether it's entirely generated (from just the defined data or the extensions too), or whether a human authored it and it may contain additional data
      * </p> 
 	 */
-	public void setStatus(CodeDt theValue) {
+	public void setStatus(BoundCodeDt<NarrativeStatusEnum> theValue) {
 		myStatus = theValue;
 	}
-	
- 
+
+	/**
+	 * Sets the value(s) for <b>status</b> (generated | extensions | additional)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The status of the narrative - whether it's entirely generated (from just the defined data or the extensions too), or whether a human authored it and it may contain additional data
+     * </p> 
+	 */
+	public void setStatus(NarrativeStatusEnum theValue) {
+		getStatus().setValueAsEnum(theValue);
+	}
+
+  
 	/**
 	 * Gets the value(s) for <b>div</b> (Limited xhtml content).
 	 * creating it if it does
@@ -102,8 +115,8 @@ public class NarrativeDt extends BaseElement implements ICompositeDatatype {
 	public void setDiv(XhtmlDt theValue) {
 		myDiv = theValue;
 	}
-	
- 
+
+  
 
 
 }
