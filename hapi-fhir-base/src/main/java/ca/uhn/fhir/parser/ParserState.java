@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.xml.namespace.QName;
-import javax.xml.stream.events.Attribute;
 import javax.xml.stream.events.EndElement;
 import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
@@ -16,6 +15,7 @@ import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeChildDeclaredExtensionDefinition;
+import ca.uhn.fhir.context.RuntimeChildPrimitiveBoundCodeDatatypeDefinition;
 import ca.uhn.fhir.context.RuntimePrimitiveDatatypeDefinition;
 import ca.uhn.fhir.context.RuntimePrimitiveDatatypeNarrativeDefinition;
 import ca.uhn.fhir.context.RuntimeResourceBlockDefinition;
@@ -493,7 +493,8 @@ class ParserState<T extends IElement> {
 			}
 			case PRIMITIVE_DATATYPE: {
 				RuntimePrimitiveDatatypeDefinition primitiveTarget = (RuntimePrimitiveDatatypeDefinition) target;
-				IPrimitiveDatatype<?> newChildInstance = primitiveTarget.newInstance();
+				IPrimitiveDatatype<?> newChildInstance;
+				newChildInstance = primitiveTarget.newInstance(child.getInstanceConstructorArguments());
 				child.getMutator().addValue(myInstance, newChildInstance);
 				PrimitiveState newState = new PrimitiveState(newChildInstance);
 				push(newState);

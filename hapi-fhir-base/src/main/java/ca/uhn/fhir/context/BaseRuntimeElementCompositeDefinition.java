@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeSet;
 
 import ca.uhn.fhir.model.api.ICompositeElement;
 import ca.uhn.fhir.model.api.IElement;
@@ -46,7 +47,7 @@ public abstract class BaseRuntimeElementCompositeDefinition<T extends IComposite
 	public BaseRuntimeChildDefinition getChildByNameOrThrowDataFormatException(String theName) throws DataFormatException {
 		BaseRuntimeChildDefinition retVal = myNameToChild.get(theName);
 		if (retVal == null) {
-			throw new DataFormatException("Unknown child name '" + theName + "' in element " + getName());
+			throw new DataFormatException("Unknown child name '" + theName + "' in element " + getName() + " - Valid names are: " + new TreeSet<String>(myNameToChild.keySet()));
 		}
 		return retVal;
 	}

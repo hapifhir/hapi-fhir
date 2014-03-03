@@ -7,6 +7,7 @@ import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.model.primitive.*;
 import ca.uhn.fhir.model.dstu.composite.*;
+import ca.uhn.fhir.model.dstu.valueset.*;
 
 /**
  * HAPI/FHIR <b>${className}</b> Resource
@@ -23,7 +24,7 @@ import ca.uhn.fhir.model.dstu.composite.*;
  * </p> 
  */
 @ResourceDef(name="${className}")
-public class ${className} extends BaseElement implements IResource {
+public class ${className} extends BaseResource implements IResource {
 
 #childExtensionFields( $childExtensionTypes )
 #childVars( $children )

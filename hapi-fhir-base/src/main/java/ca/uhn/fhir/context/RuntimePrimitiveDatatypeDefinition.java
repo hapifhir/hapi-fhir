@@ -21,4 +21,5 @@ public class RuntimePrimitiveDatatypeDefinition extends BaseRuntimeElementDefini
 		return ChildTypeEnum.PRIMITIVE_DATATYPE;
 	}
 
+
 }

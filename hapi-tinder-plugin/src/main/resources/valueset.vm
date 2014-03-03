@@ -2,21 +2,10 @@
 package ca.uhn.fhir.model.dstu.valueset;
 
 import ca.uhn.fhir.model.api.*;
+import java.util.HashMap;
+import java.util.Map;
 
-public class ${valueSet.className} extends ValueSetEnumeration {
-
-	/**
-	 * Identifier for this Value Set:
-	 * ${valueSet.id}
-	 */
-	public static final String VALUESET_IDENTIFIER = "${valueSet.id}";
-
-	/**
-	 * Constructor - should not be called directly
-	 */
-	protected ${valueSet.className}(String theCode) {
-		super(theCode, VALUESET_IDENTIFIER);
-	}
+public enum ${valueSet.className} {
 
 #foreach ($code in $valueSet.codes)
 	/**
@@ -25,8 +14,68 @@ public class ${valueSet.className} extends ValueSetEnumeration {
 	 *
 	 * ${code.definition}
 	 */
-	public static final ${valueSet.className} ${code.codeEnumValue} = new ${valueSet.className}("${code.code}");
+	${code.codeEnumValue}("${code.code}"),
 	
 #end
+	;
+	
+	/**
+	 * Identifier for this Value Set:
+	 * ${valueSet.id}
+	 */
+	public static final String VALUESET_IDENTIFIER = "${valueSet.id}";
 
+	/**
+	 * Name for this Value Set:
+	 * ${valueSet.name}
+	 */
+	public static final String VALUESET_NAME = "${valueSet.name}";
+
+	private static Map<String, ${valueSet.className}> CODE_TO_ENUM = new HashMap<String, ${valueSet.className}>();
+	private String myCode;
+	
+	static {
+		for (${valueSet.className} next : ${valueSet.className}.values()) {
+			CODE_TO_ENUM.put(next.getCode(), next);
+		}
+	}
+	
+	/**
+	 * Returns the code associated with this enumerated value
+	 */
+	public String getCode() {
+		return myCode;
+	}
+	
+	/**
+	 * Returns the enumerated value associated with this code
+	 */
+	public ${valueSet.className} forCode(String theCode) {
+		${valueSet.className} retVal = CODE_TO_ENUM.get(theCode);
+		return retVal;
+	}
+
+	/**
+	 * Converts codes to their respective enumerated values
+	 */
+	public static final IValueSetEnumBinder<${valueSet.className}> VALUESET_BINDER = new IValueSetEnumBinder<${valueSet.className}>() {
+		@Override
+		public String toCodeString(${valueSet.className} theEnum) {
+			return theEnum.getCode();
+		}
+		
+		@Override
+		public ${valueSet.className} fromCodeString(String theCodeString) {
+			return CODE_TO_ENUM.get(theCodeString);
+		}
+	};
+	
+	/** 
+	 * Constructor
+	 */
+	${valueSet.className}(String theCode) {
+		myCode = theCode;
+	}
+
+	
 }

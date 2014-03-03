@@ -1,10 +1,13 @@
 package ca.uhn.fhir.context;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 
 import ca.uhn.fhir.model.api.IElement;
+import ca.uhn.fhir.model.api.IPrimitiveDatatype;
+import ca.uhn.fhir.model.api.IValueSetEnumBinder;
 
 public abstract class BaseRuntimeElementDefinition<T extends IElement> {
 
@@ -28,11 +31,27 @@ public abstract class BaseRuntimeElementDefinition<T extends IElement> {
 	}
 
 	public T newInstance() {
+		return newInstance(null);
+	}
+
+	public T newInstance(Object theArgument) {
 		try {
+			if (theArgument == null) {
 			return getImplementingClass().newInstance();
+			}else {
+				return getImplementingClass().getConstructor(IValueSetEnumBinder.class).newInstance(theArgument);
+			}
 		} catch (InstantiationException e) {
 			throw new ConfigurationException("Failed to instantiate type:"+getImplementingClass().getName(), e);
 		} catch (IllegalAccessException e) {
+			throw new ConfigurationException("Failed to instantiate type:"+getImplementingClass().getName(), e);
+		} catch (IllegalArgumentException e) {
+			throw new ConfigurationException("Failed to instantiate type:"+getImplementingClass().getName(), e);
+		} catch (InvocationTargetException e) {
+			throw new ConfigurationException("Failed to instantiate type:"+getImplementingClass().getName(), e);
+		} catch (NoSuchMethodException e) {
+			throw new ConfigurationException("Failed to instantiate type:"+getImplementingClass().getName(), e);
+		} catch (SecurityException e) {
 			throw new ConfigurationException("Failed to instantiate type:"+getImplementingClass().getName(), e);
 		}
 	}

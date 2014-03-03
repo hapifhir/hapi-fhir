@@ -4,6 +4,7 @@ import static org.apache.commons.lang3.StringUtils.*;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -26,6 +27,7 @@ import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IPrimitiveDatatype;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.IResourceBlock;
+import ca.uhn.fhir.model.api.IValueSetEnumBinder;
 import ca.uhn.fhir.model.api.ResourceReference;
 import ca.uhn.fhir.model.api.annotation.Block;
 import ca.uhn.fhir.model.api.annotation.Child;
@@ -37,6 +39,7 @@ import ca.uhn.fhir.model.api.annotation.Extension;
 import ca.uhn.fhir.model.api.annotation.Narrative;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.dstu.composite.NarrativeDt;
+import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.model.primitive.ICodedDatatype;
@@ -84,7 +87,7 @@ class ModelScanner {
 
 		myRuntimeChildUndeclaredExtensionDefinition = new RuntimeChildUndeclaredExtensionDefinition();
 		myRuntimeChildUndeclaredExtensionDefinition.sealAndInitialize(myClassToElementDefinitions);
-		
+
 		ourLog.info("Done scanning FHIR library, found {} model entries", myClassToElementDefinitions.size());
 
 	}
@@ -166,7 +169,6 @@ class ModelScanner {
 		}
 	}
 
-
 	private void scanBlock(Class<? extends IResourceBlock> theClass, Block theBlockDefinition) {
 		ourLog.debug("Scanning resource block class: {}", theClass.getName());
 
@@ -219,19 +221,22 @@ class ModelScanner {
 			scanCompositeElementForChildren(next, theDefinition, elementNames, orderToElementDef, orderToExtensionDef);
 		}
 
-//		while (orderToElementDef.size() > 0 && orderToElementDef.firstKey() < 0) {
-//			BaseRuntimeDeclaredChildDefinition elementDef = orderToElementDef.remove(orderToElementDef.firstKey());
-//			if (elementDef.getElementName().equals("identifier")) {
-//				orderToElementDef.put(theIdentifierOrder, elementDef);
-//			} else {
-//				throw new ConfigurationException("Don't know how to handle element: " + elementDef.getElementName());
-//			}
-//		}
+		// while (orderToElementDef.size() > 0 && orderToElementDef.firstKey() <
+		// 0) {
+		// BaseRuntimeDeclaredChildDefinition elementDef =
+		// orderToElementDef.remove(orderToElementDef.firstKey());
+		// if (elementDef.getElementName().equals("identifier")) {
+		// orderToElementDef.put(theIdentifierOrder, elementDef);
+		// } else {
+		// throw new ConfigurationException("Don't know how to handle element: "
+		// + elementDef.getElementName());
+		// }
+		// }
 
 		TreeSet<Integer> orders = new TreeSet<Integer>();
 		orders.addAll(orderToElementDef.keySet());
 		orders.addAll(orderToExtensionDef.keySet());
-		
+
 		for (Integer i : orders) {
 			BaseRuntimeChildDefinition nextChild = orderToElementDef.get(i);
 			if (nextChild != null) {
@@ -239,16 +244,17 @@ class ModelScanner {
 			}
 			BaseRuntimeDeclaredChildDefinition nextExt = orderToExtensionDef.get(i);
 			if (nextExt != null) {
-				theDefinition.addExtension((RuntimeChildDeclaredExtensionDefinition)nextExt);
+				theDefinition.addExtension((RuntimeChildDeclaredExtensionDefinition) nextExt);
 			}
 		}
 
 	}
 
 	@SuppressWarnings("unchecked")
-	private void scanCompositeElementForChildren(Class<? extends ICompositeElement> theClass, BaseRuntimeElementCompositeDefinition<?> theDefinition, Set<String> elementNames, TreeMap<Integer, BaseRuntimeDeclaredChildDefinition> theOrderToElementDef, TreeMap<Integer,BaseRuntimeDeclaredChildDefinition> theOrderToExtensionDef) {
+	private void scanCompositeElementForChildren(Class<? extends ICompositeElement> theClass, BaseRuntimeElementCompositeDefinition<?> theDefinition, Set<String> elementNames, TreeMap<Integer, BaseRuntimeDeclaredChildDefinition> theOrderToElementDef,
+			TreeMap<Integer, BaseRuntimeDeclaredChildDefinition> theOrderToExtensionDef) {
 		int baseElementOrder = theOrderToElementDef.isEmpty() ? 0 : theOrderToElementDef.lastEntry().getKey() + 1;
-		
+
 		for (Field next : theClass.getDeclaredFields()) {
 
 			Narrative hasNarrative = next.getAnnotation(Narrative.class);
@@ -274,12 +280,12 @@ class ModelScanner {
 			int min = element.min();
 			int max = element.max();
 			TreeMap<Integer, BaseRuntimeDeclaredChildDefinition> orderMap = theOrderToElementDef;
-			
+
 			Extension extensionAttr = next.getAnnotation(Extension.class);
 			if (extensionAttr != null) {
 				orderMap = theOrderToExtensionDef;
 			}
-			
+
 			/*
 			 * Anything that's marked as unknown is given a new ID that is <0 so
 			 * that it doesn't conflict wityh any given IDs and can be figured
@@ -323,7 +329,7 @@ class ModelScanner {
 				Class<? extends IElement> et = (Class<? extends IElement>) nextElementType;
 				RuntimeChildDeclaredExtensionDefinition def = new RuntimeChildDeclaredExtensionDefinition(next, min, max, elementName, extensionAttr.url(), et);
 				orderMap.put(order, def);
-				if (IElement.class.isAssignableFrom(nextElementType )) {
+				if (IElement.class.isAssignableFrom(nextElementType)) {
 					addScanAlso((Class<? extends IElement>) nextElementType);
 				}
 			} else if (ResourceReference.class.isAssignableFrom(nextElementType)) {
@@ -359,7 +365,12 @@ class ModelScanner {
 				addScanAlso(nextDatatype);
 				BaseRuntimeChildDatatypeDefinition def;
 				if (IPrimitiveDatatype.class.isAssignableFrom(nextElementType)) {
-					def = new RuntimeChildPrimitiveDatatypeDefinition(next, elementName, min, max, nextDatatype);
+					if (nextElementType.equals(BoundCodeDt.class)) {
+						IValueSetEnumBinder<Enum<?>> binder = getBoundCodeBinder(next);
+						def = new RuntimeChildPrimitiveBoundCodeDatatypeDefinition(next, elementName, min, max, nextDatatype, binder);
+					} else {
+						def = new RuntimeChildPrimitiveDatatypeDefinition(next, elementName, min, max, nextDatatype);
+					}
 				} else {
 					def = new RuntimeChildCompositeDatatypeDefinition(next, elementName, min, max, nextDatatype);
 				}
@@ -379,10 +390,25 @@ class ModelScanner {
 
 				// TODO: handle codes
 			} else {
-				throw new ConfigurationException("Field '" + elementName + "' in type '" + theClass.getCanonicalName() + "' is not a valid child type");
+				throw new ConfigurationException("Field '" + elementName + "' in type '" + theClass.getCanonicalName() + "' is not a valid child type: " + nextElementType);
 			}
 
 			elementNames.add(elementName);
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private IValueSetEnumBinder<Enum<?>> getBoundCodeBinder(Field theNext) {
+		Class<?> bound = getGenericCollectionTypeOfCodedField(theNext);
+		if (bound == null) {
+			throw new ConfigurationException("Field '" + theNext + "' has no parameter for " + BoundCodeDt.class.getSimpleName() + " to determine enum type");
+		}
+
+		try {
+			Field bindingField = bound.getField("VALUESET_BINDER");
+			return (IValueSetEnumBinder<Enum<?>>) bindingField.get(null);
+		} catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException e) {
+			throw new ConfigurationException("Field '" + theNext + "' has type parameter " + bound.getCanonicalName() + " but this class has no valueset binding field", e);
 		}
 	}
 
@@ -446,12 +472,34 @@ class ModelScanner {
 		Class<?> type;
 		// if (genericSuperclass == null) {
 		ParameterizedType collectionType = (ParameterizedType) next.getGenericType();
-		type = (Class<?>) collectionType.getActualTypeArguments()[0];
+		Type firstArg = collectionType.getActualTypeArguments()[0];
+		if (ParameterizedType.class.isAssignableFrom(firstArg.getClass())) {
+			ParameterizedType pt = ((ParameterizedType)firstArg);
+			type = (Class<?>) pt.getRawType();
+//			firstArg = pt.getActualTypeArguments()[0];
+//			type = (Class<?>) firstArg;
+		}else {
+			type = (Class<?>) firstArg;
+		}
 		// }else {
 		// Type[] actualTypeArguments = ((ParameterizedType)
 		// genericSuperclass).getActualTypeArguments();
 		// type = (Class<?>) actualTypeArguments[0];
 		// }
+		return type;
+	}
+	
+	private static Class<?> getGenericCollectionTypeOfCodedField(Field next) {
+		Class<?> type;
+		ParameterizedType collectionType = (ParameterizedType) next.getGenericType();
+		Type firstArg = collectionType.getActualTypeArguments()[0];
+		if (ParameterizedType.class.isAssignableFrom(firstArg.getClass())) {
+			ParameterizedType pt = ((ParameterizedType)firstArg);
+			firstArg = pt.getActualTypeArguments()[0];
+			type = (Class<?>) firstArg;
+		}else {
+			type = (Class<?>) firstArg;
+		}
 		return type;
 	}
 

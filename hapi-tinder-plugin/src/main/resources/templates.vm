@@ -47,7 +47,11 @@
 	public ${child.referenceType} get${child.methodName}() {  
 #if ( ${child.hasMultipleTypes} == false && ${child.singleChildInstantiable} == true )
 		if (${child.variableName} == null) {
+#if ( ${child.boundCode} && ${child.repeatable} == false )
+			${child.variableName} = new ${child.referenceTypeForConstructor}(${child.bindingClass}.VALUESET_BINDER);
+#else
 			${child.variableName} = new ${child.referenceTypeForConstructor}();
+#end
 		}
 #end
 		return ${child.variableName};
@@ -64,7 +68,47 @@
 	public void set${child.methodName}(${child.referenceType} theValue) {
 		${child.variableName} = theValue;
 	}
-	
+
+#if ( ${child.boundCode} && ${child.repeatable} )
+	/**
+	 * Add a value for <b>${child.elementName}</b> (${child.shortName})
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * ${child.definition}
+     * </p> 
+	 */
+	public void add${child.methodName}(${child.bindingClass} theValue) {
+		get${child.methodName}().add(new BoundCodeDt<${child.bindingClass}>(${child.bindingClass}.VALUESET_BINDER, theValue));
+	}
+
+	/**
+	 * Sets the value(s), and clears any existing value(s) for <b>${child.elementName}</b> (${child.shortName})
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * ${child.definition}
+     * </p> 
+	 */
+	public void set${child.methodName}(${child.bindingClass} theValue) {
+		get${child.methodName}().clear();
+		add${child.methodName}(theValue);
+	}
+
+#elseif ( ${child.boundCode} )
+	/**
+	 * Sets the value(s) for <b>${child.elementName}</b> (${child.shortName})
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * ${child.definition}
+     * </p> 
+	 */
+	public void set${child.methodName}(${child.bindingClass} theValue) {
+		get${child.methodName}().setValueAsEnum(theValue);
+	}
+
+#end ##if (child.boundCode)
 #foreach ( $ss in $child.simpleSetters )
 	/**
 	 * Sets the value(s) for <b>${child.elementName}</b> (${child.shortName})

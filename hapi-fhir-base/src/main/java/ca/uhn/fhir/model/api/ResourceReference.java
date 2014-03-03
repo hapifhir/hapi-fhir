@@ -3,7 +3,7 @@ package ca.uhn.fhir.model.api;
 import org.apache.commons.lang3.StringUtils;
 
 
-public class ResourceReference implements IElement {
+public class ResourceReference implements IDatatype {
 
 	private String myDisplay;
 	private String myReference;

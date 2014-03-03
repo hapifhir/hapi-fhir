@@ -11,13 +11,11 @@
 		<name value="CGTAPatient" />
 		<element>
 			<path value="Patient.identifier"/>
-			<!-- 
-			<slicing>
+			<!-- <slicing>
 				<discriminator value="" />
 				<ordered value="true"/>
 				<rules value="open"/>
-			</slicing>
-			 -->
+			</slicing>  -->
 		</element>
 	</structure>
 

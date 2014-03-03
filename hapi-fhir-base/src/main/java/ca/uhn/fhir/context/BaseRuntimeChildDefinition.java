@@ -34,6 +34,10 @@ public abstract class BaseRuntimeChildDefinition {
 		return null;
 	}
 
+	public Object getInstanceConstructorArguments() {
+		return null;
+	}
+
 //	public String getExtensionUrl() {
 //		return null;
 //	}

@@ -7,8 +7,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
+
 import ca.uhn.fhir.model.api.IDatatype;
 import ca.uhn.fhir.model.api.IElement;
+import ca.uhn.fhir.model.api.IResource;
 
 public class RuntimeChildChoiceDefinition extends BaseRuntimeDeclaredChildDefinition {
 
@@ -46,8 +49,16 @@ public class RuntimeChildChoiceDefinition extends BaseRuntimeDeclaredChildDefini
 		myDatatypeToElementDefinition =new HashMap<Class<? extends IElement>, BaseRuntimeElementDefinition<?>>();
 		
 		for (Class<? extends IElement> next : myChoiceTypes) {
-			BaseRuntimeElementDefinition<?> nextDef = theClassToElementDefinitions.get(next);
-			String elementName = getElementName() + nextDef.getName();
+			
+			String elementName;
+			BaseRuntimeElementDefinition<?> nextDef;
+			if (IResource.class.isAssignableFrom(next)) {
+				elementName = getElementName() + StringUtils.capitalize(next.getSimpleName());
+				nextDef = new RuntimeResourceReferenceDefinition(elementName);
+			} else {
+				nextDef = theClassToElementDefinitions.get(next);
+				elementName = getElementName() + StringUtils.capitalize(nextDef.getName());
+			}
 			
 			myNameToChildDefinition.put(elementName, nextDef);
 			myDatatypeToElementDefinition.put(next, nextDef);
