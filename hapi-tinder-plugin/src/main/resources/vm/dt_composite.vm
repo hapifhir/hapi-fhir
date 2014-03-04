@@ -36,9 +36,9 @@ public class ${className}Dt extends BaseElement implements ICompositeDatatype {
 #########################
 #if ( ${className} == "Identifier" )
 	/**
-	 * Returns true if <code>this</code> identifier has the same {@link IdentifierDt#getValue() value}
-	 * and {@link IdentifierDt#getSystem() system} (as compared by simple equals comparison).
-	 * Does not compare other values (e.g. {@link IdentifierDt#getUse() use}) or any extensions. 
+	 * Returns true if <code>this</code> identifier has the same {@link IdentifierDt#[[#]]#getValue() value}
+	 * and {@link IdentifierDt#[[#]]#getSystem() system} (as compared by simple equals comparison).
+	 * Does not compare other values (e.g. {@link IdentifierDt#[[#]]#getUse() use}) or any extensions. 
 	 */
 	public boolean matchesSystemAndValue(IdentifierDt theIdentifier) {
 		if (theIdentifier == null) {
@@ -52,7 +52,7 @@ public class ${className}Dt extends BaseElement implements ICompositeDatatype {
 	 * format is used in HTTP queries as a parameter format.
 	 * 
 	 * @see See FHIR specification 
-	 *    <a href="http://www.hl7.org/implement/standards/fhir/search.html#ptypes">2.2.2 Search Parameter Types</a>
+	 *    <a href="http://www.hl7.org/implement/standards/fhir/search.html#[[#]]#ptypes">2.2.2 Search Parameter Types</a>
 	 *    for information on the <b>token</b> format
 	 */
 	public void setValueAsQueryToken(String theParameter) {

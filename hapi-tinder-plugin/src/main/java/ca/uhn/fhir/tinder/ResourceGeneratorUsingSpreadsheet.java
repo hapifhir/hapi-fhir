@@ -1,8 +1,10 @@
 package ca.uhn.fhir.tinder;
 
+import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.maven.plugin.MojoFailureException;
@@ -31,9 +33,10 @@ public class ResourceGeneratorUsingSpreadsheet extends BaseStructureSpreadsheetP
 
 
 	public static void main(String[] args) throws Exception {
-//		ResourceSpreadsheetParser p = new ResourceSpreadsheetParser();
-//		p.setAllDatatypes(new ArrayList<String>());
-//		p.setDirectory("src/test/resources/res");
+		ResourceGeneratorUsingSpreadsheet p = new ResourceGeneratorUsingSpreadsheet();
+		p.setBaseResourceNames(Collections.singletonList("patient"));
+		p.parse();
+		p.writeAll(new File("tmp"), "ca.test");
 //		
 //		// TODO: this needs to be properly populated
 //		p.getAllDatatypes().add("String");

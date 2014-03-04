@@ -36,9 +36,7 @@ import ca.uhn.fhir.model.api.annotation.Choice;
 import ca.uhn.fhir.model.api.annotation.CodeTableDef;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.Extension;
-import ca.uhn.fhir.model.api.annotation.Narrative;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.model.dstu.composite.NarrativeDt;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.DateDt;
@@ -71,7 +69,6 @@ class ModelScanner {
 	}
 
 	private void init(Set<Class<? extends IElement>> toScan) {
-		toScan.add(NarrativeDt.class);
 		toScan.add(DateDt.class);
 		toScan.add(CodeDt.class);
 
@@ -263,18 +260,6 @@ class ModelScanner {
 		int baseElementOrder = theOrderToElementDef.isEmpty() ? 0 : theOrderToElementDef.lastEntry().getKey() + 1;
 
 		for (Field next : theClass.getDeclaredFields()) {
-
-			Narrative hasNarrative = next.getAnnotation(Narrative.class);
-			if (hasNarrative != null) {
-				RuntimeChildNarrativeDefinition def;
-				try {
-					def = new RuntimeChildNarrativeDefinition(next, hasNarrative.name());
-				} catch (Exception e) {
-					throw new ConfigurationException("Failed to find narrative field", e);
-				}
-				theDefinition.addChild(def);
-				continue;
-			}
 
 			Child element = next.getAnnotation(Child.class);
 			if (element == null) {

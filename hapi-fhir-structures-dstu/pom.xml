@@ -10,7 +10,7 @@
 	</parent>
 
 	<groupId>ca.uhn.hapi.fhir</groupId>
-	<artifactId>hapi-tinder-test</artifactId>
+	<artifactId>hapi-fhir-structures-dstu</artifactId>
 	<packaging>jar</packaging>
 
 	<name>HAPI FHIR Structures - DSTU (FHIR 0.80)</name>
@@ -39,16 +39,34 @@
 				<configuration>
 					<package>ca.uhn.fhir.model.dstu</package>
 					<baseResourceNames>
-						<baseResourceName>patient</baseResourceName>
-						<baseResourceName>valueset</baseResourceName>
-						<baseResourceName>organization</baseResourceName>
 						<baseResourceName>device</baseResourceName>
+						<baseResourceName>group</baseResourceName>
 						<baseResourceName>location</baseResourceName>
+						<baseResourceName>medication</baseResourceName>
+						<baseResourceName>observation</baseResourceName>
+						<baseResourceName>organization</baseResourceName>
+						<baseResourceName>patient</baseResourceName>
 						<baseResourceName>practitioner</baseResourceName>
+						<baseResourceName>profile</baseResourceName>
+						<baseResourceName>specimen</baseResourceName>
+						<baseResourceName>substance</baseResourceName>
+						<baseResourceName>valueset</baseResourceName>
 					</baseResourceNames>
 				</configuration>
 			</plugin>
 		</plugins>
 	</build>
+
+	<reporting>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>${maven_javadoc_plugin_version}</version>
+				<configuration>
+				</configuration>
+			</plugin>
+		</plugins>
+	</reporting>
 
 </project>

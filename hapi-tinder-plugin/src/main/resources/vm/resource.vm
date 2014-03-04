@@ -26,6 +26,19 @@ import ${packageBase}.valueset.*;
 @ResourceDef(name="${className}")
 public class ${className} extends BaseResource implements IResource {
 
+#foreach ( $param in $searchParams )
+	/**
+	 * Search parameter constant for <b>${param.name}</b>
+	 * <p>
+	 * Description: <b>${param.description}</b><br/>
+	 * Type: <b>${param.type}</b><br/>
+	 * Path: <b>${param.path}</b><br/>
+	 * </p>
+	 */
+	public static final String $param.constantName = "${param.name}";
+
+#end
+
 #childExtensionFields( $childExtensionTypes )
 #childVars( $children )
 #childAccessors( $children )

@@ -24,11 +24,12 @@
 		<module>hapi-fhir-base</module>
 		<module>hapi-tinder-plugin</module>
 		<module>hapi-tinder-test</module>
+		<module>hapi-fhir-structures-dstu</module>
 	</modules>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-
+		<maven_javadoc_plugin_version>2.9.1</maven_javadoc_plugin_version>
 		<slf4j_version>1.6.6</slf4j_version>
 	</properties>
 

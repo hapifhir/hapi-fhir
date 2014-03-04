@@ -16,6 +16,7 @@ import ca.uhn.fhir.tinder.model.Child;
 import ca.uhn.fhir.tinder.model.Resource;
 import ca.uhn.fhir.tinder.model.ResourceBlock;
 import ca.uhn.fhir.tinder.model.ResourceBlockCopy;
+import ca.uhn.fhir.tinder.model.SearchParameter;
 import ca.uhn.fhir.tinder.util.XMLUtils;
 
 public abstract class BaseStructureSpreadsheetParser extends BaseStructureParser {
@@ -32,7 +33,7 @@ public abstract class BaseStructureSpreadsheetParser extends BaseStructureParser
 	public void parse() throws Exception {
 
 		for (InputStream nextInputStream : getInputStreams()) {
-			
+
 			Document file = XMLUtils.parse(nextInputStream, false);
 			Element dataElementsSheet = (Element) file.getElementsByTagName("Worksheet").item(0);
 			NodeList tableList = dataElementsSheet.getElementsByTagName("Table");
@@ -44,8 +45,11 @@ public abstract class BaseStructureSpreadsheetParser extends BaseStructureParser
 			parseFirstRow(defRow);
 
 			Element resourceRow = (Element) rows.item(1);
+
 			Resource resource = new Resource();
 			addResource(resource);
+
+			parseParameters(file, resource);
 
 			parseBasicElements(resourceRow, resource);
 
@@ -98,6 +102,57 @@ public abstract class BaseStructureSpreadsheetParser extends BaseStructureParser
 
 		ourLog.info("Parsed {} spreadsheet structures", getResources().size());
 
+	}
+
+	private void parseParameters(Document theFile, Resource theResource) {
+		NodeList sheets = theFile.getElementsByTagName("Worksheet");
+		for (int i = 0; i < sheets.getLength(); i++) {
+			Element sheet = (Element) sheets.item(i);
+			String name = sheet.getAttributeNS("urn:schemas-microsoft-com:office:spreadsheet", "Name");
+			if ("Search".equals(name)) {
+
+				NodeList tableList = sheet.getElementsByTagName("Table");
+				Element table = (Element) tableList.item(0);
+				NodeList rows = table.getElementsByTagName("Row");
+				Element defRow = (Element) rows.item(0);
+
+				int colName = 0;
+				int colDesc = 0;
+				int colType = 0;
+				int colPath = 0;
+				for (int j = 0; j < 20; j++) {
+					String nextName = cellValue(defRow, j);
+					if (nextName == null) {
+						continue;
+					}
+					nextName = nextName.toLowerCase().trim().replace(".", "");
+					if ("name".equals(nextName)) {
+						colName = j;
+					} else if ("description".equals(nextName)) {
+						colDesc = j;
+					} else if ("type".equals(nextName)) {
+						colType = j;
+					} else if ("path".equals(nextName)) {
+						colPath = j;
+					}
+				}
+
+				for (int j = 1; j < rows.getLength(); j++) {
+					Element nextRow = (Element) rows.item(j);
+					SearchParameter sp = new SearchParameter();
+
+					sp.setName(cellValue(nextRow, colName));
+					sp.setDescription(cellValue(nextRow, colDesc));
+					sp.setType(cellValue(nextRow, colType));
+					sp.setPath(cellValue(nextRow, colPath));
+
+					if (StringUtils.isNotBlank(sp.getName())) {
+						theResource.getSearchParameters().add(sp);
+					}
+				}
+
+			}
+		}
 	}
 
 	protected abstract Collection<InputStream> getInputStreams();

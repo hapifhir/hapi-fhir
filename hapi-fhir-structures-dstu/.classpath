@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+  <classpathentry kind="src" path="target/generated-sources/tinder" including="**/*.java"/>
+  <classpathentry kind="output" path="target/classes"/>
+  <classpathentry kind="var" path="M2_REPO/javax/xml/stream/stax-api/1.0-2/stax-api-1.0-2.jar" sourcepath="M2_REPO/javax/xml/stream/stax-api/1.0-2/stax-api-1.0-2-sources.jar"/>
+  <classpathentry kind="var" path="M2_REPO/javax/servlet/javax.servlet-api/3.1.0/javax.servlet-api-3.1.0.jar" sourcepath="M2_REPO/javax/servlet/javax.servlet-api/3.1.0/javax.servlet-api-3.1.0-sources.jar"/>
+  <classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+  <classpathentry kind="var" path="M2_REPO/ca/uhn/hapi/fhir/hapi-fhir-base/1.0-SNAPSHOT/hapi-fhir-base-1.0-SNAPSHOT.jar"/>
+  <classpathentry kind="var" path="M2_REPO/com/google/code/gson/gson/2.2.4/gson-2.2.4.jar" sourcepath="M2_REPO/com/google/code/gson/gson/2.2.4/gson-2.2.4-sources.jar">
+    <attributes>
+      <attribute value="jar:file:/home/t3903uhn/.m2/repository/com/google/code/gson/gson/2.2.4/gson-2.2.4-javadoc.jar!/" name="javadoc_location"/>
+    </attributes>
+  </classpathentry>
+  <classpathentry kind="var" path="M2_REPO/org/codehaus/woodstox/woodstox-core-asl/4.2.0/woodstox-core-asl-4.2.0.jar" sourcepath="M2_REPO/org/codehaus/woodstox/woodstox-core-asl/4.2.0/woodstox-core-asl-4.2.0-sources.jar">
+    <attributes>
+      <attribute value="jar:file:/home/t3903uhn/.m2/repository/org/codehaus/woodstox/woodstox-core-asl/4.2.0/woodstox-core-asl-4.2.0-javadoc.jar!/" name="javadoc_location"/>
+    </attributes>
+  </classpathentry>
+  <classpathentry kind="var" path="M2_REPO/org/codehaus/woodstox/stax2-api/3.1.1/stax2-api-3.1.1.jar" sourcepath="M2_REPO/org/codehaus/woodstox/stax2-api/3.1.1/stax2-api-3.1.1-sources.jar"/>
+  <classpathentry kind="var" path="M2_REPO/org/apache/commons/commons-lang3/3.2.1/commons-lang3-3.2.1.jar" sourcepath="M2_REPO/org/apache/commons/commons-lang3/3.2.1/commons-lang3-3.2.1-sources.jar">
+    <attributes>
+      <attribute value="jar:file:/home/t3903uhn/.m2/repository/org/apache/commons/commons-lang3/3.2.1/commons-lang3-3.2.1-javadoc.jar!/" name="javadoc_location"/>
+    </attributes>
+  </classpathentry>
+  <classpathentry kind="var" path="M2_REPO/commons-codec/commons-codec/1.9/commons-codec-1.9.jar" sourcepath="M2_REPO/commons-codec/commons-codec/1.9/commons-codec-1.9-sources.jar"/>
+  <classpathentry kind="var" path="M2_REPO/org/slf4j/slf4j-api/1.7.6/slf4j-api-1.7.6.jar" sourcepath="M2_REPO/org/slf4j/slf4j-api/1.7.6/slf4j-api-1.7.6-sources.jar">
+    <attributes>
+      <attribute value="jar:file:/home/t3903uhn/.m2/repository/org/slf4j/slf4j-api/1.7.6/slf4j-api-1.7.6-javadoc.jar!/" name="javadoc_location"/>
+    </attributes>
+  </classpathentry>
+  <classpathentry kind="var" path="M2_REPO/org/apache/httpcomponents/httpclient/4.2.3/httpclient-4.2.3.jar" sourcepath="M2_REPO/org/apache/httpcomponents/httpclient/4.2.3/httpclient-4.2.3-sources.jar"/>
+  <classpathentry kind="var" path="M2_REPO/org/apache/httpcomponents/httpcore/4.2.2/httpcore-4.2.2.jar"/>
+  <classpathentry kind="var" path="M2_REPO/commons-logging/commons-logging/1.1.1/commons-logging-1.1.1.jar" sourcepath="M2_REPO/commons-logging/commons-logging/1.1.1/commons-logging-1.1.1-sources.jar">
+    <attributes>
+      <attribute value="jar:file:/home/t3903uhn/.m2/repository/commons-logging/commons-logging/1.1.1/commons-logging-1.1.1-javadoc.jar!/" name="javadoc_location"/>
+    </attributes>
+  </classpathentry>
+  <classpathentry kind="var" path="M2_REPO/log4j/log4j/1.2.17/log4j-1.2.17.jar"/>
+</classpath>

@@ -145,6 +145,7 @@ public abstract class BaseStructureParser {
 		ctx.put("children", theResource.getChildren());
 		ctx.put("resourceBlockChildren", theResource.getResourceBlockChildren());
 		ctx.put("childExtensionTypes", ObjectUtils.defaultIfNull(myExtensions, new ArrayList<Extension>()));
+		ctx.put("searchParams", (theResource.getSearchParameters()));
 
 		VelocityEngine v = new VelocityEngine();
 		v.setProperty("resource.loader", "cp");
