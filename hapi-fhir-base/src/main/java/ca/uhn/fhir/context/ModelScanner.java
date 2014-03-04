@@ -60,9 +60,9 @@ class ModelScanner {
 
 	private RuntimeChildUndeclaredExtensionDefinition myRuntimeChildUndeclaredExtensionDefinition;
 
-	ModelScanner(Class<? extends IResource>... theResourceTypes) throws ConfigurationException {
+	ModelScanner(Collection<Class<? extends IResource>> theResourceTypes) throws ConfigurationException {
 
-		Set<Class<? extends IElement>> toScan = new HashSet<Class<? extends IElement>>(Arrays.asList(theResourceTypes));
+		Set<Class<? extends IElement>> toScan = new HashSet<Class<? extends IElement>>(theResourceTypes);
 		toScan.add(NarrativeDt.class);
 		toScan.add(DateDt.class);
 		toScan.add(CodeDt.class);
