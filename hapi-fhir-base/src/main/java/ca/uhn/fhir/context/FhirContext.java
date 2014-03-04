@@ -1,7 +1,10 @@
 package ca.uhn.fhir.context;
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Set;
 
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IResource;
@@ -14,6 +17,10 @@ public class FhirContext {
 	private RuntimeChildUndeclaredExtensionDefinition myRuntimeChildUndeclaredExtensionDefinition;
 
 	public FhirContext(Class<? extends IResource>... theResourceTypes) {
+		this(Arrays.asList(theResourceTypes));
+	}
+
+	public FhirContext(Collection<Class<? extends IResource>> theResourceTypes) {
 		ModelScanner scanner = new ModelScanner(theResourceTypes);
 		myNameToElementDefinition = Collections.unmodifiableMap(scanner.getNameToResourceDefinitions());
 		myClassToElementDefinition = Collections.unmodifiableMap(scanner.getClassToElementDefinitions());

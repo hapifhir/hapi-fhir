@@ -1,0 +1,4 @@
+
+ * Implement JSON parser and encoder
+ * Implement strategy for narrative generation
+ 
