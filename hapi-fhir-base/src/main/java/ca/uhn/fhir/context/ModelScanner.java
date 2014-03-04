@@ -1,6 +1,6 @@
 package ca.uhn.fhir.context;
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
@@ -60,9 +60,17 @@ class ModelScanner {
 
 	private RuntimeChildUndeclaredExtensionDefinition myRuntimeChildUndeclaredExtensionDefinition;
 
-	ModelScanner(Collection<Class<? extends IResource>> theResourceTypes) throws ConfigurationException {
+	ModelScanner(Class<? extends IResource> theResourceTypes) throws ConfigurationException {
+		Set<Class<? extends IElement>> singleton = new HashSet<>();
+		singleton.add(theResourceTypes);
+		init(singleton);
+	}
 
-		Set<Class<? extends IElement>> toScan = new HashSet<Class<? extends IElement>>(theResourceTypes);
+	ModelScanner(Collection<Class<? extends IResource>> theResourceTypes) throws ConfigurationException {
+		init(new HashSet<Class<? extends IElement>>(theResourceTypes));
+	}
+
+	private void init(Set<Class<? extends IElement>> toScan) {
 		toScan.add(NarrativeDt.class);
 		toScan.add(DateDt.class);
 		toScan.add(CodeDt.class);
@@ -89,7 +97,6 @@ class ModelScanner {
 		myRuntimeChildUndeclaredExtensionDefinition.sealAndInitialize(myClassToElementDefinitions);
 
 		ourLog.info("Done scanning FHIR library, found {} model entries", myClassToElementDefinitions.size());
-
 	}
 
 	public RuntimeChildUndeclaredExtensionDefinition getRuntimeChildUndeclaredExtensionDefinition() {

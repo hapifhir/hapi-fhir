@@ -1,6 +1,14 @@
 package ca.uhn.fhir.ws;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
+import ca.uhn.fhir.model.dstu.composite.HumanNameDt;
+import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.resource.Patient;
+import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
+import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.ws.operations.GET;
 import ca.uhn.fhir.ws.parameters.Required;
 
@@ -9,11 +17,48 @@ import ca.uhn.fhir.ws.parameters.Required;
  */
 public class DummyPatientResourceProvider implements IResourceProvider<Patient> {
 
-    @GET
-    @ResourceName(value="Patient")
-    public Patient getPatient(@Required(name="mrn") String mrn) {
-       return null;
-    }
+	private Map<Long, Patient> myIdToPatient = new HashMap<>();
+	
+	public DummyPatientResourceProvider() {
+		{
+			Patient patient = new Patient();
+			patient.getIdentifier().add(new IdentifierDt());
+			patient.getIdentifier().get(0).setUse(IdentifierUseEnum.OFFICIAL);
+			patient.getIdentifier().get(0).setSystem(new UriDt("urn:hapitest:mrns"));
+			patient.getIdentifier().get(0).setValue("00001");
+			patient.getName().add(new HumanNameDt());
+			patient.getName().get(0).addFamily("Test");
+			patient.getName().get(0).addGiven("PatientOne");
+			patient.setGender(new CodeableConceptDt());
+			patient.getGender().setText("M");
+			myIdToPatient.put(1L, patient);
+		}
+		{
+			Patient patient = new Patient();
+			patient.getIdentifier().add(new IdentifierDt());
+			patient.getIdentifier().get(0).setUse(IdentifierUseEnum.OFFICIAL);
+			patient.getIdentifier().get(0).setSystem(new UriDt("urn:hapitest:mrns"));
+			patient.getIdentifier().get(0).setValue("00002");
+			patient.getName().add(new HumanNameDt());
+			patient.getName().get(0).addFamily("Test");
+			patient.getName().get(0).addGiven("PatientTwo");
+			patient.setGender(new CodeableConceptDt());
+			patient.getGender().setText("F");
+			myIdToPatient.put(2L, patient);
+		}
+	}
+
+	@GET
+	public Patient getPatient(@Required(name = "identifier") IdentifierDt theIdentifier) {
+		for (Patient next : myIdToPatient.values()) {
+			for (IdentifierDt nextId : next.getIdentifier()) {
+				if (nextId.matchesSystemAndValue(theIdentifier)) {
+					return next;
+				}
+			}
+		}
+		return null;
+	}
 
 	@Override
 	public Class<Patient> getResourceType() {
@@ -22,6 +67,6 @@ public class DummyPatientResourceProvider implements IResourceProvider<Patient> 
 
 	@Override
 	public Patient getResourceById(long theId) {
-		return null;
+		return myIdToPatient.get(theId);
 	}
 }

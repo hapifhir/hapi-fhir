@@ -39,6 +39,10 @@ public class FhirContext {
 		return myClassToElementDefinition;
 	}
 
+	public RuntimeResourceDefinition getResourceDefinition(Class<? extends IResource> theResourceType) {
+		return (RuntimeResourceDefinition) myClassToElementDefinition.get(theResourceType);
+	}
+
 	public RuntimeResourceDefinition getResourceDefinition(IResource theResource) {
 		return (RuntimeResourceDefinition) myClassToElementDefinition.get(theResource.getClass());
 	}

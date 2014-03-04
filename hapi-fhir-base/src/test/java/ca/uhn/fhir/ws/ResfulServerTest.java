@@ -1,17 +1,12 @@
 package ca.uhn.fhir.ws;
 
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.*;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import junit.framework.TestCase;
-
+import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
@@ -21,153 +16,115 @@ import org.apache.http.impl.conn.SchemeRegistryFactory;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.junit.Before;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.testutil.RandomServerPortProvider;
 
 /**
  * Created by dsotnikov on 2/25/2014.
  */
-public class ResfulServerTest extends TestCase {
+public class ResfulServerTest {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResfulServerTest.class);
+	private static int ourPort;
+	private static Server ourServer;
+	private static DefaultHttpClient ourClient;
+	private static FhirContext ourCtx;
 
-	@Before
-	public void setUp() throws Exception {
-		/*
-		 * System.setProperty("java.naming.factory.initial",
-		 * "org.apache.naming.java.javaURLContextFactory");
-		 * System.setProperty("java.naming.factory.url.pkgs",
-		 * "org.apache.naming"); InitialContext context = new InitialContext();
-		 * //context.bind("java:comp", "env");
-		 * context.bind(context.composeName("java:comp", "env"),
-		 * "ca.uhn.rest.handlers");
-		 * 
-		 * //Context subcontext = context.createSubcontext("java:comp/env");
-		 * //context.bind("java:comp/env/ca.uhn.rest.handlers", "ca.uhn.test");
-		 * 
-		 * Context env = (Context) new InitialContext().lookup("java:comp/env");
-		 * 
-		 * //System.out.println((String) env.lookup("ca.uhn.rest.handlers"));
-		 */
-	}
-
-	@Test
-	public void testServlet() throws Exception {
-		int port = RandomServerPortProvider.findFreePort();
-		Server server = new Server(port);
+	@BeforeClass
+	public static void beforeClass() throws Exception {
+		ourPort = RandomServerPortProvider.findFreePort();
+		ourServer = new Server(ourPort);
 
 		DummyPatientResourceProvider patientProvider = new DummyPatientResourceProvider();
 
 		ServletHandler proxyHandler = new ServletHandler();
 		ServletHolder servletHolder = new ServletHolder(new DummyRestfulServer(patientProvider));
 		proxyHandler.addServletWithMapping(servletHolder, "/");
-		server.setHandler(proxyHandler);
-		server.start();
+		ourServer.setHandler(proxyHandler);
+		ourServer.start();
 
 		PoolingClientConnectionManager connectionManager = new PoolingClientConnectionManager(SchemeRegistryFactory.createDefault(), 5000, TimeUnit.MILLISECONDS);
-		HttpClient client = new DefaultHttpClient(connectionManager);
-
-		HttpPost httpPost = new HttpPost("http://localhost:" + port + "/foo/bar?bar=123&more=params");
-		httpPost.setEntity(new StringEntity("test", ContentType.create("application/json", "UTF-8")));
-		HttpResponse status = client.execute(httpPost);
-
-		ourLog.info("Response was: {}", status);
-
-		// server.join();
+		ourClient = new DefaultHttpClient(connectionManager);
+		
+		ourCtx = new FhirContext(Patient.class);
+		
 	}
 
+	@AfterClass
+	public static void afterClass() throws Exception {
+		ourServer.stop();
+	}
+	
 	@Test
-	public void testRequiredParamsMissing() {
-		ResourceMethod rm = new ResourceMethod();
-		List<Parameter> methodParams = new ArrayList<Parameter>();
+	public void testSearchByParamIdentifier() throws Exception {
 
-		methodParams.add(new Parameter("firstName", false));
-		methodParams.add(new Parameter("lastName", false));
-		methodParams.add(new Parameter("mrn", true));
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?identifier=urn:hapitest:mrns%7C00001");
+		HttpResponse status = ourClient.execute(httpGet);
 
-		rm.setParameters(methodParams);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		ourLog.info("Response was:\n{}", responseContent);
+		
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		Bundle bundle = ourCtx.newXmlParser().parseBundle(responseContent);
+		
+		assertEquals(1, bundle.getEntries().size());
+		
+		Patient patient = (Patient)bundle.getEntries().get(0).getResource();
+		assertEquals("PatientOne", patient.getName().get(0).getGiven().get(0).getValue());
 
-		Set<String> inputParams = new HashSet<String>();
-		inputParams.add("firstName");
-		inputParams.add("lastName");
 
-		assertEquals(false, rm.matches(inputParams)); // False
 	}
-
+	
 	@Test
-	public void testRequiredParamsOnly() {
-		ResourceMethod rm = new ResourceMethod();
-		List<Parameter> methodParams = new ArrayList<Parameter>();
+	public void testGetById() throws Exception {
 
-		methodParams.add(new Parameter("firstName", false));
-		methodParams.add(new Parameter("lastName", false));
-		methodParams.add(new Parameter("mrn", true));
+//		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/1");
+//		httpPost.setEntity(new StringEntity("test", ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
+		HttpResponse status = ourClient.execute(httpGet);
 
-		rm.setParameters(methodParams);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		ourLog.debug("Response was:\n{}", responseContent);
+		
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		Patient patient = (Patient) ourCtx.newXmlParser().parseResource(responseContent);
+		assertEquals("PatientOne", patient.getName().get(0).getGiven().get(0).getValue());
 
-		Set<String> inputParams = new HashSet<String>();
-		inputParams.add("mrn");
-		assertEquals(true, rm.matches(inputParams)); // True
+		/*
+		 * Different ID
+		 */
+		
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/2");
+		status = ourClient.execute(httpGet);
+
+		responseContent = IOUtils.toString(status.getEntity().getContent());
+		ourLog.debug("Response was:\n{}", responseContent);
+		
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		patient = (Patient) ourCtx.newXmlParser().parseResource(responseContent);
+		assertEquals("PatientTwo", patient.getName().get(0).getGiven().get(0).getValue());
+
+		/*
+		 * Bad ID
+		 */
+		
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/9999999");
+		status = ourClient.execute(httpGet);
+
+		responseContent = IOUtils.toString(status.getEntity().getContent());
+		ourLog.debug("Response was:\n{}", responseContent);
+		
+		assertEquals(404, status.getStatusLine().getStatusCode());
+
 	}
 
-	@Test
-	public void testMixedParams() {
-		ResourceMethod rm = new ResourceMethod();
-		List<Parameter> methodParams = new ArrayList<Parameter>();
 
-		methodParams.add(new Parameter("firstName", false));
-		methodParams.add(new Parameter("lastName", false));
-		methodParams.add(new Parameter("mrn", true));
-
-		rm.setParameters(methodParams);
-
-		Set<String> inputParams = new HashSet<String>();
-		inputParams.add("firstName");
-		inputParams.add("mrn");
-
-		assertEquals(true, rm.matches(inputParams)); // True
-	}
-
-	@Test
-	public void testAllParams() {
-		ResourceMethod rm = new ResourceMethod();
-		List<Parameter> methodParams = new ArrayList<Parameter>();
-
-		methodParams.add(new Parameter("firstName", false));
-		methodParams.add(new Parameter("lastName", false));
-		methodParams.add(new Parameter("mrn", true));
-
-		rm.setParameters(methodParams);
-
-		Set<String> inputParams = new HashSet<String>();
-		inputParams.add("firstName");
-		inputParams.add("lastName");
-		inputParams.add("mrn");
-
-		assertEquals(true, rm.matches(inputParams)); // True
-	}
-
-	@Test
-	public void testAllParamsWithExtra() {
-		ResourceMethod rm = new ResourceMethod();
-		List<Parameter> methodParams = new ArrayList<Parameter>();
-
-		methodParams.add(new Parameter("firstName", false));
-		methodParams.add(new Parameter("lastName", false));
-		methodParams.add(new Parameter("mrn", true));
-
-		rm.setParameters(methodParams);
-
-		Set<String> inputParams = new HashSet<String>();
-		inputParams.add("firstName");
-		inputParams.add("lastName");
-		inputParams.add("mrn");
-		inputParams.add("foo");
-
-		assertEquals(false, rm.matches(inputParams)); // False
-	}
 
 }

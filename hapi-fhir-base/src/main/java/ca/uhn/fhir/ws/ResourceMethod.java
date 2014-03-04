@@ -1,12 +1,21 @@
 package ca.uhn.fhir.ws;
 
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.ws.exceptions.InternalErrorException;
+import ca.uhn.fhir.ws.exceptions.InvalidRequestException;
+import ca.uhn.fhir.ws.exceptions.MethodNotFoundException;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * Created by dsotnikov on 2/25/2014.
@@ -21,9 +30,10 @@ public class ResourceMethod {
         DELETE
     }
 
-    RequestType requestType;
-    List<Parameter> parameters;
-    Method method;
+    private RequestType requestType;
+    private List<Parameter> parameters;
+    private Method method;
+	private Resource resource;
 
     public ResourceMethod() {}
 
@@ -36,7 +46,7 @@ public class ResourceMethod {
         this.resourceType = resourceType;
     }
 
-    public Class getResourceType() throws IllegalAccessException, InstantiationException {
+    public Class getResourceType() {
         return resourceType.getClass();
     }
 
@@ -76,19 +86,44 @@ public class ResourceMethod {
         return methodParamsTemp.containsAll(parameterNames);
     }
 
-    public IResource invoke(Map<String,String> parameterValues) {
+    public List<IResource> invoke(IResourceProvider theResourceProvider, Map<String,String[]> parameterValues) throws InvalidRequestException, InternalErrorException {
         Object[] params = new Object[parameters.size()];
         for (int i = 0; i < parameters.size(); i++) {
             Parameter param = parameters.get(i);
-            String value = parameterValues.get(param.getName());
-            if (null != value) {
-                //TODO
-                //param.getType().newInstance().getClass();
+            String[] value = parameterValues.get(param.getName());
+            if (value == null || value.length == 0 || StringUtils.isBlank(value[0])) {
+            	continue;
             }
-            else {
-                params[i] = null;
+            if (value.length > 1) {
+            	throw new InvalidRequestException("Multiple values specified for parameter: " + param.getName());
             }
+            params[i] = param.parse(value[0]);
         }
-        return null;
+        
+		Object response;
+        try {
+			response = this.method.invoke(theResourceProvider, params);
+		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+			throw new InternalErrorException(e);
+		}
+        
+        if (response == null) {
+        	return Collections.emptyList();
+        }else if (response instanceof IResource) {
+        	return Collections.singletonList((IResource)response);
+        } else if (response instanceof Collection) {
+        	List<IResource> retVal = new ArrayList<>();
+        	for (Object next : ((Collection<?>)response)) {
+				retVal.add((IResource) next);
+			}
+        	return retVal;
+        } else {
+        	throw new InternalErrorException("Unexpected return type: " + response.getClass().getCanonicalName());
+        }
+        
     }
+
+	public void setResource(Resource theResource) {
+		this.resource = theResource;
+	}
 }

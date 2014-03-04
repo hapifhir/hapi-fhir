@@ -18,7 +18,8 @@ import java.util.Map;
 public class Util {
     public static Map<String, String> getQueryParams(String query) throws UnsupportedEncodingException {
         try {
-
+        	
+        	
             Map<String, String> params = new HashMap<String, String>();
             for (String param : query.split("&")) {
                 String[] pair = param.split("=");
@@ -33,13 +34,6 @@ public class Util {
         }
     }
 
-    public static String getResourceName(Method method) {
-        ResourceName resourceNameAnnotation = method.getAnnotation(ResourceName.class);
-        if (null != resourceNameAnnotation) {
-            return resourceNameAnnotation.value();
-        }
-        return null;
-    }
 
     public static List<Parameter> getResourceParameters(Method method) {
         List<Parameter> parameters = new ArrayList<Parameter>();

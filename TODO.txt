@@ -1,4 +1,4 @@
 
  * Implement JSON parser and encoder
  * Implement strategy for narrative generation
- 
+ * Fix XML encoder to not encode empty elements

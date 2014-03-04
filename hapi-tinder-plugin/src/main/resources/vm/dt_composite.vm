@@ -31,6 +31,41 @@ public class ${className}Dt extends BaseElement implements ICompositeDatatype {
 #childAccessors( $children )
 #childResourceBlocks($resourceBlockChildren)
 
+#########################
+### Type-specific methods
+#########################
+#if ( ${className} == "Identifier" )
+	/**
+	 * Returns true if <code>this</code> identifier has the same {@link IdentifierDt#getValue() value}
+	 * and {@link IdentifierDt#getSystem() system} (as compared by simple equals comparison).
+	 * Does not compare other values (e.g. {@link IdentifierDt#getUse() use}) or any extensions. 
+	 */
+	public boolean matchesSystemAndValue(IdentifierDt theIdentifier) {
+		if (theIdentifier == null) {
+			return false;
+		}
+		return getValue().equals(theIdentifier.getValue()) && getSystem().equals(theIdentifier.getSystem());
+	}
+
+	/**
+	 * Sets the value of this <code>IdentifierDt</code> using the <b>token</b> format. This 
+	 * format is used in HTTP queries as a parameter format.
+	 * 
+	 * @see See FHIR specification 
+	 *    <a href="http://www.hl7.org/implement/standards/fhir/search.html#ptypes">2.2.2 Search Parameter Types</a>
+	 *    for information on the <b>token</b> format
+	 */
+	public void setValueAsQueryToken(String theParameter) {
+		int barIndex = theParameter.indexOf('|');
+		if (barIndex != -1) {
+			setSystem(new UriDt(theParameter.substring(0, barIndex)));
+			setValue(theParameter.substring(barIndex + 1));
+		} else {
+			setValue(theParameter);
+		}
+	}	
+#end
+
 #childExtensionTypes( $childExtensionTypes )
 
 }
