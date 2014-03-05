@@ -41,9 +41,31 @@ public abstract class RestfulServer extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
 
+	private Map<Class<? extends IResource>, IResourceProvider<?>> myTypeToProvider = new HashMap<Class<? extends IResource>, IResourceProvider<?>>();
+
 	private FhirContext myFhirContext;
 
-	private Map<Class<? extends IResource>, IResourceProvider<?>> myTypeToProvider = new HashMap<Class<? extends IResource>, IResourceProvider<?>>();
+	public abstract Collection<IResourceProvider<?>> getResourceProviders();
+
+	@Override
+	public void init() throws ServletException {
+		try {
+			ourLog.info("Initializing HAPI FHIR restful server");
+
+			Collection<IResourceProvider<?>> resourceProvider = getResourceProviders();
+			for (IResourceProvider<?> nextProvider : resourceProvider) {
+				if (myTypeToProvider.containsKey(nextProvider.getResourceType())) {
+					throw new ServletException("Multiple providers for type: " + nextProvider.getResourceType().getCanonicalName());
+				}
+				myTypeToProvider.put(nextProvider.getResourceType(), nextProvider);
+			}
+
+			ourLog.info("Got {} resource providers",myTypeToProvider.size());
+			
+			myFhirContext = new FhirContext(myTypeToProvider.keySet());
+			
+//			findResourceMethods(nextProvider.getClass());
+>>>>>>> b15504ab6af00727419d4888cd3a1c5215f5b5e3:hapi-fhir-base/src/main/java/ca/uhn/fhir/ws/RestfulServer.java
 
 	// map of request handler resources keyed by resource name
 	private Map<String, Resource> resources = new HashMap<String, Resource>();

@@ -96,6 +96,10 @@ class ModelScanner {
 		ourLog.info("Done scanning FHIR library, found {} model entries", myClassToElementDefinitions.size());
 	}
 
+	public ModelScanner(Class<ResourceWithExtensionsA> theClass) {
+		// TODO Auto-generated constructor stub
+	}
+
 	public RuntimeChildUndeclaredExtensionDefinition getRuntimeChildUndeclaredExtensionDefinition() {
 		return myRuntimeChildUndeclaredExtensionDefinition;
 	}
