@@ -41,9 +41,36 @@ public abstract class RestfulServer extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
 
+<<<<<<< HEAD:hapi-fhir-base/src/main/java/ca/uhn/fhir/server/RestfulServer.java
 	private FhirContext myFhirContext;
 
 	private Map<Class<? extends IResource>, IResourceProvider<?>> myTypeToProvider = new HashMap<Class<? extends IResource>, IResourceProvider<?>>();
+=======
+	private Map<Class<? extends IResource>, IResourceProvider<?>> myTypeToProvider = new HashMap<Class<? extends IResource>, IResourceProvider<?>>();
+
+	private FhirContext myFhirContext;
+
+	public abstract Collection<IResourceProvider<?>> getResourceProviders();
+
+	@Override
+	public void init() throws ServletException {
+		try {
+			ourLog.info("Initializing HAPI FHIR restful server");
+
+			Collection<IResourceProvider<?>> resourceProvider = getResourceProviders();
+			for (IResourceProvider<?> nextProvider : resourceProvider) {
+				if (myTypeToProvider.containsKey(nextProvider.getResourceType())) {
+					throw new ServletException("Multiple providers for type: " + nextProvider.getResourceType().getCanonicalName());
+				}
+				myTypeToProvider.put(nextProvider.getResourceType(), nextProvider);
+			}
+
+			ourLog.info("Got {} resource providers",myTypeToProvider.size());
+			
+			myFhirContext = new FhirContext(myTypeToProvider.keySet());
+			
+//			findResourceMethods(nextProvider.getClass());
+>>>>>>> b15504ab6af00727419d4888cd3a1c5215f5b5e3:hapi-fhir-base/src/main/java/ca/uhn/fhir/ws/RestfulServer.java
 
 	// map of request handler resources keyed by resource name
 	private Map<String, Resource> resources = new HashMap<String, Resource>();
@@ -68,7 +95,7 @@ public abstract class RestfulServer extends HttpServlet {
 		rm.setMethod(method);
 		rm.setResourceType(method.getReturnType());
 		rm.setParameters(Util.getResourceParameters(method));
-
+		
 		resource.addMethod(rm);
 		return true;
 	}
@@ -104,11 +131,11 @@ public abstract class RestfulServer extends HttpServlet {
 
 		Class<? extends IResource> resourceType = theProvider.getResourceType();
 		RuntimeResourceDefinition definition = myFhirContext.getResourceDefinition(resourceType);
-
-		Resource r = new Resource();
-		r.setResourceProvider(theProvider);
-		r.setResourceName(definition.getName());
-		resources.put(definition.getName(), r);
+		
+			Resource r = new Resource();
+			r.setResourceProvider(theProvider);
+			r.setResourceName(definition.getName());
+			resources.put(definition.getName(), r);
 
 		Class<?> clazz = theProvider.getClass();
 		for (Method m : clazz.getDeclaredMethods()) {
@@ -131,7 +158,7 @@ public abstract class RestfulServer extends HttpServlet {
 
 			Map<String, String[]> params = new HashMap<String, String[]>(request.getParameterMap());
 			EncodingUtil responseEncoding = determineResponseEncoding(params);
-
+			
 			StringTokenizer tok = new StringTokenizer(request.getRequestURI(), "/");
 			if (!tok.hasMoreTokens()) {
 				throw new MethodNotFoundException("No resource name specified");
@@ -142,7 +169,7 @@ public abstract class RestfulServer extends HttpServlet {
 			if (resourceBinding == null) {
 				throw new MethodNotFoundException("Unknown resource type: " + resourceBinding);
 			}
-
+			
 			if (tok.hasMoreTokens()) {
 				String identityString = tok.nextToken();
 				try {
@@ -151,7 +178,7 @@ public abstract class RestfulServer extends HttpServlet {
 					throw new NumberFormatException("Invalid identity token: " + identity);
 				}
 			}
-
+						
 			if (identity != null && !tok.hasMoreTokens()) {
 				if (params == null || params.isEmpty()) {
 					IResource resource = resourceBinding.getResourceProvider().getResourceById(identity);
@@ -162,24 +189,24 @@ public abstract class RestfulServer extends HttpServlet {
 					return;
 				}
 			}
-
+			
 			ResourceMethod resourceMethod = resourceBinding.getMethod(params.keySet());
 			if (null == resourceMethod) {
 				throw new MethodNotFoundException("No resource method available for the supplied parameters " + params);
 			}
-
+			
 			List<IResource> result = resourceMethod.invoke(resourceBinding.getResourceProvider(), params);
 			streamResponseAsBundle(response, result, responseEncoding);
-			// resourceMethod.get
-
+//			resourceMethod.get
+		
 		} catch (AbstractResponseException e) {
-
+			
 			response.setStatus(e.getStatusCode());
 			response.setContentType("text/plain");
 			response.setCharacterEncoding("UTF-8");
 			response.getWriter().append(e.getMessage());
 			response.getWriter().close();
-
+			
 		} catch (Throwable t) {
 			// TODO: handle this better
 			ourLog.error("Failed to process invocation", t);
@@ -201,14 +228,15 @@ public abstract class RestfulServer extends HttpServlet {
 				myTypeToProvider.put(nextProvider.getResourceType(), nextProvider);
 			}
 
-			ourLog.info("Got {} resource providers", myTypeToProvider.size());
-
+			ourLog.info("Got {} resource providers",myTypeToProvider.size());
+			
 			myFhirContext = new FhirContext(myTypeToProvider.keySet());
 
 			for (IResourceProvider<?> provider : myTypeToProvider.values()) {
 				findResourceMethods(provider);
 			}
 
+			
 		} catch (Exception ex) {
 			ourLog.error("An error occurred while loading request handlers!", ex);
 			throw new ServletException("Failed to initialize FHIR Restful server", ex);
@@ -219,21 +247,21 @@ public abstract class RestfulServer extends HttpServlet {
 		theHttpResponse.setStatus(200);
 		theHttpResponse.setContentType(Constants.CT_FHIR_XML);
 		theHttpResponse.setCharacterEncoding("UTF-8");
-
+		
 		Bundle bundle = new Bundle();
 		bundle.getAuthorName().setValue(getClass().getCanonicalName());
 		bundle.getId().setValue(UUID.randomUUID().toString());
 		bundle.getPublished().setToCurrentTimeInLocalTimeZone();
-
+		
 		for (IResource next : theResult) {
 			BundleEntry entry = new BundleEntry();
 			bundle.getEntries().add(entry);
-
+			
 			entry.setResource(next);
 		}
-
+		
 		bundle.getTotalResults().setValue(theResult.size());
-
+		
 		PrintWriter writer = theHttpResponse.getWriter();
 		myFhirContext.newXmlParser().encodeBundleToWriter(bundle, writer);
 		writer.close();
@@ -244,15 +272,16 @@ public abstract class RestfulServer extends HttpServlet {
 		theHttpResponse.setStatus(200);
 		theHttpResponse.setContentType(Constants.CT_FHIR_XML);
 		theHttpResponse.setCharacterEncoding("UTF-8");
-
+		
 		PrintWriter writer = theHttpResponse.getWriter();
 		myFhirContext.newXmlParser().encodeResourceToWriter(theResource, writer);
 		writer.close();
-
+		
 	}
 
 	/**
-	 * Recursive method used to find all classes in a given directory and subdirs.
+	 * Recursive method used to find all classes in a given directory and
+	 * subdirs.
 	 * 
 	 * @param directory
 	 *            The base directory
