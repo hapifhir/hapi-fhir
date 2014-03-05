@@ -21,6 +21,7 @@ import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.model.primitive.*;
 import ca.uhn.fhir.model.dstu.valueset.*;
+import ca.uhn.fhir.model.dstu.resource.*;
 
 /**
  * HAPI/FHIR <b>Quantity</b> Datatype
@@ -196,7 +197,18 @@ public class QuantityDt extends BaseElement implements ICompositeDatatype {
 		mySystem = theValue;
 	}
 
-  
+ 	/**
+	 * Sets the value(s) for <b>system</b> (System that defines coded unit form)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The identification of the system that provides the coded form of the unit
+     * </p> 
+	 */
+	public void setSystem( String theUri) {
+		mySystem = new UriDt(theUri); 
+	}
+ 
 	/**
 	 * Gets the value(s) for <b>code</b> (Coded form of the unit).
 	 * creating it if it does
@@ -227,6 +239,7 @@ public class QuantityDt extends BaseElement implements ICompositeDatatype {
 	}
 
   
+
 
 
 }

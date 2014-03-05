@@ -3,6 +3,8 @@ package ca.uhn.fhir.model.primitive;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import org.apache.commons.lang3.StringUtils;
+
 import ca.uhn.fhir.model.api.BaseElement;
 import ca.uhn.fhir.model.api.IPrimitiveDatatype;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
@@ -55,8 +57,13 @@ public class UriDt  extends BaseElement implements IPrimitiveDatatype<URI> {
 		if (myValue == null) {
 			return null;
 		} else {
-			return myValue.toString();
+			return myValue.toASCIIString();
 		}
+	}
+
+	@Override
+	public String toString() {
+		return getValueAsString();
 	}
 
 	@Override
@@ -67,6 +74,15 @@ public class UriDt  extends BaseElement implements IPrimitiveDatatype<URI> {
 		return result;
 	}
 
+	/**
+	 * Compares the given string to the string representation of this URI. In many cases it is preferable
+	 * to use this instead of the standard {@link #equals(Object)} method, since that method returns <code>false</code>
+	 * unless it is passed an instance of {@link UriDt}
+	 */
+	public boolean equals(String theString) {
+		return StringUtils.equals(getValueAsString(), theString);
+	}
+	
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)

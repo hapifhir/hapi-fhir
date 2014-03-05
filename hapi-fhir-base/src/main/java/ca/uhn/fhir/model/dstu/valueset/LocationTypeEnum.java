@@ -8,68 +8,52 @@ import java.util.Map;
 public enum LocationTypeEnum {
 
 	/**
-	 * bu
-	 * Building
-	 *
-	 * 
+	 * Display: <b>Building</b><br/>
+	 * Code Value: <b>bu</b>
 	 */
-	BU("bu"),
+	BUILDING("bu"),
 	
 	/**
-	 * wi
-	 * Wing
-	 *
-	 * 
+	 * Display: <b>Wing</b><br/>
+	 * Code Value: <b>wi</b>
 	 */
-	WI("wi"),
+	WING("wi"),
 	
 	/**
-	 * co
-	 * Corridor
-	 *
-	 * 
+	 * Display: <b>Corridor</b><br/>
+	 * Code Value: <b>co</b>
 	 */
-	CO("co"),
+	CORRIDOR("co"),
 	
 	/**
-	 * ro
-	 * Room
-	 *
-	 * 
+	 * Display: <b>Room</b><br/>
+	 * Code Value: <b>ro</b>
 	 */
-	RO("ro"),
+	ROOM("ro"),
 	
 	/**
-	 * ve
-	 * Vehicle
-	 *
-	 * 
+	 * Display: <b>Vehicle</b><br/>
+	 * Code Value: <b>ve</b>
 	 */
-	VE("ve"),
+	VEHICLE("ve"),
 	
 	/**
-	 * ho
-	 * House
-	 *
-	 * 
+	 * Display: <b>House</b><br/>
+	 * Code Value: <b>ho</b>
 	 */
-	HO("ho"),
+	HOUSE("ho"),
 	
 	/**
-	 * ca
-	 * Cabinet
-	 *
-	 * 
+	 * Display: <b>Cabinet</b><br/>
+	 * Code Value: <b>ca</b>
 	 */
-	CA("ca"),
+	CABINET("ca"),
 	
 	/**
-	 * rd
-	 * Road
-	 *
-	 * 
+	 * Display: <b>Road</b><br/>
+	 * Code Value: <b>rd</b>
 	 */
-	RD("rd"),
+	ROAD("rd"),
 	
 	;
 	

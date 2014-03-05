@@ -8,32 +8,28 @@ import java.util.Map;
 public enum ContactSystemEnum {
 
 	/**
-	 * phone
-	 * 
+	 * Code Value: <b>phone</b>
 	 *
 	 * The value is a telephone number used for voice calls. Use of full international numbers starting with + is recommended to enable automatic dialing support but not required.
 	 */
 	PHONE("phone"),
 	
 	/**
-	 * fax
-	 * 
+	 * Code Value: <b>fax</b>
 	 *
 	 * The value is a fax machine. Use of full international numbers starting with + is recommended to enable automatic dialing support but not required.
 	 */
 	FAX("fax"),
 	
 	/**
-	 * email
-	 * 
+	 * Code Value: <b>email</b>
 	 *
 	 * The value is an email address.
 	 */
 	EMAIL("email"),
 	
 	/**
-	 * url
-	 * 
+	 * Code Value: <b>url</b>
 	 *
 	 * The value is a url. This is intended for various personal contacts including blogs, Twitter, Facebook, etc. Do not use for email addresses.
 	 */

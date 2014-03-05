@@ -17,7 +17,6 @@
 package ca.uhn.fhir.model.dstu.resource;
 
 import java.util.*;
-
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.model.primitive.*;
@@ -40,6 +39,77 @@ import ca.uhn.fhir.model.dstu.valueset.*;
  */
 @ResourceDef(name="Medication")
 public class Medication extends BaseResource implements IResource {
+
+	/**
+	 * Search parameter constant for <b>code</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Medication.code</b><br/>
+	 * </p>
+	 */
+	public static final String SP_CODE = "code";
+
+	/**
+	 * Search parameter constant for <b>name</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>string</b><br/>
+	 * Path: <b>Medication.name</b><br/>
+	 * </p>
+	 */
+	public static final String SP_NAME = "name";
+
+	/**
+	 * Search parameter constant for <b>manufacturer</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>Medication.manufacturer</b><br/>
+	 * </p>
+	 */
+	public static final String SP_MANUFACTURER = "manufacturer";
+
+	/**
+	 * Search parameter constant for <b>form</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Medication.product.form</b><br/>
+	 * </p>
+	 */
+	public static final String SP_FORM = "form";
+
+	/**
+	 * Search parameter constant for <b>ingredient</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>Medication.product.ingredient.item</b><br/>
+	 * </p>
+	 */
+	public static final String SP_INGREDIENT = "ingredient";
+
+	/**
+	 * Search parameter constant for <b>container</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Medication.package.container</b><br/>
+	 * </p>
+	 */
+	public static final String SP_CONTAINER = "container";
+
+	/**
+	 * Search parameter constant for <b>content</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>Medication.package.content.item</b><br/>
+	 * </p>
+	 */
+	public static final String SP_CONTENT = "content";
+
 
 	@Child(name="name", type=StringDt.class, order=0, min=0, max=1)	
 	private StringDt myName;

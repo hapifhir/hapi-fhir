@@ -8,56 +8,49 @@ import java.util.Map;
 public enum SearchParamTypeEnum {
 
 	/**
-	 * number
-	 * 
+	 * Code Value: <b>number</b>
 	 *
 	 * Search parameter SHALL be a number (a whole number, or a decimal).
 	 */
 	NUMBER("number"),
 	
 	/**
-	 * date
-	 * 
+	 * Code Value: <b>date</b>
 	 *
 	 * Search parameter is on a date/time. The date format is the standard XML format, though other formats may be supported.
 	 */
 	DATE("date"),
 	
 	/**
-	 * string
-	 * 
+	 * Code Value: <b>string</b>
 	 *
 	 * Search parameter is a simple string, like a name part. Search is case-insensitive and accent-insensitive. May match just the start of a string. String parameters may contain spaces.
 	 */
 	STRING("string"),
 	
 	/**
-	 * token
-	 * 
+	 * Code Value: <b>token</b>
 	 *
 	 * Search parameter on a coded element or identifier. May be used to search through the text, displayname, code and code/codesystem (for codes) and label, system and key (for identifier). Its value is either a string or a pair of namespace and value, separated by a "|", depending on the modifier used.
 	 */
 	TOKEN("token"),
 	
 	/**
-	 * reference
-	 * 
+	 * Code Value: <b>reference</b>
 	 *
 	 * A reference to another resource.
 	 */
 	REFERENCE("reference"),
 	
 	/**
-	 * composite
-	 * 
+	 * Code Value: <b>composite</b>
 	 *
 	 * A composite search parameter that combines a search on two values together.
 	 */
 	COMPOSITE("composite"),
 	
 	/**
-	 * quantity
-	 * 
+	 * Code Value: <b>quantity</b>
 	 *
 	 * A search parameter that searches on a quantity.
 	 */

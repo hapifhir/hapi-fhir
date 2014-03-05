@@ -40,6 +40,87 @@ import ca.uhn.fhir.model.dstu.valueset.*;
 @ResourceDef(name="Location")
 public class Location extends BaseResource implements IResource {
 
+	/**
+	 * Search parameter constant for <b>identifier</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Location.identifier</b><br/>
+	 * </p>
+	 */
+	public static final String SP_IDENTIFIER = "identifier";
+
+	/**
+	 * Search parameter constant for <b>name</b>
+	 * <p>
+	 * Description: <b>A (portion of the) name of the location</b><br/>
+	 * Type: <b>string</b><br/>
+	 * Path: <b>Location.name</b><br/>
+	 * </p>
+	 */
+	public static final String SP_NAME = "name";
+
+	/**
+	 * Search parameter constant for <b>type</b>
+	 * <p>
+	 * Description: <b>A code for the type of location</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Location.type</b><br/>
+	 * </p>
+	 */
+	public static final String SP_TYPE = "type";
+
+	/**
+	 * Search parameter constant for <b>address</b>
+	 * <p>
+	 * Description: <b>A (part of the) address of the location</b><br/>
+	 * Type: <b>string</b><br/>
+	 * Path: <b>Location.address</b><br/>
+	 * </p>
+	 */
+	public static final String SP_ADDRESS = "address";
+
+	/**
+	 * Search parameter constant for <b>status</b>
+	 * <p>
+	 * Description: <b>Searches for locations with a specific kind of status</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Location.status</b><br/>
+	 * </p>
+	 */
+	public static final String SP_STATUS = "status";
+
+	/**
+	 * Search parameter constant for <b>partof</b>
+	 * <p>
+	 * Description: <b>The location of which this location is a part</b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>Location.partOf</b><br/>
+	 * </p>
+	 */
+	public static final String SP_PARTOF = "partof";
+
+	/**
+	 * Search parameter constant for <b>near</b>
+	 * <p>
+	 * Description: <b>The coordinates expressed as [lat],[long] (using KML, see notes) to find locations near to (servers may search using a square rather than a circle for efficiency)</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b></b><br/>
+	 * </p>
+	 */
+	public static final String SP_NEAR = "near";
+
+	/**
+	 * Search parameter constant for <b>near-distance</b>
+	 * <p>
+	 * Description: <b>A distance quantity to limit the near search to locations within a specific distance</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b></b><br/>
+	 * </p>
+	 */
+	public static final String SP_NEAR_DISTANCE = "near-distance";
+
+
 	@Child(name="identifier", type=IdentifierDt.class, order=0, min=0, max=1)	
 	private IdentifierDt myIdentifier;
 	

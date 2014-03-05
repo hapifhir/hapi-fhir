@@ -40,6 +40,117 @@ import ca.uhn.fhir.model.dstu.valueset.*;
 @ResourceDef(name="ValueSet")
 public class ValueSet extends BaseResource implements IResource {
 
+	/**
+	 * Search parameter constant for <b>identifier</b>
+	 * <p>
+	 * Description: <b>The identifier of the value set</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>ValueSet.identifier</b><br/>
+	 * </p>
+	 */
+	public static final String SP_IDENTIFIER = "identifier";
+
+	/**
+	 * Search parameter constant for <b>version</b>
+	 * <p>
+	 * Description: <b>The version identifier of the value set</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>ValueSet.version</b><br/>
+	 * </p>
+	 */
+	public static final String SP_VERSION = "version";
+
+	/**
+	 * Search parameter constant for <b>name</b>
+	 * <p>
+	 * Description: <b>The name of the value set</b><br/>
+	 * Type: <b>string</b><br/>
+	 * Path: <b>ValueSet.name</b><br/>
+	 * </p>
+	 */
+	public static final String SP_NAME = "name";
+
+	/**
+	 * Search parameter constant for <b>publisher</b>
+	 * <p>
+	 * Description: <b>Name of the publisher of the value set</b><br/>
+	 * Type: <b>string</b><br/>
+	 * Path: <b>ValueSet.publisher</b><br/>
+	 * </p>
+	 */
+	public static final String SP_PUBLISHER = "publisher";
+
+	/**
+	 * Search parameter constant for <b>description</b>
+	 * <p>
+	 * Description: <b>Text search in the description of the value set</b><br/>
+	 * Type: <b>string</b><br/>
+	 * Path: <b>ValueSet.description</b><br/>
+	 * </p>
+	 */
+	public static final String SP_DESCRIPTION = "description";
+
+	/**
+	 * Search parameter constant for <b>status</b>
+	 * <p>
+	 * Description: <b>The status of the value set</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>ValueSet.status</b><br/>
+	 * </p>
+	 */
+	public static final String SP_STATUS = "status";
+
+	/**
+	 * Search parameter constant for <b>date</b>
+	 * <p>
+	 * Description: <b>The value set publication date</b><br/>
+	 * Type: <b>date</b><br/>
+	 * Path: <b>ValueSet.date</b><br/>
+	 * </p>
+	 */
+	public static final String SP_DATE = "date";
+
+	/**
+	 * Search parameter constant for <b>system</b>
+	 * <p>
+	 * Description: <b>The system for any codes defined by this value set</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>ValueSet.define.system</b><br/>
+	 * </p>
+	 */
+	public static final String SP_SYSTEM = "system";
+
+	/**
+	 * Search parameter constant for <b>code</b>
+	 * <p>
+	 * Description: <b>A code defined in the value set</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>ValueSet.define.concept.code</b><br/>
+	 * </p>
+	 */
+	public static final String SP_CODE = "code";
+
+	/**
+	 * Search parameter constant for <b>reference</b>
+	 * <p>
+	 * Description: <b>A code system included or excluded in the value set or an imported value set</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>ValueSet.compose.include.system</b><br/>
+	 * </p>
+	 */
+	public static final String SP_REFERENCE = "reference";
+
+	/**
+	 * Search parameter constant for <b>!restricts</b>
+	 * <p>
+	 * Description: <b>A value set listed in the restricts list</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>ValueSet.compose.restricts</b><br/>
+	 * </p>
+	 */
+	public static final String SP_RESTRICTS = "!restricts";
+
+
 	@Child(name="identifier", type=StringDt.class, order=0, min=0, max=1)	
 	private StringDt myIdentifier;
 	
@@ -646,7 +757,18 @@ public class ValueSet extends BaseResource implements IResource {
 		mySystem = theValue;
 	}
 
-  
+ 	/**
+	 * Sets the value(s) for <b>system</b> (URI to identify the code system)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * 
+     * </p> 
+	 */
+	public void setSystem( String theUri) {
+		mySystem = new UriDt(theUri); 
+	}
+ 
 	/**
 	 * Gets the value(s) for <b>version</b> (Version of this system).
 	 * creating it if it does
@@ -1003,7 +1125,21 @@ public class ValueSet extends BaseResource implements IResource {
 		myImport = theValue;
 	}
 
-  
+ 	/**
+	 * Sets the value(s) for <b>import</b> (Import the contents of another value set)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Includes the contents of the referenced value set as a part of the contents of this value set
+     * </p> 
+	 */
+	public void addImport( String theUri) {
+		if (myImport == null) {
+			myImport = new ArrayList<UriDt>();
+		}
+		myImport.add(new UriDt(theUri)); 
+	}
+ 
 	/**
 	 * Gets the value(s) for <b>include</b> (Include one or more codes from a code system).
 	 * creating it if it does
@@ -1119,7 +1255,18 @@ public class ValueSet extends BaseResource implements IResource {
 		mySystem = theValue;
 	}
 
-  
+ 	/**
+	 * Sets the value(s) for <b>system</b> (The system the codes come from)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The code system from which the selected codes come from
+     * </p> 
+	 */
+	public void setSystem( String theUri) {
+		mySystem = new UriDt(theUri); 
+	}
+ 
 	/**
 	 * Gets the value(s) for <b>version</b> (Specific version of the code system referred to).
 	 * creating it if it does
@@ -1517,7 +1664,18 @@ public class ValueSet extends BaseResource implements IResource {
 		mySystem = theValue;
 	}
 
-  
+ 	/**
+	 * Sets the value(s) for <b>system</b> (System value for the code)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * 
+     * </p> 
+	 */
+	public void setSystem( String theUri) {
+		mySystem = new UriDt(theUri); 
+	}
+ 
 	/**
 	 * Gets the value(s) for <b>code</b> (Code - if blank, this is not a choosable code).
 	 * creating it if it does

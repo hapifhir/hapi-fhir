@@ -8,16 +8,14 @@ import java.util.Map;
 public enum MedicationKindEnum {
 
 	/**
-	 * product
-	 * 
+	 * Code Value: <b>product</b>
 	 *
 	 * The medication is a product.
 	 */
 	PRODUCT("product"),
 	
 	/**
-	 * package
-	 * 
+	 * Code Value: <b>package</b>
 	 *
 	 * The medication is a package - a contained group of one of more products.
 	 */

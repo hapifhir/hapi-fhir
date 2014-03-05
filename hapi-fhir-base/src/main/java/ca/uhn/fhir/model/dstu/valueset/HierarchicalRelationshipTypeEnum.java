@@ -8,16 +8,16 @@ import java.util.Map;
 public enum HierarchicalRelationshipTypeEnum {
 
 	/**
-	 * parent
-	 * Parent
+	 * Display: <b>Parent</b><br/>
+	 * Code Value: <b>parent</b>
 	 *
 	 * The target resource is the parent of the focal specimen resource.
 	 */
 	PARENT("parent"),
 	
 	/**
-	 * child
-	 * Child
+	 * Display: <b>Child</b><br/>
+	 * Code Value: <b>child</b>
 	 *
 	 * The target resource is the child of the focal specimen resource.
 	 */

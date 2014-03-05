@@ -8,24 +8,21 @@ import java.util.Map;
 public enum ValueSetStatusEnum {
 
 	/**
-	 * draft
-	 * 
+	 * Code Value: <b>draft</b>
 	 *
 	 * This valueset is still under development.
 	 */
 	DRAFT("draft"),
 	
 	/**
-	 * active
-	 * 
+	 * Code Value: <b>active</b>
 	 *
 	 * This valueset is ready for normal use.
 	 */
 	ACTIVE("active"),
 	
 	/**
-	 * retired
-	 * 
+	 * Code Value: <b>retired</b>
 	 *
 	 * This valueset has been withdrawn or superceded and should no longer be used.
 	 */

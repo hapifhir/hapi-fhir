@@ -8,24 +8,21 @@ import java.util.Map;
 public enum LocationStatusEnum {
 
 	/**
-	 * active
-	 * 
+	 * Code Value: <b>active</b>
 	 *
 	 * The location is operational.
 	 */
 	ACTIVE("active"),
 	
 	/**
-	 * suspended
-	 * 
+	 * Code Value: <b>suspended</b>
 	 *
 	 * The location is temporarily closed.
 	 */
 	SUSPENDED("suspended"),
 	
 	/**
-	 * inactive
-	 * 
+	 * Code Value: <b>inactive</b>
 	 *
 	 * The location is no longer used.
 	 */

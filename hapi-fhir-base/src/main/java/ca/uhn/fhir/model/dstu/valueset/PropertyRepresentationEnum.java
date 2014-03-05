@@ -8,8 +8,7 @@ import java.util.Map;
 public enum PropertyRepresentationEnum {
 
 	/**
-	 * xmlAttr
-	 * 
+	 * Code Value: <b>xmlAttr</b>
 	 *
 	 * In XML, this property is represented as an attribute not an element.
 	 */

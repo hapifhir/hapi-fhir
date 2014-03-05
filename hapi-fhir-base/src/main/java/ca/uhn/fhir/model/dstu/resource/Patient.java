@@ -17,7 +17,6 @@
 package ca.uhn.fhir.model.dstu.resource;
 
 import java.util.*;
-
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.model.primitive.*;
@@ -40,6 +39,157 @@ import ca.uhn.fhir.model.dstu.valueset.*;
  */
 @ResourceDef(name="Patient")
 public class Patient extends BaseResource implements IResource {
+
+	/**
+	 * Search parameter constant for <b>identifier</b>
+	 * <p>
+	 * Description: <b>A patient identifier</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Patient.identifier</b><br/>
+	 * </p>
+	 */
+	public static final String SP_IDENTIFIER = "identifier";
+
+	/**
+	 * Search parameter constant for <b>name</b>
+	 * <p>
+	 * Description: <b>A portion of either family or given name of the patient</b><br/>
+	 * Type: <b>string</b><br/>
+	 * Path: <b>Patient.name</b><br/>
+	 * </p>
+	 */
+	public static final String SP_NAME = "name";
+
+	/**
+	 * Search parameter constant for <b>family</b>
+	 * <p>
+	 * Description: <b>A portion of the family name of the patient</b><br/>
+	 * Type: <b>string</b><br/>
+	 * Path: <b>Patient.name.family</b><br/>
+	 * </p>
+	 */
+	public static final String SP_FAMILY = "family";
+
+	/**
+	 * Search parameter constant for <b>given</b>
+	 * <p>
+	 * Description: <b>A portion of the given name of the patient</b><br/>
+	 * Type: <b>string</b><br/>
+	 * Path: <b>Patient.name.given</b><br/>
+	 * </p>
+	 */
+	public static final String SP_GIVEN = "given";
+
+	/**
+	 * Search parameter constant for <b>phonetic</b>
+	 * <p>
+	 * Description: <b>A portion of either family or given name using some kind of phonetic matching algorithm</b><br/>
+	 * Type: <b>string</b><br/>
+	 * Path: <b></b><br/>
+	 * </p>
+	 */
+	public static final String SP_PHONETIC = "phonetic";
+
+	/**
+	 * Search parameter constant for <b>telecom</b>
+	 * <p>
+	 * Description: <b>The value in any kind of telecom details of the patient</b><br/>
+	 * Type: <b>string</b><br/>
+	 * Path: <b>Patient.telecom</b><br/>
+	 * </p>
+	 */
+	public static final String SP_TELECOM = "telecom";
+
+	/**
+	 * Search parameter constant for <b>address</b>
+	 * <p>
+	 * Description: <b>An address in any kind of address/part of the patient</b><br/>
+	 * Type: <b>string</b><br/>
+	 * Path: <b>Patient.address</b><br/>
+	 * </p>
+	 */
+	public static final String SP_ADDRESS = "address";
+
+	/**
+	 * Search parameter constant for <b>gender</b>
+	 * <p>
+	 * Description: <b>Gender of the patient</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Patient.gender</b><br/>
+	 * </p>
+	 */
+	public static final String SP_GENDER = "gender";
+
+	/**
+	 * Search parameter constant for <b>language</b>
+	 * <p>
+	 * Description: <b>Language code (irrespective of use value)</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Patient.communication</b><br/>
+	 * </p>
+	 */
+	public static final String SP_LANGUAGE = "language";
+
+	/**
+	 * Search parameter constant for <b>birthdate</b>
+	 * <p>
+	 * Description: <b>The patient's date of birth</b><br/>
+	 * Type: <b>date</b><br/>
+	 * Path: <b>Patient.birthDate</b><br/>
+	 * </p>
+	 */
+	public static final String SP_BIRTHDATE = "birthdate";
+
+	/**
+	 * Search parameter constant for <b>provider</b>
+	 * <p>
+	 * Description: <b>The organization at which this person is a patient</b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>Patient.managingOrganization</b><br/>
+	 * </p>
+	 */
+	public static final String SP_PROVIDER = "provider";
+
+	/**
+	 * Search parameter constant for <b>active</b>
+	 * <p>
+	 * Description: <b>Whether the patient record is active</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Patient.active</b><br/>
+	 * </p>
+	 */
+	public static final String SP_ACTIVE = "active";
+
+	/**
+	 * Search parameter constant for <b>animal-species</b>
+	 * <p>
+	 * Description: <b>The species for animal patients</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Patient.animal.species</b><br/>
+	 * </p>
+	 */
+	public static final String SP_ANIMAL_SPECIES = "animal-species";
+
+	/**
+	 * Search parameter constant for <b>animal-breed</b>
+	 * <p>
+	 * Description: <b>The breed for animal patients</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Patient.animal.breed</b><br/>
+	 * </p>
+	 */
+	public static final String SP_ANIMAL_BREED = "animal-breed";
+
+	/**
+	 * Search parameter constant for <b>link</b>
+	 * <p>
+	 * Description: <b>All patients linked to the given patient</b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>Patient.link.other</b><br/>
+	 * </p>
+	 */
+	public static final String SP_LINK = "link";
+
 
 	@Child(name="identifier", type=IdentifierDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)	
 	private List<IdentifierDt> myIdentifier;

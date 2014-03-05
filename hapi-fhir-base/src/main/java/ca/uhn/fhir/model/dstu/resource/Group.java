@@ -17,7 +17,6 @@
 package ca.uhn.fhir.model.dstu.resource;
 
 import java.util.*;
-
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.model.primitive.*;
@@ -40,6 +39,97 @@ import ca.uhn.fhir.model.dstu.valueset.*;
  */
 @ResourceDef(name="Group")
 public class Group extends BaseResource implements IResource {
+
+	/**
+	 * Search parameter constant for <b>type</b>
+	 * <p>
+	 * Description: <b>The type of resources the group contains</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Group.type</b><br/>
+	 * </p>
+	 */
+	public static final String SP_TYPE = "type";
+
+	/**
+	 * Search parameter constant for <b>code</b>
+	 * <p>
+	 * Description: <b>The kind of resources contained</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Group.code</b><br/>
+	 * </p>
+	 */
+	public static final String SP_CODE = "code";
+
+	/**
+	 * Search parameter constant for <b>actual</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Group.actual</b><br/>
+	 * </p>
+	 */
+	public static final String SP_ACTUAL = "actual";
+
+	/**
+	 * Search parameter constant for <b>identifier</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Group.identifier</b><br/>
+	 * </p>
+	 */
+	public static final String SP_IDENTIFIER = "identifier";
+
+	/**
+	 * Search parameter constant for <b>member</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>Group.member</b><br/>
+	 * </p>
+	 */
+	public static final String SP_MEMBER = "member";
+
+	/**
+	 * Search parameter constant for <b>characteristic</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Group.characteristic.code</b><br/>
+	 * </p>
+	 */
+	public static final String SP_CHARACTERISTIC = "characteristic";
+
+	/**
+	 * Search parameter constant for <b>value</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Group.characteristic.value[x]</b><br/>
+	 * </p>
+	 */
+	public static final String SP_VALUE = "value";
+
+	/**
+	 * Search parameter constant for <b>exclude</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Group.characteristic.exclude</b><br/>
+	 * </p>
+	 */
+	public static final String SP_EXCLUDE = "exclude";
+
+	/**
+	 * Search parameter constant for <b>characteristic-value</b>
+	 * <p>
+	 * Description: <b>A composite of both characteristic and value</b><br/>
+	 * Type: <b>composite</b><br/>
+	 * Path: <b>characteristic & value</b><br/>
+	 * </p>
+	 */
+	public static final String SP_CHARACTERISTIC_VALUE = "characteristic-value";
+
 
 	@Child(name="identifier", type=IdentifierDt.class, order=0, min=0, max=1)	
 	private IdentifierDt myIdentifier;

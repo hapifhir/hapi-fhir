@@ -8,24 +8,21 @@ import java.util.Map;
 public enum BindingConformanceEnum {
 
 	/**
-	 * required
-	 * 
+	 * Code Value: <b>required</b>
 	 *
 	 * Only codes in the specified set are allowed.  If the binding is extensible, other codes may be used for concepts not covered by the bound set of codes.
 	 */
 	REQUIRED("required"),
 	
 	/**
-	 * preferred
-	 * 
+	 * Code Value: <b>preferred</b>
 	 *
 	 * For greater interoperability, implementers are strongly encouraged to use the bound set of codes, however alternate codes may be used in derived profiles and implementations if necessary without being considered non-conformant.
 	 */
 	PREFERRED("preferred"),
 	
 	/**
-	 * example
-	 * 
+	 * Code Value: <b>example</b>
 	 *
 	 * The codes in the set are an example to illustrate the meaning of the field. There is no particular preference for its use nor any assertion that the provided values are sufficient to meet implementation needs.
 	 */

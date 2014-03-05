@@ -8,16 +8,14 @@ import java.util.Map;
 public enum AggregationModeEnum {
 
 	/**
-	 * contained
-	 * 
+	 * Code Value: <b>contained</b>
 	 *
 	 * The reference is a local reference to a contained resource.
 	 */
 	CONTAINED("contained"),
 	
 	/**
-	 * referenced
-	 * 
+	 * Code Value: <b>referenced</b>
 	 *
 	 * The reference to to a resource that has to be resolved externally to the resource that includes the reference.
 	 */

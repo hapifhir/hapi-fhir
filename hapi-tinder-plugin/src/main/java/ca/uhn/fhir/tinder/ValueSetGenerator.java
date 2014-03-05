@@ -11,6 +11,7 @@ import java.io.InputStreamReader;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -34,7 +35,7 @@ import ca.uhn.fhir.tinder.model.ValueSetTm.Code;
 public class ValueSetGenerator {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ValueSetGenerator.class);
-	private String myDirectory;
+	private List<String> myResourceValueSetFiles;
 	private Set<ValueSetTm> myMarkedValueSets = new HashSet<ValueSetTm>();
 
 	private Map<String, ValueSetTm> myValueSets = new HashMap<String, ValueSetTm>();
@@ -62,19 +63,29 @@ public class ValueSetGenerator {
 			parseValueSet(nextVs);
 		}
 
-		if (myDirectory != null) {
-			File[] files = new File(myDirectory).listFiles((FilenameFilter) new WildcardFileFilter("*.xml"));
-			for (File file : files) {
+		if (myResourceValueSetFiles != null) {
+			for (String next : myResourceValueSetFiles) {
+				File file = new File(next);
 				ourLog.info("Parsing ValueSet file: {}" + file.getName());
 				vs = IOUtils.toString(new FileReader(file));
 				ValueSet nextVs = (ValueSet) newXmlParser.parseResource(vs);
-				parseValueSet(nextVs);
+				ValueSetTm tm = parseValueSet(nextVs);
+				
+				myMarkedValueSets.add(tm);
 			}
 		}
 
+		// File[] files = new File(myResourceValueSetFiles).listFiles((FilenameFilter) new WildcardFileFilter("*.xml"));
+		// for (File file : files) {
+		// ourLog.info("Parsing ValueSet file: {}" + file.getName());
+		// vs = IOUtils.toString(new FileReader(file));
+		// ValueSet nextVs = (ValueSet) newXmlParser.parseResource(vs);
+		// parseValueSet(nextVs);
+		// }
+
 	}
 
-	private void parseValueSet(ValueSet nextVs) {
+	private ValueSetTm parseValueSet(ValueSet nextVs) {
 		myConceptCount += nextVs.getDefine().getConcept().size();
 		ourLog.info("Parsing ValueSetTm #{} - {} - {} concepts total", myValueSetCount++, nextVs.getName().getValue(), myConceptCount);
 		// output.addConcept(next.getCode().getValue(),
@@ -100,10 +111,12 @@ public class ValueSetGenerator {
 		} else {
 			myValueSets.put(vs.getName(), vs);
 		}
+		
+		return vs;
 	}
 
-	public void setDirectory(String theString) {
-		myDirectory = theString;
+	public void setResourceValueSetFiles(List<String> theString) {
+		myResourceValueSetFiles = theString;
 	}
 
 	public void write(Collection<ValueSetTm> theValueSets, File theOutputDirectory, String thePackageBase) throws IOException {
@@ -177,7 +190,7 @@ public class ValueSetGenerator {
 
 	}
 
-	public void writeMarkedValueSets(File theOutputDirectory, String thePackageBase) throws MojoFailureException  {
+	public void writeMarkedValueSets(File theOutputDirectory, String thePackageBase) throws MojoFailureException {
 		try {
 			write(myMarkedValueSets, theOutputDirectory, thePackageBase);
 		} catch (IOException e) {

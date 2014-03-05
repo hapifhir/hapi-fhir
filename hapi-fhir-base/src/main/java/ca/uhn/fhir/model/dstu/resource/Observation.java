@@ -17,7 +17,6 @@
 package ca.uhn.fhir.model.dstu.resource;
 
 import java.util.*;
-
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.model.primitive.*;
@@ -40,6 +39,157 @@ import ca.uhn.fhir.model.dstu.valueset.*;
  */
 @ResourceDef(name="Observation")
 public class Observation extends BaseResource implements IResource {
+
+	/**
+	 * Search parameter constant for <b>name</b>
+	 * <p>
+	 * Description: <b>The name of the observation type</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Observation.name</b><br/>
+	 * </p>
+	 */
+	public static final String SP_NAME = "name";
+
+	/**
+	 * Search parameter constant for <b>value-quantity</b>
+	 * <p>
+	 * Description: <b>The value of the observation, if the value is a Quantity, or a SampledData (just search on the bounds of the values in sampled data)</b><br/>
+	 * Type: <b>quantity</b><br/>
+	 * Path: <b>Observation.value[x]</b><br/>
+	 * </p>
+	 */
+	public static final String SP_VALUE_QUANTITY = "value-quantity";
+
+	/**
+	 * Search parameter constant for <b>value-concept</b>
+	 * <p>
+	 * Description: <b>The value of the observation, if the value is a CodeableConcept</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Observation.value[x]</b><br/>
+	 * </p>
+	 */
+	public static final String SP_VALUE_CONCEPT = "value-concept";
+
+	/**
+	 * Search parameter constant for <b>value-date</b>
+	 * <p>
+	 * Description: <b>The value of the observation, if the value is a Period</b><br/>
+	 * Type: <b>date</b><br/>
+	 * Path: <b>Observation.value[x]</b><br/>
+	 * </p>
+	 */
+	public static final String SP_VALUE_DATE = "value-date";
+
+	/**
+	 * Search parameter constant for <b>value-string</b>
+	 * <p>
+	 * Description: <b>The value of the observation, if the value is a string, and also searches in CodeableConcept.text</b><br/>
+	 * Type: <b>string</b><br/>
+	 * Path: <b>Observation.value[x]</b><br/>
+	 * </p>
+	 */
+	public static final String SP_VALUE_STRING = "value-string";
+
+	/**
+	 * Search parameter constant for <b>name-value-[x]</b>
+	 * <p>
+	 * Description: <b>Both name and one of the value parameters</b><br/>
+	 * Type: <b>composite</b><br/>
+	 * Path: <b>name & value-[x]</b><br/>
+	 * </p>
+	 */
+	public static final String SP_NAME_VALUE_X = "name-value-[x]";
+
+	/**
+	 * Search parameter constant for <b>date</b>
+	 * <p>
+	 * Description: <b>Obtained date/time. If the obtained element is a period, a date that falls in the period</b><br/>
+	 * Type: <b>date</b><br/>
+	 * Path: <b>Observation.applies[x]</b><br/>
+	 * </p>
+	 */
+	public static final String SP_DATE = "date";
+
+	/**
+	 * Search parameter constant for <b>status</b>
+	 * <p>
+	 * Description: <b>The status of the observation</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Observation.status</b><br/>
+	 * </p>
+	 */
+	public static final String SP_STATUS = "status";
+
+	/**
+	 * Search parameter constant for <b>reliability</b>
+	 * <p>
+	 * Description: <b>The reliability of the observation</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Observation.reliability</b><br/>
+	 * </p>
+	 */
+	public static final String SP_RELIABILITY = "reliability";
+
+	/**
+	 * Search parameter constant for <b>subject</b>
+	 * <p>
+	 * Description: <b>The subject that the observation is about</b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>Observation.subject</b><br/>
+	 * </p>
+	 */
+	public static final String SP_SUBJECT = "subject";
+
+	/**
+	 * Search parameter constant for <b>performer</b>
+	 * <p>
+	 * Description: <b>Who and/or what performed the observation</b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>Observation.performer</b><br/>
+	 * </p>
+	 */
+	public static final String SP_PERFORMER = "performer";
+
+	/**
+	 * Search parameter constant for <b>specimen</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>Observation.specimen</b><br/>
+	 * </p>
+	 */
+	public static final String SP_SPECIMEN = "specimen";
+
+	/**
+	 * Search parameter constant for <b>related-type</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Observation.related.type</b><br/>
+	 * </p>
+	 */
+	public static final String SP_RELATED_TYPE = "related-type";
+
+	/**
+	 * Search parameter constant for <b>related-target</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>Observation.related.target</b><br/>
+	 * </p>
+	 */
+	public static final String SP_RELATED_TARGET = "related-target";
+
+	/**
+	 * Search parameter constant for <b>related</b>
+	 * <p>
+	 * Description: <b>Related Observations - search on related-type and related-target together</b><br/>
+	 * Type: <b>composite</b><br/>
+	 * Path: <b>related-target & related-type</b><br/>
+	 * </p>
+	 */
+	public static final String SP_RELATED = "related";
+
 
 	@Child(name="name", type=CodeableConceptDt.class, order=0, min=1, max=1)	
 	private CodeableConceptDt myName;

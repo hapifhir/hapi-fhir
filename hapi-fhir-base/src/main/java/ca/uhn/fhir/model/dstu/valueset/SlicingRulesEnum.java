@@ -8,24 +8,21 @@ import java.util.Map;
 public enum SlicingRulesEnum {
 
 	/**
-	 * closed
-	 * 
+	 * Code Value: <b>closed</b>
 	 *
 	 * No additional content is allowed other than that described by the slices in this profile.
 	 */
 	CLOSED("closed"),
 	
 	/**
-	 * open
-	 * 
+	 * Code Value: <b>open</b>
 	 *
 	 * Additional content is allowed anywhere in the list.
 	 */
 	OPEN("open"),
 	
 	/**
-	 * openAtEnd
-	 * 
+	 * Code Value: <b>openAtEnd</b>
 	 *
 	 * Additional content is allowed, but only at the end of the list.
 	 */

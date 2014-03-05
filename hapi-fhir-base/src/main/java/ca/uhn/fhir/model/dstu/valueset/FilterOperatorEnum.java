@@ -8,48 +8,42 @@ import java.util.Map;
 public enum FilterOperatorEnum {
 
 	/**
-	 * =
-	 * 
+	 * Code Value: <b>=</b>
 	 *
 	 * The property value has the concept specified by the value.
 	 */
 	EQUALS("="),
 	
 	/**
-	 * is-a
-	 * 
+	 * Code Value: <b>is-a</b>
 	 *
 	 * The property value has a concept that has an is-a relationship with the value.
 	 */
 	IS_A("is-a"),
 	
 	/**
-	 * is-not-a
-	 * 
+	 * Code Value: <b>is-not-a</b>
 	 *
 	 * The property value has a concept that does not have an is-a relationship with the value.
 	 */
 	IS_NOT_A("is-not-a"),
 	
 	/**
-	 * regex
-	 * 
+	 * Code Value: <b>regex</b>
 	 *
 	 * The property value representation matches the regex specified in the value.
 	 */
 	REGEX("regex"),
 	
 	/**
-	 * in
-	 * 
+	 * Code Value: <b>in</b>
 	 *
 	 * The property value is in the set of codes or concepts identified by the value.
 	 */
 	IN("in"),
 	
 	/**
-	 * not in
-	 * 
+	 * Code Value: <b>not in</b>
 	 *
 	 * The property value is not in the set of codes or concepts identified by the value.
 	 */

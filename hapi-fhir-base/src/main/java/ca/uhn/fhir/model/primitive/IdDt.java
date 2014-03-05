@@ -39,7 +39,7 @@ public class IdDt  extends BaseElement implements IPrimitiveDatatype<String> {
 	 */
 	@SimpleSetter
 	public IdDt(@SimpleSetter.Parameter(name="theId") String theValue) {
-		myValue=theValue;
+		setValue(theValue);
 	}
 
 	@Override
@@ -65,6 +65,7 @@ public class IdDt  extends BaseElement implements IPrimitiveDatatype<String> {
 	 */
 	@Override
 	public void setValue(String theValue) throws DataFormatException {
+		// TODO: add validation
 		myValue = theValue;
 	}
 
@@ -81,8 +82,12 @@ public class IdDt  extends BaseElement implements IPrimitiveDatatype<String> {
 	 */
 	@Override
 	public void setValueAsString(String theValue) throws DataFormatException {
-		myValue = theValue;
+		setValue(theValue);
 	}
 	
+	@Override
+	public String toString() {
+		return myValue;
+	}
 
 }

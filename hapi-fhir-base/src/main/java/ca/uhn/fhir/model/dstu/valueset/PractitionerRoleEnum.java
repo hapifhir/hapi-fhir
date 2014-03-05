@@ -8,52 +8,36 @@ import java.util.Map;
 public enum PractitionerRoleEnum {
 
 	/**
-	 * doctor
-	 * 
-	 *
-	 * 
+	 * Code Value: <b>doctor</b>
 	 */
 	DOCTOR("doctor"),
 	
 	/**
-	 * nurse
-	 * 
-	 *
-	 * 
+	 * Code Value: <b>nurse</b>
 	 */
 	NURSE("nurse"),
 	
 	/**
-	 * pharmacist
-	 * 
-	 *
-	 * 
+	 * Code Value: <b>pharmacist</b>
 	 */
 	PHARMACIST("pharmacist"),
 	
 	/**
-	 * researcher
-	 * 
-	 *
-	 * 
+	 * Code Value: <b>researcher</b>
 	 */
 	RESEARCHER("researcher"),
 	
 	/**
-	 * teacher
-	 * Teacher/educator
-	 *
-	 * 
+	 * Display: <b>Teacher/educator</b><br/>
+	 * Code Value: <b>teacher</b>
 	 */
-	TEACHER("teacher"),
+	TEACHER_EDUCATOR("teacher"),
 	
 	/**
-	 * ict
-	 * ICT professional
-	 *
-	 * 
+	 * Display: <b>ICT professional</b><br/>
+	 * Code Value: <b>ict</b>
 	 */
-	ICT("ict"),
+	ICT_PROFESSIONAL("ict"),
 	
 	;
 	

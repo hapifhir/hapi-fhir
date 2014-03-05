@@ -17,11 +17,11 @@
 package ca.uhn.fhir.model.dstu.composite;
 
 import java.util.*;
-
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.model.primitive.*;
 import ca.uhn.fhir.model.dstu.valueset.*;
+import ca.uhn.fhir.model.dstu.resource.*;
 
 /**
  * HAPI/FHIR <b>Contact</b> Datatype
@@ -207,6 +207,7 @@ public class ContactDt extends BaseElement implements ICompositeDatatype {
 	}
 
   
+
 
 
 }

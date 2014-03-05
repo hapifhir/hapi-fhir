@@ -40,6 +40,77 @@ import ca.uhn.fhir.model.dstu.valueset.*;
 @ResourceDef(name="Organization")
 public class Organization extends BaseResource implements IResource {
 
+	/**
+	 * Search parameter constant for <b>name</b>
+	 * <p>
+	 * Description: <b>A portion of the organization's name</b><br/>
+	 * Type: <b>string</b><br/>
+	 * Path: <b>Organization.name</b><br/>
+	 * </p>
+	 */
+	public static final String SP_NAME = "name";
+
+	/**
+	 * Search parameter constant for <b>phonetic</b>
+	 * <p>
+	 * Description: <b>A portion of the organization's name using some kind of phonetic matching algorithm</b><br/>
+	 * Type: <b>string</b><br/>
+	 * Path: <b></b><br/>
+	 * </p>
+	 */
+	public static final String SP_PHONETIC = "phonetic";
+
+	/**
+	 * Search parameter constant for <b>type</b>
+	 * <p>
+	 * Description: <b>A code for the type of organization</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Organization.type</b><br/>
+	 * </p>
+	 */
+	public static final String SP_TYPE = "type";
+
+	/**
+	 * Search parameter constant for <b>identifier</b>
+	 * <p>
+	 * Description: <b>Any identifier for the organization (not the accreditation issuer's identifier)</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Organization.identifier</b><br/>
+	 * </p>
+	 */
+	public static final String SP_IDENTIFIER = "identifier";
+
+	/**
+	 * Search parameter constant for <b>!accreditation</b>
+	 * <p>
+	 * Description: <b>Any accreditation code</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Organization.accreditation.code</b><br/>
+	 * </p>
+	 */
+	public static final String SP_ACCREDITATION = "!accreditation";
+
+	/**
+	 * Search parameter constant for <b>partof</b>
+	 * <p>
+	 * Description: <b>Search all organizations that are part of the given organization</b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>Organization.partOf</b><br/>
+	 * </p>
+	 */
+	public static final String SP_PARTOF = "partof";
+
+	/**
+	 * Search parameter constant for <b>active</b>
+	 * <p>
+	 * Description: <b>Whether the organization's record is active</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Organization.active</b><br/>
+	 * </p>
+	 */
+	public static final String SP_ACTIVE = "active";
+
+
 	@Child(name="identifier", type=IdentifierDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)	
 	private List<IdentifierDt> myIdentifier;
 	

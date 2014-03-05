@@ -27,7 +27,7 @@ public class Child extends BaseElement {
 	public boolean isSingleChildInstantiable() {
 		return true;
 	}
-	
+
 	/**
 	 * Strips off "[x]"
 	 */
@@ -110,7 +110,7 @@ public class Child extends BaseElement {
 		return "1".equals(getCardMax()) == false;
 	}
 
-	protected String getSingleType() {
+	public String getSingleType() {
 		String retVal;
 		String elemName = this.getType().get(0);
 		elemName = elemName.substring(0, 1).toUpperCase() + elemName.substring(1);

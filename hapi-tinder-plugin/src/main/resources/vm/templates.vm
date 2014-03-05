@@ -72,6 +72,22 @@
 		${child.variableName} = theValue;
 	}
 
+#if( ${child.repeatable} && ${child.singleChildInstantiable} && ${child.resourceRef} == false && ${child.boundCode} == false )
+	/**
+	 * Adds and returns a new value for <b>${child.elementName}</b> (${child.shortName})
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * ${child.definition}
+     * </p> 
+	 */
+	public ${child.singleType} add${child.methodName}() {
+		${child.singleType} newType = new ${child.singleType}();
+		get${child.methodName}().add(newType);
+		return newType; 
+	}
+#end
+
 #if ( ${child.boundCode} && ${child.repeatable} )
 	/**
 	 * Add a value for <b>${child.elementName}</b> (${child.shortName})
@@ -113,15 +129,15 @@
 
 #end ##if (child.boundCode)
 #foreach ( $ss in $child.simpleSetters )
+#if(${child.repeatable})
 	/**
-	 * Sets the value(s) for <b>${child.elementName}</b> (${child.shortName})
+	 * Adds a new value for <b>${child.elementName}</b> (${child.shortName})
 	 *
      * <p>
      * <b>Definition:</b>
      * ${child.definition}
      * </p> 
 	 */
-#if(${child.repeatable})
 	public void add${child.methodName}(#{foreach}($param in $ss.parameters) ${param.datatype} ${param.parameter}#{if}( $foreach.hasNext ), #{end}#{end}) {
 		if (${child.variableName} == null) {
 			${child.variableName} = new ${child.referenceTypeForConstructor}();
@@ -129,6 +145,14 @@
 		${child.variableName}.add(new ${ss.datatype}(#{foreach}($param in $ss.parameters)${param.parameter}#{if}( $foreach.hasNext ), #{end}#{end})); 
 	}
 #else
+	/**
+	 * Sets the value for <b>${child.elementName}</b> (${child.shortName})
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * ${child.definition}
+     * </p> 
+	 */
 	public void set${child.methodName}${ss.suffix}(#{foreach}($param in $ss.parameters) ${param.datatype} ${param.parameter}#{if}( $foreach.hasNext ), #{end}#{end}) {
 		${child.variableName} = new ${ss.datatype}(#{foreach}($param in $ss.parameters)${param.parameter}#{if}( $foreach.hasNext ), #{end}#{end}); 
 	}

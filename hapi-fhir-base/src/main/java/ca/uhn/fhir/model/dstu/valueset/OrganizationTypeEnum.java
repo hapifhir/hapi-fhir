@@ -8,76 +8,58 @@ import java.util.Map;
 public enum OrganizationTypeEnum {
 
 	/**
-	 * prov
-	 * Healthcare Provider
-	 *
-	 * 
+	 * Display: <b>Healthcare Provider</b><br/>
+	 * Code Value: <b>prov</b>
 	 */
-	PROV("prov"),
+	HEALTHCARE_PROVIDER("prov"),
 	
 	/**
-	 * dept
-	 * Hospital Department
-	 *
-	 * 
+	 * Display: <b>Hospital Department</b><br/>
+	 * Code Value: <b>dept</b>
 	 */
-	DEPT("dept"),
+	HOSPITAL_DEPARTMENT("dept"),
 	
 	/**
-	 * icu
-	 * Intensive Care Unit
-	 *
-	 * 
+	 * Display: <b>Intensive Care Unit</b><br/>
+	 * Code Value: <b>icu</b>
 	 */
-	ICU("icu"),
+	INTENSIVE_CARE_UNIT("icu"),
 	
 	/**
-	 * team
-	 * Organizational team
-	 *
-	 * 
+	 * Display: <b>Organizational team</b><br/>
+	 * Code Value: <b>team</b>
 	 */
-	TEAM("team"),
+	ORGANIZATIONAL_TEAM("team"),
 	
 	/**
-	 * fed
-	 * Federal Government
-	 *
-	 * 
+	 * Display: <b>Federal Government</b><br/>
+	 * Code Value: <b>fed</b>
 	 */
-	FED("fed"),
+	FEDERAL_GOVERNMENT("fed"),
 	
 	/**
-	 * ins
-	 * Insurance Company
-	 *
-	 * 
+	 * Display: <b>Insurance Company</b><br/>
+	 * Code Value: <b>ins</b>
 	 */
-	INS("ins"),
+	INSURANCE_COMPANY("ins"),
 	
 	/**
-	 * edu
-	 * Educational Institute
-	 *
-	 * 
+	 * Display: <b>Educational Institute</b><br/>
+	 * Code Value: <b>edu</b>
 	 */
-	EDU("edu"),
+	EDUCATIONAL_INSTITUTE("edu"),
 	
 	/**
-	 * reli
-	 * Religious Institution
-	 *
-	 * 
+	 * Display: <b>Religious Institution</b><br/>
+	 * Code Value: <b>reli</b>
 	 */
-	RELI("reli"),
+	RELIGIOUS_INSTITUTION("reli"),
 	
 	/**
-	 * pharm
-	 * Pharmacy
-	 *
-	 * 
+	 * Display: <b>Pharmacy</b><br/>
+	 * Code Value: <b>pharm</b>
 	 */
-	PHARM("pharm"),
+	PHARMACY("pharm"),
 	
 	;
 	

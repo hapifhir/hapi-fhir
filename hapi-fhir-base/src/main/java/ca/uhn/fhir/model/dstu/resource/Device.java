@@ -40,6 +40,87 @@ import ca.uhn.fhir.model.dstu.valueset.*;
 @ResourceDef(name="Device")
 public class Device extends BaseResource implements IResource {
 
+	/**
+	 * Search parameter constant for <b>type</b>
+	 * <p>
+	 * Description: <b>The type of the device</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Device.type</b><br/>
+	 * </p>
+	 */
+	public static final String SP_TYPE = "type";
+
+	/**
+	 * Search parameter constant for <b>manufacturer</b>
+	 * <p>
+	 * Description: <b>The manufacturer of the device</b><br/>
+	 * Type: <b>string</b><br/>
+	 * Path: <b>Device.manufacturer</b><br/>
+	 * </p>
+	 */
+	public static final String SP_MANUFACTURER = "manufacturer";
+
+	/**
+	 * Search parameter constant for <b>model</b>
+	 * <p>
+	 * Description: <b>The model of the device</b><br/>
+	 * Type: <b>string</b><br/>
+	 * Path: <b>Device.model</b><br/>
+	 * </p>
+	 */
+	public static final String SP_MODEL = "model";
+
+	/**
+	 * Search parameter constant for <b>organization</b>
+	 * <p>
+	 * Description: <b>The organization responsible for the device</b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>Device.owner</b><br/>
+	 * </p>
+	 */
+	public static final String SP_ORGANIZATION = "organization";
+
+	/**
+	 * Search parameter constant for <b>identifier</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Device.identifier</b><br/>
+	 * </p>
+	 */
+	public static final String SP_IDENTIFIER = "identifier";
+
+	/**
+	 * Search parameter constant for <b>location</b>
+	 * <p>
+	 * Description: <b>A location, where the resource is found</b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>Device.location</b><br/>
+	 * </p>
+	 */
+	public static final String SP_LOCATION = "location";
+
+	/**
+	 * Search parameter constant for <b>patient</b>
+	 * <p>
+	 * Description: <b>Patient information, if the resource is affixed to a person</b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>Device.patient</b><br/>
+	 * </p>
+	 */
+	public static final String SP_PATIENT = "patient";
+
+	/**
+	 * Search parameter constant for <b>udi</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>string</b><br/>
+	 * Path: <b>Device.udi</b><br/>
+	 * </p>
+	 */
+	public static final String SP_UDI = "udi";
+
+
 	@Child(name="identifier", type=IdentifierDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)	
 	private List<IdentifierDt> myIdentifier;
 	
@@ -532,7 +613,18 @@ public class Device extends BaseResource implements IResource {
 		myUrl = theValue;
 	}
 
-  
+ 	/**
+	 * Sets the value(s) for <b>url</b> (Network address to contact device)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A network address on which the device may be contacted directly
+     * </p> 
+	 */
+	public void setUrl( String theUri) {
+		myUrl = new UriDt(theUri); 
+	}
+ 
 
 
 }

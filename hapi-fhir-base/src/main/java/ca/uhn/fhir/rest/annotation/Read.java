@@ -9,4 +9,16 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 public @interface Read {
 
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.PARAMETER)
+	public @interface IdParam {
+		// just a marker
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.PARAMETER)
+	public @interface VersionIdParam {
+		// just a marker
+	}
+	
 }

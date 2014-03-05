@@ -8,32 +8,28 @@ import java.util.Map;
 public enum AddressUseEnum {
 
 	/**
-	 * home
-	 * 
+	 * Code Value: <b>home</b>
 	 *
 	 * A communication address at a home.
 	 */
 	HOME("home"),
 	
 	/**
-	 * work
-	 * 
+	 * Code Value: <b>work</b>
 	 *
 	 * An office address. First choice for business related contacts during business hours.
 	 */
 	WORK("work"),
 	
 	/**
-	 * temp
-	 * 
+	 * Code Value: <b>temp</b>
 	 *
 	 * A temporary address. The period can provide more detailed information.
 	 */
 	TEMP("temp"),
 	
 	/**
-	 * old
-	 * 
+	 * Code Value: <b>old</b>
 	 *
 	 * This address is no longer in use (or was never correct, but retained for records).
 	 */

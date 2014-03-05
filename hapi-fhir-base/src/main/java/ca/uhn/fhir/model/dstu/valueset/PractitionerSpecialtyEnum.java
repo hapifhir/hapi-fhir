@@ -8,44 +8,34 @@ import java.util.Map;
 public enum PractitionerSpecialtyEnum {
 
 	/**
-	 * cardio
-	 * Cardiologist
-	 *
-	 * 
+	 * Display: <b>Cardiologist</b><br/>
+	 * Code Value: <b>cardio</b>
 	 */
-	CARDIO("cardio"),
+	CARDIOLOGIST("cardio"),
 	
 	/**
-	 * dent
-	 * Dentist
-	 *
-	 * 
+	 * Display: <b>Dentist</b><br/>
+	 * Code Value: <b>dent</b>
 	 */
-	DENT("dent"),
+	DENTIST("dent"),
 	
 	/**
-	 * dietary
-	 * Dietary consultant
-	 *
-	 * 
+	 * Display: <b>Dietary consultant</b><br/>
+	 * Code Value: <b>dietary</b>
 	 */
-	DIETARY("dietary"),
+	DIETARY_CONSULTANT("dietary"),
 	
 	/**
-	 * midw
-	 * Midwife
-	 *
-	 * 
+	 * Display: <b>Midwife</b><br/>
+	 * Code Value: <b>midw</b>
 	 */
-	MIDW("midw"),
+	MIDWIFE("midw"),
 	
 	/**
-	 * sysarch
-	 * Systems architect
-	 *
-	 * 
+	 * Display: <b>Systems architect</b><br/>
+	 * Code Value: <b>sysarch</b>
 	 */
-	SYSARCH("sysarch"),
+	SYSTEMS_ARCHITECT("sysarch"),
 	
 	;
 	

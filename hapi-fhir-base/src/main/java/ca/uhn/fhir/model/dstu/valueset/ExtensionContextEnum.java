@@ -8,32 +8,28 @@ import java.util.Map;
 public enum ExtensionContextEnum {
 
 	/**
-	 * resource
-	 * 
+	 * Code Value: <b>resource</b>
 	 *
 	 * The context is all elements matching a particular resource element path.
 	 */
 	RESOURCE("resource"),
 	
 	/**
-	 * datatype
-	 * 
+	 * Code Value: <b>datatype</b>
 	 *
 	 * The context is all nodes matching a particular data type element path (root or repeating element) or all elements referencing a particular primitive data type (expressed as the datatype name).
 	 */
 	DATATYPE("datatype"),
 	
 	/**
-	 * mapping
-	 * 
+	 * Code Value: <b>mapping</b>
 	 *
 	 * The context is all nodes whose mapping to a specified reference model corresponds to a particular mapping structure.  The context identifies the mapping target. The mapping should clearly identify where such an extension could be used.
 	 */
 	MAPPING("mapping"),
 	
 	/**
-	 * extension
-	 * 
+	 * Code Value: <b>extension</b>
 	 *
 	 * The context is a particular extension from a particular profile.  Expressed as uri#name, where uri identifies the profile and #name identifies the extension code.
 	 */

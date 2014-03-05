@@ -8,28 +8,28 @@ import java.util.Map;
 public enum AnimalSpeciesEnum {
 
 	/**
-	 * canislf
-	 * Dog
+	 * Display: <b>Dog</b><br/>
+	 * Code Value: <b>canislf</b>
 	 *
 	 * Canis lupus familiaris
 	 */
-	CANISLF("canislf"),
+	DOG("canislf"),
 	
 	/**
-	 * ovisa
-	 * Sheep
+	 * Display: <b>Sheep</b><br/>
+	 * Code Value: <b>ovisa</b>
 	 *
 	 * Ovis aries
 	 */
-	OVISA("ovisa"),
+	SHEEP("ovisa"),
 	
 	/**
-	 * serinuscd
-	 * Domestic Canary
+	 * Display: <b>Domestic Canary</b><br/>
+	 * Code Value: <b>serinuscd</b>
 	 *
 	 * Serinus canaria domestica
 	 */
-	SERINUSCD("serinuscd"),
+	DOMESTIC_CANARY("serinuscd"),
 	
 	;
 	

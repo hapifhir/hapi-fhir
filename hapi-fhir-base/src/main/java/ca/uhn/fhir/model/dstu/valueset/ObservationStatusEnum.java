@@ -8,48 +8,42 @@ import java.util.Map;
 public enum ObservationStatusEnum {
 
 	/**
-	 * registered
-	 * 
+	 * Code Value: <b>registered</b>
 	 *
 	 * The existence of the observation is registered, but there is no result yet available.
 	 */
 	REGISTERED("registered"),
 	
 	/**
-	 * preliminary
-	 * 
+	 * Code Value: <b>preliminary</b>
 	 *
 	 * This is an initial or interim observation: data may be incomplete or unverified.
 	 */
 	PRELIMINARY("preliminary"),
 	
 	/**
-	 * final
-	 * 
+	 * Code Value: <b>final</b>
 	 *
 	 * The observation is complete and verified by an authorized person.
 	 */
 	FINAL("final"),
 	
 	/**
-	 * amended
-	 * 
+	 * Code Value: <b>amended</b>
 	 *
 	 * The observation has been modified subsequent to being Final, and is complete and verified by an authorized person.
 	 */
 	AMENDED("amended"),
 	
 	/**
-	 * cancelled
-	 * 
+	 * Code Value: <b>cancelled</b>
 	 *
 	 * The observation is unavailable because the measurement was not started or not completed (also sometimes called "aborted").
 	 */
 	CANCELLED("cancelled"),
 	
 	/**
-	 * entered in error
-	 * 
+	 * Code Value: <b>entered in error</b>
 	 *
 	 * The observation has been withdrawn following previous Final release.
 	 */

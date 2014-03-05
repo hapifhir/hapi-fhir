@@ -17,7 +17,6 @@
 package ca.uhn.fhir.model.dstu.resource;
 
 import java.util.*;
-
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.model.primitive.*;
@@ -40,6 +39,97 @@ import ca.uhn.fhir.model.dstu.valueset.*;
  */
 @ResourceDef(name="Practitioner")
 public class Practitioner extends BaseResource implements IResource {
+
+	/**
+	 * Search parameter constant for <b>identifier</b>
+	 * <p>
+	 * Description: <b>A practitioner's Identifier</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Practitioner.identifier</b><br/>
+	 * </p>
+	 */
+	public static final String SP_IDENTIFIER = "identifier";
+
+	/**
+	 * Search parameter constant for <b>name</b>
+	 * <p>
+	 * Description: <b>A portion of either family or given name</b><br/>
+	 * Type: <b>string</b><br/>
+	 * Path: <b>Practitioner.name</b><br/>
+	 * </p>
+	 */
+	public static final String SP_NAME = "name";
+
+	/**
+	 * Search parameter constant for <b>family</b>
+	 * <p>
+	 * Description: <b>A portion of the family name</b><br/>
+	 * Type: <b>string</b><br/>
+	 * Path: <b>Practitioner.name</b><br/>
+	 * </p>
+	 */
+	public static final String SP_FAMILY = "family";
+
+	/**
+	 * Search parameter constant for <b>given</b>
+	 * <p>
+	 * Description: <b>A portion of the given name</b><br/>
+	 * Type: <b>string</b><br/>
+	 * Path: <b>Practitioner.name</b><br/>
+	 * </p>
+	 */
+	public static final String SP_GIVEN = "given";
+
+	/**
+	 * Search parameter constant for <b>phonetic</b>
+	 * <p>
+	 * Description: <b>A portion of either family or given name using some kind of phonetic matching algorithm</b><br/>
+	 * Type: <b>string</b><br/>
+	 * Path: <b>Practitioner.name</b><br/>
+	 * </p>
+	 */
+	public static final String SP_PHONETIC = "phonetic";
+
+	/**
+	 * Search parameter constant for <b>telecom</b>
+	 * <p>
+	 * Description: <b>The value in any kind of contact</b><br/>
+	 * Type: <b>string</b><br/>
+	 * Path: <b>Practitioner.telecom</b><br/>
+	 * </p>
+	 */
+	public static final String SP_TELECOM = "telecom";
+
+	/**
+	 * Search parameter constant for <b>address</b>
+	 * <p>
+	 * Description: <b>An address in any kind of address/part</b><br/>
+	 * Type: <b>string</b><br/>
+	 * Path: <b>Practitioner.address</b><br/>
+	 * </p>
+	 */
+	public static final String SP_ADDRESS = "address";
+
+	/**
+	 * Search parameter constant for <b>gender</b>
+	 * <p>
+	 * Description: <b>Gender of the practitioner</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Practitioner.gender</b><br/>
+	 * </p>
+	 */
+	public static final String SP_GENDER = "gender";
+
+	/**
+	 * Search parameter constant for <b>organization</b>
+	 * <p>
+	 * Description: <b>The identity of the organization the practitioner represents / acts on behalf of</b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>Practitioner.organization</b><br/>
+	 * </p>
+	 */
+	public static final String SP_ORGANIZATION = "organization";
+
 
 	@Child(name="identifier", type=IdentifierDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)	
 	private List<IdentifierDt> myIdentifier;

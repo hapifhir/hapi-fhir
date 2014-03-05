@@ -17,7 +17,6 @@
 package ca.uhn.fhir.model.dstu.resource;
 
 import java.util.*;
-
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.model.primitive.*;
@@ -40,6 +39,17 @@ import ca.uhn.fhir.model.dstu.valueset.*;
  */
 @ResourceDef(name="Specimen")
 public class Specimen extends BaseResource implements IResource {
+
+	/**
+	 * Search parameter constant for <b>subject</b>
+	 * <p>
+	 * Description: <b>The subject of the specimen</b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>Specimen.subject</b><br/>
+	 * </p>
+	 */
+	public static final String SP_SUBJECT = "subject";
+
 
 	@Child(name="identifier", type=IdentifierDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)	
 	private List<IdentifierDt> myIdentifier;

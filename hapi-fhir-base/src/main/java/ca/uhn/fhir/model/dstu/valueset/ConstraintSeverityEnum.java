@@ -8,16 +8,14 @@ import java.util.Map;
 public enum ConstraintSeverityEnum {
 
 	/**
-	 * error
-	 * 
+	 * Code Value: <b>error</b>
 	 *
 	 * If the constraint is violated, the resource is not conformant.
 	 */
 	ERROR("error"),
 	
 	/**
-	 * warning
-	 * 
+	 * Code Value: <b>warning</b>
 	 *
 	 * If the constraint is violated, the resource is conformant, but it is not necessarily following best practice.
 	 */

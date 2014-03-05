@@ -16,17 +16,12 @@
 
 package ca.uhn.fhir.model.dstu.composite;
 
-import ca.uhn.fhir.model.api.BaseElement;
-import ca.uhn.fhir.model.api.ICompositeDatatype;
-import ca.uhn.fhir.model.api.ResourceReference;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.ChildResource;
-import ca.uhn.fhir.model.api.annotation.DatatypeDef;
-import ca.uhn.fhir.model.dstu.resource.ValueSet;
-import ca.uhn.fhir.model.primitive.BooleanDt;
-import ca.uhn.fhir.model.primitive.CodeDt;
-import ca.uhn.fhir.model.primitive.StringDt;
-import ca.uhn.fhir.model.primitive.UriDt;
+import java.util.*;
+import ca.uhn.fhir.model.api.*;
+import ca.uhn.fhir.model.api.annotation.*;
+import ca.uhn.fhir.model.primitive.*;
+import ca.uhn.fhir.model.dstu.valueset.*;
+import ca.uhn.fhir.model.dstu.resource.*;
 
 /**
  * HAPI/FHIR <b>Coding</b> Datatype
@@ -95,7 +90,18 @@ public class CodingDt extends BaseElement implements ICompositeDatatype {
 		mySystem = theValue;
 	}
 
-  
+ 	/**
+	 * Sets the value(s) for <b>system</b> (Identity of the terminology system )
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The identification of the code system that defines the meaning of the symbol in the code. 
+     * </p> 
+	 */
+	public void setSystem( String theUri) {
+		mySystem = new UriDt(theUri); 
+	}
+ 
 	/**
 	 * Gets the value(s) for <b>version</b> (Version of the system - if relevant).
 	 * creating it if it does
@@ -268,6 +274,7 @@ public class CodingDt extends BaseElement implements ICompositeDatatype {
 	}
 
   
+
 
 
 }

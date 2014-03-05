@@ -1,37 +1,112 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 package ca.uhn.fhir.model.dstu.composite;
 
-import ca.uhn.fhir.model.api.BaseElement;
-import ca.uhn.fhir.model.api.ICompositeDatatype;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Constraint;
-import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+import java.util.*;
+import ca.uhn.fhir.model.api.*;
+import ca.uhn.fhir.model.api.annotation.*;
+import ca.uhn.fhir.model.primitive.*;
+import ca.uhn.fhir.model.dstu.valueset.*;
+import ca.uhn.fhir.model.dstu.resource.*;
 
-@DatatypeDef(name="Ratio")
+/**
+ * HAPI/FHIR <b>Ratio</b> Datatype
+ * (A ratio of two Quantity values - a numerator and a denominator)
+ *
+ * <p>
+ * <b>Definition:</b>
+ * A relationship of two Quantity values - expressed as a numerator and a denominator. 
+ * </p> 
+ *
+ * <p>
+ * <b>Requirements:</b>
+ * Need to able to capture ratios for some measurements (titers) and some rates (costs)
+ * </p> 
+ */
+@DatatypeDef(name="Ratio") 
 public class RatioDt extends BaseElement implements ICompositeDatatype {
 
-	@Child(name="numerator", order=0)
-	@Constraint(coRequirements= {"denominator"})
+	@Child(name="numerator", type=QuantityDt.class, order=0, min=0, max=1)	
 	private QuantityDt myNumerator;
 	
-	@Child(name="denominator", order=1)
-	@Constraint(coRequirements= {"numerator"})
+	@Child(name="denominator", type=QuantityDt.class, order=1, min=0, max=1)	
 	private QuantityDt myDenominator;
-
-	public QuantityDt getNumerator() {
+	
+	/**
+	 * Gets the value(s) for <b>numerator</b> (Numerator value).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The value of the numerator
+     * </p> 
+	 */
+	public QuantityDt getNumerator() {  
+		if (myNumerator == null) {
+			myNumerator = new QuantityDt();
+		}
 		return myNumerator;
 	}
 
-	public void setNumerator(QuantityDt theNumerator) {
-		myNumerator = theNumerator;
+	/**
+	 * Sets the value(s) for <b>numerator</b> (Numerator value)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The value of the numerator
+     * </p> 
+	 */
+	public void setNumerator(QuantityDt theValue) {
+		myNumerator = theValue;
 	}
 
-	public QuantityDt getDenominator() {
+  
+	/**
+	 * Gets the value(s) for <b>denominator</b> (Denominator value).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The value of the denominator
+     * </p> 
+	 */
+	public QuantityDt getDenominator() {  
+		if (myDenominator == null) {
+			myDenominator = new QuantityDt();
+		}
 		return myDenominator;
 	}
 
-	public void setDenominator(QuantityDt theDenominator) {
-		myDenominator = theDenominator;
+	/**
+	 * Sets the value(s) for <b>denominator</b> (Denominator value)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The value of the denominator
+     * </p> 
+	 */
+	public void setDenominator(QuantityDt theValue) {
+		myDenominator = theValue;
 	}
-	
-	
+
+  
+
+
+
 }

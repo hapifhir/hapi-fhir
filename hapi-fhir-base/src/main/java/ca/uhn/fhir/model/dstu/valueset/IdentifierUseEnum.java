@@ -8,32 +8,28 @@ import java.util.Map;
 public enum IdentifierUseEnum {
 
 	/**
-	 * usual
-	 * 
+	 * Code Value: <b>usual</b>
 	 *
 	 * the identifier recommended for display and use in real-world interactions.
 	 */
 	USUAL("usual"),
 	
 	/**
-	 * official
-	 * 
+	 * Code Value: <b>official</b>
 	 *
 	 * the identifier considered to be most trusted for the identification of this item.
 	 */
 	OFFICIAL("official"),
 	
 	/**
-	 * temp
-	 * 
+	 * Code Value: <b>temp</b>
 	 *
 	 * A temporary identifier.
 	 */
 	TEMP("temp"),
 	
 	/**
-	 * secondary
-	 * 
+	 * Code Value: <b>secondary</b>
 	 *
 	 * An identifier that was assigned in secondary use - it serves to identify the object in a relative context, but cannot be consistently assigned to the same object again in a different context.
 	 */

@@ -8,56 +8,49 @@ import java.util.Map;
 public enum ObservationReliabilityEnum {
 
 	/**
-	 * ok
-	 * 
+	 * Code Value: <b>ok</b>
 	 *
 	 * The result has no reliability concerns.
 	 */
 	OK("ok"),
 	
 	/**
-	 * ongoing
-	 * 
+	 * Code Value: <b>ongoing</b>
 	 *
 	 * An early estimate of value; measurement is still occurring.
 	 */
 	ONGOING("ongoing"),
 	
 	/**
-	 * early
-	 * 
+	 * Code Value: <b>early</b>
 	 *
 	 * An early estimate of value; processing is still occurring.
 	 */
 	EARLY("early"),
 	
 	/**
-	 * questionable
-	 * 
+	 * Code Value: <b>questionable</b>
 	 *
 	 * The observation value should be treated with care.
 	 */
 	QUESTIONABLE("questionable"),
 	
 	/**
-	 * calibrating
-	 * 
+	 * Code Value: <b>calibrating</b>
 	 *
 	 * The result has been generated while calibration is occurring.
 	 */
 	CALIBRATING("calibrating"),
 	
 	/**
-	 * error
-	 * 
+	 * Code Value: <b>error</b>
 	 *
 	 * The observation could not be completed because of an error.
 	 */
 	ERROR("error"),
 	
 	/**
-	 * unknown
-	 * 
+	 * Code Value: <b>unknown</b>
 	 *
 	 * No observation value was available.
 	 */

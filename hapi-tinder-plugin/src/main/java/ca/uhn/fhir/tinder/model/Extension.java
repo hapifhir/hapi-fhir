@@ -99,7 +99,7 @@ public class Extension extends Child {
 	}
 
 	@Override
-	protected String getSingleType() {
+	public String getSingleType() {
 		if (isHasChildExtensions()) {
 			return getNameType();
 		}

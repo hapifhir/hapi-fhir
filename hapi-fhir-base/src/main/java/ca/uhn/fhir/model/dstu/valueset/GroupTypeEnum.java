@@ -8,48 +8,42 @@ import java.util.Map;
 public enum GroupTypeEnum {
 
 	/**
-	 * person
-	 * 
+	 * Code Value: <b>person</b>
 	 *
 	 * Group contains "person" Patient resources.
 	 */
 	PERSON("person"),
 	
 	/**
-	 * animal
-	 * 
+	 * Code Value: <b>animal</b>
 	 *
 	 * Group contains "animal" Patient resources.
 	 */
 	ANIMAL("animal"),
 	
 	/**
-	 * practitioner
-	 * 
+	 * Code Value: <b>practitioner</b>
 	 *
 	 * Group contains healthcare practitioner resources.
 	 */
 	PRACTITIONER("practitioner"),
 	
 	/**
-	 * device
-	 * 
+	 * Code Value: <b>device</b>
 	 *
 	 * Group contains Device resources.
 	 */
 	DEVICE("device"),
 	
 	/**
-	 * medication
-	 * 
+	 * Code Value: <b>medication</b>
 	 *
 	 * Group contains Medication resources.
 	 */
 	MEDICATION("medication"),
 	
 	/**
-	 * substance
-	 * 
+	 * Code Value: <b>substance</b>
 	 *
 	 * Group contains Substance resources.
 	 */

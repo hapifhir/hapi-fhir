@@ -8,32 +8,28 @@ import java.util.Map;
 public enum QuantityCompararatorEnum {
 
 	/**
-	 * <
-	 * 
+	 * Code Value: <b><</b>
 	 *
 	 * The actual value is less than the given value.
 	 */
 	LESSTHAN("<"),
 	
 	/**
-	 * <=
-	 * 
+	 * Code Value: <b><=</b>
 	 *
 	 * The actual value is less than or equal to the given value.
 	 */
 	LESSTHAN_OR_EQUALS("<="),
 	
 	/**
-	 * >=
-	 * 
+	 * Code Value: <b>>=</b>
 	 *
 	 * The actual value is greater than or equal to the given value.
 	 */
 	GREATERTHAN_OR_EQUALS(">="),
 	
 	/**
-	 * >
-	 * 
+	 * Code Value: <b>></b>
 	 *
 	 * The actual value is greater than the given value.
 	 */

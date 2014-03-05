@@ -59,7 +59,7 @@ class ModelScanner {
 	private RuntimeChildUndeclaredExtensionDefinition myRuntimeChildUndeclaredExtensionDefinition;
 
 	ModelScanner(Class<? extends IResource> theResourceTypes) throws ConfigurationException {
-		Set<Class<? extends IElement>> singleton = new HashSet<>();
+		Set<Class<? extends IElement>> singleton = new HashSet<Class<? extends IElement>>();
 		singleton.add(theResourceTypes);
 		init(singleton);
 	}
@@ -399,7 +399,13 @@ class ModelScanner {
 		try {
 			Field bindingField = bound.getField("VALUESET_BINDER");
 			return (IValueSetEnumBinder<Enum<?>>) bindingField.get(null);
-		} catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException e) {
+		} catch (IllegalArgumentException e) {
+			throw new ConfigurationException("Field '" + theNext + "' has type parameter " + bound.getCanonicalName() + " but this class has no valueset binding field", e);
+		} catch ( IllegalAccessException e) {
+			throw new ConfigurationException("Field '" + theNext + "' has type parameter " + bound.getCanonicalName() + " but this class has no valueset binding field", e);
+		} catch (NoSuchFieldException e) {
+			throw new ConfigurationException("Field '" + theNext + "' has type parameter " + bound.getCanonicalName() + " but this class has no valueset binding field", e);
+		} catch (SecurityException e) {
 			throw new ConfigurationException("Field '" + theNext + "' has type parameter " + bound.getCanonicalName() + " but this class has no valueset binding field", e);
 		}
 	}

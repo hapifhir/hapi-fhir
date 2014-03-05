@@ -17,11 +17,11 @@
 package ca.uhn.fhir.model.dstu.composite;
 
 import java.util.*;
-
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.model.primitive.*;
 import ca.uhn.fhir.model.dstu.valueset.*;
+import ca.uhn.fhir.model.dstu.resource.*;
 
 /**
  * HAPI/FHIR <b>HumanName</b> Datatype
@@ -350,6 +350,7 @@ public class HumanNameDt extends BaseElement implements ICompositeDatatype {
 	}
 
   
+
 
 
 }

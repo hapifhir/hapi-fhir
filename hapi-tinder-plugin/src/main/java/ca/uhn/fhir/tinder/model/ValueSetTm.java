@@ -104,7 +104,7 @@ public class ValueSetTm {
 			if (StringUtils.isBlank(retVal)) {
 				retVal = myCode;
 			}
-			retVal = retVal.toUpperCase().replace(' ', '_').replace('-', '_').replace('/', '_').replace('.', '_').replace(':', '_').replace("'", "");
+						
 			if ("=".equals(retVal)) {
 				retVal = "EQUALS";
 			}
@@ -120,6 +120,16 @@ public class ValueSetTm {
 			if (">".equals(retVal)) {
 				retVal = "GREATERTHAN";
 			}
+
+			StringBuilder b = new StringBuilder();
+			for (char next : retVal.toUpperCase().replace("'", "").replace("(", "").replace(")", "").toCharArray()) {
+				if (Character.isJavaIdentifierPart(next)) {
+					b.append(next);
+				}else {
+					b.append("_");
+				}
+			}
+			retVal = b.toString();
 
 			if (!Character.isJavaIdentifierStart(retVal.charAt(0))) {
 				retVal = '_' + retVal;

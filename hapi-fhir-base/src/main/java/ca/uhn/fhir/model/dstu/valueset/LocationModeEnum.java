@@ -8,16 +8,14 @@ import java.util.Map;
 public enum LocationModeEnum {
 
 	/**
-	 * instance
-	 * 
+	 * Code Value: <b>instance</b>
 	 *
 	 * The Location resource represents a specific instance of a Location.
 	 */
 	INSTANCE("instance"),
 	
 	/**
-	 * kind
-	 * 
+	 * Code Value: <b>kind</b>
 	 *
 	 * The Location represents a class of Locations.
 	 */

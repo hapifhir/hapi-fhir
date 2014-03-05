@@ -17,7 +17,6 @@
 package ca.uhn.fhir.model.dstu.resource;
 
 import java.util.*;
-
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.model.primitive.*;
@@ -40,6 +39,57 @@ import ca.uhn.fhir.model.dstu.valueset.*;
  */
 @ResourceDef(name="Substance")
 public class Substance extends BaseResource implements IResource {
+
+	/**
+	 * Search parameter constant for <b>type</b>
+	 * <p>
+	 * Description: <b>The type of the substance</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Substance.type</b><br/>
+	 * </p>
+	 */
+	public static final String SP_TYPE = "type";
+
+	/**
+	 * Search parameter constant for <b>identifier</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Substance.instance.identifier</b><br/>
+	 * </p>
+	 */
+	public static final String SP_IDENTIFIER = "identifier";
+
+	/**
+	 * Search parameter constant for <b>expiry</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>date</b><br/>
+	 * Path: <b>Substance.instance.expiry</b><br/>
+	 * </p>
+	 */
+	public static final String SP_EXPIRY = "expiry";
+
+	/**
+	 * Search parameter constant for <b>quantity</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>number</b><br/>
+	 * Path: <b>Substance.instance.quantity</b><br/>
+	 * </p>
+	 */
+	public static final String SP_QUANTITY = "quantity";
+
+	/**
+	 * Search parameter constant for <b>substance</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>Substance.ingredient.substance</b><br/>
+	 * </p>
+	 */
+	public static final String SP_SUBSTANCE = "substance";
+
 
 	@Child(name="type", type=CodeableConceptDt.class, order=0, min=1, max=1)	
 	private CodeableConceptDt myType;

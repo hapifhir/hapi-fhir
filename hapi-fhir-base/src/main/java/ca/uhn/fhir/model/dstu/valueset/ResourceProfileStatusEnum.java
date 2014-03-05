@@ -8,24 +8,21 @@ import java.util.Map;
 public enum ResourceProfileStatusEnum {
 
 	/**
-	 * draft
-	 * 
+	 * Code Value: <b>draft</b>
 	 *
 	 * This profile is still under development.
 	 */
 	DRAFT("draft"),
 	
 	/**
-	 * active
-	 * 
+	 * Code Value: <b>active</b>
 	 *
 	 * This profile is ready for normal use.
 	 */
 	ACTIVE("active"),
 	
 	/**
-	 * retired
-	 * 
+	 * Code Value: <b>retired</b>
 	 *
 	 * This profile has been deprecated, withdrawn or superseded and should no longer be used.
 	 */

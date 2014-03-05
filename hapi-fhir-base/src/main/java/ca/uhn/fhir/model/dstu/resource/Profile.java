@@ -40,6 +40,117 @@ import ca.uhn.fhir.model.dstu.valueset.*;
 @ResourceDef(name="Profile")
 public class Profile extends BaseResource implements IResource {
 
+	/**
+	 * Search parameter constant for <b>identifier</b>
+	 * <p>
+	 * Description: <b>The identifier of the profile</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Profile.identifier</b><br/>
+	 * </p>
+	 */
+	public static final String SP_IDENTIFIER = "identifier";
+
+	/**
+	 * Search parameter constant for <b>version</b>
+	 * <p>
+	 * Description: <b>The version identifier of the profile</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Profile.version</b><br/>
+	 * </p>
+	 */
+	public static final String SP_VERSION = "version";
+
+	/**
+	 * Search parameter constant for <b>name</b>
+	 * <p>
+	 * Description: <b>Name of the profile</b><br/>
+	 * Type: <b>string</b><br/>
+	 * Path: <b>Profile.name</b><br/>
+	 * </p>
+	 */
+	public static final String SP_NAME = "name";
+
+	/**
+	 * Search parameter constant for <b>publisher</b>
+	 * <p>
+	 * Description: <b>Name of the publisher of the profile</b><br/>
+	 * Type: <b>string</b><br/>
+	 * Path: <b>Profile.publisher</b><br/>
+	 * </p>
+	 */
+	public static final String SP_PUBLISHER = "publisher";
+
+	/**
+	 * Search parameter constant for <b>description</b>
+	 * <p>
+	 * Description: <b>Text search in the description of the profile</b><br/>
+	 * Type: <b>string</b><br/>
+	 * Path: <b>Profile.description</b><br/>
+	 * </p>
+	 */
+	public static final String SP_DESCRIPTION = "description";
+
+	/**
+	 * Search parameter constant for <b>status</b>
+	 * <p>
+	 * Description: <b>The current status of the profile</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Profile.status</b><br/>
+	 * </p>
+	 */
+	public static final String SP_STATUS = "status";
+
+	/**
+	 * Search parameter constant for <b>date</b>
+	 * <p>
+	 * Description: <b>The profile publication date</b><br/>
+	 * Type: <b>date</b><br/>
+	 * Path: <b>Profile.date</b><br/>
+	 * </p>
+	 */
+	public static final String SP_DATE = "date";
+
+	/**
+	 * Search parameter constant for <b>code</b>
+	 * <p>
+	 * Description: <b>A code for the profile in the format uri::code (server may choose to do subsumption)</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Profile.code</b><br/>
+	 * </p>
+	 */
+	public static final String SP_CODE = "code";
+
+	/**
+	 * Search parameter constant for <b>extension</b>
+	 * <p>
+	 * Description: <b>An extension code (use or definition)</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Profile.extensionDefn.code</b><br/>
+	 * </p>
+	 */
+	public static final String SP_EXTENSION = "extension";
+
+	/**
+	 * Search parameter constant for <b>valueset</b>
+	 * <p>
+	 * Description: <b>A vocabulary binding code</b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>Profile.structure.element.definition.binding.reference[x]</b><br/>
+	 * </p>
+	 */
+	public static final String SP_VALUESET = "valueset";
+
+	/**
+	 * Search parameter constant for <b>type</b>
+	 * <p>
+	 * Description: <b>Type of resource that is constrained in the profile</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Profile.structure.type</b><br/>
+	 * </p>
+	 */
+	public static final String SP_TYPE = "type";
+
+
 	@Child(name="identifier", type=StringDt.class, order=0, min=0, max=1)	
 	private StringDt myIdentifier;
 	
@@ -761,7 +872,18 @@ public class Profile extends BaseResource implements IResource {
 		myUri = theValue;
 	}
 
-  
+ 	/**
+	 * Sets the value(s) for <b>uri</b> (Identifies what this mapping refers to)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A URI that identifies the specification that this mapping is expressed to
+     * </p> 
+	 */
+	public void setUri( String theUri) {
+		myUri = new UriDt(theUri); 
+	}
+ 
 	/**
 	 * Gets the value(s) for <b>name</b> (Names what this mapping refers to).
 	 * creating it if it does
@@ -2244,7 +2366,18 @@ public class Profile extends BaseResource implements IResource {
 		myProfile = theValue;
 	}
 
-  
+ 	/**
+	 * Sets the value(s) for <b>profile</b> (Profile.structure to apply)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Identifies a profile that SHALL hold for resources or datatypes referenced as the type of this element. Can be a local reference - to another structure in this profile, or a reference to a structure in another profile
+     * </p> 
+	 */
+	public void setProfile( String theUri) {
+		myProfile = new UriDt(theUri); 
+	}
+ 
 	/**
 	 * Gets the value(s) for <b>aggregation</b> (contained | referenced | bundled - how aggregated).
 	 * creating it if it does
