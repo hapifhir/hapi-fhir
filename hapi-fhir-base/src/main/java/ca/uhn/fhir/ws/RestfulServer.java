@@ -40,6 +40,8 @@ public abstract class RestfulServer extends HttpServlet {
 
 	private Map<Class<? extends IResource>, IResourceProvider<?>> myTypeToProvider = new HashMap<Class<? extends IResource>, IResourceProvider<?>>();
 
+	private FhirContext myFhirContext;
+
 	public abstract Collection<IResourceProvider<?>> getResourceProviders();
 
 	@Override
@@ -59,7 +61,7 @@ public abstract class RestfulServer extends HttpServlet {
 			
 			myFhirContext = new FhirContext(myTypeToProvider.keySet());
 			
-			findResourceMethods(nextProvider.getClass());
+//			findResourceMethods(nextProvider.getClass());
 
 			
 		} catch (Exception ex) {

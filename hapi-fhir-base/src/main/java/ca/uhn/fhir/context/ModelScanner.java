@@ -92,6 +92,10 @@ class ModelScanner {
 
 	}
 
+	public ModelScanner(Class<ResourceWithExtensionsA> theClass) {
+		// TODO Auto-generated constructor stub
+	}
+
 	public RuntimeChildUndeclaredExtensionDefinition getRuntimeChildUndeclaredExtensionDefinition() {
 		return myRuntimeChildUndeclaredExtensionDefinition;
 	}
