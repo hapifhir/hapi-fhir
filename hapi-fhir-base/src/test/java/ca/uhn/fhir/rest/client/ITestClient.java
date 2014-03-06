@@ -19,4 +19,6 @@ public interface ITestClient extends IRestfulClient {
 	
 	@Search(value=Patient.class)
 	Bundle findPatientByLastName(@Required(name = Patient.SP_FAMILY) IdentifierDt theId);
+	
+	
 }

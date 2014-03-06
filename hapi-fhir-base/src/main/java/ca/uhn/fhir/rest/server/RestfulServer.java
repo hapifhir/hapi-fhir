@@ -26,7 +26,7 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.common.BaseMethodBinding;
 import ca.uhn.fhir.rest.common.SearchMethodBinding;
-import ca.uhn.fhir.rest.server.exceptions.AbstractResponseException;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -174,7 +174,7 @@ public abstract class RestfulServer extends HttpServlet {
 			}
 			// resourceMethod.get
 
-		} catch (AbstractResponseException e) {
+		} catch (BaseServerResponseException e) {
 
 			if (e instanceof InternalErrorException) {
 				ourLog.error("Failure during REST processing", e);

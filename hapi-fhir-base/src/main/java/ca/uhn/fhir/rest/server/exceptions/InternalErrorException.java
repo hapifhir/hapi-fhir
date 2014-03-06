@@ -1,6 +1,6 @@
 package ca.uhn.fhir.rest.server.exceptions;
 
-public class InternalErrorException extends AbstractResponseException {
+public class InternalErrorException extends BaseServerResponseException {
 
 	private static final long serialVersionUID = 1L;
 

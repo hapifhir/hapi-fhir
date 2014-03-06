@@ -6,8 +6,11 @@ import java.lang.reflect.Proxy;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.http.client.HttpClient;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingClientConnectionManager;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.impl.conn.SchemeRegistryFactory;
 
 import ca.uhn.fhir.context.ConfigurationException;
@@ -46,10 +49,12 @@ public class RestfulClientFactory {
 			throw new ConfigurationException(theClientType.getCanonicalName() + " is not an interface");
 		}
 
-		PoolingClientConnectionManager connectionManager = new PoolingClientConnectionManager(SchemeRegistryFactory.createDefault(), 5000, TimeUnit.MILLISECONDS);
-		HttpClient client = new DefaultHttpClient(connectionManager);
-
-		ClientInvocationHandler theInvocationHandler = new ClientInvocationHandler(client, myContext);
+		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		HttpClientBuilder builder = HttpClientBuilder.create();
+		builder.setConnectionManager(connectionManager);
+		CloseableHttpClient client = builder.build();
+		
+		ClientInvocationHandler theInvocationHandler = new ClientInvocationHandler(client, myContext, theServerBase);
 
 		for (Method nextMethod : theClientType.getMethods()) {			
 			BaseMethodBinding binding = BaseMethodBinding.bindMethod(nextMethod);

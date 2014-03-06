@@ -2,6 +2,7 @@ package ca.uhn.fhir.rest.common;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -9,9 +10,9 @@ import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 
-import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.client.GetClientInvocation;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.Parameter;
 import ca.uhn.fhir.rest.server.Util;
@@ -26,14 +27,14 @@ public class SearchMethodBinding extends BaseMethodBinding {
 
 	private Method method;
 
-	private List<Parameter> parameters;
+	private List<Parameter> myParameters;
 	private RequestType requestType;
 	private Class<?> myDeclaredResourceType;
 
-	public SearchMethodBinding(Class<? extends IResource> theAnnotatedResourceType, Method theMethod) {
-		super(theAnnotatedResourceType);
+	public SearchMethodBinding(MethodReturnTypeEnum theMethodReturnTypeEnum, Class<? extends IResource> theAnnotatedResourceType, Method theMethod) {
+		super(theMethodReturnTypeEnum, theAnnotatedResourceType);
 		this.method = theMethod;
-		this.parameters = Util.getResourceParameters(theMethod);
+		this.myParameters = Util.getResourceParameters(theMethod);
 		
 		this.myDeclaredResourceType = theMethod.getReturnType();
 	}
@@ -43,7 +44,7 @@ public class SearchMethodBinding extends BaseMethodBinding {
 	}
 
 	public List<Parameter> getParameters() {
-		return parameters;
+		return myParameters;
 	}
 
 	public RequestType getRequestType() {
@@ -64,9 +65,9 @@ public class SearchMethodBinding extends BaseMethodBinding {
 		assert theId == null;
 		assert theVersionId == null;
 
-		Object[] params = new Object[parameters.size()];
-		for (int i = 0; i < parameters.size(); i++) {
-			Parameter param = parameters.get(i);
+		Object[] params = new Object[myParameters.size()];
+		for (int i = 0; i < myParameters.size(); i++) {
+			Parameter param = myParameters.get(i);
 			String[] value = parameterValues.get(param.getName());
 			if (value == null || value.length == 0 || StringUtils.isBlank(value[0])) {
 				continue;
@@ -104,8 +105,8 @@ public class SearchMethodBinding extends BaseMethodBinding {
 		}
 
 		Set<String> methodParamsTemp = new HashSet<String>();
-		for (int i = 0; i < this.parameters.size(); i++) {
-			Parameter temp = this.parameters.get(i);
+		for (int i = 0; i < this.myParameters.size(); i++) {
+			Parameter temp = this.myParameters.get(i);
 			methodParamsTemp.add(temp.getName());
 			if (temp.isRequired() && !theParameterNames.contains(temp.getName())) {
 				ourLog.trace("Method {} doesn't match param '{}' is not present", method.getName(), temp.getName());
@@ -124,7 +125,7 @@ public class SearchMethodBinding extends BaseMethodBinding {
 	}
 
 	public void setParameters(List<Parameter> parameters) {
-		this.parameters = parameters;
+		this.myParameters = parameters;
 	}
 
 	public void setRequestType(RequestType requestType) {
@@ -137,6 +138,22 @@ public class SearchMethodBinding extends BaseMethodBinding {
 
 	public static enum RequestType {
 		DELETE, GET, POST, PUT
+	}
+
+	@Override
+	public GetClientInvocation invokeClient(Object[] theArgs) throws InternalErrorException {
+		assert theArgs.length == myParameters.size() : "Wrong number of arguments: " + theArgs.length;
+		
+		Map<String, String> args = new HashMap<String, String>();
+		
+		for (int idx = 0; idx < theArgs.length; idx++) {
+			Object object = theArgs[idx];
+			Parameter nextParam = myParameters.get(idx);
+			String value = nextParam.encode(object);
+			args.put(nextParam.getName(), value);
+		}
+		
+		return new GetClientInvocation(args, getResourceName());
 	}
 
 }

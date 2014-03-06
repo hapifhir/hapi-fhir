@@ -1,0 +1,26 @@
+package ca.uhn.fhir.model.api;
+
+public interface IQueryParameterType {
+
+	/**
+	 * Sets the value of this type using the <b>token</b> format. This 
+	 * format is used in HTTP queries as a parameter format.
+	 * 
+	 * @see See FHIR specification 
+	 *    <a href="http://www.hl7.org/implement/standards/fhir/search.html#ptypes">2.2.2 Search Parameter Types</a>
+	 *    for information on the <b>token</b> format
+	 */
+	public void setValueAsQueryToken(String theParameter);
+
+	/**
+	 * Returns the value of this type using the <b>token</b> format. This 
+	 * format is used in HTTP queries as a parameter format.
+	 * 
+	 * @see See FHIR specification 
+	 *    <a href="http://www.hl7.org/implement/standards/fhir/search.html#ptypes">2.2.2 Search Parameter Types</a>
+	 *    for information on the <b>token</b> format
+	 */
+	public String getValueAsQueryToken();
+	
+	
+}

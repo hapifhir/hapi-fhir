@@ -4,12 +4,13 @@ import org.apache.commons.lang3.StringUtils;
 
 import ca.uhn.fhir.model.api.BaseElement;
 import ca.uhn.fhir.model.api.IPrimitiveDatatype;
+import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.SimpleSetter;
 import ca.uhn.fhir.parser.DataFormatException;
 
 @DatatypeDef(name = "string")
-public class StringDt  extends BaseElement implements IPrimitiveDatatype<String> {
+public class StringDt  extends BaseElement implements IPrimitiveDatatype<String>, IQueryParameterType {
 
 	private String myValue;
 
@@ -83,6 +84,22 @@ public class StringDt  extends BaseElement implements IPrimitiveDatatype<String>
 		} else if (!myValue.equals(other.myValue))
 			return false;
 		return true;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void setValueAsQueryToken(String theParameter) {
+		setValue(theParameter);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public String getValueAsQueryToken() {
+		return getValue();
 	}
 	
 

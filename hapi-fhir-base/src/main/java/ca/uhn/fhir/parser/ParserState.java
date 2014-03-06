@@ -15,7 +15,6 @@ import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeChildDeclaredExtensionDefinition;
-import ca.uhn.fhir.context.RuntimeChildPrimitiveBoundCodeDatatypeDefinition;
 import ca.uhn.fhir.context.RuntimePrimitiveDatatypeDefinition;
 import ca.uhn.fhir.context.RuntimePrimitiveDatatypeNarrativeDefinition;
 import ca.uhn.fhir.context.RuntimeResourceBlockDefinition;
@@ -23,6 +22,7 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeResourceReferenceDefinition;
 import ca.uhn.fhir.model.api.BaseBundle;
 import ca.uhn.fhir.model.api.Bundle;
+import ca.uhn.fhir.model.api.BundleCategory;
 import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.api.ICompositeDatatype;
 import ca.uhn.fhir.model.api.ICompositeElement;
@@ -84,9 +84,7 @@ class ParserState<T extends IElement> {
 	}
 
 	/**
-	 * Invoked after any new XML event is individually processed, containing a
-	 * copy of the XML event. This is basically intended for embedded XHTML
-	 * content
+	 * Invoked after any new XML event is individually processed, containing a copy of the XML event. This is basically intended for embedded XHTML content
 	 */
 	public void xmlEvent(XMLEvent theNextEvent) {
 		myState.xmlEvent(theNextEvent);
@@ -140,6 +138,37 @@ class ParserState<T extends IElement> {
 
 	}
 
+	public class AtomCategoryState extends BaseState {
+
+		private BundleCategory myInstance;
+
+		public AtomCategoryState(BundleCategory theEntry) {
+			myInstance = theEntry;
+		}
+
+		@Override
+		public void endingElement(EndElement theElem) throws DataFormatException {
+			pop();
+		}
+
+		@Override
+		public void enteringNewElement(String theNamespaceURI, String theLocalPart) throws DataFormatException {
+			throw new DataFormatException("Unexpected element: " + theLocalPart);
+		}
+
+		@Override
+		public void attributeValue(String theName, String theValue) throws DataFormatException {
+			if ("term".equals(theName)) {
+				myInstance.setTerm(theValue);
+			} else if ("label".equals(theName)) {
+				myInstance.setLabel(theValue);
+			} else if ("scheme".equals(theName)) {
+				myInstance.setScheme(theValue);
+			}
+		}
+
+	}
+
 	public class AtomEntryState extends BaseState {
 
 		private BundleEntry myEntry;
@@ -171,7 +200,9 @@ class ParserState<T extends IElement> {
 			} else if ("content".equals(theLocalPart)) {
 				push(new PreResourceState(myEntry));
 			} else if ("summary".equals(theLocalPart)) {
-				push(new XhtmlState(myEntry.getSummary(),false));
+				push(new XhtmlState(myEntry.getSummary(), false));
+			} else if ("category".equals(theLocalPart)) {
+				push(new AtomCategoryState(myEntry.addCategory()));
 			} else {
 				throw new DataFormatException("Unexpected element in entry: " + theLocalPart);
 			}
@@ -281,8 +312,6 @@ class ParserState<T extends IElement> {
 			myInstance = theInstance;
 		}
 
-	
-
 		@Override
 		public void endingElement(EndElement theElem) throws DataFormatException {
 			pop();
@@ -307,7 +336,7 @@ class ParserState<T extends IElement> {
 			} else if ("author".equals(theLocalPart)) {
 				push(new AtomAuthorState(myInstance));
 			} else {
-				throw new DataFormatException("Unexpected element: "+ theLocalPart);
+				throw new DataFormatException("Unexpected element: " + theLocalPart);
 			}
 
 			// TODO: handle category and DSig
@@ -386,7 +415,6 @@ class ParserState<T extends IElement> {
 			myDefinition = theDefinition;
 			myParentInstance = theParentInstance;
 		}
-
 
 		@Override
 		public void endingElement(EndElement theElem) throws DataFormatException {
@@ -522,7 +550,7 @@ class ParserState<T extends IElement> {
 				RuntimePrimitiveDatatypeNarrativeDefinition xhtmlTarget = (RuntimePrimitiveDatatypeNarrativeDefinition) target;
 				XhtmlDt newDt = xhtmlTarget.newInstance();
 				child.getMutator().addValue(myInstance, newDt);
-				XhtmlState state = new XhtmlState(newDt,true);
+				XhtmlState state = new XhtmlState(newDt, true);
 				push(state);
 				return;
 			}
@@ -561,7 +589,6 @@ class ParserState<T extends IElement> {
 		public ExtensionState(UndeclaredExtension theExtension) {
 			myExtension = theExtension;
 		}
-
 
 		@Override
 		public void endingElement(EndElement theElem) throws DataFormatException {
@@ -622,7 +649,6 @@ class ParserState<T extends IElement> {
 
 		private Bundle myInstance;
 
-
 		@Override
 		public void endingElement(EndElement theElem) throws DataFormatException {
 			// ignore
@@ -665,7 +691,6 @@ class ParserState<T extends IElement> {
 		public PreResourceState(BundleEntry theEntry) {
 			myEntry = theEntry;
 		}
-
 
 		@Override
 		public void endingElement(EndElement theElem) throws DataFormatException {
@@ -723,14 +748,14 @@ class ParserState<T extends IElement> {
 			pop();
 		}
 
-//		@Override
-//		public void enteringNewElementExtension(StartElement theElement, String theUrlAttr) {
-//			if (myInstance instanceof ISupportsUndeclaredExtensions) {
-//				UndeclaredExtension ext = new UndeclaredExtension(theUrlAttr);
-//				((ISupportsUndeclaredExtensions) myInstance).getUndeclaredExtensions().add(ext);
-//				push(new ExtensionState(ext));
-//			}
-//		}
+		// @Override
+		// public void enteringNewElementExtension(StartElement theElement, String theUrlAttr) {
+		// if (myInstance instanceof ISupportsUndeclaredExtensions) {
+		// UndeclaredExtension ext = new UndeclaredExtension(theUrlAttr);
+		// ((ISupportsUndeclaredExtensions) myInstance).getUndeclaredExtensions().add(ext);
+		// push(new ExtensionState(ext));
+		// }
+		// }
 
 		@Override
 		public void enteringNewElement(String theNamespaceURI, String theLocalPart) throws DataFormatException {
@@ -761,7 +786,7 @@ class ParserState<T extends IElement> {
 			if (!"value".equals(theName)) {
 				return;
 			}
-			
+
 			switch (mySubState) {
 			case DISPLAY:
 				myInstance.setDisplay(theValue);
@@ -840,7 +865,7 @@ class ParserState<T extends IElement> {
 			if (theEvent.isStartElement()) {
 				myDepth++;
 			}
-			
+
 			if (theEvent.isEndElement()) {
 				if (myDepth == 0) {
 					myDt.setValue(myEvents);

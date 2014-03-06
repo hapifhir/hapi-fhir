@@ -28,7 +28,7 @@ import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.dstu.resource.ValueSet;
 import ca.uhn.fhir.model.dstu.resource.ValueSet.DefineConcept;
-import ca.uhn.fhir.parser.XmlParser;
+import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.tinder.model.ValueSetTm;
 import ca.uhn.fhir.tinder.model.ValueSetTm.Code;
 
@@ -53,7 +53,7 @@ public class ValueSetGenerator {
 	}
 
 	public void parse() throws FileNotFoundException, IOException {
-		XmlParser newXmlParser = new FhirContext(ValueSet.class).newXmlParser();
+		IParser newXmlParser = new FhirContext(ValueSet.class).newXmlParser();
 
 		ourLog.info("Parsing built-in ValueSets");
 		String vs = IOUtils.toString(ValueSetGenerator.class.getResourceAsStream("/vs/all-valuesets-bundle.xml"));

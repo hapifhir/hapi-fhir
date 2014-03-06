@@ -20,7 +20,16 @@ public class Bundle extends BaseBundle implements IElement {
 	private InstantDt myPublished;
 	private StringDt myTitle;
 	private IntegerDt myTotalResults;
-	private InstantDt  myUpdated;
+	private InstantDt myUpdated;
+
+	/**
+	 * Adds and returns a new bundle entry
+	 */
+	public BundleEntry addEntry() {
+		BundleEntry retVal = new BundleEntry();
+		getEntries().add(retVal);
+		return retVal;
+	}
 
 	public List<BundleEntry> getEntries() {
 		if (myEntries == null) {
@@ -87,25 +96,39 @@ public class Bundle extends BaseBundle implements IElement {
 
 	public StringDt getTitle() {
 		if (myTitle == null) {
-			myTitle= new StringDt();
+			myTitle = new StringDt();
 		}
 		return myTitle;
 	}
 
 	public IntegerDt getTotalResults() {
-		if (myTotalResults== null) {
-			myTotalResults= new IntegerDt();
+		if (myTotalResults == null) {
+			myTotalResults = new IntegerDt();
 		}
 		return myTotalResults;
 	}
 
 	public InstantDt getUpdated() {
 		if (myUpdated == null) {
-			myUpdated= new InstantDt();
+			myUpdated = new InstantDt();
 		}
 		return myUpdated;
 	}
 
-	
+	public List<IResource> toListOfResources() {
+		ArrayList<IResource> retVal = new ArrayList<IResource>();
+		for (BundleEntry next : getEntries()) {
+			if (next.getResource() != null) {
+				retVal.add(next.getResource());
+			}
+		}
+		return retVal;
+	}
+
+	public static Bundle withSingleResource(IResource theResource) {
+		Bundle retVal = new Bundle();
+		retVal.addEntry().setResource(theResource);
+		return retVal;
+	}
 
 }

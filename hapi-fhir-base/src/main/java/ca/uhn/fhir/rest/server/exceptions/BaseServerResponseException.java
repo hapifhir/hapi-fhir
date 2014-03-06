@@ -1,6 +1,6 @@
 package ca.uhn.fhir.rest.server.exceptions;
 
-public abstract class AbstractResponseException extends Exception {
+public abstract class BaseServerResponseException extends Exception {
 
 	private static final long serialVersionUID = 1L;
 
@@ -14,7 +14,7 @@ public abstract class AbstractResponseException extends Exception {
 	 * @param theMessage
 	 *            The message
 	 */
-	public AbstractResponseException(int theStatusCode, String theMessage) {
+	public BaseServerResponseException(int theStatusCode, String theMessage) {
 		super(theMessage);
 		myStatusCode = theStatusCode;
 	}
@@ -28,7 +28,7 @@ public abstract class AbstractResponseException extends Exception {
 	 *            The message
 	 * @param theCause The cause
 	 */
-	public AbstractResponseException(int theStatusCode, String theMessage, Throwable theCause) {
+	public BaseServerResponseException(int theStatusCode, String theMessage, Throwable theCause) {
 		super(theMessage, theCause);
 		myStatusCode = theStatusCode;
 	}
@@ -41,7 +41,7 @@ public abstract class AbstractResponseException extends Exception {
 	 * @param theCause
 	 *            The underlying cause exception
 	 */
-	public AbstractResponseException(int theStatusCode, Throwable theCause) {
+	public BaseServerResponseException(int theStatusCode, Throwable theCause) {
 		super(theCause.toString(), theCause);
 		myStatusCode = theStatusCode;
 	}

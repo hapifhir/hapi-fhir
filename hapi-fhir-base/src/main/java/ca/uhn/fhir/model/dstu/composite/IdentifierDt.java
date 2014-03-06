@@ -17,6 +17,7 @@
 package ca.uhn.fhir.model.dstu.composite;
 
 import java.util.*;
+
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.model.primitive.*;
@@ -38,7 +39,7 @@ import ca.uhn.fhir.model.dstu.resource.*;
  * </p> 
  */
 @DatatypeDef(name="Identifier") 
-public class IdentifierDt extends BaseElement implements ICompositeDatatype {
+public class IdentifierDt extends BaseElement implements ICompositeDatatype, IQueryParameterType {
 
 	@Child(name="use", type=CodeDt.class, order=0, min=0, max=1)	
 	private BoundCodeDt<IdentifierUseEnum> myUse;
@@ -61,6 +62,21 @@ public class IdentifierDt extends BaseElement implements ICompositeDatatype {
 	})	
 	private ResourceReference myAssigner;
 	
+	/**
+	 * Creates a new identifier
+	 */
+	public IdentifierDt() {
+		// nothing
+	}
+
+	/**
+	 * Creates a new identifier with the given system and value
+	 */
+	public IdentifierDt(String theSystem, String theValue) {
+		setSystem(theSystem);
+		setValue(theValue);
+	}
+
 	/**
 	 * Gets the value(s) for <b>use</b> (usual | official | temp | secondary (If known)
 ).
@@ -303,13 +319,21 @@ public class IdentifierDt extends BaseElement implements ICompositeDatatype {
 	}
 
 	/**
-	 * Sets the value of this <code>IdentifierDt</code> using the <b>token</b> format. This 
-	 * format is used in HTTP queries as a parameter format.
-	 * 
-	 * @see See FHIR specification 
-	 *    <a href="http://www.hl7.org/implement/standards/fhir/search.html#ptypes">2.2.2 Search Parameter Types</a>
-	 *    for information on the <b>token</b> format
+	 * {@inheritDoc}
 	 */
+	@Override
+	public String getValueAsQueryToken() {
+		if (org.apache.commons.lang3.StringUtils.isNotBlank(getSystem().getValueAsString())) {
+			return getSystem().getValueAsString() + '|' + getValue().getValueAsString(); 
+		} else {
+			return getValue().getValueAsString();
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
 	public void setValueAsQueryToken(String theParameter) {
 		int barIndex = theParameter.indexOf('|');
 		if (barIndex != -1) {

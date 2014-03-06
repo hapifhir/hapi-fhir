@@ -8,7 +8,9 @@ import java.util.Set;
 
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.XmlParser;
+import ca.uhn.fhir.rest.client.RestfulClientFactory;
 
 public class FhirContext {
 
@@ -47,8 +49,12 @@ public class FhirContext {
 		return (RuntimeResourceDefinition) myClassToElementDefinition.get(theResource.getClass());
 	}
 
-	public XmlParser newXmlParser() {
+	public IParser newXmlParser() {
 		return new XmlParser(this);
+	}
+	
+	public RestfulClientFactory newClientFactory() {
+		return new RestfulClientFactory(this);
 	}
 
 }

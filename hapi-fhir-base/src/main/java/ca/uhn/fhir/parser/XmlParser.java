@@ -3,6 +3,7 @@ package ca.uhn.fhir.parser;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
@@ -48,7 +49,7 @@ import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.XhtmlDt;
 import ca.uhn.fhir.util.PrettyPrintWriterWrapper;
 
-public class XmlParser {
+public class XmlParser implements IParser {
 	static final String ATOM_NS = "http://www.w3.org/2005/Atom";
 	static final String FHIR_NS = "http://hl7.org/fhir";
 	static final String OPENSEARCH_NS = "http://a9.com/-/spec/opensearch/1.1/";
@@ -139,6 +140,10 @@ public class XmlParser {
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see ca.uhn.fhir.parser.IParser#encodeBundleToString(ca.uhn.fhir.model.api.Bundle)
+	 */
+	@Override
 	public String encodeBundleToString(Bundle theBundle) throws DataFormatException {
 		StringWriter stringWriter = new StringWriter();
 		encodeBundleToWriter(theBundle, stringWriter);
@@ -146,6 +151,10 @@ public class XmlParser {
 		return stringWriter.toString();
 	}
 
+	/* (non-Javadoc)
+	 * @see ca.uhn.fhir.parser.IParser#encodeBundleToWriter(ca.uhn.fhir.model.api.Bundle, java.io.Writer)
+	 */
+	@Override
 	public void encodeBundleToWriter(Bundle theBundle, Writer theWriter) {
 		try {
 			XMLStreamWriter eventWriter;
@@ -336,12 +345,20 @@ public class XmlParser {
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see ca.uhn.fhir.parser.IParser#encodeResourceToString(ca.uhn.fhir.model.api.IResource)
+	 */
+	@Override
 	public String encodeResourceToString(IResource theResource) throws DataFormatException {
 		Writer stringWriter = new StringWriter();
 		encodeResourceToWriter(theResource, stringWriter);
 		return stringWriter.toString();
 	}
 
+	/* (non-Javadoc)
+	 * @see ca.uhn.fhir.parser.IParser#encodeResourceToWriter(ca.uhn.fhir.model.api.IResource, java.io.Writer)
+	 */
+	@Override
 	public void encodeResourceToWriter(IResource theResource, Writer stringWriter) {
 		XMLStreamWriter eventWriter;
 		try {
@@ -354,6 +371,10 @@ public class XmlParser {
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see ca.uhn.fhir.parser.IParser#encodeResourceToXmlStreamWriter(ca.uhn.fhir.model.api.IResource, javax.xml.stream.XMLStreamWriter)
+	 */
+	@Override
 	public void encodeResourceToXmlStreamWriter(IResource theResource, XMLStreamWriter eventWriter) throws XMLStreamException, DataFormatException {
 		RuntimeResourceDefinition resDef = myContext.getResourceDefinition(theResource);
 		eventWriter.writeStartElement(resDef.getName());
@@ -411,13 +432,22 @@ public class XmlParser {
 				StartElement se = event.asStartElement();
 				if (firstEvent) {
 					theEventWriter.writeStartElement(se.getName().getLocalPart());
-					theEventWriter.writeNamespace(se.getName().getPrefix(), se.getName().getNamespaceURI());
+					if (StringUtils.isBlank(se.getName().getPrefix())) {
+						theEventWriter.writeDefaultNamespace(se.getName().getNamespaceURI());
+					}else {
+						theEventWriter.writeNamespace(se.getName().getPrefix(), se.getName().getNamespaceURI());
+					}
 				} else {
 					if (isBlank(se.getName().getPrefix())) {
 						if (isBlank(se.getName().getNamespaceURI())) {
 							theEventWriter.writeStartElement(se.getName().getLocalPart());
 						} else {
+							if (StringUtils.isBlank(se.getName().getPrefix())) {
+								theEventWriter.writeStartElement(se.getName().getLocalPart());
+								theEventWriter.writeDefaultNamespace(se.getName().getNamespaceURI());
+							}else {
 							theEventWriter.writeStartElement(se.getName().getNamespaceURI(), se.getName().getLocalPart());
+							}
 						}
 					} else {
 						theEventWriter.writeStartElement(se.getName().getPrefix(), se.getName().getLocalPart(), se.getName().getNamespaceURI());
@@ -437,17 +467,13 @@ public class XmlParser {
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see ca.uhn.fhir.parser.IParser#parseBundle(java.lang.String)
+	 */
+	@Override
 	public Bundle parseBundle(String theXml) throws ConfigurationException, DataFormatException {
-		XMLEventReader streamReader;
-		try {
-			streamReader = myXmlInputFactory.createXMLEventReader(new StringReader(theXml));
-		} catch (XMLStreamException e) {
-			throw new DataFormatException(e);
-		} catch (FactoryConfigurationError e) {
-			throw new ConfigurationException("Failed to initialize STaX event factory", e);
-		}
-
-		return parseBundle(streamReader);
+		StringReader reader = new StringReader(theXml);
+		return parseBundle(reader);
 	}
 
 	private Bundle parseBundle(XMLEventReader theStreamReader) {
@@ -455,19 +481,19 @@ public class XmlParser {
 		return doXmlLoop(theStreamReader, parserState);
 	}
 
+	/* (non-Javadoc)
+	 * @see ca.uhn.fhir.parser.IParser#parseResource(java.lang.String)
+	 */
+	@Override
 	public IResource parseResource(String theXml) throws ConfigurationException, DataFormatException {
-		XMLEventReader streamReader;
-		try {
-			streamReader = myXmlInputFactory.createXMLEventReader(new StringReader(theXml));
-		} catch (XMLStreamException e) {
-			throw new DataFormatException(e);
-		} catch (FactoryConfigurationError e) {
-			throw new ConfigurationException("Failed to initialize STaX event factory", e);
-		}
-
-		return parseResource(streamReader);
+		StringReader reader = new StringReader(theXml);
+		return parseResource(reader);
 	}
 
+	/* (non-Javadoc)
+	 * @see ca.uhn.fhir.parser.IParser#parseResource(javax.xml.stream.XMLEventReader)
+	 */
+	@Override
 	public IResource parseResource(XMLEventReader theStreamReader) {
 		ParserState<IResource> parserState = ParserState.getPreResourceInstance(myContext);
 		return doXmlLoop(theStreamReader, parserState);
@@ -503,5 +529,33 @@ public class XmlParser {
 			theEventWriter.writeCharacters(theStringDt.getValue());
 		}
 		theEventWriter.writeEndElement();
+	}
+
+	@Override
+	public Bundle parseBundle(Reader theReader) {
+		XMLEventReader streamReader;
+		try {
+			streamReader = myXmlInputFactory.createXMLEventReader(theReader);
+		} catch (XMLStreamException e) {
+			throw new DataFormatException(e);
+		} catch (FactoryConfigurationError e) {
+			throw new ConfigurationException("Failed to initialize STaX event factory", e);
+		}
+
+		return parseBundle(streamReader);
+	}
+
+	@Override
+	public IResource parseResource(Reader theReader) throws ConfigurationException, DataFormatException {
+		XMLEventReader streamReader;
+		try {
+			streamReader = myXmlInputFactory.createXMLEventReader(theReader);
+		} catch (XMLStreamException e) {
+			throw new DataFormatException(e);
+		} catch (FactoryConfigurationError e) {
+			throw new ConfigurationException("Failed to initialize STaX event factory", e);
+		}
+
+		return parseResource(streamReader);
 	}
 }

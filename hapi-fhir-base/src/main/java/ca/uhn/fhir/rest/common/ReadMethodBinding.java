@@ -10,6 +10,8 @@ import org.apache.commons.lang3.Validate;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.client.GetClientInvocation;
+import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.Util;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -22,8 +24,8 @@ public class ReadMethodBinding extends BaseMethodBinding {
 	private Integer myVersionIdIndex;
 	private int myParameterCount;
 
-	public ReadMethodBinding(Class<? extends IResource> theAnnotatedResourceType, Method theMethod) {
-		super(theAnnotatedResourceType);
+	public ReadMethodBinding(MethodReturnTypeEnum theMethodReturnType, Class<? extends IResource> theAnnotatedResourceType, Method theMethod) {
+		super(theMethodReturnType, theAnnotatedResourceType);
 		
 		Validate.notNull(theMethod, "Method must not be null");
 		
@@ -84,6 +86,17 @@ public class ReadMethodBinding extends BaseMethodBinding {
 		}
 		
 		return toResourceList(response);
+	}
+
+	@Override
+	public GetClientInvocation invokeClient(Object[] theArgs) {
+		String id = ((IdDt)theArgs[myIdIndex]).getValue();
+		if (myVersionIdIndex == null) {
+			return new GetClientInvocation(getResourceName(), id);
+		}else {
+			String vid = ((IdDt)theArgs[myVersionIdIndex]).getValue();
+			return new GetClientInvocation(getResourceName(), id, Constants.URL_TOKEN_HISTORY, vid);
+		}
 	}
 
 }

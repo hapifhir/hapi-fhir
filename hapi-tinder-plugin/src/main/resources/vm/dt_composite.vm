@@ -24,7 +24,31 @@ import ${packageBase}.resource.*;
  * </p> 
  */
 @DatatypeDef(name="${className}") 
-public class ${className}Dt extends BaseElement implements ICompositeDatatype {
+public class ${className}Dt extends BaseElement implements ICompositeDatatype 
+#if ( ${className} == "Identifier" )
+, IQueryParameter
+#end
+{
+
+#########################
+### Type-specific constructors
+#########################
+#if ( ${className} == "Identifier" )
+	/**
+	 * Creates a new identifier
+	 */
+	public IdentifierDt() {
+		// nothing
+	}
+
+	/**
+	 * Creates a new identifier with the given system and value
+	 */
+	public IdentifierDt(String theSystem, String theValue) {
+		setSystem(theSystem);
+		setValue(theValue);
+	}
+#end
 
 #childExtensionFields( $childExtensionTypes )
 #childVars( $children )
@@ -48,13 +72,21 @@ public class ${className}Dt extends BaseElement implements ICompositeDatatype {
 	}
 
 	/**
-	 * Sets the value of this <code>IdentifierDt</code> using the <b>token</b> format. This 
-	 * format is used in HTTP queries as a parameter format.
-	 * 
-	 * @see See FHIR specification 
-	 *    <a href="http://www.hl7.org/implement/standards/fhir/search.html#[[#]]#ptypes">2.2.2 Search Parameter Types</a>
-	 *    for information on the <b>token</b> format
+	 * {@inheritDoc}
 	 */
+	@Override
+	public String getValueAsQueryToken() {
+		if (org.apache.commons.lang3.StringUtils.isNotBlank(getSystem().getValueAsString())) {
+			return getSystem().getValueAsString() + '|' + getValue().getValueAsString(); 
+		} else {
+			return getValue().getValueAsString();
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
 	public void setValueAsQueryToken(String theParameter) {
 		int barIndex = theParameter.indexOf('|');
 		if (barIndex != -1) {

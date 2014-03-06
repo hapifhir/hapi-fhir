@@ -20,10 +20,20 @@ import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.resource.Observation;
+import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.dstu.resource.ValueSet;
 
 public class XmlParserTest {
 
+	@Test
+	public void testParseBundleLarge() throws IOException {
+		
+		String msg = IOUtils.toString(XmlParser.class.getResourceAsStream("/atom-document-large.xml"));
+		IParser p = new FhirContext(Patient.class).newXmlParser();
+		Bundle bundle = p.parseBundle(msg);
+
+	}
+	
 	@Test
 	public void testParseBundle() {
 		
@@ -85,7 +95,7 @@ public class XmlParserTest {
 				"</feed>";
 		//@formatter:on
 		
-		XmlParser p = new FhirContext(ValueSet.class).newXmlParser();
+		IParser p = new FhirContext(ValueSet.class).newXmlParser();
 		Bundle bundle = p.parseBundle(msg);
 		
 		assertEquals("FHIR Core Valuesets", bundle.getTitle().getValue());
@@ -105,7 +115,7 @@ public class XmlParserTest {
 	@Test
 	public void testLoadAndEncodeExtensions() throws ConfigurationException, DataFormatException, SAXException, IOException {
 		FhirContext ctx = new FhirContext(ResourceWithExtensionsA.class);
-		XmlParser p = new XmlParser(ctx);
+		IParser p = new XmlParser(ctx);
 
 		//@formatter:off
 		String msg = "<ResourceWithExtensionsA xmlns=\"http://hl7.org/fhir\">\n" + 
@@ -169,7 +179,7 @@ public class XmlParserTest {
 	public void testLoadObservation() throws ConfigurationException, DataFormatException, IOException {
 
 		FhirContext ctx = new FhirContext(Observation.class);
-		XmlParser p = new XmlParser(ctx);
+		IParser p = new XmlParser(ctx);
 
 		IResource resource = p.parseResource(IOUtils.toString(XmlParserTest.class.getResourceAsStream("/observation-example-eeg.xml")));
 

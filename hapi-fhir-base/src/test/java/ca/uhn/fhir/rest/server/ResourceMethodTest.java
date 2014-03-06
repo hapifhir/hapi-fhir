@@ -12,6 +12,7 @@ import org.junit.Test;
 
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.rest.common.SearchMethodBinding;
+import ca.uhn.fhir.rest.common.BaseMethodBinding.MethodReturnTypeEnum;
 import ca.uhn.fhir.rest.server.Parameter;
 
 public class ResourceMethodTest {
@@ -20,7 +21,7 @@ public class ResourceMethodTest {
 
 	@Before
 	public void before() throws NoSuchMethodException, SecurityException {
-		rm = new SearchMethodBinding(Patient.class, ResourceMethodTest.class.getMethod("before"));
+		rm = new SearchMethodBinding(MethodReturnTypeEnum.RESOURCE, Patient.class, ResourceMethodTest.class.getMethod("before"));
 	}
 	
 	@Test

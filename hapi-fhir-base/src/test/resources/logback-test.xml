@@ -10,6 +10,10 @@
 	<logger name="org.eclipse" additivity="false">
 	</logger>
 
+	<logger name="ca.uhn.fhir.rest.client" additivity="false" level="trace">
+		<appender-ref ref="STDOUT" />
+	</logger>
+
 	<root level="info">
 		<appender-ref ref="STDOUT" />
 	</root>

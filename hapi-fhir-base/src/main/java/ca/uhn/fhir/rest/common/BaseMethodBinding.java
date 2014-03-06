@@ -9,11 +9,12 @@ import java.util.Map;
 import java.util.Set;
 
 import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.Read;
-import ca.uhn.fhir.rest.client.ClientInvocation;
+import ca.uhn.fhir.rest.client.GetClientInvocation;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.Resource;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -23,23 +24,23 @@ import ca.uhn.fhir.rest.server.operations.Search;
 public abstract class BaseMethodBinding {
 
 	private String myResourceName;
+	private MethodReturnTypeEnum myMethodReturnType;
 
-	public BaseMethodBinding(Class<? extends IResource> theAnnotatedResourceType) {
+	public BaseMethodBinding(MethodReturnTypeEnum theMethodReturnType, Class<? extends IResource> theAnnotatedResourceType) {
 		ResourceDef resourceDefAnnotation = theAnnotatedResourceType.getAnnotation(ResourceDef.class);
 		if (resourceDefAnnotation == null) {
-			throw new ConfigurationException(theAnnotatedResourceType.getCanonicalName() + " has no @" + ResourceDef.class.getSimpleName()+ " annotation");
+			throw new ConfigurationException(theAnnotatedResourceType.getCanonicalName() + " has no @" + ResourceDef.class.getSimpleName() + " annotation");
 		}
 		myResourceName = resourceDefAnnotation.name();
+		myMethodReturnType = theMethodReturnType;
 	}
 
 	public abstract ReturnTypeEnum getReturnType();
 
-	public ClientInvocation invokeClient(Object[] theArgs) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+	public abstract GetClientInvocation invokeClient(Object[] theArgs) throws InternalErrorException;
 
-	public abstract List<IResource> invokeServer(IResourceProvider theResourceProvider, IdDt theId, IdDt theVersionId, Map<String, String[]> theParameterValues) throws InvalidRequestException, InternalErrorException;
+	public abstract List<IResource> invokeServer(IResourceProvider theResourceProvider, IdDt theId, IdDt theVersionId, Map<String, String[]> theParameterValues) throws InvalidRequestException,
+			InternalErrorException;
 
 	public abstract boolean matches(String theResourceName, IdDt theId, IdDt theVersion, Set<String> theParameterNames);
 
@@ -60,11 +61,21 @@ public abstract class BaseMethodBinding {
 		}
 
 		Class<?> methodReturnType = theMethod.getReturnType();
-		
+		MethodReturnTypeEnum methodReturnTypeEnum;
+		if (methodReturnType.equals(List.class)) {
+			methodReturnTypeEnum = MethodReturnTypeEnum.LIST_OF_RESOURCES;
+		} else if (methodReturnType.isAssignableFrom(annotatedResourceType)) {
+			methodReturnTypeEnum = MethodReturnTypeEnum.RESOURCE;
+		} else if (Bundle.class.isAssignableFrom(methodReturnType)) {
+			methodReturnTypeEnum = MethodReturnTypeEnum.LIST_OF_RESOURCES;
+		} else {
+			throw new ConfigurationException("Invalid return type '" + methodReturnType.getCanonicalName() + "' on method '" + theMethod.getName() + "' on type: " + theMethod.getDeclaringClass().getCanonicalName());
+		}
+
 		if (read != null) {
-			return new ReadMethodBinding(annotatedResourceType, theMethod);
+			return new ReadMethodBinding(methodReturnTypeEnum, annotatedResourceType, theMethod);
 		} else if (search != null) {
-			return new SearchMethodBinding(annotatedResourceType, theMethod);
+			return new SearchMethodBinding(methodReturnTypeEnum, annotatedResourceType, theMethod);
 		} else {
 			throw new ConfigurationException("Did not detect any FHIR annotations on method '" + theMethod.getName() + "' on type: " + theMethod.getDeclaringClass().getCanonicalName());
 		}
@@ -98,8 +109,8 @@ public abstract class BaseMethodBinding {
 				if (obj1 == null) {
 					obj1 = object;
 				} else {
-					throw new ConfigurationException("Method " + theNextMethod.getName() + " on type '" + theNextMethod.getDeclaringClass().getSimpleName() + " has annotations @" + obj1.getClass().getSimpleName() + " and @" + object.getClass().getSimpleName()
-							+ ". Can not have both.");
+					throw new ConfigurationException("Method " + theNextMethod.getName() + " on type '" + theNextMethod.getDeclaringClass().getSimpleName() + " has annotations @"
+							+ obj1.getClass().getSimpleName() + " and @" + object.getClass().getSimpleName() + ". Can not have both.");
 				}
 
 			}
@@ -125,7 +136,15 @@ public abstract class BaseMethodBinding {
 		}
 	}
 
+	public enum MethodReturnTypeEnum {
+		RESOURCE, BUNDLE, LIST_OF_RESOURCES
+	}
+
 	public enum ReturnTypeEnum {
 		BUNDLE, RESOURCE
+	}
+
+	public MethodReturnTypeEnum getMethodReturnType() {
+		return myMethodReturnType;
 	}
 }
