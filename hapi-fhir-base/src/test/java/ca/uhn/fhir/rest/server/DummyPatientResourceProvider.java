@@ -51,7 +51,7 @@ public class DummyPatientResourceProvider implements IResourceProvider {
 		}
 	}
 
-	@Search
+	@Search(Patient.class)
 	public Patient getPatient(@Required(name = "identifier") IdentifierDt theIdentifier) {
 		for (Patient next : myIdToPatient.values()) {
 			for (IdentifierDt nextId : next.getIdentifier()) {
@@ -75,7 +75,7 @@ public class DummyPatientResourceProvider implements IResourceProvider {
 	 *            The resource identity
 	 * @return The resource
 	 */
-	@Read
+	@Read(Patient.class)
 	public Patient getResourceById(@Read.IdParam IdDt theId) {
 		return myIdToPatient.get(theId.getValue());
 	}

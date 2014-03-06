@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Set;
 
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.common.BaseMethodBinding;
 
 /**
  * Created by dsotnikov on 2/25/2014.
@@ -14,25 +15,25 @@ public class Resource {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(Resource.class);
 
 	private String resourceName;
-	private List<BaseMethod> methods = new ArrayList<BaseMethod>();
+	private List<BaseMethodBinding> methods = new ArrayList<BaseMethodBinding>();
 	private IResourceProvider resourceProvider;
 
 	public Resource() {
 	}
 
-	public Resource(String resourceName, List<BaseMethod> methods) {
+	public Resource(String resourceName, List<BaseMethodBinding> methods) {
 		this.resourceName = resourceName;
 		this.methods = methods;
 	}
 
-	public BaseMethod getMethod(String theResourceName, IdDt theId, IdDt theVersionId, Set<String> theParameters) throws Exception {
+	public BaseMethodBinding getMethod(String theResourceName, IdDt theId, IdDt theVersionId, Set<String> theParameters) throws Exception {
 		if (null == methods) {
 			ourLog.warn("No methods exist for resource provider: {}", resourceProvider.getClass());
 			return null;
 		}
 
 		ourLog.info("Looking for a handler for {} / {} / {} / {}", new Object[] {theResourceName,theId, theVersionId, theParameters});
-		for (BaseMethod rm : methods) {
+		for (BaseMethodBinding rm : methods) {
 			if (rm.matches(theResourceName, theId, theVersionId, theParameters)) {
 				ourLog.info("Handler {} matches", rm);
 				return rm;
@@ -51,17 +52,16 @@ public class Resource {
 		this.resourceName = resourceName;
 	}
 
-	public List<BaseMethod> getMethods() {
+	public List<BaseMethodBinding> getMethods() {
 		return methods;
 	}
 
-	public void setMethods(List<BaseMethod> methods) {
+	public void setMethods(List<BaseMethodBinding> methods) {
 		this.methods = methods;
 	}
 
-	public void addMethod(BaseMethod method) {
+	public void addMethod(BaseMethodBinding method) {
 		this.methods.add(method);
-		method.setResource(this);
 	}
 
 	@Override

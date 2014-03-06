@@ -10,20 +10,17 @@ import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 
+import ca.uhn.fhir.model.dstu.resource.Patient;
+import ca.uhn.fhir.rest.common.SearchMethodBinding;
 import ca.uhn.fhir.rest.server.Parameter;
-import ca.uhn.fhir.rest.server.SearchMethod;
 
 public class ResourceMethodTest {
 
-	private SearchMethod rm;
+	private SearchMethodBinding rm;
 
 	@Before
-	public void before() {
-		Resource resource = new Resource();
-		resource.setResourceName("ResName");
-		
-		rm = new SearchMethod();
-		rm.setResource(resource);
+	public void before() throws NoSuchMethodException, SecurityException {
+		rm = new SearchMethodBinding(Patient.class, ResourceMethodTest.class.getMethod("before"));
 	}
 	
 	@Test

@@ -1,41 +1,41 @@
-package ca.uhn.fhir.rest.server;
+package ca.uhn.fhir.rest.common;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
-import org.junit.internal.MethodSorter;
 
+import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.rest.server.Parameter;
+import ca.uhn.fhir.rest.server.Util;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 /**
  * Created by dsotnikov on 2/25/2014.
  */
-public class SearchMethod extends BaseMethod {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchMethod.class);
+public class SearchMethodBinding extends BaseMethodBinding {
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchMethodBinding.class);
 
 	private Method method;
 
 	private List<Parameter> parameters;
 	private RequestType requestType;
-	private Class<?> resourceType;
+	private Class<?> myDeclaredResourceType;
 
-	public SearchMethod() {
-	}
-
-	public SearchMethod(Method method, List<Parameter> parameters) {
-		this.method = method;
-		this.parameters = parameters;
+	public SearchMethodBinding(Class<? extends IResource> theAnnotatedResourceType, Method theMethod) {
+		super(theAnnotatedResourceType);
+		this.method = theMethod;
+		this.parameters = Util.getResourceParameters(theMethod);
+		
+		this.myDeclaredResourceType = theMethod.getReturnType();
 	}
 
 	public Method getMethod() {
@@ -50,8 +50,8 @@ public class SearchMethod extends BaseMethod {
 		return requestType;
 	}
 
-	public Class getResourceType() {
-		return resourceType.getClass();
+	public Class getDeclaredResourceType() {
+		return myDeclaredResourceType.getClass();
 	}
 
 	@Override
@@ -60,7 +60,7 @@ public class SearchMethod extends BaseMethod {
 	}
 
 	@Override
-	public List<IResource> invoke(IResourceProvider theResourceProvider, IdDt theId, IdDt theVersionId, Map<String, String[]> parameterValues) throws InvalidRequestException, InternalErrorException {
+	public List<IResource> invokeServer(IResourceProvider theResourceProvider, IdDt theId, IdDt theVersionId, Map<String, String[]> parameterValues) throws InvalidRequestException, InternalErrorException {
 		assert theId == null;
 		assert theVersionId == null;
 
@@ -94,12 +94,12 @@ public class SearchMethod extends BaseMethod {
 
 	@Override
 	public boolean matches(String theResourceName, IdDt theId, IdDt theVersion, Set<String> theParameterNames) {
-		if (!theResourceName.equals(getResource().getResourceName())) {
-			ourLog.info("Method {} doesn't match because resource name {} != {}", method.getName(), theResourceName, getResource().getResourceName());
+		if (!theResourceName.equals(getResourceName())) {
+			ourLog.trace("Method {} doesn't match because resource name {} != {}", method.getName(), theResourceName, getResourceName());
 			return false;
 		}
 		if (theId != null || theVersion != null) {
-			ourLog.info("Method {} doesn't match because ID or Version are not null: {} - {}", theId, theVersion);
+			ourLog.trace("Method {} doesn't match because ID or Version are not null: {} - {}", theId, theVersion);
 			return false;
 		}
 
@@ -108,13 +108,13 @@ public class SearchMethod extends BaseMethod {
 			Parameter temp = this.parameters.get(i);
 			methodParamsTemp.add(temp.getName());
 			if (temp.isRequired() && !theParameterNames.contains(temp.getName())) {
-				ourLog.info("Method {} doesn't match param '{}' is not present", temp.getName());
+				ourLog.trace("Method {} doesn't match param '{}' is not present", method.getName(), temp.getName());
 				return false;
 			}
 		}
 		boolean retVal = methodParamsTemp.containsAll(theParameterNames);
 
-		ourLog.info("Method {} matches: {}", method.getName(), retVal);
+		ourLog.trace("Method {} matches: {}", method.getName(), retVal);
 
 		return retVal;
 	}
@@ -132,7 +132,7 @@ public class SearchMethod extends BaseMethod {
 	}
 
 	public void setResourceType(Class<?> resourceType) {
-		this.resourceType = resourceType;
+		this.myDeclaredResourceType = resourceType;
 	}
 
 	public static enum RequestType {

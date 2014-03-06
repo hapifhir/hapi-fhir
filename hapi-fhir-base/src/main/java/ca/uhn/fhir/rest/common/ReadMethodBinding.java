@@ -1,4 +1,4 @@
-package ca.uhn.fhir.rest.server;
+package ca.uhn.fhir.rest.common;
 
 import java.lang.reflect.Method;
 import java.util.List;
@@ -10,23 +10,29 @@ import org.apache.commons.lang3.Validate;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.rest.server.Util;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
-class ReadMethod extends BaseMethod {
+public class ReadMethodBinding extends BaseMethodBinding {
 
 	private Method myMethod;
 	private Integer myIdIndex;
 	private Integer myVersionIdIndex;
 	private int myParameterCount;
 
-	ReadMethod(Method theMethod, Integer theIdIndex, Integer theVersionIdIndex) {
-		Validate.notNull(theMethod, "Method must not be null");
-		Validate.notNull(theIdIndex, "ID Index must not be null");
+	public ReadMethodBinding(Class<? extends IResource> theAnnotatedResourceType, Method theMethod) {
+		super(theAnnotatedResourceType);
 		
+		Validate.notNull(theMethod, "Method must not be null");
+		
+		Integer idIndex = Util.findReadIdParameterIndex(theMethod);
+		Integer versionIdIndex = Util.findReadVersionIdParameterIndex(theMethod);
+
 		myMethod = theMethod;
-		myIdIndex = theIdIndex;
-		myVersionIdIndex = theVersionIdIndex;
+		myIdIndex = idIndex;
+		myVersionIdIndex = versionIdIndex;
 		myParameterCount = myMethod.getParameterTypes().length;
 		
 		Class<?>[] parameterTypes = theMethod.getParameterTypes();
@@ -41,7 +47,7 @@ class ReadMethod extends BaseMethod {
 
 	@Override
 	public boolean matches(String theResourceName, IdDt theId, IdDt theVersion, Set<String> theParameterNames) {
-		if (!theResourceName.equals(getResource().getResourceName())) {
+		if (!theResourceName.equals(getResourceName())) {
 			return false;
 		}
 		if (theParameterNames.isEmpty() == false) {
@@ -62,7 +68,7 @@ class ReadMethod extends BaseMethod {
 	}
 
 	@Override
-	public List<IResource> invoke(IResourceProvider theResourceProvider, IdDt theId, IdDt theVersionId, Map<String, String[]> theParameterValues) throws InvalidRequestException,
+	public List<IResource> invokeServer(IResourceProvider theResourceProvider, IdDt theId, IdDt theVersionId, Map<String, String[]> theParameterValues) throws InvalidRequestException,
 			InternalErrorException {
 		Object[] params = new Object[myParameterCount];
 		params[myIdIndex] = theId;
