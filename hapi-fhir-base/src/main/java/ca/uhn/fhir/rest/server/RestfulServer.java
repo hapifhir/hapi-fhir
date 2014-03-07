@@ -37,6 +37,8 @@ public abstract class RestfulServer extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
 
+    private ISecurityManager securityManager;
+
 	private FhirContext myFhirContext;
 
 	private Map<Class<? extends IResource>, IResourceProvider> myTypeToProvider = new HashMap<Class<? extends IResource>, IResourceProvider>();
@@ -100,6 +102,8 @@ public abstract class RestfulServer extends HttpServlet {
 	}
 
 	public abstract Collection<IResourceProvider> getResourceProviders();
+
+    public abstract ISecurityManager getSecurityManager();
 
 	protected void handleRequest(SearchMethodBinding.RequestType requestType, HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		try {
@@ -200,6 +204,11 @@ public abstract class RestfulServer extends HttpServlet {
 	public void init() throws ServletException {
 		try {
 			ourLog.info("Initializing HAPI FHIR restful server");
+
+            securityManager = getSecurityManager();
+            if (null == securityManager) {
+                ourLog.warn("No security manager has been provided, requests will not be authenticated!");
+            }
 
 			Collection<IResourceProvider> resourceProvider = getResourceProviders();
 			for (IResourceProvider nextProvider : resourceProvider) {
