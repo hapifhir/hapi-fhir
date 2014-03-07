@@ -21,4 +21,9 @@ public class DummyRestfulServer extends RestfulServer {
 		return myResourceProviders;
 	}
 
+    @Override
+    public ISecurityManager getSecurityManager() {
+        return null;
+    }
+
 }
