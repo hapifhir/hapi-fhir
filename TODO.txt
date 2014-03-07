@@ -19,3 +19,10 @@
  * Add client and server support for other operations from 
    the list here (we currently support read, vread, and search
    but there are many more): http://latest.fhir.me/http.html 
+   
+ * Get resource references working on both client and server - for the
+   client, maybe allow lazy-loading or something?
+   
+ * Support compartments for client and server
+ 
+ * Support slices in the model 
