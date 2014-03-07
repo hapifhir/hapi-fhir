@@ -1,10 +1,10 @@
 package ca.uhn.fhir.context;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
-import java.util.Set;
 
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IResource;
@@ -14,11 +14,15 @@ import ca.uhn.fhir.rest.client.RestfulClientFactory;
 
 public class FhirContext {
 
-	private final Map<String, RuntimeResourceDefinition> myNameToElementDefinition;
 	private Map<Class<? extends IElement>, BaseRuntimeElementDefinition<?>> myClassToElementDefinition;
+	private final Map<String, RuntimeResourceDefinition> myNameToElementDefinition;
 	private RuntimeChildUndeclaredExtensionDefinition myRuntimeChildUndeclaredExtensionDefinition;
 
-	public FhirContext(Class<? extends IResource>... theResourceTypes) {
+	public FhirContext(Class<? extends IResource> theResourceType) {
+		this(toCollection(theResourceType));
+	}
+
+	public FhirContext(Class<? extends IResource>[] theResourceTypes) {
 		this(Arrays.asList(theResourceTypes));
 	}
 
@@ -29,16 +33,12 @@ public class FhirContext {
 		myRuntimeChildUndeclaredExtensionDefinition = scanner.getRuntimeChildUndeclaredExtensionDefinition();
 	}
 
-	public RuntimeChildUndeclaredExtensionDefinition getRuntimeChildUndeclaredExtensionDefinition() {
-		return myRuntimeChildUndeclaredExtensionDefinition;
+	public Map<Class<? extends IElement>, BaseRuntimeElementDefinition<?>> getClassToElementDefinition() {
+		return myClassToElementDefinition;
 	}
 
 	public Map<String, RuntimeResourceDefinition> getNameToResourceDefinition() {
 		return myNameToElementDefinition;
-	}
-
-	public Map<Class<? extends IElement>, BaseRuntimeElementDefinition<?>> getClassToElementDefinition() {
-		return myClassToElementDefinition;
 	}
 
 	public RuntimeResourceDefinition getResourceDefinition(Class<? extends IResource> theResourceType) {
@@ -49,12 +49,22 @@ public class FhirContext {
 		return (RuntimeResourceDefinition) myClassToElementDefinition.get(theResource.getClass());
 	}
 
+	public RuntimeChildUndeclaredExtensionDefinition getRuntimeChildUndeclaredExtensionDefinition() {
+		return myRuntimeChildUndeclaredExtensionDefinition;
+	}
+
+	public RestfulClientFactory newClientFactory() {
+		return new RestfulClientFactory(this);
+	}
+
 	public IParser newXmlParser() {
 		return new XmlParser(this);
 	}
 	
-	public RestfulClientFactory newClientFactory() {
-		return new RestfulClientFactory(this);
+	private static Collection<Class<? extends IResource>> toCollection(Class<? extends IResource> theResourceType) {
+		ArrayList<Class<? extends IResource>> retVal = new ArrayList<Class<? extends IResource>>(1);
+		retVal.add(theResourceType);
+		return retVal;
 	}
 
 }

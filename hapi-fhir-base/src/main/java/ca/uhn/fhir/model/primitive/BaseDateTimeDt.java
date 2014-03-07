@@ -17,11 +17,12 @@ import ca.uhn.fhir.model.api.IPrimitiveDatatype;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.parser.DataFormatException;
 
-public abstract class BaseDateTimeDt  extends BaseElement implements IPrimitiveDatatype<Date> {
+public abstract class BaseDateTimeDt extends BaseElement implements IPrimitiveDatatype<Date> {
 
 	private static final FastDateFormat ourYearFormat = FastDateFormat.getInstance("yyyy");
 	private static final FastDateFormat ourYearMonthDayFormat = FastDateFormat.getInstance("yyyy-MM-dd");
 	private static final FastDateFormat ourYearMonthFormat = FastDateFormat.getInstance("yyyy-MM");
+	private static final FastDateFormat ourYearMonthDayNoDashesFormat = FastDateFormat.getInstance("yyyyMMdd");
 	private static final FastDateFormat ourYearMonthDayTimeFormat = FastDateFormat.getInstance("yyyy-MM-dd'T'HH:mm:ss");
 	private static final FastDateFormat ourYearMonthDayTimeZoneFormat = FastDateFormat.getInstance("yyyy-MM-dd'T'HH:mm:ssZZ");
 	private static final FastDateFormat ourYearMonthDayTimeMilliZoneFormat = FastDateFormat.getInstance("yyyy-MM-dd'T'HH:mm:ss.SSSZZ");
@@ -77,10 +78,10 @@ public abstract class BaseDateTimeDt  extends BaseElement implements IPrimitiveD
 					GregorianCalendar cal = new GregorianCalendar(TimeZone.getTimeZone("GMT"));
 					cal.setTime(myValue);
 					return ourYearMonthDayTimeMilliFormat.format(cal) + "Z";
-				} else if (myTimeZone!=null) {
+				} else if (myTimeZone != null) {
 					GregorianCalendar cal = new GregorianCalendar(myTimeZone);
 					cal.setTime(myValue);
-						return ourYearMonthDayTimeMilliZoneFormat.format(cal);
+					return ourYearMonthDayTimeMilliZoneFormat.format(cal);
 				} else {
 					return ourYearMonthDayTimeMilliFormat.format(myValue);
 				}
@@ -119,31 +120,54 @@ public abstract class BaseDateTimeDt  extends BaseElement implements IPrimitiveD
 			if (theValue == null) {
 				myValue = null;
 				clearTimeZone();
-			} else if (theValue.length() == 4 && isPrecisionAllowed(YEAR)) {
-				setValue((ourYearFormat).parse(theValue));
-				setPrecision(YEAR);
-				clearTimeZone();
-			} else if (theValue.length() == 7 && isPrecisionAllowed(MONTH)) {
-				setValue((ourYearMonthFormat).parse(theValue));
-				setPrecision(MONTH);
-				clearTimeZone();
-			} else if (theValue.length() == 10 && isPrecisionAllowed(DAY)) {
-				setValue((ourYearMonthDayFormat).parse(theValue));
-				setPrecision(DAY);
-				clearTimeZone();
+			} else if (theValue.length() == 4) {
+				if (isPrecisionAllowed(YEAR)) {
+					setValue((ourYearFormat).parse(theValue));
+					setPrecision(YEAR);
+					clearTimeZone();
+				} else {
+					throw new DataFormatException("Invalid date/time string (datatype " + getClass().getSimpleName() + " does not support YEAR precision): " + theValue);
+				}
+			} else if (theValue.length() == 7) {
+				// E.g. 1984-01 (this is valid according to the spec)
+				if (isPrecisionAllowed(MONTH)) {
+					setValue((ourYearMonthFormat).parse(theValue));
+					setPrecision(MONTH);
+					clearTimeZone();
+				} else {
+					throw new DataFormatException("Invalid date/time string (datatype " + getClass().getSimpleName() + " does not support MONTH precision): " + theValue);
+				}
+			} else if (theValue.length() == 8) {
+				//Eg. 19840101 (allow this just to be lenient)
+				if (isPrecisionAllowed(DAY)) {
+					setValue((ourYearMonthDayNoDashesFormat).parse(theValue));
+					setPrecision(MONTH);
+					clearTimeZone();
+				} else {
+					throw new DataFormatException("Invalid date/time string (datatype " + getClass().getSimpleName() + " does not support DAY precision): " + theValue);
+				}
+			} else if (theValue.length() == 10) {
+				// E.g. 1984-01-01 (this is valid according to the spec)
+				if (isPrecisionAllowed(DAY)) {
+					setValue((ourYearMonthDayFormat).parse(theValue));
+					setPrecision(DAY);
+					clearTimeZone();
+				} else {
+					throw new DataFormatException("Invalid date/time string (datatype " + getClass().getSimpleName() + " does not support DAY precision): " + theValue);
+				}
 			} else if (theValue.length() >= 18) {
 				int dotIndex = theValue.indexOf('.', 18);
 				if (dotIndex == -1 && !isPrecisionAllowed(SECOND)) {
-					throw new DataFormatException("Invalid date/time string (data type does not support SECONDS precision)");
+					throw new DataFormatException("Invalid date/time string (data type does not support SECONDS precision): " + theValue);
 				} else if (dotIndex > -1 && !isPrecisionAllowed(MILLI)) {
-					throw new DataFormatException("Invalid date/time string (data type " + getClass().getSimpleName() + " does not support MILLIS precision)");
+					throw new DataFormatException("Invalid date/time string (data type " + getClass().getSimpleName() + " does not support MILLIS precision):" + theValue);
 				}
 
 				Calendar cal;
 				try {
 					cal = DatatypeConverter.parseDateTime(theValue);
 				} catch (IllegalArgumentException e) {
-					throw new DataFormatException("Invalid data/time string (" + e.getMessage() + ")");
+					throw new DataFormatException("Invalid data/time string (" + e.getMessage() + "): " + theValue);
 				}
 				myValue = cal.getTime();
 				if (dotIndex == -1) {
@@ -160,10 +184,10 @@ public abstract class BaseDateTimeDt  extends BaseElement implements IPrimitiveD
 				}
 
 			} else {
-				throw new DataFormatException("Invalid date string");
+				throw new DataFormatException("Invalid date/time string (invalid length): " + theValue);
 			}
 		} catch (ParseException e) {
-			throw new DataFormatException("Invalid date string");
+			throw new DataFormatException("Invalid date string (" + e.getMessage() + "): " + theValue);
 		}
 	}
 
