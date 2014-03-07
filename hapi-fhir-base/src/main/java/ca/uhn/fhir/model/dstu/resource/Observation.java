@@ -264,6 +264,12 @@ public class Observation extends BaseResource implements IResource {
 	@Child(name="related", order=15, min=0, max=Child.MAX_UNLIMITED)	
 	private List<Related> myRelated;
 	
+
+	@Override
+	public boolean isEmpty() {
+		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myName,  myValue,  myInterpretation,  myComments,  myApplies,  myIssued,  myStatus,  myReliability,  myBodySite,  myMethod,  myIdentifier,  mySubject,  mySpecimen,  myPerformer,  myReferenceRange,  myRelated);
+	}
+
 	/**
 	 * Gets the value(s) for <b>name</b> (Type of observation (code / type)).
 	 * creating it if it does
@@ -293,6 +299,7 @@ public class Observation extends BaseResource implements IResource {
 		myName = theValue;
 	}
 
+
   
 	/**
 	 * Gets the value(s) for <b>value[x]</b> (Actual result).
@@ -319,6 +326,7 @@ public class Observation extends BaseResource implements IResource {
 	public void setValue(IDatatype theValue) {
 		myValue = theValue;
 	}
+
 
   
 	/**
@@ -350,6 +358,7 @@ public class Observation extends BaseResource implements IResource {
 		myInterpretation = theValue;
 	}
 
+
   
 	/**
 	 * Gets the value(s) for <b>comments</b> (Comments about result).
@@ -380,8 +389,9 @@ public class Observation extends BaseResource implements IResource {
 		myComments = theValue;
 	}
 
+
  	/**
-	 * Sets the value(s) for <b>comments</b> (Comments about result)
+	 * Sets the value for <b>comments</b> (Comments about result)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -391,6 +401,7 @@ public class Observation extends BaseResource implements IResource {
 	public void setComments( String theString) {
 		myComments = new StringDt(theString); 
 	}
+
  
 	/**
 	 * Gets the value(s) for <b>applies[x]</b> (Physiologically Relevant time/time-period for observation).
@@ -417,6 +428,7 @@ public class Observation extends BaseResource implements IResource {
 	public void setApplies(IDatatype theValue) {
 		myApplies = theValue;
 	}
+
 
   
 	/**
@@ -448,7 +460,32 @@ public class Observation extends BaseResource implements IResource {
 		myIssued = theValue;
 	}
 
-  
+
+ 	/**
+	 * Sets the value for <b>issued</b> (Date/Time this was made available)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * 
+     * </p> 
+	 */
+	public void setIssuedWithMillisPrecision( Date theDate) {
+		myIssued = new InstantDt(theDate); 
+	}
+
+	/**
+	 * Sets the value for <b>issued</b> (Date/Time this was made available)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * 
+     * </p> 
+	 */
+	public void setIssued( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myIssued = new InstantDt(theDate, thePrecision); 
+	}
+
+ 
 	/**
 	 * Gets the value(s) for <b>status</b> (registered | preliminary | final | amended +).
 	 * creating it if it does
@@ -477,6 +514,7 @@ public class Observation extends BaseResource implements IResource {
 	public void setStatus(BoundCodeDt<ObservationStatusEnum> theValue) {
 		myStatus = theValue;
 	}
+
 
 	/**
 	 * Sets the value(s) for <b>status</b> (registered | preliminary | final | amended +)
@@ -520,6 +558,7 @@ public class Observation extends BaseResource implements IResource {
 		myReliability = theValue;
 	}
 
+
 	/**
 	 * Sets the value(s) for <b>reliability</b> (ok | ongoing | early | questionable | calibrating | error + )
 	 *
@@ -562,6 +601,7 @@ public class Observation extends BaseResource implements IResource {
 		myBodySite = theValue;
 	}
 
+
   
 	/**
 	 * Gets the value(s) for <b>method</b> (How it was done).
@@ -591,6 +631,7 @@ public class Observation extends BaseResource implements IResource {
 	public void setMethod(CodeableConceptDt theValue) {
 		myMethod = theValue;
 	}
+
 
   
 	/**
@@ -622,6 +663,7 @@ public class Observation extends BaseResource implements IResource {
 		myIdentifier = theValue;
 	}
 
+
   
 	/**
 	 * Gets the value(s) for <b>subject</b> (Who and/or what this is about).
@@ -648,6 +690,7 @@ public class Observation extends BaseResource implements IResource {
 	public void setSubject(ResourceReference theValue) {
 		mySubject = theValue;
 	}
+
 
   
 	/**
@@ -679,6 +722,7 @@ public class Observation extends BaseResource implements IResource {
 		mySpecimen = theValue;
 	}
 
+
   
 	/**
 	 * Gets the value(s) for <b>performer</b> (Who did the observation).
@@ -705,6 +749,7 @@ public class Observation extends BaseResource implements IResource {
 	public void setPerformer(List<ResourceReference> theValue) {
 		myPerformer = theValue;
 	}
+
 
   
 	/**
@@ -734,6 +779,20 @@ public class Observation extends BaseResource implements IResource {
 	 */
 	public void setReferenceRange(List<ReferenceRange> theValue) {
 		myReferenceRange = theValue;
+	}
+
+	/**
+	 * Adds and returns a new value for <b>referenceRange</b> (Provides guide for interpretation)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Guidance on how to interpret the value by comparison to a normal or recommended range
+     * </p> 
+	 */
+	public ReferenceRange addReferenceRange() {
+		ReferenceRange newType = new ReferenceRange();
+		getReferenceRange().add(newType);
+		return newType; 
 	}
 
   
@@ -766,6 +825,20 @@ public class Observation extends BaseResource implements IResource {
 		myRelated = theValue;
 	}
 
+	/**
+	 * Adds and returns a new value for <b>related</b> (Observations related to this observation)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Related observations - either components, or previous observations, or statements of derivation
+     * </p> 
+	 */
+	public Related addRelated() {
+		Related newType = new Related();
+		getRelated().add(newType);
+		return newType; 
+	}
+
   
 	/**
 	 * Block class for child element: <b>Observation.referenceRange</b> (Provides guide for interpretation)
@@ -790,6 +863,12 @@ public class Observation extends BaseResource implements IResource {
 	@Child(name="age", type=RangeDt.class, order=3, min=0, max=1)	
 	private RangeDt myAge;
 	
+
+	@Override
+	public boolean isEmpty() {
+		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myLow,  myHigh,  myMeaning,  myAge);
+	}
+
 	/**
 	 * Gets the value(s) for <b>low</b> (Low Range, if relevant).
 	 * creating it if it does
@@ -818,6 +897,7 @@ public class Observation extends BaseResource implements IResource {
 	public void setLow(QuantityDt theValue) {
 		myLow = theValue;
 	}
+
 
   
 	/**
@@ -849,6 +929,7 @@ public class Observation extends BaseResource implements IResource {
 		myHigh = theValue;
 	}
 
+
   
 	/**
 	 * Gets the value(s) for <b>meaning</b> (Indicates the meaning/use of this range of this range).
@@ -878,6 +959,7 @@ public class Observation extends BaseResource implements IResource {
 	public void setMeaning(CodeableConceptDt theValue) {
 		myMeaning = theValue;
 	}
+
 
   
 	/**
@@ -909,6 +991,7 @@ public class Observation extends BaseResource implements IResource {
 		myAge = theValue;
 	}
 
+
   
 
 	}
@@ -934,6 +1017,12 @@ public class Observation extends BaseResource implements IResource {
 	})	
 	private ResourceReference myTarget;
 	
+
+	@Override
+	public boolean isEmpty() {
+		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myType,  myTarget);
+	}
+
 	/**
 	 * Gets the value(s) for <b>type</b> (has-component | has-member | derived-from | sequel-to | replaces | qualified-by | interfered-by).
 	 * creating it if it does
@@ -962,6 +1051,7 @@ public class Observation extends BaseResource implements IResource {
 	public void setType(BoundCodeDt<ObservationRelationshipTypeEnum> theValue) {
 		myType = theValue;
 	}
+
 
 	/**
 	 * Sets the value(s) for <b>type</b> (has-component | has-member | derived-from | sequel-to | replaces | qualified-by | interfered-by)
@@ -1004,6 +1094,7 @@ public class Observation extends BaseResource implements IResource {
 	public void setTarget(ResourceReference theValue) {
 		myTarget = theValue;
 	}
+
 
   
 

@@ -51,7 +51,9 @@ public abstract class BaseMethodBinding {
 	public static BaseMethodBinding bindMethod(Method theMethod) {
 		Read read = theMethod.getAnnotation(Read.class);
 		Search search = theMethod.getAnnotation(Search.class);
-		verifyExactlyOneValued(theMethod, read, search);
+		if (!verifyMethodHasZeroOrOneOperationAnnotation(theMethod, read, search)) {
+			return null;
+		}
 
 		Class<? extends IResource> annotatedResourceType;
 		if (read != null) {
@@ -102,7 +104,7 @@ public abstract class BaseMethodBinding {
 		// return sm;
 	}
 
-	public static void verifyExactlyOneValued(Method theNextMethod, Object... theAnnotations) {
+	public static boolean verifyMethodHasZeroOrOneOperationAnnotation(Method theNextMethod, Object... theAnnotations) {
 		Object obj1 = null;
 		for (Object object : theAnnotations) {
 			if (object != null) {
@@ -116,8 +118,10 @@ public abstract class BaseMethodBinding {
 			}
 		}
 		if (obj1 == null) {
-			throw new ConfigurationException("Method " + theNextMethod.getName() + " on type '" + theNextMethod.getDeclaringClass().getSimpleName() + " has no FHIR method annotations.");
+			return false;
+//			throw new ConfigurationException("Method '" + theNextMethod.getName() + "' on type '" + theNextMethod.getDeclaringClass().getSimpleName() + " has no FHIR method annotations.");
 		}
+		return true;
 	}
 
 	protected static List<IResource> toResourceList(Object response) throws InternalErrorException {

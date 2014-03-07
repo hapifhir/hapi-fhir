@@ -10,10 +10,31 @@ import ca.uhn.fhir.model.api.annotation.SimpleSetter;
 public class DateTimeDt extends BaseDateTimeDt {
 
 	/**
-	 * Create a new DateTimeDt
+	 * The default precision for this type
+	 */
+	public static final TemporalPrecisionEnum DEFAULT_PRECISION = TemporalPrecisionEnum.SECOND;
+
+	/**
+	 * Constructor
 	 */
 	public DateTimeDt() {
 		super();
+	}
+
+	/**
+	 * Constructor which accepts a date value and a precision value. Valid precisions values for this type are:
+	 * <ul>
+	 * <li>{@link TemporalPrecisionEnum#YEAR}
+	 * <li>{@link TemporalPrecisionEnum#MONTH}
+	 * <li>{@link TemporalPrecisionEnum#DAY}
+	 * <li>{@link TemporalPrecisionEnum#SECOND}
+	 * <li>{@link TemporalPrecisionEnum#MILLI}
+	 * </ul>
+	 */
+	@SimpleSetter
+	public DateTimeDt(@SimpleSetter.Parameter(name = "theDate") Date theDate, @SimpleSetter.Parameter(name = "thePrecision") TemporalPrecisionEnum thePrecision) {
+		setValue(theDate);
+		setPrecision(thePrecision);
 	}
 
 	/**
@@ -22,7 +43,7 @@ public class DateTimeDt extends BaseDateTimeDt {
 	@SimpleSetter(suffix="WithSecondsPrecision")
 	public DateTimeDt(@SimpleSetter.Parameter(name="theDate") Date theDate) {
 		setValue(theDate);
-		setPrecision(TemporalPrecisionEnum.SECOND);
+		setPrecision(DEFAULT_PRECISION);
 	}
 
 	@Override

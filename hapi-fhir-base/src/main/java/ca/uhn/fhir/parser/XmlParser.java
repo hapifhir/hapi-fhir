@@ -213,7 +213,11 @@ public class XmlParser implements IParser {
 
 
 
-	private boolean encodeChildElementToStreamWriter(XMLStreamWriter theEventWriter, IElement nextValue, String childName, BaseRuntimeElementDefinition<?> childDef, String theExtensionUrl) throws XMLStreamException, DataFormatException {
+	private void encodeChildElementToStreamWriter(XMLStreamWriter theEventWriter, IElement nextValue, String childName, BaseRuntimeElementDefinition<?> childDef, String theExtensionUrl) throws XMLStreamException, DataFormatException {
+		if (nextValue.isEmpty()) {
+			return;
+		}
+		
 		switch (childDef.getChildType()) {
 		case PRIMITIVE_DATATYPE: {
 			IPrimitiveDatatype<?> pd = (IPrimitiveDatatype<?>) nextValue;
@@ -223,10 +227,8 @@ public class XmlParser implements IParser {
 				theEventWriter.writeAttribute("value", value);
 				encodeExtensionsIfPresent(theEventWriter, nextValue);
 				theEventWriter.writeEndElement();
-				return true;
-			} else {
-				return false;
 			}
+			break;
 		}
 		case RESOURCE_BLOCK:
 		case COMPOSITE_DATATYPE: {
@@ -238,18 +240,16 @@ public class XmlParser implements IParser {
 			encodeCompositeElementToStreamWriter(nextValue, theEventWriter, childCompositeDef);
 			encodeExtensionsIfPresent(theEventWriter, nextValue);
 			theEventWriter.writeEndElement();
-			return true;
+			break;
 		}
 		case RESOURCE_REF: {
 			ResourceReference ref = (ResourceReference) nextValue;
-			if (ref.hasContent()) {
+			if (!ref.isEmpty()) {
 				theEventWriter.writeStartElement(childName);
 				encodeResourceReferenceToStreamWriter(theEventWriter, ref);
 				theEventWriter.writeEndElement();
-				return true;
-			} else {
-				return false;
 			}
+			break;
 		}
 		case RESOURCE: {
 			throw new IllegalStateException(); // should not happen
@@ -258,17 +258,14 @@ public class XmlParser implements IParser {
 			XhtmlDt dt = (XhtmlDt) nextValue;
 			if (dt.hasContent()) {
 				encodeXhtml(dt, theEventWriter);
-				return true;
-			} else {
-				return false;
 			}
+			break;
 		}
 		case UNDECL_EXT: {
 			throw new IllegalStateException("should not happen");
 		}
 		}
 
-		return false;
 	}
 
 	private void encodeCompositeElementChildrenToStreamWriter(IElement theElement, XMLStreamWriter theEventWriter, List<? extends BaseRuntimeChildDefinition> children) throws XMLStreamException, DataFormatException {
@@ -485,9 +482,8 @@ public class XmlParser implements IParser {
 	 * @see ca.uhn.fhir.parser.IParser#parseResource(java.lang.String)
 	 */
 	@Override
-	public IResource parseResource(String theXml) throws ConfigurationException, DataFormatException {
-		StringReader reader = new StringReader(theXml);
-		return parseResource(reader);
+	public IResource parseResource(String theMessageString) throws ConfigurationException, DataFormatException {
+		return parseResource(null, theMessageString);
 	}
 
 	/* (non-Javadoc)
@@ -495,7 +491,11 @@ public class XmlParser implements IParser {
 	 */
 	@Override
 	public IResource parseResource(XMLEventReader theStreamReader) {
-		ParserState<IResource> parserState = ParserState.getPreResourceInstance(myContext);
+		return parseResource(null, theStreamReader);
+	}
+
+	private IResource parseResource(Class<? extends IResource> theResourceType, XMLEventReader theStreamReader) {
+		ParserState<IResource> parserState = ParserState.getPreResourceInstance(theResourceType, myContext);
 		return doXmlLoop(theStreamReader, parserState);
 	}
 
@@ -547,6 +547,11 @@ public class XmlParser implements IParser {
 
 	@Override
 	public IResource parseResource(Reader theReader) throws ConfigurationException, DataFormatException {
+		return parseResource(null, theReader);
+	}
+
+	@Override
+	public IResource parseResource(Class<? extends IResource> theResourceType, Reader theReader) {
 		XMLEventReader streamReader;
 		try {
 			streamReader = myXmlInputFactory.createXMLEventReader(theReader);
@@ -556,6 +561,13 @@ public class XmlParser implements IParser {
 			throw new ConfigurationException("Failed to initialize STaX event factory", e);
 		}
 
-		return parseResource(streamReader);
+		return parseResource(theResourceType, streamReader);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T extends IResource> T parseResource(Class<T> theResourceType, String theMessageString) {
+		StringReader reader = new StringReader(theMessageString);
+		return (T) parseResource(theResourceType, reader);
 	}
 }

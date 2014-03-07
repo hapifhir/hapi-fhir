@@ -162,6 +162,12 @@ public class Group extends BaseResource implements IResource {
 	})	
 	private List<ResourceReference> myMember;
 	
+
+	@Override
+	public boolean isEmpty() {
+		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myIdentifier,  myType,  myActual,  myCode,  myName,  myQuantity,  myCharacteristic,  myMember);
+	}
+
 	/**
 	 * Gets the value(s) for <b>identifier</b> (Unique id).
 	 * creating it if it does
@@ -190,6 +196,7 @@ public class Group extends BaseResource implements IResource {
 	public void setIdentifier(IdentifierDt theValue) {
 		myIdentifier = theValue;
 	}
+
 
   
 	/**
@@ -220,6 +227,7 @@ public class Group extends BaseResource implements IResource {
 	public void setType(BoundCodeDt<GroupTypeEnum> theValue) {
 		myType = theValue;
 	}
+
 
 	/**
 	 * Sets the value(s) for <b>type</b> (person | animal | practitioner | device | medication | substance)
@@ -263,7 +271,20 @@ public class Group extends BaseResource implements IResource {
 		myActual = theValue;
 	}
 
-  
+
+ 	/**
+	 * Sets the value for <b>actual</b> (Descriptive or actual)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * If true, indicates that the resource refers to a specific group of real individuals.  If false, the group defines a set of intended individuals
+     * </p> 
+	 */
+	public void setActual( Boolean theBoolean) {
+		myActual = new BooleanDt(theBoolean); 
+	}
+
+ 
 	/**
 	 * Gets the value(s) for <b>code</b> (Kind of Group members).
 	 * creating it if it does
@@ -292,6 +313,7 @@ public class Group extends BaseResource implements IResource {
 	public void setCode(CodeableConceptDt theValue) {
 		myCode = theValue;
 	}
+
 
   
 	/**
@@ -323,8 +345,9 @@ public class Group extends BaseResource implements IResource {
 		myName = theValue;
 	}
 
+
  	/**
-	 * Sets the value(s) for <b>name</b> (Label for Group)
+	 * Sets the value for <b>name</b> (Label for Group)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -334,6 +357,7 @@ public class Group extends BaseResource implements IResource {
 	public void setName( String theString) {
 		myName = new StringDt(theString); 
 	}
+
  
 	/**
 	 * Gets the value(s) for <b>quantity</b> (Number of members).
@@ -364,7 +388,20 @@ public class Group extends BaseResource implements IResource {
 		myQuantity = theValue;
 	}
 
-  
+
+ 	/**
+	 * Sets the value for <b>quantity</b> (Number of members)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A count of the number of resource instances that are part of the group
+     * </p> 
+	 */
+	public void setQuantity( Integer theInteger) {
+		myQuantity = new IntegerDt(theInteger); 
+	}
+
+ 
 	/**
 	 * Gets the value(s) for <b>characteristic</b> (Trait of group members).
 	 * creating it if it does
@@ -394,6 +431,20 @@ public class Group extends BaseResource implements IResource {
 		myCharacteristic = theValue;
 	}
 
+	/**
+	 * Adds and returns a new value for <b>characteristic</b> (Trait of group members)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Identifies the traits shared by members of the group
+     * </p> 
+	 */
+	public Characteristic addCharacteristic() {
+		Characteristic newType = new Characteristic();
+		getCharacteristic().add(newType);
+		return newType; 
+	}
+
   
 	/**
 	 * Gets the value(s) for <b>member</b> (Who is in group).
@@ -421,6 +472,7 @@ public class Group extends BaseResource implements IResource {
 		myMember = theValue;
 	}
 
+
   
 	/**
 	 * Block class for child element: <b>Group.characteristic</b> (Trait of group members)
@@ -447,6 +499,12 @@ public class Group extends BaseResource implements IResource {
 	@Child(name="exclude", type=BooleanDt.class, order=2, min=1, max=1)	
 	private BooleanDt myExclude;
 	
+
+	@Override
+	public boolean isEmpty() {
+		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myCode,  myValue,  myExclude);
+	}
+
 	/**
 	 * Gets the value(s) for <b>code</b> (Kind of characteristic).
 	 * creating it if it does
@@ -476,6 +534,7 @@ public class Group extends BaseResource implements IResource {
 		myCode = theValue;
 	}
 
+
   
 	/**
 	 * Gets the value(s) for <b>value[x]</b> (Value held by characteristic).
@@ -502,6 +561,7 @@ public class Group extends BaseResource implements IResource {
 	public void setValue(IDatatype theValue) {
 		myValue = theValue;
 	}
+
 
   
 	/**
@@ -533,7 +593,20 @@ public class Group extends BaseResource implements IResource {
 		myExclude = theValue;
 	}
 
-  
+
+ 	/**
+	 * Sets the value for <b>exclude</b> (Group includes or excludes)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * If true, indicates the characteristic is one that is NOT held by members of the group
+     * </p> 
+	 */
+	public void setExclude( Boolean theBoolean) {
+		myExclude = new BooleanDt(theBoolean); 
+	}
+
+ 
 
 	}
 

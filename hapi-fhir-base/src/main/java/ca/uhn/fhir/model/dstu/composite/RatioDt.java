@@ -38,7 +38,8 @@ import ca.uhn.fhir.model.dstu.resource.*;
  * </p> 
  */
 @DatatypeDef(name="Ratio") 
-public class RatioDt extends BaseElement implements ICompositeDatatype {
+public class RatioDt extends BaseElement implements ICompositeDatatype  {
+
 
 	@Child(name="numerator", type=QuantityDt.class, order=0, min=0, max=1)	
 	private QuantityDt myNumerator;
@@ -46,6 +47,12 @@ public class RatioDt extends BaseElement implements ICompositeDatatype {
 	@Child(name="denominator", type=QuantityDt.class, order=1, min=0, max=1)	
 	private QuantityDt myDenominator;
 	
+
+	@Override
+	public boolean isEmpty() {
+		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myNumerator,  myDenominator);
+	}
+
 	/**
 	 * Gets the value(s) for <b>numerator</b> (Numerator value).
 	 * creating it if it does
@@ -74,6 +81,7 @@ public class RatioDt extends BaseElement implements ICompositeDatatype {
 	public void setNumerator(QuantityDt theValue) {
 		myNumerator = theValue;
 	}
+
 
   
 	/**
@@ -104,6 +112,7 @@ public class RatioDt extends BaseElement implements ICompositeDatatype {
 	public void setDenominator(QuantityDt theValue) {
 		myDenominator = theValue;
 	}
+
 
   
 

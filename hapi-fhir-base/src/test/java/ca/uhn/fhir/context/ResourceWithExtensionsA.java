@@ -89,6 +89,11 @@ public class ResourceWithExtensionsA implements IResource {
 		@Extension(url = "http://bar/1/2")
 		private List<Bar2> myBar12;
 
+		@Override
+		public boolean isEmpty() {
+			return false; // TODO: implement
+		}
+
 		public List<DateDt> getBar11() {
 			return myBar11;
 		}
@@ -118,6 +123,11 @@ public class ResourceWithExtensionsA implements IResource {
 		@Extension(url = "http://bar/1/2/2")
 		private List<DateDt> myBar122;
 
+		@Override
+		public boolean isEmpty() {
+			return false; // TODO: implement
+		}
+
 		public List<DateDt> getBar121() {
 			return myBar121;
 		}
@@ -134,6 +144,11 @@ public class ResourceWithExtensionsA implements IResource {
 			myBar122 = theBar122;
 		}
 
+	}
+
+	@Override
+	public boolean isEmpty() {
+		return false; // TODO: implement
 	}
 
 }

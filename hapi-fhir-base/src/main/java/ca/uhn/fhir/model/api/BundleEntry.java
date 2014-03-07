@@ -4,10 +4,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ca.uhn.fhir.model.primitive.InstantDt;
+import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.XhtmlDt;
+import ca.uhn.fhir.util.ElementUtil;
 
 public class BundleEntry extends BaseBundle {
+
+	//@formatter:off
+	/* ****************************************************
+	 * NB: add any new fields to the isEmpty() method!!!
+	 *****************************************************/
+	//@formatter:on
 	private StringDt myId;
 	private StringDt myLinkSelf;
 	private InstantDt myPublished;
@@ -17,6 +25,15 @@ public class BundleEntry extends BaseBundle {
 	private XhtmlDt mySummary;
 	private List<BundleCategory> myCategories;
 
+	@Override
+	public boolean isEmpty() {
+		//@formatter:off
+		return super.isEmpty() && 
+				ElementUtil.isEmpty(myId, myLinkSelf, myPublished, myResource, myTitle, myUpdated, mySummary) &&
+				ElementUtil.isEmpty(myCategories);
+		//@formatter:on
+	}
+	
 	public StringDt getId() {
 		if (myId == null) {
 			myId = new StringDt();

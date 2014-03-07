@@ -38,7 +38,8 @@ import ca.uhn.fhir.model.dstu.resource.*;
  * </p> 
  */
 @DatatypeDef(name="Quantity") 
-public class QuantityDt extends BaseElement implements ICompositeDatatype {
+public class QuantityDt extends BaseElement implements ICompositeDatatype  {
+
 
 	@Child(name="value", type=DecimalDt.class, order=0, min=0, max=1)	
 	private DecimalDt myValue;
@@ -55,6 +56,12 @@ public class QuantityDt extends BaseElement implements ICompositeDatatype {
 	@Child(name="code", type=CodeDt.class, order=4, min=0, max=1)	
 	private CodeDt myCode;
 	
+
+	@Override
+	public boolean isEmpty() {
+		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myValue,  myComparator,  myUnits,  mySystem,  myCode);
+	}
+
 	/**
 	 * Gets the value(s) for <b>value</b> (Numerical value (with implicit precision)).
 	 * creating it if it does
@@ -84,7 +91,44 @@ public class QuantityDt extends BaseElement implements ICompositeDatatype {
 		myValue = theValue;
 	}
 
-  
+
+ 	/**
+	 * Sets the value for <b>value</b> (Numerical value (with implicit precision))
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The value of the measured amount. The value includes an implicit precision in the presentation of the value
+     * </p> 
+	 */
+	public void setValue( java.math.BigDecimal theValue) {
+		myValue = new DecimalDt(theValue); 
+	}
+
+	/**
+	 * Sets the value for <b>value</b> (Numerical value (with implicit precision))
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The value of the measured amount. The value includes an implicit precision in the presentation of the value
+     * </p> 
+	 */
+	public void setValue( double theValue) {
+		myValue = new DecimalDt(theValue); 
+	}
+
+	/**
+	 * Sets the value for <b>value</b> (Numerical value (with implicit precision))
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The value of the measured amount. The value includes an implicit precision in the presentation of the value
+     * </p> 
+	 */
+	public void setValue( long theValue) {
+		myValue = new DecimalDt(theValue); 
+	}
+
+ 
 	/**
 	 * Gets the value(s) for <b>comparator</b> (< | <= | >= | > - how to understand the value).
 	 * creating it if it does
@@ -113,6 +157,7 @@ public class QuantityDt extends BaseElement implements ICompositeDatatype {
 	public void setComparator(BoundCodeDt<QuantityCompararatorEnum> theValue) {
 		myComparator = theValue;
 	}
+
 
 	/**
 	 * Sets the value(s) for <b>comparator</b> (< | <= | >= | > - how to understand the value)
@@ -156,8 +201,9 @@ public class QuantityDt extends BaseElement implements ICompositeDatatype {
 		myUnits = theValue;
 	}
 
+
  	/**
-	 * Sets the value(s) for <b>units</b> (Unit representation)
+	 * Sets the value for <b>units</b> (Unit representation)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -167,6 +213,7 @@ public class QuantityDt extends BaseElement implements ICompositeDatatype {
 	public void setUnits( String theString) {
 		myUnits = new StringDt(theString); 
 	}
+
  
 	/**
 	 * Gets the value(s) for <b>system</b> (System that defines coded unit form).
@@ -197,8 +244,9 @@ public class QuantityDt extends BaseElement implements ICompositeDatatype {
 		mySystem = theValue;
 	}
 
+
  	/**
-	 * Sets the value(s) for <b>system</b> (System that defines coded unit form)
+	 * Sets the value for <b>system</b> (System that defines coded unit form)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -208,6 +256,7 @@ public class QuantityDt extends BaseElement implements ICompositeDatatype {
 	public void setSystem( String theUri) {
 		mySystem = new UriDt(theUri); 
 	}
+
  
 	/**
 	 * Gets the value(s) for <b>code</b> (Coded form of the unit).
@@ -237,6 +286,7 @@ public class QuantityDt extends BaseElement implements ICompositeDatatype {
 	public void setCode(CodeDt theValue) {
 		myCode = theValue;
 	}
+
 
   
 

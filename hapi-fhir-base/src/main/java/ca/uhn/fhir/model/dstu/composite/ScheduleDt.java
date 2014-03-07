@@ -38,7 +38,8 @@ import ca.uhn.fhir.model.dstu.resource.*;
  * </p> 
  */
 @DatatypeDef(name="Schedule") 
-public class ScheduleDt extends BaseElement implements ICompositeDatatype {
+public class ScheduleDt extends BaseElement implements ICompositeDatatype  {
+
 
 	@Child(name="event", type=PeriodDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)	
 	private List<PeriodDt> myEvent;
@@ -46,6 +47,12 @@ public class ScheduleDt extends BaseElement implements ICompositeDatatype {
 	@Child(name="repeat", order=1, min=0, max=1)	
 	private Repeat myRepeat;
 	
+
+	@Override
+	public boolean isEmpty() {
+		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myEvent,  myRepeat);
+	}
+
 	/**
 	 * Gets the value(s) for <b>event</b> (When the event occurs).
 	 * creating it if it does
@@ -73,6 +80,20 @@ public class ScheduleDt extends BaseElement implements ICompositeDatatype {
 	 */
 	public void setEvent(List<PeriodDt> theValue) {
 		myEvent = theValue;
+	}
+
+	/**
+	 * Adds and returns a new value for <b>event</b> (When the event occurs)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Identifies specific time periods when the event should occur
+     * </p> 
+	 */
+	public PeriodDt addEvent() {
+		PeriodDt newType = new PeriodDt();
+		getEvent().add(newType);
+		return newType; 
 	}
 
   
@@ -105,6 +126,7 @@ public class ScheduleDt extends BaseElement implements ICompositeDatatype {
 		myRepeat = theValue;
 	}
 
+
   
 	/**
 	 * Block class for child element: <b>Schedule.repeat</b> (Only if there is none or one event)
@@ -135,6 +157,12 @@ public class ScheduleDt extends BaseElement implements ICompositeDatatype {
 	@Child(name="end", type=DateTimeDt.class, order=5, min=0, max=1)	
 	private DateTimeDt myEnd;
 	
+
+	@Override
+	public boolean isEmpty() {
+		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myFrequency,  myWhen,  myDuration,  myUnits,  myCount,  myEnd);
+	}
+
 	/**
 	 * Gets the value(s) for <b>frequency</b> (Event occurs frequency times per duration).
 	 * creating it if it does
@@ -164,7 +192,20 @@ public class ScheduleDt extends BaseElement implements ICompositeDatatype {
 		myFrequency = theValue;
 	}
 
-  
+
+ 	/**
+	 * Sets the value for <b>frequency</b> (Event occurs frequency times per duration)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Indicates how often the event should occur.
+     * </p> 
+	 */
+	public void setFrequency( Integer theInteger) {
+		myFrequency = new IntegerDt(theInteger); 
+	}
+
+ 
 	/**
 	 * Gets the value(s) for <b>when</b> (HS | WAKE | AC | ACM | ACD | ACV | PC | PCM | PCD | PCV - common life events).
 	 * creating it if it does
@@ -193,6 +234,7 @@ public class ScheduleDt extends BaseElement implements ICompositeDatatype {
 	public void setWhen(BoundCodeDt<EventTimingEnum> theValue) {
 		myWhen = theValue;
 	}
+
 
 	/**
 	 * Sets the value(s) for <b>when</b> (HS | WAKE | AC | ACM | ACD | ACV | PC | PCM | PCD | PCV - common life events)
@@ -236,7 +278,44 @@ public class ScheduleDt extends BaseElement implements ICompositeDatatype {
 		myDuration = theValue;
 	}
 
-  
+
+ 	/**
+	 * Sets the value for <b>duration</b> (Repeating or event-related duration)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * How long each repetition should last
+     * </p> 
+	 */
+	public void setDuration( java.math.BigDecimal theValue) {
+		myDuration = new DecimalDt(theValue); 
+	}
+
+	/**
+	 * Sets the value for <b>duration</b> (Repeating or event-related duration)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * How long each repetition should last
+     * </p> 
+	 */
+	public void setDuration( double theValue) {
+		myDuration = new DecimalDt(theValue); 
+	}
+
+	/**
+	 * Sets the value for <b>duration</b> (Repeating or event-related duration)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * How long each repetition should last
+     * </p> 
+	 */
+	public void setDuration( long theValue) {
+		myDuration = new DecimalDt(theValue); 
+	}
+
+ 
 	/**
 	 * Gets the value(s) for <b>units</b> (s | min | h | d | wk | mo | a - unit of time (UCUM)).
 	 * creating it if it does
@@ -265,6 +344,7 @@ public class ScheduleDt extends BaseElement implements ICompositeDatatype {
 	public void setUnits(BoundCodeDt<UnitsOfTimeEnum> theValue) {
 		myUnits = theValue;
 	}
+
 
 	/**
 	 * Sets the value(s) for <b>units</b> (s | min | h | d | wk | mo | a - unit of time (UCUM))
@@ -308,7 +388,20 @@ public class ScheduleDt extends BaseElement implements ICompositeDatatype {
 		myCount = theValue;
 	}
 
-  
+
+ 	/**
+	 * Sets the value for <b>count</b> (Number of times to repeat)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A total count of the desired number of repetitions
+     * </p> 
+	 */
+	public void setCount( Integer theInteger) {
+		myCount = new IntegerDt(theInteger); 
+	}
+
+ 
 	/**
 	 * Gets the value(s) for <b>end</b> (When to stop repeats).
 	 * creating it if it does
@@ -338,8 +431,9 @@ public class ScheduleDt extends BaseElement implements ICompositeDatatype {
 		myEnd = theValue;
 	}
 
+
  	/**
-	 * Sets the value(s) for <b>end</b> (When to stop repeats)
+	 * Sets the value for <b>end</b> (When to stop repeats)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -349,6 +443,19 @@ public class ScheduleDt extends BaseElement implements ICompositeDatatype {
 	public void setEndWithSecondsPrecision( Date theDate) {
 		myEnd = new DateTimeDt(theDate); 
 	}
+
+	/**
+	 * Sets the value for <b>end</b> (When to stop repeats)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * When to stop repeating the schedule
+     * </p> 
+	 */
+	public void setEnd( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myEnd = new DateTimeDt(theDate, thePrecision); 
+	}
+
  
 
 	}

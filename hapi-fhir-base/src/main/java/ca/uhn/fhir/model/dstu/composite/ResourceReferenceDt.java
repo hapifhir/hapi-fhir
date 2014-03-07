@@ -38,7 +38,8 @@ import ca.uhn.fhir.model.dstu.resource.*;
  * </p> 
  */
 @DatatypeDef(name="ResourceReference") 
-public class ResourceReferenceDt extends BaseElement implements ICompositeDatatype {
+public class ResourceReferenceDt extends BaseElement implements ICompositeDatatype  {
+
 
 	@Child(name="reference", type=StringDt.class, order=0, min=0, max=1)	
 	private StringDt myReference;
@@ -46,6 +47,12 @@ public class ResourceReferenceDt extends BaseElement implements ICompositeDataty
 	@Child(name="display", type=StringDt.class, order=1, min=0, max=1)	
 	private StringDt myDisplay;
 	
+
+	@Override
+	public boolean isEmpty() {
+		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myReference,  myDisplay);
+	}
+
 	/**
 	 * Gets the value(s) for <b>reference</b> (Relative, internal or absolute URL reference).
 	 * creating it if it does
@@ -75,8 +82,9 @@ public class ResourceReferenceDt extends BaseElement implements ICompositeDataty
 		myReference = theValue;
 	}
 
+
  	/**
-	 * Sets the value(s) for <b>reference</b> (Relative, internal or absolute URL reference)
+	 * Sets the value for <b>reference</b> (Relative, internal or absolute URL reference)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -86,6 +94,7 @@ public class ResourceReferenceDt extends BaseElement implements ICompositeDataty
 	public void setReference( String theString) {
 		myReference = new StringDt(theString); 
 	}
+
  
 	/**
 	 * Gets the value(s) for <b>display</b> (Text alternative for the resource).
@@ -116,8 +125,9 @@ public class ResourceReferenceDt extends BaseElement implements ICompositeDataty
 		myDisplay = theValue;
 	}
 
+
  	/**
-	 * Sets the value(s) for <b>display</b> (Text alternative for the resource)
+	 * Sets the value for <b>display</b> (Text alternative for the resource)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -127,6 +137,7 @@ public class ResourceReferenceDt extends BaseElement implements ICompositeDataty
 	public void setDisplay( String theString) {
 		myDisplay = new StringDt(theString); 
 	}
+
  
 
 

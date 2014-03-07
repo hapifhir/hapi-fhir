@@ -169,6 +169,12 @@ public class Device extends BaseResource implements IResource {
 	@Child(name="url", type=UriDt.class, order=12, min=0, max=1)	
 	private UriDt myUrl;
 	
+
+	@Override
+	public boolean isEmpty() {
+		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myIdentifier,  myType,  myManufacturer,  myModel,  myVersion,  myExpiry,  myUdi,  myLotNumber,  myOwner,  myLocation,  myPatient,  myContact,  myUrl);
+	}
+
 	/**
 	 * Gets the value(s) for <b>identifier</b> (Instance id from manufacturer, owner and others).
 	 * creating it if it does
@@ -196,6 +202,20 @@ public class Device extends BaseResource implements IResource {
 	 */
 	public void setIdentifier(List<IdentifierDt> theValue) {
 		myIdentifier = theValue;
+	}
+
+	/**
+	 * Adds and returns a new value for <b>identifier</b> (Instance id from manufacturer, owner and others)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Identifiers assigned to this device by various organizations. The most likely organizations to assign identifiers are the manufacturer and the owner, though regulatory agencies may also assign an identifier. The identifiers identify the particular device, not the kind of device
+     * </p> 
+	 */
+	public IdentifierDt addIdentifier() {
+		IdentifierDt newType = new IdentifierDt();
+		getIdentifier().add(newType);
+		return newType; 
 	}
 
   
@@ -228,6 +248,7 @@ public class Device extends BaseResource implements IResource {
 		myType = theValue;
 	}
 
+
   
 	/**
 	 * Gets the value(s) for <b>manufacturer</b> (Name of device manufacturer).
@@ -258,8 +279,9 @@ public class Device extends BaseResource implements IResource {
 		myManufacturer = theValue;
 	}
 
+
  	/**
-	 * Sets the value(s) for <b>manufacturer</b> (Name of device manufacturer)
+	 * Sets the value for <b>manufacturer</b> (Name of device manufacturer)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -269,6 +291,7 @@ public class Device extends BaseResource implements IResource {
 	public void setManufacturer( String theString) {
 		myManufacturer = new StringDt(theString); 
 	}
+
  
 	/**
 	 * Gets the value(s) for <b>model</b> (Model id assigned by the manufacturer).
@@ -299,8 +322,9 @@ public class Device extends BaseResource implements IResource {
 		myModel = theValue;
 	}
 
+
  	/**
-	 * Sets the value(s) for <b>model</b> (Model id assigned by the manufacturer)
+	 * Sets the value for <b>model</b> (Model id assigned by the manufacturer)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -310,6 +334,7 @@ public class Device extends BaseResource implements IResource {
 	public void setModel( String theString) {
 		myModel = new StringDt(theString); 
 	}
+
  
 	/**
 	 * Gets the value(s) for <b>version</b> (Version number (i.e. software)).
@@ -340,8 +365,9 @@ public class Device extends BaseResource implements IResource {
 		myVersion = theValue;
 	}
 
+
  	/**
-	 * Sets the value(s) for <b>version</b> (Version number (i.e. software))
+	 * Sets the value for <b>version</b> (Version number (i.e. software))
 	 *
      * <p>
      * <b>Definition:</b>
@@ -351,6 +377,7 @@ public class Device extends BaseResource implements IResource {
 	public void setVersion( String theString) {
 		myVersion = new StringDt(theString); 
 	}
+
  
 	/**
 	 * Gets the value(s) for <b>expiry</b> (Date of expiry of this device (if applicable)).
@@ -381,7 +408,32 @@ public class Device extends BaseResource implements IResource {
 		myExpiry = theValue;
 	}
 
-  
+
+ 	/**
+	 * Sets the value for <b>expiry</b> (Date of expiry of this device (if applicable))
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Date of expiry of this device (if applicable)
+     * </p> 
+	 */
+	public void setExpiry( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myExpiry = new DateDt(theDate, thePrecision); 
+	}
+
+	/**
+	 * Sets the value for <b>expiry</b> (Date of expiry of this device (if applicable))
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Date of expiry of this device (if applicable)
+     * </p> 
+	 */
+	public void setExpiryWithDayPrecision( Date theDate) {
+		myExpiry = new DateDt(theDate); 
+	}
+
+ 
 	/**
 	 * Gets the value(s) for <b>udi</b> (FDA Mandated Unique Device Identifier).
 	 * creating it if it does
@@ -411,8 +463,9 @@ public class Device extends BaseResource implements IResource {
 		myUdi = theValue;
 	}
 
+
  	/**
-	 * Sets the value(s) for <b>udi</b> (FDA Mandated Unique Device Identifier)
+	 * Sets the value for <b>udi</b> (FDA Mandated Unique Device Identifier)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -422,6 +475,7 @@ public class Device extends BaseResource implements IResource {
 	public void setUdi( String theString) {
 		myUdi = new StringDt(theString); 
 	}
+
  
 	/**
 	 * Gets the value(s) for <b>lotNumber</b> (Lot number of manufacture).
@@ -452,8 +506,9 @@ public class Device extends BaseResource implements IResource {
 		myLotNumber = theValue;
 	}
 
+
  	/**
-	 * Sets the value(s) for <b>lotNumber</b> (Lot number of manufacture)
+	 * Sets the value for <b>lotNumber</b> (Lot number of manufacture)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -463,6 +518,7 @@ public class Device extends BaseResource implements IResource {
 	public void setLotNumber( String theString) {
 		myLotNumber = new StringDt(theString); 
 	}
+
  
 	/**
 	 * Gets the value(s) for <b>owner</b> (Organization responsible for device).
@@ -492,6 +548,7 @@ public class Device extends BaseResource implements IResource {
 	public void setOwner(ResourceReference theValue) {
 		myOwner = theValue;
 	}
+
 
   
 	/**
@@ -523,6 +580,7 @@ public class Device extends BaseResource implements IResource {
 		myLocation = theValue;
 	}
 
+
   
 	/**
 	 * Gets the value(s) for <b>patient</b> (If the resource is affixed to a person).
@@ -553,6 +611,7 @@ public class Device extends BaseResource implements IResource {
 		myPatient = theValue;
 	}
 
+
   
 	/**
 	 * Gets the value(s) for <b>contact</b> (Details for human/organization for support).
@@ -581,6 +640,20 @@ public class Device extends BaseResource implements IResource {
 	 */
 	public void setContact(List<ContactDt> theValue) {
 		myContact = theValue;
+	}
+
+	/**
+	 * Adds and returns a new value for <b>contact</b> (Details for human/organization for support)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Contact details for an organization or a particular human that is responsible for the device
+     * </p> 
+	 */
+	public ContactDt addContact() {
+		ContactDt newType = new ContactDt();
+		getContact().add(newType);
+		return newType; 
 	}
 
   
@@ -613,8 +686,9 @@ public class Device extends BaseResource implements IResource {
 		myUrl = theValue;
 	}
 
+
  	/**
-	 * Sets the value(s) for <b>url</b> (Network address to contact device)
+	 * Sets the value for <b>url</b> (Network address to contact device)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -624,6 +698,7 @@ public class Device extends BaseResource implements IResource {
 	public void setUrl( String theUri) {
 		myUrl = new UriDt(theUri); 
 	}
+
  
 
 

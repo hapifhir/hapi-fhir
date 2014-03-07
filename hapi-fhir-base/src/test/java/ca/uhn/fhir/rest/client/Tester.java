@@ -13,14 +13,14 @@ public class Tester {
 		try {
 
 			FhirContext ctx = new FhirContext(Patient.class);
-			RestfulClientFactory factory = ctx.newClientFactory();
+			IRestfulClientFactory factory = ctx.newRestfulClientFactory();
 			ITestClient client = factory.newClient(ITestClient.class, "http://spark.furore.com/fhir/");
 
-//			Patient patient = client.getPatientById(new IdDt("1"));
-//			System.out.println(ctx.newXmlParser().encodeResourceToString(patient));
+			Patient patient = client.getPatientById(new IdDt("1"));
+			System.out.println(ctx.newXmlParser().encodeResourceToString(patient));
 
-			Patient patient2 = client.findPatientByMrn(new IdentifierDt("http://orionhealth.com/mrn", "PRP1660"));
-			System.out.println(ctx.newXmlParser().encodeResourceToString(patient2));
+//			Patient patient2 = client.findPatientByMrn(new IdentifierDt("http://orionhealth.com/mrn", "PRP1660"));
+//			System.out.println(ctx.newXmlParser().encodeResourceToString(patient2));
 
 		} catch (NonFhirResponseException e) {
 			e.printStackTrace();

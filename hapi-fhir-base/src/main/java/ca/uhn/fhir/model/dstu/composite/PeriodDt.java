@@ -38,7 +38,8 @@ import ca.uhn.fhir.model.dstu.resource.*;
  * </p> 
  */
 @DatatypeDef(name="Period") 
-public class PeriodDt extends BaseElement implements ICompositeDatatype {
+public class PeriodDt extends BaseElement implements ICompositeDatatype  {
+
 
 	@Child(name="start", type=DateTimeDt.class, order=0, min=0, max=1)	
 	private DateTimeDt myStart;
@@ -46,6 +47,12 @@ public class PeriodDt extends BaseElement implements ICompositeDatatype {
 	@Child(name="end", type=DateTimeDt.class, order=1, min=0, max=1)	
 	private DateTimeDt myEnd;
 	
+
+	@Override
+	public boolean isEmpty() {
+		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myStart,  myEnd);
+	}
+
 	/**
 	 * Gets the value(s) for <b>start</b> (Starting time with inclusive boundary).
 	 * creating it if it does
@@ -75,8 +82,9 @@ public class PeriodDt extends BaseElement implements ICompositeDatatype {
 		myStart = theValue;
 	}
 
+
  	/**
-	 * Sets the value(s) for <b>start</b> (Starting time with inclusive boundary)
+	 * Sets the value for <b>start</b> (Starting time with inclusive boundary)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -86,6 +94,19 @@ public class PeriodDt extends BaseElement implements ICompositeDatatype {
 	public void setStartWithSecondsPrecision( Date theDate) {
 		myStart = new DateTimeDt(theDate); 
 	}
+
+	/**
+	 * Sets the value for <b>start</b> (Starting time with inclusive boundary)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The start of the period. The boundary is inclusive.
+     * </p> 
+	 */
+	public void setStart( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myStart = new DateTimeDt(theDate, thePrecision); 
+	}
+
  
 	/**
 	 * Gets the value(s) for <b>end</b> (End time with inclusive boundary, if not ongoing).
@@ -116,8 +137,9 @@ public class PeriodDt extends BaseElement implements ICompositeDatatype {
 		myEnd = theValue;
 	}
 
+
  	/**
-	 * Sets the value(s) for <b>end</b> (End time with inclusive boundary, if not ongoing)
+	 * Sets the value for <b>end</b> (End time with inclusive boundary, if not ongoing)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -127,6 +149,19 @@ public class PeriodDt extends BaseElement implements ICompositeDatatype {
 	public void setEndWithSecondsPrecision( Date theDate) {
 		myEnd = new DateTimeDt(theDate); 
 	}
+
+	/**
+	 * Sets the value for <b>end</b> (End time with inclusive boundary, if not ongoing)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The end of the period. If the end of the period is missing, it means that the period is ongoing
+     * </p> 
+	 */
+	public void setEnd( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myEnd = new DateTimeDt(theDate, thePrecision); 
+	}
+
  
 
 

@@ -38,7 +38,8 @@ import ca.uhn.fhir.model.dstu.resource.*;
  * </p> 
  */
 @DatatypeDef(name="Address") 
-public class AddressDt extends BaseElement implements ICompositeDatatype {
+public class AddressDt extends BaseElement implements ICompositeDatatype  {
+
 
 	@Child(name="use", type=CodeDt.class, order=0, min=0, max=1)	
 	private BoundCodeDt<AddressUseEnum> myUse;
@@ -64,6 +65,12 @@ public class AddressDt extends BaseElement implements ICompositeDatatype {
 	@Child(name="period", type=PeriodDt.class, order=7, min=0, max=1)	
 	private PeriodDt myPeriod;
 	
+
+	@Override
+	public boolean isEmpty() {
+		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myUse,  myText,  myLine,  myCity,  myState,  myZip,  myCountry,  myPeriod);
+	}
+
 	/**
 	 * Gets the value(s) for <b>use</b> (home | work | temp | old - purpose of this address).
 	 * creating it if it does
@@ -92,6 +99,7 @@ public class AddressDt extends BaseElement implements ICompositeDatatype {
 	public void setUse(BoundCodeDt<AddressUseEnum> theValue) {
 		myUse = theValue;
 	}
+
 
 	/**
 	 * Sets the value(s) for <b>use</b> (home | work | temp | old - purpose of this address)
@@ -135,8 +143,9 @@ public class AddressDt extends BaseElement implements ICompositeDatatype {
 		myText = theValue;
 	}
 
+
  	/**
-	 * Sets the value(s) for <b>text</b> (Text representation of the address)
+	 * Sets the value for <b>text</b> (Text representation of the address)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -146,6 +155,7 @@ public class AddressDt extends BaseElement implements ICompositeDatatype {
 	public void setText( String theString) {
 		myText = new StringDt(theString); 
 	}
+
  
 	/**
 	 * Gets the value(s) for <b>line</b> (Street name, number, direction & P.O. Box etc ).
@@ -178,8 +188,23 @@ P.O. Box number, delivery hints, and similar address information
 		myLine = theValue;
 	}
 
+	/**
+	 * Adds and returns a new value for <b>line</b> (Street name, number, direction & P.O. Box etc )
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * This component contains the house number, apartment number, street name, street direction, 
+P.O. Box number, delivery hints, and similar address information
+     * </p> 
+	 */
+	public StringDt addLine() {
+		StringDt newType = new StringDt();
+		getLine().add(newType);
+		return newType; 
+	}
+
  	/**
-	 * Sets the value(s) for <b>line</b> (Street name, number, direction & P.O. Box etc )
+	 * Adds a new value for <b>line</b> (Street name, number, direction & P.O. Box etc )
 	 *
      * <p>
      * <b>Definition:</b>
@@ -193,6 +218,7 @@ P.O. Box number, delivery hints, and similar address information
 		}
 		myLine.add(new StringDt(theString)); 
 	}
+
  
 	/**
 	 * Gets the value(s) for <b>city</b> (Name of city, town etc.).
@@ -223,8 +249,9 @@ P.O. Box number, delivery hints, and similar address information
 		myCity = theValue;
 	}
 
+
  	/**
-	 * Sets the value(s) for <b>city</b> (Name of city, town etc.)
+	 * Sets the value for <b>city</b> (Name of city, town etc.)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -234,6 +261,7 @@ P.O. Box number, delivery hints, and similar address information
 	public void setCity( String theString) {
 		myCity = new StringDt(theString); 
 	}
+
  
 	/**
 	 * Gets the value(s) for <b>state</b> (Sub-unit of country (abreviations ok)).
@@ -264,8 +292,9 @@ P.O. Box number, delivery hints, and similar address information
 		myState = theValue;
 	}
 
+
  	/**
-	 * Sets the value(s) for <b>state</b> (Sub-unit of country (abreviations ok))
+	 * Sets the value for <b>state</b> (Sub-unit of country (abreviations ok))
 	 *
      * <p>
      * <b>Definition:</b>
@@ -275,6 +304,7 @@ P.O. Box number, delivery hints, and similar address information
 	public void setState( String theString) {
 		myState = new StringDt(theString); 
 	}
+
  
 	/**
 	 * Gets the value(s) for <b>zip</b> (Postal code for area).
@@ -305,8 +335,9 @@ P.O. Box number, delivery hints, and similar address information
 		myZip = theValue;
 	}
 
+
  	/**
-	 * Sets the value(s) for <b>zip</b> (Postal code for area)
+	 * Sets the value for <b>zip</b> (Postal code for area)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -316,6 +347,7 @@ P.O. Box number, delivery hints, and similar address information
 	public void setZip( String theString) {
 		myZip = new StringDt(theString); 
 	}
+
  
 	/**
 	 * Gets the value(s) for <b>country</b> (Country (can be ISO 3166 3 letter code)).
@@ -346,8 +378,9 @@ P.O. Box number, delivery hints, and similar address information
 		myCountry = theValue;
 	}
 
+
  	/**
-	 * Sets the value(s) for <b>country</b> (Country (can be ISO 3166 3 letter code))
+	 * Sets the value for <b>country</b> (Country (can be ISO 3166 3 letter code))
 	 *
      * <p>
      * <b>Definition:</b>
@@ -357,6 +390,7 @@ P.O. Box number, delivery hints, and similar address information
 	public void setCountry( String theString) {
 		myCountry = new StringDt(theString); 
 	}
+
  
 	/**
 	 * Gets the value(s) for <b>period</b> (Time period when address was/is in use).
@@ -386,6 +420,7 @@ P.O. Box number, delivery hints, and similar address information
 	public void setPeriod(PeriodDt theValue) {
 		myPeriod = theValue;
 	}
+
 
   
 

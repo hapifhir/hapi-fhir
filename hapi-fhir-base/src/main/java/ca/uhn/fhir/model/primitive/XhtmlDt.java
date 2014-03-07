@@ -14,12 +14,12 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.XMLEvent;
 
 import ca.uhn.fhir.context.ConfigurationException;
-import ca.uhn.fhir.model.api.IPrimitiveDatatype;
+import ca.uhn.fhir.model.api.BasePrimitive;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.parser.DataFormatException;
 
 @DatatypeDef(name = "xhtml")
-public class XhtmlDt implements IPrimitiveDatatype<List<XMLEvent>> {
+public class XhtmlDt extends BasePrimitive<List<XMLEvent>> {
 
 	private List<XMLEvent> myValue;
 

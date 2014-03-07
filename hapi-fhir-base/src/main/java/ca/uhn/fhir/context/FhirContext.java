@@ -10,6 +10,7 @@ import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.XmlParser;
+import ca.uhn.fhir.rest.client.IRestfulClientFactory;
 import ca.uhn.fhir.rest.client.RestfulClientFactory;
 
 public class FhirContext {
@@ -37,10 +38,6 @@ public class FhirContext {
 		return myClassToElementDefinition;
 	}
 
-	public Map<String, RuntimeResourceDefinition> getNameToResourceDefinition() {
-		return myNameToElementDefinition;
-	}
-
 	public RuntimeResourceDefinition getResourceDefinition(Class<? extends IResource> theResourceType) {
 		return (RuntimeResourceDefinition) myClassToElementDefinition.get(theResourceType);
 	}
@@ -53,7 +50,7 @@ public class FhirContext {
 		return myRuntimeChildUndeclaredExtensionDefinition;
 	}
 
-	public RestfulClientFactory newClientFactory() {
+	public IRestfulClientFactory newRestfulClientFactory() {
 		return new RestfulClientFactory(this);
 	}
 
@@ -65,6 +62,10 @@ public class FhirContext {
 		ArrayList<Class<? extends IResource>> retVal = new ArrayList<Class<? extends IResource>>(1);
 		retVal.add(theResourceType);
 		return retVal;
+	}
+
+	public BaseRuntimeElementDefinition<?> getResourceDefinition(String theResourceName) {
+		return myNameToElementDefinition.get(theResourceName);
 	}
 
 }

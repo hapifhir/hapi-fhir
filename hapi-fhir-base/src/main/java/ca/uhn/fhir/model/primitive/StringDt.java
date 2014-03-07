@@ -3,6 +3,7 @@ package ca.uhn.fhir.model.primitive;
 import org.apache.commons.lang3.StringUtils;
 
 import ca.uhn.fhir.model.api.BaseElement;
+import ca.uhn.fhir.model.api.BasePrimitive;
 import ca.uhn.fhir.model.api.IPrimitiveDatatype;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
@@ -10,7 +11,7 @@ import ca.uhn.fhir.model.api.annotation.SimpleSetter;
 import ca.uhn.fhir.parser.DataFormatException;
 
 @DatatypeDef(name = "string")
-public class StringDt  extends BaseElement implements IPrimitiveDatatype<String>, IQueryParameterType {
+public class StringDt extends BasePrimitive<String> implements IQueryParameterType {
 
 	private String myValue;
 

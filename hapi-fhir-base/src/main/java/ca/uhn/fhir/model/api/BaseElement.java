@@ -15,4 +15,19 @@ public abstract class BaseElement implements IElement, ISupportsUndeclaredExtens
 		return myUndeclaredExtensions;
 	}
 
+	/**
+	 * Intended to be called by extending classes {@link #isEmpty()} implementations, returns <code>true</code> if all content in this superclass instance is empty per the semantics of
+	 * {@link #isEmpty()}.
+	 */
+	protected boolean isBaseEmpty() {
+		if (myUndeclaredExtensions != null) {
+			for (UndeclaredExtension next : myUndeclaredExtensions) {
+				if (!next.isEmpty()) {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+
 }

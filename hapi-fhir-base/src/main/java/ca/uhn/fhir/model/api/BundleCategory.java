@@ -1,6 +1,8 @@
 package ca.uhn.fhir.model.api;
 
-public class BundleCategory {
+import org.apache.commons.lang3.StringUtils;
+
+public class BundleCategory implements IElement {
 
 	private String myLabel;
 	private String myScheme;
@@ -28,6 +30,11 @@ public class BundleCategory {
 
 	public void setTerm(String theTerm) {
 		myTerm = theTerm;
+	}
+
+	@Override
+	public boolean isEmpty() {
+		return StringUtils.isBlank(myLabel) && StringUtils.isBlank(myScheme) && StringUtils.isBlank(myTerm);
 	}
 
 }

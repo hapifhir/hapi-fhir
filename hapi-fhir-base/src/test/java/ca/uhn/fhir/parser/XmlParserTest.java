@@ -22,6 +22,7 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.resource.Observation;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.dstu.resource.ValueSet;
+import ca.uhn.fhir.model.dstu.valueset.NarrativeStatusEnum;
 
 public class XmlParserTest {
 
@@ -32,6 +33,9 @@ public class XmlParserTest {
 		IParser p = new FhirContext(Patient.class).newXmlParser();
 		Bundle bundle = p.parseBundle(msg);
 
+		assertEquals("http://spark.furore.com/fhir/_snapshot?id=327d6bb9-83b0-4929-aa91-6dd9c41e587b&start=0&_count=20", bundle.getLinkSelf().getValue());
+		assertEquals("Patient resource with id 3216379", bundle.getEntries().get(0).getTitle().getValue());
+		
 	}
 	
 	@Test
@@ -113,6 +117,35 @@ public class XmlParserTest {
 	}
 	
 	@Test
+	public void testLoadAndAncodeMessage() throws SAXException, IOException {
+
+		//@formatter:off
+		String msg = "<Patient xmlns=\"http://hl7.org/fhir\">" 
+				+ "<text><status value=\"generated\" /><div xmlns=\"http://www.w3.org/1999/xhtml\">John Cardinal:            444333333        </div></text>"
+				+ "<identifier><label value=\"SSN\" /><system value=\"http://orionhealth.com/mrn\" /><value value=\"PRP1660\" /></identifier>"
+				+ "<name><use value=\"official\" /><family value=\"Cardinal\" /><given value=\"John\" /></name>"
+				+ "<name><family value=\"Kramer\" /><given value=\"Doe\" /></name>"
+				+ "<telecom><system value=\"phone\" /><value value=\"555-555-2004\" /><use value=\"work\" /></telecom>"
+				+ "<gender><coding><system value=\"http://hl7.org/fhir/v3/AdministrativeGender\" /><code value=\"M\" /></coding></gender>"
+				+ "<address><use value=\"home\" /><line value=\"2222 Home Street\" /></address><active value=\"true\" />"
+				+ "</Patient>";
+		//@formatter:on
+		
+		FhirContext ctx = new FhirContext(Patient.class);
+		Patient patient = ctx.newXmlParser().parseResource(Patient.class, msg);
+		
+		assertEquals(NarrativeStatusEnum.GENERATED, patient.getText().getStatus().getValueAsEnum());
+		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">John Cardinal:            444333333        </div>", patient.getText().getDiv().getValueAsString());
+		assertEquals("PRP1660", patient.getIdentifier().get(0).getValue().getValueAsString());
+		
+		String encoded = ctx.newXmlParser().encodeResourceToString(patient);
+
+		Diff d = new Diff(new StringReader(msg), new StringReader(encoded));
+		assertTrue(d.toString(), d.identical());
+
+	}
+	
+	@Test
 	public void testLoadAndEncodeExtensions() throws ConfigurationException, DataFormatException, SAXException, IOException {
 		FhirContext ctx = new FhirContext(ResourceWithExtensionsA.class);
 		IParser p = new XmlParser(ctx);
@@ -146,7 +179,6 @@ public class XmlParserTest {
 				"	</extension>\n" + 
 				"	<identifier>\n" + 
 				"		<label value=\"IdentifierLabel\"/>\n" + 
-				"		<period />\n" + // this line can be removed once the parser encoding doesn't spit it out 
 				"	</identifier>\n" + 
 				"</ResourceWithExtensionsA>";
 		//@formatter:on
@@ -181,7 +213,8 @@ public class XmlParserTest {
 		FhirContext ctx = new FhirContext(Observation.class);
 		IParser p = new XmlParser(ctx);
 
-		IResource resource = p.parseResource(IOUtils.toString(XmlParserTest.class.getResourceAsStream("/observation-example-eeg.xml")));
+		String string = IOUtils.toString(XmlParserTest.class.getResourceAsStream("/observation-example-eeg.xml"));
+		IResource resource = p.parseResource(string);
 
 		String result = p.encodeResourceToString(resource);
 		ourLog.info(result);

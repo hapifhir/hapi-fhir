@@ -38,7 +38,8 @@ import ca.uhn.fhir.model.dstu.resource.*;
  * </p> 
  */
 @DatatypeDef(name="Range") 
-public class RangeDt extends BaseElement implements ICompositeDatatype {
+public class RangeDt extends BaseElement implements ICompositeDatatype  {
+
 
 	@Child(name="low", type=QuantityDt.class, order=0, min=0, max=1)	
 	private QuantityDt myLow;
@@ -46,6 +47,12 @@ public class RangeDt extends BaseElement implements ICompositeDatatype {
 	@Child(name="high", type=QuantityDt.class, order=1, min=0, max=1)	
 	private QuantityDt myHigh;
 	
+
+	@Override
+	public boolean isEmpty() {
+		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myLow,  myHigh);
+	}
+
 	/**
 	 * Gets the value(s) for <b>low</b> (Low limit ).
 	 * creating it if it does
@@ -74,6 +81,7 @@ public class RangeDt extends BaseElement implements ICompositeDatatype {
 	public void setLow(QuantityDt theValue) {
 		myLow = theValue;
 	}
+
 
   
 	/**
@@ -104,6 +112,7 @@ public class RangeDt extends BaseElement implements ICompositeDatatype {
 	public void setHigh(QuantityDt theValue) {
 		myHigh = theValue;
 	}
+
 
   
 

@@ -52,7 +52,7 @@ public class DummyPatientResourceProvider implements IResourceProvider {
 	}
 
 	@Search(Patient.class)
-	public Patient getPatient(@Required(name = "identifier") IdentifierDt theIdentifier) {
+	public Patient getPatient(@Required(name = Patient.SP_IDENTIFIER) IdentifierDt theIdentifier) {
 		for (Patient next : myIdToPatient.values()) {
 			for (IdentifierDt nextId : next.getIdentifier()) {
 				if (nextId.matchesSystemAndValue(theIdentifier)) {

@@ -36,6 +36,12 @@
 ##################################################################
 
 #macro ( childAccessors $childElements )
+
+	@Override
+	public boolean isEmpty() {
+		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( #{foreach}($child in $childElements) ${child.variableName}#{if}($foreach.hasNext), #{end}#{end});
+	}
+
 #foreach ( $child in $childElements )
 	/**
 	 * Gets the value(s) for <b>${child.elementName}</b> (${child.shortName}).
@@ -157,6 +163,7 @@
 		${child.variableName} = new ${ss.datatype}(#{foreach}($param in $ss.parameters)${param.parameter}#{if}( $foreach.hasNext ), #{end}#{end}); 
 	}
 #end
+
 #end ##foreach-child-in-simplesetters
 
 #end

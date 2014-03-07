@@ -6,9 +6,15 @@ import java.util.List;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.util.ElementUtil;
 
 public class Bundle extends BaseBundle implements IElement {
-
+	
+	//@formatter:off
+	/* ****************************************************
+	 * NB: add any new fields to the isEmpty() method!!!
+	 *****************************************************/
+	//@formatter:on
 	private List<BundleEntry> myEntries;
 	private StringDt myId;
 	private StringDt myLinkBase;
@@ -21,6 +27,15 @@ public class Bundle extends BaseBundle implements IElement {
 	private StringDt myTitle;
 	private IntegerDt myTotalResults;
 	private InstantDt myUpdated;
+
+	@Override
+	public boolean isEmpty() {
+		//@formatter:off
+		return super.isEmpty() && 
+				ElementUtil.isEmpty(myId, myLinkBase, myLinkFirst, myLinkLast, myLinkNext, myLinkPrevious, myLinkSelf, myPublished, myTitle, myTotalResults) &&
+				ElementUtil.isEmpty(myEntries);
+		//@formatter:on
+	}
 
 	/**
 	 * Adds and returns a new bundle entry

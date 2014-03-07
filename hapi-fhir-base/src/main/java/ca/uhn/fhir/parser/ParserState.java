@@ -3,7 +3,6 @@ package ca.uhn.fhir.parser;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.xml.namespace.QName;
 import javax.xml.stream.events.EndElement;
 import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
@@ -36,10 +35,6 @@ import ca.uhn.fhir.model.api.UndeclaredExtension;
 import ca.uhn.fhir.model.primitive.XhtmlDt;
 
 class ParserState<T extends IElement> {
-
-	private static final QName ATOM_LINK_HREF_ATTRIBUTE = new QName("href");
-
-	private static final QName ATOM_LINK_REL_ATTRIBUTE = new QName("rel");
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ParserState.class);
 	private FhirContext myContext;
@@ -106,9 +101,13 @@ class ParserState<T extends IElement> {
 		return retVal;
 	}
 
-	public static ParserState<IResource> getPreResourceInstance(FhirContext theContext) throws DataFormatException {
+	/**
+	 * @param theResourceType
+	 *            May be null
+	 */
+	public static ParserState<IResource> getPreResourceInstance(Class<? extends IResource> theResourceType, FhirContext theContext) throws DataFormatException {
 		ParserState<IResource> retVal = new ParserState<IResource>(theContext);
-		retVal.push(retVal.new PreResourceState());
+		retVal.push(retVal.new PreResourceState(theResourceType));
 		return retVal;
 	}
 
@@ -683,9 +682,14 @@ class ParserState<T extends IElement> {
 
 		private IResource myInstance;
 		private BundleEntry myEntry;
+		private Class<? extends IResource> myResourceType;
 
-		public PreResourceState() {
-			// nothing
+		/**
+		 * @param theResourceType
+		 *            May be null
+		 */
+		public PreResourceState(Class<? extends IResource> theResourceType) {
+			myResourceType = theResourceType;
 		}
 
 		public PreResourceState(BundleEntry theEntry) {
@@ -699,9 +703,17 @@ class ParserState<T extends IElement> {
 
 		@Override
 		public void enteringNewElement(String theNamespaceURI, String theLocalPart) throws DataFormatException {
-			BaseRuntimeElementDefinition<?> definition = myContext.getNameToResourceDefinition().get(theLocalPart);
-			if (!(definition instanceof RuntimeResourceDefinition)) {
-				throw new DataFormatException("Element '" + theLocalPart + "' is not a resource, expected a resource at this position");
+			BaseRuntimeElementDefinition<?> definition;
+			if (myResourceType == null) {
+				definition = myContext.getResourceDefinition(theLocalPart);
+				if (!(definition instanceof RuntimeResourceDefinition)) {
+					throw new DataFormatException("Element '" + theLocalPart + "' is not a resource, expected a resource at this position");
+				}
+			} else {
+				definition = myContext.getResourceDefinition(myResourceType);
+				if (!StringUtils.equals(theLocalPart, definition.getName())) {
+					throw new DataFormatException("Incorrect resource root element '" + theLocalPart + "', expected: '" + definition.getName() + "'");
+				}
 			}
 
 			RuntimeResourceDefinition def = (RuntimeResourceDefinition) definition;

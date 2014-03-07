@@ -25,12 +25,16 @@ public interface IParser {
 
 	Bundle parseBundle(Reader theReader);
 
-	Bundle parseBundle(String theXml) throws ConfigurationException, DataFormatException;
+	Bundle parseBundle(String theMessageString) throws ConfigurationException, DataFormatException;
 
-	IResource parseResource(String theXml) throws ConfigurationException, DataFormatException;
+	IResource parseResource(String theMessageString) throws ConfigurationException, DataFormatException;
 
 	IResource parseResource(Reader theReader) throws ConfigurationException, DataFormatException;
 
 	IResource parseResource(XMLEventReader theStreamReader);
+
+	<T extends IResource> T parseResource(Class<T> theResourceType, String theMessageString);
+
+	IResource parseResource(Class<? extends IResource> theResourceType, Reader theReader);
 
 }

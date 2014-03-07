@@ -4,4 +4,5 @@
  * Fix XML encoder to not encode empty elements
  * Add SimpleSetters for all primitive datatypes
  * Implement and add Simple Getters in a similar way to simple setters
+ * Add support for modifierExtensions
  * 

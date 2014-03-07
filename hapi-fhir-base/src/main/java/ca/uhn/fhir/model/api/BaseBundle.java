@@ -1,8 +1,9 @@
 package ca.uhn.fhir.model.api;
 
 import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.util.ElementUtil;
 
-public class BaseBundle {
+public class BaseBundle implements IElement {
 
 	private StringDt myAuthorName;
 	private StringDt myAuthorUri;
@@ -20,5 +21,12 @@ public class BaseBundle {
 		}
 		return myAuthorUri;
 	}
+
+	@Override
+	public boolean isEmpty() {
+		return ElementUtil.isEmpty(myAuthorName, myAuthorUri);
+	}
+	
+	
 
 }

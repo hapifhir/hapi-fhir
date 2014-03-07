@@ -163,6 +163,12 @@ public class Location extends BaseResource implements IResource {
 	@Child(name="mode", type=CodeDt.class, order=11, min=0, max=1)	
 	private BoundCodeDt<LocationModeEnum> myMode;
 	
+
+	@Override
+	public boolean isEmpty() {
+		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myIdentifier,  myName,  myDescription,  myType,  myTelecom,  myAddress,  myPhysicalType,  myPosition,  myManagingOrganization,  myStatus,  myPartOf,  myMode);
+	}
+
 	/**
 	 * Gets the value(s) for <b>identifier</b> (Unique code or number identifying the location to its users).
 	 * creating it if it does
@@ -191,6 +197,7 @@ public class Location extends BaseResource implements IResource {
 	public void setIdentifier(IdentifierDt theValue) {
 		myIdentifier = theValue;
 	}
+
 
   
 	/**
@@ -222,8 +229,9 @@ public class Location extends BaseResource implements IResource {
 		myName = theValue;
 	}
 
+
  	/**
-	 * Sets the value(s) for <b>name</b> (Name of the location as used by humans)
+	 * Sets the value for <b>name</b> (Name of the location as used by humans)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -233,6 +241,7 @@ public class Location extends BaseResource implements IResource {
 	public void setName( String theString) {
 		myName = new StringDt(theString); 
 	}
+
  
 	/**
 	 * Gets the value(s) for <b>description</b> (Description of the Location, which helps in finding or referencing the place).
@@ -263,8 +272,9 @@ public class Location extends BaseResource implements IResource {
 		myDescription = theValue;
 	}
 
+
  	/**
-	 * Sets the value(s) for <b>description</b> (Description of the Location, which helps in finding or referencing the place)
+	 * Sets the value for <b>description</b> (Description of the Location, which helps in finding or referencing the place)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -274,6 +284,7 @@ public class Location extends BaseResource implements IResource {
 	public void setDescription( String theString) {
 		myDescription = new StringDt(theString); 
 	}
+
  
 	/**
 	 * Gets the value(s) for <b>type</b> (Indicates the type of function performed at the location).
@@ -304,6 +315,7 @@ public class Location extends BaseResource implements IResource {
 		myType = theValue;
 	}
 
+
   
 	/**
 	 * Gets the value(s) for <b>telecom</b> (Contact details of the location).
@@ -332,6 +344,20 @@ public class Location extends BaseResource implements IResource {
 	 */
 	public void setTelecom(List<ContactDt> theValue) {
 		myTelecom = theValue;
+	}
+
+	/**
+	 * Adds and returns a new value for <b>telecom</b> (Contact details of the location)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The contact details of communication devices available at the location. This can include phone numbers, fax numbers, mobile numbers, email addresses and web sites
+     * </p> 
+	 */
+	public ContactDt addTelecom() {
+		ContactDt newType = new ContactDt();
+		getTelecom().add(newType);
+		return newType; 
 	}
 
   
@@ -364,6 +390,7 @@ public class Location extends BaseResource implements IResource {
 		myAddress = theValue;
 	}
 
+
   
 	/**
 	 * Gets the value(s) for <b>physicalType</b> (Physical form of the location).
@@ -393,6 +420,7 @@ public class Location extends BaseResource implements IResource {
 	public void setPhysicalType(CodeableConceptDt theValue) {
 		myPhysicalType = theValue;
 	}
+
 
   
 	/**
@@ -424,6 +452,7 @@ public class Location extends BaseResource implements IResource {
 		myPosition = theValue;
 	}
 
+
   
 	/**
 	 * Gets the value(s) for <b>managingOrganization</b> (The organization that is responsible for the provisioning and upkeep of the location).
@@ -454,6 +483,7 @@ public class Location extends BaseResource implements IResource {
 		myManagingOrganization = theValue;
 	}
 
+
   
 	/**
 	 * Gets the value(s) for <b>status</b> (active | suspended | inactive).
@@ -483,6 +513,7 @@ public class Location extends BaseResource implements IResource {
 	public void setStatus(BoundCodeDt<LocationStatusEnum> theValue) {
 		myStatus = theValue;
 	}
+
 
 	/**
 	 * Sets the value(s) for <b>status</b> (active | suspended | inactive)
@@ -526,6 +557,7 @@ public class Location extends BaseResource implements IResource {
 		myPartOf = theValue;
 	}
 
+
   
 	/**
 	 * Gets the value(s) for <b>mode</b> (instance | kind).
@@ -555,6 +587,7 @@ public class Location extends BaseResource implements IResource {
 	public void setMode(BoundCodeDt<LocationModeEnum> theValue) {
 		myMode = theValue;
 	}
+
 
 	/**
 	 * Sets the value(s) for <b>mode</b> (instance | kind)
@@ -589,6 +622,12 @@ public class Location extends BaseResource implements IResource {
 	@Child(name="altitude", type=DecimalDt.class, order=2, min=0, max=1)	
 	private DecimalDt myAltitude;
 	
+
+	@Override
+	public boolean isEmpty() {
+		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myLongitude,  myLatitude,  myAltitude);
+	}
+
 	/**
 	 * Gets the value(s) for <b>longitude</b> (Longitude as expressed in KML).
 	 * creating it if it does
@@ -618,7 +657,44 @@ public class Location extends BaseResource implements IResource {
 		myLongitude = theValue;
 	}
 
-  
+
+ 	/**
+	 * Sets the value for <b>longitude</b> (Longitude as expressed in KML)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Longitude. The value domain and the interpretation are the same as for the text of the longitude element in KML (see notes below)
+     * </p> 
+	 */
+	public void setLongitude( java.math.BigDecimal theValue) {
+		myLongitude = new DecimalDt(theValue); 
+	}
+
+	/**
+	 * Sets the value for <b>longitude</b> (Longitude as expressed in KML)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Longitude. The value domain and the interpretation are the same as for the text of the longitude element in KML (see notes below)
+     * </p> 
+	 */
+	public void setLongitude( double theValue) {
+		myLongitude = new DecimalDt(theValue); 
+	}
+
+	/**
+	 * Sets the value for <b>longitude</b> (Longitude as expressed in KML)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Longitude. The value domain and the interpretation are the same as for the text of the longitude element in KML (see notes below)
+     * </p> 
+	 */
+	public void setLongitude( long theValue) {
+		myLongitude = new DecimalDt(theValue); 
+	}
+
+ 
 	/**
 	 * Gets the value(s) for <b>latitude</b> (Latitude as expressed in KML).
 	 * creating it if it does
@@ -648,7 +724,44 @@ public class Location extends BaseResource implements IResource {
 		myLatitude = theValue;
 	}
 
-  
+
+ 	/**
+	 * Sets the value for <b>latitude</b> (Latitude as expressed in KML)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Latitude. The value domain and the interpretation are the same as for the text of the latitude element in KML (see notes below)
+     * </p> 
+	 */
+	public void setLatitude( java.math.BigDecimal theValue) {
+		myLatitude = new DecimalDt(theValue); 
+	}
+
+	/**
+	 * Sets the value for <b>latitude</b> (Latitude as expressed in KML)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Latitude. The value domain and the interpretation are the same as for the text of the latitude element in KML (see notes below)
+     * </p> 
+	 */
+	public void setLatitude( double theValue) {
+		myLatitude = new DecimalDt(theValue); 
+	}
+
+	/**
+	 * Sets the value for <b>latitude</b> (Latitude as expressed in KML)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Latitude. The value domain and the interpretation are the same as for the text of the latitude element in KML (see notes below)
+     * </p> 
+	 */
+	public void setLatitude( long theValue) {
+		myLatitude = new DecimalDt(theValue); 
+	}
+
+ 
 	/**
 	 * Gets the value(s) for <b>altitude</b> (Altitude as expressed in KML).
 	 * creating it if it does
@@ -678,7 +791,44 @@ public class Location extends BaseResource implements IResource {
 		myAltitude = theValue;
 	}
 
-  
+
+ 	/**
+	 * Sets the value for <b>altitude</b> (Altitude as expressed in KML)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Altitude. The value domain and the interpretation are the same as for the text of the altitude element in KML (see notes below)
+     * </p> 
+	 */
+	public void setAltitude( java.math.BigDecimal theValue) {
+		myAltitude = new DecimalDt(theValue); 
+	}
+
+	/**
+	 * Sets the value for <b>altitude</b> (Altitude as expressed in KML)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Altitude. The value domain and the interpretation are the same as for the text of the altitude element in KML (see notes below)
+     * </p> 
+	 */
+	public void setAltitude( double theValue) {
+		myAltitude = new DecimalDt(theValue); 
+	}
+
+	/**
+	 * Sets the value for <b>altitude</b> (Altitude as expressed in KML)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Altitude. The value domain and the interpretation are the same as for the text of the altitude element in KML (see notes below)
+     * </p> 
+	 */
+	public void setAltitude( long theValue) {
+		myAltitude = new DecimalDt(theValue); 
+	}
+
+ 
 
 	}
 

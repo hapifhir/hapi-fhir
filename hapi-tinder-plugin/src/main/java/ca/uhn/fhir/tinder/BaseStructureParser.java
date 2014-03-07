@@ -85,7 +85,11 @@ public abstract class BaseStructureParser {
 			Class<?>[] paramTypes = nextConstructor.getParameterTypes();
 			for (int i = 0; i < paramTypes.length; i++) {
 				Parameter p = new Parameter();
-				p.setDatatype(paramTypes[0].getSimpleName());
+				if (paramTypes[i].getCanonicalName().startsWith("java.math")) {
+					p.setDatatype(paramTypes[i].getCanonicalName());
+				}else {
+					p.setDatatype(paramTypes[i].getSimpleName());
+				}
 				p.setParameter(findAnnotation(childDt, paramAnn[i], SimpleSetter.Parameter.class).name());
 				ss.getParameters().add(p);
 			}

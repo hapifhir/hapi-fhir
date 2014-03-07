@@ -38,7 +38,8 @@ import ca.uhn.fhir.model.dstu.resource.*;
  * </p> 
  */
 @DatatypeDef(name="HumanName") 
-public class HumanNameDt extends BaseElement implements ICompositeDatatype {
+public class HumanNameDt extends BaseElement implements ICompositeDatatype  {
+
 
 	@Child(name="use", type=CodeDt.class, order=0, min=0, max=1)	
 	private BoundCodeDt<NameUseEnum> myUse;
@@ -61,6 +62,12 @@ public class HumanNameDt extends BaseElement implements ICompositeDatatype {
 	@Child(name="period", type=PeriodDt.class, order=6, min=0, max=1)	
 	private PeriodDt myPeriod;
 	
+
+	@Override
+	public boolean isEmpty() {
+		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myUse,  myText,  myFamily,  myGiven,  myPrefix,  mySuffix,  myPeriod);
+	}
+
 	/**
 	 * Gets the value(s) for <b>use</b> (usual | official | temp | nickname | anonymous | old | maiden).
 	 * creating it if it does
@@ -89,6 +96,7 @@ public class HumanNameDt extends BaseElement implements ICompositeDatatype {
 	public void setUse(BoundCodeDt<NameUseEnum> theValue) {
 		myUse = theValue;
 	}
+
 
 	/**
 	 * Sets the value(s) for <b>use</b> (usual | official | temp | nickname | anonymous | old | maiden)
@@ -132,8 +140,9 @@ public class HumanNameDt extends BaseElement implements ICompositeDatatype {
 		myText = theValue;
 	}
 
+
  	/**
-	 * Sets the value(s) for <b>text</b> (Text representation of the full name)
+	 * Sets the value for <b>text</b> (Text representation of the full name)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -143,6 +152,7 @@ public class HumanNameDt extends BaseElement implements ICompositeDatatype {
 	public void setText( String theString) {
 		myText = new StringDt(theString); 
 	}
+
  
 	/**
 	 * Gets the value(s) for <b>family</b> (Family name (often called 'Surname')).
@@ -173,8 +183,22 @@ public class HumanNameDt extends BaseElement implements ICompositeDatatype {
 		myFamily = theValue;
 	}
 
+	/**
+	 * Adds and returns a new value for <b>family</b> (Family name (often called 'Surname'))
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The part of a name that links to the genealogy. In some cultures (e.g. Eritrea) the family name of a son is the first name of his father.
+     * </p> 
+	 */
+	public StringDt addFamily() {
+		StringDt newType = new StringDt();
+		getFamily().add(newType);
+		return newType; 
+	}
+
  	/**
-	 * Sets the value(s) for <b>family</b> (Family name (often called 'Surname'))
+	 * Adds a new value for <b>family</b> (Family name (often called 'Surname'))
 	 *
      * <p>
      * <b>Definition:</b>
@@ -187,6 +211,7 @@ public class HumanNameDt extends BaseElement implements ICompositeDatatype {
 		}
 		myFamily.add(new StringDt(theString)); 
 	}
+
  
 	/**
 	 * Gets the value(s) for <b>given</b> (Given names (not always 'first'). Includes middle names).
@@ -217,8 +242,22 @@ public class HumanNameDt extends BaseElement implements ICompositeDatatype {
 		myGiven = theValue;
 	}
 
+	/**
+	 * Adds and returns a new value for <b>given</b> (Given names (not always 'first'). Includes middle names)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Given name
+     * </p> 
+	 */
+	public StringDt addGiven() {
+		StringDt newType = new StringDt();
+		getGiven().add(newType);
+		return newType; 
+	}
+
  	/**
-	 * Sets the value(s) for <b>given</b> (Given names (not always 'first'). Includes middle names)
+	 * Adds a new value for <b>given</b> (Given names (not always 'first'). Includes middle names)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -231,6 +270,7 @@ public class HumanNameDt extends BaseElement implements ICompositeDatatype {
 		}
 		myGiven.add(new StringDt(theString)); 
 	}
+
  
 	/**
 	 * Gets the value(s) for <b>prefix</b> (Parts that come before the name).
@@ -261,8 +301,22 @@ public class HumanNameDt extends BaseElement implements ICompositeDatatype {
 		myPrefix = theValue;
 	}
 
+	/**
+	 * Adds and returns a new value for <b>prefix</b> (Parts that come before the name)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Part of the name that is acquired as a title due to academic, legal, employment or nobility status, etc. and that appears at the start of the name
+     * </p> 
+	 */
+	public StringDt addPrefix() {
+		StringDt newType = new StringDt();
+		getPrefix().add(newType);
+		return newType; 
+	}
+
  	/**
-	 * Sets the value(s) for <b>prefix</b> (Parts that come before the name)
+	 * Adds a new value for <b>prefix</b> (Parts that come before the name)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -275,6 +329,7 @@ public class HumanNameDt extends BaseElement implements ICompositeDatatype {
 		}
 		myPrefix.add(new StringDt(theString)); 
 	}
+
  
 	/**
 	 * Gets the value(s) for <b>suffix</b> (Parts that come after the name).
@@ -305,8 +360,22 @@ public class HumanNameDt extends BaseElement implements ICompositeDatatype {
 		mySuffix = theValue;
 	}
 
+	/**
+	 * Adds and returns a new value for <b>suffix</b> (Parts that come after the name)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Part of the name that is acquired as a title due to academic, legal, employment or nobility status, etc. and that appears at the end of the name
+     * </p> 
+	 */
+	public StringDt addSuffix() {
+		StringDt newType = new StringDt();
+		getSuffix().add(newType);
+		return newType; 
+	}
+
  	/**
-	 * Sets the value(s) for <b>suffix</b> (Parts that come after the name)
+	 * Adds a new value for <b>suffix</b> (Parts that come after the name)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -319,6 +388,7 @@ public class HumanNameDt extends BaseElement implements ICompositeDatatype {
 		}
 		mySuffix.add(new StringDt(theString)); 
 	}
+
  
 	/**
 	 * Gets the value(s) for <b>period</b> (Time period when name was/is in use).
@@ -348,6 +418,7 @@ public class HumanNameDt extends BaseElement implements ICompositeDatatype {
 	public void setPeriod(PeriodDt theValue) {
 		myPeriod = theValue;
 	}
+
 
   
 

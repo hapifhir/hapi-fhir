@@ -38,7 +38,7 @@ public class ResourceMethodTest {
 		inputParams.add("firstName");
 		inputParams.add("lastName");
 
-		assertEquals(false, rm.matches("ResName", null, null, inputParams)); // False
+		assertEquals(false, rm.matches("Patient", null, null, inputParams)); // False
 	}
 
 	@Test
@@ -53,7 +53,7 @@ public class ResourceMethodTest {
 
 		Set<String> inputParams = new HashSet<String>();
 		inputParams.add("mrn");
-		assertEquals(true, rm.matches("ResName", null, null, inputParams)); // True
+		assertEquals(true, rm.matches("Patient", null, null, inputParams)); // True
 	}
 
 	@Test
@@ -70,7 +70,7 @@ public class ResourceMethodTest {
 		inputParams.add("firstName");
 		inputParams.add("mrn");
 
-		assertEquals(true, rm.matches("ResName", null, null, inputParams)); // True
+		assertEquals(true, rm.matches("Patient", null, null, inputParams)); // True
 	}
 
 	@Test
@@ -88,7 +88,7 @@ public class ResourceMethodTest {
 		inputParams.add("lastName");
 		inputParams.add("mrn");
 
-		assertEquals(true, rm.matches("ResName", null, null, inputParams)); // True
+		assertEquals(true, rm.matches("Patient", null, null, inputParams)); // True
 	}
 
 	@Test
@@ -107,6 +107,6 @@ public class ResourceMethodTest {
 		inputParams.add("mrn");
 		inputParams.add("foo");
 
-		assertEquals(false, rm.matches("ResName", null, null, inputParams)); // False
+		assertEquals(false, rm.matches("Patient", null, null, inputParams)); // False
 	}
 }

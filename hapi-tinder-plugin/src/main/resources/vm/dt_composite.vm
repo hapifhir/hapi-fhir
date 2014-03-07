@@ -24,10 +24,7 @@ import ${packageBase}.resource.*;
  * </p> 
  */
 @DatatypeDef(name="${className}") 
-public class ${className}Dt extends BaseElement implements ICompositeDatatype 
-#if ( ${className} == "Identifier" )
-, IQueryParameter
-#end
+public class ${className}Dt extends BaseElement implements ICompositeDatatype  #{if}( ${className} == "Identifier" ), IQueryParameterType #{end}
 {
 
 #########################

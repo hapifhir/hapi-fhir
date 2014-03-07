@@ -84,6 +84,12 @@ public class Specimen extends BaseResource implements IResource {
 	@Child(name="container", order=8, min=0, max=Child.MAX_UNLIMITED)	
 	private List<Container> myContainer;
 	
+
+	@Override
+	public boolean isEmpty() {
+		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myIdentifier,  myType,  mySource,  mySubject,  myAccessionIdentifier,  myReceivedTime,  myCollection,  myTreatment,  myContainer);
+	}
+
 	/**
 	 * Gets the value(s) for <b>identifier</b> (External Identifier).
 	 * creating it if it does
@@ -111,6 +117,20 @@ public class Specimen extends BaseResource implements IResource {
 	 */
 	public void setIdentifier(List<IdentifierDt> theValue) {
 		myIdentifier = theValue;
+	}
+
+	/**
+	 * Adds and returns a new value for <b>identifier</b> (External Identifier)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Id for specimen
+     * </p> 
+	 */
+	public IdentifierDt addIdentifier() {
+		IdentifierDt newType = new IdentifierDt();
+		getIdentifier().add(newType);
+		return newType; 
 	}
 
   
@@ -143,6 +163,7 @@ public class Specimen extends BaseResource implements IResource {
 		myType = theValue;
 	}
 
+
   
 	/**
 	 * Gets the value(s) for <b>source</b> (Parent of specimen).
@@ -173,6 +194,20 @@ public class Specimen extends BaseResource implements IResource {
 		mySource = theValue;
 	}
 
+	/**
+	 * Adds and returns a new value for <b>source</b> (Parent of specimen)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Parent specimen from which the focal specimen was a component
+     * </p> 
+	 */
+	public Source addSource() {
+		Source newType = new Source();
+		getSource().add(newType);
+		return newType; 
+	}
+
   
 	/**
 	 * Gets the value(s) for <b>subject</b> (Where the specimen came from. This may be the patient(s) or from the environment or  a device).
@@ -199,6 +234,7 @@ public class Specimen extends BaseResource implements IResource {
 	public void setSubject(ResourceReference theValue) {
 		mySubject = theValue;
 	}
+
 
   
 	/**
@@ -230,6 +266,7 @@ public class Specimen extends BaseResource implements IResource {
 		myAccessionIdentifier = theValue;
 	}
 
+
   
 	/**
 	 * Gets the value(s) for <b>receivedTime</b> (The time when specimen was received for processing).
@@ -260,8 +297,9 @@ public class Specimen extends BaseResource implements IResource {
 		myReceivedTime = theValue;
 	}
 
+
  	/**
-	 * Sets the value(s) for <b>receivedTime</b> (The time when specimen was received for processing)
+	 * Sets the value for <b>receivedTime</b> (The time when specimen was received for processing)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -271,6 +309,19 @@ public class Specimen extends BaseResource implements IResource {
 	public void setReceivedTimeWithSecondsPrecision( Date theDate) {
 		myReceivedTime = new DateTimeDt(theDate); 
 	}
+
+	/**
+	 * Sets the value for <b>receivedTime</b> (The time when specimen was received for processing)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Time when specimen was received for processing or testing
+     * </p> 
+	 */
+	public void setReceivedTime( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myReceivedTime = new DateTimeDt(theDate, thePrecision); 
+	}
+
  
 	/**
 	 * Gets the value(s) for <b>collection</b> (Collection details).
@@ -301,6 +352,7 @@ public class Specimen extends BaseResource implements IResource {
 		myCollection = theValue;
 	}
 
+
   
 	/**
 	 * Gets the value(s) for <b>treatment</b> (Treatment and processing step details).
@@ -329,6 +381,20 @@ public class Specimen extends BaseResource implements IResource {
 	 */
 	public void setTreatment(List<Treatment> theValue) {
 		myTreatment = theValue;
+	}
+
+	/**
+	 * Adds and returns a new value for <b>treatment</b> (Treatment and processing step details)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Details concerning treatment and processing steps for the specimen
+     * </p> 
+	 */
+	public Treatment addTreatment() {
+		Treatment newType = new Treatment();
+		getTreatment().add(newType);
+		return newType; 
 	}
 
   
@@ -361,6 +427,20 @@ public class Specimen extends BaseResource implements IResource {
 		myContainer = theValue;
 	}
 
+	/**
+	 * Adds and returns a new value for <b>container</b> (Direct container of specimen (tube/slide, etc))
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The container holding the specimen.  The recursive nature of containers; i.e. blood in tube in tray in rack is not addressed here. 
+     * </p> 
+	 */
+	public Container addContainer() {
+		Container newType = new Container();
+		getContainer().add(newType);
+		return newType; 
+	}
+
   
 	/**
 	 * Block class for child element: <b>Specimen.source</b> (Parent of specimen)
@@ -382,6 +462,12 @@ public class Specimen extends BaseResource implements IResource {
 	})	
 	private List<ResourceReference> myTarget;
 	
+
+	@Override
+	public boolean isEmpty() {
+		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myRelationship,  myTarget);
+	}
+
 	/**
 	 * Gets the value(s) for <b>relationship</b> (parent | child).
 	 * creating it if it does
@@ -410,6 +496,7 @@ public class Specimen extends BaseResource implements IResource {
 	public void setRelationship(BoundCodeDt<HierarchicalRelationshipTypeEnum> theValue) {
 		myRelationship = theValue;
 	}
+
 
 	/**
 	 * Sets the value(s) for <b>relationship</b> (parent | child)
@@ -453,6 +540,7 @@ public class Specimen extends BaseResource implements IResource {
 		myTarget = theValue;
 	}
 
+
   
 
 	}
@@ -493,6 +581,12 @@ public class Specimen extends BaseResource implements IResource {
 	@Child(name="sourceSite", type=CodeableConceptDt.class, order=5, min=0, max=1)	
 	private CodeableConceptDt mySourceSite;
 	
+
+	@Override
+	public boolean isEmpty() {
+		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myCollector,  myComment,  myCollected,  myQuantity,  myMethod,  mySourceSite);
+	}
+
 	/**
 	 * Gets the value(s) for <b>collector</b> (Who collected the specimen).
 	 * creating it if it does
@@ -521,6 +615,7 @@ public class Specimen extends BaseResource implements IResource {
 	public void setCollector(ResourceReference theValue) {
 		myCollector = theValue;
 	}
+
 
   
 	/**
@@ -552,8 +647,22 @@ public class Specimen extends BaseResource implements IResource {
 		myComment = theValue;
 	}
 
+	/**
+	 * Adds and returns a new value for <b>comment</b> (Collector comments)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * To communicate any details or issues encountered during the specimen collection procedure.
+     * </p> 
+	 */
+	public StringDt addComment() {
+		StringDt newType = new StringDt();
+		getComment().add(newType);
+		return newType; 
+	}
+
  	/**
-	 * Sets the value(s) for <b>comment</b> (Collector comments)
+	 * Adds a new value for <b>comment</b> (Collector comments)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -566,6 +675,7 @@ public class Specimen extends BaseResource implements IResource {
 		}
 		myComment.add(new StringDt(theString)); 
 	}
+
  
 	/**
 	 * Gets the value(s) for <b>collected[x]</b> (Collection time).
@@ -592,6 +702,7 @@ public class Specimen extends BaseResource implements IResource {
 	public void setCollected(IDatatype theValue) {
 		myCollected = theValue;
 	}
+
 
   
 	/**
@@ -623,6 +734,7 @@ public class Specimen extends BaseResource implements IResource {
 		myQuantity = theValue;
 	}
 
+
   
 	/**
 	 * Gets the value(s) for <b>method</b> (Technique used to perform collection).
@@ -652,6 +764,7 @@ public class Specimen extends BaseResource implements IResource {
 	public void setMethod(CodeableConceptDt theValue) {
 		myMethod = theValue;
 	}
+
 
   
 	/**
@@ -683,6 +796,7 @@ public class Specimen extends BaseResource implements IResource {
 		mySourceSite = theValue;
 	}
 
+
   
 
 	}
@@ -711,6 +825,12 @@ public class Specimen extends BaseResource implements IResource {
 	})	
 	private List<ResourceReference> myAdditive;
 	
+
+	@Override
+	public boolean isEmpty() {
+		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myDescription,  myProcedure,  myAdditive);
+	}
+
 	/**
 	 * Gets the value(s) for <b>description</b> (Textual description of procedure).
 	 * creating it if it does
@@ -740,8 +860,9 @@ public class Specimen extends BaseResource implements IResource {
 		myDescription = theValue;
 	}
 
+
  	/**
-	 * Sets the value(s) for <b>description</b> (Textual description of procedure)
+	 * Sets the value for <b>description</b> (Textual description of procedure)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -751,6 +872,7 @@ public class Specimen extends BaseResource implements IResource {
 	public void setDescription( String theString) {
 		myDescription = new StringDt(theString); 
 	}
+
  
 	/**
 	 * Gets the value(s) for <b>procedure</b> (Indicates the treatment or processing step  applied to the specimen).
@@ -781,6 +903,7 @@ public class Specimen extends BaseResource implements IResource {
 		myProcedure = theValue;
 	}
 
+
   
 	/**
 	 * Gets the value(s) for <b>additive</b> (Material used in the processing step).
@@ -810,6 +933,7 @@ public class Specimen extends BaseResource implements IResource {
 	public void setAdditive(List<ResourceReference> theValue) {
 		myAdditive = theValue;
 	}
+
 
   
 
@@ -848,6 +972,12 @@ public class Specimen extends BaseResource implements IResource {
 	})	
 	private ResourceReference myAdditive;
 	
+
+	@Override
+	public boolean isEmpty() {
+		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myIdentifier,  myDescription,  myType,  myCapacity,  mySpecimenQuantity,  myAdditive);
+	}
+
 	/**
 	 * Gets the value(s) for <b>identifier</b> (Id for the container).
 	 * creating it if it does
@@ -875,6 +1005,20 @@ public class Specimen extends BaseResource implements IResource {
 	 */
 	public void setIdentifier(List<IdentifierDt> theValue) {
 		myIdentifier = theValue;
+	}
+
+	/**
+	 * Adds and returns a new value for <b>identifier</b> (Id for the container)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Id for container. There may be multiple; a manufacturer's bar code, lab assigned identifier, etc. The container ID may differ from the specimen id in some circumstances
+     * </p> 
+	 */
+	public IdentifierDt addIdentifier() {
+		IdentifierDt newType = new IdentifierDt();
+		getIdentifier().add(newType);
+		return newType; 
 	}
 
   
@@ -907,8 +1051,9 @@ public class Specimen extends BaseResource implements IResource {
 		myDescription = theValue;
 	}
 
+
  	/**
-	 * Sets the value(s) for <b>description</b> (Textual description of the container)
+	 * Sets the value for <b>description</b> (Textual description of the container)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -918,6 +1063,7 @@ public class Specimen extends BaseResource implements IResource {
 	public void setDescription( String theString) {
 		myDescription = new StringDt(theString); 
 	}
+
  
 	/**
 	 * Gets the value(s) for <b>type</b> (Kind of container directly associated with specimen).
@@ -947,6 +1093,7 @@ public class Specimen extends BaseResource implements IResource {
 	public void setType(CodeableConceptDt theValue) {
 		myType = theValue;
 	}
+
 
   
 	/**
@@ -978,6 +1125,7 @@ public class Specimen extends BaseResource implements IResource {
 		myCapacity = theValue;
 	}
 
+
   
 	/**
 	 * Gets the value(s) for <b>specimenQuantity</b> (Quantity of specimen within container).
@@ -1008,6 +1156,7 @@ public class Specimen extends BaseResource implements IResource {
 		mySpecimenQuantity = theValue;
 	}
 
+
   
 	/**
 	 * Gets the value(s) for <b>additive</b> (Additive associated with container ).
@@ -1037,6 +1186,7 @@ public class Specimen extends BaseResource implements IResource {
 	public void setAdditive(ResourceReference theValue) {
 		myAdditive = theValue;
 	}
+
 
   
 

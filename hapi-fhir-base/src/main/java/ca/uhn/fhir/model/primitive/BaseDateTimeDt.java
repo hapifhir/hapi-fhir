@@ -13,11 +13,12 @@ import javax.xml.bind.DatatypeConverter;
 import org.apache.commons.lang3.time.FastDateFormat;
 
 import ca.uhn.fhir.model.api.BaseElement;
+import ca.uhn.fhir.model.api.BasePrimitive;
 import ca.uhn.fhir.model.api.IPrimitiveDatatype;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.parser.DataFormatException;
 
-public abstract class BaseDateTimeDt extends BaseElement implements IPrimitiveDatatype<Date> {
+public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 
 	private static final FastDateFormat ourYearFormat = FastDateFormat.getInstance("yyyy");
 	private static final FastDateFormat ourYearMonthDayFormat = FastDateFormat.getInstance("yyyy-MM-dd");

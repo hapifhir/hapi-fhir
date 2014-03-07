@@ -38,7 +38,8 @@ import ca.uhn.fhir.model.dstu.resource.*;
  * </p> 
  */
 @DatatypeDef(name="CodeableConcept") 
-public class CodeableConceptDt extends BaseElement implements ICompositeDatatype {
+public class CodeableConceptDt extends BaseElement implements ICompositeDatatype  {
+
 
 	@Child(name="coding", type=CodingDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)	
 	private List<CodingDt> myCoding;
@@ -46,6 +47,12 @@ public class CodeableConceptDt extends BaseElement implements ICompositeDatatype
 	@Child(name="text", type=StringDt.class, order=1, min=0, max=1)	
 	private StringDt myText;
 	
+
+	@Override
+	public boolean isEmpty() {
+		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myCoding,  myText);
+	}
+
 	/**
 	 * Gets the value(s) for <b>coding</b> (Code defined by a terminology system ).
 	 * creating it if it does
@@ -73,6 +80,20 @@ public class CodeableConceptDt extends BaseElement implements ICompositeDatatype
 	 */
 	public void setCoding(List<CodingDt> theValue) {
 		myCoding = theValue;
+	}
+
+	/**
+	 * Adds and returns a new value for <b>coding</b> (Code defined by a terminology system )
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A reference to a code defined by a terminology system 
+     * </p> 
+	 */
+	public CodingDt addCoding() {
+		CodingDt newType = new CodingDt();
+		getCoding().add(newType);
+		return newType; 
 	}
 
   
@@ -105,8 +126,9 @@ public class CodeableConceptDt extends BaseElement implements ICompositeDatatype
 		myText = theValue;
 	}
 
+
  	/**
-	 * Sets the value(s) for <b>text</b> (Plain text representation of the concept)
+	 * Sets the value for <b>text</b> (Plain text representation of the concept)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -116,6 +138,7 @@ public class CodeableConceptDt extends BaseElement implements ICompositeDatatype
 	public void setText( String theString) {
 		myText = new StringDt(theString); 
 	}
+
  
 
 

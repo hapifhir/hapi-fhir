@@ -103,6 +103,12 @@ public class Substance extends BaseResource implements IResource {
 	@Child(name="ingredient", order=3, min=0, max=Child.MAX_UNLIMITED)	
 	private List<Ingredient> myIngredient;
 	
+
+	@Override
+	public boolean isEmpty() {
+		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myType,  myDescription,  myInstance,  myIngredient);
+	}
+
 	/**
 	 * Gets the value(s) for <b>type</b> (What kind of substance this is).
 	 * creating it if it does
@@ -131,6 +137,7 @@ public class Substance extends BaseResource implements IResource {
 	public void setType(CodeableConceptDt theValue) {
 		myType = theValue;
 	}
+
 
   
 	/**
@@ -162,8 +169,9 @@ public class Substance extends BaseResource implements IResource {
 		myDescription = theValue;
 	}
 
+
  	/**
-	 * Sets the value(s) for <b>description</b> (Textual description of the substance, comments)
+	 * Sets the value for <b>description</b> (Textual description of the substance, comments)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -173,6 +181,7 @@ public class Substance extends BaseResource implements IResource {
 	public void setDescription( String theString) {
 		myDescription = new StringDt(theString); 
 	}
+
  
 	/**
 	 * Gets the value(s) for <b>instance</b> (If this describes a specific package/container of the substance).
@@ -202,6 +211,7 @@ public class Substance extends BaseResource implements IResource {
 	public void setInstance(Instance theValue) {
 		myInstance = theValue;
 	}
+
 
   
 	/**
@@ -233,6 +243,20 @@ public class Substance extends BaseResource implements IResource {
 		myIngredient = theValue;
 	}
 
+	/**
+	 * Adds and returns a new value for <b>ingredient</b> (Composition information about the substance)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A substance can be composed of other substances
+     * </p> 
+	 */
+	public Ingredient addIngredient() {
+		Ingredient newType = new Ingredient();
+		getIngredient().add(newType);
+		return newType; 
+	}
+
   
 	/**
 	 * Block class for child element: <b>Substance.instance</b> (If this describes a specific package/container of the substance)
@@ -254,6 +278,12 @@ public class Substance extends BaseResource implements IResource {
 	@Child(name="quantity", type=QuantityDt.class, order=2, min=0, max=1)	
 	private QuantityDt myQuantity;
 	
+
+	@Override
+	public boolean isEmpty() {
+		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myIdentifier,  myExpiry,  myQuantity);
+	}
+
 	/**
 	 * Gets the value(s) for <b>identifier</b> (Identifier of the package/container).
 	 * creating it if it does
@@ -282,6 +312,7 @@ public class Substance extends BaseResource implements IResource {
 	public void setIdentifier(IdentifierDt theValue) {
 		myIdentifier = theValue;
 	}
+
 
   
 	/**
@@ -313,8 +344,9 @@ public class Substance extends BaseResource implements IResource {
 		myExpiry = theValue;
 	}
 
+
  	/**
-	 * Sets the value(s) for <b>expiry</b> (When no longer valid to use)
+	 * Sets the value for <b>expiry</b> (When no longer valid to use)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -324,6 +356,19 @@ public class Substance extends BaseResource implements IResource {
 	public void setExpiryWithSecondsPrecision( Date theDate) {
 		myExpiry = new DateTimeDt(theDate); 
 	}
+
+	/**
+	 * Sets the value for <b>expiry</b> (When no longer valid to use)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * When the substance is no longer valid to use. For some substances, a single arbitrary date is used for expiry.
+     * </p> 
+	 */
+	public void setExpiry( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myExpiry = new DateTimeDt(theDate, thePrecision); 
+	}
+
  
 	/**
 	 * Gets the value(s) for <b>quantity</b> (Amount of substance in the package).
@@ -354,6 +399,7 @@ public class Substance extends BaseResource implements IResource {
 		myQuantity = theValue;
 	}
 
+
   
 
 	}
@@ -379,6 +425,12 @@ public class Substance extends BaseResource implements IResource {
 	})	
 	private ResourceReference mySubstance;
 	
+
+	@Override
+	public boolean isEmpty() {
+		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myQuantity,  mySubstance);
+	}
+
 	/**
 	 * Gets the value(s) for <b>quantity</b> (Optional amount (concentration)).
 	 * creating it if it does
@@ -407,6 +459,7 @@ public class Substance extends BaseResource implements IResource {
 	public void setQuantity(RatioDt theValue) {
 		myQuantity = theValue;
 	}
+
 
   
 	/**
@@ -437,6 +490,7 @@ public class Substance extends BaseResource implements IResource {
 	public void setSubstance(ResourceReference theValue) {
 		mySubstance = theValue;
 	}
+
 
   
 

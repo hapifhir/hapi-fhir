@@ -255,6 +255,12 @@ public class Patient extends BaseResource implements IResource {
 	@Child(name="active", type=BooleanDt.class, order=16, min=0, max=1)	
 	private BooleanDt myActive;
 	
+
+	@Override
+	public boolean isEmpty() {
+		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myIdentifier,  myName,  myTelecom,  myGender,  myBirthDate,  myDeceased,  myAddress,  myMaritalStatus,  myMultipleBirth,  myPhoto,  myContact,  myAnimal,  myCommunication,  myCareProvider,  myManagingOrganization,  myLink,  myActive);
+	}
+
 	/**
 	 * Gets the value(s) for <b>identifier</b> (An identifier for the person as this patient).
 	 * creating it if it does
@@ -282,6 +288,20 @@ public class Patient extends BaseResource implements IResource {
 	 */
 	public void setIdentifier(List<IdentifierDt> theValue) {
 		myIdentifier = theValue;
+	}
+
+	/**
+	 * Adds and returns a new value for <b>identifier</b> (An identifier for the person as this patient)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * An identifier that applies to this person as a patient
+     * </p> 
+	 */
+	public IdentifierDt addIdentifier() {
+		IdentifierDt newType = new IdentifierDt();
+		getIdentifier().add(newType);
+		return newType; 
 	}
 
   
@@ -314,6 +334,20 @@ public class Patient extends BaseResource implements IResource {
 		myName = theValue;
 	}
 
+	/**
+	 * Adds and returns a new value for <b>name</b> (A name associated with the patient)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A name associated with the individual. 
+     * </p> 
+	 */
+	public HumanNameDt addName() {
+		HumanNameDt newType = new HumanNameDt();
+		getName().add(newType);
+		return newType; 
+	}
+
   
 	/**
 	 * Gets the value(s) for <b>telecom</b> (A contact detail for the individual).
@@ -342,6 +376,20 @@ public class Patient extends BaseResource implements IResource {
 	 */
 	public void setTelecom(List<ContactDt> theValue) {
 		myTelecom = theValue;
+	}
+
+	/**
+	 * Adds and returns a new value for <b>telecom</b> (A contact detail for the individual)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A contact detail (e.g. a telephone number or an email address) by which the individual may be contacted. 
+     * </p> 
+	 */
+	public ContactDt addTelecom() {
+		ContactDt newType = new ContactDt();
+		getTelecom().add(newType);
+		return newType; 
 	}
 
   
@@ -374,6 +422,7 @@ public class Patient extends BaseResource implements IResource {
 		myGender = theValue;
 	}
 
+
   
 	/**
 	 * Gets the value(s) for <b>birthDate</b> (The date and time of birth for the individual).
@@ -404,8 +453,9 @@ public class Patient extends BaseResource implements IResource {
 		myBirthDate = theValue;
 	}
 
+
  	/**
-	 * Sets the value(s) for <b>birthDate</b> (The date and time of birth for the individual)
+	 * Sets the value for <b>birthDate</b> (The date and time of birth for the individual)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -415,6 +465,19 @@ public class Patient extends BaseResource implements IResource {
 	public void setBirthDateWithSecondsPrecision( Date theDate) {
 		myBirthDate = new DateTimeDt(theDate); 
 	}
+
+	/**
+	 * Sets the value for <b>birthDate</b> (The date and time of birth for the individual)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The date and time of birth for the individual
+     * </p> 
+	 */
+	public void setBirthDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myBirthDate = new DateTimeDt(theDate, thePrecision); 
+	}
+
  
 	/**
 	 * Gets the value(s) for <b>deceased[x]</b> (Indicates if the individual is deceased or not).
@@ -441,6 +504,7 @@ public class Patient extends BaseResource implements IResource {
 	public void setDeceased(IDatatype theValue) {
 		myDeceased = theValue;
 	}
+
 
   
 	/**
@@ -470,6 +534,20 @@ public class Patient extends BaseResource implements IResource {
 	 */
 	public void setAddress(List<AddressDt> theValue) {
 		myAddress = theValue;
+	}
+
+	/**
+	 * Adds and returns a new value for <b>address</b> (Addresses for the individual)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Addresses for the individual
+     * </p> 
+	 */
+	public AddressDt addAddress() {
+		AddressDt newType = new AddressDt();
+		getAddress().add(newType);
+		return newType; 
 	}
 
   
@@ -502,6 +580,7 @@ public class Patient extends BaseResource implements IResource {
 		myMaritalStatus = theValue;
 	}
 
+
   
 	/**
 	 * Gets the value(s) for <b>multipleBirth[x]</b> (Whether patient is part of a multiple birth).
@@ -528,6 +607,7 @@ public class Patient extends BaseResource implements IResource {
 	public void setMultipleBirth(IDatatype theValue) {
 		myMultipleBirth = theValue;
 	}
+
 
   
 	/**
@@ -557,6 +637,20 @@ public class Patient extends BaseResource implements IResource {
 	 */
 	public void setPhoto(List<AttachmentDt> theValue) {
 		myPhoto = theValue;
+	}
+
+	/**
+	 * Adds and returns a new value for <b>photo</b> (Image of the person)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Image of the person
+     * </p> 
+	 */
+	public AttachmentDt addPhoto() {
+		AttachmentDt newType = new AttachmentDt();
+		getPhoto().add(newType);
+		return newType; 
 	}
 
   
@@ -589,6 +683,20 @@ public class Patient extends BaseResource implements IResource {
 		myContact = theValue;
 	}
 
+	/**
+	 * Adds and returns a new value for <b>contact</b> (A contact party (e.g. guardian, partner, friend) for the patient)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A contact party (e.g. guardian, partner, friend) for the patient
+     * </p> 
+	 */
+	public Contact addContact() {
+		Contact newType = new Contact();
+		getContact().add(newType);
+		return newType; 
+	}
+
   
 	/**
 	 * Gets the value(s) for <b>animal</b> (If this patient is an animal (non-human)).
@@ -618,6 +726,7 @@ public class Patient extends BaseResource implements IResource {
 	public void setAnimal(Animal theValue) {
 		myAnimal = theValue;
 	}
+
 
   
 	/**
@@ -649,6 +758,20 @@ public class Patient extends BaseResource implements IResource {
 		myCommunication = theValue;
 	}
 
+	/**
+	 * Adds and returns a new value for <b>communication</b> (Languages which may be used to communicate with the patient about his or her health)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Languages which may be used to communicate with the patient about his or her health
+     * </p> 
+	 */
+	public CodeableConceptDt addCommunication() {
+		CodeableConceptDt newType = new CodeableConceptDt();
+		getCommunication().add(newType);
+		return newType; 
+	}
+
   
 	/**
 	 * Gets the value(s) for <b>careProvider</b> (Patient's nominated care provider).
@@ -675,6 +798,7 @@ public class Patient extends BaseResource implements IResource {
 	public void setCareProvider(List<ResourceReference> theValue) {
 		myCareProvider = theValue;
 	}
+
 
   
 	/**
@@ -706,6 +830,7 @@ public class Patient extends BaseResource implements IResource {
 		myManagingOrganization = theValue;
 	}
 
+
   
 	/**
 	 * Gets the value(s) for <b>link</b> (Link to another patient resource that concerns the same actual person).
@@ -734,6 +859,20 @@ public class Patient extends BaseResource implements IResource {
 	 */
 	public void setLink(List<Link> theValue) {
 		myLink = theValue;
+	}
+
+	/**
+	 * Adds and returns a new value for <b>link</b> (Link to another patient resource that concerns the same actual person)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Link to another patient resource that concerns the same actual person
+     * </p> 
+	 */
+	public Link addLink() {
+		Link newType = new Link();
+		getLink().add(newType);
+		return newType; 
 	}
 
   
@@ -766,7 +905,20 @@ public class Patient extends BaseResource implements IResource {
 		myActive = theValue;
 	}
 
-  
+
+ 	/**
+	 * Sets the value for <b>active</b> (Whether this patient's record is in active use)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Whether this patient record is in active use
+     * </p> 
+	 */
+	public void setActive( Boolean theBoolean) {
+		myActive = new BooleanDt(theBoolean); 
+	}
+
+ 
 	/**
 	 * Block class for child element: <b>Patient.contact</b> (A contact party (e.g. guardian, partner, friend) for the patient)
 	 *
@@ -799,6 +951,12 @@ public class Patient extends BaseResource implements IResource {
 	})	
 	private ResourceReference myOrganization;
 	
+
+	@Override
+	public boolean isEmpty() {
+		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myRelationship,  myName,  myTelecom,  myAddress,  myGender,  myOrganization);
+	}
+
 	/**
 	 * Gets the value(s) for <b>relationship</b> (The kind of relationship).
 	 * creating it if it does
@@ -826,6 +984,20 @@ public class Patient extends BaseResource implements IResource {
 	 */
 	public void setRelationship(List<CodeableConceptDt> theValue) {
 		myRelationship = theValue;
+	}
+
+	/**
+	 * Adds and returns a new value for <b>relationship</b> (The kind of relationship)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The nature of the relationship between the patient and the contact person
+     * </p> 
+	 */
+	public CodeableConceptDt addRelationship() {
+		CodeableConceptDt newType = new CodeableConceptDt();
+		getRelationship().add(newType);
+		return newType; 
 	}
 
   
@@ -858,6 +1030,7 @@ public class Patient extends BaseResource implements IResource {
 		myName = theValue;
 	}
 
+
   
 	/**
 	 * Gets the value(s) for <b>telecom</b> (A contact detail for the person).
@@ -886,6 +1059,20 @@ public class Patient extends BaseResource implements IResource {
 	 */
 	public void setTelecom(List<ContactDt> theValue) {
 		myTelecom = theValue;
+	}
+
+	/**
+	 * Adds and returns a new value for <b>telecom</b> (A contact detail for the person)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A contact detail for the person, e.g. a telephone number or an email address.
+     * </p> 
+	 */
+	public ContactDt addTelecom() {
+		ContactDt newType = new ContactDt();
+		getTelecom().add(newType);
+		return newType; 
 	}
 
   
@@ -918,6 +1105,7 @@ public class Patient extends BaseResource implements IResource {
 		myAddress = theValue;
 	}
 
+
   
 	/**
 	 * Gets the value(s) for <b>gender</b> (Gender for administrative purposes).
@@ -947,6 +1135,7 @@ public class Patient extends BaseResource implements IResource {
 	public void setGender(CodeableConceptDt theValue) {
 		myGender = theValue;
 	}
+
 
   
 	/**
@@ -978,6 +1167,7 @@ public class Patient extends BaseResource implements IResource {
 		myOrganization = theValue;
 	}
 
+
   
 
 	}
@@ -1003,6 +1193,12 @@ public class Patient extends BaseResource implements IResource {
 	@Child(name="genderStatus", type=CodeableConceptDt.class, order=2, min=0, max=1)	
 	private CodeableConceptDt myGenderStatus;
 	
+
+	@Override
+	public boolean isEmpty() {
+		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  mySpecies,  myBreed,  myGenderStatus);
+	}
+
 	/**
 	 * Gets the value(s) for <b>species</b> (E.g. Dog, Cow).
 	 * creating it if it does
@@ -1031,6 +1227,7 @@ public class Patient extends BaseResource implements IResource {
 	public void setSpecies(CodeableConceptDt theValue) {
 		mySpecies = theValue;
 	}
+
 
   
 	/**
@@ -1062,6 +1259,7 @@ public class Patient extends BaseResource implements IResource {
 		myBreed = theValue;
 	}
 
+
   
 	/**
 	 * Gets the value(s) for <b>genderStatus</b> (E.g. Neutered, Intact).
@@ -1092,6 +1290,7 @@ public class Patient extends BaseResource implements IResource {
 		myGenderStatus = theValue;
 	}
 
+
   
 
 	}
@@ -1117,6 +1316,12 @@ public class Patient extends BaseResource implements IResource {
 	@Child(name="type", type=CodeDt.class, order=1, min=1, max=1)	
 	private BoundCodeDt<LinkTypeEnum> myType;
 	
+
+	@Override
+	public boolean isEmpty() {
+		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myOther,  myType);
+	}
+
 	/**
 	 * Gets the value(s) for <b>other</b> (The other patient resource that the link refers to).
 	 * creating it if it does
@@ -1145,6 +1350,7 @@ public class Patient extends BaseResource implements IResource {
 	public void setOther(ResourceReference theValue) {
 		myOther = theValue;
 	}
+
 
   
 	/**
@@ -1175,6 +1381,7 @@ public class Patient extends BaseResource implements IResource {
 	public void setType(BoundCodeDt<LinkTypeEnum> theValue) {
 		myType = theValue;
 	}
+
 
 	/**
 	 * Sets the value(s) for <b>type</b> (replace | refer | seealso - type of link)

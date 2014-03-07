@@ -179,6 +179,12 @@ public class Practitioner extends BaseResource implements IResource {
 	@Child(name="communication", type=CodeableConceptDt.class, order=13, min=0, max=Child.MAX_UNLIMITED)	
 	private List<CodeableConceptDt> myCommunication;
 	
+
+	@Override
+	public boolean isEmpty() {
+		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myIdentifier,  myName,  myTelecom,  myAddress,  myGender,  myBirthDate,  myPhoto,  myOrganization,  myRole,  mySpecialty,  myPeriod,  myLocation,  myQualification,  myCommunication);
+	}
+
 	/**
 	 * Gets the value(s) for <b>identifier</b> (A identifier for the person as this agent).
 	 * creating it if it does
@@ -206,6 +212,20 @@ public class Practitioner extends BaseResource implements IResource {
 	 */
 	public void setIdentifier(List<IdentifierDt> theValue) {
 		myIdentifier = theValue;
+	}
+
+	/**
+	 * Adds and returns a new value for <b>identifier</b> (A identifier for the person as this agent)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * An identifier that applies to this person in this role
+     * </p> 
+	 */
+	public IdentifierDt addIdentifier() {
+		IdentifierDt newType = new IdentifierDt();
+		getIdentifier().add(newType);
+		return newType; 
 	}
 
   
@@ -238,6 +258,7 @@ public class Practitioner extends BaseResource implements IResource {
 		myName = theValue;
 	}
 
+
   
 	/**
 	 * Gets the value(s) for <b>telecom</b> (A contact detail for the practitioner).
@@ -266,6 +287,20 @@ public class Practitioner extends BaseResource implements IResource {
 	 */
 	public void setTelecom(List<ContactDt> theValue) {
 		myTelecom = theValue;
+	}
+
+	/**
+	 * Adds and returns a new value for <b>telecom</b> (A contact detail for the practitioner)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A contact detail for the practitioner, e.g. a telephone number or an email address.
+     * </p> 
+	 */
+	public ContactDt addTelecom() {
+		ContactDt newType = new ContactDt();
+		getTelecom().add(newType);
+		return newType; 
 	}
 
   
@@ -298,6 +333,7 @@ public class Practitioner extends BaseResource implements IResource {
 		myAddress = theValue;
 	}
 
+
   
 	/**
 	 * Gets the value(s) for <b>gender</b> (Gender for administrative purposes).
@@ -327,6 +363,7 @@ public class Practitioner extends BaseResource implements IResource {
 	public void setGender(CodeableConceptDt theValue) {
 		myGender = theValue;
 	}
+
 
   
 	/**
@@ -358,8 +395,9 @@ public class Practitioner extends BaseResource implements IResource {
 		myBirthDate = theValue;
 	}
 
+
  	/**
-	 * Sets the value(s) for <b>birthDate</b> (The date and time of birth for the practitioner)
+	 * Sets the value for <b>birthDate</b> (The date and time of birth for the practitioner)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -369,6 +407,19 @@ public class Practitioner extends BaseResource implements IResource {
 	public void setBirthDateWithSecondsPrecision( Date theDate) {
 		myBirthDate = new DateTimeDt(theDate); 
 	}
+
+	/**
+	 * Sets the value for <b>birthDate</b> (The date and time of birth for the practitioner)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The date and time of birth for the practitioner
+     * </p> 
+	 */
+	public void setBirthDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myBirthDate = new DateTimeDt(theDate, thePrecision); 
+	}
+
  
 	/**
 	 * Gets the value(s) for <b>photo</b> (Image of the person).
@@ -397,6 +448,20 @@ public class Practitioner extends BaseResource implements IResource {
 	 */
 	public void setPhoto(List<AttachmentDt> theValue) {
 		myPhoto = theValue;
+	}
+
+	/**
+	 * Adds and returns a new value for <b>photo</b> (Image of the person)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Image of the person
+     * </p> 
+	 */
+	public AttachmentDt addPhoto() {
+		AttachmentDt newType = new AttachmentDt();
+		getPhoto().add(newType);
+		return newType; 
 	}
 
   
@@ -429,6 +494,7 @@ public class Practitioner extends BaseResource implements IResource {
 		myOrganization = theValue;
 	}
 
+
   
 	/**
 	 * Gets the value(s) for <b>role</b> (Roles which this practitioner may perform).
@@ -457,6 +523,20 @@ public class Practitioner extends BaseResource implements IResource {
 	 */
 	public void setRole(List<CodeableConceptDt> theValue) {
 		myRole = theValue;
+	}
+
+	/**
+	 * Adds and returns a new value for <b>role</b> (Roles which this practitioner may perform)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Roles which this practitioner is authorized to perform for the organization
+     * </p> 
+	 */
+	public CodeableConceptDt addRole() {
+		CodeableConceptDt newType = new CodeableConceptDt();
+		getRole().add(newType);
+		return newType; 
 	}
 
   
@@ -489,6 +569,20 @@ public class Practitioner extends BaseResource implements IResource {
 		mySpecialty = theValue;
 	}
 
+	/**
+	 * Adds and returns a new value for <b>specialty</b> (Specific specialty of the practitioner)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Specific specialty of the practitioner
+     * </p> 
+	 */
+	public CodeableConceptDt addSpecialty() {
+		CodeableConceptDt newType = new CodeableConceptDt();
+		getSpecialty().add(newType);
+		return newType; 
+	}
+
   
 	/**
 	 * Gets the value(s) for <b>period</b> (The period during which the practitioner is authorized to perform in these role(s)).
@@ -518,6 +612,7 @@ public class Practitioner extends BaseResource implements IResource {
 	public void setPeriod(PeriodDt theValue) {
 		myPeriod = theValue;
 	}
+
 
   
 	/**
@@ -549,6 +644,7 @@ public class Practitioner extends BaseResource implements IResource {
 		myLocation = theValue;
 	}
 
+
   
 	/**
 	 * Gets the value(s) for <b>qualification</b> (Qualifications obtained by training and certification).
@@ -577,6 +673,20 @@ public class Practitioner extends BaseResource implements IResource {
 	 */
 	public void setQualification(List<Qualification> theValue) {
 		myQualification = theValue;
+	}
+
+	/**
+	 * Adds and returns a new value for <b>qualification</b> (Qualifications obtained by training and certification)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * 
+     * </p> 
+	 */
+	public Qualification addQualification() {
+		Qualification newType = new Qualification();
+		getQualification().add(newType);
+		return newType; 
 	}
 
   
@@ -609,6 +719,20 @@ public class Practitioner extends BaseResource implements IResource {
 		myCommunication = theValue;
 	}
 
+	/**
+	 * Adds and returns a new value for <b>communication</b> (A language the practitioner is able to use in patient communication)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A language the practitioner is able to use in patient communication
+     * </p> 
+	 */
+	public CodeableConceptDt addCommunication() {
+		CodeableConceptDt newType = new CodeableConceptDt();
+		getCommunication().add(newType);
+		return newType; 
+	}
+
   
 	/**
 	 * Block class for child element: <b>Practitioner.qualification</b> (Qualifications obtained by training and certification)
@@ -633,6 +757,12 @@ public class Practitioner extends BaseResource implements IResource {
 	})	
 	private ResourceReference myIssuer;
 	
+
+	@Override
+	public boolean isEmpty() {
+		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myCode,  myPeriod,  myIssuer);
+	}
+
 	/**
 	 * Gets the value(s) for <b>code</b> (Coded representation of the qualification).
 	 * creating it if it does
@@ -661,6 +791,7 @@ public class Practitioner extends BaseResource implements IResource {
 	public void setCode(CodeableConceptDt theValue) {
 		myCode = theValue;
 	}
+
 
   
 	/**
@@ -692,6 +823,7 @@ public class Practitioner extends BaseResource implements IResource {
 		myPeriod = theValue;
 	}
 
+
   
 	/**
 	 * Gets the value(s) for <b>issuer</b> (Organization that regulates and issues the qualification).
@@ -721,6 +853,7 @@ public class Practitioner extends BaseResource implements IResource {
 	public void setIssuer(ResourceReference theValue) {
 		myIssuer = theValue;
 	}
+
 
   
 

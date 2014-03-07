@@ -1,15 +1,31 @@
 package ca.uhn.fhir.model.primitive;
 
-import ca.uhn.fhir.model.api.BaseElement;
-import ca.uhn.fhir.model.api.IPrimitiveDatatype;
+import ca.uhn.fhir.model.api.BasePrimitive;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+import ca.uhn.fhir.model.api.annotation.SimpleSetter;
 import ca.uhn.fhir.parser.DataFormatException;
 
 @DatatypeDef(name = "boolean")
-public class BooleanDt  extends BaseElement implements IPrimitiveDatatype<Boolean> {
+public class BooleanDt extends BasePrimitive<Boolean> {
 
 	private Boolean myValue;
 
+	/**
+	 * Constructor
+	 */
+	public BooleanDt() {
+		super();
+	}
+
+	/**
+	 * Constructor
+	 */
+	@SimpleSetter
+	public BooleanDt(@SimpleSetter.Parameter(name="theBoolean") Boolean theBoolean) {
+		setValue(theBoolean);
+	}
+	
+	
 	@Override
 	public void setValueAsString(String theValue) throws DataFormatException {
 		if ("true".equals(theValue)) {

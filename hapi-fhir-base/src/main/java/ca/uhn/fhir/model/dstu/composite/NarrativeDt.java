@@ -17,6 +17,7 @@
 package ca.uhn.fhir.model.dstu.composite;
 
 import java.util.*;
+
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.model.primitive.*;
@@ -45,6 +46,11 @@ public class NarrativeDt extends BaseElement implements ICompositeDatatype {
 	@Child(name="div", type=XhtmlDt.class, order=1, min=1, max=1)	
 	private XhtmlDt myDiv;
 	
+	@Override
+	public boolean isEmpty() {
+		return ca.uhn.fhir.util.ElementUtil.isEmpty(  myStatus, myDiv );
+	}
+
 	/**
 	 * Gets the value(s) for <b>status</b> (generated | extensions | additional).
 	 * creating it if it does

@@ -6,13 +6,14 @@ import java.net.URISyntaxException;
 import org.apache.commons.lang3.StringUtils;
 
 import ca.uhn.fhir.model.api.BaseElement;
+import ca.uhn.fhir.model.api.BasePrimitive;
 import ca.uhn.fhir.model.api.IPrimitiveDatatype;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.SimpleSetter;
 import ca.uhn.fhir.parser.DataFormatException;
 
 @DatatypeDef(name = "uri")
-public class UriDt  extends BaseElement implements IPrimitiveDatatype<URI> {
+public class UriDt extends BasePrimitive<URI> {
 
 	private URI myValue;
 

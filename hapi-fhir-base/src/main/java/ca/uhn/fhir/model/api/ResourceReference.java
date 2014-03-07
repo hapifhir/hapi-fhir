@@ -24,8 +24,9 @@ public class ResourceReference implements IDatatype {
 		myReference = theReference;
 	}
 
-	public boolean hasContent() {
-		return StringUtils.isNotBlank(myDisplay) || StringUtils.isNotBlank(myReference);
+	@Override
+	public boolean isEmpty() {
+		return StringUtils.isBlank(myDisplay) && StringUtils.isBlank(myReference);
 	}
 
 }

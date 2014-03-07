@@ -199,6 +199,12 @@ public class Profile extends BaseResource implements IResource {
 	@Child(name="query", order=15, min=0, max=Child.MAX_UNLIMITED)	
 	private List<Query> myQuery;
 	
+
+	@Override
+	public boolean isEmpty() {
+		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myIdentifier,  myVersion,  myName,  myPublisher,  myTelecom,  myDescription,  myCode,  myStatus,  myExperimental,  myDate,  myRequirements,  myFhirVersion,  myMapping,  myStructure,  myExtensionDefn,  myQuery);
+	}
+
 	/**
 	 * Gets the value(s) for <b>identifier</b> (Logical id to reference this profile).
 	 * creating it if it does
@@ -228,8 +234,9 @@ public class Profile extends BaseResource implements IResource {
 		myIdentifier = theValue;
 	}
 
+
  	/**
-	 * Sets the value(s) for <b>identifier</b> (Logical id to reference this profile)
+	 * Sets the value for <b>identifier</b> (Logical id to reference this profile)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -239,6 +246,7 @@ public class Profile extends BaseResource implements IResource {
 	public void setIdentifier( String theString) {
 		myIdentifier = new StringDt(theString); 
 	}
+
  
 	/**
 	 * Gets the value(s) for <b>version</b> (Logical id for this version of the profile).
@@ -269,8 +277,9 @@ public class Profile extends BaseResource implements IResource {
 		myVersion = theValue;
 	}
 
+
  	/**
-	 * Sets the value(s) for <b>version</b> (Logical id for this version of the profile)
+	 * Sets the value for <b>version</b> (Logical id for this version of the profile)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -280,6 +289,7 @@ public class Profile extends BaseResource implements IResource {
 	public void setVersion( String theString) {
 		myVersion = new StringDt(theString); 
 	}
+
  
 	/**
 	 * Gets the value(s) for <b>name</b> (Informal name for this profile).
@@ -310,8 +320,9 @@ public class Profile extends BaseResource implements IResource {
 		myName = theValue;
 	}
 
+
  	/**
-	 * Sets the value(s) for <b>name</b> (Informal name for this profile)
+	 * Sets the value for <b>name</b> (Informal name for this profile)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -321,6 +332,7 @@ public class Profile extends BaseResource implements IResource {
 	public void setName( String theString) {
 		myName = new StringDt(theString); 
 	}
+
  
 	/**
 	 * Gets the value(s) for <b>publisher</b> (Name of the publisher (Organization or individual)).
@@ -351,8 +363,9 @@ public class Profile extends BaseResource implements IResource {
 		myPublisher = theValue;
 	}
 
+
  	/**
-	 * Sets the value(s) for <b>publisher</b> (Name of the publisher (Organization or individual))
+	 * Sets the value for <b>publisher</b> (Name of the publisher (Organization or individual))
 	 *
      * <p>
      * <b>Definition:</b>
@@ -362,6 +375,7 @@ public class Profile extends BaseResource implements IResource {
 	public void setPublisher( String theString) {
 		myPublisher = new StringDt(theString); 
 	}
+
  
 	/**
 	 * Gets the value(s) for <b>telecom</b> (Contact information of the publisher).
@@ -390,6 +404,20 @@ public class Profile extends BaseResource implements IResource {
 	 */
 	public void setTelecom(List<ContactDt> theValue) {
 		myTelecom = theValue;
+	}
+
+	/**
+	 * Adds and returns a new value for <b>telecom</b> (Contact information of the publisher)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Contact details to assist a user in finding and communicating with the publisher
+     * </p> 
+	 */
+	public ContactDt addTelecom() {
+		ContactDt newType = new ContactDt();
+		getTelecom().add(newType);
+		return newType; 
 	}
 
   
@@ -422,8 +450,9 @@ public class Profile extends BaseResource implements IResource {
 		myDescription = theValue;
 	}
 
+
  	/**
-	 * Sets the value(s) for <b>description</b> (Natural language description of the profile)
+	 * Sets the value for <b>description</b> (Natural language description of the profile)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -433,6 +462,7 @@ public class Profile extends BaseResource implements IResource {
 	public void setDescription( String theString) {
 		myDescription = new StringDt(theString); 
 	}
+
  
 	/**
 	 * Gets the value(s) for <b>code</b> (Assist with indexing and finding).
@@ -461,6 +491,20 @@ public class Profile extends BaseResource implements IResource {
 	 */
 	public void setCode(List<CodingDt> theValue) {
 		myCode = theValue;
+	}
+
+	/**
+	 * Adds and returns a new value for <b>code</b> (Assist with indexing and finding)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A set of terms from external terminologies that may be used to assist with indexing and searching of templates.
+     * </p> 
+	 */
+	public CodingDt addCode() {
+		CodingDt newType = new CodingDt();
+		getCode().add(newType);
+		return newType; 
 	}
 
   
@@ -492,6 +536,7 @@ public class Profile extends BaseResource implements IResource {
 	public void setStatus(BoundCodeDt<ResourceProfileStatusEnum> theValue) {
 		myStatus = theValue;
 	}
+
 
 	/**
 	 * Sets the value(s) for <b>status</b> (draft | active | retired)
@@ -535,7 +580,20 @@ public class Profile extends BaseResource implements IResource {
 		myExperimental = theValue;
 	}
 
-  
+
+ 	/**
+	 * Sets the value for <b>experimental</b> (If for testing purposes, not real usage)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * This profile was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage
+     * </p> 
+	 */
+	public void setExperimental( Boolean theBoolean) {
+		myExperimental = new BooleanDt(theBoolean); 
+	}
+
+ 
 	/**
 	 * Gets the value(s) for <b>date</b> (Date for this version of the profile).
 	 * creating it if it does
@@ -565,8 +623,9 @@ public class Profile extends BaseResource implements IResource {
 		myDate = theValue;
 	}
 
+
  	/**
-	 * Sets the value(s) for <b>date</b> (Date for this version of the profile)
+	 * Sets the value for <b>date</b> (Date for this version of the profile)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -576,6 +635,19 @@ public class Profile extends BaseResource implements IResource {
 	public void setDateWithSecondsPrecision( Date theDate) {
 		myDate = new DateTimeDt(theDate); 
 	}
+
+	/**
+	 * Sets the value for <b>date</b> (Date for this version of the profile)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The date that this version of the profile was published
+     * </p> 
+	 */
+	public void setDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myDate = new DateTimeDt(theDate, thePrecision); 
+	}
+
  
 	/**
 	 * Gets the value(s) for <b>requirements</b> (Scope and Usage this profile is for).
@@ -606,8 +678,9 @@ public class Profile extends BaseResource implements IResource {
 		myRequirements = theValue;
 	}
 
+
  	/**
-	 * Sets the value(s) for <b>requirements</b> (Scope and Usage this profile is for)
+	 * Sets the value for <b>requirements</b> (Scope and Usage this profile is for)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -617,6 +690,7 @@ public class Profile extends BaseResource implements IResource {
 	public void setRequirements( String theString) {
 		myRequirements = new StringDt(theString); 
 	}
+
  
 	/**
 	 * Gets the value(s) for <b>fhirVersion</b> (FHIR Version this profile targets).
@@ -647,8 +721,9 @@ public class Profile extends BaseResource implements IResource {
 		myFhirVersion = theValue;
 	}
 
+
  	/**
-	 * Sets the value(s) for <b>fhirVersion</b> (FHIR Version this profile targets)
+	 * Sets the value for <b>fhirVersion</b> (FHIR Version this profile targets)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -658,6 +733,7 @@ public class Profile extends BaseResource implements IResource {
 	public void setFhirVersion( String theId) {
 		myFhirVersion = new IdDt(theId); 
 	}
+
  
 	/**
 	 * Gets the value(s) for <b>mapping</b> (External specification that the content is mapped to).
@@ -686,6 +762,20 @@ public class Profile extends BaseResource implements IResource {
 	 */
 	public void setMapping(List<Mapping> theValue) {
 		myMapping = theValue;
+	}
+
+	/**
+	 * Adds and returns a new value for <b>mapping</b> (External specification that the content is mapped to)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * An external specification that the content is mapped to
+     * </p> 
+	 */
+	public Mapping addMapping() {
+		Mapping newType = new Mapping();
+		getMapping().add(newType);
+		return newType; 
 	}
 
   
@@ -718,6 +808,20 @@ public class Profile extends BaseResource implements IResource {
 		myStructure = theValue;
 	}
 
+	/**
+	 * Adds and returns a new value for <b>structure</b> (A constraint on a resource or a data type)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A constraint statement about what contents a resource or data type may have
+     * </p> 
+	 */
+	public Structure addStructure() {
+		Structure newType = new Structure();
+		getStructure().add(newType);
+		return newType; 
+	}
+
   
 	/**
 	 * Gets the value(s) for <b>extensionDefn</b> (Definition of an extension).
@@ -746,6 +850,20 @@ public class Profile extends BaseResource implements IResource {
 	 */
 	public void setExtensionDefn(List<ExtensionDefn> theValue) {
 		myExtensionDefn = theValue;
+	}
+
+	/**
+	 * Adds and returns a new value for <b>extensionDefn</b> (Definition of an extension)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * An extension defined as part of the profile
+     * </p> 
+	 */
+	public ExtensionDefn addExtensionDefn() {
+		ExtensionDefn newType = new ExtensionDefn();
+		getExtensionDefn().add(newType);
+		return newType; 
 	}
 
   
@@ -778,6 +896,20 @@ public class Profile extends BaseResource implements IResource {
 		myQuery = theValue;
 	}
 
+	/**
+	 * Adds and returns a new value for <b>query</b> (Definition of a named query)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Definition of a named query and its parameters and their meaning
+     * </p> 
+	 */
+	public Query addQuery() {
+		Query newType = new Query();
+		getQuery().add(newType);
+		return newType; 
+	}
+
   
 	/**
 	 * Block class for child element: <b>Profile.mapping</b> (External specification that the content is mapped to)
@@ -802,6 +934,12 @@ public class Profile extends BaseResource implements IResource {
 	@Child(name="comments", type=StringDt.class, order=3, min=0, max=1)	
 	private StringDt myComments;
 	
+
+	@Override
+	public boolean isEmpty() {
+		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myIdentity,  myUri,  myName,  myComments);
+	}
+
 	/**
 	 * Gets the value(s) for <b>identity</b> (Internal id when this mapping is used).
 	 * creating it if it does
@@ -831,8 +969,9 @@ public class Profile extends BaseResource implements IResource {
 		myIdentity = theValue;
 	}
 
+
  	/**
-	 * Sets the value(s) for <b>identity</b> (Internal id when this mapping is used)
+	 * Sets the value for <b>identity</b> (Internal id when this mapping is used)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -842,6 +981,7 @@ public class Profile extends BaseResource implements IResource {
 	public void setIdentity( String theId) {
 		myIdentity = new IdDt(theId); 
 	}
+
  
 	/**
 	 * Gets the value(s) for <b>uri</b> (Identifies what this mapping refers to).
@@ -872,8 +1012,9 @@ public class Profile extends BaseResource implements IResource {
 		myUri = theValue;
 	}
 
+
  	/**
-	 * Sets the value(s) for <b>uri</b> (Identifies what this mapping refers to)
+	 * Sets the value for <b>uri</b> (Identifies what this mapping refers to)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -883,6 +1024,7 @@ public class Profile extends BaseResource implements IResource {
 	public void setUri( String theUri) {
 		myUri = new UriDt(theUri); 
 	}
+
  
 	/**
 	 * Gets the value(s) for <b>name</b> (Names what this mapping refers to).
@@ -913,8 +1055,9 @@ public class Profile extends BaseResource implements IResource {
 		myName = theValue;
 	}
 
+
  	/**
-	 * Sets the value(s) for <b>name</b> (Names what this mapping refers to)
+	 * Sets the value for <b>name</b> (Names what this mapping refers to)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -924,6 +1067,7 @@ public class Profile extends BaseResource implements IResource {
 	public void setName( String theString) {
 		myName = new StringDt(theString); 
 	}
+
  
 	/**
 	 * Gets the value(s) for <b>comments</b> (Versions, Issues, Scope limitations etc).
@@ -954,8 +1098,9 @@ public class Profile extends BaseResource implements IResource {
 		myComments = theValue;
 	}
 
+
  	/**
-	 * Sets the value(s) for <b>comments</b> (Versions, Issues, Scope limitations etc)
+	 * Sets the value for <b>comments</b> (Versions, Issues, Scope limitations etc)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -965,6 +1110,7 @@ public class Profile extends BaseResource implements IResource {
 	public void setComments( String theString) {
 		myComments = new StringDt(theString); 
 	}
+
  
 
 	}
@@ -999,6 +1145,12 @@ public class Profile extends BaseResource implements IResource {
 	@Child(name="searchParam", order=5, min=0, max=Child.MAX_UNLIMITED)	
 	private List<StructureSearchParam> mySearchParam;
 	
+
+	@Override
+	public boolean isEmpty() {
+		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myType,  myName,  myPublish,  myPurpose,  myElement,  mySearchParam);
+	}
+
 	/**
 	 * Gets the value(s) for <b>type</b> (The Resource or Data Type being described).
 	 * creating it if it does
@@ -1027,6 +1179,7 @@ public class Profile extends BaseResource implements IResource {
 	public void setType(BoundCodeDt<FHIRDefinedTypeEnum> theValue) {
 		myType = theValue;
 	}
+
 
 	/**
 	 * Sets the value(s) for <b>type</b> (The Resource or Data Type being described)
@@ -1070,8 +1223,9 @@ public class Profile extends BaseResource implements IResource {
 		myName = theValue;
 	}
 
+
  	/**
-	 * Sets the value(s) for <b>name</b> (Name for this particular structure (reference target))
+	 * Sets the value for <b>name</b> (Name for this particular structure (reference target))
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1081,6 +1235,7 @@ public class Profile extends BaseResource implements IResource {
 	public void setName( String theString) {
 		myName = new StringDt(theString); 
 	}
+
  
 	/**
 	 * Gets the value(s) for <b>publish</b> (This definition is published (i.e. for validation)).
@@ -1111,7 +1266,20 @@ public class Profile extends BaseResource implements IResource {
 		myPublish = theValue;
 	}
 
-  
+
+ 	/**
+	 * Sets the value for <b>publish</b> (This definition is published (i.e. for validation))
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * This definition of a profile on a structure is published as a formal statement. Some structural definitions might be defined purely for internal use within the profile, and not intended to be used outside that context
+     * </p> 
+	 */
+	public void setPublish( Boolean theBoolean) {
+		myPublish = new BooleanDt(theBoolean); 
+	}
+
+ 
 	/**
 	 * Gets the value(s) for <b>purpose</b> (Human summary: why describe this resource?).
 	 * creating it if it does
@@ -1141,8 +1309,9 @@ public class Profile extends BaseResource implements IResource {
 		myPurpose = theValue;
 	}
 
+
  	/**
-	 * Sets the value(s) for <b>purpose</b> (Human summary: why describe this resource?)
+	 * Sets the value for <b>purpose</b> (Human summary: why describe this resource?)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1152,6 +1321,7 @@ public class Profile extends BaseResource implements IResource {
 	public void setPurpose( String theString) {
 		myPurpose = new StringDt(theString); 
 	}
+
  
 	/**
 	 * Gets the value(s) for <b>element</b> (Definition of elements in the resource (if no profile)).
@@ -1180,6 +1350,20 @@ public class Profile extends BaseResource implements IResource {
 	 */
 	public void setElement(List<StructureElement> theValue) {
 		myElement = theValue;
+	}
+
+	/**
+	 * Adds and returns a new value for <b>element</b> (Definition of elements in the resource (if no profile))
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Captures constraints on each element within the resource
+     * </p> 
+	 */
+	public StructureElement addElement() {
+		StructureElement newType = new StructureElement();
+		getElement().add(newType);
+		return newType; 
 	}
 
   
@@ -1212,6 +1396,20 @@ public class Profile extends BaseResource implements IResource {
 		mySearchParam = theValue;
 	}
 
+	/**
+	 * Adds and returns a new value for <b>searchParam</b> (Search params defined)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Additional search parameters for implementations to support and/or make use of
+     * </p> 
+	 */
+	public StructureSearchParam addSearchParam() {
+		StructureSearchParam newType = new StructureSearchParam();
+		getSearchParam().add(newType);
+		return newType; 
+	}
+
   
 
 	}
@@ -1242,6 +1440,12 @@ public class Profile extends BaseResource implements IResource {
 	@Child(name="definition", order=4, min=0, max=1)	
 	private StructureElementDefinition myDefinition;
 	
+
+	@Override
+	public boolean isEmpty() {
+		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myPath,  myRepresentation,  myName,  mySlicing,  myDefinition);
+	}
+
 	/**
 	 * Gets the value(s) for <b>path</b> (The path of the element (see the formal definitions)).
 	 * creating it if it does
@@ -1271,8 +1475,9 @@ public class Profile extends BaseResource implements IResource {
 		myPath = theValue;
 	}
 
+
  	/**
-	 * Sets the value(s) for <b>path</b> (The path of the element (see the formal definitions))
+	 * Sets the value for <b>path</b> (The path of the element (see the formal definitions))
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1282,6 +1487,7 @@ public class Profile extends BaseResource implements IResource {
 	public void setPath( String theString) {
 		myPath = new StringDt(theString); 
 	}
+
  
 	/**
 	 * Gets the value(s) for <b>representation</b> (How this element is represented in instances).
@@ -1311,6 +1517,7 @@ public class Profile extends BaseResource implements IResource {
 	public void setRepresentation(List<BoundCodeDt<PropertyRepresentationEnum>> theValue) {
 		myRepresentation = theValue;
 	}
+
 
 	/**
 	 * Add a value for <b>representation</b> (How this element is represented in instances)
@@ -1367,8 +1574,9 @@ public class Profile extends BaseResource implements IResource {
 		myName = theValue;
 	}
 
+
  	/**
-	 * Sets the value(s) for <b>name</b> (Name for this particular element definition (reference target))
+	 * Sets the value for <b>name</b> (Name for this particular element definition (reference target))
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1378,6 +1586,7 @@ public class Profile extends BaseResource implements IResource {
 	public void setName( String theString) {
 		myName = new StringDt(theString); 
 	}
+
  
 	/**
 	 * Gets the value(s) for <b>slicing</b> (This element is sliced - slices follow).
@@ -1407,6 +1616,7 @@ public class Profile extends BaseResource implements IResource {
 	public void setSlicing(StructureElementSlicing theValue) {
 		mySlicing = theValue;
 	}
+
 
   
 	/**
@@ -1438,6 +1648,7 @@ public class Profile extends BaseResource implements IResource {
 		myDefinition = theValue;
 	}
 
+
   
 
 	}
@@ -1462,6 +1673,12 @@ public class Profile extends BaseResource implements IResource {
 	@Child(name="rules", type=CodeDt.class, order=2, min=1, max=1)	
 	private BoundCodeDt<SlicingRulesEnum> myRules;
 	
+
+	@Override
+	public boolean isEmpty() {
+		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myDiscriminator,  myOrdered,  myRules);
+	}
+
 	/**
 	 * Gets the value(s) for <b>discriminator</b> (Element that used to distinguish the slices).
 	 * creating it if it does
@@ -1491,8 +1708,9 @@ public class Profile extends BaseResource implements IResource {
 		myDiscriminator = theValue;
 	}
 
+
  	/**
-	 * Sets the value(s) for <b>discriminator</b> (Element that used to distinguish the slices)
+	 * Sets the value for <b>discriminator</b> (Element that used to distinguish the slices)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1502,6 +1720,7 @@ public class Profile extends BaseResource implements IResource {
 	public void setDiscriminator( String theId) {
 		myDiscriminator = new IdDt(theId); 
 	}
+
  
 	/**
 	 * Gets the value(s) for <b>ordered</b> (If elements must be in same order as slices).
@@ -1532,7 +1751,20 @@ public class Profile extends BaseResource implements IResource {
 		myOrdered = theValue;
 	}
 
-  
+
+ 	/**
+	 * Sets the value for <b>ordered</b> (If elements must be in same order as slices)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * If the matching elements have to occur in the same order as defined in the profile
+     * </p> 
+	 */
+	public void setOrdered( Boolean theBoolean) {
+		myOrdered = new BooleanDt(theBoolean); 
+	}
+
+ 
 	/**
 	 * Gets the value(s) for <b>rules</b> (closed | open | openAtEnd).
 	 * creating it if it does
@@ -1561,6 +1793,7 @@ public class Profile extends BaseResource implements IResource {
 	public void setRules(BoundCodeDt<SlicingRulesEnum> theValue) {
 		myRules = theValue;
 	}
+
 
 	/**
 	 * Sets the value(s) for <b>rules</b> (closed | open | openAtEnd)
@@ -1644,6 +1877,12 @@ public class Profile extends BaseResource implements IResource {
 	@Child(name="mapping", order=17, min=0, max=Child.MAX_UNLIMITED)	
 	private List<StructureElementDefinitionMapping> myMapping;
 	
+
+	@Override
+	public boolean isEmpty() {
+		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myShort,  myFormal,  myComments,  myRequirements,  mySynonym,  myMin,  myMax,  myType,  myNameReference,  myValue,  myExample,  myMaxLength,  myCondition,  myConstraint,  myMustSupport,  myIsModifier,  myBinding,  myMapping);
+	}
+
 	/**
 	 * Gets the value(s) for <b>short</b> (Concise definition for xml presentation).
 	 * creating it if it does
@@ -1673,8 +1912,9 @@ public class Profile extends BaseResource implements IResource {
 		myShort = theValue;
 	}
 
+
  	/**
-	 * Sets the value(s) for <b>short</b> (Concise definition for xml presentation)
+	 * Sets the value for <b>short</b> (Concise definition for xml presentation)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1684,6 +1924,7 @@ public class Profile extends BaseResource implements IResource {
 	public void setShort( String theString) {
 		myShort = new StringDt(theString); 
 	}
+
  
 	/**
 	 * Gets the value(s) for <b>formal</b> (Full formal definition in human language).
@@ -1714,8 +1955,9 @@ public class Profile extends BaseResource implements IResource {
 		myFormal = theValue;
 	}
 
+
  	/**
-	 * Sets the value(s) for <b>formal</b> (Full formal definition in human language)
+	 * Sets the value for <b>formal</b> (Full formal definition in human language)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1725,6 +1967,7 @@ public class Profile extends BaseResource implements IResource {
 	public void setFormal( String theString) {
 		myFormal = new StringDt(theString); 
 	}
+
  
 	/**
 	 * Gets the value(s) for <b>comments</b> (Comments about the use of this element).
@@ -1755,8 +1998,9 @@ public class Profile extends BaseResource implements IResource {
 		myComments = theValue;
 	}
 
+
  	/**
-	 * Sets the value(s) for <b>comments</b> (Comments about the use of this element)
+	 * Sets the value for <b>comments</b> (Comments about the use of this element)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1766,6 +2010,7 @@ public class Profile extends BaseResource implements IResource {
 	public void setComments( String theString) {
 		myComments = new StringDt(theString); 
 	}
+
  
 	/**
 	 * Gets the value(s) for <b>requirements</b> (Why is this needed?).
@@ -1796,8 +2041,9 @@ public class Profile extends BaseResource implements IResource {
 		myRequirements = theValue;
 	}
 
+
  	/**
-	 * Sets the value(s) for <b>requirements</b> (Why is this needed?)
+	 * Sets the value for <b>requirements</b> (Why is this needed?)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1807,6 +2053,7 @@ public class Profile extends BaseResource implements IResource {
 	public void setRequirements( String theString) {
 		myRequirements = new StringDt(theString); 
 	}
+
  
 	/**
 	 * Gets the value(s) for <b>synonym</b> (Other names).
@@ -1837,8 +2084,22 @@ public class Profile extends BaseResource implements IResource {
 		mySynonym = theValue;
 	}
 
+	/**
+	 * Adds and returns a new value for <b>synonym</b> (Other names)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Identifies additional names by which this element might also be known
+     * </p> 
+	 */
+	public StringDt addSynonym() {
+		StringDt newType = new StringDt();
+		getSynonym().add(newType);
+		return newType; 
+	}
+
  	/**
-	 * Sets the value(s) for <b>synonym</b> (Other names)
+	 * Adds a new value for <b>synonym</b> (Other names)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1851,6 +2112,7 @@ public class Profile extends BaseResource implements IResource {
 		}
 		mySynonym.add(new StringDt(theString)); 
 	}
+
  
 	/**
 	 * Gets the value(s) for <b>min</b> (Minimum Cardinality).
@@ -1881,7 +2143,20 @@ public class Profile extends BaseResource implements IResource {
 		myMin = theValue;
 	}
 
-  
+
+ 	/**
+	 * Sets the value for <b>min</b> (Minimum Cardinality)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The minimum number of times this element SHALL appear in the instance
+     * </p> 
+	 */
+	public void setMin( Integer theInteger) {
+		myMin = new IntegerDt(theInteger); 
+	}
+
+ 
 	/**
 	 * Gets the value(s) for <b>max</b> (Maximum Cardinality (a number or *)).
 	 * creating it if it does
@@ -1911,8 +2186,9 @@ public class Profile extends BaseResource implements IResource {
 		myMax = theValue;
 	}
 
+
  	/**
-	 * Sets the value(s) for <b>max</b> (Maximum Cardinality (a number or *))
+	 * Sets the value for <b>max</b> (Maximum Cardinality (a number or *))
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1922,6 +2198,7 @@ public class Profile extends BaseResource implements IResource {
 	public void setMax( String theString) {
 		myMax = new StringDt(theString); 
 	}
+
  
 	/**
 	 * Gets the value(s) for <b>type</b> (Data type and Profile for this element).
@@ -1950,6 +2227,20 @@ public class Profile extends BaseResource implements IResource {
 	 */
 	public void setType(List<StructureElementDefinitionType> theValue) {
 		myType = theValue;
+	}
+
+	/**
+	 * Adds and returns a new value for <b>type</b> (Data type and Profile for this element)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The data type or resource that the value of this element is permitted to be
+     * </p> 
+	 */
+	public StructureElementDefinitionType addType() {
+		StructureElementDefinitionType newType = new StructureElementDefinitionType();
+		getType().add(newType);
+		return newType; 
 	}
 
   
@@ -1982,8 +2273,9 @@ public class Profile extends BaseResource implements IResource {
 		myNameReference = theValue;
 	}
 
+
  	/**
-	 * Sets the value(s) for <b>nameReference</b> (To another element constraint (by element.name))
+	 * Sets the value for <b>nameReference</b> (To another element constraint (by element.name))
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1993,6 +2285,7 @@ public class Profile extends BaseResource implements IResource {
 	public void setNameReference( String theString) {
 		myNameReference = new StringDt(theString); 
 	}
+
  
 	/**
 	 * Gets the value(s) for <b>value[x]</b> (Fixed value: [as defined for a primitive type]).
@@ -2020,6 +2313,7 @@ public class Profile extends BaseResource implements IResource {
 		myValue = theValue;
 	}
 
+
   
 	/**
 	 * Gets the value(s) for <b>example[x]</b> (Example value: [as defined for type]).
@@ -2046,6 +2340,7 @@ public class Profile extends BaseResource implements IResource {
 	public void setExample(IDatatype theValue) {
 		myExample = theValue;
 	}
+
 
   
 	/**
@@ -2077,7 +2372,20 @@ public class Profile extends BaseResource implements IResource {
 		myMaxLength = theValue;
 	}
 
-  
+
+ 	/**
+	 * Sets the value for <b>maxLength</b> (Length for strings)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Indicates the shortest length that SHALL be supported by conformant instances without truncation
+     * </p> 
+	 */
+	public void setMaxLength( Integer theInteger) {
+		myMaxLength = new IntegerDt(theInteger); 
+	}
+
+ 
 	/**
 	 * Gets the value(s) for <b>condition</b> (Reference to invariant about presence).
 	 * creating it if it does
@@ -2107,8 +2415,22 @@ public class Profile extends BaseResource implements IResource {
 		myCondition = theValue;
 	}
 
+	/**
+	 * Adds and returns a new value for <b>condition</b> (Reference to invariant about presence)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A reference to an invariant that may make additional statements about the cardinality or value in the instance
+     * </p> 
+	 */
+	public IdDt addCondition() {
+		IdDt newType = new IdDt();
+		getCondition().add(newType);
+		return newType; 
+	}
+
  	/**
-	 * Sets the value(s) for <b>condition</b> (Reference to invariant about presence)
+	 * Adds a new value for <b>condition</b> (Reference to invariant about presence)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -2121,6 +2443,7 @@ public class Profile extends BaseResource implements IResource {
 		}
 		myCondition.add(new IdDt(theId)); 
 	}
+
  
 	/**
 	 * Gets the value(s) for <b>constraint</b> (Condition that must evaluate to true).
@@ -2149,6 +2472,20 @@ public class Profile extends BaseResource implements IResource {
 	 */
 	public void setConstraint(List<StructureElementDefinitionConstraint> theValue) {
 		myConstraint = theValue;
+	}
+
+	/**
+	 * Adds and returns a new value for <b>constraint</b> (Condition that must evaluate to true)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Formal constraints such as co-occurrence and other constraints that can be computationally evaluated within the context of the instance
+     * </p> 
+	 */
+	public StructureElementDefinitionConstraint addConstraint() {
+		StructureElementDefinitionConstraint newType = new StructureElementDefinitionConstraint();
+		getConstraint().add(newType);
+		return newType; 
 	}
 
   
@@ -2181,7 +2518,20 @@ public class Profile extends BaseResource implements IResource {
 		myMustSupport = theValue;
 	}
 
-  
+
+ 	/**
+	 * Sets the value for <b>mustSupport</b> (If the element must supported)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * If true, conformant resource authors SHALL be capable of providing a value for the element and resource consumers SHALL be capable of extracting and doing something useful with the data element.  If false, the element may be ignored and not supported
+     * </p> 
+	 */
+	public void setMustSupport( Boolean theBoolean) {
+		myMustSupport = new BooleanDt(theBoolean); 
+	}
+
+ 
 	/**
 	 * Gets the value(s) for <b>isModifier</b> (If this modifies the meaning of other elements).
 	 * creating it if it does
@@ -2211,7 +2561,20 @@ public class Profile extends BaseResource implements IResource {
 		myIsModifier = theValue;
 	}
 
-  
+
+ 	/**
+	 * Sets the value for <b>isModifier</b> (If this modifies the meaning of other elements)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * If true, the value of this element affects the interpretation of the element or resource that contains it, and the value of the element cannot be ignored. Typically, this is used for status, negation and qualification codes. The effect of this is that the element cannot be ignored by systems: they SHALL either recognize the element and process it, and/or a pre-determination has been made that it is not relevant to their particular system.
+     * </p> 
+	 */
+	public void setIsModifier( Boolean theBoolean) {
+		myIsModifier = new BooleanDt(theBoolean); 
+	}
+
+ 
 	/**
 	 * Gets the value(s) for <b>binding</b> (ValueSet details if this is coded).
 	 * creating it if it does
@@ -2240,6 +2603,7 @@ public class Profile extends BaseResource implements IResource {
 	public void setBinding(StructureElementDefinitionBinding theValue) {
 		myBinding = theValue;
 	}
+
 
   
 	/**
@@ -2271,6 +2635,20 @@ public class Profile extends BaseResource implements IResource {
 		myMapping = theValue;
 	}
 
+	/**
+	 * Adds and returns a new value for <b>mapping</b> (Map element to another set of definitions)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Identifies a concept from an external specification that roughly corresponds to this element
+     * </p> 
+	 */
+	public StructureElementDefinitionMapping addMapping() {
+		StructureElementDefinitionMapping newType = new StructureElementDefinitionMapping();
+		getMapping().add(newType);
+		return newType; 
+	}
+
   
 
 	}
@@ -2295,6 +2673,12 @@ public class Profile extends BaseResource implements IResource {
 	@Child(name="aggregation", type=CodeDt.class, order=2, min=0, max=Child.MAX_UNLIMITED)	
 	private List<BoundCodeDt<AggregationModeEnum>> myAggregation;
 	
+
+	@Override
+	public boolean isEmpty() {
+		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myCode,  myProfile,  myAggregation);
+	}
+
 	/**
 	 * Gets the value(s) for <b>code</b> (Name of Data type or Resource).
 	 * creating it if it does
@@ -2323,6 +2707,7 @@ public class Profile extends BaseResource implements IResource {
 	public void setCode(BoundCodeDt<DataTypeEnum> theValue) {
 		myCode = theValue;
 	}
+
 
 	/**
 	 * Sets the value(s) for <b>code</b> (Name of Data type or Resource)
@@ -2366,8 +2751,9 @@ public class Profile extends BaseResource implements IResource {
 		myProfile = theValue;
 	}
 
+
  	/**
-	 * Sets the value(s) for <b>profile</b> (Profile.structure to apply)
+	 * Sets the value for <b>profile</b> (Profile.structure to apply)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -2377,6 +2763,7 @@ public class Profile extends BaseResource implements IResource {
 	public void setProfile( String theUri) {
 		myProfile = new UriDt(theUri); 
 	}
+
  
 	/**
 	 * Gets the value(s) for <b>aggregation</b> (contained | referenced | bundled - how aggregated).
@@ -2406,6 +2793,7 @@ public class Profile extends BaseResource implements IResource {
 	public void setAggregation(List<BoundCodeDt<AggregationModeEnum>> theValue) {
 		myAggregation = theValue;
 	}
+
 
 	/**
 	 * Add a value for <b>aggregation</b> (contained | referenced | bundled - how aggregated)
@@ -2463,6 +2851,12 @@ public class Profile extends BaseResource implements IResource {
 	@Child(name="xpath", type=StringDt.class, order=4, min=1, max=1)	
 	private StringDt myXpath;
 	
+
+	@Override
+	public boolean isEmpty() {
+		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myKey,  myName,  mySeverity,  myHuman,  myXpath);
+	}
+
 	/**
 	 * Gets the value(s) for <b>key</b> (Target of 'condition' reference above).
 	 * creating it if it does
@@ -2492,8 +2886,9 @@ public class Profile extends BaseResource implements IResource {
 		myKey = theValue;
 	}
 
+
  	/**
-	 * Sets the value(s) for <b>key</b> (Target of 'condition' reference above)
+	 * Sets the value for <b>key</b> (Target of 'condition' reference above)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -2503,6 +2898,7 @@ public class Profile extends BaseResource implements IResource {
 	public void setKey( String theId) {
 		myKey = new IdDt(theId); 
 	}
+
  
 	/**
 	 * Gets the value(s) for <b>name</b> (Short human label).
@@ -2533,8 +2929,9 @@ public class Profile extends BaseResource implements IResource {
 		myName = theValue;
 	}
 
+
  	/**
-	 * Sets the value(s) for <b>name</b> (Short human label)
+	 * Sets the value for <b>name</b> (Short human label)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -2544,6 +2941,7 @@ public class Profile extends BaseResource implements IResource {
 	public void setName( String theString) {
 		myName = new StringDt(theString); 
 	}
+
  
 	/**
 	 * Gets the value(s) for <b>severity</b> (error | warning).
@@ -2573,6 +2971,7 @@ public class Profile extends BaseResource implements IResource {
 	public void setSeverity(BoundCodeDt<ConstraintSeverityEnum> theValue) {
 		mySeverity = theValue;
 	}
+
 
 	/**
 	 * Sets the value(s) for <b>severity</b> (error | warning)
@@ -2616,8 +3015,9 @@ public class Profile extends BaseResource implements IResource {
 		myHuman = theValue;
 	}
 
+
  	/**
-	 * Sets the value(s) for <b>human</b> (Human description of constraint)
+	 * Sets the value for <b>human</b> (Human description of constraint)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -2627,6 +3027,7 @@ public class Profile extends BaseResource implements IResource {
 	public void setHuman( String theString) {
 		myHuman = new StringDt(theString); 
 	}
+
  
 	/**
 	 * Gets the value(s) for <b>xpath</b> (XPath expression of constraint).
@@ -2657,8 +3058,9 @@ public class Profile extends BaseResource implements IResource {
 		myXpath = theValue;
 	}
 
+
  	/**
-	 * Sets the value(s) for <b>xpath</b> (XPath expression of constraint)
+	 * Sets the value for <b>xpath</b> (XPath expression of constraint)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -2668,6 +3070,7 @@ public class Profile extends BaseResource implements IResource {
 	public void setXpath( String theString) {
 		myXpath = new StringDt(theString); 
 	}
+
  
 
 	}
@@ -2702,6 +3105,12 @@ public class Profile extends BaseResource implements IResource {
 	}))	
 	private IDatatype myReference;
 	
+
+	@Override
+	public boolean isEmpty() {
+		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myName,  myIsExtensible,  myConformance,  myDescription,  myReference);
+	}
+
 	/**
 	 * Gets the value(s) for <b>name</b> (Descriptive Name).
 	 * creating it if it does
@@ -2731,8 +3140,9 @@ public class Profile extends BaseResource implements IResource {
 		myName = theValue;
 	}
 
+
  	/**
-	 * Sets the value(s) for <b>name</b> (Descriptive Name)
+	 * Sets the value for <b>name</b> (Descriptive Name)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -2742,6 +3152,7 @@ public class Profile extends BaseResource implements IResource {
 	public void setName( String theString) {
 		myName = new StringDt(theString); 
 	}
+
  
 	/**
 	 * Gets the value(s) for <b>isExtensible</b> (Can additional codes be used?).
@@ -2772,7 +3183,20 @@ public class Profile extends BaseResource implements IResource {
 		myIsExtensible = theValue;
 	}
 
-  
+
+ 	/**
+	 * Sets the value for <b>isExtensible</b> (Can additional codes be used?)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * If true, then conformant systems may use additional codes or (where the data type permits) text alone to convey concepts not covered by the set of codes identified in the binding.  If false, then conformant systems are constrained to the provided codes alone
+     * </p> 
+	 */
+	public void setIsExtensible( Boolean theBoolean) {
+		myIsExtensible = new BooleanDt(theBoolean); 
+	}
+
+ 
 	/**
 	 * Gets the value(s) for <b>conformance</b> (required | preferred | example).
 	 * creating it if it does
@@ -2801,6 +3225,7 @@ public class Profile extends BaseResource implements IResource {
 	public void setConformance(BoundCodeDt<BindingConformanceEnum> theValue) {
 		myConformance = theValue;
 	}
+
 
 	/**
 	 * Sets the value(s) for <b>conformance</b> (required | preferred | example)
@@ -2844,8 +3269,9 @@ public class Profile extends BaseResource implements IResource {
 		myDescription = theValue;
 	}
 
+
  	/**
-	 * Sets the value(s) for <b>description</b> (Human explanation of the value set)
+	 * Sets the value for <b>description</b> (Human explanation of the value set)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -2855,6 +3281,7 @@ public class Profile extends BaseResource implements IResource {
 	public void setDescription( String theString) {
 		myDescription = new StringDt(theString); 
 	}
+
  
 	/**
 	 * Gets the value(s) for <b>reference[x]</b> (Source of value set).
@@ -2882,6 +3309,7 @@ public class Profile extends BaseResource implements IResource {
 		myReference = theValue;
 	}
 
+
   
 
 	}
@@ -2904,6 +3332,12 @@ public class Profile extends BaseResource implements IResource {
 	@Child(name="map", type=StringDt.class, order=1, min=1, max=1)	
 	private StringDt myMap;
 	
+
+	@Override
+	public boolean isEmpty() {
+		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myIdentity,  myMap);
+	}
+
 	/**
 	 * Gets the value(s) for <b>identity</b> (Reference to mapping declaration).
 	 * creating it if it does
@@ -2933,8 +3367,9 @@ public class Profile extends BaseResource implements IResource {
 		myIdentity = theValue;
 	}
 
+
  	/**
-	 * Sets the value(s) for <b>identity</b> (Reference to mapping declaration)
+	 * Sets the value for <b>identity</b> (Reference to mapping declaration)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -2944,6 +3379,7 @@ public class Profile extends BaseResource implements IResource {
 	public void setIdentity( String theId) {
 		myIdentity = new IdDt(theId); 
 	}
+
  
 	/**
 	 * Gets the value(s) for <b>map</b> (Details of the mapping).
@@ -2974,8 +3410,9 @@ public class Profile extends BaseResource implements IResource {
 		myMap = theValue;
 	}
 
+
  	/**
-	 * Sets the value(s) for <b>map</b> (Details of the mapping)
+	 * Sets the value for <b>map</b> (Details of the mapping)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -2985,6 +3422,7 @@ public class Profile extends BaseResource implements IResource {
 	public void setMap( String theString) {
 		myMap = new StringDt(theString); 
 	}
+
  
 
 	}
@@ -3018,6 +3456,12 @@ public class Profile extends BaseResource implements IResource {
 	@Child(name="target", type=CodeDt.class, order=4, min=0, max=Child.MAX_UNLIMITED)	
 	private List<BoundCodeDt<ResourceTypeEnum>> myTarget;
 	
+
+	@Override
+	public boolean isEmpty() {
+		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myName,  myType,  myDocumentation,  myXpath,  myTarget);
+	}
+
 	/**
 	 * Gets the value(s) for <b>name</b> (Name of search parameter).
 	 * creating it if it does
@@ -3047,8 +3491,9 @@ public class Profile extends BaseResource implements IResource {
 		myName = theValue;
 	}
 
+
  	/**
-	 * Sets the value(s) for <b>name</b> (Name of search parameter)
+	 * Sets the value for <b>name</b> (Name of search parameter)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -3058,6 +3503,7 @@ public class Profile extends BaseResource implements IResource {
 	public void setName( String theString) {
 		myName = new StringDt(theString); 
 	}
+
  
 	/**
 	 * Gets the value(s) for <b>type</b> (number | date | string | token | reference | composite | quantity).
@@ -3087,6 +3533,7 @@ public class Profile extends BaseResource implements IResource {
 	public void setType(BoundCodeDt<SearchParamTypeEnum> theValue) {
 		myType = theValue;
 	}
+
 
 	/**
 	 * Sets the value(s) for <b>type</b> (number | date | string | token | reference | composite | quantity)
@@ -3130,8 +3577,9 @@ public class Profile extends BaseResource implements IResource {
 		myDocumentation = theValue;
 	}
 
+
  	/**
-	 * Sets the value(s) for <b>documentation</b> (Contents and meaning of search parameter)
+	 * Sets the value for <b>documentation</b> (Contents and meaning of search parameter)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -3141,6 +3589,7 @@ public class Profile extends BaseResource implements IResource {
 	public void setDocumentation( String theString) {
 		myDocumentation = new StringDt(theString); 
 	}
+
  
 	/**
 	 * Gets the value(s) for <b>xpath</b> (XPath that extracts the parameter set).
@@ -3171,8 +3620,9 @@ public class Profile extends BaseResource implements IResource {
 		myXpath = theValue;
 	}
 
+
  	/**
-	 * Sets the value(s) for <b>xpath</b> (XPath that extracts the parameter set)
+	 * Sets the value for <b>xpath</b> (XPath that extracts the parameter set)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -3182,6 +3632,7 @@ public class Profile extends BaseResource implements IResource {
 	public void setXpath( String theString) {
 		myXpath = new StringDt(theString); 
 	}
+
  
 	/**
 	 * Gets the value(s) for <b>target</b> (Types of resource (if a resource reference)).
@@ -3211,6 +3662,7 @@ public class Profile extends BaseResource implements IResource {
 	public void setTarget(List<BoundCodeDt<ResourceTypeEnum>> theValue) {
 		myTarget = theValue;
 	}
+
 
 	/**
 	 * Add a value for <b>target</b> (Types of resource (if a resource reference))
@@ -3269,6 +3721,12 @@ public class Profile extends BaseResource implements IResource {
 	@Child(name="definition", type=StructureElementDefinition.class, order=4, min=1, max=1)	
 	private StructureElementDefinition myDefinition;
 	
+
+	@Override
+	public boolean isEmpty() {
+		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myCode,  myDisplay,  myContextType,  myContext,  myDefinition);
+	}
+
 	/**
 	 * Gets the value(s) for <b>code</b> (Identifies the extension in this profile).
 	 * creating it if it does
@@ -3297,6 +3755,7 @@ public class Profile extends BaseResource implements IResource {
 	public void setCode(CodeDt theValue) {
 		myCode = theValue;
 	}
+
 
   
 	/**
@@ -3328,8 +3787,9 @@ public class Profile extends BaseResource implements IResource {
 		myDisplay = theValue;
 	}
 
+
  	/**
-	 * Sets the value(s) for <b>display</b> (Use this name when displaying the value)
+	 * Sets the value for <b>display</b> (Use this name when displaying the value)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -3339,6 +3799,7 @@ public class Profile extends BaseResource implements IResource {
 	public void setDisplay( String theString) {
 		myDisplay = new StringDt(theString); 
 	}
+
  
 	/**
 	 * Gets the value(s) for <b>contextType</b> (resource | datatype | mapping | extension).
@@ -3368,6 +3829,7 @@ public class Profile extends BaseResource implements IResource {
 	public void setContextType(BoundCodeDt<ExtensionContextEnum> theValue) {
 		myContextType = theValue;
 	}
+
 
 	/**
 	 * Sets the value(s) for <b>contextType</b> (resource | datatype | mapping | extension)
@@ -3411,8 +3873,22 @@ public class Profile extends BaseResource implements IResource {
 		myContext = theValue;
 	}
 
+	/**
+	 * Adds and returns a new value for <b>context</b> (Where the extension can be used in instances)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Identifies the types of resource or data type elements to which the extension can be applied
+     * </p> 
+	 */
+	public StringDt addContext() {
+		StringDt newType = new StringDt();
+		getContext().add(newType);
+		return newType; 
+	}
+
  	/**
-	 * Sets the value(s) for <b>context</b> (Where the extension can be used in instances)
+	 * Adds a new value for <b>context</b> (Where the extension can be used in instances)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -3425,6 +3901,7 @@ public class Profile extends BaseResource implements IResource {
 		}
 		myContext.add(new StringDt(theString)); 
 	}
+
  
 	/**
 	 * Gets the value(s) for <b>definition</b> (Definition of the extension and its content).
@@ -3455,6 +3932,7 @@ public class Profile extends BaseResource implements IResource {
 		myDefinition = theValue;
 	}
 
+
   
 
 	}
@@ -3480,6 +3958,12 @@ public class Profile extends BaseResource implements IResource {
 	@Child(name="parameter", type=StructureSearchParam.class, order=2, min=0, max=Child.MAX_UNLIMITED)	
 	private List<StructureSearchParam> myParameter;
 	
+
+	@Override
+	public boolean isEmpty() {
+		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myName,  myDocumentation,  myParameter);
+	}
+
 	/**
 	 * Gets the value(s) for <b>name</b> (Special named queries (_query=)).
 	 * creating it if it does
@@ -3509,8 +3993,9 @@ public class Profile extends BaseResource implements IResource {
 		myName = theValue;
 	}
 
+
  	/**
-	 * Sets the value(s) for <b>name</b> (Special named queries (_query=))
+	 * Sets the value for <b>name</b> (Special named queries (_query=))
 	 *
      * <p>
      * <b>Definition:</b>
@@ -3520,6 +4005,7 @@ public class Profile extends BaseResource implements IResource {
 	public void setName( String theString) {
 		myName = new StringDt(theString); 
 	}
+
  
 	/**
 	 * Gets the value(s) for <b>documentation</b> (Describes the named query).
@@ -3550,8 +4036,9 @@ public class Profile extends BaseResource implements IResource {
 		myDocumentation = theValue;
 	}
 
+
  	/**
-	 * Sets the value(s) for <b>documentation</b> (Describes the named query)
+	 * Sets the value for <b>documentation</b> (Describes the named query)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -3561,6 +4048,7 @@ public class Profile extends BaseResource implements IResource {
 	public void setDocumentation( String theString) {
 		myDocumentation = new StringDt(theString); 
 	}
+
  
 	/**
 	 * Gets the value(s) for <b>parameter</b> (Parameter for the named query).
@@ -3589,6 +4077,20 @@ public class Profile extends BaseResource implements IResource {
 	 */
 	public void setParameter(List<StructureSearchParam> theValue) {
 		myParameter = theValue;
+	}
+
+	/**
+	 * Adds and returns a new value for <b>parameter</b> (Parameter for the named query)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A parameter of a named query
+     * </p> 
+	 */
+	public StructureSearchParam addParameter() {
+		StructureSearchParam newType = new StructureSearchParam();
+		getParameter().add(newType);
+		return newType; 
 	}
 
   

@@ -38,7 +38,8 @@ import ca.uhn.fhir.model.dstu.resource.*;
  * </p> 
  */
 @DatatypeDef(name="Attachment") 
-public class AttachmentDt extends BaseElement implements ICompositeDatatype {
+public class AttachmentDt extends BaseElement implements ICompositeDatatype  {
+
 
 	@Child(name="contentType", type=CodeDt.class, order=0, min=1, max=1)	
 	private CodeDt myContentType;
@@ -61,6 +62,12 @@ public class AttachmentDt extends BaseElement implements ICompositeDatatype {
 	@Child(name="title", type=StringDt.class, order=6, min=0, max=1)	
 	private StringDt myTitle;
 	
+
+	@Override
+	public boolean isEmpty() {
+		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myContentType,  myLanguage,  myData,  myUrl,  mySize,  myHash,  myTitle);
+	}
+
 	/**
 	 * Gets the value(s) for <b>contentType</b> (Mime type of the content, with charset etc.).
 	 * creating it if it does
@@ -89,6 +96,7 @@ public class AttachmentDt extends BaseElement implements ICompositeDatatype {
 	public void setContentType(CodeDt theValue) {
 		myContentType = theValue;
 	}
+
 
   
 	/**
@@ -120,6 +128,7 @@ public class AttachmentDt extends BaseElement implements ICompositeDatatype {
 		myLanguage = theValue;
 	}
 
+
   
 	/**
 	 * Gets the value(s) for <b>data</b> (Data inline, base64ed).
@@ -150,7 +159,20 @@ public class AttachmentDt extends BaseElement implements ICompositeDatatype {
 		myData = theValue;
 	}
 
-  
+
+ 	/**
+	 * Sets the value for <b>data</b> (Data inline, base64ed)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The actual data of the attachment - a sequence of bytes. In XML, represented using base64
+     * </p> 
+	 */
+	public void setData( byte[] theBytes) {
+		myData = new Base64BinaryDt(theBytes); 
+	}
+
+ 
 	/**
 	 * Gets the value(s) for <b>url</b> (Uri where the data can be found).
 	 * creating it if it does
@@ -180,8 +202,9 @@ public class AttachmentDt extends BaseElement implements ICompositeDatatype {
 		myUrl = theValue;
 	}
 
+
  	/**
-	 * Sets the value(s) for <b>url</b> (Uri where the data can be found)
+	 * Sets the value for <b>url</b> (Uri where the data can be found)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -191,6 +214,7 @@ public class AttachmentDt extends BaseElement implements ICompositeDatatype {
 	public void setUrl( String theUri) {
 		myUrl = new UriDt(theUri); 
 	}
+
  
 	/**
 	 * Gets the value(s) for <b>size</b> (Number of bytes of content (if url provided)).
@@ -221,7 +245,20 @@ public class AttachmentDt extends BaseElement implements ICompositeDatatype {
 		mySize = theValue;
 	}
 
-  
+
+ 	/**
+	 * Sets the value for <b>size</b> (Number of bytes of content (if url provided))
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The number of bytes of data that make up this attachment.
+     * </p> 
+	 */
+	public void setSize( Integer theInteger) {
+		mySize = new IntegerDt(theInteger); 
+	}
+
+ 
 	/**
 	 * Gets the value(s) for <b>hash</b> (Hash of the data (sha-1, base64ed )).
 	 * creating it if it does
@@ -251,7 +288,20 @@ public class AttachmentDt extends BaseElement implements ICompositeDatatype {
 		myHash = theValue;
 	}
 
-  
+
+ 	/**
+	 * Sets the value for <b>hash</b> (Hash of the data (sha-1, base64ed ))
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The calculated hash of the data using SHA-1. Represented using base64
+     * </p> 
+	 */
+	public void setHash( byte[] theBytes) {
+		myHash = new Base64BinaryDt(theBytes); 
+	}
+
+ 
 	/**
 	 * Gets the value(s) for <b>title</b> (Label to display in place of the data).
 	 * creating it if it does
@@ -281,8 +331,9 @@ public class AttachmentDt extends BaseElement implements ICompositeDatatype {
 		myTitle = theValue;
 	}
 
+
  	/**
-	 * Sets the value(s) for <b>title</b> (Label to display in place of the data)
+	 * Sets the value for <b>title</b> (Label to display in place of the data)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -292,6 +343,7 @@ public class AttachmentDt extends BaseElement implements ICompositeDatatype {
 	public void setTitle( String theString) {
 		myTitle = new StringDt(theString); 
 	}
+
  
 
 

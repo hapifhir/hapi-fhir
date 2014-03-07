@@ -17,7 +17,6 @@
 package ca.uhn.fhir.model.dstu.composite;
 
 import java.util.*;
-
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.model.primitive.*;
@@ -39,7 +38,22 @@ import ca.uhn.fhir.model.dstu.resource.*;
  * </p> 
  */
 @DatatypeDef(name="Identifier") 
-public class IdentifierDt extends BaseElement implements ICompositeDatatype, IQueryParameterType {
+public class IdentifierDt extends BaseElement implements ICompositeDatatype  , IQueryParameterType {
+
+	/**
+	 * Creates a new identifier
+	 */
+	public IdentifierDt() {
+		// nothing
+	}
+
+	/**
+	 * Creates a new identifier with the given system and value
+	 */
+	public IdentifierDt(String theSystem, String theValue) {
+		setSystem(theSystem);
+		setValue(theValue);
+	}
 
 	@Child(name="use", type=CodeDt.class, order=0, min=0, max=1)	
 	private BoundCodeDt<IdentifierUseEnum> myUse;
@@ -62,19 +76,10 @@ public class IdentifierDt extends BaseElement implements ICompositeDatatype, IQu
 	})	
 	private ResourceReference myAssigner;
 	
-	/**
-	 * Creates a new identifier
-	 */
-	public IdentifierDt() {
-		// nothing
-	}
 
-	/**
-	 * Creates a new identifier with the given system and value
-	 */
-	public IdentifierDt(String theSystem, String theValue) {
-		setSystem(theSystem);
-		setValue(theValue);
+	@Override
+	public boolean isEmpty() {
+		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myUse,  myLabel,  mySystem,  myValue,  myPeriod,  myAssigner);
 	}
 
 	/**
@@ -107,6 +112,7 @@ public class IdentifierDt extends BaseElement implements ICompositeDatatype, IQu
 	public void setUse(BoundCodeDt<IdentifierUseEnum> theValue) {
 		myUse = theValue;
 	}
+
 
 	/**
 	 * Sets the value(s) for <b>use</b> (usual | official | temp | secondary (If known)
@@ -151,8 +157,9 @@ public class IdentifierDt extends BaseElement implements ICompositeDatatype, IQu
 		myLabel = theValue;
 	}
 
+
  	/**
-	 * Sets the value(s) for <b>label</b> (Description of identifier)
+	 * Sets the value for <b>label</b> (Description of identifier)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -162,6 +169,7 @@ public class IdentifierDt extends BaseElement implements ICompositeDatatype, IQu
 	public void setLabel( String theString) {
 		myLabel = new StringDt(theString); 
 	}
+
  
 	/**
 	 * Gets the value(s) for <b>system</b> (The namespace for the identifier).
@@ -192,8 +200,9 @@ public class IdentifierDt extends BaseElement implements ICompositeDatatype, IQu
 		mySystem = theValue;
 	}
 
+
  	/**
-	 * Sets the value(s) for <b>system</b> (The namespace for the identifier)
+	 * Sets the value for <b>system</b> (The namespace for the identifier)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -203,6 +212,7 @@ public class IdentifierDt extends BaseElement implements ICompositeDatatype, IQu
 	public void setSystem( String theUri) {
 		mySystem = new UriDt(theUri); 
 	}
+
  
 	/**
 	 * Gets the value(s) for <b>value</b> (The value that is unique).
@@ -233,8 +243,9 @@ public class IdentifierDt extends BaseElement implements ICompositeDatatype, IQu
 		myValue = theValue;
 	}
 
+
  	/**
-	 * Sets the value(s) for <b>value</b> (The value that is unique)
+	 * Sets the value for <b>value</b> (The value that is unique)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -244,6 +255,7 @@ public class IdentifierDt extends BaseElement implements ICompositeDatatype, IQu
 	public void setValue( String theString) {
 		myValue = new StringDt(theString); 
 	}
+
  
 	/**
 	 * Gets the value(s) for <b>period</b> (Time period when id is/was valid for use).
@@ -274,6 +286,7 @@ public class IdentifierDt extends BaseElement implements ICompositeDatatype, IQu
 		myPeriod = theValue;
 	}
 
+
   
 	/**
 	 * Gets the value(s) for <b>assigner</b> (Organization that issued id (may be just text)).
@@ -303,6 +316,7 @@ public class IdentifierDt extends BaseElement implements ICompositeDatatype, IQu
 	public void setAssigner(ResourceReference theValue) {
 		myAssigner = theValue;
 	}
+
 
   
 

@@ -135,6 +135,12 @@ public class Medication extends BaseResource implements IResource {
 	@Child(name="package", type=CodeDt.class, order=6, min=0, max=1)	
 	private CodeDt myPackage;
 	
+
+	@Override
+	public boolean isEmpty() {
+		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myName,  myCode,  myIsBrand,  myManufacturer,  myKind,  myProduct,  myPackage);
+	}
+
 	/**
 	 * Gets the value(s) for <b>name</b> (Common / Commercial name).
 	 * creating it if it does
@@ -164,8 +170,9 @@ public class Medication extends BaseResource implements IResource {
 		myName = theValue;
 	}
 
+
  	/**
-	 * Sets the value(s) for <b>name</b> (Common / Commercial name)
+	 * Sets the value for <b>name</b> (Common / Commercial name)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -175,6 +182,7 @@ public class Medication extends BaseResource implements IResource {
 	public void setName( String theString) {
 		myName = new StringDt(theString); 
 	}
+
  
 	/**
 	 * Gets the value(s) for <b>code</b> (Codes that identify this medication).
@@ -204,6 +212,7 @@ public class Medication extends BaseResource implements IResource {
 	public void setCode(CodeableConceptDt theValue) {
 		myCode = theValue;
 	}
+
 
   
 	/**
@@ -235,7 +244,20 @@ public class Medication extends BaseResource implements IResource {
 		myIsBrand = theValue;
 	}
 
-  
+
+ 	/**
+	 * Sets the value for <b>isBrand</b> (True if a brand)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Set to true if the item is attributable to a specific manufacturer (even if we don't know who that is) 
+     * </p> 
+	 */
+	public void setIsBrand( Boolean theBoolean) {
+		myIsBrand = new BooleanDt(theBoolean); 
+	}
+
+ 
 	/**
 	 * Gets the value(s) for <b>manufacturer</b> (Manufacturer of the item).
 	 * creating it if it does
@@ -264,6 +286,7 @@ public class Medication extends BaseResource implements IResource {
 	public void setManufacturer(ResourceReference theValue) {
 		myManufacturer = theValue;
 	}
+
 
   
 	/**
@@ -294,6 +317,7 @@ public class Medication extends BaseResource implements IResource {
 	public void setKind(BoundCodeDt<MedicationKindEnum> theValue) {
 		myKind = theValue;
 	}
+
 
 	/**
 	 * Sets the value(s) for <b>kind</b> (product | package)
@@ -337,6 +361,7 @@ public class Medication extends BaseResource implements IResource {
 		myProduct = theValue;
 	}
 
+
   
 	/**
 	 * Gets the value(s) for <b>package</b> (Details about packaged medications).
@@ -367,6 +392,7 @@ public class Medication extends BaseResource implements IResource {
 		myPackage = theValue;
 	}
 
+
   
 	/**
 	 * Block class for child element: <b>Medication.product</b> (Administrable medication details)
@@ -385,6 +411,12 @@ public class Medication extends BaseResource implements IResource {
 	@Child(name="ingredient", order=1, min=0, max=Child.MAX_UNLIMITED)	
 	private List<ProductIngredient> myIngredient;
 	
+
+	@Override
+	public boolean isEmpty() {
+		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myForm,  myIngredient);
+	}
+
 	/**
 	 * Gets the value(s) for <b>form</b> (powder | tablets | carton +).
 	 * creating it if it does
@@ -413,6 +445,7 @@ public class Medication extends BaseResource implements IResource {
 	public void setForm(CodeableConceptDt theValue) {
 		myForm = theValue;
 	}
+
 
   
 	/**
@@ -444,6 +477,20 @@ public class Medication extends BaseResource implements IResource {
 		myIngredient = theValue;
 	}
 
+	/**
+	 * Adds and returns a new value for <b>ingredient</b> (Active or inactive ingredient)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Identifies a particular constituent of interest in the product
+     * </p> 
+	 */
+	public ProductIngredient addIngredient() {
+		ProductIngredient newType = new ProductIngredient();
+		getIngredient().add(newType);
+		return newType; 
+	}
+
   
 
 	}
@@ -469,6 +516,12 @@ public class Medication extends BaseResource implements IResource {
 	@Child(name="amount", type=RatioDt.class, order=1, min=0, max=1)	
 	private RatioDt myAmount;
 	
+
+	@Override
+	public boolean isEmpty() {
+		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myItem,  myAmount);
+	}
+
 	/**
 	 * Gets the value(s) for <b>item</b> (The product contained).
 	 * creating it if it does
@@ -494,6 +547,7 @@ public class Medication extends BaseResource implements IResource {
 	public void setItem(ResourceReference theValue) {
 		myItem = theValue;
 	}
+
 
   
 	/**
@@ -524,6 +578,7 @@ public class Medication extends BaseResource implements IResource {
 	public void setAmount(RatioDt theValue) {
 		myAmount = theValue;
 	}
+
 
   
 

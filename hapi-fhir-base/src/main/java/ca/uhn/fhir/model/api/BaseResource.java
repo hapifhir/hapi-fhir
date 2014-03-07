@@ -1,24 +1,25 @@
 package ca.uhn.fhir.model.api;
 
 import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.dstu.composite.NarrativeDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
-import ca.uhn.fhir.model.primitive.XhtmlDt;
+import ca.uhn.fhir.util.ElementUtil;
 
-public class BaseResource extends BaseElement implements IResource {
+public abstract class BaseResource extends BaseElement implements IResource {
 
 	@Child(name="language", order=0, min=0, max=Child.MAX_UNLIMITED)
 	private CodeDt myLanguage;
 
 	@Child(name="text", order=1, min=0, max=1)
-	private XhtmlDt myText;
+	private NarrativeDt myText;
 
 	public CodeDt getLanguage() {
 		return myLanguage;
 	}
 
-	public XhtmlDt getText() {
+	public NarrativeDt getText() {
 		if (myText == null) {
-			myText = new XhtmlDt();
+			myText = new NarrativeDt();
 		}
 		return myText;
 	}
@@ -27,8 +28,18 @@ public class BaseResource extends BaseElement implements IResource {
 		myLanguage = theLanguage;
 	}
 
-	public void setText(XhtmlDt theText) {
+	public void setText(NarrativeDt theText) {
 		myText = theText;
 	}
+	
+	/**
+	 * Intended to be called by extending classes {@link #isEmpty()} implementations, returns <code>true</code>
+	 * if all content in this superclass instance is empty per the semantics of {@link #isEmpty()}. 
+	 */
+	@Override
+	protected boolean isBaseEmpty() {
+		return super.isBaseEmpty() && ElementUtil.isEmpty(myLanguage, myText);
+	}
+
 	
 }

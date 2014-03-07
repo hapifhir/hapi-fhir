@@ -6,7 +6,6 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import ca.uhn.fhir.model.api.IElement;
-import ca.uhn.fhir.model.api.IValueSetEnumBinder;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(value= {ElementType.FIELD})
@@ -42,6 +41,11 @@ public @interface Child {
 	{
 		private NoDatatype() {
 			// non instantiable
+		}
+
+		@Override
+		public boolean isEmpty() {
+			return true;
 		}
 	}
 	

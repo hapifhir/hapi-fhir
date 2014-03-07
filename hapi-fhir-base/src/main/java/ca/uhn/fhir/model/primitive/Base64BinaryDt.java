@@ -2,12 +2,12 @@ package ca.uhn.fhir.model.primitive;
 
 import org.apache.commons.codec.binary.Base64;
 
-import ca.uhn.fhir.model.api.BaseElement;
-import ca.uhn.fhir.model.api.IPrimitiveDatatype;
+import ca.uhn.fhir.model.api.BasePrimitive;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+import ca.uhn.fhir.model.api.annotation.SimpleSetter;
 
 @DatatypeDef(name = "base64Binary")
-public class Base64BinaryDt extends BaseElement implements IPrimitiveDatatype<byte[]> {
+public class Base64BinaryDt extends BasePrimitive<byte[]> {
 
 	private byte[] myValue;
 
@@ -17,12 +17,13 @@ public class Base64BinaryDt extends BaseElement implements IPrimitiveDatatype<by
 	public Base64BinaryDt() {
 		super();
 	}
-	
+
 	/**
 	 * Constructor
 	 */
-	public Base64BinaryDt(byte[] theValue) {
-		myValue=theValue;
+	@SimpleSetter
+	public Base64BinaryDt(@SimpleSetter.Parameter(name="theBytes") byte[] theBytes) {
+		setValue(theBytes);
 	}
 
 	@Override

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.model.api;
 
+
 public class UndeclaredExtension extends BaseElement {
 
 	private String myUrl;
@@ -27,6 +28,11 @@ public class UndeclaredExtension extends BaseElement {
 
 	public void setValue(IElement theValue) {
 		myValue = theValue;
+	}
+
+	@Override
+	public boolean isEmpty() {
+		return myValue == null || myValue.isEmpty();
 	}
 
 }

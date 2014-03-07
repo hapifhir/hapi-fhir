@@ -38,7 +38,8 @@ import ca.uhn.fhir.model.dstu.resource.*;
  * </p> 
  */
 @DatatypeDef(name="Contact") 
-public class ContactDt extends BaseElement implements ICompositeDatatype {
+public class ContactDt extends BaseElement implements ICompositeDatatype  {
+
 
 	@Child(name="system", type=CodeDt.class, order=0, min=0, max=1)	
 	private BoundCodeDt<ContactSystemEnum> mySystem;
@@ -52,6 +53,12 @@ public class ContactDt extends BaseElement implements ICompositeDatatype {
 	@Child(name="period", type=PeriodDt.class, order=3, min=0, max=1)	
 	private PeriodDt myPeriod;
 	
+
+	@Override
+	public boolean isEmpty() {
+		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  mySystem,  myValue,  myUse,  myPeriod);
+	}
+
 	/**
 	 * Gets the value(s) for <b>system</b> (phone | fax | email | url).
 	 * creating it if it does
@@ -80,6 +87,7 @@ public class ContactDt extends BaseElement implements ICompositeDatatype {
 	public void setSystem(BoundCodeDt<ContactSystemEnum> theValue) {
 		mySystem = theValue;
 	}
+
 
 	/**
 	 * Sets the value(s) for <b>system</b> (phone | fax | email | url)
@@ -123,8 +131,9 @@ public class ContactDt extends BaseElement implements ICompositeDatatype {
 		myValue = theValue;
 	}
 
+
  	/**
-	 * Sets the value(s) for <b>value</b> (The actual contact details)
+	 * Sets the value for <b>value</b> (The actual contact details)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -134,6 +143,7 @@ public class ContactDt extends BaseElement implements ICompositeDatatype {
 	public void setValue( String theString) {
 		myValue = new StringDt(theString); 
 	}
+
  
 	/**
 	 * Gets the value(s) for <b>use</b> (home | work | temp | old | mobile - purpose of this address).
@@ -163,6 +173,7 @@ public class ContactDt extends BaseElement implements ICompositeDatatype {
 	public void setUse(BoundCodeDt<ContactUseEnum> theValue) {
 		myUse = theValue;
 	}
+
 
 	/**
 	 * Sets the value(s) for <b>use</b> (home | work | temp | old | mobile - purpose of this address)
@@ -205,6 +216,7 @@ public class ContactDt extends BaseElement implements ICompositeDatatype {
 	public void setPeriod(PeriodDt theValue) {
 		myPeriod = theValue;
 	}
+
 
   
 

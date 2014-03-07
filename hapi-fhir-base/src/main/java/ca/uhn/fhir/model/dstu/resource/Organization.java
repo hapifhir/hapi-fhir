@@ -144,6 +144,12 @@ public class Organization extends BaseResource implements IResource {
 	@Child(name="active", type=BooleanDt.class, order=8, min=0, max=1)	
 	private BooleanDt myActive;
 	
+
+	@Override
+	public boolean isEmpty() {
+		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myIdentifier,  myName,  myType,  myTelecom,  myAddress,  myPartOf,  myContact,  myLocation,  myActive);
+	}
+
 	/**
 	 * Gets the value(s) for <b>identifier</b> (Identifies this organization  across multiple systems).
 	 * creating it if it does
@@ -171,6 +177,20 @@ public class Organization extends BaseResource implements IResource {
 	 */
 	public void setIdentifier(List<IdentifierDt> theValue) {
 		myIdentifier = theValue;
+	}
+
+	/**
+	 * Adds and returns a new value for <b>identifier</b> (Identifies this organization  across multiple systems)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Identifier for the organization that is used to identify the organization across multiple disparate systems
+     * </p> 
+	 */
+	public IdentifierDt addIdentifier() {
+		IdentifierDt newType = new IdentifierDt();
+		getIdentifier().add(newType);
+		return newType; 
 	}
 
   
@@ -203,8 +223,9 @@ public class Organization extends BaseResource implements IResource {
 		myName = theValue;
 	}
 
+
  	/**
-	 * Sets the value(s) for <b>name</b> (Name used for the organization)
+	 * Sets the value for <b>name</b> (Name used for the organization)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -214,6 +235,7 @@ public class Organization extends BaseResource implements IResource {
 	public void setName( String theString) {
 		myName = new StringDt(theString); 
 	}
+
  
 	/**
 	 * Gets the value(s) for <b>type</b> (Kind of organization).
@@ -244,6 +266,7 @@ public class Organization extends BaseResource implements IResource {
 		myType = theValue;
 	}
 
+
   
 	/**
 	 * Gets the value(s) for <b>telecom</b> (A contact detail for the organization).
@@ -272,6 +295,20 @@ public class Organization extends BaseResource implements IResource {
 	 */
 	public void setTelecom(List<ContactDt> theValue) {
 		myTelecom = theValue;
+	}
+
+	/**
+	 * Adds and returns a new value for <b>telecom</b> (A contact detail for the organization)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A contact detail for the organization
+     * </p> 
+	 */
+	public ContactDt addTelecom() {
+		ContactDt newType = new ContactDt();
+		getTelecom().add(newType);
+		return newType; 
 	}
 
   
@@ -304,6 +341,20 @@ public class Organization extends BaseResource implements IResource {
 		myAddress = theValue;
 	}
 
+	/**
+	 * Adds and returns a new value for <b>address</b> (An address for the organization)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * An address for the organization
+     * </p> 
+	 */
+	public AddressDt addAddress() {
+		AddressDt newType = new AddressDt();
+		getAddress().add(newType);
+		return newType; 
+	}
+
   
 	/**
 	 * Gets the value(s) for <b>partOf</b> (The organization of which this organization forms a part).
@@ -334,6 +385,7 @@ public class Organization extends BaseResource implements IResource {
 		myPartOf = theValue;
 	}
 
+
   
 	/**
 	 * Gets the value(s) for <b>contact</b> (Contact for the organization for a certain purpose).
@@ -362,6 +414,20 @@ public class Organization extends BaseResource implements IResource {
 	 */
 	public void setContact(List<Contact> theValue) {
 		myContact = theValue;
+	}
+
+	/**
+	 * Adds and returns a new value for <b>contact</b> (Contact for the organization for a certain purpose)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * 
+     * </p> 
+	 */
+	public Contact addContact() {
+		Contact newType = new Contact();
+		getContact().add(newType);
+		return newType; 
 	}
 
   
@@ -394,6 +460,7 @@ public class Organization extends BaseResource implements IResource {
 		myLocation = theValue;
 	}
 
+
   
 	/**
 	 * Gets the value(s) for <b>active</b> (Whether the organization's record is still in active use).
@@ -424,7 +491,20 @@ public class Organization extends BaseResource implements IResource {
 		myActive = theValue;
 	}
 
-  
+
+ 	/**
+	 * Sets the value for <b>active</b> (Whether the organization's record is still in active use)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Whether the organization's record is still in active use
+     * </p> 
+	 */
+	public void setActive( Boolean theBoolean) {
+		myActive = new BooleanDt(theBoolean); 
+	}
+
+ 
 	/**
 	 * Block class for child element: <b>Organization.contact</b> (Contact for the organization for a certain purpose)
 	 *
@@ -451,6 +531,12 @@ public class Organization extends BaseResource implements IResource {
 	@Child(name="gender", type=CodeableConceptDt.class, order=4, min=0, max=1)	
 	private CodeableConceptDt myGender;
 	
+
+	@Override
+	public boolean isEmpty() {
+		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myPurpose,  myName,  myTelecom,  myAddress,  myGender);
+	}
+
 	/**
 	 * Gets the value(s) for <b>purpose</b> (The type of contact).
 	 * creating it if it does
@@ -479,6 +565,7 @@ public class Organization extends BaseResource implements IResource {
 	public void setPurpose(CodeableConceptDt theValue) {
 		myPurpose = theValue;
 	}
+
 
   
 	/**
@@ -510,6 +597,7 @@ public class Organization extends BaseResource implements IResource {
 		myName = theValue;
 	}
 
+
   
 	/**
 	 * Gets the value(s) for <b>telecom</b> (Contact details (telephone, email, etc)  for a contact).
@@ -538,6 +626,20 @@ public class Organization extends BaseResource implements IResource {
 	 */
 	public void setTelecom(List<ContactDt> theValue) {
 		myTelecom = theValue;
+	}
+
+	/**
+	 * Adds and returns a new value for <b>telecom</b> (Contact details (telephone, email, etc)  for a contact)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A contact detail (e.g. a telephone number or an email address) by which the party may be contacted. 
+     * </p> 
+	 */
+	public ContactDt addTelecom() {
+		ContactDt newType = new ContactDt();
+		getTelecom().add(newType);
+		return newType; 
 	}
 
   
@@ -570,6 +672,7 @@ public class Organization extends BaseResource implements IResource {
 		myAddress = theValue;
 	}
 
+
   
 	/**
 	 * Gets the value(s) for <b>gender</b> (Gender for administrative purposes).
@@ -599,6 +702,7 @@ public class Organization extends BaseResource implements IResource {
 	public void setGender(CodeableConceptDt theValue) {
 		myGender = theValue;
 	}
+
 
   
 

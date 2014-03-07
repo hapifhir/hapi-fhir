@@ -38,7 +38,8 @@ import ca.uhn.fhir.model.dstu.resource.*;
  * </p> 
  */
 @DatatypeDef(name="Coding") 
-public class CodingDt extends BaseElement implements ICompositeDatatype {
+public class CodingDt extends BaseElement implements ICompositeDatatype  {
+
 
 	@Child(name="system", type=UriDt.class, order=0, min=0, max=1)	
 	private UriDt mySystem;
@@ -61,6 +62,12 @@ public class CodingDt extends BaseElement implements ICompositeDatatype {
 	})	
 	private ResourceReference myValueSet;
 	
+
+	@Override
+	public boolean isEmpty() {
+		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  mySystem,  myVersion,  myCode,  myDisplay,  myPrimary,  myValueSet);
+	}
+
 	/**
 	 * Gets the value(s) for <b>system</b> (Identity of the terminology system ).
 	 * creating it if it does
@@ -90,8 +97,9 @@ public class CodingDt extends BaseElement implements ICompositeDatatype {
 		mySystem = theValue;
 	}
 
+
  	/**
-	 * Sets the value(s) for <b>system</b> (Identity of the terminology system )
+	 * Sets the value for <b>system</b> (Identity of the terminology system )
 	 *
      * <p>
      * <b>Definition:</b>
@@ -101,6 +109,7 @@ public class CodingDt extends BaseElement implements ICompositeDatatype {
 	public void setSystem( String theUri) {
 		mySystem = new UriDt(theUri); 
 	}
+
  
 	/**
 	 * Gets the value(s) for <b>version</b> (Version of the system - if relevant).
@@ -131,8 +140,9 @@ public class CodingDt extends BaseElement implements ICompositeDatatype {
 		myVersion = theValue;
 	}
 
+
  	/**
-	 * Sets the value(s) for <b>version</b> (Version of the system - if relevant)
+	 * Sets the value for <b>version</b> (Version of the system - if relevant)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -142,6 +152,7 @@ public class CodingDt extends BaseElement implements ICompositeDatatype {
 	public void setVersion( String theString) {
 		myVersion = new StringDt(theString); 
 	}
+
  
 	/**
 	 * Gets the value(s) for <b>code</b> (Symbol in syntax defined by the system).
@@ -171,6 +182,7 @@ public class CodingDt extends BaseElement implements ICompositeDatatype {
 	public void setCode(CodeDt theValue) {
 		myCode = theValue;
 	}
+
 
   
 	/**
@@ -202,8 +214,9 @@ public class CodingDt extends BaseElement implements ICompositeDatatype {
 		myDisplay = theValue;
 	}
 
+
  	/**
-	 * Sets the value(s) for <b>display</b> (Representation defined by the system)
+	 * Sets the value for <b>display</b> (Representation defined by the system)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -213,6 +226,7 @@ public class CodingDt extends BaseElement implements ICompositeDatatype {
 	public void setDisplay( String theString) {
 		myDisplay = new StringDt(theString); 
 	}
+
  
 	/**
 	 * Gets the value(s) for <b>primary</b> (If this code was chosen directly by the user).
@@ -243,7 +257,20 @@ public class CodingDt extends BaseElement implements ICompositeDatatype {
 		myPrimary = theValue;
 	}
 
-  
+
+ 	/**
+	 * Sets the value for <b>primary</b> (If this code was chosen directly by the user)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Indicates that this code was chosen by a user directly - i.e. off a pick list of available items (codes or displays)
+     * </p> 
+	 */
+	public void setPrimary( Boolean theBoolean) {
+		myPrimary = new BooleanDt(theBoolean); 
+	}
+
+ 
 	/**
 	 * Gets the value(s) for <b>valueSet</b> (Set this coding was chosen from).
 	 * creating it if it does
@@ -272,6 +299,7 @@ public class CodingDt extends BaseElement implements ICompositeDatatype {
 	public void setValueSet(ResourceReference theValue) {
 		myValueSet = theValue;
 	}
+
 
   
 
