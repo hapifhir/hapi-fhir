@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document xmlns="http://maven.apache.org/XDOC/2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
+
+	<properties>
+		<title>The Open Source HL7 API for Java</title>
+		<author email="jamesagnew@users.sourceforge.net">James Agnew</author>
+	</properties>
+
+	<body>
+
+		<!-- The body of the document contains a number of sections -->
+		<section name="Welcome">
+			<p>
+			    SOCIALPLUGINSHEREAPI
+			</p>
+			<p>
+				This is the homepage for the HAPI-FHIR library. This library is still
+				in experimental stage, so please tread with caution.
+			</p>
+
+			<subsection name="Getting HAPI-FHIR">
+				
+				<p>
+					The easiest way to get started with HAPI-FHIR is to either download the
+					source code from our 
+					<a href="https://sourceforge.net/p/hl7api/fhircode/ci/master/tree/">Git Repository</a>,
+					or to use Maven: 
+				</p>
+				<source><![CDATA[<dependency>
+   <groupId>ca.uhn.hapi.fhir</groupId>
+   <artifactId>hapi-fhir-base</artifactId>
+   <version>1.0-SNAPSHOT</version>
+</dependency>]]></source>
+				
+			</subsection>
+			
+		</section>
+
+	</body>
+
+</document>

@@ -1,0 +1,96 @@
+Hacking HAPI
+
+  This page explains all of the steps neccesary to work with the actual source 
+  code for HAPI. This might be done for example to fix bugs, add features, or
+  learn how HAPI works internally. 
+
+  As of version 0.6, HAPI uses the {{{./http://maven.apache.org}Maven}} build system to build
+  it's source code. Generating the source takes the following steps.
+  
+* Getting the Source
+
+  The first step to building HAPI is obtaining the source code. HAPI uses CVS
+  as its {{{./source-repository.html}source-code repository}}.
+  
+  Note that the correct subdirectory to check out from the repository is now
+  called "hapi-mvn". There is an outdated directory called "hapi" which
+  is kept only for reference.
+  
+  If you are using Eclipse to check the project out, the project may show errors
+  when you first check it out. These will be resolved by running through the build
+  using Maven.
+  
+* Understanding the Project Structure
+
+  HAPI is now broken up into several subprojects:
+  
+*--------------------+------+
+ hapi-base           | This is the core of the HAPI library. It contains things such as parsers, transport, validation, etc. If you are making changes to HAPI itself, this is probably where you want to start.
+*--------------------+------+
+ hapi-sourcegen      | This project is used to generate message libraries. It is only used at build time.
+*--------------------+------+
+ hapi-structures-vXX | These projects contain the libraries used to generate and process individual messages for a specific version of HL7. They are generated using the proprietary HL7 database provided by HL7.org, and so are usually not modified by end users of the HAPI library.
+*--------------------+------+
+ hapi-examples       | This project provides several annotated examples of how to use HAPI.
+*--------------------+------+
+ hapi-test           | This project contains unit tests for the HAPI library
+*--------------------+------+
+ 
+
+* Install the build tools
+
+  Download the latest version of {{{http://maven.apache.org}Maven}}. The download page also 
+  has instructions for installing Maven correctly.
+  
+  
+* Building HAPI
+
+  Building a HAPI base JAR is as simple as typing:
+
++----------------+
+mvn install
++----------------+
+
+  At the end of this build, you should have a compiled JAR in the following
+  subdirectory:
+
++----------------+
+[workspace]/hapi-mvn/hapi-base/target/hapi-base-VERSION.jar
++----------------+
+  
+
+* Set up Eclipse
+
+  Once Maven has been run for the first time, you will need to define an Eclipse classpath variable 
+  pointing to your local maven repository.
+  
+  * First, find your local Maven repository. It will be a directory called ".m2/repository" in your home directory. So, for a user named "james", it would be in the following location, depending on OS:
+
+*--------------------+------+
+ Windows XP          | C:\Documents and Settings\James\.m2\repository
+*--------------------+------+
+ Windows Vista       | C:\Users\James\.m2\repository
+*--------------------+------+
+ Linux               | /home/james/.m2/repository
+*--------------------+------+
+  
+  * Next, in Eclipse, open the Preferences dialogue (in the Window menu).
+  
+  * Navigate to the following section: Java -> Build Path -> Classpath Variables
+  
+  * Click on "New"
+  
+  ** For "Name", enter "M2_REPO"
+  
+  ** For "Path", enter the path to the local repo. eg: "C:\Users\James\.m2\repository"
+  
+  
+* Tips and tricks
+
+  To skip running the unit tests, execute the following:
+
++----------------+
+mvn -Dmaven.test.skip -P CORE install
++----------------+
+  
+   

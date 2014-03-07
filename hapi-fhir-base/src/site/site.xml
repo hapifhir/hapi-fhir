@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<project xmlns="urn:site" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="urn:site http://maven.apache.org/xsd/decoration-1.1.0.xsd" name="HAPI">
+
+	<bannerLeft>
+		<name>HAPI</name>
+		<src>images/hapi_fhir_banner.png</src>
+		<href>http://hl7api.sourceforge.net/</href>
+	</bannerLeft>
+
+	<poweredBy>
+		<logo name="Hosted on SourceForge.net" href="https://sourceforge.net/projects/hl7api/" img="http://sflogo.sourceforge.net/sflogo.php?group_id=38899&amp;type=2" />
+		<logo name="Built with Maven 2" href="http://maven.apache.org" img="images/logos/maven-feather.png" />
+	</poweredBy>
+
+	<version position="left" />
+
+	<body>
+
+		<links>
+			<item name="Sourceforge Project Page" href="https://sourceforge.net/projects/hl7api/" />
+		    <item name="hl7.org" href="http://hl7.org/" />
+			<item name="University Health Network" href="http://www.uhn.ca/" />
+		</links>
+
+		<menu name="Welcome">
+			<item name="Introduction" href="index.html" />
+		</menu>
+
+		<menu name="Documentation">
+			<item name="JavaDocs" href="./apidocs/index.html"/>
+		</menu>
+		
+		<menu name="Reports">
+			<item name="Developers" href="team-list.html" />
+			<item name="Unit Test Report" href="surefire-report.html" />
+			<item name="FindBugs" href="findbugs.html" />
+			<item name="License" href="license.html" />
+			<item name="JXR" href="./xref/index.html"/>
+		</menu>
+
+		<head>
+			<link rel="shortcut icon" href="http://hl7api.sourceforge.net/images/favicon.png" />
+			<link rel="stylesheet" type="text/css" href="hapi.css" />
+		</head>
+
+	</body>
+
+	<skin>
+		<groupId>com.googlecode.fluido-skin</groupId>
+		<artifactId>fluido-skin</artifactId>
+		<version>1.3</version>
+	</skin>
+
+</project>
