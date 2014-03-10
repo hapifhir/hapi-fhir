@@ -181,7 +181,7 @@ public abstract class RestfulServer extends HttpServlet {
 			// resourceMethod.get
 
 		} catch (AuthenticationException e) {
-            response.setStatus(401);
+            response.setStatus(e.getStatusCode());
             response.getWriter().write(e.getMessage());
         }
         catch (BaseServerResponseException e) {
