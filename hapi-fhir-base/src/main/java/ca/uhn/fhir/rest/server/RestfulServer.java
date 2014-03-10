@@ -16,6 +16,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import ca.uhn.fhir.rest.server.exceptions.*;
 import org.apache.commons.lang3.StringUtils;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -26,10 +27,6 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.common.BaseMethodBinding;
 import ca.uhn.fhir.rest.common.SearchMethodBinding;
-import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.rest.server.exceptions.MethodNotFoundException;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 
 public abstract class RestfulServer extends HttpServlet {
 
@@ -107,6 +104,11 @@ public abstract class RestfulServer extends HttpServlet {
 
 	protected void handleRequest(SearchMethodBinding.RequestType requestType, HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		try {
+
+            if (null != securityManager) {
+                securityManager.authenticate(request);
+            }
+
 			String resourceName = null;
 			Long identity = null;
 
@@ -178,7 +180,11 @@ public abstract class RestfulServer extends HttpServlet {
 			}
 			// resourceMethod.get
 
-		} catch (BaseServerResponseException e) {
+		} catch (AuthenticationException e) {
+            response.setStatus(e.getStatusCode());
+            response.getWriter().write(e.getMessage());
+        }
+        catch (BaseServerResponseException e) {
 
 			if (e instanceof InternalErrorException) {
 				ourLog.error("Failure during REST processing", e);
