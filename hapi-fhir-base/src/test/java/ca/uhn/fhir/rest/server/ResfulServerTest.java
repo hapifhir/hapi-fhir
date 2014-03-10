@@ -1,18 +1,15 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.conn.PoolingClientConnectionManager;
-import org.apache.http.impl.conn.SchemeRegistryFactory;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
@@ -33,7 +30,7 @@ public class ResfulServerTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResfulServerTest.class);
 	private static int ourPort;
 	private static Server ourServer;
-	private static DefaultHttpClient ourClient;
+	private static CloseableHttpClient ourClient;
 	private static FhirContext ourCtx;
 
 	@BeforeClass
@@ -49,9 +46,11 @@ public class ResfulServerTest {
 		ourServer.setHandler(proxyHandler);
 		ourServer.start();
 
-		PoolingClientConnectionManager connectionManager = new PoolingClientConnectionManager(SchemeRegistryFactory.createDefault(), 5000, TimeUnit.MILLISECONDS);
-		ourClient = new DefaultHttpClient(connectionManager);
-		
+		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		HttpClientBuilder builder = HttpClientBuilder.create();
+		builder.setConnectionManager(connectionManager);
+		ourClient = builder.build();
+
 		ourCtx = new FhirContext(Patient.class);
 		
 	}

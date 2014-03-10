@@ -11,7 +11,7 @@ import java.util.Set;
 import ca.uhn.fhir.model.api.IDatatype;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.api.ResourceReference;
+import ca.uhn.fhir.model.api.BaseResourceReference;
 import ca.uhn.fhir.model.api.UndeclaredExtension;
 
 public class RuntimeChildUndeclaredExtensionDefinition extends BaseRuntimeChildDefinition {
@@ -70,13 +70,13 @@ public class RuntimeChildUndeclaredExtensionDefinition extends BaseRuntimeChildD
 		}
 		
 		// Resource Reference
-		myDatatypeToAttributeName.put(ResourceReference.class, "valueReference");
+		myDatatypeToAttributeName.put(BaseResourceReference.class, "valueReference");
 		List<Class<? extends IResource>> types = new ArrayList<Class<? extends IResource>>();
 		types.add(IResource.class);
 		RuntimeResourceReferenceDefinition def = new RuntimeResourceReferenceDefinition("valueResource", types);
 		def.sealAndInitialize(theClassToElementDefinitions);
 		myAttributeNameToDefinition.put("valueResource", def);
-		myDatatypeToDefinition.put(ResourceReference.class, def);
+		myDatatypeToDefinition.put(BaseResourceReference.class, def);
 	}
 
 

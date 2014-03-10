@@ -37,7 +37,7 @@ import ca.uhn.fhir.model.dstu.valueset.*;
  * 
  * </p> 
  */
-@ResourceDef(name="Organization", profile="http://hl7.org/fhir/profiles/Organization")
+@ResourceDef(name="Organization", profile="http://hl7.org/fhir/profiles/Organization", id="organization")
 public class Organization extends BaseResource implements IResource {
 
 	/**
@@ -153,7 +153,7 @@ public class Organization extends BaseResource implements IResource {
 		shortDefinition="The organization of which this organization forms a part",
 		formalDefinition="The organization of which this organization forms a part"
 	)
-	private ResourceReference myPartOf;
+	private ResourceReferenceDt myPartOf;
 	
 	@Child(name="contact", order=6, min=0, max=Child.MAX_UNLIMITED)	
 	@Description(
@@ -169,7 +169,7 @@ public class Organization extends BaseResource implements IResource {
 		shortDefinition="Location(s) the organization uses to provide services",
 		formalDefinition="Location(s) the organization uses to provide services"
 	)
-	private List<ResourceReference> myLocation;
+	private List<ResourceReferenceDt> myLocation;
 	
 	@Child(name="active", type=BooleanDt.class, order=8, min=0, max=1)	
 	@Description(
@@ -412,9 +412,9 @@ public class Organization extends BaseResource implements IResource {
      * The organization of which this organization forms a part
      * </p> 
 	 */
-	public ResourceReference getPartOf() {  
+	public ResourceReferenceDt getPartOf() {  
 		if (myPartOf == null) {
-			myPartOf = new ResourceReference();
+			myPartOf = new ResourceReferenceDt();
 		}
 		return myPartOf;
 	}
@@ -427,7 +427,7 @@ public class Organization extends BaseResource implements IResource {
      * The organization of which this organization forms a part
      * </p> 
 	 */
-	public void setPartOf(ResourceReference theValue) {
+	public void setPartOf(ResourceReferenceDt theValue) {
 		myPartOf = theValue;
 	}
 
@@ -487,9 +487,9 @@ public class Organization extends BaseResource implements IResource {
      * Location(s) the organization uses to provide services
      * </p> 
 	 */
-	public List<ResourceReference> getLocation() {  
+	public List<ResourceReferenceDt> getLocation() {  
 		if (myLocation == null) {
-			myLocation = new ArrayList<ResourceReference>();
+			myLocation = new ArrayList<ResourceReferenceDt>();
 		}
 		return myLocation;
 	}
@@ -502,7 +502,7 @@ public class Organization extends BaseResource implements IResource {
      * Location(s) the organization uses to provide services
      * </p> 
 	 */
-	public void setLocation(List<ResourceReference> theValue) {
+	public void setLocation(List<ResourceReferenceDt> theValue) {
 		myLocation = theValue;
 	}
 

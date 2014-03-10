@@ -38,7 +38,8 @@ import ca.uhn.fhir.model.dstu.resource.*;
  * </p> 
  */
 @DatatypeDef(name="Coding") 
-public class CodingDt extends BaseElement implements ICompositeDatatype  {
+public class CodingDt 
+        extends  BaseElement         implements ICompositeDatatype  {
 
 
 	@Child(name="system", type=UriDt.class, order=0, min=0, max=1)	
@@ -83,7 +84,7 @@ public class CodingDt extends BaseElement implements ICompositeDatatype  {
 		shortDefinition="Set this coding was chosen from",
 		formalDefinition="The set of possible coded values this coding was chosen from or constrained by"
 	)
-	private ResourceReference myValueSet;
+	private ResourceReferenceDt myValueSet;
 	
 
 	@Override
@@ -316,9 +317,9 @@ public class CodingDt extends BaseElement implements ICompositeDatatype  {
      * The set of possible coded values this coding was chosen from or constrained by
      * </p> 
 	 */
-	public ResourceReference getValueSet() {  
+	public ResourceReferenceDt getValueSet() {  
 		if (myValueSet == null) {
-			myValueSet = new ResourceReference();
+			myValueSet = new ResourceReferenceDt();
 		}
 		return myValueSet;
 	}
@@ -331,7 +332,7 @@ public class CodingDt extends BaseElement implements ICompositeDatatype  {
      * The set of possible coded values this coding was chosen from or constrained by
      * </p> 
 	 */
-	public void setValueSet(ResourceReference theValue) {
+	public void setValueSet(ResourceReferenceDt theValue) {
 		myValueSet = theValue;
 	}
 

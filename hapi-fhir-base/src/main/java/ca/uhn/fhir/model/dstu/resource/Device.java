@@ -37,7 +37,7 @@ import ca.uhn.fhir.model.dstu.valueset.*;
  * Allows institutions to track their devices. 
  * </p> 
  */
-@ResourceDef(name="Device", profile="http://hl7.org/fhir/profiles/Device")
+@ResourceDef(name="Device", profile="http://hl7.org/fhir/profiles/Device", id="device")
 public class Device extends BaseResource implements IResource {
 
 	/**
@@ -184,7 +184,7 @@ public class Device extends BaseResource implements IResource {
 		shortDefinition="Organization responsible for device",
 		formalDefinition="An organization that is responsible for the provision and ongoing maintenance of the device"
 	)
-	private ResourceReference myOwner;
+	private ResourceReferenceDt myOwner;
 	
 	@Child(name="location", order=9, min=0, max=1, type={
 		Location.class,
@@ -193,7 +193,7 @@ public class Device extends BaseResource implements IResource {
 		shortDefinition="Where the resource is found",
 		formalDefinition="The resource may be found in a literal location (i.e. GPS coordinates), a logical place (i.e. \"in/with the patient\"), or a coded location"
 	)
-	private ResourceReference myLocation;
+	private ResourceReferenceDt myLocation;
 	
 	@Child(name="patient", order=10, min=0, max=1, type={
 		Patient.class,
@@ -202,7 +202,7 @@ public class Device extends BaseResource implements IResource {
 		shortDefinition="If the resource is affixed to a person",
 		formalDefinition="Patient information, if the resource is affixed to a person"
 	)
-	private ResourceReference myPatient;
+	private ResourceReferenceDt myPatient;
 	
 	@Child(name="contact", type=ContactDt.class, order=11, min=0, max=Child.MAX_UNLIMITED)	
 	@Description(
@@ -579,9 +579,9 @@ public class Device extends BaseResource implements IResource {
      * An organization that is responsible for the provision and ongoing maintenance of the device
      * </p> 
 	 */
-	public ResourceReference getOwner() {  
+	public ResourceReferenceDt getOwner() {  
 		if (myOwner == null) {
-			myOwner = new ResourceReference();
+			myOwner = new ResourceReferenceDt();
 		}
 		return myOwner;
 	}
@@ -594,7 +594,7 @@ public class Device extends BaseResource implements IResource {
      * An organization that is responsible for the provision and ongoing maintenance of the device
      * </p> 
 	 */
-	public void setOwner(ResourceReference theValue) {
+	public void setOwner(ResourceReferenceDt theValue) {
 		myOwner = theValue;
 	}
 
@@ -610,9 +610,9 @@ public class Device extends BaseResource implements IResource {
      * The resource may be found in a literal location (i.e. GPS coordinates), a logical place (i.e. \"in/with the patient\"), or a coded location
      * </p> 
 	 */
-	public ResourceReference getLocation() {  
+	public ResourceReferenceDt getLocation() {  
 		if (myLocation == null) {
-			myLocation = new ResourceReference();
+			myLocation = new ResourceReferenceDt();
 		}
 		return myLocation;
 	}
@@ -625,7 +625,7 @@ public class Device extends BaseResource implements IResource {
      * The resource may be found in a literal location (i.e. GPS coordinates), a logical place (i.e. \"in/with the patient\"), or a coded location
      * </p> 
 	 */
-	public void setLocation(ResourceReference theValue) {
+	public void setLocation(ResourceReferenceDt theValue) {
 		myLocation = theValue;
 	}
 
@@ -641,9 +641,9 @@ public class Device extends BaseResource implements IResource {
      * Patient information, if the resource is affixed to a person
      * </p> 
 	 */
-	public ResourceReference getPatient() {  
+	public ResourceReferenceDt getPatient() {  
 		if (myPatient == null) {
-			myPatient = new ResourceReference();
+			myPatient = new ResourceReferenceDt();
 		}
 		return myPatient;
 	}
@@ -656,7 +656,7 @@ public class Device extends BaseResource implements IResource {
      * Patient information, if the resource is affixed to a person
      * </p> 
 	 */
-	public void setPatient(ResourceReference theValue) {
+	public void setPatient(ResourceReferenceDt theValue) {
 		myPatient = theValue;
 	}
 

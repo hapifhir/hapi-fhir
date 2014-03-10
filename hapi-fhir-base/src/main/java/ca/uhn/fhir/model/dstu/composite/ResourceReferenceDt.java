@@ -38,7 +38,8 @@ import ca.uhn.fhir.model.dstu.resource.*;
  * </p> 
  */
 @DatatypeDef(name="ResourceReference") 
-public class ResourceReferenceDt extends BaseElement implements ICompositeDatatype  {
+public class ResourceReferenceDt 
+        extends  BaseResourceReference         implements ICompositeDatatype  {
 
 
 	@Child(name="reference", type=StringDt.class, order=0, min=0, max=1)	

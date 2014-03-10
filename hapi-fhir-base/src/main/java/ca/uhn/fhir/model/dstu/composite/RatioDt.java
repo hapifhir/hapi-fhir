@@ -38,7 +38,8 @@ import ca.uhn.fhir.model.dstu.resource.*;
  * </p> 
  */
 @DatatypeDef(name="Ratio") 
-public class RatioDt extends BaseElement implements ICompositeDatatype  {
+public class RatioDt 
+        extends  BaseElement         implements ICompositeDatatype  {
 
 
 	@Child(name="numerator", type=QuantityDt.class, order=0, min=0, max=1)	

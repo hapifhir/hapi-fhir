@@ -9,7 +9,7 @@
 	<body>
 
 		<!-- The body of the document contains a number of sections -->
-		<section name="Working with Resources">
+		<section name="Creating a RESTful Server">
 			
 			<macro name="toc">
 			</macro>
@@ -26,7 +26,7 @@
 				be possible to create a FHIR compliant server quickly and easily.
 			</p>
 			
-			<subsection name="Creating A Server">
+			<subsection name="Defining Resource Providers">
 			
 				<p>
 					The first step in creating a FHIR RESTful Server is to define one or
@@ -41,7 +41,9 @@
 				</p>
 				
 				<p>
-					Resource providers each contain one or more methods which have been
+					A Resource provider class must implement the 
+					<a href="./apidocs/ca/uhn/fhir/rest/server/IResourceProvider.html">IResourceProvider</a> interface,
+					and will contain one or more methods which have been
 					annotated with special annotations indicating which RESTful operation
 					that method supports. Below is a simple example of a resource provider
 					which supports the
@@ -59,7 +61,37 @@
 
 			</subsection>
 
+			<subsection name="Create a Server">
 			
+				<p>
+					Once your resource providers are created, your next step is to
+					define a server class. 
+				</p>
+				
+				<p>
+					HAPI provides a class called
+					<a href="./apidocs/ca/uhn/fhir/rest/server/RestfulServer.html">RestfulServer</a>, which
+					is a specialized Java Servlet. To create a server, you simply create a class
+					which extends RestfulServer as shown in the example below.
+				</p>
+				
+				<macro name="snippet">
+					<param name="id" value="servlet" />
+					<param name="file" value="src/site/example/java/example/ExampleRestfulServlet.java" />
+				</macro>
+
+			</subsection>	
+			
+			<subsection name="Deploy">
+				
+				<p>
+					Once you have created your resource providers and your restful server class,
+					you can bundle these into a WAR file and you are ready to deploy to 
+					any JEE container (Tomcat, Websphere, Glassfish, etc).
+				</p>
+			
+			</subsection>
+					
 		</section>
 
 	</body>

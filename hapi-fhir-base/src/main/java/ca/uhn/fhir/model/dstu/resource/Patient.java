@@ -37,7 +37,7 @@ import ca.uhn.fhir.model.dstu.valueset.*;
  * Tracking patient is the center of the healthcare process
  * </p> 
  */
-@ResourceDef(name="Patient", profile="http://hl7.org/fhir/profiles/Patient")
+@ResourceDef(name="Patient", profile="http://hl7.org/fhir/profiles/Patient", id="patient")
 public class Patient extends BaseResource implements IResource {
 
 	/**
@@ -296,7 +296,7 @@ public class Patient extends BaseResource implements IResource {
 		shortDefinition="Patient's nominated care provider",
 		formalDefinition="Patient's nominated care provider"
 	)
-	private List<ResourceReference> myCareProvider;
+	private List<ResourceReferenceDt> myCareProvider;
 	
 	@Child(name="managingOrganization", order=14, min=0, max=1, type={
 		Organization.class,
@@ -305,7 +305,7 @@ public class Patient extends BaseResource implements IResource {
 		shortDefinition="Organization that is the custodian of the patient record",
 		formalDefinition="Organization that is the custodian of the patient record"
 	)
-	private ResourceReference myManagingOrganization;
+	private ResourceReferenceDt myManagingOrganization;
 	
 	@Child(name="link", order=15, min=0, max=Child.MAX_UNLIMITED)	
 	@Description(
@@ -873,7 +873,7 @@ public class Patient extends BaseResource implements IResource {
      * Patient's nominated care provider
      * </p> 
 	 */
-	public List<ResourceReference> getCareProvider() {  
+	public List<ResourceReferenceDt> getCareProvider() {  
 		return myCareProvider;
 	}
 
@@ -885,7 +885,7 @@ public class Patient extends BaseResource implements IResource {
      * Patient's nominated care provider
      * </p> 
 	 */
-	public void setCareProvider(List<ResourceReference> theValue) {
+	public void setCareProvider(List<ResourceReferenceDt> theValue) {
 		myCareProvider = theValue;
 	}
 
@@ -901,9 +901,9 @@ public class Patient extends BaseResource implements IResource {
      * Organization that is the custodian of the patient record
      * </p> 
 	 */
-	public ResourceReference getManagingOrganization() {  
+	public ResourceReferenceDt getManagingOrganization() {  
 		if (myManagingOrganization == null) {
-			myManagingOrganization = new ResourceReference();
+			myManagingOrganization = new ResourceReferenceDt();
 		}
 		return myManagingOrganization;
 	}
@@ -916,7 +916,7 @@ public class Patient extends BaseResource implements IResource {
      * Organization that is the custodian of the patient record
      * </p> 
 	 */
-	public void setManagingOrganization(ResourceReference theValue) {
+	public void setManagingOrganization(ResourceReferenceDt theValue) {
 		myManagingOrganization = theValue;
 	}
 
@@ -1062,7 +1062,7 @@ public class Patient extends BaseResource implements IResource {
 		shortDefinition="Organization that is associated with the contact",
 		formalDefinition="Organization on behalf of which the contact is acting or for which the contact is working."
 	)
-	private ResourceReference myOrganization;
+	private ResourceReferenceDt myOrganization;
 	
 
 	@Override
@@ -1273,9 +1273,9 @@ public class Patient extends BaseResource implements IResource {
      * Organization on behalf of which the contact is acting or for which the contact is working.
      * </p> 
 	 */
-	public ResourceReference getOrganization() {  
+	public ResourceReferenceDt getOrganization() {  
 		if (myOrganization == null) {
-			myOrganization = new ResourceReference();
+			myOrganization = new ResourceReferenceDt();
 		}
 		return myOrganization;
 	}
@@ -1288,7 +1288,7 @@ public class Patient extends BaseResource implements IResource {
      * Organization on behalf of which the contact is acting or for which the contact is working.
      * </p> 
 	 */
-	public void setOrganization(ResourceReference theValue) {
+	public void setOrganization(ResourceReferenceDt theValue) {
 		myOrganization = theValue;
 	}
 
@@ -1463,7 +1463,7 @@ public class Patient extends BaseResource implements IResource {
 		shortDefinition="The other patient resource that the link refers to",
 		formalDefinition="The other patient resource that the link refers to"
 	)
-	private ResourceReference myOther;
+	private ResourceReferenceDt myOther;
 	
 	@Child(name="type", type=CodeDt.class, order=1, min=1, max=1)	
 	@Description(
@@ -1488,9 +1488,9 @@ public class Patient extends BaseResource implements IResource {
      * The other patient resource that the link refers to
      * </p> 
 	 */
-	public ResourceReference getOther() {  
+	public ResourceReferenceDt getOther() {  
 		if (myOther == null) {
-			myOther = new ResourceReference();
+			myOther = new ResourceReferenceDt();
 		}
 		return myOther;
 	}
@@ -1503,7 +1503,7 @@ public class Patient extends BaseResource implements IResource {
      * The other patient resource that the link refers to
      * </p> 
 	 */
-	public void setOther(ResourceReference theValue) {
+	public void setOther(ResourceReferenceDt theValue) {
 		myOther = theValue;
 	}
 

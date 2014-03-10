@@ -38,7 +38,8 @@ import ca.uhn.fhir.model.dstu.resource.*;
  * </p> 
  */
 @DatatypeDef(name="CodeableConcept") 
-public class CodeableConceptDt extends BaseElement implements ICompositeDatatype  {
+public class CodeableConceptDt 
+        extends  BaseElement         implements ICompositeDatatype  {
 
 
 	@Child(name="coding", type=CodingDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)	

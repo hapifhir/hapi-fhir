@@ -146,33 +146,33 @@ public class XmlParserTest {
 	}
 	
 	@Test
-	public void testLoadAndEncodeExtensions() throws ConfigurationException, DataFormatException, SAXException, IOException {
+	public void testLoadAndEncodeDeclaredExtensions() throws ConfigurationException, DataFormatException, SAXException, IOException {
 		FhirContext ctx = new FhirContext(ResourceWithExtensionsA.class);
 		IParser p = new XmlParser(ctx);
 
 		//@formatter:off
 		String msg = "<ResourceWithExtensionsA xmlns=\"http://hl7.org/fhir\">\n" + 
-				"	<extension url=\"http://foo/1\">\n" + 
+				"	<extension url=\"http://foo/#f1\">\n" + 
 				"		<valueString value=\"Foo1Value\"/>\n" + 
 				"	</extension>\n" + 
-				"	<extension url=\"http://foo/1\">\n" + 
+				"	<extension url=\"http://foo/#f1\">\n" + 
 				"		<valueString value=\"Foo1Value2\"/>\n" + 
 				"	</extension>\n" + 
-				"	<extension url=\"http://foo/2\">\n" + 
+				"	<modifierExtension url=\"http://foo/#f2\">\n" + 
 				"		<valueString value=\"Foo2Value1\"/>\n" + 
-				"	</extension>\n" + 
-				"	<extension url=\"http://bar/1\">\n" + 
-				"		<extension url=\"http://bar/1/1\">\n" +
+				"	</modifierExtension>\n" + 
+				"	<extension url=\"http://bar/#b1\">\n" + 
+				"		<extension url=\"http://bar/#b1/1\">\n" +
 				"			<valueDate value=\"2013-01-01\"/>\n" +
 				"		</extension>\n" + 
-				"		<extension url=\"http://bar/1/2\">\n" + 
-				"			<extension url=\"http://bar/1/2/1\">\n" + 
+				"		<extension url=\"http://bar/#b1/2\">\n" + 
+				"			<extension url=\"http://bar/#b1/2/1\">\n" + 
 				"				<valueDate value=\"2013-01-02\"/>\n" +
 				"			</extension>\n" + 
-				"			<extension url=\"http://bar/1/2/1\">\n" + 
+				"			<extension url=\"http://bar/#b1/2/1\">\n" + 
 				"				<valueDate value=\"2013-01-12\"/>\n" +
 				"			</extension>\n" + 
-				"			<extension url=\"http://bar/1/2/2\">\n" + 
+				"			<extension url=\"http://bar/#b1/2/2\">\n" + 
 				"				<valueDate value=\"2013-01-03\"/>\n" +
 				"			</extension>\n" + 
 				"		</extension>\n" + 
@@ -192,6 +192,60 @@ public class XmlParserTest {
 		assertEquals("2013-01-02", resource.getBar1().get(0).getBar12().get(0).getBar121().get(0).getValueAsString());
 		assertEquals("2013-01-12", resource.getBar1().get(0).getBar12().get(0).getBar121().get(1).getValueAsString());
 		assertEquals("2013-01-03", resource.getBar1().get(0).getBar12().get(0).getBar122().get(0).getValueAsString());
+
+		String encoded = p.encodeResourceToString(resource);
+		ourLog.info(encoded);
+
+		Diff d = new Diff(new StringReader(msg), new StringReader(encoded));
+		assertTrue(d.toString(), d.identical());
+	}
+
+	@Test
+	public void testLoadAndEncodeUndeclaredExtensions() throws ConfigurationException, DataFormatException, SAXException, IOException {
+		FhirContext ctx = new FhirContext(Patient.class);
+		IParser p = new XmlParser(ctx);
+
+		//@formatter:off
+		String msg = "<Patient xmlns=\"http://hl7.org/fhir\">\n" + 
+				"	<extension url=\"http://foo/#f1\">\n" + 
+				"		<valueString value=\"Foo1Value\"/>\n" + 
+				"	</extension>\n" + 
+				"	<extension url=\"http://foo/#f1\">\n" + 
+				"		<valueString value=\"Foo1Value2\"/>\n" + 
+				"	</extension>\n" + 
+				"	<extension url=\"http://bar/#b1\">\n" + 
+				"		<extension url=\"http://bar/#b1/1\">\n" +
+				"			<valueDate value=\"2013-01-01\"/>\n" +
+				"		</extension>\n" + 
+				"		<extension url=\"http://bar/#b1/2\">\n" + 
+				"			<extension url=\"http://bar/#b1/2/1\">\n" + 
+				"				<valueDate value=\"2013-01-02\"/>\n" +
+				"			</extension>\n" + 
+				"			<extension url=\"http://bar/#b1/2/1\">\n" + 
+				"				<valueDate value=\"2013-01-12\"/>\n" +
+				"			</extension>\n" + 
+				"			<extension url=\"http://bar/#b1/2/2\">\n" + 
+				"				<valueDate value=\"2013-01-03\"/>\n" +
+				"			</extension>\n" + 
+				"		</extension>\n" + 
+				"	</extension>\n" + 
+				"	<modifierExtension url=\"http://foo/#f2\">\n" + 
+				"		<valueString value=\"Foo2Value1\"/>\n" + 
+				"	</modifierExtension>\n" + 
+				"	<identifier>\n" + 
+				"		<label value=\"IdentifierLabel\"/>\n" + 
+				"	</identifier>\n" + 
+				"</Patient>";
+		//@formatter:on
+
+		Patient resource = (Patient) p.parseResource(msg);
+		assertEquals("IdentifierLabel", resource.getIdentifier().get(0).getLabel().getValue());
+		assertEquals("Foo1Value", resource.getUndeclaredExtensions().get(0).getValueAsPrimitive().getValueAsString());
+		assertEquals("Foo1Value2", resource.getUndeclaredExtensions().get(1).getValueAsPrimitive().getValueAsString());
+		assertEquals("Foo2Value1", resource.getUndeclaredModifierExtensions().get(0).getValueAsPrimitive().getValueAsString());
+		
+		assertEquals("2013-01-01", resource.getUndeclaredExtensions().get(2).getUndeclaredExtensions().get(0).getValueAsPrimitive().getValueAsString());
+		assertEquals("2013-01-02", resource.getUndeclaredExtensions().get(2).getUndeclaredExtensions().get(1).getUndeclaredExtensions().get(0).getValueAsPrimitive().getValueAsString());
 
 		String encoded = p.encodeResourceToString(resource);
 		ourLog.info(encoded);

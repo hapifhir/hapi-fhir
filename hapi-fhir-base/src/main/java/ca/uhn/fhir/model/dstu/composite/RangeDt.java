@@ -38,7 +38,8 @@ import ca.uhn.fhir.model.dstu.resource.*;
  * </p> 
  */
 @DatatypeDef(name="Range") 
-public class RangeDt extends BaseElement implements ICompositeDatatype  {
+public class RangeDt 
+        extends  BaseElement         implements ICompositeDatatype  {
 
 
 	@Child(name="low", type=QuantityDt.class, order=0, min=0, max=1)	

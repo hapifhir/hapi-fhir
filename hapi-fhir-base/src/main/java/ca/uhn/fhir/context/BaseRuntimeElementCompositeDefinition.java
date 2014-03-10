@@ -24,6 +24,9 @@ public abstract class BaseRuntimeElementCompositeDefinition<T extends IComposite
 		if (theNext == null) {
 			throw new NullPointerException();
 		}
+//		if (theNext.getValidChildNames().contains("performetPractitioner")) {
+//			throw new NullPointerException();
+//		}
 		if (theNext.getExtensionUrl() != null) {
 			throw new IllegalArgumentException("Shouldn't haven an extension URL, use addExtension instead");
 		}
@@ -51,7 +54,7 @@ public abstract class BaseRuntimeElementCompositeDefinition<T extends IComposite
 		}
 
 		myNameToChild = new HashMap<String, BaseRuntimeChildDefinition>();
-		for (BaseRuntimeChildDefinition next : myChildren) {
+		for (BaseRuntimeChildDefinition next : myChildren) {			
 			for (String nextName : next.getValidChildNames()) {
 				if (myNameToChild.containsKey(nextName)) {
 					throw new ConfigurationException("Duplicate child name: " + nextName);

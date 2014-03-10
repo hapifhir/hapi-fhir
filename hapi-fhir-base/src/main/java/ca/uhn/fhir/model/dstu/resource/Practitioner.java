@@ -37,7 +37,7 @@ import ca.uhn.fhir.model.dstu.valueset.*;
  * Need to track doctors, staff, locums etc. for both healthcare practitioners, funders, etc.
  * </p> 
  */
-@ResourceDef(name="Practitioner", profile="http://hl7.org/fhir/profiles/Practitioner")
+@ResourceDef(name="Practitioner", profile="http://hl7.org/fhir/profiles/Practitioner", id="practitioner")
 public class Practitioner extends BaseResource implements IResource {
 
 	/**
@@ -187,7 +187,7 @@ public class Practitioner extends BaseResource implements IResource {
 		shortDefinition="The represented organization",
 		formalDefinition="The organization that the practitioner represents"
 	)
-	private ResourceReference myOrganization;
+	private ResourceReferenceDt myOrganization;
 	
 	@Child(name="role", type=CodeableConceptDt.class, order=8, min=0, max=Child.MAX_UNLIMITED)	
 	@Description(
@@ -217,7 +217,7 @@ public class Practitioner extends BaseResource implements IResource {
 		shortDefinition="The location(s) at which this practitioner provides care",
 		formalDefinition="The location(s) at which this practitioner provides care"
 	)
-	private List<ResourceReference> myLocation;
+	private List<ResourceReferenceDt> myLocation;
 	
 	@Child(name="qualification", order=12, min=0, max=Child.MAX_UNLIMITED)	
 	@Description(
@@ -541,9 +541,9 @@ public class Practitioner extends BaseResource implements IResource {
      * The organization that the practitioner represents
      * </p> 
 	 */
-	public ResourceReference getOrganization() {  
+	public ResourceReferenceDt getOrganization() {  
 		if (myOrganization == null) {
-			myOrganization = new ResourceReference();
+			myOrganization = new ResourceReferenceDt();
 		}
 		return myOrganization;
 	}
@@ -556,7 +556,7 @@ public class Practitioner extends BaseResource implements IResource {
      * The organization that the practitioner represents
      * </p> 
 	 */
-	public void setOrganization(ResourceReference theValue) {
+	public void setOrganization(ResourceReferenceDt theValue) {
 		myOrganization = theValue;
 	}
 
@@ -715,9 +715,9 @@ public class Practitioner extends BaseResource implements IResource {
      * The location(s) at which this practitioner provides care
      * </p> 
 	 */
-	public List<ResourceReference> getLocation() {  
+	public List<ResourceReferenceDt> getLocation() {  
 		if (myLocation == null) {
-			myLocation = new ArrayList<ResourceReference>();
+			myLocation = new ArrayList<ResourceReferenceDt>();
 		}
 		return myLocation;
 	}
@@ -730,7 +730,7 @@ public class Practitioner extends BaseResource implements IResource {
      * The location(s) at which this practitioner provides care
      * </p> 
 	 */
-	public void setLocation(List<ResourceReference> theValue) {
+	public void setLocation(List<ResourceReferenceDt> theValue) {
 		myLocation = theValue;
 	}
 
@@ -856,7 +856,7 @@ public class Practitioner extends BaseResource implements IResource {
 		shortDefinition="Organization that regulates and issues the qualification",
 		formalDefinition="Organization that regulates and issues the qualification"
 	)
-	private ResourceReference myIssuer;
+	private ResourceReferenceDt myIssuer;
 	
 
 	@Override
@@ -936,9 +936,9 @@ public class Practitioner extends BaseResource implements IResource {
      * Organization that regulates and issues the qualification
      * </p> 
 	 */
-	public ResourceReference getIssuer() {  
+	public ResourceReferenceDt getIssuer() {  
 		if (myIssuer == null) {
-			myIssuer = new ResourceReference();
+			myIssuer = new ResourceReferenceDt();
 		}
 		return myIssuer;
 	}
@@ -951,7 +951,7 @@ public class Practitioner extends BaseResource implements IResource {
      * Organization that regulates and issues the qualification
      * </p> 
 	 */
-	public void setIssuer(ResourceReference theValue) {
+	public void setIssuer(ResourceReferenceDt theValue) {
 		myIssuer = theValue;
 	}
 

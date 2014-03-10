@@ -28,3 +28,5 @@
  * Support slices in the model
  
  * Support extensions (declared and undeclared) in primitives, narratives, etc. 
+ 
+ * Create a Maven archetype for a server project and a client project

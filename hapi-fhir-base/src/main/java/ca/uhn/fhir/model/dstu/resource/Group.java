@@ -37,7 +37,7 @@ import ca.uhn.fhir.model.dstu.valueset.*;
  * 
  * </p> 
  */
-@ResourceDef(name="Group", profile="http://hl7.org/fhir/profiles/Group")
+@ResourceDef(name="Group", profile="http://hl7.org/fhir/profiles/Group", id="group")
 public class Group extends BaseResource implements IResource {
 
 	/**
@@ -191,7 +191,7 @@ public class Group extends BaseResource implements IResource {
 		shortDefinition="Who is in group",
 		formalDefinition="Identifies the resource instances that are members of the group."
 	)
-	private List<ResourceReference> myMember;
+	private List<ResourceReferenceDt> myMember;
 	
 
 	@Override
@@ -487,7 +487,7 @@ public class Group extends BaseResource implements IResource {
      * Identifies the resource instances that are members of the group.
      * </p> 
 	 */
-	public List<ResourceReference> getMember() {  
+	public List<ResourceReferenceDt> getMember() {  
 		return myMember;
 	}
 
@@ -499,7 +499,7 @@ public class Group extends BaseResource implements IResource {
      * Identifies the resource instances that are members of the group.
      * </p> 
 	 */
-	public void setMember(List<ResourceReference> theValue) {
+	public void setMember(List<ResourceReferenceDt> theValue) {
 		myMember = theValue;
 	}
 

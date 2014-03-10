@@ -38,7 +38,8 @@ import ca.uhn.fhir.model.dstu.resource.*;
  * </p> 
  */
 @DatatypeDef(name="Schedule") 
-public class ScheduleDt extends BaseElement implements ICompositeDatatype  {
+public class ScheduleDt 
+        extends  BaseElement         implements ICompositeDatatype  {
 
 
 	@Child(name="event", type=PeriodDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)	
@@ -319,7 +320,7 @@ public class ScheduleDt extends BaseElement implements ICompositeDatatype  {
      * How long each repetition should last
      * </p> 
 	 */
-	public void setDuration( long theValue) {
+	public void setDuration( java.math.BigDecimal theValue) {
 		myDuration = new DecimalDt(theValue); 
 	}
 
@@ -343,7 +344,7 @@ public class ScheduleDt extends BaseElement implements ICompositeDatatype  {
      * How long each repetition should last
      * </p> 
 	 */
-	public void setDuration( java.math.BigDecimal theValue) {
+	public void setDuration( long theValue) {
 		myDuration = new DecimalDt(theValue); 
 	}
 

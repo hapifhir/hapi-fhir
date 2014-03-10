@@ -37,7 +37,7 @@ import ca.uhn.fhir.model.dstu.valueset.*;
  * Observations are a key aspect of healthcare.  This resource is used to capture those that do not require more sophisticated mechanisms.
  * </p> 
  */
-@ResourceDef(name="Observation", profile="http://hl7.org/fhir/profiles/Observation")
+@ResourceDef(name="Observation", profile="http://hl7.org/fhir/profiles/Observation", id="observation")
 public class Observation extends BaseResource implements IResource {
 
 	/**
@@ -289,7 +289,7 @@ public class Observation extends BaseResource implements IResource {
 		shortDefinition="Who and/or what this is about",
 		formalDefinition="The thing the observation is being made about"
 	)
-	private ResourceReference mySubject;
+	private ResourceReferenceDt mySubject;
 	
 	@Child(name="specimen", order=12, min=0, max=1, type={
 		Specimen.class,
@@ -298,7 +298,7 @@ public class Observation extends BaseResource implements IResource {
 		shortDefinition="Specimen used for this observation",
 		formalDefinition="The specimen that was used when this observation was made"
 	)
-	private ResourceReference mySpecimen;
+	private ResourceReferenceDt mySpecimen;
 	
 	@Child(name="performer", order=13, min=0, max=Child.MAX_UNLIMITED, type={
 		Practitioner.class,
@@ -309,7 +309,7 @@ public class Observation extends BaseResource implements IResource {
 		shortDefinition="Who did the observation",
 		formalDefinition="Who was responsible for asserting the observed value as \"true\""
 	)
-	private List<ResourceReference> myPerformer;
+	private List<ResourceReferenceDt> myPerformer;
 	
 	@Child(name="referenceRange", order=14, min=0, max=Child.MAX_UNLIMITED)	
 	@Description(
@@ -748,7 +748,7 @@ public class Observation extends BaseResource implements IResource {
      * The thing the observation is being made about
      * </p> 
 	 */
-	public ResourceReference getSubject() {  
+	public ResourceReferenceDt getSubject() {  
 		return mySubject;
 	}
 
@@ -760,7 +760,7 @@ public class Observation extends BaseResource implements IResource {
      * The thing the observation is being made about
      * </p> 
 	 */
-	public void setSubject(ResourceReference theValue) {
+	public void setSubject(ResourceReferenceDt theValue) {
 		mySubject = theValue;
 	}
 
@@ -776,9 +776,9 @@ public class Observation extends BaseResource implements IResource {
      * The specimen that was used when this observation was made
      * </p> 
 	 */
-	public ResourceReference getSpecimen() {  
+	public ResourceReferenceDt getSpecimen() {  
 		if (mySpecimen == null) {
-			mySpecimen = new ResourceReference();
+			mySpecimen = new ResourceReferenceDt();
 		}
 		return mySpecimen;
 	}
@@ -791,7 +791,7 @@ public class Observation extends BaseResource implements IResource {
      * The specimen that was used when this observation was made
      * </p> 
 	 */
-	public void setSpecimen(ResourceReference theValue) {
+	public void setSpecimen(ResourceReferenceDt theValue) {
 		mySpecimen = theValue;
 	}
 
@@ -807,7 +807,7 @@ public class Observation extends BaseResource implements IResource {
      * Who was responsible for asserting the observed value as \"true\"
      * </p> 
 	 */
-	public List<ResourceReference> getPerformer() {  
+	public List<ResourceReferenceDt> getPerformer() {  
 		return myPerformer;
 	}
 
@@ -819,7 +819,7 @@ public class Observation extends BaseResource implements IResource {
      * Who was responsible for asserting the observed value as \"true\"
      * </p> 
 	 */
-	public void setPerformer(List<ResourceReference> theValue) {
+	public void setPerformer(List<ResourceReferenceDt> theValue) {
 		myPerformer = theValue;
 	}
 
@@ -1111,7 +1111,7 @@ public class Observation extends BaseResource implements IResource {
 		shortDefinition="Observation that is related to this one",
 		formalDefinition="A reference to the observation that is related to this observation"
 	)
-	private ResourceReference myTarget;
+	private ResourceReferenceDt myTarget;
 	
 
 	@Override
@@ -1172,9 +1172,9 @@ public class Observation extends BaseResource implements IResource {
      * A reference to the observation that is related to this observation
      * </p> 
 	 */
-	public ResourceReference getTarget() {  
+	public ResourceReferenceDt getTarget() {  
 		if (myTarget == null) {
-			myTarget = new ResourceReference();
+			myTarget = new ResourceReferenceDt();
 		}
 		return myTarget;
 	}
@@ -1187,7 +1187,7 @@ public class Observation extends BaseResource implements IResource {
      * A reference to the observation that is related to this observation
      * </p> 
 	 */
-	public void setTarget(ResourceReference theValue) {
+	public void setTarget(ResourceReferenceDt theValue) {
 		myTarget = theValue;
 	}
 

@@ -208,6 +208,7 @@ public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefini
 			StructureElement extSlice = theStruct.addElement();
 			extSlice.setName(elementName);
 			extSlice.setPath(join(path, '.') + '.' + elementName);
+			extSlice.getDefinition().setIsModifier(theIsModifier);
 			extSlice.getDefinition().addType().setCode(DataTypeEnum.EXTENSION);
 			extSlice.getDefinition().setMin(0);
 			extSlice.getDefinition().setMax("*");

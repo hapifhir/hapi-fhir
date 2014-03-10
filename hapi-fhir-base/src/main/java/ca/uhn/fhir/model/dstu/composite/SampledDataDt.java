@@ -38,7 +38,8 @@ import ca.uhn.fhir.model.dstu.resource.*;
  * </p> 
  */
 @DatatypeDef(name="SampledData") 
-public class SampledDataDt extends BaseElement implements ICompositeDatatype  {
+public class SampledDataDt 
+        extends  BaseElement         implements ICompositeDatatype  {
 
 
 	@Child(name="origin", type=QuantityDt.class, order=0, min=1, max=1)	
@@ -165,7 +166,7 @@ public class SampledDataDt extends BaseElement implements ICompositeDatatype  {
      * The length of time between sampling times, measured in milliseconds
      * </p> 
 	 */
-	public void setPeriod( long theValue) {
+	public void setPeriod( java.math.BigDecimal theValue) {
 		myPeriod = new DecimalDt(theValue); 
 	}
 
@@ -189,7 +190,7 @@ public class SampledDataDt extends BaseElement implements ICompositeDatatype  {
      * The length of time between sampling times, measured in milliseconds
      * </p> 
 	 */
-	public void setPeriod( java.math.BigDecimal theValue) {
+	public void setPeriod( long theValue) {
 		myPeriod = new DecimalDt(theValue); 
 	}
 
@@ -232,7 +233,7 @@ public class SampledDataDt extends BaseElement implements ICompositeDatatype  {
      * A correction factor that is applied to the sampled data points before they are added to the origin
      * </p> 
 	 */
-	public void setFactor( long theValue) {
+	public void setFactor( java.math.BigDecimal theValue) {
 		myFactor = new DecimalDt(theValue); 
 	}
 
@@ -256,7 +257,7 @@ public class SampledDataDt extends BaseElement implements ICompositeDatatype  {
      * A correction factor that is applied to the sampled data points before they are added to the origin
      * </p> 
 	 */
-	public void setFactor( java.math.BigDecimal theValue) {
+	public void setFactor( long theValue) {
 		myFactor = new DecimalDt(theValue); 
 	}
 
@@ -299,7 +300,7 @@ public class SampledDataDt extends BaseElement implements ICompositeDatatype  {
      * The lower limit of detection of the measured points. This is needed if any of the data points have the value \"L\" (lower than detection limit)
      * </p> 
 	 */
-	public void setLowerLimit( long theValue) {
+	public void setLowerLimit( java.math.BigDecimal theValue) {
 		myLowerLimit = new DecimalDt(theValue); 
 	}
 
@@ -323,7 +324,7 @@ public class SampledDataDt extends BaseElement implements ICompositeDatatype  {
      * The lower limit of detection of the measured points. This is needed if any of the data points have the value \"L\" (lower than detection limit)
      * </p> 
 	 */
-	public void setLowerLimit( java.math.BigDecimal theValue) {
+	public void setLowerLimit( long theValue) {
 		myLowerLimit = new DecimalDt(theValue); 
 	}
 
@@ -366,7 +367,7 @@ public class SampledDataDt extends BaseElement implements ICompositeDatatype  {
      * The upper limit of detection of the measured points. This is needed if any of the data points have the value \"U\" (higher than detection limit)
      * </p> 
 	 */
-	public void setUpperLimit( long theValue) {
+	public void setUpperLimit( java.math.BigDecimal theValue) {
 		myUpperLimit = new DecimalDt(theValue); 
 	}
 
@@ -390,7 +391,7 @@ public class SampledDataDt extends BaseElement implements ICompositeDatatype  {
      * The upper limit of detection of the measured points. This is needed if any of the data points have the value \"U\" (higher than detection limit)
      * </p> 
 	 */
-	public void setUpperLimit( java.math.BigDecimal theValue) {
+	public void setUpperLimit( long theValue) {
 		myUpperLimit = new DecimalDt(theValue); 
 	}
 

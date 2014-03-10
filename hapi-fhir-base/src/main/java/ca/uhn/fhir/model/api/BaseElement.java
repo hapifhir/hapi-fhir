@@ -1,11 +1,25 @@
 package ca.uhn.fhir.model.api;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public abstract class BaseElement implements IElement, ISupportsUndeclaredExtensions {
 
 	private List<UndeclaredExtension> myUndeclaredExtensions;
+	private List<UndeclaredExtension> myUndeclaredModifierExtensions;
+
+	@Override
+	public List<UndeclaredExtension> getAllUndeclaredExtensions() {
+		ArrayList<UndeclaredExtension> retVal = new ArrayList<UndeclaredExtension>();
+		if (myUndeclaredExtensions != null) {
+			retVal.addAll(myUndeclaredExtensions);
+		}
+		if (myUndeclaredModifierExtensions != null) {
+			retVal.addAll(myUndeclaredModifierExtensions);
+		}
+		return Collections.unmodifiableList(retVal);
+	}
 
 	@Override
 	public List<UndeclaredExtension> getUndeclaredExtensions() {
@@ -15,6 +29,14 @@ public abstract class BaseElement implements IElement, ISupportsUndeclaredExtens
 		return myUndeclaredExtensions;
 	}
 
+	@Override
+	public List<UndeclaredExtension> getUndeclaredModifierExtensions() {
+		if (myUndeclaredModifierExtensions == null) {
+			myUndeclaredModifierExtensions = new ArrayList<UndeclaredExtension>();
+		}
+		return myUndeclaredModifierExtensions;
+	}
+
 	/**
 	 * Intended to be called by extending classes {@link #isEmpty()} implementations, returns <code>true</code> if all content in this superclass instance is empty per the semantics of
 	 * {@link #isEmpty()}.
@@ -22,6 +44,13 @@ public abstract class BaseElement implements IElement, ISupportsUndeclaredExtens
 	protected boolean isBaseEmpty() {
 		if (myUndeclaredExtensions != null) {
 			for (UndeclaredExtension next : myUndeclaredExtensions) {
+				if (!next.isEmpty()) {
+					return false;
+				}
+			}
+		}
+		if (myUndeclaredModifierExtensions != null) {
+			for (UndeclaredExtension next : myUndeclaredModifierExtensions) {
 				if (!next.isEmpty()) {
 					return false;
 				}

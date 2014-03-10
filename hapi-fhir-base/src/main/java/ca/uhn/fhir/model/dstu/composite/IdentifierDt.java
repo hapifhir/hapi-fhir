@@ -38,7 +38,8 @@ import ca.uhn.fhir.model.dstu.resource.*;
  * </p> 
  */
 @DatatypeDef(name="Identifier") 
-public class IdentifierDt extends BaseElement implements ICompositeDatatype  , IQueryParameterType {
+public class IdentifierDt 
+        extends  BaseElement         implements ICompositeDatatype  , IQueryParameterType {
 
 	/**
 	 * Creates a new identifier
@@ -97,7 +98,7 @@ public class IdentifierDt extends BaseElement implements ICompositeDatatype  , I
 		shortDefinition="Organization that issued id (may be just text)",
 		formalDefinition="Organization that issued/manages the identifier"
 	)
-	private ResourceReference myAssigner;
+	private ResourceReferenceDt myAssigner;
 	
 
 	@Override
@@ -318,9 +319,9 @@ public class IdentifierDt extends BaseElement implements ICompositeDatatype  , I
      * Organization that issued/manages the identifier
      * </p> 
 	 */
-	public ResourceReference getAssigner() {  
+	public ResourceReferenceDt getAssigner() {  
 		if (myAssigner == null) {
-			myAssigner = new ResourceReference();
+			myAssigner = new ResourceReferenceDt();
 		}
 		return myAssigner;
 	}
@@ -333,7 +334,7 @@ public class IdentifierDt extends BaseElement implements ICompositeDatatype  , I
      * Organization that issued/manages the identifier
      * </p> 
 	 */
-	public void setAssigner(ResourceReference theValue) {
+	public void setAssigner(ResourceReferenceDt theValue) {
 		myAssigner = theValue;
 	}
 

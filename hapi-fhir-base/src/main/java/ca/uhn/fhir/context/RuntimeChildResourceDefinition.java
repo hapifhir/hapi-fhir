@@ -8,7 +8,7 @@ import java.util.Set;
 
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.api.ResourceReference;
+import ca.uhn.fhir.model.api.BaseResourceReference;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 
@@ -28,7 +28,7 @@ public class RuntimeChildResourceDefinition extends BaseRuntimeDeclaredChildDefi
 
 	@Override
 	public String getChildNameByDatatype(Class<? extends IElement> theDatatype) {
-		if (ResourceReference.class.equals(theDatatype)) {
+		if (BaseResourceReference.class.isAssignableFrom(theDatatype)) {
 			return getElementName();
 		}
 		return null;
@@ -36,7 +36,7 @@ public class RuntimeChildResourceDefinition extends BaseRuntimeDeclaredChildDefi
 
 	@Override
 	public BaseRuntimeElementDefinition<?> getChildElementDefinitionByDatatype(Class<? extends IElement> theDatatype) {
-		if (ResourceReference.class.equals(theDatatype)) {
+		if (BaseResourceReference.class.isAssignableFrom(theDatatype)) {
 			return myRuntimeDef;
 		}
 		return null;

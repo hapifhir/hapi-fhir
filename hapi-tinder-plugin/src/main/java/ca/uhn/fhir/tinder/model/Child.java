@@ -67,7 +67,7 @@ public class Child extends BaseElement {
 	public String getReferenceType() {
 		String retVal;
 		if (this.isResourceRef()) {
-			retVal = (ResourceReference.class.getSimpleName());
+			retVal = "ResourceReferenceDt"; // (ResourceReferenceDt.class.getSimpleName());
 		} else if (this.getType().size() == 1 || this instanceof ResourceBlock) {
 			if (isBoundCode()) {
 				retVal = "Bound" + getSingleType() + "<" + getBindingClass() + ">";

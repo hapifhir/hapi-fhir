@@ -20,25 +20,25 @@ public class ModelScannerTest {
 		
 		assertEquals(RuntimeChildCompositeDatatypeDefinition.class, def.getChildByNameOrThrowDataFormatException("identifier").getClass());
 		
-		RuntimeChildDeclaredExtensionDefinition ext = def.getDeclaredExtension("http://foo/1");
+		RuntimeChildDeclaredExtensionDefinition ext = def.getDeclaredExtension("http://foo/#f1");
 		assertNotNull(ext);
 		BaseRuntimeElementDefinition<?> valueString = ext.getChildByName("valueString");
 		assertNotNull(valueString);
 		
-		ext = def.getDeclaredExtension("http://foo/2");
+		ext = def.getDeclaredExtension("http://foo/#f2");
 		assertNotNull(ext);
 		valueString = ext.getChildByName("valueString");
 		assertNotNull(valueString);
 
-		ext = def.getDeclaredExtension("http://bar/1");
+		ext = def.getDeclaredExtension("http://bar/#b1");
 		assertNotNull(ext);
-		RuntimeChildDeclaredExtensionDefinition childExt = ext.getChildExtensionForUrl("http://bar/1/1");
+		RuntimeChildDeclaredExtensionDefinition childExt = ext.getChildExtensionForUrl("http://bar/#b1/1");
 		assertNotNull(childExt);
 		BaseRuntimeElementDefinition<?> valueDate = childExt.getChildByName("valueDate");
 		assertNotNull(valueDate);
-		childExt = ext.getChildExtensionForUrl("http://bar/1/2");
+		childExt = ext.getChildExtensionForUrl("http://bar/#b1/2");
 		assertNotNull(childExt);
-		childExt = childExt.getChildExtensionForUrl("http://bar/1/2/1");
+		childExt = childExt.getChildExtensionForUrl("http://bar/#b1/2/1");
 		assertNotNull(childExt);
 		valueDate = childExt.getChildByName("valueDate");
 		assertNotNull(valueDate);

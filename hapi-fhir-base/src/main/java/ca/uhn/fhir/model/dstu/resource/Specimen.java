@@ -37,7 +37,7 @@ import ca.uhn.fhir.model.dstu.valueset.*;
  * 
  * </p> 
  */
-@ResourceDef(name="Specimen", profile="http://hl7.org/fhir/profiles/Specimen")
+@ResourceDef(name="Specimen", profile="http://hl7.org/fhir/profiles/Specimen", id="specimen")
 public class Specimen extends BaseResource implements IResource {
 
 	/**
@@ -82,7 +82,7 @@ public class Specimen extends BaseResource implements IResource {
 		shortDefinition="Where the specimen came from. This may be the patient(s) or from the environment or  a device",
 		formalDefinition=""
 	)
-	private ResourceReference mySubject;
+	private ResourceReferenceDt mySubject;
 	
 	@Child(name="accessionIdentifier", type=IdentifierDt.class, order=4, min=0, max=1)	
 	@Description(
@@ -254,7 +254,7 @@ public class Specimen extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public ResourceReference getSubject() {  
+	public ResourceReferenceDt getSubject() {  
 		return mySubject;
 	}
 
@@ -266,7 +266,7 @@ public class Specimen extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public void setSubject(ResourceReference theValue) {
+	public void setSubject(ResourceReferenceDt theValue) {
 		mySubject = theValue;
 	}
 
@@ -502,7 +502,7 @@ public class Specimen extends BaseResource implements IResource {
 		shortDefinition="The subject of the relationship",
 		formalDefinition="The specimen resource that is the target of this relationship"
 	)
-	private List<ResourceReference> myTarget;
+	private List<ResourceReferenceDt> myTarget;
 	
 
 	@Override
@@ -563,9 +563,9 @@ public class Specimen extends BaseResource implements IResource {
      * The specimen resource that is the target of this relationship
      * </p> 
 	 */
-	public List<ResourceReference> getTarget() {  
+	public List<ResourceReferenceDt> getTarget() {  
 		if (myTarget == null) {
-			myTarget = new ArrayList<ResourceReference>();
+			myTarget = new ArrayList<ResourceReferenceDt>();
 		}
 		return myTarget;
 	}
@@ -578,7 +578,7 @@ public class Specimen extends BaseResource implements IResource {
      * The specimen resource that is the target of this relationship
      * </p> 
 	 */
-	public void setTarget(List<ResourceReference> theValue) {
+	public void setTarget(List<ResourceReferenceDt> theValue) {
 		myTarget = theValue;
 	}
 
@@ -606,7 +606,7 @@ public class Specimen extends BaseResource implements IResource {
 		shortDefinition="Who collected the specimen",
 		formalDefinition="Person who collected the specimen"
 	)
-	private ResourceReference myCollector;
+	private ResourceReferenceDt myCollector;
 	
 	@Child(name="comment", type=StringDt.class, order=1, min=0, max=Child.MAX_UNLIMITED)	
 	@Description(
@@ -662,9 +662,9 @@ public class Specimen extends BaseResource implements IResource {
      * Person who collected the specimen
      * </p> 
 	 */
-	public ResourceReference getCollector() {  
+	public ResourceReferenceDt getCollector() {  
 		if (myCollector == null) {
-			myCollector = new ResourceReference();
+			myCollector = new ResourceReferenceDt();
 		}
 		return myCollector;
 	}
@@ -677,7 +677,7 @@ public class Specimen extends BaseResource implements IResource {
      * Person who collected the specimen
      * </p> 
 	 */
-	public void setCollector(ResourceReference theValue) {
+	public void setCollector(ResourceReferenceDt theValue) {
 		myCollector = theValue;
 	}
 
@@ -911,7 +911,7 @@ public class Specimen extends BaseResource implements IResource {
 		shortDefinition="Material used in the processing step",
 		formalDefinition=""
 	)
-	private List<ResourceReference> myAdditive;
+	private List<ResourceReferenceDt> myAdditive;
 	
 
 	@Override
@@ -1015,9 +1015,9 @@ public class Specimen extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public List<ResourceReference> getAdditive() {  
+	public List<ResourceReferenceDt> getAdditive() {  
 		if (myAdditive == null) {
-			myAdditive = new ArrayList<ResourceReference>();
+			myAdditive = new ArrayList<ResourceReferenceDt>();
 		}
 		return myAdditive;
 	}
@@ -1030,7 +1030,7 @@ public class Specimen extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public void setAdditive(List<ResourceReference> theValue) {
+	public void setAdditive(List<ResourceReferenceDt> theValue) {
 		myAdditive = theValue;
 	}
 
@@ -1093,7 +1093,7 @@ public class Specimen extends BaseResource implements IResource {
 		shortDefinition="Additive associated with container",
 		formalDefinition="Additive associated with the container"
 	)
-	private ResourceReference myAdditive;
+	private ResourceReferenceDt myAdditive;
 	
 
 	@Override
@@ -1291,9 +1291,9 @@ public class Specimen extends BaseResource implements IResource {
      * Additive associated with the container
      * </p> 
 	 */
-	public ResourceReference getAdditive() {  
+	public ResourceReferenceDt getAdditive() {  
 		if (myAdditive == null) {
-			myAdditive = new ResourceReference();
+			myAdditive = new ResourceReferenceDt();
 		}
 		return myAdditive;
 	}
@@ -1306,7 +1306,7 @@ public class Specimen extends BaseResource implements IResource {
      * Additive associated with the container
      * </p> 
 	 */
-	public void setAdditive(ResourceReference theValue) {
+	public void setAdditive(ResourceReferenceDt theValue) {
 		myAdditive = theValue;
 	}
 

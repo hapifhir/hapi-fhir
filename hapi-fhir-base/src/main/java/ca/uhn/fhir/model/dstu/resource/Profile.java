@@ -37,7 +37,7 @@ import ca.uhn.fhir.model.dstu.valueset.*;
  * 
  * </p> 
  */
-@ResourceDef(name="Profile", profile="http://hl7.org/fhir/profiles/Profile")
+@ResourceDef(name="Profile", profile="http://hl7.org/fhir/profiles/Profile", id="profile")
 public class Profile extends BaseResource implements IResource {
 
 	/**

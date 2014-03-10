@@ -38,7 +38,8 @@ import ca.uhn.fhir.model.dstu.resource.*;
  * </p> 
  */
 @DatatypeDef(name="Attachment") 
-public class AttachmentDt extends BaseElement implements ICompositeDatatype  {
+public class AttachmentDt 
+        extends  BaseElement         implements ICompositeDatatype  {
 
 
 	@Child(name="contentType", type=CodeDt.class, order=0, min=1, max=1)	

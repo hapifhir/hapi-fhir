@@ -38,7 +38,8 @@ import ca.uhn.fhir.model.dstu.resource.*;
  * </p> 
  */
 @DatatypeDef(name="Quantity") 
-public class QuantityDt extends BaseElement implements ICompositeDatatype  {
+public class QuantityDt 
+        extends  BaseElement         implements ICompositeDatatype  {
 
 
 	@Child(name="value", type=DecimalDt.class, order=0, min=0, max=1)	
@@ -120,7 +121,7 @@ public class QuantityDt extends BaseElement implements ICompositeDatatype  {
      * The value of the measured amount. The value includes an implicit precision in the presentation of the value
      * </p> 
 	 */
-	public void setValue( long theValue) {
+	public void setValue( java.math.BigDecimal theValue) {
 		myValue = new DecimalDt(theValue); 
 	}
 
@@ -144,7 +145,7 @@ public class QuantityDt extends BaseElement implements ICompositeDatatype  {
      * The value of the measured amount. The value includes an implicit precision in the presentation of the value
      * </p> 
 	 */
-	public void setValue( java.math.BigDecimal theValue) {
+	public void setValue( long theValue) {
 		myValue = new DecimalDt(theValue); 
 	}
 

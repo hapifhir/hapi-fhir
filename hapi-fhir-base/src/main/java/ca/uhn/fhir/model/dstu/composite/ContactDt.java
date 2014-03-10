@@ -38,7 +38,8 @@ import ca.uhn.fhir.model.dstu.resource.*;
  * </p> 
  */
 @DatatypeDef(name="Contact") 
-public class ContactDt extends BaseElement implements ICompositeDatatype  {
+public class ContactDt 
+        extends  BaseElement         implements ICompositeDatatype  {
 
 
 	@Child(name="system", type=CodeDt.class, order=0, min=0, max=1)	

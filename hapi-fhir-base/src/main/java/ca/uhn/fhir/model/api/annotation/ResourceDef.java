@@ -12,6 +12,8 @@ public @interface ResourceDef {
 	int ORDER_NOT_SPECIFIED = -1;
 
 	String name();
+
+	String id() default "";
 	
 	String profile() default "";
 	

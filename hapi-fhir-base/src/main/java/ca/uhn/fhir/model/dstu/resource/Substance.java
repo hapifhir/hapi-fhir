@@ -37,7 +37,7 @@ import ca.uhn.fhir.model.dstu.valueset.*;
  * 
  * </p> 
  */
-@ResourceDef(name="Substance", profile="http://hl7.org/fhir/profiles/Substance")
+@ResourceDef(name="Substance", profile="http://hl7.org/fhir/profiles/Substance", id="substance")
 public class Substance extends BaseResource implements IResource {
 
 	/**
@@ -470,7 +470,7 @@ public class Substance extends BaseResource implements IResource {
 		shortDefinition="A component of the substance",
 		formalDefinition="Another substance that is a component of this substance"
 	)
-	private ResourceReference mySubstance;
+	private ResourceReferenceDt mySubstance;
 	
 
 	@Override
@@ -519,9 +519,9 @@ public class Substance extends BaseResource implements IResource {
      * Another substance that is a component of this substance
      * </p> 
 	 */
-	public ResourceReference getSubstance() {  
+	public ResourceReferenceDt getSubstance() {  
 		if (mySubstance == null) {
-			mySubstance = new ResourceReference();
+			mySubstance = new ResourceReferenceDt();
 		}
 		return mySubstance;
 	}
@@ -534,7 +534,7 @@ public class Substance extends BaseResource implements IResource {
      * Another substance that is a component of this substance
      * </p> 
 	 */
-	public void setSubstance(ResourceReference theValue) {
+	public void setSubstance(ResourceReferenceDt theValue) {
 		mySubstance = theValue;
 	}
 

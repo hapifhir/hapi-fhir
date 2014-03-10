@@ -148,6 +148,7 @@ public abstract class BaseStructureParser {
 		ctx.put("includeDescriptionAnnotations", true);
 		ctx.put("packageBase", thePackageBase);
 		ctx.put("profile", theResource.getProfile());
+		ctx.put("id", StringUtils.defaultString(theResource.getId()));
 		ctx.put("className", theResource.getName());
 		ctx.put("shortName", defaultString(theResource.getShortName()));
 		ctx.put("definition", defaultString(theResource.getDefinition()));

@@ -37,7 +37,7 @@ import ca.uhn.fhir.model.dstu.valueset.*;
  * 
  * </p> 
  */
-@ResourceDef(name="Location", profile="http://hl7.org/fhir/profiles/Location")
+@ResourceDef(name="Location", profile="http://hl7.org/fhir/profiles/Location", id="location")
 public class Location extends BaseResource implements IResource {
 
 	/**
@@ -184,7 +184,7 @@ public class Location extends BaseResource implements IResource {
 		shortDefinition="The organization that is responsible for the provisioning and upkeep of the location",
 		formalDefinition=""
 	)
-	private ResourceReference myManagingOrganization;
+	private ResourceReferenceDt myManagingOrganization;
 	
 	@Child(name="status", type=CodeDt.class, order=9, min=0, max=1)	
 	@Description(
@@ -200,7 +200,7 @@ public class Location extends BaseResource implements IResource {
 		shortDefinition="Another Location which this Location is physically part of",
 		formalDefinition=""
 	)
-	private ResourceReference myPartOf;
+	private ResourceReferenceDt myPartOf;
 	
 	@Child(name="mode", type=CodeDt.class, order=11, min=0, max=1)	
 	@Description(
@@ -522,9 +522,9 @@ public class Location extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public ResourceReference getManagingOrganization() {  
+	public ResourceReferenceDt getManagingOrganization() {  
 		if (myManagingOrganization == null) {
-			myManagingOrganization = new ResourceReference();
+			myManagingOrganization = new ResourceReferenceDt();
 		}
 		return myManagingOrganization;
 	}
@@ -537,7 +537,7 @@ public class Location extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public void setManagingOrganization(ResourceReference theValue) {
+	public void setManagingOrganization(ResourceReferenceDt theValue) {
 		myManagingOrganization = theValue;
 	}
 
@@ -596,9 +596,9 @@ public class Location extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public ResourceReference getPartOf() {  
+	public ResourceReferenceDt getPartOf() {  
 		if (myPartOf == null) {
-			myPartOf = new ResourceReference();
+			myPartOf = new ResourceReferenceDt();
 		}
 		return myPartOf;
 	}
@@ -611,7 +611,7 @@ public class Location extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public void setPartOf(ResourceReference theValue) {
+	public void setPartOf(ResourceReferenceDt theValue) {
 		myPartOf = theValue;
 	}
 
@@ -736,7 +736,7 @@ public class Location extends BaseResource implements IResource {
      * Longitude. The value domain and the interpretation are the same as for the text of the longitude element in KML (see notes below)
      * </p> 
 	 */
-	public void setLongitude( long theValue) {
+	public void setLongitude( java.math.BigDecimal theValue) {
 		myLongitude = new DecimalDt(theValue); 
 	}
 
@@ -760,7 +760,7 @@ public class Location extends BaseResource implements IResource {
      * Longitude. The value domain and the interpretation are the same as for the text of the longitude element in KML (see notes below)
      * </p> 
 	 */
-	public void setLongitude( java.math.BigDecimal theValue) {
+	public void setLongitude( long theValue) {
 		myLongitude = new DecimalDt(theValue); 
 	}
 
@@ -803,7 +803,7 @@ public class Location extends BaseResource implements IResource {
      * Latitude. The value domain and the interpretation are the same as for the text of the latitude element in KML (see notes below)
      * </p> 
 	 */
-	public void setLatitude( long theValue) {
+	public void setLatitude( java.math.BigDecimal theValue) {
 		myLatitude = new DecimalDt(theValue); 
 	}
 
@@ -827,7 +827,7 @@ public class Location extends BaseResource implements IResource {
      * Latitude. The value domain and the interpretation are the same as for the text of the latitude element in KML (see notes below)
      * </p> 
 	 */
-	public void setLatitude( java.math.BigDecimal theValue) {
+	public void setLatitude( long theValue) {
 		myLatitude = new DecimalDt(theValue); 
 	}
 
@@ -870,7 +870,7 @@ public class Location extends BaseResource implements IResource {
      * Altitude. The value domain and the interpretation are the same as for the text of the altitude element in KML (see notes below)
      * </p> 
 	 */
-	public void setAltitude( long theValue) {
+	public void setAltitude( java.math.BigDecimal theValue) {
 		myAltitude = new DecimalDt(theValue); 
 	}
 
@@ -894,7 +894,7 @@ public class Location extends BaseResource implements IResource {
      * Altitude. The value domain and the interpretation are the same as for the text of the altitude element in KML (see notes below)
      * </p> 
 	 */
-	public void setAltitude( java.math.BigDecimal theValue) {
+	public void setAltitude( long theValue) {
 		myAltitude = new DecimalDt(theValue); 
 	}
 

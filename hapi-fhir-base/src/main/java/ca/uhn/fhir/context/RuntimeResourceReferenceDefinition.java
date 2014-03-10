@@ -6,15 +6,15 @@ import java.util.Map;
 
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.api.ResourceReference;
+import ca.uhn.fhir.model.api.BaseResourceReference;
 
-public class RuntimeResourceReferenceDefinition extends BaseRuntimeElementDefinition<ResourceReference> {
+public class RuntimeResourceReferenceDefinition extends BaseRuntimeElementDefinition<BaseResourceReference> {
 
 	private final List<Class<? extends IResource>> myResourceTypes;
 	private HashMap<Class<? extends IResource>, RuntimeResourceDefinition> myResourceTypeToDefinition;
 
 	public RuntimeResourceReferenceDefinition(String theName, List<Class<? extends IResource>> theResourceTypes) {
-		super(theName, ResourceReference.class);
+		super(theName, BaseResourceReference.class);
 		if (theResourceTypes == null || theResourceTypes.isEmpty()) {
 			throw new ConfigurationException("Element '" + theName + "' has no resource types noted");
 		}

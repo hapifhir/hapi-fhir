@@ -27,7 +27,7 @@ import ca.uhn.fhir.model.api.IPrimitiveDatatype;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.IResourceBlock;
 import ca.uhn.fhir.model.api.IValueSetEnumBinder;
-import ca.uhn.fhir.model.api.ResourceReference;
+import ca.uhn.fhir.model.api.BaseResourceReference;
 import ca.uhn.fhir.model.api.annotation.Block;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.CodeTableDef;
@@ -37,6 +37,7 @@ import ca.uhn.fhir.model.api.annotation.Extension;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
+import ca.uhn.fhir.model.primitive.BoundCodeableConceptDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.model.primitive.ICodedDatatype;
@@ -323,7 +324,7 @@ class ModelScanner {
 				if (IElement.class.isAssignableFrom(nextElementType)) {
 					addScanAlso((Class<? extends IElement>) nextElementType);
 				}
-			} else if (ResourceReference.class.isAssignableFrom(nextElementType)) {
+			} else if (BaseResourceReference.class.isAssignableFrom(nextElementType)) {
 				/*
 				 * Child is a resource reference
 				 */
@@ -362,7 +363,12 @@ class ModelScanner {
 						def = new RuntimeChildPrimitiveDatatypeDefinition(next, elementName, descriptionAnnotation, childAnnotation, nextDatatype);
 					}
 				} else {
-					def = new RuntimeChildCompositeDatatypeDefinition(next, elementName, childAnnotation, descriptionAnnotation, nextDatatype);
+					if (nextElementType.equals(BoundCodeableConceptDt.class)) {
+						IValueSetEnumBinder<Enum<?>> binder = getBoundCodeBinder(next);
+						def = new RuntimeChildCompositeBoundDatatypeDefinition(next, elementName, childAnnotation, descriptionAnnotation, nextDatatype, binder);
+					} else {
+						def = new RuntimeChildCompositeDatatypeDefinition(next, elementName, childAnnotation, descriptionAnnotation, nextDatatype);
+					}
 				}
 
 				CodeableConceptElement concept = next.getAnnotation(CodeableConceptElement.class);

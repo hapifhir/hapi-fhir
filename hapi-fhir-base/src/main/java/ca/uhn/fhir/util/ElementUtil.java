@@ -8,17 +8,16 @@ public class ElementUtil {
 
 	@SuppressWarnings("unchecked")
 	public static boolean isEmpty(Object... theElements) {
-		if (theElements ==null) {
+		if (theElements == null) {
 			return true;
 		}
 		for (int i = 0; i < theElements.length; i++) {
 			Object next = theElements[i];
 			if (next instanceof List) {
-				if (!isEmpty((List<? extends IElement>)next)) {
+				if (!isEmpty((List<? extends IElement>) next)) {
 					return false;
 				}
-			}
-			if (next != null && !((IElement)next).isEmpty()) {
+			} else if (next != null && !((IElement) next).isEmpty()) {
 				return false;
 			}
 		}
@@ -26,7 +25,7 @@ public class ElementUtil {
 	}
 
 	public static boolean isEmpty(IElement... theElements) {
-		if (theElements ==null) {
+		if (theElements == null) {
 			return true;
 		}
 		for (int i = 0; i < theElements.length; i++) {
@@ -39,7 +38,7 @@ public class ElementUtil {
 	}
 
 	public static boolean isEmpty(List<? extends IElement> theElements) {
-		if (theElements ==null) {
+		if (theElements == null) {
 			return true;
 		}
 		for (int i = 0; i < theElements.size(); i++) {
@@ -50,5 +49,5 @@ public class ElementUtil {
 		}
 		return true;
 	}
-	
+
 }

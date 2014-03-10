@@ -17,6 +17,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import ca.uhn.fhir.rest.server.exceptions.*;
+
 import org.apache.commons.lang3.StringUtils;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -98,9 +99,18 @@ public abstract class RestfulServer extends HttpServlet {
 		}
 	}
 
+	/**
+	 * This method must be overridden to provide one or more resource providers
+	 */
 	public abstract Collection<IResourceProvider> getResourceProviders();
 
-    public abstract ISecurityManager getSecurityManager();
+	/**
+	 * This method should be overridden to provide a security manager
+	 * instance. By default, returns null.
+	 */
+    public ISecurityManager getSecurityManager() {
+        return null;
+    }
 
 	protected void handleRequest(SearchMethodBinding.RequestType requestType, HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		try {

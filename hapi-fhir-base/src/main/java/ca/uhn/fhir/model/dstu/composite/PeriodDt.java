@@ -38,7 +38,8 @@ import ca.uhn.fhir.model.dstu.resource.*;
  * </p> 
  */
 @DatatypeDef(name="Period") 
-public class PeriodDt extends BaseElement implements ICompositeDatatype  {
+public class PeriodDt 
+        extends  BaseElement         implements ICompositeDatatype  {
 
 
 	@Child(name="start", type=DateTimeDt.class, order=0, min=0, max=1)	

@@ -37,7 +37,7 @@ import ca.uhn.fhir.model.dstu.valueset.*;
  * 
  * </p> 
  */
-@ResourceDef(name="Medication", profile="http://hl7.org/fhir/profiles/Medication")
+@ResourceDef(name="Medication", profile="http://hl7.org/fhir/profiles/Medication", id="medication")
 public class Medication extends BaseResource implements IResource {
 
 	/**
@@ -139,7 +139,7 @@ public class Medication extends BaseResource implements IResource {
 		shortDefinition="Manufacturer of the item",
 		formalDefinition="Describes the details of the manufacturer"
 	)
-	private ResourceReference myManufacturer;
+	private ResourceReferenceDt myManufacturer;
 	
 	@Child(name="kind", type=CodeDt.class, order=4, min=0, max=1)	
 	@Description(
@@ -295,9 +295,9 @@ public class Medication extends BaseResource implements IResource {
      * Describes the details of the manufacturer
      * </p> 
 	 */
-	public ResourceReference getManufacturer() {  
+	public ResourceReferenceDt getManufacturer() {  
 		if (myManufacturer == null) {
-			myManufacturer = new ResourceReference();
+			myManufacturer = new ResourceReferenceDt();
 		}
 		return myManufacturer;
 	}
@@ -310,7 +310,7 @@ public class Medication extends BaseResource implements IResource {
      * Describes the details of the manufacturer
      * </p> 
 	 */
-	public void setManufacturer(ResourceReference theValue) {
+	public void setManufacturer(ResourceReferenceDt theValue) {
 		myManufacturer = theValue;
 	}
 
@@ -561,7 +561,7 @@ public class Medication extends BaseResource implements IResource {
 		shortDefinition="The product contained",
 		formalDefinition="The actual ingredient - either a substance (simple ingredient) or another medication"
 	)
-	private ResourceReference myItem;
+	private ResourceReferenceDt myItem;
 	
 	@Child(name="amount", type=RatioDt.class, order=1, min=0, max=1)	
 	@Description(
@@ -586,7 +586,7 @@ public class Medication extends BaseResource implements IResource {
      * The actual ingredient - either a substance (simple ingredient) or another medication
      * </p> 
 	 */
-	public ResourceReference getItem() {  
+	public ResourceReferenceDt getItem() {  
 		return myItem;
 	}
 
@@ -598,7 +598,7 @@ public class Medication extends BaseResource implements IResource {
      * The actual ingredient - either a substance (simple ingredient) or another medication
      * </p> 
 	 */
-	public void setItem(ResourceReference theValue) {
+	public void setItem(ResourceReferenceDt theValue) {
 		myItem = theValue;
 	}
 

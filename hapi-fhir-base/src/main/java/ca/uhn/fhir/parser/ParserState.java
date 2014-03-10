@@ -30,8 +30,9 @@ import ca.uhn.fhir.model.api.IPrimitiveDatatype;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.IResourceBlock;
 import ca.uhn.fhir.model.api.ISupportsUndeclaredExtensions;
-import ca.uhn.fhir.model.api.ResourceReference;
+import ca.uhn.fhir.model.api.BaseResourceReference;
 import ca.uhn.fhir.model.api.UndeclaredExtension;
+import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.primitive.XhtmlDt;
 
 class ParserState<T extends IElement> {
@@ -58,8 +59,8 @@ class ParserState<T extends IElement> {
 		myState.enteringNewElement(theNamespaceURI, theName);
 	}
 
-	public void enteringNewElementExtension(StartElement theElem, String theUrlAttr) {
-		myState.enteringNewElementExtension(theElem, theUrlAttr);
+	public void enteringNewElementExtension(StartElement theElem, String theUrlAttr, boolean theIsModifier) {
+		myState.enteringNewElementExtension(theElem, theUrlAttr, theIsModifier);
 	}
 
 	public T getObject() {
@@ -370,15 +371,19 @@ class ParserState<T extends IElement> {
 		/**
 		 * Default implementation just handles undeclared extensions
 		 */
-		public void enteringNewElementExtension(@SuppressWarnings("unused") StartElement theElement, String theUrlAttr) {
+		public void enteringNewElementExtension(@SuppressWarnings("unused") StartElement theElement, String theUrlAttr, boolean theIsModifier) {
 			if (getCurrentElement() instanceof ISupportsUndeclaredExtensions) {
-				UndeclaredExtension newExtension = new UndeclaredExtension(theUrlAttr);
-				// TODO: fail if we don't support undeclared extensions
-				((ISupportsUndeclaredExtensions) getCurrentElement()).getUndeclaredExtensions().add(newExtension);
+				UndeclaredExtension newExtension = new UndeclaredExtension(theIsModifier, theUrlAttr);
+				ISupportsUndeclaredExtensions elem = (ISupportsUndeclaredExtensions) getCurrentElement();
+				if (theIsModifier) {
+					elem.getUndeclaredModifierExtensions().add(newExtension);
+				} else {
+					elem.getUndeclaredExtensions().add(newExtension);
+				}
 				ExtensionState newState = new ExtensionState(newExtension);
 				push(newState);
 			} else {
-				throw new DataFormatException("Extension is not supported at this position");
+				throw new DataFormatException("Type " + getCurrentElement() + " does not support undeclared extentions, and found an extension with URL: " + theUrlAttr);
 			}
 		}
 
@@ -446,7 +451,7 @@ class ParserState<T extends IElement> {
 			}
 			case RESOURCE_REF: {
 				RuntimeResourceReferenceDefinition resourceRefTarget = (RuntimeResourceReferenceDefinition) target;
-				ResourceReference newChildInstance = new ResourceReference();
+				ResourceReferenceDt newChildInstance = new ResourceReferenceDt();
 				myDefinition.getMutator().addValue(myParentInstance, newChildInstance);
 				ResourceReferenceState newState = new ResourceReferenceState(resourceRefTarget, newChildInstance);
 				push(newState);
@@ -463,7 +468,7 @@ class ParserState<T extends IElement> {
 		}
 
 		@Override
-		public void enteringNewElementExtension(StartElement theElement, String theUrlAttr) {
+		public void enteringNewElementExtension(StartElement theElement, String theUrlAttr, boolean theIsModifier) {
 			RuntimeChildDeclaredExtensionDefinition declaredExtension = myDefinition.getChildExtensionForUrl(theUrlAttr);
 			if (declaredExtension != null) {
 				if (myChildInstance == null) {
@@ -473,7 +478,7 @@ class ParserState<T extends IElement> {
 				BaseState newState = new DeclaredExtensionState(declaredExtension, myChildInstance);
 				push(newState);
 			} else {
-				super.enteringNewElementExtension(theElement, theUrlAttr);
+				super.enteringNewElementExtension(theElement, theUrlAttr, theIsModifier);
 			}
 		}
 
@@ -514,7 +519,7 @@ class ParserState<T extends IElement> {
 			switch (target.getChildType()) {
 			case COMPOSITE_DATATYPE: {
 				BaseRuntimeElementCompositeDefinition<?> compositeTarget = (BaseRuntimeElementCompositeDefinition<?>) target;
-				ICompositeDatatype newChildInstance = (ICompositeDatatype) compositeTarget.newInstance();
+				ICompositeDatatype newChildInstance = (ICompositeDatatype) compositeTarget.newInstance(child.getInstanceConstructorArguments());
 				child.getMutator().addValue(myInstance, newChildInstance);
 				ElementCompositeState newState = new ElementCompositeState(compositeTarget, newChildInstance);
 				push(newState);
@@ -531,7 +536,7 @@ class ParserState<T extends IElement> {
 			}
 			case RESOURCE_REF: {
 				RuntimeResourceReferenceDefinition resourceRefTarget = (RuntimeResourceReferenceDefinition) target;
-				ResourceReference newChildInstance = new ResourceReference();
+				ResourceReferenceDt newChildInstance = new ResourceReferenceDt();
 				child.getMutator().addValue(myInstance, newChildInstance);
 				ResourceReferenceState newState = new ResourceReferenceState(resourceRefTarget, newChildInstance);
 				push(newState);
@@ -564,13 +569,13 @@ class ParserState<T extends IElement> {
 		}
 
 		@Override
-		public void enteringNewElementExtension(StartElement theElement, String theUrlAttr) {
+		public void enteringNewElementExtension(StartElement theElement, String theUrlAttr, boolean theIsModifier) {
 			RuntimeChildDeclaredExtensionDefinition declaredExtension = myDefinition.getDeclaredExtension(theUrlAttr);
 			if (declaredExtension != null) {
 				BaseState newState = new DeclaredExtensionState(declaredExtension, myInstance);
 				push(newState);
 			} else {
-				super.enteringNewElementExtension(theElement, theUrlAttr);
+				super.enteringNewElementExtension(theElement, theUrlAttr, theIsModifier);
 			}
 		}
 
@@ -623,7 +628,7 @@ class ParserState<T extends IElement> {
 			}
 			case RESOURCE_REF: {
 				RuntimeResourceReferenceDefinition resourceRefTarget = (RuntimeResourceReferenceDefinition) target;
-				ResourceReference newChildInstance = new ResourceReference();
+				ResourceReferenceDt newChildInstance = new ResourceReferenceDt();
 				myExtension.setValue(newChildInstance);
 				ResourceReferenceState newState = new ResourceReferenceState(resourceRefTarget, newChildInstance);
 				push(newState);
@@ -784,10 +789,10 @@ class ParserState<T extends IElement> {
 	private class ResourceReferenceState extends BaseState {
 
 		private RuntimeResourceReferenceDefinition myDefinition;
-		private ResourceReference myInstance;
+		private ResourceReferenceDt myInstance;
 		private ResourceReferenceSubState mySubState;
 
-		public ResourceReferenceState(RuntimeResourceReferenceDefinition theDefinition, ResourceReference theInstance) {
+		public ResourceReferenceState(RuntimeResourceReferenceDefinition theDefinition, ResourceReferenceDt theInstance) {
 			myDefinition = theDefinition;
 			myInstance = theInstance;
 			mySubState = ResourceReferenceSubState.INITIAL;
