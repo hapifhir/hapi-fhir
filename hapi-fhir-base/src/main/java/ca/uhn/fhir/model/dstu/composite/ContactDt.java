@@ -42,15 +42,31 @@ public class ContactDt extends BaseElement implements ICompositeDatatype  {
 
 
 	@Child(name="system", type=CodeDt.class, order=0, min=0, max=1)	
+	@Description(
+		shortDefinition="phone | fax | email | url",
+		formalDefinition="Telecommunications form for contact - what communications system is required to make use of the contact"
+	)
 	private BoundCodeDt<ContactSystemEnum> mySystem;
 	
 	@Child(name="value", type=StringDt.class, order=1, min=0, max=1)	
+	@Description(
+		shortDefinition="The actual contact details",
+		formalDefinition="The actual contact details, in a form that is meaningful to the designated communication system (i.e. phone number or email address)."
+	)
 	private StringDt myValue;
 	
 	@Child(name="use", type=CodeDt.class, order=2, min=0, max=1)	
+	@Description(
+		shortDefinition="home | work | temp | old | mobile - purpose of this address",
+		formalDefinition="Identifies the purpose for the address"
+	)
 	private BoundCodeDt<ContactUseEnum> myUse;
 	
 	@Child(name="period", type=PeriodDt.class, order=3, min=0, max=1)	
+	@Description(
+		shortDefinition="Time period when the contact was/is in use",
+		formalDefinition="Time period when the contact was/is in use"
+	)
 	private PeriodDt myPeriod;
 	
 

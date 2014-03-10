@@ -12,21 +12,21 @@ public enum LocationStatusEnum {
 	 *
 	 * The location is operational.
 	 */
-	ACTIVE("active"),
+	ACTIVE("active", "http://hl7.org/fhir/location-status"),
 	
 	/**
 	 * Code Value: <b>suspended</b>
 	 *
 	 * The location is temporarily closed.
 	 */
-	SUSPENDED("suspended"),
+	SUSPENDED("suspended", "http://hl7.org/fhir/location-status"),
 	
 	/**
 	 * Code Value: <b>inactive</b>
 	 *
 	 * The location is no longer used.
 	 */
-	INACTIVE("inactive"),
+	INACTIVE("inactive", "http://hl7.org/fhir/location-status"),
 	
 	;
 	
@@ -43,11 +43,19 @@ public enum LocationStatusEnum {
 	public static final String VALUESET_NAME = "LocationStatus";
 
 	private static Map<String, LocationStatusEnum> CODE_TO_ENUM = new HashMap<String, LocationStatusEnum>();
-	private String myCode;
+	private static Map<String, Map<String, LocationStatusEnum>> SYSTEM_TO_CODE_TO_ENUM = new HashMap<String, Map<String, LocationStatusEnum>>();
+	
+	private final String myCode;
+	private final String mySystem;
 	
 	static {
 		for (LocationStatusEnum next : LocationStatusEnum.values()) {
 			CODE_TO_ENUM.put(next.getCode(), next);
+			
+			if (!SYSTEM_TO_CODE_TO_ENUM.containsKey(next.getSystem())) {
+				SYSTEM_TO_CODE_TO_ENUM.put(next.getSystem(), new HashMap<String, LocationStatusEnum>());
+			}
+			SYSTEM_TO_CODE_TO_ENUM.get(next.getSystem()).put(next.getCode(), next);			
 		}
 	}
 	
@@ -56,6 +64,13 @@ public enum LocationStatusEnum {
 	 */
 	public String getCode() {
 		return myCode;
+	}
+	
+	/**
+	 * Returns the code system associated with this enumerated value
+	 */
+	public String getSystem() {
+		return mySystem;
 	}
 	
 	/**
@@ -74,18 +89,34 @@ public enum LocationStatusEnum {
 		public String toCodeString(LocationStatusEnum theEnum) {
 			return theEnum.getCode();
 		}
+
+		@Override
+		public String toSystemString(LocationStatusEnum theEnum) {
+			return theEnum.getSystem();
+		}
 		
 		@Override
 		public LocationStatusEnum fromCodeString(String theCodeString) {
 			return CODE_TO_ENUM.get(theCodeString);
 		}
+		
+		@Override
+		public LocationStatusEnum fromCodeString(String theCodeString, String theSystemString) {
+			Map<String, LocationStatusEnum> map = SYSTEM_TO_CODE_TO_ENUM.get(theSystemString);
+			if (map == null) {
+				return null;
+			}
+			return map.get(theCodeString);
+		}
+		
 	};
 	
 	/** 
 	 * Constructor
 	 */
-	LocationStatusEnum(String theCode) {
+	LocationStatusEnum(String theCode, String theSystem) {
 		myCode = theCode;
+		mySystem = theSystem;
 	}
 
 	

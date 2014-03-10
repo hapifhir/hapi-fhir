@@ -25,11 +25,11 @@ import ca.uhn.fhir.model.dstu.resource.*;
 
 /**
  * HAPI/FHIR <b>Coding</b> Datatype
- * (A reference to a code defined by a terminology system )
+ * (A reference to a code defined by a terminology system)
  *
  * <p>
  * <b>Definition:</b>
- * A reference to a code defined by a terminology system 
+ * A reference to a code defined by a terminology system
  * </p> 
  *
  * <p>
@@ -42,24 +42,47 @@ public class CodingDt extends BaseElement implements ICompositeDatatype  {
 
 
 	@Child(name="system", type=UriDt.class, order=0, min=0, max=1)	
+	@Description(
+		shortDefinition="Identity of the terminology system",
+		formalDefinition="The identification of the code system that defines the meaning of the symbol in the code."
+	)
 	private UriDt mySystem;
 	
 	@Child(name="version", type=StringDt.class, order=1, min=0, max=1)	
+	@Description(
+		shortDefinition="Version of the system - if relevant",
+		formalDefinition="The version of the code system which was used when choosing this code. Note that a well-maintained code system does not need the version reported, because the meaning of codes is consistent across versions. However this cannot consistently be assured. and When the meaning is not guaranteed to be consistent, the version SHOULD be exchanged"
+	)
 	private StringDt myVersion;
 	
 	@Child(name="code", type=CodeDt.class, order=2, min=0, max=1)	
+	@Description(
+		shortDefinition="Symbol in syntax defined by the system",
+		formalDefinition="A symbol in syntax defined by the system. The symbol may be a predefined code or an expression in a syntax defined by the coding system (e.g. post-coordination)"
+	)
 	private CodeDt myCode;
 	
 	@Child(name="display", type=StringDt.class, order=3, min=0, max=1)	
+	@Description(
+		shortDefinition="Representation defined by the system",
+		formalDefinition="A representation of the meaning of the code in the system, following the rules of the system."
+	)
 	private StringDt myDisplay;
 	
 	@Child(name="primary", type=BooleanDt.class, order=4, min=0, max=1)	
+	@Description(
+		shortDefinition="If this code was chosen directly by the user",
+		formalDefinition="Indicates that this code was chosen by a user directly - i.e. off a pick list of available items (codes or displays)"
+	)
 	private BooleanDt myPrimary;
 	
-	@Child(name="valueSet", order=5, min=0, max=1)
-	@ChildResource(types= {
+	@Child(name="valueSet", order=5, min=0, max=1, type={
 		ValueSet.class,
-	})	
+	})
+	@Description(
+		shortDefinition="Set this coding was chosen from",
+		formalDefinition="The set of possible coded values this coding was chosen from or constrained by"
+	)
 	private ResourceReference myValueSet;
 	
 
@@ -69,13 +92,13 @@ public class CodingDt extends BaseElement implements ICompositeDatatype  {
 	}
 
 	/**
-	 * Gets the value(s) for <b>system</b> (Identity of the terminology system ).
+	 * Gets the value(s) for <b>system</b> (Identity of the terminology system).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
-     * The identification of the code system that defines the meaning of the symbol in the code. 
+     * The identification of the code system that defines the meaning of the symbol in the code.
      * </p> 
 	 */
 	public UriDt getSystem() {  
@@ -86,11 +109,11 @@ public class CodingDt extends BaseElement implements ICompositeDatatype  {
 	}
 
 	/**
-	 * Sets the value(s) for <b>system</b> (Identity of the terminology system )
+	 * Sets the value(s) for <b>system</b> (Identity of the terminology system)
 	 *
      * <p>
      * <b>Definition:</b>
-     * The identification of the code system that defines the meaning of the symbol in the code. 
+     * The identification of the code system that defines the meaning of the symbol in the code.
      * </p> 
 	 */
 	public void setSystem(UriDt theValue) {
@@ -99,11 +122,11 @@ public class CodingDt extends BaseElement implements ICompositeDatatype  {
 
 
  	/**
-	 * Sets the value for <b>system</b> (Identity of the terminology system )
+	 * Sets the value for <b>system</b> (Identity of the terminology system)
 	 *
      * <p>
      * <b>Definition:</b>
-     * The identification of the code system that defines the meaning of the symbol in the code. 
+     * The identification of the code system that defines the meaning of the symbol in the code.
      * </p> 
 	 */
 	public void setSystem( String theUri) {
@@ -184,7 +207,19 @@ public class CodingDt extends BaseElement implements ICompositeDatatype  {
 	}
 
 
-  
+ 	/**
+	 * Sets the value for <b>code</b> (Symbol in syntax defined by the system)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A symbol in syntax defined by the system. The symbol may be a predefined code or an expression in a syntax defined by the coding system (e.g. post-coordination)
+     * </p> 
+	 */
+	public void setCode( String theCode) {
+		myCode = new CodeDt(theCode); 
+	}
+
+ 
 	/**
 	 * Gets the value(s) for <b>display</b> (Representation defined by the system).
 	 * creating it if it does
@@ -192,7 +227,7 @@ public class CodingDt extends BaseElement implements ICompositeDatatype  {
 	 *
      * <p>
      * <b>Definition:</b>
-     * A representation of the meaning of the code in the system, following the rules of the system. 
+     * A representation of the meaning of the code in the system, following the rules of the system.
      * </p> 
 	 */
 	public StringDt getDisplay() {  
@@ -207,7 +242,7 @@ public class CodingDt extends BaseElement implements ICompositeDatatype  {
 	 *
      * <p>
      * <b>Definition:</b>
-     * A representation of the meaning of the code in the system, following the rules of the system. 
+     * A representation of the meaning of the code in the system, following the rules of the system.
      * </p> 
 	 */
 	public void setDisplay(StringDt theValue) {
@@ -220,7 +255,7 @@ public class CodingDt extends BaseElement implements ICompositeDatatype  {
 	 *
      * <p>
      * <b>Definition:</b>
-     * A representation of the meaning of the code in the system, following the rules of the system. 
+     * A representation of the meaning of the code in the system, following the rules of the system.
      * </p> 
 	 */
 	public void setDisplay( String theString) {

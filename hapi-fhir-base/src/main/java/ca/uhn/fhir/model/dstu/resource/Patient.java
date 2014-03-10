@@ -37,7 +37,7 @@ import ca.uhn.fhir.model.dstu.valueset.*;
  * Tracking patient is the center of the healthcare process
  * </p> 
  */
-@ResourceDef(name="Patient")
+@ResourceDef(name="Patient", profile="http://hl7.org/fhir/profiles/Patient")
 public class Patient extends BaseResource implements IResource {
 
 	/**
@@ -192,67 +192,133 @@ public class Patient extends BaseResource implements IResource {
 
 
 	@Child(name="identifier", type=IdentifierDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)	
+	@Description(
+		shortDefinition="An identifier for the person as this patient",
+		formalDefinition="An identifier that applies to this person as a patient"
+	)
 	private List<IdentifierDt> myIdentifier;
 	
 	@Child(name="name", type=HumanNameDt.class, order=1, min=0, max=Child.MAX_UNLIMITED)	
+	@Description(
+		shortDefinition="A name associated with the patient",
+		formalDefinition="A name associated with the individual."
+	)
 	private List<HumanNameDt> myName;
 	
 	@Child(name="telecom", type=ContactDt.class, order=2, min=0, max=Child.MAX_UNLIMITED)	
+	@Description(
+		shortDefinition="A contact detail for the individual",
+		formalDefinition="A contact detail (e.g. a telephone number or an email address) by which the individual may be contacted."
+	)
 	private List<ContactDt> myTelecom;
 	
 	@Child(name="gender", type=CodeableConceptDt.class, order=3, min=0, max=1)	
-	private CodeableConceptDt myGender;
+	@Description(
+		shortDefinition="Gender for administrative purposes",
+		formalDefinition="Administrative Gender - the gender that the patient is considered to have for administration and record keeping purposes."
+	)
+	private BoundCodeableConceptDt<AdministrativeGenderCodesEnum> myGender;
 	
 	@Child(name="birthDate", type=DateTimeDt.class, order=4, min=0, max=1)	
+	@Description(
+		shortDefinition="The date and time of birth for the individual",
+		formalDefinition="The date and time of birth for the individual"
+	)
 	private DateTimeDt myBirthDate;
 	
-	@Child(name="deceased", order=5, min=0, max=1, choice=@Choice(types= {
+	@Child(name="deceased", order=5, min=0, max=1, type={
 		BooleanDt.class,
 		DateTimeDt.class,
-	}))	
+	})
+	@Description(
+		shortDefinition="Indicates if the individual is deceased or not",
+		formalDefinition="Indicates if the individual is deceased or not"
+	)
 	private IDatatype myDeceased;
 	
 	@Child(name="address", type=AddressDt.class, order=6, min=0, max=Child.MAX_UNLIMITED)	
+	@Description(
+		shortDefinition="Addresses for the individual",
+		formalDefinition="Addresses for the individual"
+	)
 	private List<AddressDt> myAddress;
 	
 	@Child(name="maritalStatus", type=CodeableConceptDt.class, order=7, min=0, max=1)	
-	private CodeableConceptDt myMaritalStatus;
+	@Description(
+		shortDefinition="Marital (civil) status of a person",
+		formalDefinition="This field contains a patient's most recent marital (civil) status."
+	)
+	private BoundCodeableConceptDt<MaritalStatusCodesEnum> myMaritalStatus;
 	
-	@Child(name="multipleBirth", order=8, min=0, max=1, choice=@Choice(types= {
+	@Child(name="multipleBirth", order=8, min=0, max=1, type={
 		BooleanDt.class,
 		IntegerDt.class,
-	}))	
+	})
+	@Description(
+		shortDefinition="Whether patient is part of a multiple birth",
+		formalDefinition="Indicates whether the patient is part of a multiple or indicates the actual birth order."
+	)
 	private IDatatype myMultipleBirth;
 	
 	@Child(name="photo", type=AttachmentDt.class, order=9, min=0, max=Child.MAX_UNLIMITED)	
+	@Description(
+		shortDefinition="Image of the person",
+		formalDefinition="Image of the person"
+	)
 	private List<AttachmentDt> myPhoto;
 	
 	@Child(name="contact", order=10, min=0, max=Child.MAX_UNLIMITED)	
+	@Description(
+		shortDefinition="A contact party (e.g. guardian, partner, friend) for the patient",
+		formalDefinition="A contact party (e.g. guardian, partner, friend) for the patient"
+	)
 	private List<Contact> myContact;
 	
 	@Child(name="animal", order=11, min=0, max=1)	
+	@Description(
+		shortDefinition="If this patient is an animal (non-human)",
+		formalDefinition="This element has a value if the patient is an animal"
+	)
 	private Animal myAnimal;
 	
 	@Child(name="communication", type=CodeableConceptDt.class, order=12, min=0, max=Child.MAX_UNLIMITED)	
+	@Description(
+		shortDefinition="Languages which may be used to communicate with the patient about his or her health",
+		formalDefinition="Languages which may be used to communicate with the patient about his or her health"
+	)
 	private List<CodeableConceptDt> myCommunication;
 	
-	@Child(name="careProvider", order=13, min=0, max=Child.MAX_UNLIMITED)
-	@ChildResource(types= {
+	@Child(name="careProvider", order=13, min=0, max=Child.MAX_UNLIMITED, type={
 		Organization.class,
 		Practitioner.class,
-	})	
+	})
+	@Description(
+		shortDefinition="Patient's nominated care provider",
+		formalDefinition="Patient's nominated care provider"
+	)
 	private List<ResourceReference> myCareProvider;
 	
-	@Child(name="managingOrganization", order=14, min=0, max=1)
-	@ChildResource(types= {
+	@Child(name="managingOrganization", order=14, min=0, max=1, type={
 		Organization.class,
-	})	
+	})
+	@Description(
+		shortDefinition="Organization that is the custodian of the patient record",
+		formalDefinition="Organization that is the custodian of the patient record"
+	)
 	private ResourceReference myManagingOrganization;
 	
 	@Child(name="link", order=15, min=0, max=Child.MAX_UNLIMITED)	
+	@Description(
+		shortDefinition="Link to another patient resource that concerns the same actual person",
+		formalDefinition="Link to another patient resource that concerns the same actual person"
+	)
 	private List<Link> myLink;
 	
 	@Child(name="active", type=BooleanDt.class, order=16, min=0, max=1)	
+	@Description(
+		shortDefinition="Whether this patient's record is in active use",
+		formalDefinition="Whether this patient record is in active use"
+	)
 	private BooleanDt myActive;
 	
 
@@ -312,7 +378,7 @@ public class Patient extends BaseResource implements IResource {
 	 *
      * <p>
      * <b>Definition:</b>
-     * A name associated with the individual. 
+     * A name associated with the individual.
      * </p> 
 	 */
 	public List<HumanNameDt> getName() {  
@@ -327,7 +393,7 @@ public class Patient extends BaseResource implements IResource {
 	 *
      * <p>
      * <b>Definition:</b>
-     * A name associated with the individual. 
+     * A name associated with the individual.
      * </p> 
 	 */
 	public void setName(List<HumanNameDt> theValue) {
@@ -339,7 +405,7 @@ public class Patient extends BaseResource implements IResource {
 	 *
      * <p>
      * <b>Definition:</b>
-     * A name associated with the individual. 
+     * A name associated with the individual.
      * </p> 
 	 */
 	public HumanNameDt addName() {
@@ -356,7 +422,7 @@ public class Patient extends BaseResource implements IResource {
 	 *
      * <p>
      * <b>Definition:</b>
-     * A contact detail (e.g. a telephone number or an email address) by which the individual may be contacted. 
+     * A contact detail (e.g. a telephone number or an email address) by which the individual may be contacted.
      * </p> 
 	 */
 	public List<ContactDt> getTelecom() {  
@@ -371,7 +437,7 @@ public class Patient extends BaseResource implements IResource {
 	 *
      * <p>
      * <b>Definition:</b>
-     * A contact detail (e.g. a telephone number or an email address) by which the individual may be contacted. 
+     * A contact detail (e.g. a telephone number or an email address) by which the individual may be contacted.
      * </p> 
 	 */
 	public void setTelecom(List<ContactDt> theValue) {
@@ -383,7 +449,7 @@ public class Patient extends BaseResource implements IResource {
 	 *
      * <p>
      * <b>Definition:</b>
-     * A contact detail (e.g. a telephone number or an email address) by which the individual may be contacted. 
+     * A contact detail (e.g. a telephone number or an email address) by which the individual may be contacted.
      * </p> 
 	 */
 	public ContactDt addTelecom() {
@@ -400,12 +466,12 @@ public class Patient extends BaseResource implements IResource {
 	 *
      * <p>
      * <b>Definition:</b>
-     * Administrative Gender - the gender that the patient is considered to have for administration and record keeping purposes. 
+     * Administrative Gender - the gender that the patient is considered to have for administration and record keeping purposes.
      * </p> 
 	 */
-	public CodeableConceptDt getGender() {  
+	public BoundCodeableConceptDt<AdministrativeGenderCodesEnum> getGender() {  
 		if (myGender == null) {
-			myGender = new CodeableConceptDt();
+			myGender = new BoundCodeableConceptDt<AdministrativeGenderCodesEnum>(AdministrativeGenderCodesEnum.VALUESET_BINDER);
 		}
 		return myGender;
 	}
@@ -415,13 +481,25 @@ public class Patient extends BaseResource implements IResource {
 	 *
      * <p>
      * <b>Definition:</b>
-     * Administrative Gender - the gender that the patient is considered to have for administration and record keeping purposes. 
+     * Administrative Gender - the gender that the patient is considered to have for administration and record keeping purposes.
      * </p> 
 	 */
-	public void setGender(CodeableConceptDt theValue) {
+	public void setGender(BoundCodeableConceptDt<AdministrativeGenderCodesEnum> theValue) {
 		myGender = theValue;
 	}
 
+
+	/**
+	 * Sets the value(s) for <b>gender</b> (Gender for administrative purposes)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Administrative Gender - the gender that the patient is considered to have for administration and record keeping purposes.
+     * </p> 
+	 */
+	public void setGender(AdministrativeGenderCodesEnum theValue) {
+		getGender().setValueAsEnum(theValue);
+	}
 
   
 	/**
@@ -561,9 +639,9 @@ public class Patient extends BaseResource implements IResource {
      * This field contains a patient's most recent marital (civil) status.
      * </p> 
 	 */
-	public CodeableConceptDt getMaritalStatus() {  
+	public BoundCodeableConceptDt<MaritalStatusCodesEnum> getMaritalStatus() {  
 		if (myMaritalStatus == null) {
-			myMaritalStatus = new CodeableConceptDt();
+			myMaritalStatus = new BoundCodeableConceptDt<MaritalStatusCodesEnum>(MaritalStatusCodesEnum.VALUESET_BINDER);
 		}
 		return myMaritalStatus;
 	}
@@ -576,10 +654,22 @@ public class Patient extends BaseResource implements IResource {
      * This field contains a patient's most recent marital (civil) status.
      * </p> 
 	 */
-	public void setMaritalStatus(CodeableConceptDt theValue) {
+	public void setMaritalStatus(BoundCodeableConceptDt<MaritalStatusCodesEnum> theValue) {
 		myMaritalStatus = theValue;
 	}
 
+
+	/**
+	 * Sets the value(s) for <b>maritalStatus</b> (Marital (civil) status of a person)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * This field contains a patient's most recent marital (civil) status.
+     * </p> 
+	 */
+	public void setMaritalStatus(MaritalStatusCodesEnum theValue) {
+		getMaritalStatus().setValueAsEnum(theValue);
+	}
 
   
 	/**
@@ -931,24 +1021,47 @@ public class Patient extends BaseResource implements IResource {
 	public static class Contact extends BaseElement implements IResourceBlock {
 	
 	@Child(name="relationship", type=CodeableConceptDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)	
+	@Description(
+		shortDefinition="The kind of relationship",
+		formalDefinition="The nature of the relationship between the patient and the contact person"
+	)
 	private List<CodeableConceptDt> myRelationship;
 	
 	@Child(name="name", type=HumanNameDt.class, order=1, min=0, max=1)	
+	@Description(
+		shortDefinition="A name associated with the person",
+		formalDefinition="A name associated with the person"
+	)
 	private HumanNameDt myName;
 	
 	@Child(name="telecom", type=ContactDt.class, order=2, min=0, max=Child.MAX_UNLIMITED)	
+	@Description(
+		shortDefinition="A contact detail for the person",
+		formalDefinition="A contact detail for the person, e.g. a telephone number or an email address."
+	)
 	private List<ContactDt> myTelecom;
 	
 	@Child(name="address", type=AddressDt.class, order=3, min=0, max=1)	
+	@Description(
+		shortDefinition="Address for the contact person",
+		formalDefinition="Address for the contact person"
+	)
 	private AddressDt myAddress;
 	
 	@Child(name="gender", type=CodeableConceptDt.class, order=4, min=0, max=1)	
-	private CodeableConceptDt myGender;
+	@Description(
+		shortDefinition="Gender for administrative purposes",
+		formalDefinition="Administrative Gender - the gender that the person is considered to have for administration and record keeping purposes."
+	)
+	private BoundCodeableConceptDt<AdministrativeGenderCodesEnum> myGender;
 	
-	@Child(name="organization", order=5, min=0, max=1)
-	@ChildResource(types= {
+	@Child(name="organization", order=5, min=0, max=1, type={
 		Organization.class,
-	})	
+	})
+	@Description(
+		shortDefinition="Organization that is associated with the contact",
+		formalDefinition="Organization on behalf of which the contact is acting or for which the contact is working."
+	)
 	private ResourceReference myOrganization;
 	
 
@@ -1114,12 +1227,12 @@ public class Patient extends BaseResource implements IResource {
 	 *
      * <p>
      * <b>Definition:</b>
-     * Administrative Gender - the gender that the person is considered to have for administration and record keeping purposes. 
+     * Administrative Gender - the gender that the person is considered to have for administration and record keeping purposes.
      * </p> 
 	 */
-	public CodeableConceptDt getGender() {  
+	public BoundCodeableConceptDt<AdministrativeGenderCodesEnum> getGender() {  
 		if (myGender == null) {
-			myGender = new CodeableConceptDt();
+			myGender = new BoundCodeableConceptDt<AdministrativeGenderCodesEnum>(AdministrativeGenderCodesEnum.VALUESET_BINDER);
 		}
 		return myGender;
 	}
@@ -1129,13 +1242,25 @@ public class Patient extends BaseResource implements IResource {
 	 *
      * <p>
      * <b>Definition:</b>
-     * Administrative Gender - the gender that the person is considered to have for administration and record keeping purposes. 
+     * Administrative Gender - the gender that the person is considered to have for administration and record keeping purposes.
      * </p> 
 	 */
-	public void setGender(CodeableConceptDt theValue) {
+	public void setGender(BoundCodeableConceptDt<AdministrativeGenderCodesEnum> theValue) {
 		myGender = theValue;
 	}
 
+
+	/**
+	 * Sets the value(s) for <b>gender</b> (Gender for administrative purposes)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Administrative Gender - the gender that the person is considered to have for administration and record keeping purposes.
+     * </p> 
+	 */
+	public void setGender(AdministrativeGenderCodesEnum theValue) {
+		getGender().setValueAsEnum(theValue);
+	}
 
   
 	/**
@@ -1185,12 +1310,24 @@ public class Patient extends BaseResource implements IResource {
 	public static class Animal extends BaseElement implements IResourceBlock {
 	
 	@Child(name="species", type=CodeableConceptDt.class, order=0, min=1, max=1)	
-	private CodeableConceptDt mySpecies;
+	@Description(
+		shortDefinition="E.g. Dog, Cow",
+		formalDefinition="Identifies the high level categorization of the kind of animal"
+	)
+	private BoundCodeableConceptDt<AnimalSpeciesEnum> mySpecies;
 	
 	@Child(name="breed", type=CodeableConceptDt.class, order=1, min=0, max=1)	
+	@Description(
+		shortDefinition="E.g. Poodle, Angus",
+		formalDefinition="Identifies the detailed categorization of the kind of animal."
+	)
 	private CodeableConceptDt myBreed;
 	
 	@Child(name="genderStatus", type=CodeableConceptDt.class, order=2, min=0, max=1)	
+	@Description(
+		shortDefinition="E.g. Neutered, Intact",
+		formalDefinition="Indicates the current state of the animal's reproductive organs"
+	)
 	private CodeableConceptDt myGenderStatus;
 	
 
@@ -1209,9 +1346,9 @@ public class Patient extends BaseResource implements IResource {
      * Identifies the high level categorization of the kind of animal
      * </p> 
 	 */
-	public CodeableConceptDt getSpecies() {  
+	public BoundCodeableConceptDt<AnimalSpeciesEnum> getSpecies() {  
 		if (mySpecies == null) {
-			mySpecies = new CodeableConceptDt();
+			mySpecies = new BoundCodeableConceptDt<AnimalSpeciesEnum>(AnimalSpeciesEnum.VALUESET_BINDER);
 		}
 		return mySpecies;
 	}
@@ -1224,10 +1361,22 @@ public class Patient extends BaseResource implements IResource {
      * Identifies the high level categorization of the kind of animal
      * </p> 
 	 */
-	public void setSpecies(CodeableConceptDt theValue) {
+	public void setSpecies(BoundCodeableConceptDt<AnimalSpeciesEnum> theValue) {
 		mySpecies = theValue;
 	}
 
+
+	/**
+	 * Sets the value(s) for <b>species</b> (E.g. Dog, Cow)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Identifies the high level categorization of the kind of animal
+     * </p> 
+	 */
+	public void setSpecies(AnimalSpeciesEnum theValue) {
+		getSpecies().setValueAsEnum(theValue);
+	}
 
   
 	/**
@@ -1307,13 +1456,20 @@ public class Patient extends BaseResource implements IResource {
 	@Block(name="Patient.link")	
 	public static class Link extends BaseElement implements IResourceBlock {
 	
-	@Child(name="other", order=0, min=1, max=1)
-	@ChildResource(types= {
+	@Child(name="other", order=0, min=1, max=1, type={
 		Patient.class,
-	})	
+	})
+	@Description(
+		shortDefinition="The other patient resource that the link refers to",
+		formalDefinition="The other patient resource that the link refers to"
+	)
 	private ResourceReference myOther;
 	
 	@Child(name="type", type=CodeDt.class, order=1, min=1, max=1)	
+	@Description(
+		shortDefinition="replace | refer | seealso - type of link",
+		formalDefinition="The type of link between this patient resource and another patient resource."
+	)
 	private BoundCodeDt<LinkTypeEnum> myType;
 	
 

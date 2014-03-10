@@ -12,14 +12,14 @@ public enum LocationModeEnum {
 	 *
 	 * The Location resource represents a specific instance of a Location.
 	 */
-	INSTANCE("instance"),
+	INSTANCE("instance", "http://hl7.org/fhir/location-mode"),
 	
 	/**
 	 * Code Value: <b>kind</b>
 	 *
 	 * The Location represents a class of Locations.
 	 */
-	KIND("kind"),
+	KIND("kind", "http://hl7.org/fhir/location-mode"),
 	
 	;
 	
@@ -36,11 +36,19 @@ public enum LocationModeEnum {
 	public static final String VALUESET_NAME = "LocationMode";
 
 	private static Map<String, LocationModeEnum> CODE_TO_ENUM = new HashMap<String, LocationModeEnum>();
-	private String myCode;
+	private static Map<String, Map<String, LocationModeEnum>> SYSTEM_TO_CODE_TO_ENUM = new HashMap<String, Map<String, LocationModeEnum>>();
+	
+	private final String myCode;
+	private final String mySystem;
 	
 	static {
 		for (LocationModeEnum next : LocationModeEnum.values()) {
 			CODE_TO_ENUM.put(next.getCode(), next);
+			
+			if (!SYSTEM_TO_CODE_TO_ENUM.containsKey(next.getSystem())) {
+				SYSTEM_TO_CODE_TO_ENUM.put(next.getSystem(), new HashMap<String, LocationModeEnum>());
+			}
+			SYSTEM_TO_CODE_TO_ENUM.get(next.getSystem()).put(next.getCode(), next);			
 		}
 	}
 	
@@ -49,6 +57,13 @@ public enum LocationModeEnum {
 	 */
 	public String getCode() {
 		return myCode;
+	}
+	
+	/**
+	 * Returns the code system associated with this enumerated value
+	 */
+	public String getSystem() {
+		return mySystem;
 	}
 	
 	/**
@@ -67,18 +82,34 @@ public enum LocationModeEnum {
 		public String toCodeString(LocationModeEnum theEnum) {
 			return theEnum.getCode();
 		}
+
+		@Override
+		public String toSystemString(LocationModeEnum theEnum) {
+			return theEnum.getSystem();
+		}
 		
 		@Override
 		public LocationModeEnum fromCodeString(String theCodeString) {
 			return CODE_TO_ENUM.get(theCodeString);
 		}
+		
+		@Override
+		public LocationModeEnum fromCodeString(String theCodeString, String theSystemString) {
+			Map<String, LocationModeEnum> map = SYSTEM_TO_CODE_TO_ENUM.get(theSystemString);
+			if (map == null) {
+				return null;
+			}
+			return map.get(theCodeString);
+		}
+		
 	};
 	
 	/** 
 	 * Constructor
 	 */
-	LocationModeEnum(String theCode) {
+	LocationModeEnum(String theCode, String theSystem) {
 		myCode = theCode;
+		mySystem = theSystem;
 	}
 
 	

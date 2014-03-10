@@ -68,7 +68,24 @@ public abstract class BaseElement {
 	}
 
 	public String getDefinition() {
-		return defaultString(myDefinition, "");
+		return toStringConstant(myDefinition);
+	}
+
+	private String toStringConstant(String theDefinition) {
+		if (theDefinition==null) {
+			return "";
+		}
+		StringBuffer b = new StringBuffer();
+		for (char next : theDefinition.toCharArray()) {
+			if (next < ' ') {
+				continue;
+			}
+			if (next == '"') {
+				b.append('\\');
+			}
+			b.append(next);
+		}
+		return b.toString().trim();
 	}
 
 	public String getElementName() {
@@ -98,7 +115,7 @@ public abstract class BaseElement {
 	}
 
 	public String getShortName() {
-		return defaultString(myShortName);
+		return toStringConstant(myShortName);
 	}
 
 	public List<String> getType() {

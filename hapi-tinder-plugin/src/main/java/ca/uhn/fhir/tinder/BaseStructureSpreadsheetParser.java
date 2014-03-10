@@ -53,6 +53,10 @@ public abstract class BaseStructureSpreadsheetParser extends BaseStructureParser
 
 			parseBasicElements(resourceRow, resource);
 
+			if (this instanceof ResourceGeneratorUsingSpreadsheet) {
+				resource.setProfile("http://hl7.org/fhir/profiles/" + resource.getElementName());
+			}
+			
 			Map<String, BaseElement> elements = new HashMap<String, BaseElement>();
 			elements.put(resource.getElementName(), resource);
 

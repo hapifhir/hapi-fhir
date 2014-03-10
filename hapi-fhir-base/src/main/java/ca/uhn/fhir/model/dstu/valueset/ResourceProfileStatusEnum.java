@@ -12,21 +12,21 @@ public enum ResourceProfileStatusEnum {
 	 *
 	 * This profile is still under development.
 	 */
-	DRAFT("draft"),
+	DRAFT("draft", "http://hl7.org/fhir/resource-profile-status"),
 	
 	/**
 	 * Code Value: <b>active</b>
 	 *
 	 * This profile is ready for normal use.
 	 */
-	ACTIVE("active"),
+	ACTIVE("active", "http://hl7.org/fhir/resource-profile-status"),
 	
 	/**
 	 * Code Value: <b>retired</b>
 	 *
 	 * This profile has been deprecated, withdrawn or superseded and should no longer be used.
 	 */
-	RETIRED("retired"),
+	RETIRED("retired", "http://hl7.org/fhir/resource-profile-status"),
 	
 	;
 	
@@ -43,11 +43,19 @@ public enum ResourceProfileStatusEnum {
 	public static final String VALUESET_NAME = "ResourceProfileStatus";
 
 	private static Map<String, ResourceProfileStatusEnum> CODE_TO_ENUM = new HashMap<String, ResourceProfileStatusEnum>();
-	private String myCode;
+	private static Map<String, Map<String, ResourceProfileStatusEnum>> SYSTEM_TO_CODE_TO_ENUM = new HashMap<String, Map<String, ResourceProfileStatusEnum>>();
+	
+	private final String myCode;
+	private final String mySystem;
 	
 	static {
 		for (ResourceProfileStatusEnum next : ResourceProfileStatusEnum.values()) {
 			CODE_TO_ENUM.put(next.getCode(), next);
+			
+			if (!SYSTEM_TO_CODE_TO_ENUM.containsKey(next.getSystem())) {
+				SYSTEM_TO_CODE_TO_ENUM.put(next.getSystem(), new HashMap<String, ResourceProfileStatusEnum>());
+			}
+			SYSTEM_TO_CODE_TO_ENUM.get(next.getSystem()).put(next.getCode(), next);			
 		}
 	}
 	
@@ -56,6 +64,13 @@ public enum ResourceProfileStatusEnum {
 	 */
 	public String getCode() {
 		return myCode;
+	}
+	
+	/**
+	 * Returns the code system associated with this enumerated value
+	 */
+	public String getSystem() {
+		return mySystem;
 	}
 	
 	/**
@@ -74,18 +89,34 @@ public enum ResourceProfileStatusEnum {
 		public String toCodeString(ResourceProfileStatusEnum theEnum) {
 			return theEnum.getCode();
 		}
+
+		@Override
+		public String toSystemString(ResourceProfileStatusEnum theEnum) {
+			return theEnum.getSystem();
+		}
 		
 		@Override
 		public ResourceProfileStatusEnum fromCodeString(String theCodeString) {
 			return CODE_TO_ENUM.get(theCodeString);
 		}
+		
+		@Override
+		public ResourceProfileStatusEnum fromCodeString(String theCodeString, String theSystemString) {
+			Map<String, ResourceProfileStatusEnum> map = SYSTEM_TO_CODE_TO_ENUM.get(theSystemString);
+			if (map == null) {
+				return null;
+			}
+			return map.get(theCodeString);
+		}
+		
 	};
 	
 	/** 
 	 * Constructor
 	 */
-	ResourceProfileStatusEnum(String theCode) {
+	ResourceProfileStatusEnum(String theCode, String theSystem) {
 		myCode = theCode;
+		mySystem = theSystem;
 	}
 
 	

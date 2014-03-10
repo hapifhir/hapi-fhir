@@ -11,7 +11,7 @@ public class BoundCodeDt<T extends Enum<?>> extends CodeDt {
 	public BoundCodeDt(IValueSetEnumBinder<T> theBinder) {
 		myBinder = theBinder;
 	}
-	
+
 	public BoundCodeDt(IValueSetEnumBinder<T> theBinder, T theValue) {
 		myBinder = theBinder;
 		setValueAsEnum(theValue);
@@ -20,8 +20,12 @@ public class BoundCodeDt<T extends Enum<?>> extends CodeDt {
 	public void setValueAsEnum(T theValue) {
 		setValue(myBinder.toCodeString(theValue));
 	}
-	
+
 	public T getValueAsEnum() {
-		return myBinder.fromCodeString(getValue());
+		T retVal = myBinder.fromCodeString(getValue());
+		if (retVal == null) {
+			// TODO: throw special exception type?
+		}
+		return retVal;
 	}
 }

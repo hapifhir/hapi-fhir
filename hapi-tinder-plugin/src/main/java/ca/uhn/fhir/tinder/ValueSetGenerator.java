@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -16,7 +15,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.text.WordUtils;
 import org.apache.maven.plugin.MojoFailureException;
@@ -27,10 +25,12 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.dstu.resource.ValueSet;
+import ca.uhn.fhir.model.dstu.resource.ValueSet.ComposeInclude;
+import ca.uhn.fhir.model.dstu.resource.ValueSet.Define;
 import ca.uhn.fhir.model.dstu.resource.ValueSet.DefineConcept;
+import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.tinder.model.ValueSetTm;
-import ca.uhn.fhir.tinder.model.ValueSetTm.Code;
 
 public class ValueSetGenerator {
 
@@ -52,6 +52,10 @@ public class ValueSetGenerator {
 		}
 	}
 
+	public Map<String, ValueSetTm> getValueSets() {
+		return myValueSets;
+	}
+
 	public void parse() throws FileNotFoundException, IOException {
 		IParser newXmlParser = new FhirContext(ValueSet.class).newXmlParser();
 
@@ -70,12 +74,14 @@ public class ValueSetGenerator {
 				vs = IOUtils.toString(new FileReader(file));
 				ValueSet nextVs = (ValueSet) newXmlParser.parseResource(vs);
 				ValueSetTm tm = parseValueSet(nextVs);
-				
+
 				myMarkedValueSets.add(tm);
 			}
 		}
 
-		// File[] files = new File(myResourceValueSetFiles).listFiles((FilenameFilter) new WildcardFileFilter("*.xml"));
+		// File[] files = new
+		// File(myResourceValueSetFiles).listFiles((FilenameFilter) new
+		// WildcardFileFilter("*.xml"));
 		// for (File file : files) {
 		// ourLog.info("Parsing ValueSet file: {}" + file.getName());
 		// vs = IOUtils.toString(new FileReader(file));
@@ -98,12 +104,23 @@ public class ValueSetGenerator {
 		vs.setId(nextVs.getIdentifier().getValue());
 		vs.setClassName(toClassName(nextVs.getName().getValue()));
 
-		for (DefineConcept nextConcept : nextVs.getDefine().getConcept()) {
-			String nextCodeValue = nextConcept.getCode().getValue();
-			String nextCodeDisplay = StringUtils.defaultString(nextConcept.getDisplay().getValue());
-			String nextCodeDefinition = StringUtils.defaultString(nextConcept.getDefinition().getValue());
+		{
+			Define define = nextVs.getDefine();
+			String system = define.getSystem().getValueAsString();
+			for (DefineConcept nextConcept : define.getConcept()) {
+				String nextCodeValue = nextConcept.getCode().getValue();
+				String nextCodeDisplay = StringUtils.defaultString(nextConcept.getDisplay().getValue());
+				String nextCodeDefinition = StringUtils.defaultString(nextConcept.getDefinition().getValue());
+				vs.addConcept(system, nextCodeValue, nextCodeDisplay, nextCodeDefinition);
+			}
+		}
 
-			vs.getCodes().add(new Code(nextCodeValue, nextCodeDisplay, nextCodeDefinition));
+		for (ComposeInclude nextInclude : nextVs.getCompose().getInclude()) {
+			String system = nextInclude.getSystem().getValueAsString();
+			for (CodeDt nextConcept : nextInclude.getCode()) {
+				String nextCodeValue = nextConcept.getValue();
+				vs.addConcept(system, nextCodeValue, null, null);
+			}
 		}
 
 		if (myValueSets.containsKey(vs.getName())) {
@@ -111,6 +128,12 @@ public class ValueSetGenerator {
 		} else {
 			myValueSets.put(vs.getName(), vs);
 		}
+
+		// This is hackish, but deals with "Administrative Gender Codes" vs "AdministrativeGender"
+		if (vs.getName().endsWith(" Codes")) {
+			myValueSets.put(vs.getName().substring(0, vs.getName().length() - 6).replace(" ", ""), vs);
+		}
+		myValueSets.put(vs.getName().replace(" ", ""), vs);
 		
 		return vs;
 	}

@@ -13,6 +13,8 @@ public @interface ResourceDef {
 
 	String name();
 	
+	String profile() default "";
+	
 	int identifierOrder() default ORDER_NOT_SPECIFIED;
 	
 }

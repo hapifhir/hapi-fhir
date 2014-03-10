@@ -29,7 +29,7 @@ import ca.uhn.fhir.model.dstu.resource.*;
  *
  * <p>
  * <b>Definition:</b>
- * A set of ordered Quantities defined by a low and high limit. 
+ * A set of ordered Quantities defined by a low and high limit.
  * </p> 
  *
  * <p>
@@ -42,9 +42,17 @@ public class RangeDt extends BaseElement implements ICompositeDatatype  {
 
 
 	@Child(name="low", type=QuantityDt.class, order=0, min=0, max=1)	
+	@Description(
+		shortDefinition="Low limit",
+		formalDefinition="The low limit. The boundary is inclusive."
+	)
 	private QuantityDt myLow;
 	
 	@Child(name="high", type=QuantityDt.class, order=1, min=0, max=1)	
+	@Description(
+		shortDefinition="High limit",
+		formalDefinition="The high limit. The boundary is inclusive."
+	)
 	private QuantityDt myHigh;
 	
 
@@ -54,7 +62,7 @@ public class RangeDt extends BaseElement implements ICompositeDatatype  {
 	}
 
 	/**
-	 * Gets the value(s) for <b>low</b> (Low limit ).
+	 * Gets the value(s) for <b>low</b> (Low limit).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -71,7 +79,7 @@ public class RangeDt extends BaseElement implements ICompositeDatatype  {
 	}
 
 	/**
-	 * Sets the value(s) for <b>low</b> (Low limit )
+	 * Sets the value(s) for <b>low</b> (Low limit)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -85,13 +93,13 @@ public class RangeDt extends BaseElement implements ICompositeDatatype  {
 
   
 	/**
-	 * Gets the value(s) for <b>high</b> (High limit ).
+	 * Gets the value(s) for <b>high</b> (High limit).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
-     * The high limit. The boundary is inclusive. 
+     * The high limit. The boundary is inclusive.
      * </p> 
 	 */
 	public QuantityDt getHigh() {  
@@ -102,11 +110,11 @@ public class RangeDt extends BaseElement implements ICompositeDatatype  {
 	}
 
 	/**
-	 * Sets the value(s) for <b>high</b> (High limit )
+	 * Sets the value(s) for <b>high</b> (High limit)
 	 *
      * <p>
      * <b>Definition:</b>
-     * The high limit. The boundary is inclusive. 
+     * The high limit. The boundary is inclusive.
      * </p> 
 	 */
 	public void setHigh(QuantityDt theValue) {

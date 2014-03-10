@@ -11,55 +11,55 @@ public enum OrganizationTypeEnum {
 	 * Display: <b>Healthcare Provider</b><br/>
 	 * Code Value: <b>prov</b>
 	 */
-	HEALTHCARE_PROVIDER("prov"),
+	HEALTHCARE_PROVIDER("prov", "http://hl7.org/fhir/organization-type"),
 	
 	/**
 	 * Display: <b>Hospital Department</b><br/>
 	 * Code Value: <b>dept</b>
 	 */
-	HOSPITAL_DEPARTMENT("dept"),
+	HOSPITAL_DEPARTMENT("dept", "http://hl7.org/fhir/organization-type"),
 	
 	/**
 	 * Display: <b>Intensive Care Unit</b><br/>
 	 * Code Value: <b>icu</b>
 	 */
-	INTENSIVE_CARE_UNIT("icu"),
+	INTENSIVE_CARE_UNIT("icu", "http://hl7.org/fhir/organization-type"),
 	
 	/**
 	 * Display: <b>Organizational team</b><br/>
 	 * Code Value: <b>team</b>
 	 */
-	ORGANIZATIONAL_TEAM("team"),
+	ORGANIZATIONAL_TEAM("team", "http://hl7.org/fhir/organization-type"),
 	
 	/**
 	 * Display: <b>Federal Government</b><br/>
 	 * Code Value: <b>fed</b>
 	 */
-	FEDERAL_GOVERNMENT("fed"),
+	FEDERAL_GOVERNMENT("fed", "http://hl7.org/fhir/organization-type"),
 	
 	/**
 	 * Display: <b>Insurance Company</b><br/>
 	 * Code Value: <b>ins</b>
 	 */
-	INSURANCE_COMPANY("ins"),
+	INSURANCE_COMPANY("ins", "http://hl7.org/fhir/organization-type"),
 	
 	/**
 	 * Display: <b>Educational Institute</b><br/>
 	 * Code Value: <b>edu</b>
 	 */
-	EDUCATIONAL_INSTITUTE("edu"),
+	EDUCATIONAL_INSTITUTE("edu", "http://hl7.org/fhir/organization-type"),
 	
 	/**
 	 * Display: <b>Religious Institution</b><br/>
 	 * Code Value: <b>reli</b>
 	 */
-	RELIGIOUS_INSTITUTION("reli"),
+	RELIGIOUS_INSTITUTION("reli", "http://hl7.org/fhir/organization-type"),
 	
 	/**
 	 * Display: <b>Pharmacy</b><br/>
 	 * Code Value: <b>pharm</b>
 	 */
-	PHARMACY("pharm"),
+	PHARMACY("pharm", "http://hl7.org/fhir/organization-type"),
 	
 	;
 	
@@ -76,11 +76,19 @@ public enum OrganizationTypeEnum {
 	public static final String VALUESET_NAME = "OrganizationType";
 
 	private static Map<String, OrganizationTypeEnum> CODE_TO_ENUM = new HashMap<String, OrganizationTypeEnum>();
-	private String myCode;
+	private static Map<String, Map<String, OrganizationTypeEnum>> SYSTEM_TO_CODE_TO_ENUM = new HashMap<String, Map<String, OrganizationTypeEnum>>();
+	
+	private final String myCode;
+	private final String mySystem;
 	
 	static {
 		for (OrganizationTypeEnum next : OrganizationTypeEnum.values()) {
 			CODE_TO_ENUM.put(next.getCode(), next);
+			
+			if (!SYSTEM_TO_CODE_TO_ENUM.containsKey(next.getSystem())) {
+				SYSTEM_TO_CODE_TO_ENUM.put(next.getSystem(), new HashMap<String, OrganizationTypeEnum>());
+			}
+			SYSTEM_TO_CODE_TO_ENUM.get(next.getSystem()).put(next.getCode(), next);			
 		}
 	}
 	
@@ -89,6 +97,13 @@ public enum OrganizationTypeEnum {
 	 */
 	public String getCode() {
 		return myCode;
+	}
+	
+	/**
+	 * Returns the code system associated with this enumerated value
+	 */
+	public String getSystem() {
+		return mySystem;
 	}
 	
 	/**
@@ -107,18 +122,34 @@ public enum OrganizationTypeEnum {
 		public String toCodeString(OrganizationTypeEnum theEnum) {
 			return theEnum.getCode();
 		}
+
+		@Override
+		public String toSystemString(OrganizationTypeEnum theEnum) {
+			return theEnum.getSystem();
+		}
 		
 		@Override
 		public OrganizationTypeEnum fromCodeString(String theCodeString) {
 			return CODE_TO_ENUM.get(theCodeString);
 		}
+		
+		@Override
+		public OrganizationTypeEnum fromCodeString(String theCodeString, String theSystemString) {
+			Map<String, OrganizationTypeEnum> map = SYSTEM_TO_CODE_TO_ENUM.get(theSystemString);
+			if (map == null) {
+				return null;
+			}
+			return map.get(theCodeString);
+		}
+		
 	};
 	
 	/** 
 	 * Constructor
 	 */
-	OrganizationTypeEnum(String theCode) {
+	OrganizationTypeEnum(String theCode, String theSystem) {
 		myCode = theCode;
+		mySystem = theSystem;
 	}
 
 	

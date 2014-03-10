@@ -8,6 +8,8 @@ import java.util.Set;
 import ca.uhn.fhir.model.api.ICodeEnum;
 import ca.uhn.fhir.model.api.IDatatype;
 import ca.uhn.fhir.model.api.IElement;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
 
 public abstract class BaseRuntimeChildDatatypeDefinition extends BaseRuntimeDeclaredChildDefinition {
 
@@ -16,8 +18,8 @@ public abstract class BaseRuntimeChildDatatypeDefinition extends BaseRuntimeDecl
 
 	private BaseRuntimeElementDefinition<?> myElementDefinition;
 
-	public BaseRuntimeChildDatatypeDefinition(Field theField, String theElementName, int theMin, int theMax, Class<? extends IDatatype> theDatatype) {
-		super(theField, theMin, theMax, theElementName);
+	public BaseRuntimeChildDatatypeDefinition(Field theField, String theElementName, Child theChildAnnotation, Description theDescriptionAnnotation, Class<? extends IDatatype> theDatatype) {
+		super(theField, theChildAnnotation, theDescriptionAnnotation, theElementName);
 		
 		myDatatype = theDatatype;
 	}

@@ -33,6 +33,7 @@ public class InstantDt extends BaseDateTimeDt {
 	public InstantDt(@SimpleSetter.Parameter(name = "theDate") Date theDate, @SimpleSetter.Parameter(name = "thePrecision") TemporalPrecisionEnum thePrecision) {
 		setValue(theDate);
 		setPrecision(thePrecision);
+		setTimeZone(TimeZone.getDefault());
 	}
 
 	/**
@@ -42,6 +43,7 @@ public class InstantDt extends BaseDateTimeDt {
 	public InstantDt(@SimpleSetter.Parameter(name="theDate") Date theDate) {
 		setValue(theDate);
 		setPrecision(DEFAULT_PRECISION);
+		setTimeZone(TimeZone.getDefault());
 	}
 
 	@Override

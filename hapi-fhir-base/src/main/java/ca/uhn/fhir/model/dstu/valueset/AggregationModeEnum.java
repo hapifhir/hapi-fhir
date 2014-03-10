@@ -12,14 +12,14 @@ public enum AggregationModeEnum {
 	 *
 	 * The reference is a local reference to a contained resource.
 	 */
-	CONTAINED("contained"),
+	CONTAINED("contained", "http://hl7.org/fhir/resource-aggregation-mode"),
 	
 	/**
 	 * Code Value: <b>referenced</b>
 	 *
 	 * The reference to to a resource that has to be resolved externally to the resource that includes the reference.
 	 */
-	REFERENCED("referenced"),
+	REFERENCED("referenced", "http://hl7.org/fhir/resource-aggregation-mode"),
 	
 	;
 	
@@ -36,11 +36,19 @@ public enum AggregationModeEnum {
 	public static final String VALUESET_NAME = "AggregationMode";
 
 	private static Map<String, AggregationModeEnum> CODE_TO_ENUM = new HashMap<String, AggregationModeEnum>();
-	private String myCode;
+	private static Map<String, Map<String, AggregationModeEnum>> SYSTEM_TO_CODE_TO_ENUM = new HashMap<String, Map<String, AggregationModeEnum>>();
+	
+	private final String myCode;
+	private final String mySystem;
 	
 	static {
 		for (AggregationModeEnum next : AggregationModeEnum.values()) {
 			CODE_TO_ENUM.put(next.getCode(), next);
+			
+			if (!SYSTEM_TO_CODE_TO_ENUM.containsKey(next.getSystem())) {
+				SYSTEM_TO_CODE_TO_ENUM.put(next.getSystem(), new HashMap<String, AggregationModeEnum>());
+			}
+			SYSTEM_TO_CODE_TO_ENUM.get(next.getSystem()).put(next.getCode(), next);			
 		}
 	}
 	
@@ -49,6 +57,13 @@ public enum AggregationModeEnum {
 	 */
 	public String getCode() {
 		return myCode;
+	}
+	
+	/**
+	 * Returns the code system associated with this enumerated value
+	 */
+	public String getSystem() {
+		return mySystem;
 	}
 	
 	/**
@@ -67,18 +82,34 @@ public enum AggregationModeEnum {
 		public String toCodeString(AggregationModeEnum theEnum) {
 			return theEnum.getCode();
 		}
+
+		@Override
+		public String toSystemString(AggregationModeEnum theEnum) {
+			return theEnum.getSystem();
+		}
 		
 		@Override
 		public AggregationModeEnum fromCodeString(String theCodeString) {
 			return CODE_TO_ENUM.get(theCodeString);
 		}
+		
+		@Override
+		public AggregationModeEnum fromCodeString(String theCodeString, String theSystemString) {
+			Map<String, AggregationModeEnum> map = SYSTEM_TO_CODE_TO_ENUM.get(theSystemString);
+			if (map == null) {
+				return null;
+			}
+			return map.get(theCodeString);
+		}
+		
 	};
 	
 	/** 
 	 * Constructor
 	 */
-	AggregationModeEnum(String theCode) {
+	AggregationModeEnum(String theCode, String theSystem) {
 		myCode = theCode;
+		mySystem = theSystem;
 	}
 
 	

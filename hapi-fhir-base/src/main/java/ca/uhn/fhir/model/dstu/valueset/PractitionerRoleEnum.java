@@ -10,34 +10,34 @@ public enum PractitionerRoleEnum {
 	/**
 	 * Code Value: <b>doctor</b>
 	 */
-	DOCTOR("doctor"),
+	DOCTOR("doctor", "http://hl7.org/fhir/practitioner-role"),
 	
 	/**
 	 * Code Value: <b>nurse</b>
 	 */
-	NURSE("nurse"),
+	NURSE("nurse", "http://hl7.org/fhir/practitioner-role"),
 	
 	/**
 	 * Code Value: <b>pharmacist</b>
 	 */
-	PHARMACIST("pharmacist"),
+	PHARMACIST("pharmacist", "http://hl7.org/fhir/practitioner-role"),
 	
 	/**
 	 * Code Value: <b>researcher</b>
 	 */
-	RESEARCHER("researcher"),
+	RESEARCHER("researcher", "http://hl7.org/fhir/practitioner-role"),
 	
 	/**
 	 * Display: <b>Teacher/educator</b><br/>
 	 * Code Value: <b>teacher</b>
 	 */
-	TEACHER_EDUCATOR("teacher"),
+	TEACHER_EDUCATOR("teacher", "http://hl7.org/fhir/practitioner-role"),
 	
 	/**
 	 * Display: <b>ICT professional</b><br/>
 	 * Code Value: <b>ict</b>
 	 */
-	ICT_PROFESSIONAL("ict"),
+	ICT_PROFESSIONAL("ict", "http://hl7.org/fhir/practitioner-role"),
 	
 	;
 	
@@ -54,11 +54,19 @@ public enum PractitionerRoleEnum {
 	public static final String VALUESET_NAME = "PractitionerRole";
 
 	private static Map<String, PractitionerRoleEnum> CODE_TO_ENUM = new HashMap<String, PractitionerRoleEnum>();
-	private String myCode;
+	private static Map<String, Map<String, PractitionerRoleEnum>> SYSTEM_TO_CODE_TO_ENUM = new HashMap<String, Map<String, PractitionerRoleEnum>>();
+	
+	private final String myCode;
+	private final String mySystem;
 	
 	static {
 		for (PractitionerRoleEnum next : PractitionerRoleEnum.values()) {
 			CODE_TO_ENUM.put(next.getCode(), next);
+			
+			if (!SYSTEM_TO_CODE_TO_ENUM.containsKey(next.getSystem())) {
+				SYSTEM_TO_CODE_TO_ENUM.put(next.getSystem(), new HashMap<String, PractitionerRoleEnum>());
+			}
+			SYSTEM_TO_CODE_TO_ENUM.get(next.getSystem()).put(next.getCode(), next);			
 		}
 	}
 	
@@ -67,6 +75,13 @@ public enum PractitionerRoleEnum {
 	 */
 	public String getCode() {
 		return myCode;
+	}
+	
+	/**
+	 * Returns the code system associated with this enumerated value
+	 */
+	public String getSystem() {
+		return mySystem;
 	}
 	
 	/**
@@ -85,18 +100,34 @@ public enum PractitionerRoleEnum {
 		public String toCodeString(PractitionerRoleEnum theEnum) {
 			return theEnum.getCode();
 		}
+
+		@Override
+		public String toSystemString(PractitionerRoleEnum theEnum) {
+			return theEnum.getSystem();
+		}
 		
 		@Override
 		public PractitionerRoleEnum fromCodeString(String theCodeString) {
 			return CODE_TO_ENUM.get(theCodeString);
 		}
+		
+		@Override
+		public PractitionerRoleEnum fromCodeString(String theCodeString, String theSystemString) {
+			Map<String, PractitionerRoleEnum> map = SYSTEM_TO_CODE_TO_ENUM.get(theSystemString);
+			if (map == null) {
+				return null;
+			}
+			return map.get(theCodeString);
+		}
+		
 	};
 	
 	/** 
 	 * Constructor
 	 */
-	PractitionerRoleEnum(String theCode) {
+	PractitionerRoleEnum(String theCode, String theSystem) {
 		myCode = theCode;
+		mySystem = theSystem;
 	}
 
 	

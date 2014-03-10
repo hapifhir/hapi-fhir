@@ -12,21 +12,21 @@ public enum ValueSetStatusEnum {
 	 *
 	 * This valueset is still under development.
 	 */
-	DRAFT("draft"),
+	DRAFT("draft", "http://hl7.org/fhir/valueset-status"),
 	
 	/**
 	 * Code Value: <b>active</b>
 	 *
 	 * This valueset is ready for normal use.
 	 */
-	ACTIVE("active"),
+	ACTIVE("active", "http://hl7.org/fhir/valueset-status"),
 	
 	/**
 	 * Code Value: <b>retired</b>
 	 *
 	 * This valueset has been withdrawn or superceded and should no longer be used.
 	 */
-	RETIRED("retired"),
+	RETIRED("retired", "http://hl7.org/fhir/valueset-status"),
 	
 	;
 	
@@ -43,11 +43,19 @@ public enum ValueSetStatusEnum {
 	public static final String VALUESET_NAME = "ValueSetStatus";
 
 	private static Map<String, ValueSetStatusEnum> CODE_TO_ENUM = new HashMap<String, ValueSetStatusEnum>();
-	private String myCode;
+	private static Map<String, Map<String, ValueSetStatusEnum>> SYSTEM_TO_CODE_TO_ENUM = new HashMap<String, Map<String, ValueSetStatusEnum>>();
+	
+	private final String myCode;
+	private final String mySystem;
 	
 	static {
 		for (ValueSetStatusEnum next : ValueSetStatusEnum.values()) {
 			CODE_TO_ENUM.put(next.getCode(), next);
+			
+			if (!SYSTEM_TO_CODE_TO_ENUM.containsKey(next.getSystem())) {
+				SYSTEM_TO_CODE_TO_ENUM.put(next.getSystem(), new HashMap<String, ValueSetStatusEnum>());
+			}
+			SYSTEM_TO_CODE_TO_ENUM.get(next.getSystem()).put(next.getCode(), next);			
 		}
 	}
 	
@@ -56,6 +64,13 @@ public enum ValueSetStatusEnum {
 	 */
 	public String getCode() {
 		return myCode;
+	}
+	
+	/**
+	 * Returns the code system associated with this enumerated value
+	 */
+	public String getSystem() {
+		return mySystem;
 	}
 	
 	/**
@@ -74,18 +89,34 @@ public enum ValueSetStatusEnum {
 		public String toCodeString(ValueSetStatusEnum theEnum) {
 			return theEnum.getCode();
 		}
+
+		@Override
+		public String toSystemString(ValueSetStatusEnum theEnum) {
+			return theEnum.getSystem();
+		}
 		
 		@Override
 		public ValueSetStatusEnum fromCodeString(String theCodeString) {
 			return CODE_TO_ENUM.get(theCodeString);
 		}
+		
+		@Override
+		public ValueSetStatusEnum fromCodeString(String theCodeString, String theSystemString) {
+			Map<String, ValueSetStatusEnum> map = SYSTEM_TO_CODE_TO_ENUM.get(theSystemString);
+			if (map == null) {
+				return null;
+			}
+			return map.get(theCodeString);
+		}
+		
 	};
 	
 	/** 
 	 * Constructor
 	 */
-	ValueSetStatusEnum(String theCode) {
+	ValueSetStatusEnum(String theCode, String theSystem) {
 		myCode = theCode;
+		mySystem = theSystem;
 	}
 
 	

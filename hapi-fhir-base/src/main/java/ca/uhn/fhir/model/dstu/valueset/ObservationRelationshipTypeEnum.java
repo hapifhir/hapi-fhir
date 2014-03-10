@@ -12,49 +12,49 @@ public enum ObservationRelationshipTypeEnum {
 	 *
 	 * The target observation is a component of this observation (e.g. Systolic and Diastolic Blood Pressure).
 	 */
-	HAS_COMPONENT("has-component"),
+	HAS_COMPONENT("has-component", "http://hl7.org/fhir/observation-relationshiptypes"),
 	
 	/**
 	 * Code Value: <b>has-member</b>
 	 *
 	 * This observation is a group observation (e.g. a battery, a panel of tests, a set of vital sign measurements) that includes the target as a member of the group.
 	 */
-	HAS_MEMBER("has-member"),
+	HAS_MEMBER("has-member", "http://hl7.org/fhir/observation-relationshiptypes"),
 	
 	/**
 	 * Code Value: <b>derived-from</b>
 	 *
 	 * The target observation is part of the information from which this observation value is derived (e.g. calculated anion gap, Apgar score).
 	 */
-	DERIVED_FROM("derived-from"),
+	DERIVED_FROM("derived-from", "http://hl7.org/fhir/observation-relationshiptypes"),
 	
 	/**
 	 * Code Value: <b>sequel-to</b>
 	 *
 	 * This observation follows the target observation (e.g. timed tests such as Glucose Tolerance Test).
 	 */
-	SEQUEL_TO("sequel-to"),
+	SEQUEL_TO("sequel-to", "http://hl7.org/fhir/observation-relationshiptypes"),
 	
 	/**
 	 * Code Value: <b>replaces</b>
 	 *
 	 * This observation replaces a previous observation (i.e. a revised value). The target observation is now obsolete.
 	 */
-	REPLACES("replaces"),
+	REPLACES("replaces", "http://hl7.org/fhir/observation-relationshiptypes"),
 	
 	/**
 	 * Code Value: <b>qualified-by</b>
 	 *
 	 * The value of the target observation qualifies (refines) the semantics of the source observation (e.g. a lipaemia measure target from a plasma measure).
 	 */
-	QUALIFIED_BY("qualified-by"),
+	QUALIFIED_BY("qualified-by", "http://hl7.org/fhir/observation-relationshiptypes"),
 	
 	/**
 	 * Code Value: <b>interfered-by</b>
 	 *
 	 * The value of the target observation interferes (degardes quality, or prevents valid observation) with the semantics of the source observation (e.g. a hemolysis measure target from a plasma potassium measure which has no value).
 	 */
-	INTERFERED_BY("interfered-by"),
+	INTERFERED_BY("interfered-by", "http://hl7.org/fhir/observation-relationshiptypes"),
 	
 	;
 	
@@ -71,11 +71,19 @@ public enum ObservationRelationshipTypeEnum {
 	public static final String VALUESET_NAME = "ObservationRelationshipType";
 
 	private static Map<String, ObservationRelationshipTypeEnum> CODE_TO_ENUM = new HashMap<String, ObservationRelationshipTypeEnum>();
-	private String myCode;
+	private static Map<String, Map<String, ObservationRelationshipTypeEnum>> SYSTEM_TO_CODE_TO_ENUM = new HashMap<String, Map<String, ObservationRelationshipTypeEnum>>();
+	
+	private final String myCode;
+	private final String mySystem;
 	
 	static {
 		for (ObservationRelationshipTypeEnum next : ObservationRelationshipTypeEnum.values()) {
 			CODE_TO_ENUM.put(next.getCode(), next);
+			
+			if (!SYSTEM_TO_CODE_TO_ENUM.containsKey(next.getSystem())) {
+				SYSTEM_TO_CODE_TO_ENUM.put(next.getSystem(), new HashMap<String, ObservationRelationshipTypeEnum>());
+			}
+			SYSTEM_TO_CODE_TO_ENUM.get(next.getSystem()).put(next.getCode(), next);			
 		}
 	}
 	
@@ -84,6 +92,13 @@ public enum ObservationRelationshipTypeEnum {
 	 */
 	public String getCode() {
 		return myCode;
+	}
+	
+	/**
+	 * Returns the code system associated with this enumerated value
+	 */
+	public String getSystem() {
+		return mySystem;
 	}
 	
 	/**
@@ -102,18 +117,34 @@ public enum ObservationRelationshipTypeEnum {
 		public String toCodeString(ObservationRelationshipTypeEnum theEnum) {
 			return theEnum.getCode();
 		}
+
+		@Override
+		public String toSystemString(ObservationRelationshipTypeEnum theEnum) {
+			return theEnum.getSystem();
+		}
 		
 		@Override
 		public ObservationRelationshipTypeEnum fromCodeString(String theCodeString) {
 			return CODE_TO_ENUM.get(theCodeString);
 		}
+		
+		@Override
+		public ObservationRelationshipTypeEnum fromCodeString(String theCodeString, String theSystemString) {
+			Map<String, ObservationRelationshipTypeEnum> map = SYSTEM_TO_CODE_TO_ENUM.get(theSystemString);
+			if (map == null) {
+				return null;
+			}
+			return map.get(theCodeString);
+		}
+		
 	};
 	
 	/** 
 	 * Constructor
 	 */
-	ObservationRelationshipTypeEnum(String theCode) {
+	ObservationRelationshipTypeEnum(String theCode, String theSystem) {
 		myCode = theCode;
+		mySystem = theSystem;
 	}
 
 	

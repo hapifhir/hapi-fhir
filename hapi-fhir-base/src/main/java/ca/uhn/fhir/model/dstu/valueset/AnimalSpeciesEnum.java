@@ -13,7 +13,7 @@ public enum AnimalSpeciesEnum {
 	 *
 	 * Canis lupus familiaris
 	 */
-	DOG("canislf"),
+	DOG("canislf", "http://hl7.org/fhir/animal-species"),
 	
 	/**
 	 * Display: <b>Sheep</b><br/>
@@ -21,7 +21,7 @@ public enum AnimalSpeciesEnum {
 	 *
 	 * Ovis aries
 	 */
-	SHEEP("ovisa"),
+	SHEEP("ovisa", "http://hl7.org/fhir/animal-species"),
 	
 	/**
 	 * Display: <b>Domestic Canary</b><br/>
@@ -29,7 +29,7 @@ public enum AnimalSpeciesEnum {
 	 *
 	 * Serinus canaria domestica
 	 */
-	DOMESTIC_CANARY("serinuscd"),
+	DOMESTIC_CANARY("serinuscd", "http://hl7.org/fhir/animal-species"),
 	
 	;
 	
@@ -46,11 +46,19 @@ public enum AnimalSpeciesEnum {
 	public static final String VALUESET_NAME = "AnimalSpecies";
 
 	private static Map<String, AnimalSpeciesEnum> CODE_TO_ENUM = new HashMap<String, AnimalSpeciesEnum>();
-	private String myCode;
+	private static Map<String, Map<String, AnimalSpeciesEnum>> SYSTEM_TO_CODE_TO_ENUM = new HashMap<String, Map<String, AnimalSpeciesEnum>>();
+	
+	private final String myCode;
+	private final String mySystem;
 	
 	static {
 		for (AnimalSpeciesEnum next : AnimalSpeciesEnum.values()) {
 			CODE_TO_ENUM.put(next.getCode(), next);
+			
+			if (!SYSTEM_TO_CODE_TO_ENUM.containsKey(next.getSystem())) {
+				SYSTEM_TO_CODE_TO_ENUM.put(next.getSystem(), new HashMap<String, AnimalSpeciesEnum>());
+			}
+			SYSTEM_TO_CODE_TO_ENUM.get(next.getSystem()).put(next.getCode(), next);			
 		}
 	}
 	
@@ -59,6 +67,13 @@ public enum AnimalSpeciesEnum {
 	 */
 	public String getCode() {
 		return myCode;
+	}
+	
+	/**
+	 * Returns the code system associated with this enumerated value
+	 */
+	public String getSystem() {
+		return mySystem;
 	}
 	
 	/**
@@ -77,18 +92,34 @@ public enum AnimalSpeciesEnum {
 		public String toCodeString(AnimalSpeciesEnum theEnum) {
 			return theEnum.getCode();
 		}
+
+		@Override
+		public String toSystemString(AnimalSpeciesEnum theEnum) {
+			return theEnum.getSystem();
+		}
 		
 		@Override
 		public AnimalSpeciesEnum fromCodeString(String theCodeString) {
 			return CODE_TO_ENUM.get(theCodeString);
 		}
+		
+		@Override
+		public AnimalSpeciesEnum fromCodeString(String theCodeString, String theSystemString) {
+			Map<String, AnimalSpeciesEnum> map = SYSTEM_TO_CODE_TO_ENUM.get(theSystemString);
+			if (map == null) {
+				return null;
+			}
+			return map.get(theCodeString);
+		}
+		
 	};
 	
 	/** 
 	 * Constructor
 	 */
-	AnimalSpeciesEnum(String theCode) {
+	AnimalSpeciesEnum(String theCode, String theSystem) {
 		myCode = theCode;
+		mySystem = theSystem;
 	}
 
 	

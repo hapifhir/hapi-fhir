@@ -27,6 +27,9 @@
 		</menu>
 
 		<menu name="Documentation">
+			<item name="Introduction" href="./doc_intro.html"/>
+			<item name="The Data Model" href="./doc_fhirobjects.html"/>
+			<item name="RESTful Server" href="./doc_rest_server.html"/>
 			<item name="JavaDocs" href="./apidocs/index.html"/>
 		</menu>
 		

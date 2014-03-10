@@ -37,7 +37,7 @@ import ca.uhn.fhir.model.dstu.valueset.*;
  * 
  * </p> 
  */
-@ResourceDef(name="Organization")
+@ResourceDef(name="Organization", profile="http://hl7.org/fhir/profiles/Organization")
 public class Organization extends BaseResource implements IResource {
 
 	/**
@@ -112,36 +112,70 @@ public class Organization extends BaseResource implements IResource {
 
 
 	@Child(name="identifier", type=IdentifierDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)	
+	@Description(
+		shortDefinition="Identifies this organization  across multiple systems",
+		formalDefinition="Identifier for the organization that is used to identify the organization across multiple disparate systems"
+	)
 	private List<IdentifierDt> myIdentifier;
 	
 	@Child(name="name", type=StringDt.class, order=1, min=0, max=1)	
+	@Description(
+		shortDefinition="Name used for the organization",
+		formalDefinition="A name associated with the organization"
+	)
 	private StringDt myName;
 	
 	@Child(name="type", type=CodeableConceptDt.class, order=2, min=0, max=1)	
-	private CodeableConceptDt myType;
+	@Description(
+		shortDefinition="Kind of organization",
+		formalDefinition="The kind of organization that this is"
+	)
+	private BoundCodeableConceptDt<OrganizationTypeEnum> myType;
 	
 	@Child(name="telecom", type=ContactDt.class, order=3, min=0, max=Child.MAX_UNLIMITED)	
+	@Description(
+		shortDefinition="A contact detail for the organization",
+		formalDefinition="A contact detail for the organization"
+	)
 	private List<ContactDt> myTelecom;
 	
 	@Child(name="address", type=AddressDt.class, order=4, min=0, max=Child.MAX_UNLIMITED)	
+	@Description(
+		shortDefinition="An address for the organization",
+		formalDefinition="An address for the organization"
+	)
 	private List<AddressDt> myAddress;
 	
-	@Child(name="partOf", order=5, min=0, max=1)
-	@ChildResource(types= {
+	@Child(name="partOf", order=5, min=0, max=1, type={
 		Organization.class,
-	})	
+	})
+	@Description(
+		shortDefinition="The organization of which this organization forms a part",
+		formalDefinition="The organization of which this organization forms a part"
+	)
 	private ResourceReference myPartOf;
 	
 	@Child(name="contact", order=6, min=0, max=Child.MAX_UNLIMITED)	
+	@Description(
+		shortDefinition="Contact for the organization for a certain purpose",
+		formalDefinition=""
+	)
 	private List<Contact> myContact;
 	
-	@Child(name="location", order=7, min=0, max=Child.MAX_UNLIMITED)
-	@ChildResource(types= {
+	@Child(name="location", order=7, min=0, max=Child.MAX_UNLIMITED, type={
 		Location.class,
-	})	
+	})
+	@Description(
+		shortDefinition="Location(s) the organization uses to provide services",
+		formalDefinition="Location(s) the organization uses to provide services"
+	)
 	private List<ResourceReference> myLocation;
 	
 	@Child(name="active", type=BooleanDt.class, order=8, min=0, max=1)	
+	@Description(
+		shortDefinition="Whether the organization's record is still in active use",
+		formalDefinition="Whether the organization's record is still in active use"
+	)
 	private BooleanDt myActive;
 	
 
@@ -247,9 +281,9 @@ public class Organization extends BaseResource implements IResource {
      * The kind of organization that this is
      * </p> 
 	 */
-	public CodeableConceptDt getType() {  
+	public BoundCodeableConceptDt<OrganizationTypeEnum> getType() {  
 		if (myType == null) {
-			myType = new CodeableConceptDt();
+			myType = new BoundCodeableConceptDt<OrganizationTypeEnum>(OrganizationTypeEnum.VALUESET_BINDER);
 		}
 		return myType;
 	}
@@ -262,10 +296,22 @@ public class Organization extends BaseResource implements IResource {
      * The kind of organization that this is
      * </p> 
 	 */
-	public void setType(CodeableConceptDt theValue) {
+	public void setType(BoundCodeableConceptDt<OrganizationTypeEnum> theValue) {
 		myType = theValue;
 	}
 
+
+	/**
+	 * Sets the value(s) for <b>type</b> (Kind of organization)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The kind of organization that this is
+     * </p> 
+	 */
+	public void setType(OrganizationTypeEnum theValue) {
+		getType().setValueAsEnum(theValue);
+	}
 
   
 	/**
@@ -517,19 +563,39 @@ public class Organization extends BaseResource implements IResource {
 	public static class Contact extends BaseElement implements IResourceBlock {
 	
 	@Child(name="purpose", type=CodeableConceptDt.class, order=0, min=0, max=1)	
+	@Description(
+		shortDefinition="The type of contact",
+		formalDefinition="Indicates a purpose for which the contact can be reached"
+	)
 	private CodeableConceptDt myPurpose;
 	
 	@Child(name="name", type=HumanNameDt.class, order=1, min=0, max=1)	
+	@Description(
+		shortDefinition="A name associated with the contact",
+		formalDefinition="A name associated with the contact"
+	)
 	private HumanNameDt myName;
 	
 	@Child(name="telecom", type=ContactDt.class, order=2, min=0, max=Child.MAX_UNLIMITED)	
+	@Description(
+		shortDefinition="Contact details (telephone, email, etc)  for a contact",
+		formalDefinition="A contact detail (e.g. a telephone number or an email address) by which the party may be contacted."
+	)
 	private List<ContactDt> myTelecom;
 	
 	@Child(name="address", type=AddressDt.class, order=3, min=0, max=1)	
+	@Description(
+		shortDefinition="Visiting or postal addresses for the contact",
+		formalDefinition="Visiting or postal addresses for the contact"
+	)
 	private AddressDt myAddress;
 	
 	@Child(name="gender", type=CodeableConceptDt.class, order=4, min=0, max=1)	
-	private CodeableConceptDt myGender;
+	@Description(
+		shortDefinition="Gender for administrative purposes",
+		formalDefinition="Administrative Gender - the gender that the person is considered to have for administration and record keeping purposes."
+	)
+	private BoundCodeableConceptDt<AdministrativeGenderCodesEnum> myGender;
 	
 
 	@Override
@@ -606,7 +672,7 @@ public class Organization extends BaseResource implements IResource {
 	 *
      * <p>
      * <b>Definition:</b>
-     * A contact detail (e.g. a telephone number or an email address) by which the party may be contacted. 
+     * A contact detail (e.g. a telephone number or an email address) by which the party may be contacted.
      * </p> 
 	 */
 	public List<ContactDt> getTelecom() {  
@@ -621,7 +687,7 @@ public class Organization extends BaseResource implements IResource {
 	 *
      * <p>
      * <b>Definition:</b>
-     * A contact detail (e.g. a telephone number or an email address) by which the party may be contacted. 
+     * A contact detail (e.g. a telephone number or an email address) by which the party may be contacted.
      * </p> 
 	 */
 	public void setTelecom(List<ContactDt> theValue) {
@@ -633,7 +699,7 @@ public class Organization extends BaseResource implements IResource {
 	 *
      * <p>
      * <b>Definition:</b>
-     * A contact detail (e.g. a telephone number or an email address) by which the party may be contacted. 
+     * A contact detail (e.g. a telephone number or an email address) by which the party may be contacted.
      * </p> 
 	 */
 	public ContactDt addTelecom() {
@@ -681,12 +747,12 @@ public class Organization extends BaseResource implements IResource {
 	 *
      * <p>
      * <b>Definition:</b>
-     * Administrative Gender - the gender that the person is considered to have for administration and record keeping purposes. 
+     * Administrative Gender - the gender that the person is considered to have for administration and record keeping purposes.
      * </p> 
 	 */
-	public CodeableConceptDt getGender() {  
+	public BoundCodeableConceptDt<AdministrativeGenderCodesEnum> getGender() {  
 		if (myGender == null) {
-			myGender = new CodeableConceptDt();
+			myGender = new BoundCodeableConceptDt<AdministrativeGenderCodesEnum>(AdministrativeGenderCodesEnum.VALUESET_BINDER);
 		}
 		return myGender;
 	}
@@ -696,13 +762,25 @@ public class Organization extends BaseResource implements IResource {
 	 *
      * <p>
      * <b>Definition:</b>
-     * Administrative Gender - the gender that the person is considered to have for administration and record keeping purposes. 
+     * Administrative Gender - the gender that the person is considered to have for administration and record keeping purposes.
      * </p> 
 	 */
-	public void setGender(CodeableConceptDt theValue) {
+	public void setGender(BoundCodeableConceptDt<AdministrativeGenderCodesEnum> theValue) {
 		myGender = theValue;
 	}
 
+
+	/**
+	 * Sets the value(s) for <b>gender</b> (Gender for administrative purposes)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Administrative Gender - the gender that the person is considered to have for administration and record keeping purposes.
+     * </p> 
+	 */
+	public void setGender(AdministrativeGenderCodesEnum theValue) {
+		getGender().setValueAsEnum(theValue);
+	}
 
   
 

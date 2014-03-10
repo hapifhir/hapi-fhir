@@ -25,7 +25,7 @@ import ca.uhn.fhir.model.dstu.valueset.*;
 
 /**
  * HAPI/FHIR <b>Substance</b> Resource
- * (A homogeneous material with a definite composition )
+ * (A homogeneous material with a definite composition)
  *
  * <p>
  * <b>Definition:</b>
@@ -37,7 +37,7 @@ import ca.uhn.fhir.model.dstu.valueset.*;
  * 
  * </p> 
  */
-@ResourceDef(name="Substance")
+@ResourceDef(name="Substance", profile="http://hl7.org/fhir/profiles/Substance")
 public class Substance extends BaseResource implements IResource {
 
 	/**
@@ -92,15 +92,31 @@ public class Substance extends BaseResource implements IResource {
 
 
 	@Child(name="type", type=CodeableConceptDt.class, order=0, min=1, max=1)	
-	private CodeableConceptDt myType;
+	@Description(
+		shortDefinition="What kind of substance this is",
+		formalDefinition="A code (or set of codes) that identify this substance"
+	)
+	private BoundCodeableConceptDt<SubstanceTypeEnum> myType;
 	
 	@Child(name="description", type=StringDt.class, order=1, min=0, max=1)	
+	@Description(
+		shortDefinition="Textual description of the substance, comments",
+		formalDefinition="A description of the substance - its appearance, handling requirements, and other usage notes"
+	)
 	private StringDt myDescription;
 	
 	@Child(name="instance", order=2, min=0, max=1)	
+	@Description(
+		shortDefinition="If this describes a specific package/container of the substance",
+		formalDefinition="Substance may be used to describe a kind of substance, or a specific package/container of the substance: an instance"
+	)
 	private Instance myInstance;
 	
 	@Child(name="ingredient", order=3, min=0, max=Child.MAX_UNLIMITED)	
+	@Description(
+		shortDefinition="Composition information about the substance",
+		formalDefinition="A substance can be composed of other substances"
+	)
 	private List<Ingredient> myIngredient;
 	
 
@@ -119,9 +135,9 @@ public class Substance extends BaseResource implements IResource {
      * A code (or set of codes) that identify this substance
      * </p> 
 	 */
-	public CodeableConceptDt getType() {  
+	public BoundCodeableConceptDt<SubstanceTypeEnum> getType() {  
 		if (myType == null) {
-			myType = new CodeableConceptDt();
+			myType = new BoundCodeableConceptDt<SubstanceTypeEnum>(SubstanceTypeEnum.VALUESET_BINDER);
 		}
 		return myType;
 	}
@@ -134,10 +150,22 @@ public class Substance extends BaseResource implements IResource {
      * A code (or set of codes) that identify this substance
      * </p> 
 	 */
-	public void setType(CodeableConceptDt theValue) {
+	public void setType(BoundCodeableConceptDt<SubstanceTypeEnum> theValue) {
 		myType = theValue;
 	}
 
+
+	/**
+	 * Sets the value(s) for <b>type</b> (What kind of substance this is)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A code (or set of codes) that identify this substance
+     * </p> 
+	 */
+	public void setType(SubstanceTypeEnum theValue) {
+		getType().setValueAsEnum(theValue);
+	}
 
   
 	/**
@@ -270,12 +298,24 @@ public class Substance extends BaseResource implements IResource {
 	public static class Instance extends BaseElement implements IResourceBlock {
 	
 	@Child(name="identifier", type=IdentifierDt.class, order=0, min=0, max=1)	
+	@Description(
+		shortDefinition="Identifier of the package/container",
+		formalDefinition="Identifier associated with the package/container (usually a label affixed directly)"
+	)
 	private IdentifierDt myIdentifier;
 	
 	@Child(name="expiry", type=DateTimeDt.class, order=1, min=0, max=1)	
+	@Description(
+		shortDefinition="When no longer valid to use",
+		formalDefinition="When the substance is no longer valid to use. For some substances, a single arbitrary date is used for expiry."
+	)
 	private DateTimeDt myExpiry;
 	
 	@Child(name="quantity", type=QuantityDt.class, order=2, min=0, max=1)	
+	@Description(
+		shortDefinition="Amount of substance in the package",
+		formalDefinition="The amount of the substance"
+	)
 	private QuantityDt myQuantity;
 	
 
@@ -417,12 +457,19 @@ public class Substance extends BaseResource implements IResource {
 	public static class Ingredient extends BaseElement implements IResourceBlock {
 	
 	@Child(name="quantity", type=RatioDt.class, order=0, min=0, max=1)	
+	@Description(
+		shortDefinition="Optional amount (concentration)",
+		formalDefinition="The amount of the ingredient in the substance - a concentration ratio"
+	)
 	private RatioDt myQuantity;
 	
-	@Child(name="substance", order=1, min=1, max=1)
-	@ChildResource(types= {
+	@Child(name="substance", order=1, min=1, max=1, type={
 		Substance.class,
-	})	
+	})
+	@Description(
+		shortDefinition="A component of the substance",
+		formalDefinition="Another substance that is a component of this substance"
+	)
 	private ResourceReference mySubstance;
 	
 

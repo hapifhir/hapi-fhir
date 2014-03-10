@@ -14,8 +14,9 @@
 			    SOCIALPLUGINSHEREAPI
 			</p>
 			<p>
-				This is the homepage for the HAPI-FHIR library. This library is still
-				in experimental stage, so please tread with caution.
+				This is the homepage for the HAPI-FHIR library. We are developing 
+				an open-source implementation of the FHIR specification in Java. 
+				This library is still in experimental stage, so please tread with caution.
 			</p>
 
 			<subsection name="Getting HAPI-FHIR">

@@ -22,11 +22,19 @@ public enum SpecimenTreatmentProcedureEnum {
 	public static final String VALUESET_NAME = "SpecimenTreatmentProcedure";
 
 	private static Map<String, SpecimenTreatmentProcedureEnum> CODE_TO_ENUM = new HashMap<String, SpecimenTreatmentProcedureEnum>();
-	private String myCode;
+	private static Map<String, Map<String, SpecimenTreatmentProcedureEnum>> SYSTEM_TO_CODE_TO_ENUM = new HashMap<String, Map<String, SpecimenTreatmentProcedureEnum>>();
+	
+	private final String myCode;
+	private final String mySystem;
 	
 	static {
 		for (SpecimenTreatmentProcedureEnum next : SpecimenTreatmentProcedureEnum.values()) {
 			CODE_TO_ENUM.put(next.getCode(), next);
+			
+			if (!SYSTEM_TO_CODE_TO_ENUM.containsKey(next.getSystem())) {
+				SYSTEM_TO_CODE_TO_ENUM.put(next.getSystem(), new HashMap<String, SpecimenTreatmentProcedureEnum>());
+			}
+			SYSTEM_TO_CODE_TO_ENUM.get(next.getSystem()).put(next.getCode(), next);			
 		}
 	}
 	
@@ -35,6 +43,13 @@ public enum SpecimenTreatmentProcedureEnum {
 	 */
 	public String getCode() {
 		return myCode;
+	}
+	
+	/**
+	 * Returns the code system associated with this enumerated value
+	 */
+	public String getSystem() {
+		return mySystem;
 	}
 	
 	/**
@@ -53,18 +68,34 @@ public enum SpecimenTreatmentProcedureEnum {
 		public String toCodeString(SpecimenTreatmentProcedureEnum theEnum) {
 			return theEnum.getCode();
 		}
+
+		@Override
+		public String toSystemString(SpecimenTreatmentProcedureEnum theEnum) {
+			return theEnum.getSystem();
+		}
 		
 		@Override
 		public SpecimenTreatmentProcedureEnum fromCodeString(String theCodeString) {
 			return CODE_TO_ENUM.get(theCodeString);
 		}
+		
+		@Override
+		public SpecimenTreatmentProcedureEnum fromCodeString(String theCodeString, String theSystemString) {
+			Map<String, SpecimenTreatmentProcedureEnum> map = SYSTEM_TO_CODE_TO_ENUM.get(theSystemString);
+			if (map == null) {
+				return null;
+			}
+			return map.get(theCodeString);
+		}
+		
 	};
 	
 	/** 
 	 * Constructor
 	 */
-	SpecimenTreatmentProcedureEnum(String theCode) {
+	SpecimenTreatmentProcedureEnum(String theCode, String theSystem) {
 		myCode = theCode;
+		mySystem = theSystem;
 	}
 
 	

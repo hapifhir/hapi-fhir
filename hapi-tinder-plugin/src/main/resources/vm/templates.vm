@@ -4,19 +4,12 @@
 
 #macro ( childVars $childElements )
 #foreach ( $child in $childElements )
-#if ($child.resourceRef) 
-	@Child(name="${child.elementNameSimplified}", order=${foreach.index}, min=${child.cardMin}, max=${child.cardMaxForChildAnnotation})
-	@ChildResource(types= {
-#foreach ($nextType in ${child.type})
-		${nextType}.class,
-#end
-	})	
-#elseif ($!child.hasMultipleTypes)
-	@Child(name="${child.elementNameSimplified}", order=${foreach.index}, min=${child.cardMin}, max=${child.cardMaxForChildAnnotation}, choice=@Choice(types= {
+#if (${child.resourceRef} || ${child.hasMultipleTypes}) 
+	@Child(name="${child.elementNameSimplified}", order=${foreach.index}, min=${child.cardMin}, max=${child.cardMaxForChildAnnotation}, type={
 #foreach ($nextType in ${child.referenceTypesForMultiple})
 		${nextType}.class,
 #end
-	}))	
+	})
 #elseif ($!child.block)
 	@Child(name="${child.elementNameSimplified}", order=${foreach.index}, min=${child.cardMin}, max=${child.cardMaxForChildAnnotation})	
 #else
@@ -24,6 +17,12 @@
 #end
 #if ( $child.hasExtensionUrl )
 	@Extension(url = "${child.extensionUrl}")
+#end
+#if (${includeDescriptionAnnotations})
+	@Description(
+		shortDefinition="${child.shortName}",
+		formalDefinition="${child.definition}"
+	)
 #end
 	private ${child.referenceType} ${child.variableName};
 	
@@ -104,7 +103,7 @@
      * </p> 
 	 */
 	public void add${child.methodName}(${child.bindingClass} theValue) {
-		get${child.methodName}().add(new BoundCodeDt<${child.bindingClass}>(${child.bindingClass}.VALUESET_BINDER, theValue));
+		get${child.methodName}().add(new ${child.boundDatatype}<${child.bindingClass}>(${child.bindingClass}.VALUESET_BINDER, theValue));
 	}
 
 	/**

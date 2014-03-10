@@ -13,7 +13,7 @@ public enum HierarchicalRelationshipTypeEnum {
 	 *
 	 * The target resource is the parent of the focal specimen resource.
 	 */
-	PARENT("parent"),
+	PARENT("parent", "http://hl7.org/fhir/hierarchical-relationship-type"),
 	
 	/**
 	 * Display: <b>Child</b><br/>
@@ -21,7 +21,7 @@ public enum HierarchicalRelationshipTypeEnum {
 	 *
 	 * The target resource is the child of the focal specimen resource.
 	 */
-	CHILD("child"),
+	CHILD("child", "http://hl7.org/fhir/hierarchical-relationship-type"),
 	
 	;
 	
@@ -38,11 +38,19 @@ public enum HierarchicalRelationshipTypeEnum {
 	public static final String VALUESET_NAME = "HierarchicalRelationshipType";
 
 	private static Map<String, HierarchicalRelationshipTypeEnum> CODE_TO_ENUM = new HashMap<String, HierarchicalRelationshipTypeEnum>();
-	private String myCode;
+	private static Map<String, Map<String, HierarchicalRelationshipTypeEnum>> SYSTEM_TO_CODE_TO_ENUM = new HashMap<String, Map<String, HierarchicalRelationshipTypeEnum>>();
+	
+	private final String myCode;
+	private final String mySystem;
 	
 	static {
 		for (HierarchicalRelationshipTypeEnum next : HierarchicalRelationshipTypeEnum.values()) {
 			CODE_TO_ENUM.put(next.getCode(), next);
+			
+			if (!SYSTEM_TO_CODE_TO_ENUM.containsKey(next.getSystem())) {
+				SYSTEM_TO_CODE_TO_ENUM.put(next.getSystem(), new HashMap<String, HierarchicalRelationshipTypeEnum>());
+			}
+			SYSTEM_TO_CODE_TO_ENUM.get(next.getSystem()).put(next.getCode(), next);			
 		}
 	}
 	
@@ -51,6 +59,13 @@ public enum HierarchicalRelationshipTypeEnum {
 	 */
 	public String getCode() {
 		return myCode;
+	}
+	
+	/**
+	 * Returns the code system associated with this enumerated value
+	 */
+	public String getSystem() {
+		return mySystem;
 	}
 	
 	/**
@@ -69,18 +84,34 @@ public enum HierarchicalRelationshipTypeEnum {
 		public String toCodeString(HierarchicalRelationshipTypeEnum theEnum) {
 			return theEnum.getCode();
 		}
+
+		@Override
+		public String toSystemString(HierarchicalRelationshipTypeEnum theEnum) {
+			return theEnum.getSystem();
+		}
 		
 		@Override
 		public HierarchicalRelationshipTypeEnum fromCodeString(String theCodeString) {
 			return CODE_TO_ENUM.get(theCodeString);
 		}
+		
+		@Override
+		public HierarchicalRelationshipTypeEnum fromCodeString(String theCodeString, String theSystemString) {
+			Map<String, HierarchicalRelationshipTypeEnum> map = SYSTEM_TO_CODE_TO_ENUM.get(theSystemString);
+			if (map == null) {
+				return null;
+			}
+			return map.get(theCodeString);
+		}
+		
 	};
 	
 	/** 
 	 * Constructor
 	 */
-	HierarchicalRelationshipTypeEnum(String theCode) {
+	HierarchicalRelationshipTypeEnum(String theCode, String theSystem) {
 		myCode = theCode;
+		mySystem = theSystem;
 	}
 
 	

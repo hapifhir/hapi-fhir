@@ -25,14 +25,13 @@ public class DummyPatientResourceProvider implements IResourceProvider {
 	public DummyPatientResourceProvider() {
 		{
 			Patient patient = new Patient();
-			patient.getIdentifier().add(new IdentifierDt());
+			patient.addIdentifier();
 			patient.getIdentifier().get(0).setUse(IdentifierUseEnum.OFFICIAL);
 			patient.getIdentifier().get(0).setSystem(new UriDt("urn:hapitest:mrns"));
 			patient.getIdentifier().get(0).setValue("00001");
-			patient.getName().add(new HumanNameDt());
+			patient.addName();
 			patient.getName().get(0).addFamily("Test");
 			patient.getName().get(0).addGiven("PatientOne");
-			patient.setGender(new CodeableConceptDt());
 			patient.getGender().setText("M");
 			myIdToPatient.put("1", patient);
 		}
@@ -45,7 +44,6 @@ public class DummyPatientResourceProvider implements IResourceProvider {
 			patient.getName().add(new HumanNameDt());
 			patient.getName().get(0).addFamily("Test");
 			patient.getName().get(0).addGiven("PatientTwo");
-			patient.setGender(new CodeableConceptDt());
 			patient.getGender().setText("F");
 			myIdToPatient.put("2", patient);
 		}

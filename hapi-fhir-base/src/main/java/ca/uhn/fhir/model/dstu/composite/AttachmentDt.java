@@ -42,24 +42,52 @@ public class AttachmentDt extends BaseElement implements ICompositeDatatype  {
 
 
 	@Child(name="contentType", type=CodeDt.class, order=0, min=1, max=1)	
+	@Description(
+		shortDefinition="Mime type of the content, with charset etc.",
+		formalDefinition="Identifies the type of the data in the attachment and allows a method to be chosen to interpret or render the data. Includes mime type parameters such as charset where appropriate"
+	)
 	private CodeDt myContentType;
 	
 	@Child(name="language", type=CodeDt.class, order=1, min=0, max=1)	
+	@Description(
+		shortDefinition="Human language of the content (BCP-47)",
+		formalDefinition="The human language of the content. The value can be any valid value according to BCP 47"
+	)
 	private CodeDt myLanguage;
 	
 	@Child(name="data", type=Base64BinaryDt.class, order=2, min=0, max=1)	
+	@Description(
+		shortDefinition="Data inline, base64ed",
+		formalDefinition="The actual data of the attachment - a sequence of bytes. In XML, represented using base64"
+	)
 	private Base64BinaryDt myData;
 	
 	@Child(name="url", type=UriDt.class, order=3, min=0, max=1)	
+	@Description(
+		shortDefinition="Uri where the data can be found",
+		formalDefinition="An alternative location where the data can be accessed"
+	)
 	private UriDt myUrl;
 	
 	@Child(name="size", type=IntegerDt.class, order=4, min=0, max=1)	
+	@Description(
+		shortDefinition="Number of bytes of content (if url provided)",
+		formalDefinition="The number of bytes of data that make up this attachment."
+	)
 	private IntegerDt mySize;
 	
 	@Child(name="hash", type=Base64BinaryDt.class, order=5, min=0, max=1)	
+	@Description(
+		shortDefinition="Hash of the data (sha-1, base64ed )",
+		formalDefinition="The calculated hash of the data using SHA-1. Represented using base64"
+	)
 	private Base64BinaryDt myHash;
 	
 	@Child(name="title", type=StringDt.class, order=6, min=0, max=1)	
+	@Description(
+		shortDefinition="Label to display in place of the data",
+		formalDefinition="A label or set of text to display in place of the data"
+	)
 	private StringDt myTitle;
 	
 
@@ -98,7 +126,19 @@ public class AttachmentDt extends BaseElement implements ICompositeDatatype  {
 	}
 
 
-  
+ 	/**
+	 * Sets the value for <b>contentType</b> (Mime type of the content, with charset etc.)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Identifies the type of the data in the attachment and allows a method to be chosen to interpret or render the data. Includes mime type parameters such as charset where appropriate
+     * </p> 
+	 */
+	public void setContentType( String theCode) {
+		myContentType = new CodeDt(theCode); 
+	}
+
+ 
 	/**
 	 * Gets the value(s) for <b>language</b> (Human language of the content (BCP-47)).
 	 * creating it if it does
@@ -129,7 +169,19 @@ public class AttachmentDt extends BaseElement implements ICompositeDatatype  {
 	}
 
 
-  
+ 	/**
+	 * Sets the value for <b>language</b> (Human language of the content (BCP-47))
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The human language of the content. The value can be any valid value according to BCP 47
+     * </p> 
+	 */
+	public void setLanguage( String theCode) {
+		myLanguage = new CodeDt(theCode); 
+	}
+
+ 
 	/**
 	 * Gets the value(s) for <b>data</b> (Data inline, base64ed).
 	 * creating it if it does

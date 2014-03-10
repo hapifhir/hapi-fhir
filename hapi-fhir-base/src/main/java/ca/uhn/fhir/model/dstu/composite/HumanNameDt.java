@@ -42,24 +42,52 @@ public class HumanNameDt extends BaseElement implements ICompositeDatatype  {
 
 
 	@Child(name="use", type=CodeDt.class, order=0, min=0, max=1)	
+	@Description(
+		shortDefinition="usual | official | temp | nickname | anonymous | old | maiden",
+		formalDefinition="Identifies the purpose for this name"
+	)
 	private BoundCodeDt<NameUseEnum> myUse;
 	
 	@Child(name="text", type=StringDt.class, order=1, min=0, max=1)	
+	@Description(
+		shortDefinition="Text representation of the full name",
+		formalDefinition="A full text representation of the name"
+	)
 	private StringDt myText;
 	
 	@Child(name="family", type=StringDt.class, order=2, min=0, max=Child.MAX_UNLIMITED)	
+	@Description(
+		shortDefinition="Family name (often called 'Surname')",
+		formalDefinition="The part of a name that links to the genealogy. In some cultures (e.g. Eritrea) the family name of a son is the first name of his father."
+	)
 	private List<StringDt> myFamily;
 	
 	@Child(name="given", type=StringDt.class, order=3, min=0, max=Child.MAX_UNLIMITED)	
+	@Description(
+		shortDefinition="Given names (not always 'first'). Includes middle names",
+		formalDefinition="Given name"
+	)
 	private List<StringDt> myGiven;
 	
 	@Child(name="prefix", type=StringDt.class, order=4, min=0, max=Child.MAX_UNLIMITED)	
+	@Description(
+		shortDefinition="Parts that come before the name",
+		formalDefinition="Part of the name that is acquired as a title due to academic, legal, employment or nobility status, etc. and that appears at the start of the name"
+	)
 	private List<StringDt> myPrefix;
 	
 	@Child(name="suffix", type=StringDt.class, order=5, min=0, max=Child.MAX_UNLIMITED)	
+	@Description(
+		shortDefinition="Parts that come after the name",
+		formalDefinition="Part of the name that is acquired as a title due to academic, legal, employment or nobility status, etc. and that appears at the end of the name"
+	)
 	private List<StringDt> mySuffix;
 	
 	@Child(name="period", type=PeriodDt.class, order=6, min=0, max=1)	
+	@Description(
+		shortDefinition="Time period when name was/is in use",
+		formalDefinition="Indicates the period of time when this name was valid for the named person."
+	)
 	private PeriodDt myPeriod;
 	
 

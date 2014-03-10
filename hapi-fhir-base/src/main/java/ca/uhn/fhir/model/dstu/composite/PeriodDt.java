@@ -42,9 +42,17 @@ public class PeriodDt extends BaseElement implements ICompositeDatatype  {
 
 
 	@Child(name="start", type=DateTimeDt.class, order=0, min=0, max=1)	
+	@Description(
+		shortDefinition="Starting time with inclusive boundary",
+		formalDefinition="The start of the period. The boundary is inclusive."
+	)
 	private DateTimeDt myStart;
 	
 	@Child(name="end", type=DateTimeDt.class, order=1, min=0, max=1)	
+	@Description(
+		shortDefinition="End time with inclusive boundary, if not ongoing",
+		formalDefinition="The end of the period. If the end of the period is missing, it means that the period is ongoing"
+	)
 	private DateTimeDt myEnd;
 	
 

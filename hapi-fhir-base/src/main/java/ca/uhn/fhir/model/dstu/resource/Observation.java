@@ -37,7 +37,7 @@ import ca.uhn.fhir.model.dstu.valueset.*;
  * Observations are a key aspect of healthcare.  This resource is used to capture those that do not require more sophisticated mechanisms.
  * </p> 
  */
-@ResourceDef(name="Observation")
+@ResourceDef(name="Observation", profile="http://hl7.org/fhir/profiles/Observation")
 public class Observation extends BaseResource implements IResource {
 
 	/**
@@ -192,9 +192,13 @@ public class Observation extends BaseResource implements IResource {
 
 
 	@Child(name="name", type=CodeableConceptDt.class, order=0, min=1, max=1)	
+	@Description(
+		shortDefinition="Type of observation (code / type)",
+		formalDefinition="Describes what was observed. Sometimes this is called the observation \"code\""
+	)
 	private CodeableConceptDt myName;
 	
-	@Child(name="value", order=1, min=0, max=1, choice=@Choice(types= {
+	@Child(name="value", order=1, min=0, max=1, type={
 		QuantityDt.class,
 		CodeableConceptDt.class,
 		AttachmentDt.class,
@@ -202,66 +206,123 @@ public class Observation extends BaseResource implements IResource {
 		PeriodDt.class,
 		SampledDataDt.class,
 		StringDt.class,
-	}))	
+	})
+	@Description(
+		shortDefinition="Actual result",
+		formalDefinition="The information determined as a result of making the observation, if the information has a simple value"
+	)
 	private IDatatype myValue;
 	
 	@Child(name="interpretation", type=CodeableConceptDt.class, order=2, min=0, max=1)	
-	private CodeableConceptDt myInterpretation;
+	@Description(
+		shortDefinition="High, low, normal, etc.",
+		formalDefinition="The assessment made based on the result of the observation."
+	)
+	private BoundCodeableConceptDt<ObservationInterpretationCodesEnum> myInterpretation;
 	
 	@Child(name="comments", type=StringDt.class, order=3, min=0, max=1)	
+	@Description(
+		shortDefinition="Comments about result",
+		formalDefinition="May include statements about significant, unexpected or unreliable values, or information about the source of the value where this may be relevant to the interpretation of the result."
+	)
 	private StringDt myComments;
 	
-	@Child(name="applies", order=4, min=0, max=1, choice=@Choice(types= {
+	@Child(name="applies", order=4, min=0, max=1, type={
 		DateTimeDt.class,
 		PeriodDt.class,
-	}))	
+	})
+	@Description(
+		shortDefinition="Physiologically Relevant time/time-period for observation",
+		formalDefinition="The time or time-period the observed value is asserted as being true. For biological subjects - e.g. human patients - this is usually called the \"physiologically relevant time\". This is usually either the time of the procedure or of specimen collection, but very often the source of the date/time is not known, only the date/time itself"
+	)
 	private IDatatype myApplies;
 	
 	@Child(name="issued", type=InstantDt.class, order=5, min=0, max=1)	
+	@Description(
+		shortDefinition="Date/Time this was made available",
+		formalDefinition=""
+	)
 	private InstantDt myIssued;
 	
 	@Child(name="status", type=CodeDt.class, order=6, min=1, max=1)	
+	@Description(
+		shortDefinition="registered | preliminary | final | amended +",
+		formalDefinition="The status of the result value"
+	)
 	private BoundCodeDt<ObservationStatusEnum> myStatus;
 	
 	@Child(name="reliability", type=CodeDt.class, order=7, min=1, max=1)	
+	@Description(
+		shortDefinition="ok | ongoing | early | questionable | calibrating | error +",
+		formalDefinition="An estimate of the degree to which quality issues have impacted on the value reported"
+	)
 	private BoundCodeDt<ObservationReliabilityEnum> myReliability;
 	
 	@Child(name="bodySite", type=CodeableConceptDt.class, order=8, min=0, max=1)	
+	@Description(
+		shortDefinition="Observed body part",
+		formalDefinition="Indicates where on the subject's body the observation was made."
+	)
 	private CodeableConceptDt myBodySite;
 	
 	@Child(name="method", type=CodeableConceptDt.class, order=9, min=0, max=1)	
+	@Description(
+		shortDefinition="How it was done",
+		formalDefinition="Indicates the mechanism used to perform the observation"
+	)
 	private CodeableConceptDt myMethod;
 	
 	@Child(name="identifier", type=IdentifierDt.class, order=10, min=0, max=1)	
+	@Description(
+		shortDefinition="Unique Id for this particular observation",
+		formalDefinition="A unique identifier for the simple observation"
+	)
 	private IdentifierDt myIdentifier;
 	
-	@Child(name="subject", order=11, min=0, max=1)
-	@ChildResource(types= {
+	@Child(name="subject", order=11, min=0, max=1, type={
 		Patient.class,
 		Group.class,
 		Device.class,
 		Location.class,
-	})	
+	})
+	@Description(
+		shortDefinition="Who and/or what this is about",
+		formalDefinition="The thing the observation is being made about"
+	)
 	private ResourceReference mySubject;
 	
-	@Child(name="specimen", order=12, min=0, max=1)
-	@ChildResource(types= {
+	@Child(name="specimen", order=12, min=0, max=1, type={
 		Specimen.class,
-	})	
+	})
+	@Description(
+		shortDefinition="Specimen used for this observation",
+		formalDefinition="The specimen that was used when this observation was made"
+	)
 	private ResourceReference mySpecimen;
 	
-	@Child(name="performer", order=13, min=0, max=Child.MAX_UNLIMITED)
-	@ChildResource(types= {
+	@Child(name="performer", order=13, min=0, max=Child.MAX_UNLIMITED, type={
 		Practitioner.class,
 		Device.class,
 		Organization.class,
-	})	
+	})
+	@Description(
+		shortDefinition="Who did the observation",
+		formalDefinition="Who was responsible for asserting the observed value as \"true\""
+	)
 	private List<ResourceReference> myPerformer;
 	
 	@Child(name="referenceRange", order=14, min=0, max=Child.MAX_UNLIMITED)	
+	@Description(
+		shortDefinition="Provides guide for interpretation",
+		formalDefinition="Guidance on how to interpret the value by comparison to a normal or recommended range"
+	)
 	private List<ReferenceRange> myReferenceRange;
 	
 	@Child(name="related", order=15, min=0, max=Child.MAX_UNLIMITED)	
+	@Description(
+		shortDefinition="Observations related to this observation",
+		formalDefinition="Related observations - either components, or previous observations, or statements of derivation"
+	)
 	private List<Related> myRelated;
 	
 
@@ -277,7 +338,7 @@ public class Observation extends BaseResource implements IResource {
 	 *
      * <p>
      * <b>Definition:</b>
-     * Describes what was observed. Sometimes this is called the observation "code"
+     * Describes what was observed. Sometimes this is called the observation \"code\"
      * </p> 
 	 */
 	public CodeableConceptDt getName() {  
@@ -292,7 +353,7 @@ public class Observation extends BaseResource implements IResource {
 	 *
      * <p>
      * <b>Definition:</b>
-     * Describes what was observed. Sometimes this is called the observation "code"
+     * Describes what was observed. Sometimes this is called the observation \"code\"
      * </p> 
 	 */
 	public void setName(CodeableConceptDt theValue) {
@@ -339,9 +400,9 @@ public class Observation extends BaseResource implements IResource {
      * The assessment made based on the result of the observation.
      * </p> 
 	 */
-	public CodeableConceptDt getInterpretation() {  
+	public BoundCodeableConceptDt<ObservationInterpretationCodesEnum> getInterpretation() {  
 		if (myInterpretation == null) {
-			myInterpretation = new CodeableConceptDt();
+			myInterpretation = new BoundCodeableConceptDt<ObservationInterpretationCodesEnum>(ObservationInterpretationCodesEnum.VALUESET_BINDER);
 		}
 		return myInterpretation;
 	}
@@ -354,10 +415,22 @@ public class Observation extends BaseResource implements IResource {
      * The assessment made based on the result of the observation.
      * </p> 
 	 */
-	public void setInterpretation(CodeableConceptDt theValue) {
+	public void setInterpretation(BoundCodeableConceptDt<ObservationInterpretationCodesEnum> theValue) {
 		myInterpretation = theValue;
 	}
 
+
+	/**
+	 * Sets the value(s) for <b>interpretation</b> (High, low, normal, etc.)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The assessment made based on the result of the observation.
+     * </p> 
+	 */
+	public void setInterpretation(ObservationInterpretationCodesEnum theValue) {
+		getInterpretation().setValueAsEnum(theValue);
+	}
 
   
 	/**
@@ -410,7 +483,7 @@ public class Observation extends BaseResource implements IResource {
 	 *
      * <p>
      * <b>Definition:</b>
-     * The time or time-period the observed value is asserted as being true. For biological subjects - e.g. human patients - this is usually called the "physiologically relevant time". This is usually either the time of the procedure or of specimen collection, but very often the source of the date/time is not known, only the date/time itself
+     * The time or time-period the observed value is asserted as being true. For biological subjects - e.g. human patients - this is usually called the \"physiologically relevant time\". This is usually either the time of the procedure or of specimen collection, but very often the source of the date/time is not known, only the date/time itself
      * </p> 
 	 */
 	public IDatatype getApplies() {  
@@ -422,7 +495,7 @@ public class Observation extends BaseResource implements IResource {
 	 *
      * <p>
      * <b>Definition:</b>
-     * The time or time-period the observed value is asserted as being true. For biological subjects - e.g. human patients - this is usually called the "physiologically relevant time". This is usually either the time of the procedure or of specimen collection, but very often the source of the date/time is not known, only the date/time itself
+     * The time or time-period the observed value is asserted as being true. For biological subjects - e.g. human patients - this is usually called the \"physiologically relevant time\". This is usually either the time of the procedure or of specimen collection, but very often the source of the date/time is not known, only the date/time itself
      * </p> 
 	 */
 	public void setApplies(IDatatype theValue) {
@@ -530,7 +603,7 @@ public class Observation extends BaseResource implements IResource {
 
   
 	/**
-	 * Gets the value(s) for <b>reliability</b> (ok | ongoing | early | questionable | calibrating | error + ).
+	 * Gets the value(s) for <b>reliability</b> (ok | ongoing | early | questionable | calibrating | error +).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -547,7 +620,7 @@ public class Observation extends BaseResource implements IResource {
 	}
 
 	/**
-	 * Sets the value(s) for <b>reliability</b> (ok | ongoing | early | questionable | calibrating | error + )
+	 * Sets the value(s) for <b>reliability</b> (ok | ongoing | early | questionable | calibrating | error +)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -560,7 +633,7 @@ public class Observation extends BaseResource implements IResource {
 
 
 	/**
-	 * Sets the value(s) for <b>reliability</b> (ok | ongoing | early | questionable | calibrating | error + )
+	 * Sets the value(s) for <b>reliability</b> (ok | ongoing | early | questionable | calibrating | error +)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -700,7 +773,7 @@ public class Observation extends BaseResource implements IResource {
 	 *
      * <p>
      * <b>Definition:</b>
-     * The specimen that was used when this observation was made 
+     * The specimen that was used when this observation was made
      * </p> 
 	 */
 	public ResourceReference getSpecimen() {  
@@ -715,7 +788,7 @@ public class Observation extends BaseResource implements IResource {
 	 *
      * <p>
      * <b>Definition:</b>
-     * The specimen that was used when this observation was made 
+     * The specimen that was used when this observation was made
      * </p> 
 	 */
 	public void setSpecimen(ResourceReference theValue) {
@@ -731,7 +804,7 @@ public class Observation extends BaseResource implements IResource {
 	 *
      * <p>
      * <b>Definition:</b>
-     * Who was responsible for asserting the observed value as "true"
+     * Who was responsible for asserting the observed value as \"true\"
      * </p> 
 	 */
 	public List<ResourceReference> getPerformer() {  
@@ -743,7 +816,7 @@ public class Observation extends BaseResource implements IResource {
 	 *
      * <p>
      * <b>Definition:</b>
-     * Who was responsible for asserting the observed value as "true"
+     * Who was responsible for asserting the observed value as \"true\"
      * </p> 
 	 */
 	public void setPerformer(List<ResourceReference> theValue) {
@@ -852,15 +925,31 @@ public class Observation extends BaseResource implements IResource {
 	public static class ReferenceRange extends BaseElement implements IResourceBlock {
 	
 	@Child(name="low", type=QuantityDt.class, order=0, min=0, max=1)	
+	@Description(
+		shortDefinition="Low Range, if relevant",
+		formalDefinition="The value of the low bound of the reference range. If this is omitted, the low bound of the reference range is assumed to be meaningless. E.g. <2.3"
+	)
 	private QuantityDt myLow;
 	
 	@Child(name="high", type=QuantityDt.class, order=1, min=0, max=1)	
+	@Description(
+		shortDefinition="High Range, if relevant",
+		formalDefinition="The value of the high bound of the reference range. If this is omitted, the high bound of the reference range is assumed to be meaningless. E.g. >5"
+	)
 	private QuantityDt myHigh;
 	
 	@Child(name="meaning", type=CodeableConceptDt.class, order=2, min=0, max=1)	
+	@Description(
+		shortDefinition="Indicates the meaning/use of this range of this range",
+		formalDefinition="Code for the meaning of the reference range"
+	)
 	private CodeableConceptDt myMeaning;
 	
 	@Child(name="age", type=RangeDt.class, order=3, min=0, max=1)	
+	@Description(
+		shortDefinition="Applicable age range, if relevant",
+		formalDefinition="The age at which this reference range is applicable. This is a neonatal age (e.g. number of weeks at term) if the meaning says so"
+	)
 	private RangeDt myAge;
 	
 
@@ -1009,12 +1098,19 @@ public class Observation extends BaseResource implements IResource {
 	public static class Related extends BaseElement implements IResourceBlock {
 	
 	@Child(name="type", type=CodeDt.class, order=0, min=0, max=1)	
+	@Description(
+		shortDefinition="has-component | has-member | derived-from | sequel-to | replaces | qualified-by | interfered-by",
+		formalDefinition="A code specifying the kind of relationship that exists with the target observation"
+	)
 	private BoundCodeDt<ObservationRelationshipTypeEnum> myType;
 	
-	@Child(name="target", order=1, min=1, max=1)
-	@ChildResource(types= {
+	@Child(name="target", order=1, min=1, max=1, type={
 		Observation.class,
-	})	
+	})
+	@Description(
+		shortDefinition="Observation that is related to this one",
+		formalDefinition="A reference to the observation that is related to this observation"
+	)
 	private ResourceReference myTarget;
 	
 

@@ -42,9 +42,17 @@ public class ScheduleDt extends BaseElement implements ICompositeDatatype  {
 
 
 	@Child(name="event", type=PeriodDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)	
+	@Description(
+		shortDefinition="When the event occurs",
+		formalDefinition="Identifies specific time periods when the event should occur"
+	)
 	private List<PeriodDt> myEvent;
 	
 	@Child(name="repeat", order=1, min=0, max=1)	
+	@Description(
+		shortDefinition="Only if there is none or one event",
+		formalDefinition="Identifies a repeating pattern to the intended time periods."
+	)
 	private Repeat myRepeat;
 	
 
@@ -104,7 +112,7 @@ public class ScheduleDt extends BaseElement implements ICompositeDatatype  {
 	 *
      * <p>
      * <b>Definition:</b>
-     * Identifies a repeating pattern to the intended time periods. 
+     * Identifies a repeating pattern to the intended time periods.
      * </p> 
 	 */
 	public Repeat getRepeat() {  
@@ -119,7 +127,7 @@ public class ScheduleDt extends BaseElement implements ICompositeDatatype  {
 	 *
      * <p>
      * <b>Definition:</b>
-     * Identifies a repeating pattern to the intended time periods. 
+     * Identifies a repeating pattern to the intended time periods.
      * </p> 
 	 */
 	public void setRepeat(Repeat theValue) {
@@ -133,28 +141,52 @@ public class ScheduleDt extends BaseElement implements ICompositeDatatype  {
 	 *
      * <p>
      * <b>Definition:</b>
-     * Identifies a repeating pattern to the intended time periods. 
+     * Identifies a repeating pattern to the intended time periods.
      * </p> 
 	 */
 	@Block(name="Schedule.repeat")	
 	public static class Repeat extends BaseElement implements IResourceBlock {
 	
 	@Child(name="frequency", type=IntegerDt.class, order=0, min=0, max=1)	
+	@Description(
+		shortDefinition="Event occurs frequency times per duration",
+		formalDefinition="Indicates how often the event should occur."
+	)
 	private IntegerDt myFrequency;
 	
 	@Child(name="when", type=CodeDt.class, order=1, min=0, max=1)	
+	@Description(
+		shortDefinition="HS | WAKE | AC | ACM | ACD | ACV | PC | PCM | PCD | PCV - common life events",
+		formalDefinition="Identifies the occurrence of daily life that determines timing"
+	)
 	private BoundCodeDt<EventTimingEnum> myWhen;
 	
 	@Child(name="duration", type=DecimalDt.class, order=2, min=1, max=1)	
+	@Description(
+		shortDefinition="Repeating or event-related duration",
+		formalDefinition="How long each repetition should last"
+	)
 	private DecimalDt myDuration;
 	
 	@Child(name="units", type=CodeDt.class, order=3, min=1, max=1)	
+	@Description(
+		shortDefinition="s | min | h | d | wk | mo | a - unit of time (UCUM)",
+		formalDefinition="The units of time for the duration"
+	)
 	private BoundCodeDt<UnitsOfTimeEnum> myUnits;
 	
 	@Child(name="count", type=IntegerDt.class, order=4, min=0, max=1)	
+	@Description(
+		shortDefinition="Number of times to repeat",
+		formalDefinition="A total count of the desired number of repetitions"
+	)
 	private IntegerDt myCount;
 	
 	@Child(name="end", type=DateTimeDt.class, order=5, min=0, max=1)	
+	@Description(
+		shortDefinition="When to stop repeats",
+		formalDefinition="When to stop repeating the schedule"
+	)
 	private DateTimeDt myEnd;
 	
 
@@ -287,7 +319,7 @@ public class ScheduleDt extends BaseElement implements ICompositeDatatype  {
      * How long each repetition should last
      * </p> 
 	 */
-	public void setDuration( java.math.BigDecimal theValue) {
+	public void setDuration( long theValue) {
 		myDuration = new DecimalDt(theValue); 
 	}
 
@@ -311,7 +343,7 @@ public class ScheduleDt extends BaseElement implements ICompositeDatatype  {
      * How long each repetition should last
      * </p> 
 	 */
-	public void setDuration( long theValue) {
+	public void setDuration( java.math.BigDecimal theValue) {
 		myDuration = new DecimalDt(theValue); 
 	}
 

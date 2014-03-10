@@ -6,19 +6,24 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import ca.uhn.fhir.model.api.IDatatype;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceReference;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
 
 public class RuntimeChildResourceDefinition extends BaseRuntimeDeclaredChildDefinition {
 
 	private BaseRuntimeElementDefinition<?> myRuntimeDef;
 	private List<Class<? extends IResource>> myResourceTypes;
 
-	public RuntimeChildResourceDefinition(Field theField, String theElementName, int theMin, int theMax, List<Class<? extends IResource>> theResourceTypes) {
-		super(theField, theMin, theMax, theElementName);
+	public RuntimeChildResourceDefinition(Field theField, String theElementName, Child theChildAnnotation, Description theDescriptionAnnotation, List<Class<? extends IResource>> theResourceTypes) {
+		super(theField, theChildAnnotation, theDescriptionAnnotation, theElementName);
 		myResourceTypes = theResourceTypes;
+		
+		if (theResourceTypes == null || theResourceTypes.isEmpty()) {
+			throw new ConfigurationException("Field '" + theField.getName() + "' on type '" + theField.getDeclaringClass().getCanonicalName() + "' has no resource types noted");
+		}
 	}
 
 	@Override
@@ -49,6 +54,7 @@ public class RuntimeChildResourceDefinition extends BaseRuntimeDeclaredChildDefi
 
 	@Override
 	void sealAndInitialize(Map<Class<? extends IElement>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
-		myRuntimeDef = new RuntimeResourceReferenceDefinition(getElementName());
+		myRuntimeDef = new RuntimeResourceReferenceDefinition(getElementName(), myResourceTypes);
+		myRuntimeDef.sealAndInitialize(theClassToElementDefinitions);
 	}
 }

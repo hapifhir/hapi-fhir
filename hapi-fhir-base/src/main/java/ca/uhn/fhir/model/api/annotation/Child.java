@@ -30,23 +30,6 @@ public @interface Child {
 
 	int max() default 1;
 
-	Choice choice() default @Choice();
-	
-	Class<? extends IElement> type() default NoDatatype.class;
-
-	/**
-	 * Indicator that the type attribute is not set
-	 */
-	public class NoDatatype implements IElement
-	{
-		private NoDatatype() {
-			// non instantiable
-		}
-
-		@Override
-		public boolean isEmpty() {
-			return true;
-		}
-	}
-	
+	Class<? extends IElement>[] type() default {};
+		
 }

@@ -37,7 +37,7 @@ import ca.uhn.fhir.model.dstu.valueset.*;
  * Need to track doctors, staff, locums etc. for both healthcare practitioners, funders, etc.
  * </p> 
  */
-@ResourceDef(name="Practitioner")
+@ResourceDef(name="Practitioner", profile="http://hl7.org/fhir/profiles/Practitioner")
 public class Practitioner extends BaseResource implements IResource {
 
 	/**
@@ -132,51 +132,105 @@ public class Practitioner extends BaseResource implements IResource {
 
 
 	@Child(name="identifier", type=IdentifierDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)	
+	@Description(
+		shortDefinition="A identifier for the person as this agent",
+		formalDefinition="An identifier that applies to this person in this role"
+	)
 	private List<IdentifierDt> myIdentifier;
 	
 	@Child(name="name", type=HumanNameDt.class, order=1, min=0, max=1)	
+	@Description(
+		shortDefinition="A name associated with the person",
+		formalDefinition="A name associated with the person"
+	)
 	private HumanNameDt myName;
 	
 	@Child(name="telecom", type=ContactDt.class, order=2, min=0, max=Child.MAX_UNLIMITED)	
+	@Description(
+		shortDefinition="A contact detail for the practitioner",
+		formalDefinition="A contact detail for the practitioner, e.g. a telephone number or an email address."
+	)
 	private List<ContactDt> myTelecom;
 	
 	@Child(name="address", type=AddressDt.class, order=3, min=0, max=1)	
+	@Description(
+		shortDefinition="Where practitioner can be found/visited",
+		formalDefinition="The postal address where the practitioner can be found or visited or to which mail can be delivered"
+	)
 	private AddressDt myAddress;
 	
 	@Child(name="gender", type=CodeableConceptDt.class, order=4, min=0, max=1)	
-	private CodeableConceptDt myGender;
+	@Description(
+		shortDefinition="Gender for administrative purposes",
+		formalDefinition="Administrative Gender - the gender that the person is considered to have for administration and record keeping purposes."
+	)
+	private BoundCodeableConceptDt<AdministrativeGenderCodesEnum> myGender;
 	
 	@Child(name="birthDate", type=DateTimeDt.class, order=5, min=0, max=1)	
+	@Description(
+		shortDefinition="The date and time of birth for the practitioner",
+		formalDefinition="The date and time of birth for the practitioner"
+	)
 	private DateTimeDt myBirthDate;
 	
 	@Child(name="photo", type=AttachmentDt.class, order=6, min=0, max=Child.MAX_UNLIMITED)	
+	@Description(
+		shortDefinition="Image of the person",
+		formalDefinition="Image of the person"
+	)
 	private List<AttachmentDt> myPhoto;
 	
-	@Child(name="organization", order=7, min=0, max=1)
-	@ChildResource(types= {
+	@Child(name="organization", order=7, min=0, max=1, type={
 		Organization.class,
-	})	
+	})
+	@Description(
+		shortDefinition="The represented organization",
+		formalDefinition="The organization that the practitioner represents"
+	)
 	private ResourceReference myOrganization;
 	
 	@Child(name="role", type=CodeableConceptDt.class, order=8, min=0, max=Child.MAX_UNLIMITED)	
-	private List<CodeableConceptDt> myRole;
+	@Description(
+		shortDefinition="Roles which this practitioner may perform",
+		formalDefinition="Roles which this practitioner is authorized to perform for the organization"
+	)
+	private List<BoundCodeableConceptDt<PractitionerRoleEnum>> myRole;
 	
 	@Child(name="specialty", type=CodeableConceptDt.class, order=9, min=0, max=Child.MAX_UNLIMITED)	
-	private List<CodeableConceptDt> mySpecialty;
+	@Description(
+		shortDefinition="Specific specialty of the practitioner",
+		formalDefinition="Specific specialty of the practitioner"
+	)
+	private List<BoundCodeableConceptDt<PractitionerSpecialtyEnum>> mySpecialty;
 	
 	@Child(name="period", type=PeriodDt.class, order=10, min=0, max=1)	
+	@Description(
+		shortDefinition="The period during which the practitioner is authorized to perform in these role(s)",
+		formalDefinition="The period during which the person is authorized to act as a practitioner in these role(s) for the organization"
+	)
 	private PeriodDt myPeriod;
 	
-	@Child(name="location", order=11, min=0, max=Child.MAX_UNLIMITED)
-	@ChildResource(types= {
+	@Child(name="location", order=11, min=0, max=Child.MAX_UNLIMITED, type={
 		Location.class,
-	})	
+	})
+	@Description(
+		shortDefinition="The location(s) at which this practitioner provides care",
+		formalDefinition="The location(s) at which this practitioner provides care"
+	)
 	private List<ResourceReference> myLocation;
 	
 	@Child(name="qualification", order=12, min=0, max=Child.MAX_UNLIMITED)	
+	@Description(
+		shortDefinition="Qualifications obtained by training and certification",
+		formalDefinition=""
+	)
 	private List<Qualification> myQualification;
 	
 	@Child(name="communication", type=CodeableConceptDt.class, order=13, min=0, max=Child.MAX_UNLIMITED)	
+	@Description(
+		shortDefinition="A language the practitioner is able to use in patient communication",
+		formalDefinition="A language the practitioner is able to use in patient communication"
+	)
 	private List<CodeableConceptDt> myCommunication;
 	
 
@@ -342,12 +396,12 @@ public class Practitioner extends BaseResource implements IResource {
 	 *
      * <p>
      * <b>Definition:</b>
-     * Administrative Gender - the gender that the person is considered to have for administration and record keeping purposes. 
+     * Administrative Gender - the gender that the person is considered to have for administration and record keeping purposes.
      * </p> 
 	 */
-	public CodeableConceptDt getGender() {  
+	public BoundCodeableConceptDt<AdministrativeGenderCodesEnum> getGender() {  
 		if (myGender == null) {
-			myGender = new CodeableConceptDt();
+			myGender = new BoundCodeableConceptDt<AdministrativeGenderCodesEnum>(AdministrativeGenderCodesEnum.VALUESET_BINDER);
 		}
 		return myGender;
 	}
@@ -357,13 +411,25 @@ public class Practitioner extends BaseResource implements IResource {
 	 *
      * <p>
      * <b>Definition:</b>
-     * Administrative Gender - the gender that the person is considered to have for administration and record keeping purposes. 
+     * Administrative Gender - the gender that the person is considered to have for administration and record keeping purposes.
      * </p> 
 	 */
-	public void setGender(CodeableConceptDt theValue) {
+	public void setGender(BoundCodeableConceptDt<AdministrativeGenderCodesEnum> theValue) {
 		myGender = theValue;
 	}
 
+
+	/**
+	 * Sets the value(s) for <b>gender</b> (Gender for administrative purposes)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Administrative Gender - the gender that the person is considered to have for administration and record keeping purposes.
+     * </p> 
+	 */
+	public void setGender(AdministrativeGenderCodesEnum theValue) {
+		getGender().setValueAsEnum(theValue);
+	}
 
   
 	/**
@@ -506,9 +572,9 @@ public class Practitioner extends BaseResource implements IResource {
      * Roles which this practitioner is authorized to perform for the organization
      * </p> 
 	 */
-	public List<CodeableConceptDt> getRole() {  
+	public List<BoundCodeableConceptDt<PractitionerRoleEnum>> getRole() {  
 		if (myRole == null) {
-			myRole = new ArrayList<CodeableConceptDt>();
+			myRole = new ArrayList<BoundCodeableConceptDt<PractitionerRoleEnum>>();
 		}
 		return myRole;
 	}
@@ -521,22 +587,34 @@ public class Practitioner extends BaseResource implements IResource {
      * Roles which this practitioner is authorized to perform for the organization
      * </p> 
 	 */
-	public void setRole(List<CodeableConceptDt> theValue) {
+	public void setRole(List<BoundCodeableConceptDt<PractitionerRoleEnum>> theValue) {
 		myRole = theValue;
 	}
 
+
 	/**
-	 * Adds and returns a new value for <b>role</b> (Roles which this practitioner may perform)
+	 * Add a value for <b>role</b> (Roles which this practitioner may perform)
 	 *
      * <p>
      * <b>Definition:</b>
      * Roles which this practitioner is authorized to perform for the organization
      * </p> 
 	 */
-	public CodeableConceptDt addRole() {
-		CodeableConceptDt newType = new CodeableConceptDt();
-		getRole().add(newType);
-		return newType; 
+	public void addRole(PractitionerRoleEnum theValue) {
+		getRole().add(new BoundCodeableConceptDt<PractitionerRoleEnum>(PractitionerRoleEnum.VALUESET_BINDER, theValue));
+	}
+
+	/**
+	 * Sets the value(s), and clears any existing value(s) for <b>role</b> (Roles which this practitioner may perform)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Roles which this practitioner is authorized to perform for the organization
+     * </p> 
+	 */
+	public void setRole(PractitionerRoleEnum theValue) {
+		getRole().clear();
+		addRole(theValue);
 	}
 
   
@@ -550,9 +628,9 @@ public class Practitioner extends BaseResource implements IResource {
      * Specific specialty of the practitioner
      * </p> 
 	 */
-	public List<CodeableConceptDt> getSpecialty() {  
+	public List<BoundCodeableConceptDt<PractitionerSpecialtyEnum>> getSpecialty() {  
 		if (mySpecialty == null) {
-			mySpecialty = new ArrayList<CodeableConceptDt>();
+			mySpecialty = new ArrayList<BoundCodeableConceptDt<PractitionerSpecialtyEnum>>();
 		}
 		return mySpecialty;
 	}
@@ -565,22 +643,34 @@ public class Practitioner extends BaseResource implements IResource {
      * Specific specialty of the practitioner
      * </p> 
 	 */
-	public void setSpecialty(List<CodeableConceptDt> theValue) {
+	public void setSpecialty(List<BoundCodeableConceptDt<PractitionerSpecialtyEnum>> theValue) {
 		mySpecialty = theValue;
 	}
 
+
 	/**
-	 * Adds and returns a new value for <b>specialty</b> (Specific specialty of the practitioner)
+	 * Add a value for <b>specialty</b> (Specific specialty of the practitioner)
 	 *
      * <p>
      * <b>Definition:</b>
      * Specific specialty of the practitioner
      * </p> 
 	 */
-	public CodeableConceptDt addSpecialty() {
-		CodeableConceptDt newType = new CodeableConceptDt();
-		getSpecialty().add(newType);
-		return newType; 
+	public void addSpecialty(PractitionerSpecialtyEnum theValue) {
+		getSpecialty().add(new BoundCodeableConceptDt<PractitionerSpecialtyEnum>(PractitionerSpecialtyEnum.VALUESET_BINDER, theValue));
+	}
+
+	/**
+	 * Sets the value(s), and clears any existing value(s) for <b>specialty</b> (Specific specialty of the practitioner)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Specific specialty of the practitioner
+     * </p> 
+	 */
+	public void setSpecialty(PractitionerSpecialtyEnum theValue) {
+		getSpecialty().clear();
+		addSpecialty(theValue);
 	}
 
   
@@ -746,15 +836,26 @@ public class Practitioner extends BaseResource implements IResource {
 	public static class Qualification extends BaseElement implements IResourceBlock {
 	
 	@Child(name="code", type=CodeableConceptDt.class, order=0, min=1, max=1)	
+	@Description(
+		shortDefinition="Coded representation of the qualification",
+		formalDefinition=""
+	)
 	private CodeableConceptDt myCode;
 	
 	@Child(name="period", type=PeriodDt.class, order=1, min=0, max=1)	
+	@Description(
+		shortDefinition="Period during which the qualification is valid",
+		formalDefinition="Period during which the qualification is valid"
+	)
 	private PeriodDt myPeriod;
 	
-	@Child(name="issuer", order=2, min=0, max=1)
-	@ChildResource(types= {
+	@Child(name="issuer", order=2, min=0, max=1, type={
 		Organization.class,
-	})	
+	})
+	@Description(
+		shortDefinition="Organization that regulates and issues the qualification",
+		formalDefinition="Organization that regulates and issues the qualification"
+	)
 	private ResourceReference myIssuer;
 	
 

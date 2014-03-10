@@ -9,6 +9,14 @@ import java.lang.annotation.Target;
 @Target(value= {ElementType.FIELD, ElementType.TYPE})
 public @interface Description {
 
-	String value();
+	/**
+	 * Optional short name for this child 
+	 */
+	String shortDefinition() default "";
+	
+	/**
+	 * Optional formal definition for this child
+	 */
+	String formalDefinition() default "";
 	
 }

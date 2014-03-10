@@ -37,7 +37,7 @@ import ca.uhn.fhir.model.dstu.valueset.*;
  * 
  * </p> 
  */
-@ResourceDef(name="Profile")
+@ResourceDef(name="Profile", profile="http://hl7.org/fhir/profiles/Profile")
 public class Profile extends BaseResource implements IResource {
 
 	/**
@@ -152,51 +152,115 @@ public class Profile extends BaseResource implements IResource {
 
 
 	@Child(name="identifier", type=StringDt.class, order=0, min=0, max=1)	
+	@Description(
+		shortDefinition="Logical id to reference this profile",
+		formalDefinition="The identifier that is used to identify this profile when it is referenced in a specification, model, design or an instance  (should be globally unique OID, UUID, or URI)"
+	)
 	private StringDt myIdentifier;
 	
 	@Child(name="version", type=StringDt.class, order=1, min=0, max=1)	
+	@Description(
+		shortDefinition="Logical id for this version of the profile",
+		formalDefinition="The identifier that is used to identify this version of the profile when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the profile author manually and the value should be a timestamp"
+	)
 	private StringDt myVersion;
 	
 	@Child(name="name", type=StringDt.class, order=2, min=1, max=1)	
+	@Description(
+		shortDefinition="Informal name for this profile",
+		formalDefinition="A free text natural language name identifying the Profile"
+	)
 	private StringDt myName;
 	
 	@Child(name="publisher", type=StringDt.class, order=3, min=0, max=1)	
+	@Description(
+		shortDefinition="Name of the publisher (Organization or individual)",
+		formalDefinition="Details of the individual or organization who accepts responsibility for publishing the profile"
+	)
 	private StringDt myPublisher;
 	
 	@Child(name="telecom", type=ContactDt.class, order=4, min=0, max=Child.MAX_UNLIMITED)	
+	@Description(
+		shortDefinition="Contact information of the publisher",
+		formalDefinition="Contact details to assist a user in finding and communicating with the publisher"
+	)
 	private List<ContactDt> myTelecom;
 	
 	@Child(name="description", type=StringDt.class, order=5, min=0, max=1)	
+	@Description(
+		shortDefinition="Natural language description of the profile",
+		formalDefinition="A free text natural language description of the profile and its use"
+	)
 	private StringDt myDescription;
 	
 	@Child(name="code", type=CodingDt.class, order=6, min=0, max=Child.MAX_UNLIMITED)	
+	@Description(
+		shortDefinition="Assist with indexing and finding",
+		formalDefinition="A set of terms from external terminologies that may be used to assist with indexing and searching of templates."
+	)
 	private List<CodingDt> myCode;
 	
 	@Child(name="status", type=CodeDt.class, order=7, min=1, max=1)	
+	@Description(
+		shortDefinition="draft | active | retired",
+		formalDefinition="The status of the profile"
+	)
 	private BoundCodeDt<ResourceProfileStatusEnum> myStatus;
 	
 	@Child(name="experimental", type=BooleanDt.class, order=8, min=0, max=1)	
+	@Description(
+		shortDefinition="If for testing purposes, not real usage",
+		formalDefinition="This profile was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage"
+	)
 	private BooleanDt myExperimental;
 	
 	@Child(name="date", type=DateTimeDt.class, order=9, min=0, max=1)	
+	@Description(
+		shortDefinition="Date for this version of the profile",
+		formalDefinition="The date that this version of the profile was published"
+	)
 	private DateTimeDt myDate;
 	
 	@Child(name="requirements", type=StringDt.class, order=10, min=0, max=1)	
+	@Description(
+		shortDefinition="Scope and Usage this profile is for",
+		formalDefinition="The Scope and Usage that this profile was created to meet"
+	)
 	private StringDt myRequirements;
 	
 	@Child(name="fhirVersion", type=IdDt.class, order=11, min=0, max=1)	
+	@Description(
+		shortDefinition="FHIR Version this profile targets",
+		formalDefinition="The version of the FHIR specification on which this profile is based"
+	)
 	private IdDt myFhirVersion;
 	
 	@Child(name="mapping", order=12, min=0, max=Child.MAX_UNLIMITED)	
+	@Description(
+		shortDefinition="External specification that the content is mapped to",
+		formalDefinition="An external specification that the content is mapped to"
+	)
 	private List<Mapping> myMapping;
 	
 	@Child(name="structure", order=13, min=0, max=Child.MAX_UNLIMITED)	
+	@Description(
+		shortDefinition="A constraint on a resource or a data type",
+		formalDefinition="A constraint statement about what contents a resource or data type may have"
+	)
 	private List<Structure> myStructure;
 	
 	@Child(name="extensionDefn", order=14, min=0, max=Child.MAX_UNLIMITED)	
+	@Description(
+		shortDefinition="Definition of an extension",
+		formalDefinition="An extension defined as part of the profile"
+	)
 	private List<ExtensionDefn> myExtensionDefn;
 	
 	@Child(name="query", order=15, min=0, max=Child.MAX_UNLIMITED)	
+	@Description(
+		shortDefinition="Definition of a named query",
+		formalDefinition="Definition of a named query and its parameters and their meaning"
+	)
 	private List<Query> myQuery;
 	
 
@@ -923,15 +987,31 @@ public class Profile extends BaseResource implements IResource {
 	public static class Mapping extends BaseElement implements IResourceBlock {
 	
 	@Child(name="identity", type=IdDt.class, order=0, min=1, max=1)	
+	@Description(
+		shortDefinition="Internal id when this mapping is used",
+		formalDefinition="An Internal id that is used to identify this mapping set when specific mappings are made"
+	)
 	private IdDt myIdentity;
 	
 	@Child(name="uri", type=UriDt.class, order=1, min=0, max=1)	
+	@Description(
+		shortDefinition="Identifies what this mapping refers to",
+		formalDefinition="A URI that identifies the specification that this mapping is expressed to"
+	)
 	private UriDt myUri;
 	
 	@Child(name="name", type=StringDt.class, order=2, min=0, max=1)	
+	@Description(
+		shortDefinition="Names what this mapping refers to",
+		formalDefinition="A name for the specification that is being mapped to"
+	)
 	private StringDt myName;
 	
 	@Child(name="comments", type=StringDt.class, order=3, min=0, max=1)	
+	@Description(
+		shortDefinition="Versions, Issues, Scope limitations etc",
+		formalDefinition="Comments about this mapping, including version notes, issues, scope limitations, and other important notes for usage"
+	)
 	private StringDt myComments;
 	
 
@@ -1128,21 +1208,45 @@ public class Profile extends BaseResource implements IResource {
 	public static class Structure extends BaseElement implements IResourceBlock {
 	
 	@Child(name="type", type=CodeDt.class, order=0, min=1, max=1)	
+	@Description(
+		shortDefinition="The Resource or Data Type being described",
+		formalDefinition="The Resource or Data type being described"
+	)
 	private BoundCodeDt<FHIRDefinedTypeEnum> myType;
 	
 	@Child(name="name", type=StringDt.class, order=1, min=0, max=1)	
+	@Description(
+		shortDefinition="Name for this particular structure (reference target)",
+		formalDefinition="The name of this resource constraint statement (to refer to it from other resource constraints - from Profile.structure.element.definition.type.profile)"
+	)
 	private StringDt myName;
 	
 	@Child(name="publish", type=BooleanDt.class, order=2, min=0, max=1)	
+	@Description(
+		shortDefinition="This definition is published (i.e. for validation)",
+		formalDefinition="This definition of a profile on a structure is published as a formal statement. Some structural definitions might be defined purely for internal use within the profile, and not intended to be used outside that context"
+	)
 	private BooleanDt myPublish;
 	
 	@Child(name="purpose", type=StringDt.class, order=3, min=0, max=1)	
+	@Description(
+		shortDefinition="Human summary: why describe this resource?",
+		formalDefinition="Human summary: why describe this resource?"
+	)
 	private StringDt myPurpose;
 	
 	@Child(name="element", order=4, min=0, max=Child.MAX_UNLIMITED)	
+	@Description(
+		shortDefinition="Definition of elements in the resource (if no profile)",
+		formalDefinition="Captures constraints on each element within the resource"
+	)
 	private List<StructureElement> myElement;
 	
 	@Child(name="searchParam", order=5, min=0, max=Child.MAX_UNLIMITED)	
+	@Description(
+		shortDefinition="Search params defined",
+		formalDefinition="Additional search parameters for implementations to support and/or make use of"
+	)
 	private List<StructureSearchParam> mySearchParam;
 	
 
@@ -1426,18 +1530,38 @@ public class Profile extends BaseResource implements IResource {
 	public static class StructureElement extends BaseElement implements IResourceBlock {
 	
 	@Child(name="path", type=StringDt.class, order=0, min=1, max=1)	
+	@Description(
+		shortDefinition="The path of the element (see the formal definitions)",
+		formalDefinition="The path identifies the element and is expressed as a \".\"-separated list of ancestor elements, beginning with the name of the resource"
+	)
 	private StringDt myPath;
 	
 	@Child(name="representation", type=CodeDt.class, order=1, min=0, max=Child.MAX_UNLIMITED)	
+	@Description(
+		shortDefinition="How this element is represented in instances",
+		formalDefinition="Codes that define how this element is represented in instances, when the deviation varies from the normal case"
+	)
 	private List<BoundCodeDt<PropertyRepresentationEnum>> myRepresentation;
 	
 	@Child(name="name", type=StringDt.class, order=2, min=0, max=1)	
+	@Description(
+		shortDefinition="Name for this particular element definition (reference target)",
+		formalDefinition="The name of this element definition (to refer to it from other element definitions using Profile.structure.element.definition.nameReference). This is a unique name referring to a specific set of constraints applied to this element. One use of this is to provide a name to different slices of the same element"
+	)
 	private StringDt myName;
 	
 	@Child(name="slicing", order=3, min=0, max=1)	
+	@Description(
+		shortDefinition="This element is sliced - slices follow",
+		formalDefinition="Indicates that the element is sliced into a set of alternative definitions (there are multiple definitions on a single element in the base resource). The set of slices is any elements that come after this in the element sequence that have the same path, until a shorter path occurs (the shorter path terminates the set)"
+	)
 	private StructureElementSlicing mySlicing;
 	
 	@Child(name="definition", order=4, min=0, max=1)	
+	@Description(
+		shortDefinition="More specific definition of the element",
+		formalDefinition="Definition of the content of the element to provide a more specific definition than that contained for the element in the base resource"
+	)
 	private StructureElementDefinition myDefinition;
 	
 
@@ -1453,7 +1577,7 @@ public class Profile extends BaseResource implements IResource {
 	 *
      * <p>
      * <b>Definition:</b>
-     * The path identifies the element and is expressed as a "."-separated list of ancestor elements, beginning with the name of the resource
+     * The path identifies the element and is expressed as a \".\"-separated list of ancestor elements, beginning with the name of the resource
      * </p> 
 	 */
 	public StringDt getPath() {  
@@ -1468,7 +1592,7 @@ public class Profile extends BaseResource implements IResource {
 	 *
      * <p>
      * <b>Definition:</b>
-     * The path identifies the element and is expressed as a "."-separated list of ancestor elements, beginning with the name of the resource
+     * The path identifies the element and is expressed as a \".\"-separated list of ancestor elements, beginning with the name of the resource
      * </p> 
 	 */
 	public void setPath(StringDt theValue) {
@@ -1481,7 +1605,7 @@ public class Profile extends BaseResource implements IResource {
 	 *
      * <p>
      * <b>Definition:</b>
-     * The path identifies the element and is expressed as a "."-separated list of ancestor elements, beginning with the name of the resource
+     * The path identifies the element and is expressed as a \".\"-separated list of ancestor elements, beginning with the name of the resource
      * </p> 
 	 */
 	public void setPath( String theString) {
@@ -1620,7 +1744,7 @@ public class Profile extends BaseResource implements IResource {
 
   
 	/**
-	 * Gets the value(s) for <b>definition</b> (More specific definition of the element ).
+	 * Gets the value(s) for <b>definition</b> (More specific definition of the element).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -1637,7 +1761,7 @@ public class Profile extends BaseResource implements IResource {
 	}
 
 	/**
-	 * Sets the value(s) for <b>definition</b> (More specific definition of the element )
+	 * Sets the value(s) for <b>definition</b> (More specific definition of the element)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1665,12 +1789,24 @@ public class Profile extends BaseResource implements IResource {
 	public static class StructureElementSlicing extends BaseElement implements IResourceBlock {
 	
 	@Child(name="discriminator", type=IdDt.class, order=0, min=1, max=1)	
+	@Description(
+		shortDefinition="Element that used to distinguish the slices",
+		formalDefinition="Designates which child element is used to discriminate between the slices when processing an instance. The value of the child element in the instance SHALL completely distinguish which slice the element in the resource matches based on the allowed values for that element in each of the slices"
+	)
 	private IdDt myDiscriminator;
 	
 	@Child(name="ordered", type=BooleanDt.class, order=1, min=1, max=1)	
+	@Description(
+		shortDefinition="If elements must be in same order as slices",
+		formalDefinition="If the matching elements have to occur in the same order as defined in the profile"
+	)
 	private BooleanDt myOrdered;
 	
 	@Child(name="rules", type=CodeDt.class, order=2, min=1, max=1)	
+	@Description(
+		shortDefinition="closed | open | openAtEnd",
+		formalDefinition="Whether additional slices are allowed or not. When the slices are ordered, profile authors can also say that additional slices are only allowed at the end"
+	)
 	private BoundCodeDt<SlicingRulesEnum> myRules;
 	
 
@@ -1813,7 +1949,7 @@ public class Profile extends BaseResource implements IResource {
 
 
 	/**
-	 * Block class for child element: <b>Profile.structure.element.definition</b> (More specific definition of the element )
+	 * Block class for child element: <b>Profile.structure.element.definition</b> (More specific definition of the element)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1824,57 +1960,129 @@ public class Profile extends BaseResource implements IResource {
 	public static class StructureElementDefinition extends BaseElement implements IResourceBlock {
 	
 	@Child(name="short", type=StringDt.class, order=0, min=1, max=1)	
+	@Description(
+		shortDefinition="Concise definition for xml presentation",
+		formalDefinition="A concise definition that  is shown in the generated XML format that summarizes profiles (used throughout the specification)"
+	)
 	private StringDt myShort;
 	
 	@Child(name="formal", type=StringDt.class, order=1, min=1, max=1)	
+	@Description(
+		shortDefinition="Full formal definition in human language",
+		formalDefinition="The definition SHALL be consistent with the base definition, but convey the meaning of the element in the particular context of use of the resource"
+	)
 	private StringDt myFormal;
 	
 	@Child(name="comments", type=StringDt.class, order=2, min=0, max=1)	
+	@Description(
+		shortDefinition="Comments about the use of this element",
+		formalDefinition="Comments about the use of the element, including notes about how to use the data properly, exceptions to proper use, etc."
+	)
 	private StringDt myComments;
 	
 	@Child(name="requirements", type=StringDt.class, order=3, min=0, max=1)	
+	@Description(
+		shortDefinition="Why is this needed?",
+		formalDefinition="Explains why this element is needed and why it's been constrained as it has"
+	)
 	private StringDt myRequirements;
 	
 	@Child(name="synonym", type=StringDt.class, order=4, min=0, max=Child.MAX_UNLIMITED)	
+	@Description(
+		shortDefinition="Other names",
+		formalDefinition="Identifies additional names by which this element might also be known"
+	)
 	private List<StringDt> mySynonym;
 	
 	@Child(name="min", type=IntegerDt.class, order=5, min=1, max=1)	
+	@Description(
+		shortDefinition="Minimum Cardinality",
+		formalDefinition="The minimum number of times this element SHALL appear in the instance"
+	)
 	private IntegerDt myMin;
 	
 	@Child(name="max", type=StringDt.class, order=6, min=1, max=1)	
+	@Description(
+		shortDefinition="Maximum Cardinality (a number or *)",
+		formalDefinition="The maximum number of times this element is permitted to appear in the instance"
+	)
 	private StringDt myMax;
 	
 	@Child(name="type", order=7, min=0, max=Child.MAX_UNLIMITED)	
+	@Description(
+		shortDefinition="Data type and Profile for this element",
+		formalDefinition="The data type or resource that the value of this element is permitted to be"
+	)
 	private List<StructureElementDefinitionType> myType;
 	
 	@Child(name="nameReference", type=StringDt.class, order=8, min=0, max=1)	
+	@Description(
+		shortDefinition="To another element constraint (by element.name)",
+		formalDefinition="Identifies the name of a slice defined elsewhere in the profile whose constraints should be applied to the current element"
+	)
 	private StringDt myNameReference;
 	
 	@Child(name="value", type=IDatatype.class, order=9, min=0, max=1)	
+	@Description(
+		shortDefinition="Fixed value: [as defined for a primitive type]",
+		formalDefinition="Specifies a primitive value that SHALL hold for this element in the instance"
+	)
 	private IDatatype myValue;
 	
 	@Child(name="example", type=IDatatype.class, order=10, min=0, max=1)	
+	@Description(
+		shortDefinition="Example value: [as defined for type]",
+		formalDefinition="An example value for this element"
+	)
 	private IDatatype myExample;
 	
 	@Child(name="maxLength", type=IntegerDt.class, order=11, min=0, max=1)	
+	@Description(
+		shortDefinition="Length for strings",
+		formalDefinition="Indicates the shortest length that SHALL be supported by conformant instances without truncation"
+	)
 	private IntegerDt myMaxLength;
 	
 	@Child(name="condition", type=IdDt.class, order=12, min=0, max=Child.MAX_UNLIMITED)	
+	@Description(
+		shortDefinition="Reference to invariant about presence",
+		formalDefinition="A reference to an invariant that may make additional statements about the cardinality or value in the instance"
+	)
 	private List<IdDt> myCondition;
 	
 	@Child(name="constraint", order=13, min=0, max=Child.MAX_UNLIMITED)	
+	@Description(
+		shortDefinition="Condition that must evaluate to true",
+		formalDefinition="Formal constraints such as co-occurrence and other constraints that can be computationally evaluated within the context of the instance"
+	)
 	private List<StructureElementDefinitionConstraint> myConstraint;
 	
 	@Child(name="mustSupport", type=BooleanDt.class, order=14, min=0, max=1)	
+	@Description(
+		shortDefinition="If the element must supported",
+		formalDefinition="If true, conformant resource authors SHALL be capable of providing a value for the element and resource consumers SHALL be capable of extracting and doing something useful with the data element.  If false, the element may be ignored and not supported"
+	)
 	private BooleanDt myMustSupport;
 	
 	@Child(name="isModifier", type=BooleanDt.class, order=15, min=1, max=1)	
+	@Description(
+		shortDefinition="If this modifies the meaning of other elements",
+		formalDefinition="If true, the value of this element affects the interpretation of the element or resource that contains it, and the value of the element cannot be ignored. Typically, this is used for status, negation and qualification codes. The effect of this is that the element cannot be ignored by systems: they SHALL either recognize the element and process it, and/or a pre-determination has been made that it is not relevant to their particular system."
+	)
 	private BooleanDt myIsModifier;
 	
 	@Child(name="binding", order=16, min=0, max=1)	
+	@Description(
+		shortDefinition="ValueSet details if this is coded",
+		formalDefinition="Binds to a value set if this element is coded (code, Coding, CodeableConcept)"
+	)
 	private StructureElementDefinitionBinding myBinding;
 	
 	@Child(name="mapping", order=17, min=0, max=Child.MAX_UNLIMITED)	
+	@Description(
+		shortDefinition="Map element to another set of definitions",
+		formalDefinition="Identifies a concept from an external specification that roughly corresponds to this element"
+	)
 	private List<StructureElementDefinitionMapping> myMapping;
 	
 
@@ -1933,7 +2141,7 @@ public class Profile extends BaseResource implements IResource {
 	 *
      * <p>
      * <b>Definition:</b>
-     *  The definition SHALL be consistent with the base definition, but convey the meaning of the element in the particular context of use of the resource
+     * The definition SHALL be consistent with the base definition, but convey the meaning of the element in the particular context of use of the resource
      * </p> 
 	 */
 	public StringDt getFormal() {  
@@ -1948,7 +2156,7 @@ public class Profile extends BaseResource implements IResource {
 	 *
      * <p>
      * <b>Definition:</b>
-     *  The definition SHALL be consistent with the base definition, but convey the meaning of the element in the particular context of use of the resource
+     * The definition SHALL be consistent with the base definition, but convey the meaning of the element in the particular context of use of the resource
      * </p> 
 	 */
 	public void setFormal(StringDt theValue) {
@@ -1961,7 +2169,7 @@ public class Profile extends BaseResource implements IResource {
 	 *
      * <p>
      * <b>Definition:</b>
-     *  The definition SHALL be consistent with the base definition, but convey the meaning of the element in the particular context of use of the resource
+     * The definition SHALL be consistent with the base definition, but convey the meaning of the element in the particular context of use of the resource
      * </p> 
 	 */
 	public void setFormal( String theString) {
@@ -2251,7 +2459,7 @@ public class Profile extends BaseResource implements IResource {
 	 *
      * <p>
      * <b>Definition:</b>
-     * Identifies the name of a slice defined elsewhere in the profile whose constraints should be applied to the current element 
+     * Identifies the name of a slice defined elsewhere in the profile whose constraints should be applied to the current element
      * </p> 
 	 */
 	public StringDt getNameReference() {  
@@ -2266,7 +2474,7 @@ public class Profile extends BaseResource implements IResource {
 	 *
      * <p>
      * <b>Definition:</b>
-     * Identifies the name of a slice defined elsewhere in the profile whose constraints should be applied to the current element 
+     * Identifies the name of a slice defined elsewhere in the profile whose constraints should be applied to the current element
      * </p> 
 	 */
 	public void setNameReference(StringDt theValue) {
@@ -2279,7 +2487,7 @@ public class Profile extends BaseResource implements IResource {
 	 *
      * <p>
      * <b>Definition:</b>
-     * Identifies the name of a slice defined elsewhere in the profile whose constraints should be applied to the current element 
+     * Identifies the name of a slice defined elsewhere in the profile whose constraints should be applied to the current element
      * </p> 
 	 */
 	public void setNameReference( String theString) {
@@ -2665,12 +2873,24 @@ public class Profile extends BaseResource implements IResource {
 	public static class StructureElementDefinitionType extends BaseElement implements IResourceBlock {
 	
 	@Child(name="code", type=CodeDt.class, order=0, min=1, max=1)	
+	@Description(
+		shortDefinition="Name of Data type or Resource",
+		formalDefinition=""
+	)
 	private BoundCodeDt<DataTypeEnum> myCode;
 	
 	@Child(name="profile", type=UriDt.class, order=1, min=0, max=1)	
+	@Description(
+		shortDefinition="Profile.structure to apply",
+		formalDefinition="Identifies a profile that SHALL hold for resources or datatypes referenced as the type of this element. Can be a local reference - to another structure in this profile, or a reference to a structure in another profile"
+	)
 	private UriDt myProfile;
 	
 	@Child(name="aggregation", type=CodeDt.class, order=2, min=0, max=Child.MAX_UNLIMITED)	
+	@Description(
+		shortDefinition="contained | referenced | bundled - how aggregated",
+		formalDefinition="If the type is a reference to another resource, how the resource is or can be aggreated - is it a contained resource, or a reference, and if the context is a bundle, is it included in the bundle"
+	)
 	private List<BoundCodeDt<AggregationModeEnum>> myAggregation;
 	
 
@@ -2837,18 +3057,38 @@ public class Profile extends BaseResource implements IResource {
 	public static class StructureElementDefinitionConstraint extends BaseElement implements IResourceBlock {
 	
 	@Child(name="key", type=IdDt.class, order=0, min=1, max=1)	
+	@Description(
+		shortDefinition="Target of 'condition' reference above",
+		formalDefinition="Allows identification of which elements have their cardinalities impacted by the constraint.  Will not be referenced for constraints that do not affect cardinality"
+	)
 	private IdDt myKey;
 	
 	@Child(name="name", type=StringDt.class, order=1, min=0, max=1)	
+	@Description(
+		shortDefinition="Short human label",
+		formalDefinition="Used to label the constraint in OCL or in short displays incapable of displaying the full human description"
+	)
 	private StringDt myName;
 	
 	@Child(name="severity", type=CodeDt.class, order=2, min=1, max=1)	
+	@Description(
+		shortDefinition="error | warning",
+		formalDefinition="Identifies the impact constraint violation has on the conformance of the instance"
+	)
 	private BoundCodeDt<ConstraintSeverityEnum> mySeverity;
 	
 	@Child(name="human", type=StringDt.class, order=3, min=1, max=1)	
+	@Description(
+		shortDefinition="Human description of constraint",
+		formalDefinition="Text that can be used to describe the constraint in messages identifying that the constraint has been violated"
+	)
 	private StringDt myHuman;
 	
 	@Child(name="xpath", type=StringDt.class, order=4, min=1, max=1)	
+	@Description(
+		shortDefinition="XPath expression of constraint",
+		formalDefinition="XPath expression of constraint"
+	)
 	private StringDt myXpath;
 	
 
@@ -2993,7 +3233,7 @@ public class Profile extends BaseResource implements IResource {
 	 *
      * <p>
      * <b>Definition:</b>
-     * Text that can be used to describe the constraint in messages identifying that the constraint has been violated 
+     * Text that can be used to describe the constraint in messages identifying that the constraint has been violated
      * </p> 
 	 */
 	public StringDt getHuman() {  
@@ -3008,7 +3248,7 @@ public class Profile extends BaseResource implements IResource {
 	 *
      * <p>
      * <b>Definition:</b>
-     * Text that can be used to describe the constraint in messages identifying that the constraint has been violated 
+     * Text that can be used to describe the constraint in messages identifying that the constraint has been violated
      * </p> 
 	 */
 	public void setHuman(StringDt theValue) {
@@ -3021,7 +3261,7 @@ public class Profile extends BaseResource implements IResource {
 	 *
      * <p>
      * <b>Definition:</b>
-     * Text that can be used to describe the constraint in messages identifying that the constraint has been violated 
+     * Text that can be used to describe the constraint in messages identifying that the constraint has been violated
      * </p> 
 	 */
 	public void setHuman( String theString) {
@@ -3088,21 +3328,41 @@ public class Profile extends BaseResource implements IResource {
 	public static class StructureElementDefinitionBinding extends BaseElement implements IResourceBlock {
 	
 	@Child(name="name", type=StringDt.class, order=0, min=1, max=1)	
+	@Description(
+		shortDefinition="Descriptive Name",
+		formalDefinition="A descriptive name for this - can be useful for generating implementation artifacts"
+	)
 	private StringDt myName;
 	
 	@Child(name="isExtensible", type=BooleanDt.class, order=1, min=1, max=1)	
+	@Description(
+		shortDefinition="Can additional codes be used?",
+		formalDefinition="If true, then conformant systems may use additional codes or (where the data type permits) text alone to convey concepts not covered by the set of codes identified in the binding.  If false, then conformant systems are constrained to the provided codes alone"
+	)
 	private BooleanDt myIsExtensible;
 	
 	@Child(name="conformance", type=CodeDt.class, order=2, min=0, max=1)	
+	@Description(
+		shortDefinition="required | preferred | example",
+		formalDefinition="Indicates the degree of conformance expectations associated with this binding"
+	)
 	private BoundCodeDt<BindingConformanceEnum> myConformance;
 	
 	@Child(name="description", type=StringDt.class, order=3, min=0, max=1)	
+	@Description(
+		shortDefinition="Human explanation of the value set",
+		formalDefinition="Describes the intended use of this particular set of codes"
+	)
 	private StringDt myDescription;
 	
-	@Child(name="reference", order=4, min=0, max=1, choice=@Choice(types= {
+	@Child(name="reference", order=4, min=0, max=1, type={
 		UriDt.class,
 		ValueSet.class,
-	}))	
+	})
+	@Description(
+		shortDefinition="Source of value set",
+		formalDefinition="Points to the value set or external definition that identifies the set of codes to be used"
+	)
 	private IDatatype myReference;
 	
 
@@ -3327,9 +3587,17 @@ public class Profile extends BaseResource implements IResource {
 	public static class StructureElementDefinitionMapping extends BaseElement implements IResourceBlock {
 	
 	@Child(name="identity", type=IdDt.class, order=0, min=1, max=1)	
+	@Description(
+		shortDefinition="Reference to mapping declaration",
+		formalDefinition="An internal reference to the definition of a mapping"
+	)
 	private IdDt myIdentity;
 	
 	@Child(name="map", type=StringDt.class, order=1, min=1, max=1)	
+	@Description(
+		shortDefinition="Details of the mapping",
+		formalDefinition="Expresses what part of the target specification corresponds to this element"
+	)
 	private StringDt myMap;
 	
 
@@ -3442,18 +3710,38 @@ public class Profile extends BaseResource implements IResource {
 	public static class StructureSearchParam extends BaseElement implements IResourceBlock {
 	
 	@Child(name="name", type=StringDt.class, order=0, min=1, max=1)	
+	@Description(
+		shortDefinition="Name of search parameter",
+		formalDefinition="The name of the standard or custom search parameter"
+	)
 	private StringDt myName;
 	
 	@Child(name="type", type=CodeDt.class, order=1, min=1, max=1)	
+	@Description(
+		shortDefinition="number | date | string | token | reference | composite | quantity",
+		formalDefinition="The type of value a search parameter refers to, and how the content is interpreted"
+	)
 	private BoundCodeDt<SearchParamTypeEnum> myType;
 	
 	@Child(name="documentation", type=StringDt.class, order=2, min=1, max=1)	
+	@Description(
+		shortDefinition="Contents and meaning of search parameter",
+		formalDefinition="A specification for search parameters. For standard parameters, provides additional information on how the parameter is used in this solution.  For custom parameters, provides a description of what the parameter does"
+	)
 	private StringDt myDocumentation;
 	
 	@Child(name="xpath", type=StringDt.class, order=3, min=0, max=1)	
+	@Description(
+		shortDefinition="XPath that extracts the parameter set",
+		formalDefinition="An XPath expression that returns a set of elements for the search parameter"
+	)
 	private StringDt myXpath;
 	
 	@Child(name="target", type=CodeDt.class, order=4, min=0, max=Child.MAX_UNLIMITED)	
+	@Description(
+		shortDefinition="Types of resource (if a resource reference)",
+		formalDefinition="Types of resource (if a resource is referenced)"
+	)
 	private List<BoundCodeDt<ResourceTypeEnum>> myTarget;
 	
 
@@ -3707,18 +3995,38 @@ public class Profile extends BaseResource implements IResource {
 	public static class ExtensionDefn extends BaseElement implements IResourceBlock {
 	
 	@Child(name="code", type=CodeDt.class, order=0, min=1, max=1)	
+	@Description(
+		shortDefinition="Identifies the extension in this profile",
+		formalDefinition="A unique code (within the profile) used to identify the extension"
+	)
 	private CodeDt myCode;
 	
 	@Child(name="display", type=StringDt.class, order=1, min=0, max=1)	
+	@Description(
+		shortDefinition="Use this name when displaying the value",
+		formalDefinition="Defined so that applications can use this name when displaying the value of the extension to the user"
+	)
 	private StringDt myDisplay;
 	
 	@Child(name="contextType", type=CodeDt.class, order=2, min=1, max=1)	
+	@Description(
+		shortDefinition="resource | datatype | mapping | extension",
+		formalDefinition="Identifies the type of context to which the extension applies"
+	)
 	private BoundCodeDt<ExtensionContextEnum> myContextType;
 	
 	@Child(name="context", type=StringDt.class, order=3, min=1, max=Child.MAX_UNLIMITED)	
+	@Description(
+		shortDefinition="Where the extension can be used in instances",
+		formalDefinition="Identifies the types of resource or data type elements to which the extension can be applied"
+	)
 	private List<StringDt> myContext;
 	
 	@Child(name="definition", type=StructureElementDefinition.class, order=4, min=1, max=1)	
+	@Description(
+		shortDefinition="Definition of the extension and its content",
+		formalDefinition="Definition of the extension and its content"
+	)
 	private StructureElementDefinition myDefinition;
 	
 
@@ -3757,7 +4065,19 @@ public class Profile extends BaseResource implements IResource {
 	}
 
 
-  
+ 	/**
+	 * Sets the value for <b>code</b> (Identifies the extension in this profile)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A unique code (within the profile) used to identify the extension
+     * </p> 
+	 */
+	public void setCode( String theCode) {
+		myCode = new CodeDt(theCode); 
+	}
+
+ 
 	/**
 	 * Gets the value(s) for <b>display</b> (Use this name when displaying the value).
 	 * creating it if it does
@@ -3765,7 +4085,7 @@ public class Profile extends BaseResource implements IResource {
 	 *
      * <p>
      * <b>Definition:</b>
-     * Defined so that applications can use this name when displaying the value of the extension to the user 
+     * Defined so that applications can use this name when displaying the value of the extension to the user
      * </p> 
 	 */
 	public StringDt getDisplay() {  
@@ -3780,7 +4100,7 @@ public class Profile extends BaseResource implements IResource {
 	 *
      * <p>
      * <b>Definition:</b>
-     * Defined so that applications can use this name when displaying the value of the extension to the user 
+     * Defined so that applications can use this name when displaying the value of the extension to the user
      * </p> 
 	 */
 	public void setDisplay(StringDt theValue) {
@@ -3793,7 +4113,7 @@ public class Profile extends BaseResource implements IResource {
 	 *
      * <p>
      * <b>Definition:</b>
-     * Defined so that applications can use this name when displaying the value of the extension to the user 
+     * Defined so that applications can use this name when displaying the value of the extension to the user
      * </p> 
 	 */
 	public void setDisplay( String theString) {
@@ -3950,12 +4270,24 @@ public class Profile extends BaseResource implements IResource {
 	public static class Query extends BaseElement implements IResourceBlock {
 	
 	@Child(name="name", type=StringDt.class, order=0, min=1, max=1)	
+	@Description(
+		shortDefinition="Special named queries (_query=)",
+		formalDefinition="The name of a query, which is used in the URI from Conformance statements declaring use of the query.  Typically this will also be the name for the _query parameter when the query is called, though in some cases it may be aliased by a server to avoid collisions"
+	)
 	private StringDt myName;
 	
 	@Child(name="documentation", type=StringDt.class, order=1, min=1, max=1)	
+	@Description(
+		shortDefinition="Describes the named query",
+		formalDefinition="Description of the query - the functionality it offers, and considerations about how it functions and to use it"
+	)
 	private StringDt myDocumentation;
 	
 	@Child(name="parameter", type=StructureSearchParam.class, order=2, min=0, max=Child.MAX_UNLIMITED)	
+	@Description(
+		shortDefinition="Parameter for the named query",
+		formalDefinition="A parameter of a named query"
+	)
 	private List<StructureSearchParam> myParameter;
 	
 

@@ -1,6 +1,7 @@
 package ca.uhn.fhir.model.primitive;
 
 import java.util.Date;
+import java.util.TimeZone;
 
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
@@ -35,6 +36,7 @@ public class DateTimeDt extends BaseDateTimeDt {
 	public DateTimeDt(@SimpleSetter.Parameter(name = "theDate") Date theDate, @SimpleSetter.Parameter(name = "thePrecision") TemporalPrecisionEnum thePrecision) {
 		setValue(theDate);
 		setPrecision(thePrecision);
+		setTimeZone(TimeZone.getDefault());
 	}
 
 	/**
@@ -44,6 +46,7 @@ public class DateTimeDt extends BaseDateTimeDt {
 	public DateTimeDt(@SimpleSetter.Parameter(name="theDate") Date theDate) {
 		setValue(theDate);
 		setPrecision(DEFAULT_PRECISION);
+		setTimeZone(TimeZone.getDefault());
 	}
 
 	@Override

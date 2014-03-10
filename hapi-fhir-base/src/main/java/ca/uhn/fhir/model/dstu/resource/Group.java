@@ -37,7 +37,7 @@ import ca.uhn.fhir.model.dstu.valueset.*;
  * 
  * </p> 
  */
-@ResourceDef(name="Group")
+@ResourceDef(name="Group", profile="http://hl7.org/fhir/profiles/Group")
 public class Group extends BaseResource implements IResource {
 
 	/**
@@ -132,34 +132,65 @@ public class Group extends BaseResource implements IResource {
 
 
 	@Child(name="identifier", type=IdentifierDt.class, order=0, min=0, max=1)	
+	@Description(
+		shortDefinition="Unique id",
+		formalDefinition="A unique business identifier for this group"
+	)
 	private IdentifierDt myIdentifier;
 	
 	@Child(name="type", type=CodeDt.class, order=1, min=1, max=1)	
+	@Description(
+		shortDefinition="person | animal | practitioner | device | medication | substance",
+		formalDefinition="Identifies the broad classification of the kind of resources the group includes"
+	)
 	private BoundCodeDt<GroupTypeEnum> myType;
 	
 	@Child(name="actual", type=BooleanDt.class, order=2, min=1, max=1)	
+	@Description(
+		shortDefinition="Descriptive or actual",
+		formalDefinition="If true, indicates that the resource refers to a specific group of real individuals.  If false, the group defines a set of intended individuals"
+	)
 	private BooleanDt myActual;
 	
 	@Child(name="code", type=CodeableConceptDt.class, order=3, min=0, max=1)	
+	@Description(
+		shortDefinition="Kind of Group members",
+		formalDefinition="Provides a specific type of resource the group includes.  E.g. \"cow\", \"syringe\", etc."
+	)
 	private CodeableConceptDt myCode;
 	
 	@Child(name="name", type=StringDt.class, order=4, min=0, max=1)	
+	@Description(
+		shortDefinition="Label for Group",
+		formalDefinition="A label assigned to the group for human identification and communication"
+	)
 	private StringDt myName;
 	
 	@Child(name="quantity", type=IntegerDt.class, order=5, min=0, max=1)	
+	@Description(
+		shortDefinition="Number of members",
+		formalDefinition="A count of the number of resource instances that are part of the group"
+	)
 	private IntegerDt myQuantity;
 	
 	@Child(name="characteristic", order=6, min=0, max=Child.MAX_UNLIMITED)	
+	@Description(
+		shortDefinition="Trait of group members",
+		formalDefinition="Identifies the traits shared by members of the group"
+	)
 	private List<Characteristic> myCharacteristic;
 	
-	@Child(name="member", order=7, min=0, max=Child.MAX_UNLIMITED)
-	@ChildResource(types= {
+	@Child(name="member", order=7, min=0, max=Child.MAX_UNLIMITED, type={
 		Patient.class,
 		Practitioner.class,
 		Device.class,
 		Medication.class,
 		Substance.class,
-	})	
+	})
+	@Description(
+		shortDefinition="Who is in group",
+		formalDefinition="Identifies the resource instances that are members of the group."
+	)
 	private List<ResourceReference> myMember;
 	
 
@@ -292,7 +323,7 @@ public class Group extends BaseResource implements IResource {
 	 *
      * <p>
      * <b>Definition:</b>
-     * Provides a specific type of resource the group includes.  E.g. "cow", "syringe", etc.
+     * Provides a specific type of resource the group includes.  E.g. \"cow\", \"syringe\", etc.
      * </p> 
 	 */
 	public CodeableConceptDt getCode() {  
@@ -307,7 +338,7 @@ public class Group extends BaseResource implements IResource {
 	 *
      * <p>
      * <b>Definition:</b>
-     * Provides a specific type of resource the group includes.  E.g. "cow", "syringe", etc.
+     * Provides a specific type of resource the group includes.  E.g. \"cow\", \"syringe\", etc.
      * </p> 
 	 */
 	public void setCode(CodeableConceptDt theValue) {
@@ -486,17 +517,29 @@ public class Group extends BaseResource implements IResource {
 	public static class Characteristic extends BaseElement implements IResourceBlock {
 	
 	@Child(name="code", type=CodeableConceptDt.class, order=0, min=1, max=1)	
+	@Description(
+		shortDefinition="Kind of characteristic",
+		formalDefinition="A code that identifies the kind of trait being asserted"
+	)
 	private CodeableConceptDt myCode;
 	
-	@Child(name="value", order=1, min=1, max=1, choice=@Choice(types= {
+	@Child(name="value", order=1, min=1, max=1, type={
 		CodeableConceptDt.class,
 		BooleanDt.class,
 		QuantityDt.class,
 		RangeDt.class,
-	}))	
+	})
+	@Description(
+		shortDefinition="Value held by characteristic",
+		formalDefinition="The value of the trait that holds (or does not hold - see 'exclude') for members of the group"
+	)
 	private IDatatype myValue;
 	
 	@Child(name="exclude", type=BooleanDt.class, order=2, min=1, max=1)	
+	@Description(
+		shortDefinition="Group includes or excludes",
+		formalDefinition="If true, indicates the characteristic is one that is NOT held by members of the group"
+	)
 	private BooleanDt myExclude;
 	
 

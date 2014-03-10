@@ -25,4 +25,6 @@
    
  * Support compartments for client and server
  
- * Support slices in the model 
+ * Support slices in the model
+ 
+ * Support extensions (declared and undeclared) in primitives, narratives, etc. 

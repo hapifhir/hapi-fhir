@@ -7,6 +7,56 @@ import java.util.Map;
 
 public enum EventTimingEnum {
 
+	/**
+	 * Code Value: <b>HS</b>
+	 */
+	HS("HS", "http://hl7.org/fhir/v3/TimingEvent"),
+	
+	/**
+	 * Code Value: <b>WAKE</b>
+	 */
+	WAKE("WAKE", "http://hl7.org/fhir/v3/TimingEvent"),
+	
+	/**
+	 * Code Value: <b>AC</b>
+	 */
+	AC("AC", "http://hl7.org/fhir/v3/TimingEvent"),
+	
+	/**
+	 * Code Value: <b>ACM</b>
+	 */
+	ACM("ACM", "http://hl7.org/fhir/v3/TimingEvent"),
+	
+	/**
+	 * Code Value: <b>ACD</b>
+	 */
+	ACD("ACD", "http://hl7.org/fhir/v3/TimingEvent"),
+	
+	/**
+	 * Code Value: <b>ACV</b>
+	 */
+	ACV("ACV", "http://hl7.org/fhir/v3/TimingEvent"),
+	
+	/**
+	 * Code Value: <b>PC</b>
+	 */
+	PC("PC", "http://hl7.org/fhir/v3/TimingEvent"),
+	
+	/**
+	 * Code Value: <b>PCM</b>
+	 */
+	PCM("PCM", "http://hl7.org/fhir/v3/TimingEvent"),
+	
+	/**
+	 * Code Value: <b>PCD</b>
+	 */
+	PCD("PCD", "http://hl7.org/fhir/v3/TimingEvent"),
+	
+	/**
+	 * Code Value: <b>PCV</b>
+	 */
+	PCV("PCV", "http://hl7.org/fhir/v3/TimingEvent"),
+	
 	;
 	
 	/**
@@ -22,11 +72,19 @@ public enum EventTimingEnum {
 	public static final String VALUESET_NAME = "EventTiming";
 
 	private static Map<String, EventTimingEnum> CODE_TO_ENUM = new HashMap<String, EventTimingEnum>();
-	private String myCode;
+	private static Map<String, Map<String, EventTimingEnum>> SYSTEM_TO_CODE_TO_ENUM = new HashMap<String, Map<String, EventTimingEnum>>();
+	
+	private final String myCode;
+	private final String mySystem;
 	
 	static {
 		for (EventTimingEnum next : EventTimingEnum.values()) {
 			CODE_TO_ENUM.put(next.getCode(), next);
+			
+			if (!SYSTEM_TO_CODE_TO_ENUM.containsKey(next.getSystem())) {
+				SYSTEM_TO_CODE_TO_ENUM.put(next.getSystem(), new HashMap<String, EventTimingEnum>());
+			}
+			SYSTEM_TO_CODE_TO_ENUM.get(next.getSystem()).put(next.getCode(), next);			
 		}
 	}
 	
@@ -35,6 +93,13 @@ public enum EventTimingEnum {
 	 */
 	public String getCode() {
 		return myCode;
+	}
+	
+	/**
+	 * Returns the code system associated with this enumerated value
+	 */
+	public String getSystem() {
+		return mySystem;
 	}
 	
 	/**
@@ -53,18 +118,34 @@ public enum EventTimingEnum {
 		public String toCodeString(EventTimingEnum theEnum) {
 			return theEnum.getCode();
 		}
+
+		@Override
+		public String toSystemString(EventTimingEnum theEnum) {
+			return theEnum.getSystem();
+		}
 		
 		@Override
 		public EventTimingEnum fromCodeString(String theCodeString) {
 			return CODE_TO_ENUM.get(theCodeString);
 		}
+		
+		@Override
+		public EventTimingEnum fromCodeString(String theCodeString, String theSystemString) {
+			Map<String, EventTimingEnum> map = SYSTEM_TO_CODE_TO_ENUM.get(theSystemString);
+			if (map == null) {
+				return null;
+			}
+			return map.get(theCodeString);
+		}
+		
 	};
 	
 	/** 
 	 * Constructor
 	 */
-	EventTimingEnum(String theCode) {
+	EventTimingEnum(String theCode, String theSystem) {
 		myCode = theCode;
+		mySystem = theSystem;
 	}
 
 	

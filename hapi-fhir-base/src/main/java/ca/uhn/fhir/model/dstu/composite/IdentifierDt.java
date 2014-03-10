@@ -56,24 +56,47 @@ public class IdentifierDt extends BaseElement implements ICompositeDatatype  , I
 	}
 
 	@Child(name="use", type=CodeDt.class, order=0, min=0, max=1)	
+	@Description(
+		shortDefinition="usual | official | temp | secondary (If known)",
+		formalDefinition="The purpose of this identifier"
+	)
 	private BoundCodeDt<IdentifierUseEnum> myUse;
 	
 	@Child(name="label", type=StringDt.class, order=1, min=0, max=1)	
+	@Description(
+		shortDefinition="Description of identifier",
+		formalDefinition="A text string for the identifier that can be displayed to a human so they can recognize the identifier"
+	)
 	private StringDt myLabel;
 	
 	@Child(name="system", type=UriDt.class, order=2, min=0, max=1)	
+	@Description(
+		shortDefinition="The namespace for the identifier",
+		formalDefinition="Establishes the namespace in which set of possible id values is unique."
+	)
 	private UriDt mySystem;
 	
 	@Child(name="value", type=StringDt.class, order=3, min=0, max=1)	
+	@Description(
+		shortDefinition="The value that is unique",
+		formalDefinition="The portion of the identifier typically displayed to the user and which is unique within the context of the system."
+	)
 	private StringDt myValue;
 	
 	@Child(name="period", type=PeriodDt.class, order=4, min=0, max=1)	
+	@Description(
+		shortDefinition="Time period when id is/was valid for use",
+		formalDefinition="Time period during which identifier is/was valid for use"
+	)
 	private PeriodDt myPeriod;
 	
-	@Child(name="assigner", order=5, min=0, max=1)
-	@ChildResource(types= {
+	@Child(name="assigner", order=5, min=0, max=1, type={
 		Organization.class,
-	})	
+	})
+	@Description(
+		shortDefinition="Organization that issued id (may be just text)",
+		formalDefinition="Organization that issued/manages the identifier"
+	)
 	private ResourceReference myAssigner;
 	
 
@@ -83,8 +106,7 @@ public class IdentifierDt extends BaseElement implements ICompositeDatatype  , I
 	}
 
 	/**
-	 * Gets the value(s) for <b>use</b> (usual | official | temp | secondary (If known)
-).
+	 * Gets the value(s) for <b>use</b> (usual | official | temp | secondary (If known)).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -101,8 +123,7 @@ public class IdentifierDt extends BaseElement implements ICompositeDatatype  , I
 	}
 
 	/**
-	 * Sets the value(s) for <b>use</b> (usual | official | temp | secondary (If known)
-)
+	 * Sets the value(s) for <b>use</b> (usual | official | temp | secondary (If known))
 	 *
      * <p>
      * <b>Definition:</b>
@@ -115,8 +136,7 @@ public class IdentifierDt extends BaseElement implements ICompositeDatatype  , I
 
 
 	/**
-	 * Sets the value(s) for <b>use</b> (usual | official | temp | secondary (If known)
-)
+	 * Sets the value(s) for <b>use</b> (usual | official | temp | secondary (If known))
 	 *
      * <p>
      * <b>Definition:</b>

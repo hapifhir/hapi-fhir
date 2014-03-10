@@ -12,49 +12,49 @@ public enum ObservationReliabilityEnum {
 	 *
 	 * The result has no reliability concerns.
 	 */
-	OK("ok"),
+	OK("ok", "http://hl7.org/fhir/observation-reliability"),
 	
 	/**
 	 * Code Value: <b>ongoing</b>
 	 *
 	 * An early estimate of value; measurement is still occurring.
 	 */
-	ONGOING("ongoing"),
+	ONGOING("ongoing", "http://hl7.org/fhir/observation-reliability"),
 	
 	/**
 	 * Code Value: <b>early</b>
 	 *
 	 * An early estimate of value; processing is still occurring.
 	 */
-	EARLY("early"),
+	EARLY("early", "http://hl7.org/fhir/observation-reliability"),
 	
 	/**
 	 * Code Value: <b>questionable</b>
 	 *
 	 * The observation value should be treated with care.
 	 */
-	QUESTIONABLE("questionable"),
+	QUESTIONABLE("questionable", "http://hl7.org/fhir/observation-reliability"),
 	
 	/**
 	 * Code Value: <b>calibrating</b>
 	 *
 	 * The result has been generated while calibration is occurring.
 	 */
-	CALIBRATING("calibrating"),
+	CALIBRATING("calibrating", "http://hl7.org/fhir/observation-reliability"),
 	
 	/**
 	 * Code Value: <b>error</b>
 	 *
 	 * The observation could not be completed because of an error.
 	 */
-	ERROR("error"),
+	ERROR("error", "http://hl7.org/fhir/observation-reliability"),
 	
 	/**
 	 * Code Value: <b>unknown</b>
 	 *
 	 * No observation value was available.
 	 */
-	UNKNOWN("unknown"),
+	UNKNOWN("unknown", "http://hl7.org/fhir/observation-reliability"),
 	
 	;
 	
@@ -71,11 +71,19 @@ public enum ObservationReliabilityEnum {
 	public static final String VALUESET_NAME = "ObservationReliability";
 
 	private static Map<String, ObservationReliabilityEnum> CODE_TO_ENUM = new HashMap<String, ObservationReliabilityEnum>();
-	private String myCode;
+	private static Map<String, Map<String, ObservationReliabilityEnum>> SYSTEM_TO_CODE_TO_ENUM = new HashMap<String, Map<String, ObservationReliabilityEnum>>();
+	
+	private final String myCode;
+	private final String mySystem;
 	
 	static {
 		for (ObservationReliabilityEnum next : ObservationReliabilityEnum.values()) {
 			CODE_TO_ENUM.put(next.getCode(), next);
+			
+			if (!SYSTEM_TO_CODE_TO_ENUM.containsKey(next.getSystem())) {
+				SYSTEM_TO_CODE_TO_ENUM.put(next.getSystem(), new HashMap<String, ObservationReliabilityEnum>());
+			}
+			SYSTEM_TO_CODE_TO_ENUM.get(next.getSystem()).put(next.getCode(), next);			
 		}
 	}
 	
@@ -84,6 +92,13 @@ public enum ObservationReliabilityEnum {
 	 */
 	public String getCode() {
 		return myCode;
+	}
+	
+	/**
+	 * Returns the code system associated with this enumerated value
+	 */
+	public String getSystem() {
+		return mySystem;
 	}
 	
 	/**
@@ -102,18 +117,34 @@ public enum ObservationReliabilityEnum {
 		public String toCodeString(ObservationReliabilityEnum theEnum) {
 			return theEnum.getCode();
 		}
+
+		@Override
+		public String toSystemString(ObservationReliabilityEnum theEnum) {
+			return theEnum.getSystem();
+		}
 		
 		@Override
 		public ObservationReliabilityEnum fromCodeString(String theCodeString) {
 			return CODE_TO_ENUM.get(theCodeString);
 		}
+		
+		@Override
+		public ObservationReliabilityEnum fromCodeString(String theCodeString, String theSystemString) {
+			Map<String, ObservationReliabilityEnum> map = SYSTEM_TO_CODE_TO_ENUM.get(theSystemString);
+			if (map == null) {
+				return null;
+			}
+			return map.get(theCodeString);
+		}
+		
 	};
 	
 	/** 
 	 * Constructor
 	 */
-	ObservationReliabilityEnum(String theCode) {
+	ObservationReliabilityEnum(String theCode, String theSystem) {
 		myCode = theCode;
+		mySystem = theSystem;
 	}
 
 	

@@ -2,6 +2,7 @@
 package ca.uhn.fhir.model.dstu.valueset;
 
 import ca.uhn.fhir.model.api.*;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -13,7 +14,7 @@ public enum NarrativeStatusEnum {
 	 *
 	 * The contents of the narrative are entirely generated from the structured data in the resource.
 	 */
-	GENERATED("generated"),
+	GENERATED("generated","http://hl7.org/fhir/narrative-status"),
 	
 	/**
 	 * extensions
@@ -21,7 +22,7 @@ public enum NarrativeStatusEnum {
 	 *
 	 * The contents of the narrative are entirely generated from the structured data in the resource and some of the content is generated from extensions.
 	 */
-	EXTENSIONS("extensions"),
+	EXTENSIONS("extensions","http://hl7.org/fhir/narrative-status"),
 	
 	/**
 	 * additional
@@ -29,7 +30,7 @@ public enum NarrativeStatusEnum {
 	 *
 	 * The contents of the narrative contain additional information not found in the structured data.
 	 */
-	ADDITIONAL("additional"),
+	ADDITIONAL("additional","http://hl7.org/fhir/narrative-status"),
 	
 	/**
 	 * empty
@@ -37,7 +38,7 @@ public enum NarrativeStatusEnum {
 	 *
 	 * the contents of the narrative are some equivalent of "No human-readable text provided for this resource".
 	 */
-	EMPTY("empty"),
+	EMPTY("empty","http://hl7.org/fhir/narrative-status"),
 	
 	;
 	
@@ -54,11 +55,19 @@ public enum NarrativeStatusEnum {
 	public static final String VALUESET_NAME = "NarrativeStatus";
 
 	private static Map<String, NarrativeStatusEnum> CODE_TO_ENUM = new HashMap<String, NarrativeStatusEnum>();
-	private String myCode;
+	private static Map<String, Map<String, NarrativeStatusEnum>> SYSTEM_TO_CODE_TO_ENUM = new HashMap<String, Map<String, NarrativeStatusEnum>>();
+	
+	private final String myCode;
+	private final String mySystem;
 	
 	static {
 		for (NarrativeStatusEnum next : NarrativeStatusEnum.values()) {
 			CODE_TO_ENUM.put(next.getCode(), next);
+			
+			if (!SYSTEM_TO_CODE_TO_ENUM.containsKey(next.getSystem())) {
+				SYSTEM_TO_CODE_TO_ENUM.put(next.getSystem(), new HashMap<String, NarrativeStatusEnum>());
+			}
+			SYSTEM_TO_CODE_TO_ENUM.get(next.getSystem()).put(next.getCode(), next);			
 		}
 	}
 	
@@ -67,6 +76,13 @@ public enum NarrativeStatusEnum {
 	 */
 	public String getCode() {
 		return myCode;
+	}
+	
+	/**
+	 * Returns the code system associated with this enumerated value
+	 */
+	public String getSystem() {
+		return mySystem;
 	}
 	
 	/**
@@ -85,19 +101,34 @@ public enum NarrativeStatusEnum {
 		public String toCodeString(NarrativeStatusEnum theEnum) {
 			return theEnum.getCode();
 		}
+
+		@Override
+		public String toSystemString(NarrativeStatusEnum theEnum) {
+			return theEnum.getSystem();
+		}
 		
 		@Override
 		public NarrativeStatusEnum fromCodeString(String theCodeString) {
 			return CODE_TO_ENUM.get(theCodeString);
 		}
+		
+		@Override
+		public NarrativeStatusEnum fromCodeString(String theCodeString, String theSystemString) {
+			Map<String, NarrativeStatusEnum> map = SYSTEM_TO_CODE_TO_ENUM.get(theSystemString);
+			if (map == null) {
+				return null;
+			}
+			return map.get(theCodeString);
+		}
+		
 	};
 	
 	/** 
 	 * Constructor
 	 */
-	NarrativeStatusEnum(String theCode) {
+	NarrativeStatusEnum(String theCode, String theSystem) {
 		myCode = theCode;
+		mySystem = theSystem;
 	}
-
 	
 }

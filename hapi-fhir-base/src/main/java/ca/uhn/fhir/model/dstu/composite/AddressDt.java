@@ -29,7 +29,7 @@ import ca.uhn.fhir.model.dstu.resource.*;
  *
  * <p>
  * <b>Definition:</b>
- * There is a variety of postal address formats defined around the world. This format defines a superset that is the basis for all addresses around the world 
+ * There is a variety of postal address formats defined around the world. This format defines a superset that is the basis for all addresses around the world
  * </p> 
  *
  * <p>
@@ -42,27 +42,59 @@ public class AddressDt extends BaseElement implements ICompositeDatatype  {
 
 
 	@Child(name="use", type=CodeDt.class, order=0, min=0, max=1)	
+	@Description(
+		shortDefinition="home | work | temp | old - purpose of this address",
+		formalDefinition="The purpose of this address"
+	)
 	private BoundCodeDt<AddressUseEnum> myUse;
 	
 	@Child(name="text", type=StringDt.class, order=1, min=0, max=1)	
+	@Description(
+		shortDefinition="Text representation of the address",
+		formalDefinition="A full text representation of the address"
+	)
 	private StringDt myText;
 	
 	@Child(name="line", type=StringDt.class, order=2, min=0, max=Child.MAX_UNLIMITED)	
+	@Description(
+		shortDefinition="Street name, number, direction & P.O. Box etc",
+		formalDefinition="This component contains the house number, apartment number, street name, street direction, P.O. Box number, delivery hints, and similar address information"
+	)
 	private List<StringDt> myLine;
 	
 	@Child(name="city", type=StringDt.class, order=3, min=0, max=1)	
+	@Description(
+		shortDefinition="Name of city, town etc.",
+		formalDefinition="The name of the city, town, village or other community or delivery center."
+	)
 	private StringDt myCity;
 	
 	@Child(name="state", type=StringDt.class, order=4, min=0, max=1)	
+	@Description(
+		shortDefinition="Sub-unit of country (abreviations ok)",
+		formalDefinition="Sub-unit of a country with limited sovereignty in a federally organized country. A code may be used if codes are in common use (i.e. US 2 letter state codes)."
+	)
 	private StringDt myState;
 	
 	@Child(name="zip", type=StringDt.class, order=5, min=0, max=1)	
+	@Description(
+		shortDefinition="Postal code for area",
+		formalDefinition="A postal code designating a region defined by the postal service."
+	)
 	private StringDt myZip;
 	
 	@Child(name="country", type=StringDt.class, order=6, min=0, max=1)	
+	@Description(
+		shortDefinition="Country (can be ISO 3166 3 letter code)",
+		formalDefinition="Country - a nation as commonly understood or generally accepted"
+	)
 	private StringDt myCountry;
 	
 	@Child(name="period", type=PeriodDt.class, order=7, min=0, max=1)	
+	@Description(
+		shortDefinition="Time period when address was/is in use",
+		formalDefinition="Time period when address was/is in use"
+	)
 	private PeriodDt myPeriod;
 	
 
@@ -158,14 +190,13 @@ public class AddressDt extends BaseElement implements ICompositeDatatype  {
 
  
 	/**
-	 * Gets the value(s) for <b>line</b> (Street name, number, direction & P.O. Box etc ).
+	 * Gets the value(s) for <b>line</b> (Street name, number, direction & P.O. Box etc).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
-     * This component contains the house number, apartment number, street name, street direction, 
-P.O. Box number, delivery hints, and similar address information
+     * This component contains the house number, apartment number, street name, street direction, P.O. Box number, delivery hints, and similar address information
      * </p> 
 	 */
 	public List<StringDt> getLine() {  
@@ -176,12 +207,11 @@ P.O. Box number, delivery hints, and similar address information
 	}
 
 	/**
-	 * Sets the value(s) for <b>line</b> (Street name, number, direction & P.O. Box etc )
+	 * Sets the value(s) for <b>line</b> (Street name, number, direction & P.O. Box etc)
 	 *
      * <p>
      * <b>Definition:</b>
-     * This component contains the house number, apartment number, street name, street direction, 
-P.O. Box number, delivery hints, and similar address information
+     * This component contains the house number, apartment number, street name, street direction, P.O. Box number, delivery hints, and similar address information
      * </p> 
 	 */
 	public void setLine(List<StringDt> theValue) {
@@ -189,12 +219,11 @@ P.O. Box number, delivery hints, and similar address information
 	}
 
 	/**
-	 * Adds and returns a new value for <b>line</b> (Street name, number, direction & P.O. Box etc )
+	 * Adds and returns a new value for <b>line</b> (Street name, number, direction & P.O. Box etc)
 	 *
      * <p>
      * <b>Definition:</b>
-     * This component contains the house number, apartment number, street name, street direction, 
-P.O. Box number, delivery hints, and similar address information
+     * This component contains the house number, apartment number, street name, street direction, P.O. Box number, delivery hints, and similar address information
      * </p> 
 	 */
 	public StringDt addLine() {
@@ -204,12 +233,11 @@ P.O. Box number, delivery hints, and similar address information
 	}
 
  	/**
-	 * Adds a new value for <b>line</b> (Street name, number, direction & P.O. Box etc )
+	 * Adds a new value for <b>line</b> (Street name, number, direction & P.O. Box etc)
 	 *
      * <p>
      * <b>Definition:</b>
-     * This component contains the house number, apartment number, street name, street direction, 
-P.O. Box number, delivery hints, and similar address information
+     * This component contains the house number, apartment number, street name, street direction, P.O. Box number, delivery hints, and similar address information
      * </p> 
 	 */
 	public void addLine( String theString) {

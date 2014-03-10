@@ -15,20 +15,25 @@ import ca.uhn.fhir.model.primitive.StringDt;
 @ResourceDef(name = "ResourceWithExtensionsA")
 public class ResourceWithExtensionsA implements IResource {
 
+	/*
+	 * NB: several unit tests depend on the structure here
+	 * so check the unit tests immediately after any changes 
+	 */
+	
 	@Child(name = "bar1", type = Bar1.class, order = 2, min = 1, max = Child.MAX_UNLIMITED)
-	@Extension(url = "http://bar/1")
+	@Extension(url = "http://bar/#b1", definedLocally=true)
 	private List<Bar1> myBar1;
 
 	@Child(name = "bar2", type = Bar1.class, order = 3, min = 1, max = Child.MAX_UNLIMITED)
-	@Extension(url = "http://bar/2")
+	@Extension(url = "http://bar/#b2", definedLocally=true)
 	private Bar1 myBar2;
 
 	@Child(name = "foo1", type = StringDt.class, order = 0, min = 0, max = Child.MAX_UNLIMITED)
-	@Extension(url = "http://foo/1")
+	@Extension(url = "http://foo/#f1", definedLocally=true)
 	private List<StringDt> myFoo1;
 
 	@Child(name = "foo2", type = StringDt.class, order = 1, min = 0, max = 1)
-	@Extension(url = "http://foo/2")
+	@Extension(url = "http://foo/#f2", definedLocally=true)
 	private StringDt myFoo2;
 
 	@Child(name = "identifier", type = IdentifierDt.class, order = 0, min = 0, max = Child.MAX_UNLIMITED)
@@ -82,11 +87,11 @@ public class ResourceWithExtensionsA implements IResource {
 		}
 		
 		@Child(name = "bar11", type = DateDt.class, order = 0, min = 0, max = Child.MAX_UNLIMITED)
-		@Extension(url = "http://bar/1/1")
+		@Extension(url = "http://bar/#1/1", definedLocally=true)
 		private List<DateDt> myBar11;
 
 		@Child(name = "bar12", type = DateDt.class, order = 1, min = 0, max = Child.MAX_UNLIMITED)
-		@Extension(url = "http://bar/1/2")
+		@Extension(url = "http://bar/#1/2", definedLocally=true)
 		private List<Bar2> myBar12;
 
 		@Override
@@ -116,11 +121,11 @@ public class ResourceWithExtensionsA implements IResource {
 	public static class Bar2 implements IExtension {
 
 		@Child(name = "bar121", type = DateDt.class, order = 0, min = 0, max = Child.MAX_UNLIMITED)
-		@Extension(url = "http://bar/1/2/1")
+		@Extension(url = "http://bar/#1/2/1", definedLocally=true)
 		private List<DateDt> myBar121;
 
 		@Child(name = "bar122", type = DateDt.class, order = 1, min = 0, max = Child.MAX_UNLIMITED)
-		@Extension(url = "http://bar/1/2/2")
+		@Extension(url = "http://bar/#1/2/2", definedLocally=true)
 		private List<DateDt> myBar122;
 
 		@Override

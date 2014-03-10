@@ -5,17 +5,18 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
-import ca.uhn.fhir.model.api.IDatatype;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IResourceBlock;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
 
 public class RuntimeChildResourceBlockDefinition extends BaseRuntimeDeclaredChildDefinition {
 
 	private RuntimeResourceBlockDefinition myElementDef;
 	private Class<? extends IResourceBlock> myResourceBlockType;
 
-	public RuntimeChildResourceBlockDefinition(Field theField, int theMin, int theMax, String theElementName, Class<? extends IResourceBlock> theResourceBlockType) throws ConfigurationException {
-		super(theField, theMin, theMax, theElementName);
+	public RuntimeChildResourceBlockDefinition(Field theField, Child theChildAnnotation, Description theDescriptionAnnotation, String theElementName, Class<? extends IResourceBlock> theResourceBlockType) throws ConfigurationException {
+		super(theField, theChildAnnotation, theDescriptionAnnotation, theElementName);
 		myResourceBlockType = theResourceBlockType;
 	}
 

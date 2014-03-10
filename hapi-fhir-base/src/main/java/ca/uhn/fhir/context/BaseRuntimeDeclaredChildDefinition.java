@@ -10,6 +10,8 @@ import java.util.Collections;
 import java.util.List;
 
 import ca.uhn.fhir.model.api.IElement;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.util.BeanUtils;
 
 public abstract class BaseRuntimeDeclaredChildDefinition extends BaseRuntimeChildDefinition {
@@ -20,16 +22,18 @@ public abstract class BaseRuntimeDeclaredChildDefinition extends BaseRuntimeChil
 	private final int myMax;
 	private final int myMin;
 	private final IMutator myMutator;
+	private final String myShortDefinition;
+	private final String myFormalDefinition;
 
-	BaseRuntimeDeclaredChildDefinition(Field theField, int theMin, int theMax, String theElementName) throws ConfigurationException {
+	BaseRuntimeDeclaredChildDefinition(Field theField, Child theChildAnnotation, Description theDescriptionAnnotation, String theElementName) throws ConfigurationException {
 		super();
 		if (theField == null) {
 			throw new IllegalArgumentException("No field speficied");
 		}
-		if (theMin < 0) {
+		if (theChildAnnotation.min() < 0) {
 			throw new ConfigurationException("Min must be >= 0");
 		}
-		if (theMax != -1 && theMax < theMin) {
+		if (theChildAnnotation.max() != -1 && theChildAnnotation.max() < theChildAnnotation.min()) {
 			throw new ConfigurationException("Max must be >= Min (unless it is -1 / unlimited)");
 		}
 		if (isBlank(theElementName)) {
@@ -37,10 +41,17 @@ public abstract class BaseRuntimeDeclaredChildDefinition extends BaseRuntimeChil
 		}
 
 		myField = theField;
-		myMin = theMin;
-		myMax = theMax;
+		myMin = theChildAnnotation.min();
+		myMax = theChildAnnotation.max();
 		myElementName = theElementName;
-
+		if (theDescriptionAnnotation != null) {
+			myShortDefinition = theDescriptionAnnotation.shortDefinition();
+			myFormalDefinition = theDescriptionAnnotation.formalDefinition();
+		}else {
+			myShortDefinition=null;
+			myFormalDefinition=null;
+		}
+		
 		// TODO: handle lists (max>0), and maybe max=0?
 
 		Class<?> declaringClass = myField.getDeclaringClass();
@@ -48,11 +59,11 @@ public abstract class BaseRuntimeDeclaredChildDefinition extends BaseRuntimeChil
 		try {
 			final Method accessor = BeanUtils.findAccessor(declaringClass, targetReturnType, myElementName);
 			final Method mutator = BeanUtils.findMutator(declaringClass, targetReturnType, myElementName);
-			
+
 			if (List.class.isAssignableFrom(targetReturnType)) {
 				myAccessor = new ListAccessor(accessor);
 				myMutator = new ListMutator(mutator);
-			}else {
+			} else {
 				myAccessor = new PlainAccessor(accessor);
 				myMutator = new PlainMutator(targetReturnType, mutator);
 			}
@@ -62,6 +73,15 @@ public abstract class BaseRuntimeDeclaredChildDefinition extends BaseRuntimeChil
 
 	}
 
+	public String getShortDefinition() {
+		return myShortDefinition;
+	}
+
+	public String getFormalDefinition() {
+		return myFormalDefinition;
+	}
+
+	@Override
 	public IAccessor getAccessor() {
 		return myAccessor;
 	}
@@ -82,25 +102,55 @@ public abstract class BaseRuntimeDeclaredChildDefinition extends BaseRuntimeChil
 		return myMin;
 	}
 
+	@Override
 	public IMutator getMutator() {
 		return myMutator;
 	}
 
+	public BaseRuntimeElementDefinition<?> getSingleChildOrThrow() {
+		if (getValidChildNames().size() != 1) {
+			throw new IllegalStateException("This child has " + getValidChildNames().size() + " children, expected 1. This is a HAPI bug. Found: " + getValidChildNames());
+		}
+		return getChildByName(getValidChildNames().iterator().next());
+	}
+
+	private final class ListAccessor implements IAccessor {
+		private final Method myAccessorMethod;
+
+		private ListAccessor(Method theAccessor) {
+			myAccessorMethod = theAccessor;
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public List<IElement> getValues(Object theTarget) {
+			try {
+				return (List<IElement>) myAccessorMethod.invoke(theTarget);
+			} catch (IllegalAccessException e) {
+				throw new ConfigurationException("Failed to get value", e);
+			} catch (IllegalArgumentException e) {
+				throw new ConfigurationException("Failed to get value", e);
+			} catch (InvocationTargetException e) {
+				throw new ConfigurationException("Failed to get value", e);
+			}
+		}
+	}
+
 	private final class ListMutator implements IMutator {
-		private final Method myMutator;
+		private final Method myMutatorMethod;
 
 		private ListMutator(Method theMutator) {
-			myMutator = theMutator;
+			myMutatorMethod = theMutator;
 		}
 
 		@Override
-		public void  addValue(Object theTarget, IElement theValue) {
+		public void addValue(Object theTarget, IElement theValue) {
 			@SuppressWarnings("unchecked")
 			List<IElement> existingList = (List<IElement>) myAccessor.getValues(theTarget);
 			if (existingList == null) {
 				existingList = new ArrayList<IElement>();
 				try {
-					myMutator.invoke(theTarget, existingList);
+					myMutatorMethod.invoke(theTarget, existingList);
 				} catch (IllegalAccessException e) {
 					throw new ConfigurationException("Failed to get value", e);
 				} catch (IllegalArgumentException e) {
@@ -113,18 +163,17 @@ public abstract class BaseRuntimeDeclaredChildDefinition extends BaseRuntimeChil
 		}
 	}
 
-	private final class ListAccessor implements IAccessor {
-		private final Method myAccessor;
+	private final class PlainAccessor implements IAccessor {
+		private final Method myAccessorMethod;
 
-		private ListAccessor(Method theAccessor) {
-			myAccessor = theAccessor;
+		private PlainAccessor(Method theAccessor) {
+			myAccessorMethod = theAccessor;
 		}
 
-		@SuppressWarnings("unchecked")
 		@Override
 		public List<IElement> getValues(Object theTarget) {
 			try {
-				return (List<IElement>) myAccessor.invoke(theTarget);
+				return Collections.singletonList((IElement) myAccessorMethod.invoke(theTarget));
 			} catch (IllegalAccessException e) {
 				throw new ConfigurationException("Failed to get value", e);
 			} catch (IllegalArgumentException e) {
@@ -136,15 +185,15 @@ public abstract class BaseRuntimeDeclaredChildDefinition extends BaseRuntimeChil
 	}
 
 	private final class PlainMutator implements IMutator {
+		private final Method myMutatorMethod;
 		private final Class<?> myTargetReturnType;
-		private final Method myMutator;
 
 		private PlainMutator(Class<?> theTargetReturnType, Method theMutator) {
 			assert theTargetReturnType != null;
 			assert theMutator != null;
-			
+
 			myTargetReturnType = theTargetReturnType;
-			myMutator = theMutator;
+			myMutatorMethod = theMutator;
 		}
 
 		@Override
@@ -153,7 +202,7 @@ public abstract class BaseRuntimeDeclaredChildDefinition extends BaseRuntimeChil
 				if (theValue != null && !myTargetReturnType.isAssignableFrom(theValue.getClass())) {
 					throw new ConfigurationException("Value for field " + myElementName + " expects type " + myTargetReturnType + " but got " + theValue.getClass());
 				}
-				myMutator.invoke(theTarget, theValue);
+				myMutatorMethod.invoke(theTarget, theValue);
 			} catch (IllegalAccessException e) {
 				throw new ConfigurationException("Failed to get value", e);
 			} catch (IllegalArgumentException e) {
@@ -163,27 +212,5 @@ public abstract class BaseRuntimeDeclaredChildDefinition extends BaseRuntimeChil
 			}
 		}
 	}
-
-	private final class PlainAccessor implements IAccessor {
-		private final Method myAccessor;
-
-		private PlainAccessor(Method theAccessor) {
-			myAccessor = theAccessor;
-		}
-
-		@Override
-		public List<IElement> getValues(Object theTarget) {
-			try {
-				return Collections.singletonList((IElement)myAccessor.invoke(theTarget));
-			} catch (IllegalAccessException e) {
-				throw new ConfigurationException("Failed to get value", e);
-			} catch (IllegalArgumentException e) {
-				throw new ConfigurationException("Failed to get value", e);
-			} catch (InvocationTargetException e) {
-				throw new ConfigurationException("Failed to get value", e);
-			}
-		}
-	}
-
 
 }

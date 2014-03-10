@@ -37,7 +37,7 @@ import ca.uhn.fhir.model.dstu.valueset.*;
  * 
  * </p> 
  */
-@ResourceDef(name="Specimen")
+@ResourceDef(name="Specimen", profile="http://hl7.org/fhir/profiles/Specimen")
 public class Specimen extends BaseResource implements IResource {
 
 	/**
@@ -52,36 +52,71 @@ public class Specimen extends BaseResource implements IResource {
 
 
 	@Child(name="identifier", type=IdentifierDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)	
+	@Description(
+		shortDefinition="External Identifier",
+		formalDefinition="Id for specimen"
+	)
 	private List<IdentifierDt> myIdentifier;
 	
 	@Child(name="type", type=CodeableConceptDt.class, order=1, min=0, max=1)	
+	@Description(
+		shortDefinition="Kind of material that forms the specimen",
+		formalDefinition="Kind of material that forms the specimen"
+	)
 	private CodeableConceptDt myType;
 	
 	@Child(name="source", order=2, min=0, max=Child.MAX_UNLIMITED)	
+	@Description(
+		shortDefinition="Parent of specimen",
+		formalDefinition="Parent specimen from which the focal specimen was a component"
+	)
 	private List<Source> mySource;
 	
-	@Child(name="subject", order=3, min=1, max=1)
-	@ChildResource(types= {
+	@Child(name="subject", order=3, min=1, max=1, type={
 		Patient.class,
 		Group.class,
 		Device.class,
 		Substance.class,
-	})	
+	})
+	@Description(
+		shortDefinition="Where the specimen came from. This may be the patient(s) or from the environment or  a device",
+		formalDefinition=""
+	)
 	private ResourceReference mySubject;
 	
 	@Child(name="accessionIdentifier", type=IdentifierDt.class, order=4, min=0, max=1)	
+	@Description(
+		shortDefinition="Identifier assigned by the lab",
+		formalDefinition="The identifier assigned by the lab when accessioning specimen(s). This is not necessarily the same as the specimen identifier, depending on local lab procedures."
+	)
 	private IdentifierDt myAccessionIdentifier;
 	
 	@Child(name="receivedTime", type=DateTimeDt.class, order=5, min=0, max=1)	
+	@Description(
+		shortDefinition="The time when specimen was received for processing",
+		formalDefinition="Time when specimen was received for processing or testing"
+	)
 	private DateTimeDt myReceivedTime;
 	
 	@Child(name="collection", order=6, min=1, max=1)	
+	@Description(
+		shortDefinition="Collection details",
+		formalDefinition="Details concerning the specimen collection"
+	)
 	private Collection myCollection;
 	
 	@Child(name="treatment", order=7, min=0, max=Child.MAX_UNLIMITED)	
+	@Description(
+		shortDefinition="Treatment and processing step details",
+		formalDefinition="Details concerning treatment and processing steps for the specimen"
+	)
 	private List<Treatment> myTreatment;
 	
 	@Child(name="container", order=8, min=0, max=Child.MAX_UNLIMITED)	
+	@Description(
+		shortDefinition="Direct container of specimen (tube/slide, etc)",
+		formalDefinition="The container holding the specimen.  The recursive nature of containers; i.e. blood in tube in tray in rack is not addressed here."
+	)
 	private List<Container> myContainer;
 	
 
@@ -244,7 +279,7 @@ public class Specimen extends BaseResource implements IResource {
 	 *
      * <p>
      * <b>Definition:</b>
-     * The identifier assigned by the lab when accessioning specimen(s). This is not necessarily the same as the specimen identifier, depending on local lab procedures. 
+     * The identifier assigned by the lab when accessioning specimen(s). This is not necessarily the same as the specimen identifier, depending on local lab procedures.
      * </p> 
 	 */
 	public IdentifierDt getAccessionIdentifier() {  
@@ -259,7 +294,7 @@ public class Specimen extends BaseResource implements IResource {
 	 *
      * <p>
      * <b>Definition:</b>
-     * The identifier assigned by the lab when accessioning specimen(s). This is not necessarily the same as the specimen identifier, depending on local lab procedures. 
+     * The identifier assigned by the lab when accessioning specimen(s). This is not necessarily the same as the specimen identifier, depending on local lab procedures.
      * </p> 
 	 */
 	public void setAccessionIdentifier(IdentifierDt theValue) {
@@ -405,7 +440,7 @@ public class Specimen extends BaseResource implements IResource {
 	 *
      * <p>
      * <b>Definition:</b>
-     * The container holding the specimen.  The recursive nature of containers; i.e. blood in tube in tray in rack is not addressed here. 
+     * The container holding the specimen.  The recursive nature of containers; i.e. blood in tube in tray in rack is not addressed here.
      * </p> 
 	 */
 	public List<Container> getContainer() {  
@@ -420,7 +455,7 @@ public class Specimen extends BaseResource implements IResource {
 	 *
      * <p>
      * <b>Definition:</b>
-     * The container holding the specimen.  The recursive nature of containers; i.e. blood in tube in tray in rack is not addressed here. 
+     * The container holding the specimen.  The recursive nature of containers; i.e. blood in tube in tray in rack is not addressed here.
      * </p> 
 	 */
 	public void setContainer(List<Container> theValue) {
@@ -432,7 +467,7 @@ public class Specimen extends BaseResource implements IResource {
 	 *
      * <p>
      * <b>Definition:</b>
-     * The container holding the specimen.  The recursive nature of containers; i.e. blood in tube in tray in rack is not addressed here. 
+     * The container holding the specimen.  The recursive nature of containers; i.e. blood in tube in tray in rack is not addressed here.
      * </p> 
 	 */
 	public Container addContainer() {
@@ -454,12 +489,19 @@ public class Specimen extends BaseResource implements IResource {
 	public static class Source extends BaseElement implements IResourceBlock {
 	
 	@Child(name="relationship", type=CodeDt.class, order=0, min=1, max=1)	
+	@Description(
+		shortDefinition="parent | child",
+		formalDefinition="Whether this relationship is to a parent or to a child"
+	)
 	private BoundCodeDt<HierarchicalRelationshipTypeEnum> myRelationship;
 	
-	@Child(name="target", order=1, min=0, max=Child.MAX_UNLIMITED)
-	@ChildResource(types= {
+	@Child(name="target", order=1, min=0, max=Child.MAX_UNLIMITED, type={
 		Specimen.class,
-	})	
+	})
+	@Description(
+		shortDefinition="The subject of the relationship",
+		formalDefinition="The specimen resource that is the target of this relationship"
+	)
 	private List<ResourceReference> myTarget;
 	
 
@@ -557,28 +599,51 @@ public class Specimen extends BaseResource implements IResource {
 	@Block(name="Specimen.collection")	
 	public static class Collection extends BaseElement implements IResourceBlock {
 	
-	@Child(name="collector", order=0, min=0, max=1)
-	@ChildResource(types= {
+	@Child(name="collector", order=0, min=0, max=1, type={
 		Practitioner.class,
-	})	
+	})
+	@Description(
+		shortDefinition="Who collected the specimen",
+		formalDefinition="Person who collected the specimen"
+	)
 	private ResourceReference myCollector;
 	
 	@Child(name="comment", type=StringDt.class, order=1, min=0, max=Child.MAX_UNLIMITED)	
+	@Description(
+		shortDefinition="Collector comments",
+		formalDefinition="To communicate any details or issues encountered during the specimen collection procedure."
+	)
 	private List<StringDt> myComment;
 	
-	@Child(name="collected", order=2, min=0, max=1, choice=@Choice(types= {
+	@Child(name="collected", order=2, min=0, max=1, type={
 		DateTimeDt.class,
 		PeriodDt.class,
-	}))	
+	})
+	@Description(
+		shortDefinition="Collection time",
+		formalDefinition="Time when specimen was collected from subject - the physiologically relevant time"
+	)
 	private IDatatype myCollected;
 	
 	@Child(name="quantity", type=QuantityDt.class, order=3, min=0, max=1)	
+	@Description(
+		shortDefinition="The quantity of specimen collected",
+		formalDefinition="The quantity of specimen collected; for instance the volume of a blood sample, or the physical measurement of an anatomic pathology sample"
+	)
 	private QuantityDt myQuantity;
 	
 	@Child(name="method", type=CodeableConceptDt.class, order=4, min=0, max=1)	
-	private CodeableConceptDt myMethod;
+	@Description(
+		shortDefinition="Technique used to perform collection",
+		formalDefinition="A coded value specifying the technique that is used to perform the procedure"
+	)
+	private BoundCodeableConceptDt<SpecimenCollectionMethodEnum> myMethod;
 	
 	@Child(name="sourceSite", type=CodeableConceptDt.class, order=5, min=0, max=1)	
+	@Description(
+		shortDefinition="Anatomical collection site",
+		formalDefinition="Anatomical location from which the specimen should be collected (if subject is a patient). This element is not used for environmental specimens."
+	)
 	private CodeableConceptDt mySourceSite;
 	
 
@@ -712,7 +777,7 @@ public class Specimen extends BaseResource implements IResource {
 	 *
      * <p>
      * <b>Definition:</b>
-     * The quantity of specimen collected; for instance the volume of a blood sample, or the physical measurement of an anatomic pathology sample 
+     * The quantity of specimen collected; for instance the volume of a blood sample, or the physical measurement of an anatomic pathology sample
      * </p> 
 	 */
 	public QuantityDt getQuantity() {  
@@ -727,7 +792,7 @@ public class Specimen extends BaseResource implements IResource {
 	 *
      * <p>
      * <b>Definition:</b>
-     * The quantity of specimen collected; for instance the volume of a blood sample, or the physical measurement of an anatomic pathology sample 
+     * The quantity of specimen collected; for instance the volume of a blood sample, or the physical measurement of an anatomic pathology sample
      * </p> 
 	 */
 	public void setQuantity(QuantityDt theValue) {
@@ -746,9 +811,9 @@ public class Specimen extends BaseResource implements IResource {
      * A coded value specifying the technique that is used to perform the procedure
      * </p> 
 	 */
-	public CodeableConceptDt getMethod() {  
+	public BoundCodeableConceptDt<SpecimenCollectionMethodEnum> getMethod() {  
 		if (myMethod == null) {
-			myMethod = new CodeableConceptDt();
+			myMethod = new BoundCodeableConceptDt<SpecimenCollectionMethodEnum>(SpecimenCollectionMethodEnum.VALUESET_BINDER);
 		}
 		return myMethod;
 	}
@@ -761,10 +826,22 @@ public class Specimen extends BaseResource implements IResource {
      * A coded value specifying the technique that is used to perform the procedure
      * </p> 
 	 */
-	public void setMethod(CodeableConceptDt theValue) {
+	public void setMethod(BoundCodeableConceptDt<SpecimenCollectionMethodEnum> theValue) {
 		myMethod = theValue;
 	}
 
+
+	/**
+	 * Sets the value(s) for <b>method</b> (Technique used to perform collection)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A coded value specifying the technique that is used to perform the procedure
+     * </p> 
+	 */
+	public void setMethod(SpecimenCollectionMethodEnum theValue) {
+		getMethod().setValueAsEnum(theValue);
+	}
 
   
 	/**
@@ -814,15 +891,26 @@ public class Specimen extends BaseResource implements IResource {
 	public static class Treatment extends BaseElement implements IResourceBlock {
 	
 	@Child(name="description", type=StringDt.class, order=0, min=0, max=1)	
+	@Description(
+		shortDefinition="Textual description of procedure",
+		formalDefinition=""
+	)
 	private StringDt myDescription;
 	
 	@Child(name="procedure", type=CodeableConceptDt.class, order=1, min=0, max=1)	
-	private CodeableConceptDt myProcedure;
+	@Description(
+		shortDefinition="Indicates the treatment or processing step  applied to the specimen",
+		formalDefinition="A coded value specifying the procedure used to process the specimen"
+	)
+	private BoundCodeableConceptDt<SpecimenTreatmentProcedureEnum> myProcedure;
 	
-	@Child(name="additive", order=2, min=0, max=Child.MAX_UNLIMITED)
-	@ChildResource(types= {
+	@Child(name="additive", order=2, min=0, max=Child.MAX_UNLIMITED, type={
 		Substance.class,
-	})	
+	})
+	@Description(
+		shortDefinition="Material used in the processing step",
+		formalDefinition=""
+	)
 	private List<ResourceReference> myAdditive;
 	
 
@@ -884,9 +972,9 @@ public class Specimen extends BaseResource implements IResource {
      * A coded value specifying the procedure used to process the specimen
      * </p> 
 	 */
-	public CodeableConceptDt getProcedure() {  
+	public BoundCodeableConceptDt<SpecimenTreatmentProcedureEnum> getProcedure() {  
 		if (myProcedure == null) {
-			myProcedure = new CodeableConceptDt();
+			myProcedure = new BoundCodeableConceptDt<SpecimenTreatmentProcedureEnum>(SpecimenTreatmentProcedureEnum.VALUESET_BINDER);
 		}
 		return myProcedure;
 	}
@@ -899,10 +987,22 @@ public class Specimen extends BaseResource implements IResource {
      * A coded value specifying the procedure used to process the specimen
      * </p> 
 	 */
-	public void setProcedure(CodeableConceptDt theValue) {
+	public void setProcedure(BoundCodeableConceptDt<SpecimenTreatmentProcedureEnum> theValue) {
 		myProcedure = theValue;
 	}
 
+
+	/**
+	 * Sets the value(s) for <b>procedure</b> (Indicates the treatment or processing step  applied to the specimen)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A coded value specifying the procedure used to process the specimen
+     * </p> 
+	 */
+	public void setProcedure(SpecimenTreatmentProcedureEnum theValue) {
+		getProcedure().setValueAsEnum(theValue);
+	}
 
   
 	/**
@@ -945,31 +1045,54 @@ public class Specimen extends BaseResource implements IResource {
 	 *
      * <p>
      * <b>Definition:</b>
-     * The container holding the specimen.  The recursive nature of containers; i.e. blood in tube in tray in rack is not addressed here. 
+     * The container holding the specimen.  The recursive nature of containers; i.e. blood in tube in tray in rack is not addressed here.
      * </p> 
 	 */
 	@Block(name="Specimen.container")	
 	public static class Container extends BaseElement implements IResourceBlock {
 	
 	@Child(name="identifier", type=IdentifierDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)	
+	@Description(
+		shortDefinition="Id for the container",
+		formalDefinition="Id for container. There may be multiple; a manufacturer's bar code, lab assigned identifier, etc. The container ID may differ from the specimen id in some circumstances"
+	)
 	private List<IdentifierDt> myIdentifier;
 	
 	@Child(name="description", type=StringDt.class, order=1, min=0, max=1)	
+	@Description(
+		shortDefinition="Textual description of the container",
+		formalDefinition=""
+	)
 	private StringDt myDescription;
 	
 	@Child(name="type", type=CodeableConceptDt.class, order=2, min=0, max=1)	
+	@Description(
+		shortDefinition="Kind of container directly associated with specimen",
+		formalDefinition="The type of container associated with the specimen (e.g. slide, aliquot, etc)"
+	)
 	private CodeableConceptDt myType;
 	
 	@Child(name="capacity", type=QuantityDt.class, order=3, min=0, max=1)	
+	@Description(
+		shortDefinition="Container volume or size",
+		formalDefinition="The capacity (volume or other measure) the container may contain."
+	)
 	private QuantityDt myCapacity;
 	
 	@Child(name="specimenQuantity", type=QuantityDt.class, order=4, min=0, max=1)	
+	@Description(
+		shortDefinition="Quantity of specimen within container",
+		formalDefinition="The quantity of specimen in the container; may be volume, dimensions, or other appropriate measurements, depending on the specimen type"
+	)
 	private QuantityDt mySpecimenQuantity;
 	
-	@Child(name="additive", order=5, min=0, max=1)
-	@ChildResource(types= {
+	@Child(name="additive", order=5, min=0, max=1, type={
 		Substance.class,
-	})	
+	})
+	@Description(
+		shortDefinition="Additive associated with container",
+		formalDefinition="Additive associated with the container"
+	)
 	private ResourceReference myAdditive;
 	
 
@@ -1159,7 +1282,7 @@ public class Specimen extends BaseResource implements IResource {
 
   
 	/**
-	 * Gets the value(s) for <b>additive</b> (Additive associated with container ).
+	 * Gets the value(s) for <b>additive</b> (Additive associated with container).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -1176,7 +1299,7 @@ public class Specimen extends BaseResource implements IResource {
 	}
 
 	/**
-	 * Sets the value(s) for <b>additive</b> (Additive associated with container )
+	 * Sets the value(s) for <b>additive</b> (Additive associated with container)
 	 *
      * <p>
      * <b>Definition:</b>

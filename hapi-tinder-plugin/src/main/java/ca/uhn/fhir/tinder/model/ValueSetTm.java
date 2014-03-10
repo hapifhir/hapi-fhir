@@ -1,9 +1,14 @@
 package ca.uhn.fhir.tinder.model;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
-import org.apache.commons.validator.ISBNValidator;
 import org.codehaus.plexus.util.StringUtils;
 
 public class ValueSetTm {
@@ -13,9 +18,16 @@ public class ValueSetTm {
 	private String myDescription;
 	private String myId;
 	private String myName;
+	private Set<String> myCodeValues = new HashSet<String>();
 
-	public void addConcept(String theCode, String theText, String theDefinition) {
-		myCodes.add(new Code(theCode, theText, theDefinition));
+	public void addConcept(String theSystem, String theCode, String theText, String theDefinition) {
+		String key = theSystem + "|" + theCode;
+		if (myCodeValues.contains(key)) {
+			return;
+		}
+		myCodeValues.add(key);
+
+		myCodes.add(new Code(theSystem, theCode, theText, theDefinition));
 	}
 
 	@Override
@@ -40,7 +52,7 @@ public class ValueSetTm {
 	}
 
 	public List<Code> getCodes() {
-		return myCodes;
+		return Collections.unmodifiableList(myCodes);
 	}
 
 	public String getDescription() {
@@ -88,11 +100,17 @@ public class ValueSetTm {
 		private String myCode;
 		private String myDefinition;
 		private String myDisplay;
+		private String mySystem;
 
-		public Code(String theCode, String theDisplay, String theDefinition) {
+		private Code(String theSystem, String theCode, String theDisplay, String theDefinition) {
+			mySystem = theSystem;
 			myCode = theCode.trim();
 			myDisplay = theDisplay;
 			myDefinition = theDefinition;
+		}
+
+		public String getSystem() {
+			return mySystem;
 		}
 
 		public String getCode() {
@@ -104,7 +122,7 @@ public class ValueSetTm {
 			if (StringUtils.isBlank(retVal)) {
 				retVal = myCode;
 			}
-						
+
 			if ("=".equals(retVal)) {
 				retVal = "EQUALS";
 			}
@@ -125,7 +143,7 @@ public class ValueSetTm {
 			for (char next : retVal.toUpperCase().replace("'", "").replace("(", "").replace(")", "").toCharArray()) {
 				if (Character.isJavaIdentifierPart(next)) {
 					b.append(next);
-				}else {
+				} else {
 					b.append("_");
 				}
 			}

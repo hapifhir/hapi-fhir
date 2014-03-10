@@ -42,24 +42,52 @@ public class SampledDataDt extends BaseElement implements ICompositeDatatype  {
 
 
 	@Child(name="origin", type=QuantityDt.class, order=0, min=1, max=1)	
+	@Description(
+		shortDefinition="Zero value and units",
+		formalDefinition="The base quantity that a measured value of zero represents. In addition, this provides the units of the entire measurement series"
+	)
 	private QuantityDt myOrigin;
 	
 	@Child(name="period", type=DecimalDt.class, order=1, min=1, max=1)	
+	@Description(
+		shortDefinition="Number of milliseconds between samples",
+		formalDefinition="The length of time between sampling times, measured in milliseconds"
+	)
 	private DecimalDt myPeriod;
 	
 	@Child(name="factor", type=DecimalDt.class, order=2, min=0, max=1)	
+	@Description(
+		shortDefinition="Multiply data by this before adding to origin",
+		formalDefinition="A correction factor that is applied to the sampled data points before they are added to the origin"
+	)
 	private DecimalDt myFactor;
 	
 	@Child(name="lowerLimit", type=DecimalDt.class, order=3, min=0, max=1)	
+	@Description(
+		shortDefinition="Lower limit of detection",
+		formalDefinition="The lower limit of detection of the measured points. This is needed if any of the data points have the value \"L\" (lower than detection limit)"
+	)
 	private DecimalDt myLowerLimit;
 	
 	@Child(name="upperLimit", type=DecimalDt.class, order=4, min=0, max=1)	
+	@Description(
+		shortDefinition="Upper limit of detection",
+		formalDefinition="The upper limit of detection of the measured points. This is needed if any of the data points have the value \"U\" (higher than detection limit)"
+	)
 	private DecimalDt myUpperLimit;
 	
 	@Child(name="dimensions", type=IntegerDt.class, order=5, min=1, max=1)	
+	@Description(
+		shortDefinition="Number of sample points at each time point",
+		formalDefinition="The number of sample points at each time point. If this value is greater than one, then the dimensions will be interlaced - all the sample points for a point in time will be recorded at once"
+	)
 	private IntegerDt myDimensions;
 	
 	@Child(name="data", type=StringDt.class, order=6, min=1, max=1)	
+	@Description(
+		shortDefinition="Decimal values with spaces, or \"E\" | \"U\" | \"L\"",
+		formalDefinition="A series of data points which are decimal values separated by a single space (character u20). The special values \"E\" (error), \"L\" (below detection limit) and \"U\" (above detection limit) can also be used in place of a decimal value"
+	)
 	private StringDt myData;
 	
 
@@ -137,7 +165,7 @@ public class SampledDataDt extends BaseElement implements ICompositeDatatype  {
      * The length of time between sampling times, measured in milliseconds
      * </p> 
 	 */
-	public void setPeriod( java.math.BigDecimal theValue) {
+	public void setPeriod( long theValue) {
 		myPeriod = new DecimalDt(theValue); 
 	}
 
@@ -161,7 +189,7 @@ public class SampledDataDt extends BaseElement implements ICompositeDatatype  {
      * The length of time between sampling times, measured in milliseconds
      * </p> 
 	 */
-	public void setPeriod( long theValue) {
+	public void setPeriod( java.math.BigDecimal theValue) {
 		myPeriod = new DecimalDt(theValue); 
 	}
 
@@ -204,7 +232,7 @@ public class SampledDataDt extends BaseElement implements ICompositeDatatype  {
      * A correction factor that is applied to the sampled data points before they are added to the origin
      * </p> 
 	 */
-	public void setFactor( java.math.BigDecimal theValue) {
+	public void setFactor( long theValue) {
 		myFactor = new DecimalDt(theValue); 
 	}
 
@@ -228,7 +256,7 @@ public class SampledDataDt extends BaseElement implements ICompositeDatatype  {
      * A correction factor that is applied to the sampled data points before they are added to the origin
      * </p> 
 	 */
-	public void setFactor( long theValue) {
+	public void setFactor( java.math.BigDecimal theValue) {
 		myFactor = new DecimalDt(theValue); 
 	}
 
@@ -240,7 +268,7 @@ public class SampledDataDt extends BaseElement implements ICompositeDatatype  {
 	 *
      * <p>
      * <b>Definition:</b>
-     * The lower limit of detection of the measured points. This is needed if any of the data points have the value "L" (lower than detection limit)
+     * The lower limit of detection of the measured points. This is needed if any of the data points have the value \"L\" (lower than detection limit)
      * </p> 
 	 */
 	public DecimalDt getLowerLimit() {  
@@ -255,7 +283,7 @@ public class SampledDataDt extends BaseElement implements ICompositeDatatype  {
 	 *
      * <p>
      * <b>Definition:</b>
-     * The lower limit of detection of the measured points. This is needed if any of the data points have the value "L" (lower than detection limit)
+     * The lower limit of detection of the measured points. This is needed if any of the data points have the value \"L\" (lower than detection limit)
      * </p> 
 	 */
 	public void setLowerLimit(DecimalDt theValue) {
@@ -268,10 +296,10 @@ public class SampledDataDt extends BaseElement implements ICompositeDatatype  {
 	 *
      * <p>
      * <b>Definition:</b>
-     * The lower limit of detection of the measured points. This is needed if any of the data points have the value "L" (lower than detection limit)
+     * The lower limit of detection of the measured points. This is needed if any of the data points have the value \"L\" (lower than detection limit)
      * </p> 
 	 */
-	public void setLowerLimit( java.math.BigDecimal theValue) {
+	public void setLowerLimit( long theValue) {
 		myLowerLimit = new DecimalDt(theValue); 
 	}
 
@@ -280,7 +308,7 @@ public class SampledDataDt extends BaseElement implements ICompositeDatatype  {
 	 *
      * <p>
      * <b>Definition:</b>
-     * The lower limit of detection of the measured points. This is needed if any of the data points have the value "L" (lower than detection limit)
+     * The lower limit of detection of the measured points. This is needed if any of the data points have the value \"L\" (lower than detection limit)
      * </p> 
 	 */
 	public void setLowerLimit( double theValue) {
@@ -292,10 +320,10 @@ public class SampledDataDt extends BaseElement implements ICompositeDatatype  {
 	 *
      * <p>
      * <b>Definition:</b>
-     * The lower limit of detection of the measured points. This is needed if any of the data points have the value "L" (lower than detection limit)
+     * The lower limit of detection of the measured points. This is needed if any of the data points have the value \"L\" (lower than detection limit)
      * </p> 
 	 */
-	public void setLowerLimit( long theValue) {
+	public void setLowerLimit( java.math.BigDecimal theValue) {
 		myLowerLimit = new DecimalDt(theValue); 
 	}
 
@@ -307,7 +335,7 @@ public class SampledDataDt extends BaseElement implements ICompositeDatatype  {
 	 *
      * <p>
      * <b>Definition:</b>
-     * The upper limit of detection of the measured points. This is needed if any of the data points have the value "U" (higher than detection limit)
+     * The upper limit of detection of the measured points. This is needed if any of the data points have the value \"U\" (higher than detection limit)
      * </p> 
 	 */
 	public DecimalDt getUpperLimit() {  
@@ -322,7 +350,7 @@ public class SampledDataDt extends BaseElement implements ICompositeDatatype  {
 	 *
      * <p>
      * <b>Definition:</b>
-     * The upper limit of detection of the measured points. This is needed if any of the data points have the value "U" (higher than detection limit)
+     * The upper limit of detection of the measured points. This is needed if any of the data points have the value \"U\" (higher than detection limit)
      * </p> 
 	 */
 	public void setUpperLimit(DecimalDt theValue) {
@@ -335,10 +363,10 @@ public class SampledDataDt extends BaseElement implements ICompositeDatatype  {
 	 *
      * <p>
      * <b>Definition:</b>
-     * The upper limit of detection of the measured points. This is needed if any of the data points have the value "U" (higher than detection limit)
+     * The upper limit of detection of the measured points. This is needed if any of the data points have the value \"U\" (higher than detection limit)
      * </p> 
 	 */
-	public void setUpperLimit( java.math.BigDecimal theValue) {
+	public void setUpperLimit( long theValue) {
 		myUpperLimit = new DecimalDt(theValue); 
 	}
 
@@ -347,7 +375,7 @@ public class SampledDataDt extends BaseElement implements ICompositeDatatype  {
 	 *
      * <p>
      * <b>Definition:</b>
-     * The upper limit of detection of the measured points. This is needed if any of the data points have the value "U" (higher than detection limit)
+     * The upper limit of detection of the measured points. This is needed if any of the data points have the value \"U\" (higher than detection limit)
      * </p> 
 	 */
 	public void setUpperLimit( double theValue) {
@@ -359,10 +387,10 @@ public class SampledDataDt extends BaseElement implements ICompositeDatatype  {
 	 *
      * <p>
      * <b>Definition:</b>
-     * The upper limit of detection of the measured points. This is needed if any of the data points have the value "U" (higher than detection limit)
+     * The upper limit of detection of the measured points. This is needed if any of the data points have the value \"U\" (higher than detection limit)
      * </p> 
 	 */
-	public void setUpperLimit( long theValue) {
+	public void setUpperLimit( java.math.BigDecimal theValue) {
 		myUpperLimit = new DecimalDt(theValue); 
 	}
 
@@ -411,13 +439,13 @@ public class SampledDataDt extends BaseElement implements ICompositeDatatype  {
 
  
 	/**
-	 * Gets the value(s) for <b>data</b> (Decimal values with spaces, or "E" | "U" | "L").
+	 * Gets the value(s) for <b>data</b> (Decimal values with spaces, or \"E\" | \"U\" | \"L\").
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
-     * A series of data points which are decimal values separated by a single space (character u20). The special values "E" (error), "L" (below detection limit) and "U" (above detection limit) can also be used in place of a decimal value
+     * A series of data points which are decimal values separated by a single space (character u20). The special values \"E\" (error), \"L\" (below detection limit) and \"U\" (above detection limit) can also be used in place of a decimal value
      * </p> 
 	 */
 	public StringDt getData() {  
@@ -428,11 +456,11 @@ public class SampledDataDt extends BaseElement implements ICompositeDatatype  {
 	}
 
 	/**
-	 * Sets the value(s) for <b>data</b> (Decimal values with spaces, or "E" | "U" | "L")
+	 * Sets the value(s) for <b>data</b> (Decimal values with spaces, or \"E\" | \"U\" | \"L\")
 	 *
      * <p>
      * <b>Definition:</b>
-     * A series of data points which are decimal values separated by a single space (character u20). The special values "E" (error), "L" (below detection limit) and "U" (above detection limit) can also be used in place of a decimal value
+     * A series of data points which are decimal values separated by a single space (character u20). The special values \"E\" (error), \"L\" (below detection limit) and \"U\" (above detection limit) can also be used in place of a decimal value
      * </p> 
 	 */
 	public void setData(StringDt theValue) {
@@ -441,11 +469,11 @@ public class SampledDataDt extends BaseElement implements ICompositeDatatype  {
 
 
  	/**
-	 * Sets the value for <b>data</b> (Decimal values with spaces, or "E" | "U" | "L")
+	 * Sets the value for <b>data</b> (Decimal values with spaces, or \"E\" | \"U\" | \"L\")
 	 *
      * <p>
      * <b>Definition:</b>
-     * A series of data points which are decimal values separated by a single space (character u20). The special values "E" (error), "L" (below detection limit) and "U" (above detection limit) can also be used in place of a decimal value
+     * A series of data points which are decimal values separated by a single space (character u20). The special values \"E\" (error), \"L\" (below detection limit) and \"U\" (above detection limit) can also be used in place of a decimal value
      * </p> 
 	 */
 	public void setData( String theString) {

@@ -12,28 +12,28 @@ public enum QuantityCompararatorEnum {
 	 *
 	 * The actual value is less than the given value.
 	 */
-	LESSTHAN("<"),
+	LESSTHAN("<", "http://hl7.org/fhir/quantity-comparator"),
 	
 	/**
 	 * Code Value: <b><=</b>
 	 *
 	 * The actual value is less than or equal to the given value.
 	 */
-	LESSTHAN_OR_EQUALS("<="),
+	LESSTHAN_OR_EQUALS("<=", "http://hl7.org/fhir/quantity-comparator"),
 	
 	/**
 	 * Code Value: <b>>=</b>
 	 *
 	 * The actual value is greater than or equal to the given value.
 	 */
-	GREATERTHAN_OR_EQUALS(">="),
+	GREATERTHAN_OR_EQUALS(">=", "http://hl7.org/fhir/quantity-comparator"),
 	
 	/**
 	 * Code Value: <b>></b>
 	 *
 	 * The actual value is greater than the given value.
 	 */
-	GREATERTHAN(">"),
+	GREATERTHAN(">", "http://hl7.org/fhir/quantity-comparator"),
 	
 	;
 	
@@ -50,11 +50,19 @@ public enum QuantityCompararatorEnum {
 	public static final String VALUESET_NAME = "QuantityCompararator";
 
 	private static Map<String, QuantityCompararatorEnum> CODE_TO_ENUM = new HashMap<String, QuantityCompararatorEnum>();
-	private String myCode;
+	private static Map<String, Map<String, QuantityCompararatorEnum>> SYSTEM_TO_CODE_TO_ENUM = new HashMap<String, Map<String, QuantityCompararatorEnum>>();
+	
+	private final String myCode;
+	private final String mySystem;
 	
 	static {
 		for (QuantityCompararatorEnum next : QuantityCompararatorEnum.values()) {
 			CODE_TO_ENUM.put(next.getCode(), next);
+			
+			if (!SYSTEM_TO_CODE_TO_ENUM.containsKey(next.getSystem())) {
+				SYSTEM_TO_CODE_TO_ENUM.put(next.getSystem(), new HashMap<String, QuantityCompararatorEnum>());
+			}
+			SYSTEM_TO_CODE_TO_ENUM.get(next.getSystem()).put(next.getCode(), next);			
 		}
 	}
 	
@@ -63,6 +71,13 @@ public enum QuantityCompararatorEnum {
 	 */
 	public String getCode() {
 		return myCode;
+	}
+	
+	/**
+	 * Returns the code system associated with this enumerated value
+	 */
+	public String getSystem() {
+		return mySystem;
 	}
 	
 	/**
@@ -81,18 +96,34 @@ public enum QuantityCompararatorEnum {
 		public String toCodeString(QuantityCompararatorEnum theEnum) {
 			return theEnum.getCode();
 		}
+
+		@Override
+		public String toSystemString(QuantityCompararatorEnum theEnum) {
+			return theEnum.getSystem();
+		}
 		
 		@Override
 		public QuantityCompararatorEnum fromCodeString(String theCodeString) {
 			return CODE_TO_ENUM.get(theCodeString);
 		}
+		
+		@Override
+		public QuantityCompararatorEnum fromCodeString(String theCodeString, String theSystemString) {
+			Map<String, QuantityCompararatorEnum> map = SYSTEM_TO_CODE_TO_ENUM.get(theSystemString);
+			if (map == null) {
+				return null;
+			}
+			return map.get(theCodeString);
+		}
+		
 	};
 	
 	/** 
 	 * Constructor
 	 */
-	QuantityCompararatorEnum(String theCode) {
+	QuantityCompararatorEnum(String theCode, String theSystem) {
 		myCode = theCode;
+		mySystem = theSystem;
 	}
 
 	

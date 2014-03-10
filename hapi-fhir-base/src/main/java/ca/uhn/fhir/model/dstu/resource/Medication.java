@@ -37,7 +37,7 @@ import ca.uhn.fhir.model.dstu.valueset.*;
  * 
  * </p> 
  */
-@ResourceDef(name="Medication")
+@ResourceDef(name="Medication", profile="http://hl7.org/fhir/profiles/Medication")
 public class Medication extends BaseResource implements IResource {
 
 	/**
@@ -112,27 +112,54 @@ public class Medication extends BaseResource implements IResource {
 
 
 	@Child(name="name", type=StringDt.class, order=0, min=0, max=1)	
+	@Description(
+		shortDefinition="Common / Commercial name",
+		formalDefinition="The common/commercial name of the medication absent information such as strength, form, etc.  E.g. Acetaminophen, Tylenol 3, etc.  The fully coordinated name is communicated as the display of Medication.code"
+	)
 	private StringDt myName;
 	
 	@Child(name="code", type=CodeableConceptDt.class, order=1, min=0, max=1)	
+	@Description(
+		shortDefinition="Codes that identify this medication",
+		formalDefinition="A code (or set of codes) that identify this medication.   Usage note: This could be a standard drug code such as a drug regulator code, RxNorm code, SNOMED CT code, etc. It could also be a local formulary code, optionally with translations to the standard drug codes"
+	)
 	private CodeableConceptDt myCode;
 	
 	@Child(name="isBrand", type=BooleanDt.class, order=2, min=0, max=1)	
+	@Description(
+		shortDefinition="True if a brand",
+		formalDefinition="Set to true if the item is attributable to a specific manufacturer (even if we don't know who that is)"
+	)
 	private BooleanDt myIsBrand;
 	
-	@Child(name="manufacturer", order=3, min=0, max=1)
-	@ChildResource(types= {
+	@Child(name="manufacturer", order=3, min=0, max=1, type={
 		Organization.class,
-	})	
+	})
+	@Description(
+		shortDefinition="Manufacturer of the item",
+		formalDefinition="Describes the details of the manufacturer"
+	)
 	private ResourceReference myManufacturer;
 	
 	@Child(name="kind", type=CodeDt.class, order=4, min=0, max=1)	
+	@Description(
+		shortDefinition="product | package",
+		formalDefinition="Medications are either a single administrable product or a package that contains one or more products."
+	)
 	private BoundCodeDt<MedicationKindEnum> myKind;
 	
 	@Child(name="product", order=5, min=0, max=1)	
+	@Description(
+		shortDefinition="Administrable medication details",
+		formalDefinition="Information that only applies to products (not packages)"
+	)
 	private Product myProduct;
 	
 	@Child(name="package", type=CodeDt.class, order=6, min=0, max=1)	
+	@Description(
+		shortDefinition="Details about packaged medications",
+		formalDefinition="Information that only applies to packages (not products)"
+	)
 	private CodeDt myPackage;
 	
 
@@ -222,7 +249,7 @@ public class Medication extends BaseResource implements IResource {
 	 *
      * <p>
      * <b>Definition:</b>
-     * Set to true if the item is attributable to a specific manufacturer (even if we don't know who that is) 
+     * Set to true if the item is attributable to a specific manufacturer (even if we don't know who that is)
      * </p> 
 	 */
 	public BooleanDt getIsBrand() {  
@@ -237,7 +264,7 @@ public class Medication extends BaseResource implements IResource {
 	 *
      * <p>
      * <b>Definition:</b>
-     * Set to true if the item is attributable to a specific manufacturer (even if we don't know who that is) 
+     * Set to true if the item is attributable to a specific manufacturer (even if we don't know who that is)
      * </p> 
 	 */
 	public void setIsBrand(BooleanDt theValue) {
@@ -250,7 +277,7 @@ public class Medication extends BaseResource implements IResource {
 	 *
      * <p>
      * <b>Definition:</b>
-     * Set to true if the item is attributable to a specific manufacturer (even if we don't know who that is) 
+     * Set to true if the item is attributable to a specific manufacturer (even if we don't know who that is)
      * </p> 
 	 */
 	public void setIsBrand( Boolean theBoolean) {
@@ -393,7 +420,19 @@ public class Medication extends BaseResource implements IResource {
 	}
 
 
-  
+ 	/**
+	 * Sets the value for <b>package</b> (Details about packaged medications)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Information that only applies to packages (not products)
+     * </p> 
+	 */
+	public void setPackage( String theCode) {
+		myPackage = new CodeDt(theCode); 
+	}
+
+ 
 	/**
 	 * Block class for child element: <b>Medication.product</b> (Administrable medication details)
 	 *
@@ -406,9 +445,17 @@ public class Medication extends BaseResource implements IResource {
 	public static class Product extends BaseElement implements IResourceBlock {
 	
 	@Child(name="form", type=CodeableConceptDt.class, order=0, min=0, max=1)	
+	@Description(
+		shortDefinition="powder | tablets | carton +",
+		formalDefinition="Describes the form of the item.  Powder; tables; carton"
+	)
 	private CodeableConceptDt myForm;
 	
 	@Child(name="ingredient", order=1, min=0, max=Child.MAX_UNLIMITED)	
+	@Description(
+		shortDefinition="Active or inactive ingredient",
+		formalDefinition="Identifies a particular constituent of interest in the product"
+	)
 	private List<ProductIngredient> myIngredient;
 	
 
@@ -506,14 +553,21 @@ public class Medication extends BaseResource implements IResource {
 	@Block(name="Medication.product.ingredient")	
 	public static class ProductIngredient extends BaseElement implements IResourceBlock {
 	
-	@Child(name="item", order=0, min=1, max=1)
-	@ChildResource(types= {
+	@Child(name="item", order=0, min=1, max=1, type={
 		Substance.class,
 		Medication.class,
-	})	
+	})
+	@Description(
+		shortDefinition="The product contained",
+		formalDefinition="The actual ingredient - either a substance (simple ingredient) or another medication"
+	)
 	private ResourceReference myItem;
 	
 	@Child(name="amount", type=RatioDt.class, order=1, min=0, max=1)	
+	@Description(
+		shortDefinition="How much ingredient in product",
+		formalDefinition="Specifies how many (or how much) of the items there are in this Medication.  E.g. 250 mg per tablet"
+	)
 	private RatioDt myAmount;
 	
 

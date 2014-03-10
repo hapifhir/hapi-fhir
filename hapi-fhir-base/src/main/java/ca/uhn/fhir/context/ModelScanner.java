@@ -1,12 +1,11 @@
 package ca.uhn.fhir.context;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -31,12 +30,12 @@ import ca.uhn.fhir.model.api.IValueSetEnumBinder;
 import ca.uhn.fhir.model.api.ResourceReference;
 import ca.uhn.fhir.model.api.annotation.Block;
 import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.ChildResource;
-import ca.uhn.fhir.model.api.annotation.Choice;
 import ca.uhn.fhir.model.api.annotation.CodeTableDef;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Extension;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.DateDt;
@@ -261,16 +260,18 @@ class ModelScanner {
 
 		for (Field next : theClass.getDeclaredFields()) {
 
-			Child element = next.getAnnotation(Child.class);
-			if (element == null) {
+			Child childAnnotation = next.getAnnotation(Child.class);
+			if (childAnnotation == null) {
 				ourLog.debug("Ignoring non-type field '" + next.getName() + "' on target type: " + theClass);
 				continue;
 			}
+			
+			Description descriptionAnnotation = next.getAnnotation(Description.class);
 
-			String elementName = element.name();
-			int order = element.order() + baseElementOrder;
-			int min = element.min();
-			int max = element.max();
+			String elementName = childAnnotation.name();
+			int order = childAnnotation.order() + baseElementOrder;
+			int min = childAnnotation.min();
+			int max = childAnnotation.max();
 			TreeMap<Integer, BaseRuntimeDeclaredChildDefinition> orderMap = theOrderToElementDef;
 
 			Extension extensionAttr = next.getAnnotation(Extension.class);
@@ -287,14 +288,13 @@ class ModelScanner {
 				order--;
 			}
 
-			Choice choiceAttr = element.choice();
 			List<Class<? extends IElement>> choiceTypes = new ArrayList<Class<? extends IElement>>();
-			for (Class<? extends IElement> nextChoiceType : choiceAttr.types()) {
+			for (Class<? extends IElement> nextChoiceType : childAnnotation.type()) {
 				choiceTypes.add(nextChoiceType);
 			}
 
 			if (orderMap.containsKey(order)) {
-				throw new ConfigurationException("Detected duplicate field order '" + element.order() + "' for element named '" + elementName + "' in type '" + theClass.getCanonicalName() + "'");
+				throw new ConfigurationException("Detected duplicate field order '" + childAnnotation.order() + "' for element named '" + elementName + "' in type '" + theClass.getCanonicalName() + "'");
 			}
 
 			if (elementNames.contains(elementName)) {
@@ -303,15 +303,14 @@ class ModelScanner {
 
 			Class<?> nextElementType = determineElementType(next);
 
-			ChildResource resRefAnnotation = next.getAnnotation(ChildResource.class);
-			if (choiceTypes.isEmpty() == false) {
+			if (choiceTypes.size() > 1 && !ResourceReferenceDt.class.isAssignableFrom(nextElementType)) {
 				/*
 				 * Child is a choice element
 				 */
 				for (Class<? extends IElement> nextType : choiceTypes) {
 					addScanAlso(nextType);
 				}
-				RuntimeChildChoiceDefinition def = new RuntimeChildChoiceDefinition(next, elementName, min, max, choiceTypes);
+				RuntimeChildChoiceDefinition def = new RuntimeChildChoiceDefinition(next, elementName, childAnnotation, descriptionAnnotation, choiceTypes);
 				orderMap.put(order, def);
 
 			} else if (extensionAttr != null) {
@@ -319,7 +318,7 @@ class ModelScanner {
 				 * Child is an extension
 				 */
 				Class<? extends IElement> et = (Class<? extends IElement>) nextElementType;
-				RuntimeChildDeclaredExtensionDefinition def = new RuntimeChildDeclaredExtensionDefinition(next, min, max, elementName, extensionAttr.url(), et);
+				RuntimeChildDeclaredExtensionDefinition def = new RuntimeChildDeclaredExtensionDefinition(next, childAnnotation, descriptionAnnotation, extensionAttr, elementName, extensionAttr.url(), et);
 				orderMap.put(order, def);
 				if (IElement.class.isAssignableFrom(nextElementType)) {
 					addScanAlso((Class<? extends IElement>) nextElementType);
@@ -328,16 +327,15 @@ class ModelScanner {
 				/*
 				 * Child is a resource reference
 				 */
-				if (resRefAnnotation == null) {
-					throw new ConfigurationException("Field '" + elementName + "' in type '" + theClass.getCanonicalName() + "' is a resource reference but does not have a @" + ChildResource.class.getSimpleName() + " annotation");
-				}
-
-				Class<? extends IResource>[] refType = resRefAnnotation.types();
-				List<Class<? extends IResource>> refTypesList = Arrays.asList(refType);
-				for (Class<? extends IElement> nextType : refTypesList) {
+				List<Class<? extends IResource>> refTypesList = new ArrayList<Class<? extends IResource>>();
+				for (Class<? extends IElement> nextType : childAnnotation.type()) {
+					if (IResource.class.isAssignableFrom(nextType)== false) {
+						throw new ConfigurationException("Field '" + next.getName() + "' is of type " + ResourceReferenceDt.class + " but contains a non-resource type: " + nextType.getCanonicalName());
+					}
+					refTypesList.add((Class<? extends IResource>) nextType);
 					addScanAlso(nextType);
 				}
-				RuntimeChildResourceDefinition def = new RuntimeChildResourceDefinition(next, elementName, min, max, refTypesList);
+				RuntimeChildResourceDefinition def = new RuntimeChildResourceDefinition(next, elementName, childAnnotation, descriptionAnnotation, refTypesList);
 				orderMap.put(order, def);
 
 			} else if (IResourceBlock.class.isAssignableFrom(nextElementType)) {
@@ -348,7 +346,7 @@ class ModelScanner {
 
 				Class<? extends IResourceBlock> blockDef = (Class<? extends IResourceBlock>) nextElementType;
 				addScanAlso(blockDef);
-				RuntimeChildResourceBlockDefinition def = new RuntimeChildResourceBlockDefinition(next, min, max, elementName, blockDef);
+				RuntimeChildResourceBlockDefinition def = new RuntimeChildResourceBlockDefinition(next,  childAnnotation, descriptionAnnotation, elementName, blockDef);
 				orderMap.put(order, def);
 
 			} else if (IDatatype.class.isAssignableFrom(nextElementType)) {
@@ -359,12 +357,12 @@ class ModelScanner {
 				if (IPrimitiveDatatype.class.isAssignableFrom(nextElementType)) {
 					if (nextElementType.equals(BoundCodeDt.class)) {
 						IValueSetEnumBinder<Enum<?>> binder = getBoundCodeBinder(next);
-						def = new RuntimeChildPrimitiveBoundCodeDatatypeDefinition(next, elementName, min, max, nextDatatype, binder);
+						def = new RuntimeChildPrimitiveBoundCodeDatatypeDefinition(next, elementName, childAnnotation, descriptionAnnotation, nextDatatype, binder);
 					} else {
-						def = new RuntimeChildPrimitiveDatatypeDefinition(next, elementName, min, max, nextDatatype);
+						def = new RuntimeChildPrimitiveDatatypeDefinition(next, elementName, descriptionAnnotation, childAnnotation, nextDatatype);
 					}
 				} else {
-					def = new RuntimeChildCompositeDatatypeDefinition(next, elementName, min, max, nextDatatype);
+					def = new RuntimeChildCompositeDatatypeDefinition(next, elementName, childAnnotation, descriptionAnnotation, nextDatatype);
 				}
 
 				CodeableConceptElement concept = next.getAnnotation(CodeableConceptElement.class);
@@ -456,7 +454,7 @@ class ModelScanner {
 			return resourceName;
 		}
 
-		RuntimeResourceDefinition resourceDef = new RuntimeResourceDefinition(theClass, resourceName);
+		RuntimeResourceDefinition resourceDef = new RuntimeResourceDefinition(theClass, resourceDefinition);
 		myClassToElementDefinitions.put(theClass, resourceDef);
 		myNameToResourceDefinitions.put(resourceName, resourceDef);
 

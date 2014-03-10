@@ -1,9 +1,9 @@
 package ca.uhn.fhir.context;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import ca.uhn.fhir.model.api.IElement;
@@ -19,12 +19,12 @@ public class FhirContext {
 	private final Map<String, RuntimeResourceDefinition> myNameToElementDefinition;
 	private RuntimeChildUndeclaredExtensionDefinition myRuntimeChildUndeclaredExtensionDefinition;
 
-	public FhirContext(Class<? extends IResource> theResourceType) {
-		this(toCollection(theResourceType));
+	public FhirContext(Class<?>... theResourceTypes) {
+		this(toCollection(theResourceTypes));
 	}
 
-	public FhirContext(Class<? extends IResource>[] theResourceTypes) {
-		this(Arrays.asList(theResourceTypes));
+	public FhirContext(Class<? extends IResource> theResourceType) {
+		this(toCollection(theResourceType));
 	}
 
 	public FhirContext(Collection<Class<? extends IResource>> theResourceTypes) {
@@ -39,11 +39,17 @@ public class FhirContext {
 	}
 
 	public RuntimeResourceDefinition getResourceDefinition(Class<? extends IResource> theResourceType) {
+		// TODO: parse this type if we would otherwise return null
 		return (RuntimeResourceDefinition) myClassToElementDefinition.get(theResourceType);
 	}
 
 	public RuntimeResourceDefinition getResourceDefinition(IResource theResource) {
+		// TODO: parse this type if we would otherwise return null
 		return (RuntimeResourceDefinition) myClassToElementDefinition.get(theResource.getClass());
+	}
+
+	public BaseRuntimeElementDefinition<?> getResourceDefinition(String theResourceName) {
+		return myNameToElementDefinition.get(theResourceName);
 	}
 
 	public RuntimeChildUndeclaredExtensionDefinition getRuntimeChildUndeclaredExtensionDefinition() {
@@ -58,14 +64,22 @@ public class FhirContext {
 		return new XmlParser(this);
 	}
 	
+	@SuppressWarnings("unchecked")
+	private static List<Class<? extends IResource>> toCollection(Class<?>[] theResourceTypes) {
+		ArrayList<Class<? extends IResource>> retVal = new ArrayList<Class<? extends IResource>>(1);
+		for (Class<?> clazz : theResourceTypes) {
+			if (!IResource.class.isAssignableFrom(clazz)) {
+				throw new IllegalArgumentException(clazz.getCanonicalName() + " is not an instance of " + IResource.class.getSimpleName());
+			}
+			retVal.add((Class<? extends IResource>) clazz);
+		}
+		return retVal;
+	}
+
 	private static Collection<Class<? extends IResource>> toCollection(Class<? extends IResource> theResourceType) {
 		ArrayList<Class<? extends IResource>> retVal = new ArrayList<Class<? extends IResource>>(1);
 		retVal.add(theResourceType);
 		return retVal;
-	}
-
-	public BaseRuntimeElementDefinition<?> getResourceDefinition(String theResourceName) {
-		return myNameToElementDefinition.get(theResourceName);
 	}
 
 }

@@ -12,35 +12,35 @@ public enum ContactUseEnum {
 	 *
 	 * A communication contact at a home; attempted contacts for business purposes might intrude privacy and chances are one will contact family or other household members instead of the person one wishes to call. Typically used with urgent cases, or if no other contacts are available.
 	 */
-	HOME("home"),
+	HOME("home", "http://hl7.org/fhir/contact-use"),
 	
 	/**
 	 * Code Value: <b>work</b>
 	 *
 	 * An office contact. First choice for business related contacts during business hours.
 	 */
-	WORK("work"),
+	WORK("work", "http://hl7.org/fhir/contact-use"),
 	
 	/**
 	 * Code Value: <b>temp</b>
 	 *
 	 * A temporary contact. The period can provide more detailed information.
 	 */
-	TEMP("temp"),
+	TEMP("temp", "http://hl7.org/fhir/contact-use"),
 	
 	/**
 	 * Code Value: <b>old</b>
 	 *
 	 * This contact is no longer in use (or was never correct, but retained for records).
 	 */
-	OLD("old"),
+	OLD("old", "http://hl7.org/fhir/contact-use"),
 	
 	/**
 	 * Code Value: <b>mobile</b>
 	 *
 	 * A telecommunication device that moves and stays with its owner. May have characteristics of all other use codes, suitable for urgent matters, not the first choice for routine business.
 	 */
-	MOBILE("mobile"),
+	MOBILE("mobile", "http://hl7.org/fhir/contact-use"),
 	
 	;
 	
@@ -57,11 +57,19 @@ public enum ContactUseEnum {
 	public static final String VALUESET_NAME = "ContactUse";
 
 	private static Map<String, ContactUseEnum> CODE_TO_ENUM = new HashMap<String, ContactUseEnum>();
-	private String myCode;
+	private static Map<String, Map<String, ContactUseEnum>> SYSTEM_TO_CODE_TO_ENUM = new HashMap<String, Map<String, ContactUseEnum>>();
+	
+	private final String myCode;
+	private final String mySystem;
 	
 	static {
 		for (ContactUseEnum next : ContactUseEnum.values()) {
 			CODE_TO_ENUM.put(next.getCode(), next);
+			
+			if (!SYSTEM_TO_CODE_TO_ENUM.containsKey(next.getSystem())) {
+				SYSTEM_TO_CODE_TO_ENUM.put(next.getSystem(), new HashMap<String, ContactUseEnum>());
+			}
+			SYSTEM_TO_CODE_TO_ENUM.get(next.getSystem()).put(next.getCode(), next);			
 		}
 	}
 	
@@ -70,6 +78,13 @@ public enum ContactUseEnum {
 	 */
 	public String getCode() {
 		return myCode;
+	}
+	
+	/**
+	 * Returns the code system associated with this enumerated value
+	 */
+	public String getSystem() {
+		return mySystem;
 	}
 	
 	/**
@@ -88,18 +103,34 @@ public enum ContactUseEnum {
 		public String toCodeString(ContactUseEnum theEnum) {
 			return theEnum.getCode();
 		}
+
+		@Override
+		public String toSystemString(ContactUseEnum theEnum) {
+			return theEnum.getSystem();
+		}
 		
 		@Override
 		public ContactUseEnum fromCodeString(String theCodeString) {
 			return CODE_TO_ENUM.get(theCodeString);
 		}
+		
+		@Override
+		public ContactUseEnum fromCodeString(String theCodeString, String theSystemString) {
+			Map<String, ContactUseEnum> map = SYSTEM_TO_CODE_TO_ENUM.get(theSystemString);
+			if (map == null) {
+				return null;
+			}
+			return map.get(theCodeString);
+		}
+		
 	};
 	
 	/** 
 	 * Constructor
 	 */
-	ContactUseEnum(String theCode) {
+	ContactUseEnum(String theCode, String theSystem) {
 		myCode = theCode;
+		mySystem = theSystem;
 	}
 
 	

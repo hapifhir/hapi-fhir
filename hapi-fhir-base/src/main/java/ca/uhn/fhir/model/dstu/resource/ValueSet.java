@@ -37,7 +37,7 @@ import ca.uhn.fhir.model.dstu.valueset.*;
  * 
  * </p> 
  */
-@ResourceDef(name="ValueSet")
+@ResourceDef(name="ValueSet", profile="http://hl7.org/fhir/profiles/ValueSet")
 public class ValueSet extends BaseResource implements IResource {
 
 	/**
@@ -152,45 +152,101 @@ public class ValueSet extends BaseResource implements IResource {
 
 
 	@Child(name="identifier", type=StringDt.class, order=0, min=0, max=1)	
+	@Description(
+		shortDefinition="Logical id to reference this value set",
+		formalDefinition="The identifier that is used to identify this value set when it is referenced in a specification, model, design or an instance (should be globally unique OID, UUID, or URI)"
+	)
 	private StringDt myIdentifier;
 	
 	@Child(name="version", type=StringDt.class, order=1, min=0, max=1)	
+	@Description(
+		shortDefinition="Logical id for this version of the value set",
+		formalDefinition="The identifier that is used to identify this version of the value set when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the profile author manually and the value should be a timestamp"
+	)
 	private StringDt myVersion;
 	
 	@Child(name="name", type=StringDt.class, order=2, min=1, max=1)	
+	@Description(
+		shortDefinition="Informal name for this value set",
+		formalDefinition="A free text natural language name describing the value set"
+	)
 	private StringDt myName;
 	
 	@Child(name="publisher", type=StringDt.class, order=3, min=0, max=1)	
+	@Description(
+		shortDefinition="Name of the publisher (Organization or individual)",
+		formalDefinition="The name of the individual or organization that published the value set"
+	)
 	private StringDt myPublisher;
 	
 	@Child(name="telecom", type=ContactDt.class, order=4, min=0, max=Child.MAX_UNLIMITED)	
+	@Description(
+		shortDefinition="Contact information of the publisher",
+		formalDefinition="Contacts of the publisher to assist a user in finding and communicating with the publisher"
+	)
 	private List<ContactDt> myTelecom;
 	
 	@Child(name="description", type=StringDt.class, order=5, min=1, max=1)	
+	@Description(
+		shortDefinition="Human language description of the value set",
+		formalDefinition="A free text natural language description of the use of the value set - reason for definition, conditions of use, etc."
+	)
 	private StringDt myDescription;
 	
 	@Child(name="copyright", type=StringDt.class, order=6, min=0, max=1)	
+	@Description(
+		shortDefinition="About the value set or its content",
+		formalDefinition="A copyright statement relating to the value set and/or its contents"
+	)
 	private StringDt myCopyright;
 	
 	@Child(name="status", type=CodeDt.class, order=7, min=1, max=1)	
+	@Description(
+		shortDefinition="draft | active | retired",
+		formalDefinition="The status of the value set"
+	)
 	private BoundCodeDt<ValueSetStatusEnum> myStatus;
 	
 	@Child(name="experimental", type=BooleanDt.class, order=8, min=0, max=1)	
+	@Description(
+		shortDefinition="If for testing purposes, not real usage",
+		formalDefinition="This valueset was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage"
+	)
 	private BooleanDt myExperimental;
 	
 	@Child(name="extensible", type=BooleanDt.class, order=9, min=0, max=1)	
+	@Description(
+		shortDefinition="Whether this is intended to be used with an extensible binding",
+		formalDefinition="Whether this is intended to be used with an extensible binding or not"
+	)
 	private BooleanDt myExtensible;
 	
 	@Child(name="date", type=DateTimeDt.class, order=10, min=0, max=1)	
+	@Description(
+		shortDefinition="Date for given status",
+		formalDefinition="The date that the value set status was last changed"
+	)
 	private DateTimeDt myDate;
 	
 	@Child(name="define", order=11, min=0, max=1)	
+	@Description(
+		shortDefinition="When value set defines its own codes",
+		formalDefinition=""
+	)
 	private Define myDefine;
 	
 	@Child(name="compose", order=12, min=0, max=1)	
+	@Description(
+		shortDefinition="When value set includes codes from elsewhere",
+		formalDefinition=""
+	)
 	private Compose myCompose;
 	
 	@Child(name="expansion", order=13, min=0, max=1)	
+	@Description(
+		shortDefinition="When value set is an expansion",
+		formalDefinition=""
+	)
 	private Expansion myExpansion;
 	
 
@@ -502,8 +558,7 @@ public class ValueSet extends BaseResource implements IResource {
 
  
 	/**
-	 * Gets the value(s) for <b>status</b> (draft | active | retired
-).
+	 * Gets the value(s) for <b>status</b> (draft | active | retired).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -520,8 +575,7 @@ public class ValueSet extends BaseResource implements IResource {
 	}
 
 	/**
-	 * Sets the value(s) for <b>status</b> (draft | active | retired
-)
+	 * Sets the value(s) for <b>status</b> (draft | active | retired)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -534,8 +588,7 @@ public class ValueSet extends BaseResource implements IResource {
 
 
 	/**
-	 * Sets the value(s) for <b>status</b> (draft | active | retired
-)
+	 * Sets the value(s) for <b>status</b> (draft | active | retired)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -793,15 +846,31 @@ public class ValueSet extends BaseResource implements IResource {
 	public static class Define extends BaseElement implements IResourceBlock {
 	
 	@Child(name="system", type=UriDt.class, order=0, min=1, max=1)	
+	@Description(
+		shortDefinition="URI to identify the code system",
+		formalDefinition=""
+	)
 	private UriDt mySystem;
 	
 	@Child(name="version", type=StringDt.class, order=1, min=0, max=1)	
+	@Description(
+		shortDefinition="Version of this system",
+		formalDefinition="The version of this code system that defines the codes. Note that the version is optional because a well maintained code system does not suffer from versioning, and therefore the version does not need to be maintained. However many code systems are not well maintained, and the version needs to be defined and tracked"
+	)
 	private StringDt myVersion;
 	
 	@Child(name="caseSensitive", type=BooleanDt.class, order=2, min=0, max=1)	
+	@Description(
+		shortDefinition="If code comparison is case sensitive",
+		formalDefinition="If code comparison is case sensitive when codes within this system are compared to each other"
+	)
 	private BooleanDt myCaseSensitive;
 	
 	@Child(name="concept", order=3, min=0, max=Child.MAX_UNLIMITED)	
+	@Description(
+		shortDefinition="Concepts in the code system",
+		formalDefinition=""
+	)
 	private List<DefineConcept> myConcept;
 	
 
@@ -998,18 +1067,38 @@ public class ValueSet extends BaseResource implements IResource {
 	public static class DefineConcept extends BaseElement implements IResourceBlock {
 	
 	@Child(name="code", type=CodeDt.class, order=0, min=1, max=1)	
+	@Description(
+		shortDefinition="Code that identifies concept",
+		formalDefinition=""
+	)
 	private CodeDt myCode;
 	
 	@Child(name="abstract", type=BooleanDt.class, order=1, min=0, max=1)	
+	@Description(
+		shortDefinition="If this code is not for use as a real concept",
+		formalDefinition="If this code is not for use as a real concept"
+	)
 	private BooleanDt myAbstract;
 	
 	@Child(name="display", type=StringDt.class, order=2, min=0, max=1)	
+	@Description(
+		shortDefinition="Text to Display to the user",
+		formalDefinition=""
+	)
 	private StringDt myDisplay;
 	
 	@Child(name="definition", type=StringDt.class, order=3, min=0, max=1)	
+	@Description(
+		shortDefinition="Formal Definition",
+		formalDefinition="The formal definition of the concept. Formal definitions are not required, because of the prevalence of legacy systems without them, but they are highly recommended, as without them there is no formal meaning associated with the concept"
+	)
 	private StringDt myDefinition;
 	
 	@Child(name="concept", type=DefineConcept.class, order=4, min=0, max=Child.MAX_UNLIMITED)	
+	@Description(
+		shortDefinition="Child Concepts (is-a / contains)",
+		formalDefinition=""
+	)
 	private List<DefineConcept> myConcept;
 	
 
@@ -1048,7 +1137,19 @@ public class ValueSet extends BaseResource implements IResource {
 	}
 
 
-  
+ 	/**
+	 * Sets the value for <b>code</b> (Code that identifies concept)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * 
+     * </p> 
+	 */
+	public void setCode( String theCode) {
+		myCode = new CodeDt(theCode); 
+	}
+
+ 
 	/**
 	 * Gets the value(s) for <b>abstract</b> (If this code is not for use as a real concept).
 	 * creating it if it does
@@ -1239,12 +1340,24 @@ public class ValueSet extends BaseResource implements IResource {
 	public static class Compose extends BaseElement implements IResourceBlock {
 	
 	@Child(name="import", type=UriDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)	
+	@Description(
+		shortDefinition="Import the contents of another value set",
+		formalDefinition="Includes the contents of the referenced value set as a part of the contents of this value set"
+	)
 	private List<UriDt> myImport;
 	
 	@Child(name="include", order=1, min=0, max=Child.MAX_UNLIMITED)	
+	@Description(
+		shortDefinition="Include one or more codes from a code system",
+		formalDefinition="Include one or more codes from a code system"
+	)
 	private List<ComposeInclude> myInclude;
 	
 	@Child(name="exclude", type=ComposeInclude.class, order=2, min=0, max=Child.MAX_UNLIMITED)	
+	@Description(
+		shortDefinition="Explicitly exclude codes",
+		formalDefinition="Exclude one or more codes from the value set"
+	)
 	private List<ComposeInclude> myExclude;
 	
 
@@ -1415,15 +1528,31 @@ public class ValueSet extends BaseResource implements IResource {
 	public static class ComposeInclude extends BaseElement implements IResourceBlock {
 	
 	@Child(name="system", type=UriDt.class, order=0, min=1, max=1)	
+	@Description(
+		shortDefinition="The system the codes come from",
+		formalDefinition="The code system from which the selected codes come from"
+	)
 	private UriDt mySystem;
 	
 	@Child(name="version", type=StringDt.class, order=1, min=0, max=1)	
+	@Description(
+		shortDefinition="Specific version of the code system referred to",
+		formalDefinition="The version of the code system that the codes are selected from"
+	)
 	private StringDt myVersion;
 	
 	@Child(name="code", type=CodeDt.class, order=2, min=0, max=Child.MAX_UNLIMITED)	
+	@Description(
+		shortDefinition="Code or concept from system",
+		formalDefinition="Specifies a code or concept to be included or excluded. The list of codes is considered ordered, though the order may not have any particular significance"
+	)
 	private List<CodeDt> myCode;
 	
 	@Child(name="filter", order=3, min=0, max=Child.MAX_UNLIMITED)	
+	@Description(
+		shortDefinition="Select codes/concepts by their properties (including relationships)",
+		formalDefinition="Select concepts by specify a matching criteria based on the properties (including relationships) defined by the system. If multiple filters are specified, they SHALL all be true."
+	)
 	private List<ComposeIncludeFilter> myFilter;
 	
 
@@ -1561,7 +1690,22 @@ public class ValueSet extends BaseResource implements IResource {
 		return newType; 
 	}
 
-  
+ 	/**
+	 * Adds a new value for <b>code</b> (Code or concept from system)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Specifies a code or concept to be included or excluded. The list of codes is considered ordered, though the order may not have any particular significance
+     * </p> 
+	 */
+	public void addCode( String theCode) {
+		if (myCode == null) {
+			myCode = new ArrayList<CodeDt>();
+		}
+		myCode.add(new CodeDt(theCode)); 
+	}
+
+ 
 	/**
 	 * Gets the value(s) for <b>filter</b> (Select codes/concepts by their properties (including relationships)).
 	 * creating it if it does
@@ -1621,12 +1765,24 @@ public class ValueSet extends BaseResource implements IResource {
 	public static class ComposeIncludeFilter extends BaseElement implements IResourceBlock {
 	
 	@Child(name="property", type=CodeDt.class, order=0, min=1, max=1)	
+	@Description(
+		shortDefinition="",
+		formalDefinition="A code that identifies a property defined in the code system"
+	)
 	private CodeDt myProperty;
 	
 	@Child(name="op", type=CodeDt.class, order=1, min=1, max=1)	
+	@Description(
+		shortDefinition="= | is-a | is-not-a | regex | in | not in",
+		formalDefinition="The kind of operation to perform as a part of the filter criteria"
+	)
 	private BoundCodeDt<FilterOperatorEnum> myOp;
 	
 	@Child(name="value", type=CodeDt.class, order=2, min=1, max=1)	
+	@Description(
+		shortDefinition="Code from the system, or regex criteria",
+		formalDefinition="The match value may be either a code defined by the system, or a string value which is used a regex match on the literal string of the property value"
+	)
 	private CodeDt myValue;
 	
 
@@ -1665,7 +1821,19 @@ public class ValueSet extends BaseResource implements IResource {
 	}
 
 
-  
+ 	/**
+	 * Sets the value for <b>property</b> ()
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A code that identifies a property defined in the code system
+     * </p> 
+	 */
+	public void setProperty( String theCode) {
+		myProperty = new CodeDt(theCode); 
+	}
+
+ 
 	/**
 	 * Gets the value(s) for <b>op</b> (= | is-a | is-not-a | regex | in | not in).
 	 * creating it if it does
@@ -1739,7 +1907,19 @@ public class ValueSet extends BaseResource implements IResource {
 	}
 
 
-  
+ 	/**
+	 * Sets the value for <b>value</b> (Code from the system, or regex criteria)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The match value may be either a code defined by the system, or a string value which is used a regex match on the literal string of the property value
+     * </p> 
+	 */
+	public void setValue( String theCode) {
+		myValue = new CodeDt(theCode); 
+	}
+
+ 
 
 	}
 
@@ -1758,12 +1938,24 @@ public class ValueSet extends BaseResource implements IResource {
 	public static class Expansion extends BaseElement implements IResourceBlock {
 	
 	@Child(name="identifier", type=IdentifierDt.class, order=0, min=0, max=1)	
+	@Description(
+		shortDefinition="Uniquely identifies this expansion",
+		formalDefinition="An identifier that uniquely identifies this expansion of the valueset. Systems may re-use the same identifier as long as the expansion and the definition remain the same, but are not required to do so"
+	)
 	private IdentifierDt myIdentifier;
 	
 	@Child(name="timestamp", type=InstantDt.class, order=1, min=1, max=1)	
+	@Description(
+		shortDefinition="Time valueset expansion happened",
+		formalDefinition=""
+	)
 	private InstantDt myTimestamp;
 	
 	@Child(name="contains", order=2, min=0, max=Child.MAX_UNLIMITED)	
+	@Description(
+		shortDefinition="Codes in the value set",
+		formalDefinition=""
+	)
 	private List<ExpansionContains> myContains;
 	
 
@@ -1917,15 +2109,31 @@ public class ValueSet extends BaseResource implements IResource {
 	public static class ExpansionContains extends BaseElement implements IResourceBlock {
 	
 	@Child(name="system", type=UriDt.class, order=0, min=0, max=1)	
+	@Description(
+		shortDefinition="System value for the code",
+		formalDefinition=""
+	)
 	private UriDt mySystem;
 	
 	@Child(name="code", type=CodeDt.class, order=1, min=0, max=1)	
+	@Description(
+		shortDefinition="Code - if blank, this is not a choosable code",
+		formalDefinition=""
+	)
 	private CodeDt myCode;
 	
 	@Child(name="display", type=StringDt.class, order=2, min=0, max=1)	
+	@Description(
+		shortDefinition="User display for the concept",
+		formalDefinition=""
+	)
 	private StringDt myDisplay;
 	
 	@Child(name="contains", type=ExpansionContains.class, order=3, min=0, max=Child.MAX_UNLIMITED)	
+	@Description(
+		shortDefinition="Codes contained in this concept",
+		formalDefinition=""
+	)
 	private List<ExpansionContains> myContains;
 	
 
@@ -2007,7 +2215,19 @@ public class ValueSet extends BaseResource implements IResource {
 	}
 
 
-  
+ 	/**
+	 * Sets the value for <b>code</b> (Code - if blank, this is not a choosable code)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * 
+     * </p> 
+	 */
+	public void setCode( String theCode) {
+		myCode = new CodeDt(theCode); 
+	}
+
+ 
 	/**
 	 * Gets the value(s) for <b>display</b> (User display for the concept).
 	 * creating it if it does

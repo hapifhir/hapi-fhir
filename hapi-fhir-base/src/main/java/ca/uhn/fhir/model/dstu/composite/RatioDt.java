@@ -29,7 +29,7 @@ import ca.uhn.fhir.model.dstu.resource.*;
  *
  * <p>
  * <b>Definition:</b>
- * A relationship of two Quantity values - expressed as a numerator and a denominator. 
+ * A relationship of two Quantity values - expressed as a numerator and a denominator.
  * </p> 
  *
  * <p>
@@ -42,9 +42,17 @@ public class RatioDt extends BaseElement implements ICompositeDatatype  {
 
 
 	@Child(name="numerator", type=QuantityDt.class, order=0, min=0, max=1)	
+	@Description(
+		shortDefinition="Numerator value",
+		formalDefinition="The value of the numerator"
+	)
 	private QuantityDt myNumerator;
 	
 	@Child(name="denominator", type=QuantityDt.class, order=1, min=0, max=1)	
+	@Description(
+		shortDefinition="Denominator value",
+		formalDefinition="The value of the denominator"
+	)
 	private QuantityDt myDenominator;
 	
 

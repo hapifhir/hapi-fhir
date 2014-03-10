@@ -42,18 +42,38 @@ public class QuantityDt extends BaseElement implements ICompositeDatatype  {
 
 
 	@Child(name="value", type=DecimalDt.class, order=0, min=0, max=1)	
+	@Description(
+		shortDefinition="Numerical value (with implicit precision)",
+		formalDefinition="The value of the measured amount. The value includes an implicit precision in the presentation of the value"
+	)
 	private DecimalDt myValue;
 	
 	@Child(name="comparator", type=CodeDt.class, order=1, min=0, max=1)	
+	@Description(
+		shortDefinition="< | <= | >= | > - how to understand the value",
+		formalDefinition="How the value should be understood and represented - whether the actual value is greater or less than the stated value due to measurement issues. E.g. if the comparator is \"<\" , then the real value is < stated value"
+	)
 	private BoundCodeDt<QuantityCompararatorEnum> myComparator;
 	
 	@Child(name="units", type=StringDt.class, order=2, min=0, max=1)	
+	@Description(
+		shortDefinition="Unit representation",
+		formalDefinition="A human-readable form of the units"
+	)
 	private StringDt myUnits;
 	
 	@Child(name="system", type=UriDt.class, order=3, min=0, max=1)	
+	@Description(
+		shortDefinition="System that defines coded unit form",
+		formalDefinition="The identification of the system that provides the coded form of the unit"
+	)
 	private UriDt mySystem;
 	
 	@Child(name="code", type=CodeDt.class, order=4, min=0, max=1)	
+	@Description(
+		shortDefinition="Coded form of the unit",
+		formalDefinition="A computer processable form of the units in some unit representation system"
+	)
 	private CodeDt myCode;
 	
 
@@ -100,7 +120,7 @@ public class QuantityDt extends BaseElement implements ICompositeDatatype  {
      * The value of the measured amount. The value includes an implicit precision in the presentation of the value
      * </p> 
 	 */
-	public void setValue( java.math.BigDecimal theValue) {
+	public void setValue( long theValue) {
 		myValue = new DecimalDt(theValue); 
 	}
 
@@ -124,7 +144,7 @@ public class QuantityDt extends BaseElement implements ICompositeDatatype  {
      * The value of the measured amount. The value includes an implicit precision in the presentation of the value
      * </p> 
 	 */
-	public void setValue( long theValue) {
+	public void setValue( java.math.BigDecimal theValue) {
 		myValue = new DecimalDt(theValue); 
 	}
 
@@ -136,7 +156,7 @@ public class QuantityDt extends BaseElement implements ICompositeDatatype  {
 	 *
      * <p>
      * <b>Definition:</b>
-     * How the value should be understood and represented - whether the actual value is greater or less than the stated value due to measurement issues. E.g. if the comparator is "<" , then the real value is < stated value
+     * How the value should be understood and represented - whether the actual value is greater or less than the stated value due to measurement issues. E.g. if the comparator is \"<\" , then the real value is < stated value
      * </p> 
 	 */
 	public BoundCodeDt<QuantityCompararatorEnum> getComparator() {  
@@ -151,7 +171,7 @@ public class QuantityDt extends BaseElement implements ICompositeDatatype  {
 	 *
      * <p>
      * <b>Definition:</b>
-     * How the value should be understood and represented - whether the actual value is greater or less than the stated value due to measurement issues. E.g. if the comparator is "<" , then the real value is < stated value
+     * How the value should be understood and represented - whether the actual value is greater or less than the stated value due to measurement issues. E.g. if the comparator is \"<\" , then the real value is < stated value
      * </p> 
 	 */
 	public void setComparator(BoundCodeDt<QuantityCompararatorEnum> theValue) {
@@ -164,7 +184,7 @@ public class QuantityDt extends BaseElement implements ICompositeDatatype  {
 	 *
      * <p>
      * <b>Definition:</b>
-     * How the value should be understood and represented - whether the actual value is greater or less than the stated value due to measurement issues. E.g. if the comparator is "<" , then the real value is < stated value
+     * How the value should be understood and represented - whether the actual value is greater or less than the stated value due to measurement issues. E.g. if the comparator is \"<\" , then the real value is < stated value
      * </p> 
 	 */
 	public void setComparator(QuantityCompararatorEnum theValue) {
@@ -288,7 +308,19 @@ public class QuantityDt extends BaseElement implements ICompositeDatatype  {
 	}
 
 
-  
+ 	/**
+	 * Sets the value for <b>code</b> (Coded form of the unit)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A computer processable form of the units in some unit representation system
+     * </p> 
+	 */
+	public void setCode( String theCode) {
+		myCode = new CodeDt(theCode); 
+	}
+
+ 
 
 
 

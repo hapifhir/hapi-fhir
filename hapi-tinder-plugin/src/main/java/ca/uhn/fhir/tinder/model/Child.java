@@ -7,6 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import ca.uhn.fhir.model.api.IDatatype;
 import ca.uhn.fhir.model.api.ResourceReference;
+import edu.emory.mathcs.backport.java.util.Collections;
 
 public class Child extends BaseElement {
 
@@ -45,9 +46,17 @@ public class Child extends BaseElement {
 		return elementName;
 	}
 
+	public String getBoundDatatype() {
+		String singleType = getSingleType();
+		if ("CodeDt".equals(singleType) || "CodeableConceptDt".equals(singleType)) {
+			return "Bound" + singleType;
+		}
+		throw new IllegalStateException();
+	}
+	
 	public boolean isBoundCode() {
 		String singleType = getSingleType();
-		if ("CodeDt".equals(singleType)) {
+		if ("CodeDt".equals(singleType) || "CodeableConceptDt".equals(singleType)) {
 			if (StringUtils.isNotBlank(getBindingClass())) {
 				return true;
 			}
@@ -61,7 +70,7 @@ public class Child extends BaseElement {
 			retVal = (ResourceReference.class.getSimpleName());
 		} else if (this.getType().size() == 1 || this instanceof ResourceBlock) {
 			if (isBoundCode()) {
-				retVal = "BoundCodeDt<" + getBindingClass() + ">";
+				retVal = "Bound" + getSingleType() + "<" + getBindingClass() + ">";
 			}else {
 				retVal = getSingleType();
 			}
@@ -93,7 +102,11 @@ public class Child extends BaseElement {
 		return retVal;
 	}
 
+	@SuppressWarnings("unchecked")
 	public List<SimpleSetter> getSimpleSetters() {
+		if (isBoundCode()) {
+			return Collections.emptyList();
+		}
 		return mySimpleStters;
 	}
 

@@ -18,7 +18,7 @@ public enum ${valueSet.className} {
 	 * ${code.definition}
 #end
 	 */
-	${code.codeEnumValue}("${code.code}"),
+	${code.codeEnumValue}("${code.code}", "${code.system}"),
 	
 #end
 	;
@@ -36,11 +36,19 @@ public enum ${valueSet.className} {
 	public static final String VALUESET_NAME = "${valueSet.name}";
 
 	private static Map<String, ${valueSet.className}> CODE_TO_ENUM = new HashMap<String, ${valueSet.className}>();
-	private String myCode;
+	private static Map<String, Map<String, ${valueSet.className}>> SYSTEM_TO_CODE_TO_ENUM = new HashMap<String, Map<String, ${valueSet.className}>>();
+	
+	private final String myCode;
+	private final String mySystem;
 	
 	static {
 		for (${valueSet.className} next : ${valueSet.className}.values()) {
 			CODE_TO_ENUM.put(next.getCode(), next);
+			
+			if (!SYSTEM_TO_CODE_TO_ENUM.containsKey(next.getSystem())) {
+				SYSTEM_TO_CODE_TO_ENUM.put(next.getSystem(), new HashMap<String, ${valueSet.className}>());
+			}
+			SYSTEM_TO_CODE_TO_ENUM.get(next.getSystem()).put(next.getCode(), next);			
 		}
 	}
 	
@@ -49,6 +57,13 @@ public enum ${valueSet.className} {
 	 */
 	public String getCode() {
 		return myCode;
+	}
+	
+	/**
+	 * Returns the code system associated with this enumerated value
+	 */
+	public String getSystem() {
+		return mySystem;
 	}
 	
 	/**
@@ -67,18 +82,34 @@ public enum ${valueSet.className} {
 		public String toCodeString(${valueSet.className} theEnum) {
 			return theEnum.getCode();
 		}
+
+		@Override
+		public String toSystemString(${valueSet.className} theEnum) {
+			return theEnum.getSystem();
+		}
 		
 		@Override
 		public ${valueSet.className} fromCodeString(String theCodeString) {
 			return CODE_TO_ENUM.get(theCodeString);
 		}
+		
+		@Override
+		public ${valueSet.className} fromCodeString(String theCodeString, String theSystemString) {
+			Map<String, ${valueSet.className}> map = SYSTEM_TO_CODE_TO_ENUM.get(theSystemString);
+			if (map == null) {
+				return null;
+			}
+			return map.get(theCodeString);
+		}
+		
 	};
 	
 	/** 
 	 * Constructor
 	 */
-	${valueSet.className}(String theCode) {
+	${valueSet.className}(String theCode, String theSystem) {
 		myCode = theCode;
+		mySystem = theSystem;
 	}
 
 	

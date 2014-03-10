@@ -23,7 +23,7 @@ import ${packageBase}.valueset.*;
  * ${requirements}
  * </p> 
  */
-@ResourceDef(name="${className}")
+@ResourceDef(name="${className}", profile="${profile}")
 public class ${className} extends BaseResource implements IResource {
 
 #foreach ( $param in $searchParams )

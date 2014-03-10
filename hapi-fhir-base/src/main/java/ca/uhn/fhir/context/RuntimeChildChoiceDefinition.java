@@ -1,6 +1,7 @@
 package ca.uhn.fhir.context;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -9,9 +10,10 @@ import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 
-import ca.uhn.fhir.model.api.IDatatype;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
 
 public class RuntimeChildChoiceDefinition extends BaseRuntimeDeclaredChildDefinition {
 
@@ -20,8 +22,8 @@ public class RuntimeChildChoiceDefinition extends BaseRuntimeDeclaredChildDefini
 	private Map<Class<? extends IElement>, String> myDatatypeToElementName;
 	private Map<Class<? extends IElement>, BaseRuntimeElementDefinition<?>> myDatatypeToElementDefinition;
 
-	public RuntimeChildChoiceDefinition(Field theField, String theElementName, int theMin, int theMax, List<Class<? extends IElement>> theChoiceTypes) {
-		super(theField, theMin,theMax, theElementName);
+	public RuntimeChildChoiceDefinition(Field theField, String theElementName, Child theChildAnnotation, Description theDescriptionAnnotation, List<Class<? extends IElement>> theChoiceTypes) {
+		super(theField, theChildAnnotation, theDescriptionAnnotation, theElementName);
 		
 		myChoiceTypes= Collections.unmodifiableList(theChoiceTypes);
 	}
@@ -42,6 +44,7 @@ public class RuntimeChildChoiceDefinition extends BaseRuntimeDeclaredChildDefini
 		return myNameToChildDefinition.get(theName);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	void sealAndInitialize(Map<Class<? extends IElement>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
 		myNameToChildDefinition = new HashMap<String, BaseRuntimeElementDefinition<?>>();
@@ -54,7 +57,10 @@ public class RuntimeChildChoiceDefinition extends BaseRuntimeDeclaredChildDefini
 			BaseRuntimeElementDefinition<?> nextDef;
 			if (IResource.class.isAssignableFrom(next)) {
 				elementName = getElementName() + StringUtils.capitalize(next.getSimpleName());
-				nextDef = new RuntimeResourceReferenceDefinition(elementName);
+				List<Class<? extends IResource>> types = new ArrayList<Class<? extends IResource>>();
+				types.add((Class<? extends IResource>)next);
+				nextDef = new RuntimeResourceReferenceDefinition(elementName, types);
+				nextDef.sealAndInitialize(theClassToElementDefinitions);
 			} else {
 				nextDef = theClassToElementDefinitions.get(next);
 				elementName = getElementName() + StringUtils.capitalize(nextDef.getName());

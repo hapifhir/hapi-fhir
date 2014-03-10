@@ -42,9 +42,17 @@ public class CodeableConceptDt extends BaseElement implements ICompositeDatatype
 
 
 	@Child(name="coding", type=CodingDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)	
+	@Description(
+		shortDefinition="Code defined by a terminology system",
+		formalDefinition="A reference to a code defined by a terminology system"
+	)
 	private List<CodingDt> myCoding;
 	
 	@Child(name="text", type=StringDt.class, order=1, min=0, max=1)	
+	@Description(
+		shortDefinition="Plain text representation of the concept",
+		formalDefinition="A human language representation of the concept as seen/selected/uttered by the user who entered the data and/or which represents the intended meaning of the user"
+	)
 	private StringDt myText;
 	
 
@@ -54,13 +62,13 @@ public class CodeableConceptDt extends BaseElement implements ICompositeDatatype
 	}
 
 	/**
-	 * Gets the value(s) for <b>coding</b> (Code defined by a terminology system ).
+	 * Gets the value(s) for <b>coding</b> (Code defined by a terminology system).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
-     * A reference to a code defined by a terminology system 
+     * A reference to a code defined by a terminology system
      * </p> 
 	 */
 	public List<CodingDt> getCoding() {  
@@ -71,11 +79,11 @@ public class CodeableConceptDt extends BaseElement implements ICompositeDatatype
 	}
 
 	/**
-	 * Sets the value(s) for <b>coding</b> (Code defined by a terminology system )
+	 * Sets the value(s) for <b>coding</b> (Code defined by a terminology system)
 	 *
      * <p>
      * <b>Definition:</b>
-     * A reference to a code defined by a terminology system 
+     * A reference to a code defined by a terminology system
      * </p> 
 	 */
 	public void setCoding(List<CodingDt> theValue) {
@@ -83,11 +91,11 @@ public class CodeableConceptDt extends BaseElement implements ICompositeDatatype
 	}
 
 	/**
-	 * Adds and returns a new value for <b>coding</b> (Code defined by a terminology system )
+	 * Adds and returns a new value for <b>coding</b> (Code defined by a terminology system)
 	 *
      * <p>
      * <b>Definition:</b>
-     * A reference to a code defined by a terminology system 
+     * A reference to a code defined by a terminology system
      * </p> 
 	 */
 	public CodingDt addCoding() {

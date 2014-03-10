@@ -11,49 +11,49 @@ public enum LocationTypeEnum {
 	 * Display: <b>Building</b><br/>
 	 * Code Value: <b>bu</b>
 	 */
-	BUILDING("bu"),
+	BUILDING("bu", "http://hl7.org/fhir/location-physical-type"),
 	
 	/**
 	 * Display: <b>Wing</b><br/>
 	 * Code Value: <b>wi</b>
 	 */
-	WING("wi"),
+	WING("wi", "http://hl7.org/fhir/location-physical-type"),
 	
 	/**
 	 * Display: <b>Corridor</b><br/>
 	 * Code Value: <b>co</b>
 	 */
-	CORRIDOR("co"),
+	CORRIDOR("co", "http://hl7.org/fhir/location-physical-type"),
 	
 	/**
 	 * Display: <b>Room</b><br/>
 	 * Code Value: <b>ro</b>
 	 */
-	ROOM("ro"),
+	ROOM("ro", "http://hl7.org/fhir/location-physical-type"),
 	
 	/**
 	 * Display: <b>Vehicle</b><br/>
 	 * Code Value: <b>ve</b>
 	 */
-	VEHICLE("ve"),
+	VEHICLE("ve", "http://hl7.org/fhir/location-physical-type"),
 	
 	/**
 	 * Display: <b>House</b><br/>
 	 * Code Value: <b>ho</b>
 	 */
-	HOUSE("ho"),
+	HOUSE("ho", "http://hl7.org/fhir/location-physical-type"),
 	
 	/**
 	 * Display: <b>Cabinet</b><br/>
 	 * Code Value: <b>ca</b>
 	 */
-	CABINET("ca"),
+	CABINET("ca", "http://hl7.org/fhir/location-physical-type"),
 	
 	/**
 	 * Display: <b>Road</b><br/>
 	 * Code Value: <b>rd</b>
 	 */
-	ROAD("rd"),
+	ROAD("rd", "http://hl7.org/fhir/location-physical-type"),
 	
 	;
 	
@@ -70,11 +70,19 @@ public enum LocationTypeEnum {
 	public static final String VALUESET_NAME = "LocationType";
 
 	private static Map<String, LocationTypeEnum> CODE_TO_ENUM = new HashMap<String, LocationTypeEnum>();
-	private String myCode;
+	private static Map<String, Map<String, LocationTypeEnum>> SYSTEM_TO_CODE_TO_ENUM = new HashMap<String, Map<String, LocationTypeEnum>>();
+	
+	private final String myCode;
+	private final String mySystem;
 	
 	static {
 		for (LocationTypeEnum next : LocationTypeEnum.values()) {
 			CODE_TO_ENUM.put(next.getCode(), next);
+			
+			if (!SYSTEM_TO_CODE_TO_ENUM.containsKey(next.getSystem())) {
+				SYSTEM_TO_CODE_TO_ENUM.put(next.getSystem(), new HashMap<String, LocationTypeEnum>());
+			}
+			SYSTEM_TO_CODE_TO_ENUM.get(next.getSystem()).put(next.getCode(), next);			
 		}
 	}
 	
@@ -83,6 +91,13 @@ public enum LocationTypeEnum {
 	 */
 	public String getCode() {
 		return myCode;
+	}
+	
+	/**
+	 * Returns the code system associated with this enumerated value
+	 */
+	public String getSystem() {
+		return mySystem;
 	}
 	
 	/**
@@ -101,18 +116,34 @@ public enum LocationTypeEnum {
 		public String toCodeString(LocationTypeEnum theEnum) {
 			return theEnum.getCode();
 		}
+
+		@Override
+		public String toSystemString(LocationTypeEnum theEnum) {
+			return theEnum.getSystem();
+		}
 		
 		@Override
 		public LocationTypeEnum fromCodeString(String theCodeString) {
 			return CODE_TO_ENUM.get(theCodeString);
 		}
+		
+		@Override
+		public LocationTypeEnum fromCodeString(String theCodeString, String theSystemString) {
+			Map<String, LocationTypeEnum> map = SYSTEM_TO_CODE_TO_ENUM.get(theSystemString);
+			if (map == null) {
+				return null;
+			}
+			return map.get(theCodeString);
+		}
+		
 	};
 	
 	/** 
 	 * Constructor
 	 */
-	LocationTypeEnum(String theCode) {
+	LocationTypeEnum(String theCode, String theSystem) {
 		myCode = theCode;
+		mySystem = theSystem;
 	}
 
 	

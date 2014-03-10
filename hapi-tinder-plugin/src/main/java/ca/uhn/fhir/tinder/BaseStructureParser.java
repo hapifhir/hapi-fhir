@@ -11,6 +11,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.TreeSet;
 
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -50,6 +51,9 @@ public abstract class BaseStructureParser {
 			String bindingClass = theVsp.getClassForValueSetIdAndMarkAsNeeded(theResource.getBinding());
 			if (bindingClass!= null) {
 				theResource.setBindingClass(bindingClass);
+			}else {
+				ourLog.info("No binding found for: {}", theResource.getBinding());
+				ourLog.info(" * Valid: {}", new TreeSet<String>(theVsp.getValueSets().keySet()));
 			}
 		}
 		for (BaseElement next : theResource.getChildren()) {
@@ -141,7 +145,9 @@ public abstract class BaseStructureParser {
 		ourLog.info("Writing file: {}", theFile.getAbsolutePath());
 
 		VelocityContext ctx = new VelocityContext();
+		ctx.put("includeDescriptionAnnotations", true);
 		ctx.put("packageBase", thePackageBase);
+		ctx.put("profile", theResource.getProfile());
 		ctx.put("className", theResource.getName());
 		ctx.put("shortName", defaultString(theResource.getShortName()));
 		ctx.put("definition", defaultString(theResource.getDefinition()));

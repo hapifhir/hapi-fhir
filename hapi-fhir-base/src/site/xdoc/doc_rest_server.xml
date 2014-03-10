@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document xmlns="http://maven.apache.org/XDOC/2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
+
+	<properties>
+		<title>RESTful Server - HAPI FHIR</title>
+		<author email="jamesagnew@users.sourceforge.net">James Agnew</author>
+	</properties>
+
+	<body>
+
+		<!-- The body of the document contains a number of sections -->
+		<section name="Working with Resources">
+			
+			<macro name="toc">
+			</macro>
+			
+			<p>
+				HAPI provides a built-in mechanism for adding FHIR's RESTful Server
+				capabilities to your applications. The HAPI RESTful Server is Servlet
+				based, so it should be easy to deploy to any of the many compliant
+				containers that exist.					
+			</p>
+
+			<p>
+				Setup is mostly done using simple annotations, which means that it should
+				be possible to create a FHIR compliant server quickly and easily.
+			</p>
+			
+			<subsection name="Creating A Server">
+			
+				<p>
+					The first step in creating a FHIR RESTful Server is to define one or
+					more resource providers. A resource provider is a class which is 
+					able to supply exactly one type of resource to be served up.
+				</p>
+				
+				<p>
+					For example, if you wish to allow your server to serve up Patient, 
+					Observation and Location resources, you will need three resource
+					providers.
+				</p>
+				
+				<p>
+					Resource providers each contain one or more methods which have been
+					annotated with special annotations indicating which RESTful operation
+					that method supports. Below is a simple example of a resource provider
+					which supports the
+					<a href="http://hl7.org/implement/standards/fhir/http.html#read">read</a>
+					operation (i.e. retrieve a single resource by ID) as well as the
+					<a href="http://hl7.org/implement/standards/fhir/http.html#search">search</a>
+					operation (i.e. find any resources matching a given criteria) for a specific
+					search criteria.
+				</p>
+				
+				<macro name="snippet">
+					<param name="id" value="provider" />
+					<param name="file" value="src/site/example/java/example/RestfulPatientResourceProvider.java" />
+				</macro>
+
+			</subsection>
+
+			
+		</section>
+
+	</body>
+
+</document>

@@ -12,42 +12,42 @@ public enum GroupTypeEnum {
 	 *
 	 * Group contains "person" Patient resources.
 	 */
-	PERSON("person"),
+	PERSON("person", "http://hl7.org/fhir/group-type"),
 	
 	/**
 	 * Code Value: <b>animal</b>
 	 *
 	 * Group contains "animal" Patient resources.
 	 */
-	ANIMAL("animal"),
+	ANIMAL("animal", "http://hl7.org/fhir/group-type"),
 	
 	/**
 	 * Code Value: <b>practitioner</b>
 	 *
 	 * Group contains healthcare practitioner resources.
 	 */
-	PRACTITIONER("practitioner"),
+	PRACTITIONER("practitioner", "http://hl7.org/fhir/group-type"),
 	
 	/**
 	 * Code Value: <b>device</b>
 	 *
 	 * Group contains Device resources.
 	 */
-	DEVICE("device"),
+	DEVICE("device", "http://hl7.org/fhir/group-type"),
 	
 	/**
 	 * Code Value: <b>medication</b>
 	 *
 	 * Group contains Medication resources.
 	 */
-	MEDICATION("medication"),
+	MEDICATION("medication", "http://hl7.org/fhir/group-type"),
 	
 	/**
 	 * Code Value: <b>substance</b>
 	 *
 	 * Group contains Substance resources.
 	 */
-	SUBSTANCE("substance"),
+	SUBSTANCE("substance", "http://hl7.org/fhir/group-type"),
 	
 	;
 	
@@ -64,11 +64,19 @@ public enum GroupTypeEnum {
 	public static final String VALUESET_NAME = "GroupType";
 
 	private static Map<String, GroupTypeEnum> CODE_TO_ENUM = new HashMap<String, GroupTypeEnum>();
-	private String myCode;
+	private static Map<String, Map<String, GroupTypeEnum>> SYSTEM_TO_CODE_TO_ENUM = new HashMap<String, Map<String, GroupTypeEnum>>();
+	
+	private final String myCode;
+	private final String mySystem;
 	
 	static {
 		for (GroupTypeEnum next : GroupTypeEnum.values()) {
 			CODE_TO_ENUM.put(next.getCode(), next);
+			
+			if (!SYSTEM_TO_CODE_TO_ENUM.containsKey(next.getSystem())) {
+				SYSTEM_TO_CODE_TO_ENUM.put(next.getSystem(), new HashMap<String, GroupTypeEnum>());
+			}
+			SYSTEM_TO_CODE_TO_ENUM.get(next.getSystem()).put(next.getCode(), next);			
 		}
 	}
 	
@@ -77,6 +85,13 @@ public enum GroupTypeEnum {
 	 */
 	public String getCode() {
 		return myCode;
+	}
+	
+	/**
+	 * Returns the code system associated with this enumerated value
+	 */
+	public String getSystem() {
+		return mySystem;
 	}
 	
 	/**
@@ -95,18 +110,34 @@ public enum GroupTypeEnum {
 		public String toCodeString(GroupTypeEnum theEnum) {
 			return theEnum.getCode();
 		}
+
+		@Override
+		public String toSystemString(GroupTypeEnum theEnum) {
+			return theEnum.getSystem();
+		}
 		
 		@Override
 		public GroupTypeEnum fromCodeString(String theCodeString) {
 			return CODE_TO_ENUM.get(theCodeString);
 		}
+		
+		@Override
+		public GroupTypeEnum fromCodeString(String theCodeString, String theSystemString) {
+			Map<String, GroupTypeEnum> map = SYSTEM_TO_CODE_TO_ENUM.get(theSystemString);
+			if (map == null) {
+				return null;
+			}
+			return map.get(theCodeString);
+		}
+		
 	};
 	
 	/** 
 	 * Constructor
 	 */
-	GroupTypeEnum(String theCode) {
+	GroupTypeEnum(String theCode, String theSystem) {
 		myCode = theCode;
+		mySystem = theSystem;
 	}
 
 	

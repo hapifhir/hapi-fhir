@@ -12,42 +12,42 @@ public enum ObservationStatusEnum {
 	 *
 	 * The existence of the observation is registered, but there is no result yet available.
 	 */
-	REGISTERED("registered"),
+	REGISTERED("registered", "http://hl7.org/fhir/observation-status"),
 	
 	/**
 	 * Code Value: <b>preliminary</b>
 	 *
 	 * This is an initial or interim observation: data may be incomplete or unverified.
 	 */
-	PRELIMINARY("preliminary"),
+	PRELIMINARY("preliminary", "http://hl7.org/fhir/observation-status"),
 	
 	/**
 	 * Code Value: <b>final</b>
 	 *
 	 * The observation is complete and verified by an authorized person.
 	 */
-	FINAL("final"),
+	FINAL("final", "http://hl7.org/fhir/observation-status"),
 	
 	/**
 	 * Code Value: <b>amended</b>
 	 *
 	 * The observation has been modified subsequent to being Final, and is complete and verified by an authorized person.
 	 */
-	AMENDED("amended"),
+	AMENDED("amended", "http://hl7.org/fhir/observation-status"),
 	
 	/**
 	 * Code Value: <b>cancelled</b>
 	 *
 	 * The observation is unavailable because the measurement was not started or not completed (also sometimes called "aborted").
 	 */
-	CANCELLED("cancelled"),
+	CANCELLED("cancelled", "http://hl7.org/fhir/observation-status"),
 	
 	/**
 	 * Code Value: <b>entered in error</b>
 	 *
 	 * The observation has been withdrawn following previous Final release.
 	 */
-	ENTERED_IN_ERROR("entered in error"),
+	ENTERED_IN_ERROR("entered in error", "http://hl7.org/fhir/observation-status"),
 	
 	;
 	
@@ -64,11 +64,19 @@ public enum ObservationStatusEnum {
 	public static final String VALUESET_NAME = "ObservationStatus";
 
 	private static Map<String, ObservationStatusEnum> CODE_TO_ENUM = new HashMap<String, ObservationStatusEnum>();
-	private String myCode;
+	private static Map<String, Map<String, ObservationStatusEnum>> SYSTEM_TO_CODE_TO_ENUM = new HashMap<String, Map<String, ObservationStatusEnum>>();
+	
+	private final String myCode;
+	private final String mySystem;
 	
 	static {
 		for (ObservationStatusEnum next : ObservationStatusEnum.values()) {
 			CODE_TO_ENUM.put(next.getCode(), next);
+			
+			if (!SYSTEM_TO_CODE_TO_ENUM.containsKey(next.getSystem())) {
+				SYSTEM_TO_CODE_TO_ENUM.put(next.getSystem(), new HashMap<String, ObservationStatusEnum>());
+			}
+			SYSTEM_TO_CODE_TO_ENUM.get(next.getSystem()).put(next.getCode(), next);			
 		}
 	}
 	
@@ -77,6 +85,13 @@ public enum ObservationStatusEnum {
 	 */
 	public String getCode() {
 		return myCode;
+	}
+	
+	/**
+	 * Returns the code system associated with this enumerated value
+	 */
+	public String getSystem() {
+		return mySystem;
 	}
 	
 	/**
@@ -95,18 +110,34 @@ public enum ObservationStatusEnum {
 		public String toCodeString(ObservationStatusEnum theEnum) {
 			return theEnum.getCode();
 		}
+
+		@Override
+		public String toSystemString(ObservationStatusEnum theEnum) {
+			return theEnum.getSystem();
+		}
 		
 		@Override
 		public ObservationStatusEnum fromCodeString(String theCodeString) {
 			return CODE_TO_ENUM.get(theCodeString);
 		}
+		
+		@Override
+		public ObservationStatusEnum fromCodeString(String theCodeString, String theSystemString) {
+			Map<String, ObservationStatusEnum> map = SYSTEM_TO_CODE_TO_ENUM.get(theSystemString);
+			if (map == null) {
+				return null;
+			}
+			return map.get(theCodeString);
+		}
+		
 	};
 	
 	/** 
 	 * Constructor
 	 */
-	ObservationStatusEnum(String theCode) {
+	ObservationStatusEnum(String theCode, String theSystem) {
 		myCode = theCode;
+		mySystem = theSystem;
 	}
 
 	

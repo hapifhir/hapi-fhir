@@ -71,6 +71,7 @@ public class ProfileParser extends BaseStructureParser {
 				BaseElement elem;
 				if (elemIdx == 0) {
 					Resource resource = new Resource();
+					resource.setProfile(theProfile.getIdentifier().getValue());
 					
 					for (StructureSearchParam nextParam : nextStructure.getSearchParam()) {
 						SearchParameter param = new SearchParameter();
