@@ -49,7 +49,7 @@ public class DummyPatientResourceProvider implements IResourceProvider {
 		}
 	}
 
-	@Search(Patient.class)
+	@Search()
 	public Patient getPatient(@Required(name = Patient.SP_IDENTIFIER) IdentifierDt theIdentifier) {
 		for (Patient next : myIdToPatient.values()) {
 			for (IdentifierDt nextId : next.getIdentifier()) {
@@ -73,7 +73,7 @@ public class DummyPatientResourceProvider implements IResourceProvider {
 	 *            The resource identity
 	 * @return The resource
 	 */
-	@Read(Patient.class)
+	@Read()
 	public Patient getResourceById(@Read.IdParam IdDt theId) {
 		return myIdToPatient.get(theId.getValue());
 	}

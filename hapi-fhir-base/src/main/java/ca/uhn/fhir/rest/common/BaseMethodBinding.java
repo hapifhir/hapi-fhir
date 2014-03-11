@@ -26,10 +26,10 @@ public abstract class BaseMethodBinding {
 	private String myResourceName;
 	private MethodReturnTypeEnum myMethodReturnType;
 
-	public BaseMethodBinding(MethodReturnTypeEnum theMethodReturnType, Class<? extends IResource> theAnnotatedResourceType) {
-		ResourceDef resourceDefAnnotation = theAnnotatedResourceType.getAnnotation(ResourceDef.class);
+	public BaseMethodBinding(MethodReturnTypeEnum theMethodReturnType, Class<? extends IResource> theReturnResourceType) {
+		ResourceDef resourceDefAnnotation = theReturnResourceType.getAnnotation(ResourceDef.class);
 		if (resourceDefAnnotation == null) {
-			throw new ConfigurationException(theAnnotatedResourceType.getCanonicalName() + " has no @" + ResourceDef.class.getSimpleName() + " annotation");
+			throw new ConfigurationException(theReturnResourceType.getCanonicalName() + " has no @" + ResourceDef.class.getSimpleName() + " annotation");
 		}
 		myResourceName = resourceDefAnnotation.name();
 		myMethodReturnType = theMethodReturnType;
@@ -39,8 +39,7 @@ public abstract class BaseMethodBinding {
 
 	public abstract GetClientInvocation invokeClient(Object[] theArgs) throws InternalErrorException;
 
-	public abstract List<IResource> invokeServer(IResourceProvider theResourceProvider, IdDt theId, IdDt theVersionId, Map<String, String[]> theParameterValues) throws InvalidRequestException,
-			InternalErrorException;
+	public abstract List<IResource> invokeServer(IResourceProvider theResourceProvider, IdDt theId, IdDt theVersionId, Map<String, String[]> theParameterValues) throws InvalidRequestException, InternalErrorException;
 
 	public abstract boolean matches(String theResourceName, IdDt theId, IdDt theVersion, Set<String> theParameterNames);
 
@@ -48,25 +47,18 @@ public abstract class BaseMethodBinding {
 		return myResourceName;
 	}
 
-	public static BaseMethodBinding bindMethod(Method theMethod) {
+	public static BaseMethodBinding bindMethod(Class<? extends IResource> theReturnType, Method theMethod) {
 		Read read = theMethod.getAnnotation(Read.class);
 		Search search = theMethod.getAnnotation(Search.class);
 		if (!verifyMethodHasZeroOrOneOperationAnnotation(theMethod, read, search)) {
 			return null;
 		}
 
-		Class<? extends IResource> annotatedResourceType;
-		if (read != null) {
-			annotatedResourceType = read.value();
-		} else {
-			annotatedResourceType = search.value();
-		}
-
 		Class<?> methodReturnType = theMethod.getReturnType();
 		MethodReturnTypeEnum methodReturnTypeEnum;
 		if (methodReturnType.equals(List.class)) {
 			methodReturnTypeEnum = MethodReturnTypeEnum.LIST_OF_RESOURCES;
-		} else if (methodReturnType.isAssignableFrom(annotatedResourceType)) {
+		} else if (IResource.class.isAssignableFrom(methodReturnType)) {
 			methodReturnTypeEnum = MethodReturnTypeEnum.RESOURCE;
 		} else if (Bundle.class.isAssignableFrom(methodReturnType)) {
 			methodReturnTypeEnum = MethodReturnTypeEnum.LIST_OF_RESOURCES;
@@ -74,10 +66,23 @@ public abstract class BaseMethodBinding {
 			throw new ConfigurationException("Invalid return type '" + methodReturnType.getCanonicalName() + "' on method '" + theMethod.getName() + "' on type: " + theMethod.getDeclaringClass().getCanonicalName());
 		}
 
+		Class<? extends IResource> returnType = theReturnType;
+		if (returnType == null) {
+			if (read != null) {
+				returnType = read.type();
+			} else if (search != null) {
+				returnType = search.type();
+			}
+
+			if (returnType == null) {
+				throw new ConfigurationException("Could not determine return type for method '" + theMethod.getName() + "'. Try explicitly specifying one in the operation annotation.");
+			}
+		}
+
 		if (read != null) {
-			return new ReadMethodBinding(methodReturnTypeEnum, annotatedResourceType, theMethod);
+			return new ReadMethodBinding(methodReturnTypeEnum, returnType, theMethod);
 		} else if (search != null) {
-			return new SearchMethodBinding(methodReturnTypeEnum, annotatedResourceType, theMethod);
+			return new SearchMethodBinding(methodReturnTypeEnum, returnType, theMethod);
 		} else {
 			throw new ConfigurationException("Did not detect any FHIR annotations on method '" + theMethod.getName() + "' on type: " + theMethod.getDeclaringClass().getCanonicalName());
 		}
@@ -111,15 +116,18 @@ public abstract class BaseMethodBinding {
 				if (obj1 == null) {
 					obj1 = object;
 				} else {
-					throw new ConfigurationException("Method " + theNextMethod.getName() + " on type '" + theNextMethod.getDeclaringClass().getSimpleName() + " has annotations @"
-							+ obj1.getClass().getSimpleName() + " and @" + object.getClass().getSimpleName() + ". Can not have both.");
+					throw new ConfigurationException("Method " + theNextMethod.getName() + " on type '" + theNextMethod.getDeclaringClass().getSimpleName() + " has annotations @" + obj1.getClass().getSimpleName() + " and @" + object.getClass().getSimpleName()
+							+ ". Can not have both.");
 				}
 
 			}
 		}
 		if (obj1 == null) {
 			return false;
-//			throw new ConfigurationException("Method '" + theNextMethod.getName() + "' on type '" + theNextMethod.getDeclaringClass().getSimpleName() + " has no FHIR method annotations.");
+			// throw new ConfigurationException("Method '" +
+			// theNextMethod.getName() + "' on type '" +
+			// theNextMethod.getDeclaringClass().getSimpleName() +
+			// " has no FHIR method annotations.");
 		}
 		return true;
 	}

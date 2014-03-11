@@ -18,6 +18,7 @@ public class FhirContext {
 	private Map<Class<? extends IElement>, BaseRuntimeElementDefinition<?>> myClassToElementDefinition;
 	private final Map<String, RuntimeResourceDefinition> myNameToElementDefinition;
 	private RuntimeChildUndeclaredExtensionDefinition myRuntimeChildUndeclaredExtensionDefinition;
+	private Map<String, RuntimeResourceDefinition> myIdToResourceDefinition;
 
 	public FhirContext(Class<?>... theResourceTypes) {
 		this(toCollection(theResourceTypes));
@@ -32,6 +33,11 @@ public class FhirContext {
 		myNameToElementDefinition = Collections.unmodifiableMap(scanner.getNameToResourceDefinitions());
 		myClassToElementDefinition = Collections.unmodifiableMap(scanner.getClassToElementDefinitions());
 		myRuntimeChildUndeclaredExtensionDefinition = scanner.getRuntimeChildUndeclaredExtensionDefinition();
+		myIdToResourceDefinition = scanner.getIdToResourceDefinition();
+	}
+	
+	public RuntimeResourceDefinition getResourceDefinitionById(String theId) {
+		return myIdToResourceDefinition.get(theId);
 	}
 
 	public Map<Class<? extends IElement>, BaseRuntimeElementDefinition<?>> getClassToElementDefinition() {
@@ -80,6 +86,10 @@ public class FhirContext {
 		ArrayList<Class<? extends IResource>> retVal = new ArrayList<Class<? extends IResource>>(1);
 		retVal.add(theResourceType);
 		return retVal;
+	}
+
+	public Collection<RuntimeResourceDefinition> getResourceDefinitions() {
+		return myIdToResourceDefinition.values();
 	}
 
 }

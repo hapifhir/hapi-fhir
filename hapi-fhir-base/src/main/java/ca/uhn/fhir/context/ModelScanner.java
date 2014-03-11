@@ -47,16 +47,18 @@ class ModelScanner {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ModelScanner.class);
 
 	private Map<Class<? extends IElement>, BaseRuntimeElementDefinition<?>> myClassToElementDefinitions = new HashMap<Class<? extends IElement>, BaseRuntimeElementDefinition<?>>();
+	private Map<String, RuntimeResourceDefinition> myIdToResourceDefinition = new HashMap<String, RuntimeResourceDefinition>();
 	private Map<String, RuntimeResourceDefinition> myNameToResourceDefinitions = new HashMap<String, RuntimeResourceDefinition>();
-	private Set<Class<? extends IElement>> myScanAlso = new HashSet<Class<? extends IElement>>();
 
 	// private Map<String, RuntimeResourceDefinition>
 	// myNameToDatatypeDefinitions = new HashMap<String,
 	// RuntimeDatatypeDefinition>();
 
-	private Set<Class<? extends ICodeEnum>> myScanAlsoCodeTable = new HashSet<Class<? extends ICodeEnum>>();
-
 	private RuntimeChildUndeclaredExtensionDefinition myRuntimeChildUndeclaredExtensionDefinition;
+
+	private Set<Class<? extends IElement>> myScanAlso = new HashSet<Class<? extends IElement>>();
+
+	private Set<Class<? extends ICodeEnum>> myScanAlsoCodeTable = new HashSet<Class<? extends ICodeEnum>>();
 
 	ModelScanner(Class<? extends IResource> theResourceTypes) throws ConfigurationException {
 		Set<Class<? extends IElement>> singleton = new HashSet<Class<? extends IElement>>();
@@ -66,6 +68,56 @@ class ModelScanner {
 
 	ModelScanner(Collection<Class<? extends IResource>> theResourceTypes) throws ConfigurationException {
 		init(new HashSet<Class<? extends IElement>>(theResourceTypes));
+	}
+
+	public Map<Class<? extends IElement>, BaseRuntimeElementDefinition<?>> getClassToElementDefinitions() {
+		return myClassToElementDefinitions;
+	}
+
+	public Map<String, RuntimeResourceDefinition> getNameToResourceDefinitions() {
+		return (myNameToResourceDefinitions);
+	}
+
+	public RuntimeChildUndeclaredExtensionDefinition getRuntimeChildUndeclaredExtensionDefinition() {
+		return myRuntimeChildUndeclaredExtensionDefinition;
+	}
+
+	private void addScanAlso(Class<? extends IElement> theType) {
+		if (theType.isInterface()) {
+			return;
+		}
+		myScanAlso.add(theType);
+	}
+
+	private Class<?> determineElementType(Field next) {
+		Class<?> nextElementType = next.getType();
+		if (List.class.equals(nextElementType)) {
+			nextElementType = getGenericCollectionTypeOfField(next);
+		} else if (Collection.class.isAssignableFrom(nextElementType)) {
+			throw new ConfigurationException("Field '" + next.getName() + "' in type '" + next.getClass().getCanonicalName() + "' is a Collection - Only java.util.List curently supported");
+		}
+		return nextElementType;
+	}
+
+	@SuppressWarnings("unchecked")
+	private IValueSetEnumBinder<Enum<?>> getBoundCodeBinder(Field theNext) {
+		Class<?> bound = getGenericCollectionTypeOfCodedField(theNext);
+		if (bound == null) {
+			throw new ConfigurationException("Field '" + theNext + "' has no parameter for " + BoundCodeDt.class.getSimpleName() + " to determine enum type");
+		}
+
+		try {
+			Field bindingField = bound.getField("VALUESET_BINDER");
+			return (IValueSetEnumBinder<Enum<?>>) bindingField.get(null);
+		} catch (IllegalArgumentException e) {
+			throw new ConfigurationException("Field '" + theNext + "' has type parameter " + bound.getCanonicalName() + " but this class has no valueset binding field", e);
+		} catch (IllegalAccessException e) {
+			throw new ConfigurationException("Field '" + theNext + "' has type parameter " + bound.getCanonicalName() + " but this class has no valueset binding field", e);
+		} catch (NoSuchFieldException e) {
+			throw new ConfigurationException("Field '" + theNext + "' has type parameter " + bound.getCanonicalName() + " but this class has no valueset binding field", e);
+		} catch (SecurityException e) {
+			throw new ConfigurationException("Field '" + theNext + "' has type parameter " + bound.getCanonicalName() + " but this class has no valueset binding field", e);
+		}
 	}
 
 	private void init(Set<Class<? extends IElement>> toScan) {
@@ -94,25 +146,6 @@ class ModelScanner {
 		myRuntimeChildUndeclaredExtensionDefinition.sealAndInitialize(myClassToElementDefinitions);
 
 		ourLog.info("Done scanning FHIR library, found {} model entries", myClassToElementDefinitions.size());
-	}
-
-	public RuntimeChildUndeclaredExtensionDefinition getRuntimeChildUndeclaredExtensionDefinition() {
-		return myRuntimeChildUndeclaredExtensionDefinition;
-	}
-
-	public Map<Class<? extends IElement>, BaseRuntimeElementDefinition<?>> getClassToElementDefinitions() {
-		return myClassToElementDefinitions;
-	}
-
-	public Map<String, RuntimeResourceDefinition> getNameToResourceDefinitions() {
-		return (myNameToResourceDefinitions);
-	}
-
-	private void addScanAlso(Class<? extends IElement> theType) {
-		if (theType.isInterface()) {
-			return;
-		}
-		myScanAlso.add(theType);
 	}
 
 	private void scan(Class<? extends IElement> theClass) throws ConfigurationException {
@@ -266,7 +299,7 @@ class ModelScanner {
 				ourLog.debug("Ignoring non-type field '" + next.getName() + "' on target type: " + theClass);
 				continue;
 			}
-			
+
 			Description descriptionAnnotation = next.getAnnotation(Description.class);
 
 			String elementName = childAnnotation.name();
@@ -330,7 +363,7 @@ class ModelScanner {
 				 */
 				List<Class<? extends IResource>> refTypesList = new ArrayList<Class<? extends IResource>>();
 				for (Class<? extends IElement> nextType : childAnnotation.type()) {
-					if (IResource.class.isAssignableFrom(nextType)== false) {
+					if (IResource.class.isAssignableFrom(nextType) == false) {
 						throw new ConfigurationException("Field '" + next.getName() + "' is of type " + ResourceReferenceDt.class + " but contains a non-resource type: " + nextType.getCanonicalName());
 					}
 					refTypesList.add((Class<? extends IResource>) nextType);
@@ -347,7 +380,7 @@ class ModelScanner {
 
 				Class<? extends IResourceBlock> blockDef = (Class<? extends IResourceBlock>) nextElementType;
 				addScanAlso(blockDef);
-				RuntimeChildResourceBlockDefinition def = new RuntimeChildResourceBlockDefinition(next,  childAnnotation, descriptionAnnotation, elementName, blockDef);
+				RuntimeChildResourceBlockDefinition def = new RuntimeChildResourceBlockDefinition(next, childAnnotation, descriptionAnnotation, elementName, blockDef);
 				orderMap.put(order, def);
 
 			} else if (IDatatype.class.isAssignableFrom(nextElementType)) {
@@ -393,37 +426,6 @@ class ModelScanner {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
-	private IValueSetEnumBinder<Enum<?>> getBoundCodeBinder(Field theNext) {
-		Class<?> bound = getGenericCollectionTypeOfCodedField(theNext);
-		if (bound == null) {
-			throw new ConfigurationException("Field '" + theNext + "' has no parameter for " + BoundCodeDt.class.getSimpleName() + " to determine enum type");
-		}
-
-		try {
-			Field bindingField = bound.getField("VALUESET_BINDER");
-			return (IValueSetEnumBinder<Enum<?>>) bindingField.get(null);
-		} catch (IllegalArgumentException e) {
-			throw new ConfigurationException("Field '" + theNext + "' has type parameter " + bound.getCanonicalName() + " but this class has no valueset binding field", e);
-		} catch ( IllegalAccessException e) {
-			throw new ConfigurationException("Field '" + theNext + "' has type parameter " + bound.getCanonicalName() + " but this class has no valueset binding field", e);
-		} catch (NoSuchFieldException e) {
-			throw new ConfigurationException("Field '" + theNext + "' has type parameter " + bound.getCanonicalName() + " but this class has no valueset binding field", e);
-		} catch (SecurityException e) {
-			throw new ConfigurationException("Field '" + theNext + "' has type parameter " + bound.getCanonicalName() + " but this class has no valueset binding field", e);
-		}
-	}
-
-	private Class<?> determineElementType(Field next) {
-		Class<?> nextElementType = next.getType();
-		if (List.class.equals(nextElementType)) {
-			nextElementType = getGenericCollectionTypeOfField(next);
-		} else if (Collection.class.isAssignableFrom(nextElementType)) {
-			throw new ConfigurationException("Field '" + next.getName() + "' in type '" + next.getClass().getCanonicalName() + "' is a Collection - Only java.util.List curently supported");
-		}
-		return nextElementType;
-	}
-
 	private String scanPrimitiveDatatype(Class<? extends IPrimitiveDatatype<?>> theClass, DatatypeDef theDatatypeDefinition) {
 		ourLog.debug("Scanning resource class: {}", theClass.getName());
 
@@ -460,13 +462,40 @@ class ModelScanner {
 			return resourceName;
 		}
 
+		String resourceId = resourceDefinition.id();
+		if (isBlank(resourceId)) {
+			throw new ConfigurationException("Resource type @" + ResourceDef.class.getSimpleName() + " annotation contains no resource ID: " + theClass.getCanonicalName());
+		}
+		if (myIdToResourceDefinition.containsKey(resourceId)) {
+			throw new ConfigurationException("The following resource types have the same ID of '" + resourceId + "' - " + theClass.getCanonicalName() + " and " + myIdToResourceDefinition.get(resourceId).getImplementingClass().getCanonicalName());
+		}
+		
 		RuntimeResourceDefinition resourceDef = new RuntimeResourceDefinition(theClass, resourceDefinition);
 		myClassToElementDefinitions.put(theClass, resourceDef);
 		myNameToResourceDefinitions.put(resourceName, resourceDef);
 
 		scanCompositeElementForChildren(theClass, resourceDef, resourceDefinition.identifierOrder());
 
+		myIdToResourceDefinition.put(resourceId, resourceDef);
 		return resourceName;
+	}
+
+	public Map<String, RuntimeResourceDefinition> getIdToResourceDefinition() {
+		return myIdToResourceDefinition;
+	}
+
+	private static Class<?> getGenericCollectionTypeOfCodedField(Field next) {
+		Class<?> type;
+		ParameterizedType collectionType = (ParameterizedType) next.getGenericType();
+		Type firstArg = collectionType.getActualTypeArguments()[0];
+		if (ParameterizedType.class.isAssignableFrom(firstArg.getClass())) {
+			ParameterizedType pt = ((ParameterizedType) firstArg);
+			firstArg = pt.getActualTypeArguments()[0];
+			type = (Class<?>) firstArg;
+		} else {
+			type = (Class<?>) firstArg;
+		}
+		return type;
 	}
 
 	private static Class<?> getGenericCollectionTypeOfField(Field next) {
@@ -476,11 +505,11 @@ class ModelScanner {
 		ParameterizedType collectionType = (ParameterizedType) next.getGenericType();
 		Type firstArg = collectionType.getActualTypeArguments()[0];
 		if (ParameterizedType.class.isAssignableFrom(firstArg.getClass())) {
-			ParameterizedType pt = ((ParameterizedType)firstArg);
+			ParameterizedType pt = ((ParameterizedType) firstArg);
 			type = (Class<?>) pt.getRawType();
-//			firstArg = pt.getActualTypeArguments()[0];
-//			type = (Class<?>) firstArg;
-		}else {
+			// firstArg = pt.getActualTypeArguments()[0];
+			// type = (Class<?>) firstArg;
+		} else {
 			type = (Class<?>) firstArg;
 		}
 		// }else {
@@ -488,20 +517,6 @@ class ModelScanner {
 		// genericSuperclass).getActualTypeArguments();
 		// type = (Class<?>) actualTypeArguments[0];
 		// }
-		return type;
-	}
-	
-	private static Class<?> getGenericCollectionTypeOfCodedField(Field next) {
-		Class<?> type;
-		ParameterizedType collectionType = (ParameterizedType) next.getGenericType();
-		Type firstArg = collectionType.getActualTypeArguments()[0];
-		if (ParameterizedType.class.isAssignableFrom(firstArg.getClass())) {
-			ParameterizedType pt = ((ParameterizedType)firstArg);
-			firstArg = pt.getActualTypeArguments()[0];
-			type = (Class<?>) firstArg;
-		}else {
-			type = (Class<?>) firstArg;
-		}
 		return type;
 	}
 

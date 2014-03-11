@@ -32,7 +32,8 @@ public class RestfulPatientResourceProvider implements IResourceProvider {
 	
 	/**
 	 * The "@Read" annotation indicates that this method supports the
-	 * read operation. It takes one argument, the Resource type being returned. 
+	 * read operation. Read operations should return a single resource
+	 * instance. 
 	 * 
 	 * @param theId
 	 *    The read operation takes one parameter, which must be of type
@@ -40,7 +41,7 @@ public class RestfulPatientResourceProvider implements IResourceProvider {
 	 * @return 
 	 *    Returns a resource matching this identifier, or null if none exists.
 	 */
-	@Read(Patient.class)
+	@Read()
 	public Patient getResourceById(@Read.IdParam IdDt theId) {
 		Patient patient = new Patient();
 		patient.addIdentifier();
@@ -68,7 +69,7 @@ public class RestfulPatientResourceProvider implements IResourceProvider {
 	 *    This method returns a list of Patients. This list may contain multiple
 	 *    matching resources, or it may also be empty.
 	 */
-	@Search(Patient.class)
+	@Search()
 	public List<Patient> getPatient(@Required(name = Patient.SP_FAMILY) StringDt theFamilyName) {
 		Patient patient = new Patient();
 		patient.addIdentifier();
@@ -76,7 +77,7 @@ public class RestfulPatientResourceProvider implements IResourceProvider {
 		patient.getIdentifier().get(0).setSystem(new UriDt("urn:hapitest:mrns"));
 		patient.getIdentifier().get(0).setValue("00001");
 		patient.addName();
-		patient.getName().get(0).addFamily("Test");
+		patient.getName().get(0).addFamily(theFamilyName.getValue());
 		patient.getName().get(0).addGiven("PatientOne");
 		patient.getGender().setText("M");
 		return Collections.singletonList(patient);
@@ -84,3 +85,5 @@ public class RestfulPatientResourceProvider implements IResourceProvider {
 
 }
 //END SNIPPET: provider
+
+

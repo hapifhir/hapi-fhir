@@ -8,11 +8,14 @@ import ca.uhn.fhir.model.api.IResource;
 @Retention(RetentionPolicy.RUNTIME)
 
 public @interface Search {
-
+	
 	/**
-	 * Returns the resource type that is returned by the method annotated
-	 * with this annotation
+	 * The return type for this search method. This generally does not need
+	 * to be populated for a server implementation, since servers will return
+	 * only one resource per class, but generally does need to be populated
+	 * for client implementations. 
 	 */
-	Class<? extends IResource> value();
+	// NB: Read, Search (maybe others) share this annotation, so update the javadocs everywhere
+	Class<? extends IResource> type() default IResource.class;
 	
 }

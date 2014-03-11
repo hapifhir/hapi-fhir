@@ -11,6 +11,7 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.rest.client.api.IRestfulClient;
 import ca.uhn.fhir.rest.common.BaseMethodBinding;
 
@@ -70,7 +71,7 @@ public class RestfulClientFactory implements IRestfulClientFactory {
 		ClientInvocationHandler theInvocationHandler = new ClientInvocationHandler(client, myContext, serverBase);
 
 		for (Method nextMethod : theClientType.getMethods()) {			
-			BaseMethodBinding binding = BaseMethodBinding.bindMethod(nextMethod);
+			BaseMethodBinding binding = BaseMethodBinding.bindMethod(null, nextMethod);
 			theInvocationHandler.addBinding(nextMethod, binding);
 		}
 

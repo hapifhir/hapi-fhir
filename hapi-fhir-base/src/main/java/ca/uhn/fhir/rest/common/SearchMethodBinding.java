@@ -31,8 +31,8 @@ public class SearchMethodBinding extends BaseMethodBinding {
 	private RequestType requestType;
 	private Class<?> myDeclaredResourceType;
 
-	public SearchMethodBinding(MethodReturnTypeEnum theMethodReturnTypeEnum, Class<? extends IResource> theAnnotatedResourceType, Method theMethod) {
-		super(theMethodReturnTypeEnum, theAnnotatedResourceType);
+	public SearchMethodBinding(MethodReturnTypeEnum theMethodReturnTypeEnum, Class<? extends IResource> theReturnResourceType, Method theMethod) {
+		super(theMethodReturnTypeEnum, theReturnResourceType);
 		this.method = theMethod;
 		this.myParameters = Util.getResourceParameters(theMethod);
 		

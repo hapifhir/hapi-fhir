@@ -28,6 +28,7 @@ import ca.uhn.fhir.model.dstu.valueset.SlicingRulesEnum;
 public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefinition<IResource> {
 
 	private String myResourceProfile;
+	private Profile myProfileDef;
 
 	public RuntimeResourceDefinition(Class<? extends IResource> theClass, ResourceDef theResourceAnnotation) {
 		super(theResourceAnnotation.name(), theClass);
@@ -44,6 +45,10 @@ public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefini
 	}
 
 	public synchronized Profile toProfile() {
+		if (myProfileDef != null) {
+			return myProfileDef;
+		}
+
 		Profile retVal = new Profile();
 		RuntimeResourceDefinition def = this;
 
@@ -68,6 +73,8 @@ public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefini
 		fillProfile(struct, element, def, path, null);
 
 		retVal.getStructure().get(0).getElement().get(0).getDefinition().addType().getCode().setValue("Resource");
+
+		myProfileDef = retVal;
 
 		return retVal;
 	}
@@ -132,7 +139,7 @@ public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefini
 			narrative.getDefinition().setIsModifier(false);
 			narrative.getDefinition().setMin(0);
 			narrative.getDefinition().setMax("1");
-			
+
 			StructureElement contained = theStruct.addElement();
 			contained.setName("contained");
 			contained.setPath(join(path, '.') + ".contained");
@@ -141,7 +148,7 @@ public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefini
 			contained.getDefinition().setMin(0);
 			contained.getDefinition().setMax("1");
 		}
-		
+
 		if (def instanceof BaseRuntimeElementCompositeDefinition) {
 			BaseRuntimeElementCompositeDefinition<?> cdef = ((BaseRuntimeElementCompositeDefinition<?>) def);
 			for (BaseRuntimeChildDefinition nextChild : cdef.getChildren()) {

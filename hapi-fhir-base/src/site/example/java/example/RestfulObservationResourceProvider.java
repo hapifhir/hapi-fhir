@@ -40,7 +40,7 @@ public class RestfulObservationResourceProvider implements IResourceProvider {
 	 * @return 
 	 *    Returns a resource matching this identifier, or null if none exists.
 	 */
-	@Read(Patient.class)
+	@Read()
 	public Patient getResourceById(@Read.IdParam IdDt theId) {
 		Patient patient = new Patient();
 		patient.addIdentifier();
@@ -68,7 +68,7 @@ public class RestfulObservationResourceProvider implements IResourceProvider {
 	 *    This method returns a list of Patients. This list may contain multiple
 	 *    matching resources, or it may also be empty.
 	 */
-	@Search(Patient.class)
+	@Search()
 	public List<Patient> getPatient(@Required(name = Patient.SP_FAMILY) StringDt theFamilyName) {
 		Patient patient = new Patient();
 		patient.addIdentifier();

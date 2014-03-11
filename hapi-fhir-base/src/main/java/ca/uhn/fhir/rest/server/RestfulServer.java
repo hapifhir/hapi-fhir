@@ -88,7 +88,7 @@ public abstract class RestfulServer extends HttpServlet {
 			if (Modifier.isPublic(m.getModifiers())) {
 				ourLog.info("Scanning public method: {}#{}", theProvider.getClass(), m.getName());
 
-				BaseMethodBinding foundMethodBinding = BaseMethodBinding.bindMethod(m);
+				BaseMethodBinding foundMethodBinding = BaseMethodBinding.bindMethod(theProvider.getResourceType(), m);
 				if (foundMethodBinding != null) {
 					r.addMethod(foundMethodBinding);
 					ourLog.info(" * Method: {}#{} is a handler", theProvider.getClass(), m.getName());

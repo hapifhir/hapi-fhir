@@ -12,7 +12,7 @@ import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 
-@ResourceDef(name = "ResourceWithExtensionsA")
+@ResourceDef(name = "ResourceWithExtensionsA", id="0001")
 public class ResourceWithExtensionsA implements IResource {
 
 	/*
