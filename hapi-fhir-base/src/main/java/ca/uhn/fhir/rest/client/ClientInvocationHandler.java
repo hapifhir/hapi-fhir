@@ -90,7 +90,7 @@ public class ClientInvocationHandler implements InvocationHandler {
 				if (list.size() == 0) {
 					return null;
 				} else if (list.size() == 1) {
-					return list.get(1);
+					return list.get(0);
 				} else {
 					throw new InvalidResponseException("FHIR server call returned a bundle with multiple resources, but this method is only able to returns one.");
 				}

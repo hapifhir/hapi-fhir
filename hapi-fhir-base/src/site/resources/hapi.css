@@ -56,6 +56,14 @@
 	padding-left: 25px;
 }
 
+tt {
+	margin-left: 20px;
+	white-space: pre;
+	color: #448;
+	padding: 4px;
+	margin-bottom: 5px;
+	margin-top: 10px;
+}
 
 h1,h2,h3,h4,h5 {
 	color: #E3701A;

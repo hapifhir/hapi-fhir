@@ -3,7 +3,6 @@ package ca.uhn.fhir.rest.common;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.commons.lang3.Validate;
 
@@ -11,6 +10,7 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.client.GetClientInvocation;
+import ca.uhn.fhir.rest.common.SearchMethodBinding.RequestType;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.Util;
@@ -18,7 +18,8 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 public class ReadMethodBinding extends BaseMethodBinding {
-
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ReadMethodBinding.class);
+	
 	private Method myMethod;
 	private Integer myIdIndex;
 	private Integer myVersionIdIndex;
@@ -48,17 +49,21 @@ public class ReadMethodBinding extends BaseMethodBinding {
 	}
 
 	@Override
-	public boolean matches(String theResourceName, IdDt theId, IdDt theVersion, Set<String> theParameterNames) {
-		if (!theResourceName.equals(getResourceName())) {
+	public boolean matches(Request theRequest) {
+		if (!theRequest.getResourceName().equals(getResourceName())) {
 			return false;
 		}
-		if (theParameterNames.isEmpty() == false) {
+		if (theRequest.getParameterNames().isEmpty() == false) {
 			return false;
 		}
-		if ((theVersion == null) != (myVersionIdIndex == null)) {
+		if ((theRequest.getVersion() == null) != (myVersionIdIndex == null)) {
 			return false;
 		}
-		if (theId == null) {
+		if (theRequest.getId() == null) {
+			return false;
+		}
+		if (theRequest.getRequestType() != RequestType.GET) {
+			ourLog.trace("Method {} doesn't match because request type is not GET: {}", theRequest.getId(), theRequest.getRequestType());
 			return false;
 		}
 		return true;

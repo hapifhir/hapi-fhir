@@ -27,6 +27,7 @@ import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.common.BaseMethodBinding;
+import ca.uhn.fhir.rest.common.Request;
 import ca.uhn.fhir.rest.common.SearchMethodBinding;
 
 public abstract class RestfulServer extends HttpServlet {
@@ -120,8 +121,6 @@ public abstract class RestfulServer extends HttpServlet {
             }
 
 			String resourceName = null;
-			Long identity = null;
-
 			String requestPath = StringUtils.defaultString(request.getRequestURI());
 			String contextPath = StringUtils.defaultString(request.getContextPath());
 			requestPath = requestPath.substring(contextPath.length());
@@ -147,11 +146,27 @@ public abstract class RestfulServer extends HttpServlet {
 
 			IdDt id = null;
 			IdDt versionId = null;
+			String operation = null;
 			if (tok.hasMoreTokens()) {
-				String identityString = tok.nextToken();
-				id = new IdDt(identityString);
+				String nextString = tok.nextToken();
+				if (nextString.startsWith("_")) {
+					operation = nextString;
+				}else {
+					id = new IdDt(nextString);
+				}
 			}
 
+			if (tok.hasMoreTokens()) {
+				String nextString = tok.nextToken();
+				if (nextString.startsWith("_history")) {
+					if (tok.hasMoreTokens()) {
+						versionId = new IdDt(tok.nextToken());
+					}else {
+						throw new InvalidRequestException("_history search specified but no version requested in URL");
+					}
+				}
+			}
+			
 			// TODO: look for more tokens for version, compartments, etc...
 
 			//
@@ -169,7 +184,15 @@ public abstract class RestfulServer extends HttpServlet {
 			// }
 			// }
 
-			BaseMethodBinding resourceMethod = resourceBinding.getMethod(resourceName, id, versionId, params.keySet());
+			Request r = new Request();
+			r.setResourceName(resourceName);
+			r.setId(id);
+			r.setVersion(versionId);
+			r.setOperation(operation);
+			r.setParameterNames(params.keySet());
+			r.setRequestType(requestType);
+
+			BaseMethodBinding resourceMethod = resourceBinding.getMethod(r);
 			if (null == resourceMethod) {
 				throw new MethodNotFoundException("No resource method available for the supplied parameters " + params);
 			}

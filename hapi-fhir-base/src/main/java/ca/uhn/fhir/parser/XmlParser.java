@@ -391,6 +391,7 @@ public class XmlParser implements IParser {
 			eventWriter = decorateStreamWriter(eventWriter);
 
 			encodeResourceToXmlStreamWriter(theResource, eventWriter);
+			eventWriter.flush();
 		} catch (XMLStreamException e) {
 			throw new ConfigurationException("Failed to initialize STaX event factory", e);
 		}
@@ -410,7 +411,6 @@ public class XmlParser implements IParser {
 		encodeCompositeElementToStreamWriter(theResource, eventWriter, resDef);
 
 		eventWriter.writeEndElement();
-		eventWriter.close();
 	}
 
 	private void encodeXhtml(XhtmlDt theDt, XMLStreamWriter theEventWriter) throws XMLStreamException {

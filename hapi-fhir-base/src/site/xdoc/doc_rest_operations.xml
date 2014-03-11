@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document xmlns="http://maven.apache.org/XDOC/2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
+
+	<properties>
+		<title>RESTful Operations - HAPI FHIR</title>
+		<author email="jamesagnew@users.sourceforge.net">James Agnew</author>
+	</properties>
+
+	<body>
+
+		<section name="Implementing Resource Provider Operations">
+			
+			<p>
+				RESTful Clients and Servers both share the same 
+				method pattern, with one key difference: A client
+				is defined using annotated methods on an interface
+				which are used to retrieve resources,
+				whereas a server requires concrete method implementations
+				to actually provide those resources.
+			</p>
+			
+			<p>
+				Unless otherwise specified, the examples below show <b>server</b>
+				implementations, but client methods will follow the same patterns.
+			</p>
+			
+			<macro name="toc">
+			</macro>
+		
+		</section>
+		
+		<section name="Instance Level - read">
+		
+			<p>
+				The 
+				<a href="http://latest.fhir.me/http.html#read"><b>read</b></a> 
+				operation retrieves a resource by ID. It is annotated with the
+				<a href="./apidocs/ca/uhn/fhir/rest/annotation/Read.html">@Read</a>
+				annotation, and has a single parameter annotated with the 
+				<a href="./apidocs/ca/uhn/fhir/rest/annotation/Read.IdParam.html">@Read.IdParam</a>
+				annotation.
+			</p>
+
+			<macro name="snippet">
+				<param name="id" value="read" />
+				<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
+			</macro>
+
+			<p>
+				Example URL to invoke this method:<br/>
+				<code>http://fhir.example.com/Patient/111</code>
+			</p>
+			
+		</section>
+
+		<section name="Instance Level - vread">
+		
+			<p>
+				The 
+				<a href="http://latest.fhir.me/http.html#vread"><b>vread</b></a> 
+				operation retrieves a specific version of a resource with a given ID. It looks exactly
+				like a "read" operation, but with a second
+				parameter annotated with the 
+				<a href="./apidocs/ca/uhn/fhir/rest/annotation/Read.VersionIdParam.html">@VersionIdParam</a>
+				annotation.
+			</p>
+
+			<macro name="snippet">
+				<param name="id" value="vread" />
+				<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
+			</macro>
+			
+			<p>
+				Example URL to invoke this method:<br/>
+				<code>http://fhir.example.com/Patient/111/_history/2</code>
+			</p>
+			
+		</section>
+		
+		<section name="Type Level - search">
+		
+			<p>
+				The
+				<a href="http://latest.fhir.me/http.html#search"><b>search</b></a> operation returns a bundle
+				with zero-to-many resources of a given type, matching a given set of parameters. 
+			</p>
+			
+			<subsection name="Search with No Parameters">
+		
+				<p>
+					The following example shows a search with no parameters. This operation
+					should return all resources of a given type (this obviously doesn't make
+					sense in all contexts, but does for some resource types).
+				</p>
+				
+				<macro name="snippet">
+					<param name="id" value="searchAll" />
+					<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
+				</macro>
+				
+				<p>
+					Example URL to invoke this method:<br/>
+					<code>http://fhir.example.com/Patient</code>
+				</p>
+			
+			</subsection>
+			<subsection name="Search with a String Parameter">
+
+				<p>
+					To allow a search using given search parameters, add one or more parameters
+					to your search method and tag these parameters as either 
+					<a href="./apidocs/ca/uhn/fhir/rest/server/parameters/Required.html">@Required</a>
+					or
+					<a href="./apidocs/ca/uhn/fhir/rest/server/parameters/Optional.html">@Optional</a>.
+				</p>
+				
+				<p>
+					This annotation takes a "name" parameter which specifies the parameter's 
+					name (as it will appear in the search URL). FHIR defines standardized parameter
+					names for each resource, and these are available as constants on the
+					individual HAPI resource classes.										
+				</p>
+			
+				<macro name="snippet">
+					<param name="id" value="searchStringParam" />
+					<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
+				</macro>
+				
+				<p>
+					Example URL to invoke this method:<br/>
+					<code>http://fhir.example.com/Patient?family=SMITH</code>
+				</p>
+
+			</subsection>
+			<subsection name="Search By Identifier">
+
+				<p>
+					Searches method parameters may be of any type that implements the
+					<a href="./apidocs/ca/uhn/fhir/model/api/IQueryParameterType.html">IQueryParameterType</a>
+					interface. For example, the search below can be used to search by
+					identifier (e.g. search for an MRN).
+				</p>
+			
+				<macro name="snippet">
+					<param name="id" value="searchIdentifierParam" />
+					<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
+				</macro>
+				
+				<p>
+					Example URL to invoke this method:<br/>
+					<code>http://fhir.example.com/Patient?identifier=urn:foo|7000135</code>
+				</p>
+			
+			</subsection>
+			<subsection name="Multiple and Optional Parameters">
+
+				<p>
+					Search methods may take multiple parameters, and these parameters
+					may be optional. To add a second required parameter, annotate the
+					parameter with 
+					<a href="./apidocs/ca/uhn/fhir/rest/server/parameters/Required.html">@Required</a>.
+					To add an optional parameter (which will be pased in as <code>null</code> if no value
+					is supplied), annotate the method with
+					<a href="./apidocs/ca/uhn/fhir/rest/server/parameters/Required.html">@Optional</a>.
+				</p>
+			
+				<macro name="snippet">
+					<param name="id" value="searchOptionalParam" />
+					<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
+				</macro>
+				
+				<p>
+					Example URLs to invoke this method:<br/>
+					<code>http://fhir.example.com/Patient?family=SMITH</code><br/>
+					<code>http://fhir.example.com/Patient?family=SMITH&amp;given=JOHN</code>
+				</p>
+					
+			</subsection>
+			
+		</section>
+			
+
+	</body>
+
+</document>

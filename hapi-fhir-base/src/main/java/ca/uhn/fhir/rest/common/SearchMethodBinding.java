@@ -27,9 +27,8 @@ public class SearchMethodBinding extends BaseMethodBinding {
 
 	private Method method;
 
-	private List<Parameter> myParameters;
-	private RequestType requestType;
 	private Class<?> myDeclaredResourceType;
+	private List<Parameter> myParameters;
 
 	public SearchMethodBinding(MethodReturnTypeEnum theMethodReturnTypeEnum, Class<? extends IResource> theReturnResourceType, Method theMethod) {
 		super(theMethodReturnTypeEnum, theReturnResourceType);
@@ -37,6 +36,10 @@ public class SearchMethodBinding extends BaseMethodBinding {
 		this.myParameters = Util.getResourceParameters(theMethod);
 		
 		this.myDeclaredResourceType = theMethod.getReturnType();
+	}
+
+	public Class<?> getDeclaredResourceType() {
+		return myDeclaredResourceType.getClass();
 	}
 
 	public Method getMethod() {
@@ -47,17 +50,25 @@ public class SearchMethodBinding extends BaseMethodBinding {
 		return myParameters;
 	}
 
-	public RequestType getRequestType() {
-		return requestType;
-	}
-
-	public Class getDeclaredResourceType() {
-		return myDeclaredResourceType.getClass();
-	}
-
 	@Override
 	public ReturnTypeEnum getReturnType() {
 		return ReturnTypeEnum.BUNDLE;
+	}
+
+	@Override
+	public GetClientInvocation invokeClient(Object[] theArgs) throws InternalErrorException {
+		assert theArgs.length == myParameters.size() : "Wrong number of arguments: " + theArgs.length;
+		
+		Map<String, String> args = new HashMap<String, String>();
+		
+		for (int idx = 0; idx < theArgs.length; idx++) {
+			Object object = theArgs[idx];
+			Parameter nextParam = myParameters.get(idx);
+			String value = nextParam.encode(object);
+			args.put(nextParam.getName(), value);
+		}
+		
+		return new GetClientInvocation(args, getResourceName());
 	}
 
 	@Override
@@ -94,26 +105,34 @@ public class SearchMethodBinding extends BaseMethodBinding {
 	}
 
 	@Override
-	public boolean matches(String theResourceName, IdDt theId, IdDt theVersion, Set<String> theParameterNames) {
-		if (!theResourceName.equals(getResourceName())) {
-			ourLog.trace("Method {} doesn't match because resource name {} != {}", method.getName(), theResourceName, getResourceName());
+	public boolean matches(Request theRequest) {
+		if (!theRequest.getResourceName().equals(getResourceName())) {
+			ourLog.trace("Method {} doesn't match because resource name {} != {}", method.getName(), theRequest.getResourceName(), getResourceName());
 			return false;
 		}
-		if (theId != null || theVersion != null) {
-			ourLog.trace("Method {} doesn't match because ID or Version are not null: {} - {}", theId, theVersion);
+		if (theRequest.getId() != null || theRequest.getVersion() != null) {
+			ourLog.trace("Method {} doesn't match because ID or Version are not null: {} - {}", theRequest.getId(), theRequest.getVersion());
 			return false;
 		}
-
+		if (theRequest.getRequestType() == RequestType.GET && theRequest.getOperation() != null) {
+			ourLog.trace("Method {} doesn't match because request type is GET but operation is not null: {}", theRequest.getId(), theRequest.getOperation());
+			return false;
+		}
+		if (theRequest.getRequestType() == RequestType.POST && !"_search".equals(theRequest.getOperation())) {
+			ourLog.trace("Method {} doesn't match because request type is POST but operation is not _search: {}", theRequest.getId(), theRequest.getOperation());
+			return false;
+		}
+		
 		Set<String> methodParamsTemp = new HashSet<String>();
 		for (int i = 0; i < this.myParameters.size(); i++) {
 			Parameter temp = this.myParameters.get(i);
 			methodParamsTemp.add(temp.getName());
-			if (temp.isRequired() && !theParameterNames.contains(temp.getName())) {
+			if (temp.isRequired() && !theRequest.getParameterNames().contains(temp.getName())) {
 				ourLog.trace("Method {} doesn't match param '{}' is not present", method.getName(), temp.getName());
 				return false;
 			}
 		}
-		boolean retVal = methodParamsTemp.containsAll(theParameterNames);
+		boolean retVal = methodParamsTemp.containsAll(theRequest.getParameterNames());
 
 		ourLog.trace("Method {} matches: {}", method.getName(), retVal);
 
@@ -128,32 +147,12 @@ public class SearchMethodBinding extends BaseMethodBinding {
 		this.myParameters = parameters;
 	}
 
-	public void setRequestType(RequestType requestType) {
-		this.requestType = requestType;
-	}
-
 	public void setResourceType(Class<?> resourceType) {
 		this.myDeclaredResourceType = resourceType;
 	}
 
 	public static enum RequestType {
 		DELETE, GET, POST, PUT
-	}
-
-	@Override
-	public GetClientInvocation invokeClient(Object[] theArgs) throws InternalErrorException {
-		assert theArgs.length == myParameters.size() : "Wrong number of arguments: " + theArgs.length;
-		
-		Map<String, String> args = new HashMap<String, String>();
-		
-		for (int idx = 0; idx < theArgs.length; idx++) {
-			Object object = theArgs[idx];
-			Parameter nextParam = myParameters.get(idx);
-			String value = nextParam.encode(object);
-			args.put(nextParam.getName(), value);
-		}
-		
-		return new GetClientInvocation(args, getResourceName());
 	}
 
 }

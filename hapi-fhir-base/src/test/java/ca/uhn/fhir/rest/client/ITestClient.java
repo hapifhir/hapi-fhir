@@ -14,6 +14,9 @@ public interface ITestClient extends IRestfulClient {
 	@Read(type=Patient.class)
 	Patient getPatientById(@Read.IdParam IdDt theId);
 
+	@Read(type=Patient.class)
+	Patient getPatientByVersionId(@Read.IdParam IdDt theId, @Read.VersionIdParam IdDt theVersionId);
+
 	@Search(type=Patient.class)
 	Patient findPatientByMrn(@Required(name = Patient.SP_IDENTIFIER) IdentifierDt theId);
 	

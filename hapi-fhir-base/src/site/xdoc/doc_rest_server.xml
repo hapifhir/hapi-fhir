@@ -59,6 +59,13 @@
 					<param name="file" value="src/site/example/java/example/RestfulPatientResourceProvider.java" />
 				</macro>
 
+				<p>
+					You will probable wish to add more methods
+					to your resource provider. See
+					<a href="./doc_rest_operations.html">RESTful Operations</a> for
+					lots more examples of how to add methods for various operations.
+				</p>
+
 			</subsection>
 
 			<subsection name="Create a Server">
@@ -92,25 +99,6 @@
 			
 			</subsection>
 					
-		</section>
-
-		<section name="Resource Providers">
-			
-			<p>
-				Resource providers can support a wide variety of operations.
-			</p>
-			
-			<p>
-				The following example shows a search with no parameters. This operation
-				should return all resources of a given type (this obviously doesn't make
-				sense in all contexts, but does for some resource types).
-			</p>
-			
-			<macro name="snippet">
-				<param name="id" value="searchAll" />
-				<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
-			</macro>
-		
 		</section>
 
 	</body>

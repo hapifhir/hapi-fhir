@@ -41,7 +41,7 @@ public abstract class BaseMethodBinding {
 
 	public abstract List<IResource> invokeServer(IResourceProvider theResourceProvider, IdDt theId, IdDt theVersionId, Map<String, String[]> theParameterValues) throws InvalidRequestException, InternalErrorException;
 
-	public abstract boolean matches(String theResourceName, IdDt theId, IdDt theVersion, Set<String> theParameterNames);
+	public abstract boolean matches(Request theRequest);
 
 	public String getResourceName() {
 		return myResourceName;
@@ -56,7 +56,7 @@ public abstract class BaseMethodBinding {
 
 		Class<?> methodReturnType = theMethod.getReturnType();
 		MethodReturnTypeEnum methodReturnTypeEnum;
-		if (methodReturnType.equals(List.class)) {
+		if (Collection.class.isAssignableFrom(methodReturnType)) {
 			methodReturnTypeEnum = MethodReturnTypeEnum.LIST_OF_RESOURCES;
 		} else if (IResource.class.isAssignableFrom(methodReturnType)) {
 			methodReturnTypeEnum = MethodReturnTypeEnum.RESOURCE;

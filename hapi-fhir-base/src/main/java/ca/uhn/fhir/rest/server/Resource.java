@@ -6,6 +6,7 @@ import java.util.Set;
 
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.common.BaseMethodBinding;
+import ca.uhn.fhir.rest.common.Request;
 
 /**
  * Created by dsotnikov on 2/25/2014.
@@ -26,15 +27,15 @@ public class Resource {
 		this.methods = methods;
 	}
 
-	public BaseMethodBinding getMethod(String theResourceName, IdDt theId, IdDt theVersionId, Set<String> theParameters) throws Exception {
+	public BaseMethodBinding getMethod(Request theRequest) throws Exception {
 		if (null == methods) {
 			ourLog.warn("No methods exist for resource provider: {}", resourceProvider.getClass());
 			return null;
 		}
 
-		ourLog.info("Looking for a handler for {} / {} / {} / {}", new Object[] {theResourceName,theId, theVersionId, theParameters});
+		ourLog.debug("Looking for a handler for {}", theRequest);
 		for (BaseMethodBinding rm : methods) {
-			if (rm.matches(theResourceName, theId, theVersionId, theParameters)) {
+			if (rm.matches(theRequest)) {
 				ourLog.info("Handler {} matches", rm);
 				return rm;
 			} else {

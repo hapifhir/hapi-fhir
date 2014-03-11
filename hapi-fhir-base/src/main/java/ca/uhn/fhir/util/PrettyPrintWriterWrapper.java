@@ -15,7 +15,6 @@ public class PrettyPrintWriterWrapper implements XMLStreamWriter {
 	private XMLStreamWriter myTarget;
 	private int depth = 0;
 	private Map<Integer, Boolean> hasChildElement = new HashMap<Integer, Boolean>();
-	private XMLEventFactory myXmlEventFactory;
 
 	private static final String INDENT_CHAR = " ";
 	private static final String LINEFEED_CHAR = "\n";
@@ -135,7 +134,8 @@ public class PrettyPrintWriterWrapper implements XMLStreamWriter {
 
 	@Override
 	public void writeEndDocument() throws XMLStreamException {
-		decrementAndIndent();myTarget.writeEndDocument();
+		decrementAndIndent();
+		myTarget.writeEndDocument();
 	}
 
 	@Override
@@ -215,7 +215,7 @@ public class PrettyPrintWriterWrapper implements XMLStreamWriter {
 
 	@Override
 	public void writeCharacters(char[] theText, int theStart, int theLen) throws XMLStreamException {
-		myTarget.writeCharacters(theText,theStart,theLen);
+		myTarget.writeCharacters(theText, theStart, theLen);
 	}
 
 	@Override
