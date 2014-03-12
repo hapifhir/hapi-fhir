@@ -6,7 +6,6 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 
 import ca.uhn.fhir.model.api.IDatatype;
-import ca.uhn.fhir.model.api.ResourceReference;
 import edu.emory.mathcs.backport.java.util.Collections;
 
 public class Child extends BaseElement {

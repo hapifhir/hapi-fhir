@@ -1,5 +1,5 @@
 package ca.uhn.fhir.rest.client;
-
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
@@ -17,10 +17,12 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.ContentType;
 
+import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.client.api.IRestfulClient;
 import ca.uhn.fhir.rest.client.exceptions.InvalidResponseException;
 import ca.uhn.fhir.rest.client.exceptions.NonFhirResponseException;
 import ca.uhn.fhir.rest.common.BaseMethodBinding;
@@ -33,11 +35,22 @@ public class ClientInvocationHandler implements InvocationHandler {
 	private final HttpClient myClient;
 	private final FhirContext myContext;
 	private final String myUrlBase;
+	private final Map<Method, Object> myMethodToReturnValue=new HashMap<Method, Object>();
 
-	public ClientInvocationHandler(HttpClient theClient, FhirContext theContext, String theUrlBase) {
+	public ClientInvocationHandler(HttpClient theClient, FhirContext theContext, String theUrlBase, Class<? extends IRestfulClient> theClientType) {
 		myClient = theClient;
 		myContext = theContext;
 		myUrlBase = theUrlBase;
+		
+		try {
+			myMethodToReturnValue.put(theClientType.getMethod("getFhirContext"), theContext);
+			myMethodToReturnValue.put(theClientType.getMethod("getHttpClient"), theClient);
+			myMethodToReturnValue.put(theClientType.getMethod("getServerBase"), theUrlBase);
+		} catch (NoSuchMethodException e) {
+			throw new ConfigurationException("Failed to find methods on client. This is a HAPI bug!",e);
+		} catch (SecurityException e) {
+			throw new ConfigurationException("Failed to find methods on client. This is a HAPI bug!",e);
+		}
 	}
 
 	public void addBinding(Method theMethod, BaseMethodBinding theBinding) {
@@ -46,26 +59,25 @@ public class ClientInvocationHandler implements InvocationHandler {
 
 	@Override
 	public Object invoke(Object theProxy, Method theMethod, Object[] theArgs) throws Throwable {
+		Object directRetVal = myMethodToReturnValue.get(theMethod);
+		if (directRetVal!=null) {
+			return directRetVal;
+		}
+		
 		BaseMethodBinding binding = myBindings.get(theMethod);
 		GetClientInvocation clientInvocation = binding.invokeClient(theArgs);
 		HttpRequestBase httpRequest = clientInvocation.asHttpRequest(myUrlBase);
 		HttpResponse response = myClient.execute(httpRequest);
 
-		ContentType ct = ContentType.get(response.getEntity());
-		Charset charset = ct.getCharset();
-
-		if (charset == null) {
-			ourLog.warn("Response did not specify a charset.");
-			charset = Charset.forName("UTF-8");
-		}
-
-		Reader reader = new InputStreamReader(response.getEntity().getContent(), charset);
-
+		Reader reader = createReaderFromResponse(response);
+		
 		if (ourLog.isTraceEnabled()) {
 			String responseString = IOUtils.toString(reader);
 			ourLog.trace("FHIR response:\n{}\n{}", response, responseString);
 			reader = new StringReader(responseString);
 		}
+		
+		ContentType ct = ContentType.get(response.getEntity());
 		
 		IParser parser;
 		String mimeType = ct.getMimeType();
@@ -112,6 +124,19 @@ public class ClientInvocationHandler implements InvocationHandler {
 		}
 
 		throw new IllegalStateException("Should not get here!");
+	}
+
+	public static Reader createReaderFromResponse(HttpResponse theResponse) throws IllegalStateException, IOException {
+		ContentType ct = ContentType.get(theResponse.getEntity());
+		Charset charset = ct.getCharset();
+
+		if (charset == null) {
+			ourLog.warn("Response did not specify a charset.");
+			charset = Charset.forName("UTF-8");
+		}
+
+		Reader reader = new InputStreamReader(theResponse.getEntity().getContent(), charset);
+		return reader;
 	}
 
 }

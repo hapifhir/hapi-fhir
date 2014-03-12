@@ -47,8 +47,9 @@ public class RestfulClientFactory implements IRestfulClientFactory {
 	 * @throws ConfigurationException
 	 *             If the interface type is not an interface
 	 */
+	@SuppressWarnings("unchecked")
 	@Override
-	public <T extends IRestfulClient> T newClient(Class<T> theClientType, String theServerBase){
+	public <T extends IRestfulClient> T newClient(Class<T> theClientType, String theServerBase) {
 		if (!theClientType.isInterface()) {
 			throw new ConfigurationException(theClientType.getCanonicalName() + " is not an interface");
 		}
@@ -56,37 +57,42 @@ public class RestfulClientFactory implements IRestfulClientFactory {
 		HttpClient client;
 		if (myHttpClient != null) {
 			client = myHttpClient;
-		}else {
+		} else {
 			PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 			HttpClientBuilder builder = HttpClientBuilder.create();
 			builder.setConnectionManager(connectionManager);
 			client = builder.build();
 		}
-		
+
 		String serverBase = theServerBase;
 		if (!serverBase.endsWith("/")) {
 			serverBase = serverBase + "/";
 		}
-		
-		ClientInvocationHandler theInvocationHandler = new ClientInvocationHandler(client, myContext, serverBase);
 
-		for (Method nextMethod : theClientType.getMethods()) {			
-			BaseMethodBinding binding = BaseMethodBinding.bindMethod(null, nextMethod);
-			theInvocationHandler.addBinding(nextMethod, binding);
+		ClientInvocationHandler invocationHandler = new ClientInvocationHandler(client, myContext, serverBase, theClientType);
+
+		for (Method nextMethod : theClientType.getMethods()) {
+			Class<? extends IResource> resReturnType = null;
+			Class<?> returnType = nextMethod.getReturnType();
+			if (IResource.class.isAssignableFrom(returnType)) {
+				resReturnType = (Class<? extends IResource>) returnType;
+			}
+			BaseMethodBinding binding = BaseMethodBinding.bindMethod(resReturnType, nextMethod);
+			invocationHandler.addBinding(nextMethod, binding);
 		}
 
-		T proxy = instantiateProxy(theClientType, theInvocationHandler);
+		T proxy = instantiateProxy(theClientType, invocationHandler);
 
 		return proxy;
 	}
 
-	
 	/**
-	 * Sets the Apache HTTP client instance to be used by any new restful clients created by
-	 * this factory. If set to <code>null</code>, which is the default, a new HTTP client with 
-	 * default settings will be created.
-	 *  
-	 * @param theHttpClient An HTTP client instance to use, or <code>null</code>
+	 * Sets the Apache HTTP client instance to be used by any new restful
+	 * clients created by this factory. If set to <code>null</code>, which is
+	 * the default, a new HTTP client with default settings will be created.
+	 * 
+	 * @param theHttpClient
+	 *            An HTTP client instance to use, or <code>null</code>
 	 */
 	@Override
 	public void setHttpClient(HttpClient theHttpClient) {

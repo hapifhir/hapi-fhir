@@ -13,10 +13,10 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 
-@Mojo(name = "generate", defaultPhase = LifecyclePhase.GENERATE_SOURCES)
-public class TinderMojo extends AbstractMojo {
+@Mojo(name = "generate-structures", defaultPhase = LifecyclePhase.GENERATE_SOURCES)
+public class TinderStructuresMojo extends AbstractMojo {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TinderMojo.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TinderStructuresMojo.class);
 
 	@Parameter(alias = "package", required = true)
 	private String myPackage;

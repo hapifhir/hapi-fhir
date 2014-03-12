@@ -6,7 +6,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.model.api.Bundle;
@@ -16,9 +15,9 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.client.GetClientInvocation;
 import ca.uhn.fhir.rest.server.IResourceProvider;
-import ca.uhn.fhir.rest.server.Resource;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.operations.Metadata;
 import ca.uhn.fhir.rest.server.operations.Search;
 
 public abstract class BaseMethodBinding {
@@ -50,7 +49,8 @@ public abstract class BaseMethodBinding {
 	public static BaseMethodBinding bindMethod(Class<? extends IResource> theReturnType, Method theMethod) {
 		Read read = theMethod.getAnnotation(Read.class);
 		Search search = theMethod.getAnnotation(Search.class);
-		if (!verifyMethodHasZeroOrOneOperationAnnotation(theMethod, read, search)) {
+		Metadata conformance = theMethod.getAnnotation(Metadata.class);
+		if (!verifyMethodHasZeroOrOneOperationAnnotation(theMethod, read, search, conformance)) {
 			return null;
 		}
 
@@ -61,7 +61,7 @@ public abstract class BaseMethodBinding {
 		} else if (IResource.class.isAssignableFrom(methodReturnType)) {
 			methodReturnTypeEnum = MethodReturnTypeEnum.RESOURCE;
 		} else if (Bundle.class.isAssignableFrom(methodReturnType)) {
-			methodReturnTypeEnum = MethodReturnTypeEnum.LIST_OF_RESOURCES;
+			methodReturnTypeEnum = MethodReturnTypeEnum.BUNDLE;
 		} else {
 			throw new ConfigurationException("Invalid return type '" + methodReturnType.getCanonicalName() + "' on method '" + theMethod.getName() + "' on type: " + theMethod.getDeclaringClass().getCanonicalName());
 		}
@@ -83,6 +83,8 @@ public abstract class BaseMethodBinding {
 			return new ReadMethodBinding(methodReturnTypeEnum, returnType, theMethod);
 		} else if (search != null) {
 			return new SearchMethodBinding(methodReturnTypeEnum, returnType, theMethod);
+		} else if (conformance != null) {
+			return new ConformanceMethodBinding(methodReturnTypeEnum);
 		} else {
 			throw new ConfigurationException("Did not detect any FHIR annotations on method '" + theMethod.getName() + "' on type: " + theMethod.getDeclaringClass().getCanonicalName());
 		}

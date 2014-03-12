@@ -46,6 +46,9 @@ public class GetClientInvocation extends BaseClientInvocation {
 
 		boolean first = true;
 		for (Entry<String, String> next : myParameters.entrySet()) {
+			if (next.getValue()==null) {
+				continue;
+			}
 			if (first) {
 				b.append('?');
 				first = false;

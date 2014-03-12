@@ -4,6 +4,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -59,12 +60,23 @@ public class SearchMethodBinding extends BaseMethodBinding {
 	public GetClientInvocation invokeClient(Object[] theArgs) throws InternalErrorException {
 		assert theArgs.length == myParameters.size() : "Wrong number of arguments: " + theArgs.length;
 		
-		Map<String, String> args = new HashMap<String, String>();
+		Map<String, String> args = new LinkedHashMap<String, String>();
 		
 		for (int idx = 0; idx < theArgs.length; idx++) {
 			Object object = theArgs[idx];
 			Parameter nextParam = myParameters.get(idx);
-			String value = nextParam.encode(object);
+			String value;
+
+			if (object == null) {
+				if (nextParam.isRequired()) {
+					throw new NullPointerException("Parameter '" + nextParam.getName() + "' is required and may not be null");
+				}else {
+					value=null;
+				}
+			}else {
+				value = nextParam.encode(object);
+			}
+			
 			args.put(nextParam.getName(), value);
 		}
 		
@@ -152,7 +164,7 @@ public class SearchMethodBinding extends BaseMethodBinding {
 	}
 
 	public static enum RequestType {
-		DELETE, GET, POST, PUT
+		DELETE, GET, POST, PUT, OPTIONS
 	}
 
 }

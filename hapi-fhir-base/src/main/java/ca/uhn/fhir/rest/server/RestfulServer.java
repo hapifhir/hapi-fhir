@@ -42,6 +42,11 @@ public abstract class RestfulServer extends HttpServlet {
 
 	private Map<Class<? extends IResource>, IResourceProvider> myTypeToProvider = new HashMap<Class<? extends IResource>, IResourceProvider>();
 
+	@Override
+	protected void doOptions(HttpServletRequest theReq, HttpServletResponse theResp) throws ServletException, IOException {
+		handleRequest(SearchMethodBinding.RequestType.OPTIONS, theReq, theResp);
+	}
+
 	// map of request handler resources keyed by resource name
 	private Map<String, Resource> resources = new HashMap<String, Resource>();
 
