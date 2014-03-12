@@ -14,6 +14,7 @@ import java.util.Map;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.ContentType;
 
@@ -68,6 +69,7 @@ public class ClientInvocationHandler implements InvocationHandler {
 		GetClientInvocation clientInvocation = binding.invokeClient(theArgs);
 		HttpRequestBase httpRequest = clientInvocation.asHttpRequest(myUrlBase);
 		HttpResponse response = myClient.execute(httpRequest);
+		try {
 
 		Reader reader = createReaderFromResponse(response);
 		
@@ -124,6 +126,11 @@ public class ClientInvocationHandler implements InvocationHandler {
 		}
 
 		throw new IllegalStateException("Should not get here!");
+		} finally {
+			if (response instanceof CloseableHttpResponse) {
+				((CloseableHttpResponse) response).close();
+			}
+		}
 	}
 
 	public static Reader createReaderFromResponse(HttpResponse theResponse) throws IllegalStateException, IOException {

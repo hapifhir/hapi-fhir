@@ -6,15 +6,15 @@ import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.annotation.Read;
-import ca.uhn.fhir.rest.client.api.IRestfulClient;
-import ca.uhn.fhir.rest.server.operations.Search;
-import ca.uhn.fhir.rest.server.parameters.Required;
+import ca.uhn.fhir.rest.annotation.Required;
+import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.client.api.IBasicClient;
 
 //START SNIPPET: provider
 /**
- * All RESTful clients must be an interface which extends IRestfulClient
+ * All RESTful clients must be an interface which extends IBasicClient
  */
-public interface RestfulClientImpl extends IRestfulClient {
+public interface RestfulClientImpl extends IBasicClient {
 
 	/**
 	 * The "@Read" annotation indicates that this method supports the

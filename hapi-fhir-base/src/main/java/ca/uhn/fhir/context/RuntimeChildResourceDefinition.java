@@ -2,6 +2,7 @@ package ca.uhn.fhir.context;
 
 import java.lang.reflect.Field;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -16,6 +17,7 @@ public class RuntimeChildResourceDefinition extends BaseRuntimeDeclaredChildDefi
 
 	private BaseRuntimeElementDefinition<?> myRuntimeDef;
 	private List<Class<? extends IResource>> myResourceTypes;
+	private Set<String> myValidChildNames;
 
 	public RuntimeChildResourceDefinition(Field theField, String theElementName, Child theChildAnnotation, Description theDescriptionAnnotation, List<Class<? extends IResource>> theResourceTypes) {
 		super(theField, theChildAnnotation, theDescriptionAnnotation, theElementName);
@@ -44,7 +46,7 @@ public class RuntimeChildResourceDefinition extends BaseRuntimeDeclaredChildDefi
 
 	@Override
 	public Set<String> getValidChildNames() {
-		return Collections.singleton(getElementName());
+		return myValidChildNames;
 	}
 
 	@Override
@@ -56,5 +58,16 @@ public class RuntimeChildResourceDefinition extends BaseRuntimeDeclaredChildDefi
 	void sealAndInitialize(Map<Class<? extends IElement>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
 		myRuntimeDef = new RuntimeResourceReferenceDefinition(getElementName(), myResourceTypes);
 		myRuntimeDef.sealAndInitialize(theClassToElementDefinitions);
+		
+		myValidChildNames = new HashSet<String>();
+		myValidChildNames.add(getElementName());
+		myValidChildNames.add(getElementName() + "Resource");
+		
+		for (Class<? extends IResource> next : myResourceTypes) {
+			RuntimeResourceDefinition nextDef = (RuntimeResourceDefinition) theClassToElementDefinitions.get(next);
+			myValidChildNames.add(getElementName() + nextDef.getName());
+		}
+		
+		myValidChildNames = Collections.unmodifiableSet(myValidChildNames);
 	}
 }

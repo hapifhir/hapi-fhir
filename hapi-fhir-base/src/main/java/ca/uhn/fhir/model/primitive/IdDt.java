@@ -26,6 +26,13 @@ public class IdDt extends BasePrimitive<String> {
 	public IdDt() {
 		super();
 	}
+	
+	/**
+	 * Create a new ID using a long
+	 */
+	public IdDt(long theId) {
+		setValue(Long.toString(theId));
+	}
 
 	/**
 	 * Create a new ID

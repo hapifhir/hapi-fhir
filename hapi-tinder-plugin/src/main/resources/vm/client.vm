@@ -1,0 +1,54 @@
+
+package ${packageBase};
+
+import ca.uhn.fhir.model.api.*;
+import ca.uhn.fhir.model.dstu.composite.*;
+import ca.uhn.fhir.model.primitive.*;
+import ca.uhn.fhir.rest.annotation.*;
+import ca.uhn.fhir.rest.client.api.*;
+import ${packageBase}.resource.*;
+
+/**
+ * Restful Client Definition Class
+ */
+public interface ${className} extends IMetadataClient {
+
+#foreach ( $resource in ${resources} )
+#if ( ${resource.hasReadOperation} )
+	/**
+	 * Retrieves a single ${resource.resourceType} resource by
+	 * its ID. 
+#if ( ${resource.readOperation.hasDocumentation} )
+     * <p>
+     * Documentation: ${resource.readOperation.documentation}
+     * </p>
+#end
+     * @param theId The ID to use.
+     * @see See {@link IdDt} for examples of how to use the ID datatype
+     * @see See the FHIR <a href="http://www.hl7.org/implement/standards/fhir/http.html#read">read operation</a> definition. 
+	 */
+	@Read
+	${resource.resourceType} get${resource.resourceType}ById(@Read.IdParam IdDt theId);
+
+#end
+#if ( ${resource.hasVReadOperation} )
+	/**
+	 * Retrieves a single ${resource.resourceType} resource by
+	 * its ID and version ID. 
+#if ( ${resource.readOperation.hasDocumentation} )
+     * <p>
+     * Documentation: ${resource.readOperation.documentation}
+     * </p>
+#end
+     * @param theId The ID to use. 
+     * @param theVersionId The ID to use. 
+     * @see See {@link IdDt} for examples of how to use the ID datatype
+     * @see See the FHIR <a href="http://www.hl7.org/implement/standards/fhir/http.html#read">read operation</a> definition. 
+	 */
+	@Read
+	${resource.resourceType} get${resource.resourceType}ById(@Read.IdParam IdDt theId, @Read.VersionIdParam IdDt theVersionId);
+
+#end
+#end
+	
+}

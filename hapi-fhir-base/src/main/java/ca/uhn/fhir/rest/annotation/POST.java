@@ -1,4 +1,4 @@
-package ca.uhn.fhir.rest.server.operations;
+package ca.uhn.fhir.rest.annotation;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

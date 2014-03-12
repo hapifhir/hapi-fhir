@@ -6,8 +6,9 @@ import java.util.*;
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.model.primitive.*;
-import ${packageBase}.composite.*;
-import ${packageBase}.valueset.*;
+import ca.uhn.fhir.model.dstu.composite.*;
+
+//import ${packageBase}.valueset.*;
 
 /**
  * HAPI/FHIR <b>${className}</b> Resource

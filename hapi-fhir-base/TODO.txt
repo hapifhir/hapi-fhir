@@ -30,3 +30,14 @@
  * Support extensions (declared and undeclared) in primitives, narratives, etc. 
  
  * Create a Maven archetype for a server project and a client project
+ 
+ * Support "Binary" resource, which is a special resource type
+ 
+---------
+Issues:
+ * Need to be able to bind Identifier.system to a set of allowable values in a profile. Graeme
+   has suggested making value[x] repeatable in the profile definition
+   
+ * CarePlan.Activity has a type of "xmlIdRef" which is a weird datatype. The example here:
+   http://www.hl7.org/implement/standards/fhir/careplan-example-integrated.xml.html
+   seems to use an extension to model that element instead of the goal type too.

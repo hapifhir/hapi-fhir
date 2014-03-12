@@ -9,11 +9,11 @@ import ca.uhn.fhir.model.dstu.resource.Organization;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.rest.annotation.Optional;
 import ca.uhn.fhir.rest.annotation.Read;
+import ca.uhn.fhir.rest.annotation.Required;
+import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.server.IResourceProvider;
-import ca.uhn.fhir.rest.server.operations.Search;
-import ca.uhn.fhir.rest.server.parameters.Optional;
-import ca.uhn.fhir.rest.server.parameters.Required;
 
 @SuppressWarnings("unused")
 public class RestfulPatientResourceProviderMore implements IResourceProvider {

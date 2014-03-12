@@ -13,10 +13,10 @@ import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
+import ca.uhn.fhir.rest.annotation.Optional;
 import ca.uhn.fhir.rest.annotation.Read;
-import ca.uhn.fhir.rest.server.operations.Search;
-import ca.uhn.fhir.rest.server.parameters.Optional;
-import ca.uhn.fhir.rest.server.parameters.Required;
+import ca.uhn.fhir.rest.annotation.Required;
+import ca.uhn.fhir.rest.annotation.Search;
 
 /**
  * Created by dsotnikov on 2/25/2014.

@@ -5,13 +5,13 @@ import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.rest.annotation.Optional;
 import ca.uhn.fhir.rest.annotation.Read;
-import ca.uhn.fhir.rest.client.api.IMetadataClient;
-import ca.uhn.fhir.rest.server.operations.Search;
-import ca.uhn.fhir.rest.server.parameters.Optional;
-import ca.uhn.fhir.rest.server.parameters.Required;
+import ca.uhn.fhir.rest.annotation.Required;
+import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.client.api.IBasicClient;
 
-public interface ITestClient extends IMetadataClient {
+public interface ITestClient extends IBasicClient {
 
 	@Read(type=Patient.class)
 	Patient getPatientById(@Read.IdParam IdDt theId);

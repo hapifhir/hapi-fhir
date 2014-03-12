@@ -54,9 +54,11 @@ public class RuntimeChildChoiceDefinition extends BaseRuntimeDeclaredChildDefini
 		for (Class<? extends IElement> next : myChoiceTypes) {
 			
 			String elementName;
+			String alternateElementName=null;
 			BaseRuntimeElementDefinition<?> nextDef;
 			if (IResource.class.isAssignableFrom(next)) {
 				elementName = getElementName() + StringUtils.capitalize(next.getSimpleName());
+				alternateElementName = getElementName() + "Resource";
 				List<Class<? extends IResource>> types = new ArrayList<Class<? extends IResource>>();
 				types.add((Class<? extends IResource>)next);
 				nextDef = new RuntimeResourceReferenceDefinition(elementName, types);
@@ -67,6 +69,9 @@ public class RuntimeChildChoiceDefinition extends BaseRuntimeDeclaredChildDefini
 			}
 			
 			myNameToChildDefinition.put(elementName, nextDef);
+			if (alternateElementName!=null) {
+				myNameToChildDefinition.put(alternateElementName, nextDef);
+			}
 			myDatatypeToElementDefinition.put(next, nextDef);
 			myDatatypeToElementName.put(next, elementName);
 		}

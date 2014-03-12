@@ -9,9 +9,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import ca.uhn.fhir.rest.annotation.Optional;
 import ca.uhn.fhir.rest.annotation.Read;
-import ca.uhn.fhir.rest.server.parameters.Optional;
-import ca.uhn.fhir.rest.server.parameters.Required;
+import ca.uhn.fhir.rest.annotation.Required;
 
 /**
  * Created by dsotnikov on 2/25/2014.

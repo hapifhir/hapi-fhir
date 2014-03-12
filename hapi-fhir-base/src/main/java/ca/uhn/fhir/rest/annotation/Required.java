@@ -1,10 +1,10 @@
-package ca.uhn.fhir.rest.server.parameters;
+package ca.uhn.fhir.rest.annotation;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 @Retention(RetentionPolicy.RUNTIME)
 
-public @interface Optional {
+public @interface Required {
     String name();
 }

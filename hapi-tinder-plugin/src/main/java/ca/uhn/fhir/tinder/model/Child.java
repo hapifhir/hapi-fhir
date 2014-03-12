@@ -82,14 +82,14 @@ public class Child extends BaseElement {
 		}
 
 		if (this.isRepeatable()) {
-			retVal = ("List<" + retVal + ">");
+			retVal = ("java.util.List<" + retVal + ">");
 		}
 
 		return retVal;
 	}
 
 	public String getReferenceTypeForConstructor() {
-		return getReferenceType().replaceAll("^List<", "ArrayList<");
+		return getReferenceType().replaceAll("^java.util.List<", "java.util.ArrayList<");
 	}
 
 	public List<String> getReferenceTypesForMultiple() {
