@@ -1,5 +1,6 @@
 package ca.uhn.fhir.tinder.model;
 
+import org.apache.commons.lang.WordUtils;
 import org.apache.commons.lang3.StringUtils;
 
 public class SearchParameter {
@@ -19,6 +20,10 @@ public class SearchParameter {
 
 	public String getName() {
 		return myName;
+	}
+
+	public String getNameCapitalized() {
+		return WordUtils.capitalize(myName);
 	}
 
 	public String getPath() {

@@ -16,7 +16,7 @@
 	@Child(name="${child.elementNameSimplified}", type=${child.annotationType}.class, order=${foreach.index}, min=${child.cardMin}, max=${child.cardMaxForChildAnnotation})	
 #end
 #if ( $child.hasExtensionUrl )
-	@Extension(url = "${child.extensionUrl}")
+	@Extension(url = "${child.extensionUrl}", isModifier=${child.extensionModifier}, definedLocally=${child.extensionLocal})
 #end
 #if (${includeDescriptionAnnotations})
 	@Description(

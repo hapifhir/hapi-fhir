@@ -19,41 +19,41 @@ public class TinderStructuresMojo extends AbstractMojo {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TinderStructuresMojo.class);
 
 	@Parameter(alias = "package", required = true)
-	private String myPackage;
+	private String packageName;
 
 	@Parameter(alias = "targetDirectory", required = true, defaultValue = "${project.build.directory}/generated-sources/tinder")
-	private String myTargetDirectory;
+	private String targetDirectory;
 
 	@Parameter(alias="resourceValueSetFiles", required = false)
-	private List<String> myResourceValueSetFiles;
+	private List<String> resourceValueSetFiles;
 
 	@Parameter(alias = "baseResourceNames", required = true)
-	private List<String> myBaseResourceNames;
+	private List<String> baseResourceNames;
 
 	@Parameter(alias = "resourceProfileFiles", required = false)
-	private List<String> myResourceProfileFiles;
+	private List<String> resourceProfileFiles;
 
 	@Component
 	private MavenProject myProject;
 
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException {
-		if (StringUtils.isBlank(myPackage)) {
+		if (StringUtils.isBlank(packageName)) {
 			throw new MojoFailureException("Package not specified");
 		}
-		if (myPackage.contains("..") || myPackage.endsWith(".")) {
+		if (packageName.contains("..") || packageName.endsWith(".")) {
 			throw new MojoFailureException("Invalid package specified");
 		}
 
 		ourLog.info("Beginning HAPI-FHIR Tinder Code Generation...");
 
-		ourLog.info(" * Output Package: " + myPackage);
-		File directoryBase = new File(new File(myTargetDirectory), myPackage.replace('.', File.separatorChar));
+		ourLog.info(" * Output Package: " + packageName);
+		File directoryBase = new File(new File(targetDirectory), packageName.replace('.', File.separatorChar));
 		directoryBase.mkdirs();
 		ourLog.info(" * Output Directory: " + directoryBase.getAbsolutePath());
 
 		ValueSetGenerator vsp = new ValueSetGenerator();
-		vsp.setResourceValueSetFiles(myResourceValueSetFiles);
+		vsp.setResourceValueSetFiles(resourceValueSetFiles);
 		try {
 			vsp.parse();
 		} catch (Exception e) {
@@ -73,31 +73,31 @@ public class TinderStructuresMojo extends AbstractMojo {
 		ourLog.info("Loading Resources...");
 		ResourceGeneratorUsingSpreadsheet rp = new ResourceGeneratorUsingSpreadsheet();
 		try {
-			rp.setBaseResourceNames(myBaseResourceNames);
+			rp.setBaseResourceNames(baseResourceNames);
 			rp.parse();
 		} catch (Exception e) {
 			throw new MojoFailureException("Failed to load resources", e);
 		}
 		rp.bindValueSets(vsp);
 
-		if (myResourceProfileFiles != null) {
+		if (resourceProfileFiles != null) {
 			ourLog.info("Loading profiles...");
 			ProfileParser pp = new ProfileParser();
-			pp.parseBaseResources(myResourceProfileFiles);
+			pp.parseBaseResources(resourceProfileFiles);
 			pp.bindValueSets(vsp);
-			pp.writeAll(new File(directoryBase, "resource"), myPackage);
+			pp.writeAll(new File(directoryBase, "resource"), packageName);
 		}
 
 		ourLog.info("Writing Resources...");
-		rp.writeAll(new File(directoryBase, "resource"), myPackage);
+		rp.writeAll(new File(directoryBase, "resource"), packageName);
 
 		ourLog.info("Writing Composite Datatypes...");
-		dtp.writeAll(new File(directoryBase, "composite"), myPackage);
+		dtp.writeAll(new File(directoryBase, "composite"), packageName);
 
 		ourLog.info("Writing ValueSet Enums...");
-		vsp.writeMarkedValueSets(new File(directoryBase, "valueset"), myPackage);
+		vsp.writeMarkedValueSets(new File(directoryBase, "valueset"), packageName);
 
-		myProject.addCompileSourceRoot(myTargetDirectory);
+		myProject.addCompileSourceRoot(targetDirectory);
 	}
 
 	public static void main(String[] args) throws Exception {

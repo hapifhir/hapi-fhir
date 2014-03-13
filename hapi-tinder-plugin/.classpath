@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry excluding="**/*.java" kind="src" path="src/test/resources"/>
-	<classpathentry kind="src" path="target/gen"/>
 	<classpathentry including="**/*.java" kind="src" path="src/main/java"/>
 	<classpathentry excluding="**/*.java" kind="src" path="src/main/resources"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/hapi-fhir-base"/>

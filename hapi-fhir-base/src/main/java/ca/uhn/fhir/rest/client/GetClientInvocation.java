@@ -1,7 +1,6 @@
 package ca.uhn.fhir.rest.client;
 
 import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.Collections;
 import java.util.Map;
@@ -10,10 +9,8 @@ import java.util.Map.Entry;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.client.utils.URLEncodedUtils;
 
 import ca.uhn.fhir.context.ConfigurationException;
-import ca.uhn.fhir.rest.common.BaseMethodBinding;
 
 public class GetClientInvocation extends BaseClientInvocation {
 

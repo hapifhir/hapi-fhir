@@ -47,8 +47,23 @@ public interface ${className} extends IMetadataClient {
 	 */
 	@Read
 	${resource.resourceType} get${resource.resourceType}ById(@Read.IdParam IdDt theId, @Read.VersionIdParam IdDt theVersionId);
+#end
+#if ( ${resource.hasSearchOperation} )
+#foreach ( $param in $resource.searchParams )
+	/**
+	 * Searches for ${resource.resourceType} resource(s)
+#if ( ${resource.readOperation.hasDocumentation} )
+     * <p>
+     * Documentation: ${resource.readOperation.documentation}
+     * </p>
+#end
+	 */
+	@Search
+	${resource.resourceType} search${resource.resourceType}By${param.nameCapitalized}(@Required(name=${resource.resourceType}.${param.constantName}) StringDt the${param.nameCapitalized});
 
+#end
 #end
 #end
 	
 }
+

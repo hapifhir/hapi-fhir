@@ -1,4 +1,5 @@
 package ca.uhn.fhir.rest.client;
+
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -36,21 +37,21 @@ public class ClientInvocationHandler implements InvocationHandler {
 	private final HttpClient myClient;
 	private final FhirContext myContext;
 	private final String myUrlBase;
-	private final Map<Method, Object> myMethodToReturnValue=new HashMap<Method, Object>();
+	private final Map<Method, Object> myMethodToReturnValue = new HashMap<Method, Object>();
 
 	public ClientInvocationHandler(HttpClient theClient, FhirContext theContext, String theUrlBase, Class<? extends IRestfulClient> theClientType) {
 		myClient = theClient;
 		myContext = theContext;
 		myUrlBase = theUrlBase;
-		
+
 		try {
 			myMethodToReturnValue.put(theClientType.getMethod("getFhirContext"), theContext);
 			myMethodToReturnValue.put(theClientType.getMethod("getHttpClient"), theClient);
 			myMethodToReturnValue.put(theClientType.getMethod("getServerBase"), theUrlBase);
 		} catch (NoSuchMethodException e) {
-			throw new ConfigurationException("Failed to find methods on client. This is a HAPI bug!",e);
+			throw new ConfigurationException("Failed to find methods on client. This is a HAPI bug!", e);
 		} catch (SecurityException e) {
-			throw new ConfigurationException("Failed to find methods on client. This is a HAPI bug!",e);
+			throw new ConfigurationException("Failed to find methods on client. This is a HAPI bug!", e);
 		}
 	}
 
@@ -61,71 +62,72 @@ public class ClientInvocationHandler implements InvocationHandler {
 	@Override
 	public Object invoke(Object theProxy, Method theMethod, Object[] theArgs) throws Throwable {
 		Object directRetVal = myMethodToReturnValue.get(theMethod);
-		if (directRetVal!=null) {
+		if (directRetVal != null) {
 			return directRetVal;
 		}
-		
+
 		BaseMethodBinding binding = myBindings.get(theMethod);
 		GetClientInvocation clientInvocation = binding.invokeClient(theArgs);
+		
 		HttpRequestBase httpRequest = clientInvocation.asHttpRequest(myUrlBase);
 		HttpResponse response = myClient.execute(httpRequest);
 		try {
 
-		Reader reader = createReaderFromResponse(response);
-		
-		if (ourLog.isTraceEnabled()) {
-			String responseString = IOUtils.toString(reader);
-			ourLog.trace("FHIR response:\n{}\n{}", response, responseString);
-			reader = new StringReader(responseString);
-		}
-		
-		ContentType ct = ContentType.get(response.getEntity());
-		
-		IParser parser;
-		String mimeType = ct.getMimeType();
-		if (Constants.CT_ATOM_XML.equals(mimeType)) {
-			parser = myContext.newXmlParser();
-		} else if (Constants.CT_FHIR_XML.equals(mimeType)) {
-			parser = myContext.newXmlParser();
-		} else {
-			throw new NonFhirResponseException("Response contains non-FHIR content-type: " + mimeType, mimeType, response.getStatusLine().getStatusCode(), IOUtils.toString(reader));
-		}
+			Reader reader = createReaderFromResponse(response);
 
-		switch (binding.getReturnType()) {
-		case BUNDLE: {
-			Bundle bundle = parser.parseBundle(reader);
-			switch (binding.getMethodReturnType()) {
-			case BUNDLE:
-				return bundle;
-			case LIST_OF_RESOURCES:
-				return bundle.toListOfResources();
-			case RESOURCE:
-				List<IResource> list = bundle.toListOfResources();
-				if (list.size() == 0) {
-					return null;
-				} else if (list.size() == 1) {
-					return list.get(0);
-				} else {
-					throw new InvalidResponseException("FHIR server call returned a bundle with multiple resources, but this method is only able to returns one.");
+			if (ourLog.isTraceEnabled()) {
+				String responseString = IOUtils.toString(reader);
+				ourLog.trace("FHIR response:\n{}\n{}", response, responseString);
+				reader = new StringReader(responseString);
+			}
+
+			ContentType ct = ContentType.get(response.getEntity());
+
+			IParser parser;
+			String mimeType = ct.getMimeType();
+			if (Constants.CT_ATOM_XML.equals(mimeType)) {
+				parser = myContext.newXmlParser();
+			} else if (Constants.CT_FHIR_XML.equals(mimeType)) {
+				parser = myContext.newXmlParser();
+			} else {
+				throw new NonFhirResponseException("Response contains non-FHIR content-type: " + mimeType, mimeType, response.getStatusLine().getStatusCode(), IOUtils.toString(reader));
+			}
+
+			switch (binding.getReturnType()) {
+			case BUNDLE: {
+				Bundle bundle = parser.parseBundle(reader);
+				switch (binding.getMethodReturnType()) {
+				case BUNDLE:
+					return bundle;
+				case LIST_OF_RESOURCES:
+					return bundle.toListOfResources();
+				case RESOURCE:
+					List<IResource> list = bundle.toListOfResources();
+					if (list.size() == 0) {
+						return null;
+					} else if (list.size() == 1) {
+						return list.get(0);
+					} else {
+						throw new InvalidResponseException("FHIR server call returned a bundle with multiple resources, but this method is only able to returns one.");
+					}
 				}
+				break;
 			}
-			break;
-		}
-		case RESOURCE: {
-			IResource resource = parser.parseResource(reader);
-			switch (binding.getMethodReturnType()) {
-			case BUNDLE:
-				return Bundle.withSingleResource(resource);
-			case LIST_OF_RESOURCES:
-				return Collections.singletonList(resource);
-			case RESOURCE:
-				return resource;
+			case RESOURCE: {
+				IResource resource = parser.parseResource(reader);
+				switch (binding.getMethodReturnType()) {
+				case BUNDLE:
+					return Bundle.withSingleResource(resource);
+				case LIST_OF_RESOURCES:
+					return Collections.singletonList(resource);
+				case RESOURCE:
+					return resource;
+				}
+				break;
 			}
-			break;
-		}
-		}
+			}
 
-		throw new IllegalStateException("Should not get here!");
+			throw new IllegalStateException("Should not get here!");
 		} finally {
 			if (response instanceof CloseableHttpResponse) {
 				((CloseableHttpResponse) response).close();

@@ -4,8 +4,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import ca.uhn.fhir.model.primitive.IdDt;
+
 public abstract class BaseElement implements IElement, ISupportsUndeclaredExtensions {
 
+	private IdDt myId;
 	private List<UndeclaredExtension> myUndeclaredExtensions;
 	private List<UndeclaredExtension> myUndeclaredModifierExtensions;
 
@@ -19,6 +22,11 @@ public abstract class BaseElement implements IElement, ISupportsUndeclaredExtens
 			retVal.addAll(myUndeclaredModifierExtensions);
 		}
 		return Collections.unmodifiableList(retVal);
+	}
+
+	@Override
+	public IdDt getId() {
+		return myId;
 	}
 
 	@Override
@@ -57,6 +65,11 @@ public abstract class BaseElement implements IElement, ISupportsUndeclaredExtens
 			}
 		}
 		return true;
+	}
+
+	@Override
+	public void setId(IdDt theId) {
+		myId = theId;
 	}
 
 }

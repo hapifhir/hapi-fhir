@@ -1,6 +1,8 @@
 package ca.uhn.fhir.tinder.model;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.Validate;
@@ -13,6 +15,7 @@ public class RestResourceTm {
 
 	private String myResourceType;
 	private Map<RestfulOperationTypeEnum, RestResourceOperationTm> mySupportedOperations = new HashMap<RestfulOperationTypeEnum, RestResourceOperationTm>();
+	private ArrayList<SearchParameter> mySearchParams;
 
 	public RestResourceTm(RestResource theResource) {
 		myResourceType = theResource.getType().getValue();
@@ -49,6 +52,13 @@ public class RestResourceTm {
 
 	public String getResourceType() {
 		return myResourceType;
+	}
+
+	public List<SearchParameter> getSearchParams() {
+		if (mySearchParams == null) {
+			mySearchParams = new ArrayList<SearchParameter>();
+		}
+		return mySearchParams;
 	}
 
 }

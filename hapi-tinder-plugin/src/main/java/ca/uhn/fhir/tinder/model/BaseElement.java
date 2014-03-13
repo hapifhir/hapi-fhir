@@ -243,6 +243,15 @@ public abstract class BaseElement {
 		myExtensionUrl = theExtensionUrl;
 	}
 
+	public boolean isExtensionModifier() {
+		return false; // TODO: implemment
+	}
+
+	public boolean isExtensionLocal() {
+		return false; // TODO: implemment
+	}
+
+	
 	public boolean isHasExtensionUrl() {
 		return StringUtils.isNotBlank(myExtensionUrl);
 	}

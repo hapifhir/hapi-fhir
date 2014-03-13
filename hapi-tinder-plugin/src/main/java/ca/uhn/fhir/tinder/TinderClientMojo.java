@@ -1,10 +1,6 @@
 package ca.uhn.fhir.tinder;
 
-import static org.apache.commons.lang.StringUtils.defaultString;
-
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -12,10 +8,6 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.http.ParseException;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -26,9 +18,7 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 
-import ch.qos.logback.core.util.FileUtil;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.resource.Conformance;
 import ca.uhn.fhir.model.dstu.resource.Conformance.Rest;
 import ca.uhn.fhir.model.dstu.resource.Conformance.RestResource;
@@ -36,51 +26,54 @@ import ca.uhn.fhir.model.dstu.resource.Profile;
 import ca.uhn.fhir.model.dstu.valueset.RestfulConformanceModeEnum;
 import ca.uhn.fhir.rest.client.IRestfulClientFactory;
 import ca.uhn.fhir.rest.client.api.IBasicClient;
-import ca.uhn.fhir.tinder.model.Extension;
 import ca.uhn.fhir.tinder.model.Resource;
 import ca.uhn.fhir.tinder.model.RestResourceTm;
+import ca.uhn.fhir.tinder.model.SearchParameter;
 
 @Mojo(name = "generate-client", defaultPhase = LifecyclePhase.GENERATE_SOURCES)
 public class TinderClientMojo extends AbstractMojo {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TinderClientMojo.class);
 
-	@Parameter(alias = "clientClassName", required = true)
-	private String myClientClassName;
+	@Parameter(required = true)
+	private String serverBaseHref;
 
-	@Parameter(alias = "targetDirectory", required = true, defaultValue = "${project.build.directory}/generated-sources/tinder")
-	private File myTargetDirectory;
+	@Parameter(required = true)
+	private String clientClassName;
+
+	@Parameter(required = true, defaultValue = "${project.build.directory}/generated-sources/tinder")
+	private File targetDirectory;
+
+	@Parameter(required = true, defaultValue = "false")
+	private boolean generateSearchForAllParams;
 
 	private List<RestResourceTm> myResources = new ArrayList<RestResourceTm>();
-
 	private String myPackageBase;
-
 	private File myDirectoryBase;
-
 	private String myClientClassSimpleName;
-	
+
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException {
 		determinePaths();
-		
-//		
-//		try {
-//			ProfileParser pp = new ProfileParser();
-//			Profile prof=(Profile) new FhirContext(Profile.class).newXmlParser().parseResource(IOUtils.toString(new FileReader("src/test/resources/profile.xml")));
-//			pp.parseSingleProfile(prof, "http://foo");
-//			File resourceDir = new File(myDirectoryBase, "resource");
-//			resourceDir.mkdirs();
-//			pp.writeAll(resourceDir, myPackageBase);
-//		} catch (Exception e) {
-//			throw new MojoFailureException("Failed to load resource profile: ",e);
-//		}
-//		if (true) {
-//			return;
-//		}
-		
+
+		//
+		// try {
+		// ProfileParser pp = new ProfileParser();
+		// Profile prof=(Profile) new FhirContext(Profile.class).newXmlParser().parseResource(IOUtils.toString(new FileReader("src/test/resources/profile.xml")));
+		// pp.parseSingleProfile(prof, "http://foo");
+		// File resourceDir = new File(myDirectoryBase, "resource");
+		// resourceDir.mkdirs();
+		// pp.writeAll(resourceDir, myPackageBase);
+		// } catch (Exception e) {
+		// throw new MojoFailureException("Failed to load resource profile: ",e);
+		// }
+		// if (true) {
+		// return;
+		// }
+
 		FhirContext ctx = new FhirContext(Conformance.class);
 		IRestfulClientFactory cFact = ctx.newRestfulClientFactory();
-		IBasicClient client = cFact.newClient(IBasicClient.class, "http://fhir.healthintersections.com.au/open");
+		IBasicClient client = cFact.newClient(IBasicClient.class, serverBaseHref);
 
 		Conformance conformance = client.getServerConformanceStatement();
 
@@ -96,27 +89,33 @@ public class TinderClientMojo extends AbstractMojo {
 		for (RestResource nextResource : rest.getResource()) {
 			RestResourceTm nextTmResource = new RestResourceTm(nextResource);
 			myResources.add(nextTmResource);
-			
+
 			Profile profile;
 			try {
 				ourLog.info("Loading Profile: {}", nextResource.getProfile().getResourceUrl());
-				profile = (Profile)nextResource.getProfile().loadResource(client);
+				profile = (Profile) nextResource.getProfile().loadResource(client);
 			} catch (IOException e) {
-				throw new MojoFailureException("Failed to load resource profile: "+nextResource.getProfile().getReference().getValue(),e);
+				throw new MojoFailureException("Failed to load resource profile: " + nextResource.getProfile().getReference().getValue(), e);
 			}
 
 			ProfileParser pp = new ProfileParser();
+			Resource resourceModel;
 			try {
-				pp.parseSingleProfile(profile, nextResource.getProfile().getResourceUrl());
+				resourceModel = pp.parseSingleProfile(profile, nextResource.getProfile().getResourceUrl());
 				File resourceDir = new File(myDirectoryBase, "resource");
 				resourceDir.mkdirs();
 				pp.writeAll(resourceDir, myPackageBase);
 			} catch (Exception e) {
-				throw new MojoFailureException("Failed to load resource profile: "+nextResource.getProfile().getReference().getValue(),e);
+				throw new MojoFailureException("Failed to load resource profile: " + nextResource.getProfile().getReference().getValue(), e);
 			}
-			
+
+			if (generateSearchForAllParams) {
+				for (SearchParameter next : resourceModel.getSearchParameters()) {
+					nextTmResource.getSearchParams().add(next);
+				}
+			}
 		}
-		
+
 		try {
 			write();
 		} catch (IOException e) {
@@ -127,14 +126,14 @@ public class TinderClientMojo extends AbstractMojo {
 
 	private void determinePaths() {
 		myPackageBase = "";
-		myDirectoryBase = myTargetDirectory;
-		myClientClassSimpleName = myClientClassName;
-		if (myClientClassName.lastIndexOf('.') > -1) {
-			myPackageBase = myClientClassName.substring(0, myClientClassName.lastIndexOf('.'));
-			myDirectoryBase = new File(myDirectoryBase, myPackageBase.replace(".", File.separatorChar+""));
-			myClientClassSimpleName = myClientClassName.substring(myClientClassName.lastIndexOf('.')+1);
+		myDirectoryBase = targetDirectory;
+		myClientClassSimpleName = clientClassName;
+		if (clientClassName.lastIndexOf('.') > -1) {
+			myPackageBase = clientClassName.substring(0, clientClassName.lastIndexOf('.'));
+			myDirectoryBase = new File(myDirectoryBase, myPackageBase.replace(".", File.separatorChar + ""));
+			myClientClassSimpleName = clientClassName.substring(clientClassName.lastIndexOf('.') + 1);
 		}
-		
+
 		myDirectoryBase.mkdirs();
 	}
 
@@ -160,7 +159,7 @@ public class TinderClientMojo extends AbstractMojo {
 
 		w.close();
 	}
-	
+
 	public static void main(String[] args) throws ParseException, IOException, MojoFailureException, MojoExecutionException {
 
 		// PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
@@ -179,8 +178,9 @@ public class TinderClientMojo extends AbstractMojo {
 		// Conformance conformance = new FhirContext(Conformance.class).newXmlParser().parseResource(Conformance.class, metadataString);
 
 		TinderClientMojo mojo = new TinderClientMojo();
-		mojo.myClientClassName = "ca.uhn.test.ClientClass";
-		mojo.myTargetDirectory = new File("target/gen");
+		mojo.clientClassName = "ca.uhn.test.ClientClass";
+		mojo.targetDirectory = new File("target/gen");
+		mojo.serverBaseHref = "http://fhir.healthintersections.com.au/open";
 		mojo.execute();
 	}
 
