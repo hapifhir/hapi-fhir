@@ -6,8 +6,8 @@ public interface IElement {
 
 	boolean isEmpty();
 	
-	public void setId(IdDt theId);
-	
-	public IdDt getId();
+//	public void setId(IdDt theId);
+//	
+//	public IdDt getId();
 	
 }
