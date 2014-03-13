@@ -6,6 +6,9 @@ public class UndeclaredExtension extends BaseElement {
 	private IElement myValue;
 	private boolean myIsModifier;
 
+	public UndeclaredExtension() {
+	}
+
 	public UndeclaredExtension(boolean theIsModifier) {
 		myIsModifier = theIsModifier;
 	}

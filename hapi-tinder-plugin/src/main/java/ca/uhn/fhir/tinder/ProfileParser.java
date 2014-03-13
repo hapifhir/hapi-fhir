@@ -30,12 +30,14 @@ import ca.uhn.fhir.model.dstu.resource.Profile.StructureSearchParam;
 import ca.uhn.fhir.model.dstu.valueset.DataTypeEnum;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.XmlParser;
+import ca.uhn.fhir.tinder.model.AnyChild;
 import ca.uhn.fhir.tinder.model.BaseElement;
 import ca.uhn.fhir.tinder.model.Child;
 import ca.uhn.fhir.tinder.model.Resource;
 import ca.uhn.fhir.tinder.model.ResourceBlock;
 import ca.uhn.fhir.tinder.model.SearchParameter;
 import ca.uhn.fhir.tinder.model.Slicing;
+import ca.uhn.fhir.tinder.model.UndeclaredExtensionChild;
 
 public class ProfileParser extends BaseStructureParser {
 
@@ -46,7 +48,8 @@ public class ProfileParser extends BaseStructureParser {
 		// FhirContext fhirContext = new FhirContext(Profile.class);
 		// XmlParser parser = fhirContext.newXmlParser();
 		//
-		// String file = IOUtils.toString(new FileReader("src/test/resources/prof/organization.xml"));
+		// String file = IOUtils.toString(new
+		// FileReader("src/test/resources/prof/organization.xml"));
 		// Profile text = (Profile) parser.parseResource(file);
 		//
 		// ValueSetGenerator vsp = new ValueSetGenerator();
@@ -54,7 +57,8 @@ public class ProfileParser extends BaseStructureParser {
 		// vsp.parse();
 		//
 		// ProfileParser p = new ProfileParser();
-		// p.parseSingleProfile(text, "http://fhir.connectinggta.ca/static/Profile/organization.xml");
+		// p.parseSingleProfile(text,
+		// "http://fhir.connectinggta.ca/static/Profile/organization.xml");
 		// p.bindValueSets(vsp);
 		// p.writeAll("target/generated/valuesets/ca/uhn/fhir/model/dstu/resource");
 		//
@@ -63,7 +67,7 @@ public class ProfileParser extends BaseStructureParser {
 
 	public void parseSingleProfile(Profile theProfile, String theUrlTOThisProfile) throws Exception {
 		for (Structure nextStructure : theProfile.getStructure()) {
-			
+
 			int elemIdx = 0;
 			Map<String, BaseElement> elements = new HashMap<String, BaseElement>();
 			for (StructureElement next : nextStructure.getElement()) {
@@ -75,7 +79,7 @@ public class ProfileParser extends BaseStructureParser {
 					if (resource.getProfile() == null) {
 						resource.setProfile(theUrlTOThisProfile);
 					}
-					
+
 					for (StructureSearchParam nextParam : nextStructure.getSearchParam()) {
 						SearchParameter param = new SearchParameter();
 						param.setName(nextParam.getName().getValue());
@@ -84,7 +88,7 @@ public class ProfileParser extends BaseStructureParser {
 						param.setDescription(nextParam.getDocumentation().getValue());
 						resource.getSearchParameters().add(param);
 					}
-					
+
 					addResource(resource);
 					elem = resource;
 					// below StringUtils.isBlank(type) || type.startsWith("=")
@@ -92,8 +96,10 @@ public class ProfileParser extends BaseStructureParser {
 					elem = new ResourceBlock();
 					// } else if (type.startsWith("@")) {
 					// elem = new ResourceBlockCopy();
-					// } else if (type.equals("*")) {
-					// elem = new AnyChild();
+				} else if (next.getDefinition().getType().get(0).getCode().getValue().equals("*")) {
+					elem = new AnyChild();
+				} else if (next.getDefinition().getType().get(0).getCode().getValue().equals("Extension")) {
+					elem = new UndeclaredExtensionChild();
 				} else {
 					elem = new Child();
 				}
@@ -125,7 +131,9 @@ public class ProfileParser extends BaseStructureParser {
 				}
 
 				/*
-				 * Profiles come with a number of standard elements which are generally ignored because they are boilerplate, unless the definition is somehow changing their behaviour (e.g. through
+				 * Profiles come with a number of standard elements which are
+				 * generally ignored because they are boilerplate, unless the
+				 * definition is somehow changing their behaviour (e.g. through
 				 * slices)
 				 */
 				if (next.getPath().getValue().endsWith(".contained")) {
@@ -258,18 +266,22 @@ public class ProfileParser extends BaseStructureParser {
 		}
 
 		// for (int i = 0; i < theBaseResourceNames.size(); i++) {
-		// theBaseResourceNames.set(i, theBaseResourceNames.get(i).toLowerCase());
+		// theBaseResourceNames.set(i,
+		// theBaseResourceNames.get(i).toLowerCase());
 		// }
 		//
 		// try {
 		//
-		// Bundle bundle = fhirContext.newXmlParser().parseBundle(IOUtils.toString(getClass().getResourceAsStream("/prof/allprofiles.xml")));
+		// Bundle bundle =
+		// fhirContext.newXmlParser().parseBundle(IOUtils.toString(getClass().getResourceAsStream("/prof/allprofiles.xml")));
 		// TreeSet<String> allProfiles = new TreeSet<String>();
 		// for (BundleEntry nextResource : bundle.getEntries() ) {
 		// Profile nextProfile = (Profile) nextResource.getResource();
 		// allProfiles.add(nextProfile.getName().getValue());
-		// if (theBaseResourceNames.contains(nextProfile.getName().getValue().toLowerCase())){
-		// parseSingleProfile(nextProfile, bundle.getLinkBase().getValueNotNull());
+		// if
+		// (theBaseResourceNames.contains(nextProfile.getName().getValue().toLowerCase())){
+		// parseSingleProfile(nextProfile,
+		// bundle.getLinkBase().getValueNotNull());
 		// }
 		// }
 		//

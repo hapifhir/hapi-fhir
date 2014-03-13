@@ -4,6 +4,7 @@ import static org.apache.commons.lang.StringUtils.defaultString;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -61,6 +62,21 @@ public class TinderClientMojo extends AbstractMojo {
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException {
 		determinePaths();
+		
+//		
+//		try {
+//			ProfileParser pp = new ProfileParser();
+//			Profile prof=(Profile) new FhirContext(Profile.class).newXmlParser().parseResource(IOUtils.toString(new FileReader("src/test/resources/profile.xml")));
+//			pp.parseSingleProfile(prof, "http://foo");
+//			File resourceDir = new File(myDirectoryBase, "resource");
+//			resourceDir.mkdirs();
+//			pp.writeAll(resourceDir, myPackageBase);
+//		} catch (Exception e) {
+//			throw new MojoFailureException("Failed to load resource profile: ",e);
+//		}
+//		if (true) {
+//			return;
+//		}
 		
 		FhirContext ctx = new FhirContext(Conformance.class);
 		IRestfulClientFactory cFact = ctx.newRestfulClientFactory();

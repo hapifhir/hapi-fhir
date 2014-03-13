@@ -4,12 +4,18 @@ import java.util.List;
 
 public class ResourceBlock extends Child {
 
+	private String myForcedClassName;
+
 	@Override
 	public List<BaseElement> getChildren() {
 		return super.getChildren();
 	}
 
 	public String getClassName() {
+		if (myForcedClassName != null) {
+			return myForcedClassName;
+		}
+		
 //		return getElementName().substring(0, 1).toUpperCase() + getElementName().substring(1);
 		String name = getName();
 		return convertFhirPathNameToClassName(name);
@@ -42,6 +48,10 @@ public class ResourceBlock extends Child {
 	@Override
 	public String getTypeSuffix() {
 		return "";
+	}
+
+	public void setForcedClassName(String theClassName) {
+		myForcedClassName =theClassName;
 	}
 
 }

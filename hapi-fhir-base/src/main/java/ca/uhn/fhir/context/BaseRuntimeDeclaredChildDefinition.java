@@ -57,8 +57,12 @@ public abstract class BaseRuntimeDeclaredChildDefinition extends BaseRuntimeChil
 		Class<?> declaringClass = myField.getDeclaringClass();
 		final Class<?> targetReturnType = myField.getType();
 		try {
-			final Method accessor = BeanUtils.findAccessor(declaringClass, targetReturnType, myElementName);
-			final Method mutator = BeanUtils.findMutator(declaringClass, targetReturnType, myElementName);
+			String elementName = myElementName;
+			if ("Class".equals(elementName)) {
+				elementName = "ClassElement"; // because getClass() is reserved
+			}
+			final Method accessor = BeanUtils.findAccessor(declaringClass, targetReturnType, elementName);
+			final Method mutator = BeanUtils.findMutator(declaringClass, targetReturnType, elementName);
 
 			if (List.class.isAssignableFrom(targetReturnType)) {
 				myAccessor = new ListAccessor(accessor);

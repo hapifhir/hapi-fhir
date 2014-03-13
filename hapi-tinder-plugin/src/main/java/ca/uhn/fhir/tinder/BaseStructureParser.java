@@ -10,7 +10,9 @@ import java.io.InputStreamReader;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.TreeSet;
 
 import org.apache.commons.lang3.ObjectUtils;
@@ -27,6 +29,7 @@ import ca.uhn.fhir.tinder.model.BaseElement;
 import ca.uhn.fhir.tinder.model.Child;
 import ca.uhn.fhir.tinder.model.Extension;
 import ca.uhn.fhir.tinder.model.Resource;
+import ca.uhn.fhir.tinder.model.ResourceBlock;
 import ca.uhn.fhir.tinder.model.SimpleSetter.Parameter;
 
 public abstract class BaseStructureParser {
@@ -128,11 +131,37 @@ public abstract class BaseStructureParser {
 		}
 
 		for (Resource next : myResources) {
+			scanForTypeNameConflicts(next);
+			
 			File f = new File(theOutputDirectory, next.getName() + getFilenameSuffix() + ".java");
 			try {
 				write(next, f, thePackageBase);
 			} catch (IOException e) {
 				throw new MojoFailureException("Failed to write structure", e);
+			}
+		}
+	}
+
+	private void scanForTypeNameConflicts(Resource theNext) {
+		Set<String> typeNames = new HashSet<String>();
+		typeNames.add(theNext.getName());
+		scanForTypeNameConflicts(theNext,typeNames);
+	}
+
+	private void scanForTypeNameConflicts(BaseElement theResourceBlock, Set<String> theTypeNames) {
+		for (BaseElement nextChild : theResourceBlock.getChildren()){
+			if (nextChild instanceof ResourceBlock) {
+				ResourceBlock resourceBlock = (ResourceBlock) nextChild;
+				String className = resourceBlock.getClassName();
+				String newClassName = className;
+				int index = 2;
+				while (theTypeNames.contains(newClassName)) {
+					newClassName = className + (index++);
+					resourceBlock.setForcedClassName(newClassName);
+				}
+				theTypeNames.add(newClassName);
+				
+				scanForTypeNameConflicts(resourceBlock, theTypeNames);
 			}
 		}
 	}

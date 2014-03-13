@@ -42,6 +42,9 @@ public class Child extends BaseElement {
 	public String getMethodName() {
 		String elementName = getElementNameSimplified();
 		elementName = elementName.substring(0, 1).toUpperCase() + elementName.substring(1);
+		if ("Class".equals(elementName)) {
+			elementName = "ClassElement";
+		}
 		return elementName;
 	}
 
@@ -95,6 +98,9 @@ public class Child extends BaseElement {
 	public List<String> getReferenceTypesForMultiple() {
 		ArrayList<String> retVal = new ArrayList<String>();
 		for (String next : getType()) {
+			if ("Any".equals(next)) {
+				next = "IResource";
+			}
 			retVal.add(next);
 //			retVal.add(next + getTypeSuffix());
 		}
