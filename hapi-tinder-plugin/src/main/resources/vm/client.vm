@@ -11,7 +11,7 @@ import ${packageBase}.resource.*;
 /**
  * Restful Client Definition Class
  */
-public interface ${className} extends IMetadataClient {
+public interface ${className} extends IBasicClient {
 
 #foreach ( $resource in ${resources} )
 #if ( ${resource.hasReadOperation} )
@@ -47,6 +47,7 @@ public interface ${className} extends IMetadataClient {
 	 */
 	@Read
 	${resource.resourceType} get${resource.resourceType}ById(@Read.IdParam IdDt theId, @Read.VersionIdParam IdDt theVersionId);
+	
 #end
 #if ( ${resource.hasSearchOperation} )
 #foreach ( $param in $resource.searchParams )
@@ -58,8 +59,8 @@ public interface ${className} extends IMetadataClient {
      * </p>
 #end
 	 */
-	@Search
-	${resource.resourceType} search${resource.resourceType}By${param.nameCapitalized}(@Required(name=${resource.resourceType}.${param.constantName}) StringDt the${param.nameCapitalized});
+	@Search(type=${resource.resourceType}.class)
+	Bundle search${resource.resourceType}By${param.nameCapitalized}(@Required(name=${resource.resourceType}.${param.constantName}) StringDt the${param.nameCapitalized});
 
 #end
 #end

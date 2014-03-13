@@ -8,6 +8,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.ParseException;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -26,7 +27,7 @@ import ca.uhn.fhir.model.dstu.resource.Profile;
 import ca.uhn.fhir.model.dstu.valueset.RestfulConformanceModeEnum;
 import ca.uhn.fhir.rest.client.IRestfulClientFactory;
 import ca.uhn.fhir.rest.client.api.IBasicClient;
-import ca.uhn.fhir.tinder.model.Resource;
+import ca.uhn.fhir.tinder.model.BaseRootType;
 import ca.uhn.fhir.tinder.model.RestResourceTm;
 import ca.uhn.fhir.tinder.model.SearchParameter;
 
@@ -86,7 +87,13 @@ public class TinderClientMojo extends AbstractMojo {
 			throw new MojoFailureException("Conformance mode is not server, found: " + rest.getMode().getValue());
 		}
 
+		ProfileParser pp = new ProfileParser();
+		int index = 0;
 		for (RestResource nextResource : rest.getResource()) {
+			if (StringUtils.isBlank(nextResource.getProfile().getResourceUrl())) {
+				continue;
+			}
+			
 			RestResourceTm nextTmResource = new RestResourceTm(nextResource);
 			myResources.add(nextTmResource);
 
@@ -98,13 +105,9 @@ public class TinderClientMojo extends AbstractMojo {
 				throw new MojoFailureException("Failed to load resource profile: " + nextResource.getProfile().getReference().getValue(), e);
 			}
 
-			ProfileParser pp = new ProfileParser();
-			Resource resourceModel;
+			BaseRootType resourceModel;
 			try {
 				resourceModel = pp.parseSingleProfile(profile, nextResource.getProfile().getResourceUrl());
-				File resourceDir = new File(myDirectoryBase, "resource");
-				resourceDir.mkdirs();
-				pp.writeAll(resourceDir, myPackageBase);
 			} catch (Exception e) {
 				throw new MojoFailureException("Failed to load resource profile: " + nextResource.getProfile().getReference().getValue(), e);
 			}
@@ -115,6 +118,11 @@ public class TinderClientMojo extends AbstractMojo {
 				}
 			}
 		}
+
+		File resourceDir = new File(myDirectoryBase, "resource");
+		resourceDir.mkdirs();
+		pp.markResourcesForImports();
+		pp.writeAll(resourceDir, myPackageBase);
 
 		try {
 			write();
@@ -181,6 +189,7 @@ public class TinderClientMojo extends AbstractMojo {
 		mojo.clientClassName = "ca.uhn.test.ClientClass";
 		mojo.targetDirectory = new File("target/gen");
 		mojo.serverBaseHref = "http://fhir.healthintersections.com.au/open";
+		mojo.generateSearchForAllParams = true;
 		mojo.execute();
 	}
 

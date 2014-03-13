@@ -4,6 +4,10 @@ import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
+
+import ca.uhn.fhir.tinder.model.BaseRootType;
+import ca.uhn.fhir.tinder.model.Composite;
 
 public class DatatypeGeneratorUsingSpreadsheet extends BaseStructureSpreadsheetParser {
 
@@ -39,6 +43,11 @@ public class DatatypeGeneratorUsingSpreadsheet extends BaseStructureSpreadsheetP
 		retVal.add(getClass().getResourceAsStream("/dt/sampleddata.xml"));
 
 		return retVal;
+	}
+
+	@Override
+	protected BaseRootType createRootType() {
+		return new Composite();
 	}
 
 

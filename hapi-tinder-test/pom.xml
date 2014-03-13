@@ -25,6 +25,7 @@
 
 	<build>
 		<plugins>
+			<!-- 
 			<plugin>
 				<groupId>ca.uhn.hapi.fhir</groupId>
 				<artifactId>hapi-tinder-plugin</artifactId>
@@ -60,6 +61,63 @@
 					</execution>
 				</executions>
 			</plugin>
+			-->
+			
+			<plugin>
+				<groupId>ca.uhn.hapi.fhir</groupId>
+				<artifactId>hapi-tinder-plugin</artifactId>
+				<version>1.0-SNAPSHOT</version>
+				<executions>
+					<execution>
+						<id>custom-structs</id>
+						<goals>
+							<goal>generate-structures</goal>
+						</goals>
+						<configuration>
+							<package>ca.uhn.test.customstructs</package>
+							<resourceProfileFiles>
+								<resourceProfileFile>src/test/resources/profile/patient.xml</resourceProfileFile>
+								<resourceProfileFile>src/test/resources/profile/organization.xml</resourceProfileFile>
+							</resourceProfileFiles>
+							<resourceValueSetFiles>
+								<resourceValueSetFile>src/test/resources/valueset/valueset-cgta-patientidpool.xml</resourceValueSetFile>
+								<resourceValueSetFile>src/test/resources/valueset/valueset-cgta-provideridpool.xml</resourceValueSetFile>
+							</resourceValueSetFiles>
+						</configuration>
+					</execution>
+					<execution>
+						<id>generalstructs</id>
+						<goals>
+							<goal>generate-structures</goal>
+						</goals>
+						<configuration>
+							<package>ca.uhn.test.realstructs</package>
+							<baseResourceNames>
+								<baseResourceName>patient</baseResourceName>
+								<baseResourceName>valueset</baseResourceName>
+								<baseResourceName>organization</baseResourceName>
+								<baseResourceName>device</baseResourceName>
+								<baseResourceName>location</baseResourceName>
+								<baseResourceName>practitioner</baseResourceName>
+							</baseResourceNames>
+							<buildDatatypes>true</buildDatatypes>
+						</configuration>
+					</execution>
+<!--
+					<execution>
+						<id>client</id>
+						<goals>
+							<goal>generate-client</goal>
+						</goals>
+						<configuration>
+							<clientClassName>ca.uhn.hitest.HiTest</clientClassName>
+							<serverBaseHref>http://fhir.healthintersections.com.au/open</serverBaseHref>
+							<generateSearchForAllParams>true</generateSearchForAllParams>
+						</configuration>
+					</execution>
+-->
+				</executions>
+			</plugin>			
 		</plugins>
 	</build>
 

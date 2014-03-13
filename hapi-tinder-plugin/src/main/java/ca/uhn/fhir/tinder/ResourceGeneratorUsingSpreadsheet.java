@@ -9,6 +9,9 @@ import java.util.List;
 
 import org.apache.maven.plugin.MojoFailureException;
 
+import ca.uhn.fhir.tinder.model.BaseRootType;
+import ca.uhn.fhir.tinder.model.Resource;
+
 
 
 public class ResourceGeneratorUsingSpreadsheet extends BaseStructureSpreadsheetParser {
@@ -32,7 +35,7 @@ public class ResourceGeneratorUsingSpreadsheet extends BaseStructureSpreadsheetP
 	}
 
 
-	public static void main(String[] args) throws Exception {
+	public static void main(String[] args) throws Exception  {
 		ResourceGeneratorUsingSpreadsheet p = new ResourceGeneratorUsingSpreadsheet();
 		p.setBaseResourceNames(Collections.singletonList("patient"));
 		p.parse();
@@ -148,6 +151,11 @@ public class ResourceGeneratorUsingSpreadsheet extends BaseStructureSpreadsheetP
 				throw new MojoFailureException("Unknown base resource name: " + next);
 			}
 		}
+	}
+
+	@Override
+	protected BaseRootType createRootType() {
+		return new Resource();
 	}
 
 }

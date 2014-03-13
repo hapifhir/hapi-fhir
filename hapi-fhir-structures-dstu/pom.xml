@@ -53,6 +53,7 @@
 						<baseResourceName>substance</baseResourceName>
 						<baseResourceName>valueset</baseResourceName>
 					</baseResourceNames>
+					<buildDatatypes>true</buildDatatypes>
 				</configuration>
 			</plugin>
 		</plugins>

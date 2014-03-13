@@ -5,9 +5,10 @@ package ${packageBase}.composite;
 import java.util.*;
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.api.annotation.*;
-import ca.uhn.fhir.model.primitive.*;
-import ${packageBase}.valueset.*;
-import ${packageBase}.resource.*;
+
+#foreach ( $import in $imports )
+import ${import};
+#end
 
 /**
  * HAPI/FHIR <b>${className}</b> Datatype

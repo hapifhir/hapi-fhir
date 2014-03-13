@@ -1,0 +1,484 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Profile xmlns="http://hl7.org/fhir">
+  <text>
+    <status value="generated"/>
+    <div xmlns="http://www.w3.org/1999/xhtml">&#x0A;      
+      <pre>&#x0A;&lt;&#x0A;        
+        <a title="A description of a query with a set of parameters." class="dict" href="query-definitions.html#Query">&#x0A;          
+          <b>Query</b>&#x0A;        </a> xmlns="http://hl7.org/fhir"&gt; &#x0A;        
+        <span style="float: right">&#x0A;          
+          <a title="Documentation for this format" href="formats.html">&#x0A;            
+            <img alt="doco" src="help.png"/>&#x0A;          </a>&#x0A;        </span>&#x0A; &lt;!-- from &#x0A;        
+        <a href="resources.html">Resource</a>: &#x0A;        
+        <a href="extensibility.html">extension</a>, &#x0A;        
+        <a href="extensibility.html#modifierExtension">modifierExtension</a>, language, &#x0A;        
+        <a href="narrative.html#Narrative">text</a>, and &#x0A;        
+        <a href="references.html#contained">contained</a> --&gt;&#x0A; &lt;&#x0A;        
+        <a title="Links query and its response(s)." class="dict" href="query-definitions.html#Query.identifier">&#x0A;          
+          <b>identifier</b>&#x0A;        </a> value="[&#x0A;        
+        <span style="color: darkgreen">&#x0A;          
+          <a href="datatypes.html#uri">uri</a>&#x0A;        </span>]"/&gt;&#x0A;        
+        <span style="color: Gray">&lt;!--</span> &#x0A;        
+        <span style="color: brown">&#x0A;          
+          <b>1..1</b>&#x0A;        </span> &#x0A;        
+        <span style="color: navy">Links query and its response(s)</span>&#x0A;        
+        <span style="color: Gray"> --&gt;</span>&#x0A; &lt;&#x0A;        
+        <a title="Set of query parameters with values." class="dict" href="query-definitions.html#Query.parameter">&#x0A;          
+          <b>parameter</b>&#x0A;        </a>&gt;&#x0A;        
+        <span style="color: Gray">&lt;!--</span> &#x0A;        
+        <span style="color: brown">&#x0A;          
+          <b>1..*</b>&#x0A;        </span> &#x0A;        
+        <span style="color: darkgreen">&#x0A;          
+          <a href="extensibility.html#Extension">Extension</a>&#x0A;        </span> &#x0A;        
+        <span style="color: navy">Set of query parameters with values</span>&#x0A;        
+        <span style="color: Gray"> --&gt;</span>&lt;/parameter&gt;&#x0A; &lt;&#x0A;        
+        <a title="If this is a response to a query." class="dict" href="query-definitions.html#Query.response">&#x0A;          
+          <b>response</b>&#x0A;        </a>&gt;  &#x0A;        
+        <span style="color: Gray">&lt;!-- &#x0A;          
+          <span style="color: brown">&#x0A;            
+            <b>0..1</b>&#x0A;          </span> If this is a response to a query --&gt;</span>&#x0A;  &lt;&#x0A;        
+        <a title="Links response to source query." class="dict" href="query-definitions.html#Query.response.identifier">&#x0A;          
+          <b>identifier</b>&#x0A;        </a> value="[&#x0A;        
+        <span style="color: darkgreen">&#x0A;          
+          <a href="datatypes.html#uri">uri</a>&#x0A;        </span>]"/&gt;&#x0A;        
+        <span style="color: Gray">&lt;!--</span> &#x0A;        
+        <span style="color: brown">&#x0A;          
+          <b>1..1</b>&#x0A;        </span> &#x0A;        
+        <span style="color: navy">Links response to source query</span>&#x0A;        
+        <span style="color: Gray"> --&gt;</span>&#x0A;  &lt;&#x0A;        
+        <a title="Outcome of processing the query." class="dict" href="query-definitions.html#Query.response.outcome">&#x0A;          
+          <b>outcome</b>&#x0A;        </a> value="[&#x0A;        
+        <span style="color: darkgreen">&#x0A;          
+          <a href="datatypes.html#code">code</a>&#x0A;        </span>]"/&gt;&#x0A;        
+        <span style="color: Gray">&lt;!--</span> &#x0A;        
+        <span style="color: brown">&#x0A;          
+          <b>1..1</b>&#x0A;        </span> &#x0A;        
+        <span style="color: navy">&#x0A;          
+          <a style="color: navy" href="query-outcome.html">ok | limited | refused | error</a>&#x0A;        </span>&#x0A;        
+        <span style="color: Gray"> --&gt;</span>&#x0A;  &lt;&#x0A;        
+        <a title="Total number of matching records." class="dict" href="query-definitions.html#Query.response.total">&#x0A;          
+          <b>total</b>&#x0A;        </a> value="[&#x0A;        
+        <span style="color: darkgreen">&#x0A;          
+          <a href="datatypes.html#integer">integer</a>&#x0A;        </span>]"/&gt;&#x0A;        
+        <span style="color: Gray">&lt;!--</span> &#x0A;        
+        <span style="color: brown">&#x0A;          
+          <b>0..1</b>&#x0A;        </span> &#x0A;        
+        <span style="color: navy">Total number of matching records</span>&#x0A;        
+        <span style="color: Gray"> --&gt;</span>&#x0A;  &lt;&#x0A;        
+        <a title="Parameters server used." class="dict" href="query-definitions.html#Query.response.parameter">&#x0A;          
+          <b>parameter</b>&#x0A;        </a>&gt;&#x0A;        
+        <span style="color: Gray">&lt;!--</span> &#x0A;        
+        <span style="color: brown">&#x0A;          
+          <b>0..*</b>&#x0A;        </span> &#x0A;        
+        <span style="color: darkgreen">&#x0A;          
+          <a href="extensibility.html#Extension">Extension</a>&#x0A;        </span> &#x0A;        
+        <span style="color: navy">Parameters server used</span>&#x0A;        
+        <span style="color: Gray"> --&gt;</span>&lt;/parameter&gt;&#x0A;  &lt;&#x0A;        
+        <a title="To get first page (if paged)." class="dict" href="query-definitions.html#Query.response.first">&#x0A;          
+          <b>first</b>&#x0A;        </a>&gt;&#x0A;        
+        <span style="color: Gray">&lt;!--</span> &#x0A;        
+        <span style="color: brown">&#x0A;          
+          <b>0..*</b>&#x0A;        </span> &#x0A;        
+        <span style="color: darkgreen">&#x0A;          
+          <a href="extensibility.html#Extension">Extension</a>&#x0A;        </span> &#x0A;        
+        <span style="color: navy">To get first page (if paged)</span>&#x0A;        
+        <span style="color: Gray"> --&gt;</span>&lt;/first&gt;&#x0A;  &lt;&#x0A;        
+        <a title="To get previous page (if paged)." class="dict" href="query-definitions.html#Query.response.previous">&#x0A;          
+          <b>previous</b>&#x0A;        </a>&gt;&#x0A;        
+        <span style="color: Gray">&lt;!--</span> &#x0A;        
+        <span style="color: brown">&#x0A;          
+          <b>0..*</b>&#x0A;        </span> &#x0A;        
+        <span style="color: darkgreen">&#x0A;          
+          <a href="extensibility.html#Extension">Extension</a>&#x0A;        </span> &#x0A;        
+        <span style="color: navy">To get previous page (if paged)</span>&#x0A;        
+        <span style="color: Gray"> --&gt;</span>&lt;/previous&gt;&#x0A;  &lt;&#x0A;        
+        <a title="To get next page (if paged)." class="dict" href="query-definitions.html#Query.response.next">&#x0A;          
+          <b>next</b>&#x0A;        </a>&gt;&#x0A;        
+        <span style="color: Gray">&lt;!--</span> &#x0A;        
+        <span style="color: brown">&#x0A;          
+          <b>0..*</b>&#x0A;        </span> &#x0A;        
+        <span style="color: darkgreen">&#x0A;          
+          <a href="extensibility.html#Extension">Extension</a>&#x0A;        </span> &#x0A;        
+        <span style="color: navy">To get next page (if paged)</span>&#x0A;        
+        <span style="color: Gray"> --&gt;</span>&lt;/next&gt;&#x0A;  &lt;&#x0A;        
+        <a title="To get last page (if paged)." class="dict" href="query-definitions.html#Query.response.last">&#x0A;          
+          <b>last</b>&#x0A;        </a>&gt;&#x0A;        
+        <span style="color: Gray">&lt;!--</span> &#x0A;        
+        <span style="color: brown">&#x0A;          
+          <b>0..*</b>&#x0A;        </span> &#x0A;        
+        <span style="color: darkgreen">&#x0A;          
+          <a href="extensibility.html#Extension">Extension</a>&#x0A;        </span> &#x0A;        
+        <span style="color: navy">To get last page (if paged)</span>&#x0A;        
+        <span style="color: Gray"> --&gt;</span>&lt;/last&gt;&#x0A;  &lt;&#x0A;        
+        <a title="Resources that are the results of the search." class="dict" href="query-definitions.html#Query.response.reference">&#x0A;          
+          <b>reference</b>&#x0A;        </a>&gt;&#x0A;        
+        <span style="color: Gray">&lt;!--</span> &#x0A;        
+        <span style="color: brown">&#x0A;          
+          <b>0..*</b>&#x0A;        </span> &#x0A;        
+        <span style="color: darkgreen">&#x0A;          
+          <a href="references.html#Resource">Resource</a>(&#x0A;          
+          <a href="resourcelist.html">Any</a>)</span> &#x0A;        
+        <span style="color: navy">Resources that are the results of the search</span>&#x0A;        
+        <span style="color: Gray"> --&gt;</span>&lt;/reference&gt;&#x0A; &lt;/response&gt;&#x0A;&lt;/Query&gt;&#x0A;</pre>&#x0A;    </div>
+  </text>
+  <name value="query"/>
+  <publisher value="FHIR Project"/>
+  <description value="Basic Profile. A description of a query with a set of parameters."/>
+  <status value="draft"/>
+  <date value="2014-02-03"/>
+  <requirements value="Scope and Usage The resource is used to perform queries using messaging-based exchanges, and to perform asynchronous searches using the RESTful interface."/>
+  <mapping>
+    <identity value="rim"/>
+    <uri value="http://hl7.org/v3"/>
+    <name value="RIM"/>
+  </mapping>
+  <structure>
+    <type value="Query"/>
+    <publish value="true"/>
+    <element>
+      <path value="Query"/>
+      <definition>
+        <short value="A description of a query with a set of parameters"/>
+        <formal value="A description of a query with a set of parameters."/>
+        <min value="1"/>
+        <max value="1"/>
+        <type>
+          <code value="Resource"/>
+        </type>
+        <isModifier value="false"/>
+        <mapping>
+          <identity value="rim"/>
+          <map value="QuerySpec"/>
+        </mapping>
+      </definition>
+    </element>
+    <element>
+      <path value="Query.extension"/>
+      <definition>
+        <short value="Additional Content defined by implementations"/>
+        <formal value="May be used to represent additional information that is not part of the basic definition of the resource. In order to make the use of extensions safe and manageable, there is a strict governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+        <comments value="there can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core simplicity for everyone."/>
+        <synonym value="extensions"/>
+        <synonym value="user content"/>
+        <min value="0"/>
+        <max value="*"/>
+        <type>
+          <code value="Extension"/>
+        </type>
+        <isModifier value="false"/>
+      </definition>
+    </element>
+    <element>
+      <path value="Query.modifierExtension"/>
+      <definition>
+        <short value="Extensions that cannot be ignored"/>
+        <formal value="May be used to represent additional information that is not part of the basic definition of the resource, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
+        <comments value="there can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core simplicity for everyone."/>
+        <synonym value="extensions"/>
+        <synonym value="user content"/>
+        <min value="0"/>
+        <max value="*"/>
+        <type>
+          <code value="Extension"/>
+        </type>
+        <isModifier value="false"/>
+      </definition>
+    </element>
+    <element>
+      <path value="Query.text"/>
+      <definition>
+        <short value="Text summary of the resource, for human interpretation"/>
+        <formal value="A human-readable narrative that contains a summary of the resource, and may be used to represent the content of the resource to a human. The narrative need not encode all the structured data, but is required to contain sufficient detail to make it &quot;clinically safe&quot; for a human to just read the narrative. Resource definitions may define what content should be represented in the narrative to ensure clinical safety."/>
+        <comments value="Contained resources do not have narrative. Resources that are not contained SHOULD have a narrative."/>
+        <synonym value="narrative"/>
+        <synonym value="html"/>
+        <synonym value="xhtml"/>
+        <synonym value="display"/>
+        <min value="0"/>
+        <max value="1"/>
+        <type>
+          <code value="Narrative"/>
+        </type>
+        <isModifier value="false"/>
+      </definition>
+    </element>
+    <element>
+      <path value="Query.contained"/>
+      <definition>
+        <short value="Contained, inline Resources"/>
+        <formal value="These resources do not have an independent existence apart from the resource that contains them - they cannot be identified independently, and nor can they have their own independent transaction scope."/>
+        <comments value="This should never be done when the content can be identified properly, as once identification is lost, it is extremely difficult (and context dependent) to restore it again."/>
+        <synonym value="inline resources"/>
+        <synonym value="anonymous resources"/>
+        <synonym value="contained resources"/>
+        <min value="0"/>
+        <max value="*"/>
+        <type>
+          <code value="Resource"/>
+        </type>
+        <isModifier value="false"/>
+      </definition>
+    </element>
+    <element>
+      <path value="Query.identifier"/>
+      <definition>
+        <short value="Links query and its response(s)"/>
+        <formal value="Links query and its response(s)."/>
+        <min value="1"/>
+        <max value="1"/>
+        <type>
+          <code value="uri"/>
+        </type>
+        <isModifier value="false"/>
+        <mapping>
+          <identity value="rim"/>
+          <map value=".queryId"/>
+        </mapping>
+      </definition>
+    </element>
+    <element>
+      <path value="Query.parameter"/>
+      <definition>
+        <short value="Set of query parameters with values"/>
+        <formal value="Set of query parameters with values."/>
+        <comments value="Unless otherwise specified, parameters are usually strings."/>
+        <min value="1"/>
+        <max value="*"/>
+        <type>
+          <code value="Extension"/>
+        </type>
+        <isModifier value="false"/>
+        <mapping>
+          <identity value="rim"/>
+          <map value=".parameter"/>
+        </mapping>
+      </definition>
+    </element>
+    <element>
+      <path value="Query.response"/>
+      <definition>
+        <short value="If this is a response to a query"/>
+        <formal value="If this is a response to a query."/>
+        <min value="0"/>
+        <max value="1"/>
+        <isModifier value="false"/>
+        <mapping>
+          <identity value="rim"/>
+          <map value="QueryAck (indirectly linked through .queryId, directly linked via Message.acknowledges"/>
+        </mapping>
+      </definition>
+    </element>
+    <element>
+      <path value="Query.response.extension"/>
+      <definition>
+        <short value="Additional Content defined by implementations"/>
+        <formal value="May be used to represent additional information that is not part of the basic definition of the resource. In order to make the use of extensions safe and manageable, there is a strict governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+        <comments value="there can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core simplicity for everyone."/>
+        <synonym value="extensions"/>
+        <synonym value="user content"/>
+        <min value="0"/>
+        <max value="*"/>
+        <type>
+          <code value="Extension"/>
+        </type>
+        <isModifier value="false"/>
+      </definition>
+    </element>
+    <element>
+      <path value="Query.response.modifierExtension"/>
+      <definition>
+        <short value="Extensions that cannot be ignored"/>
+        <formal value="May be used to represent additional information that is not part of the basic definition of the resource, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
+        <comments value="there can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core simplicity for everyone."/>
+        <synonym value="extensions"/>
+        <synonym value="user content"/>
+        <min value="0"/>
+        <max value="*"/>
+        <type>
+          <code value="Extension"/>
+        </type>
+        <isModifier value="false"/>
+      </definition>
+    </element>
+    <element>
+      <path value="Query.response.identifier"/>
+      <definition>
+        <short value="Links response to source query"/>
+        <formal value="Links response to source query."/>
+        <min value="1"/>
+        <max value="1"/>
+        <type>
+          <code value="uri"/>
+        </type>
+        <isModifier value="false"/>
+        <mapping>
+          <identity value="rim"/>
+          <map value=".queryId?"/>
+        </mapping>
+      </definition>
+    </element>
+    <element>
+      <path value="Query.response.outcome"/>
+      <definition>
+        <short value="ok | limited | refused | error"/>
+        <formal value="Outcome of processing the query."/>
+        <min value="1"/>
+        <max value="1"/>
+        <type>
+          <code value="code"/>
+        </type>
+        <isModifier value="false"/>
+        <binding>
+          <name value="QueryOutcome"/>
+          <isExtensible value="false"/>
+          <conformance value="required"/>
+          <referenceResource>
+            <reference value="http://hl7.org/fhir/vs/query-outcome"/>
+          </referenceResource>
+        </binding>
+        <mapping>
+          <identity value="rim"/>
+          <map value=".queryResponseCode"/>
+        </mapping>
+      </definition>
+    </element>
+    <element>
+      <path value="Query.response.total"/>
+      <definition>
+        <short value="Total number of matching records"/>
+        <formal value="Total number of matching records."/>
+        <min value="0"/>
+        <max value="1"/>
+        <type>
+          <code value="integer"/>
+        </type>
+        <isModifier value="false"/>
+        <mapping>
+          <identity value="rim"/>
+          <map value=".resultTotalQuantity"/>
+        </mapping>
+      </definition>
+    </element>
+    <element>
+      <path value="Query.response.parameter"/>
+      <definition>
+        <short value="Parameters server used"/>
+        <formal value="Parameters server used."/>
+        <min value="0"/>
+        <max value="*"/>
+        <type>
+          <code value="Extension"/>
+        </type>
+        <isModifier value="false"/>
+        <mapping>
+          <identity value="rim"/>
+          <map value="Not supported"/>
+        </mapping>
+      </definition>
+    </element>
+    <element>
+      <path value="Query.response.first"/>
+      <definition>
+        <short value="To get first page (if paged)"/>
+        <formal value="To get first page (if paged)."/>
+        <min value="0"/>
+        <max value="*"/>
+        <type>
+          <code value="Extension"/>
+        </type>
+        <isModifier value="false"/>
+        <mapping>
+          <identity value="rim"/>
+          <map value="Not supported"/>
+        </mapping>
+      </definition>
+    </element>
+    <element>
+      <path value="Query.response.previous"/>
+      <definition>
+        <short value="To get previous page (if paged)"/>
+        <formal value="To get previous page (if paged)."/>
+        <min value="0"/>
+        <max value="*"/>
+        <type>
+          <code value="Extension"/>
+        </type>
+        <isModifier value="false"/>
+        <mapping>
+          <identity value="rim"/>
+          <map value="Not supported"/>
+        </mapping>
+      </definition>
+    </element>
+    <element>
+      <path value="Query.response.next"/>
+      <definition>
+        <short value="To get next page (if paged)"/>
+        <formal value="To get next page (if paged)."/>
+        <min value="0"/>
+        <max value="*"/>
+        <type>
+          <code value="Extension"/>
+        </type>
+        <isModifier value="false"/>
+        <mapping>
+          <identity value="rim"/>
+          <map value=".continuationToken"/>
+        </mapping>
+      </definition>
+    </element>
+    <element>
+      <path value="Query.response.last"/>
+      <definition>
+        <short value="To get last page (if paged)"/>
+        <formal value="To get last page (if paged)."/>
+        <min value="0"/>
+        <max value="*"/>
+        <type>
+          <code value="Extension"/>
+        </type>
+        <isModifier value="false"/>
+        <mapping>
+          <identity value="rim"/>
+          <map value="Not supported"/>
+        </mapping>
+      </definition>
+    </element>
+    <element>
+      <path value="Query.response.reference"/>
+      <definition>
+        <short value="Resources that are the results of the search"/>
+        <formal value="Resources that are the results of the search."/>
+        <comments value="Is query only used in messaging?."/>
+        <min value="0"/>
+        <max value="*"/>
+        <type>
+          <code value="ResourceReference"/>
+          <profile value="http://hl7.org/fhir/profiles/Any"/>
+        </type>
+        <isModifier value="false"/>
+        <mapping>
+          <identity value="rim"/>
+          <map value=".controlAct.outboundRelationship[typeCode=SUBJ].target or .controlAct.participation[typeCode=SBJ].role"/>
+        </mapping>
+      </definition>
+    </element>
+    <searchParam>
+      <name value="_id"/>
+      <type value="token"/>
+      <documentation value="The logical resource id associated with the resource (must be supported by all servers)"/>
+    </searchParam>
+    <searchParam>
+      <name value="identifier"/>
+      <type value="token"/>
+      <documentation value="Links query and its response(s)"/>
+      <xpath value="f:Query/f:identifier"/>
+    </searchParam>
+    <searchParam>
+      <name value="response"/>
+      <type value="token"/>
+      <documentation value="Links response to source query"/>
+      <xpath value="f:Query/f:response/f:identifier"/>
+    </searchParam>
+  </structure>
+</Profile>

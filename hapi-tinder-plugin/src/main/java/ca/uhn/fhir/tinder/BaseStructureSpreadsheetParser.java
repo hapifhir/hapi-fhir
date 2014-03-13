@@ -13,10 +13,11 @@ import org.w3c.dom.NodeList;
 import ca.uhn.fhir.tinder.model.AnyChild;
 import ca.uhn.fhir.tinder.model.BaseElement;
 import ca.uhn.fhir.tinder.model.Child;
-import ca.uhn.fhir.tinder.model.Resource;
+import ca.uhn.fhir.tinder.model.BaseRootType;
 import ca.uhn.fhir.tinder.model.ResourceBlock;
 import ca.uhn.fhir.tinder.model.ResourceBlockCopy;
 import ca.uhn.fhir.tinder.model.SearchParameter;
+import ca.uhn.fhir.tinder.model.SimpleChild;
 import ca.uhn.fhir.tinder.util.XMLUtils;
 
 public abstract class BaseStructureSpreadsheetParser extends BaseStructureParser {
@@ -46,7 +47,7 @@ public abstract class BaseStructureSpreadsheetParser extends BaseStructureParser
 
 			Element resourceRow = (Element) rows.item(1);
 
-			Resource resource = new Resource();
+			BaseRootType resource = createRootType();
 			addResource(resource);
 
 			parseParameters(file, resource);
@@ -83,7 +84,7 @@ public abstract class BaseStructureSpreadsheetParser extends BaseStructureParser
 				} else if (type.equals("*")) {
 					elem = new AnyChild();
 				} else {
-					elem = new Child();
+					elem = new SimpleChild();
 				}
 
 				parseBasicElements(nextRow, elem);
@@ -110,7 +111,9 @@ public abstract class BaseStructureSpreadsheetParser extends BaseStructureParser
 
 	}
 
-	private void parseParameters(Document theFile, Resource theResource) {
+	protected abstract BaseRootType createRootType();
+
+	private void parseParameters(Document theFile, BaseRootType theResource) {
 		NodeList sheets = theFile.getElementsByTagName("Worksheet");
 		for (int i = 0; i < sheets.getLength(); i++) {
 			Element sheet = (Element) sheets.item(i);

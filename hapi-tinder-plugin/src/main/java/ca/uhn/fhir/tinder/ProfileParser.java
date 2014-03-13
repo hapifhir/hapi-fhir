@@ -3,7 +3,9 @@ package ca.uhn.fhir.tinder;
 import static org.apache.commons.lang.StringUtils.capitalize;
 import static org.apache.commons.lang.StringUtils.isBlank;
 
+import java.io.File;
 import java.io.FileReader;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,9 +27,11 @@ import ca.uhn.fhir.model.dstu.valueset.DataTypeEnum;
 import ca.uhn.fhir.tinder.model.AnyChild;
 import ca.uhn.fhir.tinder.model.BaseElement;
 import ca.uhn.fhir.tinder.model.Child;
+import ca.uhn.fhir.tinder.model.BaseRootType;
 import ca.uhn.fhir.tinder.model.Resource;
 import ca.uhn.fhir.tinder.model.ResourceBlock;
 import ca.uhn.fhir.tinder.model.SearchParameter;
+import ca.uhn.fhir.tinder.model.SimpleChild;
 import ca.uhn.fhir.tinder.model.Slicing;
 import ca.uhn.fhir.tinder.model.UndeclaredExtensionChild;
 
@@ -101,8 +105,8 @@ public class ProfileParser extends BaseStructureParser {
 		// }
 	}
 
-	public Resource parseSingleProfile(Profile theProfile, String theUrlTOThisProfile) throws Exception {
-		Resource retVal = null;
+	public BaseRootType parseSingleProfile(Profile theProfile, String theUrlTOThisProfile) throws Exception {
+		BaseRootType retVal = null;
 		for (Structure nextStructure : theProfile.getStructure()) {
 
 			int elemIdx = 0;
@@ -135,10 +139,10 @@ public class ProfileParser extends BaseStructureParser {
 					// elem = new ResourceBlockCopy();
 				} else if (next.getDefinition().getType().get(0).getCode().getValue().equals("*")) {
 					elem = new AnyChild();
-//				} else if (next.getDefinition().getType().get(0).getCode().getValue().equals("Extension")) {
-//					elem = new UndeclaredExtensionChild();
+				} else if (next.getDefinition().getType().get(0).getCode().getValue().equals("Extension")) {
+					elem = new UndeclaredExtensionChild();
 				} else {
-					elem = new Child();
+					elem = new SimpleChild();
 				}
 
 				elem.setName(next.getPath().getValue());
@@ -251,7 +255,7 @@ public class ProfileParser extends BaseStructureParser {
 					 */
 					scanForSimpleSetters(child);
 				} else {
-					Resource res = (Resource) elem;
+					BaseRootType res = (BaseRootType) elem;
 					elements.put(res.getName(), res);
 				}
 
@@ -264,25 +268,14 @@ public class ProfileParser extends BaseStructureParser {
 	}
 
 	public static void main(String[] args) throws Exception {
-
-		// FhirContext fhirContext = new FhirContext(Profile.class);
-		// XmlParser parser = fhirContext.newXmlParser();
-		//
-		// String file = IOUtils.toString(new
-		// FileReader("src/test/resources/prof/organization.xml"));
-		// Profile text = (Profile) parser.parseResource(file);
-		//
-		// ValueSetGenerator vsp = new ValueSetGenerator();
-		// vsp.setDirectory("src/test/resources/vs/");
-		// vsp.parse();
-		//
-		// ProfileParser p = new ProfileParser();
-		// p.parseSingleProfile(text,
-		// "http://fhir.connectinggta.ca/static/Profile/organization.xml");
-		// p.bindValueSets(vsp);
-		// p.writeAll("target/generated/valuesets/ca/uhn/fhir/model/dstu/resource");
-		//
-		// vsp.writeMarkedValueSets("target/generated/valuesets/ca/uhn/fhir/model/dstu/valueset");
+		String str = IOUtils.toString(Profile.class.getResourceAsStream("/tmp.txt"));
+		Profile prof = new FhirContext(Profile.class).newXmlParser().parseResource(Profile.class, str);
+		
+		ProfileParser pp = new ProfileParser();
+		pp.parseSingleProfile(prof, "http://foo");
+		pp.markResourcesForImports();
+		pp.writeAll(new File("target/gen"), "test");
+		
 	}
 
 }

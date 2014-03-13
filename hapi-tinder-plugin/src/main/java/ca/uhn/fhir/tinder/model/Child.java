@@ -7,8 +7,9 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 
 import ca.uhn.fhir.model.api.IDatatype;
+import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 
-public class Child extends BaseElement {
+public abstract class Child extends BaseElement {
 
 	private List<SimpleSetter> mySimpleStters = new ArrayList<SimpleSetter>();
 
@@ -69,7 +70,7 @@ public class Child extends BaseElement {
 	public String getReferenceType() {
 		String retVal;
 		if (this.isResourceRef()) {
-			retVal = "ResourceReferenceDt"; // (ResourceReferenceDt.class.getSimpleName());
+			retVal = ResourceReferenceDt.class.getSimpleName();
 		} else if (this.getType().size() == 1 || this instanceof ResourceBlock) {
 			if (isBoundCode()) {
 				retVal = "Bound" + getSingleType() + "<" + getBindingClass() + ">";

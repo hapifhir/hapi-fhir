@@ -1,7 +1,10 @@
 package ca.uhn.fhir.tinder;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.plugin.AbstractMojo;
@@ -18,23 +21,26 @@ public class TinderStructuresMojo extends AbstractMojo {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TinderStructuresMojo.class);
 
-	@Parameter(alias = "package", required = true)
-	private String packageName;
-
-	@Parameter(alias = "targetDirectory", required = true, defaultValue = "${project.build.directory}/generated-sources/tinder")
-	private String targetDirectory;
-
-	@Parameter(alias="resourceValueSetFiles", required = false)
-	private List<String> resourceValueSetFiles;
-
-	@Parameter(alias = "baseResourceNames", required = true)
+	@Parameter(required = false)
 	private List<String> baseResourceNames;
 
-	@Parameter(alias = "resourceProfileFiles", required = false)
-	private List<String> resourceProfileFiles;
+	@Parameter(required = false, defaultValue="false")
+	private boolean buildDatatypes;
 
 	@Component
 	private MavenProject myProject;
+
+	@Parameter(alias = "package", required = true)
+	private String packageName;
+
+	@Parameter(required = false)
+	private List<String> resourceProfileFiles;
+
+	@Parameter(required = false)
+	private List<String> resourceValueSetFiles;
+
+	@Parameter(required = true, defaultValue = "${project.build.directory}/generated-sources/tinder")
+	private String targetDirectory;
 
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException {
@@ -62,42 +68,110 @@ public class TinderStructuresMojo extends AbstractMojo {
 
 		ourLog.info("Loading Datatypes...");
 
-		DatatypeGeneratorUsingSpreadsheet dtp = new DatatypeGeneratorUsingSpreadsheet();
-		try {
-			dtp.parse();
-		} catch (Exception e) {
-			throw new MojoFailureException("Failed to load datatypes", e);
+		Map<String, String> datatypeLocalImports = new HashMap<String, String>();
+		DatatypeGeneratorUsingSpreadsheet dtp = null;
+		if (buildDatatypes) {
+			dtp = new DatatypeGeneratorUsingSpreadsheet();
+			try {
+				dtp.parse();
+				dtp.markResourcesForImports();
+			} catch (Exception e) {
+				throw new MojoFailureException("Failed to load datatypes", e);
+			}
+			dtp.bindValueSets(vsp);
+			
+			datatypeLocalImports = dtp.getLocalImports();
 		}
-		dtp.bindValueSets(vsp);
 
-		ourLog.info("Loading Resources...");
-		ResourceGeneratorUsingSpreadsheet rp = new ResourceGeneratorUsingSpreadsheet();
-		try {
-			rp.setBaseResourceNames(baseResourceNames);
-			rp.parse();
-		} catch (Exception e) {
-			throw new MojoFailureException("Failed to load resources", e);
+		if (baseResourceNames != null && baseResourceNames.size() > 0) {
+			ourLog.info("Loading Resources...");
+			ResourceGeneratorUsingSpreadsheet rp = new ResourceGeneratorUsingSpreadsheet();
+			try {
+				rp.setBaseResourceNames(baseResourceNames);
+				rp.parse();
+				rp.markResourcesForImports();
+			} catch (Exception e) {
+				throw new MojoFailureException("Failed to load resources", e);
+			}
+			
+			rp.bindValueSets(vsp);
+			rp.getLocalImports().putAll(datatypeLocalImports);
+			datatypeLocalImports.putAll(rp.getLocalImports());
+			
+			ourLog.info("Writing Resources...");
+			rp.writeAll(new File(directoryBase, "resource"), packageName);
 		}
-		rp.bindValueSets(vsp);
 
 		if (resourceProfileFiles != null) {
 			ourLog.info("Loading profiles...");
 			ProfileParser pp = new ProfileParser();
 			pp.parseBaseResources(resourceProfileFiles);
+			
 			pp.bindValueSets(vsp);
+			pp.markResourcesForImports();
+			pp.getLocalImports().putAll(datatypeLocalImports);
+			datatypeLocalImports.putAll(pp.getLocalImports());
+			
 			pp.writeAll(new File(directoryBase, "resource"), packageName);
 		}
 
-		ourLog.info("Writing Resources...");
-		rp.writeAll(new File(directoryBase, "resource"), packageName);
-
-		ourLog.info("Writing Composite Datatypes...");
-		dtp.writeAll(new File(directoryBase, "composite"), packageName);
-
+		if (dtp != null) {
+			ourLog.info("Writing Composite Datatypes...");
+			dtp.writeAll(new File(directoryBase, "composite"), packageName);
+		}
+		
 		ourLog.info("Writing ValueSet Enums...");
 		vsp.writeMarkedValueSets(new File(directoryBase, "valueset"), packageName);
 
 		myProject.addCompileSourceRoot(targetDirectory);
+	}
+
+	public List<String> getBaseResourceNames() {
+		return baseResourceNames;
+	}
+
+	public String getPackageName() {
+		return packageName;
+	}
+
+	public List<String> getResourceProfileFiles() {
+		return resourceProfileFiles;
+	}
+
+	public List<String> getResourceValueSetFiles() {
+		return resourceValueSetFiles;
+	}
+
+	public String getTargetDirectory() {
+		return targetDirectory;
+	}
+
+	public boolean isBuildDatatypes() {
+		return buildDatatypes;
+	}
+
+	public void setBaseResourceNames(List<String> theBaseResourceNames) {
+		baseResourceNames = theBaseResourceNames;
+	}
+
+	public void setBuildDatatypes(boolean theBuildDatatypes) {
+		buildDatatypes = theBuildDatatypes;
+	}
+
+	public void setPackageName(String thePackageName) {
+		packageName = thePackageName;
+	}
+
+	public void setResourceProfileFiles(List<String> theResourceProfileFiles) {
+		resourceProfileFiles = theResourceProfileFiles;
+	}
+
+	public void setResourceValueSetFiles(List<String> theResourceValueSetFiles) {
+		resourceValueSetFiles = theResourceValueSetFiles;
+	}
+
+	public void setTargetDirectory(String theTargetDirectory) {
+		targetDirectory = theTargetDirectory;
 	}
 
 	public static void main(String[] args) throws Exception {

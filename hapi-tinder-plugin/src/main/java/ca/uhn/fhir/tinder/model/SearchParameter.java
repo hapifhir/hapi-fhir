@@ -15,7 +15,7 @@ public class SearchParameter {
 	}
 
 	public String getConstantName() {
-		return "SP_" + myName.toUpperCase().replace("-[X]", "_X").replace('-', '_').replace("!", "");
+		return "SP_" + myName.toUpperCase().replace("_[X]", "_X").replace("-[X]", "_X").replace('-', '_').replace("!", "");
 	}
 
 	public String getName() {
@@ -23,7 +23,7 @@ public class SearchParameter {
 	}
 
 	public String getNameCapitalized() {
-		return WordUtils.capitalize(myName);
+		return WordUtils.capitalize(myName).replace("_[x]", "").replace("-[x]", "").replace("_[X]", "").replace("-[X]", "").replace('-', '_').replace("!", "");
 	}
 
 	public String getPath() {
