@@ -1,12 +1,12 @@
 package ca.uhn.fhir.tinder.model;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
 import ca.uhn.fhir.model.api.IDatatype;
-import edu.emory.mathcs.backport.java.util.Collections;
 
 public class Child extends BaseElement {
 
@@ -107,7 +107,6 @@ public class Child extends BaseElement {
 		return retVal;
 	}
 
-	@SuppressWarnings("unchecked")
 	public List<SimpleSetter> getSimpleSetters() {
 		if (isBoundCode()) {
 			return Collections.emptyList();
