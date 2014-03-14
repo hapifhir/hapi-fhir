@@ -145,6 +145,29 @@ public class XmlParserTest {
 
 	}
 	
+
+	@Test
+	public void testMessageWithMultipleTypes() throws SAXException, IOException {
+
+		//@formatter:off
+		String msg = "<Patient xmlns=\"http://hl7.org/fhir\">" 
+				+ "<identifier><label value=\"SSN\" /><system value=\"http://orionhealth.com/mrn\" /><value value=\"PRP1660\" /></identifier>"
+				+ "</Patient>";
+		//@formatter:on
+		
+		FhirContext ctx = new FhirContext(Patient.class, ca.uhn.fhir.testmodel.Patient.class);
+		Patient patient1 = ctx.newXmlParser().parseResource(Patient.class, msg);
+		String encoded1 = ctx.newXmlParser().encodeResourceToString(patient1);
+
+		ca.uhn.fhir.testmodel.Patient patient2 = ctx.newXmlParser().parseResource(ca.uhn.fhir.testmodel.Patient.class, msg);
+		String encoded2 = ctx.newXmlParser().encodeResourceToString(patient2);
+
+		Diff d = new Diff(new StringReader(encoded1), new StringReader(encoded2));
+		assertTrue(d.toString(), d.identical());
+
+	}
+
+	
 	@Test
 	public void testLoadAndEncodeDeclaredExtensions() throws ConfigurationException, DataFormatException, SAXException, IOException {
 		FhirContext ctx = new FhirContext(ResourceWithExtensionsA.class);

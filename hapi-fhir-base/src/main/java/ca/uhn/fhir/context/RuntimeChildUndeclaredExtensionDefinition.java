@@ -13,6 +13,7 @@ import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.BaseResourceReference;
 import ca.uhn.fhir.model.api.UndeclaredExtension;
+import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 
 public class RuntimeChildUndeclaredExtensionDefinition extends BaseRuntimeChildDefinition {
 
@@ -77,6 +78,7 @@ public class RuntimeChildUndeclaredExtensionDefinition extends BaseRuntimeChildD
 		def.sealAndInitialize(theClassToElementDefinitions);
 		myAttributeNameToDefinition.put("valueResource", def);
 		myDatatypeToDefinition.put(BaseResourceReference.class, def);
+		myDatatypeToDefinition.put(ResourceReferenceDt.class, def);
 	}
 
 
@@ -106,6 +108,18 @@ public class RuntimeChildUndeclaredExtensionDefinition extends BaseRuntimeChildD
 					target.getUndeclaredExtensions().add((UndeclaredExtension) theValue);
 				}
 			}};
+	}
+
+
+	@Override
+	public int getMax() {
+		return 1;
+	}
+
+
+	@Override
+	public int getMin() {
+		return 0;
 	}
 
 

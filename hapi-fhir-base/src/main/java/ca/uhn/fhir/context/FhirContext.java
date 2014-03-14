@@ -9,6 +9,7 @@ import java.util.Map;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.parser.JsonParser;
 import ca.uhn.fhir.parser.XmlParser;
 import ca.uhn.fhir.rest.client.IRestfulClientFactory;
 import ca.uhn.fhir.rest.client.RestfulClientFactory;
@@ -90,6 +91,10 @@ public class FhirContext {
 
 	public Collection<RuntimeResourceDefinition> getResourceDefinitions() {
 		return myIdToResourceDefinition.values();
+	}
+
+	public IParser newJsonParser() {
+		return new JsonParser(this);
 	}
 
 }

@@ -26,6 +26,10 @@ public abstract class BaseRuntimeChildDefinition {
 		List<? extends IElement> getValues(Object theTarget);
 	}
 
+	public abstract int getMax();
+	
+	public abstract int getMin();
+	
 	public interface IMutator {
 		void addValue(Object theTarget, IElement theValue);
 	}

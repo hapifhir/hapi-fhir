@@ -1,7 +1,6 @@
 package ca.uhn.fhir.parser;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 import java.io.Reader;
 import java.io.StringReader;
@@ -43,7 +42,6 @@ import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IPrimitiveDatatype;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ISupportsUndeclaredExtensions;
-import ca.uhn.fhir.model.api.BaseResourceReference;
 import ca.uhn.fhir.model.api.UndeclaredExtension;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
@@ -149,11 +147,6 @@ public class XmlParser implements IParser {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see ca.uhn.fhir.parser.IParser#encodeBundleToString(ca.uhn.fhir.model.api.Bundle)
-	 */
 	@Override
 	public String encodeBundleToString(Bundle theBundle) throws DataFormatException {
 		StringWriter stringWriter = new StringWriter();
@@ -162,11 +155,6 @@ public class XmlParser implements IParser {
 		return stringWriter.toString();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see ca.uhn.fhir.parser.IParser#encodeBundleToWriter(ca.uhn.fhir.model.api.Bundle, java.io.Writer)
-	 */
 	@Override
 	public void encodeBundleToWriter(Bundle theBundle, Writer theWriter) {
 		try {
@@ -366,11 +354,7 @@ public class XmlParser implements IParser {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see ca.uhn.fhir.parser.IParser#encodeResourceToString(ca.uhn.fhir.model.api.IResource)
-	 */
+
 	@Override
 	public String encodeResourceToString(IResource theResource) throws DataFormatException {
 		Writer stringWriter = new StringWriter();
@@ -378,11 +362,6 @@ public class XmlParser implements IParser {
 		return stringWriter.toString();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see ca.uhn.fhir.parser.IParser#encodeResourceToWriter(ca.uhn.fhir.model.api.IResource, java.io.Writer)
-	 */
 	@Override
 	public void encodeResourceToWriter(IResource theResource, Writer stringWriter) {
 		XMLStreamWriter eventWriter;
@@ -397,13 +376,8 @@ public class XmlParser implements IParser {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see ca.uhn.fhir.parser.IParser#encodeResourceToXmlStreamWriter(ca.uhn.fhir.model.api.IResource, javax.xml.stream.XMLStreamWriter)
-	 */
-	@Override
-	public void encodeResourceToXmlStreamWriter(IResource theResource, XMLStreamWriter eventWriter) throws XMLStreamException, DataFormatException {
+
+	private void encodeResourceToXmlStreamWriter(IResource theResource, XMLStreamWriter eventWriter) throws XMLStreamException, DataFormatException {
 		RuntimeResourceDefinition resDef = myContext.getResourceDefinition(theResource);
 		eventWriter.writeStartElement(resDef.getName());
 		eventWriter.writeDefaultNamespace(FHIR_NS);
@@ -520,13 +494,7 @@ public class XmlParser implements IParser {
 		return parseResource(null, theMessageString);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see ca.uhn.fhir.parser.IParser#parseResource(javax.xml.stream.XMLEventReader)
-	 */
-	@Override
-	public IResource parseResource(XMLEventReader theStreamReader) {
+	private IResource parseResource(XMLEventReader theStreamReader) {
 		return parseResource(null, theStreamReader);
 	}
 

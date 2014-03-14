@@ -13,7 +13,7 @@ public @interface ResourceDef {
 
 	String name();
 
-	String id();
+	String id() default "";
 	
 	String profile() default "";
 	

@@ -1,5 +1,7 @@
 package example;
 
+import java.io.IOException;
+
 import ca.uhn.fhir.model.dstu.composite.HumanNameDt;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.resource.Observation;
@@ -7,6 +9,7 @@ import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.dstu.valueset.NameUseEnum;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.context.FhirContext;
 
@@ -33,7 +36,7 @@ Patient patient = new Patient();
 		
 	}
 		
-	public void encodeMsg() {
+	public void encodeMsg() throws DataFormatException, IOException {
 FhirContext ctx = new FhirContext(Patient.class, Observation.class);
 //START SNIPPET: encodeMsg
 

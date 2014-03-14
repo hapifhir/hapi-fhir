@@ -2,7 +2,7 @@ package ca.uhn.fhir.model.api;
 
 import java.util.List;
 
-public interface ISupportsUndeclaredExtensions {
+public interface ISupportsUndeclaredExtensions extends IElement {
 	
 	/**
 	 * Returns a list containing all undeclared non-modifier extensions
