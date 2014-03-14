@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.xml.stream.XMLInputFactory;
@@ -123,6 +124,14 @@ public class JsonParser implements IParser {
 		encodeCompositeElementChildrenToStreamWriter(theElement, theEventWriter, resDef.getChildren());
 	}
 
+	private class HeldExtension {
+
+		public HeldExtension(UndeclaredExtension theUndeclaredExtension) {
+
+		}
+
+	}
+
 	private void encodeCompositeElementChildrenToStreamWriter(IElement theElement, JsonWriter theEventWriter, List<? extends BaseRuntimeChildDefinition> theChildren) throws IOException {
 		for (BaseRuntimeChildDefinition nextChild : theChildren) {
 			List<? extends IElement> values = nextChild.getAccessor().getValues(theElement);
@@ -132,63 +141,115 @@ public class JsonParser implements IParser {
 
 			String currentChildName = null;
 			boolean inArray = false;
-			
-			IElement[] extensions = new IElement[values.size()];
-			IElement[] modifierExtensions = new IElement[values.size()];
-			boolean haveExtensions = false;
-			boolean haveModifierExtensions = false;
-			
+
+			ArrayList<ArrayList<HeldExtension>> extensions = new ArrayList<ArrayList<HeldExtension>>(0);
+			ArrayList<ArrayList<HeldExtension>> modifierExtensions = new ArrayList<ArrayList<HeldExtension>>(0);
+
+			int valueIdx = 0;
 			for (IElement nextValue : values) {
 				if (nextValue == null || nextValue.isEmpty()) {
 					continue;
 				}
-				
+
 				Class<? extends IElement> type = nextValue.getClass();
 				String childName = nextChild.getChildNameByDatatype(type);
-				String extensionUrl = nextChild.getExtensionUrl();
 				BaseRuntimeElementDefinition<?> childDef = nextChild.getChildElementDefinitionByDatatype(type);
 				if (childDef == null) {
 					throw new IllegalStateException(nextChild + " has no child of type " + type);
 				}
 
-				if (extensionUrl != null && childName.equals("extension") == false) {
-					
-					RuntimeChildDeclaredExtensionDefinition extDef = (RuntimeChildDeclaredExtensionDefinition) nextChild;
-					if (extDef.isModifier()) {
-						theEventWriter.name("modifierExtension");
-					} else {
-						theEventWriter.name("extension");
-					}
+				if (nextChild instanceof RuntimeChildDeclaredExtensionDefinition) {
 
-					theEventWriter.beginObject();
-					theEventWriter.name("url");
-					theEventWriter.value(extensionUrl);
-					theEventWriter.name(childName);
-					encodeChildElementToStreamWriter(theEventWriter, nextValue, childName, childDef);
-					theEventWriter.endObject();
+					// TODO: hold and return
+					 RuntimeChildDeclaredExtensionDefinition extDef = (RuntimeChildDeclaredExtensionDefinition) nextChild;
+					 if (extDef.isModifier()) {
+					 theEventWriter.name("modifierExtension");
+					 } else {
+					 theEventWriter.name("extension");
+					 }
 					
+					 theEventWriter.beginObject();
+					 theEventWriter.name("url");
+					 String extensionUrl = nextChild.getExtensionUrl();
+					 theEventWriter.value(extensionUrl);
+					 theEventWriter.name(childName);
+					 encodeChildElementToStreamWriter(theEventWriter, nextValue, childName, childDef);
+					 theEventWriter.endObject();
+
 				} else {
-					
+
 					if (currentChildName == null || !currentChildName.equals(childName)) {
 						if (inArray) {
 							theEventWriter.endArray();
 						}
 						theEventWriter.name(childName);
-						if (nextChild.getMax() > 1 || nextChild.getMax() == Child.MAX_UNLIMITED){
+						if (nextChild.getMax() > 1 || nextChild.getMax() == Child.MAX_UNLIMITED) {
 							theEventWriter.beginArray();
 							inArray = true;
 						}
 						currentChildName = childName;
 					}
-					
+
 					encodeChildElementToStreamWriter(theEventWriter, nextValue, childName, childDef);
+
+					if (nextValue instanceof ISupportsUndeclaredExtensions) {
+						List<UndeclaredExtension> ext = ((ISupportsUndeclaredExtensions) nextValue).getUndeclaredExtensions();
+						addToHeldExtensions(valueIdx, ext, extensions);
+
+						ext = ((ISupportsUndeclaredExtensions) nextValue).getUndeclaredModifierExtensions();
+						addToHeldExtensions(valueIdx, ext, modifierExtensions);
+					}
+
 				}
+
+				valueIdx++;
 			}
-			
-			
-			
+
 			if (inArray) {
 				theEventWriter.endArray();
+			}
+			
+			String extType = "extension";
+			if (extensions.size() > 0 || modifierExtensions.size() > 0) {
+				theEventWriter.name('_' + currentChildName);
+				theEventWriter.beginObject();
+
+				if (extensions.size() > 0) {
+					
+					theEventWriter.name(extType);
+					theEventWriter.beginArray();
+					for (ArrayList<HeldExtension> next : extensions) {
+						if (next == null || next.isEmpty()) {
+							theEventWriter.nullValue();
+						}else {
+							theEventWriter.beginArray();
+//							next.write(theEventWriter);
+							theEventWriter.endArray();
+						}
+					}
+					for (int i = extensions.size(); i < valueIdx; i++) {
+						theEventWriter.nullValue();
+					}
+					theEventWriter.endArray();
+				}
+				
+				theEventWriter.endObject();
+			}
+
+		}
+	}
+
+	private void addToHeldExtensions(int valueIdx, List<UndeclaredExtension> ext, ArrayList<ArrayList<HeldExtension>> list) {
+		if (ext.size() > 0) {
+			list.ensureCapacity(valueIdx);
+			while (list.size() <= valueIdx) {
+				list.add(null);
+			}
+			if (list.get(valueIdx) == null) {
+				list.set(valueIdx, new ArrayList<JsonParser.HeldExtension>());
+			}
+			for (UndeclaredExtension next : ext) {
+				list.get(valueIdx).add(new HeldExtension(next));
 			}
 		}
 	}
@@ -260,7 +321,7 @@ public class JsonParser implements IParser {
 		case RESOURCE_REF: {
 			ResourceReferenceDt value = (ResourceReferenceDt) theValue;
 			theWriter.beginObject();
-			if (value.getReference().isEmpty()==false) {
+			if (value.getReference().isEmpty() == false) {
 				theWriter.name("resource");
 				theWriter.value(value.getReference().getValueAsString());
 			}
@@ -278,9 +339,9 @@ public class JsonParser implements IParser {
 		}
 		case UNDECL_EXT:
 		default:
-			throw new IllegalStateException("Should not have this state here: "+theChildDef.getChildType().name());
+			throw new IllegalStateException("Should not have this state here: " + theChildDef.getChildType().name());
 		}
-		
+
 	}
 
 	@Override
