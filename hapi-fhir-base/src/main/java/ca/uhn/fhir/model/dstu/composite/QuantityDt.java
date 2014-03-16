@@ -16,12 +16,18 @@
 
 package ca.uhn.fhir.model.dstu.composite;
 
-import java.util.*;
-import ca.uhn.fhir.model.api.*;
-import ca.uhn.fhir.model.api.annotation.*;
-import ca.uhn.fhir.model.primitive.*;
-import ca.uhn.fhir.model.dstu.valueset.*;
-import ca.uhn.fhir.model.dstu.resource.*;
+import ca.uhn.fhir.model.api.BaseElement;
+import ca.uhn.fhir.model.api.ICompositeDatatype;
+import ca.uhn.fhir.model.api.IElement;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
+import ca.uhn.fhir.model.primitive.BoundCodeDt;
+import ca.uhn.fhir.model.primitive.CodeDt;
+import ca.uhn.fhir.model.primitive.DecimalDt;
+import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.model.primitive.UriDt;
 
 /**
  * HAPI/FHIR <b>Quantity</b> Datatype
@@ -82,6 +88,11 @@ public class QuantityDt
 	public boolean isEmpty() {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myValue,  myComparator,  myUnits,  mySystem,  myCode);
 	}
+	
+	public java.util.List<IElement> getAllPopulatedChildElements() {
+		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(  myValue,  myComparator,  myUnits,  mySystem,  myCode);
+	}
+	
 
 	/**
 	 * Gets the value(s) for <b>value</b> (Numerical value (with implicit precision)).
@@ -121,7 +132,7 @@ public class QuantityDt
      * The value of the measured amount. The value includes an implicit precision in the presentation of the value
      * </p> 
 	 */
-	public void setValue( java.math.BigDecimal theValue) {
+	public void setValue( long theValue) {
 		myValue = new DecimalDt(theValue); 
 	}
 
@@ -145,7 +156,7 @@ public class QuantityDt
      * The value of the measured amount. The value includes an implicit precision in the presentation of the value
      * </p> 
 	 */
-	public void setValue( long theValue) {
+	public void setValue( java.math.BigDecimal theValue) {
 		myValue = new DecimalDt(theValue); 
 	}
 

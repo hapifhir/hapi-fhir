@@ -16,12 +16,28 @@
 
 package ca.uhn.fhir.model.dstu.resource;
 
-import java.util.*;
-import ca.uhn.fhir.model.api.*;
-import ca.uhn.fhir.model.api.annotation.*;
-import ca.uhn.fhir.model.primitive.*;
-import ca.uhn.fhir.model.dstu.composite.*;
-import ca.uhn.fhir.model.dstu.valueset.*;
+
+import ca.uhn.fhir.model.api.BaseElement;
+import ca.uhn.fhir.model.api.BaseResource;
+import ca.uhn.fhir.model.api.IElement;
+import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.IResourceBlock;
+import ca.uhn.fhir.model.api.annotation.Block;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.dstu.composite.AddressDt;
+import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
+import ca.uhn.fhir.model.dstu.composite.ContactDt;
+import ca.uhn.fhir.model.dstu.composite.HumanNameDt;
+import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
+import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
+import ca.uhn.fhir.model.dstu.valueset.OrganizationTypeEnum;
+import ca.uhn.fhir.model.primitive.BooleanDt;
+import ca.uhn.fhir.model.primitive.BoundCodeableConceptDt;
+import ca.uhn.fhir.model.primitive.StringDt;
+
 
 /**
  * HAPI/FHIR <b>Organization</b> Resource
@@ -116,7 +132,7 @@ public class Organization extends BaseResource implements IResource {
 		shortDefinition="Identifies this organization  across multiple systems",
 		formalDefinition="Identifier for the organization that is used to identify the organization across multiple disparate systems"
 	)
-	private List<IdentifierDt> myIdentifier;
+	private java.util.List<IdentifierDt> myIdentifier;
 	
 	@Child(name="name", type=StringDt.class, order=1, min=0, max=1)	
 	@Description(
@@ -137,17 +153,17 @@ public class Organization extends BaseResource implements IResource {
 		shortDefinition="A contact detail for the organization",
 		formalDefinition="A contact detail for the organization"
 	)
-	private List<ContactDt> myTelecom;
+	private java.util.List<ContactDt> myTelecom;
 	
 	@Child(name="address", type=AddressDt.class, order=4, min=0, max=Child.MAX_UNLIMITED)	
 	@Description(
 		shortDefinition="An address for the organization",
 		formalDefinition="An address for the organization"
 	)
-	private List<AddressDt> myAddress;
+	private java.util.List<AddressDt> myAddress;
 	
 	@Child(name="partOf", order=5, min=0, max=1, type={
-		Organization.class,
+		ca.uhn.fhir.model.dstu.resource.Organization.class,
 	})
 	@Description(
 		shortDefinition="The organization of which this organization forms a part",
@@ -160,16 +176,16 @@ public class Organization extends BaseResource implements IResource {
 		shortDefinition="Contact for the organization for a certain purpose",
 		formalDefinition=""
 	)
-	private List<Contact> myContact;
+	private java.util.List<Contact> myContact;
 	
 	@Child(name="location", order=7, min=0, max=Child.MAX_UNLIMITED, type={
-		Location.class,
+		ca.uhn.fhir.model.dstu.resource.Location.class,
 	})
 	@Description(
 		shortDefinition="Location(s) the organization uses to provide services",
 		formalDefinition="Location(s) the organization uses to provide services"
 	)
-	private List<ResourceReferenceDt> myLocation;
+	private java.util.List<ResourceReferenceDt> myLocation;
 	
 	@Child(name="active", type=BooleanDt.class, order=8, min=0, max=1)	
 	@Description(
@@ -183,6 +199,11 @@ public class Organization extends BaseResource implements IResource {
 	public boolean isEmpty() {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myIdentifier,  myName,  myType,  myTelecom,  myAddress,  myPartOf,  myContact,  myLocation,  myActive);
 	}
+	
+	public java.util.List<IElement> getAllPopulatedChildElements() {
+		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(  myIdentifier,  myName,  myType,  myTelecom,  myAddress,  myPartOf,  myContact,  myLocation,  myActive);
+	}
+	
 
 	/**
 	 * Gets the value(s) for <b>identifier</b> (Identifies this organization  across multiple systems).
@@ -194,9 +215,9 @@ public class Organization extends BaseResource implements IResource {
      * Identifier for the organization that is used to identify the organization across multiple disparate systems
      * </p> 
 	 */
-	public List<IdentifierDt> getIdentifier() {  
+	public java.util.List<IdentifierDt> getIdentifier() {  
 		if (myIdentifier == null) {
-			myIdentifier = new ArrayList<IdentifierDt>();
+			myIdentifier = new java.util.ArrayList<IdentifierDt>();
 		}
 		return myIdentifier;
 	}
@@ -209,7 +230,7 @@ public class Organization extends BaseResource implements IResource {
      * Identifier for the organization that is used to identify the organization across multiple disparate systems
      * </p> 
 	 */
-	public void setIdentifier(List<IdentifierDt> theValue) {
+	public void setIdentifier(java.util.List<IdentifierDt> theValue) {
 		myIdentifier = theValue;
 	}
 
@@ -324,9 +345,9 @@ public class Organization extends BaseResource implements IResource {
      * A contact detail for the organization
      * </p> 
 	 */
-	public List<ContactDt> getTelecom() {  
+	public java.util.List<ContactDt> getTelecom() {  
 		if (myTelecom == null) {
-			myTelecom = new ArrayList<ContactDt>();
+			myTelecom = new java.util.ArrayList<ContactDt>();
 		}
 		return myTelecom;
 	}
@@ -339,7 +360,7 @@ public class Organization extends BaseResource implements IResource {
      * A contact detail for the organization
      * </p> 
 	 */
-	public void setTelecom(List<ContactDt> theValue) {
+	public void setTelecom(java.util.List<ContactDt> theValue) {
 		myTelecom = theValue;
 	}
 
@@ -368,9 +389,9 @@ public class Organization extends BaseResource implements IResource {
      * An address for the organization
      * </p> 
 	 */
-	public List<AddressDt> getAddress() {  
+	public java.util.List<AddressDt> getAddress() {  
 		if (myAddress == null) {
-			myAddress = new ArrayList<AddressDt>();
+			myAddress = new java.util.ArrayList<AddressDt>();
 		}
 		return myAddress;
 	}
@@ -383,7 +404,7 @@ public class Organization extends BaseResource implements IResource {
      * An address for the organization
      * </p> 
 	 */
-	public void setAddress(List<AddressDt> theValue) {
+	public void setAddress(java.util.List<AddressDt> theValue) {
 		myAddress = theValue;
 	}
 
@@ -443,9 +464,9 @@ public class Organization extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public List<Contact> getContact() {  
+	public java.util.List<Contact> getContact() {  
 		if (myContact == null) {
-			myContact = new ArrayList<Contact>();
+			myContact = new java.util.ArrayList<Contact>();
 		}
 		return myContact;
 	}
@@ -458,7 +479,7 @@ public class Organization extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public void setContact(List<Contact> theValue) {
+	public void setContact(java.util.List<Contact> theValue) {
 		myContact = theValue;
 	}
 
@@ -487,9 +508,9 @@ public class Organization extends BaseResource implements IResource {
      * Location(s) the organization uses to provide services
      * </p> 
 	 */
-	public List<ResourceReferenceDt> getLocation() {  
+	public java.util.List<ResourceReferenceDt> getLocation() {  
 		if (myLocation == null) {
-			myLocation = new ArrayList<ResourceReferenceDt>();
+			myLocation = new java.util.ArrayList<ResourceReferenceDt>();
 		}
 		return myLocation;
 	}
@@ -502,7 +523,7 @@ public class Organization extends BaseResource implements IResource {
      * Location(s) the organization uses to provide services
      * </p> 
 	 */
-	public void setLocation(List<ResourceReferenceDt> theValue) {
+	public void setLocation(java.util.List<ResourceReferenceDt> theValue) {
 		myLocation = theValue;
 	}
 
@@ -581,7 +602,7 @@ public class Organization extends BaseResource implements IResource {
 		shortDefinition="Contact details (telephone, email, etc)  for a contact",
 		formalDefinition="A contact detail (e.g. a telephone number or an email address) by which the party may be contacted."
 	)
-	private List<ContactDt> myTelecom;
+	private java.util.List<ContactDt> myTelecom;
 	
 	@Child(name="address", type=AddressDt.class, order=3, min=0, max=1)	
 	@Description(
@@ -602,6 +623,11 @@ public class Organization extends BaseResource implements IResource {
 	public boolean isEmpty() {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myPurpose,  myName,  myTelecom,  myAddress,  myGender);
 	}
+	
+	public java.util.List<IElement> getAllPopulatedChildElements() {
+		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(  myPurpose,  myName,  myTelecom,  myAddress,  myGender);
+	}
+	
 
 	/**
 	 * Gets the value(s) for <b>purpose</b> (The type of contact).
@@ -675,9 +701,9 @@ public class Organization extends BaseResource implements IResource {
      * A contact detail (e.g. a telephone number or an email address) by which the party may be contacted.
      * </p> 
 	 */
-	public List<ContactDt> getTelecom() {  
+	public java.util.List<ContactDt> getTelecom() {  
 		if (myTelecom == null) {
-			myTelecom = new ArrayList<ContactDt>();
+			myTelecom = new java.util.ArrayList<ContactDt>();
 		}
 		return myTelecom;
 	}
@@ -690,7 +716,7 @@ public class Organization extends BaseResource implements IResource {
      * A contact detail (e.g. a telephone number or an email address) by which the party may be contacted.
      * </p> 
 	 */
-	public void setTelecom(List<ContactDt> theValue) {
+	public void setTelecom(java.util.List<ContactDt> theValue) {
 		myTelecom = theValue;
 	}
 

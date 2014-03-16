@@ -8,10 +8,10 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import ca.uhn.fhir.model.api.BaseResourceReference;
 import ca.uhn.fhir.model.api.IDatatype;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.api.BaseResourceReference;
 import ca.uhn.fhir.model.api.UndeclaredExtension;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 
@@ -52,9 +52,11 @@ public class RuntimeChildUndeclaredExtensionDefinition extends BaseRuntimeChildD
 		Map<String, BaseRuntimeElementDefinition<?>> datatypeAttributeNameToDefinition=new HashMap<String, BaseRuntimeElementDefinition<?>>();
 		
 		for (BaseRuntimeElementDefinition<?> next : theClassToElementDefinitions.values()) {
-			if (next instanceof RuntimePrimitiveDatatypeDefinition || next instanceof RuntimeCompositeDatatypeDefinition) {
-				String attrName = "value" + next.getName().substring(0, 1).toUpperCase() + next.getName().substring(1);
-				datatypeAttributeNameToDefinition.put(attrName, next);
+			if (next instanceof IRuntimeDatatypeDefinition) {
+				if (!((IRuntimeDatatypeDefinition) next).isSpecialization()) {
+					String attrName = "value" + next.getName().substring(0, 1).toUpperCase() + next.getName().substring(1);
+					datatypeAttributeNameToDefinition.put(attrName, next);
+				}
 			}
 		}
 		
@@ -71,7 +73,7 @@ public class RuntimeChildUndeclaredExtensionDefinition extends BaseRuntimeChildD
 		}
 		
 		// Resource Reference
-		myDatatypeToAttributeName.put(BaseResourceReference.class, "valueReference");
+		myDatatypeToAttributeName.put(ResourceReferenceDt.class, "valueReference");
 		List<Class<? extends IResource>> types = new ArrayList<Class<? extends IResource>>();
 		types.add(IResource.class);
 		RuntimeResourceReferenceDefinition def = new RuntimeResourceReferenceDefinition("valueResource", types);

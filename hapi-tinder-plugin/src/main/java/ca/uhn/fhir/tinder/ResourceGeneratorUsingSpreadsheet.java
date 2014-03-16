@@ -37,7 +37,7 @@ public class ResourceGeneratorUsingSpreadsheet extends BaseStructureSpreadsheetP
 
 	public static void main(String[] args) throws Exception  {
 		ResourceGeneratorUsingSpreadsheet p = new ResourceGeneratorUsingSpreadsheet();
-		p.setBaseResourceNames(Collections.singletonList("patient"));
+		p.setBaseResourceNames(Collections.singletonList("encounter"));
 		p.parse();
 		p.writeAll(new File("tmp"), "ca.test");
 //		

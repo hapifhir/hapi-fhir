@@ -1,4 +1,4 @@
-package ca.uhn.fhir.rest.common;
+package ca.uhn.fhir.rest.method;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -74,11 +74,11 @@ public abstract class BaseMethodBinding {
 				returnType = search.type();
 			}
 
-			if (returnType == null) {
+			if (returnType == IResource.class) {
 				throw new ConfigurationException("Could not determine return type for method '" + theMethod.getName() + "'. Try explicitly specifying one in the operation annotation.");
 			}
 		}
-
+		
 		if (read != null) {
 			return new ReadMethodBinding(methodReturnTypeEnum, returnType, theMethod);
 		} else if (search != null) {

@@ -13,7 +13,8 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.rest.client.api.IRestfulClient;
-import ca.uhn.fhir.rest.common.BaseMethodBinding;
+import ca.uhn.fhir.rest.method.BaseMethodBinding;
+import ca.uhn.fhir.util.ReflectionUtil;
 
 public class RestfulClientFactory implements IRestfulClientFactory {
 
@@ -76,6 +77,12 @@ public class RestfulClientFactory implements IRestfulClientFactory {
 			Class<?> returnType = nextMethod.getReturnType();
 			if (IResource.class.isAssignableFrom(returnType)) {
 				resReturnType = (Class<? extends IResource>) returnType;
+			} else if (java.util.Collection.class.isAssignableFrom(returnType)) {
+				Class<?> returnTypeColl = ReflectionUtil.getGenericCollectionTypeOfMethodReturnType(nextMethod);
+				if (!IResource.class.isAssignableFrom(returnTypeColl)) {
+					throw new ConfigurationException("Generic type of collection for method '" + nextMethod + "' is not a subclass of IResource");
+				}
+				resReturnType = (Class<? extends IResource>) returnTypeColl;
 			}
 			BaseMethodBinding binding = BaseMethodBinding.bindMethod(resReturnType, nextMethod);
 			invocationHandler.addBinding(nextMethod, binding);

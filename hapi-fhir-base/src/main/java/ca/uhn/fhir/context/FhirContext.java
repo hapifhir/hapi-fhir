@@ -41,8 +41,8 @@ public class FhirContext {
 		return myIdToResourceDefinition.get(theId);
 	}
 
-	public Map<Class<? extends IElement>, BaseRuntimeElementDefinition<?>> getClassToElementDefinition() {
-		return myClassToElementDefinition;
+	public BaseRuntimeElementDefinition<?> getElementDefinition(Class<? extends IElement> theElementType) {
+		return myClassToElementDefinition.get(theElementType);
 	}
 
 	public RuntimeResourceDefinition getResourceDefinition(Class<? extends IResource> theResourceType) {

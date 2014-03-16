@@ -16,8 +16,8 @@ import ca.uhn.fhir.rest.client.api.IRestfulClient;
 
 public abstract class BaseResourceReference extends BaseElement {
 
-	private IResource myResource;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseResourceReference.class);
+	private IResource myResource;
 
 	/**
 	 * Gets the value(s) for <b>reference</b> (Relative, internal or absolute URL reference). creating it if it does not exist. Will not return <code>null</code>.
@@ -29,6 +29,23 @@ public abstract class BaseResourceReference extends BaseElement {
 	 * </p>
 	 */
 	public abstract StringDt getReference();
+
+	/**
+	 * Gets the actual loaded and parsed resource instance, <b>if it is already present</b>. This
+	 * method will return the resource instance only if it has previously been loaded using
+	 * {@link #loadResource(IRestfulClient)} or it was contained within the resource containing
+	 * this resource.
+	 *
+	 * @see See {@link #loadResource(IRestfulClient)}
+	 * @see See the FHIR specification section on <a href="http://www.hl7.org/implement/standards/fhir/references.html#id>contained resources</a>
+	 */
+	public IResource getResource() {
+		return myResource;
+	}
+
+	public String getResourceUrl() {
+		return getReference().getValue();
+	}
 
 	/**
 	 * Returns the referenced resource, fetching it <b>if it has not already been loaded</b>. This method invokes the HTTP client to retrieve the resource unless it has already been loaded, or was a
@@ -62,8 +79,8 @@ public abstract class BaseResourceReference extends BaseElement {
 		return myResource;
 	}
 
-	public String getResourceUrl() {
-		return getReference().getValue();
+	public void setResource(IResource theResource) {
+		myResource = theResource;
 	}
 
 }

@@ -3,7 +3,7 @@ package ca.uhn.fhir.model.api;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.util.ElementUtil;
 
-public class BaseBundle implements IElement {
+public class BaseBundle  extends BaseElement implements IElement {
 
 	private StringDt myAuthorName;
 	private StringDt myAuthorUri;

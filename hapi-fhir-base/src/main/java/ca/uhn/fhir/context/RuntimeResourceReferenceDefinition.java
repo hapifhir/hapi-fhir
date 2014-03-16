@@ -4,9 +4,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import ca.uhn.fhir.model.api.BaseResourceReference;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.api.BaseResourceReference;
 
 public class RuntimeResourceReferenceDefinition extends BaseRuntimeElementDefinition<BaseResourceReference> {
 

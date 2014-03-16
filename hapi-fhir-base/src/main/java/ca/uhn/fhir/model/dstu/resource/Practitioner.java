@@ -16,12 +16,33 @@
 
 package ca.uhn.fhir.model.dstu.resource;
 
-import java.util.*;
-import ca.uhn.fhir.model.api.*;
-import ca.uhn.fhir.model.api.annotation.*;
-import ca.uhn.fhir.model.primitive.*;
-import ca.uhn.fhir.model.dstu.composite.*;
-import ca.uhn.fhir.model.dstu.valueset.*;
+
+import java.util.Date;
+
+import ca.uhn.fhir.model.api.BaseElement;
+import ca.uhn.fhir.model.api.BaseResource;
+import ca.uhn.fhir.model.api.IElement;
+import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.IResourceBlock;
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import ca.uhn.fhir.model.api.annotation.Block;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.dstu.composite.AddressDt;
+import ca.uhn.fhir.model.dstu.composite.AttachmentDt;
+import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
+import ca.uhn.fhir.model.dstu.composite.ContactDt;
+import ca.uhn.fhir.model.dstu.composite.HumanNameDt;
+import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
+import ca.uhn.fhir.model.dstu.composite.PeriodDt;
+import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
+import ca.uhn.fhir.model.dstu.valueset.PractitionerRoleEnum;
+import ca.uhn.fhir.model.dstu.valueset.PractitionerSpecialtyEnum;
+import ca.uhn.fhir.model.primitive.BoundCodeableConceptDt;
+import ca.uhn.fhir.model.primitive.DateTimeDt;
+
 
 /**
  * HAPI/FHIR <b>Practitioner</b> Resource
@@ -136,7 +157,7 @@ public class Practitioner extends BaseResource implements IResource {
 		shortDefinition="A identifier for the person as this agent",
 		formalDefinition="An identifier that applies to this person in this role"
 	)
-	private List<IdentifierDt> myIdentifier;
+	private java.util.List<IdentifierDt> myIdentifier;
 	
 	@Child(name="name", type=HumanNameDt.class, order=1, min=0, max=1)	
 	@Description(
@@ -150,7 +171,7 @@ public class Practitioner extends BaseResource implements IResource {
 		shortDefinition="A contact detail for the practitioner",
 		formalDefinition="A contact detail for the practitioner, e.g. a telephone number or an email address."
 	)
-	private List<ContactDt> myTelecom;
+	private java.util.List<ContactDt> myTelecom;
 	
 	@Child(name="address", type=AddressDt.class, order=3, min=0, max=1)	
 	@Description(
@@ -178,10 +199,10 @@ public class Practitioner extends BaseResource implements IResource {
 		shortDefinition="Image of the person",
 		formalDefinition="Image of the person"
 	)
-	private List<AttachmentDt> myPhoto;
+	private java.util.List<AttachmentDt> myPhoto;
 	
 	@Child(name="organization", order=7, min=0, max=1, type={
-		Organization.class,
+		ca.uhn.fhir.model.dstu.resource.Organization.class,
 	})
 	@Description(
 		shortDefinition="The represented organization",
@@ -194,14 +215,14 @@ public class Practitioner extends BaseResource implements IResource {
 		shortDefinition="Roles which this practitioner may perform",
 		formalDefinition="Roles which this practitioner is authorized to perform for the organization"
 	)
-	private List<BoundCodeableConceptDt<PractitionerRoleEnum>> myRole;
+	private java.util.List<BoundCodeableConceptDt<PractitionerRoleEnum>> myRole;
 	
 	@Child(name="specialty", type=CodeableConceptDt.class, order=9, min=0, max=Child.MAX_UNLIMITED)	
 	@Description(
 		shortDefinition="Specific specialty of the practitioner",
 		formalDefinition="Specific specialty of the practitioner"
 	)
-	private List<BoundCodeableConceptDt<PractitionerSpecialtyEnum>> mySpecialty;
+	private java.util.List<BoundCodeableConceptDt<PractitionerSpecialtyEnum>> mySpecialty;
 	
 	@Child(name="period", type=PeriodDt.class, order=10, min=0, max=1)	
 	@Description(
@@ -211,33 +232,38 @@ public class Practitioner extends BaseResource implements IResource {
 	private PeriodDt myPeriod;
 	
 	@Child(name="location", order=11, min=0, max=Child.MAX_UNLIMITED, type={
-		Location.class,
+		ca.uhn.fhir.model.dstu.resource.Location.class,
 	})
 	@Description(
 		shortDefinition="The location(s) at which this practitioner provides care",
 		formalDefinition="The location(s) at which this practitioner provides care"
 	)
-	private List<ResourceReferenceDt> myLocation;
+	private java.util.List<ResourceReferenceDt> myLocation;
 	
 	@Child(name="qualification", order=12, min=0, max=Child.MAX_UNLIMITED)	
 	@Description(
 		shortDefinition="Qualifications obtained by training and certification",
 		formalDefinition=""
 	)
-	private List<Qualification> myQualification;
+	private java.util.List<Qualification> myQualification;
 	
 	@Child(name="communication", type=CodeableConceptDt.class, order=13, min=0, max=Child.MAX_UNLIMITED)	
 	@Description(
 		shortDefinition="A language the practitioner is able to use in patient communication",
 		formalDefinition="A language the practitioner is able to use in patient communication"
 	)
-	private List<CodeableConceptDt> myCommunication;
+	private java.util.List<CodeableConceptDt> myCommunication;
 	
 
 	@Override
 	public boolean isEmpty() {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myIdentifier,  myName,  myTelecom,  myAddress,  myGender,  myBirthDate,  myPhoto,  myOrganization,  myRole,  mySpecialty,  myPeriod,  myLocation,  myQualification,  myCommunication);
 	}
+	
+	public java.util.List<IElement> getAllPopulatedChildElements() {
+		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(  myIdentifier,  myName,  myTelecom,  myAddress,  myGender,  myBirthDate,  myPhoto,  myOrganization,  myRole,  mySpecialty,  myPeriod,  myLocation,  myQualification,  myCommunication);
+	}
+	
 
 	/**
 	 * Gets the value(s) for <b>identifier</b> (A identifier for the person as this agent).
@@ -249,9 +275,9 @@ public class Practitioner extends BaseResource implements IResource {
      * An identifier that applies to this person in this role
      * </p> 
 	 */
-	public List<IdentifierDt> getIdentifier() {  
+	public java.util.List<IdentifierDt> getIdentifier() {  
 		if (myIdentifier == null) {
-			myIdentifier = new ArrayList<IdentifierDt>();
+			myIdentifier = new java.util.ArrayList<IdentifierDt>();
 		}
 		return myIdentifier;
 	}
@@ -264,7 +290,7 @@ public class Practitioner extends BaseResource implements IResource {
      * An identifier that applies to this person in this role
      * </p> 
 	 */
-	public void setIdentifier(List<IdentifierDt> theValue) {
+	public void setIdentifier(java.util.List<IdentifierDt> theValue) {
 		myIdentifier = theValue;
 	}
 
@@ -324,9 +350,9 @@ public class Practitioner extends BaseResource implements IResource {
      * A contact detail for the practitioner, e.g. a telephone number or an email address.
      * </p> 
 	 */
-	public List<ContactDt> getTelecom() {  
+	public java.util.List<ContactDt> getTelecom() {  
 		if (myTelecom == null) {
-			myTelecom = new ArrayList<ContactDt>();
+			myTelecom = new java.util.ArrayList<ContactDt>();
 		}
 		return myTelecom;
 	}
@@ -339,7 +365,7 @@ public class Practitioner extends BaseResource implements IResource {
      * A contact detail for the practitioner, e.g. a telephone number or an email address.
      * </p> 
 	 */
-	public void setTelecom(List<ContactDt> theValue) {
+	public void setTelecom(java.util.List<ContactDt> theValue) {
 		myTelecom = theValue;
 	}
 
@@ -470,8 +496,8 @@ public class Practitioner extends BaseResource implements IResource {
      * The date and time of birth for the practitioner
      * </p> 
 	 */
-	public void setBirthDateWithSecondsPrecision( Date theDate) {
-		myBirthDate = new DateTimeDt(theDate); 
+	public void setBirthDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myBirthDate = new DateTimeDt(theDate, thePrecision); 
 	}
 
 	/**
@@ -482,8 +508,8 @@ public class Practitioner extends BaseResource implements IResource {
      * The date and time of birth for the practitioner
      * </p> 
 	 */
-	public void setBirthDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myBirthDate = new DateTimeDt(theDate, thePrecision); 
+	public void setBirthDateWithSecondsPrecision( Date theDate) {
+		myBirthDate = new DateTimeDt(theDate); 
 	}
 
  
@@ -497,9 +523,9 @@ public class Practitioner extends BaseResource implements IResource {
      * Image of the person
      * </p> 
 	 */
-	public List<AttachmentDt> getPhoto() {  
+	public java.util.List<AttachmentDt> getPhoto() {  
 		if (myPhoto == null) {
-			myPhoto = new ArrayList<AttachmentDt>();
+			myPhoto = new java.util.ArrayList<AttachmentDt>();
 		}
 		return myPhoto;
 	}
@@ -512,7 +538,7 @@ public class Practitioner extends BaseResource implements IResource {
      * Image of the person
      * </p> 
 	 */
-	public void setPhoto(List<AttachmentDt> theValue) {
+	public void setPhoto(java.util.List<AttachmentDt> theValue) {
 		myPhoto = theValue;
 	}
 
@@ -572,9 +598,9 @@ public class Practitioner extends BaseResource implements IResource {
      * Roles which this practitioner is authorized to perform for the organization
      * </p> 
 	 */
-	public List<BoundCodeableConceptDt<PractitionerRoleEnum>> getRole() {  
+	public java.util.List<BoundCodeableConceptDt<PractitionerRoleEnum>> getRole() {  
 		if (myRole == null) {
-			myRole = new ArrayList<BoundCodeableConceptDt<PractitionerRoleEnum>>();
+			myRole = new java.util.ArrayList<BoundCodeableConceptDt<PractitionerRoleEnum>>();
 		}
 		return myRole;
 	}
@@ -587,7 +613,7 @@ public class Practitioner extends BaseResource implements IResource {
      * Roles which this practitioner is authorized to perform for the organization
      * </p> 
 	 */
-	public void setRole(List<BoundCodeableConceptDt<PractitionerRoleEnum>> theValue) {
+	public void setRole(java.util.List<BoundCodeableConceptDt<PractitionerRoleEnum>> theValue) {
 		myRole = theValue;
 	}
 
@@ -628,9 +654,9 @@ public class Practitioner extends BaseResource implements IResource {
      * Specific specialty of the practitioner
      * </p> 
 	 */
-	public List<BoundCodeableConceptDt<PractitionerSpecialtyEnum>> getSpecialty() {  
+	public java.util.List<BoundCodeableConceptDt<PractitionerSpecialtyEnum>> getSpecialty() {  
 		if (mySpecialty == null) {
-			mySpecialty = new ArrayList<BoundCodeableConceptDt<PractitionerSpecialtyEnum>>();
+			mySpecialty = new java.util.ArrayList<BoundCodeableConceptDt<PractitionerSpecialtyEnum>>();
 		}
 		return mySpecialty;
 	}
@@ -643,7 +669,7 @@ public class Practitioner extends BaseResource implements IResource {
      * Specific specialty of the practitioner
      * </p> 
 	 */
-	public void setSpecialty(List<BoundCodeableConceptDt<PractitionerSpecialtyEnum>> theValue) {
+	public void setSpecialty(java.util.List<BoundCodeableConceptDt<PractitionerSpecialtyEnum>> theValue) {
 		mySpecialty = theValue;
 	}
 
@@ -715,9 +741,9 @@ public class Practitioner extends BaseResource implements IResource {
      * The location(s) at which this practitioner provides care
      * </p> 
 	 */
-	public List<ResourceReferenceDt> getLocation() {  
+	public java.util.List<ResourceReferenceDt> getLocation() {  
 		if (myLocation == null) {
-			myLocation = new ArrayList<ResourceReferenceDt>();
+			myLocation = new java.util.ArrayList<ResourceReferenceDt>();
 		}
 		return myLocation;
 	}
@@ -730,7 +756,7 @@ public class Practitioner extends BaseResource implements IResource {
      * The location(s) at which this practitioner provides care
      * </p> 
 	 */
-	public void setLocation(List<ResourceReferenceDt> theValue) {
+	public void setLocation(java.util.List<ResourceReferenceDt> theValue) {
 		myLocation = theValue;
 	}
 
@@ -746,9 +772,9 @@ public class Practitioner extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public List<Qualification> getQualification() {  
+	public java.util.List<Qualification> getQualification() {  
 		if (myQualification == null) {
-			myQualification = new ArrayList<Qualification>();
+			myQualification = new java.util.ArrayList<Qualification>();
 		}
 		return myQualification;
 	}
@@ -761,7 +787,7 @@ public class Practitioner extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public void setQualification(List<Qualification> theValue) {
+	public void setQualification(java.util.List<Qualification> theValue) {
 		myQualification = theValue;
 	}
 
@@ -790,9 +816,9 @@ public class Practitioner extends BaseResource implements IResource {
      * A language the practitioner is able to use in patient communication
      * </p> 
 	 */
-	public List<CodeableConceptDt> getCommunication() {  
+	public java.util.List<CodeableConceptDt> getCommunication() {  
 		if (myCommunication == null) {
-			myCommunication = new ArrayList<CodeableConceptDt>();
+			myCommunication = new java.util.ArrayList<CodeableConceptDt>();
 		}
 		return myCommunication;
 	}
@@ -805,7 +831,7 @@ public class Practitioner extends BaseResource implements IResource {
      * A language the practitioner is able to use in patient communication
      * </p> 
 	 */
-	public void setCommunication(List<CodeableConceptDt> theValue) {
+	public void setCommunication(java.util.List<CodeableConceptDt> theValue) {
 		myCommunication = theValue;
 	}
 
@@ -850,7 +876,7 @@ public class Practitioner extends BaseResource implements IResource {
 	private PeriodDt myPeriod;
 	
 	@Child(name="issuer", order=2, min=0, max=1, type={
-		Organization.class,
+		ca.uhn.fhir.model.dstu.resource.Organization.class,
 	})
 	@Description(
 		shortDefinition="Organization that regulates and issues the qualification",
@@ -863,6 +889,11 @@ public class Practitioner extends BaseResource implements IResource {
 	public boolean isEmpty() {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myCode,  myPeriod,  myIssuer);
 	}
+	
+	public java.util.List<IElement> getAllPopulatedChildElements() {
+		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(  myCode,  myPeriod,  myIssuer);
+	}
+	
 
 	/**
 	 * Gets the value(s) for <b>code</b> (Coded representation of the qualification).

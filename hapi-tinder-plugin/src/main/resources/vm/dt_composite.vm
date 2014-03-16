@@ -27,7 +27,7 @@ import ${import};
 @DatatypeDef(name="${className}") 
 public class ${className}Dt 
         extends #{if}(${className}=="ResourceReference") BaseResourceReference #{else} BaseElement #{end} 
-        implements ICompositeDatatype  #{if}( ${className} == "Identifier" ), IQueryParameterType #{end}
+        implements ICompositeDatatype  #{if}( ${className} == "Identifier" || ${className} == "Coding" ), IQueryParameterType #{end}
 {
 
 #########################
@@ -47,6 +47,22 @@ public class ${className}Dt
 	public IdentifierDt(String theSystem, String theValue) {
 		setSystem(theSystem);
 		setValue(theValue);
+	}
+#end
+#if ( ${className} == "Coding" )
+	/**
+	 * Creates a new Coding
+	 */
+	public CodingDt() {
+		// nothing
+	}
+
+	/**
+	 * Creates a new Coding with the given system and code
+	 */
+	public CodingDt(String theSystem, String theCode) {
+		setSystem(theSystem);
+		setCode(theCode);
 	}
 #end
 
@@ -94,6 +110,45 @@ public class ${className}Dt
 			setValue(theParameter.substring(barIndex + 1));
 		} else {
 			setValue(theParameter);
+		}
+	}	
+#end
+#if ( ${className} == "Coding" )
+	/**
+	 * Returns true if <code>this</code> Coding has the same {@link CodingDt#[[#]]#getCode() Code}
+	 * and {@link CodingDt#[[#]]#getSystem() system} (as compared by simple equals comparison).
+	 * Does not compare other Codes (e.g. {@link CodingDt#[[#]]#getUse() use}) or any extensions. 
+	 */
+	public boolean matchesSystemAndCode(CodingDt theCoding) {
+		if (theCoding == null) {
+			return false;
+		}
+		return getCode().equals(theCoding.getCode()) && getSystem().equals(theCoding.getSystem());
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public String getValueAsQueryToken() {
+		if (org.apache.commons.lang3.StringUtils.isNotBlank(getSystem().getValueAsString())) {
+			return getSystem().getValueAsString() + '|' + getCode().getValueAsString(); 
+		} else {
+			return getCode().getValueAsString();
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void setValueAsQueryToken(String theParameter) {
+		int barIndex = theParameter.indexOf('|');
+		if (barIndex != -1) {
+			setSystem(new UriDt(theParameter.substring(0, barIndex)));
+			setCode(theParameter.substring(barIndex + 1));
+		} else {
+			setCode(theParameter);
 		}
 	}	
 #end

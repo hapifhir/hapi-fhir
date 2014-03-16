@@ -1,6 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 import java.util.concurrent.TimeUnit;
 
@@ -78,11 +78,11 @@ public class ResfulServerTest {
 		Patient patient = (Patient) bundle.getEntries().get(0).getResource();
 		assertEquals("AAA", patient.getName().get(0).getFamily().get(0).getValue());
 		assertEquals("PatientOne", patient.getName().get(0).getGiven().get(0).getValue());
-		
+
 		/*
 		 * Now with optional value populated
 		 */
-		
+
 		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?name1=AAA&name2=BBB");
 		status = ourClient.execute(httpGet);
 
@@ -97,9 +97,67 @@ public class ResfulServerTest {
 		patient = (Patient) bundle.getEntries().get(0).getResource();
 		assertEquals("AAA", patient.getName().get(0).getFamily().get(0).getValue());
 		assertEquals("BBB", patient.getName().get(0).getGiven().get(0).getValue());
-		
+
 	}
 
+	@Test
+	public void testSearchByMultipleIdentifiers() throws Exception {
+
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?ids=urn:aaa%7Caaa,urn:bbb%7Cbbb");
+		HttpResponse status = ourClient.execute(httpGet);
+
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		ourLog.info("Response was:\n{}", responseContent);
+
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		Bundle bundle = ourCtx.newXmlParser().parseBundle(responseContent);
+
+		assertEquals(1, bundle.getEntries().size());
+
+		Patient patient = (Patient) bundle.getEntries().get(0).getResource();
+		assertEquals("urn:aaa|aaa", patient.getIdentifier().get(1).getValueAsQueryToken());
+		assertEquals("urn:bbb|bbb", patient.getIdentifier().get(2).getValueAsQueryToken());
+	}
+
+	@Test
+	public void testSearchByDob() throws Exception {
+
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?dob=2011-01-02");
+		HttpResponse status = ourClient.execute(httpGet);
+
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		ourLog.info("Response was:\n{}", responseContent);
+
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		Bundle bundle = ourCtx.newXmlParser().parseBundle(responseContent);
+
+		assertEquals(1, bundle.getEntries().size());
+
+		Patient patient = (Patient) bundle.getEntries().get(0).getResource();
+		assertEquals("NONE", patient.getIdentifier().get(1).getValue().getValue());
+		assertEquals("2011-01-02", patient.getIdentifier().get(2).getValue().getValue());
+
+		/*
+		 * With comparator
+		 */
+		
+		 httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?dob=%3E%3D2011-01-02");
+		 status = ourClient.execute(httpGet);
+
+		 responseContent = IOUtils.toString(status.getEntity().getContent());
+		ourLog.info("Response was:\n{}", responseContent);
+
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		 bundle = ourCtx.newXmlParser().parseBundle(responseContent);
+
+		assertEquals(1, bundle.getEntries().size());
+
+		 patient = (Patient) bundle.getEntries().get(0).getResource();
+		assertEquals(">=", patient.getIdentifier().get(1).getValue().getValue());
+		assertEquals("2011-01-02", patient.getIdentifier().get(2).getValue().getValue());
+
+	}
+	
 	@Test
 	public void testSearchByParamIdentifier() throws Exception {
 
@@ -175,10 +233,56 @@ public class ResfulServerTest {
 	}
 
 	@Test
+	public void testFormatParamXml() throws Exception {
+
+		// HttpPost httpPost = new HttpPost("http://localhost:" + ourPort +
+		// "/Patient/1");
+		// httpPost.setEntity(new StringEntity("test",
+		// ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1?_format=xml");
+		HttpResponse status = ourClient.execute(httpGet);
+
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		ourLog.info("Response was:\n{}", responseContent);
+
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		Patient patient = (Patient) ourCtx.newXmlParser().parseResource(responseContent);
+		assertEquals("PatientOne", patient.getName().get(0).getGiven().get(0).getValue());
+
+	}
+
+	@Test
+	public void testFormatParamJson() throws Exception {
+
+		// HttpPost httpPost = new HttpPost("http://localhost:" + ourPort +
+		// "/Patient/1");
+		// httpPost.setEntity(new StringEntity("test",
+		// ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1?_format=json");
+		HttpResponse status = ourClient.execute(httpGet);
+
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		ourLog.info("Response was:\n{}", responseContent);
+
+		assertEquals(200, status.getStatusLine().getStatusCode());
+
+		// TODO: enable once JSON parser is written
+		// Patient patient = (Patient)
+		// ourCtx.newJsonParser().parseResource(responseContent);
+		// assertEquals("PatientOne",
+		// patient.getName().get(0).getGiven().get(0).getValue());
+
+	}
+
+	@Test
 	public void testGetById() throws Exception {
 
-		// HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/1");
-		// httpPost.setEntity(new StringEntity("test", ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		// HttpPost httpPost = new HttpPost("http://localhost:" + ourPort +
+		// "/Patient/1");
+		// httpPost.setEntity(new StringEntity("test",
+		// ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
 		HttpResponse status = ourClient.execute(httpGet);
@@ -221,8 +325,10 @@ public class ResfulServerTest {
 	@Test
 	public void testGetByVersionId() throws Exception {
 
-		// HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/1");
-		// httpPost.setEntity(new StringEntity("test", ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		// HttpPost httpPost = new HttpPost("http://localhost:" + ourPort +
+		// "/Patient/1");
+		// httpPost.setEntity(new StringEntity("test",
+		// ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1/_history/999");
 		HttpResponse status = ourClient.execute(httpGet);

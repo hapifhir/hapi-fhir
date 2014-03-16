@@ -16,12 +16,40 @@
 
 package ca.uhn.fhir.model.dstu.resource;
 
-import java.util.*;
-import ca.uhn.fhir.model.api.*;
-import ca.uhn.fhir.model.api.annotation.*;
-import ca.uhn.fhir.model.primitive.*;
-import ca.uhn.fhir.model.dstu.composite.*;
-import ca.uhn.fhir.model.dstu.valueset.*;
+
+import java.util.Date;
+
+import ca.uhn.fhir.model.api.BaseElement;
+import ca.uhn.fhir.model.api.BaseResource;
+import ca.uhn.fhir.model.api.IDatatype;
+import ca.uhn.fhir.model.api.IElement;
+import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.IResourceBlock;
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import ca.uhn.fhir.model.api.annotation.Block;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.dstu.composite.AttachmentDt;
+import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
+import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
+import ca.uhn.fhir.model.dstu.composite.PeriodDt;
+import ca.uhn.fhir.model.dstu.composite.QuantityDt;
+import ca.uhn.fhir.model.dstu.composite.RangeDt;
+import ca.uhn.fhir.model.dstu.composite.RatioDt;
+import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.dstu.composite.SampledDataDt;
+import ca.uhn.fhir.model.dstu.valueset.ObservationInterpretationCodesEnum;
+import ca.uhn.fhir.model.dstu.valueset.ObservationRelationshipTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.ObservationReliabilityEnum;
+import ca.uhn.fhir.model.dstu.valueset.ObservationStatusEnum;
+import ca.uhn.fhir.model.primitive.BoundCodeDt;
+import ca.uhn.fhir.model.primitive.BoundCodeableConceptDt;
+import ca.uhn.fhir.model.primitive.CodeDt;
+import ca.uhn.fhir.model.primitive.DateTimeDt;
+import ca.uhn.fhir.model.primitive.InstantDt;
+import ca.uhn.fhir.model.primitive.StringDt;
+
 
 /**
  * HAPI/FHIR <b>Observation</b> Resource
@@ -280,10 +308,10 @@ public class Observation extends BaseResource implements IResource {
 	private IdentifierDt myIdentifier;
 	
 	@Child(name="subject", order=11, min=0, max=1, type={
-		Patient.class,
-		Group.class,
-		Device.class,
-		Location.class,
+		ca.uhn.fhir.model.dstu.resource.Patient.class,
+		ca.uhn.fhir.model.dstu.resource.Group.class,
+		ca.uhn.fhir.model.dstu.resource.Device.class,
+		ca.uhn.fhir.model.dstu.resource.Location.class,
 	})
 	@Description(
 		shortDefinition="Who and/or what this is about",
@@ -292,7 +320,7 @@ public class Observation extends BaseResource implements IResource {
 	private ResourceReferenceDt mySubject;
 	
 	@Child(name="specimen", order=12, min=0, max=1, type={
-		Specimen.class,
+		ca.uhn.fhir.model.dstu.resource.Specimen.class,
 	})
 	@Description(
 		shortDefinition="Specimen used for this observation",
@@ -301,35 +329,40 @@ public class Observation extends BaseResource implements IResource {
 	private ResourceReferenceDt mySpecimen;
 	
 	@Child(name="performer", order=13, min=0, max=Child.MAX_UNLIMITED, type={
-		Practitioner.class,
-		Device.class,
-		Organization.class,
+		ca.uhn.fhir.model.dstu.resource.Practitioner.class,
+		ca.uhn.fhir.model.dstu.resource.Device.class,
+		ca.uhn.fhir.model.dstu.resource.Organization.class,
 	})
 	@Description(
 		shortDefinition="Who did the observation",
 		formalDefinition="Who was responsible for asserting the observed value as \"true\""
 	)
-	private List<ResourceReferenceDt> myPerformer;
+	private java.util.List<ResourceReferenceDt> myPerformer;
 	
 	@Child(name="referenceRange", order=14, min=0, max=Child.MAX_UNLIMITED)	
 	@Description(
 		shortDefinition="Provides guide for interpretation",
 		formalDefinition="Guidance on how to interpret the value by comparison to a normal or recommended range"
 	)
-	private List<ReferenceRange> myReferenceRange;
+	private java.util.List<ReferenceRange> myReferenceRange;
 	
 	@Child(name="related", order=15, min=0, max=Child.MAX_UNLIMITED)	
 	@Description(
 		shortDefinition="Observations related to this observation",
 		formalDefinition="Related observations - either components, or previous observations, or statements of derivation"
 	)
-	private List<Related> myRelated;
+	private java.util.List<Related> myRelated;
 	
 
 	@Override
 	public boolean isEmpty() {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myName,  myValue,  myInterpretation,  myComments,  myApplies,  myIssued,  myStatus,  myReliability,  myBodySite,  myMethod,  myIdentifier,  mySubject,  mySpecimen,  myPerformer,  myReferenceRange,  myRelated);
 	}
+	
+	public java.util.List<IElement> getAllPopulatedChildElements() {
+		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(  myName,  myValue,  myInterpretation,  myComments,  myApplies,  myIssued,  myStatus,  myReliability,  myBodySite,  myMethod,  myIdentifier,  mySubject,  mySpecimen,  myPerformer,  myReferenceRange,  myRelated);
+	}
+	
 
 	/**
 	 * Gets the value(s) for <b>name</b> (Type of observation (code / type)).
@@ -542,8 +575,8 @@ public class Observation extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public void setIssuedWithMillisPrecision( Date theDate) {
-		myIssued = new InstantDt(theDate); 
+	public void setIssued( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myIssued = new InstantDt(theDate, thePrecision); 
 	}
 
 	/**
@@ -554,8 +587,8 @@ public class Observation extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public void setIssued( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myIssued = new InstantDt(theDate, thePrecision); 
+	public void setIssuedWithMillisPrecision( Date theDate) {
+		myIssued = new InstantDt(theDate); 
 	}
 
  
@@ -807,7 +840,7 @@ public class Observation extends BaseResource implements IResource {
      * Who was responsible for asserting the observed value as \"true\"
      * </p> 
 	 */
-	public List<ResourceReferenceDt> getPerformer() {  
+	public java.util.List<ResourceReferenceDt> getPerformer() {  
 		return myPerformer;
 	}
 
@@ -819,7 +852,7 @@ public class Observation extends BaseResource implements IResource {
      * Who was responsible for asserting the observed value as \"true\"
      * </p> 
 	 */
-	public void setPerformer(List<ResourceReferenceDt> theValue) {
+	public void setPerformer(java.util.List<ResourceReferenceDt> theValue) {
 		myPerformer = theValue;
 	}
 
@@ -835,9 +868,9 @@ public class Observation extends BaseResource implements IResource {
      * Guidance on how to interpret the value by comparison to a normal or recommended range
      * </p> 
 	 */
-	public List<ReferenceRange> getReferenceRange() {  
+	public java.util.List<ReferenceRange> getReferenceRange() {  
 		if (myReferenceRange == null) {
-			myReferenceRange = new ArrayList<ReferenceRange>();
+			myReferenceRange = new java.util.ArrayList<ReferenceRange>();
 		}
 		return myReferenceRange;
 	}
@@ -850,7 +883,7 @@ public class Observation extends BaseResource implements IResource {
      * Guidance on how to interpret the value by comparison to a normal or recommended range
      * </p> 
 	 */
-	public void setReferenceRange(List<ReferenceRange> theValue) {
+	public void setReferenceRange(java.util.List<ReferenceRange> theValue) {
 		myReferenceRange = theValue;
 	}
 
@@ -879,9 +912,9 @@ public class Observation extends BaseResource implements IResource {
      * Related observations - either components, or previous observations, or statements of derivation
      * </p> 
 	 */
-	public List<Related> getRelated() {  
+	public java.util.List<Related> getRelated() {  
 		if (myRelated == null) {
-			myRelated = new ArrayList<Related>();
+			myRelated = new java.util.ArrayList<Related>();
 		}
 		return myRelated;
 	}
@@ -894,7 +927,7 @@ public class Observation extends BaseResource implements IResource {
      * Related observations - either components, or previous observations, or statements of derivation
      * </p> 
 	 */
-	public void setRelated(List<Related> theValue) {
+	public void setRelated(java.util.List<Related> theValue) {
 		myRelated = theValue;
 	}
 
@@ -957,6 +990,11 @@ public class Observation extends BaseResource implements IResource {
 	public boolean isEmpty() {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myLow,  myHigh,  myMeaning,  myAge);
 	}
+	
+	public java.util.List<IElement> getAllPopulatedChildElements() {
+		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(  myLow,  myHigh,  myMeaning,  myAge);
+	}
+	
 
 	/**
 	 * Gets the value(s) for <b>low</b> (Low Range, if relevant).
@@ -1105,7 +1143,7 @@ public class Observation extends BaseResource implements IResource {
 	private BoundCodeDt<ObservationRelationshipTypeEnum> myType;
 	
 	@Child(name="target", order=1, min=1, max=1, type={
-		Observation.class,
+		ca.uhn.fhir.model.dstu.resource.Observation.class,
 	})
 	@Description(
 		shortDefinition="Observation that is related to this one",
@@ -1118,6 +1156,11 @@ public class Observation extends BaseResource implements IResource {
 	public boolean isEmpty() {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myType,  myTarget);
 	}
+	
+	public java.util.List<IElement> getAllPopulatedChildElements() {
+		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(  myType,  myTarget);
+	}
+	
 
 	/**
 	 * Gets the value(s) for <b>type</b> (has-component | has-member | derived-from | sequel-to | replaces | qualified-by | interfered-by).

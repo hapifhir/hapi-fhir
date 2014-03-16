@@ -152,7 +152,7 @@
 				</p>
 			
 			</subsection>
-			<subsection name="Multiple and Optional Parameters">
+			<subsection name="Chained Parameters">
 
 				<p>
 					Search methods may take multiple parameters, and these parameters
@@ -162,6 +162,12 @@
 					To add an optional parameter (which will be pased in as <code>null</code> if no value
 					is supplied), annotate the method with
 					<a href="./apidocs/ca/uhn/fhir/rest/server/parameters/Required.html">@Optional</a>.
+				</p>
+				
+				<p>
+					You may annotate a method with any combination of as many @Required and as many @Optional
+					parameters as you want. It is valid to have no @Required parameters, or
+					no @Optional parameters as well.
 				</p>
 			
 				<macro name="snippet">
@@ -176,7 +182,94 @@
 				</p>
 					
 			</subsection>
+
+			<subsection name="Composite (Multi-Valued) Parameters">
+
+				<p>
+					It is possible to accept multiple values of a single parameter
+					as well. This is useful in cases when you want to return a list
+					of resources with criteria matching a list of possible values. 
+					See the <a href="http://www.hl7.org/implement/standards/fhir/search.html#combining">FHIR Specification</a>
+					for more information.
+				</p>
+				
+				<p>
+					The FHIR specification allows two types of composite parameters:
+				</p>
+				<ul>
+					<li>
+						Where a parameter may accept multiple comma separated values within a single value string 
+						(e.g. <code>?language=FR,NL</code>) this is treated as an <b>OR</b> relationship, and 
+						the search should return elements matching either one or the other. 
+					</li>
+					<li>
+						Where a parameter may accept multiple value strings for the same parameter name 
+						(e.g. <code>?language=FR&amp;language=NL</code>) this is treated as an <b>AND</b> relationship, 
+						and	the search should return only elements matching both. 
+					</li>
+				</ul> 
+				
+				<h4>OR Relationship Query Parameters</h4>
+				
+				<p>
+					To accept a composite parameter, use a parameter type which implements the
+					<a href="./apidocs/ca/uhn/fhir/model/api/IQueryParameterOr.html">IQueryParameterOr</a>
+					interface. For example, to accept searches for
+					Observations matching any of a collection of names:
+				</p>
+				
+				<macro name="snippet">
+					<param name="id" value="searchMultiple" />
+					<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
+				</macro>
+				
+				<p>
+					Example URL to invoke this method:<br/>
+					<code>http://fhir.example.com/Observation?name=urn:fakenames|123,urn:fakenames|456</code>
+				</p>
+					
+			</subsection>
 			
+			<subsection name="Date Parameters">
+
+				<p>
+					The FHIR specification provides a sytax for specifying
+					dates (and date/times as well, but for simplicity we will just say dates here) 
+					as search criteria.
+				</p>
+
+				<p>
+					Dates may be optionally prefixed with a qualifier. For example, the 
+					string <code>&gt;=2011-01-02</code> means any date on or after 2011-01-02.
+				</p>				
+				
+				<p>
+					To accept a qualified date parameter, use the
+					QualifiedDateParam
+					parameter type. 
+				</p>
+				
+				<macro name="snippet">
+					<param name="id" value="dates" />
+					<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
+				</macro>
+				
+				<p>
+					Example URL to invoke this method:<br/>
+					<code>http://fhir.example.com/Observation?birthdate=&gt;=2011-01-02</code>
+				</p>
+				
+				<p>
+					Invoking a client of thie type involves the following syntax:
+				</p>
+				
+				<macro name="snippet">
+					<param name="id" value="dateClient" />
+					<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
+				</macro>
+
+			</subsection>
+
 		</section>
 			
 

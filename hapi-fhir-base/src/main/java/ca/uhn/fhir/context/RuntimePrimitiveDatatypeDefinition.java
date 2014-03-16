@@ -1,14 +1,32 @@
 package ca.uhn.fhir.context;
 
+import static org.apache.commons.lang3.StringUtils.*;
+
 import java.util.Map;
 
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IPrimitiveDatatype;
+import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
 
-public class RuntimePrimitiveDatatypeDefinition extends BaseRuntimeElementDefinition<IPrimitiveDatatype<?>>{
+public class RuntimePrimitiveDatatypeDefinition extends BaseRuntimeElementDefinition<IPrimitiveDatatype<?>> implements IRuntimeDatatypeDefinition {
 
-	public RuntimePrimitiveDatatypeDefinition(String theName, Class<? extends IPrimitiveDatatype<?>> theImplementingClass) {
-		super(theName, theImplementingClass);
+	private boolean mySpecialization;
+
+	public RuntimePrimitiveDatatypeDefinition(DatatypeDef theDef, Class<? extends IPrimitiveDatatype<?>> theImplementingClass) {
+		super(theDef.name(), theImplementingClass);
+		
+		String resourceName = theDef.name();
+		if (isBlank(resourceName)) {
+			throw new ConfigurationException("Resource type @" + ResourceDef.class.getSimpleName() + " annotation contains no resource name: " + theImplementingClass.getCanonicalName());
+		}
+		
+		mySpecialization = theDef.isSpecialization();
+	}
+
+	@Override
+	public boolean isSpecialization() {
+		return mySpecialization;
 	}
 
 	@Override

@@ -16,12 +16,13 @@
 
 package ca.uhn.fhir.model.dstu.composite;
 
-import java.util.*;
-import ca.uhn.fhir.model.api.*;
-import ca.uhn.fhir.model.api.annotation.*;
-import ca.uhn.fhir.model.primitive.*;
-import ca.uhn.fhir.model.dstu.valueset.*;
-import ca.uhn.fhir.model.dstu.resource.*;
+import ca.uhn.fhir.model.api.BaseResourceReference;
+import ca.uhn.fhir.model.api.ICompositeDatatype;
+import ca.uhn.fhir.model.api.IElement;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.primitive.StringDt;
 
 /**
  * HAPI/FHIR <b>ResourceReference</b> Datatype
@@ -61,6 +62,11 @@ public class ResourceReferenceDt
 	public boolean isEmpty() {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myReference,  myDisplay);
 	}
+	
+	public java.util.List<IElement> getAllPopulatedChildElements() {
+		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(  myReference,  myDisplay);
+	}
+	
 
 	/**
 	 * Gets the value(s) for <b>reference</b> (Relative, internal or absolute URL reference).

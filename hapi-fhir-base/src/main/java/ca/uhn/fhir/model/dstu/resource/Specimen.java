@@ -16,12 +16,34 @@
 
 package ca.uhn.fhir.model.dstu.resource;
 
-import java.util.*;
-import ca.uhn.fhir.model.api.*;
-import ca.uhn.fhir.model.api.annotation.*;
-import ca.uhn.fhir.model.primitive.*;
-import ca.uhn.fhir.model.dstu.composite.*;
-import ca.uhn.fhir.model.dstu.valueset.*;
+
+import java.util.Date;
+
+import ca.uhn.fhir.model.api.BaseElement;
+import ca.uhn.fhir.model.api.BaseResource;
+import ca.uhn.fhir.model.api.IDatatype;
+import ca.uhn.fhir.model.api.IElement;
+import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.IResourceBlock;
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import ca.uhn.fhir.model.api.annotation.Block;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
+import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
+import ca.uhn.fhir.model.dstu.composite.PeriodDt;
+import ca.uhn.fhir.model.dstu.composite.QuantityDt;
+import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.dstu.valueset.HierarchicalRelationshipTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.SpecimenCollectionMethodEnum;
+import ca.uhn.fhir.model.dstu.valueset.SpecimenTreatmentProcedureEnum;
+import ca.uhn.fhir.model.primitive.BoundCodeDt;
+import ca.uhn.fhir.model.primitive.BoundCodeableConceptDt;
+import ca.uhn.fhir.model.primitive.CodeDt;
+import ca.uhn.fhir.model.primitive.DateTimeDt;
+import ca.uhn.fhir.model.primitive.StringDt;
+
 
 /**
  * HAPI/FHIR <b>Specimen</b> Resource
@@ -56,7 +78,7 @@ public class Specimen extends BaseResource implements IResource {
 		shortDefinition="External Identifier",
 		formalDefinition="Id for specimen"
 	)
-	private List<IdentifierDt> myIdentifier;
+	private java.util.List<IdentifierDt> myIdentifier;
 	
 	@Child(name="type", type=CodeableConceptDt.class, order=1, min=0, max=1)	
 	@Description(
@@ -70,13 +92,13 @@ public class Specimen extends BaseResource implements IResource {
 		shortDefinition="Parent of specimen",
 		formalDefinition="Parent specimen from which the focal specimen was a component"
 	)
-	private List<Source> mySource;
+	private java.util.List<Source> mySource;
 	
 	@Child(name="subject", order=3, min=1, max=1, type={
-		Patient.class,
-		Group.class,
-		Device.class,
-		Substance.class,
+		ca.uhn.fhir.model.dstu.resource.Patient.class,
+		ca.uhn.fhir.model.dstu.resource.Group.class,
+		ca.uhn.fhir.model.dstu.resource.Device.class,
+		ca.uhn.fhir.model.dstu.resource.Substance.class,
 	})
 	@Description(
 		shortDefinition="Where the specimen came from. This may be the patient(s) or from the environment or  a device",
@@ -110,20 +132,25 @@ public class Specimen extends BaseResource implements IResource {
 		shortDefinition="Treatment and processing step details",
 		formalDefinition="Details concerning treatment and processing steps for the specimen"
 	)
-	private List<Treatment> myTreatment;
+	private java.util.List<Treatment> myTreatment;
 	
 	@Child(name="container", order=8, min=0, max=Child.MAX_UNLIMITED)	
 	@Description(
 		shortDefinition="Direct container of specimen (tube/slide, etc)",
 		formalDefinition="The container holding the specimen.  The recursive nature of containers; i.e. blood in tube in tray in rack is not addressed here."
 	)
-	private List<Container> myContainer;
+	private java.util.List<Container> myContainer;
 	
 
 	@Override
 	public boolean isEmpty() {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myIdentifier,  myType,  mySource,  mySubject,  myAccessionIdentifier,  myReceivedTime,  myCollection,  myTreatment,  myContainer);
 	}
+	
+	public java.util.List<IElement> getAllPopulatedChildElements() {
+		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(  myIdentifier,  myType,  mySource,  mySubject,  myAccessionIdentifier,  myReceivedTime,  myCollection,  myTreatment,  myContainer);
+	}
+	
 
 	/**
 	 * Gets the value(s) for <b>identifier</b> (External Identifier).
@@ -135,9 +162,9 @@ public class Specimen extends BaseResource implements IResource {
      * Id for specimen
      * </p> 
 	 */
-	public List<IdentifierDt> getIdentifier() {  
+	public java.util.List<IdentifierDt> getIdentifier() {  
 		if (myIdentifier == null) {
-			myIdentifier = new ArrayList<IdentifierDt>();
+			myIdentifier = new java.util.ArrayList<IdentifierDt>();
 		}
 		return myIdentifier;
 	}
@@ -150,7 +177,7 @@ public class Specimen extends BaseResource implements IResource {
      * Id for specimen
      * </p> 
 	 */
-	public void setIdentifier(List<IdentifierDt> theValue) {
+	public void setIdentifier(java.util.List<IdentifierDt> theValue) {
 		myIdentifier = theValue;
 	}
 
@@ -210,9 +237,9 @@ public class Specimen extends BaseResource implements IResource {
      * Parent specimen from which the focal specimen was a component
      * </p> 
 	 */
-	public List<Source> getSource() {  
+	public java.util.List<Source> getSource() {  
 		if (mySource == null) {
-			mySource = new ArrayList<Source>();
+			mySource = new java.util.ArrayList<Source>();
 		}
 		return mySource;
 	}
@@ -225,7 +252,7 @@ public class Specimen extends BaseResource implements IResource {
      * Parent specimen from which the focal specimen was a component
      * </p> 
 	 */
-	public void setSource(List<Source> theValue) {
+	public void setSource(java.util.List<Source> theValue) {
 		mySource = theValue;
 	}
 
@@ -341,8 +368,8 @@ public class Specimen extends BaseResource implements IResource {
      * Time when specimen was received for processing or testing
      * </p> 
 	 */
-	public void setReceivedTimeWithSecondsPrecision( Date theDate) {
-		myReceivedTime = new DateTimeDt(theDate); 
+	public void setReceivedTime( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myReceivedTime = new DateTimeDt(theDate, thePrecision); 
 	}
 
 	/**
@@ -353,8 +380,8 @@ public class Specimen extends BaseResource implements IResource {
      * Time when specimen was received for processing or testing
      * </p> 
 	 */
-	public void setReceivedTime( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myReceivedTime = new DateTimeDt(theDate, thePrecision); 
+	public void setReceivedTimeWithSecondsPrecision( Date theDate) {
+		myReceivedTime = new DateTimeDt(theDate); 
 	}
 
  
@@ -399,9 +426,9 @@ public class Specimen extends BaseResource implements IResource {
      * Details concerning treatment and processing steps for the specimen
      * </p> 
 	 */
-	public List<Treatment> getTreatment() {  
+	public java.util.List<Treatment> getTreatment() {  
 		if (myTreatment == null) {
-			myTreatment = new ArrayList<Treatment>();
+			myTreatment = new java.util.ArrayList<Treatment>();
 		}
 		return myTreatment;
 	}
@@ -414,7 +441,7 @@ public class Specimen extends BaseResource implements IResource {
      * Details concerning treatment and processing steps for the specimen
      * </p> 
 	 */
-	public void setTreatment(List<Treatment> theValue) {
+	public void setTreatment(java.util.List<Treatment> theValue) {
 		myTreatment = theValue;
 	}
 
@@ -443,9 +470,9 @@ public class Specimen extends BaseResource implements IResource {
      * The container holding the specimen.  The recursive nature of containers; i.e. blood in tube in tray in rack is not addressed here.
      * </p> 
 	 */
-	public List<Container> getContainer() {  
+	public java.util.List<Container> getContainer() {  
 		if (myContainer == null) {
-			myContainer = new ArrayList<Container>();
+			myContainer = new java.util.ArrayList<Container>();
 		}
 		return myContainer;
 	}
@@ -458,7 +485,7 @@ public class Specimen extends BaseResource implements IResource {
      * The container holding the specimen.  The recursive nature of containers; i.e. blood in tube in tray in rack is not addressed here.
      * </p> 
 	 */
-	public void setContainer(List<Container> theValue) {
+	public void setContainer(java.util.List<Container> theValue) {
 		myContainer = theValue;
 	}
 
@@ -496,19 +523,24 @@ public class Specimen extends BaseResource implements IResource {
 	private BoundCodeDt<HierarchicalRelationshipTypeEnum> myRelationship;
 	
 	@Child(name="target", order=1, min=0, max=Child.MAX_UNLIMITED, type={
-		Specimen.class,
+		ca.uhn.fhir.model.dstu.resource.Specimen.class,
 	})
 	@Description(
 		shortDefinition="The subject of the relationship",
 		formalDefinition="The specimen resource that is the target of this relationship"
 	)
-	private List<ResourceReferenceDt> myTarget;
+	private java.util.List<ResourceReferenceDt> myTarget;
 	
 
 	@Override
 	public boolean isEmpty() {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myRelationship,  myTarget);
 	}
+	
+	public java.util.List<IElement> getAllPopulatedChildElements() {
+		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(  myRelationship,  myTarget);
+	}
+	
 
 	/**
 	 * Gets the value(s) for <b>relationship</b> (parent | child).
@@ -563,9 +595,9 @@ public class Specimen extends BaseResource implements IResource {
      * The specimen resource that is the target of this relationship
      * </p> 
 	 */
-	public List<ResourceReferenceDt> getTarget() {  
+	public java.util.List<ResourceReferenceDt> getTarget() {  
 		if (myTarget == null) {
-			myTarget = new ArrayList<ResourceReferenceDt>();
+			myTarget = new java.util.ArrayList<ResourceReferenceDt>();
 		}
 		return myTarget;
 	}
@@ -578,7 +610,7 @@ public class Specimen extends BaseResource implements IResource {
      * The specimen resource that is the target of this relationship
      * </p> 
 	 */
-	public void setTarget(List<ResourceReferenceDt> theValue) {
+	public void setTarget(java.util.List<ResourceReferenceDt> theValue) {
 		myTarget = theValue;
 	}
 
@@ -600,7 +632,7 @@ public class Specimen extends BaseResource implements IResource {
 	public static class Collection extends BaseElement implements IResourceBlock {
 	
 	@Child(name="collector", order=0, min=0, max=1, type={
-		Practitioner.class,
+		ca.uhn.fhir.model.dstu.resource.Practitioner.class,
 	})
 	@Description(
 		shortDefinition="Who collected the specimen",
@@ -613,7 +645,7 @@ public class Specimen extends BaseResource implements IResource {
 		shortDefinition="Collector comments",
 		formalDefinition="To communicate any details or issues encountered during the specimen collection procedure."
 	)
-	private List<StringDt> myComment;
+	private java.util.List<StringDt> myComment;
 	
 	@Child(name="collected", order=2, min=0, max=1, type={
 		DateTimeDt.class,
@@ -651,6 +683,11 @@ public class Specimen extends BaseResource implements IResource {
 	public boolean isEmpty() {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myCollector,  myComment,  myCollected,  myQuantity,  myMethod,  mySourceSite);
 	}
+	
+	public java.util.List<IElement> getAllPopulatedChildElements() {
+		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(  myCollector,  myComment,  myCollected,  myQuantity,  myMethod,  mySourceSite);
+	}
+	
 
 	/**
 	 * Gets the value(s) for <b>collector</b> (Who collected the specimen).
@@ -693,9 +730,9 @@ public class Specimen extends BaseResource implements IResource {
      * To communicate any details or issues encountered during the specimen collection procedure.
      * </p> 
 	 */
-	public List<StringDt> getComment() {  
+	public java.util.List<StringDt> getComment() {  
 		if (myComment == null) {
-			myComment = new ArrayList<StringDt>();
+			myComment = new java.util.ArrayList<StringDt>();
 		}
 		return myComment;
 	}
@@ -708,7 +745,7 @@ public class Specimen extends BaseResource implements IResource {
      * To communicate any details or issues encountered during the specimen collection procedure.
      * </p> 
 	 */
-	public void setComment(List<StringDt> theValue) {
+	public void setComment(java.util.List<StringDt> theValue) {
 		myComment = theValue;
 	}
 
@@ -736,7 +773,7 @@ public class Specimen extends BaseResource implements IResource {
 	 */
 	public void addComment( String theString) {
 		if (myComment == null) {
-			myComment = new ArrayList<StringDt>();
+			myComment = new java.util.ArrayList<StringDt>();
 		}
 		myComment.add(new StringDt(theString)); 
 	}
@@ -905,19 +942,24 @@ public class Specimen extends BaseResource implements IResource {
 	private BoundCodeableConceptDt<SpecimenTreatmentProcedureEnum> myProcedure;
 	
 	@Child(name="additive", order=2, min=0, max=Child.MAX_UNLIMITED, type={
-		Substance.class,
+		ca.uhn.fhir.model.dstu.resource.Substance.class,
 	})
 	@Description(
 		shortDefinition="Material used in the processing step",
 		formalDefinition=""
 	)
-	private List<ResourceReferenceDt> myAdditive;
+	private java.util.List<ResourceReferenceDt> myAdditive;
 	
 
 	@Override
 	public boolean isEmpty() {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myDescription,  myProcedure,  myAdditive);
 	}
+	
+	public java.util.List<IElement> getAllPopulatedChildElements() {
+		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(  myDescription,  myProcedure,  myAdditive);
+	}
+	
 
 	/**
 	 * Gets the value(s) for <b>description</b> (Textual description of procedure).
@@ -1015,9 +1057,9 @@ public class Specimen extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public List<ResourceReferenceDt> getAdditive() {  
+	public java.util.List<ResourceReferenceDt> getAdditive() {  
 		if (myAdditive == null) {
-			myAdditive = new ArrayList<ResourceReferenceDt>();
+			myAdditive = new java.util.ArrayList<ResourceReferenceDt>();
 		}
 		return myAdditive;
 	}
@@ -1030,7 +1072,7 @@ public class Specimen extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public void setAdditive(List<ResourceReferenceDt> theValue) {
+	public void setAdditive(java.util.List<ResourceReferenceDt> theValue) {
 		myAdditive = theValue;
 	}
 
@@ -1056,7 +1098,7 @@ public class Specimen extends BaseResource implements IResource {
 		shortDefinition="Id for the container",
 		formalDefinition="Id for container. There may be multiple; a manufacturer's bar code, lab assigned identifier, etc. The container ID may differ from the specimen id in some circumstances"
 	)
-	private List<IdentifierDt> myIdentifier;
+	private java.util.List<IdentifierDt> myIdentifier;
 	
 	@Child(name="description", type=StringDt.class, order=1, min=0, max=1)	
 	@Description(
@@ -1087,7 +1129,7 @@ public class Specimen extends BaseResource implements IResource {
 	private QuantityDt mySpecimenQuantity;
 	
 	@Child(name="additive", order=5, min=0, max=1, type={
-		Substance.class,
+		ca.uhn.fhir.model.dstu.resource.Substance.class,
 	})
 	@Description(
 		shortDefinition="Additive associated with container",
@@ -1100,6 +1142,11 @@ public class Specimen extends BaseResource implements IResource {
 	public boolean isEmpty() {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myIdentifier,  myDescription,  myType,  myCapacity,  mySpecimenQuantity,  myAdditive);
 	}
+	
+	public java.util.List<IElement> getAllPopulatedChildElements() {
+		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(  myIdentifier,  myDescription,  myType,  myCapacity,  mySpecimenQuantity,  myAdditive);
+	}
+	
 
 	/**
 	 * Gets the value(s) for <b>identifier</b> (Id for the container).
@@ -1111,9 +1158,9 @@ public class Specimen extends BaseResource implements IResource {
      * Id for container. There may be multiple; a manufacturer's bar code, lab assigned identifier, etc. The container ID may differ from the specimen id in some circumstances
      * </p> 
 	 */
-	public List<IdentifierDt> getIdentifier() {  
+	public java.util.List<IdentifierDt> getIdentifier() {  
 		if (myIdentifier == null) {
-			myIdentifier = new ArrayList<IdentifierDt>();
+			myIdentifier = new java.util.ArrayList<IdentifierDt>();
 		}
 		return myIdentifier;
 	}
@@ -1126,7 +1173,7 @@ public class Specimen extends BaseResource implements IResource {
      * Id for container. There may be multiple; a manufacturer's bar code, lab assigned identifier, etc. The container ID may differ from the specimen id in some circumstances
      * </p> 
 	 */
-	public void setIdentifier(List<IdentifierDt> theValue) {
+	public void setIdentifier(java.util.List<IdentifierDt> theValue) {
 		myIdentifier = theValue;
 	}
 

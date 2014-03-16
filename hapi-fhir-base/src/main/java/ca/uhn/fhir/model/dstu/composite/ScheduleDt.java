@@ -16,12 +16,24 @@
 
 package ca.uhn.fhir.model.dstu.composite;
 
-import java.util.*;
-import ca.uhn.fhir.model.api.*;
-import ca.uhn.fhir.model.api.annotation.*;
-import ca.uhn.fhir.model.primitive.*;
-import ca.uhn.fhir.model.dstu.valueset.*;
-import ca.uhn.fhir.model.dstu.resource.*;
+import java.util.Date;
+
+import ca.uhn.fhir.model.api.BaseElement;
+import ca.uhn.fhir.model.api.ICompositeDatatype;
+import ca.uhn.fhir.model.api.IElement;
+import ca.uhn.fhir.model.api.IResourceBlock;
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import ca.uhn.fhir.model.api.annotation.Block;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.dstu.valueset.EventTimingEnum;
+import ca.uhn.fhir.model.dstu.valueset.UnitsOfTimeEnum;
+import ca.uhn.fhir.model.primitive.BoundCodeDt;
+import ca.uhn.fhir.model.primitive.CodeDt;
+import ca.uhn.fhir.model.primitive.DateTimeDt;
+import ca.uhn.fhir.model.primitive.DecimalDt;
+import ca.uhn.fhir.model.primitive.IntegerDt;
 
 /**
  * HAPI/FHIR <b>Schedule</b> Datatype
@@ -47,7 +59,7 @@ public class ScheduleDt
 		shortDefinition="When the event occurs",
 		formalDefinition="Identifies specific time periods when the event should occur"
 	)
-	private List<PeriodDt> myEvent;
+	private java.util.List<PeriodDt> myEvent;
 	
 	@Child(name="repeat", order=1, min=0, max=1)	
 	@Description(
@@ -61,6 +73,11 @@ public class ScheduleDt
 	public boolean isEmpty() {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myEvent,  myRepeat);
 	}
+	
+	public java.util.List<IElement> getAllPopulatedChildElements() {
+		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(  myEvent,  myRepeat);
+	}
+	
 
 	/**
 	 * Gets the value(s) for <b>event</b> (When the event occurs).
@@ -72,9 +89,9 @@ public class ScheduleDt
      * Identifies specific time periods when the event should occur
      * </p> 
 	 */
-	public List<PeriodDt> getEvent() {  
+	public java.util.List<PeriodDt> getEvent() {  
 		if (myEvent == null) {
-			myEvent = new ArrayList<PeriodDt>();
+			myEvent = new java.util.ArrayList<PeriodDt>();
 		}
 		return myEvent;
 	}
@@ -87,7 +104,7 @@ public class ScheduleDt
      * Identifies specific time periods when the event should occur
      * </p> 
 	 */
-	public void setEvent(List<PeriodDt> theValue) {
+	public void setEvent(java.util.List<PeriodDt> theValue) {
 		myEvent = theValue;
 	}
 
@@ -195,6 +212,11 @@ public class ScheduleDt
 	public boolean isEmpty() {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myFrequency,  myWhen,  myDuration,  myUnits,  myCount,  myEnd);
 	}
+	
+	public java.util.List<IElement> getAllPopulatedChildElements() {
+		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(  myFrequency,  myWhen,  myDuration,  myUnits,  myCount,  myEnd);
+	}
+	
 
 	/**
 	 * Gets the value(s) for <b>frequency</b> (Event occurs frequency times per duration).
@@ -320,7 +342,7 @@ public class ScheduleDt
      * How long each repetition should last
      * </p> 
 	 */
-	public void setDuration( java.math.BigDecimal theValue) {
+	public void setDuration( long theValue) {
 		myDuration = new DecimalDt(theValue); 
 	}
 
@@ -344,7 +366,7 @@ public class ScheduleDt
      * How long each repetition should last
      * </p> 
 	 */
-	public void setDuration( long theValue) {
+	public void setDuration( java.math.BigDecimal theValue) {
 		myDuration = new DecimalDt(theValue); 
 	}
 
@@ -473,8 +495,8 @@ public class ScheduleDt
      * When to stop repeating the schedule
      * </p> 
 	 */
-	public void setEndWithSecondsPrecision( Date theDate) {
-		myEnd = new DateTimeDt(theDate); 
+	public void setEnd( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myEnd = new DateTimeDt(theDate, thePrecision); 
 	}
 
 	/**
@@ -485,8 +507,8 @@ public class ScheduleDt
      * When to stop repeating the schedule
      * </p> 
 	 */
-	public void setEnd( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myEnd = new DateTimeDt(theDate, thePrecision); 
+	public void setEndWithSecondsPrecision( Date theDate) {
+		myEnd = new DateTimeDt(theDate); 
 	}
 
  

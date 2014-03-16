@@ -16,12 +16,16 @@
 
 package ca.uhn.fhir.model.dstu.composite;
 
-import java.util.*;
-import ca.uhn.fhir.model.api.*;
-import ca.uhn.fhir.model.api.annotation.*;
-import ca.uhn.fhir.model.primitive.*;
-import ca.uhn.fhir.model.dstu.valueset.*;
-import ca.uhn.fhir.model.dstu.resource.*;
+import ca.uhn.fhir.model.api.BaseElement;
+import ca.uhn.fhir.model.api.ICompositeDatatype;
+import ca.uhn.fhir.model.api.IElement;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.dstu.valueset.AddressUseEnum;
+import ca.uhn.fhir.model.primitive.BoundCodeDt;
+import ca.uhn.fhir.model.primitive.CodeDt;
+import ca.uhn.fhir.model.primitive.StringDt;
 
 /**
  * HAPI/FHIR <b>Address</b> Datatype
@@ -61,7 +65,7 @@ public class AddressDt
 		shortDefinition="Street name, number, direction & P.O. Box etc",
 		formalDefinition="This component contains the house number, apartment number, street name, street direction, P.O. Box number, delivery hints, and similar address information"
 	)
-	private List<StringDt> myLine;
+	private java.util.List<StringDt> myLine;
 	
 	@Child(name="city", type=StringDt.class, order=3, min=0, max=1)	
 	@Description(
@@ -103,6 +107,11 @@ public class AddressDt
 	public boolean isEmpty() {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myUse,  myText,  myLine,  myCity,  myState,  myZip,  myCountry,  myPeriod);
 	}
+	
+	public java.util.List<IElement> getAllPopulatedChildElements() {
+		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(  myUse,  myText,  myLine,  myCity,  myState,  myZip,  myCountry,  myPeriod);
+	}
+	
 
 	/**
 	 * Gets the value(s) for <b>use</b> (home | work | temp | old - purpose of this address).
@@ -200,9 +209,9 @@ public class AddressDt
      * This component contains the house number, apartment number, street name, street direction, P.O. Box number, delivery hints, and similar address information
      * </p> 
 	 */
-	public List<StringDt> getLine() {  
+	public java.util.List<StringDt> getLine() {  
 		if (myLine == null) {
-			myLine = new ArrayList<StringDt>();
+			myLine = new java.util.ArrayList<StringDt>();
 		}
 		return myLine;
 	}
@@ -215,7 +224,7 @@ public class AddressDt
      * This component contains the house number, apartment number, street name, street direction, P.O. Box number, delivery hints, and similar address information
      * </p> 
 	 */
-	public void setLine(List<StringDt> theValue) {
+	public void setLine(java.util.List<StringDt> theValue) {
 		myLine = theValue;
 	}
 
@@ -243,7 +252,7 @@ public class AddressDt
 	 */
 	public void addLine( String theString) {
 		if (myLine == null) {
-			myLine = new ArrayList<StringDt>();
+			myLine = new java.util.ArrayList<StringDt>();
 		}
 		myLine.add(new StringDt(theString)); 
 	}

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- This example is taken from the v3 data types (SLIST) -->
 
-<Observation xmlns="http://hl7.org/fhir" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://hl7.org/fhir ..\..\schema\observation.xsd">
+<Observation xmlns="http://hl7.org/fhir" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://hl7.org/fhir ./fhir-single.xsd">
 	<extension url="http://acme.org/fhir/Profile/main#trial-status">
 		<extension url="http://acme.org/fhir/Profile/main#trial-status-code">
 			<valueCode value="unsure" />
@@ -50,5 +50,6 @@
 
 	<subject>
 		<reference value="Patient/example" />
+		
 	</subject>
 </Observation>

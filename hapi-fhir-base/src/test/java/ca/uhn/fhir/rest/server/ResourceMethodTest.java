@@ -11,11 +11,11 @@ import org.junit.Before;
 import org.junit.Test;
 
 import ca.uhn.fhir.model.dstu.resource.Patient;
-import ca.uhn.fhir.rest.common.Request;
-import ca.uhn.fhir.rest.common.SearchMethodBinding;
-import ca.uhn.fhir.rest.common.BaseMethodBinding.MethodReturnTypeEnum;
-import ca.uhn.fhir.rest.common.SearchMethodBinding.RequestType;
-import ca.uhn.fhir.rest.server.Parameter;
+import ca.uhn.fhir.rest.method.BaseMethodBinding.MethodReturnTypeEnum;
+import ca.uhn.fhir.rest.method.Request;
+import ca.uhn.fhir.rest.method.SearchMethodBinding;
+import ca.uhn.fhir.rest.method.SearchMethodBinding.RequestType;
+import ca.uhn.fhir.rest.param.Parameter;
 
 public class ResourceMethodTest {
 

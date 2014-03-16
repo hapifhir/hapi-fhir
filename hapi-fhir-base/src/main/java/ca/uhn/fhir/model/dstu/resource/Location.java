@@ -16,12 +16,30 @@
 
 package ca.uhn.fhir.model.dstu.resource;
 
-import java.util.*;
-import ca.uhn.fhir.model.api.*;
-import ca.uhn.fhir.model.api.annotation.*;
-import ca.uhn.fhir.model.primitive.*;
-import ca.uhn.fhir.model.dstu.composite.*;
-import ca.uhn.fhir.model.dstu.valueset.*;
+
+import ca.uhn.fhir.model.api.BaseElement;
+import ca.uhn.fhir.model.api.BaseResource;
+import ca.uhn.fhir.model.api.IElement;
+import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.IResourceBlock;
+import ca.uhn.fhir.model.api.annotation.Block;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.dstu.composite.AddressDt;
+import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
+import ca.uhn.fhir.model.dstu.composite.ContactDt;
+import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
+import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.dstu.valueset.LocationModeEnum;
+import ca.uhn.fhir.model.dstu.valueset.LocationStatusEnum;
+import ca.uhn.fhir.model.dstu.valueset.LocationTypeEnum;
+import ca.uhn.fhir.model.primitive.BoundCodeDt;
+import ca.uhn.fhir.model.primitive.BoundCodeableConceptDt;
+import ca.uhn.fhir.model.primitive.CodeDt;
+import ca.uhn.fhir.model.primitive.DecimalDt;
+import ca.uhn.fhir.model.primitive.StringDt;
+
 
 /**
  * HAPI/FHIR <b>Location</b> Resource
@@ -154,7 +172,7 @@ public class Location extends BaseResource implements IResource {
 		shortDefinition="Contact details of the location",
 		formalDefinition="The contact details of communication devices available at the location. This can include phone numbers, fax numbers, mobile numbers, email addresses and web sites"
 	)
-	private List<ContactDt> myTelecom;
+	private java.util.List<ContactDt> myTelecom;
 	
 	@Child(name="address", type=AddressDt.class, order=5, min=0, max=1)	
 	@Description(
@@ -178,7 +196,7 @@ public class Location extends BaseResource implements IResource {
 	private Position myPosition;
 	
 	@Child(name="managingOrganization", order=8, min=0, max=1, type={
-		Organization.class,
+		ca.uhn.fhir.model.dstu.resource.Organization.class,
 	})
 	@Description(
 		shortDefinition="The organization that is responsible for the provisioning and upkeep of the location",
@@ -194,7 +212,7 @@ public class Location extends BaseResource implements IResource {
 	private BoundCodeDt<LocationStatusEnum> myStatus;
 	
 	@Child(name="partOf", order=10, min=0, max=1, type={
-		Location.class,
+		ca.uhn.fhir.model.dstu.resource.Location.class,
 	})
 	@Description(
 		shortDefinition="Another Location which this Location is physically part of",
@@ -214,6 +232,11 @@ public class Location extends BaseResource implements IResource {
 	public boolean isEmpty() {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myIdentifier,  myName,  myDescription,  myType,  myTelecom,  myAddress,  myPhysicalType,  myPosition,  myManagingOrganization,  myStatus,  myPartOf,  myMode);
 	}
+	
+	public java.util.List<IElement> getAllPopulatedChildElements() {
+		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(  myIdentifier,  myName,  myDescription,  myType,  myTelecom,  myAddress,  myPhysicalType,  myPosition,  myManagingOrganization,  myStatus,  myPartOf,  myMode);
+	}
+	
 
 	/**
 	 * Gets the value(s) for <b>identifier</b> (Unique code or number identifying the location to its users).
@@ -385,9 +408,9 @@ public class Location extends BaseResource implements IResource {
      * The contact details of communication devices available at the location. This can include phone numbers, fax numbers, mobile numbers, email addresses and web sites
      * </p> 
 	 */
-	public List<ContactDt> getTelecom() {  
+	public java.util.List<ContactDt> getTelecom() {  
 		if (myTelecom == null) {
-			myTelecom = new ArrayList<ContactDt>();
+			myTelecom = new java.util.ArrayList<ContactDt>();
 		}
 		return myTelecom;
 	}
@@ -400,7 +423,7 @@ public class Location extends BaseResource implements IResource {
      * The contact details of communication devices available at the location. This can include phone numbers, fax numbers, mobile numbers, email addresses and web sites
      * </p> 
 	 */
-	public void setTelecom(List<ContactDt> theValue) {
+	public void setTelecom(java.util.List<ContactDt> theValue) {
 		myTelecom = theValue;
 	}
 
@@ -697,6 +720,11 @@ public class Location extends BaseResource implements IResource {
 	public boolean isEmpty() {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myLongitude,  myLatitude,  myAltitude);
 	}
+	
+	public java.util.List<IElement> getAllPopulatedChildElements() {
+		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(  myLongitude,  myLatitude,  myAltitude);
+	}
+	
 
 	/**
 	 * Gets the value(s) for <b>longitude</b> (Longitude as expressed in KML).
@@ -736,7 +764,7 @@ public class Location extends BaseResource implements IResource {
      * Longitude. The value domain and the interpretation are the same as for the text of the longitude element in KML (see notes below)
      * </p> 
 	 */
-	public void setLongitude( java.math.BigDecimal theValue) {
+	public void setLongitude( long theValue) {
 		myLongitude = new DecimalDt(theValue); 
 	}
 
@@ -760,7 +788,7 @@ public class Location extends BaseResource implements IResource {
      * Longitude. The value domain and the interpretation are the same as for the text of the longitude element in KML (see notes below)
      * </p> 
 	 */
-	public void setLongitude( long theValue) {
+	public void setLongitude( java.math.BigDecimal theValue) {
 		myLongitude = new DecimalDt(theValue); 
 	}
 
@@ -803,7 +831,7 @@ public class Location extends BaseResource implements IResource {
      * Latitude. The value domain and the interpretation are the same as for the text of the latitude element in KML (see notes below)
      * </p> 
 	 */
-	public void setLatitude( java.math.BigDecimal theValue) {
+	public void setLatitude( long theValue) {
 		myLatitude = new DecimalDt(theValue); 
 	}
 
@@ -827,7 +855,7 @@ public class Location extends BaseResource implements IResource {
      * Latitude. The value domain and the interpretation are the same as for the text of the latitude element in KML (see notes below)
      * </p> 
 	 */
-	public void setLatitude( long theValue) {
+	public void setLatitude( java.math.BigDecimal theValue) {
 		myLatitude = new DecimalDt(theValue); 
 	}
 
@@ -870,7 +898,7 @@ public class Location extends BaseResource implements IResource {
      * Altitude. The value domain and the interpretation are the same as for the text of the altitude element in KML (see notes below)
      * </p> 
 	 */
-	public void setAltitude( java.math.BigDecimal theValue) {
+	public void setAltitude( long theValue) {
 		myAltitude = new DecimalDt(theValue); 
 	}
 
@@ -894,7 +922,7 @@ public class Location extends BaseResource implements IResource {
      * Altitude. The value domain and the interpretation are the same as for the text of the altitude element in KML (see notes below)
      * </p> 
 	 */
-	public void setAltitude( long theValue) {
+	public void setAltitude( java.math.BigDecimal theValue) {
 		myAltitude = new DecimalDt(theValue); 
 	}
 

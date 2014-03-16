@@ -1,4 +1,4 @@
-package ca.uhn.fhir.rest.common;
+package ca.uhn.fhir.rest.method;
 
 import java.util.List;
 import java.util.Map;
@@ -7,7 +7,7 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.resource.Conformance;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.client.GetClientInvocation;
-import ca.uhn.fhir.rest.common.SearchMethodBinding.RequestType;
+import ca.uhn.fhir.rest.method.SearchMethodBinding.RequestType;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;

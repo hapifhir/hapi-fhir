@@ -17,6 +17,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import ca.uhn.fhir.model.api.BaseResourceReference;
 import ca.uhn.fhir.model.api.CodeableConceptElement;
 import ca.uhn.fhir.model.api.ICodeEnum;
 import ca.uhn.fhir.model.api.ICompositeDatatype;
@@ -27,7 +28,6 @@ import ca.uhn.fhir.model.api.IPrimitiveDatatype;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.IResourceBlock;
 import ca.uhn.fhir.model.api.IValueSetEnumBinder;
-import ca.uhn.fhir.model.api.BaseResourceReference;
 import ca.uhn.fhir.model.api.annotation.Block;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.CodeTableDef;
@@ -42,6 +42,7 @@ import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.model.primitive.ICodedDatatype;
 import ca.uhn.fhir.model.primitive.XhtmlDt;
+import ca.uhn.fhir.util.ReflectionUtil;
 
 class ModelScanner {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ModelScanner.class);
@@ -92,7 +93,7 @@ class ModelScanner {
 	private Class<?> determineElementType(Field next) {
 		Class<?> nextElementType = next.getType();
 		if (List.class.equals(nextElementType)) {
-			nextElementType = getGenericCollectionTypeOfField(next);
+			nextElementType = ReflectionUtil.getGenericCollectionTypeOfField(next);
 		} else if (Collection.class.isAssignableFrom(nextElementType)) {
 			throw new ConfigurationException("Field '" + next.getName() + "' in type '" + next.getClass().getCanonicalName() + "' is a Collection - Only java.util.List curently supported");
 		}
@@ -231,12 +232,7 @@ class ModelScanner {
 	private void scanCompositeDatatype(Class<? extends ICompositeDatatype> theClass, DatatypeDef theDatatypeDefinition) {
 		ourLog.debug("Scanning resource class: {}", theClass.getName());
 
-		String resourceName = theDatatypeDefinition.name();
-		if (isBlank(resourceName)) {
-			throw new ConfigurationException("Resource type @" + ResourceDef.class.getSimpleName() + " annotation contains no resource name: " + theClass.getCanonicalName());
-		}
-
-		RuntimeCompositeDatatypeDefinition resourceDef = new RuntimeCompositeDatatypeDefinition(resourceName, theClass);
+		RuntimeCompositeDatatypeDefinition resourceDef = new RuntimeCompositeDatatypeDefinition(theDatatypeDefinition, theClass);
 		myClassToElementDefinitions.put(theClass, resourceDef);
 		scanCompositeElementForChildren(theClass, resourceDef, null);
 	}
@@ -368,7 +364,7 @@ class ModelScanner {
 				List<Class<? extends IResource>> refTypesList = new ArrayList<Class<? extends IResource>>();
 				for (Class<? extends IElement> nextType : childAnnotation.type()) {
 					if (IResource.class.isAssignableFrom(nextType) == false) {
-						throw new ConfigurationException("Field '" + next.getName() + "' is of type " + ResourceReferenceDt.class + " but contains a non-resource type: " + nextType.getCanonicalName());
+						throw new ConfigurationException("Field '" + next.getName() + "' in class '" + next.getDeclaringClass().getSimpleName() + "' is of type " + ResourceReferenceDt.class + " but contains a non-resource type: " + nextType.getCanonicalName());
 					}
 					refTypesList.add((Class<? extends IResource>) nextType);
 					addScanAlso(nextType);
@@ -444,7 +440,7 @@ class ModelScanner {
 			Class<XhtmlDt> clazz = (Class<XhtmlDt>) theClass;
 			resourceDef = new RuntimePrimitiveDatatypeNarrativeDefinition(resourceName, clazz);
 		} else {
-			resourceDef = new RuntimePrimitiveDatatypeDefinition(resourceName, theClass);
+			resourceDef = new RuntimePrimitiveDatatypeDefinition(theDatatypeDefinition, theClass);
 		}
 		myClassToElementDefinitions.put(theClass, resourceDef);
 
@@ -506,26 +502,5 @@ class ModelScanner {
 		return type;
 	}
 
-	private static Class<?> getGenericCollectionTypeOfField(Field next) {
-		// Type genericSuperclass = next.getType().getGenericSuperclass();
-		Class<?> type;
-		// if (genericSuperclass == null) {
-		ParameterizedType collectionType = (ParameterizedType) next.getGenericType();
-		Type firstArg = collectionType.getActualTypeArguments()[0];
-		if (ParameterizedType.class.isAssignableFrom(firstArg.getClass())) {
-			ParameterizedType pt = ((ParameterizedType) firstArg);
-			type = (Class<?>) pt.getRawType();
-			// firstArg = pt.getActualTypeArguments()[0];
-			// type = (Class<?>) firstArg;
-		} else {
-			type = (Class<?>) firstArg;
-		}
-		// }else {
-		// Type[] actualTypeArguments = ((ParameterizedType)
-		// genericSuperclass).getActualTypeArguments();
-		// type = (Class<?>) actualTypeArguments[0];
-		// }
-		return type;
-	}
 
 }

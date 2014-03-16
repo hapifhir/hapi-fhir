@@ -16,12 +16,13 @@
 
 package ca.uhn.fhir.model.dstu.composite;
 
-import java.util.*;
-import ca.uhn.fhir.model.api.*;
-import ca.uhn.fhir.model.api.annotation.*;
-import ca.uhn.fhir.model.primitive.*;
-import ca.uhn.fhir.model.dstu.valueset.*;
-import ca.uhn.fhir.model.dstu.resource.*;
+import ca.uhn.fhir.model.api.BaseElement;
+import ca.uhn.fhir.model.api.ICompositeDatatype;
+import ca.uhn.fhir.model.api.IElement;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.primitive.StringDt;
 
 /**
  * HAPI/FHIR <b>CodeableConcept</b> Datatype
@@ -47,7 +48,7 @@ public class CodeableConceptDt
 		shortDefinition="Code defined by a terminology system",
 		formalDefinition="A reference to a code defined by a terminology system"
 	)
-	private List<CodingDt> myCoding;
+	private java.util.List<CodingDt> myCoding;
 	
 	@Child(name="text", type=StringDt.class, order=1, min=0, max=1)	
 	@Description(
@@ -61,6 +62,11 @@ public class CodeableConceptDt
 	public boolean isEmpty() {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myCoding,  myText);
 	}
+	
+	public java.util.List<IElement> getAllPopulatedChildElements() {
+		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(  myCoding,  myText);
+	}
+	
 
 	/**
 	 * Gets the value(s) for <b>coding</b> (Code defined by a terminology system).
@@ -72,9 +78,9 @@ public class CodeableConceptDt
      * A reference to a code defined by a terminology system
      * </p> 
 	 */
-	public List<CodingDt> getCoding() {  
+	public java.util.List<CodingDt> getCoding() {  
 		if (myCoding == null) {
-			myCoding = new ArrayList<CodingDt>();
+			myCoding = new java.util.ArrayList<CodingDt>();
 		}
 		return myCoding;
 	}
@@ -87,7 +93,7 @@ public class CodeableConceptDt
      * A reference to a code defined by a terminology system
      * </p> 
 	 */
-	public void setCoding(List<CodingDt> theValue) {
+	public void setCoding(java.util.List<CodingDt> theValue) {
 		myCoding = theValue;
 	}
 

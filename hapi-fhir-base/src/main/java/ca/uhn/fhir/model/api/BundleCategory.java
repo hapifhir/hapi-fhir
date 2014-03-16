@@ -2,7 +2,7 @@ package ca.uhn.fhir.model.api;
 
 import org.apache.commons.lang3.StringUtils;
 
-public class BundleCategory implements IElement {
+public class BundleCategory extends BaseElement implements IElement {
 
 	private String myLabel;
 	private String myScheme;

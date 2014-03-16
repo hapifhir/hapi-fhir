@@ -1,24 +1,24 @@
-package ca.uhn.fhir.rest.common;
+package ca.uhn.fhir.rest.method;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.lang3.StringUtils;
-
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.client.GetClientInvocation;
+import ca.uhn.fhir.rest.param.Parameter;
 import ca.uhn.fhir.rest.server.IResourceProvider;
-import ca.uhn.fhir.rest.server.Parameter;
 import ca.uhn.fhir.rest.server.Util;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.util.QueryUtil;
 
 /**
  * Created by dsotnikov on 2/25/2014.
@@ -35,7 +35,7 @@ public class SearchMethodBinding extends BaseMethodBinding {
 		super(theMethodReturnTypeEnum, theReturnResourceType);
 		this.method = theMethod;
 		this.myParameters = Util.getResourceParameters(theMethod);
-		
+
 		this.myDeclaredResourceType = theMethod.getReturnType();
 	}
 
@@ -59,27 +59,37 @@ public class SearchMethodBinding extends BaseMethodBinding {
 	@Override
 	public GetClientInvocation invokeClient(Object[] theArgs) throws InternalErrorException {
 		assert theArgs.length == myParameters.size() : "Wrong number of arguments: " + theArgs.length;
-		
-		Map<String, String> args = new LinkedHashMap<String, String>();
-		
+
+		Map<String, List<String>> args = new LinkedHashMap<String, List<String>>();
+
 		for (int idx = 0; idx < theArgs.length; idx++) {
 			Object object = theArgs[idx];
 			Parameter nextParam = myParameters.get(idx);
-			String value;
 
 			if (object == null) {
 				if (nextParam.isRequired()) {
 					throw new NullPointerException("Parameter '" + nextParam.getName() + "' is required and may not be null");
-				}else {
-					value=null;
 				}
-			}else {
-				value = nextParam.encode(object);
+			} else {
+				List<List<String>> value = nextParam.encode(object);
+				ArrayList<String> paramValues = new ArrayList<String>(value.size());
+				args.put(nextParam.getName(), paramValues);
+
+				for (List<String> nextParamEntry : value) {
+					StringBuilder b = new StringBuilder();
+					for (String str : nextParamEntry) {
+						if (b.length() > 0) {
+							b.append(",");
+						}
+						b.append(str.replace(",", "\\,"));
+					}
+					paramValues.add(b.toString());
+				}
+				
 			}
-			
-			args.put(nextParam.getName(), value);
+
 		}
-		
+
 		return new GetClientInvocation(args, getResourceName());
 	}
 
@@ -92,13 +102,21 @@ public class SearchMethodBinding extends BaseMethodBinding {
 		for (int i = 0; i < myParameters.size(); i++) {
 			Parameter param = myParameters.get(i);
 			String[] value = parameterValues.get(param.getName());
-			if (value == null || value.length == 0 || StringUtils.isBlank(value[0])) {
+			if (value == null || value.length == 0) {
 				continue;
 			}
-			if (value.length > 1) {
-				throw new InvalidRequestException("Multiple values specified for parameter: " + param.getName());
+			
+			List<List<String>> paramList=new ArrayList<List<String>>(value.length);
+			for (String nextParam : value) {
+				if (nextParam.contains(",")==false) {
+					paramList.add(Collections.singletonList(nextParam));
+				}else {
+					paramList.add(QueryUtil.splitQueryStringByCommasIgnoreEscape(nextParam));
+				}
 			}
-			params[i] = param.parse(value[0]);
+			
+			params[i] = param.parse(paramList);
+			
 		}
 
 		Object response;
@@ -134,7 +152,7 @@ public class SearchMethodBinding extends BaseMethodBinding {
 			ourLog.trace("Method {} doesn't match because request type is POST but operation is not _search: {}", theRequest.getId(), theRequest.getOperation());
 			return false;
 		}
-		
+
 		Set<String> methodParamsTemp = new HashSet<String>();
 		for (int i = 0; i < this.myParameters.size(); i++) {
 			Parameter temp = this.myParameters.get(i);

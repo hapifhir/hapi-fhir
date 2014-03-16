@@ -16,12 +16,18 @@
 
 package ca.uhn.fhir.model.dstu.composite;
 
-import java.util.*;
-import ca.uhn.fhir.model.api.*;
-import ca.uhn.fhir.model.api.annotation.*;
-import ca.uhn.fhir.model.primitive.*;
-import ca.uhn.fhir.model.dstu.valueset.*;
-import ca.uhn.fhir.model.dstu.resource.*;
+import ca.uhn.fhir.model.api.BaseElement;
+import ca.uhn.fhir.model.api.ICompositeDatatype;
+import ca.uhn.fhir.model.api.IElement;
+import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
+import ca.uhn.fhir.model.primitive.BoundCodeDt;
+import ca.uhn.fhir.model.primitive.CodeDt;
+import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.model.primitive.UriDt;
 
 /**
  * HAPI/FHIR <b>Identifier</b> Datatype
@@ -92,7 +98,7 @@ public class IdentifierDt
 	private PeriodDt myPeriod;
 	
 	@Child(name="assigner", order=5, min=0, max=1, type={
-		Organization.class,
+		ca.uhn.fhir.model.dstu.resource.Organization.class,
 	})
 	@Description(
 		shortDefinition="Organization that issued id (may be just text)",
@@ -105,6 +111,11 @@ public class IdentifierDt
 	public boolean isEmpty() {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myUse,  myLabel,  mySystem,  myValue,  myPeriod,  myAssigner);
 	}
+	
+	public java.util.List<IElement> getAllPopulatedChildElements() {
+		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(  myUse,  myLabel,  mySystem,  myValue,  myPeriod,  myAssigner);
+	}
+	
 
 	/**
 	 * Gets the value(s) for <b>use</b> (usual | official | temp | secondary (If known)).

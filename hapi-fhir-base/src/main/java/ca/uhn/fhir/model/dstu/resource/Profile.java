@@ -16,12 +16,42 @@
 
 package ca.uhn.fhir.model.dstu.resource;
 
-import java.util.*;
-import ca.uhn.fhir.model.api.*;
-import ca.uhn.fhir.model.api.annotation.*;
-import ca.uhn.fhir.model.primitive.*;
-import ca.uhn.fhir.model.dstu.composite.*;
-import ca.uhn.fhir.model.dstu.valueset.*;
+
+import java.util.Date;
+
+import ca.uhn.fhir.model.api.BaseElement;
+import ca.uhn.fhir.model.api.BaseResource;
+import ca.uhn.fhir.model.api.IDatatype;
+import ca.uhn.fhir.model.api.IElement;
+import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.IResourceBlock;
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import ca.uhn.fhir.model.api.annotation.Block;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.dstu.composite.CodingDt;
+import ca.uhn.fhir.model.dstu.composite.ContactDt;
+import ca.uhn.fhir.model.dstu.valueset.AggregationModeEnum;
+import ca.uhn.fhir.model.dstu.valueset.BindingConformanceEnum;
+import ca.uhn.fhir.model.dstu.valueset.ConstraintSeverityEnum;
+import ca.uhn.fhir.model.dstu.valueset.DataTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.ExtensionContextEnum;
+import ca.uhn.fhir.model.dstu.valueset.FHIRDefinedTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.PropertyRepresentationEnum;
+import ca.uhn.fhir.model.dstu.valueset.ResourceProfileStatusEnum;
+import ca.uhn.fhir.model.dstu.valueset.ResourceTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.SearchParamTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.SlicingRulesEnum;
+import ca.uhn.fhir.model.primitive.BooleanDt;
+import ca.uhn.fhir.model.primitive.BoundCodeDt;
+import ca.uhn.fhir.model.primitive.CodeDt;
+import ca.uhn.fhir.model.primitive.DateTimeDt;
+import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.model.primitive.IntegerDt;
+import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.model.primitive.UriDt;
+
 
 /**
  * HAPI/FHIR <b>Profile</b> Resource
@@ -184,7 +214,7 @@ public class Profile extends BaseResource implements IResource {
 		shortDefinition="Contact information of the publisher",
 		formalDefinition="Contact details to assist a user in finding and communicating with the publisher"
 	)
-	private List<ContactDt> myTelecom;
+	private java.util.List<ContactDt> myTelecom;
 	
 	@Child(name="description", type=StringDt.class, order=5, min=0, max=1)	
 	@Description(
@@ -198,7 +228,7 @@ public class Profile extends BaseResource implements IResource {
 		shortDefinition="Assist with indexing and finding",
 		formalDefinition="A set of terms from external terminologies that may be used to assist with indexing and searching of templates."
 	)
-	private List<CodingDt> myCode;
+	private java.util.List<CodingDt> myCode;
 	
 	@Child(name="status", type=CodeDt.class, order=7, min=1, max=1)	
 	@Description(
@@ -240,34 +270,39 @@ public class Profile extends BaseResource implements IResource {
 		shortDefinition="External specification that the content is mapped to",
 		formalDefinition="An external specification that the content is mapped to"
 	)
-	private List<Mapping> myMapping;
+	private java.util.List<Mapping> myMapping;
 	
 	@Child(name="structure", order=13, min=0, max=Child.MAX_UNLIMITED)	
 	@Description(
 		shortDefinition="A constraint on a resource or a data type",
 		formalDefinition="A constraint statement about what contents a resource or data type may have"
 	)
-	private List<Structure> myStructure;
+	private java.util.List<Structure> myStructure;
 	
 	@Child(name="extensionDefn", order=14, min=0, max=Child.MAX_UNLIMITED)	
 	@Description(
 		shortDefinition="Definition of an extension",
 		formalDefinition="An extension defined as part of the profile"
 	)
-	private List<ExtensionDefn> myExtensionDefn;
+	private java.util.List<ExtensionDefn> myExtensionDefn;
 	
 	@Child(name="query", order=15, min=0, max=Child.MAX_UNLIMITED)	
 	@Description(
 		shortDefinition="Definition of a named query",
 		formalDefinition="Definition of a named query and its parameters and their meaning"
 	)
-	private List<Query> myQuery;
+	private java.util.List<Query> myQuery;
 	
 
 	@Override
 	public boolean isEmpty() {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myIdentifier,  myVersion,  myName,  myPublisher,  myTelecom,  myDescription,  myCode,  myStatus,  myExperimental,  myDate,  myRequirements,  myFhirVersion,  myMapping,  myStructure,  myExtensionDefn,  myQuery);
 	}
+	
+	public java.util.List<IElement> getAllPopulatedChildElements() {
+		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(  myIdentifier,  myVersion,  myName,  myPublisher,  myTelecom,  myDescription,  myCode,  myStatus,  myExperimental,  myDate,  myRequirements,  myFhirVersion,  myMapping,  myStructure,  myExtensionDefn,  myQuery);
+	}
+	
 
 	/**
 	 * Gets the value(s) for <b>identifier</b> (Logical id to reference this profile).
@@ -451,9 +486,9 @@ public class Profile extends BaseResource implements IResource {
      * Contact details to assist a user in finding and communicating with the publisher
      * </p> 
 	 */
-	public List<ContactDt> getTelecom() {  
+	public java.util.List<ContactDt> getTelecom() {  
 		if (myTelecom == null) {
-			myTelecom = new ArrayList<ContactDt>();
+			myTelecom = new java.util.ArrayList<ContactDt>();
 		}
 		return myTelecom;
 	}
@@ -466,7 +501,7 @@ public class Profile extends BaseResource implements IResource {
      * Contact details to assist a user in finding and communicating with the publisher
      * </p> 
 	 */
-	public void setTelecom(List<ContactDt> theValue) {
+	public void setTelecom(java.util.List<ContactDt> theValue) {
 		myTelecom = theValue;
 	}
 
@@ -538,9 +573,9 @@ public class Profile extends BaseResource implements IResource {
      * A set of terms from external terminologies that may be used to assist with indexing and searching of templates.
      * </p> 
 	 */
-	public List<CodingDt> getCode() {  
+	public java.util.List<CodingDt> getCode() {  
 		if (myCode == null) {
-			myCode = new ArrayList<CodingDt>();
+			myCode = new java.util.ArrayList<CodingDt>();
 		}
 		return myCode;
 	}
@@ -553,7 +588,7 @@ public class Profile extends BaseResource implements IResource {
      * A set of terms from external terminologies that may be used to assist with indexing and searching of templates.
      * </p> 
 	 */
-	public void setCode(List<CodingDt> theValue) {
+	public void setCode(java.util.List<CodingDt> theValue) {
 		myCode = theValue;
 	}
 
@@ -696,8 +731,8 @@ public class Profile extends BaseResource implements IResource {
      * The date that this version of the profile was published
      * </p> 
 	 */
-	public void setDateWithSecondsPrecision( Date theDate) {
-		myDate = new DateTimeDt(theDate); 
+	public void setDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myDate = new DateTimeDt(theDate, thePrecision); 
 	}
 
 	/**
@@ -708,8 +743,8 @@ public class Profile extends BaseResource implements IResource {
      * The date that this version of the profile was published
      * </p> 
 	 */
-	public void setDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myDate = new DateTimeDt(theDate, thePrecision); 
+	public void setDateWithSecondsPrecision( Date theDate) {
+		myDate = new DateTimeDt(theDate); 
 	}
 
  
@@ -809,9 +844,9 @@ public class Profile extends BaseResource implements IResource {
      * An external specification that the content is mapped to
      * </p> 
 	 */
-	public List<Mapping> getMapping() {  
+	public java.util.List<Mapping> getMapping() {  
 		if (myMapping == null) {
-			myMapping = new ArrayList<Mapping>();
+			myMapping = new java.util.ArrayList<Mapping>();
 		}
 		return myMapping;
 	}
@@ -824,7 +859,7 @@ public class Profile extends BaseResource implements IResource {
      * An external specification that the content is mapped to
      * </p> 
 	 */
-	public void setMapping(List<Mapping> theValue) {
+	public void setMapping(java.util.List<Mapping> theValue) {
 		myMapping = theValue;
 	}
 
@@ -853,9 +888,9 @@ public class Profile extends BaseResource implements IResource {
      * A constraint statement about what contents a resource or data type may have
      * </p> 
 	 */
-	public List<Structure> getStructure() {  
+	public java.util.List<Structure> getStructure() {  
 		if (myStructure == null) {
-			myStructure = new ArrayList<Structure>();
+			myStructure = new java.util.ArrayList<Structure>();
 		}
 		return myStructure;
 	}
@@ -868,7 +903,7 @@ public class Profile extends BaseResource implements IResource {
      * A constraint statement about what contents a resource or data type may have
      * </p> 
 	 */
-	public void setStructure(List<Structure> theValue) {
+	public void setStructure(java.util.List<Structure> theValue) {
 		myStructure = theValue;
 	}
 
@@ -897,9 +932,9 @@ public class Profile extends BaseResource implements IResource {
      * An extension defined as part of the profile
      * </p> 
 	 */
-	public List<ExtensionDefn> getExtensionDefn() {  
+	public java.util.List<ExtensionDefn> getExtensionDefn() {  
 		if (myExtensionDefn == null) {
-			myExtensionDefn = new ArrayList<ExtensionDefn>();
+			myExtensionDefn = new java.util.ArrayList<ExtensionDefn>();
 		}
 		return myExtensionDefn;
 	}
@@ -912,7 +947,7 @@ public class Profile extends BaseResource implements IResource {
      * An extension defined as part of the profile
      * </p> 
 	 */
-	public void setExtensionDefn(List<ExtensionDefn> theValue) {
+	public void setExtensionDefn(java.util.List<ExtensionDefn> theValue) {
 		myExtensionDefn = theValue;
 	}
 
@@ -941,9 +976,9 @@ public class Profile extends BaseResource implements IResource {
      * Definition of a named query and its parameters and their meaning
      * </p> 
 	 */
-	public List<Query> getQuery() {  
+	public java.util.List<Query> getQuery() {  
 		if (myQuery == null) {
-			myQuery = new ArrayList<Query>();
+			myQuery = new java.util.ArrayList<Query>();
 		}
 		return myQuery;
 	}
@@ -956,7 +991,7 @@ public class Profile extends BaseResource implements IResource {
      * Definition of a named query and its parameters and their meaning
      * </p> 
 	 */
-	public void setQuery(List<Query> theValue) {
+	public void setQuery(java.util.List<Query> theValue) {
 		myQuery = theValue;
 	}
 
@@ -1019,6 +1054,11 @@ public class Profile extends BaseResource implements IResource {
 	public boolean isEmpty() {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myIdentity,  myUri,  myName,  myComments);
 	}
+	
+	public java.util.List<IElement> getAllPopulatedChildElements() {
+		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(  myIdentity,  myUri,  myName,  myComments);
+	}
+	
 
 	/**
 	 * Gets the value(s) for <b>identity</b> (Internal id when this mapping is used).
@@ -1240,20 +1280,25 @@ public class Profile extends BaseResource implements IResource {
 		shortDefinition="Definition of elements in the resource (if no profile)",
 		formalDefinition="Captures constraints on each element within the resource"
 	)
-	private List<StructureElement> myElement;
+	private java.util.List<StructureElement> myElement;
 	
 	@Child(name="searchParam", order=5, min=0, max=Child.MAX_UNLIMITED)	
 	@Description(
 		shortDefinition="Search params defined",
 		formalDefinition="Additional search parameters for implementations to support and/or make use of"
 	)
-	private List<StructureSearchParam> mySearchParam;
+	private java.util.List<StructureSearchParam> mySearchParam;
 	
 
 	@Override
 	public boolean isEmpty() {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myType,  myName,  myPublish,  myPurpose,  myElement,  mySearchParam);
 	}
+	
+	public java.util.List<IElement> getAllPopulatedChildElements() {
+		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(  myType,  myName,  myPublish,  myPurpose,  myElement,  mySearchParam);
+	}
+	
 
 	/**
 	 * Gets the value(s) for <b>type</b> (The Resource or Data Type being described).
@@ -1437,9 +1482,9 @@ public class Profile extends BaseResource implements IResource {
      * Captures constraints on each element within the resource
      * </p> 
 	 */
-	public List<StructureElement> getElement() {  
+	public java.util.List<StructureElement> getElement() {  
 		if (myElement == null) {
-			myElement = new ArrayList<StructureElement>();
+			myElement = new java.util.ArrayList<StructureElement>();
 		}
 		return myElement;
 	}
@@ -1452,7 +1497,7 @@ public class Profile extends BaseResource implements IResource {
      * Captures constraints on each element within the resource
      * </p> 
 	 */
-	public void setElement(List<StructureElement> theValue) {
+	public void setElement(java.util.List<StructureElement> theValue) {
 		myElement = theValue;
 	}
 
@@ -1481,9 +1526,9 @@ public class Profile extends BaseResource implements IResource {
      * Additional search parameters for implementations to support and/or make use of
      * </p> 
 	 */
-	public List<StructureSearchParam> getSearchParam() {  
+	public java.util.List<StructureSearchParam> getSearchParam() {  
 		if (mySearchParam == null) {
-			mySearchParam = new ArrayList<StructureSearchParam>();
+			mySearchParam = new java.util.ArrayList<StructureSearchParam>();
 		}
 		return mySearchParam;
 	}
@@ -1496,7 +1541,7 @@ public class Profile extends BaseResource implements IResource {
      * Additional search parameters for implementations to support and/or make use of
      * </p> 
 	 */
-	public void setSearchParam(List<StructureSearchParam> theValue) {
+	public void setSearchParam(java.util.List<StructureSearchParam> theValue) {
 		mySearchParam = theValue;
 	}
 
@@ -1541,7 +1586,7 @@ public class Profile extends BaseResource implements IResource {
 		shortDefinition="How this element is represented in instances",
 		formalDefinition="Codes that define how this element is represented in instances, when the deviation varies from the normal case"
 	)
-	private List<BoundCodeDt<PropertyRepresentationEnum>> myRepresentation;
+	private java.util.List<BoundCodeDt<PropertyRepresentationEnum>> myRepresentation;
 	
 	@Child(name="name", type=StringDt.class, order=2, min=0, max=1)	
 	@Description(
@@ -1569,6 +1614,11 @@ public class Profile extends BaseResource implements IResource {
 	public boolean isEmpty() {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myPath,  myRepresentation,  myName,  mySlicing,  myDefinition);
 	}
+	
+	public java.util.List<IElement> getAllPopulatedChildElements() {
+		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(  myPath,  myRepresentation,  myName,  mySlicing,  myDefinition);
+	}
+	
 
 	/**
 	 * Gets the value(s) for <b>path</b> (The path of the element (see the formal definitions)).
@@ -1623,9 +1673,9 @@ public class Profile extends BaseResource implements IResource {
      * Codes that define how this element is represented in instances, when the deviation varies from the normal case
      * </p> 
 	 */
-	public List<BoundCodeDt<PropertyRepresentationEnum>> getRepresentation() {  
+	public java.util.List<BoundCodeDt<PropertyRepresentationEnum>> getRepresentation() {  
 		if (myRepresentation == null) {
-			myRepresentation = new ArrayList<BoundCodeDt<PropertyRepresentationEnum>>();
+			myRepresentation = new java.util.ArrayList<BoundCodeDt<PropertyRepresentationEnum>>();
 		}
 		return myRepresentation;
 	}
@@ -1638,7 +1688,7 @@ public class Profile extends BaseResource implements IResource {
      * Codes that define how this element is represented in instances, when the deviation varies from the normal case
      * </p> 
 	 */
-	public void setRepresentation(List<BoundCodeDt<PropertyRepresentationEnum>> theValue) {
+	public void setRepresentation(java.util.List<BoundCodeDt<PropertyRepresentationEnum>> theValue) {
 		myRepresentation = theValue;
 	}
 
@@ -1814,6 +1864,11 @@ public class Profile extends BaseResource implements IResource {
 	public boolean isEmpty() {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myDiscriminator,  myOrdered,  myRules);
 	}
+	
+	public java.util.List<IElement> getAllPopulatedChildElements() {
+		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(  myDiscriminator,  myOrdered,  myRules);
+	}
+	
 
 	/**
 	 * Gets the value(s) for <b>discriminator</b> (Element that used to distinguish the slices).
@@ -1992,7 +2047,7 @@ public class Profile extends BaseResource implements IResource {
 		shortDefinition="Other names",
 		formalDefinition="Identifies additional names by which this element might also be known"
 	)
-	private List<StringDt> mySynonym;
+	private java.util.List<StringDt> mySynonym;
 	
 	@Child(name="min", type=IntegerDt.class, order=5, min=1, max=1)	
 	@Description(
@@ -2013,7 +2068,7 @@ public class Profile extends BaseResource implements IResource {
 		shortDefinition="Data type and Profile for this element",
 		formalDefinition="The data type or resource that the value of this element is permitted to be"
 	)
-	private List<StructureElementDefinitionType> myType;
+	private java.util.List<StructureElementDefinitionType> myType;
 	
 	@Child(name="nameReference", type=StringDt.class, order=8, min=0, max=1)	
 	@Description(
@@ -2048,14 +2103,14 @@ public class Profile extends BaseResource implements IResource {
 		shortDefinition="Reference to invariant about presence",
 		formalDefinition="A reference to an invariant that may make additional statements about the cardinality or value in the instance"
 	)
-	private List<IdDt> myCondition;
+	private java.util.List<IdDt> myCondition;
 	
 	@Child(name="constraint", order=13, min=0, max=Child.MAX_UNLIMITED)	
 	@Description(
 		shortDefinition="Condition that must evaluate to true",
 		formalDefinition="Formal constraints such as co-occurrence and other constraints that can be computationally evaluated within the context of the instance"
 	)
-	private List<StructureElementDefinitionConstraint> myConstraint;
+	private java.util.List<StructureElementDefinitionConstraint> myConstraint;
 	
 	@Child(name="mustSupport", type=BooleanDt.class, order=14, min=0, max=1)	
 	@Description(
@@ -2083,13 +2138,18 @@ public class Profile extends BaseResource implements IResource {
 		shortDefinition="Map element to another set of definitions",
 		formalDefinition="Identifies a concept from an external specification that roughly corresponds to this element"
 	)
-	private List<StructureElementDefinitionMapping> myMapping;
+	private java.util.List<StructureElementDefinitionMapping> myMapping;
 	
 
 	@Override
 	public boolean isEmpty() {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myShort,  myFormal,  myComments,  myRequirements,  mySynonym,  myMin,  myMax,  myType,  myNameReference,  myValue,  myExample,  myMaxLength,  myCondition,  myConstraint,  myMustSupport,  myIsModifier,  myBinding,  myMapping);
 	}
+	
+	public java.util.List<IElement> getAllPopulatedChildElements() {
+		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(  myShort,  myFormal,  myComments,  myRequirements,  mySynonym,  myMin,  myMax,  myType,  myNameReference,  myValue,  myExample,  myMaxLength,  myCondition,  myConstraint,  myMustSupport,  myIsModifier,  myBinding,  myMapping);
+	}
+	
 
 	/**
 	 * Gets the value(s) for <b>short</b> (Concise definition for xml presentation).
@@ -2273,9 +2333,9 @@ public class Profile extends BaseResource implements IResource {
      * Identifies additional names by which this element might also be known
      * </p> 
 	 */
-	public List<StringDt> getSynonym() {  
+	public java.util.List<StringDt> getSynonym() {  
 		if (mySynonym == null) {
-			mySynonym = new ArrayList<StringDt>();
+			mySynonym = new java.util.ArrayList<StringDt>();
 		}
 		return mySynonym;
 	}
@@ -2288,7 +2348,7 @@ public class Profile extends BaseResource implements IResource {
      * Identifies additional names by which this element might also be known
      * </p> 
 	 */
-	public void setSynonym(List<StringDt> theValue) {
+	public void setSynonym(java.util.List<StringDt> theValue) {
 		mySynonym = theValue;
 	}
 
@@ -2316,7 +2376,7 @@ public class Profile extends BaseResource implements IResource {
 	 */
 	public void addSynonym( String theString) {
 		if (mySynonym == null) {
-			mySynonym = new ArrayList<StringDt>();
+			mySynonym = new java.util.ArrayList<StringDt>();
 		}
 		mySynonym.add(new StringDt(theString)); 
 	}
@@ -2418,9 +2478,9 @@ public class Profile extends BaseResource implements IResource {
      * The data type or resource that the value of this element is permitted to be
      * </p> 
 	 */
-	public List<StructureElementDefinitionType> getType() {  
+	public java.util.List<StructureElementDefinitionType> getType() {  
 		if (myType == null) {
-			myType = new ArrayList<StructureElementDefinitionType>();
+			myType = new java.util.ArrayList<StructureElementDefinitionType>();
 		}
 		return myType;
 	}
@@ -2433,7 +2493,7 @@ public class Profile extends BaseResource implements IResource {
      * The data type or resource that the value of this element is permitted to be
      * </p> 
 	 */
-	public void setType(List<StructureElementDefinitionType> theValue) {
+	public void setType(java.util.List<StructureElementDefinitionType> theValue) {
 		myType = theValue;
 	}
 
@@ -2604,9 +2664,9 @@ public class Profile extends BaseResource implements IResource {
      * A reference to an invariant that may make additional statements about the cardinality or value in the instance
      * </p> 
 	 */
-	public List<IdDt> getCondition() {  
+	public java.util.List<IdDt> getCondition() {  
 		if (myCondition == null) {
-			myCondition = new ArrayList<IdDt>();
+			myCondition = new java.util.ArrayList<IdDt>();
 		}
 		return myCondition;
 	}
@@ -2619,7 +2679,7 @@ public class Profile extends BaseResource implements IResource {
      * A reference to an invariant that may make additional statements about the cardinality or value in the instance
      * </p> 
 	 */
-	public void setCondition(List<IdDt> theValue) {
+	public void setCondition(java.util.List<IdDt> theValue) {
 		myCondition = theValue;
 	}
 
@@ -2647,7 +2707,7 @@ public class Profile extends BaseResource implements IResource {
 	 */
 	public void addCondition( String theId) {
 		if (myCondition == null) {
-			myCondition = new ArrayList<IdDt>();
+			myCondition = new java.util.ArrayList<IdDt>();
 		}
 		myCondition.add(new IdDt(theId)); 
 	}
@@ -2663,9 +2723,9 @@ public class Profile extends BaseResource implements IResource {
      * Formal constraints such as co-occurrence and other constraints that can be computationally evaluated within the context of the instance
      * </p> 
 	 */
-	public List<StructureElementDefinitionConstraint> getConstraint() {  
+	public java.util.List<StructureElementDefinitionConstraint> getConstraint() {  
 		if (myConstraint == null) {
-			myConstraint = new ArrayList<StructureElementDefinitionConstraint>();
+			myConstraint = new java.util.ArrayList<StructureElementDefinitionConstraint>();
 		}
 		return myConstraint;
 	}
@@ -2678,7 +2738,7 @@ public class Profile extends BaseResource implements IResource {
      * Formal constraints such as co-occurrence and other constraints that can be computationally evaluated within the context of the instance
      * </p> 
 	 */
-	public void setConstraint(List<StructureElementDefinitionConstraint> theValue) {
+	public void setConstraint(java.util.List<StructureElementDefinitionConstraint> theValue) {
 		myConstraint = theValue;
 	}
 
@@ -2824,9 +2884,9 @@ public class Profile extends BaseResource implements IResource {
      * Identifies a concept from an external specification that roughly corresponds to this element
      * </p> 
 	 */
-	public List<StructureElementDefinitionMapping> getMapping() {  
+	public java.util.List<StructureElementDefinitionMapping> getMapping() {  
 		if (myMapping == null) {
-			myMapping = new ArrayList<StructureElementDefinitionMapping>();
+			myMapping = new java.util.ArrayList<StructureElementDefinitionMapping>();
 		}
 		return myMapping;
 	}
@@ -2839,7 +2899,7 @@ public class Profile extends BaseResource implements IResource {
      * Identifies a concept from an external specification that roughly corresponds to this element
      * </p> 
 	 */
-	public void setMapping(List<StructureElementDefinitionMapping> theValue) {
+	public void setMapping(java.util.List<StructureElementDefinitionMapping> theValue) {
 		myMapping = theValue;
 	}
 
@@ -2891,13 +2951,18 @@ public class Profile extends BaseResource implements IResource {
 		shortDefinition="contained | referenced | bundled - how aggregated",
 		formalDefinition="If the type is a reference to another resource, how the resource is or can be aggreated - is it a contained resource, or a reference, and if the context is a bundle, is it included in the bundle"
 	)
-	private List<BoundCodeDt<AggregationModeEnum>> myAggregation;
+	private java.util.List<BoundCodeDt<AggregationModeEnum>> myAggregation;
 	
 
 	@Override
 	public boolean isEmpty() {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myCode,  myProfile,  myAggregation);
 	}
+	
+	public java.util.List<IElement> getAllPopulatedChildElements() {
+		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(  myCode,  myProfile,  myAggregation);
+	}
+	
 
 	/**
 	 * Gets the value(s) for <b>code</b> (Name of Data type or Resource).
@@ -2995,9 +3060,9 @@ public class Profile extends BaseResource implements IResource {
      * If the type is a reference to another resource, how the resource is or can be aggreated - is it a contained resource, or a reference, and if the context is a bundle, is it included in the bundle
      * </p> 
 	 */
-	public List<BoundCodeDt<AggregationModeEnum>> getAggregation() {  
+	public java.util.List<BoundCodeDt<AggregationModeEnum>> getAggregation() {  
 		if (myAggregation == null) {
-			myAggregation = new ArrayList<BoundCodeDt<AggregationModeEnum>>();
+			myAggregation = new java.util.ArrayList<BoundCodeDt<AggregationModeEnum>>();
 		}
 		return myAggregation;
 	}
@@ -3010,7 +3075,7 @@ public class Profile extends BaseResource implements IResource {
      * If the type is a reference to another resource, how the resource is or can be aggreated - is it a contained resource, or a reference, and if the context is a bundle, is it included in the bundle
      * </p> 
 	 */
-	public void setAggregation(List<BoundCodeDt<AggregationModeEnum>> theValue) {
+	public void setAggregation(java.util.List<BoundCodeDt<AggregationModeEnum>> theValue) {
 		myAggregation = theValue;
 	}
 
@@ -3096,6 +3161,11 @@ public class Profile extends BaseResource implements IResource {
 	public boolean isEmpty() {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myKey,  myName,  mySeverity,  myHuman,  myXpath);
 	}
+	
+	public java.util.List<IElement> getAllPopulatedChildElements() {
+		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(  myKey,  myName,  mySeverity,  myHuman,  myXpath);
+	}
+	
 
 	/**
 	 * Gets the value(s) for <b>key</b> (Target of 'condition' reference above).
@@ -3370,6 +3440,11 @@ public class Profile extends BaseResource implements IResource {
 	public boolean isEmpty() {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myName,  myIsExtensible,  myConformance,  myDescription,  myReference);
 	}
+	
+	public java.util.List<IElement> getAllPopulatedChildElements() {
+		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(  myName,  myIsExtensible,  myConformance,  myDescription,  myReference);
+	}
+	
 
 	/**
 	 * Gets the value(s) for <b>name</b> (Descriptive Name).
@@ -3605,6 +3680,11 @@ public class Profile extends BaseResource implements IResource {
 	public boolean isEmpty() {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myIdentity,  myMap);
 	}
+	
+	public java.util.List<IElement> getAllPopulatedChildElements() {
+		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(  myIdentity,  myMap);
+	}
+	
 
 	/**
 	 * Gets the value(s) for <b>identity</b> (Reference to mapping declaration).
@@ -3742,13 +3822,18 @@ public class Profile extends BaseResource implements IResource {
 		shortDefinition="Types of resource (if a resource reference)",
 		formalDefinition="Types of resource (if a resource is referenced)"
 	)
-	private List<BoundCodeDt<ResourceTypeEnum>> myTarget;
+	private java.util.List<BoundCodeDt<ResourceTypeEnum>> myTarget;
 	
 
 	@Override
 	public boolean isEmpty() {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myName,  myType,  myDocumentation,  myXpath,  myTarget);
 	}
+	
+	public java.util.List<IElement> getAllPopulatedChildElements() {
+		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(  myName,  myType,  myDocumentation,  myXpath,  myTarget);
+	}
+	
 
 	/**
 	 * Gets the value(s) for <b>name</b> (Name of search parameter).
@@ -3932,9 +4017,9 @@ public class Profile extends BaseResource implements IResource {
      * Types of resource (if a resource is referenced)
      * </p> 
 	 */
-	public List<BoundCodeDt<ResourceTypeEnum>> getTarget() {  
+	public java.util.List<BoundCodeDt<ResourceTypeEnum>> getTarget() {  
 		if (myTarget == null) {
-			myTarget = new ArrayList<BoundCodeDt<ResourceTypeEnum>>();
+			myTarget = new java.util.ArrayList<BoundCodeDt<ResourceTypeEnum>>();
 		}
 		return myTarget;
 	}
@@ -3947,7 +4032,7 @@ public class Profile extends BaseResource implements IResource {
      * Types of resource (if a resource is referenced)
      * </p> 
 	 */
-	public void setTarget(List<BoundCodeDt<ResourceTypeEnum>> theValue) {
+	public void setTarget(java.util.List<BoundCodeDt<ResourceTypeEnum>> theValue) {
 		myTarget = theValue;
 	}
 
@@ -4020,7 +4105,7 @@ public class Profile extends BaseResource implements IResource {
 		shortDefinition="Where the extension can be used in instances",
 		formalDefinition="Identifies the types of resource or data type elements to which the extension can be applied"
 	)
-	private List<StringDt> myContext;
+	private java.util.List<StringDt> myContext;
 	
 	@Child(name="definition", type=StructureElementDefinition.class, order=4, min=1, max=1)	
 	@Description(
@@ -4034,6 +4119,11 @@ public class Profile extends BaseResource implements IResource {
 	public boolean isEmpty() {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myCode,  myDisplay,  myContextType,  myContext,  myDefinition);
 	}
+	
+	public java.util.List<IElement> getAllPopulatedChildElements() {
+		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(  myCode,  myDisplay,  myContextType,  myContext,  myDefinition);
+	}
+	
 
 	/**
 	 * Gets the value(s) for <b>code</b> (Identifies the extension in this profile).
@@ -4174,9 +4264,9 @@ public class Profile extends BaseResource implements IResource {
      * Identifies the types of resource or data type elements to which the extension can be applied
      * </p> 
 	 */
-	public List<StringDt> getContext() {  
+	public java.util.List<StringDt> getContext() {  
 		if (myContext == null) {
-			myContext = new ArrayList<StringDt>();
+			myContext = new java.util.ArrayList<StringDt>();
 		}
 		return myContext;
 	}
@@ -4189,7 +4279,7 @@ public class Profile extends BaseResource implements IResource {
      * Identifies the types of resource or data type elements to which the extension can be applied
      * </p> 
 	 */
-	public void setContext(List<StringDt> theValue) {
+	public void setContext(java.util.List<StringDt> theValue) {
 		myContext = theValue;
 	}
 
@@ -4217,7 +4307,7 @@ public class Profile extends BaseResource implements IResource {
 	 */
 	public void addContext( String theString) {
 		if (myContext == null) {
-			myContext = new ArrayList<StringDt>();
+			myContext = new java.util.ArrayList<StringDt>();
 		}
 		myContext.add(new StringDt(theString)); 
 	}
@@ -4288,13 +4378,18 @@ public class Profile extends BaseResource implements IResource {
 		shortDefinition="Parameter for the named query",
 		formalDefinition="A parameter of a named query"
 	)
-	private List<StructureSearchParam> myParameter;
+	private java.util.List<StructureSearchParam> myParameter;
 	
 
 	@Override
 	public boolean isEmpty() {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myName,  myDocumentation,  myParameter);
 	}
+	
+	public java.util.List<IElement> getAllPopulatedChildElements() {
+		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(  myName,  myDocumentation,  myParameter);
+	}
+	
 
 	/**
 	 * Gets the value(s) for <b>name</b> (Special named queries (_query=)).
@@ -4392,9 +4487,9 @@ public class Profile extends BaseResource implements IResource {
      * A parameter of a named query
      * </p> 
 	 */
-	public List<StructureSearchParam> getParameter() {  
+	public java.util.List<StructureSearchParam> getParameter() {  
 		if (myParameter == null) {
-			myParameter = new ArrayList<StructureSearchParam>();
+			myParameter = new java.util.ArrayList<StructureSearchParam>();
 		}
 		return myParameter;
 	}
@@ -4407,7 +4502,7 @@ public class Profile extends BaseResource implements IResource {
      * A parameter of a named query
      * </p> 
 	 */
-	public void setParameter(List<StructureSearchParam> theValue) {
+	public void setParameter(java.util.List<StructureSearchParam> theValue) {
 		myParameter = theValue;
 	}
 

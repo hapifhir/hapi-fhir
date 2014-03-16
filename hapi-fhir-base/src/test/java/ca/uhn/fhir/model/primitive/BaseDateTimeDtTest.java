@@ -10,8 +10,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
-import ca.uhn.fhir.model.primitive.DateTimeDt;
-import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.parser.DataFormatException;
 
 public class BaseDateTimeDtTest {

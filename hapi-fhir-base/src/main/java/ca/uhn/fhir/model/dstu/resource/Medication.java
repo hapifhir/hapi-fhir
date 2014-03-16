@@ -16,12 +16,25 @@
 
 package ca.uhn.fhir.model.dstu.resource;
 
-import java.util.*;
-import ca.uhn.fhir.model.api.*;
-import ca.uhn.fhir.model.api.annotation.*;
-import ca.uhn.fhir.model.primitive.*;
-import ca.uhn.fhir.model.dstu.composite.*;
-import ca.uhn.fhir.model.dstu.valueset.*;
+
+import ca.uhn.fhir.model.api.BaseElement;
+import ca.uhn.fhir.model.api.BaseResource;
+import ca.uhn.fhir.model.api.IElement;
+import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.IResourceBlock;
+import ca.uhn.fhir.model.api.annotation.Block;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
+import ca.uhn.fhir.model.dstu.composite.RatioDt;
+import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.dstu.valueset.MedicationKindEnum;
+import ca.uhn.fhir.model.primitive.BooleanDt;
+import ca.uhn.fhir.model.primitive.BoundCodeDt;
+import ca.uhn.fhir.model.primitive.CodeDt;
+import ca.uhn.fhir.model.primitive.StringDt;
+
 
 /**
  * HAPI/FHIR <b>Medication</b> Resource
@@ -133,7 +146,7 @@ public class Medication extends BaseResource implements IResource {
 	private BooleanDt myIsBrand;
 	
 	@Child(name="manufacturer", order=3, min=0, max=1, type={
-		Organization.class,
+		ca.uhn.fhir.model.dstu.resource.Organization.class,
 	})
 	@Description(
 		shortDefinition="Manufacturer of the item",
@@ -167,6 +180,11 @@ public class Medication extends BaseResource implements IResource {
 	public boolean isEmpty() {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myName,  myCode,  myIsBrand,  myManufacturer,  myKind,  myProduct,  myPackage);
 	}
+	
+	public java.util.List<IElement> getAllPopulatedChildElements() {
+		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(  myName,  myCode,  myIsBrand,  myManufacturer,  myKind,  myProduct,  myPackage);
+	}
+	
 
 	/**
 	 * Gets the value(s) for <b>name</b> (Common / Commercial name).
@@ -456,13 +474,18 @@ public class Medication extends BaseResource implements IResource {
 		shortDefinition="Active or inactive ingredient",
 		formalDefinition="Identifies a particular constituent of interest in the product"
 	)
-	private List<ProductIngredient> myIngredient;
+	private java.util.List<ProductIngredient> myIngredient;
 	
 
 	@Override
 	public boolean isEmpty() {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myForm,  myIngredient);
 	}
+	
+	public java.util.List<IElement> getAllPopulatedChildElements() {
+		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(  myForm,  myIngredient);
+	}
+	
 
 	/**
 	 * Gets the value(s) for <b>form</b> (powder | tablets | carton +).
@@ -505,9 +528,9 @@ public class Medication extends BaseResource implements IResource {
      * Identifies a particular constituent of interest in the product
      * </p> 
 	 */
-	public List<ProductIngredient> getIngredient() {  
+	public java.util.List<ProductIngredient> getIngredient() {  
 		if (myIngredient == null) {
-			myIngredient = new ArrayList<ProductIngredient>();
+			myIngredient = new java.util.ArrayList<ProductIngredient>();
 		}
 		return myIngredient;
 	}
@@ -520,7 +543,7 @@ public class Medication extends BaseResource implements IResource {
      * Identifies a particular constituent of interest in the product
      * </p> 
 	 */
-	public void setIngredient(List<ProductIngredient> theValue) {
+	public void setIngredient(java.util.List<ProductIngredient> theValue) {
 		myIngredient = theValue;
 	}
 
@@ -554,8 +577,8 @@ public class Medication extends BaseResource implements IResource {
 	public static class ProductIngredient extends BaseElement implements IResourceBlock {
 	
 	@Child(name="item", order=0, min=1, max=1, type={
-		Substance.class,
-		Medication.class,
+		ca.uhn.fhir.model.dstu.resource.Substance.class,
+		ca.uhn.fhir.model.dstu.resource.Medication.class,
 	})
 	@Description(
 		shortDefinition="The product contained",
@@ -575,6 +598,11 @@ public class Medication extends BaseResource implements IResource {
 	public boolean isEmpty() {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myItem,  myAmount);
 	}
+	
+	public java.util.List<IElement> getAllPopulatedChildElements() {
+		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(  myItem,  myAmount);
+	}
+	
 
 	/**
 	 * Gets the value(s) for <b>item</b> (The product contained).

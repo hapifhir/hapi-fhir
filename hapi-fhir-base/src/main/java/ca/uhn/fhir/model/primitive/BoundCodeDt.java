@@ -3,7 +3,7 @@ package ca.uhn.fhir.model.primitive;
 import ca.uhn.fhir.model.api.IValueSetEnumBinder;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 
-@DatatypeDef(name = "boundCode") // note: this name is not real, it's a HAPI identifier- we should remove it
+@DatatypeDef(name = "code", isSpecialization = true)
 public class BoundCodeDt<T extends Enum<?>> extends CodeDt {
 
 	private IValueSetEnumBinder<T> myBinder;

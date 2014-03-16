@@ -16,12 +16,15 @@
 
 package ca.uhn.fhir.model.dstu.composite;
 
-import java.util.*;
-import ca.uhn.fhir.model.api.*;
-import ca.uhn.fhir.model.api.annotation.*;
-import ca.uhn.fhir.model.primitive.*;
-import ca.uhn.fhir.model.dstu.valueset.*;
-import ca.uhn.fhir.model.dstu.resource.*;
+import ca.uhn.fhir.model.api.BaseElement;
+import ca.uhn.fhir.model.api.ICompositeDatatype;
+import ca.uhn.fhir.model.api.IElement;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.primitive.DecimalDt;
+import ca.uhn.fhir.model.primitive.IntegerDt;
+import ca.uhn.fhir.model.primitive.StringDt;
 
 /**
  * HAPI/FHIR <b>SampledData</b> Datatype
@@ -96,6 +99,11 @@ public class SampledDataDt
 	public boolean isEmpty() {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myOrigin,  myPeriod,  myFactor,  myLowerLimit,  myUpperLimit,  myDimensions,  myData);
 	}
+	
+	public java.util.List<IElement> getAllPopulatedChildElements() {
+		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(  myOrigin,  myPeriod,  myFactor,  myLowerLimit,  myUpperLimit,  myDimensions,  myData);
+	}
+	
 
 	/**
 	 * Gets the value(s) for <b>origin</b> (Zero value and units).
@@ -166,7 +174,7 @@ public class SampledDataDt
      * The length of time between sampling times, measured in milliseconds
      * </p> 
 	 */
-	public void setPeriod( java.math.BigDecimal theValue) {
+	public void setPeriod( long theValue) {
 		myPeriod = new DecimalDt(theValue); 
 	}
 
@@ -190,7 +198,7 @@ public class SampledDataDt
      * The length of time between sampling times, measured in milliseconds
      * </p> 
 	 */
-	public void setPeriod( long theValue) {
+	public void setPeriod( java.math.BigDecimal theValue) {
 		myPeriod = new DecimalDt(theValue); 
 	}
 
@@ -233,7 +241,7 @@ public class SampledDataDt
      * A correction factor that is applied to the sampled data points before they are added to the origin
      * </p> 
 	 */
-	public void setFactor( java.math.BigDecimal theValue) {
+	public void setFactor( long theValue) {
 		myFactor = new DecimalDt(theValue); 
 	}
 
@@ -257,7 +265,7 @@ public class SampledDataDt
      * A correction factor that is applied to the sampled data points before they are added to the origin
      * </p> 
 	 */
-	public void setFactor( long theValue) {
+	public void setFactor( java.math.BigDecimal theValue) {
 		myFactor = new DecimalDt(theValue); 
 	}
 
@@ -300,7 +308,7 @@ public class SampledDataDt
      * The lower limit of detection of the measured points. This is needed if any of the data points have the value \"L\" (lower than detection limit)
      * </p> 
 	 */
-	public void setLowerLimit( java.math.BigDecimal theValue) {
+	public void setLowerLimit( long theValue) {
 		myLowerLimit = new DecimalDt(theValue); 
 	}
 
@@ -324,7 +332,7 @@ public class SampledDataDt
      * The lower limit of detection of the measured points. This is needed if any of the data points have the value \"L\" (lower than detection limit)
      * </p> 
 	 */
-	public void setLowerLimit( long theValue) {
+	public void setLowerLimit( java.math.BigDecimal theValue) {
 		myLowerLimit = new DecimalDt(theValue); 
 	}
 
@@ -367,7 +375,7 @@ public class SampledDataDt
      * The upper limit of detection of the measured points. This is needed if any of the data points have the value \"U\" (higher than detection limit)
      * </p> 
 	 */
-	public void setUpperLimit( java.math.BigDecimal theValue) {
+	public void setUpperLimit( long theValue) {
 		myUpperLimit = new DecimalDt(theValue); 
 	}
 
@@ -391,7 +399,7 @@ public class SampledDataDt
      * The upper limit of detection of the measured points. This is needed if any of the data points have the value \"U\" (higher than detection limit)
      * </p> 
 	 */
-	public void setUpperLimit( long theValue) {
+	public void setUpperLimit( java.math.BigDecimal theValue) {
 		myUpperLimit = new DecimalDt(theValue); 
 	}
 

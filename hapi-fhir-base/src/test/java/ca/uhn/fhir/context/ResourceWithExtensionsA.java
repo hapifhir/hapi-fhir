@@ -2,6 +2,7 @@ package ca.uhn.fhir.context;
 
 import java.util.List;
 
+import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IExtension;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.annotation.Block;
@@ -10,6 +11,7 @@ import ca.uhn.fhir.model.api.annotation.Extension;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.primitive.DateDt;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 
 @ResourceDef(name = "ResourceWithExtensionsA", id="0001")
@@ -38,6 +40,8 @@ public class ResourceWithExtensionsA implements IResource {
 
 	@Child(name = "identifier", type = IdentifierDt.class, order = 0, min = 0, max = Child.MAX_UNLIMITED)
 	private List<IdentifierDt> myIdentifier;
+
+	private IdDt myId;
 
 	public List<Bar1> getBar1() {
 		return myBar1;
@@ -94,10 +98,17 @@ public class ResourceWithExtensionsA implements IResource {
 		@Extension(url = "http://bar/#b1/2", definedLocally=true, isModifier=false)
 		private List<Bar2> myBar12;
 
+		private IdDt myId;
+		
 		@Override
 		public boolean isEmpty() {
 			return false; // TODO: implement
 		}
+		@Override
+		public List<IElement> getAllPopulatedChildElements() {
+			return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements( ); // TODO: implement
+		}
+
 
 		public List<DateDt> getBar11() {
 			return myBar11;
@@ -114,6 +125,18 @@ public class ResourceWithExtensionsA implements IResource {
 		public void setBar12(List<Bar2> theBar12) {
 			myBar12 = theBar12;
 		}
+		
+		@Override
+		public void setId(IdDt theId) {
+			myId=theId;
+		}
+
+		@Override
+		public IdDt getId() {
+			return myId;
+		}
+
+
 
 	}
 
@@ -128,10 +151,17 @@ public class ResourceWithExtensionsA implements IResource {
 		@Extension(url = "http://bar/#b1/2/2", definedLocally=true, isModifier=false)
 		private List<DateDt> myBar122;
 
+		private IdDt myId;
+		
 		@Override
 		public boolean isEmpty() {
 			return false; // TODO: implement
 		}
+		@Override
+		public List<IElement> getAllPopulatedChildElements() {
+			return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements( ); // TODO: implement
+		}
+
 
 		public List<DateDt> getBar121() {
 			return myBar121;
@@ -149,11 +179,37 @@ public class ResourceWithExtensionsA implements IResource {
 			myBar122 = theBar122;
 		}
 
+		@Override
+		public void setId(IdDt theId) {
+			myId=theId;
+		}
+
+		@Override
+		public IdDt getId() {
+			return myId;
+		}
+
+
 	}
 
 	@Override
 	public boolean isEmpty() {
 		return false; // TODO: implement
+	}
+
+	@Override
+	public List<IElement> getAllPopulatedChildElements() {
+		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements( ); // TODO: implement
+	}
+
+	@Override
+	public void setId(IdDt theId) {
+		myId=theId;
+	}
+
+	@Override
+	public IdDt getId() {
+		return myId;
 	}
 
 }

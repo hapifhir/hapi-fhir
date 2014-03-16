@@ -16,8 +16,11 @@
 
 package ca.uhn.fhir.testmodel;
 
+import java.util.List;
+
 import ca.uhn.fhir.model.api.BaseElement;
 import ca.uhn.fhir.model.api.ICompositeDatatype;
+import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
@@ -114,6 +117,12 @@ public class IdentifierDt
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myUse,  myLabel,  mySystem,  myValue,  myPeriod,  myAssigner);
 	}
 
+	@Override
+	public List<IElement> getAllPopulatedChildElements() {
+		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(  myUse,  myLabel,  mySystem,  myValue,  myPeriod,  myAssigner);
+	}
+
+	
 	/**
 	 * Gets the value(s) for <b>use</b> (usual | official | temp | secondary (If known)).
 	 * creating it if it does

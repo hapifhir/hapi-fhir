@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import ca.uhn.fhir.model.dstu.composite.CodingDt;
 import ca.uhn.fhir.model.dstu.composite.HumanNameDt;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.resource.Patient;
@@ -17,6 +18,8 @@ import ca.uhn.fhir.rest.annotation.Optional;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.Required;
 import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.param.CodingListParam;
+import ca.uhn.fhir.rest.param.QualifiedDateParam;
 
 /**
  * Created by dsotnikov on 2/25/2014.
@@ -63,6 +66,18 @@ public class DummyPatientResourceProvider implements IResourceProvider {
 		}
 		return null;
 	}
+	
+	@Search()
+	public Patient getPatientWithDOB(@Required(name = "dob") QualifiedDateParam theDob) {
+		Patient next = getIdToPatient().get("1");
+		if (theDob.getComparator()!=null) {
+			next.addIdentifier().setValue(theDob.getComparator().getCode());
+		}else {
+			next.addIdentifier().setValue("NONE");
+		}
+		next.addIdentifier().setValue(theDob.getValueAsString());
+		return next;
+	}	
 
 	@Search()
 	public List<Patient> getPatientWithOptionalName(@Required(name = "name1") StringDt theName1, @Optional(name = "name2") StringDt theName2) {
@@ -72,6 +87,20 @@ public class DummyPatientResourceProvider implements IResourceProvider {
 		if (theName2 != null) {
 			next.getName().get(0).getGiven().set(0, theName2);
 		}
+		retVal.add(next);
+
+		return retVal;
+	}
+
+	@Search()
+	public List<Patient> getPatientMultipleIdentifiers(@Required(name = "ids") CodingListParam theIdentifiers) {
+		List<Patient> retVal = new ArrayList<Patient>();
+		Patient next = getIdToPatient().get("1");
+		
+		for (CodingDt nextId : theIdentifiers.getCodings()) {
+			next.getIdentifier().add(new IdentifierDt(nextId.getSystem().getValueAsString(), nextId.getCode().getValue()));
+		}
+		
 		retVal.add(next);
 
 		return retVal;
@@ -89,13 +118,6 @@ public class DummyPatientResourceProvider implements IResourceProvider {
 		return getIdToPatient().get(theId.getValue());
 	}
 
-	/**
-	 * Retrieve the resource by its identifier
-	 * 
-	 * @param theId
-	 *            The resource identity
-	 * @return The resource
-	 */
 	@Read()
 	public Patient getResourceById(@Read.IdParam IdDt theId, @Read.VersionIdParam IdDt theVersionId) {
 		Patient retVal = getIdToPatient().get(theId.getValue());

@@ -5,6 +5,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.net.URLDecoder;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,6 +13,8 @@ import java.util.Map;
 import ca.uhn.fhir.rest.annotation.Optional;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.Required;
+import ca.uhn.fhir.rest.param.Parameter;
+import ca.uhn.fhir.util.ReflectionUtil;
 
 /**
  * Created by dsotnikov on 2/25/2014.
@@ -34,6 +37,7 @@ public class Util {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	public static List<Parameter> getResourceParameters(Method method) {
 		List<Parameter> parameters = new ArrayList<Parameter>();
 
@@ -42,15 +46,31 @@ public class Util {
 			for (int i = 0; i < annotations.length; i++) {
 				Annotation nextAnnotation = annotations[i];
 				Parameter parameter = new Parameter();
+				Class<?> parameterType = parameterTypes[i];
+				
+				Class<? extends java.util.Collection<?>> outerCollectionType = null;
+				Class<? extends java.util.Collection<?>> innerCollectionType = null;
+				
+				if (Collection.class.isAssignableFrom(parameterType)) {
+					innerCollectionType = (Class<? extends java.util.Collection<?>>) parameterType;
+					parameterType = ReflectionUtil.getGenericCollectionTypeOfMethodParameter(method, i);
+				}
+
+				if (Collection.class.isAssignableFrom(parameterType)) {
+					outerCollectionType = innerCollectionType;
+					innerCollectionType = (Class<? extends java.util.Collection<?>>) parameterType;
+					parameterType = ReflectionUtil.getGenericCollectionTypeOfMethodParameter(method, i);
+				}
+
 				if (nextAnnotation instanceof Required) {
 					parameter.setName(((Required) nextAnnotation).name());
 					parameter.setRequired(true);
-					parameter.setType(parameterTypes[i]);
+					parameter.setType(parameterType, innerCollectionType, outerCollectionType);
 
 				} else if (nextAnnotation instanceof Optional) {
 					parameter.setName(((Optional) nextAnnotation).name());
 					parameter.setRequired(false);
-					parameter.setType(parameterTypes[i]);
+					parameter.setType(parameterType, innerCollectionType, innerCollectionType);
 				}
 				parameters.add(parameter);
 			}

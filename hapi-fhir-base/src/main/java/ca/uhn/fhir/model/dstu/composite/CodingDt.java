@@ -16,12 +16,17 @@
 
 package ca.uhn.fhir.model.dstu.composite;
 
-import java.util.*;
-import ca.uhn.fhir.model.api.*;
-import ca.uhn.fhir.model.api.annotation.*;
-import ca.uhn.fhir.model.primitive.*;
-import ca.uhn.fhir.model.dstu.valueset.*;
-import ca.uhn.fhir.model.dstu.resource.*;
+import ca.uhn.fhir.model.api.BaseElement;
+import ca.uhn.fhir.model.api.ICompositeDatatype;
+import ca.uhn.fhir.model.api.IElement;
+import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.primitive.BooleanDt;
+import ca.uhn.fhir.model.primitive.CodeDt;
+import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.model.primitive.UriDt;
 
 /**
  * HAPI/FHIR <b>Coding</b> Datatype
@@ -39,8 +44,22 @@ import ca.uhn.fhir.model.dstu.resource.*;
  */
 @DatatypeDef(name="Coding") 
 public class CodingDt 
-        extends  BaseElement         implements ICompositeDatatype  {
+        extends  BaseElement         implements ICompositeDatatype  , IQueryParameterType {
 
+	/**
+	 * Creates a new Coding
+	 */
+	public CodingDt() {
+		// nothing
+	}
+
+	/**
+	 * Creates a new Coding with the given system and code
+	 */
+	public CodingDt(String theSystem, String theCode) {
+		setSystem(theSystem);
+		setCode(theCode);
+	}
 
 	@Child(name="system", type=UriDt.class, order=0, min=0, max=1)	
 	@Description(
@@ -78,7 +97,7 @@ public class CodingDt
 	private BooleanDt myPrimary;
 	
 	@Child(name="valueSet", order=5, min=0, max=1, type={
-		ValueSet.class,
+		ca.uhn.fhir.model.dstu.resource.ValueSet.class,
 	})
 	@Description(
 		shortDefinition="Set this coding was chosen from",
@@ -91,6 +110,11 @@ public class CodingDt
 	public boolean isEmpty() {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  mySystem,  myVersion,  myCode,  myDisplay,  myPrimary,  myValueSet);
 	}
+	
+	public java.util.List<IElement> getAllPopulatedChildElements() {
+		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(  mySystem,  myVersion,  myCode,  myDisplay,  myPrimary,  myValueSet);
+	}
+	
 
 	/**
 	 * Gets the value(s) for <b>system</b> (Identity of the terminology system).
@@ -339,6 +363,43 @@ public class CodingDt
 
   
 
+	/**
+	 * Returns true if <code>this</code> Coding has the same {@link CodingDt#getCode() Code}
+	 * and {@link CodingDt#getSystem() system} (as compared by simple equals comparison).
+	 * Does not compare other Codes (e.g. {@link CodingDt#getUse() use}) or any extensions. 
+	 */
+	public boolean matchesSystemAndCode(CodingDt theCoding) {
+		if (theCoding == null) {
+			return false;
+		}
+		return getCode().equals(theCoding.getCode()) && getSystem().equals(theCoding.getSystem());
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public String getValueAsQueryToken() {
+		if (org.apache.commons.lang3.StringUtils.isNotBlank(getSystem().getValueAsString())) {
+			return getSystem().getValueAsString() + '|' + getCode().getValueAsString(); 
+		} else {
+			return getCode().getValueAsString();
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void setValueAsQueryToken(String theParameter) {
+		int barIndex = theParameter.indexOf('|');
+		if (barIndex != -1) {
+			setSystem(new UriDt(theParameter.substring(0, barIndex)));
+			setCode(theParameter.substring(barIndex + 1));
+		} else {
+			setCode(theParameter);
+		}
+	}	
 
 
 }

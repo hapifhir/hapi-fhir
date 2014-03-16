@@ -16,12 +16,38 @@
 
 package ca.uhn.fhir.model.dstu.resource;
 
-import java.util.*;
-import ca.uhn.fhir.model.api.*;
-import ca.uhn.fhir.model.api.annotation.*;
-import ca.uhn.fhir.model.primitive.*;
-import ca.uhn.fhir.model.dstu.composite.*;
-import ca.uhn.fhir.model.dstu.valueset.*;
+
+import java.util.Date;
+
+import ca.uhn.fhir.model.api.BaseElement;
+import ca.uhn.fhir.model.api.BaseResource;
+import ca.uhn.fhir.model.api.IDatatype;
+import ca.uhn.fhir.model.api.IElement;
+import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.IResourceBlock;
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import ca.uhn.fhir.model.api.annotation.Block;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.dstu.composite.AddressDt;
+import ca.uhn.fhir.model.dstu.composite.AttachmentDt;
+import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
+import ca.uhn.fhir.model.dstu.composite.ContactDt;
+import ca.uhn.fhir.model.dstu.composite.HumanNameDt;
+import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
+import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
+import ca.uhn.fhir.model.dstu.valueset.AnimalSpeciesEnum;
+import ca.uhn.fhir.model.dstu.valueset.LinkTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.MaritalStatusCodesEnum;
+import ca.uhn.fhir.model.primitive.BooleanDt;
+import ca.uhn.fhir.model.primitive.BoundCodeDt;
+import ca.uhn.fhir.model.primitive.BoundCodeableConceptDt;
+import ca.uhn.fhir.model.primitive.CodeDt;
+import ca.uhn.fhir.model.primitive.DateTimeDt;
+import ca.uhn.fhir.model.primitive.IntegerDt;
+
 
 /**
  * HAPI/FHIR <b>Patient</b> Resource
@@ -196,21 +222,21 @@ public class Patient extends BaseResource implements IResource {
 		shortDefinition="An identifier for the person as this patient",
 		formalDefinition="An identifier that applies to this person as a patient"
 	)
-	private List<IdentifierDt> myIdentifier;
+	private java.util.List<IdentifierDt> myIdentifier;
 	
 	@Child(name="name", type=HumanNameDt.class, order=1, min=0, max=Child.MAX_UNLIMITED)	
 	@Description(
 		shortDefinition="A name associated with the patient",
 		formalDefinition="A name associated with the individual."
 	)
-	private List<HumanNameDt> myName;
+	private java.util.List<HumanNameDt> myName;
 	
 	@Child(name="telecom", type=ContactDt.class, order=2, min=0, max=Child.MAX_UNLIMITED)	
 	@Description(
 		shortDefinition="A contact detail for the individual",
 		formalDefinition="A contact detail (e.g. a telephone number or an email address) by which the individual may be contacted."
 	)
-	private List<ContactDt> myTelecom;
+	private java.util.List<ContactDt> myTelecom;
 	
 	@Child(name="gender", type=CodeableConceptDt.class, order=3, min=0, max=1)	
 	@Description(
@@ -241,7 +267,7 @@ public class Patient extends BaseResource implements IResource {
 		shortDefinition="Addresses for the individual",
 		formalDefinition="Addresses for the individual"
 	)
-	private List<AddressDt> myAddress;
+	private java.util.List<AddressDt> myAddress;
 	
 	@Child(name="maritalStatus", type=CodeableConceptDt.class, order=7, min=0, max=1)	
 	@Description(
@@ -265,14 +291,14 @@ public class Patient extends BaseResource implements IResource {
 		shortDefinition="Image of the person",
 		formalDefinition="Image of the person"
 	)
-	private List<AttachmentDt> myPhoto;
+	private java.util.List<AttachmentDt> myPhoto;
 	
 	@Child(name="contact", order=10, min=0, max=Child.MAX_UNLIMITED)	
 	@Description(
 		shortDefinition="A contact party (e.g. guardian, partner, friend) for the patient",
 		formalDefinition="A contact party (e.g. guardian, partner, friend) for the patient"
 	)
-	private List<Contact> myContact;
+	private java.util.List<Contact> myContact;
 	
 	@Child(name="animal", order=11, min=0, max=1)	
 	@Description(
@@ -286,20 +312,20 @@ public class Patient extends BaseResource implements IResource {
 		shortDefinition="Languages which may be used to communicate with the patient about his or her health",
 		formalDefinition="Languages which may be used to communicate with the patient about his or her health"
 	)
-	private List<CodeableConceptDt> myCommunication;
+	private java.util.List<CodeableConceptDt> myCommunication;
 	
 	@Child(name="careProvider", order=13, min=0, max=Child.MAX_UNLIMITED, type={
-		Organization.class,
-		Practitioner.class,
+		ca.uhn.fhir.model.dstu.resource.Organization.class,
+		ca.uhn.fhir.model.dstu.resource.Practitioner.class,
 	})
 	@Description(
 		shortDefinition="Patient's nominated care provider",
 		formalDefinition="Patient's nominated care provider"
 	)
-	private List<ResourceReferenceDt> myCareProvider;
+	private java.util.List<ResourceReferenceDt> myCareProvider;
 	
 	@Child(name="managingOrganization", order=14, min=0, max=1, type={
-		Organization.class,
+		ca.uhn.fhir.model.dstu.resource.Organization.class,
 	})
 	@Description(
 		shortDefinition="Organization that is the custodian of the patient record",
@@ -312,7 +338,7 @@ public class Patient extends BaseResource implements IResource {
 		shortDefinition="Link to another patient resource that concerns the same actual person",
 		formalDefinition="Link to another patient resource that concerns the same actual person"
 	)
-	private List<Link> myLink;
+	private java.util.List<Link> myLink;
 	
 	@Child(name="active", type=BooleanDt.class, order=16, min=0, max=1)	
 	@Description(
@@ -326,6 +352,11 @@ public class Patient extends BaseResource implements IResource {
 	public boolean isEmpty() {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myIdentifier,  myName,  myTelecom,  myGender,  myBirthDate,  myDeceased,  myAddress,  myMaritalStatus,  myMultipleBirth,  myPhoto,  myContact,  myAnimal,  myCommunication,  myCareProvider,  myManagingOrganization,  myLink,  myActive);
 	}
+	
+	public java.util.List<IElement> getAllPopulatedChildElements() {
+		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(  myIdentifier,  myName,  myTelecom,  myGender,  myBirthDate,  myDeceased,  myAddress,  myMaritalStatus,  myMultipleBirth,  myPhoto,  myContact,  myAnimal,  myCommunication,  myCareProvider,  myManagingOrganization,  myLink,  myActive);
+	}
+	
 
 	/**
 	 * Gets the value(s) for <b>identifier</b> (An identifier for the person as this patient).
@@ -337,9 +368,9 @@ public class Patient extends BaseResource implements IResource {
      * An identifier that applies to this person as a patient
      * </p> 
 	 */
-	public List<IdentifierDt> getIdentifier() {  
+	public java.util.List<IdentifierDt> getIdentifier() {  
 		if (myIdentifier == null) {
-			myIdentifier = new ArrayList<IdentifierDt>();
+			myIdentifier = new java.util.ArrayList<IdentifierDt>();
 		}
 		return myIdentifier;
 	}
@@ -352,7 +383,7 @@ public class Patient extends BaseResource implements IResource {
      * An identifier that applies to this person as a patient
      * </p> 
 	 */
-	public void setIdentifier(List<IdentifierDt> theValue) {
+	public void setIdentifier(java.util.List<IdentifierDt> theValue) {
 		myIdentifier = theValue;
 	}
 
@@ -381,9 +412,9 @@ public class Patient extends BaseResource implements IResource {
      * A name associated with the individual.
      * </p> 
 	 */
-	public List<HumanNameDt> getName() {  
+	public java.util.List<HumanNameDt> getName() {  
 		if (myName == null) {
-			myName = new ArrayList<HumanNameDt>();
+			myName = new java.util.ArrayList<HumanNameDt>();
 		}
 		return myName;
 	}
@@ -396,7 +427,7 @@ public class Patient extends BaseResource implements IResource {
      * A name associated with the individual.
      * </p> 
 	 */
-	public void setName(List<HumanNameDt> theValue) {
+	public void setName(java.util.List<HumanNameDt> theValue) {
 		myName = theValue;
 	}
 
@@ -425,9 +456,9 @@ public class Patient extends BaseResource implements IResource {
      * A contact detail (e.g. a telephone number or an email address) by which the individual may be contacted.
      * </p> 
 	 */
-	public List<ContactDt> getTelecom() {  
+	public java.util.List<ContactDt> getTelecom() {  
 		if (myTelecom == null) {
-			myTelecom = new ArrayList<ContactDt>();
+			myTelecom = new java.util.ArrayList<ContactDt>();
 		}
 		return myTelecom;
 	}
@@ -440,7 +471,7 @@ public class Patient extends BaseResource implements IResource {
      * A contact detail (e.g. a telephone number or an email address) by which the individual may be contacted.
      * </p> 
 	 */
-	public void setTelecom(List<ContactDt> theValue) {
+	public void setTelecom(java.util.List<ContactDt> theValue) {
 		myTelecom = theValue;
 	}
 
@@ -540,8 +571,8 @@ public class Patient extends BaseResource implements IResource {
      * The date and time of birth for the individual
      * </p> 
 	 */
-	public void setBirthDateWithSecondsPrecision( Date theDate) {
-		myBirthDate = new DateTimeDt(theDate); 
+	public void setBirthDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myBirthDate = new DateTimeDt(theDate, thePrecision); 
 	}
 
 	/**
@@ -552,8 +583,8 @@ public class Patient extends BaseResource implements IResource {
      * The date and time of birth for the individual
      * </p> 
 	 */
-	public void setBirthDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myBirthDate = new DateTimeDt(theDate, thePrecision); 
+	public void setBirthDateWithSecondsPrecision( Date theDate) {
+		myBirthDate = new DateTimeDt(theDate); 
 	}
 
  
@@ -595,9 +626,9 @@ public class Patient extends BaseResource implements IResource {
      * Addresses for the individual
      * </p> 
 	 */
-	public List<AddressDt> getAddress() {  
+	public java.util.List<AddressDt> getAddress() {  
 		if (myAddress == null) {
-			myAddress = new ArrayList<AddressDt>();
+			myAddress = new java.util.ArrayList<AddressDt>();
 		}
 		return myAddress;
 	}
@@ -610,7 +641,7 @@ public class Patient extends BaseResource implements IResource {
      * Addresses for the individual
      * </p> 
 	 */
-	public void setAddress(List<AddressDt> theValue) {
+	public void setAddress(java.util.List<AddressDt> theValue) {
 		myAddress = theValue;
 	}
 
@@ -710,9 +741,9 @@ public class Patient extends BaseResource implements IResource {
      * Image of the person
      * </p> 
 	 */
-	public List<AttachmentDt> getPhoto() {  
+	public java.util.List<AttachmentDt> getPhoto() {  
 		if (myPhoto == null) {
-			myPhoto = new ArrayList<AttachmentDt>();
+			myPhoto = new java.util.ArrayList<AttachmentDt>();
 		}
 		return myPhoto;
 	}
@@ -725,7 +756,7 @@ public class Patient extends BaseResource implements IResource {
      * Image of the person
      * </p> 
 	 */
-	public void setPhoto(List<AttachmentDt> theValue) {
+	public void setPhoto(java.util.List<AttachmentDt> theValue) {
 		myPhoto = theValue;
 	}
 
@@ -754,9 +785,9 @@ public class Patient extends BaseResource implements IResource {
      * A contact party (e.g. guardian, partner, friend) for the patient
      * </p> 
 	 */
-	public List<Contact> getContact() {  
+	public java.util.List<Contact> getContact() {  
 		if (myContact == null) {
-			myContact = new ArrayList<Contact>();
+			myContact = new java.util.ArrayList<Contact>();
 		}
 		return myContact;
 	}
@@ -769,7 +800,7 @@ public class Patient extends BaseResource implements IResource {
      * A contact party (e.g. guardian, partner, friend) for the patient
      * </p> 
 	 */
-	public void setContact(List<Contact> theValue) {
+	public void setContact(java.util.List<Contact> theValue) {
 		myContact = theValue;
 	}
 
@@ -829,9 +860,9 @@ public class Patient extends BaseResource implements IResource {
      * Languages which may be used to communicate with the patient about his or her health
      * </p> 
 	 */
-	public List<CodeableConceptDt> getCommunication() {  
+	public java.util.List<CodeableConceptDt> getCommunication() {  
 		if (myCommunication == null) {
-			myCommunication = new ArrayList<CodeableConceptDt>();
+			myCommunication = new java.util.ArrayList<CodeableConceptDt>();
 		}
 		return myCommunication;
 	}
@@ -844,7 +875,7 @@ public class Patient extends BaseResource implements IResource {
      * Languages which may be used to communicate with the patient about his or her health
      * </p> 
 	 */
-	public void setCommunication(List<CodeableConceptDt> theValue) {
+	public void setCommunication(java.util.List<CodeableConceptDt> theValue) {
 		myCommunication = theValue;
 	}
 
@@ -873,7 +904,7 @@ public class Patient extends BaseResource implements IResource {
      * Patient's nominated care provider
      * </p> 
 	 */
-	public List<ResourceReferenceDt> getCareProvider() {  
+	public java.util.List<ResourceReferenceDt> getCareProvider() {  
 		return myCareProvider;
 	}
 
@@ -885,7 +916,7 @@ public class Patient extends BaseResource implements IResource {
      * Patient's nominated care provider
      * </p> 
 	 */
-	public void setCareProvider(List<ResourceReferenceDt> theValue) {
+	public void setCareProvider(java.util.List<ResourceReferenceDt> theValue) {
 		myCareProvider = theValue;
 	}
 
@@ -932,9 +963,9 @@ public class Patient extends BaseResource implements IResource {
      * Link to another patient resource that concerns the same actual person
      * </p> 
 	 */
-	public List<Link> getLink() {  
+	public java.util.List<Link> getLink() {  
 		if (myLink == null) {
-			myLink = new ArrayList<Link>();
+			myLink = new java.util.ArrayList<Link>();
 		}
 		return myLink;
 	}
@@ -947,7 +978,7 @@ public class Patient extends BaseResource implements IResource {
      * Link to another patient resource that concerns the same actual person
      * </p> 
 	 */
-	public void setLink(List<Link> theValue) {
+	public void setLink(java.util.List<Link> theValue) {
 		myLink = theValue;
 	}
 
@@ -1025,7 +1056,7 @@ public class Patient extends BaseResource implements IResource {
 		shortDefinition="The kind of relationship",
 		formalDefinition="The nature of the relationship between the patient and the contact person"
 	)
-	private List<CodeableConceptDt> myRelationship;
+	private java.util.List<CodeableConceptDt> myRelationship;
 	
 	@Child(name="name", type=HumanNameDt.class, order=1, min=0, max=1)	
 	@Description(
@@ -1039,7 +1070,7 @@ public class Patient extends BaseResource implements IResource {
 		shortDefinition="A contact detail for the person",
 		formalDefinition="A contact detail for the person, e.g. a telephone number or an email address."
 	)
-	private List<ContactDt> myTelecom;
+	private java.util.List<ContactDt> myTelecom;
 	
 	@Child(name="address", type=AddressDt.class, order=3, min=0, max=1)	
 	@Description(
@@ -1056,7 +1087,7 @@ public class Patient extends BaseResource implements IResource {
 	private BoundCodeableConceptDt<AdministrativeGenderCodesEnum> myGender;
 	
 	@Child(name="organization", order=5, min=0, max=1, type={
-		Organization.class,
+		ca.uhn.fhir.model.dstu.resource.Organization.class,
 	})
 	@Description(
 		shortDefinition="Organization that is associated with the contact",
@@ -1069,6 +1100,11 @@ public class Patient extends BaseResource implements IResource {
 	public boolean isEmpty() {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myRelationship,  myName,  myTelecom,  myAddress,  myGender,  myOrganization);
 	}
+	
+	public java.util.List<IElement> getAllPopulatedChildElements() {
+		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(  myRelationship,  myName,  myTelecom,  myAddress,  myGender,  myOrganization);
+	}
+	
 
 	/**
 	 * Gets the value(s) for <b>relationship</b> (The kind of relationship).
@@ -1080,9 +1116,9 @@ public class Patient extends BaseResource implements IResource {
      * The nature of the relationship between the patient and the contact person
      * </p> 
 	 */
-	public List<CodeableConceptDt> getRelationship() {  
+	public java.util.List<CodeableConceptDt> getRelationship() {  
 		if (myRelationship == null) {
-			myRelationship = new ArrayList<CodeableConceptDt>();
+			myRelationship = new java.util.ArrayList<CodeableConceptDt>();
 		}
 		return myRelationship;
 	}
@@ -1095,7 +1131,7 @@ public class Patient extends BaseResource implements IResource {
      * The nature of the relationship between the patient and the contact person
      * </p> 
 	 */
-	public void setRelationship(List<CodeableConceptDt> theValue) {
+	public void setRelationship(java.util.List<CodeableConceptDt> theValue) {
 		myRelationship = theValue;
 	}
 
@@ -1155,9 +1191,9 @@ public class Patient extends BaseResource implements IResource {
      * A contact detail for the person, e.g. a telephone number or an email address.
      * </p> 
 	 */
-	public List<ContactDt> getTelecom() {  
+	public java.util.List<ContactDt> getTelecom() {  
 		if (myTelecom == null) {
-			myTelecom = new ArrayList<ContactDt>();
+			myTelecom = new java.util.ArrayList<ContactDt>();
 		}
 		return myTelecom;
 	}
@@ -1170,7 +1206,7 @@ public class Patient extends BaseResource implements IResource {
      * A contact detail for the person, e.g. a telephone number or an email address.
      * </p> 
 	 */
-	public void setTelecom(List<ContactDt> theValue) {
+	public void setTelecom(java.util.List<ContactDt> theValue) {
 		myTelecom = theValue;
 	}
 
@@ -1335,6 +1371,11 @@ public class Patient extends BaseResource implements IResource {
 	public boolean isEmpty() {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  mySpecies,  myBreed,  myGenderStatus);
 	}
+	
+	public java.util.List<IElement> getAllPopulatedChildElements() {
+		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(  mySpecies,  myBreed,  myGenderStatus);
+	}
+	
 
 	/**
 	 * Gets the value(s) for <b>species</b> (E.g. Dog, Cow).
@@ -1457,7 +1498,7 @@ public class Patient extends BaseResource implements IResource {
 	public static class Link extends BaseElement implements IResourceBlock {
 	
 	@Child(name="other", order=0, min=1, max=1, type={
-		Patient.class,
+		ca.uhn.fhir.model.dstu.resource.Patient.class,
 	})
 	@Description(
 		shortDefinition="The other patient resource that the link refers to",
@@ -1477,6 +1518,11 @@ public class Patient extends BaseResource implements IResource {
 	public boolean isEmpty() {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myOther,  myType);
 	}
+	
+	public java.util.List<IElement> getAllPopulatedChildElements() {
+		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(  myOther,  myType);
+	}
+	
 
 	/**
 	 * Gets the value(s) for <b>other</b> (The other patient resource that the link refers to).

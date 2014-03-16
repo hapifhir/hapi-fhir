@@ -16,12 +16,44 @@
 
 package ca.uhn.fhir.model.dstu.resource;
 
-import java.util.*;
-import ca.uhn.fhir.model.api.*;
-import ca.uhn.fhir.model.api.annotation.*;
-import ca.uhn.fhir.model.primitive.*;
-import ca.uhn.fhir.model.dstu.composite.*;
-import ca.uhn.fhir.model.dstu.valueset.*;
+
+import java.util.Date;
+
+import ca.uhn.fhir.model.api.BaseElement;
+import ca.uhn.fhir.model.api.BaseResource;
+import ca.uhn.fhir.model.api.IElement;
+import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.IResourceBlock;
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import ca.uhn.fhir.model.api.annotation.Block;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
+import ca.uhn.fhir.model.dstu.composite.CodingDt;
+import ca.uhn.fhir.model.dstu.composite.ContactDt;
+import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.dstu.valueset.ConformanceEventModeEnum;
+import ca.uhn.fhir.model.dstu.valueset.ConformanceStatementStatusEnum;
+import ca.uhn.fhir.model.dstu.valueset.DocumentModeEnum;
+import ca.uhn.fhir.model.dstu.valueset.MessageSignificanceCategoryEnum;
+import ca.uhn.fhir.model.dstu.valueset.ResourceTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.RestfulConformanceModeEnum;
+import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
+import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.RestfulSecurityServiceEnum;
+import ca.uhn.fhir.model.dstu.valueset.SearchParamTypeEnum;
+import ca.uhn.fhir.model.primitive.Base64BinaryDt;
+import ca.uhn.fhir.model.primitive.BooleanDt;
+import ca.uhn.fhir.model.primitive.BoundCodeDt;
+import ca.uhn.fhir.model.primitive.BoundCodeableConceptDt;
+import ca.uhn.fhir.model.primitive.CodeDt;
+import ca.uhn.fhir.model.primitive.DateTimeDt;
+import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.model.primitive.IntegerDt;
+import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.model.primitive.UriDt;
+
 
 /**
  * HAPI/FHIR <b>Conformance</b> Resource
@@ -234,7 +266,7 @@ public class Conformance extends BaseResource implements IResource {
 		shortDefinition="Contacts for Organization",
 		formalDefinition="Contacts for Organization relevant to this conformance statement.  The contacts may be a website, email, phone numbers, etc."
 	)
-	private List<ContactDt> myTelecom;
+	private java.util.List<ContactDt> myTelecom;
 	
 	@Child(name="description", type=StringDt.class, order=5, min=0, max=1)	
 	@Description(
@@ -297,43 +329,48 @@ public class Conformance extends BaseResource implements IResource {
 		shortDefinition="formats supported (xml | json | mime type)",
 		formalDefinition="A list of the formats supported by this implementation"
 	)
-	private List<CodeDt> myFormat;
+	private java.util.List<CodeDt> myFormat;
 	
 	@Child(name="profile", order=14, min=0, max=Child.MAX_UNLIMITED, type={
-		Profile.class,
+		ca.uhn.fhir.model.dstu.resource.Profile.class,
 	})
 	@Description(
 		shortDefinition="Profiles supported by the system",
 		formalDefinition="A list of profiles supported by the system. For a server, \"supported by the system\" means the system hosts/produces a set of recourses, conformant to a particular profile, and allows its clients to search using this profile and to find appropriate data. For a client, it means the system will search by this profile and process data according to the guidance implicit in the profile."
 	)
-	private List<ResourceReferenceDt> myProfile;
+	private java.util.List<ResourceReferenceDt> myProfile;
 	
 	@Child(name="rest", order=15, min=0, max=Child.MAX_UNLIMITED)	
 	@Description(
 		shortDefinition="If the endpoint is a RESTful one",
 		formalDefinition="A definition of the restful capabilities of the solution, if any"
 	)
-	private List<Rest> myRest;
+	private java.util.List<Rest> myRest;
 	
 	@Child(name="messaging", order=16, min=0, max=Child.MAX_UNLIMITED)	
 	@Description(
 		shortDefinition="If messaging is supported",
 		formalDefinition="A description of the messaging capabilities of the solution"
 	)
-	private List<Messaging> myMessaging;
+	private java.util.List<Messaging> myMessaging;
 	
 	@Child(name="document", order=17, min=0, max=Child.MAX_UNLIMITED)	
 	@Description(
 		shortDefinition="Document definition",
 		formalDefinition="A document definition"
 	)
-	private List<Document> myDocument;
+	private java.util.List<Document> myDocument;
 	
 
 	@Override
 	public boolean isEmpty() {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myIdentifier,  myVersion,  myName,  myPublisher,  myTelecom,  myDescription,  myStatus,  myExperimental,  myDate,  mySoftware,  myImplementation,  myFhirVersion,  myAcceptUnknown,  myFormat,  myProfile,  myRest,  myMessaging,  myDocument);
 	}
+	
+	public java.util.List<IElement> getAllPopulatedChildElements() {
+		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(  myIdentifier,  myVersion,  myName,  myPublisher,  myTelecom,  myDescription,  myStatus,  myExperimental,  myDate,  mySoftware,  myImplementation,  myFhirVersion,  myAcceptUnknown,  myFormat,  myProfile,  myRest,  myMessaging,  myDocument);
+	}
+	
 
 	/**
 	 * Gets the value(s) for <b>identifier</b> (Logical id to reference this statement).
@@ -517,9 +554,9 @@ public class Conformance extends BaseResource implements IResource {
      * Contacts for Organization relevant to this conformance statement.  The contacts may be a website, email, phone numbers, etc.
      * </p> 
 	 */
-	public List<ContactDt> getTelecom() {  
+	public java.util.List<ContactDt> getTelecom() {  
 		if (myTelecom == null) {
-			myTelecom = new ArrayList<ContactDt>();
+			myTelecom = new java.util.ArrayList<ContactDt>();
 		}
 		return myTelecom;
 	}
@@ -532,7 +569,7 @@ public class Conformance extends BaseResource implements IResource {
      * Contacts for Organization relevant to this conformance statement.  The contacts may be a website, email, phone numbers, etc.
      * </p> 
 	 */
-	public void setTelecom(List<ContactDt> theValue) {
+	public void setTelecom(java.util.List<ContactDt> theValue) {
 		myTelecom = theValue;
 	}
 
@@ -718,8 +755,8 @@ public class Conformance extends BaseResource implements IResource {
      * The date when the conformance statement was published
      * </p> 
 	 */
-	public void setDateWithSecondsPrecision( Date theDate) {
-		myDate = new DateTimeDt(theDate); 
+	public void setDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myDate = new DateTimeDt(theDate, thePrecision); 
 	}
 
 	/**
@@ -730,8 +767,8 @@ public class Conformance extends BaseResource implements IResource {
      * The date when the conformance statement was published
      * </p> 
 	 */
-	public void setDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myDate = new DateTimeDt(theDate, thePrecision); 
+	public void setDateWithSecondsPrecision( Date theDate) {
+		myDate = new DateTimeDt(theDate); 
 	}
 
  
@@ -893,9 +930,9 @@ public class Conformance extends BaseResource implements IResource {
      * A list of the formats supported by this implementation
      * </p> 
 	 */
-	public List<CodeDt> getFormat() {  
+	public java.util.List<CodeDt> getFormat() {  
 		if (myFormat == null) {
-			myFormat = new ArrayList<CodeDt>();
+			myFormat = new java.util.ArrayList<CodeDt>();
 		}
 		return myFormat;
 	}
@@ -908,7 +945,7 @@ public class Conformance extends BaseResource implements IResource {
      * A list of the formats supported by this implementation
      * </p> 
 	 */
-	public void setFormat(List<CodeDt> theValue) {
+	public void setFormat(java.util.List<CodeDt> theValue) {
 		myFormat = theValue;
 	}
 
@@ -936,7 +973,7 @@ public class Conformance extends BaseResource implements IResource {
 	 */
 	public void addFormat( String theCode) {
 		if (myFormat == null) {
-			myFormat = new ArrayList<CodeDt>();
+			myFormat = new java.util.ArrayList<CodeDt>();
 		}
 		myFormat.add(new CodeDt(theCode)); 
 	}
@@ -952,9 +989,9 @@ public class Conformance extends BaseResource implements IResource {
      * A list of profiles supported by the system. For a server, \"supported by the system\" means the system hosts/produces a set of recourses, conformant to a particular profile, and allows its clients to search using this profile and to find appropriate data. For a client, it means the system will search by this profile and process data according to the guidance implicit in the profile.
      * </p> 
 	 */
-	public List<ResourceReferenceDt> getProfile() {  
+	public java.util.List<ResourceReferenceDt> getProfile() {  
 		if (myProfile == null) {
-			myProfile = new ArrayList<ResourceReferenceDt>();
+			myProfile = new java.util.ArrayList<ResourceReferenceDt>();
 		}
 		return myProfile;
 	}
@@ -967,7 +1004,7 @@ public class Conformance extends BaseResource implements IResource {
      * A list of profiles supported by the system. For a server, \"supported by the system\" means the system hosts/produces a set of recourses, conformant to a particular profile, and allows its clients to search using this profile and to find appropriate data. For a client, it means the system will search by this profile and process data according to the guidance implicit in the profile.
      * </p> 
 	 */
-	public void setProfile(List<ResourceReferenceDt> theValue) {
+	public void setProfile(java.util.List<ResourceReferenceDt> theValue) {
 		myProfile = theValue;
 	}
 
@@ -983,9 +1020,9 @@ public class Conformance extends BaseResource implements IResource {
      * A definition of the restful capabilities of the solution, if any
      * </p> 
 	 */
-	public List<Rest> getRest() {  
+	public java.util.List<Rest> getRest() {  
 		if (myRest == null) {
-			myRest = new ArrayList<Rest>();
+			myRest = new java.util.ArrayList<Rest>();
 		}
 		return myRest;
 	}
@@ -998,7 +1035,7 @@ public class Conformance extends BaseResource implements IResource {
      * A definition of the restful capabilities of the solution, if any
      * </p> 
 	 */
-	public void setRest(List<Rest> theValue) {
+	public void setRest(java.util.List<Rest> theValue) {
 		myRest = theValue;
 	}
 
@@ -1027,9 +1064,9 @@ public class Conformance extends BaseResource implements IResource {
      * A description of the messaging capabilities of the solution
      * </p> 
 	 */
-	public List<Messaging> getMessaging() {  
+	public java.util.List<Messaging> getMessaging() {  
 		if (myMessaging == null) {
-			myMessaging = new ArrayList<Messaging>();
+			myMessaging = new java.util.ArrayList<Messaging>();
 		}
 		return myMessaging;
 	}
@@ -1042,7 +1079,7 @@ public class Conformance extends BaseResource implements IResource {
      * A description of the messaging capabilities of the solution
      * </p> 
 	 */
-	public void setMessaging(List<Messaging> theValue) {
+	public void setMessaging(java.util.List<Messaging> theValue) {
 		myMessaging = theValue;
 	}
 
@@ -1071,9 +1108,9 @@ public class Conformance extends BaseResource implements IResource {
      * A document definition
      * </p> 
 	 */
-	public List<Document> getDocument() {  
+	public java.util.List<Document> getDocument() {  
 		if (myDocument == null) {
-			myDocument = new ArrayList<Document>();
+			myDocument = new java.util.ArrayList<Document>();
 		}
 		return myDocument;
 	}
@@ -1086,7 +1123,7 @@ public class Conformance extends BaseResource implements IResource {
      * A document definition
      * </p> 
 	 */
-	public void setDocument(List<Document> theValue) {
+	public void setDocument(java.util.List<Document> theValue) {
 		myDocument = theValue;
 	}
 
@@ -1142,6 +1179,11 @@ public class Conformance extends BaseResource implements IResource {
 	public boolean isEmpty() {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myName,  myVersion,  myReleaseDate);
 	}
+	
+	public java.util.List<IElement> getAllPopulatedChildElements() {
+		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(  myName,  myVersion,  myReleaseDate);
+	}
+	
 
 	/**
 	 * Gets the value(s) for <b>name</b> (A name the software is known by).
@@ -1267,8 +1309,8 @@ public class Conformance extends BaseResource implements IResource {
      * Date this version of the software released
      * </p> 
 	 */
-	public void setReleaseDateWithSecondsPrecision( Date theDate) {
-		myReleaseDate = new DateTimeDt(theDate); 
+	public void setReleaseDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myReleaseDate = new DateTimeDt(theDate, thePrecision); 
 	}
 
 	/**
@@ -1279,8 +1321,8 @@ public class Conformance extends BaseResource implements IResource {
      * Date this version of the software released
      * </p> 
 	 */
-	public void setReleaseDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myReleaseDate = new DateTimeDt(theDate, thePrecision); 
+	public void setReleaseDateWithSecondsPrecision( Date theDate) {
+		myReleaseDate = new DateTimeDt(theDate); 
 	}
 
  
@@ -1318,6 +1360,11 @@ public class Conformance extends BaseResource implements IResource {
 	public boolean isEmpty() {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myDescription,  myUrl);
 	}
+	
+	public java.util.List<IElement> getAllPopulatedChildElements() {
+		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(  myDescription,  myUrl);
+	}
+	
 
 	/**
 	 * Gets the value(s) for <b>description</b> (Describes this specific instance).
@@ -1446,34 +1493,39 @@ public class Conformance extends BaseResource implements IResource {
 		shortDefinition="Resource served on the REST interface",
 		formalDefinition="A specification of the restful capabilities of the solution for a specific resource type"
 	)
-	private List<RestResource> myResource;
+	private java.util.List<RestResource> myResource;
 	
 	@Child(name="operation", order=4, min=0, max=Child.MAX_UNLIMITED)	
 	@Description(
 		shortDefinition="What operations are supported?",
 		formalDefinition="A specification of restful operations supported by the system"
 	)
-	private List<RestOperation> myOperation;
+	private java.util.List<RestOperation> myOperation;
 	
 	@Child(name="query", order=5, min=0, max=Child.MAX_UNLIMITED)	
 	@Description(
 		shortDefinition="Definition of a named query",
 		formalDefinition="Definition of a named query and its parameters and their meaning"
 	)
-	private List<RestQuery> myQuery;
+	private java.util.List<RestQuery> myQuery;
 	
 	@Child(name="documentMailbox", type=UriDt.class, order=6, min=0, max=Child.MAX_UNLIMITED)	
 	@Description(
 		shortDefinition="How documents are accepted in /Mailbox",
 		formalDefinition="A list of profiles that this server implements for accepting documents in the mailbox. If this list is empty, then documents are not accepted. The base specification has the profile identifier \"http://hl7.org/fhir/documents/mailbox\". Other specifications can declare their own identifier for this purpose"
 	)
-	private List<UriDt> myDocumentMailbox;
+	private java.util.List<UriDt> myDocumentMailbox;
 	
 
 	@Override
 	public boolean isEmpty() {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myMode,  myDocumentation,  mySecurity,  myResource,  myOperation,  myQuery,  myDocumentMailbox);
 	}
+	
+	public java.util.List<IElement> getAllPopulatedChildElements() {
+		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(  myMode,  myDocumentation,  mySecurity,  myResource,  myOperation,  myQuery,  myDocumentMailbox);
+	}
+	
 
 	/**
 	 * Gets the value(s) for <b>mode</b> (client | server).
@@ -1602,9 +1654,9 @@ public class Conformance extends BaseResource implements IResource {
      * A specification of the restful capabilities of the solution for a specific resource type
      * </p> 
 	 */
-	public List<RestResource> getResource() {  
+	public java.util.List<RestResource> getResource() {  
 		if (myResource == null) {
-			myResource = new ArrayList<RestResource>();
+			myResource = new java.util.ArrayList<RestResource>();
 		}
 		return myResource;
 	}
@@ -1617,7 +1669,7 @@ public class Conformance extends BaseResource implements IResource {
      * A specification of the restful capabilities of the solution for a specific resource type
      * </p> 
 	 */
-	public void setResource(List<RestResource> theValue) {
+	public void setResource(java.util.List<RestResource> theValue) {
 		myResource = theValue;
 	}
 
@@ -1646,9 +1698,9 @@ public class Conformance extends BaseResource implements IResource {
      * A specification of restful operations supported by the system
      * </p> 
 	 */
-	public List<RestOperation> getOperation() {  
+	public java.util.List<RestOperation> getOperation() {  
 		if (myOperation == null) {
-			myOperation = new ArrayList<RestOperation>();
+			myOperation = new java.util.ArrayList<RestOperation>();
 		}
 		return myOperation;
 	}
@@ -1661,7 +1713,7 @@ public class Conformance extends BaseResource implements IResource {
      * A specification of restful operations supported by the system
      * </p> 
 	 */
-	public void setOperation(List<RestOperation> theValue) {
+	public void setOperation(java.util.List<RestOperation> theValue) {
 		myOperation = theValue;
 	}
 
@@ -1690,9 +1742,9 @@ public class Conformance extends BaseResource implements IResource {
      * Definition of a named query and its parameters and their meaning
      * </p> 
 	 */
-	public List<RestQuery> getQuery() {  
+	public java.util.List<RestQuery> getQuery() {  
 		if (myQuery == null) {
-			myQuery = new ArrayList<RestQuery>();
+			myQuery = new java.util.ArrayList<RestQuery>();
 		}
 		return myQuery;
 	}
@@ -1705,7 +1757,7 @@ public class Conformance extends BaseResource implements IResource {
      * Definition of a named query and its parameters and their meaning
      * </p> 
 	 */
-	public void setQuery(List<RestQuery> theValue) {
+	public void setQuery(java.util.List<RestQuery> theValue) {
 		myQuery = theValue;
 	}
 
@@ -1734,9 +1786,9 @@ public class Conformance extends BaseResource implements IResource {
      * A list of profiles that this server implements for accepting documents in the mailbox. If this list is empty, then documents are not accepted. The base specification has the profile identifier \"http://hl7.org/fhir/documents/mailbox\". Other specifications can declare their own identifier for this purpose
      * </p> 
 	 */
-	public List<UriDt> getDocumentMailbox() {  
+	public java.util.List<UriDt> getDocumentMailbox() {  
 		if (myDocumentMailbox == null) {
-			myDocumentMailbox = new ArrayList<UriDt>();
+			myDocumentMailbox = new java.util.ArrayList<UriDt>();
 		}
 		return myDocumentMailbox;
 	}
@@ -1749,7 +1801,7 @@ public class Conformance extends BaseResource implements IResource {
      * A list of profiles that this server implements for accepting documents in the mailbox. If this list is empty, then documents are not accepted. The base specification has the profile identifier \"http://hl7.org/fhir/documents/mailbox\". Other specifications can declare their own identifier for this purpose
      * </p> 
 	 */
-	public void setDocumentMailbox(List<UriDt> theValue) {
+	public void setDocumentMailbox(java.util.List<UriDt> theValue) {
 		myDocumentMailbox = theValue;
 	}
 
@@ -1777,7 +1829,7 @@ public class Conformance extends BaseResource implements IResource {
 	 */
 	public void addDocumentMailbox( String theUri) {
 		if (myDocumentMailbox == null) {
-			myDocumentMailbox = new ArrayList<UriDt>();
+			myDocumentMailbox = new java.util.ArrayList<UriDt>();
 		}
 		myDocumentMailbox.add(new UriDt(theUri)); 
 	}
@@ -1809,7 +1861,7 @@ public class Conformance extends BaseResource implements IResource {
 		shortDefinition="OAuth | OAuth2 | NTLM | Basic | Kerberos",
 		formalDefinition="Types of security services are supported/required by the system"
 	)
-	private List<BoundCodeableConceptDt<RestfulSecurityServiceEnum>> myService;
+	private java.util.List<BoundCodeableConceptDt<RestfulSecurityServiceEnum>> myService;
 	
 	@Child(name="description", type=StringDt.class, order=2, min=0, max=1)	
 	@Description(
@@ -1823,13 +1875,18 @@ public class Conformance extends BaseResource implements IResource {
 		shortDefinition="Certificates associated with security profiles",
 		formalDefinition="Certificates associated with security profiles"
 	)
-	private List<RestSecurityCertificate> myCertificate;
+	private java.util.List<RestSecurityCertificate> myCertificate;
 	
 
 	@Override
 	public boolean isEmpty() {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myCors,  myService,  myDescription,  myCertificate);
 	}
+	
+	public java.util.List<IElement> getAllPopulatedChildElements() {
+		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(  myCors,  myService,  myDescription,  myCertificate);
+	}
+	
 
 	/**
 	 * Gets the value(s) for <b>cors</b> (Adds CORS Headers (http://enable-cors.org/)).
@@ -1884,9 +1941,9 @@ public class Conformance extends BaseResource implements IResource {
      * Types of security services are supported/required by the system
      * </p> 
 	 */
-	public List<BoundCodeableConceptDt<RestfulSecurityServiceEnum>> getService() {  
+	public java.util.List<BoundCodeableConceptDt<RestfulSecurityServiceEnum>> getService() {  
 		if (myService == null) {
-			myService = new ArrayList<BoundCodeableConceptDt<RestfulSecurityServiceEnum>>();
+			myService = new java.util.ArrayList<BoundCodeableConceptDt<RestfulSecurityServiceEnum>>();
 		}
 		return myService;
 	}
@@ -1899,7 +1956,7 @@ public class Conformance extends BaseResource implements IResource {
      * Types of security services are supported/required by the system
      * </p> 
 	 */
-	public void setService(List<BoundCodeableConceptDt<RestfulSecurityServiceEnum>> theValue) {
+	public void setService(java.util.List<BoundCodeableConceptDt<RestfulSecurityServiceEnum>> theValue) {
 		myService = theValue;
 	}
 
@@ -1983,9 +2040,9 @@ public class Conformance extends BaseResource implements IResource {
      * Certificates associated with security profiles
      * </p> 
 	 */
-	public List<RestSecurityCertificate> getCertificate() {  
+	public java.util.List<RestSecurityCertificate> getCertificate() {  
 		if (myCertificate == null) {
-			myCertificate = new ArrayList<RestSecurityCertificate>();
+			myCertificate = new java.util.ArrayList<RestSecurityCertificate>();
 		}
 		return myCertificate;
 	}
@@ -1998,7 +2055,7 @@ public class Conformance extends BaseResource implements IResource {
      * Certificates associated with security profiles
      * </p> 
 	 */
-	public void setCertificate(List<RestSecurityCertificate> theValue) {
+	public void setCertificate(java.util.List<RestSecurityCertificate> theValue) {
 		myCertificate = theValue;
 	}
 
@@ -2050,6 +2107,11 @@ public class Conformance extends BaseResource implements IResource {
 	public boolean isEmpty() {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myType,  myBlob);
 	}
+	
+	public java.util.List<IElement> getAllPopulatedChildElements() {
+		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(  myType,  myBlob);
+	}
+	
 
 	/**
 	 * Gets the value(s) for <b>type</b> (Mime type for certificate).
@@ -2161,7 +2223,7 @@ public class Conformance extends BaseResource implements IResource {
 	private BoundCodeDt<ResourceTypeEnum> myType;
 	
 	@Child(name="profile", order=1, min=0, max=1, type={
-		Profile.class,
+		ca.uhn.fhir.model.dstu.resource.Profile.class,
 	})
 	@Description(
 		shortDefinition="What structural features are supported",
@@ -2174,7 +2236,7 @@ public class Conformance extends BaseResource implements IResource {
 		shortDefinition="What operations are supported?",
 		formalDefinition="Identifies a restful operation supported by the solution"
 	)
-	private List<RestResourceOperation> myOperation;
+	private java.util.List<RestResourceOperation> myOperation;
 	
 	@Child(name="readHistory", type=BooleanDt.class, order=3, min=0, max=1)	
 	@Description(
@@ -2195,20 +2257,25 @@ public class Conformance extends BaseResource implements IResource {
 		shortDefinition="_include values supported by the server",
 		formalDefinition="A list of _include values supported by the server"
 	)
-	private List<StringDt> mySearchInclude;
+	private java.util.List<StringDt> mySearchInclude;
 	
 	@Child(name="searchParam", order=6, min=0, max=Child.MAX_UNLIMITED)	
 	@Description(
 		shortDefinition="Additional search params defined",
 		formalDefinition="Additional search parameters for implementations to support and/or make use of"
 	)
-	private List<RestResourceSearchParam> mySearchParam;
+	private java.util.List<RestResourceSearchParam> mySearchParam;
 	
 
 	@Override
 	public boolean isEmpty() {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myType,  myProfile,  myOperation,  myReadHistory,  myUpdateCreate,  mySearchInclude,  mySearchParam);
 	}
+	
+	public java.util.List<IElement> getAllPopulatedChildElements() {
+		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(  myType,  myProfile,  myOperation,  myReadHistory,  myUpdateCreate,  mySearchInclude,  mySearchParam);
+	}
+	
 
 	/**
 	 * Gets the value(s) for <b>type</b> (A resource type that is supported).
@@ -2294,9 +2361,9 @@ public class Conformance extends BaseResource implements IResource {
      * Identifies a restful operation supported by the solution
      * </p> 
 	 */
-	public List<RestResourceOperation> getOperation() {  
+	public java.util.List<RestResourceOperation> getOperation() {  
 		if (myOperation == null) {
-			myOperation = new ArrayList<RestResourceOperation>();
+			myOperation = new java.util.ArrayList<RestResourceOperation>();
 		}
 		return myOperation;
 	}
@@ -2309,7 +2376,7 @@ public class Conformance extends BaseResource implements IResource {
      * Identifies a restful operation supported by the solution
      * </p> 
 	 */
-	public void setOperation(List<RestResourceOperation> theValue) {
+	public void setOperation(java.util.List<RestResourceOperation> theValue) {
 		myOperation = theValue;
 	}
 
@@ -2424,9 +2491,9 @@ public class Conformance extends BaseResource implements IResource {
      * A list of _include values supported by the server
      * </p> 
 	 */
-	public List<StringDt> getSearchInclude() {  
+	public java.util.List<StringDt> getSearchInclude() {  
 		if (mySearchInclude == null) {
-			mySearchInclude = new ArrayList<StringDt>();
+			mySearchInclude = new java.util.ArrayList<StringDt>();
 		}
 		return mySearchInclude;
 	}
@@ -2439,7 +2506,7 @@ public class Conformance extends BaseResource implements IResource {
      * A list of _include values supported by the server
      * </p> 
 	 */
-	public void setSearchInclude(List<StringDt> theValue) {
+	public void setSearchInclude(java.util.List<StringDt> theValue) {
 		mySearchInclude = theValue;
 	}
 
@@ -2467,7 +2534,7 @@ public class Conformance extends BaseResource implements IResource {
 	 */
 	public void addSearchInclude( String theString) {
 		if (mySearchInclude == null) {
-			mySearchInclude = new ArrayList<StringDt>();
+			mySearchInclude = new java.util.ArrayList<StringDt>();
 		}
 		mySearchInclude.add(new StringDt(theString)); 
 	}
@@ -2483,9 +2550,9 @@ public class Conformance extends BaseResource implements IResource {
      * Additional search parameters for implementations to support and/or make use of
      * </p> 
 	 */
-	public List<RestResourceSearchParam> getSearchParam() {  
+	public java.util.List<RestResourceSearchParam> getSearchParam() {  
 		if (mySearchParam == null) {
-			mySearchParam = new ArrayList<RestResourceSearchParam>();
+			mySearchParam = new java.util.ArrayList<RestResourceSearchParam>();
 		}
 		return mySearchParam;
 	}
@@ -2498,7 +2565,7 @@ public class Conformance extends BaseResource implements IResource {
      * Additional search parameters for implementations to support and/or make use of
      * </p> 
 	 */
-	public void setSearchParam(List<RestResourceSearchParam> theValue) {
+	public void setSearchParam(java.util.List<RestResourceSearchParam> theValue) {
 		mySearchParam = theValue;
 	}
 
@@ -2550,6 +2617,11 @@ public class Conformance extends BaseResource implements IResource {
 	public boolean isEmpty() {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myCode,  myDocumentation);
 	}
+	
+	public java.util.List<IElement> getAllPopulatedChildElements() {
+		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(  myCode,  myDocumentation);
+	}
+	
 
 	/**
 	 * Gets the value(s) for <b>code</b> (read | vread | update | delete | history-instance | validate | history-type | create | search-type).
@@ -2685,20 +2757,25 @@ public class Conformance extends BaseResource implements IResource {
 		shortDefinition="Types of resource (if a resource reference)",
 		formalDefinition="Types of resource (if a resource is referenced)"
 	)
-	private List<BoundCodeDt<ResourceTypeEnum>> myTarget;
+	private java.util.List<BoundCodeDt<ResourceTypeEnum>> myTarget;
 	
 	@Child(name="chain", type=StringDt.class, order=5, min=0, max=Child.MAX_UNLIMITED)	
 	@Description(
 		shortDefinition="Chained names supported",
 		formalDefinition=""
 	)
-	private List<StringDt> myChain;
+	private java.util.List<StringDt> myChain;
 	
 
 	@Override
 	public boolean isEmpty() {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myName,  myDefinition,  myType,  myDocumentation,  myTarget,  myChain);
 	}
+	
+	public java.util.List<IElement> getAllPopulatedChildElements() {
+		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(  myName,  myDefinition,  myType,  myDocumentation,  myTarget,  myChain);
+	}
+	
 
 	/**
 	 * Gets the value(s) for <b>name</b> (Name of search parameter).
@@ -2882,9 +2959,9 @@ public class Conformance extends BaseResource implements IResource {
      * Types of resource (if a resource is referenced)
      * </p> 
 	 */
-	public List<BoundCodeDt<ResourceTypeEnum>> getTarget() {  
+	public java.util.List<BoundCodeDt<ResourceTypeEnum>> getTarget() {  
 		if (myTarget == null) {
-			myTarget = new ArrayList<BoundCodeDt<ResourceTypeEnum>>();
+			myTarget = new java.util.ArrayList<BoundCodeDt<ResourceTypeEnum>>();
 		}
 		return myTarget;
 	}
@@ -2897,7 +2974,7 @@ public class Conformance extends BaseResource implements IResource {
      * Types of resource (if a resource is referenced)
      * </p> 
 	 */
-	public void setTarget(List<BoundCodeDt<ResourceTypeEnum>> theValue) {
+	public void setTarget(java.util.List<BoundCodeDt<ResourceTypeEnum>> theValue) {
 		myTarget = theValue;
 	}
 
@@ -2938,9 +3015,9 @@ public class Conformance extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public List<StringDt> getChain() {  
+	public java.util.List<StringDt> getChain() {  
 		if (myChain == null) {
-			myChain = new ArrayList<StringDt>();
+			myChain = new java.util.ArrayList<StringDt>();
 		}
 		return myChain;
 	}
@@ -2953,7 +3030,7 @@ public class Conformance extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public void setChain(List<StringDt> theValue) {
+	public void setChain(java.util.List<StringDt> theValue) {
 		myChain = theValue;
 	}
 
@@ -2981,7 +3058,7 @@ public class Conformance extends BaseResource implements IResource {
 	 */
 	public void addChain( String theString) {
 		if (myChain == null) {
-			myChain = new ArrayList<StringDt>();
+			myChain = new java.util.ArrayList<StringDt>();
 		}
 		myChain.add(new StringDt(theString)); 
 	}
@@ -3022,6 +3099,11 @@ public class Conformance extends BaseResource implements IResource {
 	public boolean isEmpty() {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myCode,  myDocumentation);
 	}
+	
+	public java.util.List<IElement> getAllPopulatedChildElements() {
+		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(  myCode,  myDocumentation);
+	}
+	
 
 	/**
 	 * Gets the value(s) for <b>code</b> (transaction | search-system | history-system).
@@ -3150,13 +3232,18 @@ public class Conformance extends BaseResource implements IResource {
 		shortDefinition="Parameter for the named query",
 		formalDefinition="Identifies which of the parameters for the named query are supported"
 	)
-	private List<RestResourceSearchParam> myParameter;
+	private java.util.List<RestResourceSearchParam> myParameter;
 	
 
 	@Override
 	public boolean isEmpty() {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myName,  myDefinition,  myDocumentation,  myParameter);
 	}
+	
+	public java.util.List<IElement> getAllPopulatedChildElements() {
+		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(  myName,  myDefinition,  myDocumentation,  myParameter);
+	}
+	
 
 	/**
 	 * Gets the value(s) for <b>name</b> (Special named queries (_query=)).
@@ -3297,9 +3384,9 @@ public class Conformance extends BaseResource implements IResource {
      * Identifies which of the parameters for the named query are supported
      * </p> 
 	 */
-	public List<RestResourceSearchParam> getParameter() {  
+	public java.util.List<RestResourceSearchParam> getParameter() {  
 		if (myParameter == null) {
-			myParameter = new ArrayList<RestResourceSearchParam>();
+			myParameter = new java.util.ArrayList<RestResourceSearchParam>();
 		}
 		return myParameter;
 	}
@@ -3312,7 +3399,7 @@ public class Conformance extends BaseResource implements IResource {
      * Identifies which of the parameters for the named query are supported
      * </p> 
 	 */
-	public void setParameter(List<RestResourceSearchParam> theValue) {
+	public void setParameter(java.util.List<RestResourceSearchParam> theValue) {
 		myParameter = theValue;
 	}
 
@@ -3373,13 +3460,18 @@ public class Conformance extends BaseResource implements IResource {
 		shortDefinition="Declare support for this event",
 		formalDefinition="A description of the solution's support for an event at this end point."
 	)
-	private List<MessagingEvent> myEvent;
+	private java.util.List<MessagingEvent> myEvent;
 	
 
 	@Override
 	public boolean isEmpty() {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myEndpoint,  myReliableCache,  myDocumentation,  myEvent);
 	}
+	
+	public java.util.List<IElement> getAllPopulatedChildElements() {
+		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(  myEndpoint,  myReliableCache,  myDocumentation,  myEvent);
+	}
+	
 
 	/**
 	 * Gets the value(s) for <b>endpoint</b> (Actual endpoint being described).
@@ -3520,9 +3612,9 @@ public class Conformance extends BaseResource implements IResource {
      * A description of the solution's support for an event at this end point.
      * </p> 
 	 */
-	public List<MessagingEvent> getEvent() {  
+	public java.util.List<MessagingEvent> getEvent() {  
 		if (myEvent == null) {
-			myEvent = new ArrayList<MessagingEvent>();
+			myEvent = new java.util.ArrayList<MessagingEvent>();
 		}
 		return myEvent;
 	}
@@ -3535,7 +3627,7 @@ public class Conformance extends BaseResource implements IResource {
      * A description of the solution's support for an event at this end point.
      * </p> 
 	 */
-	public void setEvent(List<MessagingEvent> theValue) {
+	public void setEvent(java.util.List<MessagingEvent> theValue) {
 		myEvent = theValue;
 	}
 
@@ -3594,7 +3686,7 @@ public class Conformance extends BaseResource implements IResource {
 		shortDefinition="http | ftp | mllp +",
 		formalDefinition="A list of the messaging transport protocol(s) identifiers, supported by this endpoint"
 	)
-	private List<CodingDt> myProtocol;
+	private java.util.List<CodingDt> myProtocol;
 	
 	@Child(name="focus", type=CodeDt.class, order=4, min=1, max=1)	
 	@Description(
@@ -3604,7 +3696,7 @@ public class Conformance extends BaseResource implements IResource {
 	private BoundCodeDt<ResourceTypeEnum> myFocus;
 	
 	@Child(name="request", order=5, min=1, max=1, type={
-		Profile.class,
+		ca.uhn.fhir.model.dstu.resource.Profile.class,
 	})
 	@Description(
 		shortDefinition="Profile that describes the request",
@@ -3613,7 +3705,7 @@ public class Conformance extends BaseResource implements IResource {
 	private ResourceReferenceDt myRequest;
 	
 	@Child(name="response", order=6, min=1, max=1, type={
-		Profile.class,
+		ca.uhn.fhir.model.dstu.resource.Profile.class,
 	})
 	@Description(
 		shortDefinition="Profile that describes the response",
@@ -3633,6 +3725,11 @@ public class Conformance extends BaseResource implements IResource {
 	public boolean isEmpty() {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myCode,  myCategory,  myMode,  myProtocol,  myFocus,  myRequest,  myResponse,  myDocumentation);
 	}
+	
+	public java.util.List<IElement> getAllPopulatedChildElements() {
+		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(  myCode,  myCategory,  myMode,  myProtocol,  myFocus,  myRequest,  myResponse,  myDocumentation);
+	}
+	
 
 	/**
 	 * Gets the value(s) for <b>code</b> (Event type).
@@ -3761,9 +3858,9 @@ public class Conformance extends BaseResource implements IResource {
      * A list of the messaging transport protocol(s) identifiers, supported by this endpoint
      * </p> 
 	 */
-	public List<CodingDt> getProtocol() {  
+	public java.util.List<CodingDt> getProtocol() {  
 		if (myProtocol == null) {
-			myProtocol = new ArrayList<CodingDt>();
+			myProtocol = new java.util.ArrayList<CodingDt>();
 		}
 		return myProtocol;
 	}
@@ -3776,7 +3873,7 @@ public class Conformance extends BaseResource implements IResource {
      * A list of the messaging transport protocol(s) identifiers, supported by this endpoint
      * </p> 
 	 */
-	public void setProtocol(List<CodingDt> theValue) {
+	public void setProtocol(java.util.List<CodingDt> theValue) {
 		myProtocol = theValue;
 	}
 
@@ -3974,7 +4071,7 @@ public class Conformance extends BaseResource implements IResource {
 	private StringDt myDocumentation;
 	
 	@Child(name="profile", order=2, min=1, max=1, type={
-		Profile.class,
+		ca.uhn.fhir.model.dstu.resource.Profile.class,
 	})
 	@Description(
 		shortDefinition="Constraint on a resource used in the document",
@@ -3987,6 +4084,11 @@ public class Conformance extends BaseResource implements IResource {
 	public boolean isEmpty() {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myMode,  myDocumentation,  myProfile);
 	}
+	
+	public java.util.List<IElement> getAllPopulatedChildElements() {
+		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(  myMode,  myDocumentation,  myProfile);
+	}
+	
 
 	/**
 	 * Gets the value(s) for <b>mode</b> (producer | consumer).

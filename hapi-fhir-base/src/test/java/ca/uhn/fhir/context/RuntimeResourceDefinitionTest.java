@@ -2,8 +2,6 @@ package ca.uhn.fhir.context;
 
 import static org.junit.Assert.*;
 
-import java.io.IOException;
-
 import org.junit.Test;
 
 import ca.uhn.fhir.model.dstu.resource.Patient;
@@ -11,7 +9,6 @@ import ca.uhn.fhir.model.dstu.resource.Profile;
 import ca.uhn.fhir.model.dstu.resource.Profile.ExtensionDefn;
 import ca.uhn.fhir.model.dstu.resource.Profile.Structure;
 import ca.uhn.fhir.model.dstu.valueset.DataTypeEnum;
-import ca.uhn.fhir.parser.DataFormatException;
 
 public class RuntimeResourceDefinitionTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RuntimeResourceDefinitionTest.class);

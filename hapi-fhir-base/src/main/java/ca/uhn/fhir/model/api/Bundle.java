@@ -16,7 +16,7 @@ public class Bundle extends BaseBundle implements IElement {
 	 *****************************************************/
 	//@formatter:on
 	private List<BundleEntry> myEntries;
-	private StringDt myId;
+	private StringDt myBundleId;
 	private StringDt myLinkBase;
 	private StringDt myLinkFirst;
 	private StringDt myLinkLast;
@@ -32,7 +32,7 @@ public class Bundle extends BaseBundle implements IElement {
 	public boolean isEmpty() {
 		//@formatter:off
 		return super.isEmpty() && 
-				ElementUtil.isEmpty(myId, myLinkBase, myLinkFirst, myLinkLast, myLinkNext, myLinkPrevious, myLinkSelf, myPublished, myTitle, myTotalResults) &&
+				ElementUtil.isEmpty(myBundleId, myLinkBase, myLinkFirst, myLinkLast, myLinkNext, myLinkPrevious, myLinkSelf, myPublished, myTitle, myTotalResults) &&
 				ElementUtil.isEmpty(myEntries);
 		//@formatter:on
 	}
@@ -53,11 +53,11 @@ public class Bundle extends BaseBundle implements IElement {
 		return myEntries;
 	}
 
-	public StringDt getId() {
-		if (myId == null) {
-			myId = new StringDt();
+	public StringDt getBundleId() {
+		if (myBundleId == null) {
+			myBundleId = new StringDt();
 		}
-		return myId;
+		return myBundleId;
 	}
 
 	public StringDt getLinkBase() {

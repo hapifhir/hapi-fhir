@@ -10,9 +10,9 @@ import ca.uhn.fhir.model.api.IResource;
 
 public interface IParser {
 
-	String encodeBundleToString(Bundle theBundle) throws DataFormatException;
+	String encodeBundleToString(Bundle theBundle) throws DataFormatException, IOException;
 
-	void encodeBundleToWriter(Bundle theBundle, Writer theWriter);
+	void encodeBundleToWriter(Bundle theBundle, Writer theWriter) throws IOException;
 
 	String encodeResourceToString(IResource theResource) throws DataFormatException, IOException;
 
@@ -29,5 +29,7 @@ public interface IParser {
 	<T extends IResource> T parseResource(Class<T> theResourceType, String theMessageString);
 
 	IResource parseResource(Class<? extends IResource> theResourceType, Reader theReader);
+
+	IParser setPrettyPrint(boolean thePrettyPrint);
 
 }

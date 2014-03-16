@@ -58,8 +58,8 @@ public abstract class BaseRuntimeDeclaredChildDefinition extends BaseRuntimeChil
 		final Class<?> targetReturnType = myField.getType();
 		try {
 			String elementName = myElementName;
-			if ("Class".equals(elementName)) {
-				elementName = "ClassElement"; // because getClass() is reserved
+			if ("class".equals(elementName.toLowerCase())) {
+				elementName = "classElement"; // because getClass() is reserved
 			}
 			final Method accessor = BeanUtils.findAccessor(declaringClass, targetReturnType, elementName);
 			final Method mutator = BeanUtils.findMutator(declaringClass, targetReturnType, elementName);

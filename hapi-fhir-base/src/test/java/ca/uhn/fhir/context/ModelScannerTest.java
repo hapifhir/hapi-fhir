@@ -2,12 +2,8 @@ package ca.uhn.fhir.context;
 
 import static org.junit.Assert.*;
 
-import java.util.Collection;
-import java.util.Collections;
-
 import org.junit.Test;
 
-import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.parser.DataFormatException;
 
 public class ModelScannerTest {

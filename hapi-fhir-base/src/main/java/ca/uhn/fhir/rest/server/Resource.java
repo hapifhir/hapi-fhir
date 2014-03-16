@@ -2,11 +2,9 @@ package ca.uhn.fhir.rest.server;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
-import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.rest.common.BaseMethodBinding;
-import ca.uhn.fhir.rest.common.Request;
+import ca.uhn.fhir.rest.method.BaseMethodBinding;
+import ca.uhn.fhir.rest.method.Request;
 
 /**
  * Created by dsotnikov on 2/25/2014.

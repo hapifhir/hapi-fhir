@@ -16,12 +16,29 @@
 
 package ca.uhn.fhir.model.dstu.resource;
 
-import java.util.*;
-import ca.uhn.fhir.model.api.*;
-import ca.uhn.fhir.model.api.annotation.*;
-import ca.uhn.fhir.model.primitive.*;
-import ca.uhn.fhir.model.dstu.composite.*;
-import ca.uhn.fhir.model.dstu.valueset.*;
+
+import java.util.Date;
+
+import ca.uhn.fhir.model.api.BaseElement;
+import ca.uhn.fhir.model.api.BaseResource;
+import ca.uhn.fhir.model.api.IElement;
+import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.IResourceBlock;
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import ca.uhn.fhir.model.api.annotation.Block;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
+import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
+import ca.uhn.fhir.model.dstu.composite.QuantityDt;
+import ca.uhn.fhir.model.dstu.composite.RatioDt;
+import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.dstu.valueset.SubstanceTypeEnum;
+import ca.uhn.fhir.model.primitive.BoundCodeableConceptDt;
+import ca.uhn.fhir.model.primitive.DateTimeDt;
+import ca.uhn.fhir.model.primitive.StringDt;
+
 
 /**
  * HAPI/FHIR <b>Substance</b> Resource
@@ -117,13 +134,18 @@ public class Substance extends BaseResource implements IResource {
 		shortDefinition="Composition information about the substance",
 		formalDefinition="A substance can be composed of other substances"
 	)
-	private List<Ingredient> myIngredient;
+	private java.util.List<Ingredient> myIngredient;
 	
 
 	@Override
 	public boolean isEmpty() {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myType,  myDescription,  myInstance,  myIngredient);
 	}
+	
+	public java.util.List<IElement> getAllPopulatedChildElements() {
+		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(  myType,  myDescription,  myInstance,  myIngredient);
+	}
+	
 
 	/**
 	 * Gets the value(s) for <b>type</b> (What kind of substance this is).
@@ -252,9 +274,9 @@ public class Substance extends BaseResource implements IResource {
      * A substance can be composed of other substances
      * </p> 
 	 */
-	public List<Ingredient> getIngredient() {  
+	public java.util.List<Ingredient> getIngredient() {  
 		if (myIngredient == null) {
-			myIngredient = new ArrayList<Ingredient>();
+			myIngredient = new java.util.ArrayList<Ingredient>();
 		}
 		return myIngredient;
 	}
@@ -267,7 +289,7 @@ public class Substance extends BaseResource implements IResource {
      * A substance can be composed of other substances
      * </p> 
 	 */
-	public void setIngredient(List<Ingredient> theValue) {
+	public void setIngredient(java.util.List<Ingredient> theValue) {
 		myIngredient = theValue;
 	}
 
@@ -323,6 +345,11 @@ public class Substance extends BaseResource implements IResource {
 	public boolean isEmpty() {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myIdentifier,  myExpiry,  myQuantity);
 	}
+	
+	public java.util.List<IElement> getAllPopulatedChildElements() {
+		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(  myIdentifier,  myExpiry,  myQuantity);
+	}
+	
 
 	/**
 	 * Gets the value(s) for <b>identifier</b> (Identifier of the package/container).
@@ -393,8 +420,8 @@ public class Substance extends BaseResource implements IResource {
      * When the substance is no longer valid to use. For some substances, a single arbitrary date is used for expiry.
      * </p> 
 	 */
-	public void setExpiryWithSecondsPrecision( Date theDate) {
-		myExpiry = new DateTimeDt(theDate); 
+	public void setExpiry( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myExpiry = new DateTimeDt(theDate, thePrecision); 
 	}
 
 	/**
@@ -405,8 +432,8 @@ public class Substance extends BaseResource implements IResource {
      * When the substance is no longer valid to use. For some substances, a single arbitrary date is used for expiry.
      * </p> 
 	 */
-	public void setExpiry( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myExpiry = new DateTimeDt(theDate, thePrecision); 
+	public void setExpiryWithSecondsPrecision( Date theDate) {
+		myExpiry = new DateTimeDt(theDate); 
 	}
 
  
@@ -464,7 +491,7 @@ public class Substance extends BaseResource implements IResource {
 	private RatioDt myQuantity;
 	
 	@Child(name="substance", order=1, min=1, max=1, type={
-		Substance.class,
+		ca.uhn.fhir.model.dstu.resource.Substance.class,
 	})
 	@Description(
 		shortDefinition="A component of the substance",
@@ -477,6 +504,11 @@ public class Substance extends BaseResource implements IResource {
 	public boolean isEmpty() {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myQuantity,  mySubstance);
 	}
+	
+	public java.util.List<IElement> getAllPopulatedChildElements() {
+		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(  myQuantity,  mySubstance);
+	}
+	
 
 	/**
 	 * Gets the value(s) for <b>quantity</b> (Optional amount (concentration)).

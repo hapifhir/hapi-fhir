@@ -37,7 +37,7 @@ public abstract class Child extends BaseElement {
 		if (elementName.endsWith("[x]")) {
 			elementName = elementName.substring(0, elementName.length() - 3);
 		}
-		return elementName;
+		return elementName.trim();
 	}
 
 	public String getMethodName() {

@@ -1,13 +1,19 @@
 package ca.uhn.fhir.parser;
 
+
+import static org.apache.commons.lang3.StringUtils.*;
+
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.xml.stream.events.EndElement;
 import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
@@ -30,9 +36,9 @@ import ca.uhn.fhir.model.api.IPrimitiveDatatype;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.IResourceBlock;
 import ca.uhn.fhir.model.api.ISupportsUndeclaredExtensions;
-import ca.uhn.fhir.model.api.BaseResourceReference;
 import ca.uhn.fhir.model.api.UndeclaredExtension;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.XhtmlDt;
 
 class ParserState<T extends IElement> {
@@ -40,7 +46,6 @@ class ParserState<T extends IElement> {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ParserState.class);
 	private FhirContext myContext;
 	private T myObject;
-
 	private BaseState myState;
 
 	private ParserState(FhirContext theContext) {
@@ -80,7 +85,9 @@ class ParserState<T extends IElement> {
 	}
 
 	/**
-	 * Invoked after any new XML event is individually processed, containing a copy of the XML event. This is basically intended for embedded XHTML content
+	 * Invoked after any new XML event is individually processed, containing a
+	 * copy of the XML event. This is basically intended for embedded XHTML
+	 * content
 	 */
 	public void xmlEvent(XMLEvent theNextEvent) {
 		myState.xmlEvent(theNextEvent);
@@ -117,6 +124,7 @@ class ParserState<T extends IElement> {
 		private BaseBundle myInstance;
 
 		public AtomAuthorState(BaseBundle theEntry) {
+			super(null);
 			myInstance = theEntry;
 		}
 
@@ -143,17 +151,8 @@ class ParserState<T extends IElement> {
 		private BundleCategory myInstance;
 
 		public AtomCategoryState(BundleCategory theEntry) {
+			super(null);
 			myInstance = theEntry;
-		}
-
-		@Override
-		public void endingElement(EndElement theElem) throws DataFormatException {
-			pop();
-		}
-
-		@Override
-		public void enteringNewElement(String theNamespaceURI, String theLocalPart) throws DataFormatException {
-			throw new DataFormatException("Unexpected element: " + theLocalPart);
 		}
 
 		@Override
@@ -167,6 +166,16 @@ class ParserState<T extends IElement> {
 			}
 		}
 
+		@Override
+		public void endingElement(EndElement theElem) throws DataFormatException {
+			pop();
+		}
+
+		@Override
+		public void enteringNewElement(String theNamespaceURI, String theLocalPart) throws DataFormatException {
+			throw new DataFormatException("Unexpected element: " + theLocalPart);
+		}
+
 	}
 
 	public class AtomEntryState extends BaseState {
@@ -174,6 +183,7 @@ class ParserState<T extends IElement> {
 		private BundleEntry myEntry;
 
 		public AtomEntryState(Bundle theInstance) {
+			super(null);
 			myEntry = new BundleEntry();
 			theInstance.getEntries().add(myEntry);
 		}
@@ -188,7 +198,7 @@ class ParserState<T extends IElement> {
 			if ("title".equals(theLocalPart)) {
 				push(new AtomPrimitiveState(myEntry.getTitle()));
 			} else if ("id".equals(theLocalPart)) {
-				push(new AtomPrimitiveState(myEntry.getId()));
+				push(new AtomPrimitiveState(myEntry.getEntryId()));
 			} else if ("link".equals(theLocalPart)) {
 				push(new AtomLinkState(myEntry));
 			} else if ("updated".equals(theLocalPart)) {
@@ -200,7 +210,7 @@ class ParserState<T extends IElement> {
 			} else if ("content".equals(theLocalPart)) {
 				push(new PreResourceState(myEntry));
 			} else if ("summary".equals(theLocalPart)) {
-				push(new XhtmlState(myEntry.getSummary(), false));
+				push(new XhtmlState(getPreResourceState(),myEntry.getSummary(), false));
 			} else if ("category".equals(theLocalPart)) {
 				push(new AtomCategoryState(myEntry.addCategory()));
 			} else {
@@ -220,10 +230,12 @@ class ParserState<T extends IElement> {
 		private String myRel;
 
 		public AtomLinkState(Bundle theInstance) {
+			super(null);
 			myInstance = theInstance;
 		}
 
 		public AtomLinkState(BundleEntry theEntry) {
+			super(null);
 			myEntry = theEntry;
 		}
 
@@ -271,7 +283,8 @@ class ParserState<T extends IElement> {
 		private IPrimitiveDatatype<?> myPrimitive;
 
 		public AtomPrimitiveState(IPrimitiveDatatype<?> thePrimitive) {
-			assert thePrimitive != null;
+			super(null);
+			Validate.notNull(thePrimitive, "thePrimitive");
 			myPrimitive = thePrimitive;
 		}
 
@@ -309,6 +322,7 @@ class ParserState<T extends IElement> {
 		private Bundle myInstance;
 
 		public AtomState(Bundle theInstance) {
+			super(null);
 			myInstance = theInstance;
 		}
 
@@ -326,7 +340,7 @@ class ParserState<T extends IElement> {
 			} else if (theLocalPart.equals("title")) {
 				push(new AtomPrimitiveState(myInstance.getTitle()));
 			} else if ("id".equals(theLocalPart)) {
-				push(new AtomPrimitiveState(myInstance.getId()));
+				push(new AtomPrimitiveState(myInstance.getBundleId()));
 			} else if ("link".equals(theLocalPart)) {
 				push(new AtomLinkState(myInstance));
 			} else if ("totalResults".equals(theLocalPart) && verifyNamespace(XmlParser.OPENSEARCH_NS, theNamespaceURI)) {
@@ -351,7 +365,13 @@ class ParserState<T extends IElement> {
 
 	private abstract class BaseState {
 
+		private PreResourceState myPreResourceState;
 		private BaseState myStack;
+
+		public BaseState(PreResourceState thePreResourceState) {
+			super();
+			myPreResourceState = thePreResourceState;
+		}
 
 		@SuppressWarnings("unused")
 		public void attributeValue(String theName, String theValue) throws DataFormatException {
@@ -372,7 +392,7 @@ class ParserState<T extends IElement> {
 		 * Default implementation just handles undeclared extensions
 		 */
 		public void enteringNewElementExtension(@SuppressWarnings("unused") StartElement theElement, String theUrlAttr, boolean theIsModifier) {
-			if (getCurrentElement() instanceof ISupportsUndeclaredExtensions) {
+			if (myPreResourceState != null && getCurrentElement() instanceof ISupportsUndeclaredExtensions) {
 				UndeclaredExtension newExtension = new UndeclaredExtension(theIsModifier, theUrlAttr);
 				ISupportsUndeclaredExtensions elem = (ISupportsUndeclaredExtensions) getCurrentElement();
 				if (theIsModifier) {
@@ -380,11 +400,15 @@ class ParserState<T extends IElement> {
 				} else {
 					elem.getUndeclaredExtensions().add(newExtension);
 				}
-				ExtensionState newState = new ExtensionState(newExtension);
+				ExtensionState newState = new ExtensionState(myPreResourceState, newExtension);
 				push(newState);
 			} else {
 				throw new DataFormatException("Type " + getCurrentElement() + " does not support undeclared extentions, and found an extension with URL: " + theUrlAttr);
 			}
+		}
+
+		public PreResourceState getPreResourceState() {
+			return myPreResourceState;
 		}
 
 		public void setStack(BaseState theState) {
@@ -409,13 +433,42 @@ class ParserState<T extends IElement> {
 
 	}
 
+	private class ContainedResourcesState extends PreResourceState
+	{
+		
+		public ContainedResourcesState(PreResourceState thePreResourcesState) {
+			super(thePreResourcesState);
+		}
+
+		@Override
+		public void endingElement(EndElement theElem) throws DataFormatException {
+			pop();
+		}
+
+		@Override
+		public void wereBack() {
+			IResource res = (IResource) getCurrentElement();
+			assert res != null;
+			if (res.getId()==null || res.getId().isEmpty()) {
+				ourLog.warn("Discarding contained resource with no ID!");
+			} else {
+				getPreResourceState().getContainedResources().put(res.getId().getValueAsString(), res);
+			}
+		}
+
+		
+	}
+
 	private class DeclaredExtensionState extends BaseState {
 
 		private IElement myChildInstance;
 		private RuntimeChildDeclaredExtensionDefinition myDefinition;
 		private IElement myParentInstance;
+		private PreResourceState myPreResourceState;
 
-		public DeclaredExtensionState(RuntimeChildDeclaredExtensionDefinition theDefinition, IElement theParentInstance) {
+		public DeclaredExtensionState(PreResourceState thePreResourceState, RuntimeChildDeclaredExtensionDefinition theDefinition, IElement theParentInstance) {
+			super(thePreResourceState);
+			myPreResourceState=thePreResourceState;
 			myDefinition = theDefinition;
 			myParentInstance = theParentInstance;
 		}
@@ -437,7 +490,7 @@ class ParserState<T extends IElement> {
 				BaseRuntimeElementCompositeDefinition<?> compositeTarget = (BaseRuntimeElementCompositeDefinition<?>) target;
 				ICompositeDatatype newChildInstance = (ICompositeDatatype) compositeTarget.newInstance();
 				myDefinition.getMutator().addValue(myParentInstance, newChildInstance);
-				ElementCompositeState newState = new ElementCompositeState(compositeTarget, newChildInstance);
+				ElementCompositeState newState = new ElementCompositeState(myPreResourceState, compositeTarget, newChildInstance);
 				push(newState);
 				return;
 			}
@@ -445,7 +498,7 @@ class ParserState<T extends IElement> {
 				RuntimePrimitiveDatatypeDefinition primitiveTarget = (RuntimePrimitiveDatatypeDefinition) target;
 				IPrimitiveDatatype<?> newChildInstance = primitiveTarget.newInstance();
 				myDefinition.getMutator().addValue(myParentInstance, newChildInstance);
-				PrimitiveState newState = new PrimitiveState(newChildInstance);
+				PrimitiveState newState = new PrimitiveState(getPreResourceState(), newChildInstance);
 				push(newState);
 				return;
 			}
@@ -453,7 +506,7 @@ class ParserState<T extends IElement> {
 				RuntimeResourceReferenceDefinition resourceRefTarget = (RuntimeResourceReferenceDefinition) target;
 				ResourceReferenceDt newChildInstance = new ResourceReferenceDt();
 				myDefinition.getMutator().addValue(myParentInstance, newChildInstance);
-				ResourceReferenceState newState = new ResourceReferenceState(resourceRefTarget, newChildInstance);
+				ResourceReferenceState newState = new ResourceReferenceState(getPreResourceState(), resourceRefTarget, newChildInstance);
 				push(newState);
 				return;
 			}
@@ -475,7 +528,7 @@ class ParserState<T extends IElement> {
 					myChildInstance = myDefinition.newInstance();
 					myDefinition.getMutator().addValue(myParentInstance, myChildInstance);
 				}
-				BaseState newState = new DeclaredExtensionState(declaredExtension, myChildInstance);
+				BaseState newState = new DeclaredExtensionState(getPreResourceState(), declaredExtension, myChildInstance);
 				push(newState);
 			} else {
 				super.enteringNewElementExtension(theElement, theUrlAttr, theIsModifier);
@@ -494,9 +547,17 @@ class ParserState<T extends IElement> {
 		private BaseRuntimeElementCompositeDefinition<?> myDefinition;
 		private ICompositeElement myInstance;
 
-		public ElementCompositeState(BaseRuntimeElementCompositeDefinition<?> theDef, ICompositeElement theInstance) {
+		public ElementCompositeState(PreResourceState thePreResourceState, BaseRuntimeElementCompositeDefinition<?> theDef, ICompositeElement theInstance) {
+			super(thePreResourceState);
 			myDefinition = theDef;
 			myInstance = theInstance;
+		}
+
+		@Override
+		public void attributeValue(String theName, String theValue) throws DataFormatException {
+			if ("id".equals(theName)) {
+				myInstance.setId(new IdDt(theValue));
+			}
 		}
 
 		@SuppressWarnings("unchecked")
@@ -521,7 +582,7 @@ class ParserState<T extends IElement> {
 				BaseRuntimeElementCompositeDefinition<?> compositeTarget = (BaseRuntimeElementCompositeDefinition<?>) target;
 				ICompositeDatatype newChildInstance = (ICompositeDatatype) compositeTarget.newInstance(child.getInstanceConstructorArguments());
 				child.getMutator().addValue(myInstance, newChildInstance);
-				ElementCompositeState newState = new ElementCompositeState(compositeTarget, newChildInstance);
+				ElementCompositeState newState = new ElementCompositeState(getPreResourceState(), compositeTarget, newChildInstance);
 				push(newState);
 				return;
 			}
@@ -530,15 +591,16 @@ class ParserState<T extends IElement> {
 				IPrimitiveDatatype<?> newChildInstance;
 				newChildInstance = primitiveTarget.newInstance(child.getInstanceConstructorArguments());
 				child.getMutator().addValue(myInstance, newChildInstance);
-				PrimitiveState newState = new PrimitiveState(newChildInstance);
+				PrimitiveState newState = new PrimitiveState(getPreResourceState(), newChildInstance);
 				push(newState);
 				return;
 			}
 			case RESOURCE_REF: {
 				RuntimeResourceReferenceDefinition resourceRefTarget = (RuntimeResourceReferenceDefinition) target;
 				ResourceReferenceDt newChildInstance = new ResourceReferenceDt();
+				getPreResourceState().getResourceReferences().add(newChildInstance);
 				child.getMutator().addValue(myInstance, newChildInstance);
-				ResourceReferenceState newState = new ResourceReferenceState(resourceRefTarget, newChildInstance);
+				ResourceReferenceState newState = new ResourceReferenceState(getPreResourceState(), resourceRefTarget, newChildInstance);
 				push(newState);
 				return;
 			}
@@ -546,7 +608,7 @@ class ParserState<T extends IElement> {
 				RuntimeResourceBlockDefinition blockTarget = (RuntimeResourceBlockDefinition) target;
 				IResourceBlock newBlockInstance = blockTarget.newInstance();
 				child.getMutator().addValue(myInstance, newBlockInstance);
-				ElementCompositeState newState = new ElementCompositeState(blockTarget, newBlockInstance);
+				ElementCompositeState newState = new ElementCompositeState(getPreResourceState(), blockTarget, newBlockInstance);
 				push(newState);
 				return;
 			}
@@ -554,7 +616,7 @@ class ParserState<T extends IElement> {
 				RuntimePrimitiveDatatypeNarrativeDefinition xhtmlTarget = (RuntimePrimitiveDatatypeNarrativeDefinition) target;
 				XhtmlDt newDt = xhtmlTarget.newInstance();
 				child.getMutator().addValue(myInstance, newDt);
-				XhtmlState state = new XhtmlState(newDt, true);
+				XhtmlState state = new XhtmlState(getPreResourceState(), newDt, true);
 				push(state);
 				return;
 			}
@@ -572,7 +634,7 @@ class ParserState<T extends IElement> {
 		public void enteringNewElementExtension(StartElement theElement, String theUrlAttr, boolean theIsModifier) {
 			RuntimeChildDeclaredExtensionDefinition declaredExtension = myDefinition.getDeclaredExtension(theUrlAttr);
 			if (declaredExtension != null) {
-				BaseState newState = new DeclaredExtensionState(declaredExtension, myInstance);
+				BaseState newState = new DeclaredExtensionState(getPreResourceState(), declaredExtension, myInstance);
 				push(newState);
 			} else {
 				super.enteringNewElementExtension(theElement, theUrlAttr, theIsModifier);
@@ -590,7 +652,8 @@ class ParserState<T extends IElement> {
 
 		private UndeclaredExtension myExtension;
 
-		public ExtensionState(UndeclaredExtension theExtension) {
+		public ExtensionState(PreResourceState thePreResourceState, UndeclaredExtension theExtension) {
+			super(thePreResourceState);
 			myExtension = theExtension;
 		}
 
@@ -614,7 +677,7 @@ class ParserState<T extends IElement> {
 				BaseRuntimeElementCompositeDefinition<?> compositeTarget = (BaseRuntimeElementCompositeDefinition<?>) target;
 				ICompositeDatatype newChildInstance = (ICompositeDatatype) compositeTarget.newInstance();
 				myExtension.setValue(newChildInstance);
-				ElementCompositeState newState = new ElementCompositeState(compositeTarget, newChildInstance);
+				ElementCompositeState newState = new ElementCompositeState(getPreResourceState(), compositeTarget, newChildInstance);
 				push(newState);
 				return;
 			}
@@ -622,7 +685,7 @@ class ParserState<T extends IElement> {
 				RuntimePrimitiveDatatypeDefinition primitiveTarget = (RuntimePrimitiveDatatypeDefinition) target;
 				IPrimitiveDatatype<?> newChildInstance = primitiveTarget.newInstance();
 				myExtension.setValue(newChildInstance);
-				PrimitiveState newState = new PrimitiveState(newChildInstance);
+				PrimitiveState newState = new PrimitiveState(getPreResourceState(), newChildInstance);
 				push(newState);
 				return;
 			}
@@ -630,7 +693,7 @@ class ParserState<T extends IElement> {
 				RuntimeResourceReferenceDefinition resourceRefTarget = (RuntimeResourceReferenceDefinition) target;
 				ResourceReferenceDt newChildInstance = new ResourceReferenceDt();
 				myExtension.setValue(newChildInstance);
-				ResourceReferenceState newState = new ResourceReferenceState(resourceRefTarget, newChildInstance);
+				ResourceReferenceState newState = new ResourceReferenceState(getPreResourceState(), resourceRefTarget, newChildInstance);
 				push(newState);
 				return;
 			}
@@ -649,9 +712,14 @@ class ParserState<T extends IElement> {
 
 	}
 
+	
 	private class PreAtomState extends BaseState {
 
 		private Bundle myInstance;
+
+		public PreAtomState() {
+			super(null);
+		}
 
 		@Override
 		public void endingElement(EndElement theElem) throws DataFormatException {
@@ -682,30 +750,39 @@ class ParserState<T extends IElement> {
 		}
 
 	}
-
+	
 	private class PreResourceState extends BaseState {
 
-		private IResource myInstance;
+		private Map<String, IResource> myContainedResources = new HashMap<String, IResource>();
 		private BundleEntry myEntry;
+		private IResource myInstance;
+		private List<ResourceReferenceDt> myResourceReferences = new ArrayList<ResourceReferenceDt>();
+		
 		private Class<? extends IResource> myResourceType;
+
+		public PreResourceState(BundleEntry theEntry) {
+			super(null);
+			myEntry = theEntry;
+		}
 
 		/**
 		 * @param theResourceType
 		 *            May be null
 		 */
 		public PreResourceState(Class<? extends IResource> theResourceType) {
+			super(null);
 			myResourceType = theResourceType;
 		}
 
-		public PreResourceState(BundleEntry theEntry) {
-			myEntry = theEntry;
+		public PreResourceState(PreResourceState thePreResourcesState) {
+			super(thePreResourcesState);
 		}
 
 		@Override
 		public void endingElement(EndElement theElem) throws DataFormatException {
 			pop();
 		}
-
+		
 		@Override
 		public void enteringNewElement(String theNamespaceURI, String theLocalPart) throws DataFormatException {
 			BaseRuntimeElementDefinition<?> definition;
@@ -727,7 +804,15 @@ class ParserState<T extends IElement> {
 				myEntry.setResource(myInstance);
 			}
 
-			push(new ElementCompositeState(def, myInstance));
+			push(new ResourceState(this, def, myInstance));
+		}
+
+		public Map<String, IResource> getContainedResources() {
+			return myContainedResources;
+		}
+
+		public List<ResourceReferenceDt> getResourceReferences() {
+			return myResourceReferences;
 		}
 
 		@SuppressWarnings("unchecked")
@@ -736,6 +821,21 @@ class ParserState<T extends IElement> {
 			if (myEntry == null) {
 				myObject = (T) myInstance;
 			}
+			
+			for (ResourceReferenceDt nextRef : myResourceReferences) {
+				String ref = nextRef.getReference().getValue();
+				if (isNotBlank(ref)){
+					if (ref.startsWith("#")) {
+						IResource target = myContainedResources.get(ref.substring(1));
+						if (target != null) {
+							nextRef.setResource(target);
+						} else {
+							ourLog.warn("Resource contains unknown local ref: " + ref);
+						}
+					}
+				}
+			}
+			
 		}
 
 		@Override
@@ -748,8 +848,8 @@ class ParserState<T extends IElement> {
 	private class PrimitiveState extends BaseState {
 		private IPrimitiveDatatype<?> myInstance;
 
-		public PrimitiveState(IPrimitiveDatatype<?> theInstance) {
-			super();
+		public PrimitiveState(PreResourceState thePreResourceState, IPrimitiveDatatype<?> theInstance) {
+			super(thePreResourceState);
 			myInstance = theInstance;
 		}
 
@@ -766,10 +866,12 @@ class ParserState<T extends IElement> {
 		}
 
 		// @Override
-		// public void enteringNewElementExtension(StartElement theElement, String theUrlAttr) {
+		// public void enteringNewElementExtension(StartElement theElement,
+		// String theUrlAttr) {
 		// if (myInstance instanceof ISupportsUndeclaredExtensions) {
 		// UndeclaredExtension ext = new UndeclaredExtension(theUrlAttr);
-		// ((ISupportsUndeclaredExtensions) myInstance).getUndeclaredExtensions().add(ext);
+		// ((ISupportsUndeclaredExtensions)
+		// myInstance).getUndeclaredExtensions().add(ext);
 		// push(new ExtensionState(ext));
 		// }
 		// }
@@ -792,7 +894,8 @@ class ParserState<T extends IElement> {
 		private ResourceReferenceDt myInstance;
 		private ResourceReferenceSubState mySubState;
 
-		public ResourceReferenceState(RuntimeResourceReferenceDefinition theDefinition, ResourceReferenceDt theInstance) {
+		public ResourceReferenceState(PreResourceState thePreResourceState, RuntimeResourceReferenceDefinition theDefinition, ResourceReferenceDt theInstance) {
+			super(thePreResourceState);
 			myDefinition = theDefinition;
 			myInstance = theInstance;
 			mySubState = ResourceReferenceSubState.INITIAL;
@@ -857,13 +960,32 @@ class ParserState<T extends IElement> {
 		DISPLAY, INITIAL, REFERENCE
 	}
 
+	private class ResourceState extends ElementCompositeState {
+
+		public ResourceState(PreResourceState thePreResourceState, RuntimeResourceDefinition theDef, IResource theInstance) {
+			super(thePreResourceState, theDef, theInstance);
+		}
+
+		@Override
+		public void enteringNewElement(String theNamespace, String theChildName) throws DataFormatException {
+			if ("contained".equals(theChildName)) {
+				push(new ContainedResourcesState(getPreResourceState()));
+			}else {
+				super.enteringNewElement(theNamespace, theChildName);
+			}
+		}
+
+		
+	}
+
 	private class XhtmlState extends BaseState {
 		private int myDepth;
 		private XhtmlDt myDt;
 		private List<XMLEvent> myEvents = new ArrayList<XMLEvent>();
 		private boolean myIncludeOuterEvent;
 
-		private XhtmlState(XhtmlDt theXhtmlDt, boolean theIncludeOuterEvent) throws DataFormatException {
+		private XhtmlState(PreResourceState thePreResourceState, XhtmlDt theXhtmlDt, boolean theIncludeOuterEvent) throws DataFormatException {
+			super(thePreResourceState);
 			myDepth = 0;
 			myDt = theXhtmlDt;
 			myIncludeOuterEvent = theIncludeOuterEvent;

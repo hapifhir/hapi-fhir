@@ -12,9 +12,7 @@ import javax.xml.bind.DatatypeConverter;
 
 import org.apache.commons.lang3.time.FastDateFormat;
 
-import ca.uhn.fhir.model.api.BaseElement;
 import ca.uhn.fhir.model.api.BasePrimitive;
-import ca.uhn.fhir.model.api.IPrimitiveDatatype;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.parser.DataFormatException;
 

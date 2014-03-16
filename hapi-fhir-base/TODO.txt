@@ -41,3 +41,5 @@ Issues:
  * CarePlan.Activity has a type of "xmlIdRef" which is a weird datatype. The example here:
    http://www.hl7.org/implement/standards/fhir/careplan-example-integrated.xml.html
    seems to use an extension to model that element instead of the goal type too.
+   
+ * Would like a standardized (but optional) HTTP parameter for pretty-printing. Suggest: _pretty=true

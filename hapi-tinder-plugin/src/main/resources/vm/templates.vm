@@ -7,7 +7,11 @@
 #if (${child.resourceRef} || ${child.hasMultipleTypes}) 
 	@Child(name="${child.elementNameSimplified}", order=${foreach.index}, min=${child.cardMin}, max=${child.cardMaxForChildAnnotation}, type={
 #foreach ($nextType in ${child.referenceTypesForMultiple})
+#if ( ${child.resourceRef} && ${nextType} != "IResource" )
+		${packageBase}.resource.${nextType}.class,
+#else
 		${nextType}.class,
+#end
 #end
 	})
 #elseif ($!child.block)
@@ -40,6 +44,11 @@
 	public boolean isEmpty() {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( #{foreach}($child in $childElements) ${child.variableName}#{if}($foreach.hasNext), #{end}#{end});
 	}
+	
+	public java.util.List<IElement> getAllChildElements() {
+		return ca.uhn.fhir.util.ElementUtil.allChildElements( #{foreach}($child in $childElements) ${child.variableName}#{if}($foreach.hasNext), #{end}#{end});
+	}
+	
 
 #foreach ( $child in $childElements )
 	/**

@@ -16,12 +16,29 @@
 
 package ca.uhn.fhir.model.dstu.resource;
 
-import java.util.*;
-import ca.uhn.fhir.model.api.*;
-import ca.uhn.fhir.model.api.annotation.*;
-import ca.uhn.fhir.model.primitive.*;
-import ca.uhn.fhir.model.dstu.composite.*;
-import ca.uhn.fhir.model.dstu.valueset.*;
+
+import ca.uhn.fhir.model.api.BaseElement;
+import ca.uhn.fhir.model.api.BaseResource;
+import ca.uhn.fhir.model.api.IDatatype;
+import ca.uhn.fhir.model.api.IElement;
+import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.IResourceBlock;
+import ca.uhn.fhir.model.api.annotation.Block;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
+import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
+import ca.uhn.fhir.model.dstu.composite.QuantityDt;
+import ca.uhn.fhir.model.dstu.composite.RangeDt;
+import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.dstu.valueset.GroupTypeEnum;
+import ca.uhn.fhir.model.primitive.BooleanDt;
+import ca.uhn.fhir.model.primitive.BoundCodeDt;
+import ca.uhn.fhir.model.primitive.CodeDt;
+import ca.uhn.fhir.model.primitive.IntegerDt;
+import ca.uhn.fhir.model.primitive.StringDt;
+
 
 /**
  * HAPI/FHIR <b>Group</b> Resource
@@ -178,26 +195,31 @@ public class Group extends BaseResource implements IResource {
 		shortDefinition="Trait of group members",
 		formalDefinition="Identifies the traits shared by members of the group"
 	)
-	private List<Characteristic> myCharacteristic;
+	private java.util.List<Characteristic> myCharacteristic;
 	
 	@Child(name="member", order=7, min=0, max=Child.MAX_UNLIMITED, type={
-		Patient.class,
-		Practitioner.class,
-		Device.class,
-		Medication.class,
-		Substance.class,
+		ca.uhn.fhir.model.dstu.resource.Patient.class,
+		ca.uhn.fhir.model.dstu.resource.Practitioner.class,
+		ca.uhn.fhir.model.dstu.resource.Device.class,
+		ca.uhn.fhir.model.dstu.resource.Medication.class,
+		ca.uhn.fhir.model.dstu.resource.Substance.class,
 	})
 	@Description(
 		shortDefinition="Who is in group",
 		formalDefinition="Identifies the resource instances that are members of the group."
 	)
-	private List<ResourceReferenceDt> myMember;
+	private java.util.List<ResourceReferenceDt> myMember;
 	
 
 	@Override
 	public boolean isEmpty() {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myIdentifier,  myType,  myActual,  myCode,  myName,  myQuantity,  myCharacteristic,  myMember);
 	}
+	
+	public java.util.List<IElement> getAllPopulatedChildElements() {
+		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(  myIdentifier,  myType,  myActual,  myCode,  myName,  myQuantity,  myCharacteristic,  myMember);
+	}
+	
 
 	/**
 	 * Gets the value(s) for <b>identifier</b> (Unique id).
@@ -443,9 +465,9 @@ public class Group extends BaseResource implements IResource {
      * Identifies the traits shared by members of the group
      * </p> 
 	 */
-	public List<Characteristic> getCharacteristic() {  
+	public java.util.List<Characteristic> getCharacteristic() {  
 		if (myCharacteristic == null) {
-			myCharacteristic = new ArrayList<Characteristic>();
+			myCharacteristic = new java.util.ArrayList<Characteristic>();
 		}
 		return myCharacteristic;
 	}
@@ -458,7 +480,7 @@ public class Group extends BaseResource implements IResource {
      * Identifies the traits shared by members of the group
      * </p> 
 	 */
-	public void setCharacteristic(List<Characteristic> theValue) {
+	public void setCharacteristic(java.util.List<Characteristic> theValue) {
 		myCharacteristic = theValue;
 	}
 
@@ -487,7 +509,7 @@ public class Group extends BaseResource implements IResource {
      * Identifies the resource instances that are members of the group.
      * </p> 
 	 */
-	public List<ResourceReferenceDt> getMember() {  
+	public java.util.List<ResourceReferenceDt> getMember() {  
 		return myMember;
 	}
 
@@ -499,7 +521,7 @@ public class Group extends BaseResource implements IResource {
      * Identifies the resource instances that are members of the group.
      * </p> 
 	 */
-	public void setMember(List<ResourceReferenceDt> theValue) {
+	public void setMember(java.util.List<ResourceReferenceDt> theValue) {
 		myMember = theValue;
 	}
 
@@ -547,6 +569,11 @@ public class Group extends BaseResource implements IResource {
 	public boolean isEmpty() {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myCode,  myValue,  myExclude);
 	}
+	
+	public java.util.List<IElement> getAllPopulatedChildElements() {
+		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(  myCode,  myValue,  myExclude);
+	}
+	
 
 	/**
 	 * Gets the value(s) for <b>code</b> (Kind of characteristic).

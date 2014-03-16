@@ -1,9 +1,9 @@
-package ca.uhn.fhir.rest.common;
+package ca.uhn.fhir.rest.method;
 
 import java.util.Set;
 
 import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.rest.common.SearchMethodBinding.RequestType;
+import ca.uhn.fhir.rest.method.SearchMethodBinding.RequestType;
 
 public class Request {
 
@@ -12,7 +12,6 @@ public class Request {
 	private Set<String> myParameterNames;
 	private RequestType myRequestType;
 	private String myResourceName;
-
 	private IdDt myVersion;
 
 	public IdDt getId() {

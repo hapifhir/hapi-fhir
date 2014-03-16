@@ -41,14 +41,20 @@
 					<baseResourceNames>
 						<baseResourceName>conformance</baseResourceName>
 						<baseResourceName>device</baseResourceName>
+						<baseResourceName>diagnosticorder</baseResourceName>
+						<baseResourceName>diagnosticreport</baseResourceName>
+						<baseResourceName>encounter</baseResourceName>
 						<baseResourceName>group</baseResourceName>
+						<baseResourceName>imagingstudy</baseResourceName>
 						<baseResourceName>location</baseResourceName>
+						<baseResourceName>media</baseResourceName>
 						<baseResourceName>medication</baseResourceName>
 						<baseResourceName>observation</baseResourceName>
 						<baseResourceName>organization</baseResourceName>
 						<baseResourceName>patient</baseResourceName>
 						<baseResourceName>practitioner</baseResourceName>
 						<baseResourceName>profile</baseResourceName>
+						<baseResourceName>relatedperson</baseResourceName>
 						<baseResourceName>specimen</baseResourceName>
 						<baseResourceName>substance</baseResourceName>
 						<baseResourceName>valueset</baseResourceName>

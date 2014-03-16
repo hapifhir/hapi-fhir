@@ -16,9 +16,15 @@
 
 package ca.uhn.fhir.testmodel;
 
-import java.util.*;
-import ca.uhn.fhir.model.api.*;
-import ca.uhn.fhir.model.api.annotation.*;
+import java.util.ArrayList;
+import java.util.List;
+
+import ca.uhn.fhir.model.api.BaseResource;
+import ca.uhn.fhir.model.api.IElement;
+import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
 
 /**
  * HAPI/FHIR <b>Patient</b> Resource
@@ -45,6 +51,11 @@ public class Patient extends BaseResource implements IResource {
 	)
 	private List<IdentifierDt> myIdentifier;
 	
+	@Override
+	public List<IElement> getAllPopulatedChildElements() {
+		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(  myIdentifier );
+	}
+
 
 	@Override
 	public boolean isEmpty() {

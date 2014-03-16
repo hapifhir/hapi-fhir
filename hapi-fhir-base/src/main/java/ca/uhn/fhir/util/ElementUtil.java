@@ -1,5 +1,6 @@
 package ca.uhn.fhir.util;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import ca.uhn.fhir.model.api.IElement;
@@ -50,4 +51,26 @@ public class ElementUtil {
 		return true;
 	}
 
+	public static List<IElement> allPopulatedChildElements(Object... theElements) {
+		ArrayList<IElement> retVal = new ArrayList<IElement>();
+		for (Object next : theElements) {
+			if (next == null) {
+				continue;
+			}else if (next instanceof IElement) {
+				retVal.add((IElement) next);
+			} else if (next instanceof List) {
+				for (Object nextElement : ((List<?>)next)) {
+					if (!(nextElement instanceof IElement)) {
+						throw new IllegalArgumentException("Found element of "+nextElement.getClass());
+					}
+					retVal.add((IElement) nextElement);
+				}
+			} else {
+				throw new IllegalArgumentException("Found element of "+next.getClass());
+			}
+			
+		}
+		return retVal;
+	}
+	
 }

@@ -24,10 +24,10 @@ public abstract class BaseElement implements IElement, ISupportsUndeclaredExtens
 		return Collections.unmodifiableList(retVal);
 	}
 
-//	@Override
-//	public IdDt getId() {
-//		return myId;
-//	}
+	@Override
+	public IdDt getId() {
+		return myId;
+	}
 
 	@Override
 	public List<UndeclaredExtension> getUndeclaredExtensions() {
@@ -67,9 +67,9 @@ public abstract class BaseElement implements IElement, ISupportsUndeclaredExtens
 		return true;
 	}
 
-//	@Override
-//	public void setId(IdDt theId) {
-//		myId = theId;
-//	}
+	@Override
+	public void setId(IdDt theId) {
+		myId = theId;
+	}
 
 }

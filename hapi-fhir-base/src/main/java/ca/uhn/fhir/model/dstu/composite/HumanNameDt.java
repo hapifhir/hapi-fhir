@@ -16,12 +16,16 @@
 
 package ca.uhn.fhir.model.dstu.composite;
 
-import java.util.*;
-import ca.uhn.fhir.model.api.*;
-import ca.uhn.fhir.model.api.annotation.*;
-import ca.uhn.fhir.model.primitive.*;
-import ca.uhn.fhir.model.dstu.valueset.*;
-import ca.uhn.fhir.model.dstu.resource.*;
+import ca.uhn.fhir.model.api.BaseElement;
+import ca.uhn.fhir.model.api.ICompositeDatatype;
+import ca.uhn.fhir.model.api.IElement;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.dstu.valueset.NameUseEnum;
+import ca.uhn.fhir.model.primitive.BoundCodeDt;
+import ca.uhn.fhir.model.primitive.CodeDt;
+import ca.uhn.fhir.model.primitive.StringDt;
 
 /**
  * HAPI/FHIR <b>HumanName</b> Datatype
@@ -61,28 +65,28 @@ public class HumanNameDt
 		shortDefinition="Family name (often called 'Surname')",
 		formalDefinition="The part of a name that links to the genealogy. In some cultures (e.g. Eritrea) the family name of a son is the first name of his father."
 	)
-	private List<StringDt> myFamily;
+	private java.util.List<StringDt> myFamily;
 	
 	@Child(name="given", type=StringDt.class, order=3, min=0, max=Child.MAX_UNLIMITED)	
 	@Description(
 		shortDefinition="Given names (not always 'first'). Includes middle names",
 		formalDefinition="Given name"
 	)
-	private List<StringDt> myGiven;
+	private java.util.List<StringDt> myGiven;
 	
 	@Child(name="prefix", type=StringDt.class, order=4, min=0, max=Child.MAX_UNLIMITED)	
 	@Description(
 		shortDefinition="Parts that come before the name",
 		formalDefinition="Part of the name that is acquired as a title due to academic, legal, employment or nobility status, etc. and that appears at the start of the name"
 	)
-	private List<StringDt> myPrefix;
+	private java.util.List<StringDt> myPrefix;
 	
 	@Child(name="suffix", type=StringDt.class, order=5, min=0, max=Child.MAX_UNLIMITED)	
 	@Description(
 		shortDefinition="Parts that come after the name",
 		formalDefinition="Part of the name that is acquired as a title due to academic, legal, employment or nobility status, etc. and that appears at the end of the name"
 	)
-	private List<StringDt> mySuffix;
+	private java.util.List<StringDt> mySuffix;
 	
 	@Child(name="period", type=PeriodDt.class, order=6, min=0, max=1)	
 	@Description(
@@ -96,6 +100,11 @@ public class HumanNameDt
 	public boolean isEmpty() {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myUse,  myText,  myFamily,  myGiven,  myPrefix,  mySuffix,  myPeriod);
 	}
+	
+	public java.util.List<IElement> getAllPopulatedChildElements() {
+		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(  myUse,  myText,  myFamily,  myGiven,  myPrefix,  mySuffix,  myPeriod);
+	}
+	
 
 	/**
 	 * Gets the value(s) for <b>use</b> (usual | official | temp | nickname | anonymous | old | maiden).
@@ -193,9 +202,9 @@ public class HumanNameDt
      * The part of a name that links to the genealogy. In some cultures (e.g. Eritrea) the family name of a son is the first name of his father.
      * </p> 
 	 */
-	public List<StringDt> getFamily() {  
+	public java.util.List<StringDt> getFamily() {  
 		if (myFamily == null) {
-			myFamily = new ArrayList<StringDt>();
+			myFamily = new java.util.ArrayList<StringDt>();
 		}
 		return myFamily;
 	}
@@ -208,7 +217,7 @@ public class HumanNameDt
      * The part of a name that links to the genealogy. In some cultures (e.g. Eritrea) the family name of a son is the first name of his father.
      * </p> 
 	 */
-	public void setFamily(List<StringDt> theValue) {
+	public void setFamily(java.util.List<StringDt> theValue) {
 		myFamily = theValue;
 	}
 
@@ -236,7 +245,7 @@ public class HumanNameDt
 	 */
 	public void addFamily( String theString) {
 		if (myFamily == null) {
-			myFamily = new ArrayList<StringDt>();
+			myFamily = new java.util.ArrayList<StringDt>();
 		}
 		myFamily.add(new StringDt(theString)); 
 	}
@@ -252,9 +261,9 @@ public class HumanNameDt
      * Given name
      * </p> 
 	 */
-	public List<StringDt> getGiven() {  
+	public java.util.List<StringDt> getGiven() {  
 		if (myGiven == null) {
-			myGiven = new ArrayList<StringDt>();
+			myGiven = new java.util.ArrayList<StringDt>();
 		}
 		return myGiven;
 	}
@@ -267,7 +276,7 @@ public class HumanNameDt
      * Given name
      * </p> 
 	 */
-	public void setGiven(List<StringDt> theValue) {
+	public void setGiven(java.util.List<StringDt> theValue) {
 		myGiven = theValue;
 	}
 
@@ -295,7 +304,7 @@ public class HumanNameDt
 	 */
 	public void addGiven( String theString) {
 		if (myGiven == null) {
-			myGiven = new ArrayList<StringDt>();
+			myGiven = new java.util.ArrayList<StringDt>();
 		}
 		myGiven.add(new StringDt(theString)); 
 	}
@@ -311,9 +320,9 @@ public class HumanNameDt
      * Part of the name that is acquired as a title due to academic, legal, employment or nobility status, etc. and that appears at the start of the name
      * </p> 
 	 */
-	public List<StringDt> getPrefix() {  
+	public java.util.List<StringDt> getPrefix() {  
 		if (myPrefix == null) {
-			myPrefix = new ArrayList<StringDt>();
+			myPrefix = new java.util.ArrayList<StringDt>();
 		}
 		return myPrefix;
 	}
@@ -326,7 +335,7 @@ public class HumanNameDt
      * Part of the name that is acquired as a title due to academic, legal, employment or nobility status, etc. and that appears at the start of the name
      * </p> 
 	 */
-	public void setPrefix(List<StringDt> theValue) {
+	public void setPrefix(java.util.List<StringDt> theValue) {
 		myPrefix = theValue;
 	}
 
@@ -354,7 +363,7 @@ public class HumanNameDt
 	 */
 	public void addPrefix( String theString) {
 		if (myPrefix == null) {
-			myPrefix = new ArrayList<StringDt>();
+			myPrefix = new java.util.ArrayList<StringDt>();
 		}
 		myPrefix.add(new StringDt(theString)); 
 	}
@@ -370,9 +379,9 @@ public class HumanNameDt
      * Part of the name that is acquired as a title due to academic, legal, employment or nobility status, etc. and that appears at the end of the name
      * </p> 
 	 */
-	public List<StringDt> getSuffix() {  
+	public java.util.List<StringDt> getSuffix() {  
 		if (mySuffix == null) {
-			mySuffix = new ArrayList<StringDt>();
+			mySuffix = new java.util.ArrayList<StringDt>();
 		}
 		return mySuffix;
 	}
@@ -385,7 +394,7 @@ public class HumanNameDt
      * Part of the name that is acquired as a title due to academic, legal, employment or nobility status, etc. and that appears at the end of the name
      * </p> 
 	 */
-	public void setSuffix(List<StringDt> theValue) {
+	public void setSuffix(java.util.List<StringDt> theValue) {
 		mySuffix = theValue;
 	}
 
@@ -413,7 +422,7 @@ public class HumanNameDt
 	 */
 	public void addSuffix( String theString) {
 		if (mySuffix == null) {
-			mySuffix = new ArrayList<StringDt>();
+			mySuffix = new java.util.ArrayList<StringDt>();
 		}
 		mySuffix.add(new StringDt(theString)); 
 	}

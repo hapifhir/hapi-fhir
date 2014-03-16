@@ -16,12 +16,24 @@
 
 package ca.uhn.fhir.model.dstu.resource;
 
-import java.util.*;
-import ca.uhn.fhir.model.api.*;
-import ca.uhn.fhir.model.api.annotation.*;
-import ca.uhn.fhir.model.primitive.*;
-import ca.uhn.fhir.model.dstu.composite.*;
-import ca.uhn.fhir.model.dstu.valueset.*;
+
+import java.util.Date;
+
+import ca.uhn.fhir.model.api.BaseResource;
+import ca.uhn.fhir.model.api.IElement;
+import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
+import ca.uhn.fhir.model.dstu.composite.ContactDt;
+import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
+import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.primitive.DateDt;
+import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.model.primitive.UriDt;
+
 
 /**
  * HAPI/FHIR <b>Device</b> Resource
@@ -126,7 +138,7 @@ public class Device extends BaseResource implements IResource {
 		shortDefinition="Instance id from manufacturer, owner and others",
 		formalDefinition="Identifiers assigned to this device by various organizations. The most likely organizations to assign identifiers are the manufacturer and the owner, though regulatory agencies may also assign an identifier. The identifiers identify the particular device, not the kind of device"
 	)
-	private List<IdentifierDt> myIdentifier;
+	private java.util.List<IdentifierDt> myIdentifier;
 	
 	@Child(name="type", type=CodeableConceptDt.class, order=1, min=1, max=1)	
 	@Description(
@@ -178,7 +190,7 @@ public class Device extends BaseResource implements IResource {
 	private StringDt myLotNumber;
 	
 	@Child(name="owner", order=8, min=0, max=1, type={
-		Organization.class,
+		ca.uhn.fhir.model.dstu.resource.Organization.class,
 	})
 	@Description(
 		shortDefinition="Organization responsible for device",
@@ -187,7 +199,7 @@ public class Device extends BaseResource implements IResource {
 	private ResourceReferenceDt myOwner;
 	
 	@Child(name="location", order=9, min=0, max=1, type={
-		Location.class,
+		ca.uhn.fhir.model.dstu.resource.Location.class,
 	})
 	@Description(
 		shortDefinition="Where the resource is found",
@@ -196,7 +208,7 @@ public class Device extends BaseResource implements IResource {
 	private ResourceReferenceDt myLocation;
 	
 	@Child(name="patient", order=10, min=0, max=1, type={
-		Patient.class,
+		ca.uhn.fhir.model.dstu.resource.Patient.class,
 	})
 	@Description(
 		shortDefinition="If the resource is affixed to a person",
@@ -209,7 +221,7 @@ public class Device extends BaseResource implements IResource {
 		shortDefinition="Details for human/organization for support",
 		formalDefinition="Contact details for an organization or a particular human that is responsible for the device"
 	)
-	private List<ContactDt> myContact;
+	private java.util.List<ContactDt> myContact;
 	
 	@Child(name="url", type=UriDt.class, order=12, min=0, max=1)	
 	@Description(
@@ -223,6 +235,11 @@ public class Device extends BaseResource implements IResource {
 	public boolean isEmpty() {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myIdentifier,  myType,  myManufacturer,  myModel,  myVersion,  myExpiry,  myUdi,  myLotNumber,  myOwner,  myLocation,  myPatient,  myContact,  myUrl);
 	}
+	
+	public java.util.List<IElement> getAllPopulatedChildElements() {
+		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(  myIdentifier,  myType,  myManufacturer,  myModel,  myVersion,  myExpiry,  myUdi,  myLotNumber,  myOwner,  myLocation,  myPatient,  myContact,  myUrl);
+	}
+	
 
 	/**
 	 * Gets the value(s) for <b>identifier</b> (Instance id from manufacturer, owner and others).
@@ -234,9 +251,9 @@ public class Device extends BaseResource implements IResource {
      * Identifiers assigned to this device by various organizations. The most likely organizations to assign identifiers are the manufacturer and the owner, though regulatory agencies may also assign an identifier. The identifiers identify the particular device, not the kind of device
      * </p> 
 	 */
-	public List<IdentifierDt> getIdentifier() {  
+	public java.util.List<IdentifierDt> getIdentifier() {  
 		if (myIdentifier == null) {
-			myIdentifier = new ArrayList<IdentifierDt>();
+			myIdentifier = new java.util.ArrayList<IdentifierDt>();
 		}
 		return myIdentifier;
 	}
@@ -249,7 +266,7 @@ public class Device extends BaseResource implements IResource {
      * Identifiers assigned to this device by various organizations. The most likely organizations to assign identifiers are the manufacturer and the owner, though regulatory agencies may also assign an identifier. The identifiers identify the particular device, not the kind of device
      * </p> 
 	 */
-	public void setIdentifier(List<IdentifierDt> theValue) {
+	public void setIdentifier(java.util.List<IdentifierDt> theValue) {
 		myIdentifier = theValue;
 	}
 
@@ -466,8 +483,8 @@ public class Device extends BaseResource implements IResource {
      * Date of expiry of this device (if applicable)
      * </p> 
 	 */
-	public void setExpiry( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myExpiry = new DateDt(theDate, thePrecision); 
+	public void setExpiryWithDayPrecision( Date theDate) {
+		myExpiry = new DateDt(theDate); 
 	}
 
 	/**
@@ -478,8 +495,8 @@ public class Device extends BaseResource implements IResource {
      * Date of expiry of this device (if applicable)
      * </p> 
 	 */
-	public void setExpiryWithDayPrecision( Date theDate) {
-		myExpiry = new DateDt(theDate); 
+	public void setExpiry( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myExpiry = new DateDt(theDate, thePrecision); 
 	}
 
  
@@ -672,9 +689,9 @@ public class Device extends BaseResource implements IResource {
      * Contact details for an organization or a particular human that is responsible for the device
      * </p> 
 	 */
-	public List<ContactDt> getContact() {  
+	public java.util.List<ContactDt> getContact() {  
 		if (myContact == null) {
-			myContact = new ArrayList<ContactDt>();
+			myContact = new java.util.ArrayList<ContactDt>();
 		}
 		return myContact;
 	}
@@ -687,7 +704,7 @@ public class Device extends BaseResource implements IResource {
      * Contact details for an organization or a particular human that is responsible for the device
      * </p> 
 	 */
-	public void setContact(List<ContactDt> theValue) {
+	public void setContact(java.util.List<ContactDt> theValue) {
 		myContact = theValue;
 	}
 

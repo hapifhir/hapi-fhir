@@ -16,12 +16,31 @@
 
 package ca.uhn.fhir.model.dstu.resource;
 
-import java.util.*;
-import ca.uhn.fhir.model.api.*;
-import ca.uhn.fhir.model.api.annotation.*;
-import ca.uhn.fhir.model.primitive.*;
-import ca.uhn.fhir.model.dstu.composite.*;
-import ca.uhn.fhir.model.dstu.valueset.*;
+
+import java.util.Date;
+
+import ca.uhn.fhir.model.api.BaseElement;
+import ca.uhn.fhir.model.api.BaseResource;
+import ca.uhn.fhir.model.api.IElement;
+import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.IResourceBlock;
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import ca.uhn.fhir.model.api.annotation.Block;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.dstu.composite.ContactDt;
+import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
+import ca.uhn.fhir.model.dstu.valueset.FilterOperatorEnum;
+import ca.uhn.fhir.model.dstu.valueset.ValueSetStatusEnum;
+import ca.uhn.fhir.model.primitive.BooleanDt;
+import ca.uhn.fhir.model.primitive.BoundCodeDt;
+import ca.uhn.fhir.model.primitive.CodeDt;
+import ca.uhn.fhir.model.primitive.DateTimeDt;
+import ca.uhn.fhir.model.primitive.InstantDt;
+import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.model.primitive.UriDt;
+
 
 /**
  * HAPI/FHIR <b>ValueSet</b> Resource
@@ -184,7 +203,7 @@ public class ValueSet extends BaseResource implements IResource {
 		shortDefinition="Contact information of the publisher",
 		formalDefinition="Contacts of the publisher to assist a user in finding and communicating with the publisher"
 	)
-	private List<ContactDt> myTelecom;
+	private java.util.List<ContactDt> myTelecom;
 	
 	@Child(name="description", type=StringDt.class, order=5, min=1, max=1)	
 	@Description(
@@ -254,6 +273,11 @@ public class ValueSet extends BaseResource implements IResource {
 	public boolean isEmpty() {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myIdentifier,  myVersion,  myName,  myPublisher,  myTelecom,  myDescription,  myCopyright,  myStatus,  myExperimental,  myExtensible,  myDate,  myDefine,  myCompose,  myExpansion);
 	}
+	
+	public java.util.List<IElement> getAllPopulatedChildElements() {
+		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(  myIdentifier,  myVersion,  myName,  myPublisher,  myTelecom,  myDescription,  myCopyright,  myStatus,  myExperimental,  myExtensible,  myDate,  myDefine,  myCompose,  myExpansion);
+	}
+	
 
 	/**
 	 * Gets the value(s) for <b>identifier</b> (Logical id to reference this value set).
@@ -437,9 +461,9 @@ public class ValueSet extends BaseResource implements IResource {
      * Contacts of the publisher to assist a user in finding and communicating with the publisher
      * </p> 
 	 */
-	public List<ContactDt> getTelecom() {  
+	public java.util.List<ContactDt> getTelecom() {  
 		if (myTelecom == null) {
-			myTelecom = new ArrayList<ContactDt>();
+			myTelecom = new java.util.ArrayList<ContactDt>();
 		}
 		return myTelecom;
 	}
@@ -452,7 +476,7 @@ public class ValueSet extends BaseResource implements IResource {
      * Contacts of the publisher to assist a user in finding and communicating with the publisher
      * </p> 
 	 */
-	public void setTelecom(List<ContactDt> theValue) {
+	public void setTelecom(java.util.List<ContactDt> theValue) {
 		myTelecom = theValue;
 	}
 
@@ -724,8 +748,8 @@ public class ValueSet extends BaseResource implements IResource {
      * The date that the value set status was last changed
      * </p> 
 	 */
-	public void setDateWithSecondsPrecision( Date theDate) {
-		myDate = new DateTimeDt(theDate); 
+	public void setDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myDate = new DateTimeDt(theDate, thePrecision); 
 	}
 
 	/**
@@ -736,8 +760,8 @@ public class ValueSet extends BaseResource implements IResource {
      * The date that the value set status was last changed
      * </p> 
 	 */
-	public void setDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myDate = new DateTimeDt(theDate, thePrecision); 
+	public void setDateWithSecondsPrecision( Date theDate) {
+		myDate = new DateTimeDt(theDate); 
 	}
 
  
@@ -871,13 +895,18 @@ public class ValueSet extends BaseResource implements IResource {
 		shortDefinition="Concepts in the code system",
 		formalDefinition=""
 	)
-	private List<DefineConcept> myConcept;
+	private java.util.List<DefineConcept> myConcept;
 	
 
 	@Override
 	public boolean isEmpty() {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  mySystem,  myVersion,  myCaseSensitive,  myConcept);
 	}
+	
+	public java.util.List<IElement> getAllPopulatedChildElements() {
+		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(  mySystem,  myVersion,  myCaseSensitive,  myConcept);
+	}
+	
 
 	/**
 	 * Gets the value(s) for <b>system</b> (URI to identify the code system).
@@ -1018,9 +1047,9 @@ public class ValueSet extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public List<DefineConcept> getConcept() {  
+	public java.util.List<DefineConcept> getConcept() {  
 		if (myConcept == null) {
-			myConcept = new ArrayList<DefineConcept>();
+			myConcept = new java.util.ArrayList<DefineConcept>();
 		}
 		return myConcept;
 	}
@@ -1033,7 +1062,7 @@ public class ValueSet extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public void setConcept(List<DefineConcept> theValue) {
+	public void setConcept(java.util.List<DefineConcept> theValue) {
 		myConcept = theValue;
 	}
 
@@ -1099,13 +1128,18 @@ public class ValueSet extends BaseResource implements IResource {
 		shortDefinition="Child Concepts (is-a / contains)",
 		formalDefinition=""
 	)
-	private List<DefineConcept> myConcept;
+	private java.util.List<DefineConcept> myConcept;
 	
 
 	@Override
 	public boolean isEmpty() {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myCode,  myAbstract,  myDisplay,  myDefinition,  myConcept);
 	}
+	
+	public java.util.List<IElement> getAllPopulatedChildElements() {
+		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(  myCode,  myAbstract,  myDisplay,  myDefinition,  myConcept);
+	}
+	
 
 	/**
 	 * Gets the value(s) for <b>code</b> (Code that identifies concept).
@@ -1289,9 +1323,9 @@ public class ValueSet extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public List<DefineConcept> getConcept() {  
+	public java.util.List<DefineConcept> getConcept() {  
 		if (myConcept == null) {
-			myConcept = new ArrayList<DefineConcept>();
+			myConcept = new java.util.ArrayList<DefineConcept>();
 		}
 		return myConcept;
 	}
@@ -1304,7 +1338,7 @@ public class ValueSet extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public void setConcept(List<DefineConcept> theValue) {
+	public void setConcept(java.util.List<DefineConcept> theValue) {
 		myConcept = theValue;
 	}
 
@@ -1344,27 +1378,32 @@ public class ValueSet extends BaseResource implements IResource {
 		shortDefinition="Import the contents of another value set",
 		formalDefinition="Includes the contents of the referenced value set as a part of the contents of this value set"
 	)
-	private List<UriDt> myImport;
+	private java.util.List<UriDt> myImport;
 	
 	@Child(name="include", order=1, min=0, max=Child.MAX_UNLIMITED)	
 	@Description(
 		shortDefinition="Include one or more codes from a code system",
 		formalDefinition="Include one or more codes from a code system"
 	)
-	private List<ComposeInclude> myInclude;
+	private java.util.List<ComposeInclude> myInclude;
 	
 	@Child(name="exclude", type=ComposeInclude.class, order=2, min=0, max=Child.MAX_UNLIMITED)	
 	@Description(
 		shortDefinition="Explicitly exclude codes",
 		formalDefinition="Exclude one or more codes from the value set"
 	)
-	private List<ComposeInclude> myExclude;
+	private java.util.List<ComposeInclude> myExclude;
 	
 
 	@Override
 	public boolean isEmpty() {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myImport,  myInclude,  myExclude);
 	}
+	
+	public java.util.List<IElement> getAllPopulatedChildElements() {
+		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(  myImport,  myInclude,  myExclude);
+	}
+	
 
 	/**
 	 * Gets the value(s) for <b>import</b> (Import the contents of another value set).
@@ -1376,9 +1415,9 @@ public class ValueSet extends BaseResource implements IResource {
      * Includes the contents of the referenced value set as a part of the contents of this value set
      * </p> 
 	 */
-	public List<UriDt> getImport() {  
+	public java.util.List<UriDt> getImport() {  
 		if (myImport == null) {
-			myImport = new ArrayList<UriDt>();
+			myImport = new java.util.ArrayList<UriDt>();
 		}
 		return myImport;
 	}
@@ -1391,7 +1430,7 @@ public class ValueSet extends BaseResource implements IResource {
      * Includes the contents of the referenced value set as a part of the contents of this value set
      * </p> 
 	 */
-	public void setImport(List<UriDt> theValue) {
+	public void setImport(java.util.List<UriDt> theValue) {
 		myImport = theValue;
 	}
 
@@ -1419,7 +1458,7 @@ public class ValueSet extends BaseResource implements IResource {
 	 */
 	public void addImport( String theUri) {
 		if (myImport == null) {
-			myImport = new ArrayList<UriDt>();
+			myImport = new java.util.ArrayList<UriDt>();
 		}
 		myImport.add(new UriDt(theUri)); 
 	}
@@ -1435,9 +1474,9 @@ public class ValueSet extends BaseResource implements IResource {
      * Include one or more codes from a code system
      * </p> 
 	 */
-	public List<ComposeInclude> getInclude() {  
+	public java.util.List<ComposeInclude> getInclude() {  
 		if (myInclude == null) {
-			myInclude = new ArrayList<ComposeInclude>();
+			myInclude = new java.util.ArrayList<ComposeInclude>();
 		}
 		return myInclude;
 	}
@@ -1450,7 +1489,7 @@ public class ValueSet extends BaseResource implements IResource {
      * Include one or more codes from a code system
      * </p> 
 	 */
-	public void setInclude(List<ComposeInclude> theValue) {
+	public void setInclude(java.util.List<ComposeInclude> theValue) {
 		myInclude = theValue;
 	}
 
@@ -1479,9 +1518,9 @@ public class ValueSet extends BaseResource implements IResource {
      * Exclude one or more codes from the value set
      * </p> 
 	 */
-	public List<ComposeInclude> getExclude() {  
+	public java.util.List<ComposeInclude> getExclude() {  
 		if (myExclude == null) {
-			myExclude = new ArrayList<ComposeInclude>();
+			myExclude = new java.util.ArrayList<ComposeInclude>();
 		}
 		return myExclude;
 	}
@@ -1494,7 +1533,7 @@ public class ValueSet extends BaseResource implements IResource {
      * Exclude one or more codes from the value set
      * </p> 
 	 */
-	public void setExclude(List<ComposeInclude> theValue) {
+	public void setExclude(java.util.List<ComposeInclude> theValue) {
 		myExclude = theValue;
 	}
 
@@ -1546,20 +1585,25 @@ public class ValueSet extends BaseResource implements IResource {
 		shortDefinition="Code or concept from system",
 		formalDefinition="Specifies a code or concept to be included or excluded. The list of codes is considered ordered, though the order may not have any particular significance"
 	)
-	private List<CodeDt> myCode;
+	private java.util.List<CodeDt> myCode;
 	
 	@Child(name="filter", order=3, min=0, max=Child.MAX_UNLIMITED)	
 	@Description(
 		shortDefinition="Select codes/concepts by their properties (including relationships)",
 		formalDefinition="Select concepts by specify a matching criteria based on the properties (including relationships) defined by the system. If multiple filters are specified, they SHALL all be true."
 	)
-	private List<ComposeIncludeFilter> myFilter;
+	private java.util.List<ComposeIncludeFilter> myFilter;
 	
 
 	@Override
 	public boolean isEmpty() {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  mySystem,  myVersion,  myCode,  myFilter);
 	}
+	
+	public java.util.List<IElement> getAllPopulatedChildElements() {
+		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(  mySystem,  myVersion,  myCode,  myFilter);
+	}
+	
 
 	/**
 	 * Gets the value(s) for <b>system</b> (The system the codes come from).
@@ -1657,9 +1701,9 @@ public class ValueSet extends BaseResource implements IResource {
      * Specifies a code or concept to be included or excluded. The list of codes is considered ordered, though the order may not have any particular significance
      * </p> 
 	 */
-	public List<CodeDt> getCode() {  
+	public java.util.List<CodeDt> getCode() {  
 		if (myCode == null) {
-			myCode = new ArrayList<CodeDt>();
+			myCode = new java.util.ArrayList<CodeDt>();
 		}
 		return myCode;
 	}
@@ -1672,7 +1716,7 @@ public class ValueSet extends BaseResource implements IResource {
      * Specifies a code or concept to be included or excluded. The list of codes is considered ordered, though the order may not have any particular significance
      * </p> 
 	 */
-	public void setCode(List<CodeDt> theValue) {
+	public void setCode(java.util.List<CodeDt> theValue) {
 		myCode = theValue;
 	}
 
@@ -1700,7 +1744,7 @@ public class ValueSet extends BaseResource implements IResource {
 	 */
 	public void addCode( String theCode) {
 		if (myCode == null) {
-			myCode = new ArrayList<CodeDt>();
+			myCode = new java.util.ArrayList<CodeDt>();
 		}
 		myCode.add(new CodeDt(theCode)); 
 	}
@@ -1716,9 +1760,9 @@ public class ValueSet extends BaseResource implements IResource {
      * Select concepts by specify a matching criteria based on the properties (including relationships) defined by the system. If multiple filters are specified, they SHALL all be true.
      * </p> 
 	 */
-	public List<ComposeIncludeFilter> getFilter() {  
+	public java.util.List<ComposeIncludeFilter> getFilter() {  
 		if (myFilter == null) {
-			myFilter = new ArrayList<ComposeIncludeFilter>();
+			myFilter = new java.util.ArrayList<ComposeIncludeFilter>();
 		}
 		return myFilter;
 	}
@@ -1731,7 +1775,7 @@ public class ValueSet extends BaseResource implements IResource {
      * Select concepts by specify a matching criteria based on the properties (including relationships) defined by the system. If multiple filters are specified, they SHALL all be true.
      * </p> 
 	 */
-	public void setFilter(List<ComposeIncludeFilter> theValue) {
+	public void setFilter(java.util.List<ComposeIncludeFilter> theValue) {
 		myFilter = theValue;
 	}
 
@@ -1790,6 +1834,11 @@ public class ValueSet extends BaseResource implements IResource {
 	public boolean isEmpty() {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myProperty,  myOp,  myValue);
 	}
+	
+	public java.util.List<IElement> getAllPopulatedChildElements() {
+		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(  myProperty,  myOp,  myValue);
+	}
+	
 
 	/**
 	 * Gets the value(s) for <b>property</b> ().
@@ -1956,13 +2005,18 @@ public class ValueSet extends BaseResource implements IResource {
 		shortDefinition="Codes in the value set",
 		formalDefinition=""
 	)
-	private List<ExpansionContains> myContains;
+	private java.util.List<ExpansionContains> myContains;
 	
 
 	@Override
 	public boolean isEmpty() {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myIdentifier,  myTimestamp,  myContains);
 	}
+	
+	public java.util.List<IElement> getAllPopulatedChildElements() {
+		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(  myIdentifier,  myTimestamp,  myContains);
+	}
+	
 
 	/**
 	 * Gets the value(s) for <b>identifier</b> (Uniquely identifies this expansion).
@@ -2033,8 +2087,8 @@ public class ValueSet extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public void setTimestampWithMillisPrecision( Date theDate) {
-		myTimestamp = new InstantDt(theDate); 
+	public void setTimestamp( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myTimestamp = new InstantDt(theDate, thePrecision); 
 	}
 
 	/**
@@ -2045,8 +2099,8 @@ public class ValueSet extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public void setTimestamp( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myTimestamp = new InstantDt(theDate, thePrecision); 
+	public void setTimestampWithMillisPrecision( Date theDate) {
+		myTimestamp = new InstantDt(theDate); 
 	}
 
  
@@ -2060,9 +2114,9 @@ public class ValueSet extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public List<ExpansionContains> getContains() {  
+	public java.util.List<ExpansionContains> getContains() {  
 		if (myContains == null) {
-			myContains = new ArrayList<ExpansionContains>();
+			myContains = new java.util.ArrayList<ExpansionContains>();
 		}
 		return myContains;
 	}
@@ -2075,7 +2129,7 @@ public class ValueSet extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public void setContains(List<ExpansionContains> theValue) {
+	public void setContains(java.util.List<ExpansionContains> theValue) {
 		myContains = theValue;
 	}
 
@@ -2134,13 +2188,18 @@ public class ValueSet extends BaseResource implements IResource {
 		shortDefinition="Codes contained in this concept",
 		formalDefinition=""
 	)
-	private List<ExpansionContains> myContains;
+	private java.util.List<ExpansionContains> myContains;
 	
 
 	@Override
 	public boolean isEmpty() {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  mySystem,  myCode,  myDisplay,  myContains);
 	}
+	
+	public java.util.List<IElement> getAllPopulatedChildElements() {
+		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(  mySystem,  myCode,  myDisplay,  myContains);
+	}
+	
 
 	/**
 	 * Gets the value(s) for <b>system</b> (System value for the code).
@@ -2281,9 +2340,9 @@ public class ValueSet extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public List<ExpansionContains> getContains() {  
+	public java.util.List<ExpansionContains> getContains() {  
 		if (myContains == null) {
-			myContains = new ArrayList<ExpansionContains>();
+			myContains = new java.util.ArrayList<ExpansionContains>();
 		}
 		return myContains;
 	}
@@ -2296,7 +2355,7 @@ public class ValueSet extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public void setContains(List<ExpansionContains> theValue) {
+	public void setContains(java.util.List<ExpansionContains> theValue) {
 		myContains = theValue;
 	}
 

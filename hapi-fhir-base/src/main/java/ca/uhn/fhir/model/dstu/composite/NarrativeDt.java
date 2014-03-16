@@ -16,12 +16,17 @@
 
 package ca.uhn.fhir.model.dstu.composite;
 
-import java.util.*;
+import java.util.List;
 
-import ca.uhn.fhir.model.api.*;
-import ca.uhn.fhir.model.api.annotation.*;
-import ca.uhn.fhir.model.primitive.*;
-import ca.uhn.fhir.model.dstu.valueset.*;
+import ca.uhn.fhir.model.api.BaseElement;
+import ca.uhn.fhir.model.api.ICompositeDatatype;
+import ca.uhn.fhir.model.api.IElement;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+import ca.uhn.fhir.model.dstu.valueset.NarrativeStatusEnum;
+import ca.uhn.fhir.model.primitive.BoundCodeDt;
+import ca.uhn.fhir.model.primitive.CodeDt;
+import ca.uhn.fhir.model.primitive.XhtmlDt;
 
 /**
  * HAPI/FHIR <b>Narrative</b> Datatype
@@ -49,6 +54,11 @@ public class NarrativeDt extends BaseElement implements ICompositeDatatype {
 	@Override
 	public boolean isEmpty() {
 		return ca.uhn.fhir.util.ElementUtil.isEmpty(  myStatus, myDiv );
+	}
+
+	@Override
+	public List<IElement> getAllPopulatedChildElements() {
+		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(  myStatus, myDiv );
 	}
 
 	/**

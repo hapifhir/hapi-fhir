@@ -16,12 +16,16 @@
 
 package ca.uhn.fhir.model.dstu.composite;
 
-import java.util.*;
-import ca.uhn.fhir.model.api.*;
-import ca.uhn.fhir.model.api.annotation.*;
-import ca.uhn.fhir.model.primitive.*;
-import ca.uhn.fhir.model.dstu.valueset.*;
-import ca.uhn.fhir.model.dstu.resource.*;
+import java.util.Date;
+
+import ca.uhn.fhir.model.api.BaseElement;
+import ca.uhn.fhir.model.api.ICompositeDatatype;
+import ca.uhn.fhir.model.api.IElement;
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.primitive.DateTimeDt;
 
 /**
  * HAPI/FHIR <b>Period</b> Datatype
@@ -61,6 +65,11 @@ public class PeriodDt
 	public boolean isEmpty() {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myStart,  myEnd);
 	}
+	
+	public java.util.List<IElement> getAllPopulatedChildElements() {
+		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(  myStart,  myEnd);
+	}
+	
 
 	/**
 	 * Gets the value(s) for <b>start</b> (Starting time with inclusive boundary).
@@ -100,8 +109,8 @@ public class PeriodDt
      * The start of the period. The boundary is inclusive.
      * </p> 
 	 */
-	public void setStartWithSecondsPrecision( Date theDate) {
-		myStart = new DateTimeDt(theDate); 
+	public void setStart( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myStart = new DateTimeDt(theDate, thePrecision); 
 	}
 
 	/**
@@ -112,8 +121,8 @@ public class PeriodDt
      * The start of the period. The boundary is inclusive.
      * </p> 
 	 */
-	public void setStart( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myStart = new DateTimeDt(theDate, thePrecision); 
+	public void setStartWithSecondsPrecision( Date theDate) {
+		myStart = new DateTimeDt(theDate); 
 	}
 
  
@@ -155,8 +164,8 @@ public class PeriodDt
      * The end of the period. If the end of the period is missing, it means that the period is ongoing
      * </p> 
 	 */
-	public void setEndWithSecondsPrecision( Date theDate) {
-		myEnd = new DateTimeDt(theDate); 
+	public void setEnd( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myEnd = new DateTimeDt(theDate, thePrecision); 
 	}
 
 	/**
@@ -167,8 +176,8 @@ public class PeriodDt
      * The end of the period. If the end of the period is missing, it means that the period is ongoing
      * </p> 
 	 */
-	public void setEnd( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myEnd = new DateTimeDt(theDate, thePrecision); 
+	public void setEndWithSecondsPrecision( Date theDate) {
+		myEnd = new DateTimeDt(theDate); 
 	}
 
  

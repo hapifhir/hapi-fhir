@@ -1,7 +1,6 @@
 package ca.uhn.fhir.parser;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -19,6 +18,8 @@ import ca.uhn.fhir.context.ResourceWithExtensionsA;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.dstu.resource.DiagnosticReport;
 import ca.uhn.fhir.model.dstu.resource.Observation;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.dstu.resource.ValueSet;
@@ -37,6 +38,22 @@ public class XmlParserTest {
 		assertEquals("Patient resource with id 3216379", bundle.getEntries().get(0).getTitle().getValue());
 		
 	}
+	
+	@Test
+	public void testParseContainedResources() throws IOException {
+		
+		String msg = IOUtils.toString(XmlParser.class.getResourceAsStream("/contained-diagnosticreport.xml"));
+		IParser p = new FhirContext(DiagnosticReport.class).newXmlParser();
+		DiagnosticReport bundle = p.parseResource(DiagnosticReport.class, msg);
+		
+		ResourceReferenceDt result0 = bundle.getResult().get(0);
+		Observation obs = (Observation) result0.getResource();
+		
+		assertNotNull(obs);
+		assertEquals("718-7", obs.getName().getCoding().get(0).getCode().getValue());
+		
+	}
+
 	
 	@Test
 	public void testParseBundle() {
