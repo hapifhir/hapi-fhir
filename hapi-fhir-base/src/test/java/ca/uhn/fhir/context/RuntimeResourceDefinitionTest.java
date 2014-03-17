@@ -8,6 +8,7 @@ import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.dstu.resource.Profile;
 import ca.uhn.fhir.model.dstu.resource.Profile.ExtensionDefn;
 import ca.uhn.fhir.model.dstu.resource.Profile.Structure;
+import ca.uhn.fhir.model.dstu.resource.ValueSet;
 import ca.uhn.fhir.model.dstu.valueset.DataTypeEnum;
 
 public class RuntimeResourceDefinitionTest {
@@ -31,6 +32,21 @@ public class RuntimeResourceDefinitionTest {
 		assertEquals("Patient.language", struct.getElement().get(5).getPath().getValue());
 		
 	}
+	
+	@Test
+	public void testToProfileValueSet() throws Exception {
+		FhirContext ctx = new FhirContext(ValueSet.class, Profile.class);
+		RuntimeResourceDefinition def = ctx.getResourceDefinition(ValueSet.class);
+
+		Profile profile = def.toProfile();
+
+		String encoded = ctx.newXmlParser().setPrettyPrint(true).encodeResourceToString(profile);
+		ourLog.info(encoded);
+		
+		assertTrue(encoded.contains("<path value=\"ValueSet.compose\"/>"));
+		
+	}
+
 	
 	@Test
 	public void testToProfileExtensions() throws Exception {

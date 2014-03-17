@@ -16,24 +16,33 @@
 
 package ca.uhn.fhir.model.dstu.composite;
 
-import java.util.Date;
+import java.util.*;
+import ca.uhn.fhir.model.api.*;
+import ca.uhn.fhir.model.api.annotation.*;
 
-import ca.uhn.fhir.model.api.BaseElement;
-import ca.uhn.fhir.model.api.ICompositeDatatype;
-import ca.uhn.fhir.model.api.IElement;
-import ca.uhn.fhir.model.api.IResourceBlock;
-import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.DatatypeDef;
-import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.dstu.valueset.AddressUseEnum;
+import ca.uhn.fhir.model.dstu.composite.CodingDt;
+import ca.uhn.fhir.model.dstu.valueset.ContactSystemEnum;
+import ca.uhn.fhir.model.dstu.valueset.ContactUseEnum;
 import ca.uhn.fhir.model.dstu.valueset.EventTimingEnum;
+import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
+import ca.uhn.fhir.model.dstu.valueset.NameUseEnum;
+import ca.uhn.fhir.model.dstu.resource.Organization;
+import ca.uhn.fhir.model.dstu.composite.PeriodDt;
+import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
+import ca.uhn.fhir.model.dstu.composite.QuantityDt;
+import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.valueset.UnitsOfTimeEnum;
+import ca.uhn.fhir.model.dstu.resource.ValueSet;
+import ca.uhn.fhir.model.primitive.Base64BinaryDt;
+import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.DecimalDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
+import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.model.primitive.UriDt;
 
 /**
  * HAPI/FHIR <b>Schedule</b> Datatype
@@ -74,10 +83,15 @@ public class ScheduleDt
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myEvent,  myRepeat);
 	}
 	
+	@Override
 	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(  myEvent,  myRepeat);
+		return getAllPopulatedChildElementsOfType(null);
 	}
-	
+
+	@Override
+	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
+		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myEvent, myRepeat);
+	}
 
 	/**
 	 * Gets the value(s) for <b>event</b> (When the event occurs).
@@ -213,10 +227,15 @@ public class ScheduleDt
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myFrequency,  myWhen,  myDuration,  myUnits,  myCount,  myEnd);
 	}
 	
+	@Override
 	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(  myFrequency,  myWhen,  myDuration,  myUnits,  myCount,  myEnd);
+		return getAllPopulatedChildElementsOfType(null);
 	}
-	
+
+	@Override
+	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
+		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myFrequency, myWhen, myDuration, myUnits, myCount, myEnd);
+	}
 
 	/**
 	 * Gets the value(s) for <b>frequency</b> (Event occurs frequency times per duration).

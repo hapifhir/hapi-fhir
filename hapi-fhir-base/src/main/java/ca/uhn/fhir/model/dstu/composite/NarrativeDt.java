@@ -58,7 +58,12 @@ public class NarrativeDt extends BaseElement implements ICompositeDatatype {
 
 	@Override
 	public List<IElement> getAllPopulatedChildElements() {
-		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(  myStatus, myDiv );
+		return getAllPopulatedChildElementsOfType(null);
+	}
+
+	@Override
+	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
+		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements( theType, myStatus, myDiv );
 	}
 
 	/**
@@ -131,6 +136,7 @@ public class NarrativeDt extends BaseElement implements ICompositeDatatype {
 	public void setDiv(XhtmlDt theValue) {
 		myDiv = theValue;
 	}
+
 
   
 

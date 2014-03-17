@@ -9,6 +9,7 @@ import ca.uhn.fhir.model.api.annotation.Block;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Extension;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.dstu.composite.ContainedDt;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -104,9 +105,15 @@ public class ResourceWithExtensionsA implements IResource {
 		public boolean isEmpty() {
 			return false; // TODO: implement
 		}
+
 		@Override
 		public List<IElement> getAllPopulatedChildElements() {
-			return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements( ); // TODO: implement
+			return getAllPopulatedChildElementsOfType(null);
+		}
+
+		@Override
+		public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
+			return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType ); // TODO: implement
 		}
 
 
@@ -157,9 +164,15 @@ public class ResourceWithExtensionsA implements IResource {
 		public boolean isEmpty() {
 			return false; // TODO: implement
 		}
+
 		@Override
 		public List<IElement> getAllPopulatedChildElements() {
-			return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements( ); // TODO: implement
+			return getAllPopulatedChildElementsOfType(null);
+		}
+
+		@Override
+		public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
+			return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType ); // TODO: implement
 		}
 
 
@@ -199,7 +212,12 @@ public class ResourceWithExtensionsA implements IResource {
 
 	@Override
 	public List<IElement> getAllPopulatedChildElements() {
-		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements( ); // TODO: implement
+		return getAllPopulatedChildElementsOfType(null);
+	}
+
+	@Override
+	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
+		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType ); // TODO: implement
 	}
 
 	@Override
@@ -210,6 +228,12 @@ public class ResourceWithExtensionsA implements IResource {
 	@Override
 	public IdDt getId() {
 		return myId;
+	}
+
+	@Override
+	public ContainedDt getContained() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

@@ -1,6 +1,7 @@
 package ca.uhn.fhir.model.api;
 
 import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.dstu.composite.ContainedDt;
 import ca.uhn.fhir.model.dstu.composite.NarrativeDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.util.ElementUtil;
@@ -12,6 +13,21 @@ public abstract class BaseResource extends BaseElement implements IResource {
 
 	@Child(name="text", order=1, min=0, max=1)
 	private NarrativeDt myText;
+
+	@Child(name="contained", order=2, min=0, max=1)
+	private ContainedDt myContained;
+
+	@Override
+	public ContainedDt getContained() {
+		if (myContained == null) {
+			myContained = new ContainedDt();
+		}
+		return myContained;
+	}
+
+	public void setContained(ContainedDt theContained) {
+		myContained = theContained;
+	}
 
 	public CodeDt getLanguage() {
 		return myLanguage;

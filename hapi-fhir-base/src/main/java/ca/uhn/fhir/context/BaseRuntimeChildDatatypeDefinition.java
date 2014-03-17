@@ -8,6 +8,7 @@ import java.util.Set;
 import ca.uhn.fhir.model.api.ICodeEnum;
 import ca.uhn.fhir.model.api.IDatatype;
 import ca.uhn.fhir.model.api.IElement;
+import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 
@@ -20,7 +21,8 @@ public abstract class BaseRuntimeChildDatatypeDefinition extends BaseRuntimeDecl
 
 	public BaseRuntimeChildDatatypeDefinition(Field theField, String theElementName, Child theChildAnnotation, Description theDescriptionAnnotation, Class<? extends IDatatype> theDatatype) {
 		super(theField, theChildAnnotation, theDescriptionAnnotation, theElementName);
-		
+		assert theDatatype != IResource.class; // shouldn't exist
+		assert theDatatype != IDatatype.class; // should use RuntimeChildAny
 		myDatatype = theDatatype;
 	}
 
@@ -64,6 +66,7 @@ public abstract class BaseRuntimeChildDatatypeDefinition extends BaseRuntimeDecl
 	@Override
 	void sealAndInitialize(Map<Class<? extends IElement>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
 		myElementDefinition = theClassToElementDefinitions.get(getDatatype());
+		assert myElementDefinition != null : "Unknown type: " + getDatatype();
 	}
 
 	public void setCodeType(Class<? extends ICodeEnum> theType) {

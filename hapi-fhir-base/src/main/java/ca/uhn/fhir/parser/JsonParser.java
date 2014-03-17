@@ -34,6 +34,7 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ISupportsUndeclaredExtensions;
 import ca.uhn.fhir.model.api.UndeclaredExtension;
 import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.dstu.composite.ContainedDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.model.primitive.DecimalDt;
@@ -41,7 +42,7 @@ import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.XhtmlDt;
 
-public class JsonParser implements IParser {
+public class JsonParser extends BaseParser implements IParser {
 
 	private FhirContext myContext;
 	private boolean myPrettyPrint;
@@ -60,16 +61,16 @@ public class JsonParser implements IParser {
 
 	private void writeTagWithTextNode(JsonGenerator theEventWriter, String theElementName, StringDt theStringDt) {
 		if (StringUtils.isNotBlank(theStringDt.getValue())) {
-			theEventWriter.write(theElementName,theStringDt.getValue());
-		}else {
+			theEventWriter.write(theElementName, theStringDt.getValue());
+		} else {
 			theEventWriter.writeNull(theElementName);
 		}
 	}
-	
+
 	private void writeOptionalTagWithTextNode(JsonGenerator theEventWriter, String theElementName, IPrimitiveDatatype<?> theInstantDt) {
 		String str = theInstantDt.getValueAsString();
 		if (StringUtils.isNotBlank(str)) {
-			theEventWriter.write(theElementName,theInstantDt.getValueAsString());
+			theEventWriter.write(theElementName, theInstantDt.getValueAsString());
 		}
 	}
 
@@ -77,7 +78,7 @@ public class JsonParser implements IParser {
 	public void encodeBundleToWriter(Bundle theBundle, Writer theWriter) throws IOException {
 		JsonGenerator eventWriter = createJsonGenerator(theWriter);
 		eventWriter.writeStartObject();
-		
+
 		eventWriter.write("resourceType", "Bundle");
 
 		writeTagWithTextNode(eventWriter, "title", theBundle.getTitle());
@@ -93,7 +94,7 @@ public class JsonParser implements IParser {
 		writeAtomLink(eventWriter, "last", theBundle.getLinkLast());
 		writeAtomLink(eventWriter, "fhir-base", theBundle.getLinkBase());
 		eventWriter.writeEnd();
-		
+
 		writeOptionalTagWithTextNode(eventWriter, "totalResults", theBundle.getTotalResults());
 
 		writeAuthor(theBundle, eventWriter);
@@ -101,7 +102,7 @@ public class JsonParser implements IParser {
 		eventWriter.writeStartArray("entry");
 		for (BundleEntry nextEntry : theBundle.getEntries()) {
 			eventWriter.writeStartObject();
-			
+
 			writeTagWithTextNode(eventWriter, "title", nextEntry.getTitle());
 			writeTagWithTextNode(eventWriter, "id", nextEntry.getEntryId());
 
@@ -111,13 +112,13 @@ public class JsonParser implements IParser {
 
 			writeOptionalTagWithTextNode(eventWriter, "updated", nextEntry.getUpdated());
 			writeOptionalTagWithTextNode(eventWriter, "published", nextEntry.getPublished());
-			
+
 			writeAuthor(nextEntry, eventWriter);
 
 			IResource resource = nextEntry.getResource();
 			encodeResourceToJsonStreamWriter(resource, eventWriter, "content");
 
-			eventWriter.writeEnd(); //entry object
+			eventWriter.writeEnd(); // entry object
 		}
 		eventWriter.writeEnd(); // entry array
 
@@ -157,7 +158,7 @@ public class JsonParser implements IParser {
 		JsonGenerator eventWriter = createJsonGenerator(theWriter);
 
 		// try {
-		encodeResourceToJsonStreamWriter(theResource, eventWriter,null);
+		encodeResourceToJsonStreamWriter(theResource, eventWriter, null);
 		eventWriter.flush();
 		// } catch (XMLStreamException e) {
 		// throw new
@@ -289,6 +290,15 @@ public class JsonParser implements IParser {
 			}
 			if (value.getDisplay().isEmpty() == false) {
 				theWriter.write("display", value.getDisplay().getValueAsString());
+			}
+			theWriter.writeEnd();
+			break;
+		}
+		case CONTAINED_RESOURCES: {
+			theWriter.writeStartArray(theChildName);
+			ContainedDt value = (ContainedDt) theValue;
+			for (IResource next : value.getContainedResources()) {
+				encodeResourceToJsonStreamWriter(next, theWriter, null);
 			}
 			theWriter.writeEnd();
 			break;
@@ -448,15 +458,20 @@ public class JsonParser implements IParser {
 	}
 
 	private void encodeResourceToJsonStreamWriter(IResource theResource, JsonGenerator theEventWriter, String theObjectNameOrNull) throws IOException {
+		super.containResourcesForEncoding(theResource);
+
 		RuntimeResourceDefinition resDef = myContext.getResourceDefinition(theResource);
 
-		if(theObjectNameOrNull==null) {
-		theEventWriter.writeStartObject();
-		}else {
+		if (theObjectNameOrNull == null) {
+			theEventWriter.writeStartObject();
+		} else {
 			theEventWriter.writeStartObject(theObjectNameOrNull);
 		}
 
 		theEventWriter.write("resourceType", resDef.getName());
+		if (theResource.getId() !=null && isNotBlank(theResource.getId().getValue())) {
+			theEventWriter.write("id", theResource.getId().getValue());
+		}
 
 		encodeCompositeElementToStreamWriter(theResource, theEventWriter, resDef);
 

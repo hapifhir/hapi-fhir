@@ -3,6 +3,7 @@ package ca.uhn.fhir.util;
 import java.util.ArrayList;
 import java.util.List;
 
+import ca.uhn.fhir.model.api.ICompositeElement;
 import ca.uhn.fhir.model.api.IElement;
 
 public class ElementUtil {
@@ -51,19 +52,22 @@ public class ElementUtil {
 		return true;
 	}
 
-	public static List<IElement> allPopulatedChildElements(Object... theElements) {
-		ArrayList<IElement> retVal = new ArrayList<IElement>();
+	/**
+	 * @param theType Can be null
+	 */
+	public static <T extends IElement> List<T> allPopulatedChildElements(Class<T> theType, Object... theElements) {
+		ArrayList<T> retVal = new ArrayList<T>();
 		for (Object next : theElements) {
 			if (next == null) {
 				continue;
 			}else if (next instanceof IElement) {
-				retVal.add((IElement) next);
+				addElement(retVal, (IElement) next, theType);
 			} else if (next instanceof List) {
 				for (Object nextElement : ((List<?>)next)) {
 					if (!(nextElement instanceof IElement)) {
 						throw new IllegalArgumentException("Found element of "+nextElement.getClass());
 					}
-					retVal.add((IElement) nextElement);
+					addElement(retVal, (IElement) nextElement, theType);
 				}
 			} else {
 				throw new IllegalArgumentException("Found element of "+next.getClass());
@@ -71,6 +75,16 @@ public class ElementUtil {
 			
 		}
 		return retVal;
+	}
+
+	@SuppressWarnings("unchecked")
+	private static <T extends IElement> void addElement(ArrayList<T> retVal, IElement next, Class<T> theType) {
+		if (theType == null|| theType.isAssignableFrom(next.getClass())) {
+			retVal.add((T) next);
+		}
+		if (next instanceof ICompositeElement) {
+			retVal.addAll(((ICompositeElement) next).getAllPopulatedChildElementsOfType(theType));
+		}
 	}
 	
 }

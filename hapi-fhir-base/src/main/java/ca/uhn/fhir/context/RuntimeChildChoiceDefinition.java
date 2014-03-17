@@ -28,6 +28,17 @@ public class RuntimeChildChoiceDefinition extends BaseRuntimeDeclaredChildDefini
 		myChoiceTypes= Collections.unmodifiableList(theChoiceTypes);
 	}
 
+	/**
+	 * For extension, if myChoiceTypes will be set some other way
+	 */
+	RuntimeChildChoiceDefinition(Field theField, String theElementName, Child theChildAnnotation, Description theDescriptionAnnotation) {
+		super(theField, theChildAnnotation, theDescriptionAnnotation, theElementName);
+	}
+
+	void setChoiceTypes(List<Class<? extends IElement>> theChoiceTypes) {
+		myChoiceTypes = Collections.unmodifiableList(theChoiceTypes);
+	}
+
 	public List<Class<? extends IElement>> getChoices() {
 		return myChoiceTypes;
 	}

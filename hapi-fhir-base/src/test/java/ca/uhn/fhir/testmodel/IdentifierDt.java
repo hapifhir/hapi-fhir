@@ -117,9 +117,15 @@ public class IdentifierDt
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myUse,  myLabel,  mySystem,  myValue,  myPeriod,  myAssigner);
 	}
 
+
 	@Override
 	public List<IElement> getAllPopulatedChildElements() {
-		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(  myUse,  myLabel,  mySystem,  myValue,  myPeriod,  myAssigner);
+		return getAllPopulatedChildElementsOfType(null);
+	}
+
+	@Override
+	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
+		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType,  myUse,  myLabel,  mySystem,  myValue,  myPeriod,  myAssigner );
 	}
 
 	

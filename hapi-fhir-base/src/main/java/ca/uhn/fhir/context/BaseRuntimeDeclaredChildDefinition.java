@@ -98,10 +98,12 @@ public abstract class BaseRuntimeDeclaredChildDefinition extends BaseRuntimeChil
 		return myField;
 	}
 
+	@Override
 	public int getMax() {
 		return myMax;
 	}
 
+	@Override
 	public int getMin() {
 		return myMin;
 	}

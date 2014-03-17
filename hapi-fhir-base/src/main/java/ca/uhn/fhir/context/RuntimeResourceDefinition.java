@@ -123,11 +123,20 @@ public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefini
 			}
 		}
 	}
-
+private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RuntimeResourceDefinition.class);
 	private void fillProfile(Structure theStruct, StructureElement theElement, BaseRuntimeElementDefinition<?> def, LinkedList<String> path, BaseRuntimeDeclaredChildDefinition theChild) {
 
 		fillBasics(theElement, def, path, theChild);
 
+		String expectedPath = StringUtils.join(path, '.');
+		
+		ourLog.info("Filling profile for: {} - Path: {}", expectedPath);
+		if (!expectedPath.equals(def.getName())) {
+			theElement.getDefinition().getNameReference().setValue(def.getName());
+			return;
+		}
+
+		
 		fillExtensions(theStruct, path, def.getExtensionsNonModifier(), "extension", false);
 		fillExtensions(theStruct, path, def.getExtensionsModifier(), "modifierExtension", true);
 
@@ -163,11 +172,14 @@ public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefini
 				if (child instanceof RuntimeChildResourceBlockDefinition) {
 					RuntimeResourceBlockDefinition nextDef = (RuntimeResourceBlockDefinition) child.getSingleChildOrThrow();
 					fillProfile(theStruct, elem, nextDef, path, child);
+				} else if (child instanceof RuntimeChildContainedResources) {
+					// ignore
 				} else if (child instanceof RuntimeChildDeclaredExtensionDefinition) {
 					throw new IllegalStateException("Unexpected child type: " + child.getClass().getCanonicalName());
 				} else if (child instanceof RuntimeChildCompositeDatatypeDefinition || child instanceof RuntimeChildPrimitiveDatatypeDefinition || child instanceof RuntimeChildChoiceDefinition || child instanceof RuntimeChildResourceDefinition) {
 					Iterator<String> childNamesIter = child.getValidChildNames().iterator();
-					BaseRuntimeElementDefinition<?> nextDef = child.getChildByName(childNamesIter.next());
+					String nextName = childNamesIter.next();
+					BaseRuntimeElementDefinition<?> nextDef = child.getChildByName(nextName);
 					fillBasics(elem, nextDef, path, child);
 					fillName(elem, nextDef);
 					while (childNamesIter.hasNext()) {

@@ -21,6 +21,8 @@ import org.junit.Test;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.dstu.resource.Patient;
+import ca.uhn.fhir.model.dstu.resource.Profile;
+import ca.uhn.fhir.rest.server.provider.ProfileProvider;
 import ca.uhn.fhir.testutil.RandomServerPortProvider;
 
 /**
@@ -38,11 +40,13 @@ public class ResfulServerTest {
 	public static void beforeClass() throws Exception {
 		ourPort = RandomServerPortProvider.findFreePort();
 		ourServer = new Server(ourPort);
+		ourCtx = new FhirContext(Patient.class, Profile.class);
 
 		DummyPatientResourceProvider patientProvider = new DummyPatientResourceProvider();
+		ProfileProvider profProvider=new ProfileProvider(ourCtx);
 
 		ServletHandler proxyHandler = new ServletHandler();
-		ServletHolder servletHolder = new ServletHolder(new DummyRestfulServer(patientProvider));
+		ServletHolder servletHolder = new ServletHolder(new DummyRestfulServer(patientProvider,profProvider));
 		proxyHandler.addServletWithMapping(servletHolder, "/");
 		ourServer.setHandler(proxyHandler);
 		ourServer.start();
@@ -52,7 +56,6 @@ public class ResfulServerTest {
 		builder.setConnectionManager(connectionManager);
 		ourClient = builder.build();
 
-		ourCtx = new FhirContext(Patient.class);
 
 	}
 
@@ -61,6 +64,20 @@ public class ResfulServerTest {
 		ourServer.stop();
 	}
 
+	@Test
+	public void testSearchAllProfiles() throws Exception {
+
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Profile?");
+		HttpResponse status = ourClient.execute(httpGet);
+
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		ourLog.info("Response was:\n{}", responseContent);
+
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		Bundle bundle = ourCtx.newXmlParser().parseBundle(responseContent);
+
+	}
+	
 	@Test
 	public void testSearchWithOptionalParam() throws Exception {
 

@@ -49,7 +49,7 @@ import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.XhtmlDt;
 import ca.uhn.fhir.util.PrettyPrintWriterWrapper;
 
-public class XmlParser implements IParser {
+public class XmlParser extends BaseParser implements IParser {
 	static final String ATOM_NS = "http://www.w3.org/2005/Atom";
 	static final String FHIR_NS = "http://hl7.org/fhir";
 	static final String OPENSEARCH_NS = "http://a9.com/-/spec/opensearch/1.1/";
@@ -381,7 +381,13 @@ public class XmlParser implements IParser {
 	}
 
 	private void encodeResourceToXmlStreamWriter(IResource theResource, XMLStreamWriter eventWriter) throws XMLStreamException, DataFormatException {
+		super.containResourcesForEncoding(theResource);
+		
 		RuntimeResourceDefinition resDef = myContext.getResourceDefinition(theResource);
+		if (resDef == null) {
+			throw new ConfigurationException("Unknown resource type: " + theResource.getClass());
+		}
+		
 		eventWriter.writeStartElement(resDef.getName());
 		eventWriter.writeDefaultNamespace(FHIR_NS);
 

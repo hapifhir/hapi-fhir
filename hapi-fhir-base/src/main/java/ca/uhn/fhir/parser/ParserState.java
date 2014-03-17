@@ -20,6 +20,7 @@ import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeChildDeclaredExtensionDefinition;
+import ca.uhn.fhir.context.RuntimeElemContainedResources;
 import ca.uhn.fhir.context.RuntimePrimitiveDatatypeDefinition;
 import ca.uhn.fhir.context.RuntimePrimitiveDatatypeNarrativeDefinition;
 import ca.uhn.fhir.context.RuntimeResourceBlockDefinition;
@@ -37,6 +38,7 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.IResourceBlock;
 import ca.uhn.fhir.model.api.ISupportsUndeclaredExtensions;
 import ca.uhn.fhir.model.api.UndeclaredExtension;
+import ca.uhn.fhir.model.dstu.composite.ContainedDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.XhtmlDt;
@@ -447,13 +449,14 @@ class ParserState<T extends IElement> {
 
 		@Override
 		public void wereBack() {
-			IResource res = (IResource) getCurrentElement();
+			IResource res = getCurrentElement();
 			assert res != null;
 			if (res.getId()==null || res.getId().isEmpty()) {
-				ourLog.warn("Discarding contained resource with no ID!");
+				ourLog.debug("Discarding contained resource with no ID!");
 			} else {
 				getPreResourceState().getContainedResources().put(res.getId().getValueAsString(), res);
 			}
+			getPreResourceState().getCurrentElement().getContained().getContainedResources().add(res);
 		}
 
 		
@@ -617,6 +620,14 @@ class ParserState<T extends IElement> {
 				XhtmlDt newDt = xhtmlTarget.newInstance();
 				child.getMutator().addValue(myInstance, newDt);
 				XhtmlState state = new XhtmlState(getPreResourceState(), newDt, true);
+				push(state);
+				return;
+			}
+			case CONTAINED_RESOURCES: {
+				RuntimeElemContainedResources targetElem = (RuntimeElemContainedResources) target;
+				ContainedDt newDt = targetElem.newInstance();
+				child.getMutator().addValue(myInstance, newDt);
+				ContainedResourcesState state = new ContainedResourcesState(getPreResourceState());
 				push(state);
 				return;
 			}
@@ -804,7 +815,7 @@ class ParserState<T extends IElement> {
 				myEntry.setResource(myInstance);
 			}
 
-			push(new ResourceState(this, def, myInstance));
+			push(new ElementCompositeState(this, def, myInstance));
 		}
 
 		public Map<String, IResource> getContainedResources() {
@@ -839,7 +850,7 @@ class ParserState<T extends IElement> {
 		}
 
 		@Override
-		protected IElement getCurrentElement() {
+		protected IResource getCurrentElement() {
 			return myInstance;
 		}
 
@@ -960,23 +971,6 @@ class ParserState<T extends IElement> {
 		DISPLAY, INITIAL, REFERENCE
 	}
 
-	private class ResourceState extends ElementCompositeState {
-
-		public ResourceState(PreResourceState thePreResourceState, RuntimeResourceDefinition theDef, IResource theInstance) {
-			super(thePreResourceState, theDef, theInstance);
-		}
-
-		@Override
-		public void enteringNewElement(String theNamespace, String theChildName) throws DataFormatException {
-			if ("contained".equals(theChildName)) {
-				push(new ContainedResourcesState(getPreResourceState()));
-			}else {
-				super.enteringNewElement(theNamespace, theChildName);
-			}
-		}
-
-		
-	}
 
 	private class XhtmlState extends BaseState {
 		private int myDepth;
