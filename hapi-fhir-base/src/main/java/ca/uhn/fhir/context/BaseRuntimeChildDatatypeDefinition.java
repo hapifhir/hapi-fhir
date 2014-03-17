@@ -21,7 +21,6 @@ public abstract class BaseRuntimeChildDatatypeDefinition extends BaseRuntimeDecl
 
 	public BaseRuntimeChildDatatypeDefinition(Field theField, String theElementName, Child theChildAnnotation, Description theDescriptionAnnotation, Class<? extends IDatatype> theDatatype) {
 		super(theField, theChildAnnotation, theDescriptionAnnotation, theElementName);
-		assert theDatatype != IResource.class; // shouldn't exist
 		assert theDatatype != IDatatype.class; // should use RuntimeChildAny
 		myDatatype = theDatatype;
 	}

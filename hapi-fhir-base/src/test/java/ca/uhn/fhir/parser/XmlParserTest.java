@@ -126,7 +126,7 @@ public class XmlParserTest {
 		
 		BundleEntry entry = bundle.getEntries().get(0);
 		assertEquals("HL7, Inc (FHIR Project)", entry.getAuthorName().getValue());
-		assertEquals("http://hl7.org/fhir/valueset/256a5231-a2bb-49bd-9fea-f349d428b70d", entry.getId().getValue());
+		assertEquals("http://hl7.org/fhir/valueset/256a5231-a2bb-49bd-9fea-f349d428b70d", entry.getEntryId().getValue());
 		
 		ValueSet resource = (ValueSet) entry.getResource();
 		assertEquals("LOINC Codes for Cholesterol", resource.getName().getValue());

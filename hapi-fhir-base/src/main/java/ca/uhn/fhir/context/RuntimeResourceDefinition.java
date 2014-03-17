@@ -131,7 +131,9 @@ private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger
 		String expectedPath = StringUtils.join(path, '.');
 		
 		ourLog.info("Filling profile for: {} - Path: {}", expectedPath);
-		if (!expectedPath.equals(def.getName())) {
+		String name = def.getName();
+		if (!expectedPath.equals(name)) {
+			path.pollLast();
 			theElement.getDefinition().getNameReference().setValue(def.getName());
 			return;
 		}

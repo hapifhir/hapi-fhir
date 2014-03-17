@@ -157,7 +157,7 @@ public abstract class RestfulServer extends HttpServlet {
 
 		Bundle bundle = new Bundle();
 		bundle.getAuthorName().setValue(getClass().getCanonicalName());
-		bundle.getId().setValue(UUID.randomUUID().toString());
+		bundle.getBundleId().setValue(UUID.randomUUID().toString());
 		bundle.getPublished().setToCurrentTimeInLocalTimeZone();
 
 		for (IResource next : theResult) {
