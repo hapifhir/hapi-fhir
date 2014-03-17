@@ -1,12 +1,11 @@
+
 package ca.uhn.fhir.tinder;
 
 import static org.apache.commons.lang.StringUtils.capitalize;
 import static org.apache.commons.lang.StringUtils.isBlank;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,20 +24,21 @@ import ca.uhn.fhir.model.dstu.resource.Profile.StructureElementDefinition;
 import ca.uhn.fhir.model.dstu.resource.Profile.StructureElementDefinitionType;
 import ca.uhn.fhir.model.dstu.resource.Profile.StructureSearchParam;
 import ca.uhn.fhir.model.dstu.valueset.DataTypeEnum;
-import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.model.dstu.valueset.SlicingRulesEnum;
 import ca.uhn.fhir.tinder.model.AnyChild;
 import ca.uhn.fhir.tinder.model.BaseElement;
 import ca.uhn.fhir.tinder.model.BaseRootType;
 import ca.uhn.fhir.tinder.model.Child;
+import ca.uhn.fhir.tinder.model.Extension;
 import ca.uhn.fhir.tinder.model.Resource;
 import ca.uhn.fhir.tinder.model.ResourceBlock;
 import ca.uhn.fhir.tinder.model.SearchParameter;
 import ca.uhn.fhir.tinder.model.SimpleChild;
 import ca.uhn.fhir.tinder.model.Slicing;
 
-public class ProfileParser extends BaseStructureParser {
+public class CopyOfProfileParser extends BaseStructureParser {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ProfileParser.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(CopyOfProfileParser.class);
 
 	private ExtensionDefn findExtension(Profile theProfile, String theCode) {
 		for (ExtensionDefn next : theProfile.getExtensionDefn()) {
@@ -59,25 +59,7 @@ public class ProfileParser extends BaseStructureParser {
 		return "/vm/resource.vm";
 	}
 
-	public void parseSingleProfile(File theProfile, String theHttpUrl) throws MojoFailureException {
-		String profileString;
-		try {
-			profileString = IOUtils.toString(new FileReader(theProfile));
-		} catch (IOException e) {
-			throw new MojoFailureException("Failed to load: " + theProfile, e);
-		}
-		
-		FhirContext ctx = new FhirContext(Profile.class);
-		Profile profile = ctx.newXmlParser().parseResource(Profile.class, profileString);
-		try {
-			parseSingleProfile(profile, theHttpUrl);
-		} catch (Exception e) {
-			throw new MojoFailureException("Failed to parse profile", e);
-		}
-	}
-	
-	
-	public void parseBaseResources(List<String> theBaseResourceNames, String theHttpUrl) throws MojoFailureException {
+	public void parseBaseResources(List<String> theBaseResourceNames) throws MojoFailureException {
 		FhirContext fhirContext = new FhirContext(Profile.class);
 
 		for (String nextFileName : theBaseResourceNames) {
@@ -91,7 +73,7 @@ public class ProfileParser extends BaseStructureParser {
 			}
 
 			try {
-				parseSingleProfile(profile, theHttpUrl);
+				parseSingleProfile(profile, "");
 			} catch (Exception e) {
 				throw new MojoFailureException("Failed to process file: " + nextFileName, e);
 			}
@@ -129,6 +111,9 @@ public class ProfileParser extends BaseStructureParser {
 		for (Structure nextStructure : theProfile.getStructure()) {
 
 			int elemIdx = 0;
+			boolean extensionsSliced = false;
+			SlicingRulesEnum extensionsSlicingIsOpen = SlicingRulesEnum.OPEN;
+
 			Map<String, BaseElement> elements = new HashMap<String, BaseElement>();
 			for (StructureElement next : nextStructure.getElement()) {
 
@@ -153,19 +138,45 @@ public class ProfileParser extends BaseStructureParser {
 					elem = retVal;
 					// below StringUtils.isBlank(type) || type.startsWith("=")
 				} else {
-					if (next.getDefinition().getType().isEmpty()) {
-						elem = new ResourceBlock();
-						// } else if (type.startsWith("@")) {
-						// elem = new ResourceBlockCopy();
-					} else if (next.getDefinition().getType().get(0).getCode().getValue().equals("*")) {
-						elem = new AnyChild();
-//					} else if (next.getDefinition().getType().get(0).getCode().getValue().equals("Extension")) {
-//						elem = new UndeclaredExtensionChild();
+					if (next.getDefinition().getType().size() > 0 && next.getDefinition().getType().get(0).getCode().getValue().equals("Extension")) {
+						if (!next.getSlicing().isEmpty()) {
+							if (!"url".equals(next.getSlicing().getDiscriminator().getValue())) {
+								throw new ConfigurationException("Invalid extension slicing discriminator (must be 'url'): " + next.getSlicing().getDiscriminator().getValue());
+							}
+							extensionsSliced = true;
+							if (StringUtils.isNotBlank(next.getSlicing().getRules().getValueAsString())) {
+								extensionsSlicingIsOpen = next.getSlicing().getRules().getValueAsEnum();
+								if (extensionsSlicingIsOpen == null) {
+									throw new ConfigurationException("Invalid extension slicing rules: " + next.getSlicing().getRules().getValueAsString());
+								}
+							}
+							continue;
+						} else {
+							if (!extensionsSliced) {
+								continue;
+							}
+							
+							if (next.getDefinition().getType().size() != 1) {
+								throw new ConfigurationException("Extension definition '" + next.getName().getValue() + "' has multiple type blocks. This is not supported.");
+							}
+							String extUrl = next.getDefinition().getType().get(0).getProfile().getValueAsString();
+							elem = new Extension(next.getName().getValue(), extUrl, "CodeDt");
+						}
 					} else {
-						elem = new SimpleChild();
+						if (next.getDefinition().getType().isEmpty()) {
+							elem = new ResourceBlock();
+							// } else if (type.startsWith("@")) {
+							// elem = new ResourceBlockCopy();
+						} else if (next.getDefinition().getType().get(0).getCode().getValue().equals("*")) {
+							elem = new AnyChild();
+						} else {
+							elem = new SimpleChild();
+						}
 					}
-
 				}
+
+				elem.setName(next.getPath().getValue());
+				elem.setElementNameAndDeriveParentElementName(next.getPath().getValue());
 
 				boolean allResourceReferences = next.getDefinition().getType().size() > 0;
 				for (StructureElementDefinitionType nextType : next.getDefinition().getType()) {
@@ -173,12 +184,13 @@ public class ProfileParser extends BaseStructureParser {
 						allResourceReferences = false;
 					}
 				}
-
-				populateNewElement(next, elem, allResourceReferences);
+				elem.setResourceRef(allResourceReferences);
 
 				StructureElementDefinition definition = next.getDefinition();
 
 				BaseElement parentElement = elements.get(elem.getElementParentName());
+				Slicing childIsSliced = parentElement != null ? parentElement.getChildElementNameToSlicing().get(elem.getName()) : null;
+
 				if (next.getSlicing().getDiscriminator().getValue() != null) {
 					Slicing slicing = new Slicing();
 					slicing.setDiscriminator(next.getSlicing().getDiscriminator().getValue());
@@ -188,8 +200,6 @@ public class ProfileParser extends BaseStructureParser {
 					parentElement.getChildElementNameToSlicing().put(elem.getName(), slicing);
 					continue;
 				}
-
-				Slicing childIsSliced = parentElement != null ? parentElement.getChildElementNameToSlicing().get(elem.getName()) : null;
 
 				/*
 				 * Profiles come with a number of standard elements which are generally ignored because they are boilerplate, unless the definition is somehow changing their behaviour (e.g. through
@@ -209,17 +219,12 @@ public class ProfileParser extends BaseStructureParser {
 						if (next.getDefinition().getType().size() != 1 || next.getDefinition().getType().get(0).getCode().getValueAsEnum() != DataTypeEnum.EXTENSION) {
 							throw new ConfigurationException("Extension slices must have a single type with a code of 'Extension'");
 						}
-
 						String name = next.getName().getValue();
 						if (StringUtils.isBlank(name)) {
 							throw new ConfigurationException("Extension slices must have a 'name' defined, none found at path: " + next.getPath());
 						}
 						elem.setName(name);
 						elem.setElementName(name);
-						
-//						elem = new Extension();
-//						populateNewElement(next, elem, allResourceReferences);
-						
 						String profile = next.getDefinition().getType().get(0).getProfile().getValueAsString();
 						if (isBlank(profile)) {
 							throw new ConfigurationException("Extension slice for " + next.getPath().getValue() + " has no profile specified in its type");
@@ -292,24 +297,13 @@ public class ProfileParser extends BaseStructureParser {
 		return retVal;
 	}
 
-	private void populateNewElement(StructureElement next, BaseElement elem, boolean allResourceReferences) {
-		elem.setName(next.getPath().getValue());
-		elem.setElementNameAndDeriveParentElementName(next.getPath().getValue());
-		elem.setResourceRef(allResourceReferences);
-	}
-
 	public static void main(String[] args) throws Exception {
-		IParser parser = new FhirContext(Profile.class).newXmlParser();
-		ProfileParser pp = new ProfileParser();
-		
-		String str = IOUtils.toString(new FileReader("../hapi-tinder-test/src/test/resources/profile/organization.xml"));
-		Profile prof = parser.parseResource(Profile.class, str);
-		pp.parseSingleProfile(prof, "http://foo");
+		String str = IOUtils.toString(Profile.class.getResourceAsStream("/tmp.txt"));
+		str = IOUtils.toString(new FileReader("../hapi-tinder-test/src/test/resources/profile/organization.xml"));
+		Profile prof = new FhirContext(Profile.class).newXmlParser().parseResource(Profile.class, str);
 
-		str = IOUtils.toString(new FileReader("../hapi-tinder-test/src/test/resources/profile/patient.xml"));
-		prof = parser.parseResource(Profile.class, str);
+		CopyOfProfileParser pp = new CopyOfProfileParser();
 		pp.parseSingleProfile(prof, "http://foo");
-
 		pp.markResourcesForImports();
 		pp.writeAll(new File("target/gen/test/resource"), "test");
 

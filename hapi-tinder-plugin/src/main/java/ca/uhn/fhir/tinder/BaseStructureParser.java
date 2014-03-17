@@ -330,12 +330,12 @@ public abstract class BaseStructureParser {
 		String base = "/home/t3903uhn/workspace/uhn-fhir-service/";
 		TinderStructuresMojo m = new TinderStructuresMojo();
 		m.setPackageName("ca.uhn.sailfhirmodel");
-		m.setResourceProfileFiles(new ArrayList<String>());
-		m.getResourceProfileFiles().add(base + "src/main/resources/profile/patient.xml");
-		m.getResourceProfileFiles().add(base + "src/main/resources/profile/organization.xml");
-		m.setResourceValueSetFiles(new ArrayList<String>());
-		m.getResourceValueSetFiles().add(base + "src/main/resources/valueset/valueset-cgta-patientidpool.xml");
-		m.getResourceValueSetFiles().add(base + "src/main/resources/valueset/valueset-cgta-provideridpool.xml");
+//		m.setResourceProfileFiles(new ArrayList<String>());
+//		m.getResourceProfileFiles().add(base + "src/main/resources/profile/patient.xml");
+//		m.getResourceProfileFiles().add(base + "src/main/resources/profile/organization.xml");
+//		m.setResourceValueSetFiles(new ArrayList<String>());
+//		m.getResourceValueSetFiles().add(base + "src/main/resources/valueset/valueset-cgta-patientidpool.xml");
+//		m.getResourceValueSetFiles().add(base + "src/main/resources/valueset/valueset-cgta-provideridpool.xml");
 		m.setTargetDirectory(base + "target/generated-sources/tinder");
 		m.setBuildDatatypes(true);
 		m.execute();

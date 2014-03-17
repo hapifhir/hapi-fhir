@@ -30,12 +30,13 @@ import ca.uhn.fhir.model.dstu.resource.ValueSet.Define;
 import ca.uhn.fhir.model.dstu.resource.ValueSet.DefineConcept;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.tinder.TinderStructuresMojo.ValueSetFileDefinition;
 import ca.uhn.fhir.tinder.model.ValueSetTm;
 
 public class ValueSetGenerator {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ValueSetGenerator.class);
-	private List<String> myResourceValueSetFiles;
+	private List<ValueSetFileDefinition> myResourceValueSetFiles;
 	private Set<ValueSetTm> myMarkedValueSets = new HashSet<ValueSetTm>();
 
 	private Map<String, ValueSetTm> myValueSets = new HashMap<String, ValueSetTm>();
@@ -68,8 +69,8 @@ public class ValueSetGenerator {
 		}
 
 		if (myResourceValueSetFiles != null) {
-			for (String next : myResourceValueSetFiles) {
-				File file = new File(next);
+			for (ValueSetFileDefinition next : myResourceValueSetFiles) {
+				File file = new File(next.getValueSetFile());
 				ourLog.info("Parsing ValueSet file: {}" + file.getName());
 				vs = IOUtils.toString(new FileReader(file));
 				ValueSet nextVs = (ValueSet) newXmlParser.parseResource(vs);
@@ -138,8 +139,8 @@ public class ValueSetGenerator {
 		return vs;
 	}
 
-	public void setResourceValueSetFiles(List<String> theString) {
-		myResourceValueSetFiles = theString;
+	public void setResourceValueSetFiles(List<ValueSetFileDefinition> theResourceValueSetFiles) {
+		myResourceValueSetFiles = theResourceValueSetFiles;
 	}
 
 	public void write(Collection<ValueSetTm> theValueSets, File theOutputDirectory, String thePackageBase) throws IOException {

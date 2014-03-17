@@ -41,6 +41,16 @@
 				<ordered value="false"/>
 				<rules value="open"/>
 			</slicing>
+			<definition>
+				<short value="Extensions" />
+				<formal value="Extensions" />
+				<min value="0" />
+				<max value="*" />
+				<type>
+					<code value="Extension" />
+				</type>
+				<isModifier value="false" />
+			</definition>
 		</element>
 		<element>
 			<path value="Organization.extension" />

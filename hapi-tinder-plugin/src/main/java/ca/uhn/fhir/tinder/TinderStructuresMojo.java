@@ -34,13 +34,36 @@ public class TinderStructuresMojo extends AbstractMojo {
 	private String packageName;
 
 	@Parameter(required = false)
-	private List<String> resourceProfileFiles;
+	private List<ProfileFileDefinition> resourceProfileFiles;
 
 	@Parameter(required = false)
-	private List<String> resourceValueSetFiles;
+	private List<ValueSetFileDefinition> resourceValueSetFiles;
 
 	@Parameter(required = true, defaultValue = "${project.build.directory}/generated-sources/tinder")
 	private String targetDirectory;
+
+	public static class ProfileFileDefinition
+	{
+		@Parameter(required = true)
+		private String profileFile;
+		
+		@Parameter(required = true)
+		private String profileSourceUrl;
+	}
+
+	public static class ValueSetFileDefinition
+	{
+		@Parameter(required = true)
+		private String valueSetFile;
+
+		public String getValueSetFile() {
+			return valueSetFile;
+		}
+
+		public void setValueSetFile(String theValueSetFile) {
+			valueSetFile = theValueSetFile;
+		}
+	}
 
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException {
@@ -105,7 +128,9 @@ public class TinderStructuresMojo extends AbstractMojo {
 		if (resourceProfileFiles != null) {
 			ourLog.info("Loading profiles...");
 			ProfileParser pp = new ProfileParser();
-			pp.parseBaseResources(resourceProfileFiles);
+			for (ProfileFileDefinition next : resourceProfileFiles) {
+				pp.parseSingleProfile(new File(next.profileFile), next.profileSourceUrl);
+			}
 			
 			pp.bindValueSets(vsp);
 			pp.markResourcesForImports();
@@ -134,11 +159,11 @@ public class TinderStructuresMojo extends AbstractMojo {
 		return packageName;
 	}
 
-	public List<String> getResourceProfileFiles() {
+	public List<ProfileFileDefinition> getResourceProfileFiles() {
 		return resourceProfileFiles;
 	}
 
-	public List<String> getResourceValueSetFiles() {
+	public List<ValueSetFileDefinition> getResourceValueSetFiles() {
 		return resourceValueSetFiles;
 	}
 
@@ -162,11 +187,11 @@ public class TinderStructuresMojo extends AbstractMojo {
 		packageName = thePackageName;
 	}
 
-	public void setResourceProfileFiles(List<String> theResourceProfileFiles) {
+	public void setResourceProfileFiles(List<ProfileFileDefinition> theResourceProfileFiles) {
 		resourceProfileFiles = theResourceProfileFiles;
 	}
 
-	public void setResourceValueSetFiles(List<String> theResourceValueSetFiles) {
+	public void setResourceValueSetFiles(List<ValueSetFileDefinition> theResourceValueSetFiles) {
 		resourceValueSetFiles = theResourceValueSetFiles;
 	}
 
