@@ -7,7 +7,7 @@ public interface IQueryParameterType {
 	 * format is used in HTTP queries as a parameter format.
 	 * 
 	 * @see See FHIR specification 
-	 *    <a href="http://www.hl7.org/implement/standards/fhir/search.html#ptypes">2.2.2 Search Parameter Types</a>
+	 *    <a href="http://www.hl7.org/implement/standards/fhir/search.html#ptypes">2.2.2 Search SearchParameter Types</a>
 	 *    for information on the <b>token</b> format
 	 */
 	public void setValueAsQueryToken(String theParameter);
@@ -17,7 +17,7 @@ public interface IQueryParameterType {
 	 * format is used in HTTP queries as a parameter format.
 	 * 
 	 * @see See FHIR specification 
-	 *    <a href="http://www.hl7.org/implement/standards/fhir/search.html#ptypes">2.2.2 Search Parameter Types</a>
+	 *    <a href="http://www.hl7.org/implement/standards/fhir/search.html#ptypes">2.2.2 Search SearchParameter Types</a>
 	 *    for information on the <b>token</b> format
 	 */
 	public String getValueAsQueryToken();

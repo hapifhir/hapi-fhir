@@ -10,10 +10,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import ca.uhn.fhir.rest.annotation.Include;
 import ca.uhn.fhir.rest.annotation.Optional;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.Required;
-import ca.uhn.fhir.rest.param.Parameter;
+import ca.uhn.fhir.rest.param.IParameter;
+import ca.uhn.fhir.rest.param.SearchParameter;
 import ca.uhn.fhir.util.ReflectionUtil;
 
 /**
@@ -38,15 +40,16 @@ public class Util {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static List<Parameter> getResourceParameters(Method method) {
-		List<Parameter> parameters = new ArrayList<Parameter>();
+	public static List<IParameter> getResourceParameters(Method method) {
+		List<IParameter> parameters = new ArrayList<IParameter>();
 
 		Class<?>[] parameterTypes = method.getParameterTypes();
 		for (Annotation[] annotations : method.getParameterAnnotations()) {
 			for (int i = 0; i < annotations.length; i++) {
 				Annotation nextAnnotation = annotations[i];
-				Parameter parameter = new Parameter();
 				Class<?> parameterType = parameterTypes[i];
+				
+				
 				
 				Class<? extends java.util.Collection<?>> outerCollectionType = null;
 				Class<? extends java.util.Collection<?>> innerCollectionType = null;
@@ -62,17 +65,22 @@ public class Util {
 					parameterType = ReflectionUtil.getGenericCollectionTypeOfMethodParameter(method, i);
 				}
 
+				IParameter param;
 				if (nextAnnotation instanceof Required) {
+					SearchParameter parameter = new SearchParameter();
 					parameter.setName(((Required) nextAnnotation).name());
 					parameter.setRequired(true);
 					parameter.setType(parameterType, innerCollectionType, outerCollectionType);
-
 				} else if (nextAnnotation instanceof Optional) {
+					SearchParameter parameter = new SearchParameter();
 					parameter.setName(((Optional) nextAnnotation).name());
 					parameter.setRequired(false);
 					parameter.setType(parameterType, innerCollectionType, innerCollectionType);
+				} else if (nextAnnotation instanceof Include) {
+					
 				}
-				parameters.add(parameter);
+				
+				parameters.add(param);
 			}
 		}
 		return parameters;

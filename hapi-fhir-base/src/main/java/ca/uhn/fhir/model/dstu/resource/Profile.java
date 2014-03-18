@@ -4508,7 +4508,7 @@ public class Profile extends BaseResource implements IResource {
 	
 	@Child(name="parameter", type=StructureSearchParam.class, order=2, min=0, max=Child.MAX_UNLIMITED)	
 	@Description(
-		shortDefinition="Parameter for the named query",
+		shortDefinition="SearchParameter for the named query",
 		formalDefinition="A parameter of a named query"
 	)
 	private java.util.List<StructureSearchParam> myParameter;
@@ -4616,7 +4616,7 @@ public class Profile extends BaseResource implements IResource {
 
  
 	/**
-	 * Gets the value(s) for <b>parameter</b> (Parameter for the named query).
+	 * Gets the value(s) for <b>parameter</b> (SearchParameter for the named query).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -4633,7 +4633,7 @@ public class Profile extends BaseResource implements IResource {
 	}
 
 	/**
-	 * Sets the value(s) for <b>parameter</b> (Parameter for the named query)
+	 * Sets the value(s) for <b>parameter</b> (SearchParameter for the named query)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -4645,7 +4645,7 @@ public class Profile extends BaseResource implements IResource {
 	}
 
 	/**
-	 * Adds and returns a new value for <b>parameter</b> (Parameter for the named query)
+	 * Adds and returns a new value for <b>parameter</b> (SearchParameter for the named query)
 	 *
      * <p>
      * <b>Definition:</b>

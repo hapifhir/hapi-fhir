@@ -9,7 +9,7 @@ public interface IQueryParameterOr {
 	 * format is used in HTTP queries as a parameter format.
 	 * 
 	 * @see See FHIR specification 
-	 *    <a href="http://www.hl7.org/implement/standards/fhir/search.html#ptypes">2.2.2 Search Parameter Types</a>
+	 *    <a href="http://www.hl7.org/implement/standards/fhir/search.html#ptypes">2.2.2 Search SearchParameter Types</a>
 	 *    for information on the <b>token</b> format
 	 */
 	public void setValuesAsQueryTokens(List<String> theParameters);
@@ -19,7 +19,7 @@ public interface IQueryParameterOr {
 	 * format is used in HTTP queries as a parameter format.
 	 * 
 	 * @see See FHIR specification 
-	 *    <a href="http://www.hl7.org/implement/standards/fhir/search.html#ptypes">2.2.2 Search Parameter Types</a>
+	 *    <a href="http://www.hl7.org/implement/standards/fhir/search.html#ptypes">2.2.2 Search SearchParameter Types</a>
 	 *    for information on the <b>token</b> format
 	 */
 	public List<String> getValuesAsQueryTokens();

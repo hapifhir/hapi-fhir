@@ -14,6 +14,7 @@ import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
+import ca.uhn.fhir.rest.annotation.Include;
 import ca.uhn.fhir.rest.annotation.Optional;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.Required;
@@ -92,6 +93,18 @@ public class DummyPatientResourceProvider implements IResourceProvider {
 		return retVal;
 	}
 
+	@Search()
+	public Patient getPatientWithIncludes(@Required(name = "withIncludes") StringDt theString, @Include List<String> theIncludes) {
+		Patient next = getIdToPatient().get("1");
+		
+		for (String line : theIncludes) {
+			next.addAddress().addLine(line);
+		}
+		
+		return next;
+	}
+
+	
 	@Search()
 	public List<Patient> getPatientMultipleIdentifiers(@Required(name = "ids") CodingListParam theIdentifiers) {
 		List<Patient> retVal = new ArrayList<Patient>();

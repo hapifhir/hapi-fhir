@@ -3350,7 +3350,7 @@ public class Conformance extends BaseResource implements IResource {
 	
 	@Child(name="parameter", type=RestResourceSearchParam.class, order=3, min=0, max=Child.MAX_UNLIMITED)	
 	@Description(
-		shortDefinition="Parameter for the named query",
+		shortDefinition="SearchParameter for the named query",
 		formalDefinition="Identifies which of the parameters for the named query are supported"
 	)
 	private java.util.List<RestResourceSearchParam> myParameter;
@@ -3501,7 +3501,7 @@ public class Conformance extends BaseResource implements IResource {
 
  
 	/**
-	 * Gets the value(s) for <b>parameter</b> (Parameter for the named query).
+	 * Gets the value(s) for <b>parameter</b> (SearchParameter for the named query).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -3518,7 +3518,7 @@ public class Conformance extends BaseResource implements IResource {
 	}
 
 	/**
-	 * Sets the value(s) for <b>parameter</b> (Parameter for the named query)
+	 * Sets the value(s) for <b>parameter</b> (SearchParameter for the named query)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -3530,7 +3530,7 @@ public class Conformance extends BaseResource implements IResource {
 	}
 
 	/**
-	 * Adds and returns a new value for <b>parameter</b> (Parameter for the named query)
+	 * Adds and returns a new value for <b>parameter</b> (SearchParameter for the named query)
 	 *
      * <p>
      * <b>Definition:</b>

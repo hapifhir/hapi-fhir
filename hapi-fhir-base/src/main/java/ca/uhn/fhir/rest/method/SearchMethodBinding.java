@@ -13,7 +13,8 @@ import java.util.Set;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.client.GetClientInvocation;
-import ca.uhn.fhir.rest.param.Parameter;
+import ca.uhn.fhir.rest.param.IParameter;
+import ca.uhn.fhir.rest.param.SearchParameter;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.Util;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -29,7 +30,7 @@ public class SearchMethodBinding extends BaseMethodBinding {
 	private Method method;
 
 	private Class<?> myDeclaredResourceType;
-	private List<Parameter> myParameters;
+	private List<SearchParameter> myParameters;
 
 	public SearchMethodBinding(MethodReturnTypeEnum theMethodReturnTypeEnum, Class<? extends IResource> theReturnResourceType, Method theMethod) {
 		super(theMethodReturnTypeEnum, theReturnResourceType);
@@ -47,7 +48,7 @@ public class SearchMethodBinding extends BaseMethodBinding {
 		return method;
 	}
 
-	public List<Parameter> getParameters() {
+	public List<SearchParameter> getParameters() {
 		return myParameters;
 	}
 
@@ -64,11 +65,11 @@ public class SearchMethodBinding extends BaseMethodBinding {
 
 		for (int idx = 0; idx < theArgs.length; idx++) {
 			Object object = theArgs[idx];
-			Parameter nextParam = myParameters.get(idx);
+			SearchParameter nextParam = myParameters.get(idx);
 
 			if (object == null) {
 				if (nextParam.isRequired()) {
-					throw new NullPointerException("Parameter '" + nextParam.getName() + "' is required and may not be null");
+					throw new NullPointerException("SearchParameter '" + nextParam.getName() + "' is required and may not be null");
 				}
 			} else {
 				List<List<String>> value = nextParam.encode(object);
@@ -100,7 +101,7 @@ public class SearchMethodBinding extends BaseMethodBinding {
 
 		Object[] params = new Object[myParameters.size()];
 		for (int i = 0; i < myParameters.size(); i++) {
-			Parameter param = myParameters.get(i);
+			IParameter param = myParameters.get(i);
 			String[] value = parameterValues.get(param.getName());
 			if (value == null || value.length == 0) {
 				continue;
@@ -155,7 +156,7 @@ public class SearchMethodBinding extends BaseMethodBinding {
 
 		Set<String> methodParamsTemp = new HashSet<String>();
 		for (int i = 0; i < this.myParameters.size(); i++) {
-			Parameter temp = this.myParameters.get(i);
+			SearchParameter temp = this.myParameters.get(i);
 			methodParamsTemp.add(temp.getName());
 			if (temp.isRequired() && !theRequest.getParameterNames().contains(temp.getName())) {
 				ourLog.trace("Method {} doesn't match param '{}' is not present", method.getName(), temp.getName());
@@ -173,7 +174,7 @@ public class SearchMethodBinding extends BaseMethodBinding {
 		this.method = method;
 	}
 
-	public void setParameters(List<Parameter> parameters) {
+	public void setParameters(List<SearchParameter> parameters) {
 		this.myParameters = parameters;
 	}
 

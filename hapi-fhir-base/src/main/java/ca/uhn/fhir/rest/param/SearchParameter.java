@@ -12,25 +12,33 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 /**
  * Created by dsotnikov on 2/25/2014.
  */
-public class Parameter {
+public class SearchParameter implements IParameter {
 
 	private String name;
 	private IParamBinder parser;
 	private boolean required;
 	private Class<?> type;
 
-	public Parameter() {
+	public SearchParameter() {
 	}
 
-	public Parameter(String name, boolean required) {
+	public SearchParameter(String name, boolean required) {
 		this.name = name;
 		this.required = required;
 	}
 
+	/* (non-Javadoc)
+	 * @see ca.uhn.fhir.rest.param.IParameter#encode(java.lang.Object)
+	 */
+	@Override
 	public List<List<String>> encode(Object theObject) throws InternalErrorException {
 		return parser.encode(theObject);
 	}
 
+	/* (non-Javadoc)
+	 * @see ca.uhn.fhir.rest.param.IParameter#getName()
+	 */
+	@Override
 	public String getName() {
 		return name;
 	}
@@ -43,6 +51,10 @@ public class Parameter {
 		return required;
 	}
 
+	/* (non-Javadoc)
+	 * @see ca.uhn.fhir.rest.param.IParameter#parse(java.util.List)
+	 */
+	@Override
 	public Object parse(List<List<String>> theString) throws InternalErrorException, InvalidRequestException {
 		return parser.parse(theString);
 	}

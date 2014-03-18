@@ -15,7 +15,7 @@ import ca.uhn.fhir.rest.method.BaseMethodBinding.MethodReturnTypeEnum;
 import ca.uhn.fhir.rest.method.Request;
 import ca.uhn.fhir.rest.method.SearchMethodBinding;
 import ca.uhn.fhir.rest.method.SearchMethodBinding.RequestType;
-import ca.uhn.fhir.rest.param.Parameter;
+import ca.uhn.fhir.rest.param.SearchParameter;
 
 public class ResourceMethodTest {
 
@@ -28,11 +28,11 @@ public class ResourceMethodTest {
 	
 	@Test
 	public void testRequiredParamsMissing() {
-		List<Parameter> methodParams = new ArrayList<Parameter>();
+		List<SearchParameter> methodParams = new ArrayList<SearchParameter>();
 
-		methodParams.add(new Parameter("firstName", false));
-		methodParams.add(new Parameter("lastName", false));
-		methodParams.add(new Parameter("mrn", true));
+		methodParams.add(new SearchParameter("firstName", false));
+		methodParams.add(new SearchParameter("lastName", false));
+		methodParams.add(new SearchParameter("mrn", true));
 
 		rm.setParameters(methodParams);
 
@@ -45,11 +45,11 @@ public class ResourceMethodTest {
 
 	@Test
 	public void testRequiredParamsOnly() {
-		List<Parameter> methodParams = new ArrayList<Parameter>();
+		List<SearchParameter> methodParams = new ArrayList<SearchParameter>();
 
-		methodParams.add(new Parameter("firstName", false));
-		methodParams.add(new Parameter("lastName", false));
-		methodParams.add(new Parameter("mrn", true));
+		methodParams.add(new SearchParameter("firstName", false));
+		methodParams.add(new SearchParameter("lastName", false));
+		methodParams.add(new SearchParameter("mrn", true));
 
 		rm.setParameters(methodParams);
 
@@ -60,11 +60,11 @@ public class ResourceMethodTest {
 
 	@Test
 	public void testMixedParams() {
-		List<Parameter> methodParams = new ArrayList<Parameter>();
+		List<SearchParameter> methodParams = new ArrayList<SearchParameter>();
 
-		methodParams.add(new Parameter("firstName", false));
-		methodParams.add(new Parameter("lastName", false));
-		methodParams.add(new Parameter("mrn", true));
+		methodParams.add(new SearchParameter("firstName", false));
+		methodParams.add(new SearchParameter("lastName", false));
+		methodParams.add(new SearchParameter("mrn", true));
 
 		rm.setParameters(methodParams);
 
@@ -77,11 +77,11 @@ public class ResourceMethodTest {
 
 	@Test
 	public void testAllParams() {
-		List<Parameter> methodParams = new ArrayList<Parameter>();
+		List<SearchParameter> methodParams = new ArrayList<SearchParameter>();
 
-		methodParams.add(new Parameter("firstName", false));
-		methodParams.add(new Parameter("lastName", false));
-		methodParams.add(new Parameter("mrn", true));
+		methodParams.add(new SearchParameter("firstName", false));
+		methodParams.add(new SearchParameter("lastName", false));
+		methodParams.add(new SearchParameter("mrn", true));
 
 		rm.setParameters(methodParams);
 
@@ -95,11 +95,11 @@ public class ResourceMethodTest {
 
 	@Test
 	public void testAllParamsWithExtra() {
-		List<Parameter> methodParams = new ArrayList<Parameter>();
+		List<SearchParameter> methodParams = new ArrayList<SearchParameter>();
 
-		methodParams.add(new Parameter("firstName", false));
-		methodParams.add(new Parameter("lastName", false));
-		methodParams.add(new Parameter("mrn", true));
+		methodParams.add(new SearchParameter("firstName", false));
+		methodParams.add(new SearchParameter("lastName", false));
+		methodParams.add(new SearchParameter("mrn", true));
 
 		rm.setParameters(methodParams);
 

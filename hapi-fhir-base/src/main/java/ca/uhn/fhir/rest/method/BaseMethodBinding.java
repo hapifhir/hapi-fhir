@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.method;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -110,6 +111,8 @@ public abstract class BaseMethodBinding {
 		//
 		// return sm;
 	}
+
+	
 
 	public static boolean verifyMethodHasZeroOrOneOperationAnnotation(Method theNextMethod, Object... theAnnotations) {
 		Object obj1 = null;
