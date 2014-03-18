@@ -13,4 +13,6 @@ public interface IParameter {
 
 	public abstract Object parse(List<List<String>> theString) throws InternalErrorException, InvalidRequestException;
 
+	public abstract boolean isRequired();
+
 }

@@ -25,4 +25,10 @@ public class IncludeParameter implements IParameter {
 		return null;
 	}
 
+	@Override
+	public boolean isRequired() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
 }

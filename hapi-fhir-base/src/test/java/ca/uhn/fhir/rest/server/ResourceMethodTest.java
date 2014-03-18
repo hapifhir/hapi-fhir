@@ -15,6 +15,7 @@ import ca.uhn.fhir.rest.method.BaseMethodBinding.MethodReturnTypeEnum;
 import ca.uhn.fhir.rest.method.Request;
 import ca.uhn.fhir.rest.method.SearchMethodBinding;
 import ca.uhn.fhir.rest.method.SearchMethodBinding.RequestType;
+import ca.uhn.fhir.rest.param.IParameter;
 import ca.uhn.fhir.rest.param.SearchParameter;
 
 public class ResourceMethodTest {
@@ -28,7 +29,7 @@ public class ResourceMethodTest {
 	
 	@Test
 	public void testRequiredParamsMissing() {
-		List<SearchParameter> methodParams = new ArrayList<SearchParameter>();
+		List<IParameter> methodParams = new ArrayList<IParameter>();
 
 		methodParams.add(new SearchParameter("firstName", false));
 		methodParams.add(new SearchParameter("lastName", false));
@@ -45,7 +46,7 @@ public class ResourceMethodTest {
 
 	@Test
 	public void testRequiredParamsOnly() {
-		List<SearchParameter> methodParams = new ArrayList<SearchParameter>();
+		List<IParameter> methodParams = new ArrayList<IParameter>();
 
 		methodParams.add(new SearchParameter("firstName", false));
 		methodParams.add(new SearchParameter("lastName", false));
@@ -60,7 +61,7 @@ public class ResourceMethodTest {
 
 	@Test
 	public void testMixedParams() {
-		List<SearchParameter> methodParams = new ArrayList<SearchParameter>();
+		List<IParameter> methodParams = new ArrayList<IParameter>();
 
 		methodParams.add(new SearchParameter("firstName", false));
 		methodParams.add(new SearchParameter("lastName", false));
@@ -77,7 +78,7 @@ public class ResourceMethodTest {
 
 	@Test
 	public void testAllParams() {
-		List<SearchParameter> methodParams = new ArrayList<SearchParameter>();
+		List<IParameter> methodParams = new ArrayList<IParameter>();
 
 		methodParams.add(new SearchParameter("firstName", false));
 		methodParams.add(new SearchParameter("lastName", false));
@@ -95,7 +96,7 @@ public class ResourceMethodTest {
 
 	@Test
 	public void testAllParamsWithExtra() {
-		List<SearchParameter> methodParams = new ArrayList<SearchParameter>();
+		List<IParameter> methodParams = new ArrayList<IParameter>();
 
 		methodParams.add(new SearchParameter("firstName", false));
 		methodParams.add(new SearchParameter("lastName", false));

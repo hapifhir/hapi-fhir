@@ -30,7 +30,7 @@ public class SearchMethodBinding extends BaseMethodBinding {
 	private Method method;
 
 	private Class<?> myDeclaredResourceType;
-	private List<SearchParameter> myParameters;
+	private List<IParameter> myParameters;
 
 	public SearchMethodBinding(MethodReturnTypeEnum theMethodReturnTypeEnum, Class<? extends IResource> theReturnResourceType, Method theMethod) {
 		super(theMethodReturnTypeEnum, theReturnResourceType);
@@ -48,7 +48,7 @@ public class SearchMethodBinding extends BaseMethodBinding {
 		return method;
 	}
 
-	public List<SearchParameter> getParameters() {
+	public List<IParameter> getParameters() {
 		return myParameters;
 	}
 
@@ -65,7 +65,7 @@ public class SearchMethodBinding extends BaseMethodBinding {
 
 		for (int idx = 0; idx < theArgs.length; idx++) {
 			Object object = theArgs[idx];
-			SearchParameter nextParam = myParameters.get(idx);
+			IParameter nextParam = myParameters.get(idx);
 
 			if (object == null) {
 				if (nextParam.isRequired()) {
@@ -156,7 +156,7 @@ public class SearchMethodBinding extends BaseMethodBinding {
 
 		Set<String> methodParamsTemp = new HashSet<String>();
 		for (int i = 0; i < this.myParameters.size(); i++) {
-			SearchParameter temp = this.myParameters.get(i);
+			IParameter temp = this.myParameters.get(i);
 			methodParamsTemp.add(temp.getName());
 			if (temp.isRequired() && !theRequest.getParameterNames().contains(temp.getName())) {
 				ourLog.trace("Method {} doesn't match param '{}' is not present", method.getName(), temp.getName());
@@ -174,7 +174,7 @@ public class SearchMethodBinding extends BaseMethodBinding {
 		this.method = method;
 	}
 
-	public void setParameters(List<SearchParameter> parameters) {
+	public void setParameters(List<IParameter> parameters) {
 		this.myParameters = parameters;
 	}
 
