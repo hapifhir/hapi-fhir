@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import ca.uhn.fhir.model.api.PathSpecification;
 import ca.uhn.fhir.model.dstu.composite.CodingDt;
 import ca.uhn.fhir.model.dstu.composite.HumanNameDt;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
@@ -57,6 +58,19 @@ public class DummyPatientResourceProvider implements IResourceProvider {
 	}
 
 	@Search()
+	public Patient getPatientWithIncludes(@Required(name = "withIncludes") StringDt theString, @Include List<PathSpecification> theIncludes) {
+		Patient next = getIdToPatient().get("1");
+		
+		next.addCommunication().setText(theString.getValue());
+		
+		for (PathSpecification line : theIncludes) {
+			next.addAddress().addLine(line.getValue());
+		}
+		
+		return next;
+	}
+
+	@Search()
 	public Patient getPatient(@Required(name = Patient.SP_IDENTIFIER) IdentifierDt theIdentifier) {
 		for (Patient next : getIdToPatient().values()) {
 			for (IdentifierDt nextId : next.getIdentifier()) {
@@ -92,18 +106,6 @@ public class DummyPatientResourceProvider implements IResourceProvider {
 
 		return retVal;
 	}
-
-	@Search()
-	public Patient getPatientWithIncludes(@Required(name = "withIncludes") StringDt theString, @Include List<String> theIncludes) {
-		Patient next = getIdToPatient().get("1");
-		
-		for (String line : theIncludes) {
-			next.addAddress().addLine(line);
-		}
-		
-		return next;
-	}
-
 	
 	@Search()
 	public List<Patient> getPatientMultipleIdentifiers(@Required(name = "ids") CodingListParam theIdentifiers) {

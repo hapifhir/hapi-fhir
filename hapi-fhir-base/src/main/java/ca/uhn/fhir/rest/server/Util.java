@@ -12,10 +12,12 @@ import java.util.Map;
 
 import ch.qos.logback.core.joran.action.ParamAction;
 import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.model.api.PathSpecification;
 import ca.uhn.fhir.rest.annotation.Include;
 import ca.uhn.fhir.rest.annotation.Optional;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.Required;
+import ca.uhn.fhir.rest.param.CollectionBinder;
 import ca.uhn.fhir.rest.param.IParameter;
 import ca.uhn.fhir.rest.param.IncludeParameter;
 import ca.uhn.fhir.rest.param.SearchParameter;
@@ -82,12 +84,12 @@ public class Util {
 					parameter.setType(parameterType, innerCollectionType, innerCollectionType);
 					param = parameter;
 				} else if (nextAnnotation instanceof Include) {
-					if (parameterType != String.class) {
-						throw new ConfigurationException("Method '" + method.getName() + "' is annotated with @" + Include.class.getSimpleName() + " but has a type other than Collection<String>");
+					if (parameterType != PathSpecification.class || innerCollectionType == null || outerCollectionType != null) {
+						throw new ConfigurationException("Method '" + method.getName() + "' is annotated with @" + Include.class.getSimpleName() + " but has a type other than Collection<"+PathSpecification.class.getSimpleName() + ">");
 					}
-//					if (innerCollectionType)
+					Class<? extends Collection<PathSpecification>> instantiableCollectionType = (Class<? extends Collection<PathSpecification>>) CollectionBinder.getInstantiableCollectionType(innerCollectionType, "Method '" + method.getName() + "'");
 					
-					param = new IncludeParameter();
+					param = new IncludeParameter(instantiableCollectionType);
 				} else {
 					continue;
 				}

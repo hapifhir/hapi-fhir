@@ -8,6 +8,8 @@ import org.apache.commons.lang3.Validate;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
+import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.client.GetClientInvocation;
 import ca.uhn.fhir.rest.method.SearchMethodBinding.RequestType;
@@ -46,6 +48,10 @@ public class ReadMethodBinding extends BaseMethodBinding {
 			throw new ConfigurationException("Version ID parameter must be of type: " + IdDt.class.getCanonicalName()+ " - Found: "+parameterTypes[myVersionIdIndex]);
 		}
 
+	}
+	
+	public boolean isVread() {
+		return myVersionIdIndex != null;
 	}
 
 	@Override
@@ -102,6 +108,16 @@ public class ReadMethodBinding extends BaseMethodBinding {
 			String vid = ((IdDt)theArgs[myVersionIdIndex]).getValue();
 			return new GetClientInvocation(getResourceName(), id, Constants.URL_TOKEN_HISTORY, vid);
 		}
+	}
+
+	@Override
+	public RestfulOperationTypeEnum getResourceOperationType() {
+		return isVread() ? RestfulOperationTypeEnum.VREAD : RestfulOperationTypeEnum.READ;
+	}
+
+	@Override
+	public RestfulOperationSystemEnum getSystemOperationType() {
+		return null;
 	}
 
 }

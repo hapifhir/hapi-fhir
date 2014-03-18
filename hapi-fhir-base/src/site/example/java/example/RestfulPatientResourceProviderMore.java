@@ -3,17 +3,21 @@ package example;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.PathSpecification;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.dstu.composite.CodingDt;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
+import ca.uhn.fhir.model.dstu.resource.DiagnosticReport;
 import ca.uhn.fhir.model.dstu.resource.Observation;
 import ca.uhn.fhir.model.dstu.resource.Organization;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.rest.annotation.Include;
 import ca.uhn.fhir.rest.annotation.Optional;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.Required;
@@ -127,6 +131,42 @@ private ITestClient provideTc() {
 @Override
 public Class<? extends IResource> getResourceType() {
    return null;
+}
+
+
+
+//START SNIPPET: pathSpec
+@Search()
+public List<DiagnosticReport> getDiagnosticReport( @Required(name=DiagnosticReport.SP_IDENTIFIER) IdentifierDt theIdentifier,
+                                                   @Include Set<PathSpecification> theIncludes ) {
+  List<DiagnosticReport> retVal = new ArrayList<DiagnosticReport>();
+ 
+  // Assume this method exists and loads the report from the DB
+  DiagnosticReport report = loadSomeDiagnosticReportFromDatabase(theIdentifier);
+
+  // If the client has asked for the subject to be included:
+  if (theIncludes.contains(new PathSpecification("DiagnosticReport.subject"))) {
+	 
+    // The resource reference should contain the ID of the patient
+    IdDt subjectId = report.getSubject().getId();
+	
+    // So load the patient ID and return it
+    Patient subject = loadSomePatientFromDatabase(subjectId);
+    report.getSubject().setResource(subject);
+	
+  }
+ 
+  retVal.add(report);
+  return retVal;
+}
+//END SNIPPET: pathSpec
+
+private DiagnosticReport loadSomeDiagnosticReportFromDatabase(IdentifierDt theIdentifier) {
+	return null;
+}
+
+private Patient loadSomePatientFromDatabase(IdDt theId) {
+	return null;
 }
 
 }

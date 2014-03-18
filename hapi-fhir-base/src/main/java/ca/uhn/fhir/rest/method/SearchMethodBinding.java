@@ -11,6 +11,8 @@ import java.util.Map;
 import java.util.Set;
 
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
+import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.client.GetClientInvocation;
 import ca.uhn.fhir.rest.param.IParameter;
@@ -184,6 +186,16 @@ public class SearchMethodBinding extends BaseMethodBinding {
 
 	public static enum RequestType {
 		DELETE, GET, POST, PUT, OPTIONS
+	}
+
+	@Override
+	public RestfulOperationTypeEnum getResourceOperationType() {
+		return RestfulOperationTypeEnum.SEARCH_TYPE;
+	}
+
+	@Override
+	public RestfulOperationSystemEnum getSystemOperationType() {
+		return null;
 	}
 
 }

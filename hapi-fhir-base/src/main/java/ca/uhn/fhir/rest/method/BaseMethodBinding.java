@@ -12,6 +12,8 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
+import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.Metadata;
 import ca.uhn.fhir.rest.annotation.Read;
@@ -41,6 +43,10 @@ public abstract class BaseMethodBinding {
 
 	public abstract List<IResource> invokeServer(IResourceProvider theResourceProvider, IdDt theId, IdDt theVersionId, Map<String, String[]> theParameterValues) throws InvalidRequestException, InternalErrorException;
 
+	public abstract RestfulOperationTypeEnum getResourceOperationType();
+	
+	public abstract RestfulOperationSystemEnum getSystemOperationType();
+	
 	public abstract boolean matches(Request theRequest);
 
 	public String getResourceName() {
@@ -85,7 +91,7 @@ public abstract class BaseMethodBinding {
 		} else if (search != null) {
 			return new SearchMethodBinding(methodReturnTypeEnum, returnType, theMethod);
 		} else if (conformance != null) {
-			return new ConformanceMethodBinding(methodReturnTypeEnum);
+			return new ConformanceMethodBinding(methodReturnTypeEnum, returnType, theMethod);
 		} else {
 			throw new ConfigurationException("Did not detect any FHIR annotations on method '" + theMethod.getName() + "' on type: " + theMethod.getDeclaringClass().getCanonicalName());
 		}

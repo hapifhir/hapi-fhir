@@ -3,10 +3,12 @@ package ca.uhn.fhir.rest.client;
 import java.util.List;
 
 import ca.uhn.fhir.model.api.Bundle;
+import ca.uhn.fhir.model.api.PathSpecification;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.rest.annotation.Include;
 import ca.uhn.fhir.rest.annotation.Optional;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.Required;
@@ -34,5 +36,8 @@ public interface ITestClient extends IBasicClient {
 
 	@Search()
 	public List<Patient> getPatientByDob(@Required(name=Patient.SP_BIRTHDATE) QualifiedDateParam theBirthDate);
-	
+
+	@Search()
+	public Patient getPatientWithIncludes(@Required(name = "withIncludes") StringDt theString, @Include List<PathSpecification> theIncludes);
+
 }

@@ -269,6 +269,26 @@
 				</macro>
 
 			</subsection>
+			
+			<subsection name="Resource Includes (_include)">
+			
+				<p>
+					FHIR allows clients to request that specific linked resources be included
+					as contained resources, which means that they will be "embedded" in a special
+					container called "contained" within the parent resource. 
+				</p>
+				
+				<p>
+					HAPI allows you to add a parameter for accepting includes if you wish
+					to support them for specific search methods.
+				</p>
+
+				<macro name="snippet">
+					<param name="id" value="pathSpec" />
+					<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
+				</macro>
+				
+			</subsection>
 
 		</section>
 			

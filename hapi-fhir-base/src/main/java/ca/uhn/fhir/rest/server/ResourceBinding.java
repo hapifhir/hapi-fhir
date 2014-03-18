@@ -9,18 +9,18 @@ import ca.uhn.fhir.rest.method.Request;
 /**
  * Created by dsotnikov on 2/25/2014.
  */
-public class Resource {
+public class ResourceBinding {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(Resource.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceBinding.class);
 
 	private String resourceName;
 	private List<BaseMethodBinding> methods = new ArrayList<BaseMethodBinding>();
 	private IResourceProvider resourceProvider;
 
-	public Resource() {
+	public ResourceBinding() {
 	}
 
-	public Resource(String resourceName, List<BaseMethodBinding> methods) {
+	public ResourceBinding(String resourceName, List<BaseMethodBinding> methods) {
 		this.resourceName = resourceName;
 		this.methods = methods;
 	}
@@ -51,7 +51,7 @@ public class Resource {
 		this.resourceName = resourceName;
 	}
 
-	public List<BaseMethodBinding> getMethods() {
+	public List<BaseMethodBinding> getMethodBindings() {
 		return methods;
 	}
 
@@ -65,9 +65,9 @@ public class Resource {
 
 	@Override
 	public boolean equals(Object o) {
-		if (!(o instanceof Resource))
+		if (!(o instanceof ResourceBinding))
 			return false;
-		return resourceName.equals(((Resource) o).getResourceName());
+		return resourceName.equals(((ResourceBinding) o).getResourceName());
 	}
 
 	@Override

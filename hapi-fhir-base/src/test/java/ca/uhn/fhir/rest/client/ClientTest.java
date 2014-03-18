@@ -5,6 +5,7 @@ import static org.mockito.Mockito.*;
 
 import java.io.StringReader;
 import java.nio.charset.Charset;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
@@ -22,6 +23,7 @@ import org.mockito.internal.stubbing.defaultanswers.ReturnsDeepStubs;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
+import ca.uhn.fhir.model.api.PathSpecification;
 import ca.uhn.fhir.model.dstu.composite.CodingDt;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.resource.Conformance;
@@ -150,6 +152,25 @@ public class ClientTest {
 		assertEquals("PRP1660", response.get(0).getIdentifier().get(0).getValue().getValue());
 
 	}
+	
+	@Test
+	public void testSearchWithIncludes() throws Exception {
+
+		String msg = getPatientFeedWithOneResult();
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
+		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
+
+		ITestClient client = clientFactory.newClient(ITestClient.class, "http://foo");
+		client.getPatientWithIncludes(new StringDt("aaa"), Arrays.asList(new PathSpecification[] {new PathSpecification("inc1"), new PathSpecification("inc2")}));
+
+		assertEquals("http://foo/Patient?withIncludes=aaa&_include=inc1&_include=inc2", capt.getValue().getURI().toString());
+		
+	}
+	
 	@Test
 	public void testSearchComposite() throws Exception {
 

@@ -14,11 +14,11 @@ import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 
-public class ProfileProvider implements IResourceProvider {
+public class ServerProfileProvider implements IResourceProvider {
 
 	private FhirContext myContext;
 
-	public ProfileProvider(FhirContext theContext) {
+	public ServerProfileProvider(FhirContext theContext) {
 		myContext = theContext;
 	}
 	

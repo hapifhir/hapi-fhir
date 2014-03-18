@@ -36,10 +36,10 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.rest.server.provider.ServerProfileProvider;
+import ca.uhn.fhir.rest.server.provider.ServerConformanceProvider;
 
 public abstract class RestfulServer extends HttpServlet {
-
-	private static HashSet<String> FORMAT_VAL_XML;
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RestfulServer.class);
 
@@ -50,54 +50,9 @@ public abstract class RestfulServer extends HttpServlet {
 	private Map<Class<? extends IResource>, IResourceProvider> myTypeToProvider = new HashMap<Class<? extends IResource>, IResourceProvider>();
 
 	// map of request handler resources keyed by resource name
-	private Map<String, Resource> resources = new HashMap<String, Resource>();
+	private Map<String, ResourceBinding> resources = new HashMap<String, ResourceBinding>();
 
 	private ISecurityManager securityManager;
-
-	/**
-	 * This method must be overridden to provide one or more resource providers
-	 */
-	public abstract Collection<IResourceProvider> getResourceProviders();
-
-	/**
-	 * This method should be overridden to provide a security manager instance.
-	 * By default, returns null.
-	 */
-	public ISecurityManager getSecurityManager() {
-		return null;
-	}
-
-	@Override
-	public void init() throws ServletException {
-		try {
-			ourLog.info("Initializing HAPI FHIR restful server");
-
-			securityManager = getSecurityManager();
-			if (null == securityManager) {
-				ourLog.warn("No security manager has been provided, requests will not be authenticated!");
-			}
-
-			Collection<IResourceProvider> resourceProvider = getResourceProviders();
-			for (IResourceProvider nextProvider : resourceProvider) {
-				if (myTypeToProvider.containsKey(nextProvider.getResourceType())) {
-					throw new ServletException("Multiple providers for type: " + nextProvider.getResourceType().getCanonicalName());
-				}
-				myTypeToProvider.put(nextProvider.getResourceType(), nextProvider);
-			}
-
-			ourLog.info("Got {} resource providers", myTypeToProvider.size());
-
-			myFhirContext = new FhirContext(myTypeToProvider.keySet());
-
-			for (IResourceProvider provider : myTypeToProvider.values()) {
-				findResourceMethods(provider);
-			}
-
-		} catch (Exception ex) {
-			ourLog.error("An error occurred while loading request handlers!", ex);
-			throw new ServletException("Failed to initialize FHIR Restful server", ex);
-		}
-	}
 
 	private EncodingUtil determineResponseEncoding(HttpServletRequest theRequest, Map<String, String[]> theParams) {
 		String[] format = theParams.remove(Constants.PARAM_FORMAT);
@@ -121,13 +76,40 @@ public abstract class RestfulServer extends HttpServlet {
 		}
 		return EncodingUtil.XML;
 	}
+	
+	@Override
+	protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		handleRequest(SearchMethodBinding.RequestType.DELETE, request, response);
+	}
+
+	
+	@Override
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		handleRequest(SearchMethodBinding.RequestType.GET, request, response);
+	}
+	
+	@Override
+	protected void doOptions(HttpServletRequest theReq, HttpServletResponse theResp) throws ServletException, IOException {
+		handleRequest(SearchMethodBinding.RequestType.OPTIONS, theReq, theResp);
+	}
+
+	@Override
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		handleRequest(SearchMethodBinding.RequestType.POST, request, response);
+	}
+
+	@Override
+	protected void doPut(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		handleRequest(SearchMethodBinding.RequestType.PUT, request, response);
+	}
+
 
 	private void findResourceMethods(IResourceProvider theProvider) throws Exception {
 
 		Class<? extends IResource> resourceType = theProvider.getResourceType();
 		RuntimeResourceDefinition definition = myFhirContext.getResourceDefinition(resourceType);
 
-		Resource r = new Resource();
+		ResourceBinding r = new ResourceBinding();
 		r.setResourceProvider(theProvider);
 		r.setResourceName(definition.getName());
 		resources.put(definition.getName(), r);
@@ -137,41 +119,22 @@ public abstract class RestfulServer extends HttpServlet {
 		Class<?> clazz = theProvider.getClass();
 		for (Method m : clazz.getDeclaredMethods()) {
 			if (Modifier.isPublic(m.getModifiers())) {
-				ourLog.info("Scanning public method: {}#{}", theProvider.getClass(), m.getName());
+				ourLog.debug("Scanning public method: {}#{}", theProvider.getClass(), m.getName());
 
 				BaseMethodBinding foundMethodBinding = BaseMethodBinding.bindMethod(theProvider.getResourceType(), m);
 				if (foundMethodBinding != null) {
 					r.addMethod(foundMethodBinding);
 					ourLog.info(" * Method: {}#{} is a handler", theProvider.getClass(), m.getName());
 				} else {
-					ourLog.info(" * Method: {}#{} is not a handler", theProvider.getClass(), m.getName());
+					ourLog.debug(" * Method: {}#{} is not a handler", theProvider.getClass(), m.getName());
 				}
 			}
 		}
 	}
 
-	private void streamResponseAsBundle(HttpServletResponse theHttpResponse, List<IResource> theResult, EncodingUtil theResponseEncoding) throws IOException {
-		theHttpResponse.setStatus(200);
-		theHttpResponse.setContentType(theResponseEncoding.getBundleContentType());
-		theHttpResponse.setCharacterEncoding("UTF-8");
 
-		Bundle bundle = new Bundle();
-		bundle.getAuthorName().setValue(getClass().getCanonicalName());
-		bundle.getBundleId().setValue(UUID.randomUUID().toString());
-		bundle.getPublished().setToCurrentTimeInLocalTimeZone();
-
-		for (IResource next : theResult) {
-			BundleEntry entry = new BundleEntry();
-			bundle.getEntries().add(entry);
-
-			entry.setResource(next);
-		}
-
-		bundle.getTotalResults().setValue(theResult.size());
-
-		PrintWriter writer = theHttpResponse.getWriter();
-		getNewParser(theResponseEncoding).encodeBundleToWriter(bundle, writer);
-		writer.close();
+	public FhirContext getFhirContext() {
+		return myFhirContext;
 	}
 
 	private IParser getNewParser(EncodingUtil theResponseEncoding) {
@@ -188,41 +151,29 @@ public abstract class RestfulServer extends HttpServlet {
 		return parser;
 	}
 
-	private void streamResponseAsResource(HttpServletResponse theHttpResponse, IResource theResource, Resource theResourceBinding, EncodingUtil theResponseEncoding) throws IOException {
-
-		theHttpResponse.setStatus(200);
-		theHttpResponse.setContentType(theResponseEncoding.getResourceContentType());
-		theHttpResponse.setCharacterEncoding("UTF-8");
-
-		PrintWriter writer = theHttpResponse.getWriter();
-		getNewParser(theResponseEncoding).encodeResourceToWriter(theResource, writer);
-		writer.close();
-
+	public Collection<ResourceBinding> getResourceBindings() {
+		return resources.values();
 	}
 
-	@Override
-	protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		handleRequest(SearchMethodBinding.RequestType.DELETE, request, response);
+	/**
+	 * This method must be overridden to provide one or more resource providers
+	 */
+	public abstract Collection<IResourceProvider> getResourceProviders();
+
+	/**
+	 * This method should be overridden to provide a security manager instance.
+	 * By default, returns null.
+	 */
+	public ISecurityManager getSecurityManager() {
+		return null;
 	}
 
-	@Override
-	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		handleRequest(SearchMethodBinding.RequestType.GET, request, response);
+	public IResourceProvider getServerConformanceProvider() {
+		return new ServerConformanceProvider(this);
 	}
 
-	@Override
-	protected void doOptions(HttpServletRequest theReq, HttpServletResponse theResp) throws ServletException, IOException {
-		handleRequest(SearchMethodBinding.RequestType.OPTIONS, theReq, theResp);
-	}
-
-	@Override
-	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		handleRequest(SearchMethodBinding.RequestType.POST, request, response);
-	}
-
-	@Override
-	protected void doPut(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		handleRequest(SearchMethodBinding.RequestType.PUT, request, response);
+	public IResourceProvider getServerProfilesProvider() {
+		return new ServerProfileProvider(getFhirContext());
 	}
 
 	protected void handleRequest(SearchMethodBinding.RequestType requestType, HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -235,6 +186,10 @@ public abstract class RestfulServer extends HttpServlet {
 			String resourceName = null;
 			String requestPath = StringUtils.defaultString(request.getRequestURI());
 			String contextPath = StringUtils.defaultString(request.getContextPath());
+			IdDt id = null;
+			IdDt versionId = null;
+			String operation = null;
+
 			requestPath = requestPath.substring(contextPath.length());
 			if (requestPath.charAt(0) == '/') {
 				requestPath = requestPath.substring(1);
@@ -251,14 +206,18 @@ public abstract class RestfulServer extends HttpServlet {
 			}
 			resourceName = tok.nextToken();
 
-			Resource resourceBinding = resources.get(resourceName);
+			ResourceBinding resourceBinding;
+			if ("metadata".equals(resourceName)) {
+				operation = "metadata";
+				resourceBinding = resources.get("Conformance");
+			} else {
+				resourceBinding = resources.get(resourceName);
+			}
+			
 			if (resourceBinding == null) {
 				throw new MethodNotFoundException("Unknown resource type: " + resourceName);
 			}
 
-			IdDt id = null;
-			IdDt versionId = null;
-			String operation = null;
 			if (tok.hasMoreTokens()) {
 				String nextString = tok.nextToken();
 				if (nextString.startsWith("_")) {
@@ -280,21 +239,6 @@ public abstract class RestfulServer extends HttpServlet {
 			}
 
 			// TODO: look for more tokens for version, compartments, etc...
-
-			//
-			//
-			// if (identity != null && !tok.hasMoreTokens()) {
-			// if (params == null || params.isEmpty()) {
-			// IResource resource =
-			// resourceBinding.getResourceProvider().getResourceById(identity);
-			// if (resource == null) {
-			// throw new ResourceNotFoundException(identity);
-			// }
-			// streamResponseAsResource(response, resource, resourceBinding,
-			// responseEncoding);
-			// return;
-			// }
-			// }
 
 			Request r = new Request();
 			r.setResourceName(resourceName);
@@ -347,6 +291,77 @@ public abstract class RestfulServer extends HttpServlet {
 			ourLog.error("Failed to process invocation", t);
 			throw new ServletException(t);
 		}
+
+	}
+
+	@Override
+	public void init() throws ServletException {
+		try {
+			ourLog.info("Initializing HAPI FHIR restful server");
+
+			securityManager = getSecurityManager();
+			if (null == securityManager) {
+				ourLog.warn("No security manager has been provided, requests will not be authenticated!");
+			}
+
+			Collection<IResourceProvider> resourceProvider = getResourceProviders();
+			for (IResourceProvider nextProvider : resourceProvider) {
+				if (myTypeToProvider.containsKey(nextProvider.getResourceType())) {
+					throw new ServletException("Multiple providers for type: " + nextProvider.getResourceType().getCanonicalName());
+				}
+				myTypeToProvider.put(nextProvider.getResourceType(), nextProvider);
+			}
+
+			ourLog.info("Got {} resource providers", myTypeToProvider.size());
+
+			myFhirContext = new FhirContext(myTypeToProvider.keySet());
+
+			for (IResourceProvider provider : myTypeToProvider.values()) {
+				findResourceMethods(provider);
+			}
+			
+			findResourceMethods(getServerProfilesProvider());
+			findResourceMethods(getServerConformanceProvider());
+
+		} catch (Exception ex) {
+			ourLog.error("An error occurred while loading request handlers!", ex);
+			throw new ServletException("Failed to initialize FHIR Restful server", ex);
+		}
+	}
+
+	private void streamResponseAsBundle(HttpServletResponse theHttpResponse, List<IResource> theResult, EncodingUtil theResponseEncoding) throws IOException {
+		theHttpResponse.setStatus(200);
+		theHttpResponse.setContentType(theResponseEncoding.getBundleContentType());
+		theHttpResponse.setCharacterEncoding("UTF-8");
+
+		Bundle bundle = new Bundle();
+		bundle.getAuthorName().setValue(getClass().getCanonicalName());
+		bundle.getBundleId().setValue(UUID.randomUUID().toString());
+		bundle.getPublished().setToCurrentTimeInLocalTimeZone();
+
+		for (IResource next : theResult) {
+			BundleEntry entry = new BundleEntry();
+			bundle.getEntries().add(entry);
+
+			entry.setResource(next);
+		}
+
+		bundle.getTotalResults().setValue(theResult.size());
+
+		PrintWriter writer = theHttpResponse.getWriter();
+		getNewParser(theResponseEncoding).encodeBundleToWriter(bundle, writer);
+		writer.close();
+	}
+
+	private void streamResponseAsResource(HttpServletResponse theHttpResponse, IResource theResource, ResourceBinding theResourceBinding, EncodingUtil theResponseEncoding) throws IOException {
+
+		theHttpResponse.setStatus(200);
+		theHttpResponse.setContentType(theResponseEncoding.getResourceContentType());
+		theHttpResponse.setCharacterEncoding("UTF-8");
+
+		PrintWriter writer = theHttpResponse.getWriter();
+		getNewParser(theResponseEncoding).encodeResourceToWriter(theResource, writer);
+		writer.close();
 
 	}
 

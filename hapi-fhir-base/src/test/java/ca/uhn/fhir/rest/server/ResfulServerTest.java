@@ -20,9 +20,11 @@ import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
+import ca.uhn.fhir.model.dstu.resource.Conformance;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.dstu.resource.Profile;
-import ca.uhn.fhir.rest.server.provider.ProfileProvider;
+import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.server.provider.ServerProfileProvider;
 import ca.uhn.fhir.testutil.RandomServerPortProvider;
 
 /**
@@ -40,10 +42,10 @@ public class ResfulServerTest {
 	public static void beforeClass() throws Exception {
 		ourPort = RandomServerPortProvider.findFreePort();
 		ourServer = new Server(ourPort);
-		ourCtx = new FhirContext(Patient.class, Profile.class);
+		ourCtx = new FhirContext(Patient.class);
 
 		DummyPatientResourceProvider patientProvider = new DummyPatientResourceProvider();
-		ProfileProvider profProvider=new ProfileProvider(ourCtx);
+		ServerProfileProvider profProvider=new ServerProfileProvider(ourCtx);
 
 		ServletHandler proxyHandler = new ServletHandler();
 		ServletHolder servletHolder = new ServletHolder(new DummyRestfulServer(patientProvider,profProvider));
@@ -65,9 +67,9 @@ public class ResfulServerTest {
 	}
 
 	@Test
-	public void testSearchAllProfiles() throws Exception {
+	public void testSearchWithIncludes() throws Exception {
 
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Profile?");
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?withIncludes=include1&_include=include2&_include=include3");
 		HttpResponse status = ourClient.execute(httpGet);
 
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
@@ -76,6 +78,45 @@ public class ResfulServerTest {
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		Bundle bundle = ourCtx.newXmlParser().parseBundle(responseContent);
 
+		Patient patient = (Patient) bundle.getEntries().get(0).getResource();
+		assertEquals("include1", patient.getCommunication().get(0).getText().getValue());
+		assertEquals("include2", patient.getAddress().get(0).getLine().get(0).getValue());
+		assertEquals("include3", patient.getAddress().get(1).getLine().get(0).getValue());
+	}
+
+	@Test
+	public void testSearchAllProfiles() throws Exception {
+
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Profile?");
+		HttpResponse status = ourClient.execute(httpGet);
+
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+//		ourLog.info("Response was:\n{}", responseContent);
+
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		IParser parser = ourCtx.newXmlParser().setPrettyPrint(true);
+		Bundle bundle = parser.parseBundle(responseContent);
+
+		ourLog.info("Response:\n{}", parser.encodeBundleToString(bundle));
+		
+	}
+	
+	
+	@Test
+	public void testGetMetadata() throws Exception {
+
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/metadata");
+		HttpResponse status = ourClient.execute(httpGet);
+
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+//		ourLog.info("Response was:\n{}", responseContent);
+
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		IParser parser = ourCtx.newXmlParser().setPrettyPrint(true);
+		Conformance bundle = parser.parseResource(Conformance.class, responseContent);
+
+		ourLog.info("Response:\n{}", parser.encodeResourceToString(bundle));
+		
 	}
 	
 	@Test

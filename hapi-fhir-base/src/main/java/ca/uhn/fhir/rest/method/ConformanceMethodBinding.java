@@ -1,10 +1,15 @@
 package ca.uhn.fhir.rest.method;
 
+import java.lang.reflect.Method;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.resource.Conformance;
+import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
+import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.client.GetClientInvocation;
 import ca.uhn.fhir.rest.method.SearchMethodBinding.RequestType;
@@ -14,8 +19,16 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 public class ConformanceMethodBinding extends BaseMethodBinding {
 
-	public ConformanceMethodBinding(MethodReturnTypeEnum theMethodReturnType) {
+	private Method myMethod;
+
+	public ConformanceMethodBinding(MethodReturnTypeEnum theMethodReturnType, Class<? extends IResource> theReturnType, Method theMethod) {
 		super(theMethodReturnType, Conformance.class);
+		
+		if (theMethodReturnType != MethodReturnTypeEnum.RESOURCE) {
+			throw new ConfigurationException("Conformance resource provider '" + theMethod.getName() + "' should return type " + Conformance.class);
+		}
+		
+		myMethod = theMethod;
 	}
 
 	@Override
@@ -30,7 +43,14 @@ public class ConformanceMethodBinding extends BaseMethodBinding {
 
 	@Override
 	public List<IResource> invokeServer(IResourceProvider theResourceProvider, IdDt theId, IdDt theVersionId, Map<String, String[]> theParameterValues) throws InvalidRequestException, InternalErrorException {
-		return null;
+		IResource conf;
+		try {
+			conf = (Conformance) myMethod.invoke(theResourceProvider);
+		} catch (Exception e) {
+			throw new InternalErrorException("Failed to call access method",e);
+		}
+		
+		return Collections.singletonList(conf);
 	}
 
 	@Override
@@ -40,10 +60,20 @@ public class ConformanceMethodBinding extends BaseMethodBinding {
 		}
 		
 		if (theRequest.getRequestType() == RequestType.GET && "metadata".equals(theRequest.getOperation())) {
-			return false;
+			return true;
 		}
 		
 		return false;
+	}
+
+	@Override
+	public RestfulOperationTypeEnum getResourceOperationType() {
+		return null;
+	}
+
+	@Override
+	public RestfulOperationSystemEnum getSystemOperationType() {
+		return null;
 	}
 
 }
