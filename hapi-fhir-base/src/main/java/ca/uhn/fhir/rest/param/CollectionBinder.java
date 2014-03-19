@@ -16,13 +16,13 @@ public class CollectionBinder
 	 * @param thePositionDescription Just used in exceptions if theCollectionType is invalid
 	 */
 	@SuppressWarnings("unchecked")
-	public static Class<? extends Collection<?>> getInstantiableCollectionType(Class<? extends Collection<?>> theCollectionType, String thePositionDescription) {
-		if (theCollectionType == List.class || theCollectionType == ArrayList.class) {
-			return (Class<? extends Collection<?>>) ArrayList.class;
-		} else if (theCollectionType == Set.class || theCollectionType == HashSet.class) {
-			return (Class<? extends Collection<?>>) HashSet.class;
-		} else if (theCollectionType == Collection.class) {
-			return (Class<? extends Collection<?>>) ArrayList.class;
+	public static Class<? extends Collection> getInstantiableCollectionType(Class<? extends Collection<?>> theCollectionType, String thePositionDescription) {
+		if (theCollectionType.equals(List.class) || theCollectionType .equals(ArrayList.class)) {
+			return (Class<? extends Collection>) ArrayList.class;
+		} else if (theCollectionType .equals( Set.class )|| theCollectionType .equals( HashSet.class)) {
+			return (Class<? extends Collection>) HashSet.class;
+		} else if (theCollectionType.equals(Collection.class)) {
+			return (Class<? extends Collection>) ArrayList.class;
 		} else {
 			throw new ConfigurationException("Unsupported binding collection type '" + theCollectionType.getCanonicalName() + "' for " + thePositionDescription);
 		}

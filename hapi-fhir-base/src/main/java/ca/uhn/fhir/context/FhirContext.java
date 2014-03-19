@@ -119,7 +119,7 @@ public class FhirContext {
 		idToElementDefinition.putAll(myIdToResourceDefinition);
 		idToElementDefinition.putAll(scanner.getIdToResourceDefinition());
 
-		myNameToElementDefinition = idToElementDefinition;
+		myNameToElementDefinition = nameToElementDefinition;
 		myClassToElementDefinition = classToElementDefinition;
 		myIdToResourceDefinition = idToElementDefinition;
 		
