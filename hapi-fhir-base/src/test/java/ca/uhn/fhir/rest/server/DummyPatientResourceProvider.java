@@ -107,6 +107,22 @@ public class DummyPatientResourceProvider implements IResourceProvider {
 		return retVal;
 	}
 	
+	/**
+	 * @param theName3  
+	 */
+	@Search()
+	public List<Patient> getPatientWithOptionalName(@Required(name = "aaa") StringDt theName1, @Optional(name = "bbb") StringDt theName2, @Optional(name = "ccc") StringDt theName3) {
+		List<Patient> retVal = new ArrayList<Patient>();
+		Patient next = getIdToPatient().get("1");
+		next.getName().get(0).getFamily().set(0, theName1);
+		if (theName2 != null) {
+			next.getName().get(0).getGiven().set(0, theName2);
+		}
+		retVal.add(next);
+
+		return retVal;
+	}
+
 	@Search()
 	public List<Patient> getPatientMultipleIdentifiers(@Required(name = "ids") CodingListParam theIdentifiers) {
 		List<Patient> retVal = new ArrayList<Patient>();

@@ -10,6 +10,8 @@
    and maybe a way to configure this in the FhirContext so that the parser
    can take advantage?
  
+ * Return link-self in returned bundles from server
+ 
  * Add SimpleSetters for all primitive datatypes
  
  * Implement and add Simple Getters in a similar way to simple setters

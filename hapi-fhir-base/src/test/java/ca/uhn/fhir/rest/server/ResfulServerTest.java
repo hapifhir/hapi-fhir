@@ -26,6 +26,7 @@ import ca.uhn.fhir.model.dstu.resource.Profile;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.server.provider.ServerProfileProvider;
 import ca.uhn.fhir.testutil.RandomServerPortProvider;
+import ca.uhn.fhir.util.ExtensionConstants;
 
 /**
  * Created by dsotnikov on 2/25/2014.
@@ -102,7 +103,6 @@ public class ResfulServerTest {
 	}
 	
 	
-	@Test
 	public void testGetMetadata() throws Exception {
 
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/metadata");
@@ -115,8 +115,16 @@ public class ResfulServerTest {
 		IParser parser = ourCtx.newXmlParser().setPrettyPrint(true);
 		Conformance bundle = parser.parseResource(Conformance.class, responseContent);
 
-		ourLog.info("Response:\n{}", parser.encodeResourceToString(bundle));
+		IParser p = ourCtx.newJsonParser().setPrettyPrint(true);
+		String enc = p.encodeResourceToString(bundle);
+		ourLog.info("Response:\n{}", enc);
+		assertTrue(enc.contains(ExtensionConstants.CONF_ALSO_CHAIN));
 		
+		 p = ourCtx.newXmlParser().setPrettyPrint(true);
+		 enc = p.encodeResourceToString(bundle);
+		ourLog.info("Response:\n{}", enc);
+		assertTrue(enc.contains(ExtensionConstants.CONF_ALSO_CHAIN));
+
 	}
 	
 	@Test
