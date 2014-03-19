@@ -274,7 +274,7 @@ class ParserState<T extends IElement> {
 
 		@Override
 		public void enteringNewElement(String theNamespaceURI, String theLocalPart) throws DataFormatException {
-			throw new DataFormatException("Found unexpected element content");
+			throw new DataFormatException("Found unexpected element content '" + theLocalPart + "' within <link>");
 		}
 
 	}

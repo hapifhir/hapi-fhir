@@ -517,6 +517,7 @@ public class XmlParser extends BaseParser implements IParser {
 			theEventWriter.writeStartElement("link");
 			theEventWriter.writeAttribute("rel", theRel);
 			theEventWriter.writeAttribute("href", theStringDt.getValue());
+			theEventWriter.writeEndElement();
 		}
 	}
 

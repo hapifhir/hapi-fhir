@@ -1,7 +1,15 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
+import java.io.OutputStreamWriter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.IOUtils;
@@ -20,10 +28,24 @@ import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
+import ca.uhn.fhir.model.api.PathSpecification;
+import ca.uhn.fhir.model.dstu.composite.CodingDt;
+import ca.uhn.fhir.model.dstu.composite.HumanNameDt;
+import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.resource.Conformance;
 import ca.uhn.fhir.model.dstu.resource.Patient;
-import ca.uhn.fhir.model.dstu.resource.Profile;
+import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
+import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.annotation.Include;
+import ca.uhn.fhir.rest.annotation.Optional;
+import ca.uhn.fhir.rest.annotation.Read;
+import ca.uhn.fhir.rest.annotation.Required;
+import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.param.CodingListParam;
+import ca.uhn.fhir.rest.param.QualifiedDateParam;
 import ca.uhn.fhir.rest.server.provider.ServerProfileProvider;
 import ca.uhn.fhir.testutil.RandomServerPortProvider;
 import ca.uhn.fhir.util.ExtensionConstants;
@@ -31,9 +53,9 @@ import ca.uhn.fhir.util.ExtensionConstants;
 /**
  * Created by dsotnikov on 2/25/2014.
  */
-public class ResfulServerTest {
+public class ResfulServerMethodTest {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResfulServerTest.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResfulServerMethodTest.class);
 	private static int ourPort;
 	private static Server ourServer;
 	private static CloseableHttpClient ourClient;
@@ -50,7 +72,7 @@ public class ResfulServerTest {
 
 		ServletHandler proxyHandler = new ServletHandler();
 		ServletHolder servletHolder = new ServletHolder(new DummyRestfulServer(patientProvider,profProvider));
-		proxyHandler.addServletWithMapping(servletHolder, "/");
+		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
 		ourServer.start();
 
@@ -102,7 +124,7 @@ public class ResfulServerTest {
 		
 	}
 	
-	
+	@Test
 	public void testGetMetadata() throws Exception {
 
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/metadata");
@@ -116,6 +138,9 @@ public class ResfulServerTest {
 		Conformance bundle = parser.parseResource(Conformance.class, responseContent);
 
 		IParser p = ourCtx.newJsonParser().setPrettyPrint(true);
+
+		p.encodeResourceToWriter(bundle, new OutputStreamWriter(System.out));
+
 		String enc = p.encodeResourceToString(bundle);
 		ourLog.info("Response:\n{}", enc);
 		assertTrue(enc.contains(ExtensionConstants.CONF_ALSO_CHAIN));
@@ -409,4 +434,175 @@ public class ResfulServerTest {
 
 	}
 
+	
+	public static class DummyRestfulServer extends RestfulServer {
+
+		private static final long serialVersionUID = 1L;
+		
+		private Collection<IResourceProvider> myResourceProviders;
+
+		public DummyRestfulServer(IResourceProvider... theResourceProviders) {
+			myResourceProviders = Arrays.asList(theResourceProviders);
+		}
+
+		@Override
+		public Collection<IResourceProvider> getResourceProviders() {
+			return myResourceProviders;
+		}
+
+	    @Override
+	    public ISecurityManager getSecurityManager() {
+	        return null;
+	    }
+
+	}
+	
+	
+	/**
+	 * Created by dsotnikov on 2/25/2014.
+	 */
+	public static class DummyPatientResourceProvider implements IResourceProvider {
+
+		public Map<String, Patient> getIdToPatient() {
+			Map<String, Patient> idToPatient = new HashMap<String, Patient>();
+			{
+				Patient patient = new Patient();
+				patient.addIdentifier();
+				patient.getIdentifier().get(0).setUse(IdentifierUseEnum.OFFICIAL);
+				patient.getIdentifier().get(0).setSystem(new UriDt("urn:hapitest:mrns"));
+				patient.getIdentifier().get(0).setValue("00001");
+				patient.addName();
+				patient.getName().get(0).addFamily("Test");
+				patient.getName().get(0).addGiven("PatientOne");
+				patient.getGender().setText("M");
+				idToPatient.put("1", patient);
+			}
+			{
+				Patient patient = new Patient();
+				patient.getIdentifier().add(new IdentifierDt());
+				patient.getIdentifier().get(0).setUse(IdentifierUseEnum.OFFICIAL);
+				patient.getIdentifier().get(0).setSystem(new UriDt("urn:hapitest:mrns"));
+				patient.getIdentifier().get(0).setValue("00002");
+				patient.getName().add(new HumanNameDt());
+				patient.getName().get(0).addFamily("Test");
+				patient.getName().get(0).addGiven("PatientTwo");
+				patient.getGender().setText("F");
+				idToPatient.put("2", patient);
+			}
+			return idToPatient;
+		}
+
+		@Search()
+		public Patient getPatientWithIncludes(@Required(name = "withIncludes") StringDt theString, @Include List<PathSpecification> theIncludes) {
+			Patient next = getIdToPatient().get("1");
+			
+			next.addCommunication().setText(theString.getValue());
+			
+			for (PathSpecification line : theIncludes) {
+				next.addAddress().addLine(line.getValue());
+			}
+			
+			return next;
+		}
+
+		@Search()
+		public Patient getPatient(@Required(name = Patient.SP_IDENTIFIER) IdentifierDt theIdentifier) {
+			for (Patient next : getIdToPatient().values()) {
+				for (IdentifierDt nextId : next.getIdentifier()) {
+					if (nextId.matchesSystemAndValue(theIdentifier)) {
+						return next;
+					}
+				}
+			}
+			return null;
+		}
+		
+		@Search()
+		public Patient getPatientWithDOB(@Required(name = "dob") QualifiedDateParam theDob) {
+			Patient next = getIdToPatient().get("1");
+			if (theDob.getComparator()!=null) {
+				next.addIdentifier().setValue(theDob.getComparator().getCode());
+			}else {
+				next.addIdentifier().setValue("NONE");
+			}
+			next.addIdentifier().setValue(theDob.getValueAsString());
+			return next;
+		}	
+
+		@Search()
+		public List<Patient> getPatientWithOptionalName(@Required(name = "name1") StringDt theName1, @Optional(name = "name2") StringDt theName2) {
+			List<Patient> retVal = new ArrayList<Patient>();
+			Patient next = getIdToPatient().get("1");
+			next.getName().get(0).getFamily().set(0, theName1);
+			if (theName2 != null) {
+				next.getName().get(0).getGiven().set(0, theName2);
+			}
+			retVal.add(next);
+
+			return retVal;
+		}
+		
+		/**
+		 * @param theName3  
+		 */
+		@Search()
+		public List<Patient> getPatientWithOptionalName(@Required(name = "aaa") StringDt theName1, @Optional(name = "bbb") StringDt theName2, @Optional(name = "ccc") StringDt theName3) {
+			List<Patient> retVal = new ArrayList<Patient>();
+			Patient next = getIdToPatient().get("1");
+			next.getName().get(0).getFamily().set(0, theName1);
+			if (theName2 != null) {
+				next.getName().get(0).getGiven().set(0, theName2);
+			}
+			retVal.add(next);
+
+			return retVal;
+		}
+
+		@Search()
+		public List<Patient> getPatientMultipleIdentifiers(@Required(name = "ids") CodingListParam theIdentifiers) {
+			List<Patient> retVal = new ArrayList<Patient>();
+			Patient next = getIdToPatient().get("1");
+			
+			for (CodingDt nextId : theIdentifiers.getCodings()) {
+				next.getIdentifier().add(new IdentifierDt(nextId.getSystem().getValueAsString(), nextId.getCode().getValue()));
+			}
+			
+			retVal.add(next);
+
+			return retVal;
+		}
+
+		/**
+		 * Retrieve the resource by its identifier
+		 * 
+		 * @param theId
+		 *            The resource identity
+		 * @return The resource
+		 */
+		@Read()
+		public Patient getResourceById(@Read.IdParam IdDt theId) {
+			return getIdToPatient().get(theId.getValue());
+		}
+
+		@Read()
+		public Patient getResourceById(@Read.IdParam IdDt theId, @Read.VersionIdParam IdDt theVersionId) {
+			Patient retVal = getIdToPatient().get(theId.getValue());
+			retVal.getName().get(0).setText(theVersionId.getValue());
+			return retVal;
+		}
+
+		@Search()
+		public Collection<Patient> getResources() {
+			return getIdToPatient().values();
+		}
+
+		@Override
+		public Class<Patient> getResourceType() {
+			return Patient.class;
+		}
+
+	}
+
+
+	
 }

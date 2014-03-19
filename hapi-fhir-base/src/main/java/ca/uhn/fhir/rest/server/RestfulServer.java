@@ -19,6 +19,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
+import org.hamcrest.core.IsNot;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
@@ -184,17 +185,23 @@ public abstract class RestfulServer extends HttpServlet {
 			}
 
 			String resourceName = null;
-			String requestPath = StringUtils.defaultString(request.getRequestURI());
-			String contextPath = StringUtils.defaultString(request.getContextPath());
+			String requestFullPath = StringUtils.defaultString(request.getRequestURI());
+//			String contextPath = StringUtils.defaultString(request.getContextPath());
+			String servletPath = StringUtils.defaultString(request.getServletPath());
 			IdDt id = null;
 			IdDt versionId = null;
-			String operation = null;
-
-			requestPath = requestPath.substring(contextPath.length());
-			if (requestPath.charAt(0) == '/') {
+			String operation = null;			
+			
+			String requestPath = requestFullPath.substring(servletPath.length());
+			if (requestPath.length() > 0 && requestPath.charAt(0) == '/') {
 				requestPath = requestPath.substring(1);
 			}
 
+			StringBuffer requestUrl = request.getRequestURL();
+			int contextIndex = requestUrl.indexOf(servletPath);
+			String fhirServerBase = requestUrl.substring(0, contextIndex + servletPath.length());
+			String completeUrl = StringUtils.isNotBlank(request.getQueryString()) ? requestUrl + "?" + request.getQueryString() : requestUrl.toString();
+			
 			ourLog.info("Request URI: {}", requestPath);
 
 			Map<String, String[]> params = new HashMap<String, String[]>(request.getParameterMap());
@@ -256,7 +263,7 @@ public abstract class RestfulServer extends HttpServlet {
 			List<IResource> result = resourceMethod.invokeServer(resourceBinding.getResourceProvider(), id, versionId, params);
 			switch (resourceMethod.getReturnType()) {
 			case BUNDLE:
-				streamResponseAsBundle(response, result, responseEncoding);
+				streamResponseAsBundle(response, result, responseEncoding, fhirServerBase, completeUrl);
 				break;
 			case RESOURCE:
 				if (result.size() == 0) {
@@ -329,7 +336,7 @@ public abstract class RestfulServer extends HttpServlet {
 		}
 	}
 
-	private void streamResponseAsBundle(HttpServletResponse theHttpResponse, List<IResource> theResult, EncodingUtil theResponseEncoding) throws IOException {
+	private void streamResponseAsBundle(HttpServletResponse theHttpResponse, List<IResource> theResult, EncodingUtil theResponseEncoding, String theFhirServerBase, String theCompleteUrl) throws IOException {
 		theHttpResponse.setStatus(200);
 		theHttpResponse.setContentType(theResponseEncoding.getBundleContentType());
 		theHttpResponse.setCharacterEncoding("UTF-8");
@@ -338,6 +345,8 @@ public abstract class RestfulServer extends HttpServlet {
 		bundle.getAuthorName().setValue(getClass().getCanonicalName());
 		bundle.getBundleId().setValue(UUID.randomUUID().toString());
 		bundle.getPublished().setToCurrentTimeInLocalTimeZone();
+		bundle.getLinkBase().setValue(theFhirServerBase);
+		bundle.getLinkSelf().setValue(theCompleteUrl);
 
 		for (IResource next : theResult) {
 			BundleEntry entry = new BundleEntry();

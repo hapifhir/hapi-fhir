@@ -272,6 +272,7 @@ public class JsonParser extends BaseParser implements IParser {
 			if (theChildName != null) {
 				theWriter.writeStartObject(theChildName);
 			} else {
+				theWriter.flush();//TODO: remove
 				theWriter.writeStartObject();
 			}
 			encodeCompositeElementToStreamWriter(theValue, theWriter, childCompositeDef);
@@ -377,6 +378,7 @@ public class JsonParser extends BaseParser implements IParser {
 						}
 						currentChildName = childName;
 					} else {
+						theEventWriter.flush();//TODO: remove
 						encodeChildElementToStreamWriter(theEventWriter, nextValue, childDef, null);
 					}
 
@@ -410,6 +412,7 @@ public class JsonParser extends BaseParser implements IParser {
 							nextExt.write(theEventWriter);
 						}
 						theEventWriter.writeEnd();
+						theEventWriter.writeEnd();
 					}
 
 					if (!haveContent) {
@@ -438,6 +441,7 @@ public class JsonParser extends BaseParser implements IParser {
 				// }
 
 				theEventWriter.writeEnd();
+				theEventWriter.flush(); // TODO: remove
 			}
 
 		}
