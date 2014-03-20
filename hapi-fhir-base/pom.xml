@@ -168,6 +168,13 @@
 			<version>0.8</version>
 			<scope>test</scope>
 		</dependency>
+        <dependency>
+                <groupId>org.hamcrest</groupId>
+                <artifactId>hamcrest-all</artifactId>
+                <version>${hamcrest_version}</version>
+                <scope>test</scope>
+        </dependency>
+
 	</dependencies>
 
 	<reporting>

@@ -3,6 +3,7 @@ package ca.uhn.fhir.parser;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.nio.charset.Charset;
 import java.util.List;
 
@@ -33,6 +34,8 @@ public class JsonParserTest {
 		List<UndeclaredExtension> undeclaredExtensions = obs.getContact().get(0).getName().getFamily().get(0).getUndeclaredExtensions();
 		UndeclaredExtension undeclaredExtension = undeclaredExtensions.get(0);
 		assertEquals("http://hl7.org/fhir/Profile/iso-21090#qualifier", undeclaredExtension.getUrl());
+
+		ctx.newJsonParser().setPrettyPrint(true).encodeResourceToWriter(obs, new OutputStreamWriter(System.out));
 
 		String encoded = ctx.newJsonParser().encodeResourceToString(obs);
 		ourLog.info(encoded);

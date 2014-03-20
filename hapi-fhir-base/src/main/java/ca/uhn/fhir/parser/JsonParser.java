@@ -462,7 +462,8 @@ public class JsonParser extends BaseParser implements IParser {
 					}
 
 					if (!haveContent) {
-						theEventWriter.writeEnd();
+//						theEventWriter.writeEnd();
+						theEventWriter.flush(); // TODO: remove
 						theEventWriter.writeNull();
 					}
 				}

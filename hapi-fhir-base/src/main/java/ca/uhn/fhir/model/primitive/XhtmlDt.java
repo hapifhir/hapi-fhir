@@ -16,6 +16,7 @@ import javax.xml.stream.events.XMLEvent;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.model.api.BasePrimitive;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+import ca.uhn.fhir.model.api.annotation.SimpleSetter;
 import ca.uhn.fhir.parser.DataFormatException;
 
 @DatatypeDef(name = "xhtml")
@@ -23,13 +24,43 @@ public class XhtmlDt extends BasePrimitive<List<XMLEvent>> {
 
 	private List<XMLEvent> myValue;
 
+	/**
+	 * Constructor
+	 */
+	public XhtmlDt() {
+		// nothing
+	}
+	
+	/**
+	 * Constructor which accepts a string code
+	 * 
+	 * @see #setValueAsString(String) for a description of how this value is applied
+	 */
+	@SimpleSetter()
+	public XhtmlDt(@SimpleSetter.Parameter(name = "theTextDiv") String theTextDiv) {
+		setValueAsString(theTextDiv);
+	}
+
+	/**
+	 * Accepts a textual DIV and parses it into XHTML events which are stored internally.
+	 * <p>
+	 * <b>Formatting note:</b> The text will be trimmed {@link String#trim()}. If the text does not start with
+	 * an HTML tag (generally this would be a div tag), a div tag will be automatically
+	 * placed surrounding the text. 
+	 * </p>
+	 */
 	@Override
 	public void setValueAsString(String theValue) throws DataFormatException {
 		if (theValue == null) {
 			myValue = null;
 			return;
 		}
-		String val = "<a>" + theValue + "</a>";
+		
+		String val = theValue.trim();
+		if (!val.startsWith("<")) {
+			val = "<div>" + val + "</div>";
+		}
+		
 		try {
 			ArrayList<XMLEvent> value = new ArrayList<XMLEvent>();
 			XMLEventReader er = XMLInputFactory.newInstance().createXMLEventReader(new StringReader(val));

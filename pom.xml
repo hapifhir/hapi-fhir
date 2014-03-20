@@ -31,6 +31,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven_javadoc_plugin_version>2.9.1</maven_javadoc_plugin_version>
 		<slf4j_version>1.6.6</slf4j_version>
+		<hamcrest_version>1.3</hamcrest_version>
 	</properties>
 
 	<build>
