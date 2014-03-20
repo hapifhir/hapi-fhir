@@ -296,10 +296,10 @@ public class DiagnosticReport extends BaseResource implements IResource {
 	private DateTimeDt myIssued;
 	
 	@Child(name="subject", order=3, min=1, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Patient.class,
-		ca.uhn.fhir.model.dstu.resource.Group.class,
-		ca.uhn.fhir.model.dstu.resource.Device.class,
-		ca.uhn.fhir.model.dstu.resource.Location.class,
+		Patient.class,
+		Group.class,
+		Device.class,
+		Location.class,
 	})
 	@Description(
 		shortDefinition="The subject of the report, usually, but not always, the patient",
@@ -308,8 +308,8 @@ public class DiagnosticReport extends BaseResource implements IResource {
 	private ResourceReferenceDt mySubject;
 	
 	@Child(name="performer", order=4, min=1, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Practitioner.class,
-		ca.uhn.fhir.model.dstu.resource.Organization.class,
+		Practitioner.class,
+		Organization.class,
 	})
 	@Description(
 		shortDefinition="Responsible Diagnostic Service",
@@ -325,7 +325,7 @@ public class DiagnosticReport extends BaseResource implements IResource {
 	private IdentifierDt myIdentifier;
 	
 	@Child(name="requestDetail", order=6, min=0, max=Child.MAX_UNLIMITED, type={
-		ca.uhn.fhir.model.dstu.resource.DiagnosticOrder.class,
+		DiagnosticOrder.class,
 	})
 	@Description(
 		shortDefinition="What was requested",
@@ -351,7 +351,7 @@ public class DiagnosticReport extends BaseResource implements IResource {
 	private IDatatype myDiagnostic;
 	
 	@Child(name="specimen", order=9, min=0, max=Child.MAX_UNLIMITED, type={
-		ca.uhn.fhir.model.dstu.resource.Specimen.class,
+		Specimen.class,
 	})
 	@Description(
 		shortDefinition="Specimens this report is based on",
@@ -360,7 +360,7 @@ public class DiagnosticReport extends BaseResource implements IResource {
 	private java.util.List<ResourceReferenceDt> mySpecimen;
 	
 	@Child(name="result", order=10, min=0, max=Child.MAX_UNLIMITED, type={
-		ca.uhn.fhir.model.dstu.resource.Observation.class,
+		Observation.class,
 	})
 	@Description(
 		shortDefinition="Observations - simple, or complex nested groups",
@@ -369,7 +369,7 @@ public class DiagnosticReport extends BaseResource implements IResource {
 	private java.util.List<ResourceReferenceDt> myResult;
 	
 	@Child(name="imagingStudy", order=11, min=0, max=Child.MAX_UNLIMITED, type={
-		ca.uhn.fhir.model.dstu.resource.ImagingStudy.class,
+		ImagingStudy.class,
 	})
 	@Description(
 		shortDefinition="Reference to full details of imaging associated with the diagnostic report",
@@ -450,7 +450,6 @@ public class DiagnosticReport extends BaseResource implements IResource {
 		myName = theValue;
 	}
 
-
   
 	/**
 	 * Gets the value(s) for <b>status</b> (registered | partial | final | corrected +).
@@ -480,7 +479,6 @@ public class DiagnosticReport extends BaseResource implements IResource {
 	public void setStatus(BoundCodeDt<DiagnosticReportStatusEnum> theValue) {
 		myStatus = theValue;
 	}
-
 
 	/**
 	 * Sets the value(s) for <b>status</b> (registered | partial | final | corrected +)
@@ -524,7 +522,6 @@ public class DiagnosticReport extends BaseResource implements IResource {
 		myIssued = theValue;
 	}
 
-
  	/**
 	 * Sets the value for <b>issued</b> (Date this version was released)
 	 *
@@ -533,8 +530,8 @@ public class DiagnosticReport extends BaseResource implements IResource {
      * The date and/or time that this version of the report was released from the source diagnostic service
      * </p> 
 	 */
-	public void setIssued( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myIssued = new DateTimeDt(theDate, thePrecision); 
+	public void setIssuedWithSecondsPrecision( Date theDate) {
+		myIssued = new DateTimeDt(theDate); 
 	}
 
 	/**
@@ -545,8 +542,8 @@ public class DiagnosticReport extends BaseResource implements IResource {
      * The date and/or time that this version of the report was released from the source diagnostic service
      * </p> 
 	 */
-	public void setIssuedWithSecondsPrecision( Date theDate) {
-		myIssued = new DateTimeDt(theDate); 
+	public void setIssued( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myIssued = new DateTimeDt(theDate, thePrecision); 
 	}
 
  
@@ -576,7 +573,6 @@ public class DiagnosticReport extends BaseResource implements IResource {
 		mySubject = theValue;
 	}
 
-
   
 	/**
 	 * Gets the value(s) for <b>performer</b> (Responsible Diagnostic Service).
@@ -603,7 +599,6 @@ public class DiagnosticReport extends BaseResource implements IResource {
 	public void setPerformer(ResourceReferenceDt theValue) {
 		myPerformer = theValue;
 	}
-
 
   
 	/**
@@ -635,7 +630,6 @@ public class DiagnosticReport extends BaseResource implements IResource {
 		myIdentifier = theValue;
 	}
 
-
   
 	/**
 	 * Gets the value(s) for <b>requestDetail</b> (What was requested).
@@ -666,7 +660,19 @@ public class DiagnosticReport extends BaseResource implements IResource {
 		myRequestDetail = theValue;
 	}
 
-
+	/**
+	 * Adds and returns a new value for <b>requestDetail</b> (What was requested)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Details concerning a test requested.
+     * </p> 
+	 */
+	public ResourceReferenceDt addRequestDetail() {
+		ResourceReferenceDt newType = new ResourceReferenceDt();
+		getRequestDetail().add(newType);
+		return newType; 
+	}
   
 	/**
 	 * Gets the value(s) for <b>serviceCategory</b> (Biochemistry, Hematology etc.).
@@ -697,7 +703,6 @@ public class DiagnosticReport extends BaseResource implements IResource {
 		myServiceCategory = theValue;
 	}
 
-
   
 	/**
 	 * Gets the value(s) for <b>diagnostic[x]</b> (Physiologically Relevant time/time-period for report).
@@ -724,7 +729,6 @@ public class DiagnosticReport extends BaseResource implements IResource {
 	public void setDiagnostic(IDatatype theValue) {
 		myDiagnostic = theValue;
 	}
-
 
   
 	/**
@@ -756,7 +760,19 @@ public class DiagnosticReport extends BaseResource implements IResource {
 		mySpecimen = theValue;
 	}
 
-
+	/**
+	 * Adds and returns a new value for <b>specimen</b> (Specimens this report is based on)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Details about the specimens on which this Disagnostic report is based
+     * </p> 
+	 */
+	public ResourceReferenceDt addSpecimen() {
+		ResourceReferenceDt newType = new ResourceReferenceDt();
+		getSpecimen().add(newType);
+		return newType; 
+	}
   
 	/**
 	 * Gets the value(s) for <b>result</b> (Observations - simple, or complex nested groups).
@@ -787,7 +803,19 @@ public class DiagnosticReport extends BaseResource implements IResource {
 		myResult = theValue;
 	}
 
-
+	/**
+	 * Adds and returns a new value for <b>result</b> (Observations - simple, or complex nested groups)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Observations that are part of this diagnostic report. Observations can be simple name/value pairs (e.g. \"atomic\" results), or they can be grouping observations that include references to other members of the group (e.g. \"panels\")
+     * </p> 
+	 */
+	public ResourceReferenceDt addResult() {
+		ResourceReferenceDt newType = new ResourceReferenceDt();
+		getResult().add(newType);
+		return newType; 
+	}
   
 	/**
 	 * Gets the value(s) for <b>imagingStudy</b> (Reference to full details of imaging associated with the diagnostic report).
@@ -818,7 +846,19 @@ public class DiagnosticReport extends BaseResource implements IResource {
 		myImagingStudy = theValue;
 	}
 
-
+	/**
+	 * Adds and returns a new value for <b>imagingStudy</b> (Reference to full details of imaging associated with the diagnostic report)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * One or more links to full details of any imaging performed during the diagnostic investigation. Typically, this is imaging performed by DICOM enabled modalities, but this is not required. A fully enabled PACS viewer can use this information to provide views of the source images
+     * </p> 
+	 */
+	public ResourceReferenceDt addImagingStudy() {
+		ResourceReferenceDt newType = new ResourceReferenceDt();
+		getImagingStudy().add(newType);
+		return newType; 
+	}
   
 	/**
 	 * Gets the value(s) for <b>image</b> (Key images associated with this report).
@@ -862,7 +902,6 @@ public class DiagnosticReport extends BaseResource implements IResource {
 		getImage().add(newType);
 		return newType; 
 	}
-
   
 	/**
 	 * Gets the value(s) for <b>conclusion</b> (Clinical Interpretation of test results).
@@ -892,7 +931,6 @@ public class DiagnosticReport extends BaseResource implements IResource {
 	public void setConclusion(StringDt theValue) {
 		myConclusion = theValue;
 	}
-
 
  	/**
 	 * Sets the value for <b>conclusion</b> (Clinical Interpretation of test results)
@@ -949,7 +987,6 @@ public class DiagnosticReport extends BaseResource implements IResource {
 		getCodedDiagnosis().add(newType);
 		return newType; 
 	}
-
   
 	/**
 	 * Gets the value(s) for <b>presentedForm</b> (Entire Report as issued).
@@ -993,7 +1030,6 @@ public class DiagnosticReport extends BaseResource implements IResource {
 		getPresentedForm().add(newType);
 		return newType; 
 	}
-
   
 	/**
 	 * Block class for child element: <b>DiagnosticReport.image</b> (Key images associated with this report)
@@ -1014,7 +1050,7 @@ public class DiagnosticReport extends BaseResource implements IResource {
 	private StringDt myComment;
 	
 	@Child(name="link", order=1, min=1, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Media.class,
+		Media.class,
 	})
 	@Description(
 		shortDefinition="Reference to the image source",
@@ -1067,7 +1103,6 @@ public class DiagnosticReport extends BaseResource implements IResource {
 		myComment = theValue;
 	}
 
-
  	/**
 	 * Sets the value for <b>comment</b> (Comment about the image (e.g. explanation))
 	 *
@@ -1109,7 +1144,6 @@ public class DiagnosticReport extends BaseResource implements IResource {
 	public void setLink(ResourceReferenceDt theValue) {
 		myLink = theValue;
 	}
-
 
   
 

@@ -11,6 +11,8 @@ import net.sf.json.JSON;
 import net.sf.json.JSONSerializer;
 
 import org.apache.commons.io.IOUtils;
+import org.hamcrest.core.IsNot;
+import org.hamcrest.core.StringContains;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -19,6 +21,8 @@ import ca.uhn.fhir.model.api.UndeclaredExtension;
 import ca.uhn.fhir.model.dstu.resource.DiagnosticReport;
 import ca.uhn.fhir.model.dstu.resource.Observation;
 import ca.uhn.fhir.model.dstu.resource.Patient;
+import ca.uhn.fhir.model.dstu.resource.Specimen;
+import ca.uhn.fhir.model.primitive.DecimalDt;
 
 public class JsonParserTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(JsonParserTest.class);
@@ -88,5 +92,39 @@ public class JsonParserTest {
 
 	}
 
+	@Test
+	public void testEncodeContainedResourcesMore() throws IOException {
+
+		DiagnosticReport rpt = new DiagnosticReport();
+		Specimen spm = new Specimen();
+		spm.getText().setDiv("AAA");
+		rpt.addSpecimen().setResource(spm);
+		
+		IParser p = new FhirContext(DiagnosticReport.class).newJsonParser().setPrettyPrint(true);
+		String str = p.encodeResourceToString(rpt);
+		
+		ourLog.info(str);
+		assertThat(str, StringContains.containsString("<div>AAA</div>"));
+		String substring = "\"resource\":\"#";
+		assertThat(str, StringContains.containsString(substring));
+		
+		int idx = str.indexOf(substring) + substring.length();
+		int idx2 = str.indexOf('"', idx+1);
+		String id = str.substring(idx, idx2);
+		assertThat(str, StringContains.containsString("\"id\":\"" + id + "\""));
+		assertThat(str, IsNot.not(StringContains.containsString("<?xml version='1.0'?>")));
+		
+	}
+
+	@Test
+	public void testEncodeInvalidChildGoodException() throws IOException {
+		Observation obs = new Observation();
+		obs.setValue(new DecimalDt(112.22));
+		
+		IParser p = new FhirContext(Observation.class).newXmlParser();
+		
+		// Should have good error message
+		p.encodeResourceToString(obs);
+	}
 
 }

@@ -26,6 +26,9 @@ public abstract class BaseElement implements IElement, ISupportsUndeclaredExtens
 
 	@Override
 	public IdDt getId() {
+		if (myId == null) {
+			myId = new IdDt();
+		}
 		return myId;
 	}
 

@@ -41,6 +41,7 @@ import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.BoundCodeableConceptDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.DateDt;
+import ca.uhn.fhir.model.primitive.DecimalDt;
 import ca.uhn.fhir.model.primitive.ICodedDatatype;
 import ca.uhn.fhir.model.primitive.XhtmlDt;
 import ca.uhn.fhir.util.ReflectionUtil;
@@ -125,7 +126,8 @@ class ModelScanner {
 	private void init(Set<Class<? extends IElement>> toScan) {
 		toScan.add(DateDt.class);
 		toScan.add(CodeDt.class);
-
+		toScan.add(DecimalDt.class);
+		
 		do {
 			for (Class<? extends IElement> nextClass : toScan) {
 				scan(nextClass);

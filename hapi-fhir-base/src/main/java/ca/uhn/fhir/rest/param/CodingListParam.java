@@ -1,12 +1,13 @@
 package ca.uhn.fhir.rest.param;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.model.dstu.composite.CodingDt;
 
-public class CodingListParam implements IQueryParameterOr {
+public class CodingListParam implements IQueryParameterOr, Iterable<CodingDt> {
 
 	private List<CodingDt> myCodings = new ArrayList<CodingDt>();
 	
@@ -14,6 +15,9 @@ public class CodingListParam implements IQueryParameterOr {
 	 * Returns all Codings associated with this list
 	 */
 	public List<CodingDt> getCodings() {
+		if (myCodings == null) {
+			myCodings = new ArrayList<CodingDt>();
+		}
 		return myCodings;
 	}
 
@@ -35,6 +39,7 @@ public class CodingListParam implements IQueryParameterOr {
 
 	@Override
 	public void setValuesAsQueryTokens(List<String> theParameters) {
+		getCodings().clear();
 		for (String string : theParameters) {
 			CodingDt dt = new CodingDt();
 			dt.setValueAsQueryToken(string);
@@ -44,6 +49,11 @@ public class CodingListParam implements IQueryParameterOr {
 
 	public void add(CodingDt theCodingDt) {
 		myCodings.add(theCodingDt);
+	}
+
+	@Override
+	public Iterator<CodingDt> iterator() {
+		return getCodings().iterator();
 	}
 
 }

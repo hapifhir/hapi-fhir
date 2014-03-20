@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.List;
 
 import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.model.api.IQueryParameterAnd;
 import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
@@ -79,6 +80,8 @@ public class SearchParameter implements IParameter {
 			this.parser = new QueryParameterTypeBinder((Class<? extends IQueryParameterType>) type);
 		} else if (IQueryParameterOr.class.isAssignableFrom(type)) {
 			this.parser = new QueryParameterOrBinder((Class<? extends IQueryParameterOr>) type);
+		} else if (IQueryParameterAnd.class.isAssignableFrom(type)) {
+			this.parser = new QueryParameterAndBinder((Class<? extends IQueryParameterAnd>) type);
 		} else {
 			throw new ConfigurationException("Unsupported data type for parameter: " + type.getCanonicalName());
 		}
@@ -86,6 +89,8 @@ public class SearchParameter implements IParameter {
 		if (StringDt.class.isAssignableFrom(type)) {
 			myParamType = SearchParamTypeEnum.STRING;
 		} else if (QualifiedDateParam.class.isAssignableFrom(type)) {
+			myParamType = SearchParamTypeEnum.DATE;
+		} else if (DateRangeParam.class.isAssignableFrom(type)) {
 			myParamType = SearchParamTypeEnum.DATE;
 		} else if (CodingListParam.class.isAssignableFrom(type)) {
 			myParamType = SearchParamTypeEnum.TOKEN;

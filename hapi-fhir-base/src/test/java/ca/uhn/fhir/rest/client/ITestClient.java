@@ -15,6 +15,7 @@ import ca.uhn.fhir.rest.annotation.Required;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.client.api.IBasicClient;
 import ca.uhn.fhir.rest.param.CodingListParam;
+import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.QualifiedDateParam;
 
 public interface ITestClient extends IBasicClient {
@@ -33,6 +34,9 @@ public interface ITestClient extends IBasicClient {
 	
 	@Search()
 	public List<Patient> getPatientMultipleIdentifiers(@Required(name = "ids") CodingListParam theIdentifiers);
+
+	@Search()
+	public List<Patient> getPatientByDateRange(@Required(name = "dateRange") DateRangeParam theIdentifiers);
 
 	@Search()
 	public List<Patient> getPatientByDob(@Required(name=Patient.SP_BIRTHDATE) QualifiedDateParam theBirthDate);

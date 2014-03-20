@@ -106,7 +106,21 @@
 		return newType; 
 	}
 #end
-
+#if( ${child.repeatable} && ${child.singleChildInstantiable} && ${child.resourceRef} )
+	/**
+	 * Adds and returns a new value for <b>${child.elementName}</b> (${child.shortName})
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * ${child.definition}
+     * </p> 
+	 */
+	public ResourceReferenceDt add${child.methodName}() {
+		ResourceReferenceDt newType = new ResourceReferenceDt();
+		get${child.methodName}().add(newType);
+		return newType; 
+	}
+#end
 #if ( ${child.boundCode} && ${child.repeatable} )
 	/**
 	 * Add a value for <b>${child.elementName}</b> (${child.shortName})

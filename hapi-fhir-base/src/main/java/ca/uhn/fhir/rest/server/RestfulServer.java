@@ -186,6 +186,19 @@ public abstract class RestfulServer extends HttpServlet {
 			String requestFullPath = StringUtils.defaultString(request.getRequestURI());
 //			String contextPath = StringUtils.defaultString(request.getContextPath());
 			String servletPath = StringUtils.defaultString(request.getServletPath());
+			StringBuffer requestUrl = request.getRequestURL();
+			String servletContextPath = "";
+			if (request.getServletContext() != null) {
+				servletContextPath = StringUtils.defaultString(request.getServletContext().getContextPath());
+			}
+			
+			ourLog.info("Request FullPath: {}", requestFullPath);
+			ourLog.info("Servlet Path: {}", servletPath);
+			ourLog.info("Request Url: {}", requestUrl);
+			ourLog.info("Context Path: {}", servletContextPath);
+
+			servletPath = servletContextPath;
+			
 			IdDt id = null;
 			IdDt versionId = null;
 			String operation = null;			
@@ -195,13 +208,10 @@ public abstract class RestfulServer extends HttpServlet {
 				requestPath = requestPath.substring(1);
 			}
 
-			StringBuffer requestUrl = request.getRequestURL();
 			int contextIndex = requestUrl.indexOf(servletPath);
 			String fhirServerBase = requestUrl.substring(0, contextIndex + servletPath.length());
 			String completeUrl = StringUtils.isNotBlank(request.getQueryString()) ? requestUrl + "?" + request.getQueryString() : requestUrl.toString();
 			
-			ourLog.info("Request URI: {}", requestPath);
-
 			Map<String, String[]> params = new HashMap<String, String[]>(request.getParameterMap());
 			EncodingUtil responseEncoding = determineResponseEncoding(request, params);
 

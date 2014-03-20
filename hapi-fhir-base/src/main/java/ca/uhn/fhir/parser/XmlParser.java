@@ -43,6 +43,7 @@ import ca.uhn.fhir.model.api.IPrimitiveDatatype;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ISupportsUndeclaredExtensions;
 import ca.uhn.fhir.model.api.UndeclaredExtension;
+import ca.uhn.fhir.model.dstu.composite.ContainedDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.StringDt;
@@ -122,7 +123,7 @@ public class XmlParser extends BaseParser implements IParser {
 				eventWriter.writeAttribute("type", "text/xml");
 
 				IResource resource = nextEntry.getResource();
-				encodeResourceToXmlStreamWriter(resource, eventWriter);
+				encodeResourceToXmlStreamWriter(resource, eventWriter, false);
 
 				eventWriter.writeEndElement(); // content
 				eventWriter.writeEndElement(); // entry
@@ -149,7 +150,7 @@ public class XmlParser extends BaseParser implements IParser {
 			eventWriter = myXmlOutputFactory.createXMLStreamWriter(stringWriter);
 			eventWriter = decorateStreamWriter(eventWriter);
 
-			encodeResourceToXmlStreamWriter(theResource, eventWriter);
+			encodeResourceToXmlStreamWriter(theResource, eventWriter, false);
 			eventWriter.flush();
 		} catch (XMLStreamException e) {
 			throw new ConfigurationException("Failed to initialize STaX event factory", e);
@@ -323,6 +324,15 @@ public class XmlParser extends BaseParser implements IParser {
 			}
 			break;
 		}
+		case CONTAINED_RESOURCES: {
+			ContainedDt value = (ContainedDt) nextValue;
+			theEventWriter.writeStartElement("contained");
+			for (IResource next : value.getContainedResources()) {
+				encodeResourceToXmlStreamWriter(next, theEventWriter, true);
+			}
+			theEventWriter.writeEndElement();
+			break;
+		}
 		case RESOURCE: {
 			throw new IllegalStateException(); // should not happen
 		}
@@ -333,8 +343,9 @@ public class XmlParser extends BaseParser implements IParser {
 			}
 			break;
 		}
+		case EXTENSION_DECLARED:
 		case UNDECL_EXT: {
-			throw new IllegalStateException("should not happen");
+			throw new IllegalStateException("state should not happen: " + childDef.getName());
 		}
 		}
 
@@ -405,7 +416,7 @@ public class XmlParser extends BaseParser implements IParser {
 	}
 
 
-	private void encodeResourceToXmlStreamWriter(IResource theResource, XMLStreamWriter eventWriter) throws XMLStreamException, DataFormatException {
+	private void encodeResourceToXmlStreamWriter(IResource theResource, XMLStreamWriter theEventWriter, boolean theIncludeResourceId) throws XMLStreamException, DataFormatException {
 		super.containResourcesForEncoding(theResource);
 		
 		RuntimeResourceDefinition resDef = myContext.getResourceDefinition(theResource);
@@ -413,12 +424,16 @@ public class XmlParser extends BaseParser implements IParser {
 			throw new ConfigurationException("Unknown resource type: " + theResource.getClass());
 		}
 		
-		eventWriter.writeStartElement(resDef.getName());
-		eventWriter.writeDefaultNamespace(FHIR_NS);
+		theEventWriter.writeStartElement(resDef.getName());
+		theEventWriter.writeDefaultNamespace(FHIR_NS);
 
-		encodeCompositeElementToStreamWriter(theResource, eventWriter, resDef);
+		if (theIncludeResourceId && StringUtils.isNotBlank(theResource.getId().getValue())) {
+			theEventWriter.writeAttribute("id", theResource.getId().getValue());
+		}
+		
+		encodeCompositeElementToStreamWriter(theResource, theEventWriter, resDef);
 
-		eventWriter.writeEndElement();
+		theEventWriter.writeEndElement();
 	}
 
 	private void encodeUndeclaredExtensions(XMLStreamWriter theWriter, List<UndeclaredExtension> extensions, String tagName) throws XMLStreamException {

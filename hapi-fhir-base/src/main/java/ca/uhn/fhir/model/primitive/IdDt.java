@@ -114,4 +114,16 @@ public class IdDt extends BasePrimitive<String> {
 		return myValue;
 	}
 
+	/**
+	 * Returns the value of this ID as a big decimal, or <code>null</code> if the value is null
+	 * 
+	 * @throws NumberFormatException If the value is not a valid BigDecimal
+	 */
+	public BigDecimal asBigDecimal() {
+		if (getValue() == null){
+			return null;
+		}
+		return new BigDecimal(getValueAsString());
+	}
+
 }

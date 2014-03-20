@@ -66,17 +66,18 @@ public class XhtmlDt extends BasePrimitive<List<XMLEvent>> {
 			XMLEventReader er = XMLInputFactory.newInstance().createXMLEventReader(new StringReader(val));
 			boolean first = true;
 			while (er.hasNext()) {
+				XMLEvent next = er.nextEvent();
 				if (first) {
 					first = false;
 					continue;
 				}
-				XMLEvent next = er.nextEvent();
 				if (er.hasNext()) {
 					// don't add the last event
 					value.add(next);
 				}
 			}
-
+			setValue(value);
+			
 		} catch (XMLStreamException e) {
 			throw new DataFormatException("String does not appear to be valid XML/XHTML", e);
 		} catch (FactoryConfigurationError e) {

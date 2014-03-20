@@ -137,8 +137,15 @@ public class NarrativeDt extends BaseElement implements ICompositeDatatype {
 		myDiv = theValue;
 	}
 
+	/**
+	 * Sets the value using a textual DIV (or simple text block which will be
+	 * converted to XHTML)
+	 */
+	public void setDiv(String theTextDiv) {
+		myDiv = new XhtmlDt(theTextDiv);
+	}
 
-  
+
 
 
 }

@@ -8,6 +8,8 @@ import java.io.StringReader;
 import org.apache.commons.io.IOUtils;
 import org.custommonkey.xmlunit.Diff;
 import org.custommonkey.xmlunit.XMLUnit;
+import org.hamcrest.core.IsNot;
+import org.hamcrest.core.StringContains;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xml.sax.SAXException;
@@ -18,12 +20,15 @@ import ca.uhn.fhir.context.ResourceWithExtensionsA;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.dstu.composite.NarrativeDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.resource.DiagnosticReport;
 import ca.uhn.fhir.model.dstu.resource.Observation;
 import ca.uhn.fhir.model.dstu.resource.Patient;
+import ca.uhn.fhir.model.dstu.resource.Specimen;
 import ca.uhn.fhir.model.dstu.resource.ValueSet;
 import ca.uhn.fhir.model.dstu.valueset.NarrativeStatusEnum;
+import ca.uhn.fhir.model.primitive.DecimalDt;
 
 public class XmlParserTest {
 
@@ -54,6 +59,41 @@ public class XmlParserTest {
 		
 	}
 
+	@Test
+	public void testEncodeInvalidChildGoodException() throws IOException {
+		Observation obs = new Observation();
+		obs.setValue(new DecimalDt(112.22));
+		
+		IParser p = new FhirContext(Observation.class).newXmlParser();
+		
+		// Should have good error message
+		p.encodeResourceToString(obs);
+	}
+
+	@Test
+	public void testEncodeContainedResources() throws IOException {
+
+		DiagnosticReport rpt = new DiagnosticReport();
+		Specimen spm = new Specimen();
+		spm.getText().setDiv("AAA");
+		rpt.addSpecimen().setResource(spm);
+		
+		IParser p = new FhirContext(DiagnosticReport.class).newXmlParser().setPrettyPrint(true);
+		String str = p.encodeResourceToString(rpt);
+		
+		ourLog.info(str);
+		assertThat(str, StringContains.containsString("<div>AAA</div>"));
+		assertThat(str, StringContains.containsString("reference value=\"#"));
+		
+		int idx = str.indexOf("reference value=\"#") + "reference value=\"#".length();
+		int idx2 = str.indexOf('"', idx+1);
+		String id = str.substring(idx, idx2);
+		assertThat(str, StringContains.containsString("<Specimen xmlns=\"http://hl7.org/fhir\" id=\"" + id + "\">"));
+		assertThat(str, IsNot.not(StringContains.containsString("<?xml version='1.0'?>")));
+
+	}
+
+	
 	
 	@Test
 	public void testParseBundle() {

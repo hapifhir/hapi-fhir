@@ -1,6 +1,8 @@
 package ca.uhn.fhir.model.primitive;
 
 import java.math.BigDecimal;
+import java.math.MathContext;
+import java.math.RoundingMode;
 
 import ca.uhn.fhir.model.api.BasePrimitive;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
@@ -33,6 +35,31 @@ public class DecimalDt extends BasePrimitive<BigDecimal> {
 	@SimpleSetter
 	public DecimalDt(@SimpleSetter.Parameter(name = "theValue") double theValue) {
 		setValue(new BigDecimal(theValue));
+	}
+
+	/**
+	 * Rounds the value to the given prevision
+	 * 
+	 * @see MathContext#getPrecision()
+	 */
+	public void round(int thePrecision) {
+		if (getValue()!=null) {
+			BigDecimal newValue = getValue().round(new MathContext(thePrecision));
+			setValue(newValue);
+		}
+	}
+
+	/**
+	 * Rounds the value to the given prevision
+	 * 
+	 * @see MathContext#getPrecision()
+	 * @see MathContext#getRoundingMode()
+	 */
+	public void round(int thePrecision, RoundingMode theRoundingMode) {
+		if (getValue()!=null) {
+			BigDecimal newValue = getValue().round(new MathContext(thePrecision, theRoundingMode));
+			setValue(newValue);
+		}
 	}
 
 	/**

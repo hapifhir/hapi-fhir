@@ -32,6 +32,7 @@ import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.param.CodingListParam;
+import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.QualifiedDateParam;
 import ca.uhn.fhir.rest.server.Constants;
 
@@ -133,6 +134,32 @@ public class ClientTest {
 		assertEquals("PRP1660", response.getIdentifier().get(0).getValue().getValue());
 
 	}
+	
+	
+	@Test
+	public void testSearchByDateRange() throws Exception {
+
+		String msg = getPatientFeedWithOneResult();
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
+		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
+
+		ITestClient client = clientFactory.newClient(ITestClient.class, "http://foo");
+		DateRangeParam param = new DateRangeParam();
+		param.setLowerBound(new QualifiedDateParam(QuantityCompararatorEnum.GREATERTHAN_OR_EQUALS, "2011-01-01"));
+		param.setUpperBound(new QualifiedDateParam(QuantityCompararatorEnum.LESSTHAN_OR_EQUALS, "2021-01-01"));
+		List<Patient> response = client.getPatientByDateRange(param);
+
+		assertEquals("http://foo/Patient?dateRange=%3E%3D2011-01-01&dateRange=%3C%3D2021-01-01", capt.getValue().getURI().toString());
+
+	}
+	
+
+
+	
 	
 	@Test
 	public void testSearchByDob() throws Exception {

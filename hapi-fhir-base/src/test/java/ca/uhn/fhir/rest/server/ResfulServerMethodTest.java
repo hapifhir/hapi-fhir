@@ -7,6 +7,7 @@ import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +26,7 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.experimental.theories.Theories;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
@@ -33,6 +35,7 @@ import ca.uhn.fhir.model.dstu.composite.CodingDt;
 import ca.uhn.fhir.model.dstu.composite.HumanNameDt;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.resource.Conformance;
+import ca.uhn.fhir.model.dstu.resource.DiagnosticReport;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -45,6 +48,7 @@ import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.Required;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.param.CodingListParam;
+import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.QualifiedDateParam;
 import ca.uhn.fhir.rest.server.provider.ServerProfileProvider;
 import ca.uhn.fhir.testutil.RandomServerPortProvider;
@@ -142,16 +146,16 @@ public class ResfulServerMethodTest {
 			ourLog.info("Response:\n{}", enc);
 			assertTrue(enc.contains(ExtensionConstants.CONF_ALSO_CHAIN));
 		}
-//		{
-//			IParser p = ourCtx.newJsonParser().setPrettyPrint(true);
-//
-//			p.encodeResourceToWriter(bundle, new OutputStreamWriter(System.out));
-//
-//			String enc = p.encodeResourceToString(bundle);
-//			ourLog.info("Response:\n{}", enc);
-//			assertTrue(enc.contains(ExtensionConstants.CONF_ALSO_CHAIN));
-//
-//		}
+		// {
+		// IParser p = ourCtx.newJsonParser().setPrettyPrint(true);
+		//
+		// p.encodeResourceToWriter(bundle, new OutputStreamWriter(System.out));
+		//
+		// String enc = p.encodeResourceToString(bundle);
+		// ourLog.info("Response:\n{}", enc);
+		// assertTrue(enc.contains(ExtensionConstants.CONF_ALSO_CHAIN));
+		//
+		// }
 	}
 
 	@Test
@@ -212,6 +216,18 @@ public class ResfulServerMethodTest {
 		assertEquals("urn:bbb|bbb", patient.getIdentifier().get(2).getValueAsQueryToken());
 	}
 
+//	@Test
+//	public void testSearchByComplex() throws Exception {
+//
+//		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?Patient.identifier=urn:oid:2.16.840.1.113883.3.239.18.148%7C7000135&name=urn:oid:1.3.6.1.4.1.12201.102.5%7C522&date=");
+//		HttpResponse status = ourClient.execute(httpGet);
+//
+//		String responseContent = IOUtils.toString(status.getEntity().getContent());
+//		ourLog.info("Response was:\n{}", responseContent);
+//
+//		assertEquals(200, status.getStatusLine().getStatusCode());
+//	}
+	
 	@Test
 	public void testSearchByDob() throws Exception {
 
@@ -361,11 +377,30 @@ public class ResfulServerMethodTest {
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
 
-		// TODO: enable once JSON parser is written
-		// Patient patient = (Patient)
-		// ourCtx.newJsonParser().parseResource(responseContent);
-		// assertEquals("PatientOne",
-		// patient.getName().get(0).getGiven().get(0).getValue());
+		Patient patient = (Patient) ourCtx.newJsonParser().parseResource(responseContent);
+		assertEquals("PatientOne", patient.getName().get(0).getGiven().get(0).getValue());
+
+	}
+
+	@Test
+	public void testDateRangeParam() throws Exception {
+
+		// HttpPost httpPost = new HttpPost("http://localhost:" + ourPort +
+		// "/Patient/1");
+		// httpPost.setEntity(new StringEntity("test",
+		// ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?dateRange=%3E%3D2011-01-01&dateRange=%3C%3D2021-01-01");
+		HttpResponse status = ourClient.execute(httpGet);
+
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		ourLog.info("Response was:\n{}", responseContent);
+
+		assertEquals(200, status.getStatusLine().getStatusCode());
+
+		Patient patient = (Patient) ourCtx.newXmlParser().parseBundle(responseContent).getEntries().get(0).getResource();
+		assertEquals(">=2011-01-01", patient.getName().get(0).getSuffix().get(0).getValue());
+		assertEquals("<=2021-01-01", patient.getName().get(0).getSuffix().get(1).getValue());
 
 	}
 
@@ -517,6 +552,15 @@ public class ResfulServerMethodTest {
 			return null;
 		}
 
+		@SuppressWarnings("unused")
+		public List<Patient> findDiagnosticReportsByPatient(
+				@Required(name="Patient.identifier") IdentifierDt thePatientId, 
+				@Required(name=DiagnosticReport.SP_NAME) CodingListParam theNames,
+				@Optional(name=DiagnosticReport.SP_DATE) DateRangeParam theDateRange
+				) throws Exception {
+			return Collections.emptyList();
+		}
+		
 		@Search()
 		public Patient getPatientWithDOB(@Required(name = "dob") QualifiedDateParam theDob) {
 			Patient next = getIdToPatient().get("1");
@@ -599,6 +643,14 @@ public class ResfulServerMethodTest {
 		@Override
 		public Class<Patient> getResourceType() {
 			return Patient.class;
+		}
+
+		@Search()
+		public Patient getPatientByDateRange(@Required(name = "dateRange") DateRangeParam theIdentifiers) {
+			Patient retVal = getIdToPatient().get("1");
+			retVal.getName().get(0).addSuffix().setValue(theIdentifiers.getLowerBound().getValueAsQueryToken());
+			retVal.getName().get(0).addSuffix().setValue(theIdentifiers.getUpperBound().getValueAsQueryToken());
+			return retVal;
 		}
 
 	}
