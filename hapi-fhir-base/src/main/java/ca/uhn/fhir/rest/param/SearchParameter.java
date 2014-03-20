@@ -6,6 +6,9 @@ import java.util.List;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
+import ca.uhn.fhir.model.dstu.valueset.SearchParamTypeEnum;
+import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
@@ -18,6 +21,7 @@ public class SearchParameter implements IParameter {
 	private IParamBinder parser;
 	private boolean required;
 	private Class<?> type;
+	private SearchParamTypeEnum myParamType;
 
 	public SearchParameter() {
 	}
@@ -47,6 +51,7 @@ public class SearchParameter implements IParameter {
 		return type;
 	}
 
+	@Override
 	public boolean isRequired() {
 		return required;
 	}
@@ -78,6 +83,18 @@ public class SearchParameter implements IParameter {
 			throw new ConfigurationException("Unsupported data type for parameter: " + type.getCanonicalName());
 		}
 
+		if (StringDt.class.isAssignableFrom(type)) {
+			myParamType = SearchParamTypeEnum.STRING;
+		} else if (QualifiedDateParam.class.isAssignableFrom(type)) {
+			myParamType = SearchParamTypeEnum.DATE;
+		} else if (CodingListParam.class.isAssignableFrom(type)) {
+			myParamType = SearchParamTypeEnum.TOKEN;
+		} else if (IdentifierDt.class.isAssignableFrom(type)) {
+			myParamType = SearchParamTypeEnum.TOKEN;
+		} else {
+			throw new ConfigurationException("Unknown search parameter type: " + type);
+		}
+		
 //		if (theInnerCollectionType != null) {
 //			this.parser = new CollectionBinder(this.parser, theInnerCollectionType);
 //		}
@@ -86,6 +103,11 @@ public class SearchParameter implements IParameter {
 //			this.parser = new CollectionBinder(this.parser, theOuterCollectionType);
 //		}
 
+	}
+
+	@Override
+	public SearchParamTypeEnum getParamType() {
+		return myParamType;
 	}
 
 }

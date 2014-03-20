@@ -22,5 +22,4 @@ public interface IQueryParameterType {
 	 */
 	public String getValueAsQueryToken();
 	
-	
 }

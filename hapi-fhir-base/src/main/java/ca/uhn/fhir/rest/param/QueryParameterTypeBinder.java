@@ -42,4 +42,5 @@ final class QueryParameterTypeBinder implements IParamBinder {
 		}
 		return dt;
 	}
+
 }

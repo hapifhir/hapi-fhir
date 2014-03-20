@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.List;
 
 import ca.uhn.fhir.model.api.PathSpecification;
+import ca.uhn.fhir.model.dstu.valueset.SearchParamTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
@@ -61,6 +62,11 @@ public class IncludeParameter implements IParameter {
 	@Override
 	public boolean isRequired() {
 		return false;
+	}
+
+	@Override
+	public SearchParamTypeEnum getParamType() {
+		return null;
 	}
 
 }

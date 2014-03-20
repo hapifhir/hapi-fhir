@@ -17,6 +17,7 @@ import ca.uhn.fhir.model.dstu.resource.Conformance.RestResourceSearchParam;
 import ca.uhn.fhir.model.dstu.valueset.RestfulConformanceModeEnum;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
+import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.annotation.Metadata;
@@ -102,14 +103,29 @@ public class ServerConformanceProvider implements IResourceProvider {
 							} else {
 								searchParam = nameToSearchParam.get(nextParameter.getName());
 							}
+							
+							if (searchParam !=null) {
+								searchParam.setType(nextParameter.getParamType());
+							}
+							
 						} else if (searchParamChain == null) {
 							searchParam.addChain(nextParameter.getName());
 							searchParamChain = searchParam.getChain().get(searchParam.getChain().size()-1);
+							UndeclaredExtension ext = new UndeclaredExtension();
+							ext.setUrl(ExtensionConstants.CONF_CHAIN_REQUIRED);
+							ext.setValue(new BooleanDt(nextParameter.isRequired()));
+							searchParamChain.getUndeclaredExtensions().add(ext);
+							
 						} else {
 							UndeclaredExtension ext = new UndeclaredExtension();
 							ext.setUrl(ExtensionConstants.CONF_ALSO_CHAIN);
-							ext.setValue(new StringDt(nextParameter.getName()));
 							searchParamChain.getUndeclaredExtensions().add(ext);
+							
+							UndeclaredExtension extReq = new UndeclaredExtension();
+							extReq.setUrl(ExtensionConstants.CONF_CHAIN_REQUIRED);
+							extReq.setValue(new BooleanDt(nextParameter.isRequired()));
+							ext.getUndeclaredExtensions().add(extReq);
+
 						}
 
 					}

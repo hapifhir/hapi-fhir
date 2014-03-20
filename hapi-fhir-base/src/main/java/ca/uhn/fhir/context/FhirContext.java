@@ -52,7 +52,7 @@ public class FhirContext {
 	}
 
 	@SuppressWarnings("unchecked")
-	public BaseRuntimeElementDefinition<?> getResourceDefinition(String theResourceName) {
+	public RuntimeResourceDefinition getResourceDefinition(String theResourceName) {
 		RuntimeResourceDefinition retVal = myNameToElementDefinition.get(theResourceName);
 		
 		if (retVal == null) {

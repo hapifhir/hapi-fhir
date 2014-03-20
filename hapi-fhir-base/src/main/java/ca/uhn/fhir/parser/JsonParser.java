@@ -12,8 +12,14 @@ import java.util.List;
 import java.util.Map;
 
 import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonReader;
+import javax.json.JsonString;
+import javax.json.JsonValue;
+import javax.json.JsonValue.ValueType;
 import javax.json.stream.JsonGenerator;
 import javax.json.stream.JsonGeneratorFactory;
+import javax.json.stream.JsonParser.Event;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -190,8 +196,59 @@ public class JsonParser extends BaseParser implements IParser {
 
 	@Override
 	public IResource parseResource(Class<? extends IResource> theResourceType, Reader theReader) {
-		// TODO Auto-generated method stub
+		JsonReader reader = Json.createReader(theReader);
+		JsonObject object = reader.readObject();
+		
+		JsonValue resourceTypeObj = object.remove("resourceType");
+		assertObjectOfType(resourceTypeObj, JsonValue.ValueType.STRING, "resourceType");
+		String resourceType = ((JsonString)resourceTypeObj).getString();
+		
+		if (theResourceType != null) {
+			RuntimeResourceDefinition def = myContext.getResourceDefinition(theResourceType);
+		}else {
+			RuntimeResourceDefinition def = myContext.getResourceDefinition(resourceType);
+		}
+		
+		PushbackJsonParser parser = new PushbackJsonParser(Json.createParser(theReader));
+		
+		while (parser.hasNext()) {
+			
+			Event next = parser.next();
+			switch (next) {
+			case END_ARRAY:
+				break;
+			case END_OBJECT:
+				break;
+			case KEY_NAME:
+				break;
+			case START_ARRAY:
+				break;
+			case START_OBJECT:
+				break;
+			case VALUE_FALSE:
+			case VALUE_TRUE:
+				break;
+			case VALUE_NULL:
+				break;
+			case VALUE_NUMBER:
+				break;
+			case VALUE_STRING:
+				break;
+			default:
+				break;
+			
+			}
+			
+			
+		}
+			
 		return null;
+	}
+
+	private void assertObjectOfType(JsonValue theResourceTypeObj, ValueType theValueType, String thePosition) {
+		if (theResourceTypeObj.getValueType() != theValueType) {
+			throw new DataFormatException("Invalid content of element " + thePosition + ", expected " + theValueType);
+		}
 	}
 
 	@Override
@@ -200,17 +257,6 @@ public class JsonParser extends BaseParser implements IParser {
 		return null;
 	}
 
-	@Override
-	public IResource parseResource(Reader theReader) throws ConfigurationException, DataFormatException {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public IResource parseResource(String theMessageString) throws ConfigurationException, DataFormatException {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
 	@Override
 	public IParser setPrettyPrint(boolean thePrettyPrint) {
@@ -534,7 +580,7 @@ public class JsonParser extends BaseParser implements IParser {
 			if (value == null && ext.getAllUndeclaredExtensions().isEmpty()) {
 				theEventWriter.writeNull();
 			} else if (value == null) {
-				theEventWriter.writeStartArray();
+				theEventWriter.writeStartArray("extension");
 				for (UndeclaredExtension next : ext.getUndeclaredExtensions()) {
 					writeUndeclaredExt(theEventWriter, next);
 				}

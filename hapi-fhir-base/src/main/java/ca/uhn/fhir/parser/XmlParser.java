@@ -50,24 +50,157 @@ import ca.uhn.fhir.model.primitive.XhtmlDt;
 import ca.uhn.fhir.util.PrettyPrintWriterWrapper;
 
 public class XmlParser extends BaseParser implements IParser {
+	@SuppressWarnings("unused")
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(XmlParser.class);
 	static final String ATOM_NS = "http://www.w3.org/2005/Atom";
 	static final String FHIR_NS = "http://hl7.org/fhir";
 	static final String OPENSEARCH_NS = "http://a9.com/-/spec/opensearch/1.1/";
-	@SuppressWarnings("unused")
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(XmlParser.class);
 	static final String XHTML_NS = "http://www.w3.org/1999/xhtml";
 
 	// private static final Set<String> RESOURCE_NAMESPACES;
 
 	private FhirContext myContext;
+	private boolean myPrettyPrint;
 	private XMLInputFactory myXmlInputFactory;
 	private XMLOutputFactory myXmlOutputFactory;
-	private boolean myPrettyPrint;
 
 	public XmlParser(FhirContext theContext) {
 		myContext = theContext;
 		myXmlInputFactory = XMLInputFactory.newInstance();
 		myXmlOutputFactory = XMLOutputFactory.newInstance();
+	}
+
+	@Override
+	public String encodeBundleToString(Bundle theBundle) throws DataFormatException {
+		StringWriter stringWriter = new StringWriter();
+		encodeBundleToWriter(theBundle, stringWriter);
+
+		return stringWriter.toString();
+	}
+
+	@Override
+	public void encodeBundleToWriter(Bundle theBundle, Writer theWriter) {
+		try {
+			XMLStreamWriter eventWriter;
+			eventWriter = myXmlOutputFactory.createXMLStreamWriter(theWriter);
+			eventWriter = decorateStreamWriter(eventWriter);
+
+			eventWriter.writeStartElement("feed");
+			eventWriter.writeDefaultNamespace(ATOM_NS);
+
+			writeTagWithTextNode(eventWriter, "title", theBundle.getTitle());
+			writeTagWithTextNode(eventWriter, "id", theBundle.getBundleId());
+
+			writeAtomLink(eventWriter, "self", theBundle.getLinkSelf());
+			writeAtomLink(eventWriter, "first", theBundle.getLinkFirst());
+			writeAtomLink(eventWriter, "previous", theBundle.getLinkPrevious());
+			writeAtomLink(eventWriter, "next", theBundle.getLinkNext());
+			writeAtomLink(eventWriter, "last", theBundle.getLinkLast());
+			writeAtomLink(eventWriter, "fhir-base", theBundle.getLinkBase());
+
+			if (theBundle.getTotalResults().getValue() != null) {
+				eventWriter.writeStartElement("os", "totalResults",OPENSEARCH_NS);
+				eventWriter.writeNamespace("os", OPENSEARCH_NS);
+				eventWriter.writeCharacters(theBundle.getTotalResults().getValue().toString());
+				eventWriter.writeEndElement();
+			}
+
+			writeOptionalTagWithTextNode(eventWriter, "updated", theBundle.getUpdated());
+			writeOptionalTagWithTextNode(eventWriter, "published", theBundle.getPublished());
+
+			if (StringUtils.isNotBlank(theBundle.getAuthorName().getValue())) {
+				eventWriter.writeStartElement("author");
+				writeTagWithTextNode(eventWriter, "name", theBundle.getAuthorName());
+				writeOptionalTagWithTextNode(eventWriter, "uri", theBundle.getAuthorUri());
+				eventWriter.writeEndElement();
+			}
+
+			for (BundleEntry nextEntry : theBundle.getEntries()) {
+				eventWriter.writeStartElement("entry");
+
+				eventWriter.writeStartElement("content");
+				eventWriter.writeAttribute("type", "text/xml");
+
+				IResource resource = nextEntry.getResource();
+				encodeResourceToXmlStreamWriter(resource, eventWriter);
+
+				eventWriter.writeEndElement(); // content
+				eventWriter.writeEndElement(); // entry
+			}
+
+			eventWriter.writeEndElement();
+			eventWriter.close();
+		} catch (XMLStreamException e) {
+			throw new ConfigurationException("Failed to initialize STaX event factory", e);
+		}
+	}
+
+	@Override
+	public String encodeResourceToString(IResource theResource) throws DataFormatException {
+		Writer stringWriter = new StringWriter();
+		encodeResourceToWriter(theResource, stringWriter);
+		return stringWriter.toString();
+	}
+
+	@Override
+	public void encodeResourceToWriter(IResource theResource, Writer stringWriter) {
+		XMLStreamWriter eventWriter;
+		try {
+			eventWriter = myXmlOutputFactory.createXMLStreamWriter(stringWriter);
+			eventWriter = decorateStreamWriter(eventWriter);
+
+			encodeResourceToXmlStreamWriter(theResource, eventWriter);
+			eventWriter.flush();
+		} catch (XMLStreamException e) {
+			throw new ConfigurationException("Failed to initialize STaX event factory", e);
+		}
+	}
+
+	@Override
+	public Bundle parseBundle(Reader theReader) {
+		XMLEventReader streamReader;
+		try {
+			streamReader = myXmlInputFactory.createXMLEventReader(theReader);
+		} catch (XMLStreamException e) {
+			throw new DataFormatException(e);
+		} catch (FactoryConfigurationError e) {
+			throw new ConfigurationException("Failed to initialize STaX event factory", e);
+		}
+
+		return parseBundle(streamReader);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see ca.uhn.fhir.parser.IParser#parseBundle(java.lang.String)
+	 */
+	@Override
+	public Bundle parseBundle(String theXml) throws ConfigurationException, DataFormatException {
+		StringReader reader = new StringReader(theXml);
+		return parseBundle(reader);
+	}
+
+	@Override
+	public IResource parseResource(Class<? extends IResource> theResourceType, Reader theReader) {
+		XMLEventReader streamReader;
+		try {
+			streamReader = myXmlInputFactory.createXMLEventReader(theReader);
+		} catch (XMLStreamException e) {
+			throw new DataFormatException(e);
+		} catch (FactoryConfigurationError e) {
+			throw new ConfigurationException("Failed to initialize STaX event factory", e);
+		}
+
+		return parseResource(theResourceType, streamReader);
+	}
+
+
+
+	@Override
+	public IParser setPrettyPrint(boolean thePrettyPrint) {
+		myPrettyPrint = thePrettyPrint;
+		return this;
 	}
 
 	private XMLStreamWriter decorateStreamWriter(XMLStreamWriter eventWriter) {
@@ -149,71 +282,6 @@ public class XmlParser extends BaseParser implements IParser {
 			return null;
 		} catch (XMLStreamException e) {
 			throw new DataFormatException(e);
-		}
-	}
-
-	@Override
-	public String encodeBundleToString(Bundle theBundle) throws DataFormatException {
-		StringWriter stringWriter = new StringWriter();
-		encodeBundleToWriter(theBundle, stringWriter);
-
-		return stringWriter.toString();
-	}
-
-	@Override
-	public void encodeBundleToWriter(Bundle theBundle, Writer theWriter) {
-		try {
-			XMLStreamWriter eventWriter;
-			eventWriter = myXmlOutputFactory.createXMLStreamWriter(theWriter);
-			eventWriter = decorateStreamWriter(eventWriter);
-
-			eventWriter.writeStartElement("feed");
-			eventWriter.writeDefaultNamespace(ATOM_NS);
-
-			writeTagWithTextNode(eventWriter, "title", theBundle.getTitle());
-			writeTagWithTextNode(eventWriter, "id", theBundle.getBundleId());
-
-			writeAtomLink(eventWriter, "self", theBundle.getLinkSelf());
-			writeAtomLink(eventWriter, "first", theBundle.getLinkFirst());
-			writeAtomLink(eventWriter, "previous", theBundle.getLinkPrevious());
-			writeAtomLink(eventWriter, "next", theBundle.getLinkNext());
-			writeAtomLink(eventWriter, "last", theBundle.getLinkLast());
-			writeAtomLink(eventWriter, "fhir-base", theBundle.getLinkBase());
-
-			if (theBundle.getTotalResults().getValue() != null) {
-				eventWriter.writeStartElement("os", "totalResults",OPENSEARCH_NS);
-				eventWriter.writeNamespace("os", OPENSEARCH_NS);
-				eventWriter.writeCharacters(theBundle.getTotalResults().getValue().toString());
-				eventWriter.writeEndElement();
-			}
-
-			writeOptionalTagWithTextNode(eventWriter, "updated", theBundle.getUpdated());
-			writeOptionalTagWithTextNode(eventWriter, "published", theBundle.getPublished());
-
-			if (StringUtils.isNotBlank(theBundle.getAuthorName().getValue())) {
-				eventWriter.writeStartElement("author");
-				writeTagWithTextNode(eventWriter, "name", theBundle.getAuthorName());
-				writeOptionalTagWithTextNode(eventWriter, "uri", theBundle.getAuthorUri());
-				eventWriter.writeEndElement();
-			}
-
-			for (BundleEntry nextEntry : theBundle.getEntries()) {
-				eventWriter.writeStartElement("entry");
-
-				eventWriter.writeStartElement("content");
-				eventWriter.writeAttribute("type", "text/xml");
-
-				IResource resource = nextEntry.getResource();
-				encodeResourceToXmlStreamWriter(resource, eventWriter);
-
-				eventWriter.writeEndElement(); // content
-				eventWriter.writeEndElement(); // entry
-			}
-
-			eventWriter.writeEndElement();
-			eventWriter.close();
-		} catch (XMLStreamException e) {
-			throw new ConfigurationException("Failed to initialize STaX event factory", e);
 		}
 	}
 
@@ -323,6 +391,36 @@ public class XmlParser extends BaseParser implements IParser {
 		}
 	}
 
+	private void encodeResourceReferenceToStreamWriter(XMLStreamWriter theEventWriter, ResourceReferenceDt theRef) throws XMLStreamException {
+		if (!(theRef.getDisplay().isEmpty())) {
+			theEventWriter.writeStartElement("display");
+			theEventWriter.writeAttribute("value", theRef.getDisplay().getValue());
+			theEventWriter.writeEndElement();
+		}
+		if (!(theRef.getReference().isEmpty())) {
+			theEventWriter.writeStartElement("reference");
+			theEventWriter.writeAttribute("value", theRef.getReference().getValue());
+			theEventWriter.writeEndElement();
+		}
+	}
+
+
+	private void encodeResourceToXmlStreamWriter(IResource theResource, XMLStreamWriter eventWriter) throws XMLStreamException, DataFormatException {
+		super.containResourcesForEncoding(theResource);
+		
+		RuntimeResourceDefinition resDef = myContext.getResourceDefinition(theResource);
+		if (resDef == null) {
+			throw new ConfigurationException("Unknown resource type: " + theResource.getClass());
+		}
+		
+		eventWriter.writeStartElement(resDef.getName());
+		eventWriter.writeDefaultNamespace(FHIR_NS);
+
+		encodeCompositeElementToStreamWriter(theResource, eventWriter, resDef);
+
+		eventWriter.writeEndElement();
+	}
+
 	private void encodeUndeclaredExtensions(XMLStreamWriter theWriter, List<UndeclaredExtension> extensions, String tagName) throws XMLStreamException {
 		for (UndeclaredExtension next : extensions) {
 			theWriter.writeStartElement(tagName);
@@ -344,56 +442,6 @@ public class XmlParser extends BaseParser implements IParser {
 
 			theWriter.writeEndElement();
 		}
-	}
-
-	private void encodeResourceReferenceToStreamWriter(XMLStreamWriter theEventWriter, ResourceReferenceDt theRef) throws XMLStreamException {
-		if (!(theRef.getDisplay().isEmpty())) {
-			theEventWriter.writeStartElement("display");
-			theEventWriter.writeAttribute("value", theRef.getDisplay().getValue());
-			theEventWriter.writeEndElement();
-		}
-		if (!(theRef.getReference().isEmpty())) {
-			theEventWriter.writeStartElement("reference");
-			theEventWriter.writeAttribute("value", theRef.getReference().getValue());
-			theEventWriter.writeEndElement();
-		}
-	}
-
-	@Override
-	public String encodeResourceToString(IResource theResource) throws DataFormatException {
-		Writer stringWriter = new StringWriter();
-		encodeResourceToWriter(theResource, stringWriter);
-		return stringWriter.toString();
-	}
-
-	@Override
-	public void encodeResourceToWriter(IResource theResource, Writer stringWriter) {
-		XMLStreamWriter eventWriter;
-		try {
-			eventWriter = myXmlOutputFactory.createXMLStreamWriter(stringWriter);
-			eventWriter = decorateStreamWriter(eventWriter);
-
-			encodeResourceToXmlStreamWriter(theResource, eventWriter);
-			eventWriter.flush();
-		} catch (XMLStreamException e) {
-			throw new ConfigurationException("Failed to initialize STaX event factory", e);
-		}
-	}
-
-	private void encodeResourceToXmlStreamWriter(IResource theResource, XMLStreamWriter eventWriter) throws XMLStreamException, DataFormatException {
-		super.containResourcesForEncoding(theResource);
-		
-		RuntimeResourceDefinition resDef = myContext.getResourceDefinition(theResource);
-		if (resDef == null) {
-			throw new ConfigurationException("Unknown resource type: " + theResource.getClass());
-		}
-		
-		eventWriter.writeStartElement(resDef.getName());
-		eventWriter.writeDefaultNamespace(FHIR_NS);
-
-		encodeCompositeElementToStreamWriter(theResource, eventWriter, resDef);
-
-		eventWriter.writeEndElement();
 	}
 
 	private void encodeXhtml(XhtmlDt theDt, XMLStreamWriter theEventWriter) throws XMLStreamException {
@@ -477,34 +525,9 @@ public class XmlParser extends BaseParser implements IParser {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see ca.uhn.fhir.parser.IParser#parseBundle(java.lang.String)
-	 */
-	@Override
-	public Bundle parseBundle(String theXml) throws ConfigurationException, DataFormatException {
-		StringReader reader = new StringReader(theXml);
-		return parseBundle(reader);
-	}
-
 	private Bundle parseBundle(XMLEventReader theStreamReader) {
 		ParserState<Bundle> parserState = ParserState.getPreAtomInstance(myContext);
 		return doXmlLoop(theStreamReader, parserState);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see ca.uhn.fhir.parser.IParser#parseResource(java.lang.String)
-	 */
-	@Override
-	public IResource parseResource(String theMessageString) throws ConfigurationException, DataFormatException {
-		return parseResource(null, theMessageString);
-	}
-
-	private IResource parseResource(XMLEventReader theStreamReader) {
-		return parseResource(null, theStreamReader);
 	}
 
 	private IResource parseResource(Class<? extends IResource> theResourceType, XMLEventReader theStreamReader) {
@@ -537,57 +560,12 @@ public class XmlParser extends BaseParser implements IParser {
 		}
 	}
 
+
 	private void writeTagWithTextNode(XMLStreamWriter theEventWriter, String theElementName, StringDt theStringDt) throws XMLStreamException {
 		theEventWriter.writeStartElement(theElementName);
 		if (StringUtils.isNotBlank(theStringDt.getValue())) {
 			theEventWriter.writeCharacters(theStringDt.getValue());
 		}
 		theEventWriter.writeEndElement();
-	}
-
-	@Override
-	public Bundle parseBundle(Reader theReader) {
-		XMLEventReader streamReader;
-		try {
-			streamReader = myXmlInputFactory.createXMLEventReader(theReader);
-		} catch (XMLStreamException e) {
-			throw new DataFormatException(e);
-		} catch (FactoryConfigurationError e) {
-			throw new ConfigurationException("Failed to initialize STaX event factory", e);
-		}
-
-		return parseBundle(streamReader);
-	}
-
-	@Override
-	public IResource parseResource(Reader theReader) throws ConfigurationException, DataFormatException {
-		return parseResource(null, theReader);
-	}
-
-	@Override
-	public IResource parseResource(Class<? extends IResource> theResourceType, Reader theReader) {
-		XMLEventReader streamReader;
-		try {
-			streamReader = myXmlInputFactory.createXMLEventReader(theReader);
-		} catch (XMLStreamException e) {
-			throw new DataFormatException(e);
-		} catch (FactoryConfigurationError e) {
-			throw new ConfigurationException("Failed to initialize STaX event factory", e);
-		}
-
-		return parseResource(theResourceType, streamReader);
-	}
-
-	@SuppressWarnings("unchecked")
-	@Override
-	public <T extends IResource> T parseResource(Class<T> theResourceType, String theMessageString) {
-		StringReader reader = new StringReader(theMessageString);
-		return (T) parseResource(theResourceType, reader);
-	}
-
-	@Override
-	public IParser setPrettyPrint(boolean thePrettyPrint) {
-		myPrettyPrint = thePrettyPrint;
-		return this;
 	}
 }
