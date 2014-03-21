@@ -82,7 +82,7 @@ public class XmlParserTest {
 		String str = p.encodeResourceToString(rpt);
 		
 		ourLog.info(str);
-		assertThat(str, StringContains.containsString("<div>AAA</div>"));
+		assertThat(str, StringContains.containsString("<div xmlns=\"\">AAA</div>"));
 		assertThat(str, StringContains.containsString("reference value=\"#"));
 		
 		int idx = str.indexOf("reference value=\"#") + "reference value=\"#".length();

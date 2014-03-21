@@ -24,6 +24,7 @@ import ca.uhn.fhir.rest.annotation.Required;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.client.ITestClient;
 import ca.uhn.fhir.rest.param.CodingListParam;
+import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.QualifiedDateParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 
@@ -160,6 +161,22 @@ public List<DiagnosticReport> getDiagnosticReport( @Required(name=DiagnosticRepo
   return retVal;
 }
 //END SNIPPET: pathSpec
+
+//START SNIPPET: dateRange
+@Search()
+public List<Observation> getObservationsByDateRange(@Required(name="subject.identifier") IdentifierDt theSubjectId,
+                                                    @Required(name=Observation.SP_DATE) DateRangeParam theRange) {
+  List<Observation> retVal = new ArrayList<Observation>();
+  
+  // The following two will be set as the start and end
+  // of the range specified by the query parameter
+  Date from = theRange.getLowerBoundAsInstant();
+  Date to   = theRange.getUpperBoundAsInstant();
+  
+  // ... populate ...
+  return retVal;
+}
+//END SNIPPET: dateRange
 
 private DiagnosticReport loadSomeDiagnosticReportFromDatabase(IdentifierDt theIdentifier) {
 	return null;

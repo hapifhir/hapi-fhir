@@ -17,12 +17,7 @@ public class FhirContextIntro {
 
 	public static void creatingContext() {
 // START SNIPPET: creatingContext
-/*
- * Create a FhirContex instance which is able to parse and encode
- * the Patient and Observation resources, and any resources referenced
- * from these.
- */
-FhirContext ctx = new FhirContext(Patient.class, Observation.class);
+FhirContext ctx = new FhirContext();
 // END SNIPPET: creatingContext
 		
 	}
@@ -103,7 +98,7 @@ StringDt familyName = patient.getName().get(0).getFamily().get(0);
 CodeDt gender = patient.getGender().getCoding().get(0).getCode();
 
 /*
- * The 
+ * The various datatype classes have accessors called getValue()
  */
 System.out.println(patientId.getValue()); // PRP1660
 System.out.println(familyName.getValue()); // Cardinal

@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.List;
 
 import ca.uhn.fhir.model.api.IQueryParameterAnd;
+import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 public class DateRangeParam implements IQueryParameterAnd {
@@ -91,13 +92,39 @@ public class DateRangeParam implements IQueryParameterAnd {
 	}
 
 	public Date getLowerBoundAsInstant() {
-		// TODO: account for precision
-		return myLowerBound.getValue();
+		Date retVal = myLowerBound.getValue();
+		if (myLowerBound.getComparator() != null) {
+			switch (myLowerBound.getComparator()) {
+			case GREATERTHAN:
+				retVal = myLowerBound.getPrecision().add(retVal, 1);
+				break;
+			case GREATERTHAN_OR_EQUALS:
+				break;
+			case LESSTHAN:
+			case LESSTHAN_OR_EQUALS:
+				throw new IllegalStateException("Unvalid lower bound comparator: " + myLowerBound.getComparator());
+			}
+		}
+		return retVal;
 	}
 
 	public Date getUpperBoundAsInstant() {
-		// TODO: account for precision
-		return myUpperBound.getValue();
+		Date retVal = myUpperBound.getValue();
+		if (myUpperBound.getComparator() != null) {
+			switch (myUpperBound.getComparator()) {
+			case LESSTHAN:
+				retVal = new Date(retVal.getTime() - 1L);
+				break;
+			case LESSTHAN_OR_EQUALS:
+				retVal = myUpperBound.getPrecision().add(retVal, 1);
+				retVal = new Date(retVal.getTime() - 1L);
+				break;
+			case GREATERTHAN_OR_EQUALS:
+			case GREATERTHAN:
+				throw new IllegalStateException("Unvalid upper bound comparator: " + myUpperBound.getComparator());
+			}
+		}
+		return retVal;
 	}
 
 }

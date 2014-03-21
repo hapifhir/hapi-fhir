@@ -4,6 +4,7 @@ import static org.apache.commons.lang3.StringUtils.*;
 
 import java.io.IOException;
 import java.io.Reader;
+import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.ArrayList;
@@ -65,21 +66,6 @@ public class JsonParser extends BaseParser implements IParser {
 		return stringWriter.toString();
 	}
 
-	private void writeTagWithTextNode(JsonGenerator theEventWriter, String theElementName, StringDt theStringDt) {
-		if (StringUtils.isNotBlank(theStringDt.getValue())) {
-			theEventWriter.write(theElementName, theStringDt.getValue());
-		} else {
-			theEventWriter.writeNull(theElementName);
-		}
-	}
-
-	private void writeOptionalTagWithTextNode(JsonGenerator theEventWriter, String theElementName, IPrimitiveDatatype<?> theInstantDt) {
-		String str = theInstantDt.getValueAsString();
-		if (StringUtils.isNotBlank(str)) {
-			theEventWriter.write(theElementName, theInstantDt.getValueAsString());
-		}
-	}
-
 	@Override
 	public void encodeBundleToWriter(Bundle theBundle, Writer theWriter) throws IOException {
 		JsonGenerator eventWriter = createJsonGenerator(theWriter);
@@ -132,26 +118,6 @@ public class JsonParser extends BaseParser implements IParser {
 		eventWriter.close();
 	}
 
-	private void writeAuthor(BaseBundle theBundle, JsonGenerator eventWriter) {
-		if (StringUtils.isNotBlank(theBundle.getAuthorName().getValue())) {
-			eventWriter.writeStartArray("author");
-			eventWriter.writeStartObject();
-			writeTagWithTextNode(eventWriter, "name", theBundle.getAuthorName());
-			writeOptionalTagWithTextNode(eventWriter, "uri", theBundle.getAuthorUri());
-			eventWriter.writeEnd();
-			eventWriter.writeEnd();
-		}
-	}
-
-	private void writeAtomLink(JsonGenerator theEventWriter, String theRel, StringDt theLink) {
-		if (isNotBlank(theLink.getValue())) {
-			theEventWriter.writeStartObject();
-			theEventWriter.write("rel", theRel);
-			theEventWriter.write("href", theLink.getValue());
-			theEventWriter.writeEnd();
-		}
-	}
-
 	@Override
 	public String encodeResourceToString(IResource theResource) throws DataFormatException, IOException {
 		Writer stringWriter = new StringWriter();
@@ -172,16 +138,6 @@ public class JsonParser extends BaseParser implements IParser {
 		// }
 	}
 
-	private JsonGenerator createJsonGenerator(Writer theWriter) {
-		Map<String, Object> properties = new HashMap<String, Object>(1);
-		if (myPrettyPrint) {
-			properties.put(JsonGenerator.PRETTY_PRINTING, myPrettyPrint);
-		}
-		JsonGeneratorFactory jgf = Json.createGeneratorFactory(properties);
-		JsonGenerator eventWriter = jgf.createGenerator(theWriter);
-		return eventWriter;
-	}
-
 	@Override
 	public Bundle parseBundle(Reader theReader) {
 		// TODO Auto-generated method stub
@@ -195,24 +151,29 @@ public class JsonParser extends BaseParser implements IParser {
 	}
 
 	@Override
-	public IResource parseResource(Class<? extends IResource> theResourceType, Reader theReader) {
+	public <T extends IResource> T parseResource(Class<T> theResourceType, String theMessageString) {
+		return parseResource(theResourceType, new StringReader(theMessageString));
+	}
+
+	@Override
+	public <T extends IResource> T parseResource(Class<T> theResourceType, Reader theReader) {
 		JsonReader reader = Json.createReader(theReader);
 		JsonObject object = reader.readObject();
-		
-		JsonValue resourceTypeObj = object.remove("resourceType");
+
+		JsonValue resourceTypeObj = object.get("resourceType");
 		assertObjectOfType(resourceTypeObj, JsonValue.ValueType.STRING, "resourceType");
-		String resourceType = ((JsonString)resourceTypeObj).getString();
-		
+		String resourceType = ((JsonString) resourceTypeObj).getString();
+
 		if (theResourceType != null) {
 			RuntimeResourceDefinition def = myContext.getResourceDefinition(theResourceType);
-		}else {
+		} else {
 			RuntimeResourceDefinition def = myContext.getResourceDefinition(resourceType);
 		}
-		
+
 		PushbackJsonParser parser = new PushbackJsonParser(Json.createParser(theReader));
-		
+
 		while (parser.hasNext()) {
-			
+
 			Event next = parser.next();
 			switch (next) {
 			case END_ARRAY:
@@ -236,27 +197,13 @@ public class JsonParser extends BaseParser implements IParser {
 				break;
 			default:
 				break;
-			
+
 			}
-			
-			
+
 		}
-			
+
 		return null;
 	}
-
-	private void assertObjectOfType(JsonValue theResourceTypeObj, ValueType theValueType, String thePosition) {
-		if (theResourceTypeObj.getValueType() != theValueType) {
-			throw new DataFormatException("Invalid content of element " + thePosition + ", expected " + theValueType);
-		}
-	}
-
-	@Override
-	public <T extends IResource> T parseResource(Class<T> theResourceType, String theMessageString) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 
 	@Override
 	public IParser setPrettyPrint(boolean thePrettyPrint) {
@@ -277,6 +224,22 @@ public class JsonParser extends BaseParser implements IParser {
 				list.get(valueIdx).add(new HeldExtension(next));
 			}
 		}
+	}
+
+	private void assertObjectOfType(JsonValue theResourceTypeObj, ValueType theValueType, String thePosition) {
+		if (theResourceTypeObj.getValueType() != theValueType) {
+			throw new DataFormatException("Invalid content of element " + thePosition + ", expected " + theValueType);
+		}
+	}
+
+	private JsonGenerator createJsonGenerator(Writer theWriter) {
+		Map<String, Object> properties = new HashMap<String, Object>(1);
+		if (myPrettyPrint) {
+			properties.put(JsonGenerator.PRETTY_PRINTING, myPrettyPrint);
+		}
+		JsonGeneratorFactory jgf = Json.createGeneratorFactory(properties);
+		JsonGenerator eventWriter = jgf.createGenerator(theWriter);
+		return eventWriter;
 	}
 
 	private void encodeChildElementToStreamWriter(JsonGenerator theWriter, IElement theValue, BaseRuntimeElementDefinition<?> theChildDef, String theChildName) throws IOException {
@@ -318,7 +281,7 @@ public class JsonParser extends BaseParser implements IParser {
 			if (theChildName != null) {
 				theWriter.writeStartObject(theChildName);
 			} else {
-				theWriter.flush();//TODO: remove
+				theWriter.flush();// TODO: remove
 				theWriter.writeStartObject();
 			}
 			encodeCompositeElementToStreamWriter(theValue, theWriter, childCompositeDef);
@@ -424,7 +387,7 @@ public class JsonParser extends BaseParser implements IParser {
 						}
 						currentChildName = childName;
 					} else {
-						theEventWriter.flush();//TODO: remove
+						theEventWriter.flush();// TODO: remove
 						encodeChildElementToStreamWriter(theEventWriter, nextValue, childDef, null);
 					}
 
@@ -462,7 +425,7 @@ public class JsonParser extends BaseParser implements IParser {
 					}
 
 					if (!haveContent) {
-//						theEventWriter.writeEnd();
+						// theEventWriter.writeEnd();
 						theEventWriter.flush(); // TODO: remove
 						theEventWriter.writeNull();
 					}
@@ -520,7 +483,7 @@ public class JsonParser extends BaseParser implements IParser {
 		}
 
 		theEventWriter.write("resourceType", resDef.getName());
-		if (theResource.getId() !=null && isNotBlank(theResource.getId().getValue())) {
+		if (theResource.getId() != null && isNotBlank(theResource.getId().getValue())) {
 			theEventWriter.write("id", theResource.getId().getValue());
 		}
 
@@ -557,6 +520,41 @@ public class JsonParser extends BaseParser implements IParser {
 		}
 
 		theWriter.writeEnd();
+	}
+
+	private void writeAtomLink(JsonGenerator theEventWriter, String theRel, StringDt theLink) {
+		if (isNotBlank(theLink.getValue())) {
+			theEventWriter.writeStartObject();
+			theEventWriter.write("rel", theRel);
+			theEventWriter.write("href", theLink.getValue());
+			theEventWriter.writeEnd();
+		}
+	}
+
+	private void writeAuthor(BaseBundle theBundle, JsonGenerator eventWriter) {
+		if (StringUtils.isNotBlank(theBundle.getAuthorName().getValue())) {
+			eventWriter.writeStartArray("author");
+			eventWriter.writeStartObject();
+			writeTagWithTextNode(eventWriter, "name", theBundle.getAuthorName());
+			writeOptionalTagWithTextNode(eventWriter, "uri", theBundle.getAuthorUri());
+			eventWriter.writeEnd();
+			eventWriter.writeEnd();
+		}
+	}
+
+	private void writeOptionalTagWithTextNode(JsonGenerator theEventWriter, String theElementName, IPrimitiveDatatype<?> theInstantDt) {
+		String str = theInstantDt.getValueAsString();
+		if (StringUtils.isNotBlank(str)) {
+			theEventWriter.write(theElementName, theInstantDt.getValueAsString());
+		}
+	}
+
+	private void writeTagWithTextNode(JsonGenerator theEventWriter, String theElementName, StringDt theStringDt) {
+		if (StringUtils.isNotBlank(theStringDt.getValue())) {
+			theEventWriter.write(theElementName, theStringDt.getValue());
+		} else {
+			theEventWriter.writeNull(theElementName);
+		}
 	}
 
 	private class HeldExtension {

@@ -28,7 +28,7 @@ public interface IParser {
 
 	<T extends IResource> T parseResource(Class<T> theResourceType, String theMessageString);
 
-	IResource parseResource(Class<? extends IResource> theResourceType, Reader theReader);
+	<T extends IResource> T parseResource(Class<T> theResourceType, Reader theReader);
 
 	IParser setPrettyPrint(boolean thePrettyPrint);
 

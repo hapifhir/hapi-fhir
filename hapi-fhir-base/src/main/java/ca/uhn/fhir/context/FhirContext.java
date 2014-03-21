@@ -27,6 +27,9 @@ public class FhirContext {
 		this(toCollection(theResourceType));
 	}
 
+	public FhirContext() {
+	}
+	
 	public FhirContext(Class<?>... theResourceTypes) {
 		this(toCollection(theResourceTypes));
 	}

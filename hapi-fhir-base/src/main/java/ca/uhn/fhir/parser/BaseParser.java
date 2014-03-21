@@ -30,6 +30,7 @@ public abstract class BaseParser implements IParser {
 	public IResource parseResource(Reader theReader) throws ConfigurationException, DataFormatException {
 		return parseResource(null, theReader);
 	}
+
 	public void containResourcesForEncoding(IResource theResource) {
 		List<ResourceReferenceDt> allElements = theResource.getAllPopulatedChildElementsOfType(ResourceReferenceDt.class);
 
@@ -46,7 +47,7 @@ public abstract class BaseParser implements IParser {
 					theResource.getContained().getContainedResources().add(resource);
 					allIds.add(resource.getId().getValue());
 				}
-				
+
 				next.setReference("#" + resource.getId().getValue());
 			}
 		}

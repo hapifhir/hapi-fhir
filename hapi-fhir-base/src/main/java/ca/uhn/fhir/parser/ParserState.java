@@ -115,8 +115,8 @@ class ParserState<T extends IElement> {
 	 * @param theResourceType
 	 *            May be null
 	 */
-	public static ParserState<IResource> getPreResourceInstance(Class<? extends IResource> theResourceType, FhirContext theContext) throws DataFormatException {
-		ParserState<IResource> retVal = new ParserState<IResource>(theContext);
+	public static <T extends IResource> ParserState<T> getPreResourceInstance(Class<T> theResourceType, FhirContext theContext) throws DataFormatException {
+		ParserState<T> retVal = new ParserState<T>(theContext);
 		retVal.push(retVal.new PreResourceState(theResourceType));
 		return retVal;
 	}

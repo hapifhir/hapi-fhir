@@ -159,15 +159,15 @@
 					may be optional. To add a second required parameter, annotate the
 					parameter with 
 					<a href="./apidocs/ca/uhn/fhir/rest/server/parameters/Required.html">@Required</a>.
-					To add an optional parameter (which will be pased in as <code>null</code> if no value
+					To add an optional parameter (which will be passed in as <code>null</code> if no value
 					is supplied), annotate the method with
 					<a href="./apidocs/ca/uhn/fhir/rest/server/parameters/Required.html">@Optional</a>.
 				</p>
 				
 				<p>
 					You may annotate a method with any combination of as many @Required and as many @Optional
-					parameters as you want. It is valid to have no @Required parameters, or
-					no @Optional parameters as well.
+					parameters as you want. It is valid to have only @Required parameters, or
+					only @Optional parameters, or any combination of the two.
 				</p>
 			
 				<macro name="snippet">
@@ -230,7 +230,7 @@
 					
 			</subsection>
 			
-			<subsection name="Date Parameters">
+			<subsection name="Date Parameters - Simple">
 
 				<p>
 					The FHIR specification provides a sytax for specifying
@@ -270,6 +270,46 @@
 
 			</subsection>
 			
+			<subsection name="Date Parameters - Ranges">
+
+				<p>
+					A common scenario in searches is to allow searching for resources 
+					with values (i.e timestamps) within a range of dates. 
+				</p>
+
+				<p>
+					FHIR allows for multiple parameters with the same key, and interprets
+					these as being an "AND" set. So, for example, a range of<br/> 
+					<code>DATE &gt;= 2011-01-01</code> and <code>DATE &lt; 2011-02-01</code><br/>
+					can be interpreted as any date within January 2011.
+				</p>
+
+				<p>
+					The following snippet shows how to accept such a range, and combines it
+					with a specific identifier, which is a common scenario. (i.e. Give me a list
+					of observations for a specific patient within a given date range)
+				</p>				
+				<macro name="snippet">
+					<param name="id" value="dateRange" />
+					<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
+				</macro>
+				
+				<p>
+					Example URL to invoke this method:<br/>
+					<code>http://fhir.example.com/Observation?subject.identifier=7000135&amp;date=&gt;=2011-01-01&amp;date=&lt;2011-02-01</code>
+				</p>
+				
+				<p>
+					Invoking a client of thie type involves the following syntax:
+				</p>
+				
+				<macro name="snippet">
+					<param name="id" value="dateClient" />
+					<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
+				</macro>
+
+			</subsection>
+
 			<subsection name="Resource Includes (_include)">
 			
 				<p>

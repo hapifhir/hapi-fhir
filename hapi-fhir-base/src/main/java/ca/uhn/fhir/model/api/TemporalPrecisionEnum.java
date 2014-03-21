@@ -1,14 +1,45 @@
 package ca.uhn.fhir.model.api;
 
 import java.util.Calendar;
+import java.util.Date;
+
+import org.apache.commons.lang3.time.DateUtils;
 
 public enum TemporalPrecisionEnum {
 
-	YEAR(Calendar.YEAR),
-	MONTH(Calendar.MONTH),
-	DAY(Calendar.DATE),
-	SECOND(Calendar.SECOND),
-	MILLI(Calendar.MILLISECOND),
+	YEAR(Calendar.YEAR) {
+		@Override
+		public Date add(Date theInput, int theAmount) {
+			return DateUtils.addYears(theInput, theAmount);
+		}
+	},
+	
+	MONTH(Calendar.MONTH) {
+		@Override
+		public Date add(Date theInput, int theAmount) {
+			return DateUtils.addMonths(theInput, theAmount);
+		}
+	},
+	DAY(Calendar.DATE) {
+		@Override
+		public Date add(Date theInput, int theAmount) {
+			return DateUtils.addDays(theInput, theAmount);
+		}
+	},
+	SECOND(Calendar.SECOND) {
+		@Override
+		public Date add(Date theInput, int theAmount) {
+			return DateUtils.addSeconds(theInput, theAmount);
+		}
+	},
+	
+	MILLI(Calendar.MILLISECOND) {
+		@Override
+		public Date add(Date theInput, int theAmount) {
+			return DateUtils.addMilliseconds(theInput, theAmount);
+		}
+	},
+	
 	;
 	
 	private int myCalendarConstant;
@@ -17,7 +48,10 @@ public enum TemporalPrecisionEnum {
 		myCalendarConstant = theCalendarConstant;
 	}
 
+	public abstract Date add(Date theInput, int theAmount);
+	
 	public int getCalendarConstant() {
 		return myCalendarConstant;
 	}
+
 }

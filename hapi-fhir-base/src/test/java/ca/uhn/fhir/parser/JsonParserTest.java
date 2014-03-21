@@ -80,17 +80,19 @@ public class JsonParserTest {
 		
 	}
 	
+	@Test
 	public void testSimpleParse() throws DataFormatException, IOException {
 		
 		String msg = IOUtils.toString(XmlParser.class.getResourceAsStream("/example-patient-general.json"));
 		FhirContext ctx = new FhirContext(Patient.class);
 		IParser p = ctx.newJsonParser();
+		ourLog.info("Reading in message: {}", msg);
 		Patient res = p.parseResource(Patient.class, msg);
 		
 		String encoded = ctx.newXmlParser().setPrettyPrint(true).encodeResourceToString(res);
 		ourLog.info(encoded);
 
-	}
+	}	
 
 	@Test
 	public void testEncodeContainedResourcesMore() throws IOException {

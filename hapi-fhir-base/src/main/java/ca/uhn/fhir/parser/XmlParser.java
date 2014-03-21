@@ -138,6 +138,10 @@ public class XmlParser extends BaseParser implements IParser {
 
 	@Override
 	public String encodeResourceToString(IResource theResource) throws DataFormatException {
+		if (theResource==null) {
+			throw new NullPointerException("Resource can not be null");
+		}
+		
 		Writer stringWriter = new StringWriter();
 		encodeResourceToWriter(theResource, stringWriter);
 		return stringWriter.toString();
@@ -183,7 +187,7 @@ public class XmlParser extends BaseParser implements IParser {
 	}
 
 	@Override
-	public IResource parseResource(Class<? extends IResource> theResourceType, Reader theReader) {
+	public <T extends IResource> T parseResource(Class<T> theResourceType, Reader theReader) {
 		XMLEventReader streamReader;
 		try {
 			streamReader = myXmlInputFactory.createXMLEventReader(theReader);
@@ -545,8 +549,8 @@ public class XmlParser extends BaseParser implements IParser {
 		return doXmlLoop(theStreamReader, parserState);
 	}
 
-	private IResource parseResource(Class<? extends IResource> theResourceType, XMLEventReader theStreamReader) {
-		ParserState<IResource> parserState = ParserState.getPreResourceInstance(theResourceType, myContext);
+	private <T extends IResource> T parseResource(Class<T> theResourceType, XMLEventReader theStreamReader) {
+		ParserState<T> parserState = ParserState.getPreResourceInstance(theResourceType, myContext);
 		return doXmlLoop(theStreamReader, parserState);
 	}
 
