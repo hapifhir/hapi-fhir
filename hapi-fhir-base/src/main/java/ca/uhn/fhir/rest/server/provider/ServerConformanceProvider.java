@@ -1,6 +1,5 @@
 package ca.uhn.fhir.rest.server.provider;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -22,13 +21,11 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.annotation.Metadata;
 import ca.uhn.fhir.rest.method.BaseMethodBinding;
-import ca.uhn.fhir.rest.method.ReadMethodBinding;
 import ca.uhn.fhir.rest.method.SearchMethodBinding;
 import ca.uhn.fhir.rest.param.IParameter;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.ResourceBinding;
 import ca.uhn.fhir.rest.server.RestfulServer;
-import ca.uhn.fhir.util.DatatypeUtil;
 import ca.uhn.fhir.util.ExtensionConstants;
 import ca.uhn.fhir.util.VersionUtil;
 

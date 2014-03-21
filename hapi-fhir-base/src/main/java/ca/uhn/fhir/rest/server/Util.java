@@ -10,7 +10,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import ch.qos.logback.core.joran.action.ParamAction;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.model.api.PathSpecification;
 import ca.uhn.fhir.rest.annotation.Include;
@@ -89,7 +88,7 @@ public class Util {
 					}
 					Class<? extends Collection<PathSpecification>> instantiableCollectionType = (Class<? extends Collection<PathSpecification>>) CollectionBinder.getInstantiableCollectionType(innerCollectionType, "Method '" + method.getName() + "'");
 					
-					param = new IncludeParameter(instantiableCollectionType);
+					param = new IncludeParameter((Include) nextAnnotation, instantiableCollectionType);
 				} else {
 					continue;
 				}

@@ -8,10 +8,8 @@ import ca.uhn.fhir.model.api.annotation.SimpleSetter;
 import ca.uhn.fhir.parser.DataFormatException;
 
 /**
- * Represents the FHIR ID type. This is the actual resource ID, meaning the ID that
- * will be used in RESTful URLs, Resource References, etc. to represent a specific
- * instance of a resource.
- *  
+ * Represents the FHIR ID type. This is the actual resource ID, meaning the ID that will be used in RESTful URLs, Resource References, etc. to represent a specific instance of a resource.
+ * 
  * <p>
  * <b>Description</b>: A whole number in the range 0 to 2^64-1 (optionally represented in hex), a uuid, an oid, or any other combination of lowercase letters, numerals, "-" and ".", with a length
  * limit of 36 characters.
@@ -30,6 +28,17 @@ public class IdDt extends BasePrimitive<String> {
 	 */
 	public IdDt() {
 		super();
+	}
+
+	/**
+	 * Create a new ID, using a BigDecimal input. Uses {@link BigDecimal#toPlainString()} to generate the string representation.
+	 */
+	public IdDt(BigDecimal thePid) {
+		if (thePid != null) {
+			setValue(thePid.toPlainString());
+		} else {
+			setValue(null);
+		}
 	}
 
 	/**
@@ -56,14 +65,24 @@ public class IdDt extends BasePrimitive<String> {
 	}
 
 	/**
-	 * Create a new ID, using a BigDecimal input. Uses {@link BigDecimal#toPlainString()} to generate the string representation.
+	 * Returns the value of this ID as a big decimal, or <code>null</code> if the value is null
+	 * 
+	 * @throws NumberFormatException
+	 *             If the value is not a valid BigDecimal
 	 */
-	public IdDt(BigDecimal thePid) {
-		if (thePid != null) {
-			setValue(thePid.toPlainString());
-		} else {
-			setValue(null);
+	public BigDecimal asBigDecimal() {
+		if (getValue() == null) {
+			return null;
 		}
+		return new BigDecimal(getValueAsString());
+	}
+
+	/**
+	 * Returns a reference to <code>this</code> IdDt. It is generally not neccesary to use this method but it is provided for consistency with the rest of the API.
+	 */
+	@Override
+	public IdDt getId() {
+		return this;
 	}
 
 	@Override
@@ -74,6 +93,14 @@ public class IdDt extends BasePrimitive<String> {
 	@Override
 	public String getValueAsString() {
 		return myValue;
+	}
+
+	/**
+	 * Copies the value from the given IdDt to <code>this</code> IdDt. It is generally not neccesary to use this method but it is provided for consistency with the rest of the API.
+	 */
+	@Override
+	public void setId(IdDt theId) {
+		setValue(theId.getValue());
 	}
 
 	/**
@@ -112,18 +139,6 @@ public class IdDt extends BasePrimitive<String> {
 	@Override
 	public String toString() {
 		return myValue;
-	}
-
-	/**
-	 * Returns the value of this ID as a big decimal, or <code>null</code> if the value is null
-	 * 
-	 * @throws NumberFormatException If the value is not a valid BigDecimal
-	 */
-	public BigDecimal asBigDecimal() {
-		if (getValue() == null){
-			return null;
-		}
-		return new BigDecimal(getValueAsString());
 	}
 
 }

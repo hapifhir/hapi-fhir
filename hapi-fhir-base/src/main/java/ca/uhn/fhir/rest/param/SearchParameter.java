@@ -100,6 +100,8 @@ public class SearchParameter implements IParameter {
 			throw new ConfigurationException("Unknown search parameter type: " + type);
 		}
 		
+		// NB: Once this is enabled, we should return true from handlesMissing if
+		// it's a collection type
 //		if (theInnerCollectionType != null) {
 //			this.parser = new CollectionBinder(this.parser, theInnerCollectionType);
 //		}
@@ -113,6 +115,11 @@ public class SearchParameter implements IParameter {
 	@Override
 	public SearchParamTypeEnum getParamType() {
 		return myParamType;
+	}
+
+	@Override
+	public boolean handlesMissing() {
+		return false;
 	}
 
 }

@@ -5,16 +5,16 @@ import ca.uhn.fhir.model.api.IValueSetEnumBinder;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.dstu.composite.CodingDt;
 
-@DatatypeDef(name = "Coding")
-public class BoundCodingDt<T extends Enum<?>> extends CodingDt {
+@DatatypeDef(name = "Coding", isSpecialization=true)
+public class BoundCodingDt__<T extends Enum<?>> extends CodingDt {
 
 	private IValueSetEnumBinder<T> myBinder;
 
-	public BoundCodingDt(IValueSetEnumBinder<T> theBinder) {
+	public BoundCodingDt__(IValueSetEnumBinder<T> theBinder) {
 		myBinder = theBinder;
 	}
 	
-	public BoundCodingDt(IValueSetEnumBinder<T> theBinder, T theValue) {
+	public BoundCodingDt__(IValueSetEnumBinder<T> theBinder, T theValue) {
 		myBinder = theBinder;
 		setValueAsEnum(theValue);
 	}

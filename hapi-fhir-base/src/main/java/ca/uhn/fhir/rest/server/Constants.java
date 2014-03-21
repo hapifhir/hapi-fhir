@@ -16,6 +16,8 @@ public class Constants {
 	public static final Set<String> FORMAT_VAL_XML;
 	public static final Set<String> FORMAT_VAL_JSON;
 	public static final Map<String, EncodingUtil> FORMAT_VAL_TO_ENCODING;
+	public static final String CT_XML = "application/xml";
+	public static final String CT_JSON = "application/json";
 
 	static {
 		Map<String, EncodingUtil> valToEncoding = new HashMap<String, EncodingUtil>();

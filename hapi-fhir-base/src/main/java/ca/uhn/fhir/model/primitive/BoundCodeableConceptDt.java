@@ -30,7 +30,7 @@ public class BoundCodeableConceptDt<T extends Enum<?>> extends CodeableConceptDt
 			return;
 		}
 		for (T next : theValues) {
-			getCoding().add(new BoundCodingDt<T>(myBinder, next));
+			getCoding().add(new CodingDt(myBinder.toSystemString(next), myBinder.toCodeString(next)));
 		}
 	}
 

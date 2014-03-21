@@ -8,14 +8,20 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 public interface IParameter {
 
-	public abstract List<List<String>> encode(Object theObject) throws InternalErrorException;
+	List<List<String>> encode(Object theObject) throws InternalErrorException;
 
-	public abstract String getName();
+	String getName();
 
-	public abstract Object parse(List<List<String>> theString) throws InternalErrorException, InvalidRequestException;
+	Object parse(List<List<String>> theString) throws InternalErrorException, InvalidRequestException;
 
-	public abstract boolean isRequired();
+	boolean isRequired();
+	
+	/**
+	 * Parameter should return true if {@link #parse(List)} should be called even
+	 * if the query string contained no values for the given parameter 
+	 */
+	boolean handlesMissing();
 
-	public abstract SearchParamTypeEnum getParamType();
+	SearchParamTypeEnum getParamType();
 
 }

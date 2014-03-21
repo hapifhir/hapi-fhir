@@ -94,7 +94,7 @@ public class PrettyPrintWriterWrapper implements XMLStreamWriter {
 	@Override
 	public void writeStartElement(String thePrefix, String theLocalName, String theNamespaceURI) throws XMLStreamException {
 		indentAndAdd();
-		myTarget.writeStartElement(thePrefix, theNamespaceURI, theLocalName);
+		myTarget.writeStartElement(thePrefix, theLocalName, theNamespaceURI);
 	}
 
 	@Override

@@ -1,9 +1,9 @@
 package ca.uhn.fhir.rest.server;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
-import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -23,13 +23,15 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.hamcrest.core.IsNot;
+import org.hamcrest.core.StringContains;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.experimental.theories.Theories;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
+import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.api.PathSpecification;
 import ca.uhn.fhir.model.dstu.composite.CodingDt;
 import ca.uhn.fhir.model.dstu.composite.HumanNameDt;
@@ -104,10 +106,58 @@ public class ResfulServerMethodTest {
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		Bundle bundle = ourCtx.newXmlParser().parseBundle(responseContent);
 
-		Patient patient = (Patient) bundle.getEntries().get(0).getResource();
+		BundleEntry entry0 = bundle.getEntries().get(0);
+		Patient patient = (Patient) entry0.getResource();
 		assertEquals("include1", patient.getCommunication().get(0).getText().getValue());
 		assertEquals("include2", patient.getAddress().get(0).getLine().get(0).getValue());
 		assertEquals("include3", patient.getAddress().get(1).getLine().get(0).getValue());
+	}
+
+	@Test
+	public void testSearchWithIncludesNone() throws Exception {
+
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?withIncludes=include1");
+		HttpResponse status = ourClient.execute(httpGet);
+
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		ourLog.info("Response was:\n{}", responseContent);
+
+		// Make sure there is no crash
+		assertEquals(200, status.getStatusLine().getStatusCode());
+	}
+	
+	@Test
+	public void testSearchWithIncludesBad() throws Exception {
+
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?withIncludes=include1&_include=include2&_include=include4");
+		HttpResponse status = ourClient.execute(httpGet);
+
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		ourLog.info("Response was:\n{}", responseContent);
+
+		assertEquals(400, status.getStatusLine().getStatusCode());
+	}
+
+	@Test
+	public void testEntryLinkSelf() throws Exception {
+
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?withIncludes=include1&_include=include2&_include=include3");
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		Bundle bundle = ourCtx.newXmlParser().parseBundle(responseContent);
+		BundleEntry entry0 = bundle.getEntries().get(0);
+		assertEquals("http://localhost:" + ourPort + "/Patient/1", entry0.getLinkSelf().getValue());
+		assertEquals("1", entry0.getEntryId().getValue());
+
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?withIncludes=include1&_include=include2&_include=include3&_format=json");
+		status = ourClient.execute(httpGet);
+		responseContent = IOUtils.toString(status.getEntity().getContent());
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		bundle = ourCtx.newJsonParser().parseBundle(responseContent);
+		entry0 = bundle.getEntries().get(0);
+		assertEquals("http://localhost:" + ourPort + "/Patient/1?_format=json", entry0.getLinkSelf().getValue());
+
 	}
 
 	@Test
@@ -216,18 +266,18 @@ public class ResfulServerMethodTest {
 		assertEquals("urn:bbb|bbb", patient.getIdentifier().get(2).getValueAsQueryToken());
 	}
 
-//	@Test
-//	public void testSearchByComplex() throws Exception {
-//
-//		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?Patient.identifier=urn:oid:2.16.840.1.113883.3.239.18.148%7C7000135&name=urn:oid:1.3.6.1.4.1.12201.102.5%7C522&date=");
-//		HttpResponse status = ourClient.execute(httpGet);
-//
-//		String responseContent = IOUtils.toString(status.getEntity().getContent());
-//		ourLog.info("Response was:\n{}", responseContent);
-//
-//		assertEquals(200, status.getStatusLine().getStatusCode());
-//	}
-	
+	// @Test
+	// public void testSearchByComplex() throws Exception {
+	//
+	// HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?Patient.identifier=urn:oid:2.16.840.1.113883.3.239.18.148%7C7000135&name=urn:oid:1.3.6.1.4.1.12201.102.5%7C522&date=");
+	// HttpResponse status = ourClient.execute(httpGet);
+	//
+	// String responseContent = IOUtils.toString(status.getEntity().getContent());
+	// ourLog.info("Response was:\n{}", responseContent);
+	//
+	// assertEquals(200, status.getStatusLine().getStatusCode());
+	// }
+
 	@Test
 	public void testSearchByDob() throws Exception {
 
@@ -405,6 +455,31 @@ public class ResfulServerMethodTest {
 	}
 
 	@Test
+	public void testPrettyPrint() throws Exception {
+
+		// HttpPost httpPost = new HttpPost("http://localhost:" + ourPort +
+		// "/Patient/1");
+		// httpPost.setEntity(new StringEntity("test",
+		// ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		assertThat(responseContent, StringContains.containsString("<identifier><use"));
+
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1?_pretty=false");
+		status = ourClient.execute(httpGet);
+		responseContent = IOUtils.toString(status.getEntity().getContent());
+		assertThat(responseContent, StringContains.containsString("<identifier><use"));
+
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1?_pretty=true");
+		status = ourClient.execute(httpGet);
+		responseContent = IOUtils.toString(status.getEntity().getContent());
+		assertThat(responseContent, IsNot.not(StringContains.containsString("<identifier><use")));
+
+	}
+
+	@Test
 	public void testGetById() throws Exception {
 
 		// HttpPost httpPost = new HttpPost("http://localhost:" + ourPort +
@@ -510,6 +585,7 @@ public class ResfulServerMethodTest {
 				patient.getName().get(0).addFamily("Test");
 				patient.getName().get(0).addGiven("PatientOne");
 				patient.getGender().setText("M");
+				patient.getId().setValue("1");
 				idToPatient.put("1", patient);
 			}
 			{
@@ -522,13 +598,15 @@ public class ResfulServerMethodTest {
 				patient.getName().get(0).addFamily("Test");
 				patient.getName().get(0).addGiven("PatientTwo");
 				patient.getGender().setText("F");
+				patient.getId().setValue("2");
 				idToPatient.put("2", patient);
 			}
 			return idToPatient;
 		}
 
 		@Search()
-		public Patient getPatientWithIncludes(@Required(name = "withIncludes") StringDt theString, @Include List<PathSpecification> theIncludes) {
+		public Patient getPatientWithIncludes(@Required(name = "withIncludes") StringDt theString, 
+				@Include(allow= {"include1","include2", "include3"}) List<PathSpecification> theIncludes) {
 			Patient next = getIdToPatient().get("1");
 
 			next.addCommunication().setText(theString.getValue());
@@ -553,14 +631,11 @@ public class ResfulServerMethodTest {
 		}
 
 		@SuppressWarnings("unused")
-		public List<Patient> findDiagnosticReportsByPatient(
-				@Required(name="Patient.identifier") IdentifierDt thePatientId, 
-				@Required(name=DiagnosticReport.SP_NAME) CodingListParam theNames,
-				@Optional(name=DiagnosticReport.SP_DATE) DateRangeParam theDateRange
-				) throws Exception {
+		public List<Patient> findDiagnosticReportsByPatient(@Required(name = "Patient.identifier") IdentifierDt thePatientId, @Required(name = DiagnosticReport.SP_NAME) CodingListParam theNames,
+				@Optional(name = DiagnosticReport.SP_DATE) DateRangeParam theDateRange) throws Exception {
 			return Collections.emptyList();
 		}
-		
+
 		@Search()
 		public Patient getPatientWithDOB(@Required(name = "dob") QualifiedDateParam theDob) {
 			Patient next = getIdToPatient().get("1");

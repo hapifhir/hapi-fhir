@@ -8,7 +8,6 @@ import java.util.Set;
 import ca.uhn.fhir.model.api.ICodeEnum;
 import ca.uhn.fhir.model.api.IDatatype;
 import ca.uhn.fhir.model.api.IElement;
-import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 
@@ -35,7 +34,8 @@ public abstract class BaseRuntimeChildDatatypeDefinition extends BaseRuntimeDecl
 
 	@Override
 	public BaseRuntimeElementDefinition<?> getChildElementDefinitionByDatatype(Class<? extends IElement> theDatatype) {
-		if (myDatatype.equals(theDatatype)) {
+		Class<? extends IElement> datatype = theDatatype;
+		if (myDatatype.equals(datatype)) {
 			return myElementDefinition;
 		}
 		return null;
@@ -74,4 +74,11 @@ public abstract class BaseRuntimeChildDatatypeDefinition extends BaseRuntimeDecl
 		}
 		myCodeType = theType;
 	}
+	
+	@Override
+	public String toString() {
+		return getClass().getSimpleName() + "[" + getElementName() + "]";
+	}
+
+	
 }

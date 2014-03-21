@@ -12,6 +12,5 @@ public class RuntimeChildCompositeDatatypeDefinition extends BaseRuntimeChildDat
 		super(theField, theElementName, theChildAnnotation,theDescriptionAnnotation, theDatatype);
 	}
 
-	
 
 }

@@ -40,11 +40,24 @@ import ca.uhn.fhir.rest.server.provider.ServerProfileProvider;
 
 public abstract class RestfulServer extends HttpServlet {
 
+	private static final String PARAM_HISTORY = "_history";
+	private static final String PARAM_PRETTY = "_pretty";
+
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RestfulServer.class);
 
 	private static final long serialVersionUID = 1L;
 
 	private FhirContext myFhirContext;
+	private boolean myUseBrowserFriendlyContentTypes;
+
+	/**
+	 * If set to <code>true</code> (default is false), the server will use browser friendly
+	 * content-types (instead of standard FHIR ones) when it detects that the request
+	 * is coming from a browser instead of a FHIR
+	 */
+	public void setUseBrowserFriendlyContentTypes(boolean theUseBrowserFriendlyContentTypes) {
+		myUseBrowserFriendlyContentTypes = theUseBrowserFriendlyContentTypes;
+	}
 
 	private Map<Class<? extends IResource>, IResourceProvider> myTypeToProvider = new HashMap<Class<? extends IResource>, IResourceProvider>();
 
@@ -75,18 +88,17 @@ public abstract class RestfulServer extends HttpServlet {
 		}
 		return EncodingUtil.XML;
 	}
-	
+
 	@Override
 	protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		handleRequest(SearchMethodBinding.RequestType.DELETE, request, response);
 	}
 
-	
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		handleRequest(SearchMethodBinding.RequestType.GET, request, response);
 	}
-	
+
 	@Override
 	protected void doOptions(HttpServletRequest theReq, HttpServletResponse theResp) throws ServletException, IOException {
 		handleRequest(SearchMethodBinding.RequestType.OPTIONS, theReq, theResp);
@@ -101,7 +113,6 @@ public abstract class RestfulServer extends HttpServlet {
 	protected void doPut(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		handleRequest(SearchMethodBinding.RequestType.PUT, request, response);
 	}
-
 
 	private void findResourceMethods(IResourceProvider theProvider) throws Exception {
 
@@ -131,12 +142,11 @@ public abstract class RestfulServer extends HttpServlet {
 		}
 	}
 
-
 	public FhirContext getFhirContext() {
 		return myFhirContext;
 	}
 
-	private IParser getNewParser(EncodingUtil theResponseEncoding) {
+	private IParser getNewParser(EncodingUtil theResponseEncoding, boolean thePrettyPrint) {
 		IParser parser;
 		switch (theResponseEncoding) {
 		case JSON:
@@ -147,7 +157,7 @@ public abstract class RestfulServer extends HttpServlet {
 			parser = myFhirContext.newXmlParser();
 			break;
 		}
-		return parser;
+		return parser.setPrettyPrint(thePrettyPrint);
 	}
 
 	public Collection<ResourceBinding> getResourceBindings() {
@@ -160,8 +170,7 @@ public abstract class RestfulServer extends HttpServlet {
 	public abstract Collection<IResourceProvider> getResourceProviders();
 
 	/**
-	 * This method should be overridden to provide a security manager instance.
-	 * By default, returns null.
+	 * This method should be overridden to provide a security manager instance. By default, returns null.
 	 */
 	public ISecurityManager getSecurityManager() {
 		return null;
@@ -181,39 +190,60 @@ public abstract class RestfulServer extends HttpServlet {
 			if (null != securityManager) {
 				securityManager.authenticate(request);
 			}
+			
+			String uaHeader = request.getHeader("user-agent");
+			boolean requestIsBrowser = false;
+			if (uaHeader != null && uaHeader.contains("Mozilla")) {
+				requestIsBrowser = true;
+			}
+			
 
 			String resourceName = null;
 			String requestFullPath = StringUtils.defaultString(request.getRequestURI());
-//			String contextPath = StringUtils.defaultString(request.getContextPath());
+			// String contextPath = StringUtils.defaultString(request.getContextPath());
 			String servletPath = StringUtils.defaultString(request.getServletPath());
 			StringBuffer requestUrl = request.getRequestURL();
 			String servletContextPath = "";
 			if (request.getServletContext() != null) {
 				servletContextPath = StringUtils.defaultString(request.getServletContext().getContextPath());
 			}
-			
+
 			ourLog.info("Request FullPath: {}", requestFullPath);
 			ourLog.info("Servlet Path: {}", servletPath);
 			ourLog.info("Request Url: {}", requestUrl);
 			ourLog.info("Context Path: {}", servletContextPath);
 
 			servletPath = servletContextPath;
-			
+
 			IdDt id = null;
 			IdDt versionId = null;
-			String operation = null;			
-			
+			String operation = null;
+
 			String requestPath = requestFullPath.substring(servletPath.length());
 			if (requestPath.length() > 0 && requestPath.charAt(0) == '/') {
 				requestPath = requestPath.substring(1);
 			}
 
-			int contextIndex = requestUrl.indexOf(servletPath);
+			int contextIndex;
+			if (servletPath.length()==0) {
+				contextIndex = requestUrl.indexOf(requestPath);
+			}else {
+				contextIndex = requestUrl.indexOf(servletPath);
+			}
+			
 			String fhirServerBase = requestUrl.substring(0, contextIndex + servletPath.length());
 			String completeUrl = StringUtils.isNotBlank(request.getQueryString()) ? requestUrl + "?" + request.getQueryString() : requestUrl.toString();
-			
+
 			Map<String, String[]> params = new HashMap<String, String[]>(request.getParameterMap());
 			EncodingUtil responseEncoding = determineResponseEncoding(request, params);
+
+			String[] pretty = params.remove(PARAM_PRETTY);
+			boolean prettyPrint = false;
+			if (pretty != null && pretty.length > 0) {
+				if ("true".equals(pretty[0])) {
+					prettyPrint = true;
+				}
+			}
 
 			StringTokenizer tok = new StringTokenizer(requestPath, "/");
 			if (!tok.hasMoreTokens()) {
@@ -228,7 +258,7 @@ public abstract class RestfulServer extends HttpServlet {
 			} else {
 				resourceBinding = resources.get(resourceName);
 			}
-			
+
 			if (resourceBinding == null) {
 				throw new MethodNotFoundException("Unknown resource type: " + resourceName);
 			}
@@ -244,7 +274,7 @@ public abstract class RestfulServer extends HttpServlet {
 
 			if (tok.hasMoreTokens()) {
 				String nextString = tok.nextToken();
-				if (nextString.startsWith("_history")) {
+				if (nextString.startsWith(PARAM_HISTORY)) {
 					if (tok.hasMoreTokens()) {
 						versionId = new IdDt(tok.nextToken());
 					} else {
@@ -271,7 +301,7 @@ public abstract class RestfulServer extends HttpServlet {
 			List<IResource> result = resourceMethod.invokeServer(resourceBinding.getResourceProvider(), id, versionId, params);
 			switch (resourceMethod.getReturnType()) {
 			case BUNDLE:
-				streamResponseAsBundle(response, result, responseEncoding, fhirServerBase, completeUrl);
+				streamResponseAsBundle(response, result, responseEncoding, fhirServerBase, completeUrl, prettyPrint, requestIsBrowser);
 				break;
 			case RESOURCE:
 				if (result.size() == 0) {
@@ -279,7 +309,7 @@ public abstract class RestfulServer extends HttpServlet {
 				} else if (result.size() > 1) {
 					throw new InternalErrorException("Method returned multiple resources");
 				}
-				streamResponseAsResource(response, result.get(0), resourceBinding, responseEncoding);
+				streamResponseAsResource(response, result.get(0), responseEncoding, prettyPrint, requestIsBrowser);
 				break;
 			}
 			// resourceMethod.get
@@ -334,7 +364,7 @@ public abstract class RestfulServer extends HttpServlet {
 			for (IResourceProvider provider : myTypeToProvider.values()) {
 				findResourceMethods(provider);
 			}
-			
+
 			findResourceMethods(getServerProfilesProvider());
 			findResourceMethods(getServerConformanceProvider());
 
@@ -344,16 +374,25 @@ public abstract class RestfulServer extends HttpServlet {
 		}
 	}
 
-	private void streamResponseAsBundle(HttpServletResponse theHttpResponse, List<IResource> theResult, EncodingUtil theResponseEncoding, String theFhirServerBase, String theCompleteUrl) throws IOException {
+	private void streamResponseAsBundle(HttpServletResponse theHttpResponse, List<IResource> theResult, EncodingUtil theResponseEncoding, String theServerBase, String theCompleteUrl,
+			boolean thePrettyPrint, boolean theRequestIsBrowser) throws IOException {
+		assert theServerBase.endsWith("/");
+		
 		theHttpResponse.setStatus(200);
-		theHttpResponse.setContentType(theResponseEncoding.getBundleContentType());
+		
+		if (theRequestIsBrowser && myUseBrowserFriendlyContentTypes) {
+			theHttpResponse.setContentType(theResponseEncoding.getBrowserFriendlyBundleContentType());
+		} else {
+			theHttpResponse.setContentType(theResponseEncoding.getBundleContentType());
+		}
+		
 		theHttpResponse.setCharacterEncoding("UTF-8");
 
 		Bundle bundle = new Bundle();
 		bundle.getAuthorName().setValue(getClass().getCanonicalName());
 		bundle.getBundleId().setValue(UUID.randomUUID().toString());
 		bundle.getPublished().setToCurrentTimeInLocalTimeZone();
-		bundle.getLinkBase().setValue(theFhirServerBase);
+		bundle.getLinkBase().setValue(theServerBase);
 		bundle.getLinkSelf().setValue(theCompleteUrl);
 
 		for (IResource next : theResult) {
@@ -361,23 +400,55 @@ public abstract class RestfulServer extends HttpServlet {
 			bundle.getEntries().add(entry);
 
 			entry.setResource(next);
+
+			RuntimeResourceDefinition def = myFhirContext.getResourceDefinition(next);
+
+			if (next.getId() != null && StringUtils.isNotBlank(next.getId().getValue())) {
+				entry.getEntryId().setValue(next.getId().getValue());
+				entry.getTitle().setValue(def.getName() + " " + next.getId().getValue());
+
+				StringBuilder b = new StringBuilder();
+				b.append(theServerBase);
+				b.append(def.getName());
+				b.append('/');
+				b.append(next.getId().getValue());
+				boolean haveQ = false;
+				if (thePrettyPrint) {
+					b.append('?').append(PARAM_PRETTY).append("=true");
+					haveQ = true;
+				}
+				if (theResponseEncoding == EncodingUtil.JSON) {
+					if (!haveQ) {
+						b.append('?');
+						haveQ = true;
+					} else {
+						b.append('&');
+					}
+					b.append(Constants.PARAM_FORMAT).append("=json");
+				}
+				entry.getLinkSelf().setValue(b.toString());
+			}
 		}
 
 		bundle.getTotalResults().setValue(theResult.size());
 
 		PrintWriter writer = theHttpResponse.getWriter();
-		getNewParser(theResponseEncoding).encodeBundleToWriter(bundle, writer);
+		getNewParser(theResponseEncoding, thePrettyPrint).encodeBundleToWriter(bundle, writer);
 		writer.close();
 	}
 
-	private void streamResponseAsResource(HttpServletResponse theHttpResponse, IResource theResource, ResourceBinding theResourceBinding, EncodingUtil theResponseEncoding) throws IOException {
+	private void streamResponseAsResource(HttpServletResponse theHttpResponse, IResource theResource, EncodingUtil theResponseEncoding, boolean thePrettyPrint, boolean theRequestIsBrowser) throws IOException {
 
 		theHttpResponse.setStatus(200);
-		theHttpResponse.setContentType(theResponseEncoding.getResourceContentType());
+		if (theRequestIsBrowser && myUseBrowserFriendlyContentTypes) {
+			theHttpResponse.setContentType(theResponseEncoding.getBrowserFriendlyBundleContentType());
+		} else {
+			theHttpResponse.setContentType(theResponseEncoding.getBundleContentType());
+		}
 		theHttpResponse.setCharacterEncoding("UTF-8");
 
 		PrintWriter writer = theHttpResponse.getWriter();
-		getNewParser(theResponseEncoding).encodeResourceToWriter(theResource, writer);
+		getNewParser(theResponseEncoding, thePrettyPrint).encodeResourceToWriter(theResource, writer);
 		writer.close();
 
 	}

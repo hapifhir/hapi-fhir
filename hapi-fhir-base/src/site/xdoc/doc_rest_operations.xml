@@ -300,7 +300,7 @@
 				</p>
 				
 				<p>
-					Invoking a client of thie type involves the following syntax:
+					Invoking a client of this type involves the following syntax:
 				</p>
 				
 				<macro name="snippet">
@@ -327,6 +327,11 @@
 					<param name="id" value="pathSpec" />
 					<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
 				</macro>
+				
+				<p>
+					Example URL to invoke this method:<br/>
+					<code>http://fhir.example.com/DiagnosticReport?subject.identifier=7000135&amp;_include=DiagnosticReport.subject</code>
+				</p>
 				
 			</subsection>
 

@@ -101,5 +101,13 @@ public class StringDt extends BasePrimitive<String> implements IQueryParameterTy
 		return getValue();
 	}
 	
+	/**
+	 * Returns <code>true</code> if this datatype has no extensions, and has either a <code>null</code>
+	 * value or an empty ("") value.
+	 */
+	@Override
+	public boolean isEmpty() {
+		return super.isEmpty() && StringUtils.isBlank(getValue());
+	}
 
 }

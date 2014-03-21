@@ -19,6 +19,8 @@ public class ElementUtil {
 				if (!isEmpty((List<? extends IElement>) next)) {
 					return false;
 				}
+			} else if (next instanceof String && (!((String)next).isEmpty())) {
+				return false;
 			} else if (next != null && !((IElement) next).isEmpty()) {
 				return false;
 			}

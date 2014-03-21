@@ -3,19 +3,29 @@ package ca.uhn.fhir.rest.param;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.TreeSet;
 
 import ca.uhn.fhir.model.api.PathSpecification;
 import ca.uhn.fhir.model.dstu.valueset.SearchParamTypeEnum;
+import ca.uhn.fhir.rest.annotation.Include;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 public class IncludeParameter implements IParameter {
 
 	private Class<? extends Collection<PathSpecification>> myInstantiableCollectionType;
+	private HashSet<String> myAllow;
 
-	public IncludeParameter(Class<? extends Collection<PathSpecification>> theInstantiableCollectionType) {
+	public IncludeParameter(Include theAnnotation, Class<? extends Collection<PathSpecification>> theInstantiableCollectionType) {
 		myInstantiableCollectionType = theInstantiableCollectionType;
+		if (theAnnotation.allow().length > 0) {
+			myAllow = new HashSet<String>();
+			for (String next : theAnnotation.allow()) {
+				myAllow.add(next);
+			}
+		}
 	}
 
 	@SuppressWarnings("unchecked")
@@ -53,7 +63,13 @@ public class IncludeParameter implements IParameter {
 				throw new InvalidRequestException("'OR' query parameters (values containing ',') are not supported in _include parameters");
 			}
 			
-			retVal.add(new PathSpecification(nextParamList.get(0)));
+			String value = nextParamList.get(0);
+			if (myAllow != null) {
+				if (!myAllow.contains(value)) {
+					throw new InvalidRequestException("Invalid _include parameter value: '" + value + "'. Valid values are: " + new TreeSet<String>(myAllow));
+				}
+			}
+			retVal.add(new PathSpecification(value));
 		}
 		
 		return retVal;
@@ -67,6 +83,11 @@ public class IncludeParameter implements IParameter {
 	@Override
 	public SearchParamTypeEnum getParamType() {
 		return null;
+	}
+
+	@Override
+	public boolean handlesMissing() {
+		return true;
 	}
 
 }

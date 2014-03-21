@@ -27,6 +27,8 @@ import ca.uhn.fhir.model.dstu.resource.Observation;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.dstu.resource.Specimen;
 import ca.uhn.fhir.model.dstu.resource.ValueSet;
+import ca.uhn.fhir.model.dstu.valueset.AddressUseEnum;
+import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
 import ca.uhn.fhir.model.dstu.valueset.NarrativeStatusEnum;
 import ca.uhn.fhir.model.primitive.DecimalDt;
 
@@ -43,6 +45,33 @@ public class XmlParserTest {
 		assertEquals("Patient resource with id 3216379", bundle.getEntries().get(0).getTitle().getValue());
 		
 	}
+
+	@Test
+	public void testEncodeBoundCode() throws IOException {
+
+		Patient patient = new Patient();
+		patient.addAddress().setUse(AddressUseEnum.HOME);
+		
+		patient.getGender().setValueAsEnum(AdministrativeGenderCodesEnum.M);
+		
+		String val = new FhirContext().newXmlParser().encodeResourceToString(patient);
+		ourLog.info(val);
+		
+	}
+
+	@Test
+	public void testEncodeBundleResultCount() throws IOException {
+
+		Bundle b = new Bundle();
+		b.getTotalResults().setValue(123);
+		
+		String val = new FhirContext().newXmlParser().setPrettyPrint(true).encodeBundleToString(b);
+		ourLog.info(val);
+		
+		assertThat(val, StringContains.containsString("<os:totalResults xmlns:os=\"http://a9.com/-/spec/opensearch/1.1/\">123</os:totalResults>"));
+		
+	}
+
 	
 	@Test
 	public void testParseContainedResources() throws IOException {

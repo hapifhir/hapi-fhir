@@ -106,6 +106,9 @@ public class SearchMethodBinding extends BaseMethodBinding {
 			IParameter param = myParameters.get(i);
 			String[] value = parameterValues.get(param.getName());
 			if (value == null || value.length == 0) {
+				if (param.handlesMissing()) {
+					params[i] = param.parse(new ArrayList<List<String>>(0));
+				}
 				continue;
 			}
 			

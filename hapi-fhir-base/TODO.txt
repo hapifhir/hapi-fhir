@@ -33,6 +33,8 @@
  
  * Support "Binary" resource, which is a special resource type
  
+ * Submit "_pretty" as possible parameter to HL7
+ 
 ---------
 Issues:
  * Need to be able to bind Identifier.system to a set of allowable values in a profile. Graeme

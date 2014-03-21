@@ -138,8 +138,11 @@ public Class<? extends IResource> getResourceType() {
 
 //START SNIPPET: pathSpec
 @Search()
-public List<DiagnosticReport> getDiagnosticReport( @Required(name=DiagnosticReport.SP_IDENTIFIER) IdentifierDt theIdentifier,
-                                                   @Include Set<PathSpecification> theIncludes ) {
+public List<DiagnosticReport> getDiagnosticReport( 
+               @Required(name=DiagnosticReport.SP_IDENTIFIER) 
+               IdentifierDt theIdentifier,
+               @Include(allow= {"DiagnosticReport.subject"}) 
+               Set<PathSpecification> theIncludes ) {
   List<DiagnosticReport> retVal = new ArrayList<DiagnosticReport>();
  
   // Assume this method exists and loads the report from the DB

@@ -100,7 +100,7 @@ public class XmlParser extends BaseParser implements IParser {
 			writeAtomLink(eventWriter, "fhir-base", theBundle.getLinkBase());
 
 			if (theBundle.getTotalResults().getValue() != null) {
-				eventWriter.writeStartElement("os", "totalResults",OPENSEARCH_NS);
+				eventWriter.writeStartElement("os", "totalResults", OPENSEARCH_NS);
 				eventWriter.writeNamespace("os", OPENSEARCH_NS);
 				eventWriter.writeCharacters(theBundle.getTotalResults().getValue().toString());
 				eventWriter.writeEndElement();
@@ -118,6 +118,13 @@ public class XmlParser extends BaseParser implements IParser {
 
 			for (BundleEntry nextEntry : theBundle.getEntries()) {
 				eventWriter.writeStartElement("entry");
+
+				writeTagWithTextNode(eventWriter, "title", nextEntry.getTitle());
+				writeTagWithTextNode(eventWriter, "id", nextEntry.getEntryId());
+
+				if (!nextEntry.getLinkSelf().isEmpty()) {
+					writeAtomLink(eventWriter, "self", nextEntry.getLinkSelf());
+				}
 
 				eventWriter.writeStartElement("content");
 				eventWriter.writeAttribute("type", "text/xml");
@@ -138,10 +145,10 @@ public class XmlParser extends BaseParser implements IParser {
 
 	@Override
 	public String encodeResourceToString(IResource theResource) throws DataFormatException {
-		if (theResource==null) {
+		if (theResource == null) {
 			throw new NullPointerException("Resource can not be null");
 		}
-		
+
 		Writer stringWriter = new StringWriter();
 		encodeResourceToWriter(theResource, stringWriter);
 		return stringWriter.toString();
@@ -199,8 +206,6 @@ public class XmlParser extends BaseParser implements IParser {
 
 		return parseResource(theResourceType, streamReader);
 	}
-
-
 
 	@Override
 	public IParser setPrettyPrint(boolean thePrettyPrint) {
@@ -290,7 +295,8 @@ public class XmlParser extends BaseParser implements IParser {
 		}
 	}
 
-	private void encodeChildElementToStreamWriter(XMLStreamWriter theEventWriter, IElement nextValue, String childName, BaseRuntimeElementDefinition<?> childDef, String theExtensionUrl) throws XMLStreamException, DataFormatException {
+	private void encodeChildElementToStreamWriter(XMLStreamWriter theEventWriter, IElement nextValue, String childName, BaseRuntimeElementDefinition<?> childDef, String theExtensionUrl)
+			throws XMLStreamException, DataFormatException {
 		if (nextValue.isEmpty()) {
 			return;
 		}
@@ -355,7 +361,8 @@ public class XmlParser extends BaseParser implements IParser {
 
 	}
 
-	private void encodeCompositeElementChildrenToStreamWriter(IElement theElement, XMLStreamWriter theEventWriter, List<? extends BaseRuntimeChildDefinition> children) throws XMLStreamException, DataFormatException {
+	private void encodeCompositeElementChildrenToStreamWriter(IElement theElement, XMLStreamWriter theEventWriter, List<? extends BaseRuntimeChildDefinition> children) throws XMLStreamException,
+			DataFormatException {
 		for (BaseRuntimeChildDefinition nextChild : children) {
 			List<? extends IElement> values = nextChild.getAccessor().getValues(theElement);
 			if (values == null || values.isEmpty()) {
@@ -392,7 +399,8 @@ public class XmlParser extends BaseParser implements IParser {
 		}
 	}
 
-	private void encodeCompositeElementToStreamWriter(IElement theElement, XMLStreamWriter theEventWriter, BaseRuntimeElementCompositeDefinition<?> resDef) throws XMLStreamException, DataFormatException {
+	private void encodeCompositeElementToStreamWriter(IElement theElement, XMLStreamWriter theEventWriter, BaseRuntimeElementCompositeDefinition<?> resDef) throws XMLStreamException,
+			DataFormatException {
 		encodeExtensionsIfPresent(theEventWriter, theElement);
 		encodeCompositeElementChildrenToStreamWriter(theElement, theEventWriter, resDef.getExtensions());
 		encodeCompositeElementChildrenToStreamWriter(theElement, theEventWriter, resDef.getChildren());
@@ -419,22 +427,21 @@ public class XmlParser extends BaseParser implements IParser {
 		}
 	}
 
-
 	private void encodeResourceToXmlStreamWriter(IResource theResource, XMLStreamWriter theEventWriter, boolean theIncludeResourceId) throws XMLStreamException, DataFormatException {
 		super.containResourcesForEncoding(theResource);
-		
+
 		RuntimeResourceDefinition resDef = myContext.getResourceDefinition(theResource);
 		if (resDef == null) {
 			throw new ConfigurationException("Unknown resource type: " + theResource.getClass());
 		}
-		
+
 		theEventWriter.writeStartElement(resDef.getName());
 		theEventWriter.writeDefaultNamespace(FHIR_NS);
 
 		if (theIncludeResourceId && StringUtils.isNotBlank(theResource.getId().getValue())) {
 			theEventWriter.writeAttribute("id", theResource.getId().getValue());
 		}
-		
+
 		encodeCompositeElementToStreamWriter(theResource, theEventWriter, resDef);
 
 		theEventWriter.writeEndElement();
@@ -449,7 +456,7 @@ public class XmlParser extends BaseParser implements IParser {
 				IElement nextValue = next.getValue();
 				RuntimeChildUndeclaredExtensionDefinition extDef = myContext.getRuntimeChildUndeclaredExtensionDefinition();
 				String childName = extDef.getChildNameByDatatype(nextValue.getClass());
-				if (childName==null) {
+				if (childName == null) {
 					throw new ConfigurationException("Unable to encode extension, unregognized child element type: " + nextValue.getClass().getCanonicalName());
 				}
 				BaseRuntimeElementDefinition<?> childDef = extDef.getChildElementDefinitionByDatatype(nextValue.getClass());
@@ -578,7 +585,6 @@ public class XmlParser extends BaseParser implements IParser {
 			theEventWriter.writeEndElement();
 		}
 	}
-
 
 	private void writeTagWithTextNode(XMLStreamWriter theEventWriter, String theElementName, StringDt theStringDt) throws XMLStreamException {
 		theEventWriter.writeStartElement(theElementName);

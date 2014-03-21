@@ -83,4 +83,9 @@ public class RuntimeChildResourceDefinition extends BaseRuntimeDeclaredChildDefi
 
 		myValidChildNames = Collections.unmodifiableSet(myValidChildNames);
 	}
+
+	@Override
+	public String toString() {
+		return getClass().getSimpleName() + "[" + getElementName() + "]";
+	}
 }
