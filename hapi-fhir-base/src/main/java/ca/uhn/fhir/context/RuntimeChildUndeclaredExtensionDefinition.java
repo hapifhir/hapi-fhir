@@ -56,6 +56,7 @@ public class RuntimeChildUndeclaredExtensionDefinition extends BaseRuntimeChildD
 				if (!((IRuntimeDatatypeDefinition) next).isSpecialization()) {
 					String attrName = "value" + next.getName().substring(0, 1).toUpperCase() + next.getName().substring(1);
 					datatypeAttributeNameToDefinition.put(attrName, next);
+					datatypeAttributeNameToDefinition.put(attrName.toLowerCase(), next);
 				}
 			}
 		}

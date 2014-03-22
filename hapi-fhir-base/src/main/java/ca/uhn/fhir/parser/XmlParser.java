@@ -552,12 +552,12 @@ public class XmlParser extends BaseParser implements IParser {
 	}
 
 	private Bundle parseBundle(XMLEventReader theStreamReader) {
-		ParserState<Bundle> parserState = ParserState.getPreAtomInstance(myContext);
+		ParserState<Bundle> parserState = ParserState.getPreAtomInstance(myContext,false);
 		return doXmlLoop(theStreamReader, parserState);
 	}
 
 	private <T extends IResource> T parseResource(Class<T> theResourceType, XMLEventReader theStreamReader) {
-		ParserState<T> parserState = ParserState.getPreResourceInstance(theResourceType, myContext);
+		ParserState<T> parserState = ParserState.getPreResourceInstance(theResourceType, myContext,false);
 		return doXmlLoop(theStreamReader, parserState);
 	}
 

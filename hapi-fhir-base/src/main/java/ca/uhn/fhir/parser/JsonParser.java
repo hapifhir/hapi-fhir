@@ -9,10 +9,13 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.json.Json;
+import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
 import javax.json.JsonString;
@@ -20,7 +23,6 @@ import javax.json.JsonValue;
 import javax.json.JsonValue.ValueType;
 import javax.json.stream.JsonGenerator;
 import javax.json.stream.JsonGeneratorFactory;
-import javax.json.stream.JsonParser.Event;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -45,6 +47,7 @@ import ca.uhn.fhir.model.dstu.composite.ContainedDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.model.primitive.DecimalDt;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.XhtmlDt;
@@ -164,45 +167,168 @@ public class JsonParser extends BaseParser implements IParser {
 		assertObjectOfType(resourceTypeObj, JsonValue.ValueType.STRING, "resourceType");
 		String resourceType = ((JsonString) resourceTypeObj).getString();
 
+		RuntimeResourceDefinition def;
 		if (theResourceType != null) {
-			RuntimeResourceDefinition def = myContext.getResourceDefinition(theResourceType);
+			def = myContext.getResourceDefinition(theResourceType);
 		} else {
-			RuntimeResourceDefinition def = myContext.getResourceDefinition(resourceType);
+			def = myContext.getResourceDefinition(resourceType);
 		}
 
-		PushbackJsonParser parser = new PushbackJsonParser(Json.createParser(theReader));
+		ParserState<? extends IResource> state = ParserState.getPreResourceInstance(def.getImplementingClass(), myContext, true);
+		state.enteringNewElement(null, def.getName());
 
-		while (parser.hasNext()) {
+		parseChildren(object, state);
 
-			Event next = parser.next();
-			switch (next) {
-			case END_ARRAY:
-				break;
-			case END_OBJECT:
-				break;
-			case KEY_NAME:
-				break;
-			case START_ARRAY:
-				break;
-			case START_OBJECT:
-				break;
-			case VALUE_FALSE:
-			case VALUE_TRUE:
-				break;
-			case VALUE_NULL:
-				break;
-			case VALUE_NUMBER:
-				break;
-			case VALUE_STRING:
-				break;
-			default:
-				break;
+		state.endingElement(null);
 
+		@SuppressWarnings("unchecked")
+		T retVal = (T) state.getObject();
+
+		return retVal;
+	}
+
+	private void parseChildren(JsonObject theObject, ParserState<? extends IResource> theState) {
+		String elementId = null;
+		for (String nextName : theObject.keySet()) {
+			if ("resourceType".equals(nextName)) {
+				continue;
+			} else if ("id".equals(nextName)) {
+				elementId = theObject.getString(nextName);
+				continue;
+			} else if ("extension".equals(nextName)) {
+				JsonArray array = theObject.getJsonArray(nextName);
+				parseExtension(theState, array, false);
+				continue;
+			} else if ("modifierExtension".equals(nextName)) {
+				JsonArray array = theObject.getJsonArray(nextName);
+				parseExtension(theState, array, true);
+				continue;
+			} else if (nextName.charAt(0) == '_') {
+				continue;
 			}
 
+			JsonValue nextVal = theObject.get(nextName);
+			JsonValue alternateVal = theObject.get('_' + nextName);
+
+			parseChildren(theState, nextName, nextVal, alternateVal);
+
 		}
 
-		return null;
+		if (elementId != null) {
+			// System.out.checkError(); // TODO: remove
+			IResource object = theState.getObject();
+			object.setId(new IdDt(elementId));
+		}
+	}
+
+	private void parseChildren(ParserState<? extends IResource> theState, String theName, JsonValue theJsonVal, JsonValue theAlternateVal) {
+		switch (theJsonVal.getValueType()) {
+		case ARRAY: {
+			JsonArray nextArray = (JsonArray) theJsonVal;
+			JsonArray nextAlternateArray = (JsonArray) theAlternateVal;
+			for (int i = 0; i < nextArray.size(); i++) {
+				JsonValue nextObject = nextArray.get(i);
+				JsonValue nextAlternate = null;
+				if (nextAlternateArray != null) {
+					nextAlternate = nextAlternateArray.get(i);
+				}
+				parseChildren(theState, theName, nextObject, nextAlternate);
+			}
+			break;
+		}
+		case OBJECT: {
+			theState.enteringNewElement(null, theName);
+			JsonObject nextObject = (JsonObject) theJsonVal;
+			boolean preResource = false;
+			if (theState.isPreResource()) {
+				String resType = nextObject.getString("resourceType");
+				if (isBlank(resType)) {
+					throw new DataFormatException("Missing 'resourceType' from resource");
+				}
+				theState.enteringNewElement(null, resType);
+				preResource = true;
+			}
+			parseChildren(nextObject, theState);
+			if (preResource) {
+				theState.endingElement(null);
+			}
+			theState.endingElement(null);
+			break;
+		}
+		case STRING: {
+			JsonString nextValStr = (JsonString) theJsonVal;
+			theState.enteringNewElement(null, theName);
+			theState.attributeValue("value", nextValStr.getString());
+			parseAlternates(theAlternateVal, theState);
+			theState.endingElement(null);
+			break;
+		}
+		case NUMBER:
+		case FALSE:
+		case TRUE:
+			theState.enteringNewElement(null, theName);
+			theState.attributeValue("value", theJsonVal.toString());
+			parseAlternates(theAlternateVal, theState);
+			theState.endingElement(null);
+			break;
+		case NULL:
+			break;
+		}
+	}
+
+	private void parseAlternates(JsonValue theAlternateVal, ParserState<? extends IResource> theState) {
+		if (theAlternateVal == null || theAlternateVal.getValueType() == ValueType.NULL) {
+			return;
+		}
+		JsonObject alternate = (JsonObject) theAlternateVal;
+		for (Entry<String, JsonValue> nextEntry : alternate.entrySet()) {
+			String nextKey = nextEntry.getKey();
+			JsonValue nextVal = nextEntry.getValue();
+			if ("extension".equals(nextKey)) {
+				boolean isModifier = false;
+				JsonArray array = (JsonArray) nextEntry.getValue();
+				parseExtension(theState, array, isModifier);
+			} else if ("modifierExtension".equals(nextKey)) {
+				boolean isModifier = true;
+				JsonArray array = (JsonArray) nextEntry.getValue();
+				parseExtension(theState, array, isModifier);
+			} else if ("id".equals(nextKey)) {
+				switch (nextVal.getValueType()) {
+				case STRING:
+					theState.attributeValue("id", ((JsonString) nextVal).getString());
+					break;
+				case NULL:
+					break;
+				default:
+					break;
+				}
+			}
+		}
+	}
+
+	private void parseExtension(ParserState<? extends IResource> theState, JsonArray array, boolean theIsModifier) {
+		// TODO: use theIsModifier
+		for (int i = 0; i < array.size(); i++) {
+			JsonObject nextExtObj = array.getJsonObject(i);
+			String url = nextExtObj.getString("url");
+			theState.enteringNewElementExtension(null, url, false);
+			for (Iterator<String> iter = nextExtObj.keySet().iterator(); iter.hasNext();) {
+				String next = iter.next();
+				if ("url".equals(next)) {
+					continue;
+				} else if ("extension".equals(next)) {
+					JsonArray jsonVal = (JsonArray) nextExtObj.get(next);
+					parseExtension(theState, jsonVal, false);
+				} else if ("modifierExtension".equals(next)) {
+					JsonArray jsonVal = (JsonArray) nextExtObj.get(next);
+					parseExtension(theState, jsonVal, true);
+				} else {
+					JsonValue jsonVal = nextExtObj.get(next);
+					parseChildren(theState, next, jsonVal, null);
+				}
+			}
+			theState.endingElement(null);
+		}
 	}
 
 	@Override

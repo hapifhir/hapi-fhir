@@ -18,6 +18,7 @@ import org.junit.Test;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.UndeclaredExtension;
+import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.resource.DiagnosticReport;
 import ca.uhn.fhir.model.dstu.resource.Observation;
 import ca.uhn.fhir.model.dstu.resource.Patient;
@@ -86,7 +87,7 @@ public class JsonParserTest {
 		String msg = IOUtils.toString(XmlParser.class.getResourceAsStream("/example-patient-general.json"));
 		FhirContext ctx = new FhirContext(Patient.class);
 		IParser p = ctx.newJsonParser();
-		ourLog.info("Reading in message: {}", msg);
+//		ourLog.info("Reading in message: {}", msg);
 		Patient res = p.parseResource(Patient.class, msg);
 		
 		String encoded = ctx.newXmlParser().setPrettyPrint(true).encodeResourceToString(res);
@@ -94,6 +95,26 @@ public class JsonParserTest {
 
 	}	
 
+
+	@Test
+	public void testParseWithContained() throws DataFormatException, IOException {
+		
+		String msg = IOUtils.toString(XmlParser.class.getResourceAsStream("/diagnostic-report.json"));
+		FhirContext ctx = new FhirContext(Patient.class);
+		IParser p = ctx.newJsonParser();
+//		ourLog.info("Reading in message: {}", msg);
+		DiagnosticReport res = p.parseResource(DiagnosticReport.class, msg);
+		
+		String encoded = ctx.newXmlParser().setPrettyPrint(true).encodeResourceToString(res);
+		ourLog.info(encoded);
+
+		ResourceReferenceDt reference = res.getResult().get(1);
+		Observation obs = (Observation) reference.getResource();
+		
+		assertEquals("789-8", obs.getName().getCoding().get(0).getCode().getValue());
+	}	
+
+	
 	@Test
 	public void testEncodeContainedResourcesMore() throws IOException {
 

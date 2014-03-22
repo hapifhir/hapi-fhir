@@ -33,15 +33,11 @@
  
  * Support "Binary" resource, which is a special resource type
  
- * Submit "_pretty" as possible parameter to HL7
- 
 ---------
 Issues:
  * Need to be able to bind Identifier.system to a set of allowable values in a profile. Graeme
    has suggested making value[x] repeatable in the profile definition
    
- * CarePlan.Activity has a type of "xmlIdRef" which is a weird datatype. The example here:
-   http://www.hl7.org/implement/standards/fhir/careplan-example-integrated.xml.html
-   seems to use an extension to model that element instead of the goal type too.
-   
  * Would like a standardized (but optional) HTTP parameter for pretty-printing. Suggest: _pretty=true
+ 
+ * Example-patient-general.xml/json has <reference value="Organization/1"/> but "resource":"Organization/1"

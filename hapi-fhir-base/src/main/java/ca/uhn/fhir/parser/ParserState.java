@@ -1,6 +1,5 @@
 package ca.uhn.fhir.parser;
 
-
 import static org.apache.commons.lang3.StringUtils.*;
 
 import java.util.ArrayList;
@@ -49,9 +48,11 @@ class ParserState<T extends IElement> {
 	private FhirContext myContext;
 	private T myObject;
 	private BaseState myState;
+	private boolean myJsonMode;
 
-	private ParserState(FhirContext theContext) {
+	private ParserState(FhirContext theContext, boolean theJsonMode) {
 		myContext = theContext;
+		myJsonMode = theJsonMode;
 	}
 
 	public void attributeValue(String theName, String theValue) throws DataFormatException {
@@ -70,8 +71,9 @@ class ParserState<T extends IElement> {
 		myState.enteringNewElementExtension(theElem, theUrlAttr, theIsModifier);
 	}
 
+	@SuppressWarnings("unchecked")
 	public T getObject() {
-		return myObject;
+		return (T) myState.getCurrentElement();
 	}
 
 	public boolean isComplete() {
@@ -105,8 +107,8 @@ class ParserState<T extends IElement> {
 		myState = theState;
 	}
 
-	public static ParserState<Bundle> getPreAtomInstance(FhirContext theContext) throws DataFormatException {
-		ParserState<Bundle> retVal = new ParserState<Bundle>(theContext);
+	public static ParserState<Bundle> getPreAtomInstance(FhirContext theContext, boolean theJsonMode) throws DataFormatException {
+		ParserState<Bundle> retVal = new ParserState<Bundle>(theContext, theJsonMode);
 		retVal.push(retVal.new PreAtomState());
 		return retVal;
 	}
@@ -115,8 +117,8 @@ class ParserState<T extends IElement> {
 	 * @param theResourceType
 	 *            May be null
 	 */
-	public static <T extends IResource> ParserState<T> getPreResourceInstance(Class<T> theResourceType, FhirContext theContext) throws DataFormatException {
-		ParserState<T> retVal = new ParserState<T>(theContext);
+	public static <T extends IResource> ParserState<T> getPreResourceInstance(Class<T> theResourceType, FhirContext theContext, boolean theJsonMode) throws DataFormatException {
+		ParserState<T> retVal = new ParserState<T>(theContext, theJsonMode);
 		retVal.push(retVal.new PreResourceState(theResourceType));
 		return retVal;
 	}
@@ -212,7 +214,7 @@ class ParserState<T extends IElement> {
 			} else if ("content".equals(theLocalPart)) {
 				push(new PreResourceState(myEntry));
 			} else if ("summary".equals(theLocalPart)) {
-				push(new XhtmlState(getPreResourceState(),myEntry.getSummary(), false));
+				push(new XhtmlState(getPreResourceState(), myEntry.getSummary(), false));
 			} else if ("category".equals(theLocalPart)) {
 				push(new AtomCategoryState(myEntry.addCategory()));
 			} else {
@@ -433,11 +435,14 @@ class ParserState<T extends IElement> {
 			return null;
 		}
 
+		public boolean isPreResource() {
+			return false;
+		}
+
 	}
 
-	private class ContainedResourcesState extends PreResourceState
-	{
-		
+	private class ContainedResourcesState extends PreResourceState {
+
 		public ContainedResourcesState(PreResourceState thePreResourcesState) {
 			super(thePreResourcesState);
 		}
@@ -451,7 +456,7 @@ class ParserState<T extends IElement> {
 		public void wereBack() {
 			IResource res = getCurrentElement();
 			assert res != null;
-			if (res.getId()==null || res.getId().isEmpty()) {
+			if (res.getId() == null || res.getId().isEmpty()) {
 				ourLog.debug("Discarding contained resource with no ID!");
 			} else {
 				getPreResourceState().getContainedResources().put(res.getId().getValueAsString(), res);
@@ -459,7 +464,6 @@ class ParserState<T extends IElement> {
 			getPreResourceState().getCurrentElement().getContained().getContainedResources().add(res);
 		}
 
-		
 	}
 
 	private class DeclaredExtensionState extends BaseState {
@@ -471,7 +475,7 @@ class ParserState<T extends IElement> {
 
 		public DeclaredExtensionState(PreResourceState thePreResourceState, RuntimeChildDeclaredExtensionDefinition theDefinition, IElement theParentInstance) {
 			super(thePreResourceState);
-			myPreResourceState=thePreResourceState;
+			myPreResourceState = thePreResourceState;
 			myDefinition = theDefinition;
 			myParentInstance = theParentInstance;
 		}
@@ -625,8 +629,14 @@ class ParserState<T extends IElement> {
 			}
 			case CONTAINED_RESOURCES: {
 				RuntimeElemContainedResources targetElem = (RuntimeElemContainedResources) target;
-				ContainedDt newDt = targetElem.newInstance();
-				child.getMutator().addValue(myInstance, newDt);
+				List<? extends IElement> values = child.getAccessor().getValues(myInstance);
+				ContainedDt newDt;
+				if (values == null || values.isEmpty() || values.get(0) == null) {
+					newDt = targetElem.newInstance();
+					child.getMutator().addValue(myInstance, newDt);
+				}else {
+					newDt = (ContainedDt) values.get(0);
+				}
 				ContainedResourcesState state = new ContainedResourcesState(getPreResourceState());
 				push(state);
 				return;
@@ -723,7 +733,6 @@ class ParserState<T extends IElement> {
 
 	}
 
-	
 	private class PreAtomState extends BaseState {
 
 		private Bundle myInstance;
@@ -761,15 +770,20 @@ class ParserState<T extends IElement> {
 		}
 
 	}
-	
+
 	private class PreResourceState extends BaseState {
 
 		private Map<String, IResource> myContainedResources = new HashMap<String, IResource>();
 		private BundleEntry myEntry;
 		private IResource myInstance;
 		private List<ResourceReferenceDt> myResourceReferences = new ArrayList<ResourceReferenceDt>();
-		
+
 		private Class<? extends IResource> myResourceType;
+
+		@Override
+		public boolean isPreResource() {
+			return true;
+		}
 
 		public PreResourceState(BundleEntry theEntry) {
 			super(null);
@@ -793,7 +807,7 @@ class ParserState<T extends IElement> {
 		public void endingElement(EndElement theElem) throws DataFormatException {
 			pop();
 		}
-		
+
 		@Override
 		public void enteringNewElement(String theNamespaceURI, String theLocalPart) throws DataFormatException {
 			BaseRuntimeElementDefinition<?> definition;
@@ -832,10 +846,10 @@ class ParserState<T extends IElement> {
 			if (myEntry == null) {
 				myObject = (T) myInstance;
 			}
-			
+
 			for (ResourceReferenceDt nextRef : myResourceReferences) {
 				String ref = nextRef.getReference().getValue();
-				if (isNotBlank(ref)){
+				if (isNotBlank(ref)) {
 					if (ref.startsWith("#")) {
 						IResource target = myContainedResources.get(ref.substring(1));
 						if (target != null) {
@@ -846,7 +860,7 @@ class ParserState<T extends IElement> {
 					}
 				}
 			}
-			
+
 		}
 
 		@Override
@@ -868,6 +882,8 @@ class ParserState<T extends IElement> {
 		public void attributeValue(String theName, String theValue) throws DataFormatException {
 			if ("value".equals(theName)) {
 				myInstance.setValueAsString(theValue);
+			} else if ("id".equals(theName)) {
+				myInstance.setId(new IdDt(theValue));
 			}
 		}
 
@@ -889,7 +905,10 @@ class ParserState<T extends IElement> {
 
 		@Override
 		public void enteringNewElement(String theNamespaceURI, String theLocalPart) throws DataFormatException {
-			throw new Error("?? can this happen?"); // TODO: can this happen?
+			throw new Error("Element " + theLocalPart + " in primitive!"); // TODO:
+																			// can
+																			// this
+																			// happen?
 		}
 
 		@Override
@@ -952,6 +971,9 @@ class ParserState<T extends IElement> {
 				} else if ("reference".equals(theLocalPart)) {
 					mySubState = ResourceReferenceSubState.REFERENCE;
 					break;
+				} else if ("resource".equals(theLocalPart)) {
+					mySubState = ResourceReferenceSubState.REFERENCE;
+					break;
 				}
 				//$FALL-THROUGH$
 			case DISPLAY:
@@ -971,7 +993,6 @@ class ParserState<T extends IElement> {
 		DISPLAY, INITIAL, REFERENCE
 	}
 
-
 	private class XhtmlState extends BaseState {
 		private int myDepth;
 		private XhtmlDt myDt;
@@ -983,6 +1004,24 @@ class ParserState<T extends IElement> {
 			myDepth = 0;
 			myDt = theXhtmlDt;
 			myIncludeOuterEvent = theIncludeOuterEvent;
+		}
+
+		@Override
+		public void attributeValue(String theName, String theValue) throws DataFormatException {
+			if (myJsonMode) {
+				myDt.setValueAsString(theValue);
+				return;
+			}
+			super.attributeValue(theName, theValue);
+		}
+
+		@Override
+		public void endingElement(EndElement theElem) throws DataFormatException {
+			if (myJsonMode) {
+				pop();
+				return;
+			}
+			super.endingElement(theElem);
 		}
 
 		@Override
@@ -1012,6 +1051,10 @@ class ParserState<T extends IElement> {
 			return myDt;
 		}
 
+	}
+
+	public boolean isPreResource() {
+		return myState.isPreResource();
 	}
 
 }
