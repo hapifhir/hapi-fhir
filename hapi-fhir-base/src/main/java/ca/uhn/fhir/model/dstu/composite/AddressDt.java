@@ -16,18 +16,33 @@
 
 package ca.uhn.fhir.model.dstu.composite;
 
-import java.util.List;
+import java.util.*;
+import ca.uhn.fhir.model.api.*;
+import ca.uhn.fhir.model.api.annotation.*;
 
-import ca.uhn.fhir.model.api.BaseElement;
-import ca.uhn.fhir.model.api.ICompositeDatatype;
-import ca.uhn.fhir.model.api.IElement;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.DatatypeDef;
-import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.dstu.valueset.AddressUseEnum;
+import ca.uhn.fhir.model.dstu.composite.CodingDt;
+import ca.uhn.fhir.model.dstu.valueset.ContactSystemEnum;
+import ca.uhn.fhir.model.dstu.valueset.ContactUseEnum;
+import ca.uhn.fhir.model.dstu.valueset.EventTimingEnum;
+import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
+import ca.uhn.fhir.model.dstu.valueset.NameUseEnum;
+import ca.uhn.fhir.model.dstu.resource.Organization;
+import ca.uhn.fhir.model.dstu.composite.PeriodDt;
+import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
+import ca.uhn.fhir.model.dstu.composite.QuantityDt;
+import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.dstu.valueset.UnitsOfTimeEnum;
+import ca.uhn.fhir.model.dstu.resource.ValueSet;
+import ca.uhn.fhir.model.primitive.Base64BinaryDt;
+import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
+import ca.uhn.fhir.model.primitive.DateTimeDt;
+import ca.uhn.fhir.model.primitive.DecimalDt;
+import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.model.primitive.UriDt;
 
 /**
  * HAPI/FHIR <b>Address</b> Datatype
@@ -145,8 +160,9 @@ public class AddressDt
      * The purpose of this address
      * </p> 
 	 */
-	public void setUse(BoundCodeDt<AddressUseEnum> theValue) {
+	public AddressDt setUse(BoundCodeDt<AddressUseEnum> theValue) {
 		myUse = theValue;
+		return this;
 	}
 
 	/**
@@ -157,8 +173,9 @@ public class AddressDt
      * The purpose of this address
      * </p> 
 	 */
-	public void setUse(AddressUseEnum theValue) {
+	public AddressDt setUse(AddressUseEnum theValue) {
 		getUse().setValueAsEnum(theValue);
+		return this;
 	}
 
   
@@ -187,8 +204,9 @@ public class AddressDt
      * A full text representation of the address
      * </p> 
 	 */
-	public void setText(StringDt theValue) {
+	public AddressDt setText(StringDt theValue) {
 		myText = theValue;
+		return this;
 	}
 
  	/**
@@ -230,8 +248,9 @@ public class AddressDt
      * This component contains the house number, apartment number, street name, street direction, P.O. Box number, delivery hints, and similar address information
      * </p> 
 	 */
-	public void setLine(java.util.List<StringDt> theValue) {
+	public AddressDt setLine(java.util.List<StringDt> theValue) {
 		myLine = theValue;
+		return this;
 	}
 
 	/**
@@ -307,8 +326,9 @@ public class AddressDt
      * The name of the city, town, village or other community or delivery center.
      * </p> 
 	 */
-	public void setCity(StringDt theValue) {
+	public AddressDt setCity(StringDt theValue) {
 		myCity = theValue;
+		return this;
 	}
 
  	/**
@@ -350,8 +370,9 @@ public class AddressDt
      * Sub-unit of a country with limited sovereignty in a federally organized country. A code may be used if codes are in common use (i.e. US 2 letter state codes).
      * </p> 
 	 */
-	public void setState(StringDt theValue) {
+	public AddressDt setState(StringDt theValue) {
 		myState = theValue;
+		return this;
 	}
 
  	/**
@@ -393,8 +414,9 @@ public class AddressDt
      * A postal code designating a region defined by the postal service.
      * </p> 
 	 */
-	public void setZip(StringDt theValue) {
+	public AddressDt setZip(StringDt theValue) {
 		myZip = theValue;
+		return this;
 	}
 
  	/**
@@ -436,8 +458,9 @@ public class AddressDt
      * Country - a nation as commonly understood or generally accepted
      * </p> 
 	 */
-	public void setCountry(StringDt theValue) {
+	public AddressDt setCountry(StringDt theValue) {
 		myCountry = theValue;
+		return this;
 	}
 
  	/**
@@ -479,8 +502,9 @@ public class AddressDt
      * Time period when address was/is in use
      * </p> 
 	 */
-	public void setPeriod(PeriodDt theValue) {
+	public AddressDt setPeriod(PeriodDt theValue) {
 		myPeriod = theValue;
+		return this;
 	}
 
   

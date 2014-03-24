@@ -7,7 +7,13 @@ import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import ca.uhn.fhir.model.dstu.composite.QuantityDt;
+import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.dstu.resource.DiagnosticReport;
+import ca.uhn.fhir.model.dstu.resource.Observation;
 import ca.uhn.fhir.model.dstu.resource.Patient;
+import ca.uhn.fhir.model.dstu.valueset.ObservationStatusEnum;
+import ca.uhn.fhir.model.primitive.DecimalDt;
 import ca.uhn.fhir.narrative.ThymeleafNarrativeGenerator;
 
 public class ThymeleafNarrativeGeneratorTest {
@@ -31,5 +37,29 @@ public class ThymeleafNarrativeGeneratorTest {
 
 		ourLog.info(output);
 	}
+
+	@Test
+	public void testGenerateDiagnosticReport() throws IOException {
+		FhirContext ctx = new FhirContext();
+
+		DiagnosticReport value = new DiagnosticReport();
+		value.getName().setText("Some Diagnostic Report");
+
+		Observation obs = new Observation();
+		obs.getName().addCoding().setCode("1938HB").setDisplay("Hemoglobin");
+		obs.setValue(new QuantityDt(2.223, "mg/L"));		
+		obs.addReferenceRange().setLow(new QuantityDt(2.20)).setHigh(new QuantityDt(2.99));
+		obs.setStatus(ObservationStatusEnum.FINAL);
+		obs.setComments("This is a result comment");
+		
+		ResourceReferenceDt result = value.addResult();
+		result.setResource(obs);
+
+		ThymeleafNarrativeGenerator gen = new ThymeleafNarrativeGenerator();
+		String output = gen.generateNarrative("http://hl7.org/fhir/profiles/DiagnosticReport", value).getDiv().getValueAsString();
+
+		ourLog.info(output);
+	}
+
 
 }

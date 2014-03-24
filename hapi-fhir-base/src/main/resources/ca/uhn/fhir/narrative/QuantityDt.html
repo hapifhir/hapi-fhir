@@ -1,0 +1,5 @@
+<div>
+	<th:block th:if="${not resource.comparator.empty}" th:text="${resource.comparator.value}"/>
+	<th:block th:if="${not resource.value.empty}" th:text="${#numbers.formatDecimal(resource.value.valueAsNumber, 1, 2)}"/>
+	<th:block th:if="${not resource.units.empty}" th:text="${resource.units.value}"/>
+</div>

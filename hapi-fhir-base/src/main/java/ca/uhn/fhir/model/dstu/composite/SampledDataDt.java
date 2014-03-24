@@ -16,17 +16,33 @@
 
 package ca.uhn.fhir.model.dstu.composite;
 
-import java.util.List;
+import java.util.*;
+import ca.uhn.fhir.model.api.*;
+import ca.uhn.fhir.model.api.annotation.*;
 
-import ca.uhn.fhir.model.api.BaseElement;
-import ca.uhn.fhir.model.api.ICompositeDatatype;
-import ca.uhn.fhir.model.api.IElement;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.DatatypeDef;
-import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.dstu.valueset.AddressUseEnum;
+import ca.uhn.fhir.model.dstu.composite.CodingDt;
+import ca.uhn.fhir.model.dstu.valueset.ContactSystemEnum;
+import ca.uhn.fhir.model.dstu.valueset.ContactUseEnum;
+import ca.uhn.fhir.model.dstu.valueset.EventTimingEnum;
+import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
+import ca.uhn.fhir.model.dstu.valueset.NameUseEnum;
+import ca.uhn.fhir.model.dstu.resource.Organization;
+import ca.uhn.fhir.model.dstu.composite.PeriodDt;
+import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
+import ca.uhn.fhir.model.dstu.composite.QuantityDt;
+import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.dstu.valueset.UnitsOfTimeEnum;
+import ca.uhn.fhir.model.dstu.resource.ValueSet;
+import ca.uhn.fhir.model.primitive.Base64BinaryDt;
+import ca.uhn.fhir.model.primitive.BooleanDt;
+import ca.uhn.fhir.model.primitive.BoundCodeDt;
+import ca.uhn.fhir.model.primitive.CodeDt;
+import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.DecimalDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.model.primitive.UriDt;
 
 /**
  * HAPI/FHIR <b>SampledData</b> Datatype
@@ -137,8 +153,9 @@ public class SampledDataDt
      * The base quantity that a measured value of zero represents. In addition, this provides the units of the entire measurement series
      * </p> 
 	 */
-	public void setOrigin(QuantityDt theValue) {
+	public SampledDataDt setOrigin(QuantityDt theValue) {
 		myOrigin = theValue;
+		return this;
 	}
 
   
@@ -167,8 +184,9 @@ public class SampledDataDt
      * The length of time between sampling times, measured in milliseconds
      * </p> 
 	 */
-	public void setPeriod(DecimalDt theValue) {
+	public SampledDataDt setPeriod(DecimalDt theValue) {
 		myPeriod = theValue;
+		return this;
 	}
 
  	/**
@@ -236,8 +254,9 @@ public class SampledDataDt
      * A correction factor that is applied to the sampled data points before they are added to the origin
      * </p> 
 	 */
-	public void setFactor(DecimalDt theValue) {
+	public SampledDataDt setFactor(DecimalDt theValue) {
 		myFactor = theValue;
+		return this;
 	}
 
  	/**
@@ -305,8 +324,9 @@ public class SampledDataDt
      * The lower limit of detection of the measured points. This is needed if any of the data points have the value \"L\" (lower than detection limit)
      * </p> 
 	 */
-	public void setLowerLimit(DecimalDt theValue) {
+	public SampledDataDt setLowerLimit(DecimalDt theValue) {
 		myLowerLimit = theValue;
+		return this;
 	}
 
  	/**
@@ -374,8 +394,9 @@ public class SampledDataDt
      * The upper limit of detection of the measured points. This is needed if any of the data points have the value \"U\" (higher than detection limit)
      * </p> 
 	 */
-	public void setUpperLimit(DecimalDt theValue) {
+	public SampledDataDt setUpperLimit(DecimalDt theValue) {
 		myUpperLimit = theValue;
+		return this;
 	}
 
  	/**
@@ -443,8 +464,9 @@ public class SampledDataDt
      * The number of sample points at each time point. If this value is greater than one, then the dimensions will be interlaced - all the sample points for a point in time will be recorded at once
      * </p> 
 	 */
-	public void setDimensions(IntegerDt theValue) {
+	public SampledDataDt setDimensions(IntegerDt theValue) {
 		myDimensions = theValue;
+		return this;
 	}
 
  	/**
@@ -486,8 +508,9 @@ public class SampledDataDt
      * A series of data points which are decimal values separated by a single space (character u20). The special values \"E\" (error), \"L\" (below detection limit) and \"U\" (above detection limit) can also be used in place of a decimal value
      * </p> 
 	 */
-	public void setData(StringDt theValue) {
+	public SampledDataDt setData(StringDt theValue) {
 		myData = theValue;
+		return this;
 	}
 
  	/**

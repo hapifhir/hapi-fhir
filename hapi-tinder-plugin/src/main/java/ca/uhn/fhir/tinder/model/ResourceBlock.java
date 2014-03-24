@@ -37,7 +37,7 @@ public class ResourceBlock extends Child {
 
 
 	@Override
-	public String getDeclaringClassNameComplete() {
+	public String getDeclaringClassNameCompleteForChildren() {
 		return getClassName();
 	}
 

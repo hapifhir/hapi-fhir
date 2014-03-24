@@ -1,10 +1,9 @@
 
 package ca.uhn.fhir.model.dstu.valueset;
 
+import ca.uhn.fhir.model.api.*;
 import java.util.HashMap;
 import java.util.Map;
-
-import ca.uhn.fhir.model.api.IValueSetEnumBinder;
 
 public enum EventTimingEnum {
 

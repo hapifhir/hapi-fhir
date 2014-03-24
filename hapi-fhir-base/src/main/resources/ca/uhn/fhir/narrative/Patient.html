@@ -1,10 +1,10 @@
 <div>
-	<span style="font-size: 1.2em;">
+	<div style="font-size: 1.2em;" th:if="${not #lists.isEmpty(resource.name)} and ${not resource.name[0].empty}">
 		<span th:each="prefix : ${resource.name[0].prefix}" th:text="${prefix.value}">Dr</span>
 		<span th:each="givenName : ${resource.name[0].given}" th:text="${givenName.value} ">John</span>
 		<b th:each="familyName : ${resource.name[0].family}" th:text="${#strings.toUpperCase(familyName.value)}">SMITH</b>
 		<span th:each="suffix : ${resource.name[0].suffix}" th:text="${suffix.value}">Esq</span>
-	</span>
+	</div>
 	<table>
 		<tr th:if="${not #lists.isEmpty(resource.identifier)} and ${not resource.identifier[0].empty}">
 			<td>Identifier</td>

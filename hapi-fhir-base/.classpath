@@ -90,15 +90,15 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="var" path="M2_REPO/org/codehaus/woodstox/stax2-api/3.1.1/stax2-api-3.1.1.jar" sourcepath="M2_REPO/org/codehaus/woodstox/stax2-api/3.1.1/stax2-api-3.1.1-sources.jar"/>
-	<classpathentry kind="var" path="M2_REPO/org/thymeleaf/thymeleaf/2.1.2.RELEASE/thymeleaf-2.1.2.RELEASE.jar" sourcepath="M2_REPO/org/thymeleaf/thymeleaf/2.1.2.RELEASE/thymeleaf-2.1.2.RELEASE-sources.jar"/>
-	<classpathentry kind="var" path="M2_REPO/org/codehaus/woodstox/woodstox-core-asl/4.2.0/woodstox-core-asl-4.2.0.jar" sourcepath="M2_REPO/org/codehaus/woodstox/woodstox-core-asl/4.2.0/woodstox-core-asl-4.2.0-sources.jar">
-		<attributes>
-			<attribute name="javadoc_location" value="jar:file:/Users/james/.m2/repository/org/codehaus/woodstox/woodstox-core-asl/4.2.0/woodstox-core-asl-4.2.0-javadoc.jar!/"/>
-		</attributes>
-	</classpathentry>
+	<classpathentry kind="var" path="M2_REPO/org/thymeleaf/thymeleaf/2.1.2.RELEASE/thymeleaf-2.1.2.RELEASE.jar" sourcepath="/M2_REPO/org/thymeleaf/thymeleaf/2.1.2.RELEASE/thymeleaf-2.1.2.RELEASE-sources.jar"/>
 	<classpathentry kind="var" path="M2_REPO/xmlunit/xmlunit/1.5/xmlunit-1.5.jar" sourcepath="M2_REPO/xmlunit/xmlunit/1.5/xmlunit-1.5-sources.jar">
 		<attributes>
 			<attribute name="javadoc_location" value="jar:file:/Users/james/.m2/repository/xmlunit/xmlunit/1.5/xmlunit-1.5-javadoc.jar!/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="var" path="M2_REPO/org/codehaus/woodstox/woodstox-core-asl/4.2.0/woodstox-core-asl-4.2.0.jar" sourcepath="M2_REPO/org/codehaus/woodstox/woodstox-core-asl/4.2.0/woodstox-core-asl-4.2.0-sources.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:file:/Users/james/.m2/repository/org/codehaus/woodstox/woodstox-core-asl/4.2.0/woodstox-core-asl-4.2.0-javadoc.jar!/"/>
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>

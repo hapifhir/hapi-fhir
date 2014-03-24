@@ -17,30 +17,113 @@
 package ca.uhn.fhir.model.dstu.resource;
 
 
-import java.util.Date;
-import java.util.List;
+import java.util.*;
+import ca.uhn.fhir.model.api.*;
+import ca.uhn.fhir.model.api.annotation.*;
 
-import ca.uhn.fhir.model.api.BaseElement;
-import ca.uhn.fhir.model.api.BaseResource;
-import ca.uhn.fhir.model.api.IDatatype;
-import ca.uhn.fhir.model.api.IElement;
-import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.api.IResourceBlock;
-import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.dstu.composite.AddressDt;
+import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
+import ca.uhn.fhir.model.dstu.valueset.AdmitSourceEnum;
+import ca.uhn.fhir.model.dstu.valueset.AggregationModeEnum;
+import ca.uhn.fhir.model.dstu.valueset.AnimalSpeciesEnum;
 import ca.uhn.fhir.model.dstu.composite.AttachmentDt;
+import ca.uhn.fhir.model.dstu.valueset.BindingConformanceEnum;
 import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
-import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
-import ca.uhn.fhir.model.dstu.composite.PeriodDt;
-import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.dstu.composite.CodingDt;
+import ca.uhn.fhir.model.dstu.valueset.ConformanceEventModeEnum;
+import ca.uhn.fhir.model.dstu.valueset.ConformanceStatementStatusEnum;
+import ca.uhn.fhir.model.dstu.valueset.ConstraintSeverityEnum;
+import ca.uhn.fhir.model.dstu.composite.ContactDt;
+import ca.uhn.fhir.model.dstu.valueset.DataTypeEnum;
+import ca.uhn.fhir.model.dstu.resource.Device;
+import ca.uhn.fhir.model.dstu.resource.DiagnosticOrder;
+import ca.uhn.fhir.model.dstu.valueset.DiagnosticOrderPriorityEnum;
+import ca.uhn.fhir.model.dstu.valueset.DiagnosticOrderStatusEnum;
 import ca.uhn.fhir.model.dstu.valueset.DiagnosticReportStatusEnum;
+import ca.uhn.fhir.model.dstu.valueset.DocumentModeEnum;
+import ca.uhn.fhir.model.dstu.resource.Encounter;
+import ca.uhn.fhir.model.dstu.valueset.EncounterClassEnum;
+import ca.uhn.fhir.model.dstu.valueset.EncounterReasonCodesEnum;
+import ca.uhn.fhir.model.dstu.valueset.EncounterStateEnum;
+import ca.uhn.fhir.model.dstu.valueset.EncounterTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.ExtensionContextEnum;
+import ca.uhn.fhir.model.dstu.valueset.FHIRDefinedTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.FilterOperatorEnum;
+import ca.uhn.fhir.model.dstu.resource.Group;
+import ca.uhn.fhir.model.dstu.valueset.GroupTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.HierarchicalRelationshipTypeEnum;
+import ca.uhn.fhir.model.dstu.composite.HumanNameDt;
+import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
+import ca.uhn.fhir.model.dstu.valueset.ImagingModalityEnum;
+import ca.uhn.fhir.model.dstu.resource.ImagingStudy;
+import ca.uhn.fhir.model.dstu.valueset.InstanceAvailabilityEnum;
+import ca.uhn.fhir.model.dstu.valueset.LinkTypeEnum;
+import ca.uhn.fhir.model.dstu.resource.Location;
+import ca.uhn.fhir.model.dstu.valueset.LocationModeEnum;
+import ca.uhn.fhir.model.dstu.valueset.LocationStatusEnum;
+import ca.uhn.fhir.model.dstu.valueset.LocationTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.MaritalStatusCodesEnum;
+import ca.uhn.fhir.model.dstu.resource.Media;
+import ca.uhn.fhir.model.dstu.valueset.MediaTypeEnum;
+import ca.uhn.fhir.model.dstu.resource.Medication;
+import ca.uhn.fhir.model.dstu.valueset.MedicationKindEnum;
+import ca.uhn.fhir.model.dstu.valueset.MessageEventEnum;
+import ca.uhn.fhir.model.dstu.valueset.MessageSignificanceCategoryEnum;
+import ca.uhn.fhir.model.dstu.valueset.MessageTransportEnum;
+import ca.uhn.fhir.model.dstu.valueset.ModalityEnum;
+import ca.uhn.fhir.model.dstu.resource.Observation;
+import ca.uhn.fhir.model.dstu.valueset.ObservationInterpretationCodesEnum;
+import ca.uhn.fhir.model.dstu.valueset.ObservationRelationshipTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.ObservationReliabilityEnum;
+import ca.uhn.fhir.model.dstu.valueset.ObservationStatusEnum;
+import ca.uhn.fhir.model.dstu.resource.Organization;
+import ca.uhn.fhir.model.dstu.valueset.OrganizationTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.ParticipantTypeEnum;
+import ca.uhn.fhir.model.dstu.resource.Patient;
+import ca.uhn.fhir.model.dstu.valueset.PatientRelationshipTypeEnum;
+import ca.uhn.fhir.model.dstu.composite.PeriodDt;
+import ca.uhn.fhir.model.dstu.resource.Practitioner;
+import ca.uhn.fhir.model.dstu.valueset.PractitionerRoleEnum;
+import ca.uhn.fhir.model.dstu.valueset.PractitionerSpecialtyEnum;
+import ca.uhn.fhir.model.dstu.resource.Profile;
+import ca.uhn.fhir.model.dstu.valueset.PropertyRepresentationEnum;
+import ca.uhn.fhir.model.dstu.composite.QuantityDt;
+import ca.uhn.fhir.model.dstu.composite.RangeDt;
+import ca.uhn.fhir.model.dstu.composite.RatioDt;
+import ca.uhn.fhir.model.dstu.resource.RelatedPerson;
+import ca.uhn.fhir.model.dstu.valueset.ResourceProfileStatusEnum;
+import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.dstu.valueset.ResourceTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.RestfulConformanceModeEnum;
+import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
+import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.RestfulSecurityServiceEnum;
+import ca.uhn.fhir.model.dstu.composite.SampledDataDt;
+import ca.uhn.fhir.model.dstu.valueset.SearchParamTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.SlicingRulesEnum;
+import ca.uhn.fhir.model.dstu.resource.Specimen;
+import ca.uhn.fhir.model.dstu.valueset.SpecimenCollectionMethodEnum;
+import ca.uhn.fhir.model.dstu.valueset.SpecimenTreatmentProcedureEnum;
+import ca.uhn.fhir.model.dstu.resource.Substance;
+import ca.uhn.fhir.model.dstu.valueset.SubstanceTypeEnum;
+import ca.uhn.fhir.model.dstu.resource.ValueSet;
+import ca.uhn.fhir.model.dstu.valueset.ValueSetStatusEnum;
+import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.dstu.composite.DurationDt;
+import ca.uhn.fhir.model.primitive.Base64BinaryDt;
+import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
+import ca.uhn.fhir.model.primitive.BoundCodeableConceptDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
+import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
+import ca.uhn.fhir.model.primitive.DecimalDt;
+import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.model.primitive.InstantDt;
+import ca.uhn.fhir.model.primitive.IntegerDt;
+import ca.uhn.fhir.model.primitive.OidDt;
 import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.model.primitive.UriDt;
 
 
 /**
@@ -363,8 +446,9 @@ public class DiagnosticReport extends BaseResource implements IResource {
      * A code or name that describes this diagnostic report
      * </p> 
 	 */
-	public void setName(CodeableConceptDt theValue) {
+	public DiagnosticReport setName(CodeableConceptDt theValue) {
 		myName = theValue;
+		return this;
 	}
 
   
@@ -393,8 +477,9 @@ public class DiagnosticReport extends BaseResource implements IResource {
      * The status of the diagnostic report as a whole
      * </p> 
 	 */
-	public void setStatus(BoundCodeDt<DiagnosticReportStatusEnum> theValue) {
+	public DiagnosticReport setStatus(BoundCodeDt<DiagnosticReportStatusEnum> theValue) {
 		myStatus = theValue;
+		return this;
 	}
 
 	/**
@@ -405,8 +490,9 @@ public class DiagnosticReport extends BaseResource implements IResource {
      * The status of the diagnostic report as a whole
      * </p> 
 	 */
-	public void setStatus(DiagnosticReportStatusEnum theValue) {
+	public DiagnosticReport setStatus(DiagnosticReportStatusEnum theValue) {
 		getStatus().setValueAsEnum(theValue);
+		return this;
 	}
 
   
@@ -435,8 +521,9 @@ public class DiagnosticReport extends BaseResource implements IResource {
      * The date and/or time that this version of the report was released from the source diagnostic service
      * </p> 
 	 */
-	public void setIssued(DateTimeDt theValue) {
+	public DiagnosticReport setIssued(DateTimeDt theValue) {
 		myIssued = theValue;
+		return this;
 	}
 
  	/**
@@ -488,8 +575,9 @@ public class DiagnosticReport extends BaseResource implements IResource {
      * The subject of the report. Usually, but not always, this is a patient. However diagnostic services also perform analyses on specimens collected from a variety of other sources
      * </p> 
 	 */
-	public void setSubject(ResourceReferenceDt theValue) {
+	public DiagnosticReport setSubject(ResourceReferenceDt theValue) {
 		mySubject = theValue;
+		return this;
 	}
 
   
@@ -515,8 +603,9 @@ public class DiagnosticReport extends BaseResource implements IResource {
      * The diagnostic service that is responsible for issuing the report
      * </p> 
 	 */
-	public void setPerformer(ResourceReferenceDt theValue) {
+	public DiagnosticReport setPerformer(ResourceReferenceDt theValue) {
 		myPerformer = theValue;
+		return this;
 	}
 
   
@@ -545,8 +634,9 @@ public class DiagnosticReport extends BaseResource implements IResource {
      * The local ID assigned to the report by the order filler, usually by the Information System of the diagnostic service provider
      * </p> 
 	 */
-	public void setIdentifier(IdentifierDt theValue) {
+	public DiagnosticReport setIdentifier(IdentifierDt theValue) {
 		myIdentifier = theValue;
+		return this;
 	}
 
   
@@ -575,8 +665,9 @@ public class DiagnosticReport extends BaseResource implements IResource {
      * Details concerning a test requested.
      * </p> 
 	 */
-	public void setRequestDetail(java.util.List<ResourceReferenceDt> theValue) {
+	public DiagnosticReport setRequestDetail(java.util.List<ResourceReferenceDt> theValue) {
 		myRequestDetail = theValue;
+		return this;
 	}
 
 	/**
@@ -618,8 +709,9 @@ public class DiagnosticReport extends BaseResource implements IResource {
      * The section of the diagnostic service that performs the examination e.g. biochemistry, hematology, MRI
      * </p> 
 	 */
-	public void setServiceCategory(CodeableConceptDt theValue) {
+	public DiagnosticReport setServiceCategory(CodeableConceptDt theValue) {
 		myServiceCategory = theValue;
+		return this;
 	}
 
   
@@ -645,8 +737,9 @@ public class DiagnosticReport extends BaseResource implements IResource {
      * The time or time-period the observed values are related to. This is usually either the time of the procedure or of specimen collection(s), but very often the source of the date/time is not known, only the date/time itself
      * </p> 
 	 */
-	public void setDiagnostic(IDatatype theValue) {
+	public DiagnosticReport setDiagnostic(IDatatype theValue) {
 		myDiagnostic = theValue;
+		return this;
 	}
 
   
@@ -675,8 +768,9 @@ public class DiagnosticReport extends BaseResource implements IResource {
      * Details about the specimens on which this Disagnostic report is based
      * </p> 
 	 */
-	public void setSpecimen(java.util.List<ResourceReferenceDt> theValue) {
+	public DiagnosticReport setSpecimen(java.util.List<ResourceReferenceDt> theValue) {
 		mySpecimen = theValue;
+		return this;
 	}
 
 	/**
@@ -718,8 +812,9 @@ public class DiagnosticReport extends BaseResource implements IResource {
      * Observations that are part of this diagnostic report. Observations can be simple name/value pairs (e.g. \"atomic\" results), or they can be grouping observations that include references to other members of the group (e.g. \"panels\")
      * </p> 
 	 */
-	public void setResult(java.util.List<ResourceReferenceDt> theValue) {
+	public DiagnosticReport setResult(java.util.List<ResourceReferenceDt> theValue) {
 		myResult = theValue;
+		return this;
 	}
 
 	/**
@@ -761,8 +856,9 @@ public class DiagnosticReport extends BaseResource implements IResource {
      * One or more links to full details of any imaging performed during the diagnostic investigation. Typically, this is imaging performed by DICOM enabled modalities, but this is not required. A fully enabled PACS viewer can use this information to provide views of the source images
      * </p> 
 	 */
-	public void setImagingStudy(java.util.List<ResourceReferenceDt> theValue) {
+	public DiagnosticReport setImagingStudy(java.util.List<ResourceReferenceDt> theValue) {
 		myImagingStudy = theValue;
+		return this;
 	}
 
 	/**
@@ -804,8 +900,9 @@ public class DiagnosticReport extends BaseResource implements IResource {
      * A list of key images associated with this report. The images are generally created during the diagnostic process, and may be directly of the patient, or of treated specimens (i.e. slides of interest)
      * </p> 
 	 */
-	public void setImage(java.util.List<Image> theValue) {
+	public DiagnosticReport setImage(java.util.List<Image> theValue) {
 		myImage = theValue;
+		return this;
 	}
 
 	/**
@@ -863,8 +960,9 @@ public class DiagnosticReport extends BaseResource implements IResource {
      * Concise and clinically contextualized narrative interpretation of the diagnostic report
      * </p> 
 	 */
-	public void setConclusion(StringDt theValue) {
+	public DiagnosticReport setConclusion(StringDt theValue) {
 		myConclusion = theValue;
+		return this;
 	}
 
  	/**
@@ -906,8 +1004,9 @@ public class DiagnosticReport extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public void setCodedDiagnosis(java.util.List<CodeableConceptDt> theValue) {
+	public DiagnosticReport setCodedDiagnosis(java.util.List<CodeableConceptDt> theValue) {
 		myCodedDiagnosis = theValue;
+		return this;
 	}
 
 	/**
@@ -965,8 +1064,9 @@ public class DiagnosticReport extends BaseResource implements IResource {
      * Rich text representation of the entire result as issued by the diagnostic service. Multiple formats are allowed but they SHALL be semantically equivalent.
      * </p> 
 	 */
-	public void setPresentedForm(java.util.List<AttachmentDt> theValue) {
+	public DiagnosticReport setPresentedForm(java.util.List<AttachmentDt> theValue) {
 		myPresentedForm = theValue;
+		return this;
 	}
 
 	/**
@@ -1067,8 +1167,9 @@ public class DiagnosticReport extends BaseResource implements IResource {
      * A comment about the image. Typically, this is used to provide an explanation for why the image is included, or to draw the viewer's attention to important features
      * </p> 
 	 */
-	public void setComment(StringDt theValue) {
+	public Image setComment(StringDt theValue) {
 		myComment = theValue;
+		return this;
 	}
 
  	/**
@@ -1110,8 +1211,9 @@ public class DiagnosticReport extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public void setLink(ResourceReferenceDt theValue) {
+	public Image setLink(ResourceReferenceDt theValue) {
 		myLink = theValue;
+		return this;
 	}
 
   

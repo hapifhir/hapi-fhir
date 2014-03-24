@@ -1,2 +1,55 @@
-<span>
-</span>
+<div>
+	<div style="font-size: 1.2em;">
+		<th:block th:if="${not resource.name.text.empty}" th:text="${resource.name.text.value}"/>
+		<th:block th:if="${resource.name.text.empty} and ${not #lists.isEmpty(resource.name.coding)} and ${not resource.name.coding[0].empty} and ${not resource.name.coding[0].display.empty}" th:text="${resource.name.coding[0].display}"/>
+		<th:block th:if="${resource.name.text.empty} and ${not #lists.isEmpty(resource.name.coding)} and ${not resource.name.coding[0].empty} and ${resource.name.coding[0].display.empty}" th:text="Untitled Diagnostic Report"/>
+		<!--/*--> Complete Blood Count <!--*/-->
+	</div>
+	<div style="font-size: 1.2em;" ></div>
+	
+	<table>
+		<thead>
+			<tr>
+				<td>Name</td>
+				<td>Value</td>
+				<td>Interpretation</td>
+				<td>Reference Range</td>
+				<td>Status</td>
+			</tr>
+		</thead>
+		<tbody>
+			<tr th:if="${#lists.isEmpty(resource.result)}">
+				<td colspan="5">No Observations</td>
+			</tr>
+			<th:block th:each="result : ${resource.result}">
+				<tr>
+					<td>
+						<th:block th:if="${not result.resource.name.text.empty}" th:text="${result.resource.name.text.value}"/>
+						<th:block th:if="${result.resource.name.text.empty} and ${not #lists.isEmpty(result.resource.name.coding)} and ${not result.resource.name.coding[0].empty} and ${not result.resource.name.coding[0].display.empty}" th:text="${result.resource.name.coding[0].display}"/>
+						<th:block th:if="${result.resource.name.text.empty} and ${not #lists.isEmpty(result.resource.name.coding)} and ${not result.resource.name.coding[0].empty} and ${result.resource.name.coding[0].display.empty}" th:text="?"/>
+						<!--/*--> Hb <!--*/-->
+					</td>
+					<td th:narrative="${result.resource.value}">2.2 g/L</td>
+					<td>
+						<th:block th:if="${not result.resource.interpretation.text.empty}" th:text="${result.resource.interpretation.text}"/>
+						<th:block th:if="${result.resource.interpretation.text.empty} and ${not result.resource.interpretation.codingFirstRep.display.empty}" th:text="${result.resource.interpretation.codingFirstRep.display}"/>
+						<!--/*--> N <!--*/-->
+					</td>
+					<td>
+						<th:block th:if="${not result.resource.referenceRange.empty} and ${not result.resource.referenceRange[0].empty}">
+							<th:block th:narrative="${result.resource.referenceRange[0].low}">2.2 g/L</th:block>
+							-
+							<th:block th:narrative="${result.resource.referenceRange[0].high}">2.9 g/L</th:block>
+						</th:block>
+					</td>
+					<td th:text="${result.resource.status.value}">final</td>
+				</tr>
+				<tr th:if="${not result.resource.comments.empty}">
+					<td th:text="${result.resource.comments.value}" colspan="5">
+					</td>
+				</tr>
+			</th:block>
+		</tbody>
+	</table>
+		
+</div>

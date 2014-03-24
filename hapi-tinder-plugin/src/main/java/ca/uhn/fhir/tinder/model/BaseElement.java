@@ -35,6 +35,10 @@ public abstract class BaseElement {
 		return myDeclaringClassNameComplete;
 	}
 
+	public String getDeclaringClassNameCompleteForChildren() {
+		return getDeclaringClassNameComplete();
+	}
+
 	public void setDeclaringClassNameComplete(String theDeclaringClassNameComplete) {
 		myDeclaringClassNameComplete = theDeclaringClassNameComplete;
 	}
@@ -45,9 +49,9 @@ public abstract class BaseElement {
 		}
 		myChildren.add(theElem);
 		
-		if (theElem.getDeclaringClassNameComplete()==null) {
-			theElem.setDeclaringClassNameComplete(getDeclaringClassNameComplete());
-		}
+//		if (theElem.getDeclaringClassNameComplete()==null) {
+			theElem.setDeclaringClassNameComplete(getDeclaringClassNameCompleteForChildren());
+//		}
 	}
 
 	public String getBinding() {

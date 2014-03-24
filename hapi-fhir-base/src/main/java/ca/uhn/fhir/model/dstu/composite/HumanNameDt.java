@@ -16,19 +16,33 @@
 
 package ca.uhn.fhir.model.dstu.composite;
 
-import java.util.List;
+import java.util.*;
+import ca.uhn.fhir.model.api.*;
+import ca.uhn.fhir.model.api.annotation.*;
 
-import ca.uhn.fhir.model.api.BaseElement;
-import ca.uhn.fhir.model.api.ICompositeDatatype;
-import ca.uhn.fhir.model.api.IElement;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.DatatypeDef;
-import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.dstu.valueset.AddressUseEnum;
+import ca.uhn.fhir.model.dstu.composite.CodingDt;
+import ca.uhn.fhir.model.dstu.valueset.ContactSystemEnum;
+import ca.uhn.fhir.model.dstu.valueset.ContactUseEnum;
+import ca.uhn.fhir.model.dstu.valueset.EventTimingEnum;
+import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
 import ca.uhn.fhir.model.dstu.valueset.NameUseEnum;
+import ca.uhn.fhir.model.dstu.resource.Organization;
+import ca.uhn.fhir.model.dstu.composite.PeriodDt;
+import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
+import ca.uhn.fhir.model.dstu.composite.QuantityDt;
+import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.dstu.valueset.UnitsOfTimeEnum;
+import ca.uhn.fhir.model.dstu.resource.ValueSet;
+import ca.uhn.fhir.model.primitive.Base64BinaryDt;
+import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
+import ca.uhn.fhir.model.primitive.DateTimeDt;
+import ca.uhn.fhir.model.primitive.DecimalDt;
+import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.model.primitive.StringDt;
-import ca.uhn.fhir.util.DatatypeUtil;
+import ca.uhn.fhir.model.primitive.UriDt;
 
 /**
  * HAPI/FHIR <b>HumanName</b> Datatype
@@ -139,8 +153,9 @@ public class HumanNameDt
      * Identifies the purpose for this name
      * </p> 
 	 */
-	public void setUse(BoundCodeDt<NameUseEnum> theValue) {
+	public HumanNameDt setUse(BoundCodeDt<NameUseEnum> theValue) {
 		myUse = theValue;
+		return this;
 	}
 
 	/**
@@ -151,8 +166,9 @@ public class HumanNameDt
      * Identifies the purpose for this name
      * </p> 
 	 */
-	public void setUse(NameUseEnum theValue) {
+	public HumanNameDt setUse(NameUseEnum theValue) {
 		getUse().setValueAsEnum(theValue);
+		return this;
 	}
 
   
@@ -181,8 +197,9 @@ public class HumanNameDt
      * A full text representation of the name
      * </p> 
 	 */
-	public void setText(StringDt theValue) {
+	public HumanNameDt setText(StringDt theValue) {
 		myText = theValue;
+		return this;
 	}
 
  	/**
@@ -224,8 +241,9 @@ public class HumanNameDt
      * The part of a name that links to the genealogy. In some cultures (e.g. Eritrea) the family name of a son is the first name of his father.
      * </p> 
 	 */
-	public void setFamily(java.util.List<StringDt> theValue) {
+	public HumanNameDt setFamily(java.util.List<StringDt> theValue) {
 		myFamily = theValue;
+		return this;
 	}
 
 	/**
@@ -301,8 +319,9 @@ public class HumanNameDt
      * Given name
      * </p> 
 	 */
-	public void setGiven(java.util.List<StringDt> theValue) {
+	public HumanNameDt setGiven(java.util.List<StringDt> theValue) {
 		myGiven = theValue;
+		return this;
 	}
 
 	/**
@@ -378,8 +397,9 @@ public class HumanNameDt
      * Part of the name that is acquired as a title due to academic, legal, employment or nobility status, etc. and that appears at the start of the name
      * </p> 
 	 */
-	public void setPrefix(java.util.List<StringDt> theValue) {
+	public HumanNameDt setPrefix(java.util.List<StringDt> theValue) {
 		myPrefix = theValue;
+		return this;
 	}
 
 	/**
@@ -455,8 +475,9 @@ public class HumanNameDt
      * Part of the name that is acquired as a title due to academic, legal, employment or nobility status, etc. and that appears at the end of the name
      * </p> 
 	 */
-	public void setSuffix(java.util.List<StringDt> theValue) {
+	public HumanNameDt setSuffix(java.util.List<StringDt> theValue) {
 		mySuffix = theValue;
+		return this;
 	}
 
 	/**
@@ -532,8 +553,9 @@ public class HumanNameDt
      * Indicates the period of time when this name was valid for the named person.
      * </p> 
 	 */
-	public void setPeriod(PeriodDt theValue) {
+	public HumanNameDt setPeriod(PeriodDt theValue) {
 		myPeriod = theValue;
+		return this;
 	}
 
   

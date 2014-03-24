@@ -17,25 +17,113 @@
 package ca.uhn.fhir.model.dstu.resource;
 
 
-import java.util.List;
+import java.util.*;
+import ca.uhn.fhir.model.api.*;
+import ca.uhn.fhir.model.api.annotation.*;
 
-import ca.uhn.fhir.model.api.BaseElement;
-import ca.uhn.fhir.model.api.BaseResource;
-import ca.uhn.fhir.model.api.IElement;
-import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.api.IResourceBlock;
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.dstu.composite.AddressDt;
+import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
+import ca.uhn.fhir.model.dstu.valueset.AdmitSourceEnum;
+import ca.uhn.fhir.model.dstu.valueset.AggregationModeEnum;
+import ca.uhn.fhir.model.dstu.valueset.AnimalSpeciesEnum;
+import ca.uhn.fhir.model.dstu.composite.AttachmentDt;
+import ca.uhn.fhir.model.dstu.valueset.BindingConformanceEnum;
 import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
-import ca.uhn.fhir.model.dstu.composite.RatioDt;
-import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.dstu.composite.CodingDt;
+import ca.uhn.fhir.model.dstu.valueset.ConformanceEventModeEnum;
+import ca.uhn.fhir.model.dstu.valueset.ConformanceStatementStatusEnum;
+import ca.uhn.fhir.model.dstu.valueset.ConstraintSeverityEnum;
+import ca.uhn.fhir.model.dstu.composite.ContactDt;
+import ca.uhn.fhir.model.dstu.valueset.DataTypeEnum;
+import ca.uhn.fhir.model.dstu.resource.Device;
+import ca.uhn.fhir.model.dstu.resource.DiagnosticOrder;
+import ca.uhn.fhir.model.dstu.valueset.DiagnosticOrderPriorityEnum;
+import ca.uhn.fhir.model.dstu.valueset.DiagnosticOrderStatusEnum;
+import ca.uhn.fhir.model.dstu.valueset.DiagnosticReportStatusEnum;
+import ca.uhn.fhir.model.dstu.valueset.DocumentModeEnum;
+import ca.uhn.fhir.model.dstu.resource.Encounter;
+import ca.uhn.fhir.model.dstu.valueset.EncounterClassEnum;
+import ca.uhn.fhir.model.dstu.valueset.EncounterReasonCodesEnum;
+import ca.uhn.fhir.model.dstu.valueset.EncounterStateEnum;
+import ca.uhn.fhir.model.dstu.valueset.EncounterTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.ExtensionContextEnum;
+import ca.uhn.fhir.model.dstu.valueset.FHIRDefinedTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.FilterOperatorEnum;
+import ca.uhn.fhir.model.dstu.resource.Group;
+import ca.uhn.fhir.model.dstu.valueset.GroupTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.HierarchicalRelationshipTypeEnum;
+import ca.uhn.fhir.model.dstu.composite.HumanNameDt;
+import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
+import ca.uhn.fhir.model.dstu.valueset.ImagingModalityEnum;
+import ca.uhn.fhir.model.dstu.resource.ImagingStudy;
+import ca.uhn.fhir.model.dstu.valueset.InstanceAvailabilityEnum;
+import ca.uhn.fhir.model.dstu.valueset.LinkTypeEnum;
+import ca.uhn.fhir.model.dstu.resource.Location;
+import ca.uhn.fhir.model.dstu.valueset.LocationModeEnum;
+import ca.uhn.fhir.model.dstu.valueset.LocationStatusEnum;
+import ca.uhn.fhir.model.dstu.valueset.LocationTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.MaritalStatusCodesEnum;
+import ca.uhn.fhir.model.dstu.resource.Media;
+import ca.uhn.fhir.model.dstu.valueset.MediaTypeEnum;
+import ca.uhn.fhir.model.dstu.resource.Medication;
 import ca.uhn.fhir.model.dstu.valueset.MedicationKindEnum;
+import ca.uhn.fhir.model.dstu.valueset.MessageEventEnum;
+import ca.uhn.fhir.model.dstu.valueset.MessageSignificanceCategoryEnum;
+import ca.uhn.fhir.model.dstu.valueset.MessageTransportEnum;
+import ca.uhn.fhir.model.dstu.valueset.ModalityEnum;
+import ca.uhn.fhir.model.dstu.resource.Observation;
+import ca.uhn.fhir.model.dstu.valueset.ObservationInterpretationCodesEnum;
+import ca.uhn.fhir.model.dstu.valueset.ObservationRelationshipTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.ObservationReliabilityEnum;
+import ca.uhn.fhir.model.dstu.valueset.ObservationStatusEnum;
+import ca.uhn.fhir.model.dstu.resource.Organization;
+import ca.uhn.fhir.model.dstu.valueset.OrganizationTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.ParticipantTypeEnum;
+import ca.uhn.fhir.model.dstu.resource.Patient;
+import ca.uhn.fhir.model.dstu.valueset.PatientRelationshipTypeEnum;
+import ca.uhn.fhir.model.dstu.composite.PeriodDt;
+import ca.uhn.fhir.model.dstu.resource.Practitioner;
+import ca.uhn.fhir.model.dstu.valueset.PractitionerRoleEnum;
+import ca.uhn.fhir.model.dstu.valueset.PractitionerSpecialtyEnum;
+import ca.uhn.fhir.model.dstu.resource.Profile;
+import ca.uhn.fhir.model.dstu.valueset.PropertyRepresentationEnum;
+import ca.uhn.fhir.model.dstu.composite.QuantityDt;
+import ca.uhn.fhir.model.dstu.composite.RangeDt;
+import ca.uhn.fhir.model.dstu.composite.RatioDt;
+import ca.uhn.fhir.model.dstu.resource.RelatedPerson;
+import ca.uhn.fhir.model.dstu.valueset.ResourceProfileStatusEnum;
+import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.dstu.valueset.ResourceTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.RestfulConformanceModeEnum;
+import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
+import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.RestfulSecurityServiceEnum;
+import ca.uhn.fhir.model.dstu.composite.SampledDataDt;
+import ca.uhn.fhir.model.dstu.valueset.SearchParamTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.SlicingRulesEnum;
+import ca.uhn.fhir.model.dstu.resource.Specimen;
+import ca.uhn.fhir.model.dstu.valueset.SpecimenCollectionMethodEnum;
+import ca.uhn.fhir.model.dstu.valueset.SpecimenTreatmentProcedureEnum;
+import ca.uhn.fhir.model.dstu.resource.Substance;
+import ca.uhn.fhir.model.dstu.valueset.SubstanceTypeEnum;
+import ca.uhn.fhir.model.dstu.resource.ValueSet;
+import ca.uhn.fhir.model.dstu.valueset.ValueSetStatusEnum;
+import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.dstu.composite.DurationDt;
+import ca.uhn.fhir.model.primitive.Base64BinaryDt;
 import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
+import ca.uhn.fhir.model.primitive.BoundCodeableConceptDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
+import ca.uhn.fhir.model.primitive.DateDt;
+import ca.uhn.fhir.model.primitive.DateTimeDt;
+import ca.uhn.fhir.model.primitive.DecimalDt;
+import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.model.primitive.InstantDt;
+import ca.uhn.fhir.model.primitive.IntegerDt;
+import ca.uhn.fhir.model.primitive.OidDt;
 import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.model.primitive.UriDt;
 
 
 /**
@@ -218,8 +306,9 @@ public class Medication extends BaseResource implements IResource {
      * The common/commercial name of the medication absent information such as strength, form, etc.  E.g. Acetaminophen, Tylenol 3, etc.  The fully coordinated name is communicated as the display of Medication.code
      * </p> 
 	 */
-	public void setName(StringDt theValue) {
+	public Medication setName(StringDt theValue) {
 		myName = theValue;
+		return this;
 	}
 
  	/**
@@ -261,8 +350,9 @@ public class Medication extends BaseResource implements IResource {
      * A code (or set of codes) that identify this medication.   Usage note: This could be a standard drug code such as a drug regulator code, RxNorm code, SNOMED CT code, etc. It could also be a local formulary code, optionally with translations to the standard drug codes
      * </p> 
 	 */
-	public void setCode(CodeableConceptDt theValue) {
+	public Medication setCode(CodeableConceptDt theValue) {
 		myCode = theValue;
+		return this;
 	}
 
   
@@ -291,8 +381,9 @@ public class Medication extends BaseResource implements IResource {
      * Set to true if the item is attributable to a specific manufacturer (even if we don't know who that is)
      * </p> 
 	 */
-	public void setIsBrand(BooleanDt theValue) {
+	public Medication setIsBrand(BooleanDt theValue) {
 		myIsBrand = theValue;
+		return this;
 	}
 
  	/**
@@ -334,8 +425,9 @@ public class Medication extends BaseResource implements IResource {
      * Describes the details of the manufacturer
      * </p> 
 	 */
-	public void setManufacturer(ResourceReferenceDt theValue) {
+	public Medication setManufacturer(ResourceReferenceDt theValue) {
 		myManufacturer = theValue;
+		return this;
 	}
 
   
@@ -364,8 +456,9 @@ public class Medication extends BaseResource implements IResource {
      * Medications are either a single administrable product or a package that contains one or more products.
      * </p> 
 	 */
-	public void setKind(BoundCodeDt<MedicationKindEnum> theValue) {
+	public Medication setKind(BoundCodeDt<MedicationKindEnum> theValue) {
 		myKind = theValue;
+		return this;
 	}
 
 	/**
@@ -376,8 +469,9 @@ public class Medication extends BaseResource implements IResource {
      * Medications are either a single administrable product or a package that contains one or more products.
      * </p> 
 	 */
-	public void setKind(MedicationKindEnum theValue) {
+	public Medication setKind(MedicationKindEnum theValue) {
 		getKind().setValueAsEnum(theValue);
+		return this;
 	}
 
   
@@ -406,8 +500,9 @@ public class Medication extends BaseResource implements IResource {
      * Information that only applies to products (not packages)
      * </p> 
 	 */
-	public void setProduct(Product theValue) {
+	public Medication setProduct(Product theValue) {
 		myProduct = theValue;
+		return this;
 	}
 
   
@@ -436,8 +531,9 @@ public class Medication extends BaseResource implements IResource {
      * Information that only applies to packages (not products)
      * </p> 
 	 */
-	public void setPackage(CodeDt theValue) {
+	public Medication setPackage(CodeDt theValue) {
 		myPackage = theValue;
+		return this;
 	}
 
  	/**
@@ -520,8 +616,9 @@ public class Medication extends BaseResource implements IResource {
      * Describes the form of the item.  Powder; tables; carton
      * </p> 
 	 */
-	public void setForm(CodeableConceptDt theValue) {
+	public Product setForm(CodeableConceptDt theValue) {
 		myForm = theValue;
+		return this;
 	}
 
   
@@ -550,8 +647,9 @@ public class Medication extends BaseResource implements IResource {
      * Identifies a particular constituent of interest in the product
      * </p> 
 	 */
-	public void setIngredient(java.util.List<ProductIngredient> theValue) {
+	public Product setIngredient(java.util.List<ProductIngredient> theValue) {
 		myIngredient = theValue;
+		return this;
 	}
 
 	/**
@@ -653,8 +751,9 @@ public class Medication extends BaseResource implements IResource {
      * The actual ingredient - either a substance (simple ingredient) or another medication
      * </p> 
 	 */
-	public void setItem(ResourceReferenceDt theValue) {
+	public ProductIngredient setItem(ResourceReferenceDt theValue) {
 		myItem = theValue;
+		return this;
 	}
 
   
@@ -683,8 +782,9 @@ public class Medication extends BaseResource implements IResource {
      * Specifies how many (or how much) of the items there are in this Medication.  E.g. 250 mg per tablet
      * </p> 
 	 */
-	public void setAmount(RatioDt theValue) {
+	public ProductIngredient setAmount(RatioDt theValue) {
 		myAmount = theValue;
+		return this;
 	}
 
   
