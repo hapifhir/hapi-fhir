@@ -10,26 +10,30 @@ import java.util.Map;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.resource.Patient;
+import ca.uhn.fhir.narrative.INarrativeGenerator;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.JsonParser;
 import ca.uhn.fhir.parser.XmlParser;
 import ca.uhn.fhir.rest.client.IRestfulClientFactory;
 import ca.uhn.fhir.rest.client.RestfulClientFactory;
+import ca.uhn.fhir.rest.client.api.IRestfulClient;
 
 public class FhirContext {
 
 	private volatile Map<Class<? extends IElement>, BaseRuntimeElementDefinition<?>> myClassToElementDefinition = Collections.emptyMap();
 	private volatile Map<String, RuntimeResourceDefinition> myIdToResourceDefinition = Collections.emptyMap();
 	private volatile Map<String, RuntimeResourceDefinition> myNameToElementDefinition = Collections.emptyMap();
+	private INarrativeGenerator myNarrativeGenerator;
+	private IRestfulClientFactory myRestfulClientFactory;
 	private volatile RuntimeChildUndeclaredExtensionDefinition myRuntimeChildUndeclaredExtensionDefinition;
+
+	public FhirContext() {
+	}
 
 	public FhirContext(Class<? extends IResource> theResourceType) {
 		this(toCollection(theResourceType));
 	}
 
-	public FhirContext() {
-	}
-	
 	public FhirContext(Class<?>... theResourceTypes) {
 		this(toCollection(theResourceTypes));
 	}
@@ -37,11 +41,15 @@ public class FhirContext {
 	public FhirContext(Collection<Class<? extends IResource>> theResourceTypes) {
 		scanResourceTypes(theResourceTypes);
 	}
-
+	
 	public BaseRuntimeElementDefinition<?> getElementDefinition(Class<? extends IElement> theElementType) {
 		return myClassToElementDefinition.get(theElementType);
 	}
-	
+
+	public INarrativeGenerator getNarrativeGenerator() {
+		return myNarrativeGenerator;
+	}
+
 	public RuntimeResourceDefinition getResourceDefinition(Class<? extends IResource> theResourceType) {
 		RuntimeResourceDefinition retVal = (RuntimeResourceDefinition) myClassToElementDefinition.get(theResourceType);
 		if (retVal == null) {
@@ -49,7 +57,7 @@ public class FhirContext {
 		}
 		return retVal;
 	}
-
+	
 	public RuntimeResourceDefinition getResourceDefinition(IResource theResource) {
 		return getResourceDefinition(theResource.getClass());
 	}
@@ -81,6 +89,13 @@ public class FhirContext {
 		return myIdToResourceDefinition.values();
 	}
 
+	public IRestfulClientFactory getRestfulClientFactory() {
+		if (myRestfulClientFactory==null) {
+			myRestfulClientFactory = new RestfulClientFactory(this);
+		}
+		return myRestfulClientFactory;
+	}
+
 	public RuntimeChildUndeclaredExtensionDefinition getRuntimeChildUndeclaredExtensionDefinition() {
 		return myRuntimeChildUndeclaredExtensionDefinition;
 	}
@@ -89,12 +104,27 @@ public class FhirContext {
 		return new JsonParser(this);
 	}
 
-	public IRestfulClientFactory newRestfulClientFactory() {
-		return new RestfulClientFactory(this);
+	/**
+	 * Instantiates a new client instance
+	 * 
+	 * @param theClientType
+	 *            The client type, which is an interface type to be instantiated
+	 * @param theServerBase
+	 *            The URL of the base for the restful FHIR server to connect to
+	 * @return A newly created client
+	 * @throws ConfigurationException
+	 *             If the interface type is not an interface
+	 */
+	public <T extends IRestfulClient> T newRestfulClient(Class<T> theClientType, String theServerBase) {
+		return getRestfulClientFactory().newClient(theClientType, theServerBase);
 	}
 
 	public IParser newXmlParser() {
 		return new XmlParser(this);
+	}
+	
+	public void setNarrativeGenerator(INarrativeGenerator theNarrativeGenerator) {
+		myNarrativeGenerator = theNarrativeGenerator;
 	}
 	
 	private RuntimeResourceDefinition scanResourceType(Class<? extends IResource> theResourceType) {

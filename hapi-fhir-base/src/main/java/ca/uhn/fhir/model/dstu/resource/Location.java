@@ -17,113 +17,30 @@
 package ca.uhn.fhir.model.dstu.resource;
 
 
-import java.util.*;
-import ca.uhn.fhir.model.api.*;
-import ca.uhn.fhir.model.api.annotation.*;
+import java.util.List;
 
+import ca.uhn.fhir.model.api.BaseElement;
+import ca.uhn.fhir.model.api.BaseResource;
+import ca.uhn.fhir.model.api.IElement;
+import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.IResourceBlock;
+import ca.uhn.fhir.model.api.annotation.Block;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.dstu.composite.AddressDt;
-import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
-import ca.uhn.fhir.model.dstu.valueset.AdmitSourceEnum;
-import ca.uhn.fhir.model.dstu.valueset.AggregationModeEnum;
-import ca.uhn.fhir.model.dstu.valueset.AnimalSpeciesEnum;
-import ca.uhn.fhir.model.dstu.composite.AttachmentDt;
-import ca.uhn.fhir.model.dstu.valueset.BindingConformanceEnum;
 import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
-import ca.uhn.fhir.model.dstu.composite.CodingDt;
-import ca.uhn.fhir.model.dstu.valueset.ConformanceEventModeEnum;
-import ca.uhn.fhir.model.dstu.valueset.ConformanceStatementStatusEnum;
-import ca.uhn.fhir.model.dstu.valueset.ConstraintSeverityEnum;
 import ca.uhn.fhir.model.dstu.composite.ContactDt;
-import ca.uhn.fhir.model.dstu.valueset.DataTypeEnum;
-import ca.uhn.fhir.model.dstu.resource.Device;
-import ca.uhn.fhir.model.dstu.resource.DiagnosticOrder;
-import ca.uhn.fhir.model.dstu.valueset.DiagnosticOrderPriorityEnum;
-import ca.uhn.fhir.model.dstu.valueset.DiagnosticOrderStatusEnum;
-import ca.uhn.fhir.model.dstu.valueset.DiagnosticReportStatusEnum;
-import ca.uhn.fhir.model.dstu.valueset.DocumentModeEnum;
-import ca.uhn.fhir.model.dstu.resource.Encounter;
-import ca.uhn.fhir.model.dstu.valueset.EncounterClassEnum;
-import ca.uhn.fhir.model.dstu.valueset.EncounterReasonCodesEnum;
-import ca.uhn.fhir.model.dstu.valueset.EncounterStateEnum;
-import ca.uhn.fhir.model.dstu.valueset.EncounterTypeEnum;
-import ca.uhn.fhir.model.dstu.valueset.ExtensionContextEnum;
-import ca.uhn.fhir.model.dstu.valueset.FHIRDefinedTypeEnum;
-import ca.uhn.fhir.model.dstu.valueset.FilterOperatorEnum;
-import ca.uhn.fhir.model.dstu.resource.Group;
-import ca.uhn.fhir.model.dstu.valueset.GroupTypeEnum;
-import ca.uhn.fhir.model.dstu.valueset.HierarchicalRelationshipTypeEnum;
-import ca.uhn.fhir.model.dstu.composite.HumanNameDt;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
-import ca.uhn.fhir.model.dstu.valueset.ImagingModalityEnum;
-import ca.uhn.fhir.model.dstu.resource.ImagingStudy;
-import ca.uhn.fhir.model.dstu.valueset.InstanceAvailabilityEnum;
-import ca.uhn.fhir.model.dstu.valueset.LinkTypeEnum;
-import ca.uhn.fhir.model.dstu.resource.Location;
+import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.valueset.LocationModeEnum;
 import ca.uhn.fhir.model.dstu.valueset.LocationStatusEnum;
 import ca.uhn.fhir.model.dstu.valueset.LocationTypeEnum;
-import ca.uhn.fhir.model.dstu.valueset.MaritalStatusCodesEnum;
-import ca.uhn.fhir.model.dstu.resource.Media;
-import ca.uhn.fhir.model.dstu.valueset.MediaTypeEnum;
-import ca.uhn.fhir.model.dstu.resource.Medication;
-import ca.uhn.fhir.model.dstu.valueset.MedicationKindEnum;
-import ca.uhn.fhir.model.dstu.valueset.MessageEventEnum;
-import ca.uhn.fhir.model.dstu.valueset.MessageSignificanceCategoryEnum;
-import ca.uhn.fhir.model.dstu.valueset.MessageTransportEnum;
-import ca.uhn.fhir.model.dstu.valueset.ModalityEnum;
-import ca.uhn.fhir.model.dstu.resource.Observation;
-import ca.uhn.fhir.model.dstu.valueset.ObservationInterpretationCodesEnum;
-import ca.uhn.fhir.model.dstu.valueset.ObservationRelationshipTypeEnum;
-import ca.uhn.fhir.model.dstu.valueset.ObservationReliabilityEnum;
-import ca.uhn.fhir.model.dstu.valueset.ObservationStatusEnum;
-import ca.uhn.fhir.model.dstu.resource.Organization;
-import ca.uhn.fhir.model.dstu.valueset.OrganizationTypeEnum;
-import ca.uhn.fhir.model.dstu.valueset.ParticipantTypeEnum;
-import ca.uhn.fhir.model.dstu.resource.Patient;
-import ca.uhn.fhir.model.dstu.valueset.PatientRelationshipTypeEnum;
-import ca.uhn.fhir.model.dstu.composite.PeriodDt;
-import ca.uhn.fhir.model.dstu.resource.Practitioner;
-import ca.uhn.fhir.model.dstu.valueset.PractitionerRoleEnum;
-import ca.uhn.fhir.model.dstu.valueset.PractitionerSpecialtyEnum;
-import ca.uhn.fhir.model.dstu.resource.Profile;
-import ca.uhn.fhir.model.dstu.valueset.PropertyRepresentationEnum;
-import ca.uhn.fhir.model.dstu.composite.QuantityDt;
-import ca.uhn.fhir.model.dstu.composite.RangeDt;
-import ca.uhn.fhir.model.dstu.composite.RatioDt;
-import ca.uhn.fhir.model.dstu.resource.RelatedPerson;
-import ca.uhn.fhir.model.dstu.valueset.ResourceProfileStatusEnum;
-import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
-import ca.uhn.fhir.model.dstu.valueset.ResourceTypeEnum;
-import ca.uhn.fhir.model.dstu.valueset.RestfulConformanceModeEnum;
-import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
-import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
-import ca.uhn.fhir.model.dstu.valueset.RestfulSecurityServiceEnum;
-import ca.uhn.fhir.model.dstu.composite.SampledDataDt;
-import ca.uhn.fhir.model.dstu.valueset.SearchParamTypeEnum;
-import ca.uhn.fhir.model.dstu.valueset.SlicingRulesEnum;
-import ca.uhn.fhir.model.dstu.resource.Specimen;
-import ca.uhn.fhir.model.dstu.valueset.SpecimenCollectionMethodEnum;
-import ca.uhn.fhir.model.dstu.valueset.SpecimenTreatmentProcedureEnum;
-import ca.uhn.fhir.model.dstu.resource.Substance;
-import ca.uhn.fhir.model.dstu.valueset.SubstanceTypeEnum;
-import ca.uhn.fhir.model.dstu.resource.ValueSet;
-import ca.uhn.fhir.model.dstu.valueset.ValueSetStatusEnum;
-import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.dstu.composite.DurationDt;
-import ca.uhn.fhir.model.primitive.Base64BinaryDt;
-import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.BoundCodeableConceptDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
-import ca.uhn.fhir.model.primitive.DateDt;
-import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.DecimalDt;
-import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.model.primitive.InstantDt;
-import ca.uhn.fhir.model.primitive.IntegerDt;
-import ca.uhn.fhir.model.primitive.OidDt;
 import ca.uhn.fhir.model.primitive.StringDt;
-import ca.uhn.fhir.model.primitive.UriDt;
 
 
 /**
@@ -357,7 +274,6 @@ public class Location extends BaseResource implements IResource {
 		myIdentifier = theValue;
 	}
 
-
   
 	/**
 	 * Gets the value(s) for <b>name</b> (Name of the location as used by humans).
@@ -388,7 +304,6 @@ public class Location extends BaseResource implements IResource {
 		myName = theValue;
 	}
 
-
  	/**
 	 * Sets the value for <b>name</b> (Name of the location as used by humans)
 	 *
@@ -397,8 +312,9 @@ public class Location extends BaseResource implements IResource {
      * Name of the location as used by humans. Does not need to be unique.
      * </p> 
 	 */
-	public void setName( String theString) {
+	public Location setName( String theString) {
 		myName = new StringDt(theString); 
+		return this; 
 	}
 
  
@@ -431,7 +347,6 @@ public class Location extends BaseResource implements IResource {
 		myDescription = theValue;
 	}
 
-
  	/**
 	 * Sets the value for <b>description</b> (Description of the Location, which helps in finding or referencing the place)
 	 *
@@ -440,8 +355,9 @@ public class Location extends BaseResource implements IResource {
      * Description of the Location, which helps in finding or referencing the place
      * </p> 
 	 */
-	public void setDescription( String theString) {
+	public Location setDescription( String theString) {
 		myDescription = new StringDt(theString); 
+		return this; 
 	}
 
  
@@ -473,7 +389,6 @@ public class Location extends BaseResource implements IResource {
 	public void setType(BoundCodeableConceptDt<LocationTypeEnum> theValue) {
 		myType = theValue;
 	}
-
 
 	/**
 	 * Sets the value(s) for <b>type</b> (Indicates the type of function performed at the location)
@@ -531,6 +446,21 @@ public class Location extends BaseResource implements IResource {
 		return newType; 
 	}
 
+	/**
+	 * Gets the first repetition for <b>telecom</b> (Contact details of the location),
+	 * creating it if it does not already exist.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The contact details of communication devices available at the location. This can include phone numbers, fax numbers, mobile numbers, email addresses and web sites
+     * </p> 
+	 */
+	public ContactDt getTelecomFirstRep() {
+		if (getTelecom().isEmpty()) {
+			return addTelecom();
+		}
+		return getTelecom().get(0); 
+	}
   
 	/**
 	 * Gets the value(s) for <b>address</b> (Physical location).
@@ -560,7 +490,6 @@ public class Location extends BaseResource implements IResource {
 	public void setAddress(AddressDt theValue) {
 		myAddress = theValue;
 	}
-
 
   
 	/**
@@ -592,7 +521,6 @@ public class Location extends BaseResource implements IResource {
 		myPhysicalType = theValue;
 	}
 
-
   
 	/**
 	 * Gets the value(s) for <b>position</b> (The absolute geographic location).
@@ -622,7 +550,6 @@ public class Location extends BaseResource implements IResource {
 	public void setPosition(Position theValue) {
 		myPosition = theValue;
 	}
-
 
   
 	/**
@@ -654,7 +581,6 @@ public class Location extends BaseResource implements IResource {
 		myManagingOrganization = theValue;
 	}
 
-
   
 	/**
 	 * Gets the value(s) for <b>status</b> (active | suspended | inactive).
@@ -684,7 +610,6 @@ public class Location extends BaseResource implements IResource {
 	public void setStatus(BoundCodeDt<LocationStatusEnum> theValue) {
 		myStatus = theValue;
 	}
-
 
 	/**
 	 * Sets the value(s) for <b>status</b> (active | suspended | inactive)
@@ -728,7 +653,6 @@ public class Location extends BaseResource implements IResource {
 		myPartOf = theValue;
 	}
 
-
   
 	/**
 	 * Gets the value(s) for <b>mode</b> (instance | kind).
@@ -758,7 +682,6 @@ public class Location extends BaseResource implements IResource {
 	public void setMode(BoundCodeDt<LocationModeEnum> theValue) {
 		myMode = theValue;
 	}
-
 
 	/**
 	 * Sets the value(s) for <b>mode</b> (instance | kind)
@@ -850,7 +773,6 @@ public class Location extends BaseResource implements IResource {
 		myLongitude = theValue;
 	}
 
-
  	/**
 	 * Sets the value for <b>longitude</b> (Longitude as expressed in KML)
 	 *
@@ -859,8 +781,9 @@ public class Location extends BaseResource implements IResource {
      * Longitude. The value domain and the interpretation are the same as for the text of the longitude element in KML (see notes below)
      * </p> 
 	 */
-	public void setLongitude( long theValue) {
+	public Position setLongitude( long theValue) {
 		myLongitude = new DecimalDt(theValue); 
+		return this; 
 	}
 
 	/**
@@ -871,8 +794,9 @@ public class Location extends BaseResource implements IResource {
      * Longitude. The value domain and the interpretation are the same as for the text of the longitude element in KML (see notes below)
      * </p> 
 	 */
-	public void setLongitude( double theValue) {
+	public Position setLongitude( double theValue) {
 		myLongitude = new DecimalDt(theValue); 
+		return this; 
 	}
 
 	/**
@@ -883,8 +807,9 @@ public class Location extends BaseResource implements IResource {
      * Longitude. The value domain and the interpretation are the same as for the text of the longitude element in KML (see notes below)
      * </p> 
 	 */
-	public void setLongitude( java.math.BigDecimal theValue) {
+	public Position setLongitude( java.math.BigDecimal theValue) {
 		myLongitude = new DecimalDt(theValue); 
+		return this; 
 	}
 
  
@@ -917,7 +842,6 @@ public class Location extends BaseResource implements IResource {
 		myLatitude = theValue;
 	}
 
-
  	/**
 	 * Sets the value for <b>latitude</b> (Latitude as expressed in KML)
 	 *
@@ -926,8 +850,9 @@ public class Location extends BaseResource implements IResource {
      * Latitude. The value domain and the interpretation are the same as for the text of the latitude element in KML (see notes below)
      * </p> 
 	 */
-	public void setLatitude( long theValue) {
+	public Position setLatitude( long theValue) {
 		myLatitude = new DecimalDt(theValue); 
+		return this; 
 	}
 
 	/**
@@ -938,8 +863,9 @@ public class Location extends BaseResource implements IResource {
      * Latitude. The value domain and the interpretation are the same as for the text of the latitude element in KML (see notes below)
      * </p> 
 	 */
-	public void setLatitude( double theValue) {
+	public Position setLatitude( double theValue) {
 		myLatitude = new DecimalDt(theValue); 
+		return this; 
 	}
 
 	/**
@@ -950,8 +876,9 @@ public class Location extends BaseResource implements IResource {
      * Latitude. The value domain and the interpretation are the same as for the text of the latitude element in KML (see notes below)
      * </p> 
 	 */
-	public void setLatitude( java.math.BigDecimal theValue) {
+	public Position setLatitude( java.math.BigDecimal theValue) {
 		myLatitude = new DecimalDt(theValue); 
+		return this; 
 	}
 
  
@@ -984,7 +911,6 @@ public class Location extends BaseResource implements IResource {
 		myAltitude = theValue;
 	}
 
-
  	/**
 	 * Sets the value for <b>altitude</b> (Altitude as expressed in KML)
 	 *
@@ -993,8 +919,9 @@ public class Location extends BaseResource implements IResource {
      * Altitude. The value domain and the interpretation are the same as for the text of the altitude element in KML (see notes below)
      * </p> 
 	 */
-	public void setAltitude( long theValue) {
+	public Position setAltitude( long theValue) {
 		myAltitude = new DecimalDt(theValue); 
+		return this; 
 	}
 
 	/**
@@ -1005,8 +932,9 @@ public class Location extends BaseResource implements IResource {
      * Altitude. The value domain and the interpretation are the same as for the text of the altitude element in KML (see notes below)
      * </p> 
 	 */
-	public void setAltitude( double theValue) {
+	public Position setAltitude( double theValue) {
 		myAltitude = new DecimalDt(theValue); 
+		return this; 
 	}
 
 	/**
@@ -1017,8 +945,9 @@ public class Location extends BaseResource implements IResource {
      * Altitude. The value domain and the interpretation are the same as for the text of the altitude element in KML (see notes below)
      * </p> 
 	 */
-	public void setAltitude( java.math.BigDecimal theValue) {
+	public Position setAltitude( java.math.BigDecimal theValue) {
 		myAltitude = new DecimalDt(theValue); 
+		return this; 
 	}
 
  

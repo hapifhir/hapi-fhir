@@ -14,8 +14,7 @@ public class Tester {
 		try {
 
 			FhirContext ctx = new FhirContext(Patient.class);
-			IRestfulClientFactory factory = ctx.newRestfulClientFactory();
-			ITestClient client = factory.newClient(ITestClient.class, "http://spark.furore.com/fhir/");
+			ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://spark.furore.com/fhir/");
 
 			Patient patient = client.getPatientById(new IdDt("1"));
 			System.out.println(ctx.newXmlParser().encodeResourceToString(patient));

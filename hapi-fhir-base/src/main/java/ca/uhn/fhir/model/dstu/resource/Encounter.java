@@ -17,113 +17,32 @@
 package ca.uhn.fhir.model.dstu.resource;
 
 
-import java.util.*;
-import ca.uhn.fhir.model.api.*;
-import ca.uhn.fhir.model.api.annotation.*;
+import java.util.List;
 
-import ca.uhn.fhir.model.dstu.composite.AddressDt;
-import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
-import ca.uhn.fhir.model.dstu.valueset.AdmitSourceEnum;
-import ca.uhn.fhir.model.dstu.valueset.AggregationModeEnum;
-import ca.uhn.fhir.model.dstu.valueset.AnimalSpeciesEnum;
-import ca.uhn.fhir.model.dstu.composite.AttachmentDt;
-import ca.uhn.fhir.model.dstu.valueset.BindingConformanceEnum;
+import ca.uhn.fhir.model.api.BaseElement;
+import ca.uhn.fhir.model.api.BaseResource;
+import ca.uhn.fhir.model.api.IElement;
+import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.IResourceBlock;
+import ca.uhn.fhir.model.api.annotation.Block;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
-import ca.uhn.fhir.model.dstu.composite.CodingDt;
-import ca.uhn.fhir.model.dstu.valueset.ConformanceEventModeEnum;
-import ca.uhn.fhir.model.dstu.valueset.ConformanceStatementStatusEnum;
-import ca.uhn.fhir.model.dstu.valueset.ConstraintSeverityEnum;
-import ca.uhn.fhir.model.dstu.composite.ContactDt;
-import ca.uhn.fhir.model.dstu.valueset.DataTypeEnum;
-import ca.uhn.fhir.model.dstu.resource.Device;
-import ca.uhn.fhir.model.dstu.resource.DiagnosticOrder;
-import ca.uhn.fhir.model.dstu.valueset.DiagnosticOrderPriorityEnum;
-import ca.uhn.fhir.model.dstu.valueset.DiagnosticOrderStatusEnum;
-import ca.uhn.fhir.model.dstu.valueset.DiagnosticReportStatusEnum;
-import ca.uhn.fhir.model.dstu.valueset.DocumentModeEnum;
-import ca.uhn.fhir.model.dstu.resource.Encounter;
+import ca.uhn.fhir.model.dstu.composite.DurationDt;
+import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
+import ca.uhn.fhir.model.dstu.composite.PeriodDt;
+import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.dstu.valueset.AdmitSourceEnum;
 import ca.uhn.fhir.model.dstu.valueset.EncounterClassEnum;
 import ca.uhn.fhir.model.dstu.valueset.EncounterReasonCodesEnum;
 import ca.uhn.fhir.model.dstu.valueset.EncounterStateEnum;
 import ca.uhn.fhir.model.dstu.valueset.EncounterTypeEnum;
-import ca.uhn.fhir.model.dstu.valueset.ExtensionContextEnum;
-import ca.uhn.fhir.model.dstu.valueset.FHIRDefinedTypeEnum;
-import ca.uhn.fhir.model.dstu.valueset.FilterOperatorEnum;
-import ca.uhn.fhir.model.dstu.resource.Group;
-import ca.uhn.fhir.model.dstu.valueset.GroupTypeEnum;
-import ca.uhn.fhir.model.dstu.valueset.HierarchicalRelationshipTypeEnum;
-import ca.uhn.fhir.model.dstu.composite.HumanNameDt;
-import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
-import ca.uhn.fhir.model.dstu.valueset.ImagingModalityEnum;
-import ca.uhn.fhir.model.dstu.resource.ImagingStudy;
-import ca.uhn.fhir.model.dstu.valueset.InstanceAvailabilityEnum;
-import ca.uhn.fhir.model.dstu.valueset.LinkTypeEnum;
-import ca.uhn.fhir.model.dstu.resource.Location;
-import ca.uhn.fhir.model.dstu.valueset.LocationModeEnum;
-import ca.uhn.fhir.model.dstu.valueset.LocationStatusEnum;
-import ca.uhn.fhir.model.dstu.valueset.LocationTypeEnum;
-import ca.uhn.fhir.model.dstu.valueset.MaritalStatusCodesEnum;
-import ca.uhn.fhir.model.dstu.resource.Media;
-import ca.uhn.fhir.model.dstu.valueset.MediaTypeEnum;
-import ca.uhn.fhir.model.dstu.resource.Medication;
-import ca.uhn.fhir.model.dstu.valueset.MedicationKindEnum;
-import ca.uhn.fhir.model.dstu.valueset.MessageEventEnum;
-import ca.uhn.fhir.model.dstu.valueset.MessageSignificanceCategoryEnum;
-import ca.uhn.fhir.model.dstu.valueset.MessageTransportEnum;
-import ca.uhn.fhir.model.dstu.valueset.ModalityEnum;
-import ca.uhn.fhir.model.dstu.resource.Observation;
-import ca.uhn.fhir.model.dstu.valueset.ObservationInterpretationCodesEnum;
-import ca.uhn.fhir.model.dstu.valueset.ObservationRelationshipTypeEnum;
-import ca.uhn.fhir.model.dstu.valueset.ObservationReliabilityEnum;
-import ca.uhn.fhir.model.dstu.valueset.ObservationStatusEnum;
-import ca.uhn.fhir.model.dstu.resource.Organization;
-import ca.uhn.fhir.model.dstu.valueset.OrganizationTypeEnum;
 import ca.uhn.fhir.model.dstu.valueset.ParticipantTypeEnum;
-import ca.uhn.fhir.model.dstu.resource.Patient;
-import ca.uhn.fhir.model.dstu.valueset.PatientRelationshipTypeEnum;
-import ca.uhn.fhir.model.dstu.composite.PeriodDt;
-import ca.uhn.fhir.model.dstu.resource.Practitioner;
-import ca.uhn.fhir.model.dstu.valueset.PractitionerRoleEnum;
-import ca.uhn.fhir.model.dstu.valueset.PractitionerSpecialtyEnum;
-import ca.uhn.fhir.model.dstu.resource.Profile;
-import ca.uhn.fhir.model.dstu.valueset.PropertyRepresentationEnum;
-import ca.uhn.fhir.model.dstu.composite.QuantityDt;
-import ca.uhn.fhir.model.dstu.composite.RangeDt;
-import ca.uhn.fhir.model.dstu.composite.RatioDt;
-import ca.uhn.fhir.model.dstu.resource.RelatedPerson;
-import ca.uhn.fhir.model.dstu.valueset.ResourceProfileStatusEnum;
-import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
-import ca.uhn.fhir.model.dstu.valueset.ResourceTypeEnum;
-import ca.uhn.fhir.model.dstu.valueset.RestfulConformanceModeEnum;
-import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
-import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
-import ca.uhn.fhir.model.dstu.valueset.RestfulSecurityServiceEnum;
-import ca.uhn.fhir.model.dstu.composite.SampledDataDt;
-import ca.uhn.fhir.model.dstu.valueset.SearchParamTypeEnum;
-import ca.uhn.fhir.model.dstu.valueset.SlicingRulesEnum;
-import ca.uhn.fhir.model.dstu.resource.Specimen;
-import ca.uhn.fhir.model.dstu.valueset.SpecimenCollectionMethodEnum;
-import ca.uhn.fhir.model.dstu.valueset.SpecimenTreatmentProcedureEnum;
-import ca.uhn.fhir.model.dstu.resource.Substance;
-import ca.uhn.fhir.model.dstu.valueset.SubstanceTypeEnum;
-import ca.uhn.fhir.model.dstu.resource.ValueSet;
-import ca.uhn.fhir.model.dstu.valueset.ValueSetStatusEnum;
-import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.dstu.composite.DurationDt;
-import ca.uhn.fhir.model.primitive.Base64BinaryDt;
 import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.BoundCodeableConceptDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
-import ca.uhn.fhir.model.primitive.DateDt;
-import ca.uhn.fhir.model.primitive.DateTimeDt;
-import ca.uhn.fhir.model.primitive.DecimalDt;
-import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.model.primitive.InstantDt;
-import ca.uhn.fhir.model.primitive.IntegerDt;
-import ca.uhn.fhir.model.primitive.OidDt;
-import ca.uhn.fhir.model.primitive.StringDt;
-import ca.uhn.fhir.model.primitive.UriDt;
 
 
 /**
@@ -406,6 +325,21 @@ public class Encounter extends BaseResource implements IResource {
 		return newType; 
 	}
 
+	/**
+	 * Gets the first repetition for <b>identifier</b> (Identifier(s) by which this encounter is known),
+	 * creating it if it does not already exist.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * 
+     * </p> 
+	 */
+	public IdentifierDt getIdentifierFirstRep() {
+		if (getIdentifier().isEmpty()) {
+			return addIdentifier();
+		}
+		return getIdentifier().get(0); 
+	}
   
 	/**
 	 * Gets the value(s) for <b>status</b> (planned | in progress | onleave | finished | cancelled).
@@ -435,7 +369,6 @@ public class Encounter extends BaseResource implements IResource {
 	public void setStatus(BoundCodeDt<EncounterStateEnum> theValue) {
 		myStatus = theValue;
 	}
-
 
 	/**
 	 * Sets the value(s) for <b>status</b> (planned | in progress | onleave | finished | cancelled)
@@ -479,7 +412,6 @@ public class Encounter extends BaseResource implements IResource {
 		myClassElement = theValue;
 	}
 
-
 	/**
 	 * Sets the value(s) for <b>class</b> (inpatient | outpatient | ambulatory | emergency +)
 	 *
@@ -521,7 +453,6 @@ public class Encounter extends BaseResource implements IResource {
 	public void setType(java.util.List<BoundCodeableConceptDt<EncounterTypeEnum>> theValue) {
 		myType = theValue;
 	}
-
 
 	/**
 	 * Add a value for <b>type</b> (Specific type of encounter)
@@ -578,7 +509,6 @@ public class Encounter extends BaseResource implements IResource {
 		mySubject = theValue;
 	}
 
-
   
 	/**
 	 * Gets the value(s) for <b>participant</b> (List of participants involved in the encounter).
@@ -623,6 +553,21 @@ public class Encounter extends BaseResource implements IResource {
 		return newType; 
 	}
 
+	/**
+	 * Gets the first repetition for <b>participant</b> (List of participants involved in the encounter),
+	 * creating it if it does not already exist.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The main practitioner responsible for providing the service
+     * </p> 
+	 */
+	public Participant getParticipantFirstRep() {
+		if (getParticipant().isEmpty()) {
+			return addParticipant();
+		}
+		return getParticipant().get(0); 
+	}
   
 	/**
 	 * Gets the value(s) for <b>period</b> (The start and end time of the encounter).
@@ -652,7 +597,6 @@ public class Encounter extends BaseResource implements IResource {
 	public void setPeriod(PeriodDt theValue) {
 		myPeriod = theValue;
 	}
-
 
   
 	/**
@@ -684,7 +628,6 @@ public class Encounter extends BaseResource implements IResource {
 		myLength = theValue;
 	}
 
-
   
 	/**
 	 * Gets the value(s) for <b>reason</b> (Reason the encounter takes place (code)).
@@ -714,7 +657,6 @@ public class Encounter extends BaseResource implements IResource {
 	public void setReason(BoundCodeableConceptDt<EncounterReasonCodesEnum> theValue) {
 		myReason = theValue;
 	}
-
 
 	/**
 	 * Sets the value(s) for <b>reason</b> (Reason the encounter takes place (code))
@@ -758,7 +700,6 @@ public class Encounter extends BaseResource implements IResource {
 		myIndication = theValue;
 	}
 
-
   
 	/**
 	 * Gets the value(s) for <b>priority</b> (Indicates the urgency of the encounter).
@@ -789,7 +730,6 @@ public class Encounter extends BaseResource implements IResource {
 		myPriority = theValue;
 	}
 
-
   
 	/**
 	 * Gets the value(s) for <b>hospitalization</b> (Details about an admission to a clinic).
@@ -819,7 +759,6 @@ public class Encounter extends BaseResource implements IResource {
 	public void setHospitalization(Hospitalization theValue) {
 		myHospitalization = theValue;
 	}
-
 
   
 	/**
@@ -865,6 +804,21 @@ public class Encounter extends BaseResource implements IResource {
 		return newType; 
 	}
 
+	/**
+	 * Gets the first repetition for <b>location</b> (List of locations the patient has been at),
+	 * creating it if it does not already exist.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * List of locations at which the patient has been
+     * </p> 
+	 */
+	public Location getLocationFirstRep() {
+		if (getLocation().isEmpty()) {
+			return addLocation();
+		}
+		return getLocation().get(0); 
+	}
   
 	/**
 	 * Gets the value(s) for <b>serviceProvider</b> (Department or team providing care).
@@ -895,7 +849,6 @@ public class Encounter extends BaseResource implements IResource {
 		myServiceProvider = theValue;
 	}
 
-
   
 	/**
 	 * Gets the value(s) for <b>partOf</b> (Another Encounter this encounter is part of).
@@ -925,7 +878,6 @@ public class Encounter extends BaseResource implements IResource {
 	public void setPartOf(ResourceReferenceDt theValue) {
 		myPartOf = theValue;
 	}
-
 
   
 	/**
@@ -1001,7 +953,6 @@ public class Encounter extends BaseResource implements IResource {
 		myType = theValue;
 	}
 
-
 	/**
 	 * Add a value for <b>type</b> (Role of participant in encounter)
 	 *
@@ -1053,7 +1004,6 @@ public class Encounter extends BaseResource implements IResource {
 	public void setIndividual(ResourceReferenceDt theValue) {
 		myIndividual = theValue;
 	}
-
 
   
 
@@ -1206,7 +1156,6 @@ public class Encounter extends BaseResource implements IResource {
 		myPreAdmissionIdentifier = theValue;
 	}
 
-
   
 	/**
 	 * Gets the value(s) for <b>origin</b> (The location from which the patient came before admission).
@@ -1237,7 +1186,6 @@ public class Encounter extends BaseResource implements IResource {
 		myOrigin = theValue;
 	}
 
-
   
 	/**
 	 * Gets the value(s) for <b>admitSource</b> (From where patient was admitted (physician referral, transfer)).
@@ -1267,7 +1215,6 @@ public class Encounter extends BaseResource implements IResource {
 	public void setAdmitSource(BoundCodeableConceptDt<AdmitSourceEnum> theValue) {
 		myAdmitSource = theValue;
 	}
-
 
 	/**
 	 * Sets the value(s) for <b>admitSource</b> (From where patient was admitted (physician referral, transfer))
@@ -1310,7 +1257,6 @@ public class Encounter extends BaseResource implements IResource {
 	public void setPeriod(PeriodDt theValue) {
 		myPeriod = theValue;
 	}
-
 
   
 	/**
@@ -1356,6 +1302,21 @@ public class Encounter extends BaseResource implements IResource {
 		return newType; 
 	}
 
+	/**
+	 * Gets the first repetition for <b>accomodation</b> (Where the patient stays during this encounter),
+	 * creating it if it does not already exist.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * 
+     * </p> 
+	 */
+	public HospitalizationAccomodation getAccomodationFirstRep() {
+		if (getAccomodation().isEmpty()) {
+			return addAccomodation();
+		}
+		return getAccomodation().get(0); 
+	}
   
 	/**
 	 * Gets the value(s) for <b>diet</b> (Dietary restrictions for the patient).
@@ -1385,7 +1346,6 @@ public class Encounter extends BaseResource implements IResource {
 	public void setDiet(CodeableConceptDt theValue) {
 		myDiet = theValue;
 	}
-
 
   
 	/**
@@ -1431,6 +1391,21 @@ public class Encounter extends BaseResource implements IResource {
 		return newType; 
 	}
 
+	/**
+	 * Gets the first repetition for <b>specialCourtesy</b> (Special courtesies (VIP, board member)),
+	 * creating it if it does not already exist.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * 
+     * </p> 
+	 */
+	public CodeableConceptDt getSpecialCourtesyFirstRep() {
+		if (getSpecialCourtesy().isEmpty()) {
+			return addSpecialCourtesy();
+		}
+		return getSpecialCourtesy().get(0); 
+	}
   
 	/**
 	 * Gets the value(s) for <b>specialArrangement</b> (Wheelchair, translator, stretcher, etc).
@@ -1475,6 +1450,21 @@ public class Encounter extends BaseResource implements IResource {
 		return newType; 
 	}
 
+	/**
+	 * Gets the first repetition for <b>specialArrangement</b> (Wheelchair, translator, stretcher, etc),
+	 * creating it if it does not already exist.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * 
+     * </p> 
+	 */
+	public CodeableConceptDt getSpecialArrangementFirstRep() {
+		if (getSpecialArrangement().isEmpty()) {
+			return addSpecialArrangement();
+		}
+		return getSpecialArrangement().get(0); 
+	}
   
 	/**
 	 * Gets the value(s) for <b>destination</b> (Location to which the patient is discharged).
@@ -1504,7 +1494,6 @@ public class Encounter extends BaseResource implements IResource {
 	public void setDestination(ResourceReferenceDt theValue) {
 		myDestination = theValue;
 	}
-
 
   
 	/**
@@ -1536,7 +1525,6 @@ public class Encounter extends BaseResource implements IResource {
 		myDischargeDisposition = theValue;
 	}
 
-
   
 	/**
 	 * Gets the value(s) for <b>dischargeDiagnosis</b> (The final diagnosis given a patient before release from the hospital after all testing, surgery, and workup are complete).
@@ -1566,7 +1554,6 @@ public class Encounter extends BaseResource implements IResource {
 	public void setDischargeDiagnosis(ResourceReferenceDt theValue) {
 		myDischargeDiagnosis = theValue;
 	}
-
 
   
 	/**
@@ -1598,7 +1585,6 @@ public class Encounter extends BaseResource implements IResource {
 		myReAdmission = theValue;
 	}
 
-
  	/**
 	 * Sets the value for <b>reAdmission</b> (Is this hospitalization a readmission?)
 	 *
@@ -1607,8 +1593,9 @@ public class Encounter extends BaseResource implements IResource {
      * Whether this hospitalization is a readmission
      * </p> 
 	 */
-	public void setReAdmission( Boolean theBoolean) {
+	public Hospitalization setReAdmission( Boolean theBoolean) {
 		myReAdmission = new BooleanDt(theBoolean); 
+		return this; 
 	}
 
  
@@ -1687,7 +1674,6 @@ public class Encounter extends BaseResource implements IResource {
 		myBed = theValue;
 	}
 
-
   
 	/**
 	 * Gets the value(s) for <b>period</b> (Period during which the patient was assigned the bed).
@@ -1717,7 +1703,6 @@ public class Encounter extends BaseResource implements IResource {
 	public void setPeriod(PeriodDt theValue) {
 		myPeriod = theValue;
 	}
-
 
   
 
@@ -1797,7 +1782,6 @@ public class Encounter extends BaseResource implements IResource {
 		myLocation = theValue;
 	}
 
-
   
 	/**
 	 * Gets the value(s) for <b>period</b> (Time period during which the patient was present at the location).
@@ -1827,7 +1811,6 @@ public class Encounter extends BaseResource implements IResource {
 	public void setPeriod(PeriodDt theValue) {
 		myPeriod = theValue;
 	}
-
 
   
 

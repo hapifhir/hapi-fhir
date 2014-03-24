@@ -16,33 +16,15 @@
 
 package ca.uhn.fhir.model.dstu.composite;
 
-import java.util.*;
-import ca.uhn.fhir.model.api.*;
-import ca.uhn.fhir.model.api.annotation.*;
+import java.util.List;
 
-import ca.uhn.fhir.model.dstu.valueset.AddressUseEnum;
-import ca.uhn.fhir.model.dstu.composite.CodingDt;
-import ca.uhn.fhir.model.dstu.valueset.ContactSystemEnum;
-import ca.uhn.fhir.model.dstu.valueset.ContactUseEnum;
-import ca.uhn.fhir.model.dstu.valueset.EventTimingEnum;
-import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
-import ca.uhn.fhir.model.dstu.valueset.NameUseEnum;
-import ca.uhn.fhir.model.dstu.resource.Organization;
-import ca.uhn.fhir.model.dstu.composite.PeriodDt;
-import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
-import ca.uhn.fhir.model.dstu.composite.QuantityDt;
-import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
-import ca.uhn.fhir.model.dstu.valueset.UnitsOfTimeEnum;
-import ca.uhn.fhir.model.dstu.resource.ValueSet;
-import ca.uhn.fhir.model.primitive.Base64BinaryDt;
-import ca.uhn.fhir.model.primitive.BooleanDt;
-import ca.uhn.fhir.model.primitive.BoundCodeDt;
-import ca.uhn.fhir.model.primitive.CodeDt;
-import ca.uhn.fhir.model.primitive.DateTimeDt;
-import ca.uhn.fhir.model.primitive.DecimalDt;
-import ca.uhn.fhir.model.primitive.IntegerDt;
+import ca.uhn.fhir.model.api.BaseResourceReference;
+import ca.uhn.fhir.model.api.ICompositeDatatype;
+import ca.uhn.fhir.model.api.IElement;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.primitive.StringDt;
-import ca.uhn.fhir.model.primitive.UriDt;
 
 /**
  * HAPI/FHIR <b>ResourceReference</b> Datatype
@@ -122,7 +104,6 @@ public class ResourceReferenceDt
 		myReference = theValue;
 	}
 
-
  	/**
 	 * Sets the value for <b>reference</b> (Relative, internal or absolute URL reference)
 	 *
@@ -131,8 +112,9 @@ public class ResourceReferenceDt
      * A reference to a location at which the other resource is found. The reference may a relative reference, in which case it is relative to the service base URL, or an absolute URL that resolves to the location where the resource is found. The reference may be version specific or not. If the reference is not to a FHIR RESTful server, then it should be assumed to be version specific. Internal fragment references (start with '#') refer to contained resources
      * </p> 
 	 */
-	public void setReference( String theString) {
+	public ResourceReferenceDt setReference( String theString) {
 		myReference = new StringDt(theString); 
+		return this; 
 	}
 
  
@@ -165,7 +147,6 @@ public class ResourceReferenceDt
 		myDisplay = theValue;
 	}
 
-
  	/**
 	 * Sets the value for <b>display</b> (Text alternative for the resource)
 	 *
@@ -174,8 +155,9 @@ public class ResourceReferenceDt
      * Plain text narrative that identifies the resource in addition to the resource reference
      * </p> 
 	 */
-	public void setDisplay( String theString) {
+	public ResourceReferenceDt setDisplay( String theString) {
 		myDisplay = new StringDt(theString); 
+		return this; 
 	}
 
  

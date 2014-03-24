@@ -16,33 +16,25 @@
 
 package ca.uhn.fhir.model.dstu.composite;
 
-import java.util.*;
-import ca.uhn.fhir.model.api.*;
-import ca.uhn.fhir.model.api.annotation.*;
+import java.util.Date;
+import java.util.List;
 
-import ca.uhn.fhir.model.dstu.valueset.AddressUseEnum;
-import ca.uhn.fhir.model.dstu.composite.CodingDt;
-import ca.uhn.fhir.model.dstu.valueset.ContactSystemEnum;
-import ca.uhn.fhir.model.dstu.valueset.ContactUseEnum;
+import ca.uhn.fhir.model.api.BaseElement;
+import ca.uhn.fhir.model.api.ICompositeDatatype;
+import ca.uhn.fhir.model.api.IElement;
+import ca.uhn.fhir.model.api.IResourceBlock;
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import ca.uhn.fhir.model.api.annotation.Block;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.dstu.valueset.EventTimingEnum;
-import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
-import ca.uhn.fhir.model.dstu.valueset.NameUseEnum;
-import ca.uhn.fhir.model.dstu.resource.Organization;
-import ca.uhn.fhir.model.dstu.composite.PeriodDt;
-import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
-import ca.uhn.fhir.model.dstu.composite.QuantityDt;
-import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.valueset.UnitsOfTimeEnum;
-import ca.uhn.fhir.model.dstu.resource.ValueSet;
-import ca.uhn.fhir.model.primitive.Base64BinaryDt;
-import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.DecimalDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
-import ca.uhn.fhir.model.primitive.StringDt;
-import ca.uhn.fhir.model.primitive.UriDt;
 
 /**
  * HAPI/FHIR <b>Schedule</b> Datatype
@@ -136,6 +128,21 @@ public class ScheduleDt
 		return newType; 
 	}
 
+	/**
+	 * Gets the first repetition for <b>event</b> (When the event occurs),
+	 * creating it if it does not already exist.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Identifies specific time periods when the event should occur
+     * </p> 
+	 */
+	public PeriodDt getEventFirstRep() {
+		if (getEvent().isEmpty()) {
+			return addEvent();
+		}
+		return getEvent().get(0); 
+	}
   
 	/**
 	 * Gets the value(s) for <b>repeat</b> (Only if there is none or one event).
@@ -165,7 +172,6 @@ public class ScheduleDt
 	public void setRepeat(Repeat theValue) {
 		myRepeat = theValue;
 	}
-
 
   
 	/**
@@ -266,7 +272,6 @@ public class ScheduleDt
 		myFrequency = theValue;
 	}
 
-
  	/**
 	 * Sets the value for <b>frequency</b> (Event occurs frequency times per duration)
 	 *
@@ -275,8 +280,9 @@ public class ScheduleDt
      * Indicates how often the event should occur.
      * </p> 
 	 */
-	public void setFrequency( Integer theInteger) {
+	public Repeat setFrequency( Integer theInteger) {
 		myFrequency = new IntegerDt(theInteger); 
+		return this; 
 	}
 
  
@@ -308,7 +314,6 @@ public class ScheduleDt
 	public void setWhen(BoundCodeDt<EventTimingEnum> theValue) {
 		myWhen = theValue;
 	}
-
 
 	/**
 	 * Sets the value(s) for <b>when</b> (HS | WAKE | AC | ACM | ACD | ACV | PC | PCM | PCD | PCV - common life events)
@@ -352,7 +357,6 @@ public class ScheduleDt
 		myDuration = theValue;
 	}
 
-
  	/**
 	 * Sets the value for <b>duration</b> (Repeating or event-related duration)
 	 *
@@ -361,8 +365,9 @@ public class ScheduleDt
      * How long each repetition should last
      * </p> 
 	 */
-	public void setDuration( long theValue) {
+	public Repeat setDuration( long theValue) {
 		myDuration = new DecimalDt(theValue); 
+		return this; 
 	}
 
 	/**
@@ -373,8 +378,9 @@ public class ScheduleDt
      * How long each repetition should last
      * </p> 
 	 */
-	public void setDuration( double theValue) {
+	public Repeat setDuration( double theValue) {
 		myDuration = new DecimalDt(theValue); 
+		return this; 
 	}
 
 	/**
@@ -385,8 +391,9 @@ public class ScheduleDt
      * How long each repetition should last
      * </p> 
 	 */
-	public void setDuration( java.math.BigDecimal theValue) {
+	public Repeat setDuration( java.math.BigDecimal theValue) {
 		myDuration = new DecimalDt(theValue); 
+		return this; 
 	}
 
  
@@ -418,7 +425,6 @@ public class ScheduleDt
 	public void setUnits(BoundCodeDt<UnitsOfTimeEnum> theValue) {
 		myUnits = theValue;
 	}
-
 
 	/**
 	 * Sets the value(s) for <b>units</b> (s | min | h | d | wk | mo | a - unit of time (UCUM))
@@ -462,7 +468,6 @@ public class ScheduleDt
 		myCount = theValue;
 	}
 
-
  	/**
 	 * Sets the value for <b>count</b> (Number of times to repeat)
 	 *
@@ -471,8 +476,9 @@ public class ScheduleDt
      * A total count of the desired number of repetitions
      * </p> 
 	 */
-	public void setCount( Integer theInteger) {
+	public Repeat setCount( Integer theInteger) {
 		myCount = new IntegerDt(theInteger); 
+		return this; 
 	}
 
  
@@ -505,7 +511,6 @@ public class ScheduleDt
 		myEnd = theValue;
 	}
 
-
  	/**
 	 * Sets the value for <b>end</b> (When to stop repeats)
 	 *
@@ -514,8 +519,9 @@ public class ScheduleDt
      * When to stop repeating the schedule
      * </p> 
 	 */
-	public void setEnd( Date theDate,  TemporalPrecisionEnum thePrecision) {
+	public Repeat setEnd( Date theDate,  TemporalPrecisionEnum thePrecision) {
 		myEnd = new DateTimeDt(theDate, thePrecision); 
+		return this; 
 	}
 
 	/**
@@ -526,8 +532,9 @@ public class ScheduleDt
      * When to stop repeating the schedule
      * </p> 
 	 */
-	public void setEndWithSecondsPrecision( Date theDate) {
+	public Repeat setEndWithSecondsPrecision( Date theDate) {
 		myEnd = new DateTimeDt(theDate); 
+		return this; 
 	}
 
  

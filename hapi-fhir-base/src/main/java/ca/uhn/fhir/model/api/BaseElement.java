@@ -6,7 +6,7 @@ import java.util.List;
 
 import ca.uhn.fhir.model.primitive.IdDt;
 
-public abstract class BaseElement implements IElement, ISupportsUndeclaredExtensions {
+public abstract class BaseElement implements IIdentifiableElement, ISupportsUndeclaredExtensions {
 
 	private IdDt myId;
 	private List<UndeclaredExtension> myUndeclaredExtensions;

@@ -70,6 +70,38 @@
 
 			</subsection>
 			
+			<subsection name="Convenience Methods">
+				
+				<p>
+					The FHIR data model is rich enough to meet common use cases, but sometimes
+					that richness adds complexity. For example, a Patient may have multiple names
+					(a preferred name, a nickname, etc.) and each of those names may have multiple
+					last names, multiple prefixes, etc.
+				</p>
+			
+				<p>
+					The example below shows populating a name entry for a Patient. Note the
+					use of the StringDt type, which encapsulates a regular String, but allows for
+					extensions to be added.
+				</p>
+			
+				<macro name="snippet">
+					<param name="id" value="namesHard" />
+					<param name="file" value="src/site/example/java/example/FhirDataModel.java" />
+				</macro>
+			
+				<p>
+					HAPI also provides for simple setters that use Java primitive types
+					and can be chained, leading to much simpler code.
+				</p>
+			
+				<macro name="snippet">
+					<param name="id" value="namesEasy" />
+					<param name="file" value="src/site/example/java/example/FhirDataModel.java" />
+				</macro>
+			
+			</subsection>
+			
 		</section>
 
 	</body>

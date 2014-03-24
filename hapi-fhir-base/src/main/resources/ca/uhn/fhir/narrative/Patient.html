@@ -1,0 +1,31 @@
+<div>
+	<span style="font-size: 1.2em;">
+		<span th:each="prefix : ${resource.name[0].prefix}" th:text="${prefix.value}">Dr</span>
+		<span th:each="givenName : ${resource.name[0].given}" th:text="${givenName.value} ">John</span>
+		<b th:each="familyName : ${resource.name[0].family}" th:text="${#strings.toUpperCase(familyName.value)}">SMITH</b>
+		<span th:each="suffix : ${resource.name[0].suffix}" th:text="${suffix.value}">Esq</span>
+	</span>
+	<table>
+		<tr th:if="${not #lists.isEmpty(resource.identifier)} and ${not resource.identifier[0].empty}">
+			<td>Identifier</td>
+			<td th:text="${resource.identifier[0].value.value}">8708660</td>
+		</tr>
+		<tr th:if="${not #lists.isEmpty(resource.address)} and ${not resource.address[0].empty}">
+			<td>Address</td>
+			<td>
+				<th:block th:each="line : ${resource.address[0].line}">
+					<span th:text="${line}">123 Fake Street</span><br/>
+				</th:block>
+				<span th:if="${not resource.address[0].city.empty}" th:text="${resource.address[0].city}">Toronto</span>
+				<span th:if="${not resource.address[0].state.empty}" th:text="${resource.address[0].state}">ON</span>
+				<span th:if="${not resource.address[0].country.empty}" th:text="${resource.address[0].country}">Canada</span>
+			</td>
+		</tr>
+		<tr th:if="${not resource.birthDate.empty}">
+			<td>Date of birth</td>
+			<td>
+				<span th:text="${#dates.format(resource.birthDate.value,'dd MMMM yyyy')}">22 March 2012</span>
+			</td>
+		</tr>
+	</table>
+</div>

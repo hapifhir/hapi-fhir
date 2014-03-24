@@ -23,7 +23,18 @@ public class DateTimeDt extends BaseDateTimeDt {
 	}
 
 	/**
-	 * Constructor which accepts a date value and a precision value. Valid precisions values for this type are:
+	 * Create a new DateTimeDt
+	 */
+	@SimpleSetter(suffix = "WithSecondsPrecision")
+	public DateTimeDt(@SimpleSetter.Parameter(name = "theDate") Date theDate) {
+		setValue(theDate);
+		setPrecision(DEFAULT_PRECISION);
+		setTimeZone(TimeZone.getDefault());
+	}
+
+	/**
+	 * Constructor which accepts a date value and a precision value. Valid
+	 * precisions values for this type are:
 	 * <ul>
 	 * <li>{@link TemporalPrecisionEnum#YEAR}
 	 * <li>{@link TemporalPrecisionEnum#MONTH}
@@ -40,13 +51,10 @@ public class DateTimeDt extends BaseDateTimeDt {
 	}
 
 	/**
-	 * Create a new DateTimeDt
+	 * Create a new instance using a string date/time
 	 */
-	@SimpleSetter(suffix="WithSecondsPrecision")
-	public DateTimeDt(@SimpleSetter.Parameter(name="theDate") Date theDate) {
-		setValue(theDate);
-		setPrecision(DEFAULT_PRECISION);
-		setTimeZone(TimeZone.getDefault());
+	public DateTimeDt(String theValue) {
+		setValueAsString(theValue);
 	}
 
 	@Override

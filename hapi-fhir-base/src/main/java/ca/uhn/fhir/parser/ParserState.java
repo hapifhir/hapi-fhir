@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.xml.stream.events.EndElement;
 import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
 
@@ -59,8 +58,8 @@ class ParserState<T extends IElement> {
 		myState.attributeValue(theName, theValue);
 	}
 
-	public void endingElement(EndElement theElem) throws DataFormatException {
-		myState.endingElement(theElem);
+	public void endingElement() throws DataFormatException {
+		myState.endingElement();
 	}
 
 	public void enteringNewElement(String theNamespaceURI, String theName) throws DataFormatException {
@@ -85,6 +84,9 @@ class ParserState<T extends IElement> {
 	}
 
 	public boolean verifyNamespace(String theExpect, String theActual) {
+		if (myJsonMode) {
+			return true;
+		}
 		return StringUtils.equals(theExpect, theActual);
 	}
 
@@ -133,7 +135,7 @@ class ParserState<T extends IElement> {
 		}
 
 		@Override
-		public void endingElement(EndElement theElem) throws DataFormatException {
+		public void endingElement() throws DataFormatException {
 			pop();
 		}
 
@@ -171,7 +173,7 @@ class ParserState<T extends IElement> {
 		}
 
 		@Override
-		public void endingElement(EndElement theElem) throws DataFormatException {
+		public void endingElement() throws DataFormatException {
 			pop();
 		}
 
@@ -193,7 +195,7 @@ class ParserState<T extends IElement> {
 		}
 
 		@Override
-		public void endingElement(EndElement theElem) throws DataFormatException {
+		public void endingElement() throws DataFormatException {
 			pop();
 		}
 
@@ -253,7 +255,7 @@ class ParserState<T extends IElement> {
 		}
 
 		@Override
-		public void endingElement(EndElement theElem) throws DataFormatException {
+		public void endingElement() throws DataFormatException {
 			if (myInstance != null) {
 				if ("self".equals(myRel)) {
 					myInstance.getLinkSelf().setValueAsString(myHref);
@@ -293,7 +295,7 @@ class ParserState<T extends IElement> {
 		}
 
 		@Override
-		public void endingElement(EndElement theElem) throws DataFormatException {
+		public void endingElement() throws DataFormatException {
 			myPrimitive.setValueAsString(myData);
 			pop();
 		}
@@ -331,7 +333,7 @@ class ParserState<T extends IElement> {
 		}
 
 		@Override
-		public void endingElement(EndElement theElem) throws DataFormatException {
+		public void endingElement() throws DataFormatException {
 			pop();
 		}
 
@@ -383,7 +385,7 @@ class ParserState<T extends IElement> {
 		}
 
 		@SuppressWarnings("unused")
-		public void endingElement(EndElement theElem) throws DataFormatException {
+		public void endingElement() throws DataFormatException {
 			// ignore by default
 		}
 
@@ -448,7 +450,7 @@ class ParserState<T extends IElement> {
 		}
 
 		@Override
-		public void endingElement(EndElement theElem) throws DataFormatException {
+		public void endingElement() throws DataFormatException {
 			pop();
 		}
 
@@ -481,7 +483,7 @@ class ParserState<T extends IElement> {
 		}
 
 		@Override
-		public void endingElement(EndElement theElem) throws DataFormatException {
+		public void endingElement() throws DataFormatException {
 			pop();
 		}
 
@@ -510,10 +512,9 @@ class ParserState<T extends IElement> {
 				return;
 			}
 			case RESOURCE_REF: {
-				RuntimeResourceReferenceDefinition resourceRefTarget = (RuntimeResourceReferenceDefinition) target;
 				ResourceReferenceDt newChildInstance = new ResourceReferenceDt();
 				myDefinition.getMutator().addValue(myParentInstance, newChildInstance);
-				ResourceReferenceState newState = new ResourceReferenceState(getPreResourceState(), resourceRefTarget, newChildInstance);
+				ResourceReferenceState newState = new ResourceReferenceState(getPreResourceState(), newChildInstance);
 				push(newState);
 				return;
 			}
@@ -569,7 +570,7 @@ class ParserState<T extends IElement> {
 
 		@SuppressWarnings("unchecked")
 		@Override
-		public void endingElement(EndElement theElem) {
+		public void endingElement() {
 			pop();
 			if (myState == null) {
 				myObject = (T) myInstance;
@@ -607,7 +608,7 @@ class ParserState<T extends IElement> {
 				ResourceReferenceDt newChildInstance = new ResourceReferenceDt();
 				getPreResourceState().getResourceReferences().add(newChildInstance);
 				child.getMutator().addValue(myInstance, newChildInstance);
-				ResourceReferenceState newState = new ResourceReferenceState(getPreResourceState(), resourceRefTarget, newChildInstance);
+				ResourceReferenceState newState = new ResourceReferenceState(getPreResourceState(), newChildInstance);
 				push(newState);
 				return;
 			}
@@ -679,7 +680,7 @@ class ParserState<T extends IElement> {
 		}
 
 		@Override
-		public void endingElement(EndElement theElem) throws DataFormatException {
+		public void endingElement() throws DataFormatException {
 			if (myExtension.getValue() != null && myExtension.getUndeclaredExtensions().size() > 0) {
 				throw new DataFormatException("Extension must not have both a value and other contained extensions");
 			}
@@ -711,10 +712,9 @@ class ParserState<T extends IElement> {
 				return;
 			}
 			case RESOURCE_REF: {
-				RuntimeResourceReferenceDefinition resourceRefTarget = (RuntimeResourceReferenceDefinition) target;
 				ResourceReferenceDt newChildInstance = new ResourceReferenceDt();
 				myExtension.setValue(newChildInstance);
-				ResourceReferenceState newState = new ResourceReferenceState(getPreResourceState(), resourceRefTarget, newChildInstance);
+				ResourceReferenceState newState = new ResourceReferenceState(getPreResourceState(), newChildInstance);
 				push(newState);
 				return;
 			}
@@ -742,7 +742,7 @@ class ParserState<T extends IElement> {
 		}
 
 		@Override
-		public void endingElement(EndElement theElem) throws DataFormatException {
+		public void endingElement() throws DataFormatException {
 			// ignore
 		}
 
@@ -765,8 +765,7 @@ class ParserState<T extends IElement> {
 
 		@Override
 		protected IElement getCurrentElement() {
-			// TODO Auto-generated method stub
-			return null;
+			return myInstance;
 		}
 
 	}
@@ -804,7 +803,7 @@ class ParserState<T extends IElement> {
 		}
 
 		@Override
-		public void endingElement(EndElement theElem) throws DataFormatException {
+		public void endingElement() throws DataFormatException {
 			pop();
 		}
 
@@ -888,7 +887,7 @@ class ParserState<T extends IElement> {
 		}
 
 		@Override
-		public void endingElement(EndElement theElem) {
+		public void endingElement() {
 			pop();
 		}
 
@@ -920,13 +919,11 @@ class ParserState<T extends IElement> {
 
 	private class ResourceReferenceState extends BaseState {
 
-		private RuntimeResourceReferenceDefinition myDefinition;
 		private ResourceReferenceDt myInstance;
 		private ResourceReferenceSubState mySubState;
 
-		public ResourceReferenceState(PreResourceState thePreResourceState, RuntimeResourceReferenceDefinition theDefinition, ResourceReferenceDt theInstance) {
+		public ResourceReferenceState(PreResourceState thePreResourceState, ResourceReferenceDt theInstance) {
 			super(thePreResourceState);
-			myDefinition = theDefinition;
 			myInstance = theInstance;
 			mySubState = ResourceReferenceSubState.INITIAL;
 		}
@@ -950,7 +947,7 @@ class ParserState<T extends IElement> {
 		}
 
 		@Override
-		public void endingElement(EndElement theElement) {
+		public void endingElement() {
 			switch (mySubState) {
 			case INITIAL:
 				pop();
@@ -1016,12 +1013,12 @@ class ParserState<T extends IElement> {
 		}
 
 		@Override
-		public void endingElement(EndElement theElem) throws DataFormatException {
+		public void endingElement() throws DataFormatException {
 			if (myJsonMode) {
 				pop();
 				return;
 			}
-			super.endingElement(theElem);
+			super.endingElement();
 		}
 
 		@Override

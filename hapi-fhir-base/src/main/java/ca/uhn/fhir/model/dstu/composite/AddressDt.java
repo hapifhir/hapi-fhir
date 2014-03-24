@@ -16,33 +16,18 @@
 
 package ca.uhn.fhir.model.dstu.composite;
 
-import java.util.*;
-import ca.uhn.fhir.model.api.*;
-import ca.uhn.fhir.model.api.annotation.*;
+import java.util.List;
 
+import ca.uhn.fhir.model.api.BaseElement;
+import ca.uhn.fhir.model.api.ICompositeDatatype;
+import ca.uhn.fhir.model.api.IElement;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.dstu.valueset.AddressUseEnum;
-import ca.uhn.fhir.model.dstu.composite.CodingDt;
-import ca.uhn.fhir.model.dstu.valueset.ContactSystemEnum;
-import ca.uhn.fhir.model.dstu.valueset.ContactUseEnum;
-import ca.uhn.fhir.model.dstu.valueset.EventTimingEnum;
-import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
-import ca.uhn.fhir.model.dstu.valueset.NameUseEnum;
-import ca.uhn.fhir.model.dstu.resource.Organization;
-import ca.uhn.fhir.model.dstu.composite.PeriodDt;
-import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
-import ca.uhn.fhir.model.dstu.composite.QuantityDt;
-import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
-import ca.uhn.fhir.model.dstu.valueset.UnitsOfTimeEnum;
-import ca.uhn.fhir.model.dstu.resource.ValueSet;
-import ca.uhn.fhir.model.primitive.Base64BinaryDt;
-import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
-import ca.uhn.fhir.model.primitive.DateTimeDt;
-import ca.uhn.fhir.model.primitive.DecimalDt;
-import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.model.primitive.StringDt;
-import ca.uhn.fhir.model.primitive.UriDt;
 
 /**
  * HAPI/FHIR <b>Address</b> Datatype
@@ -164,7 +149,6 @@ public class AddressDt
 		myUse = theValue;
 	}
 
-
 	/**
 	 * Sets the value(s) for <b>use</b> (home | work | temp | old - purpose of this address)
 	 *
@@ -207,7 +191,6 @@ public class AddressDt
 		myText = theValue;
 	}
 
-
  	/**
 	 * Sets the value for <b>text</b> (Text representation of the address)
 	 *
@@ -216,8 +199,9 @@ public class AddressDt
      * A full text representation of the address
      * </p> 
 	 */
-	public void setText( String theString) {
+	public AddressDt setText( String theString) {
 		myText = new StringDt(theString); 
+		return this; 
 	}
 
  
@@ -264,6 +248,21 @@ public class AddressDt
 		return newType; 
 	}
 
+	/**
+	 * Gets the first repetition for <b>line</b> (Street name, number, direction & P.O. Box etc),
+	 * creating it if it does not already exist.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * This component contains the house number, apartment number, street name, street direction, P.O. Box number, delivery hints, and similar address information
+     * </p> 
+	 */
+	public StringDt getLineFirstRep() {
+		if (getLine().isEmpty()) {
+			return addLine();
+		}
+		return getLine().get(0); 
+	}
  	/**
 	 * Adds a new value for <b>line</b> (Street name, number, direction & P.O. Box etc)
 	 *
@@ -271,12 +270,15 @@ public class AddressDt
      * <b>Definition:</b>
      * This component contains the house number, apartment number, street name, street direction, P.O. Box number, delivery hints, and similar address information
      * </p> 
+     *
+     * @return Returns a reference to this object, to allow for simple chaining.
 	 */
-	public void addLine( String theString) {
+	public AddressDt addLine( String theString) {
 		if (myLine == null) {
 			myLine = new java.util.ArrayList<StringDt>();
 		}
-		myLine.add(new StringDt(theString)); 
+		myLine.add(new StringDt(theString));
+		return this; 
 	}
 
  
@@ -309,7 +311,6 @@ public class AddressDt
 		myCity = theValue;
 	}
 
-
  	/**
 	 * Sets the value for <b>city</b> (Name of city, town etc.)
 	 *
@@ -318,8 +319,9 @@ public class AddressDt
      * The name of the city, town, village or other community or delivery center.
      * </p> 
 	 */
-	public void setCity( String theString) {
+	public AddressDt setCity( String theString) {
 		myCity = new StringDt(theString); 
+		return this; 
 	}
 
  
@@ -352,7 +354,6 @@ public class AddressDt
 		myState = theValue;
 	}
 
-
  	/**
 	 * Sets the value for <b>state</b> (Sub-unit of country (abreviations ok))
 	 *
@@ -361,8 +362,9 @@ public class AddressDt
      * Sub-unit of a country with limited sovereignty in a federally organized country. A code may be used if codes are in common use (i.e. US 2 letter state codes).
      * </p> 
 	 */
-	public void setState( String theString) {
+	public AddressDt setState( String theString) {
 		myState = new StringDt(theString); 
+		return this; 
 	}
 
  
@@ -395,7 +397,6 @@ public class AddressDt
 		myZip = theValue;
 	}
 
-
  	/**
 	 * Sets the value for <b>zip</b> (Postal code for area)
 	 *
@@ -404,8 +405,9 @@ public class AddressDt
      * A postal code designating a region defined by the postal service.
      * </p> 
 	 */
-	public void setZip( String theString) {
+	public AddressDt setZip( String theString) {
 		myZip = new StringDt(theString); 
+		return this; 
 	}
 
  
@@ -438,7 +440,6 @@ public class AddressDt
 		myCountry = theValue;
 	}
 
-
  	/**
 	 * Sets the value for <b>country</b> (Country (can be ISO 3166 3 letter code))
 	 *
@@ -447,8 +448,9 @@ public class AddressDt
      * Country - a nation as commonly understood or generally accepted
      * </p> 
 	 */
-	public void setCountry( String theString) {
+	public AddressDt setCountry( String theString) {
 		myCountry = new StringDt(theString); 
+		return this; 
 	}
 
  
@@ -480,7 +482,6 @@ public class AddressDt
 	public void setPeriod(PeriodDt theValue) {
 		myPeriod = theValue;
 	}
-
 
   
 

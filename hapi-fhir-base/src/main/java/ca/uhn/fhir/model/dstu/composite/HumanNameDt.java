@@ -16,33 +16,19 @@
 
 package ca.uhn.fhir.model.dstu.composite;
 
-import java.util.*;
-import ca.uhn.fhir.model.api.*;
-import ca.uhn.fhir.model.api.annotation.*;
+import java.util.List;
 
-import ca.uhn.fhir.model.dstu.valueset.AddressUseEnum;
-import ca.uhn.fhir.model.dstu.composite.CodingDt;
-import ca.uhn.fhir.model.dstu.valueset.ContactSystemEnum;
-import ca.uhn.fhir.model.dstu.valueset.ContactUseEnum;
-import ca.uhn.fhir.model.dstu.valueset.EventTimingEnum;
-import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
+import ca.uhn.fhir.model.api.BaseElement;
+import ca.uhn.fhir.model.api.ICompositeDatatype;
+import ca.uhn.fhir.model.api.IElement;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.dstu.valueset.NameUseEnum;
-import ca.uhn.fhir.model.dstu.resource.Organization;
-import ca.uhn.fhir.model.dstu.composite.PeriodDt;
-import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
-import ca.uhn.fhir.model.dstu.composite.QuantityDt;
-import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
-import ca.uhn.fhir.model.dstu.valueset.UnitsOfTimeEnum;
-import ca.uhn.fhir.model.dstu.resource.ValueSet;
-import ca.uhn.fhir.model.primitive.Base64BinaryDt;
-import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
-import ca.uhn.fhir.model.primitive.DateTimeDt;
-import ca.uhn.fhir.model.primitive.DecimalDt;
-import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.model.primitive.StringDt;
-import ca.uhn.fhir.model.primitive.UriDt;
+import ca.uhn.fhir.util.DatatypeUtil;
 
 /**
  * HAPI/FHIR <b>HumanName</b> Datatype
@@ -157,7 +143,6 @@ public class HumanNameDt
 		myUse = theValue;
 	}
 
-
 	/**
 	 * Sets the value(s) for <b>use</b> (usual | official | temp | nickname | anonymous | old | maiden)
 	 *
@@ -200,7 +185,6 @@ public class HumanNameDt
 		myText = theValue;
 	}
 
-
  	/**
 	 * Sets the value for <b>text</b> (Text representation of the full name)
 	 *
@@ -209,8 +193,9 @@ public class HumanNameDt
      * A full text representation of the name
      * </p> 
 	 */
-	public void setText( String theString) {
+	public HumanNameDt setText( String theString) {
 		myText = new StringDt(theString); 
+		return this; 
 	}
 
  
@@ -257,6 +242,21 @@ public class HumanNameDt
 		return newType; 
 	}
 
+	/**
+	 * Gets the first repetition for <b>family</b> (Family name (often called 'Surname')),
+	 * creating it if it does not already exist.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The part of a name that links to the genealogy. In some cultures (e.g. Eritrea) the family name of a son is the first name of his father.
+     * </p> 
+	 */
+	public StringDt getFamilyFirstRep() {
+		if (getFamily().isEmpty()) {
+			return addFamily();
+		}
+		return getFamily().get(0); 
+	}
  	/**
 	 * Adds a new value for <b>family</b> (Family name (often called 'Surname'))
 	 *
@@ -264,12 +264,15 @@ public class HumanNameDt
      * <b>Definition:</b>
      * The part of a name that links to the genealogy. In some cultures (e.g. Eritrea) the family name of a son is the first name of his father.
      * </p> 
+     *
+     * @return Returns a reference to this object, to allow for simple chaining.
 	 */
-	public void addFamily( String theString) {
+	public HumanNameDt addFamily( String theString) {
 		if (myFamily == null) {
 			myFamily = new java.util.ArrayList<StringDt>();
 		}
-		myFamily.add(new StringDt(theString)); 
+		myFamily.add(new StringDt(theString));
+		return this; 
 	}
 
  
@@ -316,6 +319,21 @@ public class HumanNameDt
 		return newType; 
 	}
 
+	/**
+	 * Gets the first repetition for <b>given</b> (Given names (not always 'first'). Includes middle names),
+	 * creating it if it does not already exist.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Given name
+     * </p> 
+	 */
+	public StringDt getGivenFirstRep() {
+		if (getGiven().isEmpty()) {
+			return addGiven();
+		}
+		return getGiven().get(0); 
+	}
  	/**
 	 * Adds a new value for <b>given</b> (Given names (not always 'first'). Includes middle names)
 	 *
@@ -323,12 +341,15 @@ public class HumanNameDt
      * <b>Definition:</b>
      * Given name
      * </p> 
+     *
+     * @return Returns a reference to this object, to allow for simple chaining.
 	 */
-	public void addGiven( String theString) {
+	public HumanNameDt addGiven( String theString) {
 		if (myGiven == null) {
 			myGiven = new java.util.ArrayList<StringDt>();
 		}
-		myGiven.add(new StringDt(theString)); 
+		myGiven.add(new StringDt(theString));
+		return this; 
 	}
 
  
@@ -375,6 +396,21 @@ public class HumanNameDt
 		return newType; 
 	}
 
+	/**
+	 * Gets the first repetition for <b>prefix</b> (Parts that come before the name),
+	 * creating it if it does not already exist.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Part of the name that is acquired as a title due to academic, legal, employment or nobility status, etc. and that appears at the start of the name
+     * </p> 
+	 */
+	public StringDt getPrefixFirstRep() {
+		if (getPrefix().isEmpty()) {
+			return addPrefix();
+		}
+		return getPrefix().get(0); 
+	}
  	/**
 	 * Adds a new value for <b>prefix</b> (Parts that come before the name)
 	 *
@@ -382,12 +418,15 @@ public class HumanNameDt
      * <b>Definition:</b>
      * Part of the name that is acquired as a title due to academic, legal, employment or nobility status, etc. and that appears at the start of the name
      * </p> 
+     *
+     * @return Returns a reference to this object, to allow for simple chaining.
 	 */
-	public void addPrefix( String theString) {
+	public HumanNameDt addPrefix( String theString) {
 		if (myPrefix == null) {
 			myPrefix = new java.util.ArrayList<StringDt>();
 		}
-		myPrefix.add(new StringDt(theString)); 
+		myPrefix.add(new StringDt(theString));
+		return this; 
 	}
 
  
@@ -434,6 +473,21 @@ public class HumanNameDt
 		return newType; 
 	}
 
+	/**
+	 * Gets the first repetition for <b>suffix</b> (Parts that come after the name),
+	 * creating it if it does not already exist.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Part of the name that is acquired as a title due to academic, legal, employment or nobility status, etc. and that appears at the end of the name
+     * </p> 
+	 */
+	public StringDt getSuffixFirstRep() {
+		if (getSuffix().isEmpty()) {
+			return addSuffix();
+		}
+		return getSuffix().get(0); 
+	}
  	/**
 	 * Adds a new value for <b>suffix</b> (Parts that come after the name)
 	 *
@@ -441,12 +495,15 @@ public class HumanNameDt
      * <b>Definition:</b>
      * Part of the name that is acquired as a title due to academic, legal, employment or nobility status, etc. and that appears at the end of the name
      * </p> 
+     *
+     * @return Returns a reference to this object, to allow for simple chaining.
 	 */
-	public void addSuffix( String theString) {
+	public HumanNameDt addSuffix( String theString) {
 		if (mySuffix == null) {
 			mySuffix = new java.util.ArrayList<StringDt>();
 		}
-		mySuffix.add(new StringDt(theString)); 
+		mySuffix.add(new StringDt(theString));
+		return this; 
 	}
 
  
@@ -479,9 +536,43 @@ public class HumanNameDt
 		myPeriod = theValue;
 	}
 
-
   
 
+	/**
+	 * Returns all repetitions of {@link #getFamily() family name} as a space separated string
+	 * 
+	 * @see DatatypeUtil#joinStringsSpaceSeparated(List)
+	 */
+	public String getFamilyAsSingleString() {
+		return ca.uhn.fhir.util.DatatypeUtil.joinStringsSpaceSeparated(getFamily());
+	}
+
+	/**
+	 * Returns all repetitions of {@link #getGiven() given name} as a space separated string
+	 * 
+	 * @see DatatypeUtil#joinStringsSpaceSeparated(List)
+	 */
+	public String getGivenAsSingleString() {
+		return ca.uhn.fhir.util.DatatypeUtil.joinStringsSpaceSeparated(getGiven());
+	}
+
+	/**
+	 * Returns all repetitions of {@link #getPrefix() prefix name} as a space separated string
+	 * 
+	 * @see DatatypeUtil#joinStringsSpaceSeparated(List)
+	 */
+	public String getPrefixAsSingleString() {
+		return ca.uhn.fhir.util.DatatypeUtil.joinStringsSpaceSeparated(getPrefix());
+	}
+
+	/**
+	 * Returns all repetitions of {@link #Suffix() suffix} as a space separated string
+	 * 
+	 * @see DatatypeUtil#joinStringsSpaceSeparated(List)
+	 */
+	public String getSuffixAsSingleString() {
+		return ca.uhn.fhir.util.DatatypeUtil.joinStringsSpaceSeparated(getSuffix());
+	}
 
 
 }

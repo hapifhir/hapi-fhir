@@ -39,7 +39,8 @@ public class ResourceGeneratorUsingSpreadsheet extends BaseStructureSpreadsheetP
 		ResourceGeneratorUsingSpreadsheet p = new ResourceGeneratorUsingSpreadsheet();
 		p.setBaseResourceNames(Collections.singletonList("encounter"));
 		p.parse();
-		p.writeAll(new File("tmp"), "ca.test");
+		p.markResourcesForImports();
+		p.writeAll(new File("target/gen/ca/test/resource"), "ca.test");
 //		
 //		// TODO: this needs to be properly populated
 //		p.getAllDatatypes().add("String");

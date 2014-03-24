@@ -2,7 +2,7 @@ package ca.uhn.fhir.model.api;
 
 import java.util.List;
 
-public interface ICompositeElement extends IElement {
+public interface ICompositeElement extends IIdentifiableElement {
 
 	/**
 	 * Returns a list containing all child elements 

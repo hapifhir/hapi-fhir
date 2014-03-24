@@ -36,6 +36,7 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Extension;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.dstu.composite.ContainedDt;
+import ca.uhn.fhir.model.dstu.composite.NarrativeDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.BoundCodeableConceptDt;
@@ -221,7 +222,7 @@ class ModelScanner {
 		RuntimeResourceBlockDefinition resourceDef = new RuntimeResourceBlockDefinition(resourceName, theClass);
 		myClassToElementDefinitions.put(theClass, resourceDef);
 
-		scanCompositeElementForChildren(theClass, resourceDef, null);
+		scanCompositeElementForChildren(theClass, resourceDef);
 	}
 
 	private String scanCodeTable(Class<? extends ICodeEnum> theCodeType, CodeTableDef theCodeTableDefinition) {
@@ -233,11 +234,11 @@ class ModelScanner {
 
 		RuntimeCompositeDatatypeDefinition resourceDef = new RuntimeCompositeDatatypeDefinition(theDatatypeDefinition, theClass);
 		myClassToElementDefinitions.put(theClass, resourceDef);
-		scanCompositeElementForChildren(theClass, resourceDef, null);
+		scanCompositeElementForChildren(theClass, resourceDef);
 	}
 
 	@SuppressWarnings("unchecked")
-	private void scanCompositeElementForChildren(Class<? extends ICompositeElement> theClass, BaseRuntimeElementCompositeDefinition<?> theDefinition, Integer theIdentifierOrder) {
+	private void scanCompositeElementForChildren(Class<? extends ICompositeElement> theClass, BaseRuntimeElementCompositeDefinition<?> theDefinition) {
 		Set<String> elementNames = new HashSet<String>();
 		TreeMap<Integer, BaseRuntimeDeclaredChildDefinition> orderToElementDef = new TreeMap<Integer, BaseRuntimeDeclaredChildDefinition>();
 		TreeMap<Integer, BaseRuntimeDeclaredChildDefinition> orderToExtensionDef = new TreeMap<Integer, BaseRuntimeDeclaredChildDefinition>();
@@ -302,7 +303,13 @@ class ModelScanner {
 			Description descriptionAnnotation = next.getAnnotation(Description.class);
 
 			String elementName = childAnnotation.name();
-			int order = childAnnotation.order() + baseElementOrder;
+			int order = childAnnotation.order();
+			if (order < 0 && order != Child.ORDER_UNKNOWN) {
+				throw new ConfigurationException("Invalid order '" + order +"' on @Child for field '" + next.getName()+ "' on target type: " + theClass);
+			}
+			if (order != Child.ORDER_UNKNOWN) {
+				order = order + baseElementOrder;
+			}
 			int min = childAnnotation.min();
 			int max = childAnnotation.max();
 			TreeMap<Integer, BaseRuntimeDeclaredChildDefinition> orderMap = theOrderToElementDef;
@@ -370,7 +377,7 @@ class ModelScanner {
 				List<Class<? extends IResource>> refTypesList = new ArrayList<Class<? extends IResource>>();
 				for (Class<? extends IElement> nextType : childAnnotation.type()) {
 					if (IResource.class.isAssignableFrom(nextType) == false) {
-						throw new ConfigurationException("Field '" + next.getName() + "' in class '" + next.getDeclaringClass().getSimpleName() + "' is of type " + ResourceReferenceDt.class + " but contains a non-resource type: " + nextType.getCanonicalName());
+						throw new ConfigurationException("Field '" + next.getName() + "' in class '" + next.getDeclaringClass().getCanonicalName() + "' is of type " + ResourceReferenceDt.class + " but contains a non-resource type: " + nextType.getCanonicalName());
 					}
 					refTypesList.add((Class<? extends IResource>) nextType);
 					addScanAlso(nextType);
@@ -410,6 +417,8 @@ class ModelScanner {
 					if (nextElementType.equals(BoundCodeableConceptDt.class)) {
 						IValueSetEnumBinder<Enum<?>> binder = getBoundCodeBinder(next);
 						def = new RuntimeChildCompositeBoundDatatypeDefinition(next, elementName, childAnnotation, descriptionAnnotation, nextDatatype, binder);
+					} else if (NarrativeDt.class.getSimpleName().equals(nextElementType.getSimpleName())) {
+						def = new RuntimeChildNarrativeDefinition(next, elementName, childAnnotation, descriptionAnnotation, nextDatatype);
 					} else {
 						def = new RuntimeChildCompositeDatatypeDefinition(next, elementName, childAnnotation, descriptionAnnotation, nextDatatype);
 					}
@@ -495,7 +504,7 @@ class ModelScanner {
 		myClassToElementDefinitions.put(theClass, resourceDef);
 		myNameToResourceDefinitions.put(resourceName, resourceDef);
 
-		scanCompositeElementForChildren(theClass, resourceDef, resourceDefinition.identifierOrder());
+		scanCompositeElementForChildren(theClass, resourceDef);
 
 		myIdToResourceDefinition.put(resourceId, resourceDef);
 		return resourceName;

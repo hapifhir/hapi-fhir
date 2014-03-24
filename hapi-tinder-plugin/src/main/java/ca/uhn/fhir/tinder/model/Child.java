@@ -17,6 +17,14 @@ public abstract class Child extends BaseElement {
 		return getSingleType();
 	}
 
+	public String getBoundDatatype() {
+		String singleType = getSingleType();
+		if ("CodeDt".equals(singleType) || "CodeableConceptDt".equals(singleType)) {
+			return "Bound" + singleType;
+		}
+		throw new IllegalStateException();
+	}
+
 	public String getCardMaxForChildAnnotation() {
 		if (getCardMax().equals("*")) {
 			return "Child.MAX_UNLIMITED";
@@ -24,10 +32,7 @@ public abstract class Child extends BaseElement {
 			return getCardMax();
 		}
 	}
-
-	public boolean isSingleChildInstantiable() {
-		return true;
-	}
+	
 
 	/**
 	 * Strips off "[x]"
@@ -49,24 +54,6 @@ public abstract class Child extends BaseElement {
 		return elementName;
 	}
 
-	public String getBoundDatatype() {
-		String singleType = getSingleType();
-		if ("CodeDt".equals(singleType) || "CodeableConceptDt".equals(singleType)) {
-			return "Bound" + singleType;
-		}
-		throw new IllegalStateException();
-	}
-	
-	public boolean isBoundCode() {
-		String singleType = getSingleType();
-		if ("CodeDt".equals(singleType) || "CodeableConceptDt".equals(singleType)) {
-			if (StringUtils.isNotBlank(getBindingClass())) {
-				return true;
-			}
-		}
-		return false;
-	}
-	
 	public String getReferenceType() {
 		String retVal;
 		if (this.isResourceRef()) {
@@ -95,7 +82,7 @@ public abstract class Child extends BaseElement {
 	public String getReferenceTypeForConstructor() {
 		return getReferenceType().replaceAll("^java.util.List<", "java.util.ArrayList<");
 	}
-
+	
 	public List<String> getReferenceTypesForMultiple() {
 		ArrayList<String> retVal = new ArrayList<String>();
 		for (String next : getType()) {
@@ -107,25 +94,12 @@ public abstract class Child extends BaseElement {
 		}
 		return retVal;
 	}
-
+	
 	public List<SimpleSetter> getSimpleSetters() {
 		if (isBoundCode()) {
 			return Collections.emptyList();
 		}
 		return mySimpleStters;
-	}
-
-	public String getVariableName() {
-		String elementName = getMethodName();
-		return "my" + elementName;
-	}
-
-	public boolean isBlock() {
-		return false;
-	}
-
-	public boolean isRepeatable() {
-		return "1".equals(getCardMax()) == false;
 	}
 
 	public String getSingleType() {
@@ -146,5 +120,33 @@ public abstract class Child extends BaseElement {
 		}
 		return "Dt";
 	}
+
+	public String getVariableName() {
+		String elementName = getMethodName();
+		return "my" + elementName;
+	}
+
+	public boolean isBlock() {
+		return false;
+	}
+
+	public boolean isBoundCode() {
+		String singleType = getSingleType();
+		if ("CodeDt".equals(singleType) || "CodeableConceptDt".equals(singleType)) {
+			if (StringUtils.isNotBlank(getBindingClass())) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public boolean isRepeatable() {
+		return "1".equals(getCardMax()) == false;
+	}
+
+	public boolean isSingleChildInstantiable() {
+		return true;
+	}
+
 
 }

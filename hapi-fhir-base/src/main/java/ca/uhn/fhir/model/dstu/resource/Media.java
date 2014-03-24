@@ -17,113 +17,26 @@
 package ca.uhn.fhir.model.dstu.resource;
 
 
-import java.util.*;
-import ca.uhn.fhir.model.api.*;
-import ca.uhn.fhir.model.api.annotation.*;
+import java.util.Date;
+import java.util.List;
 
-import ca.uhn.fhir.model.dstu.composite.AddressDt;
-import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
-import ca.uhn.fhir.model.dstu.valueset.AdmitSourceEnum;
-import ca.uhn.fhir.model.dstu.valueset.AggregationModeEnum;
-import ca.uhn.fhir.model.dstu.valueset.AnimalSpeciesEnum;
-import ca.uhn.fhir.model.dstu.composite.AttachmentDt;
-import ca.uhn.fhir.model.dstu.valueset.BindingConformanceEnum;
-import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
-import ca.uhn.fhir.model.dstu.composite.CodingDt;
-import ca.uhn.fhir.model.dstu.valueset.ConformanceEventModeEnum;
-import ca.uhn.fhir.model.dstu.valueset.ConformanceStatementStatusEnum;
-import ca.uhn.fhir.model.dstu.valueset.ConstraintSeverityEnum;
-import ca.uhn.fhir.model.dstu.composite.ContactDt;
-import ca.uhn.fhir.model.dstu.valueset.DataTypeEnum;
-import ca.uhn.fhir.model.dstu.resource.Device;
-import ca.uhn.fhir.model.dstu.resource.DiagnosticOrder;
-import ca.uhn.fhir.model.dstu.valueset.DiagnosticOrderPriorityEnum;
-import ca.uhn.fhir.model.dstu.valueset.DiagnosticOrderStatusEnum;
-import ca.uhn.fhir.model.dstu.valueset.DiagnosticReportStatusEnum;
-import ca.uhn.fhir.model.dstu.valueset.DocumentModeEnum;
-import ca.uhn.fhir.model.dstu.resource.Encounter;
-import ca.uhn.fhir.model.dstu.valueset.EncounterClassEnum;
-import ca.uhn.fhir.model.dstu.valueset.EncounterReasonCodesEnum;
-import ca.uhn.fhir.model.dstu.valueset.EncounterStateEnum;
-import ca.uhn.fhir.model.dstu.valueset.EncounterTypeEnum;
-import ca.uhn.fhir.model.dstu.valueset.ExtensionContextEnum;
-import ca.uhn.fhir.model.dstu.valueset.FHIRDefinedTypeEnum;
-import ca.uhn.fhir.model.dstu.valueset.FilterOperatorEnum;
-import ca.uhn.fhir.model.dstu.resource.Group;
-import ca.uhn.fhir.model.dstu.valueset.GroupTypeEnum;
-import ca.uhn.fhir.model.dstu.valueset.HierarchicalRelationshipTypeEnum;
-import ca.uhn.fhir.model.dstu.composite.HumanNameDt;
-import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
-import ca.uhn.fhir.model.dstu.valueset.ImagingModalityEnum;
-import ca.uhn.fhir.model.dstu.resource.ImagingStudy;
-import ca.uhn.fhir.model.dstu.valueset.InstanceAvailabilityEnum;
-import ca.uhn.fhir.model.dstu.valueset.LinkTypeEnum;
-import ca.uhn.fhir.model.dstu.resource.Location;
-import ca.uhn.fhir.model.dstu.valueset.LocationModeEnum;
-import ca.uhn.fhir.model.dstu.valueset.LocationStatusEnum;
-import ca.uhn.fhir.model.dstu.valueset.LocationTypeEnum;
-import ca.uhn.fhir.model.dstu.valueset.MaritalStatusCodesEnum;
-import ca.uhn.fhir.model.dstu.resource.Media;
-import ca.uhn.fhir.model.dstu.valueset.MediaTypeEnum;
-import ca.uhn.fhir.model.dstu.resource.Medication;
-import ca.uhn.fhir.model.dstu.valueset.MedicationKindEnum;
-import ca.uhn.fhir.model.dstu.valueset.MessageEventEnum;
-import ca.uhn.fhir.model.dstu.valueset.MessageSignificanceCategoryEnum;
-import ca.uhn.fhir.model.dstu.valueset.MessageTransportEnum;
-import ca.uhn.fhir.model.dstu.valueset.ModalityEnum;
-import ca.uhn.fhir.model.dstu.resource.Observation;
-import ca.uhn.fhir.model.dstu.valueset.ObservationInterpretationCodesEnum;
-import ca.uhn.fhir.model.dstu.valueset.ObservationRelationshipTypeEnum;
-import ca.uhn.fhir.model.dstu.valueset.ObservationReliabilityEnum;
-import ca.uhn.fhir.model.dstu.valueset.ObservationStatusEnum;
-import ca.uhn.fhir.model.dstu.resource.Organization;
-import ca.uhn.fhir.model.dstu.valueset.OrganizationTypeEnum;
-import ca.uhn.fhir.model.dstu.valueset.ParticipantTypeEnum;
-import ca.uhn.fhir.model.dstu.resource.Patient;
-import ca.uhn.fhir.model.dstu.valueset.PatientRelationshipTypeEnum;
-import ca.uhn.fhir.model.dstu.composite.PeriodDt;
-import ca.uhn.fhir.model.dstu.resource.Practitioner;
-import ca.uhn.fhir.model.dstu.valueset.PractitionerRoleEnum;
-import ca.uhn.fhir.model.dstu.valueset.PractitionerSpecialtyEnum;
-import ca.uhn.fhir.model.dstu.resource.Profile;
-import ca.uhn.fhir.model.dstu.valueset.PropertyRepresentationEnum;
-import ca.uhn.fhir.model.dstu.composite.QuantityDt;
-import ca.uhn.fhir.model.dstu.composite.RangeDt;
-import ca.uhn.fhir.model.dstu.composite.RatioDt;
-import ca.uhn.fhir.model.dstu.resource.RelatedPerson;
-import ca.uhn.fhir.model.dstu.valueset.ResourceProfileStatusEnum;
-import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
-import ca.uhn.fhir.model.dstu.valueset.ResourceTypeEnum;
-import ca.uhn.fhir.model.dstu.valueset.RestfulConformanceModeEnum;
-import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
-import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
-import ca.uhn.fhir.model.dstu.valueset.RestfulSecurityServiceEnum;
-import ca.uhn.fhir.model.dstu.composite.SampledDataDt;
-import ca.uhn.fhir.model.dstu.valueset.SearchParamTypeEnum;
-import ca.uhn.fhir.model.dstu.valueset.SlicingRulesEnum;
-import ca.uhn.fhir.model.dstu.resource.Specimen;
-import ca.uhn.fhir.model.dstu.valueset.SpecimenCollectionMethodEnum;
-import ca.uhn.fhir.model.dstu.valueset.SpecimenTreatmentProcedureEnum;
-import ca.uhn.fhir.model.dstu.resource.Substance;
-import ca.uhn.fhir.model.dstu.valueset.SubstanceTypeEnum;
-import ca.uhn.fhir.model.dstu.resource.ValueSet;
-import ca.uhn.fhir.model.dstu.valueset.ValueSetStatusEnum;
+import ca.uhn.fhir.model.api.BaseResource;
+import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.dstu.composite.DurationDt;
-import ca.uhn.fhir.model.primitive.Base64BinaryDt;
-import ca.uhn.fhir.model.primitive.BooleanDt;
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.dstu.composite.AttachmentDt;
+import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
+import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
+import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.dstu.valueset.MediaTypeEnum;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
-import ca.uhn.fhir.model.primitive.BoundCodeableConceptDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
-import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
-import ca.uhn.fhir.model.primitive.DecimalDt;
-import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
-import ca.uhn.fhir.model.primitive.OidDt;
 import ca.uhn.fhir.model.primitive.StringDt;
-import ca.uhn.fhir.model.primitive.UriDt;
 
 
 /**
@@ -358,7 +271,6 @@ public class Media extends BaseResource implements IResource {
 		myType = theValue;
 	}
 
-
 	/**
 	 * Sets the value(s) for <b>type</b> (photo | video | audio)
 	 *
@@ -400,7 +312,6 @@ public class Media extends BaseResource implements IResource {
 	public void setSubtype(CodeableConceptDt theValue) {
 		mySubtype = theValue;
 	}
-
 
   
 	/**
@@ -446,6 +357,21 @@ public class Media extends BaseResource implements IResource {
 		return newType; 
 	}
 
+	/**
+	 * Gets the first repetition for <b>identifier</b> (Identifier(s) for the image),
+	 * creating it if it does not already exist.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Identifiers associated with the image - these may include identifiers for the image itself, identifiers for the context of its collection (e.g. series ids) and context ids such as accession numbers or other workflow identifiers
+     * </p> 
+	 */
+	public IdentifierDt getIdentifierFirstRep() {
+		if (getIdentifier().isEmpty()) {
+			return addIdentifier();
+		}
+		return getIdentifier().get(0); 
+	}
   
 	/**
 	 * Gets the value(s) for <b>dateTime</b> (When the media was taken/recorded (end)).
@@ -476,7 +402,6 @@ public class Media extends BaseResource implements IResource {
 		myDateTime = theValue;
 	}
 
-
  	/**
 	 * Sets the value for <b>dateTime</b> (When the media was taken/recorded (end))
 	 *
@@ -485,8 +410,9 @@ public class Media extends BaseResource implements IResource {
      * When the media was originally recorded. For video and audio, if the length of the recording is not insignificant, this is the end of the recording
      * </p> 
 	 */
-	public void setDateTime( Date theDate,  TemporalPrecisionEnum thePrecision) {
+	public Media setDateTime( Date theDate,  TemporalPrecisionEnum thePrecision) {
 		myDateTime = new DateTimeDt(theDate, thePrecision); 
+		return this; 
 	}
 
 	/**
@@ -497,8 +423,9 @@ public class Media extends BaseResource implements IResource {
      * When the media was originally recorded. For video and audio, if the length of the recording is not insignificant, this is the end of the recording
      * </p> 
 	 */
-	public void setDateTimeWithSecondsPrecision( Date theDate) {
+	public Media setDateTimeWithSecondsPrecision( Date theDate) {
 		myDateTime = new DateTimeDt(theDate); 
+		return this; 
 	}
 
  
@@ -527,7 +454,6 @@ public class Media extends BaseResource implements IResource {
 	public void setSubject(ResourceReferenceDt theValue) {
 		mySubject = theValue;
 	}
-
 
   
 	/**
@@ -559,7 +485,6 @@ public class Media extends BaseResource implements IResource {
 		myOperator = theValue;
 	}
 
-
   
 	/**
 	 * Gets the value(s) for <b>view</b> (Imaging view e.g Lateral or Antero-posterior).
@@ -589,7 +514,6 @@ public class Media extends BaseResource implements IResource {
 	public void setView(CodeableConceptDt theValue) {
 		myView = theValue;
 	}
-
 
   
 	/**
@@ -621,7 +545,6 @@ public class Media extends BaseResource implements IResource {
 		myDeviceName = theValue;
 	}
 
-
  	/**
 	 * Sets the value for <b>deviceName</b> (Name of the device/manufacturer)
 	 *
@@ -630,8 +553,9 @@ public class Media extends BaseResource implements IResource {
      * The name of the device / manufacturer of the device  that was used to make the recording
      * </p> 
 	 */
-	public void setDeviceName( String theString) {
+	public Media setDeviceName( String theString) {
 		myDeviceName = new StringDt(theString); 
+		return this; 
 	}
 
  
@@ -664,7 +588,6 @@ public class Media extends BaseResource implements IResource {
 		myHeight = theValue;
 	}
 
-
  	/**
 	 * Sets the value for <b>height</b> (Height of the image in pixels(photo/video))
 	 *
@@ -673,8 +596,9 @@ public class Media extends BaseResource implements IResource {
      * Height of the image in pixels(photo/video)
      * </p> 
 	 */
-	public void setHeight( Integer theInteger) {
+	public Media setHeight( Integer theInteger) {
 		myHeight = new IntegerDt(theInteger); 
+		return this; 
 	}
 
  
@@ -707,7 +631,6 @@ public class Media extends BaseResource implements IResource {
 		myWidth = theValue;
 	}
 
-
  	/**
 	 * Sets the value for <b>width</b> (Width of the image in pixels (photo/video))
 	 *
@@ -716,8 +639,9 @@ public class Media extends BaseResource implements IResource {
      * Width of the image in pixels (photo/video)
      * </p> 
 	 */
-	public void setWidth( Integer theInteger) {
+	public Media setWidth( Integer theInteger) {
 		myWidth = new IntegerDt(theInteger); 
+		return this; 
 	}
 
  
@@ -750,7 +674,6 @@ public class Media extends BaseResource implements IResource {
 		myFrames = theValue;
 	}
 
-
  	/**
 	 * Sets the value for <b>frames</b> (Number of frames if > 1 (photo))
 	 *
@@ -759,8 +682,9 @@ public class Media extends BaseResource implements IResource {
      * The number of frames in a photo. This is used with a multi-page fax, or an imaging acquisition context that takes multiple slices in a single image, or an animated gif. If there is more than one frame, this SHALL have a value in order to alert interface software that a multi-frame capable rendering widget is required
      * </p> 
 	 */
-	public void setFrames( Integer theInteger) {
+	public Media setFrames( Integer theInteger) {
 		myFrames = new IntegerDt(theInteger); 
+		return this; 
 	}
 
  
@@ -793,7 +717,6 @@ public class Media extends BaseResource implements IResource {
 		myLength = theValue;
 	}
 
-
  	/**
 	 * Sets the value for <b>length</b> (Length in seconds (audio / video))
 	 *
@@ -802,8 +725,9 @@ public class Media extends BaseResource implements IResource {
      * The length of the recording in seconds - for audio and video
      * </p> 
 	 */
-	public void setLength( Integer theInteger) {
+	public Media setLength( Integer theInteger) {
 		myLength = new IntegerDt(theInteger); 
+		return this; 
 	}
 
  
@@ -835,7 +759,6 @@ public class Media extends BaseResource implements IResource {
 	public void setContent(AttachmentDt theValue) {
 		myContent = theValue;
 	}
-
 
   
 

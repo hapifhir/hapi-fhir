@@ -87,6 +87,20 @@
 			
 		</section>
 
+		<section name="A Complete Example">
+
+			<p>
+				The following is a complete example showing a RESTful client
+				using HAPI FHIR.
+			</p>
+			
+			<macro name="snippet">
+				<param name="id" value="client" />                      
+				<param name="file" value="src/site/example/java/example/CompleteExampleClient.java" />
+			</macro>
+
+		</section>
+		
 	</body>
 
 </document>

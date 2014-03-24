@@ -24,7 +24,7 @@ public @interface Child {
 
 	String name();
 	
-	int order();
+	int order() default ORDER_UNKNOWN;
 
 	int min() default 0;
 

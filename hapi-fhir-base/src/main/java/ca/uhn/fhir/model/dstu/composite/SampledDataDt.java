@@ -16,33 +16,17 @@
 
 package ca.uhn.fhir.model.dstu.composite;
 
-import java.util.*;
-import ca.uhn.fhir.model.api.*;
-import ca.uhn.fhir.model.api.annotation.*;
+import java.util.List;
 
-import ca.uhn.fhir.model.dstu.valueset.AddressUseEnum;
-import ca.uhn.fhir.model.dstu.composite.CodingDt;
-import ca.uhn.fhir.model.dstu.valueset.ContactSystemEnum;
-import ca.uhn.fhir.model.dstu.valueset.ContactUseEnum;
-import ca.uhn.fhir.model.dstu.valueset.EventTimingEnum;
-import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
-import ca.uhn.fhir.model.dstu.valueset.NameUseEnum;
-import ca.uhn.fhir.model.dstu.resource.Organization;
-import ca.uhn.fhir.model.dstu.composite.PeriodDt;
-import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
-import ca.uhn.fhir.model.dstu.composite.QuantityDt;
-import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
-import ca.uhn.fhir.model.dstu.valueset.UnitsOfTimeEnum;
-import ca.uhn.fhir.model.dstu.resource.ValueSet;
-import ca.uhn.fhir.model.primitive.Base64BinaryDt;
-import ca.uhn.fhir.model.primitive.BooleanDt;
-import ca.uhn.fhir.model.primitive.BoundCodeDt;
-import ca.uhn.fhir.model.primitive.CodeDt;
-import ca.uhn.fhir.model.primitive.DateTimeDt;
+import ca.uhn.fhir.model.api.BaseElement;
+import ca.uhn.fhir.model.api.ICompositeDatatype;
+import ca.uhn.fhir.model.api.IElement;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.primitive.DecimalDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.model.primitive.StringDt;
-import ca.uhn.fhir.model.primitive.UriDt;
 
 /**
  * HAPI/FHIR <b>SampledData</b> Datatype
@@ -157,7 +141,6 @@ public class SampledDataDt
 		myOrigin = theValue;
 	}
 
-
   
 	/**
 	 * Gets the value(s) for <b>period</b> (Number of milliseconds between samples).
@@ -188,7 +171,6 @@ public class SampledDataDt
 		myPeriod = theValue;
 	}
 
-
  	/**
 	 * Sets the value for <b>period</b> (Number of milliseconds between samples)
 	 *
@@ -197,8 +179,9 @@ public class SampledDataDt
      * The length of time between sampling times, measured in milliseconds
      * </p> 
 	 */
-	public void setPeriod( long theValue) {
+	public SampledDataDt setPeriod( long theValue) {
 		myPeriod = new DecimalDt(theValue); 
+		return this; 
 	}
 
 	/**
@@ -209,8 +192,9 @@ public class SampledDataDt
      * The length of time between sampling times, measured in milliseconds
      * </p> 
 	 */
-	public void setPeriod( double theValue) {
+	public SampledDataDt setPeriod( double theValue) {
 		myPeriod = new DecimalDt(theValue); 
+		return this; 
 	}
 
 	/**
@@ -221,8 +205,9 @@ public class SampledDataDt
      * The length of time between sampling times, measured in milliseconds
      * </p> 
 	 */
-	public void setPeriod( java.math.BigDecimal theValue) {
+	public SampledDataDt setPeriod( java.math.BigDecimal theValue) {
 		myPeriod = new DecimalDt(theValue); 
+		return this; 
 	}
 
  
@@ -255,7 +240,6 @@ public class SampledDataDt
 		myFactor = theValue;
 	}
 
-
  	/**
 	 * Sets the value for <b>factor</b> (Multiply data by this before adding to origin)
 	 *
@@ -264,8 +248,9 @@ public class SampledDataDt
      * A correction factor that is applied to the sampled data points before they are added to the origin
      * </p> 
 	 */
-	public void setFactor( long theValue) {
+	public SampledDataDt setFactor( long theValue) {
 		myFactor = new DecimalDt(theValue); 
+		return this; 
 	}
 
 	/**
@@ -276,8 +261,9 @@ public class SampledDataDt
      * A correction factor that is applied to the sampled data points before they are added to the origin
      * </p> 
 	 */
-	public void setFactor( double theValue) {
+	public SampledDataDt setFactor( double theValue) {
 		myFactor = new DecimalDt(theValue); 
+		return this; 
 	}
 
 	/**
@@ -288,8 +274,9 @@ public class SampledDataDt
      * A correction factor that is applied to the sampled data points before they are added to the origin
      * </p> 
 	 */
-	public void setFactor( java.math.BigDecimal theValue) {
+	public SampledDataDt setFactor( java.math.BigDecimal theValue) {
 		myFactor = new DecimalDt(theValue); 
+		return this; 
 	}
 
  
@@ -322,7 +309,6 @@ public class SampledDataDt
 		myLowerLimit = theValue;
 	}
 
-
  	/**
 	 * Sets the value for <b>lowerLimit</b> (Lower limit of detection)
 	 *
@@ -331,8 +317,9 @@ public class SampledDataDt
      * The lower limit of detection of the measured points. This is needed if any of the data points have the value \"L\" (lower than detection limit)
      * </p> 
 	 */
-	public void setLowerLimit( long theValue) {
+	public SampledDataDt setLowerLimit( long theValue) {
 		myLowerLimit = new DecimalDt(theValue); 
+		return this; 
 	}
 
 	/**
@@ -343,8 +330,9 @@ public class SampledDataDt
      * The lower limit of detection of the measured points. This is needed if any of the data points have the value \"L\" (lower than detection limit)
      * </p> 
 	 */
-	public void setLowerLimit( double theValue) {
+	public SampledDataDt setLowerLimit( double theValue) {
 		myLowerLimit = new DecimalDt(theValue); 
+		return this; 
 	}
 
 	/**
@@ -355,8 +343,9 @@ public class SampledDataDt
      * The lower limit of detection of the measured points. This is needed if any of the data points have the value \"L\" (lower than detection limit)
      * </p> 
 	 */
-	public void setLowerLimit( java.math.BigDecimal theValue) {
+	public SampledDataDt setLowerLimit( java.math.BigDecimal theValue) {
 		myLowerLimit = new DecimalDt(theValue); 
+		return this; 
 	}
 
  
@@ -389,7 +378,6 @@ public class SampledDataDt
 		myUpperLimit = theValue;
 	}
 
-
  	/**
 	 * Sets the value for <b>upperLimit</b> (Upper limit of detection)
 	 *
@@ -398,8 +386,9 @@ public class SampledDataDt
      * The upper limit of detection of the measured points. This is needed if any of the data points have the value \"U\" (higher than detection limit)
      * </p> 
 	 */
-	public void setUpperLimit( long theValue) {
+	public SampledDataDt setUpperLimit( long theValue) {
 		myUpperLimit = new DecimalDt(theValue); 
+		return this; 
 	}
 
 	/**
@@ -410,8 +399,9 @@ public class SampledDataDt
      * The upper limit of detection of the measured points. This is needed if any of the data points have the value \"U\" (higher than detection limit)
      * </p> 
 	 */
-	public void setUpperLimit( double theValue) {
+	public SampledDataDt setUpperLimit( double theValue) {
 		myUpperLimit = new DecimalDt(theValue); 
+		return this; 
 	}
 
 	/**
@@ -422,8 +412,9 @@ public class SampledDataDt
      * The upper limit of detection of the measured points. This is needed if any of the data points have the value \"U\" (higher than detection limit)
      * </p> 
 	 */
-	public void setUpperLimit( java.math.BigDecimal theValue) {
+	public SampledDataDt setUpperLimit( java.math.BigDecimal theValue) {
 		myUpperLimit = new DecimalDt(theValue); 
+		return this; 
 	}
 
  
@@ -456,7 +447,6 @@ public class SampledDataDt
 		myDimensions = theValue;
 	}
 
-
  	/**
 	 * Sets the value for <b>dimensions</b> (Number of sample points at each time point)
 	 *
@@ -465,8 +455,9 @@ public class SampledDataDt
      * The number of sample points at each time point. If this value is greater than one, then the dimensions will be interlaced - all the sample points for a point in time will be recorded at once
      * </p> 
 	 */
-	public void setDimensions( Integer theInteger) {
+	public SampledDataDt setDimensions( Integer theInteger) {
 		myDimensions = new IntegerDt(theInteger); 
+		return this; 
 	}
 
  
@@ -499,7 +490,6 @@ public class SampledDataDt
 		myData = theValue;
 	}
 
-
  	/**
 	 * Sets the value for <b>data</b> (Decimal values with spaces, or \"E\" | \"U\" | \"L\")
 	 *
@@ -508,8 +498,9 @@ public class SampledDataDt
      * A series of data points which are decimal values separated by a single space (character u20). The special values \"E\" (error), \"L\" (below detection limit) and \"U\" (above detection limit) can also be used in place of a decimal value
      * </p> 
 	 */
-	public void setData( String theString) {
+	public SampledDataDt setData( String theString) {
 		myData = new StringDt(theString); 
+		return this; 
 	}
 
  

@@ -9,14 +9,13 @@ import java.lang.annotation.Target;
 @Target(value= {ElementType.TYPE})
 public @interface ResourceDef {
 
-	int ORDER_NOT_SPECIFIED = -1;
-
+	/**
+	 * The name of the resource (e.g. "Patient" or "DiagnosticReport")
+	 */
 	String name();
 
 	String id() default "";
 	
 	String profile() default "";
-	
-	int identifierOrder() default ORDER_NOT_SPECIFIED;
 	
 }

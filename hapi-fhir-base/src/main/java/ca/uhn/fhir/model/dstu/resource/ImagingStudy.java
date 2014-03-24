@@ -17,109 +17,28 @@
 package ca.uhn.fhir.model.dstu.resource;
 
 
-import java.util.*;
-import ca.uhn.fhir.model.api.*;
-import ca.uhn.fhir.model.api.annotation.*;
+import java.util.Date;
+import java.util.List;
 
-import ca.uhn.fhir.model.dstu.composite.AddressDt;
-import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
-import ca.uhn.fhir.model.dstu.valueset.AdmitSourceEnum;
-import ca.uhn.fhir.model.dstu.valueset.AggregationModeEnum;
-import ca.uhn.fhir.model.dstu.valueset.AnimalSpeciesEnum;
-import ca.uhn.fhir.model.dstu.composite.AttachmentDt;
-import ca.uhn.fhir.model.dstu.valueset.BindingConformanceEnum;
-import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
-import ca.uhn.fhir.model.dstu.composite.CodingDt;
-import ca.uhn.fhir.model.dstu.valueset.ConformanceEventModeEnum;
-import ca.uhn.fhir.model.dstu.valueset.ConformanceStatementStatusEnum;
-import ca.uhn.fhir.model.dstu.valueset.ConstraintSeverityEnum;
-import ca.uhn.fhir.model.dstu.composite.ContactDt;
-import ca.uhn.fhir.model.dstu.valueset.DataTypeEnum;
-import ca.uhn.fhir.model.dstu.resource.Device;
-import ca.uhn.fhir.model.dstu.resource.DiagnosticOrder;
-import ca.uhn.fhir.model.dstu.valueset.DiagnosticOrderPriorityEnum;
-import ca.uhn.fhir.model.dstu.valueset.DiagnosticOrderStatusEnum;
-import ca.uhn.fhir.model.dstu.valueset.DiagnosticReportStatusEnum;
-import ca.uhn.fhir.model.dstu.valueset.DocumentModeEnum;
-import ca.uhn.fhir.model.dstu.resource.Encounter;
-import ca.uhn.fhir.model.dstu.valueset.EncounterClassEnum;
-import ca.uhn.fhir.model.dstu.valueset.EncounterReasonCodesEnum;
-import ca.uhn.fhir.model.dstu.valueset.EncounterStateEnum;
-import ca.uhn.fhir.model.dstu.valueset.EncounterTypeEnum;
-import ca.uhn.fhir.model.dstu.valueset.ExtensionContextEnum;
-import ca.uhn.fhir.model.dstu.valueset.FHIRDefinedTypeEnum;
-import ca.uhn.fhir.model.dstu.valueset.FilterOperatorEnum;
-import ca.uhn.fhir.model.dstu.resource.Group;
-import ca.uhn.fhir.model.dstu.valueset.GroupTypeEnum;
-import ca.uhn.fhir.model.dstu.valueset.HierarchicalRelationshipTypeEnum;
-import ca.uhn.fhir.model.dstu.composite.HumanNameDt;
-import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
-import ca.uhn.fhir.model.dstu.valueset.ImagingModalityEnum;
-import ca.uhn.fhir.model.dstu.resource.ImagingStudy;
-import ca.uhn.fhir.model.dstu.valueset.InstanceAvailabilityEnum;
-import ca.uhn.fhir.model.dstu.valueset.LinkTypeEnum;
-import ca.uhn.fhir.model.dstu.resource.Location;
-import ca.uhn.fhir.model.dstu.valueset.LocationModeEnum;
-import ca.uhn.fhir.model.dstu.valueset.LocationStatusEnum;
-import ca.uhn.fhir.model.dstu.valueset.LocationTypeEnum;
-import ca.uhn.fhir.model.dstu.valueset.MaritalStatusCodesEnum;
-import ca.uhn.fhir.model.dstu.resource.Media;
-import ca.uhn.fhir.model.dstu.valueset.MediaTypeEnum;
-import ca.uhn.fhir.model.dstu.resource.Medication;
-import ca.uhn.fhir.model.dstu.valueset.MedicationKindEnum;
-import ca.uhn.fhir.model.dstu.valueset.MessageEventEnum;
-import ca.uhn.fhir.model.dstu.valueset.MessageSignificanceCategoryEnum;
-import ca.uhn.fhir.model.dstu.valueset.MessageTransportEnum;
-import ca.uhn.fhir.model.dstu.valueset.ModalityEnum;
-import ca.uhn.fhir.model.dstu.resource.Observation;
-import ca.uhn.fhir.model.dstu.valueset.ObservationInterpretationCodesEnum;
-import ca.uhn.fhir.model.dstu.valueset.ObservationRelationshipTypeEnum;
-import ca.uhn.fhir.model.dstu.valueset.ObservationReliabilityEnum;
-import ca.uhn.fhir.model.dstu.valueset.ObservationStatusEnum;
-import ca.uhn.fhir.model.dstu.resource.Organization;
-import ca.uhn.fhir.model.dstu.valueset.OrganizationTypeEnum;
-import ca.uhn.fhir.model.dstu.valueset.ParticipantTypeEnum;
-import ca.uhn.fhir.model.dstu.resource.Patient;
-import ca.uhn.fhir.model.dstu.valueset.PatientRelationshipTypeEnum;
-import ca.uhn.fhir.model.dstu.composite.PeriodDt;
-import ca.uhn.fhir.model.dstu.resource.Practitioner;
-import ca.uhn.fhir.model.dstu.valueset.PractitionerRoleEnum;
-import ca.uhn.fhir.model.dstu.valueset.PractitionerSpecialtyEnum;
-import ca.uhn.fhir.model.dstu.resource.Profile;
-import ca.uhn.fhir.model.dstu.valueset.PropertyRepresentationEnum;
-import ca.uhn.fhir.model.dstu.composite.QuantityDt;
-import ca.uhn.fhir.model.dstu.composite.RangeDt;
-import ca.uhn.fhir.model.dstu.composite.RatioDt;
-import ca.uhn.fhir.model.dstu.resource.RelatedPerson;
-import ca.uhn.fhir.model.dstu.valueset.ResourceProfileStatusEnum;
-import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
-import ca.uhn.fhir.model.dstu.valueset.ResourceTypeEnum;
-import ca.uhn.fhir.model.dstu.valueset.RestfulConformanceModeEnum;
-import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
-import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
-import ca.uhn.fhir.model.dstu.valueset.RestfulSecurityServiceEnum;
-import ca.uhn.fhir.model.dstu.composite.SampledDataDt;
-import ca.uhn.fhir.model.dstu.valueset.SearchParamTypeEnum;
-import ca.uhn.fhir.model.dstu.valueset.SlicingRulesEnum;
-import ca.uhn.fhir.model.dstu.resource.Specimen;
-import ca.uhn.fhir.model.dstu.valueset.SpecimenCollectionMethodEnum;
-import ca.uhn.fhir.model.dstu.valueset.SpecimenTreatmentProcedureEnum;
-import ca.uhn.fhir.model.dstu.resource.Substance;
-import ca.uhn.fhir.model.dstu.valueset.SubstanceTypeEnum;
-import ca.uhn.fhir.model.dstu.resource.ValueSet;
-import ca.uhn.fhir.model.dstu.valueset.ValueSetStatusEnum;
+import ca.uhn.fhir.model.api.BaseElement;
+import ca.uhn.fhir.model.api.BaseResource;
+import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.dstu.composite.DurationDt;
-import ca.uhn.fhir.model.primitive.Base64BinaryDt;
-import ca.uhn.fhir.model.primitive.BooleanDt;
+import ca.uhn.fhir.model.api.IResourceBlock;
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import ca.uhn.fhir.model.api.annotation.Block;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.dstu.composite.CodingDt;
+import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
+import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.dstu.valueset.ImagingModalityEnum;
+import ca.uhn.fhir.model.dstu.valueset.InstanceAvailabilityEnum;
+import ca.uhn.fhir.model.dstu.valueset.ModalityEnum;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
-import ca.uhn.fhir.model.primitive.BoundCodeableConceptDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
-import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
-import ca.uhn.fhir.model.primitive.DecimalDt;
-import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.model.primitive.OidDt;
 import ca.uhn.fhir.model.primitive.StringDt;
@@ -416,7 +335,6 @@ public class ImagingStudy extends BaseResource implements IResource {
 		myDateTime = theValue;
 	}
 
-
  	/**
 	 * Sets the value for <b>dateTime</b> (When the study was performed)
 	 *
@@ -425,8 +343,9 @@ public class ImagingStudy extends BaseResource implements IResource {
      * Date and Time the study took place
      * </p> 
 	 */
-	public void setDateTime( Date theDate,  TemporalPrecisionEnum thePrecision) {
+	public ImagingStudy setDateTime( Date theDate,  TemporalPrecisionEnum thePrecision) {
 		myDateTime = new DateTimeDt(theDate, thePrecision); 
+		return this; 
 	}
 
 	/**
@@ -437,8 +356,9 @@ public class ImagingStudy extends BaseResource implements IResource {
      * Date and Time the study took place
      * </p> 
 	 */
-	public void setDateTimeWithSecondsPrecision( Date theDate) {
+	public ImagingStudy setDateTimeWithSecondsPrecision( Date theDate) {
 		myDateTime = new DateTimeDt(theDate); 
+		return this; 
 	}
 
  
@@ -471,7 +391,6 @@ public class ImagingStudy extends BaseResource implements IResource {
 		mySubject = theValue;
 	}
 
-
   
 	/**
 	 * Gets the value(s) for <b>uid</b> (Formal identifier for the study (0020,000D)).
@@ -502,7 +421,6 @@ public class ImagingStudy extends BaseResource implements IResource {
 		myUid = theValue;
 	}
 
-
   
 	/**
 	 * Gets the value(s) for <b>accessionNo</b> (Accession Number (0008,0050)).
@@ -532,7 +450,6 @@ public class ImagingStudy extends BaseResource implements IResource {
 	public void setAccessionNo(IdentifierDt theValue) {
 		myAccessionNo = theValue;
 	}
-
 
   
 	/**
@@ -578,6 +495,21 @@ public class ImagingStudy extends BaseResource implements IResource {
 		return newType; 
 	}
 
+	/**
+	 * Gets the first repetition for <b>identifier</b> (Other identifiers for the study (0020,0010)),
+	 * creating it if it does not already exist.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Other identifiers for the study
+     * </p> 
+	 */
+	public IdentifierDt getIdentifierFirstRep() {
+		if (getIdentifier().isEmpty()) {
+			return addIdentifier();
+		}
+		return getIdentifier().get(0); 
+	}
   
 	/**
 	 * Gets the value(s) for <b>order</b> (Order(s) that caused this study to be performed).
@@ -608,7 +540,19 @@ public class ImagingStudy extends BaseResource implements IResource {
 		myOrder = theValue;
 	}
 
-
+	/**
+	 * Adds and returns a new value for <b>order</b> (Order(s) that caused this study to be performed)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A list of the diagnostic orders that resulted in this imaging study being performed
+     * </p> 
+	 */
+	public ResourceReferenceDt addOrder() {
+		ResourceReferenceDt newType = new ResourceReferenceDt();
+		getOrder().add(newType);
+		return newType; 
+	}
   
 	/**
 	 * Gets the value(s) for <b>modality</b> (All series.modality if actual acquisition modalities).
@@ -638,7 +582,6 @@ public class ImagingStudy extends BaseResource implements IResource {
 	public void setModality(java.util.List<BoundCodeDt<ImagingModalityEnum>> theValue) {
 		myModality = theValue;
 	}
-
 
 	/**
 	 * Add a value for <b>modality</b> (All series.modality if actual acquisition modalities)
@@ -695,7 +638,6 @@ public class ImagingStudy extends BaseResource implements IResource {
 		myReferrer = theValue;
 	}
 
-
   
 	/**
 	 * Gets the value(s) for <b>availability</b> (ONLINE | OFFLINE | NEARLINE | UNAVAILABLE (0008,0056)).
@@ -725,7 +667,6 @@ public class ImagingStudy extends BaseResource implements IResource {
 	public void setAvailability(BoundCodeDt<InstanceAvailabilityEnum> theValue) {
 		myAvailability = theValue;
 	}
-
 
 	/**
 	 * Sets the value(s) for <b>availability</b> (ONLINE | OFFLINE | NEARLINE | UNAVAILABLE (0008,0056))
@@ -769,7 +710,6 @@ public class ImagingStudy extends BaseResource implements IResource {
 		myUrl = theValue;
 	}
 
-
  	/**
 	 * Sets the value for <b>url</b> (Retrieve URI (0008,1190))
 	 *
@@ -778,8 +718,9 @@ public class ImagingStudy extends BaseResource implements IResource {
      * WADO-RS URI where Study is available
      * </p> 
 	 */
-	public void setUrl( String theUri) {
+	public ImagingStudy setUrl( String theUri) {
 		myUrl = new UriDt(theUri); 
+		return this; 
 	}
 
  
@@ -812,7 +753,6 @@ public class ImagingStudy extends BaseResource implements IResource {
 		myNumberOfSeries = theValue;
 	}
 
-
  	/**
 	 * Sets the value for <b>numberOfSeries</b> (Number of Study Related Series (0020,1206))
 	 *
@@ -821,8 +761,9 @@ public class ImagingStudy extends BaseResource implements IResource {
      * Number of Series in Study
      * </p> 
 	 */
-	public void setNumberOfSeries( Integer theInteger) {
+	public ImagingStudy setNumberOfSeries( Integer theInteger) {
 		myNumberOfSeries = new IntegerDt(theInteger); 
+		return this; 
 	}
 
  
@@ -855,7 +796,6 @@ public class ImagingStudy extends BaseResource implements IResource {
 		myNumberOfInstances = theValue;
 	}
 
-
  	/**
 	 * Sets the value for <b>numberOfInstances</b> (Number of Study Related Instances (0020,1208))
 	 *
@@ -864,8 +804,9 @@ public class ImagingStudy extends BaseResource implements IResource {
      * Number of SOP Instances in Study
      * </p> 
 	 */
-	public void setNumberOfInstances( Integer theInteger) {
+	public ImagingStudy setNumberOfInstances( Integer theInteger) {
 		myNumberOfInstances = new IntegerDt(theInteger); 
+		return this; 
 	}
 
  
@@ -898,7 +839,6 @@ public class ImagingStudy extends BaseResource implements IResource {
 		myClinicalInformation = theValue;
 	}
 
-
  	/**
 	 * Sets the value for <b>clinicalInformation</b> (Diagnoses etc with request (0040,1002))
 	 *
@@ -907,8 +847,9 @@ public class ImagingStudy extends BaseResource implements IResource {
      * Diagnoses etc provided with request
      * </p> 
 	 */
-	public void setClinicalInformation( String theString) {
+	public ImagingStudy setClinicalInformation( String theString) {
 		myClinicalInformation = new StringDt(theString); 
+		return this; 
 	}
 
  
@@ -955,6 +896,21 @@ public class ImagingStudy extends BaseResource implements IResource {
 		return newType; 
 	}
 
+	/**
+	 * Gets the first repetition for <b>procedure</b> (Type of procedure performed (0008,1032)),
+	 * creating it if it does not already exist.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Type of procedure performed
+     * </p> 
+	 */
+	public CodingDt getProcedureFirstRep() {
+		if (getProcedure().isEmpty()) {
+			return addProcedure();
+		}
+		return getProcedure().get(0); 
+	}
   
 	/**
 	 * Gets the value(s) for <b>interpreter</b> (Who interpreted images (0008,1060)).
@@ -984,7 +940,6 @@ public class ImagingStudy extends BaseResource implements IResource {
 	public void setInterpreter(ResourceReferenceDt theValue) {
 		myInterpreter = theValue;
 	}
-
 
   
 	/**
@@ -1016,7 +971,6 @@ public class ImagingStudy extends BaseResource implements IResource {
 		myDescription = theValue;
 	}
 
-
  	/**
 	 * Sets the value for <b>description</b> (Institution-generated description (0008,1030))
 	 *
@@ -1025,8 +979,9 @@ public class ImagingStudy extends BaseResource implements IResource {
      * Institution-generated description or classification of the Study (component) performed
      * </p> 
 	 */
-	public void setDescription( String theString) {
+	public ImagingStudy setDescription( String theString) {
 		myDescription = new StringDt(theString); 
+		return this; 
 	}
 
  
@@ -1073,6 +1028,21 @@ public class ImagingStudy extends BaseResource implements IResource {
 		return newType; 
 	}
 
+	/**
+	 * Gets the first repetition for <b>series</b> (Each study has one or more series of instances),
+	 * creating it if it does not already exist.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Each study has one or more series of image instances
+     * </p> 
+	 */
+	public Series getSeriesFirstRep() {
+		if (getSeries().isEmpty()) {
+			return addSeries();
+		}
+		return getSeries().get(0); 
+	}
   
 	/**
 	 * Block class for child element: <b>ImagingStudy.series</b> (Each study has one or more series of instances)
@@ -1200,7 +1170,6 @@ public class ImagingStudy extends BaseResource implements IResource {
 		myNumber = theValue;
 	}
 
-
  	/**
 	 * Sets the value for <b>number</b> (Number of this series in overall sequence (0020,0011))
 	 *
@@ -1209,8 +1178,9 @@ public class ImagingStudy extends BaseResource implements IResource {
      * The number of this series in the overall sequence
      * </p> 
 	 */
-	public void setNumber( Integer theInteger) {
+	public Series setNumber( Integer theInteger) {
 		myNumber = new IntegerDt(theInteger); 
+		return this; 
 	}
 
  
@@ -1242,7 +1212,6 @@ public class ImagingStudy extends BaseResource implements IResource {
 	public void setModality(BoundCodeDt<ModalityEnum> theValue) {
 		myModality = theValue;
 	}
-
 
 	/**
 	 * Sets the value(s) for <b>modality</b> (The modality of the instances in the series (0008,0060))
@@ -1286,7 +1255,6 @@ public class ImagingStudy extends BaseResource implements IResource {
 		myUid = theValue;
 	}
 
-
   
 	/**
 	 * Gets the value(s) for <b>description</b> (A description of the series (0008,103E)).
@@ -1317,7 +1285,6 @@ public class ImagingStudy extends BaseResource implements IResource {
 		myDescription = theValue;
 	}
 
-
  	/**
 	 * Sets the value for <b>description</b> (A description of the series (0008,103E))
 	 *
@@ -1326,8 +1293,9 @@ public class ImagingStudy extends BaseResource implements IResource {
      * A description of the series
      * </p> 
 	 */
-	public void setDescription( String theString) {
+	public Series setDescription( String theString) {
 		myDescription = new StringDt(theString); 
+		return this; 
 	}
 
  
@@ -1360,7 +1328,6 @@ public class ImagingStudy extends BaseResource implements IResource {
 		myNumberOfInstances = theValue;
 	}
 
-
  	/**
 	 * Sets the value for <b>numberOfInstances</b> (Number of Series Related Instances (0020,1209))
 	 *
@@ -1369,8 +1336,9 @@ public class ImagingStudy extends BaseResource implements IResource {
      * Sequence that contains attributes from the
      * </p> 
 	 */
-	public void setNumberOfInstances( Integer theInteger) {
+	public Series setNumberOfInstances( Integer theInteger) {
 		myNumberOfInstances = new IntegerDt(theInteger); 
+		return this; 
 	}
 
  
@@ -1402,7 +1370,6 @@ public class ImagingStudy extends BaseResource implements IResource {
 	public void setAvailability(BoundCodeDt<InstanceAvailabilityEnum> theValue) {
 		myAvailability = theValue;
 	}
-
 
 	/**
 	 * Sets the value(s) for <b>availability</b> (ONLINE | OFFLINE | NEARLINE | UNAVAILABLE (0008,0056))
@@ -1446,7 +1413,6 @@ public class ImagingStudy extends BaseResource implements IResource {
 		myUrl = theValue;
 	}
 
-
  	/**
 	 * Sets the value for <b>url</b> (Retrieve URI (0008,1115 > 0008,1190))
 	 *
@@ -1455,8 +1421,9 @@ public class ImagingStudy extends BaseResource implements IResource {
      * WADO-RS URI where Series is available
      * </p> 
 	 */
-	public void setUrl( String theUri) {
+	public Series setUrl( String theUri) {
 		myUrl = new UriDt(theUri); 
+		return this; 
 	}
 
  
@@ -1489,7 +1456,6 @@ public class ImagingStudy extends BaseResource implements IResource {
 		myBodySite = theValue;
 	}
 
-
   
 	/**
 	 * Gets the value(s) for <b>dateTime</b> (When the series started).
@@ -1520,7 +1486,6 @@ public class ImagingStudy extends BaseResource implements IResource {
 		myDateTime = theValue;
 	}
 
-
  	/**
 	 * Sets the value for <b>dateTime</b> (When the series started)
 	 *
@@ -1529,8 +1494,9 @@ public class ImagingStudy extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public void setDateTime( Date theDate,  TemporalPrecisionEnum thePrecision) {
+	public Series setDateTime( Date theDate,  TemporalPrecisionEnum thePrecision) {
 		myDateTime = new DateTimeDt(theDate, thePrecision); 
+		return this; 
 	}
 
 	/**
@@ -1541,8 +1507,9 @@ public class ImagingStudy extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public void setDateTimeWithSecondsPrecision( Date theDate) {
+	public Series setDateTimeWithSecondsPrecision( Date theDate) {
 		myDateTime = new DateTimeDt(theDate); 
+		return this; 
 	}
 
  
@@ -1589,6 +1556,21 @@ public class ImagingStudy extends BaseResource implements IResource {
 		return newType; 
 	}
 
+	/**
+	 * Gets the first repetition for <b>instance</b> (A single instance taken from a patient (image or other)),
+	 * creating it if it does not already exist.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A single image taken from a patient
+     * </p> 
+	 */
+	public SeriesInstance getInstanceFirstRep() {
+		if (getInstance().isEmpty()) {
+			return addInstance();
+		}
+		return getInstance().get(0); 
+	}
   
 
 	}
@@ -1700,7 +1682,6 @@ public class ImagingStudy extends BaseResource implements IResource {
 		myNumber = theValue;
 	}
 
-
  	/**
 	 * Sets the value for <b>number</b> (The number of this instance in the series (0020,0013))
 	 *
@@ -1709,8 +1690,9 @@ public class ImagingStudy extends BaseResource implements IResource {
      * The number of this image in the series
      * </p> 
 	 */
-	public void setNumber( Integer theInteger) {
+	public SeriesInstance setNumber( Integer theInteger) {
 		myNumber = new IntegerDt(theInteger); 
+		return this; 
 	}
 
  
@@ -1743,7 +1725,6 @@ public class ImagingStudy extends BaseResource implements IResource {
 		myUid = theValue;
 	}
 
-
   
 	/**
 	 * Gets the value(s) for <b>sopclass</b> (DICOM class type (0008,0016)).
@@ -1773,7 +1754,6 @@ public class ImagingStudy extends BaseResource implements IResource {
 	public void setSopclass(OidDt theValue) {
 		mySopclass = theValue;
 	}
-
 
   
 	/**
@@ -1805,7 +1785,6 @@ public class ImagingStudy extends BaseResource implements IResource {
 		myType = theValue;
 	}
 
-
  	/**
 	 * Sets the value for <b>type </b> (Type of instance (image etc) (0004,1430))
 	 *
@@ -1814,8 +1793,9 @@ public class ImagingStudy extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public void setType( String theString) {
+	public SeriesInstance setType( String theString) {
 		myType = new StringDt(theString); 
+		return this; 
 	}
 
  
@@ -1848,7 +1828,6 @@ public class ImagingStudy extends BaseResource implements IResource {
 		myTitle = theValue;
 	}
 
-
  	/**
 	 * Sets the value for <b>title</b> (Description (0070,0080 | 0040,A043 > 0008,0104 | 0042,0010 | 0008,0008))
 	 *
@@ -1857,8 +1836,9 @@ public class ImagingStudy extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public void setTitle( String theString) {
+	public SeriesInstance setTitle( String theString) {
 		myTitle = new StringDt(theString); 
+		return this; 
 	}
 
  
@@ -1891,7 +1871,6 @@ public class ImagingStudy extends BaseResource implements IResource {
 		myUrl = theValue;
 	}
 
-
  	/**
 	 * Sets the value for <b>url</b> (WADO-RS service where instance is available  (0008,1199 > 0008,1190))
 	 *
@@ -1900,8 +1879,9 @@ public class ImagingStudy extends BaseResource implements IResource {
      * WADO-RS url where image is available
      * </p> 
 	 */
-	public void setUrl( String theUri) {
+	public SeriesInstance setUrl( String theUri) {
 		myUrl = new UriDt(theUri); 
+		return this; 
 	}
 
  
@@ -1933,7 +1913,6 @@ public class ImagingStudy extends BaseResource implements IResource {
 	public void setAttachment(ResourceReferenceDt theValue) {
 		myAttachment = theValue;
 	}
-
 
   
 

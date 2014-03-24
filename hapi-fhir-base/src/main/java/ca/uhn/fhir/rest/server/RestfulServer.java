@@ -205,7 +205,9 @@ public abstract class RestfulServer extends HttpServlet {
 			StringBuffer requestUrl = request.getRequestURL();
 			String servletContextPath = "";
 			if (request.getServletContext() != null) {
-				servletContextPath = StringUtils.defaultString(request.getServletContext().getContextPath());
+				servletContextPath = StringUtils.defaultIfBlank(request.getServletContext().getContextPath(), servletPath);
+			} else {
+				servletContextPath = servletPath;
 			}
 
 			ourLog.info("Request FullPath: {}", requestFullPath);
@@ -232,6 +234,10 @@ public abstract class RestfulServer extends HttpServlet {
 			}
 			
 			String fhirServerBase = requestUrl.substring(0, contextIndex + servletPath.length());
+			if (fhirServerBase.endsWith("/")) {
+				fhirServerBase = fhirServerBase.substring(0, fhirServerBase.length() - 1);
+			}
+			
 			String completeUrl = StringUtils.isNotBlank(request.getQueryString()) ? requestUrl + "?" + request.getQueryString() : requestUrl.toString();
 
 			Map<String, String[]> params = new HashMap<String, String[]>(request.getParameterMap());
@@ -376,7 +382,7 @@ public abstract class RestfulServer extends HttpServlet {
 
 	private void streamResponseAsBundle(HttpServletResponse theHttpResponse, List<IResource> theResult, EncodingUtil theResponseEncoding, String theServerBase, String theCompleteUrl,
 			boolean thePrettyPrint, boolean theRequestIsBrowser) throws IOException {
-		assert theServerBase.endsWith("/");
+		assert !theServerBase.endsWith("/");
 		
 		theHttpResponse.setStatus(200);
 		
@@ -409,6 +415,7 @@ public abstract class RestfulServer extends HttpServlet {
 
 				StringBuilder b = new StringBuilder();
 				b.append(theServerBase);
+				b.append('/');
 				b.append(def.getName());
 				b.append('/');
 				b.append(next.getId().getValue());

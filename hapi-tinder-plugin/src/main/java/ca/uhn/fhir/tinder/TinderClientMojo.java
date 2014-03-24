@@ -25,7 +25,6 @@ import ca.uhn.fhir.model.dstu.resource.Conformance.Rest;
 import ca.uhn.fhir.model.dstu.resource.Conformance.RestResource;
 import ca.uhn.fhir.model.dstu.resource.Profile;
 import ca.uhn.fhir.model.dstu.valueset.RestfulConformanceModeEnum;
-import ca.uhn.fhir.rest.client.IRestfulClientFactory;
 import ca.uhn.fhir.rest.client.api.IBasicClient;
 import ca.uhn.fhir.tinder.model.BaseRootType;
 import ca.uhn.fhir.tinder.model.RestResourceTm;
@@ -73,8 +72,7 @@ public class TinderClientMojo extends AbstractMojo {
 		// }
 
 		FhirContext ctx = new FhirContext(Conformance.class);
-		IRestfulClientFactory cFact = ctx.newRestfulClientFactory();
-		IBasicClient client = cFact.newClient(IBasicClient.class, serverBaseHref);
+		IBasicClient client = ctx.newRestfulClient(IBasicClient.class, serverBaseHref);
 
 		Conformance conformance = client.getServerConformanceStatement();
 

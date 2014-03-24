@@ -11,6 +11,9 @@ public interface IRestfulClient {
 	
 	HttpClient getHttpClient();
 	
+	/**
+	 * Base URL for the server, with no trailing "/"
+	 */
 	String getServerBase();
 	
 }

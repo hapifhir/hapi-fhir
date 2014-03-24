@@ -23,4 +23,21 @@ public class DatatypeUtil {
 		return retVal;
 	}
 
+	/**
+	 * Joins a list of strings with a single space (' ') between each string 
+	 */
+	public static String joinStringsSpaceSeparated(List<StringDt> theStrings) {
+		StringBuilder b = new StringBuilder();
+		for (StringDt next : theStrings) {
+			if (next.isEmpty()) {
+				continue;
+			}
+			if (b.length() > 0) {
+				b.append(' ');
+			}
+			b.append(next.getValue());
+		}
+		return b.toString();
+	}
+
 }

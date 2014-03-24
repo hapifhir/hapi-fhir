@@ -17,113 +17,39 @@
 package ca.uhn.fhir.model.dstu.resource;
 
 
-import java.util.*;
-import ca.uhn.fhir.model.api.*;
-import ca.uhn.fhir.model.api.annotation.*;
+import java.util.Date;
+import java.util.List;
 
-import ca.uhn.fhir.model.dstu.composite.AddressDt;
-import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
-import ca.uhn.fhir.model.dstu.valueset.AdmitSourceEnum;
-import ca.uhn.fhir.model.dstu.valueset.AggregationModeEnum;
-import ca.uhn.fhir.model.dstu.valueset.AnimalSpeciesEnum;
+import ca.uhn.fhir.model.api.BaseElement;
+import ca.uhn.fhir.model.api.BaseResource;
+import ca.uhn.fhir.model.api.IDatatype;
+import ca.uhn.fhir.model.api.IElement;
+import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.IResourceBlock;
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import ca.uhn.fhir.model.api.annotation.Block;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.dstu.composite.AttachmentDt;
-import ca.uhn.fhir.model.dstu.valueset.BindingConformanceEnum;
 import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
-import ca.uhn.fhir.model.dstu.composite.CodingDt;
-import ca.uhn.fhir.model.dstu.valueset.ConformanceEventModeEnum;
-import ca.uhn.fhir.model.dstu.valueset.ConformanceStatementStatusEnum;
-import ca.uhn.fhir.model.dstu.valueset.ConstraintSeverityEnum;
-import ca.uhn.fhir.model.dstu.composite.ContactDt;
-import ca.uhn.fhir.model.dstu.valueset.DataTypeEnum;
-import ca.uhn.fhir.model.dstu.resource.Device;
-import ca.uhn.fhir.model.dstu.resource.DiagnosticOrder;
-import ca.uhn.fhir.model.dstu.valueset.DiagnosticOrderPriorityEnum;
-import ca.uhn.fhir.model.dstu.valueset.DiagnosticOrderStatusEnum;
-import ca.uhn.fhir.model.dstu.valueset.DiagnosticReportStatusEnum;
-import ca.uhn.fhir.model.dstu.valueset.DocumentModeEnum;
-import ca.uhn.fhir.model.dstu.resource.Encounter;
-import ca.uhn.fhir.model.dstu.valueset.EncounterClassEnum;
-import ca.uhn.fhir.model.dstu.valueset.EncounterReasonCodesEnum;
-import ca.uhn.fhir.model.dstu.valueset.EncounterStateEnum;
-import ca.uhn.fhir.model.dstu.valueset.EncounterTypeEnum;
-import ca.uhn.fhir.model.dstu.valueset.ExtensionContextEnum;
-import ca.uhn.fhir.model.dstu.valueset.FHIRDefinedTypeEnum;
-import ca.uhn.fhir.model.dstu.valueset.FilterOperatorEnum;
-import ca.uhn.fhir.model.dstu.resource.Group;
-import ca.uhn.fhir.model.dstu.valueset.GroupTypeEnum;
-import ca.uhn.fhir.model.dstu.valueset.HierarchicalRelationshipTypeEnum;
-import ca.uhn.fhir.model.dstu.composite.HumanNameDt;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
-import ca.uhn.fhir.model.dstu.valueset.ImagingModalityEnum;
-import ca.uhn.fhir.model.dstu.resource.ImagingStudy;
-import ca.uhn.fhir.model.dstu.valueset.InstanceAvailabilityEnum;
-import ca.uhn.fhir.model.dstu.valueset.LinkTypeEnum;
-import ca.uhn.fhir.model.dstu.resource.Location;
-import ca.uhn.fhir.model.dstu.valueset.LocationModeEnum;
-import ca.uhn.fhir.model.dstu.valueset.LocationStatusEnum;
-import ca.uhn.fhir.model.dstu.valueset.LocationTypeEnum;
-import ca.uhn.fhir.model.dstu.valueset.MaritalStatusCodesEnum;
-import ca.uhn.fhir.model.dstu.resource.Media;
-import ca.uhn.fhir.model.dstu.valueset.MediaTypeEnum;
-import ca.uhn.fhir.model.dstu.resource.Medication;
-import ca.uhn.fhir.model.dstu.valueset.MedicationKindEnum;
-import ca.uhn.fhir.model.dstu.valueset.MessageEventEnum;
-import ca.uhn.fhir.model.dstu.valueset.MessageSignificanceCategoryEnum;
-import ca.uhn.fhir.model.dstu.valueset.MessageTransportEnum;
-import ca.uhn.fhir.model.dstu.valueset.ModalityEnum;
-import ca.uhn.fhir.model.dstu.resource.Observation;
+import ca.uhn.fhir.model.dstu.composite.PeriodDt;
+import ca.uhn.fhir.model.dstu.composite.QuantityDt;
+import ca.uhn.fhir.model.dstu.composite.RangeDt;
+import ca.uhn.fhir.model.dstu.composite.RatioDt;
+import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.dstu.composite.SampledDataDt;
 import ca.uhn.fhir.model.dstu.valueset.ObservationInterpretationCodesEnum;
 import ca.uhn.fhir.model.dstu.valueset.ObservationRelationshipTypeEnum;
 import ca.uhn.fhir.model.dstu.valueset.ObservationReliabilityEnum;
 import ca.uhn.fhir.model.dstu.valueset.ObservationStatusEnum;
-import ca.uhn.fhir.model.dstu.resource.Organization;
-import ca.uhn.fhir.model.dstu.valueset.OrganizationTypeEnum;
-import ca.uhn.fhir.model.dstu.valueset.ParticipantTypeEnum;
-import ca.uhn.fhir.model.dstu.resource.Patient;
-import ca.uhn.fhir.model.dstu.valueset.PatientRelationshipTypeEnum;
-import ca.uhn.fhir.model.dstu.composite.PeriodDt;
-import ca.uhn.fhir.model.dstu.resource.Practitioner;
-import ca.uhn.fhir.model.dstu.valueset.PractitionerRoleEnum;
-import ca.uhn.fhir.model.dstu.valueset.PractitionerSpecialtyEnum;
-import ca.uhn.fhir.model.dstu.resource.Profile;
-import ca.uhn.fhir.model.dstu.valueset.PropertyRepresentationEnum;
-import ca.uhn.fhir.model.dstu.composite.QuantityDt;
-import ca.uhn.fhir.model.dstu.composite.RangeDt;
-import ca.uhn.fhir.model.dstu.composite.RatioDt;
-import ca.uhn.fhir.model.dstu.resource.RelatedPerson;
-import ca.uhn.fhir.model.dstu.valueset.ResourceProfileStatusEnum;
-import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
-import ca.uhn.fhir.model.dstu.valueset.ResourceTypeEnum;
-import ca.uhn.fhir.model.dstu.valueset.RestfulConformanceModeEnum;
-import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
-import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
-import ca.uhn.fhir.model.dstu.valueset.RestfulSecurityServiceEnum;
-import ca.uhn.fhir.model.dstu.composite.SampledDataDt;
-import ca.uhn.fhir.model.dstu.valueset.SearchParamTypeEnum;
-import ca.uhn.fhir.model.dstu.valueset.SlicingRulesEnum;
-import ca.uhn.fhir.model.dstu.resource.Specimen;
-import ca.uhn.fhir.model.dstu.valueset.SpecimenCollectionMethodEnum;
-import ca.uhn.fhir.model.dstu.valueset.SpecimenTreatmentProcedureEnum;
-import ca.uhn.fhir.model.dstu.resource.Substance;
-import ca.uhn.fhir.model.dstu.valueset.SubstanceTypeEnum;
-import ca.uhn.fhir.model.dstu.resource.ValueSet;
-import ca.uhn.fhir.model.dstu.valueset.ValueSetStatusEnum;
-import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.dstu.composite.DurationDt;
-import ca.uhn.fhir.model.primitive.Base64BinaryDt;
-import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.BoundCodeableConceptDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
-import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
-import ca.uhn.fhir.model.primitive.DecimalDt;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
-import ca.uhn.fhir.model.primitive.IntegerDt;
-import ca.uhn.fhir.model.primitive.OidDt;
 import ca.uhn.fhir.model.primitive.StringDt;
-import ca.uhn.fhir.model.primitive.UriDt;
 
 
 /**
@@ -473,7 +399,6 @@ public class Observation extends BaseResource implements IResource {
 		myName = theValue;
 	}
 
-
   
 	/**
 	 * Gets the value(s) for <b>value[x]</b> (Actual result).
@@ -500,7 +425,6 @@ public class Observation extends BaseResource implements IResource {
 	public void setValue(IDatatype theValue) {
 		myValue = theValue;
 	}
-
 
   
 	/**
@@ -531,7 +455,6 @@ public class Observation extends BaseResource implements IResource {
 	public void setInterpretation(BoundCodeableConceptDt<ObservationInterpretationCodesEnum> theValue) {
 		myInterpretation = theValue;
 	}
-
 
 	/**
 	 * Sets the value(s) for <b>interpretation</b> (High, low, normal, etc.)
@@ -575,7 +498,6 @@ public class Observation extends BaseResource implements IResource {
 		myComments = theValue;
 	}
 
-
  	/**
 	 * Sets the value for <b>comments</b> (Comments about result)
 	 *
@@ -584,8 +506,9 @@ public class Observation extends BaseResource implements IResource {
      * May include statements about significant, unexpected or unreliable values, or information about the source of the value where this may be relevant to the interpretation of the result.
      * </p> 
 	 */
-	public void setComments( String theString) {
+	public Observation setComments( String theString) {
 		myComments = new StringDt(theString); 
+		return this; 
 	}
 
  
@@ -614,7 +537,6 @@ public class Observation extends BaseResource implements IResource {
 	public void setApplies(IDatatype theValue) {
 		myApplies = theValue;
 	}
-
 
   
 	/**
@@ -646,7 +568,6 @@ public class Observation extends BaseResource implements IResource {
 		myIssued = theValue;
 	}
 
-
  	/**
 	 * Sets the value for <b>issued</b> (Date/Time this was made available)
 	 *
@@ -655,8 +576,9 @@ public class Observation extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public void setIssued( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myIssued = new InstantDt(theDate, thePrecision); 
+	public Observation setIssuedWithMillisPrecision( Date theDate) {
+		myIssued = new InstantDt(theDate); 
+		return this; 
 	}
 
 	/**
@@ -667,8 +589,9 @@ public class Observation extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public void setIssuedWithMillisPrecision( Date theDate) {
-		myIssued = new InstantDt(theDate); 
+	public Observation setIssued( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myIssued = new InstantDt(theDate, thePrecision); 
+		return this; 
 	}
 
  
@@ -700,7 +623,6 @@ public class Observation extends BaseResource implements IResource {
 	public void setStatus(BoundCodeDt<ObservationStatusEnum> theValue) {
 		myStatus = theValue;
 	}
-
 
 	/**
 	 * Sets the value(s) for <b>status</b> (registered | preliminary | final | amended +)
@@ -744,7 +666,6 @@ public class Observation extends BaseResource implements IResource {
 		myReliability = theValue;
 	}
 
-
 	/**
 	 * Sets the value(s) for <b>reliability</b> (ok | ongoing | early | questionable | calibrating | error +)
 	 *
@@ -787,7 +708,6 @@ public class Observation extends BaseResource implements IResource {
 		myBodySite = theValue;
 	}
 
-
   
 	/**
 	 * Gets the value(s) for <b>method</b> (How it was done).
@@ -817,7 +737,6 @@ public class Observation extends BaseResource implements IResource {
 	public void setMethod(CodeableConceptDt theValue) {
 		myMethod = theValue;
 	}
-
 
   
 	/**
@@ -849,7 +768,6 @@ public class Observation extends BaseResource implements IResource {
 		myIdentifier = theValue;
 	}
 
-
   
 	/**
 	 * Gets the value(s) for <b>subject</b> (Who and/or what this is about).
@@ -876,7 +794,6 @@ public class Observation extends BaseResource implements IResource {
 	public void setSubject(ResourceReferenceDt theValue) {
 		mySubject = theValue;
 	}
-
 
   
 	/**
@@ -908,7 +825,6 @@ public class Observation extends BaseResource implements IResource {
 		mySpecimen = theValue;
 	}
 
-
   
 	/**
 	 * Gets the value(s) for <b>performer</b> (Who did the observation).
@@ -936,7 +852,19 @@ public class Observation extends BaseResource implements IResource {
 		myPerformer = theValue;
 	}
 
-
+	/**
+	 * Adds and returns a new value for <b>performer</b> (Who did the observation)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Who was responsible for asserting the observed value as \"true\"
+     * </p> 
+	 */
+	public ResourceReferenceDt addPerformer() {
+		ResourceReferenceDt newType = new ResourceReferenceDt();
+		getPerformer().add(newType);
+		return newType; 
+	}
   
 	/**
 	 * Gets the value(s) for <b>referenceRange</b> (Provides guide for interpretation).
@@ -981,6 +909,21 @@ public class Observation extends BaseResource implements IResource {
 		return newType; 
 	}
 
+	/**
+	 * Gets the first repetition for <b>referenceRange</b> (Provides guide for interpretation),
+	 * creating it if it does not already exist.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Guidance on how to interpret the value by comparison to a normal or recommended range
+     * </p> 
+	 */
+	public ReferenceRange getReferenceRangeFirstRep() {
+		if (getReferenceRange().isEmpty()) {
+			return addReferenceRange();
+		}
+		return getReferenceRange().get(0); 
+	}
   
 	/**
 	 * Gets the value(s) for <b>related</b> (Observations related to this observation).
@@ -1025,6 +968,21 @@ public class Observation extends BaseResource implements IResource {
 		return newType; 
 	}
 
+	/**
+	 * Gets the first repetition for <b>related</b> (Observations related to this observation),
+	 * creating it if it does not already exist.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Related observations - either components, or previous observations, or statements of derivation
+     * </p> 
+	 */
+	public Related getRelatedFirstRep() {
+		if (getRelated().isEmpty()) {
+			return addRelated();
+		}
+		return getRelated().get(0); 
+	}
   
 	/**
 	 * Block class for child element: <b>Observation.referenceRange</b> (Provides guide for interpretation)
@@ -1110,7 +1068,6 @@ public class Observation extends BaseResource implements IResource {
 		myLow = theValue;
 	}
 
-
   
 	/**
 	 * Gets the value(s) for <b>high</b> (High Range, if relevant).
@@ -1140,7 +1097,6 @@ public class Observation extends BaseResource implements IResource {
 	public void setHigh(QuantityDt theValue) {
 		myHigh = theValue;
 	}
-
 
   
 	/**
@@ -1172,7 +1128,6 @@ public class Observation extends BaseResource implements IResource {
 		myMeaning = theValue;
 	}
 
-
   
 	/**
 	 * Gets the value(s) for <b>age</b> (Applicable age range, if relevant).
@@ -1202,7 +1157,6 @@ public class Observation extends BaseResource implements IResource {
 	public void setAge(RangeDt theValue) {
 		myAge = theValue;
 	}
-
 
   
 
@@ -1281,7 +1235,6 @@ public class Observation extends BaseResource implements IResource {
 		myType = theValue;
 	}
 
-
 	/**
 	 * Sets the value(s) for <b>type</b> (has-component | has-member | derived-from | sequel-to | replaces | qualified-by | interfered-by)
 	 *
@@ -1323,7 +1276,6 @@ public class Observation extends BaseResource implements IResource {
 	public void setTarget(ResourceReferenceDt theValue) {
 		myTarget = theValue;
 	}
-
 
   
 
