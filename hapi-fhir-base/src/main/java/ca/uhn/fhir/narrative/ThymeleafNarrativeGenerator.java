@@ -41,30 +41,15 @@ import ca.uhn.fhir.parser.DataFormatException;
 public class ThymeleafNarrativeGenerator implements INarrativeGenerator {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ThymeleafNarrativeGenerator.class);
 
-	private HashMap<String, String> myProfileToNarrativeTemplate;
-	private TemplateEngine myProfileTemplateEngine;
-
 	private HashMap<String, String> myDatatypeClassNameToNarrativeTemplate;
-
 	private TemplateEngine myDatatypeTemplateEngine;
 
 	private boolean myIgnoreFailures = true;
 
-	/**
-	 * If set to <code>true</code>, which is the default, if any failure occurs during narrative generation the generator will suppress any generated exceptions, and simply return a default narrative
-	 * indicating that no narrative is available.
-	 */
-	public boolean isIgnoreFailures() {
-		return myIgnoreFailures;
-	}
+	private boolean myIgnoreMissingTemplates = true;
 
-	/**
-	 * If set to <code>true</code>, which is the default, if any failure occurs during narrative generation the generator will suppress any generated exceptions, and simply return a default narrative
-	 * indicating that no narrative is available.
-	 */
-	public void setIgnoreFailures(boolean theIgnoreFailures) {
-		myIgnoreFailures = theIgnoreFailures;
-	}
+	private TemplateEngine myProfileTemplateEngine;
+	private HashMap<String, String> myProfileToNarrativeTemplate;
 
 	public ThymeleafNarrativeGenerator() throws IOException {
 		myProfileToNarrativeTemplate = new HashMap<String, String>();
@@ -94,6 +79,48 @@ public class ThymeleafNarrativeGenerator implements INarrativeGenerator {
 			myDatatypeTemplateEngine.initialize();
 		}
 
+	}
+
+	@Override
+	public NarrativeDt generateNarrative(String theProfile, IResource theResource) {
+		if (myIgnoreMissingTemplates && !myProfileToNarrativeTemplate.containsKey(theProfile)) {
+			ourLog.debug("No narrative template available for profile: {}", theProfile);
+			return new NarrativeDt(new XhtmlDt("<div>No narrative available</div>"), NarrativeStatusEnum.EMPTY);
+		}
+		
+		try {
+			Context context = new Context();
+			context.setVariable("resource", theResource);
+
+			String result = myProfileTemplateEngine.process(theProfile, context);
+			result = result.replaceAll("\\s+", " ").replace("> ", ">").replace(" <", "<");
+
+			XhtmlDt div = new XhtmlDt(result);
+			return new NarrativeDt(div, NarrativeStatusEnum.GENERATED);
+		} catch (Exception e) {
+			if (myIgnoreFailures) {
+				ourLog.error("Failed to generate narrative", e);
+				return new NarrativeDt(new XhtmlDt("<div>No narrative available</div>"), NarrativeStatusEnum.EMPTY);
+			} else {
+				throw new DataFormatException(e);
+			}
+		}
+	}
+
+	/**
+	 * If set to <code>true</code>, which is the default, if any failure occurs during narrative generation the generator will suppress any generated exceptions, and simply return a default narrative
+	 * indicating that no narrative is available.
+	 */
+	public boolean isIgnoreFailures() {
+		return myIgnoreFailures;
+	}
+
+	/**
+	 * If set to true, will return an empty narrative block for any
+	 * profiles where no template is available
+	 */
+	public boolean isIgnoreMissingTemplates() {
+		return myIgnoreMissingTemplates;
 	}
 
 	private void loadProperties(String propFileName) throws IOException {
@@ -144,37 +171,6 @@ public class ThymeleafNarrativeGenerator implements INarrativeGenerator {
 		}
 	}
 
-	@Override
-	public NarrativeDt generateNarrative(String theProfile, IResource theResource) {
-		try {
-			Context context = new Context();
-			context.setVariable("resource", theResource);
-
-			String result = myProfileTemplateEngine.process(theProfile, context);
-			result = result.replaceAll("\\s+", " ").replace("> ", ">").replace(" <", "<");
-
-			return new NarrativeDt(new XhtmlDt(result), NarrativeStatusEnum.GENERATED);
-		} catch (Exception e) {
-			if (myIgnoreFailures) {
-				ourLog.error("Failed to generate narrative", e);
-				return new NarrativeDt(new XhtmlDt("<div>Error: no narrative available</div>"), NarrativeStatusEnum.EMPTY);
-			} else {
-				throw new DataFormatException(e);
-			}
-		}
-	}
-
-	// public String generateString(Patient theValue) {
-	//
-	// Context context = new Context();
-	// context.setVariable("resource", theValue);
-	// String result = myProfileTemplateEngine.process("ca/uhn/fhir/narrative/Patient.html", context);
-	//
-	// ourLog.info("Result: {}", result);
-	//
-	// return result;
-	// }
-
 	private InputStream loadResource(String name) {
 		if (name.startsWith("classpath:")) {
 			String cpName = name.substring("classpath:".length());
@@ -191,17 +187,31 @@ public class ThymeleafNarrativeGenerator implements INarrativeGenerator {
 		}
 	}
 
-	private final class ProfileResourceResolver implements IResourceResolver {
-		@Override
-		public String getName() {
-			return getClass().getCanonicalName();
-		}
+	/**
+	 * If set to <code>true</code>, which is the default, if any failure occurs during narrative generation the generator will suppress any generated exceptions, and simply return a default narrative
+	 * indicating that no narrative is available.
+	 */
+	public void setIgnoreFailures(boolean theIgnoreFailures) {
+		myIgnoreFailures = theIgnoreFailures;
+	}
 
-		@Override
-		public InputStream getResourceAsStream(TemplateProcessingParameters theTemplateProcessingParameters, String theResourceName) {
-			String template = myProfileToNarrativeTemplate.get(theResourceName);
-			return new ReaderInputStream(new StringReader(template));
-		}
+	// public String generateString(Patient theValue) {
+	//
+	// Context context = new Context();
+	// context.setVariable("resource", theValue);
+	// String result = myProfileTemplateEngine.process("ca/uhn/fhir/narrative/Patient.html", context);
+	//
+	// ourLog.info("Result: {}", result);
+	//
+	// return result;
+	// }
+
+	/**
+	 * If set to true, will return an empty narrative block for any
+	 * profiles where no template is available
+	 */
+	public void setIgnoreMissingTemplates(boolean theIgnoreMissingTemplates) {
+		myIgnoreMissingTemplates = theIgnoreMissingTemplates;
 	}
 
 	private final class DatatypeResourceResolver implements IResourceResolver {
@@ -221,6 +231,11 @@ public class ThymeleafNarrativeGenerator implements INarrativeGenerator {
 
 		protected MyProcessor() {
 			super("narrative");
+		}
+
+		@Override
+		public int getPrecedence() {
+			return 0;
 		}
 
 		@Override
@@ -251,11 +266,23 @@ public class ThymeleafNarrativeGenerator implements INarrativeGenerator {
 			return ProcessorResult.ok();
 		}
 
+	}
+
+	private final class ProfileResourceResolver implements IResourceResolver {
 		@Override
-		public int getPrecedence() {
-			return 0;
+		public String getName() {
+			return getClass().getCanonicalName();
 		}
 
+		@Override
+		public InputStream getResourceAsStream(TemplateProcessingParameters theTemplateProcessingParameters, String theResourceName) {
+			String template = myProfileToNarrativeTemplate.get(theResourceName);
+			if (template == null) {
+				ourLog.info("No narative template for resource profile: {}", theResourceName);
+				return new ReaderInputStream(new StringReader(""));
+			}
+			return new ReaderInputStream(new StringReader(template));
+		}
 	}
 
 }

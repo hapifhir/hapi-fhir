@@ -8,4 +8,9 @@ public abstract class BasePrimitive<T> extends BaseElement implements IPrimitive
 		return super.isBaseEmpty() && getValue() == null;
 	}
 
+	@Override
+	public String toString() {
+		return getClass().getSimpleName() + "[" + getValueAsString() + "]";
+	}
+
 }

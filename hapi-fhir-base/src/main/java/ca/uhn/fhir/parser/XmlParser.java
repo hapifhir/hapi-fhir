@@ -519,7 +519,11 @@ public class XmlParser extends BaseParser implements IParser {
 				if (firstEvent) {
 					theEventWriter.writeStartElement(se.getName().getLocalPart());
 					if (StringUtils.isBlank(se.getName().getPrefix())) {
-						theEventWriter.writeDefaultNamespace(se.getName().getNamespaceURI());
+						String namespaceURI = se.getName().getNamespaceURI();
+						if (StringUtils.isBlank(namespaceURI)) {
+							namespaceURI = "http://www.w3.org/1999/xhtml";
+						}
+						theEventWriter.writeDefaultNamespace(namespaceURI);
 					} else {
 						theEventWriter.writeNamespace(se.getName().getPrefix(), se.getName().getNamespaceURI());
 					}
@@ -537,6 +541,10 @@ public class XmlParser extends BaseParser implements IParser {
 						}
 					} else {
 						theEventWriter.writeStartElement(se.getName().getPrefix(), se.getName().getLocalPart(), se.getName().getNamespaceURI());
+					}
+					for (Iterator<?> attrIter = se.getAttributes(); attrIter.hasNext(); ) {
+						Attribute next = (Attribute) attrIter.next();
+						theEventWriter.writeAttribute(next.getName().getLocalPart(), next.getValue());
 					}
 				}
 				break;

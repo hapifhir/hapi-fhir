@@ -1,6 +1,9 @@
 package ca.uhn.fhir.parser;
 
 import static org.junit.Assert.*;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -19,13 +22,17 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.api.UndeclaredExtension;
+import ca.uhn.fhir.model.dstu.composite.NarrativeDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.resource.DiagnosticReport;
 import ca.uhn.fhir.model.dstu.resource.Observation;
 import ca.uhn.fhir.model.dstu.resource.Organization;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.dstu.resource.Specimen;
+import ca.uhn.fhir.model.dstu.valueset.NarrativeStatusEnum;
 import ca.uhn.fhir.model.primitive.DecimalDt;
+import ca.uhn.fhir.model.primitive.XhtmlDt;
+import ca.uhn.fhir.narrative.INarrativeGenerator;
 
 public class JsonParserTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(JsonParserTest.class);
@@ -52,6 +59,29 @@ public class JsonParserTest {
 		
 	}
 
+	
+	@Test
+	public void testNarrativeGeneration() throws DataFormatException, IOException {
+		
+		Patient patient = new Patient();
+		
+		patient.addName().addFamily("Smith");
+		
+		INarrativeGenerator gen = mock(INarrativeGenerator.class);
+		XhtmlDt xhtmlDt = new XhtmlDt("<div>help</div>");
+		NarrativeDt nar = new NarrativeDt(xhtmlDt, NarrativeStatusEnum.GENERATED);
+		when(gen.generateNarrative(eq("http://hl7.org/fhir/profiles/Patient"), eq(patient))).thenReturn(nar);
+		
+		FhirContext context = new FhirContext();
+		context.setNarrativeGenerator(gen);
+		IParser p = context.newJsonParser();
+		p.encodeResourceToWriter(patient, new OutputStreamWriter(System.out));
+		String str = p.encodeResourceToString(patient);
+		
+		ourLog.info(str);
+	
+		assertThat(str, StringContains.containsString(",\"text\":{\"status\":\"generated\",\"div\":\"<div>help</div>\"},"));
+	}
 	
 	@Test
 	public void testSimpleResourceEncode() throws IOException {

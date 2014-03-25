@@ -1,11 +1,15 @@
 package ca.uhn.fhir.narrative;
 
+import static org.junit.Assert.assertThat;
+
 import java.io.IOException;
 import java.util.Date;
 
+import org.hamcrest.core.StringContains;
 import org.junit.Before;
 import org.junit.Test;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.dstu.composite.NarrativeDt;
 import ca.uhn.fhir.model.dstu.composite.QuantityDt;
@@ -15,7 +19,6 @@ import ca.uhn.fhir.model.dstu.resource.Observation;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.dstu.valueset.ObservationStatusEnum;
 import ca.uhn.fhir.parser.DataFormatException;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 
 public class ThymeleafNarrativeGeneratorTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ThymeleafNarrativeGeneratorTest.class);
@@ -25,10 +28,11 @@ public class ThymeleafNarrativeGeneratorTest {
 	public void before() throws IOException {
 		gen = new ThymeleafNarrativeGenerator();
 		gen.setIgnoreFailures(false);
+		gen.setIgnoreMissingTemplates(true);
 	}
 	
 	@Test
-	public void testGeneratePatient() throws DataFormatException, InternalErrorException {
+	public void testGeneratePatient() throws DataFormatException {
 		Patient value = new Patient();
 		
 		value.addIdentifier().setSystem("urn:names").setValue("123456");
@@ -44,7 +48,7 @@ public class ThymeleafNarrativeGeneratorTest {
 	}
 
 	@Test
-	public void testGenerateDiagnosticReport() throws DataFormatException, InternalErrorException {
+	public void testGenerateDiagnosticReport() throws DataFormatException {
 		DiagnosticReport value = new DiagnosticReport();
 		value.getName().setText("Some Diagnostic Report");
 
@@ -58,7 +62,7 @@ public class ThymeleafNarrativeGeneratorTest {
 	}
 
 	@Test
-	public void testGenerateDiagnosticReportWithObservations() throws DataFormatException, InternalErrorException {
+	public void testGenerateDiagnosticReportWithObservations() throws DataFormatException, IOException {
 		DiagnosticReport value = new DiagnosticReport();
 		value.getName().setText("Some Diagnostic Report");
 
@@ -76,6 +80,16 @@ public class ThymeleafNarrativeGeneratorTest {
 		String output = generateNarrative.getDiv().getValueAsString();
 
 		ourLog.info(output);
+		assertThat(output, StringContains.containsString("<div class=\"hapiHeaderText\">Some Diagnostic Report</div>"));
+		
+		// Now try it with the parser
+		
+		FhirContext context = new FhirContext();
+		context.setNarrativeGenerator(gen);
+		output = context.newXmlParser().setPrettyPrint(true).encodeResourceToString(value);
+		ourLog.info(output);
+		assertThat(output, StringContains.containsString("<div class=\"hapiHeaderText\">Some Diagnostic Report</div>"));
+		
 	}
 
 }
