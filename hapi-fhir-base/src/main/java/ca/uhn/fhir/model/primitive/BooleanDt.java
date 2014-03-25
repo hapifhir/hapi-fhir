@@ -21,7 +21,7 @@ public class BooleanDt extends BasePrimitive<Boolean> {
 	 * Constructor
 	 */
 	@SimpleSetter
-	public BooleanDt(@SimpleSetter.Parameter(name="theBoolean") Boolean theBoolean) {
+	public BooleanDt(@SimpleSetter.Parameter(name="theBoolean") boolean theBoolean) {
 		setValue(theBoolean);
 	}
 	

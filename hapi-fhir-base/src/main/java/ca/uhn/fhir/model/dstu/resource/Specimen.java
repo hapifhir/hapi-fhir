@@ -37,6 +37,8 @@ import ca.uhn.fhir.model.dstu.composite.PeriodDt;
 import ca.uhn.fhir.model.dstu.composite.QuantityDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.valueset.HierarchicalRelationshipTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
+import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
 import ca.uhn.fhir.model.dstu.valueset.SpecimenCollectionMethodEnum;
 import ca.uhn.fhir.model.dstu.valueset.SpecimenTreatmentProcedureEnum;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
@@ -217,7 +219,43 @@ public class Specimen extends BaseResource implements IResource {
 		}
 		return getIdentifier().get(0); 
 	}
-  
+ 	/**
+	 * Adds a new value for <b>identifier</b> (External Identifier)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Id for specimen
+     * </p> 
+     *
+     * @return Returns a reference to this object, to allow for simple chaining.
+	 */
+	public Specimen addIdentifier( IdentifierUseEnum theUse,  String theSystem,  String theValue,  String theLabel) {
+		if (myIdentifier == null) {
+			myIdentifier = new java.util.ArrayList<IdentifierDt>();
+		}
+		myIdentifier.add(new IdentifierDt(theUse, theSystem, theValue, theLabel));
+		return this; 
+	}
+
+	/**
+	 * Adds a new value for <b>identifier</b> (External Identifier)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Id for specimen
+     * </p> 
+     *
+     * @return Returns a reference to this object, to allow for simple chaining.
+	 */
+	public Specimen addIdentifier( String theSystem,  String theValue) {
+		if (myIdentifier == null) {
+			myIdentifier = new java.util.ArrayList<IdentifierDt>();
+		}
+		myIdentifier.add(new IdentifierDt(theSystem, theValue));
+		return this; 
+	}
+
+ 
 	/**
 	 * Gets the value(s) for <b>type</b> (Kind of material that forms the specimen).
 	 * creating it if it does
@@ -367,7 +405,33 @@ public class Specimen extends BaseResource implements IResource {
 		return this;
 	}
 
-  
+ 	/**
+	 * Sets the value for <b>accessionIdentifier</b> (Identifier assigned by the lab)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The identifier assigned by the lab when accessioning specimen(s). This is not necessarily the same as the specimen identifier, depending on local lab procedures.
+     * </p> 
+	 */
+	public Specimen setAccessionIdentifier( IdentifierUseEnum theUse,  String theSystem,  String theValue,  String theLabel) {
+		myAccessionIdentifier = new IdentifierDt(theUse, theSystem, theValue, theLabel); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>accessionIdentifier</b> (Identifier assigned by the lab)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The identifier assigned by the lab when accessioning specimen(s). This is not necessarily the same as the specimen identifier, depending on local lab procedures.
+     * </p> 
+	 */
+	public Specimen setAccessionIdentifier( String theSystem,  String theValue) {
+		myAccessionIdentifier = new IdentifierDt(theSystem, theValue); 
+		return this; 
+	}
+
+ 
 	/**
 	 * Gets the value(s) for <b>receivedTime</b> (The time when specimen was received for processing).
 	 * creating it if it does
@@ -952,7 +1016,59 @@ public class Specimen extends BaseResource implements IResource {
 		return this;
 	}
 
-  
+ 	/**
+	 * Sets the value for <b>quantity</b> (The quantity of specimen collected)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The quantity of specimen collected; for instance the volume of a blood sample, or the physical measurement of an anatomic pathology sample
+     * </p> 
+	 */
+	public Collection setQuantity( QuantityCompararatorEnum theComparator,  long theValue,  String theUnits) {
+		myQuantity = new QuantityDt(theComparator, theValue, theUnits); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>quantity</b> (The quantity of specimen collected)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The quantity of specimen collected; for instance the volume of a blood sample, or the physical measurement of an anatomic pathology sample
+     * </p> 
+	 */
+	public Collection setQuantity( QuantityCompararatorEnum theComparator,  double theValue,  String theUnits) {
+		myQuantity = new QuantityDt(theComparator, theValue, theUnits); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>quantity</b> (The quantity of specimen collected)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The quantity of specimen collected; for instance the volume of a blood sample, or the physical measurement of an anatomic pathology sample
+     * </p> 
+	 */
+	public Collection setQuantity( long theValue) {
+		myQuantity = new QuantityDt(theValue); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>quantity</b> (The quantity of specimen collected)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The quantity of specimen collected; for instance the volume of a blood sample, or the physical measurement of an anatomic pathology sample
+     * </p> 
+	 */
+	public Collection setQuantity( double theValue) {
+		myQuantity = new QuantityDt(theValue); 
+		return this; 
+	}
+
+ 
 	/**
 	 * Gets the value(s) for <b>method</b> (Technique used to perform collection).
 	 * creating it if it does
@@ -1348,7 +1464,43 @@ public class Specimen extends BaseResource implements IResource {
 		}
 		return getIdentifier().get(0); 
 	}
-  
+ 	/**
+	 * Adds a new value for <b>identifier</b> (Id for the container)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Id for container. There may be multiple; a manufacturer's bar code, lab assigned identifier, etc. The container ID may differ from the specimen id in some circumstances
+     * </p> 
+     *
+     * @return Returns a reference to this object, to allow for simple chaining.
+	 */
+	public Container addIdentifier( IdentifierUseEnum theUse,  String theSystem,  String theValue,  String theLabel) {
+		if (myIdentifier == null) {
+			myIdentifier = new java.util.ArrayList<IdentifierDt>();
+		}
+		myIdentifier.add(new IdentifierDt(theUse, theSystem, theValue, theLabel));
+		return this; 
+	}
+
+	/**
+	 * Adds a new value for <b>identifier</b> (Id for the container)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Id for container. There may be multiple; a manufacturer's bar code, lab assigned identifier, etc. The container ID may differ from the specimen id in some circumstances
+     * </p> 
+     *
+     * @return Returns a reference to this object, to allow for simple chaining.
+	 */
+	public Container addIdentifier( String theSystem,  String theValue) {
+		if (myIdentifier == null) {
+			myIdentifier = new java.util.ArrayList<IdentifierDt>();
+		}
+		myIdentifier.add(new IdentifierDt(theSystem, theValue));
+		return this; 
+	}
+
+ 
 	/**
 	 * Gets the value(s) for <b>description</b> (Textual description of the container).
 	 * creating it if it does
@@ -1454,7 +1606,59 @@ public class Specimen extends BaseResource implements IResource {
 		return this;
 	}
 
-  
+ 	/**
+	 * Sets the value for <b>capacity</b> (Container volume or size)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The capacity (volume or other measure) the container may contain.
+     * </p> 
+	 */
+	public Container setCapacity( QuantityCompararatorEnum theComparator,  long theValue,  String theUnits) {
+		myCapacity = new QuantityDt(theComparator, theValue, theUnits); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>capacity</b> (Container volume or size)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The capacity (volume or other measure) the container may contain.
+     * </p> 
+	 */
+	public Container setCapacity( QuantityCompararatorEnum theComparator,  double theValue,  String theUnits) {
+		myCapacity = new QuantityDt(theComparator, theValue, theUnits); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>capacity</b> (Container volume or size)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The capacity (volume or other measure) the container may contain.
+     * </p> 
+	 */
+	public Container setCapacity( long theValue) {
+		myCapacity = new QuantityDt(theValue); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>capacity</b> (Container volume or size)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The capacity (volume or other measure) the container may contain.
+     * </p> 
+	 */
+	public Container setCapacity( double theValue) {
+		myCapacity = new QuantityDt(theValue); 
+		return this; 
+	}
+
+ 
 	/**
 	 * Gets the value(s) for <b>specimenQuantity</b> (Quantity of specimen within container).
 	 * creating it if it does
@@ -1485,7 +1689,59 @@ public class Specimen extends BaseResource implements IResource {
 		return this;
 	}
 
-  
+ 	/**
+	 * Sets the value for <b>specimenQuantity</b> (Quantity of specimen within container)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The quantity of specimen in the container; may be volume, dimensions, or other appropriate measurements, depending on the specimen type
+     * </p> 
+	 */
+	public Container setSpecimenQuantity( QuantityCompararatorEnum theComparator,  long theValue,  String theUnits) {
+		mySpecimenQuantity = new QuantityDt(theComparator, theValue, theUnits); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>specimenQuantity</b> (Quantity of specimen within container)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The quantity of specimen in the container; may be volume, dimensions, or other appropriate measurements, depending on the specimen type
+     * </p> 
+	 */
+	public Container setSpecimenQuantity( QuantityCompararatorEnum theComparator,  double theValue,  String theUnits) {
+		mySpecimenQuantity = new QuantityDt(theComparator, theValue, theUnits); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>specimenQuantity</b> (Quantity of specimen within container)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The quantity of specimen in the container; may be volume, dimensions, or other appropriate measurements, depending on the specimen type
+     * </p> 
+	 */
+	public Container setSpecimenQuantity( long theValue) {
+		mySpecimenQuantity = new QuantityDt(theValue); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>specimenQuantity</b> (Quantity of specimen within container)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The quantity of specimen in the container; may be volume, dimensions, or other appropriate measurements, depending on the specimen type
+     * </p> 
+	 */
+	public Container setSpecimenQuantity( double theValue) {
+		mySpecimenQuantity = new QuantityDt(theValue); 
+		return this; 
+	}
+
+ 
 	/**
 	 * Gets the value(s) for <b>additive</b> (Additive associated with container).
 	 * creating it if it does

@@ -39,6 +39,7 @@
 				<configuration>
 					<package>ca.uhn.fhir.model.dstu</package>
 					<baseResourceNames>
+						<baseResourceName>adversereaction</baseResourceName>
 						<baseResourceName>conformance</baseResourceName>
 						<baseResourceName>device</baseResourceName>
 						<baseResourceName>diagnosticorder</baseResourceName>

@@ -25,6 +25,7 @@ import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.SimpleSetter;
 import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
@@ -59,9 +60,21 @@ public class IdentifierDt
 	/**
 	 * Creates a new identifier with the given system and value
 	 */
-	public IdentifierDt(String theSystem, String theValue) {
+	@SimpleSetter
+	public IdentifierDt(@SimpleSetter.Parameter(name="theSystem") String theSystem, @SimpleSetter.Parameter(name="theValue") String theValue) {
 		setSystem(theSystem);
 		setValue(theValue);
+	}
+
+	/**
+	 * Creates a new identifier with the given system and value
+	 */
+	@SimpleSetter
+	public IdentifierDt(@SimpleSetter.Parameter(name="theUse") IdentifierUseEnum theUse, @SimpleSetter.Parameter(name="theSystem") String theSystem, @SimpleSetter.Parameter(name="theValue") String theValue, @SimpleSetter.Parameter(name="theLabel") String theLabel) {
+		setUse(theUse);
+		setSystem(theSystem);
+		setValue(theValue);
+		setLabel(theLabel);
 	}
 
 	@Child(name="use", type=CodeDt.class, order=0, min=0, max=1)	

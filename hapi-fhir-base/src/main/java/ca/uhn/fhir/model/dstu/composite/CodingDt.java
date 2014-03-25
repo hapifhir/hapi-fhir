@@ -337,7 +337,7 @@ public class CodingDt
      * Indicates that this code was chosen by a user directly - i.e. off a pick list of available items (codes or displays)
      * </p> 
 	 */
-	public CodingDt setPrimary( Boolean theBoolean) {
+	public CodingDt setPrimary( boolean theBoolean) {
 		myPrimary = new BooleanDt(theBoolean); 
 		return this; 
 	}

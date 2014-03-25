@@ -30,10 +30,12 @@ public class UriDt extends BasePrimitive<URI> {
 		setValueAsString(theValue);
 	}
 
+	@Override
 	public URI getValue() {
 		return myValue;
 	}
 
+	@Override
 	public void setValue(URI theValue) {
 		myValue = theValue;
 	}

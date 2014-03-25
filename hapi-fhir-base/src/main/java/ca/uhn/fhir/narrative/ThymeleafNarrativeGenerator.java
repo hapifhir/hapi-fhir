@@ -1,6 +1,6 @@
 package ca.uhn.fhir.narrative;
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -31,12 +31,12 @@ import org.thymeleaf.templateresolver.TemplateResolver;
 import org.thymeleaf.util.DOMUtils;
 
 import ca.uhn.fhir.context.ConfigurationException;
-import ca.uhn.fhir.model.api.IDatatype;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.composite.NarrativeDt;
 import ca.uhn.fhir.model.dstu.composite.QuantityDt;
 import ca.uhn.fhir.model.dstu.valueset.NarrativeStatusEnum;
 import ca.uhn.fhir.model.primitive.XhtmlDt;
+import ca.uhn.fhir.parser.DataFormatException;
 
 public class ThymeleafNarrativeGenerator implements INarrativeGenerator {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ThymeleafNarrativeGenerator.class);
@@ -47,6 +47,24 @@ public class ThymeleafNarrativeGenerator implements INarrativeGenerator {
 	private HashMap<String, String> myDatatypeClassNameToNarrativeTemplate;
 
 	private TemplateEngine myDatatypeTemplateEngine;
+
+	private boolean myIgnoreFailures = true;
+
+	/**
+	 * If set to <code>true</code>, which is the default, if any failure occurs during narrative generation the generator will suppress any generated exceptions, and simply return a default narrative
+	 * indicating that no narrative is available.
+	 */
+	public boolean isIgnoreFailures() {
+		return myIgnoreFailures;
+	}
+
+	/**
+	 * If set to <code>true</code>, which is the default, if any failure occurs during narrative generation the generator will suppress any generated exceptions, and simply return a default narrative
+	 * indicating that no narrative is available.
+	 */
+	public void setIgnoreFailures(boolean theIgnoreFailures) {
+		myIgnoreFailures = theIgnoreFailures;
+	}
 
 	public ThymeleafNarrativeGenerator() throws IOException {
 		myProfileToNarrativeTemplate = new HashMap<String, String>();
@@ -131,15 +149,18 @@ public class ThymeleafNarrativeGenerator implements INarrativeGenerator {
 		try {
 			Context context = new Context();
 			context.setVariable("resource", theResource);
-			context.setVariable("render", new SubElementRenderer());
 
 			String result = myProfileTemplateEngine.process(theProfile, context);
 			result = result.replaceAll("\\s+", " ").replace("> ", ">").replace(" <", "<");
 
 			return new NarrativeDt(new XhtmlDt(result), NarrativeStatusEnum.GENERATED);
 		} catch (Exception e) {
-			ourLog.error("Failed to generate narrative", e);
-			return null;
+			if (myIgnoreFailures) {
+				ourLog.error("Failed to generate narrative", e);
+				return new NarrativeDt(new XhtmlDt("<div>Error: no narrative available</div>"), NarrativeStatusEnum.EMPTY);
+			} else {
+				throw new DataFormatException(e);
+			}
 		}
 	}
 
@@ -233,14 +254,6 @@ public class ThymeleafNarrativeGenerator implements INarrativeGenerator {
 		@Override
 		public int getPrecedence() {
 			return 0;
-		}
-
-	}
-
-	public class SubElementRenderer {
-
-		public String formatDt(IDatatype theDatatype) {
-			return "AAA<div></div>";
 		}
 
 	}

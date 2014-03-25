@@ -1,4 +1,4 @@
-package ca.uhn.fhir.rest.server;
+package ca.uhn.fhir.rest.method;
 
 import java.io.UnsupportedEncodingException;
 import java.lang.annotation.Annotation;
@@ -25,7 +25,7 @@ import ca.uhn.fhir.util.ReflectionUtil;
 /**
  * Created by dsotnikov on 2/25/2014.
  */
-public class Util {
+class Util {
 	public static Map<String, String> getQueryParams(String query) {
 		try {
 

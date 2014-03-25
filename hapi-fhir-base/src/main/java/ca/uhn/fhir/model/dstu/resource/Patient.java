@@ -40,6 +40,7 @@ import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
 import ca.uhn.fhir.model.dstu.valueset.AnimalSpeciesEnum;
+import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
 import ca.uhn.fhir.model.dstu.valueset.LinkTypeEnum;
 import ca.uhn.fhir.model.dstu.valueset.MaritalStatusCodesEnum;
 import ca.uhn.fhir.model.primitive.BooleanDt;
@@ -423,7 +424,43 @@ public class Patient extends BaseResource implements IResource {
 		}
 		return getIdentifier().get(0); 
 	}
-  
+ 	/**
+	 * Adds a new value for <b>identifier</b> (An identifier for the person as this patient)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * An identifier that applies to this person as a patient
+     * </p> 
+     *
+     * @return Returns a reference to this object, to allow for simple chaining.
+	 */
+	public Patient addIdentifier( IdentifierUseEnum theUse,  String theSystem,  String theValue,  String theLabel) {
+		if (myIdentifier == null) {
+			myIdentifier = new java.util.ArrayList<IdentifierDt>();
+		}
+		myIdentifier.add(new IdentifierDt(theUse, theSystem, theValue, theLabel));
+		return this; 
+	}
+
+	/**
+	 * Adds a new value for <b>identifier</b> (An identifier for the person as this patient)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * An identifier that applies to this person as a patient
+     * </p> 
+     *
+     * @return Returns a reference to this object, to allow for simple chaining.
+	 */
+	public Patient addIdentifier( String theSystem,  String theValue) {
+		if (myIdentifier == null) {
+			myIdentifier = new java.util.ArrayList<IdentifierDt>();
+		}
+		myIdentifier.add(new IdentifierDt(theSystem, theValue));
+		return this; 
+	}
+
+ 
 	/**
 	 * Gets the value(s) for <b>name</b> (A name associated with the patient).
 	 * creating it if it does
@@ -1186,7 +1223,7 @@ public class Patient extends BaseResource implements IResource {
      * Whether this patient record is in active use
      * </p> 
 	 */
-	public Patient setActive( Boolean theBoolean) {
+	public Patient setActive( boolean theBoolean) {
 		myActive = new BooleanDt(theBoolean); 
 		return this; 
 	}

@@ -33,6 +33,7 @@ import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.dstu.composite.ContactDt;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.valueset.FilterOperatorEnum;
+import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
 import ca.uhn.fhir.model.dstu.valueset.ValueSetStatusEnum;
 import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
@@ -691,7 +692,7 @@ public class ValueSet extends BaseResource implements IResource {
      * This valueset was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage
      * </p> 
 	 */
-	public ValueSet setExperimental( Boolean theBoolean) {
+	public ValueSet setExperimental( boolean theBoolean) {
 		myExperimental = new BooleanDt(theBoolean); 
 		return this; 
 	}
@@ -735,7 +736,7 @@ public class ValueSet extends BaseResource implements IResource {
      * Whether this is intended to be used with an extensible binding or not
      * </p> 
 	 */
-	public ValueSet setExtensible( Boolean theBoolean) {
+	public ValueSet setExtensible( boolean theBoolean) {
 		myExtensible = new BooleanDt(theBoolean); 
 		return this; 
 	}
@@ -1072,7 +1073,7 @@ public class ValueSet extends BaseResource implements IResource {
      * If code comparison is case sensitive when codes within this system are compared to each other
      * </p> 
 	 */
-	public Define setCaseSensitive( Boolean theBoolean) {
+	public Define setCaseSensitive( boolean theBoolean) {
 		myCaseSensitive = new BooleanDt(theBoolean); 
 		return this; 
 	}
@@ -1285,7 +1286,7 @@ public class ValueSet extends BaseResource implements IResource {
      * If this code is not for use as a real concept
      * </p> 
 	 */
-	public DefineConcept setAbstract( Boolean theBoolean) {
+	public DefineConcept setAbstract( boolean theBoolean) {
 		myAbstract = new BooleanDt(theBoolean); 
 		return this; 
 	}
@@ -2241,7 +2242,33 @@ public class ValueSet extends BaseResource implements IResource {
 		return this;
 	}
 
-  
+ 	/**
+	 * Sets the value for <b>identifier</b> (Uniquely identifies this expansion)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * An identifier that uniquely identifies this expansion of the valueset. Systems may re-use the same identifier as long as the expansion and the definition remain the same, but are not required to do so
+     * </p> 
+	 */
+	public Expansion setIdentifier( IdentifierUseEnum theUse,  String theSystem,  String theValue,  String theLabel) {
+		myIdentifier = new IdentifierDt(theUse, theSystem, theValue, theLabel); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>identifier</b> (Uniquely identifies this expansion)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * An identifier that uniquely identifies this expansion of the valueset. Systems may re-use the same identifier as long as the expansion and the definition remain the same, but are not required to do so
+     * </p> 
+	 */
+	public Expansion setIdentifier( String theSystem,  String theValue) {
+		myIdentifier = new IdentifierDt(theSystem, theValue); 
+		return this; 
+	}
+
+ 
 	/**
 	 * Gets the value(s) for <b>timestamp</b> (Time valueset expansion happened).
 	 * creating it if it does

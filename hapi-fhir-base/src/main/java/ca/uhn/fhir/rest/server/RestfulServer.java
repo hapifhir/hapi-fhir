@@ -25,6 +25,7 @@ import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.narrative.INarrativeGenerator;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.method.Request;
@@ -49,11 +50,28 @@ public abstract class RestfulServer extends HttpServlet {
 
 	private FhirContext myFhirContext;
 	private boolean myUseBrowserFriendlyContentTypes;
+	private INarrativeGenerator myNarrativeGenerator;
+
+	public INarrativeGenerator getNarrativeGenerator() {
+		return myNarrativeGenerator;
+	}
 
 	/**
-	 * If set to <code>true</code> (default is false), the server will use browser friendly
-	 * content-types (instead of standard FHIR ones) when it detects that the request
-	 * is coming from a browser instead of a FHIR
+	 * Sets the {@link INarrativeGenerator Narrative Generator} to use when serializing responses from this server, or <code>null</code> (which is the default) to disable narrative generation.
+	 * 
+	 * @throws IllegalStateException
+	 *             Note that this method can only be called prior to {@link #init() initialization} and will throw an {@link IllegalStateException} if called after that.
+	 */
+	public void setNarrativeGenerator(INarrativeGenerator theNarrativeGenerator) {
+		if (myFhirContext != null) {
+			throw new IllegalStateException("Server has already been initialized, can not change this property");
+		}
+		myNarrativeGenerator = theNarrativeGenerator;
+	}
+
+	/**
+	 * If set to <code>true</code> (default is false), the server will use browser friendly content-types (instead of standard FHIR ones) when it detects that the request is coming from a browser
+	 * instead of a FHIR
 	 */
 	public void setUseBrowserFriendlyContentTypes(boolean theUseBrowserFriendlyContentTypes) {
 		myUseBrowserFriendlyContentTypes = theUseBrowserFriendlyContentTypes;
@@ -190,13 +208,12 @@ public abstract class RestfulServer extends HttpServlet {
 			if (null != securityManager) {
 				securityManager.authenticate(request);
 			}
-			
+
 			String uaHeader = request.getHeader("user-agent");
 			boolean requestIsBrowser = false;
 			if (uaHeader != null && uaHeader.contains("Mozilla")) {
 				requestIsBrowser = true;
 			}
-			
 
 			String resourceName = null;
 			String requestFullPath = StringUtils.defaultString(request.getRequestURI());
@@ -227,17 +244,17 @@ public abstract class RestfulServer extends HttpServlet {
 			}
 
 			int contextIndex;
-			if (servletPath.length()==0) {
+			if (servletPath.length() == 0) {
 				contextIndex = requestUrl.indexOf(requestPath);
-			}else {
+			} else {
 				contextIndex = requestUrl.indexOf(servletPath);
 			}
-			
+
 			String fhirServerBase = requestUrl.substring(0, contextIndex + servletPath.length());
 			if (fhirServerBase.endsWith("/")) {
 				fhirServerBase = fhirServerBase.substring(0, fhirServerBase.length() - 1);
 			}
-			
+
 			String completeUrl = StringUtils.isNotBlank(request.getQueryString()) ? requestUrl + "?" + request.getQueryString() : requestUrl.toString();
 
 			Map<String, String[]> params = new HashMap<String, String[]>(request.getParameterMap());
@@ -346,7 +363,8 @@ public abstract class RestfulServer extends HttpServlet {
 	}
 
 	@Override
-	public void init() throws ServletException {
+	public final void init() throws ServletException {
+		initialize();
 		try {
 			ourLog.info("Initializing HAPI FHIR restful server");
 
@@ -366,6 +384,7 @@ public abstract class RestfulServer extends HttpServlet {
 			ourLog.info("Got {} resource providers", myTypeToProvider.size());
 
 			myFhirContext = new FhirContext(myTypeToProvider.keySet());
+			myFhirContext.setNarrativeGenerator(myNarrativeGenerator);
 
 			for (IResourceProvider provider : myTypeToProvider.values()) {
 				findResourceMethods(provider);
@@ -378,20 +397,29 @@ public abstract class RestfulServer extends HttpServlet {
 			ourLog.error("An error occurred while loading request handlers!", ex);
 			throw new ServletException("Failed to initialize FHIR Restful server", ex);
 		}
+
+		ourLog.info("A FHIR has been lit on this server");
+	}
+
+	/**
+	 * This method may be overridden by subclasses to do perform initialization that needs to be performed prior to the server being used.
+	 */
+	protected void initialize() {
+		// nothing by default
 	}
 
 	private void streamResponseAsBundle(HttpServletResponse theHttpResponse, List<IResource> theResult, EncodingUtil theResponseEncoding, String theServerBase, String theCompleteUrl,
 			boolean thePrettyPrint, boolean theRequestIsBrowser) throws IOException {
 		assert !theServerBase.endsWith("/");
-		
+
 		theHttpResponse.setStatus(200);
-		
+
 		if (theRequestIsBrowser && myUseBrowserFriendlyContentTypes) {
 			theHttpResponse.setContentType(theResponseEncoding.getBrowserFriendlyBundleContentType());
 		} else {
 			theHttpResponse.setContentType(theResponseEncoding.getBundleContentType());
 		}
-		
+
 		theHttpResponse.setCharacterEncoding("UTF-8");
 
 		Bundle bundle = new Bundle();
@@ -440,11 +468,15 @@ public abstract class RestfulServer extends HttpServlet {
 		bundle.getTotalResults().setValue(theResult.size());
 
 		PrintWriter writer = theHttpResponse.getWriter();
-		getNewParser(theResponseEncoding, thePrettyPrint).encodeBundleToWriter(bundle, writer);
-		writer.close();
+		try {
+			getNewParser(theResponseEncoding, thePrettyPrint).encodeBundleToWriter(bundle, writer);
+		} finally {
+			writer.close();
+		}
 	}
 
-	private void streamResponseAsResource(HttpServletResponse theHttpResponse, IResource theResource, EncodingUtil theResponseEncoding, boolean thePrettyPrint, boolean theRequestIsBrowser) throws IOException {
+	private void streamResponseAsResource(HttpServletResponse theHttpResponse, IResource theResource, EncodingUtil theResponseEncoding, boolean thePrettyPrint, boolean theRequestIsBrowser)
+			throws IOException {
 
 		theHttpResponse.setStatus(200);
 		if (theRequestIsBrowser && myUseBrowserFriendlyContentTypes) {

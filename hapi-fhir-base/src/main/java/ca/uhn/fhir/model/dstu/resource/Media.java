@@ -31,6 +31,7 @@ import ca.uhn.fhir.model.dstu.composite.AttachmentDt;
 import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
 import ca.uhn.fhir.model.dstu.valueset.MediaTypeEnum;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
@@ -376,7 +377,43 @@ public class Media extends BaseResource implements IResource {
 		}
 		return getIdentifier().get(0); 
 	}
-  
+ 	/**
+	 * Adds a new value for <b>identifier</b> (Identifier(s) for the image)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Identifiers associated with the image - these may include identifiers for the image itself, identifiers for the context of its collection (e.g. series ids) and context ids such as accession numbers or other workflow identifiers
+     * </p> 
+     *
+     * @return Returns a reference to this object, to allow for simple chaining.
+	 */
+	public Media addIdentifier( IdentifierUseEnum theUse,  String theSystem,  String theValue,  String theLabel) {
+		if (myIdentifier == null) {
+			myIdentifier = new java.util.ArrayList<IdentifierDt>();
+		}
+		myIdentifier.add(new IdentifierDt(theUse, theSystem, theValue, theLabel));
+		return this; 
+	}
+
+	/**
+	 * Adds a new value for <b>identifier</b> (Identifier(s) for the image)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Identifiers associated with the image - these may include identifiers for the image itself, identifiers for the context of its collection (e.g. series ids) and context ids such as accession numbers or other workflow identifiers
+     * </p> 
+     *
+     * @return Returns a reference to this object, to allow for simple chaining.
+	 */
+	public Media addIdentifier( String theSystem,  String theValue) {
+		if (myIdentifier == null) {
+			myIdentifier = new java.util.ArrayList<IdentifierDt>();
+		}
+		myIdentifier.add(new IdentifierDt(theSystem, theValue));
+		return this; 
+	}
+
+ 
 	/**
 	 * Gets the value(s) for <b>dateTime</b> (When the media was taken/recorded (end)).
 	 * creating it if it does
@@ -606,7 +643,7 @@ public class Media extends BaseResource implements IResource {
      * Height of the image in pixels(photo/video)
      * </p> 
 	 */
-	public Media setHeight( Integer theInteger) {
+	public Media setHeight( int theInteger) {
 		myHeight = new IntegerDt(theInteger); 
 		return this; 
 	}
@@ -650,7 +687,7 @@ public class Media extends BaseResource implements IResource {
      * Width of the image in pixels (photo/video)
      * </p> 
 	 */
-	public Media setWidth( Integer theInteger) {
+	public Media setWidth( int theInteger) {
 		myWidth = new IntegerDt(theInteger); 
 		return this; 
 	}
@@ -694,7 +731,7 @@ public class Media extends BaseResource implements IResource {
      * The number of frames in a photo. This is used with a multi-page fax, or an imaging acquisition context that takes multiple slices in a single image, or an animated gif. If there is more than one frame, this SHALL have a value in order to alert interface software that a multi-frame capable rendering widget is required
      * </p> 
 	 */
-	public Media setFrames( Integer theInteger) {
+	public Media setFrames( int theInteger) {
 		myFrames = new IntegerDt(theInteger); 
 		return this; 
 	}
@@ -738,7 +775,7 @@ public class Media extends BaseResource implements IResource {
      * The length of the recording in seconds - for audio and video
      * </p> 
 	 */
-	public Media setLength( Integer theInteger) {
+	public Media setLength( int theInteger) {
 		myLength = new IntegerDt(theInteger); 
 		return this; 
 	}

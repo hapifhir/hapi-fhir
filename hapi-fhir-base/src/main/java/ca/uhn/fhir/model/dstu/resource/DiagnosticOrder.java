@@ -35,6 +35,7 @@ import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.valueset.DiagnosticOrderPriorityEnum;
 import ca.uhn.fhir.model.dstu.valueset.DiagnosticOrderStatusEnum;
+import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
@@ -434,7 +435,43 @@ public class DiagnosticOrder extends BaseResource implements IResource {
 		}
 		return getIdentifier().get(0); 
 	}
-  
+ 	/**
+	 * Adds a new value for <b>identifier</b> (Identifiers assigned to this order)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Identifiers assigned to this order by the order or by the receiver
+     * </p> 
+     *
+     * @return Returns a reference to this object, to allow for simple chaining.
+	 */
+	public DiagnosticOrder addIdentifier( IdentifierUseEnum theUse,  String theSystem,  String theValue,  String theLabel) {
+		if (myIdentifier == null) {
+			myIdentifier = new java.util.ArrayList<IdentifierDt>();
+		}
+		myIdentifier.add(new IdentifierDt(theUse, theSystem, theValue, theLabel));
+		return this; 
+	}
+
+	/**
+	 * Adds a new value for <b>identifier</b> (Identifiers assigned to this order)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Identifiers assigned to this order by the order or by the receiver
+     * </p> 
+     *
+     * @return Returns a reference to this object, to allow for simple chaining.
+	 */
+	public DiagnosticOrder addIdentifier( String theSystem,  String theValue) {
+		if (myIdentifier == null) {
+			myIdentifier = new java.util.ArrayList<IdentifierDt>();
+		}
+		myIdentifier.add(new IdentifierDt(theSystem, theValue));
+		return this; 
+	}
+
+ 
 	/**
 	 * Gets the value(s) for <b>encounter</b> (The encounter that this diagnostic order is associated with).
 	 * creating it if it does

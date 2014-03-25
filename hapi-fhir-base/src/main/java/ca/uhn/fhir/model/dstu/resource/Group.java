@@ -35,6 +35,7 @@ import ca.uhn.fhir.model.dstu.composite.QuantityDt;
 import ca.uhn.fhir.model.dstu.composite.RangeDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.valueset.GroupTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
 import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
@@ -258,7 +259,33 @@ public class Group extends BaseResource implements IResource {
 		return this;
 	}
 
-  
+ 	/**
+	 * Sets the value for <b>identifier</b> (Unique id)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A unique business identifier for this group
+     * </p> 
+	 */
+	public Group setIdentifier( IdentifierUseEnum theUse,  String theSystem,  String theValue,  String theLabel) {
+		myIdentifier = new IdentifierDt(theUse, theSystem, theValue, theLabel); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>identifier</b> (Unique id)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A unique business identifier for this group
+     * </p> 
+	 */
+	public Group setIdentifier( String theSystem,  String theValue) {
+		myIdentifier = new IdentifierDt(theSystem, theValue); 
+		return this; 
+	}
+
+ 
 	/**
 	 * Gets the value(s) for <b>type</b> (person | animal | practitioner | device | medication | substance).
 	 * creating it if it does
@@ -341,7 +368,7 @@ public class Group extends BaseResource implements IResource {
      * If true, indicates that the resource refers to a specific group of real individuals.  If false, the group defines a set of intended individuals
      * </p> 
 	 */
-	public Group setActual( Boolean theBoolean) {
+	public Group setActual( boolean theBoolean) {
 		myActual = new BooleanDt(theBoolean); 
 		return this; 
 	}
@@ -460,7 +487,7 @@ public class Group extends BaseResource implements IResource {
      * A count of the number of resource instances that are part of the group
      * </p> 
 	 */
-	public Group setQuantity( Integer theInteger) {
+	public Group setQuantity( int theInteger) {
 		myQuantity = new IntegerDt(theInteger); 
 		return this; 
 	}
@@ -717,7 +744,7 @@ public class Group extends BaseResource implements IResource {
      * If true, indicates the characteristic is one that is NOT held by members of the group
      * </p> 
 	 */
-	public Characteristic setExclude( Boolean theBoolean) {
+	public Characteristic setExclude( boolean theBoolean) {
 		myExclude = new BooleanDt(theBoolean); 
 		return this; 
 	}

@@ -31,6 +31,7 @@ import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu.composite.ContactDt;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
 import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
@@ -306,7 +307,43 @@ public class Device extends BaseResource implements IResource {
 		}
 		return getIdentifier().get(0); 
 	}
-  
+ 	/**
+	 * Adds a new value for <b>identifier</b> (Instance id from manufacturer, owner and others)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Identifiers assigned to this device by various organizations. The most likely organizations to assign identifiers are the manufacturer and the owner, though regulatory agencies may also assign an identifier. The identifiers identify the particular device, not the kind of device
+     * </p> 
+     *
+     * @return Returns a reference to this object, to allow for simple chaining.
+	 */
+	public Device addIdentifier( IdentifierUseEnum theUse,  String theSystem,  String theValue,  String theLabel) {
+		if (myIdentifier == null) {
+			myIdentifier = new java.util.ArrayList<IdentifierDt>();
+		}
+		myIdentifier.add(new IdentifierDt(theUse, theSystem, theValue, theLabel));
+		return this; 
+	}
+
+	/**
+	 * Adds a new value for <b>identifier</b> (Instance id from manufacturer, owner and others)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Identifiers assigned to this device by various organizations. The most likely organizations to assign identifiers are the manufacturer and the owner, though regulatory agencies may also assign an identifier. The identifiers identify the particular device, not the kind of device
+     * </p> 
+     *
+     * @return Returns a reference to this object, to allow for simple chaining.
+	 */
+	public Device addIdentifier( String theSystem,  String theValue) {
+		if (myIdentifier == null) {
+			myIdentifier = new java.util.ArrayList<IdentifierDt>();
+		}
+		myIdentifier.add(new IdentifierDt(theSystem, theValue));
+		return this; 
+	}
+
+ 
 	/**
 	 * Gets the value(s) for <b>type</b> (What kind of device this is).
 	 * creating it if it does

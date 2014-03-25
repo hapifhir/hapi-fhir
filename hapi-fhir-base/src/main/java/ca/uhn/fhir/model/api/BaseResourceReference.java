@@ -3,6 +3,7 @@ package ca.uhn.fhir.model.api;
 import java.io.IOException;
 import java.io.Reader;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -18,6 +19,32 @@ public abstract class BaseResourceReference extends BaseElement {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseResourceReference.class);
 	private IResource myResource;
+	private String myResourceId;
+	private Class<? extends IResource> myResourceType;
+
+	/**
+	 * Constructor
+	 */
+	public BaseResourceReference() {
+		// nothing
+	}
+	
+	/**
+	 * Constructor
+	 */
+	public BaseResourceReference(Class<? extends IResource> theResourceType, String theResourceId) {
+		myResourceType = theResourceType;
+		myResourceId = theResourceId;
+	}
+
+	@Override
+	protected boolean isBaseEmpty() {
+		return super.isBaseEmpty() && myResource == null && myResourceType == null && StringUtils.isBlank(myResourceId);
+	}
+
+	public BaseResourceReference(IResource theResource) {
+		myResource=theResource;
+	}
 
 	/**
 	 * Gets the value(s) for <b>reference</b> (Relative, internal or absolute URL reference). creating it if it does not exist. Will not return <code>null</code>.
@@ -41,6 +68,14 @@ public abstract class BaseResourceReference extends BaseElement {
 	 */
 	public IResource getResource() {
 		return myResource;
+	}
+
+	public String getResourceId() {
+		return myResourceId;
+	}
+
+	public Class<? extends IResource> getResourceType() {
+		return myResourceType;
 	}
 
 	public String getResourceUrl() {
@@ -86,6 +121,14 @@ public abstract class BaseResourceReference extends BaseElement {
 
 	public void setResource(IResource theResource) {
 		myResource = theResource;
+	}
+
+	public void setResourceId(String theResourceId) {
+		myResourceId = theResourceId;
+	}
+
+	public void setResourceType(Class<? extends IResource> theResourceType) {
+		myResourceType = theResourceType;
 	}
 
 }

@@ -38,6 +38,7 @@ import ca.uhn.fhir.model.dstu.valueset.EncounterClassEnum;
 import ca.uhn.fhir.model.dstu.valueset.EncounterReasonCodesEnum;
 import ca.uhn.fhir.model.dstu.valueset.EncounterStateEnum;
 import ca.uhn.fhir.model.dstu.valueset.EncounterTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
 import ca.uhn.fhir.model.dstu.valueset.ParticipantTypeEnum;
 import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
@@ -341,7 +342,43 @@ public class Encounter extends BaseResource implements IResource {
 		}
 		return getIdentifier().get(0); 
 	}
-  
+ 	/**
+	 * Adds a new value for <b>identifier</b> (Identifier(s) by which this encounter is known)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * 
+     * </p> 
+     *
+     * @return Returns a reference to this object, to allow for simple chaining.
+	 */
+	public Encounter addIdentifier( IdentifierUseEnum theUse,  String theSystem,  String theValue,  String theLabel) {
+		if (myIdentifier == null) {
+			myIdentifier = new java.util.ArrayList<IdentifierDt>();
+		}
+		myIdentifier.add(new IdentifierDt(theUse, theSystem, theValue, theLabel));
+		return this; 
+	}
+
+	/**
+	 * Adds a new value for <b>identifier</b> (Identifier(s) by which this encounter is known)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * 
+     * </p> 
+     *
+     * @return Returns a reference to this object, to allow for simple chaining.
+	 */
+	public Encounter addIdentifier( String theSystem,  String theValue) {
+		if (myIdentifier == null) {
+			myIdentifier = new java.util.ArrayList<IdentifierDt>();
+		}
+		myIdentifier.add(new IdentifierDt(theSystem, theValue));
+		return this; 
+	}
+
+ 
 	/**
 	 * Gets the value(s) for <b>status</b> (planned | in progress | onleave | finished | cancelled).
 	 * creating it if it does
@@ -1179,7 +1216,33 @@ public class Encounter extends BaseResource implements IResource {
 		return this;
 	}
 
-  
+ 	/**
+	 * Sets the value for <b>preAdmissionIdentifier</b> (Pre-admission identifier)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * 
+     * </p> 
+	 */
+	public Hospitalization setPreAdmissionIdentifier( IdentifierUseEnum theUse,  String theSystem,  String theValue,  String theLabel) {
+		myPreAdmissionIdentifier = new IdentifierDt(theUse, theSystem, theValue, theLabel); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>preAdmissionIdentifier</b> (Pre-admission identifier)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * 
+     * </p> 
+	 */
+	public Hospitalization setPreAdmissionIdentifier( String theSystem,  String theValue) {
+		myPreAdmissionIdentifier = new IdentifierDt(theSystem, theValue); 
+		return this; 
+	}
+
+ 
 	/**
 	 * Gets the value(s) for <b>origin</b> (The location from which the patient came before admission).
 	 * creating it if it does
@@ -1628,7 +1691,7 @@ public class Encounter extends BaseResource implements IResource {
      * Whether this hospitalization is a readmission
      * </p> 
 	 */
-	public Hospitalization setReAdmission( Boolean theBoolean) {
+	public Hospitalization setReAdmission( boolean theBoolean) {
 		myReAdmission = new BooleanDt(theBoolean); 
 		return this; 
 	}

@@ -1,6 +1,7 @@
 package ca.uhn.fhir.parser;
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.io.Reader;
 import java.io.StringWriter;
@@ -81,7 +82,7 @@ public class XmlParser extends BaseParser implements IParser {
 	}
 
 	@Override
-	public void encodeBundleToWriter(Bundle theBundle, Writer theWriter) {
+	public void encodeBundleToWriter(Bundle theBundle, Writer theWriter) throws DataFormatException {
 		try {
 			XMLStreamWriter eventWriter;
 			eventWriter = myXmlOutputFactory.createXMLStreamWriter(theWriter);
@@ -156,7 +157,7 @@ public class XmlParser extends BaseParser implements IParser {
 	}
 
 	@Override
-	public void encodeResourceToWriter(IResource theResource, Writer stringWriter) {
+	public void encodeResourceToWriter(IResource theResource, Writer stringWriter) throws DataFormatException {
 		XMLStreamWriter eventWriter;
 		try {
 			eventWriter = myXmlOutputFactory.createXMLStreamWriter(stringWriter);
@@ -409,14 +410,21 @@ public class XmlParser extends BaseParser implements IParser {
 	}
 
 	private void encodeResourceReferenceToStreamWriter(XMLStreamWriter theEventWriter, ResourceReferenceDt theRef) throws XMLStreamException {
+		String reference = theRef.getReference().getValue();
+		if (StringUtils.isBlank(reference)) {
+			if (theRef.getResourceType() != null && StringUtils.isNotBlank(theRef.getResourceId())) {
+				reference = myContext.getResourceDefinition(theRef.getResourceType()).getName() + '/' + theRef.getResourceId();
+			}
+		}
+		
 		if (!(theRef.getDisplay().isEmpty())) {
 			theEventWriter.writeStartElement("display");
 			theEventWriter.writeAttribute("value", theRef.getDisplay().getValue());
 			theEventWriter.writeEndElement();
 		}
-		if (!(theRef.getReference().isEmpty())) {
+		if (StringUtils.isNotBlank(reference)) {
 			theEventWriter.writeStartElement("reference");
-			theEventWriter.writeAttribute("value", theRef.getReference().getValue());
+			theEventWriter.writeAttribute("value", reference);
 			theEventWriter.writeEndElement();
 		}
 	}
@@ -441,7 +449,7 @@ public class XmlParser extends BaseParser implements IParser {
 		theEventWriter.writeEndElement();
 	}
 
-	private void encodeUndeclaredExtensions(RuntimeResourceDefinition theResDef, IResource theResource, XMLStreamWriter theWriter, List<UndeclaredExtension> extensions, String tagName) throws XMLStreamException {
+	private void encodeUndeclaredExtensions(RuntimeResourceDefinition theResDef, IResource theResource, XMLStreamWriter theWriter, List<UndeclaredExtension> extensions, String tagName) throws XMLStreamException, DataFormatException {
 		for (UndeclaredExtension next : extensions) {
 			theWriter.writeStartElement(tagName);
 			theWriter.writeAttribute("url", next.getUrl());

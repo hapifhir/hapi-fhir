@@ -44,9 +44,21 @@ public class ${className}Dt
 	/**
 	 * Creates a new identifier with the given system and value
 	 */
-	public IdentifierDt(String theSystem, String theValue) {
+	@SimpleSetter
+	public IdentifierDt(@SimpleSetter.Parameter(name="theSystem") String theSystem, @SimpleSetter.Parameter(name="theValue") String theValue) {
 		setSystem(theSystem);
 		setValue(theValue);
+	}
+
+	/**
+	 * Creates a new identifier with the given system and value
+	 */
+	@SimpleSetter
+	public IdentifierDt(@SimpleSetter.Parameter(name="theUse") IdentifierUseEnum theUse, @SimpleSetter.Parameter(name="theSystem") String theSystem, @SimpleSetter.Parameter(name="theValue") String theValue, @SimpleSetter.Parameter(name="theLabel") String theLabel) {
+		setUse(theUse);
+		setSystem(theSystem);
+		setValue(theValue);
+		setLabel(theLabel);
 	}
 #end
 #if ( ${className} == "Coding" )
@@ -62,15 +74,66 @@ public class ${className}Dt
 	/**
 	 * Constructor
 	 */
-	public QuantityDt(double theValue) {
+	@SimpleSetter
+	public QuantityDt(@SimpleSetter.Parameter(name="theValue") double theValue) {
 		setValue(theValue);
 	}
 
 	/**
 	 * Constructor
 	 */
-	public QuantityDt(long theValue) {
+	@SimpleSetter
+	public QuantityDt(@SimpleSetter.Parameter(name="theValue") long theValue) {
 		setValue(theValue);
+	}
+
+	/**
+	 * Constructor
+	 */
+	@SimpleSetter
+	public QuantityDt(@SimpleSetter.Parameter(name="theComparator") QuantityCompararatorEnum theComparator, @SimpleSetter.Parameter(name="theValue") double theValue, @SimpleSetter.Parameter(name="theUnits") String theUnits) {
+		setValue(theValue);
+		setComparator(theComparator);
+		setUnits(theUnits);
+	}
+
+	/**
+	 * Constructor
+	 */
+	@SimpleSetter
+	public QuantityDt(@SimpleSetter.Parameter(name="theComparator") QuantityCompararatorEnum theComparator, @SimpleSetter.Parameter(name="theValue") long theValue, @SimpleSetter.Parameter(name="theUnits") String theUnits) {
+		setValue(theValue);
+		setComparator(theComparator);
+		setUnits(theUnits);
+	}
+#end
+#if ( ${className} == "ResourceReference" )
+	/**
+	 * Constructor which creates a normal resource reference
+	 * 
+	 * @param theResourceType The resource type
+	 * @param theResourceId The resource ID
+	 */
+	public ResourceReferenceDt(Class<? extends IResource> theResourceType, String theResourceId) {
+		super(theResourceType, theResourceId);
+	}
+
+	/**
+	 * Constructor which creates a resource reference containing the actual
+	 * resource in question. 
+	 * <p>
+	 * <b>
+	 * When using this in a server:</b> Generally if this is serialized, it will be serialized
+	 * as a contained resource, so this should not be used if the intent is not to actually
+	 * supply the referenced resource. This is not a hard-and-fast rule however, as the 
+	 * server can be configured to not serialized this resource, or to load an ID and contain
+	 * even if this constructor is not used.
+	 * </p>
+	 * 
+	 * @param theResource The resource instance
+	 */
+	public ResourceReferenceDt(IResource theResource) {
+		super(theResource);
 	}
 #end
 

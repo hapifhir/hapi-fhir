@@ -35,6 +35,8 @@ import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.composite.QuantityDt;
 import ca.uhn.fhir.model.dstu.composite.RatioDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
+import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
 import ca.uhn.fhir.model.dstu.valueset.SubstanceTypeEnum;
 import ca.uhn.fhir.model.primitive.BoundCodeableConceptDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
@@ -410,7 +412,33 @@ public class Substance extends BaseResource implements IResource {
 		return this;
 	}
 
-  
+ 	/**
+	 * Sets the value for <b>identifier</b> (Identifier of the package/container)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Identifier associated with the package/container (usually a label affixed directly)
+     * </p> 
+	 */
+	public Instance setIdentifier( IdentifierUseEnum theUse,  String theSystem,  String theValue,  String theLabel) {
+		myIdentifier = new IdentifierDt(theUse, theSystem, theValue, theLabel); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>identifier</b> (Identifier of the package/container)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Identifier associated with the package/container (usually a label affixed directly)
+     * </p> 
+	 */
+	public Instance setIdentifier( String theSystem,  String theValue) {
+		myIdentifier = new IdentifierDt(theSystem, theValue); 
+		return this; 
+	}
+
+ 
 	/**
 	 * Gets the value(s) for <b>expiry</b> (When no longer valid to use).
 	 * creating it if it does
@@ -498,7 +526,59 @@ public class Substance extends BaseResource implements IResource {
 		return this;
 	}
 
-  
+ 	/**
+	 * Sets the value for <b>quantity</b> (Amount of substance in the package)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The amount of the substance
+     * </p> 
+	 */
+	public Instance setQuantity( QuantityCompararatorEnum theComparator,  long theValue,  String theUnits) {
+		myQuantity = new QuantityDt(theComparator, theValue, theUnits); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>quantity</b> (Amount of substance in the package)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The amount of the substance
+     * </p> 
+	 */
+	public Instance setQuantity( QuantityCompararatorEnum theComparator,  double theValue,  String theUnits) {
+		myQuantity = new QuantityDt(theComparator, theValue, theUnits); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>quantity</b> (Amount of substance in the package)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The amount of the substance
+     * </p> 
+	 */
+	public Instance setQuantity( long theValue) {
+		myQuantity = new QuantityDt(theValue); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>quantity</b> (Amount of substance in the package)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The amount of the substance
+     * </p> 
+	 */
+	public Instance setQuantity( double theValue) {
+		myQuantity = new QuantityDt(theValue); 
+		return this; 
+	}
+
+ 
 
 	}
 

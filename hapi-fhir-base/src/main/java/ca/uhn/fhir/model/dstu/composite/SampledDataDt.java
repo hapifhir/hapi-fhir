@@ -24,6 +24,7 @@ import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
 import ca.uhn.fhir.model.primitive.DecimalDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.model.primitive.StringDt;
@@ -149,7 +150,59 @@ public class SampledDataDt
 		return this;
 	}
 
-  
+ 	/**
+	 * Sets the value for <b>origin</b> (Zero value and units)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The base quantity that a measured value of zero represents. In addition, this provides the units of the entire measurement series
+     * </p> 
+	 */
+	public SampledDataDt setOrigin( QuantityCompararatorEnum theComparator,  long theValue,  String theUnits) {
+		myOrigin = new QuantityDt(theComparator, theValue, theUnits); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>origin</b> (Zero value and units)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The base quantity that a measured value of zero represents. In addition, this provides the units of the entire measurement series
+     * </p> 
+	 */
+	public SampledDataDt setOrigin( QuantityCompararatorEnum theComparator,  double theValue,  String theUnits) {
+		myOrigin = new QuantityDt(theComparator, theValue, theUnits); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>origin</b> (Zero value and units)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The base quantity that a measured value of zero represents. In addition, this provides the units of the entire measurement series
+     * </p> 
+	 */
+	public SampledDataDt setOrigin( long theValue) {
+		myOrigin = new QuantityDt(theValue); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>origin</b> (Zero value and units)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The base quantity that a measured value of zero represents. In addition, this provides the units of the entire measurement series
+     * </p> 
+	 */
+	public SampledDataDt setOrigin( double theValue) {
+		myOrigin = new QuantityDt(theValue); 
+		return this; 
+	}
+
+ 
 	/**
 	 * Gets the value(s) for <b>period</b> (Number of milliseconds between samples).
 	 * creating it if it does
@@ -468,7 +521,7 @@ public class SampledDataDt
      * The number of sample points at each time point. If this value is greater than one, then the dimensions will be interlaced - all the sample points for a point in time will be recorded at once
      * </p> 
 	 */
-	public SampledDataDt setDimensions( Integer theInteger) {
+	public SampledDataDt setDimensions( int theInteger) {
 		myDimensions = new IntegerDt(theInteger); 
 		return this; 
 	}

@@ -24,6 +24,7 @@ import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
 
 /**
  * HAPI/FHIR <b>Ratio</b> Datatype
@@ -111,7 +112,59 @@ public class RatioDt
 		return this;
 	}
 
-  
+ 	/**
+	 * Sets the value for <b>numerator</b> (Numerator value)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The value of the numerator
+     * </p> 
+	 */
+	public RatioDt setNumerator( QuantityCompararatorEnum theComparator,  long theValue,  String theUnits) {
+		myNumerator = new QuantityDt(theComparator, theValue, theUnits); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>numerator</b> (Numerator value)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The value of the numerator
+     * </p> 
+	 */
+	public RatioDt setNumerator( QuantityCompararatorEnum theComparator,  double theValue,  String theUnits) {
+		myNumerator = new QuantityDt(theComparator, theValue, theUnits); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>numerator</b> (Numerator value)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The value of the numerator
+     * </p> 
+	 */
+	public RatioDt setNumerator( long theValue) {
+		myNumerator = new QuantityDt(theValue); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>numerator</b> (Numerator value)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The value of the numerator
+     * </p> 
+	 */
+	public RatioDt setNumerator( double theValue) {
+		myNumerator = new QuantityDt(theValue); 
+		return this; 
+	}
+
+ 
 	/**
 	 * Gets the value(s) for <b>denominator</b> (Denominator value).
 	 * creating it if it does
@@ -142,7 +195,59 @@ public class RatioDt
 		return this;
 	}
 
-  
+ 	/**
+	 * Sets the value for <b>denominator</b> (Denominator value)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The value of the denominator
+     * </p> 
+	 */
+	public RatioDt setDenominator( QuantityCompararatorEnum theComparator,  long theValue,  String theUnits) {
+		myDenominator = new QuantityDt(theComparator, theValue, theUnits); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>denominator</b> (Denominator value)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The value of the denominator
+     * </p> 
+	 */
+	public RatioDt setDenominator( QuantityCompararatorEnum theComparator,  double theValue,  String theUnits) {
+		myDenominator = new QuantityDt(theComparator, theValue, theUnits); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>denominator</b> (Denominator value)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The value of the denominator
+     * </p> 
+	 */
+	public RatioDt setDenominator( long theValue) {
+		myDenominator = new QuantityDt(theValue); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>denominator</b> (Denominator value)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The value of the denominator
+     * </p> 
+	 */
+	public RatioDt setDenominator( double theValue) {
+		myDenominator = new QuantityDt(theValue); 
+		return this; 
+	}
+
+ 
 
 
 

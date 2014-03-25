@@ -335,7 +335,7 @@ public class AttachmentDt
      * The number of bytes of data that make up this attachment.
      * </p> 
 	 */
-	public AttachmentDt setSize( Integer theInteger) {
+	public AttachmentDt setSize( int theInteger) {
 		mySize = new IntegerDt(theInteger); 
 		return this; 
 	}

@@ -15,7 +15,6 @@ import ca.uhn.fhir.rest.client.GetClientInvocation;
 import ca.uhn.fhir.rest.method.SearchMethodBinding.RequestType;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.IResourceProvider;
-import ca.uhn.fhir.rest.server.Util;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 

@@ -1,6 +1,6 @@
 package ca.uhn.fhir.parser;
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.util.ArrayList;
 import java.util.HashMap;

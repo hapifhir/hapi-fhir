@@ -37,6 +37,7 @@ import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.composite.PeriodDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.valueset.DiagnosticReportStatusEnum;
+import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
@@ -556,7 +557,33 @@ public class DiagnosticReport extends BaseResource implements IResource {
 		return this;
 	}
 
-  
+ 	/**
+	 * Sets the value for <b>identifier</b> (Id for external references to this report)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The local ID assigned to the report by the order filler, usually by the Information System of the diagnostic service provider
+     * </p> 
+	 */
+	public DiagnosticReport setIdentifier( IdentifierUseEnum theUse,  String theSystem,  String theValue,  String theLabel) {
+		myIdentifier = new IdentifierDt(theUse, theSystem, theValue, theLabel); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>identifier</b> (Id for external references to this report)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The local ID assigned to the report by the order filler, usually by the Information System of the diagnostic service provider
+     * </p> 
+	 */
+	public DiagnosticReport setIdentifier( String theSystem,  String theValue) {
+		myIdentifier = new IdentifierDt(theSystem, theValue); 
+		return this; 
+	}
+
+ 
 	/**
 	 * Gets the value(s) for <b>requestDetail</b> (What was requested).
 	 * creating it if it does

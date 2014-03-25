@@ -24,6 +24,7 @@ import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
 
 /**
  * HAPI/FHIR <b>Range</b> Datatype
@@ -111,7 +112,59 @@ public class RangeDt
 		return this;
 	}
 
-  
+ 	/**
+	 * Sets the value for <b>low</b> (Low limit)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The low limit. The boundary is inclusive.
+     * </p> 
+	 */
+	public RangeDt setLow( QuantityCompararatorEnum theComparator,  long theValue,  String theUnits) {
+		myLow = new QuantityDt(theComparator, theValue, theUnits); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>low</b> (Low limit)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The low limit. The boundary is inclusive.
+     * </p> 
+	 */
+	public RangeDt setLow( QuantityCompararatorEnum theComparator,  double theValue,  String theUnits) {
+		myLow = new QuantityDt(theComparator, theValue, theUnits); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>low</b> (Low limit)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The low limit. The boundary is inclusive.
+     * </p> 
+	 */
+	public RangeDt setLow( long theValue) {
+		myLow = new QuantityDt(theValue); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>low</b> (Low limit)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The low limit. The boundary is inclusive.
+     * </p> 
+	 */
+	public RangeDt setLow( double theValue) {
+		myLow = new QuantityDt(theValue); 
+		return this; 
+	}
+
+ 
 	/**
 	 * Gets the value(s) for <b>high</b> (High limit).
 	 * creating it if it does
@@ -142,7 +195,59 @@ public class RangeDt
 		return this;
 	}
 
-  
+ 	/**
+	 * Sets the value for <b>high</b> (High limit)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The high limit. The boundary is inclusive.
+     * </p> 
+	 */
+	public RangeDt setHigh( QuantityCompararatorEnum theComparator,  long theValue,  String theUnits) {
+		myHigh = new QuantityDt(theComparator, theValue, theUnits); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>high</b> (High limit)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The high limit. The boundary is inclusive.
+     * </p> 
+	 */
+	public RangeDt setHigh( QuantityCompararatorEnum theComparator,  double theValue,  String theUnits) {
+		myHigh = new QuantityDt(theComparator, theValue, theUnits); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>high</b> (High limit)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The high limit. The boundary is inclusive.
+     * </p> 
+	 */
+	public RangeDt setHigh( long theValue) {
+		myHigh = new QuantityDt(theValue); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>high</b> (High limit)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The high limit. The boundary is inclusive.
+     * </p> 
+	 */
+	public RangeDt setHigh( double theValue) {
+		myHigh = new QuantityDt(theValue); 
+		return this; 
+	}
+
+ 
 
 
 

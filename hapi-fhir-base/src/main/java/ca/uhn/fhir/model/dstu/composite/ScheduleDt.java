@@ -290,7 +290,7 @@ public class ScheduleDt
      * Indicates how often the event should occur.
      * </p> 
 	 */
-	public Repeat setFrequency( Integer theInteger) {
+	public Repeat setFrequency( int theInteger) {
 		myFrequency = new IntegerDt(theInteger); 
 		return this; 
 	}
@@ -492,7 +492,7 @@ public class ScheduleDt
      * A total count of the desired number of repetitions
      * </p> 
 	 */
-	public Repeat setCount( Integer theInteger) {
+	public Repeat setCount( int theInteger) {
 		myCount = new IntegerDt(theInteger); 
 		return this; 
 	}

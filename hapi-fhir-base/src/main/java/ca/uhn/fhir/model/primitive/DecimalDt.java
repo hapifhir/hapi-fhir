@@ -38,7 +38,9 @@ public class DecimalDt extends BasePrimitive<BigDecimal> {
 	 */
 	@SimpleSetter
 	public DecimalDt(@SimpleSetter.Parameter(name = "theValue") double theValue) {
-		setValue(new BigDecimal(theValue));
+		// Use the valueOf here because the constructor gives crazy precision
+		// changes due to the floating point conversion
+		setValue(BigDecimal.valueOf(theValue));
 	}
 
 	/**

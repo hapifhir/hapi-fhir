@@ -33,6 +33,7 @@ import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu.composite.ContactDt;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
 import ca.uhn.fhir.model.dstu.valueset.LocationModeEnum;
 import ca.uhn.fhir.model.dstu.valueset.LocationStatusEnum;
 import ca.uhn.fhir.model.dstu.valueset.LocationTypeEnum;
@@ -275,7 +276,33 @@ public class Location extends BaseResource implements IResource {
 		return this;
 	}
 
-  
+ 	/**
+	 * Sets the value for <b>identifier</b> (Unique code or number identifying the location to its users)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Unique code or number identifying the location to its users
+     * </p> 
+	 */
+	public Location setIdentifier( IdentifierUseEnum theUse,  String theSystem,  String theValue,  String theLabel) {
+		myIdentifier = new IdentifierDt(theUse, theSystem, theValue, theLabel); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>identifier</b> (Unique code or number identifying the location to its users)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Unique code or number identifying the location to its users
+     * </p> 
+	 */
+	public Location setIdentifier( String theSystem,  String theValue) {
+		myIdentifier = new IdentifierDt(theSystem, theValue); 
+		return this; 
+	}
+
+ 
 	/**
 	 * Gets the value(s) for <b>name</b> (Name of the location as used by humans).
 	 * creating it if it does

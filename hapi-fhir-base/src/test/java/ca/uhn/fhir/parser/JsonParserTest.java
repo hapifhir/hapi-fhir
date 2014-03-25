@@ -22,6 +22,7 @@ import ca.uhn.fhir.model.api.UndeclaredExtension;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.resource.DiagnosticReport;
 import ca.uhn.fhir.model.dstu.resource.Observation;
+import ca.uhn.fhir.model.dstu.resource.Organization;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.dstu.resource.Specimen;
 import ca.uhn.fhir.model.primitive.DecimalDt;
@@ -29,6 +30,29 @@ import ca.uhn.fhir.model.primitive.DecimalDt;
 public class JsonParserTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(JsonParserTest.class);
 
+	@Test
+	public void testEncodeResourceRef() throws DataFormatException, IOException {
+
+		Patient patient = new Patient();
+		patient.setManagingOrganization(new ResourceReferenceDt());
+		
+		IParser p = new FhirContext().newJsonParser();
+		String str = p.encodeResourceToString(patient);
+		assertThat(str, IsNot.not(StringContains.containsString("managingOrganization")));
+		
+		patient.setManagingOrganization(new ResourceReferenceDt(Organization.class, "123"));
+		str = p.encodeResourceToString(patient);
+		assertThat(str, StringContains.containsString("\"managingOrganization\":{\"resource\":\"Organization/123\"}"));
+
+		Organization org = new Organization();
+		org.addIdentifier().setSystem("foo").setValue("bar");
+		patient.setManagingOrganization(new ResourceReferenceDt(org));
+		str = p.encodeResourceToString(patient);
+		assertThat(str, StringContains.containsString("\"contained\":[{\"resourceType\":\"Organization\""));
+		
+	}
+
+	
 	@Test
 	public void testSimpleResourceEncode() throws IOException {
 

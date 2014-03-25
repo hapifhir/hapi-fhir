@@ -1,6 +1,6 @@
 package ca.uhn.fhir.context;
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
@@ -255,7 +255,7 @@ class ModelScanner {
 		} while (current != null);
 
 		for (Class<? extends ICompositeElement> next : classes) {
-			scanCompositeElementForChildren(next, theDefinition, elementNames, orderToElementDef, orderToExtensionDef);
+			scanCompositeElementForChildren(next, elementNames, orderToElementDef, orderToExtensionDef);
 		}
 
 		// while (orderToElementDef.size() > 0 && orderToElementDef.firstKey() <
@@ -288,7 +288,7 @@ class ModelScanner {
 	}
 
 	@SuppressWarnings("unchecked")
-	private void scanCompositeElementForChildren(Class<? extends ICompositeElement> theClass, BaseRuntimeElementCompositeDefinition<?> theDefinition, Set<String> elementNames, TreeMap<Integer, BaseRuntimeDeclaredChildDefinition> theOrderToElementDef,
+	private void scanCompositeElementForChildren(Class<? extends ICompositeElement> theClass, Set<String> elementNames, TreeMap<Integer, BaseRuntimeDeclaredChildDefinition> theOrderToElementDef,
 			TreeMap<Integer, BaseRuntimeDeclaredChildDefinition> theOrderToExtensionDef) {
 		int baseElementOrder = theOrderToElementDef.isEmpty() ? 0 : theOrderToElementDef.lastEntry().getKey() + 1;
 

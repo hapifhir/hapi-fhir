@@ -35,6 +35,7 @@ import ca.uhn.fhir.model.dstu.composite.HumanNameDt;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
+import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
 import ca.uhn.fhir.model.dstu.valueset.OrganizationTypeEnum;
 import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.model.primitive.BoundCodeableConceptDt;
@@ -271,7 +272,43 @@ public class Organization extends BaseResource implements IResource {
 		}
 		return getIdentifier().get(0); 
 	}
-  
+ 	/**
+	 * Adds a new value for <b>identifier</b> (Identifies this organization  across multiple systems)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Identifier for the organization that is used to identify the organization across multiple disparate systems
+     * </p> 
+     *
+     * @return Returns a reference to this object, to allow for simple chaining.
+	 */
+	public Organization addIdentifier( IdentifierUseEnum theUse,  String theSystem,  String theValue,  String theLabel) {
+		if (myIdentifier == null) {
+			myIdentifier = new java.util.ArrayList<IdentifierDt>();
+		}
+		myIdentifier.add(new IdentifierDt(theUse, theSystem, theValue, theLabel));
+		return this; 
+	}
+
+	/**
+	 * Adds a new value for <b>identifier</b> (Identifies this organization  across multiple systems)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Identifier for the organization that is used to identify the organization across multiple disparate systems
+     * </p> 
+     *
+     * @return Returns a reference to this object, to allow for simple chaining.
+	 */
+	public Organization addIdentifier( String theSystem,  String theValue) {
+		if (myIdentifier == null) {
+			myIdentifier = new java.util.ArrayList<IdentifierDt>();
+		}
+		myIdentifier.add(new IdentifierDt(theSystem, theValue));
+		return this; 
+	}
+
+ 
 	/**
 	 * Gets the value(s) for <b>name</b> (Name used for the organization).
 	 * creating it if it does
@@ -653,7 +690,7 @@ public class Organization extends BaseResource implements IResource {
      * Whether the organization's record is still in active use
      * </p> 
 	 */
-	public Organization setActive( Boolean theBoolean) {
+	public Organization setActive( boolean theBoolean) {
 		myActive = new BooleanDt(theBoolean); 
 		return this; 
 	}

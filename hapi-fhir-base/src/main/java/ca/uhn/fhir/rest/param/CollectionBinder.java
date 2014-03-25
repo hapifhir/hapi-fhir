@@ -15,7 +15,7 @@ public class CollectionBinder
 	/**
 	 * @param thePositionDescription Just used in exceptions if theCollectionType is invalid
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "rawtypes", "cast" })
 	public static Class<? extends Collection> getInstantiableCollectionType(Class<? extends Collection<?>> theCollectionType, String thePositionDescription) {
 		if (theCollectionType.equals(List.class) || theCollectionType .equals(ArrayList.class)) {
 			return (Class<? extends Collection>) ArrayList.class;

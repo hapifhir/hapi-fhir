@@ -1,6 +1,6 @@
 package ca.uhn.fhir.context;
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -8,6 +8,8 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import org.apache.commons.lang3.text.WordUtils;
 
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.annotation.Child;
@@ -19,11 +21,11 @@ public abstract class BaseRuntimeDeclaredChildDefinition extends BaseRuntimeChil
 	private final IAccessor myAccessor;
 	private final String myElementName;
 	private final Field myField;
+	private final String myFormalDefinition;
 	private final int myMax;
 	private final int myMin;
 	private final IMutator myMutator;
 	private final String myShortDefinition;
-	private final String myFormalDefinition;
 
 	BaseRuntimeDeclaredChildDefinition(Field theField, Child theChildAnnotation, Description theDescriptionAnnotation, String theElementName) throws ConfigurationException {
 		super();
@@ -62,8 +64,15 @@ public abstract class BaseRuntimeDeclaredChildDefinition extends BaseRuntimeChil
 				elementName = "classElement"; // because getClass() is reserved
 			}
 			final Method accessor = BeanUtils.findAccessor(declaringClass, targetReturnType, elementName);
-			final Method mutator = BeanUtils.findMutator(declaringClass, targetReturnType, elementName);
+			if (accessor==null) {
+				throw new ConfigurationException("Could not find bean accessor/getter for property " + elementName + " on class " + declaringClass.getCanonicalName());
+			}
 
+			final Method mutator = findMutator(declaringClass, targetReturnType, elementName);
+			if (mutator==null) {
+				throw new ConfigurationException("Could not find bean mutator/setter for property " + elementName + " on class " + declaringClass.getCanonicalName() + " (expected return type " + targetReturnType.getCanonicalName() + ")");
+			}
+			
 			if (List.class.isAssignableFrom(targetReturnType)) {
 				myAccessor = new ListAccessor(accessor);
 				myMutator = new ListMutator(mutator);
@@ -77,14 +86,6 @@ public abstract class BaseRuntimeDeclaredChildDefinition extends BaseRuntimeChil
 
 	}
 
-	public String getShortDefinition() {
-		return myShortDefinition;
-	}
-
-	public String getFormalDefinition() {
-		return myFormalDefinition;
-	}
-
 	@Override
 	public IAccessor getAccessor() {
 		return myAccessor;
@@ -96,6 +97,10 @@ public abstract class BaseRuntimeDeclaredChildDefinition extends BaseRuntimeChil
 
 	public Field getField() {
 		return myField;
+	}
+
+	public String getFormalDefinition() {
+		return myFormalDefinition;
 	}
 
 	@Override
@@ -113,11 +118,26 @@ public abstract class BaseRuntimeDeclaredChildDefinition extends BaseRuntimeChil
 		return myMutator;
 	}
 
+	public String getShortDefinition() {
+		return myShortDefinition;
+	}
+
 	public BaseRuntimeElementDefinition<?> getSingleChildOrThrow() {
 		if (getValidChildNames().size() != 1) {
 			throw new IllegalStateException("This child has " + getValidChildNames().size() + " children, expected 1. This is a HAPI bug. Found: " + getValidChildNames());
 		}
 		return getChildByName(getValidChildNames().iterator().next());
+	}
+
+	private static Method findMutator(Class<?> theDeclaringClass, Class<?> theTargetReturnType, String theElementName) {
+		String methodName = "set" + WordUtils.capitalize(theElementName);
+		try {
+			return theDeclaringClass.getMethod(methodName, theTargetReturnType);
+		} catch (NoSuchMethodException e) {
+			return null;
+		} catch (SecurityException e) {
+			throw new ConfigurationException("Failed to scan class '" + theDeclaringClass + "' because of a security exception", e);
+		}
 	}
 
 	private final class ListAccessor implements IAccessor {

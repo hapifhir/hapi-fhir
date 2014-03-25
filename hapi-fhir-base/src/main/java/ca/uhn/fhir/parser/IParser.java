@@ -12,11 +12,11 @@ public interface IParser {
 
 	String encodeBundleToString(Bundle theBundle) throws DataFormatException, IOException;
 
-	void encodeBundleToWriter(Bundle theBundle, Writer theWriter) throws IOException;
+	void encodeBundleToWriter(Bundle theBundle, Writer theWriter) throws IOException, DataFormatException;
 
 	String encodeResourceToString(IResource theResource) throws DataFormatException, IOException;
 
-	void encodeResourceToWriter(IResource theResource, Writer stringWriter) throws IOException;
+	void encodeResourceToWriter(IResource theResource, Writer stringWriter) throws IOException, DataFormatException;
 
 	Bundle parseBundle(Reader theReader);
 

@@ -21,7 +21,7 @@ public class IntegerDt extends BasePrimitive<Integer> {
 	 * Constructor
 	 */
 	@SimpleSetter
-	public IntegerDt(@SimpleSetter.Parameter(name = "theInteger") Integer theInteger) {
+	public IntegerDt(@SimpleSetter.Parameter(name = "theInteger") int theInteger) {
 		setValue(theInteger);
 	}
 	

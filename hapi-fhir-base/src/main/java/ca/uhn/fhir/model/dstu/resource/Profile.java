@@ -732,7 +732,7 @@ public class Profile extends BaseResource implements IResource {
      * This profile was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage
      * </p> 
 	 */
-	public Profile setExperimental( Boolean theBoolean) {
+	public Profile setExperimental( boolean theBoolean) {
 		myExperimental = new BooleanDt(theBoolean); 
 		return this; 
 	}
@@ -1553,7 +1553,7 @@ public class Profile extends BaseResource implements IResource {
      * This definition of a profile on a structure is published as a formal statement. Some structural definitions might be defined purely for internal use within the profile, and not intended to be used outside that context
      * </p> 
 	 */
-	public Structure setPublish( Boolean theBoolean) {
+	public Structure setPublish( boolean theBoolean) {
 		myPublish = new BooleanDt(theBoolean); 
 		return this; 
 	}
@@ -2128,7 +2128,7 @@ public class Profile extends BaseResource implements IResource {
      * If the matching elements have to occur in the same order as defined in the profile
      * </p> 
 	 */
-	public StructureElementSlicing setOrdered( Boolean theBoolean) {
+	public StructureElementSlicing setOrdered( boolean theBoolean) {
 		myOrdered = new BooleanDt(theBoolean); 
 		return this; 
 	}
@@ -2627,7 +2627,7 @@ public class Profile extends BaseResource implements IResource {
      * The minimum number of times this element SHALL appear in the instance
      * </p> 
 	 */
-	public StructureElementDefinition setMin( Integer theInteger) {
+	public StructureElementDefinition setMin( int theInteger) {
 		myMin = new IntegerDt(theInteger); 
 		return this; 
 	}
@@ -2875,7 +2875,7 @@ public class Profile extends BaseResource implements IResource {
      * Indicates the shortest length that SHALL be supported by conformant instances without truncation
      * </p> 
 	 */
-	public StructureElementDefinition setMaxLength( Integer theInteger) {
+	public StructureElementDefinition setMaxLength( int theInteger) {
 		myMaxLength = new IntegerDt(theInteger); 
 		return this; 
 	}
@@ -3057,7 +3057,7 @@ public class Profile extends BaseResource implements IResource {
      * If true, conformant resource authors SHALL be capable of providing a value for the element and resource consumers SHALL be capable of extracting and doing something useful with the data element.  If false, the element may be ignored and not supported
      * </p> 
 	 */
-	public StructureElementDefinition setMustSupport( Boolean theBoolean) {
+	public StructureElementDefinition setMustSupport( boolean theBoolean) {
 		myMustSupport = new BooleanDt(theBoolean); 
 		return this; 
 	}
@@ -3101,7 +3101,7 @@ public class Profile extends BaseResource implements IResource {
      * If true, the value of this element affects the interpretation of the element or resource that contains it, and the value of the element cannot be ignored. Typically, this is used for status, negation and qualification codes. The effect of this is that the element cannot be ignored by systems: they SHALL either recognize the element and process it, and/or a pre-determination has been made that it is not relevant to their particular system.
      * </p> 
 	 */
-	public StructureElementDefinition setIsModifier( Boolean theBoolean) {
+	public StructureElementDefinition setIsModifier( boolean theBoolean) {
 		myIsModifier = new BooleanDt(theBoolean); 
 		return this; 
 	}
@@ -3831,7 +3831,7 @@ public class Profile extends BaseResource implements IResource {
      * If true, then conformant systems may use additional codes or (where the data type permits) text alone to convey concepts not covered by the set of codes identified in the binding.  If false, then conformant systems are constrained to the provided codes alone
      * </p> 
 	 */
-	public StructureElementDefinitionBinding setIsExtensible( Boolean theBoolean) {
+	public StructureElementDefinitionBinding setIsExtensible( boolean theBoolean) {
 		myIsExtensible = new BooleanDt(theBoolean); 
 		return this; 
 	}

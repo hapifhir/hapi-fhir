@@ -26,6 +26,7 @@ import ca.uhn.fhir.model.dstu.composite.NarrativeDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.resource.DiagnosticReport;
 import ca.uhn.fhir.model.dstu.resource.Observation;
+import ca.uhn.fhir.model.dstu.resource.Organization;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.dstu.resource.Specimen;
 import ca.uhn.fhir.model.dstu.resource.ValueSet;
@@ -61,6 +62,29 @@ public class XmlParserTest {
 		assertThat(str, StringContains.containsString("<modifierExtension url=\"http://example.com/dontuse#importantDates\"><valueDateTime value=\"2014-01-26T11:11:11\"/></modifierExtension>"));
 		assertThat(str, StringContains.containsString("<name><family value=\"Smith\"/></name>"));
 	}
+
+	@Test
+	public void testEncodeResourceRef() throws DataFormatException, IOException {
+
+		Patient patient = new Patient();
+		patient.setManagingOrganization(new ResourceReferenceDt());
+		
+		IParser p = new FhirContext().newXmlParser();
+		String str = p.encodeResourceToString(patient);
+		assertThat(str, IsNot.not(StringContains.containsString("managingOrganization")));
+		
+		patient.setManagingOrganization(new ResourceReferenceDt(Organization.class, "123"));
+		str = p.encodeResourceToString(patient);
+		assertThat(str, StringContains.containsString("<managingOrganization><reference value=\"Organization/123\"/></managingOrganization>"));
+
+		Organization org = new Organization();
+		org.addIdentifier().setSystem("foo").setValue("bar");
+		patient.setManagingOrganization(new ResourceReferenceDt(org));
+		str = p.encodeResourceToString(patient);
+		assertThat(str, StringContains.containsString("<contained><Organization"));
+		
+	}
+
 	
 
 	@Test

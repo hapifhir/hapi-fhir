@@ -39,6 +39,7 @@ import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.composite.PeriodDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
+import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
 import ca.uhn.fhir.model.dstu.valueset.PractitionerRoleEnum;
 import ca.uhn.fhir.model.dstu.valueset.PractitionerSpecialtyEnum;
 import ca.uhn.fhir.model.primitive.BoundCodeableConceptDt;
@@ -330,7 +331,43 @@ public class Practitioner extends BaseResource implements IResource {
 		}
 		return getIdentifier().get(0); 
 	}
-  
+ 	/**
+	 * Adds a new value for <b>identifier</b> (A identifier for the person as this agent)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * An identifier that applies to this person in this role
+     * </p> 
+     *
+     * @return Returns a reference to this object, to allow for simple chaining.
+	 */
+	public Practitioner addIdentifier( IdentifierUseEnum theUse,  String theSystem,  String theValue,  String theLabel) {
+		if (myIdentifier == null) {
+			myIdentifier = new java.util.ArrayList<IdentifierDt>();
+		}
+		myIdentifier.add(new IdentifierDt(theUse, theSystem, theValue, theLabel));
+		return this; 
+	}
+
+	/**
+	 * Adds a new value for <b>identifier</b> (A identifier for the person as this agent)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * An identifier that applies to this person in this role
+     * </p> 
+     *
+     * @return Returns a reference to this object, to allow for simple chaining.
+	 */
+	public Practitioner addIdentifier( String theSystem,  String theValue) {
+		if (myIdentifier == null) {
+			myIdentifier = new java.util.ArrayList<IdentifierDt>();
+		}
+		myIdentifier.add(new IdentifierDt(theSystem, theValue));
+		return this; 
+	}
+
+ 
 	/**
 	 * Gets the value(s) for <b>name</b> (A name associated with the person).
 	 * creating it if it does

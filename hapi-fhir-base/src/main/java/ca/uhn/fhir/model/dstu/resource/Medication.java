@@ -306,7 +306,7 @@ public class Medication extends BaseResource implements IResource {
      * Set to true if the item is attributable to a specific manufacturer (even if we don't know who that is)
      * </p> 
 	 */
-	public Medication setIsBrand( Boolean theBoolean) {
+	public Medication setIsBrand( boolean theBoolean) {
 		myIsBrand = new BooleanDt(theBoolean); 
 		return this; 
 	}

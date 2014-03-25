@@ -33,6 +33,7 @@ import ca.uhn.fhir.model.dstu.composite.HumanNameDt;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
+import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
 import ca.uhn.fhir.model.dstu.valueset.PatientRelationshipTypeEnum;
 import ca.uhn.fhir.model.primitive.BoundCodeableConceptDt;
 
@@ -258,7 +259,43 @@ public class RelatedPerson extends BaseResource implements IResource {
 		}
 		return getIdentifier().get(0); 
 	}
-  
+ 	/**
+	 * Adds a new value for <b>identifier</b> (A Human identifier for this person)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Identifier for a person within a particular scope.
+     * </p> 
+     *
+     * @return Returns a reference to this object, to allow for simple chaining.
+	 */
+	public RelatedPerson addIdentifier( IdentifierUseEnum theUse,  String theSystem,  String theValue,  String theLabel) {
+		if (myIdentifier == null) {
+			myIdentifier = new java.util.ArrayList<IdentifierDt>();
+		}
+		myIdentifier.add(new IdentifierDt(theUse, theSystem, theValue, theLabel));
+		return this; 
+	}
+
+	/**
+	 * Adds a new value for <b>identifier</b> (A Human identifier for this person)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Identifier for a person within a particular scope.
+     * </p> 
+     *
+     * @return Returns a reference to this object, to allow for simple chaining.
+	 */
+	public RelatedPerson addIdentifier( String theSystem,  String theValue) {
+		if (myIdentifier == null) {
+			myIdentifier = new java.util.ArrayList<IdentifierDt>();
+		}
+		myIdentifier.add(new IdentifierDt(theSystem, theValue));
+		return this; 
+	}
+
+ 
 	/**
 	 * Gets the value(s) for <b>patient</b> (The patient this person is related to).
 	 * creating it if it does

@@ -740,7 +740,7 @@ public class Conformance extends BaseResource implements IResource {
      * A flag to indicate that this conformance statement is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage
      * </p> 
 	 */
-	public Conformance setExperimental( Boolean theBoolean) {
+	public Conformance setExperimental( boolean theBoolean) {
 		myExperimental = new BooleanDt(theBoolean); 
 		return this; 
 	}
@@ -947,7 +947,7 @@ public class Conformance extends BaseResource implements IResource {
      * A flag that indicates whether the application accepts unknown elements as part of a resource.
      * </p> 
 	 */
-	public Conformance setAcceptUnknown( Boolean theBoolean) {
+	public Conformance setAcceptUnknown( boolean theBoolean) {
 		myAcceptUnknown = new BooleanDt(theBoolean); 
 		return this; 
 	}
@@ -2134,7 +2134,7 @@ public class Conformance extends BaseResource implements IResource {
      * Server adds CORS headers when responding to requests - this enables javascript applications to yuse the server
      * </p> 
 	 */
-	public RestSecurity setCors( Boolean theBoolean) {
+	public RestSecurity setCors( boolean theBoolean) {
 		myCors = new BooleanDt(theBoolean); 
 		return this; 
 	}
@@ -2689,7 +2689,7 @@ public class Conformance extends BaseResource implements IResource {
      * A flag for whether the server is able to return past versions as part of the vRead operation
      * </p> 
 	 */
-	public RestResource setReadHistory( Boolean theBoolean) {
+	public RestResource setReadHistory( boolean theBoolean) {
 		myReadHistory = new BooleanDt(theBoolean); 
 		return this; 
 	}
@@ -2733,7 +2733,7 @@ public class Conformance extends BaseResource implements IResource {
      * A flag to indicate that the server allows the client to create new identities on the server. If the update operation is used (client) or allowed (server) to a new location where a resource doesn't already exist. This means that the server allows the client to create new identities on the server
      * </p> 
 	 */
-	public RestResource setUpdateCreate( Boolean theBoolean) {
+	public RestResource setUpdateCreate( boolean theBoolean) {
 		myUpdateCreate = new BooleanDt(theBoolean); 
 		return this; 
 	}
@@ -3920,7 +3920,7 @@ public class Conformance extends BaseResource implements IResource {
      * Length if the receiver's reliable messaging cache (if a receiver) or how long the cache length on the receiver should be (if a sender)
      * </p> 
 	 */
-	public Messaging setReliableCache( Integer theInteger) {
+	public Messaging setReliableCache( int theInteger) {
 		myReliableCache = new IntegerDt(theInteger); 
 		return this; 
 	}

@@ -21,6 +21,7 @@ import java.util.List;
 import ca.uhn.fhir.model.api.BaseResourceReference;
 import ca.uhn.fhir.model.api.ICompositeDatatype;
 import ca.uhn.fhir.model.api.IElement;
+import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.Description;
@@ -51,6 +52,33 @@ public class ResourceReferenceDt
 		// nothing
 	}
 
+	/**
+	 * Constructor which creates a normal resource reference
+	 * 
+	 * @param theResourceType The resource type
+	 * @param theResourceId The resource ID
+	 */
+	public ResourceReferenceDt(Class<? extends IResource> theResourceType, String theResourceId) {
+		super(theResourceType, theResourceId);
+	}
+
+	/**
+	 * Constructor which creates a resource reference containing the actual
+	 * resource in question. 
+	 * <p>
+	 * <b>
+	 * When using this in a server:</b> Generally if this is serialized, it will be serialized
+	 * as a contained resource, so this should not be used if the intent is not to actually
+	 * supply the referenced resource. This is not a hard-and-fast rule however, as the 
+	 * server can be configured to not serialized this resource, or to load an ID and contain
+	 * even if this constructor is not used.
+	 * </p>
+	 * 
+	 * @param theResource The resource instance
+	 */
+	public ResourceReferenceDt(IResource theResource) {
+		super(theResource);
+	}
 
 	@Child(name="reference", type=StringDt.class, order=0, min=0, max=1)	
 	@Description(

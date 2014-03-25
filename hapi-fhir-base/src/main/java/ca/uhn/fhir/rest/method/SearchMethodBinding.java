@@ -17,7 +17,6 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.client.GetClientInvocation;
 import ca.uhn.fhir.rest.param.IParameter;
 import ca.uhn.fhir.rest.server.IResourceProvider;
-import ca.uhn.fhir.rest.server.Util;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.QueryUtil;

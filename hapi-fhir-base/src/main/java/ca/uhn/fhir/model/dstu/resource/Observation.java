@@ -40,10 +40,12 @@ import ca.uhn.fhir.model.dstu.composite.RangeDt;
 import ca.uhn.fhir.model.dstu.composite.RatioDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.composite.SampledDataDt;
+import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
 import ca.uhn.fhir.model.dstu.valueset.ObservationInterpretationCodesEnum;
 import ca.uhn.fhir.model.dstu.valueset.ObservationRelationshipTypeEnum;
 import ca.uhn.fhir.model.dstu.valueset.ObservationReliabilityEnum;
 import ca.uhn.fhir.model.dstu.valueset.ObservationStatusEnum;
+import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.BoundCodeableConceptDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
@@ -782,7 +784,33 @@ public class Observation extends BaseResource implements IResource {
 		return this;
 	}
 
-  
+ 	/**
+	 * Sets the value for <b>identifier</b> (Unique Id for this particular observation)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A unique identifier for the simple observation
+     * </p> 
+	 */
+	public Observation setIdentifier( IdentifierUseEnum theUse,  String theSystem,  String theValue,  String theLabel) {
+		myIdentifier = new IdentifierDt(theUse, theSystem, theValue, theLabel); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>identifier</b> (Unique Id for this particular observation)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A unique identifier for the simple observation
+     * </p> 
+	 */
+	public Observation setIdentifier( String theSystem,  String theValue) {
+		myIdentifier = new IdentifierDt(theSystem, theValue); 
+		return this; 
+	}
+
+ 
 	/**
 	 * Gets the value(s) for <b>subject</b> (Who and/or what this is about).
 	 * creating it if it does
@@ -1088,7 +1116,59 @@ public class Observation extends BaseResource implements IResource {
 		return this;
 	}
 
-  
+ 	/**
+	 * Sets the value for <b>low</b> (Low Range, if relevant)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The value of the low bound of the reference range. If this is omitted, the low bound of the reference range is assumed to be meaningless. E.g. <2.3
+     * </p> 
+	 */
+	public ReferenceRange setLow( QuantityCompararatorEnum theComparator,  long theValue,  String theUnits) {
+		myLow = new QuantityDt(theComparator, theValue, theUnits); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>low</b> (Low Range, if relevant)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The value of the low bound of the reference range. If this is omitted, the low bound of the reference range is assumed to be meaningless. E.g. <2.3
+     * </p> 
+	 */
+	public ReferenceRange setLow( QuantityCompararatorEnum theComparator,  double theValue,  String theUnits) {
+		myLow = new QuantityDt(theComparator, theValue, theUnits); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>low</b> (Low Range, if relevant)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The value of the low bound of the reference range. If this is omitted, the low bound of the reference range is assumed to be meaningless. E.g. <2.3
+     * </p> 
+	 */
+	public ReferenceRange setLow( long theValue) {
+		myLow = new QuantityDt(theValue); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>low</b> (Low Range, if relevant)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The value of the low bound of the reference range. If this is omitted, the low bound of the reference range is assumed to be meaningless. E.g. <2.3
+     * </p> 
+	 */
+	public ReferenceRange setLow( double theValue) {
+		myLow = new QuantityDt(theValue); 
+		return this; 
+	}
+
+ 
 	/**
 	 * Gets the value(s) for <b>high</b> (High Range, if relevant).
 	 * creating it if it does
@@ -1119,7 +1199,59 @@ public class Observation extends BaseResource implements IResource {
 		return this;
 	}
 
-  
+ 	/**
+	 * Sets the value for <b>high</b> (High Range, if relevant)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The value of the high bound of the reference range. If this is omitted, the high bound of the reference range is assumed to be meaningless. E.g. >5
+     * </p> 
+	 */
+	public ReferenceRange setHigh( QuantityCompararatorEnum theComparator,  long theValue,  String theUnits) {
+		myHigh = new QuantityDt(theComparator, theValue, theUnits); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>high</b> (High Range, if relevant)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The value of the high bound of the reference range. If this is omitted, the high bound of the reference range is assumed to be meaningless. E.g. >5
+     * </p> 
+	 */
+	public ReferenceRange setHigh( QuantityCompararatorEnum theComparator,  double theValue,  String theUnits) {
+		myHigh = new QuantityDt(theComparator, theValue, theUnits); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>high</b> (High Range, if relevant)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The value of the high bound of the reference range. If this is omitted, the high bound of the reference range is assumed to be meaningless. E.g. >5
+     * </p> 
+	 */
+	public ReferenceRange setHigh( long theValue) {
+		myHigh = new QuantityDt(theValue); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>high</b> (High Range, if relevant)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The value of the high bound of the reference range. If this is omitted, the high bound of the reference range is assumed to be meaningless. E.g. >5
+     * </p> 
+	 */
+	public ReferenceRange setHigh( double theValue) {
+		myHigh = new QuantityDt(theValue); 
+		return this; 
+	}
+
+ 
 	/**
 	 * Gets the value(s) for <b>meaning</b> (Indicates the meaning/use of this range of this range).
 	 * creating it if it does

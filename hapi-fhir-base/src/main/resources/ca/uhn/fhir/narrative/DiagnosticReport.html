@@ -1,13 +1,20 @@
+<!--/*-->
+<html>
+	<head>
+		<link rel="stylesheet" type="text/css" href="narrative.css"/>
+	</head>
+	<body>
+<!--*/-->
+
 <div>
-	<div style="font-size: 1.2em;">
+	<div class="hapiHeaderText">
 		<th:block th:if="${not resource.name.text.empty}" th:text="${resource.name.text.value}"/>
 		<th:block th:if="${resource.name.text.empty} and ${not #lists.isEmpty(resource.name.coding)} and ${not resource.name.coding[0].empty} and ${not resource.name.coding[0].display.empty}" th:text="${resource.name.coding[0].display}"/>
 		<th:block th:if="${resource.name.text.empty} and ${not #lists.isEmpty(resource.name.coding)} and ${not resource.name.coding[0].empty} and ${resource.name.coding[0].display.empty}" th:text="Untitled Diagnostic Report"/>
 		<!--/*--> Complete Blood Count <!--*/-->
 	</div>
-	<div style="font-size: 1.2em;" ></div>
 	
-	<table th:if="${not #lists.isEmpty(resource.result)} and ${resource.result[0].resource != null}">
+	<table class="hapiTableOfValues" th:if="${not #lists.isEmpty(resource.result)} and ${resource.result[0].resource != null}">
 		<thead>
 			<tr>
 				<td>Name</td>
@@ -18,8 +25,8 @@
 			</tr>
 		</thead>
 		<tbody>
-			<th:block th:each="result : ${resource.result}">
-				<tr>
+			<th:block th:each="result,rowStat : ${resource.result}">
+				<tr th:class="${rowStat.odd}? 'hapiTableOfValuesRowOdd' : 'hapiTableOfValuesRowEven'" class="hapiTableOfValuesRowOdd">
 					<td>
 						<th:block th:if="${not result.resource.name.text.empty}" th:text="${result.resource.name.text.value}"/>
 						<th:block th:if="${result.resource.name.text.empty} and ${not #lists.isEmpty(result.resource.name.coding)} and ${not result.resource.name.coding[0].empty} and ${not result.resource.name.coding[0].display.empty}" th:text="${result.resource.name.coding[0].display}"/>
@@ -41,11 +48,21 @@
 					</td>
 					<td th:text="${result.resource.status.value}">final</td>
 				</tr>
-				<tr th:if="${not result.resource.comments.empty}">
+				<tr th:class="${rowStat.odd}? 'hapiTableOfValuesRowOdd' : 'hapiTableOfValuesRowEven'" class="hapiTableOfValuesRowOdd">
 					<td th:text="${result.resource.comments.value}" colspan="5">This is a comment</td>
 				</tr>
+				<!--/*-->
+				<tr class="hapiTableOfValuesRowEven"><td>Lkc</td><td>198 g/L</td><td>H</td><td>78 g/L - 99 g/L</td><td>final</td></tr>
+				<tr class="hapiTableOfValuesRowEven"><td colspan="5">Yet another comment</td></tr>
+				<!--*/-->
 			</th:block>
 		</tbody>
 	</table>
 		
 </div>
+
+
+<!--/*-->
+	</body>
+</html>
+<!--*/-->

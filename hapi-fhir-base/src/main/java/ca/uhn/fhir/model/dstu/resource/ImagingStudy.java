@@ -33,6 +33,7 @@ import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.dstu.composite.CodingDt;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
 import ca.uhn.fhir.model.dstu.valueset.ImagingModalityEnum;
 import ca.uhn.fhir.model.dstu.valueset.InstanceAvailabilityEnum;
 import ca.uhn.fhir.model.dstu.valueset.ModalityEnum;
@@ -455,7 +456,33 @@ public class ImagingStudy extends BaseResource implements IResource {
 		return this;
 	}
 
-  
+ 	/**
+	 * Sets the value for <b>accessionNo</b> (Accession Number (0008,0050))
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Accession Number
+     * </p> 
+	 */
+	public ImagingStudy setAccessionNo( IdentifierUseEnum theUse,  String theSystem,  String theValue,  String theLabel) {
+		myAccessionNo = new IdentifierDt(theUse, theSystem, theValue, theLabel); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>accessionNo</b> (Accession Number (0008,0050))
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Accession Number
+     * </p> 
+	 */
+	public ImagingStudy setAccessionNo( String theSystem,  String theValue) {
+		myAccessionNo = new IdentifierDt(theSystem, theValue); 
+		return this; 
+	}
+
+ 
 	/**
 	 * Gets the value(s) for <b>identifier</b> (Other identifiers for the study (0020,0010)).
 	 * creating it if it does
@@ -515,7 +542,43 @@ public class ImagingStudy extends BaseResource implements IResource {
 		}
 		return getIdentifier().get(0); 
 	}
-  
+ 	/**
+	 * Adds a new value for <b>identifier</b> (Other identifiers for the study (0020,0010))
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Other identifiers for the study
+     * </p> 
+     *
+     * @return Returns a reference to this object, to allow for simple chaining.
+	 */
+	public ImagingStudy addIdentifier( IdentifierUseEnum theUse,  String theSystem,  String theValue,  String theLabel) {
+		if (myIdentifier == null) {
+			myIdentifier = new java.util.ArrayList<IdentifierDt>();
+		}
+		myIdentifier.add(new IdentifierDt(theUse, theSystem, theValue, theLabel));
+		return this; 
+	}
+
+	/**
+	 * Adds a new value for <b>identifier</b> (Other identifiers for the study (0020,0010))
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Other identifiers for the study
+     * </p> 
+     *
+     * @return Returns a reference to this object, to allow for simple chaining.
+	 */
+	public ImagingStudy addIdentifier( String theSystem,  String theValue) {
+		if (myIdentifier == null) {
+			myIdentifier = new java.util.ArrayList<IdentifierDt>();
+		}
+		myIdentifier.add(new IdentifierDt(theSystem, theValue));
+		return this; 
+	}
+
+ 
 	/**
 	 * Gets the value(s) for <b>order</b> (Order(s) that caused this study to be performed).
 	 * creating it if it does
@@ -774,7 +837,7 @@ public class ImagingStudy extends BaseResource implements IResource {
      * Number of Series in Study
      * </p> 
 	 */
-	public ImagingStudy setNumberOfSeries( Integer theInteger) {
+	public ImagingStudy setNumberOfSeries( int theInteger) {
 		myNumberOfSeries = new IntegerDt(theInteger); 
 		return this; 
 	}
@@ -818,7 +881,7 @@ public class ImagingStudy extends BaseResource implements IResource {
      * Number of SOP Instances in Study
      * </p> 
 	 */
-	public ImagingStudy setNumberOfInstances( Integer theInteger) {
+	public ImagingStudy setNumberOfInstances( int theInteger) {
 		myNumberOfInstances = new IntegerDt(theInteger); 
 		return this; 
 	}
@@ -1198,7 +1261,7 @@ public class ImagingStudy extends BaseResource implements IResource {
      * The number of this series in the overall sequence
      * </p> 
 	 */
-	public Series setNumber( Integer theInteger) {
+	public Series setNumber( int theInteger) {
 		myNumber = new IntegerDt(theInteger); 
 		return this; 
 	}
@@ -1361,7 +1424,7 @@ public class ImagingStudy extends BaseResource implements IResource {
      * Sequence that contains attributes from the
      * </p> 
 	 */
-	public Series setNumberOfInstances( Integer theInteger) {
+	public Series setNumberOfInstances( int theInteger) {
 		myNumberOfInstances = new IntegerDt(theInteger); 
 		return this; 
 	}
@@ -1722,7 +1785,7 @@ public class ImagingStudy extends BaseResource implements IResource {
      * The number of this image in the series
      * </p> 
 	 */
-	public SeriesInstance setNumber( Integer theInteger) {
+	public SeriesInstance setNumber( int theInteger) {
 		myNumber = new IntegerDt(theInteger); 
 		return this; 
 	}

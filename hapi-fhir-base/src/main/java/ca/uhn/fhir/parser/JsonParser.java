@@ -1,6 +1,7 @@
 package ca.uhn.fhir.parser;
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -483,8 +484,16 @@ public class JsonParser extends BaseParser implements IParser {
 			} else {
 				theWriter.writeStartObject();
 			}
-			if (value.getReference().isEmpty() == false) {
-				theWriter.write("resource", value.getReference().getValueAsString());
+
+			String reference = value.getReference().getValue();
+			if (StringUtils.isBlank(reference)) {
+				if (value.getResourceType() != null && StringUtils.isNotBlank(value.getResourceId())) {
+					reference = myContext.getResourceDefinition(value.getResourceType()).getName() + '/' + value.getResourceId();
+				}
+			}
+
+			if (StringUtils.isNotBlank(reference)) {
+				theWriter.write("resource", reference);
 			}
 			if (value.getDisplay().isEmpty() == false) {
 				theWriter.write("display", value.getDisplay().getValueAsString());
