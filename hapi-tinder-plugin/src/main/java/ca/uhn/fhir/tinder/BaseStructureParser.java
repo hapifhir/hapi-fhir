@@ -120,35 +120,49 @@ public abstract class BaseStructureParser {
 		}
 	}
 
-	private void scanForImportsNames(String nextType) throws MojoFailureException {
-		if ("Any".equals(nextType)) {
-			myImports.add(IResource.class.getCanonicalName());
-			return;
+	private void scanForImportsNames(String theNextType) throws MojoFailureException {
+		myImports.add(scanForImportNamesAndReturnFqn(theNextType));
+	}
+
+	private String scanForImportNamesAndReturnFqn(String theNextType) throws MojoFailureException {
+		if ("Any".equals(theNextType)) {
+			return (IResource.class.getCanonicalName());
 		}
-		if ("ExtensionDt".equals(nextType)) {
-			myImports.add(UndeclaredExtension.class.getCanonicalName());
-			return;
+		if ("ExtensionDt".equals(theNextType)) {
+			return (UndeclaredExtension.class.getCanonicalName());
 		}
 
-		if (myLocallyDefinedClassNames.containsKey(nextType)) {
-			myImports.add(nextType);
+		if (myLocallyDefinedClassNames.containsKey(theNextType)) {
+			return (theNextType);
 		} else {
 			try {
-				String type = "ca.uhn.fhir.model.dstu.composite." + nextType;
+				String type = "ca.uhn.fhir.model.dstu.composite." + theNextType;
 				Class.forName(type);
-				myImports.add(type);
+				return (type);
 			} catch (ClassNotFoundException e) {
 				try {
-					String type = "ca.uhn.fhir.model.dstu.resource." + nextType;
+					String type = "ca.uhn.fhir.model.dstu.resource." + theNextType;
 					Class.forName(type);
-					myImports.add(type);
+					return (type);
 				} catch (ClassNotFoundException e1) {
-					String type = "ca.uhn.fhir.model.primitive." + nextType;
 					try {
+						String type = "ca.uhn.fhir.model.primitive." + theNextType;
 						Class.forName(type);
-						myImports.add(type);
+						return (type);
 					} catch (ClassNotFoundException e2) {
-						throw new MojoFailureException("Unknown type: " + nextType);
+						try {
+							String type = "ca.uhn.fhir.model.dstu.valueset." + theNextType;
+							Class.forName(type);
+							return (type);
+						} catch (ClassNotFoundException e3) {
+							try {
+								String type = "ca.uhn.fhir.model.api." + theNextType;
+								Class.forName(type);
+								return (type);
+							} catch (ClassNotFoundException e4) {
+								throw new MojoFailureException("Unknown type: " + theNextType);
+							}
+						}
 					}
 				}
 			}
@@ -161,7 +175,11 @@ public abstract class BaseStructureParser {
 			try {
 				childDt = Class.forName("ca.uhn.fhir.model.primitive." + theElem.getReferenceTypesForMultiple().get(0));
 			} catch (ClassNotFoundException e) {
-				return;
+				try {
+					childDt = Class.forName("ca.uhn.fhir.model.dstu.composite." + theElem.getReferenceTypesForMultiple().get(0));
+				} catch (ClassNotFoundException e2) {
+					return;
+				}
 			}
 		} else {
 			return;
@@ -185,6 +203,9 @@ public abstract class BaseStructureParser {
 				if (paramTypes[i].getCanonicalName().startsWith("java.math")) {
 					p.setDatatype(paramTypes[i].getCanonicalName());
 				} else {
+					if (paramTypes[i].getCanonicalName().startsWith("ca.uhn.fhir")) {
+						myImports.add(paramTypes[i].getSimpleName());
+					}
 					p.setDatatype(paramTypes[i].getSimpleName());
 				}
 				p.setParameter(findAnnotation(childDt, paramAnn[i], SimpleSetter.Parameter.class).name());
@@ -221,7 +242,7 @@ public abstract class BaseStructureParser {
 		myExtensions = theExts;
 	}
 
-	private void write(BaseRootType theResource, File theFile, String thePackageBase) throws IOException {
+	private void write(BaseRootType theResource, File theFile, String thePackageBase) throws IOException, MojoFailureException {
 		FileWriter w = new FileWriter(theFile, false);
 
 		ourLog.info("Writing file: {}", theFile.getAbsolutePath());
@@ -231,7 +252,12 @@ public abstract class BaseStructureParser {
 			if (next.contains(".")) {
 				imports.add(next);
 			} else {
-				imports.add(thePackageBase + "." + myLocallyDefinedClassNames.get(next) + "." + next);
+				String string = myLocallyDefinedClassNames.get(next);
+				if (string == null) {
+					imports.add(scanForImportNamesAndReturnFqn(next));
+				} else {
+					imports.add(thePackageBase + "." + string + "." + next);
+				}
 			}
 		}
 
@@ -313,24 +339,25 @@ public abstract class BaseStructureParser {
 
 		if (theNext.isResourceRef()) {
 			for (int i = 0; i < theNext.getType().size(); i++) {
-				String nextTypeName= theNext.getType().get(i);
+				String nextTypeName = theNext.getType().get(i);
 				if ("Any".equals(nextTypeName)) {
 					continue;
 				}
-//				if ("Location".equals(nextTypeName)) {
-//					ourLog.info("***** Checking for Location");
-//					ourLog.info("***** Imports are: {}", new TreeSet<String>(myImports));
-//				}
+				// if ("Location".equals(nextTypeName)) {
+				// ourLog.info("***** Checking for Location");
+				// ourLog.info("***** Imports are: {}", new
+				// TreeSet<String>(myImports));
+				// }
 				boolean found = false;
 				for (String nextImport : myImports) {
-					if (nextImport.endsWith(".resource."+nextTypeName)) {
-//						ourLog.info("***** Found match " + nextImport);
+					if (nextImport.endsWith(".resource." + nextTypeName)) {
+						// ourLog.info("***** Found match " + nextImport);
 						theNext.getType().set(i, nextImport);
-						found=true;
+						found = true;
 					}
 				}
 				if (!found) {
-					theNext.getType().set(i, thePackageBase+".resource." + nextTypeName);
+					theNext.getType().set(i, thePackageBase + ".resource." + nextTypeName);
 				}
 			}
 		}

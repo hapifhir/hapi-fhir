@@ -5,7 +5,6 @@ import java.util.List;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.primitive.StringDt;
-import ca.uhn.fhir.rest.client.IRestfulClientFactory;
 
 @SuppressWarnings("unused")
 public class ExampleRestfulClient {

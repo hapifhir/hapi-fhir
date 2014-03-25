@@ -5,7 +5,6 @@ import java.util.Date;
 
 import org.junit.Test;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.dstu.composite.QuantityDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
@@ -13,16 +12,12 @@ import ca.uhn.fhir.model.dstu.resource.DiagnosticReport;
 import ca.uhn.fhir.model.dstu.resource.Observation;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.dstu.valueset.ObservationStatusEnum;
-import ca.uhn.fhir.model.primitive.DecimalDt;
-import ca.uhn.fhir.narrative.ThymeleafNarrativeGenerator;
 
 public class ThymeleafNarrativeGeneratorTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ThymeleafNarrativeGeneratorTest.class);
 
 	@Test
 	public void testGeneratePatient() throws IOException {
-		FhirContext ctx = new FhirContext();
-
 		Patient value = new Patient();
 		
 		value.addIdentifier().setSystem("urn:names").setValue("123456");
@@ -40,14 +35,27 @@ public class ThymeleafNarrativeGeneratorTest {
 
 	@Test
 	public void testGenerateDiagnosticReport() throws IOException {
-		FhirContext ctx = new FhirContext();
+		DiagnosticReport value = new DiagnosticReport();
+		value.getName().setText("Some Diagnostic Report");
 
+		value.addResult().setReference("Observation/1");
+		value.addResult().setReference("Observation/2");
+		value.addResult().setReference("Observation/3");
+
+		ThymeleafNarrativeGenerator gen = new ThymeleafNarrativeGenerator();
+		String output = gen.generateNarrative("http://hl7.org/fhir/profiles/DiagnosticReport", value).getDiv().getValueAsString();
+
+		ourLog.info(output);
+	}
+
+	@Test
+	public void testGenerateDiagnosticReportWithObservations() throws IOException {
 		DiagnosticReport value = new DiagnosticReport();
 		value.getName().setText("Some Diagnostic Report");
 
 		Observation obs = new Observation();
 		obs.getName().addCoding().setCode("1938HB").setDisplay("Hemoglobin");
-		obs.setValue(new QuantityDt(2.223, "mg/L"));		
+		obs.setValue(new QuantityDt(null, 2.223, "mg/L"));		
 		obs.addReferenceRange().setLow(new QuantityDt(2.20)).setHigh(new QuantityDt(2.99));
 		obs.setStatus(ObservationStatusEnum.FINAL);
 		obs.setComments("This is a result comment");
@@ -60,6 +68,5 @@ public class ThymeleafNarrativeGeneratorTest {
 
 		ourLog.info(output);
 	}
-
 
 }

@@ -7,15 +7,10 @@ import java.io.InputStream;
 import java.io.StringReader;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Hashtable;
 import java.util.Properties;
-
-import javax.sound.sampled.LineUnavailableException;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.ReaderInputStream;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.WordUtils;
 import org.thymeleaf.Arguments;
 import org.thymeleaf.Configuration;
 import org.thymeleaf.TemplateEngine;
@@ -24,11 +19,7 @@ import org.thymeleaf.context.Context;
 import org.thymeleaf.dom.Document;
 import org.thymeleaf.dom.Element;
 import org.thymeleaf.dom.Node;
-import org.thymeleaf.fragment.IFragmentSpec;
-import org.thymeleaf.processor.IAttributeNameProcessorMatcher;
 import org.thymeleaf.processor.IProcessor;
-import org.thymeleaf.processor.IProcessorMatcher;
-import org.thymeleaf.processor.ProcessorMatchingContext;
 import org.thymeleaf.processor.ProcessorResult;
 import org.thymeleaf.processor.attr.AbstractAttrProcessor;
 import org.thymeleaf.resourceresolver.IResourceResolver;
@@ -44,7 +35,6 @@ import ca.uhn.fhir.model.api.IDatatype;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.composite.NarrativeDt;
 import ca.uhn.fhir.model.dstu.composite.QuantityDt;
-import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.dstu.valueset.NarrativeStatusEnum;
 import ca.uhn.fhir.model.primitive.XhtmlDt;
 

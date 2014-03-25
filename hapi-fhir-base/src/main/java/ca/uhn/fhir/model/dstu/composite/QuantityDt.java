@@ -16,31 +16,19 @@
 
 package ca.uhn.fhir.model.dstu.composite;
 
-import java.util.*;
-import ca.uhn.fhir.model.api.*;
-import ca.uhn.fhir.model.api.annotation.*;
+import java.util.List;
 
-import ca.uhn.fhir.model.dstu.valueset.AddressUseEnum;
-import ca.uhn.fhir.model.dstu.composite.CodingDt;
-import ca.uhn.fhir.model.dstu.valueset.ContactSystemEnum;
-import ca.uhn.fhir.model.dstu.valueset.ContactUseEnum;
-import ca.uhn.fhir.model.dstu.valueset.EventTimingEnum;
-import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
-import ca.uhn.fhir.model.dstu.valueset.NameUseEnum;
-import ca.uhn.fhir.model.dstu.resource.Organization;
-import ca.uhn.fhir.model.dstu.composite.PeriodDt;
+import ca.uhn.fhir.model.api.BaseElement;
+import ca.uhn.fhir.model.api.ICompositeDatatype;
+import ca.uhn.fhir.model.api.IElement;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.SimpleSetter;
 import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
-import ca.uhn.fhir.model.dstu.composite.QuantityDt;
-import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
-import ca.uhn.fhir.model.dstu.valueset.UnitsOfTimeEnum;
-import ca.uhn.fhir.model.dstu.resource.ValueSet;
-import ca.uhn.fhir.model.primitive.Base64BinaryDt;
-import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
-import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.DecimalDt;
-import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
 
@@ -62,6 +50,48 @@ import ca.uhn.fhir.model.primitive.UriDt;
 public class QuantityDt 
         extends  BaseElement         implements ICompositeDatatype  {
 
+	/**
+	 * Constructor
+	 */
+	public QuantityDt() {
+		// nothing
+	}
+
+	/**
+	 * Constructor
+	 */
+	@SimpleSetter
+	public QuantityDt(@SimpleSetter.Parameter(name="theValue") double theValue) {
+		setValue(theValue);
+	}
+
+	/**
+	 * Constructor
+	 */
+	@SimpleSetter
+	public QuantityDt(@SimpleSetter.Parameter(name="theValue") long theValue) {
+		setValue(theValue);
+	}
+
+	/**
+	 * Constructor
+	 */
+	@SimpleSetter
+	public QuantityDt(@SimpleSetter.Parameter(name="theComparator") QuantityCompararatorEnum theComparator, @SimpleSetter.Parameter(name="theValue") double theValue, @SimpleSetter.Parameter(name="theUnits") String theUnits) {
+		setValue(theValue);
+		setComparator(theComparator);
+		setUnits(theUnits);
+	}
+
+	/**
+	 * Constructor
+	 */
+	@SimpleSetter
+	public QuantityDt(@SimpleSetter.Parameter(name="theComparator") QuantityCompararatorEnum theComparator, @SimpleSetter.Parameter(name="theValue") long theValue, @SimpleSetter.Parameter(name="theUnits") String theUnits) {
+		setValue(theValue);
+		setComparator(theComparator);
+		setUnits(theUnits);
+	}
 
 	@Child(name="value", type=DecimalDt.class, order=0, min=0, max=1)	
 	@Description(
@@ -98,61 +128,6 @@ public class QuantityDt
 	)
 	private CodeDt myCode;
 	
-	/**
-	 * Constructor
-	 */
-	public QuantityDt() {
-		// nothing
-	}
-
-	/**
-	 * Constructor
-	 */
-	public QuantityDt(double theValue) {
-		setValue(theValue);
-	}
-
-	/**
-	 * Constructor
-	 */
-	public QuantityDt(long theValue) {
-		setValue(theValue);
-	}
-
-	/**
-	 * Constructor
-	 */
-	public QuantityDt(double theValue, String theUnits) {
-		setValue(theValue);
-		setUnits(theUnits);
-	}
-
-	/**
-	 * Constructor
-	 */
-	public QuantityDt(long theValue, String theUnits) {
-		setValue(theValue);
-		setUnits(theUnits);
-	}
-
-
-	/**
-	 * Constructor
-	 */
-	public QuantityDt(QuantityCompararatorEnum theCompararatorEnum, double theValue, String theUnits) {
-		setComparator(theCompararatorEnum);
-		setValue(theValue);
-		setUnits(theUnits);
-	}
-
-	/**
-	 * Constructor
-	 */
-	public QuantityDt(QuantityCompararatorEnum theCompararatorEnum, long theValue, String theUnits) {
-		setComparator(theCompararatorEnum);
-		setValue(theValue);
-		setUnits(theUnits);
-	}
 
 	@Override
 	public boolean isEmpty() {
