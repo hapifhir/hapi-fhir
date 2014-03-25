@@ -43,12 +43,7 @@ import ca.uhn.fhir.model.dstu.valueset.AnimalSpeciesEnum;
 import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
 import ca.uhn.fhir.model.dstu.valueset.LinkTypeEnum;
 import ca.uhn.fhir.model.dstu.valueset.MaritalStatusCodesEnum;
-import ca.uhn.fhir.model.primitive.BooleanDt;
-import ca.uhn.fhir.model.primitive.BoundCodeDt;
-import ca.uhn.fhir.model.primitive.BoundCodeableConceptDt;
-import ca.uhn.fhir.model.primitive.CodeDt;
-import ca.uhn.fhir.model.primitive.DateTimeDt;
-import ca.uhn.fhir.model.primitive.IntegerDt;
+import ca.uhn.fhir.model.primitive.*;
 
 
 /**
@@ -348,11 +343,17 @@ public class Patient extends BaseResource implements IResource {
 		formalDefinition="Whether this patient record is in active use"
 	)
 	private BooleanDt myActive;
-	
+
+    @Child(name="cautionNote", type=StringDt.class, order=17, min=0, max=Child.MAX_UNLIMITED)
+    @Description(
+            shortDefinition = "Complete caution note",
+            formalDefinition = "List of substances that may elicit a response from the patient."
+    )
+    private List<StringDt> myCautionNote;
 
 	@Override
 	public boolean isEmpty() {
-		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myIdentifier,  myName,  myTelecom,  myGender,  myBirthDate,  myDeceased,  myAddress,  myMaritalStatus,  myMultipleBirth,  myPhoto,  myContact,  myAnimal,  myCommunication,  myCareProvider,  myManagingOrganization,  myLink,  myActive);
+		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myIdentifier,  myName,  myTelecom,  myGender,  myBirthDate,  myDeceased,  myAddress,  myMaritalStatus,  myMultipleBirth,  myPhoto,  myContact,  myAnimal,  myCommunication,  myCareProvider,  myManagingOrganization,  myLink,  myActive, myCautionNote);
 	}
 	
 	@Override
@@ -362,7 +363,7 @@ public class Patient extends BaseResource implements IResource {
 
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
-		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myIdentifier, myName, myTelecom, myGender, myBirthDate, myDeceased, myAddress, myMaritalStatus, myMultipleBirth, myPhoto, myContact, myAnimal, myCommunication, myCareProvider, myManagingOrganization, myLink, myActive);
+		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myIdentifier, myName, myTelecom, myGender, myBirthDate, myDeceased, myAddress, myMaritalStatus, myMultipleBirth, myPhoto, myContact, myAnimal, myCommunication, myCareProvider, myManagingOrganization, myLink, myActive, myCautionNote);
 	}
 
 	/**
@@ -1227,6 +1228,26 @@ public class Patient extends BaseResource implements IResource {
 		myActive = new BooleanDt(theBoolean); 
 		return this; 
 	}
+
+    /**
+     * Gets the complete caution note (a list of substances and the responses a patient elicits)
+     *
+     * <p>
+     * <b>Definition:</b>
+     * Complete caution note
+     * </p>
+     */
+    public List<StringDt> getCautionNote(){ return myCautionNote; }
+
+    /**
+     * Sets the value for the caution note
+     *
+     * <p>
+     * <b>Definition:</b>
+     * Complete caution note
+     * </p>
+     */
+    public void setCautionNote(List<StringDt> theValue){ myCautionNote = theValue; }
 
  
 	/**
