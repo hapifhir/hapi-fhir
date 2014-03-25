@@ -8,11 +8,17 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import javax.json.Json;
+import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
 import javax.json.JsonString;
@@ -20,14 +26,12 @@ import javax.json.JsonValue;
 import javax.json.JsonValue.ValueType;
 import javax.json.stream.JsonGenerator;
 import javax.json.stream.JsonGeneratorFactory;
-import javax.json.stream.JsonParser.Event;
 
 import org.apache.commons.lang3.StringUtils;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
-import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeChildDeclaredExtensionDefinition;
 import ca.uhn.fhir.context.RuntimeChildUndeclaredExtensionDefinition;
@@ -36,6 +40,7 @@ import ca.uhn.fhir.model.api.BaseBundle;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.api.IElement;
+import ca.uhn.fhir.model.api.IIdentifiableElement;
 import ca.uhn.fhir.model.api.IPrimitiveDatatype;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ISupportsUndeclaredExtensions;
@@ -45,6 +50,7 @@ import ca.uhn.fhir.model.dstu.composite.ContainedDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.model.primitive.DecimalDt;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.XhtmlDt;
@@ -60,6 +66,9 @@ public class JsonParser extends BaseParser implements IParser {
 
 	@Override
 	public String encodeBundleToString(Bundle theBundle) throws DataFormatException, IOException {
+		if (theBundle == null) {
+			throw new NullPointerException("Bundle can not be null");
+		}
 		StringWriter stringWriter = new StringWriter();
 		encodeBundleToWriter(theBundle, stringWriter);
 
@@ -129,25 +138,32 @@ public class JsonParser extends BaseParser implements IParser {
 	public void encodeResourceToWriter(IResource theResource, Writer theWriter) throws IOException {
 		JsonGenerator eventWriter = createJsonGenerator(theWriter);
 
-		// try {
 		encodeResourceToJsonStreamWriter(theResource, eventWriter, null);
 		eventWriter.flush();
-		// } catch (XMLStreamException e) {
-		// throw new
-		// ConfigurationException("Failed to initialize STaX event factory", e);
-		// }
 	}
 
 	@Override
 	public Bundle parseBundle(Reader theReader) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+		JsonReader reader = Json.createReader(theReader);
+		JsonObject object = reader.readObject();
 
-	@Override
-	public Bundle parseBundle(String theMessageString) throws ConfigurationException, DataFormatException {
-		// TODO Auto-generated method stub
-		return null;
+		JsonValue resourceTypeObj = object.get("resourceType");
+		assertObjectOfType(resourceTypeObj, JsonValue.ValueType.STRING, "resourceType");
+		String resourceType = ((JsonString) resourceTypeObj).getString();
+		if (!"Bundle".equals(resourceType)) {
+			throw new DataFormatException("Trying to parse bundle but found resourceType other than 'Bundle'. Found: '" + resourceType + "'");
+		}
+
+		ParserState<Bundle> state = ParserState.getPreAtomInstance(myContext, true);
+		state.enteringNewElement(null, "feed");
+
+		parseBundleChildren(object, state);
+
+		state.endingElement();
+
+		Bundle retVal = state.getObject();
+
+		return retVal;
 	}
 
 	@Override
@@ -164,45 +180,217 @@ public class JsonParser extends BaseParser implements IParser {
 		assertObjectOfType(resourceTypeObj, JsonValue.ValueType.STRING, "resourceType");
 		String resourceType = ((JsonString) resourceTypeObj).getString();
 
+		RuntimeResourceDefinition def;
 		if (theResourceType != null) {
-			RuntimeResourceDefinition def = myContext.getResourceDefinition(theResourceType);
+			def = myContext.getResourceDefinition(theResourceType);
 		} else {
-			RuntimeResourceDefinition def = myContext.getResourceDefinition(resourceType);
+			def = myContext.getResourceDefinition(resourceType);
 		}
 
-		PushbackJsonParser parser = new PushbackJsonParser(Json.createParser(theReader));
+		ParserState<? extends IResource> state = ParserState.getPreResourceInstance(def.getImplementingClass(), myContext, true);
+		state.enteringNewElement(null, def.getName());
 
-		while (parser.hasNext()) {
+		parseChildren(object, state);
 
-			Event next = parser.next();
-			switch (next) {
-			case END_ARRAY:
-				break;
-			case END_OBJECT:
-				break;
-			case KEY_NAME:
-				break;
-			case START_ARRAY:
-				break;
-			case START_OBJECT:
-				break;
-			case VALUE_FALSE:
-			case VALUE_TRUE:
-				break;
-			case VALUE_NULL:
-				break;
-			case VALUE_NUMBER:
-				break;
-			case VALUE_STRING:
-				break;
-			default:
-				break;
+		state.endingElement();
 
+		@SuppressWarnings("unchecked")
+		T retVal = (T) state.getObject();
+
+		return retVal;
+	}
+
+	private void parseChildren(JsonObject theObject, ParserState<?> theState) {
+		String elementId = null;
+		for (String nextName : theObject.keySet()) {
+			if ("resourceType".equals(nextName)) {
+				continue;
+			} else if ("id".equals(nextName)) {
+				elementId = theObject.getString(nextName);
+				continue;
+			} else if ("extension".equals(nextName)) {
+				JsonArray array = theObject.getJsonArray(nextName);
+				parseExtension(theState, array, false);
+				continue;
+			} else if ("modifierExtension".equals(nextName)) {
+				JsonArray array = theObject.getJsonArray(nextName);
+				parseExtension(theState, array, true);
+				continue;
+			} else if (nextName.charAt(0) == '_') {
+				continue;
 			}
 
+			JsonValue nextVal = theObject.get(nextName);
+			JsonValue alternateVal = theObject.get('_' + nextName);
+
+			parseChildren(theState, nextName, nextVal, alternateVal);
+
 		}
 
-		return null;
+		if (elementId != null) {
+			IElement object = theState.getObject();
+			if (object instanceof IIdentifiableElement) {
+				((IIdentifiableElement) object).setId(new IdDt(elementId));
+			}
+		}
+	}
+
+	private static final Set<String> BUNDLE_TEXTNODE_CHILDREN;
+	
+	static {
+		HashSet<String> hashSet = new HashSet<String>();
+		hashSet.add("title");
+		hashSet.add("id");
+		hashSet.add("updated");
+		hashSet.add("published");
+		BUNDLE_TEXTNODE_CHILDREN=Collections.unmodifiableSet(hashSet);
+	}
+	
+	private void parseBundleChildren(JsonObject theObject, ParserState<?> theState) {
+		for (String nextName : theObject.keySet()) {
+			if ("resourceType".equals(nextName)) {
+				continue;
+			} else if ("link".equals(nextName)) {
+				JsonArray entries = theObject.getJsonArray(nextName);
+				for (JsonValue jsonValue : entries) {
+					theState.enteringNewElement(null, "link");
+					JsonObject linkObj = (JsonObject) jsonValue;
+					String rel = linkObj.getString("rel", null);
+					String href = linkObj.getString("href", null);
+					theState.attributeValue("rel", rel);
+					theState.attributeValue("href", href);
+					theState.endingElement();
+				}
+				continue;
+			} else if ("entry".equals(nextName)) {
+				JsonArray entries = theObject.getJsonArray(nextName);
+				for (JsonValue jsonValue : entries) {
+					theState.enteringNewElement(null, "entry");
+					parseBundleChildren((JsonObject) jsonValue, theState);
+					theState.endingElement();
+				}
+				continue;
+			} else if (BUNDLE_TEXTNODE_CHILDREN.contains(nextName)) {
+				theState.enteringNewElement(null, nextName);
+				theState.string(theObject.getString(nextName, null));
+				theState.endingElement();
+				continue;
+			}
+
+			JsonValue nextVal = theObject.get(nextName);
+			parseChildren(theState, nextName, nextVal, null);
+
+		}
+	}
+
+	private void parseChildren(ParserState<?> theState, String theName, JsonValue theJsonVal, JsonValue theAlternateVal) {
+		switch (theJsonVal.getValueType()) {
+		case ARRAY: {
+			JsonArray nextArray = (JsonArray) theJsonVal;
+			JsonArray nextAlternateArray = (JsonArray) theAlternateVal;
+			for (int i = 0; i < nextArray.size(); i++) {
+				JsonValue nextObject = nextArray.get(i);
+				JsonValue nextAlternate = null;
+				if (nextAlternateArray != null) {
+					nextAlternate = nextAlternateArray.get(i);
+				}
+				parseChildren(theState, theName, nextObject, nextAlternate);
+			}
+			break;
+		}
+		case OBJECT: {
+			theState.enteringNewElement(null, theName);
+			JsonObject nextObject = (JsonObject) theJsonVal;
+			boolean preResource = false;
+			if (theState.isPreResource()) {
+				String resType = nextObject.getString("resourceType");
+				if (isBlank(resType)) {
+					throw new DataFormatException("Missing 'resourceType' from resource");
+				}
+				theState.enteringNewElement(null, resType);
+				preResource = true;
+			}
+			parseChildren(nextObject, theState);
+			if (preResource) {
+				theState.endingElement();
+			}
+			theState.endingElement();
+			break;
+		}
+		case STRING: {
+			JsonString nextValStr = (JsonString) theJsonVal;
+			theState.enteringNewElement(null, theName);
+			theState.attributeValue("value", nextValStr.getString());
+			parseAlternates(theAlternateVal, theState);
+			theState.endingElement();
+			break;
+		}
+		case NUMBER:
+		case FALSE:
+		case TRUE:
+			theState.enteringNewElement(null, theName);
+			theState.attributeValue("value", theJsonVal.toString());
+			parseAlternates(theAlternateVal, theState);
+			theState.endingElement();
+			break;
+		case NULL:
+			break;
+		}
+	}
+
+	private void parseAlternates(JsonValue theAlternateVal, ParserState<?> theState) {
+		if (theAlternateVal == null || theAlternateVal.getValueType() == ValueType.NULL) {
+			return;
+		}
+		JsonObject alternate = (JsonObject) theAlternateVal;
+		for (Entry<String, JsonValue> nextEntry : alternate.entrySet()) {
+			String nextKey = nextEntry.getKey();
+			JsonValue nextVal = nextEntry.getValue();
+			if ("extension".equals(nextKey)) {
+				boolean isModifier = false;
+				JsonArray array = (JsonArray) nextEntry.getValue();
+				parseExtension(theState, array, isModifier);
+			} else if ("modifierExtension".equals(nextKey)) {
+				boolean isModifier = true;
+				JsonArray array = (JsonArray) nextEntry.getValue();
+				parseExtension(theState, array, isModifier);
+			} else if ("id".equals(nextKey)) {
+				switch (nextVal.getValueType()) {
+				case STRING:
+					theState.attributeValue("id", ((JsonString) nextVal).getString());
+					break;
+				case NULL:
+					break;
+				default:
+					break;
+				}
+			}
+		}
+	}
+
+	private void parseExtension(ParserState<?> theState, JsonArray array, boolean theIsModifier) {
+		// TODO: use theIsModifier
+		for (int i = 0; i < array.size(); i++) {
+			JsonObject nextExtObj = array.getJsonObject(i);
+			String url = nextExtObj.getString("url");
+			theState.enteringNewElementExtension(null, url, theIsModifier);
+			for (Iterator<String> iter = nextExtObj.keySet().iterator(); iter.hasNext();) {
+				String next = iter.next();
+				if ("url".equals(next)) {
+					continue;
+				} else if ("extension".equals(next)) {
+					JsonArray jsonVal = (JsonArray) nextExtObj.get(next);
+					parseExtension(theState, jsonVal, false);
+				} else if ("modifierExtension".equals(next)) {
+					JsonArray jsonVal = (JsonArray) nextExtObj.get(next);
+					parseExtension(theState, jsonVal, true);
+				} else {
+					JsonValue jsonVal = nextExtObj.get(next);
+					parseChildren(theState, next, jsonVal, null);
+				}
+			}
+			theState.endingElement();
+		}
 	}
 
 	@Override
@@ -352,7 +540,7 @@ public class JsonParser extends BaseParser implements IParser {
 				String childName = nextChild.getChildNameByDatatype(type);
 				BaseRuntimeElementDefinition<?> childDef = nextChild.getChildElementDefinitionByDatatype(type);
 				if (childDef == null) {
-					throw new IllegalStateException(nextChild + " has no child of type " + type);
+					super.throwExceptionForUnknownChildType(nextChild, type);
 				}
 
 				if (nextChild instanceof RuntimeChildDeclaredExtensionDefinition) {

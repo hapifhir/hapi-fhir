@@ -8,7 +8,7 @@ import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.util.ElementUtil;
 
-public class Bundle extends BaseBundle implements IElement {
+public class Bundle extends BaseBundle /*implements IElement*/ {
 	
 	//@formatter:off
 	/* ****************************************************

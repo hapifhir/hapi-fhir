@@ -23,10 +23,9 @@ FhirContext ctx = new FhirContext();
 	}
 	
 	
-	public static void main(String[] args) {
+	public static void main(String[] args) throws DataFormatException, IOException {
 
-Patient patient = new Patient();
-
+new FhirContextIntro().encodeMsg();
 		
 		
 	}
@@ -61,7 +60,14 @@ name.addGiven("Q");
 String encoded = ctx.newXmlParser().encodeResourceToString(patient);
 System.out.println(encoded);
 //END SNIPPET: encodeMsg
-		
+
+//START SNIPPET: encodeMsgJson
+IParser jsonParser = ctx.newJsonParser();
+jsonParser.setPrettyPrint(true);
+encoded = jsonParser.encodeResourceToString(patient);
+System.out.println(encoded);
+//END SNIPPET: encodeMsgJson
+
 		
 	}
 	

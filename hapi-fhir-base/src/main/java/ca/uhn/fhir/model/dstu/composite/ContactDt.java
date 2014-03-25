@@ -16,33 +16,19 @@
 
 package ca.uhn.fhir.model.dstu.composite;
 
-import java.util.*;
-import ca.uhn.fhir.model.api.*;
-import ca.uhn.fhir.model.api.annotation.*;
+import java.util.List;
 
-import ca.uhn.fhir.model.dstu.valueset.AddressUseEnum;
-import ca.uhn.fhir.model.dstu.composite.CodingDt;
+import ca.uhn.fhir.model.api.BaseElement;
+import ca.uhn.fhir.model.api.ICompositeDatatype;
+import ca.uhn.fhir.model.api.IElement;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.dstu.valueset.ContactSystemEnum;
 import ca.uhn.fhir.model.dstu.valueset.ContactUseEnum;
-import ca.uhn.fhir.model.dstu.valueset.EventTimingEnum;
-import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
-import ca.uhn.fhir.model.dstu.valueset.NameUseEnum;
-import ca.uhn.fhir.model.dstu.resource.Organization;
-import ca.uhn.fhir.model.dstu.composite.PeriodDt;
-import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
-import ca.uhn.fhir.model.dstu.composite.QuantityDt;
-import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
-import ca.uhn.fhir.model.dstu.valueset.UnitsOfTimeEnum;
-import ca.uhn.fhir.model.dstu.resource.ValueSet;
-import ca.uhn.fhir.model.primitive.Base64BinaryDt;
-import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
-import ca.uhn.fhir.model.primitive.DateTimeDt;
-import ca.uhn.fhir.model.primitive.DecimalDt;
-import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.model.primitive.StringDt;
-import ca.uhn.fhir.model.primitive.UriDt;
 
 /**
  * HAPI/FHIR <b>Contact</b> Datatype
@@ -61,6 +47,13 @@ import ca.uhn.fhir.model.primitive.UriDt;
 @DatatypeDef(name="Contact") 
 public class ContactDt 
         extends  BaseElement         implements ICompositeDatatype  {
+
+	/**
+	 * Constructor
+	 */
+	public ContactDt() {
+		// nothing
+	}
 
 
 	@Child(name="system", type=CodeDt.class, order=0, min=0, max=1)	
@@ -132,10 +125,10 @@ public class ContactDt
      * Telecommunications form for contact - what communications system is required to make use of the contact
      * </p> 
 	 */
-	public void setSystem(BoundCodeDt<ContactSystemEnum> theValue) {
+	public ContactDt setSystem(BoundCodeDt<ContactSystemEnum> theValue) {
 		mySystem = theValue;
+		return this;
 	}
-
 
 	/**
 	 * Sets the value(s) for <b>system</b> (phone | fax | email | url)
@@ -145,8 +138,9 @@ public class ContactDt
      * Telecommunications form for contact - what communications system is required to make use of the contact
      * </p> 
 	 */
-	public void setSystem(ContactSystemEnum theValue) {
+	public ContactDt setSystem(ContactSystemEnum theValue) {
 		getSystem().setValueAsEnum(theValue);
+		return this;
 	}
 
   
@@ -175,10 +169,10 @@ public class ContactDt
      * The actual contact details, in a form that is meaningful to the designated communication system (i.e. phone number or email address).
      * </p> 
 	 */
-	public void setValue(StringDt theValue) {
+	public ContactDt setValue(StringDt theValue) {
 		myValue = theValue;
+		return this;
 	}
-
 
  	/**
 	 * Sets the value for <b>value</b> (The actual contact details)
@@ -188,8 +182,9 @@ public class ContactDt
      * The actual contact details, in a form that is meaningful to the designated communication system (i.e. phone number or email address).
      * </p> 
 	 */
-	public void setValue( String theString) {
+	public ContactDt setValue( String theString) {
 		myValue = new StringDt(theString); 
+		return this; 
 	}
 
  
@@ -218,10 +213,10 @@ public class ContactDt
      * Identifies the purpose for the address
      * </p> 
 	 */
-	public void setUse(BoundCodeDt<ContactUseEnum> theValue) {
+	public ContactDt setUse(BoundCodeDt<ContactUseEnum> theValue) {
 		myUse = theValue;
+		return this;
 	}
-
 
 	/**
 	 * Sets the value(s) for <b>use</b> (home | work | temp | old | mobile - purpose of this address)
@@ -231,8 +226,9 @@ public class ContactDt
      * Identifies the purpose for the address
      * </p> 
 	 */
-	public void setUse(ContactUseEnum theValue) {
+	public ContactDt setUse(ContactUseEnum theValue) {
 		getUse().setValueAsEnum(theValue);
+		return this;
 	}
 
   
@@ -261,10 +257,10 @@ public class ContactDt
      * Time period when the contact was/is in use
      * </p> 
 	 */
-	public void setPeriod(PeriodDt theValue) {
+	public ContactDt setPeriod(PeriodDt theValue) {
 		myPeriod = theValue;
+		return this;
 	}
-
 
   
 

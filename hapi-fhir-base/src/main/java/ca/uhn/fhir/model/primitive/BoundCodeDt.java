@@ -18,7 +18,11 @@ public class BoundCodeDt<T extends Enum<?>> extends CodeDt {
 	}
 
 	public void setValueAsEnum(T theValue) {
-		setValue(myBinder.toCodeString(theValue));
+		if (theValue==null) {
+			setValue(null);
+		} else {
+			setValue(myBinder.toCodeString(theValue));
+		}
 	}
 
 	public T getValueAsEnum() {

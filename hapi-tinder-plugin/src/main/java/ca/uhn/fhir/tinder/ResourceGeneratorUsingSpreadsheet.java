@@ -37,9 +37,10 @@ public class ResourceGeneratorUsingSpreadsheet extends BaseStructureSpreadsheetP
 
 	public static void main(String[] args) throws Exception  {
 		ResourceGeneratorUsingSpreadsheet p = new ResourceGeneratorUsingSpreadsheet();
-		p.setBaseResourceNames(Collections.singletonList("encounter"));
+		p.setBaseResourceNames(Collections.singletonList("observation"));
 		p.parse();
-		p.writeAll(new File("tmp"), "ca.test");
+		p.markResourcesForImports();
+		p.writeAll(new File("target/gen/ca/uhn/fhir/model/dstu/resource"), "ca.uhn.fhir.model.dstu");
 //		
 //		// TODO: this needs to be properly populated
 //		p.getAllDatatypes().add("String");

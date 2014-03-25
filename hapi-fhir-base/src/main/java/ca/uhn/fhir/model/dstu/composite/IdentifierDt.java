@@ -16,31 +16,18 @@
 
 package ca.uhn.fhir.model.dstu.composite;
 
-import java.util.*;
-import ca.uhn.fhir.model.api.*;
-import ca.uhn.fhir.model.api.annotation.*;
+import java.util.List;
 
-import ca.uhn.fhir.model.dstu.valueset.AddressUseEnum;
-import ca.uhn.fhir.model.dstu.composite.CodingDt;
-import ca.uhn.fhir.model.dstu.valueset.ContactSystemEnum;
-import ca.uhn.fhir.model.dstu.valueset.ContactUseEnum;
-import ca.uhn.fhir.model.dstu.valueset.EventTimingEnum;
+import ca.uhn.fhir.model.api.BaseElement;
+import ca.uhn.fhir.model.api.ICompositeDatatype;
+import ca.uhn.fhir.model.api.IElement;
+import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
-import ca.uhn.fhir.model.dstu.valueset.NameUseEnum;
-import ca.uhn.fhir.model.dstu.resource.Organization;
-import ca.uhn.fhir.model.dstu.composite.PeriodDt;
-import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
-import ca.uhn.fhir.model.dstu.composite.QuantityDt;
-import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
-import ca.uhn.fhir.model.dstu.valueset.UnitsOfTimeEnum;
-import ca.uhn.fhir.model.dstu.resource.ValueSet;
-import ca.uhn.fhir.model.primitive.Base64BinaryDt;
-import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
-import ca.uhn.fhir.model.primitive.DateTimeDt;
-import ca.uhn.fhir.model.primitive.DecimalDt;
-import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
 
@@ -63,7 +50,7 @@ public class IdentifierDt
         extends  BaseElement         implements ICompositeDatatype  , IQueryParameterType {
 
 	/**
-	 * Creates a new identifier
+	 * Constructor
 	 */
 	public IdentifierDt() {
 		// nothing
@@ -162,10 +149,10 @@ public class IdentifierDt
      * The purpose of this identifier
      * </p> 
 	 */
-	public void setUse(BoundCodeDt<IdentifierUseEnum> theValue) {
+	public IdentifierDt setUse(BoundCodeDt<IdentifierUseEnum> theValue) {
 		myUse = theValue;
+		return this;
 	}
-
 
 	/**
 	 * Sets the value(s) for <b>use</b> (usual | official | temp | secondary (If known))
@@ -175,8 +162,9 @@ public class IdentifierDt
      * The purpose of this identifier
      * </p> 
 	 */
-	public void setUse(IdentifierUseEnum theValue) {
+	public IdentifierDt setUse(IdentifierUseEnum theValue) {
 		getUse().setValueAsEnum(theValue);
+		return this;
 	}
 
   
@@ -205,10 +193,10 @@ public class IdentifierDt
      * A text string for the identifier that can be displayed to a human so they can recognize the identifier
      * </p> 
 	 */
-	public void setLabel(StringDt theValue) {
+	public IdentifierDt setLabel(StringDt theValue) {
 		myLabel = theValue;
+		return this;
 	}
-
 
  	/**
 	 * Sets the value for <b>label</b> (Description of identifier)
@@ -218,8 +206,9 @@ public class IdentifierDt
      * A text string for the identifier that can be displayed to a human so they can recognize the identifier
      * </p> 
 	 */
-	public void setLabel( String theString) {
+	public IdentifierDt setLabel( String theString) {
 		myLabel = new StringDt(theString); 
+		return this; 
 	}
 
  
@@ -248,10 +237,10 @@ public class IdentifierDt
      * Establishes the namespace in which set of possible id values is unique.
      * </p> 
 	 */
-	public void setSystem(UriDt theValue) {
+	public IdentifierDt setSystem(UriDt theValue) {
 		mySystem = theValue;
+		return this;
 	}
-
 
  	/**
 	 * Sets the value for <b>system</b> (The namespace for the identifier)
@@ -261,8 +250,9 @@ public class IdentifierDt
      * Establishes the namespace in which set of possible id values is unique.
      * </p> 
 	 */
-	public void setSystem( String theUri) {
+	public IdentifierDt setSystem( String theUri) {
 		mySystem = new UriDt(theUri); 
+		return this; 
 	}
 
  
@@ -291,10 +281,10 @@ public class IdentifierDt
      * The portion of the identifier typically displayed to the user and which is unique within the context of the system.
      * </p> 
 	 */
-	public void setValue(StringDt theValue) {
+	public IdentifierDt setValue(StringDt theValue) {
 		myValue = theValue;
+		return this;
 	}
-
 
  	/**
 	 * Sets the value for <b>value</b> (The value that is unique)
@@ -304,8 +294,9 @@ public class IdentifierDt
      * The portion of the identifier typically displayed to the user and which is unique within the context of the system.
      * </p> 
 	 */
-	public void setValue( String theString) {
+	public IdentifierDt setValue( String theString) {
 		myValue = new StringDt(theString); 
+		return this; 
 	}
 
  
@@ -334,10 +325,10 @@ public class IdentifierDt
      * Time period during which identifier is/was valid for use
      * </p> 
 	 */
-	public void setPeriod(PeriodDt theValue) {
+	public IdentifierDt setPeriod(PeriodDt theValue) {
 		myPeriod = theValue;
+		return this;
 	}
-
 
   
 	/**
@@ -365,10 +356,10 @@ public class IdentifierDt
      * Organization that issued/manages the identifier
      * </p> 
 	 */
-	public void setAssigner(ResourceReferenceDt theValue) {
+	public IdentifierDt setAssigner(ResourceReferenceDt theValue) {
 		myAssigner = theValue;
+		return this;
 	}
-
 
   
 

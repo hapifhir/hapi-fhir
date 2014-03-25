@@ -4,6 +4,7 @@ import java.util.Date;
 
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.dstu.composite.CodingDt;
+import ca.uhn.fhir.model.dstu.composite.HumanNameDt;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.composite.PeriodDt;
 import ca.uhn.fhir.model.dstu.resource.Observation;
@@ -11,6 +12,7 @@ import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
+import ca.uhn.fhir.model.primitive.StringDt;
 
 public class FhirDataModel {
 
@@ -83,4 +85,25 @@ patient.setGender(AdministrativeGenderCodesEnum.M);
 	}
 		
 
+	
+public void namesHard() {
+// START SNIPPET: namesHard
+Patient patient = new Patient();
+HumanNameDt name = patient.addName();
+StringDt family = name.addFamily();
+family.setValue("Smith");
+StringDt firstName = name.addGiven();
+firstName.setValue("Rob");
+StringDt secondName = name.addGiven();
+secondName.setValue("Bruce");
+//END SNIPPET: namesHard
+}
+
+public void namesEasy() {
+// START SNIPPET: namesEasy
+Patient patient = new Patient();
+patient.addName().addFamily("Smith").addGiven("Rob").addGiven("Bruce");
+//END SNIPPET: namesEasy
+}
+	
 }

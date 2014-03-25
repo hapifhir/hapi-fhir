@@ -79,7 +79,7 @@ public class XhtmlDt extends BasePrimitive<List<XMLEvent>> {
 			setValue(value);
 			
 		} catch (XMLStreamException e) {
-			throw new DataFormatException("String does not appear to be valid XML/XHTML", e);
+			throw new DataFormatException("String does not appear to be valid XML/XHTML: "+e.getMessage(), e);
 		} catch (FactoryConfigurationError e) {
 			throw new ConfigurationException(e);
 		}

@@ -17,113 +17,28 @@
 package ca.uhn.fhir.model.dstu.resource;
 
 
-import java.util.*;
-import ca.uhn.fhir.model.api.*;
-import ca.uhn.fhir.model.api.annotation.*;
+import java.util.List;
 
+import ca.uhn.fhir.model.api.BaseElement;
+import ca.uhn.fhir.model.api.BaseResource;
+import ca.uhn.fhir.model.api.IElement;
+import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.IResourceBlock;
+import ca.uhn.fhir.model.api.annotation.Block;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.dstu.composite.AddressDt;
-import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
-import ca.uhn.fhir.model.dstu.valueset.AdmitSourceEnum;
-import ca.uhn.fhir.model.dstu.valueset.AggregationModeEnum;
-import ca.uhn.fhir.model.dstu.valueset.AnimalSpeciesEnum;
-import ca.uhn.fhir.model.dstu.composite.AttachmentDt;
-import ca.uhn.fhir.model.dstu.valueset.BindingConformanceEnum;
 import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
-import ca.uhn.fhir.model.dstu.composite.CodingDt;
-import ca.uhn.fhir.model.dstu.valueset.ConformanceEventModeEnum;
-import ca.uhn.fhir.model.dstu.valueset.ConformanceStatementStatusEnum;
-import ca.uhn.fhir.model.dstu.valueset.ConstraintSeverityEnum;
 import ca.uhn.fhir.model.dstu.composite.ContactDt;
-import ca.uhn.fhir.model.dstu.valueset.DataTypeEnum;
-import ca.uhn.fhir.model.dstu.resource.Device;
-import ca.uhn.fhir.model.dstu.resource.DiagnosticOrder;
-import ca.uhn.fhir.model.dstu.valueset.DiagnosticOrderPriorityEnum;
-import ca.uhn.fhir.model.dstu.valueset.DiagnosticOrderStatusEnum;
-import ca.uhn.fhir.model.dstu.valueset.DiagnosticReportStatusEnum;
-import ca.uhn.fhir.model.dstu.valueset.DocumentModeEnum;
-import ca.uhn.fhir.model.dstu.resource.Encounter;
-import ca.uhn.fhir.model.dstu.valueset.EncounterClassEnum;
-import ca.uhn.fhir.model.dstu.valueset.EncounterReasonCodesEnum;
-import ca.uhn.fhir.model.dstu.valueset.EncounterStateEnum;
-import ca.uhn.fhir.model.dstu.valueset.EncounterTypeEnum;
-import ca.uhn.fhir.model.dstu.valueset.ExtensionContextEnum;
-import ca.uhn.fhir.model.dstu.valueset.FHIRDefinedTypeEnum;
-import ca.uhn.fhir.model.dstu.valueset.FilterOperatorEnum;
-import ca.uhn.fhir.model.dstu.resource.Group;
-import ca.uhn.fhir.model.dstu.valueset.GroupTypeEnum;
-import ca.uhn.fhir.model.dstu.valueset.HierarchicalRelationshipTypeEnum;
 import ca.uhn.fhir.model.dstu.composite.HumanNameDt;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
-import ca.uhn.fhir.model.dstu.valueset.ImagingModalityEnum;
-import ca.uhn.fhir.model.dstu.resource.ImagingStudy;
-import ca.uhn.fhir.model.dstu.valueset.InstanceAvailabilityEnum;
-import ca.uhn.fhir.model.dstu.valueset.LinkTypeEnum;
-import ca.uhn.fhir.model.dstu.resource.Location;
-import ca.uhn.fhir.model.dstu.valueset.LocationModeEnum;
-import ca.uhn.fhir.model.dstu.valueset.LocationStatusEnum;
-import ca.uhn.fhir.model.dstu.valueset.LocationTypeEnum;
-import ca.uhn.fhir.model.dstu.valueset.MaritalStatusCodesEnum;
-import ca.uhn.fhir.model.dstu.resource.Media;
-import ca.uhn.fhir.model.dstu.valueset.MediaTypeEnum;
-import ca.uhn.fhir.model.dstu.resource.Medication;
-import ca.uhn.fhir.model.dstu.valueset.MedicationKindEnum;
-import ca.uhn.fhir.model.dstu.valueset.MessageEventEnum;
-import ca.uhn.fhir.model.dstu.valueset.MessageSignificanceCategoryEnum;
-import ca.uhn.fhir.model.dstu.valueset.MessageTransportEnum;
-import ca.uhn.fhir.model.dstu.valueset.ModalityEnum;
-import ca.uhn.fhir.model.dstu.resource.Observation;
-import ca.uhn.fhir.model.dstu.valueset.ObservationInterpretationCodesEnum;
-import ca.uhn.fhir.model.dstu.valueset.ObservationRelationshipTypeEnum;
-import ca.uhn.fhir.model.dstu.valueset.ObservationReliabilityEnum;
-import ca.uhn.fhir.model.dstu.valueset.ObservationStatusEnum;
-import ca.uhn.fhir.model.dstu.resource.Organization;
-import ca.uhn.fhir.model.dstu.valueset.OrganizationTypeEnum;
-import ca.uhn.fhir.model.dstu.valueset.ParticipantTypeEnum;
-import ca.uhn.fhir.model.dstu.resource.Patient;
-import ca.uhn.fhir.model.dstu.valueset.PatientRelationshipTypeEnum;
-import ca.uhn.fhir.model.dstu.composite.PeriodDt;
-import ca.uhn.fhir.model.dstu.resource.Practitioner;
-import ca.uhn.fhir.model.dstu.valueset.PractitionerRoleEnum;
-import ca.uhn.fhir.model.dstu.valueset.PractitionerSpecialtyEnum;
-import ca.uhn.fhir.model.dstu.resource.Profile;
-import ca.uhn.fhir.model.dstu.valueset.PropertyRepresentationEnum;
-import ca.uhn.fhir.model.dstu.composite.QuantityDt;
-import ca.uhn.fhir.model.dstu.composite.RangeDt;
-import ca.uhn.fhir.model.dstu.composite.RatioDt;
-import ca.uhn.fhir.model.dstu.resource.RelatedPerson;
-import ca.uhn.fhir.model.dstu.valueset.ResourceProfileStatusEnum;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
-import ca.uhn.fhir.model.dstu.valueset.ResourceTypeEnum;
-import ca.uhn.fhir.model.dstu.valueset.RestfulConformanceModeEnum;
-import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
-import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
-import ca.uhn.fhir.model.dstu.valueset.RestfulSecurityServiceEnum;
-import ca.uhn.fhir.model.dstu.composite.SampledDataDt;
-import ca.uhn.fhir.model.dstu.valueset.SearchParamTypeEnum;
-import ca.uhn.fhir.model.dstu.valueset.SlicingRulesEnum;
-import ca.uhn.fhir.model.dstu.resource.Specimen;
-import ca.uhn.fhir.model.dstu.valueset.SpecimenCollectionMethodEnum;
-import ca.uhn.fhir.model.dstu.valueset.SpecimenTreatmentProcedureEnum;
-import ca.uhn.fhir.model.dstu.resource.Substance;
-import ca.uhn.fhir.model.dstu.valueset.SubstanceTypeEnum;
-import ca.uhn.fhir.model.dstu.resource.ValueSet;
-import ca.uhn.fhir.model.dstu.valueset.ValueSetStatusEnum;
-import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.dstu.composite.DurationDt;
-import ca.uhn.fhir.model.primitive.Base64BinaryDt;
+import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
+import ca.uhn.fhir.model.dstu.valueset.OrganizationTypeEnum;
 import ca.uhn.fhir.model.primitive.BooleanDt;
-import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.BoundCodeableConceptDt;
-import ca.uhn.fhir.model.primitive.CodeDt;
-import ca.uhn.fhir.model.primitive.DateDt;
-import ca.uhn.fhir.model.primitive.DateTimeDt;
-import ca.uhn.fhir.model.primitive.DecimalDt;
-import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.model.primitive.InstantDt;
-import ca.uhn.fhir.model.primitive.IntegerDt;
-import ca.uhn.fhir.model.primitive.OidDt;
 import ca.uhn.fhir.model.primitive.StringDt;
-import ca.uhn.fhir.model.primitive.UriDt;
 
 
 /**
@@ -322,8 +237,9 @@ public class Organization extends BaseResource implements IResource {
      * Identifier for the organization that is used to identify the organization across multiple disparate systems
      * </p> 
 	 */
-	public void setIdentifier(java.util.List<IdentifierDt> theValue) {
+	public Organization setIdentifier(java.util.List<IdentifierDt> theValue) {
 		myIdentifier = theValue;
+		return this;
 	}
 
 	/**
@@ -340,6 +256,21 @@ public class Organization extends BaseResource implements IResource {
 		return newType; 
 	}
 
+	/**
+	 * Gets the first repetition for <b>identifier</b> (Identifies this organization  across multiple systems),
+	 * creating it if it does not already exist.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Identifier for the organization that is used to identify the organization across multiple disparate systems
+     * </p> 
+	 */
+	public IdentifierDt getIdentifierFirstRep() {
+		if (getIdentifier().isEmpty()) {
+			return addIdentifier();
+		}
+		return getIdentifier().get(0); 
+	}
   
 	/**
 	 * Gets the value(s) for <b>name</b> (Name used for the organization).
@@ -366,10 +297,10 @@ public class Organization extends BaseResource implements IResource {
      * A name associated with the organization
      * </p> 
 	 */
-	public void setName(StringDt theValue) {
+	public Organization setName(StringDt theValue) {
 		myName = theValue;
+		return this;
 	}
-
 
  	/**
 	 * Sets the value for <b>name</b> (Name used for the organization)
@@ -379,8 +310,9 @@ public class Organization extends BaseResource implements IResource {
      * A name associated with the organization
      * </p> 
 	 */
-	public void setName( String theString) {
+	public Organization setName( String theString) {
 		myName = new StringDt(theString); 
+		return this; 
 	}
 
  
@@ -409,10 +341,10 @@ public class Organization extends BaseResource implements IResource {
      * The kind of organization that this is
      * </p> 
 	 */
-	public void setType(BoundCodeableConceptDt<OrganizationTypeEnum> theValue) {
+	public Organization setType(BoundCodeableConceptDt<OrganizationTypeEnum> theValue) {
 		myType = theValue;
+		return this;
 	}
-
 
 	/**
 	 * Sets the value(s) for <b>type</b> (Kind of organization)
@@ -422,8 +354,9 @@ public class Organization extends BaseResource implements IResource {
      * The kind of organization that this is
      * </p> 
 	 */
-	public void setType(OrganizationTypeEnum theValue) {
+	public Organization setType(OrganizationTypeEnum theValue) {
 		getType().setValueAsEnum(theValue);
+		return this;
 	}
 
   
@@ -452,8 +385,9 @@ public class Organization extends BaseResource implements IResource {
      * A contact detail for the organization
      * </p> 
 	 */
-	public void setTelecom(java.util.List<ContactDt> theValue) {
+	public Organization setTelecom(java.util.List<ContactDt> theValue) {
 		myTelecom = theValue;
+		return this;
 	}
 
 	/**
@@ -470,6 +404,21 @@ public class Organization extends BaseResource implements IResource {
 		return newType; 
 	}
 
+	/**
+	 * Gets the first repetition for <b>telecom</b> (A contact detail for the organization),
+	 * creating it if it does not already exist.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A contact detail for the organization
+     * </p> 
+	 */
+	public ContactDt getTelecomFirstRep() {
+		if (getTelecom().isEmpty()) {
+			return addTelecom();
+		}
+		return getTelecom().get(0); 
+	}
   
 	/**
 	 * Gets the value(s) for <b>address</b> (An address for the organization).
@@ -496,8 +445,9 @@ public class Organization extends BaseResource implements IResource {
      * An address for the organization
      * </p> 
 	 */
-	public void setAddress(java.util.List<AddressDt> theValue) {
+	public Organization setAddress(java.util.List<AddressDt> theValue) {
 		myAddress = theValue;
+		return this;
 	}
 
 	/**
@@ -514,6 +464,21 @@ public class Organization extends BaseResource implements IResource {
 		return newType; 
 	}
 
+	/**
+	 * Gets the first repetition for <b>address</b> (An address for the organization),
+	 * creating it if it does not already exist.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * An address for the organization
+     * </p> 
+	 */
+	public AddressDt getAddressFirstRep() {
+		if (getAddress().isEmpty()) {
+			return addAddress();
+		}
+		return getAddress().get(0); 
+	}
   
 	/**
 	 * Gets the value(s) for <b>partOf</b> (The organization of which this organization forms a part).
@@ -540,10 +505,10 @@ public class Organization extends BaseResource implements IResource {
      * The organization of which this organization forms a part
      * </p> 
 	 */
-	public void setPartOf(ResourceReferenceDt theValue) {
+	public Organization setPartOf(ResourceReferenceDt theValue) {
 		myPartOf = theValue;
+		return this;
 	}
-
 
   
 	/**
@@ -571,8 +536,9 @@ public class Organization extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public void setContact(java.util.List<Contact> theValue) {
+	public Organization setContact(java.util.List<Contact> theValue) {
 		myContact = theValue;
+		return this;
 	}
 
 	/**
@@ -589,6 +555,21 @@ public class Organization extends BaseResource implements IResource {
 		return newType; 
 	}
 
+	/**
+	 * Gets the first repetition for <b>contact</b> (Contact for the organization for a certain purpose),
+	 * creating it if it does not already exist.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * 
+     * </p> 
+	 */
+	public Contact getContactFirstRep() {
+		if (getContact().isEmpty()) {
+			return addContact();
+		}
+		return getContact().get(0); 
+	}
   
 	/**
 	 * Gets the value(s) for <b>location</b> (Location(s) the organization uses to provide services).
@@ -615,11 +596,24 @@ public class Organization extends BaseResource implements IResource {
      * Location(s) the organization uses to provide services
      * </p> 
 	 */
-	public void setLocation(java.util.List<ResourceReferenceDt> theValue) {
+	public Organization setLocation(java.util.List<ResourceReferenceDt> theValue) {
 		myLocation = theValue;
+		return this;
 	}
 
-
+	/**
+	 * Adds and returns a new value for <b>location</b> (Location(s) the organization uses to provide services)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Location(s) the organization uses to provide services
+     * </p> 
+	 */
+	public ResourceReferenceDt addLocation() {
+		ResourceReferenceDt newType = new ResourceReferenceDt();
+		getLocation().add(newType);
+		return newType; 
+	}
   
 	/**
 	 * Gets the value(s) for <b>active</b> (Whether the organization's record is still in active use).
@@ -646,10 +640,10 @@ public class Organization extends BaseResource implements IResource {
      * Whether the organization's record is still in active use
      * </p> 
 	 */
-	public void setActive(BooleanDt theValue) {
+	public Organization setActive(BooleanDt theValue) {
 		myActive = theValue;
+		return this;
 	}
-
 
  	/**
 	 * Sets the value for <b>active</b> (Whether the organization's record is still in active use)
@@ -659,8 +653,9 @@ public class Organization extends BaseResource implements IResource {
      * Whether the organization's record is still in active use
      * </p> 
 	 */
-	public void setActive( Boolean theBoolean) {
+	public Organization setActive( Boolean theBoolean) {
 		myActive = new BooleanDt(theBoolean); 
+		return this; 
 	}
 
  
@@ -751,10 +746,10 @@ public class Organization extends BaseResource implements IResource {
      * Indicates a purpose for which the contact can be reached
      * </p> 
 	 */
-	public void setPurpose(CodeableConceptDt theValue) {
+	public Contact setPurpose(CodeableConceptDt theValue) {
 		myPurpose = theValue;
+		return this;
 	}
-
 
   
 	/**
@@ -782,10 +777,10 @@ public class Organization extends BaseResource implements IResource {
      * A name associated with the contact
      * </p> 
 	 */
-	public void setName(HumanNameDt theValue) {
+	public Contact setName(HumanNameDt theValue) {
 		myName = theValue;
+		return this;
 	}
-
 
   
 	/**
@@ -813,8 +808,9 @@ public class Organization extends BaseResource implements IResource {
      * A contact detail (e.g. a telephone number or an email address) by which the party may be contacted.
      * </p> 
 	 */
-	public void setTelecom(java.util.List<ContactDt> theValue) {
+	public Contact setTelecom(java.util.List<ContactDt> theValue) {
 		myTelecom = theValue;
+		return this;
 	}
 
 	/**
@@ -831,6 +827,21 @@ public class Organization extends BaseResource implements IResource {
 		return newType; 
 	}
 
+	/**
+	 * Gets the first repetition for <b>telecom</b> (Contact details (telephone, email, etc)  for a contact),
+	 * creating it if it does not already exist.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A contact detail (e.g. a telephone number or an email address) by which the party may be contacted.
+     * </p> 
+	 */
+	public ContactDt getTelecomFirstRep() {
+		if (getTelecom().isEmpty()) {
+			return addTelecom();
+		}
+		return getTelecom().get(0); 
+	}
   
 	/**
 	 * Gets the value(s) for <b>address</b> (Visiting or postal addresses for the contact).
@@ -857,10 +868,10 @@ public class Organization extends BaseResource implements IResource {
      * Visiting or postal addresses for the contact
      * </p> 
 	 */
-	public void setAddress(AddressDt theValue) {
+	public Contact setAddress(AddressDt theValue) {
 		myAddress = theValue;
+		return this;
 	}
-
 
   
 	/**
@@ -888,10 +899,10 @@ public class Organization extends BaseResource implements IResource {
      * Administrative Gender - the gender that the person is considered to have for administration and record keeping purposes.
      * </p> 
 	 */
-	public void setGender(BoundCodeableConceptDt<AdministrativeGenderCodesEnum> theValue) {
+	public Contact setGender(BoundCodeableConceptDt<AdministrativeGenderCodesEnum> theValue) {
 		myGender = theValue;
+		return this;
 	}
-
 
 	/**
 	 * Sets the value(s) for <b>gender</b> (Gender for administrative purposes)
@@ -901,8 +912,9 @@ public class Organization extends BaseResource implements IResource {
      * Administrative Gender - the gender that the person is considered to have for administration and record keeping purposes.
      * </p> 
 	 */
-	public void setGender(AdministrativeGenderCodesEnum theValue) {
+	public Contact setGender(AdministrativeGenderCodesEnum theValue) {
 		getGender().setValueAsEnum(theValue);
+		return this;
 	}
 
   

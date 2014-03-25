@@ -17,111 +17,41 @@
 package ca.uhn.fhir.model.dstu.resource;
 
 
-import java.util.*;
-import ca.uhn.fhir.model.api.*;
-import ca.uhn.fhir.model.api.annotation.*;
+import java.util.Date;
+import java.util.List;
 
-import ca.uhn.fhir.model.dstu.composite.AddressDt;
-import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
-import ca.uhn.fhir.model.dstu.valueset.AdmitSourceEnum;
-import ca.uhn.fhir.model.dstu.valueset.AggregationModeEnum;
-import ca.uhn.fhir.model.dstu.valueset.AnimalSpeciesEnum;
-import ca.uhn.fhir.model.dstu.composite.AttachmentDt;
-import ca.uhn.fhir.model.dstu.valueset.BindingConformanceEnum;
+import ca.uhn.fhir.model.api.BaseElement;
+import ca.uhn.fhir.model.api.BaseResource;
+import ca.uhn.fhir.model.api.IElement;
+import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.IResourceBlock;
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import ca.uhn.fhir.model.api.annotation.Block;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu.composite.CodingDt;
+import ca.uhn.fhir.model.dstu.composite.ContactDt;
+import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.valueset.ConformanceEventModeEnum;
 import ca.uhn.fhir.model.dstu.valueset.ConformanceStatementStatusEnum;
-import ca.uhn.fhir.model.dstu.valueset.ConstraintSeverityEnum;
-import ca.uhn.fhir.model.dstu.composite.ContactDt;
-import ca.uhn.fhir.model.dstu.valueset.DataTypeEnum;
-import ca.uhn.fhir.model.dstu.resource.Device;
-import ca.uhn.fhir.model.dstu.resource.DiagnosticOrder;
-import ca.uhn.fhir.model.dstu.valueset.DiagnosticOrderPriorityEnum;
-import ca.uhn.fhir.model.dstu.valueset.DiagnosticOrderStatusEnum;
-import ca.uhn.fhir.model.dstu.valueset.DiagnosticReportStatusEnum;
 import ca.uhn.fhir.model.dstu.valueset.DocumentModeEnum;
-import ca.uhn.fhir.model.dstu.resource.Encounter;
-import ca.uhn.fhir.model.dstu.valueset.EncounterClassEnum;
-import ca.uhn.fhir.model.dstu.valueset.EncounterReasonCodesEnum;
-import ca.uhn.fhir.model.dstu.valueset.EncounterStateEnum;
-import ca.uhn.fhir.model.dstu.valueset.EncounterTypeEnum;
-import ca.uhn.fhir.model.dstu.valueset.ExtensionContextEnum;
-import ca.uhn.fhir.model.dstu.valueset.FHIRDefinedTypeEnum;
-import ca.uhn.fhir.model.dstu.valueset.FilterOperatorEnum;
-import ca.uhn.fhir.model.dstu.resource.Group;
-import ca.uhn.fhir.model.dstu.valueset.GroupTypeEnum;
-import ca.uhn.fhir.model.dstu.valueset.HierarchicalRelationshipTypeEnum;
-import ca.uhn.fhir.model.dstu.composite.HumanNameDt;
-import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
-import ca.uhn.fhir.model.dstu.valueset.ImagingModalityEnum;
-import ca.uhn.fhir.model.dstu.resource.ImagingStudy;
-import ca.uhn.fhir.model.dstu.valueset.InstanceAvailabilityEnum;
-import ca.uhn.fhir.model.dstu.valueset.LinkTypeEnum;
-import ca.uhn.fhir.model.dstu.resource.Location;
-import ca.uhn.fhir.model.dstu.valueset.LocationModeEnum;
-import ca.uhn.fhir.model.dstu.valueset.LocationStatusEnum;
-import ca.uhn.fhir.model.dstu.valueset.LocationTypeEnum;
-import ca.uhn.fhir.model.dstu.valueset.MaritalStatusCodesEnum;
-import ca.uhn.fhir.model.dstu.resource.Media;
-import ca.uhn.fhir.model.dstu.valueset.MediaTypeEnum;
-import ca.uhn.fhir.model.dstu.resource.Medication;
-import ca.uhn.fhir.model.dstu.valueset.MedicationKindEnum;
-import ca.uhn.fhir.model.dstu.valueset.MessageEventEnum;
 import ca.uhn.fhir.model.dstu.valueset.MessageSignificanceCategoryEnum;
-import ca.uhn.fhir.model.dstu.valueset.MessageTransportEnum;
-import ca.uhn.fhir.model.dstu.valueset.ModalityEnum;
-import ca.uhn.fhir.model.dstu.resource.Observation;
-import ca.uhn.fhir.model.dstu.valueset.ObservationInterpretationCodesEnum;
-import ca.uhn.fhir.model.dstu.valueset.ObservationRelationshipTypeEnum;
-import ca.uhn.fhir.model.dstu.valueset.ObservationReliabilityEnum;
-import ca.uhn.fhir.model.dstu.valueset.ObservationStatusEnum;
-import ca.uhn.fhir.model.dstu.resource.Organization;
-import ca.uhn.fhir.model.dstu.valueset.OrganizationTypeEnum;
-import ca.uhn.fhir.model.dstu.valueset.ParticipantTypeEnum;
-import ca.uhn.fhir.model.dstu.resource.Patient;
-import ca.uhn.fhir.model.dstu.valueset.PatientRelationshipTypeEnum;
-import ca.uhn.fhir.model.dstu.composite.PeriodDt;
-import ca.uhn.fhir.model.dstu.resource.Practitioner;
-import ca.uhn.fhir.model.dstu.valueset.PractitionerRoleEnum;
-import ca.uhn.fhir.model.dstu.valueset.PractitionerSpecialtyEnum;
-import ca.uhn.fhir.model.dstu.resource.Profile;
-import ca.uhn.fhir.model.dstu.valueset.PropertyRepresentationEnum;
-import ca.uhn.fhir.model.dstu.composite.QuantityDt;
-import ca.uhn.fhir.model.dstu.composite.RangeDt;
-import ca.uhn.fhir.model.dstu.composite.RatioDt;
-import ca.uhn.fhir.model.dstu.resource.RelatedPerson;
-import ca.uhn.fhir.model.dstu.valueset.ResourceProfileStatusEnum;
-import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.valueset.ResourceTypeEnum;
 import ca.uhn.fhir.model.dstu.valueset.RestfulConformanceModeEnum;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
 import ca.uhn.fhir.model.dstu.valueset.RestfulSecurityServiceEnum;
-import ca.uhn.fhir.model.dstu.composite.SampledDataDt;
 import ca.uhn.fhir.model.dstu.valueset.SearchParamTypeEnum;
-import ca.uhn.fhir.model.dstu.valueset.SlicingRulesEnum;
-import ca.uhn.fhir.model.dstu.resource.Specimen;
-import ca.uhn.fhir.model.dstu.valueset.SpecimenCollectionMethodEnum;
-import ca.uhn.fhir.model.dstu.valueset.SpecimenTreatmentProcedureEnum;
-import ca.uhn.fhir.model.dstu.resource.Substance;
-import ca.uhn.fhir.model.dstu.valueset.SubstanceTypeEnum;
-import ca.uhn.fhir.model.dstu.resource.ValueSet;
-import ca.uhn.fhir.model.dstu.valueset.ValueSetStatusEnum;
-import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.dstu.composite.DurationDt;
 import ca.uhn.fhir.model.primitive.Base64BinaryDt;
 import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.BoundCodeableConceptDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
-import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
-import ca.uhn.fhir.model.primitive.DecimalDt;
 import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
-import ca.uhn.fhir.model.primitive.OidDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
 
@@ -473,10 +403,10 @@ public class Conformance extends BaseResource implements IResource {
      * The identifier that is used to identify this conformance statement when it is referenced in a specification, model, design or an instance (should be globally unique OID, UUID, or URI)
      * </p> 
 	 */
-	public void setIdentifier(StringDt theValue) {
+	public Conformance setIdentifier(StringDt theValue) {
 		myIdentifier = theValue;
+		return this;
 	}
-
 
  	/**
 	 * Sets the value for <b>identifier</b> (Logical id to reference this statement)
@@ -486,8 +416,9 @@ public class Conformance extends BaseResource implements IResource {
      * The identifier that is used to identify this conformance statement when it is referenced in a specification, model, design or an instance (should be globally unique OID, UUID, or URI)
      * </p> 
 	 */
-	public void setIdentifier( String theString) {
+	public Conformance setIdentifier( String theString) {
 		myIdentifier = new StringDt(theString); 
+		return this; 
 	}
 
  
@@ -516,10 +447,10 @@ public class Conformance extends BaseResource implements IResource {
      * The identifier that is used to identify this version of the conformance statement when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the profile author manually and the value should be a timestamp
      * </p> 
 	 */
-	public void setVersion(StringDt theValue) {
+	public Conformance setVersion(StringDt theValue) {
 		myVersion = theValue;
+		return this;
 	}
-
 
  	/**
 	 * Sets the value for <b>version</b> (Logical id for this version of the statement)
@@ -529,8 +460,9 @@ public class Conformance extends BaseResource implements IResource {
      * The identifier that is used to identify this version of the conformance statement when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the profile author manually and the value should be a timestamp
      * </p> 
 	 */
-	public void setVersion( String theString) {
+	public Conformance setVersion( String theString) {
 		myVersion = new StringDt(theString); 
+		return this; 
 	}
 
  
@@ -559,10 +491,10 @@ public class Conformance extends BaseResource implements IResource {
      * A free text natural language name identifying the conformance statement
      * </p> 
 	 */
-	public void setName(StringDt theValue) {
+	public Conformance setName(StringDt theValue) {
 		myName = theValue;
+		return this;
 	}
-
 
  	/**
 	 * Sets the value for <b>name</b> (Informal name for this conformance statement)
@@ -572,8 +504,9 @@ public class Conformance extends BaseResource implements IResource {
      * A free text natural language name identifying the conformance statement
      * </p> 
 	 */
-	public void setName( String theString) {
+	public Conformance setName( String theString) {
 		myName = new StringDt(theString); 
+		return this; 
 	}
 
  
@@ -602,10 +535,10 @@ public class Conformance extends BaseResource implements IResource {
      * Name of Organization publishing this conformance statement
      * </p> 
 	 */
-	public void setPublisher(StringDt theValue) {
+	public Conformance setPublisher(StringDt theValue) {
 		myPublisher = theValue;
+		return this;
 	}
-
 
  	/**
 	 * Sets the value for <b>publisher</b> (Publishing Organization)
@@ -615,8 +548,9 @@ public class Conformance extends BaseResource implements IResource {
      * Name of Organization publishing this conformance statement
      * </p> 
 	 */
-	public void setPublisher( String theString) {
+	public Conformance setPublisher( String theString) {
 		myPublisher = new StringDt(theString); 
+		return this; 
 	}
 
  
@@ -645,8 +579,9 @@ public class Conformance extends BaseResource implements IResource {
      * Contacts for Organization relevant to this conformance statement.  The contacts may be a website, email, phone numbers, etc.
      * </p> 
 	 */
-	public void setTelecom(java.util.List<ContactDt> theValue) {
+	public Conformance setTelecom(java.util.List<ContactDt> theValue) {
 		myTelecom = theValue;
+		return this;
 	}
 
 	/**
@@ -663,6 +598,21 @@ public class Conformance extends BaseResource implements IResource {
 		return newType; 
 	}
 
+	/**
+	 * Gets the first repetition for <b>telecom</b> (Contacts for Organization),
+	 * creating it if it does not already exist.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Contacts for Organization relevant to this conformance statement.  The contacts may be a website, email, phone numbers, etc.
+     * </p> 
+	 */
+	public ContactDt getTelecomFirstRep() {
+		if (getTelecom().isEmpty()) {
+			return addTelecom();
+		}
+		return getTelecom().get(0); 
+	}
   
 	/**
 	 * Gets the value(s) for <b>description</b> (Human description of the conformance statement).
@@ -689,10 +639,10 @@ public class Conformance extends BaseResource implements IResource {
      * A free text natural language description of the conformance statement and its use. Typically, this is used when the profile describes a desired rather than an actual solution, for example as a formal expression of requirements as part of an RFP
      * </p> 
 	 */
-	public void setDescription(StringDt theValue) {
+	public Conformance setDescription(StringDt theValue) {
 		myDescription = theValue;
+		return this;
 	}
-
 
  	/**
 	 * Sets the value for <b>description</b> (Human description of the conformance statement)
@@ -702,8 +652,9 @@ public class Conformance extends BaseResource implements IResource {
      * A free text natural language description of the conformance statement and its use. Typically, this is used when the profile describes a desired rather than an actual solution, for example as a formal expression of requirements as part of an RFP
      * </p> 
 	 */
-	public void setDescription( String theString) {
+	public Conformance setDescription( String theString) {
 		myDescription = new StringDt(theString); 
+		return this; 
 	}
 
  
@@ -732,10 +683,10 @@ public class Conformance extends BaseResource implements IResource {
      * The status of this conformance statement
      * </p> 
 	 */
-	public void setStatus(BoundCodeDt<ConformanceStatementStatusEnum> theValue) {
+	public Conformance setStatus(BoundCodeDt<ConformanceStatementStatusEnum> theValue) {
 		myStatus = theValue;
+		return this;
 	}
-
 
 	/**
 	 * Sets the value(s) for <b>status</b> (draft | active | retired)
@@ -745,8 +696,9 @@ public class Conformance extends BaseResource implements IResource {
      * The status of this conformance statement
      * </p> 
 	 */
-	public void setStatus(ConformanceStatementStatusEnum theValue) {
+	public Conformance setStatus(ConformanceStatementStatusEnum theValue) {
 		getStatus().setValueAsEnum(theValue);
+		return this;
 	}
 
   
@@ -775,10 +727,10 @@ public class Conformance extends BaseResource implements IResource {
      * A flag to indicate that this conformance statement is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage
      * </p> 
 	 */
-	public void setExperimental(BooleanDt theValue) {
+	public Conformance setExperimental(BooleanDt theValue) {
 		myExperimental = theValue;
+		return this;
 	}
-
 
  	/**
 	 * Sets the value for <b>experimental</b> (If for testing purposes, not real usage)
@@ -788,8 +740,9 @@ public class Conformance extends BaseResource implements IResource {
      * A flag to indicate that this conformance statement is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage
      * </p> 
 	 */
-	public void setExperimental( Boolean theBoolean) {
+	public Conformance setExperimental( Boolean theBoolean) {
 		myExperimental = new BooleanDt(theBoolean); 
+		return this; 
 	}
 
  
@@ -818,10 +771,10 @@ public class Conformance extends BaseResource implements IResource {
      * The date when the conformance statement was published
      * </p> 
 	 */
-	public void setDate(DateTimeDt theValue) {
+	public Conformance setDate(DateTimeDt theValue) {
 		myDate = theValue;
+		return this;
 	}
-
 
  	/**
 	 * Sets the value for <b>date</b> (Publication Date)
@@ -831,8 +784,9 @@ public class Conformance extends BaseResource implements IResource {
      * The date when the conformance statement was published
      * </p> 
 	 */
-	public void setDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
+	public Conformance setDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
 		myDate = new DateTimeDt(theDate, thePrecision); 
+		return this; 
 	}
 
 	/**
@@ -843,8 +797,9 @@ public class Conformance extends BaseResource implements IResource {
      * The date when the conformance statement was published
      * </p> 
 	 */
-	public void setDateWithSecondsPrecision( Date theDate) {
+	public Conformance setDateWithSecondsPrecision( Date theDate) {
 		myDate = new DateTimeDt(theDate); 
+		return this; 
 	}
 
  
@@ -873,10 +828,10 @@ public class Conformance extends BaseResource implements IResource {
      * Software that is covered by this conformance statement.  It is used when the profile describes the capabilities of a particular software version, independent of an installation.
      * </p> 
 	 */
-	public void setSoftware(Software theValue) {
+	public Conformance setSoftware(Software theValue) {
 		mySoftware = theValue;
+		return this;
 	}
-
 
   
 	/**
@@ -904,10 +859,10 @@ public class Conformance extends BaseResource implements IResource {
      * Identifies a specific implementation instance that is described by the conformance statement - i.e. a particular installation, rather than the capabilities of a software program
      * </p> 
 	 */
-	public void setImplementation(Implementation theValue) {
+	public Conformance setImplementation(Implementation theValue) {
 		myImplementation = theValue;
+		return this;
 	}
-
 
   
 	/**
@@ -935,10 +890,10 @@ public class Conformance extends BaseResource implements IResource {
      * The version of the FHIR specification on which this conformance statement is based
      * </p> 
 	 */
-	public void setFhirVersion(IdDt theValue) {
+	public Conformance setFhirVersion(IdDt theValue) {
 		myFhirVersion = theValue;
+		return this;
 	}
-
 
  	/**
 	 * Sets the value for <b>fhirVersion</b> (FHIR Version)
@@ -948,8 +903,9 @@ public class Conformance extends BaseResource implements IResource {
      * The version of the FHIR specification on which this conformance statement is based
      * </p> 
 	 */
-	public void setFhirVersion( String theId) {
+	public Conformance setFhirVersion( String theId) {
 		myFhirVersion = new IdDt(theId); 
+		return this; 
 	}
 
  
@@ -978,10 +934,10 @@ public class Conformance extends BaseResource implements IResource {
      * A flag that indicates whether the application accepts unknown elements as part of a resource.
      * </p> 
 	 */
-	public void setAcceptUnknown(BooleanDt theValue) {
+	public Conformance setAcceptUnknown(BooleanDt theValue) {
 		myAcceptUnknown = theValue;
+		return this;
 	}
-
 
  	/**
 	 * Sets the value for <b>acceptUnknown</b> (True if application accepts unknown elements)
@@ -991,8 +947,9 @@ public class Conformance extends BaseResource implements IResource {
      * A flag that indicates whether the application accepts unknown elements as part of a resource.
      * </p> 
 	 */
-	public void setAcceptUnknown( Boolean theBoolean) {
+	public Conformance setAcceptUnknown( Boolean theBoolean) {
 		myAcceptUnknown = new BooleanDt(theBoolean); 
+		return this; 
 	}
 
  
@@ -1021,8 +978,9 @@ public class Conformance extends BaseResource implements IResource {
      * A list of the formats supported by this implementation
      * </p> 
 	 */
-	public void setFormat(java.util.List<CodeDt> theValue) {
+	public Conformance setFormat(java.util.List<CodeDt> theValue) {
 		myFormat = theValue;
+		return this;
 	}
 
 	/**
@@ -1039,6 +997,21 @@ public class Conformance extends BaseResource implements IResource {
 		return newType; 
 	}
 
+	/**
+	 * Gets the first repetition for <b>format</b> (formats supported (xml | json | mime type)),
+	 * creating it if it does not already exist.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A list of the formats supported by this implementation
+     * </p> 
+	 */
+	public CodeDt getFormatFirstRep() {
+		if (getFormat().isEmpty()) {
+			return addFormat();
+		}
+		return getFormat().get(0); 
+	}
  	/**
 	 * Adds a new value for <b>format</b> (formats supported (xml | json | mime type))
 	 *
@@ -1046,12 +1019,15 @@ public class Conformance extends BaseResource implements IResource {
      * <b>Definition:</b>
      * A list of the formats supported by this implementation
      * </p> 
+     *
+     * @return Returns a reference to this object, to allow for simple chaining.
 	 */
-	public void addFormat( String theCode) {
+	public Conformance addFormat( String theCode) {
 		if (myFormat == null) {
 			myFormat = new java.util.ArrayList<CodeDt>();
 		}
-		myFormat.add(new CodeDt(theCode)); 
+		myFormat.add(new CodeDt(theCode));
+		return this; 
 	}
 
  
@@ -1080,11 +1056,24 @@ public class Conformance extends BaseResource implements IResource {
      * A list of profiles supported by the system. For a server, \"supported by the system\" means the system hosts/produces a set of recourses, conformant to a particular profile, and allows its clients to search using this profile and to find appropriate data. For a client, it means the system will search by this profile and process data according to the guidance implicit in the profile.
      * </p> 
 	 */
-	public void setProfile(java.util.List<ResourceReferenceDt> theValue) {
+	public Conformance setProfile(java.util.List<ResourceReferenceDt> theValue) {
 		myProfile = theValue;
+		return this;
 	}
 
-
+	/**
+	 * Adds and returns a new value for <b>profile</b> (Profiles supported by the system)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A list of profiles supported by the system. For a server, \"supported by the system\" means the system hosts/produces a set of recourses, conformant to a particular profile, and allows its clients to search using this profile and to find appropriate data. For a client, it means the system will search by this profile and process data according to the guidance implicit in the profile.
+     * </p> 
+	 */
+	public ResourceReferenceDt addProfile() {
+		ResourceReferenceDt newType = new ResourceReferenceDt();
+		getProfile().add(newType);
+		return newType; 
+	}
   
 	/**
 	 * Gets the value(s) for <b>rest</b> (If the endpoint is a RESTful one).
@@ -1111,8 +1100,9 @@ public class Conformance extends BaseResource implements IResource {
      * A definition of the restful capabilities of the solution, if any
      * </p> 
 	 */
-	public void setRest(java.util.List<Rest> theValue) {
+	public Conformance setRest(java.util.List<Rest> theValue) {
 		myRest = theValue;
+		return this;
 	}
 
 	/**
@@ -1129,6 +1119,21 @@ public class Conformance extends BaseResource implements IResource {
 		return newType; 
 	}
 
+	/**
+	 * Gets the first repetition for <b>rest</b> (If the endpoint is a RESTful one),
+	 * creating it if it does not already exist.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A definition of the restful capabilities of the solution, if any
+     * </p> 
+	 */
+	public Rest getRestFirstRep() {
+		if (getRest().isEmpty()) {
+			return addRest();
+		}
+		return getRest().get(0); 
+	}
   
 	/**
 	 * Gets the value(s) for <b>messaging</b> (If messaging is supported).
@@ -1155,8 +1160,9 @@ public class Conformance extends BaseResource implements IResource {
      * A description of the messaging capabilities of the solution
      * </p> 
 	 */
-	public void setMessaging(java.util.List<Messaging> theValue) {
+	public Conformance setMessaging(java.util.List<Messaging> theValue) {
 		myMessaging = theValue;
+		return this;
 	}
 
 	/**
@@ -1173,6 +1179,21 @@ public class Conformance extends BaseResource implements IResource {
 		return newType; 
 	}
 
+	/**
+	 * Gets the first repetition for <b>messaging</b> (If messaging is supported),
+	 * creating it if it does not already exist.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A description of the messaging capabilities of the solution
+     * </p> 
+	 */
+	public Messaging getMessagingFirstRep() {
+		if (getMessaging().isEmpty()) {
+			return addMessaging();
+		}
+		return getMessaging().get(0); 
+	}
   
 	/**
 	 * Gets the value(s) for <b>document</b> (Document definition).
@@ -1199,8 +1220,9 @@ public class Conformance extends BaseResource implements IResource {
      * A document definition
      * </p> 
 	 */
-	public void setDocument(java.util.List<Document> theValue) {
+	public Conformance setDocument(java.util.List<Document> theValue) {
 		myDocument = theValue;
+		return this;
 	}
 
 	/**
@@ -1217,6 +1239,21 @@ public class Conformance extends BaseResource implements IResource {
 		return newType; 
 	}
 
+	/**
+	 * Gets the first repetition for <b>document</b> (Document definition),
+	 * creating it if it does not already exist.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A document definition
+     * </p> 
+	 */
+	public Document getDocumentFirstRep() {
+		if (getDocument().isEmpty()) {
+			return addDocument();
+		}
+		return getDocument().get(0); 
+	}
   
 	/**
 	 * Block class for child element: <b>Conformance.software</b> (Software that is covered by this conformance statement)
@@ -1291,10 +1328,10 @@ public class Conformance extends BaseResource implements IResource {
      * Name software is known by
      * </p> 
 	 */
-	public void setName(StringDt theValue) {
+	public Software setName(StringDt theValue) {
 		myName = theValue;
+		return this;
 	}
-
 
  	/**
 	 * Sets the value for <b>name</b> (A name the software is known by)
@@ -1304,8 +1341,9 @@ public class Conformance extends BaseResource implements IResource {
      * Name software is known by
      * </p> 
 	 */
-	public void setName( String theString) {
+	public Software setName( String theString) {
 		myName = new StringDt(theString); 
+		return this; 
 	}
 
  
@@ -1334,10 +1372,10 @@ public class Conformance extends BaseResource implements IResource {
      * The version identifier for the software covered by this statement
      * </p> 
 	 */
-	public void setVersion(StringDt theValue) {
+	public Software setVersion(StringDt theValue) {
 		myVersion = theValue;
+		return this;
 	}
-
 
  	/**
 	 * Sets the value for <b>version</b> (Version covered by this statement)
@@ -1347,8 +1385,9 @@ public class Conformance extends BaseResource implements IResource {
      * The version identifier for the software covered by this statement
      * </p> 
 	 */
-	public void setVersion( String theString) {
+	public Software setVersion( String theString) {
 		myVersion = new StringDt(theString); 
+		return this; 
 	}
 
  
@@ -1377,10 +1416,10 @@ public class Conformance extends BaseResource implements IResource {
      * Date this version of the software released
      * </p> 
 	 */
-	public void setReleaseDate(DateTimeDt theValue) {
+	public Software setReleaseDate(DateTimeDt theValue) {
 		myReleaseDate = theValue;
+		return this;
 	}
-
 
  	/**
 	 * Sets the value for <b>releaseDate</b> (Date this version released)
@@ -1390,8 +1429,9 @@ public class Conformance extends BaseResource implements IResource {
      * Date this version of the software released
      * </p> 
 	 */
-	public void setReleaseDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
+	public Software setReleaseDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
 		myReleaseDate = new DateTimeDt(theDate, thePrecision); 
+		return this; 
 	}
 
 	/**
@@ -1402,8 +1442,9 @@ public class Conformance extends BaseResource implements IResource {
      * Date this version of the software released
      * </p> 
 	 */
-	public void setReleaseDateWithSecondsPrecision( Date theDate) {
+	public Software setReleaseDateWithSecondsPrecision( Date theDate) {
 		myReleaseDate = new DateTimeDt(theDate); 
+		return this; 
 	}
 
  
@@ -1477,10 +1518,10 @@ public class Conformance extends BaseResource implements IResource {
      * Information about the specific installation that this conformance statement relates to
      * </p> 
 	 */
-	public void setDescription(StringDt theValue) {
+	public Implementation setDescription(StringDt theValue) {
 		myDescription = theValue;
+		return this;
 	}
-
 
  	/**
 	 * Sets the value for <b>description</b> (Describes this specific instance)
@@ -1490,8 +1531,9 @@ public class Conformance extends BaseResource implements IResource {
      * Information about the specific installation that this conformance statement relates to
      * </p> 
 	 */
-	public void setDescription( String theString) {
+	public Implementation setDescription( String theString) {
 		myDescription = new StringDt(theString); 
+		return this; 
 	}
 
  
@@ -1520,10 +1562,10 @@ public class Conformance extends BaseResource implements IResource {
      * A base URL for the implementation.  This forms the base for REST interfaces as well as the mailbox and document interfaces.
      * </p> 
 	 */
-	public void setUrl(UriDt theValue) {
+	public Implementation setUrl(UriDt theValue) {
 		myUrl = theValue;
+		return this;
 	}
-
 
  	/**
 	 * Sets the value for <b>url</b> (Base URL for the installation)
@@ -1533,8 +1575,9 @@ public class Conformance extends BaseResource implements IResource {
      * A base URL for the implementation.  This forms the base for REST interfaces as well as the mailbox and document interfaces.
      * </p> 
 	 */
-	public void setUrl( String theUri) {
+	public Implementation setUrl( String theUri) {
 		myUrl = new UriDt(theUri); 
+		return this; 
 	}
 
  
@@ -1643,10 +1686,10 @@ public class Conformance extends BaseResource implements IResource {
      * Identifies whether this portion of the statement is describing ability to initiate or receive restful operations
      * </p> 
 	 */
-	public void setMode(BoundCodeDt<RestfulConformanceModeEnum> theValue) {
+	public Rest setMode(BoundCodeDt<RestfulConformanceModeEnum> theValue) {
 		myMode = theValue;
+		return this;
 	}
-
 
 	/**
 	 * Sets the value(s) for <b>mode</b> (client | server)
@@ -1656,8 +1699,9 @@ public class Conformance extends BaseResource implements IResource {
      * Identifies whether this portion of the statement is describing ability to initiate or receive restful operations
      * </p> 
 	 */
-	public void setMode(RestfulConformanceModeEnum theValue) {
+	public Rest setMode(RestfulConformanceModeEnum theValue) {
 		getMode().setValueAsEnum(theValue);
+		return this;
 	}
 
   
@@ -1686,10 +1730,10 @@ public class Conformance extends BaseResource implements IResource {
      * Information about the system's restful capabilities that apply across all applications, such as security
      * </p> 
 	 */
-	public void setDocumentation(StringDt theValue) {
+	public Rest setDocumentation(StringDt theValue) {
 		myDocumentation = theValue;
+		return this;
 	}
-
 
  	/**
 	 * Sets the value for <b>documentation</b> (General description of implementation)
@@ -1699,8 +1743,9 @@ public class Conformance extends BaseResource implements IResource {
      * Information about the system's restful capabilities that apply across all applications, such as security
      * </p> 
 	 */
-	public void setDocumentation( String theString) {
+	public Rest setDocumentation( String theString) {
 		myDocumentation = new StringDt(theString); 
+		return this; 
 	}
 
  
@@ -1729,10 +1774,10 @@ public class Conformance extends BaseResource implements IResource {
      * Information about security of implementation
      * </p> 
 	 */
-	public void setSecurity(RestSecurity theValue) {
+	public Rest setSecurity(RestSecurity theValue) {
 		mySecurity = theValue;
+		return this;
 	}
-
 
   
 	/**
@@ -1760,8 +1805,9 @@ public class Conformance extends BaseResource implements IResource {
      * A specification of the restful capabilities of the solution for a specific resource type
      * </p> 
 	 */
-	public void setResource(java.util.List<RestResource> theValue) {
+	public Rest setResource(java.util.List<RestResource> theValue) {
 		myResource = theValue;
+		return this;
 	}
 
 	/**
@@ -1778,6 +1824,21 @@ public class Conformance extends BaseResource implements IResource {
 		return newType; 
 	}
 
+	/**
+	 * Gets the first repetition for <b>resource</b> (Resource served on the REST interface),
+	 * creating it if it does not already exist.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A specification of the restful capabilities of the solution for a specific resource type
+     * </p> 
+	 */
+	public RestResource getResourceFirstRep() {
+		if (getResource().isEmpty()) {
+			return addResource();
+		}
+		return getResource().get(0); 
+	}
   
 	/**
 	 * Gets the value(s) for <b>operation</b> (What operations are supported?).
@@ -1804,8 +1865,9 @@ public class Conformance extends BaseResource implements IResource {
      * A specification of restful operations supported by the system
      * </p> 
 	 */
-	public void setOperation(java.util.List<RestOperation> theValue) {
+	public Rest setOperation(java.util.List<RestOperation> theValue) {
 		myOperation = theValue;
+		return this;
 	}
 
 	/**
@@ -1822,6 +1884,21 @@ public class Conformance extends BaseResource implements IResource {
 		return newType; 
 	}
 
+	/**
+	 * Gets the first repetition for <b>operation</b> (What operations are supported?),
+	 * creating it if it does not already exist.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A specification of restful operations supported by the system
+     * </p> 
+	 */
+	public RestOperation getOperationFirstRep() {
+		if (getOperation().isEmpty()) {
+			return addOperation();
+		}
+		return getOperation().get(0); 
+	}
   
 	/**
 	 * Gets the value(s) for <b>query</b> (Definition of a named query).
@@ -1848,8 +1925,9 @@ public class Conformance extends BaseResource implements IResource {
      * Definition of a named query and its parameters and their meaning
      * </p> 
 	 */
-	public void setQuery(java.util.List<RestQuery> theValue) {
+	public Rest setQuery(java.util.List<RestQuery> theValue) {
 		myQuery = theValue;
+		return this;
 	}
 
 	/**
@@ -1866,6 +1944,21 @@ public class Conformance extends BaseResource implements IResource {
 		return newType; 
 	}
 
+	/**
+	 * Gets the first repetition for <b>query</b> (Definition of a named query),
+	 * creating it if it does not already exist.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Definition of a named query and its parameters and their meaning
+     * </p> 
+	 */
+	public RestQuery getQueryFirstRep() {
+		if (getQuery().isEmpty()) {
+			return addQuery();
+		}
+		return getQuery().get(0); 
+	}
   
 	/**
 	 * Gets the value(s) for <b>documentMailbox</b> (How documents are accepted in /Mailbox).
@@ -1892,8 +1985,9 @@ public class Conformance extends BaseResource implements IResource {
      * A list of profiles that this server implements for accepting documents in the mailbox. If this list is empty, then documents are not accepted. The base specification has the profile identifier \"http://hl7.org/fhir/documents/mailbox\". Other specifications can declare their own identifier for this purpose
      * </p> 
 	 */
-	public void setDocumentMailbox(java.util.List<UriDt> theValue) {
+	public Rest setDocumentMailbox(java.util.List<UriDt> theValue) {
 		myDocumentMailbox = theValue;
+		return this;
 	}
 
 	/**
@@ -1910,6 +2004,21 @@ public class Conformance extends BaseResource implements IResource {
 		return newType; 
 	}
 
+	/**
+	 * Gets the first repetition for <b>documentMailbox</b> (How documents are accepted in /Mailbox),
+	 * creating it if it does not already exist.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A list of profiles that this server implements for accepting documents in the mailbox. If this list is empty, then documents are not accepted. The base specification has the profile identifier \"http://hl7.org/fhir/documents/mailbox\". Other specifications can declare their own identifier for this purpose
+     * </p> 
+	 */
+	public UriDt getDocumentMailboxFirstRep() {
+		if (getDocumentMailbox().isEmpty()) {
+			return addDocumentMailbox();
+		}
+		return getDocumentMailbox().get(0); 
+	}
  	/**
 	 * Adds a new value for <b>documentMailbox</b> (How documents are accepted in /Mailbox)
 	 *
@@ -1917,12 +2026,15 @@ public class Conformance extends BaseResource implements IResource {
      * <b>Definition:</b>
      * A list of profiles that this server implements for accepting documents in the mailbox. If this list is empty, then documents are not accepted. The base specification has the profile identifier \"http://hl7.org/fhir/documents/mailbox\". Other specifications can declare their own identifier for this purpose
      * </p> 
+     *
+     * @return Returns a reference to this object, to allow for simple chaining.
 	 */
-	public void addDocumentMailbox( String theUri) {
+	public Rest addDocumentMailbox( String theUri) {
 		if (myDocumentMailbox == null) {
 			myDocumentMailbox = new java.util.ArrayList<UriDt>();
 		}
-		myDocumentMailbox.add(new UriDt(theUri)); 
+		myDocumentMailbox.add(new UriDt(theUri));
+		return this; 
 	}
 
  
@@ -2009,10 +2121,10 @@ public class Conformance extends BaseResource implements IResource {
      * Server adds CORS headers when responding to requests - this enables javascript applications to yuse the server
      * </p> 
 	 */
-	public void setCors(BooleanDt theValue) {
+	public RestSecurity setCors(BooleanDt theValue) {
 		myCors = theValue;
+		return this;
 	}
-
 
  	/**
 	 * Sets the value for <b>cors</b> (Adds CORS Headers (http://enable-cors.org/))
@@ -2022,8 +2134,9 @@ public class Conformance extends BaseResource implements IResource {
      * Server adds CORS headers when responding to requests - this enables javascript applications to yuse the server
      * </p> 
 	 */
-	public void setCors( Boolean theBoolean) {
+	public RestSecurity setCors( Boolean theBoolean) {
 		myCors = new BooleanDt(theBoolean); 
+		return this; 
 	}
 
  
@@ -2052,10 +2165,10 @@ public class Conformance extends BaseResource implements IResource {
      * Types of security services are supported/required by the system
      * </p> 
 	 */
-	public void setService(java.util.List<BoundCodeableConceptDt<RestfulSecurityServiceEnum>> theValue) {
+	public RestSecurity setService(java.util.List<BoundCodeableConceptDt<RestfulSecurityServiceEnum>> theValue) {
 		myService = theValue;
+		return this;
 	}
-
 
 	/**
 	 * Add a value for <b>service</b> (OAuth | OAuth2 | NTLM | Basic | Kerberos)
@@ -2077,9 +2190,10 @@ public class Conformance extends BaseResource implements IResource {
      * Types of security services are supported/required by the system
      * </p> 
 	 */
-	public void setService(RestfulSecurityServiceEnum theValue) {
+	public RestSecurity setService(RestfulSecurityServiceEnum theValue) {
 		getService().clear();
 		addService(theValue);
+		return this;
 	}
 
   
@@ -2108,10 +2222,10 @@ public class Conformance extends BaseResource implements IResource {
      * General description of how security works
      * </p> 
 	 */
-	public void setDescription(StringDt theValue) {
+	public RestSecurity setDescription(StringDt theValue) {
 		myDescription = theValue;
+		return this;
 	}
-
 
  	/**
 	 * Sets the value for <b>description</b> (General description of how security works)
@@ -2121,8 +2235,9 @@ public class Conformance extends BaseResource implements IResource {
      * General description of how security works
      * </p> 
 	 */
-	public void setDescription( String theString) {
+	public RestSecurity setDescription( String theString) {
 		myDescription = new StringDt(theString); 
+		return this; 
 	}
 
  
@@ -2151,8 +2266,9 @@ public class Conformance extends BaseResource implements IResource {
      * Certificates associated with security profiles
      * </p> 
 	 */
-	public void setCertificate(java.util.List<RestSecurityCertificate> theValue) {
+	public RestSecurity setCertificate(java.util.List<RestSecurityCertificate> theValue) {
 		myCertificate = theValue;
+		return this;
 	}
 
 	/**
@@ -2169,6 +2285,21 @@ public class Conformance extends BaseResource implements IResource {
 		return newType; 
 	}
 
+	/**
+	 * Gets the first repetition for <b>certificate</b> (Certificates associated with security profiles),
+	 * creating it if it does not already exist.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Certificates associated with security profiles
+     * </p> 
+	 */
+	public RestSecurityCertificate getCertificateFirstRep() {
+		if (getCertificate().isEmpty()) {
+			return addCertificate();
+		}
+		return getCertificate().get(0); 
+	}
   
 
 	}
@@ -2239,10 +2370,10 @@ public class Conformance extends BaseResource implements IResource {
      * Mime type for certificate
      * </p> 
 	 */
-	public void setType(CodeDt theValue) {
+	public RestSecurityCertificate setType(CodeDt theValue) {
 		myType = theValue;
+		return this;
 	}
-
 
  	/**
 	 * Sets the value for <b>type</b> (Mime type for certificate)
@@ -2252,8 +2383,9 @@ public class Conformance extends BaseResource implements IResource {
      * Mime type for certificate
      * </p> 
 	 */
-	public void setType( String theCode) {
+	public RestSecurityCertificate setType( String theCode) {
 		myType = new CodeDt(theCode); 
+		return this; 
 	}
 
  
@@ -2282,10 +2414,10 @@ public class Conformance extends BaseResource implements IResource {
      * Actual certificate
      * </p> 
 	 */
-	public void setBlob(Base64BinaryDt theValue) {
+	public RestSecurityCertificate setBlob(Base64BinaryDt theValue) {
 		myBlob = theValue;
+		return this;
 	}
-
 
  	/**
 	 * Sets the value for <b>blob</b> (Actual certificate)
@@ -2295,8 +2427,9 @@ public class Conformance extends BaseResource implements IResource {
      * Actual certificate
      * </p> 
 	 */
-	public void setBlob( byte[] theBytes) {
+	public RestSecurityCertificate setBlob( byte[] theBytes) {
 		myBlob = new Base64BinaryDt(theBytes); 
+		return this; 
 	}
 
  
@@ -2408,10 +2541,10 @@ public class Conformance extends BaseResource implements IResource {
      * A type of resource exposed via the restful interface
      * </p> 
 	 */
-	public void setType(BoundCodeDt<ResourceTypeEnum> theValue) {
+	public RestResource setType(BoundCodeDt<ResourceTypeEnum> theValue) {
 		myType = theValue;
+		return this;
 	}
-
 
 	/**
 	 * Sets the value(s) for <b>type</b> (A resource type that is supported)
@@ -2421,8 +2554,9 @@ public class Conformance extends BaseResource implements IResource {
      * A type of resource exposed via the restful interface
      * </p> 
 	 */
-	public void setType(ResourceTypeEnum theValue) {
+	public RestResource setType(ResourceTypeEnum theValue) {
 		getType().setValueAsEnum(theValue);
+		return this;
 	}
 
   
@@ -2451,10 +2585,10 @@ public class Conformance extends BaseResource implements IResource {
      * A specification of the profile that describes the solution's support for the resource, including any constraints on cardinality, bindings, lengths or other limitations
      * </p> 
 	 */
-	public void setProfile(ResourceReferenceDt theValue) {
+	public RestResource setProfile(ResourceReferenceDt theValue) {
 		myProfile = theValue;
+		return this;
 	}
-
 
   
 	/**
@@ -2482,8 +2616,9 @@ public class Conformance extends BaseResource implements IResource {
      * Identifies a restful operation supported by the solution
      * </p> 
 	 */
-	public void setOperation(java.util.List<RestResourceOperation> theValue) {
+	public RestResource setOperation(java.util.List<RestResourceOperation> theValue) {
 		myOperation = theValue;
+		return this;
 	}
 
 	/**
@@ -2500,6 +2635,21 @@ public class Conformance extends BaseResource implements IResource {
 		return newType; 
 	}
 
+	/**
+	 * Gets the first repetition for <b>operation</b> (What operations are supported?),
+	 * creating it if it does not already exist.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Identifies a restful operation supported by the solution
+     * </p> 
+	 */
+	public RestResourceOperation getOperationFirstRep() {
+		if (getOperation().isEmpty()) {
+			return addOperation();
+		}
+		return getOperation().get(0); 
+	}
   
 	/**
 	 * Gets the value(s) for <b>readHistory</b> (Whether vRead can return past versions).
@@ -2526,10 +2676,10 @@ public class Conformance extends BaseResource implements IResource {
      * A flag for whether the server is able to return past versions as part of the vRead operation
      * </p> 
 	 */
-	public void setReadHistory(BooleanDt theValue) {
+	public RestResource setReadHistory(BooleanDt theValue) {
 		myReadHistory = theValue;
+		return this;
 	}
-
 
  	/**
 	 * Sets the value for <b>readHistory</b> (Whether vRead can return past versions)
@@ -2539,8 +2689,9 @@ public class Conformance extends BaseResource implements IResource {
      * A flag for whether the server is able to return past versions as part of the vRead operation
      * </p> 
 	 */
-	public void setReadHistory( Boolean theBoolean) {
+	public RestResource setReadHistory( Boolean theBoolean) {
 		myReadHistory = new BooleanDt(theBoolean); 
+		return this; 
 	}
 
  
@@ -2569,10 +2720,10 @@ public class Conformance extends BaseResource implements IResource {
      * A flag to indicate that the server allows the client to create new identities on the server. If the update operation is used (client) or allowed (server) to a new location where a resource doesn't already exist. This means that the server allows the client to create new identities on the server
      * </p> 
 	 */
-	public void setUpdateCreate(BooleanDt theValue) {
+	public RestResource setUpdateCreate(BooleanDt theValue) {
 		myUpdateCreate = theValue;
+		return this;
 	}
-
 
  	/**
 	 * Sets the value for <b>updateCreate</b> (If allows/uses update to a new location)
@@ -2582,8 +2733,9 @@ public class Conformance extends BaseResource implements IResource {
      * A flag to indicate that the server allows the client to create new identities on the server. If the update operation is used (client) or allowed (server) to a new location where a resource doesn't already exist. This means that the server allows the client to create new identities on the server
      * </p> 
 	 */
-	public void setUpdateCreate( Boolean theBoolean) {
+	public RestResource setUpdateCreate( Boolean theBoolean) {
 		myUpdateCreate = new BooleanDt(theBoolean); 
+		return this; 
 	}
 
  
@@ -2612,8 +2764,9 @@ public class Conformance extends BaseResource implements IResource {
      * A list of _include values supported by the server
      * </p> 
 	 */
-	public void setSearchInclude(java.util.List<StringDt> theValue) {
+	public RestResource setSearchInclude(java.util.List<StringDt> theValue) {
 		mySearchInclude = theValue;
+		return this;
 	}
 
 	/**
@@ -2630,6 +2783,21 @@ public class Conformance extends BaseResource implements IResource {
 		return newType; 
 	}
 
+	/**
+	 * Gets the first repetition for <b>searchInclude</b> (_include values supported by the server),
+	 * creating it if it does not already exist.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A list of _include values supported by the server
+     * </p> 
+	 */
+	public StringDt getSearchIncludeFirstRep() {
+		if (getSearchInclude().isEmpty()) {
+			return addSearchInclude();
+		}
+		return getSearchInclude().get(0); 
+	}
  	/**
 	 * Adds a new value for <b>searchInclude</b> (_include values supported by the server)
 	 *
@@ -2637,12 +2805,15 @@ public class Conformance extends BaseResource implements IResource {
      * <b>Definition:</b>
      * A list of _include values supported by the server
      * </p> 
+     *
+     * @return Returns a reference to this object, to allow for simple chaining.
 	 */
-	public void addSearchInclude( String theString) {
+	public RestResource addSearchInclude( String theString) {
 		if (mySearchInclude == null) {
 			mySearchInclude = new java.util.ArrayList<StringDt>();
 		}
-		mySearchInclude.add(new StringDt(theString)); 
+		mySearchInclude.add(new StringDt(theString));
+		return this; 
 	}
 
  
@@ -2671,8 +2842,9 @@ public class Conformance extends BaseResource implements IResource {
      * Additional search parameters for implementations to support and/or make use of
      * </p> 
 	 */
-	public void setSearchParam(java.util.List<RestResourceSearchParam> theValue) {
+	public RestResource setSearchParam(java.util.List<RestResourceSearchParam> theValue) {
 		mySearchParam = theValue;
+		return this;
 	}
 
 	/**
@@ -2689,6 +2861,21 @@ public class Conformance extends BaseResource implements IResource {
 		return newType; 
 	}
 
+	/**
+	 * Gets the first repetition for <b>searchParam</b> (Additional search params defined),
+	 * creating it if it does not already exist.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Additional search parameters for implementations to support and/or make use of
+     * </p> 
+	 */
+	public RestResourceSearchParam getSearchParamFirstRep() {
+		if (getSearchParam().isEmpty()) {
+			return addSearchParam();
+		}
+		return getSearchParam().get(0); 
+	}
   
 
 	}
@@ -2759,10 +2946,10 @@ public class Conformance extends BaseResource implements IResource {
      * Coded identifier of the operation, supported by the system resource
      * </p> 
 	 */
-	public void setCode(BoundCodeDt<RestfulOperationTypeEnum> theValue) {
+	public RestResourceOperation setCode(BoundCodeDt<RestfulOperationTypeEnum> theValue) {
 		myCode = theValue;
+		return this;
 	}
-
 
 	/**
 	 * Sets the value(s) for <b>code</b> (read | vread | update | delete | history-instance | validate | history-type | create | search-type)
@@ -2772,8 +2959,9 @@ public class Conformance extends BaseResource implements IResource {
      * Coded identifier of the operation, supported by the system resource
      * </p> 
 	 */
-	public void setCode(RestfulOperationTypeEnum theValue) {
+	public RestResourceOperation setCode(RestfulOperationTypeEnum theValue) {
 		getCode().setValueAsEnum(theValue);
+		return this;
 	}
 
   
@@ -2802,10 +2990,10 @@ public class Conformance extends BaseResource implements IResource {
      * Guidance specific to the implementation of this operation, such as 'delete is a logical delete' or 'updates are only allowed with version id' or 'creates permitted from pre-authorized certificates only'
      * </p> 
 	 */
-	public void setDocumentation(StringDt theValue) {
+	public RestResourceOperation setDocumentation(StringDt theValue) {
 		myDocumentation = theValue;
+		return this;
 	}
-
 
  	/**
 	 * Sets the value for <b>documentation</b> (Anything special about operation behavior)
@@ -2815,8 +3003,9 @@ public class Conformance extends BaseResource implements IResource {
      * Guidance specific to the implementation of this operation, such as 'delete is a logical delete' or 'updates are only allowed with version id' or 'creates permitted from pre-authorized certificates only'
      * </p> 
 	 */
-	public void setDocumentation( String theString) {
+	public RestResourceOperation setDocumentation( String theString) {
 		myDocumentation = new StringDt(theString); 
+		return this; 
 	}
 
  
@@ -2918,10 +3107,10 @@ public class Conformance extends BaseResource implements IResource {
      * The name of the search parameter used in the interface
      * </p> 
 	 */
-	public void setName(StringDt theValue) {
+	public RestResourceSearchParam setName(StringDt theValue) {
 		myName = theValue;
+		return this;
 	}
-
 
  	/**
 	 * Sets the value for <b>name</b> (Name of search parameter)
@@ -2931,8 +3120,9 @@ public class Conformance extends BaseResource implements IResource {
      * The name of the search parameter used in the interface
      * </p> 
 	 */
-	public void setName( String theString) {
+	public RestResourceSearchParam setName( String theString) {
 		myName = new StringDt(theString); 
+		return this; 
 	}
 
  
@@ -2961,10 +3151,10 @@ public class Conformance extends BaseResource implements IResource {
      * A formal reference to where this parameter was first defined, so that a client can be confident of the meaning of the search parameter
      * </p> 
 	 */
-	public void setDefinition(UriDt theValue) {
+	public RestResourceSearchParam setDefinition(UriDt theValue) {
 		myDefinition = theValue;
+		return this;
 	}
-
 
  	/**
 	 * Sets the value for <b>definition</b> (Source of definition for parameter)
@@ -2974,8 +3164,9 @@ public class Conformance extends BaseResource implements IResource {
      * A formal reference to where this parameter was first defined, so that a client can be confident of the meaning of the search parameter
      * </p> 
 	 */
-	public void setDefinition( String theUri) {
+	public RestResourceSearchParam setDefinition( String theUri) {
 		myDefinition = new UriDt(theUri); 
+		return this; 
 	}
 
  
@@ -3004,10 +3195,10 @@ public class Conformance extends BaseResource implements IResource {
      * The type of value a search parameter refers to, and how the content is interpreted
      * </p> 
 	 */
-	public void setType(BoundCodeDt<SearchParamTypeEnum> theValue) {
+	public RestResourceSearchParam setType(BoundCodeDt<SearchParamTypeEnum> theValue) {
 		myType = theValue;
+		return this;
 	}
-
 
 	/**
 	 * Sets the value(s) for <b>type</b> (number | date | string | token | reference | composite | quantity)
@@ -3017,8 +3208,9 @@ public class Conformance extends BaseResource implements IResource {
      * The type of value a search parameter refers to, and how the content is interpreted
      * </p> 
 	 */
-	public void setType(SearchParamTypeEnum theValue) {
+	public RestResourceSearchParam setType(SearchParamTypeEnum theValue) {
 		getType().setValueAsEnum(theValue);
+		return this;
 	}
 
   
@@ -3047,10 +3239,10 @@ public class Conformance extends BaseResource implements IResource {
      * This allows documentation of any distinct behaviors about how the search parameter is used.  For example, text matching algorithms.
      * </p> 
 	 */
-	public void setDocumentation(StringDt theValue) {
+	public RestResourceSearchParam setDocumentation(StringDt theValue) {
 		myDocumentation = theValue;
+		return this;
 	}
-
 
  	/**
 	 * Sets the value for <b>documentation</b> (Server-specific usage)
@@ -3060,8 +3252,9 @@ public class Conformance extends BaseResource implements IResource {
      * This allows documentation of any distinct behaviors about how the search parameter is used.  For example, text matching algorithms.
      * </p> 
 	 */
-	public void setDocumentation( String theString) {
+	public RestResourceSearchParam setDocumentation( String theString) {
 		myDocumentation = new StringDt(theString); 
+		return this; 
 	}
 
  
@@ -3090,10 +3283,10 @@ public class Conformance extends BaseResource implements IResource {
      * Types of resource (if a resource is referenced)
      * </p> 
 	 */
-	public void setTarget(java.util.List<BoundCodeDt<ResourceTypeEnum>> theValue) {
+	public RestResourceSearchParam setTarget(java.util.List<BoundCodeDt<ResourceTypeEnum>> theValue) {
 		myTarget = theValue;
+		return this;
 	}
-
 
 	/**
 	 * Add a value for <b>target</b> (Types of resource (if a resource reference))
@@ -3115,9 +3308,10 @@ public class Conformance extends BaseResource implements IResource {
      * Types of resource (if a resource is referenced)
      * </p> 
 	 */
-	public void setTarget(ResourceTypeEnum theValue) {
+	public RestResourceSearchParam setTarget(ResourceTypeEnum theValue) {
 		getTarget().clear();
 		addTarget(theValue);
+		return this;
 	}
 
   
@@ -3146,8 +3340,9 @@ public class Conformance extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public void setChain(java.util.List<StringDt> theValue) {
+	public RestResourceSearchParam setChain(java.util.List<StringDt> theValue) {
 		myChain = theValue;
+		return this;
 	}
 
 	/**
@@ -3164,6 +3359,21 @@ public class Conformance extends BaseResource implements IResource {
 		return newType; 
 	}
 
+	/**
+	 * Gets the first repetition for <b>chain</b> (Chained names supported),
+	 * creating it if it does not already exist.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * 
+     * </p> 
+	 */
+	public StringDt getChainFirstRep() {
+		if (getChain().isEmpty()) {
+			return addChain();
+		}
+		return getChain().get(0); 
+	}
  	/**
 	 * Adds a new value for <b>chain</b> (Chained names supported)
 	 *
@@ -3171,12 +3381,15 @@ public class Conformance extends BaseResource implements IResource {
      * <b>Definition:</b>
      * 
      * </p> 
+     *
+     * @return Returns a reference to this object, to allow for simple chaining.
 	 */
-	public void addChain( String theString) {
+	public RestResourceSearchParam addChain( String theString) {
 		if (myChain == null) {
 			myChain = new java.util.ArrayList<StringDt>();
 		}
-		myChain.add(new StringDt(theString)); 
+		myChain.add(new StringDt(theString));
+		return this; 
 	}
 
  
@@ -3251,10 +3464,10 @@ public class Conformance extends BaseResource implements IResource {
      * A coded identifier of the operation, supported by the system
      * </p> 
 	 */
-	public void setCode(BoundCodeDt<RestfulOperationSystemEnum> theValue) {
+	public RestOperation setCode(BoundCodeDt<RestfulOperationSystemEnum> theValue) {
 		myCode = theValue;
+		return this;
 	}
-
 
 	/**
 	 * Sets the value(s) for <b>code</b> (transaction | search-system | history-system)
@@ -3264,8 +3477,9 @@ public class Conformance extends BaseResource implements IResource {
      * A coded identifier of the operation, supported by the system
      * </p> 
 	 */
-	public void setCode(RestfulOperationSystemEnum theValue) {
+	public RestOperation setCode(RestfulOperationSystemEnum theValue) {
 		getCode().setValueAsEnum(theValue);
+		return this;
 	}
 
   
@@ -3294,10 +3508,10 @@ public class Conformance extends BaseResource implements IResource {
      * Guidance specific to the implementation of this operation, such as limitations on the kind of transactions allowed, or information about system wide search is implemented
      * </p> 
 	 */
-	public void setDocumentation(StringDt theValue) {
+	public RestOperation setDocumentation(StringDt theValue) {
 		myDocumentation = theValue;
+		return this;
 	}
-
 
  	/**
 	 * Sets the value for <b>documentation</b> (Anything special about operation behavior)
@@ -3307,8 +3521,9 @@ public class Conformance extends BaseResource implements IResource {
      * Guidance specific to the implementation of this operation, such as limitations on the kind of transactions allowed, or information about system wide search is implemented
      * </p> 
 	 */
-	public void setDocumentation( String theString) {
+	public RestOperation setDocumentation( String theString) {
 		myDocumentation = new StringDt(theString); 
+		return this; 
 	}
 
  
@@ -3350,7 +3565,7 @@ public class Conformance extends BaseResource implements IResource {
 	
 	@Child(name="parameter", type=RestResourceSearchParam.class, order=3, min=0, max=Child.MAX_UNLIMITED)	
 	@Description(
-		shortDefinition="SearchParameter for the named query",
+		shortDefinition="Parameter for the named query",
 		formalDefinition="Identifies which of the parameters for the named query are supported"
 	)
 	private java.util.List<RestResourceSearchParam> myParameter;
@@ -3396,10 +3611,10 @@ public class Conformance extends BaseResource implements IResource {
      * The name of a query, which is used in the _query parameter when the query is called
      * </p> 
 	 */
-	public void setName(StringDt theValue) {
+	public RestQuery setName(StringDt theValue) {
 		myName = theValue;
+		return this;
 	}
-
 
  	/**
 	 * Sets the value for <b>name</b> (Special named queries (_query=))
@@ -3409,8 +3624,9 @@ public class Conformance extends BaseResource implements IResource {
      * The name of a query, which is used in the _query parameter when the query is called
      * </p> 
 	 */
-	public void setName( String theString) {
+	public RestQuery setName( String theString) {
 		myName = new StringDt(theString); 
+		return this; 
 	}
 
  
@@ -3439,10 +3655,10 @@ public class Conformance extends BaseResource implements IResource {
      * Identifies the custom query, defined either in FHIR core or another profile
      * </p> 
 	 */
-	public void setDefinition(UriDt theValue) {
+	public RestQuery setDefinition(UriDt theValue) {
 		myDefinition = theValue;
+		return this;
 	}
-
 
  	/**
 	 * Sets the value for <b>definition</b> (Where query is defined)
@@ -3452,8 +3668,9 @@ public class Conformance extends BaseResource implements IResource {
      * Identifies the custom query, defined either in FHIR core or another profile
      * </p> 
 	 */
-	public void setDefinition( String theUri) {
+	public RestQuery setDefinition( String theUri) {
 		myDefinition = new UriDt(theUri); 
+		return this; 
 	}
 
  
@@ -3482,10 +3699,10 @@ public class Conformance extends BaseResource implements IResource {
      * Additional information about how the query functions in this particular implementation
      * </p> 
 	 */
-	public void setDocumentation(StringDt theValue) {
+	public RestQuery setDocumentation(StringDt theValue) {
 		myDocumentation = theValue;
+		return this;
 	}
-
 
  	/**
 	 * Sets the value for <b>documentation</b> (Additional usage guidance)
@@ -3495,13 +3712,14 @@ public class Conformance extends BaseResource implements IResource {
      * Additional information about how the query functions in this particular implementation
      * </p> 
 	 */
-	public void setDocumentation( String theString) {
+	public RestQuery setDocumentation( String theString) {
 		myDocumentation = new StringDt(theString); 
+		return this; 
 	}
 
  
 	/**
-	 * Gets the value(s) for <b>parameter</b> (SearchParameter for the named query).
+	 * Gets the value(s) for <b>parameter</b> (Parameter for the named query).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -3518,19 +3736,20 @@ public class Conformance extends BaseResource implements IResource {
 	}
 
 	/**
-	 * Sets the value(s) for <b>parameter</b> (SearchParameter for the named query)
+	 * Sets the value(s) for <b>parameter</b> (Parameter for the named query)
 	 *
      * <p>
      * <b>Definition:</b>
      * Identifies which of the parameters for the named query are supported
      * </p> 
 	 */
-	public void setParameter(java.util.List<RestResourceSearchParam> theValue) {
+	public RestQuery setParameter(java.util.List<RestResourceSearchParam> theValue) {
 		myParameter = theValue;
+		return this;
 	}
 
 	/**
-	 * Adds and returns a new value for <b>parameter</b> (SearchParameter for the named query)
+	 * Adds and returns a new value for <b>parameter</b> (Parameter for the named query)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -3543,6 +3762,21 @@ public class Conformance extends BaseResource implements IResource {
 		return newType; 
 	}
 
+	/**
+	 * Gets the first repetition for <b>parameter</b> (Parameter for the named query),
+	 * creating it if it does not already exist.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Identifies which of the parameters for the named query are supported
+     * </p> 
+	 */
+	public RestResourceSearchParam getParameterFirstRep() {
+		if (getParameter().isEmpty()) {
+			return addParameter();
+		}
+		return getParameter().get(0); 
+	}
   
 
 	}
@@ -3629,10 +3863,10 @@ public class Conformance extends BaseResource implements IResource {
      * An address to which messages and/or replies are to be sent.
      * </p> 
 	 */
-	public void setEndpoint(UriDt theValue) {
+	public Messaging setEndpoint(UriDt theValue) {
 		myEndpoint = theValue;
+		return this;
 	}
-
 
  	/**
 	 * Sets the value for <b>endpoint</b> (Actual endpoint being described)
@@ -3642,8 +3876,9 @@ public class Conformance extends BaseResource implements IResource {
      * An address to which messages and/or replies are to be sent.
      * </p> 
 	 */
-	public void setEndpoint( String theUri) {
+	public Messaging setEndpoint( String theUri) {
 		myEndpoint = new UriDt(theUri); 
+		return this; 
 	}
 
  
@@ -3672,10 +3907,10 @@ public class Conformance extends BaseResource implements IResource {
      * Length if the receiver's reliable messaging cache (if a receiver) or how long the cache length on the receiver should be (if a sender)
      * </p> 
 	 */
-	public void setReliableCache(IntegerDt theValue) {
+	public Messaging setReliableCache(IntegerDt theValue) {
 		myReliableCache = theValue;
+		return this;
 	}
-
 
  	/**
 	 * Sets the value for <b>reliableCache</b> (Reliable Message Cache Length)
@@ -3685,8 +3920,9 @@ public class Conformance extends BaseResource implements IResource {
      * Length if the receiver's reliable messaging cache (if a receiver) or how long the cache length on the receiver should be (if a sender)
      * </p> 
 	 */
-	public void setReliableCache( Integer theInteger) {
+	public Messaging setReliableCache( Integer theInteger) {
 		myReliableCache = new IntegerDt(theInteger); 
+		return this; 
 	}
 
  
@@ -3715,10 +3951,10 @@ public class Conformance extends BaseResource implements IResource {
      * Documentation about the system's messaging capabilities for this endpoint not otherwise documented by the conformance statement.  For example, process for becoming an authorized messaging exchange partner.
      * </p> 
 	 */
-	public void setDocumentation(StringDt theValue) {
+	public Messaging setDocumentation(StringDt theValue) {
 		myDocumentation = theValue;
+		return this;
 	}
-
 
  	/**
 	 * Sets the value for <b>documentation</b> (Messaging interface behavior details)
@@ -3728,8 +3964,9 @@ public class Conformance extends BaseResource implements IResource {
      * Documentation about the system's messaging capabilities for this endpoint not otherwise documented by the conformance statement.  For example, process for becoming an authorized messaging exchange partner.
      * </p> 
 	 */
-	public void setDocumentation( String theString) {
+	public Messaging setDocumentation( String theString) {
 		myDocumentation = new StringDt(theString); 
+		return this; 
 	}
 
  
@@ -3758,8 +3995,9 @@ public class Conformance extends BaseResource implements IResource {
      * A description of the solution's support for an event at this end point.
      * </p> 
 	 */
-	public void setEvent(java.util.List<MessagingEvent> theValue) {
+	public Messaging setEvent(java.util.List<MessagingEvent> theValue) {
 		myEvent = theValue;
+		return this;
 	}
 
 	/**
@@ -3776,6 +4014,21 @@ public class Conformance extends BaseResource implements IResource {
 		return newType; 
 	}
 
+	/**
+	 * Gets the first repetition for <b>event</b> (Declare support for this event),
+	 * creating it if it does not already exist.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A description of the solution's support for an event at this end point.
+     * </p> 
+	 */
+	public MessagingEvent getEventFirstRep() {
+		if (getEvent().isEmpty()) {
+			return addEvent();
+		}
+		return getEvent().get(0); 
+	}
   
 
 	}
@@ -3892,10 +4145,10 @@ public class Conformance extends BaseResource implements IResource {
      * A coded identifier of a supported messaging event
      * </p> 
 	 */
-	public void setCode(CodingDt theValue) {
+	public MessagingEvent setCode(CodingDt theValue) {
 		myCode = theValue;
+		return this;
 	}
-
 
   
 	/**
@@ -3923,10 +4176,10 @@ public class Conformance extends BaseResource implements IResource {
      * The impact of the content of the message
      * </p> 
 	 */
-	public void setCategory(BoundCodeDt<MessageSignificanceCategoryEnum> theValue) {
+	public MessagingEvent setCategory(BoundCodeDt<MessageSignificanceCategoryEnum> theValue) {
 		myCategory = theValue;
+		return this;
 	}
-
 
 	/**
 	 * Sets the value(s) for <b>category</b> (Consequence | Currency | Notification)
@@ -3936,8 +4189,9 @@ public class Conformance extends BaseResource implements IResource {
      * The impact of the content of the message
      * </p> 
 	 */
-	public void setCategory(MessageSignificanceCategoryEnum theValue) {
+	public MessagingEvent setCategory(MessageSignificanceCategoryEnum theValue) {
 		getCategory().setValueAsEnum(theValue);
+		return this;
 	}
 
   
@@ -3966,10 +4220,10 @@ public class Conformance extends BaseResource implements IResource {
      * The mode of this event declaration - whether application is sender or receiver
      * </p> 
 	 */
-	public void setMode(BoundCodeDt<ConformanceEventModeEnum> theValue) {
+	public MessagingEvent setMode(BoundCodeDt<ConformanceEventModeEnum> theValue) {
 		myMode = theValue;
+		return this;
 	}
-
 
 	/**
 	 * Sets the value(s) for <b>mode</b> (sender | receiver)
@@ -3979,8 +4233,9 @@ public class Conformance extends BaseResource implements IResource {
      * The mode of this event declaration - whether application is sender or receiver
      * </p> 
 	 */
-	public void setMode(ConformanceEventModeEnum theValue) {
+	public MessagingEvent setMode(ConformanceEventModeEnum theValue) {
 		getMode().setValueAsEnum(theValue);
+		return this;
 	}
 
   
@@ -4009,8 +4264,9 @@ public class Conformance extends BaseResource implements IResource {
      * A list of the messaging transport protocol(s) identifiers, supported by this endpoint
      * </p> 
 	 */
-	public void setProtocol(java.util.List<CodingDt> theValue) {
+	public MessagingEvent setProtocol(java.util.List<CodingDt> theValue) {
 		myProtocol = theValue;
+		return this;
 	}
 
 	/**
@@ -4027,6 +4283,21 @@ public class Conformance extends BaseResource implements IResource {
 		return newType; 
 	}
 
+	/**
+	 * Gets the first repetition for <b>protocol</b> (http | ftp | mllp +),
+	 * creating it if it does not already exist.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A list of the messaging transport protocol(s) identifiers, supported by this endpoint
+     * </p> 
+	 */
+	public CodingDt getProtocolFirstRep() {
+		if (getProtocol().isEmpty()) {
+			return addProtocol();
+		}
+		return getProtocol().get(0); 
+	}
   
 	/**
 	 * Gets the value(s) for <b>focus</b> (Resource that's focus of message).
@@ -4053,10 +4324,10 @@ public class Conformance extends BaseResource implements IResource {
      * A resource associated with the event.  This is the resource that defines the event.
      * </p> 
 	 */
-	public void setFocus(BoundCodeDt<ResourceTypeEnum> theValue) {
+	public MessagingEvent setFocus(BoundCodeDt<ResourceTypeEnum> theValue) {
 		myFocus = theValue;
+		return this;
 	}
-
 
 	/**
 	 * Sets the value(s) for <b>focus</b> (Resource that's focus of message)
@@ -4066,8 +4337,9 @@ public class Conformance extends BaseResource implements IResource {
      * A resource associated with the event.  This is the resource that defines the event.
      * </p> 
 	 */
-	public void setFocus(ResourceTypeEnum theValue) {
+	public MessagingEvent setFocus(ResourceTypeEnum theValue) {
 		getFocus().setValueAsEnum(theValue);
+		return this;
 	}
 
   
@@ -4096,10 +4368,10 @@ public class Conformance extends BaseResource implements IResource {
      * Information about the request for this event
      * </p> 
 	 */
-	public void setRequest(ResourceReferenceDt theValue) {
+	public MessagingEvent setRequest(ResourceReferenceDt theValue) {
 		myRequest = theValue;
+		return this;
 	}
-
 
   
 	/**
@@ -4127,10 +4399,10 @@ public class Conformance extends BaseResource implements IResource {
      * Information about the response for this event
      * </p> 
 	 */
-	public void setResponse(ResourceReferenceDt theValue) {
+	public MessagingEvent setResponse(ResourceReferenceDt theValue) {
 		myResponse = theValue;
+		return this;
 	}
-
 
   
 	/**
@@ -4158,10 +4430,10 @@ public class Conformance extends BaseResource implements IResource {
      * Guidance on how this event is handled, such as internal system trigger points, business rules, etc.
      * </p> 
 	 */
-	public void setDocumentation(StringDt theValue) {
+	public MessagingEvent setDocumentation(StringDt theValue) {
 		myDocumentation = theValue;
+		return this;
 	}
-
 
  	/**
 	 * Sets the value for <b>documentation</b> (Endpoint-specific event documentation)
@@ -4171,8 +4443,9 @@ public class Conformance extends BaseResource implements IResource {
      * Guidance on how this event is handled, such as internal system trigger points, business rules, etc.
      * </p> 
 	 */
-	public void setDocumentation( String theString) {
+	public MessagingEvent setDocumentation( String theString) {
 		myDocumentation = new StringDt(theString); 
+		return this; 
 	}
 
  
@@ -4256,10 +4529,10 @@ public class Conformance extends BaseResource implements IResource {
      * Mode of this document declaration - whether application is producer or consumer
      * </p> 
 	 */
-	public void setMode(BoundCodeDt<DocumentModeEnum> theValue) {
+	public Document setMode(BoundCodeDt<DocumentModeEnum> theValue) {
 		myMode = theValue;
+		return this;
 	}
-
 
 	/**
 	 * Sets the value(s) for <b>mode</b> (producer | consumer)
@@ -4269,8 +4542,9 @@ public class Conformance extends BaseResource implements IResource {
      * Mode of this document declaration - whether application is producer or consumer
      * </p> 
 	 */
-	public void setMode(DocumentModeEnum theValue) {
+	public Document setMode(DocumentModeEnum theValue) {
 		getMode().setValueAsEnum(theValue);
+		return this;
 	}
 
   
@@ -4299,10 +4573,10 @@ public class Conformance extends BaseResource implements IResource {
      * A description of how the application supports or uses the specified document profile.  For example, when are documents created, what action is taken with consumed documents, etc.
      * </p> 
 	 */
-	public void setDocumentation(StringDt theValue) {
+	public Document setDocumentation(StringDt theValue) {
 		myDocumentation = theValue;
+		return this;
 	}
-
 
  	/**
 	 * Sets the value for <b>documentation</b> (Description of document support)
@@ -4312,8 +4586,9 @@ public class Conformance extends BaseResource implements IResource {
      * A description of how the application supports or uses the specified document profile.  For example, when are documents created, what action is taken with consumed documents, etc.
      * </p> 
 	 */
-	public void setDocumentation( String theString) {
+	public Document setDocumentation( String theString) {
 		myDocumentation = new StringDt(theString); 
+		return this; 
 	}
 
  
@@ -4342,10 +4617,10 @@ public class Conformance extends BaseResource implements IResource {
      * A constraint on a resource used in the document
      * </p> 
 	 */
-	public void setProfile(ResourceReferenceDt theValue) {
+	public Document setProfile(ResourceReferenceDt theValue) {
 		myProfile = theValue;
+		return this;
 	}
-
 
   
 

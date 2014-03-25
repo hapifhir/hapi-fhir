@@ -16,30 +16,16 @@
 
 package ca.uhn.fhir.model.dstu.composite;
 
-import java.util.*;
-import ca.uhn.fhir.model.api.*;
-import ca.uhn.fhir.model.api.annotation.*;
+import java.util.List;
 
-import ca.uhn.fhir.model.dstu.valueset.AddressUseEnum;
-import ca.uhn.fhir.model.dstu.composite.CodingDt;
-import ca.uhn.fhir.model.dstu.valueset.ContactSystemEnum;
-import ca.uhn.fhir.model.dstu.valueset.ContactUseEnum;
-import ca.uhn.fhir.model.dstu.valueset.EventTimingEnum;
-import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
-import ca.uhn.fhir.model.dstu.valueset.NameUseEnum;
-import ca.uhn.fhir.model.dstu.resource.Organization;
-import ca.uhn.fhir.model.dstu.composite.PeriodDt;
-import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
-import ca.uhn.fhir.model.dstu.composite.QuantityDt;
-import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
-import ca.uhn.fhir.model.dstu.valueset.UnitsOfTimeEnum;
-import ca.uhn.fhir.model.dstu.resource.ValueSet;
+import ca.uhn.fhir.model.api.BaseElement;
+import ca.uhn.fhir.model.api.ICompositeDatatype;
+import ca.uhn.fhir.model.api.IElement;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.primitive.Base64BinaryDt;
-import ca.uhn.fhir.model.primitive.BooleanDt;
-import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
-import ca.uhn.fhir.model.primitive.DateTimeDt;
-import ca.uhn.fhir.model.primitive.DecimalDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
@@ -61,6 +47,13 @@ import ca.uhn.fhir.model.primitive.UriDt;
 @DatatypeDef(name="Attachment") 
 public class AttachmentDt 
         extends  BaseElement         implements ICompositeDatatype  {
+
+	/**
+	 * Constructor
+	 */
+	public AttachmentDt() {
+		// nothing
+	}
 
 
 	@Child(name="contentType", type=CodeDt.class, order=0, min=1, max=1)	
@@ -153,10 +146,10 @@ public class AttachmentDt
      * Identifies the type of the data in the attachment and allows a method to be chosen to interpret or render the data. Includes mime type parameters such as charset where appropriate
      * </p> 
 	 */
-	public void setContentType(CodeDt theValue) {
+	public AttachmentDt setContentType(CodeDt theValue) {
 		myContentType = theValue;
+		return this;
 	}
-
 
  	/**
 	 * Sets the value for <b>contentType</b> (Mime type of the content, with charset etc.)
@@ -166,8 +159,9 @@ public class AttachmentDt
      * Identifies the type of the data in the attachment and allows a method to be chosen to interpret or render the data. Includes mime type parameters such as charset where appropriate
      * </p> 
 	 */
-	public void setContentType( String theCode) {
+	public AttachmentDt setContentType( String theCode) {
 		myContentType = new CodeDt(theCode); 
+		return this; 
 	}
 
  
@@ -196,10 +190,10 @@ public class AttachmentDt
      * The human language of the content. The value can be any valid value according to BCP 47
      * </p> 
 	 */
-	public void setLanguage(CodeDt theValue) {
+	public AttachmentDt setLanguage(CodeDt theValue) {
 		myLanguage = theValue;
+		return this;
 	}
-
 
  	/**
 	 * Sets the value for <b>language</b> (Human language of the content (BCP-47))
@@ -209,8 +203,9 @@ public class AttachmentDt
      * The human language of the content. The value can be any valid value according to BCP 47
      * </p> 
 	 */
-	public void setLanguage( String theCode) {
+	public AttachmentDt setLanguage( String theCode) {
 		myLanguage = new CodeDt(theCode); 
+		return this; 
 	}
 
  
@@ -239,10 +234,10 @@ public class AttachmentDt
      * The actual data of the attachment - a sequence of bytes. In XML, represented using base64
      * </p> 
 	 */
-	public void setData(Base64BinaryDt theValue) {
+	public AttachmentDt setData(Base64BinaryDt theValue) {
 		myData = theValue;
+		return this;
 	}
-
 
  	/**
 	 * Sets the value for <b>data</b> (Data inline, base64ed)
@@ -252,8 +247,9 @@ public class AttachmentDt
      * The actual data of the attachment - a sequence of bytes. In XML, represented using base64
      * </p> 
 	 */
-	public void setData( byte[] theBytes) {
+	public AttachmentDt setData( byte[] theBytes) {
 		myData = new Base64BinaryDt(theBytes); 
+		return this; 
 	}
 
  
@@ -282,10 +278,10 @@ public class AttachmentDt
      * An alternative location where the data can be accessed
      * </p> 
 	 */
-	public void setUrl(UriDt theValue) {
+	public AttachmentDt setUrl(UriDt theValue) {
 		myUrl = theValue;
+		return this;
 	}
-
 
  	/**
 	 * Sets the value for <b>url</b> (Uri where the data can be found)
@@ -295,8 +291,9 @@ public class AttachmentDt
      * An alternative location where the data can be accessed
      * </p> 
 	 */
-	public void setUrl( String theUri) {
+	public AttachmentDt setUrl( String theUri) {
 		myUrl = new UriDt(theUri); 
+		return this; 
 	}
 
  
@@ -325,10 +322,10 @@ public class AttachmentDt
      * The number of bytes of data that make up this attachment.
      * </p> 
 	 */
-	public void setSize(IntegerDt theValue) {
+	public AttachmentDt setSize(IntegerDt theValue) {
 		mySize = theValue;
+		return this;
 	}
-
 
  	/**
 	 * Sets the value for <b>size</b> (Number of bytes of content (if url provided))
@@ -338,8 +335,9 @@ public class AttachmentDt
      * The number of bytes of data that make up this attachment.
      * </p> 
 	 */
-	public void setSize( Integer theInteger) {
+	public AttachmentDt setSize( Integer theInteger) {
 		mySize = new IntegerDt(theInteger); 
+		return this; 
 	}
 
  
@@ -368,10 +366,10 @@ public class AttachmentDt
      * The calculated hash of the data using SHA-1. Represented using base64
      * </p> 
 	 */
-	public void setHash(Base64BinaryDt theValue) {
+	public AttachmentDt setHash(Base64BinaryDt theValue) {
 		myHash = theValue;
+		return this;
 	}
-
 
  	/**
 	 * Sets the value for <b>hash</b> (Hash of the data (sha-1, base64ed ))
@@ -381,8 +379,9 @@ public class AttachmentDt
      * The calculated hash of the data using SHA-1. Represented using base64
      * </p> 
 	 */
-	public void setHash( byte[] theBytes) {
+	public AttachmentDt setHash( byte[] theBytes) {
 		myHash = new Base64BinaryDt(theBytes); 
+		return this; 
 	}
 
  
@@ -411,10 +410,10 @@ public class AttachmentDt
      * A label or set of text to display in place of the data
      * </p> 
 	 */
-	public void setTitle(StringDt theValue) {
+	public AttachmentDt setTitle(StringDt theValue) {
 		myTitle = theValue;
+		return this;
 	}
-
 
  	/**
 	 * Sets the value for <b>title</b> (Label to display in place of the data)
@@ -424,8 +423,9 @@ public class AttachmentDt
      * A label or set of text to display in place of the data
      * </p> 
 	 */
-	public void setTitle( String theString) {
+	public AttachmentDt setTitle( String theString) {
 		myTitle = new StringDt(theString); 
+		return this; 
 	}
 
  

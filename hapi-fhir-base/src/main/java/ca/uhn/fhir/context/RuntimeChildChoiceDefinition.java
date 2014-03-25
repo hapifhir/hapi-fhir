@@ -103,5 +103,9 @@ public class RuntimeChildChoiceDefinition extends BaseRuntimeDeclaredChildDefini
 		return myDatatypeToElementDefinition.get(theDatatype);
 	}
 
+	public Set<Class<? extends IElement>> getValidChildTypes() {
+		return Collections.unmodifiableSet((myDatatypeToElementDefinition.keySet()));
+	}
+
 
 }

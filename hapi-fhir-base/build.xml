@@ -1,0 +1,110 @@
+<project name="MyProject" basedir=".">
+	<target name="urchin">
+        <echo>Adding Google analytics in target/site for &lt;body&gt;</echo>
+        <replace dir="target/site" summary="true">
+            <include name="**/*.html"></include>
+            <replacefilter token="#build#" value="${label}"/>
+            <replacefilter token="#version#" value="${version}"/>
+            <replacetoken><![CDATA[</body>]]></replacetoken>
+            <replacevalue><![CDATA[
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-1395874-5', 'sourceforge.net');
+  ga('send', 'pageview');
+
+</script>
+                </body >
+                ]]></replacevalue>
+        </replace>
+			<echo>Adding Google analytics in target/site for &lt;BODY&gt;</echo>
+        <replace dir="target/site" summary="true">
+            <include name="**/*.html"></include>
+            <replacetoken><![CDATA[</BODY>]]></replacetoken>
+            <replacevalue><![CDATA[
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-1395874-5', 'sourceforge.net');
+  ga('send', 'pageview');
+
+</script>
+                </BODY >
+                ]]></replacevalue>
+        </replace>
+      <echo>Adding Google analytics in target/site for &lt;FRAMESET&gt;</echo>
+        <replace dir="target/site" summary="true">
+            <include name="**/*.html"></include>
+            <replacetoken><![CDATA[</HEAD>
+<FRAMESET]]></replacetoken>
+            <replacevalue><![CDATA[
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-1395874-5', 'sourceforge.net');
+  ga('send', 'pageview');
+
+</script>
+                </HEAD >
+                <FRAMESET]]></replacevalue>
+        </replace>
+      <echo>Adding Google analytics in target/site for &lt;frameset&gt;</echo>
+        <replace dir="target/site" summary="true">
+            <include name="**/*.html"></include>
+            <replacetoken><![CDATA[</head>
+    <frameset]]></replacetoken>
+            <replacevalue><![CDATA[
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-1395874-5', 'sourceforge.net');
+  ga('send', 'pageview');
+
+</script>
+                </head >
+    <frameset]]></replacevalue>
+        </replace>        
+      <echo>Adding social plugins for HAPI</echo>
+		  <replace dir="target/site/" summary="true">
+            <include name="**/*.html"></include>
+            <replacetoken><![CDATA[SOCIALPLUGINSHEREFHIR]]></replacetoken>
+            <replacevalue><![CDATA[
+            	<table cellpadding="0" cellspacing="0" border="0"><tr>
+            	<td><div class="g-plusone" data-annotation="inline" data-width="300" data-href="http://hl7api.sourceforge.net/"></div></td>
+            	<td><div class="fb-like" data-href="http://hl7api.sourceforge.net/" data-send="false" data-layout="button_count" data-width="450" data-show-faces="true"></div></td>
+            	</tr></table>
+
+            	</p><p>
+            	<!-- Place this tag after the last +1 button tag. -->
+            	<script type="text/javascript">
+            	  (function() {
+            	    var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+            	    po.src = 'https://apis.google.com/js/plusone.js';
+            	    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+            	  })();
+            	</script>
+            	<div id="fb-root"></div>
+            	<script>(function(d, s, id) {
+            	  var js, fjs = d.getElementsByTagName(s)[0];
+            	  if (d.getElementById(id)) return;
+            	  js = d.createElement(s); js.id = id;
+            	  js.src = "//connect.facebook.net/en_US/all.js#xfbml=1";
+            	  fjs.parentNode.insertBefore(js, fjs);
+            	}(document, 'script', 'facebook-jssdk'));</script>
+				]]></replacevalue>
+     </replace>
+ 
+    </target>
+</project>

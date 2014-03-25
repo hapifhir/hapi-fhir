@@ -32,8 +32,13 @@
 			<item name="RESTful Server" href="./doc_rest_server.html"/>
 			<item name="RESTful Client" href="./doc_rest_client.html"/>
 			<item name="RESTful Operations" href="./doc_rest_operations.html"/>
+			<item name="Extensions" href="./doc_extensions.html"/>
 			<item name="Tinder Code Generator" href="./doc_tinder.html"/>
-			<item name="JavaDocs" href="./apidocs/index.html"/>
+		</menu>
+		
+		<menu name="JavaDocs">
+			<item name="API Documentation" href="./apidocs/index.html"/>
+			<item name="JXR" href="./xref/index.html"/>
 		</menu>
 		
 		<menu name="Reports">
@@ -41,7 +46,7 @@
 			<item name="Unit Test Report" href="surefire-report.html" />
 			<item name="FindBugs" href="findbugs.html" />
 			<item name="License" href="license.html" />
-			<item name="JXR" href="./xref/index.html"/>
+			<item name="Source Code" href="http://sourceforge.net/p/hl7api/fhircode/ci/master/tree/"/>
 		</menu>
 
 		<head>

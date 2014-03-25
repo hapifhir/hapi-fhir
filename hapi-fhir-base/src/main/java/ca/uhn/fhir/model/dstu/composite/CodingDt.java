@@ -16,31 +16,17 @@
 
 package ca.uhn.fhir.model.dstu.composite;
 
-import java.util.*;
-import ca.uhn.fhir.model.api.*;
-import ca.uhn.fhir.model.api.annotation.*;
+import java.util.List;
 
-import ca.uhn.fhir.model.dstu.valueset.AddressUseEnum;
-import ca.uhn.fhir.model.dstu.composite.CodingDt;
-import ca.uhn.fhir.model.dstu.valueset.ContactSystemEnum;
-import ca.uhn.fhir.model.dstu.valueset.ContactUseEnum;
-import ca.uhn.fhir.model.dstu.valueset.EventTimingEnum;
-import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
-import ca.uhn.fhir.model.dstu.valueset.NameUseEnum;
-import ca.uhn.fhir.model.dstu.resource.Organization;
-import ca.uhn.fhir.model.dstu.composite.PeriodDt;
-import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
-import ca.uhn.fhir.model.dstu.composite.QuantityDt;
-import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
-import ca.uhn.fhir.model.dstu.valueset.UnitsOfTimeEnum;
-import ca.uhn.fhir.model.dstu.resource.ValueSet;
-import ca.uhn.fhir.model.primitive.Base64BinaryDt;
+import ca.uhn.fhir.model.api.BaseElement;
+import ca.uhn.fhir.model.api.ICompositeDatatype;
+import ca.uhn.fhir.model.api.IElement;
+import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.primitive.BooleanDt;
-import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
-import ca.uhn.fhir.model.primitive.DateTimeDt;
-import ca.uhn.fhir.model.primitive.DecimalDt;
-import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
 
@@ -63,7 +49,7 @@ public class CodingDt
         extends  BaseElement         implements ICompositeDatatype  , IQueryParameterType {
 
 	/**
-	 * Creates a new Coding
+	 * Constructor
 	 */
 	public CodingDt() {
 		// nothing
@@ -162,10 +148,10 @@ public class CodingDt
      * The identification of the code system that defines the meaning of the symbol in the code.
      * </p> 
 	 */
-	public void setSystem(UriDt theValue) {
+	public CodingDt setSystem(UriDt theValue) {
 		mySystem = theValue;
+		return this;
 	}
-
 
  	/**
 	 * Sets the value for <b>system</b> (Identity of the terminology system)
@@ -175,8 +161,9 @@ public class CodingDt
      * The identification of the code system that defines the meaning of the symbol in the code.
      * </p> 
 	 */
-	public void setSystem( String theUri) {
+	public CodingDt setSystem( String theUri) {
 		mySystem = new UriDt(theUri); 
+		return this; 
 	}
 
  
@@ -205,10 +192,10 @@ public class CodingDt
      * The version of the code system which was used when choosing this code. Note that a well-maintained code system does not need the version reported, because the meaning of codes is consistent across versions. However this cannot consistently be assured. and When the meaning is not guaranteed to be consistent, the version SHOULD be exchanged
      * </p> 
 	 */
-	public void setVersion(StringDt theValue) {
+	public CodingDt setVersion(StringDt theValue) {
 		myVersion = theValue;
+		return this;
 	}
-
 
  	/**
 	 * Sets the value for <b>version</b> (Version of the system - if relevant)
@@ -218,8 +205,9 @@ public class CodingDt
      * The version of the code system which was used when choosing this code. Note that a well-maintained code system does not need the version reported, because the meaning of codes is consistent across versions. However this cannot consistently be assured. and When the meaning is not guaranteed to be consistent, the version SHOULD be exchanged
      * </p> 
 	 */
-	public void setVersion( String theString) {
+	public CodingDt setVersion( String theString) {
 		myVersion = new StringDt(theString); 
+		return this; 
 	}
 
  
@@ -248,10 +236,10 @@ public class CodingDt
      * A symbol in syntax defined by the system. The symbol may be a predefined code or an expression in a syntax defined by the coding system (e.g. post-coordination)
      * </p> 
 	 */
-	public void setCode(CodeDt theValue) {
+	public CodingDt setCode(CodeDt theValue) {
 		myCode = theValue;
+		return this;
 	}
-
 
  	/**
 	 * Sets the value for <b>code</b> (Symbol in syntax defined by the system)
@@ -261,8 +249,9 @@ public class CodingDt
      * A symbol in syntax defined by the system. The symbol may be a predefined code or an expression in a syntax defined by the coding system (e.g. post-coordination)
      * </p> 
 	 */
-	public void setCode( String theCode) {
+	public CodingDt setCode( String theCode) {
 		myCode = new CodeDt(theCode); 
+		return this; 
 	}
 
  
@@ -291,10 +280,10 @@ public class CodingDt
      * A representation of the meaning of the code in the system, following the rules of the system.
      * </p> 
 	 */
-	public void setDisplay(StringDt theValue) {
+	public CodingDt setDisplay(StringDt theValue) {
 		myDisplay = theValue;
+		return this;
 	}
-
 
  	/**
 	 * Sets the value for <b>display</b> (Representation defined by the system)
@@ -304,8 +293,9 @@ public class CodingDt
      * A representation of the meaning of the code in the system, following the rules of the system.
      * </p> 
 	 */
-	public void setDisplay( String theString) {
+	public CodingDt setDisplay( String theString) {
 		myDisplay = new StringDt(theString); 
+		return this; 
 	}
 
  
@@ -334,10 +324,10 @@ public class CodingDt
      * Indicates that this code was chosen by a user directly - i.e. off a pick list of available items (codes or displays)
      * </p> 
 	 */
-	public void setPrimary(BooleanDt theValue) {
+	public CodingDt setPrimary(BooleanDt theValue) {
 		myPrimary = theValue;
+		return this;
 	}
-
 
  	/**
 	 * Sets the value for <b>primary</b> (If this code was chosen directly by the user)
@@ -347,8 +337,9 @@ public class CodingDt
      * Indicates that this code was chosen by a user directly - i.e. off a pick list of available items (codes or displays)
      * </p> 
 	 */
-	public void setPrimary( Boolean theBoolean) {
+	public CodingDt setPrimary( Boolean theBoolean) {
 		myPrimary = new BooleanDt(theBoolean); 
+		return this; 
 	}
 
  
@@ -377,10 +368,10 @@ public class CodingDt
      * The set of possible coded values this coding was chosen from or constrained by
      * </p> 
 	 */
-	public void setValueSet(ResourceReferenceDt theValue) {
+	public CodingDt setValueSet(ResourceReferenceDt theValue) {
 		myValueSet = theValue;
+		return this;
 	}
-
 
   
 

@@ -3,6 +3,7 @@ package ca.uhn.fhir.tinder.model;
 import static org.apache.commons.lang.StringUtils.*;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,6 +12,7 @@ import org.apache.commons.lang3.StringUtils;
 
 public abstract class BaseElement {
 
+	private String myDeclaringClassNameComplete;
 	private String myBinding;
 	private String myBindingClass;
 	private String myCardMax;
@@ -29,11 +31,27 @@ public abstract class BaseElement {
 	private String myV2Mapping;
 	private String myExtensionUrl;
 
+	public String getDeclaringClassNameComplete() {
+		return myDeclaringClassNameComplete;
+	}
+
+	public String getDeclaringClassNameCompleteForChildren() {
+		return getDeclaringClassNameComplete();
+	}
+
+	public void setDeclaringClassNameComplete(String theDeclaringClassNameComplete) {
+		myDeclaringClassNameComplete = theDeclaringClassNameComplete;
+	}
+
 	public void addChild(Child theElem) {
 		if (myChildren == null) {
 			myChildren = new ArrayList<BaseElement>();
 		}
 		myChildren.add(theElem);
+		
+//		if (theElem.getDeclaringClassNameComplete()==null) {
+			theElem.setDeclaringClassNameComplete(getDeclaringClassNameCompleteForChildren());
+//		}
 	}
 
 	public String getBinding() {
@@ -60,7 +78,7 @@ public abstract class BaseElement {
 		if (myChildren == null) {
 			myChildren = new ArrayList<BaseElement>();
 		}
-		return myChildren;
+		return Collections.unmodifiableList(myChildren);
 	}
 
 	public String getComments() {
@@ -174,11 +192,11 @@ public abstract class BaseElement {
 	public void setElementNameAndDeriveParentElementName(String theName) {
 		int lastDot = theName.lastIndexOf('.');
 		if (lastDot == -1) {
-			myElementName = (theName);
+			setElementName(theName);
 		} else {
 			String elementName = theName.substring(lastDot + 1);
 			String elementParentName = theName.substring(0, lastDot);
-			myElementName = (elementName);
+			setElementName(elementName);
 			myElementParentName = (elementParentName);
 		}
 	}

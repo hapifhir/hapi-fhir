@@ -1,6 +1,5 @@
 package ca.uhn.fhir.rest.method;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;

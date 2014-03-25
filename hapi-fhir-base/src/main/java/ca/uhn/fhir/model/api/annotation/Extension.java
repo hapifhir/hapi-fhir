@@ -19,7 +19,6 @@ public @interface Extension {
 	 * this option for extension defintions that you have added locally (i.e.
 	 * within your own organization)
 	 * </p>
-	 * <p>
 	 * 
 	 * <p>
 	 * If set to <b><code>false</code></b>, the resource is taken to be a remote

@@ -17,7 +17,9 @@ import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
+import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.api.UndeclaredExtension;
+import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.resource.DiagnosticReport;
 import ca.uhn.fhir.model.dstu.resource.Observation;
 import ca.uhn.fhir.model.dstu.resource.Patient;
@@ -86,14 +88,63 @@ public class JsonParserTest {
 		String msg = IOUtils.toString(XmlParser.class.getResourceAsStream("/example-patient-general.json"));
 		FhirContext ctx = new FhirContext(Patient.class);
 		IParser p = ctx.newJsonParser();
-		ourLog.info("Reading in message: {}", msg);
+//		ourLog.info("Reading in message: {}", msg);
 		Patient res = p.parseResource(Patient.class, msg);
+		
+		assertEquals(2, res.getUndeclaredExtensions().size());
+		assertEquals(1, res.getUndeclaredModifierExtensions().size());
 		
 		String encoded = ctx.newXmlParser().setPrettyPrint(true).encodeResourceToString(res);
 		ourLog.info(encoded);
 
 	}	
 
+
+	@Test
+	public void testParseBundle() throws DataFormatException, IOException {
+		
+		String msg = IOUtils.toString(XmlParser.class.getResourceAsStream("/atom-document-large.json"));
+		FhirContext ctx = new FhirContext(Patient.class);
+		IParser p = ctx.newJsonParser();
+		Bundle bundle = p.parseBundle(msg);
+		
+		String encoded = ctx.newXmlParser().setPrettyPrint(true).encodeBundleToString(bundle);
+		ourLog.info(encoded);
+
+		assertEquals("http://fhir.healthintersections.com.au/open/DiagnosticReport/_search?_format=application/json+fhir&search-id=46d5f0e7-9240-4d4f-9f51-f8ac975c65&search-sort=_id",bundle.getLinkSelf().getValue());
+		assertEquals("urn:uuid:0b754ff9-03cf-4322-a119-15019af8a3",bundle.getBundleId().getValue());
+		
+		BundleEntry entry = bundle.getEntries().get(0);
+		assertEquals("http://fhir.healthintersections.com.au/open/DiagnosticReport/101",entry.getEntryId().getValue());
+		assertEquals("http://fhir.healthintersections.com.au/open/DiagnosticReport/101/_history/1", entry.getLinkSelf().getValue());
+		assertEquals("2014-03-10T11:55:59Z", entry.getUpdated().getValueAsString());
+		
+		DiagnosticReport res = (DiagnosticReport)entry.getResource();
+		assertEquals("Complete Blood Count", res.getName().getText().getValue());
+		
+	}	
+
+
+	
+	@Test
+	public void testParseWithContained() throws DataFormatException, IOException {
+		
+		String msg = IOUtils.toString(XmlParser.class.getResourceAsStream("/diagnostic-report.json"));
+		FhirContext ctx = new FhirContext(Patient.class);
+		IParser p = ctx.newJsonParser();
+//		ourLog.info("Reading in message: {}", msg);
+		DiagnosticReport res = p.parseResource(DiagnosticReport.class, msg);
+		
+		String encoded = ctx.newXmlParser().setPrettyPrint(true).encodeResourceToString(res);
+		ourLog.info(encoded);
+
+		ResourceReferenceDt reference = res.getResult().get(1);
+		Observation obs = (Observation) reference.getResource();
+		
+		assertEquals("789-8", obs.getName().getCoding().get(0).getCode().getValue());
+	}	
+
+	
 	@Test
 	public void testEncodeContainedResourcesMore() throws IOException {
 
@@ -123,10 +174,13 @@ public class JsonParserTest {
 		Observation obs = new Observation();
 		obs.setValue(new DecimalDt(112.22));
 		
-		IParser p = new FhirContext(Observation.class).newXmlParser();
-		
-		// Should have good error message
-		p.encodeResourceToString(obs);
+		IParser p = new FhirContext(Observation.class).newJsonParser();
+
+		try {
+			p.encodeResourceToString(obs);
+		} catch (DataFormatException e) {
+			assertThat(e.getMessage(), StringContains.containsString("PeriodDt"));
+		}
 	}
 
 }

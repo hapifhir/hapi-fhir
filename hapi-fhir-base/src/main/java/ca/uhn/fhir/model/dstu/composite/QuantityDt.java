@@ -16,31 +16,19 @@
 
 package ca.uhn.fhir.model.dstu.composite;
 
-import java.util.*;
-import ca.uhn.fhir.model.api.*;
-import ca.uhn.fhir.model.api.annotation.*;
+import java.util.List;
 
-import ca.uhn.fhir.model.dstu.valueset.AddressUseEnum;
-import ca.uhn.fhir.model.dstu.composite.CodingDt;
-import ca.uhn.fhir.model.dstu.valueset.ContactSystemEnum;
-import ca.uhn.fhir.model.dstu.valueset.ContactUseEnum;
-import ca.uhn.fhir.model.dstu.valueset.EventTimingEnum;
-import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
-import ca.uhn.fhir.model.dstu.valueset.NameUseEnum;
-import ca.uhn.fhir.model.dstu.resource.Organization;
-import ca.uhn.fhir.model.dstu.composite.PeriodDt;
+import ca.uhn.fhir.model.api.BaseElement;
+import ca.uhn.fhir.model.api.ICompositeDatatype;
+import ca.uhn.fhir.model.api.IElement;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.SimpleSetter;
 import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
-import ca.uhn.fhir.model.dstu.composite.QuantityDt;
-import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
-import ca.uhn.fhir.model.dstu.valueset.UnitsOfTimeEnum;
-import ca.uhn.fhir.model.dstu.resource.ValueSet;
-import ca.uhn.fhir.model.primitive.Base64BinaryDt;
-import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
-import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.DecimalDt;
-import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
 
@@ -62,6 +50,48 @@ import ca.uhn.fhir.model.primitive.UriDt;
 public class QuantityDt 
         extends  BaseElement         implements ICompositeDatatype  {
 
+	/**
+	 * Constructor
+	 */
+	public QuantityDt() {
+		// nothing
+	}
+
+	/**
+	 * Constructor
+	 */
+	@SimpleSetter
+	public QuantityDt(@SimpleSetter.Parameter(name="theValue") double theValue) {
+		setValue(theValue);
+	}
+
+	/**
+	 * Constructor
+	 */
+	@SimpleSetter
+	public QuantityDt(@SimpleSetter.Parameter(name="theValue") long theValue) {
+		setValue(theValue);
+	}
+
+	/**
+	 * Constructor
+	 */
+	@SimpleSetter
+	public QuantityDt(@SimpleSetter.Parameter(name="theComparator") QuantityCompararatorEnum theComparator, @SimpleSetter.Parameter(name="theValue") double theValue, @SimpleSetter.Parameter(name="theUnits") String theUnits) {
+		setValue(theValue);
+		setComparator(theComparator);
+		setUnits(theUnits);
+	}
+
+	/**
+	 * Constructor
+	 */
+	@SimpleSetter
+	public QuantityDt(@SimpleSetter.Parameter(name="theComparator") QuantityCompararatorEnum theComparator, @SimpleSetter.Parameter(name="theValue") long theValue, @SimpleSetter.Parameter(name="theUnits") String theUnits) {
+		setValue(theValue);
+		setComparator(theComparator);
+		setUnits(theUnits);
+	}
 
 	@Child(name="value", type=DecimalDt.class, order=0, min=0, max=1)	
 	@Description(
@@ -139,10 +169,10 @@ public class QuantityDt
      * The value of the measured amount. The value includes an implicit precision in the presentation of the value
      * </p> 
 	 */
-	public void setValue(DecimalDt theValue) {
+	public QuantityDt setValue(DecimalDt theValue) {
 		myValue = theValue;
+		return this;
 	}
-
 
  	/**
 	 * Sets the value for <b>value</b> (Numerical value (with implicit precision))
@@ -152,8 +182,9 @@ public class QuantityDt
      * The value of the measured amount. The value includes an implicit precision in the presentation of the value
      * </p> 
 	 */
-	public void setValue( long theValue) {
+	public QuantityDt setValue( long theValue) {
 		myValue = new DecimalDt(theValue); 
+		return this; 
 	}
 
 	/**
@@ -164,8 +195,9 @@ public class QuantityDt
      * The value of the measured amount. The value includes an implicit precision in the presentation of the value
      * </p> 
 	 */
-	public void setValue( double theValue) {
+	public QuantityDt setValue( double theValue) {
 		myValue = new DecimalDt(theValue); 
+		return this; 
 	}
 
 	/**
@@ -176,8 +208,9 @@ public class QuantityDt
      * The value of the measured amount. The value includes an implicit precision in the presentation of the value
      * </p> 
 	 */
-	public void setValue( java.math.BigDecimal theValue) {
+	public QuantityDt setValue( java.math.BigDecimal theValue) {
 		myValue = new DecimalDt(theValue); 
+		return this; 
 	}
 
  
@@ -206,10 +239,10 @@ public class QuantityDt
      * How the value should be understood and represented - whether the actual value is greater or less than the stated value due to measurement issues. E.g. if the comparator is \"<\" , then the real value is < stated value
      * </p> 
 	 */
-	public void setComparator(BoundCodeDt<QuantityCompararatorEnum> theValue) {
+	public QuantityDt setComparator(BoundCodeDt<QuantityCompararatorEnum> theValue) {
 		myComparator = theValue;
+		return this;
 	}
-
 
 	/**
 	 * Sets the value(s) for <b>comparator</b> (< | <= | >= | > - how to understand the value)
@@ -219,8 +252,9 @@ public class QuantityDt
      * How the value should be understood and represented - whether the actual value is greater or less than the stated value due to measurement issues. E.g. if the comparator is \"<\" , then the real value is < stated value
      * </p> 
 	 */
-	public void setComparator(QuantityCompararatorEnum theValue) {
+	public QuantityDt setComparator(QuantityCompararatorEnum theValue) {
 		getComparator().setValueAsEnum(theValue);
+		return this;
 	}
 
   
@@ -249,10 +283,10 @@ public class QuantityDt
      * A human-readable form of the units
      * </p> 
 	 */
-	public void setUnits(StringDt theValue) {
+	public QuantityDt setUnits(StringDt theValue) {
 		myUnits = theValue;
+		return this;
 	}
-
 
  	/**
 	 * Sets the value for <b>units</b> (Unit representation)
@@ -262,8 +296,9 @@ public class QuantityDt
      * A human-readable form of the units
      * </p> 
 	 */
-	public void setUnits( String theString) {
+	public QuantityDt setUnits( String theString) {
 		myUnits = new StringDt(theString); 
+		return this; 
 	}
 
  
@@ -292,10 +327,10 @@ public class QuantityDt
      * The identification of the system that provides the coded form of the unit
      * </p> 
 	 */
-	public void setSystem(UriDt theValue) {
+	public QuantityDt setSystem(UriDt theValue) {
 		mySystem = theValue;
+		return this;
 	}
-
 
  	/**
 	 * Sets the value for <b>system</b> (System that defines coded unit form)
@@ -305,8 +340,9 @@ public class QuantityDt
      * The identification of the system that provides the coded form of the unit
      * </p> 
 	 */
-	public void setSystem( String theUri) {
+	public QuantityDt setSystem( String theUri) {
 		mySystem = new UriDt(theUri); 
+		return this; 
 	}
 
  
@@ -335,10 +371,10 @@ public class QuantityDt
      * A computer processable form of the units in some unit representation system
      * </p> 
 	 */
-	public void setCode(CodeDt theValue) {
+	public QuantityDt setCode(CodeDt theValue) {
 		myCode = theValue;
+		return this;
 	}
-
 
  	/**
 	 * Sets the value for <b>code</b> (Coded form of the unit)
@@ -348,8 +384,9 @@ public class QuantityDt
      * A computer processable form of the units in some unit representation system
      * </p> 
 	 */
-	public void setCode( String theCode) {
+	public QuantityDt setCode( String theCode) {
 		myCode = new CodeDt(theCode); 
+		return this; 
 	}
 
  

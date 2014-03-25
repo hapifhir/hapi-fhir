@@ -6,7 +6,6 @@ import java.util.Date;
 import java.util.List;
 
 import ca.uhn.fhir.model.api.IQueryParameterAnd;
-import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 public class DateRangeParam implements IQueryParameterAnd {

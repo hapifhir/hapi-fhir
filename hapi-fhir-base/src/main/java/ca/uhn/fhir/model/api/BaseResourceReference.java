@@ -61,7 +61,12 @@ public abstract class BaseResourceReference extends BaseElement {
 		HttpClient httpClient = theClient.getHttpClient();
 		FhirContext context = theClient.getFhirContext();
 
-		HttpGet get = new HttpGet(getResourceUrl());
+		String resourceUrl = getResourceUrl();
+		if (!resourceUrl.startsWith("http")) {
+			resourceUrl = theClient.getServerBase() + resourceUrl;
+		}
+		
+		HttpGet get = new HttpGet(resourceUrl);
 		HttpResponse response = httpClient.execute(get);
 		try {
 			// TODO: choose appropriate parser based on response CT

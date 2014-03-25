@@ -1,6 +1,8 @@
 package ca.uhn.fhir.parser;
 
 import static org.junit.Assert.*;
+import static org.mockito.Matchers.*;
+import static org.mockito.Mockito.*;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -30,15 +32,68 @@ import ca.uhn.fhir.model.dstu.resource.ValueSet;
 import ca.uhn.fhir.model.dstu.valueset.AddressUseEnum;
 import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
 import ca.uhn.fhir.model.dstu.valueset.NarrativeStatusEnum;
+import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.DecimalDt;
+import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.model.primitive.XhtmlDt;
+import ca.uhn.fhir.narrative.INarrativeGenerator;
 
 public class XmlParserTest {
 
 	@Test
+	public void testExtensions() throws DataFormatException, IOException {
+		
+		MyPatient patient = new MyPatient();
+		patient.setPetName(new StringDt("Fido"));
+		patient.getImportantDates().add(new DateTimeDt("2010-01-02"));
+		patient.getImportantDates().add(new DateTimeDt("2014-01-26T11:11:11"));
+		
+		patient.addName().addFamily("Smith");
+		
+		IParser p = new FhirContext().newXmlParser();
+		String str = p.encodeResourceToString(patient);
+		
+		ourLog.info(str);
+	
+		assertThat(str, StringContains.containsString("<Patient xmlns=\"http://hl7.org/fhir\">"));
+		assertThat(str, StringContains.containsString("<extension url=\"http://example.com/dontuse#petname\"><valueString value=\"Fido\"/></extension>"));
+		assertThat(str, StringContains.containsString("<modifierExtension url=\"http://example.com/dontuse#importantDates\"><valueDateTime value=\"2010-01-02\"/></modifierExtension>"));
+		assertThat(str, StringContains.containsString("<modifierExtension url=\"http://example.com/dontuse#importantDates\"><valueDateTime value=\"2014-01-26T11:11:11\"/></modifierExtension>"));
+		assertThat(str, StringContains.containsString("<name><family value=\"Smith\"/></name>"));
+	}
+	
+
+	@Test
+	public void testNarrativeGeneration() throws DataFormatException, IOException {
+		
+		Patient patient = new Patient();
+		
+		patient.addName().addFamily("Smith");
+		
+		INarrativeGenerator gen = mock(INarrativeGenerator.class);
+		XhtmlDt xhtmlDt = new XhtmlDt("<div>help</div>");
+		NarrativeDt nar = new NarrativeDt(xhtmlDt, NarrativeStatusEnum.GENERATED);
+		when(gen.generateNarrative(eq("http://hl7.org/fhir/profiles/Patient"), eq(patient))).thenReturn(nar);
+		
+		FhirContext context = new FhirContext();
+		context.setNarrativeGenerator(gen);
+		IParser p = context.newXmlParser();
+		String str = p.encodeResourceToString(patient);
+		
+		ourLog.info(str);
+	
+		assertThat(str, StringContains.containsString("<Patient xmlns=\"http://hl7.org/fhir\">"));
+		assertThat(str, StringContains.containsString("<Patient xmlns=\"http://hl7.org/fhir\">"));
+	}
+
+	
+	
+	@Test
 	public void testParseBundleLarge() throws IOException {
 		
 		String msg = IOUtils.toString(XmlParser.class.getResourceAsStream("/atom-document-large.xml"));
-		IParser p = new FhirContext(Patient.class).newXmlParser();
+		FhirContext ctx = new FhirContext(Patient.class);
+		IParser p = ctx.newXmlParser();
 		Bundle bundle = p.parseBundle(msg);
 
 		assertEquals("http://spark.furore.com/fhir/_snapshot?id=327d6bb9-83b0-4929-aa91-6dd9c41e587b&start=0&_count=20", bundle.getLinkSelf().getValue());
@@ -93,11 +148,15 @@ public class XmlParserTest {
 		Observation obs = new Observation();
 		obs.setValue(new DecimalDt(112.22));
 		
-		IParser p = new FhirContext(Observation.class).newXmlParser();
-		
-		// Should have good error message
-		p.encodeResourceToString(obs);
+		IParser p = new FhirContext(Observation.class).newJsonParser();
+
+		try {
+			p.encodeResourceToString(obs);
+		} catch (DataFormatException e) {
+			assertThat(e.getMessage(), StringContains.containsString("PeriodDt"));
+		}
 	}
+
 
 	@Test
 	public void testEncodeContainedResources() throws IOException {

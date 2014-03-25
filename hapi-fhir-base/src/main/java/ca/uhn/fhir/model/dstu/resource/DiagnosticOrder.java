@@ -17,113 +17,28 @@
 package ca.uhn.fhir.model.dstu.resource;
 
 
-import java.util.*;
-import ca.uhn.fhir.model.api.*;
-import ca.uhn.fhir.model.api.annotation.*;
+import java.util.Date;
+import java.util.List;
 
-import ca.uhn.fhir.model.dstu.composite.AddressDt;
-import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
-import ca.uhn.fhir.model.dstu.valueset.AdmitSourceEnum;
-import ca.uhn.fhir.model.dstu.valueset.AggregationModeEnum;
-import ca.uhn.fhir.model.dstu.valueset.AnimalSpeciesEnum;
-import ca.uhn.fhir.model.dstu.composite.AttachmentDt;
-import ca.uhn.fhir.model.dstu.valueset.BindingConformanceEnum;
+import ca.uhn.fhir.model.api.BaseElement;
+import ca.uhn.fhir.model.api.BaseResource;
+import ca.uhn.fhir.model.api.IElement;
+import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.IResourceBlock;
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import ca.uhn.fhir.model.api.annotation.Block;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
-import ca.uhn.fhir.model.dstu.composite.CodingDt;
-import ca.uhn.fhir.model.dstu.valueset.ConformanceEventModeEnum;
-import ca.uhn.fhir.model.dstu.valueset.ConformanceStatementStatusEnum;
-import ca.uhn.fhir.model.dstu.valueset.ConstraintSeverityEnum;
-import ca.uhn.fhir.model.dstu.composite.ContactDt;
-import ca.uhn.fhir.model.dstu.valueset.DataTypeEnum;
-import ca.uhn.fhir.model.dstu.resource.Device;
-import ca.uhn.fhir.model.dstu.resource.DiagnosticOrder;
+import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
+import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.valueset.DiagnosticOrderPriorityEnum;
 import ca.uhn.fhir.model.dstu.valueset.DiagnosticOrderStatusEnum;
-import ca.uhn.fhir.model.dstu.valueset.DiagnosticReportStatusEnum;
-import ca.uhn.fhir.model.dstu.valueset.DocumentModeEnum;
-import ca.uhn.fhir.model.dstu.resource.Encounter;
-import ca.uhn.fhir.model.dstu.valueset.EncounterClassEnum;
-import ca.uhn.fhir.model.dstu.valueset.EncounterReasonCodesEnum;
-import ca.uhn.fhir.model.dstu.valueset.EncounterStateEnum;
-import ca.uhn.fhir.model.dstu.valueset.EncounterTypeEnum;
-import ca.uhn.fhir.model.dstu.valueset.ExtensionContextEnum;
-import ca.uhn.fhir.model.dstu.valueset.FHIRDefinedTypeEnum;
-import ca.uhn.fhir.model.dstu.valueset.FilterOperatorEnum;
-import ca.uhn.fhir.model.dstu.resource.Group;
-import ca.uhn.fhir.model.dstu.valueset.GroupTypeEnum;
-import ca.uhn.fhir.model.dstu.valueset.HierarchicalRelationshipTypeEnum;
-import ca.uhn.fhir.model.dstu.composite.HumanNameDt;
-import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
-import ca.uhn.fhir.model.dstu.valueset.ImagingModalityEnum;
-import ca.uhn.fhir.model.dstu.resource.ImagingStudy;
-import ca.uhn.fhir.model.dstu.valueset.InstanceAvailabilityEnum;
-import ca.uhn.fhir.model.dstu.valueset.LinkTypeEnum;
-import ca.uhn.fhir.model.dstu.resource.Location;
-import ca.uhn.fhir.model.dstu.valueset.LocationModeEnum;
-import ca.uhn.fhir.model.dstu.valueset.LocationStatusEnum;
-import ca.uhn.fhir.model.dstu.valueset.LocationTypeEnum;
-import ca.uhn.fhir.model.dstu.valueset.MaritalStatusCodesEnum;
-import ca.uhn.fhir.model.dstu.resource.Media;
-import ca.uhn.fhir.model.dstu.valueset.MediaTypeEnum;
-import ca.uhn.fhir.model.dstu.resource.Medication;
-import ca.uhn.fhir.model.dstu.valueset.MedicationKindEnum;
-import ca.uhn.fhir.model.dstu.valueset.MessageEventEnum;
-import ca.uhn.fhir.model.dstu.valueset.MessageSignificanceCategoryEnum;
-import ca.uhn.fhir.model.dstu.valueset.MessageTransportEnum;
-import ca.uhn.fhir.model.dstu.valueset.ModalityEnum;
-import ca.uhn.fhir.model.dstu.resource.Observation;
-import ca.uhn.fhir.model.dstu.valueset.ObservationInterpretationCodesEnum;
-import ca.uhn.fhir.model.dstu.valueset.ObservationRelationshipTypeEnum;
-import ca.uhn.fhir.model.dstu.valueset.ObservationReliabilityEnum;
-import ca.uhn.fhir.model.dstu.valueset.ObservationStatusEnum;
-import ca.uhn.fhir.model.dstu.resource.Organization;
-import ca.uhn.fhir.model.dstu.valueset.OrganizationTypeEnum;
-import ca.uhn.fhir.model.dstu.valueset.ParticipantTypeEnum;
-import ca.uhn.fhir.model.dstu.resource.Patient;
-import ca.uhn.fhir.model.dstu.valueset.PatientRelationshipTypeEnum;
-import ca.uhn.fhir.model.dstu.composite.PeriodDt;
-import ca.uhn.fhir.model.dstu.resource.Practitioner;
-import ca.uhn.fhir.model.dstu.valueset.PractitionerRoleEnum;
-import ca.uhn.fhir.model.dstu.valueset.PractitionerSpecialtyEnum;
-import ca.uhn.fhir.model.dstu.resource.Profile;
-import ca.uhn.fhir.model.dstu.valueset.PropertyRepresentationEnum;
-import ca.uhn.fhir.model.dstu.composite.QuantityDt;
-import ca.uhn.fhir.model.dstu.composite.RangeDt;
-import ca.uhn.fhir.model.dstu.composite.RatioDt;
-import ca.uhn.fhir.model.dstu.resource.RelatedPerson;
-import ca.uhn.fhir.model.dstu.valueset.ResourceProfileStatusEnum;
-import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
-import ca.uhn.fhir.model.dstu.valueset.ResourceTypeEnum;
-import ca.uhn.fhir.model.dstu.valueset.RestfulConformanceModeEnum;
-import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
-import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
-import ca.uhn.fhir.model.dstu.valueset.RestfulSecurityServiceEnum;
-import ca.uhn.fhir.model.dstu.composite.SampledDataDt;
-import ca.uhn.fhir.model.dstu.valueset.SearchParamTypeEnum;
-import ca.uhn.fhir.model.dstu.valueset.SlicingRulesEnum;
-import ca.uhn.fhir.model.dstu.resource.Specimen;
-import ca.uhn.fhir.model.dstu.valueset.SpecimenCollectionMethodEnum;
-import ca.uhn.fhir.model.dstu.valueset.SpecimenTreatmentProcedureEnum;
-import ca.uhn.fhir.model.dstu.resource.Substance;
-import ca.uhn.fhir.model.dstu.valueset.SubstanceTypeEnum;
-import ca.uhn.fhir.model.dstu.resource.ValueSet;
-import ca.uhn.fhir.model.dstu.valueset.ValueSetStatusEnum;
-import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.dstu.composite.DurationDt;
-import ca.uhn.fhir.model.primitive.Base64BinaryDt;
-import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
-import ca.uhn.fhir.model.primitive.BoundCodeableConceptDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
-import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
-import ca.uhn.fhir.model.primitive.DecimalDt;
-import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.model.primitive.InstantDt;
-import ca.uhn.fhir.model.primitive.IntegerDt;
-import ca.uhn.fhir.model.primitive.OidDt;
 import ca.uhn.fhir.model.primitive.StringDt;
-import ca.uhn.fhir.model.primitive.UriDt;
 
 
 /**
@@ -423,10 +338,10 @@ public class DiagnosticOrder extends BaseResource implements IResource {
      * Who or what the investigation is to be performed on. This is usually a human patient, but diagnostic tests can also be requested on animals, groups of humans or animals, devices such as dialysis machines, or even locations (typically for environmental scans)
      * </p> 
 	 */
-	public void setSubject(ResourceReferenceDt theValue) {
+	public DiagnosticOrder setSubject(ResourceReferenceDt theValue) {
 		mySubject = theValue;
+		return this;
 	}
-
 
   
 	/**
@@ -454,10 +369,10 @@ public class DiagnosticOrder extends BaseResource implements IResource {
      * The practitioner that holds legal responsibility for ordering the investigation
      * </p> 
 	 */
-	public void setOrderer(ResourceReferenceDt theValue) {
+	public DiagnosticOrder setOrderer(ResourceReferenceDt theValue) {
 		myOrderer = theValue;
+		return this;
 	}
-
 
   
 	/**
@@ -485,8 +400,9 @@ public class DiagnosticOrder extends BaseResource implements IResource {
      * Identifiers assigned to this order by the order or by the receiver
      * </p> 
 	 */
-	public void setIdentifier(java.util.List<IdentifierDt> theValue) {
+	public DiagnosticOrder setIdentifier(java.util.List<IdentifierDt> theValue) {
 		myIdentifier = theValue;
+		return this;
 	}
 
 	/**
@@ -503,6 +419,21 @@ public class DiagnosticOrder extends BaseResource implements IResource {
 		return newType; 
 	}
 
+	/**
+	 * Gets the first repetition for <b>identifier</b> (Identifiers assigned to this order),
+	 * creating it if it does not already exist.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Identifiers assigned to this order by the order or by the receiver
+     * </p> 
+	 */
+	public IdentifierDt getIdentifierFirstRep() {
+		if (getIdentifier().isEmpty()) {
+			return addIdentifier();
+		}
+		return getIdentifier().get(0); 
+	}
   
 	/**
 	 * Gets the value(s) for <b>encounter</b> (The encounter that this diagnostic order is associated with).
@@ -529,10 +460,10 @@ public class DiagnosticOrder extends BaseResource implements IResource {
      * An encounter that provides additional informaton about the healthcare context in which this request is made
      * </p> 
 	 */
-	public void setEncounter(ResourceReferenceDt theValue) {
+	public DiagnosticOrder setEncounter(ResourceReferenceDt theValue) {
 		myEncounter = theValue;
+		return this;
 	}
-
 
   
 	/**
@@ -560,10 +491,10 @@ public class DiagnosticOrder extends BaseResource implements IResource {
      * An explanation or justification for why this diagnostic investigation is being requested
      * </p> 
 	 */
-	public void setClinicalNotes(StringDt theValue) {
+	public DiagnosticOrder setClinicalNotes(StringDt theValue) {
 		myClinicalNotes = theValue;
+		return this;
 	}
-
 
  	/**
 	 * Sets the value for <b>clinicalNotes</b> (Explanation/Justification for test)
@@ -573,8 +504,9 @@ public class DiagnosticOrder extends BaseResource implements IResource {
      * An explanation or justification for why this diagnostic investigation is being requested
      * </p> 
 	 */
-	public void setClinicalNotes( String theString) {
+	public DiagnosticOrder setClinicalNotes( String theString) {
 		myClinicalNotes = new StringDt(theString); 
+		return this; 
 	}
 
  
@@ -603,11 +535,24 @@ public class DiagnosticOrder extends BaseResource implements IResource {
      * One or more specimens that the diagnostic investigation is about
      * </p> 
 	 */
-	public void setSpecimen(java.util.List<ResourceReferenceDt> theValue) {
+	public DiagnosticOrder setSpecimen(java.util.List<ResourceReferenceDt> theValue) {
 		mySpecimen = theValue;
+		return this;
 	}
 
-
+	/**
+	 * Adds and returns a new value for <b>specimen</b> (If the whole order relates to specific specimens)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * One or more specimens that the diagnostic investigation is about
+     * </p> 
+	 */
+	public ResourceReferenceDt addSpecimen() {
+		ResourceReferenceDt newType = new ResourceReferenceDt();
+		getSpecimen().add(newType);
+		return newType; 
+	}
   
 	/**
 	 * Gets the value(s) for <b>status</b> (requested | received | accepted | in progress | review | completed | suspended | rejected | failed).
@@ -634,10 +579,10 @@ public class DiagnosticOrder extends BaseResource implements IResource {
      * The status of the order
      * </p> 
 	 */
-	public void setStatus(BoundCodeDt<DiagnosticOrderStatusEnum> theValue) {
+	public DiagnosticOrder setStatus(BoundCodeDt<DiagnosticOrderStatusEnum> theValue) {
 		myStatus = theValue;
+		return this;
 	}
-
 
 	/**
 	 * Sets the value(s) for <b>status</b> (requested | received | accepted | in progress | review | completed | suspended | rejected | failed)
@@ -647,8 +592,9 @@ public class DiagnosticOrder extends BaseResource implements IResource {
      * The status of the order
      * </p> 
 	 */
-	public void setStatus(DiagnosticOrderStatusEnum theValue) {
+	public DiagnosticOrder setStatus(DiagnosticOrderStatusEnum theValue) {
 		getStatus().setValueAsEnum(theValue);
+		return this;
 	}
 
   
@@ -677,10 +623,10 @@ public class DiagnosticOrder extends BaseResource implements IResource {
      * The clinical priority associated with this order
      * </p> 
 	 */
-	public void setPriority(BoundCodeDt<DiagnosticOrderPriorityEnum> theValue) {
+	public DiagnosticOrder setPriority(BoundCodeDt<DiagnosticOrderPriorityEnum> theValue) {
 		myPriority = theValue;
+		return this;
 	}
-
 
 	/**
 	 * Sets the value(s) for <b>priority</b> (routine | urgent | stat | asap)
@@ -690,8 +636,9 @@ public class DiagnosticOrder extends BaseResource implements IResource {
      * The clinical priority associated with this order
      * </p> 
 	 */
-	public void setPriority(DiagnosticOrderPriorityEnum theValue) {
+	public DiagnosticOrder setPriority(DiagnosticOrderPriorityEnum theValue) {
 		getPriority().setValueAsEnum(theValue);
+		return this;
 	}
 
   
@@ -720,8 +667,9 @@ public class DiagnosticOrder extends BaseResource implements IResource {
      * A summary of the events of interest that have occurred as the request is processed. E.g. when the order was made, various processing steps (specimens received), when it was completed
      * </p> 
 	 */
-	public void setEvent(java.util.List<Event> theValue) {
+	public DiagnosticOrder setEvent(java.util.List<Event> theValue) {
 		myEvent = theValue;
+		return this;
 	}
 
 	/**
@@ -738,6 +686,21 @@ public class DiagnosticOrder extends BaseResource implements IResource {
 		return newType; 
 	}
 
+	/**
+	 * Gets the first repetition for <b>event</b> (A list of events of interest in the lifecycle),
+	 * creating it if it does not already exist.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A summary of the events of interest that have occurred as the request is processed. E.g. when the order was made, various processing steps (specimens received), when it was completed
+     * </p> 
+	 */
+	public Event getEventFirstRep() {
+		if (getEvent().isEmpty()) {
+			return addEvent();
+		}
+		return getEvent().get(0); 
+	}
   
 	/**
 	 * Gets the value(s) for <b>item</b> (The items the orderer requested).
@@ -764,8 +727,9 @@ public class DiagnosticOrder extends BaseResource implements IResource {
      * The specific diagnostic investigations that are requested as part of this request. Sometimes, there can only be one item per request, but in most contexts, more than one investigation can be requested
      * </p> 
 	 */
-	public void setItem(java.util.List<Item> theValue) {
+	public DiagnosticOrder setItem(java.util.List<Item> theValue) {
 		myItem = theValue;
+		return this;
 	}
 
 	/**
@@ -782,6 +746,21 @@ public class DiagnosticOrder extends BaseResource implements IResource {
 		return newType; 
 	}
 
+	/**
+	 * Gets the first repetition for <b>item</b> (The items the orderer requested),
+	 * creating it if it does not already exist.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The specific diagnostic investigations that are requested as part of this request. Sometimes, there can only be one item per request, but in most contexts, more than one investigation can be requested
+     * </p> 
+	 */
+	public Item getItemFirstRep() {
+		if (getItem().isEmpty()) {
+			return addItem();
+		}
+		return getItem().get(0); 
+	}
   
 	/**
 	 * Block class for child element: <b>DiagnosticOrder.event</b> (A list of events of interest in the lifecycle)
@@ -866,10 +845,10 @@ public class DiagnosticOrder extends BaseResource implements IResource {
      * The status for the event
      * </p> 
 	 */
-	public void setStatus(BoundCodeDt<DiagnosticOrderStatusEnum> theValue) {
+	public Event setStatus(BoundCodeDt<DiagnosticOrderStatusEnum> theValue) {
 		myStatus = theValue;
+		return this;
 	}
-
 
 	/**
 	 * Sets the value(s) for <b>status</b> (requested | received | accepted | in progress | review | completed | suspended | rejected | failed)
@@ -879,8 +858,9 @@ public class DiagnosticOrder extends BaseResource implements IResource {
      * The status for the event
      * </p> 
 	 */
-	public void setStatus(DiagnosticOrderStatusEnum theValue) {
+	public Event setStatus(DiagnosticOrderStatusEnum theValue) {
 		getStatus().setValueAsEnum(theValue);
+		return this;
 	}
 
   
@@ -909,10 +889,10 @@ public class DiagnosticOrder extends BaseResource implements IResource {
      * Additional information about the event that occurred - e.g. if the status remained unchanged
      * </p> 
 	 */
-	public void setDescription(CodeableConceptDt theValue) {
+	public Event setDescription(CodeableConceptDt theValue) {
 		myDescription = theValue;
+		return this;
 	}
-
 
   
 	/**
@@ -940,10 +920,10 @@ public class DiagnosticOrder extends BaseResource implements IResource {
      * The date/time at which the event occurred
      * </p> 
 	 */
-	public void setDateTime(DateTimeDt theValue) {
+	public Event setDateTime(DateTimeDt theValue) {
 		myDateTime = theValue;
+		return this;
 	}
-
 
  	/**
 	 * Sets the value for <b>dateTime</b> (The date at which the event happened)
@@ -953,8 +933,9 @@ public class DiagnosticOrder extends BaseResource implements IResource {
      * The date/time at which the event occurred
      * </p> 
 	 */
-	public void setDateTime( Date theDate,  TemporalPrecisionEnum thePrecision) {
+	public Event setDateTime( Date theDate,  TemporalPrecisionEnum thePrecision) {
 		myDateTime = new DateTimeDt(theDate, thePrecision); 
+		return this; 
 	}
 
 	/**
@@ -965,8 +946,9 @@ public class DiagnosticOrder extends BaseResource implements IResource {
      * The date/time at which the event occurred
      * </p> 
 	 */
-	public void setDateTimeWithSecondsPrecision( Date theDate) {
+	public Event setDateTimeWithSecondsPrecision( Date theDate) {
 		myDateTime = new DateTimeDt(theDate); 
+		return this; 
 	}
 
  
@@ -992,10 +974,10 @@ public class DiagnosticOrder extends BaseResource implements IResource {
      * The person who was responsible for performing or recording the action
      * </p> 
 	 */
-	public void setActor(ResourceReferenceDt theValue) {
+	public Event setActor(ResourceReferenceDt theValue) {
 		myActor = theValue;
+		return this;
 	}
-
 
   
 
@@ -1091,10 +1073,10 @@ public class DiagnosticOrder extends BaseResource implements IResource {
      * A code that identifies a particular diagnostic investigation, or panel of investigations, that have been requested
      * </p> 
 	 */
-	public void setCode(CodeableConceptDt theValue) {
+	public Item setCode(CodeableConceptDt theValue) {
 		myCode = theValue;
+		return this;
 	}
-
 
   
 	/**
@@ -1122,11 +1104,24 @@ public class DiagnosticOrder extends BaseResource implements IResource {
      * If the item is related to a specific speciment
      * </p> 
 	 */
-	public void setSpecimen(java.util.List<ResourceReferenceDt> theValue) {
+	public Item setSpecimen(java.util.List<ResourceReferenceDt> theValue) {
 		mySpecimen = theValue;
+		return this;
 	}
 
-
+	/**
+	 * Adds and returns a new value for <b>specimen</b> (If this item relates to specific specimens)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * If the item is related to a specific speciment
+     * </p> 
+	 */
+	public ResourceReferenceDt addSpecimen() {
+		ResourceReferenceDt newType = new ResourceReferenceDt();
+		getSpecimen().add(newType);
+		return newType; 
+	}
   
 	/**
 	 * Gets the value(s) for <b>bodySite</b> (Location of requested test (if applicable)).
@@ -1153,10 +1148,10 @@ public class DiagnosticOrder extends BaseResource implements IResource {
      * Anatomical location where the request test should be performed
      * </p> 
 	 */
-	public void setBodySite(CodeableConceptDt theValue) {
+	public Item setBodySite(CodeableConceptDt theValue) {
 		myBodySite = theValue;
+		return this;
 	}
-
 
   
 	/**
@@ -1184,10 +1179,10 @@ public class DiagnosticOrder extends BaseResource implements IResource {
      * The status of this individual item within the order
      * </p> 
 	 */
-	public void setStatus(BoundCodeDt<DiagnosticOrderStatusEnum> theValue) {
+	public Item setStatus(BoundCodeDt<DiagnosticOrderStatusEnum> theValue) {
 		myStatus = theValue;
+		return this;
 	}
-
 
 	/**
 	 * Sets the value(s) for <b>status</b> (requested | received | accepted | in progress | review | completed | suspended | rejected | failed)
@@ -1197,8 +1192,9 @@ public class DiagnosticOrder extends BaseResource implements IResource {
      * The status of this individual item within the order
      * </p> 
 	 */
-	public void setStatus(DiagnosticOrderStatusEnum theValue) {
+	public Item setStatus(DiagnosticOrderStatusEnum theValue) {
 		getStatus().setValueAsEnum(theValue);
+		return this;
 	}
 
   
@@ -1227,8 +1223,9 @@ public class DiagnosticOrder extends BaseResource implements IResource {
      * A summary of the events of interest that have occurred as this item of the request is processed
      * </p> 
 	 */
-	public void setEvent(java.util.List<Event> theValue) {
+	public Item setEvent(java.util.List<Event> theValue) {
 		myEvent = theValue;
+		return this;
 	}
 
 	/**
@@ -1245,6 +1242,21 @@ public class DiagnosticOrder extends BaseResource implements IResource {
 		return newType; 
 	}
 
+	/**
+	 * Gets the first repetition for <b>event</b> (Events specific to this item),
+	 * creating it if it does not already exist.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A summary of the events of interest that have occurred as this item of the request is processed
+     * </p> 
+	 */
+	public Event getEventFirstRep() {
+		if (getEvent().isEmpty()) {
+			return addEvent();
+		}
+		return getEvent().get(0); 
+	}
   
 
 	}

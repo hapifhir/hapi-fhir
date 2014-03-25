@@ -17,111 +17,28 @@
 package ca.uhn.fhir.model.dstu.resource;
 
 
-import java.util.*;
-import ca.uhn.fhir.model.api.*;
-import ca.uhn.fhir.model.api.annotation.*;
+import java.util.Date;
+import java.util.List;
 
-import ca.uhn.fhir.model.dstu.composite.AddressDt;
-import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
-import ca.uhn.fhir.model.dstu.valueset.AdmitSourceEnum;
-import ca.uhn.fhir.model.dstu.valueset.AggregationModeEnum;
-import ca.uhn.fhir.model.dstu.valueset.AnimalSpeciesEnum;
-import ca.uhn.fhir.model.dstu.composite.AttachmentDt;
-import ca.uhn.fhir.model.dstu.valueset.BindingConformanceEnum;
-import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
-import ca.uhn.fhir.model.dstu.composite.CodingDt;
-import ca.uhn.fhir.model.dstu.valueset.ConformanceEventModeEnum;
-import ca.uhn.fhir.model.dstu.valueset.ConformanceStatementStatusEnum;
-import ca.uhn.fhir.model.dstu.valueset.ConstraintSeverityEnum;
-import ca.uhn.fhir.model.dstu.composite.ContactDt;
-import ca.uhn.fhir.model.dstu.valueset.DataTypeEnum;
-import ca.uhn.fhir.model.dstu.resource.Device;
-import ca.uhn.fhir.model.dstu.resource.DiagnosticOrder;
-import ca.uhn.fhir.model.dstu.valueset.DiagnosticOrderPriorityEnum;
-import ca.uhn.fhir.model.dstu.valueset.DiagnosticOrderStatusEnum;
-import ca.uhn.fhir.model.dstu.valueset.DiagnosticReportStatusEnum;
-import ca.uhn.fhir.model.dstu.valueset.DocumentModeEnum;
-import ca.uhn.fhir.model.dstu.resource.Encounter;
-import ca.uhn.fhir.model.dstu.valueset.EncounterClassEnum;
-import ca.uhn.fhir.model.dstu.valueset.EncounterReasonCodesEnum;
-import ca.uhn.fhir.model.dstu.valueset.EncounterStateEnum;
-import ca.uhn.fhir.model.dstu.valueset.EncounterTypeEnum;
-import ca.uhn.fhir.model.dstu.valueset.ExtensionContextEnum;
-import ca.uhn.fhir.model.dstu.valueset.FHIRDefinedTypeEnum;
-import ca.uhn.fhir.model.dstu.valueset.FilterOperatorEnum;
-import ca.uhn.fhir.model.dstu.resource.Group;
-import ca.uhn.fhir.model.dstu.valueset.GroupTypeEnum;
-import ca.uhn.fhir.model.dstu.valueset.HierarchicalRelationshipTypeEnum;
-import ca.uhn.fhir.model.dstu.composite.HumanNameDt;
-import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
-import ca.uhn.fhir.model.dstu.valueset.ImagingModalityEnum;
-import ca.uhn.fhir.model.dstu.resource.ImagingStudy;
-import ca.uhn.fhir.model.dstu.valueset.InstanceAvailabilityEnum;
-import ca.uhn.fhir.model.dstu.valueset.LinkTypeEnum;
-import ca.uhn.fhir.model.dstu.resource.Location;
-import ca.uhn.fhir.model.dstu.valueset.LocationModeEnum;
-import ca.uhn.fhir.model.dstu.valueset.LocationStatusEnum;
-import ca.uhn.fhir.model.dstu.valueset.LocationTypeEnum;
-import ca.uhn.fhir.model.dstu.valueset.MaritalStatusCodesEnum;
-import ca.uhn.fhir.model.dstu.resource.Media;
-import ca.uhn.fhir.model.dstu.valueset.MediaTypeEnum;
-import ca.uhn.fhir.model.dstu.resource.Medication;
-import ca.uhn.fhir.model.dstu.valueset.MedicationKindEnum;
-import ca.uhn.fhir.model.dstu.valueset.MessageEventEnum;
-import ca.uhn.fhir.model.dstu.valueset.MessageSignificanceCategoryEnum;
-import ca.uhn.fhir.model.dstu.valueset.MessageTransportEnum;
-import ca.uhn.fhir.model.dstu.valueset.ModalityEnum;
-import ca.uhn.fhir.model.dstu.resource.Observation;
-import ca.uhn.fhir.model.dstu.valueset.ObservationInterpretationCodesEnum;
-import ca.uhn.fhir.model.dstu.valueset.ObservationRelationshipTypeEnum;
-import ca.uhn.fhir.model.dstu.valueset.ObservationReliabilityEnum;
-import ca.uhn.fhir.model.dstu.valueset.ObservationStatusEnum;
-import ca.uhn.fhir.model.dstu.resource.Organization;
-import ca.uhn.fhir.model.dstu.valueset.OrganizationTypeEnum;
-import ca.uhn.fhir.model.dstu.valueset.ParticipantTypeEnum;
-import ca.uhn.fhir.model.dstu.resource.Patient;
-import ca.uhn.fhir.model.dstu.valueset.PatientRelationshipTypeEnum;
-import ca.uhn.fhir.model.dstu.composite.PeriodDt;
-import ca.uhn.fhir.model.dstu.resource.Practitioner;
-import ca.uhn.fhir.model.dstu.valueset.PractitionerRoleEnum;
-import ca.uhn.fhir.model.dstu.valueset.PractitionerSpecialtyEnum;
-import ca.uhn.fhir.model.dstu.resource.Profile;
-import ca.uhn.fhir.model.dstu.valueset.PropertyRepresentationEnum;
-import ca.uhn.fhir.model.dstu.composite.QuantityDt;
-import ca.uhn.fhir.model.dstu.composite.RangeDt;
-import ca.uhn.fhir.model.dstu.composite.RatioDt;
-import ca.uhn.fhir.model.dstu.resource.RelatedPerson;
-import ca.uhn.fhir.model.dstu.valueset.ResourceProfileStatusEnum;
-import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
-import ca.uhn.fhir.model.dstu.valueset.ResourceTypeEnum;
-import ca.uhn.fhir.model.dstu.valueset.RestfulConformanceModeEnum;
-import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
-import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
-import ca.uhn.fhir.model.dstu.valueset.RestfulSecurityServiceEnum;
-import ca.uhn.fhir.model.dstu.composite.SampledDataDt;
-import ca.uhn.fhir.model.dstu.valueset.SearchParamTypeEnum;
-import ca.uhn.fhir.model.dstu.valueset.SlicingRulesEnum;
-import ca.uhn.fhir.model.dstu.resource.Specimen;
-import ca.uhn.fhir.model.dstu.valueset.SpecimenCollectionMethodEnum;
-import ca.uhn.fhir.model.dstu.valueset.SpecimenTreatmentProcedureEnum;
-import ca.uhn.fhir.model.dstu.resource.Substance;
-import ca.uhn.fhir.model.dstu.valueset.SubstanceTypeEnum;
-import ca.uhn.fhir.model.dstu.resource.ValueSet;
-import ca.uhn.fhir.model.dstu.valueset.ValueSetStatusEnum;
+import ca.uhn.fhir.model.api.BaseElement;
+import ca.uhn.fhir.model.api.BaseResource;
+import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.dstu.composite.DurationDt;
-import ca.uhn.fhir.model.primitive.Base64BinaryDt;
+import ca.uhn.fhir.model.api.IResourceBlock;
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import ca.uhn.fhir.model.api.annotation.Block;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.dstu.composite.ContactDt;
+import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
+import ca.uhn.fhir.model.dstu.valueset.FilterOperatorEnum;
+import ca.uhn.fhir.model.dstu.valueset.ValueSetStatusEnum;
 import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
-import ca.uhn.fhir.model.primitive.BoundCodeableConceptDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
-import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
-import ca.uhn.fhir.model.primitive.DecimalDt;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
-import ca.uhn.fhir.model.primitive.IntegerDt;
-import ca.uhn.fhir.model.primitive.OidDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
 
@@ -393,10 +310,10 @@ public class ValueSet extends BaseResource implements IResource {
      * The identifier that is used to identify this value set when it is referenced in a specification, model, design or an instance (should be globally unique OID, UUID, or URI)
      * </p> 
 	 */
-	public void setIdentifier(StringDt theValue) {
+	public ValueSet setIdentifier(StringDt theValue) {
 		myIdentifier = theValue;
+		return this;
 	}
-
 
  	/**
 	 * Sets the value for <b>identifier</b> (Logical id to reference this value set)
@@ -406,8 +323,9 @@ public class ValueSet extends BaseResource implements IResource {
      * The identifier that is used to identify this value set when it is referenced in a specification, model, design or an instance (should be globally unique OID, UUID, or URI)
      * </p> 
 	 */
-	public void setIdentifier( String theString) {
+	public ValueSet setIdentifier( String theString) {
 		myIdentifier = new StringDt(theString); 
+		return this; 
 	}
 
  
@@ -436,10 +354,10 @@ public class ValueSet extends BaseResource implements IResource {
      * The identifier that is used to identify this version of the value set when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the profile author manually and the value should be a timestamp
      * </p> 
 	 */
-	public void setVersion(StringDt theValue) {
+	public ValueSet setVersion(StringDt theValue) {
 		myVersion = theValue;
+		return this;
 	}
-
 
  	/**
 	 * Sets the value for <b>version</b> (Logical id for this version of the value set)
@@ -449,8 +367,9 @@ public class ValueSet extends BaseResource implements IResource {
      * The identifier that is used to identify this version of the value set when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the profile author manually and the value should be a timestamp
      * </p> 
 	 */
-	public void setVersion( String theString) {
+	public ValueSet setVersion( String theString) {
 		myVersion = new StringDt(theString); 
+		return this; 
 	}
 
  
@@ -479,10 +398,10 @@ public class ValueSet extends BaseResource implements IResource {
      * A free text natural language name describing the value set
      * </p> 
 	 */
-	public void setName(StringDt theValue) {
+	public ValueSet setName(StringDt theValue) {
 		myName = theValue;
+		return this;
 	}
-
 
  	/**
 	 * Sets the value for <b>name</b> (Informal name for this value set)
@@ -492,8 +411,9 @@ public class ValueSet extends BaseResource implements IResource {
      * A free text natural language name describing the value set
      * </p> 
 	 */
-	public void setName( String theString) {
+	public ValueSet setName( String theString) {
 		myName = new StringDt(theString); 
+		return this; 
 	}
 
  
@@ -522,10 +442,10 @@ public class ValueSet extends BaseResource implements IResource {
      * The name of the individual or organization that published the value set
      * </p> 
 	 */
-	public void setPublisher(StringDt theValue) {
+	public ValueSet setPublisher(StringDt theValue) {
 		myPublisher = theValue;
+		return this;
 	}
-
 
  	/**
 	 * Sets the value for <b>publisher</b> (Name of the publisher (Organization or individual))
@@ -535,8 +455,9 @@ public class ValueSet extends BaseResource implements IResource {
      * The name of the individual or organization that published the value set
      * </p> 
 	 */
-	public void setPublisher( String theString) {
+	public ValueSet setPublisher( String theString) {
 		myPublisher = new StringDt(theString); 
+		return this; 
 	}
 
  
@@ -565,8 +486,9 @@ public class ValueSet extends BaseResource implements IResource {
      * Contacts of the publisher to assist a user in finding and communicating with the publisher
      * </p> 
 	 */
-	public void setTelecom(java.util.List<ContactDt> theValue) {
+	public ValueSet setTelecom(java.util.List<ContactDt> theValue) {
 		myTelecom = theValue;
+		return this;
 	}
 
 	/**
@@ -583,6 +505,21 @@ public class ValueSet extends BaseResource implements IResource {
 		return newType; 
 	}
 
+	/**
+	 * Gets the first repetition for <b>telecom</b> (Contact information of the publisher),
+	 * creating it if it does not already exist.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Contacts of the publisher to assist a user in finding and communicating with the publisher
+     * </p> 
+	 */
+	public ContactDt getTelecomFirstRep() {
+		if (getTelecom().isEmpty()) {
+			return addTelecom();
+		}
+		return getTelecom().get(0); 
+	}
   
 	/**
 	 * Gets the value(s) for <b>description</b> (Human language description of the value set).
@@ -609,10 +546,10 @@ public class ValueSet extends BaseResource implements IResource {
      * A free text natural language description of the use of the value set - reason for definition, conditions of use, etc.
      * </p> 
 	 */
-	public void setDescription(StringDt theValue) {
+	public ValueSet setDescription(StringDt theValue) {
 		myDescription = theValue;
+		return this;
 	}
-
 
  	/**
 	 * Sets the value for <b>description</b> (Human language description of the value set)
@@ -622,8 +559,9 @@ public class ValueSet extends BaseResource implements IResource {
      * A free text natural language description of the use of the value set - reason for definition, conditions of use, etc.
      * </p> 
 	 */
-	public void setDescription( String theString) {
+	public ValueSet setDescription( String theString) {
 		myDescription = new StringDt(theString); 
+		return this; 
 	}
 
  
@@ -652,10 +590,10 @@ public class ValueSet extends BaseResource implements IResource {
      * A copyright statement relating to the value set and/or its contents
      * </p> 
 	 */
-	public void setCopyright(StringDt theValue) {
+	public ValueSet setCopyright(StringDt theValue) {
 		myCopyright = theValue;
+		return this;
 	}
-
 
  	/**
 	 * Sets the value for <b>copyright</b> (About the value set or its content)
@@ -665,8 +603,9 @@ public class ValueSet extends BaseResource implements IResource {
      * A copyright statement relating to the value set and/or its contents
      * </p> 
 	 */
-	public void setCopyright( String theString) {
+	public ValueSet setCopyright( String theString) {
 		myCopyright = new StringDt(theString); 
+		return this; 
 	}
 
  
@@ -695,10 +634,10 @@ public class ValueSet extends BaseResource implements IResource {
      * The status of the value set
      * </p> 
 	 */
-	public void setStatus(BoundCodeDt<ValueSetStatusEnum> theValue) {
+	public ValueSet setStatus(BoundCodeDt<ValueSetStatusEnum> theValue) {
 		myStatus = theValue;
+		return this;
 	}
-
 
 	/**
 	 * Sets the value(s) for <b>status</b> (draft | active | retired)
@@ -708,8 +647,9 @@ public class ValueSet extends BaseResource implements IResource {
      * The status of the value set
      * </p> 
 	 */
-	public void setStatus(ValueSetStatusEnum theValue) {
+	public ValueSet setStatus(ValueSetStatusEnum theValue) {
 		getStatus().setValueAsEnum(theValue);
+		return this;
 	}
 
   
@@ -738,10 +678,10 @@ public class ValueSet extends BaseResource implements IResource {
      * This valueset was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage
      * </p> 
 	 */
-	public void setExperimental(BooleanDt theValue) {
+	public ValueSet setExperimental(BooleanDt theValue) {
 		myExperimental = theValue;
+		return this;
 	}
-
 
  	/**
 	 * Sets the value for <b>experimental</b> (If for testing purposes, not real usage)
@@ -751,8 +691,9 @@ public class ValueSet extends BaseResource implements IResource {
      * This valueset was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage
      * </p> 
 	 */
-	public void setExperimental( Boolean theBoolean) {
+	public ValueSet setExperimental( Boolean theBoolean) {
 		myExperimental = new BooleanDt(theBoolean); 
+		return this; 
 	}
 
  
@@ -781,10 +722,10 @@ public class ValueSet extends BaseResource implements IResource {
      * Whether this is intended to be used with an extensible binding or not
      * </p> 
 	 */
-	public void setExtensible(BooleanDt theValue) {
+	public ValueSet setExtensible(BooleanDt theValue) {
 		myExtensible = theValue;
+		return this;
 	}
-
 
  	/**
 	 * Sets the value for <b>extensible</b> (Whether this is intended to be used with an extensible binding)
@@ -794,8 +735,9 @@ public class ValueSet extends BaseResource implements IResource {
      * Whether this is intended to be used with an extensible binding or not
      * </p> 
 	 */
-	public void setExtensible( Boolean theBoolean) {
+	public ValueSet setExtensible( Boolean theBoolean) {
 		myExtensible = new BooleanDt(theBoolean); 
+		return this; 
 	}
 
  
@@ -824,10 +766,10 @@ public class ValueSet extends BaseResource implements IResource {
      * The date that the value set status was last changed
      * </p> 
 	 */
-	public void setDate(DateTimeDt theValue) {
+	public ValueSet setDate(DateTimeDt theValue) {
 		myDate = theValue;
+		return this;
 	}
-
 
  	/**
 	 * Sets the value for <b>date</b> (Date for given status)
@@ -837,8 +779,9 @@ public class ValueSet extends BaseResource implements IResource {
      * The date that the value set status was last changed
      * </p> 
 	 */
-	public void setDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
+	public ValueSet setDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
 		myDate = new DateTimeDt(theDate, thePrecision); 
+		return this; 
 	}
 
 	/**
@@ -849,8 +792,9 @@ public class ValueSet extends BaseResource implements IResource {
      * The date that the value set status was last changed
      * </p> 
 	 */
-	public void setDateWithSecondsPrecision( Date theDate) {
+	public ValueSet setDateWithSecondsPrecision( Date theDate) {
 		myDate = new DateTimeDt(theDate); 
+		return this; 
 	}
 
  
@@ -879,10 +823,10 @@ public class ValueSet extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public void setDefine(Define theValue) {
+	public ValueSet setDefine(Define theValue) {
 		myDefine = theValue;
+		return this;
 	}
-
 
   
 	/**
@@ -910,10 +854,10 @@ public class ValueSet extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public void setCompose(Compose theValue) {
+	public ValueSet setCompose(Compose theValue) {
 		myCompose = theValue;
+		return this;
 	}
-
 
   
 	/**
@@ -941,10 +885,10 @@ public class ValueSet extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public void setExpansion(Expansion theValue) {
+	public ValueSet setExpansion(Expansion theValue) {
 		myExpansion = theValue;
+		return this;
 	}
-
 
   
 	/**
@@ -1027,10 +971,10 @@ public class ValueSet extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public void setSystem(UriDt theValue) {
+	public Define setSystem(UriDt theValue) {
 		mySystem = theValue;
+		return this;
 	}
-
 
  	/**
 	 * Sets the value for <b>system</b> (URI to identify the code system)
@@ -1040,8 +984,9 @@ public class ValueSet extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public void setSystem( String theUri) {
+	public Define setSystem( String theUri) {
 		mySystem = new UriDt(theUri); 
+		return this; 
 	}
 
  
@@ -1070,10 +1015,10 @@ public class ValueSet extends BaseResource implements IResource {
      * The version of this code system that defines the codes. Note that the version is optional because a well maintained code system does not suffer from versioning, and therefore the version does not need to be maintained. However many code systems are not well maintained, and the version needs to be defined and tracked
      * </p> 
 	 */
-	public void setVersion(StringDt theValue) {
+	public Define setVersion(StringDt theValue) {
 		myVersion = theValue;
+		return this;
 	}
-
 
  	/**
 	 * Sets the value for <b>version</b> (Version of this system)
@@ -1083,8 +1028,9 @@ public class ValueSet extends BaseResource implements IResource {
      * The version of this code system that defines the codes. Note that the version is optional because a well maintained code system does not suffer from versioning, and therefore the version does not need to be maintained. However many code systems are not well maintained, and the version needs to be defined and tracked
      * </p> 
 	 */
-	public void setVersion( String theString) {
+	public Define setVersion( String theString) {
 		myVersion = new StringDt(theString); 
+		return this; 
 	}
 
  
@@ -1113,10 +1059,10 @@ public class ValueSet extends BaseResource implements IResource {
      * If code comparison is case sensitive when codes within this system are compared to each other
      * </p> 
 	 */
-	public void setCaseSensitive(BooleanDt theValue) {
+	public Define setCaseSensitive(BooleanDt theValue) {
 		myCaseSensitive = theValue;
+		return this;
 	}
-
 
  	/**
 	 * Sets the value for <b>caseSensitive</b> (If code comparison is case sensitive)
@@ -1126,8 +1072,9 @@ public class ValueSet extends BaseResource implements IResource {
      * If code comparison is case sensitive when codes within this system are compared to each other
      * </p> 
 	 */
-	public void setCaseSensitive( Boolean theBoolean) {
+	public Define setCaseSensitive( Boolean theBoolean) {
 		myCaseSensitive = new BooleanDt(theBoolean); 
+		return this; 
 	}
 
  
@@ -1156,8 +1103,9 @@ public class ValueSet extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public void setConcept(java.util.List<DefineConcept> theValue) {
+	public Define setConcept(java.util.List<DefineConcept> theValue) {
 		myConcept = theValue;
+		return this;
 	}
 
 	/**
@@ -1174,6 +1122,21 @@ public class ValueSet extends BaseResource implements IResource {
 		return newType; 
 	}
 
+	/**
+	 * Gets the first repetition for <b>concept</b> (Concepts in the code system),
+	 * creating it if it does not already exist.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * 
+     * </p> 
+	 */
+	public DefineConcept getConceptFirstRep() {
+		if (getConcept().isEmpty()) {
+			return addConcept();
+		}
+		return getConcept().get(0); 
+	}
   
 
 	}
@@ -1265,10 +1228,10 @@ public class ValueSet extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public void setCode(CodeDt theValue) {
+	public DefineConcept setCode(CodeDt theValue) {
 		myCode = theValue;
+		return this;
 	}
-
 
  	/**
 	 * Sets the value for <b>code</b> (Code that identifies concept)
@@ -1278,8 +1241,9 @@ public class ValueSet extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public void setCode( String theCode) {
+	public DefineConcept setCode( String theCode) {
 		myCode = new CodeDt(theCode); 
+		return this; 
 	}
 
  
@@ -1308,10 +1272,10 @@ public class ValueSet extends BaseResource implements IResource {
      * If this code is not for use as a real concept
      * </p> 
 	 */
-	public void setAbstract(BooleanDt theValue) {
+	public DefineConcept setAbstract(BooleanDt theValue) {
 		myAbstract = theValue;
+		return this;
 	}
-
 
  	/**
 	 * Sets the value for <b>abstract</b> (If this code is not for use as a real concept)
@@ -1321,8 +1285,9 @@ public class ValueSet extends BaseResource implements IResource {
      * If this code is not for use as a real concept
      * </p> 
 	 */
-	public void setAbstract( Boolean theBoolean) {
+	public DefineConcept setAbstract( Boolean theBoolean) {
 		myAbstract = new BooleanDt(theBoolean); 
+		return this; 
 	}
 
  
@@ -1351,10 +1316,10 @@ public class ValueSet extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public void setDisplay(StringDt theValue) {
+	public DefineConcept setDisplay(StringDt theValue) {
 		myDisplay = theValue;
+		return this;
 	}
-
 
  	/**
 	 * Sets the value for <b>display</b> (Text to Display to the user)
@@ -1364,8 +1329,9 @@ public class ValueSet extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public void setDisplay( String theString) {
+	public DefineConcept setDisplay( String theString) {
 		myDisplay = new StringDt(theString); 
+		return this; 
 	}
 
  
@@ -1394,10 +1360,10 @@ public class ValueSet extends BaseResource implements IResource {
      * The formal definition of the concept. Formal definitions are not required, because of the prevalence of legacy systems without them, but they are highly recommended, as without them there is no formal meaning associated with the concept
      * </p> 
 	 */
-	public void setDefinition(StringDt theValue) {
+	public DefineConcept setDefinition(StringDt theValue) {
 		myDefinition = theValue;
+		return this;
 	}
-
 
  	/**
 	 * Sets the value for <b>definition</b> (Formal Definition)
@@ -1407,8 +1373,9 @@ public class ValueSet extends BaseResource implements IResource {
      * The formal definition of the concept. Formal definitions are not required, because of the prevalence of legacy systems without them, but they are highly recommended, as without them there is no formal meaning associated with the concept
      * </p> 
 	 */
-	public void setDefinition( String theString) {
+	public DefineConcept setDefinition( String theString) {
 		myDefinition = new StringDt(theString); 
+		return this; 
 	}
 
  
@@ -1437,8 +1404,9 @@ public class ValueSet extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public void setConcept(java.util.List<DefineConcept> theValue) {
+	public DefineConcept setConcept(java.util.List<DefineConcept> theValue) {
 		myConcept = theValue;
+		return this;
 	}
 
 	/**
@@ -1455,6 +1423,21 @@ public class ValueSet extends BaseResource implements IResource {
 		return newType; 
 	}
 
+	/**
+	 * Gets the first repetition for <b>concept</b> (Child Concepts (is-a / contains)),
+	 * creating it if it does not already exist.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * 
+     * </p> 
+	 */
+	public DefineConcept getConceptFirstRep() {
+		if (getConcept().isEmpty()) {
+			return addConcept();
+		}
+		return getConcept().get(0); 
+	}
   
 
 	}
@@ -1534,8 +1517,9 @@ public class ValueSet extends BaseResource implements IResource {
      * Includes the contents of the referenced value set as a part of the contents of this value set
      * </p> 
 	 */
-	public void setImport(java.util.List<UriDt> theValue) {
+	public Compose setImport(java.util.List<UriDt> theValue) {
 		myImport = theValue;
+		return this;
 	}
 
 	/**
@@ -1552,6 +1536,21 @@ public class ValueSet extends BaseResource implements IResource {
 		return newType; 
 	}
 
+	/**
+	 * Gets the first repetition for <b>import</b> (Import the contents of another value set),
+	 * creating it if it does not already exist.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Includes the contents of the referenced value set as a part of the contents of this value set
+     * </p> 
+	 */
+	public UriDt getImportFirstRep() {
+		if (getImport().isEmpty()) {
+			return addImport();
+		}
+		return getImport().get(0); 
+	}
  	/**
 	 * Adds a new value for <b>import</b> (Import the contents of another value set)
 	 *
@@ -1559,12 +1558,15 @@ public class ValueSet extends BaseResource implements IResource {
      * <b>Definition:</b>
      * Includes the contents of the referenced value set as a part of the contents of this value set
      * </p> 
+     *
+     * @return Returns a reference to this object, to allow for simple chaining.
 	 */
-	public void addImport( String theUri) {
+	public Compose addImport( String theUri) {
 		if (myImport == null) {
 			myImport = new java.util.ArrayList<UriDt>();
 		}
-		myImport.add(new UriDt(theUri)); 
+		myImport.add(new UriDt(theUri));
+		return this; 
 	}
 
  
@@ -1593,8 +1595,9 @@ public class ValueSet extends BaseResource implements IResource {
      * Include one or more codes from a code system
      * </p> 
 	 */
-	public void setInclude(java.util.List<ComposeInclude> theValue) {
+	public Compose setInclude(java.util.List<ComposeInclude> theValue) {
 		myInclude = theValue;
+		return this;
 	}
 
 	/**
@@ -1611,6 +1614,21 @@ public class ValueSet extends BaseResource implements IResource {
 		return newType; 
 	}
 
+	/**
+	 * Gets the first repetition for <b>include</b> (Include one or more codes from a code system),
+	 * creating it if it does not already exist.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Include one or more codes from a code system
+     * </p> 
+	 */
+	public ComposeInclude getIncludeFirstRep() {
+		if (getInclude().isEmpty()) {
+			return addInclude();
+		}
+		return getInclude().get(0); 
+	}
   
 	/**
 	 * Gets the value(s) for <b>exclude</b> (Explicitly exclude codes).
@@ -1637,8 +1655,9 @@ public class ValueSet extends BaseResource implements IResource {
      * Exclude one or more codes from the value set
      * </p> 
 	 */
-	public void setExclude(java.util.List<ComposeInclude> theValue) {
+	public Compose setExclude(java.util.List<ComposeInclude> theValue) {
 		myExclude = theValue;
+		return this;
 	}
 
 	/**
@@ -1655,6 +1674,21 @@ public class ValueSet extends BaseResource implements IResource {
 		return newType; 
 	}
 
+	/**
+	 * Gets the first repetition for <b>exclude</b> (Explicitly exclude codes),
+	 * creating it if it does not already exist.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Exclude one or more codes from the value set
+     * </p> 
+	 */
+	public ComposeInclude getExcludeFirstRep() {
+		if (getExclude().isEmpty()) {
+			return addExclude();
+		}
+		return getExclude().get(0); 
+	}
   
 
 	}
@@ -1739,10 +1773,10 @@ public class ValueSet extends BaseResource implements IResource {
      * The code system from which the selected codes come from
      * </p> 
 	 */
-	public void setSystem(UriDt theValue) {
+	public ComposeInclude setSystem(UriDt theValue) {
 		mySystem = theValue;
+		return this;
 	}
-
 
  	/**
 	 * Sets the value for <b>system</b> (The system the codes come from)
@@ -1752,8 +1786,9 @@ public class ValueSet extends BaseResource implements IResource {
      * The code system from which the selected codes come from
      * </p> 
 	 */
-	public void setSystem( String theUri) {
+	public ComposeInclude setSystem( String theUri) {
 		mySystem = new UriDt(theUri); 
+		return this; 
 	}
 
  
@@ -1782,10 +1817,10 @@ public class ValueSet extends BaseResource implements IResource {
      * The version of the code system that the codes are selected from
      * </p> 
 	 */
-	public void setVersion(StringDt theValue) {
+	public ComposeInclude setVersion(StringDt theValue) {
 		myVersion = theValue;
+		return this;
 	}
-
 
  	/**
 	 * Sets the value for <b>version</b> (Specific version of the code system referred to)
@@ -1795,8 +1830,9 @@ public class ValueSet extends BaseResource implements IResource {
      * The version of the code system that the codes are selected from
      * </p> 
 	 */
-	public void setVersion( String theString) {
+	public ComposeInclude setVersion( String theString) {
 		myVersion = new StringDt(theString); 
+		return this; 
 	}
 
  
@@ -1825,8 +1861,9 @@ public class ValueSet extends BaseResource implements IResource {
      * Specifies a code or concept to be included or excluded. The list of codes is considered ordered, though the order may not have any particular significance
      * </p> 
 	 */
-	public void setCode(java.util.List<CodeDt> theValue) {
+	public ComposeInclude setCode(java.util.List<CodeDt> theValue) {
 		myCode = theValue;
+		return this;
 	}
 
 	/**
@@ -1843,6 +1880,21 @@ public class ValueSet extends BaseResource implements IResource {
 		return newType; 
 	}
 
+	/**
+	 * Gets the first repetition for <b>code</b> (Code or concept from system),
+	 * creating it if it does not already exist.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Specifies a code or concept to be included or excluded. The list of codes is considered ordered, though the order may not have any particular significance
+     * </p> 
+	 */
+	public CodeDt getCodeFirstRep() {
+		if (getCode().isEmpty()) {
+			return addCode();
+		}
+		return getCode().get(0); 
+	}
  	/**
 	 * Adds a new value for <b>code</b> (Code or concept from system)
 	 *
@@ -1850,12 +1902,15 @@ public class ValueSet extends BaseResource implements IResource {
      * <b>Definition:</b>
      * Specifies a code or concept to be included or excluded. The list of codes is considered ordered, though the order may not have any particular significance
      * </p> 
+     *
+     * @return Returns a reference to this object, to allow for simple chaining.
 	 */
-	public void addCode( String theCode) {
+	public ComposeInclude addCode( String theCode) {
 		if (myCode == null) {
 			myCode = new java.util.ArrayList<CodeDt>();
 		}
-		myCode.add(new CodeDt(theCode)); 
+		myCode.add(new CodeDt(theCode));
+		return this; 
 	}
 
  
@@ -1884,8 +1939,9 @@ public class ValueSet extends BaseResource implements IResource {
      * Select concepts by specify a matching criteria based on the properties (including relationships) defined by the system. If multiple filters are specified, they SHALL all be true.
      * </p> 
 	 */
-	public void setFilter(java.util.List<ComposeIncludeFilter> theValue) {
+	public ComposeInclude setFilter(java.util.List<ComposeIncludeFilter> theValue) {
 		myFilter = theValue;
+		return this;
 	}
 
 	/**
@@ -1902,6 +1958,21 @@ public class ValueSet extends BaseResource implements IResource {
 		return newType; 
 	}
 
+	/**
+	 * Gets the first repetition for <b>filter</b> (Select codes/concepts by their properties (including relationships)),
+	 * creating it if it does not already exist.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Select concepts by specify a matching criteria based on the properties (including relationships) defined by the system. If multiple filters are specified, they SHALL all be true.
+     * </p> 
+	 */
+	public ComposeIncludeFilter getFilterFirstRep() {
+		if (getFilter().isEmpty()) {
+			return addFilter();
+		}
+		return getFilter().get(0); 
+	}
   
 
 	}
@@ -1979,10 +2050,10 @@ public class ValueSet extends BaseResource implements IResource {
      * A code that identifies a property defined in the code system
      * </p> 
 	 */
-	public void setProperty(CodeDt theValue) {
+	public ComposeIncludeFilter setProperty(CodeDt theValue) {
 		myProperty = theValue;
+		return this;
 	}
-
 
  	/**
 	 * Sets the value for <b>property</b> ()
@@ -1992,8 +2063,9 @@ public class ValueSet extends BaseResource implements IResource {
      * A code that identifies a property defined in the code system
      * </p> 
 	 */
-	public void setProperty( String theCode) {
+	public ComposeIncludeFilter setProperty( String theCode) {
 		myProperty = new CodeDt(theCode); 
+		return this; 
 	}
 
  
@@ -2022,10 +2094,10 @@ public class ValueSet extends BaseResource implements IResource {
      * The kind of operation to perform as a part of the filter criteria
      * </p> 
 	 */
-	public void setOp(BoundCodeDt<FilterOperatorEnum> theValue) {
+	public ComposeIncludeFilter setOp(BoundCodeDt<FilterOperatorEnum> theValue) {
 		myOp = theValue;
+		return this;
 	}
-
 
 	/**
 	 * Sets the value(s) for <b>op</b> (= | is-a | is-not-a | regex | in | not in)
@@ -2035,8 +2107,9 @@ public class ValueSet extends BaseResource implements IResource {
      * The kind of operation to perform as a part of the filter criteria
      * </p> 
 	 */
-	public void setOp(FilterOperatorEnum theValue) {
+	public ComposeIncludeFilter setOp(FilterOperatorEnum theValue) {
 		getOp().setValueAsEnum(theValue);
+		return this;
 	}
 
   
@@ -2065,10 +2138,10 @@ public class ValueSet extends BaseResource implements IResource {
      * The match value may be either a code defined by the system, or a string value which is used a regex match on the literal string of the property value
      * </p> 
 	 */
-	public void setValue(CodeDt theValue) {
+	public ComposeIncludeFilter setValue(CodeDt theValue) {
 		myValue = theValue;
+		return this;
 	}
-
 
  	/**
 	 * Sets the value for <b>value</b> (Code from the system, or regex criteria)
@@ -2078,8 +2151,9 @@ public class ValueSet extends BaseResource implements IResource {
      * The match value may be either a code defined by the system, or a string value which is used a regex match on the literal string of the property value
      * </p> 
 	 */
-	public void setValue( String theCode) {
+	public ComposeIncludeFilter setValue( String theCode) {
 		myValue = new CodeDt(theCode); 
+		return this; 
 	}
 
  
@@ -2162,10 +2236,10 @@ public class ValueSet extends BaseResource implements IResource {
      * An identifier that uniquely identifies this expansion of the valueset. Systems may re-use the same identifier as long as the expansion and the definition remain the same, but are not required to do so
      * </p> 
 	 */
-	public void setIdentifier(IdentifierDt theValue) {
+	public Expansion setIdentifier(IdentifierDt theValue) {
 		myIdentifier = theValue;
+		return this;
 	}
-
 
   
 	/**
@@ -2193,10 +2267,10 @@ public class ValueSet extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public void setTimestamp(InstantDt theValue) {
+	public Expansion setTimestamp(InstantDt theValue) {
 		myTimestamp = theValue;
+		return this;
 	}
-
 
  	/**
 	 * Sets the value for <b>timestamp</b> (Time valueset expansion happened)
@@ -2206,8 +2280,9 @@ public class ValueSet extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public void setTimestamp( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myTimestamp = new InstantDt(theDate, thePrecision); 
+	public Expansion setTimestampWithMillisPrecision( Date theDate) {
+		myTimestamp = new InstantDt(theDate); 
+		return this; 
 	}
 
 	/**
@@ -2218,8 +2293,9 @@ public class ValueSet extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public void setTimestampWithMillisPrecision( Date theDate) {
-		myTimestamp = new InstantDt(theDate); 
+	public Expansion setTimestamp( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myTimestamp = new InstantDt(theDate, thePrecision); 
+		return this; 
 	}
 
  
@@ -2248,8 +2324,9 @@ public class ValueSet extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public void setContains(java.util.List<ExpansionContains> theValue) {
+	public Expansion setContains(java.util.List<ExpansionContains> theValue) {
 		myContains = theValue;
+		return this;
 	}
 
 	/**
@@ -2266,6 +2343,21 @@ public class ValueSet extends BaseResource implements IResource {
 		return newType; 
 	}
 
+	/**
+	 * Gets the first repetition for <b>contains</b> (Codes in the value set),
+	 * creating it if it does not already exist.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * 
+     * </p> 
+	 */
+	public ExpansionContains getContainsFirstRep() {
+		if (getContains().isEmpty()) {
+			return addContains();
+		}
+		return getContains().get(0); 
+	}
   
 
 	}
@@ -2350,10 +2442,10 @@ public class ValueSet extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public void setSystem(UriDt theValue) {
+	public ExpansionContains setSystem(UriDt theValue) {
 		mySystem = theValue;
+		return this;
 	}
-
 
  	/**
 	 * Sets the value for <b>system</b> (System value for the code)
@@ -2363,8 +2455,9 @@ public class ValueSet extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public void setSystem( String theUri) {
+	public ExpansionContains setSystem( String theUri) {
 		mySystem = new UriDt(theUri); 
+		return this; 
 	}
 
  
@@ -2393,10 +2486,10 @@ public class ValueSet extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public void setCode(CodeDt theValue) {
+	public ExpansionContains setCode(CodeDt theValue) {
 		myCode = theValue;
+		return this;
 	}
-
 
  	/**
 	 * Sets the value for <b>code</b> (Code - if blank, this is not a choosable code)
@@ -2406,8 +2499,9 @@ public class ValueSet extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public void setCode( String theCode) {
+	public ExpansionContains setCode( String theCode) {
 		myCode = new CodeDt(theCode); 
+		return this; 
 	}
 
  
@@ -2436,10 +2530,10 @@ public class ValueSet extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public void setDisplay(StringDt theValue) {
+	public ExpansionContains setDisplay(StringDt theValue) {
 		myDisplay = theValue;
+		return this;
 	}
-
 
  	/**
 	 * Sets the value for <b>display</b> (User display for the concept)
@@ -2449,8 +2543,9 @@ public class ValueSet extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public void setDisplay( String theString) {
+	public ExpansionContains setDisplay( String theString) {
 		myDisplay = new StringDt(theString); 
+		return this; 
 	}
 
  
@@ -2479,8 +2574,9 @@ public class ValueSet extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public void setContains(java.util.List<ExpansionContains> theValue) {
+	public ExpansionContains setContains(java.util.List<ExpansionContains> theValue) {
 		myContains = theValue;
+		return this;
 	}
 
 	/**
@@ -2497,6 +2593,21 @@ public class ValueSet extends BaseResource implements IResource {
 		return newType; 
 	}
 
+	/**
+	 * Gets the first repetition for <b>contains</b> (Codes contained in this concept),
+	 * creating it if it does not already exist.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * 
+     * </p> 
+	 */
+	public ExpansionContains getContainsFirstRep() {
+		if (getContains().isEmpty()) {
+			return addContains();
+		}
+		return getContains().get(0); 
+	}
   
 
 	}

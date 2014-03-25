@@ -17,113 +17,33 @@
 package ca.uhn.fhir.model.dstu.resource;
 
 
-import java.util.*;
-import ca.uhn.fhir.model.api.*;
-import ca.uhn.fhir.model.api.annotation.*;
+import java.util.Date;
+import java.util.List;
 
-import ca.uhn.fhir.model.dstu.composite.AddressDt;
-import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
-import ca.uhn.fhir.model.dstu.valueset.AdmitSourceEnum;
-import ca.uhn.fhir.model.dstu.valueset.AggregationModeEnum;
-import ca.uhn.fhir.model.dstu.valueset.AnimalSpeciesEnum;
-import ca.uhn.fhir.model.dstu.composite.AttachmentDt;
-import ca.uhn.fhir.model.dstu.valueset.BindingConformanceEnum;
+import ca.uhn.fhir.model.api.BaseElement;
+import ca.uhn.fhir.model.api.BaseResource;
+import ca.uhn.fhir.model.api.IDatatype;
+import ca.uhn.fhir.model.api.IElement;
+import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.IResourceBlock;
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import ca.uhn.fhir.model.api.annotation.Block;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
-import ca.uhn.fhir.model.dstu.composite.CodingDt;
-import ca.uhn.fhir.model.dstu.valueset.ConformanceEventModeEnum;
-import ca.uhn.fhir.model.dstu.valueset.ConformanceStatementStatusEnum;
-import ca.uhn.fhir.model.dstu.valueset.ConstraintSeverityEnum;
-import ca.uhn.fhir.model.dstu.composite.ContactDt;
-import ca.uhn.fhir.model.dstu.valueset.DataTypeEnum;
-import ca.uhn.fhir.model.dstu.resource.Device;
-import ca.uhn.fhir.model.dstu.resource.DiagnosticOrder;
-import ca.uhn.fhir.model.dstu.valueset.DiagnosticOrderPriorityEnum;
-import ca.uhn.fhir.model.dstu.valueset.DiagnosticOrderStatusEnum;
-import ca.uhn.fhir.model.dstu.valueset.DiagnosticReportStatusEnum;
-import ca.uhn.fhir.model.dstu.valueset.DocumentModeEnum;
-import ca.uhn.fhir.model.dstu.resource.Encounter;
-import ca.uhn.fhir.model.dstu.valueset.EncounterClassEnum;
-import ca.uhn.fhir.model.dstu.valueset.EncounterReasonCodesEnum;
-import ca.uhn.fhir.model.dstu.valueset.EncounterStateEnum;
-import ca.uhn.fhir.model.dstu.valueset.EncounterTypeEnum;
-import ca.uhn.fhir.model.dstu.valueset.ExtensionContextEnum;
-import ca.uhn.fhir.model.dstu.valueset.FHIRDefinedTypeEnum;
-import ca.uhn.fhir.model.dstu.valueset.FilterOperatorEnum;
-import ca.uhn.fhir.model.dstu.resource.Group;
-import ca.uhn.fhir.model.dstu.valueset.GroupTypeEnum;
-import ca.uhn.fhir.model.dstu.valueset.HierarchicalRelationshipTypeEnum;
-import ca.uhn.fhir.model.dstu.composite.HumanNameDt;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
-import ca.uhn.fhir.model.dstu.valueset.ImagingModalityEnum;
-import ca.uhn.fhir.model.dstu.resource.ImagingStudy;
-import ca.uhn.fhir.model.dstu.valueset.InstanceAvailabilityEnum;
-import ca.uhn.fhir.model.dstu.valueset.LinkTypeEnum;
-import ca.uhn.fhir.model.dstu.resource.Location;
-import ca.uhn.fhir.model.dstu.valueset.LocationModeEnum;
-import ca.uhn.fhir.model.dstu.valueset.LocationStatusEnum;
-import ca.uhn.fhir.model.dstu.valueset.LocationTypeEnum;
-import ca.uhn.fhir.model.dstu.valueset.MaritalStatusCodesEnum;
-import ca.uhn.fhir.model.dstu.resource.Media;
-import ca.uhn.fhir.model.dstu.valueset.MediaTypeEnum;
-import ca.uhn.fhir.model.dstu.resource.Medication;
-import ca.uhn.fhir.model.dstu.valueset.MedicationKindEnum;
-import ca.uhn.fhir.model.dstu.valueset.MessageEventEnum;
-import ca.uhn.fhir.model.dstu.valueset.MessageSignificanceCategoryEnum;
-import ca.uhn.fhir.model.dstu.valueset.MessageTransportEnum;
-import ca.uhn.fhir.model.dstu.valueset.ModalityEnum;
-import ca.uhn.fhir.model.dstu.resource.Observation;
-import ca.uhn.fhir.model.dstu.valueset.ObservationInterpretationCodesEnum;
-import ca.uhn.fhir.model.dstu.valueset.ObservationRelationshipTypeEnum;
-import ca.uhn.fhir.model.dstu.valueset.ObservationReliabilityEnum;
-import ca.uhn.fhir.model.dstu.valueset.ObservationStatusEnum;
-import ca.uhn.fhir.model.dstu.resource.Organization;
-import ca.uhn.fhir.model.dstu.valueset.OrganizationTypeEnum;
-import ca.uhn.fhir.model.dstu.valueset.ParticipantTypeEnum;
-import ca.uhn.fhir.model.dstu.resource.Patient;
-import ca.uhn.fhir.model.dstu.valueset.PatientRelationshipTypeEnum;
 import ca.uhn.fhir.model.dstu.composite.PeriodDt;
-import ca.uhn.fhir.model.dstu.resource.Practitioner;
-import ca.uhn.fhir.model.dstu.valueset.PractitionerRoleEnum;
-import ca.uhn.fhir.model.dstu.valueset.PractitionerSpecialtyEnum;
-import ca.uhn.fhir.model.dstu.resource.Profile;
-import ca.uhn.fhir.model.dstu.valueset.PropertyRepresentationEnum;
 import ca.uhn.fhir.model.dstu.composite.QuantityDt;
-import ca.uhn.fhir.model.dstu.composite.RangeDt;
-import ca.uhn.fhir.model.dstu.composite.RatioDt;
-import ca.uhn.fhir.model.dstu.resource.RelatedPerson;
-import ca.uhn.fhir.model.dstu.valueset.ResourceProfileStatusEnum;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
-import ca.uhn.fhir.model.dstu.valueset.ResourceTypeEnum;
-import ca.uhn.fhir.model.dstu.valueset.RestfulConformanceModeEnum;
-import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
-import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
-import ca.uhn.fhir.model.dstu.valueset.RestfulSecurityServiceEnum;
-import ca.uhn.fhir.model.dstu.composite.SampledDataDt;
-import ca.uhn.fhir.model.dstu.valueset.SearchParamTypeEnum;
-import ca.uhn.fhir.model.dstu.valueset.SlicingRulesEnum;
-import ca.uhn.fhir.model.dstu.resource.Specimen;
+import ca.uhn.fhir.model.dstu.valueset.HierarchicalRelationshipTypeEnum;
 import ca.uhn.fhir.model.dstu.valueset.SpecimenCollectionMethodEnum;
 import ca.uhn.fhir.model.dstu.valueset.SpecimenTreatmentProcedureEnum;
-import ca.uhn.fhir.model.dstu.resource.Substance;
-import ca.uhn.fhir.model.dstu.valueset.SubstanceTypeEnum;
-import ca.uhn.fhir.model.dstu.resource.ValueSet;
-import ca.uhn.fhir.model.dstu.valueset.ValueSetStatusEnum;
-import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.dstu.composite.DurationDt;
-import ca.uhn.fhir.model.primitive.Base64BinaryDt;
-import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.BoundCodeableConceptDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
-import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
-import ca.uhn.fhir.model.primitive.DecimalDt;
-import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.model.primitive.InstantDt;
-import ca.uhn.fhir.model.primitive.IntegerDt;
-import ca.uhn.fhir.model.primitive.OidDt;
 import ca.uhn.fhir.model.primitive.StringDt;
-import ca.uhn.fhir.model.primitive.UriDt;
 
 
 /**
@@ -263,8 +183,9 @@ public class Specimen extends BaseResource implements IResource {
      * Id for specimen
      * </p> 
 	 */
-	public void setIdentifier(java.util.List<IdentifierDt> theValue) {
+	public Specimen setIdentifier(java.util.List<IdentifierDt> theValue) {
 		myIdentifier = theValue;
+		return this;
 	}
 
 	/**
@@ -281,6 +202,21 @@ public class Specimen extends BaseResource implements IResource {
 		return newType; 
 	}
 
+	/**
+	 * Gets the first repetition for <b>identifier</b> (External Identifier),
+	 * creating it if it does not already exist.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Id for specimen
+     * </p> 
+	 */
+	public IdentifierDt getIdentifierFirstRep() {
+		if (getIdentifier().isEmpty()) {
+			return addIdentifier();
+		}
+		return getIdentifier().get(0); 
+	}
   
 	/**
 	 * Gets the value(s) for <b>type</b> (Kind of material that forms the specimen).
@@ -307,10 +243,10 @@ public class Specimen extends BaseResource implements IResource {
      * Kind of material that forms the specimen
      * </p> 
 	 */
-	public void setType(CodeableConceptDt theValue) {
+	public Specimen setType(CodeableConceptDt theValue) {
 		myType = theValue;
+		return this;
 	}
-
 
   
 	/**
@@ -338,8 +274,9 @@ public class Specimen extends BaseResource implements IResource {
      * Parent specimen from which the focal specimen was a component
      * </p> 
 	 */
-	public void setSource(java.util.List<Source> theValue) {
+	public Specimen setSource(java.util.List<Source> theValue) {
 		mySource = theValue;
+		return this;
 	}
 
 	/**
@@ -356,6 +293,21 @@ public class Specimen extends BaseResource implements IResource {
 		return newType; 
 	}
 
+	/**
+	 * Gets the first repetition for <b>source</b> (Parent of specimen),
+	 * creating it if it does not already exist.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Parent specimen from which the focal specimen was a component
+     * </p> 
+	 */
+	public Source getSourceFirstRep() {
+		if (getSource().isEmpty()) {
+			return addSource();
+		}
+		return getSource().get(0); 
+	}
   
 	/**
 	 * Gets the value(s) for <b>subject</b> (Where the specimen came from. This may be the patient(s) or from the environment or  a device).
@@ -379,10 +331,10 @@ public class Specimen extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public void setSubject(ResourceReferenceDt theValue) {
+	public Specimen setSubject(ResourceReferenceDt theValue) {
 		mySubject = theValue;
+		return this;
 	}
-
 
   
 	/**
@@ -410,10 +362,10 @@ public class Specimen extends BaseResource implements IResource {
      * The identifier assigned by the lab when accessioning specimen(s). This is not necessarily the same as the specimen identifier, depending on local lab procedures.
      * </p> 
 	 */
-	public void setAccessionIdentifier(IdentifierDt theValue) {
+	public Specimen setAccessionIdentifier(IdentifierDt theValue) {
 		myAccessionIdentifier = theValue;
+		return this;
 	}
-
 
   
 	/**
@@ -441,10 +393,10 @@ public class Specimen extends BaseResource implements IResource {
      * Time when specimen was received for processing or testing
      * </p> 
 	 */
-	public void setReceivedTime(DateTimeDt theValue) {
+	public Specimen setReceivedTime(DateTimeDt theValue) {
 		myReceivedTime = theValue;
+		return this;
 	}
-
 
  	/**
 	 * Sets the value for <b>receivedTime</b> (The time when specimen was received for processing)
@@ -454,8 +406,9 @@ public class Specimen extends BaseResource implements IResource {
      * Time when specimen was received for processing or testing
      * </p> 
 	 */
-	public void setReceivedTime( Date theDate,  TemporalPrecisionEnum thePrecision) {
+	public Specimen setReceivedTime( Date theDate,  TemporalPrecisionEnum thePrecision) {
 		myReceivedTime = new DateTimeDt(theDate, thePrecision); 
+		return this; 
 	}
 
 	/**
@@ -466,8 +419,9 @@ public class Specimen extends BaseResource implements IResource {
      * Time when specimen was received for processing or testing
      * </p> 
 	 */
-	public void setReceivedTimeWithSecondsPrecision( Date theDate) {
+	public Specimen setReceivedTimeWithSecondsPrecision( Date theDate) {
 		myReceivedTime = new DateTimeDt(theDate); 
+		return this; 
 	}
 
  
@@ -496,10 +450,10 @@ public class Specimen extends BaseResource implements IResource {
      * Details concerning the specimen collection
      * </p> 
 	 */
-	public void setCollection(Collection theValue) {
+	public Specimen setCollection(Collection theValue) {
 		myCollection = theValue;
+		return this;
 	}
-
 
   
 	/**
@@ -527,8 +481,9 @@ public class Specimen extends BaseResource implements IResource {
      * Details concerning treatment and processing steps for the specimen
      * </p> 
 	 */
-	public void setTreatment(java.util.List<Treatment> theValue) {
+	public Specimen setTreatment(java.util.List<Treatment> theValue) {
 		myTreatment = theValue;
+		return this;
 	}
 
 	/**
@@ -545,6 +500,21 @@ public class Specimen extends BaseResource implements IResource {
 		return newType; 
 	}
 
+	/**
+	 * Gets the first repetition for <b>treatment</b> (Treatment and processing step details),
+	 * creating it if it does not already exist.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Details concerning treatment and processing steps for the specimen
+     * </p> 
+	 */
+	public Treatment getTreatmentFirstRep() {
+		if (getTreatment().isEmpty()) {
+			return addTreatment();
+		}
+		return getTreatment().get(0); 
+	}
   
 	/**
 	 * Gets the value(s) for <b>container</b> (Direct container of specimen (tube/slide, etc)).
@@ -571,8 +541,9 @@ public class Specimen extends BaseResource implements IResource {
      * The container holding the specimen.  The recursive nature of containers; i.e. blood in tube in tray in rack is not addressed here.
      * </p> 
 	 */
-	public void setContainer(java.util.List<Container> theValue) {
+	public Specimen setContainer(java.util.List<Container> theValue) {
 		myContainer = theValue;
+		return this;
 	}
 
 	/**
@@ -589,6 +560,21 @@ public class Specimen extends BaseResource implements IResource {
 		return newType; 
 	}
 
+	/**
+	 * Gets the first repetition for <b>container</b> (Direct container of specimen (tube/slide, etc)),
+	 * creating it if it does not already exist.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The container holding the specimen.  The recursive nature of containers; i.e. blood in tube in tray in rack is not addressed here.
+     * </p> 
+	 */
+	public Container getContainerFirstRep() {
+		if (getContainer().isEmpty()) {
+			return addContainer();
+		}
+		return getContainer().get(0); 
+	}
   
 	/**
 	 * Block class for child element: <b>Specimen.source</b> (Parent of specimen)
@@ -658,10 +644,10 @@ public class Specimen extends BaseResource implements IResource {
      * Whether this relationship is to a parent or to a child
      * </p> 
 	 */
-	public void setRelationship(BoundCodeDt<HierarchicalRelationshipTypeEnum> theValue) {
+	public Source setRelationship(BoundCodeDt<HierarchicalRelationshipTypeEnum> theValue) {
 		myRelationship = theValue;
+		return this;
 	}
-
 
 	/**
 	 * Sets the value(s) for <b>relationship</b> (parent | child)
@@ -671,8 +657,9 @@ public class Specimen extends BaseResource implements IResource {
      * Whether this relationship is to a parent or to a child
      * </p> 
 	 */
-	public void setRelationship(HierarchicalRelationshipTypeEnum theValue) {
+	public Source setRelationship(HierarchicalRelationshipTypeEnum theValue) {
 		getRelationship().setValueAsEnum(theValue);
+		return this;
 	}
 
   
@@ -701,11 +688,24 @@ public class Specimen extends BaseResource implements IResource {
      * The specimen resource that is the target of this relationship
      * </p> 
 	 */
-	public void setTarget(java.util.List<ResourceReferenceDt> theValue) {
+	public Source setTarget(java.util.List<ResourceReferenceDt> theValue) {
 		myTarget = theValue;
+		return this;
 	}
 
-
+	/**
+	 * Adds and returns a new value for <b>target</b> (The subject of the relationship)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The specimen resource that is the target of this relationship
+     * </p> 
+	 */
+	public ResourceReferenceDt addTarget() {
+		ResourceReferenceDt newType = new ResourceReferenceDt();
+		getTarget().add(newType);
+		return newType; 
+	}
   
 
 	}
@@ -810,10 +810,10 @@ public class Specimen extends BaseResource implements IResource {
      * Person who collected the specimen
      * </p> 
 	 */
-	public void setCollector(ResourceReferenceDt theValue) {
+	public Collection setCollector(ResourceReferenceDt theValue) {
 		myCollector = theValue;
+		return this;
 	}
-
 
   
 	/**
@@ -841,8 +841,9 @@ public class Specimen extends BaseResource implements IResource {
      * To communicate any details or issues encountered during the specimen collection procedure.
      * </p> 
 	 */
-	public void setComment(java.util.List<StringDt> theValue) {
+	public Collection setComment(java.util.List<StringDt> theValue) {
 		myComment = theValue;
+		return this;
 	}
 
 	/**
@@ -859,6 +860,21 @@ public class Specimen extends BaseResource implements IResource {
 		return newType; 
 	}
 
+	/**
+	 * Gets the first repetition for <b>comment</b> (Collector comments),
+	 * creating it if it does not already exist.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * To communicate any details or issues encountered during the specimen collection procedure.
+     * </p> 
+	 */
+	public StringDt getCommentFirstRep() {
+		if (getComment().isEmpty()) {
+			return addComment();
+		}
+		return getComment().get(0); 
+	}
  	/**
 	 * Adds a new value for <b>comment</b> (Collector comments)
 	 *
@@ -866,12 +882,15 @@ public class Specimen extends BaseResource implements IResource {
      * <b>Definition:</b>
      * To communicate any details or issues encountered during the specimen collection procedure.
      * </p> 
+     *
+     * @return Returns a reference to this object, to allow for simple chaining.
 	 */
-	public void addComment( String theString) {
+	public Collection addComment( String theString) {
 		if (myComment == null) {
 			myComment = new java.util.ArrayList<StringDt>();
 		}
-		myComment.add(new StringDt(theString)); 
+		myComment.add(new StringDt(theString));
+		return this; 
 	}
 
  
@@ -897,10 +916,10 @@ public class Specimen extends BaseResource implements IResource {
      * Time when specimen was collected from subject - the physiologically relevant time
      * </p> 
 	 */
-	public void setCollected(IDatatype theValue) {
+	public Collection setCollected(IDatatype theValue) {
 		myCollected = theValue;
+		return this;
 	}
-
 
   
 	/**
@@ -928,10 +947,10 @@ public class Specimen extends BaseResource implements IResource {
      * The quantity of specimen collected; for instance the volume of a blood sample, or the physical measurement of an anatomic pathology sample
      * </p> 
 	 */
-	public void setQuantity(QuantityDt theValue) {
+	public Collection setQuantity(QuantityDt theValue) {
 		myQuantity = theValue;
+		return this;
 	}
-
 
   
 	/**
@@ -959,10 +978,10 @@ public class Specimen extends BaseResource implements IResource {
      * A coded value specifying the technique that is used to perform the procedure
      * </p> 
 	 */
-	public void setMethod(BoundCodeableConceptDt<SpecimenCollectionMethodEnum> theValue) {
+	public Collection setMethod(BoundCodeableConceptDt<SpecimenCollectionMethodEnum> theValue) {
 		myMethod = theValue;
+		return this;
 	}
-
 
 	/**
 	 * Sets the value(s) for <b>method</b> (Technique used to perform collection)
@@ -972,8 +991,9 @@ public class Specimen extends BaseResource implements IResource {
      * A coded value specifying the technique that is used to perform the procedure
      * </p> 
 	 */
-	public void setMethod(SpecimenCollectionMethodEnum theValue) {
+	public Collection setMethod(SpecimenCollectionMethodEnum theValue) {
 		getMethod().setValueAsEnum(theValue);
+		return this;
 	}
 
   
@@ -1002,10 +1022,10 @@ public class Specimen extends BaseResource implements IResource {
      * Anatomical location from which the specimen should be collected (if subject is a patient). This element is not used for environmental specimens.
      * </p> 
 	 */
-	public void setSourceSite(CodeableConceptDt theValue) {
+	public Collection setSourceSite(CodeableConceptDt theValue) {
 		mySourceSite = theValue;
+		return this;
 	}
-
 
   
 
@@ -1087,10 +1107,10 @@ public class Specimen extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public void setDescription(StringDt theValue) {
+	public Treatment setDescription(StringDt theValue) {
 		myDescription = theValue;
+		return this;
 	}
-
 
  	/**
 	 * Sets the value for <b>description</b> (Textual description of procedure)
@@ -1100,8 +1120,9 @@ public class Specimen extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public void setDescription( String theString) {
+	public Treatment setDescription( String theString) {
 		myDescription = new StringDt(theString); 
+		return this; 
 	}
 
  
@@ -1130,10 +1151,10 @@ public class Specimen extends BaseResource implements IResource {
      * A coded value specifying the procedure used to process the specimen
      * </p> 
 	 */
-	public void setProcedure(BoundCodeableConceptDt<SpecimenTreatmentProcedureEnum> theValue) {
+	public Treatment setProcedure(BoundCodeableConceptDt<SpecimenTreatmentProcedureEnum> theValue) {
 		myProcedure = theValue;
+		return this;
 	}
-
 
 	/**
 	 * Sets the value(s) for <b>procedure</b> (Indicates the treatment or processing step  applied to the specimen)
@@ -1143,8 +1164,9 @@ public class Specimen extends BaseResource implements IResource {
      * A coded value specifying the procedure used to process the specimen
      * </p> 
 	 */
-	public void setProcedure(SpecimenTreatmentProcedureEnum theValue) {
+	public Treatment setProcedure(SpecimenTreatmentProcedureEnum theValue) {
 		getProcedure().setValueAsEnum(theValue);
+		return this;
 	}
 
   
@@ -1173,11 +1195,24 @@ public class Specimen extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public void setAdditive(java.util.List<ResourceReferenceDt> theValue) {
+	public Treatment setAdditive(java.util.List<ResourceReferenceDt> theValue) {
 		myAdditive = theValue;
+		return this;
 	}
 
-
+	/**
+	 * Adds and returns a new value for <b>additive</b> (Material used in the processing step)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * 
+     * </p> 
+	 */
+	public ResourceReferenceDt addAdditive() {
+		ResourceReferenceDt newType = new ResourceReferenceDt();
+		getAdditive().add(newType);
+		return newType; 
+	}
   
 
 	}
@@ -1279,8 +1314,9 @@ public class Specimen extends BaseResource implements IResource {
      * Id for container. There may be multiple; a manufacturer's bar code, lab assigned identifier, etc. The container ID may differ from the specimen id in some circumstances
      * </p> 
 	 */
-	public void setIdentifier(java.util.List<IdentifierDt> theValue) {
+	public Container setIdentifier(java.util.List<IdentifierDt> theValue) {
 		myIdentifier = theValue;
+		return this;
 	}
 
 	/**
@@ -1297,6 +1333,21 @@ public class Specimen extends BaseResource implements IResource {
 		return newType; 
 	}
 
+	/**
+	 * Gets the first repetition for <b>identifier</b> (Id for the container),
+	 * creating it if it does not already exist.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Id for container. There may be multiple; a manufacturer's bar code, lab assigned identifier, etc. The container ID may differ from the specimen id in some circumstances
+     * </p> 
+	 */
+	public IdentifierDt getIdentifierFirstRep() {
+		if (getIdentifier().isEmpty()) {
+			return addIdentifier();
+		}
+		return getIdentifier().get(0); 
+	}
   
 	/**
 	 * Gets the value(s) for <b>description</b> (Textual description of the container).
@@ -1323,10 +1374,10 @@ public class Specimen extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public void setDescription(StringDt theValue) {
+	public Container setDescription(StringDt theValue) {
 		myDescription = theValue;
+		return this;
 	}
-
 
  	/**
 	 * Sets the value for <b>description</b> (Textual description of the container)
@@ -1336,8 +1387,9 @@ public class Specimen extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public void setDescription( String theString) {
+	public Container setDescription( String theString) {
 		myDescription = new StringDt(theString); 
+		return this; 
 	}
 
  
@@ -1366,10 +1418,10 @@ public class Specimen extends BaseResource implements IResource {
      * The type of container associated with the specimen (e.g. slide, aliquot, etc)
      * </p> 
 	 */
-	public void setType(CodeableConceptDt theValue) {
+	public Container setType(CodeableConceptDt theValue) {
 		myType = theValue;
+		return this;
 	}
-
 
   
 	/**
@@ -1397,10 +1449,10 @@ public class Specimen extends BaseResource implements IResource {
      * The capacity (volume or other measure) the container may contain.
      * </p> 
 	 */
-	public void setCapacity(QuantityDt theValue) {
+	public Container setCapacity(QuantityDt theValue) {
 		myCapacity = theValue;
+		return this;
 	}
-
 
   
 	/**
@@ -1428,10 +1480,10 @@ public class Specimen extends BaseResource implements IResource {
      * The quantity of specimen in the container; may be volume, dimensions, or other appropriate measurements, depending on the specimen type
      * </p> 
 	 */
-	public void setSpecimenQuantity(QuantityDt theValue) {
+	public Container setSpecimenQuantity(QuantityDt theValue) {
 		mySpecimenQuantity = theValue;
+		return this;
 	}
-
 
   
 	/**
@@ -1459,10 +1511,10 @@ public class Specimen extends BaseResource implements IResource {
      * Additive associated with the container
      * </p> 
 	 */
-	public void setAdditive(ResourceReferenceDt theValue) {
+	public Container setAdditive(ResourceReferenceDt theValue) {
 		myAdditive = theValue;
+		return this;
 	}
-
 
   
 

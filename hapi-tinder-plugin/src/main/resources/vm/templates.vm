@@ -87,8 +87,9 @@
      * ${child.definition}
      * </p> 
 	 */
-	public void set${child.methodName}(${child.referenceType} theValue) {
+	public ${child.declaringClassNameComplete} set${child.methodName}(${child.referenceType} theValue) {
 		${child.variableName} = theValue;
+		return this;
 	}
 
 #if( ${child.repeatable} && ${child.singleChildInstantiable} && ${child.resourceRef} == false && ${child.boundCode} == false )
@@ -104,6 +105,22 @@
 		${child.singleType} newType = new ${child.singleType}();
 		get${child.methodName}().add(newType);
 		return newType; 
+	}
+
+	/**
+	 * Gets the first repetition for <b>${child.elementName}</b> (${child.shortName}),
+	 * creating it if it does not already exist.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * ${child.definition}
+     * </p> 
+	 */
+	public ${child.singleType} get${child.methodName}FirstRep() {
+		if (get${child.methodName}().isEmpty()) {
+			return add${child.methodName}();
+		}
+		return get${child.methodName}().get(0); 
 	}
 #end
 #if( ${child.repeatable} && ${child.singleChildInstantiable} && ${child.resourceRef} )
@@ -142,9 +159,10 @@
      * ${child.definition}
      * </p> 
 	 */
-	public void set${child.methodName}(${child.bindingClass} theValue) {
+	public ${child.declaringClassNameComplete} set${child.methodName}(${child.bindingClass} theValue) {
 		get${child.methodName}().clear();
 		add${child.methodName}(theValue);
+		return this;
 	}
 
 #elseif ( ${child.boundCode} )
@@ -156,8 +174,9 @@
      * ${child.definition}
      * </p> 
 	 */
-	public void set${child.methodName}(${child.bindingClass} theValue) {
+	public ${child.declaringClassNameComplete} set${child.methodName}(${child.bindingClass} theValue) {
 		get${child.methodName}().setValueAsEnum(theValue);
+		return this;
 	}
 
 #end ##if (child.boundCode)
@@ -170,12 +189,15 @@
      * <b>Definition:</b>
      * ${child.definition}
      * </p> 
+     *
+     * @return Returns a reference to this object, to allow for simple chaining.
 	 */
-	public void add${child.methodName}(#{foreach}($param in $ss.parameters) ${param.datatype} ${param.parameter}#{if}( $foreach.hasNext ), #{end}#{end}) {
+	public ${child.declaringClassNameComplete} add${child.methodName}(#{foreach}($param in $ss.parameters) ${param.datatype} ${param.parameter}#{if}( $foreach.hasNext ), #{end}#{end}) {
 		if (${child.variableName} == null) {
 			${child.variableName} = new ${child.referenceTypeForConstructor}();
 		}
-		${child.variableName}.add(new ${ss.datatype}(#{foreach}($param in $ss.parameters)${param.parameter}#{if}( $foreach.hasNext ), #{end}#{end})); 
+		${child.variableName}.add(new ${ss.datatype}(#{foreach}($param in $ss.parameters)${param.parameter}#{if}( $foreach.hasNext ), #{end}#{end}));
+		return this; 
 	}
 #else
 	/**
@@ -186,8 +208,9 @@
      * ${child.definition}
      * </p> 
 	 */
-	public void set${child.methodName}${ss.suffix}(#{foreach}($param in $ss.parameters) ${param.datatype} ${param.parameter}#{if}( $foreach.hasNext ), #{end}#{end}) {
+	public ${child.declaringClassNameComplete} set${child.methodName}${ss.suffix}(#{foreach}($param in $ss.parameters) ${param.datatype} ${param.parameter}#{if}( $foreach.hasNext ), #{end}#{end}) {
 		${child.variableName} = new ${ss.datatype}(#{foreach}($param in $ss.parameters)${param.parameter}#{if}( $foreach.hasNext ), #{end}#{end}); 
+		return this; 
 	}
 #end
 

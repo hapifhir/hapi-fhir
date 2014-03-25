@@ -16,33 +16,17 @@
 
 package ca.uhn.fhir.model.dstu.composite;
 
-import java.util.*;
-import ca.uhn.fhir.model.api.*;
-import ca.uhn.fhir.model.api.annotation.*;
+import java.util.Date;
+import java.util.List;
 
-import ca.uhn.fhir.model.dstu.valueset.AddressUseEnum;
-import ca.uhn.fhir.model.dstu.composite.CodingDt;
-import ca.uhn.fhir.model.dstu.valueset.ContactSystemEnum;
-import ca.uhn.fhir.model.dstu.valueset.ContactUseEnum;
-import ca.uhn.fhir.model.dstu.valueset.EventTimingEnum;
-import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
-import ca.uhn.fhir.model.dstu.valueset.NameUseEnum;
-import ca.uhn.fhir.model.dstu.resource.Organization;
-import ca.uhn.fhir.model.dstu.composite.PeriodDt;
-import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
-import ca.uhn.fhir.model.dstu.composite.QuantityDt;
-import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
-import ca.uhn.fhir.model.dstu.valueset.UnitsOfTimeEnum;
-import ca.uhn.fhir.model.dstu.resource.ValueSet;
-import ca.uhn.fhir.model.primitive.Base64BinaryDt;
-import ca.uhn.fhir.model.primitive.BooleanDt;
-import ca.uhn.fhir.model.primitive.BoundCodeDt;
-import ca.uhn.fhir.model.primitive.CodeDt;
+import ca.uhn.fhir.model.api.BaseElement;
+import ca.uhn.fhir.model.api.ICompositeDatatype;
+import ca.uhn.fhir.model.api.IElement;
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
-import ca.uhn.fhir.model.primitive.DecimalDt;
-import ca.uhn.fhir.model.primitive.IntegerDt;
-import ca.uhn.fhir.model.primitive.StringDt;
-import ca.uhn.fhir.model.primitive.UriDt;
 
 /**
  * HAPI/FHIR <b>Period</b> Datatype
@@ -61,6 +45,13 @@ import ca.uhn.fhir.model.primitive.UriDt;
 @DatatypeDef(name="Period") 
 public class PeriodDt 
         extends  BaseElement         implements ICompositeDatatype  {
+
+	/**
+	 * Constructor
+	 */
+	public PeriodDt() {
+		// nothing
+	}
 
 
 	@Child(name="start", type=DateTimeDt.class, order=0, min=0, max=1)	
@@ -118,10 +109,10 @@ public class PeriodDt
      * The start of the period. The boundary is inclusive.
      * </p> 
 	 */
-	public void setStart(DateTimeDt theValue) {
+	public PeriodDt setStart(DateTimeDt theValue) {
 		myStart = theValue;
+		return this;
 	}
-
 
  	/**
 	 * Sets the value for <b>start</b> (Starting time with inclusive boundary)
@@ -131,8 +122,9 @@ public class PeriodDt
      * The start of the period. The boundary is inclusive.
      * </p> 
 	 */
-	public void setStart( Date theDate,  TemporalPrecisionEnum thePrecision) {
+	public PeriodDt setStart( Date theDate,  TemporalPrecisionEnum thePrecision) {
 		myStart = new DateTimeDt(theDate, thePrecision); 
+		return this; 
 	}
 
 	/**
@@ -143,8 +135,9 @@ public class PeriodDt
      * The start of the period. The boundary is inclusive.
      * </p> 
 	 */
-	public void setStartWithSecondsPrecision( Date theDate) {
+	public PeriodDt setStartWithSecondsPrecision( Date theDate) {
 		myStart = new DateTimeDt(theDate); 
+		return this; 
 	}
 
  
@@ -173,10 +166,10 @@ public class PeriodDt
      * The end of the period. If the end of the period is missing, it means that the period is ongoing
      * </p> 
 	 */
-	public void setEnd(DateTimeDt theValue) {
+	public PeriodDt setEnd(DateTimeDt theValue) {
 		myEnd = theValue;
+		return this;
 	}
-
 
  	/**
 	 * Sets the value for <b>end</b> (End time with inclusive boundary, if not ongoing)
@@ -186,8 +179,9 @@ public class PeriodDt
      * The end of the period. If the end of the period is missing, it means that the period is ongoing
      * </p> 
 	 */
-	public void setEnd( Date theDate,  TemporalPrecisionEnum thePrecision) {
+	public PeriodDt setEnd( Date theDate,  TemporalPrecisionEnum thePrecision) {
 		myEnd = new DateTimeDt(theDate, thePrecision); 
+		return this; 
 	}
 
 	/**
@@ -198,8 +192,9 @@ public class PeriodDt
      * The end of the period. If the end of the period is missing, it means that the period is ongoing
      * </p> 
 	 */
-	public void setEndWithSecondsPrecision( Date theDate) {
+	public PeriodDt setEndWithSecondsPrecision( Date theDate) {
 		myEnd = new DateTimeDt(theDate); 
+		return this; 
 	}
 
  

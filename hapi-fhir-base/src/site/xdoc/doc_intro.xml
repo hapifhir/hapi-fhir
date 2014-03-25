@@ -56,6 +56,14 @@
    <version>1.0-SNAPSHOT</version>
 </dependency>]]></source>
 			
+			<p>
+				If you are not using Maven, you can download the latest version
+				of the snapshot JAR (and optionally the Javadoc and Sources JAR) from the Maven
+				repo here: <a href="http://oss.sonatype.org/content/repositories/snapshots/ca/uhn/hapi/fhir/hapi-fhir-base/1.0-SNAPSHOT/">download</a>.
+				Once a formal release has been created, it will be uploaded through the Sourceforge
+				file release system (as the HAPI v2 libraries are).
+			</p>
+			
 			<subsection name="Introcuding the FHIR Context">
 
 				<p>
@@ -104,7 +112,7 @@
 
 			</subsection>
 
-			<subsection name="Encoding a resource to a String">
+			<subsection name="Encoding a Resource to a String">
 								
 				<p>
 					The parser can also be used to encode a resource (which you can populate
@@ -132,6 +140,45 @@
       <given value="Q"/>
    </name>
 </Patient>]]></source>
+
+			</subsection>
+
+			<subsection name="JSON Encoding">
+								
+				<p>
+					JSON parsing/encoding is also supported. 
+				</p>
+				
+				<macro name="snippet">
+					<param name="id" value="encodeMsgJson" />
+					<param name="file" value="src/site/example/java/example/FhirContextIntro.java" />
+				</macro>
+
+				<p>
+					This code gives the following output:
+				</p>
+
+				<source><![CDATA[{
+    "resourceType":"Patient",
+    "identifier":[
+        {
+            "system":"http://example.com/fictitious-mrns",
+            "value":"MRN001"
+        }
+    ],
+    "name":[
+        {
+            "use":"official",
+            "family":[
+                "Tester"
+            ],
+            "given":[
+                "John",
+                "Q"
+            ]
+        }
+    ]
+}]]></source>
 
 			</subsection>
 

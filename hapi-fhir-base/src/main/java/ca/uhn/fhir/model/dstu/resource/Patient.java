@@ -17,114 +17,37 @@
 package ca.uhn.fhir.model.dstu.resource;
 
 
-import java.util.*;
-import ca.uhn.fhir.model.api.*;
-import ca.uhn.fhir.model.api.annotation.*;
+import java.util.Date;
+import java.util.List;
 
+import ca.uhn.fhir.model.api.BaseElement;
+import ca.uhn.fhir.model.api.BaseResource;
+import ca.uhn.fhir.model.api.IDatatype;
+import ca.uhn.fhir.model.api.IElement;
+import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.IResourceBlock;
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import ca.uhn.fhir.model.api.annotation.Block;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.dstu.composite.AddressDt;
-import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
-import ca.uhn.fhir.model.dstu.valueset.AdmitSourceEnum;
-import ca.uhn.fhir.model.dstu.valueset.AggregationModeEnum;
-import ca.uhn.fhir.model.dstu.valueset.AnimalSpeciesEnum;
 import ca.uhn.fhir.model.dstu.composite.AttachmentDt;
-import ca.uhn.fhir.model.dstu.valueset.BindingConformanceEnum;
 import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
-import ca.uhn.fhir.model.dstu.composite.CodingDt;
-import ca.uhn.fhir.model.dstu.valueset.ConformanceEventModeEnum;
-import ca.uhn.fhir.model.dstu.valueset.ConformanceStatementStatusEnum;
-import ca.uhn.fhir.model.dstu.valueset.ConstraintSeverityEnum;
 import ca.uhn.fhir.model.dstu.composite.ContactDt;
-import ca.uhn.fhir.model.dstu.valueset.DataTypeEnum;
-import ca.uhn.fhir.model.dstu.resource.Device;
-import ca.uhn.fhir.model.dstu.resource.DiagnosticOrder;
-import ca.uhn.fhir.model.dstu.valueset.DiagnosticOrderPriorityEnum;
-import ca.uhn.fhir.model.dstu.valueset.DiagnosticOrderStatusEnum;
-import ca.uhn.fhir.model.dstu.valueset.DiagnosticReportStatusEnum;
-import ca.uhn.fhir.model.dstu.valueset.DocumentModeEnum;
-import ca.uhn.fhir.model.dstu.resource.Encounter;
-import ca.uhn.fhir.model.dstu.valueset.EncounterClassEnum;
-import ca.uhn.fhir.model.dstu.valueset.EncounterReasonCodesEnum;
-import ca.uhn.fhir.model.dstu.valueset.EncounterStateEnum;
-import ca.uhn.fhir.model.dstu.valueset.EncounterTypeEnum;
-import ca.uhn.fhir.model.dstu.valueset.ExtensionContextEnum;
-import ca.uhn.fhir.model.dstu.valueset.FHIRDefinedTypeEnum;
-import ca.uhn.fhir.model.dstu.valueset.FilterOperatorEnum;
-import ca.uhn.fhir.model.dstu.resource.Group;
-import ca.uhn.fhir.model.dstu.valueset.GroupTypeEnum;
-import ca.uhn.fhir.model.dstu.valueset.HierarchicalRelationshipTypeEnum;
 import ca.uhn.fhir.model.dstu.composite.HumanNameDt;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
-import ca.uhn.fhir.model.dstu.valueset.ImagingModalityEnum;
-import ca.uhn.fhir.model.dstu.resource.ImagingStudy;
-import ca.uhn.fhir.model.dstu.valueset.InstanceAvailabilityEnum;
-import ca.uhn.fhir.model.dstu.valueset.LinkTypeEnum;
-import ca.uhn.fhir.model.dstu.resource.Location;
-import ca.uhn.fhir.model.dstu.valueset.LocationModeEnum;
-import ca.uhn.fhir.model.dstu.valueset.LocationStatusEnum;
-import ca.uhn.fhir.model.dstu.valueset.LocationTypeEnum;
-import ca.uhn.fhir.model.dstu.valueset.MaritalStatusCodesEnum;
-import ca.uhn.fhir.model.dstu.resource.Media;
-import ca.uhn.fhir.model.dstu.valueset.MediaTypeEnum;
-import ca.uhn.fhir.model.dstu.resource.Medication;
-import ca.uhn.fhir.model.dstu.valueset.MedicationKindEnum;
-import ca.uhn.fhir.model.dstu.valueset.MessageEventEnum;
-import ca.uhn.fhir.model.dstu.valueset.MessageSignificanceCategoryEnum;
-import ca.uhn.fhir.model.dstu.valueset.MessageTransportEnum;
-import ca.uhn.fhir.model.dstu.valueset.ModalityEnum;
-import ca.uhn.fhir.model.dstu.resource.Observation;
-import ca.uhn.fhir.model.dstu.valueset.ObservationInterpretationCodesEnum;
-import ca.uhn.fhir.model.dstu.valueset.ObservationRelationshipTypeEnum;
-import ca.uhn.fhir.model.dstu.valueset.ObservationReliabilityEnum;
-import ca.uhn.fhir.model.dstu.valueset.ObservationStatusEnum;
-import ca.uhn.fhir.model.dstu.resource.Organization;
-import ca.uhn.fhir.model.dstu.valueset.OrganizationTypeEnum;
-import ca.uhn.fhir.model.dstu.valueset.ParticipantTypeEnum;
-import ca.uhn.fhir.model.dstu.resource.Patient;
-import ca.uhn.fhir.model.dstu.valueset.PatientRelationshipTypeEnum;
-import ca.uhn.fhir.model.dstu.composite.PeriodDt;
-import ca.uhn.fhir.model.dstu.resource.Practitioner;
-import ca.uhn.fhir.model.dstu.valueset.PractitionerRoleEnum;
-import ca.uhn.fhir.model.dstu.valueset.PractitionerSpecialtyEnum;
-import ca.uhn.fhir.model.dstu.resource.Profile;
-import ca.uhn.fhir.model.dstu.valueset.PropertyRepresentationEnum;
-import ca.uhn.fhir.model.dstu.composite.QuantityDt;
-import ca.uhn.fhir.model.dstu.composite.RangeDt;
-import ca.uhn.fhir.model.dstu.composite.RatioDt;
-import ca.uhn.fhir.model.dstu.resource.RelatedPerson;
-import ca.uhn.fhir.model.dstu.valueset.ResourceProfileStatusEnum;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
-import ca.uhn.fhir.model.dstu.valueset.ResourceTypeEnum;
-import ca.uhn.fhir.model.dstu.valueset.RestfulConformanceModeEnum;
-import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
-import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
-import ca.uhn.fhir.model.dstu.valueset.RestfulSecurityServiceEnum;
-import ca.uhn.fhir.model.dstu.composite.SampledDataDt;
-import ca.uhn.fhir.model.dstu.valueset.SearchParamTypeEnum;
-import ca.uhn.fhir.model.dstu.valueset.SlicingRulesEnum;
-import ca.uhn.fhir.model.dstu.resource.Specimen;
-import ca.uhn.fhir.model.dstu.valueset.SpecimenCollectionMethodEnum;
-import ca.uhn.fhir.model.dstu.valueset.SpecimenTreatmentProcedureEnum;
-import ca.uhn.fhir.model.dstu.resource.Substance;
-import ca.uhn.fhir.model.dstu.valueset.SubstanceTypeEnum;
-import ca.uhn.fhir.model.dstu.resource.ValueSet;
-import ca.uhn.fhir.model.dstu.valueset.ValueSetStatusEnum;
-import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.dstu.composite.DurationDt;
-import ca.uhn.fhir.model.primitive.Base64BinaryDt;
+import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
+import ca.uhn.fhir.model.dstu.valueset.AnimalSpeciesEnum;
+import ca.uhn.fhir.model.dstu.valueset.LinkTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.MaritalStatusCodesEnum;
 import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.BoundCodeableConceptDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
-import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
-import ca.uhn.fhir.model.primitive.DecimalDt;
-import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
-import ca.uhn.fhir.model.primitive.OidDt;
-import ca.uhn.fhir.model.primitive.StringDt;
-import ca.uhn.fhir.model.primitive.UriDt;
-import com.sun.org.apache.bcel.internal.classfile.Code;
 
 
 /**
@@ -424,18 +347,11 @@ public class Patient extends BaseResource implements IResource {
 		formalDefinition="Whether this patient record is in active use"
 	)
 	private BooleanDt myActive;
-
-    @Child(name="cautionNote", type=StringDt.class, order=17, min=0, max=Child.MAX_UNLIMITED)
-    @Description(
-            shortDefinition = "Complete caution note",
-            formalDefinition = "List of substances that may elicit a response from the patient."
-    )
-    private List<StringDt> myCautionNote;
 	
 
 	@Override
 	public boolean isEmpty() {
-		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myIdentifier,  myName,  myTelecom,  myGender,  myBirthDate,  myDeceased,  myAddress,  myMaritalStatus,  myMultipleBirth,  myPhoto,  myContact,  myAnimal,  myCommunication,  myCareProvider,  myManagingOrganization,  myLink,  myActive, myCautionNote);
+		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myIdentifier,  myName,  myTelecom,  myGender,  myBirthDate,  myDeceased,  myAddress,  myMaritalStatus,  myMultipleBirth,  myPhoto,  myContact,  myAnimal,  myCommunication,  myCareProvider,  myManagingOrganization,  myLink,  myActive);
 	}
 	
 	@Override
@@ -445,7 +361,7 @@ public class Patient extends BaseResource implements IResource {
 
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
-		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myIdentifier, myName, myTelecom, myGender, myBirthDate, myDeceased, myAddress, myMaritalStatus, myMultipleBirth, myPhoto, myContact, myAnimal, myCommunication, myCareProvider, myManagingOrganization, myLink, myActive, myCautionNote);
+		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myIdentifier, myName, myTelecom, myGender, myBirthDate, myDeceased, myAddress, myMaritalStatus, myMultipleBirth, myPhoto, myContact, myAnimal, myCommunication, myCareProvider, myManagingOrganization, myLink, myActive);
 	}
 
 	/**
@@ -473,8 +389,9 @@ public class Patient extends BaseResource implements IResource {
      * An identifier that applies to this person as a patient
      * </p> 
 	 */
-	public void setIdentifier(java.util.List<IdentifierDt> theValue) {
+	public Patient setIdentifier(java.util.List<IdentifierDt> theValue) {
 		myIdentifier = theValue;
+		return this;
 	}
 
 	/**
@@ -491,6 +408,21 @@ public class Patient extends BaseResource implements IResource {
 		return newType; 
 	}
 
+	/**
+	 * Gets the first repetition for <b>identifier</b> (An identifier for the person as this patient),
+	 * creating it if it does not already exist.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * An identifier that applies to this person as a patient
+     * </p> 
+	 */
+	public IdentifierDt getIdentifierFirstRep() {
+		if (getIdentifier().isEmpty()) {
+			return addIdentifier();
+		}
+		return getIdentifier().get(0); 
+	}
   
 	/**
 	 * Gets the value(s) for <b>name</b> (A name associated with the patient).
@@ -517,8 +449,9 @@ public class Patient extends BaseResource implements IResource {
      * A name associated with the individual.
      * </p> 
 	 */
-	public void setName(java.util.List<HumanNameDt> theValue) {
+	public Patient setName(java.util.List<HumanNameDt> theValue) {
 		myName = theValue;
+		return this;
 	}
 
 	/**
@@ -535,6 +468,21 @@ public class Patient extends BaseResource implements IResource {
 		return newType; 
 	}
 
+	/**
+	 * Gets the first repetition for <b>name</b> (A name associated with the patient),
+	 * creating it if it does not already exist.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A name associated with the individual.
+     * </p> 
+	 */
+	public HumanNameDt getNameFirstRep() {
+		if (getName().isEmpty()) {
+			return addName();
+		}
+		return getName().get(0); 
+	}
   
 	/**
 	 * Gets the value(s) for <b>telecom</b> (A contact detail for the individual).
@@ -561,8 +509,9 @@ public class Patient extends BaseResource implements IResource {
      * A contact detail (e.g. a telephone number or an email address) by which the individual may be contacted.
      * </p> 
 	 */
-	public void setTelecom(java.util.List<ContactDt> theValue) {
+	public Patient setTelecom(java.util.List<ContactDt> theValue) {
 		myTelecom = theValue;
+		return this;
 	}
 
 	/**
@@ -579,6 +528,21 @@ public class Patient extends BaseResource implements IResource {
 		return newType; 
 	}
 
+	/**
+	 * Gets the first repetition for <b>telecom</b> (A contact detail for the individual),
+	 * creating it if it does not already exist.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A contact detail (e.g. a telephone number or an email address) by which the individual may be contacted.
+     * </p> 
+	 */
+	public ContactDt getTelecomFirstRep() {
+		if (getTelecom().isEmpty()) {
+			return addTelecom();
+		}
+		return getTelecom().get(0); 
+	}
   
 	/**
 	 * Gets the value(s) for <b>gender</b> (Gender for administrative purposes).
@@ -605,10 +569,10 @@ public class Patient extends BaseResource implements IResource {
      * Administrative Gender - the gender that the patient is considered to have for administration and record keeping purposes.
      * </p> 
 	 */
-	public void setGender(BoundCodeableConceptDt<AdministrativeGenderCodesEnum> theValue) {
+	public Patient setGender(BoundCodeableConceptDt<AdministrativeGenderCodesEnum> theValue) {
 		myGender = theValue;
+		return this;
 	}
-
 
 	/**
 	 * Sets the value(s) for <b>gender</b> (Gender for administrative purposes)
@@ -618,8 +582,9 @@ public class Patient extends BaseResource implements IResource {
      * Administrative Gender - the gender that the patient is considered to have for administration and record keeping purposes.
      * </p> 
 	 */
-	public void setGender(AdministrativeGenderCodesEnum theValue) {
+	public Patient setGender(AdministrativeGenderCodesEnum theValue) {
 		getGender().setValueAsEnum(theValue);
+		return this;
 	}
 
   
@@ -648,10 +613,10 @@ public class Patient extends BaseResource implements IResource {
      * The date and time of birth for the individual
      * </p> 
 	 */
-	public void setBirthDate(DateTimeDt theValue) {
+	public Patient setBirthDate(DateTimeDt theValue) {
 		myBirthDate = theValue;
+		return this;
 	}
-
 
  	/**
 	 * Sets the value for <b>birthDate</b> (The date and time of birth for the individual)
@@ -661,8 +626,9 @@ public class Patient extends BaseResource implements IResource {
      * The date and time of birth for the individual
      * </p> 
 	 */
-	public void setBirthDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
+	public Patient setBirthDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
 		myBirthDate = new DateTimeDt(theDate, thePrecision); 
+		return this; 
 	}
 
 	/**
@@ -673,8 +639,9 @@ public class Patient extends BaseResource implements IResource {
      * The date and time of birth for the individual
      * </p> 
 	 */
-	public void setBirthDateWithSecondsPrecision( Date theDate) {
+	public Patient setBirthDateWithSecondsPrecision( Date theDate) {
 		myBirthDate = new DateTimeDt(theDate); 
+		return this; 
 	}
 
  
@@ -700,10 +667,10 @@ public class Patient extends BaseResource implements IResource {
      * Indicates if the individual is deceased or not
      * </p> 
 	 */
-	public void setDeceased(IDatatype theValue) {
+	public Patient setDeceased(IDatatype theValue) {
 		myDeceased = theValue;
+		return this;
 	}
-
 
   
 	/**
@@ -731,8 +698,9 @@ public class Patient extends BaseResource implements IResource {
      * Addresses for the individual
      * </p> 
 	 */
-	public void setAddress(java.util.List<AddressDt> theValue) {
+	public Patient setAddress(java.util.List<AddressDt> theValue) {
 		myAddress = theValue;
+		return this;
 	}
 
 	/**
@@ -749,6 +717,21 @@ public class Patient extends BaseResource implements IResource {
 		return newType; 
 	}
 
+	/**
+	 * Gets the first repetition for <b>address</b> (Addresses for the individual),
+	 * creating it if it does not already exist.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Addresses for the individual
+     * </p> 
+	 */
+	public AddressDt getAddressFirstRep() {
+		if (getAddress().isEmpty()) {
+			return addAddress();
+		}
+		return getAddress().get(0); 
+	}
   
 	/**
 	 * Gets the value(s) for <b>maritalStatus</b> (Marital (civil) status of a person).
@@ -775,10 +758,10 @@ public class Patient extends BaseResource implements IResource {
      * This field contains a patient's most recent marital (civil) status.
      * </p> 
 	 */
-	public void setMaritalStatus(BoundCodeableConceptDt<MaritalStatusCodesEnum> theValue) {
+	public Patient setMaritalStatus(BoundCodeableConceptDt<MaritalStatusCodesEnum> theValue) {
 		myMaritalStatus = theValue;
+		return this;
 	}
-
 
 	/**
 	 * Sets the value(s) for <b>maritalStatus</b> (Marital (civil) status of a person)
@@ -788,8 +771,9 @@ public class Patient extends BaseResource implements IResource {
      * This field contains a patient's most recent marital (civil) status.
      * </p> 
 	 */
-	public void setMaritalStatus(MaritalStatusCodesEnum theValue) {
+	public Patient setMaritalStatus(MaritalStatusCodesEnum theValue) {
 		getMaritalStatus().setValueAsEnum(theValue);
+		return this;
 	}
 
   
@@ -815,10 +799,10 @@ public class Patient extends BaseResource implements IResource {
      * Indicates whether the patient is part of a multiple or indicates the actual birth order.
      * </p> 
 	 */
-	public void setMultipleBirth(IDatatype theValue) {
+	public Patient setMultipleBirth(IDatatype theValue) {
 		myMultipleBirth = theValue;
+		return this;
 	}
-
 
   
 	/**
@@ -846,8 +830,9 @@ public class Patient extends BaseResource implements IResource {
      * Image of the person
      * </p> 
 	 */
-	public void setPhoto(java.util.List<AttachmentDt> theValue) {
+	public Patient setPhoto(java.util.List<AttachmentDt> theValue) {
 		myPhoto = theValue;
+		return this;
 	}
 
 	/**
@@ -864,6 +849,21 @@ public class Patient extends BaseResource implements IResource {
 		return newType; 
 	}
 
+	/**
+	 * Gets the first repetition for <b>photo</b> (Image of the person),
+	 * creating it if it does not already exist.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Image of the person
+     * </p> 
+	 */
+	public AttachmentDt getPhotoFirstRep() {
+		if (getPhoto().isEmpty()) {
+			return addPhoto();
+		}
+		return getPhoto().get(0); 
+	}
   
 	/**
 	 * Gets the value(s) for <b>contact</b> (A contact party (e.g. guardian, partner, friend) for the patient).
@@ -890,8 +890,9 @@ public class Patient extends BaseResource implements IResource {
      * A contact party (e.g. guardian, partner, friend) for the patient
      * </p> 
 	 */
-	public void setContact(java.util.List<Contact> theValue) {
+	public Patient setContact(java.util.List<Contact> theValue) {
 		myContact = theValue;
+		return this;
 	}
 
 	/**
@@ -908,6 +909,21 @@ public class Patient extends BaseResource implements IResource {
 		return newType; 
 	}
 
+	/**
+	 * Gets the first repetition for <b>contact</b> (A contact party (e.g. guardian, partner, friend) for the patient),
+	 * creating it if it does not already exist.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A contact party (e.g. guardian, partner, friend) for the patient
+     * </p> 
+	 */
+	public Contact getContactFirstRep() {
+		if (getContact().isEmpty()) {
+			return addContact();
+		}
+		return getContact().get(0); 
+	}
   
 	/**
 	 * Gets the value(s) for <b>animal</b> (If this patient is an animal (non-human)).
@@ -934,10 +950,10 @@ public class Patient extends BaseResource implements IResource {
      * This element has a value if the patient is an animal
      * </p> 
 	 */
-	public void setAnimal(Animal theValue) {
+	public Patient setAnimal(Animal theValue) {
 		myAnimal = theValue;
+		return this;
 	}
-
 
   
 	/**
@@ -965,8 +981,9 @@ public class Patient extends BaseResource implements IResource {
      * Languages which may be used to communicate with the patient about his or her health
      * </p> 
 	 */
-	public void setCommunication(java.util.List<CodeableConceptDt> theValue) {
+	public Patient setCommunication(java.util.List<CodeableConceptDt> theValue) {
 		myCommunication = theValue;
+		return this;
 	}
 
 	/**
@@ -983,6 +1000,21 @@ public class Patient extends BaseResource implements IResource {
 		return newType; 
 	}
 
+	/**
+	 * Gets the first repetition for <b>communication</b> (Languages which may be used to communicate with the patient about his or her health),
+	 * creating it if it does not already exist.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Languages which may be used to communicate with the patient about his or her health
+     * </p> 
+	 */
+	public CodeableConceptDt getCommunicationFirstRep() {
+		if (getCommunication().isEmpty()) {
+			return addCommunication();
+		}
+		return getCommunication().get(0); 
+	}
   
 	/**
 	 * Gets the value(s) for <b>careProvider</b> (Patient's nominated care provider).
@@ -1006,11 +1038,24 @@ public class Patient extends BaseResource implements IResource {
      * Patient's nominated care provider
      * </p> 
 	 */
-	public void setCareProvider(java.util.List<ResourceReferenceDt> theValue) {
+	public Patient setCareProvider(java.util.List<ResourceReferenceDt> theValue) {
 		myCareProvider = theValue;
+		return this;
 	}
 
-
+	/**
+	 * Adds and returns a new value for <b>careProvider</b> (Patient's nominated care provider)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Patient's nominated care provider
+     * </p> 
+	 */
+	public ResourceReferenceDt addCareProvider() {
+		ResourceReferenceDt newType = new ResourceReferenceDt();
+		getCareProvider().add(newType);
+		return newType; 
+	}
   
 	/**
 	 * Gets the value(s) for <b>managingOrganization</b> (Organization that is the custodian of the patient record).
@@ -1037,10 +1082,10 @@ public class Patient extends BaseResource implements IResource {
      * Organization that is the custodian of the patient record
      * </p> 
 	 */
-	public void setManagingOrganization(ResourceReferenceDt theValue) {
+	public Patient setManagingOrganization(ResourceReferenceDt theValue) {
 		myManagingOrganization = theValue;
+		return this;
 	}
-
 
   
 	/**
@@ -1068,8 +1113,9 @@ public class Patient extends BaseResource implements IResource {
      * Link to another patient resource that concerns the same actual person
      * </p> 
 	 */
-	public void setLink(java.util.List<Link> theValue) {
+	public Patient setLink(java.util.List<Link> theValue) {
 		myLink = theValue;
+		return this;
 	}
 
 	/**
@@ -1086,6 +1132,21 @@ public class Patient extends BaseResource implements IResource {
 		return newType; 
 	}
 
+	/**
+	 * Gets the first repetition for <b>link</b> (Link to another patient resource that concerns the same actual person),
+	 * creating it if it does not already exist.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Link to another patient resource that concerns the same actual person
+     * </p> 
+	 */
+	public Link getLinkFirstRep() {
+		if (getLink().isEmpty()) {
+			return addLink();
+		}
+		return getLink().get(0); 
+	}
   
 	/**
 	 * Gets the value(s) for <b>active</b> (Whether this patient's record is in active use).
@@ -1112,10 +1173,10 @@ public class Patient extends BaseResource implements IResource {
      * Whether this patient record is in active use
      * </p> 
 	 */
-	public void setActive(BooleanDt theValue) {
+	public Patient setActive(BooleanDt theValue) {
 		myActive = theValue;
+		return this;
 	}
-
 
  	/**
 	 * Sets the value for <b>active</b> (Whether this patient's record is in active use)
@@ -1125,29 +1186,11 @@ public class Patient extends BaseResource implements IResource {
      * Whether this patient record is in active use
      * </p> 
 	 */
-	public void setActive( Boolean theBoolean) {
+	public Patient setActive( Boolean theBoolean) {
 		myActive = new BooleanDt(theBoolean); 
+		return this; 
 	}
 
-    /**
-     * Gets the complete caution note (a list of substances and the responses a patient elicits)
-     *
-     * <p>
-     * <b>Definition:</b>
-     * Complete caution note
-     * </p>
-     */
-    public List<StringDt> getCautionNote(){ return myCautionNote; }
-
-    /**
-     * Sets the value for the caution note
-     *
-     * <p>
-     * <b>Definition:</b>
-     * Complete caution note
-     * </p>
-     */
-    public void setMyCautionNote(List<StringDt> theValue){ myCautionNote = theValue; }
  
 	/**
 	 * Block class for child element: <b>Patient.contact</b> (A contact party (e.g. guardian, partner, friend) for the patient)
@@ -1245,8 +1288,9 @@ public class Patient extends BaseResource implements IResource {
      * The nature of the relationship between the patient and the contact person
      * </p> 
 	 */
-	public void setRelationship(java.util.List<CodeableConceptDt> theValue) {
+	public Contact setRelationship(java.util.List<CodeableConceptDt> theValue) {
 		myRelationship = theValue;
+		return this;
 	}
 
 	/**
@@ -1263,6 +1307,21 @@ public class Patient extends BaseResource implements IResource {
 		return newType; 
 	}
 
+	/**
+	 * Gets the first repetition for <b>relationship</b> (The kind of relationship),
+	 * creating it if it does not already exist.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The nature of the relationship between the patient and the contact person
+     * </p> 
+	 */
+	public CodeableConceptDt getRelationshipFirstRep() {
+		if (getRelationship().isEmpty()) {
+			return addRelationship();
+		}
+		return getRelationship().get(0); 
+	}
   
 	/**
 	 * Gets the value(s) for <b>name</b> (A name associated with the person).
@@ -1289,10 +1348,10 @@ public class Patient extends BaseResource implements IResource {
      * A name associated with the person
      * </p> 
 	 */
-	public void setName(HumanNameDt theValue) {
+	public Contact setName(HumanNameDt theValue) {
 		myName = theValue;
+		return this;
 	}
-
 
   
 	/**
@@ -1320,8 +1379,9 @@ public class Patient extends BaseResource implements IResource {
      * A contact detail for the person, e.g. a telephone number or an email address.
      * </p> 
 	 */
-	public void setTelecom(java.util.List<ContactDt> theValue) {
+	public Contact setTelecom(java.util.List<ContactDt> theValue) {
 		myTelecom = theValue;
+		return this;
 	}
 
 	/**
@@ -1338,6 +1398,21 @@ public class Patient extends BaseResource implements IResource {
 		return newType; 
 	}
 
+	/**
+	 * Gets the first repetition for <b>telecom</b> (A contact detail for the person),
+	 * creating it if it does not already exist.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A contact detail for the person, e.g. a telephone number or an email address.
+     * </p> 
+	 */
+	public ContactDt getTelecomFirstRep() {
+		if (getTelecom().isEmpty()) {
+			return addTelecom();
+		}
+		return getTelecom().get(0); 
+	}
   
 	/**
 	 * Gets the value(s) for <b>address</b> (Address for the contact person).
@@ -1364,10 +1439,10 @@ public class Patient extends BaseResource implements IResource {
      * Address for the contact person
      * </p> 
 	 */
-	public void setAddress(AddressDt theValue) {
+	public Contact setAddress(AddressDt theValue) {
 		myAddress = theValue;
+		return this;
 	}
-
 
   
 	/**
@@ -1395,10 +1470,10 @@ public class Patient extends BaseResource implements IResource {
      * Administrative Gender - the gender that the person is considered to have for administration and record keeping purposes.
      * </p> 
 	 */
-	public void setGender(BoundCodeableConceptDt<AdministrativeGenderCodesEnum> theValue) {
+	public Contact setGender(BoundCodeableConceptDt<AdministrativeGenderCodesEnum> theValue) {
 		myGender = theValue;
+		return this;
 	}
-
 
 	/**
 	 * Sets the value(s) for <b>gender</b> (Gender for administrative purposes)
@@ -1408,8 +1483,9 @@ public class Patient extends BaseResource implements IResource {
      * Administrative Gender - the gender that the person is considered to have for administration and record keeping purposes.
      * </p> 
 	 */
-	public void setGender(AdministrativeGenderCodesEnum theValue) {
+	public Contact setGender(AdministrativeGenderCodesEnum theValue) {
 		getGender().setValueAsEnum(theValue);
+		return this;
 	}
 
   
@@ -1438,10 +1514,10 @@ public class Patient extends BaseResource implements IResource {
      * Organization on behalf of which the contact is acting or for which the contact is working.
      * </p> 
 	 */
-	public void setOrganization(ResourceReferenceDt theValue) {
+	public Contact setOrganization(ResourceReferenceDt theValue) {
 		myOrganization = theValue;
+		return this;
 	}
-
 
   
 
@@ -1521,10 +1597,10 @@ public class Patient extends BaseResource implements IResource {
      * Identifies the high level categorization of the kind of animal
      * </p> 
 	 */
-	public void setSpecies(BoundCodeableConceptDt<AnimalSpeciesEnum> theValue) {
+	public Animal setSpecies(BoundCodeableConceptDt<AnimalSpeciesEnum> theValue) {
 		mySpecies = theValue;
+		return this;
 	}
-
 
 	/**
 	 * Sets the value(s) for <b>species</b> (E.g. Dog, Cow)
@@ -1534,8 +1610,9 @@ public class Patient extends BaseResource implements IResource {
      * Identifies the high level categorization of the kind of animal
      * </p> 
 	 */
-	public void setSpecies(AnimalSpeciesEnum theValue) {
+	public Animal setSpecies(AnimalSpeciesEnum theValue) {
 		getSpecies().setValueAsEnum(theValue);
+		return this;
 	}
 
   
@@ -1564,10 +1641,10 @@ public class Patient extends BaseResource implements IResource {
      * Identifies the detailed categorization of the kind of animal.
      * </p> 
 	 */
-	public void setBreed(CodeableConceptDt theValue) {
+	public Animal setBreed(CodeableConceptDt theValue) {
 		myBreed = theValue;
+		return this;
 	}
-
 
   
 	/**
@@ -1595,10 +1672,10 @@ public class Patient extends BaseResource implements IResource {
      * Indicates the current state of the animal's reproductive organs
      * </p> 
 	 */
-	public void setGenderStatus(CodeableConceptDt theValue) {
+	public Animal setGenderStatus(CodeableConceptDt theValue) {
 		myGenderStatus = theValue;
+		return this;
 	}
-
 
   
 
@@ -1673,10 +1750,10 @@ public class Patient extends BaseResource implements IResource {
      * The other patient resource that the link refers to
      * </p> 
 	 */
-	public void setOther(ResourceReferenceDt theValue) {
+	public Link setOther(ResourceReferenceDt theValue) {
 		myOther = theValue;
+		return this;
 	}
-
 
   
 	/**
@@ -1704,10 +1781,10 @@ public class Patient extends BaseResource implements IResource {
      * The type of link between this patient resource and another patient resource.
      * </p> 
 	 */
-	public void setType(BoundCodeDt<LinkTypeEnum> theValue) {
+	public Link setType(BoundCodeDt<LinkTypeEnum> theValue) {
 		myType = theValue;
+		return this;
 	}
-
 
 	/**
 	 * Sets the value(s) for <b>type</b> (replace | refer | seealso - type of link)
@@ -1717,11 +1794,12 @@ public class Patient extends BaseResource implements IResource {
      * The type of link between this patient resource and another patient resource.
      * </p> 
 	 */
-	public void setType(LinkTypeEnum theValue) {
+	public Link setType(LinkTypeEnum theValue) {
 		getType().setValueAsEnum(theValue);
+		return this;
 	}
 
-
+  
 
 	}
 

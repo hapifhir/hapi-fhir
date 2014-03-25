@@ -51,6 +51,15 @@ public class NarrativeDt extends BaseElement implements ICompositeDatatype {
 	@Child(name="div", type=XhtmlDt.class, order=1, min=1, max=1)	
 	private XhtmlDt myDiv;
 	
+	public NarrativeDt() {
+		// nothing
+	}
+	
+	public NarrativeDt(XhtmlDt theDiv, NarrativeStatusEnum theStatus) {
+		setDiv(theDiv);
+		setStatus(theStatus);
+	}
+
 	@Override
 	public boolean isEmpty() {
 		return ca.uhn.fhir.util.ElementUtil.isEmpty(  myStatus, myDiv );

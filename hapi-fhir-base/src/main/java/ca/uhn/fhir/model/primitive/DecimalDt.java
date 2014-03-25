@@ -21,6 +21,10 @@ public class DecimalDt extends BasePrimitive<BigDecimal> {
 		super();
 	}
 
+	public Number getValueAsNumber() {
+		return myValue; 
+	}
+	
 	/**
 	 * Constructor
 	 */
@@ -67,6 +71,13 @@ public class DecimalDt extends BasePrimitive<BigDecimal> {
 	 */
 	@SimpleSetter
 	public DecimalDt(@SimpleSetter.Parameter(name = "theValue") long theValue) {
+		setValue(new BigDecimal(theValue));
+	}
+
+	/**
+	 * Constructor
+	 */
+	public DecimalDt(String theValue) {
 		setValue(new BigDecimal(theValue));
 	}
 

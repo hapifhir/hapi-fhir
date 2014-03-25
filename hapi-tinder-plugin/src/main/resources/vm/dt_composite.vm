@@ -30,17 +30,17 @@ public class ${className}Dt
         implements ICompositeDatatype  #{if}( ${className} == "Identifier" || ${className} == "Coding" ), IQueryParameterType #{end}
 {
 
+	/**
+	 * Constructor
+	 */
+	public ${className}Dt() {
+		// nothing
+	}
+
 #########################
 ### Type-specific constructors
 #########################
 #if ( ${className} == "Identifier" )
-	/**
-	 * Creates a new identifier
-	 */
-	public IdentifierDt() {
-		// nothing
-	}
-
 	/**
 	 * Creates a new identifier with the given system and value
 	 */
@@ -51,18 +51,26 @@ public class ${className}Dt
 #end
 #if ( ${className} == "Coding" )
 	/**
-	 * Creates a new Coding
-	 */
-	public CodingDt() {
-		// nothing
-	}
-
-	/**
 	 * Creates a new Coding with the given system and code
 	 */
 	public CodingDt(String theSystem, String theCode) {
 		setSystem(theSystem);
 		setCode(theCode);
+	}
+#end
+#if ( ${className} == "Quantity" )
+	/**
+	 * Constructor
+	 */
+	public QuantityDt(double theValue) {
+		setValue(theValue);
+	}
+
+	/**
+	 * Constructor
+	 */
+	public QuantityDt(long theValue) {
+		setValue(theValue);
 	}
 #end
 
@@ -74,45 +82,6 @@ public class ${className}Dt
 #########################
 ### Type-specific methods
 #########################
-#if ( ${className} == "Identifier" )
-	/**
-	 * Returns true if <code>this</code> identifier has the same {@link IdentifierDt#[[#]]#getValue() value}
-	 * and {@link IdentifierDt#[[#]]#getSystem() system} (as compared by simple equals comparison).
-	 * Does not compare other values (e.g. {@link IdentifierDt#[[#]]#getUse() use}) or any extensions. 
-	 */
-	public boolean matchesSystemAndValue(IdentifierDt theIdentifier) {
-		if (theIdentifier == null) {
-			return false;
-		}
-		return getValue().equals(theIdentifier.getValue()) && getSystem().equals(theIdentifier.getSystem());
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public String getValueAsQueryToken() {
-		if (org.apache.commons.lang3.StringUtils.isNotBlank(getSystem().getValueAsString())) {
-			return getSystem().getValueAsString() + '|' + getValue().getValueAsString(); 
-		} else {
-			return getValue().getValueAsString();
-		}
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void setValueAsQueryToken(String theParameter) {
-		int barIndex = theParameter.indexOf('|');
-		if (barIndex != -1) {
-			setSystem(new UriDt(theParameter.substring(0, barIndex)));
-			setValue(theParameter.substring(barIndex + 1));
-		} else {
-			setValue(theParameter);
-		}
-	}	
-#end
 #if ( ${className} == "Coding" )
 	/**
 	 * Returns true if <code>this</code> Coding has the same {@link CodingDt#[[#]]#getCode() Code}
@@ -149,6 +118,82 @@ public class ${className}Dt
 			setCode(theParameter.substring(barIndex + 1));
 		} else {
 			setCode(theParameter);
+		}
+	}	
+#end
+#if ( ${className} == "HumanName" )
+	/**
+	 * Returns all repetitions of {@link ${hash}getFamily() family name} as a space separated string
+	 * 
+	 * @see DatatypeUtil${hash}joinStringsSpaceSeparated(List)
+	 */
+	public String getFamilyAsSingleString() {
+		return ca.uhn.fhir.util.DatatypeUtil.joinStringsSpaceSeparated(getFamily());
+	}
+
+	/**
+	 * Returns all repetitions of {@link ${hash}getGiven() given name} as a space separated string
+	 * 
+	 * @see DatatypeUtil${hash}joinStringsSpaceSeparated(List)
+	 */
+	public String getGivenAsSingleString() {
+		return ca.uhn.fhir.util.DatatypeUtil.joinStringsSpaceSeparated(getGiven());
+	}
+
+	/**
+	 * Returns all repetitions of {@link ${hash}getPrefix() prefix name} as a space separated string
+	 * 
+	 * @see DatatypeUtil${hash}joinStringsSpaceSeparated(List)
+	 */
+	public String getPrefixAsSingleString() {
+		return ca.uhn.fhir.util.DatatypeUtil.joinStringsSpaceSeparated(getPrefix());
+	}
+
+	/**
+	 * Returns all repetitions of {@link ${hash}Suffix() suffix} as a space separated string
+	 * 
+	 * @see DatatypeUtil${hash}joinStringsSpaceSeparated(List)
+	 */
+	public String getSuffixAsSingleString() {
+		return ca.uhn.fhir.util.DatatypeUtil.joinStringsSpaceSeparated(getSuffix());
+	}
+#end
+#if ( ${className} == "Identifier" )
+	/**
+	 * Returns true if <code>this</code> identifier has the same {@link IdentifierDt#[[#]]#getValue() value}
+	 * and {@link IdentifierDt#[[#]]#getSystem() system} (as compared by simple equals comparison).
+	 * Does not compare other values (e.g. {@link IdentifierDt#[[#]]#getUse() use}) or any extensions. 
+	 */
+	public boolean matchesSystemAndValue(IdentifierDt theIdentifier) {
+		if (theIdentifier == null) {
+			return false;
+		}
+		return getValue().equals(theIdentifier.getValue()) && getSystem().equals(theIdentifier.getSystem());
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public String getValueAsQueryToken() {
+		if (org.apache.commons.lang3.StringUtils.isNotBlank(getSystem().getValueAsString())) {
+			return getSystem().getValueAsString() + '|' + getValue().getValueAsString(); 
+		} else {
+			return getValue().getValueAsString();
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void setValueAsQueryToken(String theParameter) {
+		int barIndex = theParameter.indexOf('|');
+		if (barIndex != -1) {
+			setSystem(new UriDt(theParameter.substring(0, barIndex)));
+			setValue(theParameter.substring(barIndex + 1));
+		} else {
+			setValue(theParameter);
 		}
 	}	
 #end
