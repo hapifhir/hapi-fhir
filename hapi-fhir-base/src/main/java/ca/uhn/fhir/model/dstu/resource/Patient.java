@@ -1210,7 +1210,7 @@ public class Patient extends BaseResource implements IResource {
      * Complete caution note
      * </p>
      */
-    public void setMyCautionNote(List<StringDt> theValue){ myCautionNote = theValue; }
+    public void setCautionNote(List<StringDt> theValue){ myCautionNote = theValue; }
 
  
 	/**
