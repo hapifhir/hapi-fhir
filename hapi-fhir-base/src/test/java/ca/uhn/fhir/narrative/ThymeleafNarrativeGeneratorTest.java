@@ -22,11 +22,11 @@ import ca.uhn.fhir.parser.DataFormatException;
 
 public class ThymeleafNarrativeGeneratorTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ThymeleafNarrativeGeneratorTest.class);
-	private ThymeleafNarrativeGenerator gen;
+	private DefaultThymeleafNarrativeGenerator gen;
 
 	@Before
 	public void before() throws IOException {
-		gen = new ThymeleafNarrativeGenerator();
+		gen = new DefaultThymeleafNarrativeGenerator();
 		gen.setIgnoreFailures(false);
 		gen.setIgnoreMissingTemplates(true);
 	}

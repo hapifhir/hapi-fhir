@@ -38,8 +38,9 @@ import ca.uhn.fhir.model.dstu.valueset.NarrativeStatusEnum;
 import ca.uhn.fhir.model.primitive.XhtmlDt;
 import ca.uhn.fhir.parser.DataFormatException;
 
-public class ThymeleafNarrativeGenerator implements INarrativeGenerator {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ThymeleafNarrativeGenerator.class);
+public class DefaultThymeleafNarrativeGenerator extends BaseThymeleafNarrativeGenerator implements INarrativeGenerator {
+	
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(DefaultThymeleafNarrativeGenerator.class);
 
 	private HashMap<String, String> myDatatypeClassNameToNarrativeTemplate;
 	private TemplateEngine myDatatypeTemplateEngine;
@@ -51,11 +52,11 @@ public class ThymeleafNarrativeGenerator implements INarrativeGenerator {
 	private TemplateEngine myProfileTemplateEngine;
 	private HashMap<String, String> myProfileToNarrativeTemplate;
 
-	public ThymeleafNarrativeGenerator() throws IOException {
+	public DefaultThymeleafNarrativeGenerator() throws IOException {
 		myProfileToNarrativeTemplate = new HashMap<String, String>();
 		myDatatypeClassNameToNarrativeTemplate = new HashMap<String, String>();
 
-		String propFileName = "classpath:ca/uhn/fhir/narrative/narratives.properties";
+		String propFileName = getPropertyFile();
 		loadProperties(propFileName);
 
 		{
@@ -79,6 +80,11 @@ public class ThymeleafNarrativeGenerator implements INarrativeGenerator {
 			myDatatypeTemplateEngine.initialize();
 		}
 
+	}
+
+	@Override
+	public String getPropertyFile() {
+		return "classpath:ca/uhn/fhir/narrative/narratives.properties";
 	}
 
 	@Override
@@ -174,9 +180,9 @@ public class ThymeleafNarrativeGenerator implements INarrativeGenerator {
 	private InputStream loadResource(String name) {
 		if (name.startsWith("classpath:")) {
 			String cpName = name.substring("classpath:".length());
-			InputStream resource = ThymeleafNarrativeGenerator.class.getResourceAsStream(cpName);
+			InputStream resource = DefaultThymeleafNarrativeGenerator.class.getResourceAsStream(cpName);
 			if (resource == null) {
-				resource = ThymeleafNarrativeGenerator.class.getResourceAsStream("/" + cpName);
+				resource = DefaultThymeleafNarrativeGenerator.class.getResourceAsStream("/" + cpName);
 				if (resource == null) {
 					throw new ConfigurationException("Can not find '" + cpName + "' on classpath");
 				}
@@ -268,7 +274,7 @@ public class ThymeleafNarrativeGenerator implements INarrativeGenerator {
 
 	}
 
-	private final class ProfileResourceResolver implements IResourceResolver {
+		private final class ProfileResourceResolver implements IResourceResolver {
 		@Override
 		public String getName() {
 			return getClass().getCanonicalName();
