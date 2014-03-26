@@ -44,4 +44,10 @@ public interface ITestClient extends IBasicClient {
 	@Search()
 	public Patient getPatientWithIncludes(@Required(name = "withIncludes") StringDt theString, @Include List<PathSpecification> theIncludes);
 
+	@Search(queryName="someQueryNoParams")
+	public Patient getPatientNoParams();
+
+	@Search(queryName="someQueryOneParam")
+	public Patient getPatientOneParam(@Required(name="param1") StringDt theParam);
+
 }

@@ -54,8 +54,14 @@ public class MyPatient extends Patient {
 	
 	/********
 	 * Accessors and mutators follow
+	 * 
+	 * IMPORTANT:
+	 * Each extension is required to have an getter/accessor and a stter/mutator. 
+	 * You are highly recommended to create getters which create instances if they
+	 * do not already exist, since this is how the rest of the HAPI FHIR API works. 
 	 ********/
 	
+	/** Getter for important dates */
 	public List<DateTimeDt> getImportantDates() {
 		if (myImportantDates==null) {
 			myImportantDates = new ArrayList<DateTimeDt>();
@@ -63,14 +69,20 @@ public class MyPatient extends Patient {
 		return myImportantDates;
 	}
 
+	/** Getter for pet name */
 	public StringDt getPetName() {
+		if (myPetName == null) {
+			myPetName = new StringDt();
+		}
 		return myPetName;
 	}
 
+	/** Setter for important dates */
 	public void setImportantDates(List<DateTimeDt> theImportantDates) {
 		myImportantDates = theImportantDates;
 	}
 
+	/** Setter for pet name */
 	public void setPetName(StringDt thePetName) {
 		myPetName = thePetName;
 	}

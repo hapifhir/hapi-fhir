@@ -67,6 +67,15 @@ public List<Patient> searchByLastName(@Required(name=Patient.SP_FAMILY) StringDt
 }
 //END SNIPPET: searchStringParam
 
+//START SNIPPET: searchNamedQuery
+@Search(queryName="namedQuery1")
+public List<Patient> searchByNamedQuery(@Required(name="someparam") StringDt theSomeParam) {
+ List<Patient> retVal = new ArrayList<Patient>();
+ // ...populate...
+ return retVal;
+}
+//END SNIPPET: searchNamedQuery
+
 //START SNIPPET: searchIdentifierParam
 @Search()
 public List<Patient> searchByIdentifier(@Required(name=Patient.SP_IDENTIFIER) IdentifierDt theId) {

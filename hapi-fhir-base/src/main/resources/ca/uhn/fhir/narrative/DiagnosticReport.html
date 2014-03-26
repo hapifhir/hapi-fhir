@@ -19,6 +19,23 @@
 		<!--/*--> Complete Blood Count <!--*/-->
 	</div>
 	
+	<table class="hapiPropertyTable">
+		<tbody>
+			<tr th:if="${not resource.status.empty}">
+				<td>Status</td>
+				<td th:text="${resource.status.value}">Final</td>
+			</tr>
+			<tr th:if="${not resource.issued.empty}">
+				<td>Issued</td>
+				<td th:narrative="${resource.issued}">22 March 2012</td>
+			</tr>
+			<tr th:if="${not resource.conclusion.empty}">
+				<td>Conclusion</td>
+				<td th:narrative="${resource.conclusion}">This is the conclusion text</td>
+			</tr>
+		</tbody>
+	</table>
+	
 	<table class="hapiTableOfValues" th:if="${not #lists.isEmpty(resource.result)} and ${resource.result[0].resource != null}">
 		<thead>
 			<tr>
@@ -53,13 +70,15 @@
 					</td>
 					<td th:text="${result.resource.status.value}">final</td>
 				</tr>
-				<tr th:class="${rowStat.odd}? 'hapiTableOfValuesRowOdd' : 'hapiTableOfValuesRowEven'" class="hapiTableOfValuesRowOdd">
+				<tr th:if="${not result.resource.comments.empty}" th:class="${rowStat.odd}? 'hapiTableOfValuesRowOdd' : 'hapiTableOfValuesRowEven'" class="hapiTableOfValuesRowOdd">
 					<td th:text="${result.resource.comments.value}" colspan="5">This is a comment</td>
 				</tr>
-				<!--/*-->
+				
+				<!--/* The following are just examples that don't appear in the generated narrative -->
 				<tr class="hapiTableOfValuesRowEven"><td>Lkc</td><td>198 g/L</td><td>H</td><td>78 g/L - 99 g/L</td><td>final</td></tr>
 				<tr class="hapiTableOfValuesRowEven"><td colspan="5">Yet another comment</td></tr>
 				<!--*/-->
+				
 			</th:block>
 		</tbody>
 	</table>

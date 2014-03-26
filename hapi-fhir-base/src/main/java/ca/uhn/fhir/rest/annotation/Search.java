@@ -19,6 +19,14 @@ import ca.uhn.fhir.model.api.IResource;
 public @interface Search {
 	
 	/**
+	 * If specified, this the name for the Named Query
+	 * 
+	 * @see See the FHIR specification section on 
+	 * 	<a href="http://www.hl7.org/implement/standards/fhir/search.html#advanced">named queries</a>
+	 */
+	String queryName() default "";
+	
+	/**
 	 * The return type for this search method. This generally does not need
 	 * to be populated for a server implementation, since servers will return
 	 * only one resource per class, but generally does need to be populated

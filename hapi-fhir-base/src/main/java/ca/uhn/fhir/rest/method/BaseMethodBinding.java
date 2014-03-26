@@ -88,7 +88,8 @@ public abstract class BaseMethodBinding {
 		if (read != null) {
 			return new ReadMethodBinding(methodReturnTypeEnum, returnType, theMethod);
 		} else if (search != null) {
-			return new SearchMethodBinding(methodReturnTypeEnum, returnType, theMethod);
+			String queryName = search.queryName();
+			return new SearchMethodBinding(methodReturnTypeEnum, returnType, theMethod, queryName);
 		} else if (conformance != null) {
 			return new ConformanceMethodBinding(methodReturnTypeEnum, returnType, theMethod);
 		} else {

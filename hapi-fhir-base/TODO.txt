@@ -35,6 +35,9 @@
  
 ---------
 Issues:
+
+ * Submit _narrative parameter as enhancement suggestion
+
  * Need to be able to bind Identifier.system to a set of allowable values in a profile. Graeme
    has suggested making value[x] repeatable in the profile definition
    

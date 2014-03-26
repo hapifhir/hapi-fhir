@@ -11,11 +11,13 @@ public class ExampleRestfulClient {
 	
 //START SNIPPET: client
 public static void main(String[] args) {
-   FhirContext ctx = new FhirContext(Patient.class);
+   FhirContext ctx = new FhirContext();
    String serverBase = "http://foo.com/fhirServerBase";
+   
+   // Create the client
    RestfulClientImpl client = ctx.newRestfulClient(RestfulClientImpl.class, serverBase);
    
-   // The client is now ready for use!
+   // Try the client out! This method will invoke the server
    List<Patient> patients = client.getPatient(new StringDt("SMITH"));
    
 }

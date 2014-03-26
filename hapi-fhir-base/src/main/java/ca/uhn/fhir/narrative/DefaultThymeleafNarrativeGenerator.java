@@ -227,8 +227,11 @@ public class DefaultThymeleafNarrativeGenerator extends BaseThymeleafNarrativeGe
 		}
 
 		@Override
-		public InputStream getResourceAsStream(TemplateProcessingParameters theTemplateProcessingParameters, String theResourceName) {
-			String template = myDatatypeClassNameToNarrativeTemplate.get(theResourceName);
+		public InputStream getResourceAsStream(TemplateProcessingParameters theTemplateProcessingParameters, String theClassName) {
+			String template = myDatatypeClassNameToNarrativeTemplate.get(theClassName);
+			if (template==null) {
+				throw new NullPointerException("No narrative template exists for datatype: " +theClassName);
+			}
 			return new ReaderInputStream(new StringReader(template));
 		}
 	}
@@ -255,10 +258,9 @@ public class DefaultThymeleafNarrativeGenerator extends BaseThymeleafNarrativeGe
 			final Object value = expression.execute(configuration, theArguments);
 
 			Context context = new Context();
-			QuantityDt datatype = new QuantityDt();
 			context.setVariable("resource", value);
 
-			String result = myDatatypeTemplateEngine.process(datatype.getClass().getCanonicalName(), context);
+			String result = myDatatypeTemplateEngine.process(value.getClass().getCanonicalName(), context);
 			Document dom = DOMUtils.getXhtmlDOMFor(new StringReader(result));
 
 			theElement.removeAttribute(theAttributeName);

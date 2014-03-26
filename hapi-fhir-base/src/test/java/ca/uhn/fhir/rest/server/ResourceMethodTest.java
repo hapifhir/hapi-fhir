@@ -24,7 +24,7 @@ public class ResourceMethodTest {
 
 	@Before
 	public void before() throws NoSuchMethodException, SecurityException {
-		rm = new SearchMethodBinding(MethodReturnTypeEnum.RESOURCE, Patient.class, ResourceMethodTest.class.getMethod("before"));
+		rm = new SearchMethodBinding(MethodReturnTypeEnum.RESOURCE, Patient.class, ResourceMethodTest.class.getMethod("before"), null);
 	}
 	
 	@Test

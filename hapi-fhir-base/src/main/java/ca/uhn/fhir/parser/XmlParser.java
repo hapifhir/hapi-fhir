@@ -473,7 +473,7 @@ public class XmlParser extends BaseParser implements IParser {
 	}
 
 	private void encodeXhtml(XhtmlDt theDt, XMLStreamWriter theEventWriter) throws XMLStreamException {
-		if (theDt == null || theDt.getValue() == null) {
+		if (theDt == null || theDt.getValue() == null || getSuppressNarratives()) {
 			return;
 		}
 

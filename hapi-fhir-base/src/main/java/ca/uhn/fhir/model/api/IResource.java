@@ -1,6 +1,7 @@
 package ca.uhn.fhir.model.api;
 
 import ca.uhn.fhir.model.dstu.composite.ContainedDt;
+import ca.uhn.fhir.model.dstu.composite.NarrativeDt;
 
 public interface IResource extends ICompositeElement {
 
@@ -15,6 +16,8 @@ public interface IResource extends ICompositeElement {
 	 * </p>
 	 * TODO: document contained resources and link there
 	 */
-	public ContainedDt getContained();
+	ContainedDt getContained();
 
+	NarrativeDt getText();
+	
 }

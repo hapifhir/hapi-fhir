@@ -7,6 +7,7 @@ import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.dstu.composite.ContainedDt;
+import ca.uhn.fhir.model.dstu.composite.NarrativeDt;
 
 @ResourceDef(name="Binary", profile="http://hl7.org/fhir/profiles/Binary", id="binary")
 public class Binary  extends BaseElement implements IResource {
@@ -34,6 +35,11 @@ public class Binary  extends BaseElement implements IResource {
 	public ContainedDt getContained() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public NarrativeDt getText() {
+		throw new IllegalStateException();
 	}
 
 }

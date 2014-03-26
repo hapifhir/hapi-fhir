@@ -228,6 +228,19 @@
 					<code>http://fhir.example.com/Observation?name=urn:fakenames|123,urn:fakenames|456</code>
 				</p>
 					
+				<h4>AND Relationship Query Parameters</h4>
+				
+				<p>
+					To accept a composite parameter, use a parameter type which implements the
+					<a href="./apidocs/ca/uhn/fhir/model/api/IQueryParameterAnd.html">IQueryParameterAnd</a>
+					interface.
+				</p>
+				
+				<p>
+					See the section below on <a href="#DATE_RANGES">date ranges</a> for
+					one example of an AND parameter.
+				</p>
+				
 			</subsection>
 			
 			<subsection name="Date Parameters - Simple">
@@ -270,6 +283,7 @@
 
 			</subsection>
 			
+			<a name="DATE_RANGES"/>
 			<subsection name="Date Parameters - Ranges">
 
 				<p>
@@ -331,6 +345,31 @@
 				<p>
 					Example URL to invoke this method:<br/>
 					<code>http://fhir.example.com/DiagnosticReport?subject.identifier=7000135&amp;_include=DiagnosticReport.subject</code>
+				</p>
+				
+			</subsection>
+
+			<subsection name="Named Queries (_query)">
+			
+				<p>
+					FHIR supports <a href="http://www.hl7.org/implement/standards/fhir/search.html#advanced">named queries</a>,
+					which may have specific behaviour defined. The following example shows how to create a Search
+					operation with a name. 
+				</p>
+				
+				<p>
+					This operation can only be invoked by explicitly specifying the given query name
+					in the request URL. Note that the query does not need to take any parameters.  
+				</p>
+
+				<macro name="snippet">
+					<param name="id" value="searchNamedQuery" />
+					<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
+				</macro>
+				
+				<p>
+					Example URL to invoke this method:<br/>
+					<code>http://fhir.example.com/Patient?_query=namedQuery1&amp;someparam=value</code>
 				</p>
 				
 			</subsection>

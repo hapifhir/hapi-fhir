@@ -1,0 +1,7 @@
+<div th:switch="${resource.precision.name()}">
+	<th:block th:case="YEAR" th:text="${#dates.format(resource.value,'yyyy')}">22 March 2012</th:block>
+	<th:block th:case="MONTH" th:text="${#dates.format(resource.value,'MMMM yyyy')}"></th:block>
+	<th:block th:case="DAY" th:text="${#dates.format(resource.value,'dd MMMM yyyy')}"></th:block>
+	<th:block th:case="SECOND" th:text="${#dates.format(resource.value,'dd MMMM yyyy HH:mm:ss')}"></th:block>
+	<th:block th:case="MILLI" th:text="${#dates.format(resource.value,'dd MMMM yyyy HH:mm:ss')}"></th:block>
+</div>

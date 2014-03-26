@@ -546,6 +546,47 @@ public class ResfulServerMethodTest {
 
 	}
 
+	
+	@Test
+	public void testSearchNamedNoParams() throws Exception {
+
+		// HttpPost httpPost = new HttpPost("http://localhost:" + ourPort +
+		// "/Patient/1");
+		// httpPost.setEntity(new StringEntity("test",
+		// ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/?_query=someQueryNoParams");
+		HttpResponse status = ourClient.execute(httpGet);
+
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		ourLog.info("Response was:\n{}", responseContent);
+
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		Patient patient = (Patient) ourCtx.newXmlParser().parseBundle(responseContent).getEntries().get(0).getResource();
+		assertEquals("someQueryNoParams", patient.getName().get(1).getFamilyAsSingleString());
+
+	}
+	
+	@Test
+	public void testSearchNamedOneParam() throws Exception {
+
+		// HttpPost httpPost = new HttpPost("http://localhost:" + ourPort +
+		// "/Patient/1");
+		// httpPost.setEntity(new StringEntity("test",
+		// ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/?_query=someQueryOneParam&param1=AAAA");
+		HttpResponse status = ourClient.execute(httpGet);
+
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		ourLog.info("Response was:\n{}", responseContent);
+
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		Patient patient = (Patient) ourCtx.newXmlParser().parseBundle(responseContent).getEntries().get(0).getResource();
+		assertEquals("AAAA", patient.getName().get(1).getFamilyAsSingleString());
+
+	}
+	
 	public static class DummyRestfulServer extends RestfulServer {
 
 		private static final long serialVersionUID = 1L;
@@ -602,6 +643,20 @@ public class ResfulServerMethodTest {
 				idToPatient.put("2", patient);
 			}
 			return idToPatient;
+		}
+
+		@Search(queryName="someQueryNoParams")
+		public Patient getPatientNoParams() {
+			Patient next = getIdToPatient().get("1");
+			next.addName().addFamily("someQueryNoParams");
+			return next;
+		}
+
+		@Search(queryName="someQueryOneParam")
+		public Patient getPatientOneParam(@Required(name="param1") StringDt theParam) {
+			Patient next = getIdToPatient().get("1");
+			next.addName().addFamily(theParam.getValue());
+			return next;
 		}
 
 		@Search()

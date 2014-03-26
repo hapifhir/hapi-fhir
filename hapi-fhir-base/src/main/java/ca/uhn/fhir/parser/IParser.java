@@ -32,4 +32,10 @@ public interface IParser {
 
 	IParser setPrettyPrint(boolean thePrettyPrint);
 
+	/**
+	 * If set to <code>true</code> (default is <code>false</code>), narratives will not be included in the
+	 * encoded values.
+	 */
+	IParser setSuppressNarratives(boolean theSuppressNarratives);
+
 }

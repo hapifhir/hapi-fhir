@@ -1,5 +1,7 @@
 package ca.uhn.fhir.rest.method;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -9,7 +11,7 @@ public class Request {
 
 	private IdDt myId;
 	private String myOperation;
-	private Set<String> myParameterNames;
+	private Map<String, String[]> myParameterNames;
 	private RequestType myRequestType;
 	private String myResourceName;
 	private IdDt myVersion;
@@ -22,7 +24,7 @@ public class Request {
 		return myOperation;
 	}
 
-	public Set<String> getParameterNames() {
+	public Map<String, String[]> getParameterNames() {
 		return myParameterNames;
 	}
 
@@ -46,8 +48,8 @@ public class Request {
 		myOperation = theOperation;
 	}
 
-	public void setParameterNames(Set<String> theParameterNames) {
-		myParameterNames = theParameterNames;
+	public void setParameterNames(Map<String, String[]> theParams) {
+		myParameterNames = theParams;
 	}
 
 	public void setRequestType(RequestType theRequestType) {
@@ -62,11 +64,15 @@ public class Request {
 		myVersion = theVersion;
 	}
 
-	public static Request withResourceAndParams(String theResourceName, RequestType theRequestType, Set<String> theParamNamess) {
+	public static Request withResourceAndParams(String theResourceName, RequestType theRequestType, Set<String> theParamNames) {
 		Request retVal = new Request();
 		retVal.setResourceName(theResourceName);
-		retVal.setParameterNames(theParamNamess);
 		retVal.setRequestType(theRequestType);
+		Map<String, String[]> paramNames = new HashMap<String, String[]>();
+		for (String next : theParamNames) {
+			paramNames.put(next, new String[0]);
+		}
+		retVal.setParameterNames(paramNames);
 		return retVal;
 	}
 

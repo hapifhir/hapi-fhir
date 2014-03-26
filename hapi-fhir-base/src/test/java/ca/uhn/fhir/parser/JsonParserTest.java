@@ -64,8 +64,9 @@ public class JsonParserTest {
 	public void testNarrativeGeneration() throws DataFormatException, IOException {
 		
 		Patient patient = new Patient();
-		
 		patient.addName().addFamily("Smith");
+		Organization org = new Organization();
+		patient.getManagingOrganization().setResource(org);
 		
 		INarrativeGenerator gen = mock(INarrativeGenerator.class);
 		XhtmlDt xhtmlDt = new XhtmlDt("<div>help</div>");

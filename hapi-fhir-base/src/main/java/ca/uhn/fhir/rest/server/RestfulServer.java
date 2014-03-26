@@ -41,8 +41,6 @@ import ca.uhn.fhir.rest.server.provider.ServerProfileProvider;
 
 public abstract class RestfulServer extends HttpServlet {
 
-	private static final String PARAM_HISTORY = "_history";
-	private static final String PARAM_PRETTY = "_pretty";
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RestfulServer.class);
 
@@ -164,7 +162,7 @@ public abstract class RestfulServer extends HttpServlet {
 		return myFhirContext;
 	}
 
-	private IParser getNewParser(EncodingUtil theResponseEncoding, boolean thePrettyPrint) {
+	private IParser getNewParser(EncodingUtil theResponseEncoding, boolean thePrettyPrint, NarrativeModeEnum theNarrativeMode) {
 		IParser parser;
 		switch (theResponseEncoding) {
 		case JSON:
@@ -175,7 +173,7 @@ public abstract class RestfulServer extends HttpServlet {
 			parser = myFhirContext.newXmlParser();
 			break;
 		}
-		return parser.setPrettyPrint(thePrettyPrint);
+		return parser.setPrettyPrint(thePrettyPrint).setSuppressNarratives(theNarrativeMode == NarrativeModeEnum.SUPPRESS);
 	}
 
 	public Collection<ResourceBinding> getResourceBindings() {
@@ -202,6 +200,16 @@ public abstract class RestfulServer extends HttpServlet {
 		return new ServerProfileProvider(getFhirContext());
 	}
 
+	public enum NarrativeModeEnum {
+		NORMAL, 
+		SUPPRESS, 
+		ONLY;
+		
+		public static NarrativeModeEnum valueOfCaseInsensitive(String theCode) {
+			return valueOf(NarrativeModeEnum.class, theCode.toUpperCase());
+		}
+	}
+	
 	protected void handleRequest(SearchMethodBinding.RequestType requestType, HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		try {
 
@@ -260,12 +268,21 @@ public abstract class RestfulServer extends HttpServlet {
 			Map<String, String[]> params = new HashMap<String, String[]>(request.getParameterMap());
 			EncodingUtil responseEncoding = determineResponseEncoding(request, params);
 
-			String[] pretty = params.remove(PARAM_PRETTY);
+			String[] pretty = params.remove(Constants.PARAM_PRETTY);
 			boolean prettyPrint = false;
 			if (pretty != null && pretty.length > 0) {
 				if ("true".equals(pretty[0])) {
 					prettyPrint = true;
 				}
+			}
+
+			String[] narrative = params.remove(Constants.PARAM_NARRATIVE);
+			NarrativeModeEnum narrativeMode = null;
+			if (narrative != null && narrative.length > 0) {
+				narrativeMode = NarrativeModeEnum.valueOfCaseInsensitive(narrative[0]);
+			}
+			if (narrativeMode==null) {
+				narrativeMode = NarrativeModeEnum.NORMAL;
 			}
 
 			StringTokenizer tok = new StringTokenizer(requestPath, "/");
@@ -297,7 +314,7 @@ public abstract class RestfulServer extends HttpServlet {
 
 			if (tok.hasMoreTokens()) {
 				String nextString = tok.nextToken();
-				if (nextString.startsWith(PARAM_HISTORY)) {
+				if (nextString.startsWith(Constants.PARAM_HISTORY)) {
 					if (tok.hasMoreTokens()) {
 						versionId = new IdDt(tok.nextToken());
 					} else {
@@ -313,7 +330,7 @@ public abstract class RestfulServer extends HttpServlet {
 			r.setId(id);
 			r.setVersion(versionId);
 			r.setOperation(operation);
-			r.setParameterNames(params.keySet());
+			r.setParameterNames(params);
 			r.setRequestType(requestType);
 
 			BaseMethodBinding resourceMethod = resourceBinding.getMethod(r);
@@ -324,7 +341,7 @@ public abstract class RestfulServer extends HttpServlet {
 			List<IResource> result = resourceMethod.invokeServer(resourceBinding.getResourceProvider(), id, versionId, params);
 			switch (resourceMethod.getReturnType()) {
 			case BUNDLE:
-				streamResponseAsBundle(response, result, responseEncoding, fhirServerBase, completeUrl, prettyPrint, requestIsBrowser);
+				streamResponseAsBundle(response, result, responseEncoding, fhirServerBase, completeUrl, prettyPrint, requestIsBrowser, narrativeMode);
 				break;
 			case RESOURCE:
 				if (result.size() == 0) {
@@ -332,7 +349,7 @@ public abstract class RestfulServer extends HttpServlet {
 				} else if (result.size() > 1) {
 					throw new InternalErrorException("Method returned multiple resources");
 				}
-				streamResponseAsResource(response, result.get(0), responseEncoding, prettyPrint, requestIsBrowser);
+				streamResponseAsResource(response, result.get(0), responseEncoding, prettyPrint, requestIsBrowser, narrativeMode);
 				break;
 			}
 			// resourceMethod.get
@@ -409,13 +426,15 @@ public abstract class RestfulServer extends HttpServlet {
 	}
 
 	private void streamResponseAsBundle(HttpServletResponse theHttpResponse, List<IResource> theResult, EncodingUtil theResponseEncoding, String theServerBase, String theCompleteUrl,
-			boolean thePrettyPrint, boolean theRequestIsBrowser) throws IOException {
+			boolean thePrettyPrint, boolean theRequestIsBrowser, NarrativeModeEnum theNarrativeMode) throws IOException {
 		assert !theServerBase.endsWith("/");
 
 		theHttpResponse.setStatus(200);
 
 		if (theRequestIsBrowser && myUseBrowserFriendlyContentTypes) {
 			theHttpResponse.setContentType(theResponseEncoding.getBrowserFriendlyBundleContentType());
+		} else if (theNarrativeMode == NarrativeModeEnum.ONLY) {
+			theHttpResponse.setContentType(Constants.CT_HTML);
 		} else {
 			theHttpResponse.setContentType(theResponseEncoding.getBundleContentType());
 		}
@@ -449,7 +468,7 @@ public abstract class RestfulServer extends HttpServlet {
 				b.append(next.getId().getValue());
 				boolean haveQ = false;
 				if (thePrettyPrint) {
-					b.append('?').append(PARAM_PRETTY).append("=true");
+					b.append('?').append(Constants.PARAM_PRETTY).append("=true");
 					haveQ = true;
 				}
 				if (theResponseEncoding == EncodingUtil.JSON) {
@@ -461,6 +480,9 @@ public abstract class RestfulServer extends HttpServlet {
 					}
 					b.append(Constants.PARAM_FORMAT).append("=json");
 				}
+				if (theNarrativeMode != NarrativeModeEnum.NORMAL) {
+					b.append(Constants.PARAM_NARRATIVE).append("=").append(theNarrativeMode.name().toLowerCase());
+				}
 				entry.getLinkSelf().setValue(b.toString());
 			}
 		}
@@ -469,26 +491,41 @@ public abstract class RestfulServer extends HttpServlet {
 
 		PrintWriter writer = theHttpResponse.getWriter();
 		try {
-			getNewParser(theResponseEncoding, thePrettyPrint).encodeBundleToWriter(bundle, writer);
-		} finally {
+			if (theNarrativeMode == NarrativeModeEnum.ONLY) {
+				for (IResource next : theResult) {
+					writer.append(next.getText().getDiv().getValueAsString());
+					writer.append("<hr/>");
+				}
+			} else {
+			getNewParser(theResponseEncoding, thePrettyPrint, theNarrativeMode).encodeBundleToWriter(bundle, writer);
+			}		} finally {
 			writer.close();
 		}
 	}
 
-	private void streamResponseAsResource(HttpServletResponse theHttpResponse, IResource theResource, EncodingUtil theResponseEncoding, boolean thePrettyPrint, boolean theRequestIsBrowser)
+	private void streamResponseAsResource(HttpServletResponse theHttpResponse, IResource theResource, EncodingUtil theResponseEncoding, boolean thePrettyPrint, boolean theRequestIsBrowser, NarrativeModeEnum theNarrativeMode)
 			throws IOException {
 
 		theHttpResponse.setStatus(200);
 		if (theRequestIsBrowser && myUseBrowserFriendlyContentTypes) {
 			theHttpResponse.setContentType(theResponseEncoding.getBrowserFriendlyBundleContentType());
+		} else if (theNarrativeMode == NarrativeModeEnum.ONLY) {
+			theHttpResponse.setContentType(Constants.CT_HTML);
 		} else {
-			theHttpResponse.setContentType(theResponseEncoding.getBundleContentType());
+			theHttpResponse.setContentType(theResponseEncoding.getResourceContentType());
 		}
 		theHttpResponse.setCharacterEncoding("UTF-8");
 
 		PrintWriter writer = theHttpResponse.getWriter();
-		getNewParser(theResponseEncoding, thePrettyPrint).encodeResourceToWriter(theResource, writer);
+		try {
+		if (theNarrativeMode == NarrativeModeEnum.ONLY) {
+			writer.append(theResource.getText().getDiv().getValueAsString());
+		} else {
+			getNewParser(theResponseEncoding, thePrettyPrint, theNarrativeMode).encodeResourceToWriter(theResource, writer);
+		}
+		} finally {
 		writer.close();
+		}
 
 	}
 

@@ -18,6 +18,11 @@ public class Constants {
 	public static final Map<String, EncodingUtil> FORMAT_VAL_TO_ENCODING;
 	public static final String CT_XML = "application/xml";
 	public static final String CT_JSON = "application/json";
+	public static final String CT_HTML = "text/html";
+	public static final String PARAM_NARRATIVE = "_narrative";
+	public  static final String PARAM_HISTORY = "_history";
+	public static final String PARAM_PRETTY = "_pretty";
+	public static final String PARAM_QUERY = "_query";
 
 	static {
 		Map<String, EncodingUtil> valToEncoding = new HashMap<String, EncodingUtil>();

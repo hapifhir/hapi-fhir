@@ -10,12 +10,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
+
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.client.GetClientInvocation;
 import ca.uhn.fhir.rest.param.IParameter;
+import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -27,16 +30,16 @@ import ca.uhn.fhir.util.QueryUtil;
 public class SearchMethodBinding extends BaseMethodBinding {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchMethodBinding.class);
 
-	private Method method;
-
+	private Method myMethod;
 	private Class<?> myDeclaredResourceType;
 	private List<IParameter> myParameters;
+	private String myQueryName;
 
-	public SearchMethodBinding(MethodReturnTypeEnum theMethodReturnTypeEnum, Class<? extends IResource> theReturnResourceType, Method theMethod) {
+	public SearchMethodBinding(MethodReturnTypeEnum theMethodReturnTypeEnum, Class<? extends IResource> theReturnResourceType, Method theMethod, String theQueryName) {
 		super(theMethodReturnTypeEnum, theReturnResourceType);
-		this.method = theMethod;
+		this.myMethod = theMethod;
 		this.myParameters = Util.getResourceParameters(theMethod);
-
+		this.myQueryName = StringUtils.defaultIfBlank(theQueryName, null);
 		this.myDeclaredResourceType = theMethod.getReturnType();
 	}
 
@@ -45,7 +48,7 @@ public class SearchMethodBinding extends BaseMethodBinding {
 	}
 
 	public Method getMethod() {
-		return method;
+		return myMethod;
 	}
 
 	public List<IParameter> getParameters() {
@@ -59,43 +62,50 @@ public class SearchMethodBinding extends BaseMethodBinding {
 
 	@Override
 	public GetClientInvocation invokeClient(Object[] theArgs) throws InternalErrorException {
-		assert theArgs.length == myParameters.size() : "Wrong number of arguments: " + theArgs.length;
+		 assert (myQueryName == null || ((theArgs != null ? theArgs.length : 0) == myParameters.size())) : "Wrong number of arguments: " + theArgs;
 
 		Map<String, List<String>> args = new LinkedHashMap<String, List<String>>();
 
-		for (int idx = 0; idx < theArgs.length; idx++) {
-			Object object = theArgs[idx];
-			IParameter nextParam = myParameters.get(idx);
+		if (myQueryName != null) {
+			args.put(Constants.PARAM_QUERY, Collections.singletonList(myQueryName));
+		}
 
-			if (object == null) {
-				if (nextParam.isRequired()) {
-					throw new NullPointerException("SearchParameter '" + nextParam.getName() + "' is required and may not be null");
-				}
-			} else {
-				List<List<String>> value = nextParam.encode(object);
-				ArrayList<String> paramValues = new ArrayList<String>(value.size());
-				args.put(nextParam.getName(), paramValues);
+		if (theArgs != null) {
+			for (int idx = 0; idx < theArgs.length; idx++) {
+				Object object = theArgs[idx];
+				IParameter nextParam = myParameters.get(idx);
 
-				for (List<String> nextParamEntry : value) {
-					StringBuilder b = new StringBuilder();
-					for (String str : nextParamEntry) {
-						if (b.length() > 0) {
-							b.append(",");
-						}
-						b.append(str.replace(",", "\\,"));
+				if (object == null) {
+					if (nextParam.isRequired()) {
+						throw new NullPointerException("SearchParameter '" + nextParam.getName() + "' is required and may not be null");
 					}
-					paramValues.add(b.toString());
-				}
-				
-			}
+				} else {
+					List<List<String>> value = nextParam.encode(object);
+					ArrayList<String> paramValues = new ArrayList<String>(value.size());
+					args.put(nextParam.getName(), paramValues);
 
+					for (List<String> nextParamEntry : value) {
+						StringBuilder b = new StringBuilder();
+						for (String str : nextParamEntry) {
+							if (b.length() > 0) {
+								b.append(",");
+							}
+							b.append(str.replace(",", "\\,"));
+						}
+						paramValues.add(b.toString());
+					}
+
+				}
+
+			}
 		}
 
 		return new GetClientInvocation(args, getResourceName());
 	}
 
 	@Override
-	public List<IResource> invokeServer(IResourceProvider theResourceProvider, IdDt theId, IdDt theVersionId, Map<String, String[]> parameterValues) throws InvalidRequestException, InternalErrorException {
+	public List<IResource> invokeServer(IResourceProvider theResourceProvider, IdDt theId, IdDt theVersionId, Map<String, String[]> parameterValues) throws InvalidRequestException,
+			InternalErrorException {
 		assert theId == null;
 		assert theVersionId == null;
 
@@ -109,23 +119,23 @@ public class SearchMethodBinding extends BaseMethodBinding {
 				}
 				continue;
 			}
-			
-			List<List<String>> paramList=new ArrayList<List<String>>(value.length);
+
+			List<List<String>> paramList = new ArrayList<List<String>>(value.length);
 			for (String nextParam : value) {
-				if (nextParam.contains(",")==false) {
+				if (nextParam.contains(",") == false) {
 					paramList.add(Collections.singletonList(nextParam));
-				}else {
+				} else {
 					paramList.add(QueryUtil.splitQueryStringByCommasIgnoreEscape(nextParam));
 				}
 			}
-			
+
 			params[i] = param.parse(paramList);
-			
+
 		}
 
 		Object response;
 		try {
-			response = this.method.invoke(theResourceProvider, params);
+			response = this.myMethod.invoke(theResourceProvider, params);
 		} catch (IllegalAccessException e) {
 			throw new InternalErrorException(e);
 		} catch (IllegalArgumentException e) {
@@ -141,7 +151,7 @@ public class SearchMethodBinding extends BaseMethodBinding {
 	@Override
 	public boolean matches(Request theRequest) {
 		if (!theRequest.getResourceName().equals(getResourceName())) {
-			ourLog.trace("Method {} doesn't match because resource name {} != {}", method.getName(), theRequest.getResourceName(), getResourceName());
+			ourLog.trace("Method {} doesn't match because resource name {} != {}", myMethod.getName(), theRequest.getResourceName(), getResourceName());
 			return false;
 		}
 		if (theRequest.getId() != null || theRequest.getVersion() != null) {
@@ -161,20 +171,35 @@ public class SearchMethodBinding extends BaseMethodBinding {
 		for (int i = 0; i < this.myParameters.size(); i++) {
 			IParameter temp = this.myParameters.get(i);
 			methodParamsTemp.add(temp.getName());
-			if (temp.isRequired() && !theRequest.getParameterNames().contains(temp.getName())) {
-				ourLog.trace("Method {} doesn't match param '{}' is not present", method.getName(), temp.getName());
+			if (temp.isRequired() && !theRequest.getParameterNames().containsKey(temp.getName())) {
+				ourLog.trace("Method {} doesn't match param '{}' is not present", myMethod.getName(), temp.getName());
 				return false;
 			}
 		}
-		boolean retVal = methodParamsTemp.containsAll(theRequest.getParameterNames());
+		if (myQueryName != null) {
+			String[] queryNameValues = theRequest.getParameterNames().get(Constants.PARAM_QUERY);
+			if (queryNameValues != null && StringUtils.isNotBlank(queryNameValues[0])) {
+				String queryName = queryNameValues[0];
+				if (!myQueryName.equals(queryName)) {
+					ourLog.trace("Query name does not match {}", myQueryName);
+					return false;
+				} else {
+					methodParamsTemp.add(Constants.PARAM_QUERY);
+				}
+			} else {
+				ourLog.trace("Query name does not match {}", myQueryName);
+				return false;
+			}
+		}
+		boolean retVal = methodParamsTemp.containsAll(theRequest.getParameterNames().keySet());
 
-		ourLog.trace("Method {} matches: {}", method.getName(), retVal);
+		ourLog.trace("Method {} matches: {}", myMethod.getName(), retVal);
 
 		return retVal;
 	}
 
 	public void setMethod(Method method) {
-		this.method = method;
+		this.myMethod = method;
 	}
 
 	public void setParameters(List<IParameter> parameters) {

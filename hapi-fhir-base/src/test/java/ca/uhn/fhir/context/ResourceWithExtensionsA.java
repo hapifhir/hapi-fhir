@@ -2,6 +2,8 @@ package ca.uhn.fhir.context;
 
 import java.util.List;
 
+import javax.naming.OperationNotSupportedException;
+
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IExtension;
 import ca.uhn.fhir.model.api.IResource;
@@ -11,6 +13,7 @@ import ca.uhn.fhir.model.api.annotation.Extension;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.dstu.composite.ContainedDt;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
+import ca.uhn.fhir.model.dstu.composite.NarrativeDt;
 import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
@@ -232,8 +235,12 @@ public class ResourceWithExtensionsA implements IResource {
 
 	@Override
 	public ContainedDt getContained() {
-		// TODO Auto-generated method stub
-		return null;
+		throw new IllegalStateException();
+	}
+
+	@Override
+	public NarrativeDt getText() {
+		throw new IllegalStateException();
 	}
 
 }

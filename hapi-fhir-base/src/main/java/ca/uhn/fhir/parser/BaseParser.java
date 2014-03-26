@@ -19,6 +19,8 @@ import ca.uhn.fhir.model.primitive.IdDt;
 
 public abstract class BaseParser implements IParser {
 
+	private boolean mySuppressNarratives;
+
 	@SuppressWarnings("cast")
 	@Override
 	public <T extends IResource> T parseResource(Class<T> theResourceType, String theMessageString) {
@@ -80,5 +82,20 @@ public abstract class BaseParser implements IParser {
 		}
 		throw new DataFormatException(nextChild + " has no child of type " + type);
 	}
+
+	@Override
+	public IParser setSuppressNarratives(boolean theSuppressNarratives) {
+		mySuppressNarratives=theSuppressNarratives;
+		return this;
+	}
+
+	/**
+	 * If set to <code>true</code> (default is <code>false</code>), narratives will not be included in the
+	 * encoded values.
+	 */
+	public boolean getSuppressNarratives() {
+		return mySuppressNarratives;
+	}
+
 
 }
