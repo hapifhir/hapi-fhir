@@ -9,7 +9,7 @@ import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.resource.Organization;
 import ca.uhn.fhir.model.dstu.resource.Patient;
-import ca.uhn.fhir.rest.annotation.Required;
+import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.client.api.IRestfulClient;
 
@@ -27,7 +27,7 @@ public class CompleteExampleClient {
 		 * http://fhir.healthintersections.com.au/open/Patient?identifier=urn:oid:1.2.36.146.595.217.0.1%7C12345 
 		 */
 		@Search
-		List<Patient> findPatientsForMrn(@Required(name=Patient.SP_IDENTIFIER) IdentifierDt theIdentifier);
+		List<Patient> findPatientsForMrn(@RequiredParam(name=Patient.SP_IDENTIFIER) IdentifierDt theIdentifier);
 		
 	}
 

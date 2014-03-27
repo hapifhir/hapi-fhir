@@ -9,9 +9,9 @@ import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
-import ca.uhn.fhir.rest.annotation.Id;
+import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
-import ca.uhn.fhir.rest.annotation.Required;
+import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 
@@ -42,7 +42,7 @@ public class RestfulObservationResourceProvider implements IResourceProvider {
 	 *    Returns a resource matching this identifier, or null if none exists.
 	 */
 	@Read()
-	public Patient getResourceById(@Id IdDt theId) {
+	public Patient getResourceById(@IdParam IdDt theId) {
 		Patient patient = new Patient();
 		patient.addIdentifier();
 		patient.getIdentifier().get(0).setSystem(new UriDt("urn:hapitest:mrns"));
@@ -70,7 +70,7 @@ public class RestfulObservationResourceProvider implements IResourceProvider {
 	 *    matching resources, or it may also be empty.
 	 */
 	@Search()
-	public List<Patient> getPatient(@Required(name = Patient.SP_FAMILY) StringDt theFamilyName) {
+	public List<Patient> getPatient(@RequiredParam(name = Patient.SP_FAMILY) StringDt theFamilyName) {
 		Patient patient = new Patient();
 		patient.addIdentifier();
 		patient.getIdentifier().get(0).setUse(IdentifierUseEnum.OFFICIAL);

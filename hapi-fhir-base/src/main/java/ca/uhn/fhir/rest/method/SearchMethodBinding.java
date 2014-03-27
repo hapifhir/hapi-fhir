@@ -2,7 +2,6 @@ package ca.uhn.fhir.rest.method;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -19,11 +18,11 @@ import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.client.GetClientInvocation;
 import ca.uhn.fhir.rest.param.IParameter;
+import ca.uhn.fhir.rest.param.IQueryParameter;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.util.QueryUtil;
 
 /**
  * Created by dsotnikov on 2/25/2014.
@@ -69,43 +68,20 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 	public GetClientInvocation invokeClient(Object[] theArgs) throws InternalErrorException {
 		 assert (myQueryName == null || ((theArgs != null ? theArgs.length : 0) == myParameters.size())) : "Wrong number of arguments: " + theArgs;
 
-		Map<String, List<String>> args = new LinkedHashMap<String, List<String>>();
+		Map<String, List<String>> queryStringArgs = new LinkedHashMap<String, List<String>>();
 
 		if (myQueryName != null) {
-			args.put(Constants.PARAM_QUERY, Collections.singletonList(myQueryName));
+			queryStringArgs.put(Constants.PARAM_QUERY, Collections.singletonList(myQueryName));
 		}
 
 		if (theArgs != null) {
 			for (int idx = 0; idx < theArgs.length; idx++) {
-				Object object = theArgs[idx];
 				IParameter nextParam = myParameters.get(idx);
-
-				if (object == null) {
-					if (nextParam.isRequired()) {
-						throw new NullPointerException("SearchParameter '" + nextParam.getName() + "' is required and may not be null");
-					}
-				} else {
-					List<List<String>> value = nextParam.encode(object);
-					ArrayList<String> paramValues = new ArrayList<String>(value.size());
-					args.put(nextParam.getName(), paramValues);
-
-					for (List<String> nextParamEntry : value) {
-						StringBuilder b = new StringBuilder();
-						for (String str : nextParamEntry) {
-							if (b.length() > 0) {
-								b.append(",");
-							}
-							b.append(str.replace(",", "\\,"));
-						}
-						paramValues.add(b.toString());
-					}
-
-				}
-
+				nextParam.translateClientArgumentIntoQueryArgument(theArgs[idx], queryStringArgs);
 			}
 		}
 
-		return new GetClientInvocation(args, getResourceName());
+		return new GetClientInvocation(queryStringArgs, getResourceName());
 	}
 
 	@Override
@@ -117,25 +93,7 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 		Object[] params = new Object[myParameters.size()];
 		for (int i = 0; i < myParameters.size(); i++) {
 			IParameter param = myParameters.get(i);
-			String[] value = parameterValues.get(param.getName());
-			if (value == null || value.length == 0) {
-				if (param.handlesMissing()) {
-					params[i] = param.parse(new ArrayList<List<String>>(0));
-				}
-				continue;
-			}
-
-			List<List<String>> paramList = new ArrayList<List<String>>(value.length);
-			for (String nextParam : value) {
-				if (nextParam.contains(",") == false) {
-					paramList.add(Collections.singletonList(nextParam));
-				} else {
-					paramList.add(QueryUtil.splitQueryStringByCommasIgnoreEscape(nextParam));
-				}
-			}
-
-			params[i] = param.parse(paramList);
-
+			params[i] = param.translateQueryParametersIntoServerArgument(parameterValues, null);
 		}
 
 		Object response;
@@ -174,7 +132,10 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 
 		Set<String> methodParamsTemp = new HashSet<String>();
 		for (int i = 0; i < this.myParameters.size(); i++) {
-			IParameter temp = this.myParameters.get(i);
+			if (!(myParameters.get(i) instanceof IQueryParameter)) {
+				continue;
+			}
+			IQueryParameter temp = (IQueryParameter) myParameters.get(i);
 			methodParamsTemp.add(temp.getName());
 			if (temp.isRequired() && !theRequest.getParameters().containsKey(temp.getName())) {
 				ourLog.trace("Method {} doesn't match param '{}' is not present", getMethod().getName(), temp.getName());

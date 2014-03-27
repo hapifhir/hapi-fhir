@@ -10,7 +10,7 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.resource.Profile;
 import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.rest.annotation.Id;
+import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.server.IResourceProvider;
@@ -29,7 +29,7 @@ public class ServerProfileProvider implements IResourceProvider {
 	}
 	
 	@Read()
-	public Profile getProfileById(@Id IdDt theId) {
+	public Profile getProfileById(@IdParam IdDt theId) {
 		RuntimeResourceDefinition retVal = myContext.getResourceDefinitionById(theId.getValue());
 		if (retVal==null) {
 			return null;

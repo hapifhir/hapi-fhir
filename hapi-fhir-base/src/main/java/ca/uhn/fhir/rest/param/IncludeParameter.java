@@ -9,16 +9,16 @@ import java.util.TreeSet;
 
 import ca.uhn.fhir.model.api.PathSpecification;
 import ca.uhn.fhir.model.dstu.valueset.SearchParamTypeEnum;
-import ca.uhn.fhir.rest.annotation.Include;
+import ca.uhn.fhir.rest.annotation.IncludeParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
-public class IncludeParameter implements IParameter {
+public class IncludeParameter extends IQueryParameter {
 
 	private Class<? extends Collection<PathSpecification>> myInstantiableCollectionType;
 	private HashSet<String> myAllow;
 
-	public IncludeParameter(Include theAnnotation, Class<? extends Collection<PathSpecification>> theInstantiableCollectionType) {
+	public IncludeParameter(IncludeParam theAnnotation, Class<? extends Collection<PathSpecification>> theInstantiableCollectionType) {
 		myInstantiableCollectionType = theInstantiableCollectionType;
 		if (theAnnotation.allow().length > 0) {
 			myAllow = new HashSet<String>();

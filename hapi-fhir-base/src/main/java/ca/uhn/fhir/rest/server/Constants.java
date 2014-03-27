@@ -23,6 +23,8 @@ public class Constants {
 	public  static final String PARAM_HISTORY = "_history";
 	public static final String PARAM_PRETTY = "_pretty";
 	public static final String PARAM_QUERY = "_query";
+	public static final int STATUS_HTTP_201_CREATED = 201;
+	public static final String CT_TEXT = "text/plain";
 
 	static {
 		Map<String, EncodingUtil> valToEncoding = new HashMap<String, EncodingUtil>();

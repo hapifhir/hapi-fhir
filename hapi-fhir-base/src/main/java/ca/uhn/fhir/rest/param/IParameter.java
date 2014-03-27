@@ -1,27 +1,27 @@
 package ca.uhn.fhir.rest.param;
 
 import java.util.List;
+import java.util.Map;
 
-import ca.uhn.fhir.model.dstu.valueset.SearchParamTypeEnum;
+import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 public interface IParameter {
 
-	List<List<String>> encode(Object theObject) throws InternalErrorException;
+	void translateClientArgumentIntoQueryArgument(Object theSourceClientArgument, Map<String, List<String>> theTargetQueryArguments) throws InternalErrorException;
 
-	String getName();
-
-	Object parse(List<List<String>> theString) throws InternalErrorException, InvalidRequestException;
-
-	boolean isRequired();
-	
 	/**
-	 * Parameter should return true if {@link #parse(List)} should be called even
-	 * if the query string contained no values for the given parameter 
+	 * This <b>server method</b> method takes the data received by the server in an incoming request, and translates that data into a single argument for a server method invocation. Note that all
+	 * received data is passed to this method, but the expectation is that not necessarily that all data is used by every parameter.
+	 * 
+	 * @param theQueryParameters
+	 *            The query params, e.g. ?family=smith&given=john
+	 * @param theRequestContents
+	 *            The parsed contents of the incoming request. E.g. if the request was an HTTP POST with a resource in the body, this argument would contain the parsed {@link IResource} instance.
+	 * @return Returns the argument object as it will be passed to the {@link IResourceProvider} method.
 	 */
-	boolean handlesMissing();
-
-	SearchParamTypeEnum getParamType();
+	Object translateQueryParametersIntoServerArgument(Map<String, String[]> theQueryParameters, Object theRequestContents) throws InternalErrorException, InvalidRequestException;
 
 }

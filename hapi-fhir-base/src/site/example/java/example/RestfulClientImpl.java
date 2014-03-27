@@ -5,9 +5,9 @@ import java.util.List;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
-import ca.uhn.fhir.rest.annotation.Id;
+import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
-import ca.uhn.fhir.rest.annotation.Required;
+import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.client.api.IBasicClient;
 
@@ -29,7 +29,7 @@ public interface RestfulClientImpl extends IBasicClient {
 	 *    Returns a resource matching this identifier, or null if none exists.
 	 */
 	@Read()
-	public Patient getResourceById(@Id IdDt theId);
+	public Patient getResourceById(@IdParam IdDt theId);
 
 	/**
 	 * The "@Search" annotation indicates that this method supports the 
@@ -48,7 +48,7 @@ public interface RestfulClientImpl extends IBasicClient {
 	 *    matching resources, or it may also be empty.
 	 */
 	@Search()
-	public List<Patient> getPatient(@Required(name = Patient.SP_FAMILY) StringDt theFamilyName);
+	public List<Patient> getPatient(@RequiredParam(name = Patient.SP_FAMILY) StringDt theFamilyName);
 
 }
 //END SNIPPET: provider

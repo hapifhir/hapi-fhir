@@ -29,9 +29,9 @@ import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.UriDt;
-import ca.uhn.fhir.rest.annotation.Id;
+import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
-import ca.uhn.fhir.rest.annotation.Required;
+import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.server.provider.ServerProfileProvider;
 import ca.uhn.fhir.testutil.RandomServerPortProvider;
@@ -162,7 +162,7 @@ public class ResfulServerSelfReferenceTest {
 		
 
 		@Search()
-		public Patient getPatient(@Required(name = Patient.SP_IDENTIFIER) IdentifierDt theIdentifier) {
+		public Patient getPatient(@RequiredParam(name = Patient.SP_IDENTIFIER) IdentifierDt theIdentifier) {
 			for (Patient next : getIdToPatient().values()) {
 				for (IdentifierDt nextId : next.getIdentifier()) {
 					if (nextId.matchesSystemAndValue(theIdentifier)) {
@@ -182,7 +182,7 @@ public class ResfulServerSelfReferenceTest {
 		 * @return The resource
 		 */
 		@Read()
-		public Patient getResourceById(@Id IdDt theId) {
+		public Patient getResourceById(@IdParam IdDt theId) {
 			return getIdToPatient().get(theId.getValue());
 		}
 

@@ -17,21 +17,25 @@ import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
-import ca.uhn.fhir.rest.annotation.Id;
-import ca.uhn.fhir.rest.annotation.Include;
-import ca.uhn.fhir.rest.annotation.Optional;
+import ca.uhn.fhir.rest.annotation.Create;
+import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.annotation.IncludeParam;
+import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Read;
-import ca.uhn.fhir.rest.annotation.Required;
+import ca.uhn.fhir.rest.annotation.RequiredParam;
+import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
-import ca.uhn.fhir.rest.annotation.VersionId;
+import ca.uhn.fhir.rest.annotation.VersionIdParam;
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.ITestClient;
 import ca.uhn.fhir.rest.param.CodingListParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.QualifiedDateParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 
 @SuppressWarnings("unused")
-public class RestfulPatientResourceProviderMore implements IResourceProvider {
+public abstract class RestfulPatientResourceProviderMore implements IResourceProvider {
 
 //START SNIPPET: searchAll
 @Search
@@ -43,7 +47,7 @@ public List<Organization> getAllOrganizations() {
 
 //START SNIPPET: read
 @Read()
-public Patient getResourceById(@Id IdDt theId) {
+public Patient getResourceById(@IdParam IdDt theId) {
    Patient retVal = new Patient();
    // ...populate...
    return retVal;
@@ -52,8 +56,8 @@ public Patient getResourceById(@Id IdDt theId) {
 
 //START SNIPPET: vread
 @Read()
-public Patient getResourceById(@Id IdDt theId, 
-                               @VersionId IdDt theVersionId) {
+public Patient getResourceById(@IdParam IdDt theId, 
+                               @VersionIdParam IdDt theVersionId) {
    Patient retVal = new Patient();
    // ...populate...
    return retVal;
@@ -62,7 +66,7 @@ public Patient getResourceById(@Id IdDt theId,
 
 //START SNIPPET: searchStringParam
 @Search()
-public List<Patient> searchByLastName(@Required(name=Patient.SP_FAMILY) StringDt theId) {
+public List<Patient> searchByLastName(@RequiredParam(name=Patient.SP_FAMILY) StringDt theId) {
    List<Patient> retVal = new ArrayList<Patient>();
    // ...populate...
    return retVal;
@@ -71,7 +75,7 @@ public List<Patient> searchByLastName(@Required(name=Patient.SP_FAMILY) StringDt
 
 //START SNIPPET: searchNamedQuery
 @Search(queryName="namedQuery1")
-public List<Patient> searchByNamedQuery(@Required(name="someparam") StringDt theSomeParam) {
+public List<Patient> searchByNamedQuery(@RequiredParam(name="someparam") StringDt theSomeParam) {
  List<Patient> retVal = new ArrayList<Patient>();
  // ...populate...
  return retVal;
@@ -80,7 +84,7 @@ public List<Patient> searchByNamedQuery(@Required(name="someparam") StringDt the
 
 //START SNIPPET: searchIdentifierParam
 @Search()
-public List<Patient> searchByIdentifier(@Required(name=Patient.SP_IDENTIFIER) IdentifierDt theId) {
+public List<Patient> searchByIdentifier(@RequiredParam(name=Patient.SP_IDENTIFIER) IdentifierDt theId) {
    String identifierSystem = theId.getSystem().getValueAsString();
    String identifier = theId.getValue().getValue();
    
@@ -92,8 +96,8 @@ public List<Patient> searchByIdentifier(@Required(name=Patient.SP_IDENTIFIER) Id
 
 //START SNIPPET: searchOptionalParam
 @Search()
-public List<Patient> searchByNames( @Required(name=Patient.SP_FAMILY) StringDt theFamilyName,
-                                    @Optional(name=Patient.SP_GIVEN)  StringDt theGivenName ) {
+public List<Patient> searchByNames( @RequiredParam(name=Patient.SP_FAMILY) StringDt theFamilyName,
+                                    @OptionalParam(name=Patient.SP_GIVEN)  StringDt theGivenName ) {
    String familyName = theFamilyName.getValue();
    String givenName = theGivenName != null ? theGivenName.getValue() : null;
    
@@ -105,7 +109,7 @@ public List<Patient> searchByNames( @Required(name=Patient.SP_FAMILY) StringDt t
 
 //START SNIPPET: searchMultiple
 @Search()
-public List<Observation> searchByObservationNames( @Required(name=Observation.SP_NAME) CodingListParam theCodings ) {
+public List<Observation> searchByObservationNames( @RequiredParam(name=Observation.SP_NAME) CodingListParam theCodings ) {
    // This search should return any observations matching one or more
    // of the codings here.
    List<CodingDt> wantedCodings = theCodings.getCodings();
@@ -118,7 +122,7 @@ public List<Observation> searchByObservationNames( @Required(name=Observation.SP
 
 //START SNIPPET: dates
 @Search()
-public List<Patient> searchByObservationNames( @Required(name=Patient.SP_BIRTHDATE) QualifiedDateParam theDate ) {
+public List<Patient> searchByObservationNames( @RequiredParam(name=Patient.SP_BIRTHDATE) QualifiedDateParam theDate ) {
    QuantityCompararatorEnum comparator = theDate.getComparator(); // e.g. <=
    Date date = theDate.getValue(); // e.g. 2011-01-02
    TemporalPrecisionEnum precision = theDate.getPrecision(); // e.g. DAY
@@ -150,9 +154,9 @@ public Class<? extends IResource> getResourceType() {
 //START SNIPPET: pathSpec
 @Search()
 public List<DiagnosticReport> getDiagnosticReport( 
-               @Required(name=DiagnosticReport.SP_IDENTIFIER) 
+               @RequiredParam(name=DiagnosticReport.SP_IDENTIFIER) 
                IdentifierDt theIdentifier,
-               @Include(allow= {"DiagnosticReport.subject"}) 
+               @IncludeParam(allow= {"DiagnosticReport.subject"}) 
                Set<PathSpecification> theIncludes ) {
   List<DiagnosticReport> retVal = new ArrayList<DiagnosticReport>();
  
@@ -178,8 +182,8 @@ public List<DiagnosticReport> getDiagnosticReport(
 
 //START SNIPPET: dateRange
 @Search()
-public List<Observation> getObservationsByDateRange(@Required(name="subject.identifier") IdentifierDt theSubjectId,
-                                                    @Required(name=Observation.SP_DATE) DateRangeParam theRange) {
+public List<Observation> getObservationsByDateRange(@RequiredParam(name="subject.identifier") IdentifierDt theSubjectId,
+                                                    @RequiredParam(name=Observation.SP_DATE) DateRangeParam theRange) {
   List<Observation> retVal = new ArrayList<Observation>();
   
   // The following two will be set as the start and end
@@ -199,6 +203,43 @@ private DiagnosticReport loadSomeDiagnosticReportFromDatabase(IdentifierDt theId
 private Patient loadSomePatientFromDatabase(IdDt theId) {
 	return null;
 }
+
+
+//START SNIPPET: create
+@Create
+public MethodOutcome createPatient(@ResourceParam Patient thePatient) {
+
+  /* 
+   * First we might want to do business validation. The UnprocessableEntityException
+   * results in an HTTP 422, which is appropriate for business rule failure
+   */
+  if (thePatient.getIdentifierFirstRep().isEmpty()) {
+    throw new UnprocessableEntityException("No identifier supplied");
+  }
+	
+  // Save this patient to the database...
+  savePatientToDatabase(thePatient);
+
+  // This method returns a MethodOutcome object which contains
+  // the ID and Version ID for the newly saved resource
+  MethodOutcome retVal = new MethodOutcome();
+  retVal.setId(new IdDt("3746"));
+  retVal.setVersionId(new IdDt("1"));
+  return retVal;
+}
+//END SNIPPET: create
+
+//START SNIPPET: createClient
+@Create
+public abstract MethodOutcome createNewPatient(@ResourceParam Patient thePatient);
+//END SNIPPET: createClient
+
+
+private void savePatientToDatabase(Patient thePatient) {
+	// nothing
+	
+}
+
 
 }
 

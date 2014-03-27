@@ -37,7 +37,7 @@
 				operation retrieves a resource by ID. It is annotated with the
 				<a href="./apidocs/ca/uhn/fhir/rest/annotation/Read.html">@Read</a>
 				annotation, and has a single parameter annotated with the 
-				<a href="./apidocs/ca/uhn/fhir/rest/annotation/Read.IdParam.html">@Read.IdParam</a>
+				<a href="./apidocs/ca/uhn/fhir/rest/annotation/IdParam.html">@IdParam</a>
 				annotation.
 			</p>
 
@@ -61,7 +61,7 @@
 				operation retrieves a specific version of a resource with a given ID. It looks exactly
 				like a "read" operation, but with a second
 				parameter annotated with the 
-				<a href="./apidocs/ca/uhn/fhir/rest/annotation/Read.VersionIdParam.html">@VersionIdParam</a>
+				<a href="./apidocs/ca/uhn/fhir/rest/annotation/VersionIdParam.html">@VersionIdParam</a>
 				annotation.
 			</p>
 
@@ -109,9 +109,9 @@
 				<p>
 					To allow a search using given search parameters, add one or more parameters
 					to your search method and tag these parameters as either 
-					<a href="./apidocs/ca/uhn/fhir/rest/server/parameters/Required.html">@Required</a>
+					<a href="./apidocs/ca/uhn/fhir/rest/server/parameters/RequiredParam.html">@RequiredParam</a>
 					or
-					<a href="./apidocs/ca/uhn/fhir/rest/server/parameters/Optional.html">@Optional</a>.
+					<a href="./apidocs/ca/uhn/fhir/rest/server/parameters/OptionalParam.html">@OptionalParam</a>.
 				</p>
 				
 				<p>
@@ -158,16 +158,16 @@
 					Search methods may take multiple parameters, and these parameters
 					may be optional. To add a second required parameter, annotate the
 					parameter with 
-					<a href="./apidocs/ca/uhn/fhir/rest/server/parameters/Required.html">@Required</a>.
+					<a href="./apidocs/ca/uhn/fhir/rest/server/parameters/RequiredParam.html">@RequiredParam</a>.
 					To add an optional parameter (which will be passed in as <code>null</code> if no value
 					is supplied), annotate the method with
-					<a href="./apidocs/ca/uhn/fhir/rest/server/parameters/Required.html">@Optional</a>.
+					<a href="./apidocs/ca/uhn/fhir/rest/server/parameters/OptionalParam.html">@OptionalParam</a>.
 				</p>
 				
 				<p>
-					You may annotate a method with any combination of as many @Required and as many @Optional
-					parameters as you want. It is valid to have only @Required parameters, or
-					only @Optional parameters, or any combination of the two.
+					You may annotate a method with any combination of as many @RequiredParam and as many @OptionalParam
+					parameters as you want. It is valid to have only @RequiredParam parameters, or
+					only @OptionalParam parameters, or any combination of the two.
 				</p>
 			
 				<macro name="snippet">
@@ -376,6 +376,48 @@
 
 		</section>
 			
+		<section name="Type Level - create">
+		
+			<p>
+				The 
+				<a href="http://hl7.org/implement/standards/fhir/http.html#create"><b>create</b></a> 
+				operation saves a new resource to the server, allowing the server to 
+				give that resource an ID and version ID. 
+			</p>
+			<p>
+				Create methods must be annotated with the 
+				<a href="./apidocs/ca/uhn/fhir/rest/annotation/Create.html">@Create</a>
+				annotation, and have a single parameter annotated with the 
+				<a href="./apidocs/ca/uhn/fhir/rest/annotation/ResourceParam.html">@Resource</a>
+				annotation. This parameter contains the resource instance to be created.
+			</p>
+			
+			<p>
+				The following snippet shows how to define a server create method:
+			</p>
+			
+			<macro name="snippet">
+				<param name="id" value="create" />
+				<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
+			</macro>
+
+			<p>
+				Example URL to invoke this method (this would be invoked using an HTTP POST,
+				with the resource in the POST body):<br/>
+				<code>http://fhir.example.com/Patient</code>
+			</p>
+
+			<p>
+				The following snippet shows how the corresponding client interface
+				would look: 
+			</p>
+			
+			<macro name="snippet">
+				<param name="id" value="createClient" />
+				<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
+			</macro>
+			
+		</section>
 
 	</body>
 

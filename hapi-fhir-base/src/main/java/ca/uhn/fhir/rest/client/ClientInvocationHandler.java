@@ -7,10 +7,13 @@ import java.io.StringReader;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -57,8 +60,8 @@ public class ClientInvocationHandler implements InvocationHandler {
 		}
 
 		BaseMethodBinding binding = myBindings.get(theMethod);
-		GetClientInvocation clientInvocation = binding.invokeClient(theArgs);
-		
+		BaseClientInvocation clientInvocation = binding.invokeClient(theArgs);
+
 		HttpRequestBase httpRequest = clientInvocation.asHttpRequest(myUrlBase);
 		HttpResponse response = myClient.execute(httpRequest);
 		try {
@@ -74,9 +77,22 @@ public class ClientInvocationHandler implements InvocationHandler {
 			ContentType ct = ContentType.get(response.getEntity());
 
 			String mimeType = ct.getMimeType();
+
+			Map<String, List<String>> headers = new HashMap<String, List<String>>();
+			if (response.getAllHeaders() != null) {
+				for (Header next : response.getAllHeaders()) {
+					String name = next.getName().toLowerCase();
+					List<String> list = headers.get(name);
+					if (list == null) {
+						list = new ArrayList<String>();
+						headers.put(name, list);
+					}
+					list.add(next.getValue());
+				}
+			}
 			
-			return binding.invokeClient(mimeType, reader, response.getStatusLine().getStatusCode());
-			
+			return binding.invokeClient(mimeType, reader, response.getStatusLine().getStatusCode(), headers);
+
 		} finally {
 			if (response instanceof CloseableHttpResponse) {
 				((CloseableHttpResponse) response).close();

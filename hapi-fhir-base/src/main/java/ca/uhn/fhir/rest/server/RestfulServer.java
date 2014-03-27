@@ -30,6 +30,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotFoundException;
 import ca.uhn.fhir.rest.server.provider.ServerConformanceProvider;
 import ca.uhn.fhir.rest.server.provider.ServerProfileProvider;
+import ca.uhn.fhir.util.VersionUtil;
 
 public abstract class RestfulServer extends HttpServlet {
 
@@ -312,6 +313,9 @@ public abstract class RestfulServer extends HttpServlet {
 
 		} catch (AuthenticationException e) {
 			response.setStatus(e.getStatusCode());
+			addHapiHeader(response);
+			response.setContentType("text/plain");
+			response.setCharacterEncoding("UTF-8");
 			response.getWriter().write(e.getMessage());
 		} catch (BaseServerResponseException e) {
 
@@ -322,6 +326,7 @@ public abstract class RestfulServer extends HttpServlet {
 			}
 
 			response.setStatus(e.getStatusCode());
+			addHapiHeader(response);
 			response.setContentType("text/plain");
 			response.setCharacterEncoding("UTF-8");
 			response.getWriter().append(e.getMessage());
@@ -352,5 +357,8 @@ public abstract class RestfulServer extends HttpServlet {
 		}
 	}
 
+	public void addHapiHeader(HttpServletResponse theHttpResponse) {
+		theHttpResponse.addHeader("X-CatchingFhir", "HAPI FHIR " + VersionUtil.getVersion());
+	}
 
 }

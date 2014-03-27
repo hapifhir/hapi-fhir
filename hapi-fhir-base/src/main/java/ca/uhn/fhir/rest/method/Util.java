@@ -11,15 +11,18 @@ import java.util.List;
 import java.util.Map;
 
 import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.PathSpecification;
-import ca.uhn.fhir.rest.annotation.Id;
-import ca.uhn.fhir.rest.annotation.Include;
-import ca.uhn.fhir.rest.annotation.Optional;
-import ca.uhn.fhir.rest.annotation.Required;
-import ca.uhn.fhir.rest.annotation.VersionId;
+import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.annotation.IncludeParam;
+import ca.uhn.fhir.rest.annotation.OptionalParam;
+import ca.uhn.fhir.rest.annotation.RequiredParam;
+import ca.uhn.fhir.rest.annotation.ResourceParam;
+import ca.uhn.fhir.rest.annotation.VersionIdParam;
 import ca.uhn.fhir.rest.param.CollectionBinder;
 import ca.uhn.fhir.rest.param.IParameter;
 import ca.uhn.fhir.rest.param.IncludeParameter;
+import ca.uhn.fhir.rest.param.ResourceParameter;
 import ca.uhn.fhir.rest.param.SearchParameter;
 import ca.uhn.fhir.util.ReflectionUtil;
 
@@ -71,25 +74,30 @@ class Util {
 				}
 
 				IParameter param;
-				if (nextAnnotation instanceof Required) {
+				if (nextAnnotation instanceof RequiredParam) {
 					SearchParameter parameter = new SearchParameter();
-					parameter.setName(((Required) nextAnnotation).name());
+					parameter.setName(((RequiredParam) nextAnnotation).name());
 					parameter.setRequired(true);
 					parameter.setType(parameterType, innerCollectionType, outerCollectionType);
 					param = parameter;
-				} else if (nextAnnotation instanceof Optional) {
+				} else if (nextAnnotation instanceof OptionalParam) {
 					SearchParameter parameter = new SearchParameter();
-					parameter.setName(((Optional) nextAnnotation).name());
+					parameter.setName(((OptionalParam) nextAnnotation).name());
 					parameter.setRequired(false);
 					parameter.setType(parameterType, innerCollectionType, innerCollectionType);
 					param = parameter;
-				} else if (nextAnnotation instanceof Include) {
+				} else if (nextAnnotation instanceof IncludeParam) {
 					if (parameterType != PathSpecification.class || innerCollectionType == null || outerCollectionType != null) {
-						throw new ConfigurationException("Method '" + method.getName() + "' is annotated with @" + Include.class.getSimpleName() + " but has a type other than Collection<"+PathSpecification.class.getSimpleName() + ">");
+						throw new ConfigurationException("Method '" + method.getName() + "' is annotated with @" + IncludeParam.class.getSimpleName() + " but has a type other than Collection<"+PathSpecification.class.getSimpleName() + ">");
 					}
 					Class<? extends Collection<PathSpecification>> instantiableCollectionType = (Class<? extends Collection<PathSpecification>>) CollectionBinder.getInstantiableCollectionType(innerCollectionType, "Method '" + method.getName() + "'");
 					
-					param = new IncludeParameter((Include) nextAnnotation, instantiableCollectionType);
+					param = new IncludeParameter((IncludeParam) nextAnnotation, instantiableCollectionType);
+				} else if (nextAnnotation instanceof ResourceParam) {
+					if (!IResource.class.isAssignableFrom(parameterType)) {
+						throw new ConfigurationException("Method '" + method.getName() + "' is annotated with @" + ResourceParam.class.getSimpleName() + " but has a type that is not an implemtation of " + IResource.class.getCanonicalName());
+					}
+					param = new ResourceParameter((Class<? extends IResource>) parameterType);
 				} else {
 					continue;
 				}
@@ -108,11 +116,11 @@ class Util {
 	}
 
 	public static Integer findReadIdParameterIndex(Method theMethod) {
-		return findParamIndex(theMethod, Id.class);
+		return findParamIndex(theMethod, IdParam.class);
 	}
 
 	public static Integer findReadVersionIdParameterIndex(Method theMethod) {
-		return findParamIndex(theMethod, VersionId.class);
+		return findParamIndex(theMethod, VersionIdParam.class);
 	}
 
 	private static Integer findParamIndex(Method theMethod, Class<?> toFind) {

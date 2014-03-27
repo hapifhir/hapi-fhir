@@ -18,8 +18,63 @@
 				an open-source implementation of the FHIR specification in Java. 
 				This library is still in experimental stage, so please tread with caution.
 			</p>
-
 			
+			<p>
+				Note that this is the home for the FHIR version of HAPI. If you are 
+				looking for HL7 v2 support, <a href="../">click here</a>.
+			</p>
+			
+		</section>
+
+		<section name="Why HAPI FHIR?">
+			<p>
+				HAPI FHIR is a simple-but-powerful library for adding FHIR messaging to your application. It
+				is pure Java (1.6+ compatible), and licensed under the business-friendly Apache Software
+				License, version 2.0.
+			</p>
+			<p>
+				The HAPI API makes it very easy to create FHIR resources:
+			</p>
+			<source><![CDATA[Patient patient = new Patient();
+patient.addIdentifier().setUse(OFFICIAL).setSystem("urn:fake:mrns").setValue("7000135");
+patient.addIdentifier().setUse(SECONDARY).setSystem("urn:fake:otherids").setValue("3287486");
+
+patient.addName().addFamily("Smith").addGiven("John").addGiven("Q").addSuffix("Junior");
+
+patient.setGender(AdministrativeGenderCodesEnum.M);]]></source>
+			
+			<p>
+				This library supports both XML and JSON encoding natively:
+			</p>
+
+			<source><![CDATA[FhirContext ctx = new FhirContext();
+String xmlEncoded = ctx.newXmlParser().encodeResourceToString(patient);
+String jsonEncoded = ctx.newJsonParser().encodeResourceToString(patient);
+]]></source>
+
+			<p>
+				Creating clients is simple and uses an annotation based format
+				that will be familiar to users of JAX-WS.
+			</p>
+			
+			<source><![CDATA[public interface MyClientInterface
+{
+  /** A FHIR search */
+  @Search
+  public List<Patient> findPatientsByIdentifier(@RequiredParam(name="identifier") IdentifierDt theIdentifier);
+	
+  /** A FHIR create */
+  @Create
+  public MethodOutcome createPatient(@ResourceParam Patient thePatient);
+}]]></source>
+
+			<p>
+				Using this client is as simple as:
+			</p>
+			
+			<source><![CDATA[MyClientInterface client = ctx.newRestfulClient(MyClientInterface.class, "http://foo/fhir");
+IdentifierDt searchParam = new IdentifierDt("urn:someidentifiers", "7000135");
+List<Patient> clients = client.findPatientsByIdentifier(searchParam);]]></source>
 		</section>
 
 	</body>

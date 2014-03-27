@@ -14,6 +14,10 @@ public class ResourceNotFoundException extends BaseServerResponseException {
 		super(404, "Resource of type " + theClass.getSimpleName() + " with ID " + thePatientId + " is not known");
 	}
 
+	public ResourceNotFoundException(String theMessage) {
+		super(404, theMessage);
+	}
+
 	private static final long serialVersionUID = 1L;
 
 }

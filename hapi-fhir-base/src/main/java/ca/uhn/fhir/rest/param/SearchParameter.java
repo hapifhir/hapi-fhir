@@ -16,10 +16,10 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 /**
  * Created by dsotnikov on 2/25/2014.
  */
-public class SearchParameter implements IParameter {
+public class SearchParameter extends IQueryParameter {
 
 	private String name;
-	private IParamBinder parser;
+	private IParamBinder myParamBinder;
 	private boolean required;
 	private Class<?> type;
 	private SearchParamTypeEnum myParamType;
@@ -37,7 +37,7 @@ public class SearchParameter implements IParameter {
 	 */
 	@Override
 	public List<List<String>> encode(Object theObject) throws InternalErrorException {
-		return parser.encode(theObject);
+		return myParamBinder.encode(theObject);
 	}
 
 	/* (non-Javadoc)
@@ -62,7 +62,7 @@ public class SearchParameter implements IParameter {
 	 */
 	@Override
 	public Object parse(List<List<String>> theString) throws InternalErrorException, InvalidRequestException {
-		return parser.parse(theString);
+		return myParamBinder.parse(theString);
 	}
 
 	public void setName(String name) {
@@ -77,11 +77,11 @@ public class SearchParameter implements IParameter {
 	public void setType(final Class<?> type, Class<? extends Collection<?>> theInnerCollectionType, Class<? extends Collection<?>> theOuterCollectionType) {
 		this.type = type;
 		if (IQueryParameterType.class.isAssignableFrom(type)) {
-			this.parser = new QueryParameterTypeBinder((Class<? extends IQueryParameterType>) type);
+			this.myParamBinder = new QueryParameterTypeBinder((Class<? extends IQueryParameterType>) type);
 		} else if (IQueryParameterOr.class.isAssignableFrom(type)) {
-			this.parser = new QueryParameterOrBinder((Class<? extends IQueryParameterOr>) type);
+			this.myParamBinder = new QueryParameterOrBinder((Class<? extends IQueryParameterOr>) type);
 		} else if (IQueryParameterAnd.class.isAssignableFrom(type)) {
-			this.parser = new QueryParameterAndBinder((Class<? extends IQueryParameterAnd>) type);
+			this.myParamBinder = new QueryParameterAndBinder((Class<? extends IQueryParameterAnd>) type);
 		} else {
 			throw new ConfigurationException("Unsupported data type for parameter: " + type.getCanonicalName());
 		}

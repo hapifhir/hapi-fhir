@@ -1,6 +1,8 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -15,6 +17,8 @@ import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
@@ -42,13 +46,16 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.rest.annotation.Id;
-import ca.uhn.fhir.rest.annotation.Include;
-import ca.uhn.fhir.rest.annotation.Optional;
+import ca.uhn.fhir.rest.annotation.Create;
+import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.annotation.IncludeParam;
+import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Read;
-import ca.uhn.fhir.rest.annotation.Required;
+import ca.uhn.fhir.rest.annotation.RequiredParam;
+import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
-import ca.uhn.fhir.rest.annotation.VersionId;
+import ca.uhn.fhir.rest.annotation.VersionIdParam;
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.param.CodingListParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.QualifiedDateParam;
@@ -392,6 +399,27 @@ public class ResfulServerMethodTest {
 	}
 
 	@Test
+	public void testCreate() throws Exception {
+
+		Patient patient = new Patient();
+		patient.addIdentifier().setValue("001");
+		patient.addIdentifier().setValue("002");
+		
+		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
+		httpPost.setEntity(new StringEntity(new FhirContext().newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		
+		HttpResponse status = ourClient.execute(httpPost);
+
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		ourLog.info("Response was:\n{}", responseContent);
+
+		assertEquals(201, status.getStatusLine().getStatusCode());
+		assertEquals("http://localhost:" + ourPort + "/Patient/001/_history/002", status.getFirstHeader("Location").getValue());
+
+
+	}
+	
+	@Test
 	public void testFormatParamXml() throws Exception {
 
 		// HttpPost httpPost = new HttpPost("http://localhost:" + ourPort +
@@ -655,15 +683,15 @@ public class ResfulServerMethodTest {
 		}
 
 		@Search(queryName="someQueryOneParam")
-		public Patient getPatientOneParam(@Required(name="param1") StringDt theParam) {
+		public Patient getPatientOneParam(@RequiredParam(name="param1") StringDt theParam) {
 			Patient next = getIdToPatient().get("1");
 			next.addName().addFamily(theParam.getValue());
 			return next;
 		}
 
 		@Search()
-		public Patient getPatientWithIncludes(@Required(name = "withIncludes") StringDt theString, 
-				@Include(allow= {"include1","include2", "include3"}) List<PathSpecification> theIncludes) {
+		public Patient getPatientWithIncludes(@RequiredParam(name = "withIncludes") StringDt theString, 
+				@IncludeParam(allow= {"include1","include2", "include3"}) List<PathSpecification> theIncludes) {
 			Patient next = getIdToPatient().get("1");
 
 			next.addCommunication().setText(theString.getValue());
@@ -675,8 +703,16 @@ public class ResfulServerMethodTest {
 			return next;
 		}
 
+		@Create()
+		public MethodOutcome createPatient(@ResourceParam Patient thePatient) {
+			IdDt id = new IdDt(thePatient.getIdentifier().get(0).getValue().getValue());
+			IdDt version = new IdDt(thePatient.getIdentifier().get(1).getValue().getValue());
+			return new MethodOutcome(id, version);
+		}
+
+		
 		@Search()
-		public Patient getPatient(@Required(name = Patient.SP_IDENTIFIER) IdentifierDt theIdentifier) {
+		public Patient getPatient(@RequiredParam(name = Patient.SP_IDENTIFIER) IdentifierDt theIdentifier) {
 			for (Patient next : getIdToPatient().values()) {
 				for (IdentifierDt nextId : next.getIdentifier()) {
 					if (nextId.matchesSystemAndValue(theIdentifier)) {
@@ -688,13 +724,13 @@ public class ResfulServerMethodTest {
 		}
 
 		@SuppressWarnings("unused")
-		public List<Patient> findDiagnosticReportsByPatient(@Required(name = "Patient.identifier") IdentifierDt thePatientId, @Required(name = DiagnosticReport.SP_NAME) CodingListParam theNames,
-				@Optional(name = DiagnosticReport.SP_DATE) DateRangeParam theDateRange) throws Exception {
+		public List<Patient> findDiagnosticReportsByPatient(@RequiredParam(name = "Patient.identifier") IdentifierDt thePatientId, @RequiredParam(name = DiagnosticReport.SP_NAME) CodingListParam theNames,
+				@OptionalParam(name = DiagnosticReport.SP_DATE) DateRangeParam theDateRange) throws Exception {
 			return Collections.emptyList();
 		}
 
 		@Search()
-		public Patient getPatientWithDOB(@Required(name = "dob") QualifiedDateParam theDob) {
+		public Patient getPatientWithDOB(@RequiredParam(name = "dob") QualifiedDateParam theDob) {
 			Patient next = getIdToPatient().get("1");
 			if (theDob.getComparator() != null) {
 				next.addIdentifier().setValue(theDob.getComparator().getCode());
@@ -706,7 +742,7 @@ public class ResfulServerMethodTest {
 		}
 
 		@Search()
-		public List<Patient> getPatientWithOptionalName(@Required(name = "name1") StringDt theName1, @Optional(name = "name2") StringDt theName2) {
+		public List<Patient> getPatientWithOptionalName(@RequiredParam(name = "name1") StringDt theName1, @OptionalParam(name = "name2") StringDt theName2) {
 			List<Patient> retVal = new ArrayList<Patient>();
 			Patient next = getIdToPatient().get("1");
 			next.getName().get(0).getFamily().set(0, theName1);
@@ -722,7 +758,7 @@ public class ResfulServerMethodTest {
 		 * @param theName3
 		 */
 		@Search()
-		public List<Patient> getPatientWithOptionalName(@Required(name = "aaa") StringDt theName1, @Optional(name = "bbb") StringDt theName2, @Optional(name = "ccc") StringDt theName3) {
+		public List<Patient> getPatientWithOptionalName(@RequiredParam(name = "aaa") StringDt theName1, @OptionalParam(name = "bbb") StringDt theName2, @OptionalParam(name = "ccc") StringDt theName3) {
 			List<Patient> retVal = new ArrayList<Patient>();
 			Patient next = getIdToPatient().get("1");
 			next.getName().get(0).getFamily().set(0, theName1);
@@ -735,7 +771,7 @@ public class ResfulServerMethodTest {
 		}
 
 		@Search()
-		public List<Patient> getPatientMultipleIdentifiers(@Required(name = "ids") CodingListParam theIdentifiers) {
+		public List<Patient> getPatientMultipleIdentifiers(@RequiredParam(name = "ids") CodingListParam theIdentifiers) {
 			List<Patient> retVal = new ArrayList<Patient>();
 			Patient next = getIdToPatient().get("1");
 
@@ -756,12 +792,12 @@ public class ResfulServerMethodTest {
 		 * @return The resource
 		 */
 		@Read()
-		public Patient getResourceById(@Id IdDt theId) {
+		public Patient getResourceById(@IdParam IdDt theId) {
 			return getIdToPatient().get(theId.getValue());
 		}
 
 		@Read()
-		public Patient getResourceById(@Id IdDt theId, @VersionId IdDt theVersionId) {
+		public Patient getResourceById(@IdParam IdDt theId, @VersionIdParam IdDt theVersionId) {
 			Patient retVal = getIdToPatient().get(theId.getValue());
 			retVal.getName().get(0).setText(theVersionId.getValue());
 			return retVal;
@@ -778,7 +814,7 @@ public class ResfulServerMethodTest {
 		}
 
 		@Search()
-		public Patient getPatientByDateRange(@Required(name = "dateRange") DateRangeParam theIdentifiers) {
+		public Patient getPatientByDateRange(@RequiredParam(name = "dateRange") DateRangeParam theIdentifiers) {
 			Patient retVal = getIdToPatient().get("1");
 			retVal.getName().get(0).addSuffix().setValue(theIdentifiers.getLowerBound().getValueAsQueryToken());
 			retVal.getName().get(0).addSuffix().setValue(theIdentifiers.getUpperBound().getValueAsQueryToken());

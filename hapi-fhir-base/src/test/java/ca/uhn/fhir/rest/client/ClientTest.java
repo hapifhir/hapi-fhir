@@ -10,12 +10,15 @@ import java.util.List;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.ReaderInputStream;
+import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.ProtocolVersion;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicStatusLine;
+import org.hamcrest.core.StringContains;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -31,10 +34,12 @@ import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.param.CodingListParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.QualifiedDateParam;
 import ca.uhn.fhir.rest.server.Constants;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 public class ClientTest {
 
@@ -82,6 +87,54 @@ public class ClientTest {
 		assertEquals("http://foo/Patient/111", capt.getValue().getURI().toString());
 		assertEquals("PRP1660", response.getIdentifier().get(0).getValue().getValue());
 
+	}
+
+	
+	@Test
+	public void testCreate() throws Exception {
+
+		Patient patient = new Patient();
+		patient.addIdentifier("urn:foo", "123");
+		
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
+		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 201, "OK"));
+		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(""), Charset.forName("UTF-8")));
+		when(httpResponse.getAllHeaders()).thenReturn(toHeaderArray("Location" , "http://example.com/fhir/Patient/100/_history/200"));
+
+		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
+		MethodOutcome response = client.createPatient(patient);
+
+		assertEquals(HttpPost.class, capt.getValue().getClass());
+		HttpPost post = (HttpPost) capt.getValue();
+		assertThat(IOUtils.toString(post.getEntity().getContent()), StringContains.containsString("<Patient"));
+		assertEquals("100", response.getId().getValue());
+		assertEquals("200", response.getVersionId().getValue());
+	}
+
+	@Test
+	public void testCreateBad() throws Exception {
+
+		Patient patient = new Patient();
+		patient.addIdentifier("urn:foo", "123");
+		
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
+		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 400, "OK"));
+		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_TEXT + "; charset=UTF-8"));
+		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader("foobar"), Charset.forName("UTF-8")));
+
+		try {
+			ctx.newRestfulClient(ITestClient.class, "http://foo").createPatient(patient);
+			fail();
+		}catch (InvalidRequestException e) {
+			assertThat(e.getMessage(), StringContains.containsString("foobar"));
+		}
+	}
+
+	private Header[] toHeaderArray(String theName, String theValue) {
+		return new Header[] {new BasicHeader(theName, theValue)};
 	}
 
 	@Test

@@ -1,6 +1,6 @@
 package ca.uhn.fhir.rest.server.exceptions;
 
-public abstract class BaseServerResponseException extends Exception {
+public abstract class BaseServerResponseException extends RuntimeException {
 
 	private static final long serialVersionUID = 1L;
 

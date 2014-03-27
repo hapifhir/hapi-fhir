@@ -20,7 +20,7 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(value= {ElementType.PARAMETER})
-public @interface Include {
+public @interface IncludeParam {
 
 	/**
 	 * Optional parameter, if provided the server will only allow the values

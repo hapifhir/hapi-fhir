@@ -7,10 +7,6 @@ public class MethodOutcome {
 	private IdDt myId;
 	private IdDt myVersionId;
 
-	public IdDt getId() {
-		return myId;
-	}
-
 	public MethodOutcome() {
 	}
 
@@ -20,12 +16,16 @@ public class MethodOutcome {
 		myVersionId = theVersionId;
 	}
 
-	public void setId(IdDt theId) {
-		myId = theId;
+	public IdDt getId() {
+		return myId;
 	}
 
 	public IdDt getVersionId() {
 		return myVersionId;
+	}
+
+	public void setId(IdDt theId) {
+		myId = theId;
 	}
 
 	public void setVersionId(IdDt theVersionId) {

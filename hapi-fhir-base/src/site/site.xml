@@ -23,7 +23,7 @@
 		</links>
 
 		<menu name="Welcome">
-			<item name="Introduction" href="index.html" />
+			<item name="Welcome" href="index.html" />
 		</menu>
 
 		<menu name="Documentation">

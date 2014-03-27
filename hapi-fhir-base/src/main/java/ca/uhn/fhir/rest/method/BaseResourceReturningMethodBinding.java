@@ -6,14 +6,12 @@ import java.io.Reader;
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
@@ -78,15 +76,8 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 	public abstract ReturnTypeEnum getReturnType();
 
 	@Override
-	public Object invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode) throws IOException {
-		IParser parser;
-		if (Constants.CT_ATOM_XML.equals(theResponseMimeType)) {
-			parser = getContext().newXmlParser();
-		} else if (Constants.CT_FHIR_XML.equals(theResponseMimeType)) {
-			parser = getContext().newXmlParser();
-		} else {
-			throw new NonFhirResponseException("Response contains non-FHIR content-type: " + theResponseMimeType, theResponseMimeType, theResponseStatusCode, IOUtils.toString(theResponseReader));
-		}
+	public Object invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode,Map<String, List<String>> theHeaders) throws IOException {
+		IParser parser = createAppropriateParser(theResponseMimeType, theResponseReader, theResponseStatusCode);
 
 		switch (getReturnType()) {
 		case BUNDLE: {
@@ -124,6 +115,7 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 
 		throw new IllegalStateException("Should not get here!");
 	}
+
 
 	public abstract List<IResource> invokeServer(IResourceProvider theResourceProvider, IdDt theId, IdDt theVersionId, Map<String, String[]> theParameterValues) throws InvalidRequestException, InternalErrorException;
 
@@ -176,28 +168,6 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 		}
 	}
 
-	private EncodingUtil determineResponseEncoding(HttpServletRequest theRequest, Map<String, String[]> theParams) {
-		String[] format = theParams.remove(Constants.PARAM_FORMAT);
-		if (format != null) {
-			for (String nextFormat : format) {
-				EncodingUtil retVal = Constants.FORMAT_VAL_TO_ENCODING.get(nextFormat);
-				if (retVal != null) {
-					return retVal;
-				}
-			}
-		}
-
-		Enumeration<String> acceptValues = theRequest.getHeaders("Accept");
-		if (acceptValues != null) {
-			while (acceptValues.hasMoreElements()) {
-				EncodingUtil retVal = Constants.FORMAT_VAL_TO_ENCODING.get(acceptValues.nextElement());
-				if (retVal != null) {
-					return retVal;
-				}
-			}
-		}
-		return EncodingUtil.XML;
-	}
 
 	static {
 		HashSet<String> set = new HashSet<String>();
@@ -237,6 +207,8 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 
 		theHttpResponse.setCharacterEncoding("UTF-8");
 
+		theServer.addHapiHeader(theHttpResponse);
+		
 		Bundle bundle = new Bundle();
 		bundle.getAuthorName().setValue(getClass().getCanonicalName());
 		bundle.getBundleId().setValue(UUID.randomUUID().toString());
@@ -300,6 +272,7 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 		}
 	}
 
+	
 	private void streamResponseAsResource(RestfulServer theServer, HttpServletResponse theHttpResponse, IResource theResource, EncodingUtil theResponseEncoding, boolean thePrettyPrint, boolean theRequestIsBrowser, NarrativeModeEnum theNarrativeMode) throws IOException {
 
 		theHttpResponse.setStatus(200);
