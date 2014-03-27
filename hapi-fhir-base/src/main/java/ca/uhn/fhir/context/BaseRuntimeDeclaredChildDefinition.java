@@ -1,6 +1,6 @@
 package ca.uhn.fhir.context;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;

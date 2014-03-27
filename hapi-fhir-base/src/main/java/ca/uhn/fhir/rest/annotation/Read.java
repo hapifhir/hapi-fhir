@@ -19,17 +19,5 @@ public @interface Read {
 	 */
 	// NB: Read, Search (maybe others) share this annotation, so update the javadocs everywhere
 	Class<? extends IResource> type() default IResource.class;
-
-	@Retention(RetentionPolicy.RUNTIME)
-	@Target(ElementType.PARAMETER)
-	public @interface IdParam {
-		// just a marker
-	}
-
-	@Retention(RetentionPolicy.RUNTIME)
-	@Target(ElementType.PARAMETER)
-	public @interface VersionIdParam {
-		// just a marker
-	}
 	
 }

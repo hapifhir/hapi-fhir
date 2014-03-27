@@ -42,11 +42,13 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.annotation.Id;
 import ca.uhn.fhir.rest.annotation.Include;
 import ca.uhn.fhir.rest.annotation.Optional;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.Required;
 import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.annotation.VersionId;
 import ca.uhn.fhir.rest.param.CodingListParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.QualifiedDateParam;
@@ -754,12 +756,12 @@ public class ResfulServerMethodTest {
 		 * @return The resource
 		 */
 		@Read()
-		public Patient getResourceById(@Read.IdParam IdDt theId) {
+		public Patient getResourceById(@Id IdDt theId) {
 			return getIdToPatient().get(theId.getValue());
 		}
 
 		@Read()
-		public Patient getResourceById(@Read.IdParam IdDt theId, @Read.VersionIdParam IdDt theVersionId) {
+		public Patient getResourceById(@Id IdDt theId, @VersionId IdDt theVersionId) {
 			Patient retVal = getIdToPatient().get(theId.getValue());
 			retVal.getName().get(0).setText(theVersionId.getValue());
 			return retVal;

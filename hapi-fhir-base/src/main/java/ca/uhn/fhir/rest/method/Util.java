@@ -12,10 +12,11 @@ import java.util.Map;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.model.api.PathSpecification;
+import ca.uhn.fhir.rest.annotation.Id;
 import ca.uhn.fhir.rest.annotation.Include;
 import ca.uhn.fhir.rest.annotation.Optional;
-import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.Required;
+import ca.uhn.fhir.rest.annotation.VersionId;
 import ca.uhn.fhir.rest.param.CollectionBinder;
 import ca.uhn.fhir.rest.param.IParameter;
 import ca.uhn.fhir.rest.param.IncludeParameter;
@@ -107,11 +108,11 @@ class Util {
 	}
 
 	public static Integer findReadIdParameterIndex(Method theMethod) {
-		return findParamIndex(theMethod, Read.IdParam.class);
+		return findParamIndex(theMethod, Id.class);
 	}
 
 	public static Integer findReadVersionIdParameterIndex(Method theMethod) {
-		return findParamIndex(theMethod, Read.VersionIdParam.class);
+		return findParamIndex(theMethod, VersionId.class);
 	}
 
 	private static Integer findParamIndex(Method theMethod, Class<?> toFind) {

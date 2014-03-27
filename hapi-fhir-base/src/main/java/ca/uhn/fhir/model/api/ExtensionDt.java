@@ -1,29 +1,41 @@
 package ca.uhn.fhir.model.api;
 
-public class UndeclaredExtension extends BaseElement {
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+import ca.uhn.fhir.model.primitive.StringDt;
 
-	private String myUrl;
-	private IElement myValue;
+@DatatypeDef(name="Extension") 
+public class ExtensionDt extends BaseElement {
+
 	private boolean myIsModifier;
+	
+	@Child(name="use", type=StringDt.class, order=0, min=1, max=1)	
+	private StringDt myUrl;
+	
+	@Child(name="value", type=IDatatype.class, order=1, min=0, max=1)	
+	private IElement myValue;
 
-	public UndeclaredExtension() {
+	public ExtensionDt() {
 	}
 
-	public UndeclaredExtension(boolean theIsModifier) {
+	public ExtensionDt(boolean theIsModifier) {
 		myIsModifier = theIsModifier;
 	}
 
-	public UndeclaredExtension(boolean theIsModifier, String theUrl) {
+	public ExtensionDt(boolean theIsModifier, String theUrl) {
 		myIsModifier = theIsModifier;
-		myUrl = theUrl;
+		myUrl = new StringDt(theUrl);
 	}
 
-	public boolean isModifier() {
-		return myIsModifier;
-	}
-
-	public String getUrl() {
+	public StringDt getUrl() {
+		if (myUrl==null) {
+			myUrl=new StringDt();
+		}
 		return myUrl;
+	}
+
+	public String getUrlAsString() {
+		return myUrl.getValue();
 	}
 
 	/**
@@ -36,7 +48,7 @@ public class UndeclaredExtension extends BaseElement {
 	public IElement getValue() {
 		return myValue;
 	}
-
+	
 	/**
 	 * Returns the value of this extension, casted to a primitive datatype. This is a convenience method which should only be called if you are sure that the value for this particular extension will
 	 * be a primitive.
@@ -52,17 +64,25 @@ public class UndeclaredExtension extends BaseElement {
 		return (IPrimitiveDatatype<?>) getValue();
 	}
 
+	@Override
+	public boolean isEmpty() {
+		return super.isBaseEmpty() && myValue == null || myValue.isEmpty();
+	}
+
+	public boolean isModifier() {
+		return myIsModifier;
+	}
+
 	public void setUrl(String theUrl) {
+		myUrl = new StringDt(theUrl);
+	}
+
+	public void setUrl(StringDt theUrl) {
 		myUrl = theUrl;
 	}
 
 	public void setValue(IElement theValue) {
 		myValue = theValue;
-	}
-
-	@Override
-	public boolean isEmpty() {
-		return super.isBaseEmpty() && myValue == null || myValue.isEmpty();
 	}
 
 }

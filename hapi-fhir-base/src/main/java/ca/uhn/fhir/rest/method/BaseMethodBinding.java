@@ -1,75 +1,63 @@
 package ca.uhn.fhir.rest.method;
 
+import java.io.IOException;
+import java.io.Reader;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
+
+import javax.servlet.http.HttpServletResponse;
 
 import ca.uhn.fhir.context.ConfigurationException;
-import ca.uhn.fhir.model.api.Bundle;
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.Metadata;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.client.GetClientInvocation;
-import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 public abstract class BaseMethodBinding {
 
-	private String myResourceName;
-	private MethodReturnTypeEnum myMethodReturnType;
+	private Method myMethod;
+	private FhirContext myContext;
 
-	public BaseMethodBinding(MethodReturnTypeEnum theMethodReturnType, Class<? extends IResource> theReturnResourceType) {
-		ResourceDef resourceDefAnnotation = theReturnResourceType.getAnnotation(ResourceDef.class);
-		if (resourceDefAnnotation == null) {
-			throw new ConfigurationException(theReturnResourceType.getCanonicalName() + " has no @" + ResourceDef.class.getSimpleName() + " annotation");
-		}
-		myResourceName = resourceDefAnnotation.name();
-		myMethodReturnType = theMethodReturnType;
+	public BaseMethodBinding(Method theMethod, FhirContext theConetxt) {
+		assert theMethod!=null;
+		assert theConetxt!=null;
+		
+		myMethod = theMethod;
+		myContext=theConetxt;
 	}
 
-	public abstract ReturnTypeEnum getReturnType();
+	public FhirContext getContext() {
+		return myContext;
+	}
+
+	public Method getMethod() {
+		return myMethod;
+	}
 
 	public abstract GetClientInvocation invokeClient(Object[] theArgs) throws InternalErrorException;
 
-	public abstract List<IResource> invokeServer(IResourceProvider theResourceProvider, IdDt theId, IdDt theVersionId, Map<String, String[]> theParameterValues) throws InvalidRequestException, InternalErrorException;
-
 	public abstract RestfulOperationTypeEnum getResourceOperationType();
-	
+
 	public abstract RestfulOperationSystemEnum getSystemOperationType();
-	
+
 	public abstract boolean matches(Request theRequest);
 
-	public String getResourceName() {
-		return myResourceName;
-	}
-
-	public static BaseMethodBinding bindMethod(Class<? extends IResource> theReturnType, Method theMethod) {
+	public static BaseMethodBinding bindMethod(Class<? extends IResource> theReturnType, Method theMethod, FhirContext theContext) {
 		Read read = theMethod.getAnnotation(Read.class);
 		Search search = theMethod.getAnnotation(Search.class);
 		Metadata conformance = theMethod.getAnnotation(Metadata.class);
 		if (!verifyMethodHasZeroOrOneOperationAnnotation(theMethod, read, search, conformance)) {
 			return null;
-		}
-
-		Class<?> methodReturnType = theMethod.getReturnType();
-		MethodReturnTypeEnum methodReturnTypeEnum;
-		if (Collection.class.isAssignableFrom(methodReturnType)) {
-			methodReturnTypeEnum = MethodReturnTypeEnum.LIST_OF_RESOURCES;
-		} else if (IResource.class.isAssignableFrom(methodReturnType)) {
-			methodReturnTypeEnum = MethodReturnTypeEnum.RESOURCE;
-		} else if (Bundle.class.isAssignableFrom(methodReturnType)) {
-			methodReturnTypeEnum = MethodReturnTypeEnum.BUNDLE;
-		} else {
-			throw new ConfigurationException("Invalid return type '" + methodReturnType.getCanonicalName() + "' on method '" + theMethod.getName() + "' on type: " + theMethod.getDeclaringClass().getCanonicalName());
 		}
 
 		Class<? extends IResource> returnType = theReturnType;
@@ -84,14 +72,14 @@ public abstract class BaseMethodBinding {
 				throw new ConfigurationException("Could not determine return type for method '" + theMethod.getName() + "'. Try explicitly specifying one in the operation annotation.");
 			}
 		}
-		
+
 		if (read != null) {
-			return new ReadMethodBinding(methodReturnTypeEnum, returnType, theMethod);
+			return new ReadMethodBinding(returnType, theMethod, theContext);
 		} else if (search != null) {
 			String queryName = search.queryName();
-			return new SearchMethodBinding(methodReturnTypeEnum, returnType, theMethod, queryName);
+			return new SearchMethodBinding(returnType, theMethod, queryName,theContext);
 		} else if (conformance != null) {
-			return new ConformanceMethodBinding(methodReturnTypeEnum, returnType, theMethod);
+			return new ConformanceMethodBinding(theMethod, theContext);
 		} else {
 			throw new ConfigurationException("Did not detect any FHIR annotations on method '" + theMethod.getName() + "' on type: " + theMethod.getDeclaringClass().getCanonicalName());
 		}
@@ -117,8 +105,6 @@ public abstract class BaseMethodBinding {
 		//
 		// return sm;
 	}
-
-	
 
 	public static boolean verifyMethodHasZeroOrOneOperationAnnotation(Method theNextMethod, Object... theAnnotations) {
 		Object obj1 = null;
@@ -159,15 +145,10 @@ public abstract class BaseMethodBinding {
 		}
 	}
 
-	public enum MethodReturnTypeEnum {
-		RESOURCE, BUNDLE, LIST_OF_RESOURCES
-	}
 
-	public enum ReturnTypeEnum {
-		BUNDLE, RESOURCE
-	}
 
-	public MethodReturnTypeEnum getMethodReturnType() {
-		return myMethodReturnType;
-	}
+	public abstract void invokeServer(RestfulServer theServer, Request theRequest, HttpServletResponse theResponse) throws BaseServerResponseException, IOException;
+
+	public abstract Object invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode) throws IOException;
+
 }

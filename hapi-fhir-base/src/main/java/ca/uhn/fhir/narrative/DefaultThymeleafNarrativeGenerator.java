@@ -1,6 +1,6 @@
 package ca.uhn.fhir.narrative;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -33,7 +33,6 @@ import org.thymeleaf.util.DOMUtils;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.composite.NarrativeDt;
-import ca.uhn.fhir.model.dstu.composite.QuantityDt;
 import ca.uhn.fhir.model.dstu.valueset.NarrativeStatusEnum;
 import ca.uhn.fhir.model.primitive.XhtmlDt;
 import ca.uhn.fhir.parser.DataFormatException;

@@ -1,7 +1,6 @@
 package ca.uhn.fhir.parser;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -42,12 +41,12 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.api.BaseBundle;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.BundleEntry;
+import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IIdentifiableElement;
 import ca.uhn.fhir.model.api.IPrimitiveDatatype;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ISupportsUndeclaredExtensions;
-import ca.uhn.fhir.model.api.UndeclaredExtension;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.dstu.composite.ContainedDt;
 import ca.uhn.fhir.model.dstu.composite.NarrativeDt;
@@ -408,7 +407,7 @@ public class JsonParser extends BaseParser implements IParser {
 		return this;
 	}
 
-	private void addToHeldExtensions(int valueIdx, List<UndeclaredExtension> ext, ArrayList<ArrayList<HeldExtension>> list) {
+	private void addToHeldExtensions(int valueIdx, List<ExtensionDt> ext, ArrayList<ArrayList<HeldExtension>> list) {
 		if (ext.size() > 0) {
 			list.ensureCapacity(valueIdx);
 			while (list.size() <= valueIdx) {
@@ -417,7 +416,7 @@ public class JsonParser extends BaseParser implements IParser {
 			if (list.get(valueIdx) == null) {
 				list.set(valueIdx, new ArrayList<JsonParser.HeldExtension>());
 			}
-			for (UndeclaredExtension next : ext) {
+			for (ExtensionDt next : ext) {
 				list.get(valueIdx).add(new HeldExtension(next));
 			}
 		}
@@ -619,7 +618,7 @@ public class JsonParser extends BaseParser implements IParser {
 					}
 
 					if (nextValue instanceof ISupportsUndeclaredExtensions) {
-						List<UndeclaredExtension> ext = ((ISupportsUndeclaredExtensions) nextValue).getUndeclaredExtensions();
+						List<ExtensionDt> ext = ((ISupportsUndeclaredExtensions) nextValue).getUndeclaredExtensions();
 						addToHeldExtensions(valueIdx, ext, extensions);
 
 						ext = ((ISupportsUndeclaredExtensions) nextValue).getUndeclaredModifierExtensions();
@@ -718,7 +717,7 @@ public class JsonParser extends BaseParser implements IParser {
 		theEventWriter.writeEnd();
 	}
 
-	private void encodeUndeclaredExtensions(RuntimeResourceDefinition theResDef, IResource theResource, JsonGenerator theWriter, List<UndeclaredExtension> extensions, String theTagName)
+	private void encodeUndeclaredExtensions(RuntimeResourceDefinition theResDef, IResource theResource, JsonGenerator theWriter, List<ExtensionDt> extensions, String theTagName)
 			throws IOException {
 		if (extensions.isEmpty()) {
 			return;
@@ -726,11 +725,11 @@ public class JsonParser extends BaseParser implements IParser {
 
 		theWriter.writeStartArray(theTagName);
 
-		for (UndeclaredExtension next : extensions) {
+		for (ExtensionDt next : extensions) {
 
 			theWriter.writeStartObject();
 
-			theWriter.write("url", next.getUrl());
+			theWriter.write("url", next.getUrl().getValue());
 
 			if (next.getValue() != null) {
 				IElement nextValue = next.getValue();
@@ -786,9 +785,9 @@ public class JsonParser extends BaseParser implements IParser {
 
 	private class HeldExtension {
 
-		private UndeclaredExtension myUndeclaredExtension;
+		private ExtensionDt myUndeclaredExtension;
 
-		public HeldExtension(UndeclaredExtension theUndeclaredExtension) {
+		public HeldExtension(ExtensionDt theUndeclaredExtension) {
 			myUndeclaredExtension = theUndeclaredExtension;
 		}
 
@@ -798,16 +797,16 @@ public class JsonParser extends BaseParser implements IParser {
 			}
 		}
 
-		private void writeUndeclaredExt(RuntimeResourceDefinition theResDef, IResource theResource, JsonGenerator theEventWriter, UndeclaredExtension ext) throws IOException {
+		private void writeUndeclaredExt(RuntimeResourceDefinition theResDef, IResource theResource, JsonGenerator theEventWriter, ExtensionDt ext) throws IOException {
 			theEventWriter.writeStartObject();
-			theEventWriter.write("url", ext.getUrl());
+			theEventWriter.write("url", ext.getUrl().getValue());
 
 			IElement value = ext.getValue();
 			if (value == null && ext.getAllUndeclaredExtensions().isEmpty()) {
 				theEventWriter.writeNull();
 			} else if (value == null) {
 				theEventWriter.writeStartArray("extension");
-				for (UndeclaredExtension next : ext.getUndeclaredExtensions()) {
+				for (ExtensionDt next : ext.getUndeclaredExtensions()) {
 					writeUndeclaredExt(theResDef, theResource, theEventWriter, next);
 				}
 				theEventWriter.writeEnd();

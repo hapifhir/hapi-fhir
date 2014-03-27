@@ -1,16 +1,12 @@
 package ca.uhn.fhir.rest.server;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Collection;
-import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
-import java.util.UUID;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -21,12 +17,9 @@ import org.apache.commons.lang3.StringUtils;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.model.api.Bundle;
-import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.narrative.INarrativeGenerator;
-import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.method.Request;
 import ca.uhn.fhir.rest.method.SearchMethodBinding;
@@ -35,7 +28,6 @@ import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotFoundException;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.provider.ServerConformanceProvider;
 import ca.uhn.fhir.rest.server.provider.ServerProfileProvider;
 
@@ -47,133 +39,22 @@ public abstract class RestfulServer extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
 	private FhirContext myFhirContext;
-	private boolean myUseBrowserFriendlyContentTypes;
+
 	private INarrativeGenerator myNarrativeGenerator;
-
-	public INarrativeGenerator getNarrativeGenerator() {
-		return myNarrativeGenerator;
-	}
-
-	/**
-	 * Sets the {@link INarrativeGenerator Narrative Generator} to use when serializing responses from this server, or <code>null</code> (which is the default) to disable narrative generation.
-	 * 
-	 * @throws IllegalStateException
-	 *             Note that this method can only be called prior to {@link #init() initialization} and will throw an {@link IllegalStateException} if called after that.
-	 */
-	public void setNarrativeGenerator(INarrativeGenerator theNarrativeGenerator) {
-		if (myFhirContext != null) {
-			throw new IllegalStateException("Server has already been initialized, can not change this property");
-		}
-		myNarrativeGenerator = theNarrativeGenerator;
-	}
-
-	/**
-	 * If set to <code>true</code> (default is false), the server will use browser friendly content-types (instead of standard FHIR ones) when it detects that the request is coming from a browser
-	 * instead of a FHIR
-	 */
-	public void setUseBrowserFriendlyContentTypes(boolean theUseBrowserFriendlyContentTypes) {
-		myUseBrowserFriendlyContentTypes = theUseBrowserFriendlyContentTypes;
-	}
-
 	private Map<Class<? extends IResource>, IResourceProvider> myTypeToProvider = new HashMap<Class<? extends IResource>, IResourceProvider>();
+	private boolean myUseBrowserFriendlyContentTypes;
 
 	// map of request handler resources keyed by resource name
 	private Map<String, ResourceBinding> resources = new HashMap<String, ResourceBinding>();
 
 	private ISecurityManager securityManager;
 
-	private EncodingUtil determineResponseEncoding(HttpServletRequest theRequest, Map<String, String[]> theParams) {
-		String[] format = theParams.remove(Constants.PARAM_FORMAT);
-		if (format != null) {
-			for (String nextFormat : format) {
-				EncodingUtil retVal = Constants.FORMAT_VAL_TO_ENCODING.get(nextFormat);
-				if (retVal != null) {
-					return retVal;
-				}
-			}
-		}
-
-		Enumeration<String> acceptValues = theRequest.getHeaders("Accept");
-		if (acceptValues != null) {
-			while (acceptValues.hasMoreElements()) {
-				EncodingUtil retVal = Constants.FORMAT_VAL_TO_ENCODING.get(acceptValues.nextElement());
-				if (retVal != null) {
-					return retVal;
-				}
-			}
-		}
-		return EncodingUtil.XML;
-	}
-
-	@Override
-	protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		handleRequest(SearchMethodBinding.RequestType.DELETE, request, response);
-	}
-
-	@Override
-	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		handleRequest(SearchMethodBinding.RequestType.GET, request, response);
-	}
-
-	@Override
-	protected void doOptions(HttpServletRequest theReq, HttpServletResponse theResp) throws ServletException, IOException {
-		handleRequest(SearchMethodBinding.RequestType.OPTIONS, theReq, theResp);
-	}
-
-	@Override
-	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		handleRequest(SearchMethodBinding.RequestType.POST, request, response);
-	}
-
-	@Override
-	protected void doPut(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		handleRequest(SearchMethodBinding.RequestType.PUT, request, response);
-	}
-
-	private void findResourceMethods(IResourceProvider theProvider) throws Exception {
-
-		Class<? extends IResource> resourceType = theProvider.getResourceType();
-		RuntimeResourceDefinition definition = myFhirContext.getResourceDefinition(resourceType);
-
-		ResourceBinding r = new ResourceBinding();
-		r.setResourceProvider(theProvider);
-		r.setResourceName(definition.getName());
-		resources.put(definition.getName(), r);
-
-		ourLog.info("Scanning type for RESTful methods: {}", theProvider.getClass());
-
-		Class<?> clazz = theProvider.getClass();
-		for (Method m : clazz.getDeclaredMethods()) {
-			if (Modifier.isPublic(m.getModifiers())) {
-				ourLog.debug("Scanning public method: {}#{}", theProvider.getClass(), m.getName());
-
-				BaseMethodBinding foundMethodBinding = BaseMethodBinding.bindMethod(theProvider.getResourceType(), m);
-				if (foundMethodBinding != null) {
-					r.addMethod(foundMethodBinding);
-					ourLog.info(" * Method: {}#{} is a handler", theProvider.getClass(), m.getName());
-				} else {
-					ourLog.debug(" * Method: {}#{} is not a handler", theProvider.getClass(), m.getName());
-				}
-			}
-		}
-	}
-
 	public FhirContext getFhirContext() {
 		return myFhirContext;
 	}
 
-	private IParser getNewParser(EncodingUtil theResponseEncoding, boolean thePrettyPrint, NarrativeModeEnum theNarrativeMode) {
-		IParser parser;
-		switch (theResponseEncoding) {
-		case JSON:
-			parser = myFhirContext.newJsonParser();
-			break;
-		case XML:
-		default:
-			parser = myFhirContext.newXmlParser();
-			break;
-		}
-		return parser.setPrettyPrint(thePrettyPrint).setSuppressNarratives(theNarrativeMode == NarrativeModeEnum.SUPPRESS);
+	public INarrativeGenerator getNarrativeGenerator() {
+		return myNarrativeGenerator;
 	}
 
 	public Collection<ResourceBinding> getResourceBindings() {
@@ -200,14 +81,122 @@ public abstract class RestfulServer extends HttpServlet {
 		return new ServerProfileProvider(getFhirContext());
 	}
 
-	public enum NarrativeModeEnum {
-		NORMAL, 
-		SUPPRESS, 
-		ONLY;
-		
-		public static NarrativeModeEnum valueOfCaseInsensitive(String theCode) {
-			return valueOf(NarrativeModeEnum.class, theCode.toUpperCase());
+	@Override
+	public final void init() throws ServletException {
+		initialize();
+		try {
+			ourLog.info("Initializing HAPI FHIR restful server");
+
+			securityManager = getSecurityManager();
+			if (null == securityManager) {
+				ourLog.warn("No security manager has been provided, requests will not be authenticated!");
+			}
+
+			Collection<IResourceProvider> resourceProvider = getResourceProviders();
+			for (IResourceProvider nextProvider : resourceProvider) {
+				if (myTypeToProvider.containsKey(nextProvider.getResourceType())) {
+					throw new ServletException("Multiple providers for type: " + nextProvider.getResourceType().getCanonicalName());
+				}
+				myTypeToProvider.put(nextProvider.getResourceType(), nextProvider);
+			}
+
+			ourLog.info("Got {} resource providers", myTypeToProvider.size());
+
+			myFhirContext = new FhirContext(myTypeToProvider.keySet());
+			myFhirContext.setNarrativeGenerator(myNarrativeGenerator);
+
+			for (IResourceProvider provider : myTypeToProvider.values()) {
+				findResourceMethods(provider);
+			}
+
+			findResourceMethods(getServerProfilesProvider());
+			findResourceMethods(getServerConformanceProvider());
+
+		} catch (Exception ex) {
+			ourLog.error("An error occurred while loading request handlers!", ex);
+			throw new ServletException("Failed to initialize FHIR Restful server", ex);
 		}
+
+		ourLog.info("A FHIR has been lit on this server");
+	}
+
+	public boolean isUseBrowserFriendlyContentTypes() {
+		return myUseBrowserFriendlyContentTypes;
+	}
+
+	/**
+	 * Sets the {@link INarrativeGenerator Narrative Generator} to use when serializing responses from this server, or <code>null</code> (which is the default) to disable narrative generation.
+	 * 
+	 * @throws IllegalStateException
+	 *             Note that this method can only be called prior to {@link #init() initialization} and will throw an {@link IllegalStateException} if called after that.
+	 */
+	public void setNarrativeGenerator(INarrativeGenerator theNarrativeGenerator) {
+		if (myFhirContext != null) {
+			throw new IllegalStateException("Server has already been initialized, can not change this property");
+		}
+		myNarrativeGenerator = theNarrativeGenerator;
+	}
+
+	/**
+	 * If set to <code>true</code> (default is false), the server will use browser friendly content-types (instead of standard FHIR ones) when it detects that the request is coming from a browser
+	 * instead of a FHIR
+	 */
+	public void setUseBrowserFriendlyContentTypes(boolean theUseBrowserFriendlyContentTypes) {
+		myUseBrowserFriendlyContentTypes = theUseBrowserFriendlyContentTypes;
+	}
+
+
+	private void findResourceMethods(IResourceProvider theProvider) throws Exception {
+
+		Class<? extends IResource> resourceType = theProvider.getResourceType();
+		RuntimeResourceDefinition definition = myFhirContext.getResourceDefinition(resourceType);
+
+		ResourceBinding r = new ResourceBinding();
+		r.setResourceProvider(theProvider);
+		r.setResourceName(definition.getName());
+		resources.put(definition.getName(), r);
+
+		ourLog.info("Scanning type for RESTful methods: {}", theProvider.getClass());
+
+		Class<?> clazz = theProvider.getClass();
+		for (Method m : clazz.getDeclaredMethods()) {
+			if (Modifier.isPublic(m.getModifiers())) {
+				ourLog.debug("Scanning public method: {}#{}", theProvider.getClass(), m.getName());
+
+				BaseMethodBinding foundMethodBinding = BaseMethodBinding.bindMethod(theProvider.getResourceType(), m, myFhirContext);
+				if (foundMethodBinding != null) {
+					r.addMethod(foundMethodBinding);
+					ourLog.info(" * Method: {}#{} is a handler", theProvider.getClass(), m.getName());
+				} else {
+					ourLog.debug(" * Method: {}#{} is not a handler", theProvider.getClass(), m.getName());
+				}
+			}
+		}
+	}
+
+	@Override
+	protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		handleRequest(SearchMethodBinding.RequestType.DELETE, request, response);
+	}
+
+	@Override
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		handleRequest(SearchMethodBinding.RequestType.GET, request, response);
+	}
+
+	@Override
+	protected void doOptions(HttpServletRequest theReq, HttpServletResponse theResp) throws ServletException, IOException {
+		handleRequest(SearchMethodBinding.RequestType.OPTIONS, theReq, theResp);
+	}
+
+	@Override
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		handleRequest(SearchMethodBinding.RequestType.POST, request, response);
+	}
+
+	@Override
+	protected void doPut(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		handleRequest(SearchMethodBinding.RequestType.PUT, request, response);
 	}
 	
 	protected void handleRequest(SearchMethodBinding.RequestType requestType, HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -215,12 +204,6 @@ public abstract class RestfulServer extends HttpServlet {
 
 			if (null != securityManager) {
 				securityManager.authenticate(request);
-			}
-
-			String uaHeader = request.getHeader("user-agent");
-			boolean requestIsBrowser = false;
-			if (uaHeader != null && uaHeader.contains("Mozilla")) {
-				requestIsBrowser = true;
 			}
 
 			String resourceName = null;
@@ -266,24 +249,6 @@ public abstract class RestfulServer extends HttpServlet {
 			String completeUrl = StringUtils.isNotBlank(request.getQueryString()) ? requestUrl + "?" + request.getQueryString() : requestUrl.toString();
 
 			Map<String, String[]> params = new HashMap<String, String[]>(request.getParameterMap());
-			EncodingUtil responseEncoding = determineResponseEncoding(request, params);
-
-			String[] pretty = params.remove(Constants.PARAM_PRETTY);
-			boolean prettyPrint = false;
-			if (pretty != null && pretty.length > 0) {
-				if ("true".equals(pretty[0])) {
-					prettyPrint = true;
-				}
-			}
-
-			String[] narrative = params.remove(Constants.PARAM_NARRATIVE);
-			NarrativeModeEnum narrativeMode = null;
-			if (narrative != null && narrative.length > 0) {
-				narrativeMode = NarrativeModeEnum.valueOfCaseInsensitive(narrative[0]);
-			}
-			if (narrativeMode==null) {
-				narrativeMode = NarrativeModeEnum.NORMAL;
-			}
 
 			StringTokenizer tok = new StringTokenizer(requestPath, "/");
 			if (!tok.hasMoreTokens()) {
@@ -330,29 +295,20 @@ public abstract class RestfulServer extends HttpServlet {
 			r.setId(id);
 			r.setVersion(versionId);
 			r.setOperation(operation);
-			r.setParameterNames(params);
+			r.setParameters(params);
 			r.setRequestType(requestType);
+			r.setResourceProvider(resourceBinding.getResourceProvider());
+			r.setInputReader(request.getReader());
+			r.setFhirServerBase(fhirServerBase);
+			r.setCompleteUrl(completeUrl);
+			r.setServletRequest(request);
 
 			BaseMethodBinding resourceMethod = resourceBinding.getMethod(r);
 			if (null == resourceMethod) {
 				throw new MethodNotFoundException("No resource method available for the supplied parameters " + params);
 			}
 
-			List<IResource> result = resourceMethod.invokeServer(resourceBinding.getResourceProvider(), id, versionId, params);
-			switch (resourceMethod.getReturnType()) {
-			case BUNDLE:
-				streamResponseAsBundle(response, result, responseEncoding, fhirServerBase, completeUrl, prettyPrint, requestIsBrowser, narrativeMode);
-				break;
-			case RESOURCE:
-				if (result.size() == 0) {
-					throw new ResourceNotFoundException(id);
-				} else if (result.size() > 1) {
-					throw new InternalErrorException("Method returned multiple resources");
-				}
-				streamResponseAsResource(response, result.get(0), responseEncoding, prettyPrint, requestIsBrowser, narrativeMode);
-				break;
-			}
-			// resourceMethod.get
+			resourceMethod.invokeServer(this, r, response);
 
 		} catch (AuthenticationException e) {
 			response.setStatus(e.getStatusCode());
@@ -379,45 +335,6 @@ public abstract class RestfulServer extends HttpServlet {
 
 	}
 
-	@Override
-	public final void init() throws ServletException {
-		initialize();
-		try {
-			ourLog.info("Initializing HAPI FHIR restful server");
-
-			securityManager = getSecurityManager();
-			if (null == securityManager) {
-				ourLog.warn("No security manager has been provided, requests will not be authenticated!");
-			}
-
-			Collection<IResourceProvider> resourceProvider = getResourceProviders();
-			for (IResourceProvider nextProvider : resourceProvider) {
-				if (myTypeToProvider.containsKey(nextProvider.getResourceType())) {
-					throw new ServletException("Multiple providers for type: " + nextProvider.getResourceType().getCanonicalName());
-				}
-				myTypeToProvider.put(nextProvider.getResourceType(), nextProvider);
-			}
-
-			ourLog.info("Got {} resource providers", myTypeToProvider.size());
-
-			myFhirContext = new FhirContext(myTypeToProvider.keySet());
-			myFhirContext.setNarrativeGenerator(myNarrativeGenerator);
-
-			for (IResourceProvider provider : myTypeToProvider.values()) {
-				findResourceMethods(provider);
-			}
-
-			findResourceMethods(getServerProfilesProvider());
-			findResourceMethods(getServerConformanceProvider());
-
-		} catch (Exception ex) {
-			ourLog.error("An error occurred while loading request handlers!", ex);
-			throw new ServletException("Failed to initialize FHIR Restful server", ex);
-		}
-
-		ourLog.info("A FHIR has been lit on this server");
-	}
-
 	/**
 	 * This method may be overridden by subclasses to do perform initialization that needs to be performed prior to the server being used.
 	 */
@@ -425,108 +342,15 @@ public abstract class RestfulServer extends HttpServlet {
 		// nothing by default
 	}
 
-	private void streamResponseAsBundle(HttpServletResponse theHttpResponse, List<IResource> theResult, EncodingUtil theResponseEncoding, String theServerBase, String theCompleteUrl,
-			boolean thePrettyPrint, boolean theRequestIsBrowser, NarrativeModeEnum theNarrativeMode) throws IOException {
-		assert !theServerBase.endsWith("/");
-
-		theHttpResponse.setStatus(200);
-
-		if (theRequestIsBrowser && myUseBrowserFriendlyContentTypes) {
-			theHttpResponse.setContentType(theResponseEncoding.getBrowserFriendlyBundleContentType());
-		} else if (theNarrativeMode == NarrativeModeEnum.ONLY) {
-			theHttpResponse.setContentType(Constants.CT_HTML);
-		} else {
-			theHttpResponse.setContentType(theResponseEncoding.getBundleContentType());
-		}
-
-		theHttpResponse.setCharacterEncoding("UTF-8");
-
-		Bundle bundle = new Bundle();
-		bundle.getAuthorName().setValue(getClass().getCanonicalName());
-		bundle.getBundleId().setValue(UUID.randomUUID().toString());
-		bundle.getPublished().setToCurrentTimeInLocalTimeZone();
-		bundle.getLinkBase().setValue(theServerBase);
-		bundle.getLinkSelf().setValue(theCompleteUrl);
-
-		for (IResource next : theResult) {
-			BundleEntry entry = new BundleEntry();
-			bundle.getEntries().add(entry);
-
-			entry.setResource(next);
-
-			RuntimeResourceDefinition def = myFhirContext.getResourceDefinition(next);
-
-			if (next.getId() != null && StringUtils.isNotBlank(next.getId().getValue())) {
-				entry.getEntryId().setValue(next.getId().getValue());
-				entry.getTitle().setValue(def.getName() + " " + next.getId().getValue());
-
-				StringBuilder b = new StringBuilder();
-				b.append(theServerBase);
-				b.append('/');
-				b.append(def.getName());
-				b.append('/');
-				b.append(next.getId().getValue());
-				boolean haveQ = false;
-				if (thePrettyPrint) {
-					b.append('?').append(Constants.PARAM_PRETTY).append("=true");
-					haveQ = true;
-				}
-				if (theResponseEncoding == EncodingUtil.JSON) {
-					if (!haveQ) {
-						b.append('?');
-						haveQ = true;
-					} else {
-						b.append('&');
-					}
-					b.append(Constants.PARAM_FORMAT).append("=json");
-				}
-				if (theNarrativeMode != NarrativeModeEnum.NORMAL) {
-					b.append(Constants.PARAM_NARRATIVE).append("=").append(theNarrativeMode.name().toLowerCase());
-				}
-				entry.getLinkSelf().setValue(b.toString());
-			}
-		}
-
-		bundle.getTotalResults().setValue(theResult.size());
-
-		PrintWriter writer = theHttpResponse.getWriter();
-		try {
-			if (theNarrativeMode == NarrativeModeEnum.ONLY) {
-				for (IResource next : theResult) {
-					writer.append(next.getText().getDiv().getValueAsString());
-					writer.append("<hr/>");
-				}
-			} else {
-			getNewParser(theResponseEncoding, thePrettyPrint, theNarrativeMode).encodeBundleToWriter(bundle, writer);
-			}		} finally {
-			writer.close();
+	public enum NarrativeModeEnum {
+		NORMAL, 
+		ONLY, 
+		SUPPRESS;
+		
+		public static NarrativeModeEnum valueOfCaseInsensitive(String theCode) {
+			return valueOf(NarrativeModeEnum.class, theCode.toUpperCase());
 		}
 	}
 
-	private void streamResponseAsResource(HttpServletResponse theHttpResponse, IResource theResource, EncodingUtil theResponseEncoding, boolean thePrettyPrint, boolean theRequestIsBrowser, NarrativeModeEnum theNarrativeMode)
-			throws IOException {
-
-		theHttpResponse.setStatus(200);
-		if (theRequestIsBrowser && myUseBrowserFriendlyContentTypes) {
-			theHttpResponse.setContentType(theResponseEncoding.getBrowserFriendlyBundleContentType());
-		} else if (theNarrativeMode == NarrativeModeEnum.ONLY) {
-			theHttpResponse.setContentType(Constants.CT_HTML);
-		} else {
-			theHttpResponse.setContentType(theResponseEncoding.getResourceContentType());
-		}
-		theHttpResponse.setCharacterEncoding("UTF-8");
-
-		PrintWriter writer = theHttpResponse.getWriter();
-		try {
-		if (theNarrativeMode == NarrativeModeEnum.ONLY) {
-			writer.append(theResource.getText().getDiv().getValueAsString());
-		} else {
-			getNewParser(theResponseEncoding, thePrettyPrint, theNarrativeMode).encodeResourceToWriter(theResource, writer);
-		}
-		} finally {
-		writer.close();
-		}
-
-	}
 
 }

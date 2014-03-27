@@ -40,6 +40,7 @@
 					<package>ca.uhn.fhir.model.dstu</package>
 					<baseResourceNames>
 						<baseResourceName>adversereaction</baseResourceName>
+						<baseResourceName>alert</baseResourceName>
 						<baseResourceName>conformance</baseResourceName>
 						<baseResourceName>device</baseResourceName>
 						<baseResourceName>diagnosticorder</baseResourceName>
@@ -51,10 +52,13 @@
 						<baseResourceName>media</baseResourceName>
 						<baseResourceName>medication</baseResourceName>
 						<baseResourceName>observation</baseResourceName>
+						<baseResourceName>operationoutcome</baseResourceName>
 						<baseResourceName>organization</baseResourceName>
 						<baseResourceName>patient</baseResourceName>
 						<baseResourceName>practitioner</baseResourceName>
 						<baseResourceName>profile</baseResourceName>
+						<baseResourceName>query</baseResourceName>
+						<baseResourceName>questionnaire</baseResourceName>
 						<baseResourceName>relatedperson</baseResourceName>
 						<baseResourceName>specimen</baseResourceName>
 						<baseResourceName>substance</baseResourceName>

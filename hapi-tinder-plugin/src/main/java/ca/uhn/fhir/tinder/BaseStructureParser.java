@@ -28,7 +28,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.api.UndeclaredExtension;
+import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.api.annotation.SimpleSetter;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.tinder.model.BaseElement;
@@ -129,7 +129,7 @@ public abstract class BaseStructureParser {
 			return (IResource.class.getCanonicalName());
 		}
 		if ("ExtensionDt".equals(theNextType)) {
-			return (UndeclaredExtension.class.getCanonicalName());
+			return (ExtensionDt.class.getCanonicalName());
 		}
 
 		if (myLocallyDefinedClassNames.containsKey(theNextType)) {

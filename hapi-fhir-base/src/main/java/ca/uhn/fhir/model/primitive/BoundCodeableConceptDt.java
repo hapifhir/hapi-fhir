@@ -1,6 +1,6 @@
 package ca.uhn.fhir.model.primitive;
 
-import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.apache.commons.lang3.StringUtils.*;
 
 import java.util.HashSet;
 import java.util.Set;

@@ -43,7 +43,12 @@ import ca.uhn.fhir.model.dstu.valueset.AnimalSpeciesEnum;
 import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
 import ca.uhn.fhir.model.dstu.valueset.LinkTypeEnum;
 import ca.uhn.fhir.model.dstu.valueset.MaritalStatusCodesEnum;
-import ca.uhn.fhir.model.primitive.*;
+import ca.uhn.fhir.model.primitive.BooleanDt;
+import ca.uhn.fhir.model.primitive.BoundCodeDt;
+import ca.uhn.fhir.model.primitive.BoundCodeableConceptDt;
+import ca.uhn.fhir.model.primitive.CodeDt;
+import ca.uhn.fhir.model.primitive.DateTimeDt;
+import ca.uhn.fhir.model.primitive.IntegerDt;
 
 
 /**
@@ -343,6 +348,7 @@ public class Patient extends BaseResource implements IResource {
 		formalDefinition="Whether this patient record is in active use"
 	)
 	private BooleanDt myActive;
+	
 
 	@Override
 	public boolean isEmpty() {

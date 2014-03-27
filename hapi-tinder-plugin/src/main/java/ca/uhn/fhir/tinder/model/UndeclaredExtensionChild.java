@@ -2,26 +2,26 @@ package ca.uhn.fhir.tinder.model;
 
 import java.util.ArrayList;
 
-import ca.uhn.fhir.model.api.UndeclaredExtension;
+import ca.uhn.fhir.model.api.ExtensionDt;
 
 public class UndeclaredExtensionChild extends Child {
 
 	@Override
 	public String getReferenceType() {
 		if (isRepeatable()) {
-			return ArrayList.class.getCanonicalName() + "<" + UndeclaredExtension.class.getSimpleName()+">";
+			return ArrayList.class.getCanonicalName() + "<" + ExtensionDt.class.getSimpleName()+">";
 		}
-		return UndeclaredExtension.class.getSimpleName();
+		return ExtensionDt.class.getSimpleName();
 	}
 
 	@Override
 	public String getAnnotationType() {
-		return UndeclaredExtension.class.getSimpleName();
+		return ExtensionDt.class.getSimpleName();
 	}
 
 	@Override
 	public String getSingleType() {
-		return UndeclaredExtension.class.getSimpleName();
+		return ExtensionDt.class.getSimpleName();
 	}
 
 	@Override

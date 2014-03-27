@@ -1,6 +1,6 @@
 package ca.uhn.fhir.parser;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,6 +28,7 @@ import ca.uhn.fhir.model.api.BaseBundle;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.BundleCategory;
 import ca.uhn.fhir.model.api.BundleEntry;
+import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.api.ICompositeDatatype;
 import ca.uhn.fhir.model.api.ICompositeElement;
 import ca.uhn.fhir.model.api.IElement;
@@ -35,7 +36,6 @@ import ca.uhn.fhir.model.api.IPrimitiveDatatype;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.IResourceBlock;
 import ca.uhn.fhir.model.api.ISupportsUndeclaredExtensions;
-import ca.uhn.fhir.model.api.UndeclaredExtension;
 import ca.uhn.fhir.model.dstu.composite.ContainedDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -399,7 +399,7 @@ class ParserState<T extends IElement> {
 		 */
 		public void enteringNewElementExtension(@SuppressWarnings("unused") StartElement theElement, String theUrlAttr, boolean theIsModifier) {
 			if (myPreResourceState != null && getCurrentElement() instanceof ISupportsUndeclaredExtensions) {
-				UndeclaredExtension newExtension = new UndeclaredExtension(theIsModifier, theUrlAttr);
+				ExtensionDt newExtension = new ExtensionDt(theIsModifier, theUrlAttr);
 				ISupportsUndeclaredExtensions elem = (ISupportsUndeclaredExtensions) getCurrentElement();
 				if (theIsModifier) {
 					elem.getUndeclaredModifierExtensions().add(newExtension);
@@ -672,9 +672,9 @@ class ParserState<T extends IElement> {
 
 	private class ExtensionState extends BaseState {
 
-		private UndeclaredExtension myExtension;
+		private ExtensionDt myExtension;
 
-		public ExtensionState(PreResourceState thePreResourceState, UndeclaredExtension theExtension) {
+		public ExtensionState(PreResourceState thePreResourceState, ExtensionDt theExtension) {
 			super(thePreResourceState);
 			myExtension = theExtension;
 		}

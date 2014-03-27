@@ -7,8 +7,8 @@ import java.util.Map;
 import java.util.Set;
 
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.api.UndeclaredExtension;
 import ca.uhn.fhir.model.dstu.resource.Conformance;
 import ca.uhn.fhir.model.dstu.resource.Conformance.Rest;
 import ca.uhn.fhir.model.dstu.resource.Conformance.RestResource;
@@ -108,17 +108,17 @@ public class ServerConformanceProvider implements IResourceProvider {
 						} else if (searchParamChain == null) {
 							searchParam.addChain(nextParameter.getName());
 							searchParamChain = searchParam.getChain().get(searchParam.getChain().size()-1);
-							UndeclaredExtension ext = new UndeclaredExtension();
+							ExtensionDt ext = new ExtensionDt();
 							ext.setUrl(ExtensionConstants.CONF_CHAIN_REQUIRED);
 							ext.setValue(new BooleanDt(nextParameter.isRequired()));
 							searchParamChain.getUndeclaredExtensions().add(ext);
 							
 						} else {
-							UndeclaredExtension ext = new UndeclaredExtension();
+							ExtensionDt ext = new ExtensionDt();
 							ext.setUrl(ExtensionConstants.CONF_ALSO_CHAIN);
 							searchParamChain.getUndeclaredExtensions().add(ext);
 							
-							UndeclaredExtension extReq = new UndeclaredExtension();
+							ExtensionDt extReq = new ExtensionDt();
 							extReq.setUrl(ExtensionConstants.CONF_CHAIN_REQUIRED);
 							extReq.setValue(new BooleanDt(nextParameter.isRequired()));
 							ext.getUndeclaredExtensions().add(extReq);

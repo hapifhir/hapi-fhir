@@ -9,6 +9,7 @@ import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
+import ca.uhn.fhir.rest.annotation.Id;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.Required;
 import ca.uhn.fhir.rest.annotation.Search;
@@ -41,7 +42,7 @@ public class RestfulObservationResourceProvider implements IResourceProvider {
 	 *    Returns a resource matching this identifier, or null if none exists.
 	 */
 	@Read()
-	public Patient getResourceById(@Read.IdParam IdDt theId) {
+	public Patient getResourceById(@Id IdDt theId) {
 		Patient patient = new Patient();
 		patient.addIdentifier();
 		patient.getIdentifier().get(0).setSystem(new UriDt("urn:hapitest:mrns"));

@@ -1,6 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
-enum EncodingUtil {
+public enum EncodingUtil {
 
 	XML(Constants.CT_FHIR_XML, Constants.CT_ATOM_XML, Constants.CT_XML),
 

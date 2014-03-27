@@ -17,11 +17,13 @@ import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.rest.annotation.Id;
 import ca.uhn.fhir.rest.annotation.Include;
 import ca.uhn.fhir.rest.annotation.Optional;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.Required;
 import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.annotation.VersionId;
 import ca.uhn.fhir.rest.client.ITestClient;
 import ca.uhn.fhir.rest.param.CodingListParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
@@ -41,7 +43,7 @@ public List<Organization> getAllOrganizations() {
 
 //START SNIPPET: read
 @Read()
-public Patient getResourceById(@Read.IdParam IdDt theId) {
+public Patient getResourceById(@Id IdDt theId) {
    Patient retVal = new Patient();
    // ...populate...
    return retVal;
@@ -50,8 +52,8 @@ public Patient getResourceById(@Read.IdParam IdDt theId) {
 
 //START SNIPPET: vread
 @Read()
-public Patient getResourceById(@Read.IdParam IdDt theId, 
-                               @Read.VersionIdParam IdDt theVersionId) {
+public Patient getResourceById(@Id IdDt theId, 
+                               @VersionId IdDt theVersionId) {
    Patient retVal = new Patient();
    // ...populate...
    return retVal;

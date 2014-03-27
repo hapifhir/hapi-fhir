@@ -9,12 +9,12 @@ import ca.uhn.fhir.model.primitive.IdDt;
 public abstract class BaseElement implements IIdentifiableElement, ISupportsUndeclaredExtensions {
 
 	private IdDt myId;
-	private List<UndeclaredExtension> myUndeclaredExtensions;
-	private List<UndeclaredExtension> myUndeclaredModifierExtensions;
+	private List<ExtensionDt> myUndeclaredExtensions;
+	private List<ExtensionDt> myUndeclaredModifierExtensions;
 
 	@Override
-	public List<UndeclaredExtension> getAllUndeclaredExtensions() {
-		ArrayList<UndeclaredExtension> retVal = new ArrayList<UndeclaredExtension>();
+	public List<ExtensionDt> getAllUndeclaredExtensions() {
+		ArrayList<ExtensionDt> retVal = new ArrayList<ExtensionDt>();
 		if (myUndeclaredExtensions != null) {
 			retVal.addAll(myUndeclaredExtensions);
 		}
@@ -33,17 +33,17 @@ public abstract class BaseElement implements IIdentifiableElement, ISupportsUnde
 	}
 
 	@Override
-	public List<UndeclaredExtension> getUndeclaredExtensions() {
+	public List<ExtensionDt> getUndeclaredExtensions() {
 		if (myUndeclaredExtensions == null) {
-			myUndeclaredExtensions = new ArrayList<UndeclaredExtension>();
+			myUndeclaredExtensions = new ArrayList<ExtensionDt>();
 		}
 		return myUndeclaredExtensions;
 	}
 
 	@Override
-	public List<UndeclaredExtension> getUndeclaredModifierExtensions() {
+	public List<ExtensionDt> getUndeclaredModifierExtensions() {
 		if (myUndeclaredModifierExtensions == null) {
-			myUndeclaredModifierExtensions = new ArrayList<UndeclaredExtension>();
+			myUndeclaredModifierExtensions = new ArrayList<ExtensionDt>();
 		}
 		return myUndeclaredModifierExtensions;
 	}
@@ -54,14 +54,14 @@ public abstract class BaseElement implements IIdentifiableElement, ISupportsUnde
 	 */
 	protected boolean isBaseEmpty() {
 		if (myUndeclaredExtensions != null) {
-			for (UndeclaredExtension next : myUndeclaredExtensions) {
+			for (ExtensionDt next : myUndeclaredExtensions) {
 				if (!next.isEmpty()) {
 					return false;
 				}
 			}
 		}
 		if (myUndeclaredModifierExtensions != null) {
-			for (UndeclaredExtension next : myUndeclaredModifierExtensions) {
+			for (ExtensionDt next : myUndeclaredModifierExtensions) {
 				if (!next.isEmpty()) {
 					return false;
 				}

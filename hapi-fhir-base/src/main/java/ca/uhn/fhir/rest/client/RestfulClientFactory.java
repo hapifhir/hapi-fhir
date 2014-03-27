@@ -84,7 +84,7 @@ public class RestfulClientFactory implements IRestfulClientFactory {
 				}
 				resReturnType = (Class<? extends IResource>) returnTypeColl;
 			}
-			BaseMethodBinding binding = BaseMethodBinding.bindMethod(resReturnType, nextMethod);
+			BaseMethodBinding binding = BaseMethodBinding.bindMethod(resReturnType, nextMethod, myContext);
 			invocationHandler.addBinding(nextMethod, binding);
 		}
 

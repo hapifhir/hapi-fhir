@@ -7,16 +7,16 @@ public interface ISupportsUndeclaredExtensions extends IElement {
 	/**
 	 * Returns a list containing all undeclared non-modifier extensions
 	 */
-	List<UndeclaredExtension> getUndeclaredExtensions();
+	List<ExtensionDt> getUndeclaredExtensions();
 
 	/**
 	 * Returns an <b>immutable</b> list containing all extensions (modifier and non-modifier)
 	 */
-	List<UndeclaredExtension> getAllUndeclaredExtensions();
+	List<ExtensionDt> getAllUndeclaredExtensions();
 
 	/**
 	 * Returns a list containing all undeclared modifier extensions
 	 */
-	List<UndeclaredExtension> getUndeclaredModifierExtensions();
+	List<ExtensionDt> getUndeclaredModifierExtensions();
 	
 }

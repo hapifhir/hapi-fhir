@@ -2,8 +2,6 @@ package ca.uhn.fhir.context;
 
 import java.util.List;
 
-import javax.naming.OperationNotSupportedException;
-
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IExtension;
 import ca.uhn.fhir.model.api.IResource;

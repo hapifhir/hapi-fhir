@@ -7,6 +7,7 @@ import java.util.Map;
 import org.apache.commons.lang3.Validate;
 
 import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
@@ -18,26 +19,24 @@ import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
-public class ReadMethodBinding extends BaseMethodBinding {
+public class ReadMethodBinding extends BaseResourceReturningMethodBinding {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ReadMethodBinding.class);
 	
-	private Method myMethod;
 	private Integer myIdIndex;
 	private Integer myVersionIdIndex;
 	private int myParameterCount;
 
-	public ReadMethodBinding(MethodReturnTypeEnum theMethodReturnType, Class<? extends IResource> theAnnotatedResourceType, Method theMethod) {
-		super(theMethodReturnType, theAnnotatedResourceType);
+	public ReadMethodBinding(Class<? extends IResource> theAnnotatedResourceType, Method theMethod, FhirContext theContext) {
+		super( theAnnotatedResourceType, theMethod, theContext);
 		
 		Validate.notNull(theMethod, "Method must not be null");
 		
 		Integer idIndex = Util.findReadIdParameterIndex(theMethod);
 		Integer versionIdIndex = Util.findReadVersionIdParameterIndex(theMethod);
 
-		myMethod = theMethod;
 		myIdIndex = idIndex;
 		myVersionIdIndex = versionIdIndex;
-		myParameterCount = myMethod.getParameterTypes().length;
+		myParameterCount = getMethod().getParameterTypes().length;
 		
 		Class<?>[] parameterTypes = theMethod.getParameterTypes();
 		if (!IdDt.class.equals(parameterTypes[myIdIndex])) {
@@ -58,8 +57,10 @@ public class ReadMethodBinding extends BaseMethodBinding {
 		if (!theRequest.getResourceName().equals(getResourceName())) {
 			return false;
 		}
-		if (theRequest.getParameterNames().isEmpty() == false) {
-			return false;
+		for (String next : theRequest.getParameters().keySet()) {
+			if (!ALLOWED_PARAMS.contains(next)) {
+				return false;
+			}
 		}
 		if ((theRequest.getVersion() == null) != (myVersionIdIndex == null)) {
 			return false;
@@ -90,7 +91,7 @@ public class ReadMethodBinding extends BaseMethodBinding {
 		
 		Object response;
 		try {
-			response = myMethod.invoke(theResourceProvider, params);
+			response = getMethod().invoke(theResourceProvider, params);
 		} catch (Exception e) {
 			throw new InternalErrorException("Failed to call access method",e);
 		}

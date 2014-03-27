@@ -10,8 +10,9 @@ import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.dstu.resource.Patient;
-import ca.uhn.fhir.rest.method.BaseMethodBinding.MethodReturnTypeEnum;
 import ca.uhn.fhir.rest.method.Request;
 import ca.uhn.fhir.rest.method.SearchMethodBinding;
 import ca.uhn.fhir.rest.method.SearchMethodBinding.RequestType;
@@ -22,9 +23,13 @@ public class ResourceMethodTest {
 
 	private SearchMethodBinding rm;
 
+	public Bundle foo() {
+		return null;
+	}
+	
 	@Before
 	public void before() throws NoSuchMethodException, SecurityException {
-		rm = new SearchMethodBinding(MethodReturnTypeEnum.RESOURCE, Patient.class, ResourceMethodTest.class.getMethod("before"), null);
+		rm = new SearchMethodBinding(Patient.class, ResourceMethodTest.class.getMethod("foo"), null, new FhirContext());
 	}
 	
 	@Test

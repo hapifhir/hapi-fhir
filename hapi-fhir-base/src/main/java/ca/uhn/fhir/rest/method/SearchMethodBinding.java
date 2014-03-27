@@ -12,6 +12,7 @@ import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
@@ -27,17 +28,15 @@ import ca.uhn.fhir.util.QueryUtil;
 /**
  * Created by dsotnikov on 2/25/2014.
  */
-public class SearchMethodBinding extends BaseMethodBinding {
+public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchMethodBinding.class);
 
-	private Method myMethod;
 	private Class<?> myDeclaredResourceType;
 	private List<IParameter> myParameters;
 	private String myQueryName;
 
-	public SearchMethodBinding(MethodReturnTypeEnum theMethodReturnTypeEnum, Class<? extends IResource> theReturnResourceType, Method theMethod, String theQueryName) {
-		super(theMethodReturnTypeEnum, theReturnResourceType);
-		this.myMethod = theMethod;
+	public SearchMethodBinding(Class<? extends IResource> theReturnResourceType, Method theMethod, String theQueryName, FhirContext theContext) {
+		super(theReturnResourceType, theMethod, theContext);
 		this.myParameters = Util.getResourceParameters(theMethod);
 		this.myQueryName = StringUtils.defaultIfBlank(theQueryName, null);
 		this.myDeclaredResourceType = theMethod.getReturnType();
@@ -47,17 +46,23 @@ public class SearchMethodBinding extends BaseMethodBinding {
 		return myDeclaredResourceType.getClass();
 	}
 
-	public Method getMethod() {
-		return myMethod;
-	}
-
 	public List<IParameter> getParameters() {
 		return myParameters;
 	}
 
 	@Override
+	public RestfulOperationTypeEnum getResourceOperationType() {
+		return RestfulOperationTypeEnum.SEARCH_TYPE;
+	}
+
+	@Override
 	public ReturnTypeEnum getReturnType() {
 		return ReturnTypeEnum.BUNDLE;
+	}
+
+	@Override
+	public RestfulOperationSystemEnum getSystemOperationType() {
+		return null;
 	}
 
 	@Override
@@ -135,7 +140,7 @@ public class SearchMethodBinding extends BaseMethodBinding {
 
 		Object response;
 		try {
-			response = this.myMethod.invoke(theResourceProvider, params);
+			response = this.getMethod().invoke(theResourceProvider, params);
 		} catch (IllegalAccessException e) {
 			throw new InternalErrorException(e);
 		} catch (IllegalArgumentException e) {
@@ -151,7 +156,7 @@ public class SearchMethodBinding extends BaseMethodBinding {
 	@Override
 	public boolean matches(Request theRequest) {
 		if (!theRequest.getResourceName().equals(getResourceName())) {
-			ourLog.trace("Method {} doesn't match because resource name {} != {}", myMethod.getName(), theRequest.getResourceName(), getResourceName());
+			ourLog.trace("Method {} doesn't match because resource name {} != {}", getMethod().getName(), theRequest.getResourceName(), getResourceName());
 			return false;
 		}
 		if (theRequest.getId() != null || theRequest.getVersion() != null) {
@@ -171,13 +176,13 @@ public class SearchMethodBinding extends BaseMethodBinding {
 		for (int i = 0; i < this.myParameters.size(); i++) {
 			IParameter temp = this.myParameters.get(i);
 			methodParamsTemp.add(temp.getName());
-			if (temp.isRequired() && !theRequest.getParameterNames().containsKey(temp.getName())) {
-				ourLog.trace("Method {} doesn't match param '{}' is not present", myMethod.getName(), temp.getName());
+			if (temp.isRequired() && !theRequest.getParameters().containsKey(temp.getName())) {
+				ourLog.trace("Method {} doesn't match param '{}' is not present", getMethod().getName(), temp.getName());
 				return false;
 			}
 		}
 		if (myQueryName != null) {
-			String[] queryNameValues = theRequest.getParameterNames().get(Constants.PARAM_QUERY);
+			String[] queryNameValues = theRequest.getParameters().get(Constants.PARAM_QUERY);
 			if (queryNameValues != null && StringUtils.isNotBlank(queryNameValues[0])) {
 				String queryName = queryNameValues[0];
 				if (!myQueryName.equals(queryName)) {
@@ -191,15 +196,16 @@ public class SearchMethodBinding extends BaseMethodBinding {
 				return false;
 			}
 		}
-		boolean retVal = methodParamsTemp.containsAll(theRequest.getParameterNames().keySet());
+		for (String next : theRequest.getParameters().keySet()) {
+			if (ALLOWED_PARAMS.contains(next)) {
+				methodParamsTemp.add(next);
+			}
+		}
+		boolean retVal = methodParamsTemp.containsAll(theRequest.getParameters().keySet());
 
-		ourLog.trace("Method {} matches: {}", myMethod.getName(), retVal);
+		ourLog.trace("Method {} matches: {}", getMethod().getName(), retVal);
 
 		return retVal;
-	}
-
-	public void setMethod(Method method) {
-		this.myMethod = method;
 	}
 
 	public void setParameters(List<IParameter> parameters) {
@@ -211,17 +217,7 @@ public class SearchMethodBinding extends BaseMethodBinding {
 	}
 
 	public static enum RequestType {
-		DELETE, GET, POST, PUT, OPTIONS
-	}
-
-	@Override
-	public RestfulOperationTypeEnum getResourceOperationType() {
-		return RestfulOperationTypeEnum.SEARCH_TYPE;
-	}
-
-	@Override
-	public RestfulOperationSystemEnum getSystemOperationType() {
-		return null;
+		DELETE, GET, OPTIONS, POST, PUT
 	}
 
 }

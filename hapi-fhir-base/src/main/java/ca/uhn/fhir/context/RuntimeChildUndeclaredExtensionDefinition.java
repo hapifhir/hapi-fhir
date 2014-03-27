@@ -9,10 +9,10 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import ca.uhn.fhir.model.api.BaseResourceReference;
+import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.api.IDatatype;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.api.UndeclaredExtension;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 
 public class RuntimeChildUndeclaredExtensionDefinition extends BaseRuntimeChildDefinition {
@@ -90,7 +90,7 @@ public class RuntimeChildUndeclaredExtensionDefinition extends BaseRuntimeChildD
 		return new IAccessor() {
 			@Override
 			public List<? extends IElement> getValues(Object theTarget) {
-				UndeclaredExtension target = (UndeclaredExtension)theTarget;
+				ExtensionDt target = (ExtensionDt)theTarget;
 				if (target.getValue() != null) {
 					return Collections.singletonList(target.getValue());
 				}
@@ -104,11 +104,11 @@ public class RuntimeChildUndeclaredExtensionDefinition extends BaseRuntimeChildD
 		return new IMutator() {
 			@Override
 			public void addValue(Object theTarget, IElement theValue) {
-				UndeclaredExtension target = (UndeclaredExtension)theTarget;
+				ExtensionDt target = (ExtensionDt)theTarget;
 				if (theValue instanceof IDatatype) {
 					target.setValue((IDatatype) theTarget);
 				}else {
-					target.getUndeclaredExtensions().add((UndeclaredExtension) theValue);
+					target.getUndeclaredExtensions().add((ExtensionDt) theValue);
 				}
 			}};
 	}

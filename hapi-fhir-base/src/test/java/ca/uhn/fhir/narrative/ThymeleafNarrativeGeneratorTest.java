@@ -1,6 +1,6 @@
 package ca.uhn.fhir.narrative;
 
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.util.Date;

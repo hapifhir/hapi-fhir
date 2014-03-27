@@ -5,6 +5,7 @@ import java.util.List;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.rest.annotation.Id;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.Required;
 import ca.uhn.fhir.rest.annotation.Search;
@@ -28,7 +29,7 @@ public interface RestfulClientImpl extends IBasicClient {
 	 *    Returns a resource matching this identifier, or null if none exists.
 	 */
 	@Read()
-	public Patient getResourceById(@Read.IdParam IdDt theId);
+	public Patient getResourceById(@Id IdDt theId);
 
 	/**
 	 * The "@Search" annotation indicates that this method supports the 

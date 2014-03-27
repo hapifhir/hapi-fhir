@@ -1,7 +1,6 @@
 package ca.uhn.fhir.parser;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 import java.io.Reader;
 import java.io.StringWriter;
@@ -38,11 +37,11 @@ import ca.uhn.fhir.context.RuntimeChildUndeclaredExtensionDefinition;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.BundleEntry;
+import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IPrimitiveDatatype;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ISupportsUndeclaredExtensions;
-import ca.uhn.fhir.model.api.UndeclaredExtension;
 import ca.uhn.fhir.model.dstu.composite.ContainedDt;
 import ca.uhn.fhir.model.dstu.composite.NarrativeDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
@@ -449,10 +448,10 @@ public class XmlParser extends BaseParser implements IParser {
 		theEventWriter.writeEndElement();
 	}
 
-	private void encodeUndeclaredExtensions(RuntimeResourceDefinition theResDef, IResource theResource, XMLStreamWriter theWriter, List<UndeclaredExtension> extensions, String tagName) throws XMLStreamException, DataFormatException {
-		for (UndeclaredExtension next : extensions) {
+	private void encodeUndeclaredExtensions(RuntimeResourceDefinition theResDef, IResource theResource, XMLStreamWriter theWriter, List<ExtensionDt> extensions, String tagName) throws XMLStreamException, DataFormatException {
+		for (ExtensionDt next : extensions) {
 			theWriter.writeStartElement(tagName);
-			theWriter.writeAttribute("url", next.getUrl());
+			theWriter.writeAttribute("url", next.getUrl().getValue());
 
 			if (next.getValue() != null) {
 				IElement nextValue = next.getValue();
