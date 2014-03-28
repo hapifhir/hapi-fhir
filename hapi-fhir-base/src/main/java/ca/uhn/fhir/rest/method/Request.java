@@ -9,7 +9,6 @@ import javax.servlet.http.HttpServletRequest;
 
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.method.SearchMethodBinding.RequestType;
-import ca.uhn.fhir.rest.server.IResourceProvider;
 
 public class Request {
 
@@ -21,7 +20,7 @@ public class Request {
 	private Map<String, String[]> myParameters;
 	private RequestType myRequestType;
 	private String myResourceName;
-	private IResourceProvider myResourceProvider;
+	private Object myResourceProvider;
 	private IdDt myVersion;
 	private HttpServletRequest myServletRequest;
 
@@ -57,7 +56,7 @@ public class Request {
 		return myResourceName;
 	}
 
-	public IResourceProvider getResourceProvider() {
+	public Object getResourceProvider() {
 		return myResourceProvider;
 	}
 
@@ -99,8 +98,8 @@ public class Request {
 		myResourceName = theResourceName;
 	}
 
-	public void setResourceProvider(IResourceProvider theResourceProvider) {
-		myResourceProvider=theResourceProvider;
+	public void setResourceProvider(Object theProvider) {
+		myResourceProvider=theProvider;
 	}
 
 	public void setVersion(IdDt theVersion) {

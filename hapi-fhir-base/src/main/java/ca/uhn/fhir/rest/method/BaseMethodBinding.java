@@ -201,4 +201,8 @@ public abstract class BaseMethodBinding {
 
 	public abstract Object invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException, BaseServerResponseException;
 
+	public static BaseMethodBinding bindSystemMethod(Method theMethod, FhirContext theContext) {
+		return bindMethod(null, theMethod, theContext);
+	}
+
 }

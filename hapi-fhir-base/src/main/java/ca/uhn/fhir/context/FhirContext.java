@@ -18,15 +18,32 @@ import ca.uhn.fhir.rest.client.IRestfulClientFactory;
 import ca.uhn.fhir.rest.client.RestfulClientFactory;
 import ca.uhn.fhir.rest.client.api.IRestfulClient;
 
+/**
+ * The FHIR context is the central starting point for the use of the HAPI FHIR API. It should be created once, and then used as a factory for various other types of objects (parsers, clients, etc.).
+ * 
+ * <p>
+ * Important usage notes:
+ * <ul>
+ * <li>Thread safety: <b>This class is thread safe</b> and may be shared between multiple processing threads.</li>
+ * <li>
+ * Performance: <b>This class is expensive</b> to create, as it scans every resource class it needs to parse or encode to build up an internal model of those classes. For that reason, you should try
+ * to create one FhirContext instance which remains for the life of your application and reuse that instance. Note that it will not cause problems to create multiple instances (ie. resources
+ * originating from one FhirContext may be passed to parsers originating from another) but you will incur a performance penalty if a new FhirContext is created for every message you parse/encode.</li>
+ * </ul>
+ * </p>
+ */
 public class FhirContext {
 
 	private volatile Map<Class<? extends IElement>, BaseRuntimeElementDefinition<?>> myClassToElementDefinition = Collections.emptyMap();
 	private volatile Map<String, RuntimeResourceDefinition> myIdToResourceDefinition = Collections.emptyMap();
 	private volatile Map<String, RuntimeResourceDefinition> myNameToElementDefinition = Collections.emptyMap();
-	private INarrativeGenerator myNarrativeGenerator;
-	private IRestfulClientFactory myRestfulClientFactory;
+	private volatile INarrativeGenerator myNarrativeGenerator;
+	private volatile IRestfulClientFactory myRestfulClientFactory;
 	private volatile RuntimeChildUndeclaredExtensionDefinition myRuntimeChildUndeclaredExtensionDefinition;
 
+	/**
+	 * Default constructor. In most cases this is the right constructor to use.
+	 */
 	public FhirContext() {
 	}
 
@@ -41,7 +58,11 @@ public class FhirContext {
 	public FhirContext(Collection<Class<? extends IResource>> theResourceTypes) {
 		scanResourceTypes(theResourceTypes);
 	}
-	
+
+	/**
+	 * Returns the scanned runtime model for the given type. This is an advanced feature
+	 * which is generally only needed for extending the core library.
+	 */
 	public BaseRuntimeElementDefinition<?> getElementDefinition(Class<? extends IElement> theElementType) {
 		return myClassToElementDefinition.get(theElementType);
 	}
@@ -50,6 +71,10 @@ public class FhirContext {
 		return myNarrativeGenerator;
 	}
 
+	/**
+	 * Returns the scanned runtime model for the given type. This is an advanced feature
+	 * which is generally only needed for extending the core library.
+	 */
 	public RuntimeResourceDefinition getResourceDefinition(Class<? extends IResource> theResourceType) {
 		RuntimeResourceDefinition retVal = (RuntimeResourceDefinition) myClassToElementDefinition.get(theResourceType);
 		if (retVal == null) {
@@ -57,15 +82,23 @@ public class FhirContext {
 		}
 		return retVal;
 	}
-	
+
+	/**
+	 * Returns the scanned runtime model for the given type. This is an advanced feature
+	 * which is generally only needed for extending the core library.
+	 */
 	public RuntimeResourceDefinition getResourceDefinition(IResource theResource) {
 		return getResourceDefinition(theResource.getClass());
 	}
 
+	/**
+	 * Returns the scanned runtime model for the given type. This is an advanced feature
+	 * which is generally only needed for extending the core library.
+	 */
 	@SuppressWarnings("unchecked")
 	public RuntimeResourceDefinition getResourceDefinition(String theResourceName) {
 		RuntimeResourceDefinition retVal = myNameToElementDefinition.get(theResourceName);
-		
+
 		if (retVal == null) {
 			try {
 				String candidateName = Patient.class.getPackage().getName() + "." + theResourceName;
@@ -77,20 +110,28 @@ public class FhirContext {
 				return null;
 			}
 		}
-		
+
 		return retVal;
 	}
 
+	/**
+	 * Returns the scanned runtime model for the given type. This is an advanced feature
+	 * which is generally only needed for extending the core library.
+	 */
 	public RuntimeResourceDefinition getResourceDefinitionById(String theId) {
 		return myIdToResourceDefinition.get(theId);
 	}
 
+	/**
+	 * Returns the scanned runtime models. This is an advanced feature
+	 * which is generally only needed for extending the core library.
+	 */
 	public Collection<RuntimeResourceDefinition> getResourceDefinitions() {
 		return myIdToResourceDefinition.values();
 	}
 
 	public IRestfulClientFactory getRestfulClientFactory() {
-		if (myRestfulClientFactory==null) {
+		if (myRestfulClientFactory == null) {
 			myRestfulClientFactory = new RestfulClientFactory(this);
 		}
 		return myRestfulClientFactory;
@@ -100,12 +141,25 @@ public class FhirContext {
 		return myRuntimeChildUndeclaredExtensionDefinition;
 	}
 
+	/**
+	 * Create and return a new JSON parser. 
+	 * 
+	 * <p>
+	 * Performance Note: <b>This class is cheap</b> to create, and may be called once for
+	 * every message being processed without incurring any performance penalty
+	 * </p>
+	 */
 	public IParser newJsonParser() {
 		return new JsonParser(this);
 	}
 
 	/**
-	 * Instantiates a new client instance
+	 * Instantiates a new client instance.
+	 * 
+	 * <p>
+	 * Performance Note: <b>This class is cheap</b> to create, and may be called once for
+	 * every message being processed without incurring any performance penalty
+	 * </p>
 	 * 
 	 * @param theClientType
 	 *            The client type, which is an interface type to be instantiated
@@ -119,14 +173,22 @@ public class FhirContext {
 		return getRestfulClientFactory().newClient(theClientType, theServerBase);
 	}
 
+	/**
+	 * Create and return a new JSON parser. 
+	 * 
+	 * <p>
+	 * Performance Note: <b>This class is cheap</b> to create, and may be called once for
+	 * every message being processed without incurring any performance penalty
+	 * </p>
+	 */
 	public IParser newXmlParser() {
 		return new XmlParser(this);
 	}
-	
+
 	public void setNarrativeGenerator(INarrativeGenerator theNarrativeGenerator) {
 		myNarrativeGenerator = theNarrativeGenerator;
 	}
-	
+
 	private RuntimeResourceDefinition scanResourceType(Class<? extends IResource> theResourceType) {
 		ArrayList<Class<? extends IResource>> resourceTypes = new ArrayList<Class<? extends IResource>>();
 		resourceTypes.add(theResourceType);
@@ -139,11 +201,11 @@ public class FhirContext {
 		if (myRuntimeChildUndeclaredExtensionDefinition == null) {
 			myRuntimeChildUndeclaredExtensionDefinition = scanner.getRuntimeChildUndeclaredExtensionDefinition();
 		}
-		
+
 		Map<String, RuntimeResourceDefinition> nameToElementDefinition = new HashMap<String, RuntimeResourceDefinition>();
 		nameToElementDefinition.putAll(myNameToElementDefinition);
 		nameToElementDefinition.putAll(scanner.getNameToResourceDefinitions());
-		
+
 		Map<Class<? extends IElement>, BaseRuntimeElementDefinition<?>> classToElementDefinition = new HashMap<Class<? extends IElement>, BaseRuntimeElementDefinition<?>>();
 		classToElementDefinition.putAll(myClassToElementDefinition);
 		classToElementDefinition.putAll(scanner.getClassToElementDefinitions());
@@ -155,7 +217,7 @@ public class FhirContext {
 		myNameToElementDefinition = nameToElementDefinition;
 		myClassToElementDefinition = classToElementDefinition;
 		myIdToResourceDefinition = idToElementDefinition;
-		
+
 		return classToElementDefinition;
 	}
 

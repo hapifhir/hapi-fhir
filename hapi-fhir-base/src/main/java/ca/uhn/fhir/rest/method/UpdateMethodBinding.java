@@ -93,14 +93,14 @@ public class UpdateMethodBinding extends BaseOutcomeReturningMethodBinding {
 		PutClientInvocation retVal = new PutClientInvocation(getContext(), resource, urlExtension.toString());
 
 		if (myVersionIdParameterIndex != null) {
-			IdDt versionIdDt = (IdDt) theArgs[myIdParameterIndex];
+			IdDt versionIdDt = (IdDt) theArgs[myVersionIdParameterIndex];
 			if (versionIdDt != null) {
 				String versionId = versionIdDt.getValue();
 				if (StringUtils.isNotBlank(versionId)) {
 					StringBuilder b = new StringBuilder();
 					b.append('/');
 					b.append(urlExtension);
-					b.append('/');
+					b.append("/_history/");
 					b.append(versionId);
 					retVal.addHeader(Constants.HEADER_CONTENT_LOCATION, b.toString());
 				}

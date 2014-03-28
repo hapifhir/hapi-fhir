@@ -24,12 +24,147 @@
 				implementations, but client methods will follow the same patterns.
 			</p>
 			
-			<macro name="toc">
-			</macro>
-		
+			<p>
+				The following table lists the operations supported by 
+				HAPI FHIR RESTful Servers and Clients.
+			</p>
+			
+			<table>
+				<thead>
+					<tr style="font-weight: bold; font-size: 1.2em;">
+						<td>Operation</td>
+						<td>Definition</td>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td>
+							<a href="#instance_read">Instance - Read</a>	
+						</td>
+						<td>
+							Read the current state of the resource
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<a href="#instance_vread">Instance - VRead</a>	
+						</td>
+						<td>
+							Read the state of a specific version of the resource
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<a href="#instance_update">Instance - Update</a>	
+						</td>
+						<td>
+							Read the state of a specific version of the resource
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<a href="#instance_delete">Instance - Delete</a>	
+						</td>
+						<td>
+							Delete a resource
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<a href="#instance_history">Instance - History</a>	
+						</td>
+						<td>
+							Retrieve the update history for a particular resource
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<a href="#type_create">Type - Create</a>	
+						</td>
+						<td>
+							Create a new resource with a server assigned id
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<a href="#instance_update">Type - Search</a>	
+							<macro name="toc">
+								<param name="section" value="8"/>
+								<param name="fromDepth" value="2"/>
+							</macro>
+						</td>
+						<td>
+							Search the resource type based on some filter criteria
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<a href="#type_search">Type - Search</a>	
+						</td>
+						<td>
+							Search the resource type based on some filter criteria
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<a href="#type_history">Type - History</a>	
+						</td>
+						<td>
+							Retrieve the update history for a particular resource type
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<a href="#type_history">Type - Validate</a>	
+						</td>
+						<td>
+							Check that the content would be acceptable as an update
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<a href="#system_conformance">System - Conformance</a>	
+						</td>
+						<td>
+							Get a conformance statement for the system
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<a href="#system_transaction">System - Transaction</a>	
+						</td>
+						<td>
+							Update, create or delete a set of resources as a single transaction
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<a href="#system_history">System - History</a>	
+						</td>
+						<td>
+							Retrieve the update history for all resources
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<a href="#system_search">System - Search</a>	
+						</td>
+						<td>
+							Search across all resource types based on some filter criteria
+						</td>
+					</tr>
+					
+				</tbody>
+			</table>
+					
 		</section>
 		
-		<section name="Instance Level - read">
+		<!-- ****************************************************************** -->
+		<!-- ****************************************************************** -->
+		<!-- ****************************************************************** -->
+
+		<section name="Instance Level - Read">
+			<a name="instance_read"/>
 		
 			<p>
 				The 
@@ -53,7 +188,12 @@
 			
 		</section>
 
-		<section name="Instance Level - vread">
+		<!-- ****************************************************************** -->
+		<!-- ****************************************************************** -->
+		<!-- ****************************************************************** -->
+
+		<section name="Instance Level - VRead">
+			<a name="instance_vread"/>
 		
 			<p>
 				The 
@@ -77,7 +217,158 @@
 			
 		</section>
 		
-		<section name="Type Level - search">
+		<!-- ****************************************************************** -->
+		<!-- ****************************************************************** -->
+		<!-- ****************************************************************** -->
+
+		<section name="Instance Level - Update">
+			<a name="instance_update"/>
+		
+			<p>
+				The 
+				<a href="http://hl7.org/implement/standards/fhir/http.html#update"><b>update</b></a> 
+				operation updates a specific resource instance (using its ID), and optionally
+				accepts a version ID as well (which can be used to detect version conflicts). 
+			</p>
+			<p>
+				Update methods must be annotated with the 
+				<a href="./apidocs/ca/uhn/fhir/rest/annotation/Update.html">@Update</a>
+				annotation, and have a parameter annotated with the 
+				<a href="./apidocs/ca/uhn/fhir/rest/annotation/ResourceParam.html">@Resource</a>
+				annotation. This parameter contains the resource instance to be created.
+			</p>
+			<p>
+				In addition, the method must have a parameter annotated with the 
+				<a href="./apidocs/ca/uhn/fhir/rest/annotation/IdParam.html">@IdParam</a>
+				annotation, and optionally may have a parameter annotated with the
+				<a href="./apidocs/ca/uhn/fhir/rest/annotation/VersionIdParam.html">@VersionIdParam</a>
+			</p>
+			<p>
+				Update methods must return an object of type
+				<a href="./apidocs/ca/uhn/fhir/rest/api/MethodOutcome.html">MethodOutcome</a>. This
+				object contains the identity of the created resource.
+			</p>
+			<p>
+				The following snippet shows how to define an update method on a server:
+			</p>
+			
+			<macro name="snippet">
+				<param name="id" value="update" />
+				<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
+			</macro>
+
+			<p>
+				Example URL to invoke this method (this would be invoked using an HTTP PUT,
+				with the resource in the PUT body):<br/>
+				<code>http://fhir.example.com/Patient</code>
+			</p>
+
+			<p>
+				The following snippet shows how the corresponding client interface
+				would look: 
+			</p>
+			
+			<macro name="snippet">
+				<param name="id" value="updateClient" />
+				<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
+			</macro>
+
+			<p>
+				In the case of a server which is able to do version conflict checking, an 
+				extra parameter would be added:
+			</p>
+			
+			<macro name="snippet">
+				<param name="id" value="updateVersion" />
+				<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
+			</macro>
+			
+		</section>		
+		
+		<!-- ****************************************************************** -->
+		<!-- ****************************************************************** -->
+		<!-- ****************************************************************** -->
+		
+		<section name="Instance Level - Delete">
+			<a name="instance_delete"/>
+			
+			<p>
+				Not yet implemented
+			</p>
+			
+		</section>
+
+		<!-- ****************************************************************** -->
+		<!-- ****************************************************************** -->
+		<!-- ****************************************************************** -->
+	
+		<section name="Instance Level - History">
+			<a name="instance_history"/>
+			
+			<p>
+				Not yet implemented
+			</p>
+			
+		</section>
+
+		<!-- ****************************************************************** -->
+		<!-- ****************************************************************** -->
+		<!-- ****************************************************************** -->
+	
+		<section name="Type Level - Create">
+			<a name="type_create"/>
+			
+			<p>
+				The 
+				<a href="http://hl7.org/implement/standards/fhir/http.html#create"><b>create</b></a> 
+				operation saves a new resource to the server, allowing the server to 
+				give that resource an ID and version ID. 
+			</p>
+			<p>
+				Create methods must be annotated with the 
+				<a href="./apidocs/ca/uhn/fhir/rest/annotation/Create.html">@Create</a>
+				annotation, and have a single parameter annotated with the 
+				<a href="./apidocs/ca/uhn/fhir/rest/annotation/ResourceParam.html">@Resource</a>
+				annotation. This parameter contains the resource instance to be created.
+			</p>
+			<p>
+				Create methods must return an object of type
+				<a href="./apidocs/ca/uhn/fhir/rest/api/MethodOutcome.html">MethodOutcome</a>. This
+				object contains the identity of the created resource.
+			</p>
+			<p>
+				The following snippet shows how to define a server create method:
+			</p>
+			
+			<macro name="snippet">
+				<param name="id" value="create" />
+				<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
+			</macro>
+
+			<p>
+				Example URL to invoke this method (this would be invoked using an HTTP POST,
+				with the resource in the POST body):<br/>
+				<code>http://fhir.example.com/Patient</code>
+			</p>
+
+			<p>
+				The following snippet shows how the corresponding client interface
+				would look: 
+			</p>
+			
+			<macro name="snippet">
+				<param name="id" value="createClient" />
+				<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
+			</macro>
+			
+		</section>
+		
+		<!-- ****************************************************************** -->
+		<!-- ****************************************************************** -->
+		<!-- ****************************************************************** -->
+	
+		<section name="Type Level - Search">
+			<a name="type_search"/>
 		
 			<p>
 				The
@@ -152,7 +443,7 @@
 				</p>
 			
 			</subsection>
-			<subsection name="Chained Parameters">
+			<subsection name="Multiple Parameters">
 
 				<p>
 					Search methods may take multiple parameters, and these parameters
@@ -375,50 +666,128 @@
 			</subsection>
 
 		</section>
-			
-		<section name="Type Level - create">
-		
-			<p>
-				The 
-				<a href="http://hl7.org/implement/standards/fhir/http.html#create"><b>create</b></a> 
-				operation saves a new resource to the server, allowing the server to 
-				give that resource an ID and version ID. 
-			</p>
-			<p>
-				Create methods must be annotated with the 
-				<a href="./apidocs/ca/uhn/fhir/rest/annotation/Create.html">@Create</a>
-				annotation, and have a single parameter annotated with the 
-				<a href="./apidocs/ca/uhn/fhir/rest/annotation/ResourceParam.html">@Resource</a>
-				annotation. This parameter contains the resource instance to be created.
-			</p>
+
+		<!-- ****************************************************************** -->
+		<!-- ****************************************************************** -->
+		<!-- ****************************************************************** -->
+	
+		<section name="Type Level - History">
+			<a name="type_history"/>
 			
 			<p>
-				The following snippet shows how to define a server create method:
+				Not yet implemented
 			</p>
 			
+		</section>
+
+		<!-- ****************************************************************** -->
+		<!-- ****************************************************************** -->
+		<!-- ****************************************************************** -->
+	
+		<section name="Type Level - Validate">
+			<a name="type_validate"/>
+			
+			<p>
+				Not yet implemented
+			</p>
+			
+		</section>
+
+		<!-- ****************************************************************** -->
+		<!-- ****************************************************************** -->
+		<!-- ****************************************************************** -->
+	
+		<section name="System Level - Conformance">
+			<a name="system_conformance"/>
+			
+			<p>
+				FHIR defines that a FHIR Server must be able to export a conformance statement,
+				which is an instance of the
+				<a href="http://hl7.org/implement/standards/fhir/conformance.html">Conformance</a>
+				resource describing the server itself.
+			</p>
+			
+			<p>
+				The HAPI FHIR RESTful server will automatically export such
+				a conformance statement. See the
+				<a href="./doc_rest_server.html">RESTful Server</a>
+				documentation for more information.
+			</p>
+			
+			<p>
+				If you wish to override this default behaviour by creating
+				your own metadata provider, you simply need to define a class
+				with a method annotated using the 
+				<a href="./apidocs/ca/uhn/fhir/rest/annotation/Metadata.html">@Metadata</a>
+				annotation.
+			</p>
 			<macro name="snippet">
-				<param name="id" value="create" />
+				<param name="id" value="metadataProvider" />
+				<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
+			</macro>
+			
+			<p>
+				To create a Client which can retrieve a Server's conformance 
+				statement is simple. First, define your Client Interface, using
+				the @Metadata annotation:  
+			</p>
+			<macro name="snippet">
+				<param name="id" value="metadataClient" />
 				<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
 			</macro>
 
 			<p>
-				Example URL to invoke this method (this would be invoked using an HTTP POST,
-				with the resource in the POST body):<br/>
-				<code>http://fhir.example.com/Patient</code>
+				Then use the standard
+				<a href="doc_rest_client.html">RESTful Client</a> mechanism for instantiating
+				a client:
 			</p>
-
-			<p>
-				The following snippet shows how the corresponding client interface
-				would look: 
-			</p>
-			
 			<macro name="snippet">
-				<param name="id" value="createClient" />
+				<param name="id" value="metadataClientUsage" />
 				<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
 			</macro>
 			
 		</section>
+			
+		<!-- ****************************************************************** -->
+		<!-- ****************************************************************** -->
+		<!-- ****************************************************************** -->
+	
+		<section name="System Level - Transaction">
+			<a name="system_transaction"/>
+			
+			<p>
+				Not yet implemented
+			</p>
+			
+		</section>
 
+		<!-- ****************************************************************** -->
+		<!-- ****************************************************************** -->
+		<!-- ****************************************************************** -->
+	
+		<section name="System Level - History">
+			<a name="system_history"/>
+			
+			<p>
+				Not yet implemented
+			</p>
+			
+		</section>
+			
+		<!-- ****************************************************************** -->
+		<!-- ****************************************************************** -->
+		<!-- ****************************************************************** -->
+	
+		<section name="System Level - Search">
+			<a name="system_search"/>
+			
+			<p>
+				Not yet implemented
+			</p>
+			
+		</section>
+			
+			
 	</body>
 
 </document>

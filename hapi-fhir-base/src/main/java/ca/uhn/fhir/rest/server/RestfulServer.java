@@ -21,6 +21,7 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.narrative.INarrativeGenerator;
 import ca.uhn.fhir.rest.method.BaseMethodBinding;
+import ca.uhn.fhir.rest.method.ConformanceMethodBinding;
 import ca.uhn.fhir.rest.method.Request;
 import ca.uhn.fhir.rest.method.SearchMethodBinding;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
@@ -28,6 +29,7 @@ import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotFoundException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.provider.ServerConformanceProvider;
 import ca.uhn.fhir.rest.server.provider.ServerProfileProvider;
 import ca.uhn.fhir.util.VersionUtil;
@@ -40,143 +42,21 @@ public abstract class RestfulServer extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
 	private FhirContext myFhirContext;
-
 	private INarrativeGenerator myNarrativeGenerator;
+	private Map<String, ResourceBinding> myResourceNameToProvider = new HashMap<String, ResourceBinding>();
+	private Object myServerConformanceProvider;
 	private Map<Class<? extends IResource>, IResourceProvider> myTypeToProvider = new HashMap<Class<? extends IResource>, IResourceProvider>();
 	private boolean myUseBrowserFriendlyContentTypes;
-
-	// map of request handler resources keyed by resource name
-	private Map<String, ResourceBinding> resources = new HashMap<String, ResourceBinding>();
-
 	private ISecurityManager securityManager;
 
-	public FhirContext getFhirContext() {
-		return myFhirContext;
+	private BaseMethodBinding myServerConformanceMethod;
+
+	public RestfulServer() {
+		myServerConformanceProvider=new ServerConformanceProvider(this);
 	}
 
-	public INarrativeGenerator getNarrativeGenerator() {
-		return myNarrativeGenerator;
-	}
-
-	public Collection<ResourceBinding> getResourceBindings() {
-		return resources.values();
-	}
-
-	/**
-	 * This method must be overridden to provide one or more resource providers
-	 */
-	public abstract Collection<IResourceProvider> getResourceProviders();
-
-	/**
-	 * This method should be overridden to provide a security manager instance. By default, returns null.
-	 */
-	public ISecurityManager getSecurityManager() {
-		return null;
-	}
-
-	public IResourceProvider getServerConformanceProvider() {
-		return new ServerConformanceProvider(this);
-	}
-
-	public IResourceProvider getServerProfilesProvider() {
-		return new ServerProfileProvider(getFhirContext());
-	}
-
-	@Override
-	public final void init() throws ServletException {
-		initialize();
-		try {
-			ourLog.info("Initializing HAPI FHIR restful server");
-
-			securityManager = getSecurityManager();
-			if (null == securityManager) {
-				ourLog.warn("No security manager has been provided, requests will not be authenticated!");
-			}
-
-			Collection<IResourceProvider> resourceProvider = getResourceProviders();
-			for (IResourceProvider nextProvider : resourceProvider) {
-				Class<? extends IResource> resourceType = nextProvider.getResourceType();
-				if (resourceType==null) {
-					throw new NullPointerException("getResourceType() on class '" + nextProvider.getClass().getCanonicalName() + "' returned null");
-				}
-				if (myTypeToProvider.containsKey(resourceType)) {
-					throw new ServletException("Multiple providers for type: " + resourceType.getCanonicalName());
-				}
-				myTypeToProvider.put(resourceType, nextProvider);
-			}
-
-			ourLog.info("Got {} resource providers", myTypeToProvider.size());
-
-			myFhirContext = new FhirContext(myTypeToProvider.keySet());
-			myFhirContext.setNarrativeGenerator(myNarrativeGenerator);
-
-			for (IResourceProvider provider : myTypeToProvider.values()) {
-				findResourceMethods(provider);
-			}
-
-			findResourceMethods(getServerProfilesProvider());
-			findResourceMethods(getServerConformanceProvider());
-
-		} catch (Exception ex) {
-			ourLog.error("An error occurred while loading request handlers!", ex);
-			throw new ServletException("Failed to initialize FHIR Restful server", ex);
-		}
-
-		ourLog.info("A FHIR has been lit on this server");
-	}
-
-	public boolean isUseBrowserFriendlyContentTypes() {
-		return myUseBrowserFriendlyContentTypes;
-	}
-
-	/**
-	 * Sets the {@link INarrativeGenerator Narrative Generator} to use when serializing responses from this server, or <code>null</code> (which is the default) to disable narrative generation.
-	 * 
-	 * @throws IllegalStateException
-	 *             Note that this method can only be called prior to {@link #init() initialization} and will throw an {@link IllegalStateException} if called after that.
-	 */
-	public void setNarrativeGenerator(INarrativeGenerator theNarrativeGenerator) {
-		if (myFhirContext != null) {
-			throw new IllegalStateException("Server has already been initialized, can not change this property");
-		}
-		myNarrativeGenerator = theNarrativeGenerator;
-	}
-
-	/**
-	 * If set to <code>true</code> (default is false), the server will use browser friendly content-types (instead of standard FHIR ones) when it detects that the request is coming from a browser
-	 * instead of a FHIR
-	 */
-	public void setUseBrowserFriendlyContentTypes(boolean theUseBrowserFriendlyContentTypes) {
-		myUseBrowserFriendlyContentTypes = theUseBrowserFriendlyContentTypes;
-	}
-
-
-	private void findResourceMethods(IResourceProvider theProvider) throws Exception {
-
-		Class<? extends IResource> resourceType = theProvider.getResourceType();
-		RuntimeResourceDefinition definition = myFhirContext.getResourceDefinition(resourceType);
-
-		ResourceBinding r = new ResourceBinding();
-		r.setResourceProvider(theProvider);
-		r.setResourceName(definition.getName());
-		resources.put(definition.getName(), r);
-
-		ourLog.info("Scanning type for RESTful methods: {}", theProvider.getClass());
-
-		Class<?> clazz = theProvider.getClass();
-		for (Method m : clazz.getDeclaredMethods()) {
-			if (Modifier.isPublic(m.getModifiers())) {
-				ourLog.debug("Scanning public method: {}#{}", theProvider.getClass(), m.getName());
-
-				BaseMethodBinding foundMethodBinding = BaseMethodBinding.bindMethod(theProvider.getResourceType(), m, myFhirContext);
-				if (foundMethodBinding != null) {
-					r.addMethod(foundMethodBinding);
-					ourLog.info(" * Method: {}#{} is a handler", theProvider.getClass(), m.getName());
-				} else {
-					ourLog.debug(" * Method: {}#{} is not a handler", theProvider.getClass(), m.getName());
-				}
-			}
-		}
+	public void addHapiHeader(HttpServletResponse theHttpResponse) {
+		theHttpResponse.addHeader("X-CatchingFhir", "HAPI FHIR " + VersionUtil.getVersion());
 	}
 
 	@Override
@@ -203,7 +83,97 @@ public abstract class RestfulServer extends HttpServlet {
 	protected void doPut(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		handleRequest(SearchMethodBinding.RequestType.PUT, request, response);
 	}
-	
+
+	private void findResourceMethods(IResourceProvider theProvider) throws Exception {
+
+		Class<? extends IResource> resourceType = theProvider.getResourceType();
+		RuntimeResourceDefinition definition = myFhirContext.getResourceDefinition(resourceType);
+
+		ResourceBinding r = new ResourceBinding();
+		r.setResourceProvider(theProvider);
+		r.setResourceName(definition.getName());
+		myResourceNameToProvider.put(definition.getName(), r);
+
+		ourLog.info("Scanning type for RESTful methods: {}", theProvider.getClass());
+
+		Class<?> clazz = theProvider.getClass();
+		for (Method m : clazz.getDeclaredMethods()) {
+			if (Modifier.isPublic(m.getModifiers())) {
+				ourLog.debug("Scanning public method: {}#{}", theProvider.getClass(), m.getName());
+
+				BaseMethodBinding foundMethodBinding = BaseMethodBinding.bindMethod(theProvider.getResourceType(), m, myFhirContext);
+				if (foundMethodBinding != null) {
+					r.addMethod(foundMethodBinding);
+					ourLog.info(" * Method: {}#{} is a handler", theProvider.getClass(), m.getName());
+				} else {
+					ourLog.debug(" * Method: {}#{} is not a handler", theProvider.getClass(), m.getName());
+				}
+			}
+		}
+	}
+
+	private void findSystemMethods(Object theSystemProvider) {
+		Class<?> clazz = theSystemProvider.getClass();
+		for (Method m : clazz.getDeclaredMethods()) {
+			if (Modifier.isPublic(m.getModifiers())) {
+				ourLog.debug("Scanning public method: {}#{}", theSystemProvider.getClass(), m.getName());
+
+				BaseMethodBinding foundMethodBinding = BaseMethodBinding.bindSystemMethod(m, myFhirContext);
+				if (foundMethodBinding != null) {
+					if (foundMethodBinding instanceof ConformanceMethodBinding) {
+						myServerConformanceMethod = foundMethodBinding;
+					}
+					ourLog.info(" * Method: {}#{} is a handler", theSystemProvider.getClass(), m.getName());
+				} else {
+					ourLog.debug(" * Method: {}#{} is not a handler", theSystemProvider.getClass(), m.getName());
+				}
+			}
+		}
+
+	}
+
+	public FhirContext getFhirContext() {
+		return myFhirContext;
+	}
+
+	public INarrativeGenerator getNarrativeGenerator() {
+		return myNarrativeGenerator;
+	}
+
+	public Collection<ResourceBinding> getResourceBindings() {
+		return myResourceNameToProvider.values();
+	}
+
+	/**
+	 * This method must be overridden to provide one or more resource providers
+	 */
+	public abstract Collection<IResourceProvider> getResourceProviders();
+
+
+	/**
+	 * This method should be overridden to provide a security manager instance. By default, returns null.
+	 */
+	public ISecurityManager getSecurityManager() {
+		return null;
+	}
+
+	/**
+	 * Returns the server conformance provider, which is the provider that
+	 * is used to generate the server's conformance (metadata) statement.
+	 * <p>
+	 * By default, the {@link ServerConformanceProvider} is used, but
+	 * this can be changed, or set to <code>null</code> if you do not wish
+	 * to export a conformance statement.
+	 * </p>
+	 */
+	public Object getServerConformanceProvider() {
+		return myServerConformanceProvider;
+	}
+
+	public IResourceProvider getServerProfilesProvider() {
+		return new ServerProfileProvider(getFhirContext());
+	}
+
 	protected void handleRequest(SearchMethodBinding.RequestType requestType, HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		try {
 
@@ -261,17 +231,23 @@ public abstract class RestfulServer extends HttpServlet {
 			}
 			resourceName = tok.nextToken();
 
-			ResourceBinding resourceBinding;
+			Object provider=null;
+			ResourceBinding resourceBinding=null;
+			BaseMethodBinding resourceMethod=null;
 			if ("metadata".equals(resourceName)) {
-				operation = "metadata";
-				resourceBinding = resources.get("Conformance");
+				provider = myServerConformanceProvider;
+				if (provider==null) {
+					throw new ResourceNotFoundException("This server does not support 'metadata' query");
+				}
+				resourceMethod = myServerConformanceMethod;
 			} else {
-				resourceBinding = resources.get(resourceName);
+				resourceBinding = myResourceNameToProvider.get(resourceName);
+				if (resourceBinding == null) {
+					throw new MethodNotFoundException("Unknown resource type '" + resourceName+"' - Server knows how to handle: "+myResourceNameToProvider.keySet());
+				}
+				provider = resourceBinding.getResourceProvider();
 			}
 
-			if (resourceBinding == null) {
-				throw new MethodNotFoundException("Unknown resource type '" + resourceName+"' - Server knows how to handle: "+resources.keySet());
-			}
 
 			if (tok.hasMoreTokens()) {
 				String nextString = tok.nextToken();
@@ -302,13 +278,15 @@ public abstract class RestfulServer extends HttpServlet {
 			r.setOperation(operation);
 			r.setParameters(params);
 			r.setRequestType(requestType);
-			r.setResourceProvider(resourceBinding.getResourceProvider());
+			r.setResourceProvider(provider);
 			r.setInputReader(request.getReader());
 			r.setFhirServerBase(fhirServerBase);
 			r.setCompleteUrl(completeUrl);
 			r.setServletRequest(request);
 
-			BaseMethodBinding resourceMethod = resourceBinding.getMethod(r);
+			if (resourceMethod == null && resourceBinding != null) {
+				resourceMethod = resourceBinding.getMethod(r);
+			}
 			if (null == resourceMethod) {
 				throw new MethodNotFoundException("No resource method available for the supplied parameters " + params);
 			}
@@ -344,11 +322,100 @@ public abstract class RestfulServer extends HttpServlet {
 
 	}
 
+	@Override
+	public final void init() throws ServletException {
+		initialize();
+		try {
+			ourLog.info("Initializing HAPI FHIR restful server");
+
+			securityManager = getSecurityManager();
+			if (null == securityManager) {
+				ourLog.warn("No security manager has been provided, requests will not be authenticated!");
+			}
+
+			Collection<IResourceProvider> resourceProvider = getResourceProviders();
+			for (IResourceProvider nextProvider : resourceProvider) {
+				Class<? extends IResource> resourceType = nextProvider.getResourceType();
+				if (resourceType==null) {
+					throw new NullPointerException("getResourceType() on class '" + nextProvider.getClass().getCanonicalName() + "' returned null");
+				}
+				if (myTypeToProvider.containsKey(resourceType)) {
+					throw new ServletException("Multiple providers for type: " + resourceType.getCanonicalName());
+				}
+				myTypeToProvider.put(resourceType, nextProvider);
+			}
+
+			ourLog.info("Got {} resource providers", myTypeToProvider.size());
+
+			myFhirContext = new FhirContext(myTypeToProvider.keySet());
+			myFhirContext.setNarrativeGenerator(myNarrativeGenerator);
+
+			for (IResourceProvider provider : myTypeToProvider.values()) {
+				findResourceMethods(provider);
+			}
+
+			findResourceMethods(getServerProfilesProvider());
+			findSystemMethods(getServerConformanceProvider());
+
+		} catch (Exception ex) {
+			ourLog.error("An error occurred while loading request handlers!", ex);
+			throw new ServletException("Failed to initialize FHIR Restful server", ex);
+		}
+
+		ourLog.info("A FHIR has been lit on this server");
+	}
+
 	/**
 	 * This method may be overridden by subclasses to do perform initialization that needs to be performed prior to the server being used.
 	 */
 	protected void initialize() {
 		// nothing by default
+	}
+
+	public boolean isUseBrowserFriendlyContentTypes() {
+		return myUseBrowserFriendlyContentTypes;
+	}
+	
+	/**
+	 * Sets the {@link INarrativeGenerator Narrative Generator} to use when serializing responses from this server, or <code>null</code> (which is the default) to disable narrative generation.
+	 * Note that this method can only be called before the server is initialized. 
+	 * 
+	 * @throws IllegalStateException
+	 *             Note that this method can only be called prior to {@link #init() initialization} and will throw an {@link IllegalStateException} if called after that.
+	 */
+	public void setNarrativeGenerator(INarrativeGenerator theNarrativeGenerator) {
+		if (myFhirContext != null) {
+			throw new IllegalStateException("Server has already been initialized, can not change this property");
+		}
+		myNarrativeGenerator = theNarrativeGenerator;
+	}
+
+	/**
+	 * Returns the server conformance provider, which is the provider that
+	 * is used to generate the server's conformance (metadata) statement.
+	 * <p>
+	 * By default, the {@link ServerConformanceProvider} is used, but
+	 * this can be changed, or set to <code>null</code> if you do not wish
+	 * to export a conformance statement.
+	 * </p>
+	 * Note that this method can only be called before the server is initialized. 
+	 * 
+	 * @throws IllegalStateException
+	 *             Note that this method can only be called prior to {@link #init() initialization} and will throw an {@link IllegalStateException} if called after that.
+	 */
+	public void setServerConformanceProvider(Object theServerConformanceProvider) {
+		if (myFhirContext!=null) {
+			throw new IllegalStateException("Server is already started");
+		}
+		myServerConformanceProvider = theServerConformanceProvider;
+	}
+
+	/**
+	 * If set to <code>true</code> (default is false), the server will use browser friendly content-types (instead of standard FHIR ones) when it detects that the request is coming from a browser
+	 * instead of a FHIR
+	 */
+	public void setUseBrowserFriendlyContentTypes(boolean theUseBrowserFriendlyContentTypes) {
+		myUseBrowserFriendlyContentTypes = theUseBrowserFriendlyContentTypes;
 	}
 
 	public enum NarrativeModeEnum {
@@ -359,10 +426,6 @@ public abstract class RestfulServer extends HttpServlet {
 		public static NarrativeModeEnum valueOfCaseInsensitive(String theCode) {
 			return valueOf(NarrativeModeEnum.class, theCode.toUpperCase());
 		}
-	}
-
-	public void addHapiHeader(HttpServletResponse theHttpResponse) {
-		theHttpResponse.addHeader("X-CatchingFhir", "HAPI FHIR " + VersionUtil.getVersion());
 	}
 
 }

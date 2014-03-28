@@ -62,4 +62,7 @@ public interface ITestClient extends IBasicClient {
 	@Update
 	public MethodOutcome updatePatient(@IdParam IdDt theId, @ResourceParam Patient thePatient);
 
+	@Update
+	public MethodOutcome updatePatient(@IdParam IdDt theId, @VersionIdParam IdDt theVersion, @ResourceParam Patient thePatient);
+
 }

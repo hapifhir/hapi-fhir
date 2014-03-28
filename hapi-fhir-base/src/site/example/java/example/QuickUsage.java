@@ -1,5 +1,8 @@
 package example;
 
+import static ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum.OFFICIAL;
+import static ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum.SECONDARY;
+
 import java.io.IOException;
 import java.util.List;
 
@@ -7,7 +10,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
-import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
@@ -15,10 +17,10 @@ import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IRestfulClient;
-import static ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum.*;
 
 public class QuickUsage {
 
+@SuppressWarnings("unused")
 public static void main(String[] args) throws DataFormatException, IOException {
 
 Patient patient = new Patient();

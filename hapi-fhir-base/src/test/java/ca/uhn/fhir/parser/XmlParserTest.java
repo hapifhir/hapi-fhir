@@ -24,6 +24,8 @@ import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.composite.NarrativeDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.dstu.resource.Conformance;
+import ca.uhn.fhir.model.dstu.resource.Conformance.RestResource;
 import ca.uhn.fhir.model.dstu.resource.DiagnosticReport;
 import ca.uhn.fhir.model.dstu.resource.Observation;
 import ca.uhn.fhir.model.dstu.resource.Organization;
@@ -284,6 +286,21 @@ public class XmlParserTest {
 		assertEquals("LOINC Codes for Cholesterol", resource.getName().getValue());
 		assertEquals(summaryText.trim(), entry.getSummary().getValueAsString().trim());
 	}
+
+	/**
+	 * This sample has extra elements in <searchParam> that are not actually
+	 * a part of the spec any more..
+	 */
+	@Test
+	public void testParseFuroreMetadataWithExtraElements() throws IOException {
+		String msg = IOUtils.toString(XmlParserTest.class.getResourceAsStream("/furore-conformance.xml"));
+		
+		IParser p = new FhirContext(ValueSet.class).newXmlParser();
+		Conformance conf = p.parseResource(Conformance.class, msg);
+		RestResource res = conf.getRestFirstRep().getResourceFirstRep();
+		assertEquals("_id", res.getSearchParam().get(1).getName().getValue());
+	}
+	
 	
 	@Test
 	public void testLoadAndAncodeMessage() throws SAXException, IOException {

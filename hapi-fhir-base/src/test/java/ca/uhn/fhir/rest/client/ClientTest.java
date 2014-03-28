@@ -15,10 +15,12 @@ import org.apache.http.HttpResponse;
 import org.apache.http.ProtocolVersion;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicStatusLine;
 import org.hamcrest.core.StringContains;
+import org.hamcrest.core.StringEndsWith;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -40,6 +42,7 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.QualifiedDateParam;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 
 public class ClientTest {
 
@@ -113,6 +116,73 @@ public class ClientTest {
 		assertEquals("200", response.getVersionId().getValue());
 	}
 
+	
+	@Test
+	public void testUpdate() throws Exception {
+
+		Patient patient = new Patient();
+		patient.addIdentifier("urn:foo", "123");
+		
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
+		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 201, "OK"));
+		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(""), Charset.forName("UTF-8")));
+		when(httpResponse.getAllHeaders()).thenReturn(toHeaderArray("Location" , "http://example.com/fhir/Patient/100/_history/200"));
+
+		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
+		MethodOutcome response = client.updatePatient(new IdDt("100"), patient);
+
+		assertEquals(HttpPut.class, capt.getValue().getClass());
+		HttpPut post = (HttpPut) capt.getValue();
+		assertThat(post.getURI().toASCIIString(), StringEndsWith.endsWith("/Patient/100"));
+		assertThat(IOUtils.toString(post.getEntity().getContent()), StringContains.containsString("<Patient"));
+		assertEquals("100", response.getId().getValue());
+		assertEquals("200", response.getVersionId().getValue());
+	}
+
+	@Test
+	public void testUpdateWithVersion() throws Exception {
+
+		Patient patient = new Patient();
+		patient.addIdentifier("urn:foo", "123");
+		
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
+		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 201, "OK"));
+		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(""), Charset.forName("UTF-8")));
+		when(httpResponse.getAllHeaders()).thenReturn(toHeaderArray("Location" , "http://example.com/fhir/Patient/100/_history/200"));
+
+		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
+		MethodOutcome response = client.updatePatient(new IdDt("100"), new IdDt("200"), patient);
+
+		assertEquals(HttpPut.class, capt.getValue().getClass());
+		HttpPut post = (HttpPut) capt.getValue();
+		assertThat(post.getURI().toASCIIString(), StringEndsWith.endsWith("/Patient/100"));
+		assertThat(IOUtils.toString(post.getEntity().getContent()), StringContains.containsString("<Patient"));
+		assertThat(post.getFirstHeader("Content-Location").getValue(), StringEndsWith.endsWith("/Patient/100/_history/200"));
+		assertEquals("100", response.getId().getValue());
+		assertEquals("200", response.getVersionId().getValue());
+	}
+
+	@Test(expected=ResourceVersionConflictException.class)
+	public void testUpdateWithResourceConflict() throws Exception {
+
+		Patient patient = new Patient();
+		patient.addIdentifier("urn:foo", "123");
+		
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
+		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(""), Charset.forName("UTF-8")));
+		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), Constants.STATUS_HTTP_409_CONFLICT, "Conflict"));
+
+		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
+		client.updatePatient(new IdDt("100"), new IdDt("200"), patient);
+	}
+
+	
 	@Test
 	public void testCreateBad() throws Exception {
 

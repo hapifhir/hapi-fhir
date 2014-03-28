@@ -550,6 +550,30 @@ class ParserState<T extends IElement> {
 
 	}
 
+	private class SwallowChildrenWholeState extends BaseState
+	{
+
+		private int myDepth;
+
+		public SwallowChildrenWholeState(PreResourceState thePreResourceState) {
+			super(thePreResourceState);
+		}
+
+		@Override
+		public void endingElement() throws DataFormatException {
+			myDepth--;
+			if (myDepth < 0) {
+				pop();
+			}
+		}
+
+		@Override
+		public void enteringNewElement(String theNamespaceURI, String theLocalPart) throws DataFormatException {
+			myDepth++;
+		}
+		
+	}
+	
 	private class ElementCompositeState extends BaseState {
 
 		private BaseRuntimeElementCompositeDefinition<?> myDefinition;
@@ -579,7 +603,17 @@ class ParserState<T extends IElement> {
 
 		@Override
 		public void enteringNewElement(String theNamespace, String theChildName) throws DataFormatException {
-			BaseRuntimeChildDefinition child = myDefinition.getChildByNameOrThrowDataFormatException(theChildName);
+			BaseRuntimeChildDefinition child;
+			try {
+				child = myDefinition.getChildByNameOrThrowDataFormatException(theChildName);
+			} catch (DataFormatException e) {
+				if (false) {// TODO: make this configurable
+					throw e;
+				}
+				ourLog.warn(e.getMessage());
+				push(new SwallowChildrenWholeState(getPreResourceState()));
+				return;
+			}
 			BaseRuntimeElementDefinition<?> target = child.getChildByName(theChildName);
 			if (target == null) {
 				throw new DataFormatException("Found unexpected element '" + theChildName + "' in parent element '" + myDefinition.getName() + "'. Valid names are: " + child.getValidChildNames());

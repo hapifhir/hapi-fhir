@@ -18,16 +18,23 @@ public interface IRestfulClientFactory {
 	 * @throws ConfigurationException
 	 *             If the interface type is not an interface
 	 */
-	public <T extends IRestfulClient> T newClient(Class<T> theClientType, String theServerBase);
+	<T extends IRestfulClient> T newClient(Class<T> theClientType, String theServerBase);
 
 	
 	/**
 	 * Sets the Apache HTTP client instance to be used by any new restful clients created by
-	 * this factory. If set to <code>null</code>, which is the default, a new HTTP client with 
+	 * this factory. If set to <code>null</code>, a new HTTP client with 
 	 * default settings will be created.
 	 *  
 	 * @param theHttpClient An HTTP client instance to use, or <code>null</code>
 	 */
-	public void setHttpClient(HttpClient theHttpClient);
+	void setHttpClient(HttpClient theHttpClient);
+
+	/**
+	 * Returns the Apache HTTP client instance. This method will not return null.
+	 * 
+	 * @see #setHttpClient(HttpClient)
+	 */
+	HttpClient getHttpClient();
 
 }

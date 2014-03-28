@@ -20,7 +20,6 @@ import ca.uhn.fhir.rest.client.GetClientInvocation;
 import ca.uhn.fhir.rest.param.IParameter;
 import ca.uhn.fhir.rest.param.IQueryParameter;
 import ca.uhn.fhir.rest.server.Constants;
-import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
@@ -85,7 +84,7 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 	}
 
 	@Override
-	public List<IResource> invokeServer(IResourceProvider theResourceProvider, IdDt theId, IdDt theVersionId, Map<String, String[]> parameterValues) throws InvalidRequestException,
+	public List<IResource> invokeServer(Object theResourceProvider, IdDt theId, IdDt theVersionId, Map<String, String[]> parameterValues) throws InvalidRequestException,
 			InternalErrorException {
 		assert theId == null;
 		assert theVersionId == null;

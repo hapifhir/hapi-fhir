@@ -57,7 +57,7 @@ String jsonEncoded = ctx.newJsonParser().encodeResourceToString(patient);
 				that will be familiar to users of JAX-WS.
 			</p>
 			
-			<source><![CDATA[public interface MyClientInterface
+			<source><![CDATA[public interface MyClientInterface extends IRestfulClient
 {
   /** A FHIR search */
   @Search

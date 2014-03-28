@@ -60,7 +60,7 @@
 				</macro>
 
 				<p>
-					You will probable wish to add more methods
+					You will probably wish to add more methods
 					to your resource provider. See
 					<a href="./doc_rest_operations.html">RESTful Operations</a> for
 					lots more examples of how to add methods for various operations.
@@ -99,6 +99,26 @@
 			
 			</subsection>
 					
+		</section>
+
+		<section name="Conformance/Metadata Statement">
+		
+			<p>
+				The HAPI FHIR RESTful Server will automatically export a 
+				<a href="http://hl7.org/implement/standards/fhir/conformance.html">conformance statement</a>, 
+				as required by the
+				<a href="http://hl7.org/implement/standards/fhir/http.html#conformance">FHIR Specification</a>.
+			</p>
+			<p>
+				This statement is automatically generated based on the various annotated methods which are 
+				provided to	the server. This behaviour may be modified by creating a new class
+				containing a method annotated with a
+				<a href="doc_rest_operations.html#system_conformance">@Metadata Operation</a> 
+				and then passing an instance of that class to the
+				<a href="./apidocs/ca/uhn/fhir/rest/server/RestfulServer.html#setServerConformanceProvider(java.lang.Object)">setServerConformanceProvider</a> method
+				on your server.
+			</p>
+			
 		</section>
 
 	</body>

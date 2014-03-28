@@ -1,15 +1,18 @@
 package example;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.PathSpecification;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.dstu.composite.CodingDt;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
+import ca.uhn.fhir.model.dstu.resource.Conformance;
 import ca.uhn.fhir.model.dstu.resource.DiagnosticReport;
 import ca.uhn.fhir.model.dstu.resource.Observation;
 import ca.uhn.fhir.model.dstu.resource.Organization;
@@ -17,26 +20,32 @@ import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.IncludeParam;
+import ca.uhn.fhir.rest.annotation.Metadata;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.annotation.VersionIdParam;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.ITestClient;
+import ca.uhn.fhir.rest.client.api.IRestfulClient;
 import ca.uhn.fhir.rest.param.CodingListParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.QualifiedDateParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 
 @SuppressWarnings("unused")
 public abstract class RestfulPatientResourceProviderMore implements IResourceProvider {
 
+private boolean detectedVersionConflict;
 //START SNIPPET: searchAll
 @Search
 public List<Organization> getAllOrganizations() {
@@ -236,9 +245,97 @@ public abstract MethodOutcome createNewPatient(@ResourceParam Patient thePatient
 //END SNIPPET: createClient
 
 
+//START SNIPPET: update
+@Update
+public MethodOutcome updatePatient(@IdParam IdDt theId, @ResourceParam Patient thePatient) {
+
+  /* 
+   * First we might want to do business validation. The UnprocessableEntityException
+   * results in an HTTP 422, which is appropriate for business rule failure
+   */
+  if (thePatient.getIdentifierFirstRep().isEmpty()) {
+    throw new UnprocessableEntityException("No identifier supplied");
+  }
+	
+  // Save this patient to the database...
+  savePatientToDatabase(theId, thePatient);
+
+  // This method returns a MethodOutcome object which contains
+  // the ID and Version ID for the newly saved resource
+  MethodOutcome retVal = new MethodOutcome();
+  retVal.setCreated(true);
+  retVal.setId(theId);
+  retVal.setVersionId(new IdDt("2")); // Leave this blank if the server doesn't version
+  return retVal;
+}
+//END SNIPPET: update
+
+//START SNIPPET: updateClient
+@Update
+public abstract MethodOutcome updateSomePatient(@IdParam IdDt theId, @ResourceParam Patient thePatient);
+//END SNIPPET: updateClient
+
+//START SNIPPET: updateVersion
+@Update
+public MethodOutcome updatePatient(@IdParam IdDt theId, @VersionIdParam IdDt theVersionId, @ResourceParam Patient thePatient) {
+  // ..Process..
+  if (detectedVersionConflict) {
+	  throw new ResourceVersionConflictException("Invalid version");
+  }
+  MethodOutcome retVal = new MethodOutcome();
+return retVal;
+}
+//END SNIPPET: updateVersion
+
+
+
+
+public static void main(String[] args) throws DataFormatException, IOException {
+
+
+}
+
+
 private void savePatientToDatabase(Patient thePatient) {
 	// nothing
-	
+}
+private void savePatientToDatabase(IdDt theId, Patient thePatient) {
+	// nothing
+}
+
+//START SNIPPET: metadataProvider
+public class ConformanceProvider {
+
+  @Metadata
+  public Conformance getServerMetadata() {
+    Conformance retVal = new Conformance();
+    // ..populate..
+    return retVal;
+  }
+
+}
+//END SNIPPET: metadataProvider
+
+
+
+//START SNIPPET: metadataClient
+public interface MetadataClient extends IRestfulClient {
+  
+  @Metadata
+  Conformance getServerMetadata();
+  
+  // ....Other methods can also be added as usual....
+  
+}
+//END SNIPPET: metadataClient
+
+public void bbbbb() throws DataFormatException, IOException {
+//START SNIPPET: metadataClientUsage
+FhirContext ctx = new FhirContext();
+MetadataClient client = ctx.newRestfulClient(MetadataClient.class, "http://spark.furore.com/fhir");
+Conformance metadata = client.getServerMetadata();
+System.out.println(ctx.newXmlParser().encodeResourceToString(metadata));
+//END SNIPPET: metadataClientUsage
 }
 
 

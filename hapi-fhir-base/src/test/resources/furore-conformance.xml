@@ -1,0 +1,4893 @@
+<?xml version="1.0"?>
+<Conformance xmlns="http://hl7.org/fhir">
+  <text>
+    <status value="generated"/>
+    <div xmlns="http://www.w3.org/1999/xhtml">
+      <p>The server supports all operations on the Binary resource, including history</p>
+    </div>
+  </text>
+  <name value="Spark FHIR demo server"/>
+  <publisher value="Furore"/>
+  <telecom>
+    <system value="email"/>
+    <value value="e.kramer@furore.com"/>
+    <use value="work"/>
+  </telecom>
+  <description value="Conformance statement for the Spark FHIR demo server running at AppHarbor"/>
+  <date value="2014-03-28"/>
+  <software>
+    <name value="Spark.Service"/>
+    <version value="1.0.0.0"/>
+  </software>
+  <implementation>
+    <description value="Furore Spark FHIR demo server running at AppHarbor"/>
+    <url value="http://spark.furore.com/"/>
+  </implementation>
+  <fhirVersion value="0.12"/>
+  <acceptUnknown value="false"/>
+  <format value="xml"/>
+  <format value="json"/>
+  <rest>
+    <mode value="server"/>
+    <documentation value="Publicly available, no security, use only for TESTING."/>
+    <resource>
+      <type value="AdverseReaction"/>
+      <operation>
+        <code value="create"/>
+      </operation>
+      <operation>
+        <code value="delete"/>
+      </operation>
+      <operation>
+        <code value="history-instance"/>
+      </operation>
+      <operation>
+        <code value="history-type"/>
+      </operation>
+      <operation>
+        <code value="read"/>
+      </operation>
+      <operation>
+        <code value="search-type"/>
+      </operation>
+      <operation>
+        <code value="update"/>
+      </operation>
+      <operation>
+        <code value="validate"/>
+      </operation>
+      <operation>
+        <code value="vread"/>
+      </operation>
+      <readHistory value="true"/>
+      <searchInclude value="substance"/>
+      <searchInclude value="subject"/>
+      <searchParam>
+        <name value="substance"/>
+        <source value="http://hl7.org/fhir/adversereaction/search#substance"/>
+        <type value="reference"/>
+        <documentation value="The name or code of the substance that produces the sensitivity"/>
+        <xpath value="AdverseReaction.exposure.substance"/>
+      </searchParam>
+      <searchParam>
+        <name value="_id"/>
+        <source value="http://hl7.org/fhir/adversereaction/search#_id"/>
+        <type value="token"/>
+        <documentation value="The logical resource id associated with the resource (must be supported by all servers)"/>
+      </searchParam>
+      <searchParam>
+        <name value="subject"/>
+        <source value="http://hl7.org/fhir/adversereaction/search#subject"/>
+        <type value="reference"/>
+        <documentation value="The subject that the sensitivity is about"/>
+        <xpath value="AdverseReaction.subject"/>
+      </searchParam>
+      <searchParam>
+        <name value="date"/>
+        <source value="http://hl7.org/fhir/adversereaction/search#date"/>
+        <type value="date"/>
+        <documentation value="The date of the reaction"/>
+        <xpath value="AdverseReaction.date"/>
+      </searchParam>
+      <searchParam>
+        <name value="symptom"/>
+        <source value="http://hl7.org/fhir/adversereaction/search#symptom"/>
+        <type value="token"/>
+        <documentation value="One of the symptoms of the reaction"/>
+        <xpath value="AdverseReaction.symptom.code"/>
+      </searchParam>
+    </resource>
+    <resource>
+      <type value="Alert"/>
+      <operation>
+        <code value="create"/>
+      </operation>
+      <operation>
+        <code value="delete"/>
+      </operation>
+      <operation>
+        <code value="history-instance"/>
+      </operation>
+      <operation>
+        <code value="history-type"/>
+      </operation>
+      <operation>
+        <code value="read"/>
+      </operation>
+      <operation>
+        <code value="search-type"/>
+      </operation>
+      <operation>
+        <code value="update"/>
+      </operation>
+      <operation>
+        <code value="validate"/>
+      </operation>
+      <operation>
+        <code value="vread"/>
+      </operation>
+      <readHistory value="true"/>
+      <searchInclude value="subject"/>
+      <searchParam>
+        <name value="_id"/>
+        <source value="http://hl7.org/fhir/alert/search#_id"/>
+        <type value="token"/>
+        <documentation value="The logical resource id associated with the resource (must be supported by all servers)"/>
+      </searchParam>
+      <searchParam>
+        <name value="subject"/>
+        <source value="http://hl7.org/fhir/alert/search#subject"/>
+        <type value="reference"/>
+        <documentation value="The identity of a subject to list alerts for"/>
+        <xpath value="Alert.subject"/>
+      </searchParam>
+    </resource>
+    <resource>
+      <type value="AllergyIntolerance"/>
+      <operation>
+        <code value="create"/>
+      </operation>
+      <operation>
+        <code value="delete"/>
+      </operation>
+      <operation>
+        <code value="history-instance"/>
+      </operation>
+      <operation>
+        <code value="history-type"/>
+      </operation>
+      <operation>
+        <code value="read"/>
+      </operation>
+      <operation>
+        <code value="search-type"/>
+      </operation>
+      <operation>
+        <code value="update"/>
+      </operation>
+      <operation>
+        <code value="validate"/>
+      </operation>
+      <operation>
+        <code value="vread"/>
+      </operation>
+      <readHistory value="true"/>
+      <searchInclude value="substance"/>
+      <searchInclude value="recorder"/>
+      <searchInclude value="subject"/>
+      <searchParam>
+        <name value="substance"/>
+        <source value="http://hl7.org/fhir/allergyintolerance/search#substance"/>
+        <type value="reference"/>
+        <documentation value="The name or code of the substance that produces the sensitivity"/>
+        <xpath value="AllergyIntolerance.substance"/>
+      </searchParam>
+      <searchParam>
+        <name value="_id"/>
+        <source value="http://hl7.org/fhir/allergyintolerance/search#_id"/>
+        <type value="token"/>
+        <documentation value="The logical resource id associated with the resource (must be supported by all servers)"/>
+      </searchParam>
+      <searchParam>
+        <name value="status"/>
+        <source value="http://hl7.org/fhir/allergyintolerance/search#status"/>
+        <type value="token"/>
+        <documentation value="The status of the sensitivity"/>
+        <xpath value="AllergyIntolerance.status"/>
+      </searchParam>
+      <searchParam>
+        <name value="recorder"/>
+        <source value="http://hl7.org/fhir/allergyintolerance/search#recorder"/>
+        <type value="reference"/>
+        <documentation value="Who recorded the sensitivity"/>
+        <xpath value="AllergyIntolerance.recorder"/>
+      </searchParam>
+      <searchParam>
+        <name value="subject"/>
+        <source value="http://hl7.org/fhir/allergyintolerance/search#subject"/>
+        <type value="reference"/>
+        <documentation value="The subject that the sensitivity is about"/>
+        <xpath value="AllergyIntolerance.subject"/>
+      </searchParam>
+      <searchParam>
+        <name value="date"/>
+        <source value="http://hl7.org/fhir/allergyintolerance/search#date"/>
+        <type value="date"/>
+        <documentation value="Recorded date/time."/>
+        <xpath value="AllergyIntolerance.recordedDate"/>
+      </searchParam>
+      <searchParam>
+        <name value="type"/>
+        <source value="http://hl7.org/fhir/allergyintolerance/search#type"/>
+        <type value="token"/>
+        <documentation value="The type of sensitivity"/>
+        <xpath value="AllergyIntolerance.sensitivityType"/>
+      </searchParam>
+    </resource>
+    <resource>
+      <type value="Appointment"/>
+      <operation>
+        <code value="create"/>
+      </operation>
+      <operation>
+        <code value="delete"/>
+      </operation>
+      <operation>
+        <code value="history-instance"/>
+      </operation>
+      <operation>
+        <code value="history-type"/>
+      </operation>
+      <operation>
+        <code value="read"/>
+      </operation>
+      <operation>
+        <code value="search-type"/>
+      </operation>
+      <operation>
+        <code value="update"/>
+      </operation>
+      <operation>
+        <code value="validate"/>
+      </operation>
+      <operation>
+        <code value="vread"/>
+      </operation>
+      <readHistory value="true"/>
+      <searchInclude value="subject"/>
+      <searchParam>
+        <name value="partstatus"/>
+        <source value="http://hl7.org/fhir/appointment/search#partstatus"/>
+        <type value="token"/>
+        <documentation value="The Participation status of the subject, or other participant on the appointment"/>
+        <xpath value="Appointment.participant.status"/>
+      </searchParam>
+      <searchParam>
+        <name value="_id"/>
+        <source value="http://hl7.org/fhir/appointment/search#_id"/>
+        <type value="token"/>
+        <documentation value="The logical resource id associated with the resource (must be supported by all servers)"/>
+      </searchParam>
+      <searchParam>
+        <name value="status"/>
+        <source value="http://hl7.org/fhir/appointment/search#status"/>
+        <type value="string"/>
+        <documentation value="The overall status of the appointment"/>
+        <xpath value="Appointment.status"/>
+      </searchParam>
+      <searchParam>
+        <name value="subject"/>
+        <source value="http://hl7.org/fhir/appointment/search#subject"/>
+        <type value="reference"/>
+        <documentation value="The subject that the sensitivity is about"/>
+        <xpath value="Appointment.participant.individual"/>
+      </searchParam>
+      <searchParam>
+        <name value="date"/>
+        <source value="http://hl7.org/fhir/appointment/search#date"/>
+        <type value="date"/>
+        <documentation value="Appointment date/time."/>
+        <xpath value="Appointment.start"/>
+      </searchParam>
+    </resource>
+    <resource>
+      <type value="AppointmentResponse"/>
+      <operation>
+        <code value="create"/>
+      </operation>
+      <operation>
+        <code value="delete"/>
+      </operation>
+      <operation>
+        <code value="history-instance"/>
+      </operation>
+      <operation>
+        <code value="history-type"/>
+      </operation>
+      <operation>
+        <code value="read"/>
+      </operation>
+      <operation>
+        <code value="search-type"/>
+      </operation>
+      <operation>
+        <code value="update"/>
+      </operation>
+      <operation>
+        <code value="validate"/>
+      </operation>
+      <operation>
+        <code value="vread"/>
+      </operation>
+      <readHistory value="true"/>
+      <searchInclude value="subject"/>
+      <searchInclude value="appointment"/>
+      <searchParam>
+        <name value="partstatus"/>
+        <source value="http://hl7.org/fhir/appointmentresponse/search#partstatus"/>
+        <type value="string"/>
+        <documentation value="The overall status of the appointment"/>
+        <xpath value="AppointmentResponse.participantStatus"/>
+      </searchParam>
+      <searchParam>
+        <name value="_id"/>
+        <source value="http://hl7.org/fhir/appointmentresponse/search#_id"/>
+        <type value="token"/>
+        <documentation value="The logical resource id associated with the resource (must be supported by all servers)"/>
+      </searchParam>
+      <searchParam>
+        <name value="subject"/>
+        <source value="http://hl7.org/fhir/appointmentresponse/search#subject"/>
+        <type value="reference"/>
+        <documentation value="The subject that the appointment response replies for"/>
+        <xpath value="AppointmentResponse.individual"/>
+      </searchParam>
+      <searchParam>
+        <name value="appointment"/>
+        <source value="http://hl7.org/fhir/appointmentresponse/search#appointment"/>
+        <type value="reference"/>
+        <documentation value="The appointment that the response is attached to"/>
+        <xpath value="AppointmentResponse.appointment"/>
+      </searchParam>
+    </resource>
+    <resource>
+      <type value="Availability"/>
+      <operation>
+        <code value="create"/>
+      </operation>
+      <operation>
+        <code value="delete"/>
+      </operation>
+      <operation>
+        <code value="history-instance"/>
+      </operation>
+      <operation>
+        <code value="history-type"/>
+      </operation>
+      <operation>
+        <code value="read"/>
+      </operation>
+      <operation>
+        <code value="search-type"/>
+      </operation>
+      <operation>
+        <code value="update"/>
+      </operation>
+      <operation>
+        <code value="validate"/>
+      </operation>
+      <operation>
+        <code value="vread"/>
+      </operation>
+      <readHistory value="true"/>
+      <searchInclude value="individual"/>
+      <searchParam>
+        <name value="individual"/>
+        <source value="http://hl7.org/fhir/availability/search#individual"/>
+        <type value="reference"/>
+        <documentation value="The individual to find an availability for"/>
+        <xpath value="Availability.individual"/>
+      </searchParam>
+      <searchParam>
+        <name value="_id"/>
+        <source value="http://hl7.org/fhir/availability/search#_id"/>
+        <type value="token"/>
+        <documentation value="The logical resource id associated with the resource (must be supported by all servers)"/>
+      </searchParam>
+      <searchParam>
+        <name value="slottype"/>
+        <source value="http://hl7.org/fhir/availability/search#slottype"/>
+        <type value="token"/>
+        <documentation value="The type of appointments that can be booked into associated slot(s)"/>
+        <xpath value="Availability.type"/>
+      </searchParam>
+    </resource>
+    <resource>
+      <type value="CarePlan"/>
+      <operation>
+        <code value="create"/>
+      </operation>
+      <operation>
+        <code value="delete"/>
+      </operation>
+      <operation>
+        <code value="history-instance"/>
+      </operation>
+      <operation>
+        <code value="history-type"/>
+      </operation>
+      <operation>
+        <code value="read"/>
+      </operation>
+      <operation>
+        <code value="search-type"/>
+      </operation>
+      <operation>
+        <code value="update"/>
+      </operation>
+      <operation>
+        <code value="validate"/>
+      </operation>
+      <operation>
+        <code value="vread"/>
+      </operation>
+      <readHistory value="true"/>
+      <searchInclude value="patient"/>
+      <searchInclude value="condition"/>
+      <searchInclude value="activitydetail"/>
+      <searchInclude value="participant"/>
+      <searchParam>
+        <name value="activitycode"/>
+        <source value="http://hl7.org/fhir/careplan/search#activitycode"/>
+        <type value="token"/>
+        <documentation value="Detail type of activity"/>
+        <xpath value="CarePlan.activity.simple.code"/>
+      </searchParam>
+      <searchParam>
+        <name value="patient"/>
+        <source value="http://hl7.org/fhir/careplan/search#patient"/>
+        <type value="reference"/>
+        <documentation value="Who care plan is for"/>
+        <xpath value="CarePlan.patient"/>
+      </searchParam>
+      <searchParam>
+        <name value="_id"/>
+        <source value="http://hl7.org/fhir/careplan/search#_id"/>
+        <type value="token"/>
+        <documentation value="The logical resource id associated with the resource (must be supported by all servers)"/>
+      </searchParam>
+      <searchParam>
+        <name value="condition"/>
+        <source value="http://hl7.org/fhir/careplan/search#condition"/>
+        <type value="reference"/>
+        <documentation value="Health issues this plan addresses"/>
+        <xpath value="CarePlan.concern"/>
+      </searchParam>
+      <searchParam>
+        <name value="activitydetail"/>
+        <source value="http://hl7.org/fhir/careplan/search#activitydetail"/>
+        <type value="reference"/>
+        <documentation value="Activity details defined in specific resource"/>
+        <xpath value="CarePlan.activity.detail"/>
+      </searchParam>
+      <searchParam>
+        <name value="activitydate"/>
+        <source value="http://hl7.org/fhir/careplan/search#activitydate"/>
+        <type value="date"/>
+        <documentation value="Specified date occurs within period specified by CarePlan.activity.timingSchedule"/>
+        <xpath value="CarePlan.activity.simple.timing[x]"/>
+      </searchParam>
+      <searchParam>
+        <name value="participant"/>
+        <source value="http://hl7.org/fhir/careplan/search#participant"/>
+        <type value="reference"/>
+        <documentation value="Who is involved"/>
+        <xpath value="CarePlan.participant.member"/>
+      </searchParam>
+      <searchParam>
+        <name value="date"/>
+        <source value="http://hl7.org/fhir/careplan/search#date"/>
+        <type value="date"/>
+        <documentation value="Time period plan covers"/>
+        <xpath value="CarePlan.period"/>
+      </searchParam>
+    </resource>
+    <resource>
+      <type value="Composition"/>
+      <operation>
+        <code value="create"/>
+      </operation>
+      <operation>
+        <code value="delete"/>
+      </operation>
+      <operation>
+        <code value="history-instance"/>
+      </operation>
+      <operation>
+        <code value="history-type"/>
+      </operation>
+      <operation>
+        <code value="read"/>
+      </operation>
+      <operation>
+        <code value="search-type"/>
+      </operation>
+      <operation>
+        <code value="update"/>
+      </operation>
+      <operation>
+        <code value="validate"/>
+      </operation>
+      <operation>
+        <code value="vread"/>
+      </operation>
+      <readHistory value="true"/>
+      <searchInclude value="author"/>
+      <searchInclude value="attester"/>
+      <searchInclude value="subject"/>
+      <searchInclude value="section-content"/>
+      <searchParam>
+        <name value="author"/>
+        <source value="http://hl7.org/fhir/composition/search#author"/>
+        <type value="reference"/>
+        <documentation value="Who/what authored the composition"/>
+        <xpath value="Composition.author"/>
+      </searchParam>
+      <searchParam>
+        <name value="_id"/>
+        <source value="http://hl7.org/fhir/composition/search#_id"/>
+        <type value="token"/>
+        <documentation value="The logical resource id associated with the resource (must be supported by all servers)"/>
+      </searchParam>
+      <searchParam>
+        <name value="attester"/>
+        <source value="http://hl7.org/fhir/composition/search#attester"/>
+        <type value="reference"/>
+        <documentation value="Who attested the composition"/>
+        <xpath value="Composition.attester.party"/>
+      </searchParam>
+      <searchParam>
+        <name value="subject"/>
+        <source value="http://hl7.org/fhir/composition/search#subject"/>
+        <type value="reference"/>
+        <documentation value="Who/what the composition is about"/>
+        <xpath value="Composition.subject"/>
+      </searchParam>
+      <searchParam>
+        <name value="section-content"/>
+        <source value="http://hl7.org/fhir/composition/search#section-content"/>
+        <type value="reference"/>
+        <documentation value="The actual data for the section"/>
+        <xpath value="Composition.section.content"/>
+      </searchParam>
+      <searchParam>
+        <name value="context"/>
+        <source value="http://hl7.org/fhir/composition/search#context"/>
+        <type value="token"/>
+        <documentation value="Code(s) that apply to the event being documented"/>
+        <xpath value="Composition.event.code"/>
+      </searchParam>
+      <searchParam>
+        <name value="class"/>
+        <source value="http://hl7.org/fhir/composition/search#class"/>
+        <type value="token"/>
+        <documentation value="Categorisation of Composition"/>
+        <xpath value="Composition.class"/>
+      </searchParam>
+      <searchParam>
+        <name value="section-type"/>
+        <source value="http://hl7.org/fhir/composition/search#section-type"/>
+        <type value="token"/>
+        <documentation value="Classification of section (recommended)"/>
+        <xpath value="Composition.section.code"/>
+      </searchParam>
+      <searchParam>
+        <name value="type"/>
+        <source value="http://hl7.org/fhir/composition/search#type"/>
+        <type value="token"/>
+        <documentation value="Kind of composition (LOINC if possible)"/>
+        <xpath value="Composition.type"/>
+      </searchParam>
+      <searchParam>
+        <name value="identifier"/>
+        <source value="http://hl7.org/fhir/composition/search#identifier"/>
+        <type value="token"/>
+        <documentation value="Logical identifier of composition (version-independent)"/>
+        <xpath value="Composition.identifier"/>
+      </searchParam>
+      <searchParam>
+        <name value="instant"/>
+        <source value="http://hl7.org/fhir/composition/search#instant"/>
+        <type value="date"/>
+        <documentation value="Composition editing time"/>
+        <xpath value="Composition.instant"/>
+      </searchParam>
+    </resource>
+    <resource>
+      <type value="ConceptMap"/>
+      <operation>
+        <code value="create"/>
+      </operation>
+      <operation>
+        <code value="delete"/>
+      </operation>
+      <operation>
+        <code value="history-instance"/>
+      </operation>
+      <operation>
+        <code value="history-type"/>
+      </operation>
+      <operation>
+        <code value="read"/>
+      </operation>
+      <operation>
+        <code value="search-type"/>
+      </operation>
+      <operation>
+        <code value="update"/>
+      </operation>
+      <operation>
+        <code value="validate"/>
+      </operation>
+      <operation>
+        <code value="vread"/>
+      </operation>
+      <readHistory value="true"/>
+      <searchInclude value="source"/>
+      <searchInclude value="target"/>
+      <searchParam>
+        <name value="product"/>
+        <source value="http://hl7.org/fhir/conceptmap/search#product"/>
+        <type value="token"/>
+        <documentation value="Reference to element/field/valueset provides the context"/>
+        <xpath value="ConceptMap.concept.map.product.concept"/>
+      </searchParam>
+      <searchParam>
+        <name value="dependson"/>
+        <source value="http://hl7.org/fhir/conceptmap/search#dependson"/>
+        <type value="token"/>
+        <documentation value="Reference to element/field/valueset provides the context"/>
+        <xpath value="ConceptMap.concept.dependsOn.concept"/>
+      </searchParam>
+      <searchParam>
+        <name value="system"/>
+        <source value="http://hl7.org/fhir/conceptmap/search#system"/>
+        <type value="token"/>
+        <documentation value="The system for any destination concepts mapped by this map"/>
+        <xpath value="ConceptMap.concept.map.system"/>
+      </searchParam>
+      <searchParam>
+        <name value="source"/>
+        <source value="http://hl7.org/fhir/conceptmap/search#source"/>
+        <type value="reference"/>
+        <documentation value="The system for any concepts mapped by this concept map"/>
+        <xpath value="ConceptMap.source"/>
+      </searchParam>
+      <searchParam>
+        <name value="_id"/>
+        <source value="http://hl7.org/fhir/conceptmap/search#_id"/>
+        <type value="token"/>
+        <documentation value="The logical resource id associated with the resource (must be supported by all servers)"/>
+      </searchParam>
+      <searchParam>
+        <name value="status"/>
+        <source value="http://hl7.org/fhir/conceptmap/search#status"/>
+        <type value="token"/>
+        <documentation value="Status of the concept map"/>
+        <xpath value="ConceptMap.status"/>
+      </searchParam>
+      <searchParam>
+        <name value="description"/>
+        <source value="http://hl7.org/fhir/conceptmap/search#description"/>
+        <type value="string"/>
+        <documentation value="Text search in the description of the concept map"/>
+        <xpath value="ConceptMap.description"/>
+      </searchParam>
+      <searchParam>
+        <name value="name"/>
+        <source value="http://hl7.org/fhir/conceptmap/search#name"/>
+        <type value="string"/>
+        <documentation value="Name of the concept map"/>
+        <xpath value="ConceptMap.name"/>
+      </searchParam>
+      <searchParam>
+        <name value="target"/>
+        <source value="http://hl7.org/fhir/conceptmap/search#target"/>
+        <type value="reference"/>
+        <documentation value="Provides context to the mappings"/>
+        <xpath value="ConceptMap.target"/>
+      </searchParam>
+      <searchParam>
+        <name value="date"/>
+        <source value="http://hl7.org/fhir/conceptmap/search#date"/>
+        <type value="date"/>
+        <documentation value="The concept map publication date"/>
+        <xpath value="ConceptMap.date"/>
+      </searchParam>
+      <searchParam>
+        <name value="identifier"/>
+        <source value="http://hl7.org/fhir/conceptmap/search#identifier"/>
+        <type value="token"/>
+        <documentation value="The identifier of the concept map"/>
+        <xpath value="ConceptMap.identifier"/>
+      </searchParam>
+      <searchParam>
+        <name value="publisher"/>
+        <source value="http://hl7.org/fhir/conceptmap/search#publisher"/>
+        <type value="string"/>
+        <documentation value="Name of the publisher of the concept map"/>
+        <xpath value="ConceptMap.publisher"/>
+      </searchParam>
+      <searchParam>
+        <name value="version"/>
+        <source value="http://hl7.org/fhir/conceptmap/search#version"/>
+        <type value="token"/>
+        <documentation value="The version identifier of the concept map"/>
+        <xpath value="ConceptMap.version"/>
+      </searchParam>
+    </resource>
+    <resource>
+      <type value="Condition"/>
+      <operation>
+        <code value="create"/>
+      </operation>
+      <operation>
+        <code value="delete"/>
+      </operation>
+      <operation>
+        <code value="history-instance"/>
+      </operation>
+      <operation>
+        <code value="history-type"/>
+      </operation>
+      <operation>
+        <code value="read"/>
+      </operation>
+      <operation>
+        <code value="search-type"/>
+      </operation>
+      <operation>
+        <code value="update"/>
+      </operation>
+      <operation>
+        <code value="validate"/>
+      </operation>
+      <operation>
+        <code value="vread"/>
+      </operation>
+      <readHistory value="true"/>
+      <searchInclude value="asserter"/>
+      <searchInclude value="subject"/>
+      <searchInclude value="encounter"/>
+      <searchInclude value="related-item"/>
+      <searchParam>
+        <name value="asserter"/>
+        <source value="http://hl7.org/fhir/condition/search#asserter"/>
+        <type value="reference"/>
+        <documentation value="Person who asserts this condition"/>
+        <xpath value="Condition.asserter"/>
+      </searchParam>
+      <searchParam>
+        <name value="status"/>
+        <source value="http://hl7.org/fhir/condition/search#status"/>
+        <type value="token"/>
+        <documentation value="The status of the condition"/>
+        <xpath value="Condition.status"/>
+      </searchParam>
+      <searchParam>
+        <name value="location"/>
+        <source value="http://hl7.org/fhir/condition/search#location"/>
+        <type value="token"/>
+        <documentation value="Location - may include laterality"/>
+        <xpath value="Condition.location.code"/>
+      </searchParam>
+      <searchParam>
+        <name value="subject"/>
+        <source value="http://hl7.org/fhir/condition/search#subject"/>
+        <type value="reference"/>
+        <documentation value="Who has the condition?"/>
+        <xpath value="Condition.subject"/>
+      </searchParam>
+      <searchParam>
+        <name value="onset"/>
+        <source value="http://hl7.org/fhir/condition/search#onset"/>
+        <type value="date"/>
+        <documentation value="When the Condition started (if started on a date)"/>
+        <xpath value="Condition.onset[x]"/>
+      </searchParam>
+      <searchParam>
+        <name value="evidence"/>
+        <source value="http://hl7.org/fhir/condition/search#evidence"/>
+        <type value="token"/>
+        <documentation value="Manifestation/symptom"/>
+        <xpath value="Condition.evidence.code"/>
+      </searchParam>
+      <searchParam>
+        <name value="severity"/>
+        <source value="http://hl7.org/fhir/condition/search#severity"/>
+        <type value="token"/>
+        <documentation value="The severity of the condition"/>
+        <xpath value="Condition.severity"/>
+      </searchParam>
+      <searchParam>
+        <name value="code"/>
+        <source value="http://hl7.org/fhir/condition/search#code"/>
+        <type value="token"/>
+        <documentation value="Code for the condition"/>
+        <xpath value="Condition.code"/>
+      </searchParam>
+      <searchParam>
+        <name value="encounter"/>
+        <source value="http://hl7.org/fhir/condition/search#encounter"/>
+        <type value="reference"/>
+        <documentation value="Encounter when condition first asserted"/>
+        <xpath value="Condition.encounter"/>
+      </searchParam>
+      <searchParam>
+        <name value="date-asserted"/>
+        <source value="http://hl7.org/fhir/condition/search#date-asserted"/>
+        <type value="date"/>
+        <documentation value="When first detected/suspected/entered"/>
+        <xpath value="Condition.dateAsserted"/>
+      </searchParam>
+      <searchParam>
+        <name value="stage"/>
+        <source value="http://hl7.org/fhir/condition/search#stage"/>
+        <type value="token"/>
+        <documentation value="Simple summary (disease specific)"/>
+        <xpath value="Condition.stage.summary"/>
+      </searchParam>
+      <searchParam>
+        <name value="related-code"/>
+        <source value="http://hl7.org/fhir/condition/search#related-code"/>
+        <type value="token"/>
+        <documentation value="Relationship target by means of a predefined code"/>
+        <xpath value="Condition.relatedItem.code"/>
+      </searchParam>
+      <searchParam>
+        <name value="category"/>
+        <source value="http://hl7.org/fhir/condition/search#category"/>
+        <type value="token"/>
+        <documentation value="The category of the condition"/>
+        <xpath value="Condition.category"/>
+      </searchParam>
+      <searchParam>
+        <name value="_id"/>
+        <source value="http://hl7.org/fhir/condition/search#_id"/>
+        <type value="token"/>
+        <documentation value="The logical resource id associated with the resource (must be supported by all servers)"/>
+      </searchParam>
+      <searchParam>
+        <name value="related-item"/>
+        <source value="http://hl7.org/fhir/condition/search#related-item"/>
+        <type value="reference"/>
+        <documentation value="Relationship target resource"/>
+        <xpath value="Condition.relatedItem.target"/>
+      </searchParam>
+    </resource>
+    <resource>
+      <type value="Conformance"/>
+      <operation>
+        <code value="create"/>
+      </operation>
+      <operation>
+        <code value="delete"/>
+      </operation>
+      <operation>
+        <code value="history-instance"/>
+      </operation>
+      <operation>
+        <code value="history-type"/>
+      </operation>
+      <operation>
+        <code value="read"/>
+      </operation>
+      <operation>
+        <code value="search-type"/>
+      </operation>
+      <operation>
+        <code value="update"/>
+      </operation>
+      <operation>
+        <code value="validate"/>
+      </operation>
+      <operation>
+        <code value="vread"/>
+      </operation>
+      <readHistory value="true"/>
+      <searchInclude value="supported-profile"/>
+      <searchInclude value="profile"/>
+      <searchParam>
+        <name value="status"/>
+        <source value="http://hl7.org/fhir/conformance/search#status"/>
+        <type value="token"/>
+        <documentation value="The current status of the conformance statement"/>
+        <xpath value="Conformance.status"/>
+      </searchParam>
+      <searchParam>
+        <name value="resource"/>
+        <source value="http://hl7.org/fhir/conformance/search#resource"/>
+        <type value="token"/>
+        <documentation value="Name of a resource mentioned in a conformance statement"/>
+        <xpath value="Conformance.rest.resource.type"/>
+      </searchParam>
+      <searchParam>
+        <name value="security"/>
+        <source value="http://hl7.org/fhir/conformance/search#security"/>
+        <type value="token"/>
+        <documentation value="Information about security of implementation"/>
+        <xpath value="Conformance.rest.security"/>
+      </searchParam>
+      <searchParam>
+        <name value="format"/>
+        <source value="http://hl7.org/fhir/conformance/search#format"/>
+        <type value="token"/>
+        <documentation value="formats supported (xml | json | mime type)"/>
+        <xpath value="Conformance.format"/>
+      </searchParam>
+      <searchParam>
+        <name value="date"/>
+        <source value="http://hl7.org/fhir/conformance/search#date"/>
+        <type value="date"/>
+        <documentation value="The conformance statement publication date"/>
+        <xpath value="Conformance.date"/>
+      </searchParam>
+      <searchParam>
+        <name value="mode"/>
+        <source value="http://hl7.org/fhir/conformance/search#mode"/>
+        <type value="token"/>
+        <documentation value="Mode - restful (server/client) or messaging (sender/receiver)"/>
+        <xpath value="Conformance.rest.mode"/>
+      </searchParam>
+      <searchParam>
+        <name value="version"/>
+        <source value="http://hl7.org/fhir/conformance/search#version"/>
+        <type value="token"/>
+        <documentation value="The version identifier of the conformance statement"/>
+        <xpath value="Conformance.version"/>
+      </searchParam>
+      <searchParam>
+        <name value="publisher"/>
+        <source value="http://hl7.org/fhir/conformance/search#publisher"/>
+        <type value="string"/>
+        <documentation value="Name of the publisher of the conformance statement"/>
+        <xpath value="Conformance.publisher"/>
+      </searchParam>
+      <searchParam>
+        <name value="software"/>
+        <source value="http://hl7.org/fhir/conformance/search#software"/>
+        <type value="string"/>
+        <documentation value="Part of a the name of a software application"/>
+        <xpath value="Conformance.software.name"/>
+      </searchParam>
+      <searchParam>
+        <name value="_id"/>
+        <source value="http://hl7.org/fhir/conformance/search#_id"/>
+        <type value="token"/>
+        <documentation value="The logical resource id associated with the resource (must be supported by all servers)"/>
+      </searchParam>
+      <searchParam>
+        <name value="description"/>
+        <source value="http://hl7.org/fhir/conformance/search#description"/>
+        <type value="string"/>
+        <documentation value="Text search in the description of the conformance statement"/>
+        <xpath value="Conformance.description"/>
+      </searchParam>
+      <searchParam>
+        <name value="event"/>
+        <source value="http://hl7.org/fhir/conformance/search#event"/>
+        <type value="token"/>
+        <documentation value="Event code in a conformance statement"/>
+        <xpath value="Conformance.messaging.event.code"/>
+      </searchParam>
+      <searchParam>
+        <name value="name"/>
+        <source value="http://hl7.org/fhir/conformance/search#name"/>
+        <type value="string"/>
+        <documentation value="Name of the conformance statement"/>
+        <xpath value="Conformance.name"/>
+      </searchParam>
+      <searchParam>
+        <name value="supported-profile"/>
+        <source value="http://hl7.org/fhir/conformance/search#supported-profile"/>
+        <type value="reference"/>
+        <documentation value="Profiles supported by the system"/>
+        <xpath value="Conformance.profile"/>
+      </searchParam>
+      <searchParam>
+        <name value="fhirversion"/>
+        <source value="http://hl7.org/fhir/conformance/search#fhirversion"/>
+        <type value="token"/>
+        <documentation value="The version of FHIR"/>
+        <xpath value="Conformance.version"/>
+      </searchParam>
+      <searchParam>
+        <name value="identifier"/>
+        <source value="http://hl7.org/fhir/conformance/search#identifier"/>
+        <type value="token"/>
+        <documentation value="The identifier of the conformance statement"/>
+        <xpath value="Conformance.identifier"/>
+      </searchParam>
+      <searchParam>
+        <name value="profile"/>
+        <source value="http://hl7.org/fhir/conformance/search#profile"/>
+        <type value="reference"/>
+        <documentation value="A profile id invoked in a conformance statement"/>
+        <xpath value="Conformance.rest.resource.profile"/>
+      </searchParam>
+    </resource>
+    <resource>
+      <type value="Device"/>
+      <operation>
+        <code value="create"/>
+      </operation>
+      <operation>
+        <code value="delete"/>
+      </operation>
+      <operation>
+        <code value="history-instance"/>
+      </operation>
+      <operation>
+        <code value="history-type"/>
+      </operation>
+      <operation>
+        <code value="read"/>
+      </operation>
+      <operation>
+        <code value="search-type"/>
+      </operation>
+      <operation>
+        <code value="update"/>
+      </operation>
+      <operation>
+        <code value="validate"/>
+      </operation>
+      <operation>
+        <code value="vread"/>
+      </operation>
+      <readHistory value="true"/>
+      <searchInclude value="organization"/>
+      <searchInclude value="patient"/>
+      <searchInclude value="location"/>
+      <searchParam>
+        <name value="organization"/>
+        <source value="http://hl7.org/fhir/device/search#organization"/>
+        <type value="reference"/>
+        <documentation value="The organization responsible for the device"/>
+        <xpath value="Device.owner"/>
+      </searchParam>
+      <searchParam>
+        <name value="model"/>
+        <source value="http://hl7.org/fhir/device/search#model"/>
+        <type value="string"/>
+        <documentation value="The model of the device"/>
+        <xpath value="Device.model"/>
+      </searchParam>
+      <searchParam>
+        <name value="patient"/>
+        <source value="http://hl7.org/fhir/device/search#patient"/>
+        <type value="reference"/>
+        <documentation value="If the resource is affixed to a person"/>
+        <xpath value="Device.patient"/>
+      </searchParam>
+      <searchParam>
+        <name value="_id"/>
+        <source value="http://hl7.org/fhir/device/search#_id"/>
+        <type value="token"/>
+        <documentation value="The logical resource id associated with the resource (must be supported by all servers)"/>
+      </searchParam>
+      <searchParam>
+        <name value="location"/>
+        <source value="http://hl7.org/fhir/device/search#location"/>
+        <type value="reference"/>
+        <documentation value="Where the resource is found"/>
+        <xpath value="Device.location"/>
+      </searchParam>
+      <searchParam>
+        <name value="manufacturer"/>
+        <source value="http://hl7.org/fhir/device/search#manufacturer"/>
+        <type value="string"/>
+        <documentation value="The manufacturer of the device"/>
+        <xpath value="Device.manufacturer"/>
+      </searchParam>
+      <searchParam>
+        <name value="udi"/>
+        <source value="http://hl7.org/fhir/device/search#udi"/>
+        <type value="string"/>
+        <documentation value="FDA Mandated Unique Device Identifier"/>
+        <xpath value="Device.udi"/>
+      </searchParam>
+      <searchParam>
+        <name value="type"/>
+        <source value="http://hl7.org/fhir/device/search#type"/>
+        <type value="token"/>
+        <documentation value="The type of the device"/>
+        <xpath value="Device.type"/>
+      </searchParam>
+      <searchParam>
+        <name value="identifier"/>
+        <source value="http://hl7.org/fhir/device/search#identifier"/>
+        <type value="token"/>
+        <documentation value="Instance id from manufacturer, owner and others"/>
+        <xpath value="Device.identifier"/>
+      </searchParam>
+    </resource>
+    <resource>
+      <type value="DeviceObservationReport"/>
+      <operation>
+        <code value="create"/>
+      </operation>
+      <operation>
+        <code value="delete"/>
+      </operation>
+      <operation>
+        <code value="history-instance"/>
+      </operation>
+      <operation>
+        <code value="history-type"/>
+      </operation>
+      <operation>
+        <code value="read"/>
+      </operation>
+      <operation>
+        <code value="search-type"/>
+      </operation>
+      <operation>
+        <code value="update"/>
+      </operation>
+      <operation>
+        <code value="validate"/>
+      </operation>
+      <operation>
+        <code value="vread"/>
+      </operation>
+      <readHistory value="true"/>
+      <searchInclude value="observation"/>
+      <searchInclude value="source"/>
+      <searchInclude value="subject"/>
+      <searchParam>
+        <name value="observation"/>
+        <source value="http://hl7.org/fhir/deviceobservationreport/search#observation"/>
+        <type value="reference"/>
+        <documentation value="The data for the metric"/>
+        <xpath value="DeviceObservationReport.virtualDevice.channel.metric.observation"/>
+      </searchParam>
+      <searchParam>
+        <name value="source"/>
+        <source value="http://hl7.org/fhir/deviceobservationreport/search#source"/>
+        <type value="reference"/>
+        <documentation value="Identifies/describes where the data came from"/>
+        <xpath value="DeviceObservationReport.source"/>
+      </searchParam>
+      <searchParam>
+        <name value="_id"/>
+        <source value="http://hl7.org/fhir/deviceobservationreport/search#_id"/>
+        <type value="token"/>
+        <documentation value="The logical resource id associated with the resource (must be supported by all servers)"/>
+      </searchParam>
+      <searchParam>
+        <name value="subject"/>
+        <source value="http://hl7.org/fhir/deviceobservationreport/search#subject"/>
+        <type value="reference"/>
+        <documentation value="Subject of the measurement"/>
+        <xpath value="DeviceObservationReport.subject"/>
+      </searchParam>
+      <searchParam>
+        <name value="code"/>
+        <source value="http://hl7.org/fhir/deviceobservationreport/search#code"/>
+        <type value="token"/>
+        <documentation value="The compatment code"/>
+        <xpath value="DeviceObservationReport.virtualDevice.code"/>
+      </searchParam>
+      <searchParam>
+        <name value="channel"/>
+        <source value="http://hl7.org/fhir/deviceobservationreport/search#channel"/>
+        <type value="token"/>
+        <documentation value="The channel code"/>
+        <xpath value="DeviceObservationReport.virtualDevice.channel.code"/>
+      </searchParam>
+    </resource>
+    <resource>
+      <type value="DiagnosticOrder"/>
+      <operation>
+        <code value="create"/>
+      </operation>
+      <operation>
+        <code value="delete"/>
+      </operation>
+      <operation>
+        <code value="history-instance"/>
+      </operation>
+      <operation>
+        <code value="history-type"/>
+      </operation>
+      <operation>
+        <code value="read"/>
+      </operation>
+      <operation>
+        <code value="search-type"/>
+      </operation>
+      <operation>
+        <code value="update"/>
+      </operation>
+      <operation>
+        <code value="validate"/>
+      </operation>
+      <operation>
+        <code value="vread"/>
+      </operation>
+      <readHistory value="true"/>
+      <searchInclude value="orderer"/>
+      <searchInclude value="subject"/>
+      <searchInclude value="actor"/>
+      <searchInclude value="encounter"/>
+      <searchInclude value="specimen"/>
+      <searchParam>
+        <name value="orderer"/>
+        <source value="http://hl7.org/fhir/diagnosticorder/search#orderer"/>
+        <type value="reference"/>
+        <documentation value="Who ordered the test"/>
+        <xpath value="DiagnosticOrder.orderer"/>
+      </searchParam>
+      <searchParam>
+        <name value="status"/>
+        <source value="http://hl7.org/fhir/diagnosticorder/search#status"/>
+        <type value="token"/>
+        <documentation value="requested | received | accepted | in progress | review | completed | suspended | rejected | failed"/>
+        <xpath value="DiagnosticOrder.status"/>
+      </searchParam>
+      <searchParam>
+        <name value="subject"/>
+        <source value="http://hl7.org/fhir/diagnosticorder/search#subject"/>
+        <type value="reference"/>
+        <documentation value="Who/what test is about"/>
+        <xpath value="DiagnosticOrder.subject"/>
+      </searchParam>
+      <searchParam>
+        <name value="item-status"/>
+        <source value="http://hl7.org/fhir/diagnosticorder/search#item-status"/>
+        <type value="token"/>
+        <documentation value="requested | received | accepted | in progress | review | completed | suspended | rejected | failed"/>
+        <xpath value="DiagnosticOrder.item.status"/>
+      </searchParam>
+      <searchParam>
+        <name value="event-status"/>
+        <source value="http://hl7.org/fhir/diagnosticorder/search#event-status"/>
+        <type value="token"/>
+        <documentation value="requested | received | accepted | in progress | review | completed | suspended | rejected | failed"/>
+        <xpath value="DiagnosticOrder.event.status"/>
+      </searchParam>
+      <searchParam>
+        <name value="actor"/>
+        <source value="http://hl7.org/fhir/diagnosticorder/search#actor"/>
+        <type value="reference"/>
+        <documentation value="Who recorded or did this"/>
+        <xpath value="DiagnosticOrder.event.actor,DiagnosticOrder.item.event.actor"/>
+      </searchParam>
+      <searchParam>
+        <name value="code"/>
+        <source value="http://hl7.org/fhir/diagnosticorder/search#code"/>
+        <type value="token"/>
+        <documentation value="Code to indicate the item (test or panel) being ordered"/>
+        <xpath value="DiagnosticOrder.item.code"/>
+      </searchParam>
+      <searchParam>
+        <name value="encounter"/>
+        <source value="http://hl7.org/fhir/diagnosticorder/search#encounter"/>
+        <type value="reference"/>
+        <documentation value="The encounter that this diagnostic order is associated with"/>
+        <xpath value="DiagnosticOrder.encounter"/>
+      </searchParam>
+      <searchParam>
+        <name value="item-past-status"/>
+        <source value="http://hl7.org/fhir/diagnosticorder/search#item-past-status"/>
+        <type value="token"/>
+        <documentation value="requested | received | accepted | in progress | review | completed | suspended | rejected | failed"/>
+        <xpath value="DiagnosticOrder.item.event.status"/>
+      </searchParam>
+      <searchParam>
+        <name value="_id"/>
+        <source value="http://hl7.org/fhir/diagnosticorder/search#_id"/>
+        <type value="token"/>
+        <documentation value="The logical resource id associated with the resource (must be supported by all servers)"/>
+      </searchParam>
+      <searchParam>
+        <name value="bodysite"/>
+        <source value="http://hl7.org/fhir/diagnosticorder/search#bodysite"/>
+        <type value="token"/>
+        <documentation value="Location of requested test (if applicable)"/>
+        <xpath value="DiagnosticOrder.item.bodySite"/>
+      </searchParam>
+      <searchParam>
+        <name value="item-date"/>
+        <source value="http://hl7.org/fhir/diagnosticorder/search#item-date"/>
+        <type value="date"/>
+        <documentation value="The date at which the event happened"/>
+        <xpath value="DiagnosticOrder.item.event.dateTime"/>
+      </searchParam>
+      <searchParam>
+        <name value="specimen"/>
+        <source value="http://hl7.org/fhir/diagnosticorder/search#specimen"/>
+        <type value="reference"/>
+        <documentation value="If the whole order relates to specific specimens"/>
+        <xpath value="DiagnosticOrder.specimen,DiagnosticOrder.item.specimen"/>
+      </searchParam>
+      <searchParam>
+        <name value="event-status-date"/>
+        <source value="http://hl7.org/fhir/diagnosticorder/search#event-status-date"/>
+        <type value="composite"/>
+        <documentation value="A combination of past-status and date"/>
+      </searchParam>
+      <searchParam>
+        <name value="event-date"/>
+        <source value="http://hl7.org/fhir/diagnosticorder/search#event-date"/>
+        <type value="date"/>
+        <documentation value="The date at which the event happened"/>
+        <xpath value="DiagnosticOrder.event.dateTime"/>
+      </searchParam>
+      <searchParam>
+        <name value="identifier"/>
+        <source value="http://hl7.org/fhir/diagnosticorder/search#identifier"/>
+        <type value="token"/>
+        <documentation value="Identifiers assigned to this order"/>
+        <xpath value="DiagnosticOrder.identifier"/>
+      </searchParam>
+      <searchParam>
+        <name value="item-status-date"/>
+        <source value="http://hl7.org/fhir/diagnosticorder/search#item-status-date"/>
+        <type value="composite"/>
+        <documentation value="A combination of item-past-status and item-date"/>
+      </searchParam>
+    </resource>
+    <resource>
+      <type value="DiagnosticReport"/>
+      <operation>
+        <code value="create"/>
+      </operation>
+      <operation>
+        <code value="delete"/>
+      </operation>
+      <operation>
+        <code value="history-instance"/>
+      </operation>
+      <operation>
+        <code value="history-type"/>
+      </operation>
+      <operation>
+        <code value="read"/>
+      </operation>
+      <operation>
+        <code value="search-type"/>
+      </operation>
+      <operation>
+        <code value="update"/>
+      </operation>
+      <operation>
+        <code value="validate"/>
+      </operation>
+      <operation>
+        <code value="vread"/>
+      </operation>
+      <readHistory value="true"/>
+      <searchInclude value="result"/>
+      <searchInclude value="subject"/>
+      <searchInclude value="image"/>
+      <searchInclude value="request"/>
+      <searchInclude value="specimen"/>
+      <searchInclude value="performer"/>
+      <searchParam>
+        <name value="result"/>
+        <source value="http://hl7.org/fhir/diagnosticreport/search#result"/>
+        <type value="reference"/>
+        <documentation value="Link to an atomic result (observation resource)"/>
+        <xpath value="DiagnosticReport.results.result,DiagnosticReport.results.group.result"/>
+      </searchParam>
+      <searchParam>
+        <name value="status"/>
+        <source value="http://hl7.org/fhir/diagnosticreport/search#status"/>
+        <type value="token"/>
+        <documentation value="The status of the report"/>
+        <xpath value="DiagnosticReport.status"/>
+      </searchParam>
+      <searchParam>
+        <name value="subject"/>
+        <source value="http://hl7.org/fhir/diagnosticreport/search#subject"/>
+        <type value="reference"/>
+        <documentation value="The subject of the report"/>
+        <xpath value="DiagnosticReport.subject"/>
+      </searchParam>
+      <searchParam>
+        <name value="issued"/>
+        <source value="http://hl7.org/fhir/diagnosticreport/search#issued"/>
+        <type value="date"/>
+        <documentation value="When the report was issued"/>
+        <xpath value="DiagnosticReport.issued"/>
+      </searchParam>
+      <searchParam>
+        <name value="diagnosis"/>
+        <source value="http://hl7.org/fhir/diagnosticreport/search#diagnosis"/>
+        <type value="token"/>
+        <documentation value="A coded diagnosis on the report"/>
+        <xpath value="DiagnosticReport.codedDiagnosis"/>
+      </searchParam>
+      <searchParam>
+        <name value="image"/>
+        <source value="http://hl7.org/fhir/diagnosticreport/search#image"/>
+        <type value="reference"/>
+        <documentation value="Reference to the image source"/>
+        <xpath value="DiagnosticReport.image.link"/>
+      </searchParam>
+      <searchParam>
+        <name value="date"/>
+        <source value="http://hl7.org/fhir/diagnosticreport/search#date"/>
+        <type value="date"/>
+        <documentation value="The clinically relevant time of the report"/>
+        <xpath value="DiagnosticReport.diagnostic[x]"/>
+      </searchParam>
+      <searchParam>
+        <name value="_id"/>
+        <source value="http://hl7.org/fhir/diagnosticreport/search#_id"/>
+        <type value="token"/>
+        <documentation value="The logical resource id associated with the resource (must be supported by all servers)"/>
+      </searchParam>
+      <searchParam>
+        <name value="request"/>
+        <source value="http://hl7.org/fhir/diagnosticreport/search#request"/>
+        <type value="reference"/>
+        <documentation value="What was requested"/>
+        <xpath value="DiagnosticReport.requestDetail"/>
+      </searchParam>
+      <searchParam>
+        <name value="specimen"/>
+        <source value="http://hl7.org/fhir/diagnosticreport/search#specimen"/>
+        <type value="reference"/>
+        <documentation value="The specimen details"/>
+        <xpath value="DiagnosticReport.results.specimen,DiagnosticReport.results.group.specimen"/>
+      </searchParam>
+      <searchParam>
+        <name value="name"/>
+        <source value="http://hl7.org/fhir/diagnosticreport/search#name"/>
+        <type value="token"/>
+        <documentation value="The name of the report (e.g. the code for the report as a whole, as opposed to codes for the atomic results, which are the names on the observation resource referred to from the result)"/>
+        <xpath value="DiagnosticReport.results.name"/>
+      </searchParam>
+      <searchParam>
+        <name value="service"/>
+        <source value="http://hl7.org/fhir/diagnosticreport/search#service"/>
+        <type value="token"/>
+        <documentation value="Which diagnostic discipline/department created the report"/>
+        <xpath value="DiagnosticReport.serviceCategory"/>
+      </searchParam>
+      <searchParam>
+        <name value="performer"/>
+        <source value="http://hl7.org/fhir/diagnosticreport/search#performer"/>
+        <type value="reference"/>
+        <documentation value="Who was the source of the report (organization)"/>
+        <xpath value="DiagnosticReport.performer"/>
+      </searchParam>
+      <searchParam>
+        <name value="group"/>
+        <source value="http://hl7.org/fhir/diagnosticreport/search#group"/>
+        <type value="token"/>
+        <documentation value="Name /code of a group in the report"/>
+      </searchParam>
+      <searchParam>
+        <name value="identifier"/>
+        <source value="http://hl7.org/fhir/diagnosticreport/search#identifier"/>
+        <type value="token"/>
+        <documentation value="An identifier for the report"/>
+        <xpath value="DiagnosticReport.identifier"/>
+      </searchParam>
+    </resource>
+    <resource>
+      <type value="DocumentManifest"/>
+      <operation>
+        <code value="create"/>
+      </operation>
+      <operation>
+        <code value="delete"/>
+      </operation>
+      <operation>
+        <code value="history-instance"/>
+      </operation>
+      <operation>
+        <code value="history-type"/>
+      </operation>
+      <operation>
+        <code value="read"/>
+      </operation>
+      <operation>
+        <code value="search-type"/>
+      </operation>
+      <operation>
+        <code value="update"/>
+      </operation>
+      <operation>
+        <code value="validate"/>
+      </operation>
+      <operation>
+        <code value="vread"/>
+      </operation>
+      <readHistory value="true"/>
+      <searchInclude value="content"/>
+      <searchInclude value="author"/>
+      <searchInclude value="supersedes"/>
+      <searchInclude value="subject"/>
+      <searchInclude value="recipient"/>
+      <searchParam>
+        <name value="content"/>
+        <source value="http://hl7.org/fhir/documentmanifest/search#content"/>
+        <type value="reference"/>
+        <documentation value="Contents of this set of documents"/>
+        <xpath value="DocumentManifest.content"/>
+      </searchParam>
+      <searchParam>
+        <name value="author"/>
+        <source value="http://hl7.org/fhir/documentmanifest/search#author"/>
+        <type value="reference"/>
+        <documentation value="Who/what authored the document"/>
+        <xpath value="DocumentManifest.author"/>
+      </searchParam>
+      <searchParam>
+        <name value="supersedes"/>
+        <source value="http://hl7.org/fhir/documentmanifest/search#supersedes"/>
+        <type value="reference"/>
+        <documentation value="If this document manifest replaces another"/>
+        <xpath value="DocumentManifest.supercedes"/>
+      </searchParam>
+      <searchParam>
+        <name value="_id"/>
+        <source value="http://hl7.org/fhir/documentmanifest/search#_id"/>
+        <type value="token"/>
+        <documentation value="The logical resource id associated with the resource (must be supported by all servers)"/>
+      </searchParam>
+      <searchParam>
+        <name value="status"/>
+        <source value="http://hl7.org/fhir/documentmanifest/search#status"/>
+        <type value="token"/>
+        <documentation value="current | superceded | entered in error"/>
+        <xpath value="DocumentManifest.status"/>
+      </searchParam>
+      <searchParam>
+        <name value="created"/>
+        <source value="http://hl7.org/fhir/documentmanifest/search#created"/>
+        <type value="date"/>
+        <documentation value="When this document manifest created"/>
+        <xpath value="DocumentManifest.created"/>
+      </searchParam>
+      <searchParam>
+        <name value="confidentiality"/>
+        <source value="http://hl7.org/fhir/documentmanifest/search#confidentiality"/>
+        <type value="token"/>
+        <documentation value="Sensitivity of set of documents"/>
+        <xpath value="DocumentManifest.confidentiality"/>
+      </searchParam>
+      <searchParam>
+        <name value="description"/>
+        <source value="http://hl7.org/fhir/documentmanifest/search#description"/>
+        <type value="string"/>
+        <documentation value="Human-readable description (title)"/>
+        <xpath value="DocumentManifest.description"/>
+      </searchParam>
+      <searchParam>
+        <name value="subject"/>
+        <source value="http://hl7.org/fhir/documentmanifest/search#subject"/>
+        <type value="reference"/>
+        <documentation value="The subject of the set of documents"/>
+        <xpath value="DocumentManifest.subject"/>
+      </searchParam>
+      <searchParam>
+        <name value="type"/>
+        <source value="http://hl7.org/fhir/documentmanifest/search#type"/>
+        <type value="token"/>
+        <documentation value="What kind of document set this is"/>
+        <xpath value="DocumentManifest.type"/>
+      </searchParam>
+      <searchParam>
+        <name value="identifier"/>
+        <source value="http://hl7.org/fhir/documentmanifest/search#identifier"/>
+        <type value="token"/>
+        <documentation value="Unique Identifier for the set of documents"/>
+        <xpath value="DocumentManifest.masterIdentifier,DocumentManifest.identifier"/>
+      </searchParam>
+      <searchParam>
+        <name value="recipient"/>
+        <source value="http://hl7.org/fhir/documentmanifest/search#recipient"/>
+        <type value="reference"/>
+        <documentation value="Intended to get notified about this set of documents"/>
+        <xpath value="DocumentManifest.recipient"/>
+      </searchParam>
+    </resource>
+    <resource>
+      <type value="DocumentReference"/>
+      <operation>
+        <code value="create"/>
+      </operation>
+      <operation>
+        <code value="delete"/>
+      </operation>
+      <operation>
+        <code value="history-instance"/>
+      </operation>
+      <operation>
+        <code value="history-type"/>
+      </operation>
+      <operation>
+        <code value="read"/>
+      </operation>
+      <operation>
+        <code value="search-type"/>
+      </operation>
+      <operation>
+        <code value="update"/>
+      </operation>
+      <operation>
+        <code value="validate"/>
+      </operation>
+      <operation>
+        <code value="vread"/>
+      </operation>
+      <readHistory value="true"/>
+      <searchInclude value="subject"/>
+      <searchInclude value="relatesto"/>
+      <searchInclude value="authenticator"/>
+      <searchInclude value="author"/>
+      <searchInclude value="custodian"/>
+      <searchParam>
+        <name value="location"/>
+        <source value="http://hl7.org/fhir/documentreference/search#location"/>
+        <type value="string"/>
+        <documentation value="Where to access the document"/>
+        <xpath value="DocumentReference.location"/>
+      </searchParam>
+      <searchParam>
+        <name value="indexed"/>
+        <source value="http://hl7.org/fhir/documentreference/search#indexed"/>
+        <type value="date"/>
+        <documentation value="When this document reference created"/>
+        <xpath value="DocumentReference.indexed"/>
+      </searchParam>
+      <searchParam>
+        <name value="status"/>
+        <source value="http://hl7.org/fhir/documentreference/search#status"/>
+        <type value="token"/>
+        <documentation value="current | superceded | entered in error"/>
+        <xpath value="DocumentReference.status"/>
+      </searchParam>
+      <searchParam>
+        <name value="subject"/>
+        <source value="http://hl7.org/fhir/documentreference/search#subject"/>
+        <type value="reference"/>
+        <documentation value="Who|what is the subject of the document"/>
+        <xpath value="DocumentReference.subject"/>
+      </searchParam>
+      <searchParam>
+        <name value="relatesto"/>
+        <source value="http://hl7.org/fhir/documentreference/search#relatesto"/>
+        <type value="reference"/>
+        <documentation value="Target of the relationship"/>
+        <xpath value="DocumentReference.relatesTo.target"/>
+      </searchParam>
+      <searchParam>
+        <name value="relation"/>
+        <source value="http://hl7.org/fhir/documentreference/search#relation"/>
+        <type value="token"/>
+        <documentation value="replaces | transforms | signs | appends"/>
+        <xpath value="DocumentReference.relatesTo.code"/>
+      </searchParam>
+      <searchParam>
+        <name value="class"/>
+        <source value="http://hl7.org/fhir/documentreference/search#class"/>
+        <type value="token"/>
+        <documentation value="Categorisation of Document"/>
+        <xpath value="DocumentReference.class"/>
+      </searchParam>
+      <searchParam>
+        <name value="format"/>
+        <source value="http://hl7.org/fhir/documentreference/search#format"/>
+        <type value="token"/>
+        <documentation value="Format/content rules for the document"/>
+        <xpath value="DocumentReference.format"/>
+      </searchParam>
+      <searchParam>
+        <name value="period"/>
+        <source value="http://hl7.org/fhir/documentreference/search#period"/>
+        <type value="date"/>
+        <documentation value="Time of service that is being documented"/>
+        <xpath value="DocumentReference.context.period"/>
+      </searchParam>
+      <searchParam>
+        <name value="type"/>
+        <source value="http://hl7.org/fhir/documentreference/search#type"/>
+        <type value="token"/>
+        <documentation value="What kind of document this is (LOINC if possible)"/>
+        <xpath value="DocumentReference.type"/>
+      </searchParam>
+      <searchParam>
+        <name value="authenticator"/>
+        <source value="http://hl7.org/fhir/documentreference/search#authenticator"/>
+        <type value="reference"/>
+        <documentation value="Who/What authenticated the document"/>
+        <xpath value="DocumentReference.authenticator"/>
+      </searchParam>
+      <searchParam>
+        <name value="size"/>
+        <source value="http://hl7.org/fhir/documentreference/search#size"/>
+        <type value="number"/>
+        <documentation value="Size of the document in bytes"/>
+        <xpath value="DocumentReference.size"/>
+      </searchParam>
+      <searchParam>
+        <name value="relationship"/>
+        <source value="http://hl7.org/fhir/documentreference/search#relationship"/>
+        <type value="composite"/>
+        <documentation value="Combination of relation and relatesTo"/>
+      </searchParam>
+      <searchParam>
+        <name value="author"/>
+        <source value="http://hl7.org/fhir/documentreference/search#author"/>
+        <type value="reference"/>
+        <documentation value="Who/what authored the document"/>
+        <xpath value="DocumentReference.author"/>
+      </searchParam>
+      <searchParam>
+        <name value="custodian"/>
+        <source value="http://hl7.org/fhir/documentreference/search#custodian"/>
+        <type value="reference"/>
+        <documentation value="Org which maintains the document"/>
+        <xpath value="DocumentReference.custodian"/>
+      </searchParam>
+      <searchParam>
+        <name value="facility"/>
+        <source value="http://hl7.org/fhir/documentreference/search#facility"/>
+        <type value="token"/>
+        <documentation value="Kind of facility where patient was seen"/>
+        <xpath value="DocumentReference.context.facilityType"/>
+      </searchParam>
+      <searchParam>
+        <name value="_id"/>
+        <source value="http://hl7.org/fhir/documentreference/search#_id"/>
+        <type value="token"/>
+        <documentation value="The logical resource id associated with the resource (must be supported by all servers)"/>
+      </searchParam>
+      <searchParam>
+        <name value="created"/>
+        <source value="http://hl7.org/fhir/documentreference/search#created"/>
+        <type value="date"/>
+        <documentation value="Document creation time"/>
+        <xpath value="DocumentReference.created"/>
+      </searchParam>
+      <searchParam>
+        <name value="event"/>
+        <source value="http://hl7.org/fhir/documentreference/search#event"/>
+        <type value="token"/>
+        <documentation value="Main Clinical Acts Documented"/>
+        <xpath value="DocumentReference.context.event"/>
+      </searchParam>
+      <searchParam>
+        <name value="confidentiality"/>
+        <source value="http://hl7.org/fhir/documentreference/search#confidentiality"/>
+        <type value="token"/>
+        <documentation value="Sensitivity of source document"/>
+        <xpath value="DocumentReference.confidentiality"/>
+      </searchParam>
+      <searchParam>
+        <name value="description"/>
+        <source value="http://hl7.org/fhir/documentreference/search#description"/>
+        <type value="string"/>
+        <documentation value="Human-readable description (title)"/>
+        <xpath value="DocumentReference.description"/>
+      </searchParam>
+      <searchParam>
+        <name value="language"/>
+        <source value="http://hl7.org/fhir/documentreference/search#language"/>
+        <type value="token"/>
+        <documentation value="The marked primary language for the document"/>
+        <xpath value="DocumentReference.primaryLanguage"/>
+      </searchParam>
+      <searchParam>
+        <name value="identifier"/>
+        <source value="http://hl7.org/fhir/documentreference/search#identifier"/>
+        <type value="token"/>
+        <documentation value="Master Version Specific Identifier"/>
+        <xpath value="DocumentReference.masterIdentifier,DocumentReference.identifier"/>
+      </searchParam>
+    </resource>
+    <resource>
+      <type value="Encounter"/>
+      <operation>
+        <code value="create"/>
+      </operation>
+      <operation>
+        <code value="delete"/>
+      </operation>
+      <operation>
+        <code value="history-instance"/>
+      </operation>
+      <operation>
+        <code value="history-type"/>
+      </operation>
+      <operation>
+        <code value="read"/>
+      </operation>
+      <operation>
+        <code value="search-type"/>
+      </operation>
+      <operation>
+        <code value="update"/>
+      </operation>
+      <operation>
+        <code value="validate"/>
+      </operation>
+      <operation>
+        <code value="vread"/>
+      </operation>
+      <readHistory value="true"/>
+      <searchInclude value="location"/>
+      <searchInclude value="subject"/>
+      <searchInclude value="indication"/>
+      <searchParam>
+        <name value="_id"/>
+        <source value="http://hl7.org/fhir/encounter/search#_id"/>
+        <type value="token"/>
+        <documentation value="The logical resource id associated with the resource (must be supported by all servers)"/>
+      </searchParam>
+      <searchParam>
+        <name value="location"/>
+        <source value="http://hl7.org/fhir/encounter/search#location"/>
+        <type value="reference"/>
+        <documentation value="The location the encounter takes place"/>
+        <xpath value="Encounter.location.location"/>
+      </searchParam>
+      <searchParam>
+        <name value="status"/>
+        <source value="http://hl7.org/fhir/encounter/search#status"/>
+        <type value="token"/>
+        <documentation value="planned | in progress | onleave | finished | cancelled"/>
+        <xpath value="Encounter.status"/>
+      </searchParam>
+      <searchParam>
+        <name value="subject"/>
+        <source value="http://hl7.org/fhir/encounter/search#subject"/>
+        <type value="reference"/>
+        <documentation value="The patient present at the encounter"/>
+        <xpath value="Encounter.subject"/>
+      </searchParam>
+      <searchParam>
+        <name value="indication"/>
+        <source value="http://hl7.org/fhir/encounter/search#indication"/>
+        <type value="reference"/>
+        <documentation value="Reason the encounter takes place (resource)"/>
+        <xpath value="Encounter.indication"/>
+      </searchParam>
+      <searchParam>
+        <name value="length"/>
+        <source value="http://hl7.org/fhir/encounter/search#length"/>
+        <type value="number"/>
+        <documentation value="Length of encounter in days"/>
+        <xpath value="Encounter.length"/>
+      </searchParam>
+      <searchParam>
+        <name value="date"/>
+        <source value="http://hl7.org/fhir/encounter/search#date"/>
+        <type value="date"/>
+        <documentation value="A date within the period the Encounter lasted"/>
+        <xpath value="Encounter.period"/>
+      </searchParam>
+      <searchParam>
+        <name value="identifier"/>
+        <source value="http://hl7.org/fhir/encounter/search#identifier"/>
+        <type value="token"/>
+        <documentation value="Identifier(s) by which this encounter is known"/>
+        <xpath value="Encounter.identifier"/>
+      </searchParam>
+      <searchParam>
+        <name value="location-period"/>
+        <source value="http://hl7.org/fhir/encounter/search#location-period"/>
+        <type value="date"/>
+        <documentation value="Time period during which the patient was present at the location"/>
+        <xpath value="Encounter.location.period"/>
+      </searchParam>
+    </resource>
+    <resource>
+      <type value="FamilyHistory"/>
+      <operation>
+        <code value="create"/>
+      </operation>
+      <operation>
+        <code value="delete"/>
+      </operation>
+      <operation>
+        <code value="history-instance"/>
+      </operation>
+      <operation>
+        <code value="history-type"/>
+      </operation>
+      <operation>
+        <code value="read"/>
+      </operation>
+      <operation>
+        <code value="search-type"/>
+      </operation>
+      <operation>
+        <code value="update"/>
+      </operation>
+      <operation>
+        <code value="validate"/>
+      </operation>
+      <operation>
+        <code value="vread"/>
+      </operation>
+      <readHistory value="true"/>
+      <searchInclude value="subject"/>
+      <searchParam>
+        <name value="_id"/>
+        <source value="http://hl7.org/fhir/familyhistory/search#_id"/>
+        <type value="token"/>
+        <documentation value="The logical resource id associated with the resource (must be supported by all servers)"/>
+      </searchParam>
+      <searchParam>
+        <name value="subject"/>
+        <source value="http://hl7.org/fhir/familyhistory/search#subject"/>
+        <type value="reference"/>
+        <documentation value="The identity of a subject to list family history items for"/>
+        <xpath value="FamilyHistory.subject"/>
+      </searchParam>
+    </resource>
+    <resource>
+      <type value="Group"/>
+      <operation>
+        <code value="create"/>
+      </operation>
+      <operation>
+        <code value="delete"/>
+      </operation>
+      <operation>
+        <code value="history-instance"/>
+      </operation>
+      <operation>
+        <code value="history-type"/>
+      </operation>
+      <operation>
+        <code value="read"/>
+      </operation>
+      <operation>
+        <code value="search-type"/>
+      </operation>
+      <operation>
+        <code value="update"/>
+      </operation>
+      <operation>
+        <code value="validate"/>
+      </operation>
+      <operation>
+        <code value="vread"/>
+      </operation>
+      <readHistory value="true"/>
+      <searchInclude value="member"/>
+      <searchParam>
+        <name value="member"/>
+        <source value="http://hl7.org/fhir/group/search#member"/>
+        <type value="reference"/>
+        <documentation value="Who is in group"/>
+        <xpath value="Group.member"/>
+      </searchParam>
+      <searchParam>
+        <name value="_id"/>
+        <source value="http://hl7.org/fhir/group/search#_id"/>
+        <type value="token"/>
+        <documentation value="The logical resource id associated with the resource (must be supported by all servers)"/>
+      </searchParam>
+      <searchParam>
+        <name value="characteristic-value"/>
+        <source value="http://hl7.org/fhir/group/search#characteristic-value"/>
+        <type value="composite"/>
+        <documentation value="A composite of both characteristic and value"/>
+      </searchParam>
+      <searchParam>
+        <name value="value"/>
+        <source value="http://hl7.org/fhir/group/search#value"/>
+        <type value="token"/>
+        <documentation value="Value held by characteristic"/>
+        <xpath value="Group.characteristic.value[x]"/>
+      </searchParam>
+      <searchParam>
+        <name value="actual"/>
+        <source value="http://hl7.org/fhir/group/search#actual"/>
+        <type value="token"/>
+        <documentation value="Descriptive or actual"/>
+        <xpath value="Group.actual"/>
+      </searchParam>
+      <searchParam>
+        <name value="exclude"/>
+        <source value="http://hl7.org/fhir/group/search#exclude"/>
+        <type value="token"/>
+        <documentation value="Group includes or excludes"/>
+        <xpath value="Group.characteristic.exclude"/>
+      </searchParam>
+      <searchParam>
+        <name value="code"/>
+        <source value="http://hl7.org/fhir/group/search#code"/>
+        <type value="token"/>
+        <documentation value="The kind of resources contained"/>
+        <xpath value="Group.code"/>
+      </searchParam>
+      <searchParam>
+        <name value="characteristic"/>
+        <source value="http://hl7.org/fhir/group/search#characteristic"/>
+        <type value="token"/>
+        <documentation value="Kind of characteristic"/>
+        <xpath value="Group.characteristic.code"/>
+      </searchParam>
+      <searchParam>
+        <name value="type"/>
+        <source value="http://hl7.org/fhir/group/search#type"/>
+        <type value="token"/>
+        <documentation value="The type of resources the group contains"/>
+        <xpath value="Group.type"/>
+      </searchParam>
+      <searchParam>
+        <name value="identifier"/>
+        <source value="http://hl7.org/fhir/group/search#identifier"/>
+        <type value="token"/>
+        <documentation value="Unique id"/>
+        <xpath value="Group.identifier"/>
+      </searchParam>
+    </resource>
+    <resource>
+      <type value="ImagingStudy"/>
+      <operation>
+        <code value="create"/>
+      </operation>
+      <operation>
+        <code value="delete"/>
+      </operation>
+      <operation>
+        <code value="history-instance"/>
+      </operation>
+      <operation>
+        <code value="history-type"/>
+      </operation>
+      <operation>
+        <code value="read"/>
+      </operation>
+      <operation>
+        <code value="search-type"/>
+      </operation>
+      <operation>
+        <code value="update"/>
+      </operation>
+      <operation>
+        <code value="validate"/>
+      </operation>
+      <operation>
+        <code value="vread"/>
+      </operation>
+      <readHistory value="true"/>
+      <searchInclude value="subject"/>
+      <searchParam>
+        <name value="uid"/>
+        <source value="http://hl7.org/fhir/imagingstudy/search#uid"/>
+        <type value="token"/>
+        <documentation value="Formal identifier for this instance (0008,0018)"/>
+        <xpath value="ImagingStudy.series.instance.uid"/>
+      </searchParam>
+      <searchParam>
+        <name value="series"/>
+        <source value="http://hl7.org/fhir/imagingstudy/search#series"/>
+        <type value="token"/>
+        <documentation value="The series id for the image"/>
+        <xpath value="ImagingStudy.series.uid"/>
+      </searchParam>
+      <searchParam>
+        <name value="_id"/>
+        <source value="http://hl7.org/fhir/imagingstudy/search#_id"/>
+        <type value="token"/>
+        <documentation value="The logical resource id associated with the resource (must be supported by all servers)"/>
+      </searchParam>
+      <searchParam>
+        <name value="bodysite"/>
+        <source value="http://hl7.org/fhir/imagingstudy/search#bodysite"/>
+        <type value="token"/>
+        <documentation value="Body part examined (Map from 0018,0015)"/>
+        <xpath value="ImagingStudy.series.bodySite"/>
+      </searchParam>
+      <searchParam>
+        <name value="subject"/>
+        <source value="http://hl7.org/fhir/imagingstudy/search#subject"/>
+        <type value="reference"/>
+        <documentation value="Who the study is about"/>
+        <xpath value="ImagingStudy.subject"/>
+      </searchParam>
+      <searchParam>
+        <name value="accession"/>
+        <source value="http://hl7.org/fhir/imagingstudy/search#accession"/>
+        <type value="token"/>
+        <documentation value="The accession id for the image"/>
+        <xpath value="ImagingStudy.accessionNo"/>
+      </searchParam>
+      <searchParam>
+        <name value="study"/>
+        <source value="http://hl7.org/fhir/imagingstudy/search#study"/>
+        <type value="token"/>
+        <documentation value="The study id for the image"/>
+        <xpath value="ImagingStudy.uid"/>
+      </searchParam>
+      <searchParam>
+        <name value="modality"/>
+        <source value="http://hl7.org/fhir/imagingstudy/search#modality"/>
+        <type value="token"/>
+        <documentation value="The modality of the image"/>
+        <xpath value="ImagingStudy.series.modality"/>
+      </searchParam>
+      <searchParam>
+        <name value="date"/>
+        <source value="http://hl7.org/fhir/imagingstudy/search#date"/>
+        <type value="date"/>
+        <documentation value="The date the study was done was taken"/>
+        <xpath value="ImagingStudy.dateTime"/>
+      </searchParam>
+      <searchParam>
+        <name value="dicom-class"/>
+        <source value="http://hl7.org/fhir/imagingstudy/search#dicom-class"/>
+        <type value="token"/>
+        <documentation value="DICOM class type (0008,0016)"/>
+        <xpath value="ImagingStudy.series.instance.sopclass"/>
+      </searchParam>
+      <searchParam>
+        <name value="size"/>
+        <source value="http://hl7.org/fhir/imagingstudy/search#size"/>
+        <type value="number"/>
+        <documentation value="The size of the image in MB - may include &gt; or &lt; in the value"/>
+      </searchParam>
+    </resource>
+    <resource>
+      <type value="Immunization"/>
+      <operation>
+        <code value="create"/>
+      </operation>
+      <operation>
+        <code value="delete"/>
+      </operation>
+      <operation>
+        <code value="history-instance"/>
+      </operation>
+      <operation>
+        <code value="history-type"/>
+      </operation>
+      <operation>
+        <code value="read"/>
+      </operation>
+      <operation>
+        <code value="search-type"/>
+      </operation>
+      <operation>
+        <code value="update"/>
+      </operation>
+      <operation>
+        <code value="validate"/>
+      </operation>
+      <operation>
+        <code value="vread"/>
+      </operation>
+      <readHistory value="true"/>
+      <searchInclude value="reaction"/>
+      <searchInclude value="requester"/>
+      <searchInclude value="location"/>
+      <searchInclude value="subject"/>
+      <searchInclude value="manufacturer"/>
+      <searchInclude value="performer"/>
+      <searchParam>
+        <name value="reaction"/>
+        <source value="http://hl7.org/fhir/immunization/search#reaction"/>
+        <type value="reference"/>
+        <documentation value="Additional information on reaction"/>
+        <xpath value="Immunization.reaction.detail"/>
+      </searchParam>
+      <searchParam>
+        <name value="requester"/>
+        <source value="http://hl7.org/fhir/immunization/search#requester"/>
+        <type value="reference"/>
+        <documentation value="The practitioner who ordered the vaccination"/>
+        <xpath value="Immunization.requester"/>
+      </searchParam>
+      <searchParam>
+        <name value="dose-sequence"/>
+        <source value="http://hl7.org/fhir/immunization/search#dose-sequence"/>
+        <type value="number"/>
+        <documentation value="What dose number within series?"/>
+        <xpath value="Immunization.vaccinationProtocol.doseSequence"/>
+      </searchParam>
+      <searchParam>
+        <name value="vaccine-type"/>
+        <source value="http://hl7.org/fhir/immunization/search#vaccine-type"/>
+        <type value="token"/>
+        <documentation value="Vaccine Product Type Administered"/>
+        <xpath value="Immunization.vaccineType"/>
+      </searchParam>
+      <searchParam>
+        <name value="location"/>
+        <source value="http://hl7.org/fhir/immunization/search#location"/>
+        <type value="reference"/>
+        <documentation value="The service delivery location or facility in which the vaccine was / was to be administered"/>
+        <xpath value="Immunization.location"/>
+      </searchParam>
+      <searchParam>
+        <name value="reason"/>
+        <source value="http://hl7.org/fhir/immunization/search#reason"/>
+        <type value="token"/>
+        <documentation value="Why immunization occurred"/>
+        <xpath value="Immunization.explanation.reason"/>
+      </searchParam>
+      <searchParam>
+        <name value="subject"/>
+        <source value="http://hl7.org/fhir/immunization/search#subject"/>
+        <type value="reference"/>
+        <documentation value="The subject of the vaccination event / refusal"/>
+        <xpath value="Immunization.subject"/>
+      </searchParam>
+      <searchParam>
+        <name value="reaction-date"/>
+        <source value="http://hl7.org/fhir/immunization/search#reaction-date"/>
+        <type value="date"/>
+        <documentation value="When did reaction start?"/>
+        <xpath value="Immunization.reaction.date"/>
+      </searchParam>
+      <searchParam>
+        <name value="date"/>
+        <source value="http://hl7.org/fhir/immunization/search#date"/>
+        <type value="date"/>
+        <documentation value="Vaccination  Administration / Refusal Date"/>
+        <xpath value="Immunization.date"/>
+      </searchParam>
+      <searchParam>
+        <name value="lot-number"/>
+        <source value="http://hl7.org/fhir/immunization/search#lot-number"/>
+        <type value="string"/>
+        <documentation value="Vaccine Lot Number"/>
+        <xpath value="Immunization.lotNumber"/>
+      </searchParam>
+      <searchParam>
+        <name value="_id"/>
+        <source value="http://hl7.org/fhir/immunization/search#_id"/>
+        <type value="token"/>
+        <documentation value="The logical resource id associated with the resource (must be supported by all servers)"/>
+      </searchParam>
+      <searchParam>
+        <name value="manufacturer"/>
+        <source value="http://hl7.org/fhir/immunization/search#manufacturer"/>
+        <type value="reference"/>
+        <documentation value="Vaccine Manufacturer"/>
+        <xpath value="Immunization.manufacturer"/>
+      </searchParam>
+      <searchParam>
+        <name value="performer"/>
+        <source value="http://hl7.org/fhir/immunization/search#performer"/>
+        <type value="reference"/>
+        <documentation value="The practitioner who administered the vaccination"/>
+        <xpath value="Immunization.performer"/>
+      </searchParam>
+      <searchParam>
+        <name value="refused"/>
+        <source value="http://hl7.org/fhir/immunization/search#refused"/>
+        <type value="token"/>
+        <documentation value="Was immunization refused?"/>
+        <xpath value="Immunization.refusedIndicator"/>
+      </searchParam>
+      <searchParam>
+        <name value="refusal-reason"/>
+        <source value="http://hl7.org/fhir/immunization/search#refusal-reason"/>
+        <type value="token"/>
+        <documentation value="Explanation of refusal / exemption"/>
+        <xpath value="Immunization.explanation.refusalReason"/>
+      </searchParam>
+      <searchParam>
+        <name value="identifier"/>
+        <source value="http://hl7.org/fhir/immunization/search#identifier"/>
+        <type value="token"/>
+        <documentation value="Business identifier"/>
+        <xpath value="Immunization.identifier"/>
+      </searchParam>
+    </resource>
+    <resource>
+      <type value="ImmunizationRecommendation"/>
+      <operation>
+        <code value="create"/>
+      </operation>
+      <operation>
+        <code value="delete"/>
+      </operation>
+      <operation>
+        <code value="history-instance"/>
+      </operation>
+      <operation>
+        <code value="history-type"/>
+      </operation>
+      <operation>
+        <code value="read"/>
+      </operation>
+      <operation>
+        <code value="search-type"/>
+      </operation>
+      <operation>
+        <code value="update"/>
+      </operation>
+      <operation>
+        <code value="validate"/>
+      </operation>
+      <operation>
+        <code value="vread"/>
+      </operation>
+      <readHistory value="true"/>
+      <searchInclude value="information"/>
+      <searchInclude value="support"/>
+      <searchInclude value="subject"/>
+      <searchParam>
+        <name value="information"/>
+        <source value="http://hl7.org/fhir/immunizationrecommendation/search#information"/>
+        <type value="reference"/>
+        <documentation value="Patient observations supporting recommendation"/>
+        <xpath value="ImmunizationRecommendation.recommendation.supportingPatientInformation"/>
+      </searchParam>
+      <searchParam>
+        <name value="dose-sequence"/>
+        <source value="http://hl7.org/fhir/immunizationrecommendation/search#dose-sequence"/>
+        <type value="token"/>
+        <documentation value="Number of dose within sequence"/>
+        <xpath value="ImmunizationRecommendation.recommendation.protocol.doseSequence"/>
+      </searchParam>
+      <searchParam>
+        <name value="support"/>
+        <source value="http://hl7.org/fhir/immunizationrecommendation/search#support"/>
+        <type value="reference"/>
+        <documentation value="Past immunizations supporting recommendation"/>
+        <xpath value="ImmunizationRecommendation.recommendation.supportingImmunization"/>
+      </searchParam>
+      <searchParam>
+        <name value="vaccine-type"/>
+        <source value="http://hl7.org/fhir/immunizationrecommendation/search#vaccine-type"/>
+        <type value="token"/>
+        <documentation value="Vaccine recommendation applies to"/>
+        <xpath value="ImmunizationRecommendation.recommendation.vaccineType"/>
+      </searchParam>
+      <searchParam>
+        <name value="_id"/>
+        <source value="http://hl7.org/fhir/immunizationrecommendation/search#_id"/>
+        <type value="token"/>
+        <documentation value="The logical resource id associated with the resource (must be supported by all servers)"/>
+      </searchParam>
+      <searchParam>
+        <name value="status"/>
+        <source value="http://hl7.org/fhir/immunizationrecommendation/search#status"/>
+        <type value="token"/>
+        <documentation value="Vaccine administration status"/>
+        <xpath value="ImmunizationRecommendation.recommendation.forecastStatus"/>
+      </searchParam>
+      <searchParam>
+        <name value="dose-number"/>
+        <source value="http://hl7.org/fhir/immunizationrecommendation/search#dose-number"/>
+        <type value="number"/>
+        <documentation value="Recommended dose number"/>
+        <xpath value="ImmunizationRecommendation.recommendation.doseNumber"/>
+      </searchParam>
+      <searchParam>
+        <name value="subject"/>
+        <source value="http://hl7.org/fhir/immunizationrecommendation/search#subject"/>
+        <type value="reference"/>
+        <documentation value="Who this profile is for"/>
+        <xpath value="ImmunizationRecommendation.subject"/>
+      </searchParam>
+      <searchParam>
+        <name value="date"/>
+        <source value="http://hl7.org/fhir/immunizationrecommendation/search#date"/>
+        <type value="date"/>
+        <documentation value="Date recommendation created"/>
+        <xpath value="ImmunizationRecommendation.recommendation.date"/>
+      </searchParam>
+      <searchParam>
+        <name value="identifier"/>
+        <source value="http://hl7.org/fhir/immunizationrecommendation/search#identifier"/>
+        <type value="token"/>
+        <documentation value="Business identifier"/>
+        <xpath value="ImmunizationRecommendation.identifier"/>
+      </searchParam>
+    </resource>
+    <resource>
+      <type value="List"/>
+      <operation>
+        <code value="create"/>
+      </operation>
+      <operation>
+        <code value="delete"/>
+      </operation>
+      <operation>
+        <code value="history-instance"/>
+      </operation>
+      <operation>
+        <code value="history-type"/>
+      </operation>
+      <operation>
+        <code value="read"/>
+      </operation>
+      <operation>
+        <code value="search-type"/>
+      </operation>
+      <operation>
+        <code value="update"/>
+      </operation>
+      <operation>
+        <code value="validate"/>
+      </operation>
+      <operation>
+        <code value="vread"/>
+      </operation>
+      <readHistory value="true"/>
+      <searchInclude value="source"/>
+      <searchInclude value="subject"/>
+      <searchInclude value="item"/>
+      <searchParam>
+        <name value="source"/>
+        <source value="http://hl7.org/fhir/list/search#source"/>
+        <type value="reference"/>
+        <documentation value="Who/what defined the list contents"/>
+        <xpath value="List.source"/>
+      </searchParam>
+      <searchParam>
+        <name value="_id"/>
+        <source value="http://hl7.org/fhir/list/search#_id"/>
+        <type value="token"/>
+        <documentation value="The logical resource id associated with the resource (must be supported by all servers)"/>
+      </searchParam>
+      <searchParam>
+        <name value="subject"/>
+        <source value="http://hl7.org/fhir/list/search#subject"/>
+        <type value="reference"/>
+        <documentation value="If all resources have the same subject"/>
+        <xpath value="List.subject"/>
+      </searchParam>
+      <searchParam>
+        <name value="item"/>
+        <source value="http://hl7.org/fhir/list/search#item"/>
+        <type value="reference"/>
+        <documentation value="Actual entry"/>
+        <xpath value="List.entry.item"/>
+      </searchParam>
+      <searchParam>
+        <name value="code"/>
+        <source value="http://hl7.org/fhir/list/search#code"/>
+        <type value="token"/>
+        <documentation value="What the purpose of this list is"/>
+        <xpath value="List.code"/>
+      </searchParam>
+      <searchParam>
+        <name value="date"/>
+        <source value="http://hl7.org/fhir/list/search#date"/>
+        <type value="date"/>
+        <documentation value="When the list was prepared"/>
+        <xpath value="List.date"/>
+      </searchParam>
+      <searchParam>
+        <name value="empty-reason"/>
+        <source value="http://hl7.org/fhir/list/search#empty-reason"/>
+        <type value="token"/>
+        <documentation value="Why list is empty"/>
+        <xpath value="List.emptyReason"/>
+      </searchParam>
+    </resource>
+    <resource>
+      <type value="Location"/>
+      <operation>
+        <code value="create"/>
+      </operation>
+      <operation>
+        <code value="delete"/>
+      </operation>
+      <operation>
+        <code value="history-instance"/>
+      </operation>
+      <operation>
+        <code value="history-type"/>
+      </operation>
+      <operation>
+        <code value="read"/>
+      </operation>
+      <operation>
+        <code value="search-type"/>
+      </operation>
+      <operation>
+        <code value="update"/>
+      </operation>
+      <operation>
+        <code value="validate"/>
+      </operation>
+      <operation>
+        <code value="vread"/>
+      </operation>
+      <readHistory value="true"/>
+      <searchInclude value="partof"/>
+      <searchParam>
+        <name value="near"/>
+        <source value="http://hl7.org/fhir/location/search#near"/>
+        <type value="token"/>
+        <documentation value="The coordinates expressed as [lat],[long] (using KML, see notes) to find locations near to (servers may search using a square rather than a circle for efficiency)"/>
+      </searchParam>
+      <searchParam>
+        <name value="partof"/>
+        <source value="http://hl7.org/fhir/location/search#partof"/>
+        <type value="reference"/>
+        <documentation value="The location of which this location is a part"/>
+        <xpath value="Location.partOf"/>
+      </searchParam>
+      <searchParam>
+        <name value="_id"/>
+        <source value="http://hl7.org/fhir/location/search#_id"/>
+        <type value="token"/>
+        <documentation value="The logical resource id associated with the resource (must be supported by all servers)"/>
+      </searchParam>
+      <searchParam>
+        <name value="status"/>
+        <source value="http://hl7.org/fhir/location/search#status"/>
+        <type value="token"/>
+        <documentation value="Searches for locations with a specific kind of status"/>
+        <xpath value="Location.status"/>
+      </searchParam>
+      <searchParam>
+        <name value="address"/>
+        <source value="http://hl7.org/fhir/location/search#address"/>
+        <type value="string"/>
+        <documentation value="A (part of the) address of the location"/>
+        <xpath value="Location.address"/>
+      </searchParam>
+      <searchParam>
+        <name value="name"/>
+        <source value="http://hl7.org/fhir/location/search#name"/>
+        <type value="string"/>
+        <documentation value="A (portion of the) name of the location"/>
+        <xpath value="Location.name"/>
+      </searchParam>
+      <searchParam>
+        <name value="near-distance"/>
+        <source value="http://hl7.org/fhir/location/search#near-distance"/>
+        <type value="token"/>
+        <documentation value="A distance quantity to limit the near search to locations within a specific distance"/>
+      </searchParam>
+      <searchParam>
+        <name value="type"/>
+        <source value="http://hl7.org/fhir/location/search#type"/>
+        <type value="token"/>
+        <documentation value="A code for the type of location"/>
+        <xpath value="Location.type"/>
+      </searchParam>
+      <searchParam>
+        <name value="identifier"/>
+        <source value="http://hl7.org/fhir/location/search#identifier"/>
+        <type value="token"/>
+        <documentation value="Unique code or number identifying the location to its users"/>
+        <xpath value="Location.identifier"/>
+      </searchParam>
+    </resource>
+    <resource>
+      <type value="Media"/>
+      <operation>
+        <code value="create"/>
+      </operation>
+      <operation>
+        <code value="delete"/>
+      </operation>
+      <operation>
+        <code value="history-instance"/>
+      </operation>
+      <operation>
+        <code value="history-type"/>
+      </operation>
+      <operation>
+        <code value="read"/>
+      </operation>
+      <operation>
+        <code value="search-type"/>
+      </operation>
+      <operation>
+        <code value="update"/>
+      </operation>
+      <operation>
+        <code value="validate"/>
+      </operation>
+      <operation>
+        <code value="vread"/>
+      </operation>
+      <readHistory value="true"/>
+      <searchInclude value="subject"/>
+      <searchInclude value="operator"/>
+      <searchParam>
+        <name value="_id"/>
+        <source value="http://hl7.org/fhir/media/search#_id"/>
+        <type value="token"/>
+        <documentation value="The logical resource id associated with the resource (must be supported by all servers)"/>
+      </searchParam>
+      <searchParam>
+        <name value="subject"/>
+        <source value="http://hl7.org/fhir/media/search#subject"/>
+        <type value="reference"/>
+        <documentation value="Who/What this Media is a record of"/>
+        <xpath value="Media.subject"/>
+      </searchParam>
+      <searchParam>
+        <name value="subtype"/>
+        <source value="http://hl7.org/fhir/media/search#subtype"/>
+        <type value="token"/>
+        <documentation value="The type of acquisition equipment/process"/>
+        <xpath value="Media.subtype"/>
+      </searchParam>
+      <searchParam>
+        <name value="view"/>
+        <source value="http://hl7.org/fhir/media/search#view"/>
+        <type value="token"/>
+        <documentation value="Imaging view e.g Lateral or Antero-posterior"/>
+        <xpath value="Media.view"/>
+      </searchParam>
+      <searchParam>
+        <name value="date"/>
+        <source value="http://hl7.org/fhir/media/search#date"/>
+        <type value="date"/>
+        <documentation value="When the media was taken/recorded (end)"/>
+        <xpath value="Media.dateTime"/>
+      </searchParam>
+      <searchParam>
+        <name value="type"/>
+        <source value="http://hl7.org/fhir/media/search#type"/>
+        <type value="token"/>
+        <documentation value="photo | video | audio"/>
+        <xpath value="Media.type"/>
+      </searchParam>
+      <searchParam>
+        <name value="identifier"/>
+        <source value="http://hl7.org/fhir/media/search#identifier"/>
+        <type value="token"/>
+        <documentation value="Identifier(s) for the image"/>
+        <xpath value="Media.identifier"/>
+      </searchParam>
+      <searchParam>
+        <name value="operator"/>
+        <source value="http://hl7.org/fhir/media/search#operator"/>
+        <type value="reference"/>
+        <documentation value="The person who generated the image"/>
+        <xpath value="Media.operator"/>
+      </searchParam>
+    </resource>
+    <resource>
+      <type value="Medication"/>
+      <operation>
+        <code value="create"/>
+      </operation>
+      <operation>
+        <code value="delete"/>
+      </operation>
+      <operation>
+        <code value="history-instance"/>
+      </operation>
+      <operation>
+        <code value="history-type"/>
+      </operation>
+      <operation>
+        <code value="read"/>
+      </operation>
+      <operation>
+        <code value="search-type"/>
+      </operation>
+      <operation>
+        <code value="update"/>
+      </operation>
+      <operation>
+        <code value="validate"/>
+      </operation>
+      <operation>
+        <code value="vread"/>
+      </operation>
+      <readHistory value="true"/>
+      <searchInclude value="content"/>
+      <searchInclude value="manufacturer"/>
+      <searchInclude value="ingredient"/>
+      <searchParam>
+        <name value="content"/>
+        <source value="http://hl7.org/fhir/medication/search#content"/>
+        <type value="reference"/>
+        <documentation value="A product in the package"/>
+        <xpath value="Medication.package.content.item"/>
+      </searchParam>
+      <searchParam>
+        <name value="form"/>
+        <source value="http://hl7.org/fhir/medication/search#form"/>
+        <type value="token"/>
+        <documentation value="powder | tablets | carton +"/>
+        <xpath value="Medication.product.form"/>
+      </searchParam>
+      <searchParam>
+        <name value="_id"/>
+        <source value="http://hl7.org/fhir/medication/search#_id"/>
+        <type value="token"/>
+        <documentation value="The logical resource id associated with the resource (must be supported by all servers)"/>
+      </searchParam>
+      <searchParam>
+        <name value="container"/>
+        <source value="http://hl7.org/fhir/medication/search#container"/>
+        <type value="token"/>
+        <documentation value="E.g. box, vial, blister-pack"/>
+        <xpath value="Medication.package.container"/>
+      </searchParam>
+      <searchParam>
+        <name value="manufacturer"/>
+        <source value="http://hl7.org/fhir/medication/search#manufacturer"/>
+        <type value="reference"/>
+        <documentation value="Manufacturer of the item"/>
+        <xpath value="Medication.manufacturer"/>
+      </searchParam>
+      <searchParam>
+        <name value="name"/>
+        <source value="http://hl7.org/fhir/medication/search#name"/>
+        <type value="string"/>
+        <documentation value="Common / Commercial name"/>
+        <xpath value="Medication.name"/>
+      </searchParam>
+      <searchParam>
+        <name value="ingredient"/>
+        <source value="http://hl7.org/fhir/medication/search#ingredient"/>
+        <type value="reference"/>
+        <documentation value="The product contained"/>
+        <xpath value="Medication.product.ingredient.item"/>
+      </searchParam>
+      <searchParam>
+        <name value="code"/>
+        <source value="http://hl7.org/fhir/medication/search#code"/>
+        <type value="token"/>
+        <documentation value="Codes that identify this medication"/>
+        <xpath value="Medication.code"/>
+      </searchParam>
+    </resource>
+    <resource>
+      <type value="MedicationAdministration"/>
+      <operation>
+        <code value="create"/>
+      </operation>
+      <operation>
+        <code value="delete"/>
+      </operation>
+      <operation>
+        <code value="history-instance"/>
+      </operation>
+      <operation>
+        <code value="history-type"/>
+      </operation>
+      <operation>
+        <code value="read"/>
+      </operation>
+      <operation>
+        <code value="search-type"/>
+      </operation>
+      <operation>
+        <code value="update"/>
+      </operation>
+      <operation>
+        <code value="validate"/>
+      </operation>
+      <operation>
+        <code value="vread"/>
+      </operation>
+      <readHistory value="true"/>
+      <searchInclude value="medication"/>
+      <searchInclude value="patient"/>
+      <searchInclude value="prescription"/>
+      <searchInclude value="device"/>
+      <searchInclude value="encounter"/>
+      <searchParam>
+        <name value="medication"/>
+        <source value="http://hl7.org/fhir/medicationadministration/search#medication"/>
+        <type value="reference"/>
+        <documentation value="Return administrations of this medication"/>
+        <xpath value="MedicationAdministration.medication"/>
+      </searchParam>
+      <searchParam>
+        <name value="patient"/>
+        <source value="http://hl7.org/fhir/medicationadministration/search#patient"/>
+        <type value="reference"/>
+        <documentation value="The identity of a patient to list administrations  for"/>
+        <xpath value="MedicationAdministration.patient"/>
+      </searchParam>
+      <searchParam>
+        <name value="_id"/>
+        <source value="http://hl7.org/fhir/medicationadministration/search#_id"/>
+        <type value="token"/>
+        <documentation value="The logical resource id associated with the resource (must be supported by all servers)"/>
+      </searchParam>
+      <searchParam>
+        <name value="status"/>
+        <source value="http://hl7.org/fhir/medicationadministration/search#status"/>
+        <type value="token"/>
+        <documentation value="MedicationAdministration event status (for example one of active/paused/completed/nullified)"/>
+        <xpath value="MedicationAdministration.status"/>
+      </searchParam>
+      <searchParam>
+        <name value="prescription"/>
+        <source value="http://hl7.org/fhir/medicationadministration/search#prescription"/>
+        <type value="reference"/>
+        <documentation value="The identity of a prescription to list administrations from"/>
+        <xpath value="MedicationAdministration.prescription"/>
+      </searchParam>
+      <searchParam>
+        <name value="device"/>
+        <source value="http://hl7.org/fhir/medicationadministration/search#device"/>
+        <type value="reference"/>
+        <documentation value="Return administrations with this administration device identity"/>
+        <xpath value="MedicationAdministration.device"/>
+      </searchParam>
+      <searchParam>
+        <name value="notgiven"/>
+        <source value="http://hl7.org/fhir/medicationadministration/search#notgiven"/>
+        <type value="token"/>
+        <documentation value="Administrations that were not made"/>
+        <xpath value="MedicationAdministration.wasNotGiven"/>
+      </searchParam>
+      <searchParam>
+        <name value="whengiven"/>
+        <source value="http://hl7.org/fhir/medicationadministration/search#whengiven"/>
+        <type value="date"/>
+        <documentation value="Date of administration"/>
+        <xpath value="MedicationAdministration.whenGiven"/>
+      </searchParam>
+      <searchParam>
+        <name value="encounter"/>
+        <source value="http://hl7.org/fhir/medicationadministration/search#encounter"/>
+        <type value="reference"/>
+        <documentation value="Return administrations that share this encounter"/>
+        <xpath value="MedicationAdministration.encounter"/>
+      </searchParam>
+      <searchParam>
+        <name value="identifier"/>
+        <source value="http://hl7.org/fhir/medicationadministration/search#identifier"/>
+        <type value="token"/>
+        <documentation value="Return administrations with this external identity"/>
+        <xpath value="MedicationAdministration.identifier"/>
+      </searchParam>
+    </resource>
+    <resource>
+      <type value="MedicationDispense"/>
+      <operation>
+        <code value="create"/>
+      </operation>
+      <operation>
+        <code value="delete"/>
+      </operation>
+      <operation>
+        <code value="history-instance"/>
+      </operation>
+      <operation>
+        <code value="history-type"/>
+      </operation>
+      <operation>
+        <code value="read"/>
+      </operation>
+      <operation>
+        <code value="search-type"/>
+      </operation>
+      <operation>
+        <code value="update"/>
+      </operation>
+      <operation>
+        <code value="validate"/>
+      </operation>
+      <operation>
+        <code value="vread"/>
+      </operation>
+      <readHistory value="true"/>
+      <searchInclude value="medication"/>
+      <searchInclude value="patient"/>
+      <searchInclude value="prescription"/>
+      <searchInclude value="responsibleparty"/>
+      <searchInclude value="dispenser"/>
+      <searchInclude value="destination"/>
+      <searchParam>
+        <name value="medication"/>
+        <source value="http://hl7.org/fhir/medicationdispense/search#medication"/>
+        <type value="reference"/>
+        <documentation value="Returns dispenses of this medicine"/>
+        <xpath value="MedicationDispense.dispense.medication"/>
+      </searchParam>
+      <searchParam>
+        <name value="patient"/>
+        <source value="http://hl7.org/fhir/medicationdispense/search#patient"/>
+        <type value="reference"/>
+        <documentation value="The identity of a patient to list dispenses  for"/>
+        <xpath value="MedicationDispense.patient"/>
+      </searchParam>
+      <searchParam>
+        <name value="_id"/>
+        <source value="http://hl7.org/fhir/medicationdispense/search#_id"/>
+        <type value="token"/>
+        <documentation value="The logical resource id associated with the resource (must be supported by all servers)"/>
+      </searchParam>
+      <searchParam>
+        <name value="status"/>
+        <source value="http://hl7.org/fhir/medicationdispense/search#status"/>
+        <type value="token"/>
+        <documentation value="Status of the dispense"/>
+        <xpath value="MedicationDispense.dispense.status"/>
+      </searchParam>
+      <searchParam>
+        <name value="prescription"/>
+        <source value="http://hl7.org/fhir/medicationdispense/search#prescription"/>
+        <type value="reference"/>
+        <documentation value="The identity of a prescription to list dispenses from"/>
+        <xpath value="MedicationDispense.authorizingPrescription"/>
+      </searchParam>
+      <searchParam>
+        <name value="responsibleparty"/>
+        <source value="http://hl7.org/fhir/medicationdispense/search#responsibleparty"/>
+        <type value="reference"/>
+        <documentation value="Return all dispenses with the specified responsibel party"/>
+        <xpath value="MedicationDispense.substitution.responsibleParty"/>
+      </searchParam>
+      <searchParam>
+        <name value="dispenser"/>
+        <source value="http://hl7.org/fhir/medicationdispense/search#dispenser"/>
+        <type value="reference"/>
+        <documentation value="Return all dispenses performed by a specific indiividual"/>
+        <xpath value="MedicationDispense.dispenser"/>
+      </searchParam>
+      <searchParam>
+        <name value="type"/>
+        <source value="http://hl7.org/fhir/medicationdispense/search#type"/>
+        <type value="token"/>
+        <documentation value="Return all dispenses of a specific type"/>
+        <xpath value="MedicationDispense.dispense.type"/>
+      </searchParam>
+      <searchParam>
+        <name value="identifier"/>
+        <source value="http://hl7.org/fhir/medicationdispense/search#identifier"/>
+        <type value="token"/>
+        <documentation value="Return dispenses with this external identity"/>
+        <xpath value="MedicationDispense.identifier"/>
+      </searchParam>
+      <searchParam>
+        <name value="whenprepared"/>
+        <source value="http://hl7.org/fhir/medicationdispense/search#whenprepared"/>
+        <type value="date"/>
+        <documentation value="Date when medication prepared"/>
+        <xpath value="MedicationDispense.dispense.whenPrepared"/>
+      </searchParam>
+      <searchParam>
+        <name value="whenhandedover"/>
+        <source value="http://hl7.org/fhir/medicationdispense/search#whenhandedover"/>
+        <type value="date"/>
+        <documentation value="Date when medication handed over to patient (outpatient setting), or supplied to ward or clinic (inpatient setting)"/>
+        <xpath value="MedicationDispense.dispense.whenHandedOver"/>
+      </searchParam>
+      <searchParam>
+        <name value="destination"/>
+        <source value="http://hl7.org/fhir/medicationdispense/search#destination"/>
+        <type value="reference"/>
+        <documentation value="Return dispenses that should be sent to a secific destination"/>
+        <xpath value="MedicationDispense.dispense.destination"/>
+      </searchParam>
+    </resource>
+    <resource>
+      <type value="MedicationPrescription"/>
+      <operation>
+        <code value="create"/>
+      </operation>
+      <operation>
+        <code value="delete"/>
+      </operation>
+      <operation>
+        <code value="history-instance"/>
+      </operation>
+      <operation>
+        <code value="history-type"/>
+      </operation>
+      <operation>
+        <code value="read"/>
+      </operation>
+      <operation>
+        <code value="search-type"/>
+      </operation>
+      <operation>
+        <code value="update"/>
+      </operation>
+      <operation>
+        <code value="validate"/>
+      </operation>
+      <operation>
+        <code value="vread"/>
+      </operation>
+      <readHistory value="true"/>
+      <searchInclude value="medication"/>
+      <searchInclude value="patient"/>
+      <searchInclude value="encounter"/>
+      <searchParam>
+        <name value="medication"/>
+        <source value="http://hl7.org/fhir/medicationprescription/search#medication"/>
+        <type value="reference"/>
+        <documentation value="Code for medicine or text in medicine name"/>
+        <xpath value="MedicationPrescription.medication"/>
+      </searchParam>
+      <searchParam>
+        <name value="datewritten"/>
+        <source value="http://hl7.org/fhir/medicationprescription/search#datewritten"/>
+        <type value="date"/>
+        <documentation value="Return prescriptions written on this date"/>
+        <xpath value="MedicationPrescription.dateWritten"/>
+      </searchParam>
+      <searchParam>
+        <name value="patient"/>
+        <source value="http://hl7.org/fhir/medicationprescription/search#patient"/>
+        <type value="reference"/>
+        <documentation value="The identity of a patient to list dispenses  for"/>
+        <xpath value="MedicationPrescription.patient"/>
+      </searchParam>
+      <searchParam>
+        <name value="_id"/>
+        <source value="http://hl7.org/fhir/medicationprescription/search#_id"/>
+        <type value="token"/>
+        <documentation value="The logical resource id associated with the resource (must be supported by all servers)"/>
+      </searchParam>
+      <searchParam>
+        <name value="status"/>
+        <source value="http://hl7.org/fhir/medicationprescription/search#status"/>
+        <type value="token"/>
+        <documentation value="Status of the prescription"/>
+        <xpath value="MedicationPrescription.status"/>
+      </searchParam>
+      <searchParam>
+        <name value="encounter"/>
+        <source value="http://hl7.org/fhir/medicationprescription/search#encounter"/>
+        <type value="reference"/>
+        <documentation value="Return prescriptions with this encounter identity"/>
+        <xpath value="MedicationPrescription.encounter"/>
+      </searchParam>
+      <searchParam>
+        <name value="identifier"/>
+        <source value="http://hl7.org/fhir/medicationprescription/search#identifier"/>
+        <type value="token"/>
+        <documentation value="Return prescriptions with this external identity"/>
+        <xpath value="MedicationPrescription.identifier"/>
+      </searchParam>
+    </resource>
+    <resource>
+      <type value="MedicationStatement"/>
+      <operation>
+        <code value="create"/>
+      </operation>
+      <operation>
+        <code value="delete"/>
+      </operation>
+      <operation>
+        <code value="history-instance"/>
+      </operation>
+      <operation>
+        <code value="history-type"/>
+      </operation>
+      <operation>
+        <code value="read"/>
+      </operation>
+      <operation>
+        <code value="search-type"/>
+      </operation>
+      <operation>
+        <code value="update"/>
+      </operation>
+      <operation>
+        <code value="validate"/>
+      </operation>
+      <operation>
+        <code value="vread"/>
+      </operation>
+      <readHistory value="true"/>
+      <searchInclude value="medication"/>
+      <searchInclude value="patient"/>
+      <searchInclude value="device"/>
+      <searchParam>
+        <name value="medication"/>
+        <source value="http://hl7.org/fhir/medicationstatement/search#medication"/>
+        <type value="reference"/>
+        <documentation value="Code for medicine or text in medicine name"/>
+        <xpath value="MedicationStatement.medication"/>
+      </searchParam>
+      <searchParam>
+        <name value="patient"/>
+        <source value="http://hl7.org/fhir/medicationstatement/search#patient"/>
+        <type value="reference"/>
+        <documentation value="The identity of a patient to list administrations  for"/>
+        <xpath value="MedicationStatement.patient"/>
+      </searchParam>
+      <searchParam>
+        <name value="_id"/>
+        <source value="http://hl7.org/fhir/medicationstatement/search#_id"/>
+        <type value="token"/>
+        <documentation value="The logical resource id associated with the resource (must be supported by all servers)"/>
+      </searchParam>
+      <searchParam>
+        <name value="device"/>
+        <source value="http://hl7.org/fhir/medicationstatement/search#device"/>
+        <type value="reference"/>
+        <documentation value="Return administrations with this administration device identity"/>
+        <xpath value="MedicationStatement.device"/>
+      </searchParam>
+      <searchParam>
+        <name value="when-given"/>
+        <source value="http://hl7.org/fhir/medicationstatement/search#when-given"/>
+        <type value="date"/>
+        <documentation value="Date of administration"/>
+        <xpath value="MedicationStatement.whenGiven"/>
+      </searchParam>
+      <searchParam>
+        <name value="identifier"/>
+        <source value="http://hl7.org/fhir/medicationstatement/search#identifier"/>
+        <type value="token"/>
+        <documentation value="Return administrations with this external identity"/>
+        <xpath value="MedicationStatement.identifier"/>
+      </searchParam>
+    </resource>
+    <resource>
+      <type value="MessageHeader"/>
+      <operation>
+        <code value="create"/>
+      </operation>
+      <operation>
+        <code value="delete"/>
+      </operation>
+      <operation>
+        <code value="history-instance"/>
+      </operation>
+      <operation>
+        <code value="history-type"/>
+      </operation>
+      <operation>
+        <code value="read"/>
+      </operation>
+      <operation>
+        <code value="search-type"/>
+      </operation>
+      <operation>
+        <code value="update"/>
+      </operation>
+      <operation>
+        <code value="validate"/>
+      </operation>
+      <operation>
+        <code value="vread"/>
+      </operation>
+      <readHistory value="true"/>
+      <searchParam>
+        <name value="_id"/>
+        <source value="http://hl7.org/fhir/messageheader/search#_id"/>
+        <type value="token"/>
+        <documentation value="The logical resource id associated with the resource (must be supported by all servers)"/>
+      </searchParam>
+    </resource>
+    <resource>
+      <type value="Observation"/>
+      <operation>
+        <code value="create"/>
+      </operation>
+      <operation>
+        <code value="delete"/>
+      </operation>
+      <operation>
+        <code value="history-instance"/>
+      </operation>
+      <operation>
+        <code value="history-type"/>
+      </operation>
+      <operation>
+        <code value="read"/>
+      </operation>
+      <operation>
+        <code value="search-type"/>
+      </operation>
+      <operation>
+        <code value="update"/>
+      </operation>
+      <operation>
+        <code value="validate"/>
+      </operation>
+      <operation>
+        <code value="vread"/>
+      </operation>
+      <readHistory value="true"/>
+      <searchInclude value="subject"/>
+      <searchInclude value="specimen"/>
+      <searchInclude value="performer"/>
+      <searchParam>
+        <name value="_id"/>
+        <source value="http://hl7.org/fhir/observation/search#_id"/>
+        <type value="token"/>
+        <documentation value="The logical resource id associated with the resource (must be supported by all servers)"/>
+      </searchParam>
+      <searchParam>
+        <name value="status"/>
+        <source value="http://hl7.org/fhir/observation/search#status"/>
+        <type value="token"/>
+        <documentation value="The status of the observation"/>
+        <xpath value="Observation.status"/>
+      </searchParam>
+      <searchParam>
+        <name value="subject"/>
+        <source value="http://hl7.org/fhir/observation/search#subject"/>
+        <type value="reference"/>
+        <documentation value="The subject that the observation is about"/>
+        <xpath value="Observation.subject"/>
+      </searchParam>
+      <searchParam>
+        <name value="specimen"/>
+        <source value="http://hl7.org/fhir/observation/search#specimen"/>
+        <type value="reference"/>
+        <documentation value="Specimen used for this observation"/>
+        <xpath value="Observation.specimen"/>
+      </searchParam>
+      <searchParam>
+        <name value="name"/>
+        <source value="http://hl7.org/fhir/observation/search#name"/>
+        <type value="token"/>
+        <documentation value="The name of the observation type"/>
+        <xpath value="Observation.name"/>
+      </searchParam>
+      <searchParam>
+        <name value="reliability"/>
+        <source value="http://hl7.org/fhir/observation/search#reliability"/>
+        <type value="token"/>
+        <documentation value="The reliability of the observation"/>
+        <xpath value="Observation.reliability"/>
+      </searchParam>
+      <searchParam>
+        <name value="value"/>
+        <source value="http://hl7.org/fhir/observation/search#value"/>
+        <type value="token"/>
+        <documentation value="The code or value of a result"/>
+        <xpath value="Observation.value[x]"/>
+      </searchParam>
+      <searchParam>
+        <name value="performer"/>
+        <source value="http://hl7.org/fhir/observation/search#performer"/>
+        <type value="reference"/>
+        <documentation value="Who/what performed the observation"/>
+        <xpath value="Observation.performer"/>
+      </searchParam>
+      <searchParam>
+        <name value="name-value"/>
+        <source value="http://hl7.org/fhir/observation/search#name-value"/>
+        <type value="composite"/>
+        <documentation value="Both name and value"/>
+      </searchParam>
+      <searchParam>
+        <name value="date"/>
+        <source value="http://hl7.org/fhir/observation/search#date"/>
+        <type value="date"/>
+        <documentation value="Obtained date/time. If the obtained element is a period, a date that falls in the period"/>
+        <xpath value="Observation.applies[x]"/>
+      </searchParam>
+    </resource>
+    <resource>
+      <type value="OperationOutcome"/>
+      <operation>
+        <code value="create"/>
+      </operation>
+      <operation>
+        <code value="delete"/>
+      </operation>
+      <operation>
+        <code value="history-instance"/>
+      </operation>
+      <operation>
+        <code value="history-type"/>
+      </operation>
+      <operation>
+        <code value="read"/>
+      </operation>
+      <operation>
+        <code value="search-type"/>
+      </operation>
+      <operation>
+        <code value="update"/>
+      </operation>
+      <operation>
+        <code value="validate"/>
+      </operation>
+      <operation>
+        <code value="vread"/>
+      </operation>
+      <readHistory value="true"/>
+      <searchParam>
+        <name value="_id"/>
+        <source value="http://hl7.org/fhir/operationoutcome/search#_id"/>
+        <type value="token"/>
+        <documentation value="The logical resource id associated with the resource (must be supported by all servers)"/>
+      </searchParam>
+    </resource>
+    <resource>
+      <type value="Order"/>
+      <operation>
+        <code value="create"/>
+      </operation>
+      <operation>
+        <code value="delete"/>
+      </operation>
+      <operation>
+        <code value="history-instance"/>
+      </operation>
+      <operation>
+        <code value="history-type"/>
+      </operation>
+      <operation>
+        <code value="read"/>
+      </operation>
+      <operation>
+        <code value="search-type"/>
+      </operation>
+      <operation>
+        <code value="update"/>
+      </operation>
+      <operation>
+        <code value="validate"/>
+      </operation>
+      <operation>
+        <code value="vread"/>
+      </operation>
+      <readHistory value="true"/>
+      <searchInclude value="authority"/>
+      <searchInclude value="detail"/>
+      <searchInclude value="source"/>
+      <searchInclude value="subject"/>
+      <searchInclude value="target"/>
+      <searchParam>
+        <name value="authority"/>
+        <source value="http://hl7.org/fhir/order/search#authority"/>
+        <type value="reference"/>
+        <documentation value="If required by policy"/>
+        <xpath value="Order.authority"/>
+      </searchParam>
+      <searchParam>
+        <name value="detail"/>
+        <source value="http://hl7.org/fhir/order/search#detail"/>
+        <type value="reference"/>
+        <documentation value="What action is being ordered"/>
+        <xpath value="Order.detail"/>
+      </searchParam>
+      <searchParam>
+        <name value="source"/>
+        <source value="http://hl7.org/fhir/order/search#source"/>
+        <type value="reference"/>
+        <documentation value="Who initiated the order"/>
+        <xpath value="Order.source"/>
+      </searchParam>
+      <searchParam>
+        <name value="_id"/>
+        <source value="http://hl7.org/fhir/order/search#_id"/>
+        <type value="token"/>
+        <documentation value="The logical resource id associated with the resource (must be supported by all servers)"/>
+      </searchParam>
+      <searchParam>
+        <name value="subject"/>
+        <source value="http://hl7.org/fhir/order/search#subject"/>
+        <type value="reference"/>
+        <documentation value="Patient this order is about"/>
+        <xpath value="Order.subject"/>
+      </searchParam>
+      <searchParam>
+        <name value="when"/>
+        <source value="http://hl7.org/fhir/order/search#when"/>
+        <type value="date"/>
+        <documentation value="A formal schedule"/>
+        <xpath value="Order.when.schedule"/>
+      </searchParam>
+      <searchParam>
+        <name value="target"/>
+        <source value="http://hl7.org/fhir/order/search#target"/>
+        <type value="reference"/>
+        <documentation value="Who is intended to fulfill the order"/>
+        <xpath value="Order.target"/>
+      </searchParam>
+      <searchParam>
+        <name value="when_code"/>
+        <source value="http://hl7.org/fhir/order/search#when_code"/>
+        <type value="token"/>
+        <documentation value="Code specifies when request should be done. The code may simply be a priority code"/>
+        <xpath value="Order.when.code"/>
+      </searchParam>
+      <searchParam>
+        <name value="date"/>
+        <source value="http://hl7.org/fhir/order/search#date"/>
+        <type value="date"/>
+        <documentation value="When the order was made"/>
+        <xpath value="Order.date"/>
+      </searchParam>
+    </resource>
+    <resource>
+      <type value="OrderResponse"/>
+      <operation>
+        <code value="create"/>
+      </operation>
+      <operation>
+        <code value="delete"/>
+      </operation>
+      <operation>
+        <code value="history-instance"/>
+      </operation>
+      <operation>
+        <code value="history-type"/>
+      </operation>
+      <operation>
+        <code value="read"/>
+      </operation>
+      <operation>
+        <code value="search-type"/>
+      </operation>
+      <operation>
+        <code value="update"/>
+      </operation>
+      <operation>
+        <code value="validate"/>
+      </operation>
+      <operation>
+        <code value="vread"/>
+      </operation>
+      <readHistory value="true"/>
+      <searchInclude value="fulfillment"/>
+      <searchInclude value="request"/>
+      <searchInclude value="who"/>
+      <searchParam>
+        <name value="_id"/>
+        <source value="http://hl7.org/fhir/orderresponse/search#_id"/>
+        <type value="token"/>
+        <documentation value="The logical resource id associated with the resource (must be supported by all servers)"/>
+      </searchParam>
+      <searchParam>
+        <name value="fulfillment"/>
+        <source value="http://hl7.org/fhir/orderresponse/search#fulfillment"/>
+        <type value="reference"/>
+        <documentation value="Details of the outcome of performing the order"/>
+        <xpath value="OrderResponse.fulfillment"/>
+      </searchParam>
+      <searchParam>
+        <name value="request"/>
+        <source value="http://hl7.org/fhir/orderresponse/search#request"/>
+        <type value="reference"/>
+        <documentation value="The order that this is a response to"/>
+        <xpath value="OrderResponse.request"/>
+      </searchParam>
+      <searchParam>
+        <name value="code"/>
+        <source value="http://hl7.org/fhir/orderresponse/search#code"/>
+        <type value="token"/>
+        <documentation value="pending | review | rejected | error | accepted | cancelled | replaced | aborted | complete"/>
+        <xpath value="OrderResponse.code"/>
+      </searchParam>
+      <searchParam>
+        <name value="date"/>
+        <source value="http://hl7.org/fhir/orderresponse/search#date"/>
+        <type value="date"/>
+        <documentation value="When the response was made"/>
+        <xpath value="OrderResponse.date"/>
+      </searchParam>
+      <searchParam>
+        <name value="who"/>
+        <source value="http://hl7.org/fhir/orderresponse/search#who"/>
+        <type value="reference"/>
+        <documentation value="Who made the response"/>
+        <xpath value="OrderResponse.who"/>
+      </searchParam>
+    </resource>
+    <resource>
+      <type value="Organization"/>
+      <operation>
+        <code value="create"/>
+      </operation>
+      <operation>
+        <code value="delete"/>
+      </operation>
+      <operation>
+        <code value="history-instance"/>
+      </operation>
+      <operation>
+        <code value="history-type"/>
+      </operation>
+      <operation>
+        <code value="read"/>
+      </operation>
+      <operation>
+        <code value="search-type"/>
+      </operation>
+      <operation>
+        <code value="update"/>
+      </operation>
+      <operation>
+        <code value="validate"/>
+      </operation>
+      <operation>
+        <code value="vread"/>
+      </operation>
+      <readHistory value="true"/>
+      <searchInclude value="partof"/>
+      <searchParam>
+        <name value="phonetic"/>
+        <source value="http://hl7.org/fhir/organization/search#phonetic"/>
+        <type value="string"/>
+        <documentation value="A portion of the organization's name using some kind of phonetic matching algorithm"/>
+      </searchParam>
+      <searchParam>
+        <name value="partof"/>
+        <source value="http://hl7.org/fhir/organization/search#partof"/>
+        <type value="reference"/>
+        <documentation value="Search all organizations that are part of the given organization"/>
+        <xpath value="Organization.partOf"/>
+      </searchParam>
+      <searchParam>
+        <name value="_id"/>
+        <source value="http://hl7.org/fhir/organization/search#_id"/>
+        <type value="token"/>
+        <documentation value="The logical resource id associated with the resource (must be supported by all servers)"/>
+      </searchParam>
+      <searchParam>
+        <name value="name"/>
+        <source value="http://hl7.org/fhir/organization/search#name"/>
+        <type value="string"/>
+        <documentation value="A portion of the organization's name"/>
+        <xpath value="Organization.name"/>
+      </searchParam>
+      <searchParam>
+        <name value="active"/>
+        <source value="http://hl7.org/fhir/organization/search#active"/>
+        <type value="token"/>
+        <documentation value="Whether the organization's record is active"/>
+        <xpath value="Organization.active"/>
+      </searchParam>
+      <searchParam>
+        <name value="type"/>
+        <source value="http://hl7.org/fhir/organization/search#type"/>
+        <type value="token"/>
+        <documentation value="A code for the type of organization"/>
+        <xpath value="Organization.type"/>
+      </searchParam>
+      <searchParam>
+        <name value="identifier"/>
+        <source value="http://hl7.org/fhir/organization/search#identifier"/>
+        <type value="token"/>
+        <documentation value="Any identifier for the organization (not the accreditation issuer's identifier)"/>
+        <xpath value="Organization.identifier"/>
+      </searchParam>
+    </resource>
+    <resource>
+      <type value="Other"/>
+      <operation>
+        <code value="create"/>
+      </operation>
+      <operation>
+        <code value="delete"/>
+      </operation>
+      <operation>
+        <code value="history-instance"/>
+      </operation>
+      <operation>
+        <code value="history-type"/>
+      </operation>
+      <operation>
+        <code value="read"/>
+      </operation>
+      <operation>
+        <code value="search-type"/>
+      </operation>
+      <operation>
+        <code value="update"/>
+      </operation>
+      <operation>
+        <code value="validate"/>
+      </operation>
+      <operation>
+        <code value="vread"/>
+      </operation>
+      <readHistory value="true"/>
+      <searchInclude value="subject"/>
+      <searchParam>
+        <name value="_id"/>
+        <source value="http://hl7.org/fhir/other/search#_id"/>
+        <type value="token"/>
+        <documentation value="The logical resource id associated with the resource (must be supported by all servers)"/>
+      </searchParam>
+      <searchParam>
+        <name value="created"/>
+        <source value="http://hl7.org/fhir/other/search#created"/>
+        <type value="date"/>
+        <documentation value="When created"/>
+        <xpath value="Other.created"/>
+      </searchParam>
+      <searchParam>
+        <name value="subject"/>
+        <source value="http://hl7.org/fhir/other/search#subject"/>
+        <type value="reference"/>
+        <documentation value="Identifies the"/>
+        <xpath value="Other.subject"/>
+      </searchParam>
+      <searchParam>
+        <name value="code"/>
+        <source value="http://hl7.org/fhir/other/search#code"/>
+        <type value="token"/>
+        <documentation value="Kind of Resource"/>
+        <xpath value="Other.code"/>
+      </searchParam>
+    </resource>
+    <resource>
+      <type value="Patient"/>
+      <operation>
+        <code value="create"/>
+      </operation>
+      <operation>
+        <code value="delete"/>
+      </operation>
+      <operation>
+        <code value="history-instance"/>
+      </operation>
+      <operation>
+        <code value="history-type"/>
+      </operation>
+      <operation>
+        <code value="read"/>
+      </operation>
+      <operation>
+        <code value="search-type"/>
+      </operation>
+      <operation>
+        <code value="update"/>
+      </operation>
+      <operation>
+        <code value="validate"/>
+      </operation>
+      <operation>
+        <code value="vread"/>
+      </operation>
+      <readHistory value="true"/>
+      <searchInclude value="link"/>
+      <searchInclude value="provider"/>
+      <searchParam>
+        <name value="animal-breed"/>
+        <source value="http://hl7.org/fhir/patient/search#animal-breed"/>
+        <type value="token"/>
+        <documentation value="The breed for animal patients"/>
+        <xpath value="Patient.animal.breed"/>
+      </searchParam>
+      <searchParam>
+        <name value="phonetic"/>
+        <source value="http://hl7.org/fhir/patient/search#phonetic"/>
+        <type value="string"/>
+        <documentation value="A portion of either family or given name using some kind of phonetic matching algorithm"/>
+      </searchParam>
+      <searchParam>
+        <name value="link"/>
+        <source value="http://hl7.org/fhir/patient/search#link"/>
+        <type value="reference"/>
+        <documentation value="All patients linked to the given patient"/>
+        <xpath value="Patient.link.other"/>
+      </searchParam>
+      <searchParam>
+        <name value="provider"/>
+        <source value="http://hl7.org/fhir/patient/search#provider"/>
+        <type value="reference"/>
+        <documentation value="The organization at which this person is a patient"/>
+        <xpath value="Patient.managingOrganization"/>
+      </searchParam>
+      <searchParam>
+        <name value="animal-species"/>
+        <source value="http://hl7.org/fhir/patient/search#animal-species"/>
+        <type value="token"/>
+        <documentation value="The species for animal patients"/>
+        <xpath value="Patient.animal.species"/>
+      </searchParam>
+      <searchParam>
+        <name value="_id"/>
+        <source value="http://hl7.org/fhir/patient/search#_id"/>
+        <type value="token"/>
+        <documentation value="The logical resource id associated with the resource (must be supported by all servers)"/>
+      </searchParam>
+      <searchParam>
+        <name value="given"/>
+        <source value="http://hl7.org/fhir/patient/search#given"/>
+        <type value="string"/>
+        <documentation value="A portion of the given name of the patient"/>
+        <xpath value="Patient.name.given"/>
+      </searchParam>
+      <searchParam>
+        <name value="address"/>
+        <source value="http://hl7.org/fhir/patient/search#address"/>
+        <type value="string"/>
+        <documentation value="An address in any kind of address/part of the patient"/>
+        <xpath value="Patient.address"/>
+      </searchParam>
+      <searchParam>
+        <name value="family"/>
+        <source value="http://hl7.org/fhir/patient/search#family"/>
+        <type value="string"/>
+        <documentation value="A portion of the family name of the patient"/>
+        <xpath value="Patient.name.family"/>
+      </searchParam>
+      <searchParam>
+        <name value="name"/>
+        <source value="http://hl7.org/fhir/patient/search#name"/>
+        <type value="string"/>
+        <documentation value="A portion of either family or given name of the patient"/>
+        <xpath value="Patient.name"/>
+      </searchParam>
+      <searchParam>
+        <name value="telecom"/>
+        <source value="http://hl7.org/fhir/patient/search#telecom"/>
+        <type value="string"/>
+        <documentation value="The value in any kind of telecom details of the patient"/>
+        <xpath value="Patient.telecom"/>
+      </searchParam>
+      <searchParam>
+        <name value="birthdate"/>
+        <source value="http://hl7.org/fhir/patient/search#birthdate"/>
+        <type value="date"/>
+        <documentation value="The patient's date of birth"/>
+        <xpath value="Patient.birthDate"/>
+      </searchParam>
+      <searchParam>
+        <name value="active"/>
+        <source value="http://hl7.org/fhir/patient/search#active"/>
+        <type value="token"/>
+        <documentation value="Whether the patient record is active"/>
+        <xpath value="Patient.active"/>
+      </searchParam>
+      <searchParam>
+        <name value="gender"/>
+        <source value="http://hl7.org/fhir/patient/search#gender"/>
+        <type value="token"/>
+        <documentation value="Gender of the patient"/>
+        <xpath value="Patient.gender"/>
+      </searchParam>
+      <searchParam>
+        <name value="language"/>
+        <source value="http://hl7.org/fhir/patient/search#language"/>
+        <type value="token"/>
+        <documentation value="Language code (irrespective of use value)"/>
+        <xpath value="Patient.communication"/>
+      </searchParam>
+      <searchParam>
+        <name value="identifier"/>
+        <source value="http://hl7.org/fhir/patient/search#identifier"/>
+        <type value="token"/>
+        <documentation value="A patient identifier"/>
+        <xpath value="Patient.identifier"/>
+      </searchParam>
+    </resource>
+    <resource>
+      <type value="Practitioner"/>
+      <operation>
+        <code value="create"/>
+      </operation>
+      <operation>
+        <code value="delete"/>
+      </operation>
+      <operation>
+        <code value="history-instance"/>
+      </operation>
+      <operation>
+        <code value="history-type"/>
+      </operation>
+      <operation>
+        <code value="read"/>
+      </operation>
+      <operation>
+        <code value="search-type"/>
+      </operation>
+      <operation>
+        <code value="update"/>
+      </operation>
+      <operation>
+        <code value="validate"/>
+      </operation>
+      <operation>
+        <code value="vread"/>
+      </operation>
+      <readHistory value="true"/>
+      <searchInclude value="organization"/>
+      <searchParam>
+        <name value="organization"/>
+        <source value="http://hl7.org/fhir/practitioner/search#organization"/>
+        <type value="reference"/>
+        <documentation value="The identity of the organization the practitioner represents / acts on behalf of"/>
+        <xpath value="Practitioner.organization"/>
+      </searchParam>
+      <searchParam>
+        <name value="phonetic"/>
+        <source value="http://hl7.org/fhir/practitioner/search#phonetic"/>
+        <type value="string"/>
+        <documentation value="A portion of either family or given name using some kind of phonetic matching algorithm"/>
+        <xpath value="Practitioner.name"/>
+      </searchParam>
+      <searchParam>
+        <name value="given"/>
+        <source value="http://hl7.org/fhir/practitioner/search#given"/>
+        <type value="string"/>
+        <documentation value="A portion of the given name"/>
+        <xpath value="Practitioner.name"/>
+      </searchParam>
+      <searchParam>
+        <name value="_id"/>
+        <source value="http://hl7.org/fhir/practitioner/search#_id"/>
+        <type value="token"/>
+        <documentation value="The logical resource id associated with the resource (must be supported by all servers)"/>
+      </searchParam>
+      <searchParam>
+        <name value="address"/>
+        <source value="http://hl7.org/fhir/practitioner/search#address"/>
+        <type value="string"/>
+        <documentation value="An address in any kind of address/part"/>
+        <xpath value="Practitioner.address"/>
+      </searchParam>
+      <searchParam>
+        <name value="family"/>
+        <source value="http://hl7.org/fhir/practitioner/search#family"/>
+        <type value="string"/>
+        <documentation value="A portion of the family name"/>
+        <xpath value="Practitioner.name"/>
+      </searchParam>
+      <searchParam>
+        <name value="name"/>
+        <source value="http://hl7.org/fhir/practitioner/search#name"/>
+        <type value="string"/>
+        <documentation value="A portion of either family or given name"/>
+        <xpath value="Practitioner.name"/>
+      </searchParam>
+      <searchParam>
+        <name value="telecom"/>
+        <source value="http://hl7.org/fhir/practitioner/search#telecom"/>
+        <type value="string"/>
+        <documentation value="The value in any kind of contact"/>
+        <xpath value="Practitioner.telecom"/>
+      </searchParam>
+      <searchParam>
+        <name value="gender"/>
+        <source value="http://hl7.org/fhir/practitioner/search#gender"/>
+        <type value="token"/>
+        <documentation value="Gender of the practitioner"/>
+        <xpath value="Practitioner.gender"/>
+      </searchParam>
+      <searchParam>
+        <name value="identifier"/>
+        <source value="http://hl7.org/fhir/practitioner/search#identifier"/>
+        <type value="token"/>
+        <documentation value="A practitioner's Identifier"/>
+        <xpath value="Practitioner.identifier"/>
+      </searchParam>
+    </resource>
+    <resource>
+      <type value="Procedure"/>
+      <operation>
+        <code value="create"/>
+      </operation>
+      <operation>
+        <code value="delete"/>
+      </operation>
+      <operation>
+        <code value="history-instance"/>
+      </operation>
+      <operation>
+        <code value="history-type"/>
+      </operation>
+      <operation>
+        <code value="read"/>
+      </operation>
+      <operation>
+        <code value="search-type"/>
+      </operation>
+      <operation>
+        <code value="update"/>
+      </operation>
+      <operation>
+        <code value="validate"/>
+      </operation>
+      <operation>
+        <code value="vread"/>
+      </operation>
+      <readHistory value="true"/>
+      <searchInclude value="subject"/>
+      <searchParam>
+        <name value="_id"/>
+        <source value="http://hl7.org/fhir/procedure/search#_id"/>
+        <type value="token"/>
+        <documentation value="The logical resource id associated with the resource (must be supported by all servers)"/>
+      </searchParam>
+      <searchParam>
+        <name value="subject"/>
+        <source value="http://hl7.org/fhir/procedure/search#subject"/>
+        <type value="reference"/>
+        <documentation value="The identity of a patient to list procedures  for"/>
+        <xpath value="Procedure.subject"/>
+      </searchParam>
+      <searchParam>
+        <name value="date"/>
+        <source value="http://hl7.org/fhir/procedure/search#date"/>
+        <type value="date"/>
+        <documentation value="The date the procedure was performed on"/>
+        <xpath value="Procedure.date"/>
+      </searchParam>
+      <searchParam>
+        <name value="type"/>
+        <source value="http://hl7.org/fhir/procedure/search#type"/>
+        <type value="token"/>
+        <documentation value="Type of procedure"/>
+        <xpath value="Procedure.type"/>
+      </searchParam>
+    </resource>
+    <resource>
+      <type value="Profile"/>
+      <operation>
+        <code value="create"/>
+      </operation>
+      <operation>
+        <code value="delete"/>
+      </operation>
+      <operation>
+        <code value="history-instance"/>
+      </operation>
+      <operation>
+        <code value="history-type"/>
+      </operation>
+      <operation>
+        <code value="read"/>
+      </operation>
+      <operation>
+        <code value="search-type"/>
+      </operation>
+      <operation>
+        <code value="update"/>
+      </operation>
+      <operation>
+        <code value="validate"/>
+      </operation>
+      <operation>
+        <code value="vread"/>
+      </operation>
+      <readHistory value="true"/>
+      <searchInclude value="valueset"/>
+      <searchParam>
+        <name value="extension"/>
+        <source value="http://hl7.org/fhir/profile/search#extension"/>
+        <type value="token"/>
+        <documentation value="An extension code (use or definition)"/>
+        <xpath value="Profile.extensionDefn.code"/>
+      </searchParam>
+      <searchParam>
+        <name value="_id"/>
+        <source value="http://hl7.org/fhir/profile/search#_id"/>
+        <type value="token"/>
+        <documentation value="The logical resource id associated with the resource (must be supported by all servers)"/>
+      </searchParam>
+      <searchParam>
+        <name value="valueset"/>
+        <source value="http://hl7.org/fhir/profile/search#valueset"/>
+        <type value="reference"/>
+        <documentation value="A vocabulary binding code"/>
+        <xpath value="Profile.structure.element.definition.binding.reference[x]"/>
+      </searchParam>
+      <searchParam>
+        <name value="status"/>
+        <source value="http://hl7.org/fhir/profile/search#status"/>
+        <type value="token"/>
+        <documentation value="The current status of the profile"/>
+        <xpath value="Profile.status"/>
+      </searchParam>
+      <searchParam>
+        <name value="description"/>
+        <source value="http://hl7.org/fhir/profile/search#description"/>
+        <type value="string"/>
+        <documentation value="Text search in the description of the profile"/>
+        <xpath value="Profile.description"/>
+      </searchParam>
+      <searchParam>
+        <name value="name"/>
+        <source value="http://hl7.org/fhir/profile/search#name"/>
+        <type value="string"/>
+        <documentation value="Name of the profile"/>
+        <xpath value="Profile.name"/>
+      </searchParam>
+      <searchParam>
+        <name value="code"/>
+        <source value="http://hl7.org/fhir/profile/search#code"/>
+        <type value="token"/>
+        <documentation value="A code for the profile in the format uri::code (server may choose to do subsumption)"/>
+        <xpath value="Profile.code"/>
+      </searchParam>
+      <searchParam>
+        <name value="type"/>
+        <source value="http://hl7.org/fhir/profile/search#type"/>
+        <type value="token"/>
+        <documentation value="Type of resource that is constrained in the profile"/>
+        <xpath value="Profile.structure.type"/>
+      </searchParam>
+      <searchParam>
+        <name value="date"/>
+        <source value="http://hl7.org/fhir/profile/search#date"/>
+        <type value="date"/>
+        <documentation value="The profile publication date"/>
+        <xpath value="Profile.date"/>
+      </searchParam>
+      <searchParam>
+        <name value="identifier"/>
+        <source value="http://hl7.org/fhir/profile/search#identifier"/>
+        <type value="token"/>
+        <documentation value="The identifier of the profile"/>
+        <xpath value="Profile.identifier"/>
+      </searchParam>
+      <searchParam>
+        <name value="publisher"/>
+        <source value="http://hl7.org/fhir/profile/search#publisher"/>
+        <type value="string"/>
+        <documentation value="Name of the publisher of the profile"/>
+        <xpath value="Profile.publisher"/>
+      </searchParam>
+      <searchParam>
+        <name value="version"/>
+        <source value="http://hl7.org/fhir/profile/search#version"/>
+        <type value="token"/>
+        <documentation value="The version identifier of the profile"/>
+        <xpath value="Profile.version"/>
+      </searchParam>
+    </resource>
+    <resource>
+      <type value="Provenance"/>
+      <operation>
+        <code value="create"/>
+      </operation>
+      <operation>
+        <code value="delete"/>
+      </operation>
+      <operation>
+        <code value="history-instance"/>
+      </operation>
+      <operation>
+        <code value="history-type"/>
+      </operation>
+      <operation>
+        <code value="read"/>
+      </operation>
+      <operation>
+        <code value="search-type"/>
+      </operation>
+      <operation>
+        <code value="update"/>
+      </operation>
+      <operation>
+        <code value="validate"/>
+      </operation>
+      <operation>
+        <code value="vread"/>
+      </operation>
+      <readHistory value="true"/>
+      <searchInclude value="location"/>
+      <searchInclude value="target"/>
+      <searchParam>
+        <name value="_id"/>
+        <source value="http://hl7.org/fhir/provenance/search#_id"/>
+        <type value="token"/>
+        <documentation value="The logical resource id associated with the resource (must be supported by all servers)"/>
+      </searchParam>
+      <searchParam>
+        <name value="location"/>
+        <source value="http://hl7.org/fhir/provenance/search#location"/>
+        <type value="reference"/>
+        <documentation value="Where the activity occurred, if relevant"/>
+        <xpath value="Provenance.location"/>
+      </searchParam>
+      <searchParam>
+        <name value="start"/>
+        <source value="http://hl7.org/fhir/provenance/search#start"/>
+        <type value="date"/>
+        <documentation value="Starting time with inclusive boundary"/>
+        <xpath value="Provenance.period.start"/>
+      </searchParam>
+      <searchParam>
+        <name value="partytype"/>
+        <source value="http://hl7.org/fhir/provenance/search#partytype"/>
+        <type value="token"/>
+        <documentation value="e.g. Resource | Person | Application | Record | Document +"/>
+        <xpath value="Provenance.agent.type"/>
+      </searchParam>
+      <searchParam>
+        <name value="target"/>
+        <source value="http://hl7.org/fhir/provenance/search#target"/>
+        <type value="reference"/>
+        <documentation value="Target resource(s) (usually version specific)"/>
+        <xpath value="Provenance.target"/>
+      </searchParam>
+      <searchParam>
+        <name value="party"/>
+        <source value="http://hl7.org/fhir/provenance/search#party"/>
+        <type value="token"/>
+        <documentation value="Identity of agent (urn or url)"/>
+        <xpath value="Provenance.agent.reference"/>
+      </searchParam>
+      <searchParam>
+        <name value="end"/>
+        <source value="http://hl7.org/fhir/provenance/search#end"/>
+        <type value="date"/>
+        <documentation value="End time with inclusive boundary, if not ongoing"/>
+        <xpath value="Provenance.period.end"/>
+      </searchParam>
+    </resource>
+    <resource>
+      <type value="Query"/>
+      <operation>
+        <code value="create"/>
+      </operation>
+      <operation>
+        <code value="delete"/>
+      </operation>
+      <operation>
+        <code value="history-instance"/>
+      </operation>
+      <operation>
+        <code value="history-type"/>
+      </operation>
+      <operation>
+        <code value="read"/>
+      </operation>
+      <operation>
+        <code value="search-type"/>
+      </operation>
+      <operation>
+        <code value="update"/>
+      </operation>
+      <operation>
+        <code value="validate"/>
+      </operation>
+      <operation>
+        <code value="vread"/>
+      </operation>
+      <readHistory value="true"/>
+      <searchParam>
+        <name value="response"/>
+        <source value="http://hl7.org/fhir/query/search#response"/>
+        <type value="token"/>
+        <documentation value="Links response to source query"/>
+        <xpath value="Query.response.identifier"/>
+      </searchParam>
+      <searchParam>
+        <name value="_id"/>
+        <source value="http://hl7.org/fhir/query/search#_id"/>
+        <type value="token"/>
+        <documentation value="The logical resource id associated with the resource (must be supported by all servers)"/>
+      </searchParam>
+      <searchParam>
+        <name value="identifier"/>
+        <source value="http://hl7.org/fhir/query/search#identifier"/>
+        <type value="token"/>
+        <documentation value="Links query and its response(s)"/>
+        <xpath value="Query.identifier"/>
+      </searchParam>
+    </resource>
+    <resource>
+      <type value="Questionnaire"/>
+      <operation>
+        <code value="create"/>
+      </operation>
+      <operation>
+        <code value="delete"/>
+      </operation>
+      <operation>
+        <code value="history-instance"/>
+      </operation>
+      <operation>
+        <code value="history-type"/>
+      </operation>
+      <operation>
+        <code value="read"/>
+      </operation>
+      <operation>
+        <code value="search-type"/>
+      </operation>
+      <operation>
+        <code value="update"/>
+      </operation>
+      <operation>
+        <code value="validate"/>
+      </operation>
+      <operation>
+        <code value="vread"/>
+      </operation>
+      <readHistory value="true"/>
+      <searchInclude value="author"/>
+      <searchInclude value="subject"/>
+      <searchInclude value="encounter"/>
+      <searchParam>
+        <name value="author"/>
+        <source value="http://hl7.org/fhir/questionnaire/search#author"/>
+        <type value="reference"/>
+        <documentation value="The author of the questionnaire"/>
+        <xpath value="Questionnaire.author"/>
+      </searchParam>
+      <searchParam>
+        <name value="authored"/>
+        <source value="http://hl7.org/fhir/questionnaire/search#authored"/>
+        <type value="date"/>
+        <documentation value="When the questionnaire was authored"/>
+        <xpath value="Questionnaire.authored"/>
+      </searchParam>
+      <searchParam>
+        <name value="_id"/>
+        <source value="http://hl7.org/fhir/questionnaire/search#_id"/>
+        <type value="token"/>
+        <documentation value="The logical resource id associated with the resource (must be supported by all servers)"/>
+      </searchParam>
+      <searchParam>
+        <name value="status"/>
+        <source value="http://hl7.org/fhir/questionnaire/search#status"/>
+        <type value="token"/>
+        <documentation value="The status of the questionnaire"/>
+        <xpath value="Questionnaire.status"/>
+      </searchParam>
+      <searchParam>
+        <name value="subject"/>
+        <source value="http://hl7.org/fhir/questionnaire/search#subject"/>
+        <type value="reference"/>
+        <documentation value="The subject of the questionnaire"/>
+        <xpath value="Questionnaire.subject"/>
+      </searchParam>
+      <searchParam>
+        <name value="name"/>
+        <source value="http://hl7.org/fhir/questionnaire/search#name"/>
+        <type value="token"/>
+        <documentation value="Name of the questionnaire"/>
+        <xpath value="Questionnaire.name"/>
+      </searchParam>
+      <searchParam>
+        <name value="encounter"/>
+        <source value="http://hl7.org/fhir/questionnaire/search#encounter"/>
+        <type value="reference"/>
+        <documentation value="Encounter during which questionnaire was authored"/>
+        <xpath value="Questionnaire.encounter"/>
+      </searchParam>
+      <searchParam>
+        <name value="identifier"/>
+        <source value="http://hl7.org/fhir/questionnaire/search#identifier"/>
+        <type value="token"/>
+        <documentation value="An identifier for the questionnaire"/>
+        <xpath value="Questionnaire.identifier"/>
+      </searchParam>
+    </resource>
+    <resource>
+      <type value="RelatedPerson"/>
+      <operation>
+        <code value="create"/>
+      </operation>
+      <operation>
+        <code value="delete"/>
+      </operation>
+      <operation>
+        <code value="history-instance"/>
+      </operation>
+      <operation>
+        <code value="history-type"/>
+      </operation>
+      <operation>
+        <code value="read"/>
+      </operation>
+      <operation>
+        <code value="search-type"/>
+      </operation>
+      <operation>
+        <code value="update"/>
+      </operation>
+      <operation>
+        <code value="validate"/>
+      </operation>
+      <operation>
+        <code value="vread"/>
+      </operation>
+      <readHistory value="true"/>
+      <searchInclude value="patient"/>
+      <searchParam>
+        <name value="patient"/>
+        <source value="http://hl7.org/fhir/relatedperson/search#patient"/>
+        <type value="reference"/>
+        <documentation value="The patient this person is related to"/>
+        <xpath value="RelatedPerson.patient"/>
+      </searchParam>
+      <searchParam>
+        <name value="phonetic"/>
+        <source value="http://hl7.org/fhir/relatedperson/search#phonetic"/>
+        <type value="string"/>
+        <documentation value="A portion of name using some kind of phonetic matching algorithm"/>
+      </searchParam>
+      <searchParam>
+        <name value="_id"/>
+        <source value="http://hl7.org/fhir/relatedperson/search#_id"/>
+        <type value="token"/>
+        <documentation value="The logical resource id associated with the resource (must be supported by all servers)"/>
+      </searchParam>
+      <searchParam>
+        <name value="address"/>
+        <source value="http://hl7.org/fhir/relatedperson/search#address"/>
+        <type value="string"/>
+        <documentation value="An address in any kind of address/part"/>
+        <xpath value="RelatedPerson.address"/>
+      </searchParam>
+      <searchParam>
+        <name value="name"/>
+        <source value="http://hl7.org/fhir/relatedperson/search#name"/>
+        <type value="string"/>
+        <documentation value="A portion of name in any name part"/>
+        <xpath value="RelatedPerson.name"/>
+      </searchParam>
+      <searchParam>
+        <name value="telecom"/>
+        <source value="http://hl7.org/fhir/relatedperson/search#telecom"/>
+        <type value="string"/>
+        <documentation value="The value in any kind of contact"/>
+        <xpath value="RelatedPerson.telecom"/>
+      </searchParam>
+      <searchParam>
+        <name value="gender"/>
+        <source value="http://hl7.org/fhir/relatedperson/search#gender"/>
+        <type value="token"/>
+        <documentation value="Gender of the person"/>
+        <xpath value="RelatedPerson.gender"/>
+      </searchParam>
+      <searchParam>
+        <name value="identifier"/>
+        <source value="http://hl7.org/fhir/relatedperson/search#identifier"/>
+        <type value="token"/>
+        <documentation value="A patient Identifier"/>
+        <xpath value="RelatedPerson.identifier"/>
+      </searchParam>
+    </resource>
+    <resource>
+      <type value="SecurityEvent"/>
+      <operation>
+        <code value="create"/>
+      </operation>
+      <operation>
+        <code value="delete"/>
+      </operation>
+      <operation>
+        <code value="history-instance"/>
+      </operation>
+      <operation>
+        <code value="history-type"/>
+      </operation>
+      <operation>
+        <code value="read"/>
+      </operation>
+      <operation>
+        <code value="search-type"/>
+      </operation>
+      <operation>
+        <code value="update"/>
+      </operation>
+      <operation>
+        <code value="validate"/>
+      </operation>
+      <operation>
+        <code value="vread"/>
+      </operation>
+      <readHistory value="true"/>
+      <searchInclude value="reference"/>
+      <searchParam>
+        <name value="site"/>
+        <source value="http://hl7.org/fhir/securityevent/search#site"/>
+        <type value="token"/>
+        <documentation value="Logical source location within the enterprise"/>
+        <xpath value="SecurityEvent.source.site"/>
+      </searchParam>
+      <searchParam>
+        <name value="desc"/>
+        <source value="http://hl7.org/fhir/securityevent/search#desc"/>
+        <type value="string"/>
+        <documentation value="Instance-specific descriptor for Object"/>
+        <xpath value="SecurityEvent.object.name"/>
+      </searchParam>
+      <searchParam>
+        <name value="type"/>
+        <source value="http://hl7.org/fhir/securityevent/search#type"/>
+        <type value="token"/>
+        <documentation value="Type/identifier of event"/>
+        <xpath value="SecurityEvent.event.type"/>
+      </searchParam>
+      <searchParam>
+        <name value="date"/>
+        <source value="http://hl7.org/fhir/securityevent/search#date"/>
+        <type value="date"/>
+        <documentation value="Time when the event occurred on source"/>
+        <xpath value="SecurityEvent.event.dateTime"/>
+      </searchParam>
+      <searchParam>
+        <name value="reference"/>
+        <source value="http://hl7.org/fhir/securityevent/search#reference"/>
+        <type value="reference"/>
+        <documentation value="Specific instance of resource (e.g. versioned)"/>
+        <xpath value="SecurityEvent.object.reference"/>
+      </searchParam>
+      <searchParam>
+        <name value="identity"/>
+        <source value="http://hl7.org/fhir/securityevent/search#identity"/>
+        <type value="token"/>
+        <documentation value="Specific instance of object (e.g. versioned)"/>
+        <xpath value="SecurityEvent.object.identifier"/>
+      </searchParam>
+      <searchParam>
+        <name value="altid"/>
+        <source value="http://hl7.org/fhir/securityevent/search#altid"/>
+        <type value="token"/>
+        <documentation value="Alternative User id e.g. authentication"/>
+        <xpath value="SecurityEvent.participant.altId"/>
+      </searchParam>
+      <searchParam>
+        <name value="patientid"/>
+        <source value="http://hl7.org/fhir/securityevent/search#patientid"/>
+        <type value="token"/>
+        <documentation value="The id of the patient (one of multiple kinds of participations)"/>
+      </searchParam>
+      <searchParam>
+        <name value="_id"/>
+        <source value="http://hl7.org/fhir/securityevent/search#_id"/>
+        <type value="token"/>
+        <documentation value="The logical resource id associated with the resource (must be supported by all servers)"/>
+      </searchParam>
+      <searchParam>
+        <name value="source"/>
+        <source value="http://hl7.org/fhir/securityevent/search#source"/>
+        <type value="token"/>
+        <documentation value="The id of source where event originated"/>
+        <xpath value="SecurityEvent.source.identifier"/>
+      </searchParam>
+      <searchParam>
+        <name value="address"/>
+        <source value="http://hl7.org/fhir/securityevent/search#address"/>
+        <type value="token"/>
+        <documentation value="Identifier for the network access point of the user device"/>
+        <xpath value="SecurityEvent.participant.network.identifier"/>
+      </searchParam>
+      <searchParam>
+        <name value="subtype"/>
+        <source value="http://hl7.org/fhir/securityevent/search#subtype"/>
+        <type value="token"/>
+        <documentation value="More specific type/id for the event"/>
+        <xpath value="SecurityEvent.event.subtype"/>
+      </searchParam>
+      <searchParam>
+        <name value="name"/>
+        <source value="http://hl7.org/fhir/securityevent/search#name"/>
+        <type value="string"/>
+        <documentation value="Human-meaningful name for the user"/>
+        <xpath value="SecurityEvent.participant.name"/>
+      </searchParam>
+      <searchParam>
+        <name value="action"/>
+        <source value="http://hl7.org/fhir/securityevent/search#action"/>
+        <type value="token"/>
+        <documentation value="Type of action performed during the event"/>
+        <xpath value="SecurityEvent.event.action"/>
+      </searchParam>
+      <searchParam>
+        <name value="object-type"/>
+        <source value="http://hl7.org/fhir/securityevent/search#object-type"/>
+        <type value="token"/>
+        <documentation value="Object type being audited"/>
+        <xpath value="SecurityEvent.object.type"/>
+      </searchParam>
+      <searchParam>
+        <name value="user"/>
+        <source value="http://hl7.org/fhir/securityevent/search#user"/>
+        <type value="token"/>
+        <documentation value="Unique identifier for the user"/>
+        <xpath value="SecurityEvent.participant.userId"/>
+      </searchParam>
+    </resource>
+    <resource>
+      <type value="Slot"/>
+      <operation>
+        <code value="create"/>
+      </operation>
+      <operation>
+        <code value="delete"/>
+      </operation>
+      <operation>
+        <code value="history-instance"/>
+      </operation>
+      <operation>
+        <code value="history-type"/>
+      </operation>
+      <operation>
+        <code value="read"/>
+      </operation>
+      <operation>
+        <code value="search-type"/>
+      </operation>
+      <operation>
+        <code value="update"/>
+      </operation>
+      <operation>
+        <code value="validate"/>
+      </operation>
+      <operation>
+        <code value="vread"/>
+      </operation>
+      <readHistory value="true"/>
+      <searchInclude value="availability"/>
+      <searchParam>
+        <name value="_id"/>
+        <source value="http://hl7.org/fhir/slot/search#_id"/>
+        <type value="token"/>
+        <documentation value="The logical resource id associated with the resource (must be supported by all servers)"/>
+      </searchParam>
+      <searchParam>
+        <name value="start"/>
+        <source value="http://hl7.org/fhir/slot/search#start"/>
+        <type value="date"/>
+        <documentation value="Appointment date/time."/>
+        <xpath value="Slot.start"/>
+      </searchParam>
+      <searchParam>
+        <name value="slottype"/>
+        <source value="http://hl7.org/fhir/slot/search#slottype"/>
+        <type value="token"/>
+        <documentation value="The type of appointments that can be booked into the slot"/>
+        <xpath value="Slot.type"/>
+      </searchParam>
+      <searchParam>
+        <name value="fbtype"/>
+        <source value="http://hl7.org/fhir/slot/search#fbtype"/>
+        <type value="token"/>
+        <documentation value="The free/busy status of the appointment"/>
+        <xpath value="Slot.freeBusyType"/>
+      </searchParam>
+      <searchParam>
+        <name value="availability"/>
+        <source value="http://hl7.org/fhir/slot/search#availability"/>
+        <type value="reference"/>
+        <documentation value="The Availability Resource that we are seeking a slot within"/>
+        <xpath value="Slot.availability"/>
+      </searchParam>
+    </resource>
+    <resource>
+      <type value="Specimen"/>
+      <operation>
+        <code value="create"/>
+      </operation>
+      <operation>
+        <code value="delete"/>
+      </operation>
+      <operation>
+        <code value="history-instance"/>
+      </operation>
+      <operation>
+        <code value="history-type"/>
+      </operation>
+      <operation>
+        <code value="read"/>
+      </operation>
+      <operation>
+        <code value="search-type"/>
+      </operation>
+      <operation>
+        <code value="update"/>
+      </operation>
+      <operation>
+        <code value="validate"/>
+      </operation>
+      <operation>
+        <code value="vread"/>
+      </operation>
+      <readHistory value="true"/>
+      <searchInclude value="subject"/>
+      <searchParam>
+        <name value="_id"/>
+        <source value="http://hl7.org/fhir/specimen/search#_id"/>
+        <type value="token"/>
+        <documentation value="The logical resource id associated with the resource (must be supported by all servers)"/>
+      </searchParam>
+      <searchParam>
+        <name value="subject"/>
+        <source value="http://hl7.org/fhir/specimen/search#subject"/>
+        <type value="reference"/>
+        <documentation value="The subject of the specimen"/>
+        <xpath value="Specimen.subject"/>
+      </searchParam>
+    </resource>
+    <resource>
+      <type value="Substance"/>
+      <operation>
+        <code value="create"/>
+      </operation>
+      <operation>
+        <code value="delete"/>
+      </operation>
+      <operation>
+        <code value="history-instance"/>
+      </operation>
+      <operation>
+        <code value="history-type"/>
+      </operation>
+      <operation>
+        <code value="read"/>
+      </operation>
+      <operation>
+        <code value="search-type"/>
+      </operation>
+      <operation>
+        <code value="update"/>
+      </operation>
+      <operation>
+        <code value="validate"/>
+      </operation>
+      <operation>
+        <code value="vread"/>
+      </operation>
+      <readHistory value="true"/>
+      <searchInclude value="substance"/>
+      <searchParam>
+        <name value="substance"/>
+        <source value="http://hl7.org/fhir/substance/search#substance"/>
+        <type value="reference"/>
+        <documentation value="A component of the substance"/>
+        <xpath value="Substance.ingredient.substance"/>
+      </searchParam>
+      <searchParam>
+        <name value="_id"/>
+        <source value="http://hl7.org/fhir/substance/search#_id"/>
+        <type value="token"/>
+        <documentation value="The logical resource id associated with the resource (must be supported by all servers)"/>
+      </searchParam>
+      <searchParam>
+        <name value="quantity"/>
+        <source value="http://hl7.org/fhir/substance/search#quantity"/>
+        <type value="number"/>
+        <documentation value="Amount of substance in the package"/>
+        <xpath value="Substance.instance.quantity"/>
+      </searchParam>
+      <searchParam>
+        <name value="type"/>
+        <source value="http://hl7.org/fhir/substance/search#type"/>
+        <type value="token"/>
+        <documentation value="The type of the substance"/>
+        <xpath value="Substance.type"/>
+      </searchParam>
+      <searchParam>
+        <name value="identifier"/>
+        <source value="http://hl7.org/fhir/substance/search#identifier"/>
+        <type value="token"/>
+        <documentation value="Identifier of the package/container"/>
+        <xpath value="Substance.instance.identifier"/>
+      </searchParam>
+      <searchParam>
+        <name value="expiry"/>
+        <source value="http://hl7.org/fhir/substance/search#expiry"/>
+        <type value="date"/>
+        <documentation value="When no longer valid to use"/>
+        <xpath value="Substance.instance.expiry"/>
+      </searchParam>
+    </resource>
+    <resource>
+      <type value="Supply"/>
+      <operation>
+        <code value="create"/>
+      </operation>
+      <operation>
+        <code value="delete"/>
+      </operation>
+      <operation>
+        <code value="history-instance"/>
+      </operation>
+      <operation>
+        <code value="history-type"/>
+      </operation>
+      <operation>
+        <code value="read"/>
+      </operation>
+      <operation>
+        <code value="search-type"/>
+      </operation>
+      <operation>
+        <code value="update"/>
+      </operation>
+      <operation>
+        <code value="validate"/>
+      </operation>
+      <operation>
+        <code value="vread"/>
+      </operation>
+      <readHistory value="true"/>
+      <searchInclude value="patient"/>
+      <searchInclude value="supplier"/>
+      <searchParam>
+        <name value="patient"/>
+        <source value="http://hl7.org/fhir/supply/search#patient"/>
+        <type value="reference"/>
+        <documentation value="Patient for whom the item is supplied"/>
+        <xpath value="Supply.patient"/>
+      </searchParam>
+      <searchParam>
+        <name value="_id"/>
+        <source value="http://hl7.org/fhir/supply/search#_id"/>
+        <type value="token"/>
+        <documentation value="The logical resource id associated with the resource (must be supported by all servers)"/>
+      </searchParam>
+      <searchParam>
+        <name value="status"/>
+        <source value="http://hl7.org/fhir/supply/search#status"/>
+        <type value="token"/>
+        <documentation value="requested | dispensed | received | failed | cancelled"/>
+        <xpath value="Supply.status"/>
+      </searchParam>
+      <searchParam>
+        <name value="dispenseid"/>
+        <source value="http://hl7.org/fhir/supply/search#dispenseid"/>
+        <type value="token"/>
+        <documentation value="External identifier"/>
+        <xpath value="Supply.dispense.identifier"/>
+      </searchParam>
+      <searchParam>
+        <name value="identifier"/>
+        <source value="http://hl7.org/fhir/supply/search#identifier"/>
+        <type value="token"/>
+        <documentation value="Unique identifier"/>
+        <xpath value="Supply.identifier"/>
+      </searchParam>
+      <searchParam>
+        <name value="supplier"/>
+        <source value="http://hl7.org/fhir/supply/search#supplier"/>
+        <type value="reference"/>
+        <documentation value="Dispenser"/>
+        <xpath value="Supply.dispense.supplier"/>
+      </searchParam>
+      <searchParam>
+        <name value="kind"/>
+        <source value="http://hl7.org/fhir/supply/search#kind"/>
+        <type value="token"/>
+        <documentation value="The kind of supply (central, non-stock, etc)"/>
+        <xpath value="Supply.kind"/>
+      </searchParam>
+      <searchParam>
+        <name value="dispensestatus"/>
+        <source value="http://hl7.org/fhir/supply/search#dispensestatus"/>
+        <type value="token"/>
+        <documentation value="in progress | dispensed | abandoned"/>
+        <xpath value="Supply.dispense.status"/>
+      </searchParam>
+    </resource>
+    <resource>
+      <type value="ValueSet"/>
+      <operation>
+        <code value="create"/>
+      </operation>
+      <operation>
+        <code value="delete"/>
+      </operation>
+      <operation>
+        <code value="history-instance"/>
+      </operation>
+      <operation>
+        <code value="history-type"/>
+      </operation>
+      <operation>
+        <code value="read"/>
+      </operation>
+      <operation>
+        <code value="search-type"/>
+      </operation>
+      <operation>
+        <code value="update"/>
+      </operation>
+      <operation>
+        <code value="validate"/>
+      </operation>
+      <operation>
+        <code value="vread"/>
+      </operation>
+      <readHistory value="true"/>
+      <searchParam>
+        <name value="system"/>
+        <source value="http://hl7.org/fhir/valueset/search#system"/>
+        <type value="token"/>
+        <documentation value="The system for any codes defined by this value set"/>
+        <xpath value="ValueSet.define.system"/>
+      </searchParam>
+      <searchParam>
+        <name value="_id"/>
+        <source value="http://hl7.org/fhir/valueset/search#_id"/>
+        <type value="token"/>
+        <documentation value="The logical resource id associated with the resource (must be supported by all servers)"/>
+      </searchParam>
+      <searchParam>
+        <name value="status"/>
+        <source value="http://hl7.org/fhir/valueset/search#status"/>
+        <type value="token"/>
+        <documentation value="The status of the value set"/>
+        <xpath value="ValueSet.status"/>
+      </searchParam>
+      <searchParam>
+        <name value="description"/>
+        <source value="http://hl7.org/fhir/valueset/search#description"/>
+        <type value="string"/>
+        <documentation value="Text search in the description of the value set"/>
+        <xpath value="ValueSet.description"/>
+      </searchParam>
+      <searchParam>
+        <name value="name"/>
+        <source value="http://hl7.org/fhir/valueset/search#name"/>
+        <type value="string"/>
+        <documentation value="The name of the value set"/>
+        <xpath value="ValueSet.name"/>
+      </searchParam>
+      <searchParam>
+        <name value="code"/>
+        <source value="http://hl7.org/fhir/valueset/search#code"/>
+        <type value="token"/>
+        <documentation value="A code defined in the value set"/>
+        <xpath value="ValueSet.define.concept.code"/>
+      </searchParam>
+      <searchParam>
+        <name value="date"/>
+        <source value="http://hl7.org/fhir/valueset/search#date"/>
+        <type value="date"/>
+        <documentation value="The value set publication date"/>
+        <xpath value="ValueSet.date"/>
+      </searchParam>
+      <searchParam>
+        <name value="identifier"/>
+        <source value="http://hl7.org/fhir/valueset/search#identifier"/>
+        <type value="token"/>
+        <documentation value="The identifier of the value set"/>
+        <xpath value="ValueSet.identifier"/>
+      </searchParam>
+      <searchParam>
+        <name value="reference"/>
+        <source value="http://hl7.org/fhir/valueset/search#reference"/>
+        <type value="token"/>
+        <documentation value="A code system included or excluded in the value set or an imported value set"/>
+        <xpath value="ValueSet.compose.include.system"/>
+      </searchParam>
+      <searchParam>
+        <name value="publisher"/>
+        <source value="http://hl7.org/fhir/valueset/search#publisher"/>
+        <type value="string"/>
+        <documentation value="Name of the publisher of the value set"/>
+        <xpath value="ValueSet.publisher"/>
+      </searchParam>
+      <searchParam>
+        <name value="version"/>
+        <source value="http://hl7.org/fhir/valueset/search#version"/>
+        <type value="token"/>
+        <documentation value="The version identifier of the value set"/>
+        <xpath value="ValueSet.version"/>
+      </searchParam>
+    </resource>
+    <resource>
+      <type value="Binary"/>
+      <operation>
+        <code value="create"/>
+      </operation>
+      <operation>
+        <code value="delete"/>
+      </operation>
+      <operation>
+        <code value="history-instance"/>
+      </operation>
+      <operation>
+        <code value="history-type"/>
+      </operation>
+      <operation>
+        <code value="read"/>
+      </operation>
+      <operation>
+        <code value="search-type"/>
+      </operation>
+      <operation>
+        <code value="update"/>
+      </operation>
+      <operation>
+        <code value="validate"/>
+      </operation>
+      <operation>
+        <code value="vread"/>
+      </operation>
+      <readHistory value="true"/>
+    </resource>
+  </rest>
+</Conformance>

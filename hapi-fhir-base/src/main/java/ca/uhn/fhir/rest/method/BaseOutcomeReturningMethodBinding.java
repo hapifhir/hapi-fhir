@@ -66,8 +66,8 @@ public abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBindin
 				resourceParameter = (ResourceParameter) next;
 				myResourceName = theContext.getResourceDefinition(resourceParameter.getResourceType()).getName();
 				myResourceParameterIndex = index;
-				index++;
 			}
+			index++;
 		}
 
 		if (resourceParameter == null) {

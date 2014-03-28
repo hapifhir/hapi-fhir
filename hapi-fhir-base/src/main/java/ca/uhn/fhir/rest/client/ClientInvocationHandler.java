@@ -14,6 +14,7 @@ import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.Header;
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -90,7 +91,7 @@ public class ClientInvocationHandler implements InvocationHandler {
 					list.add(next.getValue());
 				}
 			}
-			
+
 			return binding.invokeClient(mimeType, reader, response.getStatusLine().getStatusCode(), headers);
 
 		} finally {
@@ -101,9 +102,15 @@ public class ClientInvocationHandler implements InvocationHandler {
 	}
 
 	public static Reader createReaderFromResponse(HttpResponse theResponse) throws IllegalStateException, IOException {
-		ContentType ct = ContentType.get(theResponse.getEntity());
-		Charset charset = ct.getCharset();
-
+		HttpEntity entity = theResponse.getEntity();
+		if (entity == null) {
+			return new StringReader("");
+		}
+		Charset charset = null;
+		if (entity.getContentType().getElements() != null) {
+			ContentType ct = ContentType.get(entity);
+			charset = ct.getCharset();
+		}
 		if (charset == null) {
 			ourLog.warn("Response did not specify a charset.");
 			charset = Charset.forName("UTF-8");

@@ -23,11 +23,14 @@ import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.dstu.composite.NarrativeDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.dstu.resource.Conformance;
 import ca.uhn.fhir.model.dstu.resource.DiagnosticReport;
 import ca.uhn.fhir.model.dstu.resource.Observation;
 import ca.uhn.fhir.model.dstu.resource.Organization;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.dstu.resource.Specimen;
+import ca.uhn.fhir.model.dstu.resource.ValueSet;
+import ca.uhn.fhir.model.dstu.resource.Conformance.RestResource;
 import ca.uhn.fhir.model.dstu.valueset.NarrativeStatusEnum;
 import ca.uhn.fhir.model.primitive.DecimalDt;
 import ca.uhn.fhir.model.primitive.XhtmlDt;
@@ -36,6 +39,21 @@ import ca.uhn.fhir.narrative.INarrativeGenerator;
 public class JsonParserTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(JsonParserTest.class);
 
+	/**
+	 * This sample has extra elements in <searchParam> that are not actually
+	 * a part of the spec any more..
+	 */
+	@Test
+	public void testParseFuroreMetadataWithExtraElements() throws IOException {
+		String msg = IOUtils.toString(JsonParserTest.class.getResourceAsStream("/furore-conformance.json"));
+		
+		IParser p = new FhirContext(ValueSet.class).newJsonParser();
+		Conformance conf = p.parseResource(Conformance.class, msg);
+		RestResource res = conf.getRestFirstRep().getResourceFirstRep();
+		assertEquals("_id", res.getSearchParam().get(1).getName().getValue());
+	}
+
+	
 	@Test
 	public void testEncodeResourceRef() throws DataFormatException, IOException {
 
