@@ -1,0 +1,67 @@
+package ca.uhn.fhir.rest.client;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.http.Header;
+import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.message.BasicHeader;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.Bundle;
+import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.parser.DataFormatException;
+import ca.uhn.fhir.rest.server.Constants;
+
+public abstract class BaseClientInvocationWithContents extends BaseClientInvocation {
+
+	private final Bundle myBundle;
+	private final FhirContext myContext;
+	private List<Header> myHeaders;
+	private final IResource myResource;
+	private String myUrlExtension;
+
+	public BaseClientInvocationWithContents(FhirContext theContext, Bundle theBundle) {
+		super();
+		myContext = theContext;
+		myResource = null;
+		myBundle = theBundle;
+	}
+
+	public BaseClientInvocationWithContents(FhirContext theContext, IResource theResource, String theUrlExtension) {
+		super();
+		myContext = theContext;
+		myResource = theResource;
+		myBundle = null;
+		myUrlExtension = theUrlExtension;
+	}
+
+	public void addHeader(String theName, String theValue) {
+		if (myHeaders == null) {
+			myHeaders = new ArrayList<Header>();
+		}
+		myHeaders.add(new BasicHeader(theName, theValue));
+	}
+
+	@Override
+	public HttpRequestBase asHttpRequest(String theUrlBase) throws DataFormatException, IOException {
+		String url = theUrlBase + StringUtils.defaultString(myUrlExtension);
+		String contents = myContext.newXmlParser().encodeResourceToString(myResource);
+		StringEntity entity = new StringEntity(contents, ContentType.create(Constants.CT_FHIR_XML, "UTF-8"));
+
+		HttpRequestBase http = createRequest(url, entity);
+		if (myHeaders != null) {
+			for (Header next : myHeaders) {
+				http.addHeader(next);
+			}
+		}
+		return http;
+	}
+
+	protected abstract HttpRequestBase createRequest(String url, StringEntity theEntity);
+
+}

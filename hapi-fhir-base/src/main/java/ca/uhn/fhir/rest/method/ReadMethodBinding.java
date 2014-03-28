@@ -31,8 +31,8 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding {
 		
 		Validate.notNull(theMethod, "Method must not be null");
 		
-		Integer idIndex = Util.findReadIdParameterIndex(theMethod);
-		Integer versionIdIndex = Util.findReadVersionIdParameterIndex(theMethod);
+		Integer idIndex = Util.findIdParameterIndex(theMethod);
+		Integer versionIdIndex = Util.findVersionIdParameterIndex(theMethod);
 
 		myIdIndex = idIndex;
 		myVersionIdIndex = versionIdIndex;

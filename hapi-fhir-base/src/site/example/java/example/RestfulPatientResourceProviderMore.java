@@ -223,6 +223,7 @@ public MethodOutcome createPatient(@ResourceParam Patient thePatient) {
   // This method returns a MethodOutcome object which contains
   // the ID and Version ID for the newly saved resource
   MethodOutcome retVal = new MethodOutcome();
+  retVal.setCreated(true);
   retVal.setId(new IdDt("3746"));
   retVal.setVersionId(new IdDt("1"));
   return retVal;

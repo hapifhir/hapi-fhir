@@ -25,6 +25,14 @@ public class Constants {
 	public static final String PARAM_QUERY = "_query";
 	public static final int STATUS_HTTP_201_CREATED = 201;
 	public static final String CT_TEXT = "text/plain";
+	public static final int STATUS_HTTP_200_OK = 200;
+	public static final int STATUS_HTTP_422_UNPROCESSABLE_ENTITY = 422;
+	public static final int STATUS_HTTP_404_NOT_FOUND = 404;
+	public static final int STATUS_HTTP_400_BAD_REQUEST = 400;
+	public static final int STATUS_HTTP_405_METHOD_NOT_ALLOWED = 405;
+	public static final int STATUS_HTTP_409_CONFLICT = 409;
+	public static final int STATUS_HTTP_412_PRECONDITION_FAILED = 412;
+	public static final String HEADER_CONTENT_LOCATION = "Content-Location";
 
 	static {
 		Map<String, EncodingUtil> valToEncoding = new HashMap<String, EncodingUtil>();

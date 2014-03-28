@@ -95,10 +95,14 @@ public abstract class RestfulServer extends HttpServlet {
 
 			Collection<IResourceProvider> resourceProvider = getResourceProviders();
 			for (IResourceProvider nextProvider : resourceProvider) {
-				if (myTypeToProvider.containsKey(nextProvider.getResourceType())) {
-					throw new ServletException("Multiple providers for type: " + nextProvider.getResourceType().getCanonicalName());
+				Class<? extends IResource> resourceType = nextProvider.getResourceType();
+				if (resourceType==null) {
+					throw new NullPointerException("getResourceType() on class '" + nextProvider.getClass().getCanonicalName() + "' returned null");
 				}
-				myTypeToProvider.put(nextProvider.getResourceType(), nextProvider);
+				if (myTypeToProvider.containsKey(resourceType)) {
+					throw new ServletException("Multiple providers for type: " + resourceType.getCanonicalName());
+				}
+				myTypeToProvider.put(resourceType, nextProvider);
 			}
 
 			ourLog.info("Got {} resource providers", myTypeToProvider.size());
@@ -266,7 +270,7 @@ public abstract class RestfulServer extends HttpServlet {
 			}
 
 			if (resourceBinding == null) {
-				throw new MethodNotFoundException("Unknown resource type: " + resourceName);
+				throw new MethodNotFoundException("Unknown resource type '" + resourceName+"' - Server knows how to handle: "+resources.keySet());
 			}
 
 			if (tok.hasMoreTokens()) {

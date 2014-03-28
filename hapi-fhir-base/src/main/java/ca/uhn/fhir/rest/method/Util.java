@@ -98,16 +98,19 @@ class Util {
 						throw new ConfigurationException("Method '" + method.getName() + "' is annotated with @" + ResourceParam.class.getSimpleName() + " but has a type that is not an implemtation of " + IResource.class.getCanonicalName());
 					}
 					param = new ResourceParameter((Class<? extends IResource>) parameterType);
+				} else if (nextAnnotation instanceof IdParam || nextAnnotation instanceof VersionIdParam) {
+					param = null;
 				} else {
 					continue;
 				}
 				
 				haveHandledMethod= true;
 				parameters.add(param);
+				
 			}
 			
 			if (!haveHandledMethod) {
-				throw new ConfigurationException("Parameter # " + paramIndex + " of method '" + method.getName() + "' has no recognized FHIR interface parameter annotations. Don't know how to handle this parameter!");
+				throw new ConfigurationException("Parameter #" + paramIndex + " of method '" + method.getName() + "' on type '"+method.getDeclaringClass().getCanonicalName()+"' has no recognized FHIR interface parameter annotations. Don't know how to handle this parameter");
 			}
 			
 			paramIndex++;
@@ -115,11 +118,11 @@ class Util {
 		return parameters;
 	}
 
-	public static Integer findReadIdParameterIndex(Method theMethod) {
+	public static Integer findIdParameterIndex(Method theMethod) {
 		return findParamIndex(theMethod, IdParam.class);
 	}
 
-	public static Integer findReadVersionIdParameterIndex(Method theMethod) {
+	public static Integer findVersionIdParameterIndex(Method theMethod) {
 		return findParamIndex(theMethod, VersionIdParam.class);
 	}
 

@@ -25,6 +25,7 @@ import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.Metadata;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.client.BaseClientInvocation;
 import ca.uhn.fhir.rest.client.exceptions.NonFhirResponseException;
 import ca.uhn.fhir.rest.server.Constants;
@@ -79,7 +80,8 @@ public abstract class BaseMethodBinding {
 		Search search = theMethod.getAnnotation(Search.class);
 		Metadata conformance = theMethod.getAnnotation(Metadata.class);
 		Create create = theMethod.getAnnotation(Create.class);
-		if (!verifyMethodHasZeroOrOneOperationAnnotation(theMethod, read, search, conformance,create)) {
+		Update update = theMethod.getAnnotation(Update.class);
+		if (!verifyMethodHasZeroOrOneOperationAnnotation(theMethod, read, search, conformance,create,update)) {
 			return null;
 		}
 
@@ -105,6 +107,8 @@ public abstract class BaseMethodBinding {
 			return new ConformanceMethodBinding(theMethod, theContext);
 		} else if (create != null) {
 			return new CreateMethodBinding(theMethod, theContext);
+		} else if (update != null) {
+			return new UpdateMethodBinding(theMethod, theContext);
 		} else {
 			throw new ConfigurationException("Did not detect any FHIR annotations on method '" + theMethod.getName() + "' on type: " + theMethod.getDeclaringClass().getCanonicalName());
 		}

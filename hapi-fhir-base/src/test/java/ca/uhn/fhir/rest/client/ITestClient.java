@@ -16,6 +16,7 @@ import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.annotation.VersionIdParam;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IBasicClient;
@@ -57,5 +58,8 @@ public interface ITestClient extends IBasicClient {
 
 	@Create
 	public MethodOutcome createPatient(@ResourceParam Patient thePatient);
+
+	@Update
+	public MethodOutcome updatePatient(@IdParam IdDt theId, @ResourceParam Patient thePatient);
 
 }
