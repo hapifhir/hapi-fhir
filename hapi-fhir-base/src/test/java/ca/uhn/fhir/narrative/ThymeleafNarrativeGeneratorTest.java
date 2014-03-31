@@ -34,6 +34,57 @@ public class ThymeleafNarrativeGeneratorTest {
 	}
 
 	@Test
+	public void testTrimWhitespace() {
+
+		//@formatter:off
+		String input = "<div>\n" + 
+				"	<div class=\"hapiHeaderText\">\n" + 
+				"	\n" + 
+				"	joe \n" + 
+				"	john \n" + 
+				"	<b>BLOW </b>\n" + 
+				"	\n" + 
+				"</div>\n" + 
+				"	<table class=\"hapiPropertyTable\">\n" + 
+				"		<tbody>\n" + 
+				"			<tr>\n" + 
+				"				<td>Identifier</td>\n" + 
+				"				<td>123456</td>\n" + 
+				"			</tr>\n" + 
+				"			<tr>\n" + 
+				"				<td>Address</td>\n" + 
+				"				<td>\n" + 
+				"					\n" + 
+				"						<span>123 Fake Street</span><br />\n" + 
+				"					\n" + 
+				"					\n" + 
+				"						<span>Unit 1</span><br />\n" + 
+				"					\n" + 
+				"					<span>Toronto</span>\n" + 
+				"					<span>ON</span>\n" + 
+				"					<span>Canada</span>\n" + 
+				"				</td>\n" + 
+				"			</tr>\n" + 
+				"			<tr>\n" + 
+				"				<td>Date of birth</td>\n" + 
+				"				<td>\n" + 
+				"					<span>31 March 2014</span>\n" + 
+				"				</td>\n" + 
+				"			</tr>\n" + 
+				"		</tbody>\n" + 
+				"	</table>\n" + 
+				"</div>";
+		//@formatter:on
+
+		String actual = DefaultThymeleafNarrativeGenerator.cleanWhitespace(input);
+		String expected = "<div><div class=\"hapiHeaderText\"> joe john <b>BLOW </b></div><table class=\"hapiPropertyTable\"><tbody><tr><td>Identifier</td><td>123456</td></tr><tr><td>Address</td><td><span>123 Fake Street</span><br /><span>Unit 1</span><br /><span>Toronto</span><span>ON</span><span>Canada</span></td></tr><tr><td>Date of birth</td><td><span>31 March 2014</span></td></tr></tbody></table></div>";
+		
+		ourLog.info(actual);
+		
+		assertEquals(expected, actual);
+	}
+
+	@Test
 	public void testGeneratePatient() throws DataFormatException {
 		Patient value = new Patient();
 
@@ -66,10 +117,10 @@ public class ThymeleafNarrativeGeneratorTest {
 	@Test
 	public void testGenerateDiagnosticReportWithObservations() throws DataFormatException, IOException {
 		DiagnosticReport value = new DiagnosticReport();
-		
+
 		value.getIssued().setValueAsString("2011-02-22T11:13:00");
 		value.setStatus(DiagnosticReportStatusEnum.FINAL);
-		
+
 		value.getName().setText("Some Diagnostic Report");
 		{
 			Observation obs = new Observation();
@@ -91,7 +142,7 @@ public class ThymeleafNarrativeGeneratorTest {
 		String output = generateNarrative.getDiv().getValueAsString();
 
 		ourLog.info(output);
-		assertThat(output, StringContains.containsString("<div class=\"hapiHeaderText\">Some Diagnostic Report</div>"));
+		assertThat(output, StringContains.containsString("<div class=\"hapiHeaderText\"> Some Diagnostic Report </div>"));
 
 		// Now try it with the parser
 
@@ -99,7 +150,7 @@ public class ThymeleafNarrativeGeneratorTest {
 		context.setNarrativeGenerator(gen);
 		output = context.newXmlParser().setPrettyPrint(true).encodeResourceToString(value);
 		ourLog.info(output);
-		assertThat(output, StringContains.containsString("<div class=\"hapiHeaderText\">Some Diagnostic Report</div>"));
+		assertThat(output, StringContains.containsString("<div class=\"hapiHeaderText\"> Some Diagnostic Report </div>"));
 
 	}
 

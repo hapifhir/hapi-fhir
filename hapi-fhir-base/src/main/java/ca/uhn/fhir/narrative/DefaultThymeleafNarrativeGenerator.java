@@ -38,7 +38,7 @@ import ca.uhn.fhir.model.primitive.XhtmlDt;
 import ca.uhn.fhir.parser.DataFormatException;
 
 public class DefaultThymeleafNarrativeGenerator extends BaseThymeleafNarrativeGenerator implements INarrativeGenerator {
-	
+
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(DefaultThymeleafNarrativeGenerator.class);
 
 	private HashMap<String, String> myDatatypeClassNameToNarrativeTemplate;
@@ -50,6 +50,22 @@ public class DefaultThymeleafNarrativeGenerator extends BaseThymeleafNarrativeGe
 
 	private TemplateEngine myProfileTemplateEngine;
 	private HashMap<String, String> myProfileToNarrativeTemplate;
+
+	private boolean myCleanWhitespace = true;
+
+	/**
+	 * If set to <code>true</code> (which is the default), most whitespace will be trimmed from the generated narrative before it is returned.
+	 * <p>
+	 * Note that in order to preserve formatting, not all whitespace is trimmed. Repeated whitespace characters (e.g. "\n       \n       ") will be trimmed to a single space.
+	 * </p>
+	 */
+	public boolean isCleanWhitespace() {
+		return myCleanWhitespace;
+	}
+
+	public void setCleanWhitespace(boolean theCleanWhitespace) {
+		myCleanWhitespace = theCleanWhitespace;
+	}
 
 	public DefaultThymeleafNarrativeGenerator() throws IOException {
 		myProfileToNarrativeTemplate = new HashMap<String, String>();
@@ -92,15 +108,18 @@ public class DefaultThymeleafNarrativeGenerator extends BaseThymeleafNarrativeGe
 			ourLog.debug("No narrative template available for profile: {}", theProfile);
 			return new NarrativeDt(new XhtmlDt("<div>No narrative available</div>"), NarrativeStatusEnum.EMPTY);
 		}
-		
+
 		try {
 			Context context = new Context();
 			context.setVariable("resource", theResource);
 
 			String result = myProfileTemplateEngine.process(theProfile, context);
-			result = cleanWhitespace(result);
-			ourLog.info(result);
-//			result = result.replace("\n", "").replaceAll("\\s+", " ");//.replace("> ", ">").replace(" <", "<");
+
+			if (myCleanWhitespace) {
+				ourLog.trace("Pre-whitespace cleaning: ", result);
+				result = cleanWhitespace(result);
+				ourLog.trace("Post-whitespace cleaning: ", result);
+			}
 
 			XhtmlDt div = new XhtmlDt(result);
 			return new NarrativeDt(div, NarrativeStatusEnum.GENERATED);
@@ -114,29 +133,43 @@ public class DefaultThymeleafNarrativeGenerator extends BaseThymeleafNarrativeGe
 		}
 	}
 
-	private String cleanWhitespace(String theResult) {
+	static String cleanWhitespace(String theResult) {
 		StringBuilder b = new StringBuilder();
-		boolean inWhitespace=false;
+		boolean inWhitespace = false;
 		boolean betweenTags = false;
+		boolean lastNonWhitespaceCharWasTagEnd = false;
 		for (int i = 0; i < theResult.length(); i++) {
 			char nextChar = theResult.charAt(i);
 			if (nextChar == '>') {
 				b.append(nextChar);
-				betweenTags=true;
+				betweenTags = true;
+				lastNonWhitespaceCharWasTagEnd = true;
+				continue;
+			} else if (nextChar == '\n' || nextChar == '\r') {
+				// if (inWhitespace) {
+				// b.append(' ');
+				// inWhitespace = false;
+				// }
 				continue;
 			}
-			
+
 			if (betweenTags) {
 				if (Character.isWhitespace(nextChar)) {
 					inWhitespace = true;
 				} else if (nextChar == '<') {
+					if (inWhitespace && !lastNonWhitespaceCharWasTagEnd) {
+						b.append(' ');
+					}
+					inWhitespace = false;
 					b.append(nextChar);
-					inWhitespace=false;
-					betweenTags=false;
+					inWhitespace = false;
+					betweenTags = false;
+					lastNonWhitespaceCharWasTagEnd = false;
 				} else {
+					lastNonWhitespaceCharWasTagEnd = false;
 					if (inWhitespace) {
 						b.append(' ');
-						inWhitespace=false;
+						inWhitespace = false;
 					}
 					b.append(nextChar);
 				}
@@ -156,8 +189,7 @@ public class DefaultThymeleafNarrativeGenerator extends BaseThymeleafNarrativeGe
 	}
 
 	/**
-	 * If set to true, will return an empty narrative block for any
-	 * profiles where no template is available
+	 * If set to true, will return an empty narrative block for any profiles where no template is available
 	 */
 	public boolean isIgnoreMissingTemplates() {
 		return myIgnoreMissingTemplates;
@@ -247,8 +279,7 @@ public class DefaultThymeleafNarrativeGenerator extends BaseThymeleafNarrativeGe
 	// }
 
 	/**
-	 * If set to true, will return an empty narrative block for any
-	 * profiles where no template is available
+	 * If set to true, will return an empty narrative block for any profiles where no template is available
 	 */
 	public void setIgnoreMissingTemplates(boolean theIgnoreMissingTemplates) {
 		myIgnoreMissingTemplates = theIgnoreMissingTemplates;
@@ -263,8 +294,8 @@ public class DefaultThymeleafNarrativeGenerator extends BaseThymeleafNarrativeGe
 		@Override
 		public InputStream getResourceAsStream(TemplateProcessingParameters theTemplateProcessingParameters, String theClassName) {
 			String template = myDatatypeClassNameToNarrativeTemplate.get(theClassName);
-			if (template==null) {
-				throw new NullPointerException("No narrative template exists for datatype: " +theClassName);
+			if (template == null) {
+				throw new NullPointerException("No narrative template exists for datatype: " + theClassName);
 			}
 			return new ReaderInputStream(new StringReader(template));
 		}
@@ -310,7 +341,7 @@ public class DefaultThymeleafNarrativeGenerator extends BaseThymeleafNarrativeGe
 
 	}
 
-		private final class ProfileResourceResolver implements IResourceResolver {
+	private final class ProfileResourceResolver implements IResourceResolver {
 		@Override
 		public String getName() {
 			return getClass().getCanonicalName();
