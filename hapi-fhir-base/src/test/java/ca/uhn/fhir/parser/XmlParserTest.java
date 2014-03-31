@@ -1,5 +1,6 @@
 package ca.uhn.fhir.parser;
 
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.*;
@@ -21,7 +22,9 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.ResourceWithExtensionsA;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.BundleEntry;
+import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.dstu.composite.HumanNameDt;
 import ca.uhn.fhir.model.dstu.composite.NarrativeDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.resource.Conformance;
@@ -34,6 +37,7 @@ import ca.uhn.fhir.model.dstu.resource.Specimen;
 import ca.uhn.fhir.model.dstu.resource.ValueSet;
 import ca.uhn.fhir.model.dstu.valueset.AddressUseEnum;
 import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
+import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
 import ca.uhn.fhir.model.dstu.valueset.NarrativeStatusEnum;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.DecimalDt;
@@ -43,26 +47,73 @@ import ca.uhn.fhir.narrative.INarrativeGenerator;
 
 public class XmlParserTest {
 
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(XmlParserTest.class);
+
 	@Test
-	public void testExtensions() throws DataFormatException, IOException {
+	public void testEncodeBoundCode() throws IOException {
+
+		Patient patient = new Patient();
+		patient.addAddress().setUse(AddressUseEnum.HOME);
 		
-		MyPatient patient = new MyPatient();
-		patient.setPetName(new StringDt("Fido"));
-		patient.getImportantDates().add(new DateTimeDt("2010-01-02"));
-		patient.getImportantDates().add(new DateTimeDt("2014-01-26T11:11:11"));
+		patient.getGender().setValueAsEnum(AdministrativeGenderCodesEnum.M);
 		
-		patient.addName().addFamily("Smith");
+		String val = new FhirContext().newXmlParser().encodeResourceToString(patient);
+		ourLog.info(val);
 		
-		IParser p = new FhirContext().newXmlParser();
-		String str = p.encodeResourceToString(patient);
+	}
+
+	
+
+	@Test
+	public void testEncodeBundleResultCount() throws IOException {
+
+		Bundle b = new Bundle();
+		b.getTotalResults().setValue(123);
+		
+		String val = new FhirContext().newXmlParser().setPrettyPrint(true).encodeBundleToString(b);
+		ourLog.info(val);
+		
+		assertThat(val, StringContains.containsString("<os:totalResults xmlns:os=\"http://a9.com/-/spec/opensearch/1.1/\">123</os:totalResults>"));
+		
+	}
+
+	
+	
+	@Test
+	public void testEncodeContainedResources() throws IOException {
+
+		DiagnosticReport rpt = new DiagnosticReport();
+		Specimen spm = new Specimen();
+		spm.getText().setDiv("AAA");
+		rpt.addSpecimen().setResource(spm);
+		
+		IParser p = new FhirContext(DiagnosticReport.class).newXmlParser().setPrettyPrint(true);
+		String str = p.encodeResourceToString(rpt);
 		
 		ourLog.info(str);
-	
-		assertThat(str, StringContains.containsString("<Patient xmlns=\"http://hl7.org/fhir\">"));
-		assertThat(str, StringContains.containsString("<extension url=\"http://example.com/dontuse#petname\"><valueString value=\"Fido\"/></extension>"));
-		assertThat(str, StringContains.containsString("<modifierExtension url=\"http://example.com/dontuse#importantDates\"><valueDateTime value=\"2010-01-02\"/></modifierExtension>"));
-		assertThat(str, StringContains.containsString("<modifierExtension url=\"http://example.com/dontuse#importantDates\"><valueDateTime value=\"2014-01-26T11:11:11\"/></modifierExtension>"));
-		assertThat(str, StringContains.containsString("<name><family value=\"Smith\"/></name>"));
+		assertThat(str, StringContains.containsString("<div xmlns=\"http://www.w3.org/1999/xhtml\">AAA</div>"));
+		assertThat(str, StringContains.containsString("reference value=\"#"));
+		
+		int idx = str.indexOf("reference value=\"#") + "reference value=\"#".length();
+		int idx2 = str.indexOf('"', idx+1);
+		String id = str.substring(idx, idx2);
+		assertThat(str, StringContains.containsString("<Specimen xmlns=\"http://hl7.org/fhir\" id=\"" + id + "\">"));
+		assertThat(str, IsNot.not(StringContains.containsString("<?xml version='1.0'?>")));
+
+	}
+
+	@Test
+	public void testEncodeInvalidChildGoodException() throws IOException {
+		Observation obs = new Observation();
+		obs.setValue(new DecimalDt(112.22));
+		
+		IParser p = new FhirContext(Observation.class).newJsonParser();
+
+		try {
+			p.encodeResourceToString(obs);
+		} catch (DataFormatException e) {
+			assertThat(e.getMessage(), StringContains.containsString("PeriodDt"));
+		}
 	}
 
 	@Test
@@ -88,6 +139,204 @@ public class XmlParserTest {
 	}
 
 	
+	@Test
+	public void testExtensions() throws DataFormatException, IOException {
+		
+		MyPatient patient = new MyPatient();
+		patient.setPetName(new StringDt("Fido"));
+		patient.getImportantDates().add(new DateTimeDt("2010-01-02"));
+		patient.getImportantDates().add(new DateTimeDt("2014-01-26T11:11:11"));
+		
+		patient.addName().addFamily("Smith");
+		
+		IParser p = new FhirContext().newXmlParser();
+		String str = p.encodeResourceToString(patient);
+		
+		ourLog.info(str);
+	
+		assertThat(str, StringContains.containsString("<Patient xmlns=\"http://hl7.org/fhir\">"));
+		assertThat(str, StringContains.containsString("<extension url=\"http://example.com/dontuse#petname\"><valueString value=\"Fido\"/></extension>"));
+		assertThat(str, StringContains.containsString("<modifierExtension url=\"http://example.com/dontuse#importantDates\"><valueDateTime value=\"2010-01-02\"/></modifierExtension>"));
+		assertThat(str, StringContains.containsString("<modifierExtension url=\"http://example.com/dontuse#importantDates\"><valueDateTime value=\"2014-01-26T11:11:11\"/></modifierExtension>"));
+		assertThat(str, StringContains.containsString("<name><family value=\"Smith\"/></name>"));
+	}
+
+	@Test
+	public void testLoadAndAncodeMessage() throws SAXException, IOException {
+
+		//@formatter:off
+		String msg = "<Patient xmlns=\"http://hl7.org/fhir\">" 
+				+ "<text><status value=\"generated\" /><div xmlns=\"http://www.w3.org/1999/xhtml\">John Cardinal:            444333333        </div></text>"
+				+ "<identifier><label value=\"SSN\" /><system value=\"http://orionhealth.com/mrn\" /><value value=\"PRP1660\" /></identifier>"
+				+ "<name><use value=\"official\" /><family value=\"Cardinal\" /><given value=\"John\" /></name>"
+				+ "<name><family value=\"Kramer\" /><given value=\"Doe\" /></name>"
+				+ "<telecom><system value=\"phone\" /><value value=\"555-555-2004\" /><use value=\"work\" /></telecom>"
+				+ "<gender><coding><system value=\"http://hl7.org/fhir/v3/AdministrativeGender\" /><code value=\"M\" /></coding></gender>"
+				+ "<address><use value=\"home\" /><line value=\"2222 Home Street\" /></address><active value=\"true\" />"
+				+ "</Patient>";
+		//@formatter:on
+		
+		FhirContext ctx = new FhirContext(Patient.class);
+		Patient patient = ctx.newXmlParser().parseResource(Patient.class, msg);
+		
+		assertEquals(NarrativeStatusEnum.GENERATED, patient.getText().getStatus().getValueAsEnum());
+		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">John Cardinal:            444333333        </div>", patient.getText().getDiv().getValueAsString());
+		assertEquals("PRP1660", patient.getIdentifier().get(0).getValue().getValueAsString());
+		
+		String encoded = ctx.newXmlParser().encodeResourceToString(patient);
+
+		Diff d = new Diff(new StringReader(msg), new StringReader(encoded));
+		assertTrue(d.toString(), d.identical());
+
+	}
+
+
+	@Test
+	public void testLoadAndEncodeDeclaredExtensions() throws ConfigurationException, DataFormatException, SAXException, IOException {
+		FhirContext ctx = new FhirContext(ResourceWithExtensionsA.class);
+		IParser p = new XmlParser(ctx);
+
+		//@formatter:off
+		String msg = "<ResourceWithExtensionsA xmlns=\"http://hl7.org/fhir\">\n" + 
+				"	<extension url=\"http://foo/#f1\">\n" + 
+				"		<valueString value=\"Foo1Value\"/>\n" + 
+				"	</extension>\n" + 
+				"	<extension url=\"http://foo/#f1\">\n" + 
+				"		<valueString value=\"Foo1Value2\"/>\n" + 
+				"	</extension>\n" + 
+				"	<modifierExtension url=\"http://foo/#f2\">\n" + 
+				"		<valueString value=\"Foo2Value1\"/>\n" + 
+				"	</modifierExtension>\n" + 
+				"	<extension url=\"http://bar/#b1\">\n" + 
+				"		<extension url=\"http://bar/#b1/1\">\n" +
+				"			<valueDate value=\"2013-01-01\"/>\n" +
+				"		</extension>\n" + 
+				"		<extension url=\"http://bar/#b1/2\">\n" + 
+				"			<extension url=\"http://bar/#b1/2/1\">\n" + 
+				"				<valueDate value=\"2013-01-02\"/>\n" +
+				"			</extension>\n" + 
+				"			<extension url=\"http://bar/#b1/2/1\">\n" + 
+				"				<valueDate value=\"2013-01-12\"/>\n" +
+				"			</extension>\n" + 
+				"			<extension url=\"http://bar/#b1/2/2\">\n" + 
+				"				<valueDate value=\"2013-01-03\"/>\n" +
+				"			</extension>\n" + 
+				"		</extension>\n" + 
+				"	</extension>\n" + 
+				"	<identifier>\n" + 
+				"		<label value=\"IdentifierLabel\"/>\n" + 
+				"	</identifier>\n" + 
+				"</ResourceWithExtensionsA>";
+		//@formatter:on
+
+		ResourceWithExtensionsA resource = (ResourceWithExtensionsA) p.parseResource(msg);
+		assertEquals("IdentifierLabel", resource.getIdentifier().get(0).getLabel().getValue());
+		assertEquals("Foo1Value", resource.getFoo1().get(0).getValue());
+		assertEquals("Foo1Value2", resource.getFoo1().get(1).getValue());
+		assertEquals("Foo2Value1", resource.getFoo2().getValue());
+		assertEquals("2013-01-01", resource.getBar1().get(0).getBar11().get(0).getValueAsString());
+		assertEquals("2013-01-02", resource.getBar1().get(0).getBar12().get(0).getBar121().get(0).getValueAsString());
+		assertEquals("2013-01-12", resource.getBar1().get(0).getBar12().get(0).getBar121().get(1).getValueAsString());
+		assertEquals("2013-01-03", resource.getBar1().get(0).getBar12().get(0).getBar122().get(0).getValueAsString());
+
+		String encoded = p.encodeResourceToString(resource);
+		ourLog.info(encoded);
+
+		Diff d = new Diff(new StringReader(msg), new StringReader(encoded));
+		assertTrue(d.toString(), d.identical());
+	}
+
+	
+	
+	@Test
+	public void testLoadAndEncodeUndeclaredExtensions() throws ConfigurationException, DataFormatException, SAXException, IOException {
+		FhirContext ctx = new FhirContext(Patient.class);
+		IParser p = new XmlParser(ctx);
+
+		//@formatter:off
+		String msg = "<Patient xmlns=\"http://hl7.org/fhir\">\n" + 
+				"	<extension url=\"http://foo/#f1\">\n" + 
+				"		<valueString value=\"Foo1Value\"/>\n" + 
+				"	</extension>\n" + 
+				"	<extension url=\"http://foo/#f1\">\n" + 
+				"		<valueString value=\"Foo1Value2\"/>\n" + 
+				"	</extension>\n" + 
+				"	<extension url=\"http://bar/#b1\">\n" + 
+				"		<extension url=\"http://bar/#b1/1\">\n" +
+				"			<valueDate value=\"2013-01-01\"/>\n" +
+				"		</extension>\n" + 
+				"		<extension url=\"http://bar/#b1/2\">\n" + 
+				"			<extension url=\"http://bar/#b1/2/1\">\n" + 
+				"				<valueDate value=\"2013-01-02\"/>\n" +
+				"			</extension>\n" + 
+				"			<extension url=\"http://bar/#b1/2/1\">\n" + 
+				"				<valueDate value=\"2013-01-12\"/>\n" +
+				"			</extension>\n" + 
+				"			<extension url=\"http://bar/#b1/2/2\">\n" + 
+				"				<valueDate value=\"2013-01-03\"/>\n" +
+				"			</extension>\n" + 
+				"		</extension>\n" + 
+				"	</extension>\n" + 
+				"	<modifierExtension url=\"http://foo/#f2\">\n" + 
+				"		<valueString value=\"Foo2Value1\"/>\n" + 
+				"	</modifierExtension>\n" + 
+				"	<identifier>\n" + 
+				"		<label value=\"IdentifierLabel\"/>\n" + 
+				"	</identifier>\n" + 
+				"</Patient>";
+		//@formatter:on
+
+		Patient resource = (Patient) p.parseResource(msg);
+		assertEquals("IdentifierLabel", resource.getIdentifier().get(0).getLabel().getValue());
+		assertEquals("Foo1Value", resource.getUndeclaredExtensions().get(0).getValueAsPrimitive().getValueAsString());
+		assertEquals("Foo1Value2", resource.getUndeclaredExtensions().get(1).getValueAsPrimitive().getValueAsString());
+		assertEquals("Foo2Value1", resource.getUndeclaredModifierExtensions().get(0).getValueAsPrimitive().getValueAsString());
+		
+		assertEquals("2013-01-01", resource.getUndeclaredExtensions().get(2).getUndeclaredExtensions().get(0).getValueAsPrimitive().getValueAsString());
+		assertEquals("2013-01-02", resource.getUndeclaredExtensions().get(2).getUndeclaredExtensions().get(1).getUndeclaredExtensions().get(0).getValueAsPrimitive().getValueAsString());
+
+		String encoded = p.encodeResourceToString(resource);
+		ourLog.info(encoded);
+
+		Diff d = new Diff(new StringReader(msg), new StringReader(encoded));
+		assertTrue(d.toString(), d.identical());
+	}
+
+	@Test
+	public void testLoadObservation() throws ConfigurationException, DataFormatException, IOException {
+
+		FhirContext ctx = new FhirContext(Observation.class);
+		IParser p = new XmlParser(ctx);
+
+		String string = IOUtils.toString(XmlParserTest.class.getResourceAsStream("/observation-example-eeg.xml"));
+		IResource resource = p.parseResource(string);
+
+		String result = p.encodeResourceToString(resource);
+		ourLog.info(result);
+	}
+	
+	
+	@Test
+	public void testMessageWithMultipleTypes() throws SAXException, IOException {
+
+		//@formatter:off
+		String msg = "<Patient xmlns=\"http://hl7.org/fhir\">" 
+				+ "<identifier><label value=\"SSN\" /><system value=\"http://orionhealth.com/mrn\" /><value value=\"PRP1660\" /></identifier>"
+				+ "</Patient>";
+		//@formatter:on
+		
+		FhirContext ctx = new FhirContext(Patient.class, ca.uhn.fhir.testmodel.Patient.class);
+		Patient patient1 = ctx.newXmlParser().parseResource(Patient.class, msg);
+		String encoded1 = ctx.newXmlParser().encodeResourceToString(patient1);
+
+		ca.uhn.fhir.testmodel.Patient patient2 = ctx.newXmlParser().parseResource(ca.uhn.fhir.testmodel.Patient.class, msg);
+		String encoded2 = ctx.newXmlParser().encodeResourceToString(patient2);
+
+		Diff d = new Diff(new StringReader(encoded1), new StringReader(encoded2));
+		assertTrue(d.toString(), d.identical());
+
+	}
+	
 
 	@Test
 	public void testNarrativeGeneration() throws DataFormatException, IOException {
@@ -112,102 +361,6 @@ public class XmlParserTest {
 		assertThat(str, StringContains.containsString("<Patient xmlns=\"http://hl7.org/fhir\">"));
 	}
 
-	
-	
-	@Test
-	public void testParseBundleLarge() throws IOException {
-		
-		String msg = IOUtils.toString(XmlParser.class.getResourceAsStream("/atom-document-large.xml"));
-		FhirContext ctx = new FhirContext(Patient.class);
-		IParser p = ctx.newXmlParser();
-		Bundle bundle = p.parseBundle(msg);
-
-		assertEquals("http://spark.furore.com/fhir/_snapshot?id=327d6bb9-83b0-4929-aa91-6dd9c41e587b&start=0&_count=20", bundle.getLinkSelf().getValue());
-		assertEquals("Patient resource with id 3216379", bundle.getEntries().get(0).getTitle().getValue());
-		
-	}
-
-	@Test
-	public void testEncodeBoundCode() throws IOException {
-
-		Patient patient = new Patient();
-		patient.addAddress().setUse(AddressUseEnum.HOME);
-		
-		patient.getGender().setValueAsEnum(AdministrativeGenderCodesEnum.M);
-		
-		String val = new FhirContext().newXmlParser().encodeResourceToString(patient);
-		ourLog.info(val);
-		
-	}
-
-	@Test
-	public void testEncodeBundleResultCount() throws IOException {
-
-		Bundle b = new Bundle();
-		b.getTotalResults().setValue(123);
-		
-		String val = new FhirContext().newXmlParser().setPrettyPrint(true).encodeBundleToString(b);
-		ourLog.info(val);
-		
-		assertThat(val, StringContains.containsString("<os:totalResults xmlns:os=\"http://a9.com/-/spec/opensearch/1.1/\">123</os:totalResults>"));
-		
-	}
-
-	
-	@Test
-	public void testParseContainedResources() throws IOException {
-		
-		String msg = IOUtils.toString(XmlParser.class.getResourceAsStream("/contained-diagnosticreport.xml"));
-		IParser p = new FhirContext(DiagnosticReport.class).newXmlParser();
-		DiagnosticReport bundle = p.parseResource(DiagnosticReport.class, msg);
-		
-		ResourceReferenceDt result0 = bundle.getResult().get(0);
-		Observation obs = (Observation) result0.getResource();
-		
-		assertNotNull(obs);
-		assertEquals("718-7", obs.getName().getCoding().get(0).getCode().getValue());
-		
-	}
-
-	@Test
-	public void testEncodeInvalidChildGoodException() throws IOException {
-		Observation obs = new Observation();
-		obs.setValue(new DecimalDt(112.22));
-		
-		IParser p = new FhirContext(Observation.class).newJsonParser();
-
-		try {
-			p.encodeResourceToString(obs);
-		} catch (DataFormatException e) {
-			assertThat(e.getMessage(), StringContains.containsString("PeriodDt"));
-		}
-	}
-
-
-	@Test
-	public void testEncodeContainedResources() throws IOException {
-
-		DiagnosticReport rpt = new DiagnosticReport();
-		Specimen spm = new Specimen();
-		spm.getText().setDiv("AAA");
-		rpt.addSpecimen().setResource(spm);
-		
-		IParser p = new FhirContext(DiagnosticReport.class).newXmlParser().setPrettyPrint(true);
-		String str = p.encodeResourceToString(rpt);
-		
-		ourLog.info(str);
-		assertThat(str, StringContains.containsString("<div xmlns=\"http://www.w3.org/1999/xhtml\">AAA</div>"));
-		assertThat(str, StringContains.containsString("reference value=\"#"));
-		
-		int idx = str.indexOf("reference value=\"#") + "reference value=\"#".length();
-		int idx2 = str.indexOf('"', idx+1);
-		String id = str.substring(idx, idx2);
-		assertThat(str, StringContains.containsString("<Specimen xmlns=\"http://hl7.org/fhir\" id=\"" + id + "\">"));
-		assertThat(str, IsNot.not(StringContains.containsString("<?xml version='1.0'?>")));
-
-	}
-
-	
 	
 	@Test
 	public void testParseBundle() {
@@ -287,6 +440,34 @@ public class XmlParserTest {
 		assertEquals(summaryText.trim(), entry.getSummary().getValueAsString().trim());
 	}
 
+	@Test
+	public void testParseBundleLarge() throws IOException {
+		
+		String msg = IOUtils.toString(XmlParser.class.getResourceAsStream("/atom-document-large.xml"));
+		FhirContext ctx = new FhirContext(Patient.class);
+		IParser p = ctx.newXmlParser();
+		Bundle bundle = p.parseBundle(msg);
+
+		assertEquals("http://spark.furore.com/fhir/_snapshot?id=327d6bb9-83b0-4929-aa91-6dd9c41e587b&start=0&_count=20", bundle.getLinkSelf().getValue());
+		assertEquals("Patient resource with id 3216379", bundle.getEntries().get(0).getTitle().getValue());
+		
+	}
+
+	@Test
+	public void testParseContainedResources() throws IOException {
+		
+		String msg = IOUtils.toString(XmlParser.class.getResourceAsStream("/contained-diagnosticreport.xml"));
+		IParser p = new FhirContext(DiagnosticReport.class).newXmlParser();
+		DiagnosticReport bundle = p.parseResource(DiagnosticReport.class, msg);
+		
+		ResourceReferenceDt result0 = bundle.getResult().get(0);
+		Observation obs = (Observation) result0.getResource();
+		
+		assertNotNull(obs);
+		assertEquals("718-7", obs.getName().getCoding().get(0).getCode().getValue());
+		
+	}
+	
 	/**
 	 * This sample has extra elements in <searchParam> that are not actually
 	 * a part of the spec any more..
@@ -300,168 +481,6 @@ public class XmlParserTest {
 		RestResource res = conf.getRestFirstRep().getResourceFirstRep();
 		assertEquals("_id", res.getSearchParam().get(1).getName().getValue());
 	}
-	
-	
-	@Test
-	public void testLoadAndAncodeMessage() throws SAXException, IOException {
-
-		//@formatter:off
-		String msg = "<Patient xmlns=\"http://hl7.org/fhir\">" 
-				+ "<text><status value=\"generated\" /><div xmlns=\"http://www.w3.org/1999/xhtml\">John Cardinal:            444333333        </div></text>"
-				+ "<identifier><label value=\"SSN\" /><system value=\"http://orionhealth.com/mrn\" /><value value=\"PRP1660\" /></identifier>"
-				+ "<name><use value=\"official\" /><family value=\"Cardinal\" /><given value=\"John\" /></name>"
-				+ "<name><family value=\"Kramer\" /><given value=\"Doe\" /></name>"
-				+ "<telecom><system value=\"phone\" /><value value=\"555-555-2004\" /><use value=\"work\" /></telecom>"
-				+ "<gender><coding><system value=\"http://hl7.org/fhir/v3/AdministrativeGender\" /><code value=\"M\" /></coding></gender>"
-				+ "<address><use value=\"home\" /><line value=\"2222 Home Street\" /></address><active value=\"true\" />"
-				+ "</Patient>";
-		//@formatter:on
-		
-		FhirContext ctx = new FhirContext(Patient.class);
-		Patient patient = ctx.newXmlParser().parseResource(Patient.class, msg);
-		
-		assertEquals(NarrativeStatusEnum.GENERATED, patient.getText().getStatus().getValueAsEnum());
-		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">John Cardinal:            444333333        </div>", patient.getText().getDiv().getValueAsString());
-		assertEquals("PRP1660", patient.getIdentifier().get(0).getValue().getValueAsString());
-		
-		String encoded = ctx.newXmlParser().encodeResourceToString(patient);
-
-		Diff d = new Diff(new StringReader(msg), new StringReader(encoded));
-		assertTrue(d.toString(), d.identical());
-
-	}
-	
-
-	@Test
-	public void testMessageWithMultipleTypes() throws SAXException, IOException {
-
-		//@formatter:off
-		String msg = "<Patient xmlns=\"http://hl7.org/fhir\">" 
-				+ "<identifier><label value=\"SSN\" /><system value=\"http://orionhealth.com/mrn\" /><value value=\"PRP1660\" /></identifier>"
-				+ "</Patient>";
-		//@formatter:on
-		
-		FhirContext ctx = new FhirContext(Patient.class, ca.uhn.fhir.testmodel.Patient.class);
-		Patient patient1 = ctx.newXmlParser().parseResource(Patient.class, msg);
-		String encoded1 = ctx.newXmlParser().encodeResourceToString(patient1);
-
-		ca.uhn.fhir.testmodel.Patient patient2 = ctx.newXmlParser().parseResource(ca.uhn.fhir.testmodel.Patient.class, msg);
-		String encoded2 = ctx.newXmlParser().encodeResourceToString(patient2);
-
-		Diff d = new Diff(new StringReader(encoded1), new StringReader(encoded2));
-		assertTrue(d.toString(), d.identical());
-
-	}
-
-	
-	@Test
-	public void testLoadAndEncodeDeclaredExtensions() throws ConfigurationException, DataFormatException, SAXException, IOException {
-		FhirContext ctx = new FhirContext(ResourceWithExtensionsA.class);
-		IParser p = new XmlParser(ctx);
-
-		//@formatter:off
-		String msg = "<ResourceWithExtensionsA xmlns=\"http://hl7.org/fhir\">\n" + 
-				"	<extension url=\"http://foo/#f1\">\n" + 
-				"		<valueString value=\"Foo1Value\"/>\n" + 
-				"	</extension>\n" + 
-				"	<extension url=\"http://foo/#f1\">\n" + 
-				"		<valueString value=\"Foo1Value2\"/>\n" + 
-				"	</extension>\n" + 
-				"	<modifierExtension url=\"http://foo/#f2\">\n" + 
-				"		<valueString value=\"Foo2Value1\"/>\n" + 
-				"	</modifierExtension>\n" + 
-				"	<extension url=\"http://bar/#b1\">\n" + 
-				"		<extension url=\"http://bar/#b1/1\">\n" +
-				"			<valueDate value=\"2013-01-01\"/>\n" +
-				"		</extension>\n" + 
-				"		<extension url=\"http://bar/#b1/2\">\n" + 
-				"			<extension url=\"http://bar/#b1/2/1\">\n" + 
-				"				<valueDate value=\"2013-01-02\"/>\n" +
-				"			</extension>\n" + 
-				"			<extension url=\"http://bar/#b1/2/1\">\n" + 
-				"				<valueDate value=\"2013-01-12\"/>\n" +
-				"			</extension>\n" + 
-				"			<extension url=\"http://bar/#b1/2/2\">\n" + 
-				"				<valueDate value=\"2013-01-03\"/>\n" +
-				"			</extension>\n" + 
-				"		</extension>\n" + 
-				"	</extension>\n" + 
-				"	<identifier>\n" + 
-				"		<label value=\"IdentifierLabel\"/>\n" + 
-				"	</identifier>\n" + 
-				"</ResourceWithExtensionsA>";
-		//@formatter:on
-
-		ResourceWithExtensionsA resource = (ResourceWithExtensionsA) p.parseResource(msg);
-		assertEquals("IdentifierLabel", resource.getIdentifier().get(0).getLabel().getValue());
-		assertEquals("Foo1Value", resource.getFoo1().get(0).getValue());
-		assertEquals("Foo1Value2", resource.getFoo1().get(1).getValue());
-		assertEquals("Foo2Value1", resource.getFoo2().getValue());
-		assertEquals("2013-01-01", resource.getBar1().get(0).getBar11().get(0).getValueAsString());
-		assertEquals("2013-01-02", resource.getBar1().get(0).getBar12().get(0).getBar121().get(0).getValueAsString());
-		assertEquals("2013-01-12", resource.getBar1().get(0).getBar12().get(0).getBar121().get(1).getValueAsString());
-		assertEquals("2013-01-03", resource.getBar1().get(0).getBar12().get(0).getBar122().get(0).getValueAsString());
-
-		String encoded = p.encodeResourceToString(resource);
-		ourLog.info(encoded);
-
-		Diff d = new Diff(new StringReader(msg), new StringReader(encoded));
-		assertTrue(d.toString(), d.identical());
-	}
-
-	@Test
-	public void testLoadAndEncodeUndeclaredExtensions() throws ConfigurationException, DataFormatException, SAXException, IOException {
-		FhirContext ctx = new FhirContext(Patient.class);
-		IParser p = new XmlParser(ctx);
-
-		//@formatter:off
-		String msg = "<Patient xmlns=\"http://hl7.org/fhir\">\n" + 
-				"	<extension url=\"http://foo/#f1\">\n" + 
-				"		<valueString value=\"Foo1Value\"/>\n" + 
-				"	</extension>\n" + 
-				"	<extension url=\"http://foo/#f1\">\n" + 
-				"		<valueString value=\"Foo1Value2\"/>\n" + 
-				"	</extension>\n" + 
-				"	<extension url=\"http://bar/#b1\">\n" + 
-				"		<extension url=\"http://bar/#b1/1\">\n" +
-				"			<valueDate value=\"2013-01-01\"/>\n" +
-				"		</extension>\n" + 
-				"		<extension url=\"http://bar/#b1/2\">\n" + 
-				"			<extension url=\"http://bar/#b1/2/1\">\n" + 
-				"				<valueDate value=\"2013-01-02\"/>\n" +
-				"			</extension>\n" + 
-				"			<extension url=\"http://bar/#b1/2/1\">\n" + 
-				"				<valueDate value=\"2013-01-12\"/>\n" +
-				"			</extension>\n" + 
-				"			<extension url=\"http://bar/#b1/2/2\">\n" + 
-				"				<valueDate value=\"2013-01-03\"/>\n" +
-				"			</extension>\n" + 
-				"		</extension>\n" + 
-				"	</extension>\n" + 
-				"	<modifierExtension url=\"http://foo/#f2\">\n" + 
-				"		<valueString value=\"Foo2Value1\"/>\n" + 
-				"	</modifierExtension>\n" + 
-				"	<identifier>\n" + 
-				"		<label value=\"IdentifierLabel\"/>\n" + 
-				"	</identifier>\n" + 
-				"</Patient>";
-		//@formatter:on
-
-		Patient resource = (Patient) p.parseResource(msg);
-		assertEquals("IdentifierLabel", resource.getIdentifier().get(0).getLabel().getValue());
-		assertEquals("Foo1Value", resource.getUndeclaredExtensions().get(0).getValueAsPrimitive().getValueAsString());
-		assertEquals("Foo1Value2", resource.getUndeclaredExtensions().get(1).getValueAsPrimitive().getValueAsString());
-		assertEquals("Foo2Value1", resource.getUndeclaredModifierExtensions().get(0).getValueAsPrimitive().getValueAsString());
-		
-		assertEquals("2013-01-01", resource.getUndeclaredExtensions().get(2).getUndeclaredExtensions().get(0).getValueAsPrimitive().getValueAsString());
-		assertEquals("2013-01-02", resource.getUndeclaredExtensions().get(2).getUndeclaredExtensions().get(1).getUndeclaredExtensions().get(0).getValueAsPrimitive().getValueAsString());
-
-		String encoded = p.encodeResourceToString(resource);
-		ourLog.info(encoded);
-
-		Diff d = new Diff(new StringReader(msg), new StringReader(encoded));
-		assertTrue(d.toString(), d.identical());
-	}
 
 	@BeforeClass
 	public static void beforeClass() {
@@ -471,17 +490,95 @@ public class XmlParserTest {
 	}
 	
 	@Test
-	public void testLoadObservation() throws ConfigurationException, DataFormatException, IOException {
+	public void testMoreExtensions() throws Exception {
+		
+		Patient patient = new Patient();
+		patient.addIdentifier(IdentifierUseEnum.OFFICIAL, "urn:example", "7000135", null);
 
-		FhirContext ctx = new FhirContext(Observation.class);
-		IParser p = new XmlParser(ctx);
+		ExtensionDt ext = new ExtensionDt();
+		ext.setModifier(false);
+		ext.setUrl("http://example.com/extensions#someext");
+		ext.setValue(new DateTimeDt("2011-01-02T11:13:15"));
 
-		String string = IOUtils.toString(XmlParserTest.class.getResourceAsStream("/observation-example-eeg.xml"));
-		IResource resource = p.parseResource(string);
+		// Add the extension to the resource
+		patient.addUndeclaredExtension(ext);
+		//END SNIPPET: resourceExtension
 
-		String result = p.encodeResourceToString(resource);
-		ourLog.info(result);
+
+		//START SNIPPET: resourceStringExtension
+		HumanNameDt name = patient.addName();
+		name.addFamily().setValue("Shmoe");
+		StringDt given = name.addGiven();
+		given.setValue("Joe");
+		ExtensionDt ext2 = new ExtensionDt(false, "http://examples.com#givenext", new StringDt("given"));
+		given.addUndeclaredExtension(ext2);
+		//END SNIPPET: resourceStringExtension
+
+		//START SNIPPET: subExtension
+		ExtensionDt parent = new ExtensionDt(false, "http://example.com#parent");
+		patient.addUndeclaredExtension(parent);
+
+		ExtensionDt child1 = new ExtensionDt(false, "http://example.com#child", new StringDt("value1"));
+		parent.addUndeclaredExtension(child1);
+
+		ExtensionDt child2 = new ExtensionDt(false, "http://example.com#child", new StringDt("value1"));
+		parent.addUndeclaredExtension(child2);
+		//END SNIPPET: subExtension
+
+		String output = new FhirContext().newXmlParser().setPrettyPrint(true).encodeResourceToString(patient);
+		ourLog.info(output);
+
+		String enc = new FhirContext().newXmlParser().encodeResourceToString(patient);
+		assertThat(enc, containsString("<Patient xmlns=\"http://hl7.org/fhir\"><extension url=\"http://example.com/extensions#someext\"><valueDateTime value=\"2011-01-02T11:13:15\"/></extension>"));
+		assertThat(enc, containsString("<extension url=\"http://example.com#parent\"><extension url=\"http://example.com#child\"><valueString value=\"value1\"/></extension><extension url=\"http://example.com#child\"><valueString value=\"value1\"/></extension></extension>"));
+		assertThat(enc, containsString("<given value=\"Joe\"><extension url=\"http://examples.com#givenext\"><valueString value=\"given\"/></extension></given>"));
 	}
+	
+	
+	@Test
+	public void testExtensionOnComposite() throws Exception {
+		
+		Patient patient = new Patient();
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(XmlParserTest.class);
+		HumanNameDt name = patient.addName();
+		name.addFamily().setValue("Shmoe");
+		HumanNameDt given = name.addGiven("Joe");
+		ExtensionDt ext2 = new ExtensionDt(false, "http://examples.com#givenext", new StringDt("Hello"));
+		given.addUndeclaredExtension(ext2);
+		String output = new FhirContext().newXmlParser().setPrettyPrint(true).encodeResourceToString(patient);
+		ourLog.info(output);
+
+		String enc = new FhirContext().newXmlParser().encodeResourceToString(patient);
+		assertThat(enc, containsString("<name><extension url=\"http://examples.com#givenext\"><valueString value=\"Hello\"/></extension><family value=\"Shmoe\"/><given value=\"Joe\"/></name>"));
+
+		Patient parsed = new FhirContext().newXmlParser().parseResource(Patient.class, new StringReader(enc));
+		assertEquals(1, parsed.getNameFirstRep().getUndeclaredExtensionsByUrl("http://examples.com#givenext").size());
+		ExtensionDt ext = parsed.getNameFirstRep().getUndeclaredExtensionsByUrl("http://examples.com#givenext").get(0);
+		assertEquals("Hello", ext.getValueAsPrimitive().getValue());
+		
+	}
+	
+	@Test
+	public void testExtensionOnPrimitive() throws Exception {
+		
+		Patient patient = new Patient();
+
+		HumanNameDt name = patient.addName();
+		StringDt family = name.addFamily();
+		family.setValue("Shmoe");
+
+		ExtensionDt ext2 = new ExtensionDt(false, "http://examples.com#givenext", new StringDt("Hello"));
+		family.addUndeclaredExtension(ext2);
+		String output = new FhirContext().newXmlParser().setPrettyPrint(true).encodeResourceToString(patient);
+		ourLog.info(output);
+
+		String enc = new FhirContext().newXmlParser().encodeResourceToString(patient);
+		assertThat(enc, containsString("<name><family value=\"Shmoe\"><extension url=\"http://examples.com#givenext\"><valueString value=\"Hello\"/></extension></family></name>"));
+
+		Patient parsed = new FhirContext().newXmlParser().parseResource(Patient.class, new StringReader(enc));
+		assertEquals(1, parsed.getNameFirstRep().getFamilyFirstRep().getUndeclaredExtensionsByUrl("http://examples.com#givenext").size());
+		ExtensionDt ext = parsed.getNameFirstRep().getFamilyFirstRep().getUndeclaredExtensionsByUrl("http://examples.com#givenext").get(0);
+		assertEquals("Hello", ext.getValueAsPrimitive().getValue());
+
+	}
 }

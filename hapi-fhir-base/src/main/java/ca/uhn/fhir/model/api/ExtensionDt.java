@@ -1,5 +1,7 @@
 package ca.uhn.fhir.model.api;
 
+import org.thymeleaf.util.Validate;
+
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.primitive.StringDt;
@@ -7,24 +9,35 @@ import ca.uhn.fhir.model.primitive.StringDt;
 @DatatypeDef(name="Extension") 
 public class ExtensionDt extends BaseElement {
 
-	private boolean myIsModifier;
+	private boolean myModifier;
 	
 	@Child(name="use", type=StringDt.class, order=0, min=1, max=1)	
 	private StringDt myUrl;
-	
+
 	@Child(name="value", type=IDatatype.class, order=1, min=0, max=1)	
 	private IElement myValue;
-
+	
 	public ExtensionDt() {
 	}
 
 	public ExtensionDt(boolean theIsModifier) {
-		myIsModifier = theIsModifier;
+		myModifier = theIsModifier;
 	}
 
 	public ExtensionDt(boolean theIsModifier, String theUrl) {
-		myIsModifier = theIsModifier;
+		Validate.notEmpty(theUrl, "URL must be populated");
+
+		myModifier = theIsModifier;
 		myUrl = new StringDt(theUrl);
+	}
+
+	public ExtensionDt(boolean theIsModifier, String theUrl, IDatatype theValue) {
+		Validate.notEmpty(theUrl, "URL must be populated");
+		Validate.notNull(theValue, "Value must not be null");
+
+		myModifier = theIsModifier;
+		myUrl = new StringDt(theUrl);
+		myValue=theValue;
 	}
 
 	public StringDt getUrl() {
@@ -48,7 +61,7 @@ public class ExtensionDt extends BaseElement {
 	public IElement getValue() {
 		return myValue;
 	}
-	
+
 	/**
 	 * Returns the value of this extension, casted to a primitive datatype. This is a convenience method which should only be called if you are sure that the value for this particular extension will
 	 * be a primitive.
@@ -63,14 +76,18 @@ public class ExtensionDt extends BaseElement {
 	public IPrimitiveDatatype<?> getValueAsPrimitive() {
 		return (IPrimitiveDatatype<?>) getValue();
 	}
-
+	
 	@Override
 	public boolean isEmpty() {
 		return super.isBaseEmpty() && myValue == null || myValue.isEmpty();
 	}
 
 	public boolean isModifier() {
-		return myIsModifier;
+		return myModifier;
+	}
+
+	public void setModifier(boolean theModifier) {
+		myModifier = theModifier;
 	}
 
 	public void setUrl(String theUrl) {

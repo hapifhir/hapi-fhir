@@ -36,7 +36,6 @@ import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeChildDeclaredExtensionDefinition;
 import ca.uhn.fhir.context.RuntimeChildNarrativeDefinition;
-import ca.uhn.fhir.context.RuntimeChildUndeclaredExtensionDefinition;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.api.BaseBundle;
 import ca.uhn.fhir.model.api.Bundle;
@@ -683,18 +682,10 @@ public class JsonParser extends BaseParser implements IParser {
 
 	private void encodeCompositeElementToStreamWriter(RuntimeResourceDefinition theResDef, IResource theResource, IElement theElement, JsonGenerator theEventWriter,
 			BaseRuntimeElementCompositeDefinition<?> resDef) throws IOException, DataFormatException {
-		encodeExtensionsIfPresent(theResDef, theResource, theEventWriter, theElement);
 		encodeCompositeElementChildrenToStreamWriter(theResDef, theResource, theElement, theEventWriter, resDef.getExtensions());
 		encodeCompositeElementChildrenToStreamWriter(theResDef, theResource, theElement, theEventWriter, resDef.getChildren());
 	}
 
-	private void encodeExtensionsIfPresent(RuntimeResourceDefinition theResDef, IResource theResource, JsonGenerator theWriter, IElement theElement) throws IOException {
-		if (theElement instanceof ISupportsUndeclaredExtensions) {
-			ISupportsUndeclaredExtensions res = (ISupportsUndeclaredExtensions) theElement;
-			encodeUndeclaredExtensions(theResDef, theResource, theWriter, res.getUndeclaredExtensions(), "extension");
-			encodeUndeclaredExtensions(theResDef, theResource, theWriter, res.getUndeclaredModifierExtensions(), "modifierExtension");
-		}
-	}
 
 	private void encodeResourceToJsonStreamWriter(RuntimeResourceDefinition theResDef, IResource theResource, JsonGenerator theEventWriter, String theObjectNameOrNull) throws IOException {
 		super.containResourcesForEncoding(theResource);
@@ -717,36 +708,7 @@ public class JsonParser extends BaseParser implements IParser {
 		theEventWriter.writeEnd();
 	}
 
-	private void encodeUndeclaredExtensions(RuntimeResourceDefinition theResDef, IResource theResource, JsonGenerator theWriter, List<ExtensionDt> extensions, String theTagName)
-			throws IOException {
-		if (extensions.isEmpty()) {
-			return;
-		}
 
-		theWriter.writeStartArray(theTagName);
-
-		for (ExtensionDt next : extensions) {
-
-			theWriter.writeStartObject();
-
-			theWriter.write("url", next.getUrl().getValue());
-
-			if (next.getValue() != null) {
-				IElement nextValue = next.getValue();
-				RuntimeChildUndeclaredExtensionDefinition extDef = myContext.getRuntimeChildUndeclaredExtensionDefinition();
-				BaseRuntimeElementDefinition<?> childDef = extDef.getChildElementDefinitionByDatatype(nextValue.getClass());
-				// theWriter.writeName("value" + childDef.getName());
-				encodeChildElementToStreamWriter(theResDef, theResource, theWriter, nextValue, childDef, "value" + childDef.getName());
-			}
-
-			encodeUndeclaredExtensions(theResDef, theResource, theWriter, next.getUndeclaredExtensions(), "extension");
-			encodeUndeclaredExtensions(theResDef, theResource, theWriter, next.getUndeclaredModifierExtensions(), "modifierExtension");
-
-			theWriter.writeEnd();
-		}
-
-		theWriter.writeEnd();
-	}
 
 	private void writeAtomLink(JsonGenerator theEventWriter, String theRel, StringDt theLink) {
 		if (isNotBlank(theLink.getValue())) {

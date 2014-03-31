@@ -184,7 +184,9 @@
 
 	</dependencies>
 
+
 	<reporting>
+	
 		<plugins>
 			<plugin>
 				<artifactId>maven-site-plugin</artifactId>
@@ -244,6 +246,44 @@
 				<version>1.7</version>
 				<executions>
 					<execution>
+						<id>addSyntaxHighlighter</id>
+						<phase>site</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<target>
+								<echo>Adding Syntax Highlighter</echo>
+								<replace dir="target/site" summary="true">
+									<include name="*.html"></include>
+									<replacetoken><![CDATA[</body>]]></replacetoken>
+									<replacevalue><![CDATA[
+<script type="text/javascript">
+	var elements = document.getElementsByClassName("source");
+	for (var i=0; i < elements.length; i++) {
+		var pres = elements[i].getElementsByTagName("pre");
+		for (var j = 0; j < pres.length; j++) {
+			var pre = pres[j];
+			if (pre.innerHTML.match(/\\\*/)) {
+				pre.className = 'brush: java';
+			} else if (pre.innerHTML.match(/\&lt\;\//)) {
+				pre.className = 'brush: xml';
+			} else {
+				pre.className = 'brush: java';
+			}
+		}
+	}
+
+	SyntaxHighlighter.all();
+</script>
+</body>
+									]]></replacevalue>
+								</replace>
+							</target>
+						</configuration>
+					</execution>				
+					<execution>
+						<id>addAnalytics</id>
 						<phase>post-site</phase>
 						<configuration>
 							<target>

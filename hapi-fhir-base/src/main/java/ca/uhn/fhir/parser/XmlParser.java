@@ -302,7 +302,6 @@ public class XmlParser extends BaseParser implements IParser {
 			}
 			BaseRuntimeElementCompositeDefinition<?> childCompositeDef = (BaseRuntimeElementCompositeDefinition<?>) childDef;
 			encodeCompositeElementToStreamWriter(theResDef, theResource, nextValue, theEventWriter, childCompositeDef);
-			encodeExtensionsIfPresent(theResDef, theResource, theEventWriter, nextValue);
 			theEventWriter.writeEndElement();
 			break;
 		}

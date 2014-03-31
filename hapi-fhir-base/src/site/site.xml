@@ -7,6 +7,7 @@
 		<href>http://hl7api.sourceforge.net/</href>
 	</bannerLeft>
 
+
 	<poweredBy>
 		<logo name="Hosted on SourceForge.net" href="https://sourceforge.net/projects/hl7api/" img="http://sflogo.sourceforge.net/sflogo.php?group_id=38899&amp;type=2" />
 		<logo name="Built with Maven 2" href="http://maven.apache.org" img="images/logos/maven-feather.png" />
@@ -18,7 +19,7 @@
 
 		<links>
 			<item name="Sourceforge Project Page" href="https://sourceforge.net/projects/hl7api/" />
-		    <item name="hl7.org" href="http://hl7.org/" />
+			<item name="hl7.org" href="http://hl7.org/" />
 			<item name="University Health Network" href="http://www.uhn.ca/" />
 		</links>
 
@@ -27,39 +28,58 @@
 		</menu>
 
 		<menu name="Documentation">
-			<item name="Introduction" href="./doc_intro.html"/>
-			<item name="The Data Model" href="./doc_fhirobjects.html"/>
-			<item name="RESTful Server" href="./doc_rest_server.html"/>
-			<item name="RESTful Client" href="./doc_rest_client.html"/>
-			<item name="RESTful Operations" href="./doc_rest_operations.html"/>
-			<item name="Extensions" href="./doc_extensions.html"/>
-			<item name="Tinder Code Generator" href="./doc_tinder.html"/>
+			<item name="Introduction" href="./doc_intro.html" />
+			<item name="The Data Model" href="./doc_fhirobjects.html" />
+			<item name="RESTful Server" href="./doc_rest_server.html" />
+			<item name="RESTful Client" href="./doc_rest_client.html" />
+			<item name="RESTful Operations" href="./doc_rest_operations.html" />
+			<item name="Extensions" href="./doc_extensions.html" />
+			<item name="Tinder Code Generator" href="./doc_tinder.html" />
 		</menu>
-		
+
 		<menu name="JavaDocs">
-			<item name="API Documentation" href="./apidocs/index.html"/>
-			<item name="JXR" href="./xref/index.html"/>
+			<item name="API Documentation" href="./apidocs/index.html" />
+			<item name="JXR" href="./xref/index.html" />
 		</menu>
-		
+
 		<menu name="Reports">
 			<item name="Developers" href="team-list.html" />
 			<item name="Unit Test Report" href="surefire-report.html" />
 			<item name="FindBugs" href="findbugs.html" />
 			<item name="License" href="license.html" />
-			<item name="Source Code" href="http://sourceforge.net/p/hl7api/fhircode/ci/master/tree/"/>
+			<item name="Source Code" href="http://sourceforge.net/p/hl7api/fhircode/ci/master/tree/" />
 		</menu>
 
 		<head>
+			<!-- Syntax Highlighter -->
+			<script type="text/javascript" src="syntaxhighlighter/shCore.js"></script>
+			<script type="text/javascript" src="syntaxhighlighter/shBrushJScript.js"></script>
+			<script type="text/javascript" src="syntaxhighlighter/shBrushJava.js"></script>
+			<script type="text/javascript" src="syntaxhighlighter/shBrushXml.js"></script>
+			<link href="syntaxhighlighter/shCore.css" rel="stylesheet" type="text/css" />
+			<link href="syntaxhighlighter/shThemeDefault.css" rel="stylesheet" type="text/css" />
+			
+			<!-- 
+			   HAPI stylesheet comes after because it overwrites the Syntax Highlighter
+			   font size
+			 -->
 			<link rel="shortcut icon" href="http://hl7api.sourceforge.net/images/favicon.png" />
 			<link rel="stylesheet" type="text/css" href="hapi.css" />
 		</head>
-
+		
 	</body>
 
 	<skin>
-		<groupId>com.googlecode.fluido-skin</groupId>
-		<artifactId>fluido-skin</artifactId>
-		<version>1.3</version>
+		<groupId>org.apache.maven.skins</groupId>
+		<artifactId>maven-fluido-skin</artifactId>
+		<version>1.3.1</version>
 	</skin>
+
+	<custom>
+		<fluidoSkin>
+			<googleSearch />
+			<!-- <sourceLineNumbersEnabled>true</sourceLineNumbersEnabled> -->
+		</fluidoSkin>
+	</custom>
 
 </project>

@@ -1,13 +1,24 @@
+
 #bodyColumn {
+	width: 78.5% !important;
+	/*
 	margin-left: 180px !important;
+	*/
 }
 
 #breadcrumbs {
 	background: white;
 	padding: 0px;
+	/*
 	border-bottom-width: 1px;
 	border-bottom-color: #C0C0C0;
 	border-bottom-style: solid;
+	*/
+	height: 40px;
+}
+
+#search-form {
+	width: 140px;
 }
 
 #navcolumn {
@@ -16,7 +27,7 @@
 
 #leftColumn {
 	border: none !important;
-	width: 180px !important;
+	width: 19% !important;
 	margin: 0px;
 }
 
@@ -44,6 +55,8 @@
 	border-bottom-color: #CF4711;
 	background-color: #FF5721;
 	color: #FFA;
+	font-size: 1.5em;
+	line-height: 1.4em;
 }
 
 .section h3 {
@@ -54,6 +67,18 @@
 	background-image: url('images/littlehapiface.png');
 	background-repeat: no-repeat;
 	padding-left: 25px;
+	font-size: 1.3em;
+	line-height: 1.3em;
+}
+
+.syntaxhighlighter {
+	font-size: 0.85em !important;
+}
+
+.syntaxhighlighter .line.alt1,
+.syntaxhighlighter .line.alt2 
+{
+	background-color: #F8F8F8 !important;
 }
 
 tt {

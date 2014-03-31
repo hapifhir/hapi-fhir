@@ -20,6 +20,54 @@
 
 		</section>
 		
+		<section name="Undeclared Extensions">
+			
+			<p>
+				All HAPI FHIR Resource objects support "undeclared extensions",
+				which are arbitrary extensions you can add.
+			</p>
+			<macro name="snippet">
+				<param name="id" value="resourceExtension" />
+				<param name="file" value="src/site/example/java/example/Extensions.java" />
+			</macro>
+			
+			<p>
+				Undeclared extensions can also be added to datatypes (composite or primitive).
+			</p>
+			<macro name="snippet">
+				<param name="id" value="resourceStringExtension" />
+				<param name="file" value="src/site/example/java/example/Extensions.java" />
+			</macro>
+			
+			<subsection name="Sub-Extensions">
+
+				<p>
+					Extensions may also have child extensions as their content, instead
+					of a datatype. This is done by adding a child undeclared extension to the
+					parent extension.
+				</p>
+				<macro name="snippet">
+					<param name="id" value="subExtension" />
+					<param name="file" value="src/site/example/java/example/Extensions.java" />
+				</macro>
+			
+			</subsection>
+
+			<subsection name="Retrieving Extension Values">
+
+				<p>
+					HAPI provides a few ways of getting data back out of
+					an extension value (i.e. from a received resource):
+				</p>
+				<macro name="snippet">
+					<param name="id" value="parseExtension" />
+					<param name="file" value="src/site/example/java/example/Extensions.java" />
+				</macro>
+			
+			</subsection>
+			
+		</section>
+		
 		<section name="Custom Resource Types">
 			
 				<p>

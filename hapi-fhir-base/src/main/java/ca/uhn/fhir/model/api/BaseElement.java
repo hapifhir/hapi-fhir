@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.commons.lang3.Validate;
+
 import ca.uhn.fhir.model.primitive.IdDt;
 
 public abstract class BaseElement implements IIdentifiableElement, ISupportsUndeclaredExtensions {
@@ -11,6 +13,23 @@ public abstract class BaseElement implements IIdentifiableElement, ISupportsUnde
 	private IdDt myId;
 	private List<ExtensionDt> myUndeclaredExtensions;
 	private List<ExtensionDt> myUndeclaredModifierExtensions;
+
+	@Override
+	public void addUndeclaredExtension(boolean theIsModifier, String theUrl, IDatatype theValue) {
+		Validate.notEmpty(theUrl, "URL must be populated");
+		Validate.notNull(theValue, "Value must not be null");
+		getUndeclaredExtensions().add(new ExtensionDt(theIsModifier, theUrl, theValue));
+	}
+
+	@Override
+	public void addUndeclaredExtension(ExtensionDt theExtension) {
+		Validate.notNull(theExtension, "Extension can not be null");
+		if (theExtension.isModifier()) {
+			getUndeclaredModifierExtensions().add(theExtension);
+		} else {
+			getUndeclaredExtensions().add(theExtension);
+		}
+	}
 
 	@Override
 	public List<ExtensionDt> getAllUndeclaredExtensions() {
@@ -41,6 +60,18 @@ public abstract class BaseElement implements IIdentifiableElement, ISupportsUnde
 	}
 
 	@Override
+	public List<ExtensionDt> getUndeclaredExtensionsByUrl(String theUrl) {
+		org.apache.commons.lang3.Validate.notNull(theUrl, "URL can not be null");
+		ArrayList<ExtensionDt> retVal = new ArrayList<ExtensionDt>();
+		for (ExtensionDt next : getAllUndeclaredExtensions()) {
+			if (theUrl.equals(next.getUrlAsString())) {
+				retVal.add(next);
+			}
+		}
+		return Collections.unmodifiableList(retVal);
+	}
+
+	@Override
 	public List<ExtensionDt> getUndeclaredModifierExtensions() {
 		if (myUndeclaredModifierExtensions == null) {
 			myUndeclaredModifierExtensions = new ArrayList<ExtensionDt>();
@@ -48,9 +79,15 @@ public abstract class BaseElement implements IIdentifiableElement, ISupportsUnde
 		return myUndeclaredModifierExtensions;
 	}
 
+	@Override
+	public void setId(IdDt theId) {
+		myId = theId;
+	}
+
 	/**
-	 * Intended to be called by extending classes {@link #isEmpty()} implementations, returns <code>true</code> if all content in this superclass instance is empty per the semantics of
-	 * {@link #isEmpty()}.
+	 * Intended to be called by extending classes {@link #isEmpty()}
+	 * implementations, returns <code>true</code> if all content in this
+	 * superclass instance is empty per the semantics of {@link #isEmpty()}.
 	 */
 	protected boolean isBaseEmpty() {
 		if (myUndeclaredExtensions != null) {
@@ -68,11 +105,6 @@ public abstract class BaseElement implements IIdentifiableElement, ISupportsUnde
 			}
 		}
 		return true;
-	}
-
-	@Override
-	public void setId(IdDt theId) {
-		myId = theId;
 	}
 
 }

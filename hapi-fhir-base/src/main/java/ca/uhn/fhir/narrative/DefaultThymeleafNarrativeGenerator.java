@@ -98,7 +98,9 @@ public class DefaultThymeleafNarrativeGenerator extends BaseThymeleafNarrativeGe
 			context.setVariable("resource", theResource);
 
 			String result = myProfileTemplateEngine.process(theProfile, context);
-			result = result.replaceAll("\\s+", " ").replace("> ", ">").replace(" <", "<");
+			result = cleanWhitespace(result);
+			ourLog.info(result);
+//			result = result.replace("\n", "").replaceAll("\\s+", " ");//.replace("> ", ">").replace(" <", "<");
 
 			XhtmlDt div = new XhtmlDt(result);
 			return new NarrativeDt(div, NarrativeStatusEnum.GENERATED);
@@ -110,6 +112,39 @@ public class DefaultThymeleafNarrativeGenerator extends BaseThymeleafNarrativeGe
 				throw new DataFormatException(e);
 			}
 		}
+	}
+
+	private String cleanWhitespace(String theResult) {
+		StringBuilder b = new StringBuilder();
+		boolean inWhitespace=false;
+		boolean betweenTags = false;
+		for (int i = 0; i < theResult.length(); i++) {
+			char nextChar = theResult.charAt(i);
+			if (nextChar == '>') {
+				b.append(nextChar);
+				betweenTags=true;
+				continue;
+			}
+			
+			if (betweenTags) {
+				if (Character.isWhitespace(nextChar)) {
+					inWhitespace = true;
+				} else if (nextChar == '<') {
+					b.append(nextChar);
+					inWhitespace=false;
+					betweenTags=false;
+				} else {
+					if (inWhitespace) {
+						b.append(' ');
+						inWhitespace=false;
+					}
+					b.append(nextChar);
+				}
+			} else {
+				b.append(nextChar);
+			}
+		}
+		return b.toString();
 	}
 
 	/**
