@@ -1,6 +1,6 @@
 package ca.uhn.fhir.model.api;
 
-import org.thymeleaf.util.Validate;
+import org.apache.commons.lang3.Validate;
 
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;

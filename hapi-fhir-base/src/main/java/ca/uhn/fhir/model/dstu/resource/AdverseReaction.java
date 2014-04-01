@@ -56,6 +56,12 @@ import ca.uhn.fhir.model.primitive.DateTimeDt;
  * <b>Requirements:</b>
  * Used to track reactions when it is unknown the exact cause but there's a desire to flag/track potential causes.  Also used to capture reactions that are significant for inclusion in the health record or as evidence for an allergy or intolerance.
  * </p> 
+ *
+ * <p>
+ * <b>Profile Definition:</b>
+ * <a href="http://hl7.org/fhir/profiles/AdverseReaction">http://hl7.org/fhir/profiles/AdverseReaction</a> 
+ * </p>
+ *
  */
 @ResourceDef(name="AdverseReaction", profile="http://hl7.org/fhir/profiles/AdverseReaction", id="adversereaction")
 public class AdverseReaction extends BaseResource implements IResource {

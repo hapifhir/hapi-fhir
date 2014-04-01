@@ -27,6 +27,14 @@ import ${import};
  * <b>Requirements:</b>
  * ${requirements}
  * </p> 
+ *
+#if (${profile} != "")
+ * <p>
+ * <b>Profile Definition:</b>
+ * <a href="${profile}">${profile}</a> 
+ * </p>
+ *
+#end
  */
 @ResourceDef(name="${className}", profile="${profile}", id="${id}")
 public class ${className} extends BaseResource implements IResource {

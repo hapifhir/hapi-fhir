@@ -61,6 +61,12 @@ import ca.uhn.fhir.model.primitive.StringDt;
  * <b>Requirements:</b>
  * 
  * </p> 
+ *
+ * <p>
+ * <b>Profile Definition:</b>
+ * <a href="http://hl7.org/fhir/profiles/Specimen">http://hl7.org/fhir/profiles/Specimen</a> 
+ * </p>
+ *
  */
 @ResourceDef(name="Specimen", profile="http://hl7.org/fhir/profiles/Specimen", id="specimen")
 public class Specimen extends BaseResource implements IResource {

@@ -69,6 +69,12 @@ import ca.uhn.fhir.model.primitive.UriDt;
  * <b>Requirements:</b>
  * 
  * </p> 
+ *
+ * <p>
+ * <b>Profile Definition:</b>
+ * <a href="http://hl7.org/fhir/profiles/Conformance">http://hl7.org/fhir/profiles/Conformance</a> 
+ * </p>
+ *
  */
 @ResourceDef(name="Conformance", profile="http://hl7.org/fhir/profiles/Conformance", id="conformance")
 public class Conformance extends BaseResource implements IResource {

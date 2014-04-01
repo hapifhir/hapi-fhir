@@ -48,6 +48,12 @@ import ca.uhn.fhir.model.primitive.StringDt;
  * <b>Requirements:</b>
  * 
  * </p> 
+ *
+ * <p>
+ * <b>Profile Definition:</b>
+ * <a href="http://hl7.org/fhir/profiles/Alert">http://hl7.org/fhir/profiles/Alert</a> 
+ * </p>
+ *
  */
 @ResourceDef(name="Alert", profile="http://hl7.org/fhir/profiles/Alert", id="alert")
 public class Alert extends BaseResource implements IResource {

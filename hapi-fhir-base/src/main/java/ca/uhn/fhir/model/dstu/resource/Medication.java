@@ -51,6 +51,12 @@ import ca.uhn.fhir.model.primitive.StringDt;
  * <b>Requirements:</b>
  * 
  * </p> 
+ *
+ * <p>
+ * <b>Profile Definition:</b>
+ * <a href="http://hl7.org/fhir/profiles/Medication">http://hl7.org/fhir/profiles/Medication</a> 
+ * </p>
+ *
  */
 @ResourceDef(name="Medication", profile="http://hl7.org/fhir/profiles/Medication", id="medication")
 public class Medication extends BaseResource implements IResource {

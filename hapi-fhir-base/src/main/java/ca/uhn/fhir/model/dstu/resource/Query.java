@@ -50,6 +50,12 @@ import ca.uhn.fhir.model.primitive.UriDt;
  * <b>Requirements:</b>
  * 
  * </p> 
+ *
+ * <p>
+ * <b>Profile Definition:</b>
+ * <a href="http://hl7.org/fhir/profiles/Query">http://hl7.org/fhir/profiles/Query</a> 
+ * </p>
+ *
  */
 @ResourceDef(name="Query", profile="http://hl7.org/fhir/profiles/Query", id="query")
 public class Query extends BaseResource implements IResource {

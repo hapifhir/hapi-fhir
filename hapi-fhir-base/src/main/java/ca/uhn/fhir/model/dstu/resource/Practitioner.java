@@ -59,6 +59,12 @@ import ca.uhn.fhir.model.primitive.DateTimeDt;
  * <b>Requirements:</b>
  * Need to track doctors, staff, locums etc. for both healthcare practitioners, funders, etc.
  * </p> 
+ *
+ * <p>
+ * <b>Profile Definition:</b>
+ * <a href="http://hl7.org/fhir/profiles/Practitioner">http://hl7.org/fhir/profiles/Practitioner</a> 
+ * </p>
+ *
  */
 @ResourceDef(name="Practitioner", profile="http://hl7.org/fhir/profiles/Practitioner", id="practitioner")
 public class Practitioner extends BaseResource implements IResource {

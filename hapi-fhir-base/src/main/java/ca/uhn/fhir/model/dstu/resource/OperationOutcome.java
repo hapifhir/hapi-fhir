@@ -48,6 +48,12 @@ import ca.uhn.fhir.model.primitive.StringDt;
  * <b>Requirements:</b>
  * 
  * </p> 
+ *
+ * <p>
+ * <b>Profile Definition:</b>
+ * <a href="http://hl7.org/fhir/profiles/OperationOutcome">http://hl7.org/fhir/profiles/OperationOutcome</a> 
+ * </p>
+ *
  */
 @ResourceDef(name="OperationOutcome", profile="http://hl7.org/fhir/profiles/OperationOutcome", id="operationoutcome")
 public class OperationOutcome extends BaseResource implements IResource {

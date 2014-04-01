@@ -51,6 +51,12 @@ import ca.uhn.fhir.model.primitive.BoundCodeableConceptDt;
  * <b>Requirements:</b>
  * Need to track persons related to the patient or the healthcare process.
  * </p> 
+ *
+ * <p>
+ * <b>Profile Definition:</b>
+ * <a href="http://hl7.org/fhir/profiles/RelatedPerson">http://hl7.org/fhir/profiles/RelatedPerson</a> 
+ * </p>
+ *
  */
 @ResourceDef(name="RelatedPerson", profile="http://hl7.org/fhir/profiles/RelatedPerson", id="relatedperson")
 public class RelatedPerson extends BaseResource implements IResource {

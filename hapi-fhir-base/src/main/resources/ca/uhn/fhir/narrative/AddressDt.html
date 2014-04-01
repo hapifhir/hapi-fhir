@@ -1,0 +1,8 @@
+<div>
+	<th:block th:each="line : ${resource.line}">
+		<span th:text="${line} + ' '">123 Fake Street</span><br/>
+	</th:block>
+	<span th:if="${not resource.city.empty}" th:text="${resource.city} + ' '">Toronto</span>
+	<span th:if="${not resource.state.empty}" th:text="${resource.state} + ' '">ON</span>
+	<span th:if="${not resource.country.empty}" th:text="${resource.country}+ ' '">Canada</span>
+</div>

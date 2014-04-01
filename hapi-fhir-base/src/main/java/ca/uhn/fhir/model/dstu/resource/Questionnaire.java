@@ -64,6 +64,12 @@ import ca.uhn.fhir.model.primitive.StringDt;
  * <b>Requirements:</b>
  * To support structured, hierarchical registration of data gathered using digital forms and other questionnaires.
  * </p> 
+ *
+ * <p>
+ * <b>Profile Definition:</b>
+ * <a href="http://hl7.org/fhir/profiles/Questionnaire">http://hl7.org/fhir/profiles/Questionnaire</a> 
+ * </p>
+ *
  */
 @ResourceDef(name="Questionnaire", profile="http://hl7.org/fhir/profiles/Questionnaire", id="questionnaire")
 public class Questionnaire extends BaseResource implements IResource {

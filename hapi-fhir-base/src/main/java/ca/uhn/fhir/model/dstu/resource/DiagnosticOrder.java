@@ -55,6 +55,12 @@ import ca.uhn.fhir.model.primitive.StringDt;
  * <b>Requirements:</b>
  * 
  * </p> 
+ *
+ * <p>
+ * <b>Profile Definition:</b>
+ * <a href="http://hl7.org/fhir/profiles/DiagnosticOrder">http://hl7.org/fhir/profiles/DiagnosticOrder</a> 
+ * </p>
+ *
  */
 @ResourceDef(name="DiagnosticOrder", profile="http://hl7.org/fhir/profiles/DiagnosticOrder", id="diagnosticorder")
 public class DiagnosticOrder extends BaseResource implements IResource {

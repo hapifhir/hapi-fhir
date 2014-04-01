@@ -50,6 +50,12 @@ import ca.uhn.fhir.model.primitive.UriDt;
  * <b>Requirements:</b>
  * Allows institutions to track their devices. 
  * </p> 
+ *
+ * <p>
+ * <b>Profile Definition:</b>
+ * <a href="http://hl7.org/fhir/profiles/Device">http://hl7.org/fhir/profiles/Device</a> 
+ * </p>
+ *
  */
 @ResourceDef(name="Device", profile="http://hl7.org/fhir/profiles/Device", id="device")
 public class Device extends BaseResource implements IResource {

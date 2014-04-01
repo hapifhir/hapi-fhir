@@ -56,6 +56,12 @@ import ca.uhn.fhir.model.primitive.StringDt;
  * <b>Requirements:</b>
  * 
  * </p> 
+ *
+ * <p>
+ * <b>Profile Definition:</b>
+ * <a href="http://hl7.org/fhir/profiles/Group">http://hl7.org/fhir/profiles/Group</a> 
+ * </p>
+ *
  */
 @ResourceDef(name="Group", profile="http://hl7.org/fhir/profiles/Group", id="group")
 public class Group extends BaseResource implements IResource {

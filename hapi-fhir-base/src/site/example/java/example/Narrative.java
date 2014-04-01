@@ -13,7 +13,7 @@ import ca.uhn.fhir.model.dstu.valueset.NarrativeStatusEnum;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
-import ca.uhn.fhir.narrative.ThymeleafNarrativeGeneratorTest;
+import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGeneratorTest;
 import ca.uhn.fhir.parser.DataFormatException;
 
 public class Narrative {

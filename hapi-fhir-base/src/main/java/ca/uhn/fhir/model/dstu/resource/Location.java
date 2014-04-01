@@ -57,6 +57,12 @@ import ca.uhn.fhir.model.primitive.StringDt;
  * <b>Requirements:</b>
  * 
  * </p> 
+ *
+ * <p>
+ * <b>Profile Definition:</b>
+ * <a href="http://hl7.org/fhir/profiles/Location">http://hl7.org/fhir/profiles/Location</a> 
+ * </p>
+ *
  */
 @ResourceDef(name="Location", profile="http://hl7.org/fhir/profiles/Location", id="location")
 public class Location extends BaseResource implements IResource {

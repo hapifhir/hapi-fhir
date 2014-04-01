@@ -53,6 +53,12 @@ import ca.uhn.fhir.model.primitive.StringDt;
  * <b>Requirements:</b>
  * 
  * </p> 
+ *
+ * <p>
+ * <b>Profile Definition:</b>
+ * <a href="http://hl7.org/fhir/profiles/Media">http://hl7.org/fhir/profiles/Media</a> 
+ * </p>
+ *
  */
 @ResourceDef(name="Media", profile="http://hl7.org/fhir/profiles/Media", id="media")
 public class Media extends BaseResource implements IResource {

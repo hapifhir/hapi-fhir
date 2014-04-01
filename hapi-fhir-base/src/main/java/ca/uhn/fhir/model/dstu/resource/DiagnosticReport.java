@@ -57,6 +57,12 @@ import ca.uhn.fhir.model.primitive.StringDt;
  * <b>Requirements:</b>
  * To support reporting for any diagnostic report into a clinical data repository.
  * </p> 
+ *
+ * <p>
+ * <b>Profile Definition:</b>
+ * <a href="http://hl7.org/fhir/profiles/DiagnosticReport">http://hl7.org/fhir/profiles/DiagnosticReport</a> 
+ * </p>
+ *
  */
 @ResourceDef(name="DiagnosticReport", profile="http://hl7.org/fhir/profiles/DiagnosticReport", id="diagnosticreport")
 public class DiagnosticReport extends BaseResource implements IResource {

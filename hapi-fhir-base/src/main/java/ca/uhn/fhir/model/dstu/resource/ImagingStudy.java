@@ -59,6 +59,12 @@ import ca.uhn.fhir.model.primitive.UriDt;
  * <b>Requirements:</b>
  * 
  * </p> 
+ *
+ * <p>
+ * <b>Profile Definition:</b>
+ * <a href="http://hl7.org/fhir/profiles/ImagingStudy">http://hl7.org/fhir/profiles/ImagingStudy</a> 
+ * </p>
+ *
  */
 @ResourceDef(name="ImagingStudy", profile="http://hl7.org/fhir/profiles/ImagingStudy", id="imagingstudy")
 public class ImagingStudy extends BaseResource implements IResource {

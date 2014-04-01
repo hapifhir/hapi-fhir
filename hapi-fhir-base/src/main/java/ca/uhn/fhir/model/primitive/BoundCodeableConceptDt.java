@@ -2,6 +2,7 @@ package ca.uhn.fhir.model.primitive;
 
 import static org.apache.commons.lang3.StringUtils.*;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -19,12 +20,17 @@ public class BoundCodeableConceptDt<T extends Enum<?>> extends CodeableConceptDt
 		myBinder = theBinder;
 	}
 
-	public BoundCodeableConceptDt(IValueSetEnumBinder<T> theBinder, T... theValues) {
+	public BoundCodeableConceptDt(IValueSetEnumBinder<T> theBinder, T theValue) {
+		myBinder = theBinder;
+		setValueAsEnum(theValue);
+	}
+
+	public BoundCodeableConceptDt(IValueSetEnumBinder<T> theBinder, Collection<T> theValues) {
 		myBinder = theBinder;
 		setValueAsEnum(theValues);
 	}
 
-	public void setValueAsEnum(T... theValues) {
+	public void setValueAsEnum(Collection<T> theValues) {
 		getCoding().clear();
 		if (theValues == null) {
 			return;
@@ -32,6 +38,14 @@ public class BoundCodeableConceptDt<T extends Enum<?>> extends CodeableConceptDt
 		for (T next : theValues) {
 			getCoding().add(new CodingDt(myBinder.toSystemString(next), myBinder.toCodeString(next)));
 		}
+	}
+
+	public void setValueAsEnum(T theValue) {
+		getCoding().clear();
+		if (theValue == null) {
+			return;
+		}
+		getCoding().add(new CodingDt(myBinder.toSystemString(theValue), myBinder.toCodeString(theValue)));
 	}
 
 	public Set<T> getValueAsEnum() {

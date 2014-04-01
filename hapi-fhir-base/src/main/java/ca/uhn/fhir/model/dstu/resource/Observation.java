@@ -67,6 +67,12 @@ import ca.uhn.fhir.model.primitive.StringDt;
  * <b>Requirements:</b>
  * Observations are a key aspect of healthcare.  This resource is used to capture those that do not require more sophisticated mechanisms.
  * </p> 
+ *
+ * <p>
+ * <b>Profile Definition:</b>
+ * <a href="http://hl7.org/fhir/profiles/Observation">http://hl7.org/fhir/profiles/Observation</a> 
+ * </p>
+ *
  */
 @ResourceDef(name="Observation", profile="http://hl7.org/fhir/profiles/Observation", id="observation")
 public class Observation extends BaseResource implements IResource {

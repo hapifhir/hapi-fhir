@@ -57,6 +57,12 @@ import ca.uhn.fhir.model.primitive.UriDt;
  * <b>Requirements:</b>
  * 
  * </p> 
+ *
+ * <p>
+ * <b>Profile Definition:</b>
+ * <a href="http://hl7.org/fhir/profiles/ValueSet">http://hl7.org/fhir/profiles/ValueSet</a> 
+ * </p>
+ *
  */
 @ResourceDef(name="ValueSet", profile="http://hl7.org/fhir/profiles/ValueSet", id="valueset")
 public class ValueSet extends BaseResource implements IResource {

@@ -64,6 +64,12 @@ import ca.uhn.fhir.model.primitive.IntegerDt;
  * <b>Requirements:</b>
  * Tracking patient is the center of the healthcare process
  * </p> 
+ *
+ * <p>
+ * <b>Profile Definition:</b>
+ * <a href="http://hl7.org/fhir/profiles/Patient">http://hl7.org/fhir/profiles/Patient</a> 
+ * </p>
+ *
  */
 @ResourceDef(name="Patient", profile="http://hl7.org/fhir/profiles/Patient", id="patient")
 public class Patient extends BaseResource implements IResource {

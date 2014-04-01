@@ -1,0 +1,21 @@
+<div>
+	<!-- 
+	Normal Thymeleaf tags apply. Here, we loop through each of the 
+	identifiers that the practitioner has, and create a DIV tag for
+	each one, with the text "Identifier: [value]"
+	-->
+	<div th:each="identifier : ${resource.identifier}" th:text="'Identifier: ' + ${identifier.value}"></div>
+	
+	<!-- 
+	HAPI also defines a custom tag, th:narrative="value", which is
+	used to render a datatype.
+	 -->
+	<div th:narrative="${resource.addressFirstRep}"></div>
+
+	<!-- 
+	HAPI also defines a custom tag, th:narrative="value", which is
+	used to render a datatype.
+	 -->
+	<div th:narrative="${resource.nameFirstRep}"></div>
+
+</div>

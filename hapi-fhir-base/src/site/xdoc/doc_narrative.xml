@@ -50,8 +50,8 @@
 				HAPI's built-in narrative generation uses the 
 				<a href="http://www.thymeleaf.org/">Thymeleaf</a> library
 				for templating narrative texts. Thymeleaf provides a simple
-				HTML (with extra attributes) syntax which is easy to use and 
-				meshes well with the HAPI data model.
+				XHTML-based syntax which is easy to use and 
+				meshes well with the HAPI-FHIR model objects.
 			</p>
 			
 			<subsection name="A Simple Example">

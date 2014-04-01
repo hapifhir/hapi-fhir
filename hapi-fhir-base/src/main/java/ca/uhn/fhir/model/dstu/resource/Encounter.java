@@ -59,6 +59,12 @@ import ca.uhn.fhir.model.primitive.CodeDt;
  * <b>Requirements:</b>
  * 
  * </p> 
+ *
+ * <p>
+ * <b>Profile Definition:</b>
+ * <a href="http://hl7.org/fhir/profiles/Encounter">http://hl7.org/fhir/profiles/Encounter</a> 
+ * </p>
+ *
  */
 @ResourceDef(name="Encounter", profile="http://hl7.org/fhir/profiles/Encounter", id="encounter")
 public class Encounter extends BaseResource implements IResource {

@@ -34,7 +34,8 @@
 			<item name="RESTful Client" href="./doc_rest_client.html" />
 			<item name="RESTful Operations" href="./doc_rest_operations.html" />
 			<item name="Extensions" href="./doc_extensions.html" />
-			<item name="Tinder Code Generator" href="./doc_tinder.html" />
+			<item name="Narrative Generator" href="./doc_narrative.html" />
+			<item name="Tinder Plugin" href="./doc_tinder.html" />
 		</menu>
 
 		<menu name="JavaDocs">

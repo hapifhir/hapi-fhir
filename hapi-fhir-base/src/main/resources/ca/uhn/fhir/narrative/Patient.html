@@ -14,26 +14,17 @@ a browser.
 	<div class="hapiHeaderText" th:if="${not resource.nameFirstRep.empty}" th:narrative="${resource.nameFirstRep}"/>
 	<table class="hapiPropertyTable">
 		<tbody>
-			<tr th:if="${not #lists.isEmpty(resource.identifier)} and ${not resource.identifier[0].empty}">
+			<tr th:if="${not resource.identifierFirstRep.empty}">
 				<td>Identifier</td>
-				<td th:text="${resource.identifier[0].value.value}">8708660</td>
+				<td th:text="${resource.identifierFirstRep.value.value}">8708660</td>
 			</tr>
-			<tr th:if="${not #lists.isEmpty(resource.address)} and ${not resource.address[0].empty}">
+			<tr th:if="${not resource.addressFirstRep.empty}">
 				<td>Address</td>
-				<td>
-					<th:block th:each="line : ${resource.address[0].line}">
-						<span th:text="${line}">123 Fake Street</span><br/>
-					</th:block>
-					<span th:if="${not resource.address[0].city.empty}" th:text="${resource.address[0].city}">Toronto</span>
-					<span th:if="${not resource.address[0].state.empty}" th:text="${resource.address[0].state}">ON</span>
-					<span th:if="${not resource.address[0].country.empty}" th:text="${resource.address[0].country}">Canada</span>
-				</td>
+				<td th:narrative="${resource.addressFirstRep}"></td>
 			</tr>
 			<tr th:if="${not resource.birthDate.empty}">
 				<td>Date of birth</td>
-				<td>
-					<span th:text="${#dates.format(resource.birthDate.value,'dd MMMM yyyy')}">22 March 2012</span>
-				</td>
+				<td><span th:text="${#dates.format(resource.birthDate.value,'dd MMMM yyyy')}">22 March 2012</span></td>
 			</tr>
 		</tbody>
 	</table>
