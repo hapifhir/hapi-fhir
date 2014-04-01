@@ -11,6 +11,8 @@ public class CustomThymeleafNarrativeGeneratorTest {
 		
 		CustomThymeleafNarrativeGenerator gen = new CustomThymeleafNarrativeGenerator("src/test/resources/narrative/customnarrative.properties");
 		
+		
+		
 	}
 	
 }

@@ -30,7 +30,7 @@ public class DefaultThymeleafNarrativeGeneratorTest {
 	public void before() throws IOException {
 		gen = new DefaultThymeleafNarrativeGenerator();
 		gen.setIgnoreFailures(false);
-		gen.setIgnoreMissingTemplates(true);
+		gen.setIgnoreMissingTemplates(false);
 	}
 
 	@Test
