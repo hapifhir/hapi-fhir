@@ -9,7 +9,7 @@ public class DefaultThymeleafNarrativeGenerator extends BaseThymeleafNarrativeGe
 	}
 
 	@Override
-	public String getPropertyFile() {
+	protected String getPropertyFile() {
 		return "classpath:ca/uhn/fhir/narrative/narratives.properties";
 	}
 

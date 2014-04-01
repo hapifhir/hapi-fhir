@@ -1,6 +1,6 @@
 package ca.uhn.fhir.narrative;
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -32,14 +32,13 @@ import org.thymeleaf.standard.expression.StandardExpressions;
 import org.thymeleaf.templateresolver.TemplateResolver;
 import org.thymeleaf.util.DOMUtils;
 
-import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.composite.NarrativeDt;
 import ca.uhn.fhir.model.dstu.valueset.NarrativeStatusEnum;
 import ca.uhn.fhir.model.primitive.XhtmlDt;
 import ca.uhn.fhir.parser.DataFormatException;
 
-public class BaseThymeleafNarrativeGenerator implements INarrativeGenerator {
+public abstract class BaseThymeleafNarrativeGenerator implements INarrativeGenerator {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseThymeleafNarrativeGenerator.class);
 
 	private boolean myCleanWhitespace = true;
@@ -112,9 +111,7 @@ public class BaseThymeleafNarrativeGenerator implements INarrativeGenerator {
 		}
 	}
 
-	public String getPropertyFile() {
-		return null;
-	}
+	protected abstract String getPropertyFile();
 
 	/**
 	 * If set to <code>true</code> (which is the default), most whitespace will
@@ -233,7 +230,7 @@ public class BaseThymeleafNarrativeGenerator implements INarrativeGenerator {
 			if (resource == null) {
 				resource = DefaultThymeleafNarrativeGenerator.class.getResourceAsStream("/" + cpName);
 				if (resource == null) {
-					throw new ConfigurationException("Can not find '" + cpName + "' on classpath");
+					throw new IOException("Can not find '" + cpName + "' on classpath");
 				}
 			}
 			return resource;
@@ -244,7 +241,7 @@ public class BaseThymeleafNarrativeGenerator implements INarrativeGenerator {
 			}
 			return new FileInputStream(file);
 		} else {
-			throw new IllegalArgumentException("Invalid resource name: '" + name + "'");
+			throw new IOException("Invalid resource name: '" + name + "'");
 		}
 	}
 
