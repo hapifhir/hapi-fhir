@@ -51,15 +51,20 @@ public abstract class BaseThymeleafNarrativeGenerator implements INarrativeGener
 	private HashMap<String, String> myProfileToNarrativeName;
 	private HashMap<Class<?>, String> myClassToNarrativeName;
 	private HashMap<String, String> myNameToNarrativeTemplate;
-
+	private boolean myApplyDefaultDatatypeTemplates=true;
 	private volatile boolean myInitialized;
+
+	@Override
+	public NarrativeDt generateNarrative(IResource theResource) {
+		return generateNarrative(null, theResource);
+	}
 
 	@Override
 	public NarrativeDt generateNarrative(String theProfile, IResource theResource) {
 		if (!myInitialized) {
 			initialize();
 		}
-		
+
 		String name = null;
 		if (StringUtils.isNotBlank(theProfile)) {
 			name = myProfileToNarrativeName.get(theProfile);
@@ -80,7 +85,7 @@ public abstract class BaseThymeleafNarrativeGenerator implements INarrativeGener
 		try {
 			Context context = new Context();
 			context.setVariable("resource", theResource);
-
+			
 			String result = myProfileTemplateEngine.process(name, context);
 
 			if (myCleanWhitespace) {
@@ -113,8 +118,11 @@ public abstract class BaseThymeleafNarrativeGenerator implements INarrativeGener
 		if (isBlank(propFileName)) {
 			throw new ConfigurationException("Property file name can not be null");
 		}
-		
+
 		try {
+			if (myApplyDefaultDatatypeTemplates) {
+				loadProperties(DefaultThymeleafNarrativeGenerator.NARRATIVES_PROPERTIES);
+			}
 			loadProperties(propFileName);
 		} catch (IOException e) {
 			throw new ConfigurationException("Can not load property file " + propFileName, e);
@@ -139,9 +147,12 @@ public abstract class BaseThymeleafNarrativeGenerator implements INarrativeGener
 	protected abstract String getPropertyFile();
 
 	/**
-	 * If set to <code>true</code> (which is the default), most whitespace will be trimmed from the generated narrative before it is returned.
+	 * If set to <code>true</code> (which is the default), most whitespace will
+	 * be trimmed from the generated narrative before it is returned.
 	 * <p>
-	 * Note that in order to preserve formatting, not all whitespace is trimmed. Repeated whitespace characters (e.g. "\n       \n       ") will be trimmed to a single space.
+	 * Note that in order to preserve formatting, not all whitespace is trimmed.
+	 * Repeated whitespace characters (e.g. "\n       \n       ") will be
+	 * trimmed to a single space.
 	 * </p>
 	 */
 	public boolean isCleanWhitespace() {
@@ -149,24 +160,30 @@ public abstract class BaseThymeleafNarrativeGenerator implements INarrativeGener
 	}
 
 	/**
-	 * If set to <code>true</code>, which is the default, if any failure occurs during narrative generation the generator will suppress any generated exceptions, and simply return a default narrative
-	 * indicating that no narrative is available.
+	 * If set to <code>true</code>, which is the default, if any failure occurs
+	 * during narrative generation the generator will suppress any generated
+	 * exceptions, and simply return a default narrative indicating that no
+	 * narrative is available.
 	 */
 	public boolean isIgnoreFailures() {
 		return myIgnoreFailures;
 	}
 
 	/**
-	 * If set to true, will return an empty narrative block for any profiles where no template is available
+	 * If set to true, will return an empty narrative block for any profiles
+	 * where no template is available
 	 */
 	public boolean isIgnoreMissingTemplates() {
 		return myIgnoreMissingTemplates;
 	}
 
 	/**
-	 * If set to <code>true</code> (which is the default), most whitespace will be trimmed from the generated narrative before it is returned.
+	 * If set to <code>true</code> (which is the default), most whitespace will
+	 * be trimmed from the generated narrative before it is returned.
 	 * <p>
-	 * Note that in order to preserve formatting, not all whitespace is trimmed. Repeated whitespace characters (e.g. "\n       \n       ") will be trimmed to a single space.
+	 * Note that in order to preserve formatting, not all whitespace is trimmed.
+	 * Repeated whitespace characters (e.g. "\n       \n       ") will be
+	 * trimmed to a single space.
 	 * </p>
 	 */
 	public void setCleanWhitespace(boolean theCleanWhitespace) {
@@ -174,15 +191,18 @@ public abstract class BaseThymeleafNarrativeGenerator implements INarrativeGener
 	}
 
 	/**
-	 * If set to <code>true</code>, which is the default, if any failure occurs during narrative generation the generator will suppress any generated exceptions, and simply return a default narrative
-	 * indicating that no narrative is available.
+	 * If set to <code>true</code>, which is the default, if any failure occurs
+	 * during narrative generation the generator will suppress any generated
+	 * exceptions, and simply return a default narrative indicating that no
+	 * narrative is available.
 	 */
 	public void setIgnoreFailures(boolean theIgnoreFailures) {
 		myIgnoreFailures = theIgnoreFailures;
 	}
 
 	/**
-	 * If set to true, will return an empty narrative block for any profiles where no template is available
+	 * If set to true, will return an empty narrative block for any profiles
+	 * where no template is available
 	 */
 	public void setIgnoreMissingTemplates(boolean theIgnoreMissingTemplates) {
 		myIgnoreMissingTemplates = theIgnoreMissingTemplates;
@@ -261,11 +281,11 @@ public abstract class BaseThymeleafNarrativeGenerator implements INarrativeGener
 		} else if (name.startsWith("file:")) {
 			File file = new File(name.substring("file:".length()));
 			if (file.exists() == false) {
-				throw new IOException("Can not read file: " + file.getAbsolutePath());
+				throw new IOException("File not found: " + file.getAbsolutePath());
 			}
 			return new FileInputStream(file);
 		} else {
-			throw new IOException("Invalid resource name: '" + name + "'");
+			throw new IOException("Invalid resource name: '" + name + "' (must start with classpath: or file: )");
 		}
 	}
 
@@ -337,11 +357,14 @@ public abstract class BaseThymeleafNarrativeGenerator implements INarrativeGener
 			final IStandardExpression expression = expressionParser.parseExpression(configuration, theArguments, attributeValue);
 			final Object value = expression.execute(configuration, theArguments);
 
+
+			theElement.removeAttribute(theAttributeName);
+			theElement.clearChildren();
+
 			Context context = new Context();
 			context.setVariable("resource", value);
-
+			
 			String name = myClassToNarrativeName.get(value.getClass());
-
 			if (name == null) {
 				if (myIgnoreMissingTemplates) {
 					ourLog.debug("No narrative template available for type: {}", value.getClass());
@@ -353,9 +376,6 @@ public abstract class BaseThymeleafNarrativeGenerator implements INarrativeGener
 
 			String result = myProfileTemplateEngine.process(name, context);
 			Document dom = DOMUtils.getXhtmlDOMFor(new StringReader(result));
-
-			theElement.removeAttribute(theAttributeName);
-			theElement.clearChildren();
 
 			Element firstChild = (Element) dom.getFirstChild();
 			for (Node next : firstChild.getChildren()) {

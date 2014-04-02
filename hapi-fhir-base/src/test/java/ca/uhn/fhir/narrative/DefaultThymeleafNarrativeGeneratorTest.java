@@ -27,7 +27,7 @@ public class DefaultThymeleafNarrativeGeneratorTest {
 	private DefaultThymeleafNarrativeGenerator gen;
 
 	@Before
-	public void before() throws IOException {
+	public void before() {
 		gen = new DefaultThymeleafNarrativeGenerator();
 		gen.setIgnoreFailures(false);
 		gen.setIgnoreMissingTemplates(false);

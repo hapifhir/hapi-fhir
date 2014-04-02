@@ -111,6 +111,63 @@
 			
 		</section>
 		
+		<section name="Creating your own Templates">
+		
+			<p>
+				To use your own templates for narrative generation,
+				simply create one or more templates, using the Thymeleaf
+				HTML based syntax. 
+			</p>
+		
+			<macro name="snippet">
+				<param name="file" value="src/test/resources/narrative/Practitioner.html" />
+			</macro>
+
+			<p>
+				Then create a properties file which describes your
+				templates. In this properties file, each resource to 
+				be defined has a pair or properties. 
+			</p>
+						
+			<p>
+				The first (name.class) defines the class name of the resource to define a 
+				template for. The second (name.narrative) defines the path/classpath to the
+				template file. The format of this path is <code>file:/path/foo.html</code> or  <code>classpath:/com/classpath/foo.html</code>
+			</p>
+			
+			<source><![CDATA[# Two property lines in the file per template
+practitioner.class=ca.uhn.fhir.model.dstu.resource.Practitioner
+practitioner.narrative=file:src/test/resources/narrative/Practitioner.html
+
+observation.class=ca.uhn.fhir.model.dstu.resource.Observation
+observation.narrative=file:src/test/resources/narrative/Observation.html
+
+# etc...]]></source>
+
+			<p>
+				You may also override/define behaviour for datatypes. These datatype narrative
+				definitions will be used as content within <code>th:narrative</code> blocks
+				in resource templates. See the example resource template above for an example.
+			</p>
+			  
+			<source><![CDATA[# datatypes use the same format as resources
+humanname.class=ca.uhn.fhir.model.dstu.composite.HumanNameDt
+humanname.narrative=classpath:ca/uhn/fhir/narrative/HumanNameDt.html]]></source>
+		
+			<p>
+				Finally, use the 
+				<a href="./apidocs/ca/uhn/fhir/narrative/CustomThymeleafNarrativeGenerator.html">CustomThymeleafNarrativeGenerator</a> 
+				and provide it
+				to the FhirContext.
+			</p>
+
+			<macro name="snippet">
+				<param name="id" value="gen" />
+				<param name="file" value="src/site/example/java/example/NarrativeGenerator.java" />
+			</macro>
+		
+		</section>
+		
 	</body>
 
 </document>

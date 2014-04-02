@@ -1,16 +1,13 @@
 package ca.uhn.fhir.narrative;
 
-import java.io.IOException;
 
 public class DefaultThymeleafNarrativeGenerator extends BaseThymeleafNarrativeGenerator implements INarrativeGenerator {
 
-	public DefaultThymeleafNarrativeGenerator() throws IOException {
-		super();
-	}
+	static final String NARRATIVES_PROPERTIES = "classpath:ca/uhn/fhir/narrative/narratives.properties";
 
 	@Override
 	protected String getPropertyFile() {
-		return "classpath:ca/uhn/fhir/narrative/narratives.properties";
+		return NARRATIVES_PROPERTIES;
 	}
 
 }

@@ -6,6 +6,8 @@ import ca.uhn.fhir.parser.DataFormatException;
 
 public interface INarrativeGenerator {
 
-	public NarrativeDt generateNarrative(String theProfile, IResource theResource) throws DataFormatException;
-	
+	NarrativeDt generateNarrative(String theProfile, IResource theResource) throws DataFormatException;
+
+	NarrativeDt generateNarrative(IResource theResource);
+
 }
