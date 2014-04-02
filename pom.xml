@@ -11,7 +11,7 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>1.0-SNAPSHOT</version>
+	<version>0.1</version>
 	<name>HAPI</name>
 	<url>http://hl7api.sourceforge.net/</url>
 	<description>
@@ -31,7 +31,7 @@
 		<module>hapi-fhir-base</module>
 		<module>hapi-tinder-plugin</module>
 		<module>hapi-tinder-test</module>
-		<!-- <module>hapi-fhir-structures-dstu</module> -->
+		<module>hapi-fhir-structures-dstu</module>
 	</modules>
 
 	<properties>

@@ -1,6 +1,5 @@
 package ca.uhn.fhir.tinder;
 
-import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -25,29 +24,40 @@ public class DatatypeGeneratorUsingSpreadsheet extends BaseStructureSpreadsheetP
 	protected Collection<InputStream> getInputStreams() {
 		ArrayList<InputStream> retVal = new ArrayList<InputStream>();
 
-		retVal.add(getClass().getResourceAsStream("/dt/address.xml"));
-		retVal.add(getClass().getResourceAsStream("/dt/coding.xml"));
-		retVal.add(getClass().getResourceAsStream("/dt/humanname.xml"));
-		retVal.add(getClass().getResourceAsStream("/dt/period.xml"));
-		retVal.add(getClass().getResourceAsStream("/dt/ratio.xml"));
-		retVal.add(getClass().getResourceAsStream("/dt/schedule.xml"));
-		retVal.add(getClass().getResourceAsStream("/dt/attachment.xml"));
-		retVal.add(getClass().getResourceAsStream("/dt/contact.xml"));
-		retVal.add(getClass().getResourceAsStream("/dt/identifier.xml"));
-		retVal.add(getClass().getResourceAsStream("/dt/quantity.xml"));
-		retVal.add(getClass().getResourceAsStream("/dt/resourcereference.xml"));
-		retVal.add(getClass().getResourceAsStream("/dt/codeableconcept.xml"));
-//		retVal.add(getClass().getResourceAsStream("/dt/extension.xml"));
-//		retVal.add(getClass().getResourceAsStream("/dt/narrative.xml"));
-		retVal.add(getClass().getResourceAsStream("/dt/range.xml"));
-		retVal.add(getClass().getResourceAsStream("/dt/sampleddata.xml"));
-
+		for (String next : getInputStreamNames()) {
+			retVal.add(getClass().getResourceAsStream(next));
+		}
+		
 		return retVal;
 	}
 
 	@Override
 	protected BaseRootType createRootType() {
 		return new Composite();
+	}
+
+	@Override
+	protected List<String> getInputStreamNames() {
+		ArrayList<String> retVal = new ArrayList<String>();
+
+		retVal.add(("/dt/address.xml"));
+		retVal.add(("/dt/coding.xml"));
+		retVal.add(("/dt/humanname.xml"));
+		retVal.add(("/dt/period.xml"));
+		retVal.add(("/dt/ratio.xml"));
+		retVal.add(("/dt/schedule.xml"));
+		retVal.add(("/dt/attachment.xml"));
+		retVal.add(("/dt/contact.xml"));
+		retVal.add(("/dt/identifier.xml"));
+		retVal.add(("/dt/quantity.xml"));
+		retVal.add(("/dt/resourcereference.xml"));
+		retVal.add(("/dt/codeableconcept.xml"));
+//		retVal.add(("/dt/extension.xml"));
+//		retVal.add(("/dt/narrative.xml"));
+		retVal.add(("/dt/range.xml"));
+		retVal.add(("/dt/sampleddata.xml"));
+		
+		return retVal;
 	}
 
 

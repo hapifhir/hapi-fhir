@@ -13,11 +13,11 @@
             "extension":[
                 {
                     "url":"urn:patientext:moreext:1",
-                    "valuestring":"str1"
+                    "valueString":"str1"
                 },
                 {
                     "url":"urn:patientext:moreext:2",
-                    "valuestring":"str2"
+                    "valueString":"str2"
                 }
             ]
         }
@@ -25,7 +25,7 @@
     "modifierExtension":[
         {
             "url":"urn:modext",
-            "valuedate":"2011-01-02"
+            "valueDate":"2011-01-02"
         }
     ],
     "text":{
@@ -124,7 +124,7 @@
                         "extension":[
                             {
                                 "url":"http://hl7.org/fhir/Profile/iso-21090#qualifier",
-                                "valuecode":"VV"
+                                "valueCode":"VV"
                             }
                         ]
                     },

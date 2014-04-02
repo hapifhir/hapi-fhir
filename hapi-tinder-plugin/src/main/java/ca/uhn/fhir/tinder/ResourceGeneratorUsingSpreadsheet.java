@@ -18,6 +18,7 @@ public class ResourceGeneratorUsingSpreadsheet extends BaseStructureSpreadsheetP
 
 
 	private ArrayList<InputStream> myInputStreams;
+	private List<String> myInputStreamNames;
 
 	@Override
 	protected String getTemplate() {
@@ -143,6 +144,7 @@ public class ResourceGeneratorUsingSpreadsheet extends BaseStructureSpreadsheetP
 	}
 
 	public void setBaseResourceNames(List<String> theBaseResourceNames) throws MojoFailureException {
+		myInputStreamNames = theBaseResourceNames;
 		myInputStreams = new ArrayList<InputStream>();
 		
 		for (String next : theBaseResourceNames) {
@@ -152,6 +154,10 @@ public class ResourceGeneratorUsingSpreadsheet extends BaseStructureSpreadsheetP
 				throw new MojoFailureException("Unknown base resource name: " + next);
 			}
 		}
+	}
+
+	public List<String> getInputStreamNames() {
+		return myInputStreamNames;
 	}
 
 	@Override

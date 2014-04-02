@@ -1,0 +1,1040 @@
+<?xml version="1.0"?>
+<?mso-application progid="Excel.Sheet"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:o="urn:schemas-microsoft-com:office:office"
+ xmlns:x="urn:schemas-microsoft-com:office:excel"
+ xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:html="http://www.w3.org/TR/REC-html40">
+ <DocumentProperties xmlns="urn:schemas-microsoft-com:office:office">
+  <Author>Grahame</Author>
+  <LastAuthor>Paul Knapp</LastAuthor>
+  <Created>2012-03-19T11:15:11Z</Created>
+  <LastSaved>2013-09-22T02:31:13Z</LastSaved>
+  <Version>14.00</Version>
+ </DocumentProperties>
+ <OfficeDocumentSettings xmlns="urn:schemas-microsoft-com:office:office">
+  <AllowPNG/>
+  <Colors>
+   <Color>
+    <Index>39</Index>
+    <RGB>#E3E3E3</RGB>
+   </Color>
+  </Colors>
+ </OfficeDocumentSettings>
+ <ExcelWorkbook xmlns="urn:schemas-microsoft-com:office:excel">
+  <WindowHeight>6285</WindowHeight>
+  <WindowWidth>22755</WindowWidth>
+  <WindowTopX>5520</WindowTopX>
+  <WindowTopY>6135</WindowTopY>
+  <ProtectStructure>False</ProtectStructure>
+  <ProtectWindows>False</ProtectWindows>
+ </ExcelWorkbook>
+ <Styles>
+  <Style ss:ID="Default" ss:Name="Normal">
+   <Alignment ss:Vertical="Bottom"/>
+   <Borders/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"/>
+   <Interior/>
+   <NumberFormat/>
+   <Protection/>
+  </Style>
+  <Style ss:ID="s62" ss:Name="Goed">
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="12" ss:Color="#008000"/>
+   <Interior ss:Color="#CCFFCC" ss:Pattern="Solid"/>
+  </Style>
+  <Style ss:ID="s63" ss:Name="Normal 2">
+   <Alignment ss:Vertical="Bottom"/>
+   <Borders/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"/>
+   <Interior/>
+   <NumberFormat/>
+   <Protection/>
+  </Style>
+  <Style ss:ID="s64">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:WrapText="1"/>
+  </Style>
+  <Style ss:ID="s65">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:WrapText="1"/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"
+    ss:Bold="1"/>
+  </Style>
+  <Style ss:ID="s66">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:ShrinkToFit="1"
+    ss:WrapText="1"/>
+   <Borders>
+    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1"/>
+   </Borders>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"
+    ss:Bold="1"/>
+   <Interior ss:Color="#EEECE1" ss:Pattern="Solid"/>
+  </Style>
+  <Style ss:ID="s67">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:ShrinkToFit="1"
+    ss:WrapText="1"/>
+   <Borders/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"
+    ss:Bold="1"/>
+   <Interior ss:Color="#EEECE1" ss:Pattern="Solid"/>
+  </Style>
+  <Style ss:ID="s68">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:WrapText="1"/>
+   <Interior ss:Color="#FFFF00" ss:Pattern="Solid"/>
+  </Style>
+  <Style ss:ID="s70" ss:Parent="s62">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:ShrinkToFit="1"
+    ss:WrapText="1"/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="12" ss:Color="#000000"/>
+   <Interior/>
+  </Style>
+  <Style ss:ID="s72" ss:Parent="s63">
+   <Alignment ss:Vertical="Top" ss:WrapText="1"/>
+   <Interior/>
+  </Style>
+  <Style ss:ID="s73">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:WrapText="1"/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"
+    ss:Bold="1"/>
+   <Interior ss:Color="#FFFF00" ss:Pattern="Solid"/>
+  </Style>
+  <Style ss:ID="s74">
+   <Alignment ss:Vertical="Bottom" ss:WrapText="1"/>
+  </Style>
+  <Style ss:ID="s75">
+   <Alignment ss:Vertical="Top" ss:WrapText="1"/>
+  </Style>
+  <Style ss:ID="s76">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:WrapText="1"/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"/>
+  </Style>
+  <Style ss:ID="s77">
+   <Alignment ss:Vertical="Top"/>
+  </Style>
+  <Style ss:ID="s78">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top"/>
+  </Style>
+  <Style ss:ID="s79">
+   <Alignment ss:Vertical="Top" ss:WrapText="1"/>
+   <Borders/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"/>
+   <Interior/>
+   <NumberFormat/>
+   <Protection/>
+  </Style>
+ </Styles>
+ <Worksheet ss:Name="Data Elements">
+  <Table ss:ExpandedColumnCount="21" ss:ExpandedRowCount="39" x:FullColumns="1"
+   x:FullRows="1" ss:StyleID="s64" ss:DefaultRowHeight="15">
+   <Column ss:StyleID="s65" ss:AutoFitWidth="0" ss:Width="187.5"/>
+   <Column ss:StyleID="s64" ss:AutoFitWidth="0" ss:Width="56.25"/>
+   <Column ss:StyleID="s64" ss:AutoFitWidth="0" ss:Width="25.5"/>
+   <Column ss:StyleID="s64" ss:AutoFitWidth="0" ss:Width="36.75" ss:Span="1"/>
+   <Column ss:Index="6" ss:StyleID="s64" ss:AutoFitWidth="0" ss:Width="126.75"/>
+   <Column ss:StyleID="s64" ss:AutoFitWidth="0" ss:Width="82.5"/>
+   <Column ss:StyleID="s64" ss:AutoFitWidth="0" ss:Width="213.75" ss:Span="1"/>
+   <Column ss:Index="10" ss:StyleID="s64" ss:AutoFitWidth="0" ss:Width="161.25"
+    ss:Span="1"/>
+   <Column ss:Index="12" ss:StyleID="s64" ss:AutoFitWidth="0" ss:Width="114"/>
+   <Column ss:StyleID="s64" ss:AutoFitWidth="0" ss:Width="135" ss:Span="1"/>
+   <Column ss:Index="18" ss:StyleID="s64" ss:AutoFitWidth="0" ss:Width="243"/>
+   <Row ss:AutoFitHeight="0" ss:Height="29.25" ss:StyleID="s66">
+    <Cell><Data ss:Type="String">Element</Data></Cell>
+    <Cell><Data ss:Type="String">Card.</Data></Cell>
+    <Cell><Data ss:Type="String">Inv.</Data></Cell>
+    <Cell><Data ss:Type="String">Is Modifier</Data></Cell>
+    <Cell><Data ss:Type="String">UML</Data></Cell>
+    <Cell><Data ss:Type="String">Type</Data></Cell>
+    <Cell><Data ss:Type="String">Binding</Data></Cell>
+    <Cell><Data ss:Type="String">Short Name</Data></Cell>
+    <Cell><Data ss:Type="String">Definition</Data></Cell>
+    <Cell><Data ss:Type="String">Requirements</Data></Cell>
+    <Cell><Data ss:Type="String">Comments</Data></Cell>
+    <Cell><Data ss:Type="String">Condition</Data></Cell>
+    <Cell><Data ss:Type="String">RIM Mapping</Data></Cell>
+    <Cell><Data ss:Type="String">v2 Mapping</Data></Cell>
+    <Cell><Data ss:Type="String">To Do</Data></Cell>
+    <Cell><Data ss:Type="String">Committee Notes</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="29.25" ss:StyleID="s67">
+    <Cell ss:StyleID="s65"><Data ss:Type="String">Claim</Data></Cell>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"><Data ss:Type="String">Resource</Data></Cell>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"><Data ss:Type="String">A claim</Data></Cell>
+    <Cell ss:StyleID="s64"><Data ss:Type="String">A claim</Data></Cell>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="29.25" ss:StyleID="s67">
+    <Cell ss:StyleID="s65"><Data ss:Type="String">Claim.number</Data></Cell>
+    <Cell ss:StyleID="s64"><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"><Data ss:Type="String">Identifier</Data></Cell>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"><Data ss:Type="String">Claim/Invoice number</Data></Cell>
+    <Cell ss:StyleID="s64"><Data ss:Type="String">The claim issuer and claim number</Data></Cell>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="29.25" ss:StyleID="s67">
+    <Cell ss:StyleID="s65"><Data ss:Type="String">Claim.servicedate</Data></Cell>
+    <Cell ss:StyleID="s64"><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"><Data ss:Type="String">date</Data></Cell>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"><Data ss:Type="String">Date of Service</Data></Cell>
+    <Cell ss:StyleID="s64"><Data ss:Type="String">The date when the enclosed suite of services were performed or completed</Data></Cell>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="29.25" ss:StyleID="s67">
+    <Cell ss:StyleID="s65"><Data ss:Type="String">Claim.provider</Data></Cell>
+    <Cell ss:StyleID="s64"><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"><Data ss:Type="String">Resource(Practitioner)</Data></Cell>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"><Data ss:Type="String">Responsible practitioner</Data></Cell>
+    <Cell ss:StyleID="s64"><Data ss:Type="String">The practitioner who is responsible for the services rendered to the patient</Data></Cell>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="29.25" ss:StyleID="s67">
+    <Cell ss:StyleID="s65"><Data ss:Type="String">Claim.billingProvider</Data></Cell>
+    <Cell ss:StyleID="s64"><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"><Data ss:Type="String">Resource(Practitioner)</Data></Cell>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"><Data ss:Type="String">Provider who is the payee</Data></Cell>
+    <Cell ss:StyleID="s64"><Data ss:Type="String">The provider who is to be reimbursed for the claim (the party to whom any benefit is assigned)</Data></Cell>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="29.25" ss:StyleID="s67">
+    <Cell ss:StyleID="s65"><Data ss:Type="String">Claim.referrer</Data></Cell>
+    <Cell ss:StyleID="s64"><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"><Data ss:Type="String">Resource(Practitioner)</Data></Cell>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"><Data ss:Type="String">Provider who is the payee</Data></Cell>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="29.25" ss:StyleID="s67">
+    <Cell ss:StyleID="s65"><Data ss:Type="String">Claim.reason</Data></Cell>
+    <Cell ss:StyleID="s64"><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"><Data ss:Type="String">CodeableConcept</Data></Cell>
+    <Cell ss:StyleID="s64"><Data ss:Type="String">ClaimReferral</Data></Cell>
+    <Cell ss:StyleID="s64"><Data ss:Type="String">Referal Reason</Data></Cell>
+    <Cell ss:StyleID="s64"><Data ss:Type="String">The reason code for the referral</Data></Cell>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="29.25" ss:StyleID="s67">
+    <Cell ss:StyleID="s65"><Data ss:Type="String">Claim.patient</Data></Cell>
+    <Cell ss:StyleID="s64"><Data ss:Type="String">1..1</Data></Cell>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"><Data ss:Type="String">left</Data></Cell>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"><Data ss:Type="String">Patient Details</Data></Cell>
+    <Cell ss:StyleID="s64"><Data ss:Type="String">Patient Details.</Data></Cell>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="29.25" ss:StyleID="s67">
+    <Cell ss:StyleID="s65"><Data ss:Type="String">Claim.patient.name</Data></Cell>
+    <Cell ss:StyleID="s64"><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"><Data ss:Type="String">HumanName</Data></Cell>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">Patient name</Data></Cell>
+    <Cell ss:StyleID="s64"><Data ss:Type="String">The name of the PolicyHolder</Data></Cell>
+    <Cell ss:StyleID="s64"><Data ss:Type="String">Used to validate coverage</Data></Cell>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="29.25" ss:StyleID="s67">
+    <Cell ss:StyleID="s65"><Data ss:Type="String">Claim.patient.address</Data></Cell>
+    <Cell ss:StyleID="s64"><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"><Data ss:Type="String">Address</Data></Cell>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">Patient address</Data></Cell>
+    <Cell ss:StyleID="s64"><Data ss:Type="String">The mailing address, typically home, of the PolicyHolder</Data></Cell>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="29.25" ss:StyleID="s67">
+    <Cell ss:StyleID="s65"><Data ss:Type="String">Claim.patient.birthdate</Data></Cell>
+    <Cell ss:StyleID="s64"><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"><Data ss:Type="String">date</Data></Cell>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">Patient date of birth</Data></Cell>
+    <Cell ss:StyleID="s64"><Data ss:Type="String">The date of birth of the PolicyHolder</Data></Cell>
+    <Cell ss:StyleID="s64"><Data ss:Type="String">Used to validate coverage</Data></Cell>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="29.25" ss:StyleID="s67">
+    <Cell ss:StyleID="s65"><Data ss:Type="String">Claim.patient.gender</Data></Cell>
+    <Cell ss:StyleID="s64"><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"><Data ss:Type="String">Coding</Data></Cell>
+    <Cell ss:StyleID="s70"><Data ss:Type="String">AdministrativeGender</Data></Cell>
+    <Cell ss:StyleID="s64"><Data ss:Type="String">Gender</Data></Cell>
+    <Cell ss:StyleID="s64"><Data ss:Type="String">Gender.</Data></Cell>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="30">
+    <Cell><Data ss:Type="String">Claim.coverage</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="String">right</Data></Cell>
+    <Cell ss:Index="8"><Data ss:Type="String">Insurance or medical plan</Data></Cell>
+    <Cell><Data ss:Type="String">Financial instrument by which payment information for health care</Data></Cell>
+    <Cell><Data ss:Type="String">Health care programs and insurers are significant payors of health service costs</Data></Cell>
+    <Cell ss:Index="13"><Data ss:Type="String">Coverage</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="30">
+    <Cell><Data ss:Type="String">Claim.coverage.issuer</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">Resource(Organization)</Data></Cell>
+    <Cell ss:Index="8"><Data ss:Type="String">An identifier for the plan issuer</Data></Cell>
+    <Cell><Data ss:Type="String">The program or plan underwriter or payor.</Data></Cell>
+    <Cell><Data ss:Type="String">Need to identify the issuer to target for processing and for coordination of benefit processing.</Data></Cell>
+    <Cell ss:Index="14" ss:StyleID="s72"><Data ss:Type="String">IN1-3-insurance company ID</Data></Cell>
+    <Cell ss:Index="18"><Data ss:Type="String">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&#10;&lt;Organization xmlns=&quot;http://hl7.org/fhir&quot; xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot; xsi:schemaLocation=&quot;http://hl7.org/fhir ..\..\schema\Organization.xsd&quot;&gt;&#10;  &lt;identifier&gt; &#10;    &lt;identifier&gt;&#10;      &lt;system&gt;oid:2.16.840.1.113883.3.19.2.3&lt;/system&gt;&#10;      &lt;id&gt;666666&lt;/id&gt;&#10;    &lt;/identifier&gt;&#10;  &lt;/identifier&gt;&#10;  &lt;name&gt;&#10;    &lt;value&gt;XYZ Insurance&lt;/value&gt;&#10;  &lt;/name&gt;&#10;   &#10;  &lt;text&gt;&#10;    &lt;status&gt;generated&lt;/status&gt;&#10;    &lt;div xmlns=&quot;http://www.w3.org/1999/xhtml&quot;&gt;&#10;      &lt;p&gt;XYZ Insurance&lt;/p&gt;&#10;    &lt;/div&gt;&#10;  &lt;/text&gt;&#10;&lt;/Organization&gt;</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="30" ss:StyleID="s68">
+    <Cell ss:StyleID="s73"><Data ss:Type="String">Claim.coverage.period</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">Period</Data></Cell>
+    <Cell ss:Index="8"><Data ss:Type="String">Coverage start and end dates</Data></Cell>
+    <Cell><Data ss:Type="String">Time period during which the coverage is in force. A missing start date indicates the start date isn't known, a missing end date means the coverage is continuing to be in force.</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="String">IN1-12-plan effective date / IN1-13-plan expiration date</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="30">
+    <Cell><Data ss:Type="String">Claim.coverage.type</Data></Cell>
+    <Cell><Data ss:Type="String">1..1</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">Coding</Data></Cell>
+    <Cell><Data ss:Type="String">CoverageTypeX</Data></Cell>
+    <Cell><Data ss:Type="String">Type of coverage</Data></Cell>
+    <Cell><Data ss:Type="String">The type of coverage: social program, medical plan, accident coverage (workers compensation, auto), group health. </Data></Cell>
+    <Cell><Data ss:Type="String">The order of application of coverages is dependent on the types of coverage.</Data></Cell>
+    <Cell ss:Index="14" ss:StyleID="s72"><Data ss:Type="String">IN1-15-plan type</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="49.5">
+    <Cell><Data ss:Type="String">Claim.coverage.identifier</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">Identifier</Data></Cell>
+    <Cell ss:Index="8" ss:StyleID="s68"><Data ss:Type="String">The primary coverage ID</Data></Cell>
+    <Cell><Data ss:Type="String">The main (and possibly only) identifier for the coverage - often referred to as a Subscriber Id, Certificate number or Personal Health Number or Case ID.</Data></Cell>
+    <Cell><Data ss:Type="String">This value may uniquely identify the coverage or it may be used in conjunction with the additional identifiers below.</Data></Cell>
+    <Cell ss:Index="14" ss:StyleID="s72"><Data ss:Type="String">IN1-2-health plan ID</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="49.5">
+    <Cell><Data ss:Type="String">Claim.coverage.group</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">Identifier</Data></Cell>
+    <Cell ss:Index="8" ss:StyleID="s68"><Data ss:Type="String">An identifier for the group</Data></Cell>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">Todo</Data></Cell>
+    <Cell ss:Index="14" ss:StyleID="s72"><Data ss:Type="String">IN1-8-group number</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="49.5">
+    <Cell><Data ss:Type="String">Claim.coverage.plan</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">Identifier</Data></Cell>
+    <Cell ss:Index="8" ss:StyleID="s68"><Data ss:Type="String">An identifier for the plan</Data></Cell>
+    <Cell><Data ss:Type="String">Identifies a style or collective of coverage issues by the underwriter, for example may be used to identify a class of coverage or employer group. May also be referred to as a Policy or Group ID.</Data></Cell>
+    <Cell ss:Index="14" ss:StyleID="s72"><Data ss:Type="String">IN1-35-company plan code</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="49.5">
+    <Cell><Data ss:Type="String">Claim.coverage.subplan</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">Identifier</Data></Cell>
+    <Cell ss:Index="8" ss:StyleID="s68"><Data ss:Type="String">An identifier for the subsection of the plan</Data></Cell>
+    <Cell><Data ss:Type="String">Identifies a sub-style or sub-collective of coverage issues by the underwriter, for example may be used to identify a specific employer group within a class of employers. May be referred to as a Section or Division ID.</Data></Cell>
+    <Cell ss:Index="14" ss:StyleID="s72"><Data ss:Type="String">IN1-10-insured's group emp ID</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="49.5">
+    <Cell><Data ss:Type="String">Claim.coverage.dependent</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">integer</Data></Cell>
+    <Cell ss:Index="8" ss:StyleID="s68"><Data ss:Type="String">The dependent number</Data></Cell>
+    <Cell><Data ss:Type="String">A unique identifier for a dependent under the coverage.</Data></Cell>
+    <Cell><Data ss:Type="String">For some coverage a single identifier is issued to the PolicyHolder and dependent number issues to each to each of their dependents to track and manage the plan.</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="String"> - No exact V2.x equivalent concept seems to exist; instance relationship can be inferred if ( ( PID-3-patient ID list ≠ IN1-49-insured's ID number ) &amp; ( Ǝ IN2-72-patient's relationship to insured ) )</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="49.5">
+    <Cell><Data ss:Type="String">Claim.coverage.sequence</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">integer</Data></Cell>
+    <Cell ss:Index="8"><Data ss:Type="String">The plan instance or sequence counter</Data></Cell>
+    <Cell><Data ss:Type="String">An optional counter for a particular instance of the identified coverage which increments upon each renewal.</Data></Cell>
+    <Cell><Data ss:Type="String">Some coverage, for example social plans, may be offered in short time increments, for example for a week or a month at a time, so while the rest of the plan details and identifiers may remain constant over time, the instance is incremented with each renewal and provided to the covered party on their 'card'.</Data></Cell>
+    <Cell ss:Index="14" ss:StyleID="s72"><Data ss:Type="String">No V2.x equivalent concept seems to exist</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="49.5">
+    <Cell><Data ss:Type="String">Claim.coverage.subscriber</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="String">right</Data></Cell>
+    <Cell ss:Index="8" ss:StyleID="s68"><Data ss:Type="String">Planholder information</Data></Cell>
+    <Cell><Data ss:Type="String">Th demographics for the individual in whose name the insurance coverage is issued.</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="30">
+    <Cell><Data ss:Type="String">Claim.coverage.subscriber.name</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">HumanName</Data></Cell>
+    <Cell ss:Index="8" ss:StyleID="s68"><Data ss:Type="String">PolicyHolder name</Data></Cell>
+    <Cell><Data ss:Type="String">The name of the PolicyHolder</Data></Cell>
+    <Cell><Data ss:Type="String">Used to validate coverage</Data></Cell>
+    <Cell ss:Index="14" ss:StyleID="s72"><Data ss:Type="String">IN1-16-name of insured</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="30">
+    <Cell><Data ss:Type="String">Claim.coverage.subscriber.address</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">Address</Data></Cell>
+    <Cell ss:Index="8" ss:StyleID="s68"><Data ss:Type="String">PolicyHolder address</Data></Cell>
+    <Cell><Data ss:Type="String">The mailing address, typically home, of the PolicyHolder</Data></Cell>
+    <Cell><Data ss:Type="String">Used to validate coverage</Data></Cell>
+    <Cell ss:Index="14" ss:StyleID="s72"><Data ss:Type="String">IN1-19-insured's address</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="30">
+    <Cell><Data ss:Type="String">Claim.coverage.subscriber.birthdate</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">date</Data></Cell>
+    <Cell ss:Index="8" ss:StyleID="s68"><Data ss:Type="String">PolicyHolder date of birth</Data></Cell>
+    <Cell><Data ss:Type="String">The date of birth of the PolicyHolder</Data></Cell>
+    <Cell><Data ss:Type="String">Used to validate coverage</Data></Cell>
+    <Cell ss:Index="14" ss:StyleID="s72"><Data ss:Type="String">IN1-18-insured's date of birth</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">Claim.exception</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">CodeableConcept</Data></Cell>
+    <Cell><Data ss:Type="String">ClaimException</Data></Cell>
+    <Cell><Data ss:Type="String">Eligibility exceptions</Data></Cell>
+    <Cell><Data ss:Type="String">Factors which may influence the appicability of coverage</Data></Cell>
+    <Cell><Data ss:Type="String">To determine extenuating circumstances for coverage </Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">Claim.relationship</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">CodeableConcept</Data></Cell>
+    <Cell><Data ss:Type="String">ClaimRelationship</Data></Cell>
+    <Cell><Data ss:Type="String">Patient relationship to subscriber</Data></Cell>
+    <Cell><Data ss:Type="String">The relationship of the patient to the subscriber</Data></Cell>
+    <Cell><Data ss:Type="String">To determine relationship between the patient and the subscriber</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">Claim.school</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">string</Data></Cell>
+    <Cell ss:Index="8"><Data ss:Type="String">Name of School</Data></Cell>
+    <Cell><Data ss:Type="String">Name of school</Data></Cell>
+    <Cell><Data ss:Type="String"> Often required for over-age dependents</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">Claim.service</Data></Cell>
+    <Cell><Data ss:Type="String">0..*</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="String">left</Data></Cell>
+    <Cell ss:Index="8"><Data ss:Type="String">Service Details</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">Claim.service.service</Data></Cell>
+    <Cell><Data ss:Type="String">1..1</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">CodeableConcept</Data></Cell>
+    <Cell><Data ss:Type="String">ClaimService</Data></Cell>
+    <Cell><Data ss:Type="String">Professional service code</Data></Cell>
+    <Cell><Data ss:Type="String">The code for the professional service provided.</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">Claim.service.instance</Data></Cell>
+    <Cell><Data ss:Type="String">1..1</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">integer</Data></Cell>
+    <Cell ss:Index="8"><Data ss:Type="String">Service instance</Data></Cell>
+    <Cell><Data ss:Type="String">A service line item.</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">Claim.service.fee</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">decimal</Data></Cell>
+    <Cell ss:Index="8"><Data ss:Type="String">Professional fee</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">Claim.service.location</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">CodeableConcept</Data></Cell>
+    <Cell><Data ss:Type="String">ClaimTooth</Data></Cell>
+    <Cell><Data ss:Type="String">Service Location</Data></Cell>
+    <Cell><Data ss:Type="String">Code for the oral cavity, tooth, quadrant, sextant or arch.</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">Claim.service.surface</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">CodeableConcept</Data></Cell>
+    <Cell><Data ss:Type="String">ClaimSurface</Data></Cell>
+    <Cell><Data ss:Type="String">Tooth surface</Data></Cell>
+    <Cell><Data ss:Type="String">Tooth surface(s) involved in the restoration.</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">Claim.service.lab</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:Index="8"><Data ss:Type="String">Lab Details</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">Claim.service.lab.service</Data></Cell>
+    <Cell><Data ss:Type="String">1..1</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">CodeableConcept</Data></Cell>
+    <Cell><Data ss:Type="String">ClaimService</Data></Cell>
+    <Cell><Data ss:Type="String">Lab service code</Data></Cell>
+    <Cell><Data ss:Type="String">The code for the lab service provided.</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">Claim.service.lab.fee</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">decimal</Data></Cell>
+    <Cell ss:Index="8"><Data ss:Type="String">Lab fee</Data></Cell>
+    <Cell><Data ss:Type="String">The amount to reimbuse for a laboratory service.</Data></Cell>
+    <Cell><Data ss:Type="String">If a fee is present the associated lab service code SHALL be present</Data></Cell>
+   </Row>
+  </Table>
+  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+   <PageSetup>
+    <Header x:Margin="0.3"/>
+    <Footer x:Margin="0.3"/>
+    <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
+   </PageSetup>
+   <Unsynced/>
+   <Print>
+    <ValidPrinterInfo/>
+    <VerticalResolution>0</VerticalResolution>
+   </Print>
+   <Selected/>
+   <FreezePanes/>
+   <FrozenNoSplit/>
+   <SplitHorizontal>1</SplitHorizontal>
+   <TopRowBottomPane>15</TopRowBottomPane>
+   <SplitVertical>1</SplitVertical>
+   <LeftColumnRightPane>1</LeftColumnRightPane>
+   <ActivePane>0</ActivePane>
+   <Panes>
+    <Pane>
+     <Number>3</Number>
+    </Pane>
+    <Pane>
+     <Number>1</Number>
+    </Pane>
+    <Pane>
+     <Number>2</Number>
+     <ActiveRow>1</ActiveRow>
+    </Pane>
+    <Pane>
+     <Number>0</Number>
+     <ActiveRow>31</ActiveRow>
+    </Pane>
+   </Panes>
+   <ProtectObjects>False</ProtectObjects>
+   <ProtectScenarios>False</ProtectScenarios>
+  </WorksheetOptions>
+ </Worksheet>
+ <Worksheet ss:Name="Invariants">
+  <Table ss:ExpandedColumnCount="6" ss:ExpandedRowCount="1" x:FullColumns="1"
+   x:FullRows="1" ss:StyleID="s74" ss:DefaultRowHeight="15">
+   <Row ss:AutoFitHeight="0" ss:Height="16.5" ss:StyleID="s66">
+    <Cell><Data ss:Type="String">Id</Data></Cell>
+    <Cell><Data ss:Type="String">Name</Data></Cell>
+    <Cell><Data ss:Type="String">Context</Data></Cell>
+    <Cell><Data ss:Type="String">English</Data></Cell>
+    <Cell><Data ss:Type="String">OCL</Data></Cell>
+    <Cell><Data ss:Type="String">XPath</Data></Cell>
+   </Row>
+  </Table>
+  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+   <PageSetup>
+    <Header x:Margin="0.3"/>
+    <Footer x:Margin="0.3"/>
+    <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
+   </PageSetup>
+   <Unsynced/>
+   <Panes>
+    <Pane>
+     <Number>3</Number>
+     <RangeSelection>R1</RangeSelection>
+    </Pane>
+   </Panes>
+   <ProtectObjects>False</ProtectObjects>
+   <ProtectScenarios>False</ProtectScenarios>
+  </WorksheetOptions>
+ </Worksheet>
+ <Worksheet ss:Name="Events">
+  <Table ss:ExpandedColumnCount="6" ss:ExpandedRowCount="2" x:FullColumns="1"
+   x:FullRows="1" ss:DefaultRowHeight="15">
+   <Column ss:AutoFitWidth="0" ss:Width="63.75"/>
+   <Column ss:AutoFitWidth="0" ss:Width="138" ss:Span="1"/>
+   <Column ss:Index="4" ss:AutoFitWidth="0" ss:Width="102"/>
+   <Column ss:AutoFitWidth="0" ss:Width="101.25"/>
+   <Column ss:AutoFitWidth="0" ss:Width="69.75"/>
+   <Row ss:AutoFitHeight="0" ss:Height="21.75" ss:StyleID="s66">
+    <Cell><Data ss:Type="String">Event Code</Data></Cell>
+    <Cell><Data ss:Type="String">Description</Data></Cell>
+    <Cell><Data ss:Type="String">Notes</Data></Cell>
+    <Cell><Data ss:Type="String">Request Resources</Data></Cell>
+    <Cell><Data ss:Type="String">Response Resources</Data></Cell>
+    <Cell><Data ss:Type="String">Follow Ups</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="110.25">
+    <Cell ss:StyleID="s75"><Data ss:Type="String">new</Data></Cell>
+    <Cell ss:StyleID="s75"><Data ss:Type="String">send a claim and get a remittance</Data></Cell>
+    <Cell ss:StyleID="s75"/>
+    <Cell ss:StyleID="s75"><Data ss:Type="String">Claim</Data></Cell>
+    <Cell ss:StyleID="s75"><Data ss:Type="String">Remittance</Data></Cell>
+   </Row>
+  </Table>
+  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+   <PageSetup>
+    <Header x:Margin="0.3"/>
+    <Footer x:Margin="0.3"/>
+    <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
+   </PageSetup>
+   <Unsynced/>
+   <Panes>
+    <Pane>
+     <Number>3</Number>
+     <ActiveRow>1</ActiveRow>
+     <ActiveCol>5</ActiveCol>
+    </Pane>
+   </Panes>
+   <ProtectObjects>False</ProtectObjects>
+   <ProtectScenarios>False</ProtectScenarios>
+  </WorksheetOptions>
+ </Worksheet>
+ <Worksheet ss:Name="Search">
+  <Table ss:ExpandedColumnCount="4" ss:ExpandedRowCount="10" x:FullColumns="1"
+   x:FullRows="1" ss:DefaultRowHeight="15">
+   <Column ss:AutoFitWidth="0" ss:Width="70.5"/>
+   <Column ss:AutoFitWidth="0" ss:Width="382.5"/>
+   <Column ss:Index="4" ss:AutoFitWidth="0" ss:Width="152.25"/>
+   <Row ss:AutoFitHeight="0" ss:Height="16.5" ss:StyleID="s66">
+    <Cell><Data ss:Type="String">Name</Data></Cell>
+    <Cell><Data ss:Type="String">Description</Data></Cell>
+    <Cell><Data ss:Type="String">Type</Data></Cell>
+    <Cell><Data ss:Type="String">Path</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">number</Data></Cell>
+    <Cell ss:Index="3"><Data ss:Type="String">token</Data></Cell>
+    <Cell ss:StyleID="s65"><Data ss:Type="String">Claim.number</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:Index="4" ss:StyleID="s76"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:Index="4" ss:StyleID="s76"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:Index="4" ss:StyleID="s76"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:Index="4" ss:StyleID="s76"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:Index="4" ss:StyleID="s76"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:Index="4" ss:StyleID="s76"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:Index="4" ss:StyleID="s76"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:Index="4" ss:StyleID="s76"/>
+   </Row>
+  </Table>
+  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+   <PageSetup>
+    <Header x:Margin="0.3"/>
+    <Footer x:Margin="0.3"/>
+    <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
+   </PageSetup>
+   <Unsynced/>
+   <Print>
+    <ValidPrinterInfo/>
+    <PaperSizeIndex>9</PaperSizeIndex>
+    <HorizontalResolution>-3</HorizontalResolution>
+    <VerticalResolution>-3</VerticalResolution>
+   </Print>
+   <Panes>
+    <Pane>
+     <Number>3</Number>
+     <ActiveRow>4</ActiveRow>
+     <ActiveCol>2</ActiveCol>
+    </Pane>
+   </Panes>
+   <ProtectObjects>False</ProtectObjects>
+   <ProtectScenarios>False</ProtectScenarios>
+  </WorksheetOptions>
+ </Worksheet>
+ <Worksheet ss:Name="Bindings">
+  <Table ss:ExpandedColumnCount="8" ss:ExpandedRowCount="8" x:FullColumns="1"
+   x:FullRows="1" ss:StyleID="s77" ss:DefaultRowHeight="15">
+   <Column ss:StyleID="s77" ss:AutoFitWidth="0" ss:Width="114.75"/>
+   <Column ss:StyleID="s77" ss:AutoFitWidth="0" ss:Width="201.75"/>
+   <Column ss:StyleID="s77" ss:AutoFitWidth="0" ss:Width="53.25"/>
+   <Column ss:StyleID="s77" ss:AutoFitWidth="0" ss:Width="130.5"/>
+   <Column ss:StyleID="s77" ss:AutoFitWidth="0" ss:Width="214.5"/>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s66"><Data ss:Type="String">Binding Name</Data></Cell>
+    <Cell ss:StyleID="s66"><Data ss:Type="String">Definition</Data></Cell>
+    <Cell ss:StyleID="s66"><Data ss:Type="String">Binding</Data></Cell>
+    <Cell ss:StyleID="s66"><Data ss:Type="String">Reference</Data></Cell>
+    <Cell ss:StyleID="s66"><Data ss:Type="String">Description</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="45">
+    <Cell ss:StyleID="s64"><Data ss:Type="String">CoverageTypeX</Data></Cell>
+    <Cell ss:StyleID="s75"><Data ss:Type="String">The type of insurance: public health, worker compensation; private accident, auto, private health, etc.)</Data></Cell>
+    <Cell><Data ss:Type="String">value set</Data></Cell>
+    <Cell ss:StyleID="s78"><Data ss:Type="String">http://hl7.org/fhir/v3/vs/ActCoverageTypeCode</Data></Cell>
+    <Cell ss:Index="7"><Data ss:Type="String">DENTPRG</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="30">
+    <Cell ss:StyleID="s64"><Data ss:Type="String">ClaimTooth</Data></Cell>
+    <Cell ss:StyleID="s75"><Data ss:Type="String">The code for the teeth, quadrant, sextant and arch</Data></Cell>
+    <Cell><Data ss:Type="String">value set</Data></Cell>
+    <Cell ss:StyleID="s78"><Data ss:Type="String">valueset-tooth</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="30">
+    <Cell ss:StyleID="s64"><Data ss:Type="String">ClaimSurface</Data></Cell>
+    <Cell ss:StyleID="s75"><Data ss:Type="String">The code for the tooth surface and surface combinations</Data></Cell>
+    <Cell><Data ss:Type="String">value set</Data></Cell>
+    <Cell ss:StyleID="s78"><Data ss:Type="String">valueset-surface</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s64"><Data ss:Type="String">ClaimException</Data></Cell>
+    <Cell ss:StyleID="s75"><Data ss:Type="String">The code for the relationship of the patient to the subscriber</Data></Cell>
+    <Cell ss:Index="7"><Data ss:Type="String">value set</Data></Cell>
+    <Cell ss:StyleID="s78"><Data ss:Type="String">valueset-exception</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s64"><Data ss:Type="String">ClaimRelationship</Data></Cell>
+    <Cell ss:StyleID="s75"><Data ss:Type="String">The eligibility exception codes.</Data></Cell>
+    <Cell><Data ss:Type="String">value set</Data></Cell>
+    <Cell ss:StyleID="s78"><Data ss:Type="String">valueset-relationship</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s75"><Data ss:Type="String">ClaimReferral</Data></Cell>
+    <Cell ss:StyleID="s75"><Data ss:Type="String">The referral reason codes.</Data></Cell>
+    <Cell><Data ss:Type="String">value set</Data></Cell>
+    <Cell ss:StyleID="s78"><Data ss:Type="String">valueset-referral</Data></Cell>
+    <Cell ss:StyleID="s79"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">ClaimService</Data></Cell>
+    <Cell><Data ss:Type="String">A service</Data></Cell>
+   </Row>
+  </Table>
+  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+   <PageSetup>
+    <Header x:Margin="0.3"/>
+    <Footer x:Margin="0.3"/>
+    <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
+   </PageSetup>
+   <Unsynced/>
+   <Panes>
+    <Pane>
+     <Number>3</Number>
+     <ActiveRow>2</ActiveRow>
+     <ActiveCol>3</ActiveCol>
+    </Pane>
+   </Panes>
+   <ProtectObjects>False</ProtectObjects>
+   <ProtectScenarios>False</ProtectScenarios>
+  </WorksheetOptions>
+ </Worksheet>
+ <Worksheet ss:Name="Examples">
+  <Table ss:ExpandedColumnCount="6" ss:ExpandedRowCount="1" x:FullColumns="1"
+   x:FullRows="1" ss:DefaultRowHeight="15">
+   <Column ss:AutoFitWidth="0" ss:Width="150"/>
+   <Column ss:AutoFitWidth="0" ss:Width="247.5"/>
+   <Column ss:AutoFitWidth="0" ss:Width="48.75"/>
+   <Column ss:AutoFitWidth="0" ss:Width="182.25"/>
+   <Column ss:AutoFitWidth="0" ss:Width="75.75"/>
+   <Column ss:AutoFitWidth="0" ss:Width="188.25"/>
+   <Row ss:AutoFitHeight="0" ss:Height="30">
+    <Cell ss:StyleID="s66"><Data ss:Type="String">Name</Data></Cell>
+    <Cell ss:StyleID="s66"><Data ss:Type="String">Description</Data></Cell>
+    <Cell ss:StyleID="s66"><Data ss:Type="String">Identity</Data></Cell>
+    <Cell ss:StyleID="s66"><Data ss:Type="String">Filename</Data></Cell>
+    <Cell ss:StyleID="s66"><Data ss:Type="String">Type</Data></Cell>
+    <Cell ss:StyleID="s66"><Data ss:Type="String">In Book</Data></Cell>
+   </Row>
+  </Table>
+  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+   <PageSetup>
+    <Header x:Margin="0.3"/>
+    <Footer x:Margin="0.3"/>
+    <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
+   </PageSetup>
+   <Unsynced/>
+   <Panes>
+    <Pane>
+     <Number>3</Number>
+     <ActiveRow>15</ActiveRow>
+     <ActiveCol>3</ActiveCol>
+    </Pane>
+   </Panes>
+   <ProtectObjects>False</ProtectObjects>
+   <ProtectScenarios>False</ProtectScenarios>
+  </WorksheetOptions>
+ </Worksheet>
+ <Worksheet ss:Name="Removed Elements">
+  <Table ss:ExpandedColumnCount="21" ss:ExpandedRowCount="5" x:FullColumns="1"
+   x:FullRows="1" ss:DefaultRowHeight="15">
+   <Column ss:AutoFitWidth="0" ss:Width="168.75"/>
+   <Column ss:Index="4" ss:AutoFitWidth="0" ss:Width="63.75"/>
+   <Row ss:AutoFitHeight="0" ss:Height="30">
+    <Cell ss:StyleID="s66"><Data ss:Type="String">Element</Data></Cell>
+    <Cell ss:StyleID="s66"><Data ss:Type="String">Card.</Data></Cell>
+    <Cell ss:StyleID="s66"><Data ss:Type="String">Inv.</Data></Cell>
+    <Cell ss:StyleID="s66"><Data ss:Type="String">Must Understand</Data></Cell>
+    <Cell ss:StyleID="s66"><Data ss:Type="String">UML</Data></Cell>
+    <Cell ss:StyleID="s66"><Data ss:Type="String">Type</Data></Cell>
+    <Cell ss:StyleID="s66"><Data ss:Type="String">Binding</Data></Cell>
+    <Cell ss:StyleID="s66"><Data ss:Type="String">Short Name</Data></Cell>
+    <Cell ss:StyleID="s66"><Data ss:Type="String">Definition</Data></Cell>
+    <Cell ss:StyleID="s66"><Data ss:Type="String">Requirements</Data></Cell>
+    <Cell ss:StyleID="s66"><Data ss:Type="String">Comments</Data></Cell>
+    <Cell ss:StyleID="s66"><Data ss:Type="String">Condition</Data></Cell>
+    <Cell ss:StyleID="s66"><Data ss:Type="String">RIM Mapping</Data></Cell>
+    <Cell ss:StyleID="s66"><Data ss:Type="String">v2 Mapping</Data></Cell>
+    <Cell ss:StyleID="s66"><Data ss:Type="String">To Do</Data></Cell>
+    <Cell ss:StyleID="s66"><Data ss:Type="String">Committee Notes</Data></Cell>
+    <Cell ss:StyleID="s66"/>
+    <Cell ss:StyleID="s66"><Data ss:Type="String">Vocab</Data></Cell>
+    <Cell ss:Index="20" ss:StyleID="s67"><Data ss:Type="String">Example</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="105">
+    <Cell ss:StyleID="s65"><Data ss:Type="String">Coverage.planHolder.language</Data></Cell>
+    <Cell ss:StyleID="s64"><Data ss:Type="String">1..1</Data></Cell>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"><Data ss:Type="String">y</Data></Cell>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"><Data ss:Type="String">Coding</Data></Cell>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"><Data ss:Type="String">Written language for communications</Data></Cell>
+    <Cell ss:StyleID="s64"><Data ss:Type="String">The language to be used for written communications.</Data></Cell>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:Index="19"><Data ss:Type="String">Was inside the planHolder </Data></Cell>
+    <Cell ss:Index="21"><Data ss:Type="String">&lt;language&gt;</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:Index="21"><Data ss:Type="String">   &lt;system&gt;http://hl7.org/vocab/v3/Language&lt;/system&gt;</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="270">
+    <Cell ss:StyleID="s65"><Data ss:Type="String">Coverage.exception</Data></Cell>
+    <Cell ss:StyleID="s64"><Data ss:Type="String">0..*</Data></Cell>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"><Data ss:Type="String">y</Data></Cell>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"><Data ss:Type="String">Coding</Data></Cell>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"><Data ss:Type="String">List of policy exception codes</Data></Cell>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"><Data ss:Type="String">Special policy coverage may be extended to: students and persons with special needs. (May be coded using only the field above)</Data></Cell>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:Index="21"><Data ss:Type="String">   &lt;code&gt;EN&lt;/code&gt;</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="330">
+    <Cell ss:StyleID="s65"><Data ss:Type="String">Coverage.authorization</Data></Cell>
+    <Cell ss:StyleID="s64"><Data ss:Type="String">0..*</Data></Cell>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"><Data ss:Type="String">y</Data></Cell>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"><Data ss:Type="String">string</Data></Cell>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"><Data ss:Type="String">List of authorization codes </Data></Cell>
+    <Cell ss:StyleID="s64"><Data ss:Type="String">List of special authorization codes which may apply to the services being reported.</Data></Cell>
+    <Cell ss:StyleID="s64"><Data ss:Type="String">When authorizations or predeterminations have been received for services then the references should be supplied when reporting on or claiming for those services.</Data></Cell>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"/>
+    <Cell ss:StyleID="s64"><Data ss:Type="String">  &lt;authorization&gt;RC74387546&lt;/authorization&gt;</Data></Cell>
+    <Cell ss:StyleID="s64"/>
+   </Row>
+  </Table>
+  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+   <PageSetup>
+    <Header x:Margin="0.3"/>
+    <Footer x:Margin="0.3"/>
+    <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
+   </PageSetup>
+   <Unsynced/>
+   <Panes>
+    <Pane>
+     <Number>3</Number>
+     <ActiveRow>4</ActiveRow>
+     <RangeSelection>R5C1:R5C13</RangeSelection>
+    </Pane>
+   </Panes>
+   <ProtectObjects>False</ProtectObjects>
+   <ProtectScenarios>False</ProtectScenarios>
+  </WorksheetOptions>
+ </Worksheet>
+</Workbook>

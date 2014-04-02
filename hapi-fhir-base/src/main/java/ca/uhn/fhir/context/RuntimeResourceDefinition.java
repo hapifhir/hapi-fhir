@@ -240,10 +240,13 @@ private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger
 		if (nextDef instanceof RuntimeResourceReferenceDefinition) {
 			RuntimeResourceReferenceDefinition rr = (RuntimeResourceReferenceDefinition) nextDef;
 			for (Class<? extends IResource> next : rr.getResourceTypes()) {
-				RuntimeResourceDefinition resDef = rr.getDefinitionForResourceType(next);
 				StructureElementDefinitionType type = elem.getDefinition().addType();
 				type.getCode().setValue("ResourceReference");
-				type.getProfile().setValueAsString(resDef.getResourceProfile());
+				
+				if (next != IResource.class) {
+					RuntimeResourceDefinition resDef = rr.getDefinitionForResourceType(next);
+					type.getProfile().setValueAsString(resDef.getResourceProfile());
+				}
 			}
 
 			return;

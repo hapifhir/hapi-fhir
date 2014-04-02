@@ -8,6 +8,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.apache.commons.lang3.text.WordUtils;
+
 import ca.uhn.fhir.model.api.BaseResourceReference;
 import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.api.IDatatype;
@@ -50,26 +52,26 @@ public class RuntimeChildUndeclaredExtensionDefinition extends BaseRuntimeChildD
 	@Override
 	void sealAndInitialize(Map<Class<? extends IElement>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
 		Map<String, BaseRuntimeElementDefinition<?>> datatypeAttributeNameToDefinition=new HashMap<String, BaseRuntimeElementDefinition<?>>();
+		myDatatypeToAttributeName = new HashMap<Class<? extends IElement>, String>();
 		
 		for (BaseRuntimeElementDefinition<?> next : theClassToElementDefinitions.values()) {
 			if (next instanceof IRuntimeDatatypeDefinition) {
 				if (!((IRuntimeDatatypeDefinition) next).isSpecialization()) {
-					String attrName = "value" + next.getName().substring(0, 1).toUpperCase() + next.getName().substring(1);
+					String attrName = "value" + WordUtils.capitalize(next.getName());
 					datatypeAttributeNameToDefinition.put(attrName, next);
 					datatypeAttributeNameToDefinition.put(attrName.toLowerCase(), next);
+					myDatatypeToAttributeName.put(next.getImplementingClass(), attrName);
 				}
 			}
 		}
 		
 		myAttributeNameToDefinition=datatypeAttributeNameToDefinition;
 		
-		myDatatypeToAttributeName = new HashMap<Class<? extends IElement>, String>();
 		myDatatypeToDefinition = new HashMap<Class<? extends IElement>, BaseRuntimeElementDefinition<?>>();
 
 		for (Entry<String, BaseRuntimeElementDefinition<?>> next : myAttributeNameToDefinition.entrySet()) {
 			@SuppressWarnings("unchecked")
 			Class<? extends IDatatype> type = (Class<? extends IDatatype>) next.getValue().getImplementingClass();
-			myDatatypeToAttributeName.put(type, next.getKey());
 			myDatatypeToDefinition.put(type, next.getValue());
 		}
 		

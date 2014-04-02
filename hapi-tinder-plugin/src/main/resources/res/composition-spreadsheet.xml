@@ -1,0 +1,1285 @@
+<?xml version="1.0"?>
+<?mso-application progid="Excel.Sheet"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:o="urn:schemas-microsoft-com:office:office"
+ xmlns:x="urn:schemas-microsoft-com:office:excel"
+ xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:html="http://www.w3.org/TR/REC-html40">
+ <DocumentProperties xmlns="urn:schemas-microsoft-com:office:office">
+  <Author>Grahame</Author>
+  <LastAuthor>Lloyd McKenzie</LastAuthor>
+  <Created>2012-03-19T11:20:02Z</Created>
+  <LastSaved>2014-01-29T07:56:53Z</LastSaved>
+  <Version>14.00</Version>
+ </DocumentProperties>
+ <OfficeDocumentSettings xmlns="urn:schemas-microsoft-com:office:office">
+  <AllowPNG/>
+ </OfficeDocumentSettings>
+ <ExcelWorkbook xmlns="urn:schemas-microsoft-com:office:excel">
+  <WindowHeight>11400</WindowHeight>
+  <WindowWidth>28800</WindowWidth>
+  <WindowTopX>0</WindowTopX>
+  <WindowTopY>1425</WindowTopY>
+  <TabRatio>666</TabRatio>
+  <ActiveSheet>2</ActiveSheet>
+  <ProtectStructure>False</ProtectStructure>
+  <ProtectWindows>False</ProtectWindows>
+ </ExcelWorkbook>
+ <Styles>
+  <Style ss:ID="Default" ss:Name="Normal">
+   <Alignment ss:Vertical="Bottom"/>
+   <Borders/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"/>
+   <Interior/>
+   <NumberFormat/>
+   <Protection/>
+  </Style>
+  <Style ss:ID="s62" ss:Name="Normal 2">
+   <Alignment ss:Vertical="Bottom"/>
+   <Borders/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"/>
+   <Interior/>
+   <NumberFormat/>
+   <Protection/>
+  </Style>
+  <Style ss:ID="s63" ss:Name="Normal 3">
+   <Alignment ss:Vertical="Bottom"/>
+   <Borders/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"/>
+   <Interior/>
+   <NumberFormat/>
+   <Protection/>
+  </Style>
+  <Style ss:ID="s64">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:ShrinkToFit="1"
+    ss:WrapText="1"/>
+  </Style>
+  <Style ss:ID="s65">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:ShrinkToFit="1"
+    ss:WrapText="1"/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"
+    ss:Bold="1"/>
+  </Style>
+  <Style ss:ID="s66">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:ShrinkToFit="1"
+    ss:WrapText="1"/>
+   <Borders>
+    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1"/>
+   </Borders>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"
+    ss:Bold="1"/>
+   <Interior ss:Color="#FFFFFF" ss:Pattern="Solid"/>
+  </Style>
+  <Style ss:ID="s67">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:ShrinkToFit="1"
+    ss:WrapText="1"/>
+   <Interior ss:Color="#C0C0C0" ss:Pattern="Solid"/>
+  </Style>
+  <Style ss:ID="s69">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:ShrinkToFit="1"
+    ss:WrapText="1"/>
+   <Borders/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"/>
+   <Interior/>
+   <NumberFormat/>
+   <Protection/>
+  </Style>
+  <Style ss:ID="s71" ss:Parent="s63">
+   <Alignment ss:Vertical="Top" ss:WrapText="1"/>
+   <Interior/>
+  </Style>
+  <Style ss:ID="s72">
+   <Alignment ss:Vertical="Top" ss:WrapText="1"/>
+  </Style>
+  <Style ss:ID="s74">
+   <Alignment ss:Vertical="Top" ss:ShrinkToFit="1" ss:WrapText="1"/>
+  </Style>
+  <Style ss:ID="s75">
+   <Alignment ss:Vertical="Top"/>
+  </Style>
+  <Style ss:ID="s78">
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"/>
+  </Style>
+  <Style ss:ID="s79">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:ShrinkToFit="1"
+    ss:WrapText="1"/>
+   <Borders/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"/>
+   <Interior ss:Color="#FFFFFF" ss:Pattern="Solid"/>
+  </Style>
+  <Style ss:ID="s80">
+   <Alignment ss:Vertical="Bottom" ss:WrapText="1"/>
+  </Style>
+  <Style ss:ID="s81">
+   <Interior ss:Color="#FFFFFF" ss:Pattern="Solid"/>
+  </Style>
+  <Style ss:ID="s82">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top"/>
+  </Style>
+  <Style ss:ID="s83">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:ShrinkToFit="1"
+    ss:WrapText="1"/>
+   <Borders>
+    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1"/>
+   </Borders>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"
+    ss:Bold="1"/>
+   <Interior ss:Color="#EEECE1" ss:Pattern="Solid"/>
+  </Style>
+  <Style ss:ID="s84" ss:Parent="s62">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:WrapText="1"/>
+   <Borders/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"/>
+   <Interior/>
+   <NumberFormat/>
+   <Protection/>
+  </Style>
+  <Style ss:ID="s85">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:WrapText="1"/>
+  </Style>
+ </Styles>
+ <Worksheet ss:Name="Data Elements">
+  <Table ss:ExpandedColumnCount="17" ss:ExpandedRowCount="40" x:FullColumns="1"
+   x:FullRows="1" ss:StyleID="s64" ss:DefaultColumnWidth="65.25"
+   ss:DefaultRowHeight="15">
+   <Column ss:StyleID="s65" ss:Width="189"/>
+   <Column ss:StyleID="s64" ss:AutoFitWidth="0" ss:Width="56.25"/>
+   <Column ss:StyleID="s64" ss:AutoFitWidth="0" ss:Width="27.75"/>
+   <Column ss:StyleID="s64" ss:AutoFitWidth="0" ss:Width="33.75" ss:Span="1"/>
+   <Column ss:Index="6" ss:StyleID="s64" ss:AutoFitWidth="0" ss:Width="126.75"/>
+   <Column ss:StyleID="s64" ss:AutoFitWidth="0" ss:Width="83.25"/>
+   <Column ss:StyleID="s64" ss:AutoFitWidth="0" ss:Width="213.75" ss:Span="1"/>
+   <Column ss:Index="10" ss:StyleID="s64" ss:AutoFitWidth="0" ss:Width="54"/>
+   <Column ss:StyleID="s64" ss:AutoFitWidth="0" ss:Width="161.25" ss:Span="1"/>
+   <Column ss:Index="13" ss:StyleID="s64" ss:AutoFitWidth="0" ss:Width="176.25"
+    ss:Span="1"/>
+   <Column ss:Index="15" ss:StyleID="s64" ss:AutoFitWidth="0" ss:Width="135"/>
+   <Column ss:StyleID="s64" ss:AutoFitWidth="0" ss:Width="239.25"/>
+   <Row ss:Height="45" ss:StyleID="s66">
+    <Cell><Data ss:Type="String">Element</Data></Cell>
+    <Cell><Data ss:Type="String">Card.</Data></Cell>
+    <Cell><Data ss:Type="String">Inv.</Data></Cell>
+    <Cell><Data ss:Type="String">Is Modifier</Data></Cell>
+    <Cell><Data ss:Type="String">UML</Data></Cell>
+    <Cell><Data ss:Type="String">Type</Data></Cell>
+    <Cell><Data ss:Type="String">Binding</Data></Cell>
+    <Cell><Data ss:Type="String">Short Name</Data></Cell>
+    <Cell><Data ss:Type="String">Definition</Data></Cell>
+    <Cell><Data ss:Type="String">Summary</Data></Cell>
+    <Cell><Data ss:Type="String">Requirements</Data></Cell>
+    <Cell><Data ss:Type="String">Comments</Data></Cell>
+    <Cell><Data ss:Type="String">RIM Mapping</Data></Cell>
+    <Cell><Data ss:Type="String">CDA Mapping</Data></Cell>
+    <Cell><Data ss:Type="String">v2 Mapping</Data></Cell>
+    <Cell><Data ss:Type="String">To Do</Data></Cell>
+    <Cell><Data ss:Type="String">Committee Notes</Data></Cell>
+   </Row>
+   <Row ss:Height="135">
+    <Cell><Data ss:Type="String">Composition</Data></Cell>
+    <Cell ss:StyleID="s67"/>
+    <Cell ss:StyleID="s67"/>
+    <Cell ss:StyleID="s67"/>
+    <Cell ss:StyleID="s67"/>
+    <Cell><Data ss:Type="String">Resource</Data></Cell>
+    <Cell ss:Index="8"><Data ss:Type="String">A set of resources composed into a single coherent clinical statement with clinical attestation</Data></Cell>
+    <Cell><Data ss:Type="String">A set of healthcare-related information that is assembled together into a single logical document that provides a single coherent statement of meaning, establishes its own context and that has clinical attestation with regard to who is making the statement. &#10;</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">To support documents, and also to capture the EN13606 notion of an attested commit to the patient EHR, and to allow a set of disparate resources at the information/engineering level to be gathered into a clinical statement</Data></Cell>
+    <Cell><Data ss:Type="String">While the focus of this specification is on patient-specific clinical statements, this resource can also apply to other healthcare-related statements such as study protocol designs, healthcare invoices and other activities that are not necessarily patient-specific or clinical</Data></Cell>
+    <Cell><Data ss:Type="String">Document[classCode=&quot;DOC&quot; and moodCode=&quot;EVN&quot; and isNormalAct()]</Data></Cell>
+    <Cell><Data ss:Type="String">ClinicalDocument</Data></Cell>
+   </Row>
+   <Row ss:Height="60">
+    <Cell><Data ss:Type="String">Composition.identifier</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+    <Cell><Data ss:Type="String">Identifier</Data></Cell>
+    <Cell ss:StyleID="Default"/>
+    <Cell><Data ss:Type="String">Logical identifier of composition (version-independent)</Data></Cell>
+    <Cell><Data ss:Type="String">Logical Identifier for the composition, assigned when created. This identifier stays constant as the composition is changed over time</Data></Cell>
+    <Cell><Data ss:Type="String">y</Data></Cell>
+    <Cell ss:StyleID="Default"/>
+    <Cell><Data ss:Type="String">See discussion in resource definition for how these relate</Data></Cell>
+    <Cell><Data ss:Type="String">Document.id / Document.setId</Data></Cell>
+    <Cell><Data ss:Type="String">.setId</Data></Cell>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+   </Row>
+   <Row ss:Height="150">
+    <Cell><Data ss:Type="String">!Composition.versionIdentifier</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+    <Cell><Data ss:Type="String">Identifier</Data></Cell>
+    <Cell ss:StyleID="Default"/>
+    <Cell><Data ss:Type="String">Version-specific identifier for composition</Data></Cell>
+    <Cell><Data ss:Type="String">Version specific identifier for the composition, assigned when each version is created/updated. </Data></Cell>
+    <Cell><Data ss:Type="String">y</Data></Cell>
+    <Cell ss:StyleID="Default"/>
+    <Cell><Data ss:Type="String">While each resource, including the composition itself, has it's own version identifier, this is a formal identifier for the logical version of the composition as a whole. It would remain constant if the resources were moved to a new server, and all got new individual resource versions, for example</Data></Cell>
+    <Cell><Data ss:Type="String">.id</Data></Cell>
+    <Cell><Data ss:Type="String">.id</Data></Cell>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+   </Row>
+   <Row ss:Height="60">
+    <Cell><Data ss:Type="String">Composition.date</Data></Cell>
+    <Cell><Data ss:Type="String">1..1</Data></Cell>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+    <Cell><Data ss:Type="String">dateTime</Data></Cell>
+    <Cell ss:StyleID="Default"/>
+    <Cell><Data ss:Type="String">Composition editing time</Data></Cell>
+    <Cell><Data ss:Type="String">The composition editing time, when the composition was last logically changed by the author</Data></Cell>
+    <Cell><Data ss:Type="String">y</Data></Cell>
+    <Cell><Data ss:Type="String">dateTime is used for tracking, organizing versions and searching.</Data></Cell>
+    <Cell ss:StyleID="s69"><Data ss:Type="String">The Last Modified Date on the composition may be after the date of the document was attested without being changed</Data></Cell>
+    <Cell><Data ss:Type="String">.effectiveTime[type=&quot;TS&quot;]</Data></Cell>
+    <Cell><Data ss:Type="String">.effectiveTime</Data></Cell>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+   </Row>
+   <Row ss:Height="75">
+    <Cell><Data ss:Type="String">Composition.type</Data></Cell>
+    <Cell><Data ss:Type="String">1..1</Data></Cell>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+    <Cell><Data ss:Type="String">CodeableConcept</Data></Cell>
+    <Cell><Data ss:Type="String">DocumentType</Data></Cell>
+    <Cell><Data ss:Type="String">Kind of composition (LOINC if possible)</Data></Cell>
+    <Cell><Data ss:Type="String">Specifies the particular kind of composition (e.g. History and Physical, Discharge Summary, Progress Note). This usually equates to the purpose of making the composition</Data></Cell>
+    <Cell><Data ss:Type="String">y</Data></Cell>
+    <Cell><Data ss:Type="String">Key metadata element describing the composition, used in searching/filtering.</Data></Cell>
+    <Cell ss:Index="13"><Data ss:Type="String">./code</Data></Cell>
+    <Cell><Data ss:Type="String">.code</Data></Cell>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+   </Row>
+   <Row ss:Height="60">
+    <Cell><Data ss:Type="String">Composition.class</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+    <Cell><Data ss:Type="String">CodeableConcept</Data></Cell>
+    <Cell><Data ss:Type="String">DocumentClass</Data></Cell>
+    <Cell><Data ss:Type="String">Categorization of Composition</Data></Cell>
+    <Cell><Data ss:Type="String">A categorization for the type of the composition. This may be implied by or derived from the code specified in the Composition Type</Data></Cell>
+    <Cell><Data ss:Type="String">y</Data></Cell>
+    <Cell><Data ss:Type="String">Helps humans to assess whether the composition is of interest when viewing an index of compositions or documents</Data></Cell>
+    <Cell ss:Index="13"><Data ss:Type="String">.outboundRelationship[typeCode=&quot;COMP].target[classCode=&quot;LIST&quot;, moodCode=&quot;EVN&quot;].code</Data></Cell>
+    <Cell><Data ss:Type="String">n/a</Data></Cell>
+    <Cell ss:StyleID="s71"/>
+   </Row>
+   <Row ss:Height="75">
+    <Cell><Data ss:Type="String">Composition.title</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+    <Cell><Data ss:Type="String">string</Data></Cell>
+    <Cell ss:StyleID="Default"/>
+    <Cell><Data ss:Type="String">Human Readable name/title</Data></Cell>
+    <Cell><Data ss:Type="String">Official human-readable label for the composition</Data></Cell>
+    <Cell><Data ss:Type="String">y</Data></Cell>
+    <Cell ss:Index="12"><Data ss:Type="String">If compositions do not have a title, the text or a display name of Composition.type (e.g. a &quot;consultation&quot; or &quot;progress note&quot;) can be used in it's place</Data></Cell>
+    <Cell><Data ss:Type="String">./title</Data></Cell>
+    <Cell><Data ss:Type="String">.title</Data></Cell>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+   </Row>
+   <Row ss:Height="409.5">
+    <Cell><Data ss:Type="String">Composition.status</Data></Cell>
+    <Cell><Data ss:Type="String">1..1</Data></Cell>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"><Data ss:Type="String">y</Data></Cell>
+    <Cell ss:StyleID="Default"/>
+    <Cell><Data ss:Type="String">code</Data></Cell>
+    <Cell ss:StyleID="Default"><Data ss:Type="String">CompositionStatus</Data></Cell>
+    <Cell><Data ss:Type="String">preliminary | final | appended | amended | entered in error</Data></Cell>
+    <Cell><Data ss:Type="String">The workflow/clinical status of this composition. The status is a marker for the clinical standing of the document</Data></Cell>
+    <Cell><Data ss:Type="String">y</Data></Cell>
+    <Cell><Data ss:Type="String">Need to be able to mark interim, amended, or withdrawn compositions or documents</Data></Cell>
+    <Cell><Data ss:Type="String">If a composition is marked as withdrawn, the compositions/documents in the series, or data from the composition or document series, should never be displayed to a user without being clearly marked as untrustworthy. The flag &quot;withdrawn&quot; is why this element is labeled as a modifier of other elements</Data></Cell>
+    <Cell><Data ss:Type="String">interim: .completionCode=&quot;IN&quot; &amp; ./statusCode[isNormalDatatype()]=&quot;active&quot;;&#10;&#10;final: .completionCode=&quot;AU&quot; &amp;&amp;  ./statusCode[isNormalDatatype()]=&quot;complete&quot; and not(./inboundRelationship[typeCode=&quot;SUBJ&quot; and isNormalActRelationship()]/source[subsumesCode(&quot;ActClass#CACT&quot;) and moodCode=&quot;EVN&quot; and domainMember(&quot;ReviseComposition&quot;, code) and isNormalAct()]);&#10;&#10;amended: .completionCode=&quot;AU&quot; &amp;&amp;  ./statusCode[isNormalDatatype()]=&quot;complete&quot; and ./inboundRelationship[typeCode=&quot;SUBJ&quot; and isNormalActRelationship()]/source[subsumesCode(&quot;ActClass#CACT&quot;) and moodCode=&quot;EVN&quot; and domainMember(&quot;ReviseComposition&quot;, code) and isNormalAct() and statusCode=&quot;completed&quot;];&#10;&#10;withdrawn : .completionCode=NI &amp;&amp;  ./statusCode[isNormalDatatype()]=&quot;obsolete&quot; &#10;</Data></Cell>
+    <Cell><Data ss:Type="String">n/a</Data></Cell>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+   </Row>
+   <Row ss:Height="120">
+    <Cell><Data ss:Type="String">!Composition.enterer</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+    <Cell><Data ss:Type="String">Resource(Practitioner)</Data></Cell>
+    <Cell ss:StyleID="Default"/>
+    <Cell><Data ss:Type="String">The source of the data entry</Data></Cell>
+    <Cell><Data ss:Type="String">The person or device that performed the data entry leading to this composition. Where there is more than one candidate, pick the most proximal to the document creation or capture on a per-section basis. </Data></Cell>
+    <Cell><Data ss:Type="String">y</Data></Cell>
+    <Cell><Data ss:Type="String">Identifies who is responsible for the entry of the data.</Data></Cell>
+    <Cell><Data ss:Type="String">Can provide other enterers in extensions</Data></Cell>
+    <Cell><Data ss:Type="String">unique(highest(./participation[typeCode=&quot;INT&quot; and isNormalParticipation], priorityNumber)/role[classCode=&quot;ASSIGNED&quot; and isNormalRole]/player[determinerCode=&quot;INST&quot; and classCode=(&quot;DEV&quot;, &quot;PSN&quot;) and isNormalEntity()])</Data></Cell>
+    <Cell><Data ss:Type="String">.dataEnterer</Data></Cell>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+   </Row>
+   <Row ss:Height="105">
+    <Cell><Data ss:Type="String">Composition.confidentiality</Data></Cell>
+    <Cell><Data ss:Type="String">1..1</Data></Cell>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"><Data ss:Type="String">Y</Data></Cell>
+    <Cell ss:StyleID="Default"/>
+    <Cell><Data ss:Type="String">Coding</Data></Cell>
+    <Cell ss:StyleID="Default"><Data ss:Type="String">DocumentConfidentiality</Data></Cell>
+    <Cell><Data ss:Type="String">As defined by affinity domain</Data></Cell>
+    <Cell><Data ss:Type="String">The code specifying the level of confidentiality of the Composition</Data></Cell>
+    <Cell><Data ss:Type="String">y</Data></Cell>
+    <Cell ss:Index="12"><Data ss:Type="String">The exact use of this element, and enforcement and issues related to highly sensitive documents are out of scope for FHIR, and delegated to implementation profiles (see security section)</Data></Cell>
+    <Cell ss:StyleID="s69"><Data ss:Type="String">.confidentialityCode</Data></Cell>
+    <Cell ss:StyleID="s69"><Data ss:Type="String">.confidentialityCode</Data></Cell>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+   </Row>
+   <Row ss:Height="105">
+    <Cell><Data ss:Type="String">Composition.subject</Data></Cell>
+    <Cell><Data ss:Type="String">1..1</Data></Cell>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+    <Cell><Data ss:Type="String">Resource(Patient|Practitioner|Group|Device|Location)</Data></Cell>
+    <Cell ss:StyleID="Default"/>
+    <Cell><Data ss:Type="String">Who and/or what the composition is about</Data></Cell>
+    <Cell><Data ss:Type="String">Who or what the composition is about. The composition can be about a person, (patient or healthcare practitioner), a device (I.e. machine) or even a group of subjects (such as a document about a herd of livestock, or a set of patients that share a common exposure)</Data></Cell>
+    <Cell><Data ss:Type="String">y</Data></Cell>
+    <Cell><Data ss:Type="String">Essential metadata for searching for the composition. Identifies who and/or what the composition/document is about</Data></Cell>
+    <Cell><Data ss:Type="String">For clinical documents, this is usually the patient.</Data></Cell>
+    <Cell><Data ss:Type="String">.participation[typeCode=&quot;SBJ&quot;].role[typeCode=&quot;PAT&quot;]</Data></Cell>
+    <Cell><Data ss:Type="String">.recordTarget</Data></Cell>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:Index="17" ss:StyleID="Default"/>
+   </Row>
+   <Row ss:Height="120">
+    <Cell><Data ss:Type="String">!Composition.informant</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+    <Cell><Data ss:Type="String">Resource(Patient|Practitioner)</Data></Cell>
+    <Cell ss:StyleID="Default"/>
+    <Cell><Data ss:Type="String">Who provided information in composition</Data></Cell>
+    <Cell><Data ss:Type="String">Identifies the source that recounted the information recorded</Data></Cell>
+    <Cell><Data ss:Type="String">y</Data></Cell>
+    <Cell><Data ss:Type="String">Provides context as to the potential accuracy of the information</Data></Cell>
+    <Cell><Data ss:Type="String">Generally used if information is sourced from a non-clinician (patient, relative, etc.)</Data></Cell>
+    <Cell><Data ss:Type="String">unique(highest(./participation[typeCode=&quot;INF&quot; and isNormalParticipation], priorityNumber)/role[classCode=&quot;ASSIGNED&quot; and isNormalRole]/player[determinerCode=&quot;INST&quot; and classCode=(&quot;DEV&quot;, &quot;PSN&quot;) and isNormalEntity()])</Data></Cell>
+    <Cell><Data ss:Type="String">.informant.informantChoice</Data></Cell>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+   </Row>
+   <Row ss:Height="45">
+    <Cell><Data ss:Type="String">Composition.author</Data></Cell>
+    <Cell><Data ss:Type="String">1..*</Data></Cell>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+    <Cell><Data ss:Type="String">Resource(Practitioner|Device|Patient|RelatedPerson)</Data></Cell>
+    <Cell ss:StyleID="Default"/>
+    <Cell><Data ss:Type="String">Who and/or what authored the composition</Data></Cell>
+    <Cell><Data ss:Type="String">Identifies who is responsible for the information in the composition.  (Not necessarily who typed it in.)</Data></Cell>
+    <Cell><Data ss:Type="String">y</Data></Cell>
+    <Cell><Data ss:Type="String">Identifies who is responsible for the content.</Data></Cell>
+    <Cell ss:StyleID="Default"/>
+    <Cell><Data ss:Type="String">.participation[typeCode=&quot;AUT&quot;].role[classCode=&quot;ASSIGNED&quot;]</Data></Cell>
+    <Cell><Data ss:Type="String">.author.assignedAuthor</Data></Cell>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+   </Row>
+   <Row ss:Height="45">
+    <Cell><Data ss:Type="String">Composition.attester</Data></Cell>
+    <Cell><Data ss:Type="String">0..*</Data></Cell>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+    <Cell><Data ss:Type="String">down</Data></Cell>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+    <Cell><Data ss:Type="String">Attests to accuracy of composition</Data></Cell>
+    <Cell><Data ss:Type="String">A participant who has attested to the accuracy of the composition/document</Data></Cell>
+    <Cell><Data ss:Type="String">y</Data></Cell>
+    <Cell><Data ss:Type="String">Identifies responsibility for the accuracy of the composition content.</Data></Cell>
+    <Cell ss:StyleID="s69"><Data ss:Type="String">Only list each attester once</Data></Cell>
+    <Cell><Data ss:Type="String">.participation[typeCode=&quot;AUTHEN&quot;].role[classCode=&quot;ASSIGNED&quot;]</Data></Cell>
+    <Cell><Data ss:Type="String">.authenticator/.legalAuthenticator</Data></Cell>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+   </Row>
+   <Row ss:Height="60">
+    <Cell><Data ss:Type="String">Composition.attester.mode</Data></Cell>
+    <Cell><Data ss:Type="String">1..*</Data></Cell>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+    <Cell><Data ss:Type="String">code</Data></Cell>
+    <Cell ss:StyleID="s72"><Data ss:Type="String">CompositionAttestationMode</Data></Cell>
+    <Cell><Data ss:Type="String">personal | professional | legal | official</Data></Cell>
+    <Cell><Data ss:Type="String">The type of attestation the authenticator offers</Data></Cell>
+    <Cell><Data ss:Type="String">y</Data></Cell>
+    <Cell><Data ss:Type="String">Indicates the level of officialness of the attestation.</Data></Cell>
+    <Cell ss:StyleID="s69"><Data ss:Type="String">Use more than one code where a single attester has more than one mode (professional and legal are often paired)</Data></Cell>
+    <Cell><Data ss:Type="String">unique(./modeCode)</Data></Cell>
+    <Cell><Data ss:Type="String">implied by .authenticator/.legalAuthenticator</Data></Cell>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+   </Row>
+   <Row ss:Height="60">
+    <Cell><Data ss:Type="String">Composition.attester.time</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+    <Cell><Data ss:Type="String">dateTime</Data></Cell>
+    <Cell ss:StyleID="Default"/>
+    <Cell><Data ss:Type="String">When composition attested</Data></Cell>
+    <Cell><Data ss:Type="String">When composition was attested by the party</Data></Cell>
+    <Cell><Data ss:Type="String">y</Data></Cell>
+    <Cell><Data ss:Type="String">Identifies when the information in the composition was deemed accurate.  (Things may have changed since then.)</Data></Cell>
+    <Cell ss:StyleID="Default"/>
+    <Cell><Data ss:Type="String">./time[type=&quot;TS&quot; and isNormalDatatype()]</Data></Cell>
+    <Cell><Data ss:Type="String">.authenticator.time</Data></Cell>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+   </Row>
+   <Row ss:Height="150">
+    <Cell><Data ss:Type="String">Composition.attester.party</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+    <Cell><Data ss:Type="String">Resource(Patient|Practitioner|Organization)</Data></Cell>
+    <Cell ss:StyleID="Default"/>
+    <Cell><Data ss:Type="String">Who attested the composition</Data></Cell>
+    <Cell><Data ss:Type="String">Who attested the composition in the specified way</Data></Cell>
+    <Cell><Data ss:Type="String">y</Data></Cell>
+    <Cell><Data ss:Type="String">Identifies who has taken on the responsibility for accuracy of the composition content.</Data></Cell>
+    <Cell ss:StyleID="Default"/>
+    <Cell><Data ss:Type="String">./role[classCode=&quot;ASSIGNED&quot; and isNormalRole]/player[determinerCode=&quot;INST&quot; and classCode=(&quot;DEV&quot;, &quot;PSN&quot;) and isNormalEntity()]&#10;or&#10;./role[classCode=&quot;ASSIGNED&quot; and isNormalRole and not(player)]/scoper[determinerCode=&quot;INST&quot; and classCode=&quot;ORG&quot; and isNormalEntity()]</Data></Cell>
+    <Cell><Data ss:Type="String">.authenticator.assignedEnttty</Data></Cell>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+   </Row>
+   <Row ss:Height="195">
+    <Cell><Data ss:Type="String">!Composition.recipient</Data></Cell>
+    <Cell><Data ss:Type="String">0..*</Data></Cell>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+    <Cell><Data ss:Type="String">Resource(Practitioner|Organization)</Data></Cell>
+    <Cell ss:StyleID="Default"/>
+    <Cell><Data ss:Type="String">Expected to receive a copy </Data></Cell>
+    <Cell><Data ss:Type="String">Identifies the people and organizations that are intende to be notified about the composition</Data></Cell>
+    <Cell><Data ss:Type="String">y</Data></Cell>
+    <Cell><Data ss:Type="String">Used for routing and also provides context as to intended audience.</Data></Cell>
+    <Cell ss:StyleID="Default"/>
+    <Cell><Data ss:Type="String">./participation[typeCode=&quot;RCV&quot; and isNormalParticipation]/role[classCode=&quot;ASSIGNED&quot; and isNormalRole]&#10;or&#10;./participation[typeCode=&quot;RCV&quot; and isNormalParticipation]/role[classCode=&quot;ASSIGNED&quot; and isNormalRole and not (player)]/scoper[classCode=&quot;ORG&quot; and determinerCode=&quot;INST&quot; and isNormalEntity()]</Data></Cell>
+    <Cell><Data ss:Type="String">.informationRecipient.intendedRecipient</Data></Cell>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+   </Row>
+   <Row ss:Height="195">
+    <Cell><Data ss:Type="String">Composition.custodian</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+    <Cell><Data ss:Type="String">Resource(Organization)</Data></Cell>
+    <Cell ss:StyleID="Default"/>
+    <Cell><Data ss:Type="String">Org which maintains the composition</Data></Cell>
+    <Cell><Data ss:Type="String">Identifies the organization or group who is responsible for ongoing maintenance of and access to the composition/document information</Data></Cell>
+    <Cell><Data ss:Type="String">y</Data></Cell>
+    <Cell><Data ss:Type="String">Identifies where to go to find the current version, where to report issues, etc.</Data></Cell>
+    <Cell ss:StyleID="s69"><Data ss:Type="String">This is useful when documents are derived from a composition - provides guidance for how to get the latest version of the document. This is optional because knowing this is sometimes not known by the authoring system, and can be inferred by context. However it's important that this information be known when working with a derived document, so providing a custodian is encouraged</Data></Cell>
+    <Cell><Data ss:Type="String">.participation[typeCode=&quot;RCV&quot;].role[classCode=&quot;CUST&quot;].scoper[classCode=&quot;ORG&quot; and determinerCode=&quot;INST&quot;]</Data></Cell>
+    <Cell><Data ss:Type="String">.custodian.assignedCustodian</Data></Cell>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+   </Row>
+   <Row ss:Height="90">
+    <Cell><Data ss:Type="String">Composition.event</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"><Data ss:Type="String">400;200</Data></Cell>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+    <Cell><Data ss:Type="String">The clinical event/act/item being documented</Data></Cell>
+    <Cell><Data ss:Type="String">The main event/act/item, such as a colonoscopy or an appendectomy, being documented</Data></Cell>
+    <Cell><Data ss:Type="String">y</Data></Cell>
+    <Cell><Data ss:Type="String">Provides context for the composition and creates a linkage between a resource describing an event and the composition created describing the event.</Data></Cell>
+    <Cell><Data ss:Type="String">The event needs to be consistent with the type element, though can provide further information if desired</Data></Cell>
+    <Cell><Data ss:Type="String">outboundRelationship[typeCode=&quot;SUBJ&quot;].target[classCode&lt;'ACT']</Data></Cell>
+    <Cell><Data ss:Type="String">.documentationOf.serviceEvent</Data></Cell>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+   </Row>
+   <Row ss:Height="240">
+    <Cell><Data ss:Type="String">Composition.event.code</Data></Cell>
+    <Cell><Data ss:Type="String">0..*</Data></Cell>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:Index="6"><Data ss:Type="String">CodeableConcept</Data></Cell>
+    <Cell><Data ss:Type="String">DocumentEventType</Data></Cell>
+    <Cell><Data ss:Type="String">Code(s) that apply to the event being documented</Data></Cell>
+    <Cell><Data ss:Type="String">This list of codes represents the main clinical acts, such as a colonoscopy or an appendectomy, being documented. In some cases, the event is inherent in the typeCode, such as a &quot;History and Physical Report&quot; in which the procedure being documented is necessarily a &quot;History and Physical&quot; act.</Data></Cell>
+    <Cell><Data ss:Type="String">y</Data></Cell>
+    <Cell ss:StyleID="Default"/>
+    <Cell><Data ss:Type="String">An event can further specialize the act inherent in the typeCode, such as where it is simply &quot;Procedure Report&quot; and the procedure was a &quot;colonoscopy&quot;. If one or more eventCodes are included, they SHALL NOT conflict with the values inherent in the classCode, practiceSettingCode or typeCode, as such a conflict would create an ambiguous situation. This short list of codes is provided to be used as “key words” for certain types of queries.</Data></Cell>
+    <Cell ss:StyleID="s69"><Data ss:Type="String">.code</Data></Cell>
+    <Cell ss:StyleID="s69"><Data ss:Type="String">.code</Data></Cell>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+   </Row>
+   <Row ss:Height="75">
+    <Cell><Data ss:Type="String">Composition.event.period</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+    <Cell><Data ss:Type="String">Period</Data></Cell>
+    <Cell ss:StyleID="Default"/>
+    <Cell><Data ss:Type="String">The period covered by the documentation</Data></Cell>
+    <Cell><Data ss:Type="String">The period of time covered by the documentation. There is no assertion that the documentation is a complete representation for this period, only that it documents events during this time</Data></Cell>
+    <Cell><Data ss:Type="String">y</Data></Cell>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="s69"><Data ss:Type="String">.effectiveTime</Data></Cell>
+    <Cell ss:StyleID="s69"><Data ss:Type="String">.effectiveTime</Data></Cell>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+   </Row>
+   <Row ss:Height="30">
+    <Cell><Data ss:Type="String">Composition.event.detail</Data></Cell>
+    <Cell><Data ss:Type="String">0..*</Data></Cell>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+    <Cell><Data ss:Type="String">Resource(Any)</Data></Cell>
+    <Cell ss:StyleID="Default"/>
+    <Cell><Data ss:Type="String">Full details for the event(s) the composition consents</Data></Cell>
+    <Cell><Data ss:Type="String">Full details for the event(s) the composition/documentation consents</Data></Cell>
+    <Cell><Data ss:Type="String">y</Data></Cell>
+    <Cell ss:Index="12" ss:StyleID="Default"/>
+    <Cell ss:StyleID="s69"><Data ss:Type="String">.outboundRelationship[typeCode=&quot;SUBJ&quot;].target</Data></Cell>
+    <Cell ss:StyleID="s69"><Data ss:Type="String">n/a</Data></Cell>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+   </Row>
+   <Row ss:Height="90">
+    <Cell><Data ss:Type="String">Composition.encounter</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+    <Cell><Data ss:Type="String">Resource(Encounter)</Data></Cell>
+    <Cell ss:StyleID="Default"/>
+    <Cell><Data ss:Type="String">Context of the conposition</Data></Cell>
+    <Cell><Data ss:Type="String">Describes the clinical encounter or type of care this documentation is associated with.</Data></Cell>
+    <Cell><Data ss:Type="String">y</Data></Cell>
+    <Cell><Data ss:Type="String">Provides context for the composition and supports searching.</Data></Cell>
+    <Cell ss:StyleID="Default"/>
+    <Cell><Data ss:Type="String">unique(highest(./outboundRelationship[typeCode=&quot;SUBJ&quot; and isNormalActRelationship()], priorityNumber)/target[moodCode=&quot;EVN&quot; and classCode=(&quot;ENC&quot;, &quot;PCPR&quot;) and isNormalAct])</Data></Cell>
+    <Cell><Data ss:Type="String">.componentOf.encompassingEncounter</Data></Cell>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+   </Row>
+   <Row ss:Height="90">
+    <Cell><Data ss:Type="String">!Composition.replaces</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Y</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">Identifier</Data></Cell>
+    <Cell ss:Index="8"><Data ss:Type="String">If this composition replaces another</Data></Cell>
+    <Cell><Data ss:Type="String">Identifies the composition this composition supersedes, if any. This composition supercedes another if this should be consulted in place of the other, and the only reason to retain the other is for audit completenedd</Data></Cell>
+    <Cell><Data ss:Type="String">y</Data></Cell>
+    <Cell><Data ss:Type="String">Used to establish relationships between compositions to determine which is the most current/authoritative.</Data></Cell>
+    <Cell><Data ss:Type="String">This is labeled as &quot;Is Modifier&quot; because applications SHALL be aware of composition/document replacement semantics and behave appropriately</Data></Cell>
+    <Cell><Data ss:Type="String">.outboundRelationship[typeCode=&quot;RPLC&quot;].target[classCode=&quot;DOC&quot;, moodCode=&quot;EVN&quot;].id</Data></Cell>
+    <Cell><Data ss:Type="String">.relatedComposition[typeCode=&quot;RPLC&quot;].parentComposition</Data></Cell>
+   </Row>
+   <Row ss:Height="120">
+    <Cell><Data ss:Type="String">!Composition.enterer</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">Resource(Practitioner)</Data></Cell>
+    <Cell ss:Index="8"><Data ss:Type="String">The source of the data entry</Data></Cell>
+    <Cell><Data ss:Type="String">The person or device that performed the data entry leading to this composition Where there is more than one candidate, pick the most proximal to the document creation or capture on a per-section basis. </Data></Cell>
+    <Cell><Data ss:Type="String">y</Data></Cell>
+    <Cell ss:Index="12"><Data ss:Type="String">Can provide other enterers in extensions</Data></Cell>
+    <Cell><Data ss:Type="String">unique(highest(./participation[typeCode=&quot;INT&quot; and isNormalParticipation], priorityNumber)/role[classCode=&quot;ASSIGNED&quot; and isNormalRole]/player[determinerCode=&quot;INST&quot; and classCode=(&quot;DEV&quot;, &quot;PSN&quot;) and isNormalEntity()])</Data></Cell>
+    <Cell><Data ss:Type="String">.dataEnterer</Data></Cell>
+   </Row>
+   <Row ss:Height="45">
+    <Cell><Data ss:Type="String">!Composition.provenance</Data></Cell>
+    <Cell><Data ss:Type="String">0..*</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">Resource(Provenance)</Data></Cell>
+    <Cell ss:Index="8"><Data ss:Type="String">All the provenance statements about the composition and its parts</Data></Cell>
+    <Cell><Data ss:Type="String">All the provenance statements about the composition and the resources that are the sections</Data></Cell>
+    <Cell ss:Index="13"><Data ss:Type="String">n/a</Data></Cell>
+    <Cell><Data ss:Type="String">n/a</Data></Cell>
+   </Row>
+   <Row ss:Height="105">
+    <Cell><Data ss:Type="String">!Composition.stylesheet</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell><Data ss:Type="Number">4</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">Attachment</Data></Cell>
+    <Cell ss:Index="8"><Data ss:Type="String">Stylesheet to use when rendering the document</Data></Cell>
+    <Cell><Data ss:Type="String">A fixed CSS stylesheet to use when rendering the documents. </Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Support for CDA level 1</Data></Cell>
+    <Cell><Data ss:Type="String">This stylesheet is only used when the entire document is rendered. When resources are extracted out of a document for presentation, applications are not required to use this stylesheet</Data></Cell>
+    <Cell><Data ss:Type="String">n/a</Data></Cell>
+    <Cell><Data ss:Type="String">n/a</Data></Cell>
+   </Row>
+   <Row ss:Height="45">
+    <Cell><Data ss:Type="String">!Composition.representation</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">Attachment</Data></Cell>
+    <Cell ss:Index="8"><Data ss:Type="String">Alternative representation of the document</Data></Cell>
+    <Cell><Data ss:Type="String">An alternative representation of the document that can be used in place of the html based rendering</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Adds organization and human navigability to the information in the document.</Data></Cell>
+    <Cell><Data ss:Type="String">Typically, this is application/pdf</Data></Cell>
+    <Cell><Data ss:Type="String">.entryRelationship[typeCode=&quot;CMP&quot;].target[classCode&lt;&quot;ACT&quot;].text</Data></Cell>
+    <Cell><Data ss:Type="String">.component.nonXmlBody</Data></Cell>
+   </Row>
+   <Row ss:Height="90">
+    <Cell><Data ss:Type="String">Composition.section</Data></Cell>
+    <Cell><Data ss:Type="String">0..*</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="String">right</Data></Cell>
+    <Cell><Data ss:Type="String" x:Ticked="1">=Section</Data></Cell>
+    <Cell ss:Index="8"><Data ss:Type="String">Composition is broken into sections</Data></Cell>
+    <Cell><Data ss:Type="String">The root of the sections that make up the composition</Data></Cell>
+    <Cell ss:Index="13"><Data ss:Type="String">./outboundRelationship[typeCode=&quot;COMP&quot; and isNormalActRelationship()]/target[moodCode=&quot;EVN&quot; and classCode=&quot;DOCSECT&quot; and isNormalAct]</Data></Cell>
+    <Cell><Data ss:Type="String">.component.structuredBody.component.section</Data></Cell>
+   </Row>
+   <Row ss:Height="75">
+    <Cell><Data ss:Type="String">Composition.section.title</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String" x:Ticked="1">string</Data></Cell>
+    <Cell ss:Index="8"><Data ss:Type="String">Label for section</Data></Cell>
+    <Cell><Data ss:Type="String">The heading for this particular section.  This will be part of the rendered content for the document.</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Section headings are often standardized for different types of documents.  They give guidance to humans on how the document is organized</Data></Cell>
+    <Cell ss:Index="13"><Data ss:Type="String">./title</Data></Cell>
+    <Cell><Data ss:Type="String">.title</Data></Cell>
+   </Row>
+   <Row ss:Height="45">
+    <Cell><Data ss:Type="String">Composition.section.code</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">CodeableConcept</Data></Cell>
+    <Cell><Data ss:Type="String">CompositionSectionType</Data></Cell>
+    <Cell><Data ss:Type="String">Classification of section (recommended)</Data></Cell>
+    <Cell><Data ss:Type="String">A code identifying the kind of content contained within the section</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Provides computable standardized labels to topics within the document.</Data></Cell>
+    <Cell ss:Index="13"><Data ss:Type="String">./code</Data></Cell>
+    <Cell><Data ss:Type="String">.code</Data></Cell>
+   </Row>
+   <Row ss:Height="60">
+    <Cell><Data ss:Type="String">!Composition.section.instant</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">instant</Data></Cell>
+    <Cell ss:Index="8"><Data ss:Type="String">Section Creation Time</Data></Cell>
+    <Cell><Data ss:Type="String">Identifies when the content of the section was created</Data></Cell>
+    <Cell ss:Index="12"><Data ss:Type="String">Sections are often re-used in several documents, thus the creation time of a section may differ from that of the document</Data></Cell>
+    <Cell><Data ss:Type="String">./effectiveTime[type=&quot;TS&quot; and isNormalDatatype()]</Data></Cell>
+    <Cell><Data ss:Type="String">.effectiveTime</Data></Cell>
+   </Row>
+   <Row ss:Height="105">
+    <Cell><Data ss:Type="String">!Composition.section.author</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">Resource(Practitioner)</Data></Cell>
+    <Cell ss:Index="8"><Data ss:Type="String">Who and/or what authored the section</Data></Cell>
+    <Cell><Data ss:Type="String">Identifies who is responsible for the information in the section.  (Not necessarily who typed it in.)</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Identifies who is responsible for the content.</Data></Cell>
+    <Cell ss:Index="13"><Data ss:Type="String">./participation[typeCode=&quot;AUT&quot; and isNormalParticipation]/role[classCode=&quot;ASSIGNED&quot; and isNormalRole]/player[determinerCode=&quot;INST&quot; and classCode=(&quot;DEV&quot;, &quot;PSN&quot;) and isNormalEntity()]</Data></Cell>
+    <Cell><Data ss:Type="String">.author.assignedAuthor</Data></Cell>
+   </Row>
+   <Row ss:Height="120">
+    <Cell><Data ss:Type="String">!Composition.section.enterer</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">Resource(Practitioner)</Data></Cell>
+    <Cell ss:Index="8"><Data ss:Type="String">The source of the data entry</Data></Cell>
+    <Cell><Data ss:Type="String">The person or device that performed the data entry leading to this section. Where there is more than one candidate, pick the most proximal to the construction of the composition </Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Identifies who is responsible for the entry of the data.</Data></Cell>
+    <Cell><Data ss:Type="String">Can provide other enterers in extensions</Data></Cell>
+    <Cell><Data ss:Type="String">unique(highest(./participation[typeCode=&quot;INT&quot; and isNormalParticipation], priorityNumber)/role[classCode=&quot;ASSIGNED&quot; and isNormalRole]/player[determinerCode=&quot;INST&quot; and classCode=(&quot;DEV&quot;, &quot;PSN&quot;) and isNormalEntity()])</Data></Cell>
+    <Cell><Data ss:Type="String">.dataEnterer.assignedEntity</Data></Cell>
+   </Row>
+   <Row ss:Height="165">
+    <Cell><Data ss:Type="String">Composition.section.subject</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Y</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">Resource(Patient|Group|Device)</Data></Cell>
+    <Cell ss:Index="8"><Data ss:Type="String">If section different to composition</Data></Cell>
+    <Cell><Data ss:Type="String">Identifies the primary subject of the section.  </Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Subjects can vary within one composition or document, for example mother/baby, patient &amp; relatives, etc.</Data></Cell>
+    <Cell><Data ss:Type="String">This is labeled as &quot;Is Modifier&quot; because applications SHALL be aware if the subject changes for a particular section</Data></Cell>
+    <Cell><Data ss:Type="String">unique(./participation[typeCode=&quot;SBJ&quot; and isNormalParticipation]/role[typeCode=&quot;PAT&quot;])&#10;or&#10;unique(./participation[typeCode=&quot;SBJ&quot; and isNormalParticipation]/role[typeCode=&quot;IDENT&quot;]/player[determinerCode=&quot;INST&quot; and classCode=(&quot;DEV&quot;, &quot;ORG&quot;) and isNormalEntity()])</Data></Cell>
+    <Cell><Data ss:Type="String">.subject.relatedSubject</Data></Cell>
+   </Row>
+   <Row ss:Height="120">
+    <Cell><Data ss:Type="String">!Composition.section.informant</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">Resource(Person)</Data></Cell>
+    <Cell ss:Index="8"><Data ss:Type="String">Who provided information in section</Data></Cell>
+    <Cell><Data ss:Type="String">Identifies the source that recounted the information recorded</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Provides context as to the potential accuracy of the information</Data></Cell>
+    <Cell><Data ss:Type="String">Generally used if information is sourced from a non-clinician (patient, relative, etc.)</Data></Cell>
+    <Cell><Data ss:Type="String">unique(highest(./participation[typeCode=&quot;INF&quot; and isNormalParticipation], priorityNumber)/role[classCode=&quot;ASSIGNED&quot; and isNormalRole]/player[determinerCode=&quot;INST&quot; and classCode=(&quot;DEV&quot;, &quot;PSN&quot;) and isNormalEntity()])</Data></Cell>
+    <Cell><Data ss:Type="String">.informant.informantChoice</Data></Cell>
+   </Row>
+   <Row ss:Height="135">
+    <Cell><Data ss:Type="String">Composition.section.content</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell><Data ss:Type="Number">2</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">Resource(Any)</Data></Cell>
+    <Cell ss:Index="8"><Data ss:Type="String">The actual data for the section</Data></Cell>
+    <Cell><Data ss:Type="String">Identifies the discrete data that provides the content for the section.</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Conveys the discrete data associated with the composition</Data></Cell>
+    <Cell><Data ss:Type="String">Because composition represent point-in-time snapshots, resource references should either be to a specific version, or made against resources on the same server with full version tracking, so that the correct versions can easily be assembled.</Data></Cell>
+    <Cell><Data ss:Type="String">unique(./outboundRelationship[typeCode=&quot;COMP&quot; and isNormalActRelationship()]/target[moodCode=&quot;EVN&quot; and classCode!=&quot;DOCSECT&quot; and isNormalAct])</Data></Cell>
+    <Cell><Data ss:Type="String">n/a</Data></Cell>
+   </Row>
+   <Row ss:Height="90">
+    <Cell><Data ss:Type="String">Composition.section.section</Data></Cell>
+    <Cell><Data ss:Type="String">0..*</Data></Cell>
+    <Cell><Data ss:Type="Number">2</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="String">right</Data></Cell>
+    <Cell><Data ss:Type="String" x:Ticked="1">@Composition.section</Data></Cell>
+    <Cell ss:Index="8"><Data ss:Type="String">Nested Section</Data></Cell>
+    <Cell><Data ss:Type="String">A nested sub-section within this section</Data></Cell>
+    <Cell ss:Index="13"><Data ss:Type="String">./outboundRelationship[typeCode=&quot;COMP&quot; and isNormalActRelationship()]/target[moodCode=&quot;EVN&quot; and classCode=&quot;DOCSECT&quot; and isNormalAct]</Data></Cell>
+    <Cell><Data ss:Type="String">.component.section</Data></Cell>
+   </Row>
+  </Table>
+  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+   <PageSetup>
+    <Header x:Margin="0.3"/>
+    <Footer x:Margin="0.3"/>
+    <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
+   </PageSetup>
+   <FreezePanes/>
+   <FrozenNoSplit/>
+   <SplitHorizontal>1</SplitHorizontal>
+   <TopRowBottomPane>1</TopRowBottomPane>
+   <SplitVertical>1</SplitVertical>
+   <LeftColumnRightPane>1</LeftColumnRightPane>
+   <ActivePane>0</ActivePane>
+   <Panes>
+    <Pane>
+     <Number>3</Number>
+    </Pane>
+    <Pane>
+     <Number>1</Number>
+    </Pane>
+    <Pane>
+     <Number>2</Number>
+    </Pane>
+    <Pane>
+     <Number>0</Number>
+     <ActiveCol>4</ActiveCol>
+    </Pane>
+   </Panes>
+   <ProtectObjects>False</ProtectObjects>
+   <ProtectScenarios>False</ProtectScenarios>
+   <x:PageLayoutZoom>0</x:PageLayoutZoom>
+  </WorksheetOptions>
+ </Worksheet>
+ <Worksheet ss:Name="Invariants">
+  <Table ss:ExpandedColumnCount="6" ss:ExpandedRowCount="4" x:FullColumns="1"
+   x:FullRows="1" ss:StyleID="s74" ss:DefaultColumnWidth="65.25"
+   ss:DefaultRowHeight="15">
+   <Column ss:StyleID="s74" ss:AutoFitWidth="0" ss:Width="26.25"/>
+   <Column ss:StyleID="s74" ss:AutoFitWidth="0" ss:Width="60.75"/>
+   <Column ss:StyleID="s74" ss:Width="107.25"/>
+   <Column ss:StyleID="s74" ss:AutoFitWidth="0" ss:Width="230.25"/>
+   <Column ss:StyleID="s74" ss:AutoFitWidth="0" ss:Width="210.75"/>
+   <Column ss:StyleID="s74" ss:AutoFitWidth="0" ss:Width="306"/>
+   <Row ss:AutoFitHeight="0" ss:StyleID="s66">
+    <Cell><Data ss:Type="String">Id</Data></Cell>
+    <Cell><Data ss:Type="String">Name</Data></Cell>
+    <Cell><Data ss:Type="String">Context</Data></Cell>
+    <Cell><Data ss:Type="String">English</Data></Cell>
+    <Cell><Data ss:Type="String">OCL</Data></Cell>
+    <Cell><Data ss:Type="String">XPath</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="30">
+    <Cell><Data ss:Type="Number">2</Data></Cell>
+    <Cell><Data ss:Type="String">Section Rule</Data></Cell>
+    <Cell><Data ss:Type="String">Composition.section</Data></Cell>
+    <Cell ss:StyleID="s64"><Data ss:Type="String">A section SHALL have content or one or more sections, but not both.</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">exists(f:content) != exists(f:section)</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="30" ss:Span="1"/>
+  </Table>
+  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+   <PageSetup>
+    <Header x:Margin="0.3"/>
+    <Footer x:Margin="0.3"/>
+    <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
+   </PageSetup>
+   <Unsynced/>
+   <Panes>
+    <Pane>
+     <Number>3</Number>
+     <ActiveRow>1</ActiveRow>
+     <ActiveCol>3</ActiveCol>
+    </Pane>
+   </Panes>
+   <ProtectObjects>False</ProtectObjects>
+   <ProtectScenarios>False</ProtectScenarios>
+   <x:PageLayoutZoom>0</x:PageLayoutZoom>
+  </WorksheetOptions>
+ </Worksheet>
+ <Worksheet ss:Name="Search">
+  <Table ss:ExpandedColumnCount="4" ss:ExpandedRowCount="11" x:FullColumns="1"
+   x:FullRows="1" ss:DefaultColumnWidth="65.25" ss:DefaultRowHeight="15">
+   <Column ss:Width="80.25"/>
+   <Column ss:AutoFitWidth="0" ss:Width="383.25"/>
+   <Row ss:AutoFitHeight="0" ss:Height="15.9375" ss:StyleID="s66">
+    <Cell><Data ss:Type="String">Name</Data></Cell>
+    <Cell><Data ss:Type="String">Description</Data></Cell>
+    <Cell><Data ss:Type="String">Type</Data></Cell>
+    <Cell><Data ss:Type="String">Path</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">type</Data></Cell>
+    <Cell ss:Index="3"><Data ss:Type="String">token</Data></Cell>
+    <Cell><Data ss:Type="String">Composition.type</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">class</Data></Cell>
+    <Cell ss:Index="3"><Data ss:Type="String">token</Data></Cell>
+    <Cell><Data ss:Type="String">Composition.class</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">date</Data></Cell>
+    <Cell ss:Index="3"><Data ss:Type="String">date</Data></Cell>
+    <Cell><Data ss:Type="String">Composition.date</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">subject</Data></Cell>
+    <Cell ss:Index="3"><Data ss:Type="String">reference</Data></Cell>
+    <Cell><Data ss:Type="String">Composition.subject</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">author</Data></Cell>
+    <Cell ss:Index="3"><Data ss:Type="String">reference</Data></Cell>
+    <Cell><Data ss:Type="String">Composition.author</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">attester</Data></Cell>
+    <Cell ss:Index="3"><Data ss:Type="String">reference</Data></Cell>
+    <Cell><Data ss:Type="String">Composition.attester.party</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">context</Data></Cell>
+    <Cell ss:Index="3"><Data ss:Type="String">token</Data></Cell>
+    <Cell><Data ss:Type="String">Composition.event.code</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">section-type</Data></Cell>
+    <Cell ss:Index="3"><Data ss:Type="String">token</Data></Cell>
+    <Cell><Data ss:Type="String">Composition.section.code</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">section-content</Data></Cell>
+    <Cell ss:Index="3"><Data ss:Type="String">reference</Data></Cell>
+    <Cell><Data ss:Type="String">Composition.section.content</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">identifier</Data></Cell>
+    <Cell ss:Index="3"><Data ss:Type="String">token</Data></Cell>
+    <Cell><Data ss:Type="String">Composition.identifier</Data></Cell>
+   </Row>
+  </Table>
+  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+   <PageSetup>
+    <Header x:Margin="0.3"/>
+    <Footer x:Margin="0.3"/>
+    <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
+   </PageSetup>
+   <Unsynced/>
+   <Selected/>
+   <ProtectObjects>False</ProtectObjects>
+   <ProtectScenarios>False</ProtectScenarios>
+   <x:PageLayoutZoom>0</x:PageLayoutZoom>
+  </WorksheetOptions>
+ </Worksheet>
+ <Worksheet ss:Name="Bindings">
+  <Table ss:ExpandedColumnCount="7" ss:ExpandedRowCount="51" x:FullColumns="1"
+   x:FullRows="1" ss:StyleID="s75" ss:DefaultColumnWidth="65.25"
+   ss:DefaultRowHeight="18.75">
+   <Column ss:StyleID="s75" ss:AutoFitWidth="0" ss:Width="153.75"/>
+   <Column ss:StyleID="s75" ss:AutoFitWidth="0" ss:Width="252.75"/>
+   <Column ss:StyleID="s75" ss:AutoFitWidth="0" ss:Width="54" ss:Span="1"/>
+   <Column ss:Index="5" ss:StyleID="s75" ss:AutoFitWidth="0" ss:Width="170.25"/>
+   <Column ss:StyleID="s75" ss:AutoFitWidth="0" ss:Width="288"/>
+   <Row ss:AutoFitHeight="0" ss:Height="18">
+    <Cell ss:StyleID="s66"><Data ss:Type="String">Binding Name</Data></Cell>
+    <Cell ss:StyleID="s66"><Data ss:Type="String">Definition</Data></Cell>
+    <Cell ss:StyleID="s66"><Data ss:Type="String">Binding</Data></Cell>
+    <Cell ss:StyleID="s66"><Data ss:Type="String">Example</Data></Cell>
+    <Cell ss:StyleID="s66"><Data ss:Type="String">Reference</Data></Cell>
+    <Cell ss:StyleID="s66"><Data ss:Type="String">Description</Data></Cell>
+    <Cell><Data ss:Type="String">v3</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="18">
+    <Cell ss:StyleID="s72"><Data ss:Type="String">CompositionSectionType</Data></Cell>
+    <Cell ss:StyleID="s72"><Data ss:Type="String">Classification of a composition / document</Data></Cell>
+    <Cell ss:StyleID="s72"><Data ss:Type="String">value set</Data></Cell>
+    <Cell ss:StyleID="s72"/>
+    <Cell ss:StyleID="s72"><Data ss:Type="String">valueset-doc-section-codes</Data></Cell>
+    <Cell ss:StyleID="s72"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="18">
+    <Cell ss:StyleID="s72"><Data ss:Type="String">CompositionAttestationMode</Data></Cell>
+    <Cell ss:StyleID="s72"><Data ss:Type="String">The way in which a person authenticated a composition</Data></Cell>
+    <Cell ss:StyleID="s72"><Data ss:Type="String">code list</Data></Cell>
+    <Cell ss:StyleID="s72"/>
+    <Cell ss:StyleID="s72"><Data ss:Type="String">#composition-attestation-mode</Data></Cell>
+    <Cell ss:StyleID="Default"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="18">
+    <Cell ss:StyleID="s72"><Data ss:Type="String">DocumentType</Data></Cell>
+    <Cell ss:StyleID="s72"><Data ss:Type="String">Type of a composition</Data></Cell>
+    <Cell ss:StyleID="s72"><Data ss:Type="String">value set</Data></Cell>
+    <Cell ss:StyleID="s72"/>
+    <Cell ss:StyleID="s72"><Data ss:Type="String">valueset-doc-codes</Data></Cell>
+    <Cell ss:StyleID="s72"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="18">
+    <Cell ss:StyleID="Default"><Data ss:Type="String">DocumentConfidentiality</Data></Cell>
+    <Cell ss:StyleID="s64"><Data ss:Type="String">Codes specifying the level of confidentiality of the composition</Data></Cell>
+    <Cell ss:StyleID="s72"><Data ss:Type="String">value set</Data></Cell>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="s72"><Data ss:Type="String">http://hl7.org/fhir/v3/vs/Confidentiality</Data></Cell>
+    <Cell ss:StyleID="Default"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">CompositionStatus</Data></Cell>
+    <Cell ss:StyleID="s64"><Data ss:Type="String">The workflow/clinical status of the composition</Data></Cell>
+    <Cell><Data ss:Type="String">code list</Data></Cell>
+    <Cell ss:Index="5" ss:StyleID="s72"><Data ss:Type="String">#composition-status</Data></Cell>
+    <Cell ss:Index="7" ss:StyleID="s72"><Data ss:Type="String">http://hl7.org/fhir/v3/vs/ActStatus</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s64"><Data ss:Type="String">DocumentEventType</Data></Cell>
+    <Cell ss:StyleID="s64"><Data ss:Type="String">This list of codes represents the main clinical acts being documented</Data></Cell>
+    <Cell ss:StyleID="s72"><Data ss:Type="String">value set</Data></Cell>
+    <Cell ss:Index="5" ss:StyleID="s72"><Data ss:Type="String">http://hl7.org/fhir/v3/vs/ActCode</Data></Cell>
+   </Row>
+   <Row ss:Index="20" ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s64"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="Default"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="Default"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="Default"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="Default"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="Default"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="Default"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="Default"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s72"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="Default"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="Default"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="Default"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="Default"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="Default"/>
+   </Row>
+   <Row ss:Index="35" ss:AutoFitHeight="0">
+    <Cell ss:StyleID="Default"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="Default"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="Default"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s64"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s64"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s64"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s64"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s64"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s64"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s64"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s64"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s64"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s64"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s64"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s64"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s64"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s64"/>
+   </Row>
+  </Table>
+  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+   <PageSetup>
+    <Header x:Margin="0.3"/>
+    <Footer x:Margin="0.3"/>
+    <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
+   </PageSetup>
+   <Unsynced/>
+   <Print>
+    <ValidPrinterInfo/>
+    <PaperSizeIndex>9</PaperSizeIndex>
+    <HorizontalResolution>300</HorizontalResolution>
+    <VerticalResolution>300</VerticalResolution>
+   </Print>
+   <Panes>
+    <Pane>
+     <Number>3</Number>
+     <ActiveRow>3</ActiveRow>
+     <ActiveCol>3</ActiveCol>
+    </Pane>
+   </Panes>
+   <ProtectObjects>False</ProtectObjects>
+   <ProtectScenarios>False</ProtectScenarios>
+   <x:PageLayoutZoom>0</x:PageLayoutZoom>
+  </WorksheetOptions>
+ </Worksheet>
+ <Worksheet ss:Name="composition-attestation-mode">
+  <Table ss:ExpandedColumnCount="3" ss:ExpandedRowCount="5" x:FullColumns="1"
+   x:FullRows="1" ss:DefaultColumnWidth="65.25" ss:DefaultRowHeight="15">
+   <Column ss:Index="3" ss:AutoFitWidth="0" ss:Width="344.25"/>
+   <Row ss:AutoFitHeight="0" ss:Height="30">
+    <Cell><Data ss:Type="String">Id</Data></Cell>
+    <Cell ss:StyleID="s66"><Data ss:Type="String">Code</Data></Cell>
+    <Cell ss:StyleID="s66"><Data ss:Type="String">Definition</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s62"><Data ss:Type="String">personal</Data></Cell>
+    <Cell ss:StyleID="s62"><Data ss:Type="String">The person authenticated the content in their personal capacity</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="Number">2</Data></Cell>
+    <Cell ss:StyleID="s62"><Data ss:Type="String">professional</Data></Cell>
+    <Cell ss:StyleID="s62"><Data ss:Type="String">The person authenticated the content in their professional capacity</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="Number">3</Data></Cell>
+    <Cell ss:StyleID="s62"><Data ss:Type="String">legal</Data></Cell>
+    <Cell ss:StyleID="s62"><Data ss:Type="String">The person authenticated the content and accepted legal responsibility for its content</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="Number">4</Data></Cell>
+    <Cell ss:StyleID="s62"><Data ss:Type="String">official</Data></Cell>
+    <Cell ss:StyleID="s62"><Data ss:Type="String">The organization authenticated the content as consistent with their policies and procedures</Data></Cell>
+   </Row>
+  </Table>
+  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+   <PageSetup>
+    <Header x:Margin="0.3"/>
+    <Footer x:Margin="0.3"/>
+    <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
+   </PageSetup>
+   <Unsynced/>
+   <Panes>
+    <Pane>
+     <Number>3</Number>
+     <ActiveRow>3</ActiveRow>
+     <ActiveCol>2</ActiveCol>
+    </Pane>
+   </Panes>
+   <ProtectObjects>False</ProtectObjects>
+   <ProtectScenarios>False</ProtectScenarios>
+   <x:PageLayoutZoom>0</x:PageLayoutZoom>
+  </WorksheetOptions>
+ </Worksheet>
+ <Worksheet ss:Name="Examples">
+  <Table ss:ExpandedColumnCount="6" ss:ExpandedRowCount="3" x:FullColumns="1"
+   x:FullRows="1" ss:DefaultColumnWidth="65.25" ss:DefaultRowHeight="14.0625">
+   <Column ss:Width="93.75"/>
+   <Column ss:Width="332.25"/>
+   <Column ss:Index="4" ss:AutoFitWidth="0" ss:Width="218.25"/>
+   <Row ss:AutoFitHeight="0" ss:Height="15">
+    <Cell ss:StyleID="s66"><Data ss:Type="String">Name</Data></Cell>
+    <Cell ss:StyleID="s66"><Data ss:Type="String">Description</Data></Cell>
+    <Cell ss:StyleID="s66"><Data ss:Type="String">Identity</Data></Cell>
+    <Cell ss:StyleID="s66"><Data ss:Type="String">Filename</Data></Cell>
+    <Cell ss:StyleID="s66"><Data ss:Type="String">Type</Data></Cell>
+    <Cell ss:StyleID="s66"><Data ss:Type="String">In Book</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="15" ss:StyleID="s78">
+    <Cell ss:StyleID="s79"><Data ss:Type="String">Example</Data></Cell>
+    <Cell ss:StyleID="s79"><Data ss:Type="String">Simple Example of a Composition</Data></Cell>
+    <Cell ss:StyleID="s79"><Data ss:Type="String">example</Data></Cell>
+    <Cell ss:StyleID="s79"><Data ss:Type="String">composition-example.xml</Data></Cell>
+    <Cell ss:StyleID="s79"/>
+    <Cell ss:StyleID="s79"><Data ss:Type="String">y</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="15">
+    <Cell><Data ss:Type="String">DischargeSummary</Data></Cell>
+    <Cell ss:StyleID="s80"><Data ss:Type="String">Example of a discharge summary</Data></Cell>
+    <Cell><Data ss:Type="String">father</Data></Cell>
+    <Cell ss:StyleID="s81"><Data ss:Type="String">document-example-dischargesummary.xml</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">y</Data></Cell>
+   </Row>
+  </Table>
+  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+   <Unsynced/>
+   <Print>
+    <ValidPrinterInfo/>
+    <PaperSizeIndex>9</PaperSizeIndex>
+    <HorizontalResolution>300</HorizontalResolution>
+    <VerticalResolution>300</VerticalResolution>
+   </Print>
+   <Panes>
+    <Pane>
+     <Number>3</Number>
+     <ActiveRow>2</ActiveRow>
+    </Pane>
+   </Panes>
+   <ProtectObjects>False</ProtectObjects>
+   <ProtectScenarios>False</ProtectScenarios>
+   <x:PageLayoutZoom>0</x:PageLayoutZoom>
+  </WorksheetOptions>
+ </Worksheet>
+ <Worksheet ss:Name="composition-status">
+  <Table ss:ExpandedColumnCount="5" ss:ExpandedRowCount="6" x:FullColumns="1"
+   x:FullRows="1" ss:StyleID="s82" ss:DefaultRowHeight="15">
+   <Column ss:StyleID="s82" ss:Width="14.25"/>
+   <Column ss:StyleID="s82" ss:Width="55.5"/>
+   <Column ss:StyleID="s82" ss:Width="346.5"/>
+   <Column ss:StyleID="s82" ss:Width="526.5"/>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s83"><Data ss:Type="String">Id</Data></Cell>
+    <Cell ss:StyleID="s83"><Data ss:Type="String">Code</Data></Cell>
+    <Cell ss:StyleID="s83"><Data ss:Type="String">Definition</Data></Cell>
+    <Cell ss:StyleID="s83"><Data ss:Type="String">Comments</Data></Cell>
+    <Cell><Data ss:Type="String">v3</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="30">
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s84"><Data ss:Type="String">preliminary</Data></Cell>
+    <Cell ss:StyleID="s84"><Data ss:Type="String">This is a preliminary composition or document (also known as initial or interim). The content may be incomplete or unverified</Data></Cell>
+    <Cell><Data ss:Type="String">Compositions are sometimes shared prior to being finalised</Data></Cell>
+    <Cell><Data ss:Type="String">~ActStatus.active</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="30">
+    <Cell><Data ss:Type="Number">2</Data></Cell>
+    <Cell ss:StyleID="s84"><Data ss:Type="String">final</Data></Cell>
+    <Cell ss:StyleID="s84"><Data ss:Type="String">The composition or document is complete and verified by an appropriate person, and no further work is planned</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="String">&lt;ActStatus.completed</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="60">
+    <Cell><Data ss:Type="Number">3</Data></Cell>
+    <Cell ss:StyleID="s84"><Data ss:Type="String">appended</Data></Cell>
+    <Cell ss:StyleID="s84"><Data ss:Type="String">The composition or document has been modified subsequent to being released as &quot;final&quot;, and is complete and verified by an authorized person. The modifications added new information to the composition or document, but did not revise existing content</Data></Cell>
+    <Cell><Data ss:Type="String">If systems are not able to be sure whether existing information has changed or not, they should use the status &quot;amended&quot;</Data></Cell>
+    <Cell><Data ss:Type="String">&lt;ActStatus.completed</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="30">
+    <Cell><Data ss:Type="Number">4</Data></Cell>
+    <Cell ss:StyleID="s84"><Data ss:Type="String">amended</Data></Cell>
+    <Cell ss:StyleID="s84"><Data ss:Type="String">The composition or document has been modified subsequent to being released as &quot;final&quot;, and is complete and verified by an authorized person</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="String">&lt;ActStatus.completed</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="30">
+    <Cell><Data ss:Type="Number">5</Data></Cell>
+    <Cell ss:StyleID="s84"><Data ss:Type="String">entered in error</Data></Cell>
+    <Cell ss:StyleID="s84"><Data ss:Type="String">The composition or document was originally created/issued in error, and this is an amendment that marks that the entire series should not be considered as valid</Data></Cell>
+    <Cell ss:StyleID="s85"><Data ss:Type="String">Usually this is because some major error has been detected in the workflow that created the composition or document, or the content was associated with the wrong patient/author etc.</Data></Cell>
+    <Cell><Data ss:Type="String">~ActStatus.nullified</Data></Cell>
+   </Row>
+  </Table>
+  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+   <PageSetup>
+    <Header x:Margin="0.3"/>
+    <Footer x:Margin="0.3"/>
+    <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
+   </PageSetup>
+   <Unsynced/>
+   <Panes>
+    <Pane>
+     <Number>3</Number>
+     <ActiveRow>1</ActiveRow>
+     <ActiveCol>1</ActiveCol>
+     <RangeSelection>R2C2:R6C2</RangeSelection>
+    </Pane>
+   </Panes>
+   <ProtectObjects>False</ProtectObjects>
+   <ProtectScenarios>False</ProtectScenarios>
+  </WorksheetOptions>
+ </Worksheet>
+</Workbook>

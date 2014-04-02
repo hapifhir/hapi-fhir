@@ -1,0 +1,477 @@
+<?xml version="1.0"?>
+<?mso-application progid="Excel.Sheet"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:o="urn:schemas-microsoft-com:office:office"
+ xmlns:x="urn:schemas-microsoft-com:office:excel"
+ xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:html="http://www.w3.org/TR/REC-html40">
+ <DocumentProperties xmlns="urn:schemas-microsoft-com:office:office">
+  <Author>Grahame</Author>
+  <LastAuthor>Grahame</LastAuthor>
+  <Created>2012-03-19T11:15:30Z</Created>
+  <LastSaved>2013-06-22T05:33:48Z</LastSaved>
+  <Version>14.00</Version>
+ </DocumentProperties>
+ <OfficeDocumentSettings xmlns="urn:schemas-microsoft-com:office:office">
+  <AllowPNG/>
+ </OfficeDocumentSettings>
+ <ExcelWorkbook xmlns="urn:schemas-microsoft-com:office:excel">
+  <WindowHeight>6225</WindowHeight>
+  <WindowWidth>22755</WindowWidth>
+  <WindowTopX>5520</WindowTopX>
+  <WindowTopY>6195</WindowTopY>
+  <ProtectStructure>False</ProtectStructure>
+  <ProtectWindows>False</ProtectWindows>
+ </ExcelWorkbook>
+ <Styles>
+  <Style ss:ID="Default" ss:Name="Normal">
+   <Alignment ss:Vertical="Bottom"/>
+   <Borders/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"/>
+   <Interior/>
+   <NumberFormat/>
+   <Protection/>
+  </Style>
+  <Style ss:ID="s62">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:ShrinkToFit="1"
+    ss:WrapText="1"/>
+  </Style>
+  <Style ss:ID="s63">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:ShrinkToFit="1"
+    ss:WrapText="1"/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"
+    ss:Bold="1"/>
+  </Style>
+  <Style ss:ID="s64">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:ShrinkToFit="1"
+    ss:WrapText="1"/>
+   <Borders>
+    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1"/>
+   </Borders>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"
+    ss:Bold="1"/>
+   <Interior ss:Color="#EEECE1" ss:Pattern="Solid"/>
+  </Style>
+  <Style ss:ID="s65">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:ShrinkToFit="1"
+    ss:WrapText="1"/>
+   <Interior ss:Color="#D9D9D9" ss:Pattern="Solid"/>
+  </Style>
+  <Style ss:ID="s68">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:ShrinkToFit="1"
+    ss:WrapText="1"/>
+   <Borders/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"
+    ss:Bold="1"/>
+   <Interior ss:Color="#FFFFFF" ss:Pattern="Solid"/>
+  </Style>
+  <Style ss:ID="s69">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:ShrinkToFit="1"
+    ss:WrapText="1"/>
+   <Borders/>
+   <Interior ss:Color="#FFFFFF" ss:Pattern="Solid"/>
+  </Style>
+  <Style ss:ID="s71">
+   <Alignment ss:Vertical="Bottom" ss:ShrinkToFit="1" ss:WrapText="1"/>
+  </Style>
+  <Style ss:ID="s72">
+   <Alignment ss:Vertical="Top" ss:WrapText="1"/>
+  </Style>
+  <Style ss:ID="s73">
+   <Alignment ss:Vertical="Top"/>
+  </Style>
+  <Style ss:ID="s95">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:ShrinkToFit="1"
+    ss:WrapText="1"/>
+   <Borders/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"
+    ss:Bold="1"/>
+   <Interior/>
+  </Style>
+  <Style ss:ID="s96">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:ShrinkToFit="1"
+    ss:WrapText="1"/>
+   <Borders/>
+   <Interior/>
+  </Style>
+  <Style ss:ID="s98">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:ShrinkToFit="1"
+    ss:WrapText="1"/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"
+    ss:Bold="1"/>
+   <Interior/>
+  </Style>
+  <Style ss:ID="s99">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:ShrinkToFit="1"
+    ss:WrapText="1"/>
+   <Interior/>
+  </Style>
+  <Style ss:ID="s118">
+   <Alignment ss:Vertical="Top" ss:WrapText="1"/>
+   <Borders/>
+   <Font ss:FontName="Verdana" x:Family="Swiss" ss:Size="9" ss:Color="#000000"/>
+   <Interior/>
+  </Style>
+ </Styles>
+ <Worksheet ss:Name="Data Elements">
+  <Table ss:ExpandedColumnCount="15" ss:ExpandedRowCount="13" x:FullColumns="1"
+   x:FullRows="1" ss:StyleID="s62" ss:DefaultRowHeight="15">
+   <Column ss:StyleID="s63" ss:AutoFitWidth="0" ss:Width="294"/>
+   <Column ss:StyleID="s62" ss:AutoFitWidth="0" ss:Width="56.25" ss:Span="1"/>
+   <Column ss:Index="4" ss:StyleID="s62" ss:AutoFitWidth="0" ss:Width="35.25"
+    ss:Span="1"/>
+   <Column ss:Index="6" ss:StyleID="s62" ss:AutoFitWidth="0" ss:Width="93"/>
+   <Column ss:StyleID="s62" ss:AutoFitWidth="0" ss:Width="82.5"/>
+   <Column ss:StyleID="s62" ss:AutoFitWidth="0" ss:Width="213.75" ss:Span="1"/>
+   <Column ss:Index="10" ss:StyleID="s62" ss:AutoFitWidth="0" ss:Width="161.25"
+    ss:Span="1"/>
+   <Column ss:Index="12" ss:StyleID="s62" ss:AutoFitWidth="0" ss:Width="114"/>
+   <Column ss:StyleID="s62" ss:AutoFitWidth="0" ss:Width="135" ss:Span="1"/>
+   <Row ss:Height="45" ss:StyleID="s64">
+    <Cell><Data ss:Type="String">Element</Data></Cell>
+    <Cell><Data ss:Type="String">Card.</Data></Cell>
+    <Cell><Data ss:Type="String">Inv.</Data></Cell>
+    <Cell><Data ss:Type="String">Must Understand</Data></Cell>
+    <Cell><Data ss:Type="String">UML</Data></Cell>
+    <Cell><Data ss:Type="String">Type</Data></Cell>
+    <Cell><Data ss:Type="String">Binding</Data></Cell>
+    <Cell><Data ss:Type="String">Short Name</Data></Cell>
+    <Cell><Data ss:Type="String">Definition</Data></Cell>
+    <Cell><Data ss:Type="String">Requirements</Data></Cell>
+    <Cell><Data ss:Type="String">Comments</Data></Cell>
+    <Cell><Data ss:Type="String">RIM Mapping</Data></Cell>
+    <Cell><Data ss:Type="String">v2 Mapping</Data></Cell>
+    <Cell><Data ss:Type="String">To Do</Data></Cell>
+    <Cell><Data ss:Type="String">Committee Notes</Data></Cell>
+   </Row>
+   <Row ss:Height="60">
+    <Cell><Data ss:Type="String">DeviceObservationReport</Data></Cell>
+    <Cell ss:StyleID="s65"/>
+    <Cell ss:StyleID="s65"/>
+    <Cell ss:StyleID="s65"/>
+    <Cell ss:StyleID="s65"/>
+    <Cell><Data ss:Type="String">Resource</Data></Cell>
+    <Cell ss:Index="8"><Data ss:Type="String">Describes the data produced by a device at a point in time</Data></Cell>
+    <Cell><Data ss:Type="String">Describes the data produced by a device at a point in time</Data></Cell>
+    <Cell ss:Index="12"><Data ss:Type="String">Observation[classCode=OBS, moodCode=EVN, code &lt; DeviceObservation]</Data></Cell>
+   </Row>
+   <Row ss:Height="30">
+    <Cell><Data ss:Type="String">DeviceObservationReport.instant</Data></Cell>
+    <Cell><Data ss:Type="String">1..1</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">instant</Data></Cell>
+    <Cell ss:Index="8"><Data ss:Type="String">When the data values are reported</Data></Cell>
+    <Cell><Data ss:Type="String">The point in time that the values are reported</Data></Cell>
+    <Cell ss:Index="12"><Data ss:Type="String">.effectiveTime</Data></Cell>
+   </Row>
+   <Row ss:Height="45">
+    <Cell><Data ss:Type="String">DeviceObservationReport.identifier</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">Identifier</Data></Cell>
+    <Cell ss:Index="8"><Data ss:Type="String">As assigned by the source device</Data></Cell>
+    <Cell><Data ss:Type="String">An identifier assigned to this observation bu the source device that made the observation</Data></Cell>
+    <Cell ss:Index="12"><Data ss:Type="String">.id</Data></Cell>
+   </Row>
+   <Row ss:Height="45">
+    <Cell><Data ss:Type="String">DeviceObservationReport.source</Data></Cell>
+    <Cell><Data ss:Type="String">1..1</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">Resource(Device)</Data></Cell>
+    <Cell ss:Index="8"><Data ss:Type="String">Identifies/describes where the data came from</Data></Cell>
+    <Cell><Data ss:Type="String">Identification information for the device that is the source of the data</Data></Cell>
+    <Cell ss:Index="12"><Data ss:Type="String">.participation[typeCode=PFM].role[player.classCode=DEV]</Data></Cell>
+   </Row>
+   <Row ss:Height="30" ss:StyleID="s96">
+    <Cell ss:StyleID="s95"><Data ss:Type="String">DeviceObservationReport.subject</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">Resource(Patient|Device|Location)</Data></Cell>
+    <Cell ss:Index="8"><Data ss:Type="String">Subject of the measurement</Data></Cell>
+    <Cell><Data ss:Type="String">The subject of the measurement</Data></Cell>
+    <Cell ss:Index="12"><Data ss:Type="String">.participation[typeCode=SBJ].role</Data></Cell>
+   </Row>
+   <Row ss:Height="90" ss:StyleID="s96">
+    <Cell ss:StyleID="s95"><Data ss:Type="String">DeviceObservationReport.virtualDevice</Data></Cell>
+    <Cell><Data ss:Type="String">0..*</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="String">left</Data></Cell>
+    <Cell ss:Index="8" ss:StyleID="s118"><Data ss:Type="String">A medical-related subsystem of a medical device</Data></Cell>
+    <Cell ss:StyleID="s118"><Data ss:Type="String">A medical-related subsystem of a medical device</Data></Cell>
+    <Cell ss:Index="12"><Data ss:Type="String">.outboundRelationship[typeCode='COMP'].target[classCode=OBS, moodCode=EVN, code &lt; &quot;virtual device compartment&quot;]</Data></Cell>
+   </Row>
+   <Row ss:Height="30" ss:StyleID="s96">
+    <Cell ss:StyleID="s95"><Data ss:Type="String">DeviceObservationReport.virtualDevice.code</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">CodeableConcept</Data></Cell>
+    <Cell><Data ss:Type="String">VirtalDeviceKind</Data></Cell>
+    <Cell><Data ss:Type="String">Describes the compartment</Data></Cell>
+    <Cell><Data ss:Type="String">Describes the compartment</Data></Cell>
+    <Cell ss:Index="12"><Data ss:Type="String">.code</Data></Cell>
+   </Row>
+   <Row ss:Height="75" ss:StyleID="s96">
+    <Cell ss:StyleID="s95"><Data ss:Type="String">DeviceObservationReport.virtualDevice.channel</Data></Cell>
+    <Cell><Data ss:Type="String">0..*</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="String">down</Data></Cell>
+    <Cell ss:Index="8"><Data ss:Type="String">Groups related data items</Data></Cell>
+    <Cell><Data ss:Type="String">Groups together physiological measurement data and derived data</Data></Cell>
+    <Cell ss:Index="12"><Data ss:Type="String">.outboundRelationship[typeCode='COMP'].target[classCode=OBS, moodCode=EVN, code &lt; &quot;channel&quot;]</Data></Cell>
+   </Row>
+   <Row ss:Height="30" ss:StyleID="s96">
+    <Cell ss:StyleID="s95"><Data ss:Type="String">DeviceObservationReport.virtualDevice.channel.code</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">CodeableConcept</Data></Cell>
+    <Cell><Data ss:Type="String">DeviceChannelKind1</Data></Cell>
+    <Cell><Data ss:Type="String">Describes the channel</Data></Cell>
+    <Cell><Data ss:Type="String">Describes the channel</Data></Cell>
+    <Cell ss:Index="12"><Data ss:Type="String">.participation[typeCode=PFM].role.code</Data></Cell>
+   </Row>
+   <Row ss:Height="30" ss:StyleID="s96">
+    <Cell ss:StyleID="s95"><Data ss:Type="String">DeviceObservationReport.virtualDevice.channel.metric</Data></Cell>
+    <Cell><Data ss:Type="String">0..*</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="String">right</Data></Cell>
+    <Cell ss:Index="8"><Data ss:Type="String">Piece of data reported by device</Data></Cell>
+    <Cell><Data ss:Type="String">A piece of measured or derived data that is reported by the machine</Data></Cell>
+    <Cell ss:Index="12"><Data ss:Type="String">.code</Data></Cell>
+   </Row>
+   <Row ss:Height="30" ss:StyleID="s96">
+    <Cell ss:StyleID="s95"><Data ss:Type="String">DeviceObservationReport.virtualDevice.channel.metric.observation</Data></Cell>
+    <Cell><Data ss:Type="String">1..1</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">Resource(Observation)</Data></Cell>
+    <Cell ss:Index="8"><Data ss:Type="String">The data for the metric</Data></Cell>
+    <Cell><Data ss:Type="String">The data for the metric</Data></Cell>
+    <Cell ss:Index="12"><Data ss:Type="String">.value</Data></Cell>
+   </Row>
+   <Row ss:StyleID="s99">
+    <Cell ss:StyleID="s98"/>
+   </Row>
+  </Table>
+  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+   <PageSetup>
+    <Header x:Margin="0.3"/>
+    <Footer x:Margin="0.3"/>
+    <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
+   </PageSetup>
+   <Print>
+    <ValidPrinterInfo/>
+    <PaperSizeIndex>9</PaperSizeIndex>
+    <VerticalResolution>0</VerticalResolution>
+   </Print>
+   <Selected/>
+   <FreezePanes/>
+   <FrozenNoSplit/>
+   <SplitHorizontal>1</SplitHorizontal>
+   <TopRowBottomPane>1</TopRowBottomPane>
+   <SplitVertical>1</SplitVertical>
+   <LeftColumnRightPane>1</LeftColumnRightPane>
+   <ActivePane>0</ActivePane>
+   <Panes>
+    <Pane>
+     <Number>3</Number>
+    </Pane>
+    <Pane>
+     <Number>1</Number>
+    </Pane>
+    <Pane>
+     <Number>2</Number>
+    </Pane>
+    <Pane>
+     <Number>0</Number>
+    </Pane>
+   </Panes>
+   <ProtectObjects>False</ProtectObjects>
+   <ProtectScenarios>False</ProtectScenarios>
+  </WorksheetOptions>
+ </Worksheet>
+ <Worksheet ss:Name="Invariants">
+  <Table ss:ExpandedColumnCount="6" ss:ExpandedRowCount="1" x:FullColumns="1"
+   x:FullRows="1" ss:StyleID="s71" ss:DefaultRowHeight="15">
+   <Column ss:Index="2" ss:StyleID="s71" ss:AutoFitWidth="0" ss:Width="59.25"/>
+   <Column ss:StyleID="s71" ss:AutoFitWidth="0" ss:Width="366"/>
+   <Column ss:StyleID="s71" ss:AutoFitWidth="0" ss:Width="239.25"/>
+   <Column ss:Index="6" ss:StyleID="s71" ss:AutoFitWidth="0" ss:Width="384.75"/>
+   <Row ss:AutoFitHeight="0" ss:StyleID="s64">
+    <Cell><Data ss:Type="String">Id</Data></Cell>
+    <Cell><Data ss:Type="String">Name</Data></Cell>
+    <Cell><Data ss:Type="String">Context</Data></Cell>
+    <Cell><Data ss:Type="String">English</Data></Cell>
+    <Cell><Data ss:Type="String">OCL</Data></Cell>
+    <Cell><Data ss:Type="String">XPath</Data></Cell>
+   </Row>
+  </Table>
+  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+   <PageSetup>
+    <Header x:Margin="0.3"/>
+    <Footer x:Margin="0.3"/>
+    <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
+   </PageSetup>
+   <Unsynced/>
+   <Print>
+    <ValidPrinterInfo/>
+    <PaperSizeIndex>9</PaperSizeIndex>
+    <HorizontalResolution>600</HorizontalResolution>
+    <VerticalResolution>0</VerticalResolution>
+   </Print>
+   <Panes>
+    <Pane>
+     <Number>3</Number>
+     <ActiveRow>1</ActiveRow>
+     <RangeSelection>R2:R5</RangeSelection>
+    </Pane>
+   </Panes>
+   <ProtectObjects>False</ProtectObjects>
+   <ProtectScenarios>False</ProtectScenarios>
+  </WorksheetOptions>
+ </Worksheet>
+ <Worksheet ss:Name="Events">
+  <Table ss:ExpandedColumnCount="6" ss:ExpandedRowCount="2" x:FullColumns="1"
+   x:FullRows="1" ss:DefaultRowHeight="15">
+   <Column ss:AutoFitWidth="0" ss:Width="69.75"/>
+   <Column ss:AutoFitWidth="0" ss:Width="93.75" ss:Span="1"/>
+   <Column ss:Index="4" ss:AutoFitWidth="0" ss:Width="101.25"/>
+   <Column ss:AutoFitWidth="0" ss:Width="111"/>
+   <Column ss:AutoFitWidth="0" ss:Width="69"/>
+   <Row ss:AutoFitHeight="0" ss:Height="22.5">
+    <Cell ss:StyleID="s72"><Data ss:Type="String">Event Code</Data></Cell>
+    <Cell ss:StyleID="s72"><Data ss:Type="String">Description</Data></Cell>
+    <Cell ss:StyleID="s72"><Data ss:Type="String">Notes</Data></Cell>
+    <Cell ss:StyleID="s72"><Data ss:Type="String">Request Resources</Data></Cell>
+    <Cell ss:StyleID="s72"><Data ss:Type="String">Response Resources</Data></Cell>
+    <Cell ss:StyleID="s72"><Data ss:Type="String">Follow Ups</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s72"/>
+    <Cell ss:StyleID="s72"/>
+    <Cell ss:StyleID="s72"/>
+    <Cell ss:StyleID="s72"/>
+   </Row>
+  </Table>
+  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+   <PageSetup>
+    <Header x:Margin="0.3"/>
+    <Footer x:Margin="0.3"/>
+    <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
+   </PageSetup>
+   <Unsynced/>
+   <Panes>
+    <Pane>
+     <Number>3</Number>
+     <ActiveRow>1</ActiveRow>
+     <ActiveCol>3</ActiveCol>
+    </Pane>
+   </Panes>
+   <ProtectObjects>False</ProtectObjects>
+   <ProtectScenarios>False</ProtectScenarios>
+  </WorksheetOptions>
+ </Worksheet>
+ <Worksheet ss:Name="Search">
+  <Table ss:ExpandedColumnCount="5" ss:ExpandedRowCount="6" x:FullColumns="1"
+   x:FullRows="1" ss:DefaultRowHeight="15">
+   <Column ss:AutoFitWidth="0" ss:Width="70.5"/>
+   <Column ss:AutoFitWidth="0" ss:Width="382.5"/>
+   <Column ss:Index="4" ss:AutoFitWidth="0" ss:Width="273"/>
+   <Column ss:AutoFitWidth="0" ss:Width="339.75"/>
+   <Row ss:AutoFitHeight="0" ss:Height="16.5" ss:StyleID="s64">
+    <Cell><Data ss:Type="String">Name</Data></Cell>
+    <Cell><Data ss:Type="String">Description</Data></Cell>
+    <Cell><Data ss:Type="String">Type</Data></Cell>
+    <Cell><Data ss:Type="String">Path</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">source</Data></Cell>
+    <Cell ss:Index="3"><Data ss:Type="String">reference</Data></Cell>
+    <Cell ss:StyleID="s63"><Data ss:Type="String">DeviceObservationReport.source</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">code</Data></Cell>
+    <Cell><Data ss:Type="String">The compatment code</Data></Cell>
+    <Cell><Data ss:Type="String">token</Data></Cell>
+    <Cell ss:StyleID="s63"><Data ss:Type="String">DeviceObservationReport.virtualDevice.code</Data></Cell>
+    <Cell ss:StyleID="s63"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">channel</Data></Cell>
+    <Cell><Data ss:Type="String">The channel code</Data></Cell>
+    <Cell><Data ss:Type="String">token</Data></Cell>
+    <Cell ss:StyleID="s63"><Data ss:Type="String">DeviceObservationReport.virtualDevice.channel.code</Data></Cell>
+    <Cell ss:StyleID="s63"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">observation</Data></Cell>
+    <Cell ss:Index="3"><Data ss:Type="String">reference</Data></Cell>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">DeviceObservationReport.virtualDevice.channel.metric.observation</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">subject</Data></Cell>
+    <Cell ss:Index="3"><Data ss:Type="String">reference</Data></Cell>
+    <Cell ss:StyleID="s63"><Data ss:Type="String">DeviceObservationReport.subject</Data></Cell>
+   </Row>
+  </Table>
+  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+   <PageSetup>
+    <Header x:Margin="0.3"/>
+    <Footer x:Margin="0.3"/>
+    <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
+   </PageSetup>
+   <Unsynced/>
+   <Print>
+    <ValidPrinterInfo/>
+    <PaperSizeIndex>9</PaperSizeIndex>
+    <HorizontalResolution>-3</HorizontalResolution>
+    <VerticalResolution>-3</VerticalResolution>
+   </Print>
+   <Panes>
+    <Pane>
+     <Number>3</Number>
+     <ActiveRow>2</ActiveRow>
+     <ActiveCol>3</ActiveCol>
+    </Pane>
+   </Panes>
+   <ProtectObjects>False</ProtectObjects>
+   <ProtectScenarios>False</ProtectScenarios>
+  </WorksheetOptions>
+ </Worksheet>
+ <Worksheet ss:Name="Bindings">
+  <Table ss:ExpandedColumnCount="5" ss:ExpandedRowCount="3" x:FullColumns="1"
+   x:FullRows="1" ss:StyleID="s73" ss:DefaultRowHeight="15">
+   <Column ss:StyleID="s73" ss:AutoFitWidth="0" ss:Width="130.5"/>
+   <Column ss:StyleID="s73" ss:AutoFitWidth="0" ss:Width="294.75"/>
+   <Column ss:StyleID="s73" ss:AutoFitWidth="0" ss:Width="65.25"/>
+   <Column ss:StyleID="s73" ss:AutoFitWidth="0" ss:Width="89.25"/>
+   <Column ss:StyleID="s73" ss:AutoFitWidth="0" ss:Width="287.25"/>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s64"><Data ss:Type="String">Binding Name</Data></Cell>
+    <Cell ss:StyleID="s64"><Data ss:Type="String">Definition</Data></Cell>
+    <Cell ss:StyleID="s64"><Data ss:Type="String">Binding</Data></Cell>
+    <Cell ss:StyleID="s64"><Data ss:Type="String">Reference</Data></Cell>
+    <Cell ss:StyleID="s64"><Data ss:Type="String">Description</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s69"><Data ss:Type="String">VirtalDeviceKind</Data></Cell>
+    <Cell ss:StyleID="s62"><Data ss:Type="String">Describes the virtual device</Data></Cell>
+    <Cell><Data ss:Type="String">reference</Data></Cell>
+    <Cell ss:StyleID="Default"><Data ss:Type="String">http://hit-testing.nist.gov:13110/rtmms/index.htm</Data></Cell>
+    <Cell><Data ss:Type="String">RTM Management Service</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">DeviceChannelKind1</Data></Cell>
+    <Cell ss:StyleID="s62"><Data ss:Type="String">Describes the channel</Data></Cell>
+    <Cell><Data ss:Type="String">reference</Data></Cell>
+    <Cell ss:StyleID="Default"><Data ss:Type="String">http://hit-testing.nist.gov:13110/rtmms/index.htm</Data></Cell>
+    <Cell><Data ss:Type="String">RTM Management Service</Data></Cell>
+   </Row>
+  </Table>
+  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+   <PageSetup>
+    <Header x:Margin="0.3"/>
+    <Footer x:Margin="0.3"/>
+    <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
+   </PageSetup>
+   <Unsynced/>
+   <Panes>
+    <Pane>
+     <Number>3</Number>
+     <ActiveRow>3</ActiveRow>
+     <ActiveCol>1</ActiveCol>
+    </Pane>
+   </Panes>
+   <ProtectObjects>False</ProtectObjects>
+   <ProtectScenarios>False</ProtectScenarios>
+  </WorksheetOptions>
+ </Worksheet>
+</Workbook>

@@ -6,7 +6,13 @@ import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.*;
 
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.StringReader;
+import java.nio.charset.Charset;
+import java.util.List;
+
+import net.sf.json.JSON;
+import net.sf.json.JSONSerializer;
 
 import org.apache.commons.io.IOUtils;
 import org.custommonkey.xmlunit.Diff;
@@ -581,4 +587,74 @@ public class XmlParserTest {
 		assertEquals("Hello", ext.getValueAsPrimitive().getValue());
 
 	}
+	
+	
+	
+	
+	
+	@Test
+	public void testSimpleResourceEncode() throws IOException, SAXException {
+
+		FhirContext ctx = new FhirContext(Observation.class);
+		String xmlString = IOUtils.toString(JsonParser.class.getResourceAsStream("/example-patient-general.json"), Charset.forName("UTF-8"));
+		Patient obs = ctx.newJsonParser().parseResource(Patient.class, xmlString);
+
+		List<ExtensionDt> undeclaredExtensions = obs.getContact().get(0).getName().getFamily().get(0).getUndeclaredExtensions();
+		ExtensionDt undeclaredExtension = undeclaredExtensions.get(0);
+		assertEquals("http://hl7.org/fhir/Profile/iso-21090#qualifier", undeclaredExtension.getUrl().getValue());
+
+		ctx.newJsonParser().setPrettyPrint(true).encodeResourceToWriter(obs, new OutputStreamWriter(System.out));
+
+		IParser jsonParser = ctx.newXmlParser();
+		String encoded = jsonParser.encodeResourceToString(obs);
+		ourLog.info(encoded);
+
+		String jsonString = IOUtils.toString(JsonParser.class.getResourceAsStream("/example-patient-general.xml"));
+
+		String expected = (jsonString);
+		String actual = (encoded.trim());
+
+		Diff d = new Diff(new StringReader(expected), new StringReader(actual));
+		assertTrue(d.toString(), d.identical());
+
+
+	}
+
+	
+	
+	
+	@Test
+	public void testSimpleResourceEncodeWithCustomType() throws IOException, SAXException {
+
+		FhirContext ctx = new FhirContext(MyObservationWithExtensions.class);
+		String xmlString = IOUtils.toString(JsonParser.class.getResourceAsStream("/example-patient-general.json"), Charset.forName("UTF-8"));
+		MyObservationWithExtensions obs = ctx.newJsonParser().parseResource(MyObservationWithExtensions.class, xmlString);
+
+		assertEquals(0, obs.getAllUndeclaredExtensions().size());
+		assertEquals("aaaa", obs.getExtAtt().getContentType().getValue());
+		assertEquals("str1", obs.getMoreExt().getStr1().getValue());
+		assertEquals("2011-01-02", obs.getModExt().getValueAsString());
+		
+		List<ExtensionDt> undeclaredExtensions = obs.getContact().get(0).getName().getFamily().get(0).getUndeclaredExtensions();
+		ExtensionDt undeclaredExtension = undeclaredExtensions.get(0);
+		assertEquals("http://hl7.org/fhir/Profile/iso-21090#qualifier", undeclaredExtension.getUrl().getValue());
+
+		ctx.newJsonParser().setPrettyPrint(true).encodeResourceToWriter(obs, new OutputStreamWriter(System.out));
+
+		IParser jsonParser = ctx.newXmlParser();
+		String encoded = jsonParser.encodeResourceToString(obs);
+		ourLog.info(encoded);
+
+		String jsonString = IOUtils.toString(JsonParser.class.getResourceAsStream("/example-patient-general.xml"));
+
+		String expected = (jsonString);
+		String actual = (encoded.trim());
+
+		Diff d = new Diff(new StringReader(expected), new StringReader(actual));
+		assertTrue(d.toString(), d.identical());
+
+		
+
+	}
+	
 }

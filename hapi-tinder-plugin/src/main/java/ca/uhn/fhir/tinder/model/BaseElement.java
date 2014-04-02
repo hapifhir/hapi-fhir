@@ -1,6 +1,6 @@
 package ca.uhn.fhir.tinder.model;
 
-import static org.apache.commons.lang.StringUtils.*;
+import static org.apache.commons.lang.StringUtils.isNotBlank;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -237,8 +237,11 @@ public abstract class BaseElement {
 			String[] types = typeString.replace("=", "").split("\\|");
 			for (String nextType : types) {
 				nextType = nextType.trim();
+				if (nextType.endsWith(")")){
+					nextType = nextType.substring(0, nextType.length()-1);
+				}
 				if (nextType.toLowerCase().startsWith("resource(")) {
-					nextType = nextType.substring("Resource(".length(), nextType.length() - 1);
+					nextType = nextType.substring("Resource(".length(), nextType.length());
 					nextType = nextType.substring(0, 1).toUpperCase() + nextType.substring(1);
 				} else {
 					nextType = nextType.substring(0, 1).toUpperCase() + nextType.substring(1);

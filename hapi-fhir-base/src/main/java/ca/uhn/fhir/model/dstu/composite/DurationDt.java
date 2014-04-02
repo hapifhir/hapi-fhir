@@ -2,7 +2,7 @@ package ca.uhn.fhir.model.dstu.composite;
 
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 
-@DatatypeDef(name = "duration")
+@DatatypeDef(name = "Duration")
 public class DurationDt extends QuantityDt {
 
 	// TODO: implement restricions

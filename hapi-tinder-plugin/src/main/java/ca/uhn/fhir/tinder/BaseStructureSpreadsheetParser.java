@@ -3,6 +3,7 @@ package ca.uhn.fhir.tinder;
 import java.io.InputStream;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
@@ -12,8 +13,8 @@ import org.w3c.dom.NodeList;
 
 import ca.uhn.fhir.tinder.model.AnyChild;
 import ca.uhn.fhir.tinder.model.BaseElement;
-import ca.uhn.fhir.tinder.model.Child;
 import ca.uhn.fhir.tinder.model.BaseRootType;
+import ca.uhn.fhir.tinder.model.Child;
 import ca.uhn.fhir.tinder.model.ResourceBlock;
 import ca.uhn.fhir.tinder.model.ResourceBlockCopy;
 import ca.uhn.fhir.tinder.model.SearchParameter;
@@ -32,10 +33,18 @@ public abstract class BaseStructureSpreadsheetParser extends BaseStructureParser
 	private int myColV2Mapping;
 
 	public void parse() throws Exception {
-
+		int index = 0;
 		for (InputStream nextInputStream : getInputStreams()) {
 
-			Document file = XMLUtils.parse(nextInputStream, false);
+			ourLog.info("Reading spreadsheet file {}", getInputStreamNames().get(index));
+			
+			Document file;
+			try {
+				file = XMLUtils.parse(nextInputStream, false);
+			} catch (Exception e) {
+				throw new Exception("Failed during reading: " + getInputStreamNames().get(index), e);
+			}
+
 			Element dataElementsSheet = (Element) file.getElementsByTagName("Worksheet").item(0);
 			NodeList tableList = dataElementsSheet.getElementsByTagName("Table");
 			Element table = (Element) tableList.item(0);
@@ -55,11 +64,11 @@ public abstract class BaseStructureSpreadsheetParser extends BaseStructureParser
 			parseBasicElements(resourceRow, resource);
 
 			resource.setId(resource.getName().toLowerCase());
-			
+
 			if (this instanceof ResourceGeneratorUsingSpreadsheet) {
 				resource.setProfile("http://hl7.org/fhir/profiles/" + resource.getElementName());
 			}
-			
+
 			Map<String, BaseElement> elements = new HashMap<String, BaseElement>();
 			elements.put(resource.getElementName(), resource);
 
@@ -105,6 +114,7 @@ public abstract class BaseStructureSpreadsheetParser extends BaseStructureParser
 
 			}
 
+			index++;
 		}
 
 		ourLog.info("Parsed {} spreadsheet structures", getResources().size());
@@ -165,6 +175,8 @@ public abstract class BaseStructureSpreadsheetParser extends BaseStructureParser
 	}
 
 	protected abstract Collection<InputStream> getInputStreams();
+
+	protected abstract List<String> getInputStreamNames();
 
 	private void parseFirstRow(Element theDefRow) {
 		for (int i = 0; i < 20; i++) {

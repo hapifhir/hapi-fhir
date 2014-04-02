@@ -1,6 +1,7 @@
 package ca.uhn.fhir.parser;
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -29,10 +30,12 @@ import javax.json.stream.JsonGeneratorFactory;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.text.WordUtils;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementDefinition.ChildTypeEnum;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeChildDeclaredExtensionDefinition;
 import ca.uhn.fhir.context.RuntimeChildNarrativeDefinition;
@@ -307,6 +310,7 @@ public class JsonParser extends BaseParser implements IParser {
 		}
 		case OBJECT: {
 			theState.enteringNewElement(null, theName);
+			parseAlternates(theAlternateVal, theState);
 			JsonObject nextObject = (JsonObject) theJsonVal;
 			boolean preResource = false;
 			if (theState.isPreResource()) {
@@ -419,6 +423,17 @@ public class JsonParser extends BaseParser implements IParser {
 				list.get(valueIdx).add(new HeldExtension(next));
 			}
 		}
+	}
+
+	private void addToHeldExtensions(int valueIdx, ArrayList<ArrayList<HeldExtension>> list, RuntimeChildDeclaredExtensionDefinition theDef, IElement theValue) {
+		list.ensureCapacity(valueIdx);
+		while (list.size() <= valueIdx) {
+			list.add(null);
+		}
+		if (list.get(valueIdx) == null) {
+			list.set(valueIdx, new ArrayList<JsonParser.HeldExtension>());
+		}
+		list.get(valueIdx).add(new HeldExtension(theDef, theValue));
 	}
 
 	private void assertObjectOfType(JsonValue theResourceTypeObj, ValueType theValueType, String thePosition) {
@@ -582,22 +597,12 @@ public class JsonParser extends BaseParser implements IParser {
 				}
 
 				if (nextChild instanceof RuntimeChildDeclaredExtensionDefinition) {
-
-					// TODO: hold and return
 					RuntimeChildDeclaredExtensionDefinition extDef = (RuntimeChildDeclaredExtensionDefinition) nextChild;
 					if (extDef.isModifier()) {
-						theEventWriter.writeStartObject("modifierExtension");
+						addToHeldExtensions(valueIdx, modifierExtensions, extDef, nextValue);
 					} else {
-						theEventWriter.writeStartObject("extension");
+						addToHeldExtensions(valueIdx, extensions, extDef, nextValue);
 					}
-
-					String extensionUrl = nextChild.getExtensionUrl();
-					theEventWriter.write("url", extensionUrl);
-					// theEventWriter.writeName(childName);
-					encodeChildElementToStreamWriter(theResDef, theResource, theEventWriter, nextValue, childDef, childName);
-
-					theEventWriter.writeEnd();
-
 				} else {
 
 					if (currentChildName == null || !currentChildName.equals(childName)) {
@@ -634,49 +639,51 @@ public class JsonParser extends BaseParser implements IParser {
 			}
 
 			if (extensions.size() > 0 || modifierExtensions.size() > 0) {
-				theEventWriter.writeStartArray('_' + currentChildName);
+				// Ignore extensions if we're encoding a resource, since they are handled one level up
+				if (currentChildName != null) {
+					theEventWriter.writeStartArray('_' + currentChildName);
 
-				for (int i = 0; i < valueIdx; i++) {
-					boolean haveContent = false;
-					if (extensions.size() > i && extensions.get(i) != null && extensions.get(i).isEmpty() == false) {
-						haveContent = true;
-						theEventWriter.writeStartObject();
-						theEventWriter.writeStartArray("extension");
-						for (HeldExtension nextExt : extensions.get(i)) {
-							nextExt.write(theResDef, theResource, theEventWriter);
+					for (int i = 0; i < valueIdx; i++) {
+						boolean haveContent = false;
+						if (extensions.size() > i && extensions.get(i) != null && extensions.get(i).isEmpty() == false) {
+							haveContent = true;
+							theEventWriter.writeStartObject();
+							theEventWriter.writeStartArray("extension");
+							for (HeldExtension nextExt : extensions.get(i)) {
+								nextExt.write(theResDef, theResource, theEventWriter);
+							}
+							theEventWriter.writeEnd();
+							theEventWriter.writeEnd();
 						}
-						theEventWriter.writeEnd();
-						theEventWriter.writeEnd();
+
+						if (!haveContent) {
+							// theEventWriter.writeEnd();
+							theEventWriter.writeNull();
+						}
 					}
 
-					if (!haveContent) {
-						// theEventWriter.writeEnd();
-						theEventWriter.writeNull();
-					}
+					// if (extensions.size() > 0) {
+					//
+					// theEventWriter.name(extType);
+					// theEventWriter.beginArray();
+					// for (ArrayList<HeldExtension> next : extensions) {
+					// if (next == null || next.isEmpty()) {
+					// theEventWriter.nullValue();
+					// } else {
+					// theEventWriter.beginArray();
+					// // next.write(theEventWriter);
+					// theEventWriter.endArray();
+					// }
+					// }
+					// for (int i = extensions.size(); i < valueIdx; i++) {
+					// theEventWriter.nullValue();
+					// }
+					// theEventWriter.endArray();
+					// }
+
+					theEventWriter.writeEnd();
 				}
-
-				// if (extensions.size() > 0) {
-				//
-				// theEventWriter.name(extType);
-				// theEventWriter.beginArray();
-				// for (ArrayList<HeldExtension> next : extensions) {
-				// if (next == null || next.isEmpty()) {
-				// theEventWriter.nullValue();
-				// } else {
-				// theEventWriter.beginArray();
-				// // next.write(theEventWriter);
-				// theEventWriter.endArray();
-				// }
-				// }
-				// for (int i = extensions.size(); i < valueIdx; i++) {
-				// theEventWriter.nullValue();
-				// }
-				// theEventWriter.endArray();
-				// }
-
-				theEventWriter.writeEnd();
 			}
-
 		}
 	}
 
@@ -685,7 +692,6 @@ public class JsonParser extends BaseParser implements IParser {
 		encodeCompositeElementChildrenToStreamWriter(theResDef, theResource, theElement, theEventWriter, resDef.getExtensions());
 		encodeCompositeElementChildrenToStreamWriter(theResDef, theResource, theElement, theEventWriter, resDef.getChildren());
 	}
-
 
 	private void encodeResourceToJsonStreamWriter(RuntimeResourceDefinition theResDef, IResource theResource, JsonGenerator theEventWriter, String theObjectNameOrNull) throws IOException {
 		super.containResourcesForEncoding(theResource);
@@ -703,12 +709,79 @@ public class JsonParser extends BaseParser implements IParser {
 			theEventWriter.write("id", theResource.getId().getValue());
 		}
 
+		extractAndWriteExtensionsAsDirectChild(theResource, theEventWriter, resDef, theResDef, theResource);
+
 		encodeCompositeElementToStreamWriter(theResDef, theResource, theResource, theEventWriter, resDef);
 
 		theEventWriter.writeEnd();
 	}
 
+	/**
+	 * This is useful only for the two cases where extensions are encoded as direct children (e.g. not in some object called _name): resource extensions, and extension extensions
+	 */
+	private void extractAndWriteExtensionsAsDirectChild(IElement theElement, JsonGenerator theEventWriter, BaseRuntimeElementDefinition<?> theElementDef, RuntimeResourceDefinition theResDef,
+			IResource theResource) throws IOException {
+		List<HeldExtension> extensions = new ArrayList<HeldExtension>(0);
+		List<HeldExtension> modifierExtensions = new ArrayList<HeldExtension>(0);
 
+		// Undeclared extensions
+		extractUndeclaredExtensions(theElement, extensions, modifierExtensions);
+
+		// Declared extensions
+		extractDeclaredExtensions(theElement, theElementDef, extensions, modifierExtensions);
+
+		// Write the extensions
+		writeExtensionsAsDirectChild(theResource, theEventWriter, theResDef, extensions, modifierExtensions);
+	}
+
+	private void writeExtensionsAsDirectChild(IResource theResource, JsonGenerator theEventWriter, RuntimeResourceDefinition resDef, List<HeldExtension> extensions,
+			List<HeldExtension> modifierExtensions) throws IOException {
+		if (extensions.isEmpty() == false) {
+			theEventWriter.writeStartArray("extension");
+			for (HeldExtension next : extensions) {
+				next.write(resDef, theResource, theEventWriter);
+			}
+			theEventWriter.writeEnd();
+		}
+		if (modifierExtensions.isEmpty() == false) {
+			theEventWriter.writeStartArray("modifierExtension");
+			for (HeldExtension next : modifierExtensions) {
+				next.write(resDef, theResource, theEventWriter);
+			}
+			theEventWriter.writeEnd();
+		}
+	}
+
+	private void extractUndeclaredExtensions(IElement theResource, List<HeldExtension> extensions, List<HeldExtension> modifierExtensions) {
+		if (theResource instanceof ISupportsUndeclaredExtensions) {
+			List<ExtensionDt> ext = ((ISupportsUndeclaredExtensions) theResource).getUndeclaredExtensions();
+			for (ExtensionDt next : ext) {
+				extensions.add(new HeldExtension(next));
+			}
+
+			ext = ((ISupportsUndeclaredExtensions) theResource).getUndeclaredModifierExtensions();
+			for (ExtensionDt next : ext) {
+				modifierExtensions.add(new HeldExtension(next));
+			}
+		}
+	}
+
+	private void extractDeclaredExtensions(IElement theResource, BaseRuntimeElementDefinition<?> resDef, List<HeldExtension> extensions, List<HeldExtension> modifierExtensions) {
+		for (RuntimeChildDeclaredExtensionDefinition nextDef : resDef.getExtensionsNonModifier()) {
+			for (IElement nextValue : nextDef.getAccessor().getValues(theResource)) {
+				if (nextValue != null) {
+					extensions.add(new HeldExtension(nextDef, nextValue));
+				}
+			}
+		}
+		for (RuntimeChildDeclaredExtensionDefinition nextDef : resDef.getExtensionsModifier()) {
+			for (IElement nextValue : nextDef.getAccessor().getValues(theResource)) {
+				if (nextValue != null) {
+					modifierExtensions.add(new HeldExtension(nextDef, nextValue));
+				}
+			}
+		}
+	}
 
 	private void writeAtomLink(JsonGenerator theEventWriter, String theRel, StringDt theLink) {
 		if (isNotBlank(theLink.getValue())) {
@@ -748,14 +821,38 @@ public class JsonParser extends BaseParser implements IParser {
 	private class HeldExtension {
 
 		private ExtensionDt myUndeclaredExtension;
+		private RuntimeChildDeclaredExtensionDefinition myDef;
+		private IElement myValue;
 
 		public HeldExtension(ExtensionDt theUndeclaredExtension) {
+			assert theUndeclaredExtension != null;
 			myUndeclaredExtension = theUndeclaredExtension;
+		}
+
+		public HeldExtension(RuntimeChildDeclaredExtensionDefinition theDef, IElement theValue) {
+			assert theDef != null;
+			assert theValue != null;
+			myDef = theDef;
+			myValue = theValue;
 		}
 
 		public void write(RuntimeResourceDefinition theResDef, IResource theResource, JsonGenerator theEventWriter) throws IOException {
 			if (myUndeclaredExtension != null) {
 				writeUndeclaredExt(theResDef, theResource, theEventWriter, myUndeclaredExtension);
+			} else {
+				theEventWriter.writeStartObject();
+				theEventWriter.write("url", myDef.getExtensionUrl());
+
+				BaseRuntimeElementDefinition<?> def = myDef.getChildElementDefinitionByDatatype(myValue.getClass());
+				if (def.getChildType() == ChildTypeEnum.RESOURCE_BLOCK) {
+					extractAndWriteExtensionsAsDirectChild(myValue, theEventWriter, def, theResDef, theResource);
+				} else {
+					encodeChildElementToStreamWriter(theResDef, theResource, theEventWriter, myValue, def, "value" + WordUtils.capitalize(def.getName()));
+				}
+
+				// theEventWriter.name(myUndeclaredExtension.get);
+
+				theEventWriter.writeEnd();
 			}
 		}
 
@@ -775,7 +872,7 @@ public class JsonParser extends BaseParser implements IParser {
 			} else {
 				BaseRuntimeElementDefinition<?> def = myContext.getElementDefinition(value.getClass());
 				// theEventWriter.writeName("value" + def.getName());
-				encodeChildElementToStreamWriter(theResDef, theResource, theEventWriter, value, def, "value" + def.getName());
+				encodeChildElementToStreamWriter(theResDef, theResource, theEventWriter, value, def, "value" + WordUtils.capitalize(def.getName()));
 			}
 
 			// theEventWriter.name(myUndeclaredExtension.get);

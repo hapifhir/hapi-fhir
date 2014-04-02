@@ -107,7 +107,6 @@ public class JsonParserTest {
 	public void testSimpleResourceEncode() throws IOException {
 
 		FhirContext ctx = new FhirContext(Observation.class);
-		// String name = "/observation-example-eeg.xml";
 		String xmlString = IOUtils.toString(JsonParser.class.getResourceAsStream("/example-patient-general.xml"), Charset.forName("UTF-8"));
 		Patient obs = ctx.newXmlParser().parseResource(Patient.class, xmlString);
 
@@ -117,7 +116,8 @@ public class JsonParserTest {
 
 		ctx.newJsonParser().setPrettyPrint(true).encodeResourceToWriter(obs, new OutputStreamWriter(System.out));
 
-		String encoded = ctx.newJsonParser().encodeResourceToString(obs);
+		IParser jsonParser = ctx.newJsonParser();
+		String encoded = jsonParser.encodeResourceToString(obs);
 		ourLog.info(encoded);
 
 		String jsonString = IOUtils.toString(JsonParser.class.getResourceAsStream("/example-patient-general.json"));
@@ -125,10 +125,48 @@ public class JsonParserTest {
 		JSON expected = JSONSerializer.toJSON(jsonString);
 		JSON actual = JSONSerializer.toJSON(encoded.trim());
 
+		ourLog.info("Expected: {}", expected);
+		ourLog.info("Actual  : {}", actual);
 		assertEquals(expected.toString(), actual.toString());
 
 	}
 
+	
+	
+	
+	@Test
+	public void testSimpleResourceEncodeWithCustomType() throws IOException {
+
+		FhirContext ctx = new FhirContext(MyObservationWithExtensions.class);
+		String xmlString = IOUtils.toString(JsonParser.class.getResourceAsStream("/example-patient-general.xml"), Charset.forName("UTF-8"));
+		MyObservationWithExtensions obs = ctx.newXmlParser().parseResource(MyObservationWithExtensions.class, xmlString);
+
+		assertEquals(0, obs.getAllUndeclaredExtensions().size());
+		assertEquals("aaaa", obs.getExtAtt().getContentType().getValue());
+		assertEquals("str1", obs.getMoreExt().getStr1().getValue());
+		assertEquals("2011-01-02", obs.getModExt().getValueAsString());
+		
+		List<ExtensionDt> undeclaredExtensions = obs.getContact().get(0).getName().getFamily().get(0).getUndeclaredExtensions();
+		ExtensionDt undeclaredExtension = undeclaredExtensions.get(0);
+		assertEquals("http://hl7.org/fhir/Profile/iso-21090#qualifier", undeclaredExtension.getUrl().getValue());
+
+		ctx.newJsonParser().setPrettyPrint(true).encodeResourceToWriter(obs, new OutputStreamWriter(System.out));
+
+		IParser jsonParser = ctx.newJsonParser();
+		String encoded = jsonParser.encodeResourceToString(obs);
+		ourLog.info(encoded);
+
+		String jsonString = IOUtils.toString(JsonParser.class.getResourceAsStream("/example-patient-general.json"));
+
+		JSON expected = JSONSerializer.toJSON(jsonString);
+		JSON actual = JSONSerializer.toJSON(encoded.trim());
+
+		ourLog.info("Expected: {}", expected);
+		ourLog.info("Actual  : {}", actual);
+		assertEquals(expected.toString(), actual.toString());
+
+	}
+	
 	@Test
 	public void testSimpleBundleEncode() throws IOException {
 
@@ -261,10 +299,8 @@ public class JsonParserTest {
 		HumanNameDt given = name.addGiven("Joe");
 		ExtensionDt ext2 = new ExtensionDt(false, "http://examples.com#givenext", new StringDt("Hello"));
 		given.addUndeclaredExtension(ext2);
-		String output = new FhirContext().newJsonParser().setPrettyPrint(true).encodeResourceToString(patient);
-		ourLog.info(output);
-
 		String enc = new FhirContext().newJsonParser().encodeResourceToString(patient);
+		ourLog.info(enc);
 		//@formatter:off
 		assertThat(enc, containsString(("{" + 
 				"    \"resourceType\":\"Patient\"," + 
@@ -283,7 +319,7 @@ public class JsonParserTest {
 				"            \"extension\":[" + 
 				"                {" + 
 				"                    \"url\":\"http://examples.com#givenext\"," + 
-				"                    \"valuestring\":\"Hello\"" + 
+				"                    \"valueString\":\"Hello\"" + 
 				"                }" + 
 				"            ]" + 
 				"        }" + 
@@ -291,7 +327,12 @@ public class JsonParserTest {
 				"}").replaceAll(" +", "")));
 		//@formatter:on
 
-		Patient parsed = new FhirContext().newJsonParser().parseResource(Patient.class, new StringReader(enc));
+		IParser newJsonParser = new FhirContext().newJsonParser();
+		StringReader reader = new StringReader(enc);
+		Patient parsed = newJsonParser.parseResource(Patient.class, reader);
+		
+		ourLog.info(new FhirContext().newXmlParser().setPrettyPrint(true).encodeResourceToString(parsed));
+		
 		assertEquals(1, parsed.getNameFirstRep().getUndeclaredExtensionsByUrl("http://examples.com#givenext").size());
 		ExtensionDt ext = parsed.getNameFirstRep().getUndeclaredExtensionsByUrl("http://examples.com#givenext").get(0);
 		assertEquals("Hello", ext.getValueAsPrimitive().getValue());
@@ -309,10 +350,8 @@ public class JsonParserTest {
 
 		ExtensionDt ext2 = new ExtensionDt(false, "http://examples.com#givenext", new StringDt("Hello"));
 		family.addUndeclaredExtension(ext2);
-		String output = new FhirContext().newJsonParser().setPrettyPrint(true).encodeResourceToString(patient);
-		ourLog.info(output);
-
 		String enc = new FhirContext().newJsonParser().encodeResourceToString(patient);
+		ourLog.info(enc);
 		//@formatter:off
 		assertThat(enc, containsString(("{\n" + 
 				"    \"resourceType\":\"Patient\",\n" + 
@@ -326,7 +365,7 @@ public class JsonParserTest {
 				"                    \"extension\":[\n" + 
 				"                        {\n" + 
 				"                            \"url\":\"http://examples.com#givenext\",\n" + 
-				"                            \"valuestring\":\"Hello\"\n" + 
+				"                            \"valueString\":\"Hello\"\n" + 
 				"                        }\n" + 
 				"                    ]\n" + 
 				"                }\n" + 

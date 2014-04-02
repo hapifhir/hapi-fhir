@@ -1,4 +1,5 @@
-<Patient xmlns="http://hl7.org/fhir" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://hl7.org/fhir ./fhir-single.xsd">
+<Patient xmlns="http://hl7.org/fhir">
+<!--  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://hl7.org/fhir ./fhir-single.xsd">  -->
   	<extension url="urn:patientext:att">
 		<valueAttachment>
 			<contentType value="aaaa"/>

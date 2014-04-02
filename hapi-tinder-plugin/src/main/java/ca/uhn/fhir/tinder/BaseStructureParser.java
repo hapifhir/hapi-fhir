@@ -27,8 +27,8 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ExtensionDt;
+import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.annotation.SimpleSetter;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.tinder.model.BaseElement;
@@ -160,7 +160,7 @@ public abstract class BaseStructureParser {
 								Class.forName(type);
 								return (type);
 							} catch (ClassNotFoundException e4) {
-								throw new MojoFailureException("Unknown type: " + theNextType);
+								throw new MojoFailureException("Unknown type: " + theNextType + " - Have locally defined names: " + new TreeSet<String>(myLocallyDefinedClassNames.keySet()));
 							}
 						}
 					}
