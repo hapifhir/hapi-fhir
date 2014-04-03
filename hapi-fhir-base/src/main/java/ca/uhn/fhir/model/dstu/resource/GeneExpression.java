@@ -765,19 +765,6 @@ public class GeneExpression extends BaseResource implements IResource {
      * Expression level of the gene in RPKM
      * </p> 
 	 */
-	public RnaSeq setExpression( long theValue) {
-		myExpression = new DecimalDt(theValue); 
-		return this; 
-	}
-
-	/**
-	 * Sets the value for <b>expression</b> (Expression level of the gene in RPKM)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * Expression level of the gene in RPKM
-     * </p> 
-	 */
 	public RnaSeq setExpression( double theValue) {
 		myExpression = new DecimalDt(theValue); 
 		return this; 
@@ -792,6 +779,19 @@ public class GeneExpression extends BaseResource implements IResource {
      * </p> 
 	 */
 	public RnaSeq setExpression( java.math.BigDecimal theValue) {
+		myExpression = new DecimalDt(theValue); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>expression</b> (Expression level of the gene in RPKM)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Expression level of the gene in RPKM
+     * </p> 
+	 */
+	public RnaSeq setExpression( long theValue) {
 		myExpression = new DecimalDt(theValue); 
 		return this; 
 	}
@@ -983,19 +983,6 @@ public class GeneExpression extends BaseResource implements IResource {
      * Expression level of the isoform in RPKM
      * </p> 
 	 */
-	public RnaSeqIsoform setExpression( long theValue) {
-		myExpression = new DecimalDt(theValue); 
-		return this; 
-	}
-
-	/**
-	 * Sets the value for <b>expression</b> (Expression level of the isoform in RPKM)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * Expression level of the isoform in RPKM
-     * </p> 
-	 */
 	public RnaSeqIsoform setExpression( double theValue) {
 		myExpression = new DecimalDt(theValue); 
 		return this; 
@@ -1010,6 +997,19 @@ public class GeneExpression extends BaseResource implements IResource {
      * </p> 
 	 */
 	public RnaSeqIsoform setExpression( java.math.BigDecimal theValue) {
+		myExpression = new DecimalDt(theValue); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>expression</b> (Expression level of the isoform in RPKM)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Expression level of the isoform in RPKM
+     * </p> 
+	 */
+	public RnaSeqIsoform setExpression( long theValue) {
 		myExpression = new DecimalDt(theValue); 
 		return this; 
 	}

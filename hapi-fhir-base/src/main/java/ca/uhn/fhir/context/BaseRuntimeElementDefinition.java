@@ -26,6 +26,13 @@ public abstract class BaseRuntimeElementDefinition<T extends IElement> {
 		assert theImplementingClass != null;
 
 		myName = theName;
+		
+		// TODO: remove this and fix for the model
+		if (myName.endsWith("Dt")) {
+			myName = myName.substring(0, myName.length() - 2);
+		}
+			
+		
 		myImplementingClass = theImplementingClass;
 	}
 

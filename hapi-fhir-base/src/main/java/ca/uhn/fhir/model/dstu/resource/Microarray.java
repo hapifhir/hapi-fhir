@@ -958,19 +958,6 @@ public class Microarray extends BaseResource implements IResource {
      * Intensity(expression) of the gene
      * </p> 
 	 */
-	public Sample setIntensity( long theValue) {
-		myIntensity = new DecimalDt(theValue); 
-		return this; 
-	}
-
-	/**
-	 * Sets the value for <b>intensity</b> (Intensity)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * Intensity(expression) of the gene
-     * </p> 
-	 */
 	public Sample setIntensity( double theValue) {
 		myIntensity = new DecimalDt(theValue); 
 		return this; 
@@ -985,6 +972,19 @@ public class Microarray extends BaseResource implements IResource {
      * </p> 
 	 */
 	public Sample setIntensity( java.math.BigDecimal theValue) {
+		myIntensity = new DecimalDt(theValue); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>intensity</b> (Intensity)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Intensity(expression) of the gene
+     * </p> 
+	 */
+	public Sample setIntensity( long theValue) {
 		myIntensity = new DecimalDt(theValue); 
 		return this; 
 	}

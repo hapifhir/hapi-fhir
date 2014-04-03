@@ -25,10 +25,8 @@ obs.setIssued(new InstantDt(new Date()));
 obs.setIssued(new Date(), TemporalPrecisionEnum.MILLI);
 obs.setIssuedWithMillisPrecision(new Date());
 
-/* 
- * The InstantDt also lets you work with the instant as a Java Date
- * object or as a FHIR String.
- */
+// The InstantDt also lets you work with the instant as a Java Date
+// object or as a FHIR String.
 Date date = obs.getIssued().getValue(); // A date object
 String dateString = obs.getIssued().getValueAsString(); // "2014-03-08T12:59:58.068-05:00"
 // END SNIPPET: datatypes
@@ -43,18 +41,14 @@ public void nonNull() {
 // START SNIPPET: nonNull
 Observation observation = new Observation();
 
-/*
- * None of these calls will return null, but instead create their respective
- * child elements.
- */
+// None of these calls will return null, but instead create their respective
+// child elements.
 IdentifierDt identifierDt = observation.getIdentifier();
 PeriodDt periodDt         = observation.getIdentifier().getPeriod();
 DateTimeDt activeDt       = observation.getIdentifier().getPeriod().getStart();
 
-/*
- * DateTimeDt is a FHIR primitive however, so the following will return null
- * unless a value has been placed there.
- */
+// DateTimeDt is a FHIR primitive however, so the following will return null
+// unless a value has been placed there.
 Date active = observation.getIdentifier().getPeriod().getStart().getValue();
 // END SNIPPET: nonNull
 

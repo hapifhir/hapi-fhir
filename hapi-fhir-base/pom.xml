@@ -266,6 +266,10 @@
 			var pre = pres[j];
 			if (pre.innerHTML.match(/\/\*/)) {
 				pre.className = 'brush: java';
+			} else if (pre.innerHTML.match(/^\/\//)) {
+				pre.className = 'brush: java';
+			} else if (pre.innerHTML.match(/^\{/)) {
+				pre.className = 'brush: jscript';
 			} else if (pre.innerHTML.match(/^\#/)) {
 				pre.className = 'brush: bash';
 			} else if (pre.innerHTML.match(/\&lt\;\//)) {

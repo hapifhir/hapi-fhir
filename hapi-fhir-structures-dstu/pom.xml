@@ -89,7 +89,7 @@
 						<baseResourceName>organization</baseResourceName>
 						<baseResourceName>other</baseResourceName>
 						<baseResourceName>patient</baseResourceName>
-						<baseResourceName>person</baseResourceName>
+						<!--<baseResourceName>person</baseResourceName>-->
 						<baseResourceName>practitioner</baseResourceName>
 						<baseResourceName>procedure</baseResourceName>
 						<baseResourceName>profile</baseResourceName>

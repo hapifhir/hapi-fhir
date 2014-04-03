@@ -1755,19 +1755,6 @@ public class Claim extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public Service setFee( long theValue) {
-		myFee = new DecimalDt(theValue); 
-		return this; 
-	}
-
-	/**
-	 * Sets the value for <b>fee</b> (Professional fee)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * 
-     * </p> 
-	 */
 	public Service setFee( double theValue) {
 		myFee = new DecimalDt(theValue); 
 		return this; 
@@ -1782,6 +1769,19 @@ public class Claim extends BaseResource implements IResource {
      * </p> 
 	 */
 	public Service setFee( java.math.BigDecimal theValue) {
+		myFee = new DecimalDt(theValue); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>fee</b> (Professional fee)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * 
+     * </p> 
+	 */
+	public Service setFee( long theValue) {
 		myFee = new DecimalDt(theValue); 
 		return this; 
 	}
@@ -1993,19 +1993,6 @@ public class Claim extends BaseResource implements IResource {
      * The amount to reimbuse for a laboratory service.
      * </p> 
 	 */
-	public ServiceLab setFee( long theValue) {
-		myFee = new DecimalDt(theValue); 
-		return this; 
-	}
-
-	/**
-	 * Sets the value for <b>fee</b> (Lab fee)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * The amount to reimbuse for a laboratory service.
-     * </p> 
-	 */
 	public ServiceLab setFee( double theValue) {
 		myFee = new DecimalDt(theValue); 
 		return this; 
@@ -2020,6 +2007,19 @@ public class Claim extends BaseResource implements IResource {
      * </p> 
 	 */
 	public ServiceLab setFee( java.math.BigDecimal theValue) {
+		myFee = new DecimalDt(theValue); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>fee</b> (Lab fee)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The amount to reimbuse for a laboratory service.
+     * </p> 
+	 */
+	public ServiceLab setFee( long theValue) {
 		myFee = new DecimalDt(theValue); 
 		return this; 
 	}

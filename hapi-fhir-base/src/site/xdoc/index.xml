@@ -26,16 +26,34 @@
 			
 		</section>
 
-		<section name="Why HAPI FHIR?">
+		<section name="What is HAPI FHIR?">
 			<p>
 				HAPI FHIR is a simple-but-powerful library for adding FHIR messaging to your application. It
 				is pure Java (1.6+ compatible), and licensed under the business-friendly Apache Software
 				License, version 2.0.
 			</p>
-			<p>
-				The HAPI API makes it very easy to create FHIR resources:
-			</p>
-			<source><![CDATA[Patient patient = new Patient();
+			
+			<subsection name="Multiple Usage Patterns">
+				<p>
+					HAPI is designed with one main intent: providing a flexible way of adding
+					FHIR capability to applications. We at <a href="http://www.uhn.ca">University Health Network</a> 
+					developed HAPI-FHIR to allow us to 
+					build up our own unified FHIR RESTful server which exposes data backed by
+					a number of systems and repositories, so it is designed to be flexible
+					above all else. 
+				</p>
+				<p>
+					The library is designed to support several main usage patterns:
+					<img src="images/hapi-usage.png" alt="HAPI Usage Patterns"/>  
+				</p>
+			</subsection>
+						
+			<subsection name="The Data Model">
+			
+				<p>
+					The HAPI API makes it very easy to create FHIR resources:
+				</p>
+				<source><![CDATA[Patient patient = new Patient();
 patient.addIdentifier().setUse(OFFICIAL).setSystem("urn:fake:mrns").setValue("7000135");
 patient.addIdentifier().setUse(SECONDARY).setSystem("urn:fake:otherids").setValue("3287486");
 
@@ -43,21 +61,25 @@ patient.addName().addFamily("Smith").addGiven("John").addGiven("Q").addSuffix("J
 
 patient.setGender(AdministrativeGenderCodesEnum.M);]]></source>
 			
-			<p>
-				This library supports both XML and JSON encoding natively:
-			</p>
-
-			<source><![CDATA[FhirContext ctx = new FhirContext();
+				<p>
+					Both XML and JSON encoding are suported natively using a simple API
+					to pick between them. XML support is built on top of the lightning-fast 
+					<a href="http://docs.oracle.com/javase/tutorial/jaxp/stax/why.html">STaX/JSR 173</a> 
+					API, and JSON support is provided using the new
+					<a href="https://jcp.org/en/jsr/detail?id=353">javax.json/JSR-353</a> API. 
+				</p>
+	
+				<source><![CDATA[FhirContext ctx = new FhirContext();
 String xmlEncoded = ctx.newXmlParser().encodeResourceToString(patient);
 String jsonEncoded = ctx.newJsonParser().encodeResourceToString(patient);
 ]]></source>
 
-			<p>
-				Creating clients is simple and uses an annotation based format
-				that will be familiar to users of JAX-WS.
-			</p>
-			
-			<source><![CDATA[public interface MyClientInterface extends IRestfulClient
+				<p>
+					Creating clients is simple and uses an annotation based format
+					that will be familiar to users of JAX-WS.
+				</p>
+				
+				<source><![CDATA[public interface MyClientInterface extends IRestfulClient
 {
   /** A FHIR search */
   @Search
@@ -68,13 +90,15 @@ String jsonEncoded = ctx.newJsonParser().encodeResourceToString(patient);
   public MethodOutcome createPatient(@ResourceParam Patient thePatient);
 }]]></source>
 
-			<p>
-				Using this client is as simple as:
-			</p>
-			
-			<source><![CDATA[MyClientInterface client = ctx.newRestfulClient(MyClientInterface.class, "http://foo/fhir");
+				<p>
+					Using this client is as simple as:
+				</p>
+				
+				<source><![CDATA[MyClientInterface client = ctx.newRestfulClient(MyClientInterface.class, "http://foo/fhir");
 IdentifierDt searchParam = new IdentifierDt("urn:someidentifiers", "7000135");
 List<Patient> clients = client.findPatientsByIdentifier(searchParam);]]></source>
+
+			</subsection>
 		</section>
 
 	</body>

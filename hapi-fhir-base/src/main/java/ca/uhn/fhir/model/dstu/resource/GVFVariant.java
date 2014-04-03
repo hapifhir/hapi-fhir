@@ -998,24 +998,6 @@ public class GVFVariant extends BaseResource implements IResource {
      *
      * @return Returns a reference to this object, to allow for simple chaining.
 	 */
-	public GVFVariant addVariantFreq( long theValue) {
-		if (myVariantFreq == null) {
-			myVariantFreq = new java.util.ArrayList<DecimalDt>();
-		}
-		myVariantFreq.add(new DecimalDt(theValue));
-		return this; 
-	}
-
-	/**
-	 * Adds a new value for <b>variantFreq</b> (Variant frequency)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * Frequency of the variant
-     * </p> 
-     *
-     * @return Returns a reference to this object, to allow for simple chaining.
-	 */
 	public GVFVariant addVariantFreq( double theValue) {
 		if (myVariantFreq == null) {
 			myVariantFreq = new java.util.ArrayList<DecimalDt>();
@@ -1035,6 +1017,24 @@ public class GVFVariant extends BaseResource implements IResource {
      * @return Returns a reference to this object, to allow for simple chaining.
 	 */
 	public GVFVariant addVariantFreq( java.math.BigDecimal theValue) {
+		if (myVariantFreq == null) {
+			myVariantFreq = new java.util.ArrayList<DecimalDt>();
+		}
+		myVariantFreq.add(new DecimalDt(theValue));
+		return this; 
+	}
+
+	/**
+	 * Adds a new value for <b>variantFreq</b> (Variant frequency)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Frequency of the variant
+     * </p> 
+     *
+     * @return Returns a reference to this object, to allow for simple chaining.
+	 */
+	public GVFVariant addVariantFreq( long theValue) {
 		if (myVariantFreq == null) {
 			myVariantFreq = new java.util.ArrayList<DecimalDt>();
 		}

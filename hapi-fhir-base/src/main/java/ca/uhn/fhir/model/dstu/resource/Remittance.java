@@ -394,19 +394,6 @@ public class Remittance extends BaseResource implements IResource {
      * The percent of the service fee which would be elegible for coverage
      * </p> 
 	 */
-	public Service setRate( long theValue) {
-		myRate = new DecimalDt(theValue); 
-		return this; 
-	}
-
-	/**
-	 * Sets the value for <b>rate</b> (Benefit Rate %)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * The percent of the service fee which would be elegible for coverage
-     * </p> 
-	 */
 	public Service setRate( double theValue) {
 		myRate = new DecimalDt(theValue); 
 		return this; 
@@ -421,6 +408,19 @@ public class Remittance extends BaseResource implements IResource {
      * </p> 
 	 */
 	public Service setRate( java.math.BigDecimal theValue) {
+		myRate = new DecimalDt(theValue); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>rate</b> (Benefit Rate %)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The percent of the service fee which would be elegible for coverage
+     * </p> 
+	 */
+	public Service setRate( long theValue) {
 		myRate = new DecimalDt(theValue); 
 		return this; 
 	}
@@ -464,19 +464,6 @@ public class Remittance extends BaseResource implements IResource {
      * The amount payable for a submitted service (includes both professional and lab fees.)
      * </p> 
 	 */
-	public Service setBenefit( long theValue) {
-		myBenefit = new DecimalDt(theValue); 
-		return this; 
-	}
-
-	/**
-	 * Sets the value for <b>benefit</b> (Benefit amount)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * The amount payable for a submitted service (includes both professional and lab fees.)
-     * </p> 
-	 */
 	public Service setBenefit( double theValue) {
 		myBenefit = new DecimalDt(theValue); 
 		return this; 
@@ -491,6 +478,19 @@ public class Remittance extends BaseResource implements IResource {
      * </p> 
 	 */
 	public Service setBenefit( java.math.BigDecimal theValue) {
+		myBenefit = new DecimalDt(theValue); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>benefit</b> (Benefit amount)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The amount payable for a submitted service (includes both professional and lab fees.)
+     * </p> 
+	 */
+	public Service setBenefit( long theValue) {
 		myBenefit = new DecimalDt(theValue); 
 		return this; 
 	}

@@ -719,24 +719,6 @@ public class Test extends BaseResource implements IResource {
      *
      * @return Returns a reference to this object, to allow for simple chaining.
 	 */
-	public Test addDecimalErr( long theValue) {
-		if (myDecimalErr == null) {
-			myDecimalErr = new java.util.ArrayList<DecimalDt>();
-		}
-		myDecimalErr.add(new DecimalDt(theValue));
-		return this; 
-	}
-
-	/**
-	 * Adds a new value for <b>decimalErr</b> (Decimals with invalid content)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * 
-     * </p> 
-     *
-     * @return Returns a reference to this object, to allow for simple chaining.
-	 */
 	public Test addDecimalErr( double theValue) {
 		if (myDecimalErr == null) {
 			myDecimalErr = new java.util.ArrayList<DecimalDt>();
@@ -756,6 +738,24 @@ public class Test extends BaseResource implements IResource {
      * @return Returns a reference to this object, to allow for simple chaining.
 	 */
 	public Test addDecimalErr( java.math.BigDecimal theValue) {
+		if (myDecimalErr == null) {
+			myDecimalErr = new java.util.ArrayList<DecimalDt>();
+		}
+		myDecimalErr.add(new DecimalDt(theValue));
+		return this; 
+	}
+
+	/**
+	 * Adds a new value for <b>decimalErr</b> (Decimals with invalid content)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * 
+     * </p> 
+     *
+     * @return Returns a reference to this object, to allow for simple chaining.
+	 */
+	public Test addDecimalErr( long theValue) {
 		if (myDecimalErr == null) {
 			myDecimalErr = new java.util.ArrayList<DecimalDt>();
 		}
@@ -833,24 +833,6 @@ public class Test extends BaseResource implements IResource {
      *
      * @return Returns a reference to this object, to allow for simple chaining.
 	 */
-	public Test addDecimalCorr( long theValue) {
-		if (myDecimalCorr == null) {
-			myDecimalCorr = new java.util.ArrayList<DecimalDt>();
-		}
-		myDecimalCorr.add(new DecimalDt(theValue));
-		return this; 
-	}
-
-	/**
-	 * Adds a new value for <b>decimalCorr</b> (Decimals with correct content)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * 
-     * </p> 
-     *
-     * @return Returns a reference to this object, to allow for simple chaining.
-	 */
 	public Test addDecimalCorr( double theValue) {
 		if (myDecimalCorr == null) {
 			myDecimalCorr = new java.util.ArrayList<DecimalDt>();
@@ -870,6 +852,24 @@ public class Test extends BaseResource implements IResource {
      * @return Returns a reference to this object, to allow for simple chaining.
 	 */
 	public Test addDecimalCorr( java.math.BigDecimal theValue) {
+		if (myDecimalCorr == null) {
+			myDecimalCorr = new java.util.ArrayList<DecimalDt>();
+		}
+		myDecimalCorr.add(new DecimalDt(theValue));
+		return this; 
+	}
+
+	/**
+	 * Adds a new value for <b>decimalCorr</b> (Decimals with correct content)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * 
+     * </p> 
+     *
+     * @return Returns a reference to this object, to allow for simple chaining.
+	 */
+	public Test addDecimalCorr( long theValue) {
 		if (myDecimalCorr == null) {
 			myDecimalCorr = new java.util.ArrayList<DecimalDt>();
 		}

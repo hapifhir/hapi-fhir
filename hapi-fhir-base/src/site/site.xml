@@ -25,6 +25,7 @@
 
 		<menu name="Welcome">
 			<item name="Welcome" href="index.html" />
+			<item name="Download" href="./download.html" />
 		</menu>
 
 		<menu name="Documentation">

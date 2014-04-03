@@ -34,7 +34,7 @@ new FhirContextIntro().encodeMsg();
 FhirContext ctx = new FhirContext(Patient.class, Observation.class);
 //START SNIPPET: encodeMsg
 
-/*
+/**
  * FHIR model types in HAPI are simple POJOs. To create a new
  * one, invoke the default constructor and then
  * start populating values.
@@ -53,10 +53,7 @@ name.addFamily("Tester");
 name.addGiven("John");
 name.addGiven("Q");
 
-/*
- * We can now use a parser to encode this resource into
- * a string.
- */
+// We can now use a parser to encode this resource into a string.
 String encoded = ctx.newXmlParser().encodeResourceToString(patient);
 System.out.println(encoded);
 //END SNIPPET: encodeMsg
@@ -75,9 +72,7 @@ System.out.println(encoded);
 FhirContext ctx = new FhirContext(Patient.class, Observation.class);
 
 //START SNIPPET: parseMsg
-/*
- * The following is an example Patient resource
- */
+// The following is an example Patient resource
 String msgString = "<Patient xmlns=\"http://hl7.org/fhir\">" 
   + "<text><status value=\"generated\" /><div xmlns=\"http://www.w3.org/1999/xhtml\">John Cardinal</div></text>"
   + "<identifier><system value=\"http://orionhealth.com/mrn\" /><value value=\"PRP1660\" /></identifier>"
@@ -86,26 +81,20 @@ String msgString = "<Patient xmlns=\"http://hl7.org/fhir\">"
   + "<address><use value=\"home\" /><line value=\"2222 Home Street\" /></address><active value=\"true\" />"
   + "</Patient>";
 
-/* 
- * The hapi context object is used to create a new XML parser
- * instance. The parser can then be used to parse (or unmarshall) the 
- * string message into a Patient object 
- */
+// The hapi context object is used to create a new XML parser
+// instance. The parser can then be used to parse (or unmarshall) the 
+// string message into a Patient object 
 IParser parser = ctx.newXmlParser();
 Patient patient = parser.parseResource(Patient.class, msgString);
 
-/*
- * The patient object has accessor methods to retrieve all of the
- * data which has been parsed into the instance. All of the
- * FHIR datatypes are represented by classes which end in "Dt". 
- */
+// The patient object has accessor methods to retrieve all of the
+// data which has been parsed into the instance. All of the
+// FHIR datatypes are represented by classes which end in "Dt". 
 StringDt patientId = patient.getIdentifier().get(0).getValue();
 StringDt familyName = patient.getName().get(0).getFamily().get(0);
 CodeDt gender = patient.getGender().getCoding().get(0).getCode();
 
-/*
- * The various datatype classes have accessors called getValue()
- */
+// The various datatype classes have accessors called getValue()
 System.out.println(patientId.getValue()); // PRP1660
 System.out.println(familyName.getValue()); // Cardinal
 System.out.println(gender.getValue()); // M

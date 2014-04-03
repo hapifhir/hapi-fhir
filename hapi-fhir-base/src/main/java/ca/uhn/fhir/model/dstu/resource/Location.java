@@ -830,19 +830,6 @@ public class Location extends BaseResource implements IResource {
      * Longitude. The value domain and the interpretation are the same as for the text of the longitude element in KML (see notes below)
      * </p> 
 	 */
-	public Position setLongitude( long theValue) {
-		myLongitude = new DecimalDt(theValue); 
-		return this; 
-	}
-
-	/**
-	 * Sets the value for <b>longitude</b> (Longitude as expressed in KML)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * Longitude. The value domain and the interpretation are the same as for the text of the longitude element in KML (see notes below)
-     * </p> 
-	 */
 	public Position setLongitude( double theValue) {
 		myLongitude = new DecimalDt(theValue); 
 		return this; 
@@ -857,6 +844,19 @@ public class Location extends BaseResource implements IResource {
      * </p> 
 	 */
 	public Position setLongitude( java.math.BigDecimal theValue) {
+		myLongitude = new DecimalDt(theValue); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>longitude</b> (Longitude as expressed in KML)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Longitude. The value domain and the interpretation are the same as for the text of the longitude element in KML (see notes below)
+     * </p> 
+	 */
+	public Position setLongitude( long theValue) {
 		myLongitude = new DecimalDt(theValue); 
 		return this; 
 	}
@@ -900,19 +900,6 @@ public class Location extends BaseResource implements IResource {
      * Latitude. The value domain and the interpretation are the same as for the text of the latitude element in KML (see notes below)
      * </p> 
 	 */
-	public Position setLatitude( long theValue) {
-		myLatitude = new DecimalDt(theValue); 
-		return this; 
-	}
-
-	/**
-	 * Sets the value for <b>latitude</b> (Latitude as expressed in KML)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * Latitude. The value domain and the interpretation are the same as for the text of the latitude element in KML (see notes below)
-     * </p> 
-	 */
 	public Position setLatitude( double theValue) {
 		myLatitude = new DecimalDt(theValue); 
 		return this; 
@@ -927,6 +914,19 @@ public class Location extends BaseResource implements IResource {
      * </p> 
 	 */
 	public Position setLatitude( java.math.BigDecimal theValue) {
+		myLatitude = new DecimalDt(theValue); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>latitude</b> (Latitude as expressed in KML)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Latitude. The value domain and the interpretation are the same as for the text of the latitude element in KML (see notes below)
+     * </p> 
+	 */
+	public Position setLatitude( long theValue) {
 		myLatitude = new DecimalDt(theValue); 
 		return this; 
 	}
@@ -970,19 +970,6 @@ public class Location extends BaseResource implements IResource {
      * Altitude. The value domain and the interpretation are the same as for the text of the altitude element in KML (see notes below)
      * </p> 
 	 */
-	public Position setAltitude( long theValue) {
-		myAltitude = new DecimalDt(theValue); 
-		return this; 
-	}
-
-	/**
-	 * Sets the value for <b>altitude</b> (Altitude as expressed in KML)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * Altitude. The value domain and the interpretation are the same as for the text of the altitude element in KML (see notes below)
-     * </p> 
-	 */
 	public Position setAltitude( double theValue) {
 		myAltitude = new DecimalDt(theValue); 
 		return this; 
@@ -997,6 +984,19 @@ public class Location extends BaseResource implements IResource {
      * </p> 
 	 */
 	public Position setAltitude( java.math.BigDecimal theValue) {
+		myAltitude = new DecimalDt(theValue); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>altitude</b> (Altitude as expressed in KML)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Altitude. The value domain and the interpretation are the same as for the text of the altitude element in KML (see notes below)
+     * </p> 
+	 */
+	public Position setAltitude( long theValue) {
 		myAltitude = new DecimalDt(theValue); 
 		return this; 
 	}
