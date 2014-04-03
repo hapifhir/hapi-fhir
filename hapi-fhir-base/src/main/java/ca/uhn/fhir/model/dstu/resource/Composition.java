@@ -218,12 +218,7 @@ public class Composition extends BaseResource implements IResource {
 	private CodingDt myConfidentiality;
 	
 	@Child(name="subject", order=7, min=1, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Patient.class,
-		ca.uhn.fhir.model.dstu.resource.Practitioner.class,
-		ca.uhn.fhir.model.dstu.resource.Group.class,
-		ca.uhn.fhir.model.dstu.resource.Device.class,
-		ca.uhn.fhir.model.dstu.resource.Location.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Patient.class, 		ca.uhn.fhir.model.dstu.resource.Practitioner.class, 		ca.uhn.fhir.model.dstu.resource.Group.class, 		ca.uhn.fhir.model.dstu.resource.Device.class, 		ca.uhn.fhir.model.dstu.resource.Location.class	})
 	@Description(
 		shortDefinition="Who and/or what the composition is about",
 		formalDefinition="Who or what the composition is about. The composition can be about a person, (patient or healthcare practitioner), a device (I.e. machine) or even a group of subjects (such as a document about a herd of livestock, or a set of patients that share a common exposure)"
@@ -231,11 +226,7 @@ public class Composition extends BaseResource implements IResource {
 	private ResourceReferenceDt mySubject;
 	
 	@Child(name="author", order=8, min=1, max=Child.MAX_UNLIMITED, type={
-		ca.uhn.fhir.model.dstu.resource.Practitioner.class,
-		ca.uhn.fhir.model.dstu.resource.Device.class,
-		ca.uhn.fhir.model.dstu.resource.Patient.class,
-		ca.uhn.fhir.model.dstu.resource.RelatedPerson.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Practitioner.class, 		ca.uhn.fhir.model.dstu.resource.Device.class, 		ca.uhn.fhir.model.dstu.resource.Patient.class, 		ca.uhn.fhir.model.dstu.resource.RelatedPerson.class	})
 	@Description(
 		shortDefinition="Who and/or what authored the composition",
 		formalDefinition="Identifies who is responsible for the information in the composition.  (Not necessarily who typed it in.)"
@@ -250,8 +241,7 @@ public class Composition extends BaseResource implements IResource {
 	private java.util.List<Attester> myAttester;
 	
 	@Child(name="custodian", order=10, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Organization.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Organization.class	})
 	@Description(
 		shortDefinition="Org which maintains the composition",
 		formalDefinition="Identifies the organization or group who is responsible for ongoing maintenance of and access to the composition/document information"
@@ -266,8 +256,7 @@ public class Composition extends BaseResource implements IResource {
 	private Event myEvent;
 	
 	@Child(name="encounter", order=12, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Encounter.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Encounter.class	})
 	@Description(
 		shortDefinition="Context of the conposition",
 		formalDefinition="Describes the clinical encounter or type of care this documentation is associated with."
@@ -900,10 +889,7 @@ public class Composition extends BaseResource implements IResource {
 	private DateTimeDt myTime;
 	
 	@Child(name="party", order=2, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Patient.class,
-		ca.uhn.fhir.model.dstu.resource.Practitioner.class,
-		ca.uhn.fhir.model.dstu.resource.Organization.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Patient.class, 		ca.uhn.fhir.model.dstu.resource.Practitioner.class, 		ca.uhn.fhir.model.dstu.resource.Organization.class	})
 	@Description(
 		shortDefinition="Who attested the composition",
 		formalDefinition="Who attested the composition in the specified way"
@@ -1098,8 +1084,7 @@ public class Composition extends BaseResource implements IResource {
 	private PeriodDt myPeriod;
 	
 	@Child(name="detail", order=2, min=0, max=Child.MAX_UNLIMITED, type={
-		IResource.class,
-	})
+		IResource.class	})
 	@Description(
 		shortDefinition="Full details for the event(s) the composition consents",
 		formalDefinition="Full details for the event(s) the composition/documentation consents"
@@ -1287,10 +1272,7 @@ public class Composition extends BaseResource implements IResource {
 	private CodeableConceptDt myCode;
 	
 	@Child(name="subject", order=2, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Patient.class,
-		ca.uhn.fhir.model.dstu.resource.Group.class,
-		ca.uhn.fhir.model.dstu.resource.Device.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Patient.class, 		ca.uhn.fhir.model.dstu.resource.Group.class, 		ca.uhn.fhir.model.dstu.resource.Device.class	})
 	@Description(
 		shortDefinition="If section different to composition",
 		formalDefinition="Identifies the primary subject of the section."
@@ -1298,8 +1280,7 @@ public class Composition extends BaseResource implements IResource {
 	private ResourceReferenceDt mySubject;
 	
 	@Child(name="content", order=3, min=0, max=1, type={
-		IResource.class,
-	})
+		IResource.class	})
 	@Description(
 		shortDefinition="The actual data for the section",
 		formalDefinition="Identifies the discrete data that provides the content for the section."

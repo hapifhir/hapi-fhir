@@ -160,10 +160,7 @@ public class Supply extends BaseResource implements IResource {
 	private BoundCodeDt<SupplyStatusEnum> myStatus;
 	
 	@Child(name="orderedItem", order=3, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Medication.class,
-		ca.uhn.fhir.model.dstu.resource.Substance.class,
-		ca.uhn.fhir.model.dstu.resource.Device.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Medication.class, 		ca.uhn.fhir.model.dstu.resource.Substance.class, 		ca.uhn.fhir.model.dstu.resource.Device.class	})
 	@Description(
 		shortDefinition="Medication, Substance, or Device requested to be supplied",
 		formalDefinition="The item that is requested to be supplied"
@@ -171,8 +168,7 @@ public class Supply extends BaseResource implements IResource {
 	private ResourceReferenceDt myOrderedItem;
 	
 	@Child(name="patient", order=4, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Patient.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Patient.class	})
 	@Description(
 		shortDefinition="Patient for whom the item is supplied",
 		formalDefinition="A link to a resource representing the person whom the ordered item is for"
@@ -506,10 +502,7 @@ public class Supply extends BaseResource implements IResource {
 	private QuantityDt myQuantity;
 	
 	@Child(name="suppliedItem", order=4, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Medication.class,
-		ca.uhn.fhir.model.dstu.resource.Substance.class,
-		ca.uhn.fhir.model.dstu.resource.Device.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Medication.class, 		ca.uhn.fhir.model.dstu.resource.Substance.class, 		ca.uhn.fhir.model.dstu.resource.Device.class	})
 	@Description(
 		shortDefinition="Medication, Substance, or Device supplied",
 		formalDefinition="Identifies the medication or substance being dispensed. This is either a link to a resource representing the details of the medication or substance or a simple attribute carrying a code that identifies the medication from a known list of medications."
@@ -517,8 +510,7 @@ public class Supply extends BaseResource implements IResource {
 	private ResourceReferenceDt mySuppliedItem;
 	
 	@Child(name="supplier", order=5, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Practitioner.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Practitioner.class	})
 	@Description(
 		shortDefinition="Dispenser",
 		formalDefinition="The individual responsible for dispensing the medication"
@@ -540,8 +532,7 @@ public class Supply extends BaseResource implements IResource {
 	private PeriodDt myWhenHandedOver;
 	
 	@Child(name="destination", order=8, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Location.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Location.class	})
 	@Description(
 		shortDefinition="Where the Supply was sent",
 		formalDefinition="Identification of the facility/location where the Supply was shipped to, as part of the dispense event."
@@ -549,8 +540,7 @@ public class Supply extends BaseResource implements IResource {
 	private ResourceReferenceDt myDestination;
 	
 	@Child(name="receiver", order=9, min=0, max=Child.MAX_UNLIMITED, type={
-		ca.uhn.fhir.model.dstu.resource.Practitioner.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Practitioner.class	})
 	@Description(
 		shortDefinition="Who collected the Supply",
 		formalDefinition="Identifies the person who picked up the Supply."

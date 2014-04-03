@@ -91,8 +91,7 @@ public class Alert extends BaseResource implements IResource {
 	private BoundCodeDt<AlertStatusEnum> myStatus;
 	
 	@Child(name="subject", order=3, min=1, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Patient.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Patient.class	})
 	@Description(
 		shortDefinition="Who is alert about?",
 		formalDefinition="The person who this alert concerns"
@@ -100,10 +99,7 @@ public class Alert extends BaseResource implements IResource {
 	private ResourceReferenceDt mySubject;
 	
 	@Child(name="author", order=4, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Practitioner.class,
-		ca.uhn.fhir.model.dstu.resource.Patient.class,
-		ca.uhn.fhir.model.dstu.resource.Device.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Practitioner.class, 		ca.uhn.fhir.model.dstu.resource.Patient.class, 		ca.uhn.fhir.model.dstu.resource.Device.class	})
 	@Description(
 		shortDefinition="Alert creator",
 		formalDefinition="The person or device that created the alert"

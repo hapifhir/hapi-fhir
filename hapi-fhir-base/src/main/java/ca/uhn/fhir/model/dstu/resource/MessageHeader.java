@@ -110,8 +110,7 @@ public class MessageHeader extends BaseResource implements IResource {
 	private java.util.List<Destination> myDestination;
 	
 	@Child(name="enterer", order=6, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Practitioner.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Practitioner.class	})
 	@Description(
 		shortDefinition="The source of the data entry",
 		formalDefinition="The person or device that performed the data entry leading to this message. Where there is more than one candidate, pick the most proximal to the message. Can provide other enterers in extensions"
@@ -119,8 +118,7 @@ public class MessageHeader extends BaseResource implements IResource {
 	private ResourceReferenceDt myEnterer;
 	
 	@Child(name="author", order=7, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Practitioner.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Practitioner.class	})
 	@Description(
 		shortDefinition="The source of the decision",
 		formalDefinition="The logical author of the message - the person or device that decided the described event should happen. Where there is more than one candidate, pick the most proximal to the MessageHeader. Can provide other authors in extensions"
@@ -128,9 +126,7 @@ public class MessageHeader extends BaseResource implements IResource {
 	private ResourceReferenceDt myAuthor;
 	
 	@Child(name="receiver", order=8, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Practitioner.class,
-		ca.uhn.fhir.model.dstu.resource.Organization.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Practitioner.class, 		ca.uhn.fhir.model.dstu.resource.Organization.class	})
 	@Description(
 		shortDefinition="Intended \"real-world\" recipient for the data",
 		formalDefinition="Allows data conveyed by a message to be addressed to a particular person or department when routing to a specific application isn't sufficient."
@@ -138,9 +134,7 @@ public class MessageHeader extends BaseResource implements IResource {
 	private ResourceReferenceDt myReceiver;
 	
 	@Child(name="responsible", order=9, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Practitioner.class,
-		ca.uhn.fhir.model.dstu.resource.Organization.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Practitioner.class, 		ca.uhn.fhir.model.dstu.resource.Organization.class	})
 	@Description(
 		shortDefinition="Final responsibility for event",
 		formalDefinition="The person or organization that accepts overall responsibility for the contents of the message. The implication is that the message event happened under the policies of the responsible party"
@@ -155,8 +149,7 @@ public class MessageHeader extends BaseResource implements IResource {
 	private CodeableConceptDt myReason;
 	
 	@Child(name="data", order=11, min=0, max=Child.MAX_UNLIMITED, type={
-		IResource.class,
-	})
+		IResource.class	})
 	@Description(
 		shortDefinition="The actual content of the message",
 		formalDefinition="The actual data of the message - a reference to the root/focus class of the event."
@@ -652,8 +645,7 @@ public class MessageHeader extends BaseResource implements IResource {
 	private BoundCodeDt<ResponseTypeEnum> myCode;
 	
 	@Child(name="details", order=2, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.OperationOutcome.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.OperationOutcome.class	})
 	@Description(
 		shortDefinition="Specific list of hints/warnings/errors",
 		formalDefinition="Full details of any issues found in the message"
@@ -1091,8 +1083,7 @@ public class MessageHeader extends BaseResource implements IResource {
 	private StringDt myName;
 	
 	@Child(name="target", order=1, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Device.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Device.class	})
 	@Description(
 		shortDefinition="Particular delivery destination within the destination",
 		formalDefinition="Identifies the target end system in situations where the initial message transmission is to an intermediary system."

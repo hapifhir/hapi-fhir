@@ -189,8 +189,7 @@ public class Encounter extends BaseResource implements IResource {
 	private java.util.List<BoundCodeableConceptDt<EncounterTypeEnum>> myType;
 	
 	@Child(name="subject", order=4, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Patient.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Patient.class	})
 	@Description(
 		shortDefinition="The patient present at the encounter",
 		formalDefinition=""
@@ -226,8 +225,7 @@ public class Encounter extends BaseResource implements IResource {
 	private BoundCodeableConceptDt<EncounterReasonCodesEnum> myReason;
 	
 	@Child(name="indication", order=9, min=0, max=1, type={
-		IResource.class,
-	})
+		IResource.class	})
 	@Description(
 		shortDefinition="Reason the encounter takes place (resource)",
 		formalDefinition="Reason the encounter takes place, as specified using information from another resource. For admissions, this is the admission diagnosis."
@@ -256,8 +254,7 @@ public class Encounter extends BaseResource implements IResource {
 	private java.util.List<Location> myLocation;
 	
 	@Child(name="serviceProvider", order=13, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Organization.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Organization.class	})
 	@Description(
 		shortDefinition="Department or team providing care",
 		formalDefinition=""
@@ -265,8 +262,7 @@ public class Encounter extends BaseResource implements IResource {
 	private ResourceReferenceDt myServiceProvider;
 	
 	@Child(name="partOf", order=14, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Encounter.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Encounter.class	})
 	@Description(
 		shortDefinition="Another Encounter this encounter is part of",
 		formalDefinition="Another Encounter of which this encounter is a part of (administratively or in time)."
@@ -961,9 +957,7 @@ public class Encounter extends BaseResource implements IResource {
 	private java.util.List<BoundCodeableConceptDt<ParticipantTypeEnum>> myType;
 	
 	@Child(name="individual", order=1, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Practitioner.class,
-		ca.uhn.fhir.model.dstu.resource.RelatedPerson.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Practitioner.class, 		ca.uhn.fhir.model.dstu.resource.RelatedPerson.class	})
 	@Description(
 		shortDefinition="Persons involved in the encounter other than the patient",
 		formalDefinition=""
@@ -1094,8 +1088,7 @@ public class Encounter extends BaseResource implements IResource {
 	private IdentifierDt myPreAdmissionIdentifier;
 	
 	@Child(name="origin", order=1, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Location.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Location.class	})
 	@Description(
 		shortDefinition="The location from which the patient came before admission",
 		formalDefinition=""
@@ -1145,8 +1138,7 @@ public class Encounter extends BaseResource implements IResource {
 	private java.util.List<CodeableConceptDt> mySpecialArrangement;
 	
 	@Child(name="destination", order=8, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Location.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Location.class	})
 	@Description(
 		shortDefinition="Location to which the patient is discharged",
 		formalDefinition=""
@@ -1161,8 +1153,7 @@ public class Encounter extends BaseResource implements IResource {
 	private CodeableConceptDt myDischargeDisposition;
 	
 	@Child(name="dischargeDiagnosis", order=10, min=0, max=1, type={
-		IResource.class,
-	})
+		IResource.class	})
 	@Description(
 		shortDefinition="The final diagnosis given a patient before release from the hospital after all testing, surgery, and workup are complete",
 		formalDefinition=""
@@ -1718,8 +1709,7 @@ public class Encounter extends BaseResource implements IResource {
 	public static class HospitalizationAccomodation extends BaseElement implements IResourceBlock {
 	
 	@Child(name="bed", order=0, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Location.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Location.class	})
 	@Description(
 		shortDefinition="The bed that is assigned to the patient",
 		formalDefinition=""
@@ -1828,8 +1818,7 @@ public class Encounter extends BaseResource implements IResource {
 	public static class Location extends BaseElement implements IResourceBlock {
 	
 	@Child(name="location", order=0, min=1, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Location.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Location.class	})
 	@Description(
 		shortDefinition="Location the encounter takes place",
 		formalDefinition="The location where the encounter takes place"

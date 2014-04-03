@@ -220,11 +220,7 @@ public class DiagnosticReport extends BaseResource implements IResource {
 	private DateTimeDt myIssued;
 	
 	@Child(name="subject", order=3, min=1, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Patient.class,
-		ca.uhn.fhir.model.dstu.resource.Group.class,
-		ca.uhn.fhir.model.dstu.resource.Device.class,
-		ca.uhn.fhir.model.dstu.resource.Location.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Patient.class, 		ca.uhn.fhir.model.dstu.resource.Group.class, 		ca.uhn.fhir.model.dstu.resource.Device.class, 		ca.uhn.fhir.model.dstu.resource.Location.class	})
 	@Description(
 		shortDefinition="The subject of the report, usually, but not always, the patient",
 		formalDefinition="The subject of the report. Usually, but not always, this is a patient. However diagnostic services also perform analyses on specimens collected from a variety of other sources"
@@ -232,9 +228,7 @@ public class DiagnosticReport extends BaseResource implements IResource {
 	private ResourceReferenceDt mySubject;
 	
 	@Child(name="performer", order=4, min=1, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Practitioner.class,
-		ca.uhn.fhir.model.dstu.resource.Organization.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Practitioner.class, 		ca.uhn.fhir.model.dstu.resource.Organization.class	})
 	@Description(
 		shortDefinition="Responsible Diagnostic Service",
 		formalDefinition="The diagnostic service that is responsible for issuing the report"
@@ -249,8 +243,7 @@ public class DiagnosticReport extends BaseResource implements IResource {
 	private IdentifierDt myIdentifier;
 	
 	@Child(name="requestDetail", order=6, min=0, max=Child.MAX_UNLIMITED, type={
-		ca.uhn.fhir.model.dstu.resource.DiagnosticOrder.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.DiagnosticOrder.class	})
 	@Description(
 		shortDefinition="What was requested",
 		formalDefinition="Details concerning a test requested."
@@ -265,9 +258,7 @@ public class DiagnosticReport extends BaseResource implements IResource {
 	private CodeableConceptDt myServiceCategory;
 	
 	@Child(name="diagnostic", order=8, min=1, max=1, type={
-		DateTimeDt.class,
-		PeriodDt.class,
-	})
+		DateTimeDt.class, 		PeriodDt.class	})
 	@Description(
 		shortDefinition="Physiologically Relevant time/time-period for report",
 		formalDefinition="The time or time-period the observed values are related to. This is usually either the time of the procedure or of specimen collection(s), but very often the source of the date/time is not known, only the date/time itself"
@@ -275,8 +266,7 @@ public class DiagnosticReport extends BaseResource implements IResource {
 	private IDatatype myDiagnostic;
 	
 	@Child(name="specimen", order=9, min=0, max=Child.MAX_UNLIMITED, type={
-		ca.uhn.fhir.model.dstu.resource.Specimen.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Specimen.class	})
 	@Description(
 		shortDefinition="Specimens this report is based on",
 		formalDefinition="Details about the specimens on which this Disagnostic report is based"
@@ -284,8 +274,7 @@ public class DiagnosticReport extends BaseResource implements IResource {
 	private java.util.List<ResourceReferenceDt> mySpecimen;
 	
 	@Child(name="result", order=10, min=0, max=Child.MAX_UNLIMITED, type={
-		ca.uhn.fhir.model.dstu.resource.Observation.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Observation.class	})
 	@Description(
 		shortDefinition="Observations - simple, or complex nested groups",
 		formalDefinition="Observations that are part of this diagnostic report. Observations can be simple name/value pairs (e.g. \"atomic\" results), or they can be grouping observations that include references to other members of the group (e.g. \"panels\")"
@@ -293,8 +282,7 @@ public class DiagnosticReport extends BaseResource implements IResource {
 	private java.util.List<ResourceReferenceDt> myResult;
 	
 	@Child(name="imagingStudy", order=11, min=0, max=Child.MAX_UNLIMITED, type={
-		ca.uhn.fhir.model.dstu.resource.ImagingStudy.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.ImagingStudy.class	})
 	@Description(
 		shortDefinition="Reference to full details of imaging associated with the diagnostic report",
 		formalDefinition="One or more links to full details of any imaging performed during the diagnostic investigation. Typically, this is imaging performed by DICOM enabled modalities, but this is not required. A fully enabled PACS viewer can use this information to provide views of the source images"
@@ -1068,8 +1056,7 @@ public class DiagnosticReport extends BaseResource implements IResource {
 	private StringDt myComment;
 	
 	@Child(name="link", order=1, min=1, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Media.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Media.class	})
 	@Description(
 		shortDefinition="Reference to the image source",
 		formalDefinition=""

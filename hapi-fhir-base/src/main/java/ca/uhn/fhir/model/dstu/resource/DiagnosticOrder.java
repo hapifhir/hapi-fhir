@@ -227,11 +227,7 @@ public class DiagnosticOrder extends BaseResource implements IResource {
 
 
 	@Child(name="subject", order=0, min=1, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Patient.class,
-		ca.uhn.fhir.model.dstu.resource.Group.class,
-		ca.uhn.fhir.model.dstu.resource.Location.class,
-		ca.uhn.fhir.model.dstu.resource.Device.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Patient.class, 		ca.uhn.fhir.model.dstu.resource.Group.class, 		ca.uhn.fhir.model.dstu.resource.Location.class, 		ca.uhn.fhir.model.dstu.resource.Device.class	})
 	@Description(
 		shortDefinition="Who and/or what test is about",
 		formalDefinition="Who or what the investigation is to be performed on. This is usually a human patient, but diagnostic tests can also be requested on animals, groups of humans or animals, devices such as dialysis machines, or even locations (typically for environmental scans)"
@@ -239,8 +235,7 @@ public class DiagnosticOrder extends BaseResource implements IResource {
 	private ResourceReferenceDt mySubject;
 	
 	@Child(name="orderer", order=1, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Practitioner.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Practitioner.class	})
 	@Description(
 		shortDefinition="Who ordered the test",
 		formalDefinition="The practitioner that holds legal responsibility for ordering the investigation"
@@ -255,8 +250,7 @@ public class DiagnosticOrder extends BaseResource implements IResource {
 	private java.util.List<IdentifierDt> myIdentifier;
 	
 	@Child(name="encounter", order=3, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Encounter.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Encounter.class	})
 	@Description(
 		shortDefinition="The encounter that this diagnostic order is associated with",
 		formalDefinition="An encounter that provides additional informaton about the healthcare context in which this request is made"
@@ -271,8 +265,7 @@ public class DiagnosticOrder extends BaseResource implements IResource {
 	private StringDt myClinicalNotes;
 	
 	@Child(name="specimen", order=5, min=0, max=Child.MAX_UNLIMITED, type={
-		ca.uhn.fhir.model.dstu.resource.Specimen.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Specimen.class	})
 	@Description(
 		shortDefinition="If the whole order relates to specific specimens",
 		formalDefinition="One or more specimens that the diagnostic investigation is about"
@@ -838,9 +831,7 @@ public class DiagnosticOrder extends BaseResource implements IResource {
 	private DateTimeDt myDateTime;
 	
 	@Child(name="actor", order=3, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Practitioner.class,
-		ca.uhn.fhir.model.dstu.resource.Device.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Practitioner.class, 		ca.uhn.fhir.model.dstu.resource.Device.class	})
 	@Description(
 		shortDefinition="Who recorded or did this",
 		formalDefinition="The person who was responsible for performing or recording the action"
@@ -1046,8 +1037,7 @@ public class DiagnosticOrder extends BaseResource implements IResource {
 	private CodeableConceptDt myCode;
 	
 	@Child(name="specimen", order=1, min=0, max=Child.MAX_UNLIMITED, type={
-		ca.uhn.fhir.model.dstu.resource.Specimen.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Specimen.class	})
 	@Description(
 		shortDefinition="If this item relates to specific specimens",
 		formalDefinition="If the item is related to a specific speciment"

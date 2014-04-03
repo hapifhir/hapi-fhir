@@ -160,9 +160,7 @@ public class Questionnaire extends BaseResource implements IResource {
 	private DateTimeDt myAuthored;
 	
 	@Child(name="subject", order=2, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Patient.class,
-		ca.uhn.fhir.model.dstu.resource.RelatedPerson.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Patient.class, 		ca.uhn.fhir.model.dstu.resource.RelatedPerson.class	})
 	@Description(
 		shortDefinition="The subject of the questions",
 		formalDefinition="The subject of the questionnaires: this is the patient that the answers apply to, but this person is not necessarily the source of information"
@@ -170,10 +168,7 @@ public class Questionnaire extends BaseResource implements IResource {
 	private ResourceReferenceDt mySubject;
 	
 	@Child(name="author", order=3, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Practitioner.class,
-		ca.uhn.fhir.model.dstu.resource.Patient.class,
-		ca.uhn.fhir.model.dstu.resource.RelatedPerson.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Practitioner.class, 		ca.uhn.fhir.model.dstu.resource.Patient.class, 		ca.uhn.fhir.model.dstu.resource.RelatedPerson.class	})
 	@Description(
 		shortDefinition="Person who received and recorded the answers",
 		formalDefinition="Person who received the answers to the questions in the Questionnaire and recorded them in the system"
@@ -181,10 +176,7 @@ public class Questionnaire extends BaseResource implements IResource {
 	private ResourceReferenceDt myAuthor;
 	
 	@Child(name="source", order=4, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Patient.class,
-		ca.uhn.fhir.model.dstu.resource.Practitioner.class,
-		ca.uhn.fhir.model.dstu.resource.RelatedPerson.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Patient.class, 		ca.uhn.fhir.model.dstu.resource.Practitioner.class, 		ca.uhn.fhir.model.dstu.resource.RelatedPerson.class	})
 	@Description(
 		shortDefinition="The person who answered the questions",
 		formalDefinition="The person who answered the questions about the subject. Only used when this is not the subject him/herself"
@@ -206,8 +198,7 @@ public class Questionnaire extends BaseResource implements IResource {
 	private java.util.List<IdentifierDt> myIdentifier;
 	
 	@Child(name="encounter", order=7, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Encounter.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Encounter.class	})
 	@Description(
 		shortDefinition="Primary encounter during which the answers were collected",
 		formalDefinition="Encounter during which this questionnaire answers were collected. When there were multiple encounters, this is the one considered most relevant to the context of the answers."
@@ -657,8 +648,7 @@ public class Questionnaire extends BaseResource implements IResource {
 	private StringDt myText;
 	
 	@Child(name="subject", order=3, min=0, max=1, type={
-		IResource.class,
-	})
+		IResource.class	})
 	@Description(
 		shortDefinition="The subject this group's answers are about",
 		formalDefinition="More specific subject this section's answers are about, details the subject given in Questionnaire"
@@ -1007,14 +997,7 @@ public class Questionnaire extends BaseResource implements IResource {
 	private StringDt myText;
 	
 	@Child(name="answer", order=2, min=0, max=1, type={
-		DecimalDt.class,
-		IntegerDt.class,
-		BooleanDt.class,
-		DateDt.class,
-		StringDt.class,
-		DateTimeDt.class,
-		InstantDt.class,
-	})
+		DecimalDt.class, 		IntegerDt.class, 		BooleanDt.class, 		DateDt.class, 		StringDt.class, 		DateTimeDt.class, 		InstantDt.class	})
 	@Description(
 		shortDefinition="Single-valued answer to the question",
 		formalDefinition="Single-valued answer to the question"
@@ -1029,8 +1012,7 @@ public class Questionnaire extends BaseResource implements IResource {
 	private java.util.List<CodingDt> myChoice;
 	
 	@Child(name="options", order=4, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.ValueSet.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.ValueSet.class	})
 	@Description(
 		shortDefinition="Valueset containing the possible options",
 		formalDefinition="Reference to a valueset containing the possible options"

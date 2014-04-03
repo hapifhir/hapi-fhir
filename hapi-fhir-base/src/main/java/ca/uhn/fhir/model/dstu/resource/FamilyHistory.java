@@ -83,8 +83,7 @@ public class FamilyHistory extends BaseResource implements IResource {
 	private java.util.List<IdentifierDt> myIdentifier;
 	
 	@Child(name="subject", order=1, min=1, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Patient.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Patient.class	})
 	@Description(
 		shortDefinition="Patient history is about",
 		formalDefinition="The person who this history concerns"
@@ -378,10 +377,7 @@ public class FamilyHistory extends BaseResource implements IResource {
 	private CodeableConceptDt myRelationship;
 	
 	@Child(name="born", order=2, min=0, max=1, type={
-		PeriodDt.class,
-		DateDt.class,
-		StringDt.class,
-	})
+		PeriodDt.class, 		DateDt.class, 		StringDt.class	})
 	@Description(
 		shortDefinition="(approximate) date of birth",
 		formalDefinition="The actual or approximate date of birth of the relative"
@@ -389,12 +385,7 @@ public class FamilyHistory extends BaseResource implements IResource {
 	private IDatatype myBorn;
 	
 	@Child(name="deceased", order=3, min=0, max=1, type={
-		BooleanDt.class,
-		AgeDt.class,
-		RangeDt.class,
-		DateDt.class,
-		StringDt.class,
-	})
+		BooleanDt.class, 		AgeDt.class, 		RangeDt.class, 		DateDt.class, 		StringDt.class	})
 	@Description(
 		shortDefinition="Dead? How old/when?",
 		formalDefinition="If this resource is indicating that the related person is deceased, then an indicator of whether the person is deceased (yes) or not (no) or the age or age range or description of age at death - can be indicated here. If the reason for death is known, then it can be indicated in the outcome code of the condition - in this case the deceased property should still be set."
@@ -695,10 +686,7 @@ public class FamilyHistory extends BaseResource implements IResource {
 	private CodeableConceptDt myOutcome;
 	
 	@Child(name="onset", order=2, min=0, max=1, type={
-		AgeDt.class,
-		RangeDt.class,
-		StringDt.class,
-	})
+		AgeDt.class, 		RangeDt.class, 		StringDt.class	})
 	@Description(
 		shortDefinition="When condition first manifested",
 		formalDefinition="Either the age of onset, range of approximate age or descriptive string can be recorded.  For conditions with multiple occurrences, this describes the first known occurrence."

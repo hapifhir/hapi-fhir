@@ -153,8 +153,7 @@ public class CarePlan extends BaseResource implements IResource {
 	private java.util.List<IdentifierDt> myIdentifier;
 	
 	@Child(name="patient", order=1, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Patient.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Patient.class	})
 	@Description(
 		shortDefinition="Who care plan is for",
 		formalDefinition="Identifies the patient/subject whose intended care is described by the plan."
@@ -183,8 +182,7 @@ public class CarePlan extends BaseResource implements IResource {
 	private DateTimeDt myModified;
 	
 	@Child(name="concern", order=5, min=0, max=Child.MAX_UNLIMITED, type={
-		ca.uhn.fhir.model.dstu.resource.Condition.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Condition.class	})
 	@Description(
 		shortDefinition="Health issues this plan addresses",
 		formalDefinition="Identifies the conditions/problems/concerns/diagnoses/etc. whose management and/or mitigation are handled by this plan."
@@ -781,11 +779,7 @@ public class CarePlan extends BaseResource implements IResource {
 	private CodeableConceptDt myRole;
 	
 	@Child(name="member", order=1, min=1, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Practitioner.class,
-		ca.uhn.fhir.model.dstu.resource.RelatedPerson.class,
-		ca.uhn.fhir.model.dstu.resource.Patient.class,
-		ca.uhn.fhir.model.dstu.resource.Organization.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Practitioner.class, 		ca.uhn.fhir.model.dstu.resource.RelatedPerson.class, 		ca.uhn.fhir.model.dstu.resource.Patient.class, 		ca.uhn.fhir.model.dstu.resource.Organization.class	})
 	@Description(
 		shortDefinition="Who is involved",
 		formalDefinition="The specific person or organization who is participating/expected to participate in the care plan."
@@ -904,8 +898,7 @@ public class CarePlan extends BaseResource implements IResource {
 	private StringDt myNotes;
 	
 	@Child(name="concern", order=3, min=0, max=Child.MAX_UNLIMITED, type={
-		ca.uhn.fhir.model.dstu.resource.Condition.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Condition.class	})
 	@Description(
 		shortDefinition="Health issues this goal addresses",
 		formalDefinition="The identified conditions that this goal relates to - the condition that caused it to be created, or that it is intended to address"
@@ -1141,8 +1134,7 @@ public class CarePlan extends BaseResource implements IResource {
 	private BooleanDt myProhibited;
 	
 	@Child(name="actionResulting", order=3, min=0, max=Child.MAX_UNLIMITED, type={
-		IResource.class,
-	})
+		IResource.class	})
 	@Description(
 		shortDefinition="Appointments, orders, etc.",
 		formalDefinition="Resources that describe follow-on actions resulting from the plan, such as drug prescriptions, encounter records, appointments, etc."
@@ -1157,11 +1149,7 @@ public class CarePlan extends BaseResource implements IResource {
 	private StringDt myNotes;
 	
 	@Child(name="detail", order=5, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Procedure.class,
-		ca.uhn.fhir.model.dstu.resource.MedicationPrescription.class,
-		ca.uhn.fhir.model.dstu.resource.DiagnosticOrder.class,
-		ca.uhn.fhir.model.dstu.resource.Encounter.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Procedure.class, 		ca.uhn.fhir.model.dstu.resource.MedicationPrescription.class, 		ca.uhn.fhir.model.dstu.resource.DiagnosticOrder.class, 		ca.uhn.fhir.model.dstu.resource.Encounter.class	})
 	@Description(
 		shortDefinition="Activity details defined in specific resource",
 		formalDefinition="The details of the proposed activity represented in a specific resource"
@@ -1515,10 +1503,7 @@ public class CarePlan extends BaseResource implements IResource {
 	private CodeableConceptDt myCode;
 	
 	@Child(name="timing", order=2, min=0, max=1, type={
-		ScheduleDt.class,
-		PeriodDt.class,
-		StringDt.class,
-	})
+		ScheduleDt.class, 		PeriodDt.class, 		StringDt.class	})
 	@Description(
 		shortDefinition="When activity is to occur",
 		formalDefinition="The period, timing or frequency upon which the described activity is to occur."
@@ -1526,8 +1511,7 @@ public class CarePlan extends BaseResource implements IResource {
 	private IDatatype myTiming;
 	
 	@Child(name="location", order=3, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Location.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Location.class	})
 	@Description(
 		shortDefinition="Where it should happen",
 		formalDefinition="Identifies the facility where the activity will occur.  E.g. home, hospital, specific clinic, etc."
@@ -1535,11 +1519,7 @@ public class CarePlan extends BaseResource implements IResource {
 	private ResourceReferenceDt myLocation;
 	
 	@Child(name="performer", order=4, min=0, max=Child.MAX_UNLIMITED, type={
-		ca.uhn.fhir.model.dstu.resource.Practitioner.class,
-		ca.uhn.fhir.model.dstu.resource.Organization.class,
-		ca.uhn.fhir.model.dstu.resource.RelatedPerson.class,
-		ca.uhn.fhir.model.dstu.resource.Patient.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Practitioner.class, 		ca.uhn.fhir.model.dstu.resource.Organization.class, 		ca.uhn.fhir.model.dstu.resource.RelatedPerson.class, 		ca.uhn.fhir.model.dstu.resource.Patient.class	})
 	@Description(
 		shortDefinition="Who's responsible?",
 		formalDefinition="Identifies who's expected to be involved in the activity."
@@ -1547,9 +1527,7 @@ public class CarePlan extends BaseResource implements IResource {
 	private java.util.List<ResourceReferenceDt> myPerformer;
 	
 	@Child(name="product", order=5, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Medication.class,
-		ca.uhn.fhir.model.dstu.resource.Substance.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Medication.class, 		ca.uhn.fhir.model.dstu.resource.Substance.class	})
 	@Description(
 		shortDefinition="What's administered/supplied",
 		formalDefinition="Identifies the food, drug or other product being consumed or supplied in the activity."

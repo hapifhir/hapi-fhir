@@ -305,11 +305,7 @@ public class DocumentReference extends BaseResource implements IResource {
 	private java.util.List<IdentifierDt> myIdentifier;
 	
 	@Child(name="subject", order=2, min=1, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Patient.class,
-		ca.uhn.fhir.model.dstu.resource.Practitioner.class,
-		ca.uhn.fhir.model.dstu.resource.Group.class,
-		ca.uhn.fhir.model.dstu.resource.Device.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Patient.class, 		ca.uhn.fhir.model.dstu.resource.Practitioner.class, 		ca.uhn.fhir.model.dstu.resource.Group.class, 		ca.uhn.fhir.model.dstu.resource.Device.class	})
 	@Description(
 		shortDefinition="Who|what is the subject of the document",
 		formalDefinition="Who or what the document is about. The document can be about a person, (patient or healthcare practitioner), a device (I.e. machine) or even a group of subjects (such as a document about a herd of farm animals, or a set of patients that share a common exposure)"
@@ -331,11 +327,7 @@ public class DocumentReference extends BaseResource implements IResource {
 	private CodeableConceptDt myClassElement;
 	
 	@Child(name="author", order=5, min=1, max=Child.MAX_UNLIMITED, type={
-		ca.uhn.fhir.model.dstu.resource.Practitioner.class,
-		ca.uhn.fhir.model.dstu.resource.Device.class,
-		ca.uhn.fhir.model.dstu.resource.Patient.class,
-		ca.uhn.fhir.model.dstu.resource.RelatedPerson.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Practitioner.class, 		ca.uhn.fhir.model.dstu.resource.Device.class, 		ca.uhn.fhir.model.dstu.resource.Patient.class, 		ca.uhn.fhir.model.dstu.resource.RelatedPerson.class	})
 	@Description(
 		shortDefinition="Who and/or what authored the document",
 		formalDefinition="Identifies who is responsible for adding the information to the document"
@@ -343,8 +335,7 @@ public class DocumentReference extends BaseResource implements IResource {
 	private java.util.List<ResourceReferenceDt> myAuthor;
 	
 	@Child(name="custodian", order=6, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Organization.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Organization.class	})
 	@Description(
 		shortDefinition="Org which maintains the document",
 		formalDefinition="Identifies the organization or group who is responsible for ongoing maintenance of and access to the document"
@@ -359,9 +350,7 @@ public class DocumentReference extends BaseResource implements IResource {
 	private UriDt myPolicyManager;
 	
 	@Child(name="authenticator", order=8, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Practitioner.class,
-		ca.uhn.fhir.model.dstu.resource.Organization.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Practitioner.class, 		ca.uhn.fhir.model.dstu.resource.Organization.class	})
 	@Description(
 		shortDefinition="Who/What authenticated the document",
 		formalDefinition="Which person or organization authenticates that this document is valid"
@@ -1608,8 +1597,7 @@ public class DocumentReference extends BaseResource implements IResource {
 	private BoundCodeDt<DocumentRelationshipTypeEnum> myCode;
 	
 	@Child(name="target", order=1, min=1, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.DocumentReference.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.DocumentReference.class	})
 	@Description(
 		shortDefinition="Target of the relationship",
 		formalDefinition="The target document of this relationship"

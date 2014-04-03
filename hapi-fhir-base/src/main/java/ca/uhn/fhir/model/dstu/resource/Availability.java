@@ -105,12 +105,7 @@ public class Availability extends BaseResource implements IResource {
 	private CodeableConceptDt myType;
 	
 	@Child(name="individual", order=2, min=1, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Location.class,
-		ca.uhn.fhir.model.dstu.resource.Practitioner.class,
-		ca.uhn.fhir.model.dstu.resource.Device.class,
-		ca.uhn.fhir.model.dstu.resource.Patient.class,
-		ca.uhn.fhir.model.dstu.resource.RelatedPerson.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Location.class, 		ca.uhn.fhir.model.dstu.resource.Practitioner.class, 		ca.uhn.fhir.model.dstu.resource.Device.class, 		ca.uhn.fhir.model.dstu.resource.Patient.class, 		ca.uhn.fhir.model.dstu.resource.RelatedPerson.class	})
 	@Description(
 		shortDefinition="The type of resource this availability resource is providing availability information for",
 		formalDefinition=""
@@ -132,10 +127,7 @@ public class Availability extends BaseResource implements IResource {
 	private StringDt myComment;
 	
 	@Child(name="author", order=5, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Practitioner.class,
-		ca.uhn.fhir.model.dstu.resource.Patient.class,
-		ca.uhn.fhir.model.dstu.resource.RelatedPerson.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Practitioner.class, 		ca.uhn.fhir.model.dstu.resource.Patient.class, 		ca.uhn.fhir.model.dstu.resource.RelatedPerson.class	})
 	@Description(
 		shortDefinition="Who authored the availability",
 		formalDefinition=""

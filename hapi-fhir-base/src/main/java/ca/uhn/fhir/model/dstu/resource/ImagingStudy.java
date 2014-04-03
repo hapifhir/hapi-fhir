@@ -178,8 +178,7 @@ public class ImagingStudy extends BaseResource implements IResource {
 	private DateTimeDt myDateTime;
 	
 	@Child(name="subject", order=1, min=1, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Patient.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Patient.class	})
 	@Description(
 		shortDefinition="Who the images are of",
 		formalDefinition="Who the images are of"
@@ -208,8 +207,7 @@ public class ImagingStudy extends BaseResource implements IResource {
 	private java.util.List<IdentifierDt> myIdentifier;
 	
 	@Child(name="order", order=5, min=0, max=Child.MAX_UNLIMITED, type={
-		ca.uhn.fhir.model.dstu.resource.DiagnosticOrder.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.DiagnosticOrder.class	})
 	@Description(
 		shortDefinition="Order(s) that caused this study to be performed",
 		formalDefinition="A list of the diagnostic orders that resulted in this imaging study being performed"
@@ -224,8 +222,7 @@ public class ImagingStudy extends BaseResource implements IResource {
 	private java.util.List<BoundCodeDt<ImagingModalityEnum>> myModality;
 	
 	@Child(name="referrer", order=7, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Practitioner.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Practitioner.class	})
 	@Description(
 		shortDefinition="Referring physician (0008,0090)",
 		formalDefinition="The requesting/referring physician"
@@ -275,8 +272,7 @@ public class ImagingStudy extends BaseResource implements IResource {
 	private java.util.List<CodingDt> myProcedure;
 	
 	@Child(name="interpreter", order=14, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Practitioner.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Practitioner.class	})
 	@Description(
 		shortDefinition="Who interpreted images (0008,1060)",
 		formalDefinition="Who read study and interpreted the images"
@@ -1729,8 +1725,7 @@ public class ImagingStudy extends BaseResource implements IResource {
 	private UriDt myUrl;
 	
 	@Child(name="attachment", order=6, min=0, max=1, type={
-		IResource.class,
-	})
+		IResource.class	})
 	@Description(
 		shortDefinition="A FHIR resource with content for this instance",
 		formalDefinition=""

@@ -104,11 +104,7 @@ public class Specimen extends BaseResource implements IResource {
 	private java.util.List<Source> mySource;
 	
 	@Child(name="subject", order=3, min=1, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Patient.class,
-		ca.uhn.fhir.model.dstu.resource.Group.class,
-		ca.uhn.fhir.model.dstu.resource.Device.class,
-		ca.uhn.fhir.model.dstu.resource.Substance.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Patient.class, 		ca.uhn.fhir.model.dstu.resource.Group.class, 		ca.uhn.fhir.model.dstu.resource.Device.class, 		ca.uhn.fhir.model.dstu.resource.Substance.class	})
 	@Description(
 		shortDefinition="Where the specimen came from. This may be the patient(s) or from the environment or  a device",
 		formalDefinition=""
@@ -665,8 +661,7 @@ public class Specimen extends BaseResource implements IResource {
 	private BoundCodeDt<HierarchicalRelationshipTypeEnum> myRelationship;
 	
 	@Child(name="target", order=1, min=0, max=Child.MAX_UNLIMITED, type={
-		ca.uhn.fhir.model.dstu.resource.Specimen.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Specimen.class	})
 	@Description(
 		shortDefinition="The subject of the relationship",
 		formalDefinition="The specimen resource that is the target of this relationship"
@@ -793,8 +788,7 @@ public class Specimen extends BaseResource implements IResource {
 	public static class Collection extends BaseElement implements IResourceBlock {
 	
 	@Child(name="collector", order=0, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Practitioner.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Practitioner.class	})
 	@Description(
 		shortDefinition="Who collected the specimen",
 		formalDefinition="Person who collected the specimen"
@@ -809,9 +803,7 @@ public class Specimen extends BaseResource implements IResource {
 	private java.util.List<StringDt> myComment;
 	
 	@Child(name="collected", order=2, min=0, max=1, type={
-		DateTimeDt.class,
-		PeriodDt.class,
-	})
+		DateTimeDt.class, 		PeriodDt.class	})
 	@Description(
 		shortDefinition="Collection time",
 		formalDefinition="Time when specimen was collected from subject - the physiologically relevant time"
@@ -1180,8 +1172,7 @@ public class Specimen extends BaseResource implements IResource {
 	private BoundCodeableConceptDt<SpecimenTreatmentProcedureEnum> myProcedure;
 	
 	@Child(name="additive", order=2, min=0, max=Child.MAX_UNLIMITED, type={
-		ca.uhn.fhir.model.dstu.resource.Substance.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Substance.class	})
 	@Description(
 		shortDefinition="Material used in the processing step",
 		formalDefinition=""
@@ -1387,8 +1378,7 @@ public class Specimen extends BaseResource implements IResource {
 	private QuantityDt mySpecimenQuantity;
 	
 	@Child(name="additive", order=5, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Substance.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Substance.class	})
 	@Description(
 		shortDefinition="Additive associated with container",
 		formalDefinition="Additive associated with the container"

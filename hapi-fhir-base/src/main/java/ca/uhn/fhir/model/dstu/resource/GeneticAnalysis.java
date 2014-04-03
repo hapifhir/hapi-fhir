@@ -92,8 +92,7 @@ public class GeneticAnalysis extends BaseResource implements IResource {
 
 
 	@Child(name="subject", order=0, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Patient.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Patient.class	})
 	@Description(
 		shortDefinition="Subject of the analysis",
 		formalDefinition="Subject of the analysis"
@@ -101,8 +100,7 @@ public class GeneticAnalysis extends BaseResource implements IResource {
 	private ResourceReferenceDt mySubject;
 	
 	@Child(name="author", order=1, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Practitioner.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Practitioner.class	})
 	@Description(
 		shortDefinition="Author of the analysis",
 		formalDefinition="Author of the analysis"

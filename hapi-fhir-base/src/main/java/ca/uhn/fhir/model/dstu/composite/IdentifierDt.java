@@ -113,8 +113,7 @@ public class IdentifierDt
 	private PeriodDt myPeriod;
 	
 	@Child(name="assigner", order=5, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Organization.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Organization.class	})
 	@Description(
 		shortDefinition="Organization that issued id (may be just text)",
 		formalDefinition="Organization that issued/manages the identifier"

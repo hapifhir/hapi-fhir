@@ -964,8 +964,7 @@ public class GVFMeta extends BaseResource implements IResource {
 	public static class Subject extends BaseElement implements IResourceBlock {
 	
 	@Child(name="patient", order=0, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Patient.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Patient.class	})
 	@Description(
 		shortDefinition="Identity of the subejct",
 		formalDefinition="Identity of the subejct"

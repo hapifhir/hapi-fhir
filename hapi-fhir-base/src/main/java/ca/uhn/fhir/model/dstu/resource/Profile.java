@@ -3730,9 +3730,7 @@ public class Profile extends BaseResource implements IResource {
 	private StringDt myDescription;
 	
 	@Child(name="reference", order=4, min=0, max=1, type={
-		UriDt.class,
-		ValueSet.class,
-	})
+		UriDt.class, 		ValueSet.class	})
 	@Description(
 		shortDefinition="Source of value set",
 		formalDefinition="Points to the value set or external definition that identifies the set of codes to be used"

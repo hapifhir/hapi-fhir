@@ -88,8 +88,7 @@ public class GVFVariant extends BaseResource implements IResource {
 	private Subject mySubject;
 	
 	@Child(name="meta", order=1, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.GVFMeta.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.GVFMeta.class	})
 	@Description(
 		shortDefinition="GVF Meta",
 		formalDefinition="Meta information of a GVF file"
@@ -1655,8 +1654,7 @@ public class GVFVariant extends BaseResource implements IResource {
 	public static class Subject extends BaseElement implements IResourceBlock {
 	
 	@Child(name="patient", order=0, min=1, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Patient.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Patient.class	})
 	@Description(
 		shortDefinition="Subject",
 		formalDefinition="Patient resource that stores information of the subejct"

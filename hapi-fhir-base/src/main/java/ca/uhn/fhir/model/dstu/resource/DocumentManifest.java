@@ -188,11 +188,7 @@ public class DocumentManifest extends BaseResource implements IResource {
 	private java.util.List<IdentifierDt> myIdentifier;
 	
 	@Child(name="subject", order=2, min=1, max=Child.MAX_UNLIMITED, type={
-		ca.uhn.fhir.model.dstu.resource.Patient.class,
-		ca.uhn.fhir.model.dstu.resource.Practitioner.class,
-		ca.uhn.fhir.model.dstu.resource.Group.class,
-		ca.uhn.fhir.model.dstu.resource.Device.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Patient.class, 		ca.uhn.fhir.model.dstu.resource.Practitioner.class, 		ca.uhn.fhir.model.dstu.resource.Group.class, 		ca.uhn.fhir.model.dstu.resource.Device.class	})
 	@Description(
 		shortDefinition="The subject of the set of documents",
 		formalDefinition="Who or what the set of documents is about. The documents can be about a person, (patient or healthcare practitioner), a device (i.e. machine) or even a group of subjects (such as a document about a herd of farm animals, or a set of patients that share a common exposure). If the documents cross more than one subject, then more than one subject is allowed here (unusual use case)"
@@ -200,10 +196,7 @@ public class DocumentManifest extends BaseResource implements IResource {
 	private java.util.List<ResourceReferenceDt> mySubject;
 	
 	@Child(name="recipient", order=3, min=0, max=Child.MAX_UNLIMITED, type={
-		ca.uhn.fhir.model.dstu.resource.Patient.class,
-		ca.uhn.fhir.model.dstu.resource.Practitioner.class,
-		ca.uhn.fhir.model.dstu.resource.Organization.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Patient.class, 		ca.uhn.fhir.model.dstu.resource.Practitioner.class, 		ca.uhn.fhir.model.dstu.resource.Organization.class	})
 	@Description(
 		shortDefinition="Intended to get notified about this set of documents",
 		formalDefinition="A patient, practitioner, or organization for which this set of documents is intended"
@@ -218,11 +211,7 @@ public class DocumentManifest extends BaseResource implements IResource {
 	private CodeableConceptDt myType;
 	
 	@Child(name="author", order=5, min=0, max=Child.MAX_UNLIMITED, type={
-		ca.uhn.fhir.model.dstu.resource.Practitioner.class,
-		ca.uhn.fhir.model.dstu.resource.Device.class,
-		ca.uhn.fhir.model.dstu.resource.Patient.class,
-		ca.uhn.fhir.model.dstu.resource.RelatedPerson.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Practitioner.class, 		ca.uhn.fhir.model.dstu.resource.Device.class, 		ca.uhn.fhir.model.dstu.resource.Patient.class, 		ca.uhn.fhir.model.dstu.resource.RelatedPerson.class	})
 	@Description(
 		shortDefinition="Who and/or what authored the document",
 		formalDefinition="Identifies who is responsible for adding the information to the document"
@@ -251,8 +240,7 @@ public class DocumentManifest extends BaseResource implements IResource {
 	private BoundCodeDt<DocumentReferenceStatusEnum> myStatus;
 	
 	@Child(name="supercedes", order=9, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.DocumentManifest.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.DocumentManifest.class	})
 	@Description(
 		shortDefinition="If this document manifest replaces another",
 		formalDefinition="Whether this document manifest replaces another"
@@ -274,10 +262,7 @@ public class DocumentManifest extends BaseResource implements IResource {
 	private CodeableConceptDt myConfidentiality;
 	
 	@Child(name="content", order=12, min=1, max=Child.MAX_UNLIMITED, type={
-		ca.uhn.fhir.model.dstu.resource.DocumentReference.class,
-		ca.uhn.fhir.model.dstu.resource.Binary.class,
-		ca.uhn.fhir.model.dstu.resource.Media.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.DocumentReference.class, 		ca.uhn.fhir.model.dstu.resource.Binary.class, 		ca.uhn.fhir.model.dstu.resource.Media.class	})
 	@Description(
 		shortDefinition="Contents of this set of documents",
 		formalDefinition="The list of resources that describe the parts of this document reference. Usually, these would be document references, but direct references to binary attachments and images are also allowed"

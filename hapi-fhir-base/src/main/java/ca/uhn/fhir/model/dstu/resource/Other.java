@@ -103,8 +103,7 @@ public class Other extends BaseResource implements IResource {
 	private CodeableConceptDt myCode;
 	
 	@Child(name="subject", order=2, min=0, max=1, type={
-		IResource.class,
-	})
+		IResource.class	})
 	@Description(
 		shortDefinition="Identifies the",
 		formalDefinition="Identifies the patient, practitioner, device or any other resource that is the \"focus\" of this resoruce."
@@ -112,10 +111,7 @@ public class Other extends BaseResource implements IResource {
 	private ResourceReferenceDt mySubject;
 	
 	@Child(name="author", order=3, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Practitioner.class,
-		ca.uhn.fhir.model.dstu.resource.Patient.class,
-		ca.uhn.fhir.model.dstu.resource.RelatedPerson.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Practitioner.class, 		ca.uhn.fhir.model.dstu.resource.Patient.class, 		ca.uhn.fhir.model.dstu.resource.RelatedPerson.class	})
 	@Description(
 		shortDefinition="Who created",
 		formalDefinition="Indicates who was responsible for creating the resource instance"

@@ -101,8 +101,7 @@ public class Procedure extends BaseResource implements IResource {
 	private java.util.List<IdentifierDt> myIdentifier;
 	
 	@Child(name="subject", order=1, min=1, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Patient.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Patient.class	})
 	@Description(
 		shortDefinition="Who procedure was performed on",
 		formalDefinition="The person on whom the procedure was performed"
@@ -145,8 +144,7 @@ public class Procedure extends BaseResource implements IResource {
 	private PeriodDt myDate;
 	
 	@Child(name="encounter", order=7, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Encounter.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Encounter.class	})
 	@Description(
 		shortDefinition="The encounter when procedure performed",
 		formalDefinition="The encounter during which the procedure was performed"
@@ -161,8 +159,7 @@ public class Procedure extends BaseResource implements IResource {
 	private StringDt myOutcome;
 	
 	@Child(name="report", order=9, min=0, max=Child.MAX_UNLIMITED, type={
-		ca.uhn.fhir.model.dstu.resource.DiagnosticReport.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.DiagnosticReport.class	})
 	@Description(
 		shortDefinition="Any report that results from the procedure",
 		formalDefinition="This could be a histology result. There could potentially be multiple reports - e.g. if this was a procedure that made multiple biopsies"
@@ -921,8 +918,7 @@ public class Procedure extends BaseResource implements IResource {
 	public static class Performer extends BaseElement implements IResourceBlock {
 	
 	@Child(name="person", order=0, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Practitioner.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Practitioner.class	})
 	@Description(
 		shortDefinition="The reference to the practitioner",
 		formalDefinition="The practitioner who was involved in the procedure"
@@ -1037,23 +1033,7 @@ public class Procedure extends BaseResource implements IResource {
 	private BoundCodeDt<ProcedureRelationshipTypeEnum> myType;
 	
 	@Child(name="target", order=1, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.AdverseReaction.class,
-		ca.uhn.fhir.model.dstu.resource.AllergyIntolerance.class,
-		ca.uhn.fhir.model.dstu.resource.CarePlan.class,
-		ca.uhn.fhir.model.dstu.resource.Condition.class,
-		ca.uhn.fhir.model.dstu.resource.DeviceObservationReport.class,
-		ca.uhn.fhir.model.dstu.resource.DiagnosticReport.class,
-		ca.uhn.fhir.model.dstu.resource.FamilyHistory.class,
-		ca.uhn.fhir.model.dstu.resource.ImagingStudy.class,
-		ca.uhn.fhir.model.dstu.resource.Immunization.class,
-		ca.uhn.fhir.model.dstu.resource.ImmunizationRecommendation.class,
-		ca.uhn.fhir.model.dstu.resource.MedicationAdministration.class,
-		ca.uhn.fhir.model.dstu.resource.MedicationDispense.class,
-		ca.uhn.fhir.model.dstu.resource.MedicationPrescription.class,
-		ca.uhn.fhir.model.dstu.resource.MedicationStatement.class,
-		ca.uhn.fhir.model.dstu.resource.Observation.class,
-		ca.uhn.fhir.model.dstu.resource.Procedure.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.AdverseReaction.class, 		ca.uhn.fhir.model.dstu.resource.AllergyIntolerance.class, 		ca.uhn.fhir.model.dstu.resource.CarePlan.class, 		ca.uhn.fhir.model.dstu.resource.Condition.class, 		ca.uhn.fhir.model.dstu.resource.DeviceObservationReport.class, 		ca.uhn.fhir.model.dstu.resource.DiagnosticReport.class, 		ca.uhn.fhir.model.dstu.resource.FamilyHistory.class, 		ca.uhn.fhir.model.dstu.resource.ImagingStudy.class, 		ca.uhn.fhir.model.dstu.resource.Immunization.class, 		ca.uhn.fhir.model.dstu.resource.ImmunizationRecommendation.class, 		ca.uhn.fhir.model.dstu.resource.MedicationAdministration.class, 		ca.uhn.fhir.model.dstu.resource.MedicationDispense.class, 		ca.uhn.fhir.model.dstu.resource.MedicationPrescription.class, 		ca.uhn.fhir.model.dstu.resource.MedicationStatement.class, 		ca.uhn.fhir.model.dstu.resource.Observation.class, 		ca.uhn.fhir.model.dstu.resource.Procedure.class	})
 	@Description(
 		shortDefinition="The related item - e.g. a procedure",
 		formalDefinition=""

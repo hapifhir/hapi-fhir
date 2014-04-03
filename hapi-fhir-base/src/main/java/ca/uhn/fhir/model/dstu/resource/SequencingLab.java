@@ -123,8 +123,7 @@ public class SequencingLab extends BaseResource implements IResource {
 
 
 	@Child(name="subject", order=0, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Patient.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Patient.class	})
 	@Description(
 		shortDefinition="Subject",
 		formalDefinition="Subject of the sequencing lab"

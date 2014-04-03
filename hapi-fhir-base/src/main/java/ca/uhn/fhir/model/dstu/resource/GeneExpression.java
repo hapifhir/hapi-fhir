@@ -89,8 +89,7 @@ public class GeneExpression extends BaseResource implements IResource {
 
 
 	@Child(name="subject", order=0, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Patient.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Patient.class	})
 	@Description(
 		shortDefinition="Subject described by the resource",
 		formalDefinition="Subject described by the resource"
@@ -105,8 +104,7 @@ public class GeneExpression extends BaseResource implements IResource {
 	private Gene myGene;
 	
 	@Child(name="microarray", order=2, min=0, max=Child.MAX_UNLIMITED, type={
-		ca.uhn.fhir.model.dstu.resource.Microarray.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Microarray.class	})
 	@Description(
 		shortDefinition="Microarray that studies the gene",
 		formalDefinition="Microarray that studies the gene"
@@ -618,8 +616,7 @@ public class GeneExpression extends BaseResource implements IResource {
 	public static class RnaSeq extends BaseElement implements IResourceBlock {
 	
 	@Child(name="inputLab", order=0, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.SequencingLab.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.SequencingLab.class	})
 	@Description(
 		shortDefinition="Input lab for the RNA-Seq",
 		formalDefinition="Input lab for the RNA-Seq"
@@ -627,8 +624,7 @@ public class GeneExpression extends BaseResource implements IResource {
 	private ResourceReferenceDt myInputLab;
 	
 	@Child(name="inputAnalysis", order=1, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.SequencingAnalysis.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.SequencingAnalysis.class	})
 	@Description(
 		shortDefinition="Input analysis for the RNA-Seq",
 		formalDefinition="Input analysis for the RNA-Seq"

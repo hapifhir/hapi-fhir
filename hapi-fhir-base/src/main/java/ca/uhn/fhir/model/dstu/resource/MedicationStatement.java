@@ -123,8 +123,7 @@ public class MedicationStatement extends BaseResource implements IResource {
 	private java.util.List<IdentifierDt> myIdentifier;
 	
 	@Child(name="patient", order=1, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Patient.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Patient.class	})
 	@Description(
 		shortDefinition="Who was/is taking medication",
 		formalDefinition="The person or animal who is /was taking the medication."
@@ -153,8 +152,7 @@ public class MedicationStatement extends BaseResource implements IResource {
 	private PeriodDt myWhenGiven;
 	
 	@Child(name="medication", order=5, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Medication.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Medication.class	})
 	@Description(
 		shortDefinition="What medication was taken?",
 		formalDefinition="Identifies the medication being administered. This is either a link to a resource representing the details of the medication or a simple attribute carrying a code that identifies the medication from a known list of medications."
@@ -162,8 +160,7 @@ public class MedicationStatement extends BaseResource implements IResource {
 	private ResourceReferenceDt myMedication;
 	
 	@Child(name="device", order=6, min=0, max=Child.MAX_UNLIMITED, type={
-		ca.uhn.fhir.model.dstu.resource.Device.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Device.class	})
 	@Description(
 		shortDefinition="E.g. infusion pump",
 		formalDefinition="An identifier or a link to a resource that identifies a device used in administering the medication to the patient."
@@ -609,9 +606,7 @@ public class MedicationStatement extends BaseResource implements IResource {
 	private ScheduleDt myTiming;
 	
 	@Child(name="asNeeded", order=1, min=0, max=1, type={
-		BooleanDt.class,
-		CodeableConceptDt.class,
-	})
+		BooleanDt.class, 		CodeableConceptDt.class	})
 	@Description(
 		shortDefinition="Take \"as needed\" f(or x)",
 		formalDefinition="If set to true or if specified as a CodeableConcept, indicates that the medication is only taken when needed within the specified schedule rather than at every scheduled dose.  If a CodeableConcept is present, it indicates the pre-condition for taking the Medication"

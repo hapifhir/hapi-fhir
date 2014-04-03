@@ -121,8 +121,7 @@ public class OrderResponse extends BaseResource implements IResource {
 	private java.util.List<IdentifierDt> myIdentifier;
 	
 	@Child(name="request", order=1, min=1, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Order.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Order.class	})
 	@Description(
 		shortDefinition="The order that this is a response to",
 		formalDefinition="A reference to the order that this is in response to"
@@ -137,10 +136,7 @@ public class OrderResponse extends BaseResource implements IResource {
 	private DateTimeDt myDate;
 	
 	@Child(name="who", order=3, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Practitioner.class,
-		ca.uhn.fhir.model.dstu.resource.Organization.class,
-		ca.uhn.fhir.model.dstu.resource.Device.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Practitioner.class, 		ca.uhn.fhir.model.dstu.resource.Organization.class, 		ca.uhn.fhir.model.dstu.resource.Device.class	})
 	@Description(
 		shortDefinition="Who made the response",
 		formalDefinition="The person, organization, or device credited with making the response"
@@ -148,9 +144,7 @@ public class OrderResponse extends BaseResource implements IResource {
 	private ResourceReferenceDt myWho;
 	
 	@Child(name="authority", order=4, min=0, max=1, type={
-		CodeableConceptDt.class,
-		IResource.class,
-	})
+		CodeableConceptDt.class, 		IResource.class	})
 	@Description(
 		shortDefinition="If required by policy",
 		formalDefinition="A reference to an authority policy that is the reason for the response. Usually this is used when the order is rejected, to provide a reason for rejection"
@@ -172,8 +166,7 @@ public class OrderResponse extends BaseResource implements IResource {
 	private StringDt myDescription;
 	
 	@Child(name="fulfillment", order=7, min=0, max=Child.MAX_UNLIMITED, type={
-		IResource.class,
-	})
+		IResource.class	})
 	@Description(
 		shortDefinition="Details of the outcome of performing the order",
 		formalDefinition="Links to resources that provide details of the outcome of performing the order. E.g. Diagnostic Reports in a response that is made to an order that referenced a diagnostic order"

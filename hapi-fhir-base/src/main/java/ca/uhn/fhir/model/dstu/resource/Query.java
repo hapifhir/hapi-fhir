@@ -321,8 +321,7 @@ public class Query extends BaseResource implements IResource {
 	private java.util.List<ExtensionDt> myLast;
 	
 	@Child(name="reference", order=8, min=0, max=Child.MAX_UNLIMITED, type={
-		IResource.class,
-	})
+		IResource.class	})
 	@Description(
 		shortDefinition="Resources that are the results of the search",
 		formalDefinition=""

@@ -608,8 +608,7 @@ public class Substance extends BaseResource implements IResource {
 	private RatioDt myQuantity;
 	
 	@Child(name="substance", order=1, min=1, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Substance.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Substance.class	})
 	@Description(
 		shortDefinition="A component of the substance",
 		formalDefinition="Another substance that is a component of this substance"

@@ -172,8 +172,7 @@ public class Organization extends BaseResource implements IResource {
 	private java.util.List<AddressDt> myAddress;
 	
 	@Child(name="partOf", order=5, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Organization.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Organization.class	})
 	@Description(
 		shortDefinition="The organization of which this organization forms a part",
 		formalDefinition="The organization of which this organization forms a part"
@@ -188,8 +187,7 @@ public class Organization extends BaseResource implements IResource {
 	private java.util.List<Contact> myContact;
 	
 	@Child(name="location", order=7, min=0, max=Child.MAX_UNLIMITED, type={
-		ca.uhn.fhir.model.dstu.resource.Location.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Location.class	})
 	@Description(
 		shortDefinition="Location(s) the organization uses to provide services",
 		formalDefinition="Location(s) the organization uses to provide services"

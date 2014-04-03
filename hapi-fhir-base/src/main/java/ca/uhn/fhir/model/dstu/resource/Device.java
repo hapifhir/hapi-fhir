@@ -198,8 +198,7 @@ public class Device extends BaseResource implements IResource {
 	private StringDt myLotNumber;
 	
 	@Child(name="owner", order=8, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Organization.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Organization.class	})
 	@Description(
 		shortDefinition="Organization responsible for device",
 		formalDefinition="An organization that is responsible for the provision and ongoing maintenance of the device"
@@ -207,8 +206,7 @@ public class Device extends BaseResource implements IResource {
 	private ResourceReferenceDt myOwner;
 	
 	@Child(name="location", order=9, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Location.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Location.class	})
 	@Description(
 		shortDefinition="Where the resource is found",
 		formalDefinition="The resource may be found in a literal location (i.e. GPS coordinates), a logical place (i.e. \"in/with the patient\"), or a coded location"
@@ -216,8 +214,7 @@ public class Device extends BaseResource implements IResource {
 	private ResourceReferenceDt myLocation;
 	
 	@Child(name="patient", order=10, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Patient.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Patient.class	})
 	@Description(
 		shortDefinition="If the resource is affixed to a person",
 		formalDefinition="Patient information, if the resource is affixed to a person"

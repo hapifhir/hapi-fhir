@@ -196,8 +196,7 @@ public class MedicationDispense extends BaseResource implements IResource {
 	private BoundCodeDt<MedicationDispenseStatusEnum> myStatus;
 	
 	@Child(name="patient", order=2, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Patient.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Patient.class	})
 	@Description(
 		shortDefinition="Who the dispense is for",
 		formalDefinition="A link to a resource representing the person to whom the medication will be given."
@@ -205,8 +204,7 @@ public class MedicationDispense extends BaseResource implements IResource {
 	private ResourceReferenceDt myPatient;
 	
 	@Child(name="dispenser", order=3, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Practitioner.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Practitioner.class	})
 	@Description(
 		shortDefinition="Practitioner responsible for dispensing medication",
 		formalDefinition="The individual responsible for dispensing the medication"
@@ -214,8 +212,7 @@ public class MedicationDispense extends BaseResource implements IResource {
 	private ResourceReferenceDt myDispenser;
 	
 	@Child(name="authorizingPrescription", order=4, min=0, max=Child.MAX_UNLIMITED, type={
-		ca.uhn.fhir.model.dstu.resource.MedicationPrescription.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.MedicationPrescription.class	})
 	@Description(
 		shortDefinition="Medication order that authorizes the dispense",
 		formalDefinition="Indicates the medication order that is being dispensed against."
@@ -590,8 +587,7 @@ public class MedicationDispense extends BaseResource implements IResource {
 	private QuantityDt myQuantity;
 	
 	@Child(name="medication", order=4, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Medication.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Medication.class	})
 	@Description(
 		shortDefinition="What medication was supplied",
 		formalDefinition="Identifies the medication being administered. This is either a link to a resource representing the details of the medication or a simple attribute carrying a code that identifies the medication from a known list of medications."
@@ -613,8 +609,7 @@ public class MedicationDispense extends BaseResource implements IResource {
 	private DateTimeDt myWhenHandedOver;
 	
 	@Child(name="destination", order=7, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Location.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Location.class	})
 	@Description(
 		shortDefinition="Where the medication was sent",
 		formalDefinition="Identification of the facility/location where the medication was shipped to, as part of the dispense event."
@@ -622,9 +617,7 @@ public class MedicationDispense extends BaseResource implements IResource {
 	private ResourceReferenceDt myDestination;
 	
 	@Child(name="receiver", order=8, min=0, max=Child.MAX_UNLIMITED, type={
-		ca.uhn.fhir.model.dstu.resource.Patient.class,
-		ca.uhn.fhir.model.dstu.resource.Practitioner.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Patient.class, 		ca.uhn.fhir.model.dstu.resource.Practitioner.class	})
 	@Description(
 		shortDefinition="Who collected the medication",
 		formalDefinition="Identifies the person who picked up the medication.  This will usually be a patient or their carer, but some cases exist where it can be a healthcare professional"
@@ -1168,10 +1161,7 @@ public class MedicationDispense extends BaseResource implements IResource {
 	private CodeableConceptDt myAdditionalInstructions;
 	
 	@Child(name="timing", order=1, min=0, max=1, type={
-		DateTimeDt.class,
-		PeriodDt.class,
-		ScheduleDt.class,
-	})
+		DateTimeDt.class, 		PeriodDt.class, 		ScheduleDt.class	})
 	@Description(
 		shortDefinition="When medication should be administered",
 		formalDefinition="The timing schedule for giving the medication to the patient.  The Schedule data type allows many different expressions, for example.  \"Every  8 hours\"; \"Three times a day\"; \"1/2 an hour before breakfast for 10 days from 23-Dec 2011:\";  \"15 Oct 2013, 17 Oct 2013 and 1 Nov 2013\""
@@ -1179,9 +1169,7 @@ public class MedicationDispense extends BaseResource implements IResource {
 	private IDatatype myTiming;
 	
 	@Child(name="asNeeded", order=2, min=0, max=1, type={
-		BooleanDt.class,
-		CodeableConceptDt.class,
-	})
+		BooleanDt.class, 		CodeableConceptDt.class	})
 	@Description(
 		shortDefinition="Take \"as needed\" f(or x)",
 		formalDefinition="If set to true or if specified as a CodeableConcept, indicates that the medication is only taken when needed within the specified schedule rather than at every scheduled dose.  If a CodeableConcept is present, it indicates the pre-condition for taking the Medication"
@@ -1602,8 +1590,7 @@ public class MedicationDispense extends BaseResource implements IResource {
 	private java.util.List<CodeableConceptDt> myReason;
 	
 	@Child(name="responsibleParty", order=2, min=0, max=Child.MAX_UNLIMITED, type={
-		ca.uhn.fhir.model.dstu.resource.Practitioner.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Practitioner.class	})
 	@Description(
 		shortDefinition="Who is responsible for the substitution",
 		formalDefinition="The person or organization that has primary responsibility for the substitution"

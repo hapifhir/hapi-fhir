@@ -173,8 +173,7 @@ public class MedicationAdministration extends BaseResource implements IResource 
 	private BoundCodeDt<MedicationAdministrationStatusEnum> myStatus;
 	
 	@Child(name="patient", order=2, min=1, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Patient.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Patient.class	})
 	@Description(
 		shortDefinition="Who received medication?",
 		formalDefinition="The person or animal to whom the medication was given."
@@ -182,8 +181,7 @@ public class MedicationAdministration extends BaseResource implements IResource 
 	private ResourceReferenceDt myPatient;
 	
 	@Child(name="practitioner", order=3, min=1, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Practitioner.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Practitioner.class	})
 	@Description(
 		shortDefinition="Who administered substance?",
 		formalDefinition="The individual who was responsible for giving the medication to the patient."
@@ -191,8 +189,7 @@ public class MedicationAdministration extends BaseResource implements IResource 
 	private ResourceReferenceDt myPractitioner;
 	
 	@Child(name="encounter", order=4, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Encounter.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Encounter.class	})
 	@Description(
 		shortDefinition="Encounter administered as part of",
 		formalDefinition="The visit or admission the or other contact between patient and health care provider the medication administration was performed as part of."
@@ -200,8 +197,7 @@ public class MedicationAdministration extends BaseResource implements IResource 
 	private ResourceReferenceDt myEncounter;
 	
 	@Child(name="prescription", order=5, min=1, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.MedicationPrescription.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.MedicationPrescription.class	})
 	@Description(
 		shortDefinition="Order administration performed against",
 		formalDefinition="The original request, instruction or authority to perform the administration."
@@ -230,8 +226,7 @@ public class MedicationAdministration extends BaseResource implements IResource 
 	private PeriodDt myWhenGiven;
 	
 	@Child(name="medication", order=9, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Medication.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Medication.class	})
 	@Description(
 		shortDefinition="What was administered?",
 		formalDefinition="Identifies the medication that was administered. This is either a link to a resource representing the details of the medication or a simple attribute carrying a code that identifies the medication from a known list of medications."
@@ -239,8 +234,7 @@ public class MedicationAdministration extends BaseResource implements IResource 
 	private ResourceReferenceDt myMedication;
 	
 	@Child(name="device", order=10, min=0, max=Child.MAX_UNLIMITED, type={
-		ca.uhn.fhir.model.dstu.resource.Device.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Device.class	})
 	@Description(
 		shortDefinition="Device used to administer",
 		formalDefinition="The device used in administering the medication to the patient.  E.g. a particular infusion pump"
@@ -816,9 +810,7 @@ public class MedicationAdministration extends BaseResource implements IResource 
 	public static class Dosage extends BaseElement implements IResourceBlock {
 	
 	@Child(name="timing", order=0, min=0, max=1, type={
-		DateTimeDt.class,
-		PeriodDt.class,
-	})
+		DateTimeDt.class, 		PeriodDt.class	})
 	@Description(
 		shortDefinition="When dose(s) were given",
 		formalDefinition="The timing schedule for giving the medication to the patient.  This may be a single time point (using dateTime) or it may be a start and end dateTime (Period)"
@@ -826,9 +818,7 @@ public class MedicationAdministration extends BaseResource implements IResource 
 	private IDatatype myTiming;
 	
 	@Child(name="asNeeded", order=1, min=0, max=1, type={
-		BooleanDt.class,
-		CodeableConceptDt.class,
-	})
+		BooleanDt.class, 		CodeableConceptDt.class	})
 	@Description(
 		shortDefinition="Take \"as needed\" f(or x)",
 		formalDefinition="If set to true or if specified as a CodeableConcept, indicates that the medication is only taken when needed within the specified schedule rather than at every scheduled dose.  If a CodeableConcept is present, it indicates the pre-condition for taking the Medication"

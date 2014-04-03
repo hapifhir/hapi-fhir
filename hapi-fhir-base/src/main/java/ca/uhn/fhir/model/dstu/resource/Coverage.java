@@ -156,8 +156,7 @@ public class Coverage extends BaseResource implements IResource {
 
 
 	@Child(name="issuer", order=0, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Organization.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Organization.class	})
 	@Description(
 		shortDefinition="An identifier for the plan issuer",
 		formalDefinition="The program or plan underwriter or payor."

@@ -236,14 +236,7 @@ public class Observation extends BaseResource implements IResource {
 	private CodeableConceptDt myName;
 	
 	@Child(name="value", order=1, min=0, max=1, type={
-		QuantityDt.class,
-		CodeableConceptDt.class,
-		AttachmentDt.class,
-		RatioDt.class,
-		PeriodDt.class,
-		SampledDataDt.class,
-		StringDt.class,
-	})
+		QuantityDt.class, 		CodeableConceptDt.class, 		AttachmentDt.class, 		RatioDt.class, 		PeriodDt.class, 		SampledDataDt.class, 		StringDt.class	})
 	@Description(
 		shortDefinition="Actual result",
 		formalDefinition="The information determined as a result of making the observation, if the information has a simple value"
@@ -265,9 +258,7 @@ public class Observation extends BaseResource implements IResource {
 	private StringDt myComments;
 	
 	@Child(name="applies", order=4, min=0, max=1, type={
-		DateTimeDt.class,
-		PeriodDt.class,
-	})
+		DateTimeDt.class, 		PeriodDt.class	})
 	@Description(
 		shortDefinition="Physiologically Relevant time/time-period for observation",
 		formalDefinition="The time or time-period the observed value is asserted as being true. For biological subjects - e.g. human patients - this is usually called the \"physiologically relevant time\". This is usually either the time of the procedure or of specimen collection, but very often the source of the date/time is not known, only the date/time itself"
@@ -317,11 +308,7 @@ public class Observation extends BaseResource implements IResource {
 	private IdentifierDt myIdentifier;
 	
 	@Child(name="subject", order=11, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Patient.class,
-		ca.uhn.fhir.model.dstu.resource.Group.class,
-		ca.uhn.fhir.model.dstu.resource.Device.class,
-		ca.uhn.fhir.model.dstu.resource.Location.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Patient.class, 		ca.uhn.fhir.model.dstu.resource.Group.class, 		ca.uhn.fhir.model.dstu.resource.Device.class, 		ca.uhn.fhir.model.dstu.resource.Location.class	})
 	@Description(
 		shortDefinition="Who and/or what this is about",
 		formalDefinition="The thing the observation is being made about"
@@ -329,8 +316,7 @@ public class Observation extends BaseResource implements IResource {
 	private ResourceReferenceDt mySubject;
 	
 	@Child(name="specimen", order=12, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Specimen.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Specimen.class	})
 	@Description(
 		shortDefinition="Specimen used for this observation",
 		formalDefinition="The specimen that was used when this observation was made"
@@ -338,10 +324,7 @@ public class Observation extends BaseResource implements IResource {
 	private ResourceReferenceDt mySpecimen;
 	
 	@Child(name="performer", order=13, min=0, max=Child.MAX_UNLIMITED, type={
-		ca.uhn.fhir.model.dstu.resource.Practitioner.class,
-		ca.uhn.fhir.model.dstu.resource.Device.class,
-		ca.uhn.fhir.model.dstu.resource.Organization.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Practitioner.class, 		ca.uhn.fhir.model.dstu.resource.Device.class, 		ca.uhn.fhir.model.dstu.resource.Organization.class	})
 	@Description(
 		shortDefinition="Who did the observation",
 		formalDefinition="Who was responsible for asserting the observed value as \"true\""
@@ -1343,8 +1326,7 @@ public class Observation extends BaseResource implements IResource {
 	private BoundCodeDt<ObservationRelationshipTypeEnum> myType;
 	
 	@Child(name="target", order=1, min=1, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Observation.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Observation.class	})
 	@Description(
 		shortDefinition="Observation that is related to this one",
 		formalDefinition="A reference to the observation that is related to this observation"

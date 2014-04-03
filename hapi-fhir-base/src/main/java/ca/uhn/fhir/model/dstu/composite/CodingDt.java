@@ -99,8 +99,7 @@ public class CodingDt
 	private BooleanDt myPrimary;
 	
 	@Child(name="valueSet", order=5, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.ValueSet.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.ValueSet.class	})
 	@Description(
 		shortDefinition="Set this coding was chosen from",
 		formalDefinition="The set of possible coded values this coding was chosen from or constrained by"

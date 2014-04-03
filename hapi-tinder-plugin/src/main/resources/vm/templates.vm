@@ -8,9 +8,9 @@
 	@Child(name="${child.elementNameSimplified}", order=${foreach.index}, min=${child.cardMin}, max=${child.cardMaxForChildAnnotation}, type={
 #foreach ($nextType in ${child.referenceTypesForMultiple})
 #if ( ${child.resourceRef} && ${nextType} != "IResource" )
-		${nextType}.class,
+		${nextType}.class#{if}($foreach.hasNext), #{end}
 #else
-		${nextType}.class,
+		${nextType}.class#{if}($foreach.hasNext), #{end}
 #end
 #end
 	})

@@ -158,8 +158,7 @@ public class User extends BaseResource implements IResource {
 	private java.util.List<ContactDt> myContact;
 	
 	@Child(name="patient", order=7, min=0, max=Child.MAX_UNLIMITED, type={
-		ca.uhn.fhir.model.dstu.resource.Patient.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Patient.class	})
 	@Description(
 		shortDefinition="Patient compartments the user has access to (if level is patient/family)",
 		formalDefinition=""

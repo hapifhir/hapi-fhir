@@ -101,8 +101,7 @@ public class Microarray extends BaseResource implements IResource {
 	private java.util.List<Subject> mySubject;
 	
 	@Child(name="organization", order=1, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Organization.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Organization.class	})
 	@Description(
 		shortDefinition="Organization",
 		formalDefinition="Organization that does the microarray"
@@ -397,8 +396,7 @@ public class Microarray extends BaseResource implements IResource {
 	public static class Subject extends BaseElement implements IResourceBlock {
 	
 	@Child(name="patient", order=0, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Patient.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Patient.class	})
 	@Description(
 		shortDefinition="Resource that corresponds to the subject",
 		formalDefinition="Resource that corresponds to the subject"
@@ -553,8 +551,7 @@ public class Microarray extends BaseResource implements IResource {
 	public static class Scanner extends BaseElement implements IResourceBlock {
 	
 	@Child(name="manufacturer", order=0, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Organization.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Organization.class	})
 	@Description(
 		shortDefinition="Scanner manufacturer",
 		formalDefinition="Manufactuerer of the scanner"

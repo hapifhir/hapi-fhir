@@ -164,8 +164,7 @@ public class ImmunizationRecommendation extends BaseResource implements IResourc
 	private java.util.List<IdentifierDt> myIdentifier;
 	
 	@Child(name="subject", order=1, min=1, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Patient.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Patient.class	})
 	@Description(
 		shortDefinition="Who this profile is for",
 		formalDefinition="The patient who is the subject of the profile"
@@ -436,8 +435,7 @@ public class ImmunizationRecommendation extends BaseResource implements IResourc
 	private RecommendationProtocol myProtocol;
 	
 	@Child(name="supportingImmunization", order=6, min=0, max=Child.MAX_UNLIMITED, type={
-		ca.uhn.fhir.model.dstu.resource.Immunization.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Immunization.class	})
 	@Description(
 		shortDefinition="Past immunizations supporting recommendation",
 		formalDefinition="Immunization event history that supports the status and recommendation"
@@ -445,10 +443,7 @@ public class ImmunizationRecommendation extends BaseResource implements IResourc
 	private java.util.List<ResourceReferenceDt> mySupportingImmunization;
 	
 	@Child(name="supportingPatientInformation", order=7, min=0, max=Child.MAX_UNLIMITED, type={
-		ca.uhn.fhir.model.dstu.resource.Observation.class,
-		ca.uhn.fhir.model.dstu.resource.AdverseReaction.class,
-		ca.uhn.fhir.model.dstu.resource.AllergyIntolerance.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Observation.class, 		ca.uhn.fhir.model.dstu.resource.AdverseReaction.class, 		ca.uhn.fhir.model.dstu.resource.AllergyIntolerance.class	})
 	@Description(
 		shortDefinition="Patient observations supporting recommendation",
 		formalDefinition="Patient Information that supports the status and recommendation.  This includes patient observations, adverse reactions and allergy/intolerance information."
@@ -998,8 +993,7 @@ public class ImmunizationRecommendation extends BaseResource implements IResourc
 	private StringDt myDescription;
 	
 	@Child(name="authority", order=2, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Organization.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Organization.class	})
 	@Description(
 		shortDefinition="Who is responsible for protocol",
 		formalDefinition="Indicates the authority who published the protocol?  E.g. ACIP"

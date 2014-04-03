@@ -93,8 +93,7 @@ public class Claim extends BaseResource implements IResource {
 	private DateDt myServicedate;
 	
 	@Child(name="provider", order=2, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Practitioner.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Practitioner.class	})
 	@Description(
 		shortDefinition="Responsible practitioner",
 		formalDefinition="The practitioner who is responsible for the services rendered to the patient"
@@ -102,8 +101,7 @@ public class Claim extends BaseResource implements IResource {
 	private ResourceReferenceDt myProvider;
 	
 	@Child(name="billingProvider", order=3, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Practitioner.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Practitioner.class	})
 	@Description(
 		shortDefinition="Provider who is the payee",
 		formalDefinition="The provider who is to be reimbursed for the claim (the party to whom any benefit is assigned)"
@@ -111,8 +109,7 @@ public class Claim extends BaseResource implements IResource {
 	private ResourceReferenceDt myBillingProvider;
 	
 	@Child(name="referrer", order=4, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Practitioner.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Practitioner.class	})
 	@Description(
 		shortDefinition="Provider who is the payee",
 		formalDefinition=""
@@ -871,8 +868,7 @@ public class Claim extends BaseResource implements IResource {
 	public static class Coverage extends BaseElement implements IResourceBlock {
 	
 	@Child(name="issuer", order=0, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Organization.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Organization.class	})
 	@Description(
 		shortDefinition="An identifier for the plan issuer",
 		formalDefinition="The program or plan underwriter or payor."

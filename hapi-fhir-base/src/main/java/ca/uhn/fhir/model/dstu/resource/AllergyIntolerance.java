@@ -158,8 +158,7 @@ public class AllergyIntolerance extends BaseResource implements IResource {
 	private BoundCodeDt<SensitivityStatusEnum> myStatus;
 	
 	@Child(name="subject", order=5, min=1, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Patient.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Patient.class	})
 	@Description(
 		shortDefinition="Who the sensitivity is for",
 		formalDefinition="The patient who has the allergy or intolerance"
@@ -167,9 +166,7 @@ public class AllergyIntolerance extends BaseResource implements IResource {
 	private ResourceReferenceDt mySubject;
 	
 	@Child(name="recorder", order=6, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Practitioner.class,
-		ca.uhn.fhir.model.dstu.resource.Patient.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Practitioner.class, 		ca.uhn.fhir.model.dstu.resource.Patient.class	})
 	@Description(
 		shortDefinition="Who recorded the sensitivity",
 		formalDefinition="Indicates who has responsibility for the record"
@@ -177,8 +174,7 @@ public class AllergyIntolerance extends BaseResource implements IResource {
 	private ResourceReferenceDt myRecorder;
 	
 	@Child(name="substance", order=7, min=1, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Substance.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Substance.class	})
 	@Description(
 		shortDefinition="The substance that causes the sensitivity",
 		formalDefinition="The substance that causes the sensitivity"
@@ -186,8 +182,7 @@ public class AllergyIntolerance extends BaseResource implements IResource {
 	private ResourceReferenceDt mySubstance;
 	
 	@Child(name="reaction", order=8, min=0, max=Child.MAX_UNLIMITED, type={
-		ca.uhn.fhir.model.dstu.resource.AdverseReaction.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.AdverseReaction.class	})
 	@Description(
 		shortDefinition="Reactions associated with the sensitivity",
 		formalDefinition="Reactions associated with the sensitivity"
@@ -195,8 +190,7 @@ public class AllergyIntolerance extends BaseResource implements IResource {
 	private java.util.List<ResourceReferenceDt> myReaction;
 	
 	@Child(name="sensitivityTest", order=9, min=0, max=Child.MAX_UNLIMITED, type={
-		ca.uhn.fhir.model.dstu.resource.Observation.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Observation.class	})
 	@Description(
 		shortDefinition="Observations that confirm or refute",
 		formalDefinition="Observations that confirm or refute the sensitivity"

@@ -154,8 +154,7 @@ public class Medication extends BaseResource implements IResource {
 	private BooleanDt myIsBrand;
 	
 	@Child(name="manufacturer", order=3, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Organization.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Organization.class	})
 	@Description(
 		shortDefinition="Manufacturer of the item",
 		formalDefinition="Describes the details of the manufacturer"
@@ -615,9 +614,7 @@ public class Medication extends BaseResource implements IResource {
 	public static class ProductIngredient extends BaseElement implements IResourceBlock {
 	
 	@Child(name="item", order=0, min=1, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Substance.class,
-		ca.uhn.fhir.model.dstu.resource.Medication.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Substance.class, 		ca.uhn.fhir.model.dstu.resource.Medication.class	})
 	@Description(
 		shortDefinition="The product contained",
 		formalDefinition="The actual ingredient - either a substance (simple ingredient) or another medication"

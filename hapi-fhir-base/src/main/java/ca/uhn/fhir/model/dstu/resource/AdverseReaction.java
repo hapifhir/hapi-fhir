@@ -122,8 +122,7 @@ public class AdverseReaction extends BaseResource implements IResource {
 	private DateTimeDt myDate;
 	
 	@Child(name="subject", order=2, min=1, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Patient.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Patient.class	})
 	@Description(
 		shortDefinition="Who had the reaction",
 		formalDefinition="The subject of the adverse reaction"
@@ -138,9 +137,7 @@ public class AdverseReaction extends BaseResource implements IResource {
 	private BooleanDt myDidNotOccurFlag;
 	
 	@Child(name="recorder", order=4, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Practitioner.class,
-		ca.uhn.fhir.model.dstu.resource.Patient.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Practitioner.class, 		ca.uhn.fhir.model.dstu.resource.Patient.class	})
 	@Description(
 		shortDefinition="Who recorded the reaction",
 		formalDefinition="Identifies the individual responsible for the information in the reaction record."
@@ -706,8 +703,7 @@ public class AdverseReaction extends BaseResource implements IResource {
 	private BoundCodeDt<CausalityExpectationEnum> myCausalityExpectation;
 	
 	@Child(name="substance", order=3, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Substance.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Substance.class	})
 	@Description(
 		shortDefinition="Presumed causative substance",
 		formalDefinition="Substance that is presumed to have caused the adverse reaction"

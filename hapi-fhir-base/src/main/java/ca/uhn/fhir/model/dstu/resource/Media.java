@@ -163,12 +163,7 @@ public class Media extends BaseResource implements IResource {
 	private DateTimeDt myDateTime;
 	
 	@Child(name="subject", order=4, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Patient.class,
-		ca.uhn.fhir.model.dstu.resource.Practitioner.class,
-		ca.uhn.fhir.model.dstu.resource.Group.class,
-		ca.uhn.fhir.model.dstu.resource.Device.class,
-		ca.uhn.fhir.model.dstu.resource.Specimen.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Patient.class, 		ca.uhn.fhir.model.dstu.resource.Practitioner.class, 		ca.uhn.fhir.model.dstu.resource.Group.class, 		ca.uhn.fhir.model.dstu.resource.Device.class, 		ca.uhn.fhir.model.dstu.resource.Specimen.class	})
 	@Description(
 		shortDefinition="Who/What this Media is a record of",
 		formalDefinition="Who/What this Media is a record of"
@@ -176,8 +171,7 @@ public class Media extends BaseResource implements IResource {
 	private ResourceReferenceDt mySubject;
 	
 	@Child(name="operator", order=5, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Practitioner.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Practitioner.class	})
 	@Description(
 		shortDefinition="The person who generated the image",
 		formalDefinition="The person who administered the collection of the image"

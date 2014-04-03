@@ -158,8 +158,7 @@ public class Order extends BaseResource implements IResource {
 	private DateTimeDt myDate;
 	
 	@Child(name="subject", order=2, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Patient.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Patient.class	})
 	@Description(
 		shortDefinition="Patient this order is about",
 		formalDefinition=""
@@ -167,8 +166,7 @@ public class Order extends BaseResource implements IResource {
 	private ResourceReferenceDt mySubject;
 	
 	@Child(name="source", order=3, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Practitioner.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Practitioner.class	})
 	@Description(
 		shortDefinition="Who initiated the order",
 		formalDefinition=""
@@ -176,10 +174,7 @@ public class Order extends BaseResource implements IResource {
 	private ResourceReferenceDt mySource;
 	
 	@Child(name="target", order=4, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Organization.class,
-		ca.uhn.fhir.model.dstu.resource.Device.class,
-		ca.uhn.fhir.model.dstu.resource.Practitioner.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Organization.class, 		ca.uhn.fhir.model.dstu.resource.Device.class, 		ca.uhn.fhir.model.dstu.resource.Practitioner.class	})
 	@Description(
 		shortDefinition="Who is intended to fulfill the order",
 		formalDefinition=""
@@ -187,9 +182,7 @@ public class Order extends BaseResource implements IResource {
 	private ResourceReferenceDt myTarget;
 	
 	@Child(name="reason", order=5, min=0, max=1, type={
-		CodeableConceptDt.class,
-		IResource.class,
-	})
+		CodeableConceptDt.class, 		IResource.class	})
 	@Description(
 		shortDefinition="Text - why the order was made",
 		formalDefinition=""
@@ -197,8 +190,7 @@ public class Order extends BaseResource implements IResource {
 	private IDatatype myReason;
 	
 	@Child(name="authority", order=6, min=0, max=1, type={
-		IResource.class,
-	})
+		IResource.class	})
 	@Description(
 		shortDefinition="If required by policy",
 		formalDefinition=""
@@ -213,8 +205,7 @@ public class Order extends BaseResource implements IResource {
 	private When myWhen;
 	
 	@Child(name="detail", order=8, min=1, max=Child.MAX_UNLIMITED, type={
-		IResource.class,
-	})
+		IResource.class	})
 	@Description(
 		shortDefinition="What action is being ordered",
 		formalDefinition=""

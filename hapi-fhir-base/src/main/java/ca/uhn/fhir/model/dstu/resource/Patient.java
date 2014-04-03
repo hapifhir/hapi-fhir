@@ -261,9 +261,7 @@ public class Patient extends BaseResource implements IResource {
 	private DateTimeDt myBirthDate;
 	
 	@Child(name="deceased", order=5, min=0, max=1, type={
-		BooleanDt.class,
-		DateTimeDt.class,
-	})
+		BooleanDt.class, 		DateTimeDt.class	})
 	@Description(
 		shortDefinition="Indicates if the individual is deceased or not",
 		formalDefinition="Indicates if the individual is deceased or not"
@@ -285,9 +283,7 @@ public class Patient extends BaseResource implements IResource {
 	private BoundCodeableConceptDt<MaritalStatusCodesEnum> myMaritalStatus;
 	
 	@Child(name="multipleBirth", order=8, min=0, max=1, type={
-		BooleanDt.class,
-		IntegerDt.class,
-	})
+		BooleanDt.class, 		IntegerDt.class	})
 	@Description(
 		shortDefinition="Whether patient is part of a multiple birth",
 		formalDefinition="Indicates whether the patient is part of a multiple or indicates the actual birth order."
@@ -323,9 +319,7 @@ public class Patient extends BaseResource implements IResource {
 	private java.util.List<CodeableConceptDt> myCommunication;
 	
 	@Child(name="careProvider", order=13, min=0, max=Child.MAX_UNLIMITED, type={
-		ca.uhn.fhir.model.dstu.resource.Organization.class,
-		ca.uhn.fhir.model.dstu.resource.Practitioner.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Organization.class, 		ca.uhn.fhir.model.dstu.resource.Practitioner.class	})
 	@Description(
 		shortDefinition="Patient's nominated care provider",
 		formalDefinition="Patient's nominated care provider"
@@ -333,8 +327,7 @@ public class Patient extends BaseResource implements IResource {
 	private java.util.List<ResourceReferenceDt> myCareProvider;
 	
 	@Child(name="managingOrganization", order=14, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Organization.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Organization.class	})
 	@Description(
 		shortDefinition="Organization that is the custodian of the patient record",
 		formalDefinition="Organization that is the custodian of the patient record"
@@ -1282,8 +1275,7 @@ public class Patient extends BaseResource implements IResource {
 	private BoundCodeableConceptDt<AdministrativeGenderCodesEnum> myGender;
 	
 	@Child(name="organization", order=5, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Organization.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Organization.class	})
 	@Description(
 		shortDefinition="Organization that is associated with the contact",
 		formalDefinition="Organization on behalf of which the contact is acting or for which the contact is working."
@@ -1737,8 +1729,7 @@ public class Patient extends BaseResource implements IResource {
 	public static class Link extends BaseElement implements IResourceBlock {
 	
 	@Child(name="other", order=0, min=1, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Patient.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Patient.class	})
 	@Description(
 		shortDefinition="The other patient resource that the link refers to",
 		formalDefinition="The other patient resource that the link refers to"

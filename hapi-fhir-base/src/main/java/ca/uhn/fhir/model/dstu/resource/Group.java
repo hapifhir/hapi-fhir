@@ -207,12 +207,7 @@ public class Group extends BaseResource implements IResource {
 	private java.util.List<Characteristic> myCharacteristic;
 	
 	@Child(name="member", order=7, min=0, max=Child.MAX_UNLIMITED, type={
-		ca.uhn.fhir.model.dstu.resource.Patient.class,
-		ca.uhn.fhir.model.dstu.resource.Practitioner.class,
-		ca.uhn.fhir.model.dstu.resource.Device.class,
-		ca.uhn.fhir.model.dstu.resource.Medication.class,
-		ca.uhn.fhir.model.dstu.resource.Substance.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Patient.class, 		ca.uhn.fhir.model.dstu.resource.Practitioner.class, 		ca.uhn.fhir.model.dstu.resource.Device.class, 		ca.uhn.fhir.model.dstu.resource.Medication.class, 		ca.uhn.fhir.model.dstu.resource.Substance.class	})
 	@Description(
 		shortDefinition="Who is in group",
 		formalDefinition="Identifies the resource instances that are members of the group."
@@ -619,11 +614,7 @@ public class Group extends BaseResource implements IResource {
 	private CodeableConceptDt myCode;
 	
 	@Child(name="value", order=1, min=1, max=1, type={
-		CodeableConceptDt.class,
-		BooleanDt.class,
-		QuantityDt.class,
-		RangeDt.class,
-	})
+		CodeableConceptDt.class, 		BooleanDt.class, 		QuantityDt.class, 		RangeDt.class	})
 	@Description(
 		shortDefinition="Value held by characteristic",
 		formalDefinition="The value of the trait that holds (or does not hold - see 'exclude') for members of the group"

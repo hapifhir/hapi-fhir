@@ -140,11 +140,7 @@ public class ListResource extends BaseResource implements IResource {
 	private CodeableConceptDt myCode;
 	
 	@Child(name="subject", order=2, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Patient.class,
-		ca.uhn.fhir.model.dstu.resource.Group.class,
-		ca.uhn.fhir.model.dstu.resource.Device.class,
-		ca.uhn.fhir.model.dstu.resource.Location.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Patient.class, 		ca.uhn.fhir.model.dstu.resource.Group.class, 		ca.uhn.fhir.model.dstu.resource.Device.class, 		ca.uhn.fhir.model.dstu.resource.Location.class	})
 	@Description(
 		shortDefinition="If all resources have the same subject",
 		formalDefinition="The common subject (or patient) of the resources that are in the list, if there is one"
@@ -152,10 +148,7 @@ public class ListResource extends BaseResource implements IResource {
 	private ResourceReferenceDt mySubject;
 	
 	@Child(name="source", order=3, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Practitioner.class,
-		ca.uhn.fhir.model.dstu.resource.Patient.class,
-		ca.uhn.fhir.model.dstu.resource.Device.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Practitioner.class, 		ca.uhn.fhir.model.dstu.resource.Patient.class, 		ca.uhn.fhir.model.dstu.resource.Device.class	})
 	@Description(
 		shortDefinition="Who and/or what defined the list contents",
 		formalDefinition="The entity responsible for deciding what the contents of the list were"
@@ -665,8 +658,7 @@ public class ListResource extends BaseResource implements IResource {
 	private DateTimeDt myDate;
 	
 	@Child(name="item", order=3, min=1, max=1, type={
-		IResource.class,
-	})
+		IResource.class	})
 	@Description(
 		shortDefinition="Actual entry",
 		formalDefinition="A reference to the actual resource from which data was derived"

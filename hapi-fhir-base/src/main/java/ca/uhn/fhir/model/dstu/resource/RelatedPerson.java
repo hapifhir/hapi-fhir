@@ -140,8 +140,7 @@ public class RelatedPerson extends BaseResource implements IResource {
 	private java.util.List<IdentifierDt> myIdentifier;
 	
 	@Child(name="patient", order=1, min=1, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Patient.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Patient.class	})
 	@Description(
 		shortDefinition="The patient this person is related to",
 		formalDefinition="The patient this person is related to"

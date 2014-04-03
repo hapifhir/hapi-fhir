@@ -175,8 +175,7 @@ public class Appointment extends BaseResource implements IResource {
 	private StringDt myTimezone;
 	
 	@Child(name="slot", order=8, min=0, max=Child.MAX_UNLIMITED, type={
-		ca.uhn.fhir.model.dstu.resource.Slot.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Slot.class	})
 	@Description(
 		shortDefinition="The slot that this appointment is filling. If provided then the schedule will not be provided as slots are not recursive, and the start/end values MUST be the same as from the slot",
 		formalDefinition=""
@@ -184,8 +183,7 @@ public class Appointment extends BaseResource implements IResource {
 	private java.util.List<ResourceReferenceDt> mySlot;
 	
 	@Child(name="location", order=9, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Location.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Location.class	})
 	@Description(
 		shortDefinition="The primary location that this appointment is to take place",
 		formalDefinition=""
@@ -200,8 +198,7 @@ public class Appointment extends BaseResource implements IResource {
 	private StringDt myComment;
 	
 	@Child(name="order", order=11, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Order.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Order.class	})
 	@Description(
 		shortDefinition="An Order that lead to the creation of this appointment",
 		formalDefinition=""
@@ -216,10 +213,7 @@ public class Appointment extends BaseResource implements IResource {
 	private java.util.List<Participant> myParticipant;
 	
 	@Child(name="recorder", order=13, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Practitioner.class,
-		ca.uhn.fhir.model.dstu.resource.Patient.class,
-		ca.uhn.fhir.model.dstu.resource.RelatedPerson.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Practitioner.class, 		ca.uhn.fhir.model.dstu.resource.Patient.class, 		ca.uhn.fhir.model.dstu.resource.RelatedPerson.class	})
 	@Description(
 		shortDefinition="Who recorded the appointment",
 		formalDefinition=""
@@ -980,11 +974,7 @@ public class Appointment extends BaseResource implements IResource {
 	private java.util.List<BoundCodeableConceptDt<ParticipantTypeEnum>> myType;
 	
 	@Child(name="individual", order=1, min=0, max=Child.MAX_UNLIMITED, type={
-		ca.uhn.fhir.model.dstu.resource.Practitioner.class,
-		ca.uhn.fhir.model.dstu.resource.Patient.class,
-		ca.uhn.fhir.model.dstu.resource.RelatedPerson.class,
-		ca.uhn.fhir.model.dstu.resource.Device.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Practitioner.class, 		ca.uhn.fhir.model.dstu.resource.Patient.class, 		ca.uhn.fhir.model.dstu.resource.RelatedPerson.class, 		ca.uhn.fhir.model.dstu.resource.Device.class	})
 	@Description(
 		shortDefinition="A Person of device that is participating in the appointment",
 		formalDefinition=""
@@ -1006,8 +996,7 @@ public class Appointment extends BaseResource implements IResource {
 	private CodeDt myStatus;
 	
 	@Child(name="observation", order=4, min=0, max=Child.MAX_UNLIMITED, type={
-		ca.uhn.fhir.model.dstu.resource.Observation.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Observation.class	})
 	@Description(
 		shortDefinition="Observations that lead to the creation of this appointment. (Is this 80%)",
 		formalDefinition=""

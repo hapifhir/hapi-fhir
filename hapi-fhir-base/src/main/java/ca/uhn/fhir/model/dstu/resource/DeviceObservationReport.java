@@ -126,8 +126,7 @@ public class DeviceObservationReport extends BaseResource implements IResource {
 	private IdentifierDt myIdentifier;
 	
 	@Child(name="source", order=2, min=1, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Device.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Device.class	})
 	@Description(
 		shortDefinition="Identifies/describes where the data came from",
 		formalDefinition="Identification information for the device that is the source of the data"
@@ -135,10 +134,7 @@ public class DeviceObservationReport extends BaseResource implements IResource {
 	private ResourceReferenceDt mySource;
 	
 	@Child(name="subject", order=3, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Patient.class,
-		ca.uhn.fhir.model.dstu.resource.Device.class,
-		ca.uhn.fhir.model.dstu.resource.Location.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Patient.class, 		ca.uhn.fhir.model.dstu.resource.Device.class, 		ca.uhn.fhir.model.dstu.resource.Location.class	})
 	@Description(
 		shortDefinition="Subject of the measurement",
 		formalDefinition="The subject of the measurement"
@@ -683,8 +679,7 @@ public class DeviceObservationReport extends BaseResource implements IResource {
 	public static class VirtualDeviceChannelMetric extends BaseElement implements IResourceBlock {
 	
 	@Child(name="observation", order=0, min=1, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Observation.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Observation.class	})
 	@Description(
 		shortDefinition="The data for the metric",
 		formalDefinition="The data for the metric"

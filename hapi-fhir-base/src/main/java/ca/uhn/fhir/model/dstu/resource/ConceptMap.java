@@ -257,8 +257,7 @@ public class ConceptMap extends BaseResource implements IResource {
 	private DateTimeDt myDate;
 	
 	@Child(name="source", order=10, min=1, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.ValueSet.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.ValueSet.class	})
 	@Description(
 		shortDefinition="Identifies the source value set which is being mapped",
 		formalDefinition="The source value set that specifies the concepts that are being mapped"
@@ -266,8 +265,7 @@ public class ConceptMap extends BaseResource implements IResource {
 	private ResourceReferenceDt mySource;
 	
 	@Child(name="target", order=11, min=1, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.ValueSet.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.ValueSet.class	})
 	@Description(
 		shortDefinition="Provides context to the mappings",
 		formalDefinition="The target value set provides context to the mappings. Note that the mapping is made between concepts, not between value sets, but the value set provides important context about how the concept mapping choices are made"

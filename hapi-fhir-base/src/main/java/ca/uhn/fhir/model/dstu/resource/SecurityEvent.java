@@ -823,10 +823,7 @@ public class SecurityEvent extends BaseResource implements IResource {
 	private java.util.List<CodeableConceptDt> myRole;
 	
 	@Child(name="reference", order=1, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Practitioner.class,
-		ca.uhn.fhir.model.dstu.resource.Patient.class,
-		ca.uhn.fhir.model.dstu.resource.Device.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Practitioner.class, 		ca.uhn.fhir.model.dstu.resource.Patient.class, 		ca.uhn.fhir.model.dstu.resource.Device.class	})
 	@Description(
 		shortDefinition="Direct reference to resource",
 		formalDefinition="Direct reference to a resource that identifies the participant"
@@ -1573,8 +1570,7 @@ public class SecurityEvent extends BaseResource implements IResource {
 	private IdentifierDt myIdentifier;
 	
 	@Child(name="reference", order=1, min=0, max=1, type={
-		IResource.class,
-	})
+		IResource.class	})
 	@Description(
 		shortDefinition="Specific instance of resource (e.g. versioned)",
 		formalDefinition="Identifies a specific instance of the participant object. The reference should always be version specific"

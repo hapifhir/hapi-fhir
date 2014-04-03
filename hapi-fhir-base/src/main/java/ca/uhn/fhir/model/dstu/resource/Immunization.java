@@ -242,8 +242,7 @@ public class Immunization extends BaseResource implements IResource {
 	private CodeableConceptDt myVaccineType;
 	
 	@Child(name="subject", order=3, min=1, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Patient.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Patient.class	})
 	@Description(
 		shortDefinition="Who was immunized?",
 		formalDefinition="The patient to whom the vaccine was to be administered"
@@ -265,8 +264,7 @@ public class Immunization extends BaseResource implements IResource {
 	private BooleanDt myReported;
 	
 	@Child(name="performer", order=6, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Practitioner.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Practitioner.class	})
 	@Description(
 		shortDefinition="Who administered vaccine?",
 		formalDefinition="Clinician who administered the vaccine"
@@ -274,8 +272,7 @@ public class Immunization extends BaseResource implements IResource {
 	private ResourceReferenceDt myPerformer;
 	
 	@Child(name="requester", order=7, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Practitioner.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Practitioner.class	})
 	@Description(
 		shortDefinition="Who ordered vaccination?",
 		formalDefinition="Clinician who ordered the vaccination"
@@ -283,8 +280,7 @@ public class Immunization extends BaseResource implements IResource {
 	private ResourceReferenceDt myRequester;
 	
 	@Child(name="manufacturer", order=8, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Organization.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Organization.class	})
 	@Description(
 		shortDefinition="Vaccine manufacturer",
 		formalDefinition="Name of vaccine manufacturer"
@@ -292,8 +288,7 @@ public class Immunization extends BaseResource implements IResource {
 	private ResourceReferenceDt myManufacturer;
 	
 	@Child(name="location", order=9, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Location.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Location.class	})
 	@Description(
 		shortDefinition="Where did vaccination occur?",
 		formalDefinition="The service delivery location where the vaccine administration occurred."
@@ -1390,9 +1385,7 @@ public class Immunization extends BaseResource implements IResource {
 	private DateTimeDt myDate;
 	
 	@Child(name="detail", order=1, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.AdverseReaction.class,
-		ca.uhn.fhir.model.dstu.resource.Observation.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.AdverseReaction.class, 		ca.uhn.fhir.model.dstu.resource.Observation.class	})
 	@Description(
 		shortDefinition="Additional information on reaction",
 		formalDefinition="Details of the reaction"
@@ -1581,8 +1574,7 @@ public class Immunization extends BaseResource implements IResource {
 	private StringDt myDescription;
 	
 	@Child(name="authority", order=2, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Organization.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Organization.class	})
 	@Description(
 		shortDefinition="Who is responsible for protocol",
 		formalDefinition="Indicates the authority who published the protocol?  E.g. ACIP"

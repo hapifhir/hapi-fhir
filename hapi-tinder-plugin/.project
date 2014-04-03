@@ -1,9 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
   <name>hapi-tinder-plugin</name>
   <comment>NO_M2ECLIPSE_SUPPORT: Project files created with the maven-eclipse-plugin are not supported in M2Eclipse.</comment>
-  <projects>
-    <project>hapi-fhir-base</project>
-  </projects>
+  <projects/>
   <buildSpec>
     <buildCommand>
       <name>org.eclipse.jdt.core.javabuilder</name>

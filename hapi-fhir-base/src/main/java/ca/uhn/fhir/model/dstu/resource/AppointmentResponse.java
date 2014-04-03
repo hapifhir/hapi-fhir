@@ -102,8 +102,7 @@ public class AppointmentResponse extends BaseResource implements IResource {
 	private java.util.List<IdentifierDt> myIdentifier;
 	
 	@Child(name="appointment", order=1, min=1, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Appointment.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Appointment.class	})
 	@Description(
 		shortDefinition="Parent appointment that this response is replying to",
 		formalDefinition=""
@@ -118,11 +117,7 @@ public class AppointmentResponse extends BaseResource implements IResource {
 	private java.util.List<BoundCodeableConceptDt<ParticipantTypeEnum>> myParticipantType;
 	
 	@Child(name="individual", order=3, min=0, max=Child.MAX_UNLIMITED, type={
-		ca.uhn.fhir.model.dstu.resource.Practitioner.class,
-		ca.uhn.fhir.model.dstu.resource.Patient.class,
-		ca.uhn.fhir.model.dstu.resource.RelatedPerson.class,
-		ca.uhn.fhir.model.dstu.resource.Device.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Practitioner.class, 		ca.uhn.fhir.model.dstu.resource.Patient.class, 		ca.uhn.fhir.model.dstu.resource.RelatedPerson.class, 		ca.uhn.fhir.model.dstu.resource.Device.class	})
 	@Description(
 		shortDefinition="A Person of device that is participating in the appointment",
 		formalDefinition=""
@@ -172,10 +167,7 @@ public class AppointmentResponse extends BaseResource implements IResource {
 	private StringDt myTimezone;
 	
 	@Child(name="recorder", order=10, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Practitioner.class,
-		ca.uhn.fhir.model.dstu.resource.Patient.class,
-		ca.uhn.fhir.model.dstu.resource.RelatedPerson.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Practitioner.class, 		ca.uhn.fhir.model.dstu.resource.Patient.class, 		ca.uhn.fhir.model.dstu.resource.RelatedPerson.class	})
 	@Description(
 		shortDefinition="Who recorded the appointment response",
 		formalDefinition=""

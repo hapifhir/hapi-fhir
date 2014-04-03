@@ -116,8 +116,7 @@ public class Slot extends BaseResource implements IResource {
 	private CodeableConceptDt myType;
 	
 	@Child(name="availability", order=2, min=1, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Availability.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Availability.class	})
 	@Description(
 		shortDefinition="The availability resource that this slot defines an interval of status information",
 		formalDefinition=""
@@ -153,10 +152,7 @@ public class Slot extends BaseResource implements IResource {
 	private StringDt myComment;
 	
 	@Child(name="author", order=7, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Practitioner.class,
-		ca.uhn.fhir.model.dstu.resource.Patient.class,
-		ca.uhn.fhir.model.dstu.resource.RelatedPerson.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Practitioner.class, 		ca.uhn.fhir.model.dstu.resource.Patient.class, 		ca.uhn.fhir.model.dstu.resource.RelatedPerson.class	})
 	@Description(
 		shortDefinition="Who authored the slot",
 		formalDefinition=""

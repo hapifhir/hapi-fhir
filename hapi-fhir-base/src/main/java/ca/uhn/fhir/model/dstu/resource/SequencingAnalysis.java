@@ -92,8 +92,7 @@ public class SequencingAnalysis extends BaseResource implements IResource {
 
 
 	@Child(name="subject", order=0, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Patient.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Patient.class	})
 	@Description(
 		shortDefinition="Subject",
 		formalDefinition="Subject of the analysis"
@@ -129,8 +128,7 @@ public class SequencingAnalysis extends BaseResource implements IResource {
 	private java.util.List<AttachmentDt> myFile;
 	
 	@Child(name="inputLab", order=5, min=0, max=Child.MAX_UNLIMITED, type={
-		ca.uhn.fhir.model.dstu.resource.SequencingLab.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.SequencingLab.class	})
 	@Description(
 		shortDefinition="Input lab",
 		formalDefinition="SequencingLab taken into account of the analysis"
@@ -138,8 +136,7 @@ public class SequencingAnalysis extends BaseResource implements IResource {
 	private java.util.List<ResourceReferenceDt> myInputLab;
 	
 	@Child(name="inputAnalysis", order=6, min=0, max=Child.MAX_UNLIMITED, type={
-		ca.uhn.fhir.model.dstu.resource.SequencingAnalysis.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.SequencingAnalysis.class	})
 	@Description(
 		shortDefinition="Input analysis",
 		formalDefinition="SequencingAnalysis taken into account of the analysis"

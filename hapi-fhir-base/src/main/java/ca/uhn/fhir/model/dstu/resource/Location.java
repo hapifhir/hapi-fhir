@@ -205,8 +205,7 @@ public class Location extends BaseResource implements IResource {
 	private Position myPosition;
 	
 	@Child(name="managingOrganization", order=8, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Organization.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Organization.class	})
 	@Description(
 		shortDefinition="The organization that is responsible for the provisioning and upkeep of the location",
 		formalDefinition=""
@@ -221,8 +220,7 @@ public class Location extends BaseResource implements IResource {
 	private BoundCodeDt<LocationStatusEnum> myStatus;
 	
 	@Child(name="partOf", order=10, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Location.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Location.class	})
 	@Description(
 		shortDefinition="Another Location which this Location is physically part of",
 		formalDefinition=""

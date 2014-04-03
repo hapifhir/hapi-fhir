@@ -210,8 +210,7 @@ public class Practitioner extends BaseResource implements IResource {
 	private java.util.List<AttachmentDt> myPhoto;
 	
 	@Child(name="organization", order=7, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Organization.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Organization.class	})
 	@Description(
 		shortDefinition="The represented organization",
 		formalDefinition="The organization that the practitioner represents"
@@ -240,8 +239,7 @@ public class Practitioner extends BaseResource implements IResource {
 	private PeriodDt myPeriod;
 	
 	@Child(name="location", order=11, min=0, max=Child.MAX_UNLIMITED, type={
-		ca.uhn.fhir.model.dstu.resource.Location.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Location.class	})
 	@Description(
 		shortDefinition="The location(s) at which this practitioner provides care",
 		formalDefinition="The location(s) at which this practitioner provides care"
@@ -1023,8 +1021,7 @@ public class Practitioner extends BaseResource implements IResource {
 	private PeriodDt myPeriod;
 	
 	@Child(name="issuer", order=2, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Organization.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Organization.class	})
 	@Description(
 		shortDefinition="Organization that regulates and issues the qualification",
 		formalDefinition="Organization that regulates and issues the qualification"

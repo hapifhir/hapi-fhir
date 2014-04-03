@@ -339,8 +339,7 @@ public class Conformance extends BaseResource implements IResource {
 	private java.util.List<CodeDt> myFormat;
 	
 	@Child(name="profile", order=14, min=0, max=Child.MAX_UNLIMITED, type={
-		ca.uhn.fhir.model.dstu.resource.Profile.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Profile.class	})
 	@Description(
 		shortDefinition="Profiles supported by the system",
 		formalDefinition="A list of profiles supported by the system. For a server, \"supported by the system\" means the system hosts/produces a set of recourses, conformant to a particular profile, and allows its clients to search using this profile and to find appropriate data. For a client, it means the system will search by this profile and process data according to the guidance implicit in the profile."
@@ -2463,8 +2462,7 @@ public class Conformance extends BaseResource implements IResource {
 	private BoundCodeDt<ResourceTypeEnum> myType;
 	
 	@Child(name="profile", order=1, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Profile.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Profile.class	})
 	@Description(
 		shortDefinition="What structural features are supported",
 		formalDefinition="A specification of the profile that describes the solution's support for the resource, including any constraints on cardinality, bindings, lengths or other limitations"
@@ -4086,8 +4084,7 @@ public class Conformance extends BaseResource implements IResource {
 	private BoundCodeDt<ResourceTypeEnum> myFocus;
 	
 	@Child(name="request", order=5, min=1, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Profile.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Profile.class	})
 	@Description(
 		shortDefinition="Profile that describes the request",
 		formalDefinition="Information about the request for this event"
@@ -4095,8 +4092,7 @@ public class Conformance extends BaseResource implements IResource {
 	private ResourceReferenceDt myRequest;
 	
 	@Child(name="response", order=6, min=1, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Profile.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Profile.class	})
 	@Description(
 		shortDefinition="Profile that describes the response",
 		formalDefinition="Information about the response for this event"
@@ -4486,8 +4482,7 @@ public class Conformance extends BaseResource implements IResource {
 	private StringDt myDocumentation;
 	
 	@Child(name="profile", order=2, min=1, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Profile.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Profile.class	})
 	@Description(
 		shortDefinition="Constraint on a resource used in the document",
 		formalDefinition="A constraint on a resource used in the document"

@@ -217,8 +217,7 @@ public class Condition extends BaseResource implements IResource {
 	private java.util.List<IdentifierDt> myIdentifier;
 	
 	@Child(name="subject", order=1, min=1, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Patient.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Patient.class	})
 	@Description(
 		shortDefinition="Who has the condition?",
 		formalDefinition="Indicates the patient who the condition record is associated with"
@@ -226,8 +225,7 @@ public class Condition extends BaseResource implements IResource {
 	private ResourceReferenceDt mySubject;
 	
 	@Child(name="encounter", order=2, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Encounter.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Encounter.class	})
 	@Description(
 		shortDefinition="Encounter when condition first asserted",
 		formalDefinition="Encounter during which the condition was first asserted"
@@ -235,9 +233,7 @@ public class Condition extends BaseResource implements IResource {
 	private ResourceReferenceDt myEncounter;
 	
 	@Child(name="asserter", order=3, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Practitioner.class,
-		ca.uhn.fhir.model.dstu.resource.Patient.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Practitioner.class, 		ca.uhn.fhir.model.dstu.resource.Patient.class	})
 	@Description(
 		shortDefinition="Person who asserts this condition",
 		formalDefinition="Person who takes responsibility for asserting the existence of the condition as part of the electronic record"
@@ -287,9 +283,7 @@ public class Condition extends BaseResource implements IResource {
 	private CodeableConceptDt mySeverity;
 	
 	@Child(name="onset", order=10, min=0, max=1, type={
-		DateDt.class,
-		AgeDt.class,
-	})
+		DateDt.class, 		AgeDt.class	})
 	@Description(
 		shortDefinition="Estimated or actual date, or age",
 		formalDefinition="Estimated or actual date the condition began, in the opinion of the clinician"
@@ -297,10 +291,7 @@ public class Condition extends BaseResource implements IResource {
 	private IDatatype myOnset;
 	
 	@Child(name="abatement", order=11, min=0, max=1, type={
-		DateDt.class,
-		AgeDt.class,
-		BooleanDt.class,
-	})
+		DateDt.class, 		AgeDt.class, 		BooleanDt.class	})
 	@Description(
 		shortDefinition="If/when in resolution/remission",
 		formalDefinition="The date or estimated date that the condition resolved or went into remission. This is called \"abatement\" because of the many overloaded connotations associated with \"remission\" or \"resolution\" - Conditions are never really resolved, but they can abate."
@@ -1099,8 +1090,7 @@ public class Condition extends BaseResource implements IResource {
 	private CodeableConceptDt mySummary;
 	
 	@Child(name="assessment", order=1, min=0, max=Child.MAX_UNLIMITED, type={
-		IResource.class,
-	})
+		IResource.class	})
 	@Description(
 		shortDefinition="Formal record of assessment",
 		formalDefinition="Reference to a formal record of the evidence on which the staging assessment is based"
@@ -1221,8 +1211,7 @@ public class Condition extends BaseResource implements IResource {
 	private CodeableConceptDt myCode;
 	
 	@Child(name="detail", order=1, min=0, max=Child.MAX_UNLIMITED, type={
-		IResource.class,
-	})
+		IResource.class	})
 	@Description(
 		shortDefinition="Supporting information found elsewhere",
 		formalDefinition="Links to other relevant information, including pathology reports"
@@ -1470,12 +1459,7 @@ public class Condition extends BaseResource implements IResource {
 	private CodeableConceptDt myCode;
 	
 	@Child(name="target", order=2, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Condition.class,
-		ca.uhn.fhir.model.dstu.resource.Procedure.class,
-		ca.uhn.fhir.model.dstu.resource.MedicationAdministration.class,
-		ca.uhn.fhir.model.dstu.resource.Immunization.class,
-		ca.uhn.fhir.model.dstu.resource.MedicationStatement.class,
-	})
+		ca.uhn.fhir.model.dstu.resource.Condition.class, 		ca.uhn.fhir.model.dstu.resource.Procedure.class, 		ca.uhn.fhir.model.dstu.resource.MedicationAdministration.class, 		ca.uhn.fhir.model.dstu.resource.Immunization.class, 		ca.uhn.fhir.model.dstu.resource.MedicationStatement.class	})
 	@Description(
 		shortDefinition="Relationship target resource",
 		formalDefinition="Target of the relationship"
