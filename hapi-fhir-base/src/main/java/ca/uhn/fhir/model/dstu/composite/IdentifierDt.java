@@ -33,7 +33,7 @@ import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
 
 /**
- * HAPI/FHIR <b>Identifier</b> Datatype
+ * HAPI/FHIR <b>IdentifierDt</b> Datatype
  * (An identifier intended for computation)
  *
  * <p>
@@ -46,8 +46,8 @@ import ca.uhn.fhir.model.primitive.UriDt;
  * Need to be able to identify things with confidence and be sure that the identification is not subject to misinterpretation
  * </p> 
  */
-@DatatypeDef(name="Identifier") 
-public class IdentifierDt 
+@DatatypeDef(name="IdentifierDt") 
+public class IdentifierDt
         extends  BaseElement         implements ICompositeDatatype  , IQueryParameterType {
 
 	/**

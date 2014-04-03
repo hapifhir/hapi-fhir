@@ -27,7 +27,7 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.primitive.StringDt;
 
 /**
- * HAPI/FHIR <b>CodeableConcept</b> Datatype
+ * HAPI/FHIR <b>CodeableConceptDt</b> Datatype
  * (Concept - reference to a terminology or just  text)
  *
  * <p>
@@ -40,8 +40,8 @@ import ca.uhn.fhir.model.primitive.StringDt;
  * This is a common pattern in healthcare - a concept that may be defined by one or more codes from formal definitions including LOINC and SNOMED CT, and/or defined by the provision of text that captures a human sense of the concept
  * </p> 
  */
-@DatatypeDef(name="CodeableConcept") 
-public class CodeableConceptDt 
+@DatatypeDef(name="CodeableConceptDt") 
+public class CodeableConceptDt
         extends  BaseElement         implements ICompositeDatatype  {
 
 	/**

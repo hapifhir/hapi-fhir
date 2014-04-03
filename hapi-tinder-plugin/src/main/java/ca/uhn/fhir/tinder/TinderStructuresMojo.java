@@ -41,29 +41,6 @@ public class TinderStructuresMojo extends AbstractMojo {
 	@Parameter(required = true, defaultValue = "${project.build.directory}/generated-sources/tinder")
 	private String targetDirectory;
 
-	public static class ProfileFileDefinition
-	{
-		@Parameter(required = true)
-		private String profileFile;
-		
-		@Parameter(required = true)
-		private String profileSourceUrl;
-	}
-
-	public static class ValueSetFileDefinition
-	{
-		@Parameter(required = true)
-		private String valueSetFile;
-
-		public String getValueSetFile() {
-			return valueSetFile;
-		}
-
-		public void setValueSetFile(String theValueSetFile) {
-			valueSetFile = theValueSetFile;
-		}
-	}
-
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException {
 		if (StringUtils.isBlank(packageName)) {
@@ -220,6 +197,29 @@ public class TinderStructuresMojo extends AbstractMojo {
 		//
 		// String vsOutputDir = "target/generated/valuesets/ca/uhn/fhir/model/dstu/valueset";
 		// vsp.writeMarkedValueSets(vsOutputDir);
+	}
+
+	public static class ProfileFileDefinition
+	{
+		@Parameter(required = true)
+		private String profileFile;
+		
+		@Parameter(required = true)
+		private String profileSourceUrl;
+	}
+
+	public static class ValueSetFileDefinition
+	{
+		@Parameter(required = true)
+		private String valueSetFile;
+
+		public String getValueSetFile() {
+			return valueSetFile;
+		}
+
+		public void setValueSetFile(String theValueSetFile) {
+			valueSetFile = theValueSetFile;
+		}
 	}
 
 }

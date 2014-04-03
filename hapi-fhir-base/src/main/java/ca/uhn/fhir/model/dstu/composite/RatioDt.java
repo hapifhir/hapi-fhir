@@ -27,7 +27,7 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
 
 /**
- * HAPI/FHIR <b>Ratio</b> Datatype
+ * HAPI/FHIR <b>RatioDt</b> Datatype
  * (A ratio of two Quantity values - a numerator and a denominator)
  *
  * <p>
@@ -40,8 +40,8 @@ import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
  * Need to able to capture ratios for some measurements (titers) and some rates (costs)
  * </p> 
  */
-@DatatypeDef(name="Ratio") 
-public class RatioDt 
+@DatatypeDef(name="RatioDt") 
+public class RatioDt
         extends  BaseElement         implements ICompositeDatatype  {
 
 	/**

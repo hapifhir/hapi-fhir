@@ -224,6 +224,9 @@ public abstract class BaseStructureParser {
 				while (theTypeNames.contains(newClassName)) {
 					newClassName = className + (index++);
 					resourceBlock.setForcedClassName(newClassName);
+					for (BaseElement next : resourceBlock.getChildren()) {
+						next.setDeclaringClassNameComplete(newClassName);
+					}
 				}
 				theTypeNames.add(newClassName);
 
@@ -268,8 +271,12 @@ public abstract class BaseStructureParser {
 		ctx.put("imports", imports);
 		ctx.put("profile", theResource.getProfile());
 		ctx.put("id", StringUtils.defaultString(theResource.getId()));
-		ctx.put("className", theResource.getName()); // HumanName
-		ctx.put("classNameComplete", theResource.getName() + getFilenameSuffix()); // HumanNameDt
+		if (theResource.getDeclaringClassNameComplete() != null) {
+			ctx.put("className", theResource.getDeclaringClassNameComplete());
+		} else {
+			ctx.put("className", translateClassName(theResource.getName()));
+		} // HumanName}
+		ctx.put("classNameComplete", translateClassName(theResource.getName()) + getFilenameSuffix()); // HumanNameDt
 		ctx.put("shortName", defaultString(theResource.getShortName()));
 		ctx.put("definition", defaultString(theResource.getDefinition()));
 		ctx.put("requirements", defaultString(theResource.getRequirement()));
@@ -311,20 +318,34 @@ public abstract class BaseStructureParser {
 		}
 
 		for (BaseRootType next : myResources) {
+			ourLog.info("Scanning resource for imports {}", next.getName());
 			scanForImportsNames(next);
 		}
 
 		for (BaseRootType next : myResources) {
+			ourLog.info("Writing Resource {}", next.getName());
+
 			scanForTypeNameConflicts(next);
 			fixResourceReferenceClassNames(next, thePackageBase);
 
-			File f = new File(theOutputDirectory, next.getName() + getFilenameSuffix() + ".java");
+			File f = new File(theOutputDirectory, translateClassName(next.getDeclaringClassNameComplete()) /*+ getFilenameSuffix()*/ + ".java");
 			try {
 				write(next, f, thePackageBase);
 			} catch (IOException e) {
 				throw new MojoFailureException("Failed to write structure", e);
 			}
 		}
+	}
+
+	// private String translateClassName(String theName) {
+	// if ("List".equals(theName)) {
+	// return "ListResource";
+	// }
+	// return theName;
+	// }
+
+	private String translateClassName(String theName) {
+		return theName;
 	}
 
 	/**

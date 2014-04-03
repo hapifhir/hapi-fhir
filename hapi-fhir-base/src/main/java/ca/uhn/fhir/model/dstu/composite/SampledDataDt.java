@@ -30,7 +30,7 @@ import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 
 /**
- * HAPI/FHIR <b>SampledData</b> Datatype
+ * HAPI/FHIR <b>SampledDataDt</b> Datatype
  * (A series of measurements taken by a device)
  *
  * <p>
@@ -43,8 +43,8 @@ import ca.uhn.fhir.model.primitive.StringDt;
  * There is a need for a concise way to handle the data produced by devices that sample a physical state at a high frequency
  * </p> 
  */
-@DatatypeDef(name="SampledData") 
-public class SampledDataDt 
+@DatatypeDef(name="SampledDataDt") 
+public class SampledDataDt
         extends  BaseElement         implements ICompositeDatatype  {
 
 	/**

@@ -29,7 +29,7 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 
 /**
- * HAPI/FHIR <b>Period</b> Datatype
+ * HAPI/FHIR <b>PeriodDt</b> Datatype
  * (Time range defined by start and end date/time)
  *
  * <p>
@@ -42,8 +42,8 @@ import ca.uhn.fhir.model.primitive.DateTimeDt;
  * 
  * </p> 
  */
-@DatatypeDef(name="Period") 
-public class PeriodDt 
+@DatatypeDef(name="PeriodDt") 
+public class PeriodDt
         extends  BaseElement         implements ICompositeDatatype  {
 
 	/**

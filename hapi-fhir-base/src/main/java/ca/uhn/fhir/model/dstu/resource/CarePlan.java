@@ -1,0 +1,2016 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+package ca.uhn.fhir.model.dstu.resource;
+
+
+import java.util.Date;
+import java.util.List;
+
+import ca.uhn.fhir.model.api.BaseElement;
+import ca.uhn.fhir.model.api.BaseResource;
+import ca.uhn.fhir.model.api.IDatatype;
+import ca.uhn.fhir.model.api.IElement;
+import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.IResourceBlock;
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import ca.uhn.fhir.model.api.annotation.Block;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
+import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
+import ca.uhn.fhir.model.dstu.composite.PeriodDt;
+import ca.uhn.fhir.model.dstu.composite.QuantityDt;
+import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.dstu.composite.ScheduleDt;
+import ca.uhn.fhir.model.dstu.valueset.CarePlanActivityCategoryEnum;
+import ca.uhn.fhir.model.dstu.valueset.CarePlanActivityStatusEnum;
+import ca.uhn.fhir.model.dstu.valueset.CarePlanGoalStatusEnum;
+import ca.uhn.fhir.model.dstu.valueset.CarePlanStatusEnum;
+import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
+import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
+import ca.uhn.fhir.model.primitive.BooleanDt;
+import ca.uhn.fhir.model.primitive.BoundCodeDt;
+import ca.uhn.fhir.model.primitive.CodeDt;
+import ca.uhn.fhir.model.primitive.DateTimeDt;
+import ca.uhn.fhir.model.primitive.IdrefDt;
+import ca.uhn.fhir.model.primitive.StringDt;
+
+
+/**
+ * HAPI/FHIR <b>CarePlan</b> Resource
+ * (Healthcare plan for patient)
+ *
+ * <p>
+ * <b>Definition:</b>
+ * Describes the intention of how one or more practitioners intend to deliver care for a particular patient for a period of time, possibly limited to care for a specific condition or set of conditions.
+ * </p> 
+ *
+ * <p>
+ * <b>Requirements:</b>
+ * 
+ * </p> 
+ *
+ * <p>
+ * <b>Profile Definition:</b>
+ * <a href="http://hl7.org/fhir/profiles/CarePlan">http://hl7.org/fhir/profiles/CarePlan</a> 
+ * </p>
+ *
+ */
+@ResourceDef(name="CarePlan", profile="http://hl7.org/fhir/profiles/CarePlan", id="careplan")
+public class CarePlan extends BaseResource implements IResource {
+
+	/**
+	 * Search parameter constant for <b>patient</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>CarePlan.patient</b><br/>
+	 * </p>
+	 */
+	public static final String SP_PATIENT = "patient";
+
+	/**
+	 * Search parameter constant for <b>condition</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>CarePlan.concern</b><br/>
+	 * </p>
+	 */
+	public static final String SP_CONDITION = "condition";
+
+	/**
+	 * Search parameter constant for <b>date</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>date</b><br/>
+	 * Path: <b>CarePlan.period</b><br/>
+	 * </p>
+	 */
+	public static final String SP_DATE = "date";
+
+	/**
+	 * Search parameter constant for <b>participant</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>CarePlan.participant.member</b><br/>
+	 * </p>
+	 */
+	public static final String SP_PARTICIPANT = "participant";
+
+	/**
+	 * Search parameter constant for <b>activitycode</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>CarePlan.activity.simple.code</b><br/>
+	 * </p>
+	 */
+	public static final String SP_ACTIVITYCODE = "activitycode";
+
+	/**
+	 * Search parameter constant for <b>activitydate</b>
+	 * <p>
+	 * Description: <b>Specified date occurs within period specified by CarePlan.activity.timingSchedule</b><br/>
+	 * Type: <b>date</b><br/>
+	 * Path: <b>CarePlan.activity.simple.timing[x]</b><br/>
+	 * </p>
+	 */
+	public static final String SP_ACTIVITYDATE = "activitydate";
+
+	/**
+	 * Search parameter constant for <b>activitydetail</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>CarePlan.activity.detail</b><br/>
+	 * </p>
+	 */
+	public static final String SP_ACTIVITYDETAIL = "activitydetail";
+
+
+	@Child(name="identifier", type=IdentifierDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)	
+	@Description(
+		shortDefinition="External Ids for this plan",
+		formalDefinition="This records identifiers associated with this care plan that are defined by business processed and/ or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation)"
+	)
+	private java.util.List<IdentifierDt> myIdentifier;
+	
+	@Child(name="patient", order=1, min=0, max=1, type={
+		ca.uhn.fhir.model.dstu.resource.Patient.class,
+	})
+	@Description(
+		shortDefinition="Who care plan is for",
+		formalDefinition="Identifies the patient/subject whose intended care is described by the plan."
+	)
+	private ResourceReferenceDt myPatient;
+	
+	@Child(name="status", type=CodeDt.class, order=2, min=1, max=1)	
+	@Description(
+		shortDefinition="planned | active | completed",
+		formalDefinition="Indicates whether the plan is currently being acted upon, represents future intentions or is now just historical record."
+	)
+	private BoundCodeDt<CarePlanStatusEnum> myStatus;
+	
+	@Child(name="period", type=PeriodDt.class, order=3, min=0, max=1)	
+	@Description(
+		shortDefinition="Time period plan covers",
+		formalDefinition="Indicates when the plan did (or is intended to) come into effect and end."
+	)
+	private PeriodDt myPeriod;
+	
+	@Child(name="modified", type=DateTimeDt.class, order=4, min=0, max=1)	
+	@Description(
+		shortDefinition="When last updated",
+		formalDefinition="Identifies the most recent date on which the plan has been revised."
+	)
+	private DateTimeDt myModified;
+	
+	@Child(name="concern", order=5, min=0, max=Child.MAX_UNLIMITED, type={
+		ca.uhn.fhir.model.dstu.resource.Condition.class,
+	})
+	@Description(
+		shortDefinition="Health issues this plan addresses",
+		formalDefinition="Identifies the conditions/problems/concerns/diagnoses/etc. whose management and/or mitigation are handled by this plan."
+	)
+	private java.util.List<ResourceReferenceDt> myConcern;
+	
+	@Child(name="participant", order=6, min=0, max=Child.MAX_UNLIMITED)	
+	@Description(
+		shortDefinition="Who's involved in plan?",
+		formalDefinition="Identifies all people and organizations who are expected to be involved in the care envisioned by this plan."
+	)
+	private java.util.List<Participant> myParticipant;
+	
+	@Child(name="goal", order=7, min=0, max=Child.MAX_UNLIMITED)	
+	@Description(
+		shortDefinition="Desired outcome of plan",
+		formalDefinition="Describes the intended objective(s) of carrying out the Care Plan."
+	)
+	private java.util.List<Goal> myGoal;
+	
+	@Child(name="activity", order=8, min=0, max=Child.MAX_UNLIMITED)	
+	@Description(
+		shortDefinition="Action to occur as part of plan",
+		formalDefinition="Identifies a planned action to occur as part of the plan.  For example, a medication to be used, lab tests to perform, self-monitoring, education, etc."
+	)
+	private java.util.List<Activity> myActivity;
+	
+	@Child(name="notes", type=StringDt.class, order=9, min=0, max=1)	
+	@Description(
+		shortDefinition="Comments about the plan",
+		formalDefinition="General notes about the care plan not covered elsewhere"
+	)
+	private StringDt myNotes;
+	
+
+	@Override
+	public boolean isEmpty() {
+		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myIdentifier,  myPatient,  myStatus,  myPeriod,  myModified,  myConcern,  myParticipant,  myGoal,  myActivity,  myNotes);
+	}
+	
+	@Override
+	public java.util.List<IElement> getAllPopulatedChildElements() {
+		return getAllPopulatedChildElementsOfType(null);
+	}
+
+	@Override
+	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
+		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myIdentifier, myPatient, myStatus, myPeriod, myModified, myConcern, myParticipant, myGoal, myActivity, myNotes);
+	}
+
+	/**
+	 * Gets the value(s) for <b>identifier</b> (External Ids for this plan).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * This records identifiers associated with this care plan that are defined by business processed and/ or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation)
+     * </p> 
+	 */
+	public java.util.List<IdentifierDt> getIdentifier() {  
+		if (myIdentifier == null) {
+			myIdentifier = new java.util.ArrayList<IdentifierDt>();
+		}
+		return myIdentifier;
+	}
+
+	/**
+	 * Sets the value(s) for <b>identifier</b> (External Ids for this plan)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * This records identifiers associated with this care plan that are defined by business processed and/ or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation)
+     * </p> 
+	 */
+	public CarePlan setIdentifier(java.util.List<IdentifierDt> theValue) {
+		myIdentifier = theValue;
+		return this;
+	}
+
+	/**
+	 * Adds and returns a new value for <b>identifier</b> (External Ids for this plan)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * This records identifiers associated with this care plan that are defined by business processed and/ or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation)
+     * </p> 
+	 */
+	public IdentifierDt addIdentifier() {
+		IdentifierDt newType = new IdentifierDt();
+		getIdentifier().add(newType);
+		return newType; 
+	}
+
+	/**
+	 * Gets the first repetition for <b>identifier</b> (External Ids for this plan),
+	 * creating it if it does not already exist.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * This records identifiers associated with this care plan that are defined by business processed and/ or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation)
+     * </p> 
+	 */
+	public IdentifierDt getIdentifierFirstRep() {
+		if (getIdentifier().isEmpty()) {
+			return addIdentifier();
+		}
+		return getIdentifier().get(0); 
+	}
+ 	/**
+	 * Adds a new value for <b>identifier</b> (External Ids for this plan)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * This records identifiers associated with this care plan that are defined by business processed and/ or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation)
+     * </p> 
+     *
+     * @return Returns a reference to this object, to allow for simple chaining.
+	 */
+	public CarePlan addIdentifier( IdentifierUseEnum theUse,  String theSystem,  String theValue,  String theLabel) {
+		if (myIdentifier == null) {
+			myIdentifier = new java.util.ArrayList<IdentifierDt>();
+		}
+		myIdentifier.add(new IdentifierDt(theUse, theSystem, theValue, theLabel));
+		return this; 
+	}
+
+	/**
+	 * Adds a new value for <b>identifier</b> (External Ids for this plan)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * This records identifiers associated with this care plan that are defined by business processed and/ or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation)
+     * </p> 
+     *
+     * @return Returns a reference to this object, to allow for simple chaining.
+	 */
+	public CarePlan addIdentifier( String theSystem,  String theValue) {
+		if (myIdentifier == null) {
+			myIdentifier = new java.util.ArrayList<IdentifierDt>();
+		}
+		myIdentifier.add(new IdentifierDt(theSystem, theValue));
+		return this; 
+	}
+
+ 
+	/**
+	 * Gets the value(s) for <b>patient</b> (Who care plan is for).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Identifies the patient/subject whose intended care is described by the plan.
+     * </p> 
+	 */
+	public ResourceReferenceDt getPatient() {  
+		if (myPatient == null) {
+			myPatient = new ResourceReferenceDt();
+		}
+		return myPatient;
+	}
+
+	/**
+	 * Sets the value(s) for <b>patient</b> (Who care plan is for)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Identifies the patient/subject whose intended care is described by the plan.
+     * </p> 
+	 */
+	public CarePlan setPatient(ResourceReferenceDt theValue) {
+		myPatient = theValue;
+		return this;
+	}
+
+  
+	/**
+	 * Gets the value(s) for <b>status</b> (planned | active | completed).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Indicates whether the plan is currently being acted upon, represents future intentions or is now just historical record.
+     * </p> 
+	 */
+	public BoundCodeDt<CarePlanStatusEnum> getStatus() {  
+		if (myStatus == null) {
+			myStatus = new BoundCodeDt<CarePlanStatusEnum>(CarePlanStatusEnum.VALUESET_BINDER);
+		}
+		return myStatus;
+	}
+
+	/**
+	 * Sets the value(s) for <b>status</b> (planned | active | completed)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Indicates whether the plan is currently being acted upon, represents future intentions or is now just historical record.
+     * </p> 
+	 */
+	public CarePlan setStatus(BoundCodeDt<CarePlanStatusEnum> theValue) {
+		myStatus = theValue;
+		return this;
+	}
+
+	/**
+	 * Sets the value(s) for <b>status</b> (planned | active | completed)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Indicates whether the plan is currently being acted upon, represents future intentions or is now just historical record.
+     * </p> 
+	 */
+	public CarePlan setStatus(CarePlanStatusEnum theValue) {
+		getStatus().setValueAsEnum(theValue);
+		return this;
+	}
+
+  
+	/**
+	 * Gets the value(s) for <b>period</b> (Time period plan covers).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Indicates when the plan did (or is intended to) come into effect and end.
+     * </p> 
+	 */
+	public PeriodDt getPeriod() {  
+		if (myPeriod == null) {
+			myPeriod = new PeriodDt();
+		}
+		return myPeriod;
+	}
+
+	/**
+	 * Sets the value(s) for <b>period</b> (Time period plan covers)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Indicates when the plan did (or is intended to) come into effect and end.
+     * </p> 
+	 */
+	public CarePlan setPeriod(PeriodDt theValue) {
+		myPeriod = theValue;
+		return this;
+	}
+
+  
+	/**
+	 * Gets the value(s) for <b>modified</b> (When last updated).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Identifies the most recent date on which the plan has been revised.
+     * </p> 
+	 */
+	public DateTimeDt getModified() {  
+		if (myModified == null) {
+			myModified = new DateTimeDt();
+		}
+		return myModified;
+	}
+
+	/**
+	 * Sets the value(s) for <b>modified</b> (When last updated)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Identifies the most recent date on which the plan has been revised.
+     * </p> 
+	 */
+	public CarePlan setModified(DateTimeDt theValue) {
+		myModified = theValue;
+		return this;
+	}
+
+ 	/**
+	 * Sets the value for <b>modified</b> (When last updated)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Identifies the most recent date on which the plan has been revised.
+     * </p> 
+	 */
+	public CarePlan setModified( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myModified = new DateTimeDt(theDate, thePrecision); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>modified</b> (When last updated)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Identifies the most recent date on which the plan has been revised.
+     * </p> 
+	 */
+	public CarePlan setModifiedWithSecondsPrecision( Date theDate) {
+		myModified = new DateTimeDt(theDate); 
+		return this; 
+	}
+
+ 
+	/**
+	 * Gets the value(s) for <b>concern</b> (Health issues this plan addresses).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Identifies the conditions/problems/concerns/diagnoses/etc. whose management and/or mitigation are handled by this plan.
+     * </p> 
+	 */
+	public java.util.List<ResourceReferenceDt> getConcern() {  
+		if (myConcern == null) {
+			myConcern = new java.util.ArrayList<ResourceReferenceDt>();
+		}
+		return myConcern;
+	}
+
+	/**
+	 * Sets the value(s) for <b>concern</b> (Health issues this plan addresses)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Identifies the conditions/problems/concerns/diagnoses/etc. whose management and/or mitigation are handled by this plan.
+     * </p> 
+	 */
+	public CarePlan setConcern(java.util.List<ResourceReferenceDt> theValue) {
+		myConcern = theValue;
+		return this;
+	}
+
+	/**
+	 * Adds and returns a new value for <b>concern</b> (Health issues this plan addresses)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Identifies the conditions/problems/concerns/diagnoses/etc. whose management and/or mitigation are handled by this plan.
+     * </p> 
+	 */
+	public ResourceReferenceDt addConcern() {
+		ResourceReferenceDt newType = new ResourceReferenceDt();
+		getConcern().add(newType);
+		return newType; 
+	}
+  
+	/**
+	 * Gets the value(s) for <b>participant</b> (Who's involved in plan?).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Identifies all people and organizations who are expected to be involved in the care envisioned by this plan.
+     * </p> 
+	 */
+	public java.util.List<Participant> getParticipant() {  
+		if (myParticipant == null) {
+			myParticipant = new java.util.ArrayList<Participant>();
+		}
+		return myParticipant;
+	}
+
+	/**
+	 * Sets the value(s) for <b>participant</b> (Who's involved in plan?)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Identifies all people and organizations who are expected to be involved in the care envisioned by this plan.
+     * </p> 
+	 */
+	public CarePlan setParticipant(java.util.List<Participant> theValue) {
+		myParticipant = theValue;
+		return this;
+	}
+
+	/**
+	 * Adds and returns a new value for <b>participant</b> (Who's involved in plan?)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Identifies all people and organizations who are expected to be involved in the care envisioned by this plan.
+     * </p> 
+	 */
+	public Participant addParticipant() {
+		Participant newType = new Participant();
+		getParticipant().add(newType);
+		return newType; 
+	}
+
+	/**
+	 * Gets the first repetition for <b>participant</b> (Who's involved in plan?),
+	 * creating it if it does not already exist.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Identifies all people and organizations who are expected to be involved in the care envisioned by this plan.
+     * </p> 
+	 */
+	public Participant getParticipantFirstRep() {
+		if (getParticipant().isEmpty()) {
+			return addParticipant();
+		}
+		return getParticipant().get(0); 
+	}
+  
+	/**
+	 * Gets the value(s) for <b>goal</b> (Desired outcome of plan).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Describes the intended objective(s) of carrying out the Care Plan.
+     * </p> 
+	 */
+	public java.util.List<Goal> getGoal() {  
+		if (myGoal == null) {
+			myGoal = new java.util.ArrayList<Goal>();
+		}
+		return myGoal;
+	}
+
+	/**
+	 * Sets the value(s) for <b>goal</b> (Desired outcome of plan)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Describes the intended objective(s) of carrying out the Care Plan.
+     * </p> 
+	 */
+	public CarePlan setGoal(java.util.List<Goal> theValue) {
+		myGoal = theValue;
+		return this;
+	}
+
+	/**
+	 * Adds and returns a new value for <b>goal</b> (Desired outcome of plan)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Describes the intended objective(s) of carrying out the Care Plan.
+     * </p> 
+	 */
+	public Goal addGoal() {
+		Goal newType = new Goal();
+		getGoal().add(newType);
+		return newType; 
+	}
+
+	/**
+	 * Gets the first repetition for <b>goal</b> (Desired outcome of plan),
+	 * creating it if it does not already exist.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Describes the intended objective(s) of carrying out the Care Plan.
+     * </p> 
+	 */
+	public Goal getGoalFirstRep() {
+		if (getGoal().isEmpty()) {
+			return addGoal();
+		}
+		return getGoal().get(0); 
+	}
+  
+	/**
+	 * Gets the value(s) for <b>activity</b> (Action to occur as part of plan).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Identifies a planned action to occur as part of the plan.  For example, a medication to be used, lab tests to perform, self-monitoring, education, etc.
+     * </p> 
+	 */
+	public java.util.List<Activity> getActivity() {  
+		if (myActivity == null) {
+			myActivity = new java.util.ArrayList<Activity>();
+		}
+		return myActivity;
+	}
+
+	/**
+	 * Sets the value(s) for <b>activity</b> (Action to occur as part of plan)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Identifies a planned action to occur as part of the plan.  For example, a medication to be used, lab tests to perform, self-monitoring, education, etc.
+     * </p> 
+	 */
+	public CarePlan setActivity(java.util.List<Activity> theValue) {
+		myActivity = theValue;
+		return this;
+	}
+
+	/**
+	 * Adds and returns a new value for <b>activity</b> (Action to occur as part of plan)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Identifies a planned action to occur as part of the plan.  For example, a medication to be used, lab tests to perform, self-monitoring, education, etc.
+     * </p> 
+	 */
+	public Activity addActivity() {
+		Activity newType = new Activity();
+		getActivity().add(newType);
+		return newType; 
+	}
+
+	/**
+	 * Gets the first repetition for <b>activity</b> (Action to occur as part of plan),
+	 * creating it if it does not already exist.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Identifies a planned action to occur as part of the plan.  For example, a medication to be used, lab tests to perform, self-monitoring, education, etc.
+     * </p> 
+	 */
+	public Activity getActivityFirstRep() {
+		if (getActivity().isEmpty()) {
+			return addActivity();
+		}
+		return getActivity().get(0); 
+	}
+  
+	/**
+	 * Gets the value(s) for <b>notes</b> (Comments about the plan).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * General notes about the care plan not covered elsewhere
+     * </p> 
+	 */
+	public StringDt getNotes() {  
+		if (myNotes == null) {
+			myNotes = new StringDt();
+		}
+		return myNotes;
+	}
+
+	/**
+	 * Sets the value(s) for <b>notes</b> (Comments about the plan)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * General notes about the care plan not covered elsewhere
+     * </p> 
+	 */
+	public CarePlan setNotes(StringDt theValue) {
+		myNotes = theValue;
+		return this;
+	}
+
+ 	/**
+	 * Sets the value for <b>notes</b> (Comments about the plan)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * General notes about the care plan not covered elsewhere
+     * </p> 
+	 */
+	public CarePlan setNotes( String theString) {
+		myNotes = new StringDt(theString); 
+		return this; 
+	}
+
+ 
+	/**
+	 * Block class for child element: <b>CarePlan.participant</b> (Who's involved in plan?)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Identifies all people and organizations who are expected to be involved in the care envisioned by this plan.
+     * </p> 
+	 */
+	@Block(name="CarePlan.participant")	
+	public static class Participant extends BaseElement implements IResourceBlock {
+	
+	@Child(name="role", type=CodeableConceptDt.class, order=0, min=0, max=1)	
+	@Description(
+		shortDefinition="Type of involvement",
+		formalDefinition="Indicates specific responsibility of an individual within the care plan.  E.g. \"Primary physician\", \"Team coordinator\", \"Caregiver\", etc."
+	)
+	private CodeableConceptDt myRole;
+	
+	@Child(name="member", order=1, min=1, max=1, type={
+		ca.uhn.fhir.model.dstu.resource.Practitioner.class,
+		ca.uhn.fhir.model.dstu.resource.RelatedPerson.class,
+		ca.uhn.fhir.model.dstu.resource.Patient.class,
+		ca.uhn.fhir.model.dstu.resource.Organization.class,
+	})
+	@Description(
+		shortDefinition="Who is involved",
+		formalDefinition="The specific person or organization who is participating/expected to participate in the care plan."
+	)
+	private ResourceReferenceDt myMember;
+	
+
+	@Override
+	public boolean isEmpty() {
+		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myRole,  myMember);
+	}
+	
+	@Override
+	public java.util.List<IElement> getAllPopulatedChildElements() {
+		return getAllPopulatedChildElementsOfType(null);
+	}
+
+	@Override
+	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
+		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myRole, myMember);
+	}
+
+	/**
+	 * Gets the value(s) for <b>role</b> (Type of involvement).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Indicates specific responsibility of an individual within the care plan.  E.g. \"Primary physician\", \"Team coordinator\", \"Caregiver\", etc.
+     * </p> 
+	 */
+	public CodeableConceptDt getRole() {  
+		if (myRole == null) {
+			myRole = new CodeableConceptDt();
+		}
+		return myRole;
+	}
+
+	/**
+	 * Sets the value(s) for <b>role</b> (Type of involvement)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Indicates specific responsibility of an individual within the care plan.  E.g. \"Primary physician\", \"Team coordinator\", \"Caregiver\", etc.
+     * </p> 
+	 */
+	public Participant setRole(CodeableConceptDt theValue) {
+		myRole = theValue;
+		return this;
+	}
+
+  
+	/**
+	 * Gets the value(s) for <b>member</b> (Who is involved).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The specific person or organization who is participating/expected to participate in the care plan.
+     * </p> 
+	 */
+	public ResourceReferenceDt getMember() {  
+		return myMember;
+	}
+
+	/**
+	 * Sets the value(s) for <b>member</b> (Who is involved)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The specific person or organization who is participating/expected to participate in the care plan.
+     * </p> 
+	 */
+	public Participant setMember(ResourceReferenceDt theValue) {
+		myMember = theValue;
+		return this;
+	}
+
+  
+
+	}
+
+
+	/**
+	 * Block class for child element: <b>CarePlan.goal</b> (Desired outcome of plan)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Describes the intended objective(s) of carrying out the Care Plan.
+     * </p> 
+	 */
+	@Block(name="CarePlan.goal")	
+	public static class Goal extends BaseElement implements IResourceBlock {
+	
+	@Child(name="description", type=StringDt.class, order=0, min=1, max=1)	
+	@Description(
+		shortDefinition="What's the desired outcome?",
+		formalDefinition="Human-readable description of a specific desired objective of the care plan."
+	)
+	private StringDt myDescription;
+	
+	@Child(name="status", type=CodeDt.class, order=1, min=0, max=1)	
+	@Description(
+		shortDefinition="in progress | achieved | sustaining | cancelled",
+		formalDefinition="Indicates whether the goal has been reached and is still considered relevant"
+	)
+	private BoundCodeDt<CarePlanGoalStatusEnum> myStatus;
+	
+	@Child(name="notes", type=StringDt.class, order=2, min=0, max=1)	
+	@Description(
+		shortDefinition="Comments about the goal",
+		formalDefinition="Any comments related to the goal"
+	)
+	private StringDt myNotes;
+	
+	@Child(name="concern", order=3, min=0, max=Child.MAX_UNLIMITED, type={
+		ca.uhn.fhir.model.dstu.resource.Condition.class,
+	})
+	@Description(
+		shortDefinition="Health issues this goal addresses",
+		formalDefinition="The identified conditions that this goal relates to - the condition that caused it to be created, or that it is intended to address"
+	)
+	private java.util.List<ResourceReferenceDt> myConcern;
+	
+
+	@Override
+	public boolean isEmpty() {
+		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myDescription,  myStatus,  myNotes,  myConcern);
+	}
+	
+	@Override
+	public java.util.List<IElement> getAllPopulatedChildElements() {
+		return getAllPopulatedChildElementsOfType(null);
+	}
+
+	@Override
+	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
+		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myDescription, myStatus, myNotes, myConcern);
+	}
+
+	/**
+	 * Gets the value(s) for <b>description</b> (What's the desired outcome?).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Human-readable description of a specific desired objective of the care plan.
+     * </p> 
+	 */
+	public StringDt getDescription() {  
+		if (myDescription == null) {
+			myDescription = new StringDt();
+		}
+		return myDescription;
+	}
+
+	/**
+	 * Sets the value(s) for <b>description</b> (What's the desired outcome?)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Human-readable description of a specific desired objective of the care plan.
+     * </p> 
+	 */
+	public Goal setDescription(StringDt theValue) {
+		myDescription = theValue;
+		return this;
+	}
+
+ 	/**
+	 * Sets the value for <b>description</b> (What's the desired outcome?)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Human-readable description of a specific desired objective of the care plan.
+     * </p> 
+	 */
+	public Goal setDescription( String theString) {
+		myDescription = new StringDt(theString); 
+		return this; 
+	}
+
+ 
+	/**
+	 * Gets the value(s) for <b>status</b> (in progress | achieved | sustaining | cancelled).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Indicates whether the goal has been reached and is still considered relevant
+     * </p> 
+	 */
+	public BoundCodeDt<CarePlanGoalStatusEnum> getStatus() {  
+		if (myStatus == null) {
+			myStatus = new BoundCodeDt<CarePlanGoalStatusEnum>(CarePlanGoalStatusEnum.VALUESET_BINDER);
+		}
+		return myStatus;
+	}
+
+	/**
+	 * Sets the value(s) for <b>status</b> (in progress | achieved | sustaining | cancelled)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Indicates whether the goal has been reached and is still considered relevant
+     * </p> 
+	 */
+	public Goal setStatus(BoundCodeDt<CarePlanGoalStatusEnum> theValue) {
+		myStatus = theValue;
+		return this;
+	}
+
+	/**
+	 * Sets the value(s) for <b>status</b> (in progress | achieved | sustaining | cancelled)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Indicates whether the goal has been reached and is still considered relevant
+     * </p> 
+	 */
+	public Goal setStatus(CarePlanGoalStatusEnum theValue) {
+		getStatus().setValueAsEnum(theValue);
+		return this;
+	}
+
+  
+	/**
+	 * Gets the value(s) for <b>notes</b> (Comments about the goal).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Any comments related to the goal
+     * </p> 
+	 */
+	public StringDt getNotes() {  
+		if (myNotes == null) {
+			myNotes = new StringDt();
+		}
+		return myNotes;
+	}
+
+	/**
+	 * Sets the value(s) for <b>notes</b> (Comments about the goal)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Any comments related to the goal
+     * </p> 
+	 */
+	public Goal setNotes(StringDt theValue) {
+		myNotes = theValue;
+		return this;
+	}
+
+ 	/**
+	 * Sets the value for <b>notes</b> (Comments about the goal)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Any comments related to the goal
+     * </p> 
+	 */
+	public Goal setNotes( String theString) {
+		myNotes = new StringDt(theString); 
+		return this; 
+	}
+
+ 
+	/**
+	 * Gets the value(s) for <b>concern</b> (Health issues this goal addresses).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The identified conditions that this goal relates to - the condition that caused it to be created, or that it is intended to address
+     * </p> 
+	 */
+	public java.util.List<ResourceReferenceDt> getConcern() {  
+		if (myConcern == null) {
+			myConcern = new java.util.ArrayList<ResourceReferenceDt>();
+		}
+		return myConcern;
+	}
+
+	/**
+	 * Sets the value(s) for <b>concern</b> (Health issues this goal addresses)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The identified conditions that this goal relates to - the condition that caused it to be created, or that it is intended to address
+     * </p> 
+	 */
+	public Goal setConcern(java.util.List<ResourceReferenceDt> theValue) {
+		myConcern = theValue;
+		return this;
+	}
+
+	/**
+	 * Adds and returns a new value for <b>concern</b> (Health issues this goal addresses)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The identified conditions that this goal relates to - the condition that caused it to be created, or that it is intended to address
+     * </p> 
+	 */
+	public ResourceReferenceDt addConcern() {
+		ResourceReferenceDt newType = new ResourceReferenceDt();
+		getConcern().add(newType);
+		return newType; 
+	}
+  
+
+	}
+
+
+	/**
+	 * Block class for child element: <b>CarePlan.activity</b> (Action to occur as part of plan)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Identifies a planned action to occur as part of the plan.  For example, a medication to be used, lab tests to perform, self-monitoring, education, etc.
+     * </p> 
+	 */
+	@Block(name="CarePlan.activity")	
+	public static class Activity extends BaseElement implements IResourceBlock {
+	
+	@Child(name="goal", type=IdrefDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)	
+	@Description(
+		shortDefinition="Goals this activity relates to",
+		formalDefinition="Internal reference that identifies the goals that this activity is intended to contribute towards meeting"
+	)
+	private java.util.List<IdrefDt> myGoal;
+	
+	@Child(name="status", type=CodeDt.class, order=1, min=0, max=1)	
+	@Description(
+		shortDefinition="not started | scheduled | in progress | on hold | completed | cancelled",
+		formalDefinition="Identifies what progress is being made for the specific activity."
+	)
+	private BoundCodeDt<CarePlanActivityStatusEnum> myStatus;
+	
+	@Child(name="prohibited", type=BooleanDt.class, order=2, min=1, max=1)	
+	@Description(
+		shortDefinition="Do NOT do",
+		formalDefinition="If true, indicates that the described activity is one that must NOT be engaged in when following the plan."
+	)
+	private BooleanDt myProhibited;
+	
+	@Child(name="actionResulting", order=3, min=0, max=Child.MAX_UNLIMITED, type={
+		IResource.class,
+	})
+	@Description(
+		shortDefinition="Appointments, orders, etc.",
+		formalDefinition="Resources that describe follow-on actions resulting from the plan, such as drug prescriptions, encounter records, appointments, etc."
+	)
+	private java.util.List<ResourceReferenceDt> myActionResulting;
+	
+	@Child(name="notes", type=StringDt.class, order=4, min=0, max=1)	
+	@Description(
+		shortDefinition="Comments about the activity",
+		formalDefinition="Notes about the execution of the activity"
+	)
+	private StringDt myNotes;
+	
+	@Child(name="detail", order=5, min=0, max=1, type={
+		ca.uhn.fhir.model.dstu.resource.Procedure.class,
+		ca.uhn.fhir.model.dstu.resource.MedicationPrescription.class,
+		ca.uhn.fhir.model.dstu.resource.DiagnosticOrder.class,
+		ca.uhn.fhir.model.dstu.resource.Encounter.class,
+	})
+	@Description(
+		shortDefinition="Activity details defined in specific resource",
+		formalDefinition="The details of the proposed activity represented in a specific resource"
+	)
+	private ResourceReferenceDt myDetail;
+	
+	@Child(name="simple", order=6, min=0, max=1)	
+	@Description(
+		shortDefinition="Activity details summarised here",
+		formalDefinition="A simple summary of details suitable for a general care plan system (e.g. form driven) that doesn't know about specific resources such as procedure etc"
+	)
+	private ActivitySimple mySimple;
+	
+
+	@Override
+	public boolean isEmpty() {
+		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myGoal,  myStatus,  myProhibited,  myActionResulting,  myNotes,  myDetail,  mySimple);
+	}
+	
+	@Override
+	public java.util.List<IElement> getAllPopulatedChildElements() {
+		return getAllPopulatedChildElementsOfType(null);
+	}
+
+	@Override
+	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
+		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myGoal, myStatus, myProhibited, myActionResulting, myNotes, myDetail, mySimple);
+	}
+
+	/**
+	 * Gets the value(s) for <b>goal</b> (Goals this activity relates to).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Internal reference that identifies the goals that this activity is intended to contribute towards meeting
+     * </p> 
+	 */
+	public java.util.List<IdrefDt> getGoal() {  
+		if (myGoal == null) {
+			myGoal = new java.util.ArrayList<IdrefDt>();
+		}
+		return myGoal;
+	}
+
+	/**
+	 * Sets the value(s) for <b>goal</b> (Goals this activity relates to)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Internal reference that identifies the goals that this activity is intended to contribute towards meeting
+     * </p> 
+	 */
+	public Activity setGoal(java.util.List<IdrefDt> theValue) {
+		myGoal = theValue;
+		return this;
+	}
+
+	/**
+	 * Adds and returns a new value for <b>goal</b> (Goals this activity relates to)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Internal reference that identifies the goals that this activity is intended to contribute towards meeting
+     * </p> 
+	 */
+	public IdrefDt addGoal() {
+		IdrefDt newType = new IdrefDt();
+		getGoal().add(newType);
+		return newType; 
+	}
+
+	/**
+	 * Gets the first repetition for <b>goal</b> (Goals this activity relates to),
+	 * creating it if it does not already exist.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Internal reference that identifies the goals that this activity is intended to contribute towards meeting
+     * </p> 
+	 */
+	public IdrefDt getGoalFirstRep() {
+		if (getGoal().isEmpty()) {
+			return addGoal();
+		}
+		return getGoal().get(0); 
+	}
+  
+	/**
+	 * Gets the value(s) for <b>status</b> (not started | scheduled | in progress | on hold | completed | cancelled).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Identifies what progress is being made for the specific activity.
+     * </p> 
+	 */
+	public BoundCodeDt<CarePlanActivityStatusEnum> getStatus() {  
+		if (myStatus == null) {
+			myStatus = new BoundCodeDt<CarePlanActivityStatusEnum>(CarePlanActivityStatusEnum.VALUESET_BINDER);
+		}
+		return myStatus;
+	}
+
+	/**
+	 * Sets the value(s) for <b>status</b> (not started | scheduled | in progress | on hold | completed | cancelled)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Identifies what progress is being made for the specific activity.
+     * </p> 
+	 */
+	public Activity setStatus(BoundCodeDt<CarePlanActivityStatusEnum> theValue) {
+		myStatus = theValue;
+		return this;
+	}
+
+	/**
+	 * Sets the value(s) for <b>status</b> (not started | scheduled | in progress | on hold | completed | cancelled)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Identifies what progress is being made for the specific activity.
+     * </p> 
+	 */
+	public Activity setStatus(CarePlanActivityStatusEnum theValue) {
+		getStatus().setValueAsEnum(theValue);
+		return this;
+	}
+
+  
+	/**
+	 * Gets the value(s) for <b>prohibited</b> (Do NOT do).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * If true, indicates that the described activity is one that must NOT be engaged in when following the plan.
+     * </p> 
+	 */
+	public BooleanDt getProhibited() {  
+		if (myProhibited == null) {
+			myProhibited = new BooleanDt();
+		}
+		return myProhibited;
+	}
+
+	/**
+	 * Sets the value(s) for <b>prohibited</b> (Do NOT do)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * If true, indicates that the described activity is one that must NOT be engaged in when following the plan.
+     * </p> 
+	 */
+	public Activity setProhibited(BooleanDt theValue) {
+		myProhibited = theValue;
+		return this;
+	}
+
+ 	/**
+	 * Sets the value for <b>prohibited</b> (Do NOT do)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * If true, indicates that the described activity is one that must NOT be engaged in when following the plan.
+     * </p> 
+	 */
+	public Activity setProhibited( boolean theBoolean) {
+		myProhibited = new BooleanDt(theBoolean); 
+		return this; 
+	}
+
+ 
+	/**
+	 * Gets the value(s) for <b>actionResulting</b> (Appointments, orders, etc.).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Resources that describe follow-on actions resulting from the plan, such as drug prescriptions, encounter records, appointments, etc.
+     * </p> 
+	 */
+	public java.util.List<ResourceReferenceDt> getActionResulting() {  
+		if (myActionResulting == null) {
+			myActionResulting = new java.util.ArrayList<ResourceReferenceDt>();
+		}
+		return myActionResulting;
+	}
+
+	/**
+	 * Sets the value(s) for <b>actionResulting</b> (Appointments, orders, etc.)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Resources that describe follow-on actions resulting from the plan, such as drug prescriptions, encounter records, appointments, etc.
+     * </p> 
+	 */
+	public Activity setActionResulting(java.util.List<ResourceReferenceDt> theValue) {
+		myActionResulting = theValue;
+		return this;
+	}
+
+	/**
+	 * Adds and returns a new value for <b>actionResulting</b> (Appointments, orders, etc.)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Resources that describe follow-on actions resulting from the plan, such as drug prescriptions, encounter records, appointments, etc.
+     * </p> 
+	 */
+	public ResourceReferenceDt addActionResulting() {
+		ResourceReferenceDt newType = new ResourceReferenceDt();
+		getActionResulting().add(newType);
+		return newType; 
+	}
+  
+	/**
+	 * Gets the value(s) for <b>notes</b> (Comments about the activity).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Notes about the execution of the activity
+     * </p> 
+	 */
+	public StringDt getNotes() {  
+		if (myNotes == null) {
+			myNotes = new StringDt();
+		}
+		return myNotes;
+	}
+
+	/**
+	 * Sets the value(s) for <b>notes</b> (Comments about the activity)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Notes about the execution of the activity
+     * </p> 
+	 */
+	public Activity setNotes(StringDt theValue) {
+		myNotes = theValue;
+		return this;
+	}
+
+ 	/**
+	 * Sets the value for <b>notes</b> (Comments about the activity)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Notes about the execution of the activity
+     * </p> 
+	 */
+	public Activity setNotes( String theString) {
+		myNotes = new StringDt(theString); 
+		return this; 
+	}
+
+ 
+	/**
+	 * Gets the value(s) for <b>detail</b> (Activity details defined in specific resource).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The details of the proposed activity represented in a specific resource
+     * </p> 
+	 */
+	public ResourceReferenceDt getDetail() {  
+		return myDetail;
+	}
+
+	/**
+	 * Sets the value(s) for <b>detail</b> (Activity details defined in specific resource)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The details of the proposed activity represented in a specific resource
+     * </p> 
+	 */
+	public Activity setDetail(ResourceReferenceDt theValue) {
+		myDetail = theValue;
+		return this;
+	}
+
+  
+	/**
+	 * Gets the value(s) for <b>simple</b> (Activity details summarised here).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A simple summary of details suitable for a general care plan system (e.g. form driven) that doesn't know about specific resources such as procedure etc
+     * </p> 
+	 */
+	public ActivitySimple getSimple() {  
+		if (mySimple == null) {
+			mySimple = new ActivitySimple();
+		}
+		return mySimple;
+	}
+
+	/**
+	 * Sets the value(s) for <b>simple</b> (Activity details summarised here)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A simple summary of details suitable for a general care plan system (e.g. form driven) that doesn't know about specific resources such as procedure etc
+     * </p> 
+	 */
+	public Activity setSimple(ActivitySimple theValue) {
+		mySimple = theValue;
+		return this;
+	}
+
+  
+
+	}
+
+	/**
+	 * Block class for child element: <b>CarePlan.activity.simple</b> (Activity details summarised here)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A simple summary of details suitable for a general care plan system (e.g. form driven) that doesn't know about specific resources such as procedure etc
+     * </p> 
+	 */
+	@Block(name="CarePlan.activity.simple")	
+	public static class ActivitySimple extends BaseElement implements IResourceBlock {
+	
+	@Child(name="category", type=CodeDt.class, order=0, min=1, max=1)	
+	@Description(
+		shortDefinition="diet | drug | encounter | observation | procedure | supply | other",
+		formalDefinition="High-level categorization of the type of activity in a care plan."
+	)
+	private BoundCodeDt<CarePlanActivityCategoryEnum> myCategory;
+	
+	@Child(name="code", type=CodeableConceptDt.class, order=1, min=0, max=1)	
+	@Description(
+		shortDefinition="Detail type of activity",
+		formalDefinition="Detailed description of the type of activity.  E.g. What lab test, what procedure, what kind of encounter."
+	)
+	private CodeableConceptDt myCode;
+	
+	@Child(name="timing", order=2, min=0, max=1, type={
+		ScheduleDt.class,
+		PeriodDt.class,
+		StringDt.class,
+	})
+	@Description(
+		shortDefinition="When activity is to occur",
+		formalDefinition="The period, timing or frequency upon which the described activity is to occur."
+	)
+	private IDatatype myTiming;
+	
+	@Child(name="location", order=3, min=0, max=1, type={
+		ca.uhn.fhir.model.dstu.resource.Location.class,
+	})
+	@Description(
+		shortDefinition="Where it should happen",
+		formalDefinition="Identifies the facility where the activity will occur.  E.g. home, hospital, specific clinic, etc."
+	)
+	private ResourceReferenceDt myLocation;
+	
+	@Child(name="performer", order=4, min=0, max=Child.MAX_UNLIMITED, type={
+		ca.uhn.fhir.model.dstu.resource.Practitioner.class,
+		ca.uhn.fhir.model.dstu.resource.Organization.class,
+		ca.uhn.fhir.model.dstu.resource.RelatedPerson.class,
+		ca.uhn.fhir.model.dstu.resource.Patient.class,
+	})
+	@Description(
+		shortDefinition="Who's responsible?",
+		formalDefinition="Identifies who's expected to be involved in the activity."
+	)
+	private java.util.List<ResourceReferenceDt> myPerformer;
+	
+	@Child(name="product", order=5, min=0, max=1, type={
+		ca.uhn.fhir.model.dstu.resource.Medication.class,
+		ca.uhn.fhir.model.dstu.resource.Substance.class,
+	})
+	@Description(
+		shortDefinition="What's administered/supplied",
+		formalDefinition="Identifies the food, drug or other product being consumed or supplied in the activity."
+	)
+	private ResourceReferenceDt myProduct;
+	
+	@Child(name="dailyAmount", type=QuantityDt.class, order=6, min=0, max=1)	
+	@Description(
+		shortDefinition="How much consumed/day?",
+		formalDefinition="Identifies the quantity expected to be consumed in a given day."
+	)
+	private QuantityDt myDailyAmount;
+	
+	@Child(name="quantity", type=QuantityDt.class, order=7, min=0, max=1)	
+	@Description(
+		shortDefinition="How much is administered/supplied/consumed",
+		formalDefinition="Identifies the quantity expected to be supplied."
+	)
+	private QuantityDt myQuantity;
+	
+	@Child(name="details", type=StringDt.class, order=8, min=0, max=1)	
+	@Description(
+		shortDefinition="Extra info on activity occurrence",
+		formalDefinition="This provides a textual description of constraints on the activity occurrence, including relation to other activities.  It may also include objectives, pre-conditions and end-conditions.  Finally, it may convey specifics about the activity such as body site, method, route, etc."
+	)
+	private StringDt myDetails;
+	
+
+	@Override
+	public boolean isEmpty() {
+		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myCategory,  myCode,  myTiming,  myLocation,  myPerformer,  myProduct,  myDailyAmount,  myQuantity,  myDetails);
+	}
+	
+	@Override
+	public java.util.List<IElement> getAllPopulatedChildElements() {
+		return getAllPopulatedChildElementsOfType(null);
+	}
+
+	@Override
+	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
+		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myCategory, myCode, myTiming, myLocation, myPerformer, myProduct, myDailyAmount, myQuantity, myDetails);
+	}
+
+	/**
+	 * Gets the value(s) for <b>category</b> (diet | drug | encounter | observation | procedure | supply | other).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * High-level categorization of the type of activity in a care plan.
+     * </p> 
+	 */
+	public BoundCodeDt<CarePlanActivityCategoryEnum> getCategory() {  
+		if (myCategory == null) {
+			myCategory = new BoundCodeDt<CarePlanActivityCategoryEnum>(CarePlanActivityCategoryEnum.VALUESET_BINDER);
+		}
+		return myCategory;
+	}
+
+	/**
+	 * Sets the value(s) for <b>category</b> (diet | drug | encounter | observation | procedure | supply | other)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * High-level categorization of the type of activity in a care plan.
+     * </p> 
+	 */
+	public ActivitySimple setCategory(BoundCodeDt<CarePlanActivityCategoryEnum> theValue) {
+		myCategory = theValue;
+		return this;
+	}
+
+	/**
+	 * Sets the value(s) for <b>category</b> (diet | drug | encounter | observation | procedure | supply | other)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * High-level categorization of the type of activity in a care plan.
+     * </p> 
+	 */
+	public ActivitySimple setCategory(CarePlanActivityCategoryEnum theValue) {
+		getCategory().setValueAsEnum(theValue);
+		return this;
+	}
+
+  
+	/**
+	 * Gets the value(s) for <b>code</b> (Detail type of activity).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Detailed description of the type of activity.  E.g. What lab test, what procedure, what kind of encounter.
+     * </p> 
+	 */
+	public CodeableConceptDt getCode() {  
+		if (myCode == null) {
+			myCode = new CodeableConceptDt();
+		}
+		return myCode;
+	}
+
+	/**
+	 * Sets the value(s) for <b>code</b> (Detail type of activity)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Detailed description of the type of activity.  E.g. What lab test, what procedure, what kind of encounter.
+     * </p> 
+	 */
+	public ActivitySimple setCode(CodeableConceptDt theValue) {
+		myCode = theValue;
+		return this;
+	}
+
+  
+	/**
+	 * Gets the value(s) for <b>timing[x]</b> (When activity is to occur).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The period, timing or frequency upon which the described activity is to occur.
+     * </p> 
+	 */
+	public IDatatype getTiming() {  
+		return myTiming;
+	}
+
+	/**
+	 * Sets the value(s) for <b>timing[x]</b> (When activity is to occur)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The period, timing or frequency upon which the described activity is to occur.
+     * </p> 
+	 */
+	public ActivitySimple setTiming(IDatatype theValue) {
+		myTiming = theValue;
+		return this;
+	}
+
+  
+	/**
+	 * Gets the value(s) for <b>location</b> (Where it should happen).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Identifies the facility where the activity will occur.  E.g. home, hospital, specific clinic, etc.
+     * </p> 
+	 */
+	public ResourceReferenceDt getLocation() {  
+		if (myLocation == null) {
+			myLocation = new ResourceReferenceDt();
+		}
+		return myLocation;
+	}
+
+	/**
+	 * Sets the value(s) for <b>location</b> (Where it should happen)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Identifies the facility where the activity will occur.  E.g. home, hospital, specific clinic, etc.
+     * </p> 
+	 */
+	public ActivitySimple setLocation(ResourceReferenceDt theValue) {
+		myLocation = theValue;
+		return this;
+	}
+
+  
+	/**
+	 * Gets the value(s) for <b>performer</b> (Who's responsible?).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Identifies who's expected to be involved in the activity.
+     * </p> 
+	 */
+	public java.util.List<ResourceReferenceDt> getPerformer() {  
+		return myPerformer;
+	}
+
+	/**
+	 * Sets the value(s) for <b>performer</b> (Who's responsible?)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Identifies who's expected to be involved in the activity.
+     * </p> 
+	 */
+	public ActivitySimple setPerformer(java.util.List<ResourceReferenceDt> theValue) {
+		myPerformer = theValue;
+		return this;
+	}
+
+	/**
+	 * Adds and returns a new value for <b>performer</b> (Who's responsible?)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Identifies who's expected to be involved in the activity.
+     * </p> 
+	 */
+	public ResourceReferenceDt addPerformer() {
+		ResourceReferenceDt newType = new ResourceReferenceDt();
+		getPerformer().add(newType);
+		return newType; 
+	}
+  
+	/**
+	 * Gets the value(s) for <b>product</b> (What's administered/supplied).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Identifies the food, drug or other product being consumed or supplied in the activity.
+     * </p> 
+	 */
+	public ResourceReferenceDt getProduct() {  
+		return myProduct;
+	}
+
+	/**
+	 * Sets the value(s) for <b>product</b> (What's administered/supplied)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Identifies the food, drug or other product being consumed or supplied in the activity.
+     * </p> 
+	 */
+	public ActivitySimple setProduct(ResourceReferenceDt theValue) {
+		myProduct = theValue;
+		return this;
+	}
+
+  
+	/**
+	 * Gets the value(s) for <b>dailyAmount</b> (How much consumed/day?).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Identifies the quantity expected to be consumed in a given day.
+     * </p> 
+	 */
+	public QuantityDt getDailyAmount() {  
+		if (myDailyAmount == null) {
+			myDailyAmount = new QuantityDt();
+		}
+		return myDailyAmount;
+	}
+
+	/**
+	 * Sets the value(s) for <b>dailyAmount</b> (How much consumed/day?)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Identifies the quantity expected to be consumed in a given day.
+     * </p> 
+	 */
+	public ActivitySimple setDailyAmount(QuantityDt theValue) {
+		myDailyAmount = theValue;
+		return this;
+	}
+
+ 	/**
+	 * Sets the value for <b>dailyAmount</b> (How much consumed/day?)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Identifies the quantity expected to be consumed in a given day.
+     * </p> 
+	 */
+	public ActivitySimple setDailyAmount( QuantityCompararatorEnum theComparator,  long theValue,  String theUnits) {
+		myDailyAmount = new QuantityDt(theComparator, theValue, theUnits); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>dailyAmount</b> (How much consumed/day?)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Identifies the quantity expected to be consumed in a given day.
+     * </p> 
+	 */
+	public ActivitySimple setDailyAmount( QuantityCompararatorEnum theComparator,  double theValue,  String theUnits) {
+		myDailyAmount = new QuantityDt(theComparator, theValue, theUnits); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>dailyAmount</b> (How much consumed/day?)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Identifies the quantity expected to be consumed in a given day.
+     * </p> 
+	 */
+	public ActivitySimple setDailyAmount( long theValue) {
+		myDailyAmount = new QuantityDt(theValue); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>dailyAmount</b> (How much consumed/day?)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Identifies the quantity expected to be consumed in a given day.
+     * </p> 
+	 */
+	public ActivitySimple setDailyAmount( double theValue) {
+		myDailyAmount = new QuantityDt(theValue); 
+		return this; 
+	}
+
+ 
+	/**
+	 * Gets the value(s) for <b>quantity</b> (How much is administered/supplied/consumed).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Identifies the quantity expected to be supplied.
+     * </p> 
+	 */
+	public QuantityDt getQuantity() {  
+		if (myQuantity == null) {
+			myQuantity = new QuantityDt();
+		}
+		return myQuantity;
+	}
+
+	/**
+	 * Sets the value(s) for <b>quantity</b> (How much is administered/supplied/consumed)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Identifies the quantity expected to be supplied.
+     * </p> 
+	 */
+	public ActivitySimple setQuantity(QuantityDt theValue) {
+		myQuantity = theValue;
+		return this;
+	}
+
+ 	/**
+	 * Sets the value for <b>quantity</b> (How much is administered/supplied/consumed)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Identifies the quantity expected to be supplied.
+     * </p> 
+	 */
+	public ActivitySimple setQuantity( QuantityCompararatorEnum theComparator,  long theValue,  String theUnits) {
+		myQuantity = new QuantityDt(theComparator, theValue, theUnits); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>quantity</b> (How much is administered/supplied/consumed)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Identifies the quantity expected to be supplied.
+     * </p> 
+	 */
+	public ActivitySimple setQuantity( QuantityCompararatorEnum theComparator,  double theValue,  String theUnits) {
+		myQuantity = new QuantityDt(theComparator, theValue, theUnits); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>quantity</b> (How much is administered/supplied/consumed)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Identifies the quantity expected to be supplied.
+     * </p> 
+	 */
+	public ActivitySimple setQuantity( long theValue) {
+		myQuantity = new QuantityDt(theValue); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>quantity</b> (How much is administered/supplied/consumed)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Identifies the quantity expected to be supplied.
+     * </p> 
+	 */
+	public ActivitySimple setQuantity( double theValue) {
+		myQuantity = new QuantityDt(theValue); 
+		return this; 
+	}
+
+ 
+	/**
+	 * Gets the value(s) for <b>details</b> (Extra info on activity occurrence).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * This provides a textual description of constraints on the activity occurrence, including relation to other activities.  It may also include objectives, pre-conditions and end-conditions.  Finally, it may convey specifics about the activity such as body site, method, route, etc.
+     * </p> 
+	 */
+	public StringDt getDetails() {  
+		if (myDetails == null) {
+			myDetails = new StringDt();
+		}
+		return myDetails;
+	}
+
+	/**
+	 * Sets the value(s) for <b>details</b> (Extra info on activity occurrence)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * This provides a textual description of constraints on the activity occurrence, including relation to other activities.  It may also include objectives, pre-conditions and end-conditions.  Finally, it may convey specifics about the activity such as body site, method, route, etc.
+     * </p> 
+	 */
+	public ActivitySimple setDetails(StringDt theValue) {
+		myDetails = theValue;
+		return this;
+	}
+
+ 	/**
+	 * Sets the value for <b>details</b> (Extra info on activity occurrence)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * This provides a textual description of constraints on the activity occurrence, including relation to other activities.  It may also include objectives, pre-conditions and end-conditions.  Finally, it may convey specifics about the activity such as body site, method, route, etc.
+     * </p> 
+	 */
+	public ActivitySimple setDetails( String theString) {
+		myDetails = new StringDt(theString); 
+		return this; 
+	}
+
+ 
+
+	}
+
+
+
+
+
+}

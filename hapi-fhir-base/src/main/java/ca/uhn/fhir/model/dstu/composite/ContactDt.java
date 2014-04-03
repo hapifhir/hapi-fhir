@@ -31,7 +31,7 @@ import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 
 /**
- * HAPI/FHIR <b>Contact</b> Datatype
+ * HAPI/FHIR <b>ContactDt</b> Datatype
  * (Technology mediated contact details (phone, fax, email, etc))
  *
  * <p>
@@ -44,8 +44,8 @@ import ca.uhn.fhir.model.primitive.StringDt;
  * Need to track phone, fax, mobile, sms numbers, email addresses, twitter tags, etc.
  * </p> 
  */
-@DatatypeDef(name="Contact") 
-public class ContactDt 
+@DatatypeDef(name="ContactDt") 
+public class ContactDt
         extends  BaseElement         implements ICompositeDatatype  {
 
 	/**

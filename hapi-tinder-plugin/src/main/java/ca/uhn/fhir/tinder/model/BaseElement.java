@@ -1,6 +1,6 @@
 package ca.uhn.fhir.tinder.model;
 
-import static org.apache.commons.lang.StringUtils.isNotBlank;
+import static org.apache.commons.lang.StringUtils.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -63,11 +63,11 @@ public abstract class BaseElement {
 	}
 
 	public String getCardMax() {
-		return myCardMax;
+		return defaultString(myCardMax,"1");
 	}
 
 	public String getCardMin() {
-		return myCardMin;
+		return defaultString(myCardMin,"0");
 	}
 
 	public Map<String, Slicing> getChildElementNameToSlicing() {

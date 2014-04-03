@@ -30,7 +30,7 @@ import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 
 /**
- * HAPI/FHIR <b>Address</b> Datatype
+ * HAPI/FHIR <b>AddressDt</b> Datatype
  * (A postal address)
  *
  * <p>
@@ -43,8 +43,8 @@ import ca.uhn.fhir.model.primitive.StringDt;
  * Need to be able to record postal addresses, along with notes about their use
  * </p> 
  */
-@DatatypeDef(name="Address") 
-public class AddressDt 
+@DatatypeDef(name="AddressDt") 
+public class AddressDt
         extends  BaseElement         implements ICompositeDatatype  {
 
 	/**

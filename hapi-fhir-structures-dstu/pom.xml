@@ -93,7 +93,7 @@
 						<baseResourceName>practitioner</baseResourceName>
 						<baseResourceName>procedure</baseResourceName>
 						<baseResourceName>profile</baseResourceName>
-						<baseResourceName>protocol</baseResourceName>
+						<!-- <baseResourceName>protocol</baseResourceName> -->
 						<!-- <baseResourceName>provenance-extensions</baseResourceName> -->
 						<baseResourceName>provenance</baseResourceName>
 						<baseResourceName>query</baseResourceName>
@@ -101,22 +101,22 @@
 						<baseResourceName>questionnaire</baseResourceName>
 						<baseResourceName>relatedperson</baseResourceName>
 						<baseResourceName>remittance</baseResourceName>
-						<baseResourceName>resource</baseResourceName>
+						<!-- <baseResourceName>resource</baseResourceName> -->
 						<baseResourceName>securityevent</baseResourceName>
-						<baseResourceName>sequence</baseResourceName>
+						<!--<baseResourceName>sequence</baseResourceName>-->
 						<baseResourceName>sequencinganalysis</baseResourceName>
 						<baseResourceName>sequencinglab</baseResourceName>
 						<baseResourceName>slot</baseResourceName>
 						<baseResourceName>specimen</baseResourceName>
 						<baseResourceName>substance</baseResourceName>
 						<baseResourceName>supply</baseResourceName>
-						<baseResourceName>template</baseResourceName>
+						<!--<baseResourceName>template</baseResourceName>-->
 						<baseResourceName>test</baseResourceName>
 						<baseResourceName>user</baseResourceName>
 						<!-- <baseResourceName>valueset-extensions</baseResourceName>  -->
 						<baseResourceName>valueset</baseResourceName>
-						<baseResourceName>vcfmeta</baseResourceName>
-						<baseResourceName>vcfvariant</baseResourceName>
+						<!--<baseResourceName>vcfmeta</baseResourceName>-->
+						<!--<baseResourceName>vcfvariant</baseResourceName>-->
 					</baseResourceNames>
 					<buildDatatypes>true</buildDatatypes>
 				</configuration>

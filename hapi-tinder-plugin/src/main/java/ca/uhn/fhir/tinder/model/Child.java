@@ -51,6 +51,9 @@ public abstract class Child extends BaseElement {
 		if ("Class".equals(elementName)) {
 			elementName = "ClassElement";
 		}
+		if ("Language".equals(elementName)) {
+			elementName = "LanguageElement";
+		}
 		return elementName;
 	}
 

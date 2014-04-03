@@ -5,7 +5,11 @@ public class Resource extends BaseRootType {
 	@Override
 	public void setElementName(String theName) {
 		super.setElementName(theName);
-		setDeclaringClassNameComplete(theName);
+		String name = theName;
+		if ("List".equals(name)) {
+			name="ListResource";
+		}
+		setDeclaringClassNameComplete(name);
 	}
 
 }

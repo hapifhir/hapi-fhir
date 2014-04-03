@@ -42,17 +42,6 @@ ExtensionDt ext2 = new ExtensionDt(false, "http://examples.com#moreext", new Str
 given.addUndeclaredExtension(ext2);
 //END SNIPPET: resourceStringExtension
 
-//START SNIPPET: subExtension
-ExtensionDt parent = new ExtensionDt(false, "http://example.com#parent");
-patient.addUndeclaredExtension(parent);
-
-ExtensionDt child1 = new ExtensionDt(false, "http://example.com#parent", new StringDt("value1"));
-parent.addUndeclaredExtension(child1);
-
-ExtensionDt child2 = new ExtensionDt(false, "http://example.com#parent", new StringDt("value1"));
-parent.addUndeclaredExtension(child2);
-//END SNIPPET: subExtension
-
 String output = new FhirContext().newXmlParser().setPrettyPrint(true).encodeResourceToString(patient);
 System.out.println(output);
 
@@ -69,5 +58,22 @@ List<ExtensionDt> modExts = patient.getUndeclaredModifierExtensions();
 //END SNIPPET: parseExtension
 
 }
+
+
+public void foo() {
+//START SNIPPET: subExtension
+Patient patient = new Patient();
 	
+ExtensionDt parent = new ExtensionDt(false, "http://example.com#parent");
+patient.addUndeclaredExtension(parent);
+
+ExtensionDt child1 = new ExtensionDt(false, "http://example.com#childOne", new StringDt("value1"));
+parent.addUndeclaredExtension(child1);
+
+ExtensionDt child2 = new ExtensionDt(false, "http://example.com#childTwo", new StringDt("value1"));
+parent.addUndeclaredExtension(child2);
+//END SNIPPET: subExtension
+	
+}
+
 }

@@ -31,7 +31,7 @@ import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.util.DatatypeUtil;
 
 /**
- * HAPI/FHIR <b>HumanName</b> Datatype
+ * HAPI/FHIR <b>HumanNameDt</b> Datatype
  * (Name of a human - parts and usage)
  *
  * <p>
@@ -44,8 +44,8 @@ import ca.uhn.fhir.util.DatatypeUtil;
  * Need to be able to record names, along with notes about their use
  * </p> 
  */
-@DatatypeDef(name="HumanName") 
-public class HumanNameDt 
+@DatatypeDef(name="HumanNameDt") 
+public class HumanNameDt
         extends  BaseElement         implements ICompositeDatatype  {
 
 	/**

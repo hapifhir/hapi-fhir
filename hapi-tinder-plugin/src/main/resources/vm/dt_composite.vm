@@ -25,22 +25,22 @@ import ${import};
  * </p> 
  */
 @DatatypeDef(name="${className}") 
-public class ${className}Dt 
-        extends #{if}(${className}=="ResourceReference") BaseResourceReference #{else} BaseElement #{end} 
-        implements ICompositeDatatype  #{if}( ${className} == "Identifier" || ${className} == "Coding" ), IQueryParameterType #{end}
+public class ${className}
+        extends #{if}(${className}=="ResourceReferenceDt") BaseResourceReference #{else} BaseElement #{end} 
+        implements ICompositeDatatype  #{if}( ${className} == "IdentifierDt" || ${className} == "CodingDt" ), IQueryParameterType #{end}
 {
 
 	/**
 	 * Constructor
 	 */
-	public ${className}Dt() {
+	public ${className}() {
 		// nothing
 	}
 
 #########################
 ### Type-specific constructors
 #########################
-#if ( ${className} == "Identifier" )
+#if ( ${className} == "IdentifierDt" )
 	/**
 	 * Creates a new identifier with the given system and value
 	 */
@@ -61,7 +61,7 @@ public class ${className}Dt
 		setLabel(theLabel);
 	}
 #end
-#if ( ${className} == "Coding" )
+#if ( ${className} == "CodingDt" )
 	/**
 	 * Creates a new Coding with the given system and code
 	 */
@@ -70,7 +70,7 @@ public class ${className}Dt
 		setCode(theCode);
 	}
 #end
-#if ( ${className} == "Quantity" )
+#if ( ${className} == "QuantityDt" )
 	/**
 	 * Constructor
 	 */
@@ -107,7 +107,7 @@ public class ${className}Dt
 		setUnits(theUnits);
 	}
 #end
-#if ( ${className} == "ResourceReference" )
+#if ( ${className} == "ResourceReferenceDt" )
 	/**
 	 * Constructor which creates a normal resource reference
 	 * 
@@ -145,7 +145,7 @@ public class ${className}Dt
 #########################
 ### Type-specific methods
 #########################
-#if ( ${className} == "Coding" )
+#if ( ${className} == "CodingDt" )
 	/**
 	 * Returns true if <code>this</code> Coding has the same {@link CodingDt#[[#]]#getCode() Code}
 	 * and {@link CodingDt#[[#]]#getSystem() system} (as compared by simple equals comparison).
@@ -184,7 +184,7 @@ public class ${className}Dt
 		}
 	}	
 #end
-#if ( ${className} == "HumanName" )
+#if ( ${className} == "HumanNameDt" )
 	/**
 	 * Returns all repetitions of {@link ${hash}getFamily() family name} as a space separated string
 	 * 
@@ -221,7 +221,7 @@ public class ${className}Dt
 		return ca.uhn.fhir.util.DatatypeUtil.joinStringsSpaceSeparated(getSuffix());
 	}
 #end
-#if ( ${className} == "Identifier" )
+#if ( ${className} == "IdentifierDt" )
 	/**
 	 * Returns true if <code>this</code> identifier has the same {@link IdentifierDt#[[#]]#getValue() value}
 	 * and {@link IdentifierDt#[[#]]#getSystem() system} (as compared by simple equals comparison).

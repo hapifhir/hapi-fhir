@@ -37,7 +37,7 @@ import ca.uhn.fhir.model.primitive.DecimalDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 
 /**
- * HAPI/FHIR <b>Schedule</b> Datatype
+ * HAPI/FHIR <b>ScheduleDt</b> Datatype
  * (A schedule that specifies an event that may occur multiple times)
  *
  * <p>
@@ -50,8 +50,8 @@ import ca.uhn.fhir.model.primitive.IntegerDt;
  * Need to able to track schedules. There are several different ways to do scheduling: one or more specified times, a simple rules like three times a day, or  before/after meals
  * </p> 
  */
-@DatatypeDef(name="Schedule") 
-public class ScheduleDt 
+@DatatypeDef(name="ScheduleDt") 
+public class ScheduleDt
         extends  BaseElement         implements ICompositeDatatype  {
 
 	/**

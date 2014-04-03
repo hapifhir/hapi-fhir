@@ -33,7 +33,7 @@ import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
 
 /**
- * HAPI/FHIR <b>Quantity</b> Datatype
+ * HAPI/FHIR <b>QuantityDt</b> Datatype
  * (A measured or measurable amount)
  *
  * <p>
@@ -46,8 +46,8 @@ import ca.uhn.fhir.model.primitive.UriDt;
  * Need to able to capture all sorts of measured values, even if the measured value are not precisely quantified. Values include exact measures such as 3.51g, customary units such as 3 tablets, and currencies such as $100.32USD
  * </p> 
  */
-@DatatypeDef(name="Quantity") 
-public class QuantityDt 
+@DatatypeDef(name="QuantityDt") 
+public class QuantityDt
         extends  BaseElement         implements ICompositeDatatype  {
 
 	/**

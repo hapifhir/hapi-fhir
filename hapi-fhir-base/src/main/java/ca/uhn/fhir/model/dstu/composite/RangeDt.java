@@ -27,7 +27,7 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
 
 /**
- * HAPI/FHIR <b>Range</b> Datatype
+ * HAPI/FHIR <b>RangeDt</b> Datatype
  * (Set of values bounded by low and high)
  *
  * <p>
@@ -40,8 +40,8 @@ import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
  * Need to be able to specify ranges of values
  * </p> 
  */
-@DatatypeDef(name="Range") 
-public class RangeDt 
+@DatatypeDef(name="RangeDt") 
+public class RangeDt
         extends  BaseElement         implements ICompositeDatatype  {
 
 	/**

@@ -31,7 +31,7 @@ import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
 
 /**
- * HAPI/FHIR <b>Attachment</b> Datatype
+ * HAPI/FHIR <b>AttachmentDt</b> Datatype
  * (Content in a format defined elsewhere)
  *
  * <p>
@@ -44,8 +44,8 @@ import ca.uhn.fhir.model.primitive.UriDt;
  * Many models need to include data defined in other specifications that is complex and opaque to the healthcare model. This includes documents, media recordings, structured data, etc.
  * </p> 
  */
-@DatatypeDef(name="Attachment") 
-public class AttachmentDt 
+@DatatypeDef(name="AttachmentDt") 
+public class AttachmentDt
         extends  BaseElement         implements ICompositeDatatype  {
 
 	/**
@@ -68,7 +68,7 @@ public class AttachmentDt
 		shortDefinition="Human language of the content (BCP-47)",
 		formalDefinition="The human language of the content. The value can be any valid value according to BCP 47"
 	)
-	private CodeDt myLanguage;
+	private CodeDt myLanguageElement;
 	
 	@Child(name="data", type=Base64BinaryDt.class, order=2, min=0, max=1)	
 	@Description(
@@ -108,7 +108,7 @@ public class AttachmentDt
 
 	@Override
 	public boolean isEmpty() {
-		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myContentType,  myLanguage,  myData,  myUrl,  mySize,  myHash,  myTitle);
+		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myContentType,  myLanguageElement,  myData,  myUrl,  mySize,  myHash,  myTitle);
 	}
 	
 	@Override
@@ -118,7 +118,7 @@ public class AttachmentDt
 
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
-		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myContentType, myLanguage, myData, myUrl, mySize, myHash, myTitle);
+		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myContentType, myLanguageElement, myData, myUrl, mySize, myHash, myTitle);
 	}
 
 	/**
@@ -175,11 +175,11 @@ public class AttachmentDt
      * The human language of the content. The value can be any valid value according to BCP 47
      * </p> 
 	 */
-	public CodeDt getLanguage() {  
-		if (myLanguage == null) {
-			myLanguage = new CodeDt();
+	public CodeDt getLanguageElement() {  
+		if (myLanguageElement == null) {
+			myLanguageElement = new CodeDt();
 		}
-		return myLanguage;
+		return myLanguageElement;
 	}
 
 	/**
@@ -190,8 +190,8 @@ public class AttachmentDt
      * The human language of the content. The value can be any valid value according to BCP 47
      * </p> 
 	 */
-	public AttachmentDt setLanguage(CodeDt theValue) {
-		myLanguage = theValue;
+	public AttachmentDt setLanguageElement(CodeDt theValue) {
+		myLanguageElement = theValue;
 		return this;
 	}
 
@@ -203,8 +203,8 @@ public class AttachmentDt
      * The human language of the content. The value can be any valid value according to BCP 47
      * </p> 
 	 */
-	public AttachmentDt setLanguage( String theCode) {
-		myLanguage = new CodeDt(theCode); 
+	public AttachmentDt setLanguageElement( String theCode) {
+		myLanguageElement = new CodeDt(theCode); 
 		return this; 
 	}
 

@@ -31,7 +31,7 @@ import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
 
 /**
- * HAPI/FHIR <b>Coding</b> Datatype
+ * HAPI/FHIR <b>CodingDt</b> Datatype
  * (A reference to a code defined by a terminology system)
  *
  * <p>
@@ -44,8 +44,8 @@ import ca.uhn.fhir.model.primitive.UriDt;
  * References to codes are very common in healthcare models
  * </p> 
  */
-@DatatypeDef(name="Coding") 
-public class CodingDt 
+@DatatypeDef(name="CodingDt") 
+public class CodingDt
         extends  BaseElement         implements ICompositeDatatype  , IQueryParameterType {
 
 	/**
