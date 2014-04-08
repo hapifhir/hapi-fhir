@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.api;
 
+import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
 import ca.uhn.fhir.model.primitive.IdDt;
 
 public class MethodOutcome {
@@ -7,8 +8,13 @@ public class MethodOutcome {
 	private IdDt myId;
 	private IdDt myVersionId;
 	private boolean myCreated;
+	private OperationOutcome myOperationOutcome;
 
 	public MethodOutcome() {
+	}
+
+	public MethodOutcome(IdDt theId) {
+		myId=theId;
 	}
 
 	public MethodOutcome(boolean theCreated, IdDt theId, IdDt theVersionId) {
@@ -48,6 +54,14 @@ public class MethodOutcome {
 	 */
 	public void setCreated(boolean theCreated) {
 		myCreated=theCreated;
+	}
+
+	public void setOperationOutcome(OperationOutcome theOperationOutcome) {
+		myOperationOutcome=theOperationOutcome;
+	}
+
+	public OperationOutcome getOperationOutcome() {
+		return myOperationOutcome;
 	}
 
 }

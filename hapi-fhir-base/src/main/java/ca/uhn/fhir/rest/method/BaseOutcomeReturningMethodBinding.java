@@ -18,17 +18,14 @@ import org.apache.commons.lang3.StringUtils;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.BaseClientInvocation;
 import ca.uhn.fhir.rest.method.SearchMethodBinding.RequestType;
 import ca.uhn.fhir.rest.param.IParameter;
-import ca.uhn.fhir.rest.param.ResourceParameter;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingUtil;
 import ca.uhn.fhir.rest.server.RestfulServer;
@@ -51,47 +48,35 @@ public abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBindin
 		ALLOWED_PARAMS = Collections.unmodifiableSet(set);
 	}
 
-	private int myResourceParameterIndex;
 	private List<IParameter> myParameters;
-	private String myResourceName;
+	private boolean myReturnVoid;
 
 	public BaseOutcomeReturningMethodBinding(Method theMethod, FhirContext theContext, Class<?> theMethodAnnotation) {
 		super(theMethod, theContext);
 		myParameters = Util.getResourceParameters(theMethod);
-		ResourceParameter resourceParameter = null;
-
-		int index = 0;
-		for (IParameter next : myParameters) {
-			if (next instanceof ResourceParameter) {
-				resourceParameter = (ResourceParameter) next;
-				myResourceName = theContext.getResourceDefinition(resourceParameter.getResourceType()).getName();
-				myResourceParameterIndex = index;
-			}
-			index++;
-		}
-
-		if (resourceParameter == null) {
-			throw new ConfigurationException("Method " + theMethod.getName() + " in type " + theMethod.getDeclaringClass().getCanonicalName() + " does not have a parameter annotated with @" + ResourceParam.class.getSimpleName());
-		}
 
 		if (!theMethod.getReturnType().equals(MethodOutcome.class)) {
-			throw new ConfigurationException("Method " + theMethod.getName() + " in type " + theMethod.getDeclaringClass().getCanonicalName() + " is a @" + theMethodAnnotation.getSimpleName() + " method but it does not return " + MethodOutcome.class);
+			if (!allowVoidReturnType()) {
+				throw new ConfigurationException("Method " + theMethod.getName() + " in type " + theMethod.getDeclaringClass().getCanonicalName() + " is a @" + theMethodAnnotation.getSimpleName()
+						+ " method but it does not return " + MethodOutcome.class);
+			} else if (theMethod.getReturnType() == Void.class) {
+				myReturnVoid = true;
+			}
 		}
 
 	}
 
-	@Override
-	public BaseClientInvocation invokeClient(Object[] theArgs) throws InternalErrorException {
-		IResource resource = (IResource) theArgs[myResourceParameterIndex];
-		if (resource == null) {
-			throw new NullPointerException("Resource can not be null");
-		}
-
-		RuntimeResourceDefinition def = getContext().getResourceDefinition(resource);
-		String resourceName = def.getName();
-
-		return createClientInvocation(theArgs, resource, resourceName);
+	protected List<IParameter> getParameters() {
+		return myParameters;
 	}
+
+	/**
+	 * Subclasses may override to allow a void method return type, which is allowable for some methods (e.g. delete)
+	 */
+	protected boolean allowVoidReturnType() {
+		return false;
+	}
+
 
 	protected abstract BaseClientInvocation createClientInvocation(Object[] theArgs, IResource resource, String resourceName);
 
@@ -100,6 +85,10 @@ public abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBindin
 		switch (theResponseStatusCode) {
 		case Constants.STATUS_HTTP_200_OK:
 		case Constants.STATUS_HTTP_201_CREATED:
+		case Constants.STATUS_HTTP_204_NO_CONTENT:
+			if (myReturnVoid) {
+				return null;
+			}
 			List<String> locationHeaders = theHeaders.get("location");
 			MethodOutcome retVal = new MethodOutcome();
 			if (locationHeaders != null && locationHeaders.size() > 0) {
@@ -128,7 +117,7 @@ public abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBindin
 	}
 
 	protected void parseContentLocation(MethodOutcome theOutcomeToPopulate, String theLocationHeader) {
-		String resourceNamePart = "/" + myResourceName + "/";
+		String resourceNamePart = "/" + getResourceName() + "/";
 		int resourceIndex = theLocationHeader.lastIndexOf(resourceNamePart);
 		if (resourceIndex > -1) {
 			int idIndexStart = resourceIndex + resourceNamePart.length();
@@ -146,9 +135,7 @@ public abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBindin
 		}
 	}
 
-	public String getResourceName() {
-		return myResourceName;
-	}
+	public abstract String getResourceName();
 
 	@Override
 	public void invokeServer(RestfulServer theServer, Request theRequest, HttpServletResponse theResponse) throws BaseServerResponseException, IOException {
@@ -166,7 +153,7 @@ public abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBindin
 		}
 
 		addAdditionalParams(theRequest, params);
-		
+
 		MethodOutcome response;
 		try {
 			response = (MethodOutcome) this.getMethod().invoke(theRequest.getResourceProvider(), params);
@@ -179,24 +166,28 @@ public abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBindin
 		}
 
 		if (response == null) {
-			throw new ConfigurationException("Method " + getMethod().getName() + " in type " + getMethod().getDeclaringClass().getCanonicalName() + " returned null");
-		}
-
-		if (response.isCreated()) {
-			theResponse.setStatus(Constants.STATUS_HTTP_201_CREATED);
-			StringBuilder b = new StringBuilder();
-			b.append(theRequest.getFhirServerBase());
-			b.append('/');
-			b.append(myResourceName);
-			b.append('/');
-			b.append(response.getId().getValue());
-			if (response.getVersionId() != null && response.getVersionId().isEmpty() == false) {
-				b.append("/_history/");
-				b.append(response.getVersionId().getValue());
+			if (myReturnVoid == false) {
+				throw new ConfigurationException("Method " + getMethod().getName() + " in type " + getMethod().getDeclaringClass().getCanonicalName() + " returned null");
 			}
-			theResponse.addHeader("Location", b.toString());
+		} else if (!myReturnVoid) {
+			if (response.isCreated()) {
+				theResponse.setStatus(Constants.STATUS_HTTP_201_CREATED);
+				StringBuilder b = new StringBuilder();
+				b.append(theRequest.getFhirServerBase());
+				b.append('/');
+				b.append(getResourceName());
+				b.append('/');
+				b.append(response.getId().getValue());
+				if (response.getVersionId() != null && response.getVersionId().isEmpty() == false) {
+					b.append("/_history/");
+					b.append(response.getVersionId().getValue());
+				}
+				theResponse.addHeader("Location", b.toString());
+			} else {
+				theResponse.setStatus(Constants.STATUS_HTTP_200_OK);
+			}
 		} else {
-			theResponse.setStatus(Constants.STATUS_HTTP_200_OK);
+			theResponse.setStatus(Constants.STATUS_HTTP_204_NO_CONTENT);
 		}
 
 		theServer.addHapiHeader(theResponse);
@@ -221,7 +212,7 @@ public abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBindin
 	}
 
 	protected abstract Set<RequestType> provideAllowableRequestTypes();
-	
+
 	@Override
 	public boolean matches(Request theRequest) {
 		Set<RequestType> allowableRequestTypes = provideAllowableRequestTypes();
@@ -229,7 +220,7 @@ public abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBindin
 		if (!allowableRequestTypes.contains(requestType)) {
 			return false;
 		}
-		if (!myResourceName.equals(theRequest.getResourceName())) {
+		if (!getResourceName().equals(theRequest.getResourceName())) {
 			return false;
 		}
 		if (StringUtils.isNotBlank(theRequest.getOperation())) {

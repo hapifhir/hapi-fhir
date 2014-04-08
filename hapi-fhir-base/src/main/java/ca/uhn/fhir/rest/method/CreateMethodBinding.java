@@ -13,7 +13,7 @@ import ca.uhn.fhir.rest.client.BaseClientInvocation;
 import ca.uhn.fhir.rest.client.PostClientInvocation;
 import ca.uhn.fhir.rest.method.SearchMethodBinding.RequestType;
 
-public class CreateMethodBinding extends BaseOutcomeReturningMethodBinding {
+public class CreateMethodBinding extends BaseOutcomeReturningMethodBindingWithResourceParam {
 
 	
 

@@ -14,6 +14,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
@@ -41,6 +42,7 @@ import ca.uhn.fhir.model.dstu.composite.HumanNameDt;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.resource.Conformance;
 import ca.uhn.fhir.model.dstu.resource.DiagnosticReport;
+import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -48,6 +50,7 @@ import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.annotation.Create;
+import ca.uhn.fhir.rest.annotation.Delete;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.IncludeParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
@@ -548,6 +551,27 @@ public class ResfulServerMethodTest {
 	}
 
 	@Test
+	public void testDelete() throws Exception {
+
+		// HttpPost httpPost = new HttpPost("http://localhost:" + ourPort +
+		// "/Patient/1");
+		// httpPost.setEntity(new StringEntity("test",
+		// ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+
+		HttpDelete httpGet = new HttpDelete("http://localhost:" + ourPort + "/Patient/1234");
+		HttpResponse status = ourClient.execute(httpGet);
+
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		ourLog.info("Response was:\n{}", responseContent);
+
+		assertEquals(200, status.getStatusLine().getStatusCode());
+
+		OperationOutcome patient = (OperationOutcome) ourCtx.newXmlParser().parseBundle(responseContent).getEntries().get(0).getResource();
+		assertEquals("1234", patient.getIssueFirstRep().getDetails().getValue());
+
+	}
+	
+	@Test
 	public void testPrettyPrint() throws Exception {
 
 		// HttpPost httpPost = new HttpPost("http://localhost:" + ourPort +
@@ -718,6 +742,12 @@ public class ResfulServerMethodTest {
 			return new MethodOutcome(true, id, version);
 		}
 
+		@SuppressWarnings("unused")
+		@Delete()
+		public void deleteDiagnosticReport(@IdParam IdDt theId) {
+			// do nothing
+		}
+
 	}
 	
 	/**
@@ -768,6 +798,15 @@ public class ResfulServerMethodTest {
 			return new MethodOutcome(true, id, version);
 		}
 
+		@Delete()
+		public MethodOutcome deletePatient(@IdParam IdDt theId) {
+			MethodOutcome retVal = new MethodOutcome();
+			retVal.setOperationOutcome(new OperationOutcome());
+			retVal.getOperationOutcome().addIssue().setDetails(theId.getValue());
+			return retVal;
+		}
+
+		
 		@Search(queryName="someQueryNoParams")
 		public Patient getPatientNoParams() {
 			Patient next = getIdToPatient().get("1");

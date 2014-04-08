@@ -23,7 +23,7 @@ import ca.uhn.fhir.rest.method.SearchMethodBinding.RequestType;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
-public class UpdateMethodBinding extends BaseOutcomeReturningMethodBinding {
+public class UpdateMethodBinding extends BaseOutcomeReturningMethodBindingWithResourceParam {
 
 	private Integer myIdParameterIndex;
 

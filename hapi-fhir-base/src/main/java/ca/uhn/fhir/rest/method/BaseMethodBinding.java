@@ -22,6 +22,7 @@ import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.annotation.Create;
+import ca.uhn.fhir.rest.annotation.Delete;
 import ca.uhn.fhir.rest.annotation.Metadata;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.Search;
@@ -30,6 +31,7 @@ import ca.uhn.fhir.rest.client.BaseClientInvocation;
 import ca.uhn.fhir.rest.client.exceptions.NonFhirResponseException;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingUtil;
+import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -75,13 +77,15 @@ public abstract class BaseMethodBinding {
 		return parser;
 	}
 
-	public static BaseMethodBinding bindMethod(Class<? extends IResource> theReturnType, Method theMethod, FhirContext theContext) {
+	public static BaseMethodBinding bindMethod(Class<? extends IResource> theReturnType, Method theMethod, FhirContext theContext, IResourceProvider theProvider) {
 		Read read = theMethod.getAnnotation(Read.class);
 		Search search = theMethod.getAnnotation(Search.class);
 		Metadata conformance = theMethod.getAnnotation(Metadata.class);
 		Create create = theMethod.getAnnotation(Create.class);
 		Update update = theMethod.getAnnotation(Update.class);
-		if (!verifyMethodHasZeroOrOneOperationAnnotation(theMethod, read, search, conformance,create,update)) {
+		Delete delete = theMethod.getAnnotation(Delete.class);
+		// ** if you add another annotation above, also add it to the next line:
+		if (!verifyMethodHasZeroOrOneOperationAnnotation(theMethod, read, search, conformance,create,update,delete)) {
 			return null;
 		}
 
@@ -109,6 +113,8 @@ public abstract class BaseMethodBinding {
 			return new CreateMethodBinding(theMethod, theContext);
 		} else if (update != null) {
 			return new UpdateMethodBinding(theMethod, theContext);
+		} else if (delete != null) {
+			return new DeleteMethodBinding(theMethod, theContext, theProvider);
 		} else {
 			throw new ConfigurationException("Did not detect any FHIR annotations on method '" + theMethod.getName() + "' on type: " + theMethod.getDeclaringClass().getCanonicalName());
 		}
@@ -202,7 +208,7 @@ public abstract class BaseMethodBinding {
 	public abstract Object invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException, BaseServerResponseException;
 
 	public static BaseMethodBinding bindSystemMethod(Method theMethod, FhirContext theContext) {
-		return bindMethod(null, theMethod, theContext);
+		return bindMethod(null, theMethod, theContext, null);
 	}
 
 }
