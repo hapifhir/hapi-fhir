@@ -180,7 +180,7 @@ public abstract class BaseMethodBinding {
 		}
 	}
 
-	static EncodingUtil determineResponseEncoding(HttpServletRequest theRequest, Map<String, String[]> theParams) {
+	public static EncodingUtil determineResponseEncoding(HttpServletRequest theRequest, Map<String, String[]> theParams) {
 		String[] format = theParams.remove(Constants.PARAM_FORMAT);
 		if (format != null) {
 			for (String nextFormat : format) {

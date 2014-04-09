@@ -20,39 +20,40 @@ import ca.uhn.fhir.rest.client.PostClientInvocation;
 import ca.uhn.fhir.rest.method.SearchMethodBinding.RequestType;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 public class DeleteMethodBinding extends BaseOutcomeReturningMethodBinding {
-
-	
 
 	private String myResourceName;
 	private Integer myIdParameterIndex;
 
 	public DeleteMethodBinding(Method theMethod, FhirContext theContext, IResourceProvider theProvider) {
 		super(theMethod, theContext, Delete.class);
-		
+
 		Delete deleteAnnotation = theMethod.getAnnotation(Delete.class);
 		Class<? extends IResource> resourceType = deleteAnnotation.resourceType();
 		if (resourceType != Delete.NotSpecified.class) {
 			RuntimeResourceDefinition def = theContext.getResourceDefinition(resourceType);
 			myResourceName = def.getName();
 		} else {
-			if (theProvider!=null) {
+			if (theProvider != null) {
 				RuntimeResourceDefinition def = theContext.getResourceDefinition(theProvider.getResourceType());
 				myResourceName = def.getName();
-			}else {
-				throw new ConfigurationException("Can not determine resource type for method '"+theMethod.getName() + "' on type " + theMethod.getDeclaringClass().getCanonicalName() + " - Did you forget to include the resourceType() value on the @" + Delete.class.getSimpleName() + " method annotation?");
+			} else {
+				throw new ConfigurationException("Can not determine resource type for method '" + theMethod.getName() + "' on type " + theMethod.getDeclaringClass().getCanonicalName() + " - Did you forget to include the resourceType() value on the @"
+						+ Delete.class.getSimpleName() + " method annotation?");
 			}
 		}
-		
+
 		myIdParameterIndex = Util.findIdParameterIndex(theMethod);
 		if (myIdParameterIndex == null) {
 			throw new ConfigurationException("Method '" + theMethod.getName() + "' on type '" + theMethod.getDeclaringClass().getCanonicalName() + "' has no parameter annotated with the @" + IdParam.class.getSimpleName() + " annotation");
 		}
-		
+
 		Integer versionIdParameterIndex = Util.findVersionIdParameterIndex(theMethod);
-		if (versionIdParameterIndex!=null) {
-			throw new ConfigurationException("Method '" + theMethod.getName() + "' on type '" + theMethod.getDeclaringClass().getCanonicalName() + "' has a parameter annotated with the @" + VersionIdParam.class.getSimpleName() + " annotation but delete methods may not have this annotation");
+		if (versionIdParameterIndex != null) {
+			throw new ConfigurationException("Method '" + theMethod.getName() + "' on type '" + theMethod.getDeclaringClass().getCanonicalName() + "' has a parameter annotated with the @" + VersionIdParam.class.getSimpleName()
+					+ " annotation but delete methods may not have this annotation");
 		}
 
 	}
@@ -90,11 +91,11 @@ public class DeleteMethodBinding extends BaseOutcomeReturningMethodBinding {
 		return myResourceName;
 	}
 
-//	@Override
-//	public boolean matches(Request theRequest) {
-//		// TODO Auto-generated method stub
-//		return super.matches(theRequest);
-//	}
+	// @Override
+	// public boolean matches(Request theRequest) {
+	// // TODO Auto-generated method stub
+	// return super.matches(theRequest);
+	// }
 
 	@Override
 	public BaseClientInvocation invokeClient(Object[] theArgs) throws InternalErrorException {
@@ -107,6 +108,18 @@ public class DeleteMethodBinding extends BaseOutcomeReturningMethodBinding {
 		DeleteClientInvocation retVal = new DeleteClientInvocation(getResourceName(), id);
 
 		return retVal;
+	}
+
+	@Override
+	protected void addParametersForServerRequest(Request theRequest, Object[] theParams) {
+		String url = theRequest.getCompleteUrl();
+		int resNameIdx = url.indexOf(getResourceName());
+		String id = url.substring(resNameIdx+getResourceName().length() + 1);
+		if (id.contains("/")) {
+			throw new InvalidRequestException("Invalid request path for a DELETE operation: "+theRequest.getCompleteUrl());
+		}
+		
+		theParams[myIdParameterIndex] = new IdDt(id);
 	}
 
 }

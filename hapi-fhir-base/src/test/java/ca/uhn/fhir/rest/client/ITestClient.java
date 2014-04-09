@@ -5,10 +5,12 @@ import java.util.List;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.PathSpecification;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
+import ca.uhn.fhir.model.dstu.resource.DiagnosticReport;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.annotation.Create;
+import ca.uhn.fhir.rest.annotation.Delete;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.IncludeParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
@@ -28,6 +30,12 @@ public interface ITestClient extends IBasicClient {
 
 	@Read(type=Patient.class)
 	Patient getPatientById(@IdParam IdDt theId);
+
+	@Delete(resourceType=Patient.class)
+	MethodOutcome deletePatient(@IdParam IdDt theId);
+
+	@Delete(resourceType=DiagnosticReport.class)
+	void deleteDiagnosticReport(@IdParam IdDt theId);
 
 	@Read(type=Patient.class)
 	Patient getPatientByVersionId(@IdParam IdDt theId, @VersionIdParam IdDt theVersionId);

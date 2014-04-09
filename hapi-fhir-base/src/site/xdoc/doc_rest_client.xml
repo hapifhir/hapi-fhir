@@ -62,7 +62,7 @@
 				</macro>
 
 				<p>
-					You will probable wish to add more methods
+					You will probably want to add more methods
 					to your client interface. See
 					<a href="./doc_rest_operations.html">RESTful Operations</a> for
 					lots more examples of how to add methods for various operations.

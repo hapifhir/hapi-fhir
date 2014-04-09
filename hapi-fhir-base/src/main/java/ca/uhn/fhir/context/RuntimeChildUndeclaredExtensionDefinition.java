@@ -47,15 +47,12 @@ public class RuntimeChildUndeclaredExtensionDefinition extends BaseRuntimeChildD
 		return myDatatypeToDefinition.get(theType);
 	}
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RuntimeChildUndeclaredExtensionDefinition.class);
-
 	@Override
 	void sealAndInitialize(Map<Class<? extends IElement>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
 		Map<String, BaseRuntimeElementDefinition<?>> datatypeAttributeNameToDefinition = new HashMap<String, BaseRuntimeElementDefinition<?>>();
 		myDatatypeToAttributeName = new HashMap<Class<? extends IElement>, String>();
 
 		for (BaseRuntimeElementDefinition<?> next : theClassToElementDefinitions.values()) {
-			ourLog.info(next.getName());
 			if (next instanceof IRuntimeDatatypeDefinition) {
 				if (!((IRuntimeDatatypeDefinition) next).isSpecialization()) {
 					String attrName = "value" + WordUtils.capitalize(next.getName());

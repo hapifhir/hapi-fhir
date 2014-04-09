@@ -5,8 +5,6 @@ import java.io.Reader;
 import java.io.Writer;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -40,14 +38,7 @@ import ca.uhn.fhir.rest.server.exceptions.UnclassifiedServerFailureException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 
 public abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding {
-
-	private static Set<String> ALLOWED_PARAMS;
-	static {
-		HashSet<String> set = new HashSet<String>();
-		set.add(Constants.PARAM_FORMAT);
-		ALLOWED_PARAMS = Collections.unmodifiableSet(set);
-	}
-
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseOutcomeReturningMethodBinding.class);
 	private List<IParameter> myParameters;
 	private boolean myReturnVoid;
 
@@ -57,28 +48,15 @@ public abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBindin
 
 		if (!theMethod.getReturnType().equals(MethodOutcome.class)) {
 			if (!allowVoidReturnType()) {
-				throw new ConfigurationException("Method " + theMethod.getName() + " in type " + theMethod.getDeclaringClass().getCanonicalName() + " is a @" + theMethodAnnotation.getSimpleName()
-						+ " method but it does not return " + MethodOutcome.class);
-			} else if (theMethod.getReturnType() == Void.class) {
+				throw new ConfigurationException("Method " + theMethod.getName() + " in type " + theMethod.getDeclaringClass().getCanonicalName() + " is a @" + theMethodAnnotation.getSimpleName() + " method but it does not return " + MethodOutcome.class);
+			} else if (theMethod.getReturnType() == void.class) {
 				myReturnVoid = true;
 			}
 		}
 
 	}
 
-	protected List<IParameter> getParameters() {
-		return myParameters;
-	}
-
-	/**
-	 * Subclasses may override to allow a void method return type, which is allowable for some methods (e.g. delete)
-	 */
-	protected boolean allowVoidReturnType() {
-		return false;
-	}
-
-
-	protected abstract BaseClientInvocation createClientInvocation(Object[] theArgs, IResource resource, String resourceName);
+	public abstract String getResourceName();
 
 	@Override
 	public Object invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException, BaseServerResponseException {
@@ -94,6 +72,16 @@ public abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBindin
 			if (locationHeaders != null && locationHeaders.size() > 0) {
 				String locationHeader = locationHeaders.get(0);
 				parseContentLocation(retVal, locationHeader);
+			}
+			if (theResponseStatusCode != Constants.STATUS_HTTP_204_NO_CONTENT) {
+				EncodingUtil ct = EncodingUtil.forContentType(theResponseMimeType);
+				if (ct != null) {
+					IParser parser = ct.newParser(getContext());
+					OperationOutcome outcome = parser.parseResource(OperationOutcome.class, theResponseReader);
+					retVal.setOperationOutcome(outcome);
+				} else {
+					ourLog.debug("Ignoring response content of type: {}", theResponseMimeType);
+				}
 			}
 			return retVal;
 		case Constants.STATUS_HTTP_400_BAD_REQUEST:
@@ -116,43 +104,11 @@ public abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBindin
 
 	}
 
-	protected void parseContentLocation(MethodOutcome theOutcomeToPopulate, String theLocationHeader) {
-		String resourceNamePart = "/" + getResourceName() + "/";
-		int resourceIndex = theLocationHeader.lastIndexOf(resourceNamePart);
-		if (resourceIndex > -1) {
-			int idIndexStart = resourceIndex + resourceNamePart.length();
-			int idIndexEnd = theLocationHeader.indexOf('/', idIndexStart);
-			if (idIndexEnd == -1) {
-				theOutcomeToPopulate.setId(new IdDt(theLocationHeader.substring(idIndexStart)));
-			} else {
-				theOutcomeToPopulate.setId(new IdDt(theLocationHeader.substring(idIndexStart, idIndexEnd)));
-				String versionIdPart = "/_history/";
-				int historyIdStart = theLocationHeader.indexOf(versionIdPart, idIndexEnd);
-				if (historyIdStart != -1) {
-					theOutcomeToPopulate.setVersionId(new IdDt(theLocationHeader.substring(historyIdStart + versionIdPart.length())));
-				}
-			}
-		}
-	}
-
-	public abstract String getResourceName();
-
 	@Override
 	public void invokeServer(RestfulServer theServer, Request theRequest, HttpServletResponse theResponse) throws BaseServerResponseException, IOException {
-		EncodingUtil encoding = determineResponseEncoding(theRequest.getServletRequest(), theRequest.getParameters());
-		IParser parser = encoding.newParser(getContext());
-		IResource resource = parser.parseResource(theRequest.getInputReader());
-
 		Object[] params = new Object[myParameters.size()];
-		for (int i = 0; i < myParameters.size(); i++) {
-			IParameter param = myParameters.get(i);
-			if (param == null) {
-				continue;
-			}
-			params[i] = param.translateQueryParametersIntoServerArgument(theRequest.getParameters(), resource);
-		}
 
-		addAdditionalParams(theRequest, params);
+		addParametersForServerRequest(theRequest, params);
 
 		MethodOutcome response;
 		try {
@@ -168,6 +124,8 @@ public abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBindin
 		if (response == null) {
 			if (myReturnVoid == false) {
 				throw new ConfigurationException("Method " + getMethod().getName() + " in type " + getMethod().getDeclaringClass().getCanonicalName() + " returned null");
+			} else {
+				theResponse.setStatus(Constants.STATUS_HTTP_204_NO_CONTENT);
 			}
 		} else if (!myReturnVoid) {
 			if (response.isCreated()) {
@@ -192,26 +150,29 @@ public abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBindin
 
 		theServer.addHapiHeader(theResponse);
 
-		theResponse.setContentType(Constants.CT_TEXT);
-
 		Writer writer = theResponse.getWriter();
 		try {
-			writer.append("Resource has been created");
+			if (response != null) {
+				OperationOutcome outcome = new OperationOutcome();
+				if (response.getOperationOutcome() != null && response.getOperationOutcome().getIssue() != null) {
+					outcome.getIssue().addAll(response.getOperationOutcome().getIssue());
+				}
+				EncodingUtil encoding = BaseMethodBinding.determineResponseEncoding(theRequest.getServletRequest(), theRequest.getParameters());
+				theResponse.setContentType(encoding.getResourceContentType());
+				IParser parser = encoding.newParser(getContext());
+				parser.encodeResourceToWriter(outcome, writer);
+			}
 		} finally {
 			writer.close();
 		}
 		// getMethod().in
 	}
 
-	/**
-	 * For subclasses to override
-	 */
-	@SuppressWarnings("unused")
-	protected void addAdditionalParams(Request theRequest, Object[] theParams) {
-		// nothing
-	}
+	protected abstract void addParametersForServerRequest(Request theRequest, Object[] theParams);
 
-	protected abstract Set<RequestType> provideAllowableRequestTypes();
+	public boolean isReturnVoid() {
+		return myReturnVoid;
+	}
 
 	@Override
 	public boolean matches(Request theRequest) {
@@ -228,5 +189,40 @@ public abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBindin
 		}
 		return true;
 	}
+
+	/**
+	 * Subclasses may override to allow a void method return type, which is
+	 * allowable for some methods (e.g. delete)
+	 */
+	protected boolean allowVoidReturnType() {
+		return false;
+	}
+
+	protected abstract BaseClientInvocation createClientInvocation(Object[] theArgs, IResource resource, String resourceName);
+
+	protected List<IParameter> getParameters() {
+		return myParameters;
+	}
+
+	protected void parseContentLocation(MethodOutcome theOutcomeToPopulate, String theLocationHeader) {
+		String resourceNamePart = "/" + getResourceName() + "/";
+		int resourceIndex = theLocationHeader.lastIndexOf(resourceNamePart);
+		if (resourceIndex > -1) {
+			int idIndexStart = resourceIndex + resourceNamePart.length();
+			int idIndexEnd = theLocationHeader.indexOf('/', idIndexStart);
+			if (idIndexEnd == -1) {
+				theOutcomeToPopulate.setId(new IdDt(theLocationHeader.substring(idIndexStart)));
+			} else {
+				theOutcomeToPopulate.setId(new IdDt(theLocationHeader.substring(idIndexStart, idIndexEnd)));
+				String versionIdPart = "/_history/";
+				int historyIdStart = theLocationHeader.indexOf(versionIdPart, idIndexEnd);
+				if (historyIdStart != -1) {
+					theOutcomeToPopulate.setVersionId(new IdDt(theLocationHeader.substring(historyIdStart + versionIdPart.length())));
+				}
+			}
+		}
+	}
+
+	protected abstract Set<RequestType> provideAllowableRequestTypes();
 
 }

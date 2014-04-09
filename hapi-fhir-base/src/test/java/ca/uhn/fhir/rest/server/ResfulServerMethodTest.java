@@ -566,11 +566,26 @@ public class ResfulServerMethodTest {
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
 
-		OperationOutcome patient = (OperationOutcome) ourCtx.newXmlParser().parseBundle(responseContent).getEntries().get(0).getResource();
+		OperationOutcome patient = ourCtx.newXmlParser().parseResource(OperationOutcome.class, responseContent);
 		assertEquals("1234", patient.getIssueFirstRep().getDetails().getValue());
 
 	}
 	
+	@Test
+	public void testDeleteNoResponse() throws Exception {
+
+		// HttpPost httpPost = new HttpPost("http://localhost:" + ourPort +
+		// "/Patient/1");
+		// httpPost.setEntity(new StringEntity("test",
+		// ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+
+		HttpDelete httpGet = new HttpDelete("http://localhost:" + ourPort + "/DiagnosticReport/1234");
+		HttpResponse status = ourClient.execute(httpGet);
+
+		assertEquals(204, status.getStatusLine().getStatusCode());
+
+	}
+
 	@Test
 	public void testPrettyPrint() throws Exception {
 

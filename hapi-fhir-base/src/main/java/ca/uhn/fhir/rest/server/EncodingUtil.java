@@ -1,5 +1,7 @@
 package ca.uhn.fhir.rest.server;
 
+import java.util.HashMap;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 
@@ -21,6 +23,17 @@ public enum EncodingUtil {
 	
 	;
 
+	private static HashMap<String, EncodingUtil> ourContentTypeToEncoding;
+
+	static {
+		ourContentTypeToEncoding = new HashMap<String, EncodingUtil>();
+		for (EncodingUtil next: values()) {
+			ourContentTypeToEncoding.put(next.getBundleContentType(), next);
+			ourContentTypeToEncoding.put(next.getResourceContentType(), next);
+			ourContentTypeToEncoding.put(next.getBrowserFriendlyBundleContentType(), next);
+		}
+	}
+	
 	private String myResourceContentType;
 	private String myBundleContentType;
 	private String myBrowserFriendlyContentType;
@@ -44,5 +57,10 @@ public enum EncodingUtil {
 	public String getBrowserFriendlyBundleContentType() {
 		return myBrowserFriendlyContentType;
 	}
+
+	public static EncodingUtil forContentType(String theContentType) {
+		return ourContentTypeToEncoding.get(theContentType);
+	}
+
 
 }

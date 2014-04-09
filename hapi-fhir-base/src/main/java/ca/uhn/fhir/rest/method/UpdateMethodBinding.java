@@ -50,7 +50,7 @@ public class UpdateMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 	}
 
 	@Override
-	protected void addAdditionalParams(Request theRequest, Object[] theParams) {
+	protected void addParametersForServerRequest(Request theRequest, Object[] theParams) {
 		/*
 		 * We are being a bit lenient here, since technically the client is
 		 * supposed to include the version in the Content-Location header, but

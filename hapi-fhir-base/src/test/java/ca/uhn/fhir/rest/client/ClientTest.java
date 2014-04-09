@@ -14,6 +14,7 @@ import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.ProtocolVersion;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpUriRequest;
@@ -32,6 +33,7 @@ import ca.uhn.fhir.model.api.PathSpecification;
 import ca.uhn.fhir.model.dstu.composite.CodingDt;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.resource.Conformance;
+import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -115,7 +117,45 @@ public class ClientTest {
 		assertEquals("100", response.getId().getValue());
 		assertEquals("200", response.getVersionId().getValue());
 	}
+	
+	
+	@Test
+	public void testDelete() throws Exception {
 
+		OperationOutcome oo = new OperationOutcome();
+		oo.addIssue().setDetails("Hello");
+		String resp = new FhirContext().newXmlParser().encodeResourceToString(oo);
+				
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
+		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 201, "OK"));
+		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(resp), Charset.forName("UTF-8")));
+
+		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
+		MethodOutcome response = client.deletePatient(new IdDt("1234"));
+
+		assertEquals(HttpDelete.class, capt.getValue().getClass());
+		assertEquals("http://foo/Patient/1234", capt.getValue().getURI().toString());
+		assertEquals("Hello", response.getOperationOutcome().getIssueFirstRep().getDetails().getValue());
+	}
+	
+	@Test
+	public void testDeleteNoResponse() throws Exception {
+				
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
+		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 204, "OK"));
+		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_TEXT + "; charset=UTF-8"));
+		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(""), Charset.forName("UTF-8")));
+
+		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
+		client.deleteDiagnosticReport(new IdDt("1234"));
+
+		assertEquals(HttpDelete.class, capt.getValue().getClass());
+		assertEquals("http://foo/DiagnosticReport/1234", capt.getValue().getURI().toString());
+	}
+	
 	
 	@Test
 	public void testUpdate() throws Exception {
