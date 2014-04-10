@@ -303,7 +303,7 @@
 								<replace dir="target/site" summary="true">
 									<include name="**/*.html"></include>
 									<replacefilter token="#build#" value="${label}" />
-									<replacefilter token="#version#" value="${version}" />
+									<replacefilter token="#version#" value="${project.version}" />
 									<replacetoken><![CDATA[</body>]]></replacetoken>
 									<replacevalue><![CDATA[
 <script>

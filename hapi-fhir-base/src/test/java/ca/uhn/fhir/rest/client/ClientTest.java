@@ -104,7 +104,7 @@ public class ClientTest {
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
 		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 201, "OK"));
-		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_TEXT + "; charset=UTF-8"));
 		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(""), Charset.forName("UTF-8")));
 		when(httpResponse.getAllHeaders()).thenReturn(toHeaderArray("Location" , "http://example.com/fhir/Patient/100/_history/200"));
 
@@ -166,7 +166,7 @@ public class ClientTest {
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
 		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 201, "OK"));
-		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_TEXT + "; charset=UTF-8"));
 		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(""), Charset.forName("UTF-8")));
 		when(httpResponse.getAllHeaders()).thenReturn(toHeaderArray("Location" , "http://example.com/fhir/Patient/100/_history/200"));
 
@@ -181,6 +181,26 @@ public class ClientTest {
 		assertEquals("200", response.getVersionId().getValue());
 	}
 
+	/**
+	 * Return a FHIR content type, but no content and make sure we handle this without crashing
+	 */
+	@Test
+	public void testUpdateWithEmptyResponse() throws Exception {
+
+		Patient patient = new Patient();
+		patient.addIdentifier("urn:foo", "123");
+		
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
+		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 201, "OK"));
+		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(""), Charset.forName("UTF-8")));
+		when(httpResponse.getAllHeaders()).thenReturn(toHeaderArray("Location" , "http://example.com/fhir/Patient/100/_history/200"));
+
+		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
+		client.updatePatient(new IdDt("100"), new IdDt("200"), patient);
+	}
+
 	@Test
 	public void testUpdateWithVersion() throws Exception {
 
@@ -190,7 +210,7 @@ public class ClientTest {
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
 		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 201, "OK"));
-		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_TEXT + "; charset=UTF-8"));
 		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(""), Charset.forName("UTF-8")));
 		when(httpResponse.getAllHeaders()).thenReturn(toHeaderArray("Location" , "http://example.com/fhir/Patient/100/_history/200"));
 
@@ -206,6 +226,7 @@ public class ClientTest {
 		assertEquals("200", response.getVersionId().getValue());
 	}
 
+	
 	@Test(expected=ResourceVersionConflictException.class)
 	public void testUpdateWithResourceConflict() throws Exception {
 

@@ -8,17 +8,21 @@ public interface IQueryParameterAnd {
 
 	/**
 	 * 
-	 * @see See FHIR specification 
+	 * <p>
+	 * See FHIR specification 
 	 *    <a href="http://www.hl7.org/implement/standards/fhir/search.html#ptypes">2.2.2 Search SearchParameter Types</a>
 	 *    for information on the <b>token</b> format
+	 * </p>
 	 */
 	public void setValuesAsQueryTokens(List<List<String>> theParameters) throws InvalidRequestException;
 
 	/**
 	 * 
-	 * @see See FHIR specification 
+	 * <p>
+	 * See FHIR specification 
 	 *    <a href="http://www.hl7.org/implement/standards/fhir/search.html#ptypes">2.2.2 Search SearchParameter Types</a>
 	 *    for information on the <b>token</b> format
+	 * </p>
 	 */
 	public List<List<String>> getValuesAsQueryTokens();
 

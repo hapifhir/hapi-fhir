@@ -34,6 +34,8 @@ public class Constants {
 	public static final int STATUS_HTTP_412_PRECONDITION_FAILED = 412;
 	public static final String HEADER_CONTENT_LOCATION = "Content-Location";
 	public static final int STATUS_HTTP_204_NO_CONTENT = 204;
+	public static final String PARAM_COUNT = "_count";
+	public static final String PARAM_SINCE = "_since";
 
 	static {
 		Map<String, EncodingUtil> valToEncoding = new HashMap<String, EncodingUtil>();

@@ -81,6 +81,10 @@
 	background-color: #F8F8F8 !important;
 }
 
+.table th, .table td {
+	padding: 2px;
+}
+
 tt {
 	margin-left: 10px;
 	white-space: pre;

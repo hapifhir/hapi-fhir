@@ -1,6 +1,7 @@
 package ca.uhn.fhir.rest.method;
 
 import java.io.IOException;
+import java.io.PushbackReader;
 import java.io.Reader;
 import java.io.Writer;
 import java.lang.reflect.InvocationTargetException;
@@ -48,7 +49,8 @@ public abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBindin
 
 		if (!theMethod.getReturnType().equals(MethodOutcome.class)) {
 			if (!allowVoidReturnType()) {
-				throw new ConfigurationException("Method " + theMethod.getName() + " in type " + theMethod.getDeclaringClass().getCanonicalName() + " is a @" + theMethodAnnotation.getSimpleName() + " method but it does not return " + MethodOutcome.class);
+				throw new ConfigurationException("Method " + theMethod.getName() + " in type " + theMethod.getDeclaringClass().getCanonicalName() + " is a @" + theMethodAnnotation.getSimpleName()
+						+ " method but it does not return " + MethodOutcome.class);
 			} else if (theMethod.getReturnType() == void.class) {
 				myReturnVoid = true;
 			}
@@ -76,9 +78,27 @@ public abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBindin
 			if (theResponseStatusCode != Constants.STATUS_HTTP_204_NO_CONTENT) {
 				EncodingUtil ct = EncodingUtil.forContentType(theResponseMimeType);
 				if (ct != null) {
-					IParser parser = ct.newParser(getContext());
-					OperationOutcome outcome = parser.parseResource(OperationOutcome.class, theResponseReader);
-					retVal.setOperationOutcome(outcome);
+					PushbackReader reader = new PushbackReader(theResponseReader);
+
+					try {
+						int firstByte = reader.read();
+						if (firstByte == -1) {
+							ourLog.debug("No content in response, not going to read");
+							reader = null;
+						} else {
+							reader.unread(firstByte);
+						}
+					} catch (IOException e) {
+						ourLog.debug("No content in response, not going to read", e);
+						reader = null;
+					}
+
+					if (reader != null) {
+						IParser parser = ct.newParser(getContext());
+						OperationOutcome outcome = parser.parseResource(OperationOutcome.class, reader);
+						retVal.setOperationOutcome(outcome);
+					}
+
 				} else {
 					ourLog.debug("Ignoring response content of type: {}", theResponseMimeType);
 				}
@@ -191,8 +211,7 @@ public abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBindin
 	}
 
 	/**
-	 * Subclasses may override to allow a void method return type, which is
-	 * allowable for some methods (e.g. delete)
+	 * Subclasses may override to allow a void method return type, which is allowable for some methods (e.g. delete)
 	 */
 	protected boolean allowVoidReturnType() {
 		return false;

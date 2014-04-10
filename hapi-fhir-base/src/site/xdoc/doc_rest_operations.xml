@@ -168,7 +168,7 @@
 		
 			<p>
 				The 
-				<a href="http://latest.fhir.me/http.html#read"><b>read</b></a> 
+				<a href="http://hl7.org/implement/standards/fhir/http.html#read"><b>read</b></a> 
 				operation retrieves a resource by ID. It is annotated with the
 				<a href="./apidocs/ca/uhn/fhir/rest/annotation/Read.html">@Read</a>
 				annotation, and has a single parameter annotated with the 
@@ -197,7 +197,7 @@
 		
 			<p>
 				The 
-				<a href="http://latest.fhir.me/http.html#vread"><b>vread</b></a> 
+				<a href="http://hl7.org/implement/standards/fhir/http.html#vread"><b>vread</b></a> 
 				operation retrieves a specific version of a resource with a given ID. It looks exactly
 				like a "read" operation, but with a second
 				parameter annotated with the 
@@ -293,7 +293,40 @@
 			<a name="instance_delete"/>
 			
 			<p>
-				Not yet implemented
+				The 
+				<a href="http://hl7.org/implement/standards/fhir/http.html#delete"><b>delete</b></a> 
+				operation retrieves a specific version of a resource with a given ID. It takes a single
+				ID parameter annotated with an  
+				<a href="./apidocs/ca/uhn/fhir/rest/annotation/IdParam.html">@IdParam</a>
+				annotation, which supplies the ID of the resource to delete.
+			</p>
+
+			<macro name="snippet">
+				<param name="id" value="delete" />
+				<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
+			</macro>
+			
+			<p>
+				Delete methods are allowed to return the following types:
+			</p>
+			<ul>
+				<li>
+					<b>void</b>: This method may return <code>void</code>, in which case 
+					the server will return an empty response and the client will ignore 
+					any successful response from the server (failure responses will still throw
+					an exception) 
+				</li>
+				<li>
+					<b><a href="./apidocs/ca/uhn/fhir/rest/api/MethodOutcome.html">MethodOutcome</a></b>: 
+					This method may return <code>MethodOutcome</code>, 
+					which is a wrapper for the FHIR OperationOutcome resource, which may optionally be returned
+					by the server according to the FHIR specification.
+				</li>
+			</ul>
+			
+			<p>
+				Example URL to invoke this method (HTTP DELETE):<br/>
+				<code>http://fhir.example.com/Patient/111</code>
 			</p>
 			
 		</section>
@@ -372,7 +405,7 @@
 		
 			<p>
 				The
-				<a href="http://latest.fhir.me/http.html#search"><b>search</b></a> operation returns a bundle
+				<a href="http://hl7.org/implement/standards/fhir/http.html#search"><b>search</b></a> operation returns a bundle
 				with zero-to-many resources of a given type, matching a given set of parameters. 
 			</p>
 			

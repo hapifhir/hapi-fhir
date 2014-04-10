@@ -37,7 +37,7 @@ public interface ISupportsUndeclaredExtensions extends IElement {
 	 * </ul>
 	 * </ul> 
 	 * 
-	 * @param The extension to add. Can not be null.
+	 * @param theExtension The extension to add. Can not be null.
 	 */
 	void addUndeclaredExtension(ExtensionDt theExtension);
 	

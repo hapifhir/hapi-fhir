@@ -13,11 +13,13 @@ import java.util.Map;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.PathSpecification;
+import ca.uhn.fhir.rest.annotation.Count;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.IncludeParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
+import ca.uhn.fhir.rest.annotation.Since;
 import ca.uhn.fhir.rest.annotation.VersionIdParam;
 import ca.uhn.fhir.rest.param.CollectionBinder;
 import ca.uhn.fhir.rest.param.IParameter;
@@ -30,6 +32,37 @@ import ca.uhn.fhir.util.ReflectionUtil;
  * Created by dsotnikov on 2/25/2014.
  */
 class Util {
+	public static Integer findCountParameterIndex(Method theMethod) {
+		return findParamIndex(theMethod, Count.class);
+	}
+
+	public static Integer findIdParameterIndex(Method theMethod) {
+		return findParamIndex(theMethod, IdParam.class);
+	}
+
+	private static Integer findParamIndex(Method theMethod, Class<?> toFind) {
+		int paramIndex = 0;
+		for (Annotation[] annotations : theMethod.getParameterAnnotations()) {
+			for (int annotationIndex = 0; annotationIndex < annotations.length; annotationIndex++) {
+				Annotation nextAnnotation = annotations[annotationIndex];
+				Class<? extends Annotation> class1 = nextAnnotation.getClass();
+				if (toFind.isAssignableFrom(class1)) {
+					return paramIndex;
+				}
+			}
+			paramIndex++;
+		}
+		return null;
+	}
+
+	public static Integer findSinceParameterIndex(Method theMethod) {
+		return findParamIndex(theMethod, Since.class);
+	}
+
+	public static Integer findVersionIdParameterIndex(Method theMethod) {
+		return findParamIndex(theMethod, VersionIdParam.class);
+	}
+
 	public static Map<String, String> getQueryParams(String query) {
 		try {
 
@@ -58,10 +91,10 @@ class Util {
 			for (int i = 0; i < annotations.length; i++) {
 				Annotation nextAnnotation = annotations[i];
 				Class<?> parameterType = parameterTypes[paramIndex];
-				
+
 				Class<? extends java.util.Collection<?>> outerCollectionType = null;
 				Class<? extends java.util.Collection<?>> innerCollectionType = null;
-				
+
 				if (Collection.class.isAssignableFrom(parameterType)) {
 					innerCollectionType = (Class<? extends java.util.Collection<?>>) parameterType;
 					parameterType = ReflectionUtil.getGenericCollectionTypeOfMethodParameter(method, paramIndex);
@@ -88,14 +121,17 @@ class Util {
 					param = parameter;
 				} else if (nextAnnotation instanceof IncludeParam) {
 					if (parameterType != PathSpecification.class || innerCollectionType == null || outerCollectionType != null) {
-						throw new ConfigurationException("Method '" + method.getName() + "' is annotated with @" + IncludeParam.class.getSimpleName() + " but has a type other than Collection<"+PathSpecification.class.getSimpleName() + ">");
+						throw new ConfigurationException("Method '" + method.getName() + "' is annotated with @" + IncludeParam.class.getSimpleName() + " but has a type other than Collection<"
+								+ PathSpecification.class.getSimpleName() + ">");
 					}
-					Class<? extends Collection<PathSpecification>> instantiableCollectionType = (Class<? extends Collection<PathSpecification>>) CollectionBinder.getInstantiableCollectionType(innerCollectionType, "Method '" + method.getName() + "'");
-					
+					Class<? extends Collection<PathSpecification>> instantiableCollectionType = (Class<? extends Collection<PathSpecification>>) CollectionBinder.getInstantiableCollectionType(
+							innerCollectionType, "Method '" + method.getName() + "'");
+
 					param = new IncludeParameter((IncludeParam) nextAnnotation, instantiableCollectionType);
 				} else if (nextAnnotation instanceof ResourceParam) {
 					if (!IResource.class.isAssignableFrom(parameterType)) {
-						throw new ConfigurationException("Method '" + method.getName() + "' is annotated with @" + ResourceParam.class.getSimpleName() + " but has a type that is not an implemtation of " + IResource.class.getCanonicalName());
+						throw new ConfigurationException("Method '" + method.getName() + "' is annotated with @" + ResourceParam.class.getSimpleName()
+								+ " but has a type that is not an implemtation of " + IResource.class.getCanonicalName());
 					}
 					param = new ResourceParameter((Class<? extends IResource>) parameterType);
 				} else if (nextAnnotation instanceof IdParam || nextAnnotation instanceof VersionIdParam) {
@@ -103,41 +139,20 @@ class Util {
 				} else {
 					continue;
 				}
-				
-				haveHandledMethod= true;
+
+				haveHandledMethod = true;
 				parameters.add(param);
-				
+
 			}
-			
+
 			if (!haveHandledMethod) {
-				throw new ConfigurationException("Parameter #" + paramIndex + " of method '" + method.getName() + "' on type '"+method.getDeclaringClass().getCanonicalName()+"' has no recognized FHIR interface parameter annotations. Don't know how to handle this parameter");
+				throw new ConfigurationException("Parameter #" + paramIndex + " of method '" + method.getName() + "' on type '" + method.getDeclaringClass().getCanonicalName()
+						+ "' has no recognized FHIR interface parameter annotations. Don't know how to handle this parameter");
 			}
-			
+
 			paramIndex++;
 		}
 		return parameters;
 	}
 
-	public static Integer findIdParameterIndex(Method theMethod) {
-		return findParamIndex(theMethod, IdParam.class);
-	}
-
-	public static Integer findVersionIdParameterIndex(Method theMethod) {
-		return findParamIndex(theMethod, VersionIdParam.class);
-	}
-
-	private static Integer findParamIndex(Method theMethod, Class<?> toFind) {
-		int paramIndex = 0;
-		for (Annotation[] annotations : theMethod.getParameterAnnotations()) {
-			for (int annotationIndex = 0; annotationIndex < annotations.length; annotationIndex++) {
-				Annotation nextAnnotation = annotations[annotationIndex];
-				Class<? extends Annotation> class1 = nextAnnotation.getClass();
-				if (toFind.isAssignableFrom(class1)) {
-					return paramIndex;
-				}
-			}
-			paramIndex++;
-		}
-		return null;
-	}
 }

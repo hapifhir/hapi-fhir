@@ -39,6 +39,7 @@ import ca.uhn.fhir.rest.param.CodingListParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.QualifiedDateParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 
@@ -46,6 +47,8 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 public abstract class RestfulPatientResourceProviderMore implements IResourceProvider {
 
 private boolean detectedVersionConflict;
+private boolean conflictHappened;
+private boolean couldntFindThisId;
 //START SNIPPET: searchAll
 @Search
 public List<Organization> getAllOrganizations() {
@@ -62,6 +65,22 @@ public Patient getResourceById(@IdParam IdDt theId) {
    return retVal;
 }
 //END SNIPPET: read
+
+//START SNIPPET: delete
+@Read()
+public void deletePatient(@IdParam IdDt theId) {
+	// .. Delete the patient ..
+	if (couldntFindThisId) {
+		throw new ResourceNotFoundException("Unknown version");
+	}
+	if (conflictHappened) {
+		throw new ResourceVersionConflictException("Couldn't delete because [foo]");
+	}
+	// otherwise, delete was successful
+	return; // can also return MethodOutcome
+}
+//END SNIPPET: delete
+
 
 //START SNIPPET: vread
 @Read()

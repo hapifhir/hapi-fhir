@@ -21,8 +21,10 @@ public @interface Search {
 	/**
 	 * If specified, this the name for the Named Query
 	 * 
-	 * @see See the FHIR specification section on 
+	 * <p>
+	 * See the FHIR specification section on 
 	 * 	<a href="http://www.hl7.org/implement/standards/fhir/search.html#advanced">named queries</a>
+	 * </p>
 	 */
 	String queryName() default "";
 	

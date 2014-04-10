@@ -6,6 +6,7 @@ import java.util.TimeZone;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.SimpleSetter;
+import ca.uhn.fhir.parser.DataFormatException;
 
 @DatatypeDef(name="instant")
 public class InstantDt extends BaseDateTimeDt {
@@ -44,6 +45,17 @@ public class InstantDt extends BaseDateTimeDt {
 		setValue(theDate);
 		setPrecision(DEFAULT_PRECISION);
 		setTimeZone(TimeZone.getDefault());
+	}
+
+	/**
+	 * Create a new InstantDt from a string value
+	 * 
+	 * @param theString The string representation of the string. Must be in 
+	 * a valid format according to the FHIR specification
+	 * @throws DataFormatException 
+	 */
+	public InstantDt(String theString) {
+		setValueAsString(theString);
 	}
 
 	@Override
