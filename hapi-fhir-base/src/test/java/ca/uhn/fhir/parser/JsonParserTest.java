@@ -1,9 +1,11 @@
 package ca.uhn.fhir.parser;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -27,13 +29,15 @@ import ca.uhn.fhir.model.dstu.composite.HumanNameDt;
 import ca.uhn.fhir.model.dstu.composite.NarrativeDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.resource.Conformance;
+import ca.uhn.fhir.model.dstu.resource.Conformance.RestResource;
 import ca.uhn.fhir.model.dstu.resource.DiagnosticReport;
 import ca.uhn.fhir.model.dstu.resource.Observation;
 import ca.uhn.fhir.model.dstu.resource.Organization;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.dstu.resource.Specimen;
 import ca.uhn.fhir.model.dstu.resource.ValueSet;
-import ca.uhn.fhir.model.dstu.resource.Conformance.RestResource;
+import ca.uhn.fhir.model.dstu.resource.ValueSet.Define;
+import ca.uhn.fhir.model.dstu.resource.ValueSet.DefineConcept;
 import ca.uhn.fhir.model.dstu.valueset.NarrativeStatusEnum;
 import ca.uhn.fhir.model.primitive.DecimalDt;
 import ca.uhn.fhir.model.primitive.StringDt;
@@ -57,6 +61,21 @@ public class JsonParserTest {
 		assertEquals("_id", res.getSearchParam().get(1).getName().getValue());
 	}
 
+	@Test
+	public void testEncodeExt() throws Exception {
+
+		ValueSet valueSet = new ValueSet();
+		Define define = valueSet.getDefine();
+		DefineConcept code = define.addConcept();
+		code.setCode("someCode");
+		code.setDisplay("someDisplay");
+		code.addUndeclaredExtension(false, "urn:alt", new StringDt("alt name"));
+
+		String encoded = new FhirContext().newJsonParser().encodeResourceToString(valueSet);
+		ourLog.info(encoded);
+		
+	}
+	
 	@Test
 	public void testEncodeResourceRef() throws DataFormatException, IOException {
 
