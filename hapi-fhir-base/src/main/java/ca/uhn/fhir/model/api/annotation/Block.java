@@ -9,6 +9,8 @@ import java.lang.annotation.Target;
 @Target(value= {ElementType.TYPE})
 public @interface Block {
 
-	String name();
+	// TODO: remove
+	@Deprecated
+	String name() default "";
 	
 }

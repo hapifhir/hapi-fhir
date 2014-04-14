@@ -27,7 +27,6 @@ import ca.uhn.fhir.rest.param.IQueryParameter;
 import ca.uhn.fhir.rest.server.ResourceBinding;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.util.ExtensionConstants;
-import ca.uhn.fhir.util.VersionUtil;
 
 public class ServerConformanceProvider {
 
@@ -45,8 +44,8 @@ public class ServerConformanceProvider {
 		}
 
 		Conformance retVal = new Conformance();
-		retVal.getSoftware().setName("HAPI FHIR Server");
-		retVal.getSoftware().setVersion(VersionUtil.getVersion());
+		retVal.getSoftware().setName(myRestfulServer.getServerName());
+		retVal.getSoftware().setVersion(myRestfulServer.getServerVersion());
 
 		Rest rest = retVal.addRest();
 		rest.setMode(RestfulConformanceModeEnum.SERVER);

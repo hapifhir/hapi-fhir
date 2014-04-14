@@ -3,6 +3,7 @@ package ca.uhn.fhir.narrative;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.Date;
 
 import org.hamcrest.core.StringContains;
@@ -14,6 +15,7 @@ import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.dstu.composite.NarrativeDt;
 import ca.uhn.fhir.model.dstu.composite.QuantityDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.dstu.resource.Conformance;
 import ca.uhn.fhir.model.dstu.resource.DiagnosticReport;
 import ca.uhn.fhir.model.dstu.resource.Observation;
 import ca.uhn.fhir.model.dstu.resource.Patient;
@@ -29,6 +31,7 @@ public class DefaultThymeleafNarrativeGeneratorTest {
 	@Before
 	public void before() {
 		gen = new DefaultThymeleafNarrativeGenerator();
+		gen.setUseHapiServerConformanceNarrative(true);
 		gen.setIgnoreFailures(false);
 		gen.setIgnoreMissingTemplates(false);
 	}
@@ -49,6 +52,16 @@ public class DefaultThymeleafNarrativeGeneratorTest {
 		ourLog.info(output);
 	}
 
+	@Test
+	public void testGenerateServerConformance() throws DataFormatException {
+		Conformance value = new FhirContext().newXmlParser().parseResource(Conformance.class, new InputStreamReader(getClass().getResourceAsStream("/server-conformance-statement.xml")));
+		
+		String output = gen.generateNarrative(value).getDiv().getValueAsString();
+
+		ourLog.info(output);
+	}
+
+	
 	@Test
 	public void testGenerateDiagnosticReport() throws DataFormatException {
 		DiagnosticReport value = new DiagnosticReport();

@@ -409,6 +409,11 @@
 				</executions>
 			</plugin>
 		</plugins>
+		<resources>
+			<resource>
+				<filtering>true</filtering>
+			</resource>
+		</resources>
 	</build>
 
 </project>

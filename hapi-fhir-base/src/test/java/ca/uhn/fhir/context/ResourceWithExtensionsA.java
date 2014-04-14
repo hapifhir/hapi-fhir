@@ -222,24 +222,7 @@ public class ResourceWithExtensionsA extends BaseResource {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType ); // TODO: implement
 	}
 
-	@Override
-	public void setId(IdDt theId) {
-		myId=theId;
-	}
-
-	@Override
-	public IdDt getId() {
-		return myId;
-	}
-
-	@Override
-	public ContainedDt getContained() {
-		throw new IllegalStateException();
-	}
-
-	@Override
-	public NarrativeDt getText() {
-		throw new IllegalStateException();
-	}
+	
+	
 
 }

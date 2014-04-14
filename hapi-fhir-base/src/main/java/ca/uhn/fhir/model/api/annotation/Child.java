@@ -6,6 +6,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import ca.uhn.fhir.model.api.IElement;
+import ca.uhn.fhir.model.dstu.composite.HumanNameDt;
+import ca.uhn.fhir.model.dstu.resource.Patient;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(value= {ElementType.FIELD})
@@ -31,5 +33,15 @@ public @interface Child {
 	int max() default 1;
 
 	Class<? extends IElement>[] type() default {};
+
+	// Not implemented
+//	/**
+//	 * This value is used when extending a built-in model class and defining a
+//	 * field to replace a field within the built-in class. For example, the {@link Patient} 
+//	 * resource has a {@link Patient#getName() name} field, but if you wanted to extend Patient and
+//	 * provide your own implementation of {@link HumanNameDt} (most likely your own subclass of 
+//	 * HumanNameDt which adds extensions of your choosing) you could do that using a replacement field. 
+//	 */
+//	String replaces() default "";
 		
 }

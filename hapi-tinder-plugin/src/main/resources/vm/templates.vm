@@ -240,7 +240,7 @@
 #macro ( childExtensionTypes $childExtensionTypes )
 #foreach ( $extensionType in $childExtensionTypes )
 #if ( $extensionType.hasChildExtensions )
-	@Block(name="${extensionType.name}")
+	@Block()
 	public static class ${extensionType.nameType} implements IExtension {
 		
 #foreach ( $childExtensionSubtype in $extensionType.childExtensions )		
@@ -276,7 +276,7 @@
      * ${blockChild.definition}
      * </p> 
 	 */
-	@Block(name="${blockChild.name}")	
+	@Block()	
 	public static class ${blockChild.className} extends BaseElement implements IResourceBlock {
 	
 #childVars( $blockChild.children )

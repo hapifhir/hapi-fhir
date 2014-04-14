@@ -1,6 +1,8 @@
 package ca.uhn.fhir.narrative;
 
 import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
 
 import org.apache.commons.lang3.Validate;
 
@@ -42,8 +44,8 @@ public class CustomThymeleafNarrativeGenerator extends BaseThymeleafNarrativeGen
 	}
 
 	@Override
-	public String getPropertyFile() {
-		return myPropertyFile;
+	public List<String> getPropertyFile() {
+		return Collections.singletonList(myPropertyFile);
 	}
 
 }

@@ -106,6 +106,7 @@ public class ResfulServerMethodTest {
 		builder.setConnectionManager(connectionManager);
 		ourClient = builder.build();
 
+		
 	}
 
 	@AfterClass

@@ -9,6 +9,7 @@ import java.io.InputStream;
 import java.io.StringReader;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Properties;
 
 import org.apache.commons.io.IOUtils;
@@ -114,16 +115,15 @@ public abstract class BaseThymeleafNarrativeGenerator implements INarrativeGener
 		myClassToNarrativeName = new HashMap<Class<?>, String>();
 		myNameToNarrativeTemplate = new HashMap<String, String>();
 
-		String propFileName = getPropertyFile();
-		if (isBlank(propFileName)) {
-			throw new ConfigurationException("Property file name can not be null");
-		}
+		List<String> propFileName = getPropertyFile();
 
 		try {
 			if (myApplyDefaultDatatypeTemplates) {
 				loadProperties(DefaultThymeleafNarrativeGenerator.NARRATIVES_PROPERTIES);
 			}
-			loadProperties(propFileName);
+			for (String next : propFileName) {
+				loadProperties(next);
+			}
 		} catch (IOException e) {
 			throw new ConfigurationException("Can not load property file " + propFileName, e);
 		}
@@ -144,7 +144,7 @@ public abstract class BaseThymeleafNarrativeGenerator implements INarrativeGener
 		myInitialized = true;
 	}
 
-	protected abstract String getPropertyFile();
+	protected abstract List<String> getPropertyFile();
 
 	/**
 	 * If set to <code>true</code> (which is the default), most whitespace will
@@ -209,6 +209,8 @@ public abstract class BaseThymeleafNarrativeGenerator implements INarrativeGener
 	}
 
 	private void loadProperties(String propFileName) throws IOException {
+		ourLog.debug("Loading narrative properties file: {}", propFileName);
+		
 		Properties file = new Properties();
 
 		InputStream resource = loadResource(propFileName);

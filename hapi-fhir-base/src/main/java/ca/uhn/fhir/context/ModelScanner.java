@@ -216,7 +216,8 @@ class ModelScanner {
 	private void scanBlock(Class<? extends IResourceBlock> theClass, Block theBlockDefinition) {
 		ourLog.debug("Scanning resource block class: {}", theClass.getName());
 
-		String resourceName = theBlockDefinition.name();
+		String resourceName = theBlockDefinition.name(); // TODO: remove name
+		resourceName = theClass.getCanonicalName();
 		if (isBlank(resourceName)) {
 			throw new ConfigurationException("Block type @" + Block.class.getSimpleName() + " annotation contains no name: " + theClass.getCanonicalName());
 		}

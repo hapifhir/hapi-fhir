@@ -19,6 +19,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.narrative.INarrativeGenerator;
 import ca.uhn.fhir.rest.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.method.ConformanceMethodBinding;
@@ -49,6 +50,8 @@ public abstract class RestfulServer extends HttpServlet {
 	private boolean myUseBrowserFriendlyContentTypes;
 	private ISecurityManager securityManager;
 	private BaseMethodBinding myServerConformanceMethod;
+	private String myServerName = "HAPI FHIR Server";
+	private String myServerVersion = VersionUtil.getVersion();
 
 	public RestfulServer() {
 		myFhirContext = new FhirContext();
@@ -56,7 +59,7 @@ public abstract class RestfulServer extends HttpServlet {
 	}
 
 	public void addHapiHeader(HttpServletResponse theHttpResponse) {
-		theHttpResponse.addHeader("X-CatchingFhir", "HAPI FHIR " + VersionUtil.getVersion());
+		theHttpResponse.addHeader("X-CatchingFhir", "Powered by HAPI FHIR " + VersionUtil.getVersion());
 	}
 
 	@Override
@@ -429,6 +432,42 @@ public abstract class RestfulServer extends HttpServlet {
 		public static NarrativeModeEnum valueOfCaseInsensitive(String theCode) {
 			return valueOf(NarrativeModeEnum.class, theCode.toUpperCase());
 		}
+	}
+
+	/**
+	 * Gets the server's name, as exported in conformance profiles exported by the server. This
+	 * is informational only, but can be helpful to set with something appropriate.
+	 * 
+	 * @see RestfulServer#setServerName(StringDt)
+	 */
+	public String getServerName() {
+		return myServerName;
+	}
+
+	/**
+	 * Gets the server's name, as exported in conformance profiles exported by the server. This
+	 * is informational only, but can be helpful to set with something appropriate.
+	 * 
+	 * @see RestfulServer#setServerName(StringDt)
+	 */
+	public void setServerName(String theServerName) {
+		myServerName = theServerName;
+	}
+
+	/**
+	 * Gets the server's version, as exported in conformance profiles exported by the server. This
+	 * is informational only, but can be helpful to set with something appropriate.
+	 */
+	public void setServerVersion(String theServerVersion) {
+		myServerVersion = theServerVersion;
+	}
+
+	/**
+	 * Gets the server's version, as exported in conformance profiles exported by the server. This
+	 * is informational only, but can be helpful to set with something appropriate.
+	 */
+	public String getServerVersion() {
+		return myServerVersion;
 	}
 
 }

@@ -2,12 +2,15 @@ package ca.uhn.fhir.context;
 
 import static org.junit.Assert.*;
 
+import java.util.List;
+
 import org.junit.Test;
 
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.dstu.resource.Profile;
 import ca.uhn.fhir.model.dstu.resource.Profile.ExtensionDefn;
 import ca.uhn.fhir.model.dstu.resource.Profile.Structure;
+import ca.uhn.fhir.model.dstu.resource.Profile.StructureElement;
 import ca.uhn.fhir.model.dstu.resource.ValueSet;
 import ca.uhn.fhir.model.dstu.valueset.DataTypeEnum;
 
@@ -57,8 +60,9 @@ public class RuntimeResourceDefinitionTest {
 
 		ourLog.info(ctx.newXmlParser().encodeResourceToString(profile));
 		
-		assertEquals(1, profile.getStructure().get(0).getElement().get(0).getDefinition().getType().size());
-		assertEquals("Resource", profile.getStructure().get(0).getElement().get(0).getDefinition().getType().get(0).getCode().getValue());
+		List<StructureElement> element = profile.getStructure().get(0).getElement();
+		assertEquals(1, element.get(0).getDefinition().getType().size());
+		assertEquals("Resource", element.get(0).getDefinition().getType().get(0).getCode().getValue());
 
 		ExtensionDefn ext = profile.getExtensionDefn().get(1);
 		assertEquals("b1/1", ext.getCode().getValue());
@@ -71,19 +75,19 @@ public class RuntimeResourceDefinitionTest {
 		assertEquals(DataTypeEnum.EXTENSION, ext.getDefinition().getType().get(1).getCode().getValueAsEnum());
 		assertEquals("#b1/2/2", ext.getDefinition().getType().get(1).getProfile().getValueAsString());
 		
-		assertEquals("ResourceWithExtensionsA.extension", profile.getStructure().get(0).getElement().get(1).getPath().getValue());
-		assertEquals("ResourceWithExtensionsA.extension", profile.getStructure().get(0).getElement().get(2).getPath().getValue());
-		assertEquals("ResourceWithExtensionsA.extension", profile.getStructure().get(0).getElement().get(3).getPath().getValue());
-		assertEquals("ResourceWithExtensionsA.extension", profile.getStructure().get(0).getElement().get(4).getPath().getValue());
-		assertEquals("ResourceWithExtensionsA.modifierExtension", profile.getStructure().get(0).getElement().get(5).getPath().getValue());
+		assertEquals("ResourceWithExtensionsA.extension", element.get(1).getPath().getValue());
+		assertEquals("ResourceWithExtensionsA.extension", element.get(2).getPath().getValue());
+		assertEquals("ResourceWithExtensionsA.extension", element.get(3).getPath().getValue());
+		assertEquals("ResourceWithExtensionsA.extension", element.get(4).getPath().getValue());
+		assertEquals("ResourceWithExtensionsA.modifierExtension", element.get(5).getPath().getValue());
 
-		assertEquals(DataTypeEnum.EXTENSION, profile.getStructure().get(0).getElement().get(1).getDefinition().getType().get(0).getCode().getValueAsEnum());
-		assertEquals("url", profile.getStructure().get(0).getElement().get(1).getSlicing().getDiscriminator().getValue());
+		assertEquals(DataTypeEnum.EXTENSION, element.get(1).getDefinition().getType().get(0).getCode().getValueAsEnum());
+		assertEquals("url", element.get(1).getSlicing().getDiscriminator().getValue());
 
-		assertEquals(DataTypeEnum.EXTENSION, profile.getStructure().get(0).getElement().get(2).getDefinition().getType().get(0).getCode().getValueAsEnum());
-		assertEquals("#f1", profile.getStructure().get(0).getElement().get(2).getDefinition().getType().get(0).getProfile().getValueAsString());
+		assertEquals(DataTypeEnum.EXTENSION, element.get(2).getDefinition().getType().get(0).getCode().getValueAsEnum());
+		assertEquals("#f1", element.get(2).getDefinition().getType().get(0).getProfile().getValueAsString());
 		
-		assertEquals("ResourceWithExtensionsA.identifier", profile.getStructure().get(0).getElement().get(9).getPath().getValue());
+		assertEquals("ResourceWithExtensionsA.identifier", element.get(12).getPath().getValue());
 
 	}
 
