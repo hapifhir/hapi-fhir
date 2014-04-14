@@ -1,6 +1,6 @@
 package ca.uhn.fhir.parser;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -36,10 +36,12 @@ import ca.uhn.fhir.model.api.IPrimitiveDatatype;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.IResourceBlock;
 import ca.uhn.fhir.model.api.ISupportsUndeclaredExtensions;
+import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.dstu.composite.ContainedDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.XhtmlDt;
+import ca.uhn.fhir.rest.server.Constants;
 
 class ParserState<T extends IElement> {
 
@@ -196,7 +198,46 @@ class ParserState<T extends IElement> {
 
 		@Override
 		public void endingElement() throws DataFormatException {
+			populateResourceMetadata();
 			pop();
+		}
+
+		private void populateResourceMetadata() {
+			if (myEntry.getResource() == null) {
+				return;
+			}
+
+			Map<ResourceMetadataKeyEnum, Object> metadata = myEntry.getResource().getResourceMetadata();
+			if (myEntry.getPublished().isEmpty() == false) {
+				metadata.put(ResourceMetadataKeyEnum.PUBLISHED, myEntry.getPublished());
+			}
+			if (myEntry.getUpdated().isEmpty() == false) {
+				metadata.put(ResourceMetadataKeyEnum.UPDATED, myEntry.getUpdated());
+			}
+			if (!myEntry.getLinkSelf().isEmpty()) {
+				String subStr = "/" + Constants.PARAM_HISTORY + "/";
+				String linkSelfValue = myEntry.getLinkSelf().getValue();
+				int startIndex = linkSelfValue.indexOf(subStr);
+				if (startIndex > 0) {
+					startIndex = startIndex + subStr.length();
+					int endIndex = linkSelfValue.indexOf('?', startIndex);
+					if (endIndex == -1) {
+						endIndex = linkSelfValue.length();
+					}
+					String versionId = linkSelfValue.substring(startIndex, endIndex);
+					if (isNotBlank(versionId)) {
+						int idx = versionId.indexOf('/');
+						if (idx != -1) {
+							// Just in case
+							ourLog.warn("Bundle entry link-self contains path information beyond version (this will be ignored): {}", versionId);
+							versionId = versionId.substring(0, idx);
+						}
+						metadata.put(ResourceMetadataKeyEnum.VERSION_ID, versionId);
+
+					}
+				}
+			}
+
 		}
 
 		@Override
@@ -204,7 +245,7 @@ class ParserState<T extends IElement> {
 			if ("title".equals(theLocalPart)) {
 				push(new AtomPrimitiveState(myEntry.getTitle()));
 			} else if ("id".equals(theLocalPart)) {
-				push(new AtomPrimitiveState(myEntry.getEntryId()));
+				push(new AtomPrimitiveState(myEntry.getId()));
 			} else if ("link".equals(theLocalPart)) {
 				push(new AtomLinkState(myEntry));
 			} else if ("updated".equals(theLocalPart)) {
@@ -550,8 +591,7 @@ class ParserState<T extends IElement> {
 
 	}
 
-	private class SwallowChildrenWholeState extends BaseState
-	{
+	private class SwallowChildrenWholeState extends BaseState {
 
 		private int myDepth;
 
@@ -571,9 +611,9 @@ class ParserState<T extends IElement> {
 		public void enteringNewElement(String theNamespaceURI, String theLocalPart) throws DataFormatException {
 			myDepth++;
 		}
-		
+
 	}
-	
+
 	private class ElementCompositeState extends BaseState {
 
 		private BaseRuntimeElementCompositeDefinition<?> myDefinition;
@@ -669,7 +709,7 @@ class ParserState<T extends IElement> {
 				if (values == null || values.isEmpty() || values.get(0) == null) {
 					newDt = targetElem.newInstance();
 					child.getMutator().addValue(myInstance, newDt);
-				}else {
+				} else {
 					newDt = (ContainedDt) values.get(0);
 				}
 				ContainedResourcesState state = new ContainedResourcesState(getPreResourceState());

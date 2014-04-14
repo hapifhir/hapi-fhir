@@ -1,5 +1,7 @@
 package ca.uhn.fhir.model.api;
 
+import java.util.Map;
+
 import ca.uhn.fhir.model.dstu.composite.ContainedDt;
 import ca.uhn.fhir.model.dstu.composite.NarrativeDt;
 
@@ -19,5 +21,21 @@ public interface IResource extends ICompositeElement {
 	ContainedDt getContained();
 
 	NarrativeDt getText();
+	
+	/**
+	 * Returns the metadata map for this object, creating it if neccesary. Metadata
+	 * entries are used to get/set feed bundle entries, such as the
+	 * resource version, or the last updated timestamp.
+	 */
+	Map<ResourceMetadataKeyEnum, Object> getResourceMetadata();
+	
+	/**
+	 * Sets the metadata map for this object. Metadata
+	 * entries are used to get/set feed bundle entries, such as the
+	 * resource version, or the last updated timestamp.
+	 * 
+	 * @throws NullPointerException The map must not be null
+	 */
+	void setResourceMetadata(Map<ResourceMetadataKeyEnum, Object> theMap);
 	
 }

@@ -6,6 +6,7 @@ import static org.mockito.Mockito.*;
 import java.io.StringReader;
 import java.nio.charset.Charset;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
@@ -29,7 +30,9 @@ import org.mockito.internal.stubbing.defaultanswers.ReturnsDeepStubs;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
+import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.api.PathSpecification;
+import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.dstu.composite.CodingDt;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.resource.Conformance;
@@ -37,6 +40,7 @@ import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.param.CodingListParam;
@@ -62,6 +66,168 @@ public class ClientTest {
 		ctx.getRestfulClientFactory().setHttpClient(httpClient);
 
 		httpResponse = mock(HttpResponse.class, new ReturnsDeepStubs());
+	}
+
+	@Test
+	public void testHistoryResourceInstance() throws Exception {
+
+		//@formatter:off
+		String msg = "<feed xmlns=\"http://www.w3.org/2005/Atom\"><title/><id>6c1d93be-027f-468d-9d47-f826cd15cf42</id><link rel=\"self\" href=\"http://localhost:51698/Patient/222/_history\"/><link rel=\"fhir-base\" href=\"http://localhost:51698\"/><os:totalResults xmlns:os=\"http://a9.com/-/spec/opensearch/1.1/\">2</os:totalResults><published>2014-04-13T18:24:50-04:00</published><author><name>ca.uhn.fhir.rest.method.HistoryMethodBinding</name></author><entry><title>Patient 222</title><id>222</id><updated>1969-12-31T19:00:20.000-05:00</updated><published>1969-12-31T19:00:10.000-05:00</published><link rel=\"self\" href=\"http://localhost:51698/Patient/222/_history/1\"/><content type=\"text/xml\"><Patient xmlns=\"http://hl7.org/fhir\"><identifier><use value=\"official\"/><system value=\"urn:hapitest:mrns\"/><value value=\"00001\"/></identifier><name><family value=\"OlderFamily\"/><given value=\"PatientOne\"/></name><gender><text value=\"M\"/></gender></Patient></content></entry><entry><title>Patient 222</title><id>222</id><updated>1969-12-31T19:00:30.000-05:00</updated><published>1969-12-31T19:00:10.000-05:00</published><link rel=\"self\" href=\"http://localhost:51698/Patient/222/_history/2\"/><content type=\"text/xml\"><Patient xmlns=\"http://hl7.org/fhir\"><identifier><use value=\"official\"/><system value=\"urn:hapitest:mrns\"/><value value=\"00001\"/></identifier><name><family value=\"NewerFamily\"/><given value=\"PatientOne\"/></name><gender><text value=\"M\"/></gender></Patient></content></entry></feed>";
+		//@formatter:on
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
+		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_ATOM_XML + "; charset=UTF-8"));
+		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
+
+		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
+		Bundle response = client.getHistoryPatientInstance(new IdDt("111"));
+
+		assertEquals("http://foo/Patient/111/_history", capt.getValue().getURI().toString());
+
+		assertEquals(2, response.getEntries().size());
+
+		// Older resource
+		{
+		BundleEntry olderEntry = response.getEntries().get(0);
+		assertEquals("222", olderEntry.getId().getValue());
+		assertThat(olderEntry.getLinkSelf().getValue(), StringEndsWith.endsWith("/Patient/222/_history/1"));
+		InstantDt pubExpected = new InstantDt(new Date(10000L));
+		InstantDt pubActualRes = (InstantDt) olderEntry.getResource().getResourceMetadata().get(ResourceMetadataKeyEnum.PUBLISHED);
+		InstantDt pubActualBundle = olderEntry.getPublished();
+		assertEquals(pubExpected.getValueAsString(), pubActualRes.getValueAsString());
+		assertEquals(pubExpected.getValueAsString(), pubActualBundle.getValueAsString());
+		InstantDt updExpected = new InstantDt(new Date(20000L));
+		InstantDt updActualRes = (InstantDt) olderEntry.getResource().getResourceMetadata().get(ResourceMetadataKeyEnum.UPDATED);
+		InstantDt updActualBundle = olderEntry.getUpdated();
+		assertEquals(updExpected.getValueAsString(), updActualRes.getValueAsString());
+		assertEquals(updExpected.getValueAsString(), updActualBundle.getValueAsString());
+		}
+		// Newer resource
+		{
+		BundleEntry newerEntry = response.getEntries().get(1);
+		assertEquals("222", newerEntry.getId().getValue());
+		assertThat(newerEntry.getLinkSelf().getValue(), StringEndsWith.endsWith("/Patient/222/_history/2"));
+		InstantDt pubExpected = new InstantDt(new Date(10000L));
+		InstantDt pubActualRes = (InstantDt) newerEntry.getResource().getResourceMetadata().get(ResourceMetadataKeyEnum.PUBLISHED);
+		InstantDt pubActualBundle = newerEntry.getPublished();
+		assertEquals(pubExpected.getValueAsString(), pubActualRes.getValueAsString());
+		assertEquals(pubExpected.getValueAsString(), pubActualBundle.getValueAsString());
+		InstantDt updExpected = new InstantDt(new Date(30000L));
+		InstantDt updActualRes = (InstantDt) newerEntry.getResource().getResourceMetadata().get(ResourceMetadataKeyEnum.UPDATED);
+		InstantDt updActualBundle = newerEntry.getUpdated();
+		assertEquals(updExpected.getValueAsString(), updActualRes.getValueAsString());
+		assertEquals(updExpected.getValueAsString(), updActualBundle.getValueAsString());
+		}
+	}
+
+	@Test
+	public void testHistoryResourceType() throws Exception {
+
+		//@formatter:off
+		String msg = "<feed xmlns=\"http://www.w3.org/2005/Atom\"><title/><id>6c1d93be-027f-468d-9d47-f826cd15cf42</id><link rel=\"self\" href=\"http://localhost:51698/Patient/222/_history\"/><link rel=\"fhir-base\" href=\"http://localhost:51698\"/><os:totalResults xmlns:os=\"http://a9.com/-/spec/opensearch/1.1/\">2</os:totalResults><published>2014-04-13T18:24:50-04:00</published><author><name>ca.uhn.fhir.rest.method.HistoryMethodBinding</name></author><entry><title>Patient 222</title><id>222</id><updated>1969-12-31T19:00:20.000-05:00</updated><published>1969-12-31T19:00:10.000-05:00</published><link rel=\"self\" href=\"http://localhost:51698/Patient/222/_history/1\"/><content type=\"text/xml\"><Patient xmlns=\"http://hl7.org/fhir\"><identifier><use value=\"official\"/><system value=\"urn:hapitest:mrns\"/><value value=\"00001\"/></identifier><name><family value=\"OlderFamily\"/><given value=\"PatientOne\"/></name><gender><text value=\"M\"/></gender></Patient></content></entry><entry><title>Patient 222</title><id>222</id><updated>1969-12-31T19:00:30.000-05:00</updated><published>1969-12-31T19:00:10.000-05:00</published><link rel=\"self\" href=\"http://localhost:51698/Patient/222/_history/2\"/><content type=\"text/xml\"><Patient xmlns=\"http://hl7.org/fhir\"><identifier><use value=\"official\"/><system value=\"urn:hapitest:mrns\"/><value value=\"00001\"/></identifier><name><family value=\"NewerFamily\"/><given value=\"PatientOne\"/></name><gender><text value=\"M\"/></gender></Patient></content></entry></feed>";
+		//@formatter:on
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
+		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_ATOM_XML + "; charset=UTF-8"));
+		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
+
+		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
+		Bundle response = client.getHistoryPatientType();
+
+		assertEquals("http://foo/Patient/_history", capt.getValue().getURI().toString());
+
+		assertEquals(2, response.getEntries().size());
+
+		// Older resource
+		{
+		BundleEntry olderEntry = response.getEntries().get(0);
+		assertEquals("222", olderEntry.getId().getValue());
+		assertThat(olderEntry.getLinkSelf().getValue(), StringEndsWith.endsWith("/Patient/222/_history/1"));
+		InstantDt pubExpected = new InstantDt(new Date(10000L));
+		InstantDt pubActualRes = (InstantDt) olderEntry.getResource().getResourceMetadata().get(ResourceMetadataKeyEnum.PUBLISHED);
+		InstantDt pubActualBundle = olderEntry.getPublished();
+		assertEquals(pubExpected.getValueAsString(), pubActualRes.getValueAsString());
+		assertEquals(pubExpected.getValueAsString(), pubActualBundle.getValueAsString());
+		InstantDt updExpected = new InstantDt(new Date(20000L));
+		InstantDt updActualRes = (InstantDt) olderEntry.getResource().getResourceMetadata().get(ResourceMetadataKeyEnum.UPDATED);
+		InstantDt updActualBundle = olderEntry.getUpdated();
+		assertEquals(updExpected.getValueAsString(), updActualRes.getValueAsString());
+		assertEquals(updExpected.getValueAsString(), updActualBundle.getValueAsString());
+		}
+		// Newer resource
+		{
+		BundleEntry newerEntry = response.getEntries().get(1);
+		assertEquals("222", newerEntry.getId().getValue());
+		assertThat(newerEntry.getLinkSelf().getValue(), StringEndsWith.endsWith("/Patient/222/_history/2"));
+		InstantDt pubExpected = new InstantDt(new Date(10000L));
+		InstantDt pubActualRes = (InstantDt) newerEntry.getResource().getResourceMetadata().get(ResourceMetadataKeyEnum.PUBLISHED);
+		InstantDt pubActualBundle = newerEntry.getPublished();
+		assertEquals(pubExpected.getValueAsString(), pubActualRes.getValueAsString());
+		assertEquals(pubExpected.getValueAsString(), pubActualBundle.getValueAsString());
+		InstantDt updExpected = new InstantDt(new Date(30000L));
+		InstantDt updActualRes = (InstantDt) newerEntry.getResource().getResourceMetadata().get(ResourceMetadataKeyEnum.UPDATED);
+		InstantDt updActualBundle = newerEntry.getUpdated();
+		assertEquals(updExpected.getValueAsString(), updActualRes.getValueAsString());
+		assertEquals(updExpected.getValueAsString(), updActualBundle.getValueAsString());
+		}
+	}
+	
+	@Test
+	public void testHistoryServer() throws Exception {
+
+		//@formatter:off
+		String msg = "<feed xmlns=\"http://www.w3.org/2005/Atom\"><title/><id>6c1d93be-027f-468d-9d47-f826cd15cf42</id><link rel=\"self\" href=\"http://localhost:51698/Patient/222/_history\"/><link rel=\"fhir-base\" href=\"http://localhost:51698\"/><os:totalResults xmlns:os=\"http://a9.com/-/spec/opensearch/1.1/\">2</os:totalResults><published>2014-04-13T18:24:50-04:00</published><author><name>ca.uhn.fhir.rest.method.HistoryMethodBinding</name></author><entry><title>Patient 222</title><id>222</id><updated>1969-12-31T19:00:20.000-05:00</updated><published>1969-12-31T19:00:10.000-05:00</published><link rel=\"self\" href=\"http://localhost:51698/Patient/222/_history/1\"/><content type=\"text/xml\"><Patient xmlns=\"http://hl7.org/fhir\"><identifier><use value=\"official\"/><system value=\"urn:hapitest:mrns\"/><value value=\"00001\"/></identifier><name><family value=\"OlderFamily\"/><given value=\"PatientOne\"/></name><gender><text value=\"M\"/></gender></Patient></content></entry><entry><title>Patient 222</title><id>222</id><updated>1969-12-31T19:00:30.000-05:00</updated><published>1969-12-31T19:00:10.000-05:00</published><link rel=\"self\" href=\"http://localhost:51698/Patient/222/_history/2\"/><content type=\"text/xml\"><Patient xmlns=\"http://hl7.org/fhir\"><identifier><use value=\"official\"/><system value=\"urn:hapitest:mrns\"/><value value=\"00001\"/></identifier><name><family value=\"NewerFamily\"/><given value=\"PatientOne\"/></name><gender><text value=\"M\"/></gender></Patient></content></entry></feed>";
+		//@formatter:on
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
+		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_ATOM_XML + "; charset=UTF-8"));
+		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
+
+		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
+		Bundle response = client.getHistoryServer();
+
+		assertEquals("http://foo/_history", capt.getValue().getURI().toString());
+
+		assertEquals(2, response.getEntries().size());
+
+		// Older resource
+		{
+		BundleEntry olderEntry = response.getEntries().get(0);
+		assertEquals("222", olderEntry.getId().getValue());
+		assertThat(olderEntry.getLinkSelf().getValue(), StringEndsWith.endsWith("/Patient/222/_history/1"));
+		InstantDt pubExpected = new InstantDt(new Date(10000L));
+		InstantDt pubActualRes = (InstantDt) olderEntry.getResource().getResourceMetadata().get(ResourceMetadataKeyEnum.PUBLISHED);
+		InstantDt pubActualBundle = olderEntry.getPublished();
+		assertEquals(pubExpected.getValueAsString(), pubActualRes.getValueAsString());
+		assertEquals(pubExpected.getValueAsString(), pubActualBundle.getValueAsString());
+		InstantDt updExpected = new InstantDt(new Date(20000L));
+		InstantDt updActualRes = (InstantDt) olderEntry.getResource().getResourceMetadata().get(ResourceMetadataKeyEnum.UPDATED);
+		InstantDt updActualBundle = olderEntry.getUpdated();
+		assertEquals(updExpected.getValueAsString(), updActualRes.getValueAsString());
+		assertEquals(updExpected.getValueAsString(), updActualBundle.getValueAsString());
+		}
+		// Newer resource
+		{
+		BundleEntry newerEntry = response.getEntries().get(1);
+		assertEquals("222", newerEntry.getId().getValue());
+		assertThat(newerEntry.getLinkSelf().getValue(), StringEndsWith.endsWith("/Patient/222/_history/2"));
+		InstantDt pubExpected = new InstantDt(new Date(10000L));
+		InstantDt pubActualRes = (InstantDt) newerEntry.getResource().getResourceMetadata().get(ResourceMetadataKeyEnum.PUBLISHED);
+		InstantDt pubActualBundle = newerEntry.getPublished();
+		assertEquals(pubExpected.getValueAsString(), pubActualRes.getValueAsString());
+		assertEquals(pubExpected.getValueAsString(), pubActualBundle.getValueAsString());
+		InstantDt updExpected = new InstantDt(new Date(30000L));
+		InstantDt updActualRes = (InstantDt) newerEntry.getResource().getResourceMetadata().get(ResourceMetadataKeyEnum.UPDATED);
+		InstantDt updActualBundle = newerEntry.getUpdated();
+		assertEquals(updExpected.getValueAsString(), updActualRes.getValueAsString());
+		assertEquals(updExpected.getValueAsString(), updActualBundle.getValueAsString());
+		}
 	}
 
 	@Test

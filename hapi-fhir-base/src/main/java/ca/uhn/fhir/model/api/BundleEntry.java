@@ -3,6 +3,8 @@ package ca.uhn.fhir.model.api;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.Validate;
+
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.XhtmlDt;
@@ -15,7 +17,6 @@ public class BundleEntry extends BaseBundle {
 	 * NB: add any new fields to the isEmpty() method!!!
 	 *****************************************************/
 	//@formatter:on
-	private StringDt myEntryId;
 	private StringDt myLinkSelf;
 	private InstantDt myPublished;
 	private IResource myResource;
@@ -28,16 +29,9 @@ public class BundleEntry extends BaseBundle {
 	public boolean isEmpty() {
 		//@formatter:off
 		return super.isEmpty() && 
-				ElementUtil.isEmpty(myEntryId, myLinkSelf, myPublished, myResource, myTitle, myUpdated, mySummary) &&
+				ElementUtil.isEmpty(myLinkSelf, myPublished, myResource, myTitle, myUpdated, mySummary) &&
 				ElementUtil.isEmpty(myCategories);
 		//@formatter:on
-	}
-	
-	public StringDt getEntryId() {
-		if (myEntryId == null) {
-			myEntryId = new StringDt();
-		}
-		return myEntryId;
 	}
 
 	public StringDt getLinkSelf() {
@@ -101,6 +95,16 @@ public class BundleEntry extends BaseBundle {
 			myCategories = new ArrayList<BundleCategory>();
 		}
 		return myCategories;
+	}
+
+	public void setPublished(InstantDt thePublished) {
+		Validate.notNull(thePublished, "Published may not be null");
+		myPublished = thePublished;
+	}
+
+	public void setUpdated(InstantDt theUpdated) {
+		Validate.notNull(theUpdated, "Updated may not be null");
+		myUpdated = theUpdated;
 	}
 
 }

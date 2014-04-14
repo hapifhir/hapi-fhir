@@ -75,7 +75,7 @@ public abstract class BaseParser implements IParser {
 			b.append(type);
 			b.append(" but this is not a valid type for this element");
 			if (nextChild instanceof RuntimeChildChoiceDefinition) {
-				RuntimeChildChoiceDefinition choice = (RuntimeChildChoiceDefinition)nextChild;
+				RuntimeChildChoiceDefinition choice = (RuntimeChildChoiceDefinition) nextChild;
 				b.append(" - Expected one of: " + choice.getValidChildTypes());
 			}
 			throw new DataFormatException(b.toString());
@@ -85,17 +85,16 @@ public abstract class BaseParser implements IParser {
 
 	@Override
 	public IParser setSuppressNarratives(boolean theSuppressNarratives) {
-		mySuppressNarratives=theSuppressNarratives;
+		mySuppressNarratives = theSuppressNarratives;
 		return this;
 	}
 
 	/**
-	 * If set to <code>true</code> (default is <code>false</code>), narratives will not be included in the
-	 * encoded values.
+	 * If set to <code>true</code> (default is <code>false</code>), narratives
+	 * will not be included in the encoded values.
 	 */
 	public boolean getSuppressNarratives() {
 		return mySuppressNarratives;
 	}
-
 
 }

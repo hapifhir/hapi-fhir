@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,6 +29,7 @@ import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.hamcrest.core.IsNot;
 import org.hamcrest.core.StringContains;
+import org.hamcrest.core.StringEndsWith;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -37,6 +39,7 @@ import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.PathSpecification;
+import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.dstu.composite.CodingDt;
 import ca.uhn.fhir.model.dstu.composite.HumanNameDt;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
@@ -46,11 +49,13 @@ import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.Delete;
+import ca.uhn.fhir.rest.annotation.History;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.IncludeParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
@@ -90,7 +95,8 @@ public class ResfulServerMethodTest {
 		DummyDiagnosticReportResourceProvider reportProvider = new DummyDiagnosticReportResourceProvider();
 
 		ServletHandler proxyHandler = new ServletHandler();
-		ServletHolder servletHolder = new ServletHolder(new DummyRestfulServer(patientProvider, profProvider,reportProvider));
+		DummyRestfulServer servlet = new DummyRestfulServer(patientProvider, profProvider,reportProvider);
+		ServletHolder servletHolder = new ServletHolder(servlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
 		ourServer.start();
@@ -161,7 +167,7 @@ public class ResfulServerMethodTest {
 		Bundle bundle = ourCtx.newXmlParser().parseBundle(responseContent);
 		BundleEntry entry0 = bundle.getEntries().get(0);
 		assertEquals("http://localhost:" + ourPort + "/Patient/1", entry0.getLinkSelf().getValue());
-		assertEquals("1", entry0.getEntryId().getValue());
+		assertEquals("1", entry0.getId().getValue());
 
 		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?withIncludes=include1&_include=include2&_include=include3&_format=json");
 		status = ourClient.execute(httpGet);
@@ -403,7 +409,111 @@ public class ResfulServerMethodTest {
 		assertEquals(2, bundle.getEntries().size());
 
 	}
+	
+	
+	@Test
+	public void testHistoryResourceType() throws Exception {
 
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/_history");
+		HttpResponse status = ourClient.execute(httpGet);
+
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		ourLog.info("Response was:\n{}", responseContent);
+
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		Bundle bundle = ourCtx.newXmlParser().parseBundle(responseContent);
+
+		assertEquals(2, bundle.getEntries().size());
+
+		// Older resource
+		{
+		BundleEntry olderEntry = bundle.getEntries().get(0);
+		assertEquals("1", olderEntry.getId().getValue());
+		assertThat(olderEntry.getLinkSelf().getValue(), StringEndsWith.endsWith("/Patient/1/_history/1"));
+		InstantDt pubExpected = new InstantDt(new Date(10000L));
+		InstantDt pubActualRes = (InstantDt) olderEntry.getResource().getResourceMetadata().get(ResourceMetadataKeyEnum.PUBLISHED);
+		InstantDt pubActualBundle = olderEntry.getPublished();
+		assertEquals(pubExpected.getValueAsString(), pubActualRes.getValueAsString());
+		assertEquals(pubExpected.getValueAsString(), pubActualBundle.getValueAsString());
+		InstantDt updExpected = new InstantDt(new Date(20000L));
+		InstantDt updActualRes = (InstantDt) olderEntry.getResource().getResourceMetadata().get(ResourceMetadataKeyEnum.UPDATED);
+		InstantDt updActualBundle = olderEntry.getUpdated();
+		assertEquals(updExpected.getValueAsString(), updActualRes.getValueAsString());
+		assertEquals(updExpected.getValueAsString(), updActualBundle.getValueAsString());
+		}
+		// Newer resource
+		{
+		BundleEntry newerEntry = bundle.getEntries().get(1);
+		assertEquals("1", newerEntry.getId().getValue());
+		assertThat(newerEntry.getLinkSelf().getValue(), StringEndsWith.endsWith("/Patient/1/_history/2"));
+		InstantDt pubExpected = new InstantDt(new Date(10000L));
+		InstantDt pubActualRes = (InstantDt) newerEntry.getResource().getResourceMetadata().get(ResourceMetadataKeyEnum.PUBLISHED);
+		InstantDt pubActualBundle = newerEntry.getPublished();
+		assertEquals(pubExpected.getValueAsString(), pubActualRes.getValueAsString());
+		assertEquals(pubExpected.getValueAsString(), pubActualBundle.getValueAsString());
+		InstantDt updExpected = new InstantDt(new Date(30000L));
+		InstantDt updActualRes = (InstantDt) newerEntry.getResource().getResourceMetadata().get(ResourceMetadataKeyEnum.UPDATED);
+		InstantDt updActualBundle = newerEntry.getUpdated();
+		assertEquals(updExpected.getValueAsString(), updActualRes.getValueAsString());
+		assertEquals(updExpected.getValueAsString(), updActualBundle.getValueAsString());
+		}
+
+		
+	}
+	
+
+	@Test
+	public void testHistoryResourceInstance() throws Exception {
+
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/222/_history");
+		HttpResponse status = ourClient.execute(httpGet);
+
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		ourLog.info("Response was:\n{}", responseContent);
+
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		Bundle bundle = ourCtx.newXmlParser().parseBundle(responseContent);
+
+		assertEquals(2, bundle.getEntries().size());
+
+		// Older resource
+		{
+		BundleEntry olderEntry = bundle.getEntries().get(0);
+		assertEquals("222", olderEntry.getId().getValue());
+		assertThat(olderEntry.getLinkSelf().getValue(), StringEndsWith.endsWith("/Patient/222/_history/1"));
+		InstantDt pubExpected = new InstantDt(new Date(10000L));
+		InstantDt pubActualRes = (InstantDt) olderEntry.getResource().getResourceMetadata().get(ResourceMetadataKeyEnum.PUBLISHED);
+		InstantDt pubActualBundle = olderEntry.getPublished();
+		assertEquals(pubExpected.getValueAsString(), pubActualRes.getValueAsString());
+		assertEquals(pubExpected.getValueAsString(), pubActualBundle.getValueAsString());
+		InstantDt updExpected = new InstantDt(new Date(20000L));
+		InstantDt updActualRes = (InstantDt) olderEntry.getResource().getResourceMetadata().get(ResourceMetadataKeyEnum.UPDATED);
+		InstantDt updActualBundle = olderEntry.getUpdated();
+		assertEquals(updExpected.getValueAsString(), updActualRes.getValueAsString());
+		assertEquals(updExpected.getValueAsString(), updActualBundle.getValueAsString());
+		}
+		// Newer resource
+		{
+		BundleEntry newerEntry = bundle.getEntries().get(1);
+		assertEquals("222", newerEntry.getId().getValue());
+		assertThat(newerEntry.getLinkSelf().getValue(), StringEndsWith.endsWith("/Patient/222/_history/2"));
+		InstantDt pubExpected = new InstantDt(new Date(10000L));
+		InstantDt pubActualRes = (InstantDt) newerEntry.getResource().getResourceMetadata().get(ResourceMetadataKeyEnum.PUBLISHED);
+		InstantDt pubActualBundle = newerEntry.getPublished();
+		assertEquals(pubExpected.getValueAsString(), pubActualRes.getValueAsString());
+		assertEquals(pubExpected.getValueAsString(), pubActualBundle.getValueAsString());
+		InstantDt updExpected = new InstantDt(new Date(30000L));
+		InstantDt updActualRes = (InstantDt) newerEntry.getResource().getResourceMetadata().get(ResourceMetadataKeyEnum.UPDATED);
+		InstantDt updActualBundle = newerEntry.getUpdated();
+		assertEquals(updExpected.getValueAsString(), updActualRes.getValueAsString());
+		assertEquals(updExpected.getValueAsString(), updActualBundle.getValueAsString());
+		}
+
+		
+	}
+
+	
+	
 	@Test
 	public void testCreate() throws Exception {
 
@@ -765,6 +875,7 @@ public class ResfulServerMethodTest {
 
 	}
 	
+	
 	/**
 	 * Created by dsotnikov on 2/25/2014.
 	 */
@@ -773,16 +884,7 @@ public class ResfulServerMethodTest {
 		public Map<String, Patient> getIdToPatient() {
 			Map<String, Patient> idToPatient = new HashMap<String, Patient>();
 			{
-				Patient patient = new Patient();
-				patient.addIdentifier();
-				patient.getIdentifier().get(0).setUse(IdentifierUseEnum.OFFICIAL);
-				patient.getIdentifier().get(0).setSystem(new UriDt("urn:hapitest:mrns"));
-				patient.getIdentifier().get(0).setValue("00001");
-				patient.addName();
-				patient.getName().get(0).addFamily("Test");
-				patient.getName().get(0).addGiven("PatientOne");
-				patient.getGender().setText("M");
-				patient.getId().setValue("1");
+				Patient patient = createPatient1();
 				idToPatient.put("1", patient);
 			}
 			{
@@ -799,6 +901,67 @@ public class ResfulServerMethodTest {
 				idToPatient.put("2", patient);
 			}
 			return idToPatient;
+		}
+
+		private Patient createPatient1() {
+			Patient patient = new Patient();
+			patient.addIdentifier();
+			patient.getIdentifier().get(0).setUse(IdentifierUseEnum.OFFICIAL);
+			patient.getIdentifier().get(0).setSystem(new UriDt("urn:hapitest:mrns"));
+			patient.getIdentifier().get(0).setValue("00001");
+			patient.addName();
+			patient.getName().get(0).addFamily("Test");
+			patient.getName().get(0).addGiven("PatientOne");
+			patient.getGender().setText("M");
+			patient.getId().setValue("1");
+			return patient;
+		}
+
+		@History
+		public List<Patient> getHistoryResourceType() {
+			ArrayList<Patient> retVal = new ArrayList<Patient>();
+			
+			Patient older = createPatient1();
+			older.getNameFirstRep().getFamilyFirstRep().setValue("OlderFamily");
+			older.getResourceMetadata().put(ResourceMetadataKeyEnum.VERSION_ID, "1");
+			older.getResourceMetadata().put(ResourceMetadataKeyEnum.PUBLISHED, new Date(10000L));
+			older.getResourceMetadata().put(ResourceMetadataKeyEnum.UPDATED, new InstantDt(new Date(20000L)));
+			older.getResourceMetadata().put(ResourceMetadataKeyEnum.VERSION_ID, "1");
+			retVal.add(older);
+
+			Patient newer = createPatient1();
+			newer.getNameFirstRep().getFamilyFirstRep().setValue("NewerFamily");
+			newer.getResourceMetadata().put(ResourceMetadataKeyEnum.VERSION_ID, "2");
+			newer.getResourceMetadata().put(ResourceMetadataKeyEnum.PUBLISHED, new Date(10000L));
+			newer.getResourceMetadata().put(ResourceMetadataKeyEnum.UPDATED, new InstantDt(new Date(30000L)));
+			retVal.add(newer);
+
+			return retVal;
+		}
+		
+
+		@History
+		public List<Patient> getHistoryResourceInstance(@IdParam IdDt theId) {
+			ArrayList<Patient> retVal = new ArrayList<Patient>();
+			
+			Patient older = createPatient1();
+			older.setId(theId);
+			older.getNameFirstRep().getFamilyFirstRep().setValue("OlderFamily");
+			older.getResourceMetadata().put(ResourceMetadataKeyEnum.VERSION_ID, "1");
+			older.getResourceMetadata().put(ResourceMetadataKeyEnum.PUBLISHED, new Date(10000L));
+			older.getResourceMetadata().put(ResourceMetadataKeyEnum.UPDATED, new InstantDt(new Date(20000L)));
+			older.getResourceMetadata().put(ResourceMetadataKeyEnum.VERSION_ID, "1");
+			retVal.add(older);
+
+			Patient newer = createPatient1();
+			newer.setId(theId);
+			newer.getNameFirstRep().getFamilyFirstRep().setValue("NewerFamily");
+			newer.getResourceMetadata().put(ResourceMetadataKeyEnum.VERSION_ID, "2");
+			newer.getResourceMetadata().put(ResourceMetadataKeyEnum.PUBLISHED, new Date(10000L));
+			newer.getResourceMetadata().put(ResourceMetadataKeyEnum.UPDATED, new InstantDt(new Date(30000L)));
+			retVal.add(newer);
+
+			return retVal;
 		}
 
 		@SuppressWarnings("unused")

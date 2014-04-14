@@ -243,7 +243,7 @@ public class JsonParserTest {
 		assertEquals("urn:uuid:0b754ff9-03cf-4322-a119-15019af8a3", bundle.getBundleId().getValue());
 
 		BundleEntry entry = bundle.getEntries().get(0);
-		assertEquals("http://fhir.healthintersections.com.au/open/DiagnosticReport/101", entry.getEntryId().getValue());
+		assertEquals("http://fhir.healthintersections.com.au/open/DiagnosticReport/101", entry.getId().getValue());
 		assertEquals("http://fhir.healthintersections.com.au/open/DiagnosticReport/101/_history/1", entry.getLinkSelf().getValue());
 		assertEquals("2014-03-10T11:55:59Z", entry.getUpdated().getValueAsString());
 

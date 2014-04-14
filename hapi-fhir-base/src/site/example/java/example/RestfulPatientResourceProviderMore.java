@@ -7,8 +7,10 @@ import java.util.List;
 import java.util.Set;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.PathSpecification;
+import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.dstu.composite.CodingDt;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
@@ -22,6 +24,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.annotation.Create;
+import ca.uhn.fhir.rest.annotation.History;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.IncludeParam;
 import ca.uhn.fhir.rest.annotation.Metadata;
@@ -80,6 +83,24 @@ public void deletePatient(@IdParam IdDt theId) {
 	return; // can also return MethodOutcome
 }
 //END SNIPPET: delete
+
+
+//START SNIPPET: history
+@History()
+public List<Patient> getPatientHistory(@IdParam IdDt theId) {
+   List<Patient> retVal = new ArrayList<Patient>();
+   
+   Patient patient = new Patient();
+   patient.addName().addFamily("Smith");
+   
+   // Set the ID and version
+   patient.setId(theId);
+   patient.getResourceMetadata().put(ResourceMetadataKeyEnum.VERSION_ID, new IdDt("1"));
+   
+   // ...populate the rest...
+   return retVal;
+}
+//END SNIPPET: history
 
 
 //START SNIPPET: vread
@@ -310,8 +331,7 @@ return retVal;
 
 
 public static void main(String[] args) throws DataFormatException, IOException {
-
-
+//nothing
 }
 
 
@@ -348,6 +368,24 @@ public interface MetadataClient extends IRestfulClient {
 }
 //END SNIPPET: metadataClient
 
+public interface HistoryClient {
+//START SNIPPET: historyClient
+// Server level (history of ALL resources) 
+@History
+Bundle getHistoryServer();
+
+// Type level (history of all resources of a given type)
+@History(resourceType=Patient.class)
+Bundle getHistoryPatientType();
+
+// Instance level (history of a specific resource instance by type and ID)
+@History(resourceType=Patient.class)
+Bundle getHistoryPatientInstance(@IdParam IdDt theId);
+//END SNIPPET: historyClient
+	
+}
+
+
 public void bbbbb() throws DataFormatException, IOException {
 //START SNIPPET: metadataClientUsage
 FhirContext ctx = new FhirContext();
@@ -356,6 +394,9 @@ Conformance metadata = client.getServerMetadata();
 System.out.println(ctx.newXmlParser().encodeResourceToString(metadata));
 //END SNIPPET: metadataClientUsage
 }
+
+
+
 
 
 }

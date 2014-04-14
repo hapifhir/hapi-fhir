@@ -71,7 +71,7 @@
 					</tr>
 					<tr>
 						<td>
-							<a href="#instance_history">Instance - History</a>	
+							<a href="#history">Instance - History</a>	
 						</td>
 						<td>
 							Retrieve the update history for a particular resource
@@ -89,7 +89,7 @@
 						<td>
 							<a href="#instance_update">Type - Search</a>	
 							<macro name="toc">
-								<param name="section" value="8"/>
+								<param name="section" value="7"/>
 								<param name="fromDepth" value="2"/>
 							</macro>
 						</td>
@@ -107,7 +107,7 @@
 					</tr>
 					<tr>
 						<td>
-							<a href="#type_history">Type - History</a>	
+							<a href="#history">Type - History</a>	
 						</td>
 						<td>
 							Retrieve the update history for a particular resource type
@@ -115,7 +115,7 @@
 					</tr>
 					<tr>
 						<td>
-							<a href="#type_history">Type - Validate</a>	
+							<a href="#type_validate">Type - Validate</a>	
 						</td>
 						<td>
 							Check that the content would be acceptable as an update
@@ -139,7 +139,7 @@
 					</tr>
 					<tr>
 						<td>
-							<a href="#system_history">System - History</a>	
+							<a href="#history">System - History</a>	
 						</td>
 						<td>
 							Retrieve the update history for all resources
@@ -157,6 +157,7 @@
 				</tbody>
 			</table>
 					
+			<a name="instance_read"/>
 		</section>
 		
 		<!-- ****************************************************************** -->
@@ -164,7 +165,6 @@
 		<!-- ****************************************************************** -->
 
 		<section name="Instance Level - Read">
-			<a name="instance_read"/>
 		
 			<p>
 				The 
@@ -186,6 +186,7 @@
 				<code>http://fhir.example.com/Patient/111</code>
 			</p>
 			
+			<a name="instance_vread"/>
 		</section>
 
 		<!-- ****************************************************************** -->
@@ -193,7 +194,6 @@
 		<!-- ****************************************************************** -->
 
 		<section name="Instance Level - VRead">
-			<a name="instance_vread"/>
 		
 			<p>
 				The 
@@ -215,6 +215,7 @@
 				<code>http://fhir.example.com/Patient/111/_history/2</code>
 			</p>
 			
+			<a name="instance_update"/>
 		</section>
 		
 		<!-- ****************************************************************** -->
@@ -222,7 +223,6 @@
 		<!-- ****************************************************************** -->
 
 		<section name="Instance Level - Update">
-			<a name="instance_update"/>
 		
 			<p>
 				The 
@@ -283,6 +283,7 @@
 				<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
 			</macro>
 			
+			<a name="instance_delete"/>
 		</section>		
 		
 		<!-- ****************************************************************** -->
@@ -290,7 +291,6 @@
 		<!-- ****************************************************************** -->
 		
 		<section name="Instance Level - Delete">
-			<a name="instance_delete"/>
 			
 			<p>
 				The 
@@ -329,19 +329,7 @@
 				<code>http://fhir.example.com/Patient/111</code>
 			</p>
 			
-		</section>
-
-		<!-- ****************************************************************** -->
-		<!-- ****************************************************************** -->
-		<!-- ****************************************************************** -->
-	
-		<section name="Instance Level - History">
-			<a name="instance_history"/>
-			
-			<p>
-				Not yet implemented
-			</p>
-			
+			<a name="type_create"/>
 		</section>
 
 		<!-- ****************************************************************** -->
@@ -349,7 +337,6 @@
 		<!-- ****************************************************************** -->
 	
 		<section name="Type Level - Create">
-			<a name="type_create"/>
 			
 			<p>
 				The 
@@ -394,6 +381,7 @@
 				<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
 			</macro>
 			
+			<a name="type_search"/>
 		</section>
 		
 		<!-- ****************************************************************** -->
@@ -401,7 +389,6 @@
 		<!-- ****************************************************************** -->
 	
 		<section name="Type Level - Search">
-			<a name="type_search"/>
 		
 			<p>
 				The
@@ -698,19 +685,7 @@
 				
 			</subsection>
 
-		</section>
-
-		<!-- ****************************************************************** -->
-		<!-- ****************************************************************** -->
-		<!-- ****************************************************************** -->
-	
-		<section name="Type Level - History">
-			<a name="type_history"/>
-			
-			<p>
-				Not yet implemented
-			</p>
-			
+			<a name="type_validate"/>
 		</section>
 
 		<!-- ****************************************************************** -->
@@ -718,12 +693,12 @@
 		<!-- ****************************************************************** -->
 	
 		<section name="Type Level - Validate">
-			<a name="type_validate"/>
 			
 			<p>
 				Not yet implemented
 			</p>
 			
+			<a name="system_conformance"/>
 		</section>
 
 		<!-- ****************************************************************** -->
@@ -731,7 +706,6 @@
 		<!-- ****************************************************************** -->
 	
 		<section name="System Level - Conformance">
-			<a name="system_conformance"/>
 			
 			<p>
 				FHIR defines that a FHIR Server must be able to export a conformance statement,
@@ -779,6 +753,7 @@
 				<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
 			</macro>
 			
+			<a name="system_transaction"/>
 		</section>
 			
 		<!-- ****************************************************************** -->
@@ -786,25 +761,12 @@
 		<!-- ****************************************************************** -->
 	
 		<section name="System Level - Transaction">
-			<a name="system_transaction"/>
 			
 			<p>
 				Not yet implemented
 			</p>
 			
-		</section>
-
-		<!-- ****************************************************************** -->
-		<!-- ****************************************************************** -->
-		<!-- ****************************************************************** -->
-	
-		<section name="System Level - History">
-			<a name="system_history"/>
-			
-			<p>
-				Not yet implemented
-			</p>
-			
+			<a name="system_search"/>
 		</section>
 			
 		<!-- ****************************************************************** -->
@@ -812,14 +774,71 @@
 		<!-- ****************************************************************** -->
 	
 		<section name="System Level - Search">
-			<a name="system_search"/>
 			
 			<p>
 				Not yet implemented
 			</p>
 			
+			<a name="history"/>
 		</section>
 			
+		<!-- ****************************************************************** -->
+		<!-- ****************************************************************** -->
+		<!-- ****************************************************************** -->
+	
+		<section name="History (Instance, Type, Server)">
+			
+			<p>
+				The 
+				<a href="http://hl7.org/implement/standards/fhir/http.html#history"><b>history</b></a> 
+				operation retrieves a historical collection of all versions of a single resource 
+				<i>(instance history)</i>, all resources of a given type <i>(type history)</i>,
+				or all resources of any type on a server <i>(server history)</i>.
+			</p>
+			<p>
+				History methods must be annotated with the 
+				<a href="./apidocs/ca/uhn/fhir/rest/annotation/History.html">@History</a>
+				annotation, and will have additional requirements depending on the kind
+				of history method intended:
+			</p>
+			<ul>
+				<li>
+					For an <b>Instance History</b> method, the method must have a parameter
+					annotated with the 
+					<a href="./apidocs/ca/uhn/fhir/rest/annotation/IdParam.html">@IdParam</a>
+					annotation, indicating the ID of the resource for which to return history. 
+				</li>
+				<li>
+					For an <b>Type History</b> method, the method must not have any @IdParam parameter.
+				</li>
+				<li>
+					For an <b>Server History</b> method, the method must not have any @IdParam parameter
+					and must not be found in a ResourceProvider definition.
+					<!-- TODO: make ResourceProvider a link to a defintion of these on the RESTFul server page -->
+				</li>
+			</ul>
+			<p>
+				The following snippet shows how to define a history method on a server:
+			</p>
+			
+			<macro name="snippet">
+				<param name="id" value="history" />
+				<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
+			</macro>
+
+
+
+			
+			<p>
+				The following snippet shows how to define various history methods in a client.
+			</p>
+			
+			<macro name="snippet">
+				<param name="id" value="historyClient" />
+				<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
+			</macro>
+			
+		</section>
 			
 	</body>
 

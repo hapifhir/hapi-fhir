@@ -23,6 +23,7 @@ import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.Delete;
+import ca.uhn.fhir.rest.annotation.History;
 import ca.uhn.fhir.rest.annotation.Metadata;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.Search;
@@ -84,8 +85,9 @@ public abstract class BaseMethodBinding {
 		Create create = theMethod.getAnnotation(Create.class);
 		Update update = theMethod.getAnnotation(Update.class);
 		Delete delete = theMethod.getAnnotation(Delete.class);
+		History history = theMethod.getAnnotation(History.class);
 		// ** if you add another annotation above, also add it to the next line:
-		if (!verifyMethodHasZeroOrOneOperationAnnotation(theMethod, read, search, conformance,create,update,delete)) {
+		if (!verifyMethodHasZeroOrOneOperationAnnotation(theMethod, read, search, conformance,create,update,delete,history)) {
 			return null;
 		}
 
@@ -115,6 +117,8 @@ public abstract class BaseMethodBinding {
 			return new UpdateMethodBinding(theMethod, theContext);
 		} else if (delete != null) {
 			return new DeleteMethodBinding(theMethod, theContext, theProvider);
+		} else if (history != null) {
+			return new HistoryMethodBinding(theMethod, theContext, theProvider);
 		} else {
 			throw new ConfigurationException("Did not detect any FHIR annotations on method '" + theMethod.getName() + "' on type: " + theMethod.getDeclaringClass().getCanonicalName());
 		}

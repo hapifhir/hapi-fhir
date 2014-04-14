@@ -48,10 +48,10 @@ public abstract class RestfulServer extends HttpServlet {
 	private Map<Class<? extends IResource>, IResourceProvider> myTypeToProvider = new HashMap<Class<? extends IResource>, IResourceProvider>();
 	private boolean myUseBrowserFriendlyContentTypes;
 	private ISecurityManager securityManager;
-
 	private BaseMethodBinding myServerConformanceMethod;
 
 	public RestfulServer() {
+		myFhirContext = new FhirContext();
 		myServerConformanceProvider=new ServerConformanceProvider(this);
 	}
 
@@ -260,13 +260,17 @@ public abstract class RestfulServer extends HttpServlet {
 
 			if (tok.hasMoreTokens()) {
 				String nextString = tok.nextToken();
-				if (nextString.startsWith(Constants.PARAM_HISTORY)) {
-					if (tok.hasMoreTokens()) {
-						versionId = new IdDt(tok.nextToken());
-					} else {
-						throw new InvalidRequestException("_history search specified but no version requested in URL");
+				if (nextString.startsWith("_")) {
+					if (operation !=null) {
+						throw new InvalidRequestException("URL Path contains two operations (part beginning with _): " + requestPath);
 					}
+					operation = nextString;
 				}
+			}
+
+			if (tok.hasMoreTokens()) {
+				String nextString = tok.nextToken();
+				versionId = new IdDt(nextString);
 			}
 
 			// TODO: look for more tokens for version, compartments, etc...
@@ -347,7 +351,6 @@ public abstract class RestfulServer extends HttpServlet {
 
 			ourLog.info("Got {} resource providers", myTypeToProvider.size());
 
-			myFhirContext = new FhirContext(myTypeToProvider.keySet());
 			myFhirContext.setNarrativeGenerator(myNarrativeGenerator);
 
 			for (IResourceProvider provider : myTypeToProvider.values()) {
