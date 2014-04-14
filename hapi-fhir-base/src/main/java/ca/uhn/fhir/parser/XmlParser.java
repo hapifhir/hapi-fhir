@@ -46,6 +46,7 @@ import ca.uhn.fhir.model.api.ISupportsUndeclaredExtensions;
 import ca.uhn.fhir.model.dstu.composite.ContainedDt;
 import ca.uhn.fhir.model.dstu.composite.NarrativeDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.XhtmlDt;
@@ -122,7 +123,9 @@ public class XmlParser extends BaseParser implements IParser {
 				eventWriter.writeStartElement("entry");
 
 				writeTagWithTextNode(eventWriter, "title", nextEntry.getTitle());
-				writeTagWithTextNode(eventWriter, "id", nextEntry.getEntryId());
+				writeTagWithTextNode(eventWriter, "id", nextEntry.getId());
+				writeOptionalTagWithTextNode(eventWriter, "updated", nextEntry.getUpdated());
+				writeOptionalTagWithTextNode(eventWriter, "published", nextEntry.getPublished());
 
 				if (!nextEntry.getLinkSelf().isEmpty()) {
 					writeAtomLink(eventWriter, "self", nextEntry.getLinkSelf());
@@ -606,6 +609,14 @@ public class XmlParser extends BaseParser implements IParser {
 		theEventWriter.writeStartElement(theElementName);
 		if (StringUtils.isNotBlank(theStringDt.getValue())) {
 			theEventWriter.writeCharacters(theStringDt.getValue());
+		}
+		theEventWriter.writeEndElement();
+	}
+
+	private void writeTagWithTextNode(XMLStreamWriter theEventWriter, String theElementName, IdDt theIdDt) throws XMLStreamException {
+		theEventWriter.writeStartElement(theElementName);
+		if (StringUtils.isNotBlank(theIdDt.getValue())) {
+			theEventWriter.writeCharacters(theIdDt.getValue());
 		}
 		theEventWriter.writeEndElement();
 	}

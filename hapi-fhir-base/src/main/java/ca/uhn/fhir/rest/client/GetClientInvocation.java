@@ -22,7 +22,13 @@ public class GetClientInvocation extends BaseClientInvocation {
 		myParameters = theParameters;
 		myUrlPath = StringUtils.join(theUrlFragments, '/');
 	}
+	
+	public GetClientInvocation(String theUrlPath) {
+		myParameters = Collections.emptyMap();
+		myUrlPath = theUrlPath;
+	}
 
+	
 	public GetClientInvocation(String... theUrlFragments) {
 		myParameters = Collections.emptyMap();
 		myUrlPath = StringUtils.join(theUrlFragments, '/');

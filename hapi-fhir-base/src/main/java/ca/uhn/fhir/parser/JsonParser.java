@@ -111,7 +111,7 @@ public class JsonParser extends BaseParser implements IParser {
 			eventWriter.writeStartObject();
 
 			writeTagWithTextNode(eventWriter, "title", nextEntry.getTitle());
-			writeTagWithTextNode(eventWriter, "id", nextEntry.getEntryId());
+			writeTagWithTextNode(eventWriter, "id", nextEntry.getId());
 
 			eventWriter.writeStartArray("link");
 			writeAtomLink(eventWriter, "self", nextEntry.getLinkSelf());
@@ -813,6 +813,14 @@ public class JsonParser extends BaseParser implements IParser {
 	private void writeTagWithTextNode(JsonGenerator theEventWriter, String theElementName, StringDt theStringDt) {
 		if (StringUtils.isNotBlank(theStringDt.getValue())) {
 			theEventWriter.write(theElementName, theStringDt.getValue());
+		} else {
+			theEventWriter.writeNull(theElementName);
+		}
+	}
+
+	private void writeTagWithTextNode(JsonGenerator theEventWriter, String theElementName, IdDt theIdDt) {
+		if (StringUtils.isNotBlank(theIdDt.getValue())) {
+			theEventWriter.write(theElementName, theIdDt.getValue());
 		} else {
 			theEventWriter.writeNull(theElementName);
 		}

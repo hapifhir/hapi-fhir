@@ -2,6 +2,7 @@ package ca.uhn.fhir.context;
 
 import java.util.List;
 
+import ca.uhn.fhir.model.api.BaseResource;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IExtension;
 import ca.uhn.fhir.model.api.IResource;
@@ -17,7 +18,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 
 @ResourceDef(name = "ResourceWithExtensionsA", id="0001")
-public class ResourceWithExtensionsA implements IResource {
+public class ResourceWithExtensionsA extends BaseResource {
 
 	/*
 	 * NB: several unit tests depend on the structure here

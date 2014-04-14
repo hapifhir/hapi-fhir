@@ -1,11 +1,14 @@
 package ca.uhn.fhir.rest.method;
 
+import static org.apache.commons.lang3.StringUtils.*;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -22,8 +25,12 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
+import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.client.exceptions.InvalidResponseException;
 import ca.uhn.fhir.rest.server.Constants;
@@ -38,7 +45,15 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 public abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding {
 
 	protected static final Set<String> ALLOWED_PARAMS;
+	static {
+		HashSet<String> set = new HashSet<String>();
+		set.add(Constants.PARAM_FORMAT);
+		set.add(Constants.PARAM_NARRATIVE);
+		set.add(Constants.PARAM_PRETTY);
+		ALLOWED_PARAMS = Collections.unmodifiableSet(set);
+	}
 	private MethodReturnTypeEnum myMethodReturnType;
+
 	private String myResourceName;
 
 	public BaseResourceReturningMethodBinding(Class<? extends IResource> theReturnResourceType, Method theMethod, FhirContext theConetxt) {
@@ -55,11 +70,13 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 			throw new ConfigurationException("Invalid return type '" + methodReturnType.getCanonicalName() + "' on method '" + theMethod.getName() + "' on type: " + theMethod.getDeclaringClass().getCanonicalName());
 		}
 
-		ResourceDef resourceDefAnnotation = theReturnResourceType.getAnnotation(ResourceDef.class);
-		if (resourceDefAnnotation == null) {
-			throw new ConfigurationException(theReturnResourceType.getCanonicalName() + " has no @" + ResourceDef.class.getSimpleName() + " annotation");
+		if (theReturnResourceType != null) {
+			ResourceDef resourceDefAnnotation = theReturnResourceType.getAnnotation(ResourceDef.class);
+			if (resourceDefAnnotation == null) {
+				throw new ConfigurationException(theReturnResourceType.getCanonicalName() + " has no @" + ResourceDef.class.getSimpleName() + " annotation");
+			}
+			myResourceName = resourceDefAnnotation.name();
 		}
-		myResourceName = resourceDefAnnotation.name();
 	}
 
 	public MethodReturnTypeEnum getMethodReturnType() {
@@ -73,7 +90,7 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 	public abstract ReturnTypeEnum getReturnType();
 
 	@Override
-	public Object invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode,Map<String, List<String>> theHeaders) throws IOException {
+	public Object invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException {
 		IParser parser = createAppropriateParser(theResponseMimeType, theResponseReader, theResponseStatusCode);
 
 		switch (getReturnType()) {
@@ -112,7 +129,6 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 
 		throw new IllegalStateException("Should not get here!");
 	}
-
 
 	public abstract List<IResource> invokeServer(Object theResourceProvider, IdDt theId, IdDt theVersionId, Map<String, String[]> theParameterValues) throws InvalidRequestException, InternalErrorException;
 
@@ -165,15 +181,42 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 		}
 	}
 
-
-	static {
-		HashSet<String> set = new HashSet<String>();
-		set.add(Constants.PARAM_FORMAT);
-		set.add(Constants.PARAM_NARRATIVE);
-		set.add(Constants.PARAM_PRETTY);
-		ALLOWED_PARAMS = Collections.unmodifiableSet(set);
+	private IdDt getIdFromMetadataOrNullIfNone(Map<ResourceMetadataKeyEnum, Object> theResourceMetadata, ResourceMetadataKeyEnum theKey) {
+		Object retValObj = theResourceMetadata.get(theKey);
+		if (retValObj == null) {
+			return null;
+		} else if (retValObj instanceof String) {
+			if (isNotBlank((String) retValObj)) {
+				return new IdDt((String) retValObj);
+			} else {
+				return null;
+			}
+		} else if (retValObj instanceof IdDt) {
+			if (((IdDt) retValObj).isEmpty()) {
+				return null;
+			} else {
+				return (IdDt) retValObj;
+			}
+		}
+		throw new InternalErrorException("Found an object of type '" + retValObj.getClass().getCanonicalName() + "' in resource metadata for key " + theKey.name() + " - Expected " + IdDt.class.getCanonicalName());
 	}
-	
+
+	private InstantDt getInstantFromMetadataOrNullIfNone(Map<ResourceMetadataKeyEnum, Object> theResourceMetadata, ResourceMetadataKeyEnum theKey) {
+		Object retValObj = theResourceMetadata.get(theKey);
+		if (retValObj == null) {
+			return null;
+		} else if (retValObj instanceof Date) {
+			return new InstantDt((Date) retValObj);
+		} else if (retValObj instanceof InstantDt) {
+			if (((InstantDt) retValObj).isEmpty()) {
+				return null;
+			} else {
+				return (InstantDt) retValObj;
+			}
+		}
+		throw new InternalErrorException("Found an object of type '" + retValObj.getClass().getCanonicalName() + "' in resource metadata for key " + theKey.name() + " - Expected " + InstantDt.class.getCanonicalName());
+	}
+
 	private IParser getNewParser(EncodingUtil theResponseEncoding, boolean thePrettyPrint, NarrativeModeEnum theNarrativeMode) {
 		IParser parser;
 		switch (theResponseEncoding) {
@@ -205,7 +248,7 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 		theHttpResponse.setCharacterEncoding("UTF-8");
 
 		theServer.addHapiHeader(theHttpResponse);
-		
+
 		Bundle bundle = new Bundle();
 		bundle.getAuthorName().setValue(getClass().getCanonicalName());
 		bundle.getBundleId().setValue(UUID.randomUUID().toString());
@@ -222,7 +265,7 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 			RuntimeResourceDefinition def = getContext().getResourceDefinition(next);
 
 			if (next.getId() != null && StringUtils.isNotBlank(next.getId().getValue())) {
-				entry.getEntryId().setValue(next.getId().getValue());
+				entry.getId().setValue(next.getId().getValue());
 				entry.getTitle().setValue(def.getName() + " " + next.getId().getValue());
 
 				StringBuilder b = new StringBuilder();
@@ -230,7 +273,37 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 				b.append('/');
 				b.append(def.getName());
 				b.append('/');
-				b.append(next.getId().getValue());
+				String resId = next.getId().getValue();
+				b.append(resId);
+
+				/*
+				 * If this is a history operation, we add the version of the
+				 * resource to the self link to indicate the version
+				 */
+				if (getResourceOperationType() == RestfulOperationTypeEnum.HISTORY_INSTANCE || getResourceOperationType() == RestfulOperationTypeEnum.HISTORY_TYPE || getSystemOperationType() == RestfulOperationSystemEnum.HISTORY_SYSTEM) {
+					IdDt versionId = getIdFromMetadataOrNullIfNone(next.getResourceMetadata(), ResourceMetadataKeyEnum.VERSION_ID);
+					if (versionId != null) {
+						b.append('/');
+						b.append(Constants.PARAM_HISTORY);
+						b.append('/');
+						b.append(versionId.getValue());
+					} else {
+						throw new InternalErrorException("Server did not provide a VERSION_ID in the resource metadata for resource with ID " + resId);
+					}
+				}
+
+				InstantDt published = getInstantFromMetadataOrNullIfNone(next.getResourceMetadata(), ResourceMetadataKeyEnum.PUBLISHED);
+				if (published == null) {
+					entry.getPublished().setToCurrentTimeInLocalTimeZone();
+				} else {
+					entry.setPublished(published);
+				}
+
+				InstantDt updated = getInstantFromMetadataOrNullIfNone(next.getResourceMetadata(), ResourceMetadataKeyEnum.UPDATED);
+				if (updated != null) {
+					entry.setUpdated(updated);
+				}
+
 				boolean haveQ = false;
 				if (thePrettyPrint) {
 					b.append('?').append(Constants.PARAM_PRETTY).append("=true");
@@ -269,7 +342,6 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 		}
 	}
 
-	
 	private void streamResponseAsResource(RestfulServer theServer, HttpServletResponse theHttpResponse, IResource theResource, EncodingUtil theResponseEncoding, boolean thePrettyPrint, boolean theRequestIsBrowser, NarrativeModeEnum theNarrativeMode) throws IOException {
 
 		theHttpResponse.setStatus(200);

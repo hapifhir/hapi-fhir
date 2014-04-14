@@ -11,6 +11,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.Delete;
+import ca.uhn.fhir.rest.annotation.History;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.IncludeParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
@@ -28,35 +29,17 @@ import ca.uhn.fhir.rest.param.QualifiedDateParam;
 
 public interface ITestClient extends IBasicClient {
 
-	@Read(type=Patient.class)
-	Patient getPatientById(@IdParam IdDt theId);
-
-	@Delete(resourceType=Patient.class)
-	MethodOutcome deletePatient(@IdParam IdDt theId);
-
-	@Delete(resourceType=DiagnosticReport.class)
-	void deleteDiagnosticReport(@IdParam IdDt theId);
-
-	@Read(type=Patient.class)
-	Patient getPatientByVersionId(@IdParam IdDt theId, @VersionIdParam IdDt theVersionId);
-
-	@Search(type=Patient.class)
-	Patient findPatientByMrn(@RequiredParam(name = Patient.SP_IDENTIFIER) IdentifierDt theId);
-	
-	@Search(type=Patient.class)
-	Bundle findPatientByName(@RequiredParam(name = Patient.SP_FAMILY) StringDt theId, @OptionalParam(name=Patient.SP_GIVEN) StringDt theGiven);
-	
-	@Search()
-	public List<Patient> getPatientMultipleIdentifiers(@RequiredParam(name = "ids") CodingListParam theIdentifiers);
+	@Create
+	public MethodOutcome createPatient(@ResourceParam Patient thePatient);
 
 	@Search()
 	public List<Patient> getPatientByDateRange(@RequiredParam(name = "dateRange") DateRangeParam theIdentifiers);
 
 	@Search()
 	public List<Patient> getPatientByDob(@RequiredParam(name=Patient.SP_BIRTHDATE) QualifiedDateParam theBirthDate);
-
+	
 	@Search()
-	public Patient getPatientWithIncludes(@RequiredParam(name = "withIncludes") StringDt theString, @IncludeParam List<PathSpecification> theIncludes);
+	public List<Patient> getPatientMultipleIdentifiers(@RequiredParam(name = "ids") CodingListParam theIdentifiers);
 
 	@Search(queryName="someQueryNoParams")
 	public Patient getPatientNoParams();
@@ -64,13 +47,40 @@ public interface ITestClient extends IBasicClient {
 	@Search(queryName="someQueryOneParam")
 	public Patient getPatientOneParam(@RequiredParam(name="param1") StringDt theParam);
 
-	@Create
-	public MethodOutcome createPatient(@ResourceParam Patient thePatient);
-
+	@Search()
+	public Patient getPatientWithIncludes(@RequiredParam(name = "withIncludes") StringDt theString, @IncludeParam List<PathSpecification> theIncludes);
+	
+	@Update
+	public MethodOutcome updatePatient(@IdParam IdDt theId, @VersionIdParam IdDt theVersion, @ResourceParam Patient thePatient);
+	
 	@Update
 	public MethodOutcome updatePatient(@IdParam IdDt theId, @ResourceParam Patient thePatient);
 
-	@Update
-	public MethodOutcome updatePatient(@IdParam IdDt theId, @VersionIdParam IdDt theVersion, @ResourceParam Patient thePatient);
+	@Delete(resourceType=DiagnosticReport.class)
+	void deleteDiagnosticReport(@IdParam IdDt theId);
+
+	@Delete(resourceType=Patient.class)
+	MethodOutcome deletePatient(@IdParam IdDt theId);
+
+	@Search(type=Patient.class)
+	Patient findPatientByMrn(@RequiredParam(name = Patient.SP_IDENTIFIER) IdentifierDt theId);
+
+	@Search(type=Patient.class)
+	Bundle findPatientByName(@RequiredParam(name = Patient.SP_FAMILY) StringDt theId, @OptionalParam(name=Patient.SP_GIVEN) StringDt theGiven);
+
+	@History(resourceType=Patient.class)
+	Bundle getHistoryPatientInstance(@IdParam IdDt theId);
+
+	@History(resourceType=Patient.class)
+	Bundle getHistoryPatientType();
+
+	@History
+	Bundle getHistoryServer();
+
+	@Read(type=Patient.class)
+	Patient getPatientById(@IdParam IdDt theId);
+
+	@Read(type=Patient.class)
+	Patient getPatientByVersionId(@IdParam IdDt theId, @VersionIdParam IdDt theVersionId);
 
 }
