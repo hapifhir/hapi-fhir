@@ -65,7 +65,7 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 
 	@Override
 	public GetClientInvocation invokeClient(Object[] theArgs) throws InternalErrorException {
-		 assert (myQueryName == null || ((theArgs != null ? theArgs.length : 0) == myParameters.size())) : "Wrong number of arguments: " + theArgs;
+		 assert (myQueryName == null || ((theArgs != null ? theArgs.length : 0) == myParameters.size())) : "Wrong number of arguments: " + (theArgs!=null?theArgs.length:"null");
 
 		Map<String, List<String>> queryStringArgs = new LinkedHashMap<String, List<String>>();
 

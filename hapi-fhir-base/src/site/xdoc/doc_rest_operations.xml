@@ -826,9 +826,6 @@
 				<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
 			</macro>
 
-
-
-			
 			<p>
 				The following snippet shows how to define various history methods in a client.
 			</p>

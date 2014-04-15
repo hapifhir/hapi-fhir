@@ -100,19 +100,19 @@ public class PrettyPrintWriterWrapper implements XMLStreamWriter {
 	@Override
 	public void writeEmptyElement(String theNamespaceURI, String theLocalName) throws XMLStreamException {
 		indent();
-		writeEmptyElement(theNamespaceURI, theLocalName);
+		myTarget.writeEmptyElement(theNamespaceURI, theLocalName);
 	}
 
 	@Override
 	public void writeEmptyElement(String thePrefix, String theLocalName, String theNamespaceURI) throws XMLStreamException {
 		indent();
-		writeEmptyElement(thePrefix, theLocalName, theNamespaceURI);
+		myTarget.writeEmptyElement(thePrefix, theLocalName, theNamespaceURI);
 	}
 
 	@Override
 	public void writeEmptyElement(String theLocalName) throws XMLStreamException {
 		indent();
-		writeEmptyElement(theLocalName);
+		myTarget.writeEmptyElement(theLocalName);
 	}
 
 	@Override
