@@ -20,6 +20,7 @@ import ca.uhn.fhir.rest.client.GetClientInvocation;
 import ca.uhn.fhir.rest.param.IParameter;
 import ca.uhn.fhir.rest.param.IQueryParameter;
 import ca.uhn.fhir.rest.server.Constants;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
@@ -103,6 +104,14 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 		} catch (IllegalArgumentException e) {
 			throw new InternalErrorException(e);
 		} catch (InvocationTargetException e) {
+			Throwable cause = e.getCause();
+			if (cause != null) {
+				if (cause instanceof BaseServerResponseException) {
+					throw (BaseServerResponseException)cause;
+				} else {
+					throw new InternalErrorException(cause);
+				}
+			}
 			throw new InternalErrorException(e);
 		}
 

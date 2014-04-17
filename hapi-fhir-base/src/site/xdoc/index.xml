@@ -48,10 +48,12 @@
 				</p>
 			</subsection>
 						
-			<subsection name="The Data Model">
+			<subsection name="Fluent Interface">
 			
 				<p>
-					The HAPI API makes it very easy to create FHIR resources:
+					The HAPI API is designed to allow interaction with 
+					FHIR model objects using a convenient
+					<a href="http://en.wikipedia.org/wiki/Fluent_interface">Fluent Interface</a>.
 				</p>
 				<source><![CDATA[Patient patient = new Patient();
 patient.addIdentifier().setUse(OFFICIAL).setSystem("urn:fake:mrns").setValue("7000135");
@@ -60,7 +62,10 @@ patient.addIdentifier().setUse(SECONDARY).setSystem("urn:fake:otherids").setValu
 patient.addName().addFamily("Smith").addGiven("John").addGiven("Q").addSuffix("Junior");
 
 patient.setGender(AdministrativeGenderCodesEnum.M);]]></source>
-			
+
+			</subsection>
+			<subsection name="Encoding Support">
+						
 				<p>
 					Both XML and JSON encoding are suported natively using a simple API
 					to pick between them. XML support is built on top of the lightning-fast 
@@ -73,6 +78,9 @@ patient.setGender(AdministrativeGenderCodesEnum.M);]]></source>
 String xmlEncoded = ctx.newXmlParser().encodeResourceToString(patient);
 String jsonEncoded = ctx.newJsonParser().encodeResourceToString(patient);
 ]]></source>
+
+			</subsection>
+			<subsection name="Easy RESTful Client and Servers">
 
 				<p>
 					Creating clients is simple and uses an annotation based format

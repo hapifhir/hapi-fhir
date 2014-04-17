@@ -69,6 +69,7 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.param.CodingListParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.QualifiedDateParam;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.provider.ServerProfileProvider;
 import ca.uhn.fhir.testutil.RandomServerPortProvider;
 import ca.uhn.fhir.util.ExtensionConstants;
@@ -286,6 +287,19 @@ public class ResfulServerMethodTest {
 		assertEquals("urn:bbb|bbb", patient.getIdentifier().get(2).getValueAsQueryToken());
 	}
 
+	@Test
+	public void test404IsPropagatedCorrectly() throws Exception {
+
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/DiagnosticReport?throw404=true");
+		HttpResponse status = ourClient.execute(httpGet);
+
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		ourLog.info("Response was:\n{}", responseContent);
+
+		assertEquals(404, status.getStatusLine().getStatusCode());
+		assertThat(responseContent, StringContains.containsString("AAAABBBB"));
+			}
+	
 	// @Test
 	// public void testSearchByComplex() throws Exception {
 	//
@@ -868,6 +882,15 @@ public class ResfulServerMethodTest {
 			return new MethodOutcome(true, id, version);
 		}
 
+		
+		/**
+		 * @param theValue  
+		 */
+		@Search
+		public DiagnosticReport alwaysThrow404(@RequiredParam(name="throw404") StringDt theValue) {
+			throw new ResourceNotFoundException("AAAABBBB");
+		}
+		
 		@SuppressWarnings("unused")
 		@Delete()
 		public void deleteDiagnosticReport(@IdParam IdDt theId) {

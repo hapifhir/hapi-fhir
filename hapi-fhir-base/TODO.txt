@@ -33,6 +33,10 @@
  
  * Support "Binary" resource, which is a special resource type
  
+ * Javadocs for getters/setters of IDatatype (e.g. Observation#getApplies()) should 
+   include a list of the types that are allowed (and maybe a check?) or maybe some custom
+   getters and setters or something
+ 
 ---------
 Issues:
 

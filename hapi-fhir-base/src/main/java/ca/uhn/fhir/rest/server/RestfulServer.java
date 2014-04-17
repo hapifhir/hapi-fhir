@@ -43,7 +43,6 @@ public abstract class RestfulServer extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
 	private FhirContext myFhirContext;
-	private INarrativeGenerator myNarrativeGenerator;
 	private Map<String, ResourceBinding> myResourceNameToProvider = new HashMap<String, ResourceBinding>();
 	private Object myServerConformanceProvider;
 	private Map<Class<? extends IResource>, IResourceProvider> myTypeToProvider = new HashMap<Class<? extends IResource>, IResourceProvider>();
@@ -139,9 +138,6 @@ public abstract class RestfulServer extends HttpServlet {
 		return myFhirContext;
 	}
 
-	public INarrativeGenerator getNarrativeGenerator() {
-		return myNarrativeGenerator;
-	}
 
 	public Collection<ResourceBinding> getResourceBindings() {
 		return myResourceNameToProvider.values();
@@ -354,8 +350,6 @@ public abstract class RestfulServer extends HttpServlet {
 
 			ourLog.info("Got {} resource providers", myTypeToProvider.size());
 
-			myFhirContext.setNarrativeGenerator(myNarrativeGenerator);
-
 			for (IResourceProvider provider : myTypeToProvider.values()) {
 				findResourceMethods(provider);
 			}
@@ -382,19 +376,16 @@ public abstract class RestfulServer extends HttpServlet {
 		return myUseBrowserFriendlyContentTypes;
 	}
 	
-	/**
-	 * Sets the {@link INarrativeGenerator Narrative Generator} to use when serializing responses from this server, or <code>null</code> (which is the default) to disable narrative generation.
-	 * Note that this method can only be called before the server is initialized. 
-	 * 
-	 * @throws IllegalStateException
-	 *             Note that this method can only be called prior to {@link #init() initialization} and will throw an {@link IllegalStateException} if called after that.
-	 */
-	public void setNarrativeGenerator(INarrativeGenerator theNarrativeGenerator) {
-		if (myFhirContext != null) {
-			throw new IllegalStateException("Server has already been initialized, can not change this property");
-		}
-		myNarrativeGenerator = theNarrativeGenerator;
-	}
+//	/**
+//	 * Sets the {@link INarrativeGenerator Narrative Generator} to use when serializing responses from this server, or <code>null</code> (which is the default) to disable narrative generation.
+//	 * Note that this method can only be called before the server is initialized. 
+//	 * 
+//	 * @throws IllegalStateException
+//	 *             Note that this method can only be called prior to {@link #init() initialization} and will throw an {@link IllegalStateException} if called after that.
+//	 */
+//	public void setNarrativeGenerator(INarrativeGenerator theNarrativeGenerator) {
+//		myNarrativeGenerator = theNarrativeGenerator;
+//	}
 
 	/**
 	 * Returns the server conformance provider, which is the provider that

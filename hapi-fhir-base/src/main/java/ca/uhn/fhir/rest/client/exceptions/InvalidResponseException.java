@@ -1,5 +1,7 @@
 package ca.uhn.fhir.rest.client.exceptions;
 
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
+
 public class InvalidResponseException extends BaseServerResponseException {
 
 	private static final long serialVersionUID = 1L;
@@ -10,8 +12,8 @@ public class InvalidResponseException extends BaseServerResponseException {
 	 * @param theMessage
 	 *            The message
 	 */
-	public InvalidResponseException(String theMessage) {
-		super(theMessage);
+	public InvalidResponseException(int theStatusCode, String theMessage) {
+		super(theStatusCode, theMessage);
 	}
 
 	/**
@@ -21,8 +23,8 @@ public class InvalidResponseException extends BaseServerResponseException {
 	 *            The message
 	 * @param theCause The cause
 	 */
-	public InvalidResponseException(String theMessage, Throwable theCause) {
-		super(theMessage, theCause);
+	public InvalidResponseException(int theStatusCode, String theMessage, Throwable theCause) {
+		super(theStatusCode, theMessage, theCause);
 	}
 
 	/**
@@ -31,8 +33,8 @@ public class InvalidResponseException extends BaseServerResponseException {
 	 * @param theCause
 	 *            The underlying cause exception
 	 */
-	public InvalidResponseException(Throwable theCause) {
-		super(theCause.toString(), theCause);
+	public InvalidResponseException(int theStatusCode, Throwable theCause) {
+		super(theStatusCode, theCause.toString(), theCause);
 	}
 
 }

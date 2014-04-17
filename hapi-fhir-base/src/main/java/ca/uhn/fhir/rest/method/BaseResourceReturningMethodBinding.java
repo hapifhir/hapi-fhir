@@ -108,7 +108,7 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 				} else if (list.size() == 1) {
 					return list.get(0);
 				} else {
-					throw new InvalidResponseException("FHIR server call returned a bundle with multiple resources, but this method is only able to returns one.");
+					throw new InvalidResponseException(theResponseStatusCode, "FHIR server call returned a bundle with multiple resources, but this method is only able to returns one.");
 				}
 			}
 			break;
