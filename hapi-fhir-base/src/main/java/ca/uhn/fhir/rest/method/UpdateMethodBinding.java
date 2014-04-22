@@ -21,6 +21,7 @@ import ca.uhn.fhir.rest.client.BaseClientInvocation;
 import ca.uhn.fhir.rest.client.PutClientInvocation;
 import ca.uhn.fhir.rest.method.SearchMethodBinding.RequestType;
 import ca.uhn.fhir.rest.server.Constants;
+import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 public class UpdateMethodBinding extends BaseOutcomeReturningMethodBindingWithResourceParam {
@@ -29,8 +30,8 @@ public class UpdateMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 
 	private Integer myVersionIdParameterIndex;
 
-	public UpdateMethodBinding(Method theMethod, FhirContext theContext) {
-		super(theMethod, theContext, Update.class);
+	public UpdateMethodBinding(Method theMethod, FhirContext theContext, Object theProvider) {
+		super(theMethod, theContext, Update.class, theProvider);
 
 		myIdParameterIndex = Util.findIdParameterIndex(theMethod);
 		if (myIdParameterIndex == null) {

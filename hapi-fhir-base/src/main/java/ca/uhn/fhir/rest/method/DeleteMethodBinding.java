@@ -27,8 +27,9 @@ public class DeleteMethodBinding extends BaseOutcomeReturningMethodBinding {
 	private String myResourceName;
 	private Integer myIdParameterIndex;
 
-	public DeleteMethodBinding(Method theMethod, FhirContext theContext, IResourceProvider theProvider) {
-		super(theMethod, theContext, Delete.class);
+	public DeleteMethodBinding(Method theMethod, FhirContext theContext, Object theProvider) {
+		super(theMethod, theContext, Delete.class, 
+				theProvider);
 
 		Delete deleteAnnotation = theMethod.getAnnotation(Delete.class);
 		Class<? extends IResource> resourceType = deleteAnnotation.resourceType();
@@ -36,8 +37,8 @@ public class DeleteMethodBinding extends BaseOutcomeReturningMethodBinding {
 			RuntimeResourceDefinition def = theContext.getResourceDefinition(resourceType);
 			myResourceName = def.getName();
 		} else {
-			if (theProvider != null) {
-				RuntimeResourceDefinition def = theContext.getResourceDefinition(theProvider.getResourceType());
+			if (theProvider != null && theProvider instanceof IResourceProvider) {
+				RuntimeResourceDefinition def = theContext.getResourceDefinition(((IResourceProvider) theProvider).getResourceType());
 				myResourceName = def.getName();
 			} else {
 				throw new ConfigurationException("Can not determine resource type for method '" + theMethod.getName() + "' on type " + theMethod.getDeclaringClass().getCanonicalName() + " - Did you forget to include the resourceType() value on the @"

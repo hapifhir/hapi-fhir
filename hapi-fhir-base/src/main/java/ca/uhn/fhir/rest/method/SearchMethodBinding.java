@@ -34,8 +34,8 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 	private List<IParameter> myParameters;
 	private String myQueryName;
 
-	public SearchMethodBinding(Class<? extends IResource> theReturnResourceType, Method theMethod, String theQueryName, FhirContext theContext) {
-		super(theReturnResourceType, theMethod, theContext);
+	public SearchMethodBinding(Class<? extends IResource> theReturnResourceType, Method theMethod, String theQueryName, FhirContext theContext, Object theProvider) {
+		super(theReturnResourceType, theMethod, theContext, theProvider);
 		this.myParameters = Util.getResourceParameters(theMethod);
 		this.myQueryName = StringUtils.defaultIfBlank(theQueryName, null);
 		this.myDeclaredResourceType = theMethod.getReturnType();

@@ -35,8 +35,8 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 	private Integer mySinceParamIndex;
 	private Integer myCountParamIndex;
 
-	public HistoryMethodBinding(Method theMethod, FhirContext theConetxt, IResourceProvider theProvider) {
-		super(toReturnType(theMethod, theProvider), theMethod, theConetxt);
+	public HistoryMethodBinding(Method theMethod, FhirContext theConetxt, Object theProvider) {
+		super(toReturnType(theMethod, theProvider), theMethod, theConetxt, theProvider);
 
 		myIdParamIndex = Util.findIdParameterIndex(theMethod);
 		mySinceParamIndex = Util.findSinceParameterIndex(theMethod);
@@ -45,8 +45,8 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 		History historyAnnotation = theMethod.getAnnotation(History.class);
 		Class<? extends IResource> type = historyAnnotation.resourceType();
 		if (type == History.AllResources.class) {
-			if (theProvider != null) {
-				type = theProvider.getResourceType();
+			if (theProvider instanceof IResourceProvider) {
+				type = ((IResourceProvider) theProvider).getResourceType();
 				if (myIdParamIndex != null) {
 					myResourceOperationType = RestfulOperationTypeEnum.HISTORY_INSTANCE;
 				} else {
@@ -74,9 +74,9 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 
 	}
 
-	private static Class<? extends IResource> toReturnType(Method theMethod, IResourceProvider theProvider) {
-		if (theProvider != null) {
-			return theProvider.getResourceType();
+	private static Class<? extends IResource> toReturnType(Method theMethod, Object theProvider) {
+		if (theProvider instanceof IResourceProvider) {
+			return ((IResourceProvider) theProvider).getResourceType();
 		}
 		History historyAnnotation = theMethod.getAnnotation(History.class);
 		Class<? extends IResource> type = historyAnnotation.resourceType();

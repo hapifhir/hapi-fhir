@@ -8,7 +8,6 @@ import java.util.Set;
 
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.api.ExtensionDt;
-import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.resource.Conformance;
 import ca.uhn.fhir.model.dstu.resource.Conformance.Rest;
 import ca.uhn.fhir.model.dstu.resource.Conformance.RestResource;
@@ -57,8 +56,8 @@ public class ServerConformanceProvider {
 			Set<RestfulOperationTypeEnum> resourceOps = new HashSet<RestfulOperationTypeEnum>();
 			RestResource resource = rest.addResource();
 
-			Class<? extends IResource> resourceType = next.getResourceProvider().getResourceType();
-			RuntimeResourceDefinition def = myRestfulServer.getFhirContext().getResourceDefinition(resourceType);
+			String resourceName = next.getResourceName();
+			RuntimeResourceDefinition def = myRestfulServer.getFhirContext().getResourceDefinition(resourceName);
 			resource.getType().setValue(def.getName());
 			resource.getProfile().setId(new IdDt(def.getResourceProfile()));
 

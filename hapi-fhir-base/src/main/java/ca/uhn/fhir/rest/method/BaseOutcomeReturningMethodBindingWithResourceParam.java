@@ -27,8 +27,8 @@ public abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends
 	private int myResourceParameterIndex;
 	private String myResourceName;
 
-	public BaseOutcomeReturningMethodBindingWithResourceParam(Method theMethod, FhirContext theContext, Class<?> theMethodAnnotation) {
-		super(theMethod, theContext, theMethodAnnotation);
+	public BaseOutcomeReturningMethodBindingWithResourceParam(Method theMethod, FhirContext theContext, Class<?> theMethodAnnotation, Object theProvider) {
+		super(theMethod, theContext, theMethodAnnotation, theProvider);
 		
 		ResourceParameter resourceParameter = null;
 
@@ -76,7 +76,7 @@ public abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends
 
 		MethodOutcome response;
 		try {
-			response = (MethodOutcome) this.getMethod().invoke(theRequest.getResourceProvider(), params);
+			response = (MethodOutcome) this.getMethod().invoke(getProvider(), params);
 		} catch (IllegalAccessException e) {
 			throw new InternalErrorException(e);
 		} catch (IllegalArgumentException e) {

@@ -43,8 +43,8 @@ public abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBindin
 	private List<IParameter> myParameters;
 	private boolean myReturnVoid;
 
-	public BaseOutcomeReturningMethodBinding(Method theMethod, FhirContext theContext, Class<?> theMethodAnnotation) {
-		super(theMethod, theContext);
+	public BaseOutcomeReturningMethodBinding(Method theMethod, FhirContext theContext, Class<?> theMethodAnnotation, Object theProvider) {
+		super(theMethod, theContext, theProvider);
 		myParameters = Util.getResourceParameters(theMethod);
 
 		if (!theMethod.getReturnType().equals(MethodOutcome.class)) {
@@ -132,7 +132,7 @@ public abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBindin
 
 		MethodOutcome response;
 		try {
-			response = (MethodOutcome) this.getMethod().invoke(theRequest.getResourceProvider(), params);
+			response = (MethodOutcome) this.getMethod().invoke(getProvider(), params);
 		} catch (IllegalAccessException e) {
 			throw new InternalErrorException(e);
 		} catch (IllegalArgumentException e) {

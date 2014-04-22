@@ -56,8 +56,8 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 
 	private String myResourceName;
 
-	public BaseResourceReturningMethodBinding(Class<? extends IResource> theReturnResourceType, Method theMethod, FhirContext theConetxt) {
-		super(theMethod, theConetxt);
+	public BaseResourceReturningMethodBinding(Class<? extends IResource> theReturnResourceType, Method theMethod, FhirContext theConetxt, Object theProvider) {
+		super(theMethod, theConetxt, theProvider);
 
 		Class<?> methodReturnType = theMethod.getReturnType();
 		if (Collection.class.isAssignableFrom(methodReturnType)) {
@@ -165,7 +165,7 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 			requestIsBrowser = true;
 		}
 
-		List<IResource> result = invokeServer(theRequest.getResourceProvider(), theRequest.getId(), theRequest.getVersion(), theRequest.getParameters());
+		List<IResource> result = invokeServer(getProvider(), theRequest.getId(), theRequest.getVersion(), theRequest.getParameters());
 		switch (getReturnType()) {
 		case BUNDLE:
 			streamResponseAsBundle(theServer, theResponse, result, responseEncoding, theRequest.getFhirServerBase(), theRequest.getCompleteUrl(), prettyPrint, requestIsBrowser, narrativeMode);

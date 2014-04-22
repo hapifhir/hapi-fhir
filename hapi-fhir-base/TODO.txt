@@ -1,15 +1,3 @@
-
- * Implement JSON parser and encoder- I'm thinking probably just using GSON
-   and writing the encode() part from scratch. For the parse() part, the
-   ParserState class from the XML parser should be able to be shared with
-   the Json parser, which will make it a lot easier to implement..?
- 
- * Implement strategy for narrative generation- I'm thinking maybe 
-   an interface that turns a given resource into an HTML representation
-   and then a default implementation for our basic types (Patient, Observation)
-   and maybe a way to configure this in the FhirContext so that the parser
-   can take advantage?
- 
  * Add SimpleSetters for all primitive datatypes
  
  * Implement and add Simple Getters in a similar way to simple setters

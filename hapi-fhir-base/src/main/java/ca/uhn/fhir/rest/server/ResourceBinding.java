@@ -15,7 +15,6 @@ public class ResourceBinding {
 
 	private String resourceName;
 	private List<BaseMethodBinding> methods = new ArrayList<BaseMethodBinding>();
-	private IResourceProvider resourceProvider;
 
 	public ResourceBinding() {
 	}
@@ -27,7 +26,7 @@ public class ResourceBinding {
 
 	public BaseMethodBinding getMethod(Request theRequest) throws Exception {
 		if (null == methods) {
-			ourLog.warn("No methods exist for resource provider: {}", resourceProvider.getClass());
+			ourLog.warn("No methods exist for resource: {}", resourceName);
 			return null;
 		}
 
@@ -73,14 +72,6 @@ public class ResourceBinding {
 	@Override
 	public int hashCode() {
 		return 0;
-	}
-
-	public void setResourceProvider(IResourceProvider theProvider) {
-		resourceProvider = theProvider;
-	}
-
-	public IResourceProvider getResourceProvider() {
-		return resourceProvider;
 	}
 
 }

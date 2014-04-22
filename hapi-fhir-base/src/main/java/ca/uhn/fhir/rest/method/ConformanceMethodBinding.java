@@ -19,8 +19,8 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding {
 
-	public ConformanceMethodBinding(Method theMethod, FhirContext theContext) {
-		super(Conformance.class, theMethod, theContext);
+	public ConformanceMethodBinding(Method theMethod, FhirContext theContext, Object theProvider) {
+		super(Conformance.class, theMethod, theContext, theProvider);
 
 		if (getMethodReturnType() != MethodReturnTypeEnum.RESOURCE || theMethod.getReturnType() != Conformance.class) {
 			throw new ConfigurationException("Conformance resource provider method '" + theMethod.getName() + "' should return type " + Conformance.class);

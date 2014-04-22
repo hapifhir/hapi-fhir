@@ -20,7 +20,6 @@ public class Request {
 	private Map<String, String[]> myParameters;
 	private RequestType myRequestType;
 	private String myResourceName;
-	private Object myResourceProvider;
 	private IdDt myVersion;
 	private HttpServletRequest myServletRequest;
 
@@ -56,21 +55,16 @@ public class Request {
 		return myResourceName;
 	}
 
-	public Object getResourceProvider() {
-		return myResourceProvider;
-	}
-
 	public IdDt getVersion() {
 		return myVersion;
 	}
 
-
 	public void setCompleteUrl(String theCompleteUrl) {
-		myCompleteUrl=theCompleteUrl;
+		myCompleteUrl = theCompleteUrl;
 	}
 
 	public void setFhirServerBase(String theFhirServerBase) {
-		myFhirServerBase=theFhirServerBase;
+		myFhirServerBase = theFhirServerBase;
 	}
 
 	public void setId(IdDt theId) {
@@ -78,7 +72,7 @@ public class Request {
 	}
 
 	public void setInputReader(Reader theReader) {
-		myInputReader=theReader;
+		myInputReader = theReader;
 	}
 
 	public void setOperation(String theOperation) {
@@ -89,17 +83,12 @@ public class Request {
 		myParameters = theParams;
 	}
 
-
 	public void setRequestType(RequestType theRequestType) {
 		myRequestType = theRequestType;
 	}
 
 	public void setResourceName(String theResourceName) {
 		myResourceName = theResourceName;
-	}
-
-	public void setResourceProvider(Object theProvider) {
-		myResourceProvider=theProvider;
 	}
 
 	public void setVersion(IdDt theVersion) {
@@ -119,7 +108,7 @@ public class Request {
 	}
 
 	public void setServletRequest(HttpServletRequest theRequest) {
-		myServletRequest=theRequest;
+		myServletRequest = theRequest;
 	}
 
 	public HttpServletRequest getServletRequest() {

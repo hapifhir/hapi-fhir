@@ -17,8 +17,8 @@ public class CreateMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 
 	
 
-	public CreateMethodBinding(Method theMethod, FhirContext theContext) {
-		super(theMethod, theContext, Create.class);
+	public CreateMethodBinding(Method theMethod, FhirContext theContext, Object theProvider) {
+		super(theMethod, theContext, Create.class, theProvider);
 	}
 
 	@Override

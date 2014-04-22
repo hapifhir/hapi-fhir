@@ -14,9 +14,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.Validate;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
@@ -36,18 +38,25 @@ import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.util.ReflectionUtil;
 
 public abstract class BaseMethodBinding {
 
 	private Method myMethod;
 	private FhirContext myContext;
+	private Object myProvider;
 
-	public BaseMethodBinding(Method theMethod, FhirContext theConetxt) {
+	public BaseMethodBinding(Method theMethod, FhirContext theConetxt, Object theProvider) {
 		assert theMethod != null;
 		assert theConetxt != null;
 
 		myMethod = theMethod;
 		myContext = theConetxt;
+		myProvider = theProvider;
+	}
+
+	public Object getProvider() {
+		return myProvider;
 	}
 
 	public FhirContext getContext() {
@@ -78,7 +87,7 @@ public abstract class BaseMethodBinding {
 		return parser;
 	}
 
-	public static BaseMethodBinding bindMethod(Class<? extends IResource> theReturnType, Method theMethod, FhirContext theContext, IResourceProvider theProvider) {
+	public static BaseMethodBinding bindMethod(Method theMethod, FhirContext theContext, Object theProvider) {
 		Read read = theMethod.getAnnotation(Read.class);
 		Search search = theMethod.getAnnotation(Search.class);
 		Metadata conformance = theMethod.getAnnotation(Metadata.class);
@@ -87,34 +96,63 @@ public abstract class BaseMethodBinding {
 		Delete delete = theMethod.getAnnotation(Delete.class);
 		History history = theMethod.getAnnotation(History.class);
 		// ** if you add another annotation above, also add it to the next line:
-		if (!verifyMethodHasZeroOrOneOperationAnnotation(theMethod, read, search, conformance,create,update,delete,history)) {
+		if (!verifyMethodHasZeroOrOneOperationAnnotation(theMethod, read, search, conformance, create, update, delete, history)) {
 			return null;
 		}
 
-		Class<? extends IResource> returnType = theReturnType;
-		if (returnType == null) {
+		Class<? extends IResource> returnTypeFromRp = null;
+		if (theProvider instanceof IResourceProvider) {
+			returnTypeFromRp = ((IResourceProvider) theProvider).getResourceType();
+			if (!verifyIsValidResourceReturnType(returnTypeFromRp)) {
+				throw new ConfigurationException("getResourceType() from " + IResourceProvider.class.getSimpleName() + " type " + theMethod.getDeclaringClass().getCanonicalName() + " returned " + toLogString(returnTypeFromRp) + " - Must return a resource type");
+			}
+		}
+		
+		Class<?> returnTypeFromMethod = theMethod.getReturnType();
+		if (Collection.class.isAssignableFrom(returnTypeFromMethod)) {
+			returnTypeFromMethod = ReflectionUtil.getGenericCollectionTypeOfMethodReturnType(theMethod);
+		}
+
+		
+		if (Bundle.class.isAssignableFrom(returnTypeFromMethod)) {
+			returnTypeFromMethod = returnTypeFromRp;
+		}
+		if (!IResource.class.isAssignableFrom(returnTypeFromMethod)) {
+			throw new ConfigurationException("Method '" + theMethod.getName() + "' in type " + theMethod.getDeclaringClass().getCanonicalName() + " returns type " + returnTypeFromMethod.getCanonicalName() + " - Must return a resource type");
+		}
+
+		if (returnTypeFromRp != null) {
+			if (returnTypeFromRp.equals(returnTypeFromMethod) == false) {
+				throw new ConfigurationException("Method '" + theMethod.getName() + "' in type " + theMethod.getDeclaringClass().getCanonicalName() + " returns type " + returnTypeFromMethod.getCanonicalName() + " but must return " + returnTypeFromRp.getCanonicalName());
+			}
+		}
+		
+		if (returnTypeFromMethod == null) {
 			if (read != null) {
-				returnType = read.type();
+				returnTypeFromMethod = read.type();
 			} else if (search != null) {
-				returnType = search.type();
+				returnTypeFromMethod = search.type();
 			}
 
-			if (returnType == IResource.class) {
+			if (returnTypeFromMethod == IResource.class) {
 				throw new ConfigurationException("Could not determine return type for method '" + theMethod.getName() + "'. Try explicitly specifying one in the operation annotation.");
 			}
 		}
+		
+		@SuppressWarnings("unchecked")
+		Class<? extends IResource> retType = (Class<? extends IResource>) returnTypeFromMethod;
 
 		if (read != null) {
-			return new ReadMethodBinding(returnType, theMethod, theContext);
+			return new ReadMethodBinding(retType, theMethod, theContext, theProvider);
 		} else if (search != null) {
 			String queryName = search.queryName();
-			return new SearchMethodBinding(returnType, theMethod, queryName, theContext);
+			return new SearchMethodBinding(retType, theMethod, queryName, theContext, theProvider);
 		} else if (conformance != null) {
-			return new ConformanceMethodBinding(theMethod, theContext);
+			return new ConformanceMethodBinding(theMethod, theContext, theProvider);
 		} else if (create != null) {
-			return new CreateMethodBinding(theMethod, theContext);
+			return new CreateMethodBinding(theMethod, theContext, theProvider);
 		} else if (update != null) {
-			return new UpdateMethodBinding(theMethod, theContext);
+			return new UpdateMethodBinding(theMethod, theContext, theProvider);
 		} else if (delete != null) {
 			return new DeleteMethodBinding(theMethod, theContext, theProvider);
 		} else if (history != null) {
@@ -145,6 +183,22 @@ public abstract class BaseMethodBinding {
 		// return sm;
 	}
 
+	private static boolean verifyIsValidResourceReturnType(Class<?> theReturnType) {
+		if (theReturnType==null) {
+			return false;
+		}
+		if (!IResource.class.isAssignableFrom(theReturnType)) {
+			return false;
+		}
+	}
+
+	private static String toLogString(Class<? extends IResource> theType) {
+		if (theType==null) {
+			return null;
+		}
+		return theType.getCanonicalName();
+	}
+
 	public static boolean verifyMethodHasZeroOrOneOperationAnnotation(Method theNextMethod, Object... theAnnotations) {
 		Object obj1 = null;
 		for (Object object : theAnnotations) {
@@ -152,8 +206,8 @@ public abstract class BaseMethodBinding {
 				if (obj1 == null) {
 					obj1 = object;
 				} else {
-					throw new ConfigurationException("Method " + theNextMethod.getName() + " on type '" + theNextMethod.getDeclaringClass().getSimpleName() + " has annotations @"
-							+ obj1.getClass().getSimpleName() + " and @" + object.getClass().getSimpleName() + ". Can not have both.");
+					throw new ConfigurationException("Method " + theNextMethod.getName() + " on type '" + theNextMethod.getDeclaringClass().getSimpleName() + " has annotations @" + obj1.getClass().getSimpleName() + " and @" + object.getClass().getSimpleName()
+							+ ". Can not have both.");
 				}
 
 			}
@@ -214,5 +268,6 @@ public abstract class BaseMethodBinding {
 	public static BaseMethodBinding bindSystemMethod(Method theMethod, FhirContext theContext) {
 		return bindMethod(null, theMethod, theContext, null);
 	}
+
 
 }

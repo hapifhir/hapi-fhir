@@ -25,8 +25,8 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding {
 	private Integer myVersionIdIndex;
 	private int myParameterCount;
 
-	public ReadMethodBinding(Class<? extends IResource> theAnnotatedResourceType, Method theMethod, FhirContext theContext) {
-		super( theAnnotatedResourceType, theMethod, theContext);
+	public ReadMethodBinding(Class<? extends IResource> theAnnotatedResourceType, Method theMethod, FhirContext theContext, Object theProvider) {
+		super( theAnnotatedResourceType, theMethod, theContext, theProvider);
 		
 		Validate.notNull(theMethod, "Method must not be null");
 		
