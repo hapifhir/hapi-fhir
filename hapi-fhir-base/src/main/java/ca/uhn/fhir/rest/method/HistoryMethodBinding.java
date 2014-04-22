@@ -43,8 +43,8 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 		myCountParamIndex = Util.findCountParameterIndex(theMethod);
 
 		History historyAnnotation = theMethod.getAnnotation(History.class);
-		Class<? extends IResource> type = historyAnnotation.resourceType();
-		if (type == History.AllResources.class) {
+		Class<? extends IResource> type = historyAnnotation.type();
+		if (type == IResource.class) {
 			if (theProvider instanceof IResourceProvider) {
 				type = ((IResourceProvider) theProvider).getResourceType();
 				if (myIdParamIndex != null) {
@@ -66,7 +66,7 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 			mySystemOperationType = null;
 		}
 
-		if (type != History.AllResources.class) {
+		if (type != IResource.class) {
 			myResourceName = theConetxt.getResourceDefinition(type).getName();
 		} else {
 			myResourceName = null;
@@ -79,8 +79,8 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 			return ((IResourceProvider) theProvider).getResourceType();
 		}
 		History historyAnnotation = theMethod.getAnnotation(History.class);
-		Class<? extends IResource> type = historyAnnotation.resourceType();
-		if (type != History.AllResources.class) {
+		Class<? extends IResource> type = historyAnnotation.type();
+		if (type != IResource.class) {
 			return type;
 		}
 		return null;

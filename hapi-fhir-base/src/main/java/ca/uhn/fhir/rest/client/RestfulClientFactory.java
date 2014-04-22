@@ -13,10 +13,8 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.rest.client.api.IRestfulClient;
 import ca.uhn.fhir.rest.method.BaseMethodBinding;
-import ca.uhn.fhir.util.ReflectionUtil;
 
 public class RestfulClientFactory implements IRestfulClientFactory {
 
@@ -51,7 +49,6 @@ public class RestfulClientFactory implements IRestfulClientFactory {
 	 * @throws ConfigurationException
 	 *             If the interface type is not an interface
 	 */
-	@SuppressWarnings("unchecked")
 	@Override
 	public synchronized <T extends IRestfulClient> T newClient(Class<T> theClientType, String theServerBase) {
 		if (!theClientType.isInterface()) {
@@ -68,20 +65,8 @@ public class RestfulClientFactory implements IRestfulClientFactory {
 		ClientInvocationHandler invocationHandler = myInvocationHandlers.get(theClientType);
 		if (invocationHandler == null) {
 			invocationHandler = new ClientInvocationHandler(client, myContext, serverBase, theClientType);
-
 			for (Method nextMethod : theClientType.getMethods()) {
-				Class<? extends IResource> resReturnType = null;
-				Class<?> returnType = nextMethod.getReturnType();
-				if (IResource.class.isAssignableFrom(returnType)) {
-					resReturnType = (Class<? extends IResource>) returnType;
-				} else if (java.util.Collection.class.isAssignableFrom(returnType)) {
-					Class<?> returnTypeColl = ReflectionUtil.getGenericCollectionTypeOfMethodReturnType(nextMethod);
-					if (!IResource.class.isAssignableFrom(returnTypeColl)) {
-						throw new ConfigurationException("Generic type of collection for method '" + nextMethod + "' is not a subclass of IResource");
-					}
-					resReturnType = (Class<? extends IResource>) returnTypeColl;
-				}
-				BaseMethodBinding binding = BaseMethodBinding.bindMethod(resReturnType, nextMethod, myContext,null);
+				BaseMethodBinding binding = BaseMethodBinding.bindMethod(nextMethod, myContext, null);
 				invocationHandler.addBinding(nextMethod, binding);
 			}
 			myInvocationHandlers.put(theClientType, invocationHandler);

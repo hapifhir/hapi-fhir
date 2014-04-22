@@ -57,11 +57,6 @@ public @interface History {
 	 * The resource type that this method applies to. See the {@link History History annotation type documentation}
 	 * for information on usage patterns.  
 	 */
-	Class<? extends IResource> resourceType() default AllResources.class;
-	
-	
-	interface AllResources extends IResource {
-		// nothing
-	}
+	Class<? extends IResource> type() default IResource.class;
 	
 }

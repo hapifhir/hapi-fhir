@@ -129,11 +129,11 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 			ourLog.trace("Method {} doesn't match because ID or Version are not null: {} - {}", theRequest.getId(), theRequest.getVersion());
 			return false;
 		}
-		if (theRequest.getRequestType() == RequestType.GET && theRequest.getOperation() != null) {
+		if (theRequest.getRequestType() == RequestType.GET && theRequest.getOperation() != null && !Constants.PARAM_SEARCH.equals(theRequest.getOperation())) {
 			ourLog.trace("Method {} doesn't match because request type is GET but operation is not null: {}", theRequest.getId(), theRequest.getOperation());
 			return false;
 		}
-		if (theRequest.getRequestType() == RequestType.POST && !"_search".equals(theRequest.getOperation())) {
+		if (theRequest.getRequestType() == RequestType.POST && !Constants.PARAM_SEARCH.equals(theRequest.getOperation())) {
 			ourLog.trace("Method {} doesn't match because request type is POST but operation is not _search: {}", theRequest.getId(), theRequest.getOperation());
 			return false;
 		}

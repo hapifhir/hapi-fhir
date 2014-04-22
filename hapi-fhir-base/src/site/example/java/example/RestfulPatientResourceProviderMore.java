@@ -375,11 +375,11 @@ public interface HistoryClient {
 Bundle getHistoryServer();
 
 // Type level (history of all resources of a given type)
-@History(resourceType=Patient.class)
+@History(type=Patient.class)
 Bundle getHistoryPatientType();
 
 // Instance level (history of a specific resource instance by type and ID)
-@History(resourceType=Patient.class)
+@History(type=Patient.class)
 Bundle getHistoryPatientInstance(@IdParam IdDt theId);
 //END SNIPPET: historyClient
 	

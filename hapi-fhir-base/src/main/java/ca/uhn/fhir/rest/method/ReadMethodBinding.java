@@ -4,6 +4,7 @@ import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 
 import ca.uhn.fhir.context.ConfigurationException;
@@ -20,33 +21,33 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 public class ReadMethodBinding extends BaseResourceReturningMethodBinding {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ReadMethodBinding.class);
-	
+
 	private Integer myIdIndex;
 	private Integer myVersionIdIndex;
 	private int myParameterCount;
 
 	public ReadMethodBinding(Class<? extends IResource> theAnnotatedResourceType, Method theMethod, FhirContext theContext, Object theProvider) {
-		super( theAnnotatedResourceType, theMethod, theContext, theProvider);
-		
+		super(theAnnotatedResourceType, theMethod, theContext, theProvider);
+
 		Validate.notNull(theMethod, "Method must not be null");
-		
+
 		Integer idIndex = Util.findIdParameterIndex(theMethod);
 		Integer versionIdIndex = Util.findVersionIdParameterIndex(theMethod);
 
 		myIdIndex = idIndex;
 		myVersionIdIndex = versionIdIndex;
 		myParameterCount = getMethod().getParameterTypes().length;
-		
+
 		Class<?>[] parameterTypes = theMethod.getParameterTypes();
 		if (!IdDt.class.equals(parameterTypes[myIdIndex])) {
-			throw new ConfigurationException("ID parameter must be of type: " + IdDt.class.getCanonicalName() + " - Found: "+parameterTypes[myIdIndex]);
+			throw new ConfigurationException("ID parameter must be of type: " + IdDt.class.getCanonicalName() + " - Found: " + parameterTypes[myIdIndex]);
 		}
 		if (myVersionIdIndex != null && !IdDt.class.equals(parameterTypes[myVersionIdIndex])) {
-			throw new ConfigurationException("Version ID parameter must be of type: " + IdDt.class.getCanonicalName()+ " - Found: "+parameterTypes[myVersionIdIndex]);
+			throw new ConfigurationException("Version ID parameter must be of type: " + IdDt.class.getCanonicalName() + " - Found: " + parameterTypes[myVersionIdIndex]);
 		}
 
 	}
-	
+
 	public boolean isVread() {
 		return myVersionIdIndex != null;
 	}
@@ -71,6 +72,13 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding {
 			ourLog.trace("Method {} doesn't match because request type is not GET: {}", theRequest.getId(), theRequest.getRequestType());
 			return false;
 		}
+		if (Constants.PARAM_HISTORY.equals(theRequest.getOperation())) {
+			if (myVersionIdIndex == null) {
+				return false;
+			}
+		} else if (!StringUtils.isBlank(theRequest.getOperation())) {
+			return false;
+		}
 		return true;
 	}
 
@@ -80,31 +88,30 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding {
 	}
 
 	@Override
-	public List<IResource> invokeServer(Object theResourceProvider, IdDt theId, IdDt theVersionId, Map<String, String[]> theParameterValues) throws InvalidRequestException,
-			InternalErrorException {
+	public List<IResource> invokeServer(Object theResourceProvider, IdDt theId, IdDt theVersionId, Map<String, String[]> theParameterValues) throws InvalidRequestException, InternalErrorException {
 		Object[] params = new Object[myParameterCount];
 		params[myIdIndex] = theId;
 		if (myVersionIdIndex != null) {
 			params[myVersionIdIndex] = theVersionId;
 		}
-		
+
 		Object response;
 		try {
 			response = getMethod().invoke(theResourceProvider, params);
 		} catch (Exception e) {
-			throw new InternalErrorException("Failed to call access method",e);
+			throw new InternalErrorException("Failed to call access method", e);
 		}
-		
+
 		return toResourceList(response);
 	}
 
 	@Override
 	public GetClientInvocation invokeClient(Object[] theArgs) {
-		String id = ((IdDt)theArgs[myIdIndex]).getValue();
+		String id = ((IdDt) theArgs[myIdIndex]).getValue();
 		if (myVersionIdIndex == null) {
 			return new GetClientInvocation(getResourceName(), id);
-		}else {
-			String vid = ((IdDt)theArgs[myVersionIdIndex]).getValue();
+		} else {
+			String vid = ((IdDt) theArgs[myVersionIdIndex]).getValue();
 			return new GetClientInvocation(getResourceName(), id, Constants.URL_TOKEN_HISTORY, vid);
 		}
 	}

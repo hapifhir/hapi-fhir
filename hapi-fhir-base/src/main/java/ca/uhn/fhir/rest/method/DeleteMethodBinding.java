@@ -32,8 +32,8 @@ public class DeleteMethodBinding extends BaseOutcomeReturningMethodBinding {
 				theProvider);
 
 		Delete deleteAnnotation = theMethod.getAnnotation(Delete.class);
-		Class<? extends IResource> resourceType = deleteAnnotation.resourceType();
-		if (resourceType != Delete.NotSpecified.class) {
+		Class<? extends IResource> resourceType = deleteAnnotation.type();
+		if (resourceType != IResource.class) {
 			RuntimeResourceDefinition def = theContext.getResourceDefinition(resourceType);
 			myResourceName = def.getName();
 		} else {

@@ -1,6 +1,7 @@
 package ca.uhn.fhir.rest.server;
 
 import java.io.IOException;
+import java.io.StringReader;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
@@ -292,7 +293,7 @@ public class RestfulServer extends HttpServlet {
 				BaseMethodBinding foundMethodBinding = BaseMethodBinding.bindMethod(m, myFhirContext, theProvider);
 				if (foundMethodBinding != null) {
 					
-					RuntimeResourceDefinition definition = myFhirContext.getResourceDefinition(retType);
+					RuntimeResourceDefinition definition = myFhirContext.getResourceDefinition(foundMethodBinding.getResourceName());
 					ResourceBinding resourceBinding;
 					if (myResourceNameToProvider.containsKey(definition.getName())) {
 						resourceBinding = myResourceNameToProvider.get(definition.getName());
@@ -318,7 +319,7 @@ public class RestfulServer extends HttpServlet {
 			if (Modifier.isPublic(m.getModifiers())) {
 				ourLog.debug("Scanning public method: {}#{}", theSystemProvider.getClass(), m.getName());
 
-				BaseMethodBinding foundMethodBinding = BaseMethodBinding.bindSystemMethod(m, myFhirContext);
+				BaseMethodBinding foundMethodBinding = BaseMethodBinding.bindMethod(m, myFhirContext, theSystemProvider);
 				if (foundMethodBinding != null) {
 					if (foundMethodBinding instanceof ConformanceMethodBinding) {
 						myServerConformanceMethod = foundMethodBinding;
@@ -476,7 +477,11 @@ public class RestfulServer extends HttpServlet {
 			r.setOperation(operation);
 			r.setParameters(params);
 			r.setRequestType(requestType);
-			r.setInputReader(request.getReader());
+			if ("application/x-www-form-urlencoded".equals(request.getContentType())) {
+				r.setInputReader(new StringReader(""));
+			} else {
+				r.setInputReader(request.getReader());
+			}
 			r.setFhirServerBase(fhirServerBase);
 			r.setCompleteUrl(completeUrl);
 			r.setServletRequest(request);

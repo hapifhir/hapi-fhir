@@ -1,7 +1,11 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
+
 import javax.servlet.ServletException;
 
+import org.hamcrest.core.StringContains;
 import org.junit.Test;
 
 import ca.uhn.fhir.model.api.BaseResource;
@@ -10,15 +14,20 @@ import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
-import ca.uhn.fhir.rest.server.exceptions.ConfigurationException;
 
 public class ServerInvalidDefinitionTest {
 
-	@Test(expected=ConfigurationException.class)
-	public void testNonInstantiableTypeForResourceProvider() throws ServletException {
+	@Test
+	public void testNonInstantiableTypeForResourceProvider() {
 		RestfulServer srv = new RestfulServer();
 		srv.setResourceProviders(new NonInstantiableTypeForResourceProvider());
-		srv.init();
+		
+		try {
+			srv.init();
+			fail();
+		} catch (ServletException e) {
+			assertThat(e.getCause().toString(), StringContains.containsString("ConfigurationException"));
+		}
 	}
 	
 	/**

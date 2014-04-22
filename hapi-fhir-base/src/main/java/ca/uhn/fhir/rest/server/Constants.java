@@ -36,6 +36,7 @@ public class Constants {
 	public static final int STATUS_HTTP_204_NO_CONTENT = 204;
 	public static final String PARAM_COUNT = "_count";
 	public static final String PARAM_SINCE = "_since";
+	public static final String PARAM_SEARCH = "_search";
 
 	static {
 		Map<String, EncodingUtil> valToEncoding = new HashMap<String, EncodingUtil>();

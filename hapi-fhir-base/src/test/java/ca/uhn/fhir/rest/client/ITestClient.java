@@ -56,10 +56,10 @@ public interface ITestClient extends IBasicClient {
 	@Update
 	public MethodOutcome updatePatient(@IdParam IdDt theId, @ResourceParam Patient thePatient);
 
-	@Delete(resourceType=DiagnosticReport.class)
+	@Delete(type=DiagnosticReport.class)
 	void deleteDiagnosticReport(@IdParam IdDt theId);
 
-	@Delete(resourceType=Patient.class)
+	@Delete(type=Patient.class)
 	MethodOutcome deletePatient(@IdParam IdDt theId);
 
 	@Search(type=Patient.class)
@@ -68,10 +68,10 @@ public interface ITestClient extends IBasicClient {
 	@Search(type=Patient.class)
 	Bundle findPatientByName(@RequiredParam(name = Patient.SP_FAMILY) StringDt theId, @OptionalParam(name=Patient.SP_GIVEN) StringDt theGiven);
 
-	@History(resourceType=Patient.class)
+	@History(type=Patient.class)
 	Bundle getHistoryPatientInstance(@IdParam IdDt theId);
 
-	@History(resourceType=Patient.class)
+	@History(type=Patient.class)
 	Bundle getHistoryPatientType();
 
 	@History
