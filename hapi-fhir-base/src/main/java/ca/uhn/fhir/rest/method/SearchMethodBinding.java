@@ -15,10 +15,9 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.client.GetClientInvocation;
 import ca.uhn.fhir.rest.param.IParameter;
-import ca.uhn.fhir.rest.param.IQueryParameter;
+import ca.uhn.fhir.rest.param.BaseQueryParameter;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -85,20 +84,21 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 	}
 
 	@Override
-	public List<IResource> invokeServer(Object theResourceProvider, IdDt theId, IdDt theVersionId, Map<String, String[]> parameterValues) throws InvalidRequestException,
+	public List<IResource> invokeServer(Object theResourceProvider, Request theRequest) throws InvalidRequestException,
 			InternalErrorException {
-		assert theId == null;
-		assert theVersionId == null;
+		assert theRequest.getId() == null;
+		assert theRequest.getVersion() == null;
 
 		Object[] params = new Object[myParameters.size()];
 		for (int i = 0; i < myParameters.size(); i++) {
 			IParameter param = myParameters.get(i);
-			params[i] = param.translateQueryParametersIntoServerArgument(parameterValues, null);
+			params[i] = param.translateQueryParametersIntoServerArgument(theRequest, null);
 		}
 
 		Object response;
 		try {
-			response = this.getMethod().invoke(theResourceProvider, params);
+			Method method = this.getMethod();
+			response = method.invoke(theResourceProvider, params);
 		} catch (IllegalAccessException e) {
 			throw new InternalErrorException(e);
 		} catch (IllegalArgumentException e) {
@@ -140,10 +140,10 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 
 		Set<String> methodParamsTemp = new HashSet<String>();
 		for (int i = 0; i < this.myParameters.size(); i++) {
-			if (!(myParameters.get(i) instanceof IQueryParameter)) {
+			if (!(myParameters.get(i) instanceof BaseQueryParameter)) {
 				continue;
 			}
-			IQueryParameter temp = (IQueryParameter) myParameters.get(i);
+			BaseQueryParameter temp = (BaseQueryParameter) myParameters.get(i);
 			methodParamsTemp.add(temp.getName());
 			if (temp.isRequired() && !theRequest.getParameters().containsKey(temp.getName())) {
 				ourLog.trace("Method {} doesn't match param '{}' is not present", getMethod().getName(), temp.getName());

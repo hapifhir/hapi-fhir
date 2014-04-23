@@ -10,6 +10,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.ServletRequest;
+import javax.servlet.http.HttpServletRequest;
+
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.PathSpecification;
@@ -88,66 +91,73 @@ class Util {
 		int paramIndex = 0;
 		for (Annotation[] annotations : method.getParameterAnnotations()) {
 			boolean haveHandledMethod = false;
-			for (int i = 0; i < annotations.length; i++) {
-				Annotation nextAnnotation = annotations[i];
-				Class<?> parameterType = parameterTypes[paramIndex];
 
-				Class<? extends java.util.Collection<?>> outerCollectionType = null;
-				Class<? extends java.util.Collection<?>> innerCollectionType = null;
-
-				if (Collection.class.isAssignableFrom(parameterType)) {
-					innerCollectionType = (Class<? extends java.util.Collection<?>>) parameterType;
-					parameterType = ReflectionUtil.getGenericCollectionTypeOfMethodParameter(method, paramIndex);
-				}
-
-				if (Collection.class.isAssignableFrom(parameterType)) {
-					outerCollectionType = innerCollectionType;
-					innerCollectionType = (Class<? extends java.util.Collection<?>>) parameterType;
-					parameterType = ReflectionUtil.getGenericCollectionTypeOfMethodParameter(method, paramIndex);
-				}
-
-				IParameter param;
-				if (nextAnnotation instanceof RequiredParam) {
-					SearchParameter parameter = new SearchParameter();
-					parameter.setName(((RequiredParam) nextAnnotation).name());
-					parameter.setRequired(true);
-					parameter.setType(parameterType, innerCollectionType, outerCollectionType);
-					param = parameter;
-				} else if (nextAnnotation instanceof OptionalParam) {
-					SearchParameter parameter = new SearchParameter();
-					parameter.setName(((OptionalParam) nextAnnotation).name());
-					parameter.setRequired(false);
-					parameter.setType(parameterType, innerCollectionType, innerCollectionType);
-					param = parameter;
-				} else if (nextAnnotation instanceof IncludeParam) {
-					if (parameterType != PathSpecification.class || innerCollectionType == null || outerCollectionType != null) {
-						throw new ConfigurationException("Method '" + method.getName() + "' is annotated with @" + IncludeParam.class.getSimpleName() + " but has a type other than Collection<"
-								+ PathSpecification.class.getSimpleName() + ">");
-					}
-					Class<? extends Collection<PathSpecification>> instantiableCollectionType = (Class<? extends Collection<PathSpecification>>) CollectionBinder.getInstantiableCollectionType(
-							innerCollectionType, "Method '" + method.getName() + "'");
-
-					param = new IncludeParameter((IncludeParam) nextAnnotation, instantiableCollectionType);
-				} else if (nextAnnotation instanceof ResourceParam) {
-					if (!IResource.class.isAssignableFrom(parameterType)) {
-						throw new ConfigurationException("Method '" + method.getName() + "' is annotated with @" + ResourceParam.class.getSimpleName()
-								+ " but has a type that is not an implemtation of " + IResource.class.getCanonicalName());
-					}
-					param = new ResourceParameter((Class<? extends IResource>) parameterType);
-				} else if (nextAnnotation instanceof IdParam || nextAnnotation instanceof VersionIdParam) {
-					param = null;
-				} else {
-					continue;
-				}
-
-				haveHandledMethod = true;
+			Class<?> parameterType = parameterTypes[paramIndex];
+			if (parameterType.equals(HttpServletRequest.class) || parameterType.equals(ServletRequest.class)) {
+				ServletRequestParameter param = new ServletRequestParameter();
 				parameters.add(param);
+			} else {
+				for (int i = 0; i < annotations.length; i++) {
+					Annotation nextAnnotation = annotations[i];
 
-			}
+					Class<? extends java.util.Collection<?>> outerCollectionType = null;
+					Class<? extends java.util.Collection<?>> innerCollectionType = null;
 
-			if (!haveHandledMethod) {
-				throw new ConfigurationException("Parameter #" + paramIndex + " of method '" + method.getName() + "' on type '" + method.getDeclaringClass().getCanonicalName()
-						+ "' has no recognized FHIR interface parameter annotations. Don't know how to handle this parameter");
+					if (Collection.class.isAssignableFrom(parameterType)) {
+						innerCollectionType = (Class<? extends java.util.Collection<?>>) parameterType;
+						parameterType = ReflectionUtil.getGenericCollectionTypeOfMethodParameter(method, paramIndex);
+					}
+
+					if (Collection.class.isAssignableFrom(parameterType)) {
+						outerCollectionType = innerCollectionType;
+						innerCollectionType = (Class<? extends java.util.Collection<?>>) parameterType;
+						parameterType = ReflectionUtil.getGenericCollectionTypeOfMethodParameter(method, paramIndex);
+					}
+
+					IParameter param;
+					if (nextAnnotation instanceof RequiredParam) {
+						SearchParameter parameter = new SearchParameter();
+						parameter.setName(((RequiredParam) nextAnnotation).name());
+						parameter.setRequired(true);
+						parameter.setType(parameterType, innerCollectionType, outerCollectionType);
+						param = parameter;
+					} else if (nextAnnotation instanceof OptionalParam) {
+						SearchParameter parameter = new SearchParameter();
+						parameter.setName(((OptionalParam) nextAnnotation).name());
+						parameter.setRequired(false);
+						parameter.setType(parameterType, innerCollectionType, outerCollectionType);
+						param = parameter;
+					} else if (nextAnnotation instanceof IncludeParam) {
+						if (parameterType != PathSpecification.class || innerCollectionType == null || outerCollectionType != null) {
+							throw new ConfigurationException("Method '" + method.getName() + "' is annotated with @" + IncludeParam.class.getSimpleName() + " but has a type other than Collection<"
+									+ PathSpecification.class.getSimpleName() + ">");
+						}
+						Class<? extends Collection<PathSpecification>> instantiableCollectionType = (Class<? extends Collection<PathSpecification>>) CollectionBinder.getInstantiableCollectionType(
+								innerCollectionType, "Method '" + method.getName() + "'");
+
+						param = new IncludeParameter((IncludeParam) nextAnnotation, instantiableCollectionType);
+					} else if (nextAnnotation instanceof ResourceParam) {
+						if (!IResource.class.isAssignableFrom(parameterType)) {
+							throw new ConfigurationException("Method '" + method.getName() + "' is annotated with @" + ResourceParam.class.getSimpleName()
+									+ " but has a type that is not an implemtation of " + IResource.class.getCanonicalName());
+						}
+						param = new ResourceParameter((Class<? extends IResource>) parameterType);
+					} else if (nextAnnotation instanceof IdParam || nextAnnotation instanceof VersionIdParam) {
+						param = null;
+					} else {
+						continue;
+					}
+
+					haveHandledMethod = true;
+					parameters.add(param);
+					break;
+
+				}
+
+				if (!haveHandledMethod) {
+					throw new ConfigurationException("Parameter #" + paramIndex + " of method '" + method.getName() + "' on type '" + method.getDeclaringClass().getCanonicalName()
+							+ "' has no recognized FHIR interface parameter annotations. Don't know how to handle this parameter");
+				}
 			}
 
 			paramIndex++;

@@ -30,6 +30,20 @@ public class ServerInvalidDefinitionTest {
 		}
 	}
 	
+	@Test
+	public void testPrivateResourceProvider() {
+		RestfulServer srv = new RestfulServer();
+		srv.setResourceProviders(new PrivateResourceProvider());
+		
+		try {
+			srv.init();
+			fail();
+		} catch (ServletException e) {
+			assertThat(e.getCause().toString(), StringContains.containsString("ConfigurationException"));
+			assertThat(e.getCause().toString(), StringContains.containsString("public"));
+		}
+	}
+	
 	/**
 	 * Normal, should initialize properly
 	 */
@@ -40,8 +54,23 @@ public class ServerInvalidDefinitionTest {
 		srv.init();
 	}
 	
+	private static class PrivateResourceProvider implements IResourceProvider
+	{
+
+		@Override
+		public Class<? extends IResource> getResourceType() {
+			return Patient.class;
+		}
+		
+		@SuppressWarnings("unused")
+		@Read
+		public Patient read(@IdParam IdDt theId) {
+			return null;
+		}
+		
+	}
 	
-	private static class NonInstantiableTypeForResourceProvider implements IResourceProvider
+	public static class NonInstantiableTypeForResourceProvider implements IResourceProvider
 	{
 
 		@Override
@@ -57,7 +86,7 @@ public class ServerInvalidDefinitionTest {
 		
 	}
 	
-	private static class InstantiableTypeForResourceProvider implements IResourceProvider
+	public static class InstantiableTypeForResourceProvider implements IResourceProvider
 	{
 
 		@Override

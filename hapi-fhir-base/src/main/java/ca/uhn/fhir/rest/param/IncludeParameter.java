@@ -13,7 +13,7 @@ import ca.uhn.fhir.rest.annotation.IncludeParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
-public class IncludeParameter extends IQueryParameter {
+public class IncludeParameter extends BaseQueryParameter {
 
 	private Class<? extends Collection<PathSpecification>> myInstantiableCollectionType;
 	private HashSet<String> myAllow;

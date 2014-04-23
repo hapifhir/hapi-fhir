@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.rest.method.Request;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
@@ -22,7 +23,7 @@ public class ResourceParameter implements IParameter {
 	}
 
 	@Override
-	public Object translateQueryParametersIntoServerArgument(Map<String, String[]> theQueryParameters, Object theRequestContents) throws InternalErrorException, InvalidRequestException {
+	public Object translateQueryParametersIntoServerArgument(Request theRequest, Object theRequestContents) throws InternalErrorException, InvalidRequestException {
 		IResource resource = (IResource) theRequestContents;
 		return resource;
 	}

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document xmlns="http://maven.apache.org/XDOC/2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
+<document xmlns="http://maven.apache.org/XDOC/2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
 
 	<properties>
 		<title>RESTful Client - HAPI FHIR</title>
@@ -10,97 +11,152 @@
 
 		<!-- The body of the document contains a number of sections -->
 		<section name="Creating a RESTful Client">
-			
+
 			<macro name="toc">
 			</macro>
-			
+
 			<p>
-				HAPI provides a built-in mechanism for connecting to FHIR RESTful servers.
-				The HAPI RESTful client is designed to be easy to set up and to allow strong
-				compile-time type checking wherever possible.					
+				HAPI provides a built-in mechanism for connecting to FHIR RESTful
+				servers.
+				The HAPI RESTful client is designed to be easy to set up and
+				to allow strong
+				compile-time type checking wherever possible.
 			</p>
 
 			<p>
-				Setup is mostly done using simple annotations, which means that it should
-				be possible to create a FHIR compliant server quickly and easily. Once again,
-				this design is intended to be similar to that of JAX-WS, so users of that
-				specification should be comfortable with this one.
+				Setup is mostly done using simple annotations, which means that it
+				should
+				be possible to create a FHIR compliant server quickly and
+				easily. Once again,
+				this design is intended to be similar to that of
+				JAX-WS, so users of that
+				specification should be comfortable with
+				this one.
 			</p>
-			
+
 			<subsection name="Defining A Restful Client Interface">
-			
+
 				<p>
 					The first step in creating a FHIR RESTful Client is to define a
-					restful client interface. 
+					restful client interface.
 				</p>
-				
+
 				<p>
-					A restful client interface class must extend the 
-					<a href="./apidocs/ca/uhn/fhir/rest/client/api/IRestfulClient.html">IRestfulClient</a> interface,
+					A restful client interface class must extend the
+					<a href="./apidocs/ca/uhn/fhir/rest/client/api/IRestfulClient.html">IRestfulClient</a>
+					interface,
 					and will contain one or more methods which have been
-					annotated with special annotations indicating which RESTful operation
-					that method supports. Below is a simple example of a resource provider
+					annotated with special annotations indicating which RESTful
+					operation
+					that method supports. Below is a simple example of a
+					resource provider
 					which supports the
 					<a href="http://hl7.org/implement/standards/fhir/http.html#read">read</a>
 					operation (i.e. retrieve a single resource by ID) as well as the
 					<a href="http://hl7.org/implement/standards/fhir/http.html#search">search</a>
-					operation (i.e. find any resources matching a given criteria) for a specific
+					operation (i.e. find any resources matching a given criteria) for a
+					specific
 					search criteria.
 				</p>
-				
+
 				<p>
-					You may notice that this interface looks a lot like the Resource Provider
-					which is defined for use by the RESTful server. In fact, it supports all
-					of the same annotations and is essentially identical, other than the 
+					You may notice that this interface looks a lot like the Resource
+					Provider
+					which is defined for use by the RESTful server. In fact, it
+					supports all
+					of the same annotations and is essentially identical,
+					other than the
 					fact that for a client you must use an interface but for a server you
 					must use a concrete class with method implementations.
 				</p>
-				
+
 				<macro name="snippet">
 					<param name="id" value="provider" />
-					<param name="file" value="src/site/example/java/example/RestfulClientImpl.java" />
+					<param name="file"
+						value="src/site/example/java/example/RestfulClientImpl.java" />
 				</macro>
 
 				<p>
 					You will probably want to add more methods
-					to your client interface. See
-					<a href="./doc_rest_operations.html">RESTful Operations</a> for
+					to your client interface.
+					See
+					<a href="./doc_rest_operations.html">RESTful Operations</a>
+					for
 					lots more examples of how to add methods for various operations.
 				</p>
 
 			</subsection>
 
 			<subsection name="Instantiate the Client">
-			
+
 				<p>
 					Once your client interface is created, all that is left is to
 					create a FhirContext and instantiate the client and you are
-					ready to start using it. 
+					ready to
+					start using it.
 				</p>
-				
+
 				<macro name="snippet">
 					<param name="id" value="client" />
-					<param name="file" value="src/site/example/java/example/ExampleRestfulClient.java" />
+					<param name="file"
+						value="src/site/example/java/example/ExampleRestfulClient.java" />
 				</macro>
 
-			</subsection>	
-			
+			</subsection>
+
 		</section>
 
 		<section name="A Complete Example">
 
 			<p>
 				The following is a complete example showing a RESTful client
-				using HAPI FHIR.
+				using
+				HAPI FHIR.
 			</p>
-			
+
 			<macro name="snippet">
-				<param name="id" value="client" />                      
-				<param name="file" value="src/site/example/java/example/CompleteExampleClient.java" />
+				<param name="id" value="client" />
+				<param name="file"
+					value="src/site/example/java/example/CompleteExampleClient.java" />
 			</macro>
 
 		</section>
-		
+
+		<section name="Configuring the HTTP Client">
+
+			<p>
+				The client uses <a href="http://hc.apache.org/httpcomponents-client-ga/">Apache HTTP Client</a>
+				as a provider. The HTTP Client is very powerful, but can be a bit tricky to configure. 
+			</p>
+
+			<p>
+				In many cases, the default configuration should suffice. However, if you require anything
+				more sophisticated (username/password, HTTP proxy settings, etc.) you will need
+				to configure the underlying client. 
+			</p>
+			
+			<p>
+				The underlying client configuration is provided by setting an
+				<a href="./apidocs/ca/uhn/fhir/rest/client/IRestfulClientFactory.html#setHttpClient(org.apache.http.client.HttpClient)">HttpClient</a>
+				on the RestfulClientFactory. 
+			</p>
+
+			<subsection name="HTTP Basic Authorization">
+
+				<p>
+					The following example shows how to configure your client to
+					use a specific username and password in every request.
+				</p>
+
+				<macro name="snippet">
+					<param name="id" value="security" />
+					<param name="file" value="src/site/example/java/example/ClientExamples.java" />
+				</macro>
+
+			</subsection>
+
+		</section>
+
 	</body>
 
 </document>

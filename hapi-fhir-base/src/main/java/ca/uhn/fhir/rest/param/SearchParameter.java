@@ -16,7 +16,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 /**
  * Created by dsotnikov on 2/25/2014.
  */
-public class SearchParameter extends IQueryParameter {
+public class SearchParameter extends BaseQueryParameter {
 
 	private String name;
 	private IParamBinder myParamBinder;

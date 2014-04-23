@@ -1,11 +1,10 @@
 package ca.uhn.fhir.rest.method;
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -151,10 +150,10 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 	}
 
 	@Override
-	public List<IResource> invokeServer(Object theResourceProvider, IdDt theId, IdDt theVersionId, Map<String, String[]> theParameterValues) throws InvalidRequestException, InternalErrorException {
+	public List<IResource> invokeServer(Object theResourceProvider, Request theRequest) throws InvalidRequestException, InternalErrorException {
 		Object[] args = new Object[getMethod().getParameterTypes().length];
 		if (myCountParamIndex != null) {
-			String[] countValues = theParameterValues.remove(Constants.PARAM_COUNT);
+			String[] countValues = theRequest.getParameters().remove(Constants.PARAM_COUNT);
 			if (countValues.length > 0 && StringUtils.isNotBlank(countValues[0])) {
 				try {
 					args[myCountParamIndex] = new IntegerDt(countValues[0]);
@@ -164,7 +163,7 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 			}
 		}
 		if (mySinceParamIndex != null) {
-			String[] sinceValues = theParameterValues.remove(Constants.PARAM_SINCE);
+			String[] sinceValues = theRequest.getParameters().remove(Constants.PARAM_SINCE);
 			if (sinceValues.length > 0 && StringUtils.isNotBlank(sinceValues[0])) {
 				try {
 					args[mySinceParamIndex] = new InstantDt(sinceValues[0]);
@@ -175,7 +174,7 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 		}
 
 		if (myIdParamIndex!=null) {
-			args[myIdParamIndex] = theId;
+			args[myIdParamIndex] = theRequest.getId();
 		}
 		
 		Object response;
