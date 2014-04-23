@@ -682,7 +682,7 @@ public class ResfulServerMethodTest {
 		responseContent = IOUtils.toString(status.getEntity().getContent());
 		ourLog.info("Response was:\n{}", responseContent);
 
-		assertEquals(404, status.getStatusLine().getStatusCode());
+		assertEquals(200, status.getStatusLine().getStatusCode());
 
 	}
 

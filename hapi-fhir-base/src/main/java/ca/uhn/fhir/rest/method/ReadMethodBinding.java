@@ -87,11 +87,11 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding {
 	}
 
 	@Override
-	public List<IResource> invokeServer(Object theResourceProvider,Request theRequest) throws InvalidRequestException, InternalErrorException {
+	public List<IResource> invokeServer(Object theResourceProvider, Request theRequest) throws InvalidRequestException, InternalErrorException {
 		Object[] params = new Object[myParameterCount];
 		params[myIdIndex] = theRequest.getId();
 		if (myVersionIdIndex != null) {
-			params[myVersionIdIndex] = theRequest.getId();
+			params[myVersionIdIndex] = theRequest.getVersion();
 		}
 
 		Object response;
