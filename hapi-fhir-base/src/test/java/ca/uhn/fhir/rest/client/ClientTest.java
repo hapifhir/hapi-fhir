@@ -52,9 +52,9 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 
 public class ClientTest {
 
+	private FhirContext ctx;
 	private HttpClient httpClient;
 	private HttpResponse httpResponse;
-	private FhirContext ctx;
 
 	// atom-document-large.xml
 
@@ -66,6 +66,133 @@ public class ClientTest {
 		ctx.getRestfulClientFactory().setHttpClient(httpClient);
 
 		httpResponse = mock(HttpResponse.class, new ReturnsDeepStubs());
+	}
+
+	private String getPatientFeedWithOneResult() {
+		//@formatter:off
+		String msg = "<feed xmlns=\"http://www.w3.org/2005/Atom\">\n" + 
+				"<title/>\n" + 
+				"<id>d039f91a-cc3c-4013-988e-af4d8d0614bd</id>\n" + 
+				"<os:totalResults xmlns:os=\"http://a9.com/-/spec/opensearch/1.1/\">1</os:totalResults>\n" + 
+				"<published>2014-03-11T16:35:07-04:00</published>\n" + 
+				"<author>\n" + 
+				"<name>ca.uhn.fhir.rest.server.DummyRestfulServer</name>\n" + 
+				"</author>\n" + 
+				"<entry>\n" + 
+				"<content type=\"text/xml\">" 
+				+ "<Patient xmlns=\"http://hl7.org/fhir\">" 
+				+ "<text><status value=\"generated\" /><div xmlns=\"http://www.w3.org/1999/xhtml\">John Cardinal:            444333333        </div></text>"
+				+ "<identifier><label value=\"SSN\" /><system value=\"http://orionhealth.com/mrn\" /><value value=\"PRP1660\" /></identifier>"
+				+ "<name><use value=\"official\" /><family value=\"Cardinal\" /><given value=\"John\" /></name>"
+				+ "<name><family value=\"Kramer\" /><given value=\"Doe\" /></name>"
+				+ "<telecom><system value=\"phone\" /><value value=\"555-555-2004\" /><use value=\"work\" /></telecom>"
+				+ "<gender><coding><system value=\"http://hl7.org/fhir/v3/AdministrativeGender\" /><code value=\"M\" /></coding></gender>"
+				+ "<address><use value=\"home\" /><line value=\"2222 Home Street\" /></address><active value=\"true\" />"
+				+ "</Patient>"
+				+ "</content>\n"  
+				+ "   </entry>\n"  
+				+ "</feed>";
+		//@formatter:on
+		return msg;
+	}
+
+	@Test
+	public void testCreate() throws Exception {
+
+		Patient patient = new Patient();
+		patient.addIdentifier("urn:foo", "123");
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
+		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 201, "OK"));
+		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_TEXT + "; charset=UTF-8"));
+		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(""), Charset.forName("UTF-8")));
+		when(httpResponse.getAllHeaders()).thenReturn(toHeaderArray("Location", "http://example.com/fhir/Patient/100/_history/200"));
+
+		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
+		MethodOutcome response = client.createPatient(patient);
+
+		assertEquals(HttpPost.class, capt.getValue().getClass());
+		HttpPost post = (HttpPost) capt.getValue();
+		assertThat(IOUtils.toString(post.getEntity().getContent()), StringContains.containsString("<Patient"));
+		assertEquals("100", response.getId().getValue());
+		assertEquals("200", response.getVersionId().getValue());
+	}
+
+	@Test
+	public void testCreateBad() throws Exception {
+
+		Patient patient = new Patient();
+		patient.addIdentifier("urn:foo", "123");
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
+		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 400, "OK"));
+		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_TEXT + "; charset=UTF-8"));
+		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader("foobar"), Charset.forName("UTF-8")));
+
+		try {
+			ctx.newRestfulClient(ITestClient.class, "http://foo").createPatient(patient);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertThat(e.getMessage(), StringContains.containsString("foobar"));
+		}
+	}
+
+	@Test
+	public void testDelete() throws Exception {
+
+		OperationOutcome oo = new OperationOutcome();
+		oo.addIssue().setDetails("Hello");
+		String resp = new FhirContext().newXmlParser().encodeResourceToString(oo);
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
+		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 201, "OK"));
+		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(resp), Charset.forName("UTF-8")));
+
+		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
+		MethodOutcome response = client.deletePatient(new IdDt("1234"));
+
+		assertEquals(HttpDelete.class, capt.getValue().getClass());
+		assertEquals("http://foo/Patient/1234", capt.getValue().getURI().toString());
+		assertEquals("Hello", response.getOperationOutcome().getIssueFirstRep().getDetails().getValue());
+	}
+
+	@Test
+	public void testDeleteNoResponse() throws Exception {
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
+		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 204, "OK"));
+		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_TEXT + "; charset=UTF-8"));
+		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(""), Charset.forName("UTF-8")));
+
+		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
+		client.deleteDiagnosticReport(new IdDt("1234"));
+
+		assertEquals(HttpDelete.class, capt.getValue().getClass());
+		assertEquals("http://foo/DiagnosticReport/1234", capt.getValue().getURI().toString());
+	}
+
+	@Test
+	public void testGetConformance() throws Exception {
+
+		String msg = IOUtils.toString(ClientTest.class.getResourceAsStream("/example-metadata.xml"));
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
+		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
+
+		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
+		Conformance response = client.getServerConformanceStatement();
+
+		assertEquals("http://foo/metadata", capt.getValue().getURI().toString());
+		assertEquals("Health Intersections", response.getPublisher().getValue());
+
 	}
 
 	@Test
@@ -90,35 +217,35 @@ public class ClientTest {
 
 		// Older resource
 		{
-		BundleEntry olderEntry = response.getEntries().get(0);
-		assertEquals("222", olderEntry.getId().getValue());
-		assertThat(olderEntry.getLinkSelf().getValue(), StringEndsWith.endsWith("/Patient/222/_history/1"));
-		InstantDt pubExpected = new InstantDt(new Date(10000L));
-		InstantDt pubActualRes = (InstantDt) olderEntry.getResource().getResourceMetadata().get(ResourceMetadataKeyEnum.PUBLISHED);
-		InstantDt pubActualBundle = olderEntry.getPublished();
-		assertEquals(pubExpected.getValueAsString(), pubActualRes.getValueAsString());
-		assertEquals(pubExpected.getValueAsString(), pubActualBundle.getValueAsString());
-		InstantDt updExpected = new InstantDt(new Date(20000L));
-		InstantDt updActualRes = (InstantDt) olderEntry.getResource().getResourceMetadata().get(ResourceMetadataKeyEnum.UPDATED);
-		InstantDt updActualBundle = olderEntry.getUpdated();
-		assertEquals(updExpected.getValueAsString(), updActualRes.getValueAsString());
-		assertEquals(updExpected.getValueAsString(), updActualBundle.getValueAsString());
+			BundleEntry olderEntry = response.getEntries().get(0);
+			assertEquals("222", olderEntry.getId().getValue());
+			assertThat(olderEntry.getLinkSelf().getValue(), StringEndsWith.endsWith("/Patient/222/_history/1"));
+			InstantDt pubExpected = new InstantDt(new Date(10000L));
+			InstantDt pubActualRes = (InstantDt) olderEntry.getResource().getResourceMetadata().get(ResourceMetadataKeyEnum.PUBLISHED);
+			InstantDt pubActualBundle = olderEntry.getPublished();
+			assertEquals(pubExpected.getValueAsString(), pubActualRes.getValueAsString());
+			assertEquals(pubExpected.getValueAsString(), pubActualBundle.getValueAsString());
+			InstantDt updExpected = new InstantDt(new Date(20000L));
+			InstantDt updActualRes = (InstantDt) olderEntry.getResource().getResourceMetadata().get(ResourceMetadataKeyEnum.UPDATED);
+			InstantDt updActualBundle = olderEntry.getUpdated();
+			assertEquals(updExpected.getValueAsString(), updActualRes.getValueAsString());
+			assertEquals(updExpected.getValueAsString(), updActualBundle.getValueAsString());
 		}
 		// Newer resource
 		{
-		BundleEntry newerEntry = response.getEntries().get(1);
-		assertEquals("222", newerEntry.getId().getValue());
-		assertThat(newerEntry.getLinkSelf().getValue(), StringEndsWith.endsWith("/Patient/222/_history/2"));
-		InstantDt pubExpected = new InstantDt(new Date(10000L));
-		InstantDt pubActualRes = (InstantDt) newerEntry.getResource().getResourceMetadata().get(ResourceMetadataKeyEnum.PUBLISHED);
-		InstantDt pubActualBundle = newerEntry.getPublished();
-		assertEquals(pubExpected.getValueAsString(), pubActualRes.getValueAsString());
-		assertEquals(pubExpected.getValueAsString(), pubActualBundle.getValueAsString());
-		InstantDt updExpected = new InstantDt(new Date(30000L));
-		InstantDt updActualRes = (InstantDt) newerEntry.getResource().getResourceMetadata().get(ResourceMetadataKeyEnum.UPDATED);
-		InstantDt updActualBundle = newerEntry.getUpdated();
-		assertEquals(updExpected.getValueAsString(), updActualRes.getValueAsString());
-		assertEquals(updExpected.getValueAsString(), updActualBundle.getValueAsString());
+			BundleEntry newerEntry = response.getEntries().get(1);
+			assertEquals("222", newerEntry.getId().getValue());
+			assertThat(newerEntry.getLinkSelf().getValue(), StringEndsWith.endsWith("/Patient/222/_history/2"));
+			InstantDt pubExpected = new InstantDt(new Date(10000L));
+			InstantDt pubActualRes = (InstantDt) newerEntry.getResource().getResourceMetadata().get(ResourceMetadataKeyEnum.PUBLISHED);
+			InstantDt pubActualBundle = newerEntry.getPublished();
+			assertEquals(pubExpected.getValueAsString(), pubActualRes.getValueAsString());
+			assertEquals(pubExpected.getValueAsString(), pubActualBundle.getValueAsString());
+			InstantDt updExpected = new InstantDt(new Date(30000L));
+			InstantDt updActualRes = (InstantDt) newerEntry.getResource().getResourceMetadata().get(ResourceMetadataKeyEnum.UPDATED);
+			InstantDt updActualBundle = newerEntry.getUpdated();
+			assertEquals(updExpected.getValueAsString(), updActualRes.getValueAsString());
+			assertEquals(updExpected.getValueAsString(), updActualBundle.getValueAsString());
 		}
 	}
 
@@ -144,38 +271,38 @@ public class ClientTest {
 
 		// Older resource
 		{
-		BundleEntry olderEntry = response.getEntries().get(0);
-		assertEquals("222", olderEntry.getId().getValue());
-		assertThat(olderEntry.getLinkSelf().getValue(), StringEndsWith.endsWith("/Patient/222/_history/1"));
-		InstantDt pubExpected = new InstantDt(new Date(10000L));
-		InstantDt pubActualRes = (InstantDt) olderEntry.getResource().getResourceMetadata().get(ResourceMetadataKeyEnum.PUBLISHED);
-		InstantDt pubActualBundle = olderEntry.getPublished();
-		assertEquals(pubExpected.getValueAsString(), pubActualRes.getValueAsString());
-		assertEquals(pubExpected.getValueAsString(), pubActualBundle.getValueAsString());
-		InstantDt updExpected = new InstantDt(new Date(20000L));
-		InstantDt updActualRes = (InstantDt) olderEntry.getResource().getResourceMetadata().get(ResourceMetadataKeyEnum.UPDATED);
-		InstantDt updActualBundle = olderEntry.getUpdated();
-		assertEquals(updExpected.getValueAsString(), updActualRes.getValueAsString());
-		assertEquals(updExpected.getValueAsString(), updActualBundle.getValueAsString());
+			BundleEntry olderEntry = response.getEntries().get(0);
+			assertEquals("222", olderEntry.getId().getValue());
+			assertThat(olderEntry.getLinkSelf().getValue(), StringEndsWith.endsWith("/Patient/222/_history/1"));
+			InstantDt pubExpected = new InstantDt(new Date(10000L));
+			InstantDt pubActualRes = (InstantDt) olderEntry.getResource().getResourceMetadata().get(ResourceMetadataKeyEnum.PUBLISHED);
+			InstantDt pubActualBundle = olderEntry.getPublished();
+			assertEquals(pubExpected.getValueAsString(), pubActualRes.getValueAsString());
+			assertEquals(pubExpected.getValueAsString(), pubActualBundle.getValueAsString());
+			InstantDt updExpected = new InstantDt(new Date(20000L));
+			InstantDt updActualRes = (InstantDt) olderEntry.getResource().getResourceMetadata().get(ResourceMetadataKeyEnum.UPDATED);
+			InstantDt updActualBundle = olderEntry.getUpdated();
+			assertEquals(updExpected.getValueAsString(), updActualRes.getValueAsString());
+			assertEquals(updExpected.getValueAsString(), updActualBundle.getValueAsString());
 		}
 		// Newer resource
 		{
-		BundleEntry newerEntry = response.getEntries().get(1);
-		assertEquals("222", newerEntry.getId().getValue());
-		assertThat(newerEntry.getLinkSelf().getValue(), StringEndsWith.endsWith("/Patient/222/_history/2"));
-		InstantDt pubExpected = new InstantDt(new Date(10000L));
-		InstantDt pubActualRes = (InstantDt) newerEntry.getResource().getResourceMetadata().get(ResourceMetadataKeyEnum.PUBLISHED);
-		InstantDt pubActualBundle = newerEntry.getPublished();
-		assertEquals(pubExpected.getValueAsString(), pubActualRes.getValueAsString());
-		assertEquals(pubExpected.getValueAsString(), pubActualBundle.getValueAsString());
-		InstantDt updExpected = new InstantDt(new Date(30000L));
-		InstantDt updActualRes = (InstantDt) newerEntry.getResource().getResourceMetadata().get(ResourceMetadataKeyEnum.UPDATED);
-		InstantDt updActualBundle = newerEntry.getUpdated();
-		assertEquals(updExpected.getValueAsString(), updActualRes.getValueAsString());
-		assertEquals(updExpected.getValueAsString(), updActualBundle.getValueAsString());
+			BundleEntry newerEntry = response.getEntries().get(1);
+			assertEquals("222", newerEntry.getId().getValue());
+			assertThat(newerEntry.getLinkSelf().getValue(), StringEndsWith.endsWith("/Patient/222/_history/2"));
+			InstantDt pubExpected = new InstantDt(new Date(10000L));
+			InstantDt pubActualRes = (InstantDt) newerEntry.getResource().getResourceMetadata().get(ResourceMetadataKeyEnum.PUBLISHED);
+			InstantDt pubActualBundle = newerEntry.getPublished();
+			assertEquals(pubExpected.getValueAsString(), pubActualRes.getValueAsString());
+			assertEquals(pubExpected.getValueAsString(), pubActualBundle.getValueAsString());
+			InstantDt updExpected = new InstantDt(new Date(30000L));
+			InstantDt updActualRes = (InstantDt) newerEntry.getResource().getResourceMetadata().get(ResourceMetadataKeyEnum.UPDATED);
+			InstantDt updActualBundle = newerEntry.getUpdated();
+			assertEquals(updExpected.getValueAsString(), updActualRes.getValueAsString());
+			assertEquals(updExpected.getValueAsString(), updActualBundle.getValueAsString());
 		}
 	}
-	
+
 	@Test
 	public void testHistoryServer() throws Exception {
 
@@ -198,35 +325,35 @@ public class ClientTest {
 
 		// Older resource
 		{
-		BundleEntry olderEntry = response.getEntries().get(0);
-		assertEquals("222", olderEntry.getId().getValue());
-		assertThat(olderEntry.getLinkSelf().getValue(), StringEndsWith.endsWith("/Patient/222/_history/1"));
-		InstantDt pubExpected = new InstantDt(new Date(10000L));
-		InstantDt pubActualRes = (InstantDt) olderEntry.getResource().getResourceMetadata().get(ResourceMetadataKeyEnum.PUBLISHED);
-		InstantDt pubActualBundle = olderEntry.getPublished();
-		assertEquals(pubExpected.getValueAsString(), pubActualRes.getValueAsString());
-		assertEquals(pubExpected.getValueAsString(), pubActualBundle.getValueAsString());
-		InstantDt updExpected = new InstantDt(new Date(20000L));
-		InstantDt updActualRes = (InstantDt) olderEntry.getResource().getResourceMetadata().get(ResourceMetadataKeyEnum.UPDATED);
-		InstantDt updActualBundle = olderEntry.getUpdated();
-		assertEquals(updExpected.getValueAsString(), updActualRes.getValueAsString());
-		assertEquals(updExpected.getValueAsString(), updActualBundle.getValueAsString());
+			BundleEntry olderEntry = response.getEntries().get(0);
+			assertEquals("222", olderEntry.getId().getValue());
+			assertThat(olderEntry.getLinkSelf().getValue(), StringEndsWith.endsWith("/Patient/222/_history/1"));
+			InstantDt pubExpected = new InstantDt(new Date(10000L));
+			InstantDt pubActualRes = (InstantDt) olderEntry.getResource().getResourceMetadata().get(ResourceMetadataKeyEnum.PUBLISHED);
+			InstantDt pubActualBundle = olderEntry.getPublished();
+			assertEquals(pubExpected.getValueAsString(), pubActualRes.getValueAsString());
+			assertEquals(pubExpected.getValueAsString(), pubActualBundle.getValueAsString());
+			InstantDt updExpected = new InstantDt(new Date(20000L));
+			InstantDt updActualRes = (InstantDt) olderEntry.getResource().getResourceMetadata().get(ResourceMetadataKeyEnum.UPDATED);
+			InstantDt updActualBundle = olderEntry.getUpdated();
+			assertEquals(updExpected.getValueAsString(), updActualRes.getValueAsString());
+			assertEquals(updExpected.getValueAsString(), updActualBundle.getValueAsString());
 		}
 		// Newer resource
 		{
-		BundleEntry newerEntry = response.getEntries().get(1);
-		assertEquals("222", newerEntry.getId().getValue());
-		assertThat(newerEntry.getLinkSelf().getValue(), StringEndsWith.endsWith("/Patient/222/_history/2"));
-		InstantDt pubExpected = new InstantDt(new Date(10000L));
-		InstantDt pubActualRes = (InstantDt) newerEntry.getResource().getResourceMetadata().get(ResourceMetadataKeyEnum.PUBLISHED);
-		InstantDt pubActualBundle = newerEntry.getPublished();
-		assertEquals(pubExpected.getValueAsString(), pubActualRes.getValueAsString());
-		assertEquals(pubExpected.getValueAsString(), pubActualBundle.getValueAsString());
-		InstantDt updExpected = new InstantDt(new Date(30000L));
-		InstantDt updActualRes = (InstantDt) newerEntry.getResource().getResourceMetadata().get(ResourceMetadataKeyEnum.UPDATED);
-		InstantDt updActualBundle = newerEntry.getUpdated();
-		assertEquals(updExpected.getValueAsString(), updActualRes.getValueAsString());
-		assertEquals(updExpected.getValueAsString(), updActualBundle.getValueAsString());
+			BundleEntry newerEntry = response.getEntries().get(1);
+			assertEquals("222", newerEntry.getId().getValue());
+			assertThat(newerEntry.getLinkSelf().getValue(), StringEndsWith.endsWith("/Patient/222/_history/2"));
+			InstantDt pubExpected = new InstantDt(new Date(10000L));
+			InstantDt pubActualRes = (InstantDt) newerEntry.getResource().getResourceMetadata().get(ResourceMetadataKeyEnum.PUBLISHED);
+			InstantDt pubActualBundle = newerEntry.getPublished();
+			assertEquals(pubExpected.getValueAsString(), pubActualRes.getValueAsString());
+			assertEquals(pubExpected.getValueAsString(), pubActualBundle.getValueAsString());
+			InstantDt updExpected = new InstantDt(new Date(30000L));
+			InstantDt updActualRes = (InstantDt) newerEntry.getResource().getResourceMetadata().get(ResourceMetadataKeyEnum.UPDATED);
+			InstantDt updActualBundle = newerEntry.getUpdated();
+			assertEquals(updExpected.getValueAsString(), updActualRes.getValueAsString());
+			assertEquals(updExpected.getValueAsString(), updActualBundle.getValueAsString());
 		}
 	}
 
@@ -260,194 +387,10 @@ public class ClientTest {
 
 	}
 
-	
 	@Test
-	public void testCreate() throws Exception {
+	public void testSearchByDateRange() throws Exception {
 
-		Patient patient = new Patient();
-		patient.addIdentifier("urn:foo", "123");
-		
-		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
-		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
-		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 201, "OK"));
-		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_TEXT + "; charset=UTF-8"));
-		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(""), Charset.forName("UTF-8")));
-		when(httpResponse.getAllHeaders()).thenReturn(toHeaderArray("Location" , "http://example.com/fhir/Patient/100/_history/200"));
-
-		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
-		MethodOutcome response = client.createPatient(patient);
-
-		assertEquals(HttpPost.class, capt.getValue().getClass());
-		HttpPost post = (HttpPost) capt.getValue();
-		assertThat(IOUtils.toString(post.getEntity().getContent()), StringContains.containsString("<Patient"));
-		assertEquals("100", response.getId().getValue());
-		assertEquals("200", response.getVersionId().getValue());
-	}
-	
-	
-	@Test
-	public void testDelete() throws Exception {
-
-		OperationOutcome oo = new OperationOutcome();
-		oo.addIssue().setDetails("Hello");
-		String resp = new FhirContext().newXmlParser().encodeResourceToString(oo);
-				
-		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
-		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
-		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 201, "OK"));
-		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
-		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(resp), Charset.forName("UTF-8")));
-
-		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
-		MethodOutcome response = client.deletePatient(new IdDt("1234"));
-
-		assertEquals(HttpDelete.class, capt.getValue().getClass());
-		assertEquals("http://foo/Patient/1234", capt.getValue().getURI().toString());
-		assertEquals("Hello", response.getOperationOutcome().getIssueFirstRep().getDetails().getValue());
-	}
-	
-	@Test
-	public void testDeleteNoResponse() throws Exception {
-				
-		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
-		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
-		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 204, "OK"));
-		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_TEXT + "; charset=UTF-8"));
-		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(""), Charset.forName("UTF-8")));
-
-		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
-		client.deleteDiagnosticReport(new IdDt("1234"));
-
-		assertEquals(HttpDelete.class, capt.getValue().getClass());
-		assertEquals("http://foo/DiagnosticReport/1234", capt.getValue().getURI().toString());
-	}
-	
-	
-	@Test
-	public void testUpdate() throws Exception {
-
-		Patient patient = new Patient();
-		patient.addIdentifier("urn:foo", "123");
-		
-		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
-		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
-		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 201, "OK"));
-		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_TEXT + "; charset=UTF-8"));
-		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(""), Charset.forName("UTF-8")));
-		when(httpResponse.getAllHeaders()).thenReturn(toHeaderArray("Location" , "http://example.com/fhir/Patient/100/_history/200"));
-
-		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
-		MethodOutcome response = client.updatePatient(new IdDt("100"), patient);
-
-		assertEquals(HttpPut.class, capt.getValue().getClass());
-		HttpPut post = (HttpPut) capt.getValue();
-		assertThat(post.getURI().toASCIIString(), StringEndsWith.endsWith("/Patient/100"));
-		assertThat(IOUtils.toString(post.getEntity().getContent()), StringContains.containsString("<Patient"));
-		assertEquals("100", response.getId().getValue());
-		assertEquals("200", response.getVersionId().getValue());
-	}
-
-	/**
-	 * Return a FHIR content type, but no content and make sure we handle this without crashing
-	 */
-	@Test
-	public void testUpdateWithEmptyResponse() throws Exception {
-
-		Patient patient = new Patient();
-		patient.addIdentifier("urn:foo", "123");
-		
-		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
-		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
-		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 201, "OK"));
-		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
-		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(""), Charset.forName("UTF-8")));
-		when(httpResponse.getAllHeaders()).thenReturn(toHeaderArray("Location" , "http://example.com/fhir/Patient/100/_history/200"));
-
-		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
-		client.updatePatient(new IdDt("100"), new IdDt("200"), patient);
-	}
-
-	@Test
-	public void testUpdateWithVersion() throws Exception {
-
-		Patient patient = new Patient();
-		patient.addIdentifier("urn:foo", "123");
-		
-		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
-		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
-		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 201, "OK"));
-		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_TEXT + "; charset=UTF-8"));
-		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(""), Charset.forName("UTF-8")));
-		when(httpResponse.getAllHeaders()).thenReturn(toHeaderArray("Location" , "http://example.com/fhir/Patient/100/_history/200"));
-
-		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
-		MethodOutcome response = client.updatePatient(new IdDt("100"), new IdDt("200"), patient);
-
-		assertEquals(HttpPut.class, capt.getValue().getClass());
-		HttpPut post = (HttpPut) capt.getValue();
-		assertThat(post.getURI().toASCIIString(), StringEndsWith.endsWith("/Patient/100"));
-		assertThat(IOUtils.toString(post.getEntity().getContent()), StringContains.containsString("<Patient"));
-		assertThat(post.getFirstHeader("Content-Location").getValue(), StringEndsWith.endsWith("/Patient/100/_history/200"));
-		assertEquals("100", response.getId().getValue());
-		assertEquals("200", response.getVersionId().getValue());
-	}
-
-	
-	@Test(expected=ResourceVersionConflictException.class)
-	public void testUpdateWithResourceConflict() throws Exception {
-
-		Patient patient = new Patient();
-		patient.addIdentifier("urn:foo", "123");
-		
-		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
-		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
-		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
-		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(""), Charset.forName("UTF-8")));
-		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), Constants.STATUS_HTTP_409_CONFLICT, "Conflict"));
-
-		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
-		client.updatePatient(new IdDt("100"), new IdDt("200"), patient);
-	}
-
-	
-	@Test
-	public void testCreateBad() throws Exception {
-
-		Patient patient = new Patient();
-		patient.addIdentifier("urn:foo", "123");
-		
-		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
-		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
-		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 400, "OK"));
-		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_TEXT + "; charset=UTF-8"));
-		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader("foobar"), Charset.forName("UTF-8")));
-
-		try {
-			ctx.newRestfulClient(ITestClient.class, "http://foo").createPatient(patient);
-			fail();
-		}catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), StringContains.containsString("foobar"));
-		}
-	}
-
-	private Header[] toHeaderArray(String theName, String theValue) {
-		return new Header[] {new BasicHeader(theName, theValue)};
-	}
-
-	@Test
-	public void testVRead() throws Exception {
-
-		//@formatter:off
-		String msg = "<Patient xmlns=\"http://hl7.org/fhir\">" 
-				+ "<text><status value=\"generated\" /><div xmlns=\"http://www.w3.org/1999/xhtml\">John Cardinal:            444333333        </div></text>"
-				+ "<identifier><label value=\"SSN\" /><system value=\"http://orionhealth.com/mrn\" /><value value=\"PRP1660\" /></identifier>"
-				+ "<name><use value=\"official\" /><family value=\"Cardinal\" /><given value=\"John\" /></name>"
-				+ "<name><family value=\"Kramer\" /><given value=\"Doe\" /></name>"
-				+ "<telecom><system value=\"phone\" /><value value=\"555-555-2004\" /><use value=\"work\" /></telecom>"
-				+ "<gender><coding><system value=\"http://hl7.org/fhir/v3/AdministrativeGender\" /><code value=\"M\" /></coding></gender>"
-				+ "<address><use value=\"home\" /><line value=\"2222 Home Street\" /></address><active value=\"true\" />"
-				+ "</Patient>";
-		//@formatter:on
+		String msg = getPatientFeedWithOneResult();
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
@@ -456,11 +399,31 @@ public class ClientTest {
 		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
 
 		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
-		// Patient response = client.findPatientByMrn(new IdentifierDt("urn:foo", "123"));
-		Patient response = client.getPatientByVersionId(new IdDt("111"), new IdDt("999"));
+		DateRangeParam param = new DateRangeParam();
+		param.setLowerBound(new QualifiedDateParam(QuantityCompararatorEnum.GREATERTHAN_OR_EQUALS, "2011-01-01"));
+		param.setUpperBound(new QualifiedDateParam(QuantityCompararatorEnum.LESSTHAN_OR_EQUALS, "2021-01-01"));
+		List<Patient> response = client.getPatientByDateRange(param);
 
-		assertEquals("http://foo/Patient/111/_history/999", capt.getValue().getURI().toString());
-		assertEquals("PRP1660", response.getIdentifier().get(0).getValue().getValue());
+		assertEquals("http://foo/Patient?dateRange=%3E%3D2011-01-01&dateRange=%3C%3D2021-01-01", capt.getValue().getURI().toString());
+
+	}
+
+	@Test
+	public void testSearchByDob() throws Exception {
+
+		String msg = getPatientFeedWithOneResult();
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
+		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
+
+		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
+		List<Patient> response = client.getPatientByDob(new QualifiedDateParam(QuantityCompararatorEnum.GREATERTHAN_OR_EQUALS, "2011-01-02"));
+
+		assertEquals("http://foo/Patient?birthdate=%3E%3D2011-01-02", capt.getValue().getURI().toString());
+		assertEquals("PRP1660", response.get(0).getIdentifier().get(0).getValue().getValue());
 
 	}
 
@@ -482,70 +445,7 @@ public class ClientTest {
 		assertEquals("PRP1660", response.getIdentifier().get(0).getValue().getValue());
 
 	}
-	
-	
-	@Test
-	public void testSearchByDateRange() throws Exception {
 
-		String msg = getPatientFeedWithOneResult();
-
-		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
-		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
-		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
-		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
-
-		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
-		DateRangeParam param = new DateRangeParam();
-		param.setLowerBound(new QualifiedDateParam(QuantityCompararatorEnum.GREATERTHAN_OR_EQUALS, "2011-01-01"));
-		param.setUpperBound(new QualifiedDateParam(QuantityCompararatorEnum.LESSTHAN_OR_EQUALS, "2021-01-01"));
-		List<Patient> response = client.getPatientByDateRange(param);
-
-		assertEquals("http://foo/Patient?dateRange=%3E%3D2011-01-01&dateRange=%3C%3D2021-01-01", capt.getValue().getURI().toString());
-
-	}
-	
-
-
-	
-	
-	@Test
-	public void testSearchByDob() throws Exception {
-
-		String msg = getPatientFeedWithOneResult();
-
-		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
-		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
-		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
-		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
-
-		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
-		List<Patient> response = client.getPatientByDob(new QualifiedDateParam(QuantityCompararatorEnum.GREATERTHAN_OR_EQUALS, "2011-01-02"));
-
-		assertEquals("http://foo/Patient?birthdate=%3E%3D2011-01-02", capt.getValue().getURI().toString());
-		assertEquals("PRP1660", response.get(0).getIdentifier().get(0).getValue().getValue());
-
-	}
-	
-	@Test
-	public void testSearchWithIncludes() throws Exception {
-
-		String msg = getPatientFeedWithOneResult();
-
-		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
-		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
-		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
-		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
-
-		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
-		client.getPatientWithIncludes(new StringDt("aaa"), Arrays.asList(new PathSpecification[] {new PathSpecification("inc1"), new PathSpecification("inc2")}));
-
-		assertEquals("http://foo/Patient?withIncludes=aaa&_include=inc1&_include=inc2", capt.getValue().getURI().toString());
-		
-	}
-	
 	@Test
 	public void testSearchComposite() throws Exception {
 
@@ -566,11 +466,11 @@ public class ClientTest {
 		assertEquals("http://foo/Patient?ids=foo%7Cbar%2Cbaz%7Cboz", capt.getValue().getURI().toString());
 
 	}
-	
-	@Test
-	public void testGetConformance() throws Exception {
 
-		String msg = IOUtils.toString(ClientTest.class.getResourceAsStream("/example-metadata.xml"));
+	@Test
+	public void testSearchNamedQueryNoParams() throws Exception {
+
+		String msg = getPatientFeedWithOneResult();
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
@@ -579,10 +479,45 @@ public class ClientTest {
 		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
 
 		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
-		Conformance response = client.getServerConformanceStatement();
+		client.getPatientNoParams();
 
-		assertEquals("http://foo/metadata", capt.getValue().getURI().toString());
-		assertEquals("Health Intersections", response.getPublisher().getValue());
+		assertEquals("http://foo/Patient?_query=someQueryNoParams", capt.getValue().getURI().toString());
+
+	}
+
+	@Test
+	public void testSearchNamedQueryOneParam() throws Exception {
+
+		String msg = getPatientFeedWithOneResult();
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
+		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
+
+		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
+		client.getPatientOneParam(new StringDt("BB"));
+
+		assertEquals("http://foo/Patient?_query=someQueryOneParam&param1=BB", capt.getValue().getURI().toString());
+
+	}
+
+	@Test
+	public void testSearchWithIncludes() throws Exception {
+
+		String msg = getPatientFeedWithOneResult();
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
+		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
+
+		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
+		client.getPatientWithIncludes(new StringDt("aaa"), Arrays.asList(new PathSpecification[] { new PathSpecification("inc1"), new PathSpecification("inc2") }));
+
+		assertEquals("http://foo/Patient?withIncludes=aaa&_include=inc1&_include=inc2", capt.getValue().getURI().toString());
 
 	}
 
@@ -619,54 +554,95 @@ public class ClientTest {
 	}
 
 	@Test
-	public void testSearchNamedQueryOneParam() throws Exception {
+	public void testUpdate() throws Exception {
 
-		String msg = getPatientFeedWithOneResult();
+		Patient patient = new Patient();
+		patient.addIdentifier("urn:foo", "123");
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
-		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
-		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
+		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 201, "OK"));
+		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_TEXT + "; charset=UTF-8"));
+		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(""), Charset.forName("UTF-8")));
+		when(httpResponse.getAllHeaders()).thenReturn(toHeaderArray("Location", "http://example.com/fhir/Patient/100/_history/200"));
 
 		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
-		client.getPatientOneParam(new StringDt("BB"));
+		MethodOutcome response = client.updatePatient(new IdDt("100"), patient);
 
-		assertEquals("http://foo/Patient?_query=someQueryOneParam&param1=BB", capt.getValue().getURI().toString());
-
+		assertEquals(HttpPut.class, capt.getValue().getClass());
+		HttpPut post = (HttpPut) capt.getValue();
+		assertThat(post.getURI().toASCIIString(), StringEndsWith.endsWith("/Patient/100"));
+		assertThat(IOUtils.toString(post.getEntity().getContent()), StringContains.containsString("<Patient"));
+		assertEquals("100", response.getId().getValue());
+		assertEquals("200", response.getVersionId().getValue());
 	}
-	
+
+	/**
+	 * Return a FHIR content type, but no content and make sure we handle this without crashing
+	 */
 	@Test
-	public void testSearchNamedQueryNoParams() throws Exception {
+	public void testUpdateWithEmptyResponse() throws Exception {
 
-		String msg = getPatientFeedWithOneResult();
+		Patient patient = new Patient();
+		patient.addIdentifier("urn:foo", "123");
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
-		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 201, "OK"));
 		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
-		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
+		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(""), Charset.forName("UTF-8")));
+		when(httpResponse.getAllHeaders()).thenReturn(toHeaderArray("Location", "http://example.com/fhir/Patient/100/_history/200"));
 
 		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
-		client.getPatientNoParams();
-
-		assertEquals("http://foo/Patient?_query=someQueryNoParams", capt.getValue().getURI().toString());
-
+		client.updatePatient(new IdDt("100"), new IdDt("200"), patient);
 	}
-	
-	private String getPatientFeedWithOneResult() {
+
+	@Test(expected = ResourceVersionConflictException.class)
+	public void testUpdateWithResourceConflict() throws Exception {
+
+		Patient patient = new Patient();
+		patient.addIdentifier("urn:foo", "123");
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
+		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(""), Charset.forName("UTF-8")));
+		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), Constants.STATUS_HTTP_409_CONFLICT, "Conflict"));
+
+		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
+		client.updatePatient(new IdDt("100"), new IdDt("200"), patient);
+	}
+
+	@Test
+	public void testUpdateWithVersion() throws Exception {
+
+		Patient patient = new Patient();
+		patient.addIdentifier("urn:foo", "123");
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
+		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 201, "OK"));
+		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_TEXT + "; charset=UTF-8"));
+		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(""), Charset.forName("UTF-8")));
+		when(httpResponse.getAllHeaders()).thenReturn(toHeaderArray("Location", "http://example.com/fhir/Patient/100/_history/200"));
+
+		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
+		MethodOutcome response = client.updatePatient(new IdDt("100"), new IdDt("200"), patient);
+
+		assertEquals(HttpPut.class, capt.getValue().getClass());
+		HttpPut post = (HttpPut) capt.getValue();
+		assertThat(post.getURI().toASCIIString(), StringEndsWith.endsWith("/Patient/100"));
+		assertThat(IOUtils.toString(post.getEntity().getContent()), StringContains.containsString("<Patient"));
+		assertThat(post.getFirstHeader("Content-Location").getValue(), StringEndsWith.endsWith("/Patient/100/_history/200"));
+		assertEquals("100", response.getId().getValue());
+		assertEquals("200", response.getVersionId().getValue());
+	}
+
+	@Test
+	public void testVRead() throws Exception {
+
 		//@formatter:off
-		String msg = "<feed xmlns=\"http://www.w3.org/2005/Atom\">\n" + 
-				"<title/>\n" + 
-				"<id>d039f91a-cc3c-4013-988e-af4d8d0614bd</id>\n" + 
-				"<os:totalResults xmlns:os=\"http://a9.com/-/spec/opensearch/1.1/\">1</os:totalResults>\n" + 
-				"<published>2014-03-11T16:35:07-04:00</published>\n" + 
-				"<author>\n" + 
-				"<name>ca.uhn.fhir.rest.server.DummyRestfulServer</name>\n" + 
-				"</author>\n" + 
-				"<entry>\n" + 
-				"<content type=\"text/xml\">" 
-				+ "<Patient xmlns=\"http://hl7.org/fhir\">" 
+		String msg = "<Patient xmlns=\"http://hl7.org/fhir\">" 
 				+ "<text><status value=\"generated\" /><div xmlns=\"http://www.w3.org/1999/xhtml\">John Cardinal:            444333333        </div></text>"
 				+ "<identifier><label value=\"SSN\" /><system value=\"http://orionhealth.com/mrn\" /><value value=\"PRP1660\" /></identifier>"
 				+ "<name><use value=\"official\" /><family value=\"Cardinal\" /><given value=\"John\" /></name>"
@@ -674,11 +650,25 @@ public class ClientTest {
 				+ "<telecom><system value=\"phone\" /><value value=\"555-555-2004\" /><use value=\"work\" /></telecom>"
 				+ "<gender><coding><system value=\"http://hl7.org/fhir/v3/AdministrativeGender\" /><code value=\"M\" /></coding></gender>"
 				+ "<address><use value=\"home\" /><line value=\"2222 Home Street\" /></address><active value=\"true\" />"
-				+ "</Patient>"
-				+ "</content>\n"  
-				+ "   </entry>\n"  
-				+ "</feed>";
+				+ "</Patient>";
 		//@formatter:on
-		return msg;
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
+		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
+
+		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
+		// Patient response = client.findPatientByMrn(new IdentifierDt("urn:foo", "123"));
+		Patient response = client.getPatientByVersionId(new IdDt("111"), new IdDt("999"));
+
+		assertEquals("http://foo/Patient/111/_history/999", capt.getValue().getURI().toString());
+		assertEquals("PRP1660", response.getIdentifier().get(0).getValue().getValue());
+
+	}
+
+	private Header[] toHeaderArray(String theName, String theValue) {
+		return new Header[] { new BasicHeader(theName, theValue) };
 	}
 }

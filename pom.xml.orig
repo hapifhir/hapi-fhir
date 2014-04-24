@@ -11,7 +11,11 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
+<<<<<<< HEAD
+	<version>0.2</version>
+=======
 	<version>0.3</version>
+>>>>>>> 9ab7f8facc2fb9bf65a245933989bca1e976d28d
 	<name>HAPI</name>
 	<url>http://hl7api.sourceforge.net/</url>
 	<description>
@@ -100,6 +104,28 @@
 			</plugins>
 		</pluginManagement>
 
+<<<<<<< HEAD
+=======
+	<plugins>
+<!--
+<plugin>
+                  <groupId>org.apache.maven.plugins</groupId>
+                  <artifactId>maven-gpg-plugin</artifactId>
+                  <version>1.5</version>
+                  <executions>
+                     <execution>
+                        <id>sign-artifacts</id>
+                        <phase>verify</phase>
+                        <goals>
+                           <goal>sign</goal>
+                        </goals>
+                     </execution>
+                  </executions>
+               </plugin>
+-->
+	</plugins>
+
+>>>>>>> 9ab7f8facc2fb9bf65a245933989bca1e976d28d
 	</build>
 
 	<profiles>

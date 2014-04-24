@@ -162,6 +162,7 @@ public class RestfulServer extends HttpServlet {
 				}
 				ourLog.info("Got {} resource providers", typeToProvider.size());
 				for (IResourceProvider provider : typeToProvider.values()) {
+					assertProviderIsValid(provider);
 					findResourceMethods(provider);
 				}
 			}
@@ -169,6 +170,7 @@ public class RestfulServer extends HttpServlet {
 			Collection<Object> providers = getProviders();
 			if (providers != null) {
 				for (Object next : providers) {
+					assertProviderIsValid(next);
 					findResourceMethods(next);
 				}
 			}
@@ -182,6 +184,12 @@ public class RestfulServer extends HttpServlet {
 		}
 
 		ourLog.info("A FHIR has been lit on this server");
+	}
+
+	private void assertProviderIsValid(Object theNext) throws ConfigurationException {
+		if (Modifier.isPublic(theNext.getClass().getModifiers()) == false) {
+			throw new ConfigurationException("Can not use provider '" + theNext.getClass() + "' - Must be public");
+		}
 	}
 
 	public boolean isUseBrowserFriendlyContentTypes() {

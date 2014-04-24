@@ -6,11 +6,12 @@ import java.util.List;
 import java.util.Map;
 
 import ca.uhn.fhir.model.dstu.valueset.SearchParamTypeEnum;
+import ca.uhn.fhir.rest.method.Request;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.QueryUtil;
 
-public abstract class IQueryParameter implements IParameter {
+public abstract class BaseQueryParameter implements IParameter {
 
 	public abstract List<List<String>> encode(Object theObject) throws InternalErrorException;
 
@@ -54,8 +55,8 @@ public abstract class IQueryParameter implements IParameter {
 	}
 	
 	@Override
-	public Object translateQueryParametersIntoServerArgument(Map<String, String[]> theQueryParameters, Object theRequestContents) throws InternalErrorException, InvalidRequestException {
-		String[] value = theQueryParameters.get(getName());
+	public Object translateQueryParametersIntoServerArgument(Request theRequest, Object theRequestContents) throws InternalErrorException, InvalidRequestException {
+		String[] value = theRequest.getParameters().get(getName());
 		if (value == null || value.length == 0) {
 			if (handlesMissing()) {
 				return parse(new ArrayList<List<String>>(0));

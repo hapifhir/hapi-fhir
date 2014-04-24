@@ -22,7 +22,7 @@ import ca.uhn.fhir.rest.annotation.Metadata;
 import ca.uhn.fhir.rest.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.method.SearchMethodBinding;
 import ca.uhn.fhir.rest.param.IParameter;
-import ca.uhn.fhir.rest.param.IQueryParameter;
+import ca.uhn.fhir.rest.param.BaseQueryParameter;
 import ca.uhn.fhir.rest.server.ResourceBinding;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.util.ExtensionConstants;
@@ -86,11 +86,11 @@ public class ServerConformanceProvider {
 					RestResourceSearchParam searchParam = null;
 					StringDt searchParamChain = null;
 					for (IParameter nextParameterObj : params) {
-						if (!(nextParameterObj instanceof IQueryParameter)) {
+						if (!(nextParameterObj instanceof BaseQueryParameter)) {
 							continue;
 						}
 						
-						IQueryParameter nextParameter = (IQueryParameter)nextParameterObj;
+						BaseQueryParameter nextParameter = (BaseQueryParameter)nextParameterObj;
 						if (nextParameter.getName().startsWith("_")) {
 							continue;
 						}

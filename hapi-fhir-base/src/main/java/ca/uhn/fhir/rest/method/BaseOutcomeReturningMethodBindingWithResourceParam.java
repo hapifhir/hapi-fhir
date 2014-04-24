@@ -69,7 +69,7 @@ public abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends
 			if (param == null) {
 				continue;
 			}
-			params[i] = param.translateQueryParametersIntoServerArgument(theRequest.getParameters(), resource);
+			params[i] = param.translateQueryParametersIntoServerArgument(theRequest, resource);
 		}
 
 		addParametersForServerRequest(theRequest, params);

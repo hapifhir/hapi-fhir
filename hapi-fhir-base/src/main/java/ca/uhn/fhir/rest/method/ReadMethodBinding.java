@@ -2,7 +2,6 @@ package ca.uhn.fhir.rest.method;
 
 import java.lang.reflect.Method;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -88,11 +87,11 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding {
 	}
 
 	@Override
-	public List<IResource> invokeServer(Object theResourceProvider, IdDt theId, IdDt theVersionId, Map<String, String[]> theParameterValues) throws InvalidRequestException, InternalErrorException {
+	public List<IResource> invokeServer(Object theResourceProvider, Request theRequest) throws InvalidRequestException, InternalErrorException {
 		Object[] params = new Object[myParameterCount];
-		params[myIdIndex] = theId;
+		params[myIdIndex] = theRequest.getId();
 		if (myVersionIdIndex != null) {
-			params[myVersionIdIndex] = theVersionId;
+			params[myVersionIdIndex] = theRequest.getVersion();
 		}
 
 		Object response;

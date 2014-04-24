@@ -5,7 +5,11 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-fhir</artifactId>
+<<<<<<< HEAD
+		<version>0.2</version>
+=======
 		<version>0.3</version>
+>>>>>>> 9ab7f8facc2fb9bf65a245933989bca1e976d28d
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
@@ -20,7 +24,11 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-base</artifactId>
+<<<<<<< HEAD
+			<version>0.2</version>
+=======
 			<version>0.3</version>
+>>>>>>> 9ab7f8facc2fb9bf65a245933989bca1e976d28d
 		</dependency>
 
 		<dependency>

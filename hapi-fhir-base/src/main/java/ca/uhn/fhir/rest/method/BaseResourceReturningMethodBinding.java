@@ -1,6 +1,6 @@
 package ca.uhn.fhir.rest.method;
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -130,7 +130,7 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 		throw new IllegalStateException("Should not get here!");
 	}
 
-	public abstract List<IResource> invokeServer(Object theResourceProvider, IdDt theId, IdDt theVersionId, Map<String, String[]> theParameterValues) throws InvalidRequestException, InternalErrorException;
+	public abstract List<IResource> invokeServer(Object theResourceProvider, Request theRequest) throws InvalidRequestException, InternalErrorException;
 
 	@Override
 	public void invokeServer(RestfulServer theServer, Request theRequest, HttpServletResponse theResponse) throws BaseServerResponseException, IOException {
@@ -165,7 +165,7 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 			requestIsBrowser = true;
 		}
 
-		List<IResource> result = invokeServer(getProvider(), theRequest.getId(), theRequest.getVersion(), theRequest.getParameters());
+		List<IResource> result = invokeServer(getProvider(), theRequest);
 		switch (getReturnType()) {
 		case BUNDLE:
 			streamResponseAsBundle(theServer, theResponse, result, responseEncoding, theRequest.getFhirServerBase(), theRequest.getCompleteUrl(), prettyPrint, requestIsBrowser, narrativeMode);
