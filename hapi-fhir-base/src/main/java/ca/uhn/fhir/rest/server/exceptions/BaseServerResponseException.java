@@ -1,5 +1,7 @@
 package ca.uhn.fhir.rest.server.exceptions;
 
+import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
+
 /*
  * #%L
  * HAPI FHIR Library
@@ -25,6 +27,7 @@ public abstract class BaseServerResponseException extends RuntimeException {
 	private static final long serialVersionUID = 1L;
 
 	private int myStatusCode;
+	private final OperationOutcome myOperationOutcome;
 
 	/**
 	 * Constructor
@@ -37,8 +40,23 @@ public abstract class BaseServerResponseException extends RuntimeException {
 	public BaseServerResponseException(int theStatusCode, String theMessage) {
 		super(theMessage);
 		myStatusCode = theStatusCode;
+		myOperationOutcome=null;
 	}
 
+	/**
+	 * Constructor
+	 * 
+	 * @param theStatusCode
+	 *            The HTTP status code corresponding to this problem
+	 * @param theMessage
+	 *            The message
+	 */
+	public BaseServerResponseException(int theStatusCode, String theMessage, OperationOutcome theOperationOutcome) {
+		super(theMessage);
+		myStatusCode = theStatusCode;
+		myOperationOutcome=theOperationOutcome;
+	}
+	
 	/**
 	 * Constructor
 	 * 
@@ -51,6 +69,7 @@ public abstract class BaseServerResponseException extends RuntimeException {
 	public BaseServerResponseException(int theStatusCode, String theMessage, Throwable theCause) {
 		super(theMessage, theCause);
 		myStatusCode = theStatusCode;
+		myOperationOutcome=null;
 	}
 
 	/**
@@ -64,6 +83,7 @@ public abstract class BaseServerResponseException extends RuntimeException {
 	public BaseServerResponseException(int theStatusCode, Throwable theCause) {
 		super(theCause.toString(), theCause);
 		myStatusCode = theStatusCode;
+		myOperationOutcome=null;
 	}
 
 	/**
@@ -73,4 +93,11 @@ public abstract class BaseServerResponseException extends RuntimeException {
 		return myStatusCode;
 	}
 
+	/**
+	 * Returns the {@link OperationOutcome} resource if any which was supplied in the response,
+	 * or <code>null</code>
+	 */
+	public OperationOutcome getOperationOutcome() {
+		return myOperationOutcome;
+	}
 }

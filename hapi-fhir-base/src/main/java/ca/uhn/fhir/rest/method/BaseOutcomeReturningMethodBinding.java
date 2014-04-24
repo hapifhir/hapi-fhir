@@ -59,7 +59,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceVersionNotSpecifiedException;
 import ca.uhn.fhir.rest.server.exceptions.UnclassifiedServerFailureException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 
-public abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding {
+abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseOutcomeReturningMethodBinding.class);
 	private List<IParameter> myParameters;
 	private boolean myReturnVoid;
@@ -146,19 +146,16 @@ public abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBindin
 	@Override
 	public void invokeServer(RestfulServer theServer, Request theRequest, HttpServletResponse theResponse) throws BaseServerResponseException, IOException {
 		Object[] params = new Object[myParameters.size()];
+		for (int i = 0; i < myParameters.size(); i++) {
+			IParameter param = myParameters.get(i);
+			if (param != null) {
+				params[i] = param.translateQueryParametersIntoServerArgument(theRequest, null);
+			}
+		}
 
 		addParametersForServerRequest(theRequest, params);
 
-		MethodOutcome response;
-		try {
-			response = (MethodOutcome) this.getMethod().invoke(getProvider(), params);
-		} catch (IllegalAccessException e) {
-			throw new InternalErrorException(e);
-		} catch (IllegalArgumentException e) {
-			throw new InternalErrorException(e);
-		} catch (InvocationTargetException e) {
-			throw new InternalErrorException(e);
-		}
+		MethodOutcome response = (MethodOutcome) invokeServerMethod(getProvider(), params);
 
 		if (response == null) {
 			if (myReturnVoid == false) {

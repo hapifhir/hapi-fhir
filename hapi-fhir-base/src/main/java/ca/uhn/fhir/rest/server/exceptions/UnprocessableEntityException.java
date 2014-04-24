@@ -34,49 +34,35 @@ public class UnprocessableEntityException extends BaseServerResponseException {
 	private static final String DEFAULT_MESSAGE = "Unprocessable Entity";
 	private static final long serialVersionUID = 1L;
 
-	private final OperationOutcome myOperationOutcome;
-
 	/**
 	 * Constructor which accepts an {@link OperationOutcome} resource which will be supplied in the response
 	 */
 	public UnprocessableEntityException(OperationOutcome theOperationOutcome) {
-		super(422, theOperationOutcome == null || theOperationOutcome.getIssueFirstRep().getDetails().isEmpty() ? DEFAULT_MESSAGE : theOperationOutcome.getIssueFirstRep().getDetails().getValue());
-		if (theOperationOutcome == null) {
-			myOperationOutcome = new OperationOutcome();
-		} else {
-			myOperationOutcome = theOperationOutcome;
-		}
+		super(422, DEFAULT_MESSAGE, theOperationOutcome == null ? new OperationOutcome() : theOperationOutcome);
 	}
 
 	/**
 	 * Constructor which accepts a String describing the issue. This string will be translated into an {@link OperationOutcome} resource which will be supplied in the response.
 	 */
 	public UnprocessableEntityException(String theMessage) {
-		super(422, theMessage);
-
-		myOperationOutcome = new OperationOutcome();
-		myOperationOutcome.addIssue().setDetails(theMessage);
+		super(422, DEFAULT_MESSAGE, toOperationOutcome(theMessage));
 	}
 
 	/**
 	 * Constructor which accepts an array of Strings describing the issue. This strings will be translated into an {@link OperationOutcome} resource which will be supplied in the response.
 	 */
 	public UnprocessableEntityException(String... theMessage) {
-		super(422, theMessage != null && theMessage.length > 0 ? theMessage[0] : DEFAULT_MESSAGE);
-
-		myOperationOutcome = new OperationOutcome();
-		if (theMessage != null) {
-			for (String next : theMessage) {
-				myOperationOutcome.addIssue().setDetails(next);
-			}
-		}
+		super(422, DEFAULT_MESSAGE, toOperationOutcome(theMessage));
 	}
 
-	/**
-	 * Returns the {@link OperationOutcome} resource if any which was supplied in the response. Will not return null.
-	 */
-	public OperationOutcome getOperationOutcome() {
-		return myOperationOutcome;
+	private static OperationOutcome toOperationOutcome(String... theMessage) {
+		OperationOutcome operationOutcome = new OperationOutcome();
+		if (theMessage != null) {
+			for (String next : theMessage) {
+				operationOutcome.addIssue().setDetails(next);
+			}
+		}
+		return operationOutcome;
 	}
 
 }

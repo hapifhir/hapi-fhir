@@ -445,7 +445,6 @@ class ParserState<T extends IElement> {
 			// ignore by default
 		}
 
-		@SuppressWarnings("unused")
 		public void endingElement() throws DataFormatException {
 			// ignore by default
 		}

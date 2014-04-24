@@ -43,7 +43,6 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding {
 
 	private Integer myIdIndex;
 	private Integer myVersionIdIndex;
-	private int myParameterCount;
 
 	public ReadMethodBinding(Class<? extends IResource> theAnnotatedResourceType, Method theMethod, FhirContext theContext, Object theProvider) {
 		super(theAnnotatedResourceType, theMethod, theContext, theProvider);
@@ -55,7 +54,6 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding {
 
 		myIdIndex = idIndex;
 		myVersionIdIndex = versionIdIndex;
-		myParameterCount = getMethod().getParameterTypes().length;
 
 		Class<?>[] parameterTypes = theMethod.getParameterTypes();
 		if (!IdDt.class.equals(parameterTypes[myIdIndex])) {
@@ -107,19 +105,13 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding {
 	}
 
 	@Override
-	public List<IResource> invokeServer(Object theResourceProvider, Request theRequest) throws InvalidRequestException, InternalErrorException {
-		Object[] params = new Object[myParameterCount];
-		params[myIdIndex] = theRequest.getId();
+	public List<IResource> invokeServer(Object theResourceProvider, Request theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException {
+		theMethodParams[myIdIndex] = theRequest.getId();
 		if (myVersionIdIndex != null) {
-			params[myVersionIdIndex] = theRequest.getVersion();
+			theMethodParams[myVersionIdIndex] = theRequest.getVersion();
 		}
 
-		Object response;
-		try {
-			response = getMethod().invoke(theResourceProvider, params);
-		} catch (Exception e) {
-			throw new InternalErrorException("Failed to call access method", e);
-		}
+		Object response = invokeServerMethod(theResourceProvider, theMethodParams);
 
 		return toResourceList(response);
 	}

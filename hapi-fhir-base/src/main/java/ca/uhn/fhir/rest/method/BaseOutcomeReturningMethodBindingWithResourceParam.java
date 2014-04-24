@@ -22,7 +22,6 @@ package ca.uhn.fhir.rest.method;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import javax.servlet.http.HttpServletResponse;
@@ -44,13 +43,13 @@ import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 
-public abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOutcomeReturningMethodBinding {
+abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOutcomeReturningMethodBinding {
 	private int myResourceParameterIndex;
 	private String myResourceName;
 
 	public BaseOutcomeReturningMethodBindingWithResourceParam(Method theMethod, FhirContext theContext, Class<?> theMethodAnnotation, Object theProvider) {
 		super(theMethod, theContext, theMethodAnnotation, theProvider);
-		
+
 		ResourceParameter resourceParameter = null;
 
 		int index = 0;
@@ -77,7 +76,7 @@ public abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends
 	protected void addParametersForServerRequest(Request theRequest, Object[] theParams) {
 		// nothing
 	}
-	
+
 	@Override
 	public void invokeServer(RestfulServer theServer, Request theRequest, HttpServletResponse theResponse) throws BaseServerResponseException, IOException {
 		EncodingUtil encoding = BaseMethodBinding.determineResponseEncoding(theRequest.getServletRequest(), theRequest.getParameters());
@@ -97,20 +96,10 @@ public abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends
 
 		MethodOutcome response;
 		try {
-			response = (MethodOutcome) this.getMethod().invoke(getProvider(), params);
-		} catch (IllegalAccessException e) {
-			throw new InternalErrorException(e);
-		} catch (IllegalArgumentException e) {
-			throw new InternalErrorException(e);
-		} catch (InvocationTargetException e) {
-			if (e.getCause() instanceof UnprocessableEntityException) {
-				streamOperationOutcome((UnprocessableEntityException)e.getCause(), theServer, encoding, theResponse);
-				return;
-			}
-			if (e.getCause() instanceof BaseServerResponseException) {
-				throw (BaseServerResponseException)e.getCause();
-			}
-			throw new InternalErrorException(e);
+			response = (MethodOutcome) invokeServerMethod(getProvider(), params);
+		} catch (BaseServerResponseException e) {
+			streamOperationOutcome(e, theServer, encoding, theResponse);
+			return;
 		}
 
 		if (response == null) {
@@ -151,20 +140,30 @@ public abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends
 		// getMethod().in
 	}
 
-	private void streamOperationOutcome(UnprocessableEntityException theE, RestfulServer theServer, EncodingUtil theEncoding, HttpServletResponse theResponse) throws IOException {
+	private void streamOperationOutcome(BaseServerResponseException theE, RestfulServer theServer, EncodingUtil theEncoding, HttpServletResponse theResponse) throws IOException {
 		theResponse.setStatus(theE.getStatusCode());
 
 		theServer.addHapiHeader(theResponse);
 
-		theResponse.setContentType(theEncoding.getResourceContentType());
-		IParser parser = theEncoding.newParser(theServer.getFhirContext());
+		if (theE.getOperationOutcome() != null) {
+			theResponse.setContentType(theEncoding.getResourceContentType());
+			IParser parser = theEncoding.newParser(theServer.getFhirContext());
 
-		Writer writer = theResponse.getWriter();
-		try {
-			parser.encodeResourceToWriter(theE.getOperationOutcome(), writer);
-		} finally {
-			writer.close();
-		}		
+			Writer writer = theResponse.getWriter();
+			try {
+				parser.encodeResourceToWriter(theE.getOperationOutcome(), writer);
+			} finally {
+				writer.close();
+			}
+		} else {
+			theResponse.setContentType(Constants.CT_TEXT);
+			Writer writer = theResponse.getWriter();
+			try {
+				writer.append(theE.getMessage());
+			} finally {
+				writer.close();
+			}
+		}
 	}
 
 	@Override
@@ -185,5 +184,4 @@ public abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends
 		return createClientInvocation(theArgs, resource, resourceName);
 	}
 
-	
 }

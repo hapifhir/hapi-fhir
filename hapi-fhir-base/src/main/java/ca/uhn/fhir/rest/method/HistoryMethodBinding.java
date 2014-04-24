@@ -170,13 +170,12 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 	}
 
 	@Override
-	public List<IResource> invokeServer(Object theResourceProvider, Request theRequest) throws InvalidRequestException, InternalErrorException {
-		Object[] args = new Object[getMethod().getParameterTypes().length];
+	public List<IResource> invokeServer(Object theResourceProvider, Request theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException {
 		if (myCountParamIndex != null) {
 			String[] countValues = theRequest.getParameters().remove(Constants.PARAM_COUNT);
 			if (countValues.length > 0 && StringUtils.isNotBlank(countValues[0])) {
 				try {
-					args[myCountParamIndex] = new IntegerDt(countValues[0]);
+					theMethodParams[myCountParamIndex] = new IntegerDt(countValues[0]);
 				} catch (DataFormatException e) {
 					throw new InvalidRequestException("Invalid _count parameter value: " + countValues[0]);
 				}
@@ -186,7 +185,7 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 			String[] sinceValues = theRequest.getParameters().remove(Constants.PARAM_SINCE);
 			if (sinceValues.length > 0 && StringUtils.isNotBlank(sinceValues[0])) {
 				try {
-					args[mySinceParamIndex] = new InstantDt(sinceValues[0]);
+					theMethodParams[mySinceParamIndex] = new InstantDt(sinceValues[0]);
 				} catch (DataFormatException e) {
 					throw new InvalidRequestException("Invalid _since parameter value: " + sinceValues[0]);
 				}
@@ -194,20 +193,11 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 		}
 
 		if (myIdParamIndex!=null) {
-			args[myIdParamIndex] = theRequest.getId();
+			theMethodParams[myIdParamIndex] = theRequest.getId();
 		}
 		
-		Object response;
-		try {
-			response = getMethod().invoke(theResourceProvider, args);
-		} catch (IllegalAccessException e) {
-			throw new InternalErrorException(e);
-		} catch (IllegalArgumentException e) {
-			throw new InternalErrorException(e);
-		} catch (InvocationTargetException e) {
-			throw new InternalErrorException(e);
-		}
-		
+		Object response = invokeServerMethod(theResourceProvider, theMethodParams);
+
 		return toResourceList(response);
 	}
 

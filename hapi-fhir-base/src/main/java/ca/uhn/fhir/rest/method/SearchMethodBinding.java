@@ -105,36 +105,12 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 	}
 
 	@Override
-	public List<IResource> invokeServer(Object theResourceProvider, Request theRequest) throws InvalidRequestException,
+	public List<IResource> invokeServer(Object theResourceProvider, Request theRequest, Object[] theMethodParams) throws InvalidRequestException,
 			InternalErrorException {
 		assert theRequest.getId() == null;
 		assert theRequest.getVersion() == null;
 
-		Object[] params = new Object[myParameters.size()];
-		for (int i = 0; i < myParameters.size(); i++) {
-			IParameter param = myParameters.get(i);
-			params[i] = param.translateQueryParametersIntoServerArgument(theRequest, null);
-		}
-
-		Object response;
-		try {
-			Method method = this.getMethod();
-			response = method.invoke(theResourceProvider, params);
-		} catch (IllegalAccessException e) {
-			throw new InternalErrorException(e);
-		} catch (IllegalArgumentException e) {
-			throw new InternalErrorException(e);
-		} catch (InvocationTargetException e) {
-			Throwable cause = e.getCause();
-			if (cause != null) {
-				if (cause instanceof BaseServerResponseException) {
-					throw (BaseServerResponseException)cause;
-				} else {
-					throw new InternalErrorException(cause);
-				}
-			}
-			throw new InternalErrorException(e);
-		}
+		Object response = invokeServerMethod(theResourceProvider, theMethodParams);
 
 		return toResourceList(response);
 

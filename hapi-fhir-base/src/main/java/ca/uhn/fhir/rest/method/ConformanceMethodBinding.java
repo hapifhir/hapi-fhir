@@ -57,11 +57,11 @@ public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding
 	}
 
 	@Override
-	public List<IResource> invokeServer(Object theResourceProvider, Request theRequest) throws InvalidRequestException,
+	public List<IResource> invokeServer(Object theResourceProvider, Request theRequest, Object[] theMethodParams) throws InvalidRequestException,
 			InternalErrorException {
 		IResource conf;
 		try {
-			conf = (Conformance) getMethod().invoke(theResourceProvider);
+			conf = (Conformance) invokeServerMethod(theResourceProvider, theMethodParams);
 		} catch (Exception e) {
 			throw new InternalErrorException("Failed to call access method", e);
 		}

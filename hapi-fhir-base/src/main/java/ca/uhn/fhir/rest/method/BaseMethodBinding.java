@@ -22,6 +22,7 @@ package ca.uhn.fhir.rest.method;
 
 import java.io.IOException;
 import java.io.Reader;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -82,6 +83,20 @@ public abstract class BaseMethodBinding {
 	 */
 	public abstract String getResourceName();
 	
+	protected Object invokeServerMethod(Object theResourceProvider, Object[] theMethodParams) {
+		try {
+			return getMethod().invoke(theResourceProvider, theMethodParams);
+		} catch (InvocationTargetException e) {
+			if (e.getCause() instanceof BaseServerResponseException) {
+				throw (BaseServerResponseException)e.getCause();
+			} else {
+				throw new InternalErrorException("Failed to call access method", e);
+			}
+		} catch (Exception e) {
+			throw new InternalErrorException("Failed to call access method", e);
+		}
+	}
+
 	
 	public Object getProvider() {
 		return myProvider;

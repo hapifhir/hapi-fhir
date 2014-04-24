@@ -728,6 +728,9 @@ public class ResfulServerMethodTest {
 		Patient patient = (Patient) ourCtx.newXmlParser().parseBundle(responseContent).getEntries().get(0).getResource();
 		assertEquals("someQueryNoParams", patient.getName().get(1).getFamilyAsSingleString());
 
+		InstantDt lm = (InstantDt) patient.getResourceMetadata().get(ResourceMetadataKeyEnum.UPDATED);
+		assertEquals("2011-01-02T22:01:02", lm.getValueAsString());
+
 	}
 
 	@Test
@@ -1104,6 +1107,7 @@ public class ResfulServerMethodTest {
 		public Patient getPatientNoParams() {
 			Patient next = getIdToPatient().get("1");
 			next.addName().addFamily("someQueryNoParams");
+			next.getResourceMetadata().put(ResourceMetadataKeyEnum.UPDATED, new InstantDt("2011-01-02T22:01:02"));
 			return next;
 		}
 

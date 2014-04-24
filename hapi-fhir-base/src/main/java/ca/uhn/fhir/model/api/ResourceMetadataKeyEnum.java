@@ -45,7 +45,9 @@ public enum ResourceMetadataKeyEnum {
 	
 	/**
 	 * The value for this key is the bundle entry <b>Updated</b> time. This
-	 * is defined by FHIR as "Last Updated for resource".
+	 * is defined by FHIR as "Last Updated for resource". This value is also 
+	 * used for populating the "Last-Modified" header in the case of methods
+	 * that return a single resource (read, vread, etc.)
 	 * <p>
 	 * Values for this key are of type {@link InstantDt}
 	 * </p>
