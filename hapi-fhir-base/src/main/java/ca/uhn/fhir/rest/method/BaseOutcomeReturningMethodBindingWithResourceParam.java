@@ -1,5 +1,25 @@
 package ca.uhn.fhir.rest.method;
 
+/*
+ * #%L
+ * HAPI FHIR Library
+ * %%
+ * Copyright (C) 2014 University Health Network
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
 import java.io.IOException;
 import java.io.Writer;
 import java.lang.reflect.InvocationTargetException;
@@ -22,6 +42,7 @@ import ca.uhn.fhir.rest.server.EncodingUtil;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 
 public abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOutcomeReturningMethodBinding {
 	private int myResourceParameterIndex;
@@ -82,6 +103,13 @@ public abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends
 		} catch (IllegalArgumentException e) {
 			throw new InternalErrorException(e);
 		} catch (InvocationTargetException e) {
+			if (e.getCause() instanceof UnprocessableEntityException) {
+				streamOperationOutcome((UnprocessableEntityException)e.getCause(), theServer, encoding, theResponse);
+				return;
+			}
+			if (e.getCause() instanceof BaseServerResponseException) {
+				throw (BaseServerResponseException)e.getCause();
+			}
 			throw new InternalErrorException(e);
 		}
 
@@ -121,6 +149,22 @@ public abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends
 			writer.close();
 		}
 		// getMethod().in
+	}
+
+	private void streamOperationOutcome(UnprocessableEntityException theE, RestfulServer theServer, EncodingUtil theEncoding, HttpServletResponse theResponse) throws IOException {
+		theResponse.setStatus(theE.getStatusCode());
+
+		theServer.addHapiHeader(theResponse);
+
+		theResponse.setContentType(theEncoding.getResourceContentType());
+		IParser parser = theEncoding.newParser(theServer.getFhirContext());
+
+		Writer writer = theResponse.getWriter();
+		try {
+			parser.encodeResourceToWriter(theE.getOperationOutcome(), writer);
+		} finally {
+			writer.close();
+		}		
 	}
 
 	@Override

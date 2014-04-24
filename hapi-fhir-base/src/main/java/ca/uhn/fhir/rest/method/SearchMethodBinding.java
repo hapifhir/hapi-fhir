@@ -1,5 +1,25 @@
 package ca.uhn.fhir.rest.method;
 
+/*
+ * #%L
+ * HAPI FHIR Library
+ * %%
+ * Copyright (C) 2014 University Health Network
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collections;
@@ -18,6 +38,7 @@ import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
 import ca.uhn.fhir.rest.client.GetClientInvocation;
 import ca.uhn.fhir.rest.param.IParameter;
 import ca.uhn.fhir.rest.param.BaseQueryParameter;
+import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -35,7 +56,7 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 
 	public SearchMethodBinding(Class<? extends IResource> theReturnResourceType, Method theMethod, String theQueryName, FhirContext theContext, Object theProvider) {
 		super(theReturnResourceType, theMethod, theContext, theProvider);
-		this.myParameters = Util.getResourceParameters(theMethod);
+		this.myParameters = ParameterUtil.getResourceParameters(theMethod);
 		this.myQueryName = StringUtils.defaultIfBlank(theQueryName, null);
 		this.myDeclaredResourceType = theMethod.getReturnType();
 	}

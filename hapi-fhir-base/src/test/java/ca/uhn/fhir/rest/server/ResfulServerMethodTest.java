@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -74,6 +75,7 @@ import ca.uhn.fhir.rest.param.CodingListParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.QualifiedDateParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.provider.ServerProfileProvider;
 import ca.uhn.fhir.testutil.RandomServerPortProvider;
 import ca.uhn.fhir.util.ExtensionConstants;
@@ -119,6 +121,28 @@ public class ResfulServerMethodTest {
 
 		assertEquals(201, status.getStatusLine().getStatusCode());
 		assertEquals("http://localhost:" + ourPort + "/Patient/001/_history/002", status.getFirstHeader("Location").getValue());
+
+	}
+	
+	
+	@Test
+	public void testCreateWithUnprocessableEntity() throws Exception {
+
+		DiagnosticReport report = new DiagnosticReport();
+		report.getIdentifier().setValue("001");
+
+		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/DiagnosticReport");
+		httpPost.setEntity(new StringEntity(new FhirContext().newXmlParser().encodeResourceToString(report), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+
+		HttpResponse status = ourClient.execute(httpPost);
+
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		ourLog.info("Response was:\n{}", responseContent);
+
+		assertEquals(422, status.getStatusLine().getStatusCode());
+		
+		OperationOutcome outcome = new FhirContext().newXmlParser().parseResource(OperationOutcome.class, new StringReader(responseContent));
+		assertEquals("FOOBAR", outcome.getIssueFirstRep().getDetails().getValue());
 
 	}
 
@@ -923,6 +947,15 @@ public class ResfulServerMethodTest {
 			return new MethodOutcome(true, id, version);
 		}
 
+		@SuppressWarnings("unused")
+		@Create()
+		public MethodOutcome createDiagnosticReport(@ResourceParam DiagnosticReport thePatient) {
+			OperationOutcome outcome = new OperationOutcome();
+			outcome.addIssue().setDetails("FOOBAR");
+			throw new UnprocessableEntityException(outcome);
+		}
+
+		
 	}
 
 	/**

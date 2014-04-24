@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
@@ -13,7 +14,7 @@
 	<packaging>jar</packaging>
 	<url>http://hl7api.sourceforge.net/hapi-fhir/</url>
 
-	<name>HAPI FHIR Base Library</name>
+	<name>HAPI FHIR Library</name>
 
 	<distributionManagement>
 		<site>
@@ -25,7 +26,8 @@
 	<dependencies>
 
 		<!-- JSON -->
-		<!-- <dependency> <groupId>com.google.code.gson</groupId> <artifactId>gson</artifactId> <version>2.2.4</version> </dependency> -->
+		<!-- <dependency> <groupId>com.google.code.gson</groupId> <artifactId>gson</artifactId> 
+			<version>2.2.4</version> </dependency> -->
 		<dependency>
 			<groupId>javax.json</groupId>
 			<artifactId>javax.json-api</artifactId>
@@ -44,7 +46,8 @@
 			<version>4.2.0</version>
 		</dependency>
 
-		<!-- <dependency> <groupId>org.codehaus.woodstox</groupId> <artifactId>stax2-api</artifactId> <version>3.1.3</version> </dependency> -->
+		<!-- <dependency> <groupId>org.codehaus.woodstox</groupId> <artifactId>stax2-api</artifactId> 
+			<version>3.1.3</version> </dependency> -->
 
 		<dependency>
 			<groupId>org.thymeleaf</groupId>
@@ -194,31 +197,28 @@
 	<reporting>
 
 		<plugins>
-
-
-<plugin>
-                                <groupId>org.apache.maven.plugins</groupId>
-                                <artifactId>maven-changes-plugin</artifactId>
-                                <version>2.10</version>
-                                <inherited>false</inherited>
-                                <reportSets>
-                                        <reportSet>
-                                                <reports>
-                                                        <report>changes-report</report>
-                                                </reports>
-                                        </reportSet>
-                                </reportSets>
-                                <configuration>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-changes-plugin</artifactId>
+				<version>2.10</version>
+				<inherited>false</inherited>
+				<reportSets>
+					<reportSet>
+						<reports>
+							<report>changes-report</report>
+						</reports>
+					</reportSet>
+				</reportSets>
+				<configuration>
 					<feedType>atom_1.0</feedType>
-                                        <issueLinkTemplatePerSystem>
-                                                <default>http://sourceforge.net/support/tracker.php?aid=%ISSUE%</default>
-                                                <newbugs>https://sourceforge.net/p/hl7api/bugs/%ISSUE%/</newbugs>
-                                                <newfeatures>https://sourceforge.net/p/hl7api/feature-requests/%ISSUE%/</newfeatures>
-                                        </issueLinkTemplatePerSystem>
-                                        <escapeHTML>false</escapeHTML>
-                                </configuration>
-                        </plugin>
-
+					<issueLinkTemplatePerSystem>
+						<default>http://sourceforge.net/support/tracker.php?aid=%ISSUE%</default>
+						<newbugs>https://sourceforge.net/p/hl7api/bugs/%ISSUE%/</newbugs>
+						<newfeatures>https://sourceforge.net/p/hl7api/feature-requests/%ISSUE%/</newfeatures>
+					</issueLinkTemplatePerSystem>
+					<escapeHTML>false</escapeHTML>
+				</configuration>
+			</plugin>
 			<plugin>
 				<artifactId>maven-site-plugin</artifactId>
 				<version>3.3</version>
@@ -277,6 +277,27 @@
 
 	<build>
 		<plugins>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>license-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>first</id>
+						<goals>
+							<goal>update-file-header</goal>
+						</goals>
+						<phase>process-sources</phase>
+						<configuration>
+							<licenseName>apache_v2</licenseName>
+							<canUpdateDescription>true</canUpdateDescription>
+							<canUpdateCopyright>true</canUpdateCopyright>
+							<roots>
+								<root>src/main/java</root>
+							</roots>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 			<plugin>
 				<artifactId>maven-antrun-plugin</artifactId>
 				<version>1.7</version>

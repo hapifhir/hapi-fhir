@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
 	<parent>
 		<groupId>org.sonatype.oss</groupId>
@@ -13,7 +14,15 @@
 	<packaging>pom</packaging>
 	<version>0.3</version>
 	<name>HAPI</name>
-	<url>http://hl7api.sourceforge.net/</url>
+	<url>http://hl7api.sourceforge.net/hapi-fhir/</url>
+	
+	<organization>
+		<name>University Health Network</name>
+		<url>http://www.uhn.ca</url>
+	</organization>
+	
+	<inceptionYear>2014</inceptionYear>
+	
 	<description>
 	</description>
 
@@ -96,6 +105,15 @@
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-source-plugin</artifactId>
 					<version>2.2.1</version>
+				</plugin>
+				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>license-maven-plugin</artifactId>
+					<version>1.6</version>
+					<configuration>
+						<verbose>false</verbose>
+						<addSvnKeyWords>false</addSvnKeyWords>
+					</configuration>
 				</plugin>
 			</plugins>
 		</pluginManagement>

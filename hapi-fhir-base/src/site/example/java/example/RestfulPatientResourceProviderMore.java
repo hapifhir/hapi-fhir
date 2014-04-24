@@ -6,6 +6,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
@@ -17,6 +20,7 @@ import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.resource.Conformance;
 import ca.uhn.fhir.model.dstu.resource.DiagnosticReport;
 import ca.uhn.fhir.model.dstu.resource.Observation;
+import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
 import ca.uhn.fhir.model.dstu.resource.Organization;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
@@ -59,6 +63,18 @@ public List<Organization> getAllOrganizations() {
    return retVal;
 }
 //END SNIPPET: searchAll
+
+//START SNIPPET: underlyingReq
+@Search
+public List<Patient> findPatients(
+		@RequiredParam(name="foo") StringDt theParameter,
+		HttpServletRequest theRequest, 
+		HttpServletResponse theResponse) {
+ List<Patient> retVal=new ArrayList<Patient>(); // populate this
+ return retVal;
+}
+//END SNIPPET: underlyingReq
+
 
 //START SNIPPET: read
 @Read()
@@ -263,6 +279,11 @@ public MethodOutcome createPatient(@ResourceParam Patient thePatient) {
    * results in an HTTP 422, which is appropriate for business rule failure
    */
   if (thePatient.getIdentifierFirstRep().isEmpty()) {
+    /* It is also possible to pass an OperationOutcome resource
+     * to the UnprocessableEntityException if you want to return
+     * a custom populated OperationOutcome. Otherwise, a simple one
+     * is created using the string supplied below. 
+     */
     throw new UnprocessableEntityException("No identifier supplied");
   }
 	
@@ -275,6 +296,13 @@ public MethodOutcome createPatient(@ResourceParam Patient thePatient) {
   retVal.setCreated(true);
   retVal.setId(new IdDt("3746"));
   retVal.setVersionId(new IdDt("1"));
+  
+  // You can also add an OperationOutcome resource to return
+  // This part is optional though:
+  OperationOutcome outcome = new OperationOutcome();
+  outcome.addIssue().setDetails("One minor issue detected");
+  retVal.setOperationOutcome(outcome);  
+  
   return retVal;
 }
 //END SNIPPET: create
@@ -283,7 +311,6 @@ public MethodOutcome createPatient(@ResourceParam Patient thePatient) {
 @Create
 public abstract MethodOutcome createNewPatient(@ResourceParam Patient thePatient);
 //END SNIPPET: createClient
-
 
 //START SNIPPET: update
 @Update
@@ -294,6 +321,11 @@ public MethodOutcome updatePatient(@IdParam IdDt theId, @ResourceParam Patient t
    * results in an HTTP 422, which is appropriate for business rule failure
    */
   if (thePatient.getIdentifierFirstRep().isEmpty()) {
+    /* It is also possible to pass an OperationOutcome resource
+     * to the UnprocessableEntityException if you want to return
+     * a custom populated OperationOutcome. Otherwise, a simple one
+     * is created using the string supplied below. 
+     */
     throw new UnprocessableEntityException("No identifier supplied");
   }
 	
@@ -306,6 +338,13 @@ public MethodOutcome updatePatient(@IdParam IdDt theId, @ResourceParam Patient t
   retVal.setCreated(true);
   retVal.setId(theId);
   retVal.setVersionId(new IdDt("2")); // Leave this blank if the server doesn't version
+  
+  // You can also add an OperationOutcome resource to return
+  // This part is optional though:
+  OperationOutcome outcome = new OperationOutcome();
+  outcome.addIssue().setDetails("One minor issue detected");
+  retVal.setOperationOutcome(outcome);
+  
   return retVal;
 }
 //END SNIPPET: update

@@ -1,5 +1,25 @@
 package ca.uhn.fhir.rest.server;
 
+/*
+ * #%L
+ * HAPI FHIR Library
+ * %%
+ * Copyright (C) 2014 University Health Network
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
 import java.io.IOException;
 import java.io.StringReader;
 import java.lang.reflect.Method;
@@ -16,11 +36,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
-import org.codehaus.stax2.ri.evt.ProcInstrEventImpl;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
@@ -34,10 +52,8 @@ import ca.uhn.fhir.rest.server.exceptions.ConfigurationException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotFoundException;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.provider.ServerConformanceProvider;
 import ca.uhn.fhir.rest.server.provider.ServerProfileProvider;
-import ca.uhn.fhir.util.ReflectionUtil;
 import ca.uhn.fhir.util.VersionUtil;
 
 public class RestfulServer extends HttpServlet {
@@ -383,22 +399,22 @@ public class RestfulServer extends HttpServlet {
 		handleRequest(SearchMethodBinding.RequestType.PUT, request, response);
 	}
 
-	protected void handleRequest(SearchMethodBinding.RequestType requestType, HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	protected void handleRequest(SearchMethodBinding.RequestType theRequestType, HttpServletRequest theRequest, HttpServletResponse theResponse) throws ServletException, IOException {
 		try {
 
 			if (null != mySecurityManager) {
-				mySecurityManager.authenticate(request);
+				mySecurityManager.authenticate(theRequest);
 			}
 
 			String resourceName = null;
-			String requestFullPath = StringUtils.defaultString(request.getRequestURI());
+			String requestFullPath = StringUtils.defaultString(theRequest.getRequestURI());
 			// String contextPath =
 			// StringUtils.defaultString(request.getContextPath());
-			String servletPath = StringUtils.defaultString(request.getServletPath());
-			StringBuffer requestUrl = request.getRequestURL();
+			String servletPath = StringUtils.defaultString(theRequest.getServletPath());
+			StringBuffer requestUrl = theRequest.getRequestURL();
 			String servletContextPath = "";
-			if (request.getServletContext() != null) {
-				servletContextPath = StringUtils.defaultIfBlank(request.getServletContext().getContextPath(), servletPath);
+			if (theRequest.getServletContext() != null) {
+				servletContextPath = StringUtils.defaultIfBlank(theRequest.getServletContext().getContextPath(), servletPath);
 			} else {
 				servletContextPath = servletPath;
 			}
@@ -431,9 +447,9 @@ public class RestfulServer extends HttpServlet {
 				fhirServerBase = fhirServerBase.substring(0, fhirServerBase.length() - 1);
 			}
 
-			String completeUrl = StringUtils.isNotBlank(request.getQueryString()) ? requestUrl + "?" + request.getQueryString() : requestUrl.toString();
+			String completeUrl = StringUtils.isNotBlank(theRequest.getQueryString()) ? requestUrl + "?" + theRequest.getQueryString() : requestUrl.toString();
 
-			Map<String, String[]> params = new HashMap<String, String[]>(request.getParameterMap());
+			Map<String, String[]> params = new HashMap<String, String[]>(theRequest.getParameterMap());
 
 			StringTokenizer tok = new StringTokenizer(requestPath, "/");
 			if (!tok.hasMoreTokens()) {
@@ -484,15 +500,16 @@ public class RestfulServer extends HttpServlet {
 			r.setVersion(versionId);
 			r.setOperation(operation);
 			r.setParameters(params);
-			r.setRequestType(requestType);
-			if ("application/x-www-form-urlencoded".equals(request.getContentType())) {
+			r.setRequestType(theRequestType);
+			if ("application/x-www-form-urlencoded".equals(theRequest.getContentType())) {
 				r.setInputReader(new StringReader(""));
 			} else {
-				r.setInputReader(request.getReader());
+				r.setInputReader(theRequest.getReader());
 			}
 			r.setFhirServerBase(fhirServerBase);
 			r.setCompleteUrl(completeUrl);
-			r.setServletRequest(request);
+			r.setServletRequest(theRequest);
+			r.setServletResponse(theResponse);
 
 			if (resourceMethod == null && resourceBinding != null) {
 				resourceMethod = resourceBinding.getMethod(r);
@@ -501,14 +518,14 @@ public class RestfulServer extends HttpServlet {
 				throw new MethodNotFoundException("No resource method available for the supplied parameters " + params);
 			}
 
-			resourceMethod.invokeServer(this, r, response);
+			resourceMethod.invokeServer(this, r, theResponse);
 
 		} catch (AuthenticationException e) {
-			response.setStatus(e.getStatusCode());
-			addHapiHeader(response);
-			response.setContentType("text/plain");
-			response.setCharacterEncoding("UTF-8");
-			response.getWriter().write(e.getMessage());
+			theResponse.setStatus(e.getStatusCode());
+			addHapiHeader(theResponse);
+			theResponse.setContentType("text/plain");
+			theResponse.setCharacterEncoding("UTF-8");
+			theResponse.getWriter().write(e.getMessage());
 		} catch (BaseServerResponseException e) {
 
 			if (e instanceof InternalErrorException) {
@@ -517,12 +534,12 @@ public class RestfulServer extends HttpServlet {
 				ourLog.warn("Failure during REST processing: {}", e.toString());
 			}
 
-			response.setStatus(e.getStatusCode());
-			addHapiHeader(response);
-			response.setContentType("text/plain");
-			response.setCharacterEncoding("UTF-8");
-			response.getWriter().append(e.getMessage());
-			response.getWriter().close();
+			theResponse.setStatus(e.getStatusCode());
+			addHapiHeader(theResponse);
+			theResponse.setContentType("text/plain");
+			theResponse.setCharacterEncoding("UTF-8");
+			theResponse.getWriter().append(e.getMessage());
+			theResponse.getWriter().close();
 
 		} catch (Throwable t) {
 			// TODO: handle this better

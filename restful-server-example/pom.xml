@@ -4,10 +4,10 @@
 
 	<groupId>ca.uhn.hapi.example</groupId>
 	<artifactId>restful-server-example</artifactId>
-	<version>0.1</version>
+	<version>0.3</version>
 	<packaging>war</packaging>
 
-	<name>Sample RESTful Server</name>
+	<name>Sample RESTful Server (HAPI-FHIR)</name>
 
 	<dependencies>
 
@@ -15,7 +15,7 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-base</artifactId>
-			<version>0.1</version>
+			<version>0.3</version>
 		</dependency>
 
 		<!-- HAPI-FHIR uses Logback for logging support. The logback library is 

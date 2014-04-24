@@ -1,5 +1,25 @@
 package ca.uhn.fhir.model.primitive;
 
+/*
+ * #%L
+ * HAPI FHIR Library
+ * %%
+ * Copyright (C) 2014 University Health Network
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
 import java.math.BigDecimal;
 
 import ca.uhn.fhir.model.api.BasePrimitive;
@@ -77,6 +97,19 @@ public class IdDt extends BasePrimitive<String> {
 		return new BigDecimal(getValueAsString());
 	}
 
+	/**
+	 * Returns the value of this ID as a {@link Long}, or <code>null</code> if the value is null
+	 * 
+	 * @throws NumberFormatException
+	 *             If the value is not a valid Long
+	 */
+	public Long asLong() {
+		if (getValue() == null) {
+			return null;
+		}
+		return Long.parseLong(getValueAsString());
+	}
+	
 	/**
 	 * Returns a reference to <code>this</code> IdDt. It is generally not neccesary to use this method but it is provided for consistency with the rest of the API.
 	 */

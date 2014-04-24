@@ -59,6 +59,9 @@
 					<param name="file" value="src/site/example/java/example/RestfulPatientResourceProvider.java" />
 				</macro>
 
+			</subsection>
+			<subsection name="Adding more Methods (Search, History, Create, etc.)">
+
 				<p>
 					You will probably wish to add more methods
 					to your resource provider. See
@@ -120,6 +123,49 @@
 			</p>
 			
 		</section>
+
+		<section name="Common Method Parameters">
+		
+			<p>
+				Different RESTful methods will have different requirements
+				in terms of the method parameters they require, as described
+				in the <a href="./doc_rest_operations.html">RESTful Operations</a>
+				page.
+			</p>
+		
+			<p>
+				In addition, there are several parameters you may add
+				in order to meet specific needs of your application.
+			</p>
+			
+			<subsection name="Accessing the underlying Servlet Request/Response">
+			
+				<p>
+					In some cases, it may be useful to have access to the 
+					underlying HttpServletRequest and/or HttpServletResponse
+					objects. These may be added by simply adding one or both
+					of these objects as method parameters.
+				</p>
+			
+				<macro name="snippet">
+					<param name="id" value="underlyingReq" />
+					<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
+				</macro>
+			
+			
+			</subsection>
+		
+		</section>
+
+		<!--
+		<section name="Security">
+			
+			<p>
+				Naturally, security is a prime concern
+			</p>
+		
+		</section>
+		-->
 
 	</body>
 
