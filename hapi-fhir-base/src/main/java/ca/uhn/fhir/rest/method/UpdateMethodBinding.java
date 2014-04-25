@@ -20,7 +20,7 @@ package ca.uhn.fhir.rest.method;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 import java.lang.reflect.Method;
 import java.util.Collections;
@@ -41,7 +41,6 @@ import ca.uhn.fhir.rest.client.BaseClientInvocation;
 import ca.uhn.fhir.rest.client.PutClientInvocation;
 import ca.uhn.fhir.rest.method.SearchMethodBinding.RequestType;
 import ca.uhn.fhir.rest.server.Constants;
-import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 class UpdateMethodBinding extends BaseOutcomeReturningMethodBindingWithResourceParam {
@@ -134,6 +133,12 @@ class UpdateMethodBinding extends BaseOutcomeReturningMethodBindingWithResourceP
 	@Override
 	protected Set<RequestType> provideAllowableRequestTypes() {
 		return Collections.singleton(RequestType.PUT);
+	}
+
+
+	@Override
+	protected String getMatchingOperation() {
+		return null;
 	}
 
 }

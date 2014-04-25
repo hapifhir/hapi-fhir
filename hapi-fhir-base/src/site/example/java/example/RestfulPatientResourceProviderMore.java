@@ -23,6 +23,7 @@ import ca.uhn.fhir.model.dstu.resource.Observation;
 import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
 import ca.uhn.fhir.model.dstu.resource.Organization;
 import ca.uhn.fhir.model.dstu.resource.Patient;
+import ca.uhn.fhir.model.dstu.valueset.IssueSeverityEnum;
 import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
@@ -38,6 +39,7 @@ import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.annotation.Update;
+import ca.uhn.fhir.rest.annotation.Validate;
 import ca.uhn.fhir.rest.annotation.VersionIdParam;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.ITestClient;
@@ -307,6 +309,7 @@ public MethodOutcome createPatient(@ResourceParam Patient thePatient) {
 }
 //END SNIPPET: create
 
+
 //START SNIPPET: createClient
 @Create
 public abstract MethodOutcome createNewPatient(@ResourceParam Patient thePatient);
@@ -365,6 +368,39 @@ public MethodOutcome updatePatient(@IdParam IdDt theId, @VersionIdParam IdDt the
 return retVal;
 }
 //END SNIPPET: updateVersion
+
+
+
+
+//START SNIPPET: validate
+@Validate
+public MethodOutcome validatePatient(@ResourceParam Patient thePatient) {
+
+  /* 
+   * Actually do our validation: The UnprocessableEntityException
+   * results in an HTTP 422, which is appropriate for business rule failure
+   */
+  if (thePatient.getIdentifierFirstRep().isEmpty()) {
+    /* It is also possible to pass an OperationOutcome resource
+     * to the UnprocessableEntityException if you want to return
+     * a custom populated OperationOutcome. Otherwise, a simple one
+     * is created using the string supplied below. 
+     */
+    throw new UnprocessableEntityException("No identifier supplied");
+  }
+	
+  // This method returns a MethodOutcome object
+  MethodOutcome retVal = new MethodOutcome();
+
+  // You may also add an OperationOutcome resource to return
+  // This part is optional though:
+  OperationOutcome outcome = new OperationOutcome();
+  outcome.addIssue().setSeverity(IssueSeverityEnum.WARNING).setDetails("One minor issue detected");
+  retVal.setOperationOutcome(outcome);  
+
+  return retVal;
+}
+//END SNIPPET: validate
 
 
 

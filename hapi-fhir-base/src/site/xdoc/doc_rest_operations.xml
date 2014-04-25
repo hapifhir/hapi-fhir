@@ -9,26 +9,28 @@
 	<body>
 
 		<section name="Implementing Resource Provider Operations">
-			
+
 			<p>
-				RESTful Clients and Servers both share the same 
+				RESTful Clients and Servers both share the same
 				method pattern, with one key difference: A client
 				is defined using annotated methods on an interface
 				which are used to retrieve resources,
-				whereas a server requires concrete method implementations
+				whereas a server requires concrete method
+				implementations
 				to actually provide those resources.
 			</p>
-			
+
 			<p>
-				Unless otherwise specified, the examples below show <b>server</b>
+				Unless otherwise specified, the examples below show
+				<b>server</b>
 				implementations, but client methods will follow the same patterns.
 			</p>
-			
+
 			<p>
-				The following table lists the operations supported by 
+				The following table lists the operations supported by
 				HAPI FHIR RESTful Servers and Clients.
 			</p>
-			
+
 			<table>
 				<thead>
 					<tr style="font-weight: bold; font-size: 1.2em;">
@@ -39,7 +41,7 @@
 				<tbody>
 					<tr>
 						<td>
-							<a href="#instance_read">Instance - Read</a>	
+							<a href="#instance_read">Instance - Read</a>
 						</td>
 						<td>
 							Read the current state of the resource
@@ -47,7 +49,7 @@
 					</tr>
 					<tr>
 						<td>
-							<a href="#instance_vread">Instance - VRead</a>	
+							<a href="#instance_vread">Instance - VRead</a>
 						</td>
 						<td>
 							Read the state of a specific version of the resource
@@ -55,7 +57,7 @@
 					</tr>
 					<tr>
 						<td>
-							<a href="#instance_update">Instance - Update</a>	
+							<a href="#instance_update">Instance - Update</a>
 						</td>
 						<td>
 							Read the state of a specific version of the resource
@@ -63,7 +65,7 @@
 					</tr>
 					<tr>
 						<td>
-							<a href="#instance_delete">Instance - Delete</a>	
+							<a href="#instance_delete">Instance - Delete</a>
 						</td>
 						<td>
 							Delete a resource
@@ -71,7 +73,7 @@
 					</tr>
 					<tr>
 						<td>
-							<a href="#history">Instance - History</a>	
+							<a href="#history">Instance - History</a>
 						</td>
 						<td>
 							Retrieve the update history for a particular resource
@@ -79,7 +81,7 @@
 					</tr>
 					<tr>
 						<td>
-							<a href="#type_create">Type - Create</a>	
+							<a href="#type_create">Type - Create</a>
 						</td>
 						<td>
 							Create a new resource with a server assigned id
@@ -87,10 +89,10 @@
 					</tr>
 					<tr>
 						<td>
-							<a href="#instance_update">Type - Search</a>	
+							<a href="#instance_update">Type - Search</a>
 							<macro name="toc">
-								<param name="section" value="7"/>
-								<param name="fromDepth" value="2"/>
+								<param name="section" value="7" />
+								<param name="fromDepth" value="2" />
 							</macro>
 						</td>
 						<td>
@@ -99,7 +101,7 @@
 					</tr>
 					<tr>
 						<td>
-							<a href="#type_search">Type - Search</a>	
+							<a href="#type_search">Type - Search</a>
 						</td>
 						<td>
 							Search the resource type based on some filter criteria
@@ -107,7 +109,7 @@
 					</tr>
 					<tr>
 						<td>
-							<a href="#history">Type - History</a>	
+							<a href="#history">Type - History</a>
 						</td>
 						<td>
 							Retrieve the update history for a particular resource type
@@ -115,7 +117,7 @@
 					</tr>
 					<tr>
 						<td>
-							<a href="#type_validate">Type - Validate</a>	
+							<a href="#type_validate">Type - Validate</a>
 						</td>
 						<td>
 							Check that the content would be acceptable as an update
@@ -123,7 +125,7 @@
 					</tr>
 					<tr>
 						<td>
-							<a href="#system_conformance">System - Conformance</a>	
+							<a href="#system_conformance">System - Conformance</a>
 						</td>
 						<td>
 							Get a conformance statement for the system
@@ -131,7 +133,7 @@
 					</tr>
 					<tr>
 						<td>
-							<a href="#system_transaction">System - Transaction</a>	
+							<a href="#system_transaction">System - Transaction</a>
 						</td>
 						<td>
 							Update, create or delete a set of resources as a single transaction
@@ -139,7 +141,7 @@
 					</tr>
 					<tr>
 						<td>
-							<a href="#history">System - History</a>	
+							<a href="#history">System - History</a>
 						</td>
 						<td>
 							Retrieve the update history for all resources
@@ -147,31 +149,33 @@
 					</tr>
 					<tr>
 						<td>
-							<a href="#system_search">System - Search</a>	
+							<a href="#system_search">System - Search</a>
 						</td>
 						<td>
 							Search across all resource types based on some filter criteria
 						</td>
 					</tr>
-					
+
 				</tbody>
 			</table>
-					
-			<a name="instance_read"/>
+
+			<a name="instance_read" />
 		</section>
-		
+
 		<!-- ****************************************************************** -->
 		<!-- ****************************************************************** -->
 		<!-- ****************************************************************** -->
 
 		<section name="Instance Level - Read">
-		
+
 			<p>
-				The 
-				<a href="http://hl7.org/implement/standards/fhir/http.html#read"><b>read</b></a> 
+				The
+				<a href="http://hl7.org/implement/standards/fhir/http.html#read">
+					<b>read</b>
+				</a>
 				operation retrieves a resource by ID. It is annotated with the
 				<a href="./apidocs/ca/uhn/fhir/rest/annotation/Read.html">@Read</a>
-				annotation, and has a single parameter annotated with the 
+				annotation, and has a single parameter annotated with the
 				<a href="./apidocs/ca/uhn/fhir/rest/annotation/IdParam.html">@IdParam</a>
 				annotation.
 			</p>
@@ -182,11 +186,12 @@
 			</macro>
 
 			<p>
-				Example URL to invoke this method:<br/>
+				Example URL to invoke this method:
+				<br />
 				<code>http://fhir.example.com/Patient/111</code>
 			</p>
-			
-			<a name="instance_vread"/>
+
+			<a name="instance_vread" />
 		</section>
 
 		<!-- ****************************************************************** -->
@@ -194,13 +199,15 @@
 		<!-- ****************************************************************** -->
 
 		<section name="Instance Level - VRead">
-		
+
 			<p>
-				The 
-				<a href="http://hl7.org/implement/standards/fhir/http.html#vread"><b>vread</b></a> 
+				The
+				<a href="http://hl7.org/implement/standards/fhir/http.html#vread">
+					<b>vread</b>
+				</a>
 				operation retrieves a specific version of a resource with a given ID. It looks exactly
 				like a "read" operation, but with a second
-				parameter annotated with the 
+				parameter annotated with the
 				<a href="./apidocs/ca/uhn/fhir/rest/annotation/VersionIdParam.html">@VersionIdParam</a>
 				annotation.
 			</p>
@@ -209,49 +216,53 @@
 				<param name="id" value="vread" />
 				<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
 			</macro>
-			
+
 			<p>
-				Example URL to invoke this method:<br/>
+				Example URL to invoke this method:
+				<br />
 				<code>http://fhir.example.com/Patient/111/_history/2</code>
 			</p>
-			
-			<a name="instance_update"/>
+
+			<a name="instance_update" />
 		</section>
-		
+
 		<!-- ****************************************************************** -->
 		<!-- ****************************************************************** -->
 		<!-- ****************************************************************** -->
 
 		<section name="Instance Level - Update">
-		
+
 			<p>
-				The 
-				<a href="http://hl7.org/implement/standards/fhir/http.html#update"><b>update</b></a> 
+				The
+				<a href="http://hl7.org/implement/standards/fhir/http.html#update">
+					<b>update</b>
+				</a>
 				operation updates a specific resource instance (using its ID), and optionally
-				accepts a version ID as well (which can be used to detect version conflicts). 
+				accepts a version ID as well (which can be used to detect version conflicts).
 			</p>
 			<p>
-				Update methods must be annotated with the 
+				Update methods must be annotated with the
 				<a href="./apidocs/ca/uhn/fhir/rest/annotation/Update.html">@Update</a>
-				annotation, and have a parameter annotated with the 
+				annotation, and have a parameter annotated with the
 				<a href="./apidocs/ca/uhn/fhir/rest/annotation/ResourceParam.html">@Resource</a>
 				annotation. This parameter contains the resource instance to be created.
 			</p>
 			<p>
-				In addition, the method must have a parameter annotated with the 
+				In addition, the method must have a parameter annotated with the
 				<a href="./apidocs/ca/uhn/fhir/rest/annotation/IdParam.html">@IdParam</a>
 				annotation, and optionally may have a parameter annotated with the
 				<a href="./apidocs/ca/uhn/fhir/rest/annotation/VersionIdParam.html">@VersionIdParam</a>
 			</p>
 			<p>
 				Update methods must return an object of type
-				<a href="./apidocs/ca/uhn/fhir/rest/api/MethodOutcome.html">MethodOutcome</a>. This
+				<a href="./apidocs/ca/uhn/fhir/rest/api/MethodOutcome.html">MethodOutcome</a>
+				. This
 				object contains the identity of the created resource.
 			</p>
 			<p>
 				The following snippet shows how to define an update method on a server:
 			</p>
-			
+
 			<macro name="snippet">
 				<param name="id" value="update" />
 				<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
@@ -259,44 +270,47 @@
 
 			<p>
 				Example URL to invoke this method (this would be invoked using an HTTP PUT,
-				with the resource in the PUT body):<br/>
+				with the resource in the PUT body):
+				<br />
 				<code>http://fhir.example.com/Patient</code>
 			</p>
 
 			<p>
 				The following snippet shows how the corresponding client interface
-				would look: 
+				would look:
 			</p>
-			
+
 			<macro name="snippet">
 				<param name="id" value="updateClient" />
 				<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
 			</macro>
 
 			<p>
-				In the case of a server which is able to do version conflict checking, an 
+				In the case of a server which is able to do version conflict checking, an
 				extra parameter would be added:
 			</p>
-			
+
 			<macro name="snippet">
 				<param name="id" value="updateVersion" />
 				<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
 			</macro>
-			
-			<a name="instance_delete"/>
-		</section>		
-		
+
+			<a name="instance_delete" />
+		</section>
+
 		<!-- ****************************************************************** -->
 		<!-- ****************************************************************** -->
 		<!-- ****************************************************************** -->
-		
+
 		<section name="Instance Level - Delete">
-			
+
 			<p>
-				The 
-				<a href="http://hl7.org/implement/standards/fhir/http.html#delete"><b>delete</b></a> 
+				The
+				<a href="http://hl7.org/implement/standards/fhir/http.html#delete">
+					<b>delete</b>
+				</a>
 				operation retrieves a specific version of a resource with a given ID. It takes a single
-				ID parameter annotated with an  
+				ID parameter annotated with an
 				<a href="./apidocs/ca/uhn/fhir/rest/annotation/IdParam.html">@IdParam</a>
 				annotation, which supplies the ID of the resource to delete.
 			</p>
@@ -305,61 +319,73 @@
 				<param name="id" value="delete" />
 				<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
 			</macro>
-			
+
 			<p>
 				Delete methods are allowed to return the following types:
 			</p>
 			<ul>
 				<li>
-					<b>void</b>: This method may return <code>void</code>, in which case 
-					the server will return an empty response and the client will ignore 
+					<b>void</b>
+					: This method may return
+					<code>void</code>
+					, in which case
+					the server will return an empty response and the client will ignore
 					any successful response from the server (failure responses will still throw
-					an exception) 
+					an exception)
 				</li>
 				<li>
-					<b><a href="./apidocs/ca/uhn/fhir/rest/api/MethodOutcome.html">MethodOutcome</a></b>: 
-					This method may return <code>MethodOutcome</code>, 
+					<b>
+						<a href="./apidocs/ca/uhn/fhir/rest/api/MethodOutcome.html">MethodOutcome</a>
+					</b>
+					:
+					This method may return
+					<code>MethodOutcome</code>
+					,
 					which is a wrapper for the FHIR OperationOutcome resource, which may optionally be returned
 					by the server according to the FHIR specification.
 				</li>
 			</ul>
-			
+
 			<p>
-				Example URL to invoke this method (HTTP DELETE):<br/>
+				Example URL to invoke this method (HTTP DELETE):
+				<br />
 				<code>http://fhir.example.com/Patient/111</code>
 			</p>
-			
-			<a name="type_create"/>
+
+			<a name="type_create" />
 		</section>
 
 		<!-- ****************************************************************** -->
 		<!-- ****************************************************************** -->
 		<!-- ****************************************************************** -->
-	
+
 		<section name="Type Level - Create">
-			
+
 			<p>
-				The 
-				<a href="http://hl7.org/implement/standards/fhir/http.html#create"><b>create</b></a> 
-				operation saves a new resource to the server, allowing the server to 
-				give that resource an ID and version ID. 
+				The
+				<a href="http://hl7.org/implement/standards/fhir/http.html#create">
+					<b>create</b>
+				</a>
+				operation saves a new resource to the server, allowing the server to
+				give that resource an ID and version ID.
 			</p>
 			<p>
-				Create methods must be annotated with the 
+				Create methods must be annotated with the
 				<a href="./apidocs/ca/uhn/fhir/rest/annotation/Create.html">@Create</a>
-				annotation, and have a single parameter annotated with the 
+				annotation, and have a single parameter annotated with the
 				<a href="./apidocs/ca/uhn/fhir/rest/annotation/ResourceParam.html">@Resource</a>
 				annotation. This parameter contains the resource instance to be created.
 			</p>
 			<p>
 				Create methods must return an object of type
-				<a href="./apidocs/ca/uhn/fhir/rest/api/MethodOutcome.html">MethodOutcome</a>. This
+				<a href="./apidocs/ca/uhn/fhir/rest/api/MethodOutcome.html">MethodOutcome</a>
+				. This
 				object contains the identity of the created resource.
 			</p>
 			<p>
 				The following snippet shows how to define a server create method:
 			</p>
-			
+
 			<macro name="snippet">
 				<param name="id" value="create" />
 				<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
@@ -367,78 +393,87 @@
 
 			<p>
 				Example URL to invoke this method (this would be invoked using an HTTP POST,
-				with the resource in the POST body):<br/>
+				with the resource in the POST body):
+				<br />
 				<code>http://fhir.example.com/Patient</code>
 			</p>
 
 			<p>
 				The following snippet shows how the corresponding client interface
-				would look: 
+				would look:
 			</p>
-			
+
 			<macro name="snippet">
 				<param name="id" value="createClient" />
 				<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
 			</macro>
-			
-			<a name="type_search"/>
+
+			<a name="type_search" />
 		</section>
-		
+
 		<!-- ****************************************************************** -->
 		<!-- ****************************************************************** -->
 		<!-- ****************************************************************** -->
-	
+
 		<section name="Type Level - Search">
-		
+
 			<p>
 				The
-				<a href="http://hl7.org/implement/standards/fhir/http.html#search"><b>search</b></a> operation returns a bundle
-				with zero-to-many resources of a given type, matching a given set of parameters. 
+				<a href="http://hl7.org/implement/standards/fhir/http.html#search">
+					<b>search</b>
+				</a>
+				operation returns a bundle
+				with zero-to-many resources of a given type, matching a given set of parameters.
 			</p>
-			
+
 			<subsection name="Search with No Parameters">
-		
+
 				<p>
 					The following example shows a search with no parameters. This operation
 					should return all resources of a given type (this obviously doesn't make
-					sense in all contexts, but does for some resource types).
+					sense in all contexts, but
+					does for some resource types).
 				</p>
-				
+
 				<macro name="snippet">
 					<param name="id" value="searchAll" />
 					<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
 				</macro>
-				
+
 				<p>
-					Example URL to invoke this method:<br/>
+					Example URL to invoke this method:
+					<br />
 					<code>http://fhir.example.com/Patient</code>
 				</p>
-			
+
 			</subsection>
 			<subsection name="Search with a String Parameter">
 
 				<p>
 					To allow a search using given search parameters, add one or more parameters
-					to your search method and tag these parameters as either 
+					to your search method and tag these parameters as either
 					<a href="./apidocs/ca/uhn/fhir/rest/server/parameters/RequiredParam.html">@RequiredParam</a>
 					or
-					<a href="./apidocs/ca/uhn/fhir/rest/server/parameters/OptionalParam.html">@OptionalParam</a>.
+					<a href="./apidocs/ca/uhn/fhir/rest/server/parameters/OptionalParam.html">@OptionalParam</a>
+					.
 				</p>
-				
+
 				<p>
-					This annotation takes a "name" parameter which specifies the parameter's 
+					This annotation takes a "name" parameter which specifies the parameter's
 					name (as it will appear in the search URL). FHIR defines standardized parameter
 					names for each resource, and these are available as constants on the
-					individual HAPI resource classes.										
+					individual HAPI resource
+					classes.
 				</p>
-			
+
 				<macro name="snippet">
 					<param name="id" value="searchStringParam" />
 					<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
 				</macro>
-				
+
 				<p>
-					Example URL to invoke this method:<br/>
+					Example URL to invoke this method:
+					<br />
 					<code>http://fhir.example.com/Patient?family=SMITH</code>
 				</p>
 
@@ -451,47 +486,55 @@
 					interface. For example, the search below can be used to search by
 					identifier (e.g. search for an MRN).
 				</p>
-			
+
 				<macro name="snippet">
 					<param name="id" value="searchIdentifierParam" />
 					<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
 				</macro>
-				
+
 				<p>
-					Example URL to invoke this method:<br/>
+					Example URL to invoke this method:
+					<br />
 					<code>http://fhir.example.com/Patient?identifier=urn:foo|7000135</code>
 				</p>
-			
+
 			</subsection>
 			<subsection name="Multiple Parameters">
 
 				<p>
 					Search methods may take multiple parameters, and these parameters
 					may be optional. To add a second required parameter, annotate the
-					parameter with 
-					<a href="./apidocs/ca/uhn/fhir/rest/server/parameters/RequiredParam.html">@RequiredParam</a>.
-					To add an optional parameter (which will be passed in as <code>null</code> if no value
+					parameter with
+					<a href="./apidocs/ca/uhn/fhir/rest/server/parameters/RequiredParam.html">@RequiredParam</a>
+					.
+					To add an optional parameter (which will be passed in as
+					<code>null</code>
+					if no value
 					is supplied), annotate the method with
-					<a href="./apidocs/ca/uhn/fhir/rest/server/parameters/OptionalParam.html">@OptionalParam</a>.
+					<a href="./apidocs/ca/uhn/fhir/rest/server/parameters/OptionalParam.html">@OptionalParam</a>
+					.
 				</p>
-				
+
 				<p>
 					You may annotate a method with any combination of as many @RequiredParam and as many @OptionalParam
-					parameters as you want. It is valid to have only @RequiredParam parameters, or
+					parameters as you want. It is valid to have only @RequiredParam
+					parameters, or
 					only @OptionalParam parameters, or any combination of the two.
 				</p>
-			
+
 				<macro name="snippet">
 					<param name="id" value="searchOptionalParam" />
 					<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
 				</macro>
-				
+
 				<p>
-					Example URLs to invoke this method:<br/>
-					<code>http://fhir.example.com/Patient?family=SMITH</code><br/>
+					Example URLs to invoke this method:
+					<br />
+					<code>http://fhir.example.com/Patient?family=SMITH</code>
+					<br />
 					<code>http://fhir.example.com/Patient?family=SMITH&amp;given=JOHN</code>
 				</p>
-					
+
 			</subsection>
 
 			<subsection name="Composite (Multi-Valued) Parameters">
@@ -499,135 +542,157 @@
 				<p>
 					It is possible to accept multiple values of a single parameter
 					as well. This is useful in cases when you want to return a list
-					of resources with criteria matching a list of possible values. 
-					See the <a href="http://www.hl7.org/implement/standards/fhir/search.html#combining">FHIR Specification</a>
+					of resources with criteria matching a list of
+					possible values.
+					See the
+					<a href="http://www.hl7.org/implement/standards/fhir/search.html#combining">FHIR Specification</a>
 					for more information.
 				</p>
-				
+
 				<p>
 					The FHIR specification allows two types of composite parameters:
 				</p>
 				<ul>
 					<li>
-						Where a parameter may accept multiple comma separated values within a single value string 
-						(e.g. <code>?language=FR,NL</code>) this is treated as an <b>OR</b> relationship, and 
-						the search should return elements matching either one or the other. 
+						Where a parameter may accept multiple comma separated values within a single value string
+						(e.g.
+						<code>?language=FR,NL</code>
+						) this is treated as an
+						<b>OR</b>
+						relationship, and
+						the search should return elements matching either one or the other.
 					</li>
 					<li>
-						Where a parameter may accept multiple value strings for the same parameter name 
-						(e.g. <code>?language=FR&amp;language=NL</code>) this is treated as an <b>AND</b> relationship, 
-						and	the search should return only elements matching both. 
+						Where a parameter may accept multiple value strings for the same parameter name
+						(e.g.
+						<code>?language=FR&amp;language=NL</code>
+						) this is treated as an
+						<b>AND</b>
+						relationship,
+						and the search should return only elements matching both.
 					</li>
-				</ul> 
-				
+				</ul>
+
 				<h4>OR Relationship Query Parameters</h4>
-				
+
 				<p>
 					To accept a composite parameter, use a parameter type which implements the
 					<a href="./apidocs/ca/uhn/fhir/model/api/IQueryParameterOr.html">IQueryParameterOr</a>
 					interface. For example, to accept searches for
 					Observations matching any of a collection of names:
 				</p>
-				
+
 				<macro name="snippet">
 					<param name="id" value="searchMultiple" />
 					<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
 				</macro>
-				
+
 				<p>
-					Example URL to invoke this method:<br/>
+					Example URL to invoke this method:
+					<br />
 					<code>http://fhir.example.com/Observation?name=urn:fakenames|123,urn:fakenames|456</code>
 				</p>
-					
+
 				<h4>AND Relationship Query Parameters</h4>
-				
+
 				<p>
 					To accept a composite parameter, use a parameter type which implements the
 					<a href="./apidocs/ca/uhn/fhir/model/api/IQueryParameterAnd.html">IQueryParameterAnd</a>
 					interface.
 				</p>
-				
+
 				<p>
-					See the section below on <a href="#DATE_RANGES">date ranges</a> for
+					See the section below on
+					<a href="#DATE_RANGES">date ranges</a>
+					for
 					one example of an AND parameter.
 				</p>
-				
+
 			</subsection>
-			
+
 			<subsection name="Date Parameters - Simple">
 
 				<p>
 					The FHIR specification provides a sytax for specifying
-					dates (and date/times as well, but for simplicity we will just say dates here) 
+					dates (and date/times as well, but for simplicity we will just say dates here)
 					as search criteria.
 				</p>
 
 				<p>
-					Dates may be optionally prefixed with a qualifier. For example, the 
-					string <code>&gt;=2011-01-02</code> means any date on or after 2011-01-02.
-				</p>				
-				
+					Dates may be optionally prefixed with a qualifier. For example, the
+					string
+					<code>&gt;=2011-01-02</code>
+					means any date on or after 2011-01-02.
+				</p>
+
 				<p>
 					To accept a qualified date parameter, use the
 					QualifiedDateParam
-					parameter type. 
+					parameter type.
 				</p>
-				
+
 				<macro name="snippet">
 					<param name="id" value="dates" />
 					<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
 				</macro>
-				
+
 				<p>
-					Example URL to invoke this method:<br/>
+					Example URL to invoke this method:
+					<br />
 					<code>http://fhir.example.com/Observation?birthdate=&gt;=2011-01-02</code>
 				</p>
-				
+
 				<p>
 					Invoking a client of thie type involves the following syntax:
 				</p>
-				
+
 				<macro name="snippet">
 					<param name="id" value="dateClient" />
 					<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
 				</macro>
 
 			</subsection>
-			
-			<a name="DATE_RANGES"/>
+
+			<a name="DATE_RANGES" />
 			<subsection name="Date Parameters - Ranges">
 
 				<p>
-					A common scenario in searches is to allow searching for resources 
-					with values (i.e timestamps) within a range of dates. 
+					A common scenario in searches is to allow searching for resources
+					with values (i.e timestamps) within a range of dates.
 				</p>
 
 				<p>
 					FHIR allows for multiple parameters with the same key, and interprets
-					these as being an "AND" set. So, for example, a range of<br/> 
-					<code>DATE &gt;= 2011-01-01</code> and <code>DATE &lt; 2011-02-01</code><br/>
+					these as being an "AND" set. So, for example, a range of
+					<br />
+					<code>DATE &gt;= 2011-01-01</code>
+					and
+					<code>DATE &lt; 2011-02-01</code>
+					<br />
 					can be interpreted as any date within January 2011.
 				</p>
 
 				<p>
 					The following snippet shows how to accept such a range, and combines it
 					with a specific identifier, which is a common scenario. (i.e. Give me a list
-					of observations for a specific patient within a given date range)
-				</p>				
+					of observations for a
+					specific patient within a given date range)
+				</p>
 				<macro name="snippet">
 					<param name="id" value="dateRange" />
 					<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
 				</macro>
-				
+
 				<p>
-					Example URL to invoke this method:<br/>
+					Example URL to invoke this method:
+					<br />
 					<code>http://fhir.example.com/Observation?subject.identifier=7000135&amp;date=&gt;=2011-01-01&amp;date=&lt;2011-02-01</code>
 				</p>
-				
+
 				<p>
 					Invoking a client of this type involves the following syntax:
 				</p>
-				
+
 				<macro name="snippet">
 					<param name="id" value="dateClient" />
 					<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
@@ -636,13 +701,14 @@
 			</subsection>
 
 			<subsection name="Resource Includes (_include)">
-			
+
 				<p>
 					FHIR allows clients to request that specific linked resources be included
 					as contained resources, which means that they will be "embedded" in a special
-					container called "contained" within the parent resource. 
+					container called
+					"contained" within the parent resource.
 				</p>
-				
+
 				<p>
 					HAPI allows you to add a parameter for accepting includes if you wish
 					to support them for specific search methods.
@@ -652,79 +718,141 @@
 					<param name="id" value="pathSpec" />
 					<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
 				</macro>
-				
+
 				<p>
-					Example URL to invoke this method:<br/>
+					Example URL to invoke this method:
+					<br />
 					<code>http://fhir.example.com/DiagnosticReport?subject.identifier=7000135&amp;_include=DiagnosticReport.subject</code>
 				</p>
-				
+
 			</subsection>
 
 			<subsection name="Named Queries (_query)">
-			
+
 				<p>
-					FHIR supports <a href="http://www.hl7.org/implement/standards/fhir/search.html#advanced">named queries</a>,
+					FHIR supports
+					<a href="http://www.hl7.org/implement/standards/fhir/search.html#advanced">named queries</a>
+					,
 					which may have specific behaviour defined. The following example shows how to create a Search
-					operation with a name. 
+					operation with a name.
 				</p>
-				
+
 				<p>
 					This operation can only be invoked by explicitly specifying the given query name
-					in the request URL. Note that the query does not need to take any parameters.  
+					in the request URL. Note that the query does not need to take any parameters.
 				</p>
 
 				<macro name="snippet">
 					<param name="id" value="searchNamedQuery" />
 					<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
 				</macro>
-				
+
 				<p>
-					Example URL to invoke this method:<br/>
+					Example URL to invoke this method:
+					<br />
 					<code>http://fhir.example.com/Patient?_query=namedQuery1&amp;someparam=value</code>
 				</p>
-				
+
 			</subsection>
 
-			<a name="type_validate"/>
+			<a name="type_validate" />
 		</section>
 
 		<!-- ****************************************************************** -->
 		<!-- ****************************************************************** -->
 		<!-- ****************************************************************** -->
-	
+
 		<section name="Type Level - Validate">
-			
+
 			<p>
-				Not yet implemented
+				The
+				<a href="http://hl7.org/implement/standards/fhir/http.html#validate">
+					<b>validate</b>
+				</a>
+				tests whether a resource passes business validation, and would be
+				acceptable for saving to a server (e.g. by a create or update method).
+			</p>
+			<p>
+				Validate methods must be annotated with the
+				<a href="./apidocs/ca/uhn/fhir/rest/annotation/Validate.html">@Validate</a>
+				annotation, and have a parameter annotated with the
+				<a href="./apidocs/ca/uhn/fhir/rest/annotation/ResourceParam.html">@Resource</a>
+				annotation. This parameter contains the resource instance to be created.
+			</p>
+			<p>
+				Validate methods may optionally also have a parameter
+				oftype IdDt annotated with the
+				<a href="./apidocs/ca/uhn/fhir/rest/annotation/IdParam.html">@IdParam</a>
+				annotation. This parameter contains the resource ID (see the
+				<a href="http://hl7.org/implement/standards/fhir/http.html#validation">FHIR specification</a>
+				for details on how this is used)
+			</p>
+			<p>
+				Validate methods must return normally if the resource validates successfully,
+				or throw an
+				<a href="./apidocs/ca/uhn/fhir/rest/server/exceptions/UnprocessableEntityException.html">UnprocessableEntityException</a>
+				or
+				<a href="./apidocs/ca/uhn/fhir/rest/server/exceptions/InvalidRequestException.html">InvalidRequestException</a>
+				if the validation fails.
+			</p>
+			<p>
+				Validate methods must return either:
+			</p>
+			<ul>
+				<li>
+					<b>void</b>
+					- The method should throw an exception for a validation failure, or return normally.
+				</li>
+				<li>
+					An object of type
+					<a href="./apidocs/ca/uhn/fhir/rest/api/MethodOutcome.html">MethodOutcome</a>. The
+					MethodOutcome may optionally be populated with an OperationOutcome resource, which
+					will be returned to the client if it exists.
+				</li>
+			</ul>
+			<p>
+				The following snippet shows how to define a server validate method:
+			</p>
+
+			<macro name="snippet">
+				<param name="id" value="validate" />
+				<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
+			</macro>
+
+			<p>
+				Example URL to invoke this method (this would be invoked using an HTTP POST,
+				with the resource in the POST body):
+				<br />
+				<code>http://fhir.example.com/Patient/_validate</code>
 			</p>
 			
-			<a name="system_conformance"/>
+			<a name="system_conformance" />
 		</section>
 
 		<!-- ****************************************************************** -->
 		<!-- ****************************************************************** -->
 		<!-- ****************************************************************** -->
-	
+
 		<section name="System Level - Conformance">
-			
+
 			<p>
 				FHIR defines that a FHIR Server must be able to export a conformance statement,
 				which is an instance of the
 				<a href="http://hl7.org/implement/standards/fhir/conformance.html">Conformance</a>
 				resource describing the server itself.
 			</p>
-			
+
 			<p>
 				The HAPI FHIR RESTful server will automatically export such
 				a conformance statement. See the
 				<a href="./doc_rest_server.html">RESTful Server</a>
 				documentation for more information.
 			</p>
-			
+
 			<p>
 				If you wish to override this default behaviour by creating
 				your own metadata provider, you simply need to define a class
-				with a method annotated using the 
+				with a method annotated using the
 				<a href="./apidocs/ca/uhn/fhir/rest/annotation/Metadata.html">@Metadata</a>
 				annotation.
 			</p>
@@ -732,11 +860,11 @@
 				<param name="id" value="metadataProvider" />
 				<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
 			</macro>
-			
+
 			<p>
-				To create a Client which can retrieve a Server's conformance 
+				To create a Client which can retrieve a Server's conformance
 				statement is simple. First, define your Client Interface, using
-				the @Metadata annotation:  
+				the @Metadata annotation:
 			</p>
 			<macro name="snippet">
 				<param name="id" value="metadataClient" />
@@ -745,74 +873,88 @@
 
 			<p>
 				Then use the standard
-				<a href="doc_rest_client.html">RESTful Client</a> mechanism for instantiating
+				<a href="doc_rest_client.html">RESTful Client</a>
+				mechanism for instantiating
 				a client:
 			</p>
 			<macro name="snippet">
 				<param name="id" value="metadataClientUsage" />
 				<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
 			</macro>
-			
-			<a name="system_transaction"/>
+
+			<a name="system_transaction" />
 		</section>
-			
+
 		<!-- ****************************************************************** -->
 		<!-- ****************************************************************** -->
 		<!-- ****************************************************************** -->
-	
+
 		<section name="System Level - Transaction">
-			
+
 			<p>
 				Not yet implemented
 			</p>
-			
-			<a name="system_search"/>
+
+			<a name="system_search" />
 		</section>
-			
+
 		<!-- ****************************************************************** -->
 		<!-- ****************************************************************** -->
 		<!-- ****************************************************************** -->
-	
+
 		<section name="System Level - Search">
-			
+
 			<p>
 				Not yet implemented
 			</p>
-			
-			<a name="history"/>
+
+			<a name="history" />
 		</section>
-			
+
 		<!-- ****************************************************************** -->
 		<!-- ****************************************************************** -->
 		<!-- ****************************************************************** -->
-	
+
 		<section name="History (Instance, Type, Server)">
-			
+
 			<p>
-				The 
-				<a href="http://hl7.org/implement/standards/fhir/http.html#history"><b>history</b></a> 
-				operation retrieves a historical collection of all versions of a single resource 
-				<i>(instance history)</i>, all resources of a given type <i>(type history)</i>,
-				or all resources of any type on a server <i>(server history)</i>.
+				The
+				<a href="http://hl7.org/implement/standards/fhir/http.html#history">
+					<b>history</b>
+				</a>
+				operation retrieves a historical collection of all versions of a single resource
+				<i>(instance history)</i>
+				, all resources of a given type
+				<i>(type history)</i>
+				,
+				or all resources of any type on a server
+				<i>(server history)</i>
+				.
 			</p>
 			<p>
-				History methods must be annotated with the 
+				History methods must be annotated with the
 				<a href="./apidocs/ca/uhn/fhir/rest/annotation/History.html">@History</a>
 				annotation, and will have additional requirements depending on the kind
 				of history method intended:
 			</p>
 			<ul>
 				<li>
-					For an <b>Instance History</b> method, the method must have a parameter
-					annotated with the 
+					For an
+					<b>Instance History</b>
+					method, the method must have a parameter
+					annotated with the
 					<a href="./apidocs/ca/uhn/fhir/rest/annotation/IdParam.html">@IdParam</a>
-					annotation, indicating the ID of the resource for which to return history. 
+					annotation, indicating the ID of the resource for which to return history.
 				</li>
 				<li>
-					For an <b>Type History</b> method, the method must not have any @IdParam parameter.
+					For an
+					<b>Type History</b>
+					method, the method must not have any @IdParam parameter.
 				</li>
 				<li>
-					For an <b>Server History</b> method, the method must not have any @IdParam parameter
+					For an
+					<b>Server History</b>
+					method, the method must not have any @IdParam parameter
 					and must not be found in a ResourceProvider definition.
 					<!-- TODO: make ResourceProvider a link to a defintion of these on the RESTFul server page -->
 				</li>
@@ -820,7 +962,7 @@
 			<p>
 				The following snippet shows how to define a history method on a server:
 			</p>
-			
+
 			<macro name="snippet">
 				<param name="id" value="history" />
 				<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
@@ -829,14 +971,14 @@
 			<p>
 				The following snippet shows how to define various history methods in a client.
 			</p>
-			
+
 			<macro name="snippet">
 				<param name="id" value="historyClient" />
 				<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
 			</macro>
-			
+
 		</section>
-			
+
 	</body>
 
 </document>

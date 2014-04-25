@@ -20,7 +20,6 @@ package ca.uhn.fhir.rest.method;
  * #L%
  */
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.HashSet;
@@ -36,11 +35,10 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
 import ca.uhn.fhir.rest.client.GetClientInvocation;
-import ca.uhn.fhir.rest.param.IParameter;
 import ca.uhn.fhir.rest.param.BaseQueryParameter;
+import ca.uhn.fhir.rest.param.IParameter;
 import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.Constants;
-import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
@@ -132,6 +130,10 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 		}
 		if (theRequest.getRequestType() == RequestType.POST && !Constants.PARAM_SEARCH.equals(theRequest.getOperation())) {
 			ourLog.trace("Method {} doesn't match because request type is POST but operation is not _search: {}", theRequest.getId(), theRequest.getOperation());
+			return false;
+		}
+		if (theRequest.getRequestType() != RequestType.GET && theRequest.getRequestType() != RequestType.POST) {
+			ourLog.trace("Method {} doesn't match because request type is {}", theRequest.getOperation());
 			return false;
 		}
 

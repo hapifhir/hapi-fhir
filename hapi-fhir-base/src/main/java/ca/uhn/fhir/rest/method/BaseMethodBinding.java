@@ -51,6 +51,7 @@ import ca.uhn.fhir.rest.annotation.Metadata;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.annotation.Update;
+import ca.uhn.fhir.rest.annotation.Validate;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.BaseClientInvocation;
 import ca.uhn.fhir.rest.client.exceptions.NonFhirResponseException;
@@ -139,8 +140,9 @@ public abstract class BaseMethodBinding {
 		Update update = theMethod.getAnnotation(Update.class);
 		Delete delete = theMethod.getAnnotation(Delete.class);
 		History history = theMethod.getAnnotation(History.class);
+		Validate validate = theMethod.getAnnotation(Validate.class);
 		// ** if you add another annotation above, also add it to the next line:
-		if (!verifyMethodHasZeroOrOneOperationAnnotation(theMethod, read, search, conformance, create, update, delete, history)) {
+		if (!verifyMethodHasZeroOrOneOperationAnnotation(theMethod, read, search, conformance, create, update, delete, history, validate)) {
 			return null;
 		}
 
@@ -188,6 +190,8 @@ public abstract class BaseMethodBinding {
 			returnTypeFromAnnotation = create.type();
 		} else if (update != null) {
 			returnTypeFromAnnotation = update.type();
+		} else if (validate != null) {
+			returnTypeFromAnnotation = validate.type();
 		}
 
 		if (returnTypeFromRp != null) {
@@ -232,6 +236,8 @@ public abstract class BaseMethodBinding {
 			return new DeleteMethodBinding(theMethod, theContext, theProvider);
 		} else if (history != null) {
 			return new HistoryMethodBinding(theMethod, theContext, theProvider);
+		} else if (validate != null) {
+			return new ValidateMethodBinding(theMethod, theContext, theProvider);
 		} else {
 			throw new ConfigurationException("Did not detect any FHIR annotations on method '" + theMethod.getName() + "' on type: " + theMethod.getDeclaringClass().getCanonicalName());
 		}

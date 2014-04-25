@@ -41,7 +41,6 @@ import ca.uhn.fhir.rest.server.EncodingUtil;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 
 abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOutcomeReturningMethodBinding {
 	private int myResourceParameterIndex;
@@ -63,8 +62,7 @@ abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOu
 		}
 
 		if (resourceParameter == null) {
-			throw new ConfigurationException("Method " + theMethod.getName() + " in type " + theMethod.getDeclaringClass().getCanonicalName() + " does not have a parameter annotated with @"
-					+ ResourceParam.class.getSimpleName());
+			throw new ConfigurationException("Method " + theMethod.getName() + " in type " + theMethod.getDeclaringClass().getCanonicalName() + " does not have a parameter annotated with @" + ResourceParam.class.getSimpleName());
 		}
 
 	}
@@ -129,14 +127,20 @@ abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOu
 
 		theServer.addHapiHeader(theResponse);
 
-		theResponse.setContentType(Constants.CT_TEXT);
-
-		Writer writer = theResponse.getWriter();
-		try {
-			writer.append("Resource has been created");
-		} finally {
+		if (response != null && response.getOperationOutcome() != null) {
+			theResponse.setContentType(encoding.getResourceContentType());
+			Writer writer = theResponse.getWriter();
+			try {
+				parser.encodeResourceToWriter(response.getOperationOutcome(), writer);
+			} finally {
+				writer.close();
+			}
+		} else {
+			theResponse.setContentType(Constants.CT_TEXT);
+			Writer writer = theResponse.getWriter();
 			writer.close();
 		}
+
 		// getMethod().in
 	}
 

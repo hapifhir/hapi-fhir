@@ -28,6 +28,8 @@ import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
  * <p>
  * This exception will generally contain an {@link OperationOutcome} instance which details the failure.
  * </p>
+ * 
+ * @see InvalidRequestException Which corresponds to an <b>HTTP 400 Bad Request</b> failure
  */
 public class UnprocessableEntityException extends BaseServerResponseException {
 

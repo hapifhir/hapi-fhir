@@ -28,22 +28,26 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
-import ca.uhn.fhir.rest.annotation.Create;
+import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.annotation.Validate;
 import ca.uhn.fhir.rest.client.BaseClientInvocation;
-import ca.uhn.fhir.rest.client.PostClientInvocation;
+import ca.uhn.fhir.rest.client.PutClientInvocation;
 import ca.uhn.fhir.rest.method.SearchMethodBinding.RequestType;
+import ca.uhn.fhir.rest.server.Constants;
 
-public class CreateMethodBinding extends BaseOutcomeReturningMethodBindingWithResourceParam {
+class ValidateMethodBinding extends BaseOutcomeReturningMethodBindingWithResourceParam {
 
-	
+	private Integer myIdParameterIndex;
 
-	public CreateMethodBinding(Method theMethod, FhirContext theContext, Object theProvider) {
-		super(theMethod, theContext, Create.class, theProvider);
+	public ValidateMethodBinding(Method theMethod, FhirContext theContext, Object theProvider) {
+		super(theMethod, theContext, Validate.class, theProvider);
+
+		myIdParameterIndex = Util.findIdParameterIndex(theMethod);
 	}
 
 	@Override
 	public RestfulOperationTypeEnum getResourceOperationType() {
-		return RestfulOperationTypeEnum.CREATE;
+		return RestfulOperationTypeEnum.VALIDATE;
 	}
 
 	@Override
@@ -52,21 +56,47 @@ public class CreateMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 	}
 
 	@Override
-	protected Set<RequestType> provideAllowableRequestTypes() {
-		return Collections.singleton(RequestType.POST);
+	protected void addParametersForServerRequest(Request theRequest, Object[] theParams) {
+		if (myIdParameterIndex != null) {
+			theParams[myIdParameterIndex] = theRequest.getId();
+		}
 	}
 
 	@Override
 	protected BaseClientInvocation createClientInvocation(Object[] theArgs, IResource resource, String resourceName) {
 		StringBuilder urlExtension = new StringBuilder();
 		urlExtension.append(resourceName);
+		urlExtension.append(Constants.PARAM_VALIDATE);
 
-		return new PostClientInvocation(getContext(), resource, urlExtension.toString());
+		if (myIdParameterIndex != null) {
+			IdDt idDt = (IdDt) theArgs[myIdParameterIndex];
+			if (idDt != null && idDt.isEmpty() == false) {
+				String id = idDt.getValue();
+				urlExtension.append('/');
+				urlExtension.append(id);
+			}
+		}
+
+		PutClientInvocation retVal = new PutClientInvocation(getContext(), resource, urlExtension.toString());
+
+		return retVal;
+	}
+
+
+	@Override
+	protected boolean allowVoidReturnType() {
+		return true;
 	}
 
 	@Override
+	protected Set<RequestType> provideAllowableRequestTypes() {
+		return Collections.singleton(RequestType.POST);
+	}
+
+
+	@Override
 	protected String getMatchingOperation() {
-		return null;
+		return Constants.PARAM_VALIDATE;
 	}
 
 }

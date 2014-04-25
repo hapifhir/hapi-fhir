@@ -69,6 +69,7 @@ import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.annotation.Update;
+import ca.uhn.fhir.rest.annotation.Validate;
 import ca.uhn.fhir.rest.annotation.VersionIdParam;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.param.CodingListParam;
@@ -854,7 +855,60 @@ public class ResfulServerMethodTest {
 		assertEquals("http://localhost:" + ourPort + "/Patient/001/_history/002", status.getFirstHeader("Location").getValue());
 
 	}
+	
+	@Test
+	public void testValidate() throws Exception {
 
+		Patient patient = new Patient();
+		patient.addName().addFamily("FOO");
+
+		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/_validate");
+		httpPost.setEntity(new StringEntity(new FhirContext().newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+
+		HttpResponse status = ourClient.execute(httpPost);
+
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		ourLog.info("Response was:\n{}", responseContent);
+
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		OperationOutcome oo = new FhirContext().newXmlParser().parseResource(OperationOutcome.class, responseContent);
+		assertEquals("it passed", oo.getIssueFirstRep().getDetails().getValue());
+
+		// Now should fail
+		
+		patient = new Patient();
+		patient.addName().addFamily("BAR");
+
+		httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/_validate");
+		httpPost.setEntity(new StringEntity(new FhirContext().newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+
+		status = ourClient.execute(httpPost);
+
+		responseContent = IOUtils.toString(status.getEntity().getContent());
+		ourLog.info("Response was:\n{}", responseContent);
+
+		assertEquals(422, status.getStatusLine().getStatusCode());
+		oo = new FhirContext().newXmlParser().parseResource(OperationOutcome.class, responseContent);
+		assertEquals("it failed", oo.getIssueFirstRep().getDetails().getValue());
+
+		// Should fail with outcome
+		
+		patient = new Patient();
+		patient.addName().addFamily("BAZ");
+
+		httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/_validate");
+		httpPost.setEntity(new StringEntity(new FhirContext().newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+
+		status = ourClient.execute(httpPost);
+
+		responseContent = IOUtils.toString(status.getEntity().getContent());
+		ourLog.info("Response was:\n{}", responseContent);
+
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertEquals("", responseContent);
+
+	}
+	
 	@Test
 	public void testUpdateWithVersion() throws Exception {
 
@@ -973,6 +1027,22 @@ public class ResfulServerMethodTest {
 			return new MethodOutcome(true, id, version);
 		}
 
+		@Validate()
+		public MethodOutcome validatePatient(@ResourceParam Patient thePatient) {
+			if (thePatient.getNameFirstRep().getFamilyFirstRep().getValueNotNull().equals("FOO")) {
+				MethodOutcome methodOutcome = new MethodOutcome();
+				OperationOutcome oo = new OperationOutcome();
+				oo.addIssue().setDetails("it passed");
+				methodOutcome.setOperationOutcome(oo);
+				return methodOutcome;
+			}
+			if (thePatient.getNameFirstRep().getFamilyFirstRep().getValueNotNull().equals("BAR")) {
+				throw new UnprocessableEntityException("it failed");
+			}
+			return new MethodOutcome();
+		}
+
+		
 		private Patient createPatient1() {
 			Patient patient = new Patient();
 			patient.addIdentifier();

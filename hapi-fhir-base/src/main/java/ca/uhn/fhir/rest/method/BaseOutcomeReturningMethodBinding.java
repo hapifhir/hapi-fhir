@@ -24,7 +24,6 @@ import java.io.IOException;
 import java.io.PushbackReader;
 import java.io.Reader;
 import java.io.Writer;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
@@ -50,7 +49,6 @@ import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingUtil;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -220,12 +218,22 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding {
 		if (!getResourceName().equals(theRequest.getResourceName())) {
 			return false;
 		}
-		if (StringUtils.isNotBlank(theRequest.getOperation())) {
+		if (getMatchingOperation() == null && StringUtils.isNotBlank(theRequest.getOperation())) {
+			return false;
+		}
+		if (getMatchingOperation() != null && !getMatchingOperation().equals(theRequest.getOperation())) {
 			return false;
 		}
 		return true;
 	}
 
+	/**
+	 * For servers, this method will match only incoming requests 
+	 * that match the given operation, or which have no operation in the
+	 * URL if this method returns null.
+	 */
+	protected abstract String getMatchingOperation();
+	
 	/**
 	 * Subclasses may override to allow a void method return type, which is allowable for some methods (e.g. delete)
 	 */

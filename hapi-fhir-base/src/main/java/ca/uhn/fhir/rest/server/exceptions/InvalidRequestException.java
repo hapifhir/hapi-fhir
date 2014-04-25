@@ -20,6 +20,14 @@ package ca.uhn.fhir.rest.server.exceptions;
  * #L%
  */
 
+/**
+ * RESTful method exception which corresponds to the <b>HTTP 400 Bad Request</b> status.
+ * This status indicates that the client's message was invalid (e.g. not a valid FHIR Resource
+ * per the specifications), as opposed to the {@link InvalidRequestException} which indicates
+ * that data does not pass business rule validation on the server.
+ * 
+ * @see UnprocessableEntityException Which should be used for business level validation failures
+ */
 public class InvalidRequestException extends BaseServerResponseException {
 
 	private static final long serialVersionUID = 1L;

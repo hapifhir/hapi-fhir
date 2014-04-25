@@ -59,6 +59,7 @@ public class Constants {
 	public static final String PARAM_SEARCH = "_search";
 	public static final String HEADER_LAST_MODIFIED = "Last-Modified";
 	public static final String HEADER_LAST_MODIFIED_LOWERCASE = HEADER_LAST_MODIFIED.toLowerCase();
+	public static final String PARAM_VALIDATE = "_validate";
 
 	static {
 		Map<String, EncodingUtil> valToEncoding = new HashMap<String, EncodingUtil>();

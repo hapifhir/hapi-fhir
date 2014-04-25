@@ -143,4 +143,11 @@ public class DeleteMethodBinding extends BaseOutcomeReturningMethodBinding {
 		theParams[myIdParameterIndex] = new IdDt(id);
 	}
 
+
+	@Override
+	protected String getMatchingOperation() {
+		return null;
+	}
+
+	
 }
