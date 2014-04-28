@@ -29,7 +29,7 @@ import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.SimpleSetter;
 import ca.uhn.fhir.parser.DataFormatException;
 
-@DatatypeDef(name="instant")
+@DatatypeDef(name = "instant")
 public class InstantDt extends BaseDateTimeDt {
 
 	/**
@@ -38,10 +38,32 @@ public class InstantDt extends BaseDateTimeDt {
 	public static final TemporalPrecisionEnum DEFAULT_PRECISION = TemporalPrecisionEnum.MILLI;
 
 	/**
-	 * Constructor
+	 * Constructor which creates an InstantDt with <b>no timne value</b>. Note that unlike the default constructor for the Java {@link Date} or {@link Calendar} objects, this constructor does not
+	 * initialize the object with the current time.
+	 * 
+	 * @see #withCurrentTime() to create a new object that has been initialized with the current time.
 	 */
 	public InstantDt() {
 		super();
+	}
+
+	/**
+	 * Create a new DateTimeDt
+	 */
+	public InstantDt(Calendar theCalendar) {
+		setValue(theCalendar.getTime());
+		setPrecision(DEFAULT_PRECISION);
+		setTimeZone(theCalendar.getTimeZone());
+	}
+
+	/**
+	 * Create a new DateTimeDt
+	 */
+	@SimpleSetter(suffix = "WithMillisPrecision")
+	public InstantDt(@SimpleSetter.Parameter(name = "theDate") Date theDate) {
+		setValue(theDate);
+		setPrecision(DEFAULT_PRECISION);
+		setTimeZone(TimeZone.getDefault());
 	}
 
 	/**
@@ -59,30 +81,11 @@ public class InstantDt extends BaseDateTimeDt {
 	}
 
 	/**
-	 * Create a new DateTimeDt
-	 */
-	@SimpleSetter(suffix="WithMillisPrecision")
-	public InstantDt(@SimpleSetter.Parameter(name="theDate") Date theDate) {
-		setValue(theDate);
-		setPrecision(DEFAULT_PRECISION);
-		setTimeZone(TimeZone.getDefault());
-	}
-
-	/**
-	 * Create a new DateTimeDt
-	 */
-	public InstantDt(Calendar theCalendar) {
-		setValue(theCalendar.getTime());
-		setPrecision(DEFAULT_PRECISION);
-		setTimeZone(theCalendar.getTimeZone());
-	}
-	
-	/**
 	 * Create a new InstantDt from a string value
 	 * 
-	 * @param theString The string representation of the string. Must be in 
-	 * a valid format according to the FHIR specification
-	 * @throws DataFormatException 
+	 * @param theString
+	 *            The string representation of the string. Must be in a valid format according to the FHIR specification
+	 * @throws DataFormatException
 	 */
 	public InstantDt(String theString) {
 		setValueAsString(theString);
@@ -100,13 +103,19 @@ public class InstantDt extends BaseDateTimeDt {
 	}
 
 	/**
-	 * Sets the value of this instant to the current time (from the system clock)
-	 * and the local/default timezone (as retrieved using {@link TimeZone#getDefault()}. This
-	 * TimeZone is generally obtained from the underlying OS.
+	 * Sets the value of this instant to the current time (from the system clock) and the local/default timezone (as retrieved using {@link TimeZone#getDefault()}. This TimeZone is generally obtained
+	 * from the underlying OS.
 	 */
 	public void setToCurrentTimeInLocalTimeZone() {
 		setValue(new Date());
 		setTimeZone(TimeZone.getDefault());
+	}
+
+	/**
+	 * Factory method which creates a new InstantDt and initializes it with the current time.
+	 */
+	public static InstantDt withCurrentTime() {
+		return new InstantDt(new Date());
 	}
 
 }

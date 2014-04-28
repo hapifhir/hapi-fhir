@@ -20,9 +20,11 @@ public class ExampleRestfulServlet extends RestfulServer {
 	private static final long serialVersionUID = 1L;
 
 	/**
-	 * Constructor
+	 * This method is called automatically when the
+	 * servlet is initializing.
 	 */
-	public ExampleRestfulServlet() {
+	@Override
+	public void initialize() {
 		
 		/*
 		 * Two resource providers are defined

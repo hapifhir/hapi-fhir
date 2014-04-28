@@ -45,9 +45,9 @@ import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.annotation.Since;
 import ca.uhn.fhir.testutil.RandomServerPortProvider;
 
-public class NonResourceProviderServerTest {
+public class PlainProviderTest {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(NonResourceProviderServerTest.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(PlainProviderTest.class);
 	private int myPort;
 	private Server myServer;
 	private CloseableHttpClient myClient;

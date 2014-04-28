@@ -1,0 +1,16 @@
+BODY {
+	font-family: sans-serif;
+}
+
+DIV.bodyHeaderBlock {
+	background-color: #E0E0E0;
+	margin-top: 5px;
+	border-radius: 5px;
+	padding: 5px;
+}
+
+TD.propertyKeyCell {
+	background-color: #E0E0FF;
+	border-radius: 3px;
+	padding: 3px;
+}

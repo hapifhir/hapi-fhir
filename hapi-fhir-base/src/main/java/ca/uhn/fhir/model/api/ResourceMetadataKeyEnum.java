@@ -24,6 +24,12 @@ import ca.uhn.fhir.model.primitive.InstantDt;
 
 public enum ResourceMetadataKeyEnum {
 
+	/**
+	 * The value for this key is the version ID of the resource object.
+	 * <p>
+	 * Values for this key are of type <b>{@link IdDt}</b>
+	 * </p>
+	 */
 	VERSION_ID,
 	
 	/**
@@ -31,7 +37,7 @@ public enum ResourceMetadataKeyEnum {
 	 * is defined by FHIR as "Time resource copied into the feed", which is generally 
 	 * best left to the current time. 
 	 * <p>
-	 * Values for this key are of type {@link InstantDt}
+	 * Values for this key are of type <b>{@link InstantDt}</b>
 	 * </p>
 	 * <p>
 	 * <b>Server Note</b>: In servers, it is generally advisable to leave this
@@ -49,7 +55,7 @@ public enum ResourceMetadataKeyEnum {
 	 * used for populating the "Last-Modified" header in the case of methods
 	 * that return a single resource (read, vread, etc.)
 	 * <p>
-	 * Values for this key are of type {@link InstantDt}
+	 * Values for this key are of type <b>{@link InstantDt}</b>
 	 * </p>
 	 * 
 	 * @see InstantDt

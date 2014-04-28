@@ -1,35 +1,49 @@
 package ca.uhn.example.rest;
 
-import java.util.ArrayList;
+import java.util.Deque;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.dstu.composite.HumanNameDt;
 import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
 import ca.uhn.fhir.model.dstu.valueset.IssueSeverityEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
+import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.annotation.VersionIdParam;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 
 /**
- * All resource providers must implement IResourceProvider
+ * This is a resource provider which stores Patient resources in memory using a HashMap. This is obviously not a production-ready solution for many reasons, but it is useful to help illustrate how to
+ * build a fully-functional server.
  */
 public class RestfulPatientResourceProvider implements IResourceProvider {
 
-	private Map<Long, Patient> myIdToPatientMap = new HashMap<Long, Patient>();
+	/**
+	 * This map has a resource ID as a key, and each key maps to a Deque list containing all versions of the resource with that ID.
+	 */
+	private Map<Long, Deque<Patient>> myIdToPatientVersions = new HashMap<Long, Deque<Patient>>();
+
+	/**
+	 * This is used to generate new IDs
+	 */
 	private long myNextId = 1;
 
 	/**
@@ -43,37 +57,70 @@ public class RestfulPatientResourceProvider implements IResourceProvider {
 		patient.addName().addFamily("Test");
 		patient.getName().get(0).addGiven("PatientOne");
 		patient.setGender(AdministrativeGenderCodesEnum.F);
-		myIdToPatientMap.put(myNextId++, patient);
+
+		LinkedList<Patient> list = new LinkedList<Patient>();
+		list.add(patient);
+		myIdToPatientVersions.put(myNextId++, list);
+
 	}
 
 	/**
-	 * The getResourceType method comes from IResourceProvider, and must be overridden to indicate what type of resource this provider supplies.
-	 */
-	@Override
-	public Class<Patient> getResourceType() {
-		return Patient.class;
-	}
-
-	/**
-	 * The "@Read" annotation indicates that this method supports the read operation. Read operations should return a single resource instance.
+	 * Stores a new version of the patient in memory so that it
+	 * can be retrieved later.
 	 * 
-	 * @param theId
-	 *            The read operation takes one parameter, which must be of type IdDt and must be annotated with the "@Read.IdParam" annotation.
-	 * @return Returns a resource matching this identifier, or null if none exists.
+	 * @param thePatient The patient resource to store
+	 * @param theId The ID of the patient to retrieve
 	 */
-	@Read()
-	public Patient getPatientById(@IdParam IdDt theId) {
-		Patient retVal;
-		try {
-			retVal = myIdToPatientMap.get(theId.asLong());
-		} catch (NumberFormatException e) {
-			/*
-			 * If we can't parse the ID as a long, it's not valid so this is an unknown resource
-			 */
-			throw new ResourceNotFoundException(theId);
+	private void addNewVersion(Patient thePatient, Long theId) {
+		InstantDt publishedDate;
+		if (!myIdToPatientVersions.containsKey(theId)) {
+			myIdToPatientVersions.put(theId, new LinkedList<Patient>());
+			publishedDate = InstantDt.withCurrentTime();
+		} else {
+			Patient currentPatitne = myIdToPatientVersions.get(theId).getLast();
+			Map<ResourceMetadataKeyEnum, Object> resourceMetadata = currentPatitne.getResourceMetadata();
+			publishedDate = (InstantDt) resourceMetadata.get(ResourceMetadataKeyEnum.PUBLISHED);
 		}
+
+		/*
+		 * PUBLISHED time will always be set to the time that the first
+		 * version was stored. UPDATED time is set to the time that the new
+		 * version was stored. 
+		 */
+		thePatient.getResourceMetadata().put(ResourceMetadataKeyEnum.PUBLISHED, publishedDate);
+		thePatient.getResourceMetadata().put(ResourceMetadataKeyEnum.UPDATED, InstantDt.withCurrentTime());
+
+		Deque<Patient> existingVersions = myIdToPatientVersions.get(theId);
 		
-		return retVal;
+		/*
+		 * We just use the current number of versions as the next version number
+		 */
+		IdDt version = new IdDt(existingVersions.size());
+		thePatient.getResourceMetadata().put(ResourceMetadataKeyEnum.VERSION_ID, version);
+		
+		existingVersions.add(thePatient);
+	}
+
+	/**
+	 * The "@Search" annotation indicates that this method supports the search operation. You may have many different method annotated with this annotation, to support many different search criteria.
+	 * This example searches by family name.
+	 * 
+	 * @param theIdentifier
+	 *            This operation takes one parameter which is the search criteria. It is annotated with the "@Required" annotation. This annotation takes one argument, a string containing the name of
+	 *            the search criteria. The datatype here is StringDt, but there are other possible parameter types depending on the specific search criteria.
+	 * @return This method returns a list of Patients. This list may contain multiple matching resources, or it may also be empty.
+	 */
+	@Create()
+	public MethodOutcome createPatient(@ResourceParam Patient thePatient) {
+		validateResource(thePatient);
+
+		// Here we are just generating IDs sequentially
+		long id = myNextId++;
+
+		addNewVersion(thePatient, id);
+
+		// Let the caller know the ID of the newly created resource
+		return new MethodOutcome(new IdDt(id));
 	}
 
 	/**
@@ -87,14 +134,14 @@ public class RestfulPatientResourceProvider implements IResourceProvider {
 	 */
 	@Search()
 	public List<Patient> findPatientsByName(@RequiredParam(name = Patient.SP_FAMILY) StringDt theFamilyName) {
-		ArrayList<Patient> retVal = new ArrayList<Patient>();
-		
+		LinkedList<Patient> retVal = new LinkedList<Patient>();
+
 		/*
 		 * Look for all patients matching the name
 		 */
-		for (Patient nextPatient : myIdToPatientMap.values()) {
-			NAMELOOP:
-			for (HumanNameDt nextName : nextPatient.getName()) {
+		for (Deque<Patient> nextPatientList : myIdToPatientVersions.values()) {
+			Patient nextPatient = nextPatientList.getLast();
+			NAMELOOP: for (HumanNameDt nextName : nextPatient.getName()) {
 				for (StringDt nextFamily : nextName.getFamily()) {
 					if (theFamilyName.equals(nextFamily)) {
 						retVal.add(nextPatient);
@@ -103,64 +150,128 @@ public class RestfulPatientResourceProvider implements IResourceProvider {
 				}
 			}
 		}
-		
+
 		return retVal;
 	}
-
 	
 	/**
-	 * The "@Create" annotation indicates that this method supports creating a new resource
+	 * The getResourceType method comes from IResourceProvider, and must be overridden to indicate what type of resource this provider supplies.
+	 */
+	@Override
+	public Class<Patient> getResourceType() {
+		return Patient.class;
+	}
+
+	/**
+	 * This is the "read" operation.
+	 * The "@Read" annotation indicates that this method supports the read and/or vread operation.
+	 * <p> 
+	 * Read operations take a single parameter annotated with the {@link IdParam} paramater, and 
+	 * should return a single resource instance.
+	 * </p>
 	 * 
-	 * @param thePatient This is the actual resource to save
+	 * @param theId
+	 *            The read operation takes one parameter, which must be of type IdDt and must be annotated with the "@Read.IdParam" annotation.
+	 * @return Returns a resource matching this identifier, or null if none exists.
+	 */
+	@Read()
+	public Patient readPatient(@IdParam IdDt theId) {
+		Deque<Patient> retVal;
+		try {
+			retVal = myIdToPatientVersions.get(theId.asLong());
+		} catch (NumberFormatException e) {
+			/*
+			 * If we can't parse the ID as a long, it's not valid so this is an unknown resource
+			 */
+			throw new ResourceNotFoundException(theId);
+		}
+
+		return retVal.getLast();
+	}
+
+	/**
+	 * The "@Update" annotation indicates that this method supports replacing an existing resource (by ID) with a new instance of that resource.
+	 * 
+	 * @param theId
+	 *            This is the ID of the patient to update
+	 * @param thePatient
+	 *            This is the actual resource to save
 	 * @return This method returns a "MethodOutcome"
 	 */
 	@Create()
-	public MethodOutcome createPatient(@ResourceParam Patient thePatient) {
-		/*
-		 * Our server will have a rule that patients must
-		 * have a family name or we will reject them
-		 */
-		if (thePatient.getNameFirstRep().getFamilyFirstRep().isEmpty()) {
-			OperationOutcome outcome = new OperationOutcome();
-			outcome.addIssue().setSeverity(IssueSeverityEnum.FATAL).setDetails("No last name provided");
-			throw new UnprocessableEntityException(outcome);
-		}
-		
-		long id = myNextId++;
-		myIdToPatientMap.put(id, thePatient);
+	public MethodOutcome updatePatient(@IdParam IdDt theId, @ResourceParam Patient thePatient) {
+		validateResource(thePatient);
 
-		// Let the caller know the ID of the newly created resource
-		return new MethodOutcome(new IdDt(id));
+		Long id;
+		try {
+			id = theId.asLong();
+		} catch (DataFormatException e) {
+			throw new InvalidRequestException("Invalid ID " + theId.getValue() + " - Must be numeric");
+		}
+
+		/*
+		 * Throw an exception (HTTP 404) if the ID is not known
+		 */
+		if (!myIdToPatientVersions.containsKey(id)) {
+			throw new ResourceNotFoundException(theId);
+		}
+
+		addNewVersion(thePatient, id);
+
+		return new MethodOutcome();
 	}
-	
+
 	/**
-	 * The "@Search" annotation indicates that this method supports the search operation. You may have many different method annotated with this annotation, to support many different search criteria.
-	 * This example searches by family name.
+	 * This method just provides simple business validation for resources we are storing.
 	 * 
-	 * @param theIdentifier
-	 *            This operation takes one parameter which is the search criteria. It is annotated with the "@Required" annotation. This annotation takes one argument, a string containing the name of
-	 *            the search criteria. The datatype here is StringDt, but there are other possible parameter types depending on the specific search criteria.
-	 * @return This method returns a list of Patients. This list may contain multiple matching resources, or it may also be empty.
+	 * @param thePatient
+	 *            The patient to validate
 	 */
-	@Create()
-	public MethodOutcome createPatient(@ResourceParam Patient thePatient) {
+	private void validateResource(Patient thePatient) {
 		/*
-		 * Our server will have a rule that patients must
-		 * have a family name or we will reject them
+		 * Our server will have a rule that patients must have a family name or we will reject them
 		 */
 		if (thePatient.getNameFirstRep().getFamilyFirstRep().isEmpty()) {
 			OperationOutcome outcome = new OperationOutcome();
-			outcome.addIssue().setSeverity(IssueSeverityEnum.FATAL).setDetails("No last name provided");
+			outcome.addIssue().setSeverity(IssueSeverityEnum.FATAL).setDetails("No family name provided, Patient resources must have at least one family name.");
 			throw new UnprocessableEntityException(outcome);
 		}
-		
-		long id = myNextId++;
-		myIdToPatientMap.put(id, thePatient);
-
-		// Let the caller know the ID of the newly created resource
-		return new MethodOutcome(new IdDt(id));
 	}
-	
+
+	/**
+	 * This is the "vread" operation.
+	 * The "@Read" annotation indicates that this method supports the read and/or vread operation.
+	 * <p> 
+	 * VRead operations take a parameter annotated with the {@link IdParam} paramater, 
+	 * and a paramater annotated with the {@link VersionIdParam} parmeter,
+	 * and should return a single resource instance.
+	 * </p>
+	 * 
+	 * @param theId
+	 *            The read operation takes one parameter, which must be of type IdDt and must be annotated with the "@Read.IdParam" annotation.
+	 * @return Returns a resource matching this identifier, or null if none exists.
+	 */
+	@Read()
+	public Patient vreadPatient(@IdParam IdDt theId, @VersionIdParam IdDt theVersionId) {
+		Deque<Patient> versions;
+		try {
+			versions = myIdToPatientVersions.get(theId.asLong());
+		} catch (NumberFormatException e) {
+			/*
+			 * If we can't parse the ID as a long, it's not valid so this is an unknown resource
+			 */
+			throw new ResourceNotFoundException(theId);
+		}
+
+		for (Patient nextVersion : versions) {
+			IdDt nextVersionId = (IdDt) nextVersion.getResourceMetadata().get(ResourceMetadataKeyEnum.VERSION_ID);
+			if (theVersionId.equals(nextVersionId)) {
+				return nextVersion;
+			}
+		}
+		
+		throw new ResourceNotFoundException("Unknown version " + theVersionId);
+	}
+
 }
-// END SNIPPET: provider
 

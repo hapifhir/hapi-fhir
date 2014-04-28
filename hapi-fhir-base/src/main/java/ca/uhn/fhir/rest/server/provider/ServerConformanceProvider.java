@@ -40,9 +40,11 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.annotation.Metadata;
 import ca.uhn.fhir.rest.method.BaseMethodBinding;
+import ca.uhn.fhir.rest.method.ReadMethodBinding;
 import ca.uhn.fhir.rest.method.SearchMethodBinding;
 import ca.uhn.fhir.rest.param.IParameter;
 import ca.uhn.fhir.rest.param.BaseQueryParameter;
+import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.ResourceBinding;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.util.ExtensionConstants;
@@ -65,6 +67,8 @@ public class ServerConformanceProvider {
 		Conformance retVal = new Conformance();
 		retVal.getSoftware().setName(myRestfulServer.getServerName());
 		retVal.getSoftware().setVersion(myRestfulServer.getServerVersion());
+		retVal.addFormat(Constants.CT_FHIR_XML);
+		retVal.addFormat(Constants.CT_FHIR_JSON);
 
 		Rest rest = retVal.addRest();
 		rest.setMode(RestfulConformanceModeEnum.SERVER);

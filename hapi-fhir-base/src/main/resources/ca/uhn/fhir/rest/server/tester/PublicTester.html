@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<!--/*
+************************************************************
+This file is a Thymeleaf template for the 
+************************************************************
+*/-->
+
+<html>
+	<head>
+		<script type="text/javascript" src="jquery-2.1.0.min.js"></script>
+		<link rel="stylesheet" type="text/css" href="PublicTester.css"/>
+	</head>
+	<body>
+		<table border="0" width="100%">
+			<tr>
+				<td align="left"><img src="hapi_fhir_banner.png"/></td>
+				<td align="right"><img src="hapi_fhir_banner_right.png"/></td>
+			</tr>
+		</table>
+		<div class="bodyHeaderBlock">
+			This is a RESTful server tester, which can be used to send requests to, and receive responses 
+			from the server at the following URL:<br/>
+			<a href="http://foo.com/fhir" th:href="${base}"><th:block th:text="${base}">http://foo.com/fhir</th:block></a> 
+		</div>
+		
+		<table border="0" width="100%" cellpadding="0" cellspacing="0" style="margin-top: 4px;">
+			<tr>
+				<td width="29%" valign="top">
+					
+					<div class="bodyHeaderBlock">
+						Software Details
+					</div>
+					<table border="0">
+						<tr>
+							<td class="propertyKeyCell">Software</td>
+							<td th:text="${conf.software.name}">HAPI Restful Server</td>
+						</tr>
+						<tr>
+							<td class="propertyKeyCell">Version</td>
+							<td th:text="${conf.software.version}">1.1.1</td>
+						</tr>
+					</table>
+					
+				</td>
+				
+				<td width="1%"/>
+				
+				<td width="70%" valign="top">
+					
+					<th:block th:each="rest : ${conf.rest}">
+						<th:block th:each="resource : ${rest.resource}">
+							<div class="bodyHeaderBlock">
+								Resource: <th:block th:text="${resource.type.valueAsString}"/> 
+							</div>
+							<table border="0">
+								<tr>
+									<td valign="top" class="propertyKeyCell">Supports operations:</td>
+									<td valign="top">
+										<th:block th:each="operation : ${resource.operation}">
+											<th:block th:text="${operation.code.value}"/>
+										</th:block>												
+									</td>
+								</tr>
+							</table>
+							<div>
+								
+							</div>
+						</th:block>
+					</th:block>
+				
+				</td>
+			</tr>
+		</table>
+		
+		
+	</body>
+</html>
