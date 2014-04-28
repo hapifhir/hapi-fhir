@@ -109,6 +109,9 @@
 					<param name="id" value="encodeMsg" />
 					<param name="file" value="src/site/example/java/example/FhirContextIntro.java" />
 				</macro>
+				
+				<!-- ****** The section below on fluent references the snippet above
+				     ****** so be careful about any reordering! -->
 
 				<p>
 					This code gives the following output:
@@ -129,6 +132,26 @@
 
 			</subsection>
 
+			<subsection name="Fluent Programming">
+			
+				<p>
+					Much of the HAPI FHIR API is designed using a fluent style,
+					where method calls can be chained in a natural way. This
+					leads to tighter and easier-to-read code.
+				</p>
+				
+				<p>
+					The following snippet is functionally identical to the
+					example above:
+				</p>
+
+				<macro name="snippet">
+					<param name="id" value="encodeMsgFluent" />
+					<param name="file" value="src/site/example/java/example/FhirContextIntro.java" />
+				</macro>
+			
+			</subsection>
+			
 			<subsection name="JSON Encoding">
 								
 				<p>

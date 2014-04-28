@@ -1,5 +1,7 @@
 package ca.uhn.fhir.rest.server.exceptions;
 
+import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
+
 /*
  * #%L
  * HAPI FHIR Library
@@ -22,7 +24,8 @@ package ca.uhn.fhir.rest.server.exceptions;
 
 
 /**
- * Created by dsotnikov on 3/10/2014.
+ * Represents an <b>HTTP 401 Client Unauthorized</b> response, which means that 
+ * the client needs to provide credentials, or has provided invalid credentials. 
  */
 public class AuthenticationException extends BaseServerResponseException {
 
@@ -36,7 +39,4 @@ public class AuthenticationException extends BaseServerResponseException {
         super(401, theMessage);
     }
 
-    public AuthenticationException(int theStatusCode, String theMessage) {
-        super(theStatusCode, theMessage);
-    }
 }

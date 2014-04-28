@@ -48,10 +48,9 @@ import ca.uhn.fhir.rest.method.Request;
 import ca.uhn.fhir.rest.method.SearchMethodBinding;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
-import ca.uhn.fhir.rest.server.exceptions.ConfigurationException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.exceptions.MethodNotFoundException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.provider.ServerConformanceProvider;
 import ca.uhn.fhir.rest.server.provider.ServerProfileProvider;
 import ca.uhn.fhir.util.VersionUtil;
@@ -63,7 +62,7 @@ public class RestfulServer extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
 	private FhirContext myFhirContext;
-	private Collection<Object> myProviders;
+	private Collection<Object> myPlainProviders;
 	private Map<String, ResourceBinding> myResourceNameToProvider = new HashMap<String, ResourceBinding>();
 	private Collection<IResourceProvider> myResourceProviders;
 	private ISecurityManager mySecurityManager;
@@ -73,16 +72,34 @@ public class RestfulServer extends HttpServlet {
 	private String myServerVersion = VersionUtil.getVersion(); // defaults to
 																// HAPI version
 	private boolean myUseBrowserFriendlyContentTypes;
+	private ResourceBinding myNullResourceBinding = new ResourceBinding();
 
+	/**
+	 * Constructor
+	 */
 	public RestfulServer() {
 		myFhirContext = new FhirContext();
 		myServerConformanceProvider = new ServerConformanceProvider(this);
 	}
 
-	public void addHapiHeader(HttpServletResponse theHttpResponse) {
-		theHttpResponse.addHeader("X-CatchingFhir", "Powered by HAPI FHIR " + VersionUtil.getVersion());
+	/**
+	 * This method is called prior to sending a response to incoming requests. It is 
+	 * used to add custom headers.
+	 * <p>
+	 * Use caution if overriding this method: it is recommended to call
+	 * <code>super.addHeadersToResponse</code> to avoid inadvertantly
+	 * disabling functionality.
+	 * </p> 
+	 */
+	public void addHeadersToResponse(HttpServletResponse theHttpResponse) {
+		theHttpResponse.addHeader("X-PoweredBy", "HAPI FHIR " + VersionUtil.getVersion() + " RESTful Server");
 	}
 
+	/**
+	 * Gets the {@link FhirContext} associated with this server. For efficient processing,
+	 * resource providers and plain providers should generally use this context
+	 * if one is needed, as opposed to creating their own.
+	 */
 	public FhirContext getFhirContext() {
 		return myFhirContext;
 	}
@@ -93,8 +110,8 @@ public class RestfulServer extends HttpServlet {
 	 * 
 	 * @see #getResourceProviders()
 	 */
-	public Collection<Object> getProviders() {
-		return myProviders;
+	public Collection<Object> getPlainProviders() {
+		return myPlainProviders;
 	}
 
 	public Collection<ResourceBinding> getResourceBindings() {
@@ -152,6 +169,12 @@ public class RestfulServer extends HttpServlet {
 		return myServerVersion;
 	}
 
+	/**
+	 * Initializes the server. Note that this method is final to avoid accidentally
+	 * introducing bugs in implementations, but subclasses may put initialization code in 
+	 * {@link #initialize()}, which is called immediately before beginning initialization of 
+	 * the restful server's internal init.
+	 */
 	@Override
 	public final void init() throws ServletException {
 		initialize();
@@ -183,7 +206,7 @@ public class RestfulServer extends HttpServlet {
 				}
 			}
 
-			Collection<Object> providers = getProviders();
+			Collection<Object> providers = getPlainProviders();
 			if (providers != null) {
 				for (Object next : providers) {
 					assertProviderIsValid(next);
@@ -214,12 +237,12 @@ public class RestfulServer extends HttpServlet {
 
 	/**
 	 * Sets the non-resource specific providers which implement method calls on
-	 * this server
+	 * this server. 
 	 * 
 	 * @see #setResourceProviders(Collection)
 	 */
-	public void setProviders(Collection<Object> theProviders) {
-		myProviders = theProviders;
+	public void setPlainProviders(Collection<Object> theProviders) {
+		myPlainProviders = theProviders;
 	}
 
 	/**
@@ -229,7 +252,7 @@ public class RestfulServer extends HttpServlet {
 	 * @see #setResourceProviders(Collection)
 	 */
 	public void setProviders(Object... theProviders) {
-		myProviders = Arrays.asList(theProviders);
+		myPlainProviders = Arrays.asList(theProviders);
 	}
 
 	/**
@@ -316,16 +339,20 @@ public class RestfulServer extends HttpServlet {
 
 				BaseMethodBinding foundMethodBinding = BaseMethodBinding.bindMethod(m, myFhirContext, theProvider);
 				if (foundMethodBinding != null) {
-					
-					RuntimeResourceDefinition definition = myFhirContext.getResourceDefinition(foundMethodBinding.getResourceName());
+
+					String resourceName = foundMethodBinding.getResourceName();
 					ResourceBinding resourceBinding;
-					if (myResourceNameToProvider.containsKey(definition.getName())) {
-						resourceBinding = myResourceNameToProvider.get(definition.getName());
+					if (resourceName == null) {
+						resourceBinding = myNullResourceBinding;
 					} else {
-						resourceBinding = new ResourceBinding();
-						String resourceName = definition.getName();
-						resourceBinding.setResourceName(resourceName);
-						myResourceNameToProvider.put(resourceName, resourceBinding);
+						RuntimeResourceDefinition definition = myFhirContext.getResourceDefinition(resourceName);
+						if (myResourceNameToProvider.containsKey(definition.getName())) {
+							resourceBinding = myResourceNameToProvider.get(definition.getName());
+						} else {
+							resourceBinding = new ResourceBinding();
+							resourceBinding.setResourceName(resourceName);
+							myResourceNameToProvider.put(resourceName, resourceBinding);
+						}
 					}
 
 					resourceBinding.addMethod(foundMethodBinding);
@@ -453,18 +480,24 @@ public class RestfulServer extends HttpServlet {
 
 			StringTokenizer tok = new StringTokenizer(requestPath, "/");
 			if (!tok.hasMoreTokens()) {
-				throw new MethodNotFoundException("No resource name specified");
+				throw new ResourceNotFoundException("No resource name specified");
 			}
 			resourceName = tok.nextToken();
+			if (resourceName.startsWith("_")) {
+				operation = resourceName;
+				resourceName = null;
+			}
 
 			ResourceBinding resourceBinding = null;
 			BaseMethodBinding resourceMethod = null;
 			if ("metadata".equals(resourceName)) {
 				resourceMethod = myServerConformanceMethod;
+			} else if (resourceName == null) {
+				resourceBinding = myNullResourceBinding;
 			} else {
 				resourceBinding = myResourceNameToProvider.get(resourceName);
 				if (resourceBinding == null) {
-					throw new MethodNotFoundException("Unknown resource type '" + resourceName + "' - Server knows how to handle: " + myResourceNameToProvider.keySet());
+					throw new ResourceNotFoundException("Unknown resource type '" + resourceName + "' - Server knows how to handle: " + myResourceNameToProvider.keySet());
 				}
 			}
 
@@ -515,14 +548,14 @@ public class RestfulServer extends HttpServlet {
 				resourceMethod = resourceBinding.getMethod(r);
 			}
 			if (null == resourceMethod) {
-				throw new MethodNotFoundException("No resource method available for the supplied parameters " + params);
+				throw new ResourceNotFoundException("No resource method available for the supplied parameters " + params);
 			}
 
 			resourceMethod.invokeServer(this, r, theResponse);
 
 		} catch (AuthenticationException e) {
 			theResponse.setStatus(e.getStatusCode());
-			addHapiHeader(theResponse);
+			addHeadersToResponse(theResponse);
 			theResponse.setContentType("text/plain");
 			theResponse.setCharacterEncoding("UTF-8");
 			theResponse.getWriter().write(e.getMessage());
@@ -535,7 +568,7 @@ public class RestfulServer extends HttpServlet {
 			}
 
 			theResponse.setStatus(e.getStatusCode());
-			addHapiHeader(theResponse);
+			addHeadersToResponse(theResponse);
 			theResponse.setContentType("text/plain");
 			theResponse.setCharacterEncoding("UTF-8");
 			theResponse.getWriter().append(e.getMessage());

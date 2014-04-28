@@ -5,11 +5,6 @@
 	<classpathentry kind="var" path="M2_REPO/javax/xml/stream/stax-api/1.0-2/stax-api-1.0-2.jar" sourcepath="M2_REPO/javax/xml/stream/stax-api/1.0-2/stax-api-1.0-2-sources.jar"/>
 	<classpathentry kind="var" path="M2_REPO/javax/servlet/javax.servlet-api/3.0.1/javax.servlet-api-3.0.1.jar" sourcepath="M2_REPO/javax/servlet/javax.servlet-api/3.0.1/javax.servlet-api-3.0.1-sources.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="var" path="M2_REPO/ca/uhn/hapi/fhir/hapi-fhir-base/0.3/hapi-fhir-base-0.3.jar" sourcepath="M2_REPO/ca/uhn/hapi/fhir/hapi-fhir-base/0.1/hapi-fhir-base-0.1-sources.jar">
-		<attributes>
-			<attribute name="javadoc_location" value="jar:file:/home/t3903uhn/.m2/repository/ca/uhn/hapi/fhir/hapi-fhir-base/0.1/hapi-fhir-base-0.1-javadoc.jar!/"/>
-		</attributes>
-	</classpathentry>
 	<classpathentry kind="var" path="M2_REPO/org/glassfish/javax.json/1.0.4/javax.json-1.0.4.jar" sourcepath="M2_REPO/org/glassfish/javax.json/1.0.4/javax.json-1.0.4-sources.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/codehaus/woodstox/woodstox-core-asl/4.2.0/woodstox-core-asl-4.2.0.jar" sourcepath="M2_REPO/org/codehaus/woodstox/woodstox-core-asl/4.2.0/woodstox-core-asl-4.2.0-sources.jar">
 		<attributes>
@@ -42,5 +37,6 @@
 			<attribute name="javadoc_location" value="jar:file:/home/t3903uhn/.m2/repository/ch/qos/logback/logback-core/1.1.1/logback-core-1.1.1-javadoc.jar!/"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry combineaccessrules="false" kind="src" path="/hapi-fhir-base"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

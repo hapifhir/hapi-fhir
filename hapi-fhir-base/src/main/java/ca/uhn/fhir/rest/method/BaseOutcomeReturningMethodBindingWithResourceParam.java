@@ -125,7 +125,7 @@ abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOu
 			theResponse.setStatus(Constants.STATUS_HTTP_204_NO_CONTENT);
 		}
 
-		theServer.addHapiHeader(theResponse);
+		theServer.addHeadersToResponse(theResponse);
 
 		if (response != null && response.getOperationOutcome() != null) {
 			theResponse.setContentType(encoding.getResourceContentType());
@@ -147,7 +147,7 @@ abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOu
 	private void streamOperationOutcome(BaseServerResponseException theE, RestfulServer theServer, EncodingUtil theEncoding, HttpServletResponse theResponse) throws IOException {
 		theResponse.setStatus(theE.getStatusCode());
 
-		theServer.addHapiHeader(theResponse);
+		theServer.addHeadersToResponse(theResponse);
 
 		if (theE.getOperationOutcome() != null) {
 			theResponse.setContentType(theEncoding.getResourceContentType());

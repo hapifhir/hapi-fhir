@@ -26,6 +26,9 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.rest.client.api.IBasicClient;
+import ca.uhn.fhir.rest.client.api.IRestfulClient;
+import ca.uhn.fhir.rest.server.IResourceProvider;
 
 
 /**
@@ -49,12 +52,19 @@ public @interface Search {
 	String queryName() default "";
 	
 	/**
-	 * The return type for this search method. This generally does not need
-	 * to be populated for a server implementation, since servers will return
-	 * only one resource per class, but generally does need to be populated
-	 * for client implementations. 
+	 * The return type for this method. This generally does not need
+	 * to be populated for {@link IResourceProvider resource providers} in a server implementation, 
+	 * but often does need to be populated in client implementations using {@link IBasicClient} or
+	 * {@link IRestfulClient}, or in plain providers on a server.
+	 * <p>
+	 * This value also does not need to be populated if the return type for a method annotated with 
+	 * this annotation is sufficient to determine the type of resource provided. E.g. if the 
+	 * method returns <code>Patient</code> or <code>List&lt;Patient&gt;</code>, the server/client 
+	 * will automatically determine that the Patient resource is the return type, and this value
+	 * may be left blank. 
+	 * </p>
 	 */
-	// NB: Read, Search (maybe others) share this annotation, so update the javadocs everywhere
+	// NB: Read, Search (maybe others) share this annotation method, so update the javadocs everywhere
 	Class<? extends IResource> type() default IResource.class;
 	
 }

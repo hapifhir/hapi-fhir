@@ -26,8 +26,6 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import ca.uhn.fhir.model.api.IElement;
-import ca.uhn.fhir.model.dstu.composite.HumanNameDt;
-import ca.uhn.fhir.model.dstu.resource.Patient;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(value= {ElementType.FIELD})

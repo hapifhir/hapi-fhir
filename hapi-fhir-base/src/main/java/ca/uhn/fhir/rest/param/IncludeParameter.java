@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.param;
  * #L%
  */
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -109,5 +110,6 @@ public class IncludeParameter extends BaseQueryParameter {
 	public boolean handlesMissing() {
 		return true;
 	}
+
 
 }

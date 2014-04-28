@@ -1,4 +1,4 @@
-package ca.uhn.fhir.rest.server.exceptions;
+package ca.uhn.fhir.rest.server;
 
 /*
  * #%L
@@ -20,13 +20,14 @@ package ca.uhn.fhir.rest.server.exceptions;
  * #L%
  */
 
-/**
- * Created by dsotnikov on 2/27/2014.
- */
-public class MethodNotFoundException extends BaseServerResponseException {
+import javax.servlet.ServletException;
+
+public class ConfigurationException extends ServletException {
+
+	public ConfigurationException(String theString) {
+		super(theString);
+	}
+
 	private static final long serialVersionUID = 1L;
 
-	public MethodNotFoundException(String error) {
-		super(404, error);
-	}
 }

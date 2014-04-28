@@ -3,6 +3,7 @@ package ca.uhn.fhir.rest.client;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
+import java.io.InputStream;
 import java.io.StringReader;
 import java.nio.charset.Charset;
 import java.util.Arrays;
@@ -27,6 +28,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.internal.stubbing.defaultanswers.ReturnsDeepStubs;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
@@ -41,6 +44,7 @@ import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
+import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.param.CodingListParam;
@@ -249,6 +253,50 @@ public class ClientTest {
 		}
 	}
 
+	
+	@Test
+	public void testHistoryWithParams() throws Exception {
+
+		//@formatter:off
+		final String msg = "<feed xmlns=\"http://www.w3.org/2005/Atom\"><title/><id>6c1d93be-027f-468d-9d47-f826cd15cf42</id><link rel=\"self\" href=\"http://localhost:51698/Patient/222/_history\"/><link rel=\"fhir-base\" href=\"http://localhost:51698\"/><os:totalResults xmlns:os=\"http://a9.com/-/spec/opensearch/1.1/\">2</os:totalResults><published>2014-04-13T18:24:50-04:00</published><author><name>ca.uhn.fhir.rest.method.HistoryMethodBinding</name></author><entry><title>Patient 222</title><id>222</id><updated>1969-12-31T19:00:20.000-05:00</updated><published>1969-12-31T19:00:10.000-05:00</published><link rel=\"self\" href=\"http://localhost:51698/Patient/222/_history/1\"/><content type=\"text/xml\"><Patient xmlns=\"http://hl7.org/fhir\"><identifier><use value=\"official\"/><system value=\"urn:hapitest:mrns\"/><value value=\"00001\"/></identifier><name><family value=\"OlderFamily\"/><given value=\"PatientOne\"/></name><gender><text value=\"M\"/></gender></Patient></content></entry><entry><title>Patient 222</title><id>222</id><updated>1969-12-31T19:00:30.000-05:00</updated><published>1969-12-31T19:00:10.000-05:00</published><link rel=\"self\" href=\"http://localhost:51698/Patient/222/_history/2\"/><content type=\"text/xml\"><Patient xmlns=\"http://hl7.org/fhir\"><identifier><use value=\"official\"/><system value=\"urn:hapitest:mrns\"/><value value=\"00001\"/></identifier><name><family value=\"NewerFamily\"/><given value=\"PatientOne\"/></name><gender><text value=\"M\"/></gender></Patient></content></entry></feed>";
+		//@formatter:on
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
+		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_ATOM_XML + "; charset=UTF-8"));
+		when(httpResponse.getEntity().getContent()).thenAnswer(new Answer<InputStream>() {
+			@Override
+			public InputStream answer(InvocationOnMock theInvocation) throws Throwable {
+				return new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8"));
+			}
+		});
+		
+		
+		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
+		
+		client.getHistoryPatientInstance(new IdDt("111"), new InstantDt("2012-01-02T00:01:02"), new IntegerDt(12));
+		assertEquals("http://foo/Patient/111/_history?_since=2012-01-02T00%3A01%3A02&_count=12", capt.getAllValues().get(0).getURI().toString());
+
+		String expectedDateString= new InstantDt(new InstantDt("2012-01-02T00:01:02").getValue()).getValueAsString(); // ensures the local timezone
+		expectedDateString=expectedDateString.replace(":", "%3A");
+		client.getHistoryPatientInstance(new IdDt("111"), new InstantDt("2012-01-02T00:01:02").getValue(), new IntegerDt(12).getValue());
+		assertEquals("http://foo/Patient/111/_history?_since="+expectedDateString+"&_count=12", capt.getAllValues().get(1).getURI().toString());
+
+		client.getHistoryPatientInstance(new IdDt("111"), null, new IntegerDt(12));
+		assertEquals("http://foo/Patient/111/_history?_count=12", capt.getAllValues().get(2).getURI().toString());
+
+		client.getHistoryPatientInstance(new IdDt("111"), new InstantDt("2012-01-02T00:01:02"), null);
+		assertEquals("http://foo/Patient/111/_history?_since=2012-01-02T00%3A01%3A02", capt.getAllValues().get(3).getURI().toString());
+
+		client.getHistoryPatientInstance(new IdDt("111"), new InstantDt(), new IntegerDt(12));
+		assertEquals("http://foo/Patient/111/_history?_count=12", capt.getAllValues().get(2).getURI().toString());
+
+		client.getHistoryPatientInstance(new IdDt("111"), new InstantDt("2012-01-02T00:01:02"), new IntegerDt());
+		assertEquals("http://foo/Patient/111/_history?_since=2012-01-02T00%3A01%3A02", capt.getAllValues().get(3).getURI().toString());
+
+	}
+	
 	@Test
 	public void testHistoryResourceType() throws Exception {
 
@@ -408,7 +456,7 @@ public class ClientTest {
 		DateRangeParam param = new DateRangeParam();
 		param.setLowerBound(new QualifiedDateParam(QuantityCompararatorEnum.GREATERTHAN_OR_EQUALS, "2011-01-01"));
 		param.setUpperBound(new QualifiedDateParam(QuantityCompararatorEnum.LESSTHAN_OR_EQUALS, "2021-01-01"));
-		List<Patient> response = client.getPatientByDateRange(param);
+		client.getPatientByDateRange(param);
 
 		assertEquals("http://foo/Patient?dateRange=%3E%3D2011-01-01&dateRange=%3C%3D2021-01-01", capt.getValue().getURI().toString());
 
@@ -467,7 +515,7 @@ public class ClientTest {
 		CodingListParam identifiers = new CodingListParam();
 		identifiers.add(new CodingDt("foo", "bar"));
 		identifiers.add(new CodingDt("baz", "boz"));
-		List<Patient> response = client.getPatientMultipleIdentifiers(identifiers);
+		client.getPatientMultipleIdentifiers(identifiers);
 
 		assertEquals("http://foo/Patient?ids=foo%7Cbar%2Cbaz%7Cboz", capt.getValue().getURI().toString());
 

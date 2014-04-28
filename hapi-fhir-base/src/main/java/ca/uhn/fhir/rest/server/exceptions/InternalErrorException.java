@@ -20,6 +20,9 @@ package ca.uhn.fhir.rest.server.exceptions;
  * #L%
  */
 
+/**
+ * TODO: javadoc this
+ */
 public class InternalErrorException extends BaseServerResponseException {
 
 	private static final long serialVersionUID = 1L;

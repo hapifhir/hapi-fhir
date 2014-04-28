@@ -27,7 +27,7 @@ import java.lang.annotation.Target;
 
 /**
  * Parameter annotation for the _since parameter, which indicates to the 
- * server that only results dated since the given instant will be returned.
+ * server that only results dated since the given instant will be returned. 
  * 
  * @see History
  */

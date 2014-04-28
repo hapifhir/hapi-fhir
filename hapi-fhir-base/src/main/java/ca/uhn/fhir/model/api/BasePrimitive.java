@@ -41,13 +41,16 @@ public abstract class BasePrimitive<T> extends BaseElement implements IPrimitive
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (!(obj.getClass() == getClass())) {
+	public boolean equals(Object theObj) {
+		if (theObj == null) {
+			return false;
+		}
+		if (!(theObj.getClass() == getClass())) {
 			return false;
 		}
 
-		BasePrimitive<?> o = (BasePrimitive<?>)obj;
-		
+		BasePrimitive<?> o = (BasePrimitive<?>) theObj;
+
 		EqualsBuilder b = new EqualsBuilder();
 		b.append(getValue(), o.getValue());
 		return b.isEquals();

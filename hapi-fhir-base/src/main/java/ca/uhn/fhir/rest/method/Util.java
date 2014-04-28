@@ -27,18 +27,16 @@ import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.Map;
 
-import ca.uhn.fhir.rest.annotation.Count;
 import ca.uhn.fhir.rest.annotation.IdParam;
-import ca.uhn.fhir.rest.annotation.Since;
 import ca.uhn.fhir.rest.annotation.VersionIdParam;
 
 /**
  * Created by dsotnikov on 2/25/2014.
  */
 class Util {
-	public static Integer findCountParameterIndex(Method theMethod) {
-		return findParamIndex(theMethod, Count.class);
-	}
+//	public static Integer findCountParameterIndex(Method theMethod) {
+//		return findParamIndex(theMethod, Count.class);
+//	}
 
 	public static Integer findIdParameterIndex(Method theMethod) {
 		return findParamIndex(theMethod, IdParam.class);
@@ -59,9 +57,9 @@ class Util {
 		return null;
 	}
 
-	public static Integer findSinceParameterIndex(Method theMethod) {
-		return findParamIndex(theMethod, Since.class);
-	}
+//	public static Integer findSinceParameterIndex(Method theMethod) {
+//		return findParamIndex(theMethod, Since.class);
+//	}
 
 	public static Integer findVersionIdParameterIndex(Method theMethod) {
 		return findParamIndex(theMethod, VersionIdParam.class);

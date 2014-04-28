@@ -29,25 +29,22 @@ import ca.uhn.fhir.rest.method.Request;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
-class ServerBaseParameter implements IParameter {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ServerBaseParameter.class);
+class NullParameter implements IParameter {
 
 	@Override
 	public void translateClientArgumentIntoQueryArgument(Object theSourceClientArgument, Map<String, List<String>> theTargetQueryArguments) throws InternalErrorException {
-		/*
-		 * Does nothing, since we just ignore serverbase arguments
-		 */
-		ourLog.trace("Ignoring server base argument: {}", theSourceClientArgument);
+		//nothing
 	}
 
 	@Override
 	public Object translateQueryParametersIntoServerArgument(Request theRequest, Object theRequestContents) throws InternalErrorException, InvalidRequestException {
-		return theRequest.getFhirServerBase();
+		// nothing
+		return null;
 	}
 
 	@Override
 	public void initializeTypes(Method theMethod, Class<? extends Collection<?>> theOuterCollectionType, Class<? extends Collection<?>> theInnerCollectionType, Class<?> theParameterType) {
-		// ignore for now
+		// nothing
 	}
 
 }

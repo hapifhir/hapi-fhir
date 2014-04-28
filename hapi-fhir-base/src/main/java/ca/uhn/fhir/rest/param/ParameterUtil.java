@@ -23,63 +23,71 @@ package ca.uhn.fhir.rest.param;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
+import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.lang3.time.DateUtils;
+
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.PathSpecification;
+import ca.uhn.fhir.model.primitive.InstantDt;
+import ca.uhn.fhir.model.primitive.IntegerDt;
+import ca.uhn.fhir.rest.annotation.Count;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.IncludeParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.ServerBase;
+import ca.uhn.fhir.rest.annotation.Since;
 import ca.uhn.fhir.rest.annotation.VersionIdParam;
 import ca.uhn.fhir.util.ReflectionUtil;
 
 public class ParameterUtil {
 
 	@SuppressWarnings("unchecked")
-	public static List<IParameter> getResourceParameters(Method method) {
+	public static List<IParameter> getResourceParameters(Method theMethod) {
 		List<IParameter> parameters = new ArrayList<IParameter>();
 
-		Class<?>[] parameterTypes = method.getParameterTypes();
+		Class<?>[] parameterTypes = theMethod.getParameterTypes();
 		int paramIndex = 0;
-		for (Annotation[] annotations : method.getParameterAnnotations()) {
-			boolean haveHandledMethod = false;
+		for (Annotation[] annotations : theMethod.getParameterAnnotations()) {
 
+			IParameter param = null;
 			Class<?> parameterType = parameterTypes[paramIndex];
+			Class<? extends java.util.Collection<?>> outerCollectionType = null;
+			Class<? extends java.util.Collection<?>> innerCollectionType = null;
+			if (Collection.class.isAssignableFrom(parameterType)) {
+				innerCollectionType = (Class<? extends java.util.Collection<?>>) parameterType;
+				parameterType = ReflectionUtil.getGenericCollectionTypeOfMethodParameter(theMethod, paramIndex);
+			}
+			if (Collection.class.isAssignableFrom(parameterType)) {
+				outerCollectionType = innerCollectionType;
+				innerCollectionType = (Class<? extends java.util.Collection<?>>) parameterType;
+				parameterType = ReflectionUtil.getGenericCollectionTypeOfMethodParameter(theMethod, paramIndex);
+			}
+			if (Collection.class.isAssignableFrom(parameterType)) {
+				throw new ConfigurationException("Argument #" + paramIndex + " of Method '" + theMethod.getName() + "' in type '" + theMethod.getDeclaringClass().getCanonicalName() + "' is of an invalid generic type (can not be a collection of a collection of a collection)");
+			}
+
 			if (parameterType.equals(HttpServletRequest.class) || parameterType.equals(ServletRequest.class)) {
-				ServletRequestParameter param = new ServletRequestParameter();
-				parameters.add(param);
+				param = new ServletRequestParameter();
 			} else if (parameterType.equals(HttpServletResponse.class) || parameterType.equals(ServletResponse.class)) {
-				ServletResponseParameter param = new ServletResponseParameter();
-				parameters.add(param);
+				param = new ServletResponseParameter();
 			} else {
-				for (int i = 0; i < annotations.length; i++) {
+				for (int i = 0; i < annotations.length && param == null; i++) {
 					Annotation nextAnnotation = annotations[i];
 
-					Class<? extends java.util.Collection<?>> outerCollectionType = null;
-					Class<? extends java.util.Collection<?>> innerCollectionType = null;
-
-					if (Collection.class.isAssignableFrom(parameterType)) {
-						innerCollectionType = (Class<? extends java.util.Collection<?>>) parameterType;
-						parameterType = ReflectionUtil.getGenericCollectionTypeOfMethodParameter(method, paramIndex);
-					}
-
-					if (Collection.class.isAssignableFrom(parameterType)) {
-						outerCollectionType = innerCollectionType;
-						innerCollectionType = (Class<? extends java.util.Collection<?>>) parameterType;
-						parameterType = ReflectionUtil.getGenericCollectionTypeOfMethodParameter(method, paramIndex);
-					}
-
-					IParameter param;
 					if (nextAnnotation instanceof RequiredParam) {
 						SearchParameter parameter = new SearchParameter();
 						parameter.setName(((RequiredParam) nextAnnotation).name());
@@ -94,43 +102,121 @@ public class ParameterUtil {
 						param = parameter;
 					} else if (nextAnnotation instanceof IncludeParam) {
 						if (parameterType != PathSpecification.class || innerCollectionType == null || outerCollectionType != null) {
-							throw new ConfigurationException("Method '" + method.getName() + "' is annotated with @" + IncludeParam.class.getSimpleName() + " but has a type other than Collection<"
-									+ PathSpecification.class.getSimpleName() + ">");
+							throw new ConfigurationException("Method '" + theMethod.getName() + "' is annotated with @" + IncludeParam.class.getSimpleName() + " but has a type other than Collection<" + PathSpecification.class.getSimpleName() + ">");
 						}
-						Class<? extends Collection<PathSpecification>> instantiableCollectionType = (Class<? extends Collection<PathSpecification>>) CollectionBinder.getInstantiableCollectionType(
-								innerCollectionType, "Method '" + method.getName() + "'");
+						Class<? extends Collection<PathSpecification>> instantiableCollectionType = (Class<? extends Collection<PathSpecification>>) CollectionBinder.getInstantiableCollectionType(innerCollectionType, "Method '" + theMethod.getName() + "'");
 
 						param = new IncludeParameter((IncludeParam) nextAnnotation, instantiableCollectionType);
 					} else if (nextAnnotation instanceof ResourceParam) {
 						if (!IResource.class.isAssignableFrom(parameterType)) {
-							throw new ConfigurationException("Method '" + method.getName() + "' is annotated with @" + ResourceParam.class.getSimpleName()
-									+ " but has a type that is not an implemtation of " + IResource.class.getCanonicalName());
+							throw new ConfigurationException("Method '" + theMethod.getName() + "' is annotated with @" + ResourceParam.class.getSimpleName() + " but has a type that is not an implemtation of " + IResource.class.getCanonicalName());
 						}
 						param = new ResourceParameter((Class<? extends IResource>) parameterType);
 					} else if (nextAnnotation instanceof IdParam || nextAnnotation instanceof VersionIdParam) {
-						param = null;
+						param = new NullParameter();
 					} else if (nextAnnotation instanceof ServerBase) {
 						param = new ServerBaseParameter();
+					} else if (nextAnnotation instanceof Since) {
+						param = new SinceParameter();
+					} else if (nextAnnotation instanceof Count) {
+						param = new CountParameter();
 					} else {
 						continue;
 					}
 
-					haveHandledMethod = true;
-					parameters.add(param);
-					break;
-
 				}
 
-				if (!haveHandledMethod) {
-					throw new ConfigurationException("Parameter #" + paramIndex + " of method '" + method.getName() + "' on type '" + method.getDeclaringClass().getCanonicalName()
-							+ "' has no recognized FHIR interface parameter annotations. Don't know how to handle this parameter");
-				}
 			}
+
+			if (param == null) {
+				throw new ConfigurationException("Parameter #" + paramIndex + " of method '" + theMethod.getName() + "' on type '" + theMethod.getDeclaringClass().getCanonicalName()
+						+ "' has no recognized FHIR interface parameter annotations. Don't know how to handle this parameter");
+			}
+
+			param.initializeTypes(theMethod, outerCollectionType, innerCollectionType, parameterType);
+			parameters.add(param);
 
 			paramIndex++;
 		}
 		return parameters;
 	}
 
-	
+	public static InstantDt toInstant(Object theArgument) {
+		if (theArgument instanceof InstantDt) {
+			return (InstantDt) theArgument;
+		}
+		if (theArgument instanceof Date) {
+			return new InstantDt((Date) theArgument);
+		}
+		if (theArgument instanceof Calendar) {
+			return new InstantDt((Calendar) theArgument);
+		}
+		return null;
+	}
+
+	public static Set<Class<?>> getBindableInstantTypes() {
+		// TODO: make this constant
+		HashSet<Class<?>> retVal = new HashSet<Class<?>>();
+		retVal.add(InstantDt.class);
+		retVal.add(Date.class);
+		retVal.add(Calendar.class);
+		return retVal;
+	}
+
+	public static Object fromInstant(Class<?> theType, InstantDt theArgument) {
+		if (theType.equals(InstantDt.class)) {
+			if (theArgument == null) {
+				return new InstantDt();
+			}
+			return theArgument;
+		}
+		if (theType.equals(Date.class)) {
+			if (theArgument == null) {
+				return null;
+			}
+			return theArgument.getValue();
+		}
+		if (theType.equals(Calendar.class)) {
+			if (theArgument == null) {
+				return null;
+			}
+			return DateUtils.toCalendar(theArgument.getValue());
+		}
+		throw new IllegalArgumentException("Invalid instant type:" + theType);
+	}
+
+	public static IntegerDt toInteger(Object theArgument) {
+		if (theArgument instanceof IntegerDt) {
+			return (IntegerDt) theArgument;
+		}
+		if (theArgument instanceof Integer) {
+			return new IntegerDt((Integer) theArgument);
+		}
+		return null;
+	}
+
+	public static Set<Class<?>> getBindableIntegerTypes() {
+		// TODO: make this constant
+		HashSet<Class<?>> retVal = new HashSet<Class<?>>();
+		retVal.add(IntegerDt.class);
+		retVal.add(Integer.class);
+		return retVal;
+	}
+
+	public static Object fromInteger(Class<?> theType, IntegerDt theArgument) {
+		if (theType.equals(IntegerDt.class)) {
+			if (theArgument == null) {
+				return new IntegerDt();
+			}
+			return theArgument;
+		}
+		if (theType.equals(Integer.class)) {
+			if (theArgument == null) {
+				return null;
+			}
+			return theArgument.getValue();
+		}
+		throw new IllegalArgumentException("Invalid Integer type:" + theType);
+	}
+
 }

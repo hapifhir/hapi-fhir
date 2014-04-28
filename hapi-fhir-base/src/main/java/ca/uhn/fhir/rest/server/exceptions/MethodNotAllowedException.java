@@ -21,7 +21,7 @@ package ca.uhn.fhir.rest.server.exceptions;
  */
 
 /**
- * Created by dsotnikov on 2/27/2014.
+ * TODO: javadoc this
  */
 public class MethodNotAllowedException extends BaseServerResponseException {
 	private static final long serialVersionUID = 1L;

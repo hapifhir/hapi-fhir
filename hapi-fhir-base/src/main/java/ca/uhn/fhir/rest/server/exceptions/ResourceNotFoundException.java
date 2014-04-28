@@ -24,6 +24,10 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 
+/**
+ * Represents an <b>HTTP 404 Resource Not Found</b> response, which means that 
+ * the request is pointing to a resource that does not exist. 
+ */
 public class ResourceNotFoundException extends BaseServerResponseException {
 
 	public ResourceNotFoundException(IdDt theId) {

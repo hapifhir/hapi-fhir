@@ -26,6 +26,7 @@
 				be possible to create a FHIR compliant server quickly and easily.
 			</p>
 			
+			<a name="resource_providers"/>
 			<subsection name="Defining Resource Providers">
 			
 				<p>
@@ -90,7 +91,55 @@
 					<param name="file" value="src/site/example/java/example/ExampleRestfulServlet.java" />
 				</macro>
 
+				<a name="plain_providers"/>
 			</subsection>	
+			
+			<!-- NB there is an anchor for this section above -->
+			<subsection name="Plain Providers (non-resource specific)">
+			
+				<p>
+					Defining one provider per resource is a good strategy to keep 
+					code readable and maintainable, but it is also possible to put
+					methods for multiple resource types in a provider class. Providers
+					which do not implement the 
+					<a href="./apidocs/ca/uhn/fhir/rest/server/IResourceProvider.html">IResourceProvider</a> 
+					(and therefore are not bound to one specific resource type) are known as
+					<b>Plain Providers</b>.
+				</p>
+				<p>
+					A plain provider may implement any 
+					<a href="./doc_rest_operations.html">RESTful operation</a>, but will generally
+					need to explicitly state what type of resource it applies to. If the method directly
+					returns a resource or a collection of resources (as in an 
+					<a href="./doc_rest_operations.html#instance_read">instance read</a> or
+					<a href="./doc_rest_operations.html#type_search">type search</a> operation)
+					the resource type will be inferred automatically. If the method returns a
+					<a href="./apidocs/ca/uhn/fhir/model/api/Bundle.html">Bundle</a>
+					resource, it is necessary to explicitly specify the resource type
+					in the method annotation. The following example shows this:
+				</p>
+				<macro name="snippet">
+					<param name="id" value="plainProvider" />
+					<param name="file" value="src/site/example/java/example/ExampleProviders.java" />
+				</macro>
+			
+				<p>
+					In addition, some methods are not resource specific. For example, the 
+					<a href="./doc_rest_operations.html#history">system history</a> operation
+					returns historical versions of <b>all resource types</b> on a server,
+					so it needs to be defined in a plain provider.
+				</p>
+							
+				<p>
+					Once you have defined your resource providers, they are passed to the 
+					server in a similar way to the resource providers.
+				</p>
+				<macro name="snippet">
+					<param name="id" value="plainProviderServer" />
+					<param name="file" value="src/site/example/java/example/ExampleProviders.java" />
+				</macro>
+			
+			</subsection>
 			
 			<subsection name="Deploy">
 				
@@ -98,6 +147,12 @@
 					Once you have created your resource providers and your restful server class,
 					you can bundle these into a WAR file and you are ready to deploy to 
 					any JEE container (Tomcat, Websphere, Glassfish, etc).
+				</p>
+
+				<p>
+					Bundling a servlet into a WAR file and deploying it to an application server
+					is beyond the scope of this page, but there are many good tutorials on how
+					to do this.
 				</p>
 			
 			</subsection>
@@ -167,6 +222,22 @@
 		</section>
 		-->
 
+
+		<section name="Using the Server">
+		
+			<p>
+				Your RESTful server should now support the methods you have declared. Here are a
+				few helpful tricks for interacting with the server:
+			</p>
+			
+			<p>
+				<b>Pretty Printing:</b> The HAPI RESTful server supports a non-standard parameter called 
+				<code>_pretty</code>, which can be used to request that responses be pretty-printed (indented for
+				easy reading by humans) by setting the value to <code>true</code>. This can be useful in testing. An example URL for this might be:<br/>
+				<code>http://example.com/fhir/Patient/_search?name=TESTING&amp;_pretty=true</code>  
+			</p>
+		
+		</section>
 	</body>
 
 </document>

@@ -11,6 +11,14 @@
 		<section name="Implementing Resource Provider Operations">
 
 			<p>
+				Jump To...
+			</p>
+			<ul>
+				<li><a href="#operations">Operations</a></li>
+				<li><a href="#exceptions">Exceptions</a></li>
+			</ul>
+
+			<p>
 				RESTful Clients and Servers both share the same
 				method pattern, with one key difference: A client
 				is defined using annotated methods on an interface
@@ -26,6 +34,10 @@
 				implementations, but client methods will follow the same patterns.
 			</p>
 
+			<a name="operations"/>
+		</section>
+		
+		<section name="Operations">
 			<p>
 				The following table lists the operations supported by
 				HAPI FHIR RESTful Servers and Clients.
@@ -81,7 +93,7 @@
 					</tr>
 					<tr>
 						<td>
-							<a href="#type_create">Type - Create</a>
+							<a href="#type_search">Type - Create</a>
 						</td>
 						<td>
 							Create a new resource with a server assigned id
@@ -94,14 +106,6 @@
 								<param name="section" value="7" />
 								<param name="fromDepth" value="2" />
 							</macro>
-						</td>
-						<td>
-							Search the resource type based on some filter criteria
-						</td>
-					</tr>
-					<tr>
-						<td>
-							<a href="#type_search">Type - Search</a>
 						</td>
 						<td>
 							Search the resource type based on some filter criteria
@@ -892,7 +896,7 @@
 		<section name="System Level - Transaction">
 
 			<p>
-				Not yet implemented
+				Not yet implemented - Get in touch if you would like to help!
 			</p>
 
 			<a name="system_search" />
@@ -905,7 +909,7 @@
 		<section name="System Level - Search">
 
 			<p>
-				Not yet implemented
+				Not yet implemented - Get in touch if you would like to help!
 			</p>
 
 			<a name="history" />
@@ -945,18 +949,38 @@
 					annotated with the
 					<a href="./apidocs/ca/uhn/fhir/rest/annotation/IdParam.html">@IdParam</a>
 					annotation, indicating the ID of the resource for which to return history.
+					<ul><li>
+					For a server 
+					implementation, the method must either be defined in a 
+					<a href="./doc_rest_server.html#resource_providers">resource provider</a>
+					or have a <code>type()</code> value in the @History annotation if it is
+					defined in a 
+					<a href="./doc_rest_server.html#plain_providers">plain provider</a>.
+					</li></ul>
 				</li>
 				<li>
-					For an
+					For a
 					<b>Type History</b>
 					method, the method must not have any @IdParam parameter.
+					<ul><li> 
+					For a server 
+					implementation, the method must either be defined in a 
+					<a href="./doc_rest_server.html#resource_providers">resource provider</a>
+					or have a <code>type()</code> value in the @History annotation if it is
+					defined in a 
+					<a href="./doc_rest_server.html#plain_providers">plain provider</a>.
+					</li></ul>
 				</li>
 				<li>
-					For an
+					For a
 					<b>Server History</b>
-					method, the method must not have any @IdParam parameter
-					and must not be found in a ResourceProvider definition.
-					<!-- TODO: make ResourceProvider a link to a defintion of these on the RESTFul server page -->
+					method, the method must not have any @IdParam parameter, and
+					must not have a <code>type()</code> value specified in 
+					the @History annotation. 
+					<ul><li>
+					In a server implementation, the method must
+					be defined in a <a href="./doc_rest_server.html#plain_providers">plain provider</a>.
+					</li></ul> 
 				</li>
 			</ul>
 			<p>
@@ -977,6 +1001,32 @@
 				<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
 			</macro>
 
+			<a name="exceptions"/>
+		</section>
+
+		<section name="Exceptions">
+			
+			<p>
+				When implementing a server operation, there are a number of failure conditions
+				specified. For example, an 
+				<a href="#instance_read">Instance Read</a> request might specify an unknown
+				resource ID, or a <a href="#type_create">Type Create</a> request might contain an
+				invalid resource which can not be created.
+			</p>
+			<p>
+				In these cases, an appropriate exception should be thrown. The HAPI RESTful
+				API includes a set of exceptions extending 
+				<a href="./apidocs/ca/uhn/fhir/rest/server/exceptions/BaseServerResponseException.html">BaseServerResponseException</a>
+				which represent specific HTTP failure codes.
+			</p>
+			<p>
+				See the			
+				<a href="./apidocs/ca/uhn/fhir/rest/server/exceptions/package-summary.html">Exceptions List</a>
+				for a complete list of these exceptions. Note that these exceptions are all <b>unchecked</b>
+				exceptions, so they do not need to ne explicitly declared in the method
+				signature.
+			</p>
+			
 		</section>
 
 	</body>

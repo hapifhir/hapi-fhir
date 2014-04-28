@@ -1,7 +1,6 @@
 package example;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import javax.servlet.annotation.WebServlet;
@@ -21,18 +20,19 @@ public class ExampleRestfulServlet extends RestfulServer {
 	private static final long serialVersionUID = 1L;
 
 	/**
-	 * Restful servers must provide an implementation of this method, which
-	 * returns all resource providers to be used by this server. In the example
-	 * below, we are creating a RESTful server which is able to serve
-	 * Patient and Observation resources.
+	 * Constructor
 	 */
-	@Override
-	public Collection<IResourceProvider> getResourceProviders() {
-		List<IResourceProvider> retVal = new ArrayList<IResourceProvider>();
-		retVal.add(new RestfulPatientResourceProvider());
-		retVal.add(new RestfulObservationResourceProvider());
-		return retVal;
+	public ExampleRestfulServlet() {
+		/*
+		 * The servlet defines any number of resource providers, and
+		 * configures itself to use them by calling
+		 * setResourceProviders()
+		 */
+		List<IResourceProvider> resourceProviders = new ArrayList<IResourceProvider>();
+		resourceProviders.add(new RestfulPatientResourceProvider());
+		resourceProviders.add(new RestfulObservationResourceProvider());
+		setResourceProviders(resourceProviders);
 	}
-
+	
 }
 //END SNIPPET: servlet

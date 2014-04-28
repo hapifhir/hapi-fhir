@@ -22,7 +22,9 @@ package ca.uhn.fhir.rest.server.exceptions;
 
 /**
  * Exception for use when a response is received or being sent that
- * does not correspond to any other exception type
+ * does not correspond to any other exception type. An HTTP status code
+ * must be provided, and will be provided to the caller in the case of a 
+ * server implementation.
  */
 public class UnclassifiedServerFailureException extends BaseServerResponseException {
 

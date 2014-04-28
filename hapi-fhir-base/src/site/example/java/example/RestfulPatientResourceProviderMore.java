@@ -28,6 +28,7 @@ import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.parser.DataFormatException;
+import ca.uhn.fhir.rest.annotation.Count;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.History;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -38,11 +39,13 @@ import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.annotation.Since;
 import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.annotation.Validate;
 import ca.uhn.fhir.rest.annotation.VersionIdParam;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.ITestClient;
+import ca.uhn.fhir.rest.client.api.IBasicClient;
 import ca.uhn.fhir.rest.client.api.IRestfulClient;
 import ca.uhn.fhir.rest.param.CodingListParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
@@ -443,22 +446,29 @@ public interface MetadataClient extends IRestfulClient {
 }
 //END SNIPPET: metadataClient
 
-public interface HistoryClient {
 //START SNIPPET: historyClient
-// Server level (history of ALL resources) 
-@History
-Bundle getHistoryServer();
+public interface HistoryClient extends IBasicClient {
+  /** Server level (history of ALL resources) */ 
+  @History
+  Bundle getHistoryServer();
 
-// Type level (history of all resources of a given type)
-@History(type=Patient.class)
-Bundle getHistoryPatientType();
+  /** Type level (history of all resources of a given type) */
+  @History(type=Patient.class)
+  Bundle getHistoryPatientType();
 
-// Instance level (history of a specific resource instance by type and ID)
-@History(type=Patient.class)
-Bundle getHistoryPatientInstance(@IdParam IdDt theId);
-//END SNIPPET: historyClient
-	
+  /** Instance level (history of a specific resource instance by type and ID) */
+  @History(type=Patient.class)
+  Bundle getHistoryPatientInstance(@IdParam IdDt theId);
+
+  /**
+   * Either (or both) of the "since" and "count" paramaters can
+   * also be included in any of the methods above.
+   */
+  @History
+  Bundle getHistoryServerWithCriteria(@Since Date theDate, @Count int theCount);
+
 }
+//END SNIPPET: historyClient
 
 
 public void bbbbb() throws DataFormatException, IOException {

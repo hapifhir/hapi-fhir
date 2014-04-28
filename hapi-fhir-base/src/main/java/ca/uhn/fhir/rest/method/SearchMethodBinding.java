@@ -37,7 +37,6 @@ import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
 import ca.uhn.fhir.rest.client.GetClientInvocation;
 import ca.uhn.fhir.rest.param.BaseQueryParameter;
 import ca.uhn.fhir.rest.param.IParameter;
-import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -49,22 +48,16 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchMethodBinding.class);
 
 	private Class<?> myDeclaredResourceType;
-	private List<IParameter> myParameters;
 	private String myQueryName;
 
 	public SearchMethodBinding(Class<? extends IResource> theReturnResourceType, Method theMethod, String theQueryName, FhirContext theContext, Object theProvider) {
 		super(theReturnResourceType, theMethod, theContext, theProvider);
-		this.myParameters = ParameterUtil.getResourceParameters(theMethod);
 		this.myQueryName = StringUtils.defaultIfBlank(theQueryName, null);
 		this.myDeclaredResourceType = theMethod.getReturnType();
 	}
 
 	public Class<?> getDeclaredResourceType() {
 		return myDeclaredResourceType.getClass();
-	}
-
-	public List<IParameter> getParameters() {
-		return myParameters;
 	}
 
 	@Override
@@ -84,7 +77,7 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 
 	@Override
 	public GetClientInvocation invokeClient(Object[] theArgs) throws InternalErrorException {
-		 assert (myQueryName == null || ((theArgs != null ? theArgs.length : 0) == myParameters.size())) : "Wrong number of arguments: " + (theArgs!=null?theArgs.length:"null");
+		assert (myQueryName == null || ((theArgs != null ? theArgs.length : 0) == getParameters().size())) : "Wrong number of arguments: " + (theArgs != null ? theArgs.length : "null");
 
 		Map<String, List<String>> queryStringArgs = new LinkedHashMap<String, List<String>>();
 
@@ -94,7 +87,7 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 
 		if (theArgs != null) {
 			for (int idx = 0; idx < theArgs.length; idx++) {
-				IParameter nextParam = myParameters.get(idx);
+				IParameter nextParam = getParameters().get(idx);
 				nextParam.translateClientArgumentIntoQueryArgument(theArgs[idx], queryStringArgs);
 			}
 		}
@@ -103,8 +96,7 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 	}
 
 	@Override
-	public List<IResource> invokeServer(Object theResourceProvider, Request theRequest, Object[] theMethodParams) throws InvalidRequestException,
-			InternalErrorException {
+	public List<IResource> invokeServer(Object theResourceProvider, Request theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException {
 		assert theRequest.getId() == null;
 		assert theRequest.getVersion() == null;
 
@@ -138,11 +130,11 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 		}
 
 		Set<String> methodParamsTemp = new HashSet<String>();
-		for (int i = 0; i < this.myParameters.size(); i++) {
-			if (!(myParameters.get(i) instanceof BaseQueryParameter)) {
+		for (int i = 0; i < this.getParameters().size(); i++) {
+			if (!(getParameters().get(i) instanceof BaseQueryParameter)) {
 				continue;
 			}
-			BaseQueryParameter temp = (BaseQueryParameter) myParameters.get(i);
+			BaseQueryParameter temp = (BaseQueryParameter) getParameters().get(i);
 			methodParamsTemp.add(temp.getName());
 			if (temp.isRequired() && !theRequest.getParameters().containsKey(temp.getName())) {
 				ourLog.trace("Method {} doesn't match param '{}' is not present", getMethod().getName(), temp.getName());
@@ -174,10 +166,6 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 		ourLog.trace("Method {} matches: {}", getMethod().getName(), retVal);
 
 		return retVal;
-	}
-
-	public void setParameters(List<IParameter> parameters) {
-		this.myParameters = parameters;
 	}
 
 	public void setResourceType(Class<?> resourceType) {

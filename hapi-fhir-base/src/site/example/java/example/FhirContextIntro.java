@@ -67,6 +67,22 @@ System.out.println(encoded);
 
 		
 	}
+
+	
+public void fluent() throws DataFormatException, IOException {
+FhirContext ctx = new FhirContext(Patient.class, Observation.class);
+String encoded;
+//START SNIPPET: encodeMsgFluent
+Patient patient = new Patient();
+patient.addIdentifier().setSystem("http://example.com/fictitious-mrns").setValue("MRN001");
+patient.addName().setUse(NameUseEnum.OFFICIAL).addFamily("Tester").addGiven("John").addGiven("Q");
+
+encoded = ctx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient);
+System.out.println(encoded);
+//END SNIPPET: encodeMsgFluent
+	
+}
+	
 	
 	public static void parseMsg() {
 FhirContext ctx = new FhirContext(Patient.class, Observation.class);

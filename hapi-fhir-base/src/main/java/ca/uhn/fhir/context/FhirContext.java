@@ -27,6 +27,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.Validate;
+
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.resource.Patient;
@@ -117,6 +119,8 @@ public class FhirContext {
 	 */
 	@SuppressWarnings("unchecked")
 	public RuntimeResourceDefinition getResourceDefinition(String theResourceName) {
+		Validate.notBlank(theResourceName, "Resource name must not be blank");
+		
 		RuntimeResourceDefinition retVal = myNameToElementDefinition.get(theResourceName);
 
 		if (retVal == null) {

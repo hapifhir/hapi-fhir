@@ -44,7 +44,6 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.BaseClientInvocation;
 import ca.uhn.fhir.rest.method.SearchMethodBinding.RequestType;
 import ca.uhn.fhir.rest.param.IParameter;
-import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingUtil;
 import ca.uhn.fhir.rest.server.RestfulServer;
@@ -59,12 +58,10 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 
 abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseOutcomeReturningMethodBinding.class);
-	private List<IParameter> myParameters;
 	private boolean myReturnVoid;
 
 	public BaseOutcomeReturningMethodBinding(Method theMethod, FhirContext theContext, Class<?> theMethodAnnotation, Object theProvider) {
 		super(theMethod, theContext, theProvider);
-		myParameters = ParameterUtil.getResourceParameters(theMethod);
 
 		if (!theMethod.getReturnType().equals(MethodOutcome.class)) {
 			if (!allowVoidReturnType()) {
@@ -143,9 +140,9 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding {
 
 	@Override
 	public void invokeServer(RestfulServer theServer, Request theRequest, HttpServletResponse theResponse) throws BaseServerResponseException, IOException {
-		Object[] params = new Object[myParameters.size()];
-		for (int i = 0; i < myParameters.size(); i++) {
-			IParameter param = myParameters.get(i);
+		Object[] params = new Object[getParameters().size()];
+		for (int i = 0; i < getParameters().size(); i++) {
+			IParameter param = getParameters().get(i);
 			if (param != null) {
 				params[i] = param.translateQueryParametersIntoServerArgument(theRequest, null);
 			}
@@ -182,7 +179,7 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding {
 			theResponse.setStatus(Constants.STATUS_HTTP_204_NO_CONTENT);
 		}
 
-		theServer.addHapiHeader(theResponse);
+		theServer.addHeadersToResponse(theResponse);
 
 		Writer writer = theResponse.getWriter();
 		try {
@@ -242,10 +239,6 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding {
 	}
 
 	protected abstract BaseClientInvocation createClientInvocation(Object[] theArgs, IResource resource, String resourceName);
-
-	protected List<IParameter> getParameters() {
-		return myParameters;
-	}
 
 	protected void parseContentLocation(MethodOutcome theOutcomeToPopulate, String theLocationHeader) {
 		String resourceNamePart = "/" + getResourceName() + "/";

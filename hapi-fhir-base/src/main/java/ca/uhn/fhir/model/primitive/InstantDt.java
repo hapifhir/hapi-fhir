@@ -20,6 +20,7 @@ package ca.uhn.fhir.model.primitive;
  * #L%
  */
 
+import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 
@@ -67,6 +68,15 @@ public class InstantDt extends BaseDateTimeDt {
 		setTimeZone(TimeZone.getDefault());
 	}
 
+	/**
+	 * Create a new DateTimeDt
+	 */
+	public InstantDt(Calendar theCalendar) {
+		setValue(theCalendar.getTime());
+		setPrecision(DEFAULT_PRECISION);
+		setTimeZone(theCalendar.getTimeZone());
+	}
+	
 	/**
 	 * Create a new InstantDt from a string value
 	 * 

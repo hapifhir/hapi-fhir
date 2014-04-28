@@ -20,10 +20,14 @@ package ca.uhn.fhir.rest.server.exceptions;
  * #L%
  */
 
+import ca.uhn.fhir.rest.annotation.Delete;
+import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.server.Constants;
 
 /**
- * Created by dsotnikov on 2/27/2014.
+ * Represents an <b>HTTP 409 Conflict</b> response. This exception should be 
+ * thrown in methods which accept a version (e.g. {@link Update}, {@link Delete}) 
+ * when the operation fails because of a version conflict as specified in the FHIR specification. 
  */
 public class ResourceVersionConflictException extends BaseServerResponseException {
 	private static final long serialVersionUID = 1L;

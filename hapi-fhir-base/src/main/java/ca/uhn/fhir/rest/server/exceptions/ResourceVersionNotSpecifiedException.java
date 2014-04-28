@@ -20,10 +20,12 @@ package ca.uhn.fhir.rest.server.exceptions;
  * #L%
  */
 
+import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.server.Constants;
 
 /**
- * Thrown for an Update operation if that operation requires a version to 
+ * Represents an <b>HTTP 412 Precondition Failed</b> response. This exception
+ * should be thrown for an {@link Update} operation if that operation requires a version to 
  * be specified in an HTTP header, and none was.
  */
 public class ResourceVersionNotSpecifiedException extends BaseServerResponseException {
