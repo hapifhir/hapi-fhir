@@ -35,8 +35,6 @@ import ca.uhn.fhir.rest.method.SearchMethodBinding.RequestType;
 
 public class CreateMethodBinding extends BaseOutcomeReturningMethodBindingWithResourceParam {
 
-	
-
 	public CreateMethodBinding(Method theMethod, FhirContext theContext, Object theProvider) {
 		super(theMethod, theContext, Create.class, theProvider);
 	}

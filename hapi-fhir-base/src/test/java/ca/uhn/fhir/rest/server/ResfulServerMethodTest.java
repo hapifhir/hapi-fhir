@@ -124,8 +124,7 @@ public class ResfulServerMethodTest {
 		assertEquals("http://localhost:" + ourPort + "/Patient/001/_history/002", status.getFirstHeader("Location").getValue());
 
 	}
-	
-	
+
 	@Test
 	public void testCreateWithUnprocessableEntity() throws Exception {
 
@@ -141,7 +140,7 @@ public class ResfulServerMethodTest {
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(422, status.getStatusLine().getStatusCode());
-		
+
 		OperationOutcome outcome = new FhirContext().newXmlParser().parseResource(OperationOutcome.class, new StringReader(responseContent));
 		assertEquals("FOOBAR", outcome.getIssueFirstRep().getDetails().getValue());
 
@@ -244,7 +243,8 @@ public class ResfulServerMethodTest {
 		assertEquals(200, status.getStatusLine().getStatusCode());
 
 		Patient patient = (Patient) ourCtx.newJsonParser().parseResource(responseContent);
-		// assertEquals("PatientOne", patient.getName().get(0).getGiven().get(0).getValue());
+		// assertEquals("PatientOne",
+		// patient.getName().get(0).getGiven().get(0).getValue());
 
 		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(patient));
 
@@ -371,10 +371,12 @@ public class ResfulServerMethodTest {
 	// @Test
 	// public void testSearchByComplex() throws Exception {
 	//
-	// HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?Patient.identifier=urn:oid:2.16.840.1.113883.3.239.18.148%7C7000135&name=urn:oid:1.3.6.1.4.1.12201.102.5%7C522&date=");
+	// HttpGet httpGet = new HttpGet("http://localhost:" + ourPort +
+	// "/Patient?Patient.identifier=urn:oid:2.16.840.1.113883.3.239.18.148%7C7000135&name=urn:oid:1.3.6.1.4.1.12201.102.5%7C522&date=");
 	// HttpResponse status = ourClient.execute(httpGet);
 	//
-	// String responseContent = IOUtils.toString(status.getEntity().getContent());
+	// String responseContent =
+	// IOUtils.toString(status.getEntity().getContent());
 	// ourLog.info("Response was:\n{}", responseContent);
 	//
 	// assertEquals(200, status.getStatusLine().getStatusCode());
@@ -586,7 +588,6 @@ public class ResfulServerMethodTest {
 
 	}
 
-	
 	@Test
 	public void testSearchByDobWithSearchActionAndPost() throws Exception {
 
@@ -605,8 +606,8 @@ public class ResfulServerMethodTest {
 		assertEquals("NONE", patient.getIdentifier().get(1).getValue().getValue());
 		assertEquals("2011-01-02", patient.getIdentifier().get(2).getValue().getValue());
 
-		// POST 
-		
+		// POST
+
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/_search?dob=2011-01-02");
 		status = ourClient.execute(httpPost);
 
@@ -622,8 +623,8 @@ public class ResfulServerMethodTest {
 		assertEquals("NONE", patient.getIdentifier().get(1).getValue().getValue());
 		assertEquals("2011-01-02", patient.getIdentifier().get(2).getValue().getValue());
 
-		// POST with form encoded 
-		
+		// POST with form encoded
+
 		httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/_search");
 		List<BasicNameValuePair> urlParameters = new ArrayList<BasicNameValuePair>();
 		urlParameters.add(new BasicNameValuePair("dob", "2011-01-02"));
@@ -642,9 +643,8 @@ public class ResfulServerMethodTest {
 		assertEquals("NONE", patient.getIdentifier().get(1).getValue().getValue());
 		assertEquals("2011-01-02", patient.getIdentifier().get(2).getValue().getValue());
 
-		
 	}
-	
+
 	@Test
 	public void testSearchByMultipleIdentifiers() throws Exception {
 
@@ -851,63 +851,49 @@ public class ResfulServerMethodTest {
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		ourLog.info("Response was:\n{}", responseContent);
 
-		assertEquals(201, status.getStatusLine().getStatusCode());
+		OperationOutcome oo =new FhirContext().newXmlParser().parseResource(OperationOutcome.class, responseContent);
+		assertEquals("OODETAILS", oo.getIssueFirstRep().getDetails().getValue());
+		
+		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertEquals("http://localhost:" + ourPort + "/Patient/001/_history/002", status.getFirstHeader("Location").getValue());
 
 	}
+
 	
 	@Test
-	public void testValidate() throws Exception {
+	public void testUpdateWrongResourceType() throws Exception {
 
+		// TODO: this method sends in the wrong resource type vs. the URL so it should
+		// give a useful error message
 		Patient patient = new Patient();
-		patient.addName().addFamily("FOO");
+		patient.addIdentifier().setValue("002");
 
-		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/_validate");
+		HttpPut httpPost = new HttpPut("http://localhost:" + ourPort + "/DiagnosticReport/001");
 		httpPost.setEntity(new StringEntity(new FhirContext().newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
 		HttpResponse status = ourClient.execute(httpPost);
 
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		ourLog.info("Response was:\n{}", responseContent);
-
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		OperationOutcome oo = new FhirContext().newXmlParser().parseResource(OperationOutcome.class, responseContent);
-		assertEquals("it passed", oo.getIssueFirstRep().getDetails().getValue());
-
-		// Now should fail
-		
-		patient = new Patient();
-		patient.addName().addFamily("BAR");
-
-		httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/_validate");
-		httpPost.setEntity(new StringEntity(new FhirContext().newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
-
-		status = ourClient.execute(httpPost);
-
-		responseContent = IOUtils.toString(status.getEntity().getContent());
-		ourLog.info("Response was:\n{}", responseContent);
-
-		assertEquals(422, status.getStatusLine().getStatusCode());
-		oo = new FhirContext().newXmlParser().parseResource(OperationOutcome.class, responseContent);
-		assertEquals("it failed", oo.getIssueFirstRep().getDetails().getValue());
-
-		// Should fail with outcome
-		
-		patient = new Patient();
-		patient.addName().addFamily("BAZ");
-
-		httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/_validate");
-		httpPost.setEntity(new StringEntity(new FhirContext().newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
-
-		status = ourClient.execute(httpPost);
-
-		responseContent = IOUtils.toString(status.getEntity().getContent());
-		ourLog.info("Response was:\n{}", responseContent);
-
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertEquals("", responseContent);
+		assertEquals(201, status.getStatusLine().getStatusCode());
+		assertEquals("http://localhost:" + ourPort + "/DiagnosticReport/001/_history/002", status.getFirstHeader("Location").getValue());
 
 	}
+	
+	@Test
+	public void testUpdateNoResponse() throws Exception {
+
+		DiagnosticReport dr = new DiagnosticReport();
+		dr.addCodedDiagnosis().addCoding().setCode("AAA");
+
+		HttpPut httpPost = new HttpPut("http://localhost:" + ourPort + "/DiagnosticReport/001");
+		httpPost.setEntity(new StringEntity(new FhirContext().newXmlParser().encodeResourceToString(dr), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+
+		HttpResponse status = ourClient.execute(httpPost);
+
+		assertEquals(204, status.getStatusLine().getStatusCode());
+		assertEquals("http://localhost:" + ourPort + "/DiagnosticReport/001/_history/002", status.getFirstHeader("Location").getValue());
+
+	}
+	
 	
 	@Test
 	public void testUpdateWithVersion() throws Exception {
@@ -944,6 +930,59 @@ public class ResfulServerMethodTest {
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(400, results.getStatusLine().getStatusCode());
+	}
+
+	@Test
+	public void testValidate() throws Exception {
+
+		Patient patient = new Patient();
+		patient.addName().addFamily("FOO");
+
+		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/_validate");
+		httpPost.setEntity(new StringEntity(new FhirContext().newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+
+		HttpResponse status = ourClient.execute(httpPost);
+
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		ourLog.info("Response was:\n{}", responseContent);
+
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		OperationOutcome oo = new FhirContext().newXmlParser().parseResource(OperationOutcome.class, responseContent);
+		assertEquals("it passed", oo.getIssueFirstRep().getDetails().getValue());
+
+		// Now should fail
+
+		patient = new Patient();
+		patient.addName().addFamily("BAR");
+
+		httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/_validate");
+		httpPost.setEntity(new StringEntity(new FhirContext().newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+
+		status = ourClient.execute(httpPost);
+
+		responseContent = IOUtils.toString(status.getEntity().getContent());
+		ourLog.info("Response was:\n{}", responseContent);
+
+		assertEquals(422, status.getStatusLine().getStatusCode());
+		oo = new FhirContext().newXmlParser().parseResource(OperationOutcome.class, responseContent);
+		assertEquals("it failed", oo.getIssueFirstRep().getDetails().getValue());
+
+		// Should fail with outcome
+
+		patient = new Patient();
+		patient.addName().addFamily("BAZ");
+
+		httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/_validate");
+		httpPost.setEntity(new StringEntity(new FhirContext().newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+
+		status = ourClient.execute(httpPost);
+
+		responseContent = IOUtils.toString(status.getEntity().getContent());
+		ourLog.info("Response was:\n{}", responseContent);
+
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertEquals("", responseContent);
+
 	}
 
 	@AfterClass
@@ -986,6 +1025,14 @@ public class ResfulServerMethodTest {
 		}
 
 		@SuppressWarnings("unused")
+		@Create()
+		public MethodOutcome createDiagnosticReport(@ResourceParam DiagnosticReport thePatient) {
+			OperationOutcome outcome = new OperationOutcome();
+			outcome.addIssue().setDetails("FOOBAR");
+			throw new UnprocessableEntityException(outcome);
+		}
+
+		@SuppressWarnings("unused")
 		@Delete()
 		public void deleteDiagnosticReport(@IdParam IdDt theId) {
 			// do nothing
@@ -998,21 +1045,12 @@ public class ResfulServerMethodTest {
 
 		@SuppressWarnings("unused")
 		@Update()
-		public MethodOutcome updateDiagnosticReportWithVersion(@IdParam IdDt theId, @VersionIdParam IdDt theVersionId, @ResourceParam DiagnosticReport thePatient) {
+		public MethodOutcome updateDiagnosticReportWithVersionAndNoResponse(@IdParam IdDt theId, @ResourceParam DiagnosticReport thePatient) {
 			IdDt id = theId;
-			IdDt version = theVersionId;
-			return new MethodOutcome(true, id, version);
+			IdDt version = new IdDt("002");
+			return new MethodOutcome(id, version);
 		}
 
-		@SuppressWarnings("unused")
-		@Create()
-		public MethodOutcome createDiagnosticReport(@ResourceParam DiagnosticReport thePatient) {
-			OperationOutcome outcome = new OperationOutcome();
-			outcome.addIssue().setDetails("FOOBAR");
-			throw new UnprocessableEntityException(outcome);
-		}
-
-		
 	}
 
 	/**
@@ -1024,37 +1062,7 @@ public class ResfulServerMethodTest {
 		public MethodOutcome createPatient(@ResourceParam Patient thePatient) {
 			IdDt id = new IdDt(thePatient.getIdentifier().get(0).getValue().getValue());
 			IdDt version = new IdDt(thePatient.getIdentifier().get(1).getValue().getValue());
-			return new MethodOutcome(true, id, version);
-		}
-
-		@Validate()
-		public MethodOutcome validatePatient(@ResourceParam Patient thePatient) {
-			if (thePatient.getNameFirstRep().getFamilyFirstRep().getValueNotNull().equals("FOO")) {
-				MethodOutcome methodOutcome = new MethodOutcome();
-				OperationOutcome oo = new OperationOutcome();
-				oo.addIssue().setDetails("it passed");
-				methodOutcome.setOperationOutcome(oo);
-				return methodOutcome;
-			}
-			if (thePatient.getNameFirstRep().getFamilyFirstRep().getValueNotNull().equals("BAR")) {
-				throw new UnprocessableEntityException("it failed");
-			}
-			return new MethodOutcome();
-		}
-
-		
-		private Patient createPatient1() {
-			Patient patient = new Patient();
-			patient.addIdentifier();
-			patient.getIdentifier().get(0).setUse(IdentifierUseEnum.OFFICIAL);
-			patient.getIdentifier().get(0).setSystem(new UriDt("urn:hapitest:mrns"));
-			patient.getIdentifier().get(0).setValue("00001");
-			patient.addName();
-			patient.getName().get(0).addFamily("Test");
-			patient.getName().get(0).addGiven("PatientOne");
-			patient.getGender().setText("M");
-			patient.getId().setValue("1");
-			return patient;
+			return new MethodOutcome(id, version);
 		}
 
 		@Delete()
@@ -1066,8 +1074,8 @@ public class ResfulServerMethodTest {
 		}
 
 		@SuppressWarnings("unused")
-		public List<Patient> findDiagnosticReportsByPatient(@RequiredParam(name = "Patient.identifier") IdentifierDt thePatientId,
-				@RequiredParam(name = DiagnosticReport.SP_NAME) CodingListParam theNames, @OptionalParam(name = DiagnosticReport.SP_DATE) DateRangeParam theDateRange) throws Exception {
+		public List<Patient> findDiagnosticReportsByPatient(@RequiredParam(name = "Patient.identifier") IdentifierDt thePatientId, @RequiredParam(name = DiagnosticReport.SP_NAME) CodingListParam theNames, @OptionalParam(name = DiagnosticReport.SP_DATE) DateRangeParam theDateRange)
+				throws Exception {
 			return Collections.emptyList();
 		}
 
@@ -1201,8 +1209,7 @@ public class ResfulServerMethodTest {
 		}
 
 		@Search()
-		public Patient getPatientWithIncludes(@RequiredParam(name = "withIncludes") StringDt theString,
-				@IncludeParam(allow = { "include1", "include2", "include3" }) List<PathSpecification> theIncludes) {
+		public Patient getPatientWithIncludes(@RequiredParam(name = "withIncludes") StringDt theString, @IncludeParam(allow = { "include1", "include2", "include3" }) List<PathSpecification> theIncludes) {
 			Patient next = getIdToPatient().get("1");
 
 			next.addCommunication().setText(theString.getValue());
@@ -1276,19 +1283,52 @@ public class ResfulServerMethodTest {
 		@Update()
 		public MethodOutcome updateDiagnosticReportWithVersion(@IdParam IdDt theId, @VersionIdParam IdDt theVersionId, @ResourceParam DiagnosticReport thePatient) {
 			/*
-			 * TODO: THIS METHOD IS NOT USED. It's the wrong type (DiagnosticReport), so it should cause an exception on startup. Also we should detect if there are multiple resource params on an
+			 * TODO: THIS METHOD IS NOT USED. It's the wrong type
+			 * (DiagnosticReport), so it should cause an exception on startup.
+			 * Also we should detect if there are multiple resource params on an
 			 * update/create/etc method
 			 */
 			IdDt id = theId;
 			IdDt version = theVersionId;
-			return new MethodOutcome(true, id, version);
+			return new MethodOutcome(id, version);
 		}
 
 		@Update()
 		public MethodOutcome updatePatient(@IdParam IdDt theId, @ResourceParam Patient thePatient) {
 			IdDt id = theId;
 			IdDt version = new IdDt(thePatient.getIdentifierFirstRep().getValue().getValue());
-			return new MethodOutcome(true, id, version);
+			OperationOutcome oo = new OperationOutcome();
+			oo.addIssue().setDetails("OODETAILS");
+			return new MethodOutcome(id, version, oo);
+		}
+
+		@Validate()
+		public MethodOutcome validatePatient(@ResourceParam Patient thePatient) {
+			if (thePatient.getNameFirstRep().getFamilyFirstRep().getValueNotNull().equals("FOO")) {
+				MethodOutcome methodOutcome = new MethodOutcome();
+				OperationOutcome oo = new OperationOutcome();
+				oo.addIssue().setDetails("it passed");
+				methodOutcome.setOperationOutcome(oo);
+				return methodOutcome;
+			}
+			if (thePatient.getNameFirstRep().getFamilyFirstRep().getValueNotNull().equals("BAR")) {
+				throw new UnprocessableEntityException("it failed");
+			}
+			return new MethodOutcome();
+		}
+
+		private Patient createPatient1() {
+			Patient patient = new Patient();
+			patient.addIdentifier();
+			patient.getIdentifier().get(0).setUse(IdentifierUseEnum.OFFICIAL);
+			patient.getIdentifier().get(0).setSystem(new UriDt("urn:hapitest:mrns"));
+			patient.getIdentifier().get(0).setValue("00001");
+			patient.addName();
+			patient.getName().get(0).addFamily("Test");
+			patient.getName().get(0).addGiven("PatientOne");
+			patient.getGender().setText("M");
+			patient.getId().setValue("1");
+			return patient;
 		}
 
 	}

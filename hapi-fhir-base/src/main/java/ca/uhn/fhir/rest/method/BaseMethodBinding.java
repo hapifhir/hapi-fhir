@@ -130,7 +130,8 @@ public abstract class BaseMethodBinding {
 
 	protected Object invokeServerMethod(Object theResourceProvider, Object[] theMethodParams) {
 		try {
-			return getMethod().invoke(theResourceProvider, theMethodParams);
+			Method method = getMethod();
+			return method.invoke(theResourceProvider, theMethodParams);
 		} catch (InvocationTargetException e) {
 			if (e.getCause() instanceof BaseServerResponseException) {
 				throw (BaseServerResponseException) e.getCause();

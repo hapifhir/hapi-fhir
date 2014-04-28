@@ -62,7 +62,7 @@ public class RestfulPatientResourceProvider implements IResourceProvider {
 	 * @return Returns a resource matching this identifier, or null if none exists.
 	 */
 	@Read()
-	public Patient getResourceById(@IdParam IdDt theId) {
+	public Patient getPatientById(@IdParam IdDt theId) {
 		Patient retVal;
 		try {
 			retVal = myIdToPatientMap.get(theId.asLong());
@@ -80,17 +80,17 @@ public class RestfulPatientResourceProvider implements IResourceProvider {
 	 * The "@Search" annotation indicates that this method supports the search operation. You may have many different method annotated with this annotation, to support many different search criteria.
 	 * This example searches by family name.
 	 * 
-	 * @param theIdentifier
+	 * @param theFamilyName
 	 *            This operation takes one parameter which is the search criteria. It is annotated with the "@Required" annotation. This annotation takes one argument, a string containing the name of
 	 *            the search criteria. The datatype here is StringDt, but there are other possible parameter types depending on the specific search criteria.
 	 * @return This method returns a list of Patients. This list may contain multiple matching resources, or it may also be empty.
 	 */
 	@Search()
-	public List<Patient> getPatient(@RequiredParam(name = Patient.SP_FAMILY) StringDt theFamilyName) {
+	public List<Patient> findPatientsByName(@RequiredParam(name = Patient.SP_FAMILY) StringDt theFamilyName) {
 		ArrayList<Patient> retVal = new ArrayList<Patient>();
 		
 		/*
-		 * Look for all patients matching this
+		 * Look for all patients matching the name
 		 */
 		for (Patient nextPatient : myIdToPatientMap.values()) {
 			NAMELOOP:
@@ -109,16 +109,13 @@ public class RestfulPatientResourceProvider implements IResourceProvider {
 
 	
 	/**
-	 * The "@Search" annotation indicates that this method supports the search operation. You may have many different method annotated with this annotation, to support many different search criteria.
-	 * This example searches by family name.
+	 * The "@Create" annotation indicates that this method supports creating a new resource
 	 * 
-	 * @param theIdentifier
-	 *            This operation takes one parameter which is the search criteria. It is annotated with the "@Required" annotation. This annotation takes one argument, a string containing the name of
-	 *            the search criteria. The datatype here is StringDt, but there are other possible parameter types depending on the specific search criteria.
-	 * @return This method returns a list of Patients. This list may contain multiple matching resources, or it may also be empty.
+	 * @param thePatient This is the actual resource to save
+	 * @return This method returns a "MethodOutcome"
 	 */
 	@Create()
-	public MethodOutcome getPatient(@ResourceParam Patient thePatient) {
+	public MethodOutcome createPatient(@ResourceParam Patient thePatient) {
 		/*
 		 * Our server will have a rule that patients must
 		 * have a family name or we will reject them
@@ -128,6 +125,40 @@ public class RestfulPatientResourceProvider implements IResourceProvider {
 			outcome.addIssue().setSeverity(IssueSeverityEnum.FATAL).setDetails("No last name provided");
 			throw new UnprocessableEntityException(outcome);
 		}
+		
+		long id = myNextId++;
+		myIdToPatientMap.put(id, thePatient);
+
+		// Let the caller know the ID of the newly created resource
+		return new MethodOutcome(new IdDt(id));
+	}
+	
+	/**
+	 * The "@Search" annotation indicates that this method supports the search operation. You may have many different method annotated with this annotation, to support many different search criteria.
+	 * This example searches by family name.
+	 * 
+	 * @param theIdentifier
+	 *            This operation takes one parameter which is the search criteria. It is annotated with the "@Required" annotation. This annotation takes one argument, a string containing the name of
+	 *            the search criteria. The datatype here is StringDt, but there are other possible parameter types depending on the specific search criteria.
+	 * @return This method returns a list of Patients. This list may contain multiple matching resources, or it may also be empty.
+	 */
+	@Create()
+	public MethodOutcome createPatient(@ResourceParam Patient thePatient) {
+		/*
+		 * Our server will have a rule that patients must
+		 * have a family name or we will reject them
+		 */
+		if (thePatient.getNameFirstRep().getFamilyFirstRep().isEmpty()) {
+			OperationOutcome outcome = new OperationOutcome();
+			outcome.addIssue().setSeverity(IssueSeverityEnum.FATAL).setDetails("No last name provided");
+			throw new UnprocessableEntityException(outcome);
+		}
+		
+		long id = myNextId++;
+		myIdToPatientMap.put(id, thePatient);
+
+		// Let the caller know the ID of the newly created resource
+		return new MethodOutcome(new IdDt(id));
 	}
 	
 }
