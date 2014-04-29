@@ -39,6 +39,7 @@ public class PublicTesterServlet extends HttpServlet {
 	public PublicTesterServlet() {
 		myStaticResources = new HashMap<String, String>();
 		myStaticResources.put("jquery-2.1.0.min.js", "text/javascript");
+		myStaticResources.put("PublicTester.js", "text/javascript");
 		myStaticResources.put("PublicTester.css", "text/css");
 		myStaticResources.put("hapi_fhir_banner.png", "image/png");
 		myStaticResources.put("hapi_fhir_banner_right.png", "image/png");

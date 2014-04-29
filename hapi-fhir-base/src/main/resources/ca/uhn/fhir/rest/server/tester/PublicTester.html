@@ -8,6 +8,10 @@ This file is a Thymeleaf template for the
 <html>
 	<head>
 		<script type="text/javascript" src="jquery-2.1.0.min.js"></script>
+		<script type="text/javascript" src="PublicTester.js"></script>
+		<script type="text/javascript">
+			var serverBase = "<th:block th:text="${base}"/>";			
+		</script>
 		<link rel="stylesheet" type="text/css" href="PublicTester.css"/>
 	</head>
 	<body>
@@ -48,7 +52,7 @@ This file is a Thymeleaf template for the
 				<td width="70%" valign="top">
 					
 					<th:block th:each="rest : ${conf.rest}">
-						<th:block th:each="resource : ${rest.resource}">
+						<th:block th:each="resource, resIterStat : ${rest.resource}" th:with="expandoId='resExpando'+${resIterStat.count}">
 							<div class="bodyHeaderBlock">
 								Resource: <th:block th:text="${resource.type.valueAsString}"/> 
 							</div>
@@ -56,10 +60,15 @@ This file is a Thymeleaf template for the
 								<tr>
 									<td valign="top" class="propertyKeyCell">Supports operations:</td>
 									<td valign="top">
-										<th:block th:each="operation : ${resource.operation}">
-											<th:block th:text="${operation.code.value}"/>
-										</th:block>												
+										<th:span th:each="operation : ${resource.operation}">
+											<th:block th:switch="${operation.code.value}">
+											    <a th:case="'read'" th:href="'javascript:displayRead(\'' + ${expandoId} + '\');'">read</a>
+												<span th:case="*" th:text="${operation.code.value}"/>
+											</th:block>
+										</th:span>												
 									</td>
+								</tr>
+								<tr th:id="${expandoId}" style="display: none;">
 								</tr>
 							</table>
 							<div>

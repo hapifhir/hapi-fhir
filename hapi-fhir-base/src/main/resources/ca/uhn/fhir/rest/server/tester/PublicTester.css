@@ -14,3 +14,9 @@ TD.propertyKeyCell {
 	border-radius: 3px;
 	padding: 3px;
 }
+
+TD.testerNameCell {
+	background-color: #E0FFE0;
+	border-radius: 3px;
+	padding: 3px;
+}
