@@ -32,7 +32,7 @@ import org.apache.http.client.methods.HttpGet;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.rest.client.ClientInvocationHandler;
+import ca.uhn.fhir.rest.client.BaseClient;
 import ca.uhn.fhir.rest.client.api.IRestfulClient;
 
 public abstract class BaseResourceReference extends BaseElement {
@@ -127,7 +127,7 @@ public abstract class BaseResourceReference extends BaseElement {
 			// TODO: choose appropriate parser based on response CT
 			IParser parser = context.newXmlParser();
 
-			Reader responseReader = ClientInvocationHandler.createReaderFromResponse(response);
+			Reader responseReader = BaseClient.createReaderFromResponse(response);
 			myResource = parser.parseResource(responseReader);
 
 		} finally {

@@ -10,7 +10,8 @@ This file is a Thymeleaf template for the
 		<script type="text/javascript" src="jquery-2.1.0.min.js"></script>
 		<script type="text/javascript" src="PublicTester.js"></script>
 		<script type="text/javascript">
-			var serverBase = "<th:block th:text="${base}"/>";			
+			var serverBase = "<th:block th:text="${base}"/>";	
+			var conformance = <th:block th:text="${jsonEncodedConf}"/>;
 		</script>
 		<link rel="stylesheet" type="text/css" href="PublicTester.css"/>
 	</head>
@@ -62,7 +63,8 @@ This file is a Thymeleaf template for the
 									<td valign="top">
 										<th:span th:each="operation : ${resource.operation}">
 											<th:block th:switch="${operation.code.value}">
-											    <a th:case="'read'" th:href="'javascript:displayRead(\'' + ${expandoId} + '\');'">read</a>
+											    <a th:case="'read'" th:href="'javascript:displayRead(\'' + ${expandoId} + '\', \'' + ${resource.type.valueAsString} + '\');'">read</a>
+											    <a th:case="'vread'" th:href="'javascript:displayVRead(\'' + ${expandoId} + '\', \'' + ${resource.type.valueAsString} + '\');'">vread</a>
 												<span th:case="*" th:text="${operation.code.value}"/>
 											</th:block>
 										</th:span>												

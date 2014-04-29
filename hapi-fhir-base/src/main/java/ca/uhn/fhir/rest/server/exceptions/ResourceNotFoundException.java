@@ -23,6 +23,7 @@ package ca.uhn.fhir.rest.server.exceptions;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.server.Constants;
 
 /**
  * Represents an <b>HTTP 404 Resource Not Found</b> response, which means that 
@@ -30,16 +31,18 @@ import ca.uhn.fhir.model.primitive.IdDt;
  */
 public class ResourceNotFoundException extends BaseServerResponseException {
 
+	public static final int STATUS_CODE = Constants.STATUS_HTTP_404_NOT_FOUND;
+
 	public ResourceNotFoundException(IdDt theId) {
-		super(404, "Resource " + (theId != null ? theId.getValue() : "") + " is not known");
+		super(STATUS_CODE, "Resource " + (theId != null ? theId.getValue() : "") + " is not known");
 	}
 
 	public ResourceNotFoundException(Class<? extends IResource> theClass, IdentifierDt thePatientId) {
-		super(404, "Resource of type " + theClass.getSimpleName() + " with ID " + thePatientId + " is not known");
+		super(STATUS_CODE, "Resource of type " + theClass.getSimpleName() + " with ID " + thePatientId + " is not known");
 	}
 
 	public ResourceNotFoundException(String theMessage) {
-		super(404, theMessage);
+		super(STATUS_CODE, theMessage);
 	}
 
 	private static final long serialVersionUID = 1L;

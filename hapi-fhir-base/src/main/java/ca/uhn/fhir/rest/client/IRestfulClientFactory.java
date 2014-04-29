@@ -57,4 +57,13 @@ public interface IRestfulClientFactory {
 	 */
 	HttpClient getHttpClient();
 
+	/**
+	 * Instantiates a new generic client instance
+	 * 
+	 * @param theServerBase
+	 *            The URL of the base for the restful FHIR server to connect to
+	 * @return A newly created client
+	 */
+	IGenericClient newGenericClient(String theServerBase);
+
 }

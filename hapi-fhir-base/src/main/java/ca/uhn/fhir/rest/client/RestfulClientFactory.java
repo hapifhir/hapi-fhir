@@ -54,7 +54,7 @@ public class RestfulClientFactory implements IRestfulClientFactory {
 
 	@SuppressWarnings("unchecked")
 	private <T extends IRestfulClient> T instantiateProxy(Class<T> theClientType, InvocationHandler theInvocationHandler) {
-		T proxy = (T) Proxy.newProxyInstance(RestfulClientFactory.class.getClassLoader(), new Class[] { theClientType }, theInvocationHandler);
+		T proxy = (T) Proxy.newProxyInstance(theClientType.getClassLoader(), new Class[] { theClientType }, theInvocationHandler);
 		return proxy;
 	}
 
@@ -118,6 +118,11 @@ public class RestfulClientFactory implements IRestfulClientFactory {
 	@Override
 	public synchronized void setHttpClient(HttpClient theHttpClient) {
 		myHttpClient = theHttpClient;
+	}
+
+	@Override
+	public IGenericClient newGenericClient(String theServerBase) {
+		return new GenericClient(myContext, getHttpClient(), theServerBase);
 	}
 
 }

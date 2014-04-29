@@ -20,3 +20,7 @@ TD.testerNameCell {
 	border-radius: 3px;
 	padding: 3px;
 }
+
+.syntaxhighlighter {
+	font-size: 0.85em !important;
+}

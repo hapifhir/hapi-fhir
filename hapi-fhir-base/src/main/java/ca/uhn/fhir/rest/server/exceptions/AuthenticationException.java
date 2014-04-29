@@ -1,6 +1,6 @@
 package ca.uhn.fhir.rest.server.exceptions;
 
-import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
+import ca.uhn.fhir.rest.server.Constants;
 
 /*
  * #%L
@@ -29,14 +29,16 @@ import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
  */
 public class AuthenticationException extends BaseServerResponseException {
 
-    private static final long serialVersionUID = 1L;
+    public static final int STATUS_CODE = Constants.STATUS_HTTP_401_CLIENT_UNAUTHORIZED;
+    
+	private static final long serialVersionUID = 1L;
 
     public AuthenticationException() {
-        super(401, "Client unauthorized");
+        super(STATUS_CODE, "Client unauthorized");
     }
 
     public AuthenticationException(String theMessage) {
-        super(401, theMessage);
+        super(STATUS_CODE, theMessage);
     }
 
 }

@@ -1,5 +1,7 @@
 package ca.uhn.fhir.rest.server.exceptions;
 
+import ca.uhn.fhir.rest.server.Constants;
+
 /*
  * #%L
  * HAPI FHIR Library
@@ -30,10 +32,11 @@ package ca.uhn.fhir.rest.server.exceptions;
  */
 public class InvalidRequestException extends BaseServerResponseException {
 
+	public static final int STATUS_CODE = Constants.STATUS_HTTP_400_BAD_REQUEST;
 	private static final long serialVersionUID = 1L;
 
 	public InvalidRequestException(String theMessage) {
-		super(400, theMessage);
+		super(STATUS_CODE, theMessage);
 	}
 
 }

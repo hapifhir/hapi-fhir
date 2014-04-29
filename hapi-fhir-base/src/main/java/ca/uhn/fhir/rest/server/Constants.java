@@ -60,6 +60,8 @@ public class Constants {
 	public static final String HEADER_LAST_MODIFIED = "Last-Modified";
 	public static final String HEADER_LAST_MODIFIED_LOWERCASE = HEADER_LAST_MODIFIED.toLowerCase();
 	public static final String PARAM_VALIDATE = "_validate";
+	public static final int STATUS_HTTP_401_CLIENT_UNAUTHORIZED = 401;
+	public static final int STATUS_HTTP_500_INTERNAL_ERROR = 500;
 
 	static {
 		Map<String, EncodingUtil> valToEncoding = new HashMap<String, EncodingUtil>();

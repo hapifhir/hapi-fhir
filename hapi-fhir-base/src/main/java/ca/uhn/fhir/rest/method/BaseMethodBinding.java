@@ -65,7 +65,7 @@ import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.ReflectionUtil;
 
-public abstract class BaseMethodBinding {
+public abstract class BaseMethodBinding implements IClientResponseHandler {
 
 	private FhirContext myContext;
 	private Method myMethod;
@@ -105,8 +105,6 @@ public abstract class BaseMethodBinding {
 	public abstract RestfulOperationSystemEnum getSystemOperationType();
 
 	public abstract BaseClientInvocation invokeClient(Object[] theArgs) throws InternalErrorException;
-
-	public abstract Object invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException, BaseServerResponseException;
 
 	public abstract void invokeServer(RestfulServer theServer, Request theRequest, HttpServletResponse theResponse) throws BaseServerResponseException, IOException;
 

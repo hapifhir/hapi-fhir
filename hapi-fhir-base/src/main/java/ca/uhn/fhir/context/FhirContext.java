@@ -36,8 +36,10 @@ import ca.uhn.fhir.narrative.INarrativeGenerator;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.JsonParser;
 import ca.uhn.fhir.parser.XmlParser;
+import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.client.IRestfulClientFactory;
 import ca.uhn.fhir.rest.client.RestfulClientFactory;
+import ca.uhn.fhir.rest.client.api.IBasicClient;
 import ca.uhn.fhir.rest.client.api.IRestfulClient;
 
 /**
@@ -82,8 +84,7 @@ public class FhirContext {
 	}
 
 	/**
-	 * Returns the scanned runtime model for the given type. This is an advanced feature
-	 * which is generally only needed for extending the core library.
+	 * Returns the scanned runtime model for the given type. This is an advanced feature which is generally only needed for extending the core library.
 	 */
 	public BaseRuntimeElementDefinition<?> getElementDefinition(Class<? extends IElement> theElementType) {
 		return myClassToElementDefinition.get(theElementType);
@@ -94,8 +95,7 @@ public class FhirContext {
 	}
 
 	/**
-	 * Returns the scanned runtime model for the given type. This is an advanced feature
-	 * which is generally only needed for extending the core library.
+	 * Returns the scanned runtime model for the given type. This is an advanced feature which is generally only needed for extending the core library.
 	 */
 	public RuntimeResourceDefinition getResourceDefinition(Class<? extends IResource> theResourceType) {
 		RuntimeResourceDefinition retVal = (RuntimeResourceDefinition) myClassToElementDefinition.get(theResourceType);
@@ -106,21 +106,19 @@ public class FhirContext {
 	}
 
 	/**
-	 * Returns the scanned runtime model for the given type. This is an advanced feature
-	 * which is generally only needed for extending the core library.
+	 * Returns the scanned runtime model for the given type. This is an advanced feature which is generally only needed for extending the core library.
 	 */
 	public RuntimeResourceDefinition getResourceDefinition(IResource theResource) {
 		return getResourceDefinition(theResource.getClass());
 	}
 
 	/**
-	 * Returns the scanned runtime model for the given type. This is an advanced feature
-	 * which is generally only needed for extending the core library.
+	 * Returns the scanned runtime model for the given type. This is an advanced feature which is generally only needed for extending the core library.
 	 */
 	@SuppressWarnings("unchecked")
 	public RuntimeResourceDefinition getResourceDefinition(String theResourceName) {
 		Validate.notBlank(theResourceName, "Resource name must not be blank");
-		
+
 		RuntimeResourceDefinition retVal = myNameToElementDefinition.get(theResourceName);
 
 		if (retVal == null) {
@@ -139,16 +137,14 @@ public class FhirContext {
 	}
 
 	/**
-	 * Returns the scanned runtime model for the given type. This is an advanced feature
-	 * which is generally only needed for extending the core library.
+	 * Returns the scanned runtime model for the given type. This is an advanced feature which is generally only needed for extending the core library.
 	 */
 	public RuntimeResourceDefinition getResourceDefinitionById(String theId) {
 		return myIdToResourceDefinition.get(theId);
 	}
 
 	/**
-	 * Returns the scanned runtime models. This is an advanced feature
-	 * which is generally only needed for extending the core library.
+	 * Returns the scanned runtime models. This is an advanced feature which is generally only needed for extending the core library.
 	 */
 	public Collection<RuntimeResourceDefinition> getResourceDefinitions() {
 		return myIdToResourceDefinition.values();
@@ -166,11 +162,10 @@ public class FhirContext {
 	}
 
 	/**
-	 * Create and return a new JSON parser. 
+	 * Create and return a new JSON parser.
 	 * 
 	 * <p>
-	 * Performance Note: <b>This class is cheap</b> to create, and may be called once for
-	 * every message being processed without incurring any performance penalty
+	 * Performance Note: <b>This class is cheap</b> to create, and may be called once for every message being processed without incurring any performance penalty
 	 * </p>
 	 */
 	public IParser newJsonParser() {
@@ -178,11 +173,12 @@ public class FhirContext {
 	}
 
 	/**
-	 * Instantiates a new client instance.
+	 * Instantiates a new client instance. This method requires an interface which is defined specifically for your use cases to contain methods for each of the RESTful operations you wish to
+	 * implement (e.g. "read ImagingStudy", "search Patient by identifier", etc.). This interface must extend {@link IRestfulClient} (or commonly its sub-interface {@link IBasicClient}). See the <a
+	 * href="http://hl7api.sourceforge.net/hapi-fhir/doc_rest_client.html">RESTful Client</a> documentation for more information on how to define this interface.
 	 * 
 	 * <p>
-	 * Performance Note: <b>This class is cheap</b> to create, and may be called once for
-	 * every message being processed without incurring any performance penalty
+	 * Performance Note: <b>This class is cheap</b> to create, and may be called once for every message being processed without incurring any performance penalty
 	 * </p>
 	 * 
 	 * @param theClientType
@@ -198,11 +194,25 @@ public class FhirContext {
 	}
 
 	/**
-	 * Create and return a new JSON parser. 
+	 * Instantiates a new generic client. A generic client is able to perform any of the FHIR RESTful operations against a compliant server, but does not have methods defining the specific
+	 * functionality required (as is the case with {@link #newRestfulClient(Class, String) non-generic clients}).
+	 * <p>
+	 * In most cases it is preferable to use the non-generic clients instead of this mechanism, but not always.
+	 * </p>
+	 * 
+	 * @param theServerBase
+	 *            The URL of the base for the restful FHIR server to connect to
+	 * @return 
+	 */
+	public IGenericClient newRestfulGenericClient(String theServerBase) {
+		return getRestfulClientFactory().newGenericClient(theServerBase);
+	}
+
+	/**
+	 * Create and return a new JSON parser.
 	 * 
 	 * <p>
-	 * Performance Note: <b>This class is cheap</b> to create, and may be called once for
-	 * every message being processed without incurring any performance penalty
+	 * Performance Note: <b>This class is cheap</b> to create, and may be called once for every message being processed without incurring any performance penalty
 	 * </p>
 	 */
 	public IParser newXmlParser() {

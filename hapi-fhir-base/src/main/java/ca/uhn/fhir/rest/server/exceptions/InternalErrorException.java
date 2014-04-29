@@ -1,5 +1,7 @@
 package ca.uhn.fhir.rest.server.exceptions;
 
+import ca.uhn.fhir.rest.server.Constants;
+
 /*
  * #%L
  * HAPI FHIR Library
@@ -25,18 +27,20 @@ package ca.uhn.fhir.rest.server.exceptions;
  */
 public class InternalErrorException extends BaseServerResponseException {
 
+	public static final int STATUS_CODE = Constants.STATUS_HTTP_500_INTERNAL_ERROR;
+	
 	private static final long serialVersionUID = 1L;
 
 	public InternalErrorException(String theMessage) {
-		super(500, theMessage);
+		super(STATUS_CODE, theMessage);
 	}
 
 	public InternalErrorException(String theMessage, Throwable theCause) {
-		super(500, theMessage, theCause);
+		super(STATUS_CODE, theMessage, theCause);
 	}
 
 	public InternalErrorException(Throwable theCause) {
-		super(500, theCause);
+		super(STATUS_CODE, theCause);
 	}
 
 }

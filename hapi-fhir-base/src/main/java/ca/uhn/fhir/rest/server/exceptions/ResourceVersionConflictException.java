@@ -30,9 +30,10 @@ import ca.uhn.fhir.rest.server.Constants;
  * when the operation fails because of a version conflict as specified in the FHIR specification. 
  */
 public class ResourceVersionConflictException extends BaseServerResponseException {
+	public static final int STATUS_CODE = Constants.STATUS_HTTP_409_CONFLICT;
 	private static final long serialVersionUID = 1L;
 
 	public ResourceVersionConflictException(String error) {
-		super(Constants.STATUS_HTTP_409_CONFLICT, error);
+		super(STATUS_CODE, error);
 	}
 }

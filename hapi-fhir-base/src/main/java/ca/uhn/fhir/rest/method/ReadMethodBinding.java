@@ -118,13 +118,23 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding {
 
 	@Override
 	public GetClientInvocation invokeClient(Object[] theArgs) {
-		String id = ((IdDt) theArgs[myIdIndex]).getValue();
+		IdDt id = ((IdDt) theArgs[myIdIndex]);
 		if (myVersionIdIndex == null) {
-			return new GetClientInvocation(getResourceName(), id);
+			String resourceName = getResourceName();
+			return createReadInvocation(id, resourceName);
 		} else {
-			String vid = ((IdDt) theArgs[myVersionIdIndex]).getValue();
-			return new GetClientInvocation(getResourceName(), id, Constants.URL_TOKEN_HISTORY, vid);
+			IdDt vid = ((IdDt) theArgs[myVersionIdIndex]);
+			String resourceName = getResourceName();
+			return createVReadInvocation(id, vid, resourceName);
 		}
+	}
+
+	public static GetClientInvocation createVReadInvocation(IdDt theId, IdDt vid, String resourceName) {
+		return new GetClientInvocation(resourceName, theId.getValue(), Constants.URL_TOKEN_HISTORY, vid.getValue());
+	}
+
+	public static GetClientInvocation createReadInvocation(IdDt theId, String resourceName) {
+		return new GetClientInvocation(resourceName, theId.getValue());
 	}
 
 	@Override

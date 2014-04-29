@@ -1,5 +1,9 @@
 package ca.uhn.fhir.rest.server.exceptions;
 
+import java.lang.reflect.InvocationTargetException;
+import java.util.HashMap;
+import java.util.Map;
+
 import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
 
 /*
@@ -24,10 +28,22 @@ import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
 
 public abstract class BaseServerResponseException extends RuntimeException {
 
+	private static final Map<Integer, Class<? extends BaseServerResponseException>> ourStatusCodeToExceptionType = new HashMap<Integer, Class<? extends BaseServerResponseException>>();
 	private static final long serialVersionUID = 1L;
 
-	private int myStatusCode;
+	static {
+		registerExceptionType(AuthenticationException.STATUS_CODE, AuthenticationException.class);
+		registerExceptionType(InternalErrorException.STATUS_CODE, InternalErrorException.class);
+		registerExceptionType(InvalidRequestException.STATUS_CODE, InvalidRequestException.class);
+		registerExceptionType(MethodNotAllowedException.STATUS_CODE, MethodNotAllowedException.class);
+		registerExceptionType(ResourceNotFoundException.STATUS_CODE, ResourceNotFoundException.class);
+		registerExceptionType(ResourceVersionNotSpecifiedException.STATUS_CODE, ResourceVersionNotSpecifiedException.class);
+		registerExceptionType(UnprocessableEntityException.STATUS_CODE, UnprocessableEntityException.class);
+	}
+
 	private final OperationOutcome myOperationOutcome;
+
+	private int myStatusCode;
 
 	/**
 	 * Constructor
@@ -40,7 +56,7 @@ public abstract class BaseServerResponseException extends RuntimeException {
 	public BaseServerResponseException(int theStatusCode, String theMessage) {
 		super(theMessage);
 		myStatusCode = theStatusCode;
-		myOperationOutcome=null;
+		myOperationOutcome = null;
 	}
 
 	/**
@@ -54,9 +70,9 @@ public abstract class BaseServerResponseException extends RuntimeException {
 	public BaseServerResponseException(int theStatusCode, String theMessage, OperationOutcome theOperationOutcome) {
 		super(theMessage);
 		myStatusCode = theStatusCode;
-		myOperationOutcome=theOperationOutcome;
+		myOperationOutcome = theOperationOutcome;
 	}
-	
+
 	/**
 	 * Constructor
 	 * 
@@ -64,12 +80,13 @@ public abstract class BaseServerResponseException extends RuntimeException {
 	 *            The HTTP status code corresponding to this problem
 	 * @param theMessage
 	 *            The message
-	 * @param theCause The cause
+	 * @param theCause
+	 *            The cause
 	 */
 	public BaseServerResponseException(int theStatusCode, String theMessage, Throwable theCause) {
 		super(theMessage, theCause);
 		myStatusCode = theStatusCode;
-		myOperationOutcome=null;
+		myOperationOutcome = null;
 	}
 
 	/**
@@ -83,7 +100,14 @@ public abstract class BaseServerResponseException extends RuntimeException {
 	public BaseServerResponseException(int theStatusCode, Throwable theCause) {
 		super(theCause.toString(), theCause);
 		myStatusCode = theStatusCode;
-		myOperationOutcome=null;
+		myOperationOutcome = null;
+	}
+
+	/**
+	 * Returns the {@link OperationOutcome} resource if any which was supplied in the response, or <code>null</code>
+	 */
+	public OperationOutcome getOperationOutcome() {
+		return myOperationOutcome;
 	}
 
 	/**
@@ -93,11 +117,31 @@ public abstract class BaseServerResponseException extends RuntimeException {
 		return myStatusCode;
 	}
 
-	/**
-	 * Returns the {@link OperationOutcome} resource if any which was supplied in the response,
-	 * or <code>null</code>
-	 */
-	public OperationOutcome getOperationOutcome() {
-		return myOperationOutcome;
+	public static BaseServerResponseException newInstance(int theStatusCode, String theMessage) {
+		if (ourStatusCodeToExceptionType.containsKey(theStatusCode)) {
+			try {
+				return ourStatusCodeToExceptionType.get(theStatusCode).getConstructor(new Class[] { String.class }).newInstance(theMessage);
+			} catch (InstantiationException e) {
+				throw new InternalErrorException(e);
+			} catch (IllegalAccessException e) {
+				throw new InternalErrorException(e);
+			} catch (IllegalArgumentException e) {
+				throw new InternalErrorException(e);
+			} catch (InvocationTargetException e) {
+				throw new InternalErrorException(e);
+			} catch (NoSuchMethodException e) {
+				throw new InternalErrorException(e);
+			} catch (SecurityException e) {
+				throw new InternalErrorException(e);
+			}
+		} else {
+			return new UnclassifiedServerFailureException(theStatusCode, theMessage);
+		}
+	}
+
+	static void registerExceptionType(int theStatusCode, Class<? extends BaseServerResponseException> theType) {
+		if (ourStatusCodeToExceptionType.containsKey(theStatusCode)) {
+			throw new Error("Can not register " + theType + " to status code " + theStatusCode + " because " + ourStatusCodeToExceptionType.get(theStatusCode) + " already registers that code");
+		}
 	}
 }

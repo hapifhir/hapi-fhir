@@ -1,5 +1,7 @@
 package ca.uhn.fhir.rest.server.exceptions;
 
+import ca.uhn.fhir.rest.server.Constants;
+
 /*
  * #%L
  * HAPI FHIR Library
@@ -24,9 +26,10 @@ package ca.uhn.fhir.rest.server.exceptions;
  * TODO: javadoc this
  */
 public class MethodNotAllowedException extends BaseServerResponseException {
+	public 	static final int STATUS_CODE = Constants.STATUS_HTTP_405_METHOD_NOT_ALLOWED;
 	private static final long serialVersionUID = 1L;
 
 	public MethodNotAllowedException(String error) {
-		super(405, error);
+		super(STATUS_CODE, error);
 	}
 }

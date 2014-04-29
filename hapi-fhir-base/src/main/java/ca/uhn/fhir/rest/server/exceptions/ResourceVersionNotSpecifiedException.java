@@ -29,9 +29,10 @@ import ca.uhn.fhir.rest.server.Constants;
  * be specified in an HTTP header, and none was.
  */
 public class ResourceVersionNotSpecifiedException extends BaseServerResponseException {
+	public static final int STATUS_CODE = Constants.STATUS_HTTP_412_PRECONDITION_FAILED;
 	private static final long serialVersionUID = 1L;
 
 	public ResourceVersionNotSpecifiedException(String error) {
-		super(Constants.STATUS_HTTP_412_PRECONDITION_FAILED, error);
+		super(STATUS_CODE, error);
 	}
 }

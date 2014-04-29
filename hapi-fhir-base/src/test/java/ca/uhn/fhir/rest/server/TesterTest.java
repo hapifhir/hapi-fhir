@@ -75,7 +75,7 @@ public class TesterTest {
 
 	@Test
 	public void testTester() throws Exception {
-		if (true) return;
+//		if (true) return;
 		
 		myRestfulServer.setProviders(new SearchProvider(), new GlobalHistoryProvider());
 		myServer.start();
