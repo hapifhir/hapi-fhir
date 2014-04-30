@@ -1,8 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -49,6 +47,7 @@ import ca.uhn.fhir.model.dstu.composite.CodingDt;
 import ca.uhn.fhir.model.dstu.composite.HumanNameDt;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.resource.Conformance;
+import ca.uhn.fhir.model.dstu.resource.DiagnosticOrder;
 import ca.uhn.fhir.model.dstu.resource.DiagnosticReport;
 import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
 import ca.uhn.fhir.model.dstu.resource.Patient;
@@ -860,11 +859,10 @@ public class ResfulServerMethodTest {
 	}
 
 	
-	@Test
 	public void testUpdateWrongResourceType() throws Exception {
 
 		// TODO: this method sends in the wrong resource type vs. the URL so it should
-		// give a useful error message
+		// give a useful error message (and then make this unit test actually run)
 		Patient patient = new Patient();
 		patient.addIdentifier().setValue("002");
 
@@ -902,16 +900,17 @@ public class ResfulServerMethodTest {
 		patient.getIdentifier().setValue("001");
 
 		HttpPut httpPut = new HttpPut("http://localhost:" + ourPort + "/DiagnosticReport/001");
-		httpPut.addHeader("Content-Location", "/DiagnosticReport/001/_history/002");
+		httpPut.addHeader("Content-Location", "/DiagnosticReport/001/_history/004");
 		httpPut.setEntity(new StringEntity(new FhirContext().newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
 		HttpResponse status = ourClient.execute(httpPut);
 
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		ourLog.info("Response was:\n{}", responseContent);
+//		String responseContent = IOUtils.toString(status.getEntity().getContent());
+//		ourLog.info("Response was:\n{}", responseContent);
 
-		assertEquals(201, status.getStatusLine().getStatusCode());
-		assertEquals("http://localhost:" + ourPort + "/DiagnosticReport/001/_history/002", status.getFirstHeader("Location").getValue());
+		assertEquals(204, status.getStatusLine().getStatusCode());
+		assertNull(status.getEntity());
+		assertEquals("http://localhost:" + ourPort + "/DiagnosticReport/001/_history/004", status.getFirstHeader("Location").getValue());
 
 	}
 
@@ -977,11 +976,12 @@ public class ResfulServerMethodTest {
 
 		status = ourClient.execute(httpPost);
 
-		responseContent = IOUtils.toString(status.getEntity().getContent());
-		ourLog.info("Response was:\n{}", responseContent);
+//		responseContent = IOUtils.toString(status.getEntity().getContent());
+//		ourLog.info("Response was:\n{}", responseContent);
 
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertEquals("", responseContent);
+		assertEquals(204, status.getStatusLine().getStatusCode());
+		assertNull(status.getEntity());
+//		assertEquals("", responseContent);
 
 	}
 
@@ -1041,6 +1041,14 @@ public class ResfulServerMethodTest {
 		@Override
 		public Class<? extends IResource> getResourceType() {
 			return DiagnosticReport.class;
+		}
+
+		@SuppressWarnings("unused")
+		@Update()
+		public MethodOutcome updateDiagnosticReportWithNoResponse(@IdParam IdDt theId, @VersionIdParam IdDt theVersionId, @ResourceParam DiagnosticReport thePatient) {
+			IdDt id = theId;
+			IdDt version = theVersionId;
+			return new MethodOutcome(id, version);
 		}
 
 		@SuppressWarnings("unused")
@@ -1281,10 +1289,10 @@ public class ResfulServerMethodTest {
 
 		@SuppressWarnings("unused")
 		@Update()
-		public MethodOutcome updateDiagnosticReportWithVersion(@IdParam IdDt theId, @VersionIdParam IdDt theVersionId, @ResourceParam DiagnosticReport thePatient) {
+		public MethodOutcome updateDiagnosticReportWithVersion(@IdParam IdDt theId, @VersionIdParam IdDt theVersionId, @ResourceParam DiagnosticOrder thePatient) {
 			/*
 			 * TODO: THIS METHOD IS NOT USED. It's the wrong type
-			 * (DiagnosticReport), so it should cause an exception on startup.
+			 * (DiagnosticOrder), so it should cause an exception on startup.
 			 * Also we should detect if there are multiple resource params on an
 			 * update/create/etc method
 			 */

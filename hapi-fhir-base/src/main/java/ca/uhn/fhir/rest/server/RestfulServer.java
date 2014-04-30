@@ -46,6 +46,7 @@ import ca.uhn.fhir.rest.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.method.ConformanceMethodBinding;
 import ca.uhn.fhir.rest.method.Request;
 import ca.uhn.fhir.rest.method.SearchMethodBinding;
+import ca.uhn.fhir.rest.method.SearchMethodBinding.RequestType;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -73,6 +74,8 @@ public class RestfulServer extends HttpServlet {
 																// HAPI version
 	private boolean myUseBrowserFriendlyContentTypes;
 	private ResourceBinding myNullResourceBinding = new ResourceBinding();
+
+	private boolean myStarted;
 
 	/**
 	 * Constructor
@@ -222,6 +225,7 @@ public class RestfulServer extends HttpServlet {
 			throw new ServletException("Failed to initialize FHIR Restful server", ex);
 		}
 
+		myStarted = true;
 		ourLog.info("A FHIR has been lit on this server");
 	}
 
@@ -293,7 +297,7 @@ public class RestfulServer extends HttpServlet {
 	 *             {@link IllegalStateException} if called after that.
 	 */
 	public void setServerConformanceProvider(Object theServerConformanceProvider) {
-		if (myFhirContext != null) {
+		if (myStarted) {
 			throw new IllegalStateException("Server is already started");
 		}
 		myServerConformanceProvider = theServerConformanceProvider;
@@ -524,6 +528,18 @@ public class RestfulServer extends HttpServlet {
 				String nextString = tok.nextToken();
 				versionId = new IdDt(nextString);
 			}
+			
+			if (theRequestType==RequestType.PUT && versionId==null) {
+				String contentLocation = theRequest.getHeader("Content-Location");
+				if (contentLocation!=null) {
+					int idx = contentLocation.indexOf("/_history/");
+					if (idx != -1) {
+						String versionIdString = contentLocation.substring(idx + "/_history/".length());
+						versionId = new IdDt(versionIdString);
+					}
+				}
+			}
+			
 
 			// TODO: look for more tokens for version, compartments, etc...
 

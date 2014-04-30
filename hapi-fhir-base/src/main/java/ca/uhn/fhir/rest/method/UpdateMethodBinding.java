@@ -131,6 +131,20 @@ class UpdateMethodBinding extends BaseOutcomeReturningMethodBindingWithResourceP
 	}
 
 	@Override
+	public boolean matches(Request theRequest) {
+		if (super.matches(theRequest)) {
+			if (myVersionIdParameterIndex != null) {
+				if (theRequest.getVersion() == null) {
+					return false;
+				}
+			}
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	@Override
 	protected Set<RequestType> provideAllowableRequestTypes() {
 		return Collections.singleton(RequestType.PUT);
 	}

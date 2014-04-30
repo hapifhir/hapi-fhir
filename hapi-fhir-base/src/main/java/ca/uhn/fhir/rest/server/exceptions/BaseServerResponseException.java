@@ -38,6 +38,7 @@ public abstract class BaseServerResponseException extends RuntimeException {
 		registerExceptionType(MethodNotAllowedException.STATUS_CODE, MethodNotAllowedException.class);
 		registerExceptionType(ResourceNotFoundException.STATUS_CODE, ResourceNotFoundException.class);
 		registerExceptionType(ResourceVersionNotSpecifiedException.STATUS_CODE, ResourceVersionNotSpecifiedException.class);
+		registerExceptionType(ResourceVersionConflictException.STATUS_CODE, ResourceVersionConflictException.class);
 		registerExceptionType(UnprocessableEntityException.STATUS_CODE, UnprocessableEntityException.class);
 	}
 
@@ -143,5 +144,6 @@ public abstract class BaseServerResponseException extends RuntimeException {
 		if (ourStatusCodeToExceptionType.containsKey(theStatusCode)) {
 			throw new Error("Can not register " + theType + " to status code " + theStatusCode + " because " + ourStatusCodeToExceptionType.get(theStatusCode) + " already registers that code");
 		}
+		ourStatusCodeToExceptionType.put(theStatusCode, theType);
 	}
 }

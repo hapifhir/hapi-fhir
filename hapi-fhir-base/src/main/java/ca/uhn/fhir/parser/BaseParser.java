@@ -60,6 +60,11 @@ public abstract class BaseParser implements IParser {
 	}
 
 	@Override
+	public Bundle parseBundle(Reader theReader) {
+		return parseBundle(null, theReader);
+	}
+
+	@Override
 	public IResource parseResource(Reader theReader) throws ConfigurationException, DataFormatException {
 		return parseResource(null, theReader);
 	}

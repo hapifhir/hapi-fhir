@@ -7,13 +7,17 @@
 	</properties>
 	<body>
 		<release version="0.3" date="TBD">
-            <action type="fix" dev="Josh Mandel">
+            <action type="add">
             	Make it easier to add HTTP Basic Authorization headers to RESTful client requests
             	and <![CDATA[<a href="./doc_rest_client.html#HTTP_Basic_Authorization">an example</a>]]>
             	illustrating how it works 
             </action>
             <action type="fix" dev="Josh Mandel">
             	Correct a dependency on commons-io that was causing issues with the Tinder build 
+            </action>
+            <action type="fix">
+            	Fix an issue where extensions with a resource reference as the value show up incorrectly
+            	(wrong element name for undeclared extensions, and empty content for declared extensions) 
             </action>
         </release>			
 	</body>

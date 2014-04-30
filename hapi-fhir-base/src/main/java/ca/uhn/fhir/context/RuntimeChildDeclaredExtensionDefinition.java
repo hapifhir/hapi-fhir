@@ -23,12 +23,15 @@ package ca.uhn.fhir.context;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import ca.uhn.fhir.model.api.IElement;
+import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Extension;
@@ -133,7 +136,15 @@ public class RuntimeChildDeclaredExtensionDefinition extends BaseRuntimeDeclared
 		BaseRuntimeElementDefinition<?> elementDef = theClassToElementDefinitions.get(myChildType);
 		if (elementDef instanceof RuntimePrimitiveDatatypeDefinition || elementDef instanceof RuntimeCompositeDatatypeDefinition) {
 			myDatatypeChildName = "value" + elementDef.getName().substring(0, 1).toUpperCase() + elementDef.getName().substring(1);
-			myChildDef = elementDef;
+			if ("valueResourceReference".equals(myDatatypeChildName)) {
+				// Per one of the examples here: http://hl7.org/implement/standards/fhir/extensibility.html#extension
+				myDatatypeChildName = "valueResource";
+				List<Class<? extends IResource>> types = new ArrayList<Class<? extends IResource>>();
+				types.add(IResource.class);
+				myChildDef = new RuntimeResourceReferenceDefinition("valueResource", types);
+			}else {
+				myChildDef = elementDef;
+			}
 		} else {
 			RuntimeResourceBlockDefinition extDef = ((RuntimeResourceBlockDefinition) elementDef);
 			for (RuntimeChildDeclaredExtensionDefinition next : extDef.getExtensions()) {

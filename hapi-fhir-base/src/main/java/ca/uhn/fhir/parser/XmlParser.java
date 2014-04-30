@@ -193,8 +193,9 @@ public class XmlParser extends BaseParser implements IParser {
 		}
 	}
 
+
 	@Override
-	public Bundle parseBundle(Reader theReader) {
+	public <T extends IResource> Bundle parseBundle(Class<T> theResourceType, Reader theReader) {
 		XMLEventReader streamReader;
 		try {
 			streamReader = myXmlInputFactory.createXMLEventReader(theReader);
@@ -204,7 +205,7 @@ public class XmlParser extends BaseParser implements IParser {
 			throw new ConfigurationException("Failed to initialize STaX event factory", e);
 		}
 
-		return parseBundle(streamReader);
+		return parseBundle(streamReader, theResourceType);
 	}
 
 	@Override
@@ -590,8 +591,8 @@ public class XmlParser extends BaseParser implements IParser {
 		}
 	}
 
-	private Bundle parseBundle(XMLEventReader theStreamReader) {
-		ParserState<Bundle> parserState = ParserState.getPreAtomInstance(myContext, false);
+	private Bundle parseBundle(XMLEventReader theStreamReader, Class<? extends IResource> theResourceType) {
+		ParserState<Bundle> parserState = ParserState.getPreAtomInstance(myContext, theResourceType, false);
 		return doXmlLoop(theStreamReader, parserState);
 	}
 

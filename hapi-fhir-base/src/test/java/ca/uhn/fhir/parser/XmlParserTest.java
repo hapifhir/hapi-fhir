@@ -31,6 +31,7 @@ import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.dstu.composite.AddressDt;
 import ca.uhn.fhir.model.dstu.composite.HumanNameDt;
 import ca.uhn.fhir.model.dstu.composite.NarrativeDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
@@ -51,6 +52,8 @@ import ca.uhn.fhir.model.primitive.DecimalDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.XhtmlDt;
 import ca.uhn.fhir.narrative.INarrativeGenerator;
+import ca.uhn.fhir.parser.JsonParserTest.MyPatientWithOneDeclaredAddressExtension;
+import ca.uhn.fhir.parser.JsonParserTest.MyPatientWithOneDeclaredExtension;
 
 public class XmlParserTest {
 
@@ -69,7 +72,83 @@ public class XmlParserTest {
 		
 	}
 
+	@Test
+	public void testEncodeExtensionWithResourceContent() throws IOException {
+		IParser parser = new FhirContext().newXmlParser();
+		
+		Patient patient = new Patient();
+		patient.addAddress().setUse(AddressUseEnum.HOME);
+		patient.addUndeclaredExtension(false, "urn:foo", new ResourceReferenceDt(Organization.class, "123"));
+		
+		String val = parser.encodeResourceToString(patient);
+		ourLog.info(val);
+		assertThat(val, StringContains.containsString("<extension url=\"urn:foo\"><valueResource><reference value=\"Organization/123\"/></valueResource></extension>"));
+		
+		Patient actual = parser.parseResource(Patient.class, val);
+		assertEquals(AddressUseEnum.HOME, patient.getAddressFirstRep().getUse().getValueAsEnum());
+		List<ExtensionDt> ext = actual.getUndeclaredExtensionsByUrl("urn:foo");
+		assertEquals(1, ext.size());
+		ResourceReferenceDt ref = (ResourceReferenceDt) ext.get(0).getValue();
+		assertEquals("Organization/123", ref.getResourceUrl());
+		
+	}
+
+	@Test
+	public void testEncodeDeclaredExtensionWithResourceContent() throws IOException {
+		IParser parser = new FhirContext().newXmlParser();
+
+		MyPatientWithOneDeclaredExtension patient = new MyPatientWithOneDeclaredExtension();
+		patient.addAddress().setUse(AddressUseEnum.HOME);
+		patient.setFoo(new ResourceReferenceDt(Organization.class, "123"));
+
+		String val = parser.encodeResourceToString(patient);
+		ourLog.info(val);
+		assertThat(val, StringContains.containsString("<extension url=\"urn:foo\"><valueResource><reference value=\"Organization/123\"/></valueResource></extension>"));
+
+		MyPatientWithOneDeclaredExtension actual = parser.parseResource(MyPatientWithOneDeclaredExtension.class, val);
+		assertEquals(AddressUseEnum.HOME, patient.getAddressFirstRep().getUse().getValueAsEnum());
+		ResourceReferenceDt ref = actual.getFoo();
+		assertEquals("Organization/123", ref.getResourceUrl());
+
+	}
 	
+	@Test
+	public void testEncodeDeclaredExtensionWithAddressContent() throws IOException {
+		IParser parser = new FhirContext().newXmlParser();
+
+		MyPatientWithOneDeclaredAddressExtension patient = new MyPatientWithOneDeclaredAddressExtension();
+		patient.addAddress().setUse(AddressUseEnum.HOME);
+		patient.setFoo(new AddressDt().addLine("line1"));
+
+		String val = parser.encodeResourceToString(patient);
+		ourLog.info(val);
+		assertThat(val, StringContains.containsString("<extension url=\"urn:foo\"><valueAddress><line value=\"line1\"/></valueAddress></extension>"));
+
+		MyPatientWithOneDeclaredAddressExtension actual = parser.parseResource(MyPatientWithOneDeclaredAddressExtension.class, val);
+		assertEquals(AddressUseEnum.HOME, patient.getAddressFirstRep().getUse().getValueAsEnum());
+		AddressDt ref = actual.getFoo();
+		assertEquals("line1", ref.getLineFirstRep().getValue());
+
+	}
+
+	@Test
+	public void testEncodeUndeclaredExtensionWithAddressContent() throws IOException {
+		IParser parser = new FhirContext().newXmlParser();
+
+		Patient patient = new Patient();
+		patient.addAddress().setUse(AddressUseEnum.HOME);
+		patient.addUndeclaredExtension(false, "urn:foo", new AddressDt().addLine("line1"));
+
+		String val = parser.encodeResourceToString(patient);
+		ourLog.info(val);
+		assertThat(val, StringContains.containsString("<extension url=\"urn:foo\"><valueAddress><line value=\"line1\"/></valueAddress></extension>"));
+
+		MyPatientWithOneDeclaredAddressExtension actual = parser.parseResource(MyPatientWithOneDeclaredAddressExtension.class, val);
+		assertEquals(AddressUseEnum.HOME, patient.getAddressFirstRep().getUse().getValueAsEnum());
+		AddressDt ref = actual.getFoo();
+		assertEquals("line1", ref.getLineFirstRep().getValue());
+
+	}
 
 	@Test
 	public void testEncodeBundleResultCount() throws IOException {

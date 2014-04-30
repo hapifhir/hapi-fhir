@@ -1,5 +1,25 @@
 package ca.uhn.fhir.rest.server.tester;
 
+/*
+ * #%L
+ * HAPI FHIR Library
+ * %%
+ * Copyright (C) 2014 University Health Network
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
@@ -11,8 +31,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringEscapeUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.ContentType;
 import org.thymeleaf.TemplateEngine;
@@ -145,7 +165,7 @@ public class PublicTesterServlet extends HttpServlet {
 			ctx.setVariable("requestUrl", requestUrl);
 			ctx.setVariable("action", action);
 			ctx.setVariable("resultStatus", resultStatus);
-			ctx.setVariable("resultBody", StringEscapeUtils.escapeHtml(resultBody));
+			ctx.setVariable("resultBody", StringEscapeUtils.escapeHtml4(resultBody));
 			ctx.setVariable("resultSyntaxHighlighterClass", resultSyntaxHighlighterClass);
 			
 			myTemplateEngine.process(PUBLIC_TESTER_RESULT_HTML, ctx, theResp.getWriter());

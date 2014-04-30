@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import java.lang.annotation.Documented;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -16,8 +17,10 @@ import org.junit.Test;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
+import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.dstu.composite.HumanNameDt;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
+import ca.uhn.fhir.model.dstu.composite.QuantityDt;
 import ca.uhn.fhir.model.dstu.resource.Organization;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
@@ -75,7 +78,7 @@ public class TesterTest {
 
 	@Test
 	public void testTester() throws Exception {
-//		if (true) return;
+		if (true) return;
 		
 		myRestfulServer.setProviders(new SearchProvider(), new GlobalHistoryProvider());
 		myServer.start();
@@ -111,7 +114,10 @@ public class TesterTest {
 		}
 
 		@Search(type = Patient.class)
-		public Patient findPatient(@RequiredParam(name = Patient.SP_IDENTIFIER) IdentifierDt theIdentifier) {
+		public Patient findPatient(
+				@Description(shortDefinition="The patient's identifier (MRN or other card number)")
+				@RequiredParam(name = Patient.SP_IDENTIFIER) IdentifierDt theIdentifier
+				) {
 			for (Patient next : getIdToPatient().values()) {
 				for (IdentifierDt nextId : next.getIdentifier()) {
 					if (nextId.matchesSystemAndValue(theIdentifier)) {

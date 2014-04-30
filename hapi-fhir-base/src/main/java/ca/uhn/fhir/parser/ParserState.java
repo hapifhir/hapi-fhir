@@ -131,9 +131,9 @@ class ParserState<T extends IElement> {
 		myState = theState;
 	}
 
-	public static ParserState<Bundle> getPreAtomInstance(FhirContext theContext, boolean theJsonMode) throws DataFormatException {
+	public static ParserState<Bundle> getPreAtomInstance(FhirContext theContext, Class<? extends IResource> theResourceType, boolean theJsonMode) throws DataFormatException {
 		ParserState<Bundle> retVal = new ParserState<Bundle>(theContext, theJsonMode);
-		retVal.push(retVal.new PreAtomState());
+		retVal.push(retVal.new PreAtomState(theResourceType));
 		return retVal;
 	}
 
@@ -209,10 +209,12 @@ class ParserState<T extends IElement> {
 	public class AtomEntryState extends BaseState {
 
 		private BundleEntry myEntry;
+		private Class<? extends IResource> myResourceType;
 
-		public AtomEntryState(Bundle theInstance) {
+		public AtomEntryState(Bundle theInstance, Class<? extends IResource> theResourceType) {
 			super(null);
 			myEntry = new BundleEntry();
+			myResourceType = theResourceType;
 			theInstance.getEntries().add(myEntry);
 		}
 
@@ -275,7 +277,7 @@ class ParserState<T extends IElement> {
 			} else if ("author".equals(theLocalPart)) {
 				push(new AtomAuthorState(myEntry));
 			} else if ("content".equals(theLocalPart)) {
-				push(new PreResourceState(myEntry));
+				push(new PreResourceState(myEntry, myResourceType));
 			} else if ("summary".equals(theLocalPart)) {
 				push(new XhtmlState(getPreResourceState(), myEntry.getSummary(), false));
 			} else if ("category".equals(theLocalPart)) {
@@ -387,10 +389,12 @@ class ParserState<T extends IElement> {
 	private class AtomState extends BaseState {
 
 		private Bundle myInstance;
+		private Class<? extends IResource> myResourceType;
 
-		public AtomState(Bundle theInstance) {
+		public AtomState(Bundle theInstance, Class<? extends IResource> theResourceType) {
 			super(null);
 			myInstance = theInstance;
+			myResourceType = theResourceType;
 		}
 
 		@Override
@@ -401,7 +405,7 @@ class ParserState<T extends IElement> {
 		@Override
 		public void enteringNewElement(String theNamespaceURI, String theLocalPart) throws DataFormatException {
 			if ("entry".equals(theLocalPart) && verifyNamespace(XmlParser.ATOM_NS, theNamespaceURI)) {
-				push(new AtomEntryState(myInstance));
+				push(new AtomEntryState(myInstance, myResourceType));
 			} else if (theLocalPart.equals("published")) {
 				push(new AtomPrimitiveState(myInstance.getPublished()));
 			} else if (theLocalPart.equals("title")) {
@@ -829,9 +833,11 @@ class ParserState<T extends IElement> {
 	private class PreAtomState extends BaseState {
 
 		private Bundle myInstance;
+		private Class<? extends IResource> myResourceType;
 
-		public PreAtomState() {
+		public PreAtomState(Class<? extends IResource> theResourceType) {
 			super(null);
+			myResourceType = theResourceType;
 		}
 
 		@Override
@@ -846,7 +852,7 @@ class ParserState<T extends IElement> {
 			}
 
 			myInstance = new Bundle();
-			push(new AtomState(myInstance));
+			push(new AtomState(myInstance, myResourceType));
 
 		}
 
@@ -877,9 +883,10 @@ class ParserState<T extends IElement> {
 			return true;
 		}
 
-		public PreResourceState(BundleEntry theEntry) {
+		public PreResourceState(BundleEntry theEntry, Class<? extends IResource> theResourceType) {
 			super(null);
 			myEntry = theEntry;
+			myResourceType=theResourceType;
 		}
 
 		/**

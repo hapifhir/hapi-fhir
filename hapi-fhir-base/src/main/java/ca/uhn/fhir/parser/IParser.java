@@ -38,17 +38,19 @@ public interface IParser {
 
 	void encodeResourceToWriter(IResource theResource, Writer stringWriter) throws IOException, DataFormatException;
 
+	<T extends IResource> Bundle parseBundle(Class<T> theResourceType, Reader theReader);
+
 	Bundle parseBundle(Reader theReader);
 
 	Bundle parseBundle(String theMessageString) throws ConfigurationException, DataFormatException;
 
-	IResource parseResource(String theMessageString) throws ConfigurationException, DataFormatException;
-
-	IResource parseResource(Reader theReader) throws ConfigurationException, DataFormatException;
+	<T extends IResource> T parseResource(Class<T> theResourceType, Reader theReader);
 
 	<T extends IResource> T parseResource(Class<T> theResourceType, String theMessageString);
 
-	<T extends IResource> T parseResource(Class<T> theResourceType, Reader theReader);
+	IResource parseResource(Reader theReader) throws ConfigurationException, DataFormatException;
+
+	IResource parseResource(String theMessageString) throws ConfigurationException, DataFormatException;
 
 	IParser setPrettyPrint(boolean thePrettyPrint);
 

@@ -94,7 +94,7 @@ public class RuntimeChildUndeclaredExtensionDefinition extends BaseRuntimeChildD
 		}
 
 		// Resource Reference
-		myDatatypeToAttributeName.put(ResourceReferenceDt.class, "valueReference");
+		myDatatypeToAttributeName.put(ResourceReferenceDt.class, "valueResource");
 		List<Class<? extends IResource>> types = new ArrayList<Class<? extends IResource>>();
 		types.add(IResource.class);
 		RuntimeResourceReferenceDefinition def = new RuntimeResourceReferenceDefinition("valueResource", types);
