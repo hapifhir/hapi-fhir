@@ -7,12 +7,12 @@ This file is a Thymeleaf template for the
 
 <html>
 	<head>
-		<script type="text/javascript" src="jquery-2.1.0.min.js"></script>
-		<script type="text/javascript" src="PublicTester.js"></script>
 		<script type="text/javascript">
 			var serverBase = "<th:block th:text="${base}"/>";	
-			var conformance = <th:block th:text="${jsonEncodedConf}"/>;
+			var conformance = <th:block th:utext="${jsonEncodedConf}"/>;
 		</script>
+		<script type="text/javascript" src="jquery-2.1.0.min.js"></script>
+		<script type="text/javascript" src="PublicTester.js"></script>
 		<link rel="stylesheet" type="text/css" href="PublicTester.css"/>
 	</head>
 	<body>

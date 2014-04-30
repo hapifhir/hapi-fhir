@@ -55,7 +55,7 @@ public class TesterTest {
 
 		PublicTesterServlet testerServlet = new PublicTesterServlet();
 		testerServlet.setServerBase("http://localhost:" + myPort + "/fhir/context");
-		testerServlet.setServerBase("http://fhir.healthintersections.com.au/open");
+//		testerServlet.setServerBase("http://fhir.healthintersections.com.au/open");
 		ServletHolder handler = new ServletHolder();
 		handler.setServlet(testerServlet);
 		proxyHandler.addServlet(handler, "/fhir/tester/*");
