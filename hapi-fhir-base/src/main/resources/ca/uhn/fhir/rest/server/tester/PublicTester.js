@@ -1,75 +1,97 @@
 
-var currentForm;
-
 /** Hide any currently displayed tester form */
 function clearCurrentForm(postCompleteFunction) {
-	if (currentForm != null) {
-		var holder = currentForm;
-		holder.children().fadeOut(500).promise().then(function() {
-			holder.empty();
-			holder.hide();
+/*	$('.testerNameRow').each().fadeOut(500).promise().then(function(){
+		if (postCompleteFunction != null) {
+			$('.testerNameRow').each().remove();
 			postCompleteFunction();
-		});
-		currentForm = null;
-	} else {
+			postCompleteFunction = null;
+		}
+	}); */
+	var current = $('.testerNameRow');
+	if (current.length == 0) {
 		postCompleteFunction();
+	} else {
+		current.first().fadeOut(300, function() {
+			current.first().remove();
+			clearCurrentForm(postCompleteFunction);
+		});
 	}
+	
 }
 
 /** Create a tester form for the 'search' method */
-/*
-function displayRead(expandoTr, resourceName) {
+function displaySearchType(expandoTr, resourceName) {
 	var postCompleteFunction = function() {
-		var contentCell = $('<td />');
-		currentForm = $('#' + expandoTr).append(
-			$('<td class="testerNameCell">Search</td>'),
-			contentCell
-		);
-		
+		$('#' + expandoTr).append(
+			$('<tr class="testerNameRow" style="display: none;" />').append(
+				$('<td class="testerNameCell">Search by Type</td>'),
+				$('<td />').append(
+					$('<form/>', { action: 'PublicTesterResult.html', method: 'POST' }).append(
+				        $('<input />', { name: 'method', value: 'searchType', type: 'hidden' }),
+				        $('<input />', { name: 'resourceName', value: resourceName, type: 'hidden' }),
+				        $('<span>All Resources of Type</span><br />'),
+				        $('<input />', { type: 'submit', value: 'Submit' })
+				    )
+				)
+			)
+		);					    
 		conformance.rest.forEach(function(rest){
 			rest.resource.forEach(function(restResource){
-				if (restResource.type == 'Patient') {
-					restResource.searchParam.forEach(function(searchParam){
-						var formElement = $('<form/>', { action: 'PublicTesterResult.html', method: 'POST' });
-						contentCell.append(
+				if (restResource.type == resourceName) {
+					if (restResource.searchParam) {
+						restResource.searchParam.forEach(function(searchParam){
+							var formElement = $('<form/>', { action: 'PublicTesterResult.html', method: 'POST' });
 							formElement.append(
-						        $('<input />', { name: 'method', value: 'read', type: 'hidden' }),
-						        $('<input />', { name: 'resourceName', value: resourceName, type: 'hidden' }),
-						        $('<input />', { name: 'id', placeholder: 'Resource ID', type: 'text' }),
+						        $('<input />', { name: 'method', value: 'searchType', type: 'hidden' }),
+						        $('<input />', { name: 'resourceName', value: resourceName, type: 'hidden' })
 						    )
-						);						
-						formElement.append(
-					        $('<br />'),
-					        $('<input />', { type: 'submit', value: 'Submit' })
-					    )
-					});
+						    var inputId = newUniqueId();
+						    formElement.append(
+						    	$('<input />', { name: 'param.' + searchParam.name, placeholder: searchParam.name, type: 'text', id: inputId }),
+						    	$('<label for="' + inputId + '">' + searchParam.name + '</input>')
+						    );
+							formElement.append(
+						        $('<br />'),
+						        $('<input />', { type: 'submit', value: 'Submit' })
+						    )
+							$('#' + expandoTr).append(
+								$('<tr class="testerNameRow" style="display: none;" />').append(
+									$('<td class="testerNameCell">Search by Type</td>'),
+									$('<td />').append(
+										formElement
+									)
+								)
+							);					    
+						});
+					}
 				}				
 			});
 		});
 		
-		$('#' + expandoTr).fadeIn(500);
+		showNewForm();
 	}
 	clearCurrentForm(postCompleteFunction);
 }
-*/
 
 /** Create a tester form for the 'read' method */
 function displayRead(expandoTr, resourceName) {
 	var postCompleteFunction = function() {
-		//$('#' + expandoTr).show();
-		currentForm = $('#' + expandoTr).append(
-			$('<td class="testerNameCell">Read</td>'),
-			$('<td />').append(
-				$('<form/>', { action: 'PublicTesterResult.html', method: 'POST' }).append(
-			        $('<input />', { name: 'method', value: 'read', type: 'hidden' }),
-			        $('<input />', { name: 'resourceName', value: resourceName, type: 'hidden' }),
-			        $('<input />', { name: 'id', placeholder: 'Resource ID', type: 'text' }),
-			        $('<br />'),
-			        $('<input />', { type: 'submit', value: 'Submit' })
-			    )
+		$('#' + expandoTr).append(
+			$('<tr class="testerNameRow" style="display: none;" />').append(
+				$('<td class="testerNameCell">Read</td>'),
+				$('<td />').append(
+					$('<form/>', { action: 'PublicTesterResult.html', method: 'POST' }).append(
+				        $('<input />', { name: 'method', value: 'read', type: 'hidden' }),
+				        $('<input />', { name: 'resourceName', value: resourceName, type: 'hidden' }),
+				        $('<input />', { name: 'id', placeholder: 'Resource ID', type: 'text' }),
+				        $('<br />'),
+				        $('<input />', { type: 'submit', value: 'Submit' })
+				    )
+				)
 			)
 		);
-		$('#' + expandoTr).fadeIn(500);
+		showNewForm();
 	}
 	clearCurrentForm(postCompleteFunction);
 }
@@ -77,21 +99,37 @@ function displayRead(expandoTr, resourceName) {
 /** Create a tester form for the 'read' method */
 function displayVRead(expandoTr, resourceName) {
 	var postCompleteFunction = function() {
-		//$('#' + expandoTr).show();
-		currentForm = $('#' + expandoTr).append(
-			$('<td class="testerNameCell">VRead</td>'),
-			$('<td />').append(
-				$('<form/>', { action: 'PublicTesterResult.html', method: 'POST' }).append(
-			        $('<input />', { name: 'method', value: 'vread', type: 'hidden' }),
-			        $('<input />', { name: 'resourceName', value: resourceName, type: 'hidden' }),
-			        $('<input />', { name: 'id', placeholder: 'Resource ID', type: 'text' }),
-			        $('<input />', { name: 'versionid', placeholder: 'Version ID', type: 'text' }),
-			        $('<br />'),
-			        $('<input />', { type: 'submit', value: 'Submit' })
-			    )
+		$('#' + expandoTr).append(
+			$('<tr class="testerNameRow" style="display: none;" />').append(
+				$('<td class="testerNameCell">Read</td>'),
+				$('<td />').append(
+					$('<form/>', { action: 'PublicTesterResult.html', method: 'POST' }).append(
+				        $('<input />', { name: 'method', value: 'vread', type: 'hidden' }),
+				        $('<input />', { name: 'resourceName', value: resourceName, type: 'hidden' }),
+				        $('<input />', { name: 'id', placeholder: 'Resource ID', type: 'text' }),
+				        $('<input />', { name: 'versionid', placeholder: 'Version ID', type: 'text' }),
+				        $('<br />'),
+				        $('<input />', { type: 'submit', value: 'Submit' })
+				    )
+				)
 			)
 		);
-		$('#' + expandoTr).fadeIn(500);
+		showNewForm();
 	}
 	clearCurrentForm(postCompleteFunction);
+}
+
+var uniqueIdSeed = 1;
+/** Generate a unique ID */
+function newUniqueId() {
+    return "uid" + uniqueIdSeed++;
+}
+
+/** Show a newly created tester form */
+function showNewForm() {
+	var time = 0;
+	$('.testerNameRow').each(function() {
+	    $(this).delay(time).fadeIn(200);
+	    time += 200;
+	});		
 }

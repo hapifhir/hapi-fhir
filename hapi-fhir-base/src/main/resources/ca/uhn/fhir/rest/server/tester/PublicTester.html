@@ -57,7 +57,7 @@ This file is a Thymeleaf template for the
 							<div class="bodyHeaderBlock">
 								Resource: <th:block th:text="${resource.type.valueAsString}"/> 
 							</div>
-							<table border="0">
+							<table border="0" th:id="${expandoId}">
 								<tr>
 									<td valign="top" class="propertyKeyCell">Supports operations:</td>
 									<td valign="top">
@@ -65,12 +65,11 @@ This file is a Thymeleaf template for the
 											<th:block th:switch="${operation.code.value}">
 											    <a th:case="'read'" th:href="'javascript:displayRead(\'' + ${expandoId} + '\', \'' + ${resource.type.valueAsString} + '\');'">read</a>
 											    <a th:case="'vread'" th:href="'javascript:displayVRead(\'' + ${expandoId} + '\', \'' + ${resource.type.valueAsString} + '\');'">vread</a>
+											    <a th:case="'search-type'" th:href="'javascript:displaySearchType(\'' + ${expandoId} + '\', \'' + ${resource.type.valueAsString} + '\');'">search-type</a>
 												<span th:case="*" th:text="${operation.code.value}"/>
 											</th:block>
 										</th:span>												
 									</td>
-								</tr>
-								<tr th:id="${expandoId}" style="display: none;">
 								</tr>
 							</table>
 							<div>
