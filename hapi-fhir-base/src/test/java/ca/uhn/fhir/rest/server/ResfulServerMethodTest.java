@@ -46,6 +46,7 @@ import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.dstu.composite.CodingDt;
 import ca.uhn.fhir.model.dstu.composite.HumanNameDt;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
+import ca.uhn.fhir.model.dstu.resource.AdverseReaction;
 import ca.uhn.fhir.model.dstu.resource.Conformance;
 import ca.uhn.fhir.model.dstu.resource.DiagnosticOrder;
 import ca.uhn.fhir.model.dstu.resource.DiagnosticReport;
@@ -530,6 +531,20 @@ public class ResfulServerMethodTest {
 		assertEquals(2, bundle.getEntries().size());
 
 	}
+	
+	
+	@Test
+	public void testReadOnTypeThatDoesntSupportRead() throws Exception {
+
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/AdverseReaction/223");
+		HttpResponse status = ourClient.execute(httpGet);
+
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		ourLog.info("Response was:\n{}", responseContent);
+
+		assertEquals(Constants.STATUS_HTTP_404_NOT_FOUND, status.getStatusLine().getStatusCode());
+
+	}
 
 	@Test
 	public void testSearchAllProfiles() throws Exception {
@@ -999,9 +1014,10 @@ public class ResfulServerMethodTest {
 		DummyPatientResourceProvider patientProvider = new DummyPatientResourceProvider();
 		ServerProfileProvider profProvider = new ServerProfileProvider(ourCtx);
 		DummyDiagnosticReportResourceProvider reportProvider = new DummyDiagnosticReportResourceProvider();
+		DummyAdverseReactionResourceProvider adv = new DummyAdverseReactionResourceProvider();
 
 		ServletHandler proxyHandler = new ServletHandler();
-		DummyRestfulServer servlet = new DummyRestfulServer(patientProvider, profProvider, reportProvider);
+		DummyRestfulServer servlet = new DummyRestfulServer(patientProvider, profProvider, reportProvider, adv);
 		ServletHolder servletHolder = new ServletHolder(servlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
@@ -1061,6 +1077,31 @@ public class ResfulServerMethodTest {
 
 	}
 
+	/**
+	 * Created by dsotnikov on 2/25/2014.
+	 */
+	public static class DummyAdverseReactionResourceProvider implements IResourceProvider {
+
+		/*
+		 * *********************
+		 * NO NEW METHODS
+		 * *********************
+		 */
+		
+		@Override
+		public Class<? extends IResource> getResourceType() {
+			return AdverseReaction.class;
+		}
+		
+		@Create()
+		public MethodOutcome create(@ResourceParam AdverseReaction thePatient) {
+			IdDt id = new IdDt(thePatient.getIdentifier().get(0).getValue().getValue());
+			IdDt version = new IdDt(thePatient.getIdentifier().get(1).getValue().getValue());
+			return new MethodOutcome(id, version);
+		}
+		
+	}
+	
 	/**
 	 * Created by dsotnikov on 2/25/2014.
 	 */

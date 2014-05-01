@@ -21,6 +21,7 @@ package ca.uhn.fhir.rest.param;
  */
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
@@ -30,7 +31,60 @@ import ca.uhn.fhir.model.dstu.composite.CodingDt;
 public class CodingListParam implements IQueryParameterOr, Iterable<CodingDt> {
 
 	private List<CodingDt> myCodings = new ArrayList<CodingDt>();
-	
+
+	/**
+	 * Constructor. Codings should be added, e.g. using {@link #add(CodingDt)}
+	 */
+	public CodingListParam() {
+		// nothing
+	}
+
+	/**
+	 * Constructor which accepts an array of codings
+	 * 
+	 * @param theCodings
+	 *            The codings
+	 */
+	public CodingListParam(CodingDt... theCodings) {
+		if (theCodings != null) {
+			for (CodingDt next : theCodings) {
+				add(next);
+			}
+		}
+	}
+
+	/**
+	 * Constructor which accepts a code system and an array of codes in that system
+	 * 
+	 * @param theSystem
+	 *            The code system
+	 * @param theCodings
+	 *            The codes
+	 */
+	public CodingListParam(String theSystem, String... theCodes) {
+		if (theCodes != null) {
+			for (String next : theCodes) {
+				add(new CodingDt(theSystem, next));
+			}
+		}
+	}
+
+	/**
+	 * Constructor which accepts a code system and a collection of codes in that system
+	 * 
+	 * @param theSystem
+	 *            The code system
+	 * @param theCodings
+	 *            The codes
+	 */
+	public CodingListParam(String theSystem, Collection<String> theCodes) {
+		if (theCodes != null) {
+			for (String next : theCodes) {
+				add(new CodingDt(theSystem, next));
+			}
+		}
+	}
+
 	/**
 	 * Returns all Codings associated with this list
 	 */

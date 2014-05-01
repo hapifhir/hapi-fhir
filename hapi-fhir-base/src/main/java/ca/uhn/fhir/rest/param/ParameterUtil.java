@@ -106,12 +106,20 @@ public class ParameterUtil {
 						extractDescription(parameter, annotations);
 						param = parameter;
 					} else if (nextAnnotation instanceof IncludeParam) {
-						if (parameterType != PathSpecification.class || innerCollectionType == null || outerCollectionType != null) {
-							throw new ConfigurationException("Method '" + theMethod.getName() + "' is annotated with @" + IncludeParam.class.getSimpleName() + " but has a type other than Collection<" + PathSpecification.class.getSimpleName() + ">");
-						}
-						Class<? extends Collection<PathSpecification>> instantiableCollectionType = (Class<? extends Collection<PathSpecification>>) CollectionBinder.getInstantiableCollectionType(innerCollectionType, "Method '" + theMethod.getName() + "'");
+						Class<? extends Collection<PathSpecification>> instantiableCollectionType;
+						Class<?> specType;
 
-						param = new IncludeParameter((IncludeParam) nextAnnotation, instantiableCollectionType);
+						if (parameterType == String.class) {
+							instantiableCollectionType=null;
+							specType=String.class;
+						}else if (parameterType != PathSpecification.class || innerCollectionType == null || outerCollectionType != null) {
+							throw new ConfigurationException("Method '" + theMethod.getName() + "' is annotated with @" + IncludeParam.class.getSimpleName() + " but has a type other than Collection<" + PathSpecification.class.getSimpleName() + ">");
+						} else {
+							instantiableCollectionType = (Class<? extends Collection<PathSpecification>>) CollectionBinder.getInstantiableCollectionType(innerCollectionType, "Method '" + theMethod.getName() + "'");
+							specType = PathSpecification.class;
+						}
+						
+						param = new IncludeParameter((IncludeParam) nextAnnotation, instantiableCollectionType, specType);
 					} else if (nextAnnotation instanceof ResourceParam) {
 						if (!IResource.class.isAssignableFrom(parameterType)) {
 							throw new ConfigurationException("Method '" + theMethod.getName() + "' is annotated with @" + ResourceParam.class.getSimpleName() + " but has a type that is not an implemtation of " + IResource.class.getCanonicalName());

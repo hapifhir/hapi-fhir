@@ -26,12 +26,91 @@ import java.util.Date;
 import java.util.List;
 
 import ca.uhn.fhir.model.api.IQueryParameterAnd;
+import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
+import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 public class DateRangeParam implements IQueryParameterAnd {
 
 	private QualifiedDateParam myLowerBound;
 	private QualifiedDateParam myUpperBound;
+
+	/**
+	 * Basic constructor. Values must be supplied by calling {@link #setLowerBound(QualifiedDateParam)} and {@link #setUpperBound(QualifiedDateParam)}
+	 */
+	public DateRangeParam() {
+		// nothing
+	}
+
+	/**
+	 * Constructor which takes two strings representing the lower and upper bounds of the range
+	 * 
+	 * @param theLowerBound
+	 *            A qualified date param representing the lower date bound (optionally may include time), e.g. "2011-02-22" or "2011-02-22T13:12:00"
+	 * @param theLowerBound
+	 *            A qualified date param representing the upper date bound (optionally may include time), e.g. "2011-02-22" or "2011-02-22T13:12:00"
+	 */
+	public DateRangeParam(String theLowerBound, String theUpperBound) {
+		myLowerBound = new QualifiedDateParam(QuantityCompararatorEnum.GREATERTHAN_OR_EQUALS, theLowerBound);
+		myUpperBound = new QualifiedDateParam(QuantityCompararatorEnum.LESSTHAN_OR_EQUALS, theUpperBound);
+		validateAndThrowDataFormatExceptionIfInvalid();
+	}
+
+	/**
+	 * Constructor which takes two Dates representing the lower and upper bounds of the range
+	 * 
+	 * @param theLowerBound
+	 *            A qualified date param representing the lower date bound (optionally may include time), e.g. "2011-02-22" or "2011-02-22T13:12:00"
+	 * @param theLowerBound
+	 *            A qualified date param representing the upper date bound (optionally may include time), e.g. "2011-02-22" or "2011-02-22T13:12:00"
+	 */
+	public DateRangeParam(Date theLowerBound, Date theUpperBound) {
+		myLowerBound = new QualifiedDateParam(QuantityCompararatorEnum.GREATERTHAN_OR_EQUALS, theLowerBound);
+		myUpperBound = new QualifiedDateParam(QuantityCompararatorEnum.LESSTHAN_OR_EQUALS, theUpperBound);
+		validateAndThrowDataFormatExceptionIfInvalid();
+	}
+	
+	
+	private void validateAndThrowDataFormatExceptionIfInvalid() {
+		boolean haveLowerBound = myLowerBound != null && myLowerBound.isEmpty() == false;
+		boolean haveUpperBound = myUpperBound != null && myUpperBound.isEmpty() == false;
+		if (haveLowerBound && haveUpperBound) {
+			if (myLowerBound.getValue().after(myUpperBound.getValue())) {
+				throw new DataFormatException("Lower bound of " + myLowerBound.getValueAsString() + " is after upper bound of " + myUpperBound.getValueAsString());
+			}
+		}
+		
+		if (haveLowerBound) {
+			if (myLowerBound.getComparator() == null) {
+				myLowerBound.setComparator(QuantityCompararatorEnum.GREATERTHAN_OR_EQUALS);
+			}
+			switch (myLowerBound.getComparator()) {
+			case GREATERTHAN:
+			case GREATERTHAN_OR_EQUALS:
+			default:
+				break;
+			case LESSTHAN:
+			case LESSTHAN_OR_EQUALS:
+				throw new DataFormatException("Lower bound comparator must be > or >=, can not be " + myLowerBound.getComparator().getCode());
+			}
+		}
+
+		if (haveUpperBound) {
+			if (myUpperBound.getComparator() == null) {
+				myUpperBound.setComparator(QuantityCompararatorEnum.LESSTHAN_OR_EQUALS);
+			}
+			switch (myUpperBound.getComparator()) {
+			case LESSTHAN:
+			case LESSTHAN_OR_EQUALS:
+			default:
+				break;
+			case GREATERTHAN:
+			case GREATERTHAN_OR_EQUALS:
+				throw new DataFormatException("Upper bound comparator must be < or <=, can not be " + myUpperBound.getComparator().getCode());
+			}
+		}
+
+	}
 
 	private void addParam(QualifiedDateParam theParsed) throws InvalidRequestException {
 		if (theParsed.getComparator() == null) {
@@ -88,10 +167,12 @@ public class DateRangeParam implements IQueryParameterAnd {
 
 	public void setLowerBound(QualifiedDateParam theLowerBound) {
 		myLowerBound = theLowerBound;
+		validateAndThrowDataFormatExceptionIfInvalid();
 	}
 
 	public void setUpperBound(QualifiedDateParam theUpperBound) {
 		myUpperBound = theUpperBound;
+		validateAndThrowDataFormatExceptionIfInvalid();
 	}
 
 	@Override

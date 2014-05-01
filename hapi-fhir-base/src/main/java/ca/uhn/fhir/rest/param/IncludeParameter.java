@@ -20,7 +20,6 @@ package ca.uhn.fhir.rest.param;
  * #L%
  */
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -28,6 +27,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.TreeSet;
 
+import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.model.api.PathSpecification;
 import ca.uhn.fhir.model.dstu.valueset.SearchParamTypeEnum;
 import ca.uhn.fhir.rest.annotation.IncludeParam;
@@ -38,8 +38,9 @@ public class IncludeParameter extends BaseQueryParameter {
 
 	private Class<? extends Collection<PathSpecification>> myInstantiableCollectionType;
 	private HashSet<String> myAllow;
+	private Class<?> mySpecType;
 
-	public IncludeParameter(IncludeParam theAnnotation, Class<? extends Collection<PathSpecification>> theInstantiableCollectionType) {
+	public IncludeParameter(IncludeParam theAnnotation, Class<? extends Collection<PathSpecification>> theInstantiableCollectionType, Class<?> theSpecType) {
 		myInstantiableCollectionType = theInstantiableCollectionType;
 		if (theAnnotation.allow().length > 0) {
 			myAllow = new HashSet<String>();
@@ -47,6 +48,12 @@ public class IncludeParameter extends BaseQueryParameter {
 				myAllow.add(next);
 			}
 		}
+		
+		mySpecType = theSpecType;
+		if (mySpecType != PathSpecification.class && mySpecType != String.class) {
+			throw new ConfigurationException("Invalid @" + IncludeParam.class.getSimpleName() + " parameter type: " + mySpecType);
+		}
+		
 	}
 
 	@SuppressWarnings("unchecked")
@@ -54,9 +61,17 @@ public class IncludeParameter extends BaseQueryParameter {
 	public List<List<String>> encode(Object theObject) throws InternalErrorException {
 		ArrayList<List<String>> retVal = new ArrayList<List<String>>();
 
-		Collection<PathSpecification> val = (Collection<PathSpecification>) theObject;
-		for (PathSpecification pathSpec : val) {
-			retVal.add(Collections.singletonList(pathSpec.getValue()));
+		if (myInstantiableCollectionType == null) {
+			if (mySpecType == PathSpecification.class) {
+				retVal.add(Collections.singletonList(((PathSpecification)theObject).getValue()));
+			} else {
+				retVal.add(Collections.singletonList(((String)theObject)));
+			}
+		}else {
+			Collection<PathSpecification> val = (Collection<PathSpecification>) theObject;
+			for (PathSpecification pathSpec : val) {
+				retVal.add(Collections.singletonList(pathSpec.getValue()));
+			}
 		}
 		
 		return retVal;
@@ -69,11 +84,13 @@ public class IncludeParameter extends BaseQueryParameter {
 
 	@Override
 	public Object parse(List<List<String>> theString) throws InternalErrorException, InvalidRequestException {
-		Collection<PathSpecification> retVal;
+		Collection<PathSpecification> retValCollection = null;
+		if (myInstantiableCollectionType!=null) {
 		try {
-			retVal = myInstantiableCollectionType.newInstance();
+			retValCollection = myInstantiableCollectionType.newInstance();
 		} catch (Exception e) {
 			throw new InternalErrorException("Failed to instantiate " + myInstantiableCollectionType.getName(), e);
+		}
 		}
 		
 		for (List<String> nextParamList : theString) {
@@ -90,10 +107,18 @@ public class IncludeParameter extends BaseQueryParameter {
 					throw new InvalidRequestException("Invalid _include parameter value: '" + value + "'. Valid values are: " + new TreeSet<String>(myAllow));
 				}
 			}
-			retVal.add(new PathSpecification(value));
+			if (retValCollection == null) {
+				if (mySpecType == String.class) {
+					return value;
+				} else {
+					return new PathSpecification(value);
+				}
+			}else {
+				retValCollection.add(new PathSpecification(value));
+			}
 		}
 		
-		return retVal;
+		return retValCollection;
 	}
 
 	@Override

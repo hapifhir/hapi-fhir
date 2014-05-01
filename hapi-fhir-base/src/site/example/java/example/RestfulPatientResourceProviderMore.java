@@ -250,6 +250,36 @@ public List<DiagnosticReport> getDiagnosticReport(
 }
 //END SNIPPET: pathSpec
 
+
+//START SNIPPET: pathSpecSimple
+@Search()
+public List<DiagnosticReport> getDiagnosticReport( 
+             @RequiredParam(name=DiagnosticReport.SP_IDENTIFIER) 
+             IdentifierDt theIdentifier,
+             @IncludeParam(allow= {"DiagnosticReport.subject"}) 
+             String theInclude ) {
+  List<DiagnosticReport> retVal = new ArrayList<DiagnosticReport>();
+
+  // Assume this method exists and loads the report from the DB
+  DiagnosticReport report = loadSomeDiagnosticReportFromDatabase(theIdentifier);
+
+  // If the client has asked for the subject to be included:
+  if ("DiagnosticReport.subject".equals(theInclude)) {
+	 
+    // The resource reference should contain the ID of the patient
+    IdDt subjectId = report.getSubject().getId();
+	
+    // So load the patient ID and return it
+    Patient subject = loadSomePatientFromDatabase(subjectId);
+    report.getSubject().setResource(subject);
+	
+  }
+
+  retVal.add(report);
+  return retVal;
+}
+//END SNIPPET: pathSpecSimple
+
 //START SNIPPET: dateRange
 @Search()
 public List<Observation> getObservationsByDateRange(@RequiredParam(name="subject.identifier") IdentifierDt theSubjectId,

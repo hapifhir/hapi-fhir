@@ -97,7 +97,7 @@ public abstract class BaseThymeleafNarrativeGenerator implements INarrativeGener
 		if (name == null) {
 			if (myIgnoreMissingTemplates) {
 				ourLog.debug("No narrative template available for profile: {}", theProfile);
-				return new NarrativeDt(new XhtmlDt("<div>No narrative available</div>"), NarrativeStatusEnum.EMPTY);
+				return new NarrativeDt(new XhtmlDt("<div>No narrative template available for resource profile: " + theProfile + "</div>"), NarrativeStatusEnum.EMPTY);
 			} else {
 				throw new DataFormatException("No narrative template for class " + theResource.getClass().getCanonicalName());
 			}
@@ -120,7 +120,7 @@ public abstract class BaseThymeleafNarrativeGenerator implements INarrativeGener
 		} catch (Exception e) {
 			if (myIgnoreFailures) {
 				ourLog.error("Failed to generate narrative", e);
-				return new NarrativeDt(new XhtmlDt("<div>No narrative available</div>"), NarrativeStatusEnum.EMPTY);
+				return new NarrativeDt(new XhtmlDt("<div>No narrative available - Error: " + e.getMessage() + "</div>"), NarrativeStatusEnum.EMPTY);
 			} else {
 				throw new DataFormatException(e);
 			}

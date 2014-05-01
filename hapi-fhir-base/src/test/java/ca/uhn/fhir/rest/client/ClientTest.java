@@ -48,6 +48,7 @@ import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.annotation.Create;
+import ca.uhn.fhir.rest.annotation.IncludeParam;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
@@ -635,6 +636,29 @@ public class ClientTest {
 
 		assertEquals("http://foo/Patient?withIncludes=aaa&_include=inc1&_include=inc2", capt.getValue().getURI().toString());
 
+	}
+
+	@Test
+	public void testSearchWithStringIncludes() throws Exception {
+
+		String msg = getPatientFeedWithOneResult();
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
+		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
+
+		ITestClientWithStringIncludes client = ctx.newRestfulClient(ITestClientWithStringIncludes.class, "http://foo");
+		client.getPatientWithIncludes(new StringDt("aaa"), "inc1");
+
+		assertEquals("http://foo/Patient?withIncludes=aaa&_include=inc1", capt.getValue().getURI().toString());
+
+	}
+
+	public interface ITestClientWithStringIncludes extends IBasicClient {
+		@Search()
+		public Patient getPatientWithIncludes(@RequiredParam(name = "withIncludes") StringDt theString, @IncludeParam String theInclude);
 	}
 
 	@Test

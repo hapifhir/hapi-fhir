@@ -25,6 +25,7 @@ import java.util.Date;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
+import ca.uhn.fhir.parser.DataFormatException;
 
 public class QualifiedDateParam extends DateTimeDt implements IQueryParameterType {
 
@@ -76,7 +77,7 @@ public class QualifiedDateParam extends DateTimeDt implements IQueryParameterTyp
 	@Override
 	public void setValueAsQueryToken(String theParameter) {
 		if (theParameter.length() < 2) {
-			throw new IllegalArgumentException("Invalid qualified date parameter: "+theParameter);
+			throw new DataFormatException("Invalid qualified date parameter: "+theParameter);
 		}
 
 		char char0 = theParameter.charAt(0);
@@ -92,7 +93,7 @@ public class QualifiedDateParam extends DateTimeDt implements IQueryParameterTyp
 			String comparatorString = theParameter.substring(0, dateStart);
 			QuantityCompararatorEnum comparator = QuantityCompararatorEnum.VALUESET_BINDER.fromCodeString(comparatorString);
 			if (comparator==null) {
-				throw new IllegalArgumentException("Invalid date qualifier: "+comparatorString);
+				throw new DataFormatException("Invalid date qualifier: "+comparatorString);
 			}
 			
 			String dateString = theParameter.substring(dateStart);

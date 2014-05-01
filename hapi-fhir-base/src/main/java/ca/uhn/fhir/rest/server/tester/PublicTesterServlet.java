@@ -49,16 +49,15 @@ import org.thymeleaf.templateresolver.TemplateResolver;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.resource.Conformance;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.annotation.Metadata;
 import ca.uhn.fhir.rest.client.GenericClient;
-import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.client.api.IBasicClient;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingUtil;
-import ca.uhn.fhir.testmodel.IdentifierDt;
 
 public class PublicTesterServlet extends HttpServlet {
 

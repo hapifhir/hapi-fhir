@@ -729,6 +729,17 @@
 					<code>http://fhir.example.com/DiagnosticReport?subject.identifier=7000135&amp;_include=DiagnosticReport.subject</code>
 				</p>
 
+				<p>
+					It is also possible to use a String type for the include parameter,
+					which is more convenient if only a single include (or null for none)
+					is all that is required.
+				</p>
+				
+				<macro name="snippet">
+					<param name="id" value="pathSpecSimple" />
+					<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
+				</macro>
+
 			</subsection>
 
 			<subsection name="Named Queries (_query)">
