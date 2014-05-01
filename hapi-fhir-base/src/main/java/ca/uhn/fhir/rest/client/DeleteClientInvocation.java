@@ -41,6 +41,9 @@ public class DeleteClientInvocation extends BaseClientInvocation {
 	public HttpRequestBase asHttpRequest(String theUrlBase) throws DataFormatException, IOException {
 		StringBuilder b = new StringBuilder();
 		b.append(theUrlBase);
+		if (!theUrlBase.endsWith("/")) {
+			b.append('/');
+		}
 		b.append(myUrlPath);
 
 		HttpDelete retVal = new HttpDelete(b.toString());

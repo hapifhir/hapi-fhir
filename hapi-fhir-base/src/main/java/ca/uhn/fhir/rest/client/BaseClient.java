@@ -125,7 +125,11 @@ public abstract class BaseClient {
 				}
 			}
 
-			return binding.invokeClient(mimeType, reader, response.getStatusLine().getStatusCode(), headers);
+			try {
+				return binding.invokeClient(mimeType, reader, response.getStatusLine().getStatusCode(), headers);
+			} finally {
+				reader.close();
+			}
 
 		} catch (IllegalStateException e) {
 			throw new FhirClientConnectionException(e);

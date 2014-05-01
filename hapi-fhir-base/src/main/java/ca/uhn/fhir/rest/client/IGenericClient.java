@@ -20,13 +20,18 @@ package ca.uhn.fhir.rest.client;
  * #L%
  */
 
+import java.util.List;
+import java.util.Map;
+
+import ca.uhn.fhir.model.api.Bundle;
+import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.primitive.IdDt;
 
 public interface IGenericClient {
 
 	/**
-	 * Implementation of the "read" method.
+	 * Implementation of the "instance read" method.
 	 * 
 	 * @param theType The type of resource to load
 	 * @param theId The ID to load
@@ -35,7 +40,7 @@ public interface IGenericClient {
 	<T extends IResource> T read(Class<T> theType, IdDt theId);
 
 	/**
-	 * Implementation of the "vread" method.
+	 * Implementation of the "instance vread" method.
 	 * 
 	 * @param theType The type of resource to load
 	 * @param theId The ID to load
@@ -43,5 +48,13 @@ public interface IGenericClient {
 	 * @return The resource
 	 */
 	<T extends IResource> T vread(Class<T> theType, IdDt theId, IdDt theVersionId);
+
+	/**
+	 * Implementation of the "instance search" method.
+	 * @param theType The type of resource to load
+	 * @param theParams
+	 * @return
+	 */
+	<T extends IResource> Bundle search(Class<T> theType, Map<String, List<IQueryParameterType>> theParams);
 
 }

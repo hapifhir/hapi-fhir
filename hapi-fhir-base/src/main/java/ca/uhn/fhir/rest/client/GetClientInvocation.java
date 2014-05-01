@@ -66,6 +66,9 @@ public class GetClientInvocation extends BaseClientInvocation {
 	public HttpRequestBase asHttpRequest(String theUrlBase) {
 		StringBuilder b = new StringBuilder();
 		b.append(theUrlBase);
+		if (!theUrlBase.endsWith("/")) {
+			b.append('/');
+		}
 		b.append(myUrlPath);
 
 		boolean first = true;

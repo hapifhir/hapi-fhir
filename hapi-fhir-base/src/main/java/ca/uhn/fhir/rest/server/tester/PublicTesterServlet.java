@@ -22,7 +22,11 @@ package ca.uhn.fhir.rest.server.tester;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -44,14 +48,17 @@ import org.thymeleaf.templateresolver.TemplateResolver;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.dstu.resource.Conformance;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.annotation.Metadata;
 import ca.uhn.fhir.rest.client.GenericClient;
 import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.client.api.IBasicClient;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingUtil;
+import ca.uhn.fhir.testmodel.IdentifierDt;
 
 public class PublicTesterServlet extends HttpServlet {
 
@@ -74,13 +81,12 @@ public class PublicTesterServlet extends HttpServlet {
 		myStaticResources.put("PublicTester.css", "text/css");
 		myStaticResources.put("hapi_fhir_banner.png", "image/png");
 		myStaticResources.put("hapi_fhir_banner_right.png", "image/png");
-		myStaticResources.put("shCore.js","text/javascript");
-		myStaticResources.put("shBrushJScript.js" ,"text/javascript");
-		myStaticResources.put("shBrushXml.js" ,"text/javascript");
-		myStaticResources.put("shBrushPlain.js" ,"text/javascript");
+		myStaticResources.put("shCore.js", "text/javascript");
+		myStaticResources.put("shBrushJScript.js", "text/javascript");
+		myStaticResources.put("shBrushXml.js", "text/javascript");
+		myStaticResources.put("shBrushPlain.js", "text/javascript");
 		myStaticResources.put("shCore.css", "text/css");
 		myStaticResources.put("shThemeDefault.css", "text/css");
-
 
 		myCtx = new FhirContext();
 	}
@@ -88,9 +94,9 @@ public class PublicTesterServlet extends HttpServlet {
 	@Override
 	protected void doPost(HttpServletRequest theReq, HttpServletResponse theResp) throws ServletException, IOException {
 		if (DEBUGMODE) {
-		myTemplateEngine.getCacheManager().clearAllCaches();
+			myTemplateEngine.getCacheManager().clearAllCaches();
 		}
-		
+
 		try {
 			GenericClient client = (GenericClient) myCtx.newRestfulGenericClient(myServerBase);
 			client.setKeepResponses(true);
@@ -103,25 +109,16 @@ public class PublicTesterServlet extends HttpServlet {
 			String resultSyntaxHighlighterClass;
 
 			if ("read".equals(method)) {
-				String resourceName = StringUtils.defaultString(theReq.getParameter("resourceName"));
-				RuntimeResourceDefinition def = myCtx.getResourceDefinition(resourceName);
-				if (def == null) {
-					theResp.sendError(Constants.STATUS_HTTP_400_BAD_REQUEST, "Invalid resourceName: " + resourceName);
-					return;
-				}
+				RuntimeResourceDefinition def = getResourceType(theReq);
 				String id = StringUtils.defaultString(theReq.getParameter("id"));
 				if (StringUtils.isBlank(id)) {
 					theResp.sendError(Constants.STATUS_HTTP_400_BAD_REQUEST, "No ID specified");
 				}
 				client.read(def.getImplementingClass(), new IdDt(id));
 
-			} if ("vread".equals(method)) {
-				String resourceName = StringUtils.defaultString(theReq.getParameter("resourceName"));
-				RuntimeResourceDefinition def = myCtx.getResourceDefinition(resourceName);
-				if (def == null) {
-					theResp.sendError(Constants.STATUS_HTTP_400_BAD_REQUEST, "Invalid resourceName: " + resourceName);
-					return;
-				}
+			}
+			if ("vread".equals(method)) {
+				RuntimeResourceDefinition def = getResourceType(theReq);
 				String id = StringUtils.defaultString(theReq.getParameter("id"));
 				if (StringUtils.isBlank(id)) {
 					theResp.sendError(Constants.STATUS_HTTP_400_BAD_REQUEST, "No ID specified");
@@ -133,7 +130,48 @@ public class PublicTesterServlet extends HttpServlet {
 				}
 				client.vread(def.getImplementingClass(), new IdDt(id), new IdDt(versionId));
 
+			} else if ("searchType".equals(method)) {
+
+				Map<String, List<IQueryParameterType>> params = new HashMap<String, List<IQueryParameterType>>();
+
+				HashSet<String> hashSet = new HashSet<String>(theReq.getParameterMap().keySet());
+				String paramName = null;
+				IQueryParameterType paramValue = null;
+				while (hashSet.isEmpty() == false) {
+					
+					String nextKey = hashSet.iterator().next();
+					String nextValue = theReq.getParameter(nextKey);
+					paramName=null;
+					paramValue=null;
+					
+					if (nextKey.startsWith("param.token.")) {
+						int prefixLength = "param.token.".length();
+						paramName = nextKey.substring(prefixLength + 2);
+						String systemKey = "param.token."+"1." + paramName;
+						String valueKey = "param.token."+"2." + paramName;
+						String system = theReq.getParameter(systemKey);
+						String value = theReq.getParameter(valueKey);
+						paramValue = new IdentifierDt(system, value);
+						hashSet.remove(systemKey);
+						hashSet.remove(valueKey);
+					} else if (nextKey.startsWith("param.string.")) {
+						paramName = nextKey.substring("param.string.".length());
+						paramValue = new StringDt(nextValue);
+					}
+
+					if (paramName != null) {
+						if (params.containsKey(paramName) == false) {
+							params.put(paramName, new ArrayList<IQueryParameterType>());
+						}
+						params.get(paramName).add(paramValue);
+					}
+
+					hashSet.remove(nextKey);
+				}
 				
+				RuntimeResourceDefinition def = getResourceType(theReq);
+				client.search(def.getImplementingClass(), params);
+
 			} else {
 				theResp.sendError(Constants.STATUS_HTTP_400_BAD_REQUEST, "Invalid method: " + method);
 				return;
@@ -150,13 +188,13 @@ public class PublicTesterServlet extends HttpServlet {
 			EncodingUtil ctEnum = EncodingUtil.forContentType(mimeType);
 			switch (ctEnum) {
 			case JSON:
-				resultSyntaxHighlighterClass="brush: jscript";
+				resultSyntaxHighlighterClass = "brush: jscript";
 				break;
 			case XML:
-				resultSyntaxHighlighterClass="brush: xml";
+				resultSyntaxHighlighterClass = "brush: xml";
 				break;
 			default:
-				resultSyntaxHighlighterClass="brush: plain";
+				resultSyntaxHighlighterClass = "brush: plain";
 				break;
 			}
 
@@ -167,7 +205,7 @@ public class PublicTesterServlet extends HttpServlet {
 			ctx.setVariable("resultStatus", resultStatus);
 			ctx.setVariable("resultBody", StringEscapeUtils.escapeHtml4(resultBody));
 			ctx.setVariable("resultSyntaxHighlighterClass", resultSyntaxHighlighterClass);
-			
+
 			myTemplateEngine.process(PUBLIC_TESTER_RESULT_HTML, ctx, theResp.getWriter());
 		} catch (Exception e) {
 			ourLog.error("Failure during processing", e);
@@ -175,12 +213,21 @@ public class PublicTesterServlet extends HttpServlet {
 		}
 	}
 
+	private RuntimeResourceDefinition getResourceType(HttpServletRequest theReq) throws ServletException {
+		String resourceName = StringUtils.defaultString(theReq.getParameter("resourceName"));
+		RuntimeResourceDefinition def = myCtx.getResourceDefinition(resourceName);
+		if (def == null) {
+			throw new ServletException("Invalid resourceName: " + resourceName);
+		}
+		return def;
+	}
+
 	@Override
 	protected void doGet(HttpServletRequest theReq, HttpServletResponse theResp) throws ServletException, IOException {
 		if (DEBUGMODE) {
-		myTemplateEngine.getCacheManager().clearAllCaches();
+			myTemplateEngine.getCacheManager().clearAllCaches();
 		}
-		
+
 		ourLog.info("RequestURI: {}", theReq.getPathInfo());
 
 		String resName = theReq.getPathInfo().substring(1);

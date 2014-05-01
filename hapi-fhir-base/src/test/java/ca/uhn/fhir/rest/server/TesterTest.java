@@ -115,7 +115,7 @@ public class TesterTest {
 
 		@Search(type = Patient.class)
 		public Patient findPatient(
-				@Description(shortDefinition="The patient's identifier (MRN or other card number)")
+				@Description(shortDefinition="The patient's identifier (MRN or other card number). Example system 'urn:hapitest:mrns', example MRN '00002'")
 				@RequiredParam(name = Patient.SP_IDENTIFIER) IdentifierDt theIdentifier
 				) {
 			for (Patient next : getIdToPatient().values()) {

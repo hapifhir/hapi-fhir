@@ -44,6 +44,7 @@ import ca.uhn.fhir.rest.method.ReadMethodBinding;
 import ca.uhn.fhir.rest.method.SearchMethodBinding;
 import ca.uhn.fhir.rest.param.IParameter;
 import ca.uhn.fhir.rest.param.BaseQueryParameter;
+import ca.uhn.fhir.rest.param.SearchParameter;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.ResourceBinding;
 import ca.uhn.fhir.rest.server.RestfulServer;
@@ -110,19 +111,18 @@ public class ServerConformanceProvider {
 					RestResourceSearchParam searchParam = null;
 					StringDt searchParamChain = null;
 					for (IParameter nextParameterObj : params) {
-						if (!(nextParameterObj instanceof BaseQueryParameter)) {
+						if (!(nextParameterObj instanceof SearchParameter)) {
 							continue;
 						}
 						
-						BaseQueryParameter nextParameter = (BaseQueryParameter)nextParameterObj;
-						if (nextParameter.getName().startsWith("_")) {
-							continue;
-						}
+						SearchParameter nextParameter = (SearchParameter)nextParameterObj;
 
 						if (searchParam == null) {
 							if (!nameToSearchParam.containsKey(nextParameter.getName())) {
 								RestResourceSearchParam param = resource.addSearchParam();
 								param.setName(nextParameter.getName());
+								param.setDocumentation(nextParameter.getDescription());
+								param.setType(nextParameter.getParamType());
 								searchParam = param;
 							} else {
 								searchParam = nameToSearchParam.get(nextParameter.getName());

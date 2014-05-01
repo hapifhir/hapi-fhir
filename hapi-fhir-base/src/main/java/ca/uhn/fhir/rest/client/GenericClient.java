@@ -22,18 +22,24 @@ package ca.uhn.fhir.rest.client;
 
 import java.io.IOException;
 import java.io.Reader;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpRequestBase;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.Bundle;
+import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.method.IClientResponseHandler;
 import ca.uhn.fhir.rest.method.ReadMethodBinding;
+import ca.uhn.fhir.rest.method.SearchMethodBinding;
 import ca.uhn.fhir.rest.server.EncodingUtil;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 
@@ -109,4 +115,36 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		T resp = (T) invokeClient(binding, invocation);
 		return resp;
 	}
+
+	
+	@Override
+	public <T extends IResource> Bundle search(final Class<T> theType, Map<String, List<IQueryParameterType>> theParams) {
+		LinkedHashMap<String, List<String>> params = new LinkedHashMap<String, List<String>>();
+		for (Entry<String, List<IQueryParameterType>> nextEntry : theParams.entrySet()) {
+			ArrayList<String> valueList = new ArrayList<String>();
+			params.put(nextEntry.getKey(), valueList);
+			for (IQueryParameterType nextValue : nextEntry.getValue()) {
+				valueList.add(nextValue.getValueAsQueryToken());
+			}
+		}
+		
+		GetClientInvocation invocation = SearchMethodBinding.createSearchInvocation(toResourceName(theType), params);
+		if (isKeepResponses()) {
+			myLastRequest = invocation.asHttpRequest(getServerBase());
+		}
+		
+		IClientResponseHandler binding = new IClientResponseHandler() {
+			@Override
+			public Object invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException,
+					BaseServerResponseException {
+				EncodingUtil respType = EncodingUtil.forContentType(theResponseMimeType);
+				IParser parser = respType.newParser(myContext);
+				return parser.parseBundle(theType, theResponseReader);
+			}
+		};
+
+		Bundle resp = (Bundle) invokeClient(binding, invocation);
+		return resp;
+	}
+	
 }

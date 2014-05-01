@@ -69,7 +69,14 @@ public abstract class BaseClientInvocationWithContents extends BaseClientInvocat
 
 	@Override
 	public HttpRequestBase asHttpRequest(String theUrlBase) throws DataFormatException, IOException {
-		String url = theUrlBase + StringUtils.defaultString(myUrlExtension);
+		StringBuilder b = new StringBuilder();
+		b.append(theUrlBase);
+		if (!theUrlBase.endsWith("/")) {
+			b.append('/');
+		}
+		b.append(StringUtils.defaultString(myUrlExtension));
+		
+		String url = b.toString();
 		String contents = myContext.newXmlParser().encodeResourceToString(myResource);
 		StringEntity entity = new StringEntity(contents, ContentType.create(Constants.CT_FHIR_XML, "UTF-8"));
 

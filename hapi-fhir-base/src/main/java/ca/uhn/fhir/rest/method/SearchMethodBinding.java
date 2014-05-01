@@ -92,7 +92,12 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 			}
 		}
 
-		return new GetClientInvocation(queryStringArgs, getResourceName());
+		String resourceName = getResourceName();
+		return createSearchInvocation(resourceName, queryStringArgs);
+	}
+
+	public static GetClientInvocation createSearchInvocation(String theResourceName, Map<String, List<String>> theParameters) {
+		return new GetClientInvocation(theParameters, theResourceName);
 	}
 
 	@Override

@@ -20,6 +20,8 @@ package ca.uhn.fhir.rest.param;
  * #L%
  */
 
+import static org.apache.commons.lang3.StringUtils.*;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -40,6 +42,7 @@ import org.apache.commons.lang3.time.DateUtils;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.PathSpecification;
+import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.rest.annotation.Count;
@@ -93,12 +96,14 @@ public class ParameterUtil {
 						parameter.setName(((RequiredParam) nextAnnotation).name());
 						parameter.setRequired(true);
 						parameter.setType(parameterType, innerCollectionType, outerCollectionType);
+						extractDescription(parameter, annotations);
 						param = parameter;
 					} else if (nextAnnotation instanceof OptionalParam) {
 						SearchParameter parameter = new SearchParameter();
 						parameter.setName(((OptionalParam) nextAnnotation).name());
 						parameter.setRequired(false);
 						parameter.setType(parameterType, innerCollectionType, outerCollectionType);
+						extractDescription(parameter, annotations);
 						param = parameter;
 					} else if (nextAnnotation instanceof IncludeParam) {
 						if (parameterType != PathSpecification.class || innerCollectionType == null || outerCollectionType != null) {
@@ -139,6 +144,19 @@ public class ParameterUtil {
 			paramIndex++;
 		}
 		return parameters;
+	}
+
+	private static void extractDescription(SearchParameter theParameter, Annotation[] theAnnotations) {
+		for (Annotation annotation : theAnnotations) {
+			if (annotation instanceof Description) {
+				Description desc = (Description) annotation;
+				if (isNotBlank(desc.formalDefinition())) {
+					theParameter.setDescription(desc.formalDefinition());
+				} else {
+					theParameter.setDescription(desc.shortDefinition());
+				}
+			}
+		}
 	}
 
 	public static InstantDt toInstant(Object theArgument) {

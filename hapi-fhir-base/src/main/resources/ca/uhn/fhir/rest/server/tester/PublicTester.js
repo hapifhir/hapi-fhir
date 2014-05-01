@@ -46,11 +46,24 @@ function displaySearchType(expandoTr, resourceName) {
 						        $('<input />', { name: 'method', value: 'searchType', type: 'hidden' }),
 						        $('<input />', { name: 'resourceName', value: resourceName, type: 'hidden' })
 						    )
+						    if (searchParam.documentation && searchParam.documentation.length > 0) {
+						    	formElement.append(
+						    		$('<span>' + searchParam.documentation + '<br /></span>')
+						    	);
+						    }
 						    var inputId = newUniqueId();
-						    formElement.append(
-						    	$('<input />', { name: 'param.' + searchParam.name, placeholder: searchParam.name, type: 'text', id: inputId }),
-						    	$('<label for="' + inputId + '">' + searchParam.name + '</input>')
-						    );
+						    if (searchParam.type && searchParam.type == 'token') {
+							    formElement.append(
+							    	$('<input />', { name: 'param.token.1.' + searchParam.name, placeholder: 'system/namespace', type: 'text', id: inputId }),
+							    	$('<input />', { name: 'param.token.2.' + searchParam.name, placeholder: 'value', type: 'text', id: inputId }),
+							    	$('<label for="' + inputId + '">' + searchParam.name + '</input>')
+							    );
+						    } else {
+							    formElement.append(
+							    	$('<input />', { name: 'param.string.' + searchParam.name, placeholder: searchParam.name, type: 'text', id: inputId }),
+							    	$('<label for="' + inputId + '">' + searchParam.name + '</input>')
+							    );
+						    }
 							formElement.append(
 						        $('<br />'),
 						        $('<input />', { type: 'submit', value: 'Submit' })

@@ -38,18 +38,19 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
  */
 public class SearchParameter extends BaseQueryParameter {
 
-	private String name;
+	private String myDescription;
+	private String myName;
 	private IParamBinder myParamBinder;
-	private boolean required;
-	private Class<?> type;
 	private SearchParamTypeEnum myParamType;
+	private boolean myRequired;
+	private Class<?> myType;
 
 	public SearchParameter() {
 	}
 
 	public SearchParameter(String name, boolean required) {
-		this.name = name;
-		this.required = required;
+		this.myName = name;
+		this.myRequired = required;
 	}
 
 	/* (non-Javadoc)
@@ -60,21 +61,35 @@ public class SearchParameter extends BaseQueryParameter {
 		return myParamBinder.encode(theObject);
 	}
 
+	public String getDescription() {
+		return myDescription;
+	}
+
 	/* (non-Javadoc)
 	 * @see ca.uhn.fhir.rest.param.IParameter#getName()
 	 */
 	@Override
 	public String getName() {
-		return name;
+		return myName;
+	}
+
+	@Override
+	public SearchParamTypeEnum getParamType() {
+		return myParamType;
 	}
 
 	public Class<?> getType() {
-		return type;
+		return myType;
+	}
+
+	@Override
+	public boolean handlesMissing() {
+		return false;
 	}
 
 	@Override
 	public boolean isRequired() {
-		return required;
+		return myRequired;
 	}
 
 	/* (non-Javadoc)
@@ -85,17 +100,21 @@ public class SearchParameter extends BaseQueryParameter {
 		return myParamBinder.parse(theString);
 	}
 
+	public void setDescription(String theDescription) {
+		myDescription = theDescription;
+	}
+
 	public void setName(String name) {
-		this.name = name;
+		this.myName = name;
 	}
 
 	public void setRequired(boolean required) {
-		this.required = required;
+		this.myRequired = required;
 	}
 
 	@SuppressWarnings("unchecked")
 	public void setType(final Class<?> type, Class<? extends Collection<?>> theInnerCollectionType, Class<? extends Collection<?>> theOuterCollectionType) {
-		this.type = type;
+		this.myType = type;
 		if (IQueryParameterType.class.isAssignableFrom(type)) {
 			this.myParamBinder = new QueryParameterTypeBinder((Class<? extends IQueryParameterType>) type);
 		} else if (IQueryParameterOr.class.isAssignableFrom(type)) {
@@ -130,16 +149,6 @@ public class SearchParameter extends BaseQueryParameter {
 //			this.parser = new CollectionBinder(this.parser, theOuterCollectionType);
 //		}
 
-	}
-
-	@Override
-	public SearchParamTypeEnum getParamType() {
-		return myParamType;
-	}
-
-	@Override
-	public boolean handlesMissing() {
-		return false;
 	}
 
 }
