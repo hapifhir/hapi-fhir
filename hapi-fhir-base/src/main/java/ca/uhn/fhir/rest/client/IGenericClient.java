@@ -26,7 +26,9 @@ import java.util.Map;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.dstu.resource.Conformance;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.api.MethodOutcome;
 
 public interface IGenericClient {
 
@@ -56,5 +58,44 @@ public interface IGenericClient {
 	 * @return
 	 */
 	<T extends IResource> Bundle search(Class<T> theType, Map<String, List<IQueryParameterType>> theParams);
+
+	/**
+	 * Implementation of the "instance update" method.
+	 * 
+	 * @param theId The ID to update
+	 * @param theResource The new resource body
+	 * @return An outcome containing the results and possibly the new version ID 
+	 */
+	MethodOutcome update(IdDt theIdDt, IResource theResource);
+
+	/**
+	 * Implementation of the "type validate" method.
+	 * 
+	 * @param theId The ID to validate
+	 * @param theResource The resource to validate
+	 * @return An outcome containing any validation issues 
+	 */
+	MethodOutcome validate(IResource theResource);
+
+	/**
+	 * Implementation of the "delete instance" method.
+	 * @param theType The type of resource to delete
+	 * @param theId the ID of the resource to delete
+	 * @return An outcome
+	 */
+	MethodOutcome delete(Class<? extends IResource> theType, IdDt theId);
+
+	/**
+	 * Implementation of the "history instance" method.
+	 * @param theType The type of resource to return the history for
+	 * @param theId the ID of the resource to return the history for
+	 * @return An outcome
+	 */
+	<T extends IResource> Bundle history(Class<T> theType, IdDt theIdDt);
+
+	/**
+	 * Retrieves and returns the server conformance statement
+	 */
+	Conformance conformance();
 
 }

@@ -75,7 +75,7 @@ public class SinceParameter implements IParameter {
 			throw new ConfigurationException("Method '" + theMethod.getName() + "' in type '" + "' is annotated with @" + Since.class.getName() + " but can not be of collection type");
 		}
 		if (!ParameterUtil.getBindableInstantTypes().contains(theParameterType)) {
-			throw new ConfigurationException("Method '" + theMethod.getName() + "' in type '" + "' is annotated with @" + Since.class.getName() + " but cis an invalid type, must be one of: " + ParameterUtil.getBindableInstantTypes());
+			throw new ConfigurationException("Method '" + theMethod.getName() + "' in type '" + "' is annotated with @" + Since.class.getName() + " but is an invalid type, must be one of: " + ParameterUtil.getBindableInstantTypes());
 		}
 		myType = theParameterType;
 	}

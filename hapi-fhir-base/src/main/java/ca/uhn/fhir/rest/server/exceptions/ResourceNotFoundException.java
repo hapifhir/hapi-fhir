@@ -41,6 +41,10 @@ public class ResourceNotFoundException extends BaseServerResponseException {
 		super(STATUS_CODE, "Resource of type " + theClass.getSimpleName() + " with ID " + thePatientId + " is not known");
 	}
 
+	public ResourceNotFoundException(Class<? extends IResource> theClass, IdDt thePatientId) {
+		super(STATUS_CODE, "Resource of type " + theClass.getSimpleName() + " with ID " + thePatientId + " is not known");
+	}
+
 	public ResourceNotFoundException(String theMessage) {
 		super(STATUS_CODE, theMessage);
 	}

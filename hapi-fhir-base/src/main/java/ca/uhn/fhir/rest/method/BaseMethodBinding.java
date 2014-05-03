@@ -58,7 +58,7 @@ import ca.uhn.fhir.rest.client.exceptions.NonFhirResponseException;
 import ca.uhn.fhir.rest.param.IParameter;
 import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.Constants;
-import ca.uhn.fhir.rest.server.EncodingUtil;
+import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
@@ -277,11 +277,11 @@ public abstract class BaseMethodBinding implements IClientResponseHandler {
 		// return sm;
 	}
 
-	public static EncodingUtil determineResponseEncoding(HttpServletRequest theRequest, Map<String, String[]> theParams) {
+	public static EncodingEnum determineResponseEncoding(HttpServletRequest theRequest, Map<String, String[]> theParams) {
 		String[] format = theParams.remove(Constants.PARAM_FORMAT);
 		if (format != null) {
 			for (String nextFormat : format) {
-				EncodingUtil retVal = Constants.FORMAT_VAL_TO_ENCODING.get(nextFormat);
+				EncodingEnum retVal = Constants.FORMAT_VAL_TO_ENCODING.get(nextFormat);
 				if (retVal != null) {
 					return retVal;
 				}
@@ -291,13 +291,13 @@ public abstract class BaseMethodBinding implements IClientResponseHandler {
 		Enumeration<String> acceptValues = theRequest.getHeaders("Accept");
 		if (acceptValues != null) {
 			while (acceptValues.hasMoreElements()) {
-				EncodingUtil retVal = Constants.FORMAT_VAL_TO_ENCODING.get(acceptValues.nextElement());
+				EncodingEnum retVal = Constants.FORMAT_VAL_TO_ENCODING.get(acceptValues.nextElement());
 				if (retVal != null) {
 					return retVal;
 				}
 			}
 		}
-		return EncodingUtil.XML;
+		return EncodingEnum.XML;
 	}
 
 	public static boolean verifyMethodHasZeroOrOneOperationAnnotation(Method theNextMethod, Object... theAnnotations) {
@@ -355,6 +355,18 @@ public abstract class BaseMethodBinding implements IClientResponseHandler {
 		} else {
 			throw new InternalErrorException("Unexpected return type: " + response.getClass().getCanonicalName());
 		}
+	}
+
+	protected static boolean prettyPrintResponse(Request theRequest) {
+		Map<String, String[]> requestParams = theRequest.getParameters();
+		String[] pretty = requestParams.remove(Constants.PARAM_PRETTY);
+		boolean prettyPrint = false;
+		if (pretty != null && pretty.length > 0) {
+			if (Constants.PARAM_PRETTY_VALUE_TRUE.equals(pretty[0])) {
+				prettyPrint = true;
+			}
+		}
+		return prettyPrint;
 	}
 
 }

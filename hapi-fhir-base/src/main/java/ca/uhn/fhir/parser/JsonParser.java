@@ -20,13 +20,11 @@ package ca.uhn.fhir.parser;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
-import java.io.StringWriter;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -50,7 +48,6 @@ import javax.json.stream.JsonGeneratorFactory;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
-import org.apache.commons.lang3.text.WordUtils;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
@@ -143,17 +140,6 @@ public class JsonParser extends BaseParser implements IParser {
 		JsonGeneratorFactory jgf = Json.createGeneratorFactory(properties);
 		JsonGenerator eventWriter = jgf.createGenerator(theWriter);
 		return eventWriter;
-	}
-
-	@Override
-	public String encodeBundleToString(Bundle theBundle) throws DataFormatException, IOException {
-		if (theBundle == null) {
-			throw new NullPointerException("Bundle can not be null");
-		}
-		StringWriter stringWriter = new StringWriter();
-		encodeBundleToWriter(theBundle, stringWriter);
-
-		return stringWriter.toString();
 	}
 
 	@Override
@@ -473,12 +459,6 @@ public class JsonParser extends BaseParser implements IParser {
 		theEventWriter.writeEnd();
 	}
 
-	@Override
-	public String encodeResourceToString(IResource theResource) throws DataFormatException, IOException {
-		Writer stringWriter = new StringWriter();
-		encodeResourceToWriter(theResource, stringWriter);
-		return stringWriter.toString();
-	}
 
 	@Override
 	public void encodeResourceToWriter(IResource theResource, Writer theWriter) throws IOException {

@@ -35,7 +35,7 @@ This file is a Thymeleaf template for the
 					<div class="bodyHeaderBlock">
 						Software Details
 					</div>
-					<table border="0">
+					<table border="0" class="propertyTable">
 						<tr>
 							<td class="propertyKeyCell">Software</td>
 							<td th:text="${conf.software.name}">HAPI Restful Server</td>
@@ -45,36 +45,76 @@ This file is a Thymeleaf template for the
 							<td th:text="${conf.software.version}">1.1.1</td>
 						</tr>
 					</table>
+
+					<div class="bodyHeaderBlock">
+						Request Configuration
+					</div>
+					<table border="0" class="propertyTable">
+						<tr>
+							<td class="propertyKeyCell">Encoding</td>
+							<td>
+								<select id="configEncoding">
+									<option value="" selected="true">(default)</option>
+									<option value="xml">XML</option>
+									<option value="json">JSON</option>
+								</select>
+							</td>
+						</tr>
+						<tr>
+							<td class="propertyKeyCell">Pretty Printing</td>
+							<td>
+								<input type="checkbox" id="configPretty"/>
+							</td>
+						</tr>
+					</table>
 					
 				</td>
 				
 				<td width="1%"/>
 				
 				<td width="70%" valign="top">
-					
 					<th:block th:each="rest : ${conf.rest}">
+						<div class="bodyHeaderBlock">
+							RESTful Server 
+						</div>
+						<table border="0" th:id="systemExpando" class="propertyTable">
+							<tr>
+								<td valign="top" class="propertyKeyCell">Supports operations:</td>
+								<td valign="top">
+									<a th:onclick="'displayConformance(this, \'systemExpando\'); return false;'" href="#">conformance</a>
+									<th:span th:each="operation : ${rest.operation}">
+										<th:block th:switch="${operation.code.value}">
+											<span th:case="*" th:text="${operation.code.value}"/>
+										</th:block>
+									</th:span>												
+								</td>
+							</tr>
+						</table>
+
 						<th:block th:each="resource, resIterStat : ${rest.resource}" th:with="expandoId='resExpando'+${resIterStat.count}">
 							<div class="bodyHeaderBlock">
 								Resource: <th:block th:text="${resource.type.valueAsString}"/> 
 							</div>
-							<table border="0" th:id="${expandoId}">
+							<table border="0" th:id="${expandoId}" class="propertyTable">
 								<tr>
 									<td valign="top" class="propertyKeyCell">Supports operations:</td>
 									<td valign="top">
 										<th:span th:each="operation : ${resource.operation}">
 											<th:block th:switch="${operation.code.value}">
-											    <a th:case="'read'" th:href="'javascript:displayRead(\'' + ${expandoId} + '\', \'' + ${resource.type.valueAsString} + '\');'">read</a>
-											    <a th:case="'vread'" th:href="'javascript:displayVRead(\'' + ${expandoId} + '\', \'' + ${resource.type.valueAsString} + '\');'">vread</a>
-											    <a th:case="'search-type'" th:href="'javascript:displaySearchType(\'' + ${expandoId} + '\', \'' + ${resource.type.valueAsString} + '\');'">search-type</a>
-												<span th:case="*" th:text="${operation.code.value}"/>
+											    <a th:case="'read'"             href="#" th:onclick="'displayRead(this,            \'' + ${expandoId} + '\', \'' + ${resource.type.valueAsString} + '\'); return false;'">read</a>
+											    <a th:case="'vread'"            href="#" th:onclick="'displayVRead(this,           \'' + ${expandoId} + '\', \'' + ${resource.type.valueAsString} + '\'); return false;'">vread</a>
+											    <a th:case="'search-type'"      href="#" th:onclick="'displaySearchType(this,      \'' + ${expandoId} + '\', \'' + ${resource.type.valueAsString} + '\'); return false;'">search-type</a>
+											    <a th:case="'create'"           href="#" th:onclick="'displayCreate(this,          \'' + ${expandoId} + '\', \'' + ${resource.type.valueAsString} + '\'); return false;'">create</a>
+											    <a th:case="'update'"           href="#" th:onclick="'displayUpdate(this,          \'' + ${expandoId} + '\', \'' + ${resource.type.valueAsString} + '\'); return false;'">update</a>
+											    <a th:case="'validate'"         href="#" th:onclick="'displayValidate(this,        \'' + ${expandoId} + '\', \'' + ${resource.type.valueAsString} + '\'); return false;'">validate</a>
+											    <a th:case="'delete'"           href="#" th:onclick="'displayDelete(this,          \'' + ${expandoId} + '\', \'' + ${resource.type.valueAsString} + '\'); return false;'">delete</a>
+											    <a th:case="'history-instance'" href="#" th:onclick="'displayHistoryInstance(this, \'' + ${expandoId} + '\', \'' + ${resource.type.valueAsString} + '\'); return false;'">history-instance</a>
+												<span th:case="*"               href="#" th:text="${operation.code.value}"/>
 											</th:block>
 										</th:span>												
 									</td>
 								</tr>
 							</table>
-							<div>
-								
-							</div>
 						</th:block>
 					</th:block>
 				

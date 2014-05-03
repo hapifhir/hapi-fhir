@@ -30,11 +30,11 @@ import ca.uhn.fhir.model.api.IResource;
 
 public interface IParser {
 
-	String encodeBundleToString(Bundle theBundle) throws DataFormatException, IOException;
+	String encodeBundleToString(Bundle theBundle) throws DataFormatException;
 
 	void encodeBundleToWriter(Bundle theBundle, Writer theWriter) throws IOException, DataFormatException;
 
-	String encodeResourceToString(IResource theResource) throws DataFormatException, IOException;
+	String encodeResourceToString(IResource theResource) throws DataFormatException;
 
 	void encodeResourceToWriter(IResource theResource, Writer stringWriter) throws IOException, DataFormatException;
 
@@ -44,19 +44,57 @@ public interface IParser {
 
 	Bundle parseBundle(String theMessageString) throws ConfigurationException, DataFormatException;
 
-	<T extends IResource> T parseResource(Class<T> theResourceType, Reader theReader);
+	/**
+	 * Parses a resource
+	 * 
+	 * @param theResourceType
+	 *            The resource type to use. This can be used to explicitly
+	 *            specify a class which extends a built-in type (e.g. a custom
+	 *            type extending the default Patient class)
+	 * @param theReader
+	 *            The reader to parse inpou from
+	 * @return A parsed resource
+	 * @throws DataFormatException
+	 *             If the resource can not be parsed because the data is not
+	 *             recognized or invalid for any reason
+	 */
+	<T extends IResource> T parseResource(Class<T> theResourceType, Reader theReader) throws DataFormatException;
 
-	<T extends IResource> T parseResource(Class<T> theResourceType, String theMessageString);
+	/**
+	 * Parses a resource
+	 * 
+	 * @param theResourceType
+	 *            The resource type to use. This can be used to explicitly
+	 *            specify a class which extends a built-in type (e.g. a custom
+	 *            type extending the default Patient class)
+	 * @param theString
+	 *            The string to parse
+	 * @return A parsed resource
+	 * @throws DataFormatException
+	 *             If the resource can not be parsed because the data is not
+	 *             recognized or invalid for any reason
+	 */
+	<T extends IResource> T parseResource(Class<T> theResourceType, String theString) throws DataFormatException;
 
 	IResource parseResource(Reader theReader) throws ConfigurationException, DataFormatException;
 
 	IResource parseResource(String theMessageString) throws ConfigurationException, DataFormatException;
 
+	/**
+	 * Sets the "pretty print" flag, meaning that the parser will encode
+	 * resources with human-readable spacing and newlines between elements
+	 * instead of condensing output as much as possible.
+	 * 
+	 * @param thePrettyPrint
+	 *            The flag
+	 * @return Returns an instance of <code>this</code> parser so that method
+	 *         calls can be conveniently chained
+	 */
 	IParser setPrettyPrint(boolean thePrettyPrint);
 
 	/**
-	 * If set to <code>true</code> (default is <code>false</code>), narratives will not be included in the
-	 * encoded values.
+	 * If set to <code>true</code> (default is <code>false</code>), narratives
+	 * will not be included in the encoded values.
 	 */
 	IParser setSuppressNarratives(boolean theSuppressNarratives);
 

@@ -53,6 +53,10 @@ public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding
 
 	@Override
 	public GetClientInvocation invokeClient(Object[] theArgs) throws InternalErrorException {
+		return createConformanceInvocation();
+	}
+
+	public static GetClientInvocation createConformanceInvocation() {
 		return new GetClientInvocation("metadata");
 	}
 

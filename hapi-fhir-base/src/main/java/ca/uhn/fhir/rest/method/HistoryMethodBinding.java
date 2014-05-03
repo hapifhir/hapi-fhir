@@ -23,13 +23,13 @@ package ca.uhn.fhir.rest.method;
 import static org.apache.commons.lang3.StringUtils.*;
 
 import java.lang.reflect.Method;
-import java.util.LinkedHashMap;
 import java.util.List;
 
 import org.apache.commons.lang3.ObjectUtils;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -103,32 +103,42 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 
 	@Override
 	public BaseClientInvocation invokeClient(Object[] theArgs) throws InternalErrorException {
+		IdDt id = null;
+		String resourceName = myResourceName;
+		if (myIdParamIndex != null) {
+			id = (IdDt) theArgs[myIdParamIndex];
+			if (id == null || isBlank(id.getValue())) {
+				throw new NullPointerException("ID can not be null");
+			}
+		}
+		
+		GetClientInvocation retVal = createHistoryInvocation(resourceName, id);
+
+		if (theArgs != null) {
+			for (int idx = 0; idx < theArgs.length; idx++) {
+				IParameter nextParam = getParameters().get(idx);
+				nextParam.translateClientArgumentIntoQueryArgument(theArgs[idx], retVal.getParameters());
+			}
+		}
+
+		return retVal;
+	}
+
+	public static GetClientInvocation createHistoryInvocation(String theResourceName, IdDt theId) {
 		StringBuilder b = new StringBuilder();
-		if (myResourceName != null) {
-			b.append(myResourceName);
-			if (myIdParamIndex != null) {
-				IdDt id = (IdDt) theArgs[myIdParamIndex];
-				if (id == null || isBlank(id.getValue())) {
-					throw new NullPointerException("ID can not be null");
-				}
+		if (theResourceName != null) {
+			b.append(theResourceName);
+			if (theId != null) {
 				b.append('/');
-				b.append(id.getValue());
+				b.append(theId.getValue());
 			}
 		}
 		if (b.length() > 0) {
 			b.append('/');
 		}
 		b.append(Constants.PARAM_HISTORY);
-
-		LinkedHashMap<String, List<String>> queryStringArgs=new LinkedHashMap<String, List<String>>();
-		if (theArgs != null) {
-			for (int idx = 0; idx < theArgs.length; idx++) {
-				IParameter nextParam = getParameters().get(idx);
-				nextParam.translateClientArgumentIntoQueryArgument(theArgs[idx], queryStringArgs);
-			}
-		}
-
-		return new GetClientInvocation(queryStringArgs, b.toString());
+		GetClientInvocation retVal = new GetClientInvocation(b.toString());
+		return retVal;
 	}
 
 	@Override
@@ -139,7 +149,20 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 
 		Object response = invokeServerMethod(theResourceProvider, theMethodParams);
 
-		return toResourceList(response);
+		List<IResource> resources = toResourceList(response);
+		int index=0;
+		for (IResource nextResource : resources) {
+			if (nextResource.getId() == null || nextResource.getId().isEmpty()) {
+				throw new InternalErrorException("Server provided resource at index " + index + " with no ID set (using IResource#setId(IdDt))");
+			}
+			IdDt versionId = getIdFromMetadataOrNullIfNone(nextResource.getResourceMetadata(),ResourceMetadataKeyEnum.VERSION_ID);
+			if (versionId == null||versionId.isEmpty()) {
+				throw new InternalErrorException("Server provided resource at index " + index + " with no Version ID set (using IResource#Resource.getResourceMetadata().put(ResourceMetadataKeyEnum.VERSION_ID, Object))");
+			}
+			index++;
+		}
+		
+		return resources;
 	}
 
 	// ObjectUtils.equals is replaced by a JDK7 method..

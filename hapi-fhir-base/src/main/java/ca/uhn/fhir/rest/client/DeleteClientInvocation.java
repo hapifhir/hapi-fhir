@@ -20,13 +20,12 @@ package ca.uhn.fhir.rest.client;
  * #L%
  */
 
-import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpRequestBase;
-
-import ca.uhn.fhir.parser.DataFormatException;
 
 public class DeleteClientInvocation extends BaseClientInvocation {
 
@@ -38,13 +37,15 @@ public class DeleteClientInvocation extends BaseClientInvocation {
 	}
 
 	@Override
-	public HttpRequestBase asHttpRequest(String theUrlBase) throws DataFormatException, IOException {
+	public HttpRequestBase asHttpRequest(String theUrlBase, Map<String, List<String>> theExtraParams) {
 		StringBuilder b = new StringBuilder();
 		b.append(theUrlBase);
 		if (!theUrlBase.endsWith("/")) {
 			b.append('/');
 		}
 		b.append(myUrlPath);
+
+		appendExtraParamsWithQuestionMark(theExtraParams, b,true);
 
 		HttpDelete retVal = new HttpDelete(b.toString());
 		return retVal;

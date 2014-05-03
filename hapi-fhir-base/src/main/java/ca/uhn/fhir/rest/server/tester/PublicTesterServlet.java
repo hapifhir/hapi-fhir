@@ -22,6 +22,7 @@ package ca.uhn.fhir.rest.server.tester;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -35,8 +36,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.output.WriterOutputStream;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpEntityEnclosingRequest;
+import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.ContentType;
 import org.thymeleaf.TemplateEngine;
@@ -49,6 +54,7 @@ import org.thymeleaf.templateresolver.TemplateResolver;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.resource.Conformance;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -57,21 +63,20 @@ import ca.uhn.fhir.rest.annotation.Metadata;
 import ca.uhn.fhir.rest.client.GenericClient;
 import ca.uhn.fhir.rest.client.api.IBasicClient;
 import ca.uhn.fhir.rest.server.Constants;
-import ca.uhn.fhir.rest.server.EncodingUtil;
+import ca.uhn.fhir.rest.server.EncodingEnum;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 
 public class PublicTesterServlet extends HttpServlet {
 
-	private static final long serialVersionUID = 1L;
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(PublicTesterServlet.class);
 	private static final boolean DEBUGMODE = true;
-	private TemplateEngine myTemplateEngine;
-	private HashMap<String, String> myStaticResources;
-	private String myServerBase;
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(PublicTesterServlet.class);
+	private static final String PUBLIC_TESTER_RESULT_HTML = "/PublicTesterResult.html";
+	private static final long serialVersionUID = 1L;
 	private FhirContext myCtx;
+	private String myServerBase;
+	private HashMap<String, String> myStaticResources;
 
-	public void setServerBase(String theServerBase) {
-		myServerBase = theServerBase;
-	}
+	private TemplateEngine myTemplateEngine;
 
 	public PublicTesterServlet() {
 		myStaticResources = new HashMap<String, String>();
@@ -91,125 +96,18 @@ public class PublicTesterServlet extends HttpServlet {
 	}
 
 	@Override
-	protected void doPost(HttpServletRequest theReq, HttpServletResponse theResp) throws ServletException, IOException {
-		if (DEBUGMODE) {
-			myTemplateEngine.getCacheManager().clearAllCaches();
-		}
+	public void init(ServletConfig theConfig) throws ServletException {
+		myTemplateEngine = new TemplateEngine();
+		TemplateResolver resolver = new TemplateResolver();
+		resolver.setResourceResolver(new ProfileResourceResolver());
+		myTemplateEngine.setTemplateResolver(resolver);
+		StandardDialect dialect = new StandardDialect();
+		myTemplateEngine.setDialect(dialect);
+		myTemplateEngine.initialize();
+	}
 
-		try {
-			GenericClient client = (GenericClient) myCtx.newRestfulGenericClient(myServerBase);
-			client.setKeepResponses(true);
-			String method = theReq.getParameter("method");
-
-			String requestUrl;
-			String action;
-			String resultStatus;
-			String resultBody;
-			String resultSyntaxHighlighterClass;
-
-			if ("read".equals(method)) {
-				RuntimeResourceDefinition def = getResourceType(theReq);
-				String id = StringUtils.defaultString(theReq.getParameter("id"));
-				if (StringUtils.isBlank(id)) {
-					theResp.sendError(Constants.STATUS_HTTP_400_BAD_REQUEST, "No ID specified");
-				}
-				client.read(def.getImplementingClass(), new IdDt(id));
-
-			}
-			if ("vread".equals(method)) {
-				RuntimeResourceDefinition def = getResourceType(theReq);
-				String id = StringUtils.defaultString(theReq.getParameter("id"));
-				if (StringUtils.isBlank(id)) {
-					theResp.sendError(Constants.STATUS_HTTP_400_BAD_REQUEST, "No ID specified");
-				}
-
-				String versionId = StringUtils.defaultString(theReq.getParameter("versionid"));
-				if (StringUtils.isBlank(versionId)) {
-					theResp.sendError(Constants.STATUS_HTTP_400_BAD_REQUEST, "No Version ID specified");
-				}
-				client.vread(def.getImplementingClass(), new IdDt(id), new IdDt(versionId));
-
-			} else if ("searchType".equals(method)) {
-
-				Map<String, List<IQueryParameterType>> params = new HashMap<String, List<IQueryParameterType>>();
-
-				HashSet<String> hashSet = new HashSet<String>(theReq.getParameterMap().keySet());
-				String paramName = null;
-				IQueryParameterType paramValue = null;
-				while (hashSet.isEmpty() == false) {
-					
-					String nextKey = hashSet.iterator().next();
-					String nextValue = theReq.getParameter(nextKey);
-					paramName=null;
-					paramValue=null;
-					
-					if (nextKey.startsWith("param.token.")) {
-						int prefixLength = "param.token.".length();
-						paramName = nextKey.substring(prefixLength + 2);
-						String systemKey = "param.token."+"1." + paramName;
-						String valueKey = "param.token."+"2." + paramName;
-						String system = theReq.getParameter(systemKey);
-						String value = theReq.getParameter(valueKey);
-						paramValue = new IdentifierDt(system, value);
-						hashSet.remove(systemKey);
-						hashSet.remove(valueKey);
-					} else if (nextKey.startsWith("param.string.")) {
-						paramName = nextKey.substring("param.string.".length());
-						paramValue = new StringDt(nextValue);
-					}
-
-					if (paramName != null) {
-						if (params.containsKey(paramName) == false) {
-							params.put(paramName, new ArrayList<IQueryParameterType>());
-						}
-						params.get(paramName).add(paramValue);
-					}
-
-					hashSet.remove(nextKey);
-				}
-				
-				RuntimeResourceDefinition def = getResourceType(theReq);
-				client.search(def.getImplementingClass(), params);
-
-			} else {
-				theResp.sendError(Constants.STATUS_HTTP_400_BAD_REQUEST, "Invalid method: " + method);
-				return;
-			}
-
-			HttpRequestBase lastRequest = client.getLastRequest();
-			requestUrl = lastRequest.getURI().toASCIIString();
-			action = client.getLastRequest().getMethod();
-			resultStatus = client.getLastResponse().getStatusLine().toString();
-			resultBody = client.getLastResponseBody();
-
-			ContentType ct = ContentType.get(client.getLastResponse().getEntity());
-			String mimeType = ct.getMimeType();
-			EncodingUtil ctEnum = EncodingUtil.forContentType(mimeType);
-			switch (ctEnum) {
-			case JSON:
-				resultSyntaxHighlighterClass = "brush: jscript";
-				break;
-			case XML:
-				resultSyntaxHighlighterClass = "brush: xml";
-				break;
-			default:
-				resultSyntaxHighlighterClass = "brush: plain";
-				break;
-			}
-
-			WebContext ctx = new WebContext(theReq, theResp, theReq.getServletContext(), theReq.getLocale());
-			ctx.setVariable("base", myServerBase);
-			ctx.setVariable("requestUrl", requestUrl);
-			ctx.setVariable("action", action);
-			ctx.setVariable("resultStatus", resultStatus);
-			ctx.setVariable("resultBody", StringEscapeUtils.escapeHtml4(resultBody));
-			ctx.setVariable("resultSyntaxHighlighterClass", resultSyntaxHighlighterClass);
-
-			myTemplateEngine.process(PUBLIC_TESTER_RESULT_HTML, ctx, theResp.getWriter());
-		} catch (Exception e) {
-			ourLog.error("Failure during processing", e);
-			theResp.sendError(500, e.toString());
-		}
+	public void setServerBase(String theServerBase) {
+		myServerBase = theServerBase;
 	}
 
 	private RuntimeResourceDefinition getResourceType(HttpServletRequest theReq) throws ServletException {
@@ -219,6 +117,12 @@ public class PublicTesterServlet extends HttpServlet {
 			throw new ServletException("Invalid resourceName: " + resourceName);
 		}
 		return def;
+	}
+
+	private void streamResponse(String theResourceName, String theContentType, HttpServletResponse theResp) throws IOException {
+		InputStream res = PublicTesterServlet.class.getResourceAsStream("/ca/uhn/fhir/rest/server/tester/" + theResourceName);
+		theResp.setContentType(theContentType);
+		IOUtils.copy(res, theResp.getOutputStream());
 	}
 
 	@Override
@@ -246,23 +150,288 @@ public class PublicTesterServlet extends HttpServlet {
 
 	}
 
+	@Override
+	protected void doPost(HttpServletRequest theReq, HttpServletResponse theResp) throws ServletException, IOException {
+		if (DEBUGMODE) {
+			myTemplateEngine.getCacheManager().clearAllCaches();
+		}
+
+		try {
+			GenericClient client = (GenericClient) myCtx.newRestfulGenericClient(myServerBase);
+			client.setKeepResponses(true);
+			String method = theReq.getParameter("method");
+
+			String prettyParam = theReq.getParameter("configPretty");
+			if ("on".equals(prettyParam)) {
+				client.setPrettyPrint(true);
+			}
+			if ("xml".equals(theReq.getParameter("configEncoding"))) {
+				client.setEncoding(EncodingEnum.XML);
+			} else if ("json".equals(theReq.getParameter("configEncoding"))) {
+				client.setEncoding(EncodingEnum.JSON);
+			}
+
+			String requestUrl;
+			String action;
+			String resultStatus;
+			String resultBody;
+			String resultSyntaxHighlighterClass;
+			boolean returnsResource;
+
+			try {
+			if ("conformance".equals(method)) {
+				returnsResource = true;
+				client.conformance();
+			} else if ("read".equals(method)) {
+				RuntimeResourceDefinition def = getResourceType(theReq);
+				String id = StringUtils.defaultString(theReq.getParameter("id"));
+				if (StringUtils.isBlank(id)) {
+					theResp.sendError(Constants.STATUS_HTTP_400_BAD_REQUEST, "No ID specified");
+				}
+				returnsResource = true;
+
+				client.read(def.getImplementingClass(), new IdDt(id));
+
+			} else if ("vread".equals(method)) {
+				RuntimeResourceDefinition def = getResourceType(theReq);
+				String id = StringUtils.defaultString(theReq.getParameter("id"));
+				if (StringUtils.isBlank(id)) {
+					theResp.sendError(Constants.STATUS_HTTP_400_BAD_REQUEST, "No ID specified");
+				}
+
+				String versionId = StringUtils.defaultString(theReq.getParameter("versionid"));
+				if (StringUtils.isBlank(versionId)) {
+					theResp.sendError(Constants.STATUS_HTTP_400_BAD_REQUEST, "No Version ID specified");
+				}
+				returnsResource = true;
+
+				client.vread(def.getImplementingClass(), new IdDt(id), new IdDt(versionId));
+
+			} else if ("delete".equals(method)) {
+				RuntimeResourceDefinition def = getResourceType(theReq);
+				String id = StringUtils.defaultString(theReq.getParameter("id"));
+				if (StringUtils.isBlank(id)) {
+					theResp.sendError(Constants.STATUS_HTTP_400_BAD_REQUEST, "No ID specified");
+				}
+
+				returnsResource = false;
+
+				client.delete(def.getImplementingClass(), new IdDt(id));
+
+			} else if ("history-instance".equals(method)) {
+				RuntimeResourceDefinition def = getResourceType(theReq);
+				String id = StringUtils.defaultString(theReq.getParameter("id"));
+				if (StringUtils.isBlank(id)) {
+					theResp.sendError(Constants.STATUS_HTTP_400_BAD_REQUEST, "No ID specified");
+				}
+
+				returnsResource = false;
+
+				client.history(def.getImplementingClass(), new IdDt(id));
+
+			} else if ("create".equals(method)) {
+				RuntimeResourceDefinition def = getResourceType(theReq);
+				String resourceText = StringUtils.defaultString(theReq.getParameter("resource"));
+				if (StringUtils.isBlank(resourceText)) {
+					theResp.sendError(Constants.STATUS_HTTP_400_BAD_REQUEST, "No resource content specified");
+				}
+
+				IResource resource;
+				if (client.getEncoding() == null || client.getEncoding() == EncodingEnum.XML) {
+					resource = myCtx.newXmlParser().parseResource(def.getImplementingClass(), resourceText);
+				} else {
+					resource = myCtx.newJsonParser().parseResource(def.getImplementingClass(), resourceText);
+				}
+				returnsResource = false;
+
+				client.create(resource);
+
+			} else if ("validate".equals(method)) {
+				RuntimeResourceDefinition def = getResourceType(theReq);
+				String resourceText = StringUtils.defaultString(theReq.getParameter("resource"));
+				if (StringUtils.isBlank(resourceText)) {
+					theResp.sendError(Constants.STATUS_HTTP_400_BAD_REQUEST, "No resource content specified");
+				}
+
+				IResource resource;
+				if (client.getEncoding() == null || client.getEncoding() == EncodingEnum.XML) {
+					resource = myCtx.newXmlParser().parseResource(def.getImplementingClass(), resourceText);
+				} else {
+					resource = myCtx.newJsonParser().parseResource(def.getImplementingClass(), resourceText);
+				}
+				returnsResource = false;
+
+				client.validate(resource);
+
+			} else if ("update".equals(method)) {
+				RuntimeResourceDefinition def = getResourceType(theReq);
+				String resourceText = StringUtils.defaultString(theReq.getParameter("resource"));
+				if (StringUtils.isBlank(resourceText)) {
+					theResp.sendError(Constants.STATUS_HTTP_400_BAD_REQUEST, "No resource content specified");
+				}
+
+				String id = StringUtils.defaultString(theReq.getParameter("id"));
+				if (StringUtils.isBlank(id)) {
+					theResp.sendError(Constants.STATUS_HTTP_400_BAD_REQUEST, "No ID specified");
+				}
+
+				IResource resource;
+				if (client.getEncoding() == null || client.getEncoding() == EncodingEnum.XML) {
+					resource = myCtx.newXmlParser().parseResource(def.getImplementingClass(), resourceText);
+				} else {
+					resource = myCtx.newJsonParser().parseResource(def.getImplementingClass(), resourceText);
+				}
+				returnsResource = false;
+
+				client.update(new IdDt(id), resource);
+
+			} else if ("searchType".equals(method)) {
+				Map<String, List<IQueryParameterType>> params = new HashMap<String, List<IQueryParameterType>>();
+
+				HashSet<String> hashSet = new HashSet<String>(theReq.getParameterMap().keySet());
+				String paramName = null;
+				IQueryParameterType paramValue = null;
+				while (hashSet.isEmpty() == false) {
+
+					String nextKey = hashSet.iterator().next();
+					String nextValue = theReq.getParameter(nextKey);
+					paramName = null;
+					paramValue = null;
+
+					if (nextKey.startsWith("param.token.")) {
+						int prefixLength = "param.token.".length();
+						paramName = nextKey.substring(prefixLength + 2);
+						String systemKey = "param.token." + "1." + paramName;
+						String valueKey = "param.token." + "2." + paramName;
+						String system = theReq.getParameter(systemKey);
+						String value = theReq.getParameter(valueKey);
+						paramValue = new IdentifierDt(system, value);
+						hashSet.remove(systemKey);
+						hashSet.remove(valueKey);
+					} else if (nextKey.startsWith("param.string.")) {
+						paramName = nextKey.substring("param.string.".length());
+						paramValue = new StringDt(nextValue);
+					}
+
+					if (paramName != null) {
+						if (params.containsKey(paramName) == false) {
+							params.put(paramName, new ArrayList<IQueryParameterType>());
+						}
+						params.get(paramName).add(paramValue);
+					}
+
+					hashSet.remove(nextKey);
+				}
+
+				RuntimeResourceDefinition def = getResourceType(theReq);
+
+				returnsResource = false;
+				client.search(def.getImplementingClass(), params);
+
+			} else {
+				theResp.sendError(Constants.STATUS_HTTP_400_BAD_REQUEST, "Invalid method: " + method);
+				return;
+			}
+			} catch (BaseServerResponseException e) {
+				ourLog.error("Failed to invoke method", e);
+				returnsResource=false;
+			}
+			
+			HttpRequestBase lastRequest = client.getLastRequest();
+			String requestBody = null;
+			String requestSyntaxHighlighterClass = null;
+
+			if (lastRequest instanceof HttpEntityEnclosingRequest) {
+				HttpEntityEnclosingRequest lastEERequest = (HttpEntityEnclosingRequest) lastRequest;
+				HttpEntity lastEE = lastEERequest.getEntity();
+				if (lastEE.isRepeatable()) {
+					StringWriter requestCapture = new StringWriter();
+					lastEE.writeTo(new WriterOutputStream(requestCapture, "UTF-8"));
+					requestBody = requestCapture.toString();
+					ContentType ct = ContentType.get(lastEE);
+					String mimeType = ct.getMimeType();
+					EncodingEnum ctEnum = EncodingEnum.forContentType(mimeType);
+					if (ctEnum == null) {
+						requestSyntaxHighlighterClass = "brush: plain";
+					} else {
+						switch (ctEnum) {
+						case JSON:
+							requestSyntaxHighlighterClass = "brush: jscript";
+							break;
+						case XML:
+						default:
+							requestSyntaxHighlighterClass = "brush: xml";
+							break;
+						}
+					}
+				}
+			}
+			requestUrl = lastRequest.getURI().toASCIIString();
+			action = client.getLastRequest().getMethod();
+			resultStatus = client.getLastResponse().getStatusLine().toString();
+			resultBody = client.getLastResponseBody();
+
+			HttpResponse lastResponse = client.getLastResponse();
+			ContentType ct = ContentType.get(lastResponse.getEntity());
+			String mimeType = ct != null ? ct.getMimeType() : null;
+			EncodingEnum ctEnum = EncodingEnum.forContentType(mimeType);
+			String narrativeString = "";
+
+			if (ctEnum == null) {
+				resultSyntaxHighlighterClass = "brush: plain";
+			} else {
+				switch (ctEnum) {
+				case JSON:
+					resultSyntaxHighlighterClass = "brush: jscript";
+					if (returnsResource) {
+						narrativeString = parseNarrative(ctEnum, resultBody);
+					}
+					break;
+				case XML:
+				default:
+					resultSyntaxHighlighterClass = "brush: xml";
+					if (returnsResource) {
+						narrativeString = parseNarrative(ctEnum, resultBody);
+					}
+					break;
+				}
+			}
+
+			WebContext ctx = new WebContext(theReq, theResp, theReq.getServletContext(), theReq.getLocale());
+			ctx.setVariable("base", myServerBase);
+			ctx.setVariable("requestUrl", requestUrl);
+			ctx.setVariable("action", action);
+			ctx.setVariable("resultStatus", resultStatus);
+			ctx.setVariable("requestBody", StringEscapeUtils.escapeHtml4(requestBody));
+			ctx.setVariable("requestSyntaxHighlighterClass", requestSyntaxHighlighterClass);
+			ctx.setVariable("resultBody", StringEscapeUtils.escapeHtml4(resultBody));
+			ctx.setVariable("resultSyntaxHighlighterClass", resultSyntaxHighlighterClass);
+			ctx.setVariable("requestHeaders", lastRequest.getAllHeaders());
+			ctx.setVariable("responseHeaders", lastResponse.getAllHeaders());
+			ctx.setVariable("narrative", narrativeString);
+
+			myTemplateEngine.process(PUBLIC_TESTER_RESULT_HTML, ctx, theResp.getWriter());
+		} catch (Exception e) {
+			ourLog.error("Failure during processing", e);
+			theResp.sendError(500, e.toString());
+		}
+	}
+
+	private String parseNarrative(EncodingEnum theCtEnum, String theResultBody) {
+		try {
+			IResource resource = theCtEnum.newParser(myCtx).parseResource(theResultBody);
+			String retVal = resource.getText().getDiv().getValueAsString();
+			return StringUtils.defaultString(retVal);
+		} catch (Exception e) {
+			ourLog.error("Failed to parse resource", e);
+			return "";
+		}
+	}
+
 	private interface ConformanceClient extends IBasicClient {
 		@Metadata
 		Conformance getConformance();
 	}
-
-	@Override
-	public void init(ServletConfig theConfig) throws ServletException {
-		myTemplateEngine = new TemplateEngine();
-		TemplateResolver resolver = new TemplateResolver();
-		resolver.setResourceResolver(new ProfileResourceResolver());
-		myTemplateEngine.setTemplateResolver(resolver);
-		StandardDialect dialect = new StandardDialect();
-		myTemplateEngine.setDialect(dialect);
-		myTemplateEngine.initialize();
-	}
-
-	private static final String PUBLIC_TESTER_RESULT_HTML = "/PublicTesterResult.html";
 
 	private final class ProfileResourceResolver implements IResourceResolver {
 
@@ -283,12 +452,6 @@ public class PublicTesterServlet extends HttpServlet {
 
 			return null;
 		}
-	}
-
-	private void streamResponse(String theResourceName, String theContentType, HttpServletResponse theResp) throws IOException {
-		InputStream res = PublicTesterServlet.class.getResourceAsStream("/ca/uhn/fhir/rest/server/tester/" + theResourceName);
-		theResp.setContentType(theContentType);
-		IOUtils.copy(res, theResp.getOutputStream());
 	}
 
 }

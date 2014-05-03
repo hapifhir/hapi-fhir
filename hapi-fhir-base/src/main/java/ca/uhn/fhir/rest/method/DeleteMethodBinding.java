@@ -105,11 +105,11 @@ public class DeleteMethodBinding extends BaseOutcomeReturningMethodBinding {
 	}
 
 	@Override
-	protected BaseClientInvocation createClientInvocation(Object[] theArgs, IResource resource, String resourceName) {
+	protected BaseClientInvocation createClientInvocation(Object[] theArgs, IResource theResource) {
 		StringBuilder urlExtension = new StringBuilder();
-		urlExtension.append(resourceName);
+		urlExtension.append(getContext().getResourceDefinition(theResource).getName());
 
-		return new PostClientInvocation(getContext(), resource, urlExtension.toString());
+		return new PostClientInvocation(getContext(), theResource, urlExtension.toString());
 	}
 
 	@Override
@@ -129,23 +129,22 @@ public class DeleteMethodBinding extends BaseOutcomeReturningMethodBinding {
 		if (idDt == null) {
 			throw new NullPointerException("ID can not be null");
 		}
+		String resourceName = getResourceName();
+		
+		DeleteClientInvocation retVal = createDeleteInvocation(resourceName, idDt);
+
+		return retVal;
+	}
+
+	public static DeleteClientInvocation createDeleteInvocation(String theResourceName, IdDt idDt) {
 		String id = idDt.getValue();
-
-		DeleteClientInvocation retVal = new DeleteClientInvocation(getResourceName(), id);
-
+		DeleteClientInvocation retVal = new DeleteClientInvocation(theResourceName, id);
 		return retVal;
 	}
 
 	@Override
 	protected void addParametersForServerRequest(Request theRequest, Object[] theParams) {
-		String url = theRequest.getCompleteUrl();
-		int resNameIdx = url.indexOf(getResourceName());
-		String id = url.substring(resNameIdx+getResourceName().length() + 1);
-		if (id.contains("/")) {
-			throw new InvalidRequestException("Invalid request path for a DELETE operation: "+theRequest.getCompleteUrl());
-		}
-		
-		theParams[myIdParameterIndex] = new IdDt(id);
+		theParams[myIdParameterIndex] = theRequest.getId();
 	}
 
 

@@ -103,7 +103,7 @@
 						<td>
 							<a href="#instance_update">Type - Search</a>
 							<macro name="toc">
-								<param name="section" value="7" />
+								<param name="section" value="8" />
 								<param name="fromDepth" value="2" />
 							</macro>
 						</td>
@@ -451,7 +451,7 @@
 				</p>
 
 			</subsection>
-			<subsection name="Search with a String Parameter">
+			<subsection name="Search Parameters: Introduction (String)">
 
 				<p>
 					To allow a search using given search parameters, add one or more parameters
@@ -482,12 +482,18 @@
 				</p>
 
 			</subsection>
-			<subsection name="Search By Identifier">
+			<subsection name="Search Parameters: Token/Identifier">
 
 				<p>
 					Searches method parameters may be of any type that implements the
 					<a href="./apidocs/ca/uhn/fhir/model/api/IQueryParameterType.html">IQueryParameterType</a>
-					interface. For example, the search below can be used to search by
+					interface.
+				</p>
+				<p>
+				 	The "token" type is used for parameters which have two parts, such as
+				 	an idnetifier (which has a system URI, as well as the actual identifier)
+				 	or a code (which has a code system, as well as the actual code).
+				 	For example, the search below can be used to search by
 					identifier (e.g. search for an MRN).
 				</p>
 
@@ -503,11 +509,122 @@
 				</p>
 
 			</subsection>
-			<subsection name="Multiple Parameters">
+			
+			<subsection name="Search Parameters: Date (Simple)">
+
+				<p>
+					The FHIR specification provides a sytax for specifying
+					dates (and date/times as well, but for simplicity we will just say dates here)
+					as search criteria.
+				</p>
+
+				<p>
+					Dates may be optionally prefixed with a qualifier. For example, the
+					string
+					<code>&gt;=2011-01-02</code>
+					means any date on or after 2011-01-02.
+				</p>
+
+				<p>
+					To accept a qualified date parameter, use the
+					QualifiedDateParam
+					parameter type.
+				</p>
+
+				<macro name="snippet">
+					<param name="id" value="dates" />
+					<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
+				</macro>
+
+				<p>
+					Example URL to invoke this method:
+					<br />
+					<code>http://fhir.example.com/Observation?birthdate=&gt;=2011-01-02</code>
+				</p>
+
+				<p>
+					Invoking a client of thie type involves the following syntax:
+				</p>
+
+				<macro name="snippet">
+					<param name="id" value="dateClient" />
+					<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
+				</macro>
+
+			</subsection>
+
+			<a name="DATE_RANGES" />
+			<subsection name="Search Parameters: Date (Ranges)">
+
+				<p>
+					A common scenario in searches is to allow searching for resources
+					with values (i.e timestamps) within a range of dates.
+				</p>
+
+				<p>
+					FHIR allows for multiple parameters with the same key, and interprets
+					these as being an "AND" set. So, for example, a range of
+					<br />
+					<code>DATE &gt;= 2011-01-01</code>
+					and
+					<code>DATE &lt; 2011-02-01</code>
+					<br />
+					can be interpreted as any date within January 2011.
+				</p>
+
+				<p>
+					The following snippet shows how to accept such a range, and combines it
+					with a specific identifier, which is a common scenario. (i.e. Give me a list
+					of observations for a
+					specific patient within a given date range)
+				</p>
+				<macro name="snippet">
+					<param name="id" value="dateRange" />
+					<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
+				</macro>
+
+				<p>
+					Example URL to invoke this method:
+					<br />
+					<code>http://fhir.example.com/Observation?subject.identifier=7000135&amp;date=&gt;=2011-01-01&amp;date=&lt;2011-02-01</code>
+				</p>
+
+				<p>
+					Invoking a client of this type involves the following syntax:
+				</p>
+
+				<macro name="snippet">
+					<param name="id" value="dateClient" />
+					<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
+				</macro>
+				
+				<h4>Unbounded Ranges</h4>
+				
+				<p>
+					Note that when using a date range parameter, it is also possible for
+					the client to request an "unbounded" range. In other words, a range that
+					only a start date and no end date, or vice versa.
+				</p>
+				
+				<p>
+					An example of this might be the following URL, which refers to any Observation
+					resources for the given MRN and having a date after 2011-01-01.
+					<br/>
+					<code>http://fhir.example.com/Observation?subject.identifier=7000135&amp;date=&gt;=2011-01-01</code><br/>
+					When such a request is made of a server (or to make such a request from a client),
+					the <code>getLowerBound()</code> or <code>getUpperBound()</code> property of the
+					<code>DateRangeParam</code> object will be set to <code>null</code>.
+				</p>
+
+			</subsection>
+			
+			<subsection name="Combining Multiple Parameters">
 
 				<p>
 					Search methods may take multiple parameters, and these parameters
-					may be optional. To add a second required parameter, annotate the
+					may (or may not) be optional. 
+					aaaa
+					To add a second required parameter, annotate the
 					parameter with
 					<a href="./apidocs/ca/uhn/fhir/rest/server/parameters/RequiredParam.html">@RequiredParam</a>
 					.
@@ -611,96 +728,6 @@
 					for
 					one example of an AND parameter.
 				</p>
-
-			</subsection>
-
-			<subsection name="Date Parameters - Simple">
-
-				<p>
-					The FHIR specification provides a sytax for specifying
-					dates (and date/times as well, but for simplicity we will just say dates here)
-					as search criteria.
-				</p>
-
-				<p>
-					Dates may be optionally prefixed with a qualifier. For example, the
-					string
-					<code>&gt;=2011-01-02</code>
-					means any date on or after 2011-01-02.
-				</p>
-
-				<p>
-					To accept a qualified date parameter, use the
-					QualifiedDateParam
-					parameter type.
-				</p>
-
-				<macro name="snippet">
-					<param name="id" value="dates" />
-					<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
-				</macro>
-
-				<p>
-					Example URL to invoke this method:
-					<br />
-					<code>http://fhir.example.com/Observation?birthdate=&gt;=2011-01-02</code>
-				</p>
-
-				<p>
-					Invoking a client of thie type involves the following syntax:
-				</p>
-
-				<macro name="snippet">
-					<param name="id" value="dateClient" />
-					<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
-				</macro>
-
-			</subsection>
-
-			<a name="DATE_RANGES" />
-			<subsection name="Date Parameters - Ranges">
-
-				<p>
-					A common scenario in searches is to allow searching for resources
-					with values (i.e timestamps) within a range of dates.
-				</p>
-
-				<p>
-					FHIR allows for multiple parameters with the same key, and interprets
-					these as being an "AND" set. So, for example, a range of
-					<br />
-					<code>DATE &gt;= 2011-01-01</code>
-					and
-					<code>DATE &lt; 2011-02-01</code>
-					<br />
-					can be interpreted as any date within January 2011.
-				</p>
-
-				<p>
-					The following snippet shows how to accept such a range, and combines it
-					with a specific identifier, which is a common scenario. (i.e. Give me a list
-					of observations for a
-					specific patient within a given date range)
-				</p>
-				<macro name="snippet">
-					<param name="id" value="dateRange" />
-					<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
-				</macro>
-
-				<p>
-					Example URL to invoke this method:
-					<br />
-					<code>http://fhir.example.com/Observation?subject.identifier=7000135&amp;date=&gt;=2011-01-01&amp;date=&lt;2011-02-01</code>
-				</p>
-
-				<p>
-					Invoking a client of this type involves the following syntax:
-				</p>
-
-				<macro name="snippet">
-					<param name="id" value="dateClient" />
-					<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
-				</macro>
 
 			</subsection>
 

@@ -79,34 +79,6 @@ public class ClientTest {
 		httpResponse = mock(HttpResponse.class, new ReturnsDeepStubs());
 	}
 
-	private String getPatientFeedWithOneResult() {
-		//@formatter:off
-		String msg = "<feed xmlns=\"http://www.w3.org/2005/Atom\">\n" + 
-				"<title/>\n" + 
-				"<id>d039f91a-cc3c-4013-988e-af4d8d0614bd</id>\n" + 
-				"<os:totalResults xmlns:os=\"http://a9.com/-/spec/opensearch/1.1/\">1</os:totalResults>\n" + 
-				"<published>2014-03-11T16:35:07-04:00</published>\n" + 
-				"<author>\n" + 
-				"<name>ca.uhn.fhir.rest.server.DummyRestfulServer</name>\n" + 
-				"</author>\n" + 
-				"<entry>\n" + 
-				"<content type=\"text/xml\">" 
-				+ "<Patient xmlns=\"http://hl7.org/fhir\">" 
-				+ "<text><status value=\"generated\" /><div xmlns=\"http://www.w3.org/1999/xhtml\">John Cardinal:            444333333        </div></text>"
-				+ "<identifier><label value=\"SSN\" /><system value=\"http://orionhealth.com/mrn\" /><value value=\"PRP1660\" /></identifier>"
-				+ "<name><use value=\"official\" /><family value=\"Cardinal\" /><given value=\"John\" /></name>"
-				+ "<name><family value=\"Kramer\" /><given value=\"Doe\" /></name>"
-				+ "<telecom><system value=\"phone\" /><value value=\"555-555-2004\" /><use value=\"work\" /></telecom>"
-				+ "<gender><coding><system value=\"http://hl7.org/fhir/v3/AdministrativeGender\" /><code value=\"M\" /></coding></gender>"
-				+ "<address><use value=\"home\" /><line value=\"2222 Home Street\" /></address><active value=\"true\" />"
-				+ "</Patient>"
-				+ "</content>\n"  
-				+ "   </entry>\n"  
-				+ "</feed>";
-		//@formatter:on
-		return msg;
-	}
-
 	@Test
 	public void testCreate() throws Exception {
 
@@ -209,8 +181,27 @@ public class ClientTest {
 	@Test
 	public void testHistoryResourceInstance() throws Exception {
 
+		InstantDt date1 = new InstantDt(new Date(20000L));
+		InstantDt date2 = new InstantDt(new Date(10000L));
+		InstantDt date3 = new InstantDt(new Date(30000L));
+		InstantDt date4 = new InstantDt(new Date(10000L));
+
 		//@formatter:off
-		String msg = "<feed xmlns=\"http://www.w3.org/2005/Atom\"><title/><id>6c1d93be-027f-468d-9d47-f826cd15cf42</id><link rel=\"self\" href=\"http://localhost:51698/Patient/222/_history\"/><link rel=\"fhir-base\" href=\"http://localhost:51698\"/><os:totalResults xmlns:os=\"http://a9.com/-/spec/opensearch/1.1/\">2</os:totalResults><published>2014-04-13T18:24:50-04:00</published><author><name>ca.uhn.fhir.rest.method.HistoryMethodBinding</name></author><entry><title>Patient 222</title><id>222</id><updated>1969-12-31T19:00:20.000-05:00</updated><published>1969-12-31T19:00:10.000-05:00</published><link rel=\"self\" href=\"http://localhost:51698/Patient/222/_history/1\"/><content type=\"text/xml\"><Patient xmlns=\"http://hl7.org/fhir\"><identifier><use value=\"official\"/><system value=\"urn:hapitest:mrns\"/><value value=\"00001\"/></identifier><name><family value=\"OlderFamily\"/><given value=\"PatientOne\"/></name><gender><text value=\"M\"/></gender></Patient></content></entry><entry><title>Patient 222</title><id>222</id><updated>1969-12-31T19:00:30.000-05:00</updated><published>1969-12-31T19:00:10.000-05:00</published><link rel=\"self\" href=\"http://localhost:51698/Patient/222/_history/2\"/><content type=\"text/xml\"><Patient xmlns=\"http://hl7.org/fhir\"><identifier><use value=\"official\"/><system value=\"urn:hapitest:mrns\"/><value value=\"00001\"/></identifier><name><family value=\"NewerFamily\"/><given value=\"PatientOne\"/></name><gender><text value=\"M\"/></gender></Patient></content></entry></feed>";
+		String msg = "<feed xmlns=\"http://www.w3.org/2005/Atom\"><title/><id>6c1d93be-027f-468d-9d47-f826cd15cf42</id>"
+				+ "<link rel=\"self\" href=\"http://localhost:51698/Patient/222/_history\"/>"
+				+ "<link rel=\"fhir-base\" href=\"http://localhost:51698\"/><os:totalResults xmlns:os=\"http://a9.com/-/spec/opensearch/1.1/\">2</os:totalResults>"
+				+ "<published>2014-04-13T18:24:50-04:00</published>"
+				+ "<author><name>ca.uhn.fhir.rest.method.HistoryMethodBinding</name></author>"
+				+ "<entry><title>Patient 222</title><id>222</id>"
+				+ "<updated>"+date1.getValueAsString()+"</updated>"
+				+ "<published>"+date2.getValueAsString()+"</published>"
+				+ "<link rel=\"self\" href=\"http://localhost:51698/Patient/222/_history/1\"/>"
+				+ "<content type=\"text/xml\"><Patient xmlns=\"http://hl7.org/fhir\"><identifier><use value=\"official\"/><system value=\"urn:hapitest:mrns\"/><value value=\"00001\"/></identifier><name><family value=\"OlderFamily\"/><given value=\"PatientOne\"/></name><gender><text value=\"M\"/></gender></Patient></content>"
+				+ "</entry>"
+				+ "<entry><title>Patient 222</title><id>222</id>"
+				+ "<updated>"+date3.getValueAsString()+"</updated>"
+				+ "<published>"+date4.getValueAsString()+"</published>"
+				+ "<link rel=\"self\" href=\"http://localhost:51698/Patient/222/_history/2\"/><content type=\"text/xml\"><Patient xmlns=\"http://hl7.org/fhir\"><identifier><use value=\"official\"/><system value=\"urn:hapitest:mrns\"/><value value=\"00001\"/></identifier><name><family value=\"NewerFamily\"/><given value=\"PatientOne\"/></name><gender><text value=\"M\"/></gender></Patient></content></entry></feed>";
 		//@formatter:on
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
@@ -260,55 +251,30 @@ public class ClientTest {
 		}
 	}
 
-	
-	@Test
-	public void testHistoryWithParams() throws Exception {
-
-		//@formatter:off
-		final String msg = "<feed xmlns=\"http://www.w3.org/2005/Atom\"><title/><id>6c1d93be-027f-468d-9d47-f826cd15cf42</id><link rel=\"self\" href=\"http://localhost:51698/Patient/222/_history\"/><link rel=\"fhir-base\" href=\"http://localhost:51698\"/><os:totalResults xmlns:os=\"http://a9.com/-/spec/opensearch/1.1/\">2</os:totalResults><published>2014-04-13T18:24:50-04:00</published><author><name>ca.uhn.fhir.rest.method.HistoryMethodBinding</name></author><entry><title>Patient 222</title><id>222</id><updated>1969-12-31T19:00:20.000-05:00</updated><published>1969-12-31T19:00:10.000-05:00</published><link rel=\"self\" href=\"http://localhost:51698/Patient/222/_history/1\"/><content type=\"text/xml\"><Patient xmlns=\"http://hl7.org/fhir\"><identifier><use value=\"official\"/><system value=\"urn:hapitest:mrns\"/><value value=\"00001\"/></identifier><name><family value=\"OlderFamily\"/><given value=\"PatientOne\"/></name><gender><text value=\"M\"/></gender></Patient></content></entry><entry><title>Patient 222</title><id>222</id><updated>1969-12-31T19:00:30.000-05:00</updated><published>1969-12-31T19:00:10.000-05:00</published><link rel=\"self\" href=\"http://localhost:51698/Patient/222/_history/2\"/><content type=\"text/xml\"><Patient xmlns=\"http://hl7.org/fhir\"><identifier><use value=\"official\"/><system value=\"urn:hapitest:mrns\"/><value value=\"00001\"/></identifier><name><family value=\"NewerFamily\"/><given value=\"PatientOne\"/></name><gender><text value=\"M\"/></gender></Patient></content></entry></feed>";
-		//@formatter:on
-
-		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
-		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
-		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_ATOM_XML + "; charset=UTF-8"));
-		when(httpResponse.getEntity().getContent()).thenAnswer(new Answer<InputStream>() {
-			@Override
-			public InputStream answer(InvocationOnMock theInvocation) throws Throwable {
-				return new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8"));
-			}
-		});
-		
-		
-		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
-		
-		client.getHistoryPatientInstance(new IdDt("111"), new InstantDt("2012-01-02T00:01:02"), new IntegerDt(12));
-		assertEquals("http://foo/Patient/111/_history?_since=2012-01-02T00%3A01%3A02&_count=12", capt.getAllValues().get(0).getURI().toString());
-
-		String expectedDateString= new InstantDt(new InstantDt("2012-01-02T00:01:02").getValue()).getValueAsString(); // ensures the local timezone
-		expectedDateString=expectedDateString.replace(":", "%3A");
-		client.getHistoryPatientInstance(new IdDt("111"), new InstantDt("2012-01-02T00:01:02").getValue(), new IntegerDt(12).getValue());
-		assertEquals("http://foo/Patient/111/_history?_since="+expectedDateString+"&_count=12", capt.getAllValues().get(1).getURI().toString());
-
-		client.getHistoryPatientInstance(new IdDt("111"), null, new IntegerDt(12));
-		assertEquals("http://foo/Patient/111/_history?_count=12", capt.getAllValues().get(2).getURI().toString());
-
-		client.getHistoryPatientInstance(new IdDt("111"), new InstantDt("2012-01-02T00:01:02"), null);
-		assertEquals("http://foo/Patient/111/_history?_since=2012-01-02T00%3A01%3A02", capt.getAllValues().get(3).getURI().toString());
-
-		client.getHistoryPatientInstance(new IdDt("111"), new InstantDt(), new IntegerDt(12));
-		assertEquals("http://foo/Patient/111/_history?_count=12", capt.getAllValues().get(2).getURI().toString());
-
-		client.getHistoryPatientInstance(new IdDt("111"), new InstantDt("2012-01-02T00:01:02"), new IntegerDt());
-		assertEquals("http://foo/Patient/111/_history?_since=2012-01-02T00%3A01%3A02", capt.getAllValues().get(3).getURI().toString());
-
-	}
-	
 	@Test
 	public void testHistoryResourceType() throws Exception {
 
+		InstantDt date1 = new InstantDt(new Date(20000L));
+		InstantDt date2 = new InstantDt(new Date(10000L));
+		InstantDt date3 = new InstantDt(new Date(30000L));
+		InstantDt date4 = new InstantDt(new Date(10000L));
+
 		//@formatter:off
-		String msg = "<feed xmlns=\"http://www.w3.org/2005/Atom\"><title/><id>6c1d93be-027f-468d-9d47-f826cd15cf42</id><link rel=\"self\" href=\"http://localhost:51698/Patient/222/_history\"/><link rel=\"fhir-base\" href=\"http://localhost:51698\"/><os:totalResults xmlns:os=\"http://a9.com/-/spec/opensearch/1.1/\">2</os:totalResults><published>2014-04-13T18:24:50-04:00</published><author><name>ca.uhn.fhir.rest.method.HistoryMethodBinding</name></author><entry><title>Patient 222</title><id>222</id><updated>1969-12-31T19:00:20.000-05:00</updated><published>1969-12-31T19:00:10.000-05:00</published><link rel=\"self\" href=\"http://localhost:51698/Patient/222/_history/1\"/><content type=\"text/xml\"><Patient xmlns=\"http://hl7.org/fhir\"><identifier><use value=\"official\"/><system value=\"urn:hapitest:mrns\"/><value value=\"00001\"/></identifier><name><family value=\"OlderFamily\"/><given value=\"PatientOne\"/></name><gender><text value=\"M\"/></gender></Patient></content></entry><entry><title>Patient 222</title><id>222</id><updated>1969-12-31T19:00:30.000-05:00</updated><published>1969-12-31T19:00:10.000-05:00</published><link rel=\"self\" href=\"http://localhost:51698/Patient/222/_history/2\"/><content type=\"text/xml\"><Patient xmlns=\"http://hl7.org/fhir\"><identifier><use value=\"official\"/><system value=\"urn:hapitest:mrns\"/><value value=\"00001\"/></identifier><name><family value=\"NewerFamily\"/><given value=\"PatientOne\"/></name><gender><text value=\"M\"/></gender></Patient></content></entry></feed>";
+		String msg = "<feed xmlns=\"http://www.w3.org/2005/Atom\"><title/><id>6c1d93be-027f-468d-9d47-f826cd15cf42</id>"
+				+ "<link rel=\"self\" href=\"http://localhost:51698/Patient/222/_history\"/>"
+				+ "<link rel=\"fhir-base\" href=\"http://localhost:51698\"/><os:totalResults xmlns:os=\"http://a9.com/-/spec/opensearch/1.1/\">2</os:totalResults>"
+				+ "<published>2014-04-13T18:24:50-04:00</published>"
+				+ "<author><name>ca.uhn.fhir.rest.method.HistoryMethodBinding</name></author>"
+				+ "<entry><title>Patient 222</title><id>222</id>"
+				+ "<updated>"+date1.getValueAsString()+"</updated>"
+				+ "<published>"+date2.getValueAsString()+"</published>"
+				+ "<link rel=\"self\" href=\"http://localhost:51698/Patient/222/_history/1\"/>"
+				+ "<content type=\"text/xml\"><Patient xmlns=\"http://hl7.org/fhir\"><identifier><use value=\"official\"/><system value=\"urn:hapitest:mrns\"/><value value=\"00001\"/></identifier><name><family value=\"OlderFamily\"/><given value=\"PatientOne\"/></name><gender><text value=\"M\"/></gender></Patient></content>"
+				+ "</entry>"
+				+ "<entry><title>Patient 222</title><id>222</id>"
+				+ "<updated>"+date3.getValueAsString()+"</updated>"
+				+ "<published>"+date4.getValueAsString()+"</published>"
+				+ "<link rel=\"self\" href=\"http://localhost:51698/Patient/222/_history/2\"/><content type=\"text/xml\"><Patient xmlns=\"http://hl7.org/fhir\"><identifier><use value=\"official\"/><system value=\"urn:hapitest:mrns\"/><value value=\"00001\"/></identifier><name><family value=\"NewerFamily\"/><given value=\"PatientOne\"/></name><gender><text value=\"M\"/></gender></Patient></content></entry></feed>";
 		//@formatter:on
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
@@ -358,11 +324,30 @@ public class ClientTest {
 		}
 	}
 
+	
 	@Test
 	public void testHistoryServer() throws Exception {
+		InstantDt date1 = new InstantDt(new Date(20000L));
+		InstantDt date2 = new InstantDt(new Date(10000L));
+		InstantDt date3 = new InstantDt(new Date(30000L));
+		InstantDt date4 = new InstantDt(new Date(10000L));
 
 		//@formatter:off
-		String msg = "<feed xmlns=\"http://www.w3.org/2005/Atom\"><title/><id>6c1d93be-027f-468d-9d47-f826cd15cf42</id><link rel=\"self\" href=\"http://localhost:51698/Patient/222/_history\"/><link rel=\"fhir-base\" href=\"http://localhost:51698\"/><os:totalResults xmlns:os=\"http://a9.com/-/spec/opensearch/1.1/\">2</os:totalResults><published>2014-04-13T18:24:50-04:00</published><author><name>ca.uhn.fhir.rest.method.HistoryMethodBinding</name></author><entry><title>Patient 222</title><id>222</id><updated>1969-12-31T19:00:20.000-05:00</updated><published>1969-12-31T19:00:10.000-05:00</published><link rel=\"self\" href=\"http://localhost:51698/Patient/222/_history/1\"/><content type=\"text/xml\"><Patient xmlns=\"http://hl7.org/fhir\"><identifier><use value=\"official\"/><system value=\"urn:hapitest:mrns\"/><value value=\"00001\"/></identifier><name><family value=\"OlderFamily\"/><given value=\"PatientOne\"/></name><gender><text value=\"M\"/></gender></Patient></content></entry><entry><title>Patient 222</title><id>222</id><updated>1969-12-31T19:00:30.000-05:00</updated><published>1969-12-31T19:00:10.000-05:00</published><link rel=\"self\" href=\"http://localhost:51698/Patient/222/_history/2\"/><content type=\"text/xml\"><Patient xmlns=\"http://hl7.org/fhir\"><identifier><use value=\"official\"/><system value=\"urn:hapitest:mrns\"/><value value=\"00001\"/></identifier><name><family value=\"NewerFamily\"/><given value=\"PatientOne\"/></name><gender><text value=\"M\"/></gender></Patient></content></entry></feed>";
+		String msg = "<feed xmlns=\"http://www.w3.org/2005/Atom\"><title/><id>6c1d93be-027f-468d-9d47-f826cd15cf42</id>"
+				+ "<link rel=\"self\" href=\"http://localhost:51698/Patient/222/_history\"/>"
+				+ "<link rel=\"fhir-base\" href=\"http://localhost:51698\"/><os:totalResults xmlns:os=\"http://a9.com/-/spec/opensearch/1.1/\">2</os:totalResults>"
+				+ "<published>2014-04-13T18:24:50-04:00</published>"
+				+ "<author><name>ca.uhn.fhir.rest.method.HistoryMethodBinding</name></author>"
+				+ "<entry><title>Patient 222</title><id>222</id>"
+				+ "<updated>"+date1.getValueAsString()+"</updated>"
+				+ "<published>"+date2.getValueAsString()+"</published>"
+				+ "<link rel=\"self\" href=\"http://localhost:51698/Patient/222/_history/1\"/>"
+				+ "<content type=\"text/xml\"><Patient xmlns=\"http://hl7.org/fhir\"><identifier><use value=\"official\"/><system value=\"urn:hapitest:mrns\"/><value value=\"00001\"/></identifier><name><family value=\"OlderFamily\"/><given value=\"PatientOne\"/></name><gender><text value=\"M\"/></gender></Patient></content>"
+				+ "</entry>"
+				+ "<entry><title>Patient 222</title><id>222</id>"
+				+ "<updated>"+date3.getValueAsString()+"</updated>"
+				+ "<published>"+date4.getValueAsString()+"</published>"
+				+ "<link rel=\"self\" href=\"http://localhost:51698/Patient/222/_history/2\"/><content type=\"text/xml\"><Patient xmlns=\"http://hl7.org/fhir\"><identifier><use value=\"official\"/><system value=\"urn:hapitest:mrns\"/><value value=\"00001\"/></identifier><name><family value=\"NewerFamily\"/><given value=\"PatientOne\"/></name><gender><text value=\"M\"/></gender></Patient></content></entry></feed>";
 		//@formatter:on
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
@@ -410,6 +395,49 @@ public class ClientTest {
 			assertEquals(updExpected.getValueAsString(), updActualRes.getValueAsString());
 			assertEquals(updExpected.getValueAsString(), updActualBundle.getValueAsString());
 		}
+	}
+	
+	@Test
+	public void testHistoryWithParams() throws Exception {
+
+		//@formatter:off
+		final String msg = "<feed xmlns=\"http://www.w3.org/2005/Atom\"><title/><id>6c1d93be-027f-468d-9d47-f826cd15cf42</id><link rel=\"self\" href=\"http://localhost:51698/Patient/222/_history\"/><link rel=\"fhir-base\" href=\"http://localhost:51698\"/><os:totalResults xmlns:os=\"http://a9.com/-/spec/opensearch/1.1/\">2</os:totalResults><published>2014-04-13T18:24:50-04:00</published><author><name>ca.uhn.fhir.rest.method.HistoryMethodBinding</name></author><entry><title>Patient 222</title><id>222</id><updated>1969-12-31T19:00:20.000-05:00</updated><published>1969-12-31T19:00:10.000-05:00</published><link rel=\"self\" href=\"http://localhost:51698/Patient/222/_history/1\"/><content type=\"text/xml\"><Patient xmlns=\"http://hl7.org/fhir\"><identifier><use value=\"official\"/><system value=\"urn:hapitest:mrns\"/><value value=\"00001\"/></identifier><name><family value=\"OlderFamily\"/><given value=\"PatientOne\"/></name><gender><text value=\"M\"/></gender></Patient></content></entry><entry><title>Patient 222</title><id>222</id><updated>1969-12-31T19:00:30.000-05:00</updated><published>1969-12-31T19:00:10.000-05:00</published><link rel=\"self\" href=\"http://localhost:51698/Patient/222/_history/2\"/><content type=\"text/xml\"><Patient xmlns=\"http://hl7.org/fhir\"><identifier><use value=\"official\"/><system value=\"urn:hapitest:mrns\"/><value value=\"00001\"/></identifier><name><family value=\"NewerFamily\"/><given value=\"PatientOne\"/></name><gender><text value=\"M\"/></gender></Patient></content></entry></feed>";
+		//@formatter:on
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
+		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_ATOM_XML + "; charset=UTF-8"));
+		when(httpResponse.getEntity().getContent()).thenAnswer(new Answer<InputStream>() {
+			@Override
+			public InputStream answer(InvocationOnMock theInvocation) throws Throwable {
+				return new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8"));
+			}
+		});
+		
+		
+		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
+		
+		client.getHistoryPatientInstance(new IdDt("111"), new InstantDt("2012-01-02T00:01:02"), new IntegerDt(12));
+		assertEquals("http://foo/Patient/111/_history?_since=2012-01-02T00%3A01%3A02&_count=12", capt.getAllValues().get(0).getURI().toString());
+
+		String expectedDateString= new InstantDt(new InstantDt("2012-01-02T00:01:02").getValue()).getValueAsString(); // ensures the local timezone
+		expectedDateString=expectedDateString.replace(":", "%3A");
+		client.getHistoryPatientInstance(new IdDt("111"), new InstantDt("2012-01-02T00:01:02").getValue(), new IntegerDt(12).getValue());
+		assertEquals("http://foo/Patient/111/_history?_since="+expectedDateString+"&_count=12", capt.getAllValues().get(1).getURI().toString());
+
+		client.getHistoryPatientInstance(new IdDt("111"), null, new IntegerDt(12));
+		assertEquals("http://foo/Patient/111/_history?_count=12", capt.getAllValues().get(2).getURI().toString());
+
+		client.getHistoryPatientInstance(new IdDt("111"), new InstantDt("2012-01-02T00:01:02"), null);
+		assertEquals("http://foo/Patient/111/_history?_since=2012-01-02T00%3A01%3A02", capt.getAllValues().get(3).getURI().toString());
+
+		client.getHistoryPatientInstance(new IdDt("111"), new InstantDt(), new IntegerDt(12));
+		assertEquals("http://foo/Patient/111/_history?_count=12", capt.getAllValues().get(2).getURI().toString());
+
+		client.getHistoryPatientInstance(new IdDt("111"), new InstantDt("2012-01-02T00:01:02"), new IntegerDt());
+		assertEquals("http://foo/Patient/111/_history?_since=2012-01-02T00%3A01%3A02", capt.getAllValues().get(3).getURI().toString());
+
 	}
 
 	@Test
@@ -488,62 +516,6 @@ public class ClientTest {
 
 	}
 
-	
-	@Test
-	public void testSearchWithCustomType() throws Exception {
-
-		String msg = getPatientFeedWithOneResult();
-
-		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
-		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
-		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
-		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
-
-		ITestClientWithCustomType client = ctx.newRestfulClient(ITestClientWithCustomType.class, "http://foo");
-		CustomPatient response = client.getPatientByDob(new QualifiedDateParam(QuantityCompararatorEnum.GREATERTHAN_OR_EQUALS, "2011-01-02"));
-
-		assertEquals("http://foo/Patient?birthdate=%3E%3D2011-01-02", capt.getValue().getURI().toString());
-		assertEquals("PRP1660", response.getIdentifier().get(0).getValue().getValue());
-
-	}
-	
-	public interface ITestClientWithCustomType extends IBasicClient {
-		@Search()
-		public CustomPatient getPatientByDob(@RequiredParam(name=Patient.SP_BIRTHDATE) QualifiedDateParam theBirthDate);
-	}
-
-	@Test
-	public void testSearchWithCustomTypeList() throws Exception {
-
-		String msg = getPatientFeedWithOneResult();
-
-		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
-		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
-		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
-		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
-
-		ITestClientWithCustomTypeList client = ctx.newRestfulClient(ITestClientWithCustomTypeList.class, "http://foo");
-		List<CustomPatient> response = client.getPatientByDob(new QualifiedDateParam(QuantityCompararatorEnum.GREATERTHAN_OR_EQUALS, "2011-01-02"));
-
-		assertEquals("http://foo/Patient?birthdate=%3E%3D2011-01-02", capt.getValue().getURI().toString());
-		assertEquals("PRP1660", response.get(0).getIdentifier().get(0).getValue().getValue());
-
-	}
-	
-	public interface ITestClientWithCustomTypeList extends IBasicClient {
-		@Search()
-		public List<CustomPatient> getPatientByDob(@RequiredParam(name=Patient.SP_BIRTHDATE) QualifiedDateParam theBirthDate);
-	}
-
-	@ResourceDef(name="Patient")
-	public static class CustomPatient extends Patient
-	{
-		// nothing
-	}
-	
-	
 	@Test
 	public void testSearchByToken() throws Exception {
 
@@ -563,6 +535,7 @@ public class ClientTest {
 
 	}
 
+	
 	@Test
 	public void testSearchComposite() throws Exception {
 
@@ -583,7 +556,7 @@ public class ClientTest {
 		assertEquals("http://foo/Patient?ids=foo%7Cbar%2Cbaz%7Cboz", capt.getValue().getURI().toString());
 
 	}
-
+	
 	@Test
 	public void testSearchNamedQueryNoParams() throws Exception {
 
@@ -619,7 +592,46 @@ public class ClientTest {
 		assertEquals("http://foo/Patient?_query=someQueryOneParam&param1=BB", capt.getValue().getURI().toString());
 
 	}
+	
+	@Test
+	public void testSearchWithCustomType() throws Exception {
 
+		String msg = getPatientFeedWithOneResult();
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
+		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
+
+		ITestClientWithCustomType client = ctx.newRestfulClient(ITestClientWithCustomType.class, "http://foo");
+		CustomPatient response = client.getPatientByDob(new QualifiedDateParam(QuantityCompararatorEnum.GREATERTHAN_OR_EQUALS, "2011-01-02"));
+
+		assertEquals("http://foo/Patient?birthdate=%3E%3D2011-01-02", capt.getValue().getURI().toString());
+		assertEquals("PRP1660", response.getIdentifier().get(0).getValue().getValue());
+
+	}
+
+	@Test
+	public void testSearchWithCustomTypeList() throws Exception {
+
+		String msg = getPatientFeedWithOneResult();
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
+		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
+
+		ITestClientWithCustomTypeList client = ctx.newRestfulClient(ITestClientWithCustomTypeList.class, "http://foo");
+		List<CustomPatient> response = client.getPatientByDob(new QualifiedDateParam(QuantityCompararatorEnum.GREATERTHAN_OR_EQUALS, "2011-01-02"));
+
+		assertEquals("http://foo/Patient?birthdate=%3E%3D2011-01-02", capt.getValue().getURI().toString());
+		assertEquals("PRP1660", response.get(0).getIdentifier().get(0).getValue().getValue());
+
+	}
+	
+	
 	@Test
 	public void testSearchWithIncludes() throws Exception {
 
@@ -636,29 +648,6 @@ public class ClientTest {
 
 		assertEquals("http://foo/Patient?withIncludes=aaa&_include=inc1&_include=inc2", capt.getValue().getURI().toString());
 
-	}
-
-	@Test
-	public void testSearchWithStringIncludes() throws Exception {
-
-		String msg = getPatientFeedWithOneResult();
-
-		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
-		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
-		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
-		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
-
-		ITestClientWithStringIncludes client = ctx.newRestfulClient(ITestClientWithStringIncludes.class, "http://foo");
-		client.getPatientWithIncludes(new StringDt("aaa"), "inc1");
-
-		assertEquals("http://foo/Patient?withIncludes=aaa&_include=inc1", capt.getValue().getURI().toString());
-
-	}
-
-	public interface ITestClientWithStringIncludes extends IBasicClient {
-		@Search()
-		public Patient getPatientWithIncludes(@RequiredParam(name = "withIncludes") StringDt theString, @IncludeParam String theInclude);
 	}
 
 	@Test
@@ -690,6 +679,24 @@ public class ClientTest {
 		assertEquals("http://foo/Patient?family=AAA&given=BBB", capt.getValue().getURI().toString());
 		resource = (Patient) response.getEntries().get(0).getResource();
 		assertEquals("PRP1660", resource.getIdentifier().get(0).getValue().getValue());
+
+	}
+
+	@Test
+	public void testSearchWithStringIncludes() throws Exception {
+
+		String msg = getPatientFeedWithOneResult();
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
+		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
+
+		ITestClientWithStringIncludes client = ctx.newRestfulClient(ITestClientWithStringIncludes.class, "http://foo");
+		client.getPatientWithIncludes(new StringDt("aaa"), "inc1");
+
+		assertEquals("http://foo/Patient?withIncludes=aaa&_include=inc1", capt.getValue().getURI().toString());
 
 	}
 
@@ -779,6 +786,31 @@ public class ClientTest {
 	}
 
 	@Test
+	public void testValidate() throws Exception {
+
+		Patient patient = new Patient();
+		patient.addIdentifier("urn:foo", "123");
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
+		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 201, "OK"));
+		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_TEXT + "; charset=UTF-8"));
+		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(""), Charset.forName("UTF-8")));
+		when(httpResponse.getAllHeaders()).thenReturn(toHeaderArray("Location", "http://example.com/fhir/Patient/100/_history/200"));
+
+		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
+		MethodOutcome response = client.validatePatient(patient);
+
+		assertEquals(HttpPost.class, capt.getValue().getClass());
+		HttpPost post = (HttpPost) capt.getValue();
+		assertThat(post.getURI().toASCIIString(), StringEndsWith.endsWith("/Patient/_validate"));
+		assertThat(IOUtils.toString(post.getEntity().getContent()), StringContains.containsString("<Patient"));
+		assertEquals("100", response.getId().getValue());
+		assertEquals("200", response.getVersionId().getValue());
+
+	}
+
+	@Test
 	public void testVRead() throws Exception {
 
 		//@formatter:off
@@ -808,7 +840,56 @@ public class ClientTest {
 
 	}
 
+	private String getPatientFeedWithOneResult() {
+		//@formatter:off
+		String msg = "<feed xmlns=\"http://www.w3.org/2005/Atom\">\n" + 
+				"<title/>\n" + 
+				"<id>d039f91a-cc3c-4013-988e-af4d8d0614bd</id>\n" + 
+				"<os:totalResults xmlns:os=\"http://a9.com/-/spec/opensearch/1.1/\">1</os:totalResults>\n" + 
+				"<published>2014-03-11T16:35:07-04:00</published>\n" + 
+				"<author>\n" + 
+				"<name>ca.uhn.fhir.rest.server.DummyRestfulServer</name>\n" + 
+				"</author>\n" + 
+				"<entry>\n" + 
+				"<content type=\"text/xml\">" 
+				+ "<Patient xmlns=\"http://hl7.org/fhir\">" 
+				+ "<text><status value=\"generated\" /><div xmlns=\"http://www.w3.org/1999/xhtml\">John Cardinal:            444333333        </div></text>"
+				+ "<identifier><label value=\"SSN\" /><system value=\"http://orionhealth.com/mrn\" /><value value=\"PRP1660\" /></identifier>"
+				+ "<name><use value=\"official\" /><family value=\"Cardinal\" /><given value=\"John\" /></name>"
+				+ "<name><family value=\"Kramer\" /><given value=\"Doe\" /></name>"
+				+ "<telecom><system value=\"phone\" /><value value=\"555-555-2004\" /><use value=\"work\" /></telecom>"
+				+ "<gender><coding><system value=\"http://hl7.org/fhir/v3/AdministrativeGender\" /><code value=\"M\" /></coding></gender>"
+				+ "<address><use value=\"home\" /><line value=\"2222 Home Street\" /></address><active value=\"true\" />"
+				+ "</Patient>"
+				+ "</content>\n"  
+				+ "   </entry>\n"  
+				+ "</feed>";
+		//@formatter:on
+		return msg;
+	}
+
 	private Header[] toHeaderArray(String theName, String theValue) {
 		return new Header[] { new BasicHeader(theName, theValue) };
+	}
+
+	@ResourceDef(name="Patient")
+	public static class CustomPatient extends Patient
+	{
+		// nothing
+	}
+
+	public interface ITestClientWithCustomType extends IBasicClient {
+		@Search()
+		public CustomPatient getPatientByDob(@RequiredParam(name=Patient.SP_BIRTHDATE) QualifiedDateParam theBirthDate);
+	}
+
+	public interface ITestClientWithCustomTypeList extends IBasicClient {
+		@Search()
+		public List<CustomPatient> getPatientByDob(@RequiredParam(name=Patient.SP_BIRTHDATE) QualifiedDateParam theBirthDate);
+	}
+
+	public interface ITestClientWithStringIncludes extends IBasicClient {
+		@Search()
+		public Patient getPatientWithIncludes(@RequiredParam(name = "withIncludes") StringDt theString, @IncludeParam String theInclude);
 	}
 }

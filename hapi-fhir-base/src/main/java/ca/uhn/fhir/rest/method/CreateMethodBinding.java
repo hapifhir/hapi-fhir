@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.Set;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
@@ -55,11 +56,20 @@ public class CreateMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 	}
 
 	@Override
-	protected BaseClientInvocation createClientInvocation(Object[] theArgs, IResource resource, String resourceName) {
+	protected BaseClientInvocation createClientInvocation(Object[] theArgs, IResource resource) {
+		FhirContext context = getContext();
+
+		return createCreateInvocation(resource, context);
+	}
+
+	public static BaseClientInvocation createCreateInvocation(IResource resource, FhirContext context) {
+		RuntimeResourceDefinition def = context.getResourceDefinition(resource);
+		String resourceName = def.getName();
+
 		StringBuilder urlExtension = new StringBuilder();
 		urlExtension.append(resourceName);
 
-		return new PostClientInvocation(getContext(), resource, urlExtension.toString());
+		return new PostClientInvocation(context, resource, urlExtension.toString());
 	}
 
 	@Override

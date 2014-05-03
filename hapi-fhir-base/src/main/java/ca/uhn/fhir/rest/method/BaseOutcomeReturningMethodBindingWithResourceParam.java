@@ -20,26 +20,15 @@ package ca.uhn.fhir.rest.method;
  * #L%
  */
 
-import java.io.IOException;
-import java.io.Writer;
 import java.lang.reflect.Method;
-
-import javax.servlet.http.HttpServletResponse;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
-import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.BaseClientInvocation;
 import ca.uhn.fhir.rest.param.IParameter;
 import ca.uhn.fhir.rest.param.ResourceParameter;
-import ca.uhn.fhir.rest.server.Constants;
-import ca.uhn.fhir.rest.server.EncodingUtil;
-import ca.uhn.fhir.rest.server.RestfulServer;
-import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 
 abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOutcomeReturningMethodBinding {
@@ -91,10 +80,7 @@ abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOu
 			throw new NullPointerException("Resource can not be null");
 		}
 
-		RuntimeResourceDefinition def = getContext().getResourceDefinition(resource);
-		String resourceName = def.getName();
-
-		return createClientInvocation(theArgs, resource, resourceName);
+		return createClientInvocation(theArgs, resource);
 	}
 
 }

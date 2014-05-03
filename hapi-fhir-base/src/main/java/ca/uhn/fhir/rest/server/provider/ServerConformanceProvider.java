@@ -20,6 +20,8 @@ package ca.uhn.fhir.rest.server.provider;
  * #L%
  */
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -31,6 +33,7 @@ import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.dstu.resource.Conformance;
 import ca.uhn.fhir.model.dstu.resource.Conformance.Rest;
 import ca.uhn.fhir.model.dstu.resource.Conformance.RestResource;
+import ca.uhn.fhir.model.dstu.resource.Conformance.RestResourceOperation;
 import ca.uhn.fhir.model.dstu.resource.Conformance.RestResourceSearchParam;
 import ca.uhn.fhir.model.dstu.valueset.RestfulConformanceModeEnum;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
@@ -40,10 +43,8 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.annotation.Metadata;
 import ca.uhn.fhir.rest.method.BaseMethodBinding;
-import ca.uhn.fhir.rest.method.ReadMethodBinding;
 import ca.uhn.fhir.rest.method.SearchMethodBinding;
 import ca.uhn.fhir.rest.param.IParameter;
-import ca.uhn.fhir.rest.param.BaseQueryParameter;
 import ca.uhn.fhir.rest.param.SearchParameter;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.ResourceBinding;
@@ -155,7 +156,25 @@ public class ServerConformanceProvider {
 					}
 				}
 
+				Collections.sort(resource.getOperation(), new Comparator<RestResourceOperation>() {
+					@Override
+					public int compare(RestResourceOperation theO1, RestResourceOperation theO2) {
+						RestfulOperationTypeEnum o1 = theO1.getCode().getValueAsEnum();
+						RestfulOperationTypeEnum o2 = theO2.getCode().getValueAsEnum();
+						if (o1 == null && o2 == null) {
+							return 0;
+						}
+						if (o1 == null) {
+							return 1;
+						}
+						if (o2==null) {
+							return -1;
+						}
+						return o1.ordinal() - o2.ordinal();
+					}});
+								
 			}
+			
 
 		}
 

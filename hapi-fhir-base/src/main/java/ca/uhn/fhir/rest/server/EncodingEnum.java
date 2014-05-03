@@ -25,7 +25,7 @@ import java.util.HashMap;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 
-public enum EncodingUtil {
+public enum EncodingEnum {
 
 	XML(Constants.CT_FHIR_XML, Constants.CT_ATOM_XML, Constants.CT_XML) {
 		@Override
@@ -43,11 +43,11 @@ public enum EncodingUtil {
 	
 	;
 
-	private static HashMap<String, EncodingUtil> ourContentTypeToEncoding;
+	private static HashMap<String, EncodingEnum> ourContentTypeToEncoding;
 
 	static {
-		ourContentTypeToEncoding = new HashMap<String, EncodingUtil>();
-		for (EncodingUtil next: values()) {
+		ourContentTypeToEncoding = new HashMap<String, EncodingEnum>();
+		for (EncodingEnum next: values()) {
 			ourContentTypeToEncoding.put(next.getBundleContentType(), next);
 			ourContentTypeToEncoding.put(next.getResourceContentType(), next);
 			ourContentTypeToEncoding.put(next.getBrowserFriendlyBundleContentType(), next);
@@ -58,7 +58,7 @@ public enum EncodingUtil {
 	private String myBundleContentType;
 	private String myBrowserFriendlyContentType;
 	
-	EncodingUtil(String theResourceContentType, String theBundleContentType, String theBrowserFriendlyContentType) {
+	EncodingEnum(String theResourceContentType, String theBundleContentType, String theBrowserFriendlyContentType) {
 		myResourceContentType = theResourceContentType;
 		myBundleContentType = theBundleContentType;
 		myBrowserFriendlyContentType = theBrowserFriendlyContentType;
@@ -78,7 +78,7 @@ public enum EncodingUtil {
 		return myBrowserFriendlyContentType;
 	}
 
-	public static EncodingUtil forContentType(String theContentType) {
+	public static EncodingEnum forContentType(String theContentType) {
 		return ourContentTypeToEncoding.get(theContentType);
 	}
 

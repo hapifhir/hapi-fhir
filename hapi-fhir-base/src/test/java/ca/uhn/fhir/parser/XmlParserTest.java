@@ -60,7 +60,7 @@ public class XmlParserTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(XmlParserTest.class);
 
 	@Test
-	public void testEncodeBoundCode() throws IOException {
+	public void testEncodeBoundCode() {
 
 		Patient patient = new Patient();
 		patient.addAddress().setUse(AddressUseEnum.HOME);
@@ -73,7 +73,7 @@ public class XmlParserTest {
 	}
 
 	@Test
-	public void testEncodeExtensionWithResourceContent() throws IOException {
+	public void testEncodeExtensionWithResourceContent() {
 		IParser parser = new FhirContext().newXmlParser();
 		
 		Patient patient = new Patient();
@@ -94,7 +94,7 @@ public class XmlParserTest {
 	}
 
 	@Test
-	public void testEncodeDeclaredExtensionWithResourceContent() throws IOException {
+	public void testEncodeDeclaredExtensionWithResourceContent() {
 		IParser parser = new FhirContext().newXmlParser();
 
 		MyPatientWithOneDeclaredExtension patient = new MyPatientWithOneDeclaredExtension();
@@ -113,7 +113,7 @@ public class XmlParserTest {
 	}
 	
 	@Test
-	public void testEncodeDeclaredExtensionWithAddressContent() throws IOException {
+	public void testEncodeDeclaredExtensionWithAddressContent() {
 		IParser parser = new FhirContext().newXmlParser();
 
 		MyPatientWithOneDeclaredAddressExtension patient = new MyPatientWithOneDeclaredAddressExtension();
@@ -132,7 +132,7 @@ public class XmlParserTest {
 	}
 
 	@Test
-	public void testEncodeUndeclaredExtensionWithAddressContent() throws IOException {
+	public void testEncodeUndeclaredExtensionWithAddressContent() {
 		IParser parser = new FhirContext().newXmlParser();
 
 		Patient patient = new Patient();
@@ -151,7 +151,7 @@ public class XmlParserTest {
 	}
 
 	@Test
-	public void testEncodeBundleResultCount() throws IOException {
+	public void testEncodeBundleResultCount() {
 
 		Bundle b = new Bundle();
 		b.getTotalResults().setValue(123);
@@ -166,7 +166,7 @@ public class XmlParserTest {
 	
 	
 	@Test
-	public void testEncodeContainedResources() throws IOException {
+	public void testEncodeContainedResources() {
 
 		DiagnosticReport rpt = new DiagnosticReport();
 		Specimen spm = new Specimen();
@@ -189,7 +189,7 @@ public class XmlParserTest {
 	}
 
 	@Test
-	public void testEncodeInvalidChildGoodException() throws IOException {
+	public void testEncodeInvalidChildGoodException() {
 		Observation obs = new Observation();
 		obs.setValue(new DecimalDt(112.22));
 		
@@ -203,7 +203,7 @@ public class XmlParserTest {
 	}
 
 	@Test
-	public void testEncodeResourceRef() throws DataFormatException, IOException {
+	public void testEncodeResourceRef() throws DataFormatException {
 
 		Patient patient = new Patient();
 		patient.setManagingOrganization(new ResourceReferenceDt());
@@ -226,7 +226,7 @@ public class XmlParserTest {
 
 	
 	@Test
-	public void testExtensions() throws DataFormatException, IOException {
+	public void testExtensions() throws DataFormatException {
 		
 		MyPatient patient = new MyPatient();
 		patient.setPetName(new StringDt("Fido"));
@@ -425,7 +425,7 @@ public class XmlParserTest {
 	
 
 	@Test
-	public void testNarrativeGeneration() throws DataFormatException, IOException {
+	public void testNarrativeGeneration() throws DataFormatException {
 		
 		Patient patient = new Patient();
 		

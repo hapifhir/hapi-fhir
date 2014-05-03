@@ -25,6 +25,7 @@ import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.annotation.Since;
 import ca.uhn.fhir.rest.annotation.Update;
+import ca.uhn.fhir.rest.annotation.Validate;
 import ca.uhn.fhir.rest.annotation.VersionIdParam;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IBasicClient;
@@ -93,5 +94,8 @@ public interface ITestClient extends IBasicClient {
 
 	@Read(type=Patient.class)
 	Patient getPatientByVersionId(@IdParam IdDt theId, @VersionIdParam IdDt theVersionId);
+
+	@Validate(type=Patient.class)
+	 MethodOutcome validatePatient(@ResourceParam Patient thePatient);
 
 }

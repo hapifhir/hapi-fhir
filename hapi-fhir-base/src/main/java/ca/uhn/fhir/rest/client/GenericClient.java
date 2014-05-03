@@ -32,15 +32,25 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpRequestBase;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.dstu.resource.Conformance;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.method.BaseOutcomeReturningMethodBinding;
+import ca.uhn.fhir.rest.method.ConformanceMethodBinding;
+import ca.uhn.fhir.rest.method.CreateMethodBinding;
+import ca.uhn.fhir.rest.method.DeleteMethodBinding;
+import ca.uhn.fhir.rest.method.HistoryMethodBinding;
 import ca.uhn.fhir.rest.method.IClientResponseHandler;
 import ca.uhn.fhir.rest.method.ReadMethodBinding;
 import ca.uhn.fhir.rest.method.SearchMethodBinding;
-import ca.uhn.fhir.rest.server.EncodingUtil;
+import ca.uhn.fhir.rest.method.UpdateMethodBinding;
+import ca.uhn.fhir.rest.method.ValidateMethodBinding;
+import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 
 public class GenericClient extends BaseClient implements IGenericClient {
@@ -49,7 +59,8 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	private HttpRequestBase myLastRequest;
 
 	/**
-	 * For now, this is a part of the internal API of HAPI - Use with caution as this method may change!
+	 * For now, this is a part of the internal API of HAPI - Use with caution as
+	 * this method may change!
 	 */
 	public GenericClient(FhirContext theContext, HttpClient theHttpClient, String theServerBase) {
 		super(theHttpClient, theServerBase);
@@ -64,14 +75,13 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	public <T extends IResource> T read(final Class<T> theType, IdDt theId) {
 		GetClientInvocation invocation = ReadMethodBinding.createReadInvocation(theId, toResourceName(theType));
 		if (isKeepResponses()) {
-			myLastRequest = invocation.asHttpRequest(getServerBase());
+			myLastRequest = invocation.asHttpRequest(getServerBase(), createExtraParams());
 		}
-		
+
 		IClientResponseHandler binding = new IClientResponseHandler() {
 			@Override
-			public Object invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException,
-					BaseServerResponseException {
-				EncodingUtil respType = EncodingUtil.forContentType(theResponseMimeType);
+			public Object invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException, BaseServerResponseException {
+				EncodingEnum respType = EncodingEnum.forContentType(theResponseMimeType);
 				IParser parser = respType.newParser(myContext);
 				return parser.parseResource(theType, theResponseReader);
 			}
@@ -82,8 +92,30 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		return resp;
 	}
 
+
+	@Override
+	public MethodOutcome delete(final Class<? extends IResource> theType, IdDt theId) {
+		DeleteClientInvocation invocation = DeleteMethodBinding.createDeleteInvocation(toResourceName(theType), theId);
+		if (isKeepResponses()) {
+			myLastRequest = invocation.asHttpRequest(getServerBase(), createExtraParams());
+		}
+
+		final String resourceName = myContext.getResourceDefinition(theType).getName();
+		IClientResponseHandler binding = new IClientResponseHandler() {
+			@Override
+			public Object invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException, BaseServerResponseException {
+				MethodOutcome response = BaseOutcomeReturningMethodBinding.process2xxResponse(myContext, resourceName, theResponseStatusCode, theResponseMimeType, theResponseReader, theHeaders);
+				return response;
+			}
+		};
+
+		MethodOutcome resp =  (MethodOutcome) invokeClient(binding, invocation);
+		return resp;
+	}
+
 	/**
-	 * For now, this is a part of the internal API of HAPI - Use with caution as this method may change!
+	 * For now, this is a part of the internal API of HAPI - Use with caution as
+	 * this method may change!
 	 */
 	public void setLastRequest(HttpRequestBase theLastRequest) {
 		myLastRequest = theLastRequest;
@@ -93,19 +125,17 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		return myContext.getResourceDefinition(theType).getName();
 	}
 
-	
 	@Override
 	public <T extends IResource> T vread(final Class<T> theType, IdDt theId, IdDt theVersionId) {
 		GetClientInvocation invocation = ReadMethodBinding.createVReadInvocation(theId, theVersionId, toResourceName(theType));
 		if (isKeepResponses()) {
-			myLastRequest = invocation.asHttpRequest(getServerBase());
+			myLastRequest = invocation.asHttpRequest(getServerBase(), createExtraParams());
 		}
-		
+
 		IClientResponseHandler binding = new IClientResponseHandler() {
 			@Override
-			public Object invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException,
-					BaseServerResponseException {
-				EncodingUtil respType = EncodingUtil.forContentType(theResponseMimeType);
+			public Object invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException, BaseServerResponseException {
+				EncodingEnum respType = EncodingEnum.forContentType(theResponseMimeType);
 				IParser parser = respType.newParser(myContext);
 				return parser.parseResource(theType, theResponseReader);
 			}
@@ -116,7 +146,6 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		return resp;
 	}
 
-	
 	@Override
 	public <T extends IResource> Bundle search(final Class<T> theType, Map<String, List<IQueryParameterType>> theParams) {
 		LinkedHashMap<String, List<String>> params = new LinkedHashMap<String, List<String>>();
@@ -127,17 +156,16 @@ public class GenericClient extends BaseClient implements IGenericClient {
 				valueList.add(nextValue.getValueAsQueryToken());
 			}
 		}
-		
+
 		GetClientInvocation invocation = SearchMethodBinding.createSearchInvocation(toResourceName(theType), params);
 		if (isKeepResponses()) {
-			myLastRequest = invocation.asHttpRequest(getServerBase());
+			myLastRequest = invocation.asHttpRequest(getServerBase(), createExtraParams());
 		}
-		
+
 		IClientResponseHandler binding = new IClientResponseHandler() {
 			@Override
-			public Object invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException,
-					BaseServerResponseException {
-				EncodingUtil respType = EncodingUtil.forContentType(theResponseMimeType);
+			public Object invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException, BaseServerResponseException {
+				EncodingEnum respType = EncodingEnum.forContentType(theResponseMimeType);
 				IParser parser = respType.newParser(myContext);
 				return parser.parseBundle(theType, theResponseReader);
 			}
@@ -146,5 +174,112 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		Bundle resp = (Bundle) invokeClient(binding, invocation);
 		return resp;
 	}
-	
+
+	public MethodOutcome create(IResource theResource) {
+		BaseClientInvocation invocation = CreateMethodBinding.createCreateInvocation(theResource, myContext);
+		if (isKeepResponses()) {
+			myLastRequest = invocation.asHttpRequest(getServerBase(), createExtraParams());
+		}
+
+		RuntimeResourceDefinition def = myContext.getResourceDefinition(theResource);
+		final String resourceName = def.getName();
+		
+		IClientResponseHandler binding = new IClientResponseHandler() {
+			@Override
+			public Object invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException, BaseServerResponseException {
+				MethodOutcome response = BaseOutcomeReturningMethodBinding.process2xxResponse(myContext, resourceName, theResponseStatusCode, theResponseMimeType, theResponseReader, theHeaders);
+				return response;
+			}
+		};
+
+		MethodOutcome resp = (MethodOutcome) invokeClient(binding, invocation);
+		return resp;
+
+	}
+
+	@Override
+	public MethodOutcome update(IdDt theIdDt, IResource theResource) {
+		BaseClientInvocation invocation = UpdateMethodBinding.createUpdateInvocation(theResource, theIdDt, null, myContext);
+		if (isKeepResponses()) {
+			myLastRequest = invocation.asHttpRequest(getServerBase(), createExtraParams());
+		}
+
+		RuntimeResourceDefinition def = myContext.getResourceDefinition(theResource);
+		final String resourceName = def.getName();
+		
+		IClientResponseHandler binding = new IClientResponseHandler() {
+			@Override
+			public Object invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException, BaseServerResponseException {
+				MethodOutcome response = BaseOutcomeReturningMethodBinding.process2xxResponse(myContext, resourceName, theResponseStatusCode, theResponseMimeType, theResponseReader, theHeaders);
+				return response;
+			}
+		};
+
+		MethodOutcome resp = (MethodOutcome) invokeClient(binding, invocation);
+		return resp;
+	}
+
+	@Override
+	public MethodOutcome validate(IResource theResource) {
+		BaseClientInvocation invocation = ValidateMethodBinding.createValidateInvocation(theResource, null, myContext);
+		if (isKeepResponses()) {
+			myLastRequest = invocation.asHttpRequest(getServerBase(), createExtraParams());
+		}
+
+		RuntimeResourceDefinition def = myContext.getResourceDefinition(theResource);
+		final String resourceName = def.getName();
+		
+		IClientResponseHandler binding = new IClientResponseHandler() {
+			@Override
+			public Object invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException, BaseServerResponseException {
+				MethodOutcome response = BaseOutcomeReturningMethodBinding.process2xxResponse(myContext, resourceName, theResponseStatusCode, theResponseMimeType, theResponseReader, theHeaders);
+				return response;
+			}
+		};
+
+		MethodOutcome resp = (MethodOutcome) invokeClient(binding, invocation);
+		return resp;
+	}
+
+	@Override
+	public <T extends IResource> Bundle history(final Class<T> theType, IdDt theIdDt) {
+		GetClientInvocation invocation = HistoryMethodBinding.createHistoryInvocation(toResourceName(theType), theIdDt);
+		if (isKeepResponses()) {
+			myLastRequest = invocation.asHttpRequest(getServerBase(), createExtraParams());
+		}
+
+		IClientResponseHandler binding = new IClientResponseHandler() {
+			@Override
+			public Object invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException, BaseServerResponseException {
+				EncodingEnum respType = EncodingEnum.forContentType(theResponseMimeType);
+				IParser parser = respType.newParser(myContext);
+				return parser.parseBundle(theType, theResponseReader);
+			}
+		};
+
+		Bundle resp = (Bundle) invokeClient(binding, invocation);
+		return resp;
+
+	}
+
+	@Override
+	public Conformance conformance() {
+		GetClientInvocation invocation = ConformanceMethodBinding.createConformanceInvocation();
+		if (isKeepResponses()) {
+			myLastRequest = invocation.asHttpRequest(getServerBase(), createExtraParams());
+		}
+
+		IClientResponseHandler binding = new IClientResponseHandler() {
+			@Override
+			public Object invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException, BaseServerResponseException {
+				EncodingEnum respType = EncodingEnum.forContentType(theResponseMimeType);
+				IParser parser = respType.newParser(myContext);
+				return parser.parseResource(Conformance.class, theResponseReader);
+			}
+		};
+
+		Conformance resp = (Conformance) invokeClient(binding, invocation);
+		return resp;
+	}
+
 }

@@ -1,3 +1,24 @@
+var uniqueIdSeed = 1;
+
+function addConfigElementsToForm(theForm) {
+	var encoding = document.getElementById('configEncoding');
+	var pretty = document.getElementById('configPretty');
+	
+	var newEncoding = document.createElement("input");
+	newEncoding.type='hidden';
+	newEncoding.name='configEncoding';
+	newEncoding.value = encoding.value;
+	theForm.appendChild(newEncoding);
+	
+	var newPretty = document.createElement("input");
+	newPretty.type='hidden';
+	newPretty.name='configPretty';
+	if (pretty.checked) {
+		newPretty.value='on';
+	}
+	newPretty.checked = pretty.checked;
+	theForm.appendChild(newPretty);
+}
 
 /** Hide any currently displayed tester form */
 function clearCurrentForm(postCompleteFunction) {
@@ -20,14 +41,110 @@ function clearCurrentForm(postCompleteFunction) {
 	
 }
 
-/** Create a tester form for the 'search' method */
-function displaySearchType(expandoTr, resourceName) {
+/** Create a tester form for the 'read' method */
+function displayConformance(button, expandoTr) {
+	highlightSelectedLink(button);
 	var postCompleteFunction = function() {
+		$('#' + expandoTr).append(
+			$('<tr class="testerNameRow" style="display: none;" />').append(
+				$('<td class="testerNameCell">Conformance</td>'),
+				$('<td />').append(
+					$('<form/>', { action: 'PublicTesterResult.html', method: 'POST', onsubmit: "addConfigElementsToForm(this);" }).append(
+				        $('<input />', { name: 'method', value: 'conformance', type: 'hidden' }),
+				        $('<input />', { type: 'submit', value: 'Submit' })
+				    )
+				)
+			)
+		);
+		showNewForm();
+	}
+	clearCurrentForm(postCompleteFunction);
+}
+
+/** Create a tester form for the 'read' method */
+function displayCreate(button, expandoTr, resourceName) {
+	highlightSelectedLink(button);
+	var postCompleteFunction = function() {
+		$('#' + expandoTr).append(
+			$('<tr class="testerNameRow" style="display: none;" />').append(
+				$('<td class="testerNameCell">Create</td>'),
+				$('<td />').append(
+					$('<form/>', { action: 'PublicTesterResult.html', method: 'POST', onsubmit: "addConfigElementsToForm(this);" }).append(
+				        $('<input />', { name: 'method', value: 'create', type: 'hidden' }),
+				        $('<input />', { name: 'resourceName', value: resourceName, type: 'hidden' }),
+				        $('<div class="textareaWrapper">').append(
+				        	$('<textarea />', { name: 'resource', rows: 10, style: 'white-space: nowrap;' })
+				        ),
+				        $('<br />'),
+				        $('<input />', { type: 'submit', value: 'Submit' })
+				    )
+				)
+			)
+		);
+		showNewForm();
+	}
+	clearCurrentForm(postCompleteFunction);
+}
+
+/** Create a tester form for the 'delete' method */
+function displayDelete(button, expandoTr, resourceName) {
+	highlightSelectedLink(button);
+	var postCompleteFunction = function() {
+		$('#' + expandoTr).append(
+			$('<tr class="testerNameRow" style="display: none;" />').append(
+				$('<td class="testerNameCell">Delete</td>'),
+				$('<td />').append(
+					$('<form/>', { action: 'PublicTesterResult.html', method: 'POST', onsubmit: "addConfigElementsToForm(this);" }).append(
+				        $('<input />', { name: 'method', value: 'delete', type: 'hidden' }),
+				        $('<input />', { name: 'resourceName', value: resourceName, type: 'hidden' }),
+				        $('<input />', { name: 'id', placeholder: 'Resource ID', type: 'text' }),
+				        $('<br />'),
+				        $('<input />', { type: 'submit', value: 'Submit' })
+				    )
+				)
+			)
+		);
+		showNewForm();
+	}
+	clearCurrentForm(postCompleteFunction);
+}
+
+/** Create a tester form for the 'read' method */
+function displayUpdate(button, expandoTr, resourceName) {
+	highlightSelectedLink(button);
+	var postCompleteFunction = function() {
+		$('#' + expandoTr).append(
+			$('<tr class="testerNameRow" style="display: none;" />').append(
+				$('<td class="testerNameCell">Update</td>'),
+				$('<td />').append(
+					$('<form/>', { action: 'PublicTesterResult.html', method: 'POST', onsubmit: "addConfigElementsToForm(this);" }).append(
+				        $('<input />', { name: 'method', value: 'update', type: 'hidden' }),
+				        $('<input />', { name: 'resourceName', value: resourceName, type: 'hidden' }),
+				        $('<input />', { name: 'id', placeholder: 'Resource ID', type: 'text' }),
+				        $('<textarea />', { name: 'resource', cols: 100, rows: 10, style: 'white-space: nowrap;' }),
+				        $('<br />'),
+				        $('<input />', { type: 'submit', value: 'Submit' })
+				    )
+				)
+			)
+		);
+		showNewForm();
+	}
+	clearCurrentForm(postCompleteFunction);
+}
+
+/** Create a tester form for the 'search' method */
+function displaySearchType(button, expandoTr, resourceName) {
+	highlightSelectedLink(button);
+	var postCompleteFunction = function() {
+		
+		// Add a search form for the default (no parameter) search, which should
+		// return all resources of the given type
 		$('#' + expandoTr).append(
 			$('<tr class="testerNameRow" style="display: none;" />').append(
 				$('<td class="testerNameCell">Search by Type</td>'),
 				$('<td />').append(
-					$('<form/>', { action: 'PublicTesterResult.html', method: 'POST' }).append(
+					$('<form/>', { action: 'PublicTesterResult.html', method: 'POST', onsubmit: "addConfigElementsToForm(this);" }).append(
 				        $('<input />', { name: 'method', value: 'searchType', type: 'hidden' }),
 				        $('<input />', { name: 'resourceName', value: resourceName, type: 'hidden' }),
 				        $('<span>All Resources of Type</span><br />'),
@@ -35,13 +152,15 @@ function displaySearchType(expandoTr, resourceName) {
 				    )
 				)
 			)
-		);					    
+		);					  
+
+		// Loop through each supported search parameter and add a search form for it
 		conformance.rest.forEach(function(rest){
 			rest.resource.forEach(function(restResource){
 				if (restResource.type == resourceName) {
 					if (restResource.searchParam) {
 						restResource.searchParam.forEach(function(searchParam){
-							var formElement = $('<form/>', { action: 'PublicTesterResult.html', method: 'POST' });
+							var formElement = $('<form/>', { action: 'PublicTesterResult.html', method: 'POST', onsubmit: "addConfigElementsToForm(this);" });
 							formElement.append(
 						        $('<input />', { name: 'method', value: 'searchType', type: 'hidden' }),
 						        $('<input />', { name: 'resourceName', value: resourceName, type: 'hidden' })
@@ -87,14 +206,38 @@ function displaySearchType(expandoTr, resourceName) {
 	clearCurrentForm(postCompleteFunction);
 }
 
-/** Create a tester form for the 'read' method */
-function displayRead(expandoTr, resourceName) {
+/** Create a tester form for the 'instance-history' method */
+function displayHistoryInstance(button, expandoTr, resourceName) {
+	highlightSelectedLink(button);
 	var postCompleteFunction = function() {
 		$('#' + expandoTr).append(
 			$('<tr class="testerNameRow" style="display: none;" />').append(
 				$('<td class="testerNameCell">Read</td>'),
 				$('<td />').append(
-					$('<form/>', { action: 'PublicTesterResult.html', method: 'POST' }).append(
+					$('<form/>', { action: 'PublicTesterResult.html', method: 'POST', onsubmit: "addConfigElementsToForm(this);" }).append(
+				        $('<input />', { name: 'method', value: 'history-instance', type: 'hidden' }),
+				        $('<input />', { name: 'resourceName', value: resourceName, type: 'hidden' }),
+				        $('<input />', { name: 'id', placeholder: 'Resource ID', type: 'text' }),
+				        $('<br />'),
+				        $('<input />', { type: 'submit', value: 'Submit' })
+				    )
+				)
+			)
+		);
+		showNewForm();
+	}
+	clearCurrentForm(postCompleteFunction);
+}
+
+/** Create a tester form for the 'read' method */
+function displayRead(button, expandoTr, resourceName) {
+	highlightSelectedLink(button);
+	var postCompleteFunction = function() {
+		$('#' + expandoTr).append(
+			$('<tr class="testerNameRow" style="display: none;" />').append(
+				$('<td class="testerNameCell">Read</td>'),
+				$('<td />').append(
+					$('<form/>', { action: 'PublicTesterResult.html', method: 'POST', onsubmit: "addConfigElementsToForm(this);" }).append(
 				        $('<input />', { name: 'method', value: 'read', type: 'hidden' }),
 				        $('<input />', { name: 'resourceName', value: resourceName, type: 'hidden' }),
 				        $('<input />', { name: 'id', placeholder: 'Resource ID', type: 'text' }),
@@ -110,13 +253,37 @@ function displayRead(expandoTr, resourceName) {
 }
 
 /** Create a tester form for the 'read' method */
-function displayVRead(expandoTr, resourceName) {
+function displayValidate(button, expandoTr, resourceName) {
+	highlightSelectedLink(button);
+	var postCompleteFunction = function() {
+		$('#' + expandoTr).append(
+			$('<tr class="testerNameRow" style="display: none;" />').append(
+				$('<td class="testerNameCell">Validate</td>'),
+				$('<td />').append(
+					$('<form/>', { action: 'PublicTesterResult.html', method: 'POST', onsubmit: "addConfigElementsToForm(this);" }).append(
+				        $('<input />', { name: 'method', value: 'validate', type: 'hidden' }),
+				        $('<input />', { name: 'resourceName', value: resourceName, type: 'hidden' }),
+				        $('<textarea />', { name: 'resource', cols: 100, rows: 10, style: 'white-space: nowrap;' }),
+				        $('<br />'),
+				        $('<input />', { type: 'submit', value: 'Submit' })
+				    )
+				)
+			)
+		);
+		showNewForm();
+	}
+	clearCurrentForm(postCompleteFunction);
+}
+
+/** Create a tester form for the 'read' method */
+function displayVRead(button, expandoTr, resourceName) {
+	highlightSelectedLink(button);
 	var postCompleteFunction = function() {
 		$('#' + expandoTr).append(
 			$('<tr class="testerNameRow" style="display: none;" />').append(
 				$('<td class="testerNameCell">Read</td>'),
 				$('<td />').append(
-					$('<form/>', { action: 'PublicTesterResult.html', method: 'POST' }).append(
+					$('<form/>', { action: 'PublicTesterResult.html', method: 'POST', onsubmit: "addConfigElementsToForm(this);" }).append(
 				        $('<input />', { name: 'method', value: 'vread', type: 'hidden' }),
 				        $('<input />', { name: 'resourceName', value: resourceName, type: 'hidden' }),
 				        $('<input />', { name: 'id', placeholder: 'Resource ID', type: 'text' }),
@@ -132,7 +299,13 @@ function displayVRead(expandoTr, resourceName) {
 	clearCurrentForm(postCompleteFunction);
 }
 
-var uniqueIdSeed = 1;
+function highlightSelectedLink(button) {
+	$('.selectedFunctionLink').each(function() {
+	    $(this).removeClass('selectedFunctionLink');
+	});		
+	button.className = 'selectedFunctionLink';
+}
+
 /** Generate a unique ID */
 function newUniqueId() {
     return "uid" + uniqueIdSeed++;

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 import java.io.StringReader;
@@ -171,12 +172,23 @@ public class ResfulServerMethodTest {
 	@Test
 	public void testDelete() throws Exception {
 
-		// HttpPost httpPost = new HttpPost("http://localhost:" + ourPort +
-		// "/Patient/1");
-		// httpPost.setEntity(new StringEntity("test",
-		// ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
-
 		HttpDelete httpGet = new HttpDelete("http://localhost:" + ourPort + "/Patient/1234");
+		HttpResponse status = ourClient.execute(httpGet);
+
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		ourLog.info("Response was:\n{}", responseContent);
+
+		assertEquals(200, status.getStatusLine().getStatusCode());
+
+		OperationOutcome patient = ourCtx.newXmlParser().parseResource(OperationOutcome.class, responseContent);
+		assertEquals("1234", patient.getIssueFirstRep().getDetails().getValue());
+
+	}
+
+	@Test
+	public void testWithAdditionalParams() throws Exception {
+
+		HttpDelete httpGet = new HttpDelete("http://localhost:" + ourPort + "/Patient/1234?_pretty=true");
 		HttpResponse status = ourClient.execute(httpGet);
 
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
@@ -432,6 +444,28 @@ public class ResfulServerMethodTest {
 	}
 
 	@Test
+	public void testHistoryFailsIfResourcesAreIncorrectlyPopulated() throws Exception {
+		{
+			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/999/_history");
+			HttpResponse status = ourClient.execute(httpGet);
+
+			String responseContent = IOUtils.toString(status.getEntity().getContent());
+			ourLog.info("Response was:\n{}", responseContent);
+
+			assertEquals(500, status.getStatusLine().getStatusCode());
+		}
+		{
+			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/998/_history");
+			HttpResponse status = ourClient.execute(httpGet);
+
+			String responseContent = IOUtils.toString(status.getEntity().getContent());
+			ourLog.info("Response was:\n{}", responseContent);
+
+			assertEquals(500, status.getStatusLine().getStatusCode());
+		}
+	}
+
+	@Test
 	public void testHistoryResourceType() throws Exception {
 
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/_history");
@@ -531,8 +565,7 @@ public class ResfulServerMethodTest {
 		assertEquals(2, bundle.getEntries().size());
 
 	}
-	
-	
+
 	@Test
 	public void testReadOnTypeThatDoesntSupportRead() throws Exception {
 
@@ -865,19 +898,20 @@ public class ResfulServerMethodTest {
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		ourLog.info("Response was:\n{}", responseContent);
 
-		OperationOutcome oo =new FhirContext().newXmlParser().parseResource(OperationOutcome.class, responseContent);
+		OperationOutcome oo = new FhirContext().newXmlParser().parseResource(OperationOutcome.class, responseContent);
 		assertEquals("OODETAILS", oo.getIssueFirstRep().getDetails().getValue());
-		
+
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertEquals("http://localhost:" + ourPort + "/Patient/001/_history/002", status.getFirstHeader("Location").getValue());
 
 	}
 
-	
 	public void testUpdateWrongResourceType() throws Exception {
 
-		// TODO: this method sends in the wrong resource type vs. the URL so it should
-		// give a useful error message (and then make this unit test actually run)
+		// TODO: this method sends in the wrong resource type vs. the URL so it
+		// should
+		// give a useful error message (and then make this unit test actually
+		// run)
 		Patient patient = new Patient();
 		patient.addIdentifier().setValue("002");
 
@@ -890,7 +924,7 @@ public class ResfulServerMethodTest {
 		assertEquals("http://localhost:" + ourPort + "/DiagnosticReport/001/_history/002", status.getFirstHeader("Location").getValue());
 
 	}
-	
+
 	@Test
 	public void testUpdateNoResponse() throws Exception {
 
@@ -906,8 +940,7 @@ public class ResfulServerMethodTest {
 		assertEquals("http://localhost:" + ourPort + "/DiagnosticReport/001/_history/002", status.getFirstHeader("Location").getValue());
 
 	}
-	
-	
+
 	@Test
 	public void testUpdateWithVersion() throws Exception {
 
@@ -920,8 +953,9 @@ public class ResfulServerMethodTest {
 
 		HttpResponse status = ourClient.execute(httpPut);
 
-//		String responseContent = IOUtils.toString(status.getEntity().getContent());
-//		ourLog.info("Response was:\n{}", responseContent);
+		// String responseContent =
+		// IOUtils.toString(status.getEntity().getContent());
+		// ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(204, status.getStatusLine().getStatusCode());
 		assertNull(status.getEntity());
@@ -947,6 +981,22 @@ public class ResfulServerMethodTest {
 	}
 
 	@Test
+	public void testValidateWithPrettyPrintResponse() throws Exception {
+
+		Patient patient = new Patient();
+		patient.addName().addFamily("FOO");
+
+		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/_validate?_pretty=true");
+		httpPost.setEntity(new StringEntity(new FhirContext().newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+
+		HttpResponse status = ourClient.execute(httpPost);
+
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		ourLog.info("Response was:\n{}", responseContent);
+		assertThat(responseContent, containsString("\n  "));
+	}
+
+	@Test
 	public void testValidate() throws Exception {
 
 		Patient patient = new Patient();
@@ -959,6 +1009,7 @@ public class ResfulServerMethodTest {
 
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		ourLog.info("Response was:\n{}", responseContent);
+		assertThat(responseContent, not(containsString("\n  ")));
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		OperationOutcome oo = new FhirContext().newXmlParser().parseResource(OperationOutcome.class, responseContent);
@@ -991,12 +1042,12 @@ public class ResfulServerMethodTest {
 
 		status = ourClient.execute(httpPost);
 
-//		responseContent = IOUtils.toString(status.getEntity().getContent());
-//		ourLog.info("Response was:\n{}", responseContent);
+		// responseContent = IOUtils.toString(status.getEntity().getContent());
+		// ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(204, status.getStatusLine().getStatusCode());
 		assertNull(status.getEntity());
-//		assertEquals("", responseContent);
+		// assertEquals("", responseContent);
 
 	}
 
@@ -1084,24 +1135,23 @@ public class ResfulServerMethodTest {
 
 		/*
 		 * *********************
-		 * NO NEW METHODS
-		 * *********************
+		 * NO NEW METHODS *********************
 		 */
-		
+
 		@Override
 		public Class<? extends IResource> getResourceType() {
 			return AdverseReaction.class;
 		}
-		
+
 		@Create()
 		public MethodOutcome create(@ResourceParam AdverseReaction thePatient) {
 			IdDt id = new IdDt(thePatient.getIdentifier().get(0).getValue().getValue());
 			IdDt version = new IdDt(thePatient.getIdentifier().get(1).getValue().getValue());
 			return new MethodOutcome(id, version);
 		}
-		
+
 	}
-	
+
 	/**
 	 * Created by dsotnikov on 2/25/2014.
 	 */
@@ -1132,19 +1182,28 @@ public class ResfulServerMethodTest {
 		public List<Patient> getHistoryResourceInstance(@IdParam IdDt theId) {
 			ArrayList<Patient> retVal = new ArrayList<Patient>();
 
+			IdDt id = theId;
+			if (id.getValue().equals("999")) {
+				id = null; // to test the error when no ID is present
+			}
+
 			Patient older = createPatient1();
-			older.setId(theId);
+			older.setId(id);
 			older.getNameFirstRep().getFamilyFirstRep().setValue("OlderFamily");
 			older.getResourceMetadata().put(ResourceMetadataKeyEnum.VERSION_ID, "1");
 			older.getResourceMetadata().put(ResourceMetadataKeyEnum.PUBLISHED, new Date(10000L));
 			older.getResourceMetadata().put(ResourceMetadataKeyEnum.UPDATED, new InstantDt(new Date(20000L)));
-			older.getResourceMetadata().put(ResourceMetadataKeyEnum.VERSION_ID, "1");
+			if (id != null && !id.getValue().equals("998")) {
+				older.getResourceMetadata().put(ResourceMetadataKeyEnum.VERSION_ID, "1");
+			}
 			retVal.add(older);
 
 			Patient newer = createPatient1();
 			newer.setId(theId);
 			newer.getNameFirstRep().getFamilyFirstRep().setValue("NewerFamily");
-			newer.getResourceMetadata().put(ResourceMetadataKeyEnum.VERSION_ID, "2");
+			if (id != null && !id.getValue().equals("998")) {
+				newer.getResourceMetadata().put(ResourceMetadataKeyEnum.VERSION_ID, "2");
+			}
 			newer.getResourceMetadata().put(ResourceMetadataKeyEnum.PUBLISHED, new Date(10000L));
 			newer.getResourceMetadata().put(ResourceMetadataKeyEnum.UPDATED, new InstantDt(new Date(30000L)));
 			retVal.add(newer);

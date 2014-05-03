@@ -22,7 +22,7 @@ package ca.uhn.fhir.rest.client;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -44,13 +44,13 @@ public class GetClientInvocation extends BaseClientInvocation {
 	}
 	
 	public GetClientInvocation(String theUrlPath) {
-		myParameters = Collections.emptyMap();
+		myParameters = new HashMap<String, List<String>>();
 		myUrlPath = theUrlPath;
 	}
 
 	
 	public GetClientInvocation(String... theUrlFragments) {
-		myParameters = Collections.emptyMap();
+		myParameters = new HashMap<String, List<String>>();
 		myUrlPath = StringUtils.join(theUrlFragments, '/');
 	}
 
@@ -63,7 +63,7 @@ public class GetClientInvocation extends BaseClientInvocation {
 	}
 
 	@Override
-	public HttpRequestBase asHttpRequest(String theUrlBase) {
+	public HttpRequestBase asHttpRequest(String theUrlBase, Map<String, List<String>> theExtraParams) {
 		StringBuilder b = new StringBuilder();
 		b.append(theUrlBase);
 		if (!theUrlBase.endsWith("/")) {
@@ -92,6 +92,9 @@ public class GetClientInvocation extends BaseClientInvocation {
 				}
 			}
 		}
+		
+		appendExtraParamsWithQuestionMark(theExtraParams, b, first);
+		
 		return new HttpGet(b.toString());
 	}
 

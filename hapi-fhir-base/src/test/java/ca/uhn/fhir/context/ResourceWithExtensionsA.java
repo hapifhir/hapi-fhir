@@ -5,14 +5,11 @@ import java.util.List;
 import ca.uhn.fhir.model.api.BaseResource;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IExtension;
-import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.annotation.Block;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Extension;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.model.dstu.composite.ContainedDt;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
-import ca.uhn.fhir.model.dstu.composite.NarrativeDt;
 import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
@@ -43,8 +40,6 @@ public class ResourceWithExtensionsA extends BaseResource {
 
 	@Child(name = "identifier", type = IdentifierDt.class, order = 0, min = 0, max = Child.MAX_UNLIMITED)
 	private List<IdentifierDt> myIdentifier;
-
-	private IdDt myId;
 
 	public List<Bar1> getBar1() {
 		return myBar1;

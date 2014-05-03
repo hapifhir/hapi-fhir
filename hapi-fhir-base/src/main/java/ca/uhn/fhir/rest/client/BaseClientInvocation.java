@@ -20,19 +20,48 @@ package ca.uhn.fhir.rest.client;
  * #L%
  */
 
-import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.http.client.methods.HttpRequestBase;
-
-import ca.uhn.fhir.parser.DataFormatException;
 
 public abstract class BaseClientInvocation {
 
 	/**
 	 * Create an HTTP request out of this client request
 	 * 
-	 * @param theUrlBase The FHIR server base url (with a trailing "/")
+	 * @param theUrlBase
+	 *            The FHIR server base url (with a trailing "/")
+	 * @param theExtraParams
+	 *            Any extra request parameters the server wishes to add
 	 */
-	public abstract HttpRequestBase asHttpRequest(String theUrlBase) throws DataFormatException, IOException;
-	
+	public abstract HttpRequestBase asHttpRequest(String theUrlBase, Map<String, List<String>> theExtraParams);
+
+	protected static void appendExtraParamsWithQuestionMark(Map<String, List<String>> theExtraParams, StringBuilder theUrlBuilder, boolean theWithQuestionMark)  {
+		boolean first = theWithQuestionMark;
+
+		if (theExtraParams != null && theExtraParams.isEmpty() == false) {
+			for (Entry<String, List<String>> next : theExtraParams.entrySet()) {
+				for (String nextValue : next.getValue()) {
+					if (first) {
+						theUrlBuilder.append('?');
+						first = false;
+					} else {
+						theUrlBuilder.append('&');
+					}
+					try {
+						theUrlBuilder.append(URLEncoder.encode(next.getKey(), "UTF-8"));
+						theUrlBuilder.append('=');
+						theUrlBuilder.append(URLEncoder.encode(nextValue, "UTF-8"));
+					} catch (UnsupportedEncodingException e) {
+						throw new Error("UTF-8 not supported - This should not happen");
+					}
+				}
+			}
+		}
+	}
+
 }

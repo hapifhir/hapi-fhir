@@ -81,7 +81,11 @@ public class RestfulServer extends HttpServlet {
 	 * Constructor
 	 */
 	public RestfulServer() {
-		myFhirContext = new FhirContext();
+		this(new FhirContext());
+	}
+
+	public RestfulServer(FhirContext theCtx) {
+		myFhirContext = theCtx;
 		myServerConformanceProvider = new ServerConformanceProvider(this);
 	}
 

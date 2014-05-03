@@ -43,7 +43,7 @@ import ca.uhn.fhir.rest.method.SearchMethodBinding.RequestType;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
-class UpdateMethodBinding extends BaseOutcomeReturningMethodBindingWithResourceParam {
+public class UpdateMethodBinding extends BaseOutcomeReturningMethodBindingWithResourceParam {
 
 	private Integer myIdParameterIndex;
 
@@ -79,9 +79,9 @@ class UpdateMethodBinding extends BaseOutcomeReturningMethodBindingWithResourceP
 		String locationHeader = theRequest.getServletRequest().getHeader(Constants.HEADER_CONTENT_LOCATION);
 		if (isNotBlank(locationHeader)) {
 			MethodOutcome mo = new MethodOutcome();
-			parseContentLocation(mo, locationHeader);
+			parseContentLocation(mo, getResourceName(), locationHeader);
 			if (mo.getId() == null || mo.getId().isEmpty()) {
-				throw new InvalidRequestException("Invalid Content-Location header for resource " + getResourceName()+ ": " + locationHeader);
+				throw new InvalidRequestException("Invalid Content-Location header for resource " + getResourceName() + ": " + locationHeader);
 			}
 			if (mo.getVersionId() != null && mo.getVersionId().isEmpty() == false) {
 				theRequest.setVersion(mo.getVersionId());
@@ -99,34 +99,43 @@ class UpdateMethodBinding extends BaseOutcomeReturningMethodBindingWithResourceP
 	}
 
 	@Override
-	protected BaseClientInvocation createClientInvocation(Object[] theArgs, IResource resource, String resourceName) {
+	protected BaseClientInvocation createClientInvocation(Object[] theArgs, IResource theResource) {
 		IdDt idDt = (IdDt) theArgs[myIdParameterIndex];
 		if (idDt == null) {
 			throw new NullPointerException("ID can not be null");
 		}
-		String id = idDt.getValue();
 
+		IdDt versionIdDt = null;
+		if (myVersionIdParameterIndex != null) {
+			versionIdDt = (IdDt) theArgs[myVersionIdParameterIndex];
+		}
+		FhirContext context = getContext();
+
+		PutClientInvocation retVal = createUpdateInvocation(theResource, idDt, versionIdDt, context);
+
+		return retVal;
+	}
+
+	public static PutClientInvocation createUpdateInvocation(IResource theResource, IdDt idDt, IdDt versionIdDt, FhirContext context) {
+		String id = idDt.getValue();
+		String resourceName = context.getResourceDefinition(theResource).getName();
 		StringBuilder urlExtension = new StringBuilder();
 		urlExtension.append(resourceName);
 		urlExtension.append('/');
 		urlExtension.append(id);
-		PutClientInvocation retVal = new PutClientInvocation(getContext(), resource, urlExtension.toString());
-
-		if (myVersionIdParameterIndex != null) {
-			IdDt versionIdDt = (IdDt) theArgs[myVersionIdParameterIndex];
-			if (versionIdDt != null) {
-				String versionId = versionIdDt.getValue();
-				if (StringUtils.isNotBlank(versionId)) {
-					StringBuilder b = new StringBuilder();
-					b.append('/');
-					b.append(urlExtension);
-					b.append("/_history/");
-					b.append(versionId);
-					retVal.addHeader(Constants.HEADER_CONTENT_LOCATION, b.toString());
-				}
+		PutClientInvocation retVal = new PutClientInvocation(context, theResource, urlExtension.toString());
+		
+		if (versionIdDt != null) {
+			String versionId = versionIdDt.getValue();
+			if (StringUtils.isNotBlank(versionId)) {
+				StringBuilder b = new StringBuilder();
+				b.append('/');
+				b.append(urlExtension);
+				b.append("/_history/");
+				b.append(versionId);
+				retVal.addHeader(Constants.HEADER_CONTENT_LOCATION, b.toString());
 			}
 		}
-
 		return retVal;
 	}
 
@@ -148,7 +157,6 @@ class UpdateMethodBinding extends BaseOutcomeReturningMethodBindingWithResourceP
 	protected Set<RequestType> provideAllowableRequestTypes() {
 		return Collections.singleton(RequestType.PUT);
 	}
-
 
 	@Override
 	protected String getMatchingOperation() {

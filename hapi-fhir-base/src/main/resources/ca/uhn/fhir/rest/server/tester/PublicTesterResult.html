@@ -28,9 +28,7 @@ This file is a Thymeleaf template for the
 			</tr>
 		</table>
 		<div class="bodyHeaderBlock">
-			Executed invocation:<br/>
-			<th:block th:text="${action}">GET</th:block>
-			<a href="http://foo.com/fhir" th:href="${requestUrl}"><th:block th:text="${requestUrl}">http://foo.com/fhir</th:block></a> 
+			Executed invocation against FHIR RESTful Server
 		</div>
 
 		<table border="0" width="100%" cellpadding="0" cellspacing="0" style="margin-top: 4px;">
@@ -52,23 +50,62 @@ This file is a Thymeleaf template for the
 				<td width="1%"/>
 				
 				<td width="70%" valign="top">
+
+					<div class="bodyHeaderBlock">
+						Request
+					</div>
+					<table border="0" class="propertyTable">
+						<tr>
+							<td class="propertyKeyCell">Action</td>
+							<td th:text="${action}">GET</td>
+						</tr>
+						<tr>
+							<td class="propertyKeyCell">URL</td>
+							<td>
+								<a href="http://foo.com/fhir" th:href="${requestUrl}"><th:block th:text="${requestUrl}">http://foo.com/fhir</th:block></a> 
+							</td>
+						</tr>
+						<tr > <!-- th:if="${not #lists.isEmpty(requestHeaders)}" -->
+							<td valign="top" class="propertyKeyCell">Headers</td>
+							<td valign="top">
+								<div th:each="header : ${requestHeaders}">
+									<span class="headerName" th:text="${header.name} + ': '"/>
+									<span class="headerValue" th:text="${header.value}"/>
+								</div>
+							</td>
+						</tr>
+						<tr th:if="${requestBody} != null">
+							<td valign="top" class="propertyKeyCell">Request Body</td>
+							<td valign="top"><pre th:text="${requestBody}" th:class="${requestSyntaxHighlighterClass}">{}</pre></td>
+						</tr>
+					</table>
 					
 					<div class="bodyHeaderBlock">
 						Response 
 					</div>
-					<table border="0">
+					<table border="0" class="propertyTable">
 						<tr>
 							<td valign="top" class="propertyKeyCell">Status</td>
 							<td valign="top" th:text="${resultStatus}">HTTP 200 OK</td>
 						</tr>
-						<tr>
-							<td valign="top" class="propertyKeyCell">Result</td>
+						<tr > <!-- th:if="${not #lists.isEmpty(responseHeaders)}" -->
+							<td valign="top" class="propertyKeyCell">Headers</td>
+							<td valign="top">
+								<div th:each="header : ${responseHeaders}">
+									<span class="headerName"  th:text="${header.name} + ': '"/>
+									<span class="headerValue"  th:text="${header.value}"/>
+								</div>
+							</td>
+						</tr>
+						<tr th:if="${!#strings.isEmpty(resultBody)}">
+							<td valign="top" class="propertyKeyCell">Result Body</td>
 							<td valign="top"><pre th:text="${resultBody}" th:class="${resultSyntaxHighlighterClass}">{}</pre></td>
 						</tr>
+						<tr th:if="${!#strings.isEmpty(narrative)}">
+							<td valign="top" class="propertyKeyCell">Result Narrative</td>
+							<td valign="top" th:utext="${narrative}"></td>
+						</tr>
 					</table>
-					<div>
-						
-					</div>
 				
 				</td>
 			</tr>

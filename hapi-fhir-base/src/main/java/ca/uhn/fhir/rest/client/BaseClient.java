@@ -26,7 +26,9 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -42,6 +44,8 @@ import org.apache.http.entity.ContentType;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.client.exceptions.FhirClientConnectionException;
 import ca.uhn.fhir.rest.method.IClientResponseHandler;
+import ca.uhn.fhir.rest.server.Constants;
+import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 
 public abstract class BaseClient {
@@ -52,6 +56,29 @@ public abstract class BaseClient {
 	private HttpResponse myLastResponse;
 	private String myLastResponseBody;
 	private final String myUrlBase;
+	private EncodingEnum myEncoding = null; // default unspecified (will be XML)
+	private boolean myPrettyPrint = false;
+
+	/**
+	 * Returns the encoding that will be used on requests. Default is
+	 * <code>null</code>, which means the client will not explicitly request an
+	 * encoding. (This is standard behaviour according to the FHIR
+	 * specification)
+	 */
+	public EncodingEnum getEncoding() {
+		return myEncoding;
+	}
+
+	/**
+	 * Sets the encoding that will be used on requests. Default is
+	 * <code>null</code>, which means the client will not explicitly request an
+	 * encoding. (This is standard behaviour according to the FHIR
+	 * specification)
+	 */
+	public BaseClient setEncoding(EncodingEnum theEncoding) {
+		myEncoding = theEncoding;
+		return this;
+	}
 
 	BaseClient(HttpClient theClient, String theUrlBase) {
 		super();
@@ -60,14 +87,16 @@ public abstract class BaseClient {
 	}
 
 	/**
-	 * For now, this is a part of the internal API of HAPI - Use with caution as this method may change!
+	 * For now, this is a part of the internal API of HAPI - Use with caution as
+	 * this method may change!
 	 */
 	public HttpResponse getLastResponse() {
 		return myLastResponse;
 	}
 
 	/**
-	 * For now, this is a part of the internal API of HAPI - Use with caution as this method may change!
+	 * For now, this is a part of the internal API of HAPI - Use with caution as
+	 * this method may change!
 	 */
 	public String getLastResponseBody() {
 		return myLastResponseBody;
@@ -83,16 +112,12 @@ public abstract class BaseClient {
 		HttpRequestBase httpRequest;
 		HttpResponse response;
 		try {
-			httpRequest = clientInvocation.asHttpRequest(myUrlBase);
+			httpRequest = clientInvocation.asHttpRequest(myUrlBase, createExtraParams());
 			response = myClient.execute(httpRequest);
 		} catch (DataFormatException e) {
 			throw new FhirClientConnectionException(e);
 		} catch (IOException e) {
 			throw new FhirClientConnectionException(e);
-		}
-		
-		if (response.getStatusLine().getStatusCode() < 200 || response.getStatusLine().getStatusCode() > 299) {
-			throw BaseServerResponseException.newInstance(response.getStatusLine().getStatusCode(), response.getStatusLine().getReasonPhrase());
 		}
 
 		try {
@@ -103,14 +128,14 @@ public abstract class BaseClient {
 				String responseString = IOUtils.toString(reader);
 				if (myKeepResponses) {
 					myLastResponse = response;
-					myLastResponseBody = responseString; 
+					myLastResponseBody = responseString;
 				}
 				ourLog.trace("FHIR response:\n{}\n{}", response, responseString);
 				reader = new StringReader(responseString);
 			}
 
 			ContentType ct = ContentType.get(response.getEntity());
-			String mimeType = ct.getMimeType();
+			String mimeType = ct != null ? ct.getMimeType() : null;
 
 			Map<String, List<String>> headers = new HashMap<String, List<String>>();
 			if (response.getAllHeaders() != null) {
@@ -123,6 +148,10 @@ public abstract class BaseClient {
 					}
 					list.add(next.getValue());
 				}
+			}
+
+			if (response.getStatusLine().getStatusCode() < 200 || response.getStatusLine().getStatusCode() > 299) {
+				throw BaseServerResponseException.newInstance(response.getStatusLine().getStatusCode(), response.getStatusLine().getReasonPhrase());
 			}
 
 			try {
@@ -145,29 +174,50 @@ public abstract class BaseClient {
 			}
 		}
 	}
+
+	protected Map<String, List<String>> createExtraParams() {
+		HashMap<String, List<String>> retVal = new LinkedHashMap<String, List<String>>();
+
+		if (getEncoding() == EncodingEnum.XML) {
+			retVal.put(Constants.PARAM_FORMAT, Collections.singletonList(Constants.CT_XML));
+		} else if (getEncoding() == EncodingEnum.JSON) {
+			retVal.put(Constants.PARAM_FORMAT, Collections.singletonList(Constants.CT_JSON));
+		}
+
+		if (isPrettyPrint()) {
+			retVal.put(Constants.PARAM_PRETTY, Collections.singletonList(Constants.PARAM_PRETTY_VALUE_TRUE));
+		}
+
+		return retVal;
+	}
+
 	/**
-	 * For now, this is a part of the internal API of HAPI - Use with caution as this method may change!
+	 * For now, this is a part of the internal API of HAPI - Use with caution as
+	 * this method may change!
 	 */
 	public boolean isKeepResponses() {
 		return myKeepResponses;
 	}
 
 	/**
-	 * For now, this is a part of the internal API of HAPI - Use with caution as this method may change!
+	 * For now, this is a part of the internal API of HAPI - Use with caution as
+	 * this method may change!
 	 */
 	public void setKeepResponses(boolean theKeepResponses) {
 		myKeepResponses = theKeepResponses;
 	}
 
 	/**
-	 * For now, this is a part of the internal API of HAPI - Use with caution as this method may change!
+	 * For now, this is a part of the internal API of HAPI - Use with caution as
+	 * this method may change!
 	 */
 	public void setLastResponse(HttpResponse theLastResponse) {
 		myLastResponse = theLastResponse;
 	}
 
 	/**
-	 * For now, this is a part of the internal API of HAPI - Use with caution as this method may change!
+	 * For now, this is a part of the internal API of HAPI - Use with caution as
+	 * this method may change!
 	 */
 	public void setLastResponseBody(String theLastResponseBody) {
 		myLastResponseBody = theLastResponseBody;
@@ -190,6 +240,27 @@ public abstract class BaseClient {
 
 		Reader reader = new InputStreamReader(theResponse.getEntity().getContent(), charset);
 		return reader;
+	}
+
+	/**
+	 * Returns the pretty print flag, which is a request to the server for it to
+	 * return "pretty printed" responses. Note that this is currently a
+	 * non-standard flag (_pretty) which is supported only by HAPI based servers
+	 * (and any other servers which might implement it).
+	 */
+	public boolean isPrettyPrint() {
+		return myPrettyPrint;
+	}
+
+	/**
+	 * Sets the pretty print flag, which is a request to the server for it to
+	 * return "pretty printed" responses. Note that this is currently a
+	 * non-standard flag (_pretty) which is supported only by HAPI based servers
+	 * (and any other servers which might implement it).
+	 */
+	public BaseClient setPrettyPrint(boolean thePrettyPrint) {
+		myPrettyPrint = thePrettyPrint;
+		return this;
 	}
 
 }

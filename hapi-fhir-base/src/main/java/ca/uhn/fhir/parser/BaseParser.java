@@ -20,8 +20,11 @@ package ca.uhn.fhir.parser;
  * #L%
  */
 
+import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -52,6 +55,32 @@ public abstract class BaseParser implements IParser {
 	public Bundle parseBundle(String theXml) throws ConfigurationException, DataFormatException {
 		StringReader reader = new StringReader(theXml);
 		return parseBundle(reader);
+	}
+
+	@Override
+	public String encodeResourceToString(IResource theResource) throws DataFormatException {
+		Writer stringWriter = new StringWriter();
+		try {
+			encodeResourceToWriter(theResource, stringWriter);
+		} catch (IOException e) {
+			throw new Error("Encountered IOException during write to string - This should not happen!");
+		}
+		return stringWriter.toString();
+	}
+
+	@Override
+	public String encodeBundleToString(Bundle theBundle) throws DataFormatException {
+		if (theBundle == null) {
+			throw new NullPointerException("Bundle can not be null");
+		}
+		StringWriter stringWriter = new StringWriter();
+		try {
+			encodeBundleToWriter(theBundle, stringWriter);
+		} catch (IOException e) {
+			throw new Error("Encountered IOException during write to string - This should not happen!");
+		}
+
+		return stringWriter.toString();
 	}
 
 	@Override

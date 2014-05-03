@@ -35,7 +35,7 @@ public class Constants {
 	public static final String CT_ATOM_XML = "application/atom+xml";
 	public static final Set<String> FORMAT_VAL_XML;
 	public static final Set<String> FORMAT_VAL_JSON;
-	public static final Map<String, EncodingUtil> FORMAT_VAL_TO_ENCODING;
+	public static final Map<String, EncodingEnum> FORMAT_VAL_TO_ENCODING;
 	public static final String CT_XML = "application/xml";
 	public static final String CT_JSON = "application/json";
 	public static final String CT_HTML = "text/html";
@@ -62,9 +62,13 @@ public class Constants {
 	public static final String PARAM_VALIDATE = "_validate";
 	public static final int STATUS_HTTP_401_CLIENT_UNAUTHORIZED = 401;
 	public static final int STATUS_HTTP_500_INTERNAL_ERROR = 500;
+	public static final String PARAM_PRETTY_VALUE_TRUE = "true";
+	public static final String PARAM_SORT = "_sort";
+	public static final String PARAM_SORT_ASC = "_sort:asc";
+	public static final String PARAM_SORT_DESC = "_sort:desc";
 
 	static {
-		Map<String, EncodingUtil> valToEncoding = new HashMap<String, EncodingUtil>();
+		Map<String, EncodingEnum> valToEncoding = new HashMap<String, EncodingEnum>();
 		
 		HashSet<String> valXml = new HashSet<String>();
 		valXml.add(CT_FHIR_XML);
@@ -72,7 +76,7 @@ public class Constants {
 		valXml.add("xml");
 		FORMAT_VAL_XML = Collections.unmodifiableSet(valXml);
 		for (String string : valXml) {
-			valToEncoding.put(string, EncodingUtil.XML);
+			valToEncoding.put(string, EncodingEnum.XML);
 		}
 
 		HashSet<String> valJson = new HashSet<String>();
@@ -81,7 +85,7 @@ public class Constants {
 		valJson.add("json");
 		FORMAT_VAL_JSON = Collections.unmodifiableSet(valJson);
 		for (String string : valJson) {
-			valToEncoding.put(string, EncodingUtil.JSON);
+			valToEncoding.put(string, EncodingEnum.JSON);
 		}
 
 		FORMAT_VAL_TO_ENCODING=Collections.unmodifiableMap(valToEncoding);

@@ -31,11 +31,11 @@ import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.Validate;
 import ca.uhn.fhir.rest.client.BaseClientInvocation;
-import ca.uhn.fhir.rest.client.PutClientInvocation;
+import ca.uhn.fhir.rest.client.PostClientInvocation;
 import ca.uhn.fhir.rest.method.SearchMethodBinding.RequestType;
 import ca.uhn.fhir.rest.server.Constants;
 
-class ValidateMethodBinding extends BaseOutcomeReturningMethodBindingWithResourceParam {
+public class ValidateMethodBinding extends BaseOutcomeReturningMethodBindingWithResourceParam {
 
 	private Integer myIdParameterIndex;
 
@@ -63,22 +63,31 @@ class ValidateMethodBinding extends BaseOutcomeReturningMethodBindingWithResourc
 	}
 
 	@Override
-	protected BaseClientInvocation createClientInvocation(Object[] theArgs, IResource resource, String resourceName) {
-		StringBuilder urlExtension = new StringBuilder();
-		urlExtension.append(resourceName);
-		urlExtension.append(Constants.PARAM_VALIDATE);
-
+	protected BaseClientInvocation createClientInvocation(Object[] theArgs, IResource theResource) {
+		FhirContext context = getContext();
+		
+		IdDt idDt=null;
 		if (myIdParameterIndex != null) {
-			IdDt idDt = (IdDt) theArgs[myIdParameterIndex];
-			if (idDt != null && idDt.isEmpty() == false) {
-				String id = idDt.getValue();
-				urlExtension.append('/');
-				urlExtension.append(id);
-			}
+			idDt = (IdDt) theArgs[myIdParameterIndex];
 		}
 
-		PutClientInvocation retVal = new PutClientInvocation(getContext(), resource, urlExtension.toString());
+		PostClientInvocation retVal = createValidateInvocation(theResource, idDt, context);
+		return retVal;
+	}
 
+	public static PostClientInvocation createValidateInvocation(IResource theResource, IdDt theId, FhirContext theContext) {
+		StringBuilder urlExtension = new StringBuilder();
+		urlExtension.append(theContext.getResourceDefinition(theResource).getName());
+		urlExtension.append('/');
+		urlExtension.append(Constants.PARAM_VALIDATE);
+
+		if (theId != null && theId.isEmpty() == false) {
+			String id = theId.getValue();
+			urlExtension.append('/');
+			urlExtension.append(id);
+		}
+		// TODO: is post correct here?
+		PostClientInvocation retVal = new PostClientInvocation(theContext, theResource, urlExtension.toString());
 		return retVal;
 	}
 
@@ -90,6 +99,7 @@ class ValidateMethodBinding extends BaseOutcomeReturningMethodBindingWithResourc
 
 	@Override
 	protected Set<RequestType> provideAllowableRequestTypes() {
+		// TODO: is post correct here?
 		return Collections.singleton(RequestType.POST);
 	}
 

@@ -56,7 +56,7 @@ import ca.uhn.fhir.rest.client.exceptions.InvalidResponseException;
 import ca.uhn.fhir.rest.param.IParameter;
 import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.Constants;
-import ca.uhn.fhir.rest.server.EncodingUtil;
+import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.RestfulServer.NarrativeModeEnum;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
@@ -179,16 +179,10 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding {
 	public void invokeServer(RestfulServer theServer, Request theRequest, HttpServletResponse theResponse) throws BaseServerResponseException, IOException {
 
 		// Pretty print
-		Map<String, String[]> requestParams = theRequest.getParameters();
-		String[] pretty = requestParams.remove(Constants.PARAM_PRETTY);
-		boolean prettyPrint = false;
-		if (pretty != null && pretty.length > 0) {
-			if ("true".equals(pretty[0])) {
-				prettyPrint = true;
-			}
-		}
-
+		boolean prettyPrint = prettyPrintResponse(theRequest);
+		
 		// Narrative mode
+		Map<String, String[]> requestParams = theRequest.getParameters();
 		String[] narrative = requestParams.remove(Constants.PARAM_NARRATIVE);
 		NarrativeModeEnum narrativeMode = null;
 		if (narrative != null && narrative.length > 0) {
@@ -199,7 +193,7 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding {
 		}
 
 		// Determine response encoding
-		EncodingUtil responseEncoding = determineResponseEncoding(theRequest.getServletRequest(), requestParams);
+		EncodingEnum responseEncoding = determineResponseEncoding(theRequest.getServletRequest(), requestParams);
 
 		// Is this request coming from a browser
 		String uaHeader = theRequest.getServletRequest().getHeader("user-agent");
@@ -233,7 +227,8 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding {
 		}
 	}
 
-	private IdDt getIdFromMetadataOrNullIfNone(Map<ResourceMetadataKeyEnum, Object> theResourceMetadata, ResourceMetadataKeyEnum theKey) {
+
+	protected static IdDt getIdFromMetadataOrNullIfNone(Map<ResourceMetadataKeyEnum, Object> theResourceMetadata, ResourceMetadataKeyEnum theKey) {
 		Object retValObj = theResourceMetadata.get(theKey);
 		if (retValObj == null) {
 			return null;
@@ -271,7 +266,7 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding {
 				+ InstantDt.class.getCanonicalName());
 	}
 
-	private IParser getNewParser(EncodingUtil theResponseEncoding, boolean thePrettyPrint, NarrativeModeEnum theNarrativeMode) {
+	private IParser getNewParser(EncodingEnum theResponseEncoding, boolean thePrettyPrint, NarrativeModeEnum theNarrativeMode) {
 		IParser parser;
 		switch (theResponseEncoding) {
 		case JSON:
@@ -285,7 +280,7 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding {
 		return parser.setPrettyPrint(thePrettyPrint).setSuppressNarratives(theNarrativeMode == NarrativeModeEnum.SUPPRESS);
 	}
 
-	private void streamResponseAsBundle(RestfulServer theServer, HttpServletResponse theHttpResponse, List<IResource> theResult, EncodingUtil theResponseEncoding, String theServerBase,
+	private void streamResponseAsBundle(RestfulServer theServer, HttpServletResponse theHttpResponse, List<IResource> theResult, EncodingEnum theResponseEncoding, String theServerBase,
 			String theCompleteUrl, boolean thePrettyPrint, boolean theRequestIsBrowser, NarrativeModeEnum theNarrativeMode) throws IOException {
 		assert !theServerBase.endsWith("/");
 
@@ -363,7 +358,7 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding {
 					b.append('?').append(Constants.PARAM_PRETTY).append("=true");
 					haveQ = true;
 				}
-				if (theResponseEncoding == EncodingUtil.JSON) {
+				if (theResponseEncoding == EncodingEnum.JSON) {
 					if (!haveQ) {
 						b.append('?');
 						haveQ = true;
@@ -396,7 +391,7 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding {
 		}
 	}
 
-	private void streamResponseAsResource(RestfulServer theServer, HttpServletResponse theHttpResponse, IResource theResource, EncodingUtil theResponseEncoding, boolean thePrettyPrint,
+	private void streamResponseAsResource(RestfulServer theServer, HttpServletResponse theHttpResponse, IResource theResource, EncodingEnum theResponseEncoding, boolean thePrettyPrint,
 			boolean theRequestIsBrowser, NarrativeModeEnum theNarrativeMode) throws IOException {
 
 		theHttpResponse.setStatus(200);

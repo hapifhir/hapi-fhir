@@ -23,6 +23,7 @@ package ca.uhn.fhir.rest.client;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
@@ -68,14 +69,16 @@ public abstract class BaseClientInvocationWithContents extends BaseClientInvocat
 	}
 
 	@Override
-	public HttpRequestBase asHttpRequest(String theUrlBase) throws DataFormatException, IOException {
+	public HttpRequestBase asHttpRequest(String theUrlBase, Map<String, List<String>> theExtraParams) throws DataFormatException {
 		StringBuilder b = new StringBuilder();
 		b.append(theUrlBase);
 		if (!theUrlBase.endsWith("/")) {
 			b.append('/');
 		}
 		b.append(StringUtils.defaultString(myUrlExtension));
-		
+
+		appendExtraParamsWithQuestionMark(theExtraParams, b, true);
+
 		String url = b.toString();
 		String contents = myContext.newXmlParser().encodeResourceToString(myResource);
 		StringEntity entity = new StringEntity(contents, ContentType.create(Constants.CT_FHIR_XML, "UTF-8"));

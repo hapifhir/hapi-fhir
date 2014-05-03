@@ -51,6 +51,13 @@ public class MethodOutcome {
 		return myId;
 	}
 
+	/**
+	 * Returns the {@link OperationOutcome} resource to return to the client or
+	 * <code>null</code> if none.
+	 * 
+	 * @return This method <b>will return null</b>, unlike many methods in the
+	 *         API.
+	 */
 	public OperationOutcome getOperationOutcome() {
 		return myOperationOutcome;
 	}
@@ -63,6 +70,10 @@ public class MethodOutcome {
 		myId = theId;
 	}
 
+	/**
+	 * Sets the {@link OperationOutcome} resource to return to the client. Set
+	 * to <code>null</code> (which is the default) if none.
+	 */
 	public void setOperationOutcome(OperationOutcome theOperationOutcome) {
 		myOperationOutcome = theOperationOutcome;
 	}
