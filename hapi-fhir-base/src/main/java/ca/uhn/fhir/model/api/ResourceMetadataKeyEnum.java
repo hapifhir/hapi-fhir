@@ -25,41 +25,51 @@ import ca.uhn.fhir.model.primitive.InstantDt;
 public enum ResourceMetadataKeyEnum {
 
 	/**
-	 * The value for this key is the version ID of the resource object.
-	 * <p>
-	 * Values for this key are of type <b>{@link IdDt}</b>
-	 * </p>
-	 */
-	VERSION_ID,
-	
-	/**
-	 * The value for this key is the bundle entry <b>Published</b> time. This
-	 * is defined by FHIR as "Time resource copied into the feed", which is generally 
-	 * best left to the current time. 
+	 * The value for this key is the bundle entry <b>Published</b> time. This is
+	 * defined by FHIR as "Time resource copied into the feed", which is
+	 * generally best left to the current time.
 	 * <p>
 	 * Values for this key are of type <b>{@link InstantDt}</b>
 	 * </p>
 	 * <p>
 	 * <b>Server Note</b>: In servers, it is generally advisable to leave this
-	 * value <code>null</code>, in which case the server will substitute the 
+	 * value <code>null</code>, in which case the server will substitute the
 	 * current time automatically.
 	 * </p>
 	 * 
 	 * @see InstantDt
 	 */
 	PUBLISHED,
-	
+
 	/**
-	 * The value for this key is the bundle entry <b>Updated</b> time. This
-	 * is defined by FHIR as "Last Updated for resource". This value is also 
-	 * used for populating the "Last-Modified" header in the case of methods
-	 * that return a single resource (read, vread, etc.)
+	 * The value for this key is the list of tags associated with this resource
+	 * <p>
+	 * Values for this key are of type <b>{@link TagList}</b>
+	 * </p>
+	 * 
+	 * @see TagList
+	 */
+	TAG_LIST,
+
+	/**
+	 * The value for this key is the bundle entry <b>Updated</b> time. This is
+	 * defined by FHIR as "Last Updated for resource". This value is also used
+	 * for populating the "Last-Modified" header in the case of methods that
+	 * return a single resource (read, vread, etc.)
 	 * <p>
 	 * Values for this key are of type <b>{@link InstantDt}</b>
 	 * </p>
 	 * 
 	 * @see InstantDt
 	 */
-	UPDATED;
-	
+	UPDATED,
+
+	/**
+	 * The value for this key is the version ID of the resource object.
+	 * <p>
+	 * Values for this key are of type <b>{@link IdDt}</b>
+	 * </p>
+	 */
+	VERSION_ID;
+
 }

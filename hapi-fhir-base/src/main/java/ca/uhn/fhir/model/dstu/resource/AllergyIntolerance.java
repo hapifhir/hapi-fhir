@@ -47,6 +47,7 @@ import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.valueset.CriticalityEnum;
@@ -89,6 +90,7 @@ public class AllergyIntolerance extends BaseResource implements IResource {
 	 * Path: <b>AllergyIntolerance.sensitivityType</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="type", path="AllergyIntolerance.sensitivityType", description="The type of sensitivity")
 	public static final String SP_TYPE = "type";
 
 	/**
@@ -99,6 +101,7 @@ public class AllergyIntolerance extends BaseResource implements IResource {
 	 * Path: <b>AllergyIntolerance.substance</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="substance", path="AllergyIntolerance.substance", description="The name or code of the substance that produces the sensitivity")
 	public static final String SP_SUBSTANCE = "substance";
 
 	/**
@@ -109,6 +112,7 @@ public class AllergyIntolerance extends BaseResource implements IResource {
 	 * Path: <b>AllergyIntolerance.recordedDate</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="date", path="AllergyIntolerance.recordedDate", description="Recorded date/time.")
 	public static final String SP_DATE = "date";
 
 	/**
@@ -119,6 +123,7 @@ public class AllergyIntolerance extends BaseResource implements IResource {
 	 * Path: <b>AllergyIntolerance.status</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="status", path="AllergyIntolerance.status", description="The status of the sensitivity")
 	public static final String SP_STATUS = "status";
 
 	/**
@@ -129,6 +134,7 @@ public class AllergyIntolerance extends BaseResource implements IResource {
 	 * Path: <b>AllergyIntolerance.subject</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="subject", path="AllergyIntolerance.subject", description="The subject that the sensitivity is about")
 	public static final String SP_SUBJECT = "subject";
 
 	/**
@@ -139,6 +145,7 @@ public class AllergyIntolerance extends BaseResource implements IResource {
 	 * Path: <b>AllergyIntolerance.recorder</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="recorder", path="AllergyIntolerance.recorder", description="Who recorded the sensitivity")
 	public static final String SP_RECORDER = "recorder";
 
 

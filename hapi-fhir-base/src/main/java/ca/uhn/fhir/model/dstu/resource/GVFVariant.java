@@ -48,6 +48,7 @@ import ca.uhn.fhir.model.api.annotation.Block;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.dstu.composite.AttachmentDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
@@ -87,6 +88,7 @@ public class GVFVariant extends BaseResource implements IResource {
 	 * Path: <b>GVFVariant.subject.patient</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="patient", path="GVFVariant.subject.patient", description="Patient being described ")
 	public static final String SP_PATIENT = "patient";
 
 	/**
@@ -97,6 +99,7 @@ public class GVFVariant extends BaseResource implements IResource {
 	 * Path: <b></b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="coordinate", path="", description="Coordinate of the variant being studied")
 	public static final String SP_COORDINATE = "coordinate";
 
 
@@ -1017,6 +1020,24 @@ public class GVFVariant extends BaseResource implements IResource {
      *
      * @return Returns a reference to this object, to allow for simple chaining.
 	 */
+	public GVFVariant addVariantFreq( long theValue) {
+		if (myVariantFreq == null) {
+			myVariantFreq = new java.util.ArrayList<DecimalDt>();
+		}
+		myVariantFreq.add(new DecimalDt(theValue));
+		return this; 
+	}
+
+	/**
+	 * Adds a new value for <b>variantFreq</b> (Variant frequency)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Frequency of the variant
+     * </p> 
+     *
+     * @return Returns a reference to this object, to allow for simple chaining.
+	 */
 	public GVFVariant addVariantFreq( double theValue) {
 		if (myVariantFreq == null) {
 			myVariantFreq = new java.util.ArrayList<DecimalDt>();
@@ -1036,24 +1057,6 @@ public class GVFVariant extends BaseResource implements IResource {
      * @return Returns a reference to this object, to allow for simple chaining.
 	 */
 	public GVFVariant addVariantFreq( java.math.BigDecimal theValue) {
-		if (myVariantFreq == null) {
-			myVariantFreq = new java.util.ArrayList<DecimalDt>();
-		}
-		myVariantFreq.add(new DecimalDt(theValue));
-		return this; 
-	}
-
-	/**
-	 * Adds a new value for <b>variantFreq</b> (Variant frequency)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * Frequency of the variant
-     * </p> 
-     *
-     * @return Returns a reference to this object, to allow for simple chaining.
-	 */
-	public GVFVariant addVariantFreq( long theValue) {
 		if (myVariantFreq == null) {
 			myVariantFreq = new java.util.ArrayList<DecimalDt>();
 		}
@@ -1670,7 +1673,7 @@ public class GVFVariant extends BaseResource implements IResource {
      * Subject described by this segment of GVF file
      * </p> 
 	 */
-	@Block(name="GVFVariant.subject")	
+	@Block()	
 	public static class Subject extends BaseElement implements IResourceBlock {
 	
 	@Child(name="patient", order=0, min=1, max=1, type={
@@ -1791,7 +1794,7 @@ public class GVFVariant extends BaseResource implements IResource {
      * Reference of the feature in a database
      * </p> 
 	 */
-	@Block(name="GVFVariant.dbxref")	
+	@Block()	
 	public static class Dbxref extends BaseElement implements IResourceBlock {
 	
 	@Child(name="database", type=CodeDt.class, order=0, min=1, max=1)	
@@ -1924,7 +1927,7 @@ public class GVFVariant extends BaseResource implements IResource {
      * Effect of the variant
      * </p> 
 	 */
-	@Block(name="GVFVariant.variantEffect")	
+	@Block()	
 	public static class VariantEffect extends BaseElement implements IResourceBlock {
 	
 	@Child(name="sequenceVariant", type=CodeDt.class, order=0, min=1, max=1)	
@@ -2193,7 +2196,7 @@ public class GVFVariant extends BaseResource implements IResource {
      * Attribute describing ambiguity of the start position of the feature
      * </p> 
 	 */
-	@Block(name="GVFVariant.startRange")	
+	@Block()	
 	public static class StartRange extends BaseElement implements IResourceBlock {
 	
 	@Child(name="start", type=IntegerDt.class, order=0, min=1, max=1)	
@@ -2326,7 +2329,7 @@ public class GVFVariant extends BaseResource implements IResource {
      * Attribute describing ambiguity of the end position of the feature
      * </p> 
 	 */
-	@Block(name="GVFVariant.endRange")	
+	@Block()	
 	public static class EndRange extends BaseElement implements IResourceBlock {
 	
 	@Child(name="start", type=IntegerDt.class, order=0, min=1, max=1)	
@@ -2459,7 +2462,7 @@ public class GVFVariant extends BaseResource implements IResource {
      * Coordinate of a variant with zero length
      * </p> 
 	 */
-	@Block(name="GVFVariant.breakpointDetail")	
+	@Block()	
 	public static class BreakpointDetail extends BaseElement implements IResourceBlock {
 	
 	@Child(name="seqid", type=StringDt.class, order=0, min=1, max=1)	
@@ -2694,7 +2697,7 @@ public class GVFVariant extends BaseResource implements IResource {
      * Sequences adjacent to the feature
      * </p> 
 	 */
-	@Block(name="GVFVariant.sequenceContext")	
+	@Block()	
 	public static class SequenceContext extends BaseElement implements IResourceBlock {
 	
 	@Child(name="fivePrime", type=StringDt.class, order=0, min=1, max=1)	
@@ -2827,7 +2830,7 @@ public class GVFVariant extends BaseResource implements IResource {
      * Individual genotypic information
      * </p> 
 	 */
-	@Block(name="GVFVariant.sample")	
+	@Block()	
 	public static class Sample extends BaseElement implements IResourceBlock {
 	
 	@Child(name="phased", type=StringDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)	

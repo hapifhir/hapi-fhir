@@ -49,6 +49,7 @@ import ca.uhn.fhir.model.api.annotation.Block;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.valueset.QueryOutcomeEnum;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
@@ -88,6 +89,7 @@ public class Query extends BaseResource implements IResource {
 	 * Path: <b>Query.identifier</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="identifier", path="Query.identifier", description="")
 	public static final String SP_IDENTIFIER = "identifier";
 
 	/**
@@ -98,6 +100,7 @@ public class Query extends BaseResource implements IResource {
 	 * Path: <b>Query.response.identifier</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="response", path="Query.response.identifier", description="")
 	public static final String SP_RESPONSE = "response";
 
 
@@ -281,7 +284,7 @@ public class Query extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	@Block(name="Query.response")	
+	@Block()	
 	public static class Response extends BaseElement implements IResourceBlock {
 	
 	@Child(name="identifier", type=UriDt.class, order=0, min=1, max=1)	

@@ -48,6 +48,7 @@ public class ${className} extends BaseResource implements IResource {
 	 * Path: <b>${param.path}</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="${param.name}", path="${param.path}", description="${param.description}")
 	public static final String $param.constantName = "${param.name}";
 
 #end

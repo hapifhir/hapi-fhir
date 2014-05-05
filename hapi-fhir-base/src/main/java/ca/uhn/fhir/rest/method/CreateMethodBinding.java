@@ -33,6 +33,7 @@ import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.client.BaseClientInvocation;
 import ca.uhn.fhir.rest.client.PostClientInvocation;
 import ca.uhn.fhir.rest.method.SearchMethodBinding.RequestType;
+import ca.uhn.fhir.rest.param.IParameter;
 
 public class CreateMethodBinding extends BaseOutcomeReturningMethodBindingWithResourceParam {
 
@@ -59,10 +60,19 @@ public class CreateMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 	protected BaseClientInvocation createClientInvocation(Object[] theArgs, IResource resource) {
 		FhirContext context = getContext();
 
-		return createCreateInvocation(resource, context);
+		BaseClientInvocation retVal = createCreateInvocation(resource, context);
+		
+		if (theArgs != null) {
+			for (int idx = 0; idx < theArgs.length; idx++) {
+				IParameter nextParam = getParameters().get(idx);
+				nextParam.translateClientArgumentIntoQueryArgument(theArgs[idx], null, retVal);
+			}
+		}
+
+		return retVal;
 	}
 
-	public static BaseClientInvocation createCreateInvocation(IResource resource, FhirContext context) {
+	public static PostClientInvocation createCreateInvocation(IResource resource, FhirContext context) {
 		RuntimeResourceDefinition def = context.getResourceDefinition(resource);
 		String resourceName = def.getName();
 

@@ -50,6 +50,7 @@ import ca.uhn.fhir.model.api.annotation.Block;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.dstu.composite.AttachmentDt;
 import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
@@ -89,6 +90,7 @@ public class SequencingLab extends BaseResource implements IResource {
 	 * Path: <b>SequencingLab.subject</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="subject", path="SequencingLab.subject", description="Subject of the lab")
 	public static final String SP_SUBJECT = "subject";
 
 	/**
@@ -99,6 +101,7 @@ public class SequencingLab extends BaseResource implements IResource {
 	 * Path: <b>SequencingLab.specimen.type</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="specimen", path="SequencingLab.specimen.type", description="Type of the specimen used for the lab")
 	public static final String SP_SPECIMEN = "specimen";
 
 	/**
@@ -109,6 +112,7 @@ public class SequencingLab extends BaseResource implements IResource {
 	 * Path: <b>SequencingLab.date</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="date", path="SequencingLab.date", description="Date when result of the lab is uploaded")
 	public static final String SP_DATE = "date";
 
 	/**
@@ -119,6 +123,7 @@ public class SequencingLab extends BaseResource implements IResource {
 	 * Path: <b>SequencingLab.organization</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="organization", path="SequencingLab.organization", description="Organization that does the lab")
 	public static final String SP_ORGANIZATION = "organization";
 
 	/**
@@ -129,6 +134,7 @@ public class SequencingLab extends BaseResource implements IResource {
 	 * Path: <b>SequencingLab.system.class</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="system-class", path="SequencingLab.system.class", description="Class of the sequencing system")
 	public static final String SP_SYSTEM_CLASS = "system-class";
 
 	/**
@@ -139,6 +145,7 @@ public class SequencingLab extends BaseResource implements IResource {
 	 * Path: <b>SequencingLab.system.name</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="system-name", path="SequencingLab.system.name", description="Name of the sequencing system")
 	public static final String SP_SYSTEM_NAME = "system-name";
 
 
@@ -565,7 +572,7 @@ public class SequencingLab extends BaseResource implements IResource {
      * System of machine used for sequencing
      * </p> 
 	 */
-	@Block(name="SequencingLab.system")	
+	@Block()	
 	public static class System extends BaseElement implements IResourceBlock {
 	
 	@Child(name="class", type=CodeDt.class, order=0, min=0, max=1)	
@@ -800,7 +807,7 @@ public class SequencingLab extends BaseResource implements IResource {
      * Specimen of the lab
      * </p> 
 	 */
-	@Block(name="SequencingLab.specimen")	
+	@Block()	
 	public static class Specimen extends BaseElement implements IResourceBlock {
 	
 	@Child(name="type", type=CodeDt.class, order=0, min=1, max=1)	

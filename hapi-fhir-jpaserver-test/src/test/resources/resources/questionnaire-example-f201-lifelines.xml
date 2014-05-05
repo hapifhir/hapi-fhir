@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Questionnaire xmlns="http://hl7.org/fhir" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://hl7.org/fhir ../../schema/questionnaire.xsd">
+    <status value="completed"/>
+    <authored value="2013-06-18T00:00:00+01:00"/>
+    <!--Fictive, only the below answers are non-fictive-->
+    <subject>
+        <reference value="Patient/f201"/>
+        <display value="Roel"/>
+    </subject>
+    <author>
+        <reference value="Practitioner/f201"/>
+    </author>
+    <source>
+        <reference value="Practitioner/f201"/>
+    </source>
+    <name>
+        <coding>
+            <system value="https://lifelines.nl"/>
+            <code value="VL 1-1, 18-65_1.2.2"/>
+            <display value="Lifelines Questionnaire 1 part 1"/>
+        </coding>
+    </name>
+    <identifier>
+        <use value="temp"/>
+        <label value="Roel's VL 1-1, 18-65_1.2.2"/>
+    </identifier>
+
+    <group>
+        <group>
+            <question>
+                <!--Seperate answer-->
+                <text value="Do you have allergies?"/>
+                <answerString value="I am allergic to house dust"/>
+            </question>
+        </group>
+        <group>
+            <!--Answers to general questions-->
+            <header value="General questions"/>
+            <question>
+                <text value="What is your gender?"/>
+                <answerString value="Male"/>
+            </question>
+            <question>
+                <name>
+                    <text value="What is your date of birth?"/>
+                </name>
+                <answerDate value="1960-03-13"/>
+            </question>
+            <question>
+                <name>
+                    <text value="What is your country of birth?"/>
+                </name>
+                <answerString value="The Netherlands"/>
+            </question>
+            <question>
+                <name>
+                    <text value="What is your marital status?"/>
+                </name>
+                <answerString value="married"/>
+            </question>
+        </group>
+
+        <group>
+            <!--Answers to intoxications-->
+            <header value="Intoxications"/>
+
+            <question>
+                <text value="Do you smoke?"/>
+                <answerString value="No"/>
+            </question>
+            <question>
+                <text value="Do you drink alchohol?"/>
+                <answerString value="No, but I used to drink"/>
+            </question>
+        </group>
+    </group>
+</Questionnaire>

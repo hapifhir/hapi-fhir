@@ -211,7 +211,7 @@ public class ScheduleDt
      * Identifies a repeating pattern to the intended time periods.
      * </p> 
 	 */
-	@Block(name="Schedule.repeat")	
+	@Block()	
 	public static class Repeat extends BaseElement implements IResourceBlock {
 	
 	@Child(name="frequency", type=IntegerDt.class, order=0, min=0, max=1)	
@@ -398,6 +398,19 @@ public class ScheduleDt
      * How long each repetition should last
      * </p> 
 	 */
+	public Repeat setDuration( long theValue) {
+		myDuration = new DecimalDt(theValue); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>duration</b> (Repeating or event-related duration)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * How long each repetition should last
+     * </p> 
+	 */
 	public Repeat setDuration( double theValue) {
 		myDuration = new DecimalDt(theValue); 
 		return this; 
@@ -412,19 +425,6 @@ public class ScheduleDt
      * </p> 
 	 */
 	public Repeat setDuration( java.math.BigDecimal theValue) {
-		myDuration = new DecimalDt(theValue); 
-		return this; 
-	}
-
-	/**
-	 * Sets the value for <b>duration</b> (Repeating or event-related duration)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * How long each repetition should last
-     * </p> 
-	 */
-	public Repeat setDuration( long theValue) {
 		myDuration = new DecimalDt(theValue); 
 		return this; 
 	}

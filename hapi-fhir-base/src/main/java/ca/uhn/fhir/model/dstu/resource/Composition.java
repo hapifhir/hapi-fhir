@@ -50,6 +50,7 @@ import ca.uhn.fhir.model.api.annotation.Block;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu.composite.CodingDt;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
@@ -95,6 +96,7 @@ public class Composition extends BaseResource implements IResource {
 	 * Path: <b>Composition.type</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="type", path="Composition.type", description="")
 	public static final String SP_TYPE = "type";
 
 	/**
@@ -105,6 +107,7 @@ public class Composition extends BaseResource implements IResource {
 	 * Path: <b>Composition.class</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="class", path="Composition.class", description="")
 	public static final String SP_CLASS = "class";
 
 	/**
@@ -115,6 +118,7 @@ public class Composition extends BaseResource implements IResource {
 	 * Path: <b>Composition.date</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="date", path="Composition.date", description="")
 	public static final String SP_DATE = "date";
 
 	/**
@@ -125,6 +129,7 @@ public class Composition extends BaseResource implements IResource {
 	 * Path: <b>Composition.subject</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="subject", path="Composition.subject", description="")
 	public static final String SP_SUBJECT = "subject";
 
 	/**
@@ -135,6 +140,7 @@ public class Composition extends BaseResource implements IResource {
 	 * Path: <b>Composition.author</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="author", path="Composition.author", description="")
 	public static final String SP_AUTHOR = "author";
 
 	/**
@@ -145,6 +151,7 @@ public class Composition extends BaseResource implements IResource {
 	 * Path: <b>Composition.attester.party</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="attester", path="Composition.attester.party", description="")
 	public static final String SP_ATTESTER = "attester";
 
 	/**
@@ -155,6 +162,7 @@ public class Composition extends BaseResource implements IResource {
 	 * Path: <b>Composition.event.code</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="context", path="Composition.event.code", description="")
 	public static final String SP_CONTEXT = "context";
 
 	/**
@@ -165,6 +173,7 @@ public class Composition extends BaseResource implements IResource {
 	 * Path: <b>Composition.section.code</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="section-type", path="Composition.section.code", description="")
 	public static final String SP_SECTION_TYPE = "section-type";
 
 	/**
@@ -175,6 +184,7 @@ public class Composition extends BaseResource implements IResource {
 	 * Path: <b>Composition.section.content</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="section-content", path="Composition.section.content", description="")
 	public static final String SP_SECTION_CONTENT = "section-content";
 
 	/**
@@ -185,6 +195,7 @@ public class Composition extends BaseResource implements IResource {
 	 * Path: <b>Composition.identifier</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="identifier", path="Composition.identifier", description="")
 	public static final String SP_IDENTIFIER = "identifier";
 
 
@@ -891,7 +902,7 @@ public class Composition extends BaseResource implements IResource {
      * A participant who has attested to the accuracy of the composition/document
      * </p> 
 	 */
-	@Block(name="Composition.attester")	
+	@Block()	
 	public static class Attester extends BaseElement implements IResourceBlock {
 	
 	@Child(name="mode", type=CodeDt.class, order=0, min=1, max=Child.MAX_UNLIMITED)	
@@ -1086,7 +1097,7 @@ public class Composition extends BaseResource implements IResource {
      * The main event/act/item, such as a colonoscopy or an appendectomy, being documented
      * </p> 
 	 */
-	@Block(name="Composition.event")	
+	@Block()	
 	public static class Event extends BaseElement implements IResourceBlock {
 	
 	@Child(name="code", type=CodeableConceptDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)	
@@ -1274,7 +1285,7 @@ public class Composition extends BaseResource implements IResource {
      * The root of the sections that make up the composition
      * </p> 
 	 */
-	@Block(name="Composition.section")	
+	@Block()	
 	public static class Section extends BaseElement implements IResourceBlock {
 	
 	@Child(name="title", type=StringDt.class, order=0, min=0, max=1)	

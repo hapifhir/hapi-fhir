@@ -42,6 +42,7 @@ import org.apache.commons.lang3.time.DateUtils;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.PathSpecification;
+import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
@@ -70,19 +71,22 @@ public class ParameterUtil {
 			Class<?> parameterType = parameterTypes[paramIndex];
 			Class<? extends java.util.Collection<?>> outerCollectionType = null;
 			Class<? extends java.util.Collection<?>> innerCollectionType = null;
-			if (Collection.class.isAssignableFrom(parameterType)) {
-				innerCollectionType = (Class<? extends java.util.Collection<?>>) parameterType;
-				parameterType = ReflectionUtil.getGenericCollectionTypeOfMethodParameter(theMethod, paramIndex);
+			if (TagList.class.isAssignableFrom(parameterType)) {
+				param = new TagListParameter();
+			} else {
+				if (Collection.class.isAssignableFrom(parameterType)) {
+					innerCollectionType = (Class<? extends java.util.Collection<?>>) parameterType;
+					parameterType = ReflectionUtil.getGenericCollectionTypeOfMethodParameter(theMethod, paramIndex);
+				}
+				if (Collection.class.isAssignableFrom(parameterType)) {
+					outerCollectionType = innerCollectionType;
+					innerCollectionType = (Class<? extends java.util.Collection<?>>) parameterType;
+					parameterType = ReflectionUtil.getGenericCollectionTypeOfMethodParameter(theMethod, paramIndex);
+				}
+				if (Collection.class.isAssignableFrom(parameterType)) {
+					throw new ConfigurationException("Argument #" + paramIndex + " of Method '" + theMethod.getName() + "' in type '" + theMethod.getDeclaringClass().getCanonicalName() + "' is of an invalid generic type (can not be a collection of a collection of a collection)");
+				}
 			}
-			if (Collection.class.isAssignableFrom(parameterType)) {
-				outerCollectionType = innerCollectionType;
-				innerCollectionType = (Class<? extends java.util.Collection<?>>) parameterType;
-				parameterType = ReflectionUtil.getGenericCollectionTypeOfMethodParameter(theMethod, paramIndex);
-			}
-			if (Collection.class.isAssignableFrom(parameterType)) {
-				throw new ConfigurationException("Argument #" + paramIndex + " of Method '" + theMethod.getName() + "' in type '" + theMethod.getDeclaringClass().getCanonicalName() + "' is of an invalid generic type (can not be a collection of a collection of a collection)");
-			}
-
 			if (parameterType.equals(HttpServletRequest.class) || parameterType.equals(ServletRequest.class)) {
 				param = new ServletRequestParameter();
 			} else if (parameterType.equals(HttpServletResponse.class) || parameterType.equals(ServletResponse.class)) {
@@ -110,15 +114,15 @@ public class ParameterUtil {
 						Class<?> specType;
 
 						if (parameterType == String.class) {
-							instantiableCollectionType=null;
-							specType=String.class;
-						}else if (parameterType != PathSpecification.class || innerCollectionType == null || outerCollectionType != null) {
+							instantiableCollectionType = null;
+							specType = String.class;
+						} else if (parameterType != PathSpecification.class || innerCollectionType == null || outerCollectionType != null) {
 							throw new ConfigurationException("Method '" + theMethod.getName() + "' is annotated with @" + IncludeParam.class.getSimpleName() + " but has a type other than Collection<" + PathSpecification.class.getSimpleName() + ">");
 						} else {
 							instantiableCollectionType = (Class<? extends Collection<PathSpecification>>) CollectionBinder.getInstantiableCollectionType(innerCollectionType, "Method '" + theMethod.getName() + "'");
 							specType = PathSpecification.class;
 						}
-						
+
 						param = new IncludeParameter((IncludeParam) nextAnnotation, instantiableCollectionType, specType);
 					} else if (nextAnnotation instanceof ResourceParam) {
 						if (!IResource.class.isAssignableFrom(parameterType)) {

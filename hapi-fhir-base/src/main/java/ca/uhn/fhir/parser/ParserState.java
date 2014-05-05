@@ -67,9 +67,9 @@ class ParserState<T extends IElement> {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ParserState.class);
 	private FhirContext myContext;
+	private boolean myJsonMode;
 	private T myObject;
 	private BaseState myState;
-	private boolean myJsonMode;
 
 	private ParserState(FhirContext theContext, boolean theJsonMode) {
 		myContext = theContext;
@@ -99,6 +99,10 @@ class ParserState<T extends IElement> {
 
 	public boolean isComplete() {
 		return myObject != null;
+	}
+
+	public boolean isPreResource() {
+		return myState.isPreResource();
 	}
 
 	public void string(String theData) {
@@ -176,6 +180,15 @@ class ParserState<T extends IElement> {
 
 	public class AtomCategoryState extends BaseState {
 
+		private static final int STATE_LABEL = 2;
+		private static final int STATE_NONE = 0;
+
+		private static final int STATE_SCHEME = 3;
+
+		private static final int STATE_TERM = 1;
+
+		private int myCatState = STATE_NONE;
+
 		private BundleCategory myInstance;
 
 		public AtomCategoryState(BundleCategory theEntry) {
@@ -191,17 +204,47 @@ class ParserState<T extends IElement> {
 				myInstance.setLabel(theValue);
 			} else if ("scheme".equals(theName)) {
 				myInstance.setScheme(theValue);
+			} else if ("value".equals(theName)) {
+				// This is for the JSON parsing, which is weird for Categories..
+				switch (myCatState) {
+				case STATE_LABEL:
+					myInstance.setLabel(theValue);
+					break;
+				case STATE_TERM:
+					myInstance.setTerm(theValue);
+					break;
+				case STATE_SCHEME:
+					myInstance.setScheme(theValue);
+					break;
+				default:
+					super.string(theValue);
+					break;
+				}
+
 			}
 		}
 
 		@Override
 		public void endingElement() throws DataFormatException {
-			pop();
+			if (myCatState != STATE_NONE) {
+				myCatState = STATE_NONE;
+			} else {
+				pop();
+			}
 		}
 
 		@Override
-		public void enteringNewElement(String theNamespaceURI, String theLocalPart) throws DataFormatException {
-			throw new DataFormatException("Unexpected element: " + theLocalPart);
+		public void enteringNewElement(String theNamespaceURI, String theName) throws DataFormatException {
+			if (myCatState != STATE_NONE) {
+				throw new DataFormatException("Unexpected element in entry: " + theName);
+			}
+			if ("term".equals(theName)) {
+				myCatState = STATE_TERM;
+			} else if ("label".equals(theName)) {
+				myCatState = STATE_LABEL;
+			} else if ("scheme".equals(theName)) {
+				myCatState = STATE_SCHEME;
+			}
 		}
 
 	}
@@ -222,6 +265,33 @@ class ParserState<T extends IElement> {
 		public void endingElement() throws DataFormatException {
 			populateResourceMetadata();
 			pop();
+		}
+
+		@Override
+		public void enteringNewElement(String theNamespaceURI, String theLocalPart) throws DataFormatException {
+			if ("title".equals(theLocalPart)) {
+				push(new AtomPrimitiveState(myEntry.getTitle()));
+			} else if ("id".equals(theLocalPart)) {
+				push(new AtomPrimitiveState(myEntry.getId()));
+			} else if ("link".equals(theLocalPart)) {
+				push(new AtomLinkState(myEntry));
+			} else if ("updated".equals(theLocalPart)) {
+				push(new AtomPrimitiveState(myEntry.getUpdated()));
+			} else if ("published".equals(theLocalPart)) {
+				push(new AtomPrimitiveState(myEntry.getPublished()));
+			} else if ("author".equals(theLocalPart)) {
+				push(new AtomAuthorState(myEntry));
+			} else if ("content".equals(theLocalPart)) {
+				push(new PreResourceState(myEntry, myResourceType));
+			} else if ("summary".equals(theLocalPart)) {
+				push(new XhtmlState(getPreResourceState(), myEntry.getSummary(), false));
+			} else if ("category".equals(theLocalPart)) {
+				push(new AtomCategoryState(myEntry.addCategory()));
+			} else {
+				throw new DataFormatException("Unexpected element in entry: " + theLocalPart);
+			}
+
+			// TODO: handle category
 		}
 
 		private void populateResourceMetadata() {
@@ -260,33 +330,6 @@ class ParserState<T extends IElement> {
 				}
 			}
 
-		}
-
-		@Override
-		public void enteringNewElement(String theNamespaceURI, String theLocalPart) throws DataFormatException {
-			if ("title".equals(theLocalPart)) {
-				push(new AtomPrimitiveState(myEntry.getTitle()));
-			} else if ("id".equals(theLocalPart)) {
-				push(new AtomPrimitiveState(myEntry.getId()));
-			} else if ("link".equals(theLocalPart)) {
-				push(new AtomLinkState(myEntry));
-			} else if ("updated".equals(theLocalPart)) {
-				push(new AtomPrimitiveState(myEntry.getUpdated()));
-			} else if ("published".equals(theLocalPart)) {
-				push(new AtomPrimitiveState(myEntry.getPublished()));
-			} else if ("author".equals(theLocalPart)) {
-				push(new AtomAuthorState(myEntry));
-			} else if ("content".equals(theLocalPart)) {
-				push(new PreResourceState(myEntry, myResourceType));
-			} else if ("summary".equals(theLocalPart)) {
-				push(new XhtmlState(getPreResourceState(), myEntry.getSummary(), false));
-			} else if ("category".equals(theLocalPart)) {
-				push(new AtomCategoryState(myEntry.addCategory()));
-			} else {
-				throw new DataFormatException("Unexpected element in entry: " + theLocalPart);
-			}
-
-			// TODO: handle category
 		}
 
 	}
@@ -414,14 +457,18 @@ class ParserState<T extends IElement> {
 				push(new AtomPrimitiveState(myInstance.getBundleId()));
 			} else if ("link".equals(theLocalPart)) {
 				push(new AtomLinkState(myInstance));
-			} else if ("totalResults".equals(theLocalPart) && verifyNamespace(XmlParser.OPENSEARCH_NS, theNamespaceURI)) {
+			} else if ("totalResults".equals(theLocalPart) && (verifyNamespace(XmlParser.OPENSEARCH_NS, theNamespaceURI) || verifyNamespace(Constants.OPENSEARCH_NS_OLDER, theNamespaceURI))) {
 				push(new AtomPrimitiveState(myInstance.getTotalResults()));
 			} else if ("updated".equals(theLocalPart)) {
 				push(new AtomPrimitiveState(myInstance.getUpdated()));
 			} else if ("author".equals(theLocalPart)) {
 				push(new AtomAuthorState(myInstance));
 			} else {
-				throw new DataFormatException("Unexpected element: " + theLocalPart);
+				if (theNamespaceURI != null) {
+					throw new DataFormatException("Unexpected element: {" + theNamespaceURI + "}" + theLocalPart);
+				} else {
+					throw new DataFormatException("Unexpected element: " + theLocalPart);
+				}
 			}
 
 			// TODO: handle category and DSig
@@ -481,6 +528,10 @@ class ParserState<T extends IElement> {
 			return myPreResourceState;
 		}
 
+		public boolean isPreResource() {
+			return false;
+		}
+
 		public void setStack(BaseState theState) {
 			myStack = theState;
 		}
@@ -499,10 +550,6 @@ class ParserState<T extends IElement> {
 
 		protected IElement getCurrentElement() {
 			return null;
-		}
-
-		public boolean isPreResource() {
-			return false;
 		}
 
 	}
@@ -610,29 +657,6 @@ class ParserState<T extends IElement> {
 		@Override
 		protected IElement getCurrentElement() {
 			return myParentInstance;
-		}
-
-	}
-
-	private class SwallowChildrenWholeState extends BaseState {
-
-		private int myDepth;
-
-		public SwallowChildrenWholeState(PreResourceState thePreResourceState) {
-			super(thePreResourceState);
-		}
-
-		@Override
-		public void endingElement() throws DataFormatException {
-			myDepth--;
-			if (myDepth < 0) {
-				pop();
-			}
-		}
-
-		@Override
-		public void enteringNewElement(String theNamespaceURI, String theLocalPart) throws DataFormatException {
-			myDepth++;
 		}
 
 	}
@@ -878,15 +902,10 @@ class ParserState<T extends IElement> {
 
 		private Class<? extends IResource> myResourceType;
 
-		@Override
-		public boolean isPreResource() {
-			return true;
-		}
-
 		public PreResourceState(BundleEntry theEntry, Class<? extends IResource> theResourceType) {
 			super(null);
 			myEntry = theEntry;
-			myResourceType=theResourceType;
+			myResourceType = theResourceType;
 		}
 
 		/**
@@ -937,6 +956,11 @@ class ParserState<T extends IElement> {
 
 		public List<ResourceReferenceDt> getResourceReferences() {
 			return myResourceReferences;
+		}
+
+		@Override
+		public boolean isPreResource() {
+			return true;
 		}
 
 		@SuppressWarnings("unchecked")
@@ -1090,6 +1114,29 @@ class ParserState<T extends IElement> {
 		DISPLAY, INITIAL, REFERENCE
 	}
 
+	private class SwallowChildrenWholeState extends BaseState {
+
+		private int myDepth;
+
+		public SwallowChildrenWholeState(PreResourceState thePreResourceState) {
+			super(thePreResourceState);
+		}
+
+		@Override
+		public void endingElement() throws DataFormatException {
+			myDepth--;
+			if (myDepth < 0) {
+				pop();
+			}
+		}
+
+		@Override
+		public void enteringNewElement(String theNamespaceURI, String theLocalPart) throws DataFormatException {
+			myDepth++;
+		}
+
+	}
+
 	private class XhtmlState extends BaseState {
 		private int myDepth;
 		private XhtmlDt myDt;
@@ -1148,10 +1195,6 @@ class ParserState<T extends IElement> {
 			return myDt;
 		}
 
-	}
-
-	public boolean isPreResource() {
-		return myState.isPreResource();
 	}
 
 }

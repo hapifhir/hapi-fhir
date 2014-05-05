@@ -50,6 +50,7 @@ import ca.uhn.fhir.model.api.annotation.Block;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.dstu.composite.AttachmentDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
@@ -88,6 +89,7 @@ public class SequencingAnalysis extends BaseResource implements IResource {
 	 * Path: <b>SequencingAnalysis.subject</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="subject", path="SequencingAnalysis.subject", description="Subject of the analysis")
 	public static final String SP_SUBJECT = "subject";
 
 	/**
@@ -98,6 +100,7 @@ public class SequencingAnalysis extends BaseResource implements IResource {
 	 * Path: <b>SequencingAnalysis.date</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="date", path="SequencingAnalysis.date", description="Date when result of the analysis is updated")
 	public static final String SP_DATE = "date";
 
 	/**
@@ -108,6 +111,7 @@ public class SequencingAnalysis extends BaseResource implements IResource {
 	 * Path: <b>SequencingAnalysis.genome.name</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="genome", path="SequencingAnalysis.genome.name", description="Name of the reference genome used in the analysis")
 	public static final String SP_GENOME = "genome";
 
 
@@ -498,7 +502,7 @@ public class SequencingAnalysis extends BaseResource implements IResource {
      * Reference genome used in the analysis
      * </p> 
 	 */
-	@Block(name="SequencingAnalysis.genome")	
+	@Block()	
 	public static class Genome extends BaseElement implements IResourceBlock {
 	
 	@Child(name="name", type=CodeDt.class, order=0, min=1, max=1)	

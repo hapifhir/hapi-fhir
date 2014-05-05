@@ -51,6 +51,7 @@ import ca.uhn.fhir.model.api.annotation.Block;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu.composite.CodingDt;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
@@ -102,6 +103,7 @@ public class Questionnaire extends BaseResource implements IResource {
 	 * Path: <b>Questionnaire.status</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="status", path="Questionnaire.status", description="The status of the questionnaire")
 	public static final String SP_STATUS = "status";
 
 	/**
@@ -112,6 +114,7 @@ public class Questionnaire extends BaseResource implements IResource {
 	 * Path: <b>Questionnaire.authored</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="authored", path="Questionnaire.authored", description="When the questionnaire was authored")
 	public static final String SP_AUTHORED = "authored";
 
 	/**
@@ -122,6 +125,7 @@ public class Questionnaire extends BaseResource implements IResource {
 	 * Path: <b>Questionnaire.subject</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="subject", path="Questionnaire.subject", description="The subject of the questionnaire")
 	public static final String SP_SUBJECT = "subject";
 
 	/**
@@ -132,6 +136,7 @@ public class Questionnaire extends BaseResource implements IResource {
 	 * Path: <b>Questionnaire.author</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="author", path="Questionnaire.author", description="The author of the questionnaire")
 	public static final String SP_AUTHOR = "author";
 
 	/**
@@ -142,6 +147,7 @@ public class Questionnaire extends BaseResource implements IResource {
 	 * Path: <b>Questionnaire.identifier</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="identifier", path="Questionnaire.identifier", description="An identifier for the questionnaire")
 	public static final String SP_IDENTIFIER = "identifier";
 
 	/**
@@ -152,6 +158,7 @@ public class Questionnaire extends BaseResource implements IResource {
 	 * Path: <b>Questionnaire.name</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="name", path="Questionnaire.name", description="Name of the questionnaire")
 	public static final String SP_NAME = "name";
 
 	/**
@@ -162,6 +169,7 @@ public class Questionnaire extends BaseResource implements IResource {
 	 * Path: <b>Questionnaire.encounter</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="encounter", path="Questionnaire.encounter", description="Encounter during which questionnaire was authored")
 	public static final String SP_ENCOUNTER = "encounter";
 
 
@@ -643,7 +651,7 @@ public class Questionnaire extends BaseResource implements IResource {
      * A group of questions to a possibly similarly grouped set of questions in the questionnaire
      * </p> 
 	 */
-	@Block(name="Questionnaire.group")	
+	@Block()	
 	public static class Group extends BaseElement implements IResourceBlock {
 	
 	@Child(name="name", type=CodeableConceptDt.class, order=0, min=0, max=1)	
@@ -999,7 +1007,7 @@ public class Questionnaire extends BaseResource implements IResource {
      * Set of questions within this group. The order of questions within the group is relevant
      * </p> 
 	 */
-	@Block(name="Questionnaire.group.question")	
+	@Block()	
 	public static class GroupQuestion extends BaseElement implements IResourceBlock {
 	
 	@Child(name="name", type=CodeableConceptDt.class, order=0, min=0, max=1)	

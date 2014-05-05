@@ -50,6 +50,7 @@ import ca.uhn.fhir.model.api.annotation.Block;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.composite.QuantityDt;
@@ -94,6 +95,7 @@ public class Substance extends BaseResource implements IResource {
 	 * Path: <b>Substance.type</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="type", path="Substance.type", description="The type of the substance")
 	public static final String SP_TYPE = "type";
 
 	/**
@@ -104,6 +106,7 @@ public class Substance extends BaseResource implements IResource {
 	 * Path: <b>Substance.instance.identifier</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="identifier", path="Substance.instance.identifier", description="")
 	public static final String SP_IDENTIFIER = "identifier";
 
 	/**
@@ -114,6 +117,7 @@ public class Substance extends BaseResource implements IResource {
 	 * Path: <b>Substance.instance.expiry</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="expiry", path="Substance.instance.expiry", description="")
 	public static final String SP_EXPIRY = "expiry";
 
 	/**
@@ -124,6 +128,7 @@ public class Substance extends BaseResource implements IResource {
 	 * Path: <b>Substance.instance.quantity</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="quantity", path="Substance.instance.quantity", description="")
 	public static final String SP_QUANTITY = "quantity";
 
 	/**
@@ -134,6 +139,7 @@ public class Substance extends BaseResource implements IResource {
 	 * Path: <b>Substance.ingredient.substance</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="substance", path="Substance.ingredient.substance", description="")
 	public static final String SP_SUBSTANCE = "substance";
 
 
@@ -368,7 +374,7 @@ public class Substance extends BaseResource implements IResource {
      * Substance may be used to describe a kind of substance, or a specific package/container of the substance: an instance
      * </p> 
 	 */
-	@Block(name="Substance.instance")	
+	@Block()	
 	public static class Instance extends BaseElement implements IResourceBlock {
 	
 	@Child(name="identifier", type=IdentifierDt.class, order=0, min=0, max=1)	
@@ -617,7 +623,7 @@ public class Substance extends BaseResource implements IResource {
      * A substance can be composed of other substances
      * </p> 
 	 */
-	@Block(name="Substance.ingredient")	
+	@Block()	
 	public static class Ingredient extends BaseElement implements IResourceBlock {
 	
 	@Child(name="quantity", type=RatioDt.class, order=0, min=0, max=1)	

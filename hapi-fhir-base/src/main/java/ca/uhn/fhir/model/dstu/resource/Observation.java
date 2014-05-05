@@ -51,6 +51,7 @@ import ca.uhn.fhir.model.api.annotation.Block;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.dstu.composite.AttachmentDt;
 import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
@@ -105,6 +106,7 @@ public class Observation extends BaseResource implements IResource {
 	 * Path: <b>Observation.name</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="name", path="Observation.name", description="The name of the observation type")
 	public static final String SP_NAME = "name";
 
 	/**
@@ -115,6 +117,7 @@ public class Observation extends BaseResource implements IResource {
 	 * Path: <b>Observation.value[x]</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="value-quantity", path="Observation.value[x]", description="The value of the observation, if the value is a Quantity, or a SampledData (just search on the bounds of the values in sampled data)")
 	public static final String SP_VALUE_QUANTITY = "value-quantity";
 
 	/**
@@ -125,6 +128,7 @@ public class Observation extends BaseResource implements IResource {
 	 * Path: <b>Observation.value[x]</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="value-concept", path="Observation.value[x]", description="The value of the observation, if the value is a CodeableConcept")
 	public static final String SP_VALUE_CONCEPT = "value-concept";
 
 	/**
@@ -135,6 +139,7 @@ public class Observation extends BaseResource implements IResource {
 	 * Path: <b>Observation.value[x]</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="value-date", path="Observation.value[x]", description="The value of the observation, if the value is a Period")
 	public static final String SP_VALUE_DATE = "value-date";
 
 	/**
@@ -145,6 +150,7 @@ public class Observation extends BaseResource implements IResource {
 	 * Path: <b>Observation.value[x]</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="value-string", path="Observation.value[x]", description="The value of the observation, if the value is a string, and also searches in CodeableConcept.text")
 	public static final String SP_VALUE_STRING = "value-string";
 
 	/**
@@ -155,6 +161,7 @@ public class Observation extends BaseResource implements IResource {
 	 * Path: <b>name & value-[x]</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="name-value-[x]", path="name & value-[x]", description="Both name and one of the value parameters")
 	public static final String SP_NAME_VALUE_X = "name-value-[x]";
 
 	/**
@@ -165,6 +172,7 @@ public class Observation extends BaseResource implements IResource {
 	 * Path: <b>Observation.applies[x]</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="date", path="Observation.applies[x]", description="Obtained date/time. If the obtained element is a period, a date that falls in the period")
 	public static final String SP_DATE = "date";
 
 	/**
@@ -175,6 +183,7 @@ public class Observation extends BaseResource implements IResource {
 	 * Path: <b>Observation.status</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="status", path="Observation.status", description="The status of the observation")
 	public static final String SP_STATUS = "status";
 
 	/**
@@ -185,6 +194,7 @@ public class Observation extends BaseResource implements IResource {
 	 * Path: <b>Observation.reliability</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="reliability", path="Observation.reliability", description="The reliability of the observation")
 	public static final String SP_RELIABILITY = "reliability";
 
 	/**
@@ -195,6 +205,7 @@ public class Observation extends BaseResource implements IResource {
 	 * Path: <b>Observation.subject</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="subject", path="Observation.subject", description="The subject that the observation is about")
 	public static final String SP_SUBJECT = "subject";
 
 	/**
@@ -205,6 +216,7 @@ public class Observation extends BaseResource implements IResource {
 	 * Path: <b>Observation.performer</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="performer", path="Observation.performer", description="Who and/or what performed the observation")
 	public static final String SP_PERFORMER = "performer";
 
 	/**
@@ -215,6 +227,7 @@ public class Observation extends BaseResource implements IResource {
 	 * Path: <b>Observation.specimen</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="specimen", path="Observation.specimen", description="")
 	public static final String SP_SPECIMEN = "specimen";
 
 	/**
@@ -225,6 +238,7 @@ public class Observation extends BaseResource implements IResource {
 	 * Path: <b>Observation.related.type</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="related-type", path="Observation.related.type", description="")
 	public static final String SP_RELATED_TYPE = "related-type";
 
 	/**
@@ -235,6 +249,7 @@ public class Observation extends BaseResource implements IResource {
 	 * Path: <b>Observation.related.target</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="related-target", path="Observation.related.target", description="")
 	public static final String SP_RELATED_TARGET = "related-target";
 
 	/**
@@ -245,6 +260,7 @@ public class Observation extends BaseResource implements IResource {
 	 * Path: <b>related-target & related-type</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="related", path="related-target & related-type", description="Related Observations - search on related-type and related-target together")
 	public static final String SP_RELATED = "related";
 
 
@@ -594,8 +610,8 @@ public class Observation extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public Observation setIssuedWithMillisPrecision( Date theDate) {
-		myIssued = new InstantDt(theDate); 
+	public Observation setIssued( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myIssued = new InstantDt(theDate, thePrecision); 
 		return this; 
 	}
 
@@ -607,8 +623,8 @@ public class Observation extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public Observation setIssued( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myIssued = new InstantDt(theDate, thePrecision); 
+	public Observation setIssuedWithMillisPrecision( Date theDate) {
+		myIssued = new InstantDt(theDate); 
 		return this; 
 	}
 
@@ -1048,7 +1064,7 @@ public class Observation extends BaseResource implements IResource {
      * Guidance on how to interpret the value by comparison to a normal or recommended range
      * </p> 
 	 */
-	@Block(name="Observation.referenceRange")	
+	@Block()	
 	public static class ReferenceRange extends BaseElement implements IResourceBlock {
 	
 	@Child(name="low", type=QuantityDt.class, order=0, min=0, max=1)	
@@ -1335,7 +1351,7 @@ public class Observation extends BaseResource implements IResource {
      * Related observations - either components, or previous observations, or statements of derivation
      * </p> 
 	 */
-	@Block(name="Observation.related")	
+	@Block()	
 	public static class Related extends BaseElement implements IResourceBlock {
 	
 	@Child(name="type", type=CodeDt.class, order=0, min=0, max=1)	

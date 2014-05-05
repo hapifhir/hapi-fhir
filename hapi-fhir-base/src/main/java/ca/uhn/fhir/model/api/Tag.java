@@ -1,0 +1,145 @@
+package ca.uhn.fhir.model.api;
+
+/*
+ * #%L
+ * HAPI FHIR Library
+ * %%
+ * Copyright (C) 2014 University Health Network
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
+import static org.apache.commons.lang3.StringUtils.*;
+
+import java.net.URI;
+
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+
+public class Tag {
+
+	/**
+	 * Convenience constant containing the "http://hl7.org/fhir/tag" scheme
+	 * value
+	 */
+	public static final String HL7_ORG_FHIR_TAG = "http://hl7.org/fhir/tag";
+
+	private String myLabel;
+	private String myScheme;
+	private String myTerm;
+
+	public Tag() {
+	}
+
+	public Tag(String theTerm) {
+		this(theTerm, null, (String) null);
+	}
+
+	public Tag(String theTerm, String theLabel, String theScheme) {
+		myTerm = theTerm;
+		myLabel = theLabel;
+		myScheme = theScheme;
+	}
+
+	public Tag(String theTerm, String theLabel, URI theScheme) {
+		myTerm = theTerm;
+		myLabel = theLabel;
+		if (theScheme != null) {
+			myScheme = theScheme.toASCIIString();
+		}
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Tag other = (Tag) obj;
+		if (myLabel == null) {
+			if (other.myLabel != null)
+				return false;
+		} else if (!myLabel.equals(other.myLabel))
+			return false;
+		if (myScheme == null) {
+			if (other.myScheme != null)
+				return false;
+		} else if (!myScheme.equals(other.myScheme))
+			return false;
+		if (myTerm == null) {
+			if (other.myTerm != null)
+				return false;
+		} else if (!myTerm.equals(other.myTerm))
+			return false;
+		return true;
+	}
+
+	@Override
+	public String toString() {
+		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SIMPLE_STYLE);
+		b.append("Term", myTerm);
+		b.append("Label", myLabel);
+		b.append("Scheme", myScheme);
+		return b.toString();
+	}
+
+	public String getLabel() {
+		return myLabel;
+	}
+
+	public String getScheme() {
+		return myScheme;
+	}
+
+	public String getTerm() {
+		return myTerm;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((myLabel == null) ? 0 : myLabel.hashCode());
+		result = prime * result + ((myScheme == null) ? 0 : myScheme.hashCode());
+		result = prime * result + ((myTerm == null) ? 0 : myTerm.hashCode());
+		return result;
+	}
+
+	public void setLabel(String theLabel) {
+		myLabel = theLabel;
+	}
+
+	public void setScheme(String theScheme) {
+		myScheme = theScheme;
+	}
+
+	public void setTerm(String theTerm) {
+		myTerm = theTerm;
+	}
+
+	public String toHeaderValue() {
+		StringBuilder b = new StringBuilder();
+		b.append(this.getTerm());
+		if (isNotBlank(this.getLabel())) {
+			b.append("; label=\"").append(this.getLabel()).append('"');
+		}
+		if (isNotBlank(this.getScheme())) {
+			b.append("; scheme=\"").append(this.getScheme()).append('"');
+		}
+		return  b.toString();
+	}
+
+}

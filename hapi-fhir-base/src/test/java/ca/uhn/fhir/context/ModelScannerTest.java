@@ -8,6 +8,7 @@ import ca.uhn.fhir.parser.DataFormatException;
 
 public class ModelScannerTest {
 
+	
 	@Test
 	public void testScanExtensionTypes() throws DataFormatException {
 		

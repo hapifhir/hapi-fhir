@@ -61,6 +61,7 @@ import ca.uhn.fhir.context.RuntimeChildUndeclaredExtensionDefinition;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.api.BaseBundle;
 import ca.uhn.fhir.model.api.Bundle;
+import ca.uhn.fhir.model.api.BundleCategory;
 import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.api.IElement;
@@ -180,6 +181,18 @@ public class JsonParser extends BaseParser implements IParser {
 
 			writeOptionalTagWithTextNode(eventWriter, "updated", nextEntry.getUpdated());
 			writeOptionalTagWithTextNode(eventWriter, "published", nextEntry.getPublished());
+
+			if (nextEntry.getCategories() != null) {
+				eventWriter.writeStartArray("category");
+				for (BundleCategory next : nextEntry.getCategories()) {
+					eventWriter.writeStartObject();
+					eventWriter.write("term", defaultString(next.getTerm()));
+					eventWriter.write("label", defaultString(next.getLabel()));
+					eventWriter.write("scheme", defaultString(next.getScheme()));
+					eventWriter.writeEnd();
+				}
+				eventWriter.writeEnd();
+			}
 
 			writeAuthor(nextEntry, eventWriter);
 

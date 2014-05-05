@@ -50,6 +50,7 @@ import ca.uhn.fhir.model.api.annotation.Block;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu.composite.CodingDt;
 import ca.uhn.fhir.model.dstu.composite.ContactDt;
@@ -107,6 +108,7 @@ public class Conformance extends BaseResource implements IResource {
 	 * Path: <b>Conformance.identifier</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="identifier", path="Conformance.identifier", description="The identifier of the conformance statement")
 	public static final String SP_IDENTIFIER = "identifier";
 
 	/**
@@ -117,6 +119,7 @@ public class Conformance extends BaseResource implements IResource {
 	 * Path: <b>Conformance.version</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="version", path="Conformance.version", description="The version identifier of the conformance statement")
 	public static final String SP_VERSION = "version";
 
 	/**
@@ -127,6 +130,7 @@ public class Conformance extends BaseResource implements IResource {
 	 * Path: <b>Conformance.name</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="name", path="Conformance.name", description="Name of the conformance statement")
 	public static final String SP_NAME = "name";
 
 	/**
@@ -137,6 +141,7 @@ public class Conformance extends BaseResource implements IResource {
 	 * Path: <b>Conformance.publisher</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="publisher", path="Conformance.publisher", description="Name of the publisher of the conformance statement")
 	public static final String SP_PUBLISHER = "publisher";
 
 	/**
@@ -147,6 +152,7 @@ public class Conformance extends BaseResource implements IResource {
 	 * Path: <b>Conformance.description</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="description", path="Conformance.description", description="Text search in the description of the conformance statement")
 	public static final String SP_DESCRIPTION = "description";
 
 	/**
@@ -157,6 +163,7 @@ public class Conformance extends BaseResource implements IResource {
 	 * Path: <b>Conformance.status</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="status", path="Conformance.status", description="The current status of the conformance statement")
 	public static final String SP_STATUS = "status";
 
 	/**
@@ -167,6 +174,7 @@ public class Conformance extends BaseResource implements IResource {
 	 * Path: <b>Conformance.date</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="date", path="Conformance.date", description="The conformance statement publication date")
 	public static final String SP_DATE = "date";
 
 	/**
@@ -177,6 +185,7 @@ public class Conformance extends BaseResource implements IResource {
 	 * Path: <b>Conformance.software.name</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="software", path="Conformance.software.name", description="Part of a the name of a software application")
 	public static final String SP_SOFTWARE = "software";
 
 	/**
@@ -187,6 +196,7 @@ public class Conformance extends BaseResource implements IResource {
 	 * Path: <b>Conformance.version</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="fhirversion", path="Conformance.version", description="The version of FHIR")
 	public static final String SP_FHIRVERSION = "fhirversion";
 
 	/**
@@ -197,6 +207,7 @@ public class Conformance extends BaseResource implements IResource {
 	 * Path: <b>Conformance.rest.resource.type</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="resource", path="Conformance.rest.resource.type", description="Name of a resource mentioned in a conformance statement")
 	public static final String SP_RESOURCE = "resource";
 
 	/**
@@ -207,6 +218,7 @@ public class Conformance extends BaseResource implements IResource {
 	 * Path: <b>Conformance.messaging.event.code</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="event", path="Conformance.messaging.event.code", description="Event code in a conformance statement")
 	public static final String SP_EVENT = "event";
 
 	/**
@@ -217,6 +229,7 @@ public class Conformance extends BaseResource implements IResource {
 	 * Path: <b>Conformance.rest.mode</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="mode", path="Conformance.rest.mode", description="Mode - restful (server/client) or messaging (sender/receiver)")
 	public static final String SP_MODE = "mode";
 
 	/**
@@ -227,6 +240,7 @@ public class Conformance extends BaseResource implements IResource {
 	 * Path: <b>Conformance.rest.resource.profile</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="profile", path="Conformance.rest.resource.profile", description="A profile id invoked in a conformance statement")
 	public static final String SP_PROFILE = "profile";
 
 	/**
@@ -237,6 +251,7 @@ public class Conformance extends BaseResource implements IResource {
 	 * Path: <b>Conformance.format</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="format", path="Conformance.format", description="")
 	public static final String SP_FORMAT = "format";
 
 	/**
@@ -247,6 +262,7 @@ public class Conformance extends BaseResource implements IResource {
 	 * Path: <b>Conformance.rest.security</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="security", path="Conformance.rest.security", description="")
 	public static final String SP_SECURITY = "security";
 
 	/**
@@ -257,6 +273,7 @@ public class Conformance extends BaseResource implements IResource {
 	 * Path: <b>Conformance.profile</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="supported-profile", path="Conformance.profile", description="")
 	public static final String SP_SUPPORTED_PROFILE = "supported-profile";
 
 
@@ -1288,7 +1305,7 @@ public class Conformance extends BaseResource implements IResource {
      * Software that is covered by this conformance statement.  It is used when the profile describes the capabilities of a particular software version, independent of an installation.
      * </p> 
 	 */
-	@Block(name="Conformance.software")	
+	@Block()	
 	public static class Software extends BaseElement implements IResourceBlock {
 	
 	@Child(name="name", type=StringDt.class, order=0, min=1, max=1)	
@@ -1485,7 +1502,7 @@ public class Conformance extends BaseResource implements IResource {
      * Identifies a specific implementation instance that is described by the conformance statement - i.e. a particular installation, rather than the capabilities of a software program
      * </p> 
 	 */
-	@Block(name="Conformance.implementation")	
+	@Block()	
 	public static class Implementation extends BaseElement implements IResourceBlock {
 	
 	@Child(name="description", type=StringDt.class, order=0, min=1, max=1)	
@@ -1618,7 +1635,7 @@ public class Conformance extends BaseResource implements IResource {
      * A definition of the restful capabilities of the solution, if any
      * </p> 
 	 */
-	@Block(name="Conformance.rest")	
+	@Block()	
 	public static class Rest extends BaseElement implements IResourceBlock {
 	
 	@Child(name="mode", type=CodeDt.class, order=0, min=1, max=1)	
@@ -2074,7 +2091,7 @@ public class Conformance extends BaseResource implements IResource {
      * Information about security of implementation
      * </p> 
 	 */
-	@Block(name="Conformance.rest.security")	
+	@Block()	
 	public static class RestSecurity extends BaseElement implements IResourceBlock {
 	
 	@Child(name="cors", type=BooleanDt.class, order=0, min=0, max=1)	
@@ -2337,7 +2354,7 @@ public class Conformance extends BaseResource implements IResource {
      * Certificates associated with security profiles
      * </p> 
 	 */
-	@Block(name="Conformance.rest.security.certificate")	
+	@Block()	
 	public static class RestSecurityCertificate extends BaseElement implements IResourceBlock {
 	
 	@Child(name="type", type=CodeDt.class, order=0, min=0, max=1)	
@@ -2471,7 +2488,7 @@ public class Conformance extends BaseResource implements IResource {
      * A specification of the restful capabilities of the solution for a specific resource type
      * </p> 
 	 */
-	@Block(name="Conformance.rest.resource")	
+	@Block()	
 	public static class RestResource extends BaseElement implements IResourceBlock {
 	
 	@Child(name="type", type=CodeDt.class, order=0, min=1, max=1)	
@@ -2912,7 +2929,7 @@ public class Conformance extends BaseResource implements IResource {
      * Identifies a restful operation supported by the solution
      * </p> 
 	 */
-	@Block(name="Conformance.rest.resource.operation")	
+	@Block()	
 	public static class RestResourceOperation extends BaseElement implements IResourceBlock {
 	
 	@Child(name="code", type=CodeDt.class, order=0, min=1, max=1)	
@@ -3045,7 +3062,7 @@ public class Conformance extends BaseResource implements IResource {
      * Additional search parameters for implementations to support and/or make use of
      * </p> 
 	 */
-	@Block(name="Conformance.rest.resource.searchParam")	
+	@Block()	
 	public static class RestResourceSearchParam extends BaseElement implements IResourceBlock {
 	
 	@Child(name="name", type=StringDt.class, order=0, min=1, max=1)	
@@ -3430,7 +3447,7 @@ public class Conformance extends BaseResource implements IResource {
      * A specification of restful operations supported by the system
      * </p> 
 	 */
-	@Block(name="Conformance.rest.operation")	
+	@Block()	
 	public static class RestOperation extends BaseElement implements IResourceBlock {
 	
 	@Child(name="code", type=CodeDt.class, order=0, min=1, max=1)	
@@ -3563,7 +3580,7 @@ public class Conformance extends BaseResource implements IResource {
      * Definition of a named query and its parameters and their meaning
      * </p> 
 	 */
-	@Block(name="Conformance.rest.query")	
+	@Block()	
 	public static class RestQuery extends BaseElement implements IResourceBlock {
 	
 	@Child(name="name", type=StringDt.class, order=0, min=1, max=1)	
@@ -3815,7 +3832,7 @@ public class Conformance extends BaseResource implements IResource {
      * A description of the messaging capabilities of the solution
      * </p> 
 	 */
-	@Block(name="Conformance.messaging")	
+	@Block()	
 	public static class Messaging extends BaseElement implements IResourceBlock {
 	
 	@Child(name="endpoint", type=UriDt.class, order=0, min=0, max=1)	
@@ -4065,7 +4082,7 @@ public class Conformance extends BaseResource implements IResource {
      * A description of the solution's support for an event at this end point.
      * </p> 
 	 */
-	@Block(name="Conformance.messaging.event")	
+	@Block()	
 	public static class MessagingEvent extends BaseElement implements IResourceBlock {
 	
 	@Child(name="code", type=CodingDt.class, order=0, min=1, max=1)	
@@ -4484,7 +4501,7 @@ public class Conformance extends BaseResource implements IResource {
      * A document definition
      * </p> 
 	 */
-	@Block(name="Conformance.document")	
+	@Block()	
 	public static class Document extends BaseElement implements IResourceBlock {
 	
 	@Child(name="mode", type=CodeDt.class, order=0, min=1, max=1)	

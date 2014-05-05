@@ -40,6 +40,7 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.BaseClientInvocation;
 import ca.uhn.fhir.rest.client.PutClientInvocation;
 import ca.uhn.fhir.rest.method.SearchMethodBinding.RequestType;
+import ca.uhn.fhir.rest.param.IParameter;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
@@ -113,6 +114,11 @@ public class UpdateMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 
 		PutClientInvocation retVal = createUpdateInvocation(theResource, idDt, versionIdDt, context);
 
+		for (int idx = 0; idx < theArgs.length; idx++) {
+			IParameter nextParam = getParameters().get(idx);
+			nextParam.translateClientArgumentIntoQueryArgument(theArgs[idx], null, retVal);
+		}
+
 		return retVal;
 	}
 
@@ -124,7 +130,7 @@ public class UpdateMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 		urlExtension.append('/');
 		urlExtension.append(id);
 		PutClientInvocation retVal = new PutClientInvocation(context, theResource, urlExtension.toString());
-		
+
 		if (versionIdDt != null) {
 			String versionId = versionIdDt.getValue();
 			if (StringUtils.isNotBlank(versionId)) {

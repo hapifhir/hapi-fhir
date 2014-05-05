@@ -27,6 +27,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +35,7 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.text.WordUtils;
 
+import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IPrimitiveDatatype;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.annotation.Child;
@@ -48,12 +50,28 @@ import ca.uhn.fhir.model.dstu.valueset.SlicingRulesEnum;
 
 public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefinition<IResource> {
 
-	private String myResourceProfile;
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RuntimeResourceDefinition.class);
+	private Map<RuntimeChildDeclaredExtensionDefinition, String> myExtensionDefToCode = new HashMap<RuntimeChildDeclaredExtensionDefinition, String>();
+	private Map<String, RuntimeSearchParam> myNameToSearchParam = new LinkedHashMap<String, RuntimeSearchParam>();
 	private Profile myProfileDef;
+	private String myResourceProfile;
 
 	public RuntimeResourceDefinition(Class<? extends IResource> theClass, ResourceDef theResourceAnnotation) {
 		super(theResourceAnnotation.name(), theClass);
 		myResourceProfile = theResourceAnnotation.profile();
+	}
+
+	public RuntimeSearchParam getSearchParam(String theName) {
+		return myNameToSearchParam.get(theName);
+	}
+	
+	public void addSearchParam(RuntimeSearchParam theParam) {
+		myNameToSearchParam.put(theParam.getName(), theParam);
+	}
+
+	@Override
+	public ca.uhn.fhir.context.BaseRuntimeElementDefinition.ChildTypeEnum getChildType() {
+		return ChildTypeEnum.RESOURCE;
 	}
 
 	public String getResourceProfile() {
@@ -61,8 +79,10 @@ public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefini
 	}
 
 	@Override
-	public ca.uhn.fhir.context.BaseRuntimeElementDefinition.ChildTypeEnum getChildType() {
-		return ChildTypeEnum.RESOURCE;
+	public void sealAndInitialize(Map<Class<? extends IElement>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
+		super.sealAndInitialize(theClassToElementDefinitions);
+
+		myNameToSearchParam = Collections.unmodifiableMap(myNameToSearchParam);
 	}
 
 	public synchronized Profile toProfile() {
@@ -100,57 +120,99 @@ public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefini
 		return retVal;
 	}
 
-	private Map<RuntimeChildDeclaredExtensionDefinition, String> myExtensionDefToCode = new HashMap<RuntimeChildDeclaredExtensionDefinition, String>();
+	private void fillBasics(StructureElement theElement, BaseRuntimeElementDefinition<?> def, LinkedList<String> path, BaseRuntimeDeclaredChildDefinition theChild) {
+		if (path.isEmpty()) {
+			path.add(def.getName());
+			theElement.setName(def.getName());
+		} else {
+			path.add(WordUtils.uncapitalize(theChild.getElementName()));
+			theElement.setName(theChild.getElementName());
+		}
+		theElement.setPath(StringUtils.join(path, '.'));
+	}
 
-	private void scanForExtensions(Profile theProfile, BaseRuntimeElementDefinition<?> def) {
-		BaseRuntimeElementCompositeDefinition<?> cdef = ((BaseRuntimeElementCompositeDefinition<?>) def);
+	private void fillExtensions(Structure theStruct, LinkedList<String> path, List<RuntimeChildDeclaredExtensionDefinition> extList, String elementName, boolean theIsModifier) {
+		if (extList.size() > 0) {
+			StructureElement extSlice = theStruct.addElement();
+			extSlice.setName(elementName);
+			extSlice.setPath(join(path, '.') + '.' + elementName);
+			extSlice.getSlicing().getDiscriminator().setValue("url");
+			extSlice.getSlicing().setOrdered(false);
+			extSlice.getSlicing().setRules(SlicingRulesEnum.OPEN);
+			extSlice.getDefinition().addType().setCode(DataTypeEnum.EXTENSION);
 
-		for (RuntimeChildDeclaredExtensionDefinition nextChild : cdef.getExtensions()) {
-			if (myExtensionDefToCode.containsKey(nextChild)) {
-				continue;
-			}
-
-			if (nextChild.isDefinedLocally() == false) {
-				continue;
-			}
-
-			ExtensionDefn defn = theProfile.addExtensionDefn();
-			String code = null;
-			if (nextChild.getExtensionUrl().contains("#") && !nextChild.getExtensionUrl().endsWith("#")) {
-				code = nextChild.getExtensionUrl().substring(nextChild.getExtensionUrl().indexOf('#') + 1);
-			} else {
-				throw new ConfigurationException("Locally defined extension has no '#[code]' part in extension URL: " + nextChild.getExtensionUrl());
-			}
-
-			defn.setCode(code);
-			if (myExtensionDefToCode.values().contains(code)) {
-				throw new IllegalStateException("Duplicate extension code: " + code);
-			}
-			myExtensionDefToCode.put(nextChild, code);
-
-			if (nextChild.getChildType() != null && IPrimitiveDatatype.class.isAssignableFrom(nextChild.getChildType())) {
-				RuntimePrimitiveDatatypeDefinition pdef = (RuntimePrimitiveDatatypeDefinition) nextChild.getSingleChildOrThrow();
-				defn.getDefinition().addType().setCode(DataTypeEnum.VALUESET_BINDER.fromCodeString(pdef.getName()));
-			} else {
-				RuntimeResourceBlockDefinition pdef = (RuntimeResourceBlockDefinition) nextChild.getSingleChildOrThrow();
-				scanForExtensions(theProfile, pdef);
-
-				for (RuntimeChildDeclaredExtensionDefinition nextChildExt : pdef.getExtensions()) {
-					StructureElementDefinitionType type = defn.getDefinition().addType();
-					type.setCode(DataTypeEnum.EXTENSION);
-					type.setProfile("#" + myExtensionDefToCode.get(nextChildExt));
+			for (RuntimeChildDeclaredExtensionDefinition nextExt : extList) {
+				StructureElement nextProfileExt = theStruct.addElement();
+				nextProfileExt.getDefinition().setIsModifier(theIsModifier);
+				nextProfileExt.setName(extSlice.getName());
+				nextProfileExt.setPath(extSlice.getPath());
+				fillMinAndMaxAndDefinitions(nextExt, nextProfileExt);
+				StructureElementDefinitionType type = nextProfileExt.getDefinition().addType();
+				type.setCode(DataTypeEnum.EXTENSION);
+				if (nextExt.isDefinedLocally()) {
+					type.setProfile(nextExt.getExtensionUrl().substring(nextExt.getExtensionUrl().indexOf('#')));
+				} else {
+					type.setProfile(nextExt.getExtensionUrl());
 				}
-
 			}
+		} else {
+			StructureElement extSlice = theStruct.addElement();
+			extSlice.setName(elementName);
+			extSlice.setPath(join(path, '.') + '.' + elementName);
+			extSlice.getDefinition().setIsModifier(theIsModifier);
+			extSlice.getDefinition().addType().setCode(DataTypeEnum.EXTENSION);
+			extSlice.getDefinition().setMin(0);
+			extSlice.getDefinition().setMax("*");
 		}
 	}
-private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RuntimeResourceDefinition.class);
+
+	private void fillMinAndMaxAndDefinitions(BaseRuntimeDeclaredChildDefinition child, StructureElement elem) {
+		elem.getDefinition().setMin(child.getMin());
+		if (child.getMax() == Child.MAX_UNLIMITED) {
+			elem.getDefinition().setMax("*");
+		} else {
+			elem.getDefinition().setMax(Integer.toString(child.getMax()));
+		}
+
+		if (isNotBlank(child.getShortDefinition())) {
+			elem.getDefinition().getShort().setValue(child.getShortDefinition());
+		}
+		if (isNotBlank(child.getFormalDefinition())) {
+			elem.getDefinition().getFormal().setValue(child.getFormalDefinition());
+		}
+	}
+
+	private void fillName(StructureElement elem, BaseRuntimeElementDefinition<?> nextDef) {
+		if (nextDef instanceof RuntimeResourceReferenceDefinition) {
+			RuntimeResourceReferenceDefinition rr = (RuntimeResourceReferenceDefinition) nextDef;
+			for (Class<? extends IResource> next : rr.getResourceTypes()) {
+				StructureElementDefinitionType type = elem.getDefinition().addType();
+				type.getCode().setValue("ResourceReference");
+
+				if (next != IResource.class) {
+					RuntimeResourceDefinition resDef = rr.getDefinitionForResourceType(next);
+					type.getProfile().setValueAsString(resDef.getResourceProfile());
+				}
+			}
+
+			return;
+		}
+
+		StructureElementDefinitionType type = elem.getDefinition().addType();
+		String name = nextDef.getName();
+		DataTypeEnum fromCodeString = DataTypeEnum.VALUESET_BINDER.fromCodeString(name);
+		if (fromCodeString == null) {
+			throw new ConfigurationException("Unknown type: " + name);
+		}
+		type.setCode(fromCodeString);
+	}
+
 	private void fillProfile(Structure theStruct, StructureElement theElement, BaseRuntimeElementDefinition<?> def, LinkedList<String> path, BaseRuntimeDeclaredChildDefinition theChild) {
 
 		fillBasics(theElement, def, path, theChild);
 
 		String expectedPath = StringUtils.join(path, '.');
-		
+
 		ourLog.info("Filling profile for: {} - Path: {}", expectedPath);
 		String name = def.getName();
 		if (!expectedPath.equals(name)) {
@@ -159,7 +221,6 @@ private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger
 			return;
 		}
 
-		
 		fillExtensions(theStruct, path, def.getExtensionsNonModifier(), "extension", false);
 		fillExtensions(theStruct, path, def.getExtensionsModifier(), "modifierExtension", true);
 
@@ -222,91 +283,47 @@ private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger
 		path.pollLast();
 	}
 
-	private void fillExtensions(Structure theStruct, LinkedList<String> path, List<RuntimeChildDeclaredExtensionDefinition> extList, String elementName, boolean theIsModifier) {
-		if (extList.size() > 0) {
-			StructureElement extSlice = theStruct.addElement();
-			extSlice.setName(elementName);
-			extSlice.setPath(join(path, '.') + '.' + elementName);
-			extSlice.getSlicing().getDiscriminator().setValue("url");
-			extSlice.getSlicing().setOrdered(false);
-			extSlice.getSlicing().setRules(SlicingRulesEnum.OPEN);
-			extSlice.getDefinition().addType().setCode(DataTypeEnum.EXTENSION);
+	private void scanForExtensions(Profile theProfile, BaseRuntimeElementDefinition<?> def) {
+		BaseRuntimeElementCompositeDefinition<?> cdef = ((BaseRuntimeElementCompositeDefinition<?>) def);
 
-			for (RuntimeChildDeclaredExtensionDefinition nextExt : extList) {
-				StructureElement nextProfileExt = theStruct.addElement();
-				nextProfileExt.getDefinition().setIsModifier(theIsModifier);
-				nextProfileExt.setName(extSlice.getName());
-				nextProfileExt.setPath(extSlice.getPath());
-				fillMinAndMaxAndDefinitions(nextExt, nextProfileExt);
-				StructureElementDefinitionType type = nextProfileExt.getDefinition().addType();
-				type.setCode(DataTypeEnum.EXTENSION);
-				if (nextExt.isDefinedLocally()) {
-					type.setProfile(nextExt.getExtensionUrl().substring(nextExt.getExtensionUrl().indexOf('#')));
-				} else {
-					type.setProfile(nextExt.getExtensionUrl());
-				}
-			}
-		} else {
-			StructureElement extSlice = theStruct.addElement();
-			extSlice.setName(elementName);
-			extSlice.setPath(join(path, '.') + '.' + elementName);
-			extSlice.getDefinition().setIsModifier(theIsModifier);
-			extSlice.getDefinition().addType().setCode(DataTypeEnum.EXTENSION);
-			extSlice.getDefinition().setMin(0);
-			extSlice.getDefinition().setMax("*");
-		}
-	}
-
-	private void fillName(StructureElement elem, BaseRuntimeElementDefinition<?> nextDef) {
-		if (nextDef instanceof RuntimeResourceReferenceDefinition) {
-			RuntimeResourceReferenceDefinition rr = (RuntimeResourceReferenceDefinition) nextDef;
-			for (Class<? extends IResource> next : rr.getResourceTypes()) {
-				StructureElementDefinitionType type = elem.getDefinition().addType();
-				type.getCode().setValue("ResourceReference");
-				
-				if (next != IResource.class) {
-					RuntimeResourceDefinition resDef = rr.getDefinitionForResourceType(next);
-					type.getProfile().setValueAsString(resDef.getResourceProfile());
-				}
+		for (RuntimeChildDeclaredExtensionDefinition nextChild : cdef.getExtensions()) {
+			if (myExtensionDefToCode.containsKey(nextChild)) {
+				continue;
 			}
 
-			return;
-		}
+			if (nextChild.isDefinedLocally() == false) {
+				continue;
+			}
 
-		StructureElementDefinitionType type = elem.getDefinition().addType();
-		String name = nextDef.getName();
-		DataTypeEnum fromCodeString = DataTypeEnum.VALUESET_BINDER.fromCodeString(name);
-		if (fromCodeString == null) {
-			throw new ConfigurationException("Unknown type: " + name);
-		}
-		type.setCode(fromCodeString);
-	}
+			ExtensionDefn defn = theProfile.addExtensionDefn();
+			String code = null;
+			if (nextChild.getExtensionUrl().contains("#") && !nextChild.getExtensionUrl().endsWith("#")) {
+				code = nextChild.getExtensionUrl().substring(nextChild.getExtensionUrl().indexOf('#') + 1);
+			} else {
+				throw new ConfigurationException("Locally defined extension has no '#[code]' part in extension URL: " + nextChild.getExtensionUrl());
+			}
 
-	private void fillMinAndMaxAndDefinitions(BaseRuntimeDeclaredChildDefinition child, StructureElement elem) {
-		elem.getDefinition().setMin(child.getMin());
-		if (child.getMax() == Child.MAX_UNLIMITED) {
-			elem.getDefinition().setMax("*");
-		} else {
-			elem.getDefinition().setMax(Integer.toString(child.getMax()));
-		}
+			defn.setCode(code);
+			if (myExtensionDefToCode.values().contains(code)) {
+				throw new IllegalStateException("Duplicate extension code: " + code);
+			}
+			myExtensionDefToCode.put(nextChild, code);
 
-		if (isNotBlank(child.getShortDefinition())) {
-			elem.getDefinition().getShort().setValue(child.getShortDefinition());
-		}
-		if (isNotBlank(child.getFormalDefinition())) {
-			elem.getDefinition().getFormal().setValue(child.getFormalDefinition());
-		}
-	}
+			if (nextChild.getChildType() != null && IPrimitiveDatatype.class.isAssignableFrom(nextChild.getChildType())) {
+				RuntimePrimitiveDatatypeDefinition pdef = (RuntimePrimitiveDatatypeDefinition) nextChild.getSingleChildOrThrow();
+				defn.getDefinition().addType().setCode(DataTypeEnum.VALUESET_BINDER.fromCodeString(pdef.getName()));
+			} else {
+				RuntimeResourceBlockDefinition pdef = (RuntimeResourceBlockDefinition) nextChild.getSingleChildOrThrow();
+				scanForExtensions(theProfile, pdef);
 
-	private void fillBasics(StructureElement theElement, BaseRuntimeElementDefinition<?> def, LinkedList<String> path, BaseRuntimeDeclaredChildDefinition theChild) {
-		if (path.isEmpty()) {
-			path.add(def.getName());
-			theElement.setName(def.getName());
-		} else {
-			path.add(WordUtils.uncapitalize(theChild.getElementName()));
-			theElement.setName(theChild.getElementName());
+				for (RuntimeChildDeclaredExtensionDefinition nextChildExt : pdef.getExtensions()) {
+					StructureElementDefinitionType type = defn.getDefinition().addType();
+					type.setCode(DataTypeEnum.EXTENSION);
+					type.setProfile("#" + myExtensionDefToCode.get(nextChildExt));
+				}
+
+			}
 		}
-		theElement.setPath(StringUtils.join(path, '.'));
 	}
 
 }

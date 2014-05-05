@@ -339,8 +339,17 @@ public class RestfulServer extends HttpServlet {
 	private void findResourceMethods(Object theProvider) throws Exception {
 
 		ourLog.info("Scanning type for RESTful methods: {}", theProvider.getClass());
-
+		
 		Class<?> clazz = theProvider.getClass();
+		Class<?> supertype = clazz.getSuperclass();
+		if (!Object.class.equals(supertype)) {
+			findResourceMethods(theProvider, supertype);
+		}
+
+		findResourceMethods(theProvider, clazz);
+	}
+
+	private void findResourceMethods(Object theProvider, Class<?> clazz) {
 		for (Method m : clazz.getDeclaredMethods()) {
 			if (Modifier.isPublic(m.getModifiers()) && !Modifier.isStatic(m.getModifiers())) {
 				ourLog.debug("Scanning public method: {}#{}", theProvider.getClass(), m.getName());
@@ -374,6 +383,17 @@ public class RestfulServer extends HttpServlet {
 
 	private void findSystemMethods(Object theSystemProvider) {
 		Class<?> clazz = theSystemProvider.getClass();
+		
+		findSystemMethods(theSystemProvider, clazz);
+
+	}
+
+	private void findSystemMethods(Object theSystemProvider, Class<?> clazz) {
+		Class<?> supertype = clazz.getSuperclass();
+		if (!Object.class.equals(supertype)) {
+			findSystemMethods(theSystemProvider, supertype);
+		}
+
 		for (Method m : clazz.getDeclaredMethods()) {
 			if (Modifier.isPublic(m.getModifiers())) {
 				ourLog.debug("Scanning public method: {}#{}", theSystemProvider.getClass(), m.getName());
@@ -389,7 +409,6 @@ public class RestfulServer extends HttpServlet {
 				}
 			}
 		}
-
 	}
 
 	@Override

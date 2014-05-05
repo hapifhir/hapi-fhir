@@ -51,6 +51,7 @@ import ca.uhn.fhir.model.api.annotation.Block;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.dstu.composite.AgeDt;
 import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
@@ -96,6 +97,7 @@ public class Condition extends BaseResource implements IResource {
 	 * Path: <b>Condition.code</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="code", path="Condition.code", description="Code for the condition")
 	public static final String SP_CODE = "code";
 
 	/**
@@ -106,6 +108,7 @@ public class Condition extends BaseResource implements IResource {
 	 * Path: <b>Condition.status</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="status", path="Condition.status", description="The status of the condition")
 	public static final String SP_STATUS = "status";
 
 	/**
@@ -116,6 +119,7 @@ public class Condition extends BaseResource implements IResource {
 	 * Path: <b>Condition.severity</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="severity", path="Condition.severity", description="The severity of the condition")
 	public static final String SP_SEVERITY = "severity";
 
 	/**
@@ -126,6 +130,7 @@ public class Condition extends BaseResource implements IResource {
 	 * Path: <b>Condition.category</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="category", path="Condition.category", description="The category of the condition")
 	public static final String SP_CATEGORY = "category";
 
 	/**
@@ -136,6 +141,7 @@ public class Condition extends BaseResource implements IResource {
 	 * Path: <b>Condition.onset[x]</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="onset", path="Condition.onset[x]", description="When the Condition started (if started on a date)")
 	public static final String SP_ONSET = "onset";
 
 	/**
@@ -146,6 +152,7 @@ public class Condition extends BaseResource implements IResource {
 	 * Path: <b>Condition.subject</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="subject", path="Condition.subject", description="")
 	public static final String SP_SUBJECT = "subject";
 
 	/**
@@ -156,6 +163,7 @@ public class Condition extends BaseResource implements IResource {
 	 * Path: <b>Condition.encounter</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="encounter", path="Condition.encounter", description="")
 	public static final String SP_ENCOUNTER = "encounter";
 
 	/**
@@ -166,6 +174,7 @@ public class Condition extends BaseResource implements IResource {
 	 * Path: <b>Condition.asserter</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="asserter", path="Condition.asserter", description="")
 	public static final String SP_ASSERTER = "asserter";
 
 	/**
@@ -176,6 +185,7 @@ public class Condition extends BaseResource implements IResource {
 	 * Path: <b>Condition.dateAsserted</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="date-asserted", path="Condition.dateAsserted", description="")
 	public static final String SP_DATE_ASSERTED = "date-asserted";
 
 	/**
@@ -186,6 +196,7 @@ public class Condition extends BaseResource implements IResource {
 	 * Path: <b>Condition.evidence.code</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="evidence", path="Condition.evidence.code", description="")
 	public static final String SP_EVIDENCE = "evidence";
 
 	/**
@@ -196,6 +207,7 @@ public class Condition extends BaseResource implements IResource {
 	 * Path: <b>Condition.location.code</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="location", path="Condition.location.code", description="")
 	public static final String SP_LOCATION = "location";
 
 	/**
@@ -206,6 +218,7 @@ public class Condition extends BaseResource implements IResource {
 	 * Path: <b>Condition.relatedItem.target</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="related-item", path="Condition.relatedItem.target", description="")
 	public static final String SP_RELATED_ITEM = "related-item";
 
 	/**
@@ -216,6 +229,7 @@ public class Condition extends BaseResource implements IResource {
 	 * Path: <b>Condition.stage.summary</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="stage", path="Condition.stage.summary", description="")
 	public static final String SP_STAGE = "stage";
 
 	/**
@@ -226,6 +240,7 @@ public class Condition extends BaseResource implements IResource {
 	 * Path: <b>Condition.relatedItem.code</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="related-code", path="Condition.relatedItem.code", description="")
 	public static final String SP_RELATED_CODE = "related-code";
 
 
@@ -1099,7 +1114,7 @@ public class Condition extends BaseResource implements IResource {
      * Clinical stage or grade of a condition. May include formal severity assessments
      * </p> 
 	 */
-	@Block(name="Condition.stage")	
+	@Block()	
 	public static class Stage extends BaseElement implements IResourceBlock {
 	
 	@Child(name="summary", type=CodeableConceptDt.class, order=0, min=0, max=1)	
@@ -1220,7 +1235,7 @@ public class Condition extends BaseResource implements IResource {
      * Supporting Evidence / manifestations that are the basis on which this condition is suspected or confirmed
      * </p> 
 	 */
-	@Block(name="Condition.evidence")	
+	@Block()	
 	public static class Evidence extends BaseElement implements IResourceBlock {
 	
 	@Child(name="code", type=CodeableConceptDt.class, order=0, min=0, max=1)	
@@ -1341,7 +1356,7 @@ public class Condition extends BaseResource implements IResource {
      * The anatomical location where this condition manifests itself
      * </p> 
 	 */
-	@Block(name="Condition.location")	
+	@Block()	
 	public static class Location extends BaseElement implements IResourceBlock {
 	
 	@Child(name="code", type=CodeableConceptDt.class, order=0, min=0, max=1)	
@@ -1461,7 +1476,7 @@ public class Condition extends BaseResource implements IResource {
      * Further conditions, problems, diagnoses, procedures or events that are related in some way to this condition, or the substance that caused/triggered this Condition
      * </p> 
 	 */
-	@Block(name="Condition.relatedItem")	
+	@Block()	
 	public static class RelatedItem extends BaseElement implements IResourceBlock {
 	
 	@Child(name="type", type=CodeDt.class, order=0, min=1, max=1)	

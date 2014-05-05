@@ -51,6 +51,7 @@ import ca.uhn.fhir.model.api.annotation.Block;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
@@ -90,6 +91,7 @@ public class Order extends BaseResource implements IResource {
 	 * Path: <b>Order.date</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="date", path="Order.date", description="")
 	public static final String SP_DATE = "date";
 
 	/**
@@ -100,6 +102,7 @@ public class Order extends BaseResource implements IResource {
 	 * Path: <b>Order.subject</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="subject", path="Order.subject", description="")
 	public static final String SP_SUBJECT = "subject";
 
 	/**
@@ -110,6 +113,7 @@ public class Order extends BaseResource implements IResource {
 	 * Path: <b>Order.source</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="source", path="Order.source", description="")
 	public static final String SP_SOURCE = "source";
 
 	/**
@@ -120,6 +124,7 @@ public class Order extends BaseResource implements IResource {
 	 * Path: <b>Order.target</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="target", path="Order.target", description="")
 	public static final String SP_TARGET = "target";
 
 	/**
@@ -130,6 +135,7 @@ public class Order extends BaseResource implements IResource {
 	 * Path: <b>Order.authority</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="authority", path="Order.authority", description="")
 	public static final String SP_AUTHORITY = "authority";
 
 	/**
@@ -140,6 +146,7 @@ public class Order extends BaseResource implements IResource {
 	 * Path: <b>Order.when.code</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="when_code", path="Order.when.code", description="")
 	public static final String SP_WHEN_CODE = "when_code";
 
 	/**
@@ -150,6 +157,7 @@ public class Order extends BaseResource implements IResource {
 	 * Path: <b>Order.when.schedule</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="when", path="Order.when.schedule", description="")
 	public static final String SP_WHEN = "when";
 
 	/**
@@ -160,6 +168,7 @@ public class Order extends BaseResource implements IResource {
 	 * Path: <b>Order.detail</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="detail", path="Order.detail", description="")
 	public static final String SP_DETAIL = "detail";
 
 
@@ -633,7 +642,7 @@ public class Order extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	@Block(name="Order.when")	
+	@Block()	
 	public static class When extends BaseElement implements IResourceBlock {
 	
 	@Child(name="code", type=CodeableConceptDt.class, order=0, min=0, max=1)	

@@ -131,6 +131,7 @@ public class PublicTesterServlet extends HttpServlet {
 			myTemplateEngine.getCacheManager().clearAllCaches();
 		}
 
+		try {
 		ourLog.info("RequestURI: {}", theReq.getPathInfo());
 
 		String resName = theReq.getPathInfo().substring(1);
@@ -147,7 +148,10 @@ public class PublicTesterServlet extends HttpServlet {
 		ctx.setVariable("base", myServerBase);
 		ctx.setVariable("jsonEncodedConf", myCtx.newJsonParser().encodeResourceToString(conformance));
 		myTemplateEngine.process(theReq.getPathInfo(), ctx, theResp.getWriter());
-
+		} catch (Exception e) {
+			ourLog.error("Failed to respond", e);
+			theResp.sendError(500, e.getMessage());
+		}
 	}
 
 	@Override

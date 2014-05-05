@@ -48,6 +48,7 @@ import ca.uhn.fhir.model.api.annotation.Block;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.composite.PeriodDt;
@@ -95,6 +96,7 @@ public class Supply extends BaseResource implements IResource {
 	 * Path: <b>Supply.kind</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="kind", path="Supply.kind", description="")
 	public static final String SP_KIND = "kind";
 
 	/**
@@ -105,6 +107,7 @@ public class Supply extends BaseResource implements IResource {
 	 * Path: <b>Supply.identifier</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="identifier", path="Supply.identifier", description="")
 	public static final String SP_IDENTIFIER = "identifier";
 
 	/**
@@ -115,6 +118,7 @@ public class Supply extends BaseResource implements IResource {
 	 * Path: <b>Supply.status</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="status", path="Supply.status", description="")
 	public static final String SP_STATUS = "status";
 
 	/**
@@ -125,6 +129,7 @@ public class Supply extends BaseResource implements IResource {
 	 * Path: <b>Supply.patient</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="patient", path="Supply.patient", description="")
 	public static final String SP_PATIENT = "patient";
 
 	/**
@@ -135,6 +140,7 @@ public class Supply extends BaseResource implements IResource {
 	 * Path: <b>Supply.dispense.supplier</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="supplier", path="Supply.dispense.supplier", description="")
 	public static final String SP_SUPPLIER = "supplier";
 
 	/**
@@ -145,6 +151,7 @@ public class Supply extends BaseResource implements IResource {
 	 * Path: <b>Supply.dispense.identifier</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="dispenseid", path="Supply.dispense.identifier", description="")
 	public static final String SP_DISPENSEID = "dispenseid";
 
 	/**
@@ -155,6 +162,7 @@ public class Supply extends BaseResource implements IResource {
 	 * Path: <b>Supply.dispense.status</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="dispensestatus", path="Supply.dispense.status", description="")
 	public static final String SP_DISPENSESTATUS = "dispensestatus";
 
 
@@ -490,7 +498,7 @@ public class Supply extends BaseResource implements IResource {
      * Indicates the details of the dispense event such as the days supply and quantity of a supply dispensed.
      * </p> 
 	 */
-	@Block(name="Supply.dispense")	
+	@Block()	
 	public static class Dispense extends BaseElement implements IResourceBlock {
 	
 	@Child(name="identifier", type=IdentifierDt.class, order=0, min=0, max=1)	

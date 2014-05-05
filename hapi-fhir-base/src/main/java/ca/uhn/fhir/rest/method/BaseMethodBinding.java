@@ -116,6 +116,14 @@ public abstract class BaseMethodBinding implements IClientResponseHandler {
 			parser = getContext().newXmlParser();
 		} else if (Constants.CT_FHIR_XML.equals(theResponseMimeType)) {
 			parser = getContext().newXmlParser();
+		} else if (Constants.CT_FHIR_JSON.equals(theResponseMimeType)) {
+			parser = getContext().newJsonParser(); // TODO: move all this so it only happens in one place in the lib, and maybe use a hashmap? 
+		} else if ("application/json".equals(theResponseMimeType)) {
+			parser = getContext().newJsonParser();
+		} else if ("application/xml".equals(theResponseMimeType)) {
+			parser = getContext().newXmlParser(); 
+		} else if ("text/xml".equals(theResponseMimeType)) {
+			parser = getContext().newXmlParser(); 
 		} else {
 			throw new NonFhirResponseException("Response contains non-FHIR content-type: " + theResponseMimeType, theResponseMimeType, theResponseStatusCode, IOUtils.toString(theResponseReader));
 		}
@@ -185,7 +193,7 @@ public abstract class BaseMethodBinding implements IClientResponseHandler {
 						+ " - Must return a resource type or a collection (List, Set) of a resource type");
 			}
 		} else {
-			if (!verifyIsValidResourceReturnType(returnTypeFromMethod)) {
+			if (!IResource.class.equals(returnTypeFromMethod) && !verifyIsValidResourceReturnType(returnTypeFromMethod)) {
 				throw new ConfigurationException("Method '" + theMethod.getName() + "' from " + IResourceProvider.class.getSimpleName() + " type " + theMethod.getDeclaringClass().getCanonicalName() + " returns " + toLogString(returnTypeFromMethod)
 						+ " - Must return a resource type");
 			}

@@ -98,4 +98,11 @@ public interface IGenericClient {
 	 */
 	Conformance conformance();
 
+	/**
+	 * Implementation of the "type create" method.
+	 * @param theResource The resource to create
+	 * @return An outcome
+	 */
+	MethodOutcome create(IResource theResource);
+
 }

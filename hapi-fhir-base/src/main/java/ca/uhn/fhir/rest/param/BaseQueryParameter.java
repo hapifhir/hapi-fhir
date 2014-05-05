@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 
 import ca.uhn.fhir.model.dstu.valueset.SearchParamTypeEnum;
+import ca.uhn.fhir.rest.client.BaseClientInvocation;
 import ca.uhn.fhir.rest.method.Request;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -52,7 +53,7 @@ public abstract class BaseQueryParameter implements IParameter {
 	public abstract SearchParamTypeEnum getParamType();
 
 	@Override
-	public void translateClientArgumentIntoQueryArgument(Object theSourceClientArgument, Map<String, List<String>> theTargetQueryArguments) throws InternalErrorException {
+	public void translateClientArgumentIntoQueryArgument(Object theSourceClientArgument, Map<String, List<String>> theTargetQueryArguments, BaseClientInvocation theClientInvocation) throws InternalErrorException {
 		if (theSourceClientArgument == null) {
 			if (isRequired()) {
 				throw new NullPointerException("SearchParameter '" + getName() + "' is required and may not be null");

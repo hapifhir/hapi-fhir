@@ -47,6 +47,7 @@ import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
@@ -85,6 +86,7 @@ public class Other extends BaseResource implements IResource {
 	 * Path: <b>Other.subject</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="subject", path="Other.subject", description="")
 	public static final String SP_SUBJECT = "subject";
 
 	/**
@@ -95,6 +97,7 @@ public class Other extends BaseResource implements IResource {
 	 * Path: <b>Other.created</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="created", path="Other.created", description="")
 	public static final String SP_CREATED = "created";
 
 	/**
@@ -105,6 +108,7 @@ public class Other extends BaseResource implements IResource {
 	 * Path: <b>Other.code</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="code", path="Other.code", description="")
 	public static final String SP_CODE = "code";
 
 

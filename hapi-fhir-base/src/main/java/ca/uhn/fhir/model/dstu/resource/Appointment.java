@@ -50,6 +50,7 @@ import ca.uhn.fhir.model.api.annotation.Block;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
@@ -95,6 +96,7 @@ public class Appointment extends BaseResource implements IResource {
 	 * Path: <b>Appointment.start</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="date", path="Appointment.start", description="Appointment date/time.")
 	public static final String SP_DATE = "date";
 
 	/**
@@ -105,6 +107,7 @@ public class Appointment extends BaseResource implements IResource {
 	 * Path: <b>Appointment.status</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="status", path="Appointment.status", description="The overall status of the appointment")
 	public static final String SP_STATUS = "status";
 
 	/**
@@ -115,6 +118,7 @@ public class Appointment extends BaseResource implements IResource {
 	 * Path: <b>Appointment.participant.individual</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="subject", path="Appointment.participant.individual", description="The subject that the sensitivity is about")
 	public static final String SP_SUBJECT = "subject";
 
 	/**
@@ -125,6 +129,7 @@ public class Appointment extends BaseResource implements IResource {
 	 * Path: <b>Appointment.minutesDuration</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="!duration", path="Appointment.minutesDuration", description="The number of minutes that the appointment is to go for")
 	public static final String SP_DURATION = "!duration";
 
 	/**
@@ -135,6 +140,7 @@ public class Appointment extends BaseResource implements IResource {
 	 * Path: <b>Appointment.participant.status</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="partstatus", path="Appointment.participant.status", description="The Participation status of the subject, or other participant on the appointment ")
 	public static final String SP_PARTSTATUS = "partstatus";
 
 
@@ -529,8 +535,8 @@ public class Appointment extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public Appointment setStartWithMillisPrecision( Date theDate) {
-		myStart = new InstantDt(theDate); 
+	public Appointment setStart( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myStart = new InstantDt(theDate, thePrecision); 
 		return this; 
 	}
 
@@ -542,8 +548,8 @@ public class Appointment extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public Appointment setStart( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myStart = new InstantDt(theDate, thePrecision); 
+	public Appointment setStartWithMillisPrecision( Date theDate) {
+		myStart = new InstantDt(theDate); 
 		return this; 
 	}
 
@@ -586,8 +592,8 @@ public class Appointment extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public Appointment setEndWithMillisPrecision( Date theDate) {
-		myEnd = new InstantDt(theDate); 
+	public Appointment setEnd( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myEnd = new InstantDt(theDate, thePrecision); 
 		return this; 
 	}
 
@@ -599,8 +605,8 @@ public class Appointment extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public Appointment setEnd( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myEnd = new InstantDt(theDate, thePrecision); 
+	public Appointment setEndWithMillisPrecision( Date theDate) {
+		myEnd = new InstantDt(theDate); 
 		return this; 
 	}
 
@@ -983,7 +989,7 @@ public class Appointment extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	@Block(name="Appointment.participant")	
+	@Block()	
 	public static class Participant extends BaseElement implements IResourceBlock {
 	
 	@Child(name="type", type=CodeableConceptDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)	

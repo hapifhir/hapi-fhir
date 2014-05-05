@@ -50,6 +50,7 @@ import ca.uhn.fhir.model.api.annotation.Block;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.dstu.composite.AddressDt;
 import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu.composite.CodingDt;
@@ -95,6 +96,7 @@ public class Claim extends BaseResource implements IResource {
 	 * Path: <b>Claim.number</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="number", path="Claim.number", description="")
 	public static final String SP_NUMBER = "number";
 
 
@@ -675,7 +677,7 @@ public class Claim extends BaseResource implements IResource {
      * Patient Details.
      * </p> 
 	 */
-	@Block(name="Claim.patient")	
+	@Block()	
 	public static class Patient extends BaseElement implements IResourceBlock {
 	
 	@Child(name="name", type=HumanNameDt.class, order=0, min=0, max=1)	
@@ -884,7 +886,7 @@ public class Claim extends BaseResource implements IResource {
      * Financial instrument by which payment information for health care
      * </p> 
 	 */
-	@Block(name="Claim.coverage")	
+	@Block()	
 	public static class Coverage extends BaseElement implements IResourceBlock {
 	
 	@Child(name="issuer", order=0, min=0, max=1, type={
@@ -1425,7 +1427,7 @@ public class Claim extends BaseResource implements IResource {
      * Th demographics for the individual in whose name the insurance coverage is issued.
      * </p> 
 	 */
-	@Block(name="Claim.coverage.subscriber")	
+	@Block()	
 	public static class CoverageSubscriber extends BaseElement implements IResourceBlock {
 	
 	@Child(name="name", type=HumanNameDt.class, order=0, min=0, max=1)	
@@ -1597,7 +1599,7 @@ public class Claim extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	@Block(name="Claim.service")	
+	@Block()	
 	public static class Service extends BaseElement implements IResourceBlock {
 	
 	@Child(name="service", type=CodeableConceptDt.class, order=0, min=1, max=1)	
@@ -1771,6 +1773,19 @@ public class Claim extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
+	public Service setFee( long theValue) {
+		myFee = new DecimalDt(theValue); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>fee</b> (Professional fee)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * 
+     * </p> 
+	 */
 	public Service setFee( double theValue) {
 		myFee = new DecimalDt(theValue); 
 		return this; 
@@ -1785,19 +1800,6 @@ public class Claim extends BaseResource implements IResource {
      * </p> 
 	 */
 	public Service setFee( java.math.BigDecimal theValue) {
-		myFee = new DecimalDt(theValue); 
-		return this; 
-	}
-
-	/**
-	 * Sets the value for <b>fee</b> (Professional fee)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * 
-     * </p> 
-	 */
-	public Service setFee( long theValue) {
 		myFee = new DecimalDt(theValue); 
 		return this; 
 	}
@@ -1907,7 +1909,7 @@ public class Claim extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	@Block(name="Claim.service.lab")	
+	@Block()	
 	public static class ServiceLab extends BaseElement implements IResourceBlock {
 	
 	@Child(name="service", type=CodeableConceptDt.class, order=0, min=1, max=1)	
@@ -2009,6 +2011,19 @@ public class Claim extends BaseResource implements IResource {
      * The amount to reimbuse for a laboratory service.
      * </p> 
 	 */
+	public ServiceLab setFee( long theValue) {
+		myFee = new DecimalDt(theValue); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>fee</b> (Lab fee)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The amount to reimbuse for a laboratory service.
+     * </p> 
+	 */
 	public ServiceLab setFee( double theValue) {
 		myFee = new DecimalDt(theValue); 
 		return this; 
@@ -2023,19 +2038,6 @@ public class Claim extends BaseResource implements IResource {
      * </p> 
 	 */
 	public ServiceLab setFee( java.math.BigDecimal theValue) {
-		myFee = new DecimalDt(theValue); 
-		return this; 
-	}
-
-	/**
-	 * Sets the value for <b>fee</b> (Lab fee)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * The amount to reimbuse for a laboratory service.
-     * </p> 
-	 */
-	public ServiceLab setFee( long theValue) {
 		myFee = new DecimalDt(theValue); 
 		return this; 
 	}

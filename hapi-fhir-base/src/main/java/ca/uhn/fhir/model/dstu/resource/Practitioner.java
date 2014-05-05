@@ -50,6 +50,7 @@ import ca.uhn.fhir.model.api.annotation.Block;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.dstu.composite.AddressDt;
 import ca.uhn.fhir.model.dstu.composite.AttachmentDt;
 import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
@@ -97,6 +98,7 @@ public class Practitioner extends BaseResource implements IResource {
 	 * Path: <b>Practitioner.identifier</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="identifier", path="Practitioner.identifier", description="A practitioner's Identifier")
 	public static final String SP_IDENTIFIER = "identifier";
 
 	/**
@@ -107,6 +109,7 @@ public class Practitioner extends BaseResource implements IResource {
 	 * Path: <b>Practitioner.name</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="name", path="Practitioner.name", description="A portion of either family or given name")
 	public static final String SP_NAME = "name";
 
 	/**
@@ -117,6 +120,7 @@ public class Practitioner extends BaseResource implements IResource {
 	 * Path: <b>Practitioner.name</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="family", path="Practitioner.name", description="A portion of the family name")
 	public static final String SP_FAMILY = "family";
 
 	/**
@@ -127,6 +131,7 @@ public class Practitioner extends BaseResource implements IResource {
 	 * Path: <b>Practitioner.name</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="given", path="Practitioner.name", description="A portion of the given name")
 	public static final String SP_GIVEN = "given";
 
 	/**
@@ -137,6 +142,7 @@ public class Practitioner extends BaseResource implements IResource {
 	 * Path: <b>Practitioner.name</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="phonetic", path="Practitioner.name", description="A portion of either family or given name using some kind of phonetic matching algorithm")
 	public static final String SP_PHONETIC = "phonetic";
 
 	/**
@@ -147,6 +153,7 @@ public class Practitioner extends BaseResource implements IResource {
 	 * Path: <b>Practitioner.telecom</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="telecom", path="Practitioner.telecom", description="The value in any kind of contact")
 	public static final String SP_TELECOM = "telecom";
 
 	/**
@@ -157,6 +164,7 @@ public class Practitioner extends BaseResource implements IResource {
 	 * Path: <b>Practitioner.address</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="address", path="Practitioner.address", description="An address in any kind of address/part")
 	public static final String SP_ADDRESS = "address";
 
 	/**
@@ -167,6 +175,7 @@ public class Practitioner extends BaseResource implements IResource {
 	 * Path: <b>Practitioner.gender</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="gender", path="Practitioner.gender", description="Gender of the practitioner")
 	public static final String SP_GENDER = "gender";
 
 	/**
@@ -177,6 +186,7 @@ public class Practitioner extends BaseResource implements IResource {
 	 * Path: <b>Practitioner.organization</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="organization", path="Practitioner.organization", description="The identity of the organization the practitioner represents / acts on behalf of")
 	public static final String SP_ORGANIZATION = "organization";
 
 
@@ -1023,7 +1033,7 @@ public class Practitioner extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	@Block(name="Practitioner.qualification")	
+	@Block()	
 	public static class Qualification extends BaseElement implements IResourceBlock {
 	
 	@Child(name="code", type=CodeableConceptDt.class, order=0, min=1, max=1)	

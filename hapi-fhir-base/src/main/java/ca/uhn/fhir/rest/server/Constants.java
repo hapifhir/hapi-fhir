@@ -40,7 +40,7 @@ public class Constants {
 	public static final String CT_JSON = "application/json";
 	public static final String CT_HTML = "text/html";
 	public static final String PARAM_NARRATIVE = "_narrative";
-	public  static final String PARAM_HISTORY = "_history";
+	public static final String PARAM_HISTORY = "_history";
 	public static final String PARAM_PRETTY = "_pretty";
 	public static final String PARAM_QUERY = "_query";
 	public static final int STATUS_HTTP_201_CREATED = 201;
@@ -66,10 +66,12 @@ public class Constants {
 	public static final String PARAM_SORT = "_sort";
 	public static final String PARAM_SORT_ASC = "_sort:asc";
 	public static final String PARAM_SORT_DESC = "_sort:desc";
+	public static final String HEADER_CATEGORY = "Category";
+	public static final String OPENSEARCH_NS_OLDER = "http://purl.org/atompub/tombstones/1.0";
 
 	static {
 		Map<String, EncodingEnum> valToEncoding = new HashMap<String, EncodingEnum>();
-		
+
 		HashSet<String> valXml = new HashSet<String>();
 		valXml.add(CT_FHIR_XML);
 		valXml.add("application/xml");
@@ -88,7 +90,7 @@ public class Constants {
 			valToEncoding.put(string, EncodingEnum.JSON);
 		}
 
-		FORMAT_VAL_TO_ENCODING=Collections.unmodifiableMap(valToEncoding);
+		FORMAT_VAL_TO_ENCODING = Collections.unmodifiableMap(valToEncoding);
 	}
 
 }

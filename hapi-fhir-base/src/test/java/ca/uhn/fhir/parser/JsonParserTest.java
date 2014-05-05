@@ -1,11 +1,9 @@
 package ca.uhn.fhir.parser;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
+import static org.mockito.Matchers.*;
+import static org.mockito.Mockito.*;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -65,6 +63,143 @@ public class JsonParserTest {
 		assertEquals("_id", res.getSearchParam().get(1).getName().getValue());
 	}
 
+	@Test
+	public void testEncodeBundleCategory() {
+
+		Bundle b = new Bundle();
+		BundleEntry e = b.addEntry();
+		e.setResource(new Patient());
+		e.addCategory().setLabel("label").setTerm("term").setScheme("scheme");
+		
+		String val = new FhirContext().newJsonParser().setPrettyPrint(false).encodeBundleToString(b);
+		ourLog.info(val);
+
+		assertThat(val, StringContains.containsString("\"category\":[{\"term\":\"term\",\"label\":\"label\",\"scheme\":\"scheme\"}]"));
+		
+		b = new FhirContext().newJsonParser().parseBundle(val);
+		assertEquals(1,b.getEntries().size());
+		assertEquals(1,b.getEntries().get(0).getCategories().size());
+		assertEquals("term", b.getEntries().get(0).getCategories().get(0).getTerm());
+		assertEquals("label", b.getEntries().get(0).getCategories().get(0).getLabel());
+		assertEquals("scheme", b.getEntries().get(0).getCategories().get(0).getScheme());
+		assertNotNull(b.getEntries().get(0).getResource());
+		assertEquals(Patient.class, b.getEntries().get(0).getResource().getClass());
+
+	}
+
+	
+	@Test
+	public void testBrokenPatient() {
+		
+		String resource = "{\n" + 
+				"  \"resourceType\": \"Patient\",\n" + 
+				"  \"extension\": [\n" + 
+				"    {\n" + 
+				"      \"url\": \"http://mayoweb.mayo.edu/dms-it/reference/data_standards/reg-ctable-race.html#curr_race\",\n" + 
+				"      \"valueCodeableConcept\": {\n" + 
+				"        \"coding\": [\n" + 
+				"          {\n" + 
+				"            \"system\": \"http://mayoweb.mayo.edu/dms-it/reference/data_standards/reg-ctable-race.html#curr_race\",\n" + 
+				"            \"code\": \"O\",\n" + 
+				"            \"display\": \"Other\"\n" + 
+				"          }\n" + 
+				"        ]\n" + 
+				"      }\n" + 
+				"    },\n" + 
+				"    {\n" + 
+				"      \"url\": \"http://mayoweb.mayo.edu/dms-it/reference/data_standards/reg-ctable-race.html#curr_ethn\",\n" + 
+				"      \"valueCodeableConcept\": {\n" + 
+				"        \"coding\": [\n" + 
+				"          {\n" + 
+				"            \"system\": \"http://mayoweb.mayo.edu/dms-it/reference/data_standards/reg-ctable-race.html#curr_ethn\",\n" + 
+				"            \"code\": \"HA\",\n" + 
+				"            \"display\": \"Central American\"\n" + 
+				"          }\n" + 
+				"        ]\n" + 
+				"      }\n" + 
+				"    }\n" + 
+				"  ],\n" + 
+				"  \"identifier\": [\n" + 
+				"    {\n" + 
+				"      \"label\": \"MAYO-CLINIC-NUMBER\",\n" + 
+				"      \"value\": \"3982540\"\n" + 
+				"    }\n" + 
+				"  ],\n" + 
+				"  \"name\": [\n" + 
+				"    {\n" + 
+				"      \"use\": \"usual\",\n" + 
+				"      \"text\": \"Hurt, Mr. John Stevens\",\n" + 
+				"      \"family\": [\n" + 
+				"        \"Hurt\"\n" + 
+				"      ],\n" + 
+				"      \"given\": [\n" + 
+				"        \"John Stevens\"\n" + 
+				"      ],\n" + 
+				"      \"prefix\": [\n" + 
+				"        \"Mr.\"\n" + 
+				"      ],\n" + 
+				"      \"suffix\": [\n" + 
+				"        null\n" + 
+				"      ]\n" + 
+				"    }\n" + 
+				"  ],\n" + 
+				"  \"telecom\": [\n" + 
+				"    {\n" + 
+				"      \"system\": \"phone\",\n" + 
+				"      \"value\": \"(507)284-0122\"\n" + 
+				"    }\n" + 
+				"  ],\n" + 
+				"  \"gender\": {\n" + 
+				"    \"coding\": [\n" + 
+				"      {\n" + 
+				"        \"system\": \"http://hl7.org/fhir/v3/AdministrativeGender\",\n" + 
+				"        \"code\": \"M\",\n" + 
+				"        \"display\": \"MALE\"\n" + 
+				"      }\n" + 
+				"    ]\n" + 
+				"  },\n" + 
+				"  \"birthDate\": \"1986-05-01T00:00:00-05:00\",\n" + 
+				"  \"deceasedDateTime\": \"0001-01-01T00:00:00-06:00\",\n" + 
+				"  \"address\": [\n" + 
+				"    {\n" + 
+				"      \"use\": \"home\",\n" + 
+				"      \"line\": [\n" + 
+				"        \"100 Quality Control Avenue\"\n" + 
+				"      ],\n" + 
+				"      \"city\": \"Test Patient\",\n" + 
+				"      \"state\": \"MINNESOTA\",\n" + 
+				"      \"zip\": \"55905\",\n" + 
+				"      \"country\": \"USA\"\n" + 
+				"    }\n" + 
+				"  ],\n" + 
+				"  \"maritalStatus\": {\n" + 
+				"    \"coding\": [\n" + 
+				"      {\n" + 
+				"        \"system\": \"http://hl7.org/fhir/v3/MaritalStatus\",\n" + 
+				"        \"code\": \"M\",\n" + 
+				"        \"display\": \"Married\"\n" + 
+				"      }\n" + 
+				"    ]\n" + 
+				"  },\n" + 
+				"  \"communication\": [\n" + 
+				"    {\n" + 
+				"      \"coding\": [\n" + 
+				"        {\n" + 
+				"          \"code\": \"ENG\",\n" + 
+				"          \"display\": \"ENGLISH\"\n" + 
+				"        }\n" + 
+				"      ]\n" + 
+				"    }\n" + 
+				"  ]\n" + 
+				"}";
+		
+		FhirContext ctx = new FhirContext();
+		Patient patient = ctx.newJsonParser().parseResource(Patient.class, resource);
+		System.out.println(patient.getNameFirstRep().getFamilyAsSingleString());
+		
+	}
+	
+	
 	@Test
 	public void testEncodeExtensionWithResourceContent() throws IOException {
 		IParser parser = new FhirContext().newJsonParser();

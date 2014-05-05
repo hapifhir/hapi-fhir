@@ -15,7 +15,7 @@ import ca.uhn.fhir.rest.client.api.IBasicClient;
 /**
  * All RESTful clients must be an interface which extends IBasicClient
  */
-public interface RestfulClientImpl extends IBasicClient {
+public interface IRestfulClient extends IBasicClient {
 
 	/**
 	 * The "@Read" annotation indicates that this method supports the

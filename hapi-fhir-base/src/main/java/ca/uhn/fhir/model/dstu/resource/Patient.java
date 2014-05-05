@@ -51,6 +51,7 @@ import ca.uhn.fhir.model.api.annotation.Block;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.dstu.composite.AddressDt;
 import ca.uhn.fhir.model.dstu.composite.AttachmentDt;
 import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
@@ -102,6 +103,7 @@ public class Patient extends BaseResource implements IResource {
 	 * Path: <b>Patient.identifier</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="identifier", path="Patient.identifier", description="A patient identifier")
 	public static final String SP_IDENTIFIER = "identifier";
 
 	/**
@@ -112,6 +114,7 @@ public class Patient extends BaseResource implements IResource {
 	 * Path: <b>Patient.name</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="name", path="Patient.name", description="A portion of either family or given name of the patient")
 	public static final String SP_NAME = "name";
 
 	/**
@@ -122,6 +125,7 @@ public class Patient extends BaseResource implements IResource {
 	 * Path: <b>Patient.name.family</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="family", path="Patient.name.family", description="A portion of the family name of the patient")
 	public static final String SP_FAMILY = "family";
 
 	/**
@@ -132,6 +136,7 @@ public class Patient extends BaseResource implements IResource {
 	 * Path: <b>Patient.name.given</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="given", path="Patient.name.given", description="A portion of the given name of the patient")
 	public static final String SP_GIVEN = "given";
 
 	/**
@@ -142,6 +147,7 @@ public class Patient extends BaseResource implements IResource {
 	 * Path: <b></b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="phonetic", path="", description="A portion of either family or given name using some kind of phonetic matching algorithm")
 	public static final String SP_PHONETIC = "phonetic";
 
 	/**
@@ -152,6 +158,7 @@ public class Patient extends BaseResource implements IResource {
 	 * Path: <b>Patient.telecom</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="telecom", path="Patient.telecom", description="The value in any kind of telecom details of the patient")
 	public static final String SP_TELECOM = "telecom";
 
 	/**
@@ -162,6 +169,7 @@ public class Patient extends BaseResource implements IResource {
 	 * Path: <b>Patient.address</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="address", path="Patient.address", description="An address in any kind of address/part of the patient")
 	public static final String SP_ADDRESS = "address";
 
 	/**
@@ -172,6 +180,7 @@ public class Patient extends BaseResource implements IResource {
 	 * Path: <b>Patient.gender</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="gender", path="Patient.gender", description="Gender of the patient")
 	public static final String SP_GENDER = "gender";
 
 	/**
@@ -182,6 +191,7 @@ public class Patient extends BaseResource implements IResource {
 	 * Path: <b>Patient.communication</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="language", path="Patient.communication", description="Language code (irrespective of use value)")
 	public static final String SP_LANGUAGE = "language";
 
 	/**
@@ -192,6 +202,7 @@ public class Patient extends BaseResource implements IResource {
 	 * Path: <b>Patient.birthDate</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="birthdate", path="Patient.birthDate", description="The patient's date of birth")
 	public static final String SP_BIRTHDATE = "birthdate";
 
 	/**
@@ -202,6 +213,7 @@ public class Patient extends BaseResource implements IResource {
 	 * Path: <b>Patient.managingOrganization</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="provider", path="Patient.managingOrganization", description="The organization at which this person is a patient")
 	public static final String SP_PROVIDER = "provider";
 
 	/**
@@ -212,6 +224,7 @@ public class Patient extends BaseResource implements IResource {
 	 * Path: <b>Patient.active</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="active", path="Patient.active", description="Whether the patient record is active")
 	public static final String SP_ACTIVE = "active";
 
 	/**
@@ -222,6 +235,7 @@ public class Patient extends BaseResource implements IResource {
 	 * Path: <b>Patient.animal.species</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="animal-species", path="Patient.animal.species", description="The species for animal patients")
 	public static final String SP_ANIMAL_SPECIES = "animal-species";
 
 	/**
@@ -232,6 +246,7 @@ public class Patient extends BaseResource implements IResource {
 	 * Path: <b>Patient.animal.breed</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="animal-breed", path="Patient.animal.breed", description="The breed for animal patients")
 	public static final String SP_ANIMAL_BREED = "animal-breed";
 
 	/**
@@ -242,6 +257,7 @@ public class Patient extends BaseResource implements IResource {
 	 * Path: <b>Patient.link.other</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="link", path="Patient.link.other", description="All patients linked to the given patient")
 	public static final String SP_LINK = "link";
 
 
@@ -1256,7 +1272,7 @@ public class Patient extends BaseResource implements IResource {
      * A contact party (e.g. guardian, partner, friend) for the patient
      * </p> 
 	 */
-	@Block(name="Patient.contact")	
+	@Block()	
 	public static class Contact extends BaseElement implements IResourceBlock {
 	
 	@Child(name="relationship", type=CodeableConceptDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)	
@@ -1587,7 +1603,7 @@ public class Patient extends BaseResource implements IResource {
      * This element has a value if the patient is an animal
      * </p> 
 	 */
-	@Block(name="Patient.animal")	
+	@Block()	
 	public static class Animal extends BaseElement implements IResourceBlock {
 	
 	@Child(name="species", type=CodeableConceptDt.class, order=0, min=1, max=1)	
@@ -1745,7 +1761,7 @@ public class Patient extends BaseResource implements IResource {
      * Link to another patient resource that concerns the same actual person
      * </p> 
 	 */
-	@Block(name="Patient.link")	
+	@Block()	
 	public static class Link extends BaseElement implements IResourceBlock {
 	
 	@Child(name="other", order=0, min=1, max=1, type={

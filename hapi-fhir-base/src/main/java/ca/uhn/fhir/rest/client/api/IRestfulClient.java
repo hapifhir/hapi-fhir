@@ -24,12 +24,28 @@ package ca.uhn.fhir.rest.client.api;
 import org.apache.http.client.HttpClient;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.server.EncodingEnum;
 
 public interface IRestfulClient {
 
 	FhirContext getFhirContext();
 	
 	HttpClient getHttpClient();
+	
+	/**
+	 * Specifies that the client should use the given encoding to do its 
+	 * queries. This means that the client will append the "_format" param
+	 * to GET methods (read/search/etc), and will add an appropriate header for
+	 * write methods. 
+	 */
+	void setEncoding(EncodingEnum theEncoding);
+	
+	/**
+	 * Specifies that the client should request that the server respond with "pretty printing"
+	 * enabled. Note that this is a non-standard parameter, so it may only 
+	 * work against HAPI based servers.
+	 */
+	void setPrettyPrint(boolean thePrettyPrint);
 	
 	/**
 	 * Base URL for the server, with no trailing "/"

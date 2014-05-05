@@ -50,6 +50,7 @@ import ca.uhn.fhir.model.api.annotation.Block;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
@@ -88,6 +89,7 @@ public class DeviceObservationReport extends BaseResource implements IResource {
 	 * Path: <b>DeviceObservationReport.source</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="source", path="DeviceObservationReport.source", description="")
 	public static final String SP_SOURCE = "source";
 
 	/**
@@ -98,6 +100,7 @@ public class DeviceObservationReport extends BaseResource implements IResource {
 	 * Path: <b>DeviceObservationReport.virtualDevice.code</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="code", path="DeviceObservationReport.virtualDevice.code", description="The compatment code")
 	public static final String SP_CODE = "code";
 
 	/**
@@ -108,6 +111,7 @@ public class DeviceObservationReport extends BaseResource implements IResource {
 	 * Path: <b>DeviceObservationReport.virtualDevice.channel.code</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="channel", path="DeviceObservationReport.virtualDevice.channel.code", description="The channel code")
 	public static final String SP_CHANNEL = "channel";
 
 	/**
@@ -118,6 +122,7 @@ public class DeviceObservationReport extends BaseResource implements IResource {
 	 * Path: <b>DeviceObservationReport.virtualDevice.channel.metric.observation</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="observation", path="DeviceObservationReport.virtualDevice.channel.metric.observation", description="")
 	public static final String SP_OBSERVATION = "observation";
 
 	/**
@@ -128,6 +133,7 @@ public class DeviceObservationReport extends BaseResource implements IResource {
 	 * Path: <b>DeviceObservationReport.subject</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="subject", path="DeviceObservationReport.subject", description="")
 	public static final String SP_SUBJECT = "subject";
 
 
@@ -222,8 +228,8 @@ public class DeviceObservationReport extends BaseResource implements IResource {
      * The point in time that the values are reported
      * </p> 
 	 */
-	public DeviceObservationReport setInstantWithMillisPrecision( Date theDate) {
-		myInstant = new InstantDt(theDate); 
+	public DeviceObservationReport setInstant( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myInstant = new InstantDt(theDate, thePrecision); 
 		return this; 
 	}
 
@@ -235,8 +241,8 @@ public class DeviceObservationReport extends BaseResource implements IResource {
      * The point in time that the values are reported
      * </p> 
 	 */
-	public DeviceObservationReport setInstant( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myInstant = new InstantDt(theDate, thePrecision); 
+	public DeviceObservationReport setInstantWithMillisPrecision( Date theDate) {
+		myInstant = new InstantDt(theDate); 
 		return this; 
 	}
 
@@ -425,7 +431,7 @@ public class DeviceObservationReport extends BaseResource implements IResource {
      * A medical-related subsystem of a medical device
      * </p> 
 	 */
-	@Block(name="DeviceObservationReport.virtualDevice")	
+	@Block()	
 	public static class VirtualDevice extends BaseElement implements IResourceBlock {
 	
 	@Child(name="code", type=CodeableConceptDt.class, order=0, min=0, max=1)	
@@ -560,7 +566,7 @@ public class DeviceObservationReport extends BaseResource implements IResource {
      * Groups together physiological measurement data and derived data
      * </p> 
 	 */
-	@Block(name="DeviceObservationReport.virtualDevice.channel")	
+	@Block()	
 	public static class VirtualDeviceChannel extends BaseElement implements IResourceBlock {
 	
 	@Child(name="code", type=CodeableConceptDt.class, order=0, min=0, max=1)	
@@ -695,7 +701,7 @@ public class DeviceObservationReport extends BaseResource implements IResource {
      * A piece of measured or derived data that is reported by the machine
      * </p> 
 	 */
-	@Block(name="DeviceObservationReport.virtualDevice.channel.metric")	
+	@Block()	
 	public static class VirtualDeviceChannelMetric extends BaseElement implements IResourceBlock {
 	
 	@Child(name="observation", order=0, min=1, max=1, type={

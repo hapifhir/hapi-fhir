@@ -50,6 +50,7 @@ import ca.uhn.fhir.model.api.annotation.Block;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.dstu.composite.ContactDt;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.valueset.FilterOperatorEnum;
@@ -95,6 +96,7 @@ public class ValueSet extends BaseResource implements IResource {
 	 * Path: <b>ValueSet.identifier</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="identifier", path="ValueSet.identifier", description="The identifier of the value set")
 	public static final String SP_IDENTIFIER = "identifier";
 
 	/**
@@ -105,6 +107,7 @@ public class ValueSet extends BaseResource implements IResource {
 	 * Path: <b>ValueSet.version</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="version", path="ValueSet.version", description="The version identifier of the value set")
 	public static final String SP_VERSION = "version";
 
 	/**
@@ -115,6 +118,7 @@ public class ValueSet extends BaseResource implements IResource {
 	 * Path: <b>ValueSet.name</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="name", path="ValueSet.name", description="The name of the value set")
 	public static final String SP_NAME = "name";
 
 	/**
@@ -125,6 +129,7 @@ public class ValueSet extends BaseResource implements IResource {
 	 * Path: <b>ValueSet.publisher</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="publisher", path="ValueSet.publisher", description="Name of the publisher of the value set")
 	public static final String SP_PUBLISHER = "publisher";
 
 	/**
@@ -135,6 +140,7 @@ public class ValueSet extends BaseResource implements IResource {
 	 * Path: <b>ValueSet.description</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="description", path="ValueSet.description", description="Text search in the description of the value set")
 	public static final String SP_DESCRIPTION = "description";
 
 	/**
@@ -145,6 +151,7 @@ public class ValueSet extends BaseResource implements IResource {
 	 * Path: <b>ValueSet.status</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="status", path="ValueSet.status", description="The status of the value set")
 	public static final String SP_STATUS = "status";
 
 	/**
@@ -155,6 +162,7 @@ public class ValueSet extends BaseResource implements IResource {
 	 * Path: <b>ValueSet.date</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="date", path="ValueSet.date", description="The value set publication date")
 	public static final String SP_DATE = "date";
 
 	/**
@@ -165,6 +173,7 @@ public class ValueSet extends BaseResource implements IResource {
 	 * Path: <b>ValueSet.define.system</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="system", path="ValueSet.define.system", description="The system for any codes defined by this value set")
 	public static final String SP_SYSTEM = "system";
 
 	/**
@@ -175,6 +184,7 @@ public class ValueSet extends BaseResource implements IResource {
 	 * Path: <b>ValueSet.define.concept.code</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="code", path="ValueSet.define.concept.code", description="A code defined in the value set")
 	public static final String SP_CODE = "code";
 
 	/**
@@ -185,6 +195,7 @@ public class ValueSet extends BaseResource implements IResource {
 	 * Path: <b>ValueSet.compose.include.system</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="reference", path="ValueSet.compose.include.system", description="A code system included or excluded in the value set or an imported value set")
 	public static final String SP_REFERENCE = "reference";
 
 	/**
@@ -195,6 +206,7 @@ public class ValueSet extends BaseResource implements IResource {
 	 * Path: <b>ValueSet.compose.restricts</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="!restricts", path="ValueSet.compose.restricts", description="A value set listed in the restricts list")
 	public static final String SP_RESTRICTS = "!restricts";
 
 
@@ -926,7 +938,7 @@ public class ValueSet extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	@Block(name="ValueSet.define")	
+	@Block()	
 	public static class Define extends BaseElement implements IResourceBlock {
 	
 	@Child(name="system", type=UriDt.class, order=0, min=1, max=1)	
@@ -1176,7 +1188,7 @@ public class ValueSet extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	@Block(name="ValueSet.define.concept")	
+	@Block()	
 	public static class DefineConcept extends BaseElement implements IResourceBlock {
 	
 	@Child(name="code", type=CodeDt.class, order=0, min=1, max=1)	
@@ -1479,7 +1491,7 @@ public class ValueSet extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	@Block(name="ValueSet.compose")	
+	@Block()	
 	public static class Compose extends BaseElement implements IResourceBlock {
 	
 	@Child(name="import", type=UriDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)	
@@ -1728,7 +1740,7 @@ public class ValueSet extends BaseResource implements IResource {
      * Include one or more codes from a code system
      * </p> 
 	 */
-	@Block(name="ValueSet.compose.include")	
+	@Block()	
 	public static class ComposeInclude extends BaseElement implements IResourceBlock {
 	
 	@Child(name="system", type=UriDt.class, order=0, min=1, max=1)	
@@ -2012,7 +2024,7 @@ public class ValueSet extends BaseResource implements IResource {
      * Select concepts by specify a matching criteria based on the properties (including relationships) defined by the system. If multiple filters are specified, they SHALL all be true.
      * </p> 
 	 */
-	@Block(name="ValueSet.compose.include.filter")	
+	@Block()	
 	public static class ComposeIncludeFilter extends BaseElement implements IResourceBlock {
 	
 	@Child(name="property", type=CodeDt.class, order=0, min=1, max=1)	
@@ -2198,7 +2210,7 @@ public class ValueSet extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	@Block(name="ValueSet.expansion")	
+	@Block()	
 	public static class Expansion extends BaseElement implements IResourceBlock {
 	
 	@Child(name="identifier", type=IdentifierDt.class, order=0, min=0, max=1)	
@@ -2333,8 +2345,8 @@ public class ValueSet extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public Expansion setTimestampWithMillisPrecision( Date theDate) {
-		myTimestamp = new InstantDt(theDate); 
+	public Expansion setTimestamp( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myTimestamp = new InstantDt(theDate, thePrecision); 
 		return this; 
 	}
 
@@ -2346,8 +2358,8 @@ public class ValueSet extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public Expansion setTimestamp( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myTimestamp = new InstantDt(theDate, thePrecision); 
+	public Expansion setTimestampWithMillisPrecision( Date theDate) {
+		myTimestamp = new InstantDt(theDate); 
 		return this; 
 	}
 
@@ -2423,7 +2435,7 @@ public class ValueSet extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	@Block(name="ValueSet.expansion.contains")	
+	@Block()	
 	public static class ExpansionContains extends BaseElement implements IResourceBlock {
 	
 	@Child(name="system", type=UriDt.class, order=0, min=0, max=1)	

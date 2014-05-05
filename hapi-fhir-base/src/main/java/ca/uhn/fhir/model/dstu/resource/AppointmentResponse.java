@@ -47,6 +47,7 @@ import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
@@ -91,6 +92,7 @@ public class AppointmentResponse extends BaseResource implements IResource {
 	 * Path: <b>AppointmentResponse.participantStatus</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="partstatus", path="AppointmentResponse.participantStatus", description="The overall status of the appointment")
 	public static final String SP_PARTSTATUS = "partstatus";
 
 	/**
@@ -101,6 +103,7 @@ public class AppointmentResponse extends BaseResource implements IResource {
 	 * Path: <b>AppointmentResponse.individual</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="subject", path="AppointmentResponse.individual", description="The subject that the appointment response replies for")
 	public static final String SP_SUBJECT = "subject";
 
 	/**
@@ -111,6 +114,7 @@ public class AppointmentResponse extends BaseResource implements IResource {
 	 * Path: <b>AppointmentResponse.appointment</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="appointment", path="AppointmentResponse.appointment", description="The appointment that the response is attached to")
 	public static final String SP_APPOINTMENT = "appointment";
 
 
@@ -568,8 +572,8 @@ public class AppointmentResponse extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public AppointmentResponse setStartWithMillisPrecision( Date theDate) {
-		myStart = new InstantDt(theDate); 
+	public AppointmentResponse setStart( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myStart = new InstantDt(theDate, thePrecision); 
 		return this; 
 	}
 
@@ -581,8 +585,8 @@ public class AppointmentResponse extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public AppointmentResponse setStart( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myStart = new InstantDt(theDate, thePrecision); 
+	public AppointmentResponse setStartWithMillisPrecision( Date theDate) {
+		myStart = new InstantDt(theDate); 
 		return this; 
 	}
 
@@ -625,8 +629,8 @@ public class AppointmentResponse extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public AppointmentResponse setEndWithMillisPrecision( Date theDate) {
-		myEnd = new InstantDt(theDate); 
+	public AppointmentResponse setEnd( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myEnd = new InstantDt(theDate, thePrecision); 
 		return this; 
 	}
 
@@ -638,8 +642,8 @@ public class AppointmentResponse extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public AppointmentResponse setEnd( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myEnd = new InstantDt(theDate, thePrecision); 
+	public AppointmentResponse setEndWithMillisPrecision( Date theDate) {
+		myEnd = new InstantDt(theDate); 
 		return this; 
 	}
 

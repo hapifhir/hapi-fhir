@@ -95,7 +95,10 @@ public class GetClientInvocation extends BaseClientInvocation {
 		
 		appendExtraParamsWithQuestionMark(theExtraParams, b, first);
 		
-		return new HttpGet(b.toString());
+		HttpGet retVal = new HttpGet(b.toString());
+		super.addHeadersToRequest(retVal);
+		
+		return retVal;
 	}
 
 }

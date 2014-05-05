@@ -48,6 +48,7 @@ import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
@@ -90,6 +91,7 @@ public class OrderResponse extends BaseResource implements IResource {
 	 * Path: <b>OrderResponse.request</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="request", path="OrderResponse.request", description="")
 	public static final String SP_REQUEST = "request";
 
 	/**
@@ -100,6 +102,7 @@ public class OrderResponse extends BaseResource implements IResource {
 	 * Path: <b>OrderResponse.date</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="date", path="OrderResponse.date", description="")
 	public static final String SP_DATE = "date";
 
 	/**
@@ -110,6 +113,7 @@ public class OrderResponse extends BaseResource implements IResource {
 	 * Path: <b>OrderResponse.who</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="who", path="OrderResponse.who", description="")
 	public static final String SP_WHO = "who";
 
 	/**
@@ -120,6 +124,7 @@ public class OrderResponse extends BaseResource implements IResource {
 	 * Path: <b>OrderResponse.code</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="code", path="OrderResponse.code", description="")
 	public static final String SP_CODE = "code";
 
 	/**
@@ -130,6 +135,7 @@ public class OrderResponse extends BaseResource implements IResource {
 	 * Path: <b>OrderResponse.fulfillment</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="fulfillment", path="OrderResponse.fulfillment", description="")
 	public static final String SP_FULFILLMENT = "fulfillment";
 
 

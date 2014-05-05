@@ -51,6 +51,7 @@ import ca.uhn.fhir.model.api.annotation.Block;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.dstu.composite.CodingDt;
 import ca.uhn.fhir.model.dstu.composite.ContactDt;
 import ca.uhn.fhir.model.dstu.valueset.AggregationModeEnum;
@@ -105,6 +106,7 @@ public class Profile extends BaseResource implements IResource {
 	 * Path: <b>Profile.identifier</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="identifier", path="Profile.identifier", description="The identifier of the profile")
 	public static final String SP_IDENTIFIER = "identifier";
 
 	/**
@@ -115,6 +117,7 @@ public class Profile extends BaseResource implements IResource {
 	 * Path: <b>Profile.version</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="version", path="Profile.version", description="The version identifier of the profile")
 	public static final String SP_VERSION = "version";
 
 	/**
@@ -125,6 +128,7 @@ public class Profile extends BaseResource implements IResource {
 	 * Path: <b>Profile.name</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="name", path="Profile.name", description="Name of the profile")
 	public static final String SP_NAME = "name";
 
 	/**
@@ -135,6 +139,7 @@ public class Profile extends BaseResource implements IResource {
 	 * Path: <b>Profile.publisher</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="publisher", path="Profile.publisher", description="Name of the publisher of the profile")
 	public static final String SP_PUBLISHER = "publisher";
 
 	/**
@@ -145,6 +150,7 @@ public class Profile extends BaseResource implements IResource {
 	 * Path: <b>Profile.description</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="description", path="Profile.description", description="Text search in the description of the profile")
 	public static final String SP_DESCRIPTION = "description";
 
 	/**
@@ -155,6 +161,7 @@ public class Profile extends BaseResource implements IResource {
 	 * Path: <b>Profile.status</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="status", path="Profile.status", description="The current status of the profile")
 	public static final String SP_STATUS = "status";
 
 	/**
@@ -165,6 +172,7 @@ public class Profile extends BaseResource implements IResource {
 	 * Path: <b>Profile.date</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="date", path="Profile.date", description="The profile publication date")
 	public static final String SP_DATE = "date";
 
 	/**
@@ -175,6 +183,7 @@ public class Profile extends BaseResource implements IResource {
 	 * Path: <b>Profile.code</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="code", path="Profile.code", description="A code for the profile in the format uri::code (server may choose to do subsumption)")
 	public static final String SP_CODE = "code";
 
 	/**
@@ -185,6 +194,7 @@ public class Profile extends BaseResource implements IResource {
 	 * Path: <b>Profile.extensionDefn.code</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="extension", path="Profile.extensionDefn.code", description="An extension code (use or definition)")
 	public static final String SP_EXTENSION = "extension";
 
 	/**
@@ -195,6 +205,7 @@ public class Profile extends BaseResource implements IResource {
 	 * Path: <b>Profile.structure.element.definition.binding.reference[x]</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="valueset", path="Profile.structure.element.definition.binding.reference[x]", description="A vocabulary binding code")
 	public static final String SP_VALUESET = "valueset";
 
 	/**
@@ -205,6 +216,7 @@ public class Profile extends BaseResource implements IResource {
 	 * Path: <b>Profile.structure.type</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="type", path="Profile.structure.type", description="Type of resource that is constrained in the profile")
 	public static final String SP_TYPE = "type";
 
 
@@ -1157,7 +1169,7 @@ public class Profile extends BaseResource implements IResource {
      * An external specification that the content is mapped to
      * </p> 
 	 */
-	@Block(name="Profile.mapping")	
+	@Block()	
 	public static class Mapping extends BaseElement implements IResourceBlock {
 	
 	@Child(name="identity", type=IdDt.class, order=0, min=1, max=1)	
@@ -1392,7 +1404,7 @@ public class Profile extends BaseResource implements IResource {
      * A constraint statement about what contents a resource or data type may have
      * </p> 
 	 */
-	@Block(name="Profile.structure")	
+	@Block()	
 	public static class Structure extends BaseElement implements IResourceBlock {
 	
 	@Child(name="type", type=CodeDt.class, order=0, min=1, max=1)	
@@ -1760,7 +1772,7 @@ public class Profile extends BaseResource implements IResource {
      * Captures constraints on each element within the resource
      * </p> 
 	 */
-	@Block(name="Profile.structure.element")	
+	@Block()	
 	public static class StructureElement extends BaseElement implements IResourceBlock {
 	
 	@Child(name="path", type=StringDt.class, order=0, min=1, max=1)	
@@ -2032,7 +2044,7 @@ public class Profile extends BaseResource implements IResource {
      * Indicates that the element is sliced into a set of alternative definitions (there are multiple definitions on a single element in the base resource). The set of slices is any elements that come after this in the element sequence that have the same path, until a shorter path occurs (the shorter path terminates the set)
      * </p> 
 	 */
-	@Block(name="Profile.structure.element.slicing")	
+	@Block()	
 	public static class StructureElementSlicing extends BaseElement implements IResourceBlock {
 	
 	@Child(name="discriminator", type=IdDt.class, order=0, min=1, max=1)	
@@ -2216,7 +2228,7 @@ public class Profile extends BaseResource implements IResource {
      * Definition of the content of the element to provide a more specific definition than that contained for the element in the base resource
      * </p> 
 	 */
-	@Block(name="Profile.structure.element.definition")	
+	@Block()	
 	public static class StructureElementDefinition extends BaseElement implements IResourceBlock {
 	
 	@Child(name="short", type=StringDt.class, order=0, min=1, max=1)	
@@ -3235,7 +3247,7 @@ public class Profile extends BaseResource implements IResource {
      * The data type or resource that the value of this element is permitted to be
      * </p> 
 	 */
-	@Block(name="Profile.structure.element.definition.type")	
+	@Block()	
 	public static class StructureElementDefinitionType extends BaseElement implements IResourceBlock {
 	
 	@Child(name="code", type=CodeDt.class, order=0, min=1, max=1)	
@@ -3432,7 +3444,7 @@ public class Profile extends BaseResource implements IResource {
      * Formal constraints such as co-occurrence and other constraints that can be computationally evaluated within the context of the instance
      * </p> 
 	 */
-	@Block(name="Profile.structure.element.definition.constraint")	
+	@Block()	
 	public static class StructureElementDefinitionConstraint extends BaseElement implements IResourceBlock {
 	
 	@Child(name="key", type=IdDt.class, order=0, min=1, max=1)	
@@ -3718,7 +3730,7 @@ public class Profile extends BaseResource implements IResource {
      * Binds to a value set if this element is coded (code, Coding, CodeableConcept)
      * </p> 
 	 */
-	@Block(name="Profile.structure.element.definition.binding")	
+	@Block()	
 	public static class StructureElementDefinitionBinding extends BaseElement implements IResourceBlock {
 	
 	@Child(name="name", type=StringDt.class, order=0, min=1, max=1)	
@@ -3989,7 +4001,7 @@ public class Profile extends BaseResource implements IResource {
      * Identifies a concept from an external specification that roughly corresponds to this element
      * </p> 
 	 */
-	@Block(name="Profile.structure.element.definition.mapping")	
+	@Block()	
 	public static class StructureElementDefinitionMapping extends BaseElement implements IResourceBlock {
 	
 	@Child(name="identity", type=IdDt.class, order=0, min=1, max=1)	
@@ -4124,7 +4136,7 @@ public class Profile extends BaseResource implements IResource {
      * Additional search parameters for implementations to support and/or make use of
      * </p> 
 	 */
-	@Block(name="Profile.structure.searchParam")	
+	@Block()	
 	public static class StructureSearchParam extends BaseElement implements IResourceBlock {
 	
 	@Child(name="name", type=StringDt.class, order=0, min=1, max=1)	
@@ -4424,7 +4436,7 @@ public class Profile extends BaseResource implements IResource {
      * An extension defined as part of the profile
      * </p> 
 	 */
-	@Block(name="Profile.extensionDefn")	
+	@Block()	
 	public static class ExtensionDefn extends BaseElement implements IResourceBlock {
 	
 	@Child(name="code", type=CodeDt.class, order=0, min=1, max=1)	
@@ -4731,7 +4743,7 @@ public class Profile extends BaseResource implements IResource {
      * Definition of a named query and its parameters and their meaning
      * </p> 
 	 */
-	@Block(name="Profile.query")	
+	@Block()	
 	public static class Query extends BaseElement implements IResourceBlock {
 	
 	@Child(name="name", type=StringDt.class, order=0, min=1, max=1)	

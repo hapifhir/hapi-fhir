@@ -51,6 +51,7 @@ import ca.uhn.fhir.model.api.annotation.Block;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.composite.PeriodDt;
@@ -98,6 +99,7 @@ public class MedicationDispense extends BaseResource implements IResource {
 	 * Path: <b>MedicationDispense.dispense.destination</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="destination", path="MedicationDispense.dispense.destination", description="Return dispenses that should be sent to a secific destination")
 	public static final String SP_DESTINATION = "destination";
 
 	/**
@@ -108,6 +110,7 @@ public class MedicationDispense extends BaseResource implements IResource {
 	 * Path: <b>MedicationDispense.dispenser</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="dispenser", path="MedicationDispense.dispenser", description="Return all dispenses performed by a specific indiividual")
 	public static final String SP_DISPENSER = "dispenser";
 
 	/**
@@ -118,6 +121,7 @@ public class MedicationDispense extends BaseResource implements IResource {
 	 * Path: <b>MedicationDispense.identifier</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="identifier", path="MedicationDispense.identifier", description="Return dispenses with this external identity")
 	public static final String SP_IDENTIFIER = "identifier";
 
 	/**
@@ -128,6 +132,7 @@ public class MedicationDispense extends BaseResource implements IResource {
 	 * Path: <b>MedicationDispense.dispense.medication</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="medication", path="MedicationDispense.dispense.medication", description="Returns dispenses of this medicine")
 	public static final String SP_MEDICATION = "medication";
 
 	/**
@@ -138,6 +143,7 @@ public class MedicationDispense extends BaseResource implements IResource {
 	 * Path: <b>MedicationDispense.patient</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="patient", path="MedicationDispense.patient", description="The identity of a patient to list dispenses  for")
 	public static final String SP_PATIENT = "patient";
 
 	/**
@@ -148,6 +154,7 @@ public class MedicationDispense extends BaseResource implements IResource {
 	 * Path: <b>MedicationDispense.authorizingPrescription</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="prescription", path="MedicationDispense.authorizingPrescription", description="The identity of a prescription to list dispenses from")
 	public static final String SP_PRESCRIPTION = "prescription";
 
 	/**
@@ -158,6 +165,7 @@ public class MedicationDispense extends BaseResource implements IResource {
 	 * Path: <b>MedicationDispense.substitution.responsibleParty</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="responsibleparty", path="MedicationDispense.substitution.responsibleParty", description="Return all dispenses with the specified responsible party")
 	public static final String SP_RESPONSIBLEPARTY = "responsibleparty";
 
 	/**
@@ -168,6 +176,7 @@ public class MedicationDispense extends BaseResource implements IResource {
 	 * Path: <b>MedicationDispense.dispense.status</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="status", path="MedicationDispense.dispense.status", description="Status of the dispense")
 	public static final String SP_STATUS = "status";
 
 	/**
@@ -178,6 +187,7 @@ public class MedicationDispense extends BaseResource implements IResource {
 	 * Path: <b>MedicationDispense.dispense.type</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="type", path="MedicationDispense.dispense.type", description="Return all dispenses of a specific type")
 	public static final String SP_TYPE = "type";
 
 	/**
@@ -188,6 +198,7 @@ public class MedicationDispense extends BaseResource implements IResource {
 	 * Path: <b>MedicationDispense.dispense.whenHandedOver</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="whenhandedover", path="MedicationDispense.dispense.whenHandedOver", description="Date when medication handed over to patient (outpatient setting), or supplied to ward or clinic (inpatient setting)")
 	public static final String SP_WHENHANDEDOVER = "whenhandedover";
 
 	/**
@@ -198,6 +209,7 @@ public class MedicationDispense extends BaseResource implements IResource {
 	 * Path: <b>MedicationDispense.dispense.whenPrepared</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="whenprepared", path="MedicationDispense.dispense.whenPrepared", description="Date when medication prepared")
 	public static final String SP_WHENPREPARED = "whenprepared";
 
 
@@ -575,7 +587,7 @@ public class MedicationDispense extends BaseResource implements IResource {
      * Indicates the details of the dispense event such as the days supply and quantity of medication dispensed.
      * </p> 
 	 */
-	@Block(name="MedicationDispense.dispense")	
+	@Block()	
 	public static class Dispense extends BaseElement implements IResourceBlock {
 	
 	@Child(name="identifier", type=IdentifierDt.class, order=0, min=0, max=1)	
@@ -1170,7 +1182,7 @@ public class MedicationDispense extends BaseResource implements IResource {
      * Indicates how the medication is to be used by the patient
      * </p> 
 	 */
-	@Block(name="MedicationDispense.dispense.dosage")	
+	@Block()	
 	public static class DispenseDosage extends BaseElement implements IResourceBlock {
 	
 	@Child(name="additionalInstructions", type=CodeableConceptDt.class, order=0, min=0, max=1)	
@@ -1592,7 +1604,7 @@ public class MedicationDispense extends BaseResource implements IResource {
      * Indicates whether or not substitution was made as part of the dispense.  In some cases substitution will be expected but doesn't happen, in other cases substitution is not expected but does happen.  This block explains what substitition did or did not happen and why.
      * </p> 
 	 */
-	@Block(name="MedicationDispense.substitution")	
+	@Block()	
 	public static class Substitution extends BaseElement implements IResourceBlock {
 	
 	@Child(name="type", type=CodeableConceptDt.class, order=0, min=1, max=1)	

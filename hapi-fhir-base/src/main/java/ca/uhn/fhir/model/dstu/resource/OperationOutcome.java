@@ -170,7 +170,7 @@ public class OperationOutcome extends BaseResource implements IResource {
      * An error, warning or information message that results from a system action
      * </p> 
 	 */
-	@Block(name="OperationOutcome.issue")	
+	@Block()	
 	public static class Issue extends BaseElement implements IResourceBlock {
 	
 	@Child(name="severity", type=CodeDt.class, order=0, min=1, max=1)	

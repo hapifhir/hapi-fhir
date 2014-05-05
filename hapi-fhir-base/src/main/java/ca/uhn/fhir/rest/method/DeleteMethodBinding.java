@@ -38,6 +38,7 @@ import ca.uhn.fhir.rest.client.BaseClientInvocation;
 import ca.uhn.fhir.rest.client.DeleteClientInvocation;
 import ca.uhn.fhir.rest.client.PostClientInvocation;
 import ca.uhn.fhir.rest.method.SearchMethodBinding.RequestType;
+import ca.uhn.fhir.rest.param.IParameter;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -132,6 +133,11 @@ public class DeleteMethodBinding extends BaseOutcomeReturningMethodBinding {
 		String resourceName = getResourceName();
 		
 		DeleteClientInvocation retVal = createDeleteInvocation(resourceName, idDt);
+
+		for (int idx = 0; idx < theArgs.length; idx++) {
+			IParameter nextParam = getParameters().get(idx);
+			nextParam.translateClientArgumentIntoQueryArgument(theArgs[idx], null, retVal);
+		}
 
 		return retVal;
 	}

@@ -48,6 +48,7 @@ import ca.uhn.fhir.model.api.annotation.Block;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu.composite.RatioDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
@@ -89,6 +90,7 @@ public class Medication extends BaseResource implements IResource {
 	 * Path: <b>Medication.code</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="code", path="Medication.code", description="")
 	public static final String SP_CODE = "code";
 
 	/**
@@ -99,6 +101,7 @@ public class Medication extends BaseResource implements IResource {
 	 * Path: <b>Medication.name</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="name", path="Medication.name", description="")
 	public static final String SP_NAME = "name";
 
 	/**
@@ -109,6 +112,7 @@ public class Medication extends BaseResource implements IResource {
 	 * Path: <b>Medication.manufacturer</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="manufacturer", path="Medication.manufacturer", description="")
 	public static final String SP_MANUFACTURER = "manufacturer";
 
 	/**
@@ -119,6 +123,7 @@ public class Medication extends BaseResource implements IResource {
 	 * Path: <b>Medication.product.form</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="form", path="Medication.product.form", description="")
 	public static final String SP_FORM = "form";
 
 	/**
@@ -129,6 +134,7 @@ public class Medication extends BaseResource implements IResource {
 	 * Path: <b>Medication.product.ingredient.item</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="ingredient", path="Medication.product.ingredient.item", description="")
 	public static final String SP_INGREDIENT = "ingredient";
 
 	/**
@@ -139,6 +145,7 @@ public class Medication extends BaseResource implements IResource {
 	 * Path: <b>Medication.package.container</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="container", path="Medication.package.container", description="")
 	public static final String SP_CONTAINER = "container";
 
 	/**
@@ -149,6 +156,7 @@ public class Medication extends BaseResource implements IResource {
 	 * Path: <b>Medication.package.content.item</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="content", path="Medication.package.content.item", description="")
 	public static final String SP_CONTENT = "content";
 
 
@@ -495,7 +503,7 @@ public class Medication extends BaseResource implements IResource {
      * Information that only applies to products (not packages)
      * </p> 
 	 */
-	@Block(name="Medication.product")	
+	@Block()	
 	public static class Product extends BaseElement implements IResourceBlock {
 	
 	@Child(name="form", type=CodeableConceptDt.class, order=0, min=0, max=1)	
@@ -630,7 +638,7 @@ public class Medication extends BaseResource implements IResource {
      * Identifies a particular constituent of interest in the product
      * </p> 
 	 */
-	@Block(name="Medication.product.ingredient")	
+	@Block()	
 	public static class ProductIngredient extends BaseElement implements IResourceBlock {
 	
 	@Child(name="item", order=0, min=1, max=1, type={

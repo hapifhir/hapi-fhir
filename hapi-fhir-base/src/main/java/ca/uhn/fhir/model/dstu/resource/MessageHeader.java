@@ -274,8 +274,8 @@ public class MessageHeader extends BaseResource implements IResource {
      * The time that the message was sent
      * </p> 
 	 */
-	public MessageHeader setTimestampWithMillisPrecision( Date theDate) {
-		myTimestamp = new InstantDt(theDate); 
+	public MessageHeader setTimestamp( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myTimestamp = new InstantDt(theDate, thePrecision); 
 		return this; 
 	}
 
@@ -287,8 +287,8 @@ public class MessageHeader extends BaseResource implements IResource {
      * The time that the message was sent
      * </p> 
 	 */
-	public MessageHeader setTimestamp( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myTimestamp = new InstantDt(theDate, thePrecision); 
+	public MessageHeader setTimestampWithMillisPrecision( Date theDate) {
+		myTimestamp = new InstantDt(theDate); 
 		return this; 
 	}
 
@@ -647,7 +647,7 @@ public class MessageHeader extends BaseResource implements IResource {
      * Information about the message that this message is a response to.  Only present if this message is a response.
      * </p> 
 	 */
-	@Block(name="MessageHeader.response")	
+	@Block()	
 	public static class Response extends BaseElement implements IResourceBlock {
 	
 	@Child(name="identifier", type=IdDt.class, order=0, min=1, max=1)	
@@ -819,7 +819,7 @@ public class MessageHeader extends BaseResource implements IResource {
      * The source application from which this message originated
      * </p> 
 	 */
-	@Block(name="MessageHeader.source")	
+	@Block()	
 	public static class Source extends BaseElement implements IResourceBlock {
 	
 	@Child(name="name", type=StringDt.class, order=0, min=0, max=1)	
@@ -1092,7 +1092,7 @@ public class MessageHeader extends BaseResource implements IResource {
      * The destination application which the message is intended for
      * </p> 
 	 */
-	@Block(name="MessageHeader.destination")	
+	@Block()	
 	public static class Destination extends BaseElement implements IResourceBlock {
 	
 	@Child(name="name", type=StringDt.class, order=0, min=0, max=1)	

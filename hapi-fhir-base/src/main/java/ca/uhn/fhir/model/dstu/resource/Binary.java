@@ -22,7 +22,6 @@ package ca.uhn.fhir.model.dstu.resource;
 
 import java.util.List;
 
-import ca.uhn.fhir.model.api.BaseElement;
 import ca.uhn.fhir.model.api.BaseResource;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IResource;

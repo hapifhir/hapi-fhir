@@ -49,6 +49,7 @@ import ca.uhn.fhir.model.api.annotation.Block;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.dstu.composite.AgeDt;
 import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
@@ -92,6 +93,7 @@ public class FamilyHistory extends BaseResource implements IResource {
 	 * Path: <b>FamilyHistory.subject</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="subject", path="FamilyHistory.subject", description="The identity of a subject to list family history items for")
 	public static final String SP_SUBJECT = "subject";
 
 
@@ -379,7 +381,7 @@ public class FamilyHistory extends BaseResource implements IResource {
      * The related person. Each FamilyHistory resource contains the entire family history for a single person.
      * </p> 
 	 */
-	@Block(name="FamilyHistory.relation")	
+	@Block()	
 	public static class Relation extends BaseElement implements IResourceBlock {
 	
 	@Child(name="name", type=StringDt.class, order=0, min=0, max=1)	
@@ -688,7 +690,7 @@ public class FamilyHistory extends BaseResource implements IResource {
      * The significant Conditions (or condition) that the family member had. This is a repeating section to allow a system to represent more than one condition per resource, though there is nothing stopping multiple resources - one per condition.
      * </p> 
 	 */
-	@Block(name="FamilyHistory.relation.condition")	
+	@Block()	
 	public static class RelationCondition extends BaseElement implements IResourceBlock {
 	
 	@Child(name="type", type=CodeableConceptDt.class, order=0, min=1, max=1)	

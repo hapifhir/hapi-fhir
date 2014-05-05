@@ -84,16 +84,18 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 		if (myQueryName != null) {
 			queryStringArgs.put(Constants.PARAM_QUERY, Collections.singletonList(myQueryName));
 		}
+		
+		String resourceName = getResourceName();
+		GetClientInvocation retVal = createSearchInvocation(resourceName, queryStringArgs);
 
 		if (theArgs != null) {
 			for (int idx = 0; idx < theArgs.length; idx++) {
 				IParameter nextParam = getParameters().get(idx);
-				nextParam.translateClientArgumentIntoQueryArgument(theArgs[idx], queryStringArgs);
+				nextParam.translateClientArgumentIntoQueryArgument(theArgs[idx], queryStringArgs,retVal);
 			}
 		}
 
-		String resourceName = getResourceName();
-		return createSearchInvocation(resourceName, queryStringArgs);
+		return retVal;
 	}
 
 	public static GetClientInvocation createSearchInvocation(String theResourceName, Map<String, List<String>> theParameters) {

@@ -47,6 +47,7 @@ import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.dstu.composite.AttachmentDt;
 import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
@@ -91,6 +92,7 @@ public class Media extends BaseResource implements IResource {
 	 * Path: <b>Media.type</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="type", path="Media.type", description="")
 	public static final String SP_TYPE = "type";
 
 	/**
@@ -101,6 +103,7 @@ public class Media extends BaseResource implements IResource {
 	 * Path: <b>Media.subtype</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="subtype", path="Media.subtype", description="")
 	public static final String SP_SUBTYPE = "subtype";
 
 	/**
@@ -111,6 +114,7 @@ public class Media extends BaseResource implements IResource {
 	 * Path: <b>Media.identifier</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="identifier", path="Media.identifier", description="")
 	public static final String SP_IDENTIFIER = "identifier";
 
 	/**
@@ -121,6 +125,7 @@ public class Media extends BaseResource implements IResource {
 	 * Path: <b>Media.dateTime</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="date", path="Media.dateTime", description="")
 	public static final String SP_DATE = "date";
 
 	/**
@@ -131,6 +136,7 @@ public class Media extends BaseResource implements IResource {
 	 * Path: <b>Media.subject</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="subject", path="Media.subject", description="")
 	public static final String SP_SUBJECT = "subject";
 
 	/**
@@ -141,6 +147,7 @@ public class Media extends BaseResource implements IResource {
 	 * Path: <b>Media.operator</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="operator", path="Media.operator", description="")
 	public static final String SP_OPERATOR = "operator";
 
 	/**
@@ -151,6 +158,7 @@ public class Media extends BaseResource implements IResource {
 	 * Path: <b>Media.view</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="view", path="Media.view", description="")
 	public static final String SP_VIEW = "view";
 
 

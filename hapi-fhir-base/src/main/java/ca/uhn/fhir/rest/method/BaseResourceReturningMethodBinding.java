@@ -46,6 +46,8 @@ import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
+import ca.uhn.fhir.model.api.Tag;
+import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
@@ -154,8 +156,12 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding {
 
 			List<String> lmHeaders = theHeaders.get(Constants.HEADER_LAST_MODIFIED_LOWERCASE);
 			if (lmHeaders != null && lmHeaders.size() > 0 && StringUtils.isNotBlank(lmHeaders.get(0))) {
+				try {
 				InstantDt lmValue = new InstantDt(lmHeaders.get(0));
 				resource.getResourceMetadata().put(ResourceMetadataKeyEnum.UPDATED, lmValue);
+				} catch (Exception e) {
+					// TODO: This shouldn't be thrown - Time format is not in InstandDt format for this header, find examples online 
+				}
 			}
 
 			switch (getMethodReturnType()) {
@@ -310,6 +316,15 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding {
 			bundle.getEntries().add(entry);
 
 			entry.setResource(next);
+			TagList list = (TagList) next.getResourceMetadata().get(ResourceMetadataKeyEnum.TAG_LIST);
+			if (list != null) {
+				for (Tag tag : list) {
+					if (StringUtils.isNotBlank(tag.getTerm())) {
+						entry.addCategory().setTerm(tag.getTerm()).setLabel(tag.getLabel()).setScheme(tag.getScheme());
+					}
+				}
+			}
+
 
 			RuntimeResourceDefinition def = getContext().getResourceDefinition(next);
 
@@ -409,6 +424,15 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding {
 			theHttpResponse.addHeader(Constants.HEADER_LAST_MODIFIED, lastUpdated.getValueAsString());
 		}
 
+		TagList list = (TagList) theResource.getResourceMetadata().get(ResourceMetadataKeyEnum.TAG_LIST);
+		if (list != null) {
+			for (Tag tag : list) {
+				if (StringUtils.isNotBlank(tag.getTerm())) {
+					theHttpResponse.addHeader(Constants.HEADER_CATEGORY, tag.toHeaderValue());
+				}
+			}
+		}
+		
 		PrintWriter writer = theHttpResponse.getWriter();
 		try {
 			if (theNarrativeMode == NarrativeModeEnum.ONLY) {

@@ -96,6 +96,11 @@ public class IdentifierDt
 		setValue(theValue);
 		setLabel(theLabel);
 	}
+	
+	@Override
+	public String toString() {
+		return "IdentifierDt[" + getValueAsQueryToken() + "]";
+	}
 
 	@Child(name="use", type=CodeDt.class, order=0, min=0, max=1)	
 	@Description(

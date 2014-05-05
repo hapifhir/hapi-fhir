@@ -35,12 +35,24 @@ public abstract class BaseElement implements IIdentifiableElement, ISupportsUnde
 	private List<ExtensionDt> myUndeclaredModifierExtensions;
 
 	@Override
-	public void addUndeclaredExtension(boolean theIsModifier, String theUrl, IDatatype theValue) {
+	public ExtensionDt addUndeclaredExtension(boolean theIsModifier, String theUrl, IDatatype theValue) {
 		Validate.notEmpty(theUrl, "URL must be populated");
 		Validate.notNull(theValue, "Value must not be null");
-		getUndeclaredExtensions().add(new ExtensionDt(theIsModifier, theUrl, theValue));
+		ExtensionDt retVal = new ExtensionDt(theIsModifier, theUrl, theValue);
+		getUndeclaredExtensions().add(retVal);
+		return retVal;
 	}
 
+	@Override
+	public ExtensionDt addUndeclaredExtension(boolean theIsModifier, String theUrl) {
+		Validate.notEmpty(theUrl, "URL must be populated");
+
+		ExtensionDt retVal = new ExtensionDt(theIsModifier, theUrl);
+		getUndeclaredExtensions().add(retVal);
+		return retVal;
+	}
+
+	
 	@Override
 	public void addUndeclaredExtension(ExtensionDt theExtension) {
 		Validate.notNull(theExtension, "Extension can not be null");

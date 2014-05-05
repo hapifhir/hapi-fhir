@@ -64,6 +64,13 @@ public interface ISupportsUndeclaredExtensions extends IElement {
 	/**
 	 * Adds an extension to this object
 	 */
-	void addUndeclaredExtension(boolean theIsModifier, String theUrl, IDatatype theValue);
-	
+	ExtensionDt addUndeclaredExtension(boolean theIsModifier, String theUrl, IDatatype theValue);
+
+	/**
+	 * Adds an extension to this object. This method is intended for use when
+	 * an extension is being added which will contain child extensions, as opposed to
+	 * a datatype.
+	 */
+	ExtensionDt addUndeclaredExtension(boolean theIsModifier, String theUrl);
+
 }

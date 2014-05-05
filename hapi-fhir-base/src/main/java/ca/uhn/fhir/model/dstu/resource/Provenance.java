@@ -50,6 +50,7 @@ import ca.uhn.fhir.model.api.annotation.Block;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu.composite.CodingDt;
 import ca.uhn.fhir.model.dstu.composite.PeriodDt;
@@ -93,6 +94,7 @@ public class Provenance extends BaseResource implements IResource {
 	 * Path: <b>Provenance.target</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="target", path="Provenance.target", description="")
 	public static final String SP_TARGET = "target";
 
 	/**
@@ -103,6 +105,7 @@ public class Provenance extends BaseResource implements IResource {
 	 * Path: <b>Provenance.period.start</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="start", path="Provenance.period.start", description="")
 	public static final String SP_START = "start";
 
 	/**
@@ -113,6 +116,7 @@ public class Provenance extends BaseResource implements IResource {
 	 * Path: <b>Provenance.period.end</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="end", path="Provenance.period.end", description="")
 	public static final String SP_END = "end";
 
 	/**
@@ -123,6 +127,7 @@ public class Provenance extends BaseResource implements IResource {
 	 * Path: <b>Provenance.location</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="location", path="Provenance.location", description="")
 	public static final String SP_LOCATION = "location";
 
 	/**
@@ -133,6 +138,7 @@ public class Provenance extends BaseResource implements IResource {
 	 * Path: <b>Provenance.agent.reference</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="party", path="Provenance.agent.reference", description="")
 	public static final String SP_PARTY = "party";
 
 	/**
@@ -143,6 +149,7 @@ public class Provenance extends BaseResource implements IResource {
 	 * Path: <b>Provenance.agent.type</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="partytype", path="Provenance.agent.type", description="")
 	public static final String SP_PARTYTYPE = "partytype";
 
 
@@ -340,8 +347,8 @@ public class Provenance extends BaseResource implements IResource {
      * The instant of time at which the activity was recorded
      * </p> 
 	 */
-	public Provenance setRecordedWithMillisPrecision( Date theDate) {
-		myRecorded = new InstantDt(theDate); 
+	public Provenance setRecorded( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myRecorded = new InstantDt(theDate, thePrecision); 
 		return this; 
 	}
 
@@ -353,8 +360,8 @@ public class Provenance extends BaseResource implements IResource {
      * The instant of time at which the activity was recorded
      * </p> 
 	 */
-	public Provenance setRecorded( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myRecorded = new InstantDt(theDate, thePrecision); 
+	public Provenance setRecordedWithMillisPrecision( Date theDate) {
+		myRecorded = new InstantDt(theDate); 
 		return this; 
 	}
 
@@ -671,7 +678,7 @@ public class Provenance extends BaseResource implements IResource {
      * An agent takes a role in an activity such that the agent can be assigned some degree of responsibility for the activity taking place. An agent can be a person, a piece of software, an inanimate object, an organization, or other entities that may be ascribed responsibility
      * </p> 
 	 */
-	@Block(name="Provenance.agent")	
+	@Block()	
 	public static class Agent extends BaseElement implements IResourceBlock {
 	
 	@Child(name="role", type=CodingDt.class, order=0, min=1, max=1)	
@@ -880,7 +887,7 @@ public class Provenance extends BaseResource implements IResource {
      * An entity used in this activity
      * </p> 
 	 */
-	@Block(name="Provenance.entity")	
+	@Block()	
 	public static class Entity extends BaseElement implements IResourceBlock {
 	
 	@Child(name="role", type=CodeDt.class, order=0, min=1, max=1)	

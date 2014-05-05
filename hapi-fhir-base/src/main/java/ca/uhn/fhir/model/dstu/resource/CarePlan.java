@@ -51,6 +51,7 @@ import ca.uhn.fhir.model.api.annotation.Block;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.composite.PeriodDt;
@@ -102,6 +103,7 @@ public class CarePlan extends BaseResource implements IResource {
 	 * Path: <b>CarePlan.patient</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="patient", path="CarePlan.patient", description="")
 	public static final String SP_PATIENT = "patient";
 
 	/**
@@ -112,6 +114,7 @@ public class CarePlan extends BaseResource implements IResource {
 	 * Path: <b>CarePlan.concern</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="condition", path="CarePlan.concern", description="")
 	public static final String SP_CONDITION = "condition";
 
 	/**
@@ -122,6 +125,7 @@ public class CarePlan extends BaseResource implements IResource {
 	 * Path: <b>CarePlan.period</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="date", path="CarePlan.period", description="")
 	public static final String SP_DATE = "date";
 
 	/**
@@ -132,6 +136,7 @@ public class CarePlan extends BaseResource implements IResource {
 	 * Path: <b>CarePlan.participant.member</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="participant", path="CarePlan.participant.member", description="")
 	public static final String SP_PARTICIPANT = "participant";
 
 	/**
@@ -142,6 +147,7 @@ public class CarePlan extends BaseResource implements IResource {
 	 * Path: <b>CarePlan.activity.simple.code</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="activitycode", path="CarePlan.activity.simple.code", description="")
 	public static final String SP_ACTIVITYCODE = "activitycode";
 
 	/**
@@ -152,6 +158,7 @@ public class CarePlan extends BaseResource implements IResource {
 	 * Path: <b>CarePlan.activity.simple.timing[x]</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="activitydate", path="CarePlan.activity.simple.timing[x]", description="Specified date occurs within period specified by CarePlan.activity.timingSchedule")
 	public static final String SP_ACTIVITYDATE = "activitydate";
 
 	/**
@@ -162,6 +169,7 @@ public class CarePlan extends BaseResource implements IResource {
 	 * Path: <b>CarePlan.activity.detail</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="activitydetail", path="CarePlan.activity.detail", description="")
 	public static final String SP_ACTIVITYDETAIL = "activitydetail";
 
 
@@ -788,7 +796,7 @@ public class CarePlan extends BaseResource implements IResource {
      * Identifies all people and organizations who are expected to be involved in the care envisioned by this plan.
      * </p> 
 	 */
-	@Block(name="CarePlan.participant")	
+	@Block()	
 	public static class Participant extends BaseElement implements IResourceBlock {
 	
 	@Child(name="role", type=CodeableConceptDt.class, order=0, min=0, max=1)	
@@ -893,7 +901,7 @@ public class CarePlan extends BaseResource implements IResource {
      * Describes the intended objective(s) of carrying out the Care Plan.
      * </p> 
 	 */
-	@Block(name="CarePlan.goal")	
+	@Block()	
 	public static class Goal extends BaseElement implements IResourceBlock {
 	
 	@Child(name="description", type=StringDt.class, order=0, min=1, max=1)	
@@ -1129,7 +1137,7 @@ public class CarePlan extends BaseResource implements IResource {
      * Identifies a planned action to occur as part of the plan.  For example, a medication to be used, lab tests to perform, self-monitoring, education, etc.
      * </p> 
 	 */
-	@Block(name="CarePlan.activity")	
+	@Block()	
 	public static class Activity extends BaseElement implements IResourceBlock {
 	
 	@Child(name="goal", type=IdrefDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)	
@@ -1505,7 +1513,7 @@ public class CarePlan extends BaseResource implements IResource {
      * A simple summary of details suitable for a general care plan system (e.g. form driven) that doesn't know about specific resources such as procedure etc
      * </p> 
 	 */
-	@Block(name="CarePlan.activity.simple")	
+	@Block()	
 	public static class ActivitySimple extends BaseElement implements IResourceBlock {
 	
 	@Child(name="category", type=CodeDt.class, order=0, min=1, max=1)	

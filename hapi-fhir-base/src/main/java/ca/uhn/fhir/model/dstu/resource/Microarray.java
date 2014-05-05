@@ -50,6 +50,7 @@ import ca.uhn.fhir.model.api.annotation.Block;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.primitive.BooleanDt;
@@ -90,6 +91,7 @@ public class Microarray extends BaseResource implements IResource {
 	 * Path: <b>Microarray.subject.patient</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="patient", path="Microarray.subject.patient", description="Patient described by the microarray")
 	public static final String SP_PATIENT = "patient";
 
 	/**
@@ -100,6 +102,7 @@ public class Microarray extends BaseResource implements IResource {
 	 * Path: <b>Microarray.sample.gene.identity</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="gene", path="Microarray.sample.gene.identity", description="Gene studied in the microarray")
 	public static final String SP_GENE = "gene";
 
 	/**
@@ -110,6 +113,7 @@ public class Microarray extends BaseResource implements IResource {
 	 * Path: <b>Microarray.sample.gene.coordinate</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="coordinate", path="Microarray.sample.gene.coordinate", description="Coordinate of the gene")
 	public static final String SP_COORDINATE = "coordinate";
 
 
@@ -412,7 +416,7 @@ public class Microarray extends BaseResource implements IResource {
      * Subject of the microarray
      * </p> 
 	 */
-	@Block(name="Microarray.subject")	
+	@Block()	
 	public static class Subject extends BaseElement implements IResourceBlock {
 	
 	@Child(name="patient", order=0, min=0, max=1, type={
@@ -567,7 +571,7 @@ public class Microarray extends BaseResource implements IResource {
      * Scanner used in the microarray
      * </p> 
 	 */
-	@Block(name="Microarray.scanner")	
+	@Block()	
 	public static class Scanner extends BaseElement implements IResourceBlock {
 	
 	@Child(name="manufacturer", order=0, min=0, max=1, type={
@@ -739,7 +743,7 @@ public class Microarray extends BaseResource implements IResource {
      * Sample of a grid on the chip
      * </p> 
 	 */
-	@Block(name="Microarray.sample")	
+	@Block()	
 	public static class Sample extends BaseElement implements IResourceBlock {
 	
 	@Child(name="identity", type=StringDt.class, order=0, min=1, max=1)	
@@ -975,6 +979,19 @@ public class Microarray extends BaseResource implements IResource {
      * Intensity(expression) of the gene
      * </p> 
 	 */
+	public Sample setIntensity( long theValue) {
+		myIntensity = new DecimalDt(theValue); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>intensity</b> (Intensity)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Intensity(expression) of the gene
+     * </p> 
+	 */
 	public Sample setIntensity( double theValue) {
 		myIntensity = new DecimalDt(theValue); 
 		return this; 
@@ -989,19 +1006,6 @@ public class Microarray extends BaseResource implements IResource {
      * </p> 
 	 */
 	public Sample setIntensity( java.math.BigDecimal theValue) {
-		myIntensity = new DecimalDt(theValue); 
-		return this; 
-	}
-
-	/**
-	 * Sets the value for <b>intensity</b> (Intensity)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * Intensity(expression) of the gene
-     * </p> 
-	 */
-	public Sample setIntensity( long theValue) {
 		myIntensity = new DecimalDt(theValue); 
 		return this; 
 	}
@@ -1062,7 +1066,7 @@ public class Microarray extends BaseResource implements IResource {
      * Specimen used on the grid
      * </p> 
 	 */
-	@Block(name="Microarray.sample.specimen")	
+	@Block()	
 	public static class SampleSpecimen extends BaseElement implements IResourceBlock {
 	
 	@Child(name="type", type=StringDt.class, order=0, min=1, max=1)	
@@ -1182,7 +1186,7 @@ public class Microarray extends BaseResource implements IResource {
      * Gene of study
      * </p> 
 	 */
-	@Block(name="Microarray.sample.gene")	
+	@Block()	
 	public static class SampleGene extends BaseElement implements IResourceBlock {
 	
 	@Child(name="identity", type=StringDt.class, order=0, min=0, max=1)	
@@ -1301,7 +1305,7 @@ public class Microarray extends BaseResource implements IResource {
      * Coordinate of the gene
      * </p> 
 	 */
-	@Block(name="Microarray.sample.gene.coordinate")	
+	@Block()	
 	public static class SampleGeneCoordinate extends BaseElement implements IResourceBlock {
 	
 	@Child(name="chromosome", type=StringDt.class, order=0, min=1, max=1)	

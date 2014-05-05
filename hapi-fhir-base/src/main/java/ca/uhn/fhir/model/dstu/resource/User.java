@@ -45,6 +45,7 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.dstu.composite.ContactDt;
 import ca.uhn.fhir.model.dstu.composite.HumanNameDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
@@ -85,6 +86,7 @@ public class User extends BaseResource implements IResource {
 	 * Path: <b>User.name</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="name", path="User.name", description="")
 	public static final String SP_NAME = "name";
 
 	/**
@@ -95,6 +97,7 @@ public class User extends BaseResource implements IResource {
 	 * Path: <b>User.provider</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="provider", path="User.provider", description="")
 	public static final String SP_PROVIDER = "provider";
 
 	/**
@@ -105,6 +108,7 @@ public class User extends BaseResource implements IResource {
 	 * Path: <b>User.login</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="login", path="User.login", description="")
 	public static final String SP_LOGIN = "login";
 
 	/**
@@ -115,6 +119,7 @@ public class User extends BaseResource implements IResource {
 	 * Path: <b>User.level</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="level", path="User.level", description="")
 	public static final String SP_LEVEL = "level";
 
 	/**
@@ -125,6 +130,7 @@ public class User extends BaseResource implements IResource {
 	 * Path: <b>User.patient</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="patient", path="User.patient", description="")
 	public static final String SP_PATIENT = "patient";
 
 

@@ -51,6 +51,7 @@ import ca.uhn.fhir.model.api.annotation.Block;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.composite.PeriodDt;
@@ -99,6 +100,7 @@ public class Specimen extends BaseResource implements IResource {
 	 * Path: <b>Specimen.subject</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="subject", path="Specimen.subject", description="The subject of the specimen")
 	public static final String SP_SUBJECT = "subject";
 
 
@@ -670,7 +672,7 @@ public class Specimen extends BaseResource implements IResource {
      * Parent specimen from which the focal specimen was a component
      * </p> 
 	 */
-	@Block(name="Specimen.source")	
+	@Block()	
 	public static class Source extends BaseElement implements IResourceBlock {
 	
 	@Child(name="relationship", type=CodeDt.class, order=0, min=1, max=1)	
@@ -804,7 +806,7 @@ public class Specimen extends BaseResource implements IResource {
      * Details concerning the specimen collection
      * </p> 
 	 */
-	@Block(name="Specimen.collection")	
+	@Block()	
 	public static class Collection extends BaseElement implements IResourceBlock {
 	
 	@Child(name="collector", order=0, min=0, max=1, type={
@@ -1174,7 +1176,7 @@ public class Specimen extends BaseResource implements IResource {
      * Details concerning treatment and processing steps for the specimen
      * </p> 
 	 */
-	@Block(name="Specimen.treatment")	
+	@Block()	
 	public static class Treatment extends BaseElement implements IResourceBlock {
 	
 	@Child(name="description", type=StringDt.class, order=0, min=0, max=1)	
@@ -1359,7 +1361,7 @@ public class Specimen extends BaseResource implements IResource {
      * The container holding the specimen.  The recursive nature of containers; i.e. blood in tube in tray in rack is not addressed here.
      * </p> 
 	 */
-	@Block(name="Specimen.container")	
+	@Block()	
 	public static class Container extends BaseElement implements IResourceBlock {
 	
 	@Child(name="identifier", type=IdentifierDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)	

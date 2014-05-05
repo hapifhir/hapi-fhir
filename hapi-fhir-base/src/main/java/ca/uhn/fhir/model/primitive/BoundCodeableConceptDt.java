@@ -31,7 +31,7 @@ import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu.composite.CodingDt;
 
-@DatatypeDef(name = "CodeableConcept")
+@DatatypeDef(name = "CodeableConcept", isSpecialization=true)
 public class BoundCodeableConceptDt<T extends Enum<?>> extends CodeableConceptDt {
 
 	private IValueSetEnumBinder<T> myBinder;

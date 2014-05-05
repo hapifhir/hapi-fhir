@@ -739,6 +739,24 @@ public class Test extends BaseResource implements IResource {
      *
      * @return Returns a reference to this object, to allow for simple chaining.
 	 */
+	public Test addDecimalErr( long theValue) {
+		if (myDecimalErr == null) {
+			myDecimalErr = new java.util.ArrayList<DecimalDt>();
+		}
+		myDecimalErr.add(new DecimalDt(theValue));
+		return this; 
+	}
+
+	/**
+	 * Adds a new value for <b>decimalErr</b> (Decimals with invalid content)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * 
+     * </p> 
+     *
+     * @return Returns a reference to this object, to allow for simple chaining.
+	 */
 	public Test addDecimalErr( double theValue) {
 		if (myDecimalErr == null) {
 			myDecimalErr = new java.util.ArrayList<DecimalDt>();
@@ -758,24 +776,6 @@ public class Test extends BaseResource implements IResource {
      * @return Returns a reference to this object, to allow for simple chaining.
 	 */
 	public Test addDecimalErr( java.math.BigDecimal theValue) {
-		if (myDecimalErr == null) {
-			myDecimalErr = new java.util.ArrayList<DecimalDt>();
-		}
-		myDecimalErr.add(new DecimalDt(theValue));
-		return this; 
-	}
-
-	/**
-	 * Adds a new value for <b>decimalErr</b> (Decimals with invalid content)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * 
-     * </p> 
-     *
-     * @return Returns a reference to this object, to allow for simple chaining.
-	 */
-	public Test addDecimalErr( long theValue) {
 		if (myDecimalErr == null) {
 			myDecimalErr = new java.util.ArrayList<DecimalDt>();
 		}
@@ -853,6 +853,24 @@ public class Test extends BaseResource implements IResource {
      *
      * @return Returns a reference to this object, to allow for simple chaining.
 	 */
+	public Test addDecimalCorr( long theValue) {
+		if (myDecimalCorr == null) {
+			myDecimalCorr = new java.util.ArrayList<DecimalDt>();
+		}
+		myDecimalCorr.add(new DecimalDt(theValue));
+		return this; 
+	}
+
+	/**
+	 * Adds a new value for <b>decimalCorr</b> (Decimals with correct content)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * 
+     * </p> 
+     *
+     * @return Returns a reference to this object, to allow for simple chaining.
+	 */
 	public Test addDecimalCorr( double theValue) {
 		if (myDecimalCorr == null) {
 			myDecimalCorr = new java.util.ArrayList<DecimalDt>();
@@ -872,24 +890,6 @@ public class Test extends BaseResource implements IResource {
      * @return Returns a reference to this object, to allow for simple chaining.
 	 */
 	public Test addDecimalCorr( java.math.BigDecimal theValue) {
-		if (myDecimalCorr == null) {
-			myDecimalCorr = new java.util.ArrayList<DecimalDt>();
-		}
-		myDecimalCorr.add(new DecimalDt(theValue));
-		return this; 
-	}
-
-	/**
-	 * Adds a new value for <b>decimalCorr</b> (Decimals with correct content)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * 
-     * </p> 
-     *
-     * @return Returns a reference to this object, to allow for simple chaining.
-	 */
-	public Test addDecimalCorr( long theValue) {
 		if (myDecimalCorr == null) {
 			myDecimalCorr = new java.util.ArrayList<DecimalDt>();
 		}
@@ -1123,11 +1123,11 @@ public class Test extends BaseResource implements IResource {
      *
      * @return Returns a reference to this object, to allow for simple chaining.
 	 */
-	public Test addInstantErr( Date theDate) {
+	public Test addInstantErr( Date theDate,  TemporalPrecisionEnum thePrecision) {
 		if (myInstantErr == null) {
 			myInstantErr = new java.util.ArrayList<InstantDt>();
 		}
-		myInstantErr.add(new InstantDt(theDate));
+		myInstantErr.add(new InstantDt(theDate, thePrecision));
 		return this; 
 	}
 
@@ -1141,11 +1141,11 @@ public class Test extends BaseResource implements IResource {
      *
      * @return Returns a reference to this object, to allow for simple chaining.
 	 */
-	public Test addInstantErr( Date theDate,  TemporalPrecisionEnum thePrecision) {
+	public Test addInstantErr( Date theDate) {
 		if (myInstantErr == null) {
 			myInstantErr = new java.util.ArrayList<InstantDt>();
 		}
-		myInstantErr.add(new InstantDt(theDate, thePrecision));
+		myInstantErr.add(new InstantDt(theDate));
 		return this; 
 	}
 
@@ -1219,11 +1219,11 @@ public class Test extends BaseResource implements IResource {
      *
      * @return Returns a reference to this object, to allow for simple chaining.
 	 */
-	public Test addInstantCorr( Date theDate) {
+	public Test addInstantCorr( Date theDate,  TemporalPrecisionEnum thePrecision) {
 		if (myInstantCorr == null) {
 			myInstantCorr = new java.util.ArrayList<InstantDt>();
 		}
-		myInstantCorr.add(new InstantDt(theDate));
+		myInstantCorr.add(new InstantDt(theDate, thePrecision));
 		return this; 
 	}
 
@@ -1237,11 +1237,11 @@ public class Test extends BaseResource implements IResource {
      *
      * @return Returns a reference to this object, to allow for simple chaining.
 	 */
-	public Test addInstantCorr( Date theDate,  TemporalPrecisionEnum thePrecision) {
+	public Test addInstantCorr( Date theDate) {
 		if (myInstantCorr == null) {
 			myInstantCorr = new java.util.ArrayList<InstantDt>();
 		}
-		myInstantCorr.add(new InstantDt(theDate, thePrecision));
+		myInstantCorr.add(new InstantDt(theDate));
 		return this; 
 	}
 

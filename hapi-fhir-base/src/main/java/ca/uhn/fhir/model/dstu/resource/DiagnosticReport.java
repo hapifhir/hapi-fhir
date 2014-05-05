@@ -51,6 +51,7 @@ import ca.uhn.fhir.model.api.annotation.Block;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.dstu.composite.AttachmentDt;
 import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
@@ -95,6 +96,7 @@ public class DiagnosticReport extends BaseResource implements IResource {
 	 * Path: <b>DiagnosticReport.status</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="status", path="DiagnosticReport.status", description="The status of the report")
 	public static final String SP_STATUS = "status";
 
 	/**
@@ -105,6 +107,7 @@ public class DiagnosticReport extends BaseResource implements IResource {
 	 * Path: <b>DiagnosticReport.issued</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="issued", path="DiagnosticReport.issued", description="When the report was issued")
 	public static final String SP_ISSUED = "issued";
 
 	/**
@@ -115,6 +118,7 @@ public class DiagnosticReport extends BaseResource implements IResource {
 	 * Path: <b>DiagnosticReport.subject</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="subject", path="DiagnosticReport.subject", description="The subject of the report")
 	public static final String SP_SUBJECT = "subject";
 
 	/**
@@ -125,6 +129,7 @@ public class DiagnosticReport extends BaseResource implements IResource {
 	 * Path: <b>DiagnosticReport.performer</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="performer", path="DiagnosticReport.performer", description="Who was the source of the report (organization)")
 	public static final String SP_PERFORMER = "performer";
 
 	/**
@@ -135,6 +140,7 @@ public class DiagnosticReport extends BaseResource implements IResource {
 	 * Path: <b>DiagnosticReport.identifier</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="identifier", path="DiagnosticReport.identifier", description="An identifier for the report")
 	public static final String SP_IDENTIFIER = "identifier";
 
 	/**
@@ -145,6 +151,7 @@ public class DiagnosticReport extends BaseResource implements IResource {
 	 * Path: <b>DiagnosticReport.serviceCategory</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="service", path="DiagnosticReport.serviceCategory", description="Which diagnostic discipline/department created the report")
 	public static final String SP_SERVICE = "service";
 
 	/**
@@ -155,6 +162,7 @@ public class DiagnosticReport extends BaseResource implements IResource {
 	 * Path: <b>DiagnosticReport.diagnostic[x]</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="date", path="DiagnosticReport.diagnostic[x]", description="The clinically relevant time of the report")
 	public static final String SP_DATE = "date";
 
 	/**
@@ -165,6 +173,7 @@ public class DiagnosticReport extends BaseResource implements IResource {
 	 * Path: <b>DiagnosticReport.specimen</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="specimen", path="DiagnosticReport.specimen", description="The specimen details")
 	public static final String SP_SPECIMEN = "specimen";
 
 	/**
@@ -175,6 +184,7 @@ public class DiagnosticReport extends BaseResource implements IResource {
 	 * Path: <b>DiagnosticReport.name</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="name", path="DiagnosticReport.name", description="The name of the report (e.g. the code for the report as a whole, as opposed to codes for the atomic results, which are the names on the observation resource referred to from the result)")
 	public static final String SP_NAME = "name";
 
 	/**
@@ -185,6 +195,7 @@ public class DiagnosticReport extends BaseResource implements IResource {
 	 * Path: <b>DiagnosticReport.result</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="result", path="DiagnosticReport.result", description="Link to an atomic result (observation resource)")
 	public static final String SP_RESULT = "result";
 
 	/**
@@ -195,6 +206,7 @@ public class DiagnosticReport extends BaseResource implements IResource {
 	 * Path: <b>DiagnosticReport.codedDiagnosis</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="diagnosis", path="DiagnosticReport.codedDiagnosis", description="A coded diagnosis on the report")
 	public static final String SP_DIAGNOSIS = "diagnosis";
 
 	/**
@@ -205,6 +217,7 @@ public class DiagnosticReport extends BaseResource implements IResource {
 	 * Path: <b>DiagnosticReport.image.link</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="image", path="DiagnosticReport.image.link", description="")
 	public static final String SP_IMAGE = "image";
 
 	/**
@@ -215,6 +228,7 @@ public class DiagnosticReport extends BaseResource implements IResource {
 	 * Path: <b>DiagnosticReport.requestDetail</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="request", path="DiagnosticReport.requestDetail", description="")
 	public static final String SP_REQUEST = "request";
 
 
@@ -1065,7 +1079,7 @@ public class DiagnosticReport extends BaseResource implements IResource {
      * A list of key images associated with this report. The images are generally created during the diagnostic process, and may be directly of the patient, or of treated specimens (i.e. slides of interest)
      * </p> 
 	 */
-	@Block(name="DiagnosticReport.image")	
+	@Block()	
 	public static class Image extends BaseElement implements IResourceBlock {
 	
 	@Child(name="comment", type=StringDt.class, order=0, min=0, max=1)	

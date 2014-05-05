@@ -20,6 +20,26 @@ function addConfigElementsToForm(theForm) {
 	theForm.appendChild(newPretty);
 }
 
+function appendSearchParam(formElement, searchParam) {
+    var inputId = newUniqueId();
+    if (searchParam.type && searchParam.type == 'token') {
+	    formElement.append(
+	    	$('<input />', { name: 'param.token.1.' + searchParam.name, placeholder: 'system/namespace', type: 'text', id: inputId }),
+	    	$('<input />', { name: 'param.token.2.' + searchParam.name, placeholder: 'value', type: 'text', id: inputId }),
+	    	$('<label for="' + inputId + '">' + searchParam.name + '</input>')
+	    );
+    } else {
+	    formElement.append(
+	    	$('<input />', { name: 'param.string.' + searchParam.name, placeholder: searchParam.name, type: 'text', id: inputId }),
+	    	$('<label for="' + inputId + '">' + searchParam.name + '</input>')
+	    );
+    }
+}
+
+function appendSearchParamExtension(extension) {
+	
+}
+
 /** Hide any currently displayed tester form */
 function clearCurrentForm(postCompleteFunction) {
 /*	$('.testerNameRow').each().fadeOut(500).promise().then(function(){
@@ -159,6 +179,7 @@ function displaySearchType(button, expandoTr, resourceName) {
 			rest.resource.forEach(function(restResource){
 				if (restResource.type == resourceName) {
 					if (restResource.searchParam) {
+						var paramIndex = 0;
 						restResource.searchParam.forEach(function(searchParam){
 							var formElement = $('<form/>', { action: 'PublicTesterResult.html', method: 'POST', onsubmit: "addConfigElementsToForm(this);" });
 							formElement.append(
@@ -170,23 +191,22 @@ function displaySearchType(button, expandoTr, resourceName) {
 						    		$('<span>' + searchParam.documentation + '<br /></span>')
 						    	);
 						    }
-						    var inputId = newUniqueId();
-						    if (searchParam.type && searchParam.type == 'token') {
-							    formElement.append(
-							    	$('<input />', { name: 'param.token.1.' + searchParam.name, placeholder: 'system/namespace', type: 'text', id: inputId }),
-							    	$('<input />', { name: 'param.token.2.' + searchParam.name, placeholder: 'value', type: 'text', id: inputId }),
-							    	$('<label for="' + inputId + '">' + searchParam.name + '</input>')
-							    );
-						    } else {
-							    formElement.append(
-							    	$('<input />', { name: 'param.string.' + searchParam.name, placeholder: searchParam.name, type: 'text', id: inputId }),
-							    	$('<label for="' + inputId + '">' + searchParam.name + '</input>')
-							    );
+							
+							appendSearchParam(formElement, searchParam);
+							
+						    // http://hl7api.sourceforge.net/hapi-fhir/extensions.xml#additionalParam
+						    if (restResource._searchParam && restResource._searchParam[paramIndex] != null) {
+						    	if (restResource._searchParam[paramIndex].extension) {
+						    		appendSearchParamExtension(restResource._searchParam[paramIndex].extension);
+						    	}
 						    }
+						    
 							formElement.append(
-						        $('<br />'),
+						        $('<br />')
+						    );
+							formElement.append(
 						        $('<input />', { type: 'submit', value: 'Submit' })
-						    )
+						    );
 							$('#' + expandoTr).append(
 								$('<tr class="testerNameRow" style="display: none;" />').append(
 									$('<td class="testerNameCell">Search by Type</td>'),
@@ -194,7 +214,9 @@ function displaySearchType(button, expandoTr, resourceName) {
 										formElement
 									)
 								)
-							);					    
+							);
+							
+							paramIndex++;
 						});
 					}
 				}				

@@ -48,6 +48,7 @@ public class DeleteClientInvocation extends BaseClientInvocation {
 		appendExtraParamsWithQuestionMark(theExtraParams, b,true);
 
 		HttpDelete retVal = new HttpDelete(b.toString());
+		super.addHeadersToRequest(retVal);
 		return retVal;
 	}
 

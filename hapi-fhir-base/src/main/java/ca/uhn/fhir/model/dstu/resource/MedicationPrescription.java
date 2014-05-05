@@ -51,6 +51,7 @@ import ca.uhn.fhir.model.api.annotation.Block;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu.composite.DurationDt;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
@@ -101,6 +102,7 @@ public class MedicationPrescription extends BaseResource implements IResource {
 	 * Path: <b>MedicationPrescription.dateWritten</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="datewritten", path="MedicationPrescription.dateWritten", description="Return prescriptions written on this date")
 	public static final String SP_DATEWRITTEN = "datewritten";
 
 	/**
@@ -111,6 +113,7 @@ public class MedicationPrescription extends BaseResource implements IResource {
 	 * Path: <b>MedicationPrescription.encounter</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="encounter", path="MedicationPrescription.encounter", description="Return prescriptions with this encounter identity")
 	public static final String SP_ENCOUNTER = "encounter";
 
 	/**
@@ -121,6 +124,7 @@ public class MedicationPrescription extends BaseResource implements IResource {
 	 * Path: <b>MedicationPrescription.identifier</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="identifier", path="MedicationPrescription.identifier", description="Return prescriptions with this external identity")
 	public static final String SP_IDENTIFIER = "identifier";
 
 	/**
@@ -131,6 +135,7 @@ public class MedicationPrescription extends BaseResource implements IResource {
 	 * Path: <b>MedicationPrescription.medication</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="medication", path="MedicationPrescription.medication", description="Code for medicine or text in medicine name")
 	public static final String SP_MEDICATION = "medication";
 
 	/**
@@ -141,6 +146,7 @@ public class MedicationPrescription extends BaseResource implements IResource {
 	 * Path: <b>MedicationPrescription.patient</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="patient", path="MedicationPrescription.patient", description="The identity of a patient to list dispenses  for")
 	public static final String SP_PATIENT = "patient";
 
 	/**
@@ -151,6 +157,7 @@ public class MedicationPrescription extends BaseResource implements IResource {
 	 * Path: <b>MedicationPrescription.status</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="status", path="MedicationPrescription.status", description="Status of the prescription")
 	public static final String SP_STATUS = "status";
 
 
@@ -731,7 +738,7 @@ public class MedicationPrescription extends BaseResource implements IResource {
      * Indicates how the medication is to be used by the patient
      * </p> 
 	 */
-	@Block(name="MedicationPrescription.dosageInstruction")	
+	@Block()	
 	public static class DosageInstruction extends BaseElement implements IResourceBlock {
 	
 	@Child(name="text", type=StringDt.class, order=0, min=0, max=1)	
@@ -1203,7 +1210,7 @@ public class MedicationPrescription extends BaseResource implements IResource {
      * Deals with details of the dispense part of the order
      * </p> 
 	 */
-	@Block(name="MedicationPrescription.dispense")	
+	@Block()	
 	public static class Dispense extends BaseElement implements IResourceBlock {
 	
 	@Child(name="medication", order=0, min=0, max=1, type={
@@ -1490,7 +1497,7 @@ public class MedicationPrescription extends BaseResource implements IResource {
      * Indicates whether or not substitution can or should be part of the dispense. In some cases substitution must happen, in other cases substitution must not happen, and in others it does not matter. This block explains the prescriber's intent. If nothing is specified substitution may be done.
      * </p> 
 	 */
-	@Block(name="MedicationPrescription.substitution")	
+	@Block()	
 	public static class Substitution extends BaseElement implements IResourceBlock {
 	
 	@Child(name="type", type=CodeableConceptDt.class, order=0, min=1, max=1)	

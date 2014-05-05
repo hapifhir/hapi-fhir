@@ -47,6 +47,7 @@ import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.composite.PeriodDt;
@@ -87,6 +88,7 @@ public class Availability extends BaseResource implements IResource {
 	 * Path: <b>Availability.period</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="!period", path="Availability.period", description="Appointment date/time.")
 	public static final String SP_PERIOD = "!period";
 
 	/**
@@ -97,6 +99,7 @@ public class Availability extends BaseResource implements IResource {
 	 * Path: <b>Availability.individual</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="individual", path="Availability.individual", description="The individual to find an availability for")
 	public static final String SP_INDIVIDUAL = "individual";
 
 	/**
@@ -107,6 +110,7 @@ public class Availability extends BaseResource implements IResource {
 	 * Path: <b>Availability.type</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="slottype", path="Availability.type", description="The type of appointments that can be booked into associated slot(s)")
 	public static final String SP_SLOTTYPE = "slottype";
 
 

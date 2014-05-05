@@ -1,0 +1,9 @@
+/Users/james/workspace/hapi-fhir/hapi-fhir-jpaserver-base/src/main/java/ca/uhn/fhir/jpa/entity/BaseResourceTable.java
+/Users/james/workspace/hapi-fhir/hapi-fhir-jpaserver-base/src/main/java/ca/uhn/fhir/jpa/entity/BaseHasResource.java
+/Users/james/workspace/hapi-fhir/hapi-fhir-jpaserver-base/src/main/java/ca/uhn/fhir/jpa/entity/PatientResourceTable.java
+/Users/james/workspace/hapi-fhir/hapi-fhir-jpaserver-base/src/main/java/ca/uhn/fhir/jpa/dao/IFhirResourceDao.java
+/Users/james/workspace/hapi-fhir/hapi-fhir-jpaserver-base/src/main/java/ca/uhn/fhir/jpa/dao/FhirResourceDao.java
+/Users/james/workspace/hapi-fhir/hapi-fhir-jpaserver-base/src/main/java/ca/uhn/fhir/jpa/entity/ResourceHistoryTablePk.java
+/Users/james/workspace/hapi-fhir/hapi-fhir-jpaserver-base/src/main/java/ca/uhn/fhir/jpa/entity/FhirPersister.java
+/Users/james/workspace/hapi-fhir/hapi-fhir-jpaserver-base/src/main/java/ca/uhn/fhir/jpa/entity/ResourceHistoryTable.java
+/Users/james/workspace/hapi-fhir/hapi-fhir-jpaserver-base/src/main/java/ca/uhn/fhir/jpa/util/CustomNamingStrategy.java

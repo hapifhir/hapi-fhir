@@ -50,6 +50,7 @@ import ca.uhn.fhir.model.api.annotation.Block;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
@@ -93,6 +94,7 @@ public class DiagnosticOrder extends BaseResource implements IResource {
 	 * Path: <b>DiagnosticOrder.event.actor | DiagnosticOrder.item.event.actor</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="actor", path="DiagnosticOrder.event.actor | DiagnosticOrder.item.event.actor", description="")
 	public static final String SP_ACTOR = "actor";
 
 	/**
@@ -103,6 +105,7 @@ public class DiagnosticOrder extends BaseResource implements IResource {
 	 * Path: <b>DiagnosticOrder.item.bodySite</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="bodysite", path="DiagnosticOrder.item.bodySite", description="")
 	public static final String SP_BODYSITE = "bodysite";
 
 	/**
@@ -113,6 +116,7 @@ public class DiagnosticOrder extends BaseResource implements IResource {
 	 * Path: <b>DiagnosticOrder.item.code</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="code", path="DiagnosticOrder.item.code", description="")
 	public static final String SP_CODE = "code";
 
 	/**
@@ -123,6 +127,7 @@ public class DiagnosticOrder extends BaseResource implements IResource {
 	 * Path: <b>DiagnosticOrder.event.dateTime</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="event-date", path="DiagnosticOrder.event.dateTime", description="")
 	public static final String SP_EVENT_DATE = "event-date";
 
 	/**
@@ -133,6 +138,7 @@ public class DiagnosticOrder extends BaseResource implements IResource {
 	 * Path: <b>DiagnosticOrder.encounter</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="encounter", path="DiagnosticOrder.encounter", description="")
 	public static final String SP_ENCOUNTER = "encounter";
 
 	/**
@@ -143,6 +149,7 @@ public class DiagnosticOrder extends BaseResource implements IResource {
 	 * Path: <b>DiagnosticOrder.identifier</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="identifier", path="DiagnosticOrder.identifier", description="")
 	public static final String SP_IDENTIFIER = "identifier";
 
 	/**
@@ -153,6 +160,7 @@ public class DiagnosticOrder extends BaseResource implements IResource {
 	 * Path: <b>DiagnosticOrder.item.event.dateTime</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="item-date", path="DiagnosticOrder.item.event.dateTime", description="")
 	public static final String SP_ITEM_DATE = "item-date";
 
 	/**
@@ -163,6 +171,7 @@ public class DiagnosticOrder extends BaseResource implements IResource {
 	 * Path: <b>DiagnosticOrder.item.event.status</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="item-past-status", path="DiagnosticOrder.item.event.status", description="")
 	public static final String SP_ITEM_PAST_STATUS = "item-past-status";
 
 	/**
@@ -173,6 +182,7 @@ public class DiagnosticOrder extends BaseResource implements IResource {
 	 * Path: <b>DiagnosticOrder.item.status</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="item-status", path="DiagnosticOrder.item.status", description="")
 	public static final String SP_ITEM_STATUS = "item-status";
 
 	/**
@@ -183,6 +193,7 @@ public class DiagnosticOrder extends BaseResource implements IResource {
 	 * Path: <b>item-past-status & item-date</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="item-status-date", path="item-past-status & item-date", description="A combination of item-past-status and item-date")
 	public static final String SP_ITEM_STATUS_DATE = "item-status-date";
 
 	/**
@@ -193,6 +204,7 @@ public class DiagnosticOrder extends BaseResource implements IResource {
 	 * Path: <b>DiagnosticOrder.orderer</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="orderer", path="DiagnosticOrder.orderer", description="")
 	public static final String SP_ORDERER = "orderer";
 
 	/**
@@ -203,6 +215,7 @@ public class DiagnosticOrder extends BaseResource implements IResource {
 	 * Path: <b>DiagnosticOrder.event.status</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="event-status", path="DiagnosticOrder.event.status", description="")
 	public static final String SP_EVENT_STATUS = "event-status";
 
 	/**
@@ -213,6 +226,7 @@ public class DiagnosticOrder extends BaseResource implements IResource {
 	 * Path: <b>DiagnosticOrder.specimen | DiagnosticOrder.item.specimen</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="specimen", path="DiagnosticOrder.specimen | DiagnosticOrder.item.specimen", description="")
 	public static final String SP_SPECIMEN = "specimen";
 
 	/**
@@ -223,6 +237,7 @@ public class DiagnosticOrder extends BaseResource implements IResource {
 	 * Path: <b>DiagnosticOrder.status</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="status", path="DiagnosticOrder.status", description="")
 	public static final String SP_STATUS = "status";
 
 	/**
@@ -233,6 +248,7 @@ public class DiagnosticOrder extends BaseResource implements IResource {
 	 * Path: <b>event-status & event-date</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="event-status-date", path="event-status & event-date", description="A combination of past-status and date")
 	public static final String SP_EVENT_STATUS_DATE = "event-status-date";
 
 	/**
@@ -243,6 +259,7 @@ public class DiagnosticOrder extends BaseResource implements IResource {
 	 * Path: <b>DiagnosticOrder.subject</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="subject", path="DiagnosticOrder.subject", description="")
 	public static final String SP_SUBJECT = "subject";
 
 
@@ -826,7 +843,7 @@ public class DiagnosticOrder extends BaseResource implements IResource {
      * A summary of the events of interest that have occurred as the request is processed. E.g. when the order was made, various processing steps (specimens received), when it was completed
      * </p> 
 	 */
-	@Block(name="DiagnosticOrder.event")	
+	@Block()	
 	public static class Event extends BaseElement implements IResourceBlock {
 	
 	@Child(name="status", type=CodeDt.class, order=0, min=1, max=1)	
@@ -1046,7 +1063,7 @@ public class DiagnosticOrder extends BaseResource implements IResource {
      * The specific diagnostic investigations that are requested as part of this request. Sometimes, there can only be one item per request, but in most contexts, more than one investigation can be requested
      * </p> 
 	 */
-	@Block(name="DiagnosticOrder.item")	
+	@Block()	
 	public static class Item extends BaseElement implements IResourceBlock {
 	
 	@Child(name="code", type=CodeableConceptDt.class, order=0, min=1, max=1)	

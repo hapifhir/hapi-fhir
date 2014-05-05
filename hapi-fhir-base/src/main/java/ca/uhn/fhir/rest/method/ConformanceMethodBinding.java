@@ -32,6 +32,7 @@ import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
 import ca.uhn.fhir.rest.client.GetClientInvocation;
 import ca.uhn.fhir.rest.method.SearchMethodBinding.RequestType;
+import ca.uhn.fhir.rest.param.IParameter;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
@@ -53,7 +54,16 @@ public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding
 
 	@Override
 	public GetClientInvocation invokeClient(Object[] theArgs) throws InternalErrorException {
-		return createConformanceInvocation();
+		GetClientInvocation retVal = createConformanceInvocation();
+
+		if (theArgs != null) {
+			for (int idx = 0; idx < theArgs.length; idx++) {
+				IParameter nextParam = getParameters().get(idx);
+				nextParam.translateClientArgumentIntoQueryArgument(theArgs[idx], null, retVal);
+			}
+		}
+
+		return retVal;
 	}
 
 	public static GetClientInvocation createConformanceInvocation() {
@@ -61,8 +71,7 @@ public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding
 	}
 
 	@Override
-	public List<IResource> invokeServer(Object theResourceProvider, Request theRequest, Object[] theMethodParams) throws InvalidRequestException,
-			InternalErrorException {
+	public List<IResource> invokeServer(Object theResourceProvider, Request theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException {
 		IResource conf;
 		try {
 			conf = (Conformance) invokeServerMethod(theResourceProvider, theMethodParams);

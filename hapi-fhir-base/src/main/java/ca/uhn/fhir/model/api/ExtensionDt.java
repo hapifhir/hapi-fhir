@@ -99,7 +99,7 @@ public class ExtensionDt extends BaseElement {
 	
 	@Override
 	public boolean isEmpty() {
-		return super.isBaseEmpty() && myValue == null || myValue.isEmpty();
+		return super.isBaseEmpty() && (myValue == null || myValue.isEmpty());
 	}
 
 	public boolean isModifier() {

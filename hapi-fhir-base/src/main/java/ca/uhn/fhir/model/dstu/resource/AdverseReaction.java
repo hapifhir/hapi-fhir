@@ -50,6 +50,7 @@ import ca.uhn.fhir.model.api.annotation.Block;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
@@ -94,6 +95,7 @@ public class AdverseReaction extends BaseResource implements IResource {
 	 * Path: <b>AdverseReaction.symptom.code</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="symptom", path="AdverseReaction.symptom.code", description="One of the symptoms of the reaction")
 	public static final String SP_SYMPTOM = "symptom";
 
 	/**
@@ -104,6 +106,7 @@ public class AdverseReaction extends BaseResource implements IResource {
 	 * Path: <b>AdverseReaction.exposure.substance</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="substance", path="AdverseReaction.exposure.substance", description="The name or code of the substance that produces the sensitivity")
 	public static final String SP_SUBSTANCE = "substance";
 
 	/**
@@ -114,6 +117,7 @@ public class AdverseReaction extends BaseResource implements IResource {
 	 * Path: <b>AdverseReaction.date</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="date", path="AdverseReaction.date", description="The date of the reaction")
 	public static final String SP_DATE = "date";
 
 	/**
@@ -124,6 +128,7 @@ public class AdverseReaction extends BaseResource implements IResource {
 	 * Path: <b>AdverseReaction.subject</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="subject", path="AdverseReaction.subject", description="The subject that the sensitivity is about")
 	public static final String SP_SUBJECT = "subject";
 
 
@@ -578,7 +583,7 @@ public class AdverseReaction extends BaseResource implements IResource {
      * The signs and symptoms that were observed as part of the reaction
      * </p> 
 	 */
-	@Block(name="AdverseReaction.symptom")	
+	@Block()	
 	public static class Symptom extends BaseElement implements IResourceBlock {
 	
 	@Child(name="code", type=CodeableConceptDt.class, order=0, min=1, max=1)	
@@ -698,7 +703,7 @@ public class AdverseReaction extends BaseResource implements IResource {
      * An exposure to a substance that preceded a reaction occurrence
      * </p> 
 	 */
-	@Block(name="AdverseReaction.exposure")	
+	@Block()	
 	public static class Exposure extends BaseElement implements IResourceBlock {
 	
 	@Child(name="date", type=DateTimeDt.class, order=0, min=0, max=1)	

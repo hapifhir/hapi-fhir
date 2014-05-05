@@ -48,6 +48,7 @@ import ca.uhn.fhir.model.api.annotation.Block;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu.composite.DurationDt;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
@@ -97,6 +98,7 @@ public class Encounter extends BaseResource implements IResource {
 	 * Path: <b>Encounter.identifier</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="identifier", path="Encounter.identifier", description="")
 	public static final String SP_IDENTIFIER = "identifier";
 
 	/**
@@ -107,6 +109,7 @@ public class Encounter extends BaseResource implements IResource {
 	 * Path: <b>Encounter.status</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="status", path="Encounter.status", description="")
 	public static final String SP_STATUS = "status";
 
 	/**
@@ -117,6 +120,7 @@ public class Encounter extends BaseResource implements IResource {
 	 * Path: <b>Encounter.period</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="date", path="Encounter.period", description="A date within the period the Encounter lasted")
 	public static final String SP_DATE = "date";
 
 	/**
@@ -127,6 +131,7 @@ public class Encounter extends BaseResource implements IResource {
 	 * Path: <b>Encounter.subject</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="subject", path="Encounter.subject", description="")
 	public static final String SP_SUBJECT = "subject";
 
 	/**
@@ -137,6 +142,7 @@ public class Encounter extends BaseResource implements IResource {
 	 * Path: <b>Encounter.fulfills</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="!fulfills", path="Encounter.fulfills", description="")
 	public static final String SP_FULFILLS = "!fulfills";
 
 	/**
@@ -147,6 +153,7 @@ public class Encounter extends BaseResource implements IResource {
 	 * Path: <b>Encounter.length</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="length", path="Encounter.length", description="Length of encounter in days")
 	public static final String SP_LENGTH = "length";
 
 	/**
@@ -157,6 +164,7 @@ public class Encounter extends BaseResource implements IResource {
 	 * Path: <b>Encounter.indication</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="indication", path="Encounter.indication", description="")
 	public static final String SP_INDICATION = "indication";
 
 	/**
@@ -167,6 +175,7 @@ public class Encounter extends BaseResource implements IResource {
 	 * Path: <b>Encounter.location.location</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="location", path="Encounter.location.location", description="")
 	public static final String SP_LOCATION = "location";
 
 	/**
@@ -177,6 +186,7 @@ public class Encounter extends BaseResource implements IResource {
 	 * Path: <b>Encounter.location.period</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="location-period", path="Encounter.location.period", description="")
 	public static final String SP_LOCATION_PERIOD = "location-period";
 
 
@@ -966,7 +976,7 @@ public class Encounter extends BaseResource implements IResource {
      * The main practitioner responsible for providing the service
      * </p> 
 	 */
-	@Block(name="Encounter.participant")	
+	@Block()	
 	public static class Participant extends BaseElement implements IResourceBlock {
 	
 	@Child(name="type", type=CodeableConceptDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)	
@@ -1097,7 +1107,7 @@ public class Encounter extends BaseResource implements IResource {
      * Details about an admission to a clinic
      * </p> 
 	 */
-	@Block(name="Encounter.hospitalization")	
+	@Block()	
 	public static class Hospitalization extends BaseElement implements IResourceBlock {
 	
 	@Child(name="preAdmissionIdentifier", type=IdentifierDt.class, order=0, min=0, max=1)	
@@ -1725,7 +1735,7 @@ public class Encounter extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	@Block(name="Encounter.hospitalization.accomodation")	
+	@Block()	
 	public static class HospitalizationAccomodation extends BaseElement implements IResourceBlock {
 	
 	@Child(name="bed", order=0, min=0, max=1, type={
@@ -1834,7 +1844,7 @@ public class Encounter extends BaseResource implements IResource {
      * List of locations at which the patient has been
      * </p> 
 	 */
-	@Block(name="Encounter.location")	
+	@Block()	
 	public static class Location extends BaseElement implements IResourceBlock {
 	
 	@Child(name="location", order=0, min=1, max=1, type={

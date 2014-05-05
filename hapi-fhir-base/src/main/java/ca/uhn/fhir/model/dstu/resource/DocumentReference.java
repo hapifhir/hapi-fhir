@@ -50,6 +50,7 @@ import ca.uhn.fhir.model.api.annotation.Block;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.composite.PeriodDt;
@@ -97,6 +98,7 @@ public class DocumentReference extends BaseResource implements IResource {
 	 * Path: <b>DocumentReference.masterIdentifier | DocumentReference.identifier</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="identifier", path="DocumentReference.masterIdentifier | DocumentReference.identifier", description="")
 	public static final String SP_IDENTIFIER = "identifier";
 
 	/**
@@ -107,6 +109,7 @@ public class DocumentReference extends BaseResource implements IResource {
 	 * Path: <b>DocumentReference.subject</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="subject", path="DocumentReference.subject", description="")
 	public static final String SP_SUBJECT = "subject";
 
 	/**
@@ -117,6 +120,7 @@ public class DocumentReference extends BaseResource implements IResource {
 	 * Path: <b>DocumentReference.type</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="type", path="DocumentReference.type", description="")
 	public static final String SP_TYPE = "type";
 
 	/**
@@ -127,6 +131,7 @@ public class DocumentReference extends BaseResource implements IResource {
 	 * Path: <b>DocumentReference.class</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="class", path="DocumentReference.class", description="")
 	public static final String SP_CLASS = "class";
 
 	/**
@@ -137,6 +142,7 @@ public class DocumentReference extends BaseResource implements IResource {
 	 * Path: <b>DocumentReference.author</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="author", path="DocumentReference.author", description="")
 	public static final String SP_AUTHOR = "author";
 
 	/**
@@ -147,6 +153,7 @@ public class DocumentReference extends BaseResource implements IResource {
 	 * Path: <b>DocumentReference.custodian</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="custodian", path="DocumentReference.custodian", description="")
 	public static final String SP_CUSTODIAN = "custodian";
 
 	/**
@@ -157,6 +164,7 @@ public class DocumentReference extends BaseResource implements IResource {
 	 * Path: <b>DocumentReference.authenticator</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="authenticator", path="DocumentReference.authenticator", description="")
 	public static final String SP_AUTHENTICATOR = "authenticator";
 
 	/**
@@ -167,6 +175,7 @@ public class DocumentReference extends BaseResource implements IResource {
 	 * Path: <b>DocumentReference.created</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="created", path="DocumentReference.created", description="")
 	public static final String SP_CREATED = "created";
 
 	/**
@@ -177,6 +186,7 @@ public class DocumentReference extends BaseResource implements IResource {
 	 * Path: <b>DocumentReference.indexed</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="indexed", path="DocumentReference.indexed", description="")
 	public static final String SP_INDEXED = "indexed";
 
 	/**
@@ -187,6 +197,7 @@ public class DocumentReference extends BaseResource implements IResource {
 	 * Path: <b>DocumentReference.status</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="status", path="DocumentReference.status", description="")
 	public static final String SP_STATUS = "status";
 
 	/**
@@ -197,6 +208,7 @@ public class DocumentReference extends BaseResource implements IResource {
 	 * Path: <b>DocumentReference.relatesTo.target</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="relatesto", path="DocumentReference.relatesTo.target", description="")
 	public static final String SP_RELATESTO = "relatesto";
 
 	/**
@@ -207,6 +219,7 @@ public class DocumentReference extends BaseResource implements IResource {
 	 * Path: <b>DocumentReference.relatesTo.code</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="relation", path="DocumentReference.relatesTo.code", description="")
 	public static final String SP_RELATION = "relation";
 
 	/**
@@ -217,6 +230,7 @@ public class DocumentReference extends BaseResource implements IResource {
 	 * Path: <b>relatesto & relation</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="relationship", path="relatesto & relation", description="Combination of relation and relatesTo")
 	public static final String SP_RELATIONSHIP = "relationship";
 
 	/**
@@ -227,6 +241,7 @@ public class DocumentReference extends BaseResource implements IResource {
 	 * Path: <b>DocumentReference.description</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="description", path="DocumentReference.description", description="")
 	public static final String SP_DESCRIPTION = "description";
 
 	/**
@@ -237,6 +252,7 @@ public class DocumentReference extends BaseResource implements IResource {
 	 * Path: <b>DocumentReference.confidentiality</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="confidentiality", path="DocumentReference.confidentiality", description="")
 	public static final String SP_CONFIDENTIALITY = "confidentiality";
 
 	/**
@@ -247,6 +263,7 @@ public class DocumentReference extends BaseResource implements IResource {
 	 * Path: <b>DocumentReference.primaryLanguage</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="language", path="DocumentReference.primaryLanguage", description="")
 	public static final String SP_LANGUAGE = "language";
 
 	/**
@@ -257,6 +274,7 @@ public class DocumentReference extends BaseResource implements IResource {
 	 * Path: <b>DocumentReference.format</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="format", path="DocumentReference.format", description="")
 	public static final String SP_FORMAT = "format";
 
 	/**
@@ -267,6 +285,7 @@ public class DocumentReference extends BaseResource implements IResource {
 	 * Path: <b>DocumentReference.size</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="size", path="DocumentReference.size", description="")
 	public static final String SP_SIZE = "size";
 
 	/**
@@ -277,6 +296,7 @@ public class DocumentReference extends BaseResource implements IResource {
 	 * Path: <b>DocumentReference.location</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="location", path="DocumentReference.location", description="")
 	public static final String SP_LOCATION = "location";
 
 	/**
@@ -287,6 +307,7 @@ public class DocumentReference extends BaseResource implements IResource {
 	 * Path: <b>DocumentReference.context.event</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="event", path="DocumentReference.context.event", description="")
 	public static final String SP_EVENT = "event";
 
 	/**
@@ -297,6 +318,7 @@ public class DocumentReference extends BaseResource implements IResource {
 	 * Path: <b>DocumentReference.context.period</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="period", path="DocumentReference.context.period", description="")
 	public static final String SP_PERIOD = "period";
 
 	/**
@@ -307,6 +329,7 @@ public class DocumentReference extends BaseResource implements IResource {
 	 * Path: <b>DocumentReference.context.facilityType</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="facility", path="DocumentReference.context.facilityType", description="")
 	public static final String SP_FACILITY = "facility";
 
 
@@ -980,8 +1003,8 @@ public class DocumentReference extends BaseResource implements IResource {
      * When the document reference was created
      * </p> 
 	 */
-	public DocumentReference setIndexedWithMillisPrecision( Date theDate) {
-		myIndexed = new InstantDt(theDate); 
+	public DocumentReference setIndexed( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myIndexed = new InstantDt(theDate, thePrecision); 
 		return this; 
 	}
 
@@ -993,8 +1016,8 @@ public class DocumentReference extends BaseResource implements IResource {
      * When the document reference was created
      * </p> 
 	 */
-	public DocumentReference setIndexed( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myIndexed = new InstantDt(theDate, thePrecision); 
+	public DocumentReference setIndexedWithMillisPrecision( Date theDate) {
+		myIndexed = new InstantDt(theDate); 
 		return this; 
 	}
 
@@ -1606,7 +1629,7 @@ public class DocumentReference extends BaseResource implements IResource {
      * Relationships that this document has with other document references that already exist
      * </p> 
 	 */
-	@Block(name="DocumentReference.relatesTo")	
+	@Block()	
 	public static class RelatesTo extends BaseElement implements IResourceBlock {
 	
 	@Child(name="code", type=CodeDt.class, order=0, min=1, max=1)	
@@ -1727,7 +1750,7 @@ public class DocumentReference extends BaseResource implements IResource {
      * A description of a service call that can be used to retrieve the document
      * </p> 
 	 */
-	@Block(name="DocumentReference.service")	
+	@Block()	
 	public static class Service extends BaseElement implements IResourceBlock {
 	
 	@Child(name="type", type=CodeableConceptDt.class, order=0, min=1, max=1)	
@@ -1913,7 +1936,7 @@ public class DocumentReference extends BaseResource implements IResource {
      * A list of named parameters that is used in the service call
      * </p> 
 	 */
-	@Block(name="DocumentReference.service.parameter")	
+	@Block()	
 	public static class ServiceParameter extends BaseElement implements IResourceBlock {
 	
 	@Child(name="name", type=StringDt.class, order=0, min=1, max=1)	
@@ -2047,7 +2070,7 @@ public class DocumentReference extends BaseResource implements IResource {
      * The clinical context in which the document was prepared
      * </p> 
 	 */
-	@Block(name="DocumentReference.context")	
+	@Block()	
 	public static class Context extends BaseElement implements IResourceBlock {
 	
 	@Child(name="event", type=CodeableConceptDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)	

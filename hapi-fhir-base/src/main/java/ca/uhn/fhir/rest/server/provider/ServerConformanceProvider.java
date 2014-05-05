@@ -39,6 +39,7 @@ import ca.uhn.fhir.model.dstu.valueset.RestfulConformanceModeEnum;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
 import ca.uhn.fhir.model.primitive.BooleanDt;
+import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.annotation.Metadata;
@@ -107,16 +108,17 @@ public class ServerConformanceProvider {
 
 				if (nextMethodBinding instanceof SearchMethodBinding) {
 					List<IParameter> params = ((SearchMethodBinding) nextMethodBinding).getParameters();
-					// TODO: this would probably work best if we sorted these by required first, then optional
-					
+					// TODO: this would probably work best if we sorted these by
+					// required first, then optional
+
 					RestResourceSearchParam searchParam = null;
-					StringDt searchParamChain = null;
+					ExtensionDt searchParamChain = null;
 					for (IParameter nextParameterObj : params) {
 						if (!(nextParameterObj instanceof SearchParameter)) {
 							continue;
 						}
-						
-						SearchParameter nextParameter = (SearchParameter)nextParameterObj;
+
+						SearchParameter nextParameter = (SearchParameter) nextParameterObj;
 
 						if (searchParam == null) {
 							if (!nameToSearchParam.containsKey(nextParameter.getName())) {
@@ -128,28 +130,41 @@ public class ServerConformanceProvider {
 							} else {
 								searchParam = nameToSearchParam.get(nextParameter.getName());
 							}
-							
-							if (searchParam !=null) {
+
+							if (searchParam != null) {
 								searchParam.setType(nextParameter.getParamType());
 							}
+
+						} else {
+
+							searchParamChain = searchParam.addUndeclaredExtension(false, ExtensionConstants.CONF_ADDITIONAL_PARAM);
 							
-						} else if (searchParamChain == null) {
-							searchParam.addChain(nextParameter.getName());
-							searchParamChain = searchParam.getChain().get(searchParam.getChain().size()-1);
+//							if (searchParamChain == null) {
+//							} else {
+//								searchParamChain = searchParamChain.addUndeclaredExtension(false, ExtensionConstants.CONF_ADDITIONAL_PARAM);
+//							}
+
 							ExtensionDt ext = new ExtensionDt();
-							ext.setUrl(ExtensionConstants.CONF_CHAIN_REQUIRED);
+							ext.setUrl(ExtensionConstants.CONF_ADDITIONAL_PARAM_NAME);
+							ext.setValue(new StringDt(nextParameter.getName()));
+							searchParamChain.getUndeclaredExtensions().add(ext);
+
+							ext = new ExtensionDt();
+							ext.setUrl(ExtensionConstants.CONF_ADDITIONAL_PARAM_DESCRIPTION);
+							ext.setValue(new StringDt(nextParameter.getDescription()));
+							searchParamChain.getUndeclaredExtensions().add(ext);
+
+							ext = new ExtensionDt();
+							ext.setUrl(ExtensionConstants.CONF_ADDITIONAL_PARAM_TYPE);
+							if (nextParameter.getParamType() != null) {
+								ext.setValue(new CodeDt(nextParameter.getParamType().getCode()));
+							}
+							searchParamChain.getUndeclaredExtensions().add(ext);
+
+							ext = new ExtensionDt();
+							ext.setUrl(ExtensionConstants.CONF_ADDITIONAL_PARAM_REQUIRED);
 							ext.setValue(new BooleanDt(nextParameter.isRequired()));
 							searchParamChain.getUndeclaredExtensions().add(ext);
-							
-						} else {
-							ExtensionDt ext = new ExtensionDt();
-							ext.setUrl(ExtensionConstants.CONF_ALSO_CHAIN);
-							searchParamChain.getUndeclaredExtensions().add(ext);
-							
-							ExtensionDt extReq = new ExtensionDt();
-							extReq.setUrl(ExtensionConstants.CONF_CHAIN_REQUIRED);
-							extReq.setValue(new BooleanDt(nextParameter.isRequired()));
-							ext.getUndeclaredExtensions().add(extReq);
 
 						}
 
@@ -167,19 +182,18 @@ public class ServerConformanceProvider {
 						if (o1 == null) {
 							return 1;
 						}
-						if (o2==null) {
+						if (o2 == null) {
 							return -1;
 						}
 						return o1.ordinal() - o2.ordinal();
-					}});
-								
+					}
+				});
+
 			}
-			
 
 		}
 
 		myConformance = retVal;
 		return retVal;
 	}
-
 }

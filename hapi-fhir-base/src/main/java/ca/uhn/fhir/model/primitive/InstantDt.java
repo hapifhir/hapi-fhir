@@ -38,10 +38,13 @@ public class InstantDt extends BaseDateTimeDt {
 	public static final TemporalPrecisionEnum DEFAULT_PRECISION = TemporalPrecisionEnum.MILLI;
 
 	/**
-	 * Constructor which creates an InstantDt with <b>no timne value</b>. Note that unlike the default constructor for the Java {@link Date} or {@link Calendar} objects, this constructor does not
-	 * initialize the object with the current time.
+	 * Constructor which creates an InstantDt with <b>no timne value</b>. Note
+	 * that unlike the default constructor for the Java {@link Date} or
+	 * {@link Calendar} objects, this constructor does not initialize the object
+	 * with the current time.
 	 * 
-	 * @see #withCurrentTime() to create a new object that has been initialized with the current time.
+	 * @see #withCurrentTime() to create a new object that has been initialized
+	 *      with the current time.
 	 */
 	public InstantDt() {
 		super();
@@ -67,7 +70,8 @@ public class InstantDt extends BaseDateTimeDt {
 	}
 
 	/**
-	 * Constructor which accepts a date value and a precision value. Valid precisions values for this type are:
+	 * Constructor which accepts a date value and a precision value. Valid
+	 * precisions values for this type are:
 	 * <ul>
 	 * <li>{@link TemporalPrecisionEnum#SECOND}
 	 * <li>{@link TemporalPrecisionEnum#MILLI}
@@ -84,11 +88,45 @@ public class InstantDt extends BaseDateTimeDt {
 	 * Create a new InstantDt from a string value
 	 * 
 	 * @param theString
-	 *            The string representation of the string. Must be in a valid format according to the FHIR specification
+	 *            The string representation of the string. Must be in a valid
+	 *            format according to the FHIR specification
 	 * @throws DataFormatException
 	 */
 	public InstantDt(String theString) {
 		setValueAsString(theString);
+	}
+
+	/**
+	 * Invokes {@link Date#after(Date)} on the contained Date against the given
+	 * date
+	 * 
+	 * @throws NullPointerException
+	 *             If the {@link #getValue() contained Date} is null
+	 */
+	public boolean after(Date theDate) {
+		return getValue().after(theDate);
+	}
+
+	/**
+	 * Invokes {@link Date#before(Date)} on the contained Date against the given
+	 * date
+	 * 
+	 * @throws NullPointerException
+	 *             If the {@link #getValue() contained Date} is null
+	 */
+	public boolean before(Date theDate) {
+		return getValue().before(theDate);
+	}
+
+	/**
+	 * Sets the value of this instant to the current time (from the system
+	 * clock) and the local/default timezone (as retrieved using
+	 * {@link TimeZone#getDefault()}. This TimeZone is generally obtained from
+	 * the underlying OS.
+	 */
+	public void setToCurrentTimeInLocalTimeZone() {
+		setValue(new Date());
+		setTimeZone(TimeZone.getDefault());
 	}
 
 	@Override
@@ -103,16 +141,8 @@ public class InstantDt extends BaseDateTimeDt {
 	}
 
 	/**
-	 * Sets the value of this instant to the current time (from the system clock) and the local/default timezone (as retrieved using {@link TimeZone#getDefault()}. This TimeZone is generally obtained
-	 * from the underlying OS.
-	 */
-	public void setToCurrentTimeInLocalTimeZone() {
-		setValue(new Date());
-		setTimeZone(TimeZone.getDefault());
-	}
-
-	/**
-	 * Factory method which creates a new InstantDt and initializes it with the current time.
+	 * Factory method which creates a new InstantDt and initializes it with the
+	 * current time.
 	 */
 	public static InstantDt withCurrentTime() {
 		return new InstantDt(new Date());

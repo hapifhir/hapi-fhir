@@ -55,9 +55,11 @@ import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Extension;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.dstu.composite.AttachmentDt;
 import ca.uhn.fhir.model.dstu.composite.ContainedDt;
 import ca.uhn.fhir.model.dstu.composite.NarrativeDt;
+import ca.uhn.fhir.model.dstu.composite.QuantityDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.BoundCodeableConceptDt;
@@ -150,6 +152,8 @@ class ModelScanner {
 		toScan.add(CodeDt.class);
 		toScan.add(DecimalDt.class);
 		toScan.add(AttachmentDt.class);
+		toScan.add(ResourceReferenceDt.class);
+		toScan.add(QuantityDt.class); // TODO: why is this required
 		
 		do {
 			for (Class<? extends IElement> nextClass : toScan) {
@@ -530,7 +534,23 @@ class ModelScanner {
 		scanCompositeElementForChildren(theClass, resourceDef);
 
 		myIdToResourceDefinition.put(resourceId, resourceDef);
+		
+		scanResourceForSearchParams(theClass, resourceDef);
+		
+		
 		return resourceName;
+	}
+
+	private void scanResourceForSearchParams(Class<? extends IResource> theClass, RuntimeResourceDefinition theResourceDef) {
+		
+		for (Field nextField : theClass.getFields()) {
+			SearchParamDefinition searchParam = nextField.getAnnotation(SearchParamDefinition.class);
+			if (searchParam != null) {
+				RuntimeSearchParam param = new RuntimeSearchParam(searchParam.name(), searchParam.description(), searchParam.path());
+				theResourceDef.addSearchParam(param);
+			}
+		}
+		
 	}
 
 	public Map<String, RuntimeResourceDefinition> getIdToResourceDefinition() {

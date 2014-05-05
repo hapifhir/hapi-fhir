@@ -50,6 +50,7 @@ import ca.uhn.fhir.model.api.annotation.Block;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
@@ -93,6 +94,7 @@ public class ImmunizationRecommendation extends BaseResource implements IResourc
 	 * Path: <b>ImmunizationRecommendation.subject</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="subject", path="ImmunizationRecommendation.subject", description="")
 	public static final String SP_SUBJECT = "subject";
 
 	/**
@@ -103,6 +105,7 @@ public class ImmunizationRecommendation extends BaseResource implements IResourc
 	 * Path: <b>ImmunizationRecommendation.recommendation.vaccineType</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="vaccine-type", path="ImmunizationRecommendation.recommendation.vaccineType", description="")
 	public static final String SP_VACCINE_TYPE = "vaccine-type";
 
 	/**
@@ -113,6 +116,7 @@ public class ImmunizationRecommendation extends BaseResource implements IResourc
 	 * Path: <b>ImmunizationRecommendation.identifier</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="identifier", path="ImmunizationRecommendation.identifier", description="")
 	public static final String SP_IDENTIFIER = "identifier";
 
 	/**
@@ -123,6 +127,7 @@ public class ImmunizationRecommendation extends BaseResource implements IResourc
 	 * Path: <b>ImmunizationRecommendation.recommendation.date</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="date", path="ImmunizationRecommendation.recommendation.date", description="")
 	public static final String SP_DATE = "date";
 
 	/**
@@ -133,6 +138,7 @@ public class ImmunizationRecommendation extends BaseResource implements IResourc
 	 * Path: <b>ImmunizationRecommendation.recommendation.doseNumber</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="dose-number", path="ImmunizationRecommendation.recommendation.doseNumber", description="")
 	public static final String SP_DOSE_NUMBER = "dose-number";
 
 	/**
@@ -143,6 +149,7 @@ public class ImmunizationRecommendation extends BaseResource implements IResourc
 	 * Path: <b>ImmunizationRecommendation.recommendation.forecastStatus</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="status", path="ImmunizationRecommendation.recommendation.forecastStatus", description="")
 	public static final String SP_STATUS = "status";
 
 	/**
@@ -153,6 +160,7 @@ public class ImmunizationRecommendation extends BaseResource implements IResourc
 	 * Path: <b>ImmunizationRecommendation.recommendation.protocol.doseSequence</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="dose-sequence", path="ImmunizationRecommendation.recommendation.protocol.doseSequence", description="")
 	public static final String SP_DOSE_SEQUENCE = "dose-sequence";
 
 	/**
@@ -163,6 +171,7 @@ public class ImmunizationRecommendation extends BaseResource implements IResourc
 	 * Path: <b>ImmunizationRecommendation.recommendation.supportingImmunization</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="support", path="ImmunizationRecommendation.recommendation.supportingImmunization", description="")
 	public static final String SP_SUPPORT = "support";
 
 	/**
@@ -173,6 +182,7 @@ public class ImmunizationRecommendation extends BaseResource implements IResourc
 	 * Path: <b>ImmunizationRecommendation.recommendation.supportingPatientInformation</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="information", path="ImmunizationRecommendation.recommendation.supportingPatientInformation", description="")
 	public static final String SP_INFORMATION = "information";
 
 
@@ -409,7 +419,7 @@ public class ImmunizationRecommendation extends BaseResource implements IResourc
      * Vaccine administration recommendations
      * </p> 
 	 */
-	@Block(name="ImmunizationRecommendation.recommendation")	
+	@Block()	
 	public static class Recommendation extends BaseElement implements IResourceBlock {
 	
 	@Child(name="date", type=DateTimeDt.class, order=0, min=1, max=1)	
@@ -849,7 +859,7 @@ public class ImmunizationRecommendation extends BaseResource implements IResourc
      * Vaccine date recommendations - e.g. earliest date to administer, latest date to administer, etc.
      * </p> 
 	 */
-	@Block(name="ImmunizationRecommendation.recommendation.dateCriterion")	
+	@Block()	
 	public static class RecommendationDateCriterion extends BaseElement implements IResourceBlock {
 	
 	@Child(name="code", type=CodeableConceptDt.class, order=0, min=1, max=1)	
@@ -995,7 +1005,7 @@ public class ImmunizationRecommendation extends BaseResource implements IResourc
      * Contains information about the protocol under which the vaccine was administered
      * </p> 
 	 */
-	@Block(name="ImmunizationRecommendation.recommendation.protocol")	
+	@Block()	
 	public static class RecommendationProtocol extends BaseElement implements IResourceBlock {
 	
 	@Child(name="doseSequence", type=IntegerDt.class, order=0, min=0, max=1)	

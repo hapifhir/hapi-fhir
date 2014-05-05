@@ -47,6 +47,7 @@ import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
@@ -88,6 +89,7 @@ public class Slot extends BaseResource implements IResource {
 	 * Path: <b>Slot.type</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="slottype", path="Slot.type", description="The type of appointments that can be booked into the slot")
 	public static final String SP_SLOTTYPE = "slottype";
 
 	/**
@@ -98,6 +100,7 @@ public class Slot extends BaseResource implements IResource {
 	 * Path: <b>Slot.availability</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="availability", path="Slot.availability", description="The Availability Resource that we are seeking a slot within")
 	public static final String SP_AVAILABILITY = "availability";
 
 	/**
@@ -108,6 +111,7 @@ public class Slot extends BaseResource implements IResource {
 	 * Path: <b>Slot.start</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="start", path="Slot.start", description="Appointment date/time.")
 	public static final String SP_START = "start";
 
 	/**
@@ -118,6 +122,7 @@ public class Slot extends BaseResource implements IResource {
 	 * Path: <b>Slot.freeBusyType</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="fbtype", path="Slot.freeBusyType", description="The free/busy status of the appointment")
 	public static final String SP_FBTYPE = "fbtype";
 
 
@@ -442,8 +447,8 @@ public class Slot extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public Slot setStartWithMillisPrecision( Date theDate) {
-		myStart = new InstantDt(theDate); 
+	public Slot setStart( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myStart = new InstantDt(theDate, thePrecision); 
 		return this; 
 	}
 
@@ -455,8 +460,8 @@ public class Slot extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public Slot setStart( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myStart = new InstantDt(theDate, thePrecision); 
+	public Slot setStartWithMillisPrecision( Date theDate) {
+		myStart = new InstantDt(theDate); 
 		return this; 
 	}
 
@@ -499,8 +504,8 @@ public class Slot extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public Slot setEndWithMillisPrecision( Date theDate) {
-		myEnd = new InstantDt(theDate); 
+	public Slot setEnd( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myEnd = new InstantDt(theDate, thePrecision); 
 		return this; 
 	}
 
@@ -512,8 +517,8 @@ public class Slot extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public Slot setEnd( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myEnd = new InstantDt(theDate, thePrecision); 
+	public Slot setEndWithMillisPrecision( Date theDate) {
+		myEnd = new InstantDt(theDate); 
 		return this; 
 	}
 

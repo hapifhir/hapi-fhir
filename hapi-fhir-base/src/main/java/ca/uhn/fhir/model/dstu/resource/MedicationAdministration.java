@@ -49,6 +49,7 @@ import ca.uhn.fhir.model.api.annotation.Block;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.composite.PeriodDt;
@@ -95,6 +96,7 @@ public class MedicationAdministration extends BaseResource implements IResource 
 	 * Path: <b>MedicationAdministration.device</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="device", path="MedicationAdministration.device", description="Return administrations with this administration device identity")
 	public static final String SP_DEVICE = "device";
 
 	/**
@@ -105,6 +107,7 @@ public class MedicationAdministration extends BaseResource implements IResource 
 	 * Path: <b>MedicationAdministration.encounter</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="encounter", path="MedicationAdministration.encounter", description="Return administrations that share this encounter")
 	public static final String SP_ENCOUNTER = "encounter";
 
 	/**
@@ -115,6 +118,7 @@ public class MedicationAdministration extends BaseResource implements IResource 
 	 * Path: <b>MedicationAdministration.identifier</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="identifier", path="MedicationAdministration.identifier", description="Return administrations with this external identity")
 	public static final String SP_IDENTIFIER = "identifier";
 
 	/**
@@ -125,6 +129,7 @@ public class MedicationAdministration extends BaseResource implements IResource 
 	 * Path: <b>MedicationAdministration.medication</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="medication", path="MedicationAdministration.medication", description="Return administrations of this medication")
 	public static final String SP_MEDICATION = "medication";
 
 	/**
@@ -135,6 +140,7 @@ public class MedicationAdministration extends BaseResource implements IResource 
 	 * Path: <b>MedicationAdministration.wasNotGiven</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="notgiven", path="MedicationAdministration.wasNotGiven", description="Administrations that were not made")
 	public static final String SP_NOTGIVEN = "notgiven";
 
 	/**
@@ -145,6 +151,7 @@ public class MedicationAdministration extends BaseResource implements IResource 
 	 * Path: <b>MedicationAdministration.patient</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="patient", path="MedicationAdministration.patient", description="The identity of a patient to list administrations  for")
 	public static final String SP_PATIENT = "patient";
 
 	/**
@@ -155,6 +162,7 @@ public class MedicationAdministration extends BaseResource implements IResource 
 	 * Path: <b>MedicationAdministration.prescription</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="prescription", path="MedicationAdministration.prescription", description="The identity of a prescription to list administrations from")
 	public static final String SP_PRESCRIPTION = "prescription";
 
 	/**
@@ -165,6 +173,7 @@ public class MedicationAdministration extends BaseResource implements IResource 
 	 * Path: <b>MedicationAdministration.status</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="status", path="MedicationAdministration.status", description="MedicationAdministration event status (for example one of active/paused/completed/nullified)")
 	public static final String SP_STATUS = "status";
 
 	/**
@@ -175,6 +184,7 @@ public class MedicationAdministration extends BaseResource implements IResource 
 	 * Path: <b>MedicationAdministration.whenGiven</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="whengiven", path="MedicationAdministration.whenGiven", description="Date of administration")
 	public static final String SP_WHENGIVEN = "whengiven";
 
 
@@ -826,7 +836,7 @@ public class MedicationAdministration extends BaseResource implements IResource 
      * Provides details of how much of the medication was administered
      * </p> 
 	 */
-	@Block(name="MedicationAdministration.dosage")	
+	@Block()	
 	public static class Dosage extends BaseElement implements IResourceBlock {
 	
 	@Child(name="timing", order=0, min=0, max=1, type={

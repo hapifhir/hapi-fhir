@@ -261,6 +261,19 @@ public class SampledDataDt
      * The length of time between sampling times, measured in milliseconds
      * </p> 
 	 */
+	public SampledDataDt setPeriod( long theValue) {
+		myPeriod = new DecimalDt(theValue); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>period</b> (Number of milliseconds between samples)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The length of time between sampling times, measured in milliseconds
+     * </p> 
+	 */
 	public SampledDataDt setPeriod( double theValue) {
 		myPeriod = new DecimalDt(theValue); 
 		return this; 
@@ -275,19 +288,6 @@ public class SampledDataDt
      * </p> 
 	 */
 	public SampledDataDt setPeriod( java.math.BigDecimal theValue) {
-		myPeriod = new DecimalDt(theValue); 
-		return this; 
-	}
-
-	/**
-	 * Sets the value for <b>period</b> (Number of milliseconds between samples)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * The length of time between sampling times, measured in milliseconds
-     * </p> 
-	 */
-	public SampledDataDt setPeriod( long theValue) {
 		myPeriod = new DecimalDt(theValue); 
 		return this; 
 	}
@@ -331,6 +331,19 @@ public class SampledDataDt
      * A correction factor that is applied to the sampled data points before they are added to the origin
      * </p> 
 	 */
+	public SampledDataDt setFactor( long theValue) {
+		myFactor = new DecimalDt(theValue); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>factor</b> (Multiply data by this before adding to origin)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A correction factor that is applied to the sampled data points before they are added to the origin
+     * </p> 
+	 */
 	public SampledDataDt setFactor( double theValue) {
 		myFactor = new DecimalDt(theValue); 
 		return this; 
@@ -345,19 +358,6 @@ public class SampledDataDt
      * </p> 
 	 */
 	public SampledDataDt setFactor( java.math.BigDecimal theValue) {
-		myFactor = new DecimalDt(theValue); 
-		return this; 
-	}
-
-	/**
-	 * Sets the value for <b>factor</b> (Multiply data by this before adding to origin)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * A correction factor that is applied to the sampled data points before they are added to the origin
-     * </p> 
-	 */
-	public SampledDataDt setFactor( long theValue) {
 		myFactor = new DecimalDt(theValue); 
 		return this; 
 	}
@@ -401,6 +401,19 @@ public class SampledDataDt
      * The lower limit of detection of the measured points. This is needed if any of the data points have the value \"L\" (lower than detection limit)
      * </p> 
 	 */
+	public SampledDataDt setLowerLimit( long theValue) {
+		myLowerLimit = new DecimalDt(theValue); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>lowerLimit</b> (Lower limit of detection)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The lower limit of detection of the measured points. This is needed if any of the data points have the value \"L\" (lower than detection limit)
+     * </p> 
+	 */
 	public SampledDataDt setLowerLimit( double theValue) {
 		myLowerLimit = new DecimalDt(theValue); 
 		return this; 
@@ -415,19 +428,6 @@ public class SampledDataDt
      * </p> 
 	 */
 	public SampledDataDt setLowerLimit( java.math.BigDecimal theValue) {
-		myLowerLimit = new DecimalDt(theValue); 
-		return this; 
-	}
-
-	/**
-	 * Sets the value for <b>lowerLimit</b> (Lower limit of detection)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * The lower limit of detection of the measured points. This is needed if any of the data points have the value \"L\" (lower than detection limit)
-     * </p> 
-	 */
-	public SampledDataDt setLowerLimit( long theValue) {
 		myLowerLimit = new DecimalDt(theValue); 
 		return this; 
 	}
@@ -471,6 +471,19 @@ public class SampledDataDt
      * The upper limit of detection of the measured points. This is needed if any of the data points have the value \"U\" (higher than detection limit)
      * </p> 
 	 */
+	public SampledDataDt setUpperLimit( long theValue) {
+		myUpperLimit = new DecimalDt(theValue); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>upperLimit</b> (Upper limit of detection)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The upper limit of detection of the measured points. This is needed if any of the data points have the value \"U\" (higher than detection limit)
+     * </p> 
+	 */
 	public SampledDataDt setUpperLimit( double theValue) {
 		myUpperLimit = new DecimalDt(theValue); 
 		return this; 
@@ -485,19 +498,6 @@ public class SampledDataDt
      * </p> 
 	 */
 	public SampledDataDt setUpperLimit( java.math.BigDecimal theValue) {
-		myUpperLimit = new DecimalDt(theValue); 
-		return this; 
-	}
-
-	/**
-	 * Sets the value for <b>upperLimit</b> (Upper limit of detection)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * The upper limit of detection of the measured points. This is needed if any of the data points have the value \"U\" (higher than detection limit)
-     * </p> 
-	 */
-	public SampledDataDt setUpperLimit( long theValue) {
 		myUpperLimit = new DecimalDt(theValue); 
 		return this; 
 	}

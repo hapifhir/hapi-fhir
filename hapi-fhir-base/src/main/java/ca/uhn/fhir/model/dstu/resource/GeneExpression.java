@@ -48,6 +48,7 @@ import ca.uhn.fhir.model.api.annotation.Block;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.primitive.DecimalDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
@@ -85,6 +86,7 @@ public class GeneExpression extends BaseResource implements IResource {
 	 * Path: <b>GeneExpression.subject</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="subject", path="GeneExpression.subject", description="subject being described by the resource")
 	public static final String SP_SUBJECT = "subject";
 
 	/**
@@ -95,6 +97,7 @@ public class GeneExpression extends BaseResource implements IResource {
 	 * Path: <b>GeneExpression.gene.identifier</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="gene", path="GeneExpression.gene.identifier", description="Id of the gene")
 	public static final String SP_GENE = "gene";
 
 	/**
@@ -105,6 +108,7 @@ public class GeneExpression extends BaseResource implements IResource {
 	 * Path: <b>GeneExpression.gene.coordinate</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="coordinate", path="GeneExpression.gene.coordinate", description="Coordinate of the gene")
 	public static final String SP_COORDINATE = "coordinate";
 
 
@@ -328,7 +332,7 @@ public class GeneExpression extends BaseResource implements IResource {
      * Gene of study
      * </p> 
 	 */
-	@Block(name="GeneExpression.gene")	
+	@Block()	
 	public static class Gene extends BaseElement implements IResourceBlock {
 	
 	@Child(name="identifier", type=StringDt.class, order=0, min=0, max=1)	
@@ -447,7 +451,7 @@ public class GeneExpression extends BaseResource implements IResource {
      * Coordinate of the gene
      * </p> 
 	 */
-	@Block(name="GeneExpression.gene.coordinate")	
+	@Block()	
 	public static class GeneCoordinate extends BaseElement implements IResourceBlock {
 	
 	@Child(name="chromosome", type=StringDt.class, order=0, min=1, max=1)	
@@ -632,7 +636,7 @@ public class GeneExpression extends BaseResource implements IResource {
      * RNA-Seq that studies the gene
      * </p> 
 	 */
-	@Block(name="GeneExpression.rnaSeq")	
+	@Block()	
 	public static class RnaSeq extends BaseElement implements IResourceBlock {
 	
 	@Child(name="inputLab", order=0, min=0, max=1, type={
@@ -781,6 +785,19 @@ public class GeneExpression extends BaseResource implements IResource {
      * Expression level of the gene in RPKM
      * </p> 
 	 */
+	public RnaSeq setExpression( long theValue) {
+		myExpression = new DecimalDt(theValue); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>expression</b> (Expression level of the gene in RPKM)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Expression level of the gene in RPKM
+     * </p> 
+	 */
 	public RnaSeq setExpression( double theValue) {
 		myExpression = new DecimalDt(theValue); 
 		return this; 
@@ -795,19 +812,6 @@ public class GeneExpression extends BaseResource implements IResource {
      * </p> 
 	 */
 	public RnaSeq setExpression( java.math.BigDecimal theValue) {
-		myExpression = new DecimalDt(theValue); 
-		return this; 
-	}
-
-	/**
-	 * Sets the value for <b>expression</b> (Expression level of the gene in RPKM)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * Expression level of the gene in RPKM
-     * </p> 
-	 */
-	public RnaSeq setExpression( long theValue) {
 		myExpression = new DecimalDt(theValue); 
 		return this; 
 	}
@@ -884,7 +888,7 @@ public class GeneExpression extends BaseResource implements IResource {
      * Isoform of the gene
      * </p> 
 	 */
-	@Block(name="GeneExpression.rnaSeq.isoform")	
+	@Block()	
 	public static class RnaSeqIsoform extends BaseElement implements IResourceBlock {
 	
 	@Child(name="identity", type=StringDt.class, order=0, min=1, max=1)	
@@ -999,6 +1003,19 @@ public class GeneExpression extends BaseResource implements IResource {
      * Expression level of the isoform in RPKM
      * </p> 
 	 */
+	public RnaSeqIsoform setExpression( long theValue) {
+		myExpression = new DecimalDt(theValue); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>expression</b> (Expression level of the isoform in RPKM)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Expression level of the isoform in RPKM
+     * </p> 
+	 */
 	public RnaSeqIsoform setExpression( double theValue) {
 		myExpression = new DecimalDt(theValue); 
 		return this; 
@@ -1013,19 +1030,6 @@ public class GeneExpression extends BaseResource implements IResource {
      * </p> 
 	 */
 	public RnaSeqIsoform setExpression( java.math.BigDecimal theValue) {
-		myExpression = new DecimalDt(theValue); 
-		return this; 
-	}
-
-	/**
-	 * Sets the value for <b>expression</b> (Expression level of the isoform in RPKM)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * Expression level of the isoform in RPKM
-     * </p> 
-	 */
-	public RnaSeqIsoform setExpression( long theValue) {
 		myExpression = new DecimalDt(theValue); 
 		return this; 
 	}

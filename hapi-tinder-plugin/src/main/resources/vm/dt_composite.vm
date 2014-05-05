@@ -60,6 +60,11 @@ public class ${className}
 		setValue(theValue);
 		setLabel(theLabel);
 	}
+	
+	@Override
+	public String toString() {
+		return "IdentifierDt[" + getValueAsQueryToken() + "]";
+	}
 #end
 #if ( ${className} == "CodingDt" )
 	/**

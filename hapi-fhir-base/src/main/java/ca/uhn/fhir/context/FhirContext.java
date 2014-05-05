@@ -41,6 +41,7 @@ import ca.uhn.fhir.rest.client.IRestfulClientFactory;
 import ca.uhn.fhir.rest.client.RestfulClientFactory;
 import ca.uhn.fhir.rest.client.api.IBasicClient;
 import ca.uhn.fhir.rest.client.api.IRestfulClient;
+import ca.uhn.fhir.util.FhirTerser;
 
 /**
  * The FHIR context is the central starting point for the use of the HAPI FHIR API. It should be created once, and then used as a factory for various other types of objects (parsers, clients, etc.).
@@ -88,6 +89,10 @@ public class FhirContext {
 	 */
 	public BaseRuntimeElementDefinition<?> getElementDefinition(Class<? extends IElement> theElementType) {
 		return myClassToElementDefinition.get(theElementType);
+	}
+	
+	public FhirTerser newTerser() {
+		return new FhirTerser(this);
 	}
 
 	public INarrativeGenerator getNarrativeGenerator() {

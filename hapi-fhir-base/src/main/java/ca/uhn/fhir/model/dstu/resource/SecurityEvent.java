@@ -50,6 +50,7 @@ import ca.uhn.fhir.model.api.annotation.Block;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu.composite.CodingDt;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
@@ -102,6 +103,7 @@ public class SecurityEvent extends BaseResource implements IResource {
 	 * Path: <b>SecurityEvent.event.type</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="type", path="SecurityEvent.event.type", description="")
 	public static final String SP_TYPE = "type";
 
 	/**
@@ -112,6 +114,7 @@ public class SecurityEvent extends BaseResource implements IResource {
 	 * Path: <b>SecurityEvent.event.action</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="action", path="SecurityEvent.event.action", description="")
 	public static final String SP_ACTION = "action";
 
 	/**
@@ -122,6 +125,7 @@ public class SecurityEvent extends BaseResource implements IResource {
 	 * Path: <b>SecurityEvent.event.dateTime</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="date", path="SecurityEvent.event.dateTime", description="")
 	public static final String SP_DATE = "date";
 
 	/**
@@ -132,6 +136,7 @@ public class SecurityEvent extends BaseResource implements IResource {
 	 * Path: <b>SecurityEvent.event.subtype</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="subtype", path="SecurityEvent.event.subtype", description="")
 	public static final String SP_SUBTYPE = "subtype";
 
 	/**
@@ -142,6 +147,7 @@ public class SecurityEvent extends BaseResource implements IResource {
 	 * Path: <b>SecurityEvent.participant.userId</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="user", path="SecurityEvent.participant.userId", description="")
 	public static final String SP_USER = "user";
 
 	/**
@@ -152,6 +158,7 @@ public class SecurityEvent extends BaseResource implements IResource {
 	 * Path: <b>SecurityEvent.participant.name</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="name", path="SecurityEvent.participant.name", description="")
 	public static final String SP_NAME = "name";
 
 	/**
@@ -162,6 +169,7 @@ public class SecurityEvent extends BaseResource implements IResource {
 	 * Path: <b>SecurityEvent.participant.network.identifier</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="address", path="SecurityEvent.participant.network.identifier", description="")
 	public static final String SP_ADDRESS = "address";
 
 	/**
@@ -172,6 +180,7 @@ public class SecurityEvent extends BaseResource implements IResource {
 	 * Path: <b>SecurityEvent.source.identifier</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="source", path="SecurityEvent.source.identifier", description="")
 	public static final String SP_SOURCE = "source";
 
 	/**
@@ -182,6 +191,7 @@ public class SecurityEvent extends BaseResource implements IResource {
 	 * Path: <b>SecurityEvent.source.site</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="site", path="SecurityEvent.source.site", description="")
 	public static final String SP_SITE = "site";
 
 	/**
@@ -192,6 +202,7 @@ public class SecurityEvent extends BaseResource implements IResource {
 	 * Path: <b>SecurityEvent.object.type</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="object-type", path="SecurityEvent.object.type", description="")
 	public static final String SP_OBJECT_TYPE = "object-type";
 
 	/**
@@ -202,6 +213,7 @@ public class SecurityEvent extends BaseResource implements IResource {
 	 * Path: <b>SecurityEvent.object.identifier</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="identity", path="SecurityEvent.object.identifier", description="")
 	public static final String SP_IDENTITY = "identity";
 
 	/**
@@ -212,6 +224,7 @@ public class SecurityEvent extends BaseResource implements IResource {
 	 * Path: <b>SecurityEvent.object.reference</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="reference", path="SecurityEvent.object.reference", description="")
 	public static final String SP_REFERENCE = "reference";
 
 	/**
@@ -222,6 +235,7 @@ public class SecurityEvent extends BaseResource implements IResource {
 	 * Path: <b>SecurityEvent.object.name</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="desc", path="SecurityEvent.object.name", description="")
 	public static final String SP_DESC = "desc";
 
 	/**
@@ -232,6 +246,7 @@ public class SecurityEvent extends BaseResource implements IResource {
 	 * Path: <b></b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="patientid", path="", description="The id of the patient (one of multiple kinds of participations)")
 	public static final String SP_PATIENTID = "patientid";
 
 	/**
@@ -242,6 +257,7 @@ public class SecurityEvent extends BaseResource implements IResource {
 	 * Path: <b>SecurityEvent.participant.altId</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="altid", path="SecurityEvent.participant.altId", description="")
 	public static final String SP_ALTID = "altid";
 
 
@@ -479,7 +495,7 @@ public class SecurityEvent extends BaseResource implements IResource {
      * Identifies the name, action type, time, and disposition of the audited event
      * </p> 
 	 */
-	@Block(name="SecurityEvent.event")	
+	@Block()	
 	public static class Event extends BaseElement implements IResourceBlock {
 	
 	@Child(name="type", type=CodeableConceptDt.class, order=0, min=1, max=1)	
@@ -713,8 +729,8 @@ public class SecurityEvent extends BaseResource implements IResource {
      * The time when the event occurred on the source
      * </p> 
 	 */
-	public Event setDateTimeWithMillisPrecision( Date theDate) {
-		myDateTime = new InstantDt(theDate); 
+	public Event setDateTime( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myDateTime = new InstantDt(theDate, thePrecision); 
 		return this; 
 	}
 
@@ -726,8 +742,8 @@ public class SecurityEvent extends BaseResource implements IResource {
      * The time when the event occurred on the source
      * </p> 
 	 */
-	public Event setDateTime( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myDateTime = new InstantDt(theDate, thePrecision); 
+	public Event setDateTimeWithMillisPrecision( Date theDate) {
+		myDateTime = new InstantDt(theDate); 
 		return this; 
 	}
 
@@ -832,7 +848,7 @@ public class SecurityEvent extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	@Block(name="SecurityEvent.participant")	
+	@Block()	
 	public static class Participant extends BaseElement implements IResourceBlock {
 	
 	@Child(name="role", type=CodeableConceptDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)	
@@ -1245,7 +1261,7 @@ public class SecurityEvent extends BaseResource implements IResource {
      * Logical network location for application activity, if the activity has a network location
      * </p> 
 	 */
-	@Block(name="SecurityEvent.participant.network")	
+	@Block()	
 	public static class ParticipantNetwork extends BaseElement implements IResourceBlock {
 	
 	@Child(name="identifier", type=StringDt.class, order=0, min=0, max=1)	
@@ -1379,7 +1395,7 @@ public class SecurityEvent extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	@Block(name="SecurityEvent.source")	
+	@Block()	
 	public static class Source extends BaseElement implements IResourceBlock {
 	
 	@Child(name="site", type=StringDt.class, order=0, min=0, max=1)	
@@ -1579,7 +1595,7 @@ public class SecurityEvent extends BaseResource implements IResource {
      * Specific instances of data or objects that have been accessed
      * </p> 
 	 */
-	@Block(name="SecurityEvent.object")	
+	@Block()	
 	public static class Object extends BaseElement implements IResourceBlock {
 	
 	@Child(name="identifier", type=IdentifierDt.class, order=0, min=0, max=1)	
@@ -2136,7 +2152,7 @@ public class SecurityEvent extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	@Block(name="SecurityEvent.object.detail")	
+	@Block()	
 	public static class ObjectDetail extends BaseElement implements IResourceBlock {
 	
 	@Child(name="type", type=StringDt.class, order=0, min=1, max=1)	

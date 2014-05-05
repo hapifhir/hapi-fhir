@@ -29,6 +29,7 @@ import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.client.BaseClientInvocation;
 import ca.uhn.fhir.rest.param.IParameter;
 import ca.uhn.fhir.rest.param.ResourceParameter;
+import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 
 abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOutcomeReturningMethodBinding {
@@ -44,7 +45,14 @@ abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOu
 		for (IParameter next : getParameters()) {
 			if (next instanceof ResourceParameter) {
 				resourceParameter = (ResourceParameter) next;
-				myResourceName = theContext.getResourceDefinition(resourceParameter.getResourceType()).getName();
+				Class<? extends IResource> resourceType = resourceParameter.getResourceType();
+				
+				if (theProvider instanceof IResourceProvider) {
+					resourceType=((IResourceProvider) theProvider).getResourceType();
+				}
+				
+				myResourceName = theContext.getResourceDefinition(resourceType).getName();
+				
 				myResourceParameterIndex = index;
 			}
 			index++;

@@ -49,6 +49,7 @@ import ca.uhn.fhir.model.api.annotation.Block;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.composite.PeriodDt;
@@ -92,6 +93,7 @@ public class MedicationStatement extends BaseResource implements IResource {
 	 * Path: <b>MedicationStatement.device</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="device", path="MedicationStatement.device", description="Return administrations with this administration device identity")
 	public static final String SP_DEVICE = "device";
 
 	/**
@@ -102,6 +104,7 @@ public class MedicationStatement extends BaseResource implements IResource {
 	 * Path: <b>MedicationStatement.identifier</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="identifier", path="MedicationStatement.identifier", description="Return administrations with this external identity")
 	public static final String SP_IDENTIFIER = "identifier";
 
 	/**
@@ -112,6 +115,7 @@ public class MedicationStatement extends BaseResource implements IResource {
 	 * Path: <b>MedicationStatement.medication</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="medication", path="MedicationStatement.medication", description="Code for medicine or text in medicine name")
 	public static final String SP_MEDICATION = "medication";
 
 	/**
@@ -122,6 +126,7 @@ public class MedicationStatement extends BaseResource implements IResource {
 	 * Path: <b>MedicationStatement.patient</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="patient", path="MedicationStatement.patient", description="The identity of a patient to list administrations  for")
 	public static final String SP_PATIENT = "patient";
 
 	/**
@@ -132,6 +137,7 @@ public class MedicationStatement extends BaseResource implements IResource {
 	 * Path: <b>MedicationStatement.whenGiven</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="when-given", path="MedicationStatement.whenGiven", description="Date of administration")
 	public static final String SP_WHEN_GIVEN = "when-given";
 
 
@@ -615,7 +621,7 @@ public class MedicationStatement extends BaseResource implements IResource {
      * Indicates how the medication is/was used by the patient
      * </p> 
 	 */
-	@Block(name="MedicationStatement.dosage")	
+	@Block()	
 	public static class Dosage extends BaseElement implements IResourceBlock {
 	
 	@Child(name="timing", type=ScheduleDt.class, order=0, min=0, max=1)	

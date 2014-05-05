@@ -202,6 +202,19 @@ public class QuantityDt
      * The value of the measured amount. The value includes an implicit precision in the presentation of the value
      * </p> 
 	 */
+	public QuantityDt setValue( long theValue) {
+		myValue = new DecimalDt(theValue); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>value</b> (Numerical value (with implicit precision))
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The value of the measured amount. The value includes an implicit precision in the presentation of the value
+     * </p> 
+	 */
 	public QuantityDt setValue( double theValue) {
 		myValue = new DecimalDt(theValue); 
 		return this; 
@@ -216,19 +229,6 @@ public class QuantityDt
      * </p> 
 	 */
 	public QuantityDt setValue( java.math.BigDecimal theValue) {
-		myValue = new DecimalDt(theValue); 
-		return this; 
-	}
-
-	/**
-	 * Sets the value for <b>value</b> (Numerical value (with implicit precision))
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * The value of the measured amount. The value includes an implicit precision in the presentation of the value
-     * </p> 
-	 */
-	public QuantityDt setValue( long theValue) {
 		myValue = new DecimalDt(theValue); 
 		return this; 
 	}

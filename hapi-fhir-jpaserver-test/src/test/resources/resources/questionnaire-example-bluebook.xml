@@ -1,0 +1,95 @@
+<Questionnaire xmlns="http://hl7.org/fhir" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://hl7.org/fhir ../../schema/questionnaire.xsd">
+  <!-- Please not that in this questionnaire, the questions are mostly unnamed, that is, the questions are not identified using the <name> element. It will therefore
+    be hard to extract useful information in an automated way from this questionnaire. This is, however, quite often the case when modelling existing questionnaires -->
+  <text>
+    <status value="generated"/>
+    <div xmlns="http://www.w3.org/1999/xhtml">
+      <pre>
+        Cathy Jones, female. Birth weight 3.25 kg at 44.3 cm. 
+        Injection of Vitamin K given on 1972-11-30 (first dose) and 1972-12-11 (second dose)
+        Note: Was able to speak Chinese at birth.
+      </pre>
+    </div>
+  </text>
+  <status value="completed"/>
+  <authored value="2013-02-19T14:15:00"/>
+  <subject>
+    <reference value="http://www.hl7.org/fhir/Patient/1"/>
+  </subject>
+  <author>
+    <reference value="http://www.hl7.org/fhir/Practitioner/1"/>
+  </author>
+  <group>
+    <name>
+      <text value="NSW Government My Personal Health Record, january 2013"/>
+    </name>
+    <!-- Many groups left out of this example -->
+    <group>
+      <name>
+        <coding>
+          <code value="6.1"/>
+        </coding>
+        <text value="Birth details"/>
+      </name>
+      <header value="Birth details - To be completed by health professional"/>
+      <group>
+        <question>
+          <text value="Name of child" />
+          <answerString value="Cathy Jones" />
+        </question>
+        <question>
+          <text value="Sex" />
+          <choice>
+            <code value="f" />
+          </choice>
+        </question>
+      </group>        
+      <group>
+        <header value="Neonatal Information"/>
+        <question>
+          <text value="Birth weight (kg)"/>
+          <answerDecimal value="3.25"/>
+        </question>
+        <question>
+          <text value="Birth length (cm)"/>
+          <answerDecimal value="44.3"/>
+        </question>
+        <question>
+          <text value="Vitamin K given"/>
+          <choice>
+            <code value="INJECTION"/>
+          </choice>
+          <group>
+            <extension url="http://example.org/Profile/questionnaire#visibilityCondition">
+              <!-- note: this syntax is for demonstration purposes only, will need to be finalized during DSTU --> 
+              <valueString value="HAS_VALUE(../choice/code) AND NEQ(../choice/code,'NO')"/>
+            </extension>
+            <question>
+              <text value="1st dose"/>
+              <answerDate value="1972-11-30"/>
+            </question>
+            <question>
+              <text value="2nd dose"/>
+              <answerDate value="1972-12-11"/>
+            </question>
+          </group>
+        </question>
+        <question>
+          <text value="Hep B given y / n"/>
+          <answerBoolean value="true"/>
+          <group>
+            <question>
+              <text value="Date given"/>
+              <answerDate value="1972-12-04"/>
+            </question>
+          </group>
+        </question>
+        <question>
+          <text value="Abnormalities noted at birth"/>
+          <answerString value="Already able to speak Chinese"/>
+        </question>
+      </group>
+    </group>
+  </group>
+</Questionnaire>

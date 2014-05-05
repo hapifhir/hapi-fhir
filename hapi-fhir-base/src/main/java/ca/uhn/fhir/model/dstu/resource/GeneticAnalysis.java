@@ -50,6 +50,7 @@ import ca.uhn.fhir.model.api.annotation.Block;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.dstu.composite.CodingDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.primitive.DateDt;
@@ -88,6 +89,7 @@ public class GeneticAnalysis extends BaseResource implements IResource {
 	 * Path: <b>GeneticAnalysis.subject</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="subject", path="GeneticAnalysis.subject", description="Subject of the analysis")
 	public static final String SP_SUBJECT = "subject";
 
 	/**
@@ -98,6 +100,7 @@ public class GeneticAnalysis extends BaseResource implements IResource {
 	 * Path: <b>GeneticAnalysis.author</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="author", path="GeneticAnalysis.author", description="Author of the analysis")
 	public static final String SP_AUTHOR = "author";
 
 	/**
@@ -108,6 +111,7 @@ public class GeneticAnalysis extends BaseResource implements IResource {
 	 * Path: <b>GeneticAnalysis.date</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="date", path="GeneticAnalysis.date", description="Date when result of the analysis is uploaded")
 	public static final String SP_DATE = "date";
 
 
@@ -391,7 +395,7 @@ public class GeneticAnalysis extends BaseResource implements IResource {
      * Summary of the analysis
      * </p> 
 	 */
-	@Block(name="GeneticAnalysis.geneticAnalysisSummary")	
+	@Block()	
 	public static class GeneticAnalysisSummary extends BaseElement implements IResourceBlock {
 	
 	@Child(name="geneticDiseaseAssessed", type=CodingDt.class, order=0, min=0, max=1)	
@@ -752,7 +756,7 @@ public class GeneticAnalysis extends BaseResource implements IResource {
      * Coverage of the genetic test
      * </p> 
 	 */
-	@Block(name="GeneticAnalysis.dnaRegionAnalysisTestCoverage")	
+	@Block()	
 	public static class DnaRegionAnalysisTestCoverage extends BaseElement implements IResourceBlock {
 	
 	@Child(name="dnaRegionOfInterest", order=0, min=0, max=Child.MAX_UNLIMITED)	
@@ -849,7 +853,7 @@ public class GeneticAnalysis extends BaseResource implements IResource {
      * DNA studied
      * </p> 
 	 */
-	@Block(name="GeneticAnalysis.dnaRegionAnalysisTestCoverage.dnaRegionOfInterest")	
+	@Block()	
 	public static class DnaRegionAnalysisTestCoverageDnaRegionOfInterest extends BaseElement implements IResourceBlock {
 	
 	@Child(name="genomicReferenceSequenceIdentifier", type=StringDt.class, order=0, min=0, max=1)	
@@ -1289,7 +1293,7 @@ public class GeneticAnalysis extends BaseResource implements IResource {
      * Genetic analysis discrete result
      * </p> 
 	 */
-	@Block(name="GeneticAnalysis.geneticAnalysisDiscreteResult")	
+	@Block()	
 	public static class GeneticAnalysisDiscreteResult extends BaseElement implements IResourceBlock {
 	
 	@Child(name="dnaAnalysisDiscreteSequenceVariation", type=StringDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)	

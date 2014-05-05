@@ -347,8 +347,10 @@ public abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBindin
 
 				if (reader != null) {
 					IParser parser = ct.newParser(theContext);
-					OperationOutcome outcome = parser.parseResource(OperationOutcome.class, reader);
-					retVal.setOperationOutcome(outcome);
+					IResource outcome = parser.parseResource(reader);
+					if (outcome instanceof OperationOutcome) {
+						retVal.setOperationOutcome((OperationOutcome) outcome);
+					}
 				}
 
 			} else {

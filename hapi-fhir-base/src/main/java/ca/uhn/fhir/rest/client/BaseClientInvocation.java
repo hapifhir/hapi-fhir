@@ -22,13 +22,25 @@ package ca.uhn.fhir.rest.client;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.http.Header;
 import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.message.BasicHeader;
 
 public abstract class BaseClientInvocation {
+
+	private List<Header> myHeaders;
+
+	public void addHeader(String theName, String theValue) {
+		if (myHeaders == null) {
+			myHeaders = new ArrayList<Header>();
+		}
+		myHeaders.add(new BasicHeader(theName, theValue));
+	}
 
 	/**
 	 * Create an HTTP request out of this client request
@@ -40,7 +52,7 @@ public abstract class BaseClientInvocation {
 	 */
 	public abstract HttpRequestBase asHttpRequest(String theUrlBase, Map<String, List<String>> theExtraParams);
 
-	protected static void appendExtraParamsWithQuestionMark(Map<String, List<String>> theExtraParams, StringBuilder theUrlBuilder, boolean theWithQuestionMark)  {
+	protected static void appendExtraParamsWithQuestionMark(Map<String, List<String>> theExtraParams, StringBuilder theUrlBuilder, boolean theWithQuestionMark) {
 		boolean first = theWithQuestionMark;
 
 		if (theExtraParams != null && theExtraParams.isEmpty() == false) {
@@ -60,6 +72,14 @@ public abstract class BaseClientInvocation {
 						throw new Error("UTF-8 not supported - This should not happen");
 					}
 				}
+			}
+		}
+	}
+
+	public void addHeadersToRequest(HttpRequestBase theHttpRequest) {
+		if (myHeaders != null) {
+			for (Header next : myHeaders) {
+				theHttpRequest.addHeader(next);
 			}
 		}
 	}

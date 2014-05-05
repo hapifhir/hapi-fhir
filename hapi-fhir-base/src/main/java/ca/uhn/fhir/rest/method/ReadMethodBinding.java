@@ -34,6 +34,7 @@ import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.client.GetClientInvocation;
 import ca.uhn.fhir.rest.method.SearchMethodBinding.RequestType;
+import ca.uhn.fhir.rest.param.IParameter;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -118,15 +119,23 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding {
 
 	@Override
 	public GetClientInvocation invokeClient(Object[] theArgs) {
+		GetClientInvocation retVal;
 		IdDt id = ((IdDt) theArgs[myIdIndex]);
 		if (myVersionIdIndex == null) {
 			String resourceName = getResourceName();
-			return createReadInvocation(id, resourceName);
+			retVal = createReadInvocation(id, resourceName);
 		} else {
 			IdDt vid = ((IdDt) theArgs[myVersionIdIndex]);
 			String resourceName = getResourceName();
-			return createVReadInvocation(id, vid, resourceName);
+			retVal = createVReadInvocation(id, vid, resourceName);
 		}
+		
+		for (int idx = 0; idx < theArgs.length; idx++) {
+			IParameter nextParam = getParameters().get(idx);
+			nextParam.translateClientArgumentIntoQueryArgument(theArgs[idx], null, retVal);
+		}
+		
+		return retVal;
 	}
 
 	public static GetClientInvocation createVReadInvocation(IdDt theId, IdDt vid, String resourceName) {

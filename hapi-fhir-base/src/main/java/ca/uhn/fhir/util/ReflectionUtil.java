@@ -21,9 +21,13 @@ package ca.uhn.fhir.util;
  */
 
 import java.lang.reflect.Field;
+import java.lang.reflect.GenericDeclaration;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
+
+import ca.uhn.fhir.model.api.IResource;
 
 public class ReflectionUtil {
 
@@ -53,6 +57,7 @@ public class ReflectionUtil {
 		return type;
 	}
 
+	@SuppressWarnings({ "unused", "rawtypes" })
 	public static Class<?> getGenericCollectionTypeOfMethodReturnType(Method theMethod) {
 		Class<?> type;
 		ParameterizedType collectionType = (ParameterizedType) theMethod.getGenericReturnType();
@@ -60,6 +65,9 @@ public class ReflectionUtil {
 		if (ParameterizedType.class.isAssignableFrom(firstArg.getClass())) {
 			ParameterizedType pt = ((ParameterizedType) firstArg);
 			type = (Class<?>) pt.getRawType();
+		} else if (firstArg instanceof TypeVariable<?>) {
+			Type decl = ((TypeVariable) firstArg).getBounds()[0];
+			return (Class<?>) decl;
 		} else {
 			type = (Class<?>) firstArg;
 		}

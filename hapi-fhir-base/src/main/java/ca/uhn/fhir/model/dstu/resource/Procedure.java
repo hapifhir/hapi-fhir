@@ -48,6 +48,7 @@ import ca.uhn.fhir.model.api.annotation.Block;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.composite.PeriodDt;
@@ -90,6 +91,7 @@ public class Procedure extends BaseResource implements IResource {
 	 * Path: <b>Procedure.type</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="type", path="Procedure.type", description="Type of procedure")
 	public static final String SP_TYPE = "type";
 
 	/**
@@ -100,6 +102,7 @@ public class Procedure extends BaseResource implements IResource {
 	 * Path: <b>Procedure.subject</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="subject", path="Procedure.subject", description="The identity of a patient to list procedures  for")
 	public static final String SP_SUBJECT = "subject";
 
 	/**
@@ -110,6 +113,7 @@ public class Procedure extends BaseResource implements IResource {
 	 * Path: <b>Procedure.date</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="date", path="Procedure.date", description="The date the procedure was performed on")
 	public static final String SP_DATE = "date";
 
 
@@ -934,7 +938,7 @@ public class Procedure extends BaseResource implements IResource {
      * Limited to 'real' people rather than equipment
      * </p> 
 	 */
-	@Block(name="Procedure.performer")	
+	@Block()	
 	public static class Performer extends BaseElement implements IResourceBlock {
 	
 	@Child(name="person", order=0, min=0, max=1, type={
@@ -1042,7 +1046,7 @@ public class Procedure extends BaseResource implements IResource {
      * Procedures may be related to other items such as procedures or medications. For example treating wound dehiscence following a previous procedure
      * </p> 
 	 */
-	@Block(name="Procedure.relatedItem")	
+	@Block()	
 	public static class RelatedItem extends BaseElement implements IResourceBlock {
 	
 	@Child(name="type", type=CodeDt.class, order=0, min=0, max=1)	

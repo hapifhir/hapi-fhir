@@ -45,6 +45,7 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
@@ -86,6 +87,7 @@ public class Alert extends BaseResource implements IResource {
 	 * Path: <b>Alert.subject</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="subject", path="Alert.subject", description="The identity of a subject to list alerts for")
 	public static final String SP_SUBJECT = "subject";
 
 

@@ -50,6 +50,7 @@ import ca.uhn.fhir.model.api.annotation.Block;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
@@ -92,6 +93,7 @@ public class ListResource extends BaseResource implements IResource {
 	 * Path: <b>List.source</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="source", path="List.source", description="")
 	public static final String SP_SOURCE = "source";
 
 	/**
@@ -102,6 +104,7 @@ public class ListResource extends BaseResource implements IResource {
 	 * Path: <b>List.entry.item</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="item", path="List.entry.item", description="")
 	public static final String SP_ITEM = "item";
 
 	/**
@@ -112,6 +115,7 @@ public class ListResource extends BaseResource implements IResource {
 	 * Path: <b>List.emptyReason</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="empty-reason", path="List.emptyReason", description="")
 	public static final String SP_EMPTY_REASON = "empty-reason";
 
 	/**
@@ -122,6 +126,7 @@ public class ListResource extends BaseResource implements IResource {
 	 * Path: <b>List.date</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="date", path="List.date", description="")
 	public static final String SP_DATE = "date";
 
 	/**
@@ -132,6 +137,7 @@ public class ListResource extends BaseResource implements IResource {
 	 * Path: <b>List.code</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="code", path="List.code", description="")
 	public static final String SP_CODE = "code";
 
 	/**
@@ -142,6 +148,7 @@ public class ListResource extends BaseResource implements IResource {
 	 * Path: <b>List.subject</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="subject", path="List.subject", description="")
 	public static final String SP_SUBJECT = "subject";
 
 
@@ -653,7 +660,7 @@ public class ListResource extends BaseResource implements IResource {
      * Entries in this list
      * </p> 
 	 */
-	@Block(name="List.entry")	
+	@Block()	
 	public static class Entry extends BaseElement implements IResourceBlock {
 	
 	@Child(name="flag", type=CodeableConceptDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)	

@@ -15,7 +15,7 @@ public static void main(String[] args) {
    String serverBase = "http://foo.com/fhirServerBase";
    
    // Create the client
-   RestfulClientImpl client = ctx.newRestfulClient(RestfulClientImpl.class, serverBase);
+   IRestfulClient client = ctx.newRestfulClient(IRestfulClient.class, serverBase);
    
    // Try the client out! This method will invoke the server
    List<Patient> patients = client.getPatient(new StringDt("SMITH"));

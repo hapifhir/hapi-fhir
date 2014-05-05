@@ -50,6 +50,7 @@ import ca.uhn.fhir.model.api.annotation.Block;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.dstu.composite.AttachmentDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
@@ -90,6 +91,7 @@ public class GVFMeta extends BaseResource implements IResource {
 	 * Path: <b>GVFMeta.subject.patient</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="patient", path="GVFMeta.subject.patient", description="Patient being described in the file")
 	public static final String SP_PATIENT = "patient";
 
 	/**
@@ -100,6 +102,7 @@ public class GVFMeta extends BaseResource implements IResource {
 	 * Path: <b>GVFMeta.sourceFile</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="file", path="GVFMeta.sourceFile", description="URL to source file of the resource")
 	public static final String SP_FILE = "file";
 
 
@@ -980,7 +983,7 @@ public class GVFMeta extends BaseResource implements IResource {
      * Subject being described by the file
      * </p> 
 	 */
-	@Block(name="GVFMeta.subject")	
+	@Block()	
 	public static class Subject extends BaseElement implements IResourceBlock {
 	
 	@Child(name="patient", order=0, min=0, max=1, type={
@@ -1101,7 +1104,7 @@ public class GVFMeta extends BaseResource implements IResource {
      * Technology platform used in the sequencing
      * </p> 
 	 */
-	@Block(name="GVFMeta.platform")	
+	@Block()	
 	public static class Platform extends BaseElement implements IResourceBlock {
 	
 	@Child(name="class", type=CodeDt.class, order=0, min=0, max=1)	

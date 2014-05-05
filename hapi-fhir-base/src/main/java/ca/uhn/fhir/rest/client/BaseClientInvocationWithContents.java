@@ -42,7 +42,6 @@ public abstract class BaseClientInvocationWithContents extends BaseClientInvocat
 
 	private final Bundle myBundle;
 	private final FhirContext myContext;
-	private List<Header> myHeaders;
 	private final IResource myResource;
 	private String myUrlExtension;
 
@@ -61,13 +60,6 @@ public abstract class BaseClientInvocationWithContents extends BaseClientInvocat
 		myUrlExtension = theUrlExtension;
 	}
 
-	public void addHeader(String theName, String theValue) {
-		if (myHeaders == null) {
-			myHeaders = new ArrayList<Header>();
-		}
-		myHeaders.add(new BasicHeader(theName, theValue));
-	}
-
 	@Override
 	public HttpRequestBase asHttpRequest(String theUrlBase, Map<String, List<String>> theExtraParams) throws DataFormatException {
 		StringBuilder b = new StringBuilder();
@@ -83,13 +75,9 @@ public abstract class BaseClientInvocationWithContents extends BaseClientInvocat
 		String contents = myContext.newXmlParser().encodeResourceToString(myResource);
 		StringEntity entity = new StringEntity(contents, ContentType.create(Constants.CT_FHIR_XML, "UTF-8"));
 
-		HttpRequestBase http = createRequest(url, entity);
-		if (myHeaders != null) {
-			for (Header next : myHeaders) {
-				http.addHeader(next);
-			}
-		}
-		return http;
+		HttpRequestBase retVal = createRequest(url, entity);
+		super.addHeadersToRequest(retVal);
+		return retVal;
 	}
 
 	protected abstract HttpRequestBase createRequest(String url, StringEntity theEntity);

@@ -44,6 +44,8 @@ import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.PathSpecification;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
+import ca.uhn.fhir.model.api.Tag;
+import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.dstu.composite.CodingDt;
 import ca.uhn.fhir.model.dstu.composite.HumanNameDt;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
@@ -92,6 +94,7 @@ public class ResfulServerMethodTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResfulServerMethodTest.class);
 	private static int ourPort;
 	private static Server ourServer;
+	private static DummyDiagnosticReportResourceProvider ourReportProvider;
 
 	@Test
 	public void test404IsPropagatedCorrectly() throws Exception {
@@ -366,7 +369,7 @@ public class ResfulServerMethodTest {
 			IParser p = ourCtx.newXmlParser().setPrettyPrint(true);
 			String enc = p.encodeResourceToString(bundle);
 			ourLog.info("Response:\n{}", enc);
-			assertTrue(enc.contains(ExtensionConstants.CONF_ALSO_CHAIN));
+			assertTrue(enc.contains(ExtensionConstants.CONF_ADDITIONAL_PARAM));
 		}
 		// {
 		// IParser p = ourCtx.newJsonParser().setPrettyPrint(true);
@@ -942,6 +945,90 @@ public class ResfulServerMethodTest {
 	}
 
 	@Test
+	public void testUpdateWithTagSimple() throws Exception {
+
+		DiagnosticReport dr = new DiagnosticReport();
+		dr.addCodedDiagnosis().addCoding().setCode("AAA");
+
+		HttpPut httpPost = new HttpPut("http://localhost:" + ourPort + "/DiagnosticReport/001");
+		httpPost.addHeader("Category", "Dog");
+		httpPost.setEntity(new StringEntity(new FhirContext().newXmlParser().encodeResourceToString(dr), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		ourClient.execute(httpPost);
+		assertEquals(1, ourReportProvider.getLastTags().size());
+		assertEquals(new Tag("Dog"), ourReportProvider.getLastTags().get(0));
+		
+	}
+
+	@Test
+	public void testUpdateWithTagWithScheme() throws Exception {
+
+		DiagnosticReport dr = new DiagnosticReport();
+		dr.addCodedDiagnosis().addCoding().setCode("AAA");
+
+		HttpPut httpPost = new HttpPut("http://localhost:" + ourPort + "/DiagnosticReport/001");
+		httpPost.addHeader("Category", "Dog; scheme=\"http://foo\"");
+		httpPost.setEntity(new StringEntity(new FhirContext().newXmlParser().encodeResourceToString(dr), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		ourClient.execute(httpPost);
+		assertEquals(1, ourReportProvider.getLastTags().size());
+		assertEquals(new Tag("Dog", null, "http://foo"), ourReportProvider.getLastTags().get(0));
+
+		httpPost = new HttpPut("http://localhost:" + ourPort + "/DiagnosticReport/001");
+		httpPost.addHeader("Category", "Dog; scheme=\"http://foo\";");
+		httpPost.setEntity(new StringEntity(new FhirContext().newXmlParser().encodeResourceToString(dr), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		ourClient.execute(httpPost);
+		assertEquals(1, ourReportProvider.getLastTags().size());
+		assertEquals(new Tag("Dog", null, "http://foo"), ourReportProvider.getLastTags().get(0));
+
+	}
+
+	
+	@Test
+	public void testUpdateWithTagWithSchemeAndLabel() throws Exception {
+
+		DiagnosticReport dr = new DiagnosticReport();
+		dr.addCodedDiagnosis().addCoding().setCode("AAA");
+
+		HttpPut httpPost = new HttpPut("http://localhost:" + ourPort + "/DiagnosticReport/001");
+		httpPost.addHeader("Category", "Dog; scheme=\"http://foo\"; label=\"aaaa\"");
+		httpPost.setEntity(new StringEntity(new FhirContext().newXmlParser().encodeResourceToString(dr), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		ourClient.execute(httpPost);
+		assertEquals(1, ourReportProvider.getLastTags().size());
+		assertEquals(new Tag("Dog", "aaaa", "http://foo"), ourReportProvider.getLastTags().get(0));
+
+		httpPost = new HttpPut("http://localhost:" + ourPort + "/DiagnosticReport/001");
+		httpPost.addHeader("Category", "Dog; scheme=\"http://foo\"; label=\"aaaa\";   ");
+		httpPost.setEntity(new StringEntity(new FhirContext().newXmlParser().encodeResourceToString(dr), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		ourClient.execute(httpPost);
+		assertEquals(1, ourReportProvider.getLastTags().size());
+		assertEquals(new Tag("Dog", "aaaa", "http://foo"), ourReportProvider.getLastTags().get(0));
+
+	}
+
+	@Test
+	public void testUpdateWithTagMultiple() throws Exception {
+
+		DiagnosticReport dr = new DiagnosticReport();
+		dr.addCodedDiagnosis().addCoding().setCode("AAA");
+
+		HttpPut httpPost = new HttpPut("http://localhost:" + ourPort + "/DiagnosticReport/001");
+		httpPost.addHeader("Category", "Dog, Cat");
+		httpPost.setEntity(new StringEntity(new FhirContext().newXmlParser().encodeResourceToString(dr), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		ourClient.execute(httpPost);
+		assertEquals(2, ourReportProvider.getLastTags().size());
+		assertEquals(new Tag("Dog"), ourReportProvider.getLastTags().get(0));
+		assertEquals(new Tag("Cat"), ourReportProvider.getLastTags().get(1));
+
+		httpPost = new HttpPut("http://localhost:" + ourPort + "/DiagnosticReport/001");
+		httpPost.addHeader("Category", "Dog; label=\"aa\", Cat; label=\"bb\"");
+		httpPost.setEntity(new StringEntity(new FhirContext().newXmlParser().encodeResourceToString(dr), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		ourClient.execute(httpPost);
+		assertEquals(2, ourReportProvider.getLastTags().size());
+		assertEquals(new Tag("Dog", "aa", (String)null), ourReportProvider.getLastTags().get(0));
+		assertEquals(new Tag("Cat", "bb", (String)null), ourReportProvider.getLastTags().get(1));
+
+	}
+
+	@Test
 	public void testUpdateWithVersion() throws Exception {
 
 		DiagnosticReport patient = new DiagnosticReport();
@@ -1064,11 +1151,11 @@ public class ResfulServerMethodTest {
 
 		DummyPatientResourceProvider patientProvider = new DummyPatientResourceProvider();
 		ServerProfileProvider profProvider = new ServerProfileProvider(ourCtx);
-		DummyDiagnosticReportResourceProvider reportProvider = new DummyDiagnosticReportResourceProvider();
+		ourReportProvider = new DummyDiagnosticReportResourceProvider();
 		DummyAdverseReactionResourceProvider adv = new DummyAdverseReactionResourceProvider();
 
 		ServletHandler proxyHandler = new ServletHandler();
-		DummyRestfulServer servlet = new DummyRestfulServer(patientProvider, profProvider, reportProvider, adv);
+		DummyRestfulServer servlet = new DummyRestfulServer(patientProvider, profProvider, ourReportProvider, adv);
 		ServletHolder servletHolder = new ServletHolder(servlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
@@ -1082,6 +1169,8 @@ public class ResfulServerMethodTest {
 	}
 
 	public static class DummyDiagnosticReportResourceProvider implements IResourceProvider {
+
+		private TagList myLastTags;
 
 		/**
 		 * @param theValue
@@ -1112,17 +1201,23 @@ public class ResfulServerMethodTest {
 
 		@SuppressWarnings("unused")
 		@Update()
-		public MethodOutcome updateDiagnosticReportWithNoResponse(@IdParam IdDt theId, @VersionIdParam IdDt theVersionId, @ResourceParam DiagnosticReport thePatient) {
+		public MethodOutcome updateDiagnosticReportWithNoResponse(@IdParam IdDt theId, @VersionIdParam IdDt theVersionId, @ResourceParam DiagnosticReport thePatient, TagList theTagList) {
 			IdDt id = theId;
 			IdDt version = theVersionId;
+			myLastTags = theTagList;
 			return new MethodOutcome(id, version);
+		}
+
+		public TagList getLastTags() {
+			return myLastTags;
 		}
 
 		@SuppressWarnings("unused")
 		@Update()
-		public MethodOutcome updateDiagnosticReportWithVersionAndNoResponse(@IdParam IdDt theId, @ResourceParam DiagnosticReport thePatient) {
+		public MethodOutcome updateDiagnosticReportWithVersionAndNoResponse(@IdParam IdDt theId, @ResourceParam DiagnosticReport thePatient, TagList theTagList) {
 			IdDt id = theId;
 			IdDt version = new IdDt("002");
+			myLastTags=theTagList;
 			return new MethodOutcome(id, version);
 		}
 

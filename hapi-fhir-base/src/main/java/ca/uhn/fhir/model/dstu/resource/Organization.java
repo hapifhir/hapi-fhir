@@ -48,6 +48,7 @@ import ca.uhn.fhir.model.api.annotation.Block;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.dstu.composite.AddressDt;
 import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu.composite.ContactDt;
@@ -93,6 +94,7 @@ public class Organization extends BaseResource implements IResource {
 	 * Path: <b>Organization.name</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="name", path="Organization.name", description="A portion of the organization's name")
 	public static final String SP_NAME = "name";
 
 	/**
@@ -103,6 +105,7 @@ public class Organization extends BaseResource implements IResource {
 	 * Path: <b></b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="phonetic", path="", description="A portion of the organization's name using some kind of phonetic matching algorithm")
 	public static final String SP_PHONETIC = "phonetic";
 
 	/**
@@ -113,6 +116,7 @@ public class Organization extends BaseResource implements IResource {
 	 * Path: <b>Organization.type</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="type", path="Organization.type", description="A code for the type of organization")
 	public static final String SP_TYPE = "type";
 
 	/**
@@ -123,6 +127,7 @@ public class Organization extends BaseResource implements IResource {
 	 * Path: <b>Organization.identifier</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="identifier", path="Organization.identifier", description="Any identifier for the organization (not the accreditation issuer's identifier)")
 	public static final String SP_IDENTIFIER = "identifier";
 
 	/**
@@ -133,6 +138,7 @@ public class Organization extends BaseResource implements IResource {
 	 * Path: <b>Organization.accreditation.code</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="!accreditation", path="Organization.accreditation.code", description="Any accreditation code")
 	public static final String SP_ACCREDITATION = "!accreditation";
 
 	/**
@@ -143,6 +149,7 @@ public class Organization extends BaseResource implements IResource {
 	 * Path: <b>Organization.partOf</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="partof", path="Organization.partOf", description="Search all organizations that are part of the given organization")
 	public static final String SP_PARTOF = "partof";
 
 	/**
@@ -153,6 +160,7 @@ public class Organization extends BaseResource implements IResource {
 	 * Path: <b>Organization.active</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="active", path="Organization.active", description="Whether the organization's record is active")
 	public static final String SP_ACTIVE = "active";
 
 
@@ -728,7 +736,7 @@ public class Organization extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	@Block(name="Organization.contact")	
+	@Block()	
 	public static class Contact extends BaseElement implements IResourceBlock {
 	
 	@Child(name="purpose", type=CodeableConceptDt.class, order=0, min=0, max=1)	

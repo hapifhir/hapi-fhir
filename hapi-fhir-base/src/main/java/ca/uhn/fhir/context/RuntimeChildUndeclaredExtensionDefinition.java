@@ -74,6 +74,10 @@ public class RuntimeChildUndeclaredExtensionDefinition extends BaseRuntimeChildD
 
 		for (BaseRuntimeElementDefinition<?> next : theClassToElementDefinitions.values()) {
 			if (next instanceof IRuntimeDatatypeDefinition) {
+//				if (next.getName().equals("CodeableConcept")) {
+//					System.out.println();
+//				}
+				
 				if (!((IRuntimeDatatypeDefinition) next).isSpecialization()) {
 					String attrName = "value" + WordUtils.capitalize(next.getName());
 					datatypeAttributeNameToDefinition.put(attrName, next);

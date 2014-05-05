@@ -33,6 +33,7 @@ import ca.uhn.fhir.rest.annotation.Validate;
 import ca.uhn.fhir.rest.client.BaseClientInvocation;
 import ca.uhn.fhir.rest.client.PostClientInvocation;
 import ca.uhn.fhir.rest.method.SearchMethodBinding.RequestType;
+import ca.uhn.fhir.rest.param.IParameter;
 import ca.uhn.fhir.rest.server.Constants;
 
 public class ValidateMethodBinding extends BaseOutcomeReturningMethodBindingWithResourceParam {
@@ -72,6 +73,12 @@ public class ValidateMethodBinding extends BaseOutcomeReturningMethodBindingWith
 		}
 
 		PostClientInvocation retVal = createValidateInvocation(theResource, idDt, context);
+		
+		for (int idx = 0; idx < theArgs.length; idx++) {
+			IParameter nextParam = getParameters().get(idx);
+			nextParam.translateClientArgumentIntoQueryArgument(theArgs[idx], null, retVal);
+		}
+
 		return retVal;
 	}
 

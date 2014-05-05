@@ -50,6 +50,7 @@ import ca.uhn.fhir.model.api.annotation.Block;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.dstu.composite.AddressDt;
 import ca.uhn.fhir.model.dstu.composite.CodingDt;
 import ca.uhn.fhir.model.dstu.composite.HumanNameDt;
@@ -92,6 +93,7 @@ public class Coverage extends BaseResource implements IResource {
 	 * Path: <b>Coverage.issuer</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="issuer", path="Coverage.issuer", description="The identity of the insurer")
 	public static final String SP_ISSUER = "issuer";
 
 	/**
@@ -102,6 +104,7 @@ public class Coverage extends BaseResource implements IResource {
 	 * Path: <b>Coverage.identifier</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="identifier", path="Coverage.identifier", description="The primary identifier of the insured")
 	public static final String SP_IDENTIFIER = "identifier";
 
 	/**
@@ -112,6 +115,7 @@ public class Coverage extends BaseResource implements IResource {
 	 * Path: <b>Coverage.type</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="type", path="Coverage.type", description="The kind of coverage")
 	public static final String SP_TYPE = "type";
 
 	/**
@@ -122,6 +126,7 @@ public class Coverage extends BaseResource implements IResource {
 	 * Path: <b>Coverage.plan</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="plan", path="Coverage.plan", description="A plan or policy identifier")
 	public static final String SP_PLAN = "plan";
 
 	/**
@@ -132,6 +137,7 @@ public class Coverage extends BaseResource implements IResource {
 	 * Path: <b>Coverage.subplan</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="subplan", path="Coverage.subplan", description="Sub-plan identifier")
 	public static final String SP_SUBPLAN = "subplan";
 
 	/**
@@ -142,6 +148,7 @@ public class Coverage extends BaseResource implements IResource {
 	 * Path: <b>Coverage.group</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="group", path="Coverage.group", description="Group identifier")
 	public static final String SP_GROUP = "group";
 
 	/**
@@ -152,6 +159,7 @@ public class Coverage extends BaseResource implements IResource {
 	 * Path: <b>Coverage.dependent</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="dependent", path="Coverage.dependent", description="Dependent number")
 	public static final String SP_DEPENDENT = "dependent";
 
 	/**
@@ -162,6 +170,7 @@ public class Coverage extends BaseResource implements IResource {
 	 * Path: <b>Coverage.sequence</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="sequence", path="Coverage.sequence", description="Sequence number")
 	public static final String SP_SEQUENCE = "sequence";
 
 	/**
@@ -172,6 +181,7 @@ public class Coverage extends BaseResource implements IResource {
 	 * Path: <b>Coverage.subscriber.name</b><br/>
 	 * </p>
 	 */
+	@SearchParamDefinition(name="name", path="Coverage.subscriber.name", description="The name of the subscriber")
 	public static final String SP_NAME = "name";
 
 
@@ -710,7 +720,7 @@ public class Coverage extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	@Block(name="Coverage.subscriber")	
+	@Block()	
 	public static class Subscriber extends BaseElement implements IResourceBlock {
 	
 	@Child(name="name", type=HumanNameDt.class, order=0, min=0, max=1)	

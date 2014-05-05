@@ -40,16 +40,19 @@ public class BundleCategory extends BaseElement implements IElement {
 		return myTerm;
 	}
 
-	public void setLabel(String theLabel) {
+	public BundleCategory setLabel(String theLabel) {
 		myLabel = theLabel;
+		return this;
 	}
 
-	public void setScheme(String theScheme) {
+	public BundleCategory setScheme(String theScheme) {
 		myScheme = theScheme;
+		return this;
 	}
 
-	public void setTerm(String theTerm) {
+	public BundleCategory setTerm(String theTerm) {
 		myTerm = theTerm;
+		return this;
 	}
 
 	@Override
