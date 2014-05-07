@@ -44,8 +44,8 @@ public class StringDt extends BasePrimitive<String> implements IQueryParameterTy
 	 * Create a new String
 	 */
 	@SimpleSetter
-	public StringDt(@SimpleSetter.Parameter(name="theString") String theValue) {
-		myValue=theValue;
+	public StringDt(@SimpleSetter.Parameter(name = "theString") String theValue) {
+		myValue = theValue;
 	}
 
 	@Override
@@ -120,10 +120,9 @@ public class StringDt extends BasePrimitive<String> implements IQueryParameterTy
 	public String getValueAsQueryToken() {
 		return getValue();
 	}
-	
+
 	/**
-	 * Returns <code>true</code> if this datatype has no extensions, and has either a <code>null</code>
-	 * value or an empty ("") value.
+	 * Returns <code>true</code> if this datatype has no extensions, and has either a <code>null</code> value or an empty ("") value.
 	 */
 	@Override
 	public boolean isEmpty() {

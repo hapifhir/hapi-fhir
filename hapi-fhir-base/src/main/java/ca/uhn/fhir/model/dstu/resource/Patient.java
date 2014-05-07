@@ -70,6 +70,9 @@ import ca.uhn.fhir.model.primitive.BoundCodeableConceptDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
+import ca.uhn.fhir.rest.gclient.DateParam;
+import ca.uhn.fhir.rest.gclient.Include;
+import ca.uhn.fhir.rest.gclient.StringParam;
 
 
 /**
@@ -259,6 +262,12 @@ public class Patient extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="link", path="Patient.link.other", description="All patients linked to the given patient")
 	public static final String SP_LINK = "link";
+
+	public static final StringParam PARAM_NAME = new StringParam(SP_NAME);
+
+	public static final DateParam PARAM_BIRTHDATE = new DateParam(SP_BIRTHDATE);
+
+	public static final Include INCLUDE_MANAGINGORGANIZATION = new Include("managingOrganization");
 
 
 	@Child(name="identifier", type=IdentifierDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)	

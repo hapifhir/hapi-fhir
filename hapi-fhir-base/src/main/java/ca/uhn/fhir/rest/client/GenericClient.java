@@ -23,6 +23,7 @@ package ca.uhn.fhir.rest.client;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,6 +41,11 @@ import ca.uhn.fhir.model.dstu.resource.Conformance;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.gclient.ICriterion;
+import ca.uhn.fhir.rest.gclient.ICriterionInternal;
+import ca.uhn.fhir.rest.gclient.IFor;
+import ca.uhn.fhir.rest.gclient.IQuery;
+import ca.uhn.fhir.rest.gclient.Include;
 import ca.uhn.fhir.rest.method.BaseOutcomeReturningMethodBinding;
 import ca.uhn.fhir.rest.method.ConformanceMethodBinding;
 import ca.uhn.fhir.rest.method.CreateMethodBinding;
@@ -281,5 +287,102 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		Conformance resp = (Conformance) invokeClient(binding, invocation);
 		return resp;
 	}
+	
+	@Override
+	public IQuery search() {
+		return new QueryInternal();
+	}
+
+	public class ForInternal implements IFor {
+
+		private Class<? extends IResource> myResourceType;
+		private List<ICriterionInternal> myCriterion = new ArrayList<ICriterionInternal>();
+		private List<Include> myInclude = new ArrayList<Include>();
+		private String myResourceName;
+
+		public ForInternal(String theResourceName) {
+			myResourceType = myContext.getResourceDefinition(theResourceName).getImplementingClass();
+			myResourceName = theResourceName;
+		}
+
+		public ForInternal(Class<? extends IResource> theResourceType) {
+			myResourceType = theResourceType;
+			myResourceName = myContext.getResourceDefinition(theResourceType).getName();
+		}
+
+		@Override
+		public IFor and(ICriterion theCriterion) {
+			myCriterion.add((ICriterionInternal) theCriterion);
+			return this;
+		}
+
+		@Override
+		public IFor where(ICriterion theCriterion) {
+			myCriterion.add((ICriterionInternal) theCriterion);
+			return this;
+		}
+		
+		public Bundle execute() {
+			
+			StringBuilder b = new StringBuilder();
+			b.append(getServerBase());
+			b.append('/');
+			b.append(myResourceType);
+			b.append('?');
+			
+			Map<String, List<String>> params=new HashMap<String, List<String>>();
+			for (ICriterionInternal next : myCriterion) {
+				String parameterName = next.getParameterName();
+				String parameterValue = next.getParameterValue();
+				addParam(params, parameterName, parameterValue);
+			}
+
+			for (Include next : myInclude) {
+				addParam(params, "_include", next.getInclude());
+			}
+
+			GetClientInvocation invocation = new GetClientInvocation(params, myResourceName);
+			if (isKeepResponses()) {
+				myLastRequest = invocation.asHttpRequest(getServerBase(), createExtraParams(), getEncoding());
+			}
+
+			IClientResponseHandler binding = new IClientResponseHandler() {
+				@Override
+				public Object invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException, BaseServerResponseException {
+					EncodingEnum respType = EncodingEnum.forContentType(theResponseMimeType);
+					IParser parser = respType.newParser(myContext);
+					return parser.parseBundle(myResourceType, theResponseReader);
+				}
+			};
+
+			Bundle resp = (Bundle) invokeClient(binding, invocation);
+			return resp;
+			
+		}
+
+		private void addParam(Map<String, List<String>> params, String parameterName, String parameterValue) {
+			if (!params.containsKey(parameterName)) {
+				params.put(parameterName, new ArrayList<String>());
+			}
+			params.get(parameterName).add(parameterValue);
+		}
+
+		@Override
+		public IFor include(Include theInclude) {
+			myInclude.add(theInclude);
+			return this;
+		}
+
+	}
+
+	public class QueryInternal implements IQuery {
+
+		@Override
+		public IFor forResource(String theResourceName) {
+			return new ForInternal(theResourceName);
+		}
+
+	}
+	
 
 }

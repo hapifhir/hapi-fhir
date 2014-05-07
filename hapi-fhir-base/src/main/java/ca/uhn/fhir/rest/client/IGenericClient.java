@@ -29,6 +29,7 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.resource.Conformance;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.gclient.IQuery;
 
 public interface IGenericClient {
 
@@ -104,5 +105,7 @@ public interface IGenericClient {
 	 * @return An outcome
 	 */
 	MethodOutcome create(IResource theResource);
+
+	IQuery search();
 
 }
