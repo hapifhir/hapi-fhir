@@ -6,7 +6,7 @@
 
 	<persistence-unit name="FHIR_UT" transaction-type="RESOURCE_LOCAL">
 		<provider>org.hibernate.ejb.HibernatePersistence</provider>
-		<class>ca.uhn.fhir.jpa.entity.PatientResourceTable</class>
+		<!-- <class>ca.uhn.fhir.jpa.entity.PatientResourceTable</class>  -->
 		<exclude-unlisted-classes>false</exclude-unlisted-classes>
 		<properties>
 			<property name="hibernate.connection.url" value="jdbc:hsqldb:mem:unit-testing-jpa" />

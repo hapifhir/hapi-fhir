@@ -27,6 +27,7 @@ import java.io.Writer;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.TagList;
 
 public interface IParser {
 
@@ -36,8 +37,29 @@ public interface IParser {
 
 	String encodeResourceToString(IResource theResource) throws DataFormatException;
 
-	void encodeResourceToWriter(IResource theResource, Writer stringWriter) throws IOException, DataFormatException;
+	void encodeResourceToWriter(IResource theResource, Writer theWriter) throws IOException, DataFormatException;
 
+	/**
+	 * Encodes a tag list, as defined in the <a
+	 * href="http://hl7.org/implement/standards/fhir/http.html#tags">FHIR
+	 * Specification</a>.
+	 * 
+	 * @param theTagList The tag list to encode. Must not be null.
+	 * @return An encoded tag list
+	 */
+	String encodeTagListToString(TagList theTagList);
+
+	/**
+	 * Encodes a tag list, as defined in the <a
+	 * href="http://hl7.org/implement/standards/fhir/http.html#tags">FHIR
+	 * Specification</a>.
+	 * 
+	 * @param theTagList The tag list to encode. Must not be null.
+	 * @param theWriter The writer to encode to
+	 */
+	void encodeTagListToWriter(TagList theTagList, Writer theWriter) throws IOException;
+
+	
 	<T extends IResource> Bundle parseBundle(Class<T> theResourceType, Reader theReader);
 
 	Bundle parseBundle(Reader theReader);
@@ -79,6 +101,28 @@ public interface IParser {
 	IResource parseResource(Reader theReader) throws ConfigurationException, DataFormatException;
 
 	IResource parseResource(String theMessageString) throws ConfigurationException, DataFormatException;
+
+	/**
+	 * Parses a tag list, as defined in the <a
+	 * href="http://hl7.org/implement/standards/fhir/http.html#tags">FHIR
+	 * Specification</a>.
+	 * 
+	 * @param theReader
+	 *            A reader which will supply a tag list
+	 * @return A parsed tag list
+	 */
+	TagList parseTagList(Reader theReader);
+
+	/**
+	 * Parses a tag list, as defined in the <a
+	 * href="http://hl7.org/implement/standards/fhir/http.html#tags">FHIR
+	 * Specification</a>.
+	 * 
+	 * @param theString
+	 *            A string containing a tag list
+	 * @return A parsed tag list
+	 */
+	TagList parseTagList(String theString);
 
 	/**
 	 * Sets the "pretty print" flag, meaning that the parser will encode

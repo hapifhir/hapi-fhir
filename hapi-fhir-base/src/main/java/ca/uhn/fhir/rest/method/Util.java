@@ -21,14 +21,9 @@ package ca.uhn.fhir.rest.method;
  */
 
 import java.io.UnsupportedEncodingException;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
 import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.Map;
-
-import ca.uhn.fhir.rest.annotation.IdParam;
-import ca.uhn.fhir.rest.annotation.VersionIdParam;
 
 /**
  * Created by dsotnikov on 2/25/2014.
@@ -38,32 +33,6 @@ class Util {
 //		return findParamIndex(theMethod, Count.class);
 //	}
 
-	public static Integer findIdParameterIndex(Method theMethod) {
-		return findParamIndex(theMethod, IdParam.class);
-	}
-
-	private static Integer findParamIndex(Method theMethod, Class<?> toFind) {
-		int paramIndex = 0;
-		for (Annotation[] annotations : theMethod.getParameterAnnotations()) {
-			for (int annotationIndex = 0; annotationIndex < annotations.length; annotationIndex++) {
-				Annotation nextAnnotation = annotations[annotationIndex];
-				Class<? extends Annotation> class1 = nextAnnotation.getClass();
-				if (toFind.isAssignableFrom(class1)) {
-					return paramIndex;
-				}
-			}
-			paramIndex++;
-		}
-		return null;
-	}
-
-//	public static Integer findSinceParameterIndex(Method theMethod) {
-//		return findParamIndex(theMethod, Since.class);
-//	}
-
-	public static Integer findVersionIdParameterIndex(Method theMethod) {
-		return findParamIndex(theMethod, VersionIdParam.class);
-	}
 
 	public static Map<String, String> getQueryParams(String query) {
 		try {

@@ -31,35 +31,61 @@ import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu.composite.CodingDt;
 
-@DatatypeDef(name = "CodeableConcept", isSpecialization=true)
+@DatatypeDef(name = "CodeableConcept", isSpecialization = true)
 public class BoundCodeableConceptDt<T extends Enum<?>> extends CodeableConceptDt {
 
 	private IValueSetEnumBinder<T> myBinder;
 
+	/**
+	 * Constructor
+	 */
 	public BoundCodeableConceptDt(IValueSetEnumBinder<T> theBinder) {
 		myBinder = theBinder;
 	}
 
+	/**
+	 * Constructor
+	 */
 	public BoundCodeableConceptDt(IValueSetEnumBinder<T> theBinder, T theValue) {
 		myBinder = theBinder;
 		setValueAsEnum(theValue);
 	}
 
+	/**
+	 * Constructor
+	 */
 	public BoundCodeableConceptDt(IValueSetEnumBinder<T> theBinder, Collection<T> theValues) {
 		myBinder = theBinder;
 		setValueAsEnum(theValues);
 	}
 
+	/**
+	 * Sets the {@link #getCoding()} to contain a coding with the code and
+	 * system defined by the given enumerated types, AND clearing any existing
+	 * codings first. If theValue is null, existing codings are cleared and no
+	 * codings are added.
+	 * 
+	 * @param theValue
+	 *            The value to add, or <code>null</code>
+	 */
 	public void setValueAsEnum(Collection<T> theValues) {
 		getCoding().clear();
-		if (theValues == null) {
-			return;
-		}
-		for (T next : theValues) {
-			getCoding().add(new CodingDt(myBinder.toSystemString(next), myBinder.toCodeString(next)));
+		if (theValues != null) {
+			for (T next : theValues) {
+				getCoding().add(new CodingDt(myBinder.toSystemString(next), myBinder.toCodeString(next)));
+			}
 		}
 	}
 
+	/**
+	 * Sets the {@link #getCoding()} to contain a coding with the code and
+	 * system defined by the given enumerated type, AND clearing any existing
+	 * codings first. If theValue is null, existing codings are cleared and no
+	 * codings are added.
+	 * 
+	 * @param theValue
+	 *            The value to add, or <code>null</code>
+	 */
 	public void setValueAsEnum(T theValue) {
 		getCoding().clear();
 		if (theValue == null) {
@@ -68,6 +94,17 @@ public class BoundCodeableConceptDt<T extends Enum<?>> extends CodeableConceptDt
 		getCoding().add(new CodingDt(myBinder.toSystemString(theValue), myBinder.toCodeString(theValue)));
 	}
 
+	/**
+	 * Loops through the {@link #getCoding() codings} in this codeable concept
+	 * and returns the first bound enumerated type that matches. <b>Use
+	 * caution</b> using this method, see the return description for more
+	 * information.
+	 * 
+	 * @return Returns the bound enumerated type, or <code>null</code> if none
+	 *         are found. Note that a null return value doesn't neccesarily
+	 *         imply that this Codeable Concept has no codes, only that it has
+	 *         no codes that match the enum.
+	 */
 	public Set<T> getValueAsEnum() {
 		Set<T> retVal = new HashSet<T>();
 		for (CodingDt next : getCoding()) {

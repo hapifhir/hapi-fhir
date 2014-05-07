@@ -24,18 +24,20 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.TagList;
 
 public class PostClientInvocation extends BaseClientInvocationWithContents {
-
-	public PostClientInvocation(FhirContext theContext, Bundle theBundle) {
-		super(theContext, theBundle);
-	}
 
 	public PostClientInvocation(FhirContext theContext, IResource theResource, String theUrlExtension) {
 		super(theContext, theResource, theUrlExtension);
 	}
+
+	
+	public PostClientInvocation(FhirContext theContext, TagList theTagList, String... theUrlExtension) {
+		super(theContext, theTagList, theUrlExtension);
+	}
+
 
 	@Override
 	protected HttpPost createRequest(String url, StringEntity theEntity) {

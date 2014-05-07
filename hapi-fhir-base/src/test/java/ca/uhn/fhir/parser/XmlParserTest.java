@@ -31,6 +31,8 @@ import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
+import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.dstu.composite.AddressDt;
 import ca.uhn.fhir.model.dstu.composite.HumanNameDt;
 import ca.uhn.fhir.model.dstu.composite.NarrativeDt;
@@ -49,6 +51,7 @@ import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
 import ca.uhn.fhir.model.dstu.valueset.NarrativeStatusEnum;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.DecimalDt;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.XhtmlDt;
 import ca.uhn.fhir.narrative.INarrativeGenerator;
@@ -72,6 +75,47 @@ public class XmlParserTest {
 
 	}
 
+	@Test
+	public void testTagList() {
+		
+		//@formatter:off
+		String tagListStr = "<taglist xmlns=\"http://hl7.org/fhir\"> \n" + 
+				"    <category term=\"term0\" label=\"label0\" scheme=\"scheme0\" /> \n" + 
+				"    <category term=\"term1\" label=\"label1\" scheme=\"\" /> \n" + 
+				"    <category term=\"term2\" label=\"label2\" /> \n" + 
+				"</taglist>";
+		//@formatter:on
+		
+		TagList tagList = new FhirContext().newXmlParser().parseTagList(tagListStr);
+		assertEquals(3, tagList.size());
+		assertEquals("term0", tagList.get(0).getTerm());
+		assertEquals("label0", tagList.get(0).getLabel());
+		assertEquals("scheme0", tagList.get(0).getScheme());
+		assertEquals("term1", tagList.get(1).getTerm());
+		assertEquals("label1", tagList.get(1).getLabel());
+		assertEquals(null, tagList.get(1).getScheme());
+		assertEquals("term2", tagList.get(2).getTerm());
+		assertEquals("label2", tagList.get(2).getLabel());
+		assertEquals(null, tagList.get(2).getScheme());
+		
+		/*
+		 * Encode
+		 */
+
+		//@formatter:off
+		String expected = "<taglist xmlns=\"http://hl7.org/fhir\">" + 
+				"<category term=\"term0\" label=\"label0\" scheme=\"scheme0\"/>" + 
+				"<category term=\"term1\" label=\"label1\"/>" + 
+				"<category term=\"term2\" label=\"label2\"/>" + 
+				"</taglist>";
+		//@formatter:on
+		
+		String encoded = new FhirContext().newXmlParser().encodeTagListToString(tagList);
+		assertEquals(expected,encoded);
+		
+	}
+	
+	
 	@Test
 	public void testTotalResultsUsingOldNamespace() {
 
@@ -541,7 +585,8 @@ public class XmlParserTest {
 				"      <name>HL7, Inc (FHIR Project)</name>\n" + 
 				"      <uri>http://hl7.org/fhir</uri>\n" + 
 				"    </author>\n" + 
-				"    <published>2014-02-10T04:10:46.987-00:00</published>\n" + 
+				"    <published>2014-02-10T04:10:46.987-00:00</published>\n" +
+				"    <category term=\"term\" label=\"label\" scheme=\"http://foo\"/>\n "+
 				"    <content type=\"text/xml\">\n" + 
 				"      <ValueSet xmlns=\"http://hl7.org/fhir\">\n" + 
 				"        <text>\n" + 
@@ -589,10 +634,29 @@ public class XmlParserTest {
 		BundleEntry entry = bundle.getEntries().get(0);
 		assertEquals("HL7, Inc (FHIR Project)", entry.getAuthorName().getValue());
 		assertEquals("http://hl7.org/fhir/valueset/256a5231-a2bb-49bd-9fea-f349d428b70d", entry.getId().getValue());
+		assertEquals(1, entry.getCategories().size());
+		assertEquals("term", entry.getCategories().get(0).getTerm());
+		assertEquals("label", entry.getCategories().get(0).getLabel());
+		assertEquals("http://foo", entry.getCategories().get(0).getScheme());
 
 		ValueSet resource = (ValueSet) entry.getResource();
 		assertEquals("LOINC Codes for Cholesterol", resource.getName().getValue());
 		assertEquals(summaryText.trim(), entry.getSummary().getValueAsString().trim());
+
+		TagList tl = (TagList) resource.getResourceMetadata().get(ResourceMetadataKeyEnum.TAG_LIST);
+		assertEquals(1, tl.size());
+		assertEquals("term", tl.get(0).getTerm());
+		assertEquals("label", tl.get(0).getLabel());
+		assertEquals("http://foo", tl.get(0).getScheme());
+
+		assertEquals(new IdDt("256a5231-a2bb-49bd-9fea-f349d428b70d"), resource.getId());
+
+		msg = msg.replace("<link href=\"http://hl7.org/implement/standards/fhir/valueset/256a5231-a2bb-49bd-9fea-f349d428b70d\" rel=\"self\"/>", "<link href=\"http://hl7.org/implement/standards/fhir/valueset/256a5231-a2bb-49bd-9fea-f349d428b70d/_history/12345\" rel=\"self\"/>");
+		entry = p.parseBundle(msg).getEntries().get(0);
+		resource = (ValueSet) entry.getResource();
+		assertEquals(new IdDt("256a5231-a2bb-49bd-9fea-f349d428b70d"), resource.getId());
+		assertEquals(new IdDt("12345"), resource.getResourceMetadata().get(ResourceMetadataKeyEnum.VERSION_ID));
+
 	}
 
 	@Test

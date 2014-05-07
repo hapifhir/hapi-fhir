@@ -41,6 +41,7 @@ public class Request {
 	private Map<String, String[]> myParameters;
 	private RequestType myRequestType;
 	private String myResourceName;
+	private String mySecondaryOperation;
 	private HttpServletRequest myServletRequest;
 	private HttpServletResponse myServletResponse;
 	private IdDt myVersion;
@@ -77,6 +78,10 @@ public class Request {
 		return myResourceName;
 	}
 
+	public String getSecondaryOperation() {
+		return mySecondaryOperation;
+	}
+
 	public HttpServletRequest getServletRequest() {
 		return myServletRequest;
 	}
@@ -85,7 +90,7 @@ public class Request {
 		return myServletResponse;
 	}
 
-	public IdDt getVersion() {
+	public IdDt getVersionId() {
 		return myVersion;
 	}
 
@@ -119,6 +124,10 @@ public class Request {
 
 	public void setResourceName(String theResourceName) {
 		myResourceName = theResourceName;
+	}
+
+	public void setSecondaryOperation(String theSecondaryOperation) {
+		mySecondaryOperation = theSecondaryOperation;
 	}
 
 	public void setServletRequest(HttpServletRequest theRequest) {

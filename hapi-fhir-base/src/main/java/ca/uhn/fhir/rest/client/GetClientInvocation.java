@@ -32,6 +32,8 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpRequestBase;
 
 import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.rest.server.Constants;
+import ca.uhn.fhir.rest.server.EncodingEnum;
 
 public class GetClientInvocation extends BaseClientInvocation {
 
@@ -42,13 +44,12 @@ public class GetClientInvocation extends BaseClientInvocation {
 		myParameters = theParameters;
 		myUrlPath = StringUtils.join(theUrlFragments, '/');
 	}
-	
+
 	public GetClientInvocation(String theUrlPath) {
 		myParameters = new HashMap<String, List<String>>();
 		myUrlPath = theUrlPath;
 	}
 
-	
 	public GetClientInvocation(String... theUrlFragments) {
 		myParameters = new HashMap<String, List<String>>();
 		myUrlPath = StringUtils.join(theUrlFragments, '/');
@@ -63,7 +64,7 @@ public class GetClientInvocation extends BaseClientInvocation {
 	}
 
 	@Override
-	public HttpRequestBase asHttpRequest(String theUrlBase, Map<String, List<String>> theExtraParams) {
+	public HttpRequestBase asHttpRequest(String theUrlBase, Map<String, List<String>> theExtraParams, EncodingEnum theEncoding) {
 		StringBuilder b = new StringBuilder();
 		b.append(theUrlBase);
 		if (!theUrlBase.endsWith("/")) {
@@ -76,29 +77,35 @@ public class GetClientInvocation extends BaseClientInvocation {
 			if (next.getValue() == null || next.getValue().isEmpty()) {
 				continue;
 			}
+			String nextKey = next.getKey();
 			for (String nextValue : next.getValue()) {
-				if (first) {
-					b.append('?');
-					first = false;
-				} else {
-					b.append('&');
-				}
-				try {
-					b.append(URLEncoder.encode(next.getKey(), "UTF-8"));
-					b.append('=');
-					b.append(URLEncoder.encode(nextValue, "UTF-8"));
-				} catch (UnsupportedEncodingException e) {
-					throw new ConfigurationException("Could not find UTF-8 encoding. This shouldn't happen.", e);
-				}
+				first = addQueryParameter(b, first, nextKey, nextValue);
 			}
 		}
-		
+
 		appendExtraParamsWithQuestionMark(theExtraParams, b, first);
-		
+
 		HttpGet retVal = new HttpGet(b.toString());
 		super.addHeadersToRequest(retVal);
-		
+
 		return retVal;
+	}
+
+	private boolean addQueryParameter(StringBuilder b, boolean first, String nextKey, String nextValue) {
+		if (first) {
+			b.append('?');
+			first = false;
+		} else {
+			b.append('&');
+		}
+		try {
+			b.append(URLEncoder.encode(nextKey, "UTF-8"));
+			b.append('=');
+			b.append(URLEncoder.encode(nextValue, "UTF-8"));
+		} catch (UnsupportedEncodingException e) {
+			throw new ConfigurationException("Could not find UTF-8 encoding. This shouldn't happen.", e);
+		}
+		return first;
 	}
 
 }

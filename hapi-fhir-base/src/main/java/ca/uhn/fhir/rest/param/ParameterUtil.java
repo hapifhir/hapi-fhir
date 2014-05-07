@@ -27,6 +27,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -44,6 +45,7 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.PathSpecification;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.TagListParam;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.rest.annotation.Count;
@@ -59,6 +61,84 @@ import ca.uhn.fhir.util.ReflectionUtil;
 
 public class ParameterUtil {
 
+	private static final Set<Class<?>> BINDABLE_INTEGER_TYPES;
+	private static final Set<Class<?>> BINDABLE_TIME_TYPES;
+
+	static {
+		HashSet<Class<?>> intTypes = new HashSet<Class<?>>();
+		intTypes.add(IntegerDt.class);
+		intTypes.add(Integer.class);
+		BINDABLE_INTEGER_TYPES = Collections.unmodifiableSet(intTypes);
+		
+		HashSet<Class<?>> timeTypes = new HashSet<Class<?>>();
+		timeTypes.add(InstantDt.class);
+		timeTypes.add(Date.class);
+		timeTypes.add(Calendar.class);
+		BINDABLE_TIME_TYPES = Collections.unmodifiableSet(timeTypes);
+
+	}
+
+	public static Integer findIdParameterIndex(Method theMethod) {
+		return findParamAnnotationIndex(theMethod, IdParam.class);
+	}
+
+	// public static Integer findSinceParameterIndex(Method theMethod) {
+	// return findParamIndex(theMethod, Since.class);
+	// }
+
+	public static Integer findTagListParameterIndex(Method theMethod) {
+		return findParamAnnotationIndex(theMethod, TagListParam.class);
+	}
+
+	public static Integer findVersionIdParameterIndex(Method theMethod) {
+		return findParamAnnotationIndex(theMethod, VersionIdParam.class);
+	}
+
+	public static Object fromInstant(Class<?> theType, InstantDt theArgument) {
+		if (theType.equals(InstantDt.class)) {
+			if (theArgument == null) {
+				return new InstantDt();
+			}
+			return theArgument;
+		}
+		if (theType.equals(Date.class)) {
+			if (theArgument == null) {
+				return null;
+			}
+			return theArgument.getValue();
+		}
+		if (theType.equals(Calendar.class)) {
+			if (theArgument == null) {
+				return null;
+			}
+			return DateUtils.toCalendar(theArgument.getValue());
+		}
+		throw new IllegalArgumentException("Invalid instant type:" + theType);
+	}
+
+	public static Object fromInteger(Class<?> theType, IntegerDt theArgument) {
+		if (theType.equals(IntegerDt.class)) {
+			if (theArgument == null) {
+				return new IntegerDt();
+			}
+			return theArgument;
+		}
+		if (theType.equals(Integer.class)) {
+			if (theArgument == null) {
+				return null;
+			}
+			return theArgument.getValue();
+		}
+		throw new IllegalArgumentException("Invalid Integer type:" + theType);
+	}
+
+	public static Set<Class<?>> getBindableInstantTypes() {
+		return BINDABLE_TIME_TYPES;
+	}
+	public static Set<Class<?>> getBindableIntegerTypes() {
+		return BINDABLE_INTEGER_TYPES;
+	}
+
 	@SuppressWarnings("unchecked")
 	public static List<IParameter> getResourceParameters(Method theMethod) {
 		List<IParameter> parameters = new ArrayList<IParameter>();
@@ -72,7 +152,8 @@ public class ParameterUtil {
 			Class<? extends java.util.Collection<?>> outerCollectionType = null;
 			Class<? extends java.util.Collection<?>> innerCollectionType = null;
 			if (TagList.class.isAssignableFrom(parameterType)) {
-				param = new TagListParameter();
+				// TagList is handled directly within the method bindings
+				param=new NullParameter();
 			} else {
 				if (Collection.class.isAssignableFrom(parameterType)) {
 					innerCollectionType = (Class<? extends java.util.Collection<?>>) parameterType;
@@ -158,19 +239,6 @@ public class ParameterUtil {
 		return parameters;
 	}
 
-	private static void extractDescription(SearchParameter theParameter, Annotation[] theAnnotations) {
-		for (Annotation annotation : theAnnotations) {
-			if (annotation instanceof Description) {
-				Description desc = (Description) annotation;
-				if (isNotBlank(desc.formalDefinition())) {
-					theParameter.setDescription(desc.formalDefinition());
-				} else {
-					theParameter.setDescription(desc.shortDefinition());
-				}
-			}
-		}
-	}
-
 	public static InstantDt toInstant(Object theArgument) {
 		if (theArgument instanceof InstantDt) {
 			return (InstantDt) theArgument;
@@ -184,37 +252,6 @@ public class ParameterUtil {
 		return null;
 	}
 
-	public static Set<Class<?>> getBindableInstantTypes() {
-		// TODO: make this constant
-		HashSet<Class<?>> retVal = new HashSet<Class<?>>();
-		retVal.add(InstantDt.class);
-		retVal.add(Date.class);
-		retVal.add(Calendar.class);
-		return retVal;
-	}
-
-	public static Object fromInstant(Class<?> theType, InstantDt theArgument) {
-		if (theType.equals(InstantDt.class)) {
-			if (theArgument == null) {
-				return new InstantDt();
-			}
-			return theArgument;
-		}
-		if (theType.equals(Date.class)) {
-			if (theArgument == null) {
-				return null;
-			}
-			return theArgument.getValue();
-		}
-		if (theType.equals(Calendar.class)) {
-			if (theArgument == null) {
-				return null;
-			}
-			return DateUtils.toCalendar(theArgument.getValue());
-		}
-		throw new IllegalArgumentException("Invalid instant type:" + theType);
-	}
-
 	public static IntegerDt toInteger(Object theArgument) {
 		if (theArgument instanceof IntegerDt) {
 			return (IntegerDt) theArgument;
@@ -225,28 +262,32 @@ public class ParameterUtil {
 		return null;
 	}
 
-	public static Set<Class<?>> getBindableIntegerTypes() {
-		// TODO: make this constant
-		HashSet<Class<?>> retVal = new HashSet<Class<?>>();
-		retVal.add(IntegerDt.class);
-		retVal.add(Integer.class);
-		return retVal;
+	private static void extractDescription(SearchParameter theParameter, Annotation[] theAnnotations) {
+		for (Annotation annotation : theAnnotations) {
+			if (annotation instanceof Description) {
+				Description desc = (Description) annotation;
+				if (isNotBlank(desc.formalDefinition())) {
+					theParameter.setDescription(desc.formalDefinition());
+				} else {
+					theParameter.setDescription(desc.shortDefinition());
+				}
+			}
+		}
 	}
 
-	public static Object fromInteger(Class<?> theType, IntegerDt theArgument) {
-		if (theType.equals(IntegerDt.class)) {
-			if (theArgument == null) {
-				return new IntegerDt();
+	private static Integer findParamAnnotationIndex(Method theMethod, Class<?> toFind) {
+		int paramIndex = 0;
+		for (Annotation[] annotations : theMethod.getParameterAnnotations()) {
+			for (int annotationIndex = 0; annotationIndex < annotations.length; annotationIndex++) {
+				Annotation nextAnnotation = annotations[annotationIndex];
+				Class<? extends Annotation> class1 = nextAnnotation.getClass();
+				if (toFind.isAssignableFrom(class1)) {
+					return paramIndex;
+				}
 			}
-			return theArgument;
+			paramIndex++;
 		}
-		if (theType.equals(Integer.class)) {
-			if (theArgument == null) {
-				return null;
-			}
-			return theArgument.getValue();
-		}
-		throw new IllegalArgumentException("Invalid Integer type:" + theType);
+		return null;
 	}
 
 }

@@ -75,7 +75,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	public <T extends IResource> T read(final Class<T> theType, IdDt theId) {
 		GetClientInvocation invocation = ReadMethodBinding.createReadInvocation(theId, toResourceName(theType));
 		if (isKeepResponses()) {
-			myLastRequest = invocation.asHttpRequest(getServerBase(), createExtraParams());
+			myLastRequest = invocation.asHttpRequest(getServerBase(), createExtraParams(), getEncoding());
 		}
 
 		IClientResponseHandler binding = new IClientResponseHandler() {
@@ -92,12 +92,11 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		return resp;
 	}
 
-
 	@Override
 	public MethodOutcome delete(final Class<? extends IResource> theType, IdDt theId) {
 		DeleteClientInvocation invocation = DeleteMethodBinding.createDeleteInvocation(toResourceName(theType), theId);
 		if (isKeepResponses()) {
-			myLastRequest = invocation.asHttpRequest(getServerBase(), createExtraParams());
+			myLastRequest = invocation.asHttpRequest(getServerBase(), createExtraParams(), getEncoding());
 		}
 
 		final String resourceName = myContext.getResourceDefinition(theType).getName();
@@ -109,7 +108,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			}
 		};
 
-		MethodOutcome resp =  (MethodOutcome) invokeClient(binding, invocation);
+		MethodOutcome resp = (MethodOutcome) invokeClient(binding, invocation);
 		return resp;
 	}
 
@@ -129,7 +128,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	public <T extends IResource> T vread(final Class<T> theType, IdDt theId, IdDt theVersionId) {
 		GetClientInvocation invocation = ReadMethodBinding.createVReadInvocation(theId, theVersionId, toResourceName(theType));
 		if (isKeepResponses()) {
-			myLastRequest = invocation.asHttpRequest(getServerBase(), createExtraParams());
+			myLastRequest = invocation.asHttpRequest(getServerBase(), createExtraParams(), getEncoding());
 		}
 
 		IClientResponseHandler binding = new IClientResponseHandler() {
@@ -159,7 +158,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 		GetClientInvocation invocation = SearchMethodBinding.createSearchInvocation(toResourceName(theType), params);
 		if (isKeepResponses()) {
-			myLastRequest = invocation.asHttpRequest(getServerBase(), createExtraParams());
+			myLastRequest = invocation.asHttpRequest(getServerBase(), createExtraParams(), getEncoding());
 		}
 
 		IClientResponseHandler binding = new IClientResponseHandler() {
@@ -179,12 +178,12 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	public MethodOutcome create(IResource theResource) {
 		BaseClientInvocation invocation = CreateMethodBinding.createCreateInvocation(theResource, myContext);
 		if (isKeepResponses()) {
-			myLastRequest = invocation.asHttpRequest(getServerBase(), createExtraParams());
+			myLastRequest = invocation.asHttpRequest(getServerBase(), createExtraParams(), getEncoding());
 		}
 
 		RuntimeResourceDefinition def = myContext.getResourceDefinition(theResource);
 		final String resourceName = def.getName();
-		
+
 		IClientResponseHandler binding = new IClientResponseHandler() {
 			@Override
 			public Object invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException, BaseServerResponseException {
@@ -202,12 +201,12 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	public MethodOutcome update(IdDt theIdDt, IResource theResource) {
 		BaseClientInvocation invocation = UpdateMethodBinding.createUpdateInvocation(theResource, theIdDt, null, myContext);
 		if (isKeepResponses()) {
-			myLastRequest = invocation.asHttpRequest(getServerBase(), createExtraParams());
+			myLastRequest = invocation.asHttpRequest(getServerBase(), createExtraParams(), getEncoding());
 		}
 
 		RuntimeResourceDefinition def = myContext.getResourceDefinition(theResource);
 		final String resourceName = def.getName();
-		
+
 		IClientResponseHandler binding = new IClientResponseHandler() {
 			@Override
 			public Object invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException, BaseServerResponseException {
@@ -224,12 +223,12 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	public MethodOutcome validate(IResource theResource) {
 		BaseClientInvocation invocation = ValidateMethodBinding.createValidateInvocation(theResource, null, myContext);
 		if (isKeepResponses()) {
-			myLastRequest = invocation.asHttpRequest(getServerBase(), createExtraParams());
+			myLastRequest = invocation.asHttpRequest(getServerBase(), createExtraParams(), getEncoding());
 		}
 
 		RuntimeResourceDefinition def = myContext.getResourceDefinition(theResource);
 		final String resourceName = def.getName();
-		
+
 		IClientResponseHandler binding = new IClientResponseHandler() {
 			@Override
 			public Object invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException, BaseServerResponseException {
@@ -246,7 +245,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	public <T extends IResource> Bundle history(final Class<T> theType, IdDt theIdDt) {
 		GetClientInvocation invocation = HistoryMethodBinding.createHistoryInvocation(toResourceName(theType), theIdDt);
 		if (isKeepResponses()) {
-			myLastRequest = invocation.asHttpRequest(getServerBase(), createExtraParams());
+			myLastRequest = invocation.asHttpRequest(getServerBase(), createExtraParams(), getEncoding());
 		}
 
 		IClientResponseHandler binding = new IClientResponseHandler() {
@@ -267,7 +266,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	public Conformance conformance() {
 		GetClientInvocation invocation = ConformanceMethodBinding.createConformanceInvocation();
 		if (isKeepResponses()) {
-			myLastRequest = invocation.asHttpRequest(getServerBase(), createExtraParams());
+			myLastRequest = invocation.asHttpRequest(getServerBase(), createExtraParams(), getEncoding());
 		}
 
 		IClientResponseHandler binding = new IClientResponseHandler() {

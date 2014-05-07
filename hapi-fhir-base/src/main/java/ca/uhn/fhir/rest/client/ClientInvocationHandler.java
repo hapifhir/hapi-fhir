@@ -31,19 +31,27 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IRestfulClient;
 import ca.uhn.fhir.rest.method.BaseMethodBinding;
+import ca.uhn.fhir.rest.server.EncodingEnum;
 
 public class ClientInvocationHandler extends BaseClient implements InvocationHandler {
 
 	private final Map<Method, BaseMethodBinding> myBindings = new HashMap<Method, BaseMethodBinding>();
+
+	private final Map<Method, ILambda> myMethodToLambda = new HashMap<Method, ILambda>();
+
 	private final Map<Method, Object> myMethodToReturnValue = new HashMap<Method, Object>();
 
 	public ClientInvocationHandler(HttpClient theClient, FhirContext theContext, String theUrlBase, Class<? extends IRestfulClient> theClientType) {
 		super(theClient, theUrlBase);
-		
+
 		try {
 			myMethodToReturnValue.put(theClientType.getMethod("getFhirContext"), theContext);
 			myMethodToReturnValue.put(theClientType.getMethod("getHttpClient"), theClient);
 			myMethodToReturnValue.put(theClientType.getMethod("getServerBase"), theUrlBase);
+
+			myMethodToLambda.put(theClientType.getMethod("setEncoding", EncodingEnum.class), new SetEncodingLambda());
+			myMethodToLambda.put(theClientType.getMethod("setPrettyPrint", boolean.class), new SetPrettyPrintLambda());
+
 		} catch (NoSuchMethodException e) {
 			throw new ConfigurationException("Failed to find methods on client. This is a HAPI bug!", e);
 		} catch (SecurityException e) {
@@ -63,11 +71,39 @@ public class ClientInvocationHandler extends BaseClient implements InvocationHan
 		}
 
 		BaseMethodBinding binding = myBindings.get(theMethod);
-		BaseClientInvocation clientInvocation = binding.invokeClient(theArgs);
-		
-		return invokeClient(binding, clientInvocation);
+		if (binding != null) {
+			BaseClientInvocation clientInvocation = binding.invokeClient(theArgs);
+			return invokeClient(binding, clientInvocation);
+		}
+
+		ILambda lambda = myMethodToLambda.get(theMethod);
+		if (lambda != null) {
+			return lambda.handle(theArgs);
+		}
+
+		throw new UnsupportedOperationException("The method '" + theMethod.getName() + "' in type " + theMethod.getDeclaringClass().getSimpleName() + " has no handler. Did you forget to annotate it with a RESTful method annotation?");
 	}
 
+	private interface ILambda {
+		Object handle(Object[] theArgs);
+	}
 
+	private class SetEncodingLambda implements ILambda {
+		@Override
+		public Object handle(Object[] theArgs) {
+			EncodingEnum encoding = (EncodingEnum) theArgs[0];
+			setEncoding(encoding);
+			return null;
+		}
+	}
+
+	private class SetPrettyPrintLambda implements ILambda {
+		@Override
+		public Object handle(Object[] theArgs) {
+			Boolean prettyPrint = (Boolean) theArgs[0];
+			setPrettyPrint(prettyPrint);
+			return null;
+		}
+	}
 
 }

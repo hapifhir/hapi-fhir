@@ -26,6 +26,12 @@ import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
  * #L%
  */
 
+/**
+ * Base class for RESTful client and server exceptions. RESTful client methods
+ * will only throw exceptions which are subclasses of this exception type, and
+ * RESTful server methods should also only call subclasses of this exception
+ * type.
+ */
 public abstract class BaseServerResponseException extends RuntimeException {
 
 	private static final Map<Integer, Class<? extends BaseServerResponseException>> ourStatusCodeToExceptionType = new HashMap<Integer, Class<? extends BaseServerResponseException>>();
@@ -43,6 +49,9 @@ public abstract class BaseServerResponseException extends RuntimeException {
 	}
 
 	private final OperationOutcome myOperationOutcome;
+
+	private String myResponseBody;
+	private String myResponseMimeType;
 
 	private int myStatusCode;
 
@@ -105,10 +114,34 @@ public abstract class BaseServerResponseException extends RuntimeException {
 	}
 
 	/**
-	 * Returns the {@link OperationOutcome} resource if any which was supplied in the response, or <code>null</code>
+	 * Returns the {@link OperationOutcome} resource if any which was supplied
+	 * in the response, or <code>null</code>
 	 */
 	public OperationOutcome getOperationOutcome() {
 		return myOperationOutcome;
+	}
+
+	/**
+	 * In a RESTful client, this method will be populated with the body of the
+	 * HTTP respone if one was provided by the server, or <code>null</code>
+	 * otherwise.
+	 * <p>
+	 * In a restful server, this method is currently ignored.
+	 * </p>
+	 */
+	public String getResponseBody() {
+		return myResponseBody;
+	}
+
+	/**
+	 * In a RESTful client, this method will be populated with the HTTP status
+	 * code that was returned with the HTTP response.
+	 * <p>
+	 * In a restful server, this method is currently ignored.
+	 * </p>
+	 */
+	public String getResponseMimeType() {
+		return myResponseMimeType;
 	}
 
 	/**
@@ -116,6 +149,22 @@ public abstract class BaseServerResponseException extends RuntimeException {
 	 */
 	public int getStatusCode() {
 		return myStatusCode;
+	}
+
+	/**
+	 * This method is currently only called internally by HAPI, it should not be
+	 * called by user code.
+	 */
+	public void setResponseBody(String theResponseBody) {
+		myResponseBody = theResponseBody;
+	}
+
+	/**
+	 * This method is currently only called internally by HAPI, it should not be
+	 * called by user code.
+	 */
+	public void setResponseMimeType(String theResponseMimeType) {
+		myResponseMimeType = theResponseMimeType;
 	}
 
 	public static BaseServerResponseException newInstance(int theStatusCode, String theMessage) {
@@ -146,4 +195,5 @@ public abstract class BaseServerResponseException extends RuntimeException {
 		}
 		ourStatusCodeToExceptionType.put(theStatusCode, theType);
 	}
+
 }

@@ -239,7 +239,9 @@ public class FhirResourceDao<T extends IResource, X extends BaseResourceTable<T>
 				String path = param.getPath();
 				List<Object> values = terser.getValues(resource, path);
 				for (Object nextValue : values) {
-					if (nextValue.equals(nextParamEntry.getValue())) {
+					IQueryParameterType expectedQt = nextParamEntry.getValue();
+					IQueryParameterType actualQt = (IQueryParameterType)nextValue;
+					if (actualQt.getValueAsQueryToken().equals(expectedQt.getValueAsQueryToken())) {
 						shouldAdd = true;
 						break;
 					}

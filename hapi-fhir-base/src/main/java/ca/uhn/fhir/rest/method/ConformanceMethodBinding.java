@@ -33,8 +33,8 @@ import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
 import ca.uhn.fhir.rest.client.GetClientInvocation;
 import ca.uhn.fhir.rest.method.SearchMethodBinding.RequestType;
 import ca.uhn.fhir.rest.param.IParameter;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding {
 
@@ -71,19 +71,13 @@ public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding
 	}
 
 	@Override
-	public List<IResource> invokeServer(Object theResourceProvider, Request theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException {
-		IResource conf;
-		try {
-			conf = (Conformance) invokeServerMethod(theResourceProvider, theMethodParams);
-		} catch (Exception e) {
-			throw new InternalErrorException("Failed to call access method", e);
-		}
-
+	public List<IResource> invokeServer(Request theRequest, Object[] theMethodParams) throws BaseServerResponseException {
+		IResource conf = (IResource) invokeServerMethod(theMethodParams);
 		return Collections.singletonList(conf);
 	}
 
 	@Override
-	public boolean matches(Request theRequest) {
+	public boolean incomingServerRequestMatchesMethod(Request theRequest) {
 		if (theRequest.getRequestType() == RequestType.OPTIONS) {
 			return true;
 		}

@@ -20,9 +20,6 @@ package ca.uhn.fhir.model.api;
  * #L%
  */
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.commons.lang3.Validate;
 
 import ca.uhn.fhir.model.primitive.InstantDt;
@@ -43,7 +40,7 @@ public class BundleEntry extends BaseBundle {
 	private StringDt myTitle;
 	private InstantDt myUpdated;
 	private XhtmlDt mySummary;
-	private List<BundleCategory> myCategories;
+	private TagList myCategories;
 
 	@Override
 	public boolean isEmpty() {
@@ -104,15 +101,15 @@ public class BundleEntry extends BaseBundle {
 		return mySummary;
 	}
 
-	public BundleCategory addCategory() {
-		BundleCategory retVal = new BundleCategory();
+	public Tag addCategory() {
+		Tag retVal = new Tag();
 		getCategories().add(retVal);
 		return retVal;
 	}
 
-	public List<BundleCategory> getCategories() {
+	public TagList getCategories() {
 		if (myCategories == null) {
-			myCategories = new ArrayList<BundleCategory>();
+			myCategories = new TagList();
 		}
 		return myCategories;
 	}
@@ -125,6 +122,10 @@ public class BundleEntry extends BaseBundle {
 	public void setUpdated(InstantDt theUpdated) {
 		Validate.notNull(theUpdated, "Updated may not be null");
 		myUpdated = theUpdated;
+	}
+
+	public void addCategory(Tag theTag) {
+		getCategories().add(theTag);
 	}
 
 }

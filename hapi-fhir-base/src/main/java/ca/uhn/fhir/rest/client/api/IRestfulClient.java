@@ -28,8 +28,15 @@ import ca.uhn.fhir.rest.server.EncodingEnum;
 
 public interface IRestfulClient {
 
+	/**
+	 * Returns the FHIR context associated with this client
+	 */
 	FhirContext getFhirContext();
 	
+	/**
+	 * Do not call this method in client code. It is a part of the internal HAPI API and 
+	 * is subject to change!
+	 */
 	HttpClient getHttpClient();
 	
 	/**
@@ -37,6 +44,9 @@ public interface IRestfulClient {
 	 * queries. This means that the client will append the "_format" param
 	 * to GET methods (read/search/etc), and will add an appropriate header for
 	 * write methods. 
+	 * 
+	 * @param theEncoding The encoding to use in the request, or <code>null</code> not specify
+	 * an encoding (which generally implies the use of XML). The default is <code>null</code>.
 	 */
 	void setEncoding(EncodingEnum theEncoding);
 	
@@ -44,6 +54,8 @@ public interface IRestfulClient {
 	 * Specifies that the client should request that the server respond with "pretty printing"
 	 * enabled. Note that this is a non-standard parameter, so it may only 
 	 * work against HAPI based servers.
+	 * 
+	 * @param thePrettyPrint The pretty print flag to use in the request (default is <code>false</code>)
 	 */
 	void setPrettyPrint(boolean thePrettyPrint);
 	

@@ -31,6 +31,8 @@ import org.apache.http.Header;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.message.BasicHeader;
 
+import ca.uhn.fhir.rest.server.EncodingEnum;
+
 public abstract class BaseClientInvocation {
 
 	private List<Header> myHeaders;
@@ -49,8 +51,11 @@ public abstract class BaseClientInvocation {
 	 *            The FHIR server base url (with a trailing "/")
 	 * @param theExtraParams
 	 *            Any extra request parameters the server wishes to add
+	 * @param theEncoding
+	 *            The encoding to use for any serialized content sent to the
+	 *            server
 	 */
-	public abstract HttpRequestBase asHttpRequest(String theUrlBase, Map<String, List<String>> theExtraParams);
+	public abstract HttpRequestBase asHttpRequest(String theUrlBase, Map<String, List<String>> theExtraParams, EncodingEnum theEncoding);
 
 	protected static void appendExtraParamsWithQuestionMark(Map<String, List<String>> theExtraParams, StringBuilder theUrlBuilder, boolean theWithQuestionMark) {
 		boolean first = theWithQuestionMark;

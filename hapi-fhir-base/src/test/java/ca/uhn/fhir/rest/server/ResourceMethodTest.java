@@ -46,7 +46,7 @@ public class ResourceMethodTest {
 		inputParams.add("firstName");
 		inputParams.add("lastName");
 
-		assertEquals(false, rm.matches(Request.withResourceAndParams("Patient", RequestType.GET, inputParams))); // False
+		assertEquals(false, rm.incomingServerRequestMatchesMethod(Request.withResourceAndParams("Patient", RequestType.GET, inputParams))); // False
 	}
 
 	@Test
@@ -61,7 +61,7 @@ public class ResourceMethodTest {
 
 		Set<String> inputParams = new HashSet<String>();
 		inputParams.add("mrn");
-		assertEquals(true, rm.matches(Request.withResourceAndParams("Patient", RequestType.GET, inputParams))); // True
+		assertEquals(true, rm.incomingServerRequestMatchesMethod(Request.withResourceAndParams("Patient", RequestType.GET, inputParams))); // True
 	}
 
 	@Test
@@ -78,7 +78,7 @@ public class ResourceMethodTest {
 		inputParams.add("firstName");
 		inputParams.add("mrn");
 
-		assertEquals(true, rm.matches(Request.withResourceAndParams("Patient", RequestType.GET, inputParams))); // True
+		assertEquals(true, rm.incomingServerRequestMatchesMethod(Request.withResourceAndParams("Patient", RequestType.GET, inputParams))); // True
 	}
 
 	@Test
@@ -96,7 +96,7 @@ public class ResourceMethodTest {
 		inputParams.add("lastName");
 		inputParams.add("mrn");
 
-		assertEquals(true, rm.matches(Request.withResourceAndParams("Patient", RequestType.GET, inputParams))); // True
+		assertEquals(true, rm.incomingServerRequestMatchesMethod(Request.withResourceAndParams("Patient", RequestType.GET, inputParams))); // True
 	}
 
 	@Test
@@ -115,6 +115,6 @@ public class ResourceMethodTest {
 		inputParams.add("mrn");
 		inputParams.add("foo");
 
-		assertEquals(false, rm.matches(Request.withResourceAndParams("Patient", RequestType.GET, inputParams))); // False
+		assertEquals(false, rm.incomingServerRequestMatchesMethod(Request.withResourceAndParams("Patient", RequestType.GET, inputParams))); // False
 	}
 }

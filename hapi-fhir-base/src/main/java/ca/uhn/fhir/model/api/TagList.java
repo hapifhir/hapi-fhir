@@ -25,9 +25,18 @@ import java.util.ArrayList;
 public class TagList extends ArrayList<Tag> {
 
 	private static final long serialVersionUID = 1L;
+	public static final String ATTR_CATEGORY = "category";
+	public static final String ELEMENT_NAME = "TagList";
+	public static final String ELEMENT_NAME_LC = ELEMENT_NAME.toLowerCase();
 
-	public void addTag(String theTerm, String theLabel, String theScheme) {
-		add(new Tag(theTerm, theLabel, theScheme));		
+	public Tag addTag(String theTerm, String theLabel, String theScheme) {
+		Tag retVal = new Tag(theTerm, theLabel, theScheme);
+		add(retVal);
+		return retVal;
+	}
+
+	public Tag addTag() {
+		return addTag(null, null, null);
 	}
 	
 }

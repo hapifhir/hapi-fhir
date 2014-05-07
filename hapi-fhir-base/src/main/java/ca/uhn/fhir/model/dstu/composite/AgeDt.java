@@ -1,5 +1,7 @@
 package ca.uhn.fhir.model.dstu.composite;
 
+import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+
 /*
  * #%L
  * HAPI FHIR Library
@@ -20,6 +22,7 @@ package ca.uhn.fhir.model.dstu.composite;
  * #L%
  */
 
+@DatatypeDef(name="AgeDt") 
 public class AgeDt extends QuantityDt {
 
 	// TODO: implement restricions

@@ -24,7 +24,7 @@ public class Tester {
 
 		} catch (NonFhirResponseException e) {
 			e.printStackTrace();
-			System.out.println(e.getResponseText());
+			System.out.println(e.getResponseBody());
 		}
 
 	}

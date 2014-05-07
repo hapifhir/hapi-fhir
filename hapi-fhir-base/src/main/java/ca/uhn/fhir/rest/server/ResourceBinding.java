@@ -52,7 +52,7 @@ public class ResourceBinding {
 
 		ourLog.debug("Looking for a handler for {}", theRequest);
 		for (BaseMethodBinding rm : methods) {
-			if (rm.matches(theRequest)) {
+			if (rm.incomingServerRequestMatchesMethod(theRequest)) {
 				ourLog.debug("Handler {} matches", rm);
 				return rm;
 			} else {

@@ -41,19 +41,16 @@ public class Binary  extends BaseResource implements IResource {
 
 	@Override
 	public List<IElement> getAllPopulatedChildElements() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public ContainedDt getContained() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 

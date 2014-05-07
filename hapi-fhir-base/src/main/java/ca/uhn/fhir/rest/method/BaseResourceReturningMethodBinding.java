@@ -20,7 +20,7 @@ package ca.uhn.fhir.rest.method;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -56,7 +56,6 @@ import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.client.exceptions.InvalidResponseException;
 import ca.uhn.fhir.rest.param.IParameter;
-import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.RestfulServer;
@@ -92,8 +91,7 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding {
 		} else if (Bundle.class.isAssignableFrom(methodReturnType)) {
 			myMethodReturnType = MethodReturnTypeEnum.BUNDLE;
 		} else {
-			throw new ConfigurationException("Invalid return type '" + methodReturnType.getCanonicalName() + "' on method '" + theMethod.getName() + "' on type: "
-					+ theMethod.getDeclaringClass().getCanonicalName());
+			throw new ConfigurationException("Invalid return type '" + methodReturnType.getCanonicalName() + "' on method '" + theMethod.getName() + "' on type: " + theMethod.getDeclaringClass().getCanonicalName());
 		}
 
 		myResourceType = theReturnResourceType;
@@ -119,14 +117,14 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding {
 
 	@Override
 	public Object invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException {
-		IParser parser = createAppropriateParser(theResponseMimeType, theResponseReader, theResponseStatusCode);
+		IParser parser = createAppropriateParserForParsingResponse(theResponseMimeType, theResponseReader, theResponseStatusCode);
 
 		switch (getReturnType()) {
 		case BUNDLE: {
 			Bundle bundle;
 			if (myResourceType != null) {
 				bundle = parser.parseBundle(myResourceType, theResponseReader);
-			}else {
+			} else {
 				bundle = parser.parseBundle(theResponseReader);
 			}
 			switch (getMethodReturnType()) {
@@ -157,10 +155,11 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding {
 			List<String> lmHeaders = theHeaders.get(Constants.HEADER_LAST_MODIFIED_LOWERCASE);
 			if (lmHeaders != null && lmHeaders.size() > 0 && StringUtils.isNotBlank(lmHeaders.get(0))) {
 				try {
-				InstantDt lmValue = new InstantDt(lmHeaders.get(0));
-				resource.getResourceMetadata().put(ResourceMetadataKeyEnum.UPDATED, lmValue);
+					InstantDt lmValue = new InstantDt(lmHeaders.get(0));
+					resource.getResourceMetadata().put(ResourceMetadataKeyEnum.UPDATED, lmValue);
 				} catch (Exception e) {
-					// TODO: This shouldn't be thrown - Time format is not in InstandDt format for this header, find examples online 
+					// TODO: This shouldn't be thrown - Time format is not in
+					// InstandDt format for this header, find examples online
 				}
 			}
 
@@ -179,14 +178,14 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding {
 		throw new IllegalStateException("Should not get here!");
 	}
 
-	public abstract List<IResource> invokeServer(Object theResourceProvider, Request theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException;
+	public abstract List<IResource> invokeServer(Request theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException;
 
 	@Override
 	public void invokeServer(RestfulServer theServer, Request theRequest, HttpServletResponse theResponse) throws BaseServerResponseException, IOException {
 
 		// Pretty print
 		boolean prettyPrint = prettyPrintResponse(theRequest);
-		
+
 		// Narrative mode
 		Map<String, String[]> requestParams = theRequest.getParameters();
 		String[] narrative = requestParams.remove(Constants.PARAM_NARRATIVE);
@@ -199,7 +198,7 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding {
 		}
 
 		// Determine response encoding
-		EncodingEnum responseEncoding = determineResponseEncoding(theRequest.getServletRequest(), requestParams);
+		EncodingEnum responseEncoding = determineResponseEncoding(theRequest);
 
 		// Is this request coming from a browser
 		String uaHeader = theRequest.getServletRequest().getHeader("user-agent");
@@ -217,7 +216,7 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding {
 			}
 		}
 
-		List<IResource> result = invokeServer(getProvider(), theRequest, params);
+		List<IResource> result = invokeServer(theRequest, params);
 		switch (getReturnType()) {
 		case BUNDLE:
 			streamResponseAsBundle(theServer, theResponse, result, responseEncoding, theRequest.getFhirServerBase(), theRequest.getCompleteUrl(), prettyPrint, requestIsBrowser, narrativeMode);
@@ -232,7 +231,6 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding {
 			break;
 		}
 	}
-
 
 	protected static IdDt getIdFromMetadataOrNullIfNone(Map<ResourceMetadataKeyEnum, Object> theResourceMetadata, ResourceMetadataKeyEnum theKey) {
 		Object retValObj = theResourceMetadata.get(theKey);
@@ -251,8 +249,7 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding {
 				return (IdDt) retValObj;
 			}
 		}
-		throw new InternalErrorException("Found an object of type '" + retValObj.getClass().getCanonicalName() + "' in resource metadata for key " + theKey.name() + " - Expected "
-				+ IdDt.class.getCanonicalName());
+		throw new InternalErrorException("Found an object of type '" + retValObj.getClass().getCanonicalName() + "' in resource metadata for key " + theKey.name() + " - Expected " + IdDt.class.getCanonicalName());
 	}
 
 	private InstantDt getInstantFromMetadataOrNullIfNone(Map<ResourceMetadataKeyEnum, Object> theResourceMetadata, ResourceMetadataKeyEnum theKey) {
@@ -268,8 +265,21 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding {
 				return (InstantDt) retValObj;
 			}
 		}
-		throw new InternalErrorException("Found an object of type '" + retValObj.getClass().getCanonicalName() + "' in resource metadata for key " + theKey.name() + " - Expected "
-				+ InstantDt.class.getCanonicalName());
+		throw new InternalErrorException("Found an object of type '" + retValObj.getClass().getCanonicalName() + "' in resource metadata for key " + theKey.name() + " - Expected " + InstantDt.class.getCanonicalName());
+	}
+
+	private TagList getTagListFromMetadataOrNullIfNone(Map<ResourceMetadataKeyEnum, Object> theResourceMetadata, ResourceMetadataKeyEnum theKey) {
+		Object retValObj = theResourceMetadata.get(theKey);
+		if (retValObj == null) {
+			return null;
+		} else if (retValObj instanceof TagList) {
+			if (((TagList) retValObj).isEmpty()) {
+				return null;
+			} else {
+				return (TagList) retValObj;
+			}
+		}
+		throw new InternalErrorException("Found an object of type '" + retValObj.getClass().getCanonicalName() + "' in resource metadata for key " + theKey.name() + " - Expected " + TagList.class.getCanonicalName());
 	}
 
 	private IParser getNewParser(EncodingEnum theResponseEncoding, boolean thePrettyPrint, NarrativeModeEnum theNarrativeMode) {
@@ -286,8 +296,8 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding {
 		return parser.setPrettyPrint(thePrettyPrint).setSuppressNarratives(theNarrativeMode == NarrativeModeEnum.SUPPRESS);
 	}
 
-	private void streamResponseAsBundle(RestfulServer theServer, HttpServletResponse theHttpResponse, List<IResource> theResult, EncodingEnum theResponseEncoding, String theServerBase,
-			String theCompleteUrl, boolean thePrettyPrint, boolean theRequestIsBrowser, NarrativeModeEnum theNarrativeMode) throws IOException {
+	private void streamResponseAsBundle(RestfulServer theServer, HttpServletResponse theHttpResponse, List<IResource> theResult, EncodingEnum theResponseEncoding, String theServerBase, String theCompleteUrl, boolean thePrettyPrint, boolean theRequestIsBrowser,
+			NarrativeModeEnum theNarrativeMode) throws IOException {
 		assert !theServerBase.endsWith("/");
 
 		theHttpResponse.setStatus(200);
@@ -300,7 +310,7 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding {
 			theHttpResponse.setContentType(theResponseEncoding.getBundleContentType());
 		}
 
-		theHttpResponse.setCharacterEncoding("UTF-8");
+		theHttpResponse.setCharacterEncoding(Constants.CHARSET_UTF_8);
 
 		theServer.addHeadersToResponse(theHttpResponse);
 
@@ -325,7 +335,6 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding {
 				}
 			}
 
-
 			RuntimeResourceDefinition def = getContext().getResourceDefinition(next);
 
 			if (next.getId() != null && StringUtils.isNotBlank(next.getId().getValue())) {
@@ -341,10 +350,10 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding {
 				b.append(resId);
 
 				/*
-				 * If this is a history operation, we add the version of the resource to the self link to indicate the version
+				 * If this is a history operation, we add the version of the
+				 * resource to the self link to indicate the version
 				 */
-				if (getResourceOperationType() == RestfulOperationTypeEnum.HISTORY_INSTANCE || getResourceOperationType() == RestfulOperationTypeEnum.HISTORY_TYPE
-						|| getSystemOperationType() == RestfulOperationSystemEnum.HISTORY_SYSTEM) {
+				if (getResourceOperationType() == RestfulOperationTypeEnum.HISTORY_INSTANCE || getResourceOperationType() == RestfulOperationTypeEnum.HISTORY_TYPE || getSystemOperationType() == RestfulOperationSystemEnum.HISTORY_SYSTEM) {
 					IdDt versionId = getIdFromMetadataOrNullIfNone(next.getResourceMetadata(), ResourceMetadataKeyEnum.VERSION_ID);
 					if (versionId != null) {
 						b.append('/');
@@ -368,6 +377,13 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding {
 					entry.setUpdated(updated);
 				}
 
+				TagList tagList = getTagListFromMetadataOrNullIfNone(next.getResourceMetadata(), ResourceMetadataKeyEnum.TAG_LIST);
+				if (tagList!=null) {
+					for (Tag nextTag : tagList) {
+						entry.addCategory(nextTag);
+					}
+				}
+				
 				boolean haveQ = false;
 				if (thePrettyPrint) {
 					b.append('?').append(Constants.PARAM_PRETTY).append("=true");
@@ -406,8 +422,7 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding {
 		}
 	}
 
-	private void streamResponseAsResource(RestfulServer theServer, HttpServletResponse theHttpResponse, IResource theResource, EncodingEnum theResponseEncoding, boolean thePrettyPrint,
-			boolean theRequestIsBrowser, NarrativeModeEnum theNarrativeMode) throws IOException {
+	private void streamResponseAsResource(RestfulServer theServer, HttpServletResponse theHttpResponse, IResource theResource, EncodingEnum theResponseEncoding, boolean thePrettyPrint, boolean theRequestIsBrowser, NarrativeModeEnum theNarrativeMode) throws IOException {
 
 		theHttpResponse.setStatus(200);
 		if (theRequestIsBrowser && theServer.isUseBrowserFriendlyContentTypes()) {
@@ -417,7 +432,9 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding {
 		} else {
 			theHttpResponse.setContentType(theResponseEncoding.getResourceContentType());
 		}
-		theHttpResponse.setCharacterEncoding("UTF-8");
+		theHttpResponse.setCharacterEncoding(Constants.CHARSET_UTF_8);
+
+		theServer.addHeadersToResponse(theHttpResponse);
 
 		InstantDt lastUpdated = getInstantFromMetadataOrNullIfNone(theResource.getResourceMetadata(), ResourceMetadataKeyEnum.UPDATED);
 		if (lastUpdated != null) {
@@ -432,7 +449,7 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding {
 				}
 			}
 		}
-		
+
 		PrintWriter writer = theHttpResponse.getWriter();
 		try {
 			if (theNarrativeMode == NarrativeModeEnum.ONLY) {

@@ -122,7 +122,7 @@
 
 		</section>
 
-		<section name="Configuring the HTTP Client">
+		<section name="Configuring the Client">
 
 			<p>
 				The client uses <a href="http://hc.apache.org/httpcomponents-client-ga/">Apache HTTP Client</a>
@@ -150,6 +150,28 @@
 
 				<macro name="snippet">
 					<param name="id" value="security" />
+					<param name="file" value="src/site/example/java/example/ClientExamples.java" />
+				</macro>
+
+			</subsection>
+
+			<subsection name="Configuring Encoding (JSON/XML)">
+
+				<p>
+					Restful client interfaces that you create will also extend
+					the interface 
+					<a href="./apidocs/ca/uhn/fhir/rest/client/api/IRestfulClient.html">IRestfulClient</a>,
+					which comes with some helpful methods for configuring the way that
+					the client will interact with the server.
+				</p>
+				<p>
+					The following snippet shows how to configure the cliet to explicitly 
+					request JSON or XML responses, and how to request "pretty printed" responses
+					on servers that support this (HAPI based servers currently).				
+				</p>
+				
+				<macro name="snippet">
+					<param name="id" value="clientConfig" />
 					<param name="file" value="src/site/example/java/example/ClientExamples.java" />
 				</macro>
 

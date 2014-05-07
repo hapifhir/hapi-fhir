@@ -112,7 +112,7 @@ public abstract class BaseClient {
 		HttpRequestBase httpRequest;
 		HttpResponse response;
 		try {
-			httpRequest = clientInvocation.asHttpRequest(myUrlBase, createExtraParams());
+			httpRequest = clientInvocation.asHttpRequest(myUrlBase, createExtraParams(), getEncoding());
 			response = myClient.execute(httpRequest);
 		} catch (DataFormatException e) {
 			throw new FhirClientConnectionException(e);
@@ -179,9 +179,9 @@ public abstract class BaseClient {
 		HashMap<String, List<String>> retVal = new LinkedHashMap<String, List<String>>();
 
 		if (getEncoding() == EncodingEnum.XML) {
-			retVal.put(Constants.PARAM_FORMAT, Collections.singletonList(Constants.CT_XML));
+			retVal.put(Constants.PARAM_FORMAT, Collections.singletonList("xml"));
 		} else if (getEncoding() == EncodingEnum.JSON) {
-			retVal.put(Constants.PARAM_FORMAT, Collections.singletonList(Constants.CT_JSON));
+			retVal.put(Constants.PARAM_FORMAT, Collections.singletonList("json"));
 		}
 
 		if (isPrettyPrint()) {
@@ -229,7 +229,7 @@ public abstract class BaseClient {
 			return new StringReader("");
 		}
 		Charset charset = null;
-		if (entity.getContentType().getElements() != null) {
+		if (entity.getContentType() != null && entity.getContentType().getElements() != null && entity.getContentType().getElements().length>0) {
 			ContentType ct = ContentType.get(entity);
 			charset = ct.getCharset();
 		}

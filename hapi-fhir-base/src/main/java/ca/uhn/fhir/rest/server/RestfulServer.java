@@ -63,6 +63,7 @@ public class RestfulServer extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
 	private FhirContext myFhirContext;
+	private ResourceBinding myNullResourceBinding = new ResourceBinding();
 	private Collection<Object> myPlainProviders;
 	private Map<String, ResourceBinding> myResourceNameToProvider = new HashMap<String, ResourceBinding>();
 	private Collection<IResourceProvider> myResourceProviders;
@@ -70,12 +71,10 @@ public class RestfulServer extends HttpServlet {
 	private BaseMethodBinding myServerConformanceMethod;
 	private Object myServerConformanceProvider;
 	private String myServerName = "HAPI FHIR Server";
-	private String myServerVersion = VersionUtil.getVersion(); // defaults to
-																// HAPI version
-	private boolean myUseBrowserFriendlyContentTypes;
-	private ResourceBinding myNullResourceBinding = new ResourceBinding();
-
+	/** This is configurable but by default we jsut use HAPI version */
+	private String myServerVersion = VersionUtil.getVersion();
 	private boolean myStarted;
+	private boolean myUseBrowserFriendlyContentTypes;
 
 	/**
 	 * Constructor
@@ -90,22 +89,22 @@ public class RestfulServer extends HttpServlet {
 	}
 
 	/**
-	 * This method is called prior to sending a response to incoming requests. It is 
-	 * used to add custom headers.
+	 * This method is called prior to sending a response to incoming requests.
+	 * It is used to add custom headers.
 	 * <p>
 	 * Use caution if overriding this method: it is recommended to call
-	 * <code>super.addHeadersToResponse</code> to avoid inadvertantly
-	 * disabling functionality.
-	 * </p> 
+	 * <code>super.addHeadersToResponse</code> to avoid inadvertantly disabling
+	 * functionality.
+	 * </p>
 	 */
 	public void addHeadersToResponse(HttpServletResponse theHttpResponse) {
 		theHttpResponse.addHeader("X-PoweredBy", "HAPI FHIR " + VersionUtil.getVersion() + " RESTful Server");
 	}
 
 	/**
-	 * Gets the {@link FhirContext} associated with this server. For efficient processing,
-	 * resource providers and plain providers should generally use this context
-	 * if one is needed, as opposed to creating their own.
+	 * Gets the {@link FhirContext} associated with this server. For efficient
+	 * processing, resource providers and plain providers should generally use
+	 * this context if one is needed, as opposed to creating their own.
 	 */
 	public FhirContext getFhirContext() {
 		return myFhirContext;
@@ -177,10 +176,10 @@ public class RestfulServer extends HttpServlet {
 	}
 
 	/**
-	 * Initializes the server. Note that this method is final to avoid accidentally
-	 * introducing bugs in implementations, but subclasses may put initialization code in 
-	 * {@link #initialize()}, which is called immediately before beginning initialization of 
-	 * the restful server's internal init.
+	 * Initializes the server. Note that this method is final to avoid
+	 * accidentally introducing bugs in implementations, but subclasses may put
+	 * initialization code in {@link #initialize()}, which is called immediately
+	 * before beginning initialization of the restful server's internal init.
 	 */
 	@Override
 	public final void init() throws ServletException {
@@ -190,7 +189,7 @@ public class RestfulServer extends HttpServlet {
 
 			mySecurityManager = getSecurityManager();
 			if (null == mySecurityManager) {
-				ourLog.warn("No security manager has been provided, requests will not be authenticated!");
+				ourLog.trace("No security manager has been provided");
 			}
 
 			Collection<IResourceProvider> resourceProvider = getResourceProviders();
@@ -233,24 +232,28 @@ public class RestfulServer extends HttpServlet {
 		ourLog.info("A FHIR has been lit on this server");
 	}
 
-	private void assertProviderIsValid(Object theNext) throws ConfigurationException {
-		if (Modifier.isPublic(theNext.getClass().getModifiers()) == false) {
-			throw new ConfigurationException("Can not use provider '" + theNext.getClass() + "' - Must be public");
-		}
-	}
-
 	public boolean isUseBrowserFriendlyContentTypes() {
 		return myUseBrowserFriendlyContentTypes;
 	}
 
 	/**
 	 * Sets the non-resource specific providers which implement method calls on
-	 * this server. 
+	 * this server.
 	 * 
 	 * @see #setResourceProviders(Collection)
 	 */
 	public void setPlainProviders(Collection<Object> theProviders) {
 		myPlainProviders = theProviders;
+	}
+
+	/**
+	 * Sets the non-resource specific providers which implement method calls on
+	 * this server.
+	 * 
+	 * @see #setResourceProviders(Collection)
+	 */
+	public void setPlainProviders(Object... theProv) {
+		setPlainProviders(Arrays.asList(theProv));
 	}
 
 	/**
@@ -336,10 +339,16 @@ public class RestfulServer extends HttpServlet {
 		myUseBrowserFriendlyContentTypes = theUseBrowserFriendlyContentTypes;
 	}
 
+	private void assertProviderIsValid(Object theNext) throws ConfigurationException {
+		if (Modifier.isPublic(theNext.getClass().getModifiers()) == false) {
+			throw new ConfigurationException("Can not use provider '" + theNext.getClass() + "' - Must be public");
+		}
+	}
+
 	private void findResourceMethods(Object theProvider) throws Exception {
 
 		ourLog.info("Scanning type for RESTful methods: {}", theProvider.getClass());
-		
+
 		Class<?> clazz = theProvider.getClass();
 		Class<?> supertype = clazz.getSuperclass();
 		if (!Object.class.equals(supertype)) {
@@ -373,7 +382,7 @@ public class RestfulServer extends HttpServlet {
 					}
 
 					resourceBinding.addMethod(foundMethodBinding);
-					ourLog.info(" * Method: {}#{} is a handler", theProvider.getClass(), m.getName());
+					ourLog.debug(" * Method: {}#{} is a handler", theProvider.getClass(), m.getName());
 				} else {
 					ourLog.debug(" * Method: {}#{} is not a handler", theProvider.getClass(), m.getName());
 				}
@@ -383,7 +392,7 @@ public class RestfulServer extends HttpServlet {
 
 	private void findSystemMethods(Object theSystemProvider) {
 		Class<?> clazz = theSystemProvider.getClass();
-		
+
 		findSystemMethods(theSystemProvider, clazz);
 
 	}
@@ -411,11 +420,6 @@ public class RestfulServer extends HttpServlet {
 		}
 	}
 
-	@Override
-	protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		handleRequest(SearchMethodBinding.RequestType.DELETE, request, response);
-	}
-
 	// /**
 	// * Sets the {@link INarrativeGenerator Narrative Generator} to use when
 	// serializing responses from this server, or <code>null</code> (which is
@@ -432,6 +436,11 @@ public class RestfulServer extends HttpServlet {
 	// theNarrativeGenerator) {
 	// myNarrativeGenerator = theNarrativeGenerator;
 	// }
+
+	@Override
+	protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		handleRequest(SearchMethodBinding.RequestType.DELETE, request, response);
+	}
 
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -473,10 +482,12 @@ public class RestfulServer extends HttpServlet {
 				servletContextPath = servletPath;
 			}
 
-			ourLog.info("Request FullPath: {}", requestFullPath);
-			ourLog.info("Servlet Path: {}", servletPath);
-			ourLog.info("Request Url: {}", requestUrl);
-			ourLog.info("Context Path: {}", servletContextPath);
+			if (ourLog.isTraceEnabled()) {
+				ourLog.trace("Request FullPath: {}", requestFullPath);
+				ourLog.trace("Servlet Path: {}", servletPath);
+				ourLog.trace("Request Url: {}", requestUrl);
+				ourLog.trace("Context Path: {}", servletContextPath);
+			}
 
 			servletPath = servletContextPath;
 
@@ -539,7 +550,12 @@ public class RestfulServer extends HttpServlet {
 
 			if (tok.hasMoreTokens()) {
 				String nextString = tok.nextToken();
-				if (nextString.startsWith("_")) {
+				if (nextString.equals(Constants.PARAM_HISTORY)) {
+					if (tok.hasMoreTokens()) {
+						String versionString = tok.nextToken();
+						versionId = new IdDt(versionString);
+					}
+				} else if (nextString.startsWith("_")) {
 					if (operation != null) {
 						throw new InvalidRequestException("URL Path contains two operations (part beginning with _): " + requestPath);
 					}
@@ -547,14 +563,23 @@ public class RestfulServer extends HttpServlet {
 				}
 			}
 
-			if (tok.hasMoreTokens()) {
-				String nextString = tok.nextToken();
-				versionId = new IdDt(nextString);
-			}
+			// Secondary is for things like ..../_tags/_delete
+			String secondaryOperation=null;
 			
-			if (theRequestType==RequestType.PUT && versionId==null) {
+			while (tok.hasMoreTokens()) {
+				String nextString = tok.nextToken();
+				if (operation == null) {
+					operation = nextString;
+				}else if (secondaryOperation==null) {
+					secondaryOperation=nextString;
+				}else {
+					throw new InvalidRequestException("URL path has unexpected token '"+nextString + "' at the end: " + requestPath);
+				}
+			}
+
+			if (theRequestType == RequestType.PUT && versionId == null) {
 				String contentLocation = theRequest.getHeader("Content-Location");
-				if (contentLocation!=null) {
+				if (contentLocation != null) {
 					int idx = contentLocation.indexOf("/_history/");
 					if (idx != -1) {
 						String versionIdString = contentLocation.substring(idx + "/_history/".length());
@@ -562,7 +587,6 @@ public class RestfulServer extends HttpServlet {
 					}
 				}
 			}
-			
 
 			// TODO: look for more tokens for version, compartments, etc...
 
@@ -571,6 +595,7 @@ public class RestfulServer extends HttpServlet {
 			r.setId(id);
 			r.setVersion(versionId);
 			r.setOperation(operation);
+			r.setSecondaryOperation(secondaryOperation);
 			r.setParameters(params);
 			r.setRequestType(theRequestType);
 			if ("application/x-www-form-urlencoded".equals(theRequest.getContentType())) {

@@ -34,6 +34,7 @@ import ca.uhn.fhir.rest.client.BaseClientInvocation;
 import ca.uhn.fhir.rest.client.PostClientInvocation;
 import ca.uhn.fhir.rest.method.SearchMethodBinding.RequestType;
 import ca.uhn.fhir.rest.param.IParameter;
+import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.Constants;
 
 public class ValidateMethodBinding extends BaseOutcomeReturningMethodBindingWithResourceParam {
@@ -43,7 +44,7 @@ public class ValidateMethodBinding extends BaseOutcomeReturningMethodBindingWith
 	public ValidateMethodBinding(Method theMethod, FhirContext theContext, Object theProvider) {
 		super(theMethod, theContext, Validate.class, theProvider);
 
-		myIdParameterIndex = Util.findIdParameterIndex(theMethod);
+		myIdParameterIndex = ParameterUtil.findIdParameterIndex(theMethod);
 	}
 
 	@Override

@@ -39,9 +39,9 @@ import ca.uhn.fhir.rest.client.DeleteClientInvocation;
 import ca.uhn.fhir.rest.client.PostClientInvocation;
 import ca.uhn.fhir.rest.method.SearchMethodBinding.RequestType;
 import ca.uhn.fhir.rest.param.IParameter;
+import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 public class DeleteMethodBinding extends BaseOutcomeReturningMethodBinding {
 
@@ -67,12 +67,12 @@ public class DeleteMethodBinding extends BaseOutcomeReturningMethodBinding {
 			}
 		}
 
-		myIdParameterIndex = Util.findIdParameterIndex(theMethod);
+		myIdParameterIndex = ParameterUtil.findIdParameterIndex(theMethod);
 		if (myIdParameterIndex == null) {
 			throw new ConfigurationException("Method '" + theMethod.getName() + "' on type '" + theMethod.getDeclaringClass().getCanonicalName() + "' has no parameter annotated with the @" + IdParam.class.getSimpleName() + " annotation");
 		}
 
-		Integer versionIdParameterIndex = Util.findVersionIdParameterIndex(theMethod);
+		Integer versionIdParameterIndex = ParameterUtil.findVersionIdParameterIndex(theMethod);
 		if (versionIdParameterIndex != null) {
 			throw new ConfigurationException("Method '" + theMethod.getName() + "' on type '" + theMethod.getDeclaringClass().getCanonicalName() + "' has a parameter annotated with the @" + VersionIdParam.class.getSimpleName()
 					+ " annotation but delete methods may not have this annotation");
@@ -117,12 +117,6 @@ public class DeleteMethodBinding extends BaseOutcomeReturningMethodBinding {
 	public String getResourceName() {
 		return myResourceName;
 	}
-
-	// @Override
-	// public boolean matches(Request theRequest) {
-	// // TODO Auto-generated method stub
-	// return super.matches(theRequest);
-	// }
 
 	@Override
 	public BaseClientInvocation invokeClient(Object[] theArgs) throws InternalErrorException {

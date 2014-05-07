@@ -22,13 +22,19 @@ package ca.uhn.fhir.rest.method;
 
 import java.lang.reflect.Method;
 
+import org.apache.commons.lang3.StringUtils;
+
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
+import ca.uhn.fhir.model.api.Tag;
+import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.client.BaseClientInvocation;
 import ca.uhn.fhir.rest.param.IParameter;
 import ca.uhn.fhir.rest.param.ResourceParameter;
+import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 
@@ -88,7 +94,18 @@ abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOu
 			throw new NullPointerException("Resource can not be null");
 		}
 
-		return createClientInvocation(theArgs, resource);
+		BaseClientInvocation retVal = createClientInvocation(theArgs, resource);
+		
+		TagList list = (TagList) resource.getResourceMetadata().get(ResourceMetadataKeyEnum.TAG_LIST);
+		if (list != null) {
+			for (Tag tag : list) {
+				if (StringUtils.isNotBlank(tag.getTerm())) {
+					retVal.addHeader(Constants.HEADER_CATEGORY, tag.toHeaderValue());
+				}
+			}
+		}
+
+		return retVal;
 	}
 
 }

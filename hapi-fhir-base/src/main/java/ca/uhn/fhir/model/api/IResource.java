@@ -24,6 +24,7 @@ import java.util.Map;
 
 import ca.uhn.fhir.model.dstu.composite.ContainedDt;
 import ca.uhn.fhir.model.dstu.composite.NarrativeDt;
+import ca.uhn.fhir.model.dstu.resource.Patient;
 
 public interface IResource extends ICompositeElement {
 
@@ -34,28 +35,42 @@ public interface IResource extends ICompositeElement {
 	 * list automatically (placing inline resources in the contained list when
 	 * encoding, and copying contained resources from this list to their
 	 * appropriate references when parsing) so it is generally not neccesary to
-	 * interact with this list directly.
+	 * interact with this list directly. Instead, in a server you can place
+	 * resource instances in reference fields (such as {@link Patient#setManagingOrganization(ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt)})
+	 * and the resource will be automatically contained. In a client, contained resources will
+	 * be automatically populated into their appropriate fields by the HAPI parser.
 	 * </p>
 	 * TODO: document contained resources and link there
 	 */
 	ContainedDt getContained();
 
-	NarrativeDt getText();
-	
 	/**
-	 * Returns the metadata map for this object, creating it if neccesary. Metadata
-	 * entries are used to get/set feed bundle entries, such as the
+	 * Returns the narrative block for this resource
+	 */
+	NarrativeDt getText();
+
+	/**
+	 * Returns the metadata map for this object, creating it if neccesary.
+	 * Metadata entries are used to get/set feed bundle entries, such as the
 	 * resource version, or the last updated timestamp.
+	 * <p>
+	 * Keys in this map are enumerated in the {@link ResourceMetadataKeyEnum},
+	 * and each key has a specific value type that it must use.
+	 * </p>
+	 * 
+	 * @see ResourceMetadataKeyEnum for a list of allowable keys and the object
+	 *      types that values of a given key must use.
 	 */
 	Map<ResourceMetadataKeyEnum, Object> getResourceMetadata();
-	
+
 	/**
-	 * Sets the metadata map for this object. Metadata
-	 * entries are used to get/set feed bundle entries, such as the
-	 * resource version, or the last updated timestamp.
+	 * Sets the metadata map for this object. Metadata entries are used to
+	 * get/set feed bundle entries, such as the resource version, or the last
+	 * updated timestamp.
 	 * 
-	 * @throws NullPointerException The map must not be null
+	 * @throws NullPointerException
+	 *             The map must not be null
 	 */
 	void setResourceMetadata(Map<ResourceMetadataKeyEnum, Object> theMap);
-	
+
 }

@@ -14,6 +14,7 @@ import ca.uhn.fhir.parser.DataFormatException;
 
 public class Extensions {
 
+@SuppressWarnings("unused")
 public static void main(String[] args) throws DataFormatException, IOException {
 
 	

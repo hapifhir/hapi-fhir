@@ -921,11 +921,8 @@ public class ResfulServerMethodTest {
 		HttpPut httpPost = new HttpPut("http://localhost:" + ourPort + "/DiagnosticReport/001");
 		httpPost.setEntity(new StringEntity(new FhirContext().newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
-		HttpResponse status = ourClient.execute(httpPost);
-
-		assertEquals(201, status.getStatusLine().getStatusCode());
-		assertEquals("http://localhost:" + ourPort + "/DiagnosticReport/001/_history/002", status.getFirstHeader("Location").getValue());
-
+		ourClient.execute(httpPost);
+		fail();
 	}
 
 	@Test
@@ -1199,12 +1196,11 @@ public class ResfulServerMethodTest {
 			return DiagnosticReport.class;
 		}
 
-		@SuppressWarnings("unused")
 		@Update()
-		public MethodOutcome updateDiagnosticReportWithNoResponse(@IdParam IdDt theId, @VersionIdParam IdDt theVersionId, @ResourceParam DiagnosticReport thePatient, TagList theTagList) {
+		public MethodOutcome updateDiagnosticReportWithNoResponse(@IdParam IdDt theId, @VersionIdParam IdDt theVersionId, @ResourceParam DiagnosticReport theDr) {
 			IdDt id = theId;
 			IdDt version = theVersionId;
-			myLastTags = theTagList;
+			myLastTags = (TagList) theDr.getResourceMetadata().get(ResourceMetadataKeyEnum.TAG_LIST);
 			return new MethodOutcome(id, version);
 		}
 
@@ -1212,12 +1208,11 @@ public class ResfulServerMethodTest {
 			return myLastTags;
 		}
 
-		@SuppressWarnings("unused")
 		@Update()
-		public MethodOutcome updateDiagnosticReportWithVersionAndNoResponse(@IdParam IdDt theId, @ResourceParam DiagnosticReport thePatient, TagList theTagList) {
+		public MethodOutcome updateDiagnosticReportWithVersionAndNoResponse(@IdParam IdDt theId, @ResourceParam DiagnosticReport theDr) {
 			IdDt id = theId;
 			IdDt version = new IdDt("002");
-			myLastTags=theTagList;
+			myLastTags = (TagList) theDr.getResourceMetadata().get(ResourceMetadataKeyEnum.TAG_LIST);
 			return new MethodOutcome(id, version);
 		}
 

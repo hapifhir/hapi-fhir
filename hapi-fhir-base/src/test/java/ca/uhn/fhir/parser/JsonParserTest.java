@@ -23,6 +23,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.api.ExtensionDt;
+import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Extension;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
@@ -50,19 +51,73 @@ import ca.uhn.fhir.narrative.INarrativeGenerator;
 public class JsonParserTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(JsonParserTest.class);
 
-	/**
-	 * This sample has extra elements in <searchParam> that are not actually a part of the spec any more..
-	 */
 	@Test
-	public void testParseFuroreMetadataWithExtraElements() throws IOException {
-		String msg = IOUtils.toString(JsonParserTest.class.getResourceAsStream("/furore-conformance.json"));
+	public void testTagList() {
+		
+		//@formatter:off
+		String tagListStr = "{\n" + 
+				"  \"resourceType\" : \"TagList\", " + 
+				"  \"category\" : [" + 
+				"    { " + 
+				"      \"term\" : \"term0\", " + 
+				"      \"label\" : \"label0\", " + 
+				"      \"scheme\" : \"scheme0\" " + 
+				"    }," +
+				"    { " + 
+				"      \"term\" : \"term1\", " + 
+				"      \"label\" : \"label1\", " + 
+				"      \"scheme\" : null " + 
+				"    }," +
+				"    { " + 
+				"      \"term\" : \"term2\", " + 
+				"      \"label\" : \"label2\" " + 
+				"    }" +
+				"  ] " + 
+				"}";
+		//@formatter:on
+		
+		TagList tagList = new FhirContext().newJsonParser().parseTagList(tagListStr);
+		assertEquals(3, tagList.size());
+		assertEquals("term0", tagList.get(0).getTerm());
+		assertEquals("label0", tagList.get(0).getLabel());
+		assertEquals("scheme0", tagList.get(0).getScheme());
+		assertEquals("term1", tagList.get(1).getTerm());
+		assertEquals("label1", tagList.get(1).getLabel());
+		assertEquals(null, tagList.get(1).getScheme());
+		assertEquals("term2", tagList.get(2).getTerm());
+		assertEquals("label2", tagList.get(2).getLabel());
+		assertEquals(null, tagList.get(2).getScheme());
+		
+		/*
+		 * Encode
+		 */
 
-		IParser p = new FhirContext(ValueSet.class).newJsonParser();
-		Conformance conf = p.parseResource(Conformance.class, msg);
-		RestResource res = conf.getRestFirstRep().getResourceFirstRep();
-		assertEquals("_id", res.getSearchParam().get(1).getName().getValue());
+		//@formatter:off
+		String expected = "{" + 
+				"\"resourceType\":\"TagList\"," + 
+				"\"category\":[" + 
+				"{" + 
+				"\"term\":\"term0\"," + 
+				"\"label\":\"label0\"," + 
+				"\"scheme\":\"scheme0\"" + 
+				"}," +
+				"{" + 
+				"\"term\":\"term1\"," + 
+				"\"label\":\"label1\"" + 
+				"}," +
+				"{" + 
+				"\"term\":\"term2\"," + 
+				"\"label\":\"label2\"" + 
+				"}" +
+				"]" + 
+				"}";
+		//@formatter:on
+		
+		String encoded = new FhirContext().newJsonParser().encodeTagListToString(tagList);
+		assertEquals(expected,encoded);
+
 	}
-
+	
 	@Test
 	public void testEncodeBundleCategory() {
 
@@ -89,368 +144,6 @@ public class JsonParserTest {
 
 	
 	@Test
-	public void testBrokenPatient() {
-		
-		String resource = "{\n" + 
-				"  \"resourceType\": \"Patient\",\n" + 
-				"  \"extension\": [\n" + 
-				"    {\n" + 
-				"      \"url\": \"http://mayoweb.mayo.edu/dms-it/reference/data_standards/reg-ctable-race.html#curr_race\",\n" + 
-				"      \"valueCodeableConcept\": {\n" + 
-				"        \"coding\": [\n" + 
-				"          {\n" + 
-				"            \"system\": \"http://mayoweb.mayo.edu/dms-it/reference/data_standards/reg-ctable-race.html#curr_race\",\n" + 
-				"            \"code\": \"O\",\n" + 
-				"            \"display\": \"Other\"\n" + 
-				"          }\n" + 
-				"        ]\n" + 
-				"      }\n" + 
-				"    },\n" + 
-				"    {\n" + 
-				"      \"url\": \"http://mayoweb.mayo.edu/dms-it/reference/data_standards/reg-ctable-race.html#curr_ethn\",\n" + 
-				"      \"valueCodeableConcept\": {\n" + 
-				"        \"coding\": [\n" + 
-				"          {\n" + 
-				"            \"system\": \"http://mayoweb.mayo.edu/dms-it/reference/data_standards/reg-ctable-race.html#curr_ethn\",\n" + 
-				"            \"code\": \"HA\",\n" + 
-				"            \"display\": \"Central American\"\n" + 
-				"          }\n" + 
-				"        ]\n" + 
-				"      }\n" + 
-				"    }\n" + 
-				"  ],\n" + 
-				"  \"identifier\": [\n" + 
-				"    {\n" + 
-				"      \"label\": \"MAYO-CLINIC-NUMBER\",\n" + 
-				"      \"value\": \"3982540\"\n" + 
-				"    }\n" + 
-				"  ],\n" + 
-				"  \"name\": [\n" + 
-				"    {\n" + 
-				"      \"use\": \"usual\",\n" + 
-				"      \"text\": \"Hurt, Mr. John Stevens\",\n" + 
-				"      \"family\": [\n" + 
-				"        \"Hurt\"\n" + 
-				"      ],\n" + 
-				"      \"given\": [\n" + 
-				"        \"John Stevens\"\n" + 
-				"      ],\n" + 
-				"      \"prefix\": [\n" + 
-				"        \"Mr.\"\n" + 
-				"      ],\n" + 
-				"      \"suffix\": [\n" + 
-				"        null\n" + 
-				"      ]\n" + 
-				"    }\n" + 
-				"  ],\n" + 
-				"  \"telecom\": [\n" + 
-				"    {\n" + 
-				"      \"system\": \"phone\",\n" + 
-				"      \"value\": \"(507)284-0122\"\n" + 
-				"    }\n" + 
-				"  ],\n" + 
-				"  \"gender\": {\n" + 
-				"    \"coding\": [\n" + 
-				"      {\n" + 
-				"        \"system\": \"http://hl7.org/fhir/v3/AdministrativeGender\",\n" + 
-				"        \"code\": \"M\",\n" + 
-				"        \"display\": \"MALE\"\n" + 
-				"      }\n" + 
-				"    ]\n" + 
-				"  },\n" + 
-				"  \"birthDate\": \"1986-05-01T00:00:00-05:00\",\n" + 
-				"  \"deceasedDateTime\": \"0001-01-01T00:00:00-06:00\",\n" + 
-				"  \"address\": [\n" + 
-				"    {\n" + 
-				"      \"use\": \"home\",\n" + 
-				"      \"line\": [\n" + 
-				"        \"100 Quality Control Avenue\"\n" + 
-				"      ],\n" + 
-				"      \"city\": \"Test Patient\",\n" + 
-				"      \"state\": \"MINNESOTA\",\n" + 
-				"      \"zip\": \"55905\",\n" + 
-				"      \"country\": \"USA\"\n" + 
-				"    }\n" + 
-				"  ],\n" + 
-				"  \"maritalStatus\": {\n" + 
-				"    \"coding\": [\n" + 
-				"      {\n" + 
-				"        \"system\": \"http://hl7.org/fhir/v3/MaritalStatus\",\n" + 
-				"        \"code\": \"M\",\n" + 
-				"        \"display\": \"Married\"\n" + 
-				"      }\n" + 
-				"    ]\n" + 
-				"  },\n" + 
-				"  \"communication\": [\n" + 
-				"    {\n" + 
-				"      \"coding\": [\n" + 
-				"        {\n" + 
-				"          \"code\": \"ENG\",\n" + 
-				"          \"display\": \"ENGLISH\"\n" + 
-				"        }\n" + 
-				"      ]\n" + 
-				"    }\n" + 
-				"  ]\n" + 
-				"}";
-		
-		FhirContext ctx = new FhirContext();
-		Patient patient = ctx.newJsonParser().parseResource(Patient.class, resource);
-		System.out.println(patient.getNameFirstRep().getFamilyAsSingleString());
-		
-	}
-	
-	
-	@Test
-	public void testEncodeExtensionWithResourceContent() throws IOException {
-		IParser parser = new FhirContext().newJsonParser();
-
-		Patient patient = new Patient();
-		patient.addAddress().setUse(AddressUseEnum.HOME);
-		patient.addUndeclaredExtension(false, "urn:foo", new ResourceReferenceDt(Organization.class, "123"));
-
-		String val = parser.encodeResourceToString(patient);
-		ourLog.info(val);
-		assertThat(val, StringContains.containsString("\"extension\":[{\"url\":\"urn:foo\",\"valueResource\":{\"resource\":\"Organization/123\"}}]"));
-
-		Patient actual = parser.parseResource(Patient.class, val);
-		assertEquals(AddressUseEnum.HOME, patient.getAddressFirstRep().getUse().getValueAsEnum());
-		List<ExtensionDt> ext = actual.getUndeclaredExtensionsByUrl("urn:foo");
-		assertEquals(1, ext.size());
-		ResourceReferenceDt ref = (ResourceReferenceDt) ext.get(0).getValue();
-		assertEquals("Organization/123", ref.getResourceUrl());
-
-	}
-
-	@Test
-	public void testEncodeDeclaredExtensionWithResourceContent() throws IOException {
-		IParser parser = new FhirContext().newJsonParser();
-
-		MyPatientWithOneDeclaredExtension patient = new MyPatientWithOneDeclaredExtension();
-		patient.addAddress().setUse(AddressUseEnum.HOME);
-		patient.setFoo(new ResourceReferenceDt(Organization.class, "123"));
-
-		String val = parser.encodeResourceToString(patient);
-		ourLog.info(val);
-		assertThat(val, StringContains.containsString("\"extension\":[{\"url\":\"urn:foo\",\"valueResource\":{\"resource\":\"Organization/123\"}}]"));
-
-		MyPatientWithOneDeclaredExtension actual = parser.parseResource(MyPatientWithOneDeclaredExtension.class, val);
-		assertEquals(AddressUseEnum.HOME, patient.getAddressFirstRep().getUse().getValueAsEnum());
-		ResourceReferenceDt ref = actual.getFoo();
-		assertEquals("Organization/123", ref.getResourceUrl());
-
-	}
-	
-	
-	@Test
-	public void testEncodeDeclaredExtensionWithAddressContent() throws IOException {
-		IParser parser = new FhirContext().newJsonParser();
-
-		MyPatientWithOneDeclaredAddressExtension patient = new MyPatientWithOneDeclaredAddressExtension();
-		patient.addAddress().setUse(AddressUseEnum.HOME);
-		patient.setFoo(new AddressDt().addLine("line1"));
-
-		String val = parser.encodeResourceToString(patient);
-		ourLog.info(val);
-		assertThat(val, StringContains.containsString("\"extension\":[{\"url\":\"urn:foo\",\"valueAddress\":{\"line\":[\"line1\"]}}]"));
-
-		MyPatientWithOneDeclaredAddressExtension actual = parser.parseResource(MyPatientWithOneDeclaredAddressExtension.class, val);
-		assertEquals(AddressUseEnum.HOME, patient.getAddressFirstRep().getUse().getValueAsEnum());
-		AddressDt ref = actual.getFoo();
-		assertEquals("line1", ref.getLineFirstRep().getValue());
-
-	}
-	
-	
-	@Test
-	public void testEncodeUndeclaredExtensionWithAddressContent() throws IOException {
-		IParser parser = new FhirContext().newJsonParser();
-
-		Patient patient = new Patient();
-		patient.addAddress().setUse(AddressUseEnum.HOME);
-		patient.addUndeclaredExtension(false, "urn:foo", new AddressDt().addLine("line1"));
-
-		String val = parser.encodeResourceToString(patient);
-		ourLog.info(val);
-		assertThat(val, StringContains.containsString("\"extension\":[{\"url\":\"urn:foo\",\"valueAddress\":{\"line\":[\"line1\"]}}]"));
-
-		MyPatientWithOneDeclaredAddressExtension actual = parser.parseResource(MyPatientWithOneDeclaredAddressExtension.class, val);
-		assertEquals(AddressUseEnum.HOME, patient.getAddressFirstRep().getUse().getValueAsEnum());
-		AddressDt ref = actual.getFoo();
-		assertEquals("line1", ref.getLineFirstRep().getValue());
-
-	}
-
-	
-	@ResourceDef(name = "Patient")
-	public static class MyPatientWithOneDeclaredExtension extends Patient {
-
-		@Child(order = 0, name = "foo")
-		@Extension(url = "urn:foo", definedLocally = true, isModifier = false)
-		private ResourceReferenceDt myFoo;
-
-		public ResourceReferenceDt getFoo() {
-			return myFoo;
-		}
-
-		public void setFoo(ResourceReferenceDt theFoo) {
-			myFoo = theFoo;
-		}
-
-	}
-
-	
-	@ResourceDef(name = "Patient")
-	public static class MyPatientWithOneDeclaredAddressExtension extends Patient {
-
-		@Child(order = 0, name = "foo")
-		@Extension(url = "urn:foo", definedLocally = true, isModifier = false)
-		private AddressDt myFoo;
-
-		public AddressDt getFoo() {
-			return myFoo;
-		}
-
-		public void setFoo(AddressDt theFoo) {
-			myFoo = theFoo;
-		}
-
-	}
-	
-	@Test
-	public void testEncodeExt() throws Exception {
-
-		ValueSet valueSet = new ValueSet();
-		Define define = valueSet.getDefine();
-		DefineConcept code = define.addConcept();
-		code.setCode("someCode");
-		code.setDisplay("someDisplay");
-		code.addUndeclaredExtension(false, "urn:alt", new StringDt("alt name"));
-
-		String encoded = new FhirContext().newJsonParser().encodeResourceToString(valueSet);
-		ourLog.info(encoded);
-
-	}
-
-	@Test
-	public void testEncodeResourceRef() throws DataFormatException, IOException {
-
-		Patient patient = new Patient();
-		patient.setManagingOrganization(new ResourceReferenceDt());
-
-		IParser p = new FhirContext().newJsonParser();
-		String str = p.encodeResourceToString(patient);
-		assertThat(str, IsNot.not(StringContains.containsString("managingOrganization")));
-
-		patient.setManagingOrganization(new ResourceReferenceDt(Organization.class, "123"));
-		str = p.encodeResourceToString(patient);
-		assertThat(str, StringContains.containsString("\"managingOrganization\":{\"resource\":\"Organization/123\"}"));
-
-		Organization org = new Organization();
-		org.addIdentifier().setSystem("foo").setValue("bar");
-		patient.setManagingOrganization(new ResourceReferenceDt(org));
-		str = p.encodeResourceToString(patient);
-		assertThat(str, StringContains.containsString("\"contained\":[{\"resourceType\":\"Organization\""));
-
-	}
-
-	@Test
-	public void testNarrativeGeneration() throws DataFormatException, IOException {
-
-		Patient patient = new Patient();
-		patient.addName().addFamily("Smith");
-		Organization org = new Organization();
-		patient.getManagingOrganization().setResource(org);
-
-		INarrativeGenerator gen = mock(INarrativeGenerator.class);
-		XhtmlDt xhtmlDt = new XhtmlDt("<div>help</div>");
-		NarrativeDt nar = new NarrativeDt(xhtmlDt, NarrativeStatusEnum.GENERATED);
-		when(gen.generateNarrative(eq("http://hl7.org/fhir/profiles/Patient"), eq(patient))).thenReturn(nar);
-
-		FhirContext context = new FhirContext();
-		context.setNarrativeGenerator(gen);
-		IParser p = context.newJsonParser();
-		p.encodeResourceToWriter(patient, new OutputStreamWriter(System.out));
-		String str = p.encodeResourceToString(patient);
-
-		ourLog.info(str);
-
-		assertThat(str, StringContains.containsString(",\"text\":{\"status\":\"generated\",\"div\":\"<div>help</div>\"},"));
-	}
-
-	@Test
-	public void testSimpleResourceEncode() throws IOException {
-
-		FhirContext ctx = new FhirContext(Observation.class);
-		String xmlString = IOUtils.toString(JsonParser.class.getResourceAsStream("/example-patient-general.xml"), Charset.forName("UTF-8"));
-		Patient obs = ctx.newXmlParser().parseResource(Patient.class, xmlString);
-
-		List<ExtensionDt> undeclaredExtensions = obs.getContact().get(0).getName().getFamily().get(0).getUndeclaredExtensions();
-		ExtensionDt undeclaredExtension = undeclaredExtensions.get(0);
-		assertEquals("http://hl7.org/fhir/Profile/iso-21090#qualifier", undeclaredExtension.getUrl().getValue());
-
-		ctx.newJsonParser().setPrettyPrint(true).encodeResourceToWriter(obs, new OutputStreamWriter(System.out));
-
-		IParser jsonParser = ctx.newJsonParser();
-		String encoded = jsonParser.encodeResourceToString(obs);
-		ourLog.info(encoded);
-
-		String jsonString = IOUtils.toString(JsonParser.class.getResourceAsStream("/example-patient-general.json"));
-
-		JSON expected = JSONSerializer.toJSON(jsonString);
-		JSON actual = JSONSerializer.toJSON(encoded.trim());
-
-		ourLog.info("Expected: {}", expected);
-		ourLog.info("Actual  : {}", actual);
-		assertEquals(expected.toString(), actual.toString());
-
-	}
-
-	@Test
-	public void testSimpleResourceEncodeWithCustomType() throws IOException {
-
-		FhirContext ctx = new FhirContext(MyObservationWithExtensions.class);
-		String xmlString = IOUtils.toString(JsonParser.class.getResourceAsStream("/example-patient-general.xml"), Charset.forName("UTF-8"));
-		MyObservationWithExtensions obs = ctx.newXmlParser().parseResource(MyObservationWithExtensions.class, xmlString);
-
-		assertEquals(0, obs.getAllUndeclaredExtensions().size());
-		assertEquals("aaaa", obs.getExtAtt().getContentType().getValue());
-		assertEquals("str1", obs.getMoreExt().getStr1().getValue());
-		assertEquals("2011-01-02", obs.getModExt().getValueAsString());
-
-		List<ExtensionDt> undeclaredExtensions = obs.getContact().get(0).getName().getFamily().get(0).getUndeclaredExtensions();
-		ExtensionDt undeclaredExtension = undeclaredExtensions.get(0);
-		assertEquals("http://hl7.org/fhir/Profile/iso-21090#qualifier", undeclaredExtension.getUrl().getValue());
-
-		ctx.newJsonParser().setPrettyPrint(true).encodeResourceToWriter(obs, new OutputStreamWriter(System.out));
-
-		IParser jsonParser = ctx.newJsonParser();
-		String encoded = jsonParser.encodeResourceToString(obs);
-		ourLog.info(encoded);
-
-		String jsonString = IOUtils.toString(JsonParser.class.getResourceAsStream("/example-patient-general.json"));
-
-		JSON expected = JSONSerializer.toJSON(jsonString);
-		JSON actual = JSONSerializer.toJSON(encoded.trim());
-
-		ourLog.info("Expected: {}", expected);
-		ourLog.info("Actual  : {}", actual);
-		assertEquals(expected.toString(), actual.toString());
-
-	}
-
-	@Test
-	public void testSimpleBundleEncode() throws IOException {
-
-		FhirContext ctx = new FhirContext(Observation.class, Patient.class);
-		String xmlString = IOUtils.toString(JsonParser.class.getResourceAsStream("/atom-document-large.xml"), Charset.forName("UTF-8"));
-		Bundle obs = ctx.newXmlParser().parseBundle(xmlString);
-
-		String encoded = ctx.newJsonParser().encodeBundleToString(obs);
-		ourLog.info(encoded);
-
-	}
-
-	@Test
 	public void testEncodeContainedResources() throws IOException {
 
 		String msg = IOUtils.toString(XmlParser.class.getResourceAsStream("/contained-diagnosticreport.xml"));
@@ -462,69 +155,10 @@ public class JsonParserTest {
 		ourLog.info(encoded);
 
 	}
-
+	
+	
 	@Test
-	public void testSimpleParse() throws DataFormatException, IOException {
-
-		String msg = IOUtils.toString(XmlParser.class.getResourceAsStream("/example-patient-general.json"));
-		FhirContext ctx = new FhirContext(Patient.class);
-		IParser p = ctx.newJsonParser();
-		// ourLog.info("Reading in message: {}", msg);
-		Patient res = p.parseResource(Patient.class, msg);
-
-		assertEquals(2, res.getUndeclaredExtensions().size());
-		assertEquals(1, res.getUndeclaredModifierExtensions().size());
-
-		String encoded = ctx.newXmlParser().setPrettyPrint(true).encodeResourceToString(res);
-		ourLog.info(encoded);
-
-	}
-
-	@Test
-	public void testParseBundle() throws DataFormatException, IOException {
-
-		String msg = IOUtils.toString(XmlParser.class.getResourceAsStream("/atom-document-large.json"));
-		FhirContext ctx = new FhirContext(Patient.class);
-		IParser p = ctx.newJsonParser();
-		Bundle bundle = p.parseBundle(msg);
-
-		String encoded = ctx.newXmlParser().setPrettyPrint(true).encodeBundleToString(bundle);
-		ourLog.info(encoded);
-
-		assertEquals("http://fhir.healthintersections.com.au/open/DiagnosticReport/_search?_format=application/json+fhir&search-id=46d5f0e7-9240-4d4f-9f51-f8ac975c65&search-sort=_id", bundle
-				.getLinkSelf().getValue());
-		assertEquals("urn:uuid:0b754ff9-03cf-4322-a119-15019af8a3", bundle.getBundleId().getValue());
-
-		BundleEntry entry = bundle.getEntries().get(0);
-		assertEquals("http://fhir.healthintersections.com.au/open/DiagnosticReport/101", entry.getId().getValue());
-		assertEquals("http://fhir.healthintersections.com.au/open/DiagnosticReport/101/_history/1", entry.getLinkSelf().getValue());
-		assertEquals("2014-03-10T11:55:59Z", entry.getUpdated().getValueAsString());
-
-		DiagnosticReport res = (DiagnosticReport) entry.getResource();
-		assertEquals("Complete Blood Count", res.getName().getText().getValue());
-
-	}
-
-	@Test
-	public void testParseWithContained() throws DataFormatException, IOException {
-
-		String msg = IOUtils.toString(XmlParser.class.getResourceAsStream("/diagnostic-report.json"));
-		FhirContext ctx = new FhirContext(Patient.class);
-		IParser p = ctx.newJsonParser();
-		// ourLog.info("Reading in message: {}", msg);
-		DiagnosticReport res = p.parseResource(DiagnosticReport.class, msg);
-
-		String encoded = ctx.newXmlParser().setPrettyPrint(true).encodeResourceToString(res);
-		ourLog.info(encoded);
-
-		ResourceReferenceDt reference = res.getResult().get(1);
-		Observation obs = (Observation) reference.getResource();
-
-		assertEquals("789-8", obs.getName().getCoding().get(0).getCode().getValue());
-	}
-
-	@Test
-	public void testEncodeContainedResourcesMore() throws IOException {
+	public void testEncodeContainedResourcesMore() {
 
 		DiagnosticReport rpt = new DiagnosticReport();
 		Specimen spm = new Specimen();
@@ -548,7 +182,85 @@ public class JsonParserTest {
 	}
 
 	@Test
-	public void testEncodeInvalidChildGoodException() throws IOException {
+	public void testEncodeDeclaredExtensionWithAddressContent() {
+		IParser parser = new FhirContext().newJsonParser();
+
+		MyPatientWithOneDeclaredAddressExtension patient = new MyPatientWithOneDeclaredAddressExtension();
+		patient.addAddress().setUse(AddressUseEnum.HOME);
+		patient.setFoo(new AddressDt().addLine("line1"));
+
+		String val = parser.encodeResourceToString(patient);
+		ourLog.info(val);
+		assertThat(val, StringContains.containsString("\"extension\":[{\"url\":\"urn:foo\",\"valueAddress\":{\"line\":[\"line1\"]}}]"));
+
+		MyPatientWithOneDeclaredAddressExtension actual = parser.parseResource(MyPatientWithOneDeclaredAddressExtension.class, val);
+		assertEquals(AddressUseEnum.HOME, patient.getAddressFirstRep().getUse().getValueAsEnum());
+		AddressDt ref = actual.getFoo();
+		assertEquals("line1", ref.getLineFirstRep().getValue());
+
+	}
+	
+	
+	@Test
+	public void testEncodeDeclaredExtensionWithResourceContent() {
+		IParser parser = new FhirContext().newJsonParser();
+
+		MyPatientWithOneDeclaredExtension patient = new MyPatientWithOneDeclaredExtension();
+		patient.addAddress().setUse(AddressUseEnum.HOME);
+		patient.setFoo(new ResourceReferenceDt(Organization.class, "123"));
+
+		String val = parser.encodeResourceToString(patient);
+		ourLog.info(val);
+		assertThat(val, StringContains.containsString("\"extension\":[{\"url\":\"urn:foo\",\"valueResource\":{\"resource\":\"Organization/123\"}}]"));
+
+		MyPatientWithOneDeclaredExtension actual = parser.parseResource(MyPatientWithOneDeclaredExtension.class, val);
+		assertEquals(AddressUseEnum.HOME, patient.getAddressFirstRep().getUse().getValueAsEnum());
+		ResourceReferenceDt ref = actual.getFoo();
+		assertEquals("Organization/123", ref.getResourceUrl());
+
+	}
+	
+	
+	@Test
+	public void testEncodeExt() throws Exception {
+
+		ValueSet valueSet = new ValueSet();
+		Define define = valueSet.getDefine();
+		DefineConcept code = define.addConcept();
+		code.setCode("someCode");
+		code.setDisplay("someDisplay");
+		code.addUndeclaredExtension(false, "urn:alt", new StringDt("alt name"));
+
+		String encoded = new FhirContext().newJsonParser().encodeResourceToString(valueSet);
+		ourLog.info(encoded);
+
+	}
+
+	
+	@Test
+	public void testEncodeExtensionWithResourceContent() {
+		IParser parser = new FhirContext().newJsonParser();
+
+		Patient patient = new Patient();
+		patient.addAddress().setUse(AddressUseEnum.HOME);
+		patient.addUndeclaredExtension(false, "urn:foo", new ResourceReferenceDt(Organization.class, "123"));
+
+		String val = parser.encodeResourceToString(patient);
+		ourLog.info(val);
+		assertThat(val, StringContains.containsString("\"extension\":[{\"url\":\"urn:foo\",\"valueResource\":{\"resource\":\"Organization/123\"}}]"));
+
+		Patient actual = parser.parseResource(Patient.class, val);
+		assertEquals(AddressUseEnum.HOME, patient.getAddressFirstRep().getUse().getValueAsEnum());
+		List<ExtensionDt> ext = actual.getUndeclaredExtensionsByUrl("urn:foo");
+		assertEquals(1, ext.size());
+		ResourceReferenceDt ref = (ResourceReferenceDt) ext.get(0).getValue();
+		assertEquals("Organization/123", ref.getResourceUrl());
+
+	}
+
+	
+	@Test
+	public void testEncodeInvalidChildGoodException() {
 		Observation obs = new Observation();
 		obs.setValue(new DecimalDt(112.22));
 
@@ -559,6 +271,47 @@ public class JsonParserTest {
 		} catch (DataFormatException e) {
 			assertThat(e.getMessage(), StringContains.containsString("PeriodDt"));
 		}
+	}
+	
+	@Test
+	public void testEncodeResourceRef() throws DataFormatException {
+
+		Patient patient = new Patient();
+		patient.setManagingOrganization(new ResourceReferenceDt());
+
+		IParser p = new FhirContext().newJsonParser();
+		String str = p.encodeResourceToString(patient);
+		assertThat(str, IsNot.not(StringContains.containsString("managingOrganization")));
+
+		patient.setManagingOrganization(new ResourceReferenceDt(Organization.class, "123"));
+		str = p.encodeResourceToString(patient);
+		assertThat(str, StringContains.containsString("\"managingOrganization\":{\"resource\":\"Organization/123\"}"));
+
+		Organization org = new Organization();
+		org.addIdentifier().setSystem("foo").setValue("bar");
+		patient.setManagingOrganization(new ResourceReferenceDt(org));
+		str = p.encodeResourceToString(patient);
+		assertThat(str, StringContains.containsString("\"contained\":[{\"resourceType\":\"Organization\""));
+
+	}
+
+	@Test
+	public void testEncodeUndeclaredExtensionWithAddressContent() {
+		IParser parser = new FhirContext().newJsonParser();
+
+		Patient patient = new Patient();
+		patient.addAddress().setUse(AddressUseEnum.HOME);
+		patient.addUndeclaredExtension(false, "urn:foo", new AddressDt().addLine("line1"));
+
+		String val = parser.encodeResourceToString(patient);
+		ourLog.info(val);
+		assertThat(val, StringContains.containsString("\"extension\":[{\"url\":\"urn:foo\",\"valueAddress\":{\"line\":[\"line1\"]}}]"));
+
+		MyPatientWithOneDeclaredAddressExtension actual = parser.parseResource(MyPatientWithOneDeclaredAddressExtension.class, val);
+		assertEquals(AddressUseEnum.HOME, patient.getAddressFirstRep().getUse().getValueAsEnum());
+		AddressDt ref = actual.getFoo();
+		assertEquals("line1", ref.getLineFirstRep().getValue());
+
 	}
 
 	@Test
@@ -651,6 +404,210 @@ public class JsonParserTest {
 		assertEquals(1, parsed.getNameFirstRep().getFamilyFirstRep().getUndeclaredExtensionsByUrl("http://examples.com#givenext").size());
 		ExtensionDt ext = parsed.getNameFirstRep().getFamilyFirstRep().getUndeclaredExtensionsByUrl("http://examples.com#givenext").get(0);
 		assertEquals("Hello", ext.getValueAsPrimitive().getValue());
+
+	}
+
+	@Test
+	public void testNarrativeGeneration() throws DataFormatException, IOException {
+
+		Patient patient = new Patient();
+		patient.addName().addFamily("Smith");
+		Organization org = new Organization();
+		patient.getManagingOrganization().setResource(org);
+
+		INarrativeGenerator gen = mock(INarrativeGenerator.class);
+		XhtmlDt xhtmlDt = new XhtmlDt("<div>help</div>");
+		NarrativeDt nar = new NarrativeDt(xhtmlDt, NarrativeStatusEnum.GENERATED);
+		when(gen.generateNarrative(eq("http://hl7.org/fhir/profiles/Patient"), eq(patient))).thenReturn(nar);
+
+		FhirContext context = new FhirContext();
+		context.setNarrativeGenerator(gen);
+		IParser p = context.newJsonParser();
+		p.encodeResourceToWriter(patient, new OutputStreamWriter(System.out));
+		String str = p.encodeResourceToString(patient);
+
+		ourLog.info(str);
+
+		assertThat(str, StringContains.containsString(",\"text\":{\"status\":\"generated\",\"div\":\"<div>help</div>\"},"));
+	}
+
+	@Test
+	public void testParseBundle() throws DataFormatException, IOException {
+
+		String msg = IOUtils.toString(XmlParser.class.getResourceAsStream("/atom-document-large.json"));
+		FhirContext ctx = new FhirContext(Patient.class);
+		IParser p = ctx.newJsonParser();
+		Bundle bundle = p.parseBundle(msg);
+
+		String encoded = ctx.newXmlParser().setPrettyPrint(true).encodeBundleToString(bundle);
+		ourLog.info(encoded);
+
+		assertEquals("http://fhir.healthintersections.com.au/open/DiagnosticReport/_search?_format=application/json+fhir&search-id=46d5f0e7-9240-4d4f-9f51-f8ac975c65&search-sort=_id", bundle
+				.getLinkSelf().getValue());
+		assertEquals("urn:uuid:0b754ff9-03cf-4322-a119-15019af8a3", bundle.getBundleId().getValue());
+
+		BundleEntry entry = bundle.getEntries().get(0);
+		assertEquals("http://fhir.healthintersections.com.au/open/DiagnosticReport/101", entry.getId().getValue());
+		assertEquals("http://fhir.healthintersections.com.au/open/DiagnosticReport/101/_history/1", entry.getLinkSelf().getValue());
+		assertEquals("2014-03-10T11:55:59Z", entry.getUpdated().getValueAsString());
+
+		DiagnosticReport res = (DiagnosticReport) entry.getResource();
+		assertEquals("Complete Blood Count", res.getName().getText().getValue());
+
+	}
+
+	/**
+	 * This sample has extra elements in <searchParam> that are not actually a part of the spec any more..
+	 */
+	@Test
+	public void testParseFuroreMetadataWithExtraElements() throws IOException {
+		String msg = IOUtils.toString(JsonParserTest.class.getResourceAsStream("/furore-conformance.json"));
+
+		IParser p = new FhirContext(ValueSet.class).newJsonParser();
+		Conformance conf = p.parseResource(Conformance.class, msg);
+		RestResource res = conf.getRestFirstRep().getResourceFirstRep();
+		assertEquals("_id", res.getSearchParam().get(1).getName().getValue());
+	}
+
+	@Test
+	public void testParseWithContained() throws DataFormatException, IOException {
+
+		String msg = IOUtils.toString(XmlParser.class.getResourceAsStream("/diagnostic-report.json"));
+		FhirContext ctx = new FhirContext(Patient.class);
+		IParser p = ctx.newJsonParser();
+		// ourLog.info("Reading in message: {}", msg);
+		DiagnosticReport res = p.parseResource(DiagnosticReport.class, msg);
+
+		String encoded = ctx.newXmlParser().setPrettyPrint(true).encodeResourceToString(res);
+		ourLog.info(encoded);
+
+		ResourceReferenceDt reference = res.getResult().get(1);
+		Observation obs = (Observation) reference.getResource();
+
+		assertEquals("789-8", obs.getName().getCoding().get(0).getCode().getValue());
+	}
+
+	@Test
+	public void testSimpleBundleEncode() throws IOException {
+
+		FhirContext ctx = new FhirContext(Observation.class, Patient.class);
+		String xmlString = IOUtils.toString(JsonParser.class.getResourceAsStream("/atom-document-large.xml"), Charset.forName("UTF-8"));
+		Bundle obs = ctx.newXmlParser().parseBundle(xmlString);
+
+		String encoded = ctx.newJsonParser().encodeBundleToString(obs);
+		ourLog.info(encoded);
+
+	}
+
+	@Test
+	public void testSimpleParse() throws DataFormatException, IOException {
+
+		String msg = IOUtils.toString(XmlParser.class.getResourceAsStream("/example-patient-general.json"));
+		FhirContext ctx = new FhirContext(Patient.class);
+		IParser p = ctx.newJsonParser();
+		// ourLog.info("Reading in message: {}", msg);
+		Patient res = p.parseResource(Patient.class, msg);
+
+		assertEquals(2, res.getUndeclaredExtensions().size());
+		assertEquals(1, res.getUndeclaredModifierExtensions().size());
+
+		String encoded = ctx.newXmlParser().setPrettyPrint(true).encodeResourceToString(res);
+		ourLog.info(encoded);
+
+	}
+
+	@Test
+	public void testSimpleResourceEncode() throws IOException {
+
+		FhirContext ctx = new FhirContext(Observation.class);
+		String xmlString = IOUtils.toString(JsonParser.class.getResourceAsStream("/example-patient-general.xml"), Charset.forName("UTF-8"));
+		Patient obs = ctx.newXmlParser().parseResource(Patient.class, xmlString);
+
+		List<ExtensionDt> undeclaredExtensions = obs.getContact().get(0).getName().getFamily().get(0).getUndeclaredExtensions();
+		ExtensionDt undeclaredExtension = undeclaredExtensions.get(0);
+		assertEquals("http://hl7.org/fhir/Profile/iso-21090#qualifier", undeclaredExtension.getUrl().getValue());
+
+		ctx.newJsonParser().setPrettyPrint(true).encodeResourceToWriter(obs, new OutputStreamWriter(System.out));
+
+		IParser jsonParser = ctx.newJsonParser();
+		String encoded = jsonParser.encodeResourceToString(obs);
+		ourLog.info(encoded);
+
+		String jsonString = IOUtils.toString(JsonParser.class.getResourceAsStream("/example-patient-general.json"));
+
+		JSON expected = JSONSerializer.toJSON(jsonString);
+		JSON actual = JSONSerializer.toJSON(encoded.trim());
+
+		ourLog.info("Expected: {}", expected);
+		ourLog.info("Actual  : {}", actual);
+		assertEquals(expected.toString(), actual.toString());
+
+	}
+
+	@Test
+	public void testSimpleResourceEncodeWithCustomType() throws IOException {
+
+		FhirContext ctx = new FhirContext(MyObservationWithExtensions.class);
+		String xmlString = IOUtils.toString(JsonParser.class.getResourceAsStream("/example-patient-general.xml"), Charset.forName("UTF-8"));
+		MyObservationWithExtensions obs = ctx.newXmlParser().parseResource(MyObservationWithExtensions.class, xmlString);
+
+		assertEquals(0, obs.getAllUndeclaredExtensions().size());
+		assertEquals("aaaa", obs.getExtAtt().getContentType().getValue());
+		assertEquals("str1", obs.getMoreExt().getStr1().getValue());
+		assertEquals("2011-01-02", obs.getModExt().getValueAsString());
+
+		List<ExtensionDt> undeclaredExtensions = obs.getContact().get(0).getName().getFamily().get(0).getUndeclaredExtensions();
+		ExtensionDt undeclaredExtension = undeclaredExtensions.get(0);
+		assertEquals("http://hl7.org/fhir/Profile/iso-21090#qualifier", undeclaredExtension.getUrl().getValue());
+
+		ctx.newJsonParser().setPrettyPrint(true).encodeResourceToWriter(obs, new OutputStreamWriter(System.out));
+
+		IParser jsonParser = ctx.newJsonParser();
+		String encoded = jsonParser.encodeResourceToString(obs);
+		ourLog.info(encoded);
+
+		String jsonString = IOUtils.toString(JsonParser.class.getResourceAsStream("/example-patient-general.json"));
+
+		JSON expected = JSONSerializer.toJSON(jsonString);
+		JSON actual = JSONSerializer.toJSON(encoded.trim());
+
+		ourLog.info("Expected: {}", expected);
+		ourLog.info("Actual  : {}", actual);
+		assertEquals(expected.toString(), actual.toString());
+
+	}
+
+	@ResourceDef(name = "Patient")
+	public static class MyPatientWithOneDeclaredAddressExtension extends Patient {
+
+		@Child(order = 0, name = "foo")
+		@Extension(url = "urn:foo", definedLocally = true, isModifier = false)
+		private AddressDt myFoo;
+
+		public AddressDt getFoo() {
+			return myFoo;
+		}
+
+		public void setFoo(AddressDt theFoo) {
+			myFoo = theFoo;
+		}
+
+	}
+
+	@ResourceDef(name = "Patient")
+	public static class MyPatientWithOneDeclaredExtension extends Patient {
+
+		@Child(order = 0, name = "foo")
+		@Extension(url = "urn:foo", definedLocally = true, isModifier = false)
+		private ResourceReferenceDt myFoo;
+
+		public ResourceReferenceDt getFoo() {
+			return myFoo;
+		}
+
+		public void setFoo(ResourceReferenceDt theFoo) {
+			myFoo = theFoo;
+		}
 
 	}
 

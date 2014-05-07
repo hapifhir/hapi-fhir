@@ -37,6 +37,7 @@ import ca.uhn.fhir.rest.annotation.History;
 import ca.uhn.fhir.rest.client.BaseClientInvocation;
 import ca.uhn.fhir.rest.client.GetClientInvocation;
 import ca.uhn.fhir.rest.param.IParameter;
+import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -52,7 +53,7 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 	public HistoryMethodBinding(Method theMethod, FhirContext theConetxt, Object theProvider) {
 		super(toReturnType(theMethod, theProvider), theMethod, theConetxt, theProvider);
 
-		myIdParamIndex = Util.findIdParameterIndex(theMethod);
+		myIdParamIndex = ParameterUtil.findIdParameterIndex(theMethod);
 
 		History historyAnnotation = theMethod.getAnnotation(History.class);
 		Class<? extends IResource> type = historyAnnotation.type();
@@ -142,12 +143,12 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 	}
 
 	@Override
-	public List<IResource> invokeServer(Object theResourceProvider, Request theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException {
+	public List<IResource> invokeServer(Request theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException {
 		if (myIdParamIndex != null) {
 			theMethodParams[myIdParamIndex] = theRequest.getId();
 		}
 
-		Object response = invokeServerMethod(theResourceProvider, theMethodParams);
+		Object response = invokeServerMethod(theMethodParams);
 
 		List<IResource> resources = toResourceList(response);
 		int index=0;
@@ -168,7 +169,7 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 	// ObjectUtils.equals is replaced by a JDK7 method..
 	@SuppressWarnings("deprecation")
 	@Override
-	public boolean matches(Request theRequest) {
+	public boolean incomingServerRequestMatchesMethod(Request theRequest) {
 		if (!Constants.PARAM_HISTORY.equals(theRequest.getOperation())) {
 			return false;
 		}
@@ -185,7 +186,7 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 			return false;
 		}
 
-		if (theRequest.getVersion() != null && !theRequest.getVersion().isEmpty()) {
+		if (theRequest.getVersionId() != null && !theRequest.getVersionId().isEmpty()) {
 			return false;
 		}
 

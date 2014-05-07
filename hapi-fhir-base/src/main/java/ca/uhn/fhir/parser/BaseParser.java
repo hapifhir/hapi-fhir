@@ -37,12 +37,18 @@ import ca.uhn.fhir.context.RuntimeChildChoiceDefinition;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 
 public abstract class BaseParser implements IParser {
 
 	private boolean mySuppressNarratives;
+
+	@Override
+	public TagList parseTagList(String theString) {
+		return parseTagList(new StringReader(theString));
+	}
 
 	@SuppressWarnings("cast")
 	@Override
@@ -62,6 +68,17 @@ public abstract class BaseParser implements IParser {
 		Writer stringWriter = new StringWriter();
 		try {
 			encodeResourceToWriter(theResource, stringWriter);
+		} catch (IOException e) {
+			throw new Error("Encountered IOException during write to string - This should not happen!");
+		}
+		return stringWriter.toString();
+	}
+
+	@Override
+	public String encodeTagListToString(TagList theTagList) {
+		Writer stringWriter = new StringWriter();
+		try {
+			encodeTagListToWriter(theTagList, stringWriter);
 		} catch (IOException e) {
 			throw new Error("Encountered IOException during write to string - This should not happen!");
 		}

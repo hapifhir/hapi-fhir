@@ -46,7 +46,11 @@ public class ReflectionUtil {
 
 	public static Class<?> getGenericCollectionTypeOfMethodParameter(Method theMethod, int theParamIndex) {
 		Class<?> type;
-		ParameterizedType collectionType = (ParameterizedType) theMethod.getGenericParameterTypes()[theParamIndex];
+		Type genericParameterType = theMethod.getGenericParameterTypes()[theParamIndex];
+		if (Class.class.equals(genericParameterType)) {
+			return null;
+		}
+		ParameterizedType collectionType = (ParameterizedType) genericParameterType;
 		Type firstArg = collectionType.getActualTypeArguments()[0];
 		if (ParameterizedType.class.isAssignableFrom(firstArg.getClass())) {
 			ParameterizedType pt = ((ParameterizedType) firstArg);
@@ -60,7 +64,11 @@ public class ReflectionUtil {
 	@SuppressWarnings({ "unused", "rawtypes" })
 	public static Class<?> getGenericCollectionTypeOfMethodReturnType(Method theMethod) {
 		Class<?> type;
-		ParameterizedType collectionType = (ParameterizedType) theMethod.getGenericReturnType();
+		Type genericReturnType = theMethod.getGenericReturnType();
+		if (!(genericReturnType instanceof ParameterizedType)) {
+			return null;
+		}
+		ParameterizedType collectionType = (ParameterizedType) genericReturnType;
 		Type firstArg = collectionType.getActualTypeArguments()[0];
 		if (ParameterizedType.class.isAssignableFrom(firstArg.getClass())) {
 			ParameterizedType pt = ((ParameterizedType) firstArg);

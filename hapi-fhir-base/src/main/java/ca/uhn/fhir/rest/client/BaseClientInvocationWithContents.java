@@ -20,48 +20,52 @@ package ca.uhn.fhir.rest.client;
  * #L%
  */
 
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.Header;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.message.BasicHeader;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.parser.DataFormatException;
+import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.server.Constants;
+import ca.uhn.fhir.rest.server.EncodingEnum;
 
 public abstract class BaseClientInvocationWithContents extends BaseClientInvocation {
 
-	private final Bundle myBundle;
 	private final FhirContext myContext;
 	private final IResource myResource;
-	private String myUrlExtension;
-
-	public BaseClientInvocationWithContents(FhirContext theContext, Bundle theBundle) {
-		super();
-		myContext = theContext;
-		myResource = null;
-		myBundle = theBundle;
-	}
+	private final String myUrlExtension;
+	private final TagList myTagList;
 
 	public BaseClientInvocationWithContents(FhirContext theContext, IResource theResource, String theUrlExtension) {
 		super();
 		myContext = theContext;
 		myResource = theResource;
-		myBundle = null;
 		myUrlExtension = theUrlExtension;
+		myTagList = null;
+	}
+
+	public BaseClientInvocationWithContents(FhirContext theContext, TagList theTagList, String... theUrlExtension) {
+		super();
+		if (theTagList == null) {
+			throw new NullPointerException("Tag list must not be null");
+		}
+
+		myResource = null;
+		myContext = theContext;
+		myTagList = theTagList;
+
+		myUrlExtension = StringUtils.join(theUrlExtension, '/');
 	}
 
 	@Override
-	public HttpRequestBase asHttpRequest(String theUrlBase, Map<String, List<String>> theExtraParams) throws DataFormatException {
+	public HttpRequestBase asHttpRequest(String theUrlBase, Map<String, List<String>> theExtraParams, EncodingEnum theEncoding) throws DataFormatException {
 		StringBuilder b = new StringBuilder();
 		b.append(theUrlBase);
 		if (!theUrlBase.endsWith("/")) {
@@ -71,11 +75,26 @@ public abstract class BaseClientInvocationWithContents extends BaseClientInvocat
 
 		appendExtraParamsWithQuestionMark(theExtraParams, b, true);
 
-		String url = b.toString();
-		String contents = myContext.newXmlParser().encodeResourceToString(myResource);
-		StringEntity entity = new StringEntity(contents, ContentType.create(Constants.CT_FHIR_XML, "UTF-8"));
+		IParser parser;
+		String contentType;
+		if (theEncoding == EncodingEnum.JSON) {
+			parser = myContext.newJsonParser();
+			contentType = Constants.CT_FHIR_JSON;
+		} else {
+			parser = myContext.newXmlParser();
+			contentType = Constants.CT_FHIR_XML;
+		}
 
-		HttpRequestBase retVal = createRequest(url, entity);
+		String contents;
+		if (myTagList != null) {
+			contents = parser.encodeTagListToString(myTagList);
+		} else {
+			contents = parser.encodeResourceToString(myResource);
+		}
+
+		StringEntity entity = new StringEntity(contents, ContentType.create(contentType, "UTF-8"));
+
+		HttpRequestBase retVal = createRequest(b.toString(), entity);
 		super.addHeadersToRequest(retVal);
 		return retVal;
 	}

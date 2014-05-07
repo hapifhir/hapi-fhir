@@ -41,6 +41,7 @@ import ca.uhn.fhir.rest.client.BaseClientInvocation;
 import ca.uhn.fhir.rest.client.PutClientInvocation;
 import ca.uhn.fhir.rest.method.SearchMethodBinding.RequestType;
 import ca.uhn.fhir.rest.param.IParameter;
+import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
@@ -53,11 +54,11 @@ public class UpdateMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 	public UpdateMethodBinding(Method theMethod, FhirContext theContext, Object theProvider) {
 		super(theMethod, theContext, Update.class, theProvider);
 
-		myIdParameterIndex = Util.findIdParameterIndex(theMethod);
+		myIdParameterIndex = ParameterUtil.findIdParameterIndex(theMethod);
 		if (myIdParameterIndex == null) {
 			throw new ConfigurationException("Method '" + theMethod.getName() + "' on type '" + theMethod.getDeclaringClass().getCanonicalName() + "' has no parameter annotated with the @" + IdParam.class.getSimpleName() + " annotation");
 		}
-		myVersionIdParameterIndex = Util.findVersionIdParameterIndex(theMethod);
+		myVersionIdParameterIndex = ParameterUtil.findVersionIdParameterIndex(theMethod);
 	}
 
 	@Override
@@ -89,13 +90,9 @@ public class UpdateMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 			}
 		}
 
-		// TODO: we should send an HTTP 412 automatically if the server
-		// only has a method which requires a version ID, and no
-		// Content-Location header is present
-
 		theParams[myIdParameterIndex] = theRequest.getId();
 		if (myVersionIdParameterIndex != null) {
-			theParams[myVersionIdParameterIndex] = theRequest.getVersion();
+			theParams[myVersionIdParameterIndex] = theRequest.getVersionId();
 		}
 	}
 
@@ -146,10 +143,10 @@ public class UpdateMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 	}
 
 	@Override
-	public boolean matches(Request theRequest) {
-		if (super.matches(theRequest)) {
+	public boolean incomingServerRequestMatchesMethod(Request theRequest) {
+		if (super.incomingServerRequestMatchesMethod(theRequest)) {
 			if (myVersionIdParameterIndex != null) {
-				if (theRequest.getVersion() == null) {
+				if (theRequest.getVersionId() == null) {
 					return false;
 				}
 			}

@@ -35,6 +35,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.client.GetClientInvocation;
 import ca.uhn.fhir.rest.method.SearchMethodBinding.RequestType;
 import ca.uhn.fhir.rest.param.IParameter;
+import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -50,8 +51,8 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding {
 
 		Validate.notNull(theMethod, "Method must not be null");
 
-		Integer idIndex = Util.findIdParameterIndex(theMethod);
-		Integer versionIdIndex = Util.findVersionIdParameterIndex(theMethod);
+		Integer idIndex = ParameterUtil.findIdParameterIndex(theMethod);
+		Integer versionIdIndex = ParameterUtil.findVersionIdParameterIndex(theMethod);
 
 		myIdIndex = idIndex;
 		myVersionIdIndex = versionIdIndex;
@@ -71,7 +72,7 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding {
 	}
 
 	@Override
-	public boolean matches(Request theRequest) {
+	public boolean incomingServerRequestMatchesMethod(Request theRequest) {
 		if (!theRequest.getResourceName().equals(getResourceName())) {
 			return false;
 		}
@@ -80,7 +81,7 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding {
 				return false;
 			}
 		}
-		if ((theRequest.getVersion() == null) != (myVersionIdIndex == null)) {
+		if ((theRequest.getVersionId() == null) != (myVersionIdIndex == null)) {
 			return false;
 		}
 		if (theRequest.getId() == null) {
@@ -106,13 +107,13 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding {
 	}
 
 	@Override
-	public List<IResource> invokeServer(Object theResourceProvider, Request theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException {
+	public List<IResource> invokeServer(Request theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException {
 		theMethodParams[myIdIndex] = theRequest.getId();
 		if (myVersionIdIndex != null) {
-			theMethodParams[myVersionIdIndex] = theRequest.getVersion();
+			theMethodParams[myVersionIdIndex] = theRequest.getVersionId();
 		}
 
-		Object response = invokeServerMethod(theResourceProvider, theMethodParams);
+		Object response = invokeServerMethod(theMethodParams);
 
 		return toResourceList(response);
 	}

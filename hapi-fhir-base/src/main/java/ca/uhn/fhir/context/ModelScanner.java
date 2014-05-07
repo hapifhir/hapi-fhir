@@ -20,8 +20,10 @@ package ca.uhn.fhir.context;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -33,6 +35,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -56,16 +59,11 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Extension;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
-import ca.uhn.fhir.model.dstu.composite.AttachmentDt;
 import ca.uhn.fhir.model.dstu.composite.ContainedDt;
 import ca.uhn.fhir.model.dstu.composite.NarrativeDt;
-import ca.uhn.fhir.model.dstu.composite.QuantityDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.BoundCodeableConceptDt;
-import ca.uhn.fhir.model.primitive.CodeDt;
-import ca.uhn.fhir.model.primitive.DateDt;
-import ca.uhn.fhir.model.primitive.DecimalDt;
 import ca.uhn.fhir.model.primitive.ICodedDatatype;
 import ca.uhn.fhir.model.primitive.XhtmlDt;
 import ca.uhn.fhir.util.ReflectionUtil;
@@ -148,13 +146,43 @@ class ModelScanner {
 	}
 
 	private void init(Set<Class<? extends IElement>> toScan) {
-		toScan.add(DateDt.class);
-		toScan.add(CodeDt.class);
-		toScan.add(DecimalDt.class);
-		toScan.add(AttachmentDt.class);
-		toScan.add(ResourceReferenceDt.class);
-		toScan.add(QuantityDt.class); // TODO: why is this required
-		
+		long start = System.currentTimeMillis();
+
+		InputStream str = ModelScanner.class.getResourceAsStream("/ca/uhn/fhir/model/dstu/model.properties");
+		if (str == null) {
+			str = ModelScanner.class.getResourceAsStream("ca/uhn/fhir/model/dstu/model.properties");
+		}
+		if (str == null) {
+			throw new ConfigurationException("Can not find model property file on classpath: " + "/ca/uhn/fhir/model/dstu/model.properties");
+		}
+		Properties prop = new Properties();
+		try {
+			prop.load(str);
+			for (Object nextValue : prop.values()) {
+				try {
+					@SuppressWarnings("unchecked")
+					Class<? extends IElement> nextClass = (Class<? extends IElement>) Class.forName((String) nextValue);
+					if (!IElement.class.isAssignableFrom(nextClass)) {
+						ourLog.warn("Class is not assignable from " + IElement.class.getSimpleName()+": " + nextValue);
+						continue;
+					}
+					
+					toScan.add(nextClass);
+				} catch (ClassNotFoundException e) {
+					ourLog.warn("Unknown class exception: " + nextValue, e);
+				}
+			}
+		} catch (IOException e) {
+			throw new ConfigurationException("Failed to load model property file from classpath: " + "/ca/uhn/fhir/model/dstu/model.properties");
+		}
+
+		// toScan.add(DateDt.class);
+		// toScan.add(CodeDt.class);
+		// toScan.add(DecimalDt.class);
+		// toScan.add(AttachmentDt.class);
+		// toScan.add(ResourceReferenceDt.class);
+		// toScan.add(QuantityDt.class); 
+
 		do {
 			for (Class<? extends IElement> nextClass : toScan) {
 				scan(nextClass);
@@ -176,7 +204,8 @@ class ModelScanner {
 		myRuntimeChildUndeclaredExtensionDefinition = new RuntimeChildUndeclaredExtensionDefinition();
 		myRuntimeChildUndeclaredExtensionDefinition.sealAndInitialize(myClassToElementDefinitions);
 
-		ourLog.info("Done scanning FHIR library, found {} model entries", myClassToElementDefinitions.size());
+		long time = System.currentTimeMillis() - start;
+		ourLog.info("Done scanning FHIR library, found {} model entries in {}ms", myClassToElementDefinitions.size(), time);
 	}
 
 	private void scan(Class<? extends IElement> theClass) throws ConfigurationException {
@@ -315,8 +344,7 @@ class ModelScanner {
 	}
 
 	@SuppressWarnings("unchecked")
-	private void scanCompositeElementForChildren(Class<? extends ICompositeElement> theClass, Set<String> elementNames, TreeMap<Integer, BaseRuntimeDeclaredChildDefinition> theOrderToElementDef,
-			TreeMap<Integer, BaseRuntimeDeclaredChildDefinition> theOrderToExtensionDef) {
+	private void scanCompositeElementForChildren(Class<? extends ICompositeElement> theClass, Set<String> elementNames, TreeMap<Integer, BaseRuntimeDeclaredChildDefinition> theOrderToElementDef, TreeMap<Integer, BaseRuntimeDeclaredChildDefinition> theOrderToExtensionDef) {
 		int baseElementOrder = theOrderToElementDef.isEmpty() ? 0 : theOrderToElementDef.lastEntry().getKey() + 1;
 
 		for (Field next : theClass.getDeclaredFields()) {
@@ -332,7 +360,7 @@ class ModelScanner {
 			String elementName = childAnnotation.name();
 			int order = childAnnotation.order();
 			if (order < 0 && order != Child.ORDER_UNKNOWN) {
-				throw new ConfigurationException("Invalid order '" + order +"' on @Child for field '" + next.getName()+ "' on target type: " + theClass);
+				throw new ConfigurationException("Invalid order '" + order + "' on @Child for field '" + next.getName() + "' on target type: " + theClass);
 			}
 			if (order != Child.ORDER_UNKNOWN) {
 				order = order + baseElementOrder;
@@ -376,7 +404,7 @@ class ModelScanner {
 				 */
 				RuntimeChildContainedResources def = new RuntimeChildContainedResources(next, childAnnotation, descriptionAnnotation, elementName);
 				orderMap.put(order, def);
-				
+
 			} else if (choiceTypes.size() > 1 && !ResourceReferenceDt.class.isAssignableFrom(nextElementType)) {
 				/*
 				 * Child is a choice element
@@ -424,7 +452,7 @@ class ModelScanner {
 				orderMap.put(order, def);
 
 			} else if (IDatatype.class.equals(nextElementType)) {
-				
+
 				RuntimeChildAny def = new RuntimeChildAny(next, elementName, childAnnotation, descriptionAnnotation);
 				orderMap.put(order, def);
 
@@ -534,15 +562,14 @@ class ModelScanner {
 		scanCompositeElementForChildren(theClass, resourceDef);
 
 		myIdToResourceDefinition.put(resourceId, resourceDef);
-		
+
 		scanResourceForSearchParams(theClass, resourceDef);
-		
-		
+
 		return resourceName;
 	}
 
 	private void scanResourceForSearchParams(Class<? extends IResource> theClass, RuntimeResourceDefinition theResourceDef) {
-		
+
 		for (Field nextField : theClass.getFields()) {
 			SearchParamDefinition searchParam = nextField.getAnnotation(SearchParamDefinition.class);
 			if (searchParam != null) {
@@ -550,7 +577,7 @@ class ModelScanner {
 				theResourceDef.addSearchParam(param);
 			}
 		}
-		
+
 	}
 
 	public Map<String, RuntimeResourceDefinition> getIdToResourceDefinition() {

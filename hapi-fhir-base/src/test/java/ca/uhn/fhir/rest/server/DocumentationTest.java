@@ -6,7 +6,6 @@ import static org.junit.Assert.*;
 import java.util.Collection;
 import java.util.List;
 
-import org.hamcrest.core.StringContains;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -59,6 +58,7 @@ public class DocumentationTest {
 	/**
 	 * Created by dsotnikov on 2/25/2014.
 	 */
+	@SuppressWarnings("unused")
 	public static class SearchProvider {
 
 		@Search(type = Patient.class)

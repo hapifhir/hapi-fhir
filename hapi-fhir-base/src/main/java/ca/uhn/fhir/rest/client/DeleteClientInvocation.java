@@ -27,6 +27,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpRequestBase;
 
+import ca.uhn.fhir.rest.server.EncodingEnum;
+
 public class DeleteClientInvocation extends BaseClientInvocation {
 
 	private String myUrlPath;
@@ -37,7 +39,7 @@ public class DeleteClientInvocation extends BaseClientInvocation {
 	}
 
 	@Override
-	public HttpRequestBase asHttpRequest(String theUrlBase, Map<String, List<String>> theExtraParams) {
+	public HttpRequestBase asHttpRequest(String theUrlBase, Map<String, List<String>> theExtraParams, EncodingEnum theEncoding) {
 		StringBuilder b = new StringBuilder();
 		b.append(theUrlBase);
 		if (!theUrlBase.endsWith("/")) {

@@ -46,7 +46,7 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeResourceReferenceDefinition;
 import ca.uhn.fhir.model.api.BaseBundle;
 import ca.uhn.fhir.model.api.Bundle;
-import ca.uhn.fhir.model.api.BundleCategory;
+import ca.uhn.fhir.model.api.Tag;
 import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.api.ICompositeDatatype;
@@ -57,13 +57,14 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.IResourceBlock;
 import ca.uhn.fhir.model.api.ISupportsUndeclaredExtensions;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
+import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.dstu.composite.ContainedDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.XhtmlDt;
 import ca.uhn.fhir.rest.server.Constants;
 
-class ParserState<T extends IElement> {
+class ParserState<T> {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ParserState.class);
 	private FhirContext myContext;
@@ -151,6 +152,12 @@ class ParserState<T extends IElement> {
 		return retVal;
 	}
 
+	public static ParserState<TagList> getPreTagListInstance(FhirContext theContext, boolean theJsonMode) {
+		ParserState<TagList> retVal = new ParserState<TagList>(theContext, theJsonMode);
+		retVal.push(retVal.new PreTagListState());
+		return retVal;
+	}
+
 	public class AtomAuthorState extends BaseState {
 
 		private BaseBundle myInstance;
@@ -189,9 +196,9 @@ class ParserState<T extends IElement> {
 
 		private int myCatState = STATE_NONE;
 
-		private BundleCategory myInstance;
+		private Tag myInstance;
 
-		public AtomCategoryState(BundleCategory theEntry) {
+		public AtomCategoryState(Tag theEntry) {
 			super(null);
 			myInstance = theEntry;
 		}
@@ -205,7 +212,10 @@ class ParserState<T extends IElement> {
 			} else if ("scheme".equals(theName)) {
 				myInstance.setScheme(theValue);
 			} else if ("value".equals(theName)) {
-				// This is for the JSON parsing, which is weird for Categories..
+				/*
+				 * This handles XML parsing, which is odd for this quasi-resource type,
+				 * since the tag has three values instead of one like everything else.
+				 */
 				switch (myCatState) {
 				case STATE_LABEL:
 					myInstance.setLabel(theValue);
@@ -306,12 +316,39 @@ class ParserState<T extends IElement> {
 			if (myEntry.getUpdated().isEmpty() == false) {
 				metadata.put(ResourceMetadataKeyEnum.UPDATED, myEntry.getUpdated());
 			}
+			if (myEntry.getCategories().isEmpty() == false) {
+				TagList tagList = new TagList();
+				for (Tag next : myEntry.getCategories()) {
+					tagList.add(next);
+				}
+				metadata.put(ResourceMetadataKeyEnum.TAG_LIST, tagList);
+			}
 			if (!myEntry.getLinkSelf().isEmpty()) {
-				String subStr = "/" + Constants.PARAM_HISTORY + "/";
 				String linkSelfValue = myEntry.getLinkSelf().getValue();
-				int startIndex = linkSelfValue.indexOf(subStr);
+				/*
+				 * Find resource ID if it is there
+				 */
+				String resNameLc = myContext.getResourceDefinition(myEntry.getResource()).getName().toLowerCase();
+				String subStrId = "/" + resNameLc + "/";
+				int idIdx = linkSelfValue.toLowerCase().lastIndexOf(subStrId);
+				if (idIdx != -1) {
+					int endIndex = linkSelfValue.indexOf('/', idIdx + subStrId.length());
+					String id;
+					if (endIndex == -1) {
+						id = linkSelfValue.substring(idIdx + subStrId.length());
+					} else {
+						id = linkSelfValue.substring(idIdx + subStrId.length(), endIndex);
+					}
+					myEntry.getResource().setId(new IdDt(id));
+				}
+
+				/*
+				 * Find resource version ID if it is there
+				 */
+				String subStrVid = "/" + Constants.PARAM_HISTORY + "/";
+				int startIndex = linkSelfValue.indexOf(subStrVid);
 				if (startIndex > 0) {
-					startIndex = startIndex + subStr.length();
+					startIndex = startIndex + subStrVid.length();
 					int endIndex = linkSelfValue.indexOf('?', startIndex);
 					if (endIndex == -1) {
 						endIndex = linkSelfValue.length();
@@ -324,7 +361,7 @@ class ParserState<T extends IElement> {
 							ourLog.warn("Bundle entry link-self contains path information beyond version (this will be ignored): {}", versionId);
 							versionId = versionId.substring(0, idx);
 						}
-						metadata.put(ResourceMetadataKeyEnum.VERSION_ID, versionId);
+						metadata.put(ResourceMetadataKeyEnum.VERSION_ID, new IdDt(versionId));
 
 					}
 				}
@@ -548,7 +585,7 @@ class ParserState<T extends IElement> {
 			// ignore
 		}
 
-		protected IElement getCurrentElement() {
+		protected Object getCurrentElement() {
 			return null;
 		}
 
@@ -993,6 +1030,47 @@ class ParserState<T extends IElement> {
 
 	}
 
+	private class PreTagListState extends BaseState {
+
+		private TagList myTagList;
+
+		public PreTagListState() {
+			super(null);
+			myTagList = new TagList();
+		}
+
+		@Override
+		public void endingElement() throws DataFormatException {
+			pop();
+		}
+
+		@Override
+		public void enteringNewElement(String theNamespaceURI, String theLocalPart) throws DataFormatException {
+			if (!TagList.ELEMENT_NAME_LC.equals(theLocalPart.toLowerCase())) {
+				throw new DataFormatException("resourceType does not appear to be 'TagList', found: " + theLocalPart);
+			}
+
+			push(new TagListState(myTagList));
+		}
+
+		@Override
+		public boolean isPreResource() {
+			return true;
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public void wereBack() {
+			myObject = (T) myTagList;
+		}
+
+		@Override
+		protected TagList getCurrentElement() {
+			return myTagList;
+		}
+
+	}
+
 	private class PrimitiveState extends BaseState {
 		private IPrimitiveDatatype<?> myInstance;
 
@@ -1133,6 +1211,93 @@ class ParserState<T extends IElement> {
 		@Override
 		public void enteringNewElement(String theNamespaceURI, String theLocalPart) throws DataFormatException {
 			myDepth++;
+		}
+
+	}
+
+	private class TagListState extends BaseState {
+
+		private TagList myTagList;
+
+		public TagListState(TagList theTagList) {
+			super(null);
+			myTagList = theTagList;
+		}
+
+		@Override
+		public void endingElement() throws DataFormatException {
+			pop();
+		}
+
+		@Override
+		public void enteringNewElement(String theNamespaceURI, String theLocalPart) throws DataFormatException {
+			if (TagList.ATTR_CATEGORY.equals(theLocalPart)) {
+				push(new TagState(myTagList.addTag()));
+			} else {
+				throw new DataFormatException("Unexpected element: " + theLocalPart);
+			}
+		}
+
+	}
+
+	private class TagState extends BaseState {
+
+		private static final int LABEL = 2;
+		private static final int NONE = 0;
+
+		private static final int SCHEME = 3;
+		private static final int TERM = 1;
+		private int mySubState = 0;
+		private Tag myTag;
+
+		public TagState(Tag theTag) {
+			super(null);
+			myTag = theTag;
+		}
+
+		@Override
+		public void attributeValue(String theName, String theValue) throws DataFormatException {
+			String value = defaultIfBlank(theValue, null);
+
+			switch (mySubState) {
+			case TERM:
+				myTag.setTerm(value);
+				break;
+			case LABEL:
+				myTag.setLabel(value);
+				break;
+			case SCHEME:
+				myTag.setScheme(value);
+				break;
+			case NONE:
+				// This handles JSON encoding, which is a bit weird
+				enteringNewElement(null, theName);
+				attributeValue(null, value);
+				endingElement();
+				break;
+			}
+		}
+
+		@Override
+		public void endingElement() throws DataFormatException {
+			if (mySubState != NONE) {
+				mySubState = NONE;
+			} else {
+				pop();
+			}
+		}
+
+		@Override
+		public void enteringNewElement(String theNamespaceURI, String theLocalPart) throws DataFormatException {
+			if (Tag.ATTR_TERM.equals(theLocalPart)) {
+				mySubState = TERM;
+			} else if (Tag.ATTR_SCHEME.equals(theLocalPart)) {
+				mySubState = SCHEME;
+			} else if (Tag.ATTR_LABEL.equals(theLocalPart)) {
+				mySubState = LABEL;
+			} else {
+				throw new DataFormatException("Unexpected element: " + theLocalPart);
+			}
 		}
 
 	}

@@ -103,24 +103,24 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 	}
 
 	@Override
-	public List<IResource> invokeServer(Object theResourceProvider, Request theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException {
+	public List<IResource> invokeServer(Request theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException {
 		assert theRequest.getId() == null;
-		assert theRequest.getVersion() == null;
+		assert theRequest.getVersionId() == null;
 
-		Object response = invokeServerMethod(theResourceProvider, theMethodParams);
+		Object response = invokeServerMethod(theMethodParams);
 
 		return toResourceList(response);
 
 	}
 
 	@Override
-	public boolean matches(Request theRequest) {
+	public boolean incomingServerRequestMatchesMethod(Request theRequest) {
 		if (!theRequest.getResourceName().equals(getResourceName())) {
 			ourLog.trace("Method {} doesn't match because resource name {} != {}", getMethod().getName(), theRequest.getResourceName(), getResourceName());
 			return false;
 		}
-		if (theRequest.getId() != null || theRequest.getVersion() != null) {
-			ourLog.trace("Method {} doesn't match because ID or Version are not null: {} - {}", theRequest.getId(), theRequest.getVersion());
+		if (theRequest.getId() != null || theRequest.getVersionId() != null) {
+			ourLog.trace("Method {} doesn't match because ID or Version are not null: {} - {}", theRequest.getId(), theRequest.getVersionId());
 			return false;
 		}
 		if (theRequest.getRequestType() == RequestType.GET && theRequest.getOperation() != null && !Constants.PARAM_SEARCH.equals(theRequest.getOperation())) {

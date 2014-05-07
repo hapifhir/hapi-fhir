@@ -24,17 +24,21 @@ import static org.apache.commons.lang3.StringUtils.*;
 
 import java.net.URI;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
-public class Tag {
-
+public class Tag extends BaseElement implements IElement {
 	/**
 	 * Convenience constant containing the "http://hl7.org/fhir/tag" scheme
 	 * value
 	 */
 	public static final String HL7_ORG_FHIR_TAG = "http://hl7.org/fhir/tag";
 
+	public static final String ATTR_TERM = "term";
+	public static final String ATTR_LABEL = "label";
+	public static final String ATTR_SCHEME = "scheme";
+	
 	private String myLabel;
 	private String myScheme;
 	private String myTerm;
@@ -87,15 +91,6 @@ public class Tag {
 		return true;
 	}
 
-	@Override
-	public String toString() {
-		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SIMPLE_STYLE);
-		b.append("Term", myTerm);
-		b.append("Label", myLabel);
-		b.append("Scheme", myScheme);
-		return b.toString();
-	}
-
 	public String getLabel() {
 		return myLabel;
 	}
@@ -118,16 +113,24 @@ public class Tag {
 		return result;
 	}
 
-	public void setLabel(String theLabel) {
+	@Override
+	public boolean isEmpty() {
+		return StringUtils.isBlank(myLabel) && StringUtils.isBlank(myScheme) && StringUtils.isBlank(myTerm);
+	}
+
+	public Tag setLabel(String theLabel) {
 		myLabel = theLabel;
+		return this;
 	}
 
-	public void setScheme(String theScheme) {
+	public Tag setScheme(String theScheme) {
 		myScheme = theScheme;
+		return this;
 	}
 
-	public void setTerm(String theTerm) {
+	public Tag setTerm(String theTerm) {
 		myTerm = theTerm;
+		return this;
 	}
 
 	public String toHeaderValue() {
@@ -139,7 +142,16 @@ public class Tag {
 		if (isNotBlank(this.getScheme())) {
 			b.append("; scheme=\"").append(this.getScheme()).append('"');
 		}
-		return  b.toString();
+		return b.toString();
+	}
+
+	@Override
+	public String toString() {
+		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SIMPLE_STYLE);
+		b.append("Term", myTerm);
+		b.append("Label", myLabel);
+		b.append("Scheme", myScheme);
+		return b.toString();
 	}
 
 }

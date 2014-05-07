@@ -23,10 +23,15 @@ import ca.uhn.fhir.rest.server.Constants;
  */
 
 /**
- * RESTful method exception which corresponds to the <b>HTTP 400 Bad Request</b> status.
+ * Represents an <b>HTTP 400 Bad Request</b> response.
  * This status indicates that the client's message was invalid (e.g. not a valid FHIR Resource
  * per the specifications), as opposed to the {@link InvalidRequestException} which indicates
  * that data does not pass business rule validation on the server.
+ * 
+ * <p>
+ * Note that a complete list of RESTful exceptions is available in the
+ * <a href="./package-summary.html">Package Summary</a>.
+ * </p>
  * 
  * @see UnprocessableEntityException Which should be used for business level validation failures
  */

@@ -100,7 +100,7 @@ public class ResourceWithExtensionsA extends BaseResource {
 		
 		@Override
 		public boolean isEmpty() {
-			return false; // TODO: implement
+			return false; // not implemented
 		}
 
 		@Override
@@ -110,7 +110,7 @@ public class ResourceWithExtensionsA extends BaseResource {
 
 		@Override
 		public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
-			return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType ); // TODO: implement
+			return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType ); // not implemented
 		}
 
 
@@ -159,7 +159,7 @@ public class ResourceWithExtensionsA extends BaseResource {
 		
 		@Override
 		public boolean isEmpty() {
-			return false; // TODO: implement
+			return false; // not implemented
 		}
 
 		@Override
@@ -169,7 +169,7 @@ public class ResourceWithExtensionsA extends BaseResource {
 
 		@Override
 		public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
-			return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType ); // TODO: implement
+			return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType ); // not implemented
 		}
 
 
@@ -204,7 +204,7 @@ public class ResourceWithExtensionsA extends BaseResource {
 
 	@Override
 	public boolean isEmpty() {
-		return false; // TODO: implement
+		return false; // not implemented
 	}
 
 	@Override
@@ -214,7 +214,7 @@ public class ResourceWithExtensionsA extends BaseResource {
 
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
-		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType ); // TODO: implement
+		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType ); // not implemented
 	}
 
 	

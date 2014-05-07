@@ -22,6 +22,7 @@ package ca.uhn.fhir.parser;
 
 import static org.apache.commons.lang3.StringUtils.*;
 
+import java.io.IOException;
 import java.io.Reader;
 import java.io.StringWriter;
 import java.io.Writer;
@@ -56,13 +57,14 @@ import ca.uhn.fhir.context.RuntimeChildNarrativeDefinition;
 import ca.uhn.fhir.context.RuntimeChildUndeclaredExtensionDefinition;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.api.Bundle;
-import ca.uhn.fhir.model.api.BundleCategory;
+import ca.uhn.fhir.model.api.Tag;
 import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IPrimitiveDatatype;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ISupportsUndeclaredExtensions;
+import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.dstu.composite.ContainedDt;
 import ca.uhn.fhir.model.dstu.composite.NarrativeDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
@@ -104,9 +106,7 @@ public class XmlParser extends BaseParser implements IParser {
 	@Override
 	public void encodeBundleToWriter(Bundle theBundle, Writer theWriter) throws DataFormatException {
 		try {
-			XMLStreamWriter eventWriter;
-			eventWriter = myXmlOutputFactory.createXMLStreamWriter(theWriter);
-			eventWriter = decorateStreamWriter(eventWriter);
+			XMLStreamWriter eventWriter = createXmlWriter(theWriter);
 
 			eventWriter.writeStartElement("feed");
 			eventWriter.writeDefaultNamespace(ATOM_NS);
@@ -147,7 +147,7 @@ public class XmlParser extends BaseParser implements IParser {
 				writeOptionalTagWithTextNode(eventWriter, "published", nextEntry.getPublished());
 
 				if (nextEntry.getCategories() != null) {
-					for (BundleCategory next : nextEntry.getCategories()) {
+					for (Tag next : nextEntry.getCategories()) {
 						eventWriter.writeStartElement("category");
 						eventWriter.writeAttribute("term", defaultString(next.getTerm()));
 						eventWriter.writeAttribute("label", defaultString(next.getLabel()));
@@ -155,7 +155,7 @@ public class XmlParser extends BaseParser implements IParser {
 						eventWriter.writeEndElement();
 					}
 				}
-				
+
 				if (!nextEntry.getLinkSelf().isEmpty()) {
 					writeAtomLink(eventWriter, "self", nextEntry.getLinkSelf());
 				}
@@ -193,11 +193,10 @@ public class XmlParser extends BaseParser implements IParser {
 	}
 
 	@Override
-	public void encodeResourceToWriter(IResource theResource, Writer stringWriter) throws DataFormatException {
+	public void encodeResourceToWriter(IResource theResource, Writer theWriter) throws DataFormatException {
 		XMLStreamWriter eventWriter;
 		try {
-			eventWriter = myXmlOutputFactory.createXMLStreamWriter(stringWriter);
-			eventWriter = decorateStreamWriter(eventWriter);
+			eventWriter = createXmlWriter(theWriter);
 
 			encodeResourceToXmlStreamWriter(theResource, eventWriter, false);
 			eventWriter.flush();
@@ -206,22 +205,73 @@ public class XmlParser extends BaseParser implements IParser {
 		}
 	}
 
+	private XMLStreamWriter createXmlWriter(Writer theWriter) throws XMLStreamException {
+		XMLStreamWriter eventWriter;
+		eventWriter = myXmlOutputFactory.createXMLStreamWriter(theWriter);
+		eventWriter = decorateStreamWriter(eventWriter);
+		return eventWriter;
+	}
+
 	@Override
-	public <T extends IResource> Bundle parseBundle(Class<T> theResourceType, Reader theReader) {
-		XMLEventReader streamReader;
+	public void encodeTagListToWriter(TagList theTagList, Writer theWriter) throws IOException {
 		try {
-			streamReader = myXmlInputFactory.createXMLEventReader(theReader);
+			XMLStreamWriter eventWriter = createXmlWriter(theWriter);
+
+			eventWriter.writeStartElement(TagList.ELEMENT_NAME_LC);
+			eventWriter.writeDefaultNamespace(FHIR_NS);
+
+			for (Tag next : theTagList) {
+				eventWriter.writeStartElement(TagList.ATTR_CATEGORY);
+
+				if (isNotBlank(next.getTerm())) {
+					eventWriter.writeAttribute(Tag.ATTR_TERM, next.getTerm());
+				}
+				if (isNotBlank(next.getLabel())) {
+					eventWriter.writeAttribute(Tag.ATTR_LABEL, next.getLabel());
+				}
+				if (isNotBlank(next.getScheme())) {
+					eventWriter.writeAttribute(Tag.ATTR_SCHEME, next.getScheme());
+				}
+
+				eventWriter.writeEndElement();
+			}
+
+			eventWriter.writeEndElement();
+			eventWriter.close();
 		} catch (XMLStreamException e) {
-			throw new DataFormatException(e);
-		} catch (FactoryConfigurationError e) {
 			throw new ConfigurationException("Failed to initialize STaX event factory", e);
 		}
+	}
+
+	@Override
+	public <T extends IResource> Bundle parseBundle(Class<T> theResourceType, Reader theReader) {
+		XMLEventReader streamReader = createStreamReader(theReader);
 
 		return parseBundle(streamReader, theResourceType);
 	}
 
 	@Override
 	public <T extends IResource> T parseResource(Class<T> theResourceType, Reader theReader) {
+		XMLEventReader streamReader = createStreamReader(theReader);
+
+		return parseResource(theResourceType, streamReader);
+	}
+
+	@Override
+	public TagList parseTagList(Reader theReader) {
+		XMLEventReader streamReader = createStreamReader(theReader);
+
+		ParserState<TagList> parserState = ParserState.getPreTagListInstance(myContext, false);
+		return doXmlLoop(streamReader, parserState);
+	}
+
+	@Override
+	public IParser setPrettyPrint(boolean thePrettyPrint) {
+		myPrettyPrint = thePrettyPrint;
+		return this;
+	}
+
+	private XMLEventReader createStreamReader(Reader theReader) {
 		XMLEventReader streamReader;
 		try {
 			streamReader = myXmlInputFactory.createXMLEventReader(theReader);
@@ -230,14 +280,7 @@ public class XmlParser extends BaseParser implements IParser {
 		} catch (FactoryConfigurationError e) {
 			throw new ConfigurationException("Failed to initialize STaX event factory", e);
 		}
-
-		return parseResource(theResourceType, streamReader);
-	}
-
-	@Override
-	public IParser setPrettyPrint(boolean thePrettyPrint) {
-		myPrettyPrint = thePrettyPrint;
-		return this;
+		return streamReader;
 	}
 
 	private XMLStreamWriter decorateStreamWriter(XMLStreamWriter eventWriter) {
@@ -249,7 +292,9 @@ public class XmlParser extends BaseParser implements IParser {
 		}
 	}
 
-	private <T extends IElement> T doXmlLoop(XMLEventReader streamReader, ParserState<T> parserState) {
+	private <T> T doXmlLoop(XMLEventReader streamReader, ParserState<T> parserState) {
+		ourLog.trace("Entering XML parsing loop with state: {}", parserState);
+
 		try {
 			while (streamReader.hasNext()) {
 				XMLEvent nextEvent = streamReader.nextEvent();
@@ -639,18 +684,18 @@ public class XmlParser extends BaseParser implements IParser {
 		}
 	}
 
-	private void writeTagWithTextNode(XMLStreamWriter theEventWriter, String theElementName, StringDt theStringDt) throws XMLStreamException {
-		theEventWriter.writeStartElement(theElementName);
-		if (StringUtils.isNotBlank(theStringDt.getValue())) {
-			theEventWriter.writeCharacters(theStringDt.getValue());
-		}
-		theEventWriter.writeEndElement();
-	}
-
 	private void writeTagWithTextNode(XMLStreamWriter theEventWriter, String theElementName, IdDt theIdDt) throws XMLStreamException {
 		theEventWriter.writeStartElement(theElementName);
 		if (StringUtils.isNotBlank(theIdDt.getValue())) {
 			theEventWriter.writeCharacters(theIdDt.getValue());
+		}
+		theEventWriter.writeEndElement();
+	}
+
+	private void writeTagWithTextNode(XMLStreamWriter theEventWriter, String theElementName, StringDt theStringDt) throws XMLStreamException {
+		theEventWriter.writeStartElement(theElementName);
+		if (StringUtils.isNotBlank(theStringDt.getValue())) {
+			theEventWriter.writeCharacters(theStringDt.getValue());
 		}
 		theEventWriter.writeEndElement();
 	}

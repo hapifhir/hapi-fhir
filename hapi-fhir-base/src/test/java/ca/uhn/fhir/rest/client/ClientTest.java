@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.client;
 
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
@@ -49,12 +50,9 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.model.primitive.StringDt;
-import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.IncludeParam;
-import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
-import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IBasicClient;
@@ -64,6 +62,7 @@ import ca.uhn.fhir.rest.param.QualifiedDateParam;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 
 public class ClientTest {
@@ -107,11 +106,29 @@ public class ClientTest {
 		assertEquals("200", response.getVersionId().getValue());
 	}
 
-	
+	@Test
+	public void testCreateBad() throws Exception {
+
+		Patient patient = new Patient();
+		patient.addIdentifier("urn:foo", "123");
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
+		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 400, "foobar"));
+		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_TEXT + "; charset=UTF-8"));
+		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader("foobar"), Charset.forName("UTF-8")));
+
+		try {
+			ctx.newRestfulClient(ITestClient.class, "http://foo").createPatient(patient);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertThat(e.getMessage(), StringContains.containsString("foobar"));
+		}
+	}
 
 	/**
-	 * Some servers (older ones?) return the resourcde you created instead
-	 * of an OperationOutcome. We just need to ignore it.
+	 * Some servers (older ones?) return the resourcde you created instead of an
+	 * OperationOutcome. We just need to ignore it.
 	 */
 	@Test
 	public void testCreateWithResourceResponse() throws Exception {
@@ -135,14 +152,7 @@ public class ClientTest {
 		assertEquals("100", response.getId().getValue());
 		assertEquals("200", response.getVersionId().getValue());
 	}
-	
-	
-	public interface CreateWithTagList extends IBasicClient
-	{
-		@Create
-		public MethodOutcome createPatient(@ResourceParam Patient thePatient, TagList theTagList);
-	}
-	
+
 	@Test
 	public void testCreateWithTagList() throws Exception {
 
@@ -156,44 +166,25 @@ public class ClientTest {
 		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(""), Charset.forName("UTF-8")));
 		when(httpResponse.getAllHeaders()).thenReturn(toHeaderArray("Location", "http://example.com/fhir/Patient/100/_history/200"));
 
-		CreateWithTagList client = ctx.newRestfulClient(CreateWithTagList.class, "http://foo");
+		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
 		TagList tagList = new TagList();
-		tagList.add(new Tag("Dog", "DogLabel", (String)null));
+		tagList.add(new Tag("Dog", "DogLabel", (String) null));
 		tagList.add(new Tag("Cat", "CatLabel", "http://cats"));
-		MethodOutcome response = client.createPatient(patient, tagList);
+		patient.getResourceMetadata().put(ResourceMetadataKeyEnum.TAG_LIST, tagList);
+
+		MethodOutcome response = client.createPatient(patient);
 
 		assertEquals(HttpPost.class, capt.getValue().getClass());
 		HttpPost post = (HttpPost) capt.getValue();
 		assertThat(IOUtils.toString(post.getEntity().getContent()), StringContains.containsString("<Patient"));
 		assertEquals("100", response.getId().getValue());
 		assertEquals("200", response.getVersionId().getValue());
-		
+
 		Header[] headers = post.getHeaders("Category");
 		assertEquals(2, headers.length);
-		assertEquals("Dog; label=\"DogLabel\"", headers[0].getValue()); 
-		assertEquals("Cat; label=\"CatLabel\"; scheme=\"http://cats\"", headers[1].getValue()); 
-		
-	}
-	
-	
-	@Test
-	public void testCreateBad() throws Exception {
+		assertEquals("Dog; label=\"DogLabel\"", headers[0].getValue());
+		assertEquals("Cat; label=\"CatLabel\"; scheme=\"http://cats\"", headers[1].getValue());
 
-		Patient patient = new Patient();
-		patient.addIdentifier("urn:foo", "123");
-
-		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
-		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
-		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 400, "foobar"));
-		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_TEXT + "; charset=UTF-8"));
-		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader("foobar"), Charset.forName("UTF-8")));
-
-		try {
-			ctx.newRestfulClient(ITestClient.class, "http://foo").createPatient(patient);
-			fail();
-		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), StringContains.containsString("foobar"));
-		}
 	}
 
 	@Test
@@ -398,7 +389,6 @@ public class ClientTest {
 		}
 	}
 
-	
 	@Test
 	public void testHistoryServer() throws Exception {
 		InstantDt date1 = new InstantDt(new Date(20000L));
@@ -470,7 +460,7 @@ public class ClientTest {
 			assertEquals(updExpected.getValueAsString(), updActualBundle.getValueAsString());
 		}
 	}
-	
+
 	@Test
 	public void testHistoryWithParams() throws Exception {
 
@@ -488,17 +478,19 @@ public class ClientTest {
 				return new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8"));
 			}
 		});
-		
-		
+
 		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
-		
+
 		client.getHistoryPatientInstance(new IdDt("111"), new InstantDt("2012-01-02T00:01:02"), new IntegerDt(12));
 		assertEquals("http://foo/Patient/111/_history?_since=2012-01-02T00%3A01%3A02&_count=12", capt.getAllValues().get(0).getURI().toString());
 
-		String expectedDateString= new InstantDt(new InstantDt("2012-01-02T00:01:02").getValue()).getValueAsString(); // ensures the local timezone
-		expectedDateString=expectedDateString.replace(":", "%3A");
+		String expectedDateString = new InstantDt(new InstantDt("2012-01-02T00:01:02").getValue()).getValueAsString(); // ensures
+																														// the
+																														// local
+																														// timezone
+		expectedDateString = expectedDateString.replace(":", "%3A");
 		client.getHistoryPatientInstance(new IdDt("111"), new InstantDt("2012-01-02T00:01:02").getValue(), new IntegerDt(12).getValue());
-		assertEquals("http://foo/Patient/111/_history?_since="+expectedDateString+"&_count=12", capt.getAllValues().get(1).getURI().toString());
+		assertEquals("http://foo/Patient/111/_history?_since=" + expectedDateString + "&_count=12", capt.getAllValues().get(1).getURI().toString());
 
 		client.getHistoryPatientInstance(new IdDt("111"), null, new IntegerDt(12));
 		assertEquals("http://foo/Patient/111/_history?_count=12", capt.getAllValues().get(2).getURI().toString());
@@ -511,6 +503,22 @@ public class ClientTest {
 
 		client.getHistoryPatientInstance(new IdDt("111"), new InstantDt("2012-01-02T00:01:02"), new IntegerDt());
 		assertEquals("http://foo/Patient/111/_history?_since=2012-01-02T00%3A01%3A02", capt.getAllValues().get(3).getURI().toString());
+
+	}
+
+	@Test
+	public void testNonAnnotatedMethodFailsGracefully() {
+
+		// TODO: remove the read annotation and make sure we get a sensible
+		// error message to tell the user why the method isn't working
+		ClientWithoutAnnotation client = new FhirContext().newRestfulClient(ClientWithoutAnnotation.class, "http://wildfhir.aegis.net/fhir");
+
+		try {
+			client.read(new IdDt("8"));
+			fail();
+		} catch (UnsupportedOperationException e) {
+			assertThat(e.getMessage(), containsString("annotation"));
+		}
 
 	}
 
@@ -539,7 +547,8 @@ public class ClientTest {
 		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
 
 		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
-		// Patient response = client.findPatientByMrn(new IdentifierDt("urn:foo", "123"));
+		// Patient response = client.findPatientByMrn(new
+		// IdentifierDt("urn:foo", "123"));
 		Patient response = client.getPatientById(new IdDt("111"));
 
 		assertEquals("http://foo/Patient/111", capt.getValue().getURI().toString());
@@ -547,10 +556,35 @@ public class ClientTest {
 
 		InstantDt lm = (InstantDt) response.getResourceMetadata().get(ResourceMetadataKeyEnum.UPDATED);
 		assertEquals("2011-01-02T22:01:02", lm.getValueAsString());
-		
+
 	}
 
-	
+	@Test
+	public void testReadFailureNoCharset() throws Exception {
+
+		//@formatter:off
+		String msg = "<OperationOutcome xmlns=\"http://hl7.org/fhir\"></OperationOutcome>";
+		//@formatter:on
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
+		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 404, "NOT FOUND"));
+		Header[] headers = new Header[1];
+		headers[0] = new BasicHeader(Constants.HEADER_LAST_MODIFIED, "2011-01-02T22:01:02");
+		when(httpResponse.getAllHeaders()).thenReturn(headers);
+		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML));
+		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
+
+		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
+		try {
+			client.getPatientById(new IdDt("111"));
+			fail();
+		} catch (ResourceNotFoundException e) {
+			// good
+		}
+
+	}
+
 	@Test
 	public void testReadNoCharset() throws Exception {
 
@@ -576,7 +610,8 @@ public class ClientTest {
 		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
 
 		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
-		// Patient response = client.findPatientByMrn(new IdentifierDt("urn:foo", "123"));
+		// Patient response = client.findPatientByMrn(new
+		// IdentifierDt("urn:foo", "123"));
 		Patient response = client.getPatientById(new IdDt("111"));
 
 		assertEquals("http://foo/Patient/111", capt.getValue().getURI().toString());
@@ -584,52 +619,9 @@ public class ClientTest {
 
 		InstantDt lm = (InstantDt) response.getResourceMetadata().get(ResourceMetadataKeyEnum.UPDATED);
 		assertEquals("2011-01-02T22:01:02", lm.getValueAsString());
-		
-	}
-	
-	private interface ClientWithoutAnnotation extends IBasicClient {
-		@Read
-		Patient read(@IdParam IdDt theId);
-	}
-	
-	@Test
-	public void testIt() {
-		
-		// TODO: remove the read annotation and make sure we get a sensible 
-		// error message to tell the user why the method isn't working
-		ClientWithoutAnnotation client = new FhirContext().newRestfulClient(ClientWithoutAnnotation.class, "http://wildfhir.aegis.net/fhir");
-		client.read(new IdDt("8"));
-		
-	}
-	
-	@Test
-	public void testReadFailureNoCharset() throws Exception {
 
-		//@formatter:off
-		String msg = "<OperationOutcome xmlns=\"http://hl7.org/fhir\"></OperationOutcome>";
-		//@formatter:on
-
-		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
-		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
-		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 404, "NOT FOUND"));
-		Header[] headers = new Header[1];
-		headers[0] = new BasicHeader(Constants.HEADER_LAST_MODIFIED, "2011-01-02T22:01:02");
-		when(httpResponse.getAllHeaders()).thenReturn(headers);
-		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML));
-		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
-
-		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
-		Patient response = client.getPatientById(new IdDt("111"));
-
-		assertEquals("http://foo/Patient/111", capt.getValue().getURI().toString());
-		assertEquals("PRP1660", response.getIdentifier().get(0).getValue().getValue());
-
-		InstantDt lm = (InstantDt) response.getResourceMetadata().get(ResourceMetadataKeyEnum.UPDATED);
-		assertEquals("2011-01-02T22:01:02", lm.getValueAsString());
-		
 	}
 
-	
 	@Test
 	public void testSearchByDateRange() throws Exception {
 
@@ -670,35 +662,6 @@ public class ClientTest {
 
 	}
 
-	
-	@Test
-	public void testSearchWithFormatAndPrettyPrint() throws Exception {
-
-		String msg = getPatientFeedWithOneResult();
-
-		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
-		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
-		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
-		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
-
-		// TODO: document this
-		
-		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
-		client.getPatientByDob(new QualifiedDateParam(QuantityCompararatorEnum.GREATERTHAN_OR_EQUALS, "2011-01-02"));
-		assertEquals("http://foo/Patient?birthdate=%3E%3D2011-01-02", capt.getAllValues().get(0).getURI().toString());
-
-		client.setEncoding(EncodingEnum.JSON);
-		client.getPatientByDob(new QualifiedDateParam(QuantityCompararatorEnum.GREATERTHAN_OR_EQUALS, "2011-01-02"));
-		assertEquals("http://foo/Patient?birthdate=%3E%3D2011-01-02&_format=json", capt.getAllValues().get(1).getURI().toString());
-
-		client.setPrettyPrint(true);
-		client.getPatientByDob(new QualifiedDateParam(QuantityCompararatorEnum.GREATERTHAN_OR_EQUALS, "2011-01-02"));
-		assertEquals("http://foo/Patient?birthdate=%3E%3D2011-01-02&_format=json&_pretty=true", capt.getAllValues().get(2).getURI().toString());
-
-	}
-	
-	
 	@Test
 	public void testSearchByToken() throws Exception {
 
@@ -718,7 +681,6 @@ public class ClientTest {
 
 	}
 
-	
 	@Test
 	public void testSearchComposite() throws Exception {
 
@@ -739,7 +701,7 @@ public class ClientTest {
 		assertEquals("http://foo/Patient?ids=foo%7Cbar%2Cbaz%7Cboz", capt.getValue().getURI().toString());
 
 	}
-	
+
 	@Test
 	public void testSearchNamedQueryNoParams() throws Exception {
 
@@ -775,7 +737,7 @@ public class ClientTest {
 		assertEquals("http://foo/Patient?_query=someQueryOneParam&param1=BB", capt.getValue().getURI().toString());
 
 	}
-	
+
 	@Test
 	public void testSearchWithCustomType() throws Exception {
 
@@ -813,8 +775,37 @@ public class ClientTest {
 		assertEquals("PRP1660", response.get(0).getIdentifier().get(0).getValue().getValue());
 
 	}
-	
-	
+
+	@Test
+	public void testSearchWithFormatAndPrettyPrint() throws Exception {
+
+		String msg = getPatientFeedWithOneResult();
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
+		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
+
+		// TODO: document this
+
+		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
+		client.getPatientByDob(new QualifiedDateParam(QuantityCompararatorEnum.GREATERTHAN_OR_EQUALS, "2011-01-02"));
+		assertEquals("http://foo/Patient?birthdate=%3E%3D2011-01-02", capt.getAllValues().get(0).getURI().toString());
+
+		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
+		client.setEncoding(EncodingEnum.JSON); // this needs to be actually
+												// implemented
+		client.getPatientByDob(new QualifiedDateParam(QuantityCompararatorEnum.GREATERTHAN_OR_EQUALS, "2011-01-02"));
+		assertEquals("http://foo/Patient?birthdate=%3E%3D2011-01-02&_format=json", capt.getAllValues().get(1).getURI().toString());
+
+		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
+		client.setPrettyPrint(true);
+		client.getPatientByDob(new QualifiedDateParam(QuantityCompararatorEnum.GREATERTHAN_OR_EQUALS, "2011-01-02"));
+		assertEquals("http://foo/Patient?birthdate=%3E%3D2011-01-02&_format=json&_pretty=true", capt.getAllValues().get(2).getURI().toString());
+
+	}
+
 	@Test
 	public void testSearchWithIncludes() throws Exception {
 
@@ -908,7 +899,8 @@ public class ClientTest {
 	}
 
 	/**
-	 * Return a FHIR content type, but no content and make sure we handle this without crashing
+	 * Return a FHIR content type, but no content and make sure we handle this
+	 * without crashing
 	 */
 	@Test
 	public void testUpdateWithEmptyResponse() throws Exception {
@@ -1015,7 +1007,8 @@ public class ClientTest {
 		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
 
 		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
-		// Patient response = client.findPatientByMrn(new IdentifierDt("urn:foo", "123"));
+		// Patient response = client.findPatientByMrn(new
+		// IdentifierDt("urn:foo", "123"));
 		Patient response = client.getPatientByVersionId(new IdDt("111"), new IdDt("999"));
 
 		assertEquals("http://foo/Patient/111/_history/999", capt.getValue().getURI().toString());
@@ -1055,24 +1048,27 @@ public class ClientTest {
 		return new Header[] { new BasicHeader(theName, theValue) };
 	}
 
-	@ResourceDef(name="Patient")
-	public static class CustomPatient extends Patient
-	{
+	@ResourceDef(name = "Patient")
+	public static class CustomPatient extends Patient {
 		// nothing
 	}
 
 	public interface ITestClientWithCustomType extends IBasicClient {
 		@Search()
-		public CustomPatient getPatientByDob(@RequiredParam(name=Patient.SP_BIRTHDATE) QualifiedDateParam theBirthDate);
+		public CustomPatient getPatientByDob(@RequiredParam(name = Patient.SP_BIRTHDATE) QualifiedDateParam theBirthDate);
 	}
 
 	public interface ITestClientWithCustomTypeList extends IBasicClient {
 		@Search()
-		public List<CustomPatient> getPatientByDob(@RequiredParam(name=Patient.SP_BIRTHDATE) QualifiedDateParam theBirthDate);
+		public List<CustomPatient> getPatientByDob(@RequiredParam(name = Patient.SP_BIRTHDATE) QualifiedDateParam theBirthDate);
 	}
 
 	public interface ITestClientWithStringIncludes extends IBasicClient {
 		@Search()
 		public Patient getPatientWithIncludes(@RequiredParam(name = "withIncludes") StringDt theString, @IncludeParam String theInclude);
+	}
+
+	private interface ClientWithoutAnnotation extends IBasicClient {
+		Patient read(@IdParam IdDt theId);
 	}
 }

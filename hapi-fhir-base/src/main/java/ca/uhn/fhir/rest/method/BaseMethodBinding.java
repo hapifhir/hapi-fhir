@@ -20,6 +20,8 @@ package ca.uhn.fhir.rest.method;
  * #L%
  */
 
+import static org.apache.commons.lang3.StringUtils.*;
+
 import java.io.IOException;
 import java.io.Reader;
 import java.lang.reflect.InvocationTargetException;
@@ -32,7 +34,6 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
@@ -41,11 +42,16 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.TagList;
+import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.annotation.AddTags;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.Delete;
+import ca.uhn.fhir.rest.annotation.DeleteTags;
+import ca.uhn.fhir.rest.annotation.GetTags;
 import ca.uhn.fhir.rest.annotation.History;
 import ca.uhn.fhir.rest.annotation.Metadata;
 import ca.uhn.fhir.rest.annotation.Read;
@@ -63,6 +69,13 @@ import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceVersionNotSpecifiedException;
+import ca.uhn.fhir.rest.server.exceptions.UnclassifiedServerFailureException;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.ReflectionUtil;
 
 public abstract class BaseMethodBinding implements IClientResponseHandler {
@@ -72,12 +85,12 @@ public abstract class BaseMethodBinding implements IClientResponseHandler {
 	private List<IParameter> myParameters;
 	private Object myProvider;
 
-	public BaseMethodBinding(Method theMethod, FhirContext theConetxt, Object theProvider) {
+	public BaseMethodBinding(Method theMethod, FhirContext theContext, Object theProvider) {
 		assert theMethod != null;
-		assert theConetxt != null;
+		assert theContext != null;
 
 		myMethod = theMethod;
-		myContext = theConetxt;
+		myContext = theContext;
 		myProvider = theProvider;
 		myParameters = ParameterUtil.getResourceParameters(theMethod);
 	}
@@ -108,25 +121,17 @@ public abstract class BaseMethodBinding implements IClientResponseHandler {
 
 	public abstract void invokeServer(RestfulServer theServer, Request theRequest, HttpServletResponse theResponse) throws BaseServerResponseException, IOException;
 
-	public abstract boolean matches(Request theRequest);
+	public abstract boolean incomingServerRequestMatchesMethod(Request theRequest);
 
-	protected IParser createAppropriateParser(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode) throws IOException {
-		IParser parser;
-		if (Constants.CT_ATOM_XML.equals(theResponseMimeType)) {
-			parser = getContext().newXmlParser();
-		} else if (Constants.CT_FHIR_XML.equals(theResponseMimeType)) {
-			parser = getContext().newXmlParser();
-		} else if (Constants.CT_FHIR_JSON.equals(theResponseMimeType)) {
-			parser = getContext().newJsonParser(); // TODO: move all this so it only happens in one place in the lib, and maybe use a hashmap? 
-		} else if ("application/json".equals(theResponseMimeType)) {
-			parser = getContext().newJsonParser();
-		} else if ("application/xml".equals(theResponseMimeType)) {
-			parser = getContext().newXmlParser(); 
-		} else if ("text/xml".equals(theResponseMimeType)) {
-			parser = getContext().newXmlParser(); 
-		} else {
-			throw new NonFhirResponseException("Response contains non-FHIR content-type: " + theResponseMimeType, theResponseMimeType, theResponseStatusCode, IOUtils.toString(theResponseReader));
+	protected IParser createAppropriateParserForParsingResponse(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode) {
+		EncodingEnum encoding = EncodingEnum.forContentType(theResponseMimeType);		
+		if (encoding==null) {
+			NonFhirResponseException ex = new NonFhirResponseException(theResponseStatusCode, "Response contains non-FHIR content-type: " + theResponseMimeType);
+			populateException(ex, theResponseReader);
+			throw ex;
 		}
+		
+		IParser parser=encoding.newParser(getContext());
 		return parser;
 	}
 
@@ -134,10 +139,10 @@ public abstract class BaseMethodBinding implements IClientResponseHandler {
 		return myParameters;
 	}
 
-	protected Object invokeServerMethod(Object theResourceProvider, Object[] theMethodParams) {
+	protected Object invokeServerMethod(Object[] theMethodParams) {
 		try {
 			Method method = getMethod();
-			return method.invoke(theResourceProvider, theMethodParams);
+			return method.invoke(getProvider(), theMethodParams);
 		} catch (InvocationTargetException e) {
 			if (e.getCause() instanceof BaseServerResponseException) {
 				throw (BaseServerResponseException) e.getCause();
@@ -164,8 +169,11 @@ public abstract class BaseMethodBinding implements IClientResponseHandler {
 		Delete delete = theMethod.getAnnotation(Delete.class);
 		History history = theMethod.getAnnotation(History.class);
 		Validate validate = theMethod.getAnnotation(Validate.class);
+		GetTags getTags = theMethod.getAnnotation(GetTags.class);
+		AddTags addTags = theMethod.getAnnotation(AddTags.class);
+		DeleteTags deleteTags = theMethod.getAnnotation(DeleteTags.class);
 		// ** if you add another annotation above, also add it to the next line:
-		if (!verifyMethodHasZeroOrOneOperationAnnotation(theMethod, read, search, conformance, create, update, delete, history, validate)) {
+		if (!verifyMethodHasZeroOrOneOperationAnnotation(theMethod, read, search, conformance, create, update, delete, history, validate, getTags, addTags, deleteTags)) {
 			return null;
 		}
 
@@ -180,7 +188,11 @@ public abstract class BaseMethodBinding implements IClientResponseHandler {
 		}
 
 		Class<?> returnTypeFromMethod = theMethod.getReturnType();
-		if (MethodOutcome.class.equals(returnTypeFromMethod)) {
+		if (getTags != null) {
+			if (!TagList.class.equals(returnTypeFromMethod)) {
+				throw new ConfigurationException("Method '" + theMethod.getName() + "' from type " + theMethod.getDeclaringClass().getCanonicalName() + " is annotated with @" + GetTags.class.getSimpleName() + " but does not return type " + TagList.class.getName());
+			}
+		} else if (MethodOutcome.class.equals(returnTypeFromMethod)) {
 			// returns a method outcome
 		} else if (Bundle.class.equals(returnTypeFromMethod)) {
 			// returns a bundle
@@ -190,7 +202,7 @@ public abstract class BaseMethodBinding implements IClientResponseHandler {
 			returnTypeFromMethod = ReflectionUtil.getGenericCollectionTypeOfMethodReturnType(theMethod);
 			if (!verifyIsValidResourceReturnType(returnTypeFromMethod) && !IResource.class.equals(returnTypeFromMethod)) {
 				throw new ConfigurationException("Method '" + theMethod.getName() + "' from " + IResourceProvider.class.getSimpleName() + " type " + theMethod.getDeclaringClass().getCanonicalName() + " returns a collection with generic type " + toLogString(returnTypeFromMethod)
-						+ " - Must return a resource type or a collection (List, Set) of a resource type");
+						+ " - Must return a resource type or a collection (List, Set) with a resource type parameter (e.g. List<Patient> )");
 			}
 		} else {
 			if (!IResource.class.equals(returnTypeFromMethod) && !verifyIsValidResourceReturnType(returnTypeFromMethod)) {
@@ -214,6 +226,12 @@ public abstract class BaseMethodBinding implements IClientResponseHandler {
 			returnTypeFromAnnotation = update.type();
 		} else if (validate != null) {
 			returnTypeFromAnnotation = validate.type();
+		} else if (getTags != null) {
+			returnTypeFromAnnotation = getTags.type();
+		} else if (addTags != null) {
+			returnTypeFromAnnotation = addTags.type();
+		} else if (deleteTags != null) {
+			returnTypeFromAnnotation = deleteTags.type();
 		}
 
 		if (returnTypeFromRp != null) {
@@ -259,6 +277,12 @@ public abstract class BaseMethodBinding implements IClientResponseHandler {
 			return new HistoryMethodBinding(theMethod, theContext, theProvider);
 		} else if (validate != null) {
 			return new ValidateMethodBinding(theMethod, theContext, theProvider);
+		} else if (getTags != null) {
+			return new GetTagsMethodBinding(theMethod, theContext, theProvider, getTags);
+		} else if (addTags != null) {
+			return new AddTagsMethodBinding(theMethod, theContext, theProvider, addTags);
+		} else if (deleteTags != null) {
+			return new DeleteTagsMethodBinding(theMethod, theContext, theProvider, deleteTags);
 		} else {
 			throw new ConfigurationException("Did not detect any FHIR annotations on method '" + theMethod.getName() + "' on type: " + theMethod.getDeclaringClass().getCanonicalName());
 		}
@@ -285,8 +309,8 @@ public abstract class BaseMethodBinding implements IClientResponseHandler {
 		// return sm;
 	}
 
-	public static EncodingEnum determineResponseEncoding(HttpServletRequest theRequest, Map<String, String[]> theParams) {
-		String[] format = theParams.remove(Constants.PARAM_FORMAT);
+	public static EncodingEnum determineResponseEncoding(Request theReq) {
+		String[] format = theReq.getParameters().remove(Constants.PARAM_FORMAT);
 		if (format != null) {
 			for (String nextFormat : format) {
 				EncodingEnum retVal = Constants.FORMAT_VAL_TO_ENCODING.get(nextFormat);
@@ -296,7 +320,7 @@ public abstract class BaseMethodBinding implements IClientResponseHandler {
 			}
 		}
 
-		Enumeration<String> acceptValues = theRequest.getHeaders("Accept");
+		Enumeration<String> acceptValues = theReq.getServletRequest().getHeaders("Accept");
 		if (acceptValues != null) {
 			while (acceptValues.hasMoreElements()) {
 				EncodingEnum retVal = Constants.FORMAT_VAL_TO_ENCODING.get(acceptValues.nextElement());
@@ -306,6 +330,27 @@ public abstract class BaseMethodBinding implements IClientResponseHandler {
 			}
 		}
 		return EncodingEnum.XML;
+	}
+
+	protected IParser createAppropriateParserForParsingServerRequest(Request theRequest) {
+		String contentTypeHeader = theRequest.getServletRequest().getHeader("content-type");
+		EncodingEnum encoding;
+		if (isBlank(contentTypeHeader)) {
+			encoding = EncodingEnum.XML;
+		} else {
+			int semicolon = contentTypeHeader.indexOf(';');
+			if (semicolon!=-1) {
+				contentTypeHeader=contentTypeHeader.substring(0,semicolon);
+			}
+			encoding = EncodingEnum.forContentType(contentTypeHeader);
+		}
+		
+		if (encoding==null) {
+			throw new InvalidRequestException("Request contins non-FHIR conent-type header value: " + contentTypeHeader);
+		}
+		
+		IParser parser=encoding.newParser(getContext());
+		return parser;
 	}
 
 	public static boolean verifyMethodHasZeroOrOneOperationAnnotation(Method theNextMethod, Object... theAnnotations) {
@@ -349,6 +394,18 @@ public abstract class BaseMethodBinding implements IClientResponseHandler {
 		return retVal;
 	}
 
+	protected Object[] createParametersForServerRequest(Request theRequest, IResource theResource) {
+		Object[] params = new Object[getParameters().size()];
+		for (int i = 0; i < getParameters().size(); i++) {
+			IParameter param = getParameters().get(i);
+			if (param == null) {
+				continue;
+			}
+			params[i] = param.translateQueryParametersIntoServerArgument(theRequest, theResource);
+		}
+		return params;
+	}
+
 	protected static List<IResource> toResourceList(Object response) throws InternalErrorException {
 		if (response == null) {
 			return Collections.emptyList();
@@ -375,6 +432,49 @@ public abstract class BaseMethodBinding implements IClientResponseHandler {
 			}
 		}
 		return prettyPrint;
+	}
+
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseMethodBinding.class);
+
+	protected BaseServerResponseException processNon2xxResponseAndReturnExceptionToThrow(int theStatusCode, String theResponseMimeType, Reader theResponseReader) {
+		BaseServerResponseException ex;
+		switch (theStatusCode) {
+		case Constants.STATUS_HTTP_400_BAD_REQUEST:
+			ex = new InvalidRequestException("Server responded with HTTP 400");
+			break;
+		case Constants.STATUS_HTTP_404_NOT_FOUND:
+			ex = new ResourceNotFoundException("Server responded with HTTP 404");
+			break;
+		case Constants.STATUS_HTTP_405_METHOD_NOT_ALLOWED:
+			ex = new MethodNotAllowedException("Server responded with HTTP 405");
+			break;
+		case Constants.STATUS_HTTP_409_CONFLICT:
+			ex = new ResourceVersionConflictException("Server responded with HTTP 409");
+			break;
+		case Constants.STATUS_HTTP_412_PRECONDITION_FAILED:
+			ex = new ResourceVersionNotSpecifiedException("Server responded with HTTP 412");
+			break;
+		case Constants.STATUS_HTTP_422_UNPROCESSABLE_ENTITY:
+			IParser parser = createAppropriateParserForParsingResponse(theResponseMimeType, theResponseReader, theStatusCode);
+			OperationOutcome operationOutcome = parser.parseResource(OperationOutcome.class, theResponseReader);
+			ex = new UnprocessableEntityException(operationOutcome);
+			break;
+		default:
+			ex = new UnclassifiedServerFailureException(theStatusCode, "Server responded with HTTP " + theStatusCode);
+			break;
+		}
+
+		populateException(ex, theResponseReader);
+		return ex;
+	}
+
+	private static void populateException(BaseServerResponseException theEx, Reader theResponseReader) {
+		try {
+			String responseText = IOUtils.toString(theResponseReader);
+			theEx.setResponseBody(responseText);
+		} catch (IOException e) {
+			ourLog.debug("Failed to read response", e);
+		}
 	}
 
 }

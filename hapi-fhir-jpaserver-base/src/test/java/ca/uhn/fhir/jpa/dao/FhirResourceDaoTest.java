@@ -60,13 +60,13 @@ public class FhirResourceDaoTest {
 
 	
 	@Test
-	public void testCreateWithTags() {
+	public void testTagsWithCreateAndReadAndSearch() {
 		Patient patient = new Patient();
-		patient.addIdentifier("urn:system", "001");
+		patient.addIdentifier("urn:system", "testTagsWithCreateAndReadAndSearch");
 		patient.addName().addFamily("Tester").addGiven("Joe");
 		TagList tagList= new TagList();
 		tagList.addTag("Dog", "Puppies", null);
-		tagList.addTag("Cat", "Kittens", null);
+		tagList.addTag("Cat", "Kittens", "http://foo");
 		patient.getResourceMetadata().put(ResourceMetadataKeyEnum.TAG_LIST, tagList);
 
 		MethodOutcome outcome = ourPatientDao.create(patient);
@@ -77,10 +77,27 @@ public class FhirResourceDaoTest {
 		TagList published = (TagList) retrieved.getResourceMetadata().get(ResourceMetadataKeyEnum.TAG_LIST);
 		assertEquals(2, published.size());
 		assertEquals("Dog", published.get(0).getTerm());
+		assertEquals("Puppies", published.get(0).getLabel());
+		assertEquals(null, published.get(0).getScheme());
 		assertEquals("Cat", published.get(1).getTerm());
+		assertEquals("Kittens", published.get(1).getLabel());
+		assertEquals("http://foo", published.get(1).getScheme());
+		
+		List<Patient> search = ourPatientDao.search(Patient.SP_IDENTIFIER, patient.getIdentifierFirstRep());
+		assertEquals(1,search.size());
+		retrieved = search.get(0);
+		published = (TagList) retrieved.getResourceMetadata().get(ResourceMetadataKeyEnum.TAG_LIST);
+		assertEquals("Dog", published.get(0).getTerm());
+		assertEquals("Puppies", published.get(0).getLabel());
+		assertEquals(null, published.get(0).getScheme());
+		assertEquals("Cat", published.get(1).getTerm());
+		assertEquals("Kittens", published.get(1).getLabel());
+		assertEquals("http://foo", published.get(1).getScheme());
 		
 	}
 
+
+	
 	@Test
 	public void testSearchAll() {
 		{

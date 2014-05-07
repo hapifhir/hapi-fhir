@@ -23,7 +23,14 @@ import ca.uhn.fhir.rest.server.Constants;
  */
 
 /**
- * TODO: javadoc this
+ * Represents an <b>HTTP 405 Method Not Allowed</b> response.
+ * 
+ * <p>
+ * Note that a complete list of RESTful exceptions is available in the
+ * <a href="./package-summary.html">Package Summary</a>.
+ * </p>
+ * 
+ * @see UnprocessableEntityException Which should be used for business level validation failures
  */
 public class MethodNotAllowedException extends BaseServerResponseException {
 	public 	static final int STATUS_CODE = Constants.STATUS_HTTP_405_METHOD_NOT_ALLOWED;

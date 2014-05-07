@@ -52,6 +52,16 @@ public enum EncodingEnum {
 			ourContentTypeToEncoding.put(next.getResourceContentType(), next);
 			ourContentTypeToEncoding.put(next.getBrowserFriendlyBundleContentType(), next);
 		}
+		
+		/*
+		 * These are wrong, but we add them just to be tolerant 
+		 * of other people's mistakes
+		 */
+		ourContentTypeToEncoding.put("application/json", JSON);
+		ourContentTypeToEncoding.put("application/xml", XML);
+		ourContentTypeToEncoding.put("text/json", JSON);
+		ourContentTypeToEncoding.put("text/xml", XML);
+	
 	}
 	
 	private String myResourceContentType;

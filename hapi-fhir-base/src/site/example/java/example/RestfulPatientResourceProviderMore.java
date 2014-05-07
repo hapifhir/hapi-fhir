@@ -14,7 +14,10 @@ import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.PathSpecification;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
+import ca.uhn.fhir.model.api.Tag;
+import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import ca.uhn.fhir.model.api.annotation.TagListParam;
 import ca.uhn.fhir.model.dstu.composite.CodingDt;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.resource.Conformance;
@@ -23,13 +26,17 @@ import ca.uhn.fhir.model.dstu.resource.Observation;
 import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
 import ca.uhn.fhir.model.dstu.resource.Organization;
 import ca.uhn.fhir.model.dstu.resource.Patient;
+import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
 import ca.uhn.fhir.model.dstu.valueset.IssueSeverityEnum;
 import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.parser.DataFormatException;
+import ca.uhn.fhir.rest.annotation.AddTags;
 import ca.uhn.fhir.rest.annotation.Count;
 import ca.uhn.fhir.rest.annotation.Create;
+import ca.uhn.fhir.rest.annotation.DeleteTags;
+import ca.uhn.fhir.rest.annotation.GetTags;
 import ca.uhn.fhir.rest.annotation.History;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.IncludeParam;
@@ -508,8 +515,146 @@ System.out.println(ctx.newXmlParser().encodeResourceToString(metadata));
 //END SNIPPET: metadataClientUsage
 }
 
+//START SNIPPET: readTags
+@Read()
+public Patient readPatient(@IdParam IdDt theId) {
+  Patient retVal = new Patient();
+ 
+  // ..populate demographics, contact, or anything else you usually would..
+ 
+  // Create a TagList and place a complete list of the patient's tags inside
+  TagList tags = new TagList();
+  tags.addTag("Dog", "Canine Patient", "http://animals"); // TODO: more realistic example
+  tags.addTag("Friendly", "Friendly", "http://personality"); // TODO: more realistic example
+  
+  // The tags are then stored in the Patient resource instance
+  retVal.getResourceMetadata().put(ResourceMetadataKeyEnum.TAG_LIST, tags);
+ 
+  return retVal;
+}
+//END SNIPPET: readTags
 
+//START SNIPPET: clientReadInterface
+private interface IPatientClient extends IBasicClient
+{
+  /** Read a patient from a server by ID */
+  @Read
+  Patient readPatient(@IdParam IdDt theId);
 
+  // Only one method is shown here, but many methods may be 
+  // added to the same client interface!
+}
+//START SNIPPET: clientReadInterface
+
+public void clientRead() {
+//START SNIPPET: clientReadTags
+IPatientClient client = new FhirContext().newRestfulClient(IPatientClient.class, "http://foo/fhir");
+Patient patient = client.readPatient(new IdDt("1234"));
+  
+// Access the tag list
+TagList tagList = (TagList) patient.getResourceMetadata().get(ResourceMetadataKeyEnum.TAG_LIST);
+for (Tag next : tagList) {
+  // ..process the tags somehow..
+}
+//END SNIPPET: clientReadTags
+
+//START SNIPPET: clientCreateTags
+Patient newPatient = new Patient();
+
+// Populate the resource object
+newPatient.addIdentifier().setUse(IdentifierUseEnum.OFFICIAL).setValue("123");
+newPatient.addName().addFamily("Jones").addGiven("Frank");
+
+// Populate tags
+TagList tags = new TagList();
+tags.addTag("Dog", "Canine Patient", "http://animals"); // TODO: more realistic example
+tags.addTag("Friendly", "Friendly", "http://personality"); // TODO: more realistic example
+newPatient.getResourceMetadata().put(ResourceMetadataKeyEnum.TAG_LIST, tags);
+
+// ...invoke the create method on the client...
+//END SNIPPET: clientCreateTags
+}
+
+//START SNIPPET: createTags
+@Create
+public MethodOutcome createPatientResource(@ResourceParam Patient thePatient) {
+
+  // ..save the resouce..
+  IdDt id = new IdDt("123"); // the new databse primary key for this resource
+
+  // Get the tag list
+  TagList tags = (TagList) thePatient.getResourceMetadata().get(ResourceMetadataKeyEnum.TAG_LIST);
+  for (Tag tag : tags) {
+    // process/save each tag somehow	
+  }
+  
+  return new MethodOutcome(id);
+}
+//END SNIPPET: createTags
+
+//START SNIPPET: tagMethodProvider
+public class TagMethodProvider 
+{
+  /** Return a list of all tags that exist on the server */
+  @GetTags
+  public TagList getAllTagsOnServer() {
+    return new TagList(); // populate this
+  }
+
+  /** Return a list of all tags that exist on at least one instance
+   *  of the given resource type */
+  @GetTags(type=Patient.class)
+  public TagList getTagsForAllResourcesOfResourceType() {
+    return new TagList(); // populate this
+  }
+
+  /** Return a list of all tags that exist on a specific instance
+   *  of the given resource type */
+  @GetTags(type=Patient.class)
+  public TagList getTagsForResources(@IdParam IdDt theId) {
+    return new TagList(); // populate this
+  }
+
+  /** Return a list of all tags that exist on a specific version
+   *  of the given resource type */
+  @GetTags(type=Patient.class)
+  public TagList getTagsForResourceVersion(@IdParam IdDt theId, 
+                                           @VersionIdParam IdDt theVersion) {
+    return new TagList(); // populate this
+  }
+
+  /** Add tags to a resource */
+  @AddTags(type=Patient.class)
+  public void getTagsForResourceVersion(@IdParam IdDt theId, 
+                                        @TagListParam TagList theTagList) {
+    // add tags
+  }
+
+  /** Add tags to a resource version */
+  @AddTags(type=Patient.class)
+  public void addTagsToResourceVersion(@IdParam IdDt theId,
+                                       @VersionIdParam IdDt theVersion,
+                                       @TagListParam TagList theTagList) {
+    // add tags
+  }
+
+  /** Remove tags from a resource */
+  @DeleteTags(type=Patient.class)
+  public void deleteTagsFromResourceVersion(@IdParam IdDt theId,
+                                            @TagListParam TagList theTagList) {
+    // add tags
+  }
+
+  /** Remove tags from a resource version */
+  @DeleteTags(type=Patient.class)
+  public void deleteTagsFromResourceVersion(@IdParam IdDt theId,
+                                            @VersionIdParam IdDt theVersion,
+                                            @TagListParam TagList theTagList) {
+    // add tags
+  }
+
+}
+//END SNIPPET: tagMethodProvider
 
 
 }

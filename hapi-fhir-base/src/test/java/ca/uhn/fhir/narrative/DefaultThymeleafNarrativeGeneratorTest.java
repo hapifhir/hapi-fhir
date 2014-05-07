@@ -2,7 +2,6 @@ package ca.uhn.fhir.narrative;
 
 import static org.junit.Assert.*;
 
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Date;
 
@@ -77,7 +76,7 @@ public class DefaultThymeleafNarrativeGeneratorTest {
 	}
 
 	@Test
-	public void testGenerateDiagnosticReportWithObservations() throws DataFormatException, IOException {
+	public void testGenerateDiagnosticReportWithObservations() throws DataFormatException {
 		DiagnosticReport value = new DiagnosticReport();
 
 		value.getIssued().setValueAsString("2011-02-22T11:13:00");

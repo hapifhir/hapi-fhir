@@ -25,8 +25,6 @@ import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 public class NonFhirResponseException extends BaseServerResponseException {
 
 	private static final long serialVersionUID = 1L;
-	private final String myContentType;
-	private final String myResponseText;
 
 	/**
 	 * Constructor
@@ -37,18 +35,8 @@ public class NonFhirResponseException extends BaseServerResponseException {
 	 * @param theStatusCode
 	 * @param theContentType
 	 */
-	public NonFhirResponseException(String theMessage, String theContentType, int theStatusCode, String theResponseText) {
+	public NonFhirResponseException(int theStatusCode, String theMessage) {
 		super(theStatusCode, theMessage);
-		myContentType = theContentType;
-		myResponseText = theResponseText;
-	}
-
-	public String getContentType() {
-		return myContentType;
-	}
-
-	public String getResponseText() {
-		return myResponseText;
 	}
 
 }

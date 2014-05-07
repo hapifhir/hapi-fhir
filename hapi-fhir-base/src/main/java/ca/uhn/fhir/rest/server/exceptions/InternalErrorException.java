@@ -23,7 +23,20 @@ import ca.uhn.fhir.rest.server.Constants;
  */
 
 /**
- * TODO: javadoc this
+ * Represents an <b>HTTP 500 Internal Error</b> response.
+ * This status indicates that the server failed to successfully process the
+ * request. This generally means that the server is misbehaving or is
+ * misconfigured in some way, although a misbehaving server might also
+ * send this status code in the case of a bad request message (although it
+ * should not do this; an HTTP 4xx response is more appropriate in that
+ * situation).
+ * 
+ * <p>
+ * Note that a complete list of RESTful exceptions is available in the
+ * <a href="./package-summary.html">Package Summary</a>.
+ * </p>
+ * 
+ * @see UnprocessableEntityException Which should be used for business level validation failures
  */
 public class InternalErrorException extends BaseServerResponseException {
 

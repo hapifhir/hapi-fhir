@@ -68,6 +68,9 @@ public class Constants {
 	public static final String PARAM_SORT_DESC = "_sort:desc";
 	public static final String HEADER_CATEGORY = "Category";
 	public static final String OPENSEARCH_NS_OLDER = "http://purl.org/atompub/tombstones/1.0";
+	public static final String PARAM_TAGS = "_tags";
+	public static final String CHARSET_UTF_8 = "UTF-8";
+	public static final String PARAM_DELETE = "_delete";
 
 	static {
 		Map<String, EncodingEnum> valToEncoding = new HashMap<String, EncodingEnum>();
