@@ -41,6 +41,7 @@ import ca.uhn.fhir.model.dstu.resource.Conformance;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.gclient.DateParam;
 import ca.uhn.fhir.rest.gclient.ICriterion;
 import ca.uhn.fhir.rest.gclient.ICriterionInternal;
 import ca.uhn.fhir.rest.gclient.IFor;
@@ -371,6 +372,24 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		public IFor include(Include theInclude) {
 			myInclude.add(theInclude);
 			return this;
+		}
+
+		@Override
+		public IFor json() {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public IFor sort() {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public IFor ascending(DateParam theParamBirthdate) {
+			// TODO Auto-generated method stub
+			return null;
 		}
 
 	}

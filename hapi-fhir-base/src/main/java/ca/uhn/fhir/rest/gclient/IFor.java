@@ -13,5 +13,9 @@ public interface IFor {
 	IFor include(Include theIncludeManagingorganization);
 
 	IFor json();
+
+	IFor sort();
+
+	IFor ascending(DateParam theParamBirthdate);
 	
 }
