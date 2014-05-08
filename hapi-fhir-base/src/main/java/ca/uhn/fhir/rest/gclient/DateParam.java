@@ -5,9 +5,14 @@ import java.util.Date;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 
-public class DateParam {
+public class DateParam implements IParam {
 
 	private String myParamName;
+
+	@Override
+	public String getParamName() {
+		return myParamName;
+	}
 
 	public DateParam(String theParamName) {
 		myParamName = theParamName;

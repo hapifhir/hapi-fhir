@@ -71,6 +71,9 @@ public class Constants {
 	public static final String PARAM_TAGS = "_tags";
 	public static final String CHARSET_UTF_8 = "UTF-8";
 	public static final String PARAM_DELETE = "_delete";
+	public static final String FORMAT_XML = "xml";
+	public static final String FORMAT_JSON = "json";
+	public static final String PARAM_INCLUDE = "_include";
 
 	static {
 		Map<String, EncodingEnum> valToEncoding = new HashMap<String, EncodingEnum>();

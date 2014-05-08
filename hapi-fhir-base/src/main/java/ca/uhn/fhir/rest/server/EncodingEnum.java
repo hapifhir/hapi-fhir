@@ -27,55 +27,61 @@ import ca.uhn.fhir.parser.IParser;
 
 public enum EncodingEnum {
 
-	XML(Constants.CT_FHIR_XML, Constants.CT_ATOM_XML, Constants.CT_XML) {
+	XML(Constants.CT_FHIR_XML, Constants.CT_ATOM_XML, Constants.CT_XML, Constants.FORMAT_XML) {
 		@Override
 		public IParser newParser(FhirContext theContext) {
 			return theContext.newXmlParser();
 		}
 	},
 
-	JSON(Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON, Constants.CT_JSON) {
+	JSON(Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON, Constants.CT_JSON, Constants.FORMAT_JSON) {
 		@Override
 		public IParser newParser(FhirContext theContext) {
 			return theContext.newJsonParser();
 		}
 	}
-	
+
 	;
 
 	private static HashMap<String, EncodingEnum> ourContentTypeToEncoding;
 
 	static {
 		ourContentTypeToEncoding = new HashMap<String, EncodingEnum>();
-		for (EncodingEnum next: values()) {
+		for (EncodingEnum next : values()) {
 			ourContentTypeToEncoding.put(next.getBundleContentType(), next);
 			ourContentTypeToEncoding.put(next.getResourceContentType(), next);
 			ourContentTypeToEncoding.put(next.getBrowserFriendlyBundleContentType(), next);
 		}
-		
+
 		/*
-		 * These are wrong, but we add them just to be tolerant 
-		 * of other people's mistakes
+		 * These are wrong, but we add them just to be tolerant of other
+		 * people's mistakes
 		 */
 		ourContentTypeToEncoding.put("application/json", JSON);
 		ourContentTypeToEncoding.put("application/xml", XML);
 		ourContentTypeToEncoding.put("text/json", JSON);
 		ourContentTypeToEncoding.put("text/xml", XML);
-	
+
 	}
-	
+
 	private String myResourceContentType;
 	private String myBundleContentType;
 	private String myBrowserFriendlyContentType;
-	
-	EncodingEnum(String theResourceContentType, String theBundleContentType, String theBrowserFriendlyContentType) {
+	private String myFormatContentType;
+
+	EncodingEnum(String theResourceContentType, String theBundleContentType, String theBrowserFriendlyContentType, String theFormatContentType) {
 		myResourceContentType = theResourceContentType;
 		myBundleContentType = theBundleContentType;
 		myBrowserFriendlyContentType = theBrowserFriendlyContentType;
+		myFormatContentType = theFormatContentType;
+	}
+
+	public String getRequestContentType() {
+		return myFormatContentType;
 	}
 
 	public abstract IParser newParser(FhirContext theContext);
-	
+
 	public String getBundleContentType() {
 		return myBundleContentType;
 	}
@@ -92,5 +98,8 @@ public enum EncodingEnum {
 		return ourContentTypeToEncoding.get(theContentType);
 	}
 
+	public String getFormatContentType() {
+		return myFormatContentType;
+	}
 
 }

@@ -267,7 +267,7 @@ public class Patient extends BaseResource implements IResource {
 
 	public static final DateParam PARAM_BIRTHDATE = new DateParam(SP_BIRTHDATE);
 
-	public static final Include INCLUDE_MANAGINGORGANIZATION = new Include("managingOrganization");
+	public static final Include INCLUDE_MANAGINGORGANIZATION = new Include("Patient.managingOrganization");
 
 
 	@Child(name="identifier", type=IdentifierDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)	

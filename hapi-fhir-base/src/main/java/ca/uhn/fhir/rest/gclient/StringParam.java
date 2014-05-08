@@ -1,6 +1,6 @@
 package ca.uhn.fhir.rest.gclient;
 
-public class StringParam {
+public class StringParam implements IParam {
 
 	private String myParamName;
 
@@ -10,6 +10,24 @@ public class StringParam {
 
 	public IStringExactly exactly() {
 		return new StringExactly();
+	}
+
+	@Override
+	public String getParamName() {
+		return myParamName;
+	}
+
+	public interface IStringExactly {
+
+		ICriterion value(String theValue);
+
+	}
+
+	public class StringExactly implements IStringExactly {
+		@Override
+		public ICriterion value(String theValue) {
+			return new EqualsExactlyCriterion(theValue);
+		}
 	}
 
 	private class EqualsExactlyCriterion implements ICriterion, ICriterionInternal {
@@ -30,19 +48,6 @@ public class StringParam {
 			return myValue;
 		}
 
-	}
-
-	public interface IStringExactly {
-
-		ICriterion value(String theValue);
-
-	}
-
-	public class StringExactly implements IStringExactly {
-		@Override
-		public ICriterion value(String theValue) {
-			return new EqualsExactlyCriterion(theValue);
-		}
 	}
 
 }

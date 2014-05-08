@@ -1,12 +1,10 @@
 package ca.uhn.fhir.rest.client;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 import java.io.StringReader;
 import java.nio.charset.Charset;
-import java.util.List;
 
 import org.apache.commons.io.input.ReaderInputStream;
 import org.apache.http.HttpResponse;
@@ -22,10 +20,7 @@ import org.mockito.internal.stubbing.defaultanswers.ReturnsDeepStubs;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
-import ca.uhn.fhir.model.dstu.resource.Conformance;
 import ca.uhn.fhir.model.dstu.resource.Patient;
-import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
-import ca.uhn.fhir.rest.param.QualifiedDateParam;
 import ca.uhn.fhir.rest.server.Constants;
 
 public class GenericClientTest {
@@ -113,16 +108,18 @@ public class GenericClientTest {
 
 		//@formatter:off
 		Bundle response = client.search()
-				.forResource("Patient")
-				.json()
+				.forResource(Patient.class)
+				.encodedJson()
 				.where(Patient.PARAM_BIRTHDATE.beforeOrEquals().day("2012-01-22"))
 				.and(Patient.PARAM_BIRTHDATE.after().day("2011-01-01"))
 				.include(Patient.INCLUDE_MANAGINGORGANIZATION)
 				.sort().ascending(Patient.PARAM_BIRTHDATE)
+				.sort().descending(Patient.PARAM_NAME)
+				.limitTo(123)
 				.execute();
 		//@formatter:on
 
-		assertEquals("http://foo/Patient?birthdate=%3C%3D2012-01-22&birthdate=%3E2011-01-01&_include=Patient.managingOrganization", capt.getValue().getURI().toString());
+		assertEquals("http://foo/Patient?birthdate=%3C%3D2012-01-22&birthdate=%3E2011-01-01&_include=Patient.managingOrganization&_sort%3Aasc=birthdate&_sort%3Adesc=name&_format=json&_count=123", capt.getValue().getURI().toString());
 
 	}
 

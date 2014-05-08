@@ -12,10 +12,12 @@ public interface IFor {
 
 	IFor include(Include theIncludeManagingorganization);
 
-	IFor json();
+	IFor encodedJson();
 
-	IFor sort();
+	IFor encodedXml();
 
-	IFor ascending(DateParam theParamBirthdate);
+	ISort sort();
+
+	IFor limitTo(int theLimitTo);
 	
 }
