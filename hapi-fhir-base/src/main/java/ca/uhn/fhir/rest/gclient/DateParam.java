@@ -5,6 +5,9 @@ import java.util.Date;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 
+/**
+ * Date parameter type for use in fluent client interfaces
+ */
 public class DateParam implements IParam {
 
 	private String myParamName;

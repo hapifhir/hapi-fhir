@@ -107,12 +107,21 @@ public abstract class BaseClient {
 	}
 
 	Object invokeClient(IClientResponseHandler binding, BaseClientInvocation clientInvocation) {
+		return invokeClient(binding, clientInvocation, false);
+	}
+	
+	Object invokeClient(IClientResponseHandler binding, BaseClientInvocation clientInvocation, boolean theLogRequestAndResponse) {
 		// TODO: handle non 2xx status codes by throwing the correct exception,
 		// and ensure it's passed upwards
 		HttpRequestBase httpRequest;
 		HttpResponse response;
 		try {
 			httpRequest = clientInvocation.asHttpRequest(myUrlBase, createExtraParams(), getEncoding());
+			
+			if (theLogRequestAndResponse) {
+				ourLog.info("Client invoking: {}", httpRequest);
+			}
+			
 			response = myClient.execute(httpRequest);
 		} catch (DataFormatException e) {
 			throw new FhirClientConnectionException(e);

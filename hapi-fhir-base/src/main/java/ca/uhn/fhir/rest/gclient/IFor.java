@@ -19,5 +19,11 @@ public interface IFor {
 	ISort sort();
 
 	IFor limitTo(int theLimitTo);
+
+	/**
+	 * If set to true, the client will log the request and response to the SLF4J logger. This 
+	 * can be useful for debugging, but is generally not desirable in a production situation.
+	 */
+	IFor andLogRequestAndResponse(boolean theLogRequestAndResponse);
 	
 }

@@ -72,7 +72,9 @@ import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.rest.gclient.DateParam;
 import ca.uhn.fhir.rest.gclient.Include;
+import ca.uhn.fhir.rest.gclient.ReferenceParam;
 import ca.uhn.fhir.rest.gclient.StringParam;
+import ca.uhn.fhir.rest.gclient.TokenParam;
 
 
 /**
@@ -264,8 +266,9 @@ public class Patient extends BaseResource implements IResource {
 	public static final String SP_LINK = "link";
 
 	public static final StringParam PARAM_NAME = new StringParam(SP_NAME);
-
+	public static final TokenParam PARAM_IDENTIFIER = new TokenParam(SP_IDENTIFIER);
 	public static final DateParam PARAM_BIRTHDATE = new DateParam(SP_BIRTHDATE);
+	public static final ReferenceParam PARAM_PROVIDER = new ReferenceParam(SP_PROVIDER);
 
 	public static final Include INCLUDE_MANAGINGORGANIZATION = new Include("Patient.managingOrganization");
 

@@ -61,6 +61,7 @@ import ca.uhn.fhir.model.dstu.valueset.OrganizationTypeEnum;
 import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.model.primitive.BoundCodeableConceptDt;
 import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.rest.gclient.StringParam;
 
 
 /**
@@ -97,6 +98,8 @@ public class Organization extends BaseResource implements IResource {
 	@SearchParamDefinition(name="name", path="Organization.name", description="A portion of the organization's name")
 	public static final String SP_NAME = "name";
 
+	public static final StringParam NAME = new StringParam(SP_NAME);
+	
 	/**
 	 * Search parameter constant for <b>phonetic</b>
 	 * <p>

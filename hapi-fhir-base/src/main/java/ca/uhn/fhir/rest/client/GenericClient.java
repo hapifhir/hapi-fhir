@@ -305,6 +305,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		private String myResourceName;
 		private Class<? extends IResource> myResourceType;
 		private List<SortInternal> mySort = new ArrayList<SortInternal>();
+		private boolean myLogRequestAndResponse;
 
 		public ForInternal(Class<? extends IResource> theResourceType) {
 			myResourceType = theResourceType;
@@ -380,7 +381,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 				}
 			};
 
-			Bundle resp = (Bundle) invokeClient(binding, invocation);
+			Bundle resp = (Bundle) invokeClient(binding, invocation, myLogRequestAndResponse);
 			return resp;
 
 		}
@@ -419,6 +420,12 @@ public class GenericClient extends BaseClient implements IGenericClient {
 				params.put(parameterName, new ArrayList<String>());
 			}
 			params.get(parameterName).add(parameterValue);
+		}
+
+		@Override
+		public IFor andLogRequestAndResponse(boolean theLogRequestAndResponse) {
+			myLogRequestAndResponse =theLogRequestAndResponse;
+			return this;
 		}
 
 	}
