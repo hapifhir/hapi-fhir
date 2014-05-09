@@ -51,7 +51,7 @@ import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 
-public class GetTagsMethodBinding extends BaseMethodBinding {
+public class GetTagsMethodBinding extends BaseMethodBinding<TagList> {
 
 	private Class<? extends IResource> myType;
 	private Integer myIdParamIndex;
@@ -80,7 +80,7 @@ public class GetTagsMethodBinding extends BaseMethodBinding {
 	}
 
 	@Override
-	public Object invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException, BaseServerResponseException {
+	public TagList invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException, BaseServerResponseException {
 		if (theResponseStatusCode == Constants.STATUS_HTTP_200_OK) {
 			IParser parser = createAppropriateParserForParsingResponse(theResponseMimeType, theResponseReader, theResponseStatusCode);
 			TagList retVal = parser.parseTagList(theResponseReader);

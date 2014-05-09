@@ -35,7 +35,7 @@ import ca.uhn.fhir.rest.server.EncodingEnum;
 
 public class ClientInvocationHandler extends BaseClient implements InvocationHandler {
 
-	private final Map<Method, BaseMethodBinding> myBindings = new HashMap<Method, BaseMethodBinding>();
+	private final Map<Method, BaseMethodBinding<?>> myBindings = new HashMap<Method, BaseMethodBinding<?>>();
 
 	private final Map<Method, ILambda> myMethodToLambda = new HashMap<Method, ILambda>();
 
@@ -59,7 +59,7 @@ public class ClientInvocationHandler extends BaseClient implements InvocationHan
 		}
 	}
 
-	public void addBinding(Method theMethod, BaseMethodBinding theBinding) {
+	public void addBinding(Method theMethod, BaseMethodBinding<?> theBinding) {
 		myBindings.put(theMethod, theBinding);
 	}
 
@@ -70,7 +70,7 @@ public class ClientInvocationHandler extends BaseClient implements InvocationHan
 			return directRetVal;
 		}
 
-		BaseMethodBinding binding = myBindings.get(theMethod);
+		BaseMethodBinding<?> binding = myBindings.get(theMethod);
 		if (binding != null) {
 			BaseClientInvocation clientInvocation = binding.invokeClient(theArgs);
 			return invokeClient(binding, clientInvocation);

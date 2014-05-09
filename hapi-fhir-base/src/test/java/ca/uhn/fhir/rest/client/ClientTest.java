@@ -61,6 +61,7 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.QualifiedDateParam;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
@@ -585,6 +586,30 @@ public class ClientTest {
 
 	}
 
+	@Test
+	public void testReadFailureInternalError() throws Exception {
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
+		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 500, "INTERNAL"));
+		Header[] headers = new Header[1];
+		headers[0] = new BasicHeader(Constants.HEADER_LAST_MODIFIED, "2011-01-02T22:01:02");
+		when(httpResponse.getAllHeaders()).thenReturn(headers);
+		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_TEXT));
+		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader("Internal Failure"), Charset.forName("UTF-8")));
+
+		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
+		try {
+			client.getPatientById(new IdDt("111"));
+			fail();
+		} catch (InternalErrorException e) {
+			assertThat(e.getMessage(), containsString("INTERNAL"));
+			assertThat(e.getResponseBody(), containsString("Internal Failure"));
+		}
+
+	}
+
+	
 	@Test
 	public void testReadNoCharset() throws Exception {
 

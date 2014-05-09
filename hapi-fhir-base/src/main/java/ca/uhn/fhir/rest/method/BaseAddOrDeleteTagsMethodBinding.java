@@ -52,7 +52,7 @@ import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
-public abstract class BaseAddOrDeleteTagsMethodBinding extends BaseMethodBinding {
+public abstract class BaseAddOrDeleteTagsMethodBinding extends BaseMethodBinding<Void> {
 
 	private Class<? extends IResource> myType;
 	private Integer myIdParamIndex;
@@ -89,7 +89,7 @@ public abstract class BaseAddOrDeleteTagsMethodBinding extends BaseMethodBinding
 	}
 
 	@Override
-	public Object invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException, BaseServerResponseException {
+	public Void invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException, BaseServerResponseException {
 		switch (theResponseStatusCode) {
 		case Constants.STATUS_HTTP_200_OK:
 		case Constants.STATUS_HTTP_201_CREATED:

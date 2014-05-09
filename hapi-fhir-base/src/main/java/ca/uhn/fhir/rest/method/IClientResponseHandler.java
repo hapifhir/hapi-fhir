@@ -27,8 +27,8 @@ import java.util.Map;
 
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 
-public interface IClientResponseHandler {
+public interface IClientResponseHandler<T> {
 
-	Object invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException, BaseServerResponseException;
+	T invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException, BaseServerResponseException;
 
 }

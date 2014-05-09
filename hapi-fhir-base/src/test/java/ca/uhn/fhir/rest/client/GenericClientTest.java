@@ -1,7 +1,10 @@
 package ca.uhn.fhir.rest.client;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.StringReader;
 import java.nio.charset.Charset;
@@ -13,6 +16,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicStatusLine;
+import org.hamcrest.core.StringContains;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -24,7 +28,9 @@ import ca.uhn.fhir.model.dstu.resource.Encounter;
 import ca.uhn.fhir.model.dstu.resource.Observation;
 import ca.uhn.fhir.model.dstu.resource.Organization;
 import ca.uhn.fhir.model.dstu.resource.Patient;
+import ca.uhn.fhir.rest.client.exceptions.NonFhirResponseException;
 import ca.uhn.fhir.rest.server.Constants;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 
 public class GenericClientTest {
 
@@ -278,4 +284,52 @@ public class GenericClientTest {
 
 	}
 
+	
+	@SuppressWarnings("unused")
+	@Test
+	public void testSearchWithInternalServerError() throws Exception {
+
+		String msg = getPatientFeedWithOneResult();
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 500, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_TEXT + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader("Server Issues!"), Charset.forName("UTF-8")));
+
+		IGenericClient client = myCtx.newRestfulGenericClient("http://example.com/fhir");
+
+		try {
+			client.search().forResource(Patient.class).execute();
+			fail();
+		} catch (InternalErrorException e) {
+			assertThat(e.getMessage(), StringContains.containsString("AAA"));
+		}
+
+	}
+	
+	
+	@SuppressWarnings("unused")
+	@Test
+	public void testSearchWithNonFhirResponse() throws Exception {
+
+		String msg = getPatientFeedWithOneResult();
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_TEXT + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader("Server Issues!"), Charset.forName("UTF-8")));
+
+		IGenericClient client = myCtx.newRestfulGenericClient("http://example.com/fhir");
+
+		try {
+			client.search().forResource(Patient.class).execute();
+			fail();
+		} catch (NonFhirResponseException e) {
+			assertThat(e.getMessage(), StringContains.containsString("AAA"));
+		}
+
+	}
+	
 }
