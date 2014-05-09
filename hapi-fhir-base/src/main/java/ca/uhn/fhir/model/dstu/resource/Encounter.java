@@ -65,6 +65,7 @@ import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.BoundCodeableConceptDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
+import ca.uhn.fhir.rest.gclient.NumberParam;
 
 
 /**
@@ -90,6 +91,7 @@ import ca.uhn.fhir.model.primitive.CodeDt;
 @ResourceDef(name="Encounter", profile="http://hl7.org/fhir/profiles/Encounter", id="encounter")
 public class Encounter extends BaseResource implements IResource {
 
+	
 	/**
 	 * Search parameter constant for <b>identifier</b>
 	 * <p>
@@ -155,6 +157,8 @@ public class Encounter extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="length", path="Encounter.length", description="Length of encounter in days")
 	public static final String SP_LENGTH = "length";
+
+	public static final NumberParam LENGTH = new NumberParam(SP_LENGTH);
 
 	/**
 	 * Search parameter constant for <b>indication</b>

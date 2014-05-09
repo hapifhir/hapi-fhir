@@ -20,6 +20,8 @@ import org.mockito.internal.stubbing.defaultanswers.ReturnsDeepStubs;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
+import ca.uhn.fhir.model.dstu.resource.Encounter;
+import ca.uhn.fhir.model.dstu.resource.Observation;
 import ca.uhn.fhir.model.dstu.resource.Organization;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.rest.server.Constants;
@@ -93,7 +95,6 @@ public class GenericClientTest {
 
 	}
 
-	
 	@SuppressWarnings("unused")
 	@Test
 	public void testSearchByStringExact() throws Exception {
@@ -115,9 +116,62 @@ public class GenericClientTest {
 				.execute();
 		//@formatter:on
 
-		assertEquals("http://example.com/fhir/Patient?name:exact=james", capt.getValue().getURI().toString());
+		assertEquals("http://example.com/fhir/Patient?name%3Aexact=james", capt.getValue().getURI().toString());
 
 	}
+
+	
+	@SuppressWarnings("unused")
+	@Test
+	public void testSearchByNumberExact() throws Exception {
+
+		String msg = new FhirContext().newXmlParser().encodeBundleToString(new Bundle());
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
+
+		IGenericClient client = myCtx.newRestfulGenericClient("http://example.com/fhir");
+
+		//@formatter:off
+		Bundle response = client.search()
+				.forResource(Observation.class)
+				.where(Observation.VALUE_QUANTITY.greaterThan().number(123).andUnits("foo", "bar"))
+				.execute();
+		//@formatter:on
+
+		assertEquals("http://example.com/fhir/Observation?value-quantity=%3E123%7Cfoo%7Cbar", capt.getValue().getURI().toString());
+
+	}
+	
+	
+	@SuppressWarnings("unused")
+	@Test
+	public void testSearchByQuantity() throws Exception {
+
+		String msg = getPatientFeedWithOneResult();
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
+
+		IGenericClient client = myCtx.newRestfulGenericClient("http://example.com/fhir");
+
+		//@formatter:off
+		Bundle response = client.search()
+				.forResource(Patient.class)
+				.where(Encounter.LENGTH.exactly().number(123))
+				.execute();
+		//@formatter:on
+
+		assertEquals("http://example.com/fhir/Patient?length=123", capt.getValue().getURI().toString());
+
+	}
+	
 	@SuppressWarnings("unused")
 	@Test
 	public void testSearchByToken() throws Exception {
@@ -139,7 +193,7 @@ public class GenericClientTest {
 				.execute();
 		//@formatter:on
 
-		assertEquals("http://example.com/fhir/Patient?identifier=http%3A%2F%2Ffoo%7CZZZ", capt.getValue().getURI().toString());
+		assertEquals("http://example.com/fhir/Patient?identifier=http%3A%2F%2Fexample.com%2Ffhir%7CZZZ", capt.getValue().getURI().toString());
 
 	}
 
@@ -193,7 +247,6 @@ public class GenericClientTest {
 
 	}
 
-	
 	@SuppressWarnings("unused")
 	@Test
 	public void testSearchByDate() throws Exception {

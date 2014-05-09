@@ -42,9 +42,9 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.gclient.ICriterion;
 import ca.uhn.fhir.rest.gclient.ICriterionInternal;
-import ca.uhn.fhir.rest.gclient.IFor;
-import ca.uhn.fhir.rest.gclient.IParam;
 import ca.uhn.fhir.rest.gclient.IQuery;
+import ca.uhn.fhir.rest.gclient.IParam;
+import ca.uhn.fhir.rest.gclient.IUntypedQuery;
 import ca.uhn.fhir.rest.gclient.ISort;
 import ca.uhn.fhir.rest.gclient.Include;
 import ca.uhn.fhir.rest.method.BaseOutcomeReturningMethodBinding;
@@ -139,6 +139,11 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		return resp;
 	}
 
+	@Override
+	public MethodOutcome delete(Class<? extends IResource> theType, String theId) {
+		return delete(theType, new IdDt(theId));
+	}
+
 	public HttpRequestBase getLastRequest() {
 		return myLastRequest;
 	}
@@ -165,6 +170,11 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	}
 
 	@Override
+	public <T extends IResource> Bundle history(Class<T> theType, String theId) {
+		return history(theType, new IdDt(theId));
+	}
+
+	@Override
 	public <T extends IResource> T read(final Class<T> theType, IdDt theId) {
 		GetClientInvocation invocation = ReadMethodBinding.createReadInvocation(theId, toResourceName(theType));
 		if (isKeepResponses()) {
@@ -186,7 +196,12 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	}
 
 	@Override
-	public IQuery search() {
+	public <T extends IResource> T read(Class<T> theType, String theId) {
+		return read(theType, new IdDt(theId));
+	}
+
+	@Override
+	public IUntypedQuery search() {
 		return new QueryInternal();
 	}
 
@@ -250,6 +265,11 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	}
 
 	@Override
+	public MethodOutcome update(String theId, IResource theResource) {
+		return update(new IdDt(theId), theResource);
+	}
+
+	@Override
 	public MethodOutcome validate(IResource theResource) {
 		BaseClientInvocation invocation = ValidateMethodBinding.createValidateInvocation(theResource, null, myContext);
 		if (isKeepResponses()) {
@@ -292,20 +312,25 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		return resp;
 	}
 
+	@Override
+	public <T extends IResource> T vread(Class<T> theType, String theId, String theVersionId) {
+		return vread(theType, new IdDt(theId), new IdDt(theVersionId));
+	}
+
 	private String toResourceName(Class<? extends IResource> theType) {
 		return myContext.getResourceDefinition(theType).getName();
 	}
 
-	private class ForInternal implements IFor {
+	private class ForInternal implements IQuery {
 
 		private List<ICriterionInternal> myCriterion = new ArrayList<ICriterionInternal>();
 		private List<Include> myInclude = new ArrayList<Include>();
+		private boolean myLogRequestAndResponse;
 		private EncodingEnum myParamEncoding;
 		private Integer myParamLimit;
 		private String myResourceName;
 		private Class<? extends IResource> myResourceType;
 		private List<SortInternal> mySort = new ArrayList<SortInternal>();
-		private boolean myLogRequestAndResponse;
 
 		public ForInternal(Class<? extends IResource> theResourceType) {
 			myResourceType = theResourceType;
@@ -318,19 +343,25 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 
 		@Override
-		public IFor and(ICriterion theCriterion) {
+		public IQuery and(ICriterion theCriterion) {
 			myCriterion.add((ICriterionInternal) theCriterion);
 			return this;
 		}
 
 		@Override
-		public IFor encodedJson() {
+		public IQuery andLogRequestAndResponse(boolean theLogRequestAndResponse) {
+			myLogRequestAndResponse = theLogRequestAndResponse;
+			return this;
+		}
+
+		@Override
+		public IQuery encodedJson() {
 			myParamEncoding = EncodingEnum.JSON;
 			return this;
 		}
 
 		@Override
-		public IFor encodedXml() {
+		public IQuery encodedXml() {
 			myParamEncoding = EncodingEnum.XML;
 			return null;
 		}
@@ -387,13 +418,13 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 
 		@Override
-		public IFor include(Include theInclude) {
+		public IQuery include(Include theInclude) {
 			myInclude.add(theInclude);
 			return this;
 		}
 
 		@Override
-		public IFor limitTo(int theLimitTo) {
+		public IQuery limitTo(int theLimitTo) {
 			if (theLimitTo > 0) {
 				myParamLimit = theLimitTo;
 			} else {
@@ -410,7 +441,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 
 		@Override
-		public IFor where(ICriterion theCriterion) {
+		public IQuery where(ICriterion theCriterion) {
 			myCriterion.add((ICriterionInternal) theCriterion);
 			return this;
 		}
@@ -422,24 +453,18 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			params.get(parameterName).add(parameterValue);
 		}
 
-		@Override
-		public IFor andLogRequestAndResponse(boolean theLogRequestAndResponse) {
-			myLogRequestAndResponse =theLogRequestAndResponse;
-			return this;
-		}
-
 	}
 
-	private class QueryInternal implements IQuery {
+	private class QueryInternal implements IUntypedQuery {
 
 		@Override
-		public IFor forResource(String theResourceName) {
-			return new ForInternal(theResourceName);
+		public IQuery forResource(Class<? extends IResource> theResourceType) {
+			return new ForInternal(theResourceType);
 		}
 
 		@Override
-		public IFor forResource(Class<? extends IResource> theResourceType) {
-			return new ForInternal(theResourceType);
+		public IQuery forResource(String theResourceName) {
+			return new ForInternal(theResourceName);
 		}
 
 	}
@@ -455,21 +480,21 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 
 		@Override
-		public IFor ascending(IParam theParam) {
+		public IQuery ascending(IParam theParam) {
 			myParamName = Constants.PARAM_SORT_ASC;
 			myParamValue = theParam.getParamName();
 			return myFor;
 		}
 
 		@Override
-		public IFor defaultOrder(IParam theParam) {
+		public IQuery defaultOrder(IParam theParam) {
 			myParamName = Constants.PARAM_SORT;
 			myParamValue = theParam.getParamName();
 			return myFor;
 		}
 
 		@Override
-		public IFor descending(IParam theParam) {
+		public IQuery descending(IParam theParam) {
 			myParamName = Constants.PARAM_SORT_DESC;
 			myParamValue = theParam.getParamName();
 			return myFor;

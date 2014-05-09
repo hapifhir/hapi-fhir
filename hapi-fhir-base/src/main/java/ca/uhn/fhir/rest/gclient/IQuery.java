@@ -1,12 +1,29 @@
 package ca.uhn.fhir.rest.gclient;
 
-import ca.uhn.fhir.model.api.IResource;
-
+import ca.uhn.fhir.model.api.Bundle;
 
 public interface IQuery {
 
-	IFor forResource(String theResourceName);
+	IQuery where(ICriterion theCriterion);
+	
+	IQuery and(ICriterion theCriterion);
+	
+	Bundle execute();
 
-	IFor forResource(Class<? extends IResource> theClass);
+	IQuery include(Include theIncludeManagingorganization);
+
+	IQuery encodedJson();
+
+	IQuery encodedXml();
+
+	ISort sort();
+
+	IQuery limitTo(int theLimitTo);
+
+	/**
+	 * If set to true, the client will log the request and response to the SLF4J logger. This 
+	 * can be useful for debugging, but is generally not desirable in a production situation.
+	 */
+	IQuery andLogRequestAndResponse(boolean theLogRequestAndResponse);
 	
 }

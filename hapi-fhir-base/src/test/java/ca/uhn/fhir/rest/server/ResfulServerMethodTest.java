@@ -93,8 +93,8 @@ public class ResfulServerMethodTest {
 	private static FhirContext ourCtx;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResfulServerMethodTest.class);
 	private static int ourPort;
-	private static Server ourServer;
 	private static DummyDiagnosticReportResourceProvider ourReportProvider;
+	private static Server ourServer;
 
 	@Test
 	public void test404IsPropagatedCorrectly() throws Exception {
@@ -176,22 +176,6 @@ public class ResfulServerMethodTest {
 	public void testDelete() throws Exception {
 
 		HttpDelete httpGet = new HttpDelete("http://localhost:" + ourPort + "/Patient/1234");
-		HttpResponse status = ourClient.execute(httpGet);
-
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		ourLog.info("Response was:\n{}", responseContent);
-
-		assertEquals(200, status.getStatusLine().getStatusCode());
-
-		OperationOutcome patient = ourCtx.newXmlParser().parseResource(OperationOutcome.class, responseContent);
-		assertEquals("1234", patient.getIssueFirstRep().getDetails().getValue());
-
-	}
-
-	@Test
-	public void testWithAdditionalParams() throws Exception {
-
-		HttpDelete httpGet = new HttpDelete("http://localhost:" + ourPort + "/Patient/1234?_pretty=true");
 		HttpResponse status = ourClient.execute(httpGet);
 
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
@@ -383,6 +367,28 @@ public class ResfulServerMethodTest {
 		// }
 	}
 
+	@Test
+	public void testHistoryFailsIfResourcesAreIncorrectlyPopulated() throws Exception {
+		{
+			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/999/_history");
+			HttpResponse status = ourClient.execute(httpGet);
+
+			String responseContent = IOUtils.toString(status.getEntity().getContent());
+			ourLog.info("Response was:\n{}", responseContent);
+
+			assertEquals(500, status.getStatusLine().getStatusCode());
+		}
+		{
+			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/998/_history");
+			HttpResponse status = ourClient.execute(httpGet);
+
+			String responseContent = IOUtils.toString(status.getEntity().getContent());
+			ourLog.info("Response was:\n{}", responseContent);
+
+			assertEquals(500, status.getStatusLine().getStatusCode());
+		}
+	}
+
 	// @Test
 	// public void testSearchByComplex() throws Exception {
 	//
@@ -444,28 +450,6 @@ public class ResfulServerMethodTest {
 			assertEquals(updExpected.getValueAsString(), updActualBundle.getValueAsString());
 		}
 
-	}
-
-	@Test
-	public void testHistoryFailsIfResourcesAreIncorrectlyPopulated() throws Exception {
-		{
-			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/999/_history");
-			HttpResponse status = ourClient.execute(httpGet);
-
-			String responseContent = IOUtils.toString(status.getEntity().getContent());
-			ourLog.info("Response was:\n{}", responseContent);
-
-			assertEquals(500, status.getStatusLine().getStatusCode());
-		}
-		{
-			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/998/_history");
-			HttpResponse status = ourClient.execute(httpGet);
-
-			String responseContent = IOUtils.toString(status.getEntity().getContent());
-			ourLog.info("Response was:\n{}", responseContent);
-
-			assertEquals(500, status.getStatusLine().getStatusCode());
-		}
 	}
 
 	@Test
@@ -543,6 +527,19 @@ public class ResfulServerMethodTest {
 	}
 
 	@Test
+	public void testReadOnTypeThatDoesntSupportRead() throws Exception {
+
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/AdverseReaction/223");
+		HttpResponse status = ourClient.execute(httpGet);
+
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		ourLog.info("Response was:\n{}", responseContent);
+
+		assertEquals(Constants.STATUS_HTTP_404_NOT_FOUND, status.getStatusLine().getStatusCode());
+
+	}
+
+	@Test
 	public void testSearchAll() throws Exception {
 
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient");
@@ -566,19 +563,6 @@ public class ResfulServerMethodTest {
 		bundle = ourCtx.newXmlParser().parseBundle(responseContent);
 
 		assertEquals(2, bundle.getEntries().size());
-
-	}
-
-	@Test
-	public void testReadOnTypeThatDoesntSupportRead() throws Exception {
-
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/AdverseReaction/223");
-		HttpResponse status = ourClient.execute(httpGet);
-
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		ourLog.info("Response was:\n{}", responseContent);
-
-		assertEquals(Constants.STATUS_HTTP_404_NOT_FOUND, status.getStatusLine().getStatusCode());
 
 	}
 
@@ -909,22 +893,6 @@ public class ResfulServerMethodTest {
 
 	}
 
-	public void testUpdateWrongResourceType() throws Exception {
-
-		// TODO: this method sends in the wrong resource type vs. the URL so it
-		// should
-		// give a useful error message (and then make this unit test actually
-		// run)
-		Patient patient = new Patient();
-		patient.addIdentifier().setValue("002");
-
-		HttpPut httpPost = new HttpPut("http://localhost:" + ourPort + "/DiagnosticReport/001");
-		httpPost.setEntity(new StringEntity(new FhirContext().newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
-
-		ourClient.execute(httpPost);
-		fail();
-	}
-
 	@Test
 	public void testUpdateNoResponse() throws Exception {
 
@@ -938,6 +906,30 @@ public class ResfulServerMethodTest {
 
 		assertEquals(204, status.getStatusLine().getStatusCode());
 		assertEquals("http://localhost:" + ourPort + "/DiagnosticReport/001/_history/002", status.getFirstHeader("Location").getValue());
+
+	}
+
+	@Test
+	public void testUpdateWithTagMultiple() throws Exception {
+
+		DiagnosticReport dr = new DiagnosticReport();
+		dr.addCodedDiagnosis().addCoding().setCode("AAA");
+
+		HttpPut httpPost = new HttpPut("http://localhost:" + ourPort + "/DiagnosticReport/001");
+		httpPost.addHeader("Category", "Dog, Cat");
+		httpPost.setEntity(new StringEntity(new FhirContext().newXmlParser().encodeResourceToString(dr), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		ourClient.execute(httpPost);
+		assertEquals(2, ourReportProvider.getLastTags().size());
+		assertEquals(new Tag("Dog"), ourReportProvider.getLastTags().get(0));
+		assertEquals(new Tag("Cat"), ourReportProvider.getLastTags().get(1));
+
+		httpPost = new HttpPut("http://localhost:" + ourPort + "/DiagnosticReport/001");
+		httpPost.addHeader("Category", "Dog; label=\"aa\", Cat; label=\"bb\"");
+		httpPost.setEntity(new StringEntity(new FhirContext().newXmlParser().encodeResourceToString(dr), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		ourClient.execute(httpPost);
+		assertEquals(2, ourReportProvider.getLastTags().size());
+		assertEquals(new Tag("Dog", "aa", (String)null), ourReportProvider.getLastTags().get(0));
+		assertEquals(new Tag("Cat", "bb", (String)null), ourReportProvider.getLastTags().get(1));
 
 	}
 
@@ -978,7 +970,6 @@ public class ResfulServerMethodTest {
 
 	}
 
-	
 	@Test
 	public void testUpdateWithTagWithSchemeAndLabel() throws Exception {
 
@@ -1001,30 +992,7 @@ public class ResfulServerMethodTest {
 
 	}
 
-	@Test
-	public void testUpdateWithTagMultiple() throws Exception {
-
-		DiagnosticReport dr = new DiagnosticReport();
-		dr.addCodedDiagnosis().addCoding().setCode("AAA");
-
-		HttpPut httpPost = new HttpPut("http://localhost:" + ourPort + "/DiagnosticReport/001");
-		httpPost.addHeader("Category", "Dog, Cat");
-		httpPost.setEntity(new StringEntity(new FhirContext().newXmlParser().encodeResourceToString(dr), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
-		ourClient.execute(httpPost);
-		assertEquals(2, ourReportProvider.getLastTags().size());
-		assertEquals(new Tag("Dog"), ourReportProvider.getLastTags().get(0));
-		assertEquals(new Tag("Cat"), ourReportProvider.getLastTags().get(1));
-
-		httpPost = new HttpPut("http://localhost:" + ourPort + "/DiagnosticReport/001");
-		httpPost.addHeader("Category", "Dog; label=\"aa\", Cat; label=\"bb\"");
-		httpPost.setEntity(new StringEntity(new FhirContext().newXmlParser().encodeResourceToString(dr), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
-		ourClient.execute(httpPost);
-		assertEquals(2, ourReportProvider.getLastTags().size());
-		assertEquals(new Tag("Dog", "aa", (String)null), ourReportProvider.getLastTags().get(0));
-		assertEquals(new Tag("Cat", "bb", (String)null), ourReportProvider.getLastTags().get(1));
-
-	}
-
+	
 	@Test
 	public void testUpdateWithVersion() throws Exception {
 
@@ -1064,20 +1032,20 @@ public class ResfulServerMethodTest {
 		assertEquals(400, results.getStatusLine().getStatusCode());
 	}
 
-	@Test
-	public void testValidateWithPrettyPrintResponse() throws Exception {
+	public void testUpdateWrongResourceType() throws Exception {
 
+		// TODO: this method sends in the wrong resource type vs. the URL so it
+		// should
+		// give a useful error message (and then make this unit test actually
+		// run)
 		Patient patient = new Patient();
-		patient.addName().addFamily("FOO");
+		patient.addIdentifier().setValue("002");
 
-		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/_validate?_pretty=true");
+		HttpPut httpPost = new HttpPut("http://localhost:" + ourPort + "/DiagnosticReport/001");
 		httpPost.setEntity(new StringEntity(new FhirContext().newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
-		HttpResponse status = ourClient.execute(httpPost);
-
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		ourLog.info("Response was:\n{}", responseContent);
-		assertThat(responseContent, containsString("\n  "));
+		ourClient.execute(httpPost);
+		fail();
 	}
 
 	@Test
@@ -1135,6 +1103,38 @@ public class ResfulServerMethodTest {
 
 	}
 
+	@Test
+	public void testValidateWithPrettyPrintResponse() throws Exception {
+
+		Patient patient = new Patient();
+		patient.addName().addFamily("FOO");
+
+		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/_validate?_pretty=true");
+		httpPost.setEntity(new StringEntity(new FhirContext().newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+
+		HttpResponse status = ourClient.execute(httpPost);
+
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		ourLog.info("Response was:\n{}", responseContent);
+		assertThat(responseContent, containsString("\n  "));
+	}
+
+	@Test
+	public void testWithAdditionalParams() throws Exception {
+
+		HttpDelete httpGet = new HttpDelete("http://localhost:" + ourPort + "/Patient/1234?_pretty=true");
+		HttpResponse status = ourClient.execute(httpGet);
+
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		ourLog.info("Response was:\n{}", responseContent);
+
+		assertEquals(200, status.getStatusLine().getStatusCode());
+
+		OperationOutcome patient = ourCtx.newXmlParser().parseResource(OperationOutcome.class, responseContent);
+		assertEquals("1234", patient.getIssueFirstRep().getDetails().getValue());
+
+	}
+
 	@AfterClass
 	public static void afterClass() throws Exception {
 		ourServer.stop();
@@ -1165,6 +1165,30 @@ public class ResfulServerMethodTest {
 
 	}
 
+	/**
+	 * Created by dsotnikov on 2/25/2014.
+	 */
+	public static class DummyAdverseReactionResourceProvider implements IResourceProvider {
+
+		/*
+		 * *********************
+		 * NO NEW METHODS *********************
+		 */
+
+		@Create()
+		public MethodOutcome create(@ResourceParam AdverseReaction thePatient) {
+			IdDt id = new IdDt(thePatient.getIdentifier().get(0).getValue().getValue());
+			IdDt version = new IdDt(thePatient.getIdentifier().get(1).getValue().getValue());
+			return new MethodOutcome(id, version);
+		}
+
+		@Override
+		public Class<? extends IResource> getResourceType() {
+			return AdverseReaction.class;
+		}
+
+	}
+
 	public static class DummyDiagnosticReportResourceProvider implements IResourceProvider {
 
 		private TagList myLastTags;
@@ -1191,6 +1215,10 @@ public class ResfulServerMethodTest {
 			// do nothing
 		}
 
+		public TagList getLastTags() {
+			return myLastTags;
+		}
+
 		@Override
 		public Class<? extends IResource> getResourceType() {
 			return DiagnosticReport.class;
@@ -1204,39 +1232,11 @@ public class ResfulServerMethodTest {
 			return new MethodOutcome(id, version);
 		}
 
-		public TagList getLastTags() {
-			return myLastTags;
-		}
-
 		@Update()
 		public MethodOutcome updateDiagnosticReportWithVersionAndNoResponse(@IdParam IdDt theId, @ResourceParam DiagnosticReport theDr) {
 			IdDt id = theId;
 			IdDt version = new IdDt("002");
 			myLastTags = (TagList) theDr.getResourceMetadata().get(ResourceMetadataKeyEnum.TAG_LIST);
-			return new MethodOutcome(id, version);
-		}
-
-	}
-
-	/**
-	 * Created by dsotnikov on 2/25/2014.
-	 */
-	public static class DummyAdverseReactionResourceProvider implements IResourceProvider {
-
-		/*
-		 * *********************
-		 * NO NEW METHODS *********************
-		 */
-
-		@Override
-		public Class<? extends IResource> getResourceType() {
-			return AdverseReaction.class;
-		}
-
-		@Create()
-		public MethodOutcome create(@ResourceParam AdverseReaction thePatient) {
-			IdDt id = new IdDt(thePatient.getIdentifier().get(0).getValue().getValue());
-			IdDt version = new IdDt(thePatient.getIdentifier().get(1).getValue().getValue());
 			return new MethodOutcome(id, version);
 		}
 

@@ -2,10 +2,10 @@ package ca.uhn.fhir.rest.gclient;
 
 public interface ISort {
 
-	IFor ascending(IParam theParam);
+	IQuery ascending(IParam theParam);
 
-	IFor defaultOrder(IParam theParam);
+	IQuery defaultOrder(IParam theParam);
 	
-	IFor descending(IParam theParam);
+	IQuery descending(IParam theParam);
 
 }

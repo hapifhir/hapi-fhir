@@ -24,14 +24,73 @@
 			</p>
 
 			<p>
-				Setup is mostly done using simple annotations, which means that it
-				should
-				be possible to create a FHIR compliant server quickly and
-				easily. Once again,
-				this design is intended to be similar to that of
+				There are two types of clients provided by HAPI: Generic and Annotation-driven.
+				The generic client (introduced in HAPI-FHIR 0.3) is much simpler to create
+				and generally provides the faster way to get started. The annotation-driven
+				client is more powerful and can rely on code generation to give better
+				compile-time checking. 
+			</p>
+
+		</section>
+		
+		<section name="The Generic Client">
+		
+			<p>
+				Creating a generic client simply requires you to create an instance of
+				<code>FhirContext</code> and use that to instantiate a client. 
+				<b>Performance Tip: </b> Note that FhirContext is an expensive object to create,
+				so you should try to keep an instance around for the lifetime of your application. It
+				is thread-safe so it can be passed as needed. Client instances, on the other hand, 
+				are very inexpensive to create so you can create a new one for each request if needed 
+				(although there is no requirement to do so, clients are reusable and thread-safe as well).  
+			</p>
+			
+			<p>
+				The following example shows how to create a client, and a few operations which
+				can be performed.
+			</p>
+			
+			<macro name="snippet">
+				<param name="id" value="simple" />
+				<param name="file"
+					value="src/site/example/java/example/GenericClientExample.java" />
+			</macro>
+			
+			<subsection name="Search/Query">
+			
+				<p>
+					The generic client supports queries using a fluent interface
+					which is inspired by the fantastic 
+					<a href="http://ewoutkramer.github.io/fhir-net-api/client-search.html">.NET FHIR API</a>.
+					The fluent interface allows you to construct powerful queries by chaining
+					method calls together, leading to highly readable code. It also allows
+					you to take advantage of intellisense/code completion in your favourite
+					IDE.
+				</p>
+				
+				<p>
+					The following example shows how to query using this interface:
+				</p>
+
+				<macro name="snippet">
+					<param name="id" value="fluentExample" />
+					<param name="file"
+						value="src/site/example/java/example/GenericClientExample.java" />
+				</macro>
+				
+			</subsection>			
+			
+		</section>
+		
+		<section name="The Annotation-Driven Client">
+
+			<p>
+				The design of the annotation-driven client
+				is intended to be similar to that of
 				JAX-WS, so users of that
 				specification should be comfortable with
-				this one.
+				this one. It uses a user-defined interface containing special
+				annotated methods which HAPI binds to calls against a server.
 			</p>
 
 			<subsection name="Defining A Restful Client Interface">

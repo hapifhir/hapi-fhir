@@ -554,6 +554,8 @@ public class RestfulServer extends HttpServlet {
 					if (tok.hasMoreTokens()) {
 						String versionString = tok.nextToken();
 						versionId = new IdDt(versionString);
+					} else {
+						operation = Constants.PARAM_HISTORY;
 					}
 				} else if (nextString.startsWith("_")) {
 					if (operation != null) {

@@ -73,6 +73,7 @@ import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.rest.gclient.QuantityParam;
 
 
 /**
@@ -120,6 +121,8 @@ public class Observation extends BaseResource implements IResource {
 	@SearchParamDefinition(name="value-quantity", path="Observation.value[x]", description="The value of the observation, if the value is a Quantity, or a SampledData (just search on the bounds of the values in sampled data)")
 	public static final String SP_VALUE_QUANTITY = "value-quantity";
 
+	public static final QuantityParam VALUE_QUANTITY = new QuantityParam(SP_VALUE_QUANTITY);
+	
 	/**
 	 * Search parameter constant for <b>value-concept</b>
 	 * <p>

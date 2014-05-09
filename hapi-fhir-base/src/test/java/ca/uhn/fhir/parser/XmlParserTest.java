@@ -669,7 +669,7 @@ public class XmlParserTest {
 
 		assertEquals("http://spark.furore.com/fhir/_snapshot?id=327d6bb9-83b0-4929-aa91-6dd9c41e587b&start=0&_count=20", bundle.getLinkSelf().getValue());
 		assertEquals("Patient resource with id 3216379", bundle.getEntries().get(0).getTitle().getValue());
-		assertEquals("3216379", bundle.getEntries().get(0).getId().getValue());
+		assertEquals("http://spark.furore.com/fhir/Patient/3216379", bundle.getEntries().get(0).getId().getValue());
 		assertEquals("3216379", bundle.getEntries().get(0).getResource().getId().getValue());
 
 	}

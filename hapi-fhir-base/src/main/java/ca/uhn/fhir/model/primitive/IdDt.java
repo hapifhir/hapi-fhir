@@ -69,7 +69,8 @@ public class IdDt extends BasePrimitive<String> {
 	}
 
 	/**
-	 * Create a new ID using a string
+	 * Create a new ID using a string. This String may contain a simple ID (e.g. "1234")
+	 * or it may contain a complete URL (http://example.com/fhir/Patient/1234).
 	 * 
 	 * <p>
 	 * <b>Description</b>: A whole number in the range 0 to 2^64-1 (optionally represented in hex), a uuid, an oid, or any other combination of lowercase letters, numerals, "-" and ".", with a length
@@ -84,6 +85,10 @@ public class IdDt extends BasePrimitive<String> {
 		setValue(theValue);
 	}
 
+	
+	
+	
+	
 	/**
 	 * Returns the value of this ID as a big decimal, or <code>null</code> if the value is null
 	 * 
