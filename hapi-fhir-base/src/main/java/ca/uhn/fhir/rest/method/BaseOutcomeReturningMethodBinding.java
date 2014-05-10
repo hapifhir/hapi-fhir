@@ -55,7 +55,7 @@ import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 
-public abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding {
+public abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<MethodOutcome> {
 	private static final String LABEL = "label=\"";
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseOutcomeReturningMethodBinding.class);
 	private static final String SCHEME = "scheme=\"";
@@ -94,7 +94,7 @@ public abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBindin
 	}
 
 	@Override
-	public Object invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException, BaseServerResponseException {
+	public MethodOutcome invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException, BaseServerResponseException {
 		switch (theResponseStatusCode) {
 		case Constants.STATUS_HTTP_200_OK:
 		case Constants.STATUS_HTTP_201_CREATED:

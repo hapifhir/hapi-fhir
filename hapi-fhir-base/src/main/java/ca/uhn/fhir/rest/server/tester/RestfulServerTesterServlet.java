@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -39,6 +40,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.WriterOutputStream;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpResponse;
@@ -66,10 +68,10 @@ import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 
-public class PublicTesterServlet extends HttpServlet {
+public class RestfulServerTesterServlet extends HttpServlet {
 
 	private static final boolean DEBUGMODE = true;
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(PublicTesterServlet.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RestfulServerTesterServlet.class);
 	private static final String PUBLIC_TESTER_RESULT_HTML = "/PublicTesterResult.html";
 	private static final long serialVersionUID = 1L;
 	private FhirContext myCtx;
@@ -77,8 +79,9 @@ public class PublicTesterServlet extends HttpServlet {
 	private HashMap<String, String> myStaticResources;
 
 	private TemplateEngine myTemplateEngine;
+	private Set<String> myFilterHeaders;
 
-	public PublicTesterServlet() {
+	public RestfulServerTesterServlet() {
 		myStaticResources = new HashMap<String, String>();
 		myStaticResources.put("jquery-2.1.0.min.js", "text/javascript");
 		myStaticResources.put("PublicTester.js", "text/javascript");
@@ -93,6 +96,10 @@ public class PublicTesterServlet extends HttpServlet {
 		myStaticResources.put("shThemeDefault.css", "text/css");
 
 		myCtx = new FhirContext();
+	}
+
+	public FhirContext getFhirContext() {
+		return myCtx;
 	}
 
 	@Override
@@ -120,7 +127,7 @@ public class PublicTesterServlet extends HttpServlet {
 	}
 
 	private void streamResponse(String theResourceName, String theContentType, HttpServletResponse theResp) throws IOException {
-		InputStream res = PublicTesterServlet.class.getResourceAsStream("/ca/uhn/fhir/rest/server/tester/" + theResourceName);
+		InputStream res = RestfulServerTesterServlet.class.getResourceAsStream("/ca/uhn/fhir/rest/server/tester/" + theResourceName);
 		theResp.setContentType(theContentType);
 		IOUtils.copy(res, theResp.getOutputStream());
 	}
@@ -132,22 +139,22 @@ public class PublicTesterServlet extends HttpServlet {
 		}
 
 		try {
-		ourLog.info("RequestURI: {}", theReq.getPathInfo());
+			ourLog.info("RequestURI: {}", theReq.getPathInfo());
 
-		String resName = theReq.getPathInfo().substring(1);
-		if (myStaticResources.containsKey(resName)) {
-			streamResponse(resName, myStaticResources.get(resName), theResp);
-			return;
-		}
+			String resName = theReq.getPathInfo().substring(1);
+			if (myStaticResources.containsKey(resName)) {
+				streamResponse(resName, myStaticResources.get(resName), theResp);
+				return;
+			}
 
-		ConformanceClient client = myCtx.newRestfulClient(ConformanceClient.class, myServerBase);
-		Conformance conformance = client.getConformance();
+			ConformanceClient client = myCtx.newRestfulClient(ConformanceClient.class, myServerBase);
+			Conformance conformance = client.getConformance();
 
-		WebContext ctx = new WebContext(theReq, theResp, theReq.getServletContext(), theReq.getLocale());
-		ctx.setVariable("conf", conformance);
-		ctx.setVariable("base", myServerBase);
-		ctx.setVariable("jsonEncodedConf", myCtx.newJsonParser().encodeResourceToString(conformance));
-		myTemplateEngine.process(theReq.getPathInfo(), ctx, theResp.getWriter());
+			WebContext ctx = new WebContext(theReq, theResp, theReq.getServletContext(), theReq.getLocale());
+			ctx.setVariable("conf", conformance);
+			ctx.setVariable("base", myServerBase);
+			ctx.setVariable("jsonEncodedConf", myCtx.newJsonParser().encodeResourceToString(conformance));
+			myTemplateEngine.process(theReq.getPathInfo(), ctx, theResp.getWriter());
 		} catch (Exception e) {
 			ourLog.error("Failed to respond", e);
 			theResp.sendError(500, e.getMessage());
@@ -183,164 +190,164 @@ public class PublicTesterServlet extends HttpServlet {
 			boolean returnsResource;
 
 			try {
-			if ("conformance".equals(method)) {
-				returnsResource = true;
-				client.conformance();
-			} else if ("read".equals(method)) {
-				RuntimeResourceDefinition def = getResourceType(theReq);
-				String id = StringUtils.defaultString(theReq.getParameter("id"));
-				if (StringUtils.isBlank(id)) {
-					theResp.sendError(Constants.STATUS_HTTP_400_BAD_REQUEST, "No ID specified");
-				}
-				returnsResource = true;
+				if ("conformance".equals(method)) {
+					returnsResource = true;
+					client.conformance();
+				} else if ("read".equals(method)) {
+					RuntimeResourceDefinition def = getResourceType(theReq);
+					String id = StringUtils.defaultString(theReq.getParameter("id"));
+					if (StringUtils.isBlank(id)) {
+						theResp.sendError(Constants.STATUS_HTTP_400_BAD_REQUEST, "No ID specified");
+					}
+					returnsResource = true;
 
-				client.read(def.getImplementingClass(), new IdDt(id));
+					client.read(def.getImplementingClass(), new IdDt(id));
 
-			} else if ("vread".equals(method)) {
-				RuntimeResourceDefinition def = getResourceType(theReq);
-				String id = StringUtils.defaultString(theReq.getParameter("id"));
-				if (StringUtils.isBlank(id)) {
-					theResp.sendError(Constants.STATUS_HTTP_400_BAD_REQUEST, "No ID specified");
-				}
-
-				String versionId = StringUtils.defaultString(theReq.getParameter("versionid"));
-				if (StringUtils.isBlank(versionId)) {
-					theResp.sendError(Constants.STATUS_HTTP_400_BAD_REQUEST, "No Version ID specified");
-				}
-				returnsResource = true;
-
-				client.vread(def.getImplementingClass(), new IdDt(id), new IdDt(versionId));
-
-			} else if ("delete".equals(method)) {
-				RuntimeResourceDefinition def = getResourceType(theReq);
-				String id = StringUtils.defaultString(theReq.getParameter("id"));
-				if (StringUtils.isBlank(id)) {
-					theResp.sendError(Constants.STATUS_HTTP_400_BAD_REQUEST, "No ID specified");
-				}
-
-				returnsResource = false;
-
-				client.delete(def.getImplementingClass(), new IdDt(id));
-
-			} else if ("history-instance".equals(method)) {
-				RuntimeResourceDefinition def = getResourceType(theReq);
-				String id = StringUtils.defaultString(theReq.getParameter("id"));
-				if (StringUtils.isBlank(id)) {
-					theResp.sendError(Constants.STATUS_HTTP_400_BAD_REQUEST, "No ID specified");
-				}
-
-				returnsResource = false;
-
-				client.history(def.getImplementingClass(), new IdDt(id));
-
-			} else if ("create".equals(method)) {
-				RuntimeResourceDefinition def = getResourceType(theReq);
-				String resourceText = StringUtils.defaultString(theReq.getParameter("resource"));
-				if (StringUtils.isBlank(resourceText)) {
-					theResp.sendError(Constants.STATUS_HTTP_400_BAD_REQUEST, "No resource content specified");
-				}
-
-				IResource resource;
-				if (client.getEncoding() == null || client.getEncoding() == EncodingEnum.XML) {
-					resource = myCtx.newXmlParser().parseResource(def.getImplementingClass(), resourceText);
-				} else {
-					resource = myCtx.newJsonParser().parseResource(def.getImplementingClass(), resourceText);
-				}
-				returnsResource = false;
-
-				client.create(resource);
-
-			} else if ("validate".equals(method)) {
-				RuntimeResourceDefinition def = getResourceType(theReq);
-				String resourceText = StringUtils.defaultString(theReq.getParameter("resource"));
-				if (StringUtils.isBlank(resourceText)) {
-					theResp.sendError(Constants.STATUS_HTTP_400_BAD_REQUEST, "No resource content specified");
-				}
-
-				IResource resource;
-				if (client.getEncoding() == null || client.getEncoding() == EncodingEnum.XML) {
-					resource = myCtx.newXmlParser().parseResource(def.getImplementingClass(), resourceText);
-				} else {
-					resource = myCtx.newJsonParser().parseResource(def.getImplementingClass(), resourceText);
-				}
-				returnsResource = false;
-
-				client.validate(resource);
-
-			} else if ("update".equals(method)) {
-				RuntimeResourceDefinition def = getResourceType(theReq);
-				String resourceText = StringUtils.defaultString(theReq.getParameter("resource"));
-				if (StringUtils.isBlank(resourceText)) {
-					theResp.sendError(Constants.STATUS_HTTP_400_BAD_REQUEST, "No resource content specified");
-				}
-
-				String id = StringUtils.defaultString(theReq.getParameter("id"));
-				if (StringUtils.isBlank(id)) {
-					theResp.sendError(Constants.STATUS_HTTP_400_BAD_REQUEST, "No ID specified");
-				}
-
-				IResource resource;
-				if (client.getEncoding() == null || client.getEncoding() == EncodingEnum.XML) {
-					resource = myCtx.newXmlParser().parseResource(def.getImplementingClass(), resourceText);
-				} else {
-					resource = myCtx.newJsonParser().parseResource(def.getImplementingClass(), resourceText);
-				}
-				returnsResource = false;
-
-				client.update(new IdDt(id), resource);
-
-			} else if ("searchType".equals(method)) {
-				Map<String, List<IQueryParameterType>> params = new HashMap<String, List<IQueryParameterType>>();
-
-				HashSet<String> hashSet = new HashSet<String>(theReq.getParameterMap().keySet());
-				String paramName = null;
-				IQueryParameterType paramValue = null;
-				while (hashSet.isEmpty() == false) {
-
-					String nextKey = hashSet.iterator().next();
-					String nextValue = theReq.getParameter(nextKey);
-					paramName = null;
-					paramValue = null;
-
-					if (nextKey.startsWith("param.token.")) {
-						int prefixLength = "param.token.".length();
-						paramName = nextKey.substring(prefixLength + 2);
-						String systemKey = "param.token." + "1." + paramName;
-						String valueKey = "param.token." + "2." + paramName;
-						String system = theReq.getParameter(systemKey);
-						String value = theReq.getParameter(valueKey);
-						paramValue = new IdentifierDt(system, value);
-						hashSet.remove(systemKey);
-						hashSet.remove(valueKey);
-					} else if (nextKey.startsWith("param.string.")) {
-						paramName = nextKey.substring("param.string.".length());
-						paramValue = new StringDt(nextValue);
+				} else if ("vread".equals(method)) {
+					RuntimeResourceDefinition def = getResourceType(theReq);
+					String id = StringUtils.defaultString(theReq.getParameter("id"));
+					if (StringUtils.isBlank(id)) {
+						theResp.sendError(Constants.STATUS_HTTP_400_BAD_REQUEST, "No ID specified");
 					}
 
-					if (paramName != null) {
-						if (params.containsKey(paramName) == false) {
-							params.put(paramName, new ArrayList<IQueryParameterType>());
+					String versionId = StringUtils.defaultString(theReq.getParameter("versionid"));
+					if (StringUtils.isBlank(versionId)) {
+						theResp.sendError(Constants.STATUS_HTTP_400_BAD_REQUEST, "No Version ID specified");
+					}
+					returnsResource = true;
+
+					client.vread(def.getImplementingClass(), new IdDt(id), new IdDt(versionId));
+
+				} else if ("delete".equals(method)) {
+					RuntimeResourceDefinition def = getResourceType(theReq);
+					String id = StringUtils.defaultString(theReq.getParameter("id"));
+					if (StringUtils.isBlank(id)) {
+						theResp.sendError(Constants.STATUS_HTTP_400_BAD_REQUEST, "No ID specified");
+					}
+
+					returnsResource = false;
+
+					client.delete(def.getImplementingClass(), new IdDt(id));
+
+				} else if ("history-instance".equals(method)) {
+					RuntimeResourceDefinition def = getResourceType(theReq);
+					String id = StringUtils.defaultString(theReq.getParameter("id"));
+					if (StringUtils.isBlank(id)) {
+						theResp.sendError(Constants.STATUS_HTTP_400_BAD_REQUEST, "No ID specified");
+					}
+
+					returnsResource = false;
+
+					client.history(def.getImplementingClass(), new IdDt(id));
+
+				} else if ("create".equals(method)) {
+					RuntimeResourceDefinition def = getResourceType(theReq);
+					String resourceText = StringUtils.defaultString(theReq.getParameter("resource"));
+					if (StringUtils.isBlank(resourceText)) {
+						theResp.sendError(Constants.STATUS_HTTP_400_BAD_REQUEST, "No resource content specified");
+					}
+
+					IResource resource;
+					if (client.getEncoding() == null || client.getEncoding() == EncodingEnum.XML) {
+						resource = myCtx.newXmlParser().parseResource(def.getImplementingClass(), resourceText);
+					} else {
+						resource = myCtx.newJsonParser().parseResource(def.getImplementingClass(), resourceText);
+					}
+					returnsResource = false;
+
+					client.create(resource);
+
+				} else if ("validate".equals(method)) {
+					RuntimeResourceDefinition def = getResourceType(theReq);
+					String resourceText = StringUtils.defaultString(theReq.getParameter("resource"));
+					if (StringUtils.isBlank(resourceText)) {
+						theResp.sendError(Constants.STATUS_HTTP_400_BAD_REQUEST, "No resource content specified");
+					}
+
+					IResource resource;
+					if (client.getEncoding() == null || client.getEncoding() == EncodingEnum.XML) {
+						resource = myCtx.newXmlParser().parseResource(def.getImplementingClass(), resourceText);
+					} else {
+						resource = myCtx.newJsonParser().parseResource(def.getImplementingClass(), resourceText);
+					}
+					returnsResource = false;
+
+					client.validate(resource);
+
+				} else if ("update".equals(method)) {
+					RuntimeResourceDefinition def = getResourceType(theReq);
+					String resourceText = StringUtils.defaultString(theReq.getParameter("resource"));
+					if (StringUtils.isBlank(resourceText)) {
+						theResp.sendError(Constants.STATUS_HTTP_400_BAD_REQUEST, "No resource content specified");
+					}
+
+					String id = StringUtils.defaultString(theReq.getParameter("id"));
+					if (StringUtils.isBlank(id)) {
+						theResp.sendError(Constants.STATUS_HTTP_400_BAD_REQUEST, "No ID specified");
+					}
+
+					IResource resource;
+					if (client.getEncoding() == null || client.getEncoding() == EncodingEnum.XML) {
+						resource = myCtx.newXmlParser().parseResource(def.getImplementingClass(), resourceText);
+					} else {
+						resource = myCtx.newJsonParser().parseResource(def.getImplementingClass(), resourceText);
+					}
+					returnsResource = false;
+
+					client.update(new IdDt(id), resource);
+
+				} else if ("searchType".equals(method)) {
+					Map<String, List<IQueryParameterType>> params = new HashMap<String, List<IQueryParameterType>>();
+
+					HashSet<String> hashSet = new HashSet<String>(theReq.getParameterMap().keySet());
+					String paramName = null;
+					IQueryParameterType paramValue = null;
+					while (hashSet.isEmpty() == false) {
+
+						String nextKey = hashSet.iterator().next();
+						String nextValue = theReq.getParameter(nextKey);
+						paramName = null;
+						paramValue = null;
+
+						if (nextKey.startsWith("param.token.")) {
+							int prefixLength = "param.token.".length();
+							paramName = nextKey.substring(prefixLength + 2);
+							String systemKey = "param.token." + "1." + paramName;
+							String valueKey = "param.token." + "2." + paramName;
+							String system = theReq.getParameter(systemKey);
+							String value = theReq.getParameter(valueKey);
+							paramValue = new IdentifierDt(system, value);
+							hashSet.remove(systemKey);
+							hashSet.remove(valueKey);
+						} else if (nextKey.startsWith("param.string.")) {
+							paramName = nextKey.substring("param.string.".length());
+							paramValue = new StringDt(nextValue);
 						}
-						params.get(paramName).add(paramValue);
+
+						if (paramName != null) {
+							if (params.containsKey(paramName) == false) {
+								params.put(paramName, new ArrayList<IQueryParameterType>());
+							}
+							params.get(paramName).add(paramValue);
+						}
+
+						hashSet.remove(nextKey);
 					}
 
-					hashSet.remove(nextKey);
+					RuntimeResourceDefinition def = getResourceType(theReq);
+
+					returnsResource = false;
+					client.search(def.getImplementingClass(), params);
+
+				} else {
+					theResp.sendError(Constants.STATUS_HTTP_400_BAD_REQUEST, "Invalid method: " + method);
+					return;
 				}
-
-				RuntimeResourceDefinition def = getResourceType(theReq);
-
-				returnsResource = false;
-				client.search(def.getImplementingClass(), params);
-
-			} else {
-				theResp.sendError(Constants.STATUS_HTTP_400_BAD_REQUEST, "Invalid method: " + method);
-				return;
-			}
 			} catch (BaseServerResponseException e) {
 				ourLog.error("Failed to invoke method", e);
-				returnsResource=false;
+				returnsResource = false;
 			}
-			
+
 			HttpRequestBase lastRequest = client.getLastRequest();
 			String requestBody = null;
 			String requestSyntaxHighlighterClass = null;
@@ -401,6 +408,9 @@ public class PublicTesterServlet extends HttpServlet {
 				}
 			}
 
+			Header[] requestHeaders = applyHeaderFilters(lastRequest.getAllHeaders());
+			Header[] responseHeaders = applyHeaderFilters(lastResponse.getAllHeaders());
+
 			WebContext ctx = new WebContext(theReq, theResp, theReq.getServletContext(), theReq.getLocale());
 			ctx.setVariable("base", myServerBase);
 			ctx.setVariable("requestUrl", requestUrl);
@@ -410,14 +420,40 @@ public class PublicTesterServlet extends HttpServlet {
 			ctx.setVariable("requestSyntaxHighlighterClass", requestSyntaxHighlighterClass);
 			ctx.setVariable("resultBody", StringEscapeUtils.escapeHtml4(resultBody));
 			ctx.setVariable("resultSyntaxHighlighterClass", resultSyntaxHighlighterClass);
-			ctx.setVariable("requestHeaders", lastRequest.getAllHeaders());
-			ctx.setVariable("responseHeaders", lastResponse.getAllHeaders());
+			ctx.setVariable("requestHeaders", requestHeaders);
+			ctx.setVariable("responseHeaders", responseHeaders);
 			ctx.setVariable("narrative", narrativeString);
 
 			myTemplateEngine.process(PUBLIC_TESTER_RESULT_HTML, ctx, theResp.getWriter());
 		} catch (Exception e) {
 			ourLog.error("Failure during processing", e);
 			theResp.sendError(500, e.toString());
+		}
+	}
+
+	private Header[] applyHeaderFilters(Header[] theAllHeaders) {
+		if (myFilterHeaders == null || myFilterHeaders.isEmpty()) {
+			return theAllHeaders;
+		}
+		ArrayList<Header> retVal = new ArrayList<Header>();
+		for (Header next : theAllHeaders) {
+			if (!myFilterHeaders.contains(next.getName().toLowerCase())) {
+				retVal.add(next);
+			}
+		}
+		return retVal.toArray(new Header[retVal.size()]);
+	}
+
+	/**
+	 * If set, the headers named here will be stripped from requests/responses before they are displayed to the user. This can be used, for instance, to filter out "Authorization" headers. Note that
+	 * names are not case sensitive.
+	 */
+	public void setFilterHeaders(String... theHeaderNames) {
+		myFilterHeaders = new HashSet<String>();
+		if (theHeaderNames != null) {
+			for (String next : theHeaderNames) {
+				myFilterHeaders.add(next.toLowerCase());
+			}
 		}
 	}
 
@@ -448,10 +484,10 @@ public class PublicTesterServlet extends HttpServlet {
 		public InputStream getResourceAsStream(TemplateProcessingParameters theTemplateProcessingParameters, String theName) {
 			ourLog.debug("Loading template: {}", theName);
 			if ("/".equals(theName)) {
-				return PublicTesterServlet.class.getResourceAsStream("/ca/uhn/fhir/rest/server/tester/PublicTester.html");
+				return RestfulServerTesterServlet.class.getResourceAsStream("/ca/uhn/fhir/rest/server/tester/PublicTester.html");
 			}
 			if (PUBLIC_TESTER_RESULT_HTML.equals(theName)) {
-				return PublicTesterServlet.class.getResourceAsStream("/ca/uhn/fhir/rest/server/tester/PublicTesterResult.html");
+				return RestfulServerTesterServlet.class.getResourceAsStream("/ca/uhn/fhir/rest/server/tester/PublicTesterResult.html");
 			}
 
 			return null;

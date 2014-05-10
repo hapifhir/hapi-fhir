@@ -65,7 +65,7 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 
-abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding {
+abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Object> {
 
 	protected static final Set<String> ALLOWED_PARAMS;
 	static {

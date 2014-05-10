@@ -36,7 +36,8 @@ import org.apache.http.protocol.HttpContext;
  * HTTP interceptor to be used for adding HTTP basic auth username/password tokens
  * to requests
  * <p>
- * See the 
+ * See the <a href="http://hl7api.sourceforge.net/hapi-fhir/doc_rest_client.html#HTTP_Basic_Authorization">HAPI Documentation</a>
+ * for information on how to use this class.
  * </p>
  */
 public class HttpBasicAuthInterceptor implements HttpRequestInterceptor {

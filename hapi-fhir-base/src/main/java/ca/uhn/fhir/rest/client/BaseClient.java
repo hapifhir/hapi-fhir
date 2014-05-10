@@ -60,19 +60,15 @@ public abstract class BaseClient {
 	private boolean myPrettyPrint = false;
 
 	/**
-	 * Returns the encoding that will be used on requests. Default is
-	 * <code>null</code>, which means the client will not explicitly request an
-	 * encoding. (This is standard behaviour according to the FHIR
-	 * specification)
+	 * Returns the encoding that will be used on requests. Default is <code>null</code>, which means the client will not explicitly request an encoding. (This is standard behaviour according to the
+	 * FHIR specification)
 	 */
 	public EncodingEnum getEncoding() {
 		return myEncoding;
 	}
 
 	/**
-	 * Sets the encoding that will be used on requests. Default is
-	 * <code>null</code>, which means the client will not explicitly request an
-	 * encoding. (This is standard behaviour according to the FHIR
+	 * Sets the encoding that will be used on requests. Default is <code>null</code>, which means the client will not explicitly request an encoding. (This is standard behaviour according to the FHIR
 	 * specification)
 	 */
 	public BaseClient setEncoding(EncodingEnum theEncoding) {
@@ -87,16 +83,14 @@ public abstract class BaseClient {
 	}
 
 	/**
-	 * For now, this is a part of the internal API of HAPI - Use with caution as
-	 * this method may change!
+	 * For now, this is a part of the internal API of HAPI - Use with caution as this method may change!
 	 */
 	public HttpResponse getLastResponse() {
 		return myLastResponse;
 	}
 
 	/**
-	 * For now, this is a part of the internal API of HAPI - Use with caution as
-	 * this method may change!
+	 * For now, this is a part of the internal API of HAPI - Use with caution as this method may change!
 	 */
 	public String getLastResponseBody() {
 		return myLastResponseBody;
@@ -106,22 +100,22 @@ public abstract class BaseClient {
 		return myUrlBase;
 	}
 
-	Object invokeClient(IClientResponseHandler binding, BaseClientInvocation clientInvocation) {
+	<T> T invokeClient(IClientResponseHandler<T> binding, BaseClientInvocation clientInvocation) {
 		return invokeClient(binding, clientInvocation, false);
 	}
-	
-	Object invokeClient(IClientResponseHandler binding, BaseClientInvocation clientInvocation, boolean theLogRequestAndResponse) {
+
+	<T> T invokeClient(IClientResponseHandler<T> binding, BaseClientInvocation clientInvocation, boolean theLogRequestAndResponse) {
 		// TODO: handle non 2xx status codes by throwing the correct exception,
 		// and ensure it's passed upwards
 		HttpRequestBase httpRequest;
 		HttpResponse response;
 		try {
 			httpRequest = clientInvocation.asHttpRequest(myUrlBase, createExtraParams(), getEncoding());
-			
+
 			if (theLogRequestAndResponse) {
 				ourLog.info("Client invoking: {}", httpRequest);
 			}
-			
+
 			response = myClient.execute(httpRequest);
 		} catch (DataFormatException e) {
 			throw new FhirClientConnectionException(e);
@@ -160,13 +154,24 @@ public abstract class BaseClient {
 			}
 
 			if (response.getStatusLine().getStatusCode() < 200 || response.getStatusLine().getStatusCode() > 299) {
-				throw BaseServerResponseException.newInstance(response.getStatusLine().getStatusCode(), response.getStatusLine().getReasonPhrase());
+				BaseServerResponseException exception = BaseServerResponseException.newInstance(response.getStatusLine().getStatusCode(), response.getStatusLine().getReasonPhrase());
+
+				try {
+					String body = IOUtils.toString(reader);
+					exception.setResponseBody(body);
+				} catch (Exception e) {
+					ourLog.debug("Failed to read input stream", e);
+				} finally {
+					IOUtils.closeQuietly(reader);
+				}
+
+				throw exception;
 			}
 
 			try {
 				return binding.invokeClient(mimeType, reader, response.getStatusLine().getStatusCode(), headers);
 			} finally {
-				reader.close();
+				IOUtils.closeQuietly(reader);
 			}
 
 		} catch (IllegalStateException e) {
@@ -201,32 +206,28 @@ public abstract class BaseClient {
 	}
 
 	/**
-	 * For now, this is a part of the internal API of HAPI - Use with caution as
-	 * this method may change!
+	 * For now, this is a part of the internal API of HAPI - Use with caution as this method may change!
 	 */
 	public boolean isKeepResponses() {
 		return myKeepResponses;
 	}
 
 	/**
-	 * For now, this is a part of the internal API of HAPI - Use with caution as
-	 * this method may change!
+	 * For now, this is a part of the internal API of HAPI - Use with caution as this method may change!
 	 */
 	public void setKeepResponses(boolean theKeepResponses) {
 		myKeepResponses = theKeepResponses;
 	}
 
 	/**
-	 * For now, this is a part of the internal API of HAPI - Use with caution as
-	 * this method may change!
+	 * For now, this is a part of the internal API of HAPI - Use with caution as this method may change!
 	 */
 	public void setLastResponse(HttpResponse theLastResponse) {
 		myLastResponse = theLastResponse;
 	}
 
 	/**
-	 * For now, this is a part of the internal API of HAPI - Use with caution as
-	 * this method may change!
+	 * For now, this is a part of the internal API of HAPI - Use with caution as this method may change!
 	 */
 	public void setLastResponseBody(String theLastResponseBody) {
 		myLastResponseBody = theLastResponseBody;
@@ -238,7 +239,7 @@ public abstract class BaseClient {
 			return new StringReader("");
 		}
 		Charset charset = null;
-		if (entity.getContentType() != null && entity.getContentType().getElements() != null && entity.getContentType().getElements().length>0) {
+		if (entity.getContentType() != null && entity.getContentType().getElements() != null && entity.getContentType().getElements().length > 0) {
 			ContentType ct = ContentType.get(entity);
 			charset = ct.getCharset();
 		}
@@ -252,20 +253,16 @@ public abstract class BaseClient {
 	}
 
 	/**
-	 * Returns the pretty print flag, which is a request to the server for it to
-	 * return "pretty printed" responses. Note that this is currently a
-	 * non-standard flag (_pretty) which is supported only by HAPI based servers
-	 * (and any other servers which might implement it).
+	 * Returns the pretty print flag, which is a request to the server for it to return "pretty printed" responses. Note that this is currently a non-standard flag (_pretty) which is supported only by
+	 * HAPI based servers (and any other servers which might implement it).
 	 */
 	public boolean isPrettyPrint() {
 		return myPrettyPrint;
 	}
 
 	/**
-	 * Sets the pretty print flag, which is a request to the server for it to
-	 * return "pretty printed" responses. Note that this is currently a
-	 * non-standard flag (_pretty) which is supported only by HAPI based servers
-	 * (and any other servers which might implement it).
+	 * Sets the pretty print flag, which is a request to the server for it to return "pretty printed" responses. Note that this is currently a non-standard flag (_pretty) which is supported only by
+	 * HAPI based servers (and any other servers which might implement it).
 	 */
 	public BaseClient setPrettyPrint(boolean thePrettyPrint) {
 		myPrettyPrint = thePrettyPrint;

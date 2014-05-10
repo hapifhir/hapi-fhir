@@ -40,7 +40,7 @@ import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.annotation.Validate;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import ca.uhn.fhir.rest.server.tester.PublicTesterServlet;
+import ca.uhn.fhir.rest.server.tester.RestfulServerTesterServlet;
 import ca.uhn.fhir.testutil.RandomServerPortProvider;
 
 public class TesterTest {
@@ -62,7 +62,7 @@ public class TesterTest {
 		ServletContextHandler proxyHandler = new ServletContextHandler();
 		proxyHandler.setContextPath("/");
 
-		PublicTesterServlet testerServlet = new PublicTesterServlet();
+		RestfulServerTesterServlet testerServlet = new RestfulServerTesterServlet();
 		testerServlet.setServerBase("http://localhost:" + myPort + "/fhir/context");
 		// testerServlet.setServerBase("http://fhir.healthintersections.com.au/open");
 		ServletHolder handler = new ServletHolder();

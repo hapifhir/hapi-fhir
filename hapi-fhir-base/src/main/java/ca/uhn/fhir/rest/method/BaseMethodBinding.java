@@ -78,7 +78,7 @@ import ca.uhn.fhir.rest.server.exceptions.UnclassifiedServerFailureException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.ReflectionUtil;
 
-public abstract class BaseMethodBinding implements IClientResponseHandler {
+public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> {
 
 	private FhirContext myContext;
 	private Method myMethod;
@@ -160,7 +160,7 @@ public abstract class BaseMethodBinding implements IClientResponseHandler {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static BaseMethodBinding bindMethod(Method theMethod, FhirContext theContext, Object theProvider) {
+	public static BaseMethodBinding<?> bindMethod(Method theMethod, FhirContext theContext, Object theProvider) {
 		Read read = theMethod.getAnnotation(Read.class);
 		Search search = theMethod.getAnnotation(Search.class);
 		Metadata conformance = theMethod.getAnnotation(Metadata.class);

@@ -52,6 +52,15 @@ public class JsonParserTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(JsonParserTest.class);
 
 	@Test
+	public void testEncodingNullExtension() {
+		Patient p = new Patient();
+		p.addUndeclaredExtension(new ExtensionDt(false, "http://foo#bar"));
+		String str = new FhirContext().newJsonParser().encodeResourceToString(p);
+		
+		assertEquals("{\"resourceType\":\"Patient\",\"extension\":[{\"url\":\"http://foo#bar\"}]}", str);
+	}
+
+	@Test
 	public void testTagList() {
 		
 		//@formatter:off
