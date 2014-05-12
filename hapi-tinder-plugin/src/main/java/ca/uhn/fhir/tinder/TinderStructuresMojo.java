@@ -1,6 +1,7 @@
 package ca.uhn.fhir.tinder;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +15,8 @@ import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
+
+import edu.emory.mathcs.backport.java.util.Collections;
 
 @Mojo(name = "generate-structures", defaultPhase = LifecyclePhase.GENERATE_SOURCES)
 public class TinderStructuresMojo extends AbstractMojo {
@@ -177,26 +180,27 @@ public class TinderStructuresMojo extends AbstractMojo {
 
 	public static void main(String[] args) throws Exception {
 
-		// ValueSetGenerator vsp = new ValueSetGenerator();
-		// vsp.setDirectory("src/test/resources/vs/");
-		// vsp.parse();
-		//
-		// DatatypeGeneratorUsingSpreadsheet dtp = new DatatypeGeneratorUsingSpreadsheet();
-		// dtp.parse();
-		// dtp.bindValueSets(vsp);
-		//
-		// String dtOutputDir = "target/generated/valuesets/ca/uhn/fhir/model/dstu/composite";
-		// dtp.writeAll(dtOutputDir);
-		//
-		// ResourceGeneratorUsingSpreadsheet rp = new ResourceGeneratorUsingSpreadsheet();
-		// rp.parse();
-		// rp.bindValueSets(vsp);
-		//
-		// String rpOutputDir = "target/generated/valuesets/ca/uhn/fhir/model/dstu/resource";
-		// rp.writeAll(rpOutputDir);
-		//
-		// String vsOutputDir = "target/generated/valuesets/ca/uhn/fhir/model/dstu/valueset";
-		// vsp.writeMarkedValueSets(vsOutputDir);
+//		 ValueSetGenerator vsp = new ValueSetGenerator();
+//		 vsp.setDirectory("src/test/resources/vs/");
+//		 vsp.parse();
+//		
+//		 DatatypeGeneratorUsingSpreadsheet dtp = new DatatypeGeneratorUsingSpreadsheet();
+//		 dtp.parse();
+//		 dtp.bindValueSets(vsp);
+//		
+//		 String dtOutputDir = "target/generated/valuesets/ca/uhn/fhir/model/dstu/composite";
+//		 dtp.writeAll(dtOutputDir);
+//		
+		 ResourceGeneratorUsingSpreadsheet rp = new ResourceGeneratorUsingSpreadsheet();
+		 rp.setBaseResourceNames(Arrays.asList("patient", "diagnosticorder"));
+		 rp.parse();
+//		 rp.bindValueSets(vsp);
+		
+		 String rpOutputDir = "target/generated/valuesets/ca/uhn/fhir/model/dstu/resource";
+		 rp.writeAll(new File(rpOutputDir), "ca.uhn.test");
+//		
+//		 String vsOutputDir = "target/generated/valuesets/ca/uhn/fhir/model/dstu/valueset";
+//		 vsp.writeMarkedValueSets(vsOutputDir);
 	}
 
 	public static class ProfileFileDefinition

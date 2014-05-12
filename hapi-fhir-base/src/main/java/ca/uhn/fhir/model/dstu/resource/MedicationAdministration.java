@@ -63,6 +63,10 @@ import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
+import ca.uhn.fhir.rest.gclient.DateParam;
+import ca.uhn.fhir.rest.gclient.Include;
+import ca.uhn.fhir.rest.gclient.ReferenceParam;
+import ca.uhn.fhir.rest.gclient.TokenParam;
 
 
 /**
@@ -100,6 +104,22 @@ public class MedicationAdministration extends BaseResource implements IResource 
 	public static final String SP_DEVICE = "device";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>device</b>
+	 * <p>
+	 * Description: <b>Return administrations with this administration device identity</b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>MedicationAdministration.device</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam DEVICE = new ReferenceParam(SP_DEVICE);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>MedicationAdministration.device</b>".
+	 */
+	public static final Include INCLUDE_DEVICE = new Include("MedicationAdministration.device");
+
+	/**
 	 * Search parameter constant for <b>encounter</b>
 	 * <p>
 	 * Description: <b>Return administrations that share this encounter</b><br/>
@@ -109,6 +129,22 @@ public class MedicationAdministration extends BaseResource implements IResource 
 	 */
 	@SearchParamDefinition(name="encounter", path="MedicationAdministration.encounter", description="Return administrations that share this encounter")
 	public static final String SP_ENCOUNTER = "encounter";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>encounter</b>
+	 * <p>
+	 * Description: <b>Return administrations that share this encounter</b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>MedicationAdministration.encounter</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam ENCOUNTER = new ReferenceParam(SP_ENCOUNTER);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>MedicationAdministration.encounter</b>".
+	 */
+	public static final Include INCLUDE_ENCOUNTER = new Include("MedicationAdministration.encounter");
 
 	/**
 	 * Search parameter constant for <b>identifier</b>
@@ -122,6 +158,16 @@ public class MedicationAdministration extends BaseResource implements IResource 
 	public static final String SP_IDENTIFIER = "identifier";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
+	 * <p>
+	 * Description: <b>Return administrations with this external identity</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>MedicationAdministration.identifier</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam IDENTIFIER = new TokenParam(SP_IDENTIFIER);
+
+	/**
 	 * Search parameter constant for <b>medication</b>
 	 * <p>
 	 * Description: <b>Return administrations of this medication</b><br/>
@@ -131,6 +177,22 @@ public class MedicationAdministration extends BaseResource implements IResource 
 	 */
 	@SearchParamDefinition(name="medication", path="MedicationAdministration.medication", description="Return administrations of this medication")
 	public static final String SP_MEDICATION = "medication";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>medication</b>
+	 * <p>
+	 * Description: <b>Return administrations of this medication</b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>MedicationAdministration.medication</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam MEDICATION = new ReferenceParam(SP_MEDICATION);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>MedicationAdministration.medication</b>".
+	 */
+	public static final Include INCLUDE_MEDICATION = new Include("MedicationAdministration.medication");
 
 	/**
 	 * Search parameter constant for <b>notgiven</b>
@@ -144,6 +206,16 @@ public class MedicationAdministration extends BaseResource implements IResource 
 	public static final String SP_NOTGIVEN = "notgiven";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>notgiven</b>
+	 * <p>
+	 * Description: <b>Administrations that were not made</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>MedicationAdministration.wasNotGiven</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam NOTGIVEN = new TokenParam(SP_NOTGIVEN);
+
+	/**
 	 * Search parameter constant for <b>patient</b>
 	 * <p>
 	 * Description: <b>The identity of a patient to list administrations  for</b><br/>
@@ -153,6 +225,22 @@ public class MedicationAdministration extends BaseResource implements IResource 
 	 */
 	@SearchParamDefinition(name="patient", path="MedicationAdministration.patient", description="The identity of a patient to list administrations  for")
 	public static final String SP_PATIENT = "patient";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>patient</b>
+	 * <p>
+	 * Description: <b>The identity of a patient to list administrations  for</b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>MedicationAdministration.patient</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam PATIENT = new ReferenceParam(SP_PATIENT);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>MedicationAdministration.patient</b>".
+	 */
+	public static final Include INCLUDE_PATIENT = new Include("MedicationAdministration.patient");
 
 	/**
 	 * Search parameter constant for <b>prescription</b>
@@ -166,6 +254,22 @@ public class MedicationAdministration extends BaseResource implements IResource 
 	public static final String SP_PRESCRIPTION = "prescription";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>prescription</b>
+	 * <p>
+	 * Description: <b>The identity of a prescription to list administrations from</b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>MedicationAdministration.prescription</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam PRESCRIPTION = new ReferenceParam(SP_PRESCRIPTION);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>MedicationAdministration.prescription</b>".
+	 */
+	public static final Include INCLUDE_PRESCRIPTION = new Include("MedicationAdministration.prescription");
+
+	/**
 	 * Search parameter constant for <b>status</b>
 	 * <p>
 	 * Description: <b>MedicationAdministration event status (for example one of active/paused/completed/nullified)</b><br/>
@@ -177,6 +281,16 @@ public class MedicationAdministration extends BaseResource implements IResource 
 	public static final String SP_STATUS = "status";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>status</b>
+	 * <p>
+	 * Description: <b>MedicationAdministration event status (for example one of active/paused/completed/nullified)</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>MedicationAdministration.status</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam STATUS = new TokenParam(SP_STATUS);
+
+	/**
 	 * Search parameter constant for <b>whengiven</b>
 	 * <p>
 	 * Description: <b>Date of administration</b><br/>
@@ -186,6 +300,16 @@ public class MedicationAdministration extends BaseResource implements IResource 
 	 */
 	@SearchParamDefinition(name="whengiven", path="MedicationAdministration.whenGiven", description="Date of administration")
 	public static final String SP_WHENGIVEN = "whengiven";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>whengiven</b>
+	 * <p>
+	 * Description: <b>Date of administration</b><br/>
+	 * Type: <b>date</b><br/>
+	 * Path: <b>MedicationAdministration.whenGiven</b><br/>
+	 * </p>
+	 */
+	public static final DateParam WHENGIVEN = new DateParam(SP_WHENGIVEN);
 
 
 	@Child(name="identifier", type=IdentifierDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)	
@@ -284,11 +408,6 @@ public class MedicationAdministration extends BaseResource implements IResource 
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myIdentifier,  myStatus,  myPatient,  myPractitioner,  myEncounter,  myPrescription,  myWasNotGiven,  myReasonNotGiven,  myWhenGiven,  myMedication,  myDevice,  myDosage);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myIdentifier, myStatus, myPatient, myPractitioner, myEncounter, myPrescription, myWasNotGiven, myReasonNotGiven, myWhenGiven, myMedication, myDevice, myDosage);
@@ -903,11 +1022,6 @@ public class MedicationAdministration extends BaseResource implements IResource 
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myTiming,  myAsNeeded,  mySite,  myRoute,  myMethod,  myQuantity,  myRate,  myMaxDosePerPeriod);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myTiming, myAsNeeded, mySite, myRoute, myMethod, myQuantity, myRate, myMaxDosePerPeriod);

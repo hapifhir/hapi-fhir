@@ -103,11 +103,6 @@ public class ScheduleDt
 	}
 	
 	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
-	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myEvent, myRepeat);
 	}
@@ -262,11 +257,6 @@ public class ScheduleDt
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myFrequency,  myWhen,  myDuration,  myUnits,  myCount,  myEnd);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myFrequency, myWhen, myDuration, myUnits, myCount, myEnd);

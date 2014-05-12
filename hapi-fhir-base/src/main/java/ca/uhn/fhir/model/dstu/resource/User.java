@@ -53,6 +53,10 @@ import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
+import ca.uhn.fhir.rest.gclient.Include;
+import ca.uhn.fhir.rest.gclient.ReferenceParam;
+import ca.uhn.fhir.rest.gclient.StringParam;
+import ca.uhn.fhir.rest.gclient.TokenParam;
 
 
 /**
@@ -90,6 +94,16 @@ public class User extends BaseResource implements IResource {
 	public static final String SP_NAME = "name";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>name</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>string</b><br/>
+	 * Path: <b>User.name</b><br/>
+	 * </p>
+	 */
+	public static final StringParam NAME = new StringParam(SP_NAME);
+
+	/**
 	 * Search parameter constant for <b>provider</b>
 	 * <p>
 	 * Description: <b></b><br/>
@@ -99,6 +113,16 @@ public class User extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="provider", path="User.provider", description="")
 	public static final String SP_PROVIDER = "provider";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>provider</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>User.provider</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam PROVIDER = new TokenParam(SP_PROVIDER);
 
 	/**
 	 * Search parameter constant for <b>login</b>
@@ -112,6 +136,16 @@ public class User extends BaseResource implements IResource {
 	public static final String SP_LOGIN = "login";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>login</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>string</b><br/>
+	 * Path: <b>User.login</b><br/>
+	 * </p>
+	 */
+	public static final StringParam LOGIN = new StringParam(SP_LOGIN);
+
+	/**
 	 * Search parameter constant for <b>level</b>
 	 * <p>
 	 * Description: <b></b><br/>
@@ -123,6 +157,16 @@ public class User extends BaseResource implements IResource {
 	public static final String SP_LEVEL = "level";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>level</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>User.level</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam LEVEL = new TokenParam(SP_LEVEL);
+
+	/**
 	 * Search parameter constant for <b>patient</b>
 	 * <p>
 	 * Description: <b></b><br/>
@@ -132,6 +176,22 @@ public class User extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="patient", path="User.patient", description="")
 	public static final String SP_PATIENT = "patient";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>patient</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>User.patient</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam PATIENT = new ReferenceParam(SP_PATIENT);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>User.patient</b>".
+	 */
+	public static final Include INCLUDE_PATIENT = new Include("User.patient");
 
 
 	@Child(name="name", type=HumanNameDt.class, order=0, min=0, max=1)	
@@ -197,11 +257,6 @@ public class User extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myName,  myProvider,  myLogin,  myPassword,  myLevel,  mySessionLength,  myContact,  myPatient);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myName, myProvider, myLogin, myPassword, myLevel, mySessionLength, myContact, myPatient);

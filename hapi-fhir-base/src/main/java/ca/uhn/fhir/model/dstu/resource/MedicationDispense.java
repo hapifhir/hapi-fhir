@@ -66,6 +66,10 @@ import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
+import ca.uhn.fhir.rest.gclient.DateParam;
+import ca.uhn.fhir.rest.gclient.Include;
+import ca.uhn.fhir.rest.gclient.ReferenceParam;
+import ca.uhn.fhir.rest.gclient.TokenParam;
 
 
 /**
@@ -103,6 +107,22 @@ public class MedicationDispense extends BaseResource implements IResource {
 	public static final String SP_DESTINATION = "destination";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>destination</b>
+	 * <p>
+	 * Description: <b>Return dispenses that should be sent to a secific destination</b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>MedicationDispense.dispense.destination</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam DESTINATION = new ReferenceParam(SP_DESTINATION);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>MedicationDispense.dispense.destination</b>".
+	 */
+	public static final Include INCLUDE_DISPENSE_DESTINATION = new Include("MedicationDispense.dispense.destination");
+
+	/**
 	 * Search parameter constant for <b>dispenser</b>
 	 * <p>
 	 * Description: <b>Return all dispenses performed by a specific indiividual</b><br/>
@@ -112,6 +132,22 @@ public class MedicationDispense extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="dispenser", path="MedicationDispense.dispenser", description="Return all dispenses performed by a specific indiividual")
 	public static final String SP_DISPENSER = "dispenser";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>dispenser</b>
+	 * <p>
+	 * Description: <b>Return all dispenses performed by a specific indiividual</b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>MedicationDispense.dispenser</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam DISPENSER = new ReferenceParam(SP_DISPENSER);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>MedicationDispense.dispenser</b>".
+	 */
+	public static final Include INCLUDE_DISPENSER = new Include("MedicationDispense.dispenser");
 
 	/**
 	 * Search parameter constant for <b>identifier</b>
@@ -125,6 +161,16 @@ public class MedicationDispense extends BaseResource implements IResource {
 	public static final String SP_IDENTIFIER = "identifier";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
+	 * <p>
+	 * Description: <b>Return dispenses with this external identity</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>MedicationDispense.identifier</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam IDENTIFIER = new TokenParam(SP_IDENTIFIER);
+
+	/**
 	 * Search parameter constant for <b>medication</b>
 	 * <p>
 	 * Description: <b>Returns dispenses of this medicine</b><br/>
@@ -134,6 +180,22 @@ public class MedicationDispense extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="medication", path="MedicationDispense.dispense.medication", description="Returns dispenses of this medicine")
 	public static final String SP_MEDICATION = "medication";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>medication</b>
+	 * <p>
+	 * Description: <b>Returns dispenses of this medicine</b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>MedicationDispense.dispense.medication</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam MEDICATION = new ReferenceParam(SP_MEDICATION);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>MedicationDispense.dispense.medication</b>".
+	 */
+	public static final Include INCLUDE_DISPENSE_MEDICATION = new Include("MedicationDispense.dispense.medication");
 
 	/**
 	 * Search parameter constant for <b>patient</b>
@@ -147,6 +209,22 @@ public class MedicationDispense extends BaseResource implements IResource {
 	public static final String SP_PATIENT = "patient";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>patient</b>
+	 * <p>
+	 * Description: <b>The identity of a patient to list dispenses  for</b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>MedicationDispense.patient</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam PATIENT = new ReferenceParam(SP_PATIENT);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>MedicationDispense.patient</b>".
+	 */
+	public static final Include INCLUDE_PATIENT = new Include("MedicationDispense.patient");
+
+	/**
 	 * Search parameter constant for <b>prescription</b>
 	 * <p>
 	 * Description: <b>The identity of a prescription to list dispenses from</b><br/>
@@ -156,6 +234,22 @@ public class MedicationDispense extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="prescription", path="MedicationDispense.authorizingPrescription", description="The identity of a prescription to list dispenses from")
 	public static final String SP_PRESCRIPTION = "prescription";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>prescription</b>
+	 * <p>
+	 * Description: <b>The identity of a prescription to list dispenses from</b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>MedicationDispense.authorizingPrescription</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam PRESCRIPTION = new ReferenceParam(SP_PRESCRIPTION);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>MedicationDispense.authorizingPrescription</b>".
+	 */
+	public static final Include INCLUDE_AUTHORIZINGPRESCRIPTION = new Include("MedicationDispense.authorizingPrescription");
 
 	/**
 	 * Search parameter constant for <b>responsibleparty</b>
@@ -169,6 +263,22 @@ public class MedicationDispense extends BaseResource implements IResource {
 	public static final String SP_RESPONSIBLEPARTY = "responsibleparty";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>responsibleparty</b>
+	 * <p>
+	 * Description: <b>Return all dispenses with the specified responsible party</b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>MedicationDispense.substitution.responsibleParty</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam RESPONSIBLEPARTY = new ReferenceParam(SP_RESPONSIBLEPARTY);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>MedicationDispense.substitution.responsibleParty</b>".
+	 */
+	public static final Include INCLUDE_SUBSTITUTION_RESPONSIBLEPARTY = new Include("MedicationDispense.substitution.responsibleParty");
+
+	/**
 	 * Search parameter constant for <b>status</b>
 	 * <p>
 	 * Description: <b>Status of the dispense</b><br/>
@@ -178,6 +288,16 @@ public class MedicationDispense extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="status", path="MedicationDispense.dispense.status", description="Status of the dispense")
 	public static final String SP_STATUS = "status";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>status</b>
+	 * <p>
+	 * Description: <b>Status of the dispense</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>MedicationDispense.dispense.status</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam STATUS = new TokenParam(SP_STATUS);
 
 	/**
 	 * Search parameter constant for <b>type</b>
@@ -191,6 +311,16 @@ public class MedicationDispense extends BaseResource implements IResource {
 	public static final String SP_TYPE = "type";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>type</b>
+	 * <p>
+	 * Description: <b>Return all dispenses of a specific type</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>MedicationDispense.dispense.type</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam TYPE = new TokenParam(SP_TYPE);
+
+	/**
 	 * Search parameter constant for <b>whenhandedover</b>
 	 * <p>
 	 * Description: <b>Date when medication handed over to patient (outpatient setting), or supplied to ward or clinic (inpatient setting)</b><br/>
@@ -202,6 +332,16 @@ public class MedicationDispense extends BaseResource implements IResource {
 	public static final String SP_WHENHANDEDOVER = "whenhandedover";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>whenhandedover</b>
+	 * <p>
+	 * Description: <b>Date when medication handed over to patient (outpatient setting), or supplied to ward or clinic (inpatient setting)</b><br/>
+	 * Type: <b>date</b><br/>
+	 * Path: <b>MedicationDispense.dispense.whenHandedOver</b><br/>
+	 * </p>
+	 */
+	public static final DateParam WHENHANDEDOVER = new DateParam(SP_WHENHANDEDOVER);
+
+	/**
 	 * Search parameter constant for <b>whenprepared</b>
 	 * <p>
 	 * Description: <b>Date when medication prepared</b><br/>
@@ -211,6 +351,16 @@ public class MedicationDispense extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="whenprepared", path="MedicationDispense.dispense.whenPrepared", description="Date when medication prepared")
 	public static final String SP_WHENPREPARED = "whenprepared";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>whenprepared</b>
+	 * <p>
+	 * Description: <b>Date when medication prepared</b><br/>
+	 * Type: <b>date</b><br/>
+	 * Path: <b>MedicationDispense.dispense.whenPrepared</b><br/>
+	 * </p>
+	 */
+	public static final DateParam WHENPREPARED = new DateParam(SP_WHENPREPARED);
 
 
 	@Child(name="identifier", type=IdentifierDt.class, order=0, min=0, max=1)	
@@ -271,11 +421,6 @@ public class MedicationDispense extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myIdentifier,  myStatus,  myPatient,  myDispenser,  myAuthorizingPrescription,  myDispense,  mySubstitution);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myIdentifier, myStatus, myPatient, myDispenser, myAuthorizingPrescription, myDispense, mySubstitution);
@@ -669,11 +814,6 @@ public class MedicationDispense extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myIdentifier,  myStatus,  myType,  myQuantity,  myMedication,  myWhenPrepared,  myWhenHandedOver,  myDestination,  myReceiver,  myDosage);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myIdentifier, myStatus, myType, myQuantity, myMedication, myWhenPrepared, myWhenHandedOver, myDestination, myReceiver, myDosage);
@@ -1257,11 +1397,6 @@ public class MedicationDispense extends BaseResource implements IResource {
 	}
 	
 	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
-	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myAdditionalInstructions, myTiming, myAsNeeded, mySite, myRoute, myMethod, myQuantity, myRate, myMaxDosePerPeriod);
 	}
@@ -1635,11 +1770,6 @@ public class MedicationDispense extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myType,  myReason,  myResponsibleParty);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myType, myReason, myResponsibleParty);

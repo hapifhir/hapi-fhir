@@ -34,8 +34,8 @@ IGenericClient client = ctx.newRestfulGenericClient("http://fhir.healthintersect
 //START SNIPPET: fluentExample
 Bundle response = client.search()
   .forResource(Patient.class)
-  .where(Patient.PARAM_BIRTHDATE.beforeOrEquals().day("2011-01-01"))
-  .and(Patient.PARAM_PROVIDER.hasChainedProperty(Organization.NAME.matches().value("Health")))
+  .where(Patient.BIRTHDATE.beforeOrEquals().day("2011-01-01"))
+  .and(Patient.PROVIDER.hasChainedProperty(Organization.NAME.matches().value("Health")))
   .andLogRequestAndResponse(true)
   .execute();
 //END SNIPPET: fluentExample

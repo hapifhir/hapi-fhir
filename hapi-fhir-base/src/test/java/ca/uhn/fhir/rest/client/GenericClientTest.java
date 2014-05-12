@@ -93,7 +93,7 @@ public class GenericClientTest {
 		//@formatter:off
 		Bundle response = client.search()
 				.forResource("Patient")
-				.where(Patient.PARAM_NAME.matches().value("james"))
+				.where(Patient.NAME.matches().value("james"))
 				.execute();
 		//@formatter:on
 
@@ -118,7 +118,7 @@ public class GenericClientTest {
 		//@formatter:off
 		Bundle response = client.search()
 				.forResource("Patient")
-				.where(Patient.PARAM_NAME.matchesExactly().value("james"))
+				.where(Patient.NAME.matchesExactly().value("james"))
 				.execute();
 		//@formatter:on
 
@@ -195,7 +195,7 @@ public class GenericClientTest {
 		//@formatter:off
 		Bundle response = client.search()
 				.forResource("Patient")
-				.where(Patient.PARAM_IDENTIFIER.exactly().systemAndCode("http://example.com/fhir", "ZZZ"))
+				.where(Patient.IDENTIFIER.exactly().systemAndCode("http://example.com/fhir", "ZZZ"))
 				.execute();
 		//@formatter:on
 
@@ -220,7 +220,7 @@ public class GenericClientTest {
 		//@formatter:off
 		Bundle response = client.search()
 				.forResource("Patient")
-				.where(Patient.PARAM_PROVIDER.hasId("123"))
+				.where(Patient.PROVIDER.hasId("123"))
 				.execute();
 		//@formatter:on
 
@@ -245,7 +245,7 @@ public class GenericClientTest {
 
 		Bundle response = client.search()
 				.forResource(Patient.class)
-				.where(Patient.PARAM_PROVIDER.hasChainedProperty(Organization.NAME.matches().value("ORG0")))
+				.where(Patient.PROVIDER.hasChainedProperty(Organization.NAME.matches().value("ORG0")))
 				.execute();
 
 		assertEquals("http://example.com/fhir/Patient?provider.name=ORG0", capt.getValue().getURI().toString());
@@ -271,11 +271,11 @@ public class GenericClientTest {
 		Bundle response = client.search()
 				.forResource(Patient.class)
 				.encodedJson()
-				.where(Patient.PARAM_BIRTHDATE.beforeOrEquals().day("2012-01-22"))
-				.and(Patient.PARAM_BIRTHDATE.after().day("2011-01-01"))
+				.where(Patient.BIRTHDATE.beforeOrEquals().day("2012-01-22"))
+				.and(Patient.BIRTHDATE.after().day("2011-01-01"))
 				.include(Patient.INCLUDE_MANAGINGORGANIZATION)
-				.sort().ascending(Patient.PARAM_BIRTHDATE)
-				.sort().descending(Patient.PARAM_NAME)
+				.sort().ascending(Patient.BIRTHDATE)
+				.sort().descending(Patient.NAME)
 				.limitTo(123)
 				.execute();
 		//@formatter:on
@@ -293,7 +293,7 @@ public class GenericClientTest {
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
-		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 500, "OK"));
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 500, "INTERNAL ERRORS"));
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_TEXT + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader("Server Issues!"), Charset.forName("UTF-8")));
 
@@ -303,7 +303,8 @@ public class GenericClientTest {
 			client.search().forResource(Patient.class).execute();
 			fail();
 		} catch (InternalErrorException e) {
-			assertThat(e.getMessage(), StringContains.containsString("AAA"));
+			assertEquals(e.getMessage(), "INTERNAL ERRORS");
+			assertEquals(e.getResponseBody(), "Server Issues!");
 		}
 
 	}
@@ -327,7 +328,7 @@ public class GenericClientTest {
 			client.search().forResource(Patient.class).execute();
 			fail();
 		} catch (NonFhirResponseException e) {
-			assertThat(e.getMessage(), StringContains.containsString("AAA"));
+			assertThat(e.getMessage(), StringContains.containsString("Server Issues!"));
 		}
 
 	}

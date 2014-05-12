@@ -149,6 +149,10 @@ public class UpdateMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 				if (theRequest.getVersionId() == null) {
 					return false;
 				}
+			}else {
+				if (theRequest.getVersionId() != null) {
+					return false;
+				}
 			}
 			return true;
 		} else {

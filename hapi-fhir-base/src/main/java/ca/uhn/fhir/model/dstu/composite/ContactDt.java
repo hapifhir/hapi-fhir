@@ -44,6 +44,7 @@ import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.SimpleSetter;
 import ca.uhn.fhir.model.dstu.valueset.ContactSystemEnum;
 import ca.uhn.fhir.model.dstu.valueset.ContactUseEnum;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
@@ -75,6 +76,22 @@ public class ContactDt
 		// nothing
 	}
 
+	/**
+	 * Constructor
+	 */
+	@SimpleSetter
+	public ContactDt(@SimpleSetter.Parameter(name="theValue") String theValue) {
+		setValue(theValue);
+	}
+	
+	/**
+	 * Constructor
+	 */
+	@SimpleSetter
+	public ContactDt(@SimpleSetter.Parameter(name="theContactUse") ContactUseEnum theContactUse, @SimpleSetter.Parameter(name="theValue") String theValue) {
+		setUse(theContactUse);
+		setValue(theValue);
+	}	
 
 	@Child(name="system", type=CodeDt.class, order=0, min=0, max=1)	
 	@Description(
@@ -110,11 +127,6 @@ public class ContactDt
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  mySystem,  myValue,  myUse,  myPeriod);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, mySystem, myValue, myUse, myPeriod);

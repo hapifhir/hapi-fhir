@@ -59,6 +59,9 @@ import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.rest.gclient.Include;
+import ca.uhn.fhir.rest.gclient.ReferenceParam;
+import ca.uhn.fhir.rest.gclient.StringParam;
 
 
 /**
@@ -96,6 +99,16 @@ public class AppointmentResponse extends BaseResource implements IResource {
 	public static final String SP_PARTSTATUS = "partstatus";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>partstatus</b>
+	 * <p>
+	 * Description: <b>The overall status of the appointment</b><br/>
+	 * Type: <b>string</b><br/>
+	 * Path: <b>AppointmentResponse.participantStatus</b><br/>
+	 * </p>
+	 */
+	public static final StringParam PARTSTATUS = new StringParam(SP_PARTSTATUS);
+
+	/**
 	 * Search parameter constant for <b>subject</b>
 	 * <p>
 	 * Description: <b>The subject that the appointment response replies for</b><br/>
@@ -107,6 +120,22 @@ public class AppointmentResponse extends BaseResource implements IResource {
 	public static final String SP_SUBJECT = "subject";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>subject</b>
+	 * <p>
+	 * Description: <b>The subject that the appointment response replies for</b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>AppointmentResponse.individual</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam SUBJECT = new ReferenceParam(SP_SUBJECT);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>AppointmentResponse.individual</b>".
+	 */
+	public static final Include INCLUDE_INDIVIDUAL = new Include("AppointmentResponse.individual");
+
+	/**
 	 * Search parameter constant for <b>appointment</b>
 	 * <p>
 	 * Description: <b>The appointment that the response is attached to</b><br/>
@@ -116,6 +145,22 @@ public class AppointmentResponse extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="appointment", path="AppointmentResponse.appointment", description="The appointment that the response is attached to")
 	public static final String SP_APPOINTMENT = "appointment";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>appointment</b>
+	 * <p>
+	 * Description: <b>The appointment that the response is attached to</b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>AppointmentResponse.appointment</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam APPOINTMENT = new ReferenceParam(SP_APPOINTMENT);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>AppointmentResponse.appointment</b>".
+	 */
+	public static final Include INCLUDE_APPOINTMENT = new Include("AppointmentResponse.appointment");
 
 
 	@Child(name="identifier", type=IdentifierDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)	
@@ -211,11 +256,6 @@ public class AppointmentResponse extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myIdentifier,  myAppointment,  myParticipantType,  myIndividual,  myParticipantStatus,  myComment,  myStart,  myEnd,  mySchedule,  myTimezone,  myRecorder,  myRecordedDate);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myIdentifier, myAppointment, myParticipantType, myIndividual, myParticipantStatus, myComment, myStart, myEnd, mySchedule, myTimezone, myRecorder, myRecordedDate);

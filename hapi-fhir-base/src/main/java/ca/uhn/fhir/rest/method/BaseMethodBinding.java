@@ -126,7 +126,7 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 	protected IParser createAppropriateParserForParsingResponse(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode) {
 		EncodingEnum encoding = EncodingEnum.forContentType(theResponseMimeType);		
 		if (encoding==null) {
-			NonFhirResponseException ex = new NonFhirResponseException(theResponseStatusCode, "Response contains non-FHIR content-type: " + theResponseMimeType);
+			NonFhirResponseException ex = NonFhirResponseException.newInstance(theResponseStatusCode, theResponseMimeType, theResponseReader);
 			populateException(ex, theResponseReader);
 			throw ex;
 		}

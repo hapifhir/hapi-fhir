@@ -58,6 +58,9 @@ import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.model.primitive.DecimalDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.rest.gclient.Include;
+import ca.uhn.fhir.rest.gclient.ReferenceParam;
+import ca.uhn.fhir.rest.gclient.StringParam;
 
 
 /**
@@ -95,6 +98,22 @@ public class Microarray extends BaseResource implements IResource {
 	public static final String SP_PATIENT = "patient";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>patient</b>
+	 * <p>
+	 * Description: <b>Patient described by the microarray</b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>Microarray.subject.patient</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam PATIENT = new ReferenceParam(SP_PATIENT);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>Microarray.subject.patient</b>".
+	 */
+	public static final Include INCLUDE_SUBJECT_PATIENT = new Include("Microarray.subject.patient");
+
+	/**
 	 * Search parameter constant for <b>gene</b>
 	 * <p>
 	 * Description: <b>Gene studied in the microarray</b><br/>
@@ -106,6 +125,16 @@ public class Microarray extends BaseResource implements IResource {
 	public static final String SP_GENE = "gene";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>gene</b>
+	 * <p>
+	 * Description: <b>Gene studied in the microarray</b><br/>
+	 * Type: <b>string</b><br/>
+	 * Path: <b>Microarray.sample.gene.identity</b><br/>
+	 * </p>
+	 */
+	public static final StringParam GENE = new StringParam(SP_GENE);
+
+	/**
 	 * Search parameter constant for <b>coordinate</b>
 	 * <p>
 	 * Description: <b>Coordinate of the gene</b><br/>
@@ -115,6 +144,16 @@ public class Microarray extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="coordinate", path="Microarray.sample.gene.coordinate", description="Coordinate of the gene")
 	public static final String SP_COORDINATE = "coordinate";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>coordinate</b>
+	 * <p>
+	 * Description: <b>Coordinate of the gene</b><br/>
+	 * Type: <b>string</b><br/>
+	 * Path: <b>Microarray.sample.gene.coordinate</b><br/>
+	 * </p>
+	 */
+	public static final StringParam COORDINATE = new StringParam(SP_COORDINATE);
 
 
 	@Child(name="subject", order=0, min=0, max=Child.MAX_UNLIMITED)	
@@ -159,11 +198,6 @@ public class Microarray extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  mySubject,  myOrganization,  myDate,  myScanner,  mySample);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, mySubject, myOrganization, myDate, myScanner, mySample);
@@ -441,11 +475,6 @@ public class Microarray extends BaseResource implements IResource {
 	}
 	
 	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
-	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myPatient, mySampleId);
 	}
@@ -602,11 +631,6 @@ public class Microarray extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myManufacturer,  myName,  myVersion);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myManufacturer, myName, myVersion);
@@ -794,11 +818,6 @@ public class Microarray extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myIdentity,  myOrganism,  mySpecimen,  myGene,  myIntensity,  myIsControl);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myIdentity, myOrganism, mySpecimen, myGene, myIntensity, myIsControl);
@@ -1090,11 +1109,6 @@ public class Microarray extends BaseResource implements IResource {
 	}
 	
 	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
-	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myType, mySource);
 	}
@@ -1209,11 +1223,6 @@ public class Microarray extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myIdentity,  myCoordinate);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myIdentity, myCoordinate);
@@ -1335,11 +1344,6 @@ public class Microarray extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myChromosome,  myStart,  myEnd);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myChromosome, myStart, myEnd);

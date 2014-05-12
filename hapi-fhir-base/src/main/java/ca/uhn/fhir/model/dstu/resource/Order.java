@@ -58,6 +58,10 @@ import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.composite.ScheduleDt;
 import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
+import ca.uhn.fhir.rest.gclient.DateParam;
+import ca.uhn.fhir.rest.gclient.Include;
+import ca.uhn.fhir.rest.gclient.ReferenceParam;
+import ca.uhn.fhir.rest.gclient.TokenParam;
 
 
 /**
@@ -95,6 +99,16 @@ public class Order extends BaseResource implements IResource {
 	public static final String SP_DATE = "date";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>date</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>date</b><br/>
+	 * Path: <b>Order.date</b><br/>
+	 * </p>
+	 */
+	public static final DateParam DATE = new DateParam(SP_DATE);
+
+	/**
 	 * Search parameter constant for <b>subject</b>
 	 * <p>
 	 * Description: <b></b><br/>
@@ -104,6 +118,22 @@ public class Order extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="subject", path="Order.subject", description="")
 	public static final String SP_SUBJECT = "subject";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>subject</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>Order.subject</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam SUBJECT = new ReferenceParam(SP_SUBJECT);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>Order.subject</b>".
+	 */
+	public static final Include INCLUDE_SUBJECT = new Include("Order.subject");
 
 	/**
 	 * Search parameter constant for <b>source</b>
@@ -117,6 +147,22 @@ public class Order extends BaseResource implements IResource {
 	public static final String SP_SOURCE = "source";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>source</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>Order.source</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam SOURCE = new ReferenceParam(SP_SOURCE);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>Order.source</b>".
+	 */
+	public static final Include INCLUDE_SOURCE = new Include("Order.source");
+
+	/**
 	 * Search parameter constant for <b>target</b>
 	 * <p>
 	 * Description: <b></b><br/>
@@ -126,6 +172,22 @@ public class Order extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="target", path="Order.target", description="")
 	public static final String SP_TARGET = "target";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>target</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>Order.target</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam TARGET = new ReferenceParam(SP_TARGET);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>Order.target</b>".
+	 */
+	public static final Include INCLUDE_TARGET = new Include("Order.target");
 
 	/**
 	 * Search parameter constant for <b>authority</b>
@@ -139,6 +201,22 @@ public class Order extends BaseResource implements IResource {
 	public static final String SP_AUTHORITY = "authority";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>authority</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>Order.authority</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam AUTHORITY = new ReferenceParam(SP_AUTHORITY);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>Order.authority</b>".
+	 */
+	public static final Include INCLUDE_AUTHORITY = new Include("Order.authority");
+
+	/**
 	 * Search parameter constant for <b>when_code</b>
 	 * <p>
 	 * Description: <b></b><br/>
@@ -148,6 +226,16 @@ public class Order extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="when_code", path="Order.when.code", description="")
 	public static final String SP_WHEN_CODE = "when_code";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>when_code</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Order.when.code</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam WHEN_CODE = new TokenParam(SP_WHEN_CODE);
 
 	/**
 	 * Search parameter constant for <b>when</b>
@@ -161,6 +249,16 @@ public class Order extends BaseResource implements IResource {
 	public static final String SP_WHEN = "when";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>when</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>date</b><br/>
+	 * Path: <b>Order.when.schedule</b><br/>
+	 * </p>
+	 */
+	public static final DateParam WHEN = new DateParam(SP_WHEN);
+
+	/**
 	 * Search parameter constant for <b>detail</b>
 	 * <p>
 	 * Description: <b></b><br/>
@@ -170,6 +268,22 @@ public class Order extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="detail", path="Order.detail", description="")
 	public static final String SP_DETAIL = "detail";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>detail</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>Order.detail</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam DETAIL = new ReferenceParam(SP_DETAIL);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>Order.detail</b>".
+	 */
+	public static final Include INCLUDE_DETAIL = new Include("Order.detail");
 
 
 	@Child(name="identifier", type=IdentifierDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)	
@@ -247,11 +361,6 @@ public class Order extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myIdentifier,  myDate,  mySubject,  mySource,  myTarget,  myReason,  myAuthority,  myWhen,  myDetail);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myIdentifier, myDate, mySubject, mySource, myTarget, myReason, myAuthority, myWhen, myDetail);
@@ -665,11 +774,6 @@ public class Order extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myCode,  mySchedule);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myCode, mySchedule);

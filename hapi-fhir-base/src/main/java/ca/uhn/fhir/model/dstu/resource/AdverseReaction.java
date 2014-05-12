@@ -62,6 +62,10 @@ import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
+import ca.uhn.fhir.rest.gclient.DateParam;
+import ca.uhn.fhir.rest.gclient.Include;
+import ca.uhn.fhir.rest.gclient.ReferenceParam;
+import ca.uhn.fhir.rest.gclient.TokenParam;
 
 
 /**
@@ -99,6 +103,16 @@ public class AdverseReaction extends BaseResource implements IResource {
 	public static final String SP_SYMPTOM = "symptom";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>symptom</b>
+	 * <p>
+	 * Description: <b>One of the symptoms of the reaction</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>AdverseReaction.symptom.code</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam SYMPTOM = new TokenParam(SP_SYMPTOM);
+
+	/**
 	 * Search parameter constant for <b>substance</b>
 	 * <p>
 	 * Description: <b>The name or code of the substance that produces the sensitivity</b><br/>
@@ -108,6 +122,22 @@ public class AdverseReaction extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="substance", path="AdverseReaction.exposure.substance", description="The name or code of the substance that produces the sensitivity")
 	public static final String SP_SUBSTANCE = "substance";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>substance</b>
+	 * <p>
+	 * Description: <b>The name or code of the substance that produces the sensitivity</b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>AdverseReaction.exposure.substance</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam SUBSTANCE = new ReferenceParam(SP_SUBSTANCE);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>AdverseReaction.exposure.substance</b>".
+	 */
+	public static final Include INCLUDE_EXPOSURE_SUBSTANCE = new Include("AdverseReaction.exposure.substance");
 
 	/**
 	 * Search parameter constant for <b>date</b>
@@ -121,6 +151,16 @@ public class AdverseReaction extends BaseResource implements IResource {
 	public static final String SP_DATE = "date";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>date</b>
+	 * <p>
+	 * Description: <b>The date of the reaction</b><br/>
+	 * Type: <b>date</b><br/>
+	 * Path: <b>AdverseReaction.date</b><br/>
+	 * </p>
+	 */
+	public static final DateParam DATE = new DateParam(SP_DATE);
+
+	/**
 	 * Search parameter constant for <b>subject</b>
 	 * <p>
 	 * Description: <b>The subject that the sensitivity is about</b><br/>
@@ -130,6 +170,22 @@ public class AdverseReaction extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="subject", path="AdverseReaction.subject", description="The subject that the sensitivity is about")
 	public static final String SP_SUBJECT = "subject";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>subject</b>
+	 * <p>
+	 * Description: <b>The subject that the sensitivity is about</b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>AdverseReaction.subject</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam SUBJECT = new ReferenceParam(SP_SUBJECT);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>AdverseReaction.subject</b>".
+	 */
+	public static final Include INCLUDE_SUBJECT = new Include("AdverseReaction.subject");
 
 
 	@Child(name="identifier", type=IdentifierDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)	
@@ -189,11 +245,6 @@ public class AdverseReaction extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myIdentifier,  myDate,  mySubject,  myDidNotOccurFlag,  myRecorder,  mySymptom,  myExposure);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myIdentifier, myDate, mySubject, myDidNotOccurFlag, myRecorder, mySymptom, myExposure);
@@ -607,11 +658,6 @@ public class AdverseReaction extends BaseResource implements IResource {
 	}
 	
 	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
-	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myCode, mySeverity);
 	}
@@ -741,11 +787,6 @@ public class AdverseReaction extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myDate,  myType,  myCausalityExpectation,  mySubstance);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myDate, myType, myCausalityExpectation, mySubstance);

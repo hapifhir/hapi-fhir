@@ -20,6 +20,13 @@ package ca.uhn.fhir.rest.client.exceptions;
  * #L%
  */
 
+import static org.apache.commons.lang3.StringUtils.*;
+
+import java.io.IOException;
+import java.io.Reader;
+
+import org.apache.commons.io.IOUtils;
+
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 
 public class NonFhirResponseException extends BaseServerResponseException {
@@ -33,10 +40,32 @@ public class NonFhirResponseException extends BaseServerResponseException {
 	 *            The message
 	 * @param theResponseText
 	 * @param theStatusCode
+	 * @param theResponseReader
 	 * @param theContentType
 	 */
-	public NonFhirResponseException(int theStatusCode, String theMessage) {
+	NonFhirResponseException(int theStatusCode, String theMessage) {
 		super(theStatusCode, theMessage);
+	}
+
+	public static NonFhirResponseException newInstance(int theStatusCode, String theContentType, Reader theReader) {
+		String responseBody = "";
+		try {
+			responseBody = IOUtils.toString(theReader);
+		} catch (IOException e) {
+			IOUtils.closeQuietly(theReader);
+		}
+
+		NonFhirResponseException retVal;
+		if (isBlank(theContentType)) {
+			retVal = new NonFhirResponseException(theStatusCode, "Response contains no Content-Type");
+		} else if (theContentType.contains("text")) {
+			retVal = new NonFhirResponseException(theStatusCode, "Response contains non FHIR Content-Type '" + theContentType + "' : " + responseBody);
+		} else {
+			retVal = new NonFhirResponseException(theStatusCode, "Response contains non FHIR Content-Type '" + theContentType + "'");
+		}
+
+		retVal.setResponseBody(responseBody);
+		return retVal;
 	}
 
 }

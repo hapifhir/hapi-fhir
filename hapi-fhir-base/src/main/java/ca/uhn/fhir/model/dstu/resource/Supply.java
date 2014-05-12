@@ -63,6 +63,9 @@ import ca.uhn.fhir.model.dstu.valueset.SupplyTypeEnum;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.BoundCodeableConceptDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
+import ca.uhn.fhir.rest.gclient.Include;
+import ca.uhn.fhir.rest.gclient.ReferenceParam;
+import ca.uhn.fhir.rest.gclient.TokenParam;
 
 
 /**
@@ -100,6 +103,16 @@ public class Supply extends BaseResource implements IResource {
 	public static final String SP_KIND = "kind";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>kind</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Supply.kind</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam KIND = new TokenParam(SP_KIND);
+
+	/**
 	 * Search parameter constant for <b>identifier</b>
 	 * <p>
 	 * Description: <b></b><br/>
@@ -109,6 +122,16 @@ public class Supply extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="identifier", path="Supply.identifier", description="")
 	public static final String SP_IDENTIFIER = "identifier";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Supply.identifier</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam IDENTIFIER = new TokenParam(SP_IDENTIFIER);
 
 	/**
 	 * Search parameter constant for <b>status</b>
@@ -122,6 +145,16 @@ public class Supply extends BaseResource implements IResource {
 	public static final String SP_STATUS = "status";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>status</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Supply.status</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam STATUS = new TokenParam(SP_STATUS);
+
+	/**
 	 * Search parameter constant for <b>patient</b>
 	 * <p>
 	 * Description: <b></b><br/>
@@ -131,6 +164,22 @@ public class Supply extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="patient", path="Supply.patient", description="")
 	public static final String SP_PATIENT = "patient";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>patient</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>Supply.patient</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam PATIENT = new ReferenceParam(SP_PATIENT);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>Supply.patient</b>".
+	 */
+	public static final Include INCLUDE_PATIENT = new Include("Supply.patient");
 
 	/**
 	 * Search parameter constant for <b>supplier</b>
@@ -144,6 +193,22 @@ public class Supply extends BaseResource implements IResource {
 	public static final String SP_SUPPLIER = "supplier";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>supplier</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>Supply.dispense.supplier</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam SUPPLIER = new ReferenceParam(SP_SUPPLIER);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>Supply.dispense.supplier</b>".
+	 */
+	public static final Include INCLUDE_DISPENSE_SUPPLIER = new Include("Supply.dispense.supplier");
+
+	/**
 	 * Search parameter constant for <b>dispenseid</b>
 	 * <p>
 	 * Description: <b></b><br/>
@@ -155,6 +220,16 @@ public class Supply extends BaseResource implements IResource {
 	public static final String SP_DISPENSEID = "dispenseid";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>dispenseid</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Supply.dispense.identifier</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam DISPENSEID = new TokenParam(SP_DISPENSEID);
+
+	/**
 	 * Search parameter constant for <b>dispensestatus</b>
 	 * <p>
 	 * Description: <b></b><br/>
@@ -164,6 +239,16 @@ public class Supply extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="dispensestatus", path="Supply.dispense.status", description="")
 	public static final String SP_DISPENSESTATUS = "dispensestatus";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>dispensestatus</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Supply.dispense.status</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam DISPENSESTATUS = new TokenParam(SP_DISPENSESTATUS);
 
 
 	@Child(name="kind", type=CodeableConceptDt.class, order=0, min=0, max=1)	
@@ -216,11 +301,6 @@ public class Supply extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myKind,  myIdentifier,  myStatus,  myOrderedItem,  myPatient,  myDispense);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myKind, myIdentifier, myStatus, myOrderedItem, myPatient, myDispense);
@@ -581,11 +661,6 @@ public class Supply extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myIdentifier,  myStatus,  myType,  myQuantity,  mySuppliedItem,  mySupplier,  myWhenPrepared,  myWhenHandedOver,  myDestination,  myReceiver);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myIdentifier, myStatus, myType, myQuantity, mySuppliedItem, mySupplier, myWhenPrepared, myWhenHandedOver, myDestination, myReceiver);

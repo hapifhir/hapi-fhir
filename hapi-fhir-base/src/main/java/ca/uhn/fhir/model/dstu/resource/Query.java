@@ -56,6 +56,7 @@ import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.model.primitive.UriDt;
+import ca.uhn.fhir.rest.gclient.TokenParam;
 
 
 /**
@@ -93,6 +94,16 @@ public class Query extends BaseResource implements IResource {
 	public static final String SP_IDENTIFIER = "identifier";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Query.identifier</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam IDENTIFIER = new TokenParam(SP_IDENTIFIER);
+
+	/**
 	 * Search parameter constant for <b>response</b>
 	 * <p>
 	 * Description: <b></b><br/>
@@ -102,6 +113,16 @@ public class Query extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="response", path="Query.response.identifier", description="")
 	public static final String SP_RESPONSE = "response";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>response</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Query.response.identifier</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam RESPONSE = new TokenParam(SP_RESPONSE);
 
 
 	@Child(name="identifier", type=UriDt.class, order=0, min=1, max=1)	
@@ -131,11 +152,6 @@ public class Query extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myIdentifier,  myParameter,  myResponse);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myIdentifier, myParameter, myResponse);
@@ -357,11 +373,6 @@ public class Query extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myIdentifier,  myOutcome,  myTotal,  myParameter,  myFirst,  myPrevious,  myNext,  myLast,  myReference);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myIdentifier, myOutcome, myTotal, myParameter, myFirst, myPrevious, myNext, myLast, myReference);

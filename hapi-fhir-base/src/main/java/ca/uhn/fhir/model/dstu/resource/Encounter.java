@@ -65,7 +65,11 @@ import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.BoundCodeableConceptDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
+import ca.uhn.fhir.rest.gclient.DateParam;
+import ca.uhn.fhir.rest.gclient.Include;
 import ca.uhn.fhir.rest.gclient.NumberParam;
+import ca.uhn.fhir.rest.gclient.ReferenceParam;
+import ca.uhn.fhir.rest.gclient.TokenParam;
 
 
 /**
@@ -91,7 +95,6 @@ import ca.uhn.fhir.rest.gclient.NumberParam;
 @ResourceDef(name="Encounter", profile="http://hl7.org/fhir/profiles/Encounter", id="encounter")
 public class Encounter extends BaseResource implements IResource {
 
-	
 	/**
 	 * Search parameter constant for <b>identifier</b>
 	 * <p>
@@ -102,6 +105,16 @@ public class Encounter extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="identifier", path="Encounter.identifier", description="")
 	public static final String SP_IDENTIFIER = "identifier";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Encounter.identifier</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam IDENTIFIER = new TokenParam(SP_IDENTIFIER);
 
 	/**
 	 * Search parameter constant for <b>status</b>
@@ -115,6 +128,16 @@ public class Encounter extends BaseResource implements IResource {
 	public static final String SP_STATUS = "status";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>status</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Encounter.status</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam STATUS = new TokenParam(SP_STATUS);
+
+	/**
 	 * Search parameter constant for <b>date</b>
 	 * <p>
 	 * Description: <b>A date within the period the Encounter lasted</b><br/>
@@ -124,6 +147,16 @@ public class Encounter extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="date", path="Encounter.period", description="A date within the period the Encounter lasted")
 	public static final String SP_DATE = "date";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>date</b>
+	 * <p>
+	 * Description: <b>A date within the period the Encounter lasted</b><br/>
+	 * Type: <b>date</b><br/>
+	 * Path: <b>Encounter.period</b><br/>
+	 * </p>
+	 */
+	public static final DateParam DATE = new DateParam(SP_DATE);
 
 	/**
 	 * Search parameter constant for <b>subject</b>
@@ -137,6 +170,22 @@ public class Encounter extends BaseResource implements IResource {
 	public static final String SP_SUBJECT = "subject";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>subject</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>Encounter.subject</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam SUBJECT = new ReferenceParam(SP_SUBJECT);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>Encounter.subject</b>".
+	 */
+	public static final Include INCLUDE_SUBJECT = new Include("Encounter.subject");
+
+	/**
 	 * Search parameter constant for <b>!fulfills</b>
 	 * <p>
 	 * Description: <b></b><br/>
@@ -146,6 +195,22 @@ public class Encounter extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="!fulfills", path="Encounter.fulfills", description="")
 	public static final String SP_FULFILLS = "!fulfills";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>!fulfills</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>Encounter.fulfills</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam FULFILLS = new ReferenceParam(SP_FULFILLS);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>Encounter.fulfills</b>".
+	 */
+	public static final Include INCLUDE_FULFILLS = new Include("Encounter.fulfills");
 
 	/**
 	 * Search parameter constant for <b>length</b>
@@ -158,6 +223,14 @@ public class Encounter extends BaseResource implements IResource {
 	@SearchParamDefinition(name="length", path="Encounter.length", description="Length of encounter in days")
 	public static final String SP_LENGTH = "length";
 
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>length</b>
+	 * <p>
+	 * Description: <b>Length of encounter in days</b><br/>
+	 * Type: <b>number</b><br/>
+	 * Path: <b>Encounter.length</b><br/>
+	 * </p>
+	 */
 	public static final NumberParam LENGTH = new NumberParam(SP_LENGTH);
 
 	/**
@@ -172,6 +245,22 @@ public class Encounter extends BaseResource implements IResource {
 	public static final String SP_INDICATION = "indication";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>indication</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>Encounter.indication</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam INDICATION = new ReferenceParam(SP_INDICATION);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>Encounter.indication</b>".
+	 */
+	public static final Include INCLUDE_INDICATION = new Include("Encounter.indication");
+
+	/**
 	 * Search parameter constant for <b>location</b>
 	 * <p>
 	 * Description: <b></b><br/>
@@ -183,6 +272,22 @@ public class Encounter extends BaseResource implements IResource {
 	public static final String SP_LOCATION = "location";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>location</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>Encounter.location.location</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam LOCATION = new ReferenceParam(SP_LOCATION);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>Encounter.location.location</b>".
+	 */
+	public static final Include INCLUDE_LOCATION_LOCATION = new Include("Encounter.location.location");
+
+	/**
 	 * Search parameter constant for <b>location-period</b>
 	 * <p>
 	 * Description: <b></b><br/>
@@ -192,6 +297,16 @@ public class Encounter extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="location-period", path="Encounter.location.period", description="")
 	public static final String SP_LOCATION_PERIOD = "location-period";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>location-period</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>date</b><br/>
+	 * Path: <b>Encounter.location.period</b><br/>
+	 * </p>
+	 */
+	public static final DateParam LOCATION_PERIOD = new DateParam(SP_LOCATION_PERIOD);
 
 
 	@Child(name="identifier", type=IdentifierDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)	
@@ -309,11 +424,6 @@ public class Encounter extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myIdentifier,  myStatus,  myClassElement,  myType,  mySubject,  myParticipant,  myPeriod,  myLength,  myReason,  myIndication,  myPriority,  myHospitalization,  myLocation,  myServiceProvider,  myPartOf);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myIdentifier, myStatus, myClassElement, myType, mySubject, myParticipant, myPeriod, myLength, myReason, myIndication, myPriority, myHospitalization, myLocation, myServiceProvider, myPartOf);
@@ -1005,11 +1115,6 @@ public class Encounter extends BaseResource implements IResource {
 	}
 	
 	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
-	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myType, myIndividual);
 	}
@@ -1207,11 +1312,6 @@ public class Encounter extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myPreAdmissionIdentifier,  myOrigin,  myAdmitSource,  myPeriod,  myAccomodation,  myDiet,  mySpecialCourtesy,  mySpecialArrangement,  myDestination,  myDischargeDisposition,  myDischargeDiagnosis,  myReAdmission);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myPreAdmissionIdentifier, myOrigin, myAdmitSource, myPeriod, myAccomodation, myDiet, mySpecialCourtesy, mySpecialArrangement, myDestination, myDischargeDisposition, myDischargeDiagnosis, myReAdmission);
@@ -1764,11 +1864,6 @@ public class Encounter extends BaseResource implements IResource {
 	}
 	
 	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
-	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myBed, myPeriod);
 	}
@@ -1872,11 +1967,6 @@ public class Encounter extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myLocation,  myPeriod);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myLocation, myPeriod);

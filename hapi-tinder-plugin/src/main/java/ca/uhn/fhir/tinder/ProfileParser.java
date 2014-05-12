@@ -2,6 +2,7 @@ package ca.uhn.fhir.tinder;
 
 import static org.apache.commons.lang.StringUtils.capitalize;
 import static org.apache.commons.lang.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 import java.io.File;
 import java.io.FileReader;
@@ -142,7 +143,11 @@ public class ProfileParser extends BaseStructureParser {
 					for (StructureSearchParam nextParam : nextStructure.getSearchParam()) {
 						SearchParameter param = new SearchParameter();
 						param.setName(nextParam.getName().getValue());
-						param.setPath(nextParam.getXpath().getValue());
+						
+						String path = defaultString(nextParam.getXpath().getValue());
+						path=path.replace("/f:", ".").replace("f:", "");
+						param.setPath(path);
+						
 						param.setType(nextParam.getType().getValue());
 						param.setDescription(nextParam.getDocumentation().getValue());
 						retVal.getSearchParameters().add(param);

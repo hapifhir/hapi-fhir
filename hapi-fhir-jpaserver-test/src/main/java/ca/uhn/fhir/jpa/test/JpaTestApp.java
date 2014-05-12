@@ -9,7 +9,7 @@ import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.dstu.resource.Questionnaire;
 import ca.uhn.fhir.rest.server.RestfulServer;
-import ca.uhn.fhir.rest.server.tester.PublicTesterServlet;
+import ca.uhn.fhir.rest.server.tester.RestfulServerTesterServlet;
 
 public class JpaTestApp {
 
@@ -35,7 +35,7 @@ public class JpaTestApp {
 		ServletContextHandler proxyHandler = new ServletContextHandler();
 		proxyHandler.setContextPath("/");
 
-		PublicTesterServlet testerServlet = new PublicTesterServlet();
+		RestfulServerTesterServlet testerServlet = new RestfulServerTesterServlet();
 		testerServlet.setServerBase("http://localhost:" + myPort + "/fhir/context");
 		// testerServlet.setServerBase("http://fhir.healthintersections.com.au/open");
 		ServletHolder handler = new ServletHolder();

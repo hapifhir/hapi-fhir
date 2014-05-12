@@ -63,6 +63,12 @@ import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.rest.gclient.DateParam;
+import ca.uhn.fhir.rest.gclient.Include;
+import ca.uhn.fhir.rest.gclient.NumberParam;
+import ca.uhn.fhir.rest.gclient.ReferenceParam;
+import ca.uhn.fhir.rest.gclient.StringParam;
+import ca.uhn.fhir.rest.gclient.TokenParam;
 
 
 /**
@@ -100,6 +106,16 @@ public class Appointment extends BaseResource implements IResource {
 	public static final String SP_DATE = "date";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>date</b>
+	 * <p>
+	 * Description: <b>Appointment date/time.</b><br/>
+	 * Type: <b>date</b><br/>
+	 * Path: <b>Appointment.start</b><br/>
+	 * </p>
+	 */
+	public static final DateParam DATE = new DateParam(SP_DATE);
+
+	/**
 	 * Search parameter constant for <b>status</b>
 	 * <p>
 	 * Description: <b>The overall status of the appointment</b><br/>
@@ -109,6 +125,16 @@ public class Appointment extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="status", path="Appointment.status", description="The overall status of the appointment")
 	public static final String SP_STATUS = "status";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>status</b>
+	 * <p>
+	 * Description: <b>The overall status of the appointment</b><br/>
+	 * Type: <b>string</b><br/>
+	 * Path: <b>Appointment.status</b><br/>
+	 * </p>
+	 */
+	public static final StringParam STATUS = new StringParam(SP_STATUS);
 
 	/**
 	 * Search parameter constant for <b>subject</b>
@@ -122,6 +148,22 @@ public class Appointment extends BaseResource implements IResource {
 	public static final String SP_SUBJECT = "subject";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>subject</b>
+	 * <p>
+	 * Description: <b>The subject that the sensitivity is about</b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>Appointment.participant.individual</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam SUBJECT = new ReferenceParam(SP_SUBJECT);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>Appointment.participant.individual</b>".
+	 */
+	public static final Include INCLUDE_PARTICIPANT_INDIVIDUAL = new Include("Appointment.participant.individual");
+
+	/**
 	 * Search parameter constant for <b>!duration</b>
 	 * <p>
 	 * Description: <b>The number of minutes that the appointment is to go for</b><br/>
@@ -133,6 +175,16 @@ public class Appointment extends BaseResource implements IResource {
 	public static final String SP_DURATION = "!duration";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>!duration</b>
+	 * <p>
+	 * Description: <b>The number of minutes that the appointment is to go for</b><br/>
+	 * Type: <b>number</b><br/>
+	 * Path: <b>Appointment.minutesDuration</b><br/>
+	 * </p>
+	 */
+	public static final NumberParam DURATION = new NumberParam(SP_DURATION);
+
+	/**
 	 * Search parameter constant for <b>partstatus</b>
 	 * <p>
 	 * Description: <b>The Participation status of the subject, or other participant on the appointment </b><br/>
@@ -142,6 +194,16 @@ public class Appointment extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="partstatus", path="Appointment.participant.status", description="The Participation status of the subject, or other participant on the appointment ")
 	public static final String SP_PARTSTATUS = "partstatus";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>partstatus</b>
+	 * <p>
+	 * Description: <b>The Participation status of the subject, or other participant on the appointment </b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Appointment.participant.status</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam PARTSTATUS = new TokenParam(SP_PARTSTATUS);
 
 
 	@Child(name="identifier", type=IdentifierDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)	
@@ -259,11 +321,6 @@ public class Appointment extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myIdentifier,  myPriority,  myStatus,  myDescription,  myStart,  myEnd,  mySchedule,  myTimezone,  mySlot,  myLocation,  myComment,  myOrder,  myParticipant,  myRecorder,  myRecordedDate);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myIdentifier, myPriority, myStatus, myDescription, myStart, myEnd, mySchedule, myTimezone, mySlot, myLocation, myComment, myOrder, myParticipant, myRecorder, myRecordedDate);
@@ -1035,11 +1092,6 @@ public class Appointment extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myType,  myIndividual,  myRequired,  myStatus,  myObservation);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myType, myIndividual, myRequired, myStatus, myObservation);

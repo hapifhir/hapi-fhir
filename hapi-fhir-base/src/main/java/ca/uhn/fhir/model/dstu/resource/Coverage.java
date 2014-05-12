@@ -60,6 +60,9 @@ import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
 import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
+import ca.uhn.fhir.rest.gclient.Include;
+import ca.uhn.fhir.rest.gclient.ReferenceParam;
+import ca.uhn.fhir.rest.gclient.TokenParam;
 
 
 /**
@@ -97,6 +100,22 @@ public class Coverage extends BaseResource implements IResource {
 	public static final String SP_ISSUER = "issuer";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>issuer</b>
+	 * <p>
+	 * Description: <b>The identity of the insurer</b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>Coverage.issuer</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam ISSUER = new ReferenceParam(SP_ISSUER);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>Coverage.issuer</b>".
+	 */
+	public static final Include INCLUDE_ISSUER = new Include("Coverage.issuer");
+
+	/**
 	 * Search parameter constant for <b>identifier</b>
 	 * <p>
 	 * Description: <b>The primary identifier of the insured</b><br/>
@@ -106,6 +125,16 @@ public class Coverage extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="identifier", path="Coverage.identifier", description="The primary identifier of the insured")
 	public static final String SP_IDENTIFIER = "identifier";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
+	 * <p>
+	 * Description: <b>The primary identifier of the insured</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Coverage.identifier</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam IDENTIFIER = new TokenParam(SP_IDENTIFIER);
 
 	/**
 	 * Search parameter constant for <b>type</b>
@@ -119,6 +148,16 @@ public class Coverage extends BaseResource implements IResource {
 	public static final String SP_TYPE = "type";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>type</b>
+	 * <p>
+	 * Description: <b>The kind of coverage</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Coverage.type</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam TYPE = new TokenParam(SP_TYPE);
+
+	/**
 	 * Search parameter constant for <b>plan</b>
 	 * <p>
 	 * Description: <b>A plan or policy identifier</b><br/>
@@ -128,6 +167,16 @@ public class Coverage extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="plan", path="Coverage.plan", description="A plan or policy identifier")
 	public static final String SP_PLAN = "plan";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>plan</b>
+	 * <p>
+	 * Description: <b>A plan or policy identifier</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Coverage.plan</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam PLAN = new TokenParam(SP_PLAN);
 
 	/**
 	 * Search parameter constant for <b>subplan</b>
@@ -141,6 +190,16 @@ public class Coverage extends BaseResource implements IResource {
 	public static final String SP_SUBPLAN = "subplan";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>subplan</b>
+	 * <p>
+	 * Description: <b>Sub-plan identifier</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Coverage.subplan</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam SUBPLAN = new TokenParam(SP_SUBPLAN);
+
+	/**
 	 * Search parameter constant for <b>group</b>
 	 * <p>
 	 * Description: <b>Group identifier</b><br/>
@@ -150,6 +209,16 @@ public class Coverage extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="group", path="Coverage.group", description="Group identifier")
 	public static final String SP_GROUP = "group";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>group</b>
+	 * <p>
+	 * Description: <b>Group identifier</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Coverage.group</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam GROUP = new TokenParam(SP_GROUP);
 
 	/**
 	 * Search parameter constant for <b>dependent</b>
@@ -163,6 +232,16 @@ public class Coverage extends BaseResource implements IResource {
 	public static final String SP_DEPENDENT = "dependent";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>dependent</b>
+	 * <p>
+	 * Description: <b>Dependent number</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Coverage.dependent</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam DEPENDENT = new TokenParam(SP_DEPENDENT);
+
+	/**
 	 * Search parameter constant for <b>sequence</b>
 	 * <p>
 	 * Description: <b>Sequence number</b><br/>
@@ -174,6 +253,16 @@ public class Coverage extends BaseResource implements IResource {
 	public static final String SP_SEQUENCE = "sequence";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>sequence</b>
+	 * <p>
+	 * Description: <b>Sequence number</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Coverage.sequence</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam SEQUENCE = new TokenParam(SP_SEQUENCE);
+
+	/**
 	 * Search parameter constant for <b>name</b>
 	 * <p>
 	 * Description: <b>The name of the subscriber</b><br/>
@@ -183,6 +272,16 @@ public class Coverage extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="name", path="Coverage.subscriber.name", description="The name of the subscriber")
 	public static final String SP_NAME = "name";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>name</b>
+	 * <p>
+	 * Description: <b>The name of the subscriber</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Coverage.subscriber.name</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam NAME = new TokenParam(SP_NAME);
 
 
 	@Child(name="issuer", order=0, min=0, max=1, type={
@@ -262,11 +361,6 @@ public class Coverage extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myIssuer,  myPeriod,  myType,  myIdentifier,  myGroup,  myPlan,  mySubplan,  myDependent,  mySequence,  mySubscriber);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myIssuer, myPeriod, myType, myIdentifier, myGroup, myPlan, mySubplan, myDependent, mySequence, mySubscriber);
@@ -750,11 +844,6 @@ public class Coverage extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myName,  myAddress,  myBirthdate);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myName, myAddress, myBirthdate);

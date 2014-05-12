@@ -123,22 +123,22 @@ public class FhirResourceDaoTest {
 		{
 			Patient patient = new Patient();
 			patient.addIdentifier("urn:system", "001");
-			patient.addName().addFamily("Tester").addGiven("Joe");
+			patient.addName().addFamily("Tester_testSearchStringParam").addGiven("Joe");
 			ourPatientDao.create(patient);
 		}
 		{
 			Patient patient = new Patient();
 			patient.addIdentifier("urn:system", "002");
-			patient.addName().addFamily("Tester").addGiven("John");
+			patient.addName().addFamily("Tester_testSearchStringParam").addGiven("John");
 			ourPatientDao.create(patient);
 		}
 
 		Map<String, IQueryParameterType> params = new HashMap<>();
-		params.put(Patient.SP_FAMILY, new StringDt("Tester"));
+		params.put(Patient.SP_FAMILY, new StringDt("Tester_testSearchStringParam"));
 		List<Patient> patients = ourPatientDao.search(params);
 		assertEquals(2, patients.size());
 		
-		params.put(Patient.SP_FAMILY, new StringDt("FOO"));
+		params.put(Patient.SP_FAMILY, new StringDt("FOO_testSearchStringParam"));
 		patients = ourPatientDao.search(params);
 		assertEquals(0, patients.size());
 

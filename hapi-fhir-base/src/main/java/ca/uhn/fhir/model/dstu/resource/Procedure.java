@@ -58,6 +58,10 @@ import ca.uhn.fhir.model.dstu.valueset.ProcedureRelationshipTypeEnum;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.rest.gclient.DateParam;
+import ca.uhn.fhir.rest.gclient.Include;
+import ca.uhn.fhir.rest.gclient.ReferenceParam;
+import ca.uhn.fhir.rest.gclient.TokenParam;
 
 
 /**
@@ -95,6 +99,16 @@ public class Procedure extends BaseResource implements IResource {
 	public static final String SP_TYPE = "type";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>type</b>
+	 * <p>
+	 * Description: <b>Type of procedure</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Procedure.type</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam TYPE = new TokenParam(SP_TYPE);
+
+	/**
 	 * Search parameter constant for <b>subject</b>
 	 * <p>
 	 * Description: <b>The identity of a patient to list procedures  for</b><br/>
@@ -106,6 +120,22 @@ public class Procedure extends BaseResource implements IResource {
 	public static final String SP_SUBJECT = "subject";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>subject</b>
+	 * <p>
+	 * Description: <b>The identity of a patient to list procedures  for</b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>Procedure.subject</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam SUBJECT = new ReferenceParam(SP_SUBJECT);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>Procedure.subject</b>".
+	 */
+	public static final Include INCLUDE_SUBJECT = new Include("Procedure.subject");
+
+	/**
 	 * Search parameter constant for <b>date</b>
 	 * <p>
 	 * Description: <b>The date the procedure was performed on</b><br/>
@@ -115,6 +145,16 @@ public class Procedure extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="date", path="Procedure.date", description="The date the procedure was performed on")
 	public static final String SP_DATE = "date";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>date</b>
+	 * <p>
+	 * Description: <b>The date the procedure was performed on</b><br/>
+	 * Type: <b>date</b><br/>
+	 * Path: <b>Procedure.date</b><br/>
+	 * </p>
+	 */
+	public static final DateParam DATE = new DateParam(SP_DATE);
 
 
 	@Child(name="identifier", type=IdentifierDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)	
@@ -224,11 +264,6 @@ public class Procedure extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myIdentifier,  mySubject,  myType,  myBodySite,  myIndication,  myPerformer,  myDate,  myEncounter,  myOutcome,  myReport,  myComplication,  myFollowUp,  myRelatedItem,  myNotes);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myIdentifier, mySubject, myType, myBodySite, myIndication, myPerformer, myDate, myEncounter, myOutcome, myReport, myComplication, myFollowUp, myRelatedItem, myNotes);
@@ -963,11 +998,6 @@ public class Procedure extends BaseResource implements IResource {
 	}
 	
 	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
-	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myPerson, myRole);
 	}
@@ -1070,11 +1100,6 @@ public class Procedure extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myType,  myTarget);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myType, myTarget);

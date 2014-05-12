@@ -58,6 +58,10 @@ import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.rest.gclient.DateParam;
+import ca.uhn.fhir.rest.gclient.Include;
+import ca.uhn.fhir.rest.gclient.ReferenceParam;
+import ca.uhn.fhir.rest.gclient.TokenParam;
 
 
 /**
@@ -95,6 +99,22 @@ public class OrderResponse extends BaseResource implements IResource {
 	public static final String SP_REQUEST = "request";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>request</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>OrderResponse.request</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam REQUEST = new ReferenceParam(SP_REQUEST);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>OrderResponse.request</b>".
+	 */
+	public static final Include INCLUDE_REQUEST = new Include("OrderResponse.request");
+
+	/**
 	 * Search parameter constant for <b>date</b>
 	 * <p>
 	 * Description: <b></b><br/>
@@ -104,6 +124,16 @@ public class OrderResponse extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="date", path="OrderResponse.date", description="")
 	public static final String SP_DATE = "date";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>date</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>date</b><br/>
+	 * Path: <b>OrderResponse.date</b><br/>
+	 * </p>
+	 */
+	public static final DateParam DATE = new DateParam(SP_DATE);
 
 	/**
 	 * Search parameter constant for <b>who</b>
@@ -117,6 +147,22 @@ public class OrderResponse extends BaseResource implements IResource {
 	public static final String SP_WHO = "who";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>who</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>OrderResponse.who</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam WHO = new ReferenceParam(SP_WHO);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>OrderResponse.who</b>".
+	 */
+	public static final Include INCLUDE_WHO = new Include("OrderResponse.who");
+
+	/**
 	 * Search parameter constant for <b>code</b>
 	 * <p>
 	 * Description: <b></b><br/>
@@ -128,6 +174,16 @@ public class OrderResponse extends BaseResource implements IResource {
 	public static final String SP_CODE = "code";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>code</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>OrderResponse.code</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam CODE = new TokenParam(SP_CODE);
+
+	/**
 	 * Search parameter constant for <b>fulfillment</b>
 	 * <p>
 	 * Description: <b></b><br/>
@@ -137,6 +193,22 @@ public class OrderResponse extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="fulfillment", path="OrderResponse.fulfillment", description="")
 	public static final String SP_FULFILLMENT = "fulfillment";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>fulfillment</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>OrderResponse.fulfillment</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam FULFILLMENT = new ReferenceParam(SP_FULFILLMENT);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>OrderResponse.fulfillment</b>".
+	 */
+	public static final Include INCLUDE_FULFILLMENT = new Include("OrderResponse.fulfillment");
 
 
 	@Child(name="identifier", type=IdentifierDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)	
@@ -205,11 +277,6 @@ public class OrderResponse extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myIdentifier,  myRequest,  myDate,  myWho,  myAuthority,  myCode,  myDescription,  myFulfillment);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myIdentifier, myRequest, myDate, myWho, myAuthority, myCode, myDescription, myFulfillment);

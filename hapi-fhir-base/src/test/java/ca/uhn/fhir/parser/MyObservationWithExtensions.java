@@ -95,11 +95,6 @@ public class MyObservationWithExtensions extends Patient {
 		}
 
 		@Override
-		public List<IElement> getAllPopulatedChildElements() {
-			return Collections.emptyList();
-		}
-
-		@Override
 		public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 			return Collections.emptyList();
 		}

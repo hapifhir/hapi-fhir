@@ -59,6 +59,10 @@ import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.rest.gclient.DateParam;
+import ca.uhn.fhir.rest.gclient.Include;
+import ca.uhn.fhir.rest.gclient.ReferenceParam;
+import ca.uhn.fhir.rest.gclient.TokenParam;
 
 
 /**
@@ -96,6 +100,16 @@ public class Media extends BaseResource implements IResource {
 	public static final String SP_TYPE = "type";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>type</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Media.type</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam TYPE = new TokenParam(SP_TYPE);
+
+	/**
 	 * Search parameter constant for <b>subtype</b>
 	 * <p>
 	 * Description: <b></b><br/>
@@ -105,6 +119,16 @@ public class Media extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="subtype", path="Media.subtype", description="")
 	public static final String SP_SUBTYPE = "subtype";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>subtype</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Media.subtype</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam SUBTYPE = new TokenParam(SP_SUBTYPE);
 
 	/**
 	 * Search parameter constant for <b>identifier</b>
@@ -118,6 +142,16 @@ public class Media extends BaseResource implements IResource {
 	public static final String SP_IDENTIFIER = "identifier";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Media.identifier</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam IDENTIFIER = new TokenParam(SP_IDENTIFIER);
+
+	/**
 	 * Search parameter constant for <b>date</b>
 	 * <p>
 	 * Description: <b></b><br/>
@@ -127,6 +161,16 @@ public class Media extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="date", path="Media.dateTime", description="")
 	public static final String SP_DATE = "date";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>date</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>date</b><br/>
+	 * Path: <b>Media.dateTime</b><br/>
+	 * </p>
+	 */
+	public static final DateParam DATE = new DateParam(SP_DATE);
 
 	/**
 	 * Search parameter constant for <b>subject</b>
@@ -140,6 +184,22 @@ public class Media extends BaseResource implements IResource {
 	public static final String SP_SUBJECT = "subject";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>subject</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>Media.subject</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam SUBJECT = new ReferenceParam(SP_SUBJECT);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>Media.subject</b>".
+	 */
+	public static final Include INCLUDE_SUBJECT = new Include("Media.subject");
+
+	/**
 	 * Search parameter constant for <b>operator</b>
 	 * <p>
 	 * Description: <b></b><br/>
@@ -151,6 +211,22 @@ public class Media extends BaseResource implements IResource {
 	public static final String SP_OPERATOR = "operator";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>operator</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>Media.operator</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam OPERATOR = new ReferenceParam(SP_OPERATOR);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>Media.operator</b>".
+	 */
+	public static final Include INCLUDE_OPERATOR = new Include("Media.operator");
+
+	/**
 	 * Search parameter constant for <b>view</b>
 	 * <p>
 	 * Description: <b></b><br/>
@@ -160,6 +236,16 @@ public class Media extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="view", path="Media.view", description="")
 	public static final String SP_VIEW = "view";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>view</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Media.view</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam VIEW = new TokenParam(SP_VIEW);
 
 
 	@Child(name="type", type=CodeDt.class, order=0, min=1, max=1)	
@@ -261,11 +347,6 @@ public class Media extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myType,  mySubtype,  myIdentifier,  myDateTime,  mySubject,  myOperator,  myView,  myDeviceName,  myHeight,  myWidth,  myFrames,  myLength,  myContent);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myType, mySubtype, myIdentifier, myDateTime, mySubject, myOperator, myView, myDeviceName, myHeight, myWidth, myFrames, myLength, myContent);

@@ -56,6 +56,10 @@ import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.rest.gclient.DateParam;
+import ca.uhn.fhir.rest.gclient.Include;
+import ca.uhn.fhir.rest.gclient.ReferenceParam;
+import ca.uhn.fhir.rest.gclient.StringParam;
 
 
 /**
@@ -93,6 +97,22 @@ public class SequencingAnalysis extends BaseResource implements IResource {
 	public static final String SP_SUBJECT = "subject";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>subject</b>
+	 * <p>
+	 * Description: <b>Subject of the analysis</b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>SequencingAnalysis.subject</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam SUBJECT = new ReferenceParam(SP_SUBJECT);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>SequencingAnalysis.subject</b>".
+	 */
+	public static final Include INCLUDE_SUBJECT = new Include("SequencingAnalysis.subject");
+
+	/**
 	 * Search parameter constant for <b>date</b>
 	 * <p>
 	 * Description: <b>Date when result of the analysis is updated</b><br/>
@@ -104,6 +124,16 @@ public class SequencingAnalysis extends BaseResource implements IResource {
 	public static final String SP_DATE = "date";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>date</b>
+	 * <p>
+	 * Description: <b>Date when result of the analysis is updated</b><br/>
+	 * Type: <b>date</b><br/>
+	 * Path: <b>SequencingAnalysis.date</b><br/>
+	 * </p>
+	 */
+	public static final DateParam DATE = new DateParam(SP_DATE);
+
+	/**
 	 * Search parameter constant for <b>genome</b>
 	 * <p>
 	 * Description: <b>Name of the reference genome used in the analysis</b><br/>
@@ -113,6 +143,16 @@ public class SequencingAnalysis extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="genome", path="SequencingAnalysis.genome.name", description="Name of the reference genome used in the analysis")
 	public static final String SP_GENOME = "genome";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>genome</b>
+	 * <p>
+	 * Description: <b>Name of the reference genome used in the analysis</b><br/>
+	 * Type: <b>string</b><br/>
+	 * Path: <b>SequencingAnalysis.genome.name</b><br/>
+	 * </p>
+	 */
+	public static final StringParam GENOME = new StringParam(SP_GENOME);
 
 
 	@Child(name="subject", order=0, min=0, max=1, type={
@@ -173,11 +213,6 @@ public class SequencingAnalysis extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  mySubject,  myDate,  myName,  myGenome,  myFile,  myInputLab,  myInputAnalysis);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, mySubject, myDate, myName, myGenome, myFile, myInputLab, myInputAnalysis);
@@ -525,11 +560,6 @@ public class SequencingAnalysis extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myName,  myBuild);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myName, myBuild);

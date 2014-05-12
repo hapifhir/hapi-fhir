@@ -69,6 +69,10 @@ import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.rest.gclient.DateParam;
+import ca.uhn.fhir.rest.gclient.Include;
+import ca.uhn.fhir.rest.gclient.ReferenceParam;
+import ca.uhn.fhir.rest.gclient.TokenParam;
 
 
 /**
@@ -106,6 +110,16 @@ public class MedicationPrescription extends BaseResource implements IResource {
 	public static final String SP_DATEWRITTEN = "datewritten";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>datewritten</b>
+	 * <p>
+	 * Description: <b>Return prescriptions written on this date</b><br/>
+	 * Type: <b>date</b><br/>
+	 * Path: <b>MedicationPrescription.dateWritten</b><br/>
+	 * </p>
+	 */
+	public static final DateParam DATEWRITTEN = new DateParam(SP_DATEWRITTEN);
+
+	/**
 	 * Search parameter constant for <b>encounter</b>
 	 * <p>
 	 * Description: <b>Return prescriptions with this encounter identity</b><br/>
@@ -115,6 +129,22 @@ public class MedicationPrescription extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="encounter", path="MedicationPrescription.encounter", description="Return prescriptions with this encounter identity")
 	public static final String SP_ENCOUNTER = "encounter";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>encounter</b>
+	 * <p>
+	 * Description: <b>Return prescriptions with this encounter identity</b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>MedicationPrescription.encounter</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam ENCOUNTER = new ReferenceParam(SP_ENCOUNTER);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>MedicationPrescription.encounter</b>".
+	 */
+	public static final Include INCLUDE_ENCOUNTER = new Include("MedicationPrescription.encounter");
 
 	/**
 	 * Search parameter constant for <b>identifier</b>
@@ -128,6 +158,16 @@ public class MedicationPrescription extends BaseResource implements IResource {
 	public static final String SP_IDENTIFIER = "identifier";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
+	 * <p>
+	 * Description: <b>Return prescriptions with this external identity</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>MedicationPrescription.identifier</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam IDENTIFIER = new TokenParam(SP_IDENTIFIER);
+
+	/**
 	 * Search parameter constant for <b>medication</b>
 	 * <p>
 	 * Description: <b>Code for medicine or text in medicine name</b><br/>
@@ -137,6 +177,22 @@ public class MedicationPrescription extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="medication", path="MedicationPrescription.medication", description="Code for medicine or text in medicine name")
 	public static final String SP_MEDICATION = "medication";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>medication</b>
+	 * <p>
+	 * Description: <b>Code for medicine or text in medicine name</b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>MedicationPrescription.medication</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam MEDICATION = new ReferenceParam(SP_MEDICATION);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>MedicationPrescription.medication</b>".
+	 */
+	public static final Include INCLUDE_MEDICATION = new Include("MedicationPrescription.medication");
 
 	/**
 	 * Search parameter constant for <b>patient</b>
@@ -150,6 +206,22 @@ public class MedicationPrescription extends BaseResource implements IResource {
 	public static final String SP_PATIENT = "patient";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>patient</b>
+	 * <p>
+	 * Description: <b>The identity of a patient to list dispenses  for</b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>MedicationPrescription.patient</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam PATIENT = new ReferenceParam(SP_PATIENT);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>MedicationPrescription.patient</b>".
+	 */
+	public static final Include INCLUDE_PATIENT = new Include("MedicationPrescription.patient");
+
+	/**
 	 * Search parameter constant for <b>status</b>
 	 * <p>
 	 * Description: <b>Status of the prescription</b><br/>
@@ -159,6 +231,16 @@ public class MedicationPrescription extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="status", path="MedicationPrescription.status", description="Status of the prescription")
 	public static final String SP_STATUS = "status";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>status</b>
+	 * <p>
+	 * Description: <b>Status of the prescription</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>MedicationPrescription.status</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam STATUS = new TokenParam(SP_STATUS);
 
 
 	@Child(name="identifier", type=IdentifierDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)	
@@ -249,11 +331,6 @@ public class MedicationPrescription extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myIdentifier,  myDateWritten,  myStatus,  myPatient,  myPrescriber,  myEncounter,  myReason,  myMedication,  myDosageInstruction,  myDispense,  mySubstitution);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myIdentifier, myDateWritten, myStatus, myPatient, myPrescriber, myEncounter, myReason, myMedication, myDosageInstruction, myDispense, mySubstitution);
@@ -820,11 +897,6 @@ public class MedicationPrescription extends BaseResource implements IResource {
 	}
 	
 	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
-	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myText, myAdditionalInstructions, myTiming, myAsNeeded, mySite, myRoute, myMethod, myDoseQuantity, myRate, myMaxDosePerPeriod);
 	}
@@ -1256,11 +1328,6 @@ public class MedicationPrescription extends BaseResource implements IResource {
 	}
 	
 	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
-	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myMedication, myValidityPeriod, myNumberOfRepeatsAllowed, myQuantity, myExpectedSupplyDuration);
 	}
@@ -1520,11 +1587,6 @@ public class MedicationPrescription extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myType,  myReason);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myType, myReason);

@@ -57,6 +57,10 @@ import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.rest.gclient.DateParam;
+import ca.uhn.fhir.rest.gclient.Include;
+import ca.uhn.fhir.rest.gclient.ReferenceParam;
+import ca.uhn.fhir.rest.gclient.StringParam;
 
 
 /**
@@ -94,6 +98,22 @@ public class SequencingLab extends BaseResource implements IResource {
 	public static final String SP_SUBJECT = "subject";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>subject</b>
+	 * <p>
+	 * Description: <b>Subject of the lab</b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>SequencingLab.subject</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam SUBJECT = new ReferenceParam(SP_SUBJECT);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>SequencingLab.subject</b>".
+	 */
+	public static final Include INCLUDE_SUBJECT = new Include("SequencingLab.subject");
+
+	/**
 	 * Search parameter constant for <b>specimen</b>
 	 * <p>
 	 * Description: <b>Type of the specimen used for the lab</b><br/>
@@ -103,6 +123,16 @@ public class SequencingLab extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="specimen", path="SequencingLab.specimen.type", description="Type of the specimen used for the lab")
 	public static final String SP_SPECIMEN = "specimen";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>specimen</b>
+	 * <p>
+	 * Description: <b>Type of the specimen used for the lab</b><br/>
+	 * Type: <b>string</b><br/>
+	 * Path: <b>SequencingLab.specimen.type</b><br/>
+	 * </p>
+	 */
+	public static final StringParam SPECIMEN = new StringParam(SP_SPECIMEN);
 
 	/**
 	 * Search parameter constant for <b>date</b>
@@ -116,6 +146,16 @@ public class SequencingLab extends BaseResource implements IResource {
 	public static final String SP_DATE = "date";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>date</b>
+	 * <p>
+	 * Description: <b>Date when result of the lab is uploaded</b><br/>
+	 * Type: <b>date</b><br/>
+	 * Path: <b>SequencingLab.date</b><br/>
+	 * </p>
+	 */
+	public static final DateParam DATE = new DateParam(SP_DATE);
+
+	/**
 	 * Search parameter constant for <b>organization</b>
 	 * <p>
 	 * Description: <b>Organization that does the lab</b><br/>
@@ -125,6 +165,16 @@ public class SequencingLab extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="organization", path="SequencingLab.organization", description="Organization that does the lab")
 	public static final String SP_ORGANIZATION = "organization";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>organization</b>
+	 * <p>
+	 * Description: <b>Organization that does the lab</b><br/>
+	 * Type: <b>string</b><br/>
+	 * Path: <b>SequencingLab.organization</b><br/>
+	 * </p>
+	 */
+	public static final StringParam ORGANIZATION = new StringParam(SP_ORGANIZATION);
 
 	/**
 	 * Search parameter constant for <b>system-class</b>
@@ -138,6 +188,16 @@ public class SequencingLab extends BaseResource implements IResource {
 	public static final String SP_SYSTEM_CLASS = "system-class";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>system-class</b>
+	 * <p>
+	 * Description: <b>Class of the sequencing system</b><br/>
+	 * Type: <b>string</b><br/>
+	 * Path: <b>SequencingLab.system.class</b><br/>
+	 * </p>
+	 */
+	public static final StringParam SYSTEM_CLASS = new StringParam(SP_SYSTEM_CLASS);
+
+	/**
 	 * Search parameter constant for <b>system-name</b>
 	 * <p>
 	 * Description: <b>Name of the sequencing system</b><br/>
@@ -147,6 +207,16 @@ public class SequencingLab extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="system-name", path="SequencingLab.system.name", description="Name of the sequencing system")
 	public static final String SP_SYSTEM_NAME = "system-name";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>system-name</b>
+	 * <p>
+	 * Description: <b>Name of the sequencing system</b><br/>
+	 * Type: <b>string</b><br/>
+	 * Path: <b>SequencingLab.system.name</b><br/>
+	 * </p>
+	 */
+	public static final StringParam SYSTEM_NAME = new StringParam(SP_SYSTEM_NAME);
 
 
 	@Child(name="subject", order=0, min=0, max=1, type={
@@ -212,11 +282,6 @@ public class SequencingLab extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  mySubject,  myOrganization,  myName,  myDate,  myType,  mySystem,  mySpecimen,  myFile);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, mySubject, myOrganization, myName, myDate, myType, mySystem, mySpecimen, myFile);
@@ -610,11 +675,6 @@ public class SequencingLab extends BaseResource implements IResource {
 	}
 	
 	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
-	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myClassElement, myVersion, myName, myIdentity);
 	}
@@ -830,11 +890,6 @@ public class SequencingLab extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myType,  mySource);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myType, mySource);

@@ -73,7 +73,13 @@ import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.rest.gclient.CompositeParam;
+import ca.uhn.fhir.rest.gclient.DateParam;
+import ca.uhn.fhir.rest.gclient.Include;
 import ca.uhn.fhir.rest.gclient.QuantityParam;
+import ca.uhn.fhir.rest.gclient.ReferenceParam;
+import ca.uhn.fhir.rest.gclient.StringParam;
+import ca.uhn.fhir.rest.gclient.TokenParam;
 
 
 /**
@@ -111,6 +117,16 @@ public class Observation extends BaseResource implements IResource {
 	public static final String SP_NAME = "name";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>name</b>
+	 * <p>
+	 * Description: <b>The name of the observation type</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Observation.name</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam NAME = new TokenParam(SP_NAME);
+
+	/**
 	 * Search parameter constant for <b>value-quantity</b>
 	 * <p>
 	 * Description: <b>The value of the observation, if the value is a Quantity, or a SampledData (just search on the bounds of the values in sampled data)</b><br/>
@@ -121,8 +137,16 @@ public class Observation extends BaseResource implements IResource {
 	@SearchParamDefinition(name="value-quantity", path="Observation.value[x]", description="The value of the observation, if the value is a Quantity, or a SampledData (just search on the bounds of the values in sampled data)")
 	public static final String SP_VALUE_QUANTITY = "value-quantity";
 
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>value-quantity</b>
+	 * <p>
+	 * Description: <b>The value of the observation, if the value is a Quantity, or a SampledData (just search on the bounds of the values in sampled data)</b><br/>
+	 * Type: <b>quantity</b><br/>
+	 * Path: <b>Observation.value[x]</b><br/>
+	 * </p>
+	 */
 	public static final QuantityParam VALUE_QUANTITY = new QuantityParam(SP_VALUE_QUANTITY);
-	
+
 	/**
 	 * Search parameter constant for <b>value-concept</b>
 	 * <p>
@@ -133,6 +157,16 @@ public class Observation extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="value-concept", path="Observation.value[x]", description="The value of the observation, if the value is a CodeableConcept")
 	public static final String SP_VALUE_CONCEPT = "value-concept";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>value-concept</b>
+	 * <p>
+	 * Description: <b>The value of the observation, if the value is a CodeableConcept</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Observation.value[x]</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam VALUE_CONCEPT = new TokenParam(SP_VALUE_CONCEPT);
 
 	/**
 	 * Search parameter constant for <b>value-date</b>
@@ -146,6 +180,16 @@ public class Observation extends BaseResource implements IResource {
 	public static final String SP_VALUE_DATE = "value-date";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>value-date</b>
+	 * <p>
+	 * Description: <b>The value of the observation, if the value is a Period</b><br/>
+	 * Type: <b>date</b><br/>
+	 * Path: <b>Observation.value[x]</b><br/>
+	 * </p>
+	 */
+	public static final DateParam VALUE_DATE = new DateParam(SP_VALUE_DATE);
+
+	/**
 	 * Search parameter constant for <b>value-string</b>
 	 * <p>
 	 * Description: <b>The value of the observation, if the value is a string, and also searches in CodeableConcept.text</b><br/>
@@ -155,6 +199,16 @@ public class Observation extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="value-string", path="Observation.value[x]", description="The value of the observation, if the value is a string, and also searches in CodeableConcept.text")
 	public static final String SP_VALUE_STRING = "value-string";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>value-string</b>
+	 * <p>
+	 * Description: <b>The value of the observation, if the value is a string, and also searches in CodeableConcept.text</b><br/>
+	 * Type: <b>string</b><br/>
+	 * Path: <b>Observation.value[x]</b><br/>
+	 * </p>
+	 */
+	public static final StringParam VALUE_STRING = new StringParam(SP_VALUE_STRING);
 
 	/**
 	 * Search parameter constant for <b>name-value-[x]</b>
@@ -168,6 +222,16 @@ public class Observation extends BaseResource implements IResource {
 	public static final String SP_NAME_VALUE_X = "name-value-[x]";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>name-value-[x]</b>
+	 * <p>
+	 * Description: <b>Both name and one of the value parameters</b><br/>
+	 * Type: <b>composite</b><br/>
+	 * Path: <b>name & value-[x]</b><br/>
+	 * </p>
+	 */
+	public static final CompositeParam NAME_VALUE_X = new CompositeParam(SP_NAME_VALUE_X);
+
+	/**
 	 * Search parameter constant for <b>date</b>
 	 * <p>
 	 * Description: <b>Obtained date/time. If the obtained element is a period, a date that falls in the period</b><br/>
@@ -177,6 +241,16 @@ public class Observation extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="date", path="Observation.applies[x]", description="Obtained date/time. If the obtained element is a period, a date that falls in the period")
 	public static final String SP_DATE = "date";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>date</b>
+	 * <p>
+	 * Description: <b>Obtained date/time. If the obtained element is a period, a date that falls in the period</b><br/>
+	 * Type: <b>date</b><br/>
+	 * Path: <b>Observation.applies[x]</b><br/>
+	 * </p>
+	 */
+	public static final DateParam DATE = new DateParam(SP_DATE);
 
 	/**
 	 * Search parameter constant for <b>status</b>
@@ -190,6 +264,16 @@ public class Observation extends BaseResource implements IResource {
 	public static final String SP_STATUS = "status";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>status</b>
+	 * <p>
+	 * Description: <b>The status of the observation</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Observation.status</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam STATUS = new TokenParam(SP_STATUS);
+
+	/**
 	 * Search parameter constant for <b>reliability</b>
 	 * <p>
 	 * Description: <b>The reliability of the observation</b><br/>
@@ -199,6 +283,16 @@ public class Observation extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="reliability", path="Observation.reliability", description="The reliability of the observation")
 	public static final String SP_RELIABILITY = "reliability";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>reliability</b>
+	 * <p>
+	 * Description: <b>The reliability of the observation</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Observation.reliability</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam RELIABILITY = new TokenParam(SP_RELIABILITY);
 
 	/**
 	 * Search parameter constant for <b>subject</b>
@@ -212,6 +306,22 @@ public class Observation extends BaseResource implements IResource {
 	public static final String SP_SUBJECT = "subject";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>subject</b>
+	 * <p>
+	 * Description: <b>The subject that the observation is about</b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>Observation.subject</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam SUBJECT = new ReferenceParam(SP_SUBJECT);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>Observation.subject</b>".
+	 */
+	public static final Include INCLUDE_SUBJECT = new Include("Observation.subject");
+
+	/**
 	 * Search parameter constant for <b>performer</b>
 	 * <p>
 	 * Description: <b>Who and/or what performed the observation</b><br/>
@@ -221,6 +331,22 @@ public class Observation extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="performer", path="Observation.performer", description="Who and/or what performed the observation")
 	public static final String SP_PERFORMER = "performer";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>performer</b>
+	 * <p>
+	 * Description: <b>Who and/or what performed the observation</b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>Observation.performer</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam PERFORMER = new ReferenceParam(SP_PERFORMER);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>Observation.performer</b>".
+	 */
+	public static final Include INCLUDE_PERFORMER = new Include("Observation.performer");
 
 	/**
 	 * Search parameter constant for <b>specimen</b>
@@ -234,6 +360,22 @@ public class Observation extends BaseResource implements IResource {
 	public static final String SP_SPECIMEN = "specimen";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>specimen</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>Observation.specimen</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam SPECIMEN = new ReferenceParam(SP_SPECIMEN);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>Observation.specimen</b>".
+	 */
+	public static final Include INCLUDE_SPECIMEN = new Include("Observation.specimen");
+
+	/**
 	 * Search parameter constant for <b>related-type</b>
 	 * <p>
 	 * Description: <b></b><br/>
@@ -243,6 +385,16 @@ public class Observation extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="related-type", path="Observation.related.type", description="")
 	public static final String SP_RELATED_TYPE = "related-type";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>related-type</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Observation.related.type</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam RELATED_TYPE = new TokenParam(SP_RELATED_TYPE);
 
 	/**
 	 * Search parameter constant for <b>related-target</b>
@@ -256,6 +408,22 @@ public class Observation extends BaseResource implements IResource {
 	public static final String SP_RELATED_TARGET = "related-target";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>related-target</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>Observation.related.target</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam RELATED_TARGET = new ReferenceParam(SP_RELATED_TARGET);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>Observation.related.target</b>".
+	 */
+	public static final Include INCLUDE_RELATED_TARGET = new Include("Observation.related.target");
+
+	/**
 	 * Search parameter constant for <b>related</b>
 	 * <p>
 	 * Description: <b>Related Observations - search on related-type and related-target together</b><br/>
@@ -265,6 +433,16 @@ public class Observation extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="related", path="related-target & related-type", description="Related Observations - search on related-type and related-target together")
 	public static final String SP_RELATED = "related";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>related</b>
+	 * <p>
+	 * Description: <b>Related Observations - search on related-type and related-target together</b><br/>
+	 * Type: <b>composite</b><br/>
+	 * Path: <b>related-target & related-type</b><br/>
+	 * </p>
+	 */
+	public static final CompositeParam RELATED = new CompositeParam(SP_RELATED);
 
 
 	@Child(name="name", type=CodeableConceptDt.class, order=0, min=1, max=1)	
@@ -390,11 +568,6 @@ public class Observation extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myName,  myValue,  myInterpretation,  myComments,  myApplies,  myIssued,  myStatus,  myReliability,  myBodySite,  myMethod,  myIdentifier,  mySubject,  mySpecimen,  myPerformer,  myReferenceRange,  myRelated);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myName, myValue, myInterpretation, myComments, myApplies, myIssued, myStatus, myReliability, myBodySite, myMethod, myIdentifier, mySubject, mySpecimen, myPerformer, myReferenceRange, myRelated);
@@ -1105,11 +1278,6 @@ public class Observation extends BaseResource implements IResource {
 	}
 	
 	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
-	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myLow, myHigh, myMeaning, myAge);
 	}
@@ -1378,11 +1546,6 @@ public class Observation extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myType,  myTarget);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myType, myTarget);

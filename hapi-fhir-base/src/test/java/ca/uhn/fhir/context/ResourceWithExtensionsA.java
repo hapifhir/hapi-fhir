@@ -2,6 +2,7 @@ package ca.uhn.fhir.context;
 
 import java.util.List;
 
+import ca.uhn.fhir.model.api.BaseElement;
 import ca.uhn.fhir.model.api.BaseResource;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IExtension;
@@ -82,7 +83,7 @@ public class ResourceWithExtensionsA extends BaseResource {
 	}
 
 	@Block(name = "Bar1")
-	public static class Bar1 implements IExtension {
+	public static class Bar1 extends BaseElement implements IExtension {
 
 		public Bar1() {
 			super();
@@ -101,11 +102,6 @@ public class ResourceWithExtensionsA extends BaseResource {
 		@Override
 		public boolean isEmpty() {
 			return false; // not implemented
-		}
-
-		@Override
-		public List<IElement> getAllPopulatedChildElements() {
-			return getAllPopulatedChildElementsOfType(null);
 		}
 
 		@Override
@@ -163,11 +159,6 @@ public class ResourceWithExtensionsA extends BaseResource {
 		}
 
 		@Override
-		public List<IElement> getAllPopulatedChildElements() {
-			return getAllPopulatedChildElementsOfType(null);
-		}
-
-		@Override
 		public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 			return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType ); // not implemented
 		}
@@ -205,11 +196,6 @@ public class ResourceWithExtensionsA extends BaseResource {
 	@Override
 	public boolean isEmpty() {
 		return false; // not implemented
-	}
-
-	@Override
-	public List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
 	}
 
 	@Override

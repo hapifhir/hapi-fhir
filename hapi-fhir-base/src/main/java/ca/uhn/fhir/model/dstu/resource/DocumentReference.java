@@ -65,6 +65,13 @@ import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
+import ca.uhn.fhir.rest.gclient.CompositeParam;
+import ca.uhn.fhir.rest.gclient.DateParam;
+import ca.uhn.fhir.rest.gclient.Include;
+import ca.uhn.fhir.rest.gclient.NumberParam;
+import ca.uhn.fhir.rest.gclient.ReferenceParam;
+import ca.uhn.fhir.rest.gclient.StringParam;
+import ca.uhn.fhir.rest.gclient.TokenParam;
 
 
 /**
@@ -102,6 +109,16 @@ public class DocumentReference extends BaseResource implements IResource {
 	public static final String SP_IDENTIFIER = "identifier";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>DocumentReference.masterIdentifier | DocumentReference.identifier</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam IDENTIFIER = new TokenParam(SP_IDENTIFIER);
+
+	/**
 	 * Search parameter constant for <b>subject</b>
 	 * <p>
 	 * Description: <b></b><br/>
@@ -111,6 +128,22 @@ public class DocumentReference extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="subject", path="DocumentReference.subject", description="")
 	public static final String SP_SUBJECT = "subject";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>subject</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>DocumentReference.subject</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam SUBJECT = new ReferenceParam(SP_SUBJECT);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>DocumentReference.subject</b>".
+	 */
+	public static final Include INCLUDE_SUBJECT = new Include("DocumentReference.subject");
 
 	/**
 	 * Search parameter constant for <b>type</b>
@@ -124,6 +157,16 @@ public class DocumentReference extends BaseResource implements IResource {
 	public static final String SP_TYPE = "type";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>type</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>DocumentReference.type</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam TYPE = new TokenParam(SP_TYPE);
+
+	/**
 	 * Search parameter constant for <b>class</b>
 	 * <p>
 	 * Description: <b></b><br/>
@@ -133,6 +176,16 @@ public class DocumentReference extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="class", path="DocumentReference.class", description="")
 	public static final String SP_CLASS = "class";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>class</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>DocumentReference.class</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam CLASS = new TokenParam(SP_CLASS);
 
 	/**
 	 * Search parameter constant for <b>author</b>
@@ -146,6 +199,22 @@ public class DocumentReference extends BaseResource implements IResource {
 	public static final String SP_AUTHOR = "author";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>author</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>DocumentReference.author</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam AUTHOR = new ReferenceParam(SP_AUTHOR);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>DocumentReference.author</b>".
+	 */
+	public static final Include INCLUDE_AUTHOR = new Include("DocumentReference.author");
+
+	/**
 	 * Search parameter constant for <b>custodian</b>
 	 * <p>
 	 * Description: <b></b><br/>
@@ -155,6 +224,22 @@ public class DocumentReference extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="custodian", path="DocumentReference.custodian", description="")
 	public static final String SP_CUSTODIAN = "custodian";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>custodian</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>DocumentReference.custodian</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam CUSTODIAN = new ReferenceParam(SP_CUSTODIAN);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>DocumentReference.custodian</b>".
+	 */
+	public static final Include INCLUDE_CUSTODIAN = new Include("DocumentReference.custodian");
 
 	/**
 	 * Search parameter constant for <b>authenticator</b>
@@ -168,6 +253,22 @@ public class DocumentReference extends BaseResource implements IResource {
 	public static final String SP_AUTHENTICATOR = "authenticator";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>authenticator</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>DocumentReference.authenticator</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam AUTHENTICATOR = new ReferenceParam(SP_AUTHENTICATOR);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>DocumentReference.authenticator</b>".
+	 */
+	public static final Include INCLUDE_AUTHENTICATOR = new Include("DocumentReference.authenticator");
+
+	/**
 	 * Search parameter constant for <b>created</b>
 	 * <p>
 	 * Description: <b></b><br/>
@@ -177,6 +278,16 @@ public class DocumentReference extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="created", path="DocumentReference.created", description="")
 	public static final String SP_CREATED = "created";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>created</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>date</b><br/>
+	 * Path: <b>DocumentReference.created</b><br/>
+	 * </p>
+	 */
+	public static final DateParam CREATED = new DateParam(SP_CREATED);
 
 	/**
 	 * Search parameter constant for <b>indexed</b>
@@ -190,6 +301,16 @@ public class DocumentReference extends BaseResource implements IResource {
 	public static final String SP_INDEXED = "indexed";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>indexed</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>date</b><br/>
+	 * Path: <b>DocumentReference.indexed</b><br/>
+	 * </p>
+	 */
+	public static final DateParam INDEXED = new DateParam(SP_INDEXED);
+
+	/**
 	 * Search parameter constant for <b>status</b>
 	 * <p>
 	 * Description: <b></b><br/>
@@ -199,6 +320,16 @@ public class DocumentReference extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="status", path="DocumentReference.status", description="")
 	public static final String SP_STATUS = "status";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>status</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>DocumentReference.status</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam STATUS = new TokenParam(SP_STATUS);
 
 	/**
 	 * Search parameter constant for <b>relatesto</b>
@@ -212,6 +343,22 @@ public class DocumentReference extends BaseResource implements IResource {
 	public static final String SP_RELATESTO = "relatesto";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>relatesto</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>DocumentReference.relatesTo.target</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam RELATESTO = new ReferenceParam(SP_RELATESTO);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>DocumentReference.relatesTo.target</b>".
+	 */
+	public static final Include INCLUDE_RELATESTO_TARGET = new Include("DocumentReference.relatesTo.target");
+
+	/**
 	 * Search parameter constant for <b>relation</b>
 	 * <p>
 	 * Description: <b></b><br/>
@@ -221,6 +368,16 @@ public class DocumentReference extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="relation", path="DocumentReference.relatesTo.code", description="")
 	public static final String SP_RELATION = "relation";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>relation</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>DocumentReference.relatesTo.code</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam RELATION = new TokenParam(SP_RELATION);
 
 	/**
 	 * Search parameter constant for <b>relationship</b>
@@ -234,6 +391,16 @@ public class DocumentReference extends BaseResource implements IResource {
 	public static final String SP_RELATIONSHIP = "relationship";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>relationship</b>
+	 * <p>
+	 * Description: <b>Combination of relation and relatesTo</b><br/>
+	 * Type: <b>composite</b><br/>
+	 * Path: <b>relatesto & relation</b><br/>
+	 * </p>
+	 */
+	public static final CompositeParam RELATIONSHIP = new CompositeParam(SP_RELATIONSHIP);
+
+	/**
 	 * Search parameter constant for <b>description</b>
 	 * <p>
 	 * Description: <b></b><br/>
@@ -243,6 +410,16 @@ public class DocumentReference extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="description", path="DocumentReference.description", description="")
 	public static final String SP_DESCRIPTION = "description";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>description</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>string</b><br/>
+	 * Path: <b>DocumentReference.description</b><br/>
+	 * </p>
+	 */
+	public static final StringParam DESCRIPTION = new StringParam(SP_DESCRIPTION);
 
 	/**
 	 * Search parameter constant for <b>confidentiality</b>
@@ -256,6 +433,16 @@ public class DocumentReference extends BaseResource implements IResource {
 	public static final String SP_CONFIDENTIALITY = "confidentiality";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>confidentiality</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>DocumentReference.confidentiality</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam CONFIDENTIALITY = new TokenParam(SP_CONFIDENTIALITY);
+
+	/**
 	 * Search parameter constant for <b>language</b>
 	 * <p>
 	 * Description: <b></b><br/>
@@ -265,6 +452,16 @@ public class DocumentReference extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="language", path="DocumentReference.primaryLanguage", description="")
 	public static final String SP_LANGUAGE = "language";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>language</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>DocumentReference.primaryLanguage</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam LANGUAGE = new TokenParam(SP_LANGUAGE);
 
 	/**
 	 * Search parameter constant for <b>format</b>
@@ -278,6 +475,16 @@ public class DocumentReference extends BaseResource implements IResource {
 	public static final String SP_FORMAT = "format";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>format</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>DocumentReference.format</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam FORMAT = new TokenParam(SP_FORMAT);
+
+	/**
 	 * Search parameter constant for <b>size</b>
 	 * <p>
 	 * Description: <b></b><br/>
@@ -287,6 +494,16 @@ public class DocumentReference extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="size", path="DocumentReference.size", description="")
 	public static final String SP_SIZE = "size";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>size</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>number</b><br/>
+	 * Path: <b>DocumentReference.size</b><br/>
+	 * </p>
+	 */
+	public static final NumberParam SIZE = new NumberParam(SP_SIZE);
 
 	/**
 	 * Search parameter constant for <b>location</b>
@@ -300,6 +517,16 @@ public class DocumentReference extends BaseResource implements IResource {
 	public static final String SP_LOCATION = "location";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>location</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>string</b><br/>
+	 * Path: <b>DocumentReference.location</b><br/>
+	 * </p>
+	 */
+	public static final StringParam LOCATION = new StringParam(SP_LOCATION);
+
+	/**
 	 * Search parameter constant for <b>event</b>
 	 * <p>
 	 * Description: <b></b><br/>
@@ -309,6 +536,16 @@ public class DocumentReference extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="event", path="DocumentReference.context.event", description="")
 	public static final String SP_EVENT = "event";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>event</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>DocumentReference.context.event</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam EVENT = new TokenParam(SP_EVENT);
 
 	/**
 	 * Search parameter constant for <b>period</b>
@@ -322,6 +559,16 @@ public class DocumentReference extends BaseResource implements IResource {
 	public static final String SP_PERIOD = "period";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>period</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>date</b><br/>
+	 * Path: <b>DocumentReference.context.period</b><br/>
+	 * </p>
+	 */
+	public static final DateParam PERIOD = new DateParam(SP_PERIOD);
+
+	/**
 	 * Search parameter constant for <b>facility</b>
 	 * <p>
 	 * Description: <b></b><br/>
@@ -331,6 +578,16 @@ public class DocumentReference extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="facility", path="DocumentReference.context.facilityType", description="")
 	public static final String SP_FACILITY = "facility";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>facility</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>DocumentReference.context.facilityType</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam FACILITY = new TokenParam(SP_FACILITY);
 
 
 	@Child(name="masterIdentifier", type=IdentifierDt.class, order=0, min=1, max=1)	
@@ -511,11 +768,6 @@ public class DocumentReference extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myMasterIdentifier,  myIdentifier,  mySubject,  myType,  myClassElement,  myAuthor,  myCustodian,  myPolicyManager,  myAuthenticator,  myCreated,  myIndexed,  myStatus,  myDocStatus,  myRelatesTo,  myDescription,  myConfidentiality,  myPrimaryLanguage,  myMimeType,  myFormat,  mySize,  myHash,  myLocation,  myService,  myContext);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myMasterIdentifier, myIdentifier, mySubject, myType, myClassElement, myAuthor, myCustodian, myPolicyManager, myAuthenticator, myCreated, myIndexed, myStatus, myDocStatus, myRelatesTo, myDescription, myConfidentiality, myPrimaryLanguage, myMimeType, myFormat, mySize, myHash, myLocation, myService, myContext);
@@ -1654,11 +1906,6 @@ public class DocumentReference extends BaseResource implements IResource {
 	}
 	
 	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
-	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myCode, myTarget);
 	}
@@ -1780,11 +2027,6 @@ public class DocumentReference extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myType,  myAddress,  myParameter);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myType, myAddress, myParameter);
@@ -1960,11 +2202,6 @@ public class DocumentReference extends BaseResource implements IResource {
 	}
 	
 	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
-	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myName, myValue);
 	}
@@ -2100,11 +2337,6 @@ public class DocumentReference extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myEvent,  myPeriod,  myFacilityType);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myEvent, myPeriod, myFacilityType);

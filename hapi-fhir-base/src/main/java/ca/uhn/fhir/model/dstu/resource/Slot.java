@@ -56,6 +56,10 @@ import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.rest.gclient.DateParam;
+import ca.uhn.fhir.rest.gclient.Include;
+import ca.uhn.fhir.rest.gclient.ReferenceParam;
+import ca.uhn.fhir.rest.gclient.TokenParam;
 
 
 /**
@@ -93,6 +97,16 @@ public class Slot extends BaseResource implements IResource {
 	public static final String SP_SLOTTYPE = "slottype";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>slottype</b>
+	 * <p>
+	 * Description: <b>The type of appointments that can be booked into the slot</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Slot.type</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam SLOTTYPE = new TokenParam(SP_SLOTTYPE);
+
+	/**
 	 * Search parameter constant for <b>availability</b>
 	 * <p>
 	 * Description: <b>The Availability Resource that we are seeking a slot within</b><br/>
@@ -102,6 +116,22 @@ public class Slot extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="availability", path="Slot.availability", description="The Availability Resource that we are seeking a slot within")
 	public static final String SP_AVAILABILITY = "availability";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>availability</b>
+	 * <p>
+	 * Description: <b>The Availability Resource that we are seeking a slot within</b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>Slot.availability</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam AVAILABILITY = new ReferenceParam(SP_AVAILABILITY);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>Slot.availability</b>".
+	 */
+	public static final Include INCLUDE_AVAILABILITY = new Include("Slot.availability");
 
 	/**
 	 * Search parameter constant for <b>start</b>
@@ -115,6 +145,16 @@ public class Slot extends BaseResource implements IResource {
 	public static final String SP_START = "start";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>start</b>
+	 * <p>
+	 * Description: <b>Appointment date/time.</b><br/>
+	 * Type: <b>date</b><br/>
+	 * Path: <b>Slot.start</b><br/>
+	 * </p>
+	 */
+	public static final DateParam START = new DateParam(SP_START);
+
+	/**
 	 * Search parameter constant for <b>fbtype</b>
 	 * <p>
 	 * Description: <b>The free/busy status of the appointment</b><br/>
@@ -124,6 +164,16 @@ public class Slot extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="fbtype", path="Slot.freeBusyType", description="The free/busy status of the appointment")
 	public static final String SP_FBTYPE = "fbtype";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>fbtype</b>
+	 * <p>
+	 * Description: <b>The free/busy status of the appointment</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Slot.freeBusyType</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam FBTYPE = new TokenParam(SP_FBTYPE);
 
 
 	@Child(name="identifier", type=IdentifierDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)	
@@ -197,11 +247,6 @@ public class Slot extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myIdentifier,  myType,  myAvailability,  myFreeBusyType,  myStart,  myEnd,  myComment,  myAuthor,  myAuthorDate);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myIdentifier, myType, myAvailability, myFreeBusyType, myStart, myEnd, myComment, myAuthor, myAuthorDate);

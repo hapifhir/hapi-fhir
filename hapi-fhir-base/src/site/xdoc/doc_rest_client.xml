@@ -37,14 +37,8 @@
 		
 			<p>
 				Creating a generic client simply requires you to create an instance of
-				<code>FhirContext</code> and use that to instantiate a client. 
-				<b>Performance Tip: </b> Note that FhirContext is an expensive object to create,
-				so you should try to keep an instance around for the lifetime of your application. It
-				is thread-safe so it can be passed as needed. Client instances, on the other hand, 
-				are very inexpensive to create so you can create a new one for each request if needed 
-				(although there is no requirement to do so, clients are reusable and thread-safe as well).  
-			</p>
-			
+				<code>FhirContext</code> and use that to instantiate a client.
+			</p>			
 			<p>
 				The following example shows how to create a client, and a few operations which
 				can be performed.
@@ -55,6 +49,14 @@
 				<param name="file"
 					value="src/site/example/java/example/GenericClientExample.java" />
 			</macro>
+			
+			<p> 
+				<b>Performance Tip: </b> Note that FhirContext is an expensive object to create,
+				so you should try to keep an instance around for the lifetime of your application. It
+				is thread-safe so it can be passed as needed. Client instances, on the other hand, 
+				are very inexpensive to create so you can create a new one for each request if needed 
+				(although there is no requirement to do so, clients are reusable and thread-safe as well).  
+			</p>
 			
 			<subsection name="Search/Query">
 			
@@ -163,29 +165,32 @@
 
 			</subsection>
 
-		</section>
-
-		<section name="A Complete Example">
-
-			<p>
-				The following is a complete example showing a RESTful client
-				using
-				HAPI FHIR.
-			</p>
-
-			<macro name="snippet">
-				<param name="id" value="client" />
-				<param name="file"
-					value="src/site/example/java/example/CompleteExampleClient.java" />
-			</macro>
-
+			<subsection name="A Complete Example">
+	
+				<p>
+					The following is a complete example showing a RESTful client
+					using
+					HAPI FHIR.
+				</p>
+	
+				<macro name="snippet">
+					<param name="id" value="client" />
+					<param name="file"
+						value="src/site/example/java/example/CompleteExampleClient.java" />
+				</macro>
+				
+			</subsection>
+			
 		</section>
 
 		<section name="Configuring the Client">
 
 			<p>
-				The client uses <a href="http://hc.apache.org/httpcomponents-client-ga/">Apache HTTP Client</a>
-				as a provider. The HTTP Client is very powerful, but can be a bit tricky to configure. 
+				RESTful clients (both Generic and Annotation-Driven) use 
+				<a href="http://hc.apache.org/httpcomponents-client-ga/">Apache HTTP Client</a>
+				as a provider. The Apache HTTP Client is very powerful and extremely flexible, 
+				but can be confusing at first to configure, because of the low-level approach that
+				the library uses. 
 			</p>
 
 			<p>

@@ -61,7 +61,10 @@ import ca.uhn.fhir.model.dstu.valueset.OrganizationTypeEnum;
 import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.model.primitive.BoundCodeableConceptDt;
 import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.rest.gclient.Include;
+import ca.uhn.fhir.rest.gclient.ReferenceParam;
 import ca.uhn.fhir.rest.gclient.StringParam;
+import ca.uhn.fhir.rest.gclient.TokenParam;
 
 
 /**
@@ -98,8 +101,16 @@ public class Organization extends BaseResource implements IResource {
 	@SearchParamDefinition(name="name", path="Organization.name", description="A portion of the organization's name")
 	public static final String SP_NAME = "name";
 
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>name</b>
+	 * <p>
+	 * Description: <b>A portion of the organization's name</b><br/>
+	 * Type: <b>string</b><br/>
+	 * Path: <b>Organization.name</b><br/>
+	 * </p>
+	 */
 	public static final StringParam NAME = new StringParam(SP_NAME);
-	
+
 	/**
 	 * Search parameter constant for <b>phonetic</b>
 	 * <p>
@@ -110,6 +121,16 @@ public class Organization extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="phonetic", path="", description="A portion of the organization's name using some kind of phonetic matching algorithm")
 	public static final String SP_PHONETIC = "phonetic";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>phonetic</b>
+	 * <p>
+	 * Description: <b>A portion of the organization's name using some kind of phonetic matching algorithm</b><br/>
+	 * Type: <b>string</b><br/>
+	 * Path: <b></b><br/>
+	 * </p>
+	 */
+	public static final StringParam PHONETIC = new StringParam(SP_PHONETIC);
 
 	/**
 	 * Search parameter constant for <b>type</b>
@@ -123,6 +144,16 @@ public class Organization extends BaseResource implements IResource {
 	public static final String SP_TYPE = "type";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>type</b>
+	 * <p>
+	 * Description: <b>A code for the type of organization</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Organization.type</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam TYPE = new TokenParam(SP_TYPE);
+
+	/**
 	 * Search parameter constant for <b>identifier</b>
 	 * <p>
 	 * Description: <b>Any identifier for the organization (not the accreditation issuer's identifier)</b><br/>
@@ -132,6 +163,16 @@ public class Organization extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="identifier", path="Organization.identifier", description="Any identifier for the organization (not the accreditation issuer's identifier)")
 	public static final String SP_IDENTIFIER = "identifier";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
+	 * <p>
+	 * Description: <b>Any identifier for the organization (not the accreditation issuer's identifier)</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Organization.identifier</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam IDENTIFIER = new TokenParam(SP_IDENTIFIER);
 
 	/**
 	 * Search parameter constant for <b>!accreditation</b>
@@ -145,6 +186,16 @@ public class Organization extends BaseResource implements IResource {
 	public static final String SP_ACCREDITATION = "!accreditation";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>!accreditation</b>
+	 * <p>
+	 * Description: <b>Any accreditation code</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Organization.accreditation.code</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam ACCREDITATION = new TokenParam(SP_ACCREDITATION);
+
+	/**
 	 * Search parameter constant for <b>partof</b>
 	 * <p>
 	 * Description: <b>Search all organizations that are part of the given organization</b><br/>
@@ -156,6 +207,22 @@ public class Organization extends BaseResource implements IResource {
 	public static final String SP_PARTOF = "partof";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>partof</b>
+	 * <p>
+	 * Description: <b>Search all organizations that are part of the given organization</b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>Organization.partOf</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam PARTOF = new ReferenceParam(SP_PARTOF);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>Organization.partOf</b>".
+	 */
+	public static final Include INCLUDE_PARTOF = new Include("Organization.partOf");
+
+	/**
 	 * Search parameter constant for <b>active</b>
 	 * <p>
 	 * Description: <b>Whether the organization's record is active</b><br/>
@@ -165,6 +232,16 @@ public class Organization extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="active", path="Organization.active", description="Whether the organization's record is active")
 	public static final String SP_ACTIVE = "active";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>active</b>
+	 * <p>
+	 * Description: <b>Whether the organization's record is active</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Organization.active</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam ACTIVE = new TokenParam(SP_ACTIVE);
 
 
 	@Child(name="identifier", type=IdentifierDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)	
@@ -238,11 +315,6 @@ public class Organization extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myIdentifier,  myName,  myType,  myTelecom,  myAddress,  myPartOf,  myContact,  myLocation,  myActive);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myIdentifier, myName, myType, myTelecom, myAddress, myPartOf, myContact, myLocation, myActive);
@@ -783,11 +855,6 @@ public class Organization extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myPurpose,  myName,  myTelecom,  myAddress,  myGender);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myPurpose, myName, myTelecom, myAddress, myGender);

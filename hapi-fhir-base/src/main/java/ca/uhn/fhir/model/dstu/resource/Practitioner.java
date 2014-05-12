@@ -65,6 +65,10 @@ import ca.uhn.fhir.model.dstu.valueset.PractitionerRoleEnum;
 import ca.uhn.fhir.model.dstu.valueset.PractitionerSpecialtyEnum;
 import ca.uhn.fhir.model.primitive.BoundCodeableConceptDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
+import ca.uhn.fhir.rest.gclient.Include;
+import ca.uhn.fhir.rest.gclient.ReferenceParam;
+import ca.uhn.fhir.rest.gclient.StringParam;
+import ca.uhn.fhir.rest.gclient.TokenParam;
 
 
 /**
@@ -102,6 +106,16 @@ public class Practitioner extends BaseResource implements IResource {
 	public static final String SP_IDENTIFIER = "identifier";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
+	 * <p>
+	 * Description: <b>A practitioner's Identifier</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Practitioner.identifier</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam IDENTIFIER = new TokenParam(SP_IDENTIFIER);
+
+	/**
 	 * Search parameter constant for <b>name</b>
 	 * <p>
 	 * Description: <b>A portion of either family or given name</b><br/>
@@ -111,6 +125,16 @@ public class Practitioner extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="name", path="Practitioner.name", description="A portion of either family or given name")
 	public static final String SP_NAME = "name";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>name</b>
+	 * <p>
+	 * Description: <b>A portion of either family or given name</b><br/>
+	 * Type: <b>string</b><br/>
+	 * Path: <b>Practitioner.name</b><br/>
+	 * </p>
+	 */
+	public static final StringParam NAME = new StringParam(SP_NAME);
 
 	/**
 	 * Search parameter constant for <b>family</b>
@@ -124,6 +148,16 @@ public class Practitioner extends BaseResource implements IResource {
 	public static final String SP_FAMILY = "family";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>family</b>
+	 * <p>
+	 * Description: <b>A portion of the family name</b><br/>
+	 * Type: <b>string</b><br/>
+	 * Path: <b>Practitioner.name</b><br/>
+	 * </p>
+	 */
+	public static final StringParam FAMILY = new StringParam(SP_FAMILY);
+
+	/**
 	 * Search parameter constant for <b>given</b>
 	 * <p>
 	 * Description: <b>A portion of the given name</b><br/>
@@ -133,6 +167,16 @@ public class Practitioner extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="given", path="Practitioner.name", description="A portion of the given name")
 	public static final String SP_GIVEN = "given";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>given</b>
+	 * <p>
+	 * Description: <b>A portion of the given name</b><br/>
+	 * Type: <b>string</b><br/>
+	 * Path: <b>Practitioner.name</b><br/>
+	 * </p>
+	 */
+	public static final StringParam GIVEN = new StringParam(SP_GIVEN);
 
 	/**
 	 * Search parameter constant for <b>phonetic</b>
@@ -146,6 +190,16 @@ public class Practitioner extends BaseResource implements IResource {
 	public static final String SP_PHONETIC = "phonetic";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>phonetic</b>
+	 * <p>
+	 * Description: <b>A portion of either family or given name using some kind of phonetic matching algorithm</b><br/>
+	 * Type: <b>string</b><br/>
+	 * Path: <b>Practitioner.name</b><br/>
+	 * </p>
+	 */
+	public static final StringParam PHONETIC = new StringParam(SP_PHONETIC);
+
+	/**
 	 * Search parameter constant for <b>telecom</b>
 	 * <p>
 	 * Description: <b>The value in any kind of contact</b><br/>
@@ -155,6 +209,16 @@ public class Practitioner extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="telecom", path="Practitioner.telecom", description="The value in any kind of contact")
 	public static final String SP_TELECOM = "telecom";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>telecom</b>
+	 * <p>
+	 * Description: <b>The value in any kind of contact</b><br/>
+	 * Type: <b>string</b><br/>
+	 * Path: <b>Practitioner.telecom</b><br/>
+	 * </p>
+	 */
+	public static final StringParam TELECOM = new StringParam(SP_TELECOM);
 
 	/**
 	 * Search parameter constant for <b>address</b>
@@ -168,6 +232,16 @@ public class Practitioner extends BaseResource implements IResource {
 	public static final String SP_ADDRESS = "address";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>address</b>
+	 * <p>
+	 * Description: <b>An address in any kind of address/part</b><br/>
+	 * Type: <b>string</b><br/>
+	 * Path: <b>Practitioner.address</b><br/>
+	 * </p>
+	 */
+	public static final StringParam ADDRESS = new StringParam(SP_ADDRESS);
+
+	/**
 	 * Search parameter constant for <b>gender</b>
 	 * <p>
 	 * Description: <b>Gender of the practitioner</b><br/>
@@ -179,6 +253,16 @@ public class Practitioner extends BaseResource implements IResource {
 	public static final String SP_GENDER = "gender";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>gender</b>
+	 * <p>
+	 * Description: <b>Gender of the practitioner</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Practitioner.gender</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam GENDER = new TokenParam(SP_GENDER);
+
+	/**
 	 * Search parameter constant for <b>organization</b>
 	 * <p>
 	 * Description: <b>The identity of the organization the practitioner represents / acts on behalf of</b><br/>
@@ -188,6 +272,22 @@ public class Practitioner extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="organization", path="Practitioner.organization", description="The identity of the organization the practitioner represents / acts on behalf of")
 	public static final String SP_ORGANIZATION = "organization";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>organization</b>
+	 * <p>
+	 * Description: <b>The identity of the organization the practitioner represents / acts on behalf of</b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>Practitioner.organization</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam ORGANIZATION = new ReferenceParam(SP_ORGANIZATION);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>Practitioner.organization</b>".
+	 */
+	public static final Include INCLUDE_ORGANIZATION = new Include("Practitioner.organization");
 
 
 	@Child(name="identifier", type=IdentifierDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)	
@@ -296,11 +396,6 @@ public class Practitioner extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myIdentifier,  myName,  myTelecom,  myAddress,  myGender,  myBirthDate,  myPhoto,  myOrganization,  myRole,  mySpecialty,  myPeriod,  myLocation,  myQualification,  myCommunication);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myIdentifier, myName, myTelecom, myAddress, myGender, myBirthDate, myPhoto, myOrganization, myRole, mySpecialty, myPeriod, myLocation, myQualification, myCommunication);
@@ -1064,11 +1159,6 @@ public class Practitioner extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myCode,  myPeriod,  myIssuer);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myCode, myPeriod, myIssuer);

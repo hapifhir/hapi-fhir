@@ -63,6 +63,10 @@ import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.rest.gclient.DateParam;
+import ca.uhn.fhir.rest.gclient.Include;
+import ca.uhn.fhir.rest.gclient.ReferenceParam;
+import ca.uhn.fhir.rest.gclient.TokenParam;
 
 
 /**
@@ -100,6 +104,16 @@ public class Composition extends BaseResource implements IResource {
 	public static final String SP_TYPE = "type";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>type</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Composition.type</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam TYPE = new TokenParam(SP_TYPE);
+
+	/**
 	 * Search parameter constant for <b>class</b>
 	 * <p>
 	 * Description: <b></b><br/>
@@ -109,6 +123,16 @@ public class Composition extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="class", path="Composition.class", description="")
 	public static final String SP_CLASS = "class";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>class</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Composition.class</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam CLASS = new TokenParam(SP_CLASS);
 
 	/**
 	 * Search parameter constant for <b>date</b>
@@ -122,6 +146,16 @@ public class Composition extends BaseResource implements IResource {
 	public static final String SP_DATE = "date";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>date</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>date</b><br/>
+	 * Path: <b>Composition.date</b><br/>
+	 * </p>
+	 */
+	public static final DateParam DATE = new DateParam(SP_DATE);
+
+	/**
 	 * Search parameter constant for <b>subject</b>
 	 * <p>
 	 * Description: <b></b><br/>
@@ -131,6 +165,22 @@ public class Composition extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="subject", path="Composition.subject", description="")
 	public static final String SP_SUBJECT = "subject";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>subject</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>Composition.subject</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam SUBJECT = new ReferenceParam(SP_SUBJECT);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>Composition.subject</b>".
+	 */
+	public static final Include INCLUDE_SUBJECT = new Include("Composition.subject");
 
 	/**
 	 * Search parameter constant for <b>author</b>
@@ -144,6 +194,22 @@ public class Composition extends BaseResource implements IResource {
 	public static final String SP_AUTHOR = "author";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>author</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>Composition.author</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam AUTHOR = new ReferenceParam(SP_AUTHOR);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>Composition.author</b>".
+	 */
+	public static final Include INCLUDE_AUTHOR = new Include("Composition.author");
+
+	/**
 	 * Search parameter constant for <b>attester</b>
 	 * <p>
 	 * Description: <b></b><br/>
@@ -153,6 +219,22 @@ public class Composition extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="attester", path="Composition.attester.party", description="")
 	public static final String SP_ATTESTER = "attester";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>attester</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>Composition.attester.party</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam ATTESTER = new ReferenceParam(SP_ATTESTER);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>Composition.attester.party</b>".
+	 */
+	public static final Include INCLUDE_ATTESTER_PARTY = new Include("Composition.attester.party");
 
 	/**
 	 * Search parameter constant for <b>context</b>
@@ -166,6 +248,16 @@ public class Composition extends BaseResource implements IResource {
 	public static final String SP_CONTEXT = "context";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>context</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Composition.event.code</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam CONTEXT = new TokenParam(SP_CONTEXT);
+
+	/**
 	 * Search parameter constant for <b>section-type</b>
 	 * <p>
 	 * Description: <b></b><br/>
@@ -175,6 +267,16 @@ public class Composition extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="section-type", path="Composition.section.code", description="")
 	public static final String SP_SECTION_TYPE = "section-type";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>section-type</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Composition.section.code</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam SECTION_TYPE = new TokenParam(SP_SECTION_TYPE);
 
 	/**
 	 * Search parameter constant for <b>section-content</b>
@@ -188,6 +290,22 @@ public class Composition extends BaseResource implements IResource {
 	public static final String SP_SECTION_CONTENT = "section-content";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>section-content</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>Composition.section.content</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam SECTION_CONTENT = new ReferenceParam(SP_SECTION_CONTENT);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>Composition.section.content</b>".
+	 */
+	public static final Include INCLUDE_SECTION_CONTENT = new Include("Composition.section.content");
+
+	/**
 	 * Search parameter constant for <b>identifier</b>
 	 * <p>
 	 * Description: <b></b><br/>
@@ -197,6 +315,16 @@ public class Composition extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="identifier", path="Composition.identifier", description="")
 	public static final String SP_IDENTIFIER = "identifier";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Composition.identifier</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam IDENTIFIER = new TokenParam(SP_IDENTIFIER);
 
 
 	@Child(name="identifier", type=IdentifierDt.class, order=0, min=0, max=1)	
@@ -307,11 +435,6 @@ public class Composition extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myIdentifier,  myDate,  myType,  myClassElement,  myTitle,  myStatus,  myConfidentiality,  mySubject,  myAuthor,  myAttester,  myCustodian,  myEvent,  myEncounter,  mySection);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myIdentifier, myDate, myType, myClassElement, myTitle, myStatus, myConfidentiality, mySubject, myAuthor, myAttester, myCustodian, myEvent, myEncounter, mySection);
@@ -934,11 +1057,6 @@ public class Composition extends BaseResource implements IResource {
 	}
 	
 	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
-	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myMode, myTime, myParty);
 	}
@@ -1128,11 +1246,6 @@ public class Composition extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myCode,  myPeriod,  myDetail);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myCode, myPeriod, myDetail);
@@ -1331,11 +1444,6 @@ public class Composition extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myTitle,  myCode,  mySubject,  myContent,  mySection);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myTitle, myCode, mySubject, myContent, mySection);

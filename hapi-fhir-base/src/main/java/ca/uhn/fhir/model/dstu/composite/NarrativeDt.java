@@ -85,11 +85,7 @@ public class NarrativeDt extends BaseElement implements ICompositeDatatype {
 		return ca.uhn.fhir.util.ElementUtil.isEmpty(  myStatus, myDiv );
 	}
 
-	@Override
-	public List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
+	
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements( theType, myStatus, myDiv );

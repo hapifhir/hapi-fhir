@@ -25,11 +25,6 @@ import java.util.List;
 public interface ICompositeElement extends IIdentifiableElement {
 
 	/**
-	 * Returns a list containing all child elements 
-	 */
-	public java.util.List<IElement> getAllPopulatedChildElements();
-
-	/**
 	 * Returns a list containing all child elements matching a given type
 	 * 
 	 * @param theType The type to match. If set to null, all child elements will be returned

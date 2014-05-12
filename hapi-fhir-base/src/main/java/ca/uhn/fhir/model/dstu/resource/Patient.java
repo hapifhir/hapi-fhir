@@ -112,6 +112,16 @@ public class Patient extends BaseResource implements IResource {
 	public static final String SP_IDENTIFIER = "identifier";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
+	 * <p>
+	 * Description: <b>A patient identifier</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Patient.identifier</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam IDENTIFIER = new TokenParam(SP_IDENTIFIER);
+
+	/**
 	 * Search parameter constant for <b>name</b>
 	 * <p>
 	 * Description: <b>A portion of either family or given name of the patient</b><br/>
@@ -121,6 +131,16 @@ public class Patient extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="name", path="Patient.name", description="A portion of either family or given name of the patient")
 	public static final String SP_NAME = "name";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>name</b>
+	 * <p>
+	 * Description: <b>A portion of either family or given name of the patient</b><br/>
+	 * Type: <b>string</b><br/>
+	 * Path: <b>Patient.name</b><br/>
+	 * </p>
+	 */
+	public static final StringParam NAME = new StringParam(SP_NAME);
 
 	/**
 	 * Search parameter constant for <b>family</b>
@@ -134,6 +154,16 @@ public class Patient extends BaseResource implements IResource {
 	public static final String SP_FAMILY = "family";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>family</b>
+	 * <p>
+	 * Description: <b>A portion of the family name of the patient</b><br/>
+	 * Type: <b>string</b><br/>
+	 * Path: <b>Patient.name.family</b><br/>
+	 * </p>
+	 */
+	public static final StringParam FAMILY = new StringParam(SP_FAMILY);
+
+	/**
 	 * Search parameter constant for <b>given</b>
 	 * <p>
 	 * Description: <b>A portion of the given name of the patient</b><br/>
@@ -143,6 +173,16 @@ public class Patient extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="given", path="Patient.name.given", description="A portion of the given name of the patient")
 	public static final String SP_GIVEN = "given";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>given</b>
+	 * <p>
+	 * Description: <b>A portion of the given name of the patient</b><br/>
+	 * Type: <b>string</b><br/>
+	 * Path: <b>Patient.name.given</b><br/>
+	 * </p>
+	 */
+	public static final StringParam GIVEN = new StringParam(SP_GIVEN);
 
 	/**
 	 * Search parameter constant for <b>phonetic</b>
@@ -156,6 +196,16 @@ public class Patient extends BaseResource implements IResource {
 	public static final String SP_PHONETIC = "phonetic";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>phonetic</b>
+	 * <p>
+	 * Description: <b>A portion of either family or given name using some kind of phonetic matching algorithm</b><br/>
+	 * Type: <b>string</b><br/>
+	 * Path: <b></b><br/>
+	 * </p>
+	 */
+	public static final StringParam PHONETIC = new StringParam(SP_PHONETIC);
+
+	/**
 	 * Search parameter constant for <b>telecom</b>
 	 * <p>
 	 * Description: <b>The value in any kind of telecom details of the patient</b><br/>
@@ -165,6 +215,16 @@ public class Patient extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="telecom", path="Patient.telecom", description="The value in any kind of telecom details of the patient")
 	public static final String SP_TELECOM = "telecom";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>telecom</b>
+	 * <p>
+	 * Description: <b>The value in any kind of telecom details of the patient</b><br/>
+	 * Type: <b>string</b><br/>
+	 * Path: <b>Patient.telecom</b><br/>
+	 * </p>
+	 */
+	public static final StringParam TELECOM = new StringParam(SP_TELECOM);
 
 	/**
 	 * Search parameter constant for <b>address</b>
@@ -178,6 +238,16 @@ public class Patient extends BaseResource implements IResource {
 	public static final String SP_ADDRESS = "address";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>address</b>
+	 * <p>
+	 * Description: <b>An address in any kind of address/part of the patient</b><br/>
+	 * Type: <b>string</b><br/>
+	 * Path: <b>Patient.address</b><br/>
+	 * </p>
+	 */
+	public static final StringParam ADDRESS = new StringParam(SP_ADDRESS);
+
+	/**
 	 * Search parameter constant for <b>gender</b>
 	 * <p>
 	 * Description: <b>Gender of the patient</b><br/>
@@ -187,6 +257,16 @@ public class Patient extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="gender", path="Patient.gender", description="Gender of the patient")
 	public static final String SP_GENDER = "gender";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>gender</b>
+	 * <p>
+	 * Description: <b>Gender of the patient</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Patient.gender</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam GENDER = new TokenParam(SP_GENDER);
 
 	/**
 	 * Search parameter constant for <b>language</b>
@@ -200,6 +280,16 @@ public class Patient extends BaseResource implements IResource {
 	public static final String SP_LANGUAGE = "language";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>language</b>
+	 * <p>
+	 * Description: <b>Language code (irrespective of use value)</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Patient.communication</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam LANGUAGE = new TokenParam(SP_LANGUAGE);
+
+	/**
 	 * Search parameter constant for <b>birthdate</b>
 	 * <p>
 	 * Description: <b>The patient's date of birth</b><br/>
@@ -209,6 +299,16 @@ public class Patient extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="birthdate", path="Patient.birthDate", description="The patient's date of birth")
 	public static final String SP_BIRTHDATE = "birthdate";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>birthdate</b>
+	 * <p>
+	 * Description: <b>The patient's date of birth</b><br/>
+	 * Type: <b>date</b><br/>
+	 * Path: <b>Patient.birthDate</b><br/>
+	 * </p>
+	 */
+	public static final DateParam BIRTHDATE = new DateParam(SP_BIRTHDATE);
 
 	/**
 	 * Search parameter constant for <b>provider</b>
@@ -222,6 +322,22 @@ public class Patient extends BaseResource implements IResource {
 	public static final String SP_PROVIDER = "provider";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>provider</b>
+	 * <p>
+	 * Description: <b>The organization at which this person is a patient</b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>Patient.managingOrganization</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam PROVIDER = new ReferenceParam(SP_PROVIDER);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>Patient.managingOrganization</b>".
+	 */
+	public static final Include INCLUDE_MANAGINGORGANIZATION = new Include("Patient.managingOrganization");
+
+	/**
 	 * Search parameter constant for <b>active</b>
 	 * <p>
 	 * Description: <b>Whether the patient record is active</b><br/>
@@ -231,6 +347,16 @@ public class Patient extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="active", path="Patient.active", description="Whether the patient record is active")
 	public static final String SP_ACTIVE = "active";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>active</b>
+	 * <p>
+	 * Description: <b>Whether the patient record is active</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Patient.active</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam ACTIVE = new TokenParam(SP_ACTIVE);
 
 	/**
 	 * Search parameter constant for <b>animal-species</b>
@@ -244,6 +370,16 @@ public class Patient extends BaseResource implements IResource {
 	public static final String SP_ANIMAL_SPECIES = "animal-species";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>animal-species</b>
+	 * <p>
+	 * Description: <b>The species for animal patients</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Patient.animal.species</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam ANIMAL_SPECIES = new TokenParam(SP_ANIMAL_SPECIES);
+
+	/**
 	 * Search parameter constant for <b>animal-breed</b>
 	 * <p>
 	 * Description: <b>The breed for animal patients</b><br/>
@@ -253,6 +389,16 @@ public class Patient extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="animal-breed", path="Patient.animal.breed", description="The breed for animal patients")
 	public static final String SP_ANIMAL_BREED = "animal-breed";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>animal-breed</b>
+	 * <p>
+	 * Description: <b>The breed for animal patients</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Patient.animal.breed</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam ANIMAL_BREED = new TokenParam(SP_ANIMAL_BREED);
 
 	/**
 	 * Search parameter constant for <b>link</b>
@@ -265,12 +411,21 @@ public class Patient extends BaseResource implements IResource {
 	@SearchParamDefinition(name="link", path="Patient.link.other", description="All patients linked to the given patient")
 	public static final String SP_LINK = "link";
 
-	public static final StringParam PARAM_NAME = new StringParam(SP_NAME);
-	public static final TokenParam PARAM_IDENTIFIER = new TokenParam(SP_IDENTIFIER);
-	public static final DateParam PARAM_BIRTHDATE = new DateParam(SP_BIRTHDATE);
-	public static final ReferenceParam PARAM_PROVIDER = new ReferenceParam(SP_PROVIDER);
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>link</b>
+	 * <p>
+	 * Description: <b>All patients linked to the given patient</b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>Patient.link.other</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam LINK = new ReferenceParam(SP_LINK);
 
-	public static final Include INCLUDE_MANAGINGORGANIZATION = new Include("Patient.managingOrganization");
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>Patient.link.other</b>".
+	 */
+	public static final Include INCLUDE_LINK_OTHER = new Include("Patient.link.other");
 
 
 	@Child(name="identifier", type=IdentifierDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)	
@@ -402,11 +557,6 @@ public class Patient extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myIdentifier,  myName,  myTelecom,  myGender,  myBirthDate,  myDeceased,  myAddress,  myMaritalStatus,  myMultipleBirth,  myPhoto,  myContact,  myAnimal,  myCommunication,  myCareProvider,  myManagingOrganization,  myLink,  myActive);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myIdentifier, myName, myTelecom, myGender, myBirthDate, myDeceased, myAddress, myMaritalStatus, myMultipleBirth, myPhoto, myContact, myAnimal, myCommunication, myCareProvider, myManagingOrganization, myLink, myActive);
@@ -1337,11 +1487,6 @@ public class Patient extends BaseResource implements IResource {
 	}
 	
 	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
-	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myRelationship, myName, myTelecom, myAddress, myGender, myOrganization);
 	}
@@ -1646,11 +1791,6 @@ public class Patient extends BaseResource implements IResource {
 	}
 	
 	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
-	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, mySpecies, myBreed, myGenderStatus);
 	}
@@ -1797,11 +1937,6 @@ public class Patient extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myOther,  myType);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myOther, myType);

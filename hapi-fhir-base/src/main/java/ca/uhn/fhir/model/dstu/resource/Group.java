@@ -62,6 +62,10 @@ import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.rest.gclient.CompositeParam;
+import ca.uhn.fhir.rest.gclient.Include;
+import ca.uhn.fhir.rest.gclient.ReferenceParam;
+import ca.uhn.fhir.rest.gclient.TokenParam;
 
 
 /**
@@ -99,6 +103,16 @@ public class Group extends BaseResource implements IResource {
 	public static final String SP_TYPE = "type";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>type</b>
+	 * <p>
+	 * Description: <b>The type of resources the group contains</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Group.type</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam TYPE = new TokenParam(SP_TYPE);
+
+	/**
 	 * Search parameter constant for <b>code</b>
 	 * <p>
 	 * Description: <b>The kind of resources contained</b><br/>
@@ -108,6 +122,16 @@ public class Group extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="code", path="Group.code", description="The kind of resources contained")
 	public static final String SP_CODE = "code";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>code</b>
+	 * <p>
+	 * Description: <b>The kind of resources contained</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Group.code</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam CODE = new TokenParam(SP_CODE);
 
 	/**
 	 * Search parameter constant for <b>actual</b>
@@ -121,6 +145,16 @@ public class Group extends BaseResource implements IResource {
 	public static final String SP_ACTUAL = "actual";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>actual</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Group.actual</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam ACTUAL = new TokenParam(SP_ACTUAL);
+
+	/**
 	 * Search parameter constant for <b>identifier</b>
 	 * <p>
 	 * Description: <b></b><br/>
@@ -130,6 +164,16 @@ public class Group extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="identifier", path="Group.identifier", description="")
 	public static final String SP_IDENTIFIER = "identifier";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Group.identifier</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam IDENTIFIER = new TokenParam(SP_IDENTIFIER);
 
 	/**
 	 * Search parameter constant for <b>member</b>
@@ -143,6 +187,22 @@ public class Group extends BaseResource implements IResource {
 	public static final String SP_MEMBER = "member";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>member</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>Group.member</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam MEMBER = new ReferenceParam(SP_MEMBER);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>Group.member</b>".
+	 */
+	public static final Include INCLUDE_MEMBER = new Include("Group.member");
+
+	/**
 	 * Search parameter constant for <b>characteristic</b>
 	 * <p>
 	 * Description: <b></b><br/>
@@ -152,6 +212,16 @@ public class Group extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="characteristic", path="Group.characteristic.code", description="")
 	public static final String SP_CHARACTERISTIC = "characteristic";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>characteristic</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Group.characteristic.code</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam CHARACTERISTIC = new TokenParam(SP_CHARACTERISTIC);
 
 	/**
 	 * Search parameter constant for <b>value</b>
@@ -165,6 +235,16 @@ public class Group extends BaseResource implements IResource {
 	public static final String SP_VALUE = "value";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>value</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Group.characteristic.value[x]</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam VALUE = new TokenParam(SP_VALUE);
+
+	/**
 	 * Search parameter constant for <b>exclude</b>
 	 * <p>
 	 * Description: <b></b><br/>
@@ -176,6 +256,16 @@ public class Group extends BaseResource implements IResource {
 	public static final String SP_EXCLUDE = "exclude";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>exclude</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Group.characteristic.exclude</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam EXCLUDE = new TokenParam(SP_EXCLUDE);
+
+	/**
 	 * Search parameter constant for <b>characteristic-value</b>
 	 * <p>
 	 * Description: <b>A composite of both characteristic and value</b><br/>
@@ -185,6 +275,16 @@ public class Group extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="characteristic-value", path="characteristic & value", description="A composite of both characteristic and value")
 	public static final String SP_CHARACTERISTIC_VALUE = "characteristic-value";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>characteristic-value</b>
+	 * <p>
+	 * Description: <b>A composite of both characteristic and value</b><br/>
+	 * Type: <b>composite</b><br/>
+	 * Path: <b>characteristic & value</b><br/>
+	 * </p>
+	 */
+	public static final CompositeParam CHARACTERISTIC_VALUE = new CompositeParam(SP_CHARACTERISTIC_VALUE);
 
 
 	@Child(name="identifier", type=IdentifierDt.class, order=0, min=0, max=1)	
@@ -250,11 +350,6 @@ public class Group extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myIdentifier,  myType,  myActual,  myCode,  myName,  myQuantity,  myCharacteristic,  myMember);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myIdentifier, myType, myActual, myCode, myName, myQuantity, myCharacteristic, myMember);
@@ -664,11 +759,6 @@ public class Group extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myCode,  myValue,  myExclude);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myCode, myValue, myExclude);

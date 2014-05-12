@@ -70,6 +70,10 @@ import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.IdrefDt;
 import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.rest.gclient.DateParam;
+import ca.uhn.fhir.rest.gclient.Include;
+import ca.uhn.fhir.rest.gclient.ReferenceParam;
+import ca.uhn.fhir.rest.gclient.TokenParam;
 
 
 /**
@@ -107,6 +111,22 @@ public class CarePlan extends BaseResource implements IResource {
 	public static final String SP_PATIENT = "patient";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>patient</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>CarePlan.patient</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam PATIENT = new ReferenceParam(SP_PATIENT);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>CarePlan.patient</b>".
+	 */
+	public static final Include INCLUDE_PATIENT = new Include("CarePlan.patient");
+
+	/**
 	 * Search parameter constant for <b>condition</b>
 	 * <p>
 	 * Description: <b></b><br/>
@@ -116,6 +136,22 @@ public class CarePlan extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="condition", path="CarePlan.concern", description="")
 	public static final String SP_CONDITION = "condition";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>condition</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>CarePlan.concern</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam CONDITION = new ReferenceParam(SP_CONDITION);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>CarePlan.concern</b>".
+	 */
+	public static final Include INCLUDE_CONCERN = new Include("CarePlan.concern");
 
 	/**
 	 * Search parameter constant for <b>date</b>
@@ -129,6 +165,16 @@ public class CarePlan extends BaseResource implements IResource {
 	public static final String SP_DATE = "date";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>date</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>date</b><br/>
+	 * Path: <b>CarePlan.period</b><br/>
+	 * </p>
+	 */
+	public static final DateParam DATE = new DateParam(SP_DATE);
+
+	/**
 	 * Search parameter constant for <b>participant</b>
 	 * <p>
 	 * Description: <b></b><br/>
@@ -138,6 +184,22 @@ public class CarePlan extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="participant", path="CarePlan.participant.member", description="")
 	public static final String SP_PARTICIPANT = "participant";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>participant</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>CarePlan.participant.member</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam PARTICIPANT = new ReferenceParam(SP_PARTICIPANT);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>CarePlan.participant.member</b>".
+	 */
+	public static final Include INCLUDE_PARTICIPANT_MEMBER = new Include("CarePlan.participant.member");
 
 	/**
 	 * Search parameter constant for <b>activitycode</b>
@@ -151,6 +213,16 @@ public class CarePlan extends BaseResource implements IResource {
 	public static final String SP_ACTIVITYCODE = "activitycode";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>activitycode</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>CarePlan.activity.simple.code</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam ACTIVITYCODE = new TokenParam(SP_ACTIVITYCODE);
+
+	/**
 	 * Search parameter constant for <b>activitydate</b>
 	 * <p>
 	 * Description: <b>Specified date occurs within period specified by CarePlan.activity.timingSchedule</b><br/>
@@ -162,6 +234,16 @@ public class CarePlan extends BaseResource implements IResource {
 	public static final String SP_ACTIVITYDATE = "activitydate";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>activitydate</b>
+	 * <p>
+	 * Description: <b>Specified date occurs within period specified by CarePlan.activity.timingSchedule</b><br/>
+	 * Type: <b>date</b><br/>
+	 * Path: <b>CarePlan.activity.simple.timing[x]</b><br/>
+	 * </p>
+	 */
+	public static final DateParam ACTIVITYDATE = new DateParam(SP_ACTIVITYDATE);
+
+	/**
 	 * Search parameter constant for <b>activitydetail</b>
 	 * <p>
 	 * Description: <b></b><br/>
@@ -171,6 +253,22 @@ public class CarePlan extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="activitydetail", path="CarePlan.activity.detail", description="")
 	public static final String SP_ACTIVITYDETAIL = "activitydetail";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>activitydetail</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>CarePlan.activity.detail</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam ACTIVITYDETAIL = new ReferenceParam(SP_ACTIVITYDETAIL);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>CarePlan.activity.detail</b>".
+	 */
+	public static final Include INCLUDE_ACTIVITY_DETAIL = new Include("CarePlan.activity.detail");
 
 
 	@Child(name="identifier", type=IdentifierDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)	
@@ -251,11 +349,6 @@ public class CarePlan extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myIdentifier,  myPatient,  myStatus,  myPeriod,  myModified,  myConcern,  myParticipant,  myGoal,  myActivity,  myNotes);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myIdentifier, myPatient, myStatus, myPeriod, myModified, myConcern, myParticipant, myGoal, myActivity, myNotes);
@@ -821,11 +914,6 @@ public class CarePlan extends BaseResource implements IResource {
 	}
 	
 	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
-	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myRole, myMember);
 	}
@@ -939,11 +1027,6 @@ public class CarePlan extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myDescription,  myStatus,  myNotes,  myConcern);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myDescription, myStatus, myNotes, myConcern);
@@ -1197,11 +1280,6 @@ public class CarePlan extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myGoal,  myStatus,  myProhibited,  myActionResulting,  myNotes,  myDetail,  mySimple);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myGoal, myStatus, myProhibited, myActionResulting, myNotes, myDetail, mySimple);
@@ -1589,11 +1667,6 @@ public class CarePlan extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myCategory,  myCode,  myTiming,  myLocation,  myPerformer,  myProduct,  myDailyAmount,  myQuantity,  myDetails);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myCategory, myCode, myTiming, myLocation, myPerformer, myProduct, myDailyAmount, myQuantity, myDetails);

@@ -6,6 +6,7 @@ package ${packageBase}.resource;
 import java.util.*;
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.api.annotation.*;
+import ca.uhn.fhir.rest.gclient.*;
 
 #foreach ( $import in $imports )
 import ${import};
@@ -51,6 +52,26 @@ public class ${className} extends BaseResource implements IResource {
 	@SearchParamDefinition(name="${param.name}", path="${param.path}", description="${param.description}")
 	public static final String $param.constantName = "${param.name}";
 
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>${param.name}</b>
+	 * <p>
+	 * Description: <b>${param.description}</b><br/>
+	 * Type: <b>${param.type}</b><br/>
+	 * Path: <b>${param.path}</b><br/>
+	 * </p>
+	 */
+	public static final ${param.typeCapitalized}Param ${param.fluentConstantName} = new ${param.typeCapitalized}Param(${param.constantName});
+
+#if( ${param.typeCapitalized} == 'Reference' )
+#foreach ( $include in $param.paths )
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>${include.path}</b>".
+	 */
+	public static final Include INCLUDE_${include.includeName} = new Include("${include.path}");
+
+#end	
+#end
 #end
 
 #childExtensionFields( $childExtensionTypes )

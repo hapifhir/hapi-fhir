@@ -56,6 +56,10 @@ import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
 import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
+import ca.uhn.fhir.rest.gclient.Include;
+import ca.uhn.fhir.rest.gclient.ReferenceParam;
+import ca.uhn.fhir.rest.gclient.StringParam;
+import ca.uhn.fhir.rest.gclient.TokenParam;
 
 
 /**
@@ -93,6 +97,16 @@ public class Device extends BaseResource implements IResource {
 	public static final String SP_TYPE = "type";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>type</b>
+	 * <p>
+	 * Description: <b>The type of the device</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Device.type</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam TYPE = new TokenParam(SP_TYPE);
+
+	/**
 	 * Search parameter constant for <b>manufacturer</b>
 	 * <p>
 	 * Description: <b>The manufacturer of the device</b><br/>
@@ -102,6 +116,16 @@ public class Device extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="manufacturer", path="Device.manufacturer", description="The manufacturer of the device")
 	public static final String SP_MANUFACTURER = "manufacturer";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>manufacturer</b>
+	 * <p>
+	 * Description: <b>The manufacturer of the device</b><br/>
+	 * Type: <b>string</b><br/>
+	 * Path: <b>Device.manufacturer</b><br/>
+	 * </p>
+	 */
+	public static final StringParam MANUFACTURER = new StringParam(SP_MANUFACTURER);
 
 	/**
 	 * Search parameter constant for <b>model</b>
@@ -115,6 +139,16 @@ public class Device extends BaseResource implements IResource {
 	public static final String SP_MODEL = "model";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>model</b>
+	 * <p>
+	 * Description: <b>The model of the device</b><br/>
+	 * Type: <b>string</b><br/>
+	 * Path: <b>Device.model</b><br/>
+	 * </p>
+	 */
+	public static final StringParam MODEL = new StringParam(SP_MODEL);
+
+	/**
 	 * Search parameter constant for <b>organization</b>
 	 * <p>
 	 * Description: <b>The organization responsible for the device</b><br/>
@@ -124,6 +158,22 @@ public class Device extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="organization", path="Device.owner", description="The organization responsible for the device")
 	public static final String SP_ORGANIZATION = "organization";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>organization</b>
+	 * <p>
+	 * Description: <b>The organization responsible for the device</b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>Device.owner</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam ORGANIZATION = new ReferenceParam(SP_ORGANIZATION);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>Device.owner</b>".
+	 */
+	public static final Include INCLUDE_OWNER = new Include("Device.owner");
 
 	/**
 	 * Search parameter constant for <b>identifier</b>
@@ -137,6 +187,16 @@ public class Device extends BaseResource implements IResource {
 	public static final String SP_IDENTIFIER = "identifier";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Device.identifier</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam IDENTIFIER = new TokenParam(SP_IDENTIFIER);
+
+	/**
 	 * Search parameter constant for <b>location</b>
 	 * <p>
 	 * Description: <b>A location, where the resource is found</b><br/>
@@ -146,6 +206,22 @@ public class Device extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="location", path="Device.location", description="A location, where the resource is found")
 	public static final String SP_LOCATION = "location";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>location</b>
+	 * <p>
+	 * Description: <b>A location, where the resource is found</b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>Device.location</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam LOCATION = new ReferenceParam(SP_LOCATION);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>Device.location</b>".
+	 */
+	public static final Include INCLUDE_LOCATION = new Include("Device.location");
 
 	/**
 	 * Search parameter constant for <b>patient</b>
@@ -159,6 +235,22 @@ public class Device extends BaseResource implements IResource {
 	public static final String SP_PATIENT = "patient";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>patient</b>
+	 * <p>
+	 * Description: <b>Patient information, if the resource is affixed to a person</b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>Device.patient</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam PATIENT = new ReferenceParam(SP_PATIENT);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>Device.patient</b>".
+	 */
+	public static final Include INCLUDE_PATIENT = new Include("Device.patient");
+
+	/**
 	 * Search parameter constant for <b>udi</b>
 	 * <p>
 	 * Description: <b></b><br/>
@@ -168,6 +260,16 @@ public class Device extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="udi", path="Device.udi", description="")
 	public static final String SP_UDI = "udi";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>udi</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>string</b><br/>
+	 * Path: <b>Device.udi</b><br/>
+	 * </p>
+	 */
+	public static final StringParam UDI = new StringParam(SP_UDI);
 
 
 	@Child(name="identifier", type=IdentifierDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)	
@@ -270,11 +372,6 @@ public class Device extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myIdentifier,  myType,  myManufacturer,  myModel,  myVersion,  myExpiry,  myUdi,  myLotNumber,  myOwner,  myLocation,  myPatient,  myContact,  myUrl);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myIdentifier, myType, myManufacturer, myModel, myVersion, myExpiry, myUdi, myLotNumber, myOwner, myLocation, myPatient, myContact, myUrl);

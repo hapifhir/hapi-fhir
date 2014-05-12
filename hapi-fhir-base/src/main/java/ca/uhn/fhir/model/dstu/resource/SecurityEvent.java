@@ -70,6 +70,11 @@ import ca.uhn.fhir.model.primitive.BoundCodeableConceptDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.rest.gclient.DateParam;
+import ca.uhn.fhir.rest.gclient.Include;
+import ca.uhn.fhir.rest.gclient.ReferenceParam;
+import ca.uhn.fhir.rest.gclient.StringParam;
+import ca.uhn.fhir.rest.gclient.TokenParam;
 
 
 /**
@@ -107,6 +112,16 @@ public class SecurityEvent extends BaseResource implements IResource {
 	public static final String SP_TYPE = "type";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>type</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>SecurityEvent.event.type</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam TYPE = new TokenParam(SP_TYPE);
+
+	/**
 	 * Search parameter constant for <b>action</b>
 	 * <p>
 	 * Description: <b></b><br/>
@@ -116,6 +131,16 @@ public class SecurityEvent extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="action", path="SecurityEvent.event.action", description="")
 	public static final String SP_ACTION = "action";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>action</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>SecurityEvent.event.action</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam ACTION = new TokenParam(SP_ACTION);
 
 	/**
 	 * Search parameter constant for <b>date</b>
@@ -129,6 +154,16 @@ public class SecurityEvent extends BaseResource implements IResource {
 	public static final String SP_DATE = "date";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>date</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>date</b><br/>
+	 * Path: <b>SecurityEvent.event.dateTime</b><br/>
+	 * </p>
+	 */
+	public static final DateParam DATE = new DateParam(SP_DATE);
+
+	/**
 	 * Search parameter constant for <b>subtype</b>
 	 * <p>
 	 * Description: <b></b><br/>
@@ -138,6 +173,16 @@ public class SecurityEvent extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="subtype", path="SecurityEvent.event.subtype", description="")
 	public static final String SP_SUBTYPE = "subtype";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>subtype</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>SecurityEvent.event.subtype</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam SUBTYPE = new TokenParam(SP_SUBTYPE);
 
 	/**
 	 * Search parameter constant for <b>user</b>
@@ -151,6 +196,16 @@ public class SecurityEvent extends BaseResource implements IResource {
 	public static final String SP_USER = "user";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>user</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>SecurityEvent.participant.userId</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam USER = new TokenParam(SP_USER);
+
+	/**
 	 * Search parameter constant for <b>name</b>
 	 * <p>
 	 * Description: <b></b><br/>
@@ -160,6 +215,16 @@ public class SecurityEvent extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="name", path="SecurityEvent.participant.name", description="")
 	public static final String SP_NAME = "name";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>name</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>string</b><br/>
+	 * Path: <b>SecurityEvent.participant.name</b><br/>
+	 * </p>
+	 */
+	public static final StringParam NAME = new StringParam(SP_NAME);
 
 	/**
 	 * Search parameter constant for <b>address</b>
@@ -173,6 +238,16 @@ public class SecurityEvent extends BaseResource implements IResource {
 	public static final String SP_ADDRESS = "address";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>address</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>SecurityEvent.participant.network.identifier</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam ADDRESS = new TokenParam(SP_ADDRESS);
+
+	/**
 	 * Search parameter constant for <b>source</b>
 	 * <p>
 	 * Description: <b></b><br/>
@@ -182,6 +257,16 @@ public class SecurityEvent extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="source", path="SecurityEvent.source.identifier", description="")
 	public static final String SP_SOURCE = "source";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>source</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>SecurityEvent.source.identifier</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam SOURCE = new TokenParam(SP_SOURCE);
 
 	/**
 	 * Search parameter constant for <b>site</b>
@@ -195,6 +280,16 @@ public class SecurityEvent extends BaseResource implements IResource {
 	public static final String SP_SITE = "site";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>site</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>SecurityEvent.source.site</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam SITE = new TokenParam(SP_SITE);
+
+	/**
 	 * Search parameter constant for <b>object-type</b>
 	 * <p>
 	 * Description: <b></b><br/>
@@ -204,6 +299,16 @@ public class SecurityEvent extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="object-type", path="SecurityEvent.object.type", description="")
 	public static final String SP_OBJECT_TYPE = "object-type";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>object-type</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>SecurityEvent.object.type</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam OBJECT_TYPE = new TokenParam(SP_OBJECT_TYPE);
 
 	/**
 	 * Search parameter constant for <b>identity</b>
@@ -217,6 +322,16 @@ public class SecurityEvent extends BaseResource implements IResource {
 	public static final String SP_IDENTITY = "identity";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>identity</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>SecurityEvent.object.identifier</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam IDENTITY = new TokenParam(SP_IDENTITY);
+
+	/**
 	 * Search parameter constant for <b>reference</b>
 	 * <p>
 	 * Description: <b></b><br/>
@@ -226,6 +341,22 @@ public class SecurityEvent extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="reference", path="SecurityEvent.object.reference", description="")
 	public static final String SP_REFERENCE = "reference";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>reference</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>SecurityEvent.object.reference</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam REFERENCE = new ReferenceParam(SP_REFERENCE);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>SecurityEvent.object.reference</b>".
+	 */
+	public static final Include INCLUDE_OBJECT_REFERENCE = new Include("SecurityEvent.object.reference");
 
 	/**
 	 * Search parameter constant for <b>desc</b>
@@ -239,6 +370,16 @@ public class SecurityEvent extends BaseResource implements IResource {
 	public static final String SP_DESC = "desc";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>desc</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>string</b><br/>
+	 * Path: <b>SecurityEvent.object.name</b><br/>
+	 * </p>
+	 */
+	public static final StringParam DESC = new StringParam(SP_DESC);
+
+	/**
 	 * Search parameter constant for <b>patientid</b>
 	 * <p>
 	 * Description: <b>The id of the patient (one of multiple kinds of participations)</b><br/>
@@ -250,6 +391,16 @@ public class SecurityEvent extends BaseResource implements IResource {
 	public static final String SP_PATIENTID = "patientid";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>patientid</b>
+	 * <p>
+	 * Description: <b>The id of the patient (one of multiple kinds of participations)</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b></b><br/>
+	 * </p>
+	 */
+	public static final TokenParam PATIENTID = new TokenParam(SP_PATIENTID);
+
+	/**
 	 * Search parameter constant for <b>altid</b>
 	 * <p>
 	 * Description: <b></b><br/>
@@ -259,6 +410,16 @@ public class SecurityEvent extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="altid", path="SecurityEvent.participant.altId", description="")
 	public static final String SP_ALTID = "altid";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>altid</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>SecurityEvent.participant.altId</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam ALTID = new TokenParam(SP_ALTID);
 
 
 	@Child(name="event", order=0, min=1, max=1)	
@@ -295,11 +456,6 @@ public class SecurityEvent extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myEvent,  myParticipant,  mySource,  myObject);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myEvent, myParticipant, mySource, myObject);
@@ -546,11 +702,6 @@ public class SecurityEvent extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myType,  mySubtype,  myAction,  myDateTime,  myOutcome,  myOutcomeDesc);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myType, mySubtype, myAction, myDateTime, myOutcome, myOutcomeDesc);
@@ -914,11 +1065,6 @@ public class SecurityEvent extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myRole,  myReference,  myUserId,  myAltId,  myName,  myRequestor,  myMedia,  myNetwork);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myRole, myReference, myUserId, myAltId, myName, myRequestor, myMedia, myNetwork);
@@ -1285,11 +1431,6 @@ public class SecurityEvent extends BaseResource implements IResource {
 	}
 	
 	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
-	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myIdentifier, myType);
 	}
@@ -1425,11 +1566,6 @@ public class SecurityEvent extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  mySite,  myIdentifier,  myType);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, mySite, myIdentifier, myType);
@@ -1675,11 +1811,6 @@ public class SecurityEvent extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myIdentifier,  myReference,  myType,  myRole,  myLifecycle,  mySensitivity,  myName,  myDescription,  myQuery,  myDetail);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myIdentifier, myReference, myType, myRole, myLifecycle, mySensitivity, myName, myDescription, myQuery, myDetail);
@@ -2175,11 +2306,6 @@ public class SecurityEvent extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myType,  myValue);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myType, myValue);

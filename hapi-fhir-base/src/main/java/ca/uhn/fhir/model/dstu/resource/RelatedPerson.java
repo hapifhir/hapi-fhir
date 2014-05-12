@@ -57,6 +57,10 @@ import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
 import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
 import ca.uhn.fhir.model.dstu.valueset.PatientRelationshipTypeEnum;
 import ca.uhn.fhir.model.primitive.BoundCodeableConceptDt;
+import ca.uhn.fhir.rest.gclient.Include;
+import ca.uhn.fhir.rest.gclient.ReferenceParam;
+import ca.uhn.fhir.rest.gclient.StringParam;
+import ca.uhn.fhir.rest.gclient.TokenParam;
 
 
 /**
@@ -94,6 +98,16 @@ public class RelatedPerson extends BaseResource implements IResource {
 	public static final String SP_IDENTIFIER = "identifier";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
+	 * <p>
+	 * Description: <b>A patient Identifier</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>RelatedPerson.identifier</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam IDENTIFIER = new TokenParam(SP_IDENTIFIER);
+
+	/**
 	 * Search parameter constant for <b>name</b>
 	 * <p>
 	 * Description: <b>A portion of name in any name part</b><br/>
@@ -103,6 +117,16 @@ public class RelatedPerson extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="name", path="RelatedPerson.name", description="A portion of name in any name part")
 	public static final String SP_NAME = "name";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>name</b>
+	 * <p>
+	 * Description: <b>A portion of name in any name part</b><br/>
+	 * Type: <b>string</b><br/>
+	 * Path: <b>RelatedPerson.name</b><br/>
+	 * </p>
+	 */
+	public static final StringParam NAME = new StringParam(SP_NAME);
 
 	/**
 	 * Search parameter constant for <b>phonetic</b>
@@ -116,6 +140,16 @@ public class RelatedPerson extends BaseResource implements IResource {
 	public static final String SP_PHONETIC = "phonetic";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>phonetic</b>
+	 * <p>
+	 * Description: <b>A portion of name using some kind of phonetic matching algorithm</b><br/>
+	 * Type: <b>string</b><br/>
+	 * Path: <b></b><br/>
+	 * </p>
+	 */
+	public static final StringParam PHONETIC = new StringParam(SP_PHONETIC);
+
+	/**
 	 * Search parameter constant for <b>telecom</b>
 	 * <p>
 	 * Description: <b>The value in any kind of contact</b><br/>
@@ -125,6 +159,16 @@ public class RelatedPerson extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="telecom", path="RelatedPerson.telecom", description="The value in any kind of contact")
 	public static final String SP_TELECOM = "telecom";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>telecom</b>
+	 * <p>
+	 * Description: <b>The value in any kind of contact</b><br/>
+	 * Type: <b>string</b><br/>
+	 * Path: <b>RelatedPerson.telecom</b><br/>
+	 * </p>
+	 */
+	public static final StringParam TELECOM = new StringParam(SP_TELECOM);
 
 	/**
 	 * Search parameter constant for <b>address</b>
@@ -138,6 +182,16 @@ public class RelatedPerson extends BaseResource implements IResource {
 	public static final String SP_ADDRESS = "address";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>address</b>
+	 * <p>
+	 * Description: <b>An address in any kind of address/part</b><br/>
+	 * Type: <b>string</b><br/>
+	 * Path: <b>RelatedPerson.address</b><br/>
+	 * </p>
+	 */
+	public static final StringParam ADDRESS = new StringParam(SP_ADDRESS);
+
+	/**
 	 * Search parameter constant for <b>gender</b>
 	 * <p>
 	 * Description: <b>Gender of the person</b><br/>
@@ -149,6 +203,16 @@ public class RelatedPerson extends BaseResource implements IResource {
 	public static final String SP_GENDER = "gender";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>gender</b>
+	 * <p>
+	 * Description: <b>Gender of the person</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>RelatedPerson.gender</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam GENDER = new TokenParam(SP_GENDER);
+
+	/**
 	 * Search parameter constant for <b>patient</b>
 	 * <p>
 	 * Description: <b>The patient this person is related to</b><br/>
@@ -158,6 +222,22 @@ public class RelatedPerson extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="patient", path="RelatedPerson.patient", description="The patient this person is related to")
 	public static final String SP_PATIENT = "patient";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>patient</b>
+	 * <p>
+	 * Description: <b>The patient this person is related to</b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>RelatedPerson.patient</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam PATIENT = new ReferenceParam(SP_PATIENT);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>RelatedPerson.patient</b>".
+	 */
+	public static final Include INCLUDE_PATIENT = new Include("RelatedPerson.patient");
 
 
 	@Child(name="identifier", type=IdentifierDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)	
@@ -223,11 +303,6 @@ public class RelatedPerson extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myIdentifier,  myPatient,  myRelationship,  myName,  myTelecom,  myGender,  myAddress,  myPhoto);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myIdentifier, myPatient, myRelationship, myName, myTelecom, myGender, myAddress, myPhoto);

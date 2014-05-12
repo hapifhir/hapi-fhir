@@ -55,6 +55,9 @@ import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.DecimalDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.rest.gclient.Include;
+import ca.uhn.fhir.rest.gclient.ReferenceParam;
+import ca.uhn.fhir.rest.gclient.StringParam;
 
 
 /**
@@ -92,6 +95,22 @@ public class GVFVariant extends BaseResource implements IResource {
 	public static final String SP_PATIENT = "patient";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>patient</b>
+	 * <p>
+	 * Description: <b>Patient being described </b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>GVFVariant.subject.patient</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam PATIENT = new ReferenceParam(SP_PATIENT);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>GVFVariant.subject.patient</b>".
+	 */
+	public static final Include INCLUDE_SUBJECT_PATIENT = new Include("GVFVariant.subject.patient");
+
+	/**
 	 * Search parameter constant for <b>coordinate</b>
 	 * <p>
 	 * Description: <b>Coordinate of the variant being studied</b><br/>
@@ -101,6 +120,16 @@ public class GVFVariant extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="coordinate", path="", description="Coordinate of the variant being studied")
 	public static final String SP_COORDINATE = "coordinate";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>coordinate</b>
+	 * <p>
+	 * Description: <b>Coordinate of the variant being studied</b><br/>
+	 * Type: <b>string</b><br/>
+	 * Path: <b></b><br/>
+	 * </p>
+	 */
+	public static final StringParam COORDINATE = new StringParam(SP_COORDINATE);
 
 
 	@Child(name="subject", order=0, min=0, max=1)	
@@ -299,11 +328,6 @@ public class GVFVariant extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  mySubject,  myMeta,  mySourceFile,  mySeqid,  mySource,  myType,  myStart,  myEnd,  myScore,  myStrand,  myFeatureId,  myAlias,  myDbxref,  myVariantSeq,  myReferenceSeq,  myVariantFreq,  myVariantEffect,  myStartRange,  myEndRange,  myVariantCodon,  myReferenceCodon,  myVariantAA,  myReferenceAA,  myBreakpointDetail,  mySequenceContext,  myIndividual,  mySample);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, mySubject, myMeta, mySourceFile, mySeqid, mySource, myType, myStart, myEnd, myScore, myStrand, myFeatureId, myAlias, myDbxref, myVariantSeq, myReferenceSeq, myVariantFreq, myVariantEffect, myStartRange, myEndRange, myVariantCodon, myReferenceCodon, myVariantAA, myReferenceAA, myBreakpointDetail, mySequenceContext, myIndividual, mySample);
@@ -1698,11 +1722,6 @@ public class GVFVariant extends BaseResource implements IResource {
 	}
 	
 	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
-	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myPatient, myFileId);
 	}
@@ -1817,11 +1836,6 @@ public class GVFVariant extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myDatabase,  myIdentity);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myDatabase, myIdentity);
@@ -1964,11 +1978,6 @@ public class GVFVariant extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  mySequenceVariant,  myIndex,  myFeatureType,  myFeatureId);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, mySequenceVariant, myIndex, myFeatureType, myFeatureId);
@@ -2220,11 +2229,6 @@ public class GVFVariant extends BaseResource implements IResource {
 	}
 	
 	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
-	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myStart, myEnd);
 	}
@@ -2352,11 +2356,6 @@ public class GVFVariant extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myStart,  myEnd);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myStart, myEnd);
@@ -2499,11 +2498,6 @@ public class GVFVariant extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  mySeqid,  myStart,  myEnd,  myStrand);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, mySeqid, myStart, myEnd, myStrand);
@@ -2721,11 +2715,6 @@ public class GVFVariant extends BaseResource implements IResource {
 	}
 	
 	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
-	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myFivePrime, myThreePrime);
 	}
@@ -2874,11 +2863,6 @@ public class GVFVariant extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myPhased,  myGenotype,  myVariantReads,  myTotalReads,  myZygosity);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myPhased, myGenotype, myVariantReads, myTotalReads, myZygosity);

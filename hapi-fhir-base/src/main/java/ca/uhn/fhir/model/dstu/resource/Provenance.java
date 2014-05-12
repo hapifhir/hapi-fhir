@@ -61,6 +61,10 @@ import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
+import ca.uhn.fhir.rest.gclient.DateParam;
+import ca.uhn.fhir.rest.gclient.Include;
+import ca.uhn.fhir.rest.gclient.ReferenceParam;
+import ca.uhn.fhir.rest.gclient.TokenParam;
 
 
 /**
@@ -98,6 +102,22 @@ public class Provenance extends BaseResource implements IResource {
 	public static final String SP_TARGET = "target";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>target</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>Provenance.target</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam TARGET = new ReferenceParam(SP_TARGET);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>Provenance.target</b>".
+	 */
+	public static final Include INCLUDE_TARGET = new Include("Provenance.target");
+
+	/**
 	 * Search parameter constant for <b>start</b>
 	 * <p>
 	 * Description: <b></b><br/>
@@ -107,6 +127,16 @@ public class Provenance extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="start", path="Provenance.period.start", description="")
 	public static final String SP_START = "start";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>start</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>date</b><br/>
+	 * Path: <b>Provenance.period.start</b><br/>
+	 * </p>
+	 */
+	public static final DateParam START = new DateParam(SP_START);
 
 	/**
 	 * Search parameter constant for <b>end</b>
@@ -120,6 +150,16 @@ public class Provenance extends BaseResource implements IResource {
 	public static final String SP_END = "end";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>end</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>date</b><br/>
+	 * Path: <b>Provenance.period.end</b><br/>
+	 * </p>
+	 */
+	public static final DateParam END = new DateParam(SP_END);
+
+	/**
 	 * Search parameter constant for <b>location</b>
 	 * <p>
 	 * Description: <b></b><br/>
@@ -129,6 +169,22 @@ public class Provenance extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="location", path="Provenance.location", description="")
 	public static final String SP_LOCATION = "location";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>location</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>Provenance.location</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam LOCATION = new ReferenceParam(SP_LOCATION);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>Provenance.location</b>".
+	 */
+	public static final Include INCLUDE_LOCATION = new Include("Provenance.location");
 
 	/**
 	 * Search parameter constant for <b>party</b>
@@ -142,6 +198,16 @@ public class Provenance extends BaseResource implements IResource {
 	public static final String SP_PARTY = "party";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>party</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Provenance.agent.reference</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam PARTY = new TokenParam(SP_PARTY);
+
+	/**
 	 * Search parameter constant for <b>partytype</b>
 	 * <p>
 	 * Description: <b></b><br/>
@@ -151,6 +217,16 @@ public class Provenance extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="partytype", path="Provenance.agent.type", description="")
 	public static final String SP_PARTYTYPE = "partytype";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>partytype</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Provenance.agent.type</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam PARTYTYPE = new TokenParam(SP_PARTYTYPE);
 
 
 	@Child(name="target", order=0, min=1, max=Child.MAX_UNLIMITED, type={
@@ -224,11 +300,6 @@ public class Provenance extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myTarget,  myPeriod,  myRecorded,  myReason,  myLocation,  myPolicy,  myAgent,  myEntity,  myIntegritySignature);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myTarget, myPeriod, myRecorded, myReason, myLocation, myPolicy, myAgent, myEntity, myIntegritySignature);
@@ -716,11 +787,6 @@ public class Provenance extends BaseResource implements IResource {
 	}
 	
 	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
-	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myRole, myType, myReference, myDisplay);
 	}
@@ -931,11 +997,6 @@ public class Provenance extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myRole,  myType,  myReference,  myDisplay,  myAgent);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myRole, myType, myReference, myDisplay, myAgent);

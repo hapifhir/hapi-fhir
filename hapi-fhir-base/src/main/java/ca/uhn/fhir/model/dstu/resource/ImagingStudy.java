@@ -65,6 +65,11 @@ import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.model.primitive.OidDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
+import ca.uhn.fhir.rest.gclient.DateParam;
+import ca.uhn.fhir.rest.gclient.Include;
+import ca.uhn.fhir.rest.gclient.NumberParam;
+import ca.uhn.fhir.rest.gclient.ReferenceParam;
+import ca.uhn.fhir.rest.gclient.TokenParam;
 
 
 /**
@@ -102,6 +107,22 @@ public class ImagingStudy extends BaseResource implements IResource {
 	public static final String SP_SUBJECT = "subject";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>subject</b>
+	 * <p>
+	 * Description: <b>Who the study is about</b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>ImagingStudy.subject</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam SUBJECT = new ReferenceParam(SP_SUBJECT);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>ImagingStudy.subject</b>".
+	 */
+	public static final Include INCLUDE_SUBJECT = new Include("ImagingStudy.subject");
+
+	/**
 	 * Search parameter constant for <b>date</b>
 	 * <p>
 	 * Description: <b>The date the study was done was taken</b><br/>
@@ -111,6 +132,16 @@ public class ImagingStudy extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="date", path="ImagingStudy.dateTime", description="The date the study was done was taken")
 	public static final String SP_DATE = "date";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>date</b>
+	 * <p>
+	 * Description: <b>The date the study was done was taken</b><br/>
+	 * Type: <b>date</b><br/>
+	 * Path: <b>ImagingStudy.dateTime</b><br/>
+	 * </p>
+	 */
+	public static final DateParam DATE = new DateParam(SP_DATE);
 
 	/**
 	 * Search parameter constant for <b>accession</b>
@@ -124,6 +155,16 @@ public class ImagingStudy extends BaseResource implements IResource {
 	public static final String SP_ACCESSION = "accession";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>accession</b>
+	 * <p>
+	 * Description: <b>The accession id for the image</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>ImagingStudy.accessionNo</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam ACCESSION = new TokenParam(SP_ACCESSION);
+
+	/**
 	 * Search parameter constant for <b>study</b>
 	 * <p>
 	 * Description: <b>The study id for the image</b><br/>
@@ -133,6 +174,16 @@ public class ImagingStudy extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="study", path="ImagingStudy.uid", description="The study id for the image")
 	public static final String SP_STUDY = "study";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>study</b>
+	 * <p>
+	 * Description: <b>The study id for the image</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>ImagingStudy.uid</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam STUDY = new TokenParam(SP_STUDY);
 
 	/**
 	 * Search parameter constant for <b>series</b>
@@ -146,6 +197,16 @@ public class ImagingStudy extends BaseResource implements IResource {
 	public static final String SP_SERIES = "series";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>series</b>
+	 * <p>
+	 * Description: <b>The series id for the image</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>ImagingStudy.series.uid</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam SERIES = new TokenParam(SP_SERIES);
+
+	/**
 	 * Search parameter constant for <b>modality</b>
 	 * <p>
 	 * Description: <b>The modality of the image</b><br/>
@@ -155,6 +216,16 @@ public class ImagingStudy extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="modality", path="ImagingStudy.series.modality", description="The modality of the image")
 	public static final String SP_MODALITY = "modality";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>modality</b>
+	 * <p>
+	 * Description: <b>The modality of the image</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>ImagingStudy.series.modality</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam MODALITY = new TokenParam(SP_MODALITY);
 
 	/**
 	 * Search parameter constant for <b>size</b>
@@ -168,6 +239,16 @@ public class ImagingStudy extends BaseResource implements IResource {
 	public static final String SP_SIZE = "size";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>size</b>
+	 * <p>
+	 * Description: <b>The size of the image in MB - may include > or < in the value</b><br/>
+	 * Type: <b>number</b><br/>
+	 * Path: <b></b><br/>
+	 * </p>
+	 */
+	public static final NumberParam SIZE = new NumberParam(SP_SIZE);
+
+	/**
 	 * Search parameter constant for <b>bodysite</b>
 	 * <p>
 	 * Description: <b></b><br/>
@@ -177,6 +258,16 @@ public class ImagingStudy extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="bodysite", path="ImagingStudy.series.bodySite", description="")
 	public static final String SP_BODYSITE = "bodysite";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>bodysite</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>ImagingStudy.series.bodySite</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam BODYSITE = new TokenParam(SP_BODYSITE);
 
 	/**
 	 * Search parameter constant for <b>uid</b>
@@ -190,6 +281,16 @@ public class ImagingStudy extends BaseResource implements IResource {
 	public static final String SP_UID = "uid";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>uid</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>ImagingStudy.series.instance.uid</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam UID = new TokenParam(SP_UID);
+
+	/**
 	 * Search parameter constant for <b>dicom-class</b>
 	 * <p>
 	 * Description: <b></b><br/>
@@ -199,6 +300,16 @@ public class ImagingStudy extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="dicom-class", path="ImagingStudy.series.instance.sopclass", description="")
 	public static final String SP_DICOM_CLASS = "dicom-class";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>dicom-class</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>ImagingStudy.series.instance.sopclass</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam DICOM_CLASS = new TokenParam(SP_DICOM_CLASS);
 
 
 	@Child(name="dateTime", type=DateTimeDt.class, order=0, min=0, max=1)	
@@ -330,11 +441,6 @@ public class ImagingStudy extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myDateTime,  mySubject,  myUid,  myAccessionNo,  myIdentifier,  myOrder,  myModality,  myReferrer,  myAvailability,  myUrl,  myNumberOfSeries,  myNumberOfInstances,  myClinicalInformation,  myProcedure,  myInterpreter,  myDescription,  mySeries);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myDateTime, mySubject, myUid, myAccessionNo, myIdentifier, myOrder, myModality, myReferrer, myAvailability, myUrl, myNumberOfSeries, myNumberOfInstances, myClinicalInformation, myProcedure, myInterpreter, myDescription, mySeries);
@@ -1247,11 +1353,6 @@ public class ImagingStudy extends BaseResource implements IResource {
 	}
 	
 	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
-	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myNumber, myModality, myUid, myDescription, myNumberOfInstances, myAvailability, myUrl, myBodySite, myDateTime, myInstance);
 	}
@@ -1769,11 +1870,6 @@ public class ImagingStudy extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myNumber,  myUid,  mySopclass,  myType,  myTitle,  myUrl,  myAttachment);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myNumber, myUid, mySopclass, myType, myTitle, myUrl, myAttachment);

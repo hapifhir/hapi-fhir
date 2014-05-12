@@ -61,6 +61,11 @@ import ca.uhn.fhir.model.primitive.BoundCodeableConceptDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.rest.gclient.DateParam;
+import ca.uhn.fhir.rest.gclient.Include;
+import ca.uhn.fhir.rest.gclient.NumberParam;
+import ca.uhn.fhir.rest.gclient.ReferenceParam;
+import ca.uhn.fhir.rest.gclient.TokenParam;
 
 
 /**
@@ -98,6 +103,22 @@ public class ImmunizationRecommendation extends BaseResource implements IResourc
 	public static final String SP_SUBJECT = "subject";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>subject</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>ImmunizationRecommendation.subject</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam SUBJECT = new ReferenceParam(SP_SUBJECT);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>ImmunizationRecommendation.subject</b>".
+	 */
+	public static final Include INCLUDE_SUBJECT = new Include("ImmunizationRecommendation.subject");
+
+	/**
 	 * Search parameter constant for <b>vaccine-type</b>
 	 * <p>
 	 * Description: <b></b><br/>
@@ -107,6 +128,16 @@ public class ImmunizationRecommendation extends BaseResource implements IResourc
 	 */
 	@SearchParamDefinition(name="vaccine-type", path="ImmunizationRecommendation.recommendation.vaccineType", description="")
 	public static final String SP_VACCINE_TYPE = "vaccine-type";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>vaccine-type</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>ImmunizationRecommendation.recommendation.vaccineType</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam VACCINE_TYPE = new TokenParam(SP_VACCINE_TYPE);
 
 	/**
 	 * Search parameter constant for <b>identifier</b>
@@ -120,6 +151,16 @@ public class ImmunizationRecommendation extends BaseResource implements IResourc
 	public static final String SP_IDENTIFIER = "identifier";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>ImmunizationRecommendation.identifier</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam IDENTIFIER = new TokenParam(SP_IDENTIFIER);
+
+	/**
 	 * Search parameter constant for <b>date</b>
 	 * <p>
 	 * Description: <b></b><br/>
@@ -129,6 +170,16 @@ public class ImmunizationRecommendation extends BaseResource implements IResourc
 	 */
 	@SearchParamDefinition(name="date", path="ImmunizationRecommendation.recommendation.date", description="")
 	public static final String SP_DATE = "date";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>date</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>date</b><br/>
+	 * Path: <b>ImmunizationRecommendation.recommendation.date</b><br/>
+	 * </p>
+	 */
+	public static final DateParam DATE = new DateParam(SP_DATE);
 
 	/**
 	 * Search parameter constant for <b>dose-number</b>
@@ -142,6 +193,16 @@ public class ImmunizationRecommendation extends BaseResource implements IResourc
 	public static final String SP_DOSE_NUMBER = "dose-number";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>dose-number</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>number</b><br/>
+	 * Path: <b>ImmunizationRecommendation.recommendation.doseNumber</b><br/>
+	 * </p>
+	 */
+	public static final NumberParam DOSE_NUMBER = new NumberParam(SP_DOSE_NUMBER);
+
+	/**
 	 * Search parameter constant for <b>status</b>
 	 * <p>
 	 * Description: <b></b><br/>
@@ -151,6 +212,16 @@ public class ImmunizationRecommendation extends BaseResource implements IResourc
 	 */
 	@SearchParamDefinition(name="status", path="ImmunizationRecommendation.recommendation.forecastStatus", description="")
 	public static final String SP_STATUS = "status";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>status</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>ImmunizationRecommendation.recommendation.forecastStatus</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam STATUS = new TokenParam(SP_STATUS);
 
 	/**
 	 * Search parameter constant for <b>dose-sequence</b>
@@ -164,6 +235,16 @@ public class ImmunizationRecommendation extends BaseResource implements IResourc
 	public static final String SP_DOSE_SEQUENCE = "dose-sequence";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>dose-sequence</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>ImmunizationRecommendation.recommendation.protocol.doseSequence</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam DOSE_SEQUENCE = new TokenParam(SP_DOSE_SEQUENCE);
+
+	/**
 	 * Search parameter constant for <b>support</b>
 	 * <p>
 	 * Description: <b></b><br/>
@@ -175,6 +256,22 @@ public class ImmunizationRecommendation extends BaseResource implements IResourc
 	public static final String SP_SUPPORT = "support";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>support</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>ImmunizationRecommendation.recommendation.supportingImmunization</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam SUPPORT = new ReferenceParam(SP_SUPPORT);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>ImmunizationRecommendation.recommendation.supportingImmunization</b>".
+	 */
+	public static final Include INCLUDE_RECOMMENDATION_SUPPORTINGIMMUNIZATION = new Include("ImmunizationRecommendation.recommendation.supportingImmunization");
+
+	/**
 	 * Search parameter constant for <b>information</b>
 	 * <p>
 	 * Description: <b></b><br/>
@@ -184,6 +281,22 @@ public class ImmunizationRecommendation extends BaseResource implements IResourc
 	 */
 	@SearchParamDefinition(name="information", path="ImmunizationRecommendation.recommendation.supportingPatientInformation", description="")
 	public static final String SP_INFORMATION = "information";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>information</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>ImmunizationRecommendation.recommendation.supportingPatientInformation</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam INFORMATION = new ReferenceParam(SP_INFORMATION);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>ImmunizationRecommendation.recommendation.supportingPatientInformation</b>".
+	 */
+	public static final Include INCLUDE_RECOMMENDATION_SUPPORTINGPATIENTINFORMATION = new Include("ImmunizationRecommendation.recommendation.supportingPatientInformation");
 
 
 	@Child(name="identifier", type=IdentifierDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)	
@@ -214,11 +327,6 @@ public class ImmunizationRecommendation extends BaseResource implements IResourc
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myIdentifier,  mySubject,  myRecommendation);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myIdentifier, mySubject, myRecommendation);
@@ -486,11 +594,6 @@ public class ImmunizationRecommendation extends BaseResource implements IResourc
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myDate,  myVaccineType,  myDoseNumber,  myForecastStatus,  myDateCriterion,  myProtocol,  mySupportingImmunization,  mySupportingPatientInformation);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myDate, myVaccineType, myDoseNumber, myForecastStatus, myDateCriterion, myProtocol, mySupportingImmunization, mySupportingPatientInformation);
@@ -883,11 +986,6 @@ public class ImmunizationRecommendation extends BaseResource implements IResourc
 	}
 	
 	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
-	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myCode, myValue);
 	}
@@ -1043,11 +1141,6 @@ public class ImmunizationRecommendation extends BaseResource implements IResourc
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myDoseSequence,  myDescription,  myAuthority,  mySeries);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myDoseSequence, myDescription, myAuthority, mySeries);

@@ -58,6 +58,9 @@ import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
+import ca.uhn.fhir.rest.gclient.Include;
+import ca.uhn.fhir.rest.gclient.ReferenceParam;
+import ca.uhn.fhir.rest.gclient.StringParam;
 
 
 /**
@@ -95,6 +98,22 @@ public class GVFMeta extends BaseResource implements IResource {
 	public static final String SP_PATIENT = "patient";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>patient</b>
+	 * <p>
+	 * Description: <b>Patient being described in the file</b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>GVFMeta.subject.patient</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam PATIENT = new ReferenceParam(SP_PATIENT);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>GVFMeta.subject.patient</b>".
+	 */
+	public static final Include INCLUDE_SUBJECT_PATIENT = new Include("GVFMeta.subject.patient");
+
+	/**
 	 * Search parameter constant for <b>file</b>
 	 * <p>
 	 * Description: <b>URL to source file of the resource</b><br/>
@@ -104,6 +123,16 @@ public class GVFMeta extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="file", path="GVFMeta.sourceFile", description="URL to source file of the resource")
 	public static final String SP_FILE = "file";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>file</b>
+	 * <p>
+	 * Description: <b>URL to source file of the resource</b><br/>
+	 * Type: <b>string</b><br/>
+	 * Path: <b>GVFMeta.sourceFile</b><br/>
+	 * </p>
+	 */
+	public static final StringParam FILE = new StringParam(SP_FILE);
 
 
 	@Child(name="subject", order=0, min=0, max=Child.MAX_UNLIMITED)	
@@ -224,11 +253,6 @@ public class GVFMeta extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  mySubject,  mySourceFile,  myGvfVersion,  myReferenceFasta,  myFeatureGFF3,  myFileDate,  myIndividual,  myPopulation,  myPlatform,  mySequencingScope,  myCaptureMethod,  myCaptureRegions,  mySequenceAlignment,  myVariantCalling,  mySampleDescription,  myGenomicSource);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, mySubject, mySourceFile, myGvfVersion, myReferenceFasta, myFeatureGFF3, myFileDate, myIndividual, myPopulation, myPlatform, mySequencingScope, myCaptureMethod, myCaptureRegions, mySequenceAlignment, myVariantCalling, mySampleDescription, myGenomicSource);
@@ -1008,11 +1032,6 @@ public class GVFMeta extends BaseResource implements IResource {
 	}
 	
 	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
-	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myPatient, myFieldId);
 	}
@@ -1169,11 +1188,6 @@ public class GVFMeta extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myClassElement,  myVersion,  myName,  myIdentity,  myReadLength,  myReadType,  myReadPairSpan,  myAverageCoverage);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myClassElement, myVersion, myName, myIdentity, myReadLength, myReadType, myReadPairSpan, myAverageCoverage);

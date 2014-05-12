@@ -1,7 +1,5 @@
 package example;
 
-import java.io.IOException;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.dstu.composite.HumanNameDt;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
@@ -15,6 +13,7 @@ import ca.uhn.fhir.parser.IParser;
 
 public class FhirContextIntro {
 
+	@SuppressWarnings("unused")
 	public static void creatingContext() {
 // START SNIPPET: creatingContext
 FhirContext ctx = new FhirContext();
@@ -23,14 +22,14 @@ FhirContext ctx = new FhirContext();
 	}
 	
 	
-	public static void main(String[] args) throws DataFormatException, IOException {
+	public static void main(String[] args) throws DataFormatException {
 
 new FhirContextIntro().encodeMsg();
 		
 		
 	}
 		
-	public void encodeMsg() throws DataFormatException, IOException {
+	public void encodeMsg() throws DataFormatException {
 FhirContext ctx = new FhirContext(Patient.class, Observation.class);
 //START SNIPPET: encodeMsg
 
@@ -69,7 +68,7 @@ System.out.println(encoded);
 	}
 
 	
-public void fluent() throws DataFormatException, IOException {
+public void fluent() throws DataFormatException {
 FhirContext ctx = new FhirContext(Patient.class, Observation.class);
 String encoded;
 //START SNIPPET: encodeMsgFluent

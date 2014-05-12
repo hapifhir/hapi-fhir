@@ -60,6 +60,10 @@ import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
+import ca.uhn.fhir.rest.gclient.DateParam;
+import ca.uhn.fhir.rest.gclient.Include;
+import ca.uhn.fhir.rest.gclient.ReferenceParam;
+import ca.uhn.fhir.rest.gclient.TokenParam;
 
 
 /**
@@ -97,6 +101,22 @@ public class ListResource extends BaseResource implements IResource {
 	public static final String SP_SOURCE = "source";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>source</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>List.source</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam SOURCE = new ReferenceParam(SP_SOURCE);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>List.source</b>".
+	 */
+	public static final Include INCLUDE_SOURCE = new Include("List.source");
+
+	/**
 	 * Search parameter constant for <b>item</b>
 	 * <p>
 	 * Description: <b></b><br/>
@@ -106,6 +126,22 @@ public class ListResource extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="item", path="List.entry.item", description="")
 	public static final String SP_ITEM = "item";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>item</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>List.entry.item</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam ITEM = new ReferenceParam(SP_ITEM);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>List.entry.item</b>".
+	 */
+	public static final Include INCLUDE_ENTRY_ITEM = new Include("List.entry.item");
 
 	/**
 	 * Search parameter constant for <b>empty-reason</b>
@@ -119,6 +155,16 @@ public class ListResource extends BaseResource implements IResource {
 	public static final String SP_EMPTY_REASON = "empty-reason";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>empty-reason</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>List.emptyReason</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam EMPTY_REASON = new TokenParam(SP_EMPTY_REASON);
+
+	/**
 	 * Search parameter constant for <b>date</b>
 	 * <p>
 	 * Description: <b></b><br/>
@@ -128,6 +174,16 @@ public class ListResource extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="date", path="List.date", description="")
 	public static final String SP_DATE = "date";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>date</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>date</b><br/>
+	 * Path: <b>List.date</b><br/>
+	 * </p>
+	 */
+	public static final DateParam DATE = new DateParam(SP_DATE);
 
 	/**
 	 * Search parameter constant for <b>code</b>
@@ -141,6 +197,16 @@ public class ListResource extends BaseResource implements IResource {
 	public static final String SP_CODE = "code";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>code</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>List.code</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam CODE = new TokenParam(SP_CODE);
+
+	/**
 	 * Search parameter constant for <b>subject</b>
 	 * <p>
 	 * Description: <b></b><br/>
@@ -150,6 +216,22 @@ public class ListResource extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="subject", path="List.subject", description="")
 	public static final String SP_SUBJECT = "subject";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>subject</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>List.subject</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam SUBJECT = new ReferenceParam(SP_SUBJECT);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>List.subject</b>".
+	 */
+	public static final Include INCLUDE_SUBJECT = new Include("List.subject");
 
 
 	@Child(name="identifier", type=IdentifierDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)	
@@ -223,11 +305,6 @@ public class ListResource extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myIdentifier,  myCode,  mySubject,  mySource,  myDate,  myOrdered,  myMode,  myEntry,  myEmptyReason);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myIdentifier, myCode, mySubject, mySource, myDate, myOrdered, myMode, myEntry, myEmptyReason);
@@ -698,11 +775,6 @@ public class ListResource extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myFlag,  myDeleted,  myDate,  myItem);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myFlag, myDeleted, myDate, myItem);

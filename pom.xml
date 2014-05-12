@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
 	<parent>
 		<groupId>org.sonatype.oss</groupId>
@@ -12,17 +11,17 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>0.3-SNAPSHOT</version>
+	<version>0.3</version>
 	<name>HAPI</name>
 	<url>http://hl7api.sourceforge.net/hapi-fhir/</url>
-	
+
 	<organization>
 		<name>University Health Network</name>
 		<url>http://www.uhn.ca</url>
 	</organization>
-	
+
 	<inceptionYear>2014</inceptionYear>
-	
+
 	<description>
 	</description>
 
@@ -59,6 +58,7 @@
 		<module>hapi-fhir-structures-dstu</module>
 		<module>hapi-fhir-jpaserver-base</module>
 		<module>hapi-fhir-jpaserver-test</module>
+		<module>restful-server-example</module>
 	</modules>
 
 	<properties>
@@ -92,6 +92,10 @@
 							<version>1.0</version>
 						</dependency>
 					</dependencies>
+					<configuration>
+						<skip>true</skip>
+						<skipDeploy>true</skipDeploy>
+					</configuration>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>

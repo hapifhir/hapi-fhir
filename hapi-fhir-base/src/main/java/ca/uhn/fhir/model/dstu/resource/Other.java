@@ -53,6 +53,10 @@ import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
 import ca.uhn.fhir.model.primitive.DateDt;
+import ca.uhn.fhir.rest.gclient.DateParam;
+import ca.uhn.fhir.rest.gclient.Include;
+import ca.uhn.fhir.rest.gclient.ReferenceParam;
+import ca.uhn.fhir.rest.gclient.TokenParam;
 
 
 /**
@@ -90,6 +94,22 @@ public class Other extends BaseResource implements IResource {
 	public static final String SP_SUBJECT = "subject";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>subject</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>Other.subject</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam SUBJECT = new ReferenceParam(SP_SUBJECT);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>Other.subject</b>".
+	 */
+	public static final Include INCLUDE_SUBJECT = new Include("Other.subject");
+
+	/**
 	 * Search parameter constant for <b>created</b>
 	 * <p>
 	 * Description: <b></b><br/>
@@ -101,6 +121,16 @@ public class Other extends BaseResource implements IResource {
 	public static final String SP_CREATED = "created";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>created</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>date</b><br/>
+	 * Path: <b>Other.created</b><br/>
+	 * </p>
+	 */
+	public static final DateParam CREATED = new DateParam(SP_CREATED);
+
+	/**
 	 * Search parameter constant for <b>code</b>
 	 * <p>
 	 * Description: <b></b><br/>
@@ -110,6 +140,16 @@ public class Other extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="code", path="Other.code", description="")
 	public static final String SP_CODE = "code";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>code</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Other.code</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam CODE = new TokenParam(SP_CODE);
 
 
 	@Child(name="identifier", type=IdentifierDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)	
@@ -155,11 +195,6 @@ public class Other extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myIdentifier,  myCode,  mySubject,  myAuthor,  myCreated);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myIdentifier, myCode, mySubject, myAuthor, myCreated);

@@ -52,11 +52,6 @@ public class Patient extends BaseResource implements IResource {
 	private List<IdentifierDt> myIdentifier;
 	
 	@Override
-	public List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
-	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType,  myIdentifier );
 	}

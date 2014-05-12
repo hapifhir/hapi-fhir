@@ -1,4 +1,4 @@
-package ca.uhn.example.rest;
+package ca.uhn.example.provider;
 
 import java.util.Deque;
 import java.util.HashMap;
@@ -34,7 +34,7 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
  * This is a resource provider which stores Patient resources in memory using a HashMap. This is obviously not a production-ready solution for many reasons, but it is useful to help illustrate how to
  * build a fully-functional server.
  */
-public class RestfulPatientResourceProvider implements IResourceProvider {
+public class PatientResourceProvider implements IResourceProvider {
 
 	/**
 	 * This map has a resource ID as a key, and each key maps to a Deque list containing all versions of the resource with that ID.
@@ -49,7 +49,7 @@ public class RestfulPatientResourceProvider implements IResourceProvider {
 	/**
 	 * Constructor, which pre-populates the provider with one resource instance.
 	 */
-	public RestfulPatientResourceProvider() {
+	public PatientResourceProvider() {
 		Patient patient = new Patient();
 		patient.addIdentifier();
 		patient.getIdentifier().get(0).setSystem(new UriDt("urn:hapitest:mrns"));

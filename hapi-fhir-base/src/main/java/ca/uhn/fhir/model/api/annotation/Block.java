@@ -29,7 +29,9 @@ import java.lang.annotation.Target;
 @Target(value= {ElementType.TYPE})
 public @interface Block {
 
-	// TODO: remove
+	/**
+	 * @deprecated Do not use, will be removed
+	 */
 	@Deprecated
 	String name() default "";
 	

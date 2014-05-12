@@ -61,6 +61,11 @@ import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
+import ca.uhn.fhir.rest.gclient.DateParam;
+import ca.uhn.fhir.rest.gclient.Include;
+import ca.uhn.fhir.rest.gclient.ReferenceParam;
+import ca.uhn.fhir.rest.gclient.StringParam;
+import ca.uhn.fhir.rest.gclient.TokenParam;
 
 
 /**
@@ -98,6 +103,16 @@ public class ConceptMap extends BaseResource implements IResource {
 	public static final String SP_IDENTIFIER = "identifier";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
+	 * <p>
+	 * Description: <b>The identifier of the concept map</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>ConceptMap.identifier</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam IDENTIFIER = new TokenParam(SP_IDENTIFIER);
+
+	/**
 	 * Search parameter constant for <b>version</b>
 	 * <p>
 	 * Description: <b>The version identifier of the concept map</b><br/>
@@ -107,6 +122,16 @@ public class ConceptMap extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="version", path="ConceptMap.version", description="The version identifier of the concept map")
 	public static final String SP_VERSION = "version";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>version</b>
+	 * <p>
+	 * Description: <b>The version identifier of the concept map</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>ConceptMap.version</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam VERSION = new TokenParam(SP_VERSION);
 
 	/**
 	 * Search parameter constant for <b>name</b>
@@ -120,6 +145,16 @@ public class ConceptMap extends BaseResource implements IResource {
 	public static final String SP_NAME = "name";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>name</b>
+	 * <p>
+	 * Description: <b>Name of the concept map</b><br/>
+	 * Type: <b>string</b><br/>
+	 * Path: <b>ConceptMap.name</b><br/>
+	 * </p>
+	 */
+	public static final StringParam NAME = new StringParam(SP_NAME);
+
+	/**
 	 * Search parameter constant for <b>publisher</b>
 	 * <p>
 	 * Description: <b>Name of the publisher of the concept map</b><br/>
@@ -129,6 +164,16 @@ public class ConceptMap extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="publisher", path="ConceptMap.publisher", description="Name of the publisher of the concept map")
 	public static final String SP_PUBLISHER = "publisher";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>publisher</b>
+	 * <p>
+	 * Description: <b>Name of the publisher of the concept map</b><br/>
+	 * Type: <b>string</b><br/>
+	 * Path: <b>ConceptMap.publisher</b><br/>
+	 * </p>
+	 */
+	public static final StringParam PUBLISHER = new StringParam(SP_PUBLISHER);
 
 	/**
 	 * Search parameter constant for <b>description</b>
@@ -142,6 +187,16 @@ public class ConceptMap extends BaseResource implements IResource {
 	public static final String SP_DESCRIPTION = "description";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>description</b>
+	 * <p>
+	 * Description: <b>Text search in the description of the concept map</b><br/>
+	 * Type: <b>string</b><br/>
+	 * Path: <b>ConceptMap.description</b><br/>
+	 * </p>
+	 */
+	public static final StringParam DESCRIPTION = new StringParam(SP_DESCRIPTION);
+
+	/**
 	 * Search parameter constant for <b>status</b>
 	 * <p>
 	 * Description: <b>Status of the concept map</b><br/>
@@ -151,6 +206,16 @@ public class ConceptMap extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="status", path="ConceptMap.status", description="Status of the concept map")
 	public static final String SP_STATUS = "status";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>status</b>
+	 * <p>
+	 * Description: <b>Status of the concept map</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>ConceptMap.status</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam STATUS = new TokenParam(SP_STATUS);
 
 	/**
 	 * Search parameter constant for <b>date</b>
@@ -164,6 +229,16 @@ public class ConceptMap extends BaseResource implements IResource {
 	public static final String SP_DATE = "date";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>date</b>
+	 * <p>
+	 * Description: <b>The concept map publication date</b><br/>
+	 * Type: <b>date</b><br/>
+	 * Path: <b>ConceptMap.date</b><br/>
+	 * </p>
+	 */
+	public static final DateParam DATE = new DateParam(SP_DATE);
+
+	/**
 	 * Search parameter constant for <b>source</b>
 	 * <p>
 	 * Description: <b>The system for any concepts mapped by this concept map</b><br/>
@@ -173,6 +248,22 @@ public class ConceptMap extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="source", path="ConceptMap.source", description="The system for any concepts mapped by this concept map")
 	public static final String SP_SOURCE = "source";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>source</b>
+	 * <p>
+	 * Description: <b>The system for any concepts mapped by this concept map</b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>ConceptMap.source</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam SOURCE = new ReferenceParam(SP_SOURCE);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>ConceptMap.source</b>".
+	 */
+	public static final Include INCLUDE_SOURCE = new Include("ConceptMap.source");
 
 	/**
 	 * Search parameter constant for <b>target</b>
@@ -186,6 +277,22 @@ public class ConceptMap extends BaseResource implements IResource {
 	public static final String SP_TARGET = "target";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>target</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>ConceptMap.target</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam TARGET = new ReferenceParam(SP_TARGET);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>ConceptMap.target</b>".
+	 */
+	public static final Include INCLUDE_TARGET = new Include("ConceptMap.target");
+
+	/**
 	 * Search parameter constant for <b>system</b>
 	 * <p>
 	 * Description: <b>The system for any destination concepts mapped by this map</b><br/>
@@ -195,6 +302,16 @@ public class ConceptMap extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="system", path="ConceptMap.concept.map.system", description="The system for any destination concepts mapped by this map")
 	public static final String SP_SYSTEM = "system";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>system</b>
+	 * <p>
+	 * Description: <b>The system for any destination concepts mapped by this map</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>ConceptMap.concept.map.system</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam SYSTEM = new TokenParam(SP_SYSTEM);
 
 	/**
 	 * Search parameter constant for <b>dependson</b>
@@ -208,6 +325,16 @@ public class ConceptMap extends BaseResource implements IResource {
 	public static final String SP_DEPENDSON = "dependson";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>dependson</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>ConceptMap.concept.dependsOn.concept</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam DEPENDSON = new TokenParam(SP_DEPENDSON);
+
+	/**
 	 * Search parameter constant for <b>product</b>
 	 * <p>
 	 * Description: <b></b><br/>
@@ -217,6 +344,16 @@ public class ConceptMap extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="product", path="ConceptMap.concept.map.product.concept", description="")
 	public static final String SP_PRODUCT = "product";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>product</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>ConceptMap.concept.map.product.concept</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam PRODUCT = new TokenParam(SP_PRODUCT);
 
 
 	@Child(name="identifier", type=StringDt.class, order=0, min=0, max=1)	
@@ -318,11 +455,6 @@ public class ConceptMap extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myIdentifier,  myVersion,  myName,  myPublisher,  myTelecom,  myDescription,  myCopyright,  myStatus,  myExperimental,  myDate,  mySource,  myTarget,  myConcept);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myIdentifier, myVersion, myName, myPublisher, myTelecom, myDescription, myCopyright, myStatus, myExperimental, myDate, mySource, myTarget, myConcept);
@@ -965,11 +1097,6 @@ public class ConceptMap extends BaseResource implements IResource {
 	}
 	
 	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
-	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, mySystem, myCode, myDependsOn, myMap);
 	}
@@ -1224,11 +1351,6 @@ public class ConceptMap extends BaseResource implements IResource {
 	}
 	
 	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
-	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myConcept, mySystem, myCode);
 	}
@@ -1421,11 +1543,6 @@ public class ConceptMap extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  mySystem,  myCode,  myEquivalence,  myComments,  myProduct);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, mySystem, myCode, myEquivalence, myComments, myProduct);

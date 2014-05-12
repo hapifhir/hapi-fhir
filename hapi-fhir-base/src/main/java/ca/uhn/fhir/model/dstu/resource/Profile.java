@@ -73,6 +73,11 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
+import ca.uhn.fhir.rest.gclient.DateParam;
+import ca.uhn.fhir.rest.gclient.Include;
+import ca.uhn.fhir.rest.gclient.ReferenceParam;
+import ca.uhn.fhir.rest.gclient.StringParam;
+import ca.uhn.fhir.rest.gclient.TokenParam;
 
 
 /**
@@ -110,6 +115,16 @@ public class Profile extends BaseResource implements IResource {
 	public static final String SP_IDENTIFIER = "identifier";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
+	 * <p>
+	 * Description: <b>The identifier of the profile</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Profile.identifier</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam IDENTIFIER = new TokenParam(SP_IDENTIFIER);
+
+	/**
 	 * Search parameter constant for <b>version</b>
 	 * <p>
 	 * Description: <b>The version identifier of the profile</b><br/>
@@ -119,6 +134,16 @@ public class Profile extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="version", path="Profile.version", description="The version identifier of the profile")
 	public static final String SP_VERSION = "version";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>version</b>
+	 * <p>
+	 * Description: <b>The version identifier of the profile</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Profile.version</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam VERSION = new TokenParam(SP_VERSION);
 
 	/**
 	 * Search parameter constant for <b>name</b>
@@ -132,6 +157,16 @@ public class Profile extends BaseResource implements IResource {
 	public static final String SP_NAME = "name";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>name</b>
+	 * <p>
+	 * Description: <b>Name of the profile</b><br/>
+	 * Type: <b>string</b><br/>
+	 * Path: <b>Profile.name</b><br/>
+	 * </p>
+	 */
+	public static final StringParam NAME = new StringParam(SP_NAME);
+
+	/**
 	 * Search parameter constant for <b>publisher</b>
 	 * <p>
 	 * Description: <b>Name of the publisher of the profile</b><br/>
@@ -141,6 +176,16 @@ public class Profile extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="publisher", path="Profile.publisher", description="Name of the publisher of the profile")
 	public static final String SP_PUBLISHER = "publisher";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>publisher</b>
+	 * <p>
+	 * Description: <b>Name of the publisher of the profile</b><br/>
+	 * Type: <b>string</b><br/>
+	 * Path: <b>Profile.publisher</b><br/>
+	 * </p>
+	 */
+	public static final StringParam PUBLISHER = new StringParam(SP_PUBLISHER);
 
 	/**
 	 * Search parameter constant for <b>description</b>
@@ -154,6 +199,16 @@ public class Profile extends BaseResource implements IResource {
 	public static final String SP_DESCRIPTION = "description";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>description</b>
+	 * <p>
+	 * Description: <b>Text search in the description of the profile</b><br/>
+	 * Type: <b>string</b><br/>
+	 * Path: <b>Profile.description</b><br/>
+	 * </p>
+	 */
+	public static final StringParam DESCRIPTION = new StringParam(SP_DESCRIPTION);
+
+	/**
 	 * Search parameter constant for <b>status</b>
 	 * <p>
 	 * Description: <b>The current status of the profile</b><br/>
@@ -163,6 +218,16 @@ public class Profile extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="status", path="Profile.status", description="The current status of the profile")
 	public static final String SP_STATUS = "status";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>status</b>
+	 * <p>
+	 * Description: <b>The current status of the profile</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Profile.status</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam STATUS = new TokenParam(SP_STATUS);
 
 	/**
 	 * Search parameter constant for <b>date</b>
@@ -176,6 +241,16 @@ public class Profile extends BaseResource implements IResource {
 	public static final String SP_DATE = "date";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>date</b>
+	 * <p>
+	 * Description: <b>The profile publication date</b><br/>
+	 * Type: <b>date</b><br/>
+	 * Path: <b>Profile.date</b><br/>
+	 * </p>
+	 */
+	public static final DateParam DATE = new DateParam(SP_DATE);
+
+	/**
 	 * Search parameter constant for <b>code</b>
 	 * <p>
 	 * Description: <b>A code for the profile in the format uri::code (server may choose to do subsumption)</b><br/>
@@ -185,6 +260,16 @@ public class Profile extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="code", path="Profile.code", description="A code for the profile in the format uri::code (server may choose to do subsumption)")
 	public static final String SP_CODE = "code";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>code</b>
+	 * <p>
+	 * Description: <b>A code for the profile in the format uri::code (server may choose to do subsumption)</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Profile.code</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam CODE = new TokenParam(SP_CODE);
 
 	/**
 	 * Search parameter constant for <b>extension</b>
@@ -198,6 +283,16 @@ public class Profile extends BaseResource implements IResource {
 	public static final String SP_EXTENSION = "extension";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>extension</b>
+	 * <p>
+	 * Description: <b>An extension code (use or definition)</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Profile.extensionDefn.code</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam EXTENSION = new TokenParam(SP_EXTENSION);
+
+	/**
 	 * Search parameter constant for <b>valueset</b>
 	 * <p>
 	 * Description: <b>A vocabulary binding code</b><br/>
@@ -209,6 +304,22 @@ public class Profile extends BaseResource implements IResource {
 	public static final String SP_VALUESET = "valueset";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>valueset</b>
+	 * <p>
+	 * Description: <b>A vocabulary binding code</b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>Profile.structure.element.definition.binding.reference[x]</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam VALUESET = new ReferenceParam(SP_VALUESET);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>Profile.structure.element.definition.binding.reference[x]</b>".
+	 */
+	public static final Include INCLUDE_STRUCTURE_ELEMENT_DEFINITION_BINDING_REFERENCE = new Include("Profile.structure.element.definition.binding.reference[x]");
+
+	/**
 	 * Search parameter constant for <b>type</b>
 	 * <p>
 	 * Description: <b>Type of resource that is constrained in the profile</b><br/>
@@ -218,6 +329,16 @@ public class Profile extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="type", path="Profile.structure.type", description="Type of resource that is constrained in the profile")
 	public static final String SP_TYPE = "type";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>type</b>
+	 * <p>
+	 * Description: <b>Type of resource that is constrained in the profile</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Profile.structure.type</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam TYPE = new TokenParam(SP_TYPE);
 
 
 	@Child(name="identifier", type=StringDt.class, order=0, min=0, max=1)	
@@ -338,11 +459,6 @@ public class Profile extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myIdentifier,  myVersion,  myName,  myPublisher,  myTelecom,  myDescription,  myCode,  myStatus,  myExperimental,  myDate,  myRequirements,  myFhirVersion,  myMapping,  myStructure,  myExtensionDefn,  myQuery);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myIdentifier, myVersion, myName, myPublisher, myTelecom, myDescription, myCode, myStatus, myExperimental, myDate, myRequirements, myFhirVersion, myMapping, myStructure, myExtensionDefn, myQuery);
@@ -1207,11 +1323,6 @@ public class Profile extends BaseResource implements IResource {
 	}
 	
 	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
-	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myIdentity, myUri, myName, myComments);
 	}
@@ -1455,11 +1566,6 @@ public class Profile extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myType,  myName,  myPublish,  myPurpose,  myElement,  mySearchParam);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myType, myName, myPublish, myPurpose, myElement, mySearchParam);
@@ -1817,11 +1923,6 @@ public class Profile extends BaseResource implements IResource {
 	}
 	
 	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
-	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myPath, myRepresentation, myName, mySlicing, myDefinition);
 	}
@@ -2074,11 +2175,6 @@ public class Profile extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myDiscriminator,  myOrdered,  myRules);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myDiscriminator, myOrdered, myRules);
@@ -2363,11 +2459,6 @@ public class Profile extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myShort,  myFormal,  myComments,  myRequirements,  mySynonym,  myMin,  myMax,  myType,  myNameReference,  myValue,  myExample,  myMaxLength,  myCondition,  myConstraint,  myMustSupport,  myIsModifier,  myBinding,  myMapping);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myShort, myFormal, myComments, myRequirements, mySynonym, myMin, myMax, myType, myNameReference, myValue, myExample, myMaxLength, myCondition, myConstraint, myMustSupport, myIsModifier, myBinding, myMapping);
@@ -3278,11 +3369,6 @@ public class Profile extends BaseResource implements IResource {
 	}
 	
 	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
-	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myCode, myProfile, myAggregation);
 	}
@@ -3488,11 +3574,6 @@ public class Profile extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myKey,  myName,  mySeverity,  myHuman,  myXpath);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myKey, myName, mySeverity, myHuman, myXpath);
@@ -3776,11 +3857,6 @@ public class Profile extends BaseResource implements IResource {
 	}
 	
 	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
-	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myName, myIsExtensible, myConformance, myDescription, myReference);
 	}
@@ -4025,11 +4101,6 @@ public class Profile extends BaseResource implements IResource {
 	}
 	
 	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
-	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myIdentity, myMap);
 	}
@@ -4180,11 +4251,6 @@ public class Profile extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myName,  myType,  myDocumentation,  myXpath,  myTarget);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myName, myType, myDocumentation, myXpath, myTarget);
@@ -4481,11 +4547,6 @@ public class Profile extends BaseResource implements IResource {
 	}
 	
 	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
-	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myCode, myDisplay, myContextType, myContext, myDefinition);
 	}
@@ -4773,11 +4834,6 @@ public class Profile extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myName,  myDocumentation,  myParameter);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myName, myDocumentation, myParameter);

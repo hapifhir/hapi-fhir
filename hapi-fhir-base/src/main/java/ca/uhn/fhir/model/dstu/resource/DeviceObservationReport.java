@@ -56,6 +56,9 @@ import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
 import ca.uhn.fhir.model.primitive.InstantDt;
+import ca.uhn.fhir.rest.gclient.Include;
+import ca.uhn.fhir.rest.gclient.ReferenceParam;
+import ca.uhn.fhir.rest.gclient.TokenParam;
 
 
 /**
@@ -93,6 +96,22 @@ public class DeviceObservationReport extends BaseResource implements IResource {
 	public static final String SP_SOURCE = "source";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>source</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>DeviceObservationReport.source</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam SOURCE = new ReferenceParam(SP_SOURCE);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>DeviceObservationReport.source</b>".
+	 */
+	public static final Include INCLUDE_SOURCE = new Include("DeviceObservationReport.source");
+
+	/**
 	 * Search parameter constant for <b>code</b>
 	 * <p>
 	 * Description: <b>The compatment code</b><br/>
@@ -102,6 +121,16 @@ public class DeviceObservationReport extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="code", path="DeviceObservationReport.virtualDevice.code", description="The compatment code")
 	public static final String SP_CODE = "code";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>code</b>
+	 * <p>
+	 * Description: <b>The compatment code</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>DeviceObservationReport.virtualDevice.code</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam CODE = new TokenParam(SP_CODE);
 
 	/**
 	 * Search parameter constant for <b>channel</b>
@@ -115,6 +144,16 @@ public class DeviceObservationReport extends BaseResource implements IResource {
 	public static final String SP_CHANNEL = "channel";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>channel</b>
+	 * <p>
+	 * Description: <b>The channel code</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>DeviceObservationReport.virtualDevice.channel.code</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam CHANNEL = new TokenParam(SP_CHANNEL);
+
+	/**
 	 * Search parameter constant for <b>observation</b>
 	 * <p>
 	 * Description: <b></b><br/>
@@ -126,6 +165,22 @@ public class DeviceObservationReport extends BaseResource implements IResource {
 	public static final String SP_OBSERVATION = "observation";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>observation</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>DeviceObservationReport.virtualDevice.channel.metric.observation</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam OBSERVATION = new ReferenceParam(SP_OBSERVATION);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>DeviceObservationReport.virtualDevice.channel.metric.observation</b>".
+	 */
+	public static final Include INCLUDE_VIRTUALDEVICE_CHANNEL_METRIC_OBSERVATION = new Include("DeviceObservationReport.virtualDevice.channel.metric.observation");
+
+	/**
 	 * Search parameter constant for <b>subject</b>
 	 * <p>
 	 * Description: <b></b><br/>
@@ -135,6 +190,22 @@ public class DeviceObservationReport extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="subject", path="DeviceObservationReport.subject", description="")
 	public static final String SP_SUBJECT = "subject";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>subject</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>DeviceObservationReport.subject</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam SUBJECT = new ReferenceParam(SP_SUBJECT);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>DeviceObservationReport.subject</b>".
+	 */
+	public static final Include INCLUDE_SUBJECT = new Include("DeviceObservationReport.subject");
 
 
 	@Child(name="instant", type=InstantDt.class, order=0, min=1, max=1)	
@@ -180,11 +251,6 @@ public class DeviceObservationReport extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myInstant,  myIdentifier,  mySource,  mySubject,  myVirtualDevice);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myInstant, myIdentifier, mySource, mySubject, myVirtualDevice);
@@ -455,11 +521,6 @@ public class DeviceObservationReport extends BaseResource implements IResource {
 	}
 	
 	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
-	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myCode, myChannel);
 	}
@@ -590,11 +651,6 @@ public class DeviceObservationReport extends BaseResource implements IResource {
 	}
 	
 	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
-	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myCode, myMetric);
 	}
@@ -718,11 +774,6 @@ public class DeviceObservationReport extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myObservation);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myObservation);

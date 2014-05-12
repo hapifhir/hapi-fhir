@@ -53,6 +53,9 @@ import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.primitive.DecimalDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.rest.gclient.Include;
+import ca.uhn.fhir.rest.gclient.ReferenceParam;
+import ca.uhn.fhir.rest.gclient.StringParam;
 
 
 /**
@@ -90,6 +93,22 @@ public class GeneExpression extends BaseResource implements IResource {
 	public static final String SP_SUBJECT = "subject";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>subject</b>
+	 * <p>
+	 * Description: <b>subject being described by the resource</b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>GeneExpression.subject</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam SUBJECT = new ReferenceParam(SP_SUBJECT);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>GeneExpression.subject</b>".
+	 */
+	public static final Include INCLUDE_SUBJECT = new Include("GeneExpression.subject");
+
+	/**
 	 * Search parameter constant for <b>gene</b>
 	 * <p>
 	 * Description: <b>Id of the gene</b><br/>
@@ -101,6 +120,16 @@ public class GeneExpression extends BaseResource implements IResource {
 	public static final String SP_GENE = "gene";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>gene</b>
+	 * <p>
+	 * Description: <b>Id of the gene</b><br/>
+	 * Type: <b>string</b><br/>
+	 * Path: <b>GeneExpression.gene.identifier</b><br/>
+	 * </p>
+	 */
+	public static final StringParam GENE = new StringParam(SP_GENE);
+
+	/**
 	 * Search parameter constant for <b>coordinate</b>
 	 * <p>
 	 * Description: <b>Coordinate of the gene</b><br/>
@@ -110,6 +139,16 @@ public class GeneExpression extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="coordinate", path="GeneExpression.gene.coordinate", description="Coordinate of the gene")
 	public static final String SP_COORDINATE = "coordinate";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>coordinate</b>
+	 * <p>
+	 * Description: <b>Coordinate of the gene</b><br/>
+	 * Type: <b>string</b><br/>
+	 * Path: <b>GeneExpression.gene.coordinate</b><br/>
+	 * </p>
+	 */
+	public static final StringParam COORDINATE = new StringParam(SP_COORDINATE);
 
 
 	@Child(name="subject", order=0, min=0, max=1, type={
@@ -148,11 +187,6 @@ public class GeneExpression extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  mySubject,  myGene,  myMicroarray,  myRnaSeq);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, mySubject, myGene, myMicroarray, myRnaSeq);
@@ -356,11 +390,6 @@ public class GeneExpression extends BaseResource implements IResource {
 	}
 	
 	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
-	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myIdentifier, myCoordinate);
 	}
@@ -481,11 +510,6 @@ public class GeneExpression extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myChromosome,  myStart,  myEnd);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myChromosome, myStart, myEnd);
@@ -675,11 +699,6 @@ public class GeneExpression extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myInputLab,  myInputAnalysis,  myExpression,  myIsoform);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myInputLab, myInputAnalysis, myExpression, myIsoform);
@@ -911,11 +930,6 @@ public class GeneExpression extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myIdentity,  myExpression);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myIdentity, myExpression);

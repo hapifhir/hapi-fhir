@@ -20,8 +20,6 @@ package ca.uhn.fhir.context;
  * #L%
  */
 
-import java.util.Arrays;
-import java.util.List;
 
 public class RuntimeSearchParam {
 

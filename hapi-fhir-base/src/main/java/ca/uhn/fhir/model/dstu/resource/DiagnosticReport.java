@@ -63,6 +63,10 @@ import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.rest.gclient.DateParam;
+import ca.uhn.fhir.rest.gclient.Include;
+import ca.uhn.fhir.rest.gclient.ReferenceParam;
+import ca.uhn.fhir.rest.gclient.TokenParam;
 
 
 /**
@@ -100,6 +104,16 @@ public class DiagnosticReport extends BaseResource implements IResource {
 	public static final String SP_STATUS = "status";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>status</b>
+	 * <p>
+	 * Description: <b>The status of the report</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>DiagnosticReport.status</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam STATUS = new TokenParam(SP_STATUS);
+
+	/**
 	 * Search parameter constant for <b>issued</b>
 	 * <p>
 	 * Description: <b>When the report was issued</b><br/>
@@ -109,6 +123,16 @@ public class DiagnosticReport extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="issued", path="DiagnosticReport.issued", description="When the report was issued")
 	public static final String SP_ISSUED = "issued";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>issued</b>
+	 * <p>
+	 * Description: <b>When the report was issued</b><br/>
+	 * Type: <b>date</b><br/>
+	 * Path: <b>DiagnosticReport.issued</b><br/>
+	 * </p>
+	 */
+	public static final DateParam ISSUED = new DateParam(SP_ISSUED);
 
 	/**
 	 * Search parameter constant for <b>subject</b>
@@ -122,6 +146,22 @@ public class DiagnosticReport extends BaseResource implements IResource {
 	public static final String SP_SUBJECT = "subject";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>subject</b>
+	 * <p>
+	 * Description: <b>The subject of the report</b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>DiagnosticReport.subject</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam SUBJECT = new ReferenceParam(SP_SUBJECT);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>DiagnosticReport.subject</b>".
+	 */
+	public static final Include INCLUDE_SUBJECT = new Include("DiagnosticReport.subject");
+
+	/**
 	 * Search parameter constant for <b>performer</b>
 	 * <p>
 	 * Description: <b>Who was the source of the report (organization)</b><br/>
@@ -131,6 +171,22 @@ public class DiagnosticReport extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="performer", path="DiagnosticReport.performer", description="Who was the source of the report (organization)")
 	public static final String SP_PERFORMER = "performer";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>performer</b>
+	 * <p>
+	 * Description: <b>Who was the source of the report (organization)</b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>DiagnosticReport.performer</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam PERFORMER = new ReferenceParam(SP_PERFORMER);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>DiagnosticReport.performer</b>".
+	 */
+	public static final Include INCLUDE_PERFORMER = new Include("DiagnosticReport.performer");
 
 	/**
 	 * Search parameter constant for <b>identifier</b>
@@ -144,6 +200,16 @@ public class DiagnosticReport extends BaseResource implements IResource {
 	public static final String SP_IDENTIFIER = "identifier";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
+	 * <p>
+	 * Description: <b>An identifier for the report</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>DiagnosticReport.identifier</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam IDENTIFIER = new TokenParam(SP_IDENTIFIER);
+
+	/**
 	 * Search parameter constant for <b>service</b>
 	 * <p>
 	 * Description: <b>Which diagnostic discipline/department created the report</b><br/>
@@ -153,6 +219,16 @@ public class DiagnosticReport extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="service", path="DiagnosticReport.serviceCategory", description="Which diagnostic discipline/department created the report")
 	public static final String SP_SERVICE = "service";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>service</b>
+	 * <p>
+	 * Description: <b>Which diagnostic discipline/department created the report</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>DiagnosticReport.serviceCategory</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam SERVICE = new TokenParam(SP_SERVICE);
 
 	/**
 	 * Search parameter constant for <b>date</b>
@@ -166,6 +242,16 @@ public class DiagnosticReport extends BaseResource implements IResource {
 	public static final String SP_DATE = "date";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>date</b>
+	 * <p>
+	 * Description: <b>The clinically relevant time of the report</b><br/>
+	 * Type: <b>date</b><br/>
+	 * Path: <b>DiagnosticReport.diagnostic[x]</b><br/>
+	 * </p>
+	 */
+	public static final DateParam DATE = new DateParam(SP_DATE);
+
+	/**
 	 * Search parameter constant for <b>specimen</b>
 	 * <p>
 	 * Description: <b>The specimen details</b><br/>
@@ -175,6 +261,22 @@ public class DiagnosticReport extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="specimen", path="DiagnosticReport.specimen", description="The specimen details")
 	public static final String SP_SPECIMEN = "specimen";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>specimen</b>
+	 * <p>
+	 * Description: <b>The specimen details</b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>DiagnosticReport.specimen</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam SPECIMEN = new ReferenceParam(SP_SPECIMEN);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>DiagnosticReport.specimen</b>".
+	 */
+	public static final Include INCLUDE_SPECIMEN = new Include("DiagnosticReport.specimen");
 
 	/**
 	 * Search parameter constant for <b>name</b>
@@ -188,6 +290,16 @@ public class DiagnosticReport extends BaseResource implements IResource {
 	public static final String SP_NAME = "name";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>name</b>
+	 * <p>
+	 * Description: <b>The name of the report (e.g. the code for the report as a whole, as opposed to codes for the atomic results, which are the names on the observation resource referred to from the result)</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>DiagnosticReport.name</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam NAME = new TokenParam(SP_NAME);
+
+	/**
 	 * Search parameter constant for <b>result</b>
 	 * <p>
 	 * Description: <b>Link to an atomic result (observation resource)</b><br/>
@@ -197,6 +309,22 @@ public class DiagnosticReport extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="result", path="DiagnosticReport.result", description="Link to an atomic result (observation resource)")
 	public static final String SP_RESULT = "result";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>result</b>
+	 * <p>
+	 * Description: <b>Link to an atomic result (observation resource)</b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>DiagnosticReport.result</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam RESULT = new ReferenceParam(SP_RESULT);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>DiagnosticReport.result</b>".
+	 */
+	public static final Include INCLUDE_RESULT = new Include("DiagnosticReport.result");
 
 	/**
 	 * Search parameter constant for <b>diagnosis</b>
@@ -210,6 +338,16 @@ public class DiagnosticReport extends BaseResource implements IResource {
 	public static final String SP_DIAGNOSIS = "diagnosis";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>diagnosis</b>
+	 * <p>
+	 * Description: <b>A coded diagnosis on the report</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>DiagnosticReport.codedDiagnosis</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam DIAGNOSIS = new TokenParam(SP_DIAGNOSIS);
+
+	/**
 	 * Search parameter constant for <b>image</b>
 	 * <p>
 	 * Description: <b></b><br/>
@@ -221,6 +359,22 @@ public class DiagnosticReport extends BaseResource implements IResource {
 	public static final String SP_IMAGE = "image";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>image</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>DiagnosticReport.image.link</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam IMAGE = new ReferenceParam(SP_IMAGE);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>DiagnosticReport.image.link</b>".
+	 */
+	public static final Include INCLUDE_IMAGE_LINK = new Include("DiagnosticReport.image.link");
+
+	/**
 	 * Search parameter constant for <b>request</b>
 	 * <p>
 	 * Description: <b></b><br/>
@@ -230,6 +384,22 @@ public class DiagnosticReport extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="request", path="DiagnosticReport.requestDetail", description="")
 	public static final String SP_REQUEST = "request";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>request</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>DiagnosticReport.requestDetail</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam REQUEST = new ReferenceParam(SP_REQUEST);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>DiagnosticReport.requestDetail</b>".
+	 */
+	public static final Include INCLUDE_REQUESTDETAIL = new Include("DiagnosticReport.requestDetail");
 
 
 	@Child(name="name", type=CodeableConceptDt.class, order=0, min=1, max=1)	
@@ -357,11 +527,6 @@ public class DiagnosticReport extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myName,  myStatus,  myIssued,  mySubject,  myPerformer,  myIdentifier,  myRequestDetail,  myServiceCategory,  myDiagnostic,  mySpecimen,  myResult,  myImagingStudy,  myImage,  myConclusion,  myCodedDiagnosis,  myPresentedForm);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myName, myStatus, myIssued, mySubject, myPerformer, myIdentifier, myRequestDetail, myServiceCategory, myDiagnostic, mySpecimen, myResult, myImagingStudy, myImage, myConclusion, myCodedDiagnosis, myPresentedForm);
@@ -1103,11 +1268,6 @@ public class DiagnosticReport extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myComment,  myLink);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myComment, myLink);

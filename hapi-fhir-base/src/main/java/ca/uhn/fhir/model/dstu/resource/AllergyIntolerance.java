@@ -57,6 +57,10 @@ import ca.uhn.fhir.model.dstu.valueset.SensitivityTypeEnum;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
+import ca.uhn.fhir.rest.gclient.DateParam;
+import ca.uhn.fhir.rest.gclient.Include;
+import ca.uhn.fhir.rest.gclient.ReferenceParam;
+import ca.uhn.fhir.rest.gclient.TokenParam;
 
 
 /**
@@ -94,6 +98,16 @@ public class AllergyIntolerance extends BaseResource implements IResource {
 	public static final String SP_TYPE = "type";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>type</b>
+	 * <p>
+	 * Description: <b>The type of sensitivity</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>AllergyIntolerance.sensitivityType</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam TYPE = new TokenParam(SP_TYPE);
+
+	/**
 	 * Search parameter constant for <b>substance</b>
 	 * <p>
 	 * Description: <b>The name or code of the substance that produces the sensitivity</b><br/>
@@ -103,6 +117,22 @@ public class AllergyIntolerance extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="substance", path="AllergyIntolerance.substance", description="The name or code of the substance that produces the sensitivity")
 	public static final String SP_SUBSTANCE = "substance";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>substance</b>
+	 * <p>
+	 * Description: <b>The name or code of the substance that produces the sensitivity</b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>AllergyIntolerance.substance</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam SUBSTANCE = new ReferenceParam(SP_SUBSTANCE);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>AllergyIntolerance.substance</b>".
+	 */
+	public static final Include INCLUDE_SUBSTANCE = new Include("AllergyIntolerance.substance");
 
 	/**
 	 * Search parameter constant for <b>date</b>
@@ -116,6 +146,16 @@ public class AllergyIntolerance extends BaseResource implements IResource {
 	public static final String SP_DATE = "date";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>date</b>
+	 * <p>
+	 * Description: <b>Recorded date/time.</b><br/>
+	 * Type: <b>date</b><br/>
+	 * Path: <b>AllergyIntolerance.recordedDate</b><br/>
+	 * </p>
+	 */
+	public static final DateParam DATE = new DateParam(SP_DATE);
+
+	/**
 	 * Search parameter constant for <b>status</b>
 	 * <p>
 	 * Description: <b>The status of the sensitivity</b><br/>
@@ -125,6 +165,16 @@ public class AllergyIntolerance extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="status", path="AllergyIntolerance.status", description="The status of the sensitivity")
 	public static final String SP_STATUS = "status";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>status</b>
+	 * <p>
+	 * Description: <b>The status of the sensitivity</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>AllergyIntolerance.status</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam STATUS = new TokenParam(SP_STATUS);
 
 	/**
 	 * Search parameter constant for <b>subject</b>
@@ -138,6 +188,22 @@ public class AllergyIntolerance extends BaseResource implements IResource {
 	public static final String SP_SUBJECT = "subject";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>subject</b>
+	 * <p>
+	 * Description: <b>The subject that the sensitivity is about</b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>AllergyIntolerance.subject</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam SUBJECT = new ReferenceParam(SP_SUBJECT);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>AllergyIntolerance.subject</b>".
+	 */
+	public static final Include INCLUDE_SUBJECT = new Include("AllergyIntolerance.subject");
+
+	/**
 	 * Search parameter constant for <b>recorder</b>
 	 * <p>
 	 * Description: <b>Who recorded the sensitivity</b><br/>
@@ -147,6 +213,22 @@ public class AllergyIntolerance extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="recorder", path="AllergyIntolerance.recorder", description="Who recorded the sensitivity")
 	public static final String SP_RECORDER = "recorder";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>recorder</b>
+	 * <p>
+	 * Description: <b>Who recorded the sensitivity</b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>AllergyIntolerance.recorder</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam RECORDER = new ReferenceParam(SP_RECORDER);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>AllergyIntolerance.recorder</b>".
+	 */
+	public static final Include INCLUDE_RECORDER = new Include("AllergyIntolerance.recorder");
 
 
 	@Child(name="identifier", type=IdentifierDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)	
@@ -230,11 +312,6 @@ public class AllergyIntolerance extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myIdentifier,  myCriticality,  mySensitivityType,  myRecordedDate,  myStatus,  mySubject,  myRecorder,  mySubstance,  myReaction,  mySensitivityTest);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myIdentifier, myCriticality, mySensitivityType, myRecordedDate, myStatus, mySubject, myRecorder, mySubstance, myReaction, mySensitivityTest);

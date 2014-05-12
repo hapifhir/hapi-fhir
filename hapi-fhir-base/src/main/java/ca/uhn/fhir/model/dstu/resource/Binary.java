@@ -40,11 +40,6 @@ public class Binary  extends BaseResource implements IResource {
 	}
 
 	@Override
-	public List<IElement> getAllPopulatedChildElements() {
-		return null;
-	}
-
-	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return null;
 	}

@@ -63,6 +63,10 @@ import ca.uhn.fhir.model.primitive.BoundCodeableConceptDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.DecimalDt;
 import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.rest.gclient.Include;
+import ca.uhn.fhir.rest.gclient.ReferenceParam;
+import ca.uhn.fhir.rest.gclient.StringParam;
+import ca.uhn.fhir.rest.gclient.TokenParam;
 
 
 /**
@@ -100,6 +104,16 @@ public class Location extends BaseResource implements IResource {
 	public static final String SP_IDENTIFIER = "identifier";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Location.identifier</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam IDENTIFIER = new TokenParam(SP_IDENTIFIER);
+
+	/**
 	 * Search parameter constant for <b>name</b>
 	 * <p>
 	 * Description: <b>A (portion of the) name of the location</b><br/>
@@ -109,6 +123,16 @@ public class Location extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="name", path="Location.name", description="A (portion of the) name of the location")
 	public static final String SP_NAME = "name";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>name</b>
+	 * <p>
+	 * Description: <b>A (portion of the) name of the location</b><br/>
+	 * Type: <b>string</b><br/>
+	 * Path: <b>Location.name</b><br/>
+	 * </p>
+	 */
+	public static final StringParam NAME = new StringParam(SP_NAME);
 
 	/**
 	 * Search parameter constant for <b>type</b>
@@ -122,6 +146,16 @@ public class Location extends BaseResource implements IResource {
 	public static final String SP_TYPE = "type";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>type</b>
+	 * <p>
+	 * Description: <b>A code for the type of location</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Location.type</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam TYPE = new TokenParam(SP_TYPE);
+
+	/**
 	 * Search parameter constant for <b>address</b>
 	 * <p>
 	 * Description: <b>A (part of the) address of the location</b><br/>
@@ -131,6 +165,16 @@ public class Location extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="address", path="Location.address", description="A (part of the) address of the location")
 	public static final String SP_ADDRESS = "address";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>address</b>
+	 * <p>
+	 * Description: <b>A (part of the) address of the location</b><br/>
+	 * Type: <b>string</b><br/>
+	 * Path: <b>Location.address</b><br/>
+	 * </p>
+	 */
+	public static final StringParam ADDRESS = new StringParam(SP_ADDRESS);
 
 	/**
 	 * Search parameter constant for <b>status</b>
@@ -144,6 +188,16 @@ public class Location extends BaseResource implements IResource {
 	public static final String SP_STATUS = "status";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>status</b>
+	 * <p>
+	 * Description: <b>Searches for locations with a specific kind of status</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Location.status</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam STATUS = new TokenParam(SP_STATUS);
+
+	/**
 	 * Search parameter constant for <b>partof</b>
 	 * <p>
 	 * Description: <b>The location of which this location is a part</b><br/>
@@ -153,6 +207,22 @@ public class Location extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="partof", path="Location.partOf", description="The location of which this location is a part")
 	public static final String SP_PARTOF = "partof";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>partof</b>
+	 * <p>
+	 * Description: <b>The location of which this location is a part</b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>Location.partOf</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam PARTOF = new ReferenceParam(SP_PARTOF);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>Location.partOf</b>".
+	 */
+	public static final Include INCLUDE_PARTOF = new Include("Location.partOf");
 
 	/**
 	 * Search parameter constant for <b>near</b>
@@ -166,6 +236,16 @@ public class Location extends BaseResource implements IResource {
 	public static final String SP_NEAR = "near";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>near</b>
+	 * <p>
+	 * Description: <b>The coordinates expressed as [lat],[long] (using KML, see notes) to find locations near to (servers may search using a square rather than a circle for efficiency)</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b></b><br/>
+	 * </p>
+	 */
+	public static final TokenParam NEAR = new TokenParam(SP_NEAR);
+
+	/**
 	 * Search parameter constant for <b>near-distance</b>
 	 * <p>
 	 * Description: <b>A distance quantity to limit the near search to locations within a specific distance</b><br/>
@@ -175,6 +255,16 @@ public class Location extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="near-distance", path="", description="A distance quantity to limit the near search to locations within a specific distance")
 	public static final String SP_NEAR_DISTANCE = "near-distance";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>near-distance</b>
+	 * <p>
+	 * Description: <b>A distance quantity to limit the near search to locations within a specific distance</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b></b><br/>
+	 * </p>
+	 */
+	public static final TokenParam NEAR_DISTANCE = new TokenParam(SP_NEAR_DISTANCE);
 
 
 	@Child(name="identifier", type=IdentifierDt.class, order=0, min=0, max=1)	
@@ -269,11 +359,6 @@ public class Location extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myIdentifier,  myName,  myDescription,  myType,  myTelecom,  myAddress,  myPhysicalType,  myPosition,  myManagingOrganization,  myStatus,  myPartOf,  myMode);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myIdentifier, myName, myDescription, myType, myTelecom, myAddress, myPhysicalType, myPosition, myManagingOrganization, myStatus, myPartOf, myMode);
@@ -809,11 +894,6 @@ public class Location extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myLongitude,  myLatitude,  myAltitude);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myLongitude, myLatitude, myAltitude);

@@ -61,6 +61,11 @@ import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.rest.gclient.CompositeParam;
+import ca.uhn.fhir.rest.gclient.DateParam;
+import ca.uhn.fhir.rest.gclient.Include;
+import ca.uhn.fhir.rest.gclient.ReferenceParam;
+import ca.uhn.fhir.rest.gclient.TokenParam;
 
 
 /**
@@ -98,6 +103,28 @@ public class DiagnosticOrder extends BaseResource implements IResource {
 	public static final String SP_ACTOR = "actor";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>actor</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>DiagnosticOrder.event.actor | DiagnosticOrder.item.event.actor</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam ACTOR = new ReferenceParam(SP_ACTOR);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>DiagnosticOrder.event.actor</b>".
+	 */
+	public static final Include INCLUDE_EVENT_ACTOR = new Include("DiagnosticOrder.event.actor");
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>DiagnosticOrder.item.event.actor</b>".
+	 */
+	public static final Include INCLUDE_ITEM_EVENT_ACTOR = new Include("DiagnosticOrder.item.event.actor");
+
+	/**
 	 * Search parameter constant for <b>bodysite</b>
 	 * <p>
 	 * Description: <b></b><br/>
@@ -107,6 +134,16 @@ public class DiagnosticOrder extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="bodysite", path="DiagnosticOrder.item.bodySite", description="")
 	public static final String SP_BODYSITE = "bodysite";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>bodysite</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>DiagnosticOrder.item.bodySite</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam BODYSITE = new TokenParam(SP_BODYSITE);
 
 	/**
 	 * Search parameter constant for <b>code</b>
@@ -120,6 +157,16 @@ public class DiagnosticOrder extends BaseResource implements IResource {
 	public static final String SP_CODE = "code";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>code</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>DiagnosticOrder.item.code</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam CODE = new TokenParam(SP_CODE);
+
+	/**
 	 * Search parameter constant for <b>event-date</b>
 	 * <p>
 	 * Description: <b></b><br/>
@@ -129,6 +176,16 @@ public class DiagnosticOrder extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="event-date", path="DiagnosticOrder.event.dateTime", description="")
 	public static final String SP_EVENT_DATE = "event-date";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>event-date</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>date</b><br/>
+	 * Path: <b>DiagnosticOrder.event.dateTime</b><br/>
+	 * </p>
+	 */
+	public static final DateParam EVENT_DATE = new DateParam(SP_EVENT_DATE);
 
 	/**
 	 * Search parameter constant for <b>encounter</b>
@@ -142,6 +199,22 @@ public class DiagnosticOrder extends BaseResource implements IResource {
 	public static final String SP_ENCOUNTER = "encounter";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>encounter</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>DiagnosticOrder.encounter</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam ENCOUNTER = new ReferenceParam(SP_ENCOUNTER);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>DiagnosticOrder.encounter</b>".
+	 */
+	public static final Include INCLUDE_ENCOUNTER = new Include("DiagnosticOrder.encounter");
+
+	/**
 	 * Search parameter constant for <b>identifier</b>
 	 * <p>
 	 * Description: <b></b><br/>
@@ -151,6 +224,16 @@ public class DiagnosticOrder extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="identifier", path="DiagnosticOrder.identifier", description="")
 	public static final String SP_IDENTIFIER = "identifier";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>DiagnosticOrder.identifier</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam IDENTIFIER = new TokenParam(SP_IDENTIFIER);
 
 	/**
 	 * Search parameter constant for <b>item-date</b>
@@ -164,6 +247,16 @@ public class DiagnosticOrder extends BaseResource implements IResource {
 	public static final String SP_ITEM_DATE = "item-date";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>item-date</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>date</b><br/>
+	 * Path: <b>DiagnosticOrder.item.event.dateTime</b><br/>
+	 * </p>
+	 */
+	public static final DateParam ITEM_DATE = new DateParam(SP_ITEM_DATE);
+
+	/**
 	 * Search parameter constant for <b>item-past-status</b>
 	 * <p>
 	 * Description: <b></b><br/>
@@ -173,6 +266,16 @@ public class DiagnosticOrder extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="item-past-status", path="DiagnosticOrder.item.event.status", description="")
 	public static final String SP_ITEM_PAST_STATUS = "item-past-status";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>item-past-status</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>DiagnosticOrder.item.event.status</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam ITEM_PAST_STATUS = new TokenParam(SP_ITEM_PAST_STATUS);
 
 	/**
 	 * Search parameter constant for <b>item-status</b>
@@ -186,6 +289,16 @@ public class DiagnosticOrder extends BaseResource implements IResource {
 	public static final String SP_ITEM_STATUS = "item-status";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>item-status</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>DiagnosticOrder.item.status</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam ITEM_STATUS = new TokenParam(SP_ITEM_STATUS);
+
+	/**
 	 * Search parameter constant for <b>item-status-date</b>
 	 * <p>
 	 * Description: <b>A combination of item-past-status and item-date</b><br/>
@@ -195,6 +308,16 @@ public class DiagnosticOrder extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="item-status-date", path="item-past-status & item-date", description="A combination of item-past-status and item-date")
 	public static final String SP_ITEM_STATUS_DATE = "item-status-date";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>item-status-date</b>
+	 * <p>
+	 * Description: <b>A combination of item-past-status and item-date</b><br/>
+	 * Type: <b>composite</b><br/>
+	 * Path: <b>item-past-status & item-date</b><br/>
+	 * </p>
+	 */
+	public static final CompositeParam ITEM_STATUS_DATE = new CompositeParam(SP_ITEM_STATUS_DATE);
 
 	/**
 	 * Search parameter constant for <b>orderer</b>
@@ -208,6 +331,22 @@ public class DiagnosticOrder extends BaseResource implements IResource {
 	public static final String SP_ORDERER = "orderer";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>orderer</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>DiagnosticOrder.orderer</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam ORDERER = new ReferenceParam(SP_ORDERER);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>DiagnosticOrder.orderer</b>".
+	 */
+	public static final Include INCLUDE_ORDERER = new Include("DiagnosticOrder.orderer");
+
+	/**
 	 * Search parameter constant for <b>event-status</b>
 	 * <p>
 	 * Description: <b></b><br/>
@@ -217,6 +356,16 @@ public class DiagnosticOrder extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="event-status", path="DiagnosticOrder.event.status", description="")
 	public static final String SP_EVENT_STATUS = "event-status";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>event-status</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>DiagnosticOrder.event.status</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam EVENT_STATUS = new TokenParam(SP_EVENT_STATUS);
 
 	/**
 	 * Search parameter constant for <b>specimen</b>
@@ -230,6 +379,28 @@ public class DiagnosticOrder extends BaseResource implements IResource {
 	public static final String SP_SPECIMEN = "specimen";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>specimen</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>DiagnosticOrder.specimen | DiagnosticOrder.item.specimen</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam SPECIMEN = new ReferenceParam(SP_SPECIMEN);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>DiagnosticOrder.specimen</b>".
+	 */
+	public static final Include INCLUDE_SPECIMEN = new Include("DiagnosticOrder.specimen");
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>DiagnosticOrder.item.specimen</b>".
+	 */
+	public static final Include INCLUDE_ITEM_SPECIMEN = new Include("DiagnosticOrder.item.specimen");
+
+	/**
 	 * Search parameter constant for <b>status</b>
 	 * <p>
 	 * Description: <b></b><br/>
@@ -239,6 +410,16 @@ public class DiagnosticOrder extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="status", path="DiagnosticOrder.status", description="")
 	public static final String SP_STATUS = "status";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>status</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>DiagnosticOrder.status</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam STATUS = new TokenParam(SP_STATUS);
 
 	/**
 	 * Search parameter constant for <b>event-status-date</b>
@@ -252,6 +433,16 @@ public class DiagnosticOrder extends BaseResource implements IResource {
 	public static final String SP_EVENT_STATUS_DATE = "event-status-date";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>event-status-date</b>
+	 * <p>
+	 * Description: <b>A combination of past-status and date</b><br/>
+	 * Type: <b>composite</b><br/>
+	 * Path: <b>event-status & event-date</b><br/>
+	 * </p>
+	 */
+	public static final CompositeParam EVENT_STATUS_DATE = new CompositeParam(SP_EVENT_STATUS_DATE);
+
+	/**
 	 * Search parameter constant for <b>subject</b>
 	 * <p>
 	 * Description: <b></b><br/>
@@ -261,6 +452,22 @@ public class DiagnosticOrder extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="subject", path="DiagnosticOrder.subject", description="")
 	public static final String SP_SUBJECT = "subject";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>subject</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>DiagnosticOrder.subject</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam SUBJECT = new ReferenceParam(SP_SUBJECT);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>DiagnosticOrder.subject</b>".
+	 */
+	public static final Include INCLUDE_SUBJECT = new Include("DiagnosticOrder.subject");
 
 
 	@Child(name="subject", order=0, min=1, max=1, type={
@@ -343,11 +550,6 @@ public class DiagnosticOrder extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  mySubject,  myOrderer,  myIdentifier,  myEncounter,  myClinicalNotes,  mySpecimen,  myStatus,  myPriority,  myEvent,  myItem);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, mySubject, myOrderer, myIdentifier, myEncounter, myClinicalNotes, mySpecimen, myStatus, myPriority, myEvent, myItem);
@@ -882,11 +1084,6 @@ public class DiagnosticOrder extends BaseResource implements IResource {
 	}
 	
 	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
-	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myStatus, myDescription, myDateTime, myActor);
 	}
@@ -1108,11 +1305,6 @@ public class DiagnosticOrder extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myCode,  mySpecimen,  myBodySite,  myStatus,  myEvent);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myCode, mySpecimen, myBodySite, myStatus, myEvent);

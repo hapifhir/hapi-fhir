@@ -1,7 +1,11 @@
-package ca.uhn.example.rest;
+package ca.uhn.example.provider;
 
-import ca.uhn.fhir.model.dstu.resource.Organization;
+import ca.uhn.example.model.MyOrganization;
+import ca.uhn.example.model.MyOrganization.EmergencyContact;
+import ca.uhn.fhir.model.dstu.composite.ContactDt;
 import ca.uhn.fhir.model.dstu.valueset.ContactUseEnum;
+import ca.uhn.fhir.model.primitive.BooleanDt;
+import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
@@ -9,17 +13,21 @@ import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 
 /**
- * This is a very simple resource provider. See the RestfulPatientResourceProvider
- * for a more fancy example.
+ * This is a simple resource provider which only implements "read/GET" methods, but
+ * which uses a custom subclassed resource definition to add statically bound
+ * extensions.
+ * 
+ * See the MyOrganization definition to see how the custom resource 
+ * definition works.
  */
-public class RestfulOrganizationResourceProvider implements IResourceProvider {
+public class OrganizationResourceProvider implements IResourceProvider {
 
 	/**
 	 * The getResourceType method comes from IResourceProvider, and must be overridden to indicate what type of resource this provider supplies.
 	 */
 	@Override
-	public Class<Organization> getResourceType() {
-		return Organization.class;
+	public Class<MyOrganization> getResourceType() {
+		return MyOrganization.class;
 	}
 
 	/**
@@ -30,7 +38,7 @@ public class RestfulOrganizationResourceProvider implements IResourceProvider {
 	 * @return Returns a resource matching this identifier, or null if none exists.
 	 */
 	@Read()
-	public Organization getResourceById(@IdParam IdDt theId) {
+	public MyOrganization getResourceById(@IdParam IdDt theId) {
 		
 		/*
 		 * We only support one organization, so the follwing
@@ -41,10 +49,20 @@ public class RestfulOrganizationResourceProvider implements IResourceProvider {
 			throw new ResourceNotFoundException(theId);
 		}
 		
-		Organization retVal = new Organization();
+		MyOrganization retVal = new MyOrganization();
 		retVal.addIdentifier("urn:example:orgs", "FooOrganization");
 		retVal.addAddress().addLine("123 Fake Street").setCity("Toronto");
 		retVal.addTelecom().setUse(ContactUseEnum.WORK).setValue("1-888-123-4567");
+		
+		// Populate the first, primitive extension
+		retVal.setBillingCode(new CodeDt("00102-1"));
+		
+		// The second extension is repeatable and takes a block type
+		MyOrganization.EmergencyContact contact = new MyOrganization.EmergencyContact();
+		contact.setActive(new BooleanDt(true));
+		contact.setContact(new ContactDt());
+		retVal.getEmergencyContact().add(contact);
+		
 		return retVal;
 	}
 

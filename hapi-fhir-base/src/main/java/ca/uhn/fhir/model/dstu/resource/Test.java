@@ -193,11 +193,6 @@ public class Test extends BaseResource implements IResource {
 	}
 	
 	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
-	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myStringErr, myStringCorr, myBooleanErr, myBooleanCorr, myIntegerErr, myIntegerCorr, myDecimalErr, myDecimalCorr, myB64Err, myB64Corr, myInstantErr, myInstantCorr, myUriErr, myUriCorr, myIdrefSingle);
 	}

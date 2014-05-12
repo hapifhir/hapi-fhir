@@ -64,6 +64,10 @@ import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.rest.gclient.DateParam;
+import ca.uhn.fhir.rest.gclient.Include;
+import ca.uhn.fhir.rest.gclient.ReferenceParam;
+import ca.uhn.fhir.rest.gclient.TokenParam;
 
 
 /**
@@ -101,6 +105,16 @@ public class Condition extends BaseResource implements IResource {
 	public static final String SP_CODE = "code";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>code</b>
+	 * <p>
+	 * Description: <b>Code for the condition</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Condition.code</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam CODE = new TokenParam(SP_CODE);
+
+	/**
 	 * Search parameter constant for <b>status</b>
 	 * <p>
 	 * Description: <b>The status of the condition</b><br/>
@@ -110,6 +124,16 @@ public class Condition extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="status", path="Condition.status", description="The status of the condition")
 	public static final String SP_STATUS = "status";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>status</b>
+	 * <p>
+	 * Description: <b>The status of the condition</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Condition.status</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam STATUS = new TokenParam(SP_STATUS);
 
 	/**
 	 * Search parameter constant for <b>severity</b>
@@ -123,6 +147,16 @@ public class Condition extends BaseResource implements IResource {
 	public static final String SP_SEVERITY = "severity";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>severity</b>
+	 * <p>
+	 * Description: <b>The severity of the condition</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Condition.severity</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam SEVERITY = new TokenParam(SP_SEVERITY);
+
+	/**
 	 * Search parameter constant for <b>category</b>
 	 * <p>
 	 * Description: <b>The category of the condition</b><br/>
@@ -132,6 +166,16 @@ public class Condition extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="category", path="Condition.category", description="The category of the condition")
 	public static final String SP_CATEGORY = "category";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>category</b>
+	 * <p>
+	 * Description: <b>The category of the condition</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Condition.category</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam CATEGORY = new TokenParam(SP_CATEGORY);
 
 	/**
 	 * Search parameter constant for <b>onset</b>
@@ -145,6 +189,16 @@ public class Condition extends BaseResource implements IResource {
 	public static final String SP_ONSET = "onset";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>onset</b>
+	 * <p>
+	 * Description: <b>When the Condition started (if started on a date)</b><br/>
+	 * Type: <b>date</b><br/>
+	 * Path: <b>Condition.onset[x]</b><br/>
+	 * </p>
+	 */
+	public static final DateParam ONSET = new DateParam(SP_ONSET);
+
+	/**
 	 * Search parameter constant for <b>subject</b>
 	 * <p>
 	 * Description: <b></b><br/>
@@ -154,6 +208,22 @@ public class Condition extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="subject", path="Condition.subject", description="")
 	public static final String SP_SUBJECT = "subject";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>subject</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>Condition.subject</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam SUBJECT = new ReferenceParam(SP_SUBJECT);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>Condition.subject</b>".
+	 */
+	public static final Include INCLUDE_SUBJECT = new Include("Condition.subject");
 
 	/**
 	 * Search parameter constant for <b>encounter</b>
@@ -167,6 +237,22 @@ public class Condition extends BaseResource implements IResource {
 	public static final String SP_ENCOUNTER = "encounter";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>encounter</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>Condition.encounter</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam ENCOUNTER = new ReferenceParam(SP_ENCOUNTER);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>Condition.encounter</b>".
+	 */
+	public static final Include INCLUDE_ENCOUNTER = new Include("Condition.encounter");
+
+	/**
 	 * Search parameter constant for <b>asserter</b>
 	 * <p>
 	 * Description: <b></b><br/>
@@ -176,6 +262,22 @@ public class Condition extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="asserter", path="Condition.asserter", description="")
 	public static final String SP_ASSERTER = "asserter";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>asserter</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>Condition.asserter</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam ASSERTER = new ReferenceParam(SP_ASSERTER);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>Condition.asserter</b>".
+	 */
+	public static final Include INCLUDE_ASSERTER = new Include("Condition.asserter");
 
 	/**
 	 * Search parameter constant for <b>date-asserted</b>
@@ -189,6 +291,16 @@ public class Condition extends BaseResource implements IResource {
 	public static final String SP_DATE_ASSERTED = "date-asserted";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>date-asserted</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>date</b><br/>
+	 * Path: <b>Condition.dateAsserted</b><br/>
+	 * </p>
+	 */
+	public static final DateParam DATE_ASSERTED = new DateParam(SP_DATE_ASSERTED);
+
+	/**
 	 * Search parameter constant for <b>evidence</b>
 	 * <p>
 	 * Description: <b></b><br/>
@@ -198,6 +310,16 @@ public class Condition extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="evidence", path="Condition.evidence.code", description="")
 	public static final String SP_EVIDENCE = "evidence";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>evidence</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Condition.evidence.code</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam EVIDENCE = new TokenParam(SP_EVIDENCE);
 
 	/**
 	 * Search parameter constant for <b>location</b>
@@ -211,6 +333,16 @@ public class Condition extends BaseResource implements IResource {
 	public static final String SP_LOCATION = "location";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>location</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Condition.location.code</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam LOCATION = new TokenParam(SP_LOCATION);
+
+	/**
 	 * Search parameter constant for <b>related-item</b>
 	 * <p>
 	 * Description: <b></b><br/>
@@ -220,6 +352,22 @@ public class Condition extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="related-item", path="Condition.relatedItem.target", description="")
 	public static final String SP_RELATED_ITEM = "related-item";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>related-item</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>Condition.relatedItem.target</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam RELATED_ITEM = new ReferenceParam(SP_RELATED_ITEM);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>Condition.relatedItem.target</b>".
+	 */
+	public static final Include INCLUDE_RELATEDITEM_TARGET = new Include("Condition.relatedItem.target");
 
 	/**
 	 * Search parameter constant for <b>stage</b>
@@ -233,6 +381,16 @@ public class Condition extends BaseResource implements IResource {
 	public static final String SP_STAGE = "stage";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>stage</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Condition.stage.summary</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam STAGE = new TokenParam(SP_STAGE);
+
+	/**
 	 * Search parameter constant for <b>related-code</b>
 	 * <p>
 	 * Description: <b></b><br/>
@@ -242,6 +400,16 @@ public class Condition extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="related-code", path="Condition.relatedItem.code", description="")
 	public static final String SP_RELATED_CODE = "related-code";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>related-code</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Condition.relatedItem.code</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam RELATED_CODE = new TokenParam(SP_RELATED_CODE);
 
 
 	@Child(name="identifier", type=IdentifierDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)	
@@ -374,11 +542,6 @@ public class Condition extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myIdentifier,  mySubject,  myEncounter,  myAsserter,  myDateAsserted,  myCode,  myCategory,  myStatus,  myCertainty,  mySeverity,  myOnset,  myAbatement,  myStage,  myEvidence,  myLocation,  myRelatedItem,  myNotes);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myIdentifier, mySubject, myEncounter, myAsserter, myDateAsserted, myCode, myCategory, myStatus, myCertainty, mySeverity, myOnset, myAbatement, myStage, myEvidence, myLocation, myRelatedItem, myNotes);
@@ -1139,11 +1302,6 @@ public class Condition extends BaseResource implements IResource {
 	}
 	
 	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
-	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, mySummary, myAssessment);
 	}
@@ -1260,11 +1418,6 @@ public class Condition extends BaseResource implements IResource {
 	}
 	
 	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
-	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myCode, myDetail);
 	}
@@ -1379,11 +1532,6 @@ public class Condition extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myCode,  myDetail);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myCode, myDetail);
@@ -1507,11 +1655,6 @@ public class Condition extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myType,  myCode,  myTarget);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myType, myCode, myTarget);

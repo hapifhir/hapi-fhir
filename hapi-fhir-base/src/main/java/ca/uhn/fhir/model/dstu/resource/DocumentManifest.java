@@ -58,6 +58,11 @@ import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
+import ca.uhn.fhir.rest.gclient.DateParam;
+import ca.uhn.fhir.rest.gclient.Include;
+import ca.uhn.fhir.rest.gclient.ReferenceParam;
+import ca.uhn.fhir.rest.gclient.StringParam;
+import ca.uhn.fhir.rest.gclient.TokenParam;
 
 
 /**
@@ -95,6 +100,16 @@ public class DocumentManifest extends BaseResource implements IResource {
 	public static final String SP_IDENTIFIER = "identifier";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>DocumentManifest.masterIdentifier | DocumentManifest.identifier</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam IDENTIFIER = new TokenParam(SP_IDENTIFIER);
+
+	/**
 	 * Search parameter constant for <b>subject</b>
 	 * <p>
 	 * Description: <b></b><br/>
@@ -104,6 +119,22 @@ public class DocumentManifest extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="subject", path="DocumentManifest.subject", description="")
 	public static final String SP_SUBJECT = "subject";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>subject</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>DocumentManifest.subject</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam SUBJECT = new ReferenceParam(SP_SUBJECT);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>DocumentManifest.subject</b>".
+	 */
+	public static final Include INCLUDE_SUBJECT = new Include("DocumentManifest.subject");
 
 	/**
 	 * Search parameter constant for <b>type</b>
@@ -117,6 +148,16 @@ public class DocumentManifest extends BaseResource implements IResource {
 	public static final String SP_TYPE = "type";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>type</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>DocumentManifest.type</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam TYPE = new TokenParam(SP_TYPE);
+
+	/**
 	 * Search parameter constant for <b>recipient</b>
 	 * <p>
 	 * Description: <b></b><br/>
@@ -126,6 +167,22 @@ public class DocumentManifest extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="recipient", path="DocumentManifest.recipient", description="")
 	public static final String SP_RECIPIENT = "recipient";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>recipient</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>DocumentManifest.recipient</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam RECIPIENT = new ReferenceParam(SP_RECIPIENT);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>DocumentManifest.recipient</b>".
+	 */
+	public static final Include INCLUDE_RECIPIENT = new Include("DocumentManifest.recipient");
 
 	/**
 	 * Search parameter constant for <b>author</b>
@@ -139,6 +196,22 @@ public class DocumentManifest extends BaseResource implements IResource {
 	public static final String SP_AUTHOR = "author";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>author</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>DocumentManifest.author</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam AUTHOR = new ReferenceParam(SP_AUTHOR);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>DocumentManifest.author</b>".
+	 */
+	public static final Include INCLUDE_AUTHOR = new Include("DocumentManifest.author");
+
+	/**
 	 * Search parameter constant for <b>created</b>
 	 * <p>
 	 * Description: <b></b><br/>
@@ -148,6 +221,16 @@ public class DocumentManifest extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="created", path="DocumentManifest.created", description="")
 	public static final String SP_CREATED = "created";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>created</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>date</b><br/>
+	 * Path: <b>DocumentManifest.created</b><br/>
+	 * </p>
+	 */
+	public static final DateParam CREATED = new DateParam(SP_CREATED);
 
 	/**
 	 * Search parameter constant for <b>status</b>
@@ -161,6 +244,16 @@ public class DocumentManifest extends BaseResource implements IResource {
 	public static final String SP_STATUS = "status";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>status</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>DocumentManifest.status</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam STATUS = new TokenParam(SP_STATUS);
+
+	/**
 	 * Search parameter constant for <b>supersedes</b>
 	 * <p>
 	 * Description: <b></b><br/>
@@ -170,6 +263,22 @@ public class DocumentManifest extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="supersedes", path="DocumentManifest.supercedes", description="")
 	public static final String SP_SUPERSEDES = "supersedes";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>supersedes</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>DocumentManifest.supercedes</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam SUPERSEDES = new ReferenceParam(SP_SUPERSEDES);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>DocumentManifest.supercedes</b>".
+	 */
+	public static final Include INCLUDE_SUPERCEDES = new Include("DocumentManifest.supercedes");
 
 	/**
 	 * Search parameter constant for <b>description</b>
@@ -183,6 +292,16 @@ public class DocumentManifest extends BaseResource implements IResource {
 	public static final String SP_DESCRIPTION = "description";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>description</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>string</b><br/>
+	 * Path: <b>DocumentManifest.description</b><br/>
+	 * </p>
+	 */
+	public static final StringParam DESCRIPTION = new StringParam(SP_DESCRIPTION);
+
+	/**
 	 * Search parameter constant for <b>confidentiality</b>
 	 * <p>
 	 * Description: <b></b><br/>
@@ -194,6 +313,16 @@ public class DocumentManifest extends BaseResource implements IResource {
 	public static final String SP_CONFIDENTIALITY = "confidentiality";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>confidentiality</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>DocumentManifest.confidentiality</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam CONFIDENTIALITY = new TokenParam(SP_CONFIDENTIALITY);
+
+	/**
 	 * Search parameter constant for <b>content</b>
 	 * <p>
 	 * Description: <b></b><br/>
@@ -203,6 +332,22 @@ public class DocumentManifest extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="content", path="DocumentManifest.content", description="")
 	public static final String SP_CONTENT = "content";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>content</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>DocumentManifest.content</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam CONTENT = new ReferenceParam(SP_CONTENT);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>DocumentManifest.content</b>".
+	 */
+	public static final Include INCLUDE_CONTENT = new Include("DocumentManifest.content");
 
 
 	@Child(name="masterIdentifier", type=IdentifierDt.class, order=0, min=1, max=1)	
@@ -307,11 +452,6 @@ public class DocumentManifest extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myMasterIdentifier,  myIdentifier,  mySubject,  myRecipient,  myType,  myAuthor,  myCreated,  mySource,  myStatus,  mySupercedes,  myDescription,  myConfidentiality,  myContent);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myMasterIdentifier, myIdentifier, mySubject, myRecipient, myType, myAuthor, myCreated, mySource, myStatus, mySupercedes, myDescription, myConfidentiality, myContent);

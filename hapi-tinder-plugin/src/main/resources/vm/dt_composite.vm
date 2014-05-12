@@ -40,6 +40,33 @@ public class ${className}
 #########################
 ### Type-specific constructors
 #########################
+#if ( ${className} == "CodingDt" )
+	/**
+	 * Creates a new Coding with the given system and code
+	 */
+	public CodingDt(String theSystem, String theCode) {
+		setSystem(theSystem);
+		setCode(theCode);
+	}
+#end
+#if ( ${className} == "ContactDt" )
+	/**
+	 * Constructor
+	 */
+	@SimpleSetter
+	public ContactDt(@SimpleSetter.Parameter(name="theValue") String theValue) {
+		setValue(theValue);
+	}
+	
+	/**
+	 * Constructor
+	 */
+	@SimpleSetter
+	public ContactDt(@SimpleSetter.Parameter(name="theContactUse") ContactUseEnum theContactUse, @SimpleSetter.Parameter(name="theValue") String theValue) {
+		setUse(theContactUse);
+		setValue(theValue);
+	}	
+#end
 #if ( ${className} == "IdentifierDt" )
 	/**
 	 * Creates a new identifier with the given system and value
@@ -64,15 +91,6 @@ public class ${className}
 	@Override
 	public String toString() {
 		return "IdentifierDt[" + getValueAsQueryToken() + "]";
-	}
-#end
-#if ( ${className} == "CodingDt" )
-	/**
-	 * Creates a new Coding with the given system and code
-	 */
-	public CodingDt(String theSystem, String theCode) {
-		setSystem(theSystem);
-		setCode(theCode);
 	}
 #end
 #if ( ${className} == "QuantityDt" )

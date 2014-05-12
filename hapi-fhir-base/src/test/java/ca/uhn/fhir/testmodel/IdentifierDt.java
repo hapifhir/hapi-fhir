@@ -119,11 +119,6 @@ public class IdentifierDt
 
 
 	@Override
-	public List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
-	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType,  myUse,  myLabel,  mySystem,  myValue,  myPeriod,  myAssigner );
 	}

@@ -38,6 +38,7 @@ import java.util.UUID;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.client.utils.DateUtils;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
@@ -66,7 +67,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 
 abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Object> {
-
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseResourceReturningMethodBinding.class);
 	protected static final Set<String> ALLOWED_PARAMS;
 	static {
 		HashSet<String> set = new HashSet<String>();
@@ -154,12 +155,14 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 
 			List<String> lmHeaders = theHeaders.get(Constants.HEADER_LAST_MODIFIED_LOWERCASE);
 			if (lmHeaders != null && lmHeaders.size() > 0 && StringUtils.isNotBlank(lmHeaders.get(0))) {
+				String headerValue = lmHeaders.get(0);
+				Date headerDateValue;
 				try {
-					InstantDt lmValue = new InstantDt(lmHeaders.get(0));
+					headerDateValue = DateUtils.parseDate(headerValue);
+					InstantDt lmValue = new InstantDt(headerDateValue);
 					resource.getResourceMetadata().put(ResourceMetadataKeyEnum.UPDATED, lmValue);
 				} catch (Exception e) {
-					// TODO: This shouldn't be thrown - Time format is not in
-					// InstandDt format for this header, find examples online
+					ourLog.warn("Unable to parse date string '{}'. Error is: {}", headerValue, e.toString());
 				}
 			}
 
@@ -378,12 +381,12 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 				}
 
 				TagList tagList = getTagListFromMetadataOrNullIfNone(next.getResourceMetadata(), ResourceMetadataKeyEnum.TAG_LIST);
-				if (tagList!=null) {
+				if (tagList != null) {
 					for (Tag nextTag : tagList) {
 						entry.addCategory(nextTag);
 					}
 				}
-				
+
 				boolean haveQ = false;
 				if (thePrettyPrint) {
 					b.append('?').append(Constants.PARAM_PRETTY).append("=true");

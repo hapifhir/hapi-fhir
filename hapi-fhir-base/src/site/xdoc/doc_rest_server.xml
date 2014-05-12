@@ -238,6 +238,22 @@
 			</p>
 		
 		</section>
+		
+		<section name="A Complete Example">
+		
+			<p>
+				A complete example showing how to implement a RESTful server can
+				be found in our Git repo here:
+				<a href="http://sourceforge.net/p/hl7api/fhircode/ci/master/tree/restful-server-example/">http://sourceforge.net/p/hl7api/fhircode/ci/master/tree/restful-server-example/</a>
+			</p>
+			
+			<p>
+				Hopefully this will be available as a separate download soon, but currently it may
+				be used to demonstrate a fully working server project.
+			</p>
+			
+		</section>
+		
 	</body>
 
 </document>

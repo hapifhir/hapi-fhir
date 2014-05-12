@@ -75,6 +75,11 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
+import ca.uhn.fhir.rest.gclient.DateParam;
+import ca.uhn.fhir.rest.gclient.Include;
+import ca.uhn.fhir.rest.gclient.ReferenceParam;
+import ca.uhn.fhir.rest.gclient.StringParam;
+import ca.uhn.fhir.rest.gclient.TokenParam;
 
 
 /**
@@ -112,6 +117,16 @@ public class Conformance extends BaseResource implements IResource {
 	public static final String SP_IDENTIFIER = "identifier";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
+	 * <p>
+	 * Description: <b>The identifier of the conformance statement</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Conformance.identifier</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam IDENTIFIER = new TokenParam(SP_IDENTIFIER);
+
+	/**
 	 * Search parameter constant for <b>version</b>
 	 * <p>
 	 * Description: <b>The version identifier of the conformance statement</b><br/>
@@ -121,6 +136,16 @@ public class Conformance extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="version", path="Conformance.version", description="The version identifier of the conformance statement")
 	public static final String SP_VERSION = "version";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>version</b>
+	 * <p>
+	 * Description: <b>The version identifier of the conformance statement</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Conformance.version</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam VERSION = new TokenParam(SP_VERSION);
 
 	/**
 	 * Search parameter constant for <b>name</b>
@@ -134,6 +159,16 @@ public class Conformance extends BaseResource implements IResource {
 	public static final String SP_NAME = "name";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>name</b>
+	 * <p>
+	 * Description: <b>Name of the conformance statement</b><br/>
+	 * Type: <b>string</b><br/>
+	 * Path: <b>Conformance.name</b><br/>
+	 * </p>
+	 */
+	public static final StringParam NAME = new StringParam(SP_NAME);
+
+	/**
 	 * Search parameter constant for <b>publisher</b>
 	 * <p>
 	 * Description: <b>Name of the publisher of the conformance statement</b><br/>
@@ -143,6 +178,16 @@ public class Conformance extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="publisher", path="Conformance.publisher", description="Name of the publisher of the conformance statement")
 	public static final String SP_PUBLISHER = "publisher";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>publisher</b>
+	 * <p>
+	 * Description: <b>Name of the publisher of the conformance statement</b><br/>
+	 * Type: <b>string</b><br/>
+	 * Path: <b>Conformance.publisher</b><br/>
+	 * </p>
+	 */
+	public static final StringParam PUBLISHER = new StringParam(SP_PUBLISHER);
 
 	/**
 	 * Search parameter constant for <b>description</b>
@@ -156,6 +201,16 @@ public class Conformance extends BaseResource implements IResource {
 	public static final String SP_DESCRIPTION = "description";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>description</b>
+	 * <p>
+	 * Description: <b>Text search in the description of the conformance statement</b><br/>
+	 * Type: <b>string</b><br/>
+	 * Path: <b>Conformance.description</b><br/>
+	 * </p>
+	 */
+	public static final StringParam DESCRIPTION = new StringParam(SP_DESCRIPTION);
+
+	/**
 	 * Search parameter constant for <b>status</b>
 	 * <p>
 	 * Description: <b>The current status of the conformance statement</b><br/>
@@ -165,6 +220,16 @@ public class Conformance extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="status", path="Conformance.status", description="The current status of the conformance statement")
 	public static final String SP_STATUS = "status";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>status</b>
+	 * <p>
+	 * Description: <b>The current status of the conformance statement</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Conformance.status</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam STATUS = new TokenParam(SP_STATUS);
 
 	/**
 	 * Search parameter constant for <b>date</b>
@@ -178,6 +243,16 @@ public class Conformance extends BaseResource implements IResource {
 	public static final String SP_DATE = "date";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>date</b>
+	 * <p>
+	 * Description: <b>The conformance statement publication date</b><br/>
+	 * Type: <b>date</b><br/>
+	 * Path: <b>Conformance.date</b><br/>
+	 * </p>
+	 */
+	public static final DateParam DATE = new DateParam(SP_DATE);
+
+	/**
 	 * Search parameter constant for <b>software</b>
 	 * <p>
 	 * Description: <b>Part of a the name of a software application</b><br/>
@@ -187,6 +262,16 @@ public class Conformance extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="software", path="Conformance.software.name", description="Part of a the name of a software application")
 	public static final String SP_SOFTWARE = "software";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>software</b>
+	 * <p>
+	 * Description: <b>Part of a the name of a software application</b><br/>
+	 * Type: <b>string</b><br/>
+	 * Path: <b>Conformance.software.name</b><br/>
+	 * </p>
+	 */
+	public static final StringParam SOFTWARE = new StringParam(SP_SOFTWARE);
 
 	/**
 	 * Search parameter constant for <b>fhirversion</b>
@@ -200,6 +285,16 @@ public class Conformance extends BaseResource implements IResource {
 	public static final String SP_FHIRVERSION = "fhirversion";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>fhirversion</b>
+	 * <p>
+	 * Description: <b>The version of FHIR</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Conformance.version</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam FHIRVERSION = new TokenParam(SP_FHIRVERSION);
+
+	/**
 	 * Search parameter constant for <b>resource</b>
 	 * <p>
 	 * Description: <b>Name of a resource mentioned in a conformance statement</b><br/>
@@ -209,6 +304,16 @@ public class Conformance extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="resource", path="Conformance.rest.resource.type", description="Name of a resource mentioned in a conformance statement")
 	public static final String SP_RESOURCE = "resource";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>resource</b>
+	 * <p>
+	 * Description: <b>Name of a resource mentioned in a conformance statement</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Conformance.rest.resource.type</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam RESOURCE = new TokenParam(SP_RESOURCE);
 
 	/**
 	 * Search parameter constant for <b>event</b>
@@ -222,6 +327,16 @@ public class Conformance extends BaseResource implements IResource {
 	public static final String SP_EVENT = "event";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>event</b>
+	 * <p>
+	 * Description: <b>Event code in a conformance statement</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Conformance.messaging.event.code</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam EVENT = new TokenParam(SP_EVENT);
+
+	/**
 	 * Search parameter constant for <b>mode</b>
 	 * <p>
 	 * Description: <b>Mode - restful (server/client) or messaging (sender/receiver)</b><br/>
@@ -231,6 +346,16 @@ public class Conformance extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="mode", path="Conformance.rest.mode", description="Mode - restful (server/client) or messaging (sender/receiver)")
 	public static final String SP_MODE = "mode";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>mode</b>
+	 * <p>
+	 * Description: <b>Mode - restful (server/client) or messaging (sender/receiver)</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Conformance.rest.mode</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam MODE = new TokenParam(SP_MODE);
 
 	/**
 	 * Search parameter constant for <b>profile</b>
@@ -244,6 +369,22 @@ public class Conformance extends BaseResource implements IResource {
 	public static final String SP_PROFILE = "profile";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>profile</b>
+	 * <p>
+	 * Description: <b>A profile id invoked in a conformance statement</b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>Conformance.rest.resource.profile</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam PROFILE = new ReferenceParam(SP_PROFILE);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>Conformance.rest.resource.profile</b>".
+	 */
+	public static final Include INCLUDE_REST_RESOURCE_PROFILE = new Include("Conformance.rest.resource.profile");
+
+	/**
 	 * Search parameter constant for <b>format</b>
 	 * <p>
 	 * Description: <b></b><br/>
@@ -253,6 +394,16 @@ public class Conformance extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="format", path="Conformance.format", description="")
 	public static final String SP_FORMAT = "format";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>format</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Conformance.format</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam FORMAT = new TokenParam(SP_FORMAT);
 
 	/**
 	 * Search parameter constant for <b>security</b>
@@ -266,6 +417,16 @@ public class Conformance extends BaseResource implements IResource {
 	public static final String SP_SECURITY = "security";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>security</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Conformance.rest.security</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam SECURITY = new TokenParam(SP_SECURITY);
+
+	/**
 	 * Search parameter constant for <b>supported-profile</b>
 	 * <p>
 	 * Description: <b></b><br/>
@@ -275,6 +436,22 @@ public class Conformance extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="supported-profile", path="Conformance.profile", description="")
 	public static final String SP_SUPPORTED_PROFILE = "supported-profile";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>supported-profile</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>Conformance.profile</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam SUPPORTED_PROFILE = new ReferenceParam(SP_SUPPORTED_PROFILE);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>Conformance.profile</b>".
+	 */
+	public static final Include INCLUDE_PROFILE = new Include("Conformance.profile");
 
 
 	@Child(name="identifier", type=StringDt.class, order=0, min=0, max=1)	
@@ -410,11 +587,6 @@ public class Conformance extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myIdentifier,  myVersion,  myName,  myPublisher,  myTelecom,  myDescription,  myStatus,  myExperimental,  myDate,  mySoftware,  myImplementation,  myFhirVersion,  myAcceptUnknown,  myFormat,  myProfile,  myRest,  myMessaging,  myDocument);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myIdentifier, myVersion, myName, myPublisher, myTelecom, myDescription, myStatus, myExperimental, myDate, mySoftware, myImplementation, myFhirVersion, myAcceptUnknown, myFormat, myProfile, myRest, myMessaging, myDocument);
@@ -1336,11 +1508,6 @@ public class Conformance extends BaseResource implements IResource {
 	}
 	
 	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
-	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myName, myVersion, myReleaseDate);
 	}
@@ -1526,11 +1693,6 @@ public class Conformance extends BaseResource implements IResource {
 	}
 	
 	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
-	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myDescription, myUrl);
 	}
@@ -1693,11 +1855,6 @@ public class Conformance extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myMode,  myDocumentation,  mySecurity,  myResource,  myOperation,  myQuery,  myDocumentMailbox);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myMode, myDocumentation, mySecurity, myResource, myOperation, myQuery, myDocumentMailbox);
@@ -2129,11 +2286,6 @@ public class Conformance extends BaseResource implements IResource {
 	}
 	
 	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
-	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myCors, myService, myDescription, myCertificate);
 	}
@@ -2378,11 +2530,6 @@ public class Conformance extends BaseResource implements IResource {
 	}
 	
 	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
-	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myType, myBlob);
 	}
@@ -2547,11 +2694,6 @@ public class Conformance extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myType,  myProfile,  myOperation,  myReadHistory,  myUpdateCreate,  mySearchInclude,  mySearchParam);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myType, myProfile, myOperation, myReadHistory, myUpdateCreate, mySearchInclude, mySearchParam);
@@ -2953,11 +3095,6 @@ public class Conformance extends BaseResource implements IResource {
 	}
 	
 	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
-	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myCode, myDocumentation);
 	}
@@ -3113,11 +3250,6 @@ public class Conformance extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myName,  myDefinition,  myType,  myDocumentation,  myTarget,  myChain);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myName, myDefinition, myType, myDocumentation, myTarget, myChain);
@@ -3471,11 +3603,6 @@ public class Conformance extends BaseResource implements IResource {
 	}
 	
 	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
-	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myCode, myDocumentation);
 	}
@@ -3617,11 +3744,6 @@ public class Conformance extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myName,  myDefinition,  myDocumentation,  myParameter);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myName, myDefinition, myDocumentation, myParameter);
@@ -3869,11 +3991,6 @@ public class Conformance extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myEndpoint,  myReliableCache,  myDocumentation,  myEvent);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myEndpoint, myReliableCache, myDocumentation, myEvent);
@@ -4149,11 +4266,6 @@ public class Conformance extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myCode,  myCategory,  myMode,  myProtocol,  myFocus,  myRequest,  myResponse,  myDocumentation);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myCode, myCategory, myMode, myProtocol, myFocus, myRequest, myResponse, myDocumentation);
@@ -4532,11 +4644,6 @@ public class Conformance extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myMode,  myDocumentation,  myProfile);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myMode, myDocumentation, myProfile);

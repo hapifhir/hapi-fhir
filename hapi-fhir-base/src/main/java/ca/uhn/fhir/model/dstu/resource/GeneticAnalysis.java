@@ -56,6 +56,9 @@ import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.rest.gclient.DateParam;
+import ca.uhn.fhir.rest.gclient.Include;
+import ca.uhn.fhir.rest.gclient.ReferenceParam;
 
 
 /**
@@ -93,6 +96,22 @@ public class GeneticAnalysis extends BaseResource implements IResource {
 	public static final String SP_SUBJECT = "subject";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>subject</b>
+	 * <p>
+	 * Description: <b>Subject of the analysis</b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>GeneticAnalysis.subject</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam SUBJECT = new ReferenceParam(SP_SUBJECT);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>GeneticAnalysis.subject</b>".
+	 */
+	public static final Include INCLUDE_SUBJECT = new Include("GeneticAnalysis.subject");
+
+	/**
 	 * Search parameter constant for <b>author</b>
 	 * <p>
 	 * Description: <b>Author of the analysis</b><br/>
@@ -104,6 +123,22 @@ public class GeneticAnalysis extends BaseResource implements IResource {
 	public static final String SP_AUTHOR = "author";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>author</b>
+	 * <p>
+	 * Description: <b>Author of the analysis</b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>GeneticAnalysis.author</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam AUTHOR = new ReferenceParam(SP_AUTHOR);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>GeneticAnalysis.author</b>".
+	 */
+	public static final Include INCLUDE_AUTHOR = new Include("GeneticAnalysis.author");
+
+	/**
 	 * Search parameter constant for <b>date</b>
 	 * <p>
 	 * Description: <b>Date when result of the analysis is uploaded</b><br/>
@@ -113,6 +148,16 @@ public class GeneticAnalysis extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="date", path="GeneticAnalysis.date", description="Date when result of the analysis is uploaded")
 	public static final String SP_DATE = "date";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>date</b>
+	 * <p>
+	 * Description: <b>Date when result of the analysis is uploaded</b><br/>
+	 * Type: <b>date</b><br/>
+	 * Path: <b>GeneticAnalysis.date</b><br/>
+	 * </p>
+	 */
+	public static final DateParam DATE = new DateParam(SP_DATE);
 
 
 	@Child(name="subject", order=0, min=0, max=1, type={
@@ -165,11 +210,6 @@ public class GeneticAnalysis extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  mySubject,  myAuthor,  myDate,  myGeneticAnalysisSummary,  myDnaRegionAnalysisTestCoverage,  myGeneticAnalysisDiscreteResult);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, mySubject, myAuthor, myDate, myGeneticAnalysisSummary, myDnaRegionAnalysisTestCoverage, myGeneticAnalysisDiscreteResult);
@@ -460,11 +500,6 @@ public class GeneticAnalysis extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myGeneticDiseaseAssessed,  myMedicationAssesed,  myGenomicSourceClass,  myGeneticDiseaseAnalysisOverallInterpretation,  myGeneticDiseaseAnalysisOverallCarrierInterpertation,  myDrugEfficacyAnalysisOverallInterpretation,  myGeneticAnalysisSummaryReport,  myReasonForStudyAdditionalNote);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myGeneticDiseaseAssessed, myMedicationAssesed, myGenomicSourceClass, myGeneticDiseaseAnalysisOverallInterpretation, myGeneticDiseaseAnalysisOverallCarrierInterpertation, myDrugEfficacyAnalysisOverallInterpretation, myGeneticAnalysisSummaryReport, myReasonForStudyAdditionalNote);
@@ -773,11 +808,6 @@ public class GeneticAnalysis extends BaseResource implements IResource {
 	}
 	
 	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
-	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myDnaRegionOfInterest);
 	}
@@ -918,11 +948,6 @@ public class GeneticAnalysis extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myGenomicReferenceSequenceIdentifier,  myRegionOfInterestStart,  myRegionOfInterestStop,  myReferenceNucleotide,  myVariableNucleotide,  myGenechipId,  myGenechipManufacturerId,  myGenechipVersion);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myGenomicReferenceSequenceIdentifier, myRegionOfInterestStart, myRegionOfInterestStop, myReferenceNucleotide, myVariableNucleotide, myGenechipId, myGenechipManufacturerId, myGenechipVersion);
@@ -1309,11 +1334,6 @@ public class GeneticAnalysis extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myDnaAnalysisDiscreteSequenceVariation);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myDnaAnalysisDiscreteSequenceVariation);

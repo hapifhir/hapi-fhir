@@ -4,6 +4,7 @@ import org.apache.http.impl.client.HttpClientBuilder;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.HttpBasicAuthInterceptor;
+import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.client.IRestfulClientFactory;
 import ca.uhn.fhir.rest.client.api.IBasicClient;
 import ca.uhn.fhir.rest.server.EncodingEnum;
@@ -33,8 +34,9 @@ builder.addInterceptorFirst(new HttpBasicAuthInterceptor(username, password));
 // Use the new HTTP client builder
 clientFactory.setHttpClient(builder.build());
 
-// Actually create a client instance
-IPatientClient client = ctx.newRestfulClient(IPatientClient.class, "http://localhost:9999/");
+// This factory is applied to both styles of client
+IPatientClient annotationClient = ctx.newRestfulClient(IPatientClient.class, "http://localhost:9999/fhir");
+IGenericClient genericClient = ctx.newRestfulGenericClient("http://localhost:9999/fhir");
 //END SNIPPET: security
 }
 

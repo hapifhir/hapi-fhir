@@ -62,6 +62,11 @@ import ca.uhn.fhir.model.dstu.valueset.SubstanceTypeEnum;
 import ca.uhn.fhir.model.primitive.BoundCodeableConceptDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.rest.gclient.DateParam;
+import ca.uhn.fhir.rest.gclient.Include;
+import ca.uhn.fhir.rest.gclient.NumberParam;
+import ca.uhn.fhir.rest.gclient.ReferenceParam;
+import ca.uhn.fhir.rest.gclient.TokenParam;
 
 
 /**
@@ -99,6 +104,16 @@ public class Substance extends BaseResource implements IResource {
 	public static final String SP_TYPE = "type";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>type</b>
+	 * <p>
+	 * Description: <b>The type of the substance</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Substance.type</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam TYPE = new TokenParam(SP_TYPE);
+
+	/**
 	 * Search parameter constant for <b>identifier</b>
 	 * <p>
 	 * Description: <b></b><br/>
@@ -108,6 +123,16 @@ public class Substance extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="identifier", path="Substance.instance.identifier", description="")
 	public static final String SP_IDENTIFIER = "identifier";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>Substance.instance.identifier</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam IDENTIFIER = new TokenParam(SP_IDENTIFIER);
 
 	/**
 	 * Search parameter constant for <b>expiry</b>
@@ -121,6 +146,16 @@ public class Substance extends BaseResource implements IResource {
 	public static final String SP_EXPIRY = "expiry";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>expiry</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>date</b><br/>
+	 * Path: <b>Substance.instance.expiry</b><br/>
+	 * </p>
+	 */
+	public static final DateParam EXPIRY = new DateParam(SP_EXPIRY);
+
+	/**
 	 * Search parameter constant for <b>quantity</b>
 	 * <p>
 	 * Description: <b></b><br/>
@@ -132,6 +167,16 @@ public class Substance extends BaseResource implements IResource {
 	public static final String SP_QUANTITY = "quantity";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>quantity</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>number</b><br/>
+	 * Path: <b>Substance.instance.quantity</b><br/>
+	 * </p>
+	 */
+	public static final NumberParam QUANTITY = new NumberParam(SP_QUANTITY);
+
+	/**
 	 * Search parameter constant for <b>substance</b>
 	 * <p>
 	 * Description: <b></b><br/>
@@ -141,6 +186,22 @@ public class Substance extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="substance", path="Substance.ingredient.substance", description="")
 	public static final String SP_SUBSTANCE = "substance";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>substance</b>
+	 * <p>
+	 * Description: <b></b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>Substance.ingredient.substance</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceParam SUBSTANCE = new ReferenceParam(SP_SUBSTANCE);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>Substance.ingredient.substance</b>".
+	 */
+	public static final Include INCLUDE_INGREDIENT_SUBSTANCE = new Include("Substance.ingredient.substance");
 
 
 	@Child(name="type", type=CodeableConceptDt.class, order=0, min=1, max=1)	
@@ -177,11 +238,6 @@ public class Substance extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myType,  myDescription,  myInstance,  myIngredient);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myType, myDescription, myInstance, myIngredient);
@@ -404,11 +460,6 @@ public class Substance extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myIdentifier,  myExpiry,  myQuantity);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myIdentifier, myExpiry, myQuantity);
@@ -647,11 +698,6 @@ public class Substance extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myQuantity,  mySubstance);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myQuantity, mySubstance);

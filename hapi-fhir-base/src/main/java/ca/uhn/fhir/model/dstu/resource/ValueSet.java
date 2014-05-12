@@ -63,6 +63,9 @@ import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
+import ca.uhn.fhir.rest.gclient.DateParam;
+import ca.uhn.fhir.rest.gclient.StringParam;
+import ca.uhn.fhir.rest.gclient.TokenParam;
 
 
 /**
@@ -100,6 +103,16 @@ public class ValueSet extends BaseResource implements IResource {
 	public static final String SP_IDENTIFIER = "identifier";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
+	 * <p>
+	 * Description: <b>The identifier of the value set</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>ValueSet.identifier</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam IDENTIFIER = new TokenParam(SP_IDENTIFIER);
+
+	/**
 	 * Search parameter constant for <b>version</b>
 	 * <p>
 	 * Description: <b>The version identifier of the value set</b><br/>
@@ -109,6 +122,16 @@ public class ValueSet extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="version", path="ValueSet.version", description="The version identifier of the value set")
 	public static final String SP_VERSION = "version";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>version</b>
+	 * <p>
+	 * Description: <b>The version identifier of the value set</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>ValueSet.version</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam VERSION = new TokenParam(SP_VERSION);
 
 	/**
 	 * Search parameter constant for <b>name</b>
@@ -122,6 +145,16 @@ public class ValueSet extends BaseResource implements IResource {
 	public static final String SP_NAME = "name";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>name</b>
+	 * <p>
+	 * Description: <b>The name of the value set</b><br/>
+	 * Type: <b>string</b><br/>
+	 * Path: <b>ValueSet.name</b><br/>
+	 * </p>
+	 */
+	public static final StringParam NAME = new StringParam(SP_NAME);
+
+	/**
 	 * Search parameter constant for <b>publisher</b>
 	 * <p>
 	 * Description: <b>Name of the publisher of the value set</b><br/>
@@ -131,6 +164,16 @@ public class ValueSet extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="publisher", path="ValueSet.publisher", description="Name of the publisher of the value set")
 	public static final String SP_PUBLISHER = "publisher";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>publisher</b>
+	 * <p>
+	 * Description: <b>Name of the publisher of the value set</b><br/>
+	 * Type: <b>string</b><br/>
+	 * Path: <b>ValueSet.publisher</b><br/>
+	 * </p>
+	 */
+	public static final StringParam PUBLISHER = new StringParam(SP_PUBLISHER);
 
 	/**
 	 * Search parameter constant for <b>description</b>
@@ -144,6 +187,16 @@ public class ValueSet extends BaseResource implements IResource {
 	public static final String SP_DESCRIPTION = "description";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>description</b>
+	 * <p>
+	 * Description: <b>Text search in the description of the value set</b><br/>
+	 * Type: <b>string</b><br/>
+	 * Path: <b>ValueSet.description</b><br/>
+	 * </p>
+	 */
+	public static final StringParam DESCRIPTION = new StringParam(SP_DESCRIPTION);
+
+	/**
 	 * Search parameter constant for <b>status</b>
 	 * <p>
 	 * Description: <b>The status of the value set</b><br/>
@@ -153,6 +206,16 @@ public class ValueSet extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="status", path="ValueSet.status", description="The status of the value set")
 	public static final String SP_STATUS = "status";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>status</b>
+	 * <p>
+	 * Description: <b>The status of the value set</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>ValueSet.status</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam STATUS = new TokenParam(SP_STATUS);
 
 	/**
 	 * Search parameter constant for <b>date</b>
@@ -166,6 +229,16 @@ public class ValueSet extends BaseResource implements IResource {
 	public static final String SP_DATE = "date";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>date</b>
+	 * <p>
+	 * Description: <b>The value set publication date</b><br/>
+	 * Type: <b>date</b><br/>
+	 * Path: <b>ValueSet.date</b><br/>
+	 * </p>
+	 */
+	public static final DateParam DATE = new DateParam(SP_DATE);
+
+	/**
 	 * Search parameter constant for <b>system</b>
 	 * <p>
 	 * Description: <b>The system for any codes defined by this value set</b><br/>
@@ -175,6 +248,16 @@ public class ValueSet extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="system", path="ValueSet.define.system", description="The system for any codes defined by this value set")
 	public static final String SP_SYSTEM = "system";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>system</b>
+	 * <p>
+	 * Description: <b>The system for any codes defined by this value set</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>ValueSet.define.system</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam SYSTEM = new TokenParam(SP_SYSTEM);
 
 	/**
 	 * Search parameter constant for <b>code</b>
@@ -188,6 +271,16 @@ public class ValueSet extends BaseResource implements IResource {
 	public static final String SP_CODE = "code";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>code</b>
+	 * <p>
+	 * Description: <b>A code defined in the value set</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>ValueSet.define.concept.code</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam CODE = new TokenParam(SP_CODE);
+
+	/**
 	 * Search parameter constant for <b>reference</b>
 	 * <p>
 	 * Description: <b>A code system included or excluded in the value set or an imported value set</b><br/>
@@ -199,6 +292,16 @@ public class ValueSet extends BaseResource implements IResource {
 	public static final String SP_REFERENCE = "reference";
 
 	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>reference</b>
+	 * <p>
+	 * Description: <b>A code system included or excluded in the value set or an imported value set</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>ValueSet.compose.include.system</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam REFERENCE = new TokenParam(SP_REFERENCE);
+
+	/**
 	 * Search parameter constant for <b>!restricts</b>
 	 * <p>
 	 * Description: <b>A value set listed in the restricts list</b><br/>
@@ -208,6 +311,16 @@ public class ValueSet extends BaseResource implements IResource {
 	 */
 	@SearchParamDefinition(name="!restricts", path="ValueSet.compose.restricts", description="A value set listed in the restricts list")
 	public static final String SP_RESTRICTS = "!restricts";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>!restricts</b>
+	 * <p>
+	 * Description: <b>A value set listed in the restricts list</b><br/>
+	 * Type: <b>token</b><br/>
+	 * Path: <b>ValueSet.compose.restricts</b><br/>
+	 * </p>
+	 */
+	public static final TokenParam RESTRICTS = new TokenParam(SP_RESTRICTS);
 
 
 	@Child(name="identifier", type=StringDt.class, order=0, min=0, max=1)	
@@ -314,11 +427,6 @@ public class ValueSet extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myIdentifier,  myVersion,  myName,  myPublisher,  myTelecom,  myDescription,  myCopyright,  myStatus,  myExperimental,  myExtensible,  myDate,  myDefine,  myCompose,  myExpansion);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myIdentifier, myVersion, myName, myPublisher, myTelecom, myDescription, myCopyright, myStatus, myExperimental, myExtensible, myDate, myDefine, myCompose, myExpansion);
@@ -976,11 +1084,6 @@ public class ValueSet extends BaseResource implements IResource {
 	}
 	
 	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
-	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, mySystem, myVersion, myCaseSensitive, myConcept);
 	}
@@ -1232,11 +1335,6 @@ public class ValueSet extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myCode,  myAbstract,  myDisplay,  myDefinition,  myConcept);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myCode, myAbstract, myDisplay, myDefinition, myConcept);
@@ -1522,11 +1620,6 @@ public class ValueSet extends BaseResource implements IResource {
 	}
 	
 	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
-	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myImport, myInclude, myExclude);
 	}
@@ -1777,11 +1870,6 @@ public class ValueSet extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  mySystem,  myVersion,  myCode,  myFilter);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, mySystem, myVersion, myCode, myFilter);
@@ -2055,11 +2143,6 @@ public class ValueSet extends BaseResource implements IResource {
 	}
 	
 	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
-	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myProperty, myOp, myValue);
 	}
@@ -2240,11 +2323,6 @@ public class ValueSet extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myIdentifier,  myTimestamp,  myContains);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myIdentifier, myTimestamp, myContains);
@@ -2472,11 +2550,6 @@ public class ValueSet extends BaseResource implements IResource {
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  mySystem,  myCode,  myDisplay,  myContains);
 	}
 	
-	@Override
-	public java.util.List<IElement> getAllPopulatedChildElements() {
-		return getAllPopulatedChildElementsOfType(null);
-	}
-
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, mySystem, myCode, myDisplay, myContains);
