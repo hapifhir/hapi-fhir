@@ -1,9 +1,8 @@
-package ca.uhn.fhir.jpa.entity;
+package ca.uhn.fhir.jpa.dao;
 
 import java.util.HashMap;
 import java.util.List;
 
-import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.primitive.IdDt;

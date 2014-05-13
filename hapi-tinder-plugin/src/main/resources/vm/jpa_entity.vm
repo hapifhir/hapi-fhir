@@ -1,0 +1,45 @@
+#parse ( "/vm/templates.vm" )
+
+package ${packageBase};
+
+@ResourceDef(name="${className}", profile="${profile}", id="${id}")
+public class ${className}ResourceTable extends BaseResourceTable<${className}> {
+
+#foreach ( $param in $searchParams )
+#if( ${param.typeCapitalized} == 'String' )
+	@IndexedParam(path="${param.path}")
+	@Column(length=100)
+	private String ${param.name};
+#elseif( ${param.typeCapitalized} == 'Date' )
+	@IndexedParam(path="${param.path}")
+	@Column()
+	private String ${param.name};
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>${param.name}</b>
+	 * <p>
+	 * Description: <b>${param.description}</b><br/>
+	 * Type: <b>${param.type}</b><br/>
+	 * Path: <b>${param.path}</b><br/>
+	 * </p>
+	 */
+	public static final ${param.typeCapitalized}Param ${param.fluentConstantName} = new ${param.typeCapitalized}Param(${param.constantName});
+
+#if( ${param.typeCapitalized} == 'Reference' )
+#foreach ( $include in $param.paths )
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>${include.path}</b>".
+	 */
+	public static final Include INCLUDE_${include.includeName} = new Include("${include.path}");
+
+#end	
+#end
+#end
+
+	@Override
+	public Class<${className}> getResourceType() {
+		return ${className}.class;
+	}
+	
+}

@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.test;
 
-import ca.uhn.fhir.jpa.entity.BaseResourceProvider;
+import ca.uhn.fhir.jpa.dao.BaseResourceProvider;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.resource.Questionnaire;
 
