@@ -89,7 +89,7 @@ public class Alert extends BaseResource implements IResource {
 	 * Path: <b>Alert.subject</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="subject", path="Alert.subject", description="The identity of a subject to list alerts for")
+	@SearchParamDefinition(name="subject", path="Alert.subject", description="The identity of a subject to list alerts for", type="reference")
 	public static final String SP_SUBJECT = "subject";
 
 	/**

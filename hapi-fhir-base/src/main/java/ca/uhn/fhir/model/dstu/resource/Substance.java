@@ -100,7 +100,7 @@ public class Substance extends BaseResource implements IResource {
 	 * Path: <b>Substance.type</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="type", path="Substance.type", description="The type of the substance")
+	@SearchParamDefinition(name="type", path="Substance.type", description="The type of the substance", type="token")
 	public static final String SP_TYPE = "type";
 
 	/**
@@ -121,7 +121,7 @@ public class Substance extends BaseResource implements IResource {
 	 * Path: <b>Substance.instance.identifier</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="identifier", path="Substance.instance.identifier", description="")
+	@SearchParamDefinition(name="identifier", path="Substance.instance.identifier", description="", type="token")
 	public static final String SP_IDENTIFIER = "identifier";
 
 	/**
@@ -142,7 +142,7 @@ public class Substance extends BaseResource implements IResource {
 	 * Path: <b>Substance.instance.expiry</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="expiry", path="Substance.instance.expiry", description="")
+	@SearchParamDefinition(name="expiry", path="Substance.instance.expiry", description="", type="date")
 	public static final String SP_EXPIRY = "expiry";
 
 	/**
@@ -163,7 +163,7 @@ public class Substance extends BaseResource implements IResource {
 	 * Path: <b>Substance.instance.quantity</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="quantity", path="Substance.instance.quantity", description="")
+	@SearchParamDefinition(name="quantity", path="Substance.instance.quantity", description="", type="number")
 	public static final String SP_QUANTITY = "quantity";
 
 	/**
@@ -184,7 +184,7 @@ public class Substance extends BaseResource implements IResource {
 	 * Path: <b>Substance.ingredient.substance</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="substance", path="Substance.ingredient.substance", description="")
+	@SearchParamDefinition(name="substance", path="Substance.ingredient.substance", description="", type="reference")
 	public static final String SP_SUBSTANCE = "substance";
 
 	/**

@@ -93,7 +93,7 @@ public class Device extends BaseResource implements IResource {
 	 * Path: <b>Device.type</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="type", path="Device.type", description="The type of the device")
+	@SearchParamDefinition(name="type", path="Device.type", description="The type of the device", type="token")
 	public static final String SP_TYPE = "type";
 
 	/**
@@ -114,7 +114,7 @@ public class Device extends BaseResource implements IResource {
 	 * Path: <b>Device.manufacturer</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="manufacturer", path="Device.manufacturer", description="The manufacturer of the device")
+	@SearchParamDefinition(name="manufacturer", path="Device.manufacturer", description="The manufacturer of the device", type="string")
 	public static final String SP_MANUFACTURER = "manufacturer";
 
 	/**
@@ -135,7 +135,7 @@ public class Device extends BaseResource implements IResource {
 	 * Path: <b>Device.model</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="model", path="Device.model", description="The model of the device")
+	@SearchParamDefinition(name="model", path="Device.model", description="The model of the device", type="string")
 	public static final String SP_MODEL = "model";
 
 	/**
@@ -156,7 +156,7 @@ public class Device extends BaseResource implements IResource {
 	 * Path: <b>Device.owner</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="organization", path="Device.owner", description="The organization responsible for the device")
+	@SearchParamDefinition(name="organization", path="Device.owner", description="The organization responsible for the device", type="reference")
 	public static final String SP_ORGANIZATION = "organization";
 
 	/**
@@ -183,7 +183,7 @@ public class Device extends BaseResource implements IResource {
 	 * Path: <b>Device.identifier</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="identifier", path="Device.identifier", description="")
+	@SearchParamDefinition(name="identifier", path="Device.identifier", description="", type="token")
 	public static final String SP_IDENTIFIER = "identifier";
 
 	/**
@@ -204,7 +204,7 @@ public class Device extends BaseResource implements IResource {
 	 * Path: <b>Device.location</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="location", path="Device.location", description="A location, where the resource is found")
+	@SearchParamDefinition(name="location", path="Device.location", description="A location, where the resource is found", type="reference")
 	public static final String SP_LOCATION = "location";
 
 	/**
@@ -231,7 +231,7 @@ public class Device extends BaseResource implements IResource {
 	 * Path: <b>Device.patient</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="patient", path="Device.patient", description="Patient information, if the resource is affixed to a person")
+	@SearchParamDefinition(name="patient", path="Device.patient", description="Patient information, if the resource is affixed to a person", type="reference")
 	public static final String SP_PATIENT = "patient";
 
 	/**
@@ -258,7 +258,7 @@ public class Device extends BaseResource implements IResource {
 	 * Path: <b>Device.udi</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="udi", path="Device.udi", description="")
+	@SearchParamDefinition(name="udi", path="Device.udi", description="", type="string")
 	public static final String SP_UDI = "udi";
 
 	/**

@@ -269,8 +269,8 @@ public class MessageHeader extends BaseResource implements IResource {
      * The time that the message was sent
      * </p> 
 	 */
-	public MessageHeader setTimestamp( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myTimestamp = new InstantDt(theDate, thePrecision); 
+	public MessageHeader setTimestampWithMillisPrecision( Date theDate) {
+		myTimestamp = new InstantDt(theDate); 
 		return this; 
 	}
 
@@ -282,8 +282,8 @@ public class MessageHeader extends BaseResource implements IResource {
      * The time that the message was sent
      * </p> 
 	 */
-	public MessageHeader setTimestampWithMillisPrecision( Date theDate) {
-		myTimestamp = new InstantDt(theDate); 
+	public MessageHeader setTimestamp( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myTimestamp = new InstantDt(theDate, thePrecision); 
 		return this; 
 	}
 

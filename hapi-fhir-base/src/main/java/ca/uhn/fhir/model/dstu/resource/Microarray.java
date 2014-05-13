@@ -94,7 +94,7 @@ public class Microarray extends BaseResource implements IResource {
 	 * Path: <b>Microarray.subject.patient</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="patient", path="Microarray.subject.patient", description="Patient described by the microarray")
+	@SearchParamDefinition(name="patient", path="Microarray.subject.patient", description="Patient described by the microarray", type="reference")
 	public static final String SP_PATIENT = "patient";
 
 	/**
@@ -121,7 +121,7 @@ public class Microarray extends BaseResource implements IResource {
 	 * Path: <b>Microarray.sample.gene.identity</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="gene", path="Microarray.sample.gene.identity", description="Gene studied in the microarray")
+	@SearchParamDefinition(name="gene", path="Microarray.sample.gene.identity", description="Gene studied in the microarray", type="string")
 	public static final String SP_GENE = "gene";
 
 	/**
@@ -142,7 +142,7 @@ public class Microarray extends BaseResource implements IResource {
 	 * Path: <b>Microarray.sample.gene.coordinate</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="coordinate", path="Microarray.sample.gene.coordinate", description="Coordinate of the gene")
+	@SearchParamDefinition(name="coordinate", path="Microarray.sample.gene.coordinate", description="Coordinate of the gene", type="string")
 	public static final String SP_COORDINATE = "coordinate";
 
 	/**

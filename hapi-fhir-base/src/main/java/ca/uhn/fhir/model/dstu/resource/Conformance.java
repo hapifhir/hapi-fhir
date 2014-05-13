@@ -113,7 +113,7 @@ public class Conformance extends BaseResource implements IResource {
 	 * Path: <b>Conformance.identifier</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="identifier", path="Conformance.identifier", description="The identifier of the conformance statement")
+	@SearchParamDefinition(name="identifier", path="Conformance.identifier", description="The identifier of the conformance statement", type="token")
 	public static final String SP_IDENTIFIER = "identifier";
 
 	/**
@@ -134,7 +134,7 @@ public class Conformance extends BaseResource implements IResource {
 	 * Path: <b>Conformance.version</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="version", path="Conformance.version", description="The version identifier of the conformance statement")
+	@SearchParamDefinition(name="version", path="Conformance.version", description="The version identifier of the conformance statement", type="token")
 	public static final String SP_VERSION = "version";
 
 	/**
@@ -155,7 +155,7 @@ public class Conformance extends BaseResource implements IResource {
 	 * Path: <b>Conformance.name</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="name", path="Conformance.name", description="Name of the conformance statement")
+	@SearchParamDefinition(name="name", path="Conformance.name", description="Name of the conformance statement", type="string")
 	public static final String SP_NAME = "name";
 
 	/**
@@ -176,7 +176,7 @@ public class Conformance extends BaseResource implements IResource {
 	 * Path: <b>Conformance.publisher</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="publisher", path="Conformance.publisher", description="Name of the publisher of the conformance statement")
+	@SearchParamDefinition(name="publisher", path="Conformance.publisher", description="Name of the publisher of the conformance statement", type="string")
 	public static final String SP_PUBLISHER = "publisher";
 
 	/**
@@ -197,7 +197,7 @@ public class Conformance extends BaseResource implements IResource {
 	 * Path: <b>Conformance.description</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="description", path="Conformance.description", description="Text search in the description of the conformance statement")
+	@SearchParamDefinition(name="description", path="Conformance.description", description="Text search in the description of the conformance statement", type="string")
 	public static final String SP_DESCRIPTION = "description";
 
 	/**
@@ -218,7 +218,7 @@ public class Conformance extends BaseResource implements IResource {
 	 * Path: <b>Conformance.status</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="status", path="Conformance.status", description="The current status of the conformance statement")
+	@SearchParamDefinition(name="status", path="Conformance.status", description="The current status of the conformance statement", type="token")
 	public static final String SP_STATUS = "status";
 
 	/**
@@ -239,7 +239,7 @@ public class Conformance extends BaseResource implements IResource {
 	 * Path: <b>Conformance.date</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="date", path="Conformance.date", description="The conformance statement publication date")
+	@SearchParamDefinition(name="date", path="Conformance.date", description="The conformance statement publication date", type="date")
 	public static final String SP_DATE = "date";
 
 	/**
@@ -260,7 +260,7 @@ public class Conformance extends BaseResource implements IResource {
 	 * Path: <b>Conformance.software.name</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="software", path="Conformance.software.name", description="Part of a the name of a software application")
+	@SearchParamDefinition(name="software", path="Conformance.software.name", description="Part of a the name of a software application", type="string")
 	public static final String SP_SOFTWARE = "software";
 
 	/**
@@ -281,7 +281,7 @@ public class Conformance extends BaseResource implements IResource {
 	 * Path: <b>Conformance.version</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="fhirversion", path="Conformance.version", description="The version of FHIR")
+	@SearchParamDefinition(name="fhirversion", path="Conformance.version", description="The version of FHIR", type="token")
 	public static final String SP_FHIRVERSION = "fhirversion";
 
 	/**
@@ -302,7 +302,7 @@ public class Conformance extends BaseResource implements IResource {
 	 * Path: <b>Conformance.rest.resource.type</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="resource", path="Conformance.rest.resource.type", description="Name of a resource mentioned in a conformance statement")
+	@SearchParamDefinition(name="resource", path="Conformance.rest.resource.type", description="Name of a resource mentioned in a conformance statement", type="token")
 	public static final String SP_RESOURCE = "resource";
 
 	/**
@@ -323,7 +323,7 @@ public class Conformance extends BaseResource implements IResource {
 	 * Path: <b>Conformance.messaging.event.code</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="event", path="Conformance.messaging.event.code", description="Event code in a conformance statement")
+	@SearchParamDefinition(name="event", path="Conformance.messaging.event.code", description="Event code in a conformance statement", type="token")
 	public static final String SP_EVENT = "event";
 
 	/**
@@ -344,7 +344,7 @@ public class Conformance extends BaseResource implements IResource {
 	 * Path: <b>Conformance.rest.mode</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="mode", path="Conformance.rest.mode", description="Mode - restful (server/client) or messaging (sender/receiver)")
+	@SearchParamDefinition(name="mode", path="Conformance.rest.mode", description="Mode - restful (server/client) or messaging (sender/receiver)", type="token")
 	public static final String SP_MODE = "mode";
 
 	/**
@@ -365,7 +365,7 @@ public class Conformance extends BaseResource implements IResource {
 	 * Path: <b>Conformance.rest.resource.profile</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="profile", path="Conformance.rest.resource.profile", description="A profile id invoked in a conformance statement")
+	@SearchParamDefinition(name="profile", path="Conformance.rest.resource.profile", description="A profile id invoked in a conformance statement", type="reference")
 	public static final String SP_PROFILE = "profile";
 
 	/**
@@ -392,7 +392,7 @@ public class Conformance extends BaseResource implements IResource {
 	 * Path: <b>Conformance.format</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="format", path="Conformance.format", description="")
+	@SearchParamDefinition(name="format", path="Conformance.format", description="", type="token")
 	public static final String SP_FORMAT = "format";
 
 	/**
@@ -413,7 +413,7 @@ public class Conformance extends BaseResource implements IResource {
 	 * Path: <b>Conformance.rest.security</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="security", path="Conformance.rest.security", description="")
+	@SearchParamDefinition(name="security", path="Conformance.rest.security", description="", type="token")
 	public static final String SP_SECURITY = "security";
 
 	/**
@@ -434,7 +434,7 @@ public class Conformance extends BaseResource implements IResource {
 	 * Path: <b>Conformance.profile</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="supported-profile", path="Conformance.profile", description="")
+	@SearchParamDefinition(name="supported-profile", path="Conformance.profile", description="", type="reference")
 	public static final String SP_SUPPORTED_PROFILE = "supported-profile";
 
 	/**

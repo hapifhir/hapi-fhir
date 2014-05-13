@@ -93,7 +93,7 @@ public class SequencingAnalysis extends BaseResource implements IResource {
 	 * Path: <b>SequencingAnalysis.subject</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="subject", path="SequencingAnalysis.subject", description="Subject of the analysis")
+	@SearchParamDefinition(name="subject", path="SequencingAnalysis.subject", description="Subject of the analysis", type="reference")
 	public static final String SP_SUBJECT = "subject";
 
 	/**
@@ -120,7 +120,7 @@ public class SequencingAnalysis extends BaseResource implements IResource {
 	 * Path: <b>SequencingAnalysis.date</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="date", path="SequencingAnalysis.date", description="Date when result of the analysis is updated")
+	@SearchParamDefinition(name="date", path="SequencingAnalysis.date", description="Date when result of the analysis is updated", type="date")
 	public static final String SP_DATE = "date";
 
 	/**
@@ -141,7 +141,7 @@ public class SequencingAnalysis extends BaseResource implements IResource {
 	 * Path: <b>SequencingAnalysis.genome.name</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="genome", path="SequencingAnalysis.genome.name", description="Name of the reference genome used in the analysis")
+	@SearchParamDefinition(name="genome", path="SequencingAnalysis.genome.name", description="Name of the reference genome used in the analysis", type="string")
 	public static final String SP_GENOME = "genome";
 
 	/**

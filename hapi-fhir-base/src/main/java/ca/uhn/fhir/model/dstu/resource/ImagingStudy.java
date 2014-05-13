@@ -103,7 +103,7 @@ public class ImagingStudy extends BaseResource implements IResource {
 	 * Path: <b>ImagingStudy.subject</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="subject", path="ImagingStudy.subject", description="Who the study is about")
+	@SearchParamDefinition(name="subject", path="ImagingStudy.subject", description="Who the study is about", type="reference")
 	public static final String SP_SUBJECT = "subject";
 
 	/**
@@ -130,7 +130,7 @@ public class ImagingStudy extends BaseResource implements IResource {
 	 * Path: <b>ImagingStudy.dateTime</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="date", path="ImagingStudy.dateTime", description="The date the study was done was taken")
+	@SearchParamDefinition(name="date", path="ImagingStudy.dateTime", description="The date the study was done was taken", type="date")
 	public static final String SP_DATE = "date";
 
 	/**
@@ -151,7 +151,7 @@ public class ImagingStudy extends BaseResource implements IResource {
 	 * Path: <b>ImagingStudy.accessionNo</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="accession", path="ImagingStudy.accessionNo", description="The accession id for the image")
+	@SearchParamDefinition(name="accession", path="ImagingStudy.accessionNo", description="The accession id for the image", type="token")
 	public static final String SP_ACCESSION = "accession";
 
 	/**
@@ -172,7 +172,7 @@ public class ImagingStudy extends BaseResource implements IResource {
 	 * Path: <b>ImagingStudy.uid</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="study", path="ImagingStudy.uid", description="The study id for the image")
+	@SearchParamDefinition(name="study", path="ImagingStudy.uid", description="The study id for the image", type="token")
 	public static final String SP_STUDY = "study";
 
 	/**
@@ -193,7 +193,7 @@ public class ImagingStudy extends BaseResource implements IResource {
 	 * Path: <b>ImagingStudy.series.uid</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="series", path="ImagingStudy.series.uid", description="The series id for the image")
+	@SearchParamDefinition(name="series", path="ImagingStudy.series.uid", description="The series id for the image", type="token")
 	public static final String SP_SERIES = "series";
 
 	/**
@@ -214,7 +214,7 @@ public class ImagingStudy extends BaseResource implements IResource {
 	 * Path: <b>ImagingStudy.series.modality</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="modality", path="ImagingStudy.series.modality", description="The modality of the image")
+	@SearchParamDefinition(name="modality", path="ImagingStudy.series.modality", description="The modality of the image", type="token")
 	public static final String SP_MODALITY = "modality";
 
 	/**
@@ -235,7 +235,7 @@ public class ImagingStudy extends BaseResource implements IResource {
 	 * Path: <b></b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="size", path="", description="The size of the image in MB - may include > or < in the value")
+	@SearchParamDefinition(name="size", path="", description="The size of the image in MB - may include > or < in the value", type="number")
 	public static final String SP_SIZE = "size";
 
 	/**
@@ -256,7 +256,7 @@ public class ImagingStudy extends BaseResource implements IResource {
 	 * Path: <b>ImagingStudy.series.bodySite</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="bodysite", path="ImagingStudy.series.bodySite", description="")
+	@SearchParamDefinition(name="bodysite", path="ImagingStudy.series.bodySite", description="", type="token")
 	public static final String SP_BODYSITE = "bodysite";
 
 	/**
@@ -277,7 +277,7 @@ public class ImagingStudy extends BaseResource implements IResource {
 	 * Path: <b>ImagingStudy.series.instance.uid</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="uid", path="ImagingStudy.series.instance.uid", description="")
+	@SearchParamDefinition(name="uid", path="ImagingStudy.series.instance.uid", description="", type="token")
 	public static final String SP_UID = "uid";
 
 	/**
@@ -298,7 +298,7 @@ public class ImagingStudy extends BaseResource implements IResource {
 	 * Path: <b>ImagingStudy.series.instance.sopclass</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="dicom-class", path="ImagingStudy.series.instance.sopclass", description="")
+	@SearchParamDefinition(name="dicom-class", path="ImagingStudy.series.instance.sopclass", description="", type="token")
 	public static final String SP_DICOM_CLASS = "dicom-class";
 
 	/**

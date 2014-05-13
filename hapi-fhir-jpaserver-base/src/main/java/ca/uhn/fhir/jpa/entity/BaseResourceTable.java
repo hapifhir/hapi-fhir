@@ -33,17 +33,31 @@ public abstract class BaseResourceTable<T extends IResource> extends BaseHasReso
 	@Column(name = "RES_ID")
 	private Long myId;
 
+	@OneToMany(mappedBy = "myResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
+	private Collection<ResourceIndexedSearchParamDate> myParamsDate;
+
+	@Column(name = "SP_DATE_PRESENT")
+	private boolean myParamsDatePopulated;
+
+	@OneToMany(mappedBy = "myResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
+	private Collection<ResourceIndexedSearchParamString> myParamsString;
+
+	@Column(name = "SP_STRING_PRESENT")
+	private boolean myParamsStringPopulated;
+
+	@OneToMany(mappedBy = "myResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
+	private Collection<ResourceIndexedSearchParamToken> myParamsToken;
+
+	@Column(name = "SP_TOKEN_PRESENT")
+	private boolean myParamsTokenPopulated;
+
+	@OneToMany(mappedBy = "myResource", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+	private Collection<ResourceTag> myTags;
+
 	@Version()
 	@Column(name = "RES_VER")
 	private Long myVersion;
 
-	@OneToMany(mappedBy="myResource",cascade=CascadeType.ALL, fetch=FetchType.EAGER, orphanRemoval=true)
-	private Collection<ResourceTag> myTags;
-	
-	public IdDt getId() {
-		return new IdDt(myId);
-	}
-	
 	public void addTag(String theTerm, String theLabel, String theScheme) {
 		for (ResourceTag next : getTags()) {
 			if (next.getTerm().equals(theTerm)) {
@@ -53,21 +67,86 @@ public abstract class BaseResourceTable<T extends IResource> extends BaseHasReso
 		getTags().add(new ResourceTag(this, theTerm, theLabel, theScheme));
 	}
 
+	public Long getIdAsLong() {
+		return myId;
+	}
+
+	public IdDt getId() {
+		return new IdDt(myId);
+	}
+
+	public Collection<ResourceIndexedSearchParamDate> getParamsDate() {
+		if (myParamsDate == null) {
+			myParamsDate = new ArrayList<>();
+		}
+		return myParamsDate;
+	}
+
+	public Collection<ResourceIndexedSearchParamString> getParamsString() {
+		if (myParamsString == null) {
+			myParamsString = new ArrayList<>();
+		}
+		return myParamsString;
+	}
+
+	public Collection<ResourceIndexedSearchParamToken> getParamsToken() {
+		if (myParamsToken == null) {
+			myParamsToken = new ArrayList<>();
+		}
+		return myParamsToken;
+	}
+
+	public abstract Class<T> getResourceType();
+
 	public Collection<ResourceTag> getTags() {
-		if (myTags==null) {
+		if (myTags == null) {
 			myTags = new ArrayList<>();
 		}
 		return myTags;
 	}
 
-	public abstract Class<T> getResourceType();
-
 	public IdDt getVersion() {
 		return new IdDt(myVersion);
 	}
 
+	public boolean isParamsDatePopulated() {
+		return myParamsDatePopulated;
+	}
+
+	public boolean isParamsStringPopulated() {
+		return myParamsStringPopulated;
+	}
+
+	public boolean isParamsTokenPopulated() {
+		return myParamsTokenPopulated;
+	}
+
 	public void setId(IdDt theId) {
 		myId = theId.asLong();
+	}
+
+	public void setParamsDate(Collection<ResourceIndexedSearchParamDate> theParamsDate) {
+		myParamsDate = theParamsDate;
+	}
+
+	public void setParamsDatePopulated(boolean theParamsDatePopulated) {
+		myParamsDatePopulated = theParamsDatePopulated;
+	}
+
+	public void setParamsString(Collection<ResourceIndexedSearchParamString> theParamsString) {
+		myParamsString = theParamsString;
+	}
+
+	public void setParamsStringPopulated(boolean theParamsStringPopulated) {
+		myParamsStringPopulated = theParamsStringPopulated;
+	}
+
+	public void setParamsToken(Collection<ResourceIndexedSearchParamToken> theParamsToken) {
+		myParamsToken = theParamsToken;
+	}
+
+	public void setParamsTokenPopulated(boolean theParamsTokenPopulated) {
+		myParamsTokenPopulated = theParamsTokenPopulated;
 	}
 
 	public void setVersion(IdDt theVersion) {
@@ -91,7 +170,7 @@ public abstract class BaseResourceTable<T extends IResource> extends BaseHasReso
 		for (ResourceTag next : getTags()) {
 			retVal.addTag(next.getTerm(), next.getLabel(), next.getScheme());
 		}
-		
+
 		return retVal;
 	}
 }

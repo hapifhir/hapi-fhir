@@ -94,7 +94,7 @@ public class SequencingLab extends BaseResource implements IResource {
 	 * Path: <b>SequencingLab.subject</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="subject", path="SequencingLab.subject", description="Subject of the lab")
+	@SearchParamDefinition(name="subject", path="SequencingLab.subject", description="Subject of the lab", type="reference")
 	public static final String SP_SUBJECT = "subject";
 
 	/**
@@ -121,7 +121,7 @@ public class SequencingLab extends BaseResource implements IResource {
 	 * Path: <b>SequencingLab.specimen.type</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="specimen", path="SequencingLab.specimen.type", description="Type of the specimen used for the lab")
+	@SearchParamDefinition(name="specimen", path="SequencingLab.specimen.type", description="Type of the specimen used for the lab", type="string")
 	public static final String SP_SPECIMEN = "specimen";
 
 	/**
@@ -142,7 +142,7 @@ public class SequencingLab extends BaseResource implements IResource {
 	 * Path: <b>SequencingLab.date</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="date", path="SequencingLab.date", description="Date when result of the lab is uploaded")
+	@SearchParamDefinition(name="date", path="SequencingLab.date", description="Date when result of the lab is uploaded", type="date")
 	public static final String SP_DATE = "date";
 
 	/**
@@ -163,7 +163,7 @@ public class SequencingLab extends BaseResource implements IResource {
 	 * Path: <b>SequencingLab.organization</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="organization", path="SequencingLab.organization", description="Organization that does the lab")
+	@SearchParamDefinition(name="organization", path="SequencingLab.organization", description="Organization that does the lab", type="string")
 	public static final String SP_ORGANIZATION = "organization";
 
 	/**
@@ -184,7 +184,7 @@ public class SequencingLab extends BaseResource implements IResource {
 	 * Path: <b>SequencingLab.system.class</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="system-class", path="SequencingLab.system.class", description="Class of the sequencing system")
+	@SearchParamDefinition(name="system-class", path="SequencingLab.system.class", description="Class of the sequencing system", type="string")
 	public static final String SP_SYSTEM_CLASS = "system-class";
 
 	/**
@@ -205,7 +205,7 @@ public class SequencingLab extends BaseResource implements IResource {
 	 * Path: <b>SequencingLab.system.name</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="system-name", path="SequencingLab.system.name", description="Name of the sequencing system")
+	@SearchParamDefinition(name="system-name", path="SequencingLab.system.name", description="Name of the sequencing system", type="string")
 	public static final String SP_SYSTEM_NAME = "system-name";
 
 	/**

@@ -28,5 +28,7 @@ public interface IFhirResourceDao<T extends IResource> {
 	List<T> search(Map<String, IQueryParameterType> theParams);
 
 	List<T> search(String theSpName, IQueryParameterType theValue);
+
+	List<T> searchWithAndOr(Map<String, List<List<IQueryParameterType>>> theMap);
 	
 }

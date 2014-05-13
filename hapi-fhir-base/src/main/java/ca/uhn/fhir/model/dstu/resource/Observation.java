@@ -113,7 +113,7 @@ public class Observation extends BaseResource implements IResource {
 	 * Path: <b>Observation.name</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="name", path="Observation.name", description="The name of the observation type")
+	@SearchParamDefinition(name="name", path="Observation.name", description="The name of the observation type", type="token")
 	public static final String SP_NAME = "name";
 
 	/**
@@ -134,7 +134,7 @@ public class Observation extends BaseResource implements IResource {
 	 * Path: <b>Observation.value[x]</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="value-quantity", path="Observation.value[x]", description="The value of the observation, if the value is a Quantity, or a SampledData (just search on the bounds of the values in sampled data)")
+	@SearchParamDefinition(name="value-quantity", path="Observation.value[x]", description="The value of the observation, if the value is a Quantity, or a SampledData (just search on the bounds of the values in sampled data)", type="quantity")
 	public static final String SP_VALUE_QUANTITY = "value-quantity";
 
 	/**
@@ -155,7 +155,7 @@ public class Observation extends BaseResource implements IResource {
 	 * Path: <b>Observation.value[x]</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="value-concept", path="Observation.value[x]", description="The value of the observation, if the value is a CodeableConcept")
+	@SearchParamDefinition(name="value-concept", path="Observation.value[x]", description="The value of the observation, if the value is a CodeableConcept", type="token")
 	public static final String SP_VALUE_CONCEPT = "value-concept";
 
 	/**
@@ -176,7 +176,7 @@ public class Observation extends BaseResource implements IResource {
 	 * Path: <b>Observation.value[x]</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="value-date", path="Observation.value[x]", description="The value of the observation, if the value is a Period")
+	@SearchParamDefinition(name="value-date", path="Observation.value[x]", description="The value of the observation, if the value is a Period", type="date")
 	public static final String SP_VALUE_DATE = "value-date";
 
 	/**
@@ -197,7 +197,7 @@ public class Observation extends BaseResource implements IResource {
 	 * Path: <b>Observation.value[x]</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="value-string", path="Observation.value[x]", description="The value of the observation, if the value is a string, and also searches in CodeableConcept.text")
+	@SearchParamDefinition(name="value-string", path="Observation.value[x]", description="The value of the observation, if the value is a string, and also searches in CodeableConcept.text", type="string")
 	public static final String SP_VALUE_STRING = "value-string";
 
 	/**
@@ -218,7 +218,7 @@ public class Observation extends BaseResource implements IResource {
 	 * Path: <b>name & value-[x]</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="name-value-[x]", path="name & value-[x]", description="Both name and one of the value parameters")
+	@SearchParamDefinition(name="name-value-[x]", path="name & value-[x]", description="Both name and one of the value parameters", type="composite")
 	public static final String SP_NAME_VALUE_X = "name-value-[x]";
 
 	/**
@@ -239,7 +239,7 @@ public class Observation extends BaseResource implements IResource {
 	 * Path: <b>Observation.applies[x]</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="date", path="Observation.applies[x]", description="Obtained date/time. If the obtained element is a period, a date that falls in the period")
+	@SearchParamDefinition(name="date", path="Observation.applies[x]", description="Obtained date/time. If the obtained element is a period, a date that falls in the period", type="date")
 	public static final String SP_DATE = "date";
 
 	/**
@@ -260,7 +260,7 @@ public class Observation extends BaseResource implements IResource {
 	 * Path: <b>Observation.status</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="status", path="Observation.status", description="The status of the observation")
+	@SearchParamDefinition(name="status", path="Observation.status", description="The status of the observation", type="token")
 	public static final String SP_STATUS = "status";
 
 	/**
@@ -281,7 +281,7 @@ public class Observation extends BaseResource implements IResource {
 	 * Path: <b>Observation.reliability</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="reliability", path="Observation.reliability", description="The reliability of the observation")
+	@SearchParamDefinition(name="reliability", path="Observation.reliability", description="The reliability of the observation", type="token")
 	public static final String SP_RELIABILITY = "reliability";
 
 	/**
@@ -302,7 +302,7 @@ public class Observation extends BaseResource implements IResource {
 	 * Path: <b>Observation.subject</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="subject", path="Observation.subject", description="The subject that the observation is about")
+	@SearchParamDefinition(name="subject", path="Observation.subject", description="The subject that the observation is about", type="reference")
 	public static final String SP_SUBJECT = "subject";
 
 	/**
@@ -329,7 +329,7 @@ public class Observation extends BaseResource implements IResource {
 	 * Path: <b>Observation.performer</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="performer", path="Observation.performer", description="Who and/or what performed the observation")
+	@SearchParamDefinition(name="performer", path="Observation.performer", description="Who and/or what performed the observation", type="reference")
 	public static final String SP_PERFORMER = "performer";
 
 	/**
@@ -356,7 +356,7 @@ public class Observation extends BaseResource implements IResource {
 	 * Path: <b>Observation.specimen</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="specimen", path="Observation.specimen", description="")
+	@SearchParamDefinition(name="specimen", path="Observation.specimen", description="", type="reference")
 	public static final String SP_SPECIMEN = "specimen";
 
 	/**
@@ -383,7 +383,7 @@ public class Observation extends BaseResource implements IResource {
 	 * Path: <b>Observation.related.type</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="related-type", path="Observation.related.type", description="")
+	@SearchParamDefinition(name="related-type", path="Observation.related.type", description="", type="token")
 	public static final String SP_RELATED_TYPE = "related-type";
 
 	/**
@@ -404,7 +404,7 @@ public class Observation extends BaseResource implements IResource {
 	 * Path: <b>Observation.related.target</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="related-target", path="Observation.related.target", description="")
+	@SearchParamDefinition(name="related-target", path="Observation.related.target", description="", type="reference")
 	public static final String SP_RELATED_TARGET = "related-target";
 
 	/**
@@ -431,7 +431,7 @@ public class Observation extends BaseResource implements IResource {
 	 * Path: <b>related-target & related-type</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="related", path="related-target & related-type", description="Related Observations - search on related-type and related-target together")
+	@SearchParamDefinition(name="related", path="related-target & related-type", description="Related Observations - search on related-type and related-target together", type="composite")
 	public static final String SP_RELATED = "related";
 
 	/**
@@ -786,8 +786,8 @@ public class Observation extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public Observation setIssued( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myIssued = new InstantDt(theDate, thePrecision); 
+	public Observation setIssuedWithMillisPrecision( Date theDate) {
+		myIssued = new InstantDt(theDate); 
 		return this; 
 	}
 
@@ -799,8 +799,8 @@ public class Observation extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public Observation setIssuedWithMillisPrecision( Date theDate) {
-		myIssued = new InstantDt(theDate); 
+	public Observation setIssued( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myIssued = new InstantDt(theDate, thePrecision); 
 		return this; 
 	}
 

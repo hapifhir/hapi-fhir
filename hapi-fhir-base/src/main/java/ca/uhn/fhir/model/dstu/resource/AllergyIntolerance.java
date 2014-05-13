@@ -94,7 +94,7 @@ public class AllergyIntolerance extends BaseResource implements IResource {
 	 * Path: <b>AllergyIntolerance.sensitivityType</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="type", path="AllergyIntolerance.sensitivityType", description="The type of sensitivity")
+	@SearchParamDefinition(name="type", path="AllergyIntolerance.sensitivityType", description="The type of sensitivity", type="token")
 	public static final String SP_TYPE = "type";
 
 	/**
@@ -115,7 +115,7 @@ public class AllergyIntolerance extends BaseResource implements IResource {
 	 * Path: <b>AllergyIntolerance.substance</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="substance", path="AllergyIntolerance.substance", description="The name or code of the substance that produces the sensitivity")
+	@SearchParamDefinition(name="substance", path="AllergyIntolerance.substance", description="The name or code of the substance that produces the sensitivity", type="reference")
 	public static final String SP_SUBSTANCE = "substance";
 
 	/**
@@ -142,7 +142,7 @@ public class AllergyIntolerance extends BaseResource implements IResource {
 	 * Path: <b>AllergyIntolerance.recordedDate</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="date", path="AllergyIntolerance.recordedDate", description="Recorded date/time.")
+	@SearchParamDefinition(name="date", path="AllergyIntolerance.recordedDate", description="Recorded date/time.", type="date")
 	public static final String SP_DATE = "date";
 
 	/**
@@ -163,7 +163,7 @@ public class AllergyIntolerance extends BaseResource implements IResource {
 	 * Path: <b>AllergyIntolerance.status</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="status", path="AllergyIntolerance.status", description="The status of the sensitivity")
+	@SearchParamDefinition(name="status", path="AllergyIntolerance.status", description="The status of the sensitivity", type="token")
 	public static final String SP_STATUS = "status";
 
 	/**
@@ -184,7 +184,7 @@ public class AllergyIntolerance extends BaseResource implements IResource {
 	 * Path: <b>AllergyIntolerance.subject</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="subject", path="AllergyIntolerance.subject", description="The subject that the sensitivity is about")
+	@SearchParamDefinition(name="subject", path="AllergyIntolerance.subject", description="The subject that the sensitivity is about", type="reference")
 	public static final String SP_SUBJECT = "subject";
 
 	/**
@@ -211,7 +211,7 @@ public class AllergyIntolerance extends BaseResource implements IResource {
 	 * Path: <b>AllergyIntolerance.recorder</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="recorder", path="AllergyIntolerance.recorder", description="Who recorded the sensitivity")
+	@SearchParamDefinition(name="recorder", path="AllergyIntolerance.recorder", description="Who recorded the sensitivity", type="reference")
 	public static final String SP_RECORDER = "recorder";
 
 	/**

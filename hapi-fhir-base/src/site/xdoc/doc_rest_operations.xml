@@ -661,6 +661,31 @@
 
 			</subsection>
 
+			<subsection name="Search Parameters: Quantity">
+
+				<p>
+					Quantity parameters allow a number with units and a comparator
+				</p>
+
+				<p>
+					The following snippet shows how to accept such a range, and combines it
+					with a specific identifier, which is a common scenario. (i.e. Give me a list
+					of observations for a
+					specific patient within a given date range)
+				</p>
+				<macro name="snippet">
+					<param name="id" value="quantity" />
+					<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
+				</macro>
+
+				<p>
+					Example URL to invoke this method:
+					<br />
+					<code>http://fhir.example.com/Observation?value-quantity=%lt;=123.2||mg</code>
+				</p>
+
+			</subsection>
+
 			<subsection name="Combining Multiple Parameters">
 
 				<p>

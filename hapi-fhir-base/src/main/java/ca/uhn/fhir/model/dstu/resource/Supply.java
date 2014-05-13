@@ -99,7 +99,7 @@ public class Supply extends BaseResource implements IResource {
 	 * Path: <b>Supply.kind</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="kind", path="Supply.kind", description="")
+	@SearchParamDefinition(name="kind", path="Supply.kind", description="", type="token")
 	public static final String SP_KIND = "kind";
 
 	/**
@@ -120,7 +120,7 @@ public class Supply extends BaseResource implements IResource {
 	 * Path: <b>Supply.identifier</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="identifier", path="Supply.identifier", description="")
+	@SearchParamDefinition(name="identifier", path="Supply.identifier", description="", type="token")
 	public static final String SP_IDENTIFIER = "identifier";
 
 	/**
@@ -141,7 +141,7 @@ public class Supply extends BaseResource implements IResource {
 	 * Path: <b>Supply.status</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="status", path="Supply.status", description="")
+	@SearchParamDefinition(name="status", path="Supply.status", description="", type="token")
 	public static final String SP_STATUS = "status";
 
 	/**
@@ -162,7 +162,7 @@ public class Supply extends BaseResource implements IResource {
 	 * Path: <b>Supply.patient</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="patient", path="Supply.patient", description="")
+	@SearchParamDefinition(name="patient", path="Supply.patient", description="", type="reference")
 	public static final String SP_PATIENT = "patient";
 
 	/**
@@ -189,7 +189,7 @@ public class Supply extends BaseResource implements IResource {
 	 * Path: <b>Supply.dispense.supplier</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="supplier", path="Supply.dispense.supplier", description="")
+	@SearchParamDefinition(name="supplier", path="Supply.dispense.supplier", description="", type="reference")
 	public static final String SP_SUPPLIER = "supplier";
 
 	/**
@@ -216,7 +216,7 @@ public class Supply extends BaseResource implements IResource {
 	 * Path: <b>Supply.dispense.identifier</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="dispenseid", path="Supply.dispense.identifier", description="")
+	@SearchParamDefinition(name="dispenseid", path="Supply.dispense.identifier", description="", type="token")
 	public static final String SP_DISPENSEID = "dispenseid";
 
 	/**
@@ -237,7 +237,7 @@ public class Supply extends BaseResource implements IResource {
 	 * Path: <b>Supply.dispense.status</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="dispensestatus", path="Supply.dispense.status", description="")
+	@SearchParamDefinition(name="dispensestatus", path="Supply.dispense.status", description="", type="token")
 	public static final String SP_DISPENSESTATUS = "dispensestatus";
 
 	/**

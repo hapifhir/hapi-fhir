@@ -6,6 +6,7 @@ import java.util.List;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.PathSpecification;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
+import ca.uhn.fhir.model.dstu.composite.QuantityDt;
 import ca.uhn.fhir.model.dstu.resource.DiagnosticReport;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -97,5 +98,8 @@ public interface ITestClient extends IBasicClient {
 
 	@Validate(type=Patient.class)
 	 MethodOutcome validatePatient(@ResourceParam Patient thePatient);
+
+	@Search(type=Patient.class)
+	Patient findPatientQuantity(@RequiredParam(name="quantityParam") QuantityDt theQuantityDt);
 
 }

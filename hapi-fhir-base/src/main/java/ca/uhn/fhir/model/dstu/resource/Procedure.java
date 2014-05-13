@@ -95,7 +95,7 @@ public class Procedure extends BaseResource implements IResource {
 	 * Path: <b>Procedure.type</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="type", path="Procedure.type", description="Type of procedure")
+	@SearchParamDefinition(name="type", path="Procedure.type", description="Type of procedure", type="token")
 	public static final String SP_TYPE = "type";
 
 	/**
@@ -116,7 +116,7 @@ public class Procedure extends BaseResource implements IResource {
 	 * Path: <b>Procedure.subject</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="subject", path="Procedure.subject", description="The identity of a patient to list procedures  for")
+	@SearchParamDefinition(name="subject", path="Procedure.subject", description="The identity of a patient to list procedures  for", type="reference")
 	public static final String SP_SUBJECT = "subject";
 
 	/**
@@ -143,7 +143,7 @@ public class Procedure extends BaseResource implements IResource {
 	 * Path: <b>Procedure.date</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="date", path="Procedure.date", description="The date the procedure was performed on")
+	@SearchParamDefinition(name="date", path="Procedure.date", description="The date the procedure was performed on", type="date")
 	public static final String SP_DATE = "date";
 
 	/**

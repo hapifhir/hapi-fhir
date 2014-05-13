@@ -20,6 +20,7 @@ import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.api.annotation.TagListParam;
 import ca.uhn.fhir.model.dstu.composite.CodingDt;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
+import ca.uhn.fhir.model.dstu.composite.QuantityDt;
 import ca.uhn.fhir.model.dstu.resource.Conformance;
 import ca.uhn.fhir.model.dstu.resource.DiagnosticReport;
 import ca.uhn.fhir.model.dstu.resource.Observation;
@@ -29,6 +30,7 @@ import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
 import ca.uhn.fhir.model.dstu.valueset.IssueSeverityEnum;
 import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
+import ca.uhn.fhir.model.primitive.DecimalDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.parser.DataFormatException;
@@ -287,21 +289,22 @@ public List<DiagnosticReport> getDiagnosticReport(
 }
 //END SNIPPET: pathSpecSimple
 
-//START SNIPPET: dateRange
+//START SNIPPET: quantity
 @Search()
-public List<Observation> getObservationsByDateRange(@RequiredParam(name="subject.identifier") IdentifierDt theSubjectId,
-                                                    @RequiredParam(name=Observation.SP_DATE) DateRangeParam theRange) {
+public List<Observation> getObservationsByQuantity(
+        @RequiredParam(name=Observation.SP_VALUE_QUANTITY) QuantityDt theQuantity) {
+  
   List<Observation> retVal = new ArrayList<Observation>();
   
-  // The following two will be set as the start and end
-  // of the range specified by the query parameter
-  Date from = theRange.getLowerBoundAsInstant();
-  Date to   = theRange.getUpperBoundAsInstant();
+  QuantityCompararatorEnum comparator = theQuantity.getComparator().getValueAsEnum();
+  DecimalDt value = theQuantity.getValue();
+  StringDt units = theQuantity.getUnits();
+  // .. Apply these parameters ..
   
   // ... populate ...
   return retVal;
 }
-//END SNIPPET: dateRange
+//END SNIPPET: quantity
 
 private DiagnosticReport loadSomeDiagnosticReportFromDatabase(IdentifierDt theIdentifier) {
 	return null;

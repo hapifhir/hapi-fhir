@@ -106,7 +106,7 @@ public class MedicationPrescription extends BaseResource implements IResource {
 	 * Path: <b>MedicationPrescription.dateWritten</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="datewritten", path="MedicationPrescription.dateWritten", description="Return prescriptions written on this date")
+	@SearchParamDefinition(name="datewritten", path="MedicationPrescription.dateWritten", description="Return prescriptions written on this date", type="date")
 	public static final String SP_DATEWRITTEN = "datewritten";
 
 	/**
@@ -127,7 +127,7 @@ public class MedicationPrescription extends BaseResource implements IResource {
 	 * Path: <b>MedicationPrescription.encounter</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="encounter", path="MedicationPrescription.encounter", description="Return prescriptions with this encounter identity")
+	@SearchParamDefinition(name="encounter", path="MedicationPrescription.encounter", description="Return prescriptions with this encounter identity", type="reference")
 	public static final String SP_ENCOUNTER = "encounter";
 
 	/**
@@ -154,7 +154,7 @@ public class MedicationPrescription extends BaseResource implements IResource {
 	 * Path: <b>MedicationPrescription.identifier</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="identifier", path="MedicationPrescription.identifier", description="Return prescriptions with this external identity")
+	@SearchParamDefinition(name="identifier", path="MedicationPrescription.identifier", description="Return prescriptions with this external identity", type="token")
 	public static final String SP_IDENTIFIER = "identifier";
 
 	/**
@@ -175,7 +175,7 @@ public class MedicationPrescription extends BaseResource implements IResource {
 	 * Path: <b>MedicationPrescription.medication</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="medication", path="MedicationPrescription.medication", description="Code for medicine or text in medicine name")
+	@SearchParamDefinition(name="medication", path="MedicationPrescription.medication", description="Code for medicine or text in medicine name", type="reference")
 	public static final String SP_MEDICATION = "medication";
 
 	/**
@@ -202,7 +202,7 @@ public class MedicationPrescription extends BaseResource implements IResource {
 	 * Path: <b>MedicationPrescription.patient</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="patient", path="MedicationPrescription.patient", description="The identity of a patient to list dispenses  for")
+	@SearchParamDefinition(name="patient", path="MedicationPrescription.patient", description="The identity of a patient to list dispenses  for", type="reference")
 	public static final String SP_PATIENT = "patient";
 
 	/**
@@ -229,7 +229,7 @@ public class MedicationPrescription extends BaseResource implements IResource {
 	 * Path: <b>MedicationPrescription.status</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="status", path="MedicationPrescription.status", description="Status of the prescription")
+	@SearchParamDefinition(name="status", path="MedicationPrescription.status", description="Status of the prescription", type="token")
 	public static final String SP_STATUS = "status";
 
 	/**

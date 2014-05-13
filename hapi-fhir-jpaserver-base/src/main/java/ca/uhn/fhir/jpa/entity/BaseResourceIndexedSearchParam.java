@@ -3,20 +3,13 @@ package ca.uhn.fhir.jpa.entity;
 import java.io.Serializable;
 
 import javax.persistence.Column;
-import javax.persistence.DiscriminatorColumn;
-import javax.persistence.DiscriminatorType;
-import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
+import javax.persistence.MappedSuperclass;
 
-@Entity
-@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
-public class BaseResourceIndexedSearchParam implements Serializable {
+@MappedSuperclass
+public abstract class BaseResourceIndexedSearchParam<T> implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -24,10 +17,25 @@ public class BaseResourceIndexedSearchParam implements Serializable {
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	@Column(name = "RES_ID")
 	private Long myId;
-
-	@ManyToOne(optional=false)
-	@Column(name="RESOURCE_PID", nullable=false)
-	private BaseResourceTable<?> myResource;
 	
+	@Column(name="SP_NAME", length=100)
+	private String myName;
 
+	public String getName() {
+		return myName;
+	}
+
+	public void setName(String theName) {
+		myName = theName;
+	}
+
+	public abstract BaseResourceTable<?> getResource();
+
+	public abstract void setResource(BaseResourceTable<?> theResource);
+
+	public abstract T getValue();
+
+	public abstract void setValue(T theValue);
+
+	
 }

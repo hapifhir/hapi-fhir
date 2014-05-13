@@ -95,7 +95,7 @@ public class FamilyHistory extends BaseResource implements IResource {
 	 * Path: <b>FamilyHistory.subject</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="subject", path="FamilyHistory.subject", description="The identity of a subject to list family history items for")
+	@SearchParamDefinition(name="subject", path="FamilyHistory.subject", description="The identity of a subject to list family history items for", type="reference")
 	public static final String SP_SUBJECT = "subject";
 
 	/**

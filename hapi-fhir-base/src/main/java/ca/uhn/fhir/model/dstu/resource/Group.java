@@ -99,7 +99,7 @@ public class Group extends BaseResource implements IResource {
 	 * Path: <b>Group.type</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="type", path="Group.type", description="The type of resources the group contains")
+	@SearchParamDefinition(name="type", path="Group.type", description="The type of resources the group contains", type="token")
 	public static final String SP_TYPE = "type";
 
 	/**
@@ -120,7 +120,7 @@ public class Group extends BaseResource implements IResource {
 	 * Path: <b>Group.code</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="code", path="Group.code", description="The kind of resources contained")
+	@SearchParamDefinition(name="code", path="Group.code", description="The kind of resources contained", type="token")
 	public static final String SP_CODE = "code";
 
 	/**
@@ -141,7 +141,7 @@ public class Group extends BaseResource implements IResource {
 	 * Path: <b>Group.actual</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="actual", path="Group.actual", description="")
+	@SearchParamDefinition(name="actual", path="Group.actual", description="", type="token")
 	public static final String SP_ACTUAL = "actual";
 
 	/**
@@ -162,7 +162,7 @@ public class Group extends BaseResource implements IResource {
 	 * Path: <b>Group.identifier</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="identifier", path="Group.identifier", description="")
+	@SearchParamDefinition(name="identifier", path="Group.identifier", description="", type="token")
 	public static final String SP_IDENTIFIER = "identifier";
 
 	/**
@@ -183,7 +183,7 @@ public class Group extends BaseResource implements IResource {
 	 * Path: <b>Group.member</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="member", path="Group.member", description="")
+	@SearchParamDefinition(name="member", path="Group.member", description="", type="reference")
 	public static final String SP_MEMBER = "member";
 
 	/**
@@ -210,7 +210,7 @@ public class Group extends BaseResource implements IResource {
 	 * Path: <b>Group.characteristic.code</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="characteristic", path="Group.characteristic.code", description="")
+	@SearchParamDefinition(name="characteristic", path="Group.characteristic.code", description="", type="token")
 	public static final String SP_CHARACTERISTIC = "characteristic";
 
 	/**
@@ -231,7 +231,7 @@ public class Group extends BaseResource implements IResource {
 	 * Path: <b>Group.characteristic.value[x]</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="value", path="Group.characteristic.value[x]", description="")
+	@SearchParamDefinition(name="value", path="Group.characteristic.value[x]", description="", type="token")
 	public static final String SP_VALUE = "value";
 
 	/**
@@ -252,7 +252,7 @@ public class Group extends BaseResource implements IResource {
 	 * Path: <b>Group.characteristic.exclude</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="exclude", path="Group.characteristic.exclude", description="")
+	@SearchParamDefinition(name="exclude", path="Group.characteristic.exclude", description="", type="token")
 	public static final String SP_EXCLUDE = "exclude";
 
 	/**
@@ -273,7 +273,7 @@ public class Group extends BaseResource implements IResource {
 	 * Path: <b>characteristic & value</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="characteristic-value", path="characteristic & value", description="A composite of both characteristic and value")
+	@SearchParamDefinition(name="characteristic-value", path="characteristic & value", description="A composite of both characteristic and value", type="composite")
 	public static final String SP_CHARACTERISTIC_VALUE = "characteristic-value";
 
 	/**

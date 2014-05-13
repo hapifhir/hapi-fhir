@@ -90,7 +90,7 @@ public class User extends BaseResource implements IResource {
 	 * Path: <b>User.name</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="name", path="User.name", description="")
+	@SearchParamDefinition(name="name", path="User.name", description="", type="string")
 	public static final String SP_NAME = "name";
 
 	/**
@@ -111,7 +111,7 @@ public class User extends BaseResource implements IResource {
 	 * Path: <b>User.provider</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="provider", path="User.provider", description="")
+	@SearchParamDefinition(name="provider", path="User.provider", description="", type="token")
 	public static final String SP_PROVIDER = "provider";
 
 	/**
@@ -132,7 +132,7 @@ public class User extends BaseResource implements IResource {
 	 * Path: <b>User.login</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="login", path="User.login", description="")
+	@SearchParamDefinition(name="login", path="User.login", description="", type="string")
 	public static final String SP_LOGIN = "login";
 
 	/**
@@ -153,7 +153,7 @@ public class User extends BaseResource implements IResource {
 	 * Path: <b>User.level</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="level", path="User.level", description="")
+	@SearchParamDefinition(name="level", path="User.level", description="", type="token")
 	public static final String SP_LEVEL = "level";
 
 	/**
@@ -174,7 +174,7 @@ public class User extends BaseResource implements IResource {
 	 * Path: <b>User.patient</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="patient", path="User.patient", description="")
+	@SearchParamDefinition(name="patient", path="User.patient", description="", type="reference")
 	public static final String SP_PATIENT = "patient";
 
 	/**

@@ -97,7 +97,7 @@ public class MedicationStatement extends BaseResource implements IResource {
 	 * Path: <b>MedicationStatement.device</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="device", path="MedicationStatement.device", description="Return administrations with this administration device identity")
+	@SearchParamDefinition(name="device", path="MedicationStatement.device", description="Return administrations with this administration device identity", type="reference")
 	public static final String SP_DEVICE = "device";
 
 	/**
@@ -124,7 +124,7 @@ public class MedicationStatement extends BaseResource implements IResource {
 	 * Path: <b>MedicationStatement.identifier</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="identifier", path="MedicationStatement.identifier", description="Return administrations with this external identity")
+	@SearchParamDefinition(name="identifier", path="MedicationStatement.identifier", description="Return administrations with this external identity", type="token")
 	public static final String SP_IDENTIFIER = "identifier";
 
 	/**
@@ -145,7 +145,7 @@ public class MedicationStatement extends BaseResource implements IResource {
 	 * Path: <b>MedicationStatement.medication</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="medication", path="MedicationStatement.medication", description="Code for medicine or text in medicine name")
+	@SearchParamDefinition(name="medication", path="MedicationStatement.medication", description="Code for medicine or text in medicine name", type="reference")
 	public static final String SP_MEDICATION = "medication";
 
 	/**
@@ -172,7 +172,7 @@ public class MedicationStatement extends BaseResource implements IResource {
 	 * Path: <b>MedicationStatement.patient</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="patient", path="MedicationStatement.patient", description="The identity of a patient to list administrations  for")
+	@SearchParamDefinition(name="patient", path="MedicationStatement.patient", description="The identity of a patient to list administrations  for", type="reference")
 	public static final String SP_PATIENT = "patient";
 
 	/**
@@ -199,7 +199,7 @@ public class MedicationStatement extends BaseResource implements IResource {
 	 * Path: <b>MedicationStatement.whenGiven</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="when-given", path="MedicationStatement.whenGiven", description="Date of administration")
+	@SearchParamDefinition(name="when-given", path="MedicationStatement.whenGiven", description="Date of administration", type="date")
 	public static final String SP_WHEN_GIVEN = "when-given";
 
 	/**

@@ -90,7 +90,7 @@ public class Query extends BaseResource implements IResource {
 	 * Path: <b>Query.identifier</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="identifier", path="Query.identifier", description="")
+	@SearchParamDefinition(name="identifier", path="Query.identifier", description="", type="token")
 	public static final String SP_IDENTIFIER = "identifier";
 
 	/**
@@ -111,7 +111,7 @@ public class Query extends BaseResource implements IResource {
 	 * Path: <b>Query.response.identifier</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="response", path="Query.response.identifier", description="")
+	@SearchParamDefinition(name="response", path="Query.response.identifier", description="", type="token")
 	public static final String SP_RESPONSE = "response";
 
 	/**

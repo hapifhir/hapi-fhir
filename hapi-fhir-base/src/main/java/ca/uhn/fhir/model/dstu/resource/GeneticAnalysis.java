@@ -92,7 +92,7 @@ public class GeneticAnalysis extends BaseResource implements IResource {
 	 * Path: <b>GeneticAnalysis.subject</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="subject", path="GeneticAnalysis.subject", description="Subject of the analysis")
+	@SearchParamDefinition(name="subject", path="GeneticAnalysis.subject", description="Subject of the analysis", type="reference")
 	public static final String SP_SUBJECT = "subject";
 
 	/**
@@ -119,7 +119,7 @@ public class GeneticAnalysis extends BaseResource implements IResource {
 	 * Path: <b>GeneticAnalysis.author</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="author", path="GeneticAnalysis.author", description="Author of the analysis")
+	@SearchParamDefinition(name="author", path="GeneticAnalysis.author", description="Author of the analysis", type="reference")
 	public static final String SP_AUTHOR = "author";
 
 	/**
@@ -146,7 +146,7 @@ public class GeneticAnalysis extends BaseResource implements IResource {
 	 * Path: <b>GeneticAnalysis.date</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="date", path="GeneticAnalysis.date", description="Date when result of the analysis is uploaded")
+	@SearchParamDefinition(name="date", path="GeneticAnalysis.date", description="Date when result of the analysis is uploaded", type="date")
 	public static final String SP_DATE = "date";
 
 	/**

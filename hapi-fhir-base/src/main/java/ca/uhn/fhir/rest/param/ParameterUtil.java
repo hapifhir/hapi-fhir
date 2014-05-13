@@ -20,7 +20,7 @@ package ca.uhn.fhir.rest.param;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;

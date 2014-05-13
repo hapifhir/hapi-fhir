@@ -96,7 +96,7 @@ public class Media extends BaseResource implements IResource {
 	 * Path: <b>Media.type</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="type", path="Media.type", description="")
+	@SearchParamDefinition(name="type", path="Media.type", description="", type="token")
 	public static final String SP_TYPE = "type";
 
 	/**
@@ -117,7 +117,7 @@ public class Media extends BaseResource implements IResource {
 	 * Path: <b>Media.subtype</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="subtype", path="Media.subtype", description="")
+	@SearchParamDefinition(name="subtype", path="Media.subtype", description="", type="token")
 	public static final String SP_SUBTYPE = "subtype";
 
 	/**
@@ -138,7 +138,7 @@ public class Media extends BaseResource implements IResource {
 	 * Path: <b>Media.identifier</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="identifier", path="Media.identifier", description="")
+	@SearchParamDefinition(name="identifier", path="Media.identifier", description="", type="token")
 	public static final String SP_IDENTIFIER = "identifier";
 
 	/**
@@ -159,7 +159,7 @@ public class Media extends BaseResource implements IResource {
 	 * Path: <b>Media.dateTime</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="date", path="Media.dateTime", description="")
+	@SearchParamDefinition(name="date", path="Media.dateTime", description="", type="date")
 	public static final String SP_DATE = "date";
 
 	/**
@@ -180,7 +180,7 @@ public class Media extends BaseResource implements IResource {
 	 * Path: <b>Media.subject</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="subject", path="Media.subject", description="")
+	@SearchParamDefinition(name="subject", path="Media.subject", description="", type="reference")
 	public static final String SP_SUBJECT = "subject";
 
 	/**
@@ -207,7 +207,7 @@ public class Media extends BaseResource implements IResource {
 	 * Path: <b>Media.operator</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="operator", path="Media.operator", description="")
+	@SearchParamDefinition(name="operator", path="Media.operator", description="", type="reference")
 	public static final String SP_OPERATOR = "operator";
 
 	/**
@@ -234,7 +234,7 @@ public class Media extends BaseResource implements IResource {
 	 * Path: <b>Media.view</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="view", path="Media.view", description="")
+	@SearchParamDefinition(name="view", path="Media.view", description="", type="token")
 	public static final String SP_VIEW = "view";
 
 	/**

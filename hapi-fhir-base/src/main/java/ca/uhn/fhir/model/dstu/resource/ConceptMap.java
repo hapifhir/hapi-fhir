@@ -99,7 +99,7 @@ public class ConceptMap extends BaseResource implements IResource {
 	 * Path: <b>ConceptMap.identifier</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="identifier", path="ConceptMap.identifier", description="The identifier of the concept map")
+	@SearchParamDefinition(name="identifier", path="ConceptMap.identifier", description="The identifier of the concept map", type="token")
 	public static final String SP_IDENTIFIER = "identifier";
 
 	/**
@@ -120,7 +120,7 @@ public class ConceptMap extends BaseResource implements IResource {
 	 * Path: <b>ConceptMap.version</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="version", path="ConceptMap.version", description="The version identifier of the concept map")
+	@SearchParamDefinition(name="version", path="ConceptMap.version", description="The version identifier of the concept map", type="token")
 	public static final String SP_VERSION = "version";
 
 	/**
@@ -141,7 +141,7 @@ public class ConceptMap extends BaseResource implements IResource {
 	 * Path: <b>ConceptMap.name</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="name", path="ConceptMap.name", description="Name of the concept map")
+	@SearchParamDefinition(name="name", path="ConceptMap.name", description="Name of the concept map", type="string")
 	public static final String SP_NAME = "name";
 
 	/**
@@ -162,7 +162,7 @@ public class ConceptMap extends BaseResource implements IResource {
 	 * Path: <b>ConceptMap.publisher</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="publisher", path="ConceptMap.publisher", description="Name of the publisher of the concept map")
+	@SearchParamDefinition(name="publisher", path="ConceptMap.publisher", description="Name of the publisher of the concept map", type="string")
 	public static final String SP_PUBLISHER = "publisher";
 
 	/**
@@ -183,7 +183,7 @@ public class ConceptMap extends BaseResource implements IResource {
 	 * Path: <b>ConceptMap.description</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="description", path="ConceptMap.description", description="Text search in the description of the concept map")
+	@SearchParamDefinition(name="description", path="ConceptMap.description", description="Text search in the description of the concept map", type="string")
 	public static final String SP_DESCRIPTION = "description";
 
 	/**
@@ -204,7 +204,7 @@ public class ConceptMap extends BaseResource implements IResource {
 	 * Path: <b>ConceptMap.status</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="status", path="ConceptMap.status", description="Status of the concept map")
+	@SearchParamDefinition(name="status", path="ConceptMap.status", description="Status of the concept map", type="token")
 	public static final String SP_STATUS = "status";
 
 	/**
@@ -225,7 +225,7 @@ public class ConceptMap extends BaseResource implements IResource {
 	 * Path: <b>ConceptMap.date</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="date", path="ConceptMap.date", description="The concept map publication date")
+	@SearchParamDefinition(name="date", path="ConceptMap.date", description="The concept map publication date", type="date")
 	public static final String SP_DATE = "date";
 
 	/**
@@ -246,7 +246,7 @@ public class ConceptMap extends BaseResource implements IResource {
 	 * Path: <b>ConceptMap.source</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="source", path="ConceptMap.source", description="The system for any concepts mapped by this concept map")
+	@SearchParamDefinition(name="source", path="ConceptMap.source", description="The system for any concepts mapped by this concept map", type="reference")
 	public static final String SP_SOURCE = "source";
 
 	/**
@@ -273,7 +273,7 @@ public class ConceptMap extends BaseResource implements IResource {
 	 * Path: <b>ConceptMap.target</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="target", path="ConceptMap.target", description="")
+	@SearchParamDefinition(name="target", path="ConceptMap.target", description="", type="reference")
 	public static final String SP_TARGET = "target";
 
 	/**
@@ -300,7 +300,7 @@ public class ConceptMap extends BaseResource implements IResource {
 	 * Path: <b>ConceptMap.concept.map.system</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="system", path="ConceptMap.concept.map.system", description="The system for any destination concepts mapped by this map")
+	@SearchParamDefinition(name="system", path="ConceptMap.concept.map.system", description="The system for any destination concepts mapped by this map", type="token")
 	public static final String SP_SYSTEM = "system";
 
 	/**
@@ -321,7 +321,7 @@ public class ConceptMap extends BaseResource implements IResource {
 	 * Path: <b>ConceptMap.concept.dependsOn.concept</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="dependson", path="ConceptMap.concept.dependsOn.concept", description="")
+	@SearchParamDefinition(name="dependson", path="ConceptMap.concept.dependsOn.concept", description="", type="token")
 	public static final String SP_DEPENDSON = "dependson";
 
 	/**
@@ -342,7 +342,7 @@ public class ConceptMap extends BaseResource implements IResource {
 	 * Path: <b>ConceptMap.concept.map.product.concept</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="product", path="ConceptMap.concept.map.product.concept", description="")
+	@SearchParamDefinition(name="product", path="ConceptMap.concept.map.product.concept", description="", type="token")
 	public static final String SP_PRODUCT = "product";
 
 	/**

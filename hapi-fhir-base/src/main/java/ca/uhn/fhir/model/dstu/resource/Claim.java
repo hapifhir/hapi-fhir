@@ -97,7 +97,7 @@ public class Claim extends BaseResource implements IResource {
 	 * Path: <b>Claim.number</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="number", path="Claim.number", description="")
+	@SearchParamDefinition(name="number", path="Claim.number", description="", type="token")
 	public static final String SP_NUMBER = "number";
 
 	/**

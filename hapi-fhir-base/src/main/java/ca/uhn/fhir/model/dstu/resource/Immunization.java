@@ -104,7 +104,7 @@ public class Immunization extends BaseResource implements IResource {
 	 * Path: <b>Immunization.date</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="date", path="Immunization.date", description="Vaccination  Administration / Refusal Date")
+	@SearchParamDefinition(name="date", path="Immunization.date", description="Vaccination  Administration / Refusal Date", type="date")
 	public static final String SP_DATE = "date";
 
 	/**
@@ -125,7 +125,7 @@ public class Immunization extends BaseResource implements IResource {
 	 * Path: <b>Immunization.vaccinationProtocol.doseSequence</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="dose-sequence", path="Immunization.vaccinationProtocol.doseSequence", description="")
+	@SearchParamDefinition(name="dose-sequence", path="Immunization.vaccinationProtocol.doseSequence", description="", type="number")
 	public static final String SP_DOSE_SEQUENCE = "dose-sequence";
 
 	/**
@@ -146,7 +146,7 @@ public class Immunization extends BaseResource implements IResource {
 	 * Path: <b>Immunization.identifier</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="identifier", path="Immunization.identifier", description="")
+	@SearchParamDefinition(name="identifier", path="Immunization.identifier", description="", type="token")
 	public static final String SP_IDENTIFIER = "identifier";
 
 	/**
@@ -167,7 +167,7 @@ public class Immunization extends BaseResource implements IResource {
 	 * Path: <b>Immunization.location</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="location", path="Immunization.location", description="The service delivery location or facility in which the vaccine was / was to be administered")
+	@SearchParamDefinition(name="location", path="Immunization.location", description="The service delivery location or facility in which the vaccine was / was to be administered", type="reference")
 	public static final String SP_LOCATION = "location";
 
 	/**
@@ -194,7 +194,7 @@ public class Immunization extends BaseResource implements IResource {
 	 * Path: <b>Immunization.lotNumber</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="lot-number", path="Immunization.lotNumber", description="Vaccine Lot Number")
+	@SearchParamDefinition(name="lot-number", path="Immunization.lotNumber", description="Vaccine Lot Number", type="string")
 	public static final String SP_LOT_NUMBER = "lot-number";
 
 	/**
@@ -215,7 +215,7 @@ public class Immunization extends BaseResource implements IResource {
 	 * Path: <b>Immunization.manufacturer</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="manufacturer", path="Immunization.manufacturer", description="Vaccine Manufacturer")
+	@SearchParamDefinition(name="manufacturer", path="Immunization.manufacturer", description="Vaccine Manufacturer", type="reference")
 	public static final String SP_MANUFACTURER = "manufacturer";
 
 	/**
@@ -242,7 +242,7 @@ public class Immunization extends BaseResource implements IResource {
 	 * Path: <b>Immunization.performer</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="performer", path="Immunization.performer", description="The practitioner who administered the vaccination")
+	@SearchParamDefinition(name="performer", path="Immunization.performer", description="The practitioner who administered the vaccination", type="reference")
 	public static final String SP_PERFORMER = "performer";
 
 	/**
@@ -269,7 +269,7 @@ public class Immunization extends BaseResource implements IResource {
 	 * Path: <b>Immunization.reaction.detail</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="reaction", path="Immunization.reaction.detail", description="")
+	@SearchParamDefinition(name="reaction", path="Immunization.reaction.detail", description="", type="reference")
 	public static final String SP_REACTION = "reaction";
 
 	/**
@@ -296,7 +296,7 @@ public class Immunization extends BaseResource implements IResource {
 	 * Path: <b>Immunization.reaction.date</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="reaction-date", path="Immunization.reaction.date", description="")
+	@SearchParamDefinition(name="reaction-date", path="Immunization.reaction.date", description="", type="date")
 	public static final String SP_REACTION_DATE = "reaction-date";
 
 	/**
@@ -317,7 +317,7 @@ public class Immunization extends BaseResource implements IResource {
 	 * Path: <b>Immunization.explanation.reason</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="reason", path="Immunization.explanation.reason", description="")
+	@SearchParamDefinition(name="reason", path="Immunization.explanation.reason", description="", type="token")
 	public static final String SP_REASON = "reason";
 
 	/**
@@ -338,7 +338,7 @@ public class Immunization extends BaseResource implements IResource {
 	 * Path: <b>Immunization.explanation.refusalReason</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="refusal-reason", path="Immunization.explanation.refusalReason", description="Explanation of refusal / exemption")
+	@SearchParamDefinition(name="refusal-reason", path="Immunization.explanation.refusalReason", description="Explanation of refusal / exemption", type="token")
 	public static final String SP_REFUSAL_REASON = "refusal-reason";
 
 	/**
@@ -359,7 +359,7 @@ public class Immunization extends BaseResource implements IResource {
 	 * Path: <b>Immunization.refusedIndicator</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="refused", path="Immunization.refusedIndicator", description="")
+	@SearchParamDefinition(name="refused", path="Immunization.refusedIndicator", description="", type="token")
 	public static final String SP_REFUSED = "refused";
 
 	/**
@@ -380,7 +380,7 @@ public class Immunization extends BaseResource implements IResource {
 	 * Path: <b>Immunization.requester</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="requester", path="Immunization.requester", description="The practitioner who ordered the vaccination")
+	@SearchParamDefinition(name="requester", path="Immunization.requester", description="The practitioner who ordered the vaccination", type="reference")
 	public static final String SP_REQUESTER = "requester";
 
 	/**
@@ -407,7 +407,7 @@ public class Immunization extends BaseResource implements IResource {
 	 * Path: <b>Immunization.subject</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="subject", path="Immunization.subject", description="The subject of the vaccination event / refusal")
+	@SearchParamDefinition(name="subject", path="Immunization.subject", description="The subject of the vaccination event / refusal", type="reference")
 	public static final String SP_SUBJECT = "subject";
 
 	/**
@@ -434,7 +434,7 @@ public class Immunization extends BaseResource implements IResource {
 	 * Path: <b>Immunization.vaccineType</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="vaccine-type", path="Immunization.vaccineType", description="Vaccine Product Type Administered")
+	@SearchParamDefinition(name="vaccine-type", path="Immunization.vaccineType", description="Vaccine Product Type Administered", type="token")
 	public static final String SP_VACCINE_TYPE = "vaccine-type";
 
 	/**

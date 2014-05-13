@@ -26,6 +26,7 @@ import java.util.List;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
+import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.api.IElement;
@@ -47,7 +48,11 @@ public class FhirTerser {
 		Object currentObj = theResource;
 
 		List<String> parts = Arrays.asList(thePath.split("\\."));
-		return getValues(currentDef, currentObj, parts.subList(1, parts.size() ));
+		List<String> subList = parts.subList(1, parts.size() );
+		if (subList.size()< 1) {
+			throw new ConfigurationException("Invalid path: " + thePath);
+		}
+		return getValues(currentDef, currentObj, subList);
 
 	}
 

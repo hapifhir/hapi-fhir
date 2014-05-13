@@ -1,7 +1,12 @@
 package ca.uhn.fhir.jpa.dao;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -15,7 +20,9 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.TagList;
+import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.resource.Patient;
+import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.api.MethodOutcome;
@@ -58,13 +65,60 @@ public class FhirResourceDaoTest {
 		assertTrue(updated.before(now));
 	}
 
-	
+	@Test
+	public void testPersistSearchParams() {
+		Patient patient = new Patient();
+		patient.addIdentifier("urn:system", "001testPersistSearchParams");
+		patient.getGender().setValueAsEnum(AdministrativeGenderCodesEnum.M);
+		patient.addName().addFamily("Tester").addGiven("JoetestPersistSearchParams");
+
+		MethodOutcome outcome = ourPatientDao.create(patient);
+		assertNotNull(outcome.getId());
+		assertFalse(outcome.getId().isEmpty());
+
+		long id = outcome.getId().asLong();
+
+		IdentifierDt value = new IdentifierDt("urn:system", "001testPersistSearchParams");
+		List<Patient> found = ourPatientDao.search(Patient.SP_IDENTIFIER, value);
+		assertEquals(1, found.size());
+		assertEquals(id, found.get(0).getId().asLong().longValue());
+
+		found = ourPatientDao.search(Patient.SP_GENDER, new IdentifierDt(null, "M"));
+		assertEquals(1, found.size());
+		assertEquals(id, found.get(0).getId().asLong().longValue());
+
+		found = ourPatientDao.search(Patient.SP_GENDER, new IdentifierDt(null, "F"));
+		assertEquals(0, found.size());
+
+		Map<String, List<List<IQueryParameterType>>> map = new HashMap<>();
+		map.put(Patient.SP_IDENTIFIER, new ArrayList<List<IQueryParameterType>>());
+		map.get(Patient.SP_IDENTIFIER).add(new ArrayList<IQueryParameterType>());
+		map.get(Patient.SP_IDENTIFIER).get(0).add(new IdentifierDt("urn:system", "001testPersistSearchParams"));
+		map.put(Patient.SP_GENDER, new ArrayList<List<IQueryParameterType>>());
+		map.get(Patient.SP_GENDER).add(new ArrayList<IQueryParameterType>());
+		map.get(Patient.SP_GENDER).get(0).add(new IdentifierDt(null, "M"));
+		found = ourPatientDao.searchWithAndOr(map);
+		assertEquals(1, found.size());
+		assertEquals(id, found.get(0).getId().asLong().longValue());
+
+		map = new HashMap<>();
+		map.put(Patient.SP_IDENTIFIER, new ArrayList<List<IQueryParameterType>>());
+		map.get(Patient.SP_IDENTIFIER).add(new ArrayList<IQueryParameterType>());
+		map.get(Patient.SP_IDENTIFIER).get(0).add(new IdentifierDt("urn:system", "001testPersistSearchParams"));
+		map.put(Patient.SP_GENDER, new ArrayList<List<IQueryParameterType>>());
+		map.get(Patient.SP_GENDER).add(new ArrayList<IQueryParameterType>());
+		map.get(Patient.SP_GENDER).get(0).add(new IdentifierDt(null, "F"));
+		found = ourPatientDao.searchWithAndOr(map);
+		assertEquals(0, found.size());
+
+	}
+
 	@Test
 	public void testTagsWithCreateAndReadAndSearch() {
 		Patient patient = new Patient();
 		patient.addIdentifier("urn:system", "testTagsWithCreateAndReadAndSearch");
 		patient.addName().addFamily("Tester").addGiven("Joe");
-		TagList tagList= new TagList();
+		TagList tagList = new TagList();
 		tagList.addTag("Dog", "Puppies", null);
 		tagList.addTag("Cat", "Kittens", "http://foo");
 		patient.getResourceMetadata().put(ResourceMetadataKeyEnum.TAG_LIST, tagList);
@@ -82,9 +136,9 @@ public class FhirResourceDaoTest {
 		assertEquals("Cat", published.get(1).getTerm());
 		assertEquals("Kittens", published.get(1).getLabel());
 		assertEquals("http://foo", published.get(1).getScheme());
-		
+
 		List<Patient> search = ourPatientDao.search(Patient.SP_IDENTIFIER, patient.getIdentifierFirstRep());
-		assertEquals(1,search.size());
+		assertEquals(1, search.size());
 		retrieved = search.get(0);
 		published = (TagList) retrieved.getResourceMetadata().get(ResourceMetadataKeyEnum.TAG_LIST);
 		assertEquals("Dog", published.get(0).getTerm());
@@ -93,11 +147,9 @@ public class FhirResourceDaoTest {
 		assertEquals("Cat", published.get(1).getTerm());
 		assertEquals("Kittens", published.get(1).getLabel());
 		assertEquals("http://foo", published.get(1).getScheme());
-		
+
 	}
 
-
-	
 	@Test
 	public void testSearchAll() {
 		{
@@ -137,7 +189,7 @@ public class FhirResourceDaoTest {
 		params.put(Patient.SP_FAMILY, new StringDt("Tester_testSearchStringParam"));
 		List<Patient> patients = ourPatientDao.search(params);
 		assertEquals(2, patients.size());
-		
+
 		params.put(Patient.SP_FAMILY, new StringDt("FOO_testSearchStringParam"));
 		patients = ourPatientDao.search(params);
 		assertEquals(0, patients.size());

@@ -49,6 +49,7 @@ import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.dstu.composite.CodingDt;
 import ca.uhn.fhir.model.dstu.composite.HumanNameDt;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
+import ca.uhn.fhir.model.dstu.composite.QuantityDt;
 import ca.uhn.fhir.model.dstu.resource.AdverseReaction;
 import ca.uhn.fhir.model.dstu.resource.Conformance;
 import ca.uhn.fhir.model.dstu.resource.DiagnosticOrder;
@@ -787,6 +788,29 @@ public class ResfulServerMethodTest {
 		assertEquals("AAAA", patient.getName().get(1).getFamilyAsSingleString());
 
 	}
+	
+	@Test
+	public void testSearchQuantityParam() throws Exception {
+
+		// HttpPost httpPost = new HttpPost("http://localhost:" + ourPort +
+		// "/Patient/1");
+		// httpPost.setEntity(new StringEntity("test",
+		// ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/?quantityParam=%3E%3D123%7Cfoo%7Cbar");
+		HttpResponse status = ourClient.execute(httpGet);
+
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		ourLog.info("Response was:\n{}", responseContent);
+
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		Patient patient = (Patient) ourCtx.newXmlParser().parseBundle(responseContent).getEntries().get(0).getResource();
+		assertEquals(">=", patient.getName().get(1).getFamily().get(0).getValue());
+		assertEquals("123", patient.getName().get(1).getFamily().get(1).getValue());
+		assertEquals("foo", patient.getName().get(1).getFamily().get(2).getValue());
+		assertEquals("bar", patient.getName().get(1).getFamily().get(3).getValue());
+
+	}
 
 	@Test
 	public void testSearchWithIncludes() throws Exception {
@@ -1391,6 +1415,16 @@ public class ResfulServerMethodTest {
 		public Patient getPatientOneParam(@RequiredParam(name = "param1") StringDt theParam) {
 			Patient next = getIdToPatient().get("1");
 			next.addName().addFamily(theParam.getValue());
+			return next;
+		}
+		
+		@Search()
+		public Patient getPatientQuantityParam(@RequiredParam(name = "quantityParam") QuantityDt theParam) {
+			Patient next = getIdToPatient().get("1");
+			next.addName().addFamily(theParam.getComparator().getValueAsString())
+				.addFamily(theParam.getValue().getValueAsString())
+				.addFamily(theParam.getSystem().getValueAsString())
+				.addFamily(theParam.getUnits().getValueAsString());
 			return next;
 		}
 

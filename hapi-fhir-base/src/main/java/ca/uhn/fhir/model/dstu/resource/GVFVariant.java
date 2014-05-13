@@ -91,7 +91,7 @@ public class GVFVariant extends BaseResource implements IResource {
 	 * Path: <b>GVFVariant.subject.patient</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="patient", path="GVFVariant.subject.patient", description="Patient being described ")
+	@SearchParamDefinition(name="patient", path="GVFVariant.subject.patient", description="Patient being described ", type="reference")
 	public static final String SP_PATIENT = "patient";
 
 	/**
@@ -118,7 +118,7 @@ public class GVFVariant extends BaseResource implements IResource {
 	 * Path: <b></b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="coordinate", path="", description="Coordinate of the variant being studied")
+	@SearchParamDefinition(name="coordinate", path="", description="Coordinate of the variant being studied", type="string")
 	public static final String SP_COORDINATE = "coordinate";
 
 	/**

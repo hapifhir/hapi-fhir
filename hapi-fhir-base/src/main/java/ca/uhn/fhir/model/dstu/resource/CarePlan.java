@@ -107,7 +107,7 @@ public class CarePlan extends BaseResource implements IResource {
 	 * Path: <b>CarePlan.patient</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="patient", path="CarePlan.patient", description="")
+	@SearchParamDefinition(name="patient", path="CarePlan.patient", description="", type="reference")
 	public static final String SP_PATIENT = "patient";
 
 	/**
@@ -134,7 +134,7 @@ public class CarePlan extends BaseResource implements IResource {
 	 * Path: <b>CarePlan.concern</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="condition", path="CarePlan.concern", description="")
+	@SearchParamDefinition(name="condition", path="CarePlan.concern", description="", type="reference")
 	public static final String SP_CONDITION = "condition";
 
 	/**
@@ -161,7 +161,7 @@ public class CarePlan extends BaseResource implements IResource {
 	 * Path: <b>CarePlan.period</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="date", path="CarePlan.period", description="")
+	@SearchParamDefinition(name="date", path="CarePlan.period", description="", type="date")
 	public static final String SP_DATE = "date";
 
 	/**
@@ -182,7 +182,7 @@ public class CarePlan extends BaseResource implements IResource {
 	 * Path: <b>CarePlan.participant.member</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="participant", path="CarePlan.participant.member", description="")
+	@SearchParamDefinition(name="participant", path="CarePlan.participant.member", description="", type="reference")
 	public static final String SP_PARTICIPANT = "participant";
 
 	/**
@@ -209,7 +209,7 @@ public class CarePlan extends BaseResource implements IResource {
 	 * Path: <b>CarePlan.activity.simple.code</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="activitycode", path="CarePlan.activity.simple.code", description="")
+	@SearchParamDefinition(name="activitycode", path="CarePlan.activity.simple.code", description="", type="token")
 	public static final String SP_ACTIVITYCODE = "activitycode";
 
 	/**
@@ -230,7 +230,7 @@ public class CarePlan extends BaseResource implements IResource {
 	 * Path: <b>CarePlan.activity.simple.timing[x]</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="activitydate", path="CarePlan.activity.simple.timing[x]", description="Specified date occurs within period specified by CarePlan.activity.timingSchedule")
+	@SearchParamDefinition(name="activitydate", path="CarePlan.activity.simple.timing[x]", description="Specified date occurs within period specified by CarePlan.activity.timingSchedule", type="date")
 	public static final String SP_ACTIVITYDATE = "activitydate";
 
 	/**
@@ -251,7 +251,7 @@ public class CarePlan extends BaseResource implements IResource {
 	 * Path: <b>CarePlan.activity.detail</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="activitydetail", path="CarePlan.activity.detail", description="")
+	@SearchParamDefinition(name="activitydetail", path="CarePlan.activity.detail", description="", type="reference")
 	public static final String SP_ACTIVITYDETAIL = "activitydetail";
 
 	/**

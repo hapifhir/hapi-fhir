@@ -17,6 +17,8 @@ import javax.persistence.PersistenceContextType;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
@@ -55,13 +57,12 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.gclient.QuantityParam;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.FhirTerser;
 
-public class FhirResourceDao<T extends IResource, X extends BaseResourceTable<T>> implements IFhirResourceDao<T> {
+public class CopyOfFhirResourceDao<T extends IResource, X extends BaseResourceTable<T>> implements IFhirResourceDao<T> {
 
 	private FhirContext myCtx;
 	@PersistenceContext(name = "FHIR_UT", type = PersistenceContextType.TRANSACTION, unitName = "FHIR_UT")
@@ -73,134 +74,43 @@ public class FhirResourceDao<T extends IResource, X extends BaseResourceTable<T>
 	private Class<T> myResourceType;
 	private Class<X> myTableType;
 
-	private Set<Long> addTokenPredicate(Set<Long> thePids, List<IQueryParameterType> theOrParams) {
+	private void addTokenPredicate(CriteriaQuery<X> theCriteriaQuery, List<IQueryParameterType> theOrParams, Root<X> theFrom, CriteriaBuilder theBuilder) {
 		if (theOrParams == null || theOrParams.isEmpty()) {
-			return thePids;
+			return;
 		}
 
-		CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
-		CriteriaQuery<Long> cq = builder.createQuery(Long.class);
-		Root<ResourceIndexedSearchParamToken> from = cq.from(ResourceIndexedSearchParamToken.class);
-		cq.select(from.get("myResourcePid").as(Long.class));
-
-		List<Predicate> codePredicates = new ArrayList<Predicate>();
-		for (IQueryParameterType nextOr : theOrParams) {
-			IQueryParameterType params = nextOr;
-
-			String code;
-			String system;
-			if (params instanceof IdentifierDt) {
-				IdentifierDt id = (IdentifierDt) params;
-				system = id.getSystem().getValueAsString();
-				code = id.getValue().getValue();
-			} else if (params instanceof CodingDt) {
-				CodingDt id = (CodingDt) params;
-				system = id.getSystem().getValueAsString();
-				code = id.getCode().getValue();
-			} else {
-				throw new IllegalArgumentException("Invalid token type: " + params.getClass());
-			}
-
-			ArrayList<Predicate> singleCodePredicates = (new ArrayList<Predicate>());
-			if (system != null) {
-				singleCodePredicates.add(builder.equal(from.get("mySystem"), system));
-			}
-			if (code != null) {
-				singleCodePredicates.add(builder.equal(from.get("myValue"), code));
-			}
-			Predicate singleCode = builder.and(singleCodePredicates.toArray(new Predicate[0]));
-			codePredicates.add(singleCode);
+		if (theOrParams.size() > 1) {
+			throw new UnsupportedOperationException("Multiple values not yet supported"); // TODO: implement
 		}
 
-		Predicate masterCodePredicate = builder.or(codePredicates.toArray(new Predicate[0]));
+		IQueryParameterType params = theOrParams.get(0);
 
-		if (thePids.size() > 0) {
-			Predicate inPids = (from.get("myResourcePid").in(thePids));
-			cq.where(builder.and(inPids, masterCodePredicate));
+		String code;
+		String system;
+		if (params instanceof IdentifierDt) {
+			IdentifierDt id = (IdentifierDt) params;
+			system = id.getSystem().getValueAsString();
+			code = id.getValue().getValue();
+		} else if (params instanceof CodingDt) {
+			CodingDt id = (CodingDt) params;
+			system = id.getSystem().getValueAsString();
+			code = id.getCode().getValue();
 		} else {
-			cq.where(masterCodePredicate);
+			throw new IllegalArgumentException("Invalid token type: " + params.getClass());
 		}
 
-		TypedQuery<Long> q = myEntityManager.createQuery(cq);
-		return new HashSet<Long>(q.getResultList());
-	}
+		Join<Object, Object> join = theFrom.join("myParamsToken", JoinType.LEFT);
+		ArrayList<Predicate> predicates = (new ArrayList<Predicate>());
 
-	private Set<Long> addStringPredicate(Set<Long> thePids, List<IQueryParameterType> theOrParams) {
-		if (theOrParams == null || theOrParams.isEmpty()) {
-			return thePids;
+		if (system != null) {
+			predicates.add(theBuilder.equal(join.get("mySystem"), system));
 		}
 
-		CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
-		CriteriaQuery<Long> cq = builder.createQuery(Long.class);
-		Root<ResourceIndexedSearchParamString> from = cq.from(ResourceIndexedSearchParamString.class);
-		cq.select(from.get("myResourcePid").as(Long.class));
-
-		List<Predicate> codePredicates = new ArrayList<Predicate>();
-		for (IQueryParameterType nextOr : theOrParams) {
-			IQueryParameterType params = nextOr;
-
-			String string;
-			if (params instanceof IPrimitiveDatatype<?>) {
-				IPrimitiveDatatype<?> id = (IPrimitiveDatatype<?>) params;
-				string = id.getValueAsString();
-			} else {
-				throw new IllegalArgumentException("Invalid token type: " + params.getClass());
-			}
-
-			Predicate singleCode = builder.equal(from.get("myValue"), string);
-			codePredicates.add(singleCode);
+		if (code != null) {
+			predicates.add(theBuilder.equal(join.get("myValue"), code));
 		}
 
-		Predicate masterCodePredicate = builder.or(codePredicates.toArray(new Predicate[0]));
-
-		if (thePids.size() > 0) {
-			Predicate inPids = (from.get("myResourcePid").in(thePids));
-			cq.where(builder.and(inPids, masterCodePredicate));
-		} else {
-			cq.where(masterCodePredicate);
-		}
-
-		TypedQuery<Long> q = myEntityManager.createQuery(cq);
-		return new HashSet<Long>(q.getResultList());
-	}
-	
-	private Set<Long> addQuantityPredicate(Set<Long> thePids, List<IQueryParameterType> theOrParams) {
-		if (theOrParams == null || theOrParams.isEmpty()) {
-			return thePids;
-		}
-
-		CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
-		CriteriaQuery<Long> cq = builder.createQuery(Long.class);
-		Root<ResourceIndexedSearchParamString> from = cq.from(ResourceIndexedSearchParamString.class);
-		cq.select(from.get("myResourcePid").as(Long.class));
-
-		List<Predicate> codePredicates = new ArrayList<Predicate>();
-		for (IQueryParameterType nextOr : theOrParams) {
-			IQueryParameterType params = nextOr;
-
-			String string;
-			if (params instanceof QuantityParam<?>) {
-				IPrimitiveDatatype<?> id = (IPrimitiveDatatype<?>) params;
-				string = id.getValueAsString();
-			} else {
-				throw new IllegalArgumentException("Invalid token type: " + params.getClass());
-			}
-
-			Predicate singleCode = builder.equal(from.get("myValue"), string);
-			codePredicates.add(singleCode);
-		}
-
-		Predicate masterCodePredicate = builder.or(codePredicates.toArray(new Predicate[0]));
-
-		if (thePids.size() > 0) {
-			Predicate inPids = (from.get("myResourcePid").in(thePids));
-			cq.where(builder.and(inPids, masterCodePredicate));
-		} else {
-			cq.where(masterCodePredicate);
-		}
-
-		TypedQuery<Long> q = myEntityManager.createQuery(cq);
-		return new HashSet<Long>(q.getResultList());
+		theCriteriaQuery.where(predicates.toArray(new Predicate[0]));
 	}
 
 	@Transactional(propagation = Propagation.SUPPORTS)
@@ -414,9 +324,11 @@ public class FhirResourceDao<T extends IResource, X extends BaseResourceTable<T>
 			params = Collections.emptyMap();
 		}
 
-		RuntimeResourceDefinition resourceDef = myCtx.getResourceDefinition(myResourceType);
+		CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
+		CriteriaQuery<X> cq = builder.createQuery(myTableType);
+		Root<X> from = cq.from(myTableType);
 
-		Set<Long> pids = new HashSet<Long>();
+		RuntimeResourceDefinition resourceDef = myCtx.getResourceDefinition(myResourceType);
 
 		for (Entry<String, List<List<IQueryParameterType>>> nextParamEntry : params.entrySet()) {
 			String nextParamName = nextParamEntry.getKey();
@@ -424,42 +336,30 @@ public class FhirResourceDao<T extends IResource, X extends BaseResourceTable<T>
 			if (nextParamDef != null) {
 				if (nextParamDef.getParamType() == SearchParamTypeEnum.TOKEN) {
 					for (List<IQueryParameterType> nextAnd : nextParamEntry.getValue()) {
-						pids = addTokenPredicate(pids, nextAnd);
-						if (pids.isEmpty()) {
-							return new ArrayList<T>();
-						}
-					}
-				} else if (nextParamDef.getParamType() == SearchParamTypeEnum.STRING) {
-					for (List<IQueryParameterType> nextAnd : nextParamEntry.getValue()) {
-						pids = addStringPredicate(pids, nextAnd);
-						if (pids.isEmpty()) {
-							return new ArrayList<T>();
-						}
-					}
-				} else if (nextParamDef.getParamType() == SearchParamTypeEnum.QUANTITY) {
-					for (List<IQueryParameterType> nextAnd : nextParamEntry.getValue()) {
-						pids = addStringPredicate(pids, nextAnd);
-						if (pids.isEmpty()) {
-							return new ArrayList<T>();
-						}
+						addTokenPredicate(cq, nextAnd, from, builder);
 					}
 				}
 			}
 		}
 
 		// Execute the query and make sure we return distinct results
-		{
-			CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
-			CriteriaQuery<X> cq = builder.createQuery(myTableType);
-			cq.from(myTableType);
-			TypedQuery<X> q = myEntityManager.createQuery(cq);
-			List<T> retVal = new ArrayList<>();
-			for (X next : q.getResultList()) {
-				T resource = toResource(next);
-				retVal.add(resource);
+		
+		Set<Long> pids = new HashSet<Long>();
+		
+		TypedQuery<X> q = myEntityManager.createQuery(cq);
+		List<T> retVal = new ArrayList<>();
+		for (X next : q.getResultList()) {
+			T resource = toResource(next);
+			if (pids.contains(next.getIdAsLong())) {
+				continue;
+			}else {
+				pids.add(next.getIdAsLong());
 			}
-			return retVal;
+			
+			retVal.add(resource);
 		}
+		
+		return retVal;
 	}
 
 	@Required

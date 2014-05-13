@@ -20,7 +20,7 @@ package ca.uhn.fhir.context;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -62,6 +62,7 @@ import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.dstu.composite.ContainedDt;
 import ca.uhn.fhir.model.dstu.composite.NarrativeDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.dstu.valueset.SearchParamTypeEnum;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.BoundCodeableConceptDt;
 import ca.uhn.fhir.model.primitive.ICodedDatatype;
@@ -573,7 +574,11 @@ class ModelScanner {
 		for (Field nextField : theClass.getFields()) {
 			SearchParamDefinition searchParam = nextField.getAnnotation(SearchParamDefinition.class);
 			if (searchParam != null) {
-				RuntimeSearchParam param = new RuntimeSearchParam(searchParam.name(), searchParam.description(), searchParam.path());
+				SearchParamTypeEnum paramType = SearchParamTypeEnum.valueOf(searchParam.type().toUpperCase());
+				if (paramType ==null) {
+					throw new ConfigurationException("Searc param "+searchParam.name()+" has an invalid type: "+searchParam.type());
+				}
+				RuntimeSearchParam param = new RuntimeSearchParam(searchParam.name(), searchParam.description(), searchParam.path(), paramType);
 				theResourceDef.addSearchParam(param);
 			}
 		}

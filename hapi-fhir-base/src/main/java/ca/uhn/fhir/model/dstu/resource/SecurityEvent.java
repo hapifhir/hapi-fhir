@@ -108,7 +108,7 @@ public class SecurityEvent extends BaseResource implements IResource {
 	 * Path: <b>SecurityEvent.event.type</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="type", path="SecurityEvent.event.type", description="")
+	@SearchParamDefinition(name="type", path="SecurityEvent.event.type", description="", type="token")
 	public static final String SP_TYPE = "type";
 
 	/**
@@ -129,7 +129,7 @@ public class SecurityEvent extends BaseResource implements IResource {
 	 * Path: <b>SecurityEvent.event.action</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="action", path="SecurityEvent.event.action", description="")
+	@SearchParamDefinition(name="action", path="SecurityEvent.event.action", description="", type="token")
 	public static final String SP_ACTION = "action";
 
 	/**
@@ -150,7 +150,7 @@ public class SecurityEvent extends BaseResource implements IResource {
 	 * Path: <b>SecurityEvent.event.dateTime</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="date", path="SecurityEvent.event.dateTime", description="")
+	@SearchParamDefinition(name="date", path="SecurityEvent.event.dateTime", description="", type="date")
 	public static final String SP_DATE = "date";
 
 	/**
@@ -171,7 +171,7 @@ public class SecurityEvent extends BaseResource implements IResource {
 	 * Path: <b>SecurityEvent.event.subtype</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="subtype", path="SecurityEvent.event.subtype", description="")
+	@SearchParamDefinition(name="subtype", path="SecurityEvent.event.subtype", description="", type="token")
 	public static final String SP_SUBTYPE = "subtype";
 
 	/**
@@ -192,7 +192,7 @@ public class SecurityEvent extends BaseResource implements IResource {
 	 * Path: <b>SecurityEvent.participant.userId</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="user", path="SecurityEvent.participant.userId", description="")
+	@SearchParamDefinition(name="user", path="SecurityEvent.participant.userId", description="", type="token")
 	public static final String SP_USER = "user";
 
 	/**
@@ -213,7 +213,7 @@ public class SecurityEvent extends BaseResource implements IResource {
 	 * Path: <b>SecurityEvent.participant.name</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="name", path="SecurityEvent.participant.name", description="")
+	@SearchParamDefinition(name="name", path="SecurityEvent.participant.name", description="", type="string")
 	public static final String SP_NAME = "name";
 
 	/**
@@ -234,7 +234,7 @@ public class SecurityEvent extends BaseResource implements IResource {
 	 * Path: <b>SecurityEvent.participant.network.identifier</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="address", path="SecurityEvent.participant.network.identifier", description="")
+	@SearchParamDefinition(name="address", path="SecurityEvent.participant.network.identifier", description="", type="token")
 	public static final String SP_ADDRESS = "address";
 
 	/**
@@ -255,7 +255,7 @@ public class SecurityEvent extends BaseResource implements IResource {
 	 * Path: <b>SecurityEvent.source.identifier</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="source", path="SecurityEvent.source.identifier", description="")
+	@SearchParamDefinition(name="source", path="SecurityEvent.source.identifier", description="", type="token")
 	public static final String SP_SOURCE = "source";
 
 	/**
@@ -276,7 +276,7 @@ public class SecurityEvent extends BaseResource implements IResource {
 	 * Path: <b>SecurityEvent.source.site</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="site", path="SecurityEvent.source.site", description="")
+	@SearchParamDefinition(name="site", path="SecurityEvent.source.site", description="", type="token")
 	public static final String SP_SITE = "site";
 
 	/**
@@ -297,7 +297,7 @@ public class SecurityEvent extends BaseResource implements IResource {
 	 * Path: <b>SecurityEvent.object.type</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="object-type", path="SecurityEvent.object.type", description="")
+	@SearchParamDefinition(name="object-type", path="SecurityEvent.object.type", description="", type="token")
 	public static final String SP_OBJECT_TYPE = "object-type";
 
 	/**
@@ -318,7 +318,7 @@ public class SecurityEvent extends BaseResource implements IResource {
 	 * Path: <b>SecurityEvent.object.identifier</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="identity", path="SecurityEvent.object.identifier", description="")
+	@SearchParamDefinition(name="identity", path="SecurityEvent.object.identifier", description="", type="token")
 	public static final String SP_IDENTITY = "identity";
 
 	/**
@@ -339,7 +339,7 @@ public class SecurityEvent extends BaseResource implements IResource {
 	 * Path: <b>SecurityEvent.object.reference</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="reference", path="SecurityEvent.object.reference", description="")
+	@SearchParamDefinition(name="reference", path="SecurityEvent.object.reference", description="", type="reference")
 	public static final String SP_REFERENCE = "reference";
 
 	/**
@@ -366,7 +366,7 @@ public class SecurityEvent extends BaseResource implements IResource {
 	 * Path: <b>SecurityEvent.object.name</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="desc", path="SecurityEvent.object.name", description="")
+	@SearchParamDefinition(name="desc", path="SecurityEvent.object.name", description="", type="string")
 	public static final String SP_DESC = "desc";
 
 	/**
@@ -387,7 +387,7 @@ public class SecurityEvent extends BaseResource implements IResource {
 	 * Path: <b></b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="patientid", path="", description="The id of the patient (one of multiple kinds of participations)")
+	@SearchParamDefinition(name="patientid", path="", description="The id of the patient (one of multiple kinds of participations)", type="token")
 	public static final String SP_PATIENTID = "patientid";
 
 	/**
@@ -408,7 +408,7 @@ public class SecurityEvent extends BaseResource implements IResource {
 	 * Path: <b>SecurityEvent.participant.altId</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="altid", path="SecurityEvent.participant.altId", description="")
+	@SearchParamDefinition(name="altid", path="SecurityEvent.participant.altId", description="", type="token")
 	public static final String SP_ALTID = "altid";
 
 	/**
@@ -880,8 +880,8 @@ public class SecurityEvent extends BaseResource implements IResource {
      * The time when the event occurred on the source
      * </p> 
 	 */
-	public Event setDateTime( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myDateTime = new InstantDt(theDate, thePrecision); 
+	public Event setDateTimeWithMillisPrecision( Date theDate) {
+		myDateTime = new InstantDt(theDate); 
 		return this; 
 	}
 
@@ -893,8 +893,8 @@ public class SecurityEvent extends BaseResource implements IResource {
      * The time when the event occurred on the source
      * </p> 
 	 */
-	public Event setDateTimeWithMillisPrecision( Date theDate) {
-		myDateTime = new InstantDt(theDate); 
+	public Event setDateTime( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myDateTime = new InstantDt(theDate, thePrecision); 
 		return this; 
 	}
 

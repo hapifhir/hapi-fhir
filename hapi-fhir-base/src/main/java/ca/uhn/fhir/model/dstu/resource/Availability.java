@@ -92,7 +92,7 @@ public class Availability extends BaseResource implements IResource {
 	 * Path: <b>Availability.period</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="!period", path="Availability.period", description="Appointment date/time.")
+	@SearchParamDefinition(name="!period", path="Availability.period", description="Appointment date/time.", type="date")
 	public static final String SP_PERIOD = "!period";
 
 	/**
@@ -113,7 +113,7 @@ public class Availability extends BaseResource implements IResource {
 	 * Path: <b>Availability.individual</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="individual", path="Availability.individual", description="The individual to find an availability for")
+	@SearchParamDefinition(name="individual", path="Availability.individual", description="The individual to find an availability for", type="reference")
 	public static final String SP_INDIVIDUAL = "individual";
 
 	/**
@@ -140,7 +140,7 @@ public class Availability extends BaseResource implements IResource {
 	 * Path: <b>Availability.type</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="slottype", path="Availability.type", description="The type of appointments that can be booked into associated slot(s)")
+	@SearchParamDefinition(name="slottype", path="Availability.type", description="The type of appointments that can be booked into associated slot(s)", type="token")
 	public static final String SP_SLOTTYPE = "slottype";
 
 	/**

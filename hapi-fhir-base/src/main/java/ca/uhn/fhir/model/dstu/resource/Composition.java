@@ -100,7 +100,7 @@ public class Composition extends BaseResource implements IResource {
 	 * Path: <b>Composition.type</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="type", path="Composition.type", description="")
+	@SearchParamDefinition(name="type", path="Composition.type", description="", type="token")
 	public static final String SP_TYPE = "type";
 
 	/**
@@ -121,7 +121,7 @@ public class Composition extends BaseResource implements IResource {
 	 * Path: <b>Composition.class</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="class", path="Composition.class", description="")
+	@SearchParamDefinition(name="class", path="Composition.class", description="", type="token")
 	public static final String SP_CLASS = "class";
 
 	/**
@@ -142,7 +142,7 @@ public class Composition extends BaseResource implements IResource {
 	 * Path: <b>Composition.date</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="date", path="Composition.date", description="")
+	@SearchParamDefinition(name="date", path="Composition.date", description="", type="date")
 	public static final String SP_DATE = "date";
 
 	/**
@@ -163,7 +163,7 @@ public class Composition extends BaseResource implements IResource {
 	 * Path: <b>Composition.subject</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="subject", path="Composition.subject", description="")
+	@SearchParamDefinition(name="subject", path="Composition.subject", description="", type="reference")
 	public static final String SP_SUBJECT = "subject";
 
 	/**
@@ -190,7 +190,7 @@ public class Composition extends BaseResource implements IResource {
 	 * Path: <b>Composition.author</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="author", path="Composition.author", description="")
+	@SearchParamDefinition(name="author", path="Composition.author", description="", type="reference")
 	public static final String SP_AUTHOR = "author";
 
 	/**
@@ -217,7 +217,7 @@ public class Composition extends BaseResource implements IResource {
 	 * Path: <b>Composition.attester.party</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="attester", path="Composition.attester.party", description="")
+	@SearchParamDefinition(name="attester", path="Composition.attester.party", description="", type="reference")
 	public static final String SP_ATTESTER = "attester";
 
 	/**
@@ -244,7 +244,7 @@ public class Composition extends BaseResource implements IResource {
 	 * Path: <b>Composition.event.code</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="context", path="Composition.event.code", description="")
+	@SearchParamDefinition(name="context", path="Composition.event.code", description="", type="token")
 	public static final String SP_CONTEXT = "context";
 
 	/**
@@ -265,7 +265,7 @@ public class Composition extends BaseResource implements IResource {
 	 * Path: <b>Composition.section.code</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="section-type", path="Composition.section.code", description="")
+	@SearchParamDefinition(name="section-type", path="Composition.section.code", description="", type="token")
 	public static final String SP_SECTION_TYPE = "section-type";
 
 	/**
@@ -286,7 +286,7 @@ public class Composition extends BaseResource implements IResource {
 	 * Path: <b>Composition.section.content</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="section-content", path="Composition.section.content", description="")
+	@SearchParamDefinition(name="section-content", path="Composition.section.content", description="", type="reference")
 	public static final String SP_SECTION_CONTENT = "section-content";
 
 	/**
@@ -313,7 +313,7 @@ public class Composition extends BaseResource implements IResource {
 	 * Path: <b>Composition.identifier</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="identifier", path="Composition.identifier", description="")
+	@SearchParamDefinition(name="identifier", path="Composition.identifier", description="", type="token")
 	public static final String SP_IDENTIFIER = "identifier";
 
 	/**

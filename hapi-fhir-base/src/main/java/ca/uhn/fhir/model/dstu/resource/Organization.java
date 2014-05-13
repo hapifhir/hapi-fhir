@@ -98,7 +98,7 @@ public class Organization extends BaseResource implements IResource {
 	 * Path: <b>Organization.name</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="name", path="Organization.name", description="A portion of the organization's name")
+	@SearchParamDefinition(name="name", path="Organization.name", description="A portion of the organization's name", type="string")
 	public static final String SP_NAME = "name";
 
 	/**
@@ -119,7 +119,7 @@ public class Organization extends BaseResource implements IResource {
 	 * Path: <b></b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="phonetic", path="", description="A portion of the organization's name using some kind of phonetic matching algorithm")
+	@SearchParamDefinition(name="phonetic", path="", description="A portion of the organization's name using some kind of phonetic matching algorithm", type="string")
 	public static final String SP_PHONETIC = "phonetic";
 
 	/**
@@ -140,7 +140,7 @@ public class Organization extends BaseResource implements IResource {
 	 * Path: <b>Organization.type</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="type", path="Organization.type", description="A code for the type of organization")
+	@SearchParamDefinition(name="type", path="Organization.type", description="A code for the type of organization", type="token")
 	public static final String SP_TYPE = "type";
 
 	/**
@@ -161,7 +161,7 @@ public class Organization extends BaseResource implements IResource {
 	 * Path: <b>Organization.identifier</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="identifier", path="Organization.identifier", description="Any identifier for the organization (not the accreditation issuer's identifier)")
+	@SearchParamDefinition(name="identifier", path="Organization.identifier", description="Any identifier for the organization (not the accreditation issuer's identifier)", type="token")
 	public static final String SP_IDENTIFIER = "identifier";
 
 	/**
@@ -182,7 +182,7 @@ public class Organization extends BaseResource implements IResource {
 	 * Path: <b>Organization.accreditation.code</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="!accreditation", path="Organization.accreditation.code", description="Any accreditation code")
+	@SearchParamDefinition(name="!accreditation", path="Organization.accreditation.code", description="Any accreditation code", type="token")
 	public static final String SP_ACCREDITATION = "!accreditation";
 
 	/**
@@ -203,7 +203,7 @@ public class Organization extends BaseResource implements IResource {
 	 * Path: <b>Organization.partOf</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="partof", path="Organization.partOf", description="Search all organizations that are part of the given organization")
+	@SearchParamDefinition(name="partof", path="Organization.partOf", description="Search all organizations that are part of the given organization", type="reference")
 	public static final String SP_PARTOF = "partof";
 
 	/**
@@ -230,7 +230,7 @@ public class Organization extends BaseResource implements IResource {
 	 * Path: <b>Organization.active</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="active", path="Organization.active", description="Whether the organization's record is active")
+	@SearchParamDefinition(name="active", path="Organization.active", description="Whether the organization's record is active", type="token")
 	public static final String SP_ACTIVE = "active";
 
 	/**

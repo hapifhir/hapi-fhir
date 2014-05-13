@@ -90,7 +90,7 @@ public class Other extends BaseResource implements IResource {
 	 * Path: <b>Other.subject</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="subject", path="Other.subject", description="")
+	@SearchParamDefinition(name="subject", path="Other.subject", description="", type="reference")
 	public static final String SP_SUBJECT = "subject";
 
 	/**
@@ -117,7 +117,7 @@ public class Other extends BaseResource implements IResource {
 	 * Path: <b>Other.created</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="created", path="Other.created", description="")
+	@SearchParamDefinition(name="created", path="Other.created", description="", type="date")
 	public static final String SP_CREATED = "created";
 
 	/**
@@ -138,7 +138,7 @@ public class Other extends BaseResource implements IResource {
 	 * Path: <b>Other.code</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="code", path="Other.code", description="")
+	@SearchParamDefinition(name="code", path="Other.code", description="", type="token")
 	public static final String SP_CODE = "code";
 
 	/**

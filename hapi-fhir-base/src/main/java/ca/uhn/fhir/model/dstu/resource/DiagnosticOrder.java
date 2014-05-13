@@ -99,7 +99,7 @@ public class DiagnosticOrder extends BaseResource implements IResource {
 	 * Path: <b>DiagnosticOrder.event.actor | DiagnosticOrder.item.event.actor</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="actor", path="DiagnosticOrder.event.actor | DiagnosticOrder.item.event.actor", description="")
+	@SearchParamDefinition(name="actor", path="DiagnosticOrder.event.actor | DiagnosticOrder.item.event.actor", description="", type="reference")
 	public static final String SP_ACTOR = "actor";
 
 	/**
@@ -132,7 +132,7 @@ public class DiagnosticOrder extends BaseResource implements IResource {
 	 * Path: <b>DiagnosticOrder.item.bodySite</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="bodysite", path="DiagnosticOrder.item.bodySite", description="")
+	@SearchParamDefinition(name="bodysite", path="DiagnosticOrder.item.bodySite", description="", type="token")
 	public static final String SP_BODYSITE = "bodysite";
 
 	/**
@@ -153,7 +153,7 @@ public class DiagnosticOrder extends BaseResource implements IResource {
 	 * Path: <b>DiagnosticOrder.item.code</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="code", path="DiagnosticOrder.item.code", description="")
+	@SearchParamDefinition(name="code", path="DiagnosticOrder.item.code", description="", type="token")
 	public static final String SP_CODE = "code";
 
 	/**
@@ -174,7 +174,7 @@ public class DiagnosticOrder extends BaseResource implements IResource {
 	 * Path: <b>DiagnosticOrder.event.dateTime</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="event-date", path="DiagnosticOrder.event.dateTime", description="")
+	@SearchParamDefinition(name="event-date", path="DiagnosticOrder.event.dateTime", description="", type="date")
 	public static final String SP_EVENT_DATE = "event-date";
 
 	/**
@@ -195,7 +195,7 @@ public class DiagnosticOrder extends BaseResource implements IResource {
 	 * Path: <b>DiagnosticOrder.encounter</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="encounter", path="DiagnosticOrder.encounter", description="")
+	@SearchParamDefinition(name="encounter", path="DiagnosticOrder.encounter", description="", type="reference")
 	public static final String SP_ENCOUNTER = "encounter";
 
 	/**
@@ -222,7 +222,7 @@ public class DiagnosticOrder extends BaseResource implements IResource {
 	 * Path: <b>DiagnosticOrder.identifier</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="identifier", path="DiagnosticOrder.identifier", description="")
+	@SearchParamDefinition(name="identifier", path="DiagnosticOrder.identifier", description="", type="token")
 	public static final String SP_IDENTIFIER = "identifier";
 
 	/**
@@ -243,7 +243,7 @@ public class DiagnosticOrder extends BaseResource implements IResource {
 	 * Path: <b>DiagnosticOrder.item.event.dateTime</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="item-date", path="DiagnosticOrder.item.event.dateTime", description="")
+	@SearchParamDefinition(name="item-date", path="DiagnosticOrder.item.event.dateTime", description="", type="date")
 	public static final String SP_ITEM_DATE = "item-date";
 
 	/**
@@ -264,7 +264,7 @@ public class DiagnosticOrder extends BaseResource implements IResource {
 	 * Path: <b>DiagnosticOrder.item.event.status</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="item-past-status", path="DiagnosticOrder.item.event.status", description="")
+	@SearchParamDefinition(name="item-past-status", path="DiagnosticOrder.item.event.status", description="", type="token")
 	public static final String SP_ITEM_PAST_STATUS = "item-past-status";
 
 	/**
@@ -285,7 +285,7 @@ public class DiagnosticOrder extends BaseResource implements IResource {
 	 * Path: <b>DiagnosticOrder.item.status</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="item-status", path="DiagnosticOrder.item.status", description="")
+	@SearchParamDefinition(name="item-status", path="DiagnosticOrder.item.status", description="", type="token")
 	public static final String SP_ITEM_STATUS = "item-status";
 
 	/**
@@ -306,7 +306,7 @@ public class DiagnosticOrder extends BaseResource implements IResource {
 	 * Path: <b>item-past-status & item-date</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="item-status-date", path="item-past-status & item-date", description="A combination of item-past-status and item-date")
+	@SearchParamDefinition(name="item-status-date", path="item-past-status & item-date", description="A combination of item-past-status and item-date", type="composite")
 	public static final String SP_ITEM_STATUS_DATE = "item-status-date";
 
 	/**
@@ -327,7 +327,7 @@ public class DiagnosticOrder extends BaseResource implements IResource {
 	 * Path: <b>DiagnosticOrder.orderer</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="orderer", path="DiagnosticOrder.orderer", description="")
+	@SearchParamDefinition(name="orderer", path="DiagnosticOrder.orderer", description="", type="reference")
 	public static final String SP_ORDERER = "orderer";
 
 	/**
@@ -354,7 +354,7 @@ public class DiagnosticOrder extends BaseResource implements IResource {
 	 * Path: <b>DiagnosticOrder.event.status</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="event-status", path="DiagnosticOrder.event.status", description="")
+	@SearchParamDefinition(name="event-status", path="DiagnosticOrder.event.status", description="", type="token")
 	public static final String SP_EVENT_STATUS = "event-status";
 
 	/**
@@ -375,7 +375,7 @@ public class DiagnosticOrder extends BaseResource implements IResource {
 	 * Path: <b>DiagnosticOrder.specimen | DiagnosticOrder.item.specimen</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="specimen", path="DiagnosticOrder.specimen | DiagnosticOrder.item.specimen", description="")
+	@SearchParamDefinition(name="specimen", path="DiagnosticOrder.specimen | DiagnosticOrder.item.specimen", description="", type="reference")
 	public static final String SP_SPECIMEN = "specimen";
 
 	/**
@@ -408,7 +408,7 @@ public class DiagnosticOrder extends BaseResource implements IResource {
 	 * Path: <b>DiagnosticOrder.status</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="status", path="DiagnosticOrder.status", description="")
+	@SearchParamDefinition(name="status", path="DiagnosticOrder.status", description="", type="token")
 	public static final String SP_STATUS = "status";
 
 	/**
@@ -429,7 +429,7 @@ public class DiagnosticOrder extends BaseResource implements IResource {
 	 * Path: <b>event-status & event-date</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="event-status-date", path="event-status & event-date", description="A combination of past-status and date")
+	@SearchParamDefinition(name="event-status-date", path="event-status & event-date", description="A combination of past-status and date", type="composite")
 	public static final String SP_EVENT_STATUS_DATE = "event-status-date";
 
 	/**
@@ -450,7 +450,7 @@ public class DiagnosticOrder extends BaseResource implements IResource {
 	 * Path: <b>DiagnosticOrder.subject</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="subject", path="DiagnosticOrder.subject", description="")
+	@SearchParamDefinition(name="subject", path="DiagnosticOrder.subject", description="", type="reference")
 	public static final String SP_SUBJECT = "subject";
 
 	/**

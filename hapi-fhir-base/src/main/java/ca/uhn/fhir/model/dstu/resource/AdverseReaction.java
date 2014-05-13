@@ -99,7 +99,7 @@ public class AdverseReaction extends BaseResource implements IResource {
 	 * Path: <b>AdverseReaction.symptom.code</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="symptom", path="AdverseReaction.symptom.code", description="One of the symptoms of the reaction")
+	@SearchParamDefinition(name="symptom", path="AdverseReaction.symptom.code", description="One of the symptoms of the reaction", type="token")
 	public static final String SP_SYMPTOM = "symptom";
 
 	/**
@@ -120,7 +120,7 @@ public class AdverseReaction extends BaseResource implements IResource {
 	 * Path: <b>AdverseReaction.exposure.substance</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="substance", path="AdverseReaction.exposure.substance", description="The name or code of the substance that produces the sensitivity")
+	@SearchParamDefinition(name="substance", path="AdverseReaction.exposure.substance", description="The name or code of the substance that produces the sensitivity", type="reference")
 	public static final String SP_SUBSTANCE = "substance";
 
 	/**
@@ -147,7 +147,7 @@ public class AdverseReaction extends BaseResource implements IResource {
 	 * Path: <b>AdverseReaction.date</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="date", path="AdverseReaction.date", description="The date of the reaction")
+	@SearchParamDefinition(name="date", path="AdverseReaction.date", description="The date of the reaction", type="date")
 	public static final String SP_DATE = "date";
 
 	/**
@@ -168,7 +168,7 @@ public class AdverseReaction extends BaseResource implements IResource {
 	 * Path: <b>AdverseReaction.subject</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="subject", path="AdverseReaction.subject", description="The subject that the sensitivity is about")
+	@SearchParamDefinition(name="subject", path="AdverseReaction.subject", description="The subject that the sensitivity is about", type="reference")
 	public static final String SP_SUBJECT = "subject";
 
 	/**

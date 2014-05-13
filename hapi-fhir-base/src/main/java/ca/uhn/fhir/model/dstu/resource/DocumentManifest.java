@@ -96,7 +96,7 @@ public class DocumentManifest extends BaseResource implements IResource {
 	 * Path: <b>DocumentManifest.masterIdentifier | DocumentManifest.identifier</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="identifier", path="DocumentManifest.masterIdentifier | DocumentManifest.identifier", description="")
+	@SearchParamDefinition(name="identifier", path="DocumentManifest.masterIdentifier | DocumentManifest.identifier", description="", type="token")
 	public static final String SP_IDENTIFIER = "identifier";
 
 	/**
@@ -117,7 +117,7 @@ public class DocumentManifest extends BaseResource implements IResource {
 	 * Path: <b>DocumentManifest.subject</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="subject", path="DocumentManifest.subject", description="")
+	@SearchParamDefinition(name="subject", path="DocumentManifest.subject", description="", type="reference")
 	public static final String SP_SUBJECT = "subject";
 
 	/**
@@ -144,7 +144,7 @@ public class DocumentManifest extends BaseResource implements IResource {
 	 * Path: <b>DocumentManifest.type</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="type", path="DocumentManifest.type", description="")
+	@SearchParamDefinition(name="type", path="DocumentManifest.type", description="", type="token")
 	public static final String SP_TYPE = "type";
 
 	/**
@@ -165,7 +165,7 @@ public class DocumentManifest extends BaseResource implements IResource {
 	 * Path: <b>DocumentManifest.recipient</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="recipient", path="DocumentManifest.recipient", description="")
+	@SearchParamDefinition(name="recipient", path="DocumentManifest.recipient", description="", type="reference")
 	public static final String SP_RECIPIENT = "recipient";
 
 	/**
@@ -192,7 +192,7 @@ public class DocumentManifest extends BaseResource implements IResource {
 	 * Path: <b>DocumentManifest.author</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="author", path="DocumentManifest.author", description="")
+	@SearchParamDefinition(name="author", path="DocumentManifest.author", description="", type="reference")
 	public static final String SP_AUTHOR = "author";
 
 	/**
@@ -219,7 +219,7 @@ public class DocumentManifest extends BaseResource implements IResource {
 	 * Path: <b>DocumentManifest.created</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="created", path="DocumentManifest.created", description="")
+	@SearchParamDefinition(name="created", path="DocumentManifest.created", description="", type="date")
 	public static final String SP_CREATED = "created";
 
 	/**
@@ -240,7 +240,7 @@ public class DocumentManifest extends BaseResource implements IResource {
 	 * Path: <b>DocumentManifest.status</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="status", path="DocumentManifest.status", description="")
+	@SearchParamDefinition(name="status", path="DocumentManifest.status", description="", type="token")
 	public static final String SP_STATUS = "status";
 
 	/**
@@ -261,7 +261,7 @@ public class DocumentManifest extends BaseResource implements IResource {
 	 * Path: <b>DocumentManifest.supercedes</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="supersedes", path="DocumentManifest.supercedes", description="")
+	@SearchParamDefinition(name="supersedes", path="DocumentManifest.supercedes", description="", type="reference")
 	public static final String SP_SUPERSEDES = "supersedes";
 
 	/**
@@ -288,7 +288,7 @@ public class DocumentManifest extends BaseResource implements IResource {
 	 * Path: <b>DocumentManifest.description</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="description", path="DocumentManifest.description", description="")
+	@SearchParamDefinition(name="description", path="DocumentManifest.description", description="", type="string")
 	public static final String SP_DESCRIPTION = "description";
 
 	/**
@@ -309,7 +309,7 @@ public class DocumentManifest extends BaseResource implements IResource {
 	 * Path: <b>DocumentManifest.confidentiality</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="confidentiality", path="DocumentManifest.confidentiality", description="")
+	@SearchParamDefinition(name="confidentiality", path="DocumentManifest.confidentiality", description="", type="token")
 	public static final String SP_CONFIDENTIALITY = "confidentiality";
 
 	/**
@@ -330,7 +330,7 @@ public class DocumentManifest extends BaseResource implements IResource {
 	 * Path: <b>DocumentManifest.content</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="content", path="DocumentManifest.content", description="")
+	@SearchParamDefinition(name="content", path="DocumentManifest.content", description="", type="reference")
 	public static final String SP_CONTENT = "content";
 
 	/**

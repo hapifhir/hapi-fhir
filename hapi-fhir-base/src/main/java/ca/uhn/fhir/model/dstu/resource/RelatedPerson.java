@@ -94,7 +94,7 @@ public class RelatedPerson extends BaseResource implements IResource {
 	 * Path: <b>RelatedPerson.identifier</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="identifier", path="RelatedPerson.identifier", description="A patient Identifier")
+	@SearchParamDefinition(name="identifier", path="RelatedPerson.identifier", description="A patient Identifier", type="token")
 	public static final String SP_IDENTIFIER = "identifier";
 
 	/**
@@ -115,7 +115,7 @@ public class RelatedPerson extends BaseResource implements IResource {
 	 * Path: <b>RelatedPerson.name</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="name", path="RelatedPerson.name", description="A portion of name in any name part")
+	@SearchParamDefinition(name="name", path="RelatedPerson.name", description="A portion of name in any name part", type="string")
 	public static final String SP_NAME = "name";
 
 	/**
@@ -136,7 +136,7 @@ public class RelatedPerson extends BaseResource implements IResource {
 	 * Path: <b></b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="phonetic", path="", description="A portion of name using some kind of phonetic matching algorithm")
+	@SearchParamDefinition(name="phonetic", path="", description="A portion of name using some kind of phonetic matching algorithm", type="string")
 	public static final String SP_PHONETIC = "phonetic";
 
 	/**
@@ -157,7 +157,7 @@ public class RelatedPerson extends BaseResource implements IResource {
 	 * Path: <b>RelatedPerson.telecom</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="telecom", path="RelatedPerson.telecom", description="The value in any kind of contact")
+	@SearchParamDefinition(name="telecom", path="RelatedPerson.telecom", description="The value in any kind of contact", type="string")
 	public static final String SP_TELECOM = "telecom";
 
 	/**
@@ -178,7 +178,7 @@ public class RelatedPerson extends BaseResource implements IResource {
 	 * Path: <b>RelatedPerson.address</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="address", path="RelatedPerson.address", description="An address in any kind of address/part")
+	@SearchParamDefinition(name="address", path="RelatedPerson.address", description="An address in any kind of address/part", type="string")
 	public static final String SP_ADDRESS = "address";
 
 	/**
@@ -199,7 +199,7 @@ public class RelatedPerson extends BaseResource implements IResource {
 	 * Path: <b>RelatedPerson.gender</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="gender", path="RelatedPerson.gender", description="Gender of the person")
+	@SearchParamDefinition(name="gender", path="RelatedPerson.gender", description="Gender of the person", type="token")
 	public static final String SP_GENDER = "gender";
 
 	/**
@@ -220,7 +220,7 @@ public class RelatedPerson extends BaseResource implements IResource {
 	 * Path: <b>RelatedPerson.patient</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="patient", path="RelatedPerson.patient", description="The patient this person is related to")
+	@SearchParamDefinition(name="patient", path="RelatedPerson.patient", description="The patient this person is related to", type="reference")
 	public static final String SP_PATIENT = "patient";
 
 	/**

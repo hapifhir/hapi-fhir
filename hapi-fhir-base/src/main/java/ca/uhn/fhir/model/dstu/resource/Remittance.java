@@ -88,7 +88,7 @@ public class Remittance extends BaseResource implements IResource {
 	 * Path: <b>Remittance.identifier</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="identifier", path="Remittance.identifier", description="")
+	@SearchParamDefinition(name="identifier", path="Remittance.identifier", description="", type="token")
 	public static final String SP_IDENTIFIER = "identifier";
 
 	/**
@@ -109,7 +109,7 @@ public class Remittance extends BaseResource implements IResource {
 	 * Path: <b>Remittance.service.code</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="service", path="Remittance.service.code", description="")
+	@SearchParamDefinition(name="service", path="Remittance.service.code", description="", type="token")
 	public static final String SP_SERVICE = "service";
 
 	/**

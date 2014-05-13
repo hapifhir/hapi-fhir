@@ -95,7 +95,7 @@ public class Order extends BaseResource implements IResource {
 	 * Path: <b>Order.date</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="date", path="Order.date", description="")
+	@SearchParamDefinition(name="date", path="Order.date", description="", type="date")
 	public static final String SP_DATE = "date";
 
 	/**
@@ -116,7 +116,7 @@ public class Order extends BaseResource implements IResource {
 	 * Path: <b>Order.subject</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="subject", path="Order.subject", description="")
+	@SearchParamDefinition(name="subject", path="Order.subject", description="", type="reference")
 	public static final String SP_SUBJECT = "subject";
 
 	/**
@@ -143,7 +143,7 @@ public class Order extends BaseResource implements IResource {
 	 * Path: <b>Order.source</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="source", path="Order.source", description="")
+	@SearchParamDefinition(name="source", path="Order.source", description="", type="reference")
 	public static final String SP_SOURCE = "source";
 
 	/**
@@ -170,7 +170,7 @@ public class Order extends BaseResource implements IResource {
 	 * Path: <b>Order.target</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="target", path="Order.target", description="")
+	@SearchParamDefinition(name="target", path="Order.target", description="", type="reference")
 	public static final String SP_TARGET = "target";
 
 	/**
@@ -197,7 +197,7 @@ public class Order extends BaseResource implements IResource {
 	 * Path: <b>Order.authority</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="authority", path="Order.authority", description="")
+	@SearchParamDefinition(name="authority", path="Order.authority", description="", type="reference")
 	public static final String SP_AUTHORITY = "authority";
 
 	/**
@@ -224,7 +224,7 @@ public class Order extends BaseResource implements IResource {
 	 * Path: <b>Order.when.code</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="when_code", path="Order.when.code", description="")
+	@SearchParamDefinition(name="when_code", path="Order.when.code", description="", type="token")
 	public static final String SP_WHEN_CODE = "when_code";
 
 	/**
@@ -245,7 +245,7 @@ public class Order extends BaseResource implements IResource {
 	 * Path: <b>Order.when.schedule</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="when", path="Order.when.schedule", description="")
+	@SearchParamDefinition(name="when", path="Order.when.schedule", description="", type="date")
 	public static final String SP_WHEN = "when";
 
 	/**
@@ -266,7 +266,7 @@ public class Order extends BaseResource implements IResource {
 	 * Path: <b>Order.detail</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="detail", path="Order.detail", description="")
+	@SearchParamDefinition(name="detail", path="Order.detail", description="", type="reference")
 	public static final String SP_DETAIL = "detail";
 
 	/**

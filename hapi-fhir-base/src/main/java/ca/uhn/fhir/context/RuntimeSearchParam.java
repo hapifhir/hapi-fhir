@@ -1,5 +1,7 @@
 package ca.uhn.fhir.context;
 
+import ca.uhn.fhir.model.dstu.valueset.SearchParamTypeEnum;
+
 /*
  * #%L
  * HAPI FHIR Library
@@ -26,14 +28,20 @@ public class RuntimeSearchParam {
 	private String myDescription;
 	private String myName;
 	private String myPath;
+	private SearchParamTypeEnum myParamType;
 //	private List<String> myPathParts;
 
-	public RuntimeSearchParam(String theName, String theDescription, String thePath) {
+	public RuntimeSearchParam(String theName, String theDescription, String thePath, SearchParamTypeEnum theParamType) {
 		super();
 		myName = theName;
 		myDescription = theDescription;
 		myPath=thePath;
+		myParamType=theParamType;
 //		myPathParts = Arrays.asList(thePath.split("\\."));
+	}
+
+	public SearchParamTypeEnum getParamType() {
+		return myParamType;
 	}
 
 	public String getPath() {

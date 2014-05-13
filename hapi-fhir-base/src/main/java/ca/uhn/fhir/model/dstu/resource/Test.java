@@ -1118,11 +1118,11 @@ public class Test extends BaseResource implements IResource {
      *
      * @return Returns a reference to this object, to allow for simple chaining.
 	 */
-	public Test addInstantErr( Date theDate,  TemporalPrecisionEnum thePrecision) {
+	public Test addInstantErr( Date theDate) {
 		if (myInstantErr == null) {
 			myInstantErr = new java.util.ArrayList<InstantDt>();
 		}
-		myInstantErr.add(new InstantDt(theDate, thePrecision));
+		myInstantErr.add(new InstantDt(theDate));
 		return this; 
 	}
 
@@ -1136,11 +1136,11 @@ public class Test extends BaseResource implements IResource {
      *
      * @return Returns a reference to this object, to allow for simple chaining.
 	 */
-	public Test addInstantErr( Date theDate) {
+	public Test addInstantErr( Date theDate,  TemporalPrecisionEnum thePrecision) {
 		if (myInstantErr == null) {
 			myInstantErr = new java.util.ArrayList<InstantDt>();
 		}
-		myInstantErr.add(new InstantDt(theDate));
+		myInstantErr.add(new InstantDt(theDate, thePrecision));
 		return this; 
 	}
 
@@ -1214,11 +1214,11 @@ public class Test extends BaseResource implements IResource {
      *
      * @return Returns a reference to this object, to allow for simple chaining.
 	 */
-	public Test addInstantCorr( Date theDate,  TemporalPrecisionEnum thePrecision) {
+	public Test addInstantCorr( Date theDate) {
 		if (myInstantCorr == null) {
 			myInstantCorr = new java.util.ArrayList<InstantDt>();
 		}
-		myInstantCorr.add(new InstantDt(theDate, thePrecision));
+		myInstantCorr.add(new InstantDt(theDate));
 		return this; 
 	}
 
@@ -1232,11 +1232,11 @@ public class Test extends BaseResource implements IResource {
      *
      * @return Returns a reference to this object, to allow for simple chaining.
 	 */
-	public Test addInstantCorr( Date theDate) {
+	public Test addInstantCorr( Date theDate,  TemporalPrecisionEnum thePrecision) {
 		if (myInstantCorr == null) {
 			myInstantCorr = new java.util.ArrayList<InstantDt>();
 		}
-		myInstantCorr.add(new InstantDt(theDate));
+		myInstantCorr.add(new InstantDt(theDate, thePrecision));
 		return this; 
 	}
 

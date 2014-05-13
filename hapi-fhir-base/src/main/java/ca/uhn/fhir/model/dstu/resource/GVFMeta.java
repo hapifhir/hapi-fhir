@@ -94,7 +94,7 @@ public class GVFMeta extends BaseResource implements IResource {
 	 * Path: <b>GVFMeta.subject.patient</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="patient", path="GVFMeta.subject.patient", description="Patient being described in the file")
+	@SearchParamDefinition(name="patient", path="GVFMeta.subject.patient", description="Patient being described in the file", type="reference")
 	public static final String SP_PATIENT = "patient";
 
 	/**
@@ -121,7 +121,7 @@ public class GVFMeta extends BaseResource implements IResource {
 	 * Path: <b>GVFMeta.sourceFile</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="file", path="GVFMeta.sourceFile", description="URL to source file of the resource")
+	@SearchParamDefinition(name="file", path="GVFMeta.sourceFile", description="URL to source file of the resource", type="string")
 	public static final String SP_FILE = "file";
 
 	/**

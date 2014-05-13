@@ -111,7 +111,7 @@ public class Profile extends BaseResource implements IResource {
 	 * Path: <b>Profile.identifier</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="identifier", path="Profile.identifier", description="The identifier of the profile")
+	@SearchParamDefinition(name="identifier", path="Profile.identifier", description="The identifier of the profile", type="token")
 	public static final String SP_IDENTIFIER = "identifier";
 
 	/**
@@ -132,7 +132,7 @@ public class Profile extends BaseResource implements IResource {
 	 * Path: <b>Profile.version</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="version", path="Profile.version", description="The version identifier of the profile")
+	@SearchParamDefinition(name="version", path="Profile.version", description="The version identifier of the profile", type="token")
 	public static final String SP_VERSION = "version";
 
 	/**
@@ -153,7 +153,7 @@ public class Profile extends BaseResource implements IResource {
 	 * Path: <b>Profile.name</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="name", path="Profile.name", description="Name of the profile")
+	@SearchParamDefinition(name="name", path="Profile.name", description="Name of the profile", type="string")
 	public static final String SP_NAME = "name";
 
 	/**
@@ -174,7 +174,7 @@ public class Profile extends BaseResource implements IResource {
 	 * Path: <b>Profile.publisher</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="publisher", path="Profile.publisher", description="Name of the publisher of the profile")
+	@SearchParamDefinition(name="publisher", path="Profile.publisher", description="Name of the publisher of the profile", type="string")
 	public static final String SP_PUBLISHER = "publisher";
 
 	/**
@@ -195,7 +195,7 @@ public class Profile extends BaseResource implements IResource {
 	 * Path: <b>Profile.description</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="description", path="Profile.description", description="Text search in the description of the profile")
+	@SearchParamDefinition(name="description", path="Profile.description", description="Text search in the description of the profile", type="string")
 	public static final String SP_DESCRIPTION = "description";
 
 	/**
@@ -216,7 +216,7 @@ public class Profile extends BaseResource implements IResource {
 	 * Path: <b>Profile.status</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="status", path="Profile.status", description="The current status of the profile")
+	@SearchParamDefinition(name="status", path="Profile.status", description="The current status of the profile", type="token")
 	public static final String SP_STATUS = "status";
 
 	/**
@@ -237,7 +237,7 @@ public class Profile extends BaseResource implements IResource {
 	 * Path: <b>Profile.date</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="date", path="Profile.date", description="The profile publication date")
+	@SearchParamDefinition(name="date", path="Profile.date", description="The profile publication date", type="date")
 	public static final String SP_DATE = "date";
 
 	/**
@@ -258,7 +258,7 @@ public class Profile extends BaseResource implements IResource {
 	 * Path: <b>Profile.code</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="code", path="Profile.code", description="A code for the profile in the format uri::code (server may choose to do subsumption)")
+	@SearchParamDefinition(name="code", path="Profile.code", description="A code for the profile in the format uri::code (server may choose to do subsumption)", type="token")
 	public static final String SP_CODE = "code";
 
 	/**
@@ -279,7 +279,7 @@ public class Profile extends BaseResource implements IResource {
 	 * Path: <b>Profile.extensionDefn.code</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="extension", path="Profile.extensionDefn.code", description="An extension code (use or definition)")
+	@SearchParamDefinition(name="extension", path="Profile.extensionDefn.code", description="An extension code (use or definition)", type="token")
 	public static final String SP_EXTENSION = "extension";
 
 	/**
@@ -300,7 +300,7 @@ public class Profile extends BaseResource implements IResource {
 	 * Path: <b>Profile.structure.element.definition.binding.reference[x]</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="valueset", path="Profile.structure.element.definition.binding.reference[x]", description="A vocabulary binding code")
+	@SearchParamDefinition(name="valueset", path="Profile.structure.element.definition.binding.reference[x]", description="A vocabulary binding code", type="reference")
 	public static final String SP_VALUESET = "valueset";
 
 	/**
@@ -327,7 +327,7 @@ public class Profile extends BaseResource implements IResource {
 	 * Path: <b>Profile.structure.type</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="type", path="Profile.structure.type", description="Type of resource that is constrained in the profile")
+	@SearchParamDefinition(name="type", path="Profile.structure.type", description="Type of resource that is constrained in the profile", type="token")
 	public static final String SP_TYPE = "type";
 
 	/**

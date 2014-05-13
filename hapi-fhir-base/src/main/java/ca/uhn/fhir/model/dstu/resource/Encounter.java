@@ -103,7 +103,7 @@ public class Encounter extends BaseResource implements IResource {
 	 * Path: <b>Encounter.identifier</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="identifier", path="Encounter.identifier", description="")
+	@SearchParamDefinition(name="identifier", path="Encounter.identifier", description="", type="token")
 	public static final String SP_IDENTIFIER = "identifier";
 
 	/**
@@ -124,7 +124,7 @@ public class Encounter extends BaseResource implements IResource {
 	 * Path: <b>Encounter.status</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="status", path="Encounter.status", description="")
+	@SearchParamDefinition(name="status", path="Encounter.status", description="", type="token")
 	public static final String SP_STATUS = "status";
 
 	/**
@@ -145,7 +145,7 @@ public class Encounter extends BaseResource implements IResource {
 	 * Path: <b>Encounter.period</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="date", path="Encounter.period", description="A date within the period the Encounter lasted")
+	@SearchParamDefinition(name="date", path="Encounter.period", description="A date within the period the Encounter lasted", type="date")
 	public static final String SP_DATE = "date";
 
 	/**
@@ -166,7 +166,7 @@ public class Encounter extends BaseResource implements IResource {
 	 * Path: <b>Encounter.subject</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="subject", path="Encounter.subject", description="")
+	@SearchParamDefinition(name="subject", path="Encounter.subject", description="", type="reference")
 	public static final String SP_SUBJECT = "subject";
 
 	/**
@@ -193,7 +193,7 @@ public class Encounter extends BaseResource implements IResource {
 	 * Path: <b>Encounter.fulfills</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="!fulfills", path="Encounter.fulfills", description="")
+	@SearchParamDefinition(name="!fulfills", path="Encounter.fulfills", description="", type="reference")
 	public static final String SP_FULFILLS = "!fulfills";
 
 	/**
@@ -220,7 +220,7 @@ public class Encounter extends BaseResource implements IResource {
 	 * Path: <b>Encounter.length</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="length", path="Encounter.length", description="Length of encounter in days")
+	@SearchParamDefinition(name="length", path="Encounter.length", description="Length of encounter in days", type="number")
 	public static final String SP_LENGTH = "length";
 
 	/**
@@ -241,7 +241,7 @@ public class Encounter extends BaseResource implements IResource {
 	 * Path: <b>Encounter.indication</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="indication", path="Encounter.indication", description="")
+	@SearchParamDefinition(name="indication", path="Encounter.indication", description="", type="reference")
 	public static final String SP_INDICATION = "indication";
 
 	/**
@@ -268,7 +268,7 @@ public class Encounter extends BaseResource implements IResource {
 	 * Path: <b>Encounter.location.location</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="location", path="Encounter.location.location", description="")
+	@SearchParamDefinition(name="location", path="Encounter.location.location", description="", type="reference")
 	public static final String SP_LOCATION = "location";
 
 	/**
@@ -295,7 +295,7 @@ public class Encounter extends BaseResource implements IResource {
 	 * Path: <b>Encounter.location.period</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="location-period", path="Encounter.location.period", description="")
+	@SearchParamDefinition(name="location-period", path="Encounter.location.period", description="", type="date")
 	public static final String SP_LOCATION_PERIOD = "location-period";
 
 	/**

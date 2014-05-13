@@ -98,7 +98,7 @@ public class Provenance extends BaseResource implements IResource {
 	 * Path: <b>Provenance.target</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="target", path="Provenance.target", description="")
+	@SearchParamDefinition(name="target", path="Provenance.target", description="", type="reference")
 	public static final String SP_TARGET = "target";
 
 	/**
@@ -125,7 +125,7 @@ public class Provenance extends BaseResource implements IResource {
 	 * Path: <b>Provenance.period.start</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="start", path="Provenance.period.start", description="")
+	@SearchParamDefinition(name="start", path="Provenance.period.start", description="", type="date")
 	public static final String SP_START = "start";
 
 	/**
@@ -146,7 +146,7 @@ public class Provenance extends BaseResource implements IResource {
 	 * Path: <b>Provenance.period.end</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="end", path="Provenance.period.end", description="")
+	@SearchParamDefinition(name="end", path="Provenance.period.end", description="", type="date")
 	public static final String SP_END = "end";
 
 	/**
@@ -167,7 +167,7 @@ public class Provenance extends BaseResource implements IResource {
 	 * Path: <b>Provenance.location</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="location", path="Provenance.location", description="")
+	@SearchParamDefinition(name="location", path="Provenance.location", description="", type="reference")
 	public static final String SP_LOCATION = "location";
 
 	/**
@@ -194,7 +194,7 @@ public class Provenance extends BaseResource implements IResource {
 	 * Path: <b>Provenance.agent.reference</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="party", path="Provenance.agent.reference", description="")
+	@SearchParamDefinition(name="party", path="Provenance.agent.reference", description="", type="token")
 	public static final String SP_PARTY = "party";
 
 	/**
@@ -215,7 +215,7 @@ public class Provenance extends BaseResource implements IResource {
 	 * Path: <b>Provenance.agent.type</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="partytype", path="Provenance.agent.type", description="")
+	@SearchParamDefinition(name="partytype", path="Provenance.agent.type", description="", type="token")
 	public static final String SP_PARTYTYPE = "partytype";
 
 	/**
@@ -418,8 +418,8 @@ public class Provenance extends BaseResource implements IResource {
      * The instant of time at which the activity was recorded
      * </p> 
 	 */
-	public Provenance setRecorded( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myRecorded = new InstantDt(theDate, thePrecision); 
+	public Provenance setRecordedWithMillisPrecision( Date theDate) {
+		myRecorded = new InstantDt(theDate); 
 		return this; 
 	}
 
@@ -431,8 +431,8 @@ public class Provenance extends BaseResource implements IResource {
      * The instant of time at which the activity was recorded
      * </p> 
 	 */
-	public Provenance setRecordedWithMillisPrecision( Date theDate) {
-		myRecorded = new InstantDt(theDate); 
+	public Provenance setRecorded( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myRecorded = new InstantDt(theDate, thePrecision); 
 		return this; 
 	}
 

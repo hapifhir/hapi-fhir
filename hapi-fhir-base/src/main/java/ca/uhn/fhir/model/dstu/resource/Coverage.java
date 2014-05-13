@@ -96,7 +96,7 @@ public class Coverage extends BaseResource implements IResource {
 	 * Path: <b>Coverage.issuer</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="issuer", path="Coverage.issuer", description="The identity of the insurer")
+	@SearchParamDefinition(name="issuer", path="Coverage.issuer", description="The identity of the insurer", type="reference")
 	public static final String SP_ISSUER = "issuer";
 
 	/**
@@ -123,7 +123,7 @@ public class Coverage extends BaseResource implements IResource {
 	 * Path: <b>Coverage.identifier</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="identifier", path="Coverage.identifier", description="The primary identifier of the insured")
+	@SearchParamDefinition(name="identifier", path="Coverage.identifier", description="The primary identifier of the insured", type="token")
 	public static final String SP_IDENTIFIER = "identifier";
 
 	/**
@@ -144,7 +144,7 @@ public class Coverage extends BaseResource implements IResource {
 	 * Path: <b>Coverage.type</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="type", path="Coverage.type", description="The kind of coverage")
+	@SearchParamDefinition(name="type", path="Coverage.type", description="The kind of coverage", type="token")
 	public static final String SP_TYPE = "type";
 
 	/**
@@ -165,7 +165,7 @@ public class Coverage extends BaseResource implements IResource {
 	 * Path: <b>Coverage.plan</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="plan", path="Coverage.plan", description="A plan or policy identifier")
+	@SearchParamDefinition(name="plan", path="Coverage.plan", description="A plan or policy identifier", type="token")
 	public static final String SP_PLAN = "plan";
 
 	/**
@@ -186,7 +186,7 @@ public class Coverage extends BaseResource implements IResource {
 	 * Path: <b>Coverage.subplan</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="subplan", path="Coverage.subplan", description="Sub-plan identifier")
+	@SearchParamDefinition(name="subplan", path="Coverage.subplan", description="Sub-plan identifier", type="token")
 	public static final String SP_SUBPLAN = "subplan";
 
 	/**
@@ -207,7 +207,7 @@ public class Coverage extends BaseResource implements IResource {
 	 * Path: <b>Coverage.group</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="group", path="Coverage.group", description="Group identifier")
+	@SearchParamDefinition(name="group", path="Coverage.group", description="Group identifier", type="token")
 	public static final String SP_GROUP = "group";
 
 	/**
@@ -228,7 +228,7 @@ public class Coverage extends BaseResource implements IResource {
 	 * Path: <b>Coverage.dependent</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="dependent", path="Coverage.dependent", description="Dependent number")
+	@SearchParamDefinition(name="dependent", path="Coverage.dependent", description="Dependent number", type="token")
 	public static final String SP_DEPENDENT = "dependent";
 
 	/**
@@ -249,7 +249,7 @@ public class Coverage extends BaseResource implements IResource {
 	 * Path: <b>Coverage.sequence</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="sequence", path="Coverage.sequence", description="Sequence number")
+	@SearchParamDefinition(name="sequence", path="Coverage.sequence", description="Sequence number", type="token")
 	public static final String SP_SEQUENCE = "sequence";
 
 	/**
@@ -270,7 +270,7 @@ public class Coverage extends BaseResource implements IResource {
 	 * Path: <b>Coverage.subscriber.name</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="name", path="Coverage.subscriber.name", description="The name of the subscriber")
+	@SearchParamDefinition(name="name", path="Coverage.subscriber.name", description="The name of the subscriber", type="token")
 	public static final String SP_NAME = "name";
 
 	/**

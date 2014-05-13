@@ -95,7 +95,7 @@ public class OrderResponse extends BaseResource implements IResource {
 	 * Path: <b>OrderResponse.request</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="request", path="OrderResponse.request", description="")
+	@SearchParamDefinition(name="request", path="OrderResponse.request", description="", type="reference")
 	public static final String SP_REQUEST = "request";
 
 	/**
@@ -122,7 +122,7 @@ public class OrderResponse extends BaseResource implements IResource {
 	 * Path: <b>OrderResponse.date</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="date", path="OrderResponse.date", description="")
+	@SearchParamDefinition(name="date", path="OrderResponse.date", description="", type="date")
 	public static final String SP_DATE = "date";
 
 	/**
@@ -143,7 +143,7 @@ public class OrderResponse extends BaseResource implements IResource {
 	 * Path: <b>OrderResponse.who</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="who", path="OrderResponse.who", description="")
+	@SearchParamDefinition(name="who", path="OrderResponse.who", description="", type="reference")
 	public static final String SP_WHO = "who";
 
 	/**
@@ -170,7 +170,7 @@ public class OrderResponse extends BaseResource implements IResource {
 	 * Path: <b>OrderResponse.code</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="code", path="OrderResponse.code", description="")
+	@SearchParamDefinition(name="code", path="OrderResponse.code", description="", type="token")
 	public static final String SP_CODE = "code";
 
 	/**
@@ -191,7 +191,7 @@ public class OrderResponse extends BaseResource implements IResource {
 	 * Path: <b>OrderResponse.fulfillment</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="fulfillment", path="OrderResponse.fulfillment", description="")
+	@SearchParamDefinition(name="fulfillment", path="OrderResponse.fulfillment", description="", type="reference")
 	public static final String SP_FULFILLMENT = "fulfillment";
 
 	/**

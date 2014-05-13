@@ -42,6 +42,7 @@ import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.dstu.composite.CodingDt;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
+import ca.uhn.fhir.model.dstu.composite.QuantityDt;
 import ca.uhn.fhir.model.dstu.resource.Conformance;
 import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
 import ca.uhn.fhir.model.dstu.resource.Patient;
@@ -708,6 +709,25 @@ public class ClientTest {
 
 	}
 
+	@Test
+	public void testSearchByQuantity() throws Exception {
+
+		String msg = getPatientFeedWithOneResult();
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
+		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
+
+		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
+		Patient response = client.findPatientQuantity(new QuantityDt(QuantityCompararatorEnum.GREATERTHAN,123L,"foo","bar"));
+
+		assertEquals("http://foo/Patient?quantityParam=%3E123%7Cfoo%7Cbar", capt.getValue().getURI().toString());
+		assertEquals("PRP1660", response.getIdentifier().get(0).getValue().getValue());
+
+	}
+	
 	@Test
 	public void testSearchComposite() throws Exception {
 

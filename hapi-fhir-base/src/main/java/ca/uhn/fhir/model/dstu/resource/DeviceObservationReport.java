@@ -92,7 +92,7 @@ public class DeviceObservationReport extends BaseResource implements IResource {
 	 * Path: <b>DeviceObservationReport.source</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="source", path="DeviceObservationReport.source", description="")
+	@SearchParamDefinition(name="source", path="DeviceObservationReport.source", description="", type="reference")
 	public static final String SP_SOURCE = "source";
 
 	/**
@@ -119,7 +119,7 @@ public class DeviceObservationReport extends BaseResource implements IResource {
 	 * Path: <b>DeviceObservationReport.virtualDevice.code</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="code", path="DeviceObservationReport.virtualDevice.code", description="The compatment code")
+	@SearchParamDefinition(name="code", path="DeviceObservationReport.virtualDevice.code", description="The compatment code", type="token")
 	public static final String SP_CODE = "code";
 
 	/**
@@ -140,7 +140,7 @@ public class DeviceObservationReport extends BaseResource implements IResource {
 	 * Path: <b>DeviceObservationReport.virtualDevice.channel.code</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="channel", path="DeviceObservationReport.virtualDevice.channel.code", description="The channel code")
+	@SearchParamDefinition(name="channel", path="DeviceObservationReport.virtualDevice.channel.code", description="The channel code", type="token")
 	public static final String SP_CHANNEL = "channel";
 
 	/**
@@ -161,7 +161,7 @@ public class DeviceObservationReport extends BaseResource implements IResource {
 	 * Path: <b>DeviceObservationReport.virtualDevice.channel.metric.observation</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="observation", path="DeviceObservationReport.virtualDevice.channel.metric.observation", description="")
+	@SearchParamDefinition(name="observation", path="DeviceObservationReport.virtualDevice.channel.metric.observation", description="", type="reference")
 	public static final String SP_OBSERVATION = "observation";
 
 	/**
@@ -188,7 +188,7 @@ public class DeviceObservationReport extends BaseResource implements IResource {
 	 * Path: <b>DeviceObservationReport.subject</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="subject", path="DeviceObservationReport.subject", description="")
+	@SearchParamDefinition(name="subject", path="DeviceObservationReport.subject", description="", type="reference")
 	public static final String SP_SUBJECT = "subject";
 
 	/**
@@ -294,8 +294,8 @@ public class DeviceObservationReport extends BaseResource implements IResource {
      * The point in time that the values are reported
      * </p> 
 	 */
-	public DeviceObservationReport setInstant( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myInstant = new InstantDt(theDate, thePrecision); 
+	public DeviceObservationReport setInstantWithMillisPrecision( Date theDate) {
+		myInstant = new InstantDt(theDate); 
 		return this; 
 	}
 
@@ -307,8 +307,8 @@ public class DeviceObservationReport extends BaseResource implements IResource {
      * The point in time that the values are reported
      * </p> 
 	 */
-	public DeviceObservationReport setInstantWithMillisPrecision( Date theDate) {
-		myInstant = new InstantDt(theDate); 
+	public DeviceObservationReport setInstant( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myInstant = new InstantDt(theDate, thePrecision); 
 		return this; 
 	}
 

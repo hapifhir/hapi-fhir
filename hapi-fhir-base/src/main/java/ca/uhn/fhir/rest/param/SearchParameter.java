@@ -28,6 +28,7 @@ import ca.uhn.fhir.model.api.IQueryParameterAnd;
 import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
+import ca.uhn.fhir.model.dstu.composite.QuantityDt;
 import ca.uhn.fhir.model.dstu.valueset.SearchParamTypeEnum;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -135,6 +136,8 @@ public class SearchParameter extends BaseQueryParameter {
 			myParamType = SearchParamTypeEnum.TOKEN;
 		} else if (IdentifierDt.class.isAssignableFrom(type)) {
 			myParamType = SearchParamTypeEnum.TOKEN;
+		} else if (QuantityDt.class.isAssignableFrom(type)) {
+			myParamType = SearchParamTypeEnum.QUANTITY;
 		} else {
 			throw new ConfigurationException("Unknown search parameter type: " + type);
 		}

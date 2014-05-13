@@ -99,7 +99,7 @@ public class ImmunizationRecommendation extends BaseResource implements IResourc
 	 * Path: <b>ImmunizationRecommendation.subject</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="subject", path="ImmunizationRecommendation.subject", description="")
+	@SearchParamDefinition(name="subject", path="ImmunizationRecommendation.subject", description="", type="reference")
 	public static final String SP_SUBJECT = "subject";
 
 	/**
@@ -126,7 +126,7 @@ public class ImmunizationRecommendation extends BaseResource implements IResourc
 	 * Path: <b>ImmunizationRecommendation.recommendation.vaccineType</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="vaccine-type", path="ImmunizationRecommendation.recommendation.vaccineType", description="")
+	@SearchParamDefinition(name="vaccine-type", path="ImmunizationRecommendation.recommendation.vaccineType", description="", type="token")
 	public static final String SP_VACCINE_TYPE = "vaccine-type";
 
 	/**
@@ -147,7 +147,7 @@ public class ImmunizationRecommendation extends BaseResource implements IResourc
 	 * Path: <b>ImmunizationRecommendation.identifier</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="identifier", path="ImmunizationRecommendation.identifier", description="")
+	@SearchParamDefinition(name="identifier", path="ImmunizationRecommendation.identifier", description="", type="token")
 	public static final String SP_IDENTIFIER = "identifier";
 
 	/**
@@ -168,7 +168,7 @@ public class ImmunizationRecommendation extends BaseResource implements IResourc
 	 * Path: <b>ImmunizationRecommendation.recommendation.date</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="date", path="ImmunizationRecommendation.recommendation.date", description="")
+	@SearchParamDefinition(name="date", path="ImmunizationRecommendation.recommendation.date", description="", type="date")
 	public static final String SP_DATE = "date";
 
 	/**
@@ -189,7 +189,7 @@ public class ImmunizationRecommendation extends BaseResource implements IResourc
 	 * Path: <b>ImmunizationRecommendation.recommendation.doseNumber</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="dose-number", path="ImmunizationRecommendation.recommendation.doseNumber", description="")
+	@SearchParamDefinition(name="dose-number", path="ImmunizationRecommendation.recommendation.doseNumber", description="", type="number")
 	public static final String SP_DOSE_NUMBER = "dose-number";
 
 	/**
@@ -210,7 +210,7 @@ public class ImmunizationRecommendation extends BaseResource implements IResourc
 	 * Path: <b>ImmunizationRecommendation.recommendation.forecastStatus</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="status", path="ImmunizationRecommendation.recommendation.forecastStatus", description="")
+	@SearchParamDefinition(name="status", path="ImmunizationRecommendation.recommendation.forecastStatus", description="", type="token")
 	public static final String SP_STATUS = "status";
 
 	/**
@@ -231,7 +231,7 @@ public class ImmunizationRecommendation extends BaseResource implements IResourc
 	 * Path: <b>ImmunizationRecommendation.recommendation.protocol.doseSequence</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="dose-sequence", path="ImmunizationRecommendation.recommendation.protocol.doseSequence", description="")
+	@SearchParamDefinition(name="dose-sequence", path="ImmunizationRecommendation.recommendation.protocol.doseSequence", description="", type="token")
 	public static final String SP_DOSE_SEQUENCE = "dose-sequence";
 
 	/**
@@ -252,7 +252,7 @@ public class ImmunizationRecommendation extends BaseResource implements IResourc
 	 * Path: <b>ImmunizationRecommendation.recommendation.supportingImmunization</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="support", path="ImmunizationRecommendation.recommendation.supportingImmunization", description="")
+	@SearchParamDefinition(name="support", path="ImmunizationRecommendation.recommendation.supportingImmunization", description="", type="reference")
 	public static final String SP_SUPPORT = "support";
 
 	/**
@@ -279,7 +279,7 @@ public class ImmunizationRecommendation extends BaseResource implements IResourc
 	 * Path: <b>ImmunizationRecommendation.recommendation.supportingPatientInformation</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="information", path="ImmunizationRecommendation.recommendation.supportingPatientInformation", description="")
+	@SearchParamDefinition(name="information", path="ImmunizationRecommendation.recommendation.supportingPatientInformation", description="", type="reference")
 	public static final String SP_INFORMATION = "information";
 
 	/**

@@ -107,7 +107,7 @@ public class Questionnaire extends BaseResource implements IResource {
 	 * Path: <b>Questionnaire.status</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="status", path="Questionnaire.status", description="The status of the questionnaire")
+	@SearchParamDefinition(name="status", path="Questionnaire.status", description="The status of the questionnaire", type="token")
 	public static final String SP_STATUS = "status";
 
 	/**
@@ -128,7 +128,7 @@ public class Questionnaire extends BaseResource implements IResource {
 	 * Path: <b>Questionnaire.authored</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="authored", path="Questionnaire.authored", description="When the questionnaire was authored")
+	@SearchParamDefinition(name="authored", path="Questionnaire.authored", description="When the questionnaire was authored", type="date")
 	public static final String SP_AUTHORED = "authored";
 
 	/**
@@ -149,7 +149,7 @@ public class Questionnaire extends BaseResource implements IResource {
 	 * Path: <b>Questionnaire.subject</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="subject", path="Questionnaire.subject", description="The subject of the questionnaire")
+	@SearchParamDefinition(name="subject", path="Questionnaire.subject", description="The subject of the questionnaire", type="reference")
 	public static final String SP_SUBJECT = "subject";
 
 	/**
@@ -176,7 +176,7 @@ public class Questionnaire extends BaseResource implements IResource {
 	 * Path: <b>Questionnaire.author</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="author", path="Questionnaire.author", description="The author of the questionnaire")
+	@SearchParamDefinition(name="author", path="Questionnaire.author", description="The author of the questionnaire", type="reference")
 	public static final String SP_AUTHOR = "author";
 
 	/**
@@ -203,7 +203,7 @@ public class Questionnaire extends BaseResource implements IResource {
 	 * Path: <b>Questionnaire.identifier</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="identifier", path="Questionnaire.identifier", description="An identifier for the questionnaire")
+	@SearchParamDefinition(name="identifier", path="Questionnaire.identifier", description="An identifier for the questionnaire", type="token")
 	public static final String SP_IDENTIFIER = "identifier";
 
 	/**
@@ -224,7 +224,7 @@ public class Questionnaire extends BaseResource implements IResource {
 	 * Path: <b>Questionnaire.name</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="name", path="Questionnaire.name", description="Name of the questionnaire")
+	@SearchParamDefinition(name="name", path="Questionnaire.name", description="Name of the questionnaire", type="token")
 	public static final String SP_NAME = "name";
 
 	/**
@@ -245,7 +245,7 @@ public class Questionnaire extends BaseResource implements IResource {
 	 * Path: <b>Questionnaire.encounter</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="encounter", path="Questionnaire.encounter", description="Encounter during which questionnaire was authored")
+	@SearchParamDefinition(name="encounter", path="Questionnaire.encounter", description="Encounter during which questionnaire was authored", type="reference")
 	public static final String SP_ENCOUNTER = "encounter";
 
 	/**

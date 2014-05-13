@@ -99,7 +99,7 @@ public class ValueSet extends BaseResource implements IResource {
 	 * Path: <b>ValueSet.identifier</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="identifier", path="ValueSet.identifier", description="The identifier of the value set")
+	@SearchParamDefinition(name="identifier", path="ValueSet.identifier", description="The identifier of the value set", type="token")
 	public static final String SP_IDENTIFIER = "identifier";
 
 	/**
@@ -120,7 +120,7 @@ public class ValueSet extends BaseResource implements IResource {
 	 * Path: <b>ValueSet.version</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="version", path="ValueSet.version", description="The version identifier of the value set")
+	@SearchParamDefinition(name="version", path="ValueSet.version", description="The version identifier of the value set", type="token")
 	public static final String SP_VERSION = "version";
 
 	/**
@@ -141,7 +141,7 @@ public class ValueSet extends BaseResource implements IResource {
 	 * Path: <b>ValueSet.name</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="name", path="ValueSet.name", description="The name of the value set")
+	@SearchParamDefinition(name="name", path="ValueSet.name", description="The name of the value set", type="string")
 	public static final String SP_NAME = "name";
 
 	/**
@@ -162,7 +162,7 @@ public class ValueSet extends BaseResource implements IResource {
 	 * Path: <b>ValueSet.publisher</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="publisher", path="ValueSet.publisher", description="Name of the publisher of the value set")
+	@SearchParamDefinition(name="publisher", path="ValueSet.publisher", description="Name of the publisher of the value set", type="string")
 	public static final String SP_PUBLISHER = "publisher";
 
 	/**
@@ -183,7 +183,7 @@ public class ValueSet extends BaseResource implements IResource {
 	 * Path: <b>ValueSet.description</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="description", path="ValueSet.description", description="Text search in the description of the value set")
+	@SearchParamDefinition(name="description", path="ValueSet.description", description="Text search in the description of the value set", type="string")
 	public static final String SP_DESCRIPTION = "description";
 
 	/**
@@ -204,7 +204,7 @@ public class ValueSet extends BaseResource implements IResource {
 	 * Path: <b>ValueSet.status</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="status", path="ValueSet.status", description="The status of the value set")
+	@SearchParamDefinition(name="status", path="ValueSet.status", description="The status of the value set", type="token")
 	public static final String SP_STATUS = "status";
 
 	/**
@@ -225,7 +225,7 @@ public class ValueSet extends BaseResource implements IResource {
 	 * Path: <b>ValueSet.date</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="date", path="ValueSet.date", description="The value set publication date")
+	@SearchParamDefinition(name="date", path="ValueSet.date", description="The value set publication date", type="date")
 	public static final String SP_DATE = "date";
 
 	/**
@@ -246,7 +246,7 @@ public class ValueSet extends BaseResource implements IResource {
 	 * Path: <b>ValueSet.define.system</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="system", path="ValueSet.define.system", description="The system for any codes defined by this value set")
+	@SearchParamDefinition(name="system", path="ValueSet.define.system", description="The system for any codes defined by this value set", type="token")
 	public static final String SP_SYSTEM = "system";
 
 	/**
@@ -267,7 +267,7 @@ public class ValueSet extends BaseResource implements IResource {
 	 * Path: <b>ValueSet.define.concept.code</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="code", path="ValueSet.define.concept.code", description="A code defined in the value set")
+	@SearchParamDefinition(name="code", path="ValueSet.define.concept.code", description="A code defined in the value set", type="token")
 	public static final String SP_CODE = "code";
 
 	/**
@@ -288,7 +288,7 @@ public class ValueSet extends BaseResource implements IResource {
 	 * Path: <b>ValueSet.compose.include.system</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="reference", path="ValueSet.compose.include.system", description="A code system included or excluded in the value set or an imported value set")
+	@SearchParamDefinition(name="reference", path="ValueSet.compose.include.system", description="A code system included or excluded in the value set or an imported value set", type="token")
 	public static final String SP_REFERENCE = "reference";
 
 	/**
@@ -309,7 +309,7 @@ public class ValueSet extends BaseResource implements IResource {
 	 * Path: <b>ValueSet.compose.restricts</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="!restricts", path="ValueSet.compose.restricts", description="A value set listed in the restricts list")
+	@SearchParamDefinition(name="!restricts", path="ValueSet.compose.restricts", description="A value set listed in the restricts list", type="token")
 	public static final String SP_RESTRICTS = "!restricts";
 
 	/**
@@ -2423,8 +2423,8 @@ public class ValueSet extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public Expansion setTimestamp( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myTimestamp = new InstantDt(theDate, thePrecision); 
+	public Expansion setTimestampWithMillisPrecision( Date theDate) {
+		myTimestamp = new InstantDt(theDate); 
 		return this; 
 	}
 
@@ -2436,8 +2436,8 @@ public class ValueSet extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public Expansion setTimestampWithMillisPrecision( Date theDate) {
-		myTimestamp = new InstantDt(theDate); 
+	public Expansion setTimestamp( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myTimestamp = new InstantDt(theDate, thePrecision); 
 		return this; 
 	}
 

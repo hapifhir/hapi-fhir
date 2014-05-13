@@ -102,7 +102,7 @@ public class Specimen extends BaseResource implements IResource {
 	 * Path: <b>Specimen.subject</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="subject", path="Specimen.subject", description="The subject of the specimen")
+	@SearchParamDefinition(name="subject", path="Specimen.subject", description="The subject of the specimen", type="reference")
 	public static final String SP_SUBJECT = "subject";
 
 	/**

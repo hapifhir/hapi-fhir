@@ -35,4 +35,6 @@ public @interface SearchParamDefinition {
 	
 	String description() default "";
 	
+	String type() default "string";
+	
 }

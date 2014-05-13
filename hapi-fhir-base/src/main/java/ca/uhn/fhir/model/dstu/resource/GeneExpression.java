@@ -89,7 +89,7 @@ public class GeneExpression extends BaseResource implements IResource {
 	 * Path: <b>GeneExpression.subject</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="subject", path="GeneExpression.subject", description="subject being described by the resource")
+	@SearchParamDefinition(name="subject", path="GeneExpression.subject", description="subject being described by the resource", type="reference")
 	public static final String SP_SUBJECT = "subject";
 
 	/**
@@ -116,7 +116,7 @@ public class GeneExpression extends BaseResource implements IResource {
 	 * Path: <b>GeneExpression.gene.identifier</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="gene", path="GeneExpression.gene.identifier", description="Id of the gene")
+	@SearchParamDefinition(name="gene", path="GeneExpression.gene.identifier", description="Id of the gene", type="string")
 	public static final String SP_GENE = "gene";
 
 	/**
@@ -137,7 +137,7 @@ public class GeneExpression extends BaseResource implements IResource {
 	 * Path: <b>GeneExpression.gene.coordinate</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="coordinate", path="GeneExpression.gene.coordinate", description="Coordinate of the gene")
+	@SearchParamDefinition(name="coordinate", path="GeneExpression.gene.coordinate", description="Coordinate of the gene", type="string")
 	public static final String SP_COORDINATE = "coordinate";
 
 	/**

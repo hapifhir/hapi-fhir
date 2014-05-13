@@ -97,7 +97,7 @@ public class ListResource extends BaseResource implements IResource {
 	 * Path: <b>List.source</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="source", path="List.source", description="")
+	@SearchParamDefinition(name="source", path="List.source", description="", type="reference")
 	public static final String SP_SOURCE = "source";
 
 	/**
@@ -124,7 +124,7 @@ public class ListResource extends BaseResource implements IResource {
 	 * Path: <b>List.entry.item</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="item", path="List.entry.item", description="")
+	@SearchParamDefinition(name="item", path="List.entry.item", description="", type="reference")
 	public static final String SP_ITEM = "item";
 
 	/**
@@ -151,7 +151,7 @@ public class ListResource extends BaseResource implements IResource {
 	 * Path: <b>List.emptyReason</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="empty-reason", path="List.emptyReason", description="")
+	@SearchParamDefinition(name="empty-reason", path="List.emptyReason", description="", type="token")
 	public static final String SP_EMPTY_REASON = "empty-reason";
 
 	/**
@@ -172,7 +172,7 @@ public class ListResource extends BaseResource implements IResource {
 	 * Path: <b>List.date</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="date", path="List.date", description="")
+	@SearchParamDefinition(name="date", path="List.date", description="", type="date")
 	public static final String SP_DATE = "date";
 
 	/**
@@ -193,7 +193,7 @@ public class ListResource extends BaseResource implements IResource {
 	 * Path: <b>List.code</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="code", path="List.code", description="")
+	@SearchParamDefinition(name="code", path="List.code", description="", type="token")
 	public static final String SP_CODE = "code";
 
 	/**
@@ -214,7 +214,7 @@ public class ListResource extends BaseResource implements IResource {
 	 * Path: <b>List.subject</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="subject", path="List.subject", description="")
+	@SearchParamDefinition(name="subject", path="List.subject", description="", type="reference")
 	public static final String SP_SUBJECT = "subject";
 
 	/**
