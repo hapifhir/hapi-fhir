@@ -9,7 +9,7 @@ import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
 
 @MappedSuperclass
-public abstract class BaseResourceIndexedSearchParam<T> implements Serializable {
+public abstract class BaseResourceIndexedSearchParam implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -21,6 +21,9 @@ public abstract class BaseResourceIndexedSearchParam<T> implements Serializable 
 	@Column(name="SP_NAME", length=100)
 	private String myName;
 
+	@Column(name = "RES_TYPE",length=100,nullable=false)
+	private String myResourceType;
+
 	public String getName() {
 		return myName;
 	}
@@ -31,11 +34,21 @@ public abstract class BaseResourceIndexedSearchParam<T> implements Serializable 
 
 	public abstract BaseResourceTable<?> getResource();
 
-	public abstract void setResource(BaseResourceTable<?> theResource);
+	protected abstract void setResource(BaseResourceTable<?> theResource);
 
-	public abstract T getValue();
+	public void setResource(BaseResourceTable<?> theResource, String theResourceType) {
+		setResource(theResource);
+		setResourceType(theResourceType);
+	}
 
-	public abstract void setValue(T theValue);
+	public String getResourceType() {
+		return myResourceType;
+	}
 
+	public void setResourceType(String theResourceType) {
+		myResourceType = theResourceType;
+	}
+
+	
 	
 }

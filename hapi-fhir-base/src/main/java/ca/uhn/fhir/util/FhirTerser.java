@@ -41,6 +41,32 @@ public class FhirTerser {
 
 	private FhirContext myContext;
 
+	public BaseRuntimeChildDefinition getDefinition(Class<? extends IResource> theResourceType, String thePath) {
+		RuntimeResourceDefinition def = myContext.getResourceDefinition(theResourceType);
+
+		BaseRuntimeElementCompositeDefinition<?> currentDef = def;
+
+		List<String> parts = Arrays.asList(thePath.split("\\."));
+		List<String> subList = parts.subList(1, parts.size() );
+		if (subList.size()< 1) {
+			throw new ConfigurationException("Invalid path: " + thePath);
+		}
+		return getDefinition(currentDef, subList);
+
+	}
+	
+
+	private BaseRuntimeChildDefinition getDefinition(BaseRuntimeElementCompositeDefinition<?> theCurrentDef, List<String> theSubList) {
+		BaseRuntimeChildDefinition nextDef = theCurrentDef.getChildByNameOrThrowDataFormatException(theSubList.get(0));
+		
+		if (theSubList.size() == 1) {
+			return nextDef;
+		} else {
+			BaseRuntimeElementCompositeDefinition<?> cmp=(BaseRuntimeElementCompositeDefinition<?>) nextDef.getChildByName(theSubList.get(0));
+			return getDefinition(cmp, theSubList.subList(1, theSubList.size() ));
+		}
+	}
+
 	public List<Object> getValues(IResource theResource, String thePath) {
 		RuntimeResourceDefinition def = myContext.getResourceDefinition(theResource);
 
@@ -57,7 +83,8 @@ public class FhirTerser {
 	}
 
 	private List<Object> getValues(BaseRuntimeElementCompositeDefinition<?> theCurrentDef, Object theCurrentObj, List<String> theSubList) {
-		BaseRuntimeChildDefinition nextDef = theCurrentDef.getChildByNameOrThrowDataFormatException(theSubList.get(0));
+		String name = theSubList.get(0);
+		BaseRuntimeChildDefinition nextDef = theCurrentDef.getChildByNameOrThrowDataFormatException(name);
 		List<? extends IElement> values = nextDef.getAccessor().getValues(theCurrentObj);
 		List<Object> retVal = new ArrayList<Object>();
 

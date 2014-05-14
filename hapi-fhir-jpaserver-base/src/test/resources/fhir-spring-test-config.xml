@@ -17,6 +17,10 @@
 		<property name="tableType" value="ca.uhn.fhir.jpa.entity.PatientResourceTable"/>
 	</bean>
 
+	<bean id="myObservationDao" class="ca.uhn.fhir.jpa.dao.FhirResourceDao">
+		<property name="tableType" value="ca.uhn.fhir.jpa.entity.ObservationResourceTable"/>
+	</bean>
+
 	<bean id="myPersistenceDataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource" lazy-init="true">
 		<property name="url" value="jdbc:derby:memory:myUnitTestDB;create=true" />
 	</bean>

@@ -8,7 +8,7 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "IDX_SP_TOKEN")
-public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchParam<String> {
+public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchParam {
 
 	private static final long serialVersionUID = 1L;
 
@@ -47,7 +47,7 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 		return myValue;
 	}
 
-	public void setResource(BaseResourceTable<?> theResource) {
+	protected void setResource(BaseResourceTable<?> theResource) {
 		myResource = theResource;
 	}
 

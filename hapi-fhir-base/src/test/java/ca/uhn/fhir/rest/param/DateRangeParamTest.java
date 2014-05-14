@@ -18,18 +18,25 @@ public class DateRangeParamTest {
 
 	private static SimpleDateFormat ourFmt;
 
-	@BeforeClass
-	public static void beforeClass() {
-		ourFmt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSS");
-	}
-	
 	@Test
-	public void testYear() throws Exception {
-		assertEquals(parse("2011-01-01 00:00:00.0000"), create(">=2011", "<2012").getLowerBoundAsInstant());
-		assertEquals(parseM1("2012-01-01 00:00:00.0000"), create(">=2011", "<2012").getUpperBoundAsInstant());
+	public void testDay() throws Exception {
+		assertEquals(parse("2011-01-01 00:00:00.0000"), create(">=2011-01-01", "<2011-01-02").getLowerBoundAsInstant());
+		assertEquals(parseM1("2011-01-02 00:00:00.0000"), create(">=2011-01-01", "<2011-01-02").getUpperBoundAsInstant());
 		
-		assertEquals(parse("2012-01-01 00:00:00.0000"), create(">2011", "<=2012").getLowerBoundAsInstant());
-		assertEquals(parseM1("2014-01-01 00:00:00.0000"), create(">2011", "<=2013").getUpperBoundAsInstant());
+		assertEquals(parse("2011-01-02 00:00:00.0000"), create(">2011-01-01", "<=2011-01-02").getLowerBoundAsInstant());
+		assertEquals(parseM1("2011-01-03 00:00:00.0000"), create(">2011-01-01", "<=2011-01-02").getUpperBoundAsInstant());
+	}
+
+	@Test
+	public void testFromQualifiedDateParam() throws Exception {
+		assertEquals(parse("2011-01-01 00:00:00.0000"), create("2011-01-01").getLowerBoundAsInstant());
+		assertEquals(parseM1("2011-01-02 00:00:00.0000"), create("2011-01-01").getUpperBoundAsInstant());
+		
+		assertEquals(parse("2011-01-01 00:00:00.0000"), create(">=2011-01-01").getLowerBoundAsInstant());
+		assertEquals(null, create(">=2011-01-01").getUpperBoundAsInstant());
+
+		assertEquals(null, create("<=2011-01-01").getLowerBoundAsInstant());
+		assertEquals(parseM1("2011-01-02 00:00:00.0000"), create("<=2011-01-01").getUpperBoundAsInstant());
 	}
 
 	@Test
@@ -42,21 +49,25 @@ public class DateRangeParamTest {
 	}
 
 	@Test
-	public void testDay() throws Exception {
-		assertEquals(parse("2011-01-01 00:00:00.0000"), create(">=2011-01-01", "<2011-01-02").getLowerBoundAsInstant());
-		assertEquals(parseM1("2011-01-02 00:00:00.0000"), create(">=2011-01-01", "<2011-01-02").getUpperBoundAsInstant());
-		
-		assertEquals(parse("2011-01-02 00:00:00.0000"), create(">2011-01-01", "<=2011-01-02").getLowerBoundAsInstant());
-		assertEquals(parseM1("2011-01-03 00:00:00.0000"), create(">2011-01-01", "<=2011-01-02").getUpperBoundAsInstant());
-	}
-
-	@Test
 	public void testSecond() throws Exception {
 		assertEquals(parse("2011-01-01 00:00:00.0000"), create(">=2011-01-01T00:00:00", "<2011-01-01T01:00:00").getLowerBoundAsInstant());
 		assertEquals(parseM1("2011-01-01 02:00:00.0000"), create(">=2011-01-01T00:00:00", "<2011-01-01T02:00:00").getUpperBoundAsInstant());
 		
 		assertEquals(parse("2011-01-01 00:00:01.0000"), create(">2011-01-01T00:00:00", "<=2011-01-01T02:00:00").getLowerBoundAsInstant());
 		assertEquals(parseM1("2011-01-01 02:00:01.0000"), create(">2011-01-01T00:00:00", "<=2011-01-01T02:00:00").getUpperBoundAsInstant());
+	}
+
+	@Test
+	public void testYear() throws Exception {
+		assertEquals(parse("2011-01-01 00:00:00.0000"), create(">=2011", "<2012").getLowerBoundAsInstant());
+		assertEquals(parseM1("2012-01-01 00:00:00.0000"), create(">=2011", "<2012").getUpperBoundAsInstant());
+		
+		assertEquals(parse("2012-01-01 00:00:00.0000"), create(">2011", "<=2012").getLowerBoundAsInstant());
+		assertEquals(parseM1("2014-01-01 00:00:00.0000"), create(">2011", "<=2013").getUpperBoundAsInstant());
+	}
+
+	private DateRangeParam create(String theString) {
+		return new DateRangeParam(new QualifiedDateParam(theString));
 	}
 
 	private Date parse(String theString) throws ParseException {
@@ -69,6 +80,11 @@ public class DateRangeParamTest {
 
 	private Date parseP1(String theString) throws ParseException {
 		return new Date(ourFmt.parse(theString).getTime() + 1L);
+	}
+
+	@BeforeClass
+	public static void beforeClass() {
+		ourFmt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSS");
 	}
 
 	

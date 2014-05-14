@@ -21,16 +21,22 @@ import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
+import ca.uhn.fhir.model.dstu.composite.QuantityDt;
+import ca.uhn.fhir.model.dstu.resource.Observation;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
+import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
+import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.param.QualifiedDateParam;
 
 public class FhirResourceDaoTest {
 
 	private static ClassPathXmlApplicationContext ourCtx;
 	private static IFhirResourceDao<Patient> ourPatientDao;
+	private static IFhirResourceDao<Observation> ourObservationDao;
 	private static Date ourTestStarted;
 
 	@SuppressWarnings("unchecked")
@@ -39,6 +45,7 @@ public class FhirResourceDaoTest {
 		ourTestStarted = new Date();
 		ourCtx = new ClassPathXmlApplicationContext("fhir-spring-test-config.xml");
 		ourPatientDao = ourCtx.getBean("myPatientDao", IFhirResourceDao.class);
+		ourObservationDao = ourCtx.getBean("myObservationDao", IFhirResourceDao.class);
 	}
 
 	@AfterClass
@@ -63,6 +70,53 @@ public class FhirResourceDaoTest {
 		InstantDt updated = (InstantDt) retrieved.getResourceMetadata().get(ResourceMetadataKeyEnum.UPDATED);
 		assertTrue(published.before(now));
 		assertTrue(updated.before(now));
+	}
+	
+	@Test
+	public void testPersistSearchParamObservationString() {
+		Observation obs = new Observation();
+		obs.getName().addCoding().setSystem("foo").setCode("testPersistSearchParamQuantity");
+		obs.setValue(new StringDt("AAAABBBB"));
+		
+		ourObservationDao.create(obs);
+		
+		List<Observation> found = ourObservationDao.search("value-string", new StringDt("AAAABBBB"));
+		assertEquals(1,found.size());
+	
+		found = ourObservationDao.search("value-string", new StringDt("AAAABBBBCCC"));
+		assertEquals(0,found.size());
+		
+	}
+	
+	
+	@Test
+	public void testPersistSearchParamQuantity() {
+		Observation obs = new Observation();
+		obs.getName().addCoding().setSystem("foo").setCode("testPersistSearchParamQuantity");
+		obs.setValue(new QuantityDt(111));
+		
+		ourObservationDao.create(obs);
+		
+		List<Observation> found = ourObservationDao.search("value-quantity", new QuantityDt(111));
+		assertEquals(1,found.size());
+	
+		found = ourObservationDao.search("value-quantity", new QuantityDt(112));
+		assertEquals(0,found.size());
+		
+	}
+
+	@Test
+	public void testPersistSearchParamDate() {
+		Patient patient = new Patient();
+		patient.addIdentifier("urn:system", "001");
+		patient.setBirthDate(new DateTimeDt("2001-01-01"));
+		
+		ourPatientDao.create(patient);
+		
+		List<Patient> found = ourPatientDao.search("birthdate", new QualifiedDateParam(QuantityCompararatorEnum.GREATERTHAN, "2000-01-01"));
+		assertEquals(1,found.size());
+	
+		
 	}
 
 	@Test

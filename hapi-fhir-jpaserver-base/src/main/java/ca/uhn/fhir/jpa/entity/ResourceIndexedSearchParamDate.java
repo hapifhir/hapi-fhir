@@ -12,32 +12,53 @@ import javax.persistence.TemporalType;
 
 @Entity
 @Table(name = "IDX_SP_DATE")
-public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchParam<Date> {
+public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchParam {
 
 	private static final long serialVersionUID = 1L;
+
+	@Column(name = "SP_VALUE_HIGH", nullable = true)
+	@Temporal(TemporalType.TIMESTAMP)
+	public Date myValueHigh;
+
+	@Column(name = "SP_VALUE_LOW", nullable = true)
+	@Temporal(TemporalType.TIMESTAMP)
+	public Date myValueLow;
 
 	@ManyToOne(optional = false)
 	@JoinColumn(name = "RESOURCE_PID", nullable = false)
 	private BaseResourceTable<?> myResource;
 
-	@Column(name = "SP_VALUE", nullable = true)
-	@Temporal(TemporalType.TIMESTAMP)
-	public Date myValue;
+	@Column(name = "RESOURCE_PID", insertable = false, updatable = false)
+	private Long myResourcePid;
+
+	public ResourceIndexedSearchParamDate(String theName, Date theLow, Date theHigh) {
+		setName(theName);
+		setValueLow(theLow);
+		setValueHigh(theHigh);
+	}
 
 	public BaseResourceTable<?> getResource() {
 		return myResource;
 	}
 
-	public Date getValue() {
-		return myValue;
+	public Date getValueHigh() {
+		return myValueHigh;
 	}
 
-	public void setResource(BaseResourceTable<?> theResource) {
+	public Date getValueLow() {
+		return myValueLow;
+	}
+
+	public void setValueHigh(Date theValueHigh) {
+		myValueHigh = theValueHigh;
+	}
+
+	public void setValueLow(Date theValueLow) {
+		myValueLow = theValueLow;
+	}
+
+	protected void setResource(BaseResourceTable<?> theResource) {
 		myResource = theResource;
-	}
-
-	public void setValue(Date theValue) {
-		myValue = theValue;
 	}
 
 }

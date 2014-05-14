@@ -74,7 +74,11 @@ public abstract class BaseRuntimeElementCompositeDefinition<T extends IComposite
 		}
 
 		myNameToChild = new HashMap<String, BaseRuntimeChildDefinition>();
-		for (BaseRuntimeChildDefinition next : myChildren) {			
+		for (BaseRuntimeChildDefinition next : myChildren) {	
+			if (next instanceof RuntimeChildChoiceDefinition) {
+				String key = ((RuntimeChildChoiceDefinition) next).getElementName()+"[x]";
+				myNameToChild.put(key, next);
+			}
 			for (String nextName : next.getValidChildNames()) {
 				if (myNameToChild.containsKey(nextName)) {
 					throw new ConfigurationException("Duplicate child name: " + nextName);

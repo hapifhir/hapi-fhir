@@ -54,6 +54,15 @@ public class QualifiedDateParam extends DateTimeDt implements IQueryParameterTyp
 	}
 
 	/**
+	 * Constructor which takes a complete [qualifier]{date} string.
+	 * 
+	 * @param theString The string
+	 */
+	public QualifiedDateParam(String theString) {
+		setValueAsQueryToken(theString);
+	}
+
+	/**
 	 * Returns the comparator, or <code>null</code> if none has been set
 	 */
 	public QuantityCompararatorEnum getComparator() {
@@ -68,6 +77,17 @@ public class QualifiedDateParam extends DateTimeDt implements IQueryParameterTyp
 			return getValueAsString();
 		}
 		return "";
+	}
+
+	/**
+	 * Returns <code>true</code> if no date/time is specified. Note that this method
+	 * does not check the comparator, so a QualifiedDateParam with only a comparator
+	 * and no date/time is considered empty.
+	 */
+	@Override
+	public boolean isEmpty() {
+		// Just here to provide a javadoc
+		return super.isEmpty();
 	}
 
 	public void setComparator(QuantityCompararatorEnum theComparator) {
