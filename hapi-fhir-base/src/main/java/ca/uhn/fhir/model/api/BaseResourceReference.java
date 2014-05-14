@@ -30,6 +30,7 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.client.BaseClient;
@@ -52,14 +53,17 @@ public abstract class BaseResourceReference extends BaseElement {
 	/**
 	 * Constructor
 	 */
+	public BaseResourceReference(Class<? extends IResource> theResourceType, IdDt theResourceId) {
+		myResourceType = theResourceType;
+		myResourceId = theResourceId.getValue();
+	}
+
+	/**
+	 * Constructor
+	 */
 	public BaseResourceReference(Class<? extends IResource> theResourceType, String theResourceId) {
 		myResourceType = theResourceType;
 		myResourceId = theResourceId;
-	}
-
-	@Override
-	protected boolean isBaseEmpty() {
-		return super.isBaseEmpty() && myResource == null && myResourceType == null && StringUtils.isBlank(myResourceId);
 	}
 
 	public BaseResourceReference(IResource theResource) {
@@ -100,6 +104,11 @@ public abstract class BaseResourceReference extends BaseElement {
 
 	public String getResourceUrl() {
 		return getReference().getValue();
+	}
+
+	@Override
+	protected boolean isBaseEmpty() {
+		return super.isBaseEmpty() && myResource == null && myResourceType == null && StringUtils.isBlank(myResourceId);
 	}
 
 	/**

@@ -22,11 +22,13 @@ import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.composite.QuantityDt;
+import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.resource.Observation;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
 import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.api.MethodOutcome;
@@ -70,6 +72,29 @@ public class FhirResourceDaoTest {
 		InstantDt updated = (InstantDt) retrieved.getResourceMetadata().get(ResourceMetadataKeyEnum.UPDATED);
 		assertTrue(published.before(now));
 		assertTrue(updated.before(now));
+	}
+	
+	
+	@Test
+	public void testPersistResourceLink() {
+		Patient patient = new Patient();
+		patient.addIdentifier("urn:system", "testPersistResourceLink01");
+		IdDt patientId01 = ourPatientDao.create(patient).getId();
+
+		Patient patient02 = new Patient();
+		patient02.addIdentifier("urn:system", "testPersistResourceLink02");
+		IdDt patientId02 = ourPatientDao.create(patient02).getId();
+	
+		Observation obs01 = new Observation();
+		obs01.setApplies(new DateTimeDt(new Date()));
+		obs01.setSubject(new ResourceReferenceDt(Patient.class, patientId01));
+		IdDt obsId01 = ourObservationDao.create(obs01).getId();
+		
+		Observation obs02 = new Observation();
+		obs01.setApplies(new DateTimeDt(new Date()));
+		obs01.setSubject(new ResourceReferenceDt(Patient.class, patientId01));
+		IdDt obsId02 = ourObservationDao.create(obs01).getId();
+
 	}
 	
 	@Test

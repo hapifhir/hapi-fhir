@@ -166,6 +166,16 @@ public class ${className}
 	}
 
 	/**
+	 * Constructor which creates a normal resource reference
+	 * 
+	 * @param theResourceType The resource type
+	 * @param theResourceId The resource ID
+	 */
+	public ResourceReferenceDt(Class<? extends IResource> theResourceType, IdDt theResourceId) {
+		super(theResourceType, theResourceId);
+	}
+
+	/**
 	 * Constructor which creates a resource reference containing the actual
 	 * resource in question. 
 	 * <p>

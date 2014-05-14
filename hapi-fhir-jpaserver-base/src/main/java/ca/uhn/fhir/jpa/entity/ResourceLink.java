@@ -39,6 +39,17 @@ public class ResourceLink implements Serializable {
 	@Column(name = "TARGET_RESOURCE_PID", insertable = false, updatable = false)
 	private Long myTargetResourcePid;
 
+	public ResourceLink() {
+		//nothing
+	}
+	
+	public ResourceLink(String theSourcePath, BaseResourceTable<?> theSourceResource, BaseResourceTable<?> theTargetResource) {
+		super();
+		mySourcePath = theSourcePath;
+		mySourceResource = theSourceResource;
+		myTargetResource = theTargetResource;
+	}
+
 	public String getSourcePath() {
 		return mySourcePath;
 	}

@@ -62,7 +62,7 @@
      * </p> 
 	 */
 	public ${child.referenceType} get${child.methodName}() {  
-#if ( ${child.hasMultipleTypes} == false && ${child.singleChildInstantiable} == true )
+#if ( (${child.hasMultipleTypes} == false && ${child.singleChildInstantiable} == true) || (${child.resourceRef}) )
 		if (${child.variableName} == null) {
 #if ( ${child.boundCode} && ${child.repeatable} == false )
 			${child.variableName} = new ${child.referenceTypeForConstructor}(${child.bindingClass}.VALUESET_BINDER);

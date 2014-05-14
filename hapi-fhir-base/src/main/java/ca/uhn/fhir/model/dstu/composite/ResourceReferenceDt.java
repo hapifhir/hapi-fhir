@@ -45,6 +45,7 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 
 /**
@@ -79,6 +80,16 @@ public class ResourceReferenceDt
 	 * @param theResourceId The resource ID
 	 */
 	public ResourceReferenceDt(Class<? extends IResource> theResourceType, String theResourceId) {
+		super(theResourceType, theResourceId);
+	}
+	
+	/**
+	 * Constructor which creates a normal resource reference
+	 * 
+	 * @param theResourceType The resource type
+	 * @param theResourceId The resource ID
+	 */
+	public ResourceReferenceDt(Class<? extends IResource> theResourceType, IdDt theResourceId) {
 		super(theResourceType, theResourceId);
 	}
 

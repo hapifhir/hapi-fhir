@@ -192,7 +192,7 @@ public class TinderStructuresMojo extends AbstractMojo {
 //		 dtp.writeAll(dtOutputDir);
 //		
 		 ResourceGeneratorUsingSpreadsheet rp = new ResourceGeneratorUsingSpreadsheet();
-		 rp.setBaseResourceNames(Arrays.asList("patient", "diagnosticorder"));
+		 rp.setBaseResourceNames(Arrays.asList("observation"));
 		 rp.parse();
 //		 rp.bindValueSets(vsp);
 		

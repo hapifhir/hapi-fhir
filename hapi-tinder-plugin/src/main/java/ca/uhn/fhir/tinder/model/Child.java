@@ -34,6 +34,11 @@ public abstract class Child extends BaseElement {
 	}
 	
 
+	@Override
+	public String toString() {
+		return getClass().getSimpleName()+"[" + getName() + "]";
+	}
+
 	/**
 	 * Strips off "[x]"
 	 */

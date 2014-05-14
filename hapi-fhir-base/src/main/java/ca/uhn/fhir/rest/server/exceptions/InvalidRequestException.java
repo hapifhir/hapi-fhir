@@ -25,7 +25,7 @@ import ca.uhn.fhir.rest.server.Constants;
 /**
  * Represents an <b>HTTP 400 Bad Request</b> response.
  * This status indicates that the client's message was invalid (e.g. not a valid FHIR Resource
- * per the specifications), as opposed to the {@link InvalidRequestException} which indicates
+ * per the specifications), as opposed to the {@link UnprocessableEntityException} which indicates
  * that data does not pass business rule validation on the server.
  * 
  * <p>

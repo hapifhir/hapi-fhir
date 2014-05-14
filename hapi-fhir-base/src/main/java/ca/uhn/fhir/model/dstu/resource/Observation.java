@@ -1082,6 +1082,9 @@ public class Observation extends BaseResource implements IResource {
      * </p> 
 	 */
 	public java.util.List<ResourceReferenceDt> getPerformer() {  
+		if (myPerformer == null) {
+			myPerformer = new java.util.ArrayList<ResourceReferenceDt>();
+		}
 		return myPerformer;
 	}
 
