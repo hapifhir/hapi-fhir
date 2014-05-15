@@ -143,7 +143,7 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 			}
 			BaseQueryParameter temp = (BaseQueryParameter) getParameters().get(i);
 			methodParamsTemp.add(temp.getName());
-			if (temp.isRequired() && !theRequest.getParameters().containsKey(temp.getName())) {
+			if (temp.isRequired() && !theRequest.getParameters().containsKey(temp.getName())) {eee
 				ourLog.trace("Method {} doesn't match param '{}' is not present", getMethod().getName(), temp.getName());
 				return false;
 			}

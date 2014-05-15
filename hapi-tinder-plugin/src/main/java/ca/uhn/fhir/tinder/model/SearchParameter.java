@@ -13,6 +13,10 @@ public class SearchParameter {
 	private String myPath;
 	private String myType;
 
+	public SearchParameter() {
+		
+	}
+	
 	public String getDescription() {
 		return StringUtils.defaultString(myDescription);
 	}

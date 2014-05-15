@@ -175,27 +175,6 @@ public class Organization extends BaseResource implements IResource {
 	public static final TokenParam IDENTIFIER = new TokenParam(SP_IDENTIFIER);
 
 	/**
-	 * Search parameter constant for <b>!accreditation</b>
-	 * <p>
-	 * Description: <b>Any accreditation code</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Organization.accreditation.code</b><br/>
-	 * </p>
-	 */
-	@SearchParamDefinition(name="!accreditation", path="Organization.accreditation.code", description="Any accreditation code", type="token")
-	public static final String SP_ACCREDITATION = "!accreditation";
-
-	/**
-	 * <b>Fluent Client</b> search parameter constant for <b>!accreditation</b>
-	 * <p>
-	 * Description: <b>Any accreditation code</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Organization.accreditation.code</b><br/>
-	 * </p>
-	 */
-	public static final TokenParam ACCREDITATION = new TokenParam(SP_ACCREDITATION);
-
-	/**
 	 * Search parameter constant for <b>partof</b>
 	 * <p>
 	 * Description: <b>Search all organizations that are part of the given organization</b><br/>

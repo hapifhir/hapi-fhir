@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.dao;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import ca.uhn.fhir.jpa.entity.BaseResourceTable;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -28,12 +29,18 @@ public interface IFhirResourceDao<T extends IResource> {
 
 	List<T> search(Map<String, IQueryParameterType> theParams);
 
-	List<T> search(String theSpName, IQueryParameterType theValue);
+	List<T> search(String theParameterName, IQueryParameterType theValue);
 
 	List<T> searchWithAndOr(Map<String, List<List<IQueryParameterType>>> theMap);
 
 	Class<T> getResourceType();
 
 	Class<? extends BaseResourceTable<T>> getTableType();
+
+	Set<Long> searchForIds(String theParameterName, IQueryParameterType theValue);
+
+	Set<Long> searchForIds(Map<String, IQueryParameterType> theParams);
+
+	Set<Long> searchForIdsWithAndOr(Map<String, List<List<IQueryParameterType>>> theMap);
 	
 }

@@ -165,7 +165,7 @@ public abstract class BaseStructureSpreadsheetParser extends BaseStructureParser
 					sp.setType(cellValue(nextRow, colType));
 					sp.setPath(cellValue(nextRow, colPath));
 
-					if (StringUtils.isNotBlank(sp.getName())) {
+					if (StringUtils.isNotBlank(sp.getName()) && !sp.getName().startsWith("!")) {
 						theResource.getSearchParameters().add(sp);
 					}
 				}

@@ -16,9 +16,20 @@
 	<bean id="myPatientDao" class="ca.uhn.fhir.jpa.dao.FhirResourceDao">
 		<property name="tableType" value="ca.uhn.fhir.jpa.entity.PatientResourceTable"/>
 	</bean>
-
 	<bean id="myObservationDao" class="ca.uhn.fhir.jpa.dao.FhirResourceDao">
 		<property name="tableType" value="ca.uhn.fhir.jpa.entity.ObservationResourceTable"/>
+	</bean>
+	<bean id="myDiagnosticReportDao" class="ca.uhn.fhir.jpa.dao.FhirResourceDao">
+		<property name="tableType" value="ca.uhn.fhir.jpa.entity.DiagnosticReportResourceTable"/>
+	</bean>
+	<bean id="myDeviceDao" class="ca.uhn.fhir.jpa.dao.FhirResourceDao">
+		<property name="tableType" value="ca.uhn.fhir.jpa.entity.DeviceResourceTable"/>
+	</bean>
+	<bean id="myLocationDao" class="ca.uhn.fhir.jpa.dao.FhirResourceDao">
+		<property name="tableType" value="ca.uhn.fhir.jpa.entity.LocationResourceTable"/>
+	</bean>
+	<bean id="myOrganizationDao" class="ca.uhn.fhir.jpa.dao.FhirResourceDao">
+		<property name="tableType" value="ca.uhn.fhir.jpa.entity.OrganizationResourceTable"/>
 	</bean>
 
 	<bean id="myPersistenceDataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource" lazy-init="true">

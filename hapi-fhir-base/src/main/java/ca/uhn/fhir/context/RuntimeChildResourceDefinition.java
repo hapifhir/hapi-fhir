@@ -101,7 +101,12 @@ public class RuntimeChildResourceDefinition extends BaseRuntimeDeclaredChildDefi
 			}
 		}
 
+		myResourceTypes = Collections.unmodifiableList(myResourceTypes);
 		myValidChildNames = Collections.unmodifiableSet(myValidChildNames);
+	}
+
+	public List<Class<? extends IResource>> getResourceTypes() {
+		return myResourceTypes;
 	}
 
 	@Override

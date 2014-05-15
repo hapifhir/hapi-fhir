@@ -20,31 +20,46 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 	@Column(name = "RESOURCE_PID", insertable=false, updatable=false)
 	private Long myResourcePid;
 
-	@Column(name = "SP_VALUE", length = 100, nullable = true)
-	public String myValue;
+	@Column(name = "SP_VALUE_NORMALIZED", length = 100, nullable = true)
+	public String myValueNormalized;
 
+	@Column(name="SP_VALUE_EXACT",length=100,nullable=true)
+	public String myValueExact;
+	
 	public ResourceIndexedSearchParamString() {
 	}
 
-	public ResourceIndexedSearchParamString(String theName, String theValue) {
+	public ResourceIndexedSearchParamString(String theName, String theValueNormalized, String theValueExact) {
 		setName(theName);
-		setValue(theValue);
+		setValueNormalized(theValueNormalized);
+		setValueExact(theValueExact);
 	}
 
 	public BaseResourceTable<?> getResource() {
 		return myResource;
 	}
 
-	public String getValue() {
-		return myValue;
-	}
 
 	protected void setResource(BaseResourceTable<?> theResource) {
 		myResource = theResource;
 	}
 
-	public void setValue(String theValue) {
-		myValue = theValue;
+	public String getValueNormalized() {
+		return myValueNormalized;
 	}
+
+	public void setValueNormalized(String theValueNormalized) {
+		myValueNormalized = theValueNormalized;
+	}
+
+	public String getValueExact() {
+		return myValueExact;
+	}
+
+	public void setValueExact(String theValueExact) {
+		myValueExact = theValueExact;
+	}
+
+
 
 }

@@ -12,6 +12,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import org.apache.commons.lang3.Validate;
+
 @Entity
 @Table(name = "RES_LINK")
 public class ResourceLink implements Serializable {
@@ -95,6 +97,7 @@ public class ResourceLink implements Serializable {
 	}
 
 	public void setTargetResource(BaseResourceTable<?> theTargetResource) {
+		Validate.notNull(theTargetResource);
 		myTargetResource = theTargetResource;
 	}
 

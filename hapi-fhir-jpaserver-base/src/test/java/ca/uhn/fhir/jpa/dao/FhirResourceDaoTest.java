@@ -1,6 +1,12 @@
 package ca.uhn.fhir.jpa.dao;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -8,6 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.hamcrest.core.StringContains;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -19,7 +26,11 @@ import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.composite.QuantityDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.dstu.resource.Device;
+import ca.uhn.fhir.model.dstu.resource.DiagnosticReport;
+import ca.uhn.fhir.model.dstu.resource.Location;
 import ca.uhn.fhir.model.dstu.resource.Observation;
+import ca.uhn.fhir.model.dstu.resource.Organization;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
 import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
@@ -28,29 +39,23 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.QualifiedDateParam;
+import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.StringParameter;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 public class FhirResourceDaoTest {
 
 	private static ClassPathXmlApplicationContext ourCtx;
-	private static IFhirResourceDao<Patient> ourPatientDao;
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoTest.class);
 	private static IFhirResourceDao<Observation> ourObservationDao;
+	private static IFhirResourceDao<Patient> ourPatientDao;
+	private static IFhirResourceDao<Device> ourDeviceDao;
+	private static IFhirResourceDao<DiagnosticReport> ourDiagnosticReportDao;
+	private static IFhirResourceDao<Organization> ourOrganizationDao;
+	private static IFhirResourceDao<Location> ourLocationDao;
+
 	private static Date ourTestStarted;
-
-	@SuppressWarnings("unchecked")
-	@BeforeClass
-	public static void beforeClass() {
-		ourTestStarted = new Date();
-		ourCtx = new ClassPathXmlApplicationContext("fhir-spring-test-config.xml");
-		ourPatientDao = ourCtx.getBean("myPatientDao", IFhirResourceDao.class);
-		ourObservationDao = ourCtx.getBean("myObservationDao", IFhirResourceDao.class);
-	}
-
-	@AfterClass
-	public static void afterClass() {
-		ourCtx.close();
-	}
 
 	@Test
 	public void testPersistAndReadResource() {
@@ -70,8 +75,7 @@ public class FhirResourceDaoTest {
 		assertTrue(published.before(now));
 		assertTrue(updated.before(now));
 	}
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoTest.class);
-	
+
 	@Test
 	public void testPersistResourceLink() {
 		Patient patient = new Patient();
@@ -92,7 +96,12 @@ public class FhirResourceDaoTest {
 		obs02.setSubject(new ResourceReferenceDt(Patient.class, patientId02));
 		IdDt obsId02 = ourObservationDao.create(obs02).getId();
 
-		ourLog.info("P1[{}] P2[{}] O1[{}] O2[{}]",new Object[] {patientId01,patientId02,obsId01,obsId02});
+		// Create another type, that shouldn't be returned
+		DiagnosticReport dr01 = new DiagnosticReport();
+		dr01.setSubject(new ResourceReferenceDt(Patient.class, patientId01));
+		IdDt drId01 = ourDiagnosticReportDao.create(dr01).getId();
+		
+		ourLog.info("P1[{}] P2[{}] O1[{}] O2[{}] D1[{}]",new Object[] {patientId01,patientId02,obsId01,obsId02,drId01});
 		
 		List<Observation> result = ourObservationDao.search(Observation.SP_SUBJECT, new ReferenceParam(patientId01.getValue()));
 		assertEquals(1,result.size());
@@ -107,39 +116,21 @@ public class FhirResourceDaoTest {
 	
 	}
 	
+	
+	
+	
 	@Test
-	public void testSearchResourceLinkWithChain() {
+	public void testPersistSearchParamDate() {
 		Patient patient = new Patient();
-		patient.addIdentifier("urn:system", "testSearchResourceLinkWithChain");
-		IdDt patientId01 = ourPatientDao.create(patient).getId();
-
-		Patient patient02 = new Patient();
-		patient02.addIdentifier("urn:system", "testSearchResourceLinkWithChain");
-		IdDt patientId02 = ourPatientDao.create(patient02).getId();
+		patient.addIdentifier("urn:system", "001");
+		patient.setBirthDate(new DateTimeDt("2001-01-01"));
+		
+		ourPatientDao.create(patient);
+		
+		List<Patient> found = ourPatientDao.search("birthdate", new QualifiedDateParam(QuantityCompararatorEnum.GREATERTHAN, "2000-01-01"));
+		assertEquals(1,found.size());
 	
-		Observation obs01 = new Observation();
-		obs01.setApplies(new DateTimeDt(new Date()));
-		obs01.setSubject(new ResourceReferenceDt(Patient.class, patientId01));
-		IdDt obsId01 = ourObservationDao.create(obs01).getId();
 		
-		Observation obs02 = new Observation();
-		obs02.setApplies(new DateTimeDt(new Date()));
-		obs02.setSubject(new ResourceReferenceDt(Patient.class, patientId02));
-		IdDt obsId02 = ourObservationDao.create(obs02).getId();
-
-		ourLog.info("P1[{}] P2[{}] O1[{}] O2[{}]",new Object[] {patientId01,patientId02,obsId01,obsId02});
-		
-		List<Observation> result = ourObservationDao.search(Observation.SP_SUBJECT, new ReferenceParam(patientId01.getValue()));
-		assertEquals(1,result.size());
-		assertEquals(obsId01,result.get(0).getId());
-		
-		result = ourObservationDao.search(Observation.SP_SUBJECT, new ReferenceParam(patientId02.getValue(), Patient.SP_IDENTIFIER));
-		assertEquals(1,result.size());
-		assertEquals(obsId02,result.get(0).getId());
-
-		result = ourObservationDao.search(Observation.SP_SUBJECT, new ReferenceParam("999999999999", Patient.SP_IDENTIFIER));
-		assertEquals(0,result.size());
-	
 	}
 	
 	@Test
@@ -158,7 +149,6 @@ public class FhirResourceDaoTest {
 		
 	}
 	
-	
 	@Test
 	public void testPersistSearchParamQuantity() {
 		Observation obs = new Observation();
@@ -174,21 +164,7 @@ public class FhirResourceDaoTest {
 		assertEquals(0,found.size());
 		
 	}
-
-	@Test
-	public void testPersistSearchParamDate() {
-		Patient patient = new Patient();
-		patient.addIdentifier("urn:system", "001");
-		patient.setBirthDate(new DateTimeDt("2001-01-01"));
-		
-		ourPatientDao.create(patient);
-		
-		List<Patient> found = ourPatientDao.search("birthdate", new QualifiedDateParam(QuantityCompararatorEnum.GREATERTHAN, "2000-01-01"));
-		assertEquals(1,found.size());
 	
-		
-	}
-
 	@Test
 	public void testPersistSearchParams() {
 		Patient patient = new Patient();
@@ -236,6 +212,212 @@ public class FhirResourceDaoTest {
 		assertEquals(0, found.size());
 
 	}
+	
+	
+	@Test
+	public void testSearchAll() {
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier("urn:system", "001");
+			patient.addName().addFamily("Tester").addGiven("Joe");
+			ourPatientDao.create(patient);
+		}
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier("urn:system", "002");
+			patient.addName().addFamily("Tester").addGiven("John");
+			ourPatientDao.create(patient);
+		}
+
+		Map<String, IQueryParameterType> params = new HashMap<>();
+		List<Patient> patients = ourPatientDao.search(params);
+		assertEquals(2, patients.size());
+	}
+
+	@Test
+	public void testSearchNameParam() {
+		IdDt id1;
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier("urn:system", "001");
+			patient.addName().addFamily("testSearchNameParam01Fam").addGiven("testSearchNameParam01Giv");
+			id1=ourPatientDao.create(patient).getId();
+		}
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier("urn:system", "002");
+			patient.addName().addFamily("testSearchNameParam02Fam").addGiven("testSearchNameParam02Giv");
+			ourPatientDao.create(patient);
+		}
+
+		Map<String, IQueryParameterType> params = new HashMap<>();
+		params.put(Patient.SP_FAMILY, new StringDt("testSearchNameParam01Fam"));
+		List<Patient> patients = ourPatientDao.search(params);
+		assertEquals(1, patients.size());
+		assertEquals(id1, patients.get(0).getId());
+
+		params = new HashMap<>();
+		params.put(Patient.SP_FAMILY, new StringDt("testSearchNameParam01Giv"));
+		patients = ourPatientDao.search(params);
+		assertEquals(1, patients.size());
+		assertEquals(id1, patients.get(0).getId());
+
+		params = new HashMap<>();
+		params.put(Patient.SP_FAMILY, new StringDt("testSearchNameParam01Foo"));
+		patients = ourPatientDao.search(params);
+		assertEquals(0, patients.size());
+
+	}
+
+	@Test
+	public void testSearchResourceLinkWithChain() {
+		Patient patient = new Patient();
+		patient.addIdentifier("urn:system", "testSearchResourceLinkWithChainXX");
+		patient.addIdentifier("urn:system", "testSearchResourceLinkWithChain01");
+		IdDt patientId01 = ourPatientDao.create(patient).getId();
+
+		Patient patient02 = new Patient();
+		patient02.addIdentifier("urn:system", "testSearchResourceLinkWithChainXX");
+		patient02.addIdentifier("urn:system", "testSearchResourceLinkWithChain02");
+		IdDt patientId02 = ourPatientDao.create(patient02).getId();
+	
+		Observation obs01 = new Observation();
+		obs01.setApplies(new DateTimeDt(new Date()));
+		obs01.setSubject(new ResourceReferenceDt(Patient.class, patientId01));
+		IdDt obsId01 = ourObservationDao.create(obs01).getId();
+		
+		Observation obs02 = new Observation();
+		obs02.setApplies(new DateTimeDt(new Date()));
+		obs02.setSubject(new ResourceReferenceDt(Patient.class, patientId02));
+		IdDt obsId02 = ourObservationDao.create(obs02).getId();
+
+		// Create another type, that shouldn't be returned
+		DiagnosticReport dr01 = new DiagnosticReport();
+		dr01.setSubject(new ResourceReferenceDt(Patient.class, patientId01));
+		IdDt drId01 = ourDiagnosticReportDao.create(dr01).getId();
+		
+		ourLog.info("P1[{}] P2[{}] O1[{}] O2[{}] D1[{}]",new Object[] {patientId01,patientId02,obsId01,obsId02,drId01});
+
+		List<Observation> result = ourObservationDao.search(Observation.SP_SUBJECT, new ReferenceParam(Patient.SP_IDENTIFIER, "testSearchResourceLinkWithChain01"));
+		assertEquals(1,result.size());
+		assertEquals(obsId01,result.get(0).getId());
+
+		result = ourObservationDao.search(Observation.SP_SUBJECT, new ReferenceParam(Patient.SP_IDENTIFIER, "999999999999"));
+		assertEquals(0,result.size());
+
+		result = ourObservationDao.search(Observation.SP_SUBJECT, new ReferenceParam(Patient.SP_IDENTIFIER, "testSearchResourceLinkWithChainXX"));
+		assertEquals(2,result.size());
+
+	}
+	
+	
+	@Test
+	public void testCreateWithInvalidReferenceFailsGracefully() {
+		Patient patient = new Patient();
+		patient.addName().addFamily("testSearchResourceLinkWithChainWithMultipleTypes01");
+		patient.setManagingOrganization(new ResourceReferenceDt(Organization.class, "99999999"));
+		try {
+		ourPatientDao.create(patient).getId();
+		fail();
+		}catch (InvalidRequestException e) {
+			assertThat(e.getMessage(), StringContains.containsString("99999 not found"));
+		}
+
+	}
+	
+	
+	@Test
+	public void testSearchResourceLinkWithChainWithMultipleTypes() {
+		Patient patient = new Patient();
+		patient.addName().addFamily("testSearchResourceLinkWithChainWithMultipleTypes01");
+		patient.addName().addFamily("testSearchResourceLinkWithChainWithMultipleTypesXX");
+		IdDt patientId01 = ourPatientDao.create(patient).getId();
+
+		Location loc01 = new Location();
+		loc01.getName().setValue("testSearchResourceLinkWithChainWithMultipleTypes01");
+		IdDt locId01 = ourLocationDao.create(loc01).getId();
+		
+		Observation obs01 = new Observation();
+		obs01.setApplies(new DateTimeDt(new Date()));
+		obs01.setSubject(new ResourceReferenceDt(Patient.class, patientId01));
+		IdDt obsId01 = ourObservationDao.create(obs01).getId();
+		
+		Observation obs02 = new Observation();
+		obs02.setApplies(new DateTimeDt(new Date()));
+		obs02.setSubject(new ResourceReferenceDt(Location.class, locId01));
+		IdDt obsId02 = ourObservationDao.create(obs02).getId();
+
+		ourLog.info("P1[{}] L1[{}] Obs1[{}] Obs2[{}]",new Object[] {patientId01,locId01,obsId01,obsId02});
+
+		List<Observation> result = ourObservationDao.search(Observation.SP_SUBJECT, new ReferenceParam(Patient.SP_NAME, "testSearchResourceLinkWithChainWithMultipleTypes01"));
+		assertEquals(2,result.size());
+
+		result = ourObservationDao.search(Observation.SP_SUBJECT, new ReferenceParam(Patient.SP_NAME, "testSearchResourceLinkWithChainWithMultipleTypesXX"));
+		assertEquals(1,result.size());
+
+		result = ourObservationDao.search(Observation.SP_SUBJECT, new ReferenceParam(Patient.SP_NAME, "testSearchResourceLinkWithChainWithMultipleTypesYY"));
+		assertEquals(0,result.size());
+
+		result = ourObservationDao.search(Observation.SP_SUBJECT, new ReferenceParam(Patient.class, Patient.SP_NAME, "testSearchResourceLinkWithChainWithMultipleTypes01"));
+		assertEquals(1,result.size());
+		assertEquals(obsId01, result.get(0).getId());
+
+	}
+
+	@Test
+	public void testSearchStringParam() {
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier("urn:system", "001");
+			patient.addName().addFamily("Tester_testSearchStringParam").addGiven("Joe");
+			ourPatientDao.create(patient);
+		}
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier("urn:system", "002");
+			patient.addName().addFamily("Tester_testSearchStringParam").addGiven("John");
+			ourPatientDao.create(patient);
+		}
+
+		Map<String, IQueryParameterType> params = new HashMap<>();
+		params.put(Patient.SP_FAMILY, new StringDt("Tester_testSearchStringParam"));
+		List<Patient> patients = ourPatientDao.search(params);
+		assertEquals(2, patients.size());
+
+		params.put(Patient.SP_FAMILY, new StringDt("FOO_testSearchStringParam"));
+		patients = ourPatientDao.search(params);
+		assertEquals(0, patients.size());
+
+	}
+	
+	@Test
+	public void testSearchStringParamWithNonNormalized() {
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier("urn:system", "001");
+			patient.addName().addGiven("testSearchStringParamWithNonNormalized_höra");
+			ourPatientDao.create(patient);
+		}
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier("urn:system", "002");
+			patient.addName().addGiven("testSearchStringParamWithNonNormalized_HORA");
+			ourPatientDao.create(patient);
+		}
+
+		Map<String, IQueryParameterType> params = new HashMap<>();
+		params.put(Patient.SP_FAMILY, new StringDt("testSearchStringParamWithNonNormalized_hora"));
+		List<Patient> patients = ourPatientDao.search(params);
+		assertEquals(2, patients.size());
+
+		StringParameter parameter = new StringParameter("testSearchStringParamWithNonNormalized_hora");
+		parameter.setExact(true);
+		params.put(Patient.SP_FAMILY, parameter);
+		patients = ourPatientDao.search(params);
+		assertEquals(0, patients.size());
+
+	}
+	
 
 	@Test
 	public void testTagsWithCreateAndReadAndSearch() {
@@ -274,87 +456,6 @@ public class FhirResourceDaoTest {
 
 	}
 
-	@Test
-	public void testSearchAll() {
-		{
-			Patient patient = new Patient();
-			patient.addIdentifier("urn:system", "001");
-			patient.addName().addFamily("Tester").addGiven("Joe");
-			ourPatientDao.create(patient);
-		}
-		{
-			Patient patient = new Patient();
-			patient.addIdentifier("urn:system", "002");
-			patient.addName().addFamily("Tester").addGiven("John");
-			ourPatientDao.create(patient);
-		}
-
-		Map<String, IQueryParameterType> params = new HashMap<>();
-		List<Patient> patients = ourPatientDao.search(params);
-		assertEquals(2, patients.size());
-	}
-
-	@Test
-	public void testSearchStringParam() {
-		{
-			Patient patient = new Patient();
-			patient.addIdentifier("urn:system", "001");
-			patient.addName().addFamily("Tester_testSearchStringParam").addGiven("Joe");
-			ourPatientDao.create(patient);
-		}
-		{
-			Patient patient = new Patient();
-			patient.addIdentifier("urn:system", "002");
-			patient.addName().addFamily("Tester_testSearchStringParam").addGiven("John");
-			ourPatientDao.create(patient);
-		}
-
-		Map<String, IQueryParameterType> params = new HashMap<>();
-		params.put(Patient.SP_FAMILY, new StringDt("Tester_testSearchStringParam"));
-		List<Patient> patients = ourPatientDao.search(params);
-		assertEquals(2, patients.size());
-
-		params.put(Patient.SP_FAMILY, new StringDt("FOO_testSearchStringParam"));
-		patients = ourPatientDao.search(params);
-		assertEquals(0, patients.size());
-
-	}
-
-	@Test
-	public void testSearchNameParam() {
-		IdDt id1;
-		{
-			Patient patient = new Patient();
-			patient.addIdentifier("urn:system", "001");
-			patient.addName().addFamily("testSearchNameParam01Fam").addGiven("testSearchNameParam01Giv");
-			id1=ourPatientDao.create(patient).getId();
-		}
-		{
-			Patient patient = new Patient();
-			patient.addIdentifier("urn:system", "002");
-			patient.addName().addFamily("testSearchNameParam02Fam").addGiven("testSearchNameParam02Giv");
-			ourPatientDao.create(patient);
-		}
-
-		Map<String, IQueryParameterType> params = new HashMap<>();
-		params.put(Patient.SP_FAMILY, new StringDt("testSearchNameParam01Fam"));
-		List<Patient> patients = ourPatientDao.search(params);
-		assertEquals(1, patients.size());
-		assertEquals(id1, patients.get(0).getId());
-
-		params = new HashMap<>();
-		params.put(Patient.SP_FAMILY, new StringDt("testSearchNameParam01Giv"));
-		patients = ourPatientDao.search(params);
-		assertEquals(1, patients.size());
-		assertEquals(id1, patients.get(0).getId());
-
-		params = new HashMap<>();
-		params.put(Patient.SP_FAMILY, new StringDt("testSearchNameParam01Foo"));
-		patients = ourPatientDao.search(params);
-		assertEquals(0, patients.size());
-
-	}
-	
 	@Test
 	public void testUpdateAndGetHistoryResource() throws InterruptedException {
 		Patient patient = new Patient();
@@ -402,6 +503,24 @@ public class FhirResourceDaoTest {
 		assertEquals(updated2, history.get(1).getResourceMetadata().get(ResourceMetadataKeyEnum.UPDATED));
 		assertEquals("002", history.get(1).getIdentifierFirstRep().getValue().getValue());
 
+	}
+
+	@AfterClass
+	public static void afterClass() {
+		ourCtx.close();
+	}
+	
+	@SuppressWarnings("unchecked")
+	@BeforeClass
+	public static void beforeClass() {
+		ourTestStarted = new Date();
+		ourCtx = new ClassPathXmlApplicationContext("fhir-spring-test-config.xml");
+		ourPatientDao = ourCtx.getBean("myPatientDao", IFhirResourceDao.class);
+		ourObservationDao = ourCtx.getBean("myObservationDao", IFhirResourceDao.class);
+		ourDiagnosticReportDao = ourCtx.getBean("myDiagnosticReportDao", IFhirResourceDao.class);
+		ourDeviceDao = ourCtx.getBean("myDeviceDao", IFhirResourceDao.class);
+		ourOrganizationDao = ourCtx.getBean("myOrganizationDao", IFhirResourceDao.class);
+		ourLocationDao = ourCtx.getBean("myLocationDao", IFhirResourceDao.class);
 	}
 
 }

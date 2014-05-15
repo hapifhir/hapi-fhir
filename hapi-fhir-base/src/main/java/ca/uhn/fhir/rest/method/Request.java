@@ -70,6 +70,7 @@ public class Request {
 		return myParameters;
 	}
 
+	
 	public RequestType getRequestType() {
 		return myRequestType;
 	}
