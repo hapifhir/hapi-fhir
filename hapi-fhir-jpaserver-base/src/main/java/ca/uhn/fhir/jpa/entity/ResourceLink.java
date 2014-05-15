@@ -43,6 +43,18 @@ public class ResourceLink implements Serializable {
 		//nothing
 	}
 	
+	@Override
+	public String toString() {
+		StringBuilder b = new StringBuilder();
+		b.append("ResourceLink[");
+		b.append("path=").append(mySourcePath);
+		b.append(", src=").append(mySourceResource.getIdAsLong());
+		b.append(", target=").append(myTargetResource.getIdAsLong());
+		
+		b.append("]");
+		return b.toString();
+	}
+
 	public ResourceLink(String theSourcePath, BaseResourceTable<?> theSourceResource, BaseResourceTable<?> theTargetResource) {
 		super();
 		mySourcePath = theSourcePath;
