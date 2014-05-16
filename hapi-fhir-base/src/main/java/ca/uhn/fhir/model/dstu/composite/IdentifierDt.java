@@ -38,6 +38,7 @@ package ca.uhn.fhir.model.dstu.composite;
 
 import java.util.List;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.BaseElement;
 import ca.uhn.fhir.model.api.ICompositeDatatype;
 import ca.uhn.fhir.model.api.IElement;
@@ -433,5 +434,10 @@ public class IdentifierDt
 		}
 	}	
 
+
+	@Override
+	public String getQueryParameterQualifier(FhirContext theContext) {
+		return null;
+	}	
 
 }

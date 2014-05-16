@@ -22,12 +22,12 @@ package ca.uhn.fhir.rest.param;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.TreeSet;
 
 import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.PathSpecification;
 import ca.uhn.fhir.model.dstu.valueset.SearchParamTypeEnum;
 import ca.uhn.fhir.rest.annotation.IncludeParam;
@@ -59,19 +59,19 @@ public class IncludeParameter extends BaseQueryParameter {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<List<String>> encode(Object theObject) throws InternalErrorException {
-		ArrayList<List<String>> retVal = new ArrayList<List<String>>();
+	public List<QualifiedParamList> encode(FhirContext theContext, Object theObject) throws InternalErrorException {
+		ArrayList<QualifiedParamList> retVal = new ArrayList<QualifiedParamList>();
 
 		if (myInstantiableCollectionType == null) {
 			if (mySpecType == PathSpecification.class) {
-				retVal.add(Collections.singletonList(((PathSpecification)theObject).getValue()));
+				retVal.add(QualifiedParamList.singleton(((PathSpecification)theObject).getValue()));
 			} else {
-				retVal.add(Collections.singletonList(((String)theObject)));
+				retVal.add(QualifiedParamList.singleton(((String)theObject)));
 			}
 		}else {
 			Collection<PathSpecification> val = (Collection<PathSpecification>) theObject;
 			for (PathSpecification pathSpec : val) {
-				retVal.add(Collections.singletonList(pathSpec.getValue()));
+				retVal.add(QualifiedParamList.singleton(pathSpec.getValue()));
 			}
 		}
 		

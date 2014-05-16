@@ -18,6 +18,7 @@ package ca.uhn.fhir.testmodel;
 
 import java.util.List;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.BaseElement;
 import ca.uhn.fhir.model.api.ICompositeDatatype;
 import ca.uhn.fhir.model.api.IElement;
@@ -395,6 +396,11 @@ public class IdentifierDt
 		} else {
 			setValue(theValue);
 		}
+	}	
+
+	@Override
+	public String getQueryParameterQualifier(FhirContext theContext) {
+		return null;
 	}	
 
 

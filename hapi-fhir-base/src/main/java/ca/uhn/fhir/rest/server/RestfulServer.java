@@ -68,7 +68,7 @@ public class RestfulServer extends HttpServlet {
 	private Map<String, ResourceBinding> myResourceNameToProvider = new HashMap<String, ResourceBinding>();
 	private Collection<IResourceProvider> myResourceProviders;
 	private ISecurityManager mySecurityManager;
-	private BaseMethodBinding myServerConformanceMethod;
+	private BaseMethodBinding<?> myServerConformanceMethod;
 	private Object myServerConformanceProvider;
 	private String myServerName = "HAPI FHIR Server";
 	/** This is configurable but by default we jsut use HAPI version */
@@ -363,7 +363,7 @@ public class RestfulServer extends HttpServlet {
 			if (Modifier.isPublic(m.getModifiers()) && !Modifier.isStatic(m.getModifiers())) {
 				ourLog.debug("Scanning public method: {}#{}", theProvider.getClass(), m.getName());
 
-				BaseMethodBinding foundMethodBinding = BaseMethodBinding.bindMethod(m, myFhirContext, theProvider);
+				BaseMethodBinding<?> foundMethodBinding = BaseMethodBinding.bindMethod(m, myFhirContext, theProvider);
 				if (foundMethodBinding != null) {
 
 					String resourceName = foundMethodBinding.getResourceName();
@@ -407,7 +407,7 @@ public class RestfulServer extends HttpServlet {
 			if (Modifier.isPublic(m.getModifiers())) {
 				ourLog.debug("Scanning public method: {}#{}", theSystemProvider.getClass(), m.getName());
 
-				BaseMethodBinding foundMethodBinding = BaseMethodBinding.bindMethod(m, myFhirContext, theSystemProvider);
+				BaseMethodBinding<?> foundMethodBinding = BaseMethodBinding.bindMethod(m, myFhirContext, theSystemProvider);
 				if (foundMethodBinding != null) {
 					if (foundMethodBinding instanceof ConformanceMethodBinding) {
 						myServerConformanceMethod = foundMethodBinding;
@@ -527,7 +527,7 @@ public class RestfulServer extends HttpServlet {
 			}
 
 			ResourceBinding resourceBinding = null;
-			BaseMethodBinding resourceMethod = null;
+			BaseMethodBinding<?> resourceMethod = null;
 			if ("metadata".equals(resourceName)) {
 				resourceMethod = myServerConformanceMethod;
 			} else if (resourceName == null) {

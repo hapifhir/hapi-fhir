@@ -45,7 +45,7 @@ public interface IQueryParameterAnd {
 	 *    for information on the <b>token</b> format
 	 * </p>
 	 */
-	public List<List<String>> getValuesAsQueryTokens();
+	public List<QualifiedParamList> getValuesAsQueryTokens();
 
 	
 }

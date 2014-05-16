@@ -1,0 +1,19 @@
+
+package ${packageBase};
+
+import javax.persistence.DiscriminatorValue;
+import javax.persistence.Entity;
+import ca.uhn.fhir.model.dstu.resource.*;
+
+public class ${className}ResourceTable extends BaseResourceTable<${className}> {
+
+@Entity
+@DiscriminatorValue("${className}")
+public class PatientResourceTable extends BaseResourceTable<Patient> {
+
+	@Override
+	public Class<${className}> getResourceType() {
+		return ${className}.class;
+	}
+
+}

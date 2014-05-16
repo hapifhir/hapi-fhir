@@ -23,6 +23,7 @@ package ca.uhn.fhir.rest.param;
 import java.util.Collections;
 import java.util.List;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.rest.method.QualifiedParamList;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -36,8 +37,8 @@ final class QueryParameterOrBinder implements IParamBinder {
 	}
 
 	@Override
-	public List<List<String>> encode(Object theString) throws InternalErrorException {
-		List<String> retVal = ((IQueryParameterOr) theString).getValuesAsQueryTokens();
+	public List<QualifiedParamList> encode(FhirContext theContext, Object theString) throws InternalErrorException {
+		QualifiedParamList retVal = ((IQueryParameterOr) theString).getValuesAsQueryTokens();
 		return Collections.singletonList(retVal);
 	}
 

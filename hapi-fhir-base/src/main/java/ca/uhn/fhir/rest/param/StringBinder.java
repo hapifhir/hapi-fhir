@@ -20,40 +20,34 @@ package ca.uhn.fhir.rest.param;
  * #L%
  */
 
+import java.util.Collections;
 import java.util.List;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.IQueryParameterAnd;
 import ca.uhn.fhir.rest.method.QualifiedParamList;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
-final class QueryParameterAndBinder implements IParamBinder {
-	private final Class<? extends IQueryParameterAnd> myType;
-
-	QueryParameterAndBinder(Class<? extends IQueryParameterAnd> theType) {
-		myType = theType;
+final class StringBinder implements IParamBinder {
+	StringBinder() {
 	}
 
 	@Override
 	public List<QualifiedParamList> encode(FhirContext theContext, Object theString) throws InternalErrorException {
-		List<QualifiedParamList> retVal = ((IQueryParameterAnd) theString).getValuesAsQueryTokens();
-		return retVal;
+		String retVal = ((String) theString);
+		return Collections.singletonList(QualifiedParamList.singleton(retVal));
 	}
 
 	@Override
-	public Object parse(List<QualifiedParamList> theString) throws InternalErrorException, InvalidRequestException {
-		IQueryParameterAnd dt;
-		try {
-			dt = myType.newInstance();
-			dt.setValuesAsQueryTokens(theString);
-		} catch (InstantiationException e) {
-			throw new InternalErrorException(e);
-		} catch (IllegalAccessException e) {
-			throw new InternalErrorException(e);
-		} catch (SecurityException e) {
-			throw new InternalErrorException(e);
+	public Object parse(List<QualifiedParamList> theParams) throws InternalErrorException, InvalidRequestException {
+		if (theParams.size() == 0 || theParams.get(0).size() == 0) {
+			return "";
 		}
-		return dt;
+		if (theParams.size() > 1 || theParams.get(0).size() > 1) {
+			throw new InvalidRequestException("Multiple values detected");
+		}
+
+		return theParams.get(0).get(0);
 	}
+
 }

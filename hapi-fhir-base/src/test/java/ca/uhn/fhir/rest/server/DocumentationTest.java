@@ -39,7 +39,7 @@ public class DocumentationTest {
 		Collection<ResourceBinding> resourceBindings = rs.getResourceBindings();
 		for (ResourceBinding resourceBinding : resourceBindings) {
 			if (resourceBinding.getResourceName().equals("Patient")) {
-				List<BaseMethodBinding> methodBindings = resourceBinding.getMethodBindings();
+				List<BaseMethodBinding<?>> methodBindings = resourceBinding.getMethodBindings();
 				SearchMethodBinding binding = (SearchMethodBinding) methodBindings.get(0);
 				SearchParameter param = (SearchParameter) binding.getParameters().iterator().next();
 				assertEquals("The patient's identifier (MRN or other card number)", param.getDescription());

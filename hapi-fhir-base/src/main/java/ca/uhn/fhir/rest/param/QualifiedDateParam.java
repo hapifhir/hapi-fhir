@@ -22,6 +22,7 @@ package ca.uhn.fhir.rest.param;
 
 import java.util.Date;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
@@ -122,5 +123,12 @@ public class QualifiedDateParam extends DateTimeDt implements IQueryParameterTyp
 		}
 
 	}
+
+	
+
+	@Override
+	public String getQueryParameterQualifier(FhirContext theContext) {
+		return null;
+	}	
 
 }

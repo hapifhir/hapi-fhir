@@ -25,6 +25,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.rest.client.BaseClientInvocation;
 import ca.uhn.fhir.rest.method.Request;
@@ -34,7 +35,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 public interface IParameter {
 
-	void translateClientArgumentIntoQueryArgument(Object theSourceClientArgument, Map<String, List<String>> theTargetQueryArguments, BaseClientInvocation theClientInvocation) throws InternalErrorException;
+	void translateClientArgumentIntoQueryArgument(FhirContext theContext, Object theSourceClientArgument, Map<String, List<String>> theTargetQueryArguments, BaseClientInvocation theClientInvocation) throws InternalErrorException;
 
 	/**
 	 * This <b>server method</b> method takes the data received by the server in an incoming request, and translates that data into a single argument for a server method invocation. Note that all

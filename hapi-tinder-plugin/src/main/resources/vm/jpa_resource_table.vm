@@ -1,0 +1,47 @@
+
+package ${packageBase};
+
+import javax.persistence.DiscriminatorValue;
+import javax.persistence.Entity;
+import ca.uhn.fhir.model.dstu.resource.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import ca.uhn.fhir.jpa.dao.BaseResourceProvider;
+import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.dstu.resource.Patient;
+import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.rest.annotation.OptionalParam;
+import ca.uhn.fhir.rest.annotation.RequiredParam;
+import ca.uhn.fhir.rest.annotation.Search;
+
+
+public class ${className}ResourceProvider extends BaseResourceProvider<${className}> {
+
+	@Override
+	public Class<? extends IResource> getResourceType() {
+		return ${className}.class;
+	}
+	
+#foreach ( $param in $searchParams )
+	@Description(shortDefinition="${param.description}")
+	@OptionalParam(name="${param.name}")
+#if (${param.type} == 'string' )
+		StringParam the${param.nameCapitalized} #{if}($foreach.hasNext), #{end} 
+#elseif (${param.type} == 'token' )
+		IdentifierDt the${param.nameCapitalized} #{if}($foreach.hasNext), #{end} 
+#elseif (${param.type} == 'date' )
+		DateRangeParam the${param.nameCapitalized} #{if}($foreach.hasNext), #{end} 
+#elseif (${param.type} == 'quantity' )
+		QuantityDt the${param.nameCapitalized} #{if}($foreach.hasNext), #{end} 
+#elseif (${param.type} == 'number' )
+		QuantityDt the${param.nameCapitalized} #{if}($foreach.hasNext), #{end} 
+#elseif (${param.type} == 'reference' )
+		ReferenceParam the${param.nameCapitalized} #{if}($foreach.hasNext), #{end} 
+#end
+#end	
+	
+}

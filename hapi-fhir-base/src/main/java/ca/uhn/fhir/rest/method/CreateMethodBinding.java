@@ -65,7 +65,7 @@ public class CreateMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 		if (theArgs != null) {
 			for (int idx = 0; idx < theArgs.length; idx++) {
 				IParameter nextParam = getParameters().get(idx);
-				nextParam.translateClientArgumentIntoQueryArgument(theArgs[idx], null, retVal);
+				nextParam.translateClientArgumentIntoQueryArgument(getContext(), theArgs[idx], null, retVal);
 			}
 		}
 

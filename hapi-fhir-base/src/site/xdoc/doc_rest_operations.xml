@@ -503,6 +503,13 @@
 					individual HAPI resource
 					classes.
 				</p>
+				
+				<p>
+					Parameters which take a string as their format should use the 
+					<a href="./apidocs/ca/uhn/fhir/rest/param/StringParameter.html">StringParameter</a>
+					type. They may also use normal java Strings (or HAPI's StringDt), although it is
+					not possible to use the ":exact" qualifier in that case.
+				</p>
 
 				<macro name="snippet">
 					<param name="id" value="searchStringParam" />

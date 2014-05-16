@@ -25,6 +25,7 @@ import java.util.List;
 
 import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
+import ca.uhn.fhir.rest.method.QualifiedParamList;
 
 public class IdentifierListParam implements IQueryParameterOr {
 
@@ -38,8 +39,8 @@ public class IdentifierListParam implements IQueryParameterOr {
 	}
 
 	@Override
-	public List<String> getValuesAsQueryTokens() {
-		ArrayList<String> retVal = new ArrayList<String>();
+	public QualifiedParamList getValuesAsQueryTokens() {
+		QualifiedParamList retVal = new QualifiedParamList();
 		for (IdentifierDt next : myIdentifiers) {
 			retVal.add(next.getValueAsQueryToken());
 		}
@@ -54,7 +55,7 @@ public class IdentifierListParam implements IQueryParameterOr {
 	}
 
 	@Override
-	public void setValuesAsQueryTokens(List<String> theParameters) {
+	public void setValuesAsQueryTokens(QualifiedParamList theParameters) {
 		for (String string : theParameters) {
 			IdentifierDt dt = new IdentifierDt();
 			dt.setValueAsQueryToken(null, string);

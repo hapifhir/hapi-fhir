@@ -24,6 +24,7 @@ import java.util.Collection;
 import java.util.List;
 
 import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IQueryParameterAnd;
 import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -50,24 +51,28 @@ public class SearchParameter extends BaseQueryParameter {
 	public SearchParameter() {
 	}
 
-	public SearchParameter(String name, boolean required) {
-		this.myName = name;
-		this.myRequired = required;
+	public SearchParameter(String theName, boolean theRequired) {
+		this.myName = theName;
+		this.myRequired = theRequired;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see ca.uhn.fhir.rest.param.IParameter#encode(java.lang.Object)
 	 */
 	@Override
-	public List<List<String>> encode(Object theObject) throws InternalErrorException {
-		return myParamBinder.encode(theObject);
+	public List<QualifiedParamList> encode(FhirContext theContext, Object theObject) throws InternalErrorException {
+		return myParamBinder.encode(theContext, theObject);
 	}
 
 	public String getDescription() {
 		return myDescription;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see ca.uhn.fhir.rest.param.IParameter#getName()
 	 */
 	@Override
@@ -94,7 +99,9 @@ public class SearchParameter extends BaseQueryParameter {
 		return myRequired;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see ca.uhn.fhir.rest.param.IParameter#parse(java.util.List)
 	 */
 	@Override
@@ -118,16 +125,20 @@ public class SearchParameter extends BaseQueryParameter {
 	public void setType(final Class<?> type, Class<? extends Collection<?>> theInnerCollectionType, Class<? extends Collection<?>> theOuterCollectionType) {
 		this.myType = type;
 		if (IQueryParameterType.class.isAssignableFrom(type)) {
-			this.myParamBinder = new QueryParameterTypeBinder((Class<? extends IQueryParameterType>) type);
+			myParamBinder = new QueryParameterTypeBinder((Class<? extends IQueryParameterType>) type);
 		} else if (IQueryParameterOr.class.isAssignableFrom(type)) {
-			this.myParamBinder = new QueryParameterOrBinder((Class<? extends IQueryParameterOr>) type);
+			myParamBinder = new QueryParameterOrBinder((Class<? extends IQueryParameterOr>) type);
 		} else if (IQueryParameterAnd.class.isAssignableFrom(type)) {
-			this.myParamBinder = new QueryParameterAndBinder((Class<? extends IQueryParameterAnd>) type);
+			myParamBinder = new QueryParameterAndBinder((Class<? extends IQueryParameterAnd>) type);
+		} else if (String.class.equals(type)) {
+			myParamBinder=new StringBinder();
 		} else {
 			throw new ConfigurationException("Unsupported data type for parameter: " + type.getCanonicalName());
 		}
 
-		if (StringDt.class.isAssignableFrom(type)) {
+		if (String.class.equals(type)) {
+			myParamType = SearchParamTypeEnum.STRING;
+		} else if (StringDt.class.isAssignableFrom(type)) {
 			myParamType = SearchParamTypeEnum.STRING;
 		} else if (QualifiedDateParam.class.isAssignableFrom(type)) {
 			myParamType = SearchParamTypeEnum.DATE;
@@ -142,16 +153,16 @@ public class SearchParameter extends BaseQueryParameter {
 		} else {
 			throw new ConfigurationException("Unknown search parameter type: " + type);
 		}
-		
+
 		// NB: Once this is enabled, we should return true from handlesMissing if
 		// it's a collection type
-//		if (theInnerCollectionType != null) {
-//			this.parser = new CollectionBinder(this.parser, theInnerCollectionType);
-//		}
-//
-//		if (theOuterCollectionType != null) {
-//			this.parser = new CollectionBinder(this.parser, theOuterCollectionType);
-//		}
+		// if (theInnerCollectionType != null) {
+		// this.parser = new CollectionBinder(this.parser, theInnerCollectionType);
+		// }
+		//
+		// if (theOuterCollectionType != null) {
+		// this.parser = new CollectionBinder(this.parser, theOuterCollectionType);
+		// }
 
 	}
 

@@ -21,7 +21,6 @@ package ca.uhn.fhir.rest.param;
  */
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -157,13 +156,13 @@ public class DateRangeParam implements IQueryParameterAnd {
 	}
 
 	@Override
-	public List<List<String>> getValuesAsQueryTokens() {
-		ArrayList<List<String>> retVal = new ArrayList<List<String>>();
+	public List<QualifiedParamList> getValuesAsQueryTokens() {
+		ArrayList<QualifiedParamList> retVal = new ArrayList<QualifiedParamList>();
 		if (myLowerBound != null) {
-			retVal.add(Collections.singletonList(myLowerBound.getValueAsQueryToken()));
+			retVal.add(QualifiedParamList.singleton(myLowerBound.getValueAsQueryToken()));
 		}
 		if (myUpperBound != null) {
-			retVal.add(Collections.singletonList(myUpperBound.getValueAsQueryToken()));
+			retVal.add(QualifiedParamList.singleton(myUpperBound.getValueAsQueryToken()));
 		}
 		return retVal;
 	}

@@ -20,7 +20,7 @@ package ca.uhn.fhir.model.api;
  * #L%
  */
 
-import java.util.List;
+import ca.uhn.fhir.rest.method.QualifiedParamList;
 
 public interface IQueryParameterOr {
 
@@ -33,7 +33,7 @@ public interface IQueryParameterOr {
 	 *    for information on the <b>token</b> format
 	 * </p>
 	 */
-	public void setValuesAsQueryTokens(List<String> theParameters);
+	public void setValuesAsQueryTokens(QualifiedParamList theParameters);
 
 	/**
 	 * Returns the value of this type using the <b>token</b> format. This 
@@ -45,7 +45,7 @@ public interface IQueryParameterOr {
 	 *    for information on the <b>token</b> format
 	 * </p>
 	 */
-	public List<String> getValuesAsQueryTokens();
+	public QualifiedParamList getValuesAsQueryTokens();
 
 	
 }

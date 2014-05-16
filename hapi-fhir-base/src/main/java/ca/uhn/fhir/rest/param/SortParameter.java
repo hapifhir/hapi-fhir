@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 
 import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.Sort;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
@@ -38,7 +39,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 public class SortParameter implements IParameter {
 
 	@Override
-	public void translateClientArgumentIntoQueryArgument(Object theSourceClientArgument, Map<String, List<String>> theTargetQueryArguments, BaseClientInvocation theClientInvocation) throws InternalErrorException {
+	public void translateClientArgumentIntoQueryArgument(FhirContext theContext, Object theSourceClientArgument, Map<String, List<String>> theTargetQueryArguments, BaseClientInvocation theClientInvocation) throws InternalErrorException {
 		SortSpec ss = (SortSpec) theSourceClientArgument;
 		if (ss ==null) {
 			return;

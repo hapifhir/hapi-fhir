@@ -22,13 +22,14 @@ package ca.uhn.fhir.rest.param;
 
 import java.util.List;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.method.QualifiedParamList;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 interface IParamBinder {
 	
-	List<List<String>> encode(Object theString) throws InternalErrorException;
+	List<QualifiedParamList> encode(FhirContext theContext, Object theString) throws InternalErrorException;
 
 	Object parse(List<QualifiedParamList> theList) throws InternalErrorException, InvalidRequestException;
 

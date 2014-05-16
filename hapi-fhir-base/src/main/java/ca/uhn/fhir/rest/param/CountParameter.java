@@ -29,6 +29,7 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 
 import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.annotation.Since;
@@ -43,7 +44,7 @@ public class CountParameter implements IParameter {
 	private Class<?> myType;
 
 	@Override
-	public void translateClientArgumentIntoQueryArgument(Object theSourceClientArgument, Map<String, List<String>> theTargetQueryArguments, BaseClientInvocation theClientInvocation) throws InternalErrorException {
+	public void translateClientArgumentIntoQueryArgument(FhirContext theContext, Object theSourceClientArgument, Map<String, List<String>> theTargetQueryArguments, BaseClientInvocation theClientInvocation) throws InternalErrorException {
 		if (theSourceClientArgument != null) {
 			IntegerDt since = ParameterUtil.toInteger(theSourceClientArgument);
 			if (since.isEmpty() == false) {

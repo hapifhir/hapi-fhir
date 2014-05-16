@@ -240,6 +240,11 @@ public class ${className}
 			setCode(theParameter);
 		}
 	}	
+
+	@Override
+	public String getQueryParameterQualifier(FhirContext theContext) {
+		return null;
+	}	
 #end
 #if ( ${className} == "HumanNameDt" )
 	/**
@@ -315,6 +320,11 @@ public class ${className}
 		} else {
 			setValue(theParameter);
 		}
+	}	
+
+	@Override
+	public String getQueryParameterQualifier(FhirContext theContext) {
+		return null;
 	}	
 #end
 

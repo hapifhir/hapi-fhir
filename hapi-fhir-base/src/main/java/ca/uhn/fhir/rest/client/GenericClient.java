@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpRequestBase;
 
@@ -172,10 +173,13 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		LinkedHashMap<String, List<String>> params = new LinkedHashMap<String, List<String>>();
 		for (Entry<String, List<IQueryParameterType>> nextEntry : theParams.entrySet()) {
 			ArrayList<String> valueList = new ArrayList<String>();
-			params.put(nextEntry.getKey(), valueList);
+			String qualifier = null;
 			for (IQueryParameterType nextValue : nextEntry.getValue()) {
 				valueList.add(nextValue.getValueAsQueryToken());
+				qualifier = nextValue.getQueryParameterQualifier(myContext);
 			}
+			qualifier = StringUtils.defaultString(qualifier);
+			params.put(nextEntry.getKey()+qualifier, valueList);
 		}
 
 		GetClientInvocation invocation = SearchMethodBinding.createSearchInvocation(toResourceName(theType), params);

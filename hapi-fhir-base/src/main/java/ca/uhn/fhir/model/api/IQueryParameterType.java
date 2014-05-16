@@ -1,5 +1,7 @@
 package ca.uhn.fhir.model.api;
 
+import ca.uhn.fhir.context.FhirContext;
+
 /*
  * #%L
  * HAPI FHIR Library
@@ -23,8 +25,7 @@ package ca.uhn.fhir.model.api;
 public interface IQueryParameterType {
 
 	/**
-	 * Sets the value of this type using the <b>token</b> format. This format is used in HTTP queries as a parameter
-	 * format.
+	 * This method is generally only called by HAPI itself, and should not need to be called from user code. 
 	 * 
 	 * <p>
 	 * See FHIR specification <a href="http://www.hl7.org/implement/standards/fhir/search.html#ptypes">2.2.2 Search
@@ -41,8 +42,7 @@ public interface IQueryParameterType {
 	public void setValueAsQueryToken(String theQualifier, String theValue);
 
 	/**
-	 * Returns the value of this type using the <b>token</b> format. This format is used in HTTP queries as a parameter
-	 * format.
+	 * This method is generally only called by HAPI itself, and should not need to be called from user code. 
 	 * 
 	 * <p>
 	 * See FHIR specification <a href="http://www.hl7.org/implement/standards/fhir/search.html#ptypes">2.2.2 Search
@@ -50,5 +50,13 @@ public interface IQueryParameterType {
 	 * </p>
 	 */
 	public String getValueAsQueryToken();
+	
+	/**
+	 * This method is generally only called by HAPI itself, and should not need to be called from user code. 
+	 *
+	 * This method will return any qualifier that should be appended to the parameter name (e.g ":exact")
+	 * @param theContext TODO
+	 */
+	public String getQueryParameterQualifier(FhirContext theContext);
 
 }

@@ -61,6 +61,24 @@ public class StringParameterTest {
 			assertEquals(0, new FhirContext().newXmlParser().parseBundle(responseContent).getEntries().size());
 		}
 	}
+	
+	@Test
+	public void testRawString() throws Exception {
+		{
+			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?plain=aaa");
+			HttpResponse status = ourClient.execute(httpGet);
+			String responseContent = IOUtils.toString(status.getEntity().getContent());
+			assertEquals(200, status.getStatusLine().getStatusCode());
+			assertEquals(1, new FhirContext().newXmlParser().parseBundle(responseContent).getEntries().size());
+		}
+		{
+			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?plain=BBB");
+			HttpResponse status = ourClient.execute(httpGet);
+			String responseContent = IOUtils.toString(status.getEntity().getContent());
+			assertEquals(200, status.getStatusLine().getStatusCode());
+			assertEquals(0, new FhirContext().newXmlParser().parseBundle(responseContent).getEntries().size());
+		}
+	}
 
 	@Test
 	public void testSearchExactMatch() throws Exception {
@@ -133,6 +151,18 @@ public class StringParameterTest {
 			return retVal;
 		}
 
+		
+		@Search
+		public List<Patient> findPatient(@RequiredParam(name = "plain") String theParam) {
+			ArrayList<Patient> retVal = new ArrayList<Patient>();
+
+			if (theParam.toLowerCase().equals("aaa")) {
+				retVal.add(new Patient());
+			}
+
+			return retVal;
+		}
+		
 		@Override
 		public Class<? extends IResource> getResourceType() {
 			return Patient.class;

@@ -34,24 +34,24 @@ public class ResourceBinding {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceBinding.class);
 
 	private String resourceName;
-	private List<BaseMethodBinding> methods = new ArrayList<BaseMethodBinding>();
+	private List<BaseMethodBinding<?>> methods = new ArrayList<BaseMethodBinding<?>>();
 
 	public ResourceBinding() {
 	}
 
-	public ResourceBinding(String resourceName, List<BaseMethodBinding> methods) {
+	public ResourceBinding(String resourceName, List<BaseMethodBinding<?>> methods) {
 		this.resourceName = resourceName;
 		this.methods = methods;
 	}
 
-	public BaseMethodBinding getMethod(Request theRequest) throws Exception {
+	public BaseMethodBinding<?> getMethod(Request theRequest) throws Exception {
 		if (null == methods) {
 			ourLog.warn("No methods exist for resource: {}", resourceName);
 			return null;
 		}
 
 		ourLog.debug("Looking for a handler for {}", theRequest);
-		for (BaseMethodBinding rm : methods) {
+		for (BaseMethodBinding<?> rm : methods) {
 			if (rm.incomingServerRequestMatchesMethod(theRequest)) {
 				ourLog.debug("Handler {} matches", rm);
 				return rm;
@@ -70,15 +70,15 @@ public class ResourceBinding {
 		this.resourceName = resourceName;
 	}
 
-	public List<BaseMethodBinding> getMethodBindings() {
+	public List<BaseMethodBinding<?>> getMethodBindings() {
 		return methods;
 	}
 
-	public void setMethods(List<BaseMethodBinding> methods) {
+	public void setMethods(List<BaseMethodBinding<?>> methods) {
 		this.methods = methods;
 	}
 
-	public void addMethod(BaseMethodBinding method) {
+	public void addMethod(BaseMethodBinding<?> method) {
 		this.methods.add(method);
 	}
 

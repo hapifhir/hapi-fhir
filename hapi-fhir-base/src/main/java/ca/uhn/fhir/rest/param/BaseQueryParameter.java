@@ -26,6 +26,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
+
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.dstu.valueset.SearchParamTypeEnum;
 import ca.uhn.fhir.rest.client.BaseClientInvocation;
 import ca.uhn.fhir.rest.method.QualifiedParamList;
@@ -35,7 +38,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 public abstract class BaseQueryParameter implements IParameter {
 
-	public abstract List<List<String>> encode(Object theObject) throws InternalErrorException;
+	public abstract List<QualifiedParamList> encode(FhirContext theContext, Object theObject) throws InternalErrorException;
 
 	public abstract String getName();
 
@@ -52,17 +55,17 @@ public abstract class BaseQueryParameter implements IParameter {
 	public abstract SearchParamTypeEnum getParamType();
 
 	@Override
-	public void translateClientArgumentIntoQueryArgument(Object theSourceClientArgument, Map<String, List<String>> theTargetQueryArguments, BaseClientInvocation theClientInvocation) throws InternalErrorException {
+	public void translateClientArgumentIntoQueryArgument(FhirContext theContext, Object theSourceClientArgument, Map<String, List<String>> theTargetQueryArguments, BaseClientInvocation theClientInvocation) throws InternalErrorException {
 		if (theSourceClientArgument == null) {
 			if (isRequired()) {
 				throw new NullPointerException("SearchParameter '" + getName() + "' is required and may not be null");
 			}
 		} else {
-			List<List<String>> value = encode(theSourceClientArgument);
+			List<QualifiedParamList> value = encode(theContext, theSourceClientArgument);
 			ArrayList<String> paramValues = new ArrayList<String>(value.size());
-			theTargetQueryArguments.put(getName(), paramValues);
-
-			for (List<String> nextParamEntry : value) {
+			String qualifier=null;
+			
+			for (QualifiedParamList nextParamEntry : value) {
 				StringBuilder b = new StringBuilder();
 				for (String str : nextParamEntry) {
 					if (b.length() > 0) {
@@ -71,8 +74,13 @@ public abstract class BaseQueryParameter implements IParameter {
 					b.append(str.replace(",", "\\,"));
 				}
 				paramValues.add(b.toString());
+				
+				if (StringUtils.isBlank(qualifier)) {
+					qualifier=nextParamEntry.getQualifier();
+				}
 			}
 
+			theTargetQueryArguments.put(getName()+StringUtils.defaultString(qualifier), paramValues);
 		}
 	}
 
