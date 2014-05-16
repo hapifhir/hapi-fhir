@@ -13,17 +13,17 @@ public class ReferenceParam implements IQueryParameterType {
 	}
 
 	public ReferenceParam(String theValue) {
-		setValueAsQueryToken(theValue);
+		setValueAsQueryToken(null, theValue);
 	}
 
 	public ReferenceParam(String theChain, String theValue) {
-		setValueAsQueryToken(theValue);
+		setValueAsQueryToken(null, theValue);
 		setChain(theChain);
 	}
 
 	public ReferenceParam(Class<? extends IResource> theType, String theChain, String theValue) {
 		setType(theType);
-		setValueAsQueryToken(theValue);
+		setValueAsQueryToken(null, theValue);
 		setChain(theChain);
 	}
 	
@@ -49,8 +49,8 @@ public class ReferenceParam implements IQueryParameterType {
 	}
 
 	@Override
-	public void setValueAsQueryToken(String theParameter) {
-		myValue=theParameter;
+	public void setValueAsQueryToken(String theQualifier, String theValue) {
+		myValue=theValue;
 	}
 
 }

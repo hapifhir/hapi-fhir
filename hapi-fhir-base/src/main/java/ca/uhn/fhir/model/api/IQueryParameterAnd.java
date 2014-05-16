@@ -22,6 +22,7 @@ package ca.uhn.fhir.model.api;
 
 import java.util.List;
 
+import ca.uhn.fhir.rest.method.QualifiedParamList;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 public interface IQueryParameterAnd {
@@ -34,7 +35,7 @@ public interface IQueryParameterAnd {
 	 *    for information on the <b>token</b> format
 	 * </p>
 	 */
-	public void setValuesAsQueryTokens(List<List<String>> theParameters) throws InvalidRequestException;
+	public void setValuesAsQueryTokens(List<QualifiedParamList> theParameters) throws InvalidRequestException;
 
 	/**
 	 * 

@@ -423,13 +423,13 @@ public class IdentifierDt
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void setValueAsQueryToken(String theParameter) {
-		int barIndex = theParameter.indexOf('|');
+	public void setValueAsQueryToken(String theQualifier, String theValue) {
+		int barIndex = theValue.indexOf('|');
 		if (barIndex != -1) {
-			setSystem(new UriDt(theParameter.substring(0, barIndex)));
-			setValue(theParameter.substring(barIndex + 1));
+			setSystem(new UriDt(theValue.substring(0, barIndex)));
+			setValue(theValue.substring(barIndex + 1));
 		} else {
-			setValue(theParameter);
+			setValue(theValue);
 		}
 	}	
 

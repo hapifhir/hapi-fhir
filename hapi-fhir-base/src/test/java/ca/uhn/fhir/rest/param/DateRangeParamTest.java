@@ -5,13 +5,13 @@ import static org.junit.Assert.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import ca.uhn.fhir.rest.method.QualifiedParamList;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 public class DateRangeParamTest {
@@ -90,9 +90,9 @@ public class DateRangeParamTest {
 	
 	private static DateRangeParam create(String theLower, String theUpper) throws InvalidRequestException {
 		DateRangeParam p = new DateRangeParam();
-		List<List<String>> tokens=new ArrayList<List<String>>();
-		tokens.add(Collections.singletonList(theLower));
-		tokens.add(Collections.singletonList(theUpper));
+		List<QualifiedParamList> tokens=new ArrayList<QualifiedParamList>();
+		tokens.add(QualifiedParamList.singleton(null,theLower));
+		tokens.add(QualifiedParamList.singleton(null,theUpper));
 		p.setValuesAsQueryTokens(tokens);
 		return p;
 	}

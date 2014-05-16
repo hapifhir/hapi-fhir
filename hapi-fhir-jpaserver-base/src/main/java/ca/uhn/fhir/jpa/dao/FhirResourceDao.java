@@ -996,19 +996,19 @@ public class FhirResourceDao<T extends IResource, X extends BaseResourceTable<T>
 			return new QualifiedDateParam(theValueAsQueryToken);
 		case NUMBER:
 			QuantityDt qt = new QuantityDt();
-			qt.setValueAsQueryToken(theValueAsQueryToken);
+			qt.setValueAsQueryToken(null, theValueAsQueryToken);
 			return qt;
 		case QUANTITY:
 			qt = new QuantityDt();
-			qt.setValueAsQueryToken(theValueAsQueryToken);
+			qt.setValueAsQueryToken(null, theValueAsQueryToken);
 			return qt;
 		case STRING:
 			StringDt st = new StringDt();
-			st.setValueAsQueryToken(theValueAsQueryToken);
+			st.setValueAsQueryToken(null, theValueAsQueryToken);
 			return st;
 		case TOKEN:
 			IdentifierDt id = new IdentifierDt();
-			id.setValueAsQueryToken(theValueAsQueryToken);
+			id.setValueAsQueryToken(null, theValueAsQueryToken);
 			return id;
 		case COMPOSITE:
 		case REFERENCE:

@@ -373,17 +373,17 @@ public class QuantityDt extends BaseElement implements ICompositeDatatype, IQuer
 	}
 
 	@Override
-	public void setValueAsQueryToken(String theParameter) {
+	public void setValueAsQueryToken(String theQualifier, String theValue) {
 		setComparator((BoundCodeDt<QuantityCompararatorEnum>) null);
 		setCode((CodeDt) null);
 		setSystem((UriDt) null);
 		setUnits((StringDt) null);
 		setValue((DecimalDt) null);
 
-		if (theParameter == null) {
+		if (theValue == null) {
 			return;
 		}
-		String[] parts = theParameter.split("\\|");
+		String[] parts = theValue.split("\\|");
 		if (parts.length > 0 && StringUtils.isNotBlank(parts[0])) {
 			if (parts[0].startsWith("<=")) {
 				setComparator(QuantityCompararatorEnum.LESSTHAN_OR_EQUALS);

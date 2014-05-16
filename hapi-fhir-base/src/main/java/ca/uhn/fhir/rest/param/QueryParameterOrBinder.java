@@ -24,6 +24,7 @@ import java.util.Collections;
 import java.util.List;
 
 import ca.uhn.fhir.model.api.IQueryParameterOr;
+import ca.uhn.fhir.rest.method.QualifiedParamList;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
@@ -41,7 +42,7 @@ final class QueryParameterOrBinder implements IParamBinder {
 	}
 
 	@Override
-	public Object parse(List<List<String>> theString) throws InternalErrorException, InvalidRequestException {
+	public Object parse(List<QualifiedParamList> theString) throws InternalErrorException, InvalidRequestException {
 		IQueryParameterOr dt;
 		try {
 			dt = myType.newInstance();

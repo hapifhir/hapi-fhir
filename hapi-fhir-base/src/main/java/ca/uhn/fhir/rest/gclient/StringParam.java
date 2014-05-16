@@ -59,7 +59,7 @@ public class StringParam implements IParam {
 	private class StringExactly implements IStringMatch {
 		@Override
 		public ICriterion value(String theValue) {
-			return new StringCriterion(getParamName() + Constants.PARAMNAME_SUFFIX_EXACT, theValue);
+			return new StringCriterion(getParamName() + Constants.PARAMQUALIFIER_STRING_EXACT, theValue);
 		}
 	}
 

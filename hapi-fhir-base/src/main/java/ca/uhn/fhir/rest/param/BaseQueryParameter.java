@@ -23,16 +23,15 @@ package ca.uhn.fhir.rest.param;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 import ca.uhn.fhir.model.dstu.valueset.SearchParamTypeEnum;
 import ca.uhn.fhir.rest.client.BaseClientInvocation;
+import ca.uhn.fhir.rest.method.QualifiedParamList;
 import ca.uhn.fhir.rest.method.Request;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.util.QueryUtil;
 
 public abstract class BaseQueryParameter implements IParameter {
 
@@ -40,13 +39,13 @@ public abstract class BaseQueryParameter implements IParameter {
 
 	public abstract String getName();
 
-	public abstract Object parse(List<List<String>> theString) throws InternalErrorException, InvalidRequestException;
+	public abstract Object parse(List<QualifiedParamList> theString) throws InternalErrorException, InvalidRequestException;
 
 	public abstract boolean isRequired();
-	
+
 	/**
-	 * Parameter should return true if {@link #parse(List)} should be called even
-	 * if the query string contained no values for the given parameter 
+	 * Parameter should return true if {@link #parse(List)} should be called even if the query string contained no
+	 * values for the given parameter
 	 */
 	public abstract boolean handlesMissing();
 
@@ -76,31 +75,46 @@ public abstract class BaseQueryParameter implements IParameter {
 
 		}
 	}
-	
+
 	@Override
 	public Object translateQueryParametersIntoServerArgument(Request theRequest, Object theRequestContents) throws InternalErrorException, InvalidRequestException {
-		String[] value = theRequest.getParameters().get(getName());
-		if (value == null || value.length == 0) {
+
+		List<QualifiedParamList> paramList = new ArrayList<QualifiedParamList>();
+		String name = getName();
+		parseParams(theRequest, paramList, name, null);
+
+		List<String> qualified = theRequest.getUnqualifiedToQualifiedNames().get(name);
+		if (qualified != null) {
+			for (String nextQualified : qualified) {
+				parseParams(theRequest, paramList, nextQualified, nextQualified.substring(name.length()));
+			}
+		}
+
+		if (paramList.isEmpty()) {
 			if (handlesMissing()) {
-				return parse(new ArrayList<List<String>>(0));
-			}else {
+				return paramList;
+			} else {
 				return null;
 			}
 		}
 
-		List<List<String>> paramList = new ArrayList<List<String>>(value.length);
-		for (String nextParam : value) {
-			if (nextParam.contains(",") == false) {
-				paramList.add(Collections.singletonList(nextParam));
-			} else {
-				paramList.add(QueryUtil.splitQueryStringByCommasIgnoreEscape(nextParam));
+		return parse(paramList);
+
+	}
+
+	private void parseParams(Request theRequest, List<QualifiedParamList> paramList, String theQualifiedParamName, String theQualifier) {
+		String[] value = theRequest.getParameters().get(theQualifiedParamName);
+		if (value != null) {
+			for (String nextParam : value) {
+				if (nextParam.contains(",") == false) {
+					paramList.add(QualifiedParamList.singleton(theQualifier, nextParam));
+				} else {
+					paramList.add(QualifiedParamList.splitQueryStringByCommasIgnoreEscape(theQualifier, nextParam));
+				}
 			}
 		}
-
-		return parse(paramList);
-		
 	}
-	
+
 	@Override
 	public void initializeTypes(Method theMethod, Class<? extends Collection<?>> theOuterCollectionType, Class<? extends Collection<?>> theInnerCollectionType, Class<?> theParameterType) {
 		// ignore for now

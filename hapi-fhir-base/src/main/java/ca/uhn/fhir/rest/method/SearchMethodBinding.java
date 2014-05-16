@@ -84,14 +84,14 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 		if (myQueryName != null) {
 			queryStringArgs.put(Constants.PARAM_QUERY, Collections.singletonList(myQueryName));
 		}
-		
+
 		String resourceName = getResourceName();
 		GetClientInvocation retVal = createSearchInvocation(resourceName, queryStringArgs);
 
 		if (theArgs != null) {
 			for (int idx = 0; idx < theArgs.length; idx++) {
 				IParameter nextParam = getParameters().get(idx);
-				nextParam.translateClientArgumentIntoQueryArgument(theArgs[idx], queryStringArgs,retVal);
+				nextParam.translateClientArgumentIntoQueryArgument(theArgs[idx], queryStringArgs, retVal);
 			}
 		}
 
@@ -136,16 +136,29 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 			return false;
 		}
 
+		// This is used to track all the parameters so we can reject queries that 
+		// have additional params we don't understand
 		Set<String> methodParamsTemp = new HashSet<String>();
+		
+		Set<String> unqualifiedNames = theRequest.getUnqualifiedToQualifiedNames().keySet();
+		Set<String> qualifiedParamNames = theRequest.getParameters().keySet();
 		for (int i = 0; i < this.getParameters().size(); i++) {
 			if (!(getParameters().get(i) instanceof BaseQueryParameter)) {
 				continue;
 			}
 			BaseQueryParameter temp = (BaseQueryParameter) getParameters().get(i);
-			methodParamsTemp.add(temp.getName());
-			if (temp.isRequired() && !theRequest.getParameters().containsKey(temp.getName())) {eee
-				ourLog.trace("Method {} doesn't match param '{}' is not present", getMethod().getName(), temp.getName());
-				return false;
+			String name = temp.getName();
+			if (temp.isRequired()) {
+
+				if (qualifiedParamNames.contains(name)) {
+					methodParamsTemp.add(name);
+				} else if (unqualifiedNames.contains(name)) {
+					methodParamsTemp.addAll(theRequest.getUnqualifiedToQualifiedNames().get(name));
+				} else {
+					ourLog.trace("Method {} doesn't match param '{}' is not present", getMethod().getName(), name);
+					return false;
+
+				}
 			}
 		}
 		if (myQueryName != null) {

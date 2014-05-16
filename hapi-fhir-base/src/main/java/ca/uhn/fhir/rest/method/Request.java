@@ -21,7 +21,10 @@ package ca.uhn.fhir.rest.method;
  */
 
 import java.io.Reader;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -45,6 +48,7 @@ public class Request {
 	private HttpServletRequest myServletRequest;
 	private HttpServletResponse myServletResponse;
 	private IdDt myVersion;
+	private Map<String,List<String>> myUnqualifiedToQualifiedNames;
 
 	public String getCompleteUrl() {
 		return myCompleteUrl;
@@ -117,6 +121,33 @@ public class Request {
 
 	public void setParameters(Map<String, String[]> theParams) {
 		myParameters = theParams;
+		
+		for (String next : myParameters.keySet()) {
+			for (int i = 0; i < next.length();i++) {
+				char nextChar = next.charAt(i);
+				if(nextChar == ':' || nextChar == '.') {
+					if (myUnqualifiedToQualifiedNames==null) {
+						myUnqualifiedToQualifiedNames = new HashMap<String, List<String>>();
+					}
+					String unqualified = next.substring(0,i);
+					List<String> list = myUnqualifiedToQualifiedNames.get(unqualified);
+					if (list==null) {
+						list=new ArrayList<String>(4);
+						myUnqualifiedToQualifiedNames.put(unqualified, list);
+					}
+					list.add(next);
+					break;
+				}
+			}
+		}
+
+		if (myUnqualifiedToQualifiedNames==null) {
+			myUnqualifiedToQualifiedNames=Collections.emptyMap();
+		}
+	}
+
+	public Map<String, List<String>> getUnqualifiedToQualifiedNames() {
+		return myUnqualifiedToQualifiedNames;
 	}
 
 	public void setRequestType(RequestType theRequestType) {

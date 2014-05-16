@@ -31,6 +31,7 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.model.api.PathSpecification;
 import ca.uhn.fhir.model.dstu.valueset.SearchParamTypeEnum;
 import ca.uhn.fhir.rest.annotation.IncludeParam;
+import ca.uhn.fhir.rest.method.QualifiedParamList;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
@@ -83,7 +84,7 @@ public class IncludeParameter extends BaseQueryParameter {
 	}
 
 	@Override
-	public Object parse(List<List<String>> theString) throws InternalErrorException, InvalidRequestException {
+	public Object parse(List<QualifiedParamList> theString) throws InternalErrorException, InvalidRequestException {
 		Collection<PathSpecification> retValCollection = null;
 		if (myInstantiableCollectionType!=null) {
 		try {

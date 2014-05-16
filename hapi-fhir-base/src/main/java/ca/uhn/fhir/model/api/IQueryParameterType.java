@@ -23,25 +23,32 @@ package ca.uhn.fhir.model.api;
 public interface IQueryParameterType {
 
 	/**
-	 * Sets the value of this type using the <b>token</b> format. This 
-	 * format is used in HTTP queries as a parameter format.
+	 * Sets the value of this type using the <b>token</b> format. This format is used in HTTP queries as a parameter
+	 * format.
 	 * 
-	 * <p>See FHIR specification 
-	 *    <a href="http://www.hl7.org/implement/standards/fhir/search.html#ptypes">2.2.2 Search SearchParameter Types</a>
-	 *    for information on the <b>token</b> format
-	 *    </p>
+	 * <p>
+	 * See FHIR specification <a href="http://www.hl7.org/implement/standards/fhir/search.html#ptypes">2.2.2 Search
+	 * SearchParameter Types</a> for information on the <b>token</b> format
+	 * </p>
+	 * 
+	 * @param theQualifier
+	 *            The parameter name qualifier that accompanied this value. For example, if the complete query was
+	 *            <code>http://foo?name:exact=John</code>, qualifier would be ":exact"
+	 * @param theValue
+	 *            The actual parameter value. For example, if the complete query was
+	 *            <code>http://foo?name:exact=John</code>, the value would be "John"
 	 */
-	public void setValueAsQueryToken(String theParameter);
+	public void setValueAsQueryToken(String theQualifier, String theValue);
 
 	/**
-	 * Returns the value of this type using the <b>token</b> format. This 
-	 * format is used in HTTP queries as a parameter format.
+	 * Returns the value of this type using the <b>token</b> format. This format is used in HTTP queries as a parameter
+	 * format.
 	 * 
-	 * <p>See FHIR specification 
-	 *    <a href="http://www.hl7.org/implement/standards/fhir/search.html#ptypes">2.2.2 Search SearchParameter Types</a>
-	 *    for information on the <b>token</b> format
-	 *   </p>
+	 * <p>
+	 * See FHIR specification <a href="http://www.hl7.org/implement/standards/fhir/search.html#ptypes">2.2.2 Search
+	 * SearchParameter Types</a> for information on the <b>token</b> format
+	 * </p>
 	 */
 	public String getValueAsQueryToken();
-	
+
 }

@@ -109,8 +109,8 @@ public class StringDt extends BasePrimitive<String> implements IQueryParameterTy
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void setValueAsQueryToken(String theParameter) {
-		setValue(theParameter);
+	public void setValueAsQueryToken(String theQualifier, String theValue) {
+		setValue(theValue);
 	}
 
 	/**

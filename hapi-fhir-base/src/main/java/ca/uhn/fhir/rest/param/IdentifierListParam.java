@@ -57,7 +57,7 @@ public class IdentifierListParam implements IQueryParameterOr {
 	public void setValuesAsQueryTokens(List<String> theParameters) {
 		for (String string : theParameters) {
 			IdentifierDt dt = new IdentifierDt();
-			dt.setValueAsQueryToken(string);
+			dt.setValueAsQueryToken(null, string);
 			myIdentifiers.add(dt);
 		}
 	}

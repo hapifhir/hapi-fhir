@@ -59,7 +59,7 @@ public class QualifiedDateParam extends DateTimeDt implements IQueryParameterTyp
 	 * @param theString The string
 	 */
 	public QualifiedDateParam(String theString) {
-		setValueAsQueryToken(theString);
+		setValueAsQueryToken(null, theString);
 	}
 
 	/**
@@ -95,28 +95,28 @@ public class QualifiedDateParam extends DateTimeDt implements IQueryParameterTyp
 	}
 
 	@Override
-	public void setValueAsQueryToken(String theParameter) {
-		if (theParameter.length() < 2) {
-			throw new DataFormatException("Invalid qualified date parameter: "+theParameter);
+	public void setValueAsQueryToken(String theQualifier, String theValue) {
+		if (theValue.length() < 2) {
+			throw new DataFormatException("Invalid qualified date parameter: "+theValue);
 		}
 
-		char char0 = theParameter.charAt(0);
-		char char1 = theParameter.charAt(1);
+		char char0 = theValue.charAt(0);
+		char char1 = theValue.charAt(1);
 		if (Character.isDigit(char0)) {
-			setValueAsString(theParameter);
+			setValueAsString(theValue);
 		} else {
 			int dateStart = 2;
 			if (Character.isDigit(char1)) {
 				dateStart = 1;
 			}
 			
-			String comparatorString = theParameter.substring(0, dateStart);
+			String comparatorString = theValue.substring(0, dateStart);
 			QuantityCompararatorEnum comparator = QuantityCompararatorEnum.VALUESET_BINDER.fromCodeString(comparatorString);
 			if (comparator==null) {
 				throw new DataFormatException("Invalid date qualifier: "+comparatorString);
 			}
 			
-			String dateString = theParameter.substring(dateStart);
+			String dateString = theValue.substring(dateStart);
 			setValueAsString(dateString);
 			setComparator(comparator);
 		}

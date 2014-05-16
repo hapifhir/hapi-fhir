@@ -116,7 +116,7 @@ public class CodingListParam implements IQueryParameterOr, Iterable<CodingDt> {
 		getCodings().clear();
 		for (String string : theParameters) {
 			CodingDt dt = new CodingDt();
-			dt.setValueAsQueryToken(string);
+			dt.setValueAsQueryToken(null, string);
 			myCodings.add(dt);
 		}
 	}

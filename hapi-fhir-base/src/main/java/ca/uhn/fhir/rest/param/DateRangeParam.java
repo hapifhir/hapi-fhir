@@ -28,6 +28,7 @@ import java.util.List;
 import ca.uhn.fhir.model.api.IQueryParameterAnd;
 import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
 import ca.uhn.fhir.parser.DataFormatException;
+import ca.uhn.fhir.rest.method.QualifiedParamList;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 public class DateRangeParam implements IQueryParameterAnd {
@@ -210,7 +211,7 @@ public class DateRangeParam implements IQueryParameterAnd {
 	}
 
 	@Override
-	public void setValuesAsQueryTokens(List<List<String>> theParameters) throws InvalidRequestException {
+	public void setValuesAsQueryTokens(List<QualifiedParamList> theParameters) throws InvalidRequestException {
 		for (List<String> paramList : theParameters) {
 			if (paramList.size() == 0) {
 				continue;
@@ -220,7 +221,7 @@ public class DateRangeParam implements IQueryParameterAnd {
 			}
 			String param = paramList.get(0);
 			QualifiedDateParam parsed = new QualifiedDateParam();
-			parsed.setValueAsQueryToken(param);
+			parsed.setValueAsQueryToken(null, param);
 			addParam(parsed);
 		}
 	}

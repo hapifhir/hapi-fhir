@@ -31,6 +31,7 @@ import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.composite.QuantityDt;
 import ca.uhn.fhir.model.dstu.valueset.SearchParamTypeEnum;
 import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.rest.method.QualifiedParamList;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
@@ -97,7 +98,7 @@ public class SearchParameter extends BaseQueryParameter {
 	 * @see ca.uhn.fhir.rest.param.IParameter#parse(java.util.List)
 	 */
 	@Override
-	public Object parse(List<List<String>> theString) throws InternalErrorException, InvalidRequestException {
+	public Object parse(List<QualifiedParamList> theString) throws InternalErrorException, InvalidRequestException {
 		return myParamBinder.parse(theString);
 	}
 

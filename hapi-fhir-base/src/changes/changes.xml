@@ -14,6 +14,10 @@
 				QuantityDt did not implement IQueryParameterType so it was not valid, and there was no way to
 				support quantity search parameters on the server (e.g. Observation.value-quantity)
 			</action>
+			<action type="add">
+				Introduce StringParameter type which can be used as a RESTful operation search parameter
+				type. StringParameter allows ":exact" matches to be specified in clients, and handled in servers.
+			</action>
         </release>			
 	</body>
 </document>
