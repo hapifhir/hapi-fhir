@@ -29,6 +29,8 @@ import ca.uhn.fhir.rest.client.api.IBasicClient;
 import ca.uhn.fhir.tinder.model.BaseRootType;
 import ca.uhn.fhir.tinder.model.RestResourceTm;
 import ca.uhn.fhir.tinder.model.SearchParameter;
+import ca.uhn.fhir.tinder.parser.ProfileParser;
+import ca.uhn.fhir.tinder.parser.ResourceGeneratorUsingSpreadsheet;
 
 @Mojo(name = "generate-client", defaultPhase = LifecyclePhase.GENERATE_SOURCES)
 public class TinderClientMojo extends AbstractMojo {

@@ -24,7 +24,7 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
-import ca.uhn.fhir.rest.param.StringParameter;
+import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.testutil.RandomServerPortProvider;
 
 /**
@@ -138,7 +138,7 @@ public class StringParameterTest {
 	public static class DummyPatientResourceProvider implements IResourceProvider {
 
 		@Search
-		public List<Patient> findPatient(@RequiredParam(name = "str") StringParameter theParam) {
+		public List<Patient> findPatient(@RequiredParam(name = "str") StringParam theParam) {
 			ArrayList<Patient> retVal = new ArrayList<Patient>();
 
 			if (theParam.isExact() && theParam.getValue().equals("aaa")) {

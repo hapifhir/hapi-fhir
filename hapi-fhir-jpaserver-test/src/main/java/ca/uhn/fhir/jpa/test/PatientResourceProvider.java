@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import ca.uhn.fhir.jpa.dao.BaseResourceProvider;
+import ca.uhn.fhir.jpa.dao.BaseJpaResourceProvider;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.annotation.Description;
@@ -14,7 +14,7 @@ import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
 
-public class PatientResourceProvider extends BaseResourceProvider<Patient> {
+public class PatientResourceProvider extends BaseJpaResourceProvider<Patient> {
 
 	@Override
 	public Class<? extends IResource> getResourceType() {

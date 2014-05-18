@@ -24,18 +24,18 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.server.Constants;
 
-public class StringParameter extends StringDt {
+public class StringParam extends StringDt {
 
 	private boolean myExact;
 
-	public StringParameter() {
+	public StringParam() {
 	}
 
-	public StringParameter(String theValue) {
+	public StringParam(String theValue) {
 		setValue(theValue);
 	}
 
-	public StringParameter(String theValue, boolean theExact) {
+	public StringParam(String theValue, boolean theExact) {
 		setValue(theValue);
 		setExact(theExact);
 	}

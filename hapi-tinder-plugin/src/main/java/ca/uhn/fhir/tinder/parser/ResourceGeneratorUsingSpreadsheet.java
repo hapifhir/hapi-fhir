@@ -1,10 +1,9 @@
-package ca.uhn.fhir.tinder;
+package ca.uhn.fhir.tinder.parser;
 
 import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 import org.apache.maven.plugin.MojoFailureException;
@@ -15,26 +14,61 @@ import ca.uhn.fhir.tinder.model.Resource;
 
 
 public class ResourceGeneratorUsingSpreadsheet extends BaseStructureSpreadsheetParser {
-
-
-	private ArrayList<InputStream> myInputStreams;
+	private String myFilenameSuffix = "";
 	private List<String> myInputStreamNames;
+	private ArrayList<InputStream> myInputStreams;
+	private String myTemplate="/vm/resource.vm";
+	
+	public List<String> getInputStreamNames() {
+		return myInputStreamNames;
+	}
+
+	public void setBaseResourceNames(List<String> theBaseResourceNames) throws MojoFailureException {
+		myInputStreamNames = theBaseResourceNames;
+		myInputStreams = new ArrayList<InputStream>();
+		
+		for (String next : theBaseResourceNames) {
+			InputStream nextRes = getClass().getResourceAsStream("/res/" + next + "-spreadsheet.xml");
+			myInputStreams.add(nextRes);
+			if (nextRes == null) {
+				throw new MojoFailureException("Unknown base resource name: " + next);
+			}
+		}
+	}
+
+	public void setFilenameSuffix(String theFilenameSuffix) {
+		myFilenameSuffix = theFilenameSuffix;
+	}
+
+	public void setTemplate(String theTemplate) {
+		myTemplate = theTemplate;
+	}
+
+	@Override
+	protected BaseRootType createRootType() {
+		return new Resource();
+	}
+
+
+	@Override
+	protected String getFilenameSuffix() {
+		return myFilenameSuffix;
+	}
+
+	@Override
+	protected Collection<InputStream> getInputStreams() {
+		return myInputStreams;
+	}
 
 	@Override
 	protected String getTemplate() {
-		return "/vm/resource.vm";
+		return myTemplate;
 	}
 
 	@Override
 	protected boolean isSpreadsheet(String theFileName) {
 		return theFileName.endsWith("spreadsheet.xml");
 	}
-
-	@Override
-	protected String getFilenameSuffix() {
-		return "";
-	}
-
 
 	public static void main(String[] args) throws Exception  {
 		ResourceGeneratorUsingSpreadsheet p = new ResourceGeneratorUsingSpreadsheet();
@@ -140,33 +174,6 @@ public class ResourceGeneratorUsingSpreadsheet extends BaseStructureSpreadsheetP
 //		d.setOutputFile(basePath + "/ca/uhn/fhir/model/dstu/composite/QuantityDt.java");
 //		d.parse();
 
-	}
-
-	@Override
-	protected Collection<InputStream> getInputStreams() {
-		return myInputStreams;
-	}
-
-	public void setBaseResourceNames(List<String> theBaseResourceNames) throws MojoFailureException {
-		myInputStreamNames = theBaseResourceNames;
-		myInputStreams = new ArrayList<InputStream>();
-		
-		for (String next : theBaseResourceNames) {
-			InputStream nextRes = getClass().getResourceAsStream("/res/" + next + "-spreadsheet.xml");
-			myInputStreams.add(nextRes);
-			if (nextRes == null) {
-				throw new MojoFailureException("Unknown base resource name: " + next);
-			}
-		}
-	}
-
-	public List<String> getInputStreamNames() {
-		return myInputStreamNames;
-	}
-
-	@Override
-	protected BaseRootType createRootType() {
-		return new Resource();
 	}
 
 }

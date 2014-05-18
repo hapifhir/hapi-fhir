@@ -28,7 +28,7 @@ import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.client.api.IBasicClient;
-import ca.uhn.fhir.rest.param.StringParameter;
+import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.Constants;
 
 public class StringClientTest {
@@ -58,7 +58,7 @@ public class StringClientTest {
 		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(createBundle()), Charset.forName("UTF-8")));
 
 		IClient client = ctx.newRestfulClient(IClient.class, "http://foo");
-		client.searchWithParam(new StringParameter("hello"));
+		client.searchWithParam(new StringParam("hello"));
 
 		assertEquals(HttpGet.class, capt.getValue().getClass());
 		HttpGet get = (HttpGet) capt.getValue();
@@ -90,7 +90,7 @@ public class StringClientTest {
 		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(createBundle()), Charset.forName("UTF-8")));
 
 		IClient client = ctx.newRestfulClient(IClient.class, "http://foo");
-		client.searchWithParam(new StringParameter("hello", true));
+		client.searchWithParam(new StringParam("hello", true));
 
 		assertEquals(HttpGet.class, capt.getValue().getClass());
 		HttpGet get = (HttpGet) capt.getValue();
@@ -106,7 +106,7 @@ public class StringClientTest {
 	private interface IClient extends IBasicClient {
 
 		@Search(type=Patient.class)
-		public List<Patient> searchWithParam(@RequiredParam(name="withParam") StringParameter theString);
+		public List<Patient> searchWithParam(@RequiredParam(name="withParam") StringParam theString);
 
 		@Search(type=Patient.class)
 		public List<Patient> searchWithoutParam(@RequiredParam(name="withoutParam") String theString);

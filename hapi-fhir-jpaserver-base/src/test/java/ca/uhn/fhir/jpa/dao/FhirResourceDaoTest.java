@@ -41,7 +41,7 @@ import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.param.QualifiedDateParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
-import ca.uhn.fhir.rest.param.StringParameter;
+import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 public class FhirResourceDaoTest {
@@ -197,7 +197,7 @@ public class FhirResourceDaoTest {
 		map.put(Patient.SP_GENDER, new ArrayList<List<IQueryParameterType>>());
 		map.get(Patient.SP_GENDER).add(new ArrayList<IQueryParameterType>());
 		map.get(Patient.SP_GENDER).get(0).add(new IdentifierDt(null, "M"));
-		found = ourPatientDao.searchWithAndOr(map);
+		found = ourPatientDao.search(map);
 		assertEquals(1, found.size());
 		assertEquals(id, found.get(0).getId().asLong().longValue());
 
@@ -208,7 +208,7 @@ public class FhirResourceDaoTest {
 		map.put(Patient.SP_GENDER, new ArrayList<List<IQueryParameterType>>());
 		map.get(Patient.SP_GENDER).add(new ArrayList<IQueryParameterType>());
 		map.get(Patient.SP_GENDER).get(0).add(new IdentifierDt(null, "F"));
-		found = ourPatientDao.searchWithAndOr(map);
+		found = ourPatientDao.search(map);
 		assertEquals(0, found.size());
 
 	}
@@ -410,7 +410,7 @@ public class FhirResourceDaoTest {
 		List<Patient> patients = ourPatientDao.search(params);
 		assertEquals(2, patients.size());
 
-		StringParameter parameter = new StringParameter("testSearchStringParamWithNonNormalized_hora");
+		StringParam parameter = new StringParam("testSearchStringParamWithNonNormalized_hora");
 		parameter.setExact(true);
 		params.put(Patient.SP_FAMILY, parameter);
 		patients = ourPatientDao.search(params);

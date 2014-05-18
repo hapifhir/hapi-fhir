@@ -71,7 +71,7 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.QualifiedDateParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
-import ca.uhn.fhir.rest.param.StringParameter;
+import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -348,7 +348,7 @@ public class FhirResourceDao<T extends IResource, X extends BaseResourceTable<T>
 			}
 
 			Predicate singleCode = builder.equal(from.get("myValueNormalized"), normalizeString(string));
-			if (params instanceof StringParameter && ((StringParameter) params).isExact()) {
+			if (params instanceof StringParam && ((StringParam) params).isExact()) {
 				Predicate exactCode = builder.equal(from.get("myValueExact"), string);
 				singleCode = builder.and(singleCode, exactCode);
 			}
@@ -846,12 +846,12 @@ public class FhirResourceDao<T extends IResource, X extends BaseResourceTable<T>
 
 	@Override
 	public List<T> search(Map<String, IQueryParameterType> theParams) {
-		Map<String, List<List<IQueryParameterType>>> map = new HashMap<String, List<List<IQueryParameterType>>>();
+		SearchParameterMap map = new SearchParameterMap();
 		for (Entry<String, IQueryParameterType> nextEntry : theParams.entrySet()) {
 			map.put(nextEntry.getKey(), new ArrayList<List<IQueryParameterType>>());
 			map.get(nextEntry.getKey()).add(Collections.singletonList(nextEntry.getValue()));
 		}
-		return searchWithAndOr(map);
+		return search(map);
 	}
 
 	@Override
@@ -934,7 +934,7 @@ public class FhirResourceDao<T extends IResource, X extends BaseResourceTable<T>
 	}
 
 	@Override
-	public List<T> searchWithAndOr(Map<String, List<List<IQueryParameterType>>> theParams) {
+	public List<T> search(SearchParameterMap theParams) {
 
 		Set<Long> pids;
 		if (theParams.isEmpty()) {

@@ -59,7 +59,7 @@ import ca.uhn.fhir.rest.client.api.IRestfulClient;
 import ca.uhn.fhir.rest.param.CodingListParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.QualifiedDateParam;
-import ca.uhn.fhir.rest.param.StringParameter;
+import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
@@ -82,7 +82,7 @@ public List<Organization> getAllOrganizations() {
 //START SNIPPET: underlyingReq
 @Search
 public List<Patient> findPatients(
-		@RequiredParam(name="foo") StringParameter theParameter,
+		@RequiredParam(name="foo") StringParam theParameter,
 		HttpServletRequest theRequest, 
 		HttpServletResponse theResponse) {
  List<Patient> retVal=new ArrayList<Patient>(); // populate this
@@ -146,7 +146,7 @@ public Patient getResourceById(@IdParam IdDt theId,
 
 //START SNIPPET: searchStringParam
 @Search()
-public List<Patient> searchByLastName(@RequiredParam(name=Patient.SP_FAMILY) StringParameter theFamily) {
+public List<Patient> searchByLastName(@RequiredParam(name=Patient.SP_FAMILY) StringParam theFamily) {
    List<Patient> retVal = new ArrayList<Patient>();
    
    String valueToMatch = theFamily.getValue();
@@ -164,7 +164,7 @@ public List<Patient> searchByLastName(@RequiredParam(name=Patient.SP_FAMILY) Str
 
 //START SNIPPET: searchNamedQuery
 @Search(queryName="namedQuery1")
-public List<Patient> searchByNamedQuery(@RequiredParam(name="someparam") StringParameter theSomeParam) {
+public List<Patient> searchByNamedQuery(@RequiredParam(name="someparam") StringParam theSomeParam) {
  List<Patient> retVal = new ArrayList<Patient>();
  // ...populate...
  return retVal;
@@ -185,8 +185,8 @@ public List<Patient> searchByIdentifier(@RequiredParam(name=Patient.SP_IDENTIFIE
 
 //START SNIPPET: searchOptionalParam
 @Search()
-public List<Patient> searchByNames( @RequiredParam(name=Patient.SP_FAMILY) StringParameter theFamilyName,
-                                    @OptionalParam(name=Patient.SP_GIVEN)  StringParameter theGivenName ) {
+public List<Patient> searchByNames( @RequiredParam(name=Patient.SP_FAMILY) StringParam theFamilyName,
+                                    @OptionalParam(name=Patient.SP_GIVEN)  StringParam theGivenName ) {
    String familyName = theFamilyName.getValue();
    String givenName = theGivenName != null ? theGivenName.getValue() : null;
    

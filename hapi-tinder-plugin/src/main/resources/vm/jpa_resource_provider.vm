@@ -1,19 +1,54 @@
 
 package ${packageBase};
 
-import javax.persistence.DiscriminatorValue;
-import javax.persistence.Entity;
+import java.util.*;
+
+import org.apache.commons.lang3.StringUtils;
+
+import ca.uhn.fhir.jpa.dao.BaseJpaResourceProvider;
+import ca.uhn.fhir.jpa.dao.SearchParameterMap;
+import ca.uhn.fhir.model.api.*;
+import ca.uhn.fhir.model.api.annotation.*;
+import ca.uhn.fhir.model.dstu.composite.*;
 import ca.uhn.fhir.model.dstu.resource.*;
+import ca.uhn.fhir.rest.annotation.*;
+import ca.uhn.fhir.rest.param.*;
 
-public class ${className}ResourceTable extends BaseResourceTable<${className}> {
 
-@Entity
-@DiscriminatorValue("${className}")
-public class PatientResourceTable extends BaseResourceTable<Patient> {
+public class ${className}ResourceProvider extends BaseJpaResourceProvider<${className}> {
 
 	@Override
-	public Class<${className}> getResourceType() {
+	public Class<? extends IResource> getResourceType() {
 		return ${className}.class;
 	}
 
+	@Search()
+	List<${className}> search(
+#foreach ( $param in $searchParams ) #{if}(true) #{end} 
+
+			@Description(shortDefinition="${param.description}")
+			@OptionalParam(name="${param.name}")
+#if (${param.type} == 'string' )
+			StringParam the${param.nameCapitalized} #{if}($foreach.hasNext), #{end} 
+#elseif (${param.type} == 'token' )
+			IdentifierDt the${param.nameCapitalized} #{if}($foreach.hasNext), #{end} 
+#elseif (${param.type} == 'date' )
+			DateRangeParam the${param.nameCapitalized} #{if}($foreach.hasNext), #{end} 
+#elseif (${param.type} == 'quantity' )
+			QuantityDt the${param.nameCapitalized} #{if}($foreach.hasNext), #{end} 
+#elseif (${param.type} == 'number' )
+			QuantityDt the${param.nameCapitalized} #{if}($foreach.hasNext), #{end} 
+#elseif (${param.type} == 'reference' )
+			ReferenceParam the${param.nameCapitalized} #{if}($foreach.hasNext), #{end} 
+#end
+#end	
+	) {
+		SearchParameterMap paramMap = new SearchParameterMap();
+					
+#foreach ( $param in $searchParams ) 
+		paramMap.add("${param.name}", the${param.nameCapitalized});	
+#end
+
+		return getDao().search(paramMap);
+	}
 }

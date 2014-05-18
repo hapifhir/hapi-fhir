@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry excluding="**/*.java" kind="src" output="target/test-classes" path="src/test/resources"/>
+	<classpathentry kind="src" path="target/gen"/>
 	<classpathentry including="**/*.java" kind="src" path="src/main/java"/>
 	<classpathentry excluding="**/*.java" kind="src" path="src/main/resources"/>
 	<classpathentry kind="var" path="M2_REPO/javax/json/javax.json-api/1.0/javax.json-api-1.0.jar" sourcepath="M2_REPO/javax/json/javax.json-api/1.0/javax.json-api-1.0-sources.jar"/>
@@ -92,5 +93,6 @@
 	<classpathentry kind="var" path="M2_REPO/org/codehaus/plexus/plexus-classworlds/2.4/plexus-classworlds-2.4.jar" sourcepath="M2_REPO/org/codehaus/plexus/plexus-classworlds/2.4/plexus-classworlds-2.4-sources.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/apache/maven/plugin-tools/maven-plugin-annotations/3.2/maven-plugin-annotations-3.2.jar" sourcepath="M2_REPO/org/apache/maven/plugin-tools/maven-plugin-annotations/3.2/maven-plugin-annotations-3.2-sources.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/hapi-fhir-base"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/hapi-fhir-jpaserver-base"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

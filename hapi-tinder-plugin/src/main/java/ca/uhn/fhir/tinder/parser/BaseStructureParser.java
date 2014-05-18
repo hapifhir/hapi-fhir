@@ -1,4 +1,4 @@
-package ca.uhn.fhir.tinder;
+package ca.uhn.fhir.tinder.parser;
 
 import static org.apache.commons.lang.StringUtils.defaultString;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
@@ -31,6 +31,8 @@ import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.annotation.SimpleSetter;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
+import ca.uhn.fhir.tinder.TinderStructuresMojo;
+import ca.uhn.fhir.tinder.ValueSetGenerator;
 import ca.uhn.fhir.tinder.model.BaseElement;
 import ca.uhn.fhir.tinder.model.BaseRootType;
 import ca.uhn.fhir.tinder.model.Child;
@@ -274,9 +276,9 @@ public abstract class BaseStructureParser {
 		if (theResource.getDeclaringClassNameComplete() != null) {
 			ctx.put("className", theResource.getDeclaringClassNameComplete());
 		} else {
-			ctx.put("className", translateClassName(theResource.getName()));
+			ctx.put("className", (theResource.getName()));
 		} // HumanName}
-		ctx.put("classNameComplete", translateClassName(theResource.getName()) + getFilenameSuffix()); // HumanNameDt
+		ctx.put("classNameComplete", (theResource.getName()) + getFilenameSuffix()); // HumanNameDt
 		ctx.put("shortName", defaultString(theResource.getShortName()));
 		ctx.put("definition", defaultString(theResource.getDefinition()));
 		ctx.put("requirements", defaultString(theResource.getRequirement()));
@@ -328,7 +330,8 @@ public abstract class BaseStructureParser {
 			scanForTypeNameConflicts(next);
 			fixResourceReferenceClassNames(next, thePackageBase);
 
-			File f = new File(theOutputDirectory, translateClassName(next.getDeclaringClassNameComplete()) /*+ getFilenameSuffix()*/ + ".java");
+//			File f = new File(theOutputDirectory, (next.getDeclaringClassNameComplete()) /*+ getFilenameSuffix()*/ + ".java");
+			File f = new File(theOutputDirectory, (next.getElementName()) + getFilenameSuffix() + ".java");
 			try {
 				write(next, f, thePackageBase);
 			} catch (IOException e) {
@@ -343,10 +346,6 @@ public abstract class BaseStructureParser {
 	// }
 	// return theName;
 	// }
-
-	private String translateClassName(String theName) {
-		return theName;
-	}
 
 	/**
 	 * Example: Encounter has an internal block class named "Location", but it

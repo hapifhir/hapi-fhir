@@ -32,6 +32,7 @@ import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.tinder.TinderStructuresMojo.ValueSetFileDefinition;
 import ca.uhn.fhir.tinder.model.ValueSetTm;
+import ca.uhn.fhir.tinder.parser.ResourceGeneratorUsingSpreadsheet;
 
 public class ValueSetGenerator {
 

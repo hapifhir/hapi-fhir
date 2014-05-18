@@ -1,4 +1,4 @@
-package ca.uhn.fhir.tinder;
+package ca.uhn.fhir.tinder.parser;
 
 import static org.apache.commons.lang.StringUtils.capitalize;
 import static org.apache.commons.lang.StringUtils.isBlank;
