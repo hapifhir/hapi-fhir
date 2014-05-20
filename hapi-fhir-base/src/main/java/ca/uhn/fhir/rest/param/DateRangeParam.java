@@ -25,6 +25,7 @@ import java.util.Date;
 import java.util.List;
 
 import ca.uhn.fhir.model.api.IQueryParameterAnd;
+import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.method.QualifiedParamList;
@@ -156,13 +157,13 @@ public class DateRangeParam implements IQueryParameterAnd {
 	}
 
 	@Override
-	public List<QualifiedParamList> getValuesAsQueryTokens() {
-		ArrayList<QualifiedParamList> retVal = new ArrayList<QualifiedParamList>();
+	public List<IQueryParameterOr> getValuesAsQueryTokens() {
+		ArrayList<IQueryParameterOr> retVal = new ArrayList<IQueryParameterOr>();
 		if (myLowerBound != null) {
-			retVal.add(QualifiedParamList.singleton(myLowerBound.getValueAsQueryToken()));
+			retVal.add(ParameterUtil.singleton(myLowerBound));
 		}
 		if (myUpperBound != null) {
-			retVal.add(QualifiedParamList.singleton(myUpperBound.getValueAsQueryToken()));
+			retVal.add(ParameterUtil.singleton(myUpperBound));
 		}
 		return retVal;
 	}

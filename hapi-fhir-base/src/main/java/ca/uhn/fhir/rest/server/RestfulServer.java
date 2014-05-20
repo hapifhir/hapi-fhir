@@ -360,31 +360,35 @@ public class RestfulServer extends HttpServlet {
 
 	private void findResourceMethods(Object theProvider, Class<?> clazz) {
 		for (Method m : clazz.getDeclaredMethods()) {
-			if (Modifier.isPublic(m.getModifiers()) && !Modifier.isStatic(m.getModifiers())) {
-				ourLog.debug("Scanning public method: {}#{}", theProvider.getClass(), m.getName());
+			if (!Modifier.isPublic(m.getModifiers())) {
+				ourLog.debug("Ignoring non-public method: {}",m);
+			} else {
+				if (!Modifier.isStatic(m.getModifiers())) {
+					ourLog.debug("Scanning public method: {}#{}", theProvider.getClass(), m.getName());
 
-				BaseMethodBinding<?> foundMethodBinding = BaseMethodBinding.bindMethod(m, myFhirContext, theProvider);
-				if (foundMethodBinding != null) {
+					BaseMethodBinding<?> foundMethodBinding = BaseMethodBinding.bindMethod(m, myFhirContext, theProvider);
+					if (foundMethodBinding != null) {
 
-					String resourceName = foundMethodBinding.getResourceName();
-					ResourceBinding resourceBinding;
-					if (resourceName == null) {
-						resourceBinding = myNullResourceBinding;
-					} else {
-						RuntimeResourceDefinition definition = myFhirContext.getResourceDefinition(resourceName);
-						if (myResourceNameToProvider.containsKey(definition.getName())) {
-							resourceBinding = myResourceNameToProvider.get(definition.getName());
+						String resourceName = foundMethodBinding.getResourceName();
+						ResourceBinding resourceBinding;
+						if (resourceName == null) {
+							resourceBinding = myNullResourceBinding;
 						} else {
-							resourceBinding = new ResourceBinding();
-							resourceBinding.setResourceName(resourceName);
-							myResourceNameToProvider.put(resourceName, resourceBinding);
+							RuntimeResourceDefinition definition = myFhirContext.getResourceDefinition(resourceName);
+							if (myResourceNameToProvider.containsKey(definition.getName())) {
+								resourceBinding = myResourceNameToProvider.get(definition.getName());
+							} else {
+								resourceBinding = new ResourceBinding();
+								resourceBinding.setResourceName(resourceName);
+								myResourceNameToProvider.put(resourceName, resourceBinding);
+							}
 						}
-					}
 
-					resourceBinding.addMethod(foundMethodBinding);
-					ourLog.debug(" * Method: {}#{} is a handler", theProvider.getClass(), m.getName());
-				} else {
-					ourLog.debug(" * Method: {}#{} is not a handler", theProvider.getClass(), m.getName());
+						resourceBinding.addMethod(foundMethodBinding);
+						ourLog.debug(" * Method: {}#{} is a handler", theProvider.getClass(), m.getName());
+					} else {
+						ourLog.debug(" * Method: {}#{} is not a handler", theProvider.getClass(), m.getName());
+					}
 				}
 			}
 		}
@@ -535,7 +539,7 @@ public class RestfulServer extends HttpServlet {
 			} else {
 				resourceBinding = myResourceNameToProvider.get(resourceName);
 				if (resourceBinding == null) {
-					throw new ResourceNotFoundException("Unknown resource type '" + resourceName + "' - Server knows how to handle: " + myResourceNameToProvider.keySet());
+					throw new InvalidRequestException("Unknown resource type '" + resourceName + "' - Server knows how to handle: " + myResourceNameToProvider.keySet());
 				}
 			}
 
@@ -614,7 +618,7 @@ public class RestfulServer extends HttpServlet {
 				resourceMethod = resourceBinding.getMethod(r);
 			}
 			if (null == resourceMethod) {
-				throw new ResourceNotFoundException("No resource method available for the supplied parameters " + params);
+				throw new InvalidRequestException("No resource method available for the supplied parameters " + params);
 			}
 
 			resourceMethod.invokeServer(this, r, theResponse);

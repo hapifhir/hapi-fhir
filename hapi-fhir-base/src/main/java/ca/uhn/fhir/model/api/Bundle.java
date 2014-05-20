@@ -166,4 +166,26 @@ public class Bundle extends BaseBundle /*implements IElement*/ {
 		return retVal;
 	}
 
+	/**
+	 * Returns the number of entries in this bundle
+	 */
+	public int size() {
+		return getEntries().size();
+	}
+
+	/**
+	 * Returns a list containing all resources of the given type from this bundle
+	 */
+	public <T extends IResource> List<T> getResources(Class<T> theClass) {
+		ArrayList<T> retVal = new ArrayList<T>();
+		for (BundleEntry next : getEntries()) {
+			if (next.getResource()!=null && theClass.isAssignableFrom(next.getResource().getClass())) {
+				@SuppressWarnings("unchecked")
+				T resource = (T) next.getResource();
+				retVal.add(resource);
+			}
+		}
+		return retVal;
+	}
+
 }

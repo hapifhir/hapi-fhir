@@ -693,6 +693,49 @@
 
 			</subsection>
 
+			<subsection name="Search Parameters: Resource Reference">
+
+				<p>
+					Many search parameters refer to resource references. For instance, the Patient
+					parameter "provider" refers to the resource marked as the managing organization
+					for patients.
+				</p>
+				<p>
+					Reference parameters use the 
+					<a href="./apidocs/ca/uhn/fhir/rest/param/ReferenceParam.html">ReferenceParam</a> 
+					type. Reference param objects being passed into server methods will have three properties
+					populated:
+				</p>
+				<ul>
+					<li>
+						<b>The resource type (optional):</b> This is the type of resource
+						being targeted, if the client specifies one in the URL.
+					</li>
+					<li>
+						<b>The chain property (optional):</b> This is the name of the 
+						property on the target resource to search for
+					</li>
+					<li>
+						<b>The value (required):</b> This is the actual value to search for. If
+						a chain property has not been specified, this is the ID of the resource.
+					</li>
+				</ul>
+
+				<macro name="snippet">
+					<param name="id" value="reference" />
+					<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
+				</macro>
+
+				<p>
+					Example URLs to invoke this method:
+					<br />
+					Resource by ID: <code>http://fhir.example.com/Patient?provider=1234</code>
+					<br />
+					Resource by chained parameter value: <code>http://fhir.example.com/Patient?provider:Organization.name=FooOrg</code>
+				</p>
+
+			</subsection>
+
 			<subsection name="Combining Multiple Parameters">
 
 				<p>

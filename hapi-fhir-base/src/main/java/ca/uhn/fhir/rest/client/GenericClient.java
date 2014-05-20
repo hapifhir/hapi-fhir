@@ -431,6 +431,12 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			params.get(parameterName).add(parameterValue);
 		}
 
+		@Override
+		public IQuery prettyPrint() {
+			setPrettyPrint(true);
+			return this;
+		}
+
 	}
 
 	private class QueryInternal implements IUntypedQuery {

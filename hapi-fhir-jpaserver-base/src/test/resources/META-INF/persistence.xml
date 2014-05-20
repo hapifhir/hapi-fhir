@@ -7,6 +7,25 @@
 	<persistence-unit name="FHIR_UT" transaction-type="RESOURCE_LOCAL">
 		<provider>org.hibernate.ejb.HibernatePersistence</provider>
 		<!-- <class>ca.uhn.fhir.jpa.entity.PatientResourceTable</class>  -->
+		
+		<class>ca.uhn.fhir.jpa.testentity.DeviceResourceTable</class>
+		<class>ca.uhn.fhir.jpa.testentity.DiagnosticReportResourceTable</class>
+		<class>ca.uhn.fhir.jpa.testentity.LocationResourceTable</class>
+		<class>ca.uhn.fhir.jpa.testentity.ObservationResourceTable</class>
+		<class>ca.uhn.fhir.jpa.testentity.OrganizationResourceTable</class>
+		<class>ca.uhn.fhir.jpa.testentity.PatientResourceTable</class>
+		<class>ca.uhn.fhir.jpa.testentity.QuestionnaireResourceTable</class>
+		<class>ca.uhn.fhir.jpa.testentity.QuestionnaireResourceTable</class>
+
+		<class>ca.uhn.fhir.jpa.entity.ResourceHistoryTable</class>
+		<class>ca.uhn.fhir.jpa.entity.ResourceHistoryTag</class>
+		<class>ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamDate</class>
+		<class>ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamNumber</class>
+		<class>ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamString</class>
+		<class>ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamToken</class>
+		<class>ca.uhn.fhir.jpa.entity.ResourceLink</class>
+		<class>ca.uhn.fhir.jpa.entity.ResourceTag</class>
+		
 		<exclude-unlisted-classes>false</exclude-unlisted-classes>
 		<properties>
 			<property name="hibernate.connection.url" value="jdbc:hsqldb:mem:unit-testing-jpa" />

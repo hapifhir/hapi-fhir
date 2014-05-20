@@ -23,8 +23,8 @@ public class ${className}ResourceProvider extends BaseJpaResourceProvider<${clas
 	}
 
 	@Search()
-	List<${className}> search(
-#foreach ( $param in $searchParams ) #{if}(true) #{end} 
+	public List<${className}> search(
+#foreach ( $param in $searchParamsWithoutComposite ) #{if}(true) #{end} 
 
 			@Description(shortDefinition="${param.description}")
 			@OptionalParam(name="${param.name}")
@@ -40,12 +40,14 @@ public class ${className}ResourceProvider extends BaseJpaResourceProvider<${clas
 			QuantityDt the${param.nameCapitalized} #{if}($foreach.hasNext), #{end} 
 #elseif (${param.type} == 'reference' )
 			ReferenceParam the${param.nameCapitalized} #{if}($foreach.hasNext), #{end} 
+#elseif (${param.type} == 'composite' )
+			ReferenceParam the${param.nameCapitalized} #{if}($foreach.hasNext), #{end} 
 #end
 #end	
 	) {
 		SearchParameterMap paramMap = new SearchParameterMap();
 					
-#foreach ( $param in $searchParams ) 
+#foreach ( $param in $searchParamsWithoutComposite ) 
 		paramMap.add("${param.name}", the${param.nameCapitalized});	
 #end
 

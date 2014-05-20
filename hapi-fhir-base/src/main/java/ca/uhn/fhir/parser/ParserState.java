@@ -23,6 +23,7 @@ package ca.uhn.fhir.parser;
 import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+import java.io.ObjectInputStream.GetField;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -39,6 +40,7 @@ import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeChildDeclaredExtensionDefinition;
+import ca.uhn.fhir.context.RuntimeChildResourceDefinition;
 import ca.uhn.fhir.context.RuntimeElemContainedResources;
 import ca.uhn.fhir.context.RuntimePrimitiveDatatypeDefinition;
 import ca.uhn.fhir.context.RuntimePrimitiveDatatypeNarrativeDefinition;
@@ -663,7 +665,7 @@ class ParserState<T> {
 			case RESOURCE_REF: {
 				ResourceReferenceDt newChildInstance = new ResourceReferenceDt();
 				myDefinition.getMutator().addValue(myParentInstance, newChildInstance);
-				ResourceReferenceState newState = new ResourceReferenceState(getPreResourceState(), newChildInstance);
+				ResourceReferenceState newState = new ResourceReferenceState(getPreResourceState(), (RuntimeResourceReferenceDefinition)target, newChildInstance);
 				push(newState);
 				return;
 			}
@@ -767,7 +769,7 @@ class ParserState<T> {
 				ResourceReferenceDt newChildInstance = new ResourceReferenceDt();
 				getPreResourceState().getResourceReferences().add(newChildInstance);
 				child.getMutator().addValue(myInstance, newChildInstance);
-				ResourceReferenceState newState = new ResourceReferenceState(getPreResourceState(), newChildInstance);
+				ResourceReferenceState newState = new ResourceReferenceState(getPreResourceState(), resourceRefTarget, newChildInstance);
 				push(newState);
 				return;
 			}
@@ -873,7 +875,7 @@ class ParserState<T> {
 			case RESOURCE_REF: {
 				ResourceReferenceDt newChildInstance = new ResourceReferenceDt();
 				myExtension.setValue(newChildInstance);
-				ResourceReferenceState newState = new ResourceReferenceState(getPreResourceState(), newChildInstance);
+				ResourceReferenceState newState = new ResourceReferenceState(getPreResourceState(), null, newChildInstance);
 				push(newState);
 				return;
 			}
@@ -1125,7 +1127,7 @@ class ParserState<T> {
 		private ResourceReferenceDt myInstance;
 		private ResourceReferenceSubState mySubState;
 
-		public ResourceReferenceState(PreResourceState thePreResourceState, ResourceReferenceDt theInstance) {
+		public ResourceReferenceState(PreResourceState thePreResourceState, RuntimeResourceReferenceDefinition theTarget, ResourceReferenceDt theInstance) {
 			super(thePreResourceState);
 			myInstance = theInstance;
 			mySubState = ResourceReferenceSubState.INITIAL;
@@ -1144,6 +1146,25 @@ class ParserState<T> {
 			case INITIAL:
 				throw new DataFormatException("Unexpected attribute: " + theValue);
 			case REFERENCE:
+				int lastSlash = theValue.lastIndexOf('/');
+				if (lastSlash==-1) {
+					myInstance.setResourceId(theValue);
+				} else if (lastSlash==0) {
+					myInstance.setResourceId(theValue.substring(1));
+				}else {
+					int secondLastSlash=theValue.lastIndexOf('/', lastSlash-1);
+					String resourceTypeName;
+					if (secondLastSlash==-1) {
+						resourceTypeName=theValue.substring(0,lastSlash);
+					}else {
+						resourceTypeName=theValue.substring(secondLastSlash+1,lastSlash);
+					}
+					myInstance.setResourceId(theValue.substring(lastSlash+1));
+					RuntimeResourceDefinition def = myContext.getResourceDefinition(resourceTypeName);
+					if(def!=null) {
+						myInstance.setResourceType(def.getImplementingClass());
+					}
+				}
 				myInstance.setReference(theValue);
 				break;
 			}

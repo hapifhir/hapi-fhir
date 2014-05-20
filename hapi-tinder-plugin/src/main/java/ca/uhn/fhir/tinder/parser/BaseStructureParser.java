@@ -50,6 +50,7 @@ public abstract class BaseStructureParser {
 	private TreeSet<String> myImports = new TreeSet<String>();
 	private Map<String, String> myLocallyDefinedClassNames = new HashMap<String, String>();
 	private List<BaseRootType> myResources = new ArrayList<BaseRootType>();
+	private boolean myImportsResolved;
 
 	public void addResource(BaseRootType theResource) {
 		myResources.add(theResource);
@@ -286,6 +287,7 @@ public abstract class BaseStructureParser {
 		ctx.put("resourceBlockChildren", theResource.getResourceBlockChildren());
 		ctx.put("childExtensionTypes", ObjectUtils.defaultIfNull(myExtensions, new ArrayList<Extension>()));
 		ctx.put("searchParams", (theResource.getSearchParameters()));
+		ctx.put("searchParamsWithoutComposite", (theResource.getSearchParametersWithoutComposite()));
 
 		VelocityEngine v = new VelocityEngine();
 		v.setProperty("resource.loader", "cp");
@@ -319,9 +321,12 @@ public abstract class BaseStructureParser {
 			throw new MojoFailureException(theOutputDirectory + " is not a directory");
 		}
 
-		for (BaseRootType next : myResources) {
-			ourLog.info("Scanning resource for imports {}", next.getName());
-			scanForImportsNames(next);
+		if (!myImportsResolved) {
+			for (BaseRootType next : myResources) {
+				ourLog.info("Scanning resource for imports {}", next.getName());
+				scanForImportsNames(next);
+			}
+			myImportsResolved = true;
 		}
 
 		for (BaseRootType next : myResources) {
@@ -330,7 +335,8 @@ public abstract class BaseStructureParser {
 			scanForTypeNameConflicts(next);
 			fixResourceReferenceClassNames(next, thePackageBase);
 
-//			File f = new File(theOutputDirectory, (next.getDeclaringClassNameComplete()) /*+ getFilenameSuffix()*/ + ".java");
+			// File f = new File(theOutputDirectory, (next.getDeclaringClassNameComplete()) /*+ getFilenameSuffix()*/ +
+			// ".java");
 			File f = new File(theOutputDirectory, (next.getElementName()) + getFilenameSuffix() + ".java");
 			try {
 				write(next, f, thePackageBase);
@@ -348,9 +354,8 @@ public abstract class BaseStructureParser {
 	// }
 
 	/**
-	 * Example: Encounter has an internal block class named "Location", but it
-	 * also has a reference to the Location resource type, so we need to use the
-	 * fully qualified name for that resource reference
+	 * Example: Encounter has an internal block class named "Location", but it also has a reference to the Location
+	 * resource type, so we need to use the fully qualified name for that resource reference
 	 */
 	private void fixResourceReferenceClassNames(BaseElement theNext, String thePackageBase) {
 		for (BaseElement next : theNext.getChildren()) {

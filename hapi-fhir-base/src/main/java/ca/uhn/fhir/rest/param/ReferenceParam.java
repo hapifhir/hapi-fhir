@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.param;
  * #L%
  */
 
+import static org.apache.commons.lang3.StringUtils.*;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.IResource;
@@ -27,7 +28,7 @@ import ca.uhn.fhir.model.api.IResource;
 public class ReferenceParam implements IQueryParameterType {
 
 	private String myChain;
-	private Class<? extends IResource> myType;
+	private String myResourceType;
 	private String myValue;
 
 	public ReferenceParam() {
@@ -42,8 +43,8 @@ public class ReferenceParam implements IQueryParameterType {
 		setChain(theChain);
 	}
 
-	public ReferenceParam(Class<? extends IResource> theType, String theChain, String theValue) {
-		setType(theType);
+	public ReferenceParam(String theResourceType, String theChain, String theValue) {
+		setResourceType(theResourceType);
 		setValueAsQueryToken(null, theValue);
 		setChain(theChain);
 	}
@@ -52,8 +53,25 @@ public class ReferenceParam implements IQueryParameterType {
 		return myChain;
 	}
 
-	public Class<? extends IResource> getType() {
-		return myType;
+	@Override
+	public String getQueryParameterQualifier(FhirContext theContext) {
+		StringBuilder b = new StringBuilder();
+		if (isNotBlank(myResourceType)) {
+			b.append(':');
+			b.append(myResourceType);
+		}
+		if (isNotBlank(myChain)) {
+			b.append('.');
+			b.append(myChain);
+		}
+		if (b.length() != 0) {
+			return b.toString();
+		}
+		return null;
+	}
+
+	public String getResourceType() {
+		return myResourceType;
 	}
 
 	@Override
@@ -65,21 +83,39 @@ public class ReferenceParam implements IQueryParameterType {
 		myChain = theChain;
 	}
 
-	public void setType(Class<? extends IResource> theType) {
-		myType = theType;
+	public Class<? extends IResource> getResourceType(FhirContext theCtx) {
+		if (isBlank(myResourceType)) {
+			return null;
+		}
+		return theCtx.getResourceDefinition(myResourceType).getImplementingClass();
+	}
+
+	public void setResourceType(String theResourceType) {
+		myResourceType = theResourceType;
 	}
 
 	@Override
 	public void setValueAsQueryToken(String theQualifier, String theValue) {
+		String q = theQualifier;
+		if (isNotBlank(q)) {
+			if (q.startsWith(":")) {
+				int nextIdx = q.indexOf('.');
+				if (nextIdx != -1) {
+					myResourceType = q.substring(1, nextIdx);
+					myChain = q.substring(nextIdx + 1);
+				} else {
+					myResourceType = q.substring(1);
+				}
+			} else if (q.startsWith(".")) {
+				myChain = q.substring(1);
+			}
+		}
+
 		myValue = theValue;
 	}
 
-	@Override
-	public String getQueryParameterQualifier(FhirContext theContext) {
-		if (myType != null) {
-			return ":" + theContext.getResourceDefinition(myType).getName();
-		}
-		return null;
+	public String getValue() {
+		return myValue;
 	}
 
 }

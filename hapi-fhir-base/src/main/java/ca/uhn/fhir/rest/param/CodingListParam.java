@@ -26,6 +26,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import ca.uhn.fhir.model.api.IQueryParameterOr;
+import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.dstu.composite.CodingDt;
 import ca.uhn.fhir.rest.method.QualifiedParamList;
 
@@ -97,10 +98,10 @@ public class CodingListParam implements IQueryParameterOr, Iterable<CodingDt> {
 	}
 
 	@Override
-	public QualifiedParamList getValuesAsQueryTokens() {
-		QualifiedParamList retVal = new QualifiedParamList();
+	public List<IQueryParameterType> getValuesAsQueryTokens() {
+		ArrayList<IQueryParameterType> retVal = new ArrayList<IQueryParameterType>();
 		for (CodingDt next : myCodings) {
-			retVal.add(next.getValueAsQueryToken());
+			retVal.add(next);
 		}
 		return retVal;
 	}

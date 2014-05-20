@@ -14,18 +14,29 @@
 	<context:mbean-server />
 
 	<bean id="myPatientDao" class="ca.uhn.fhir.jpa.dao.FhirResourceDao">
-		<property name="tableType" value="ca.uhn.fhir.jpa.entity.PatientResourceTable"/>
+		<property name="tableType" value="ca.uhn.test.jpasrv.PatientResourceTable"/>
+	</bean>
+	<bean id="myObservationDao" class="ca.uhn.fhir.jpa.dao.FhirResourceDao">
+		<property name="tableType" value="ca.uhn.test.jpasrv.ObservationResourceTable"/>
+	</bean>
+	<bean id="myOrganizationDao" class="ca.uhn.fhir.jpa.dao.FhirResourceDao">
+		<property name="tableType" value="ca.uhn.test.jpasrv.OrganizationResourceTable"/>
+	</bean>
+	<bean id="myLocationDao" class="ca.uhn.fhir.jpa.dao.FhirResourceDao">
+		<property name="tableType" value="ca.uhn.test.jpasrv.LocationResourceTable"/>
 	</bean>
 	<bean id="myQuestionnaireDao" class="ca.uhn.fhir.jpa.dao.FhirResourceDao">
-		<property name="tableType" value="ca.uhn.fhir.jpa.entity.QuestionnaireResourceTable"/>
+		<property name="tableType" value="ca.uhn.test.jpasrv.QuestionnaireResourceTable"/>
 	</bean>
 
 	<bean id="myPersistenceDataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource" lazy-init="true">
-		<property name="url" value="jdbc:derby:directory:myUnitTestDB;create=true" />
+		<property name="url" value="jdbc:derby:memory:myUnitTestDB;create=true" />
+		<!-- <property name="url" value="jdbc:derby:directory:myUnitTestDB;create=true" />  -->
 	</bean>
 
 	<bean id="myEntityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
 		<property name="dataSource" ref="myPersistenceDataSource" />
+		<property name="persistenceXmlLocation" value="classpath:fhir_jpatest_persistence.xml" />
 		<property name="persistenceUnitName" value="FHIR_UT" />
 		<property name="jpaVendorAdapter">
 			<bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">

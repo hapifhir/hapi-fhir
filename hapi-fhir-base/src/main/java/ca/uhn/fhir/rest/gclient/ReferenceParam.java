@@ -1,5 +1,7 @@
 package ca.uhn.fhir.rest.gclient;
 
+import ca.uhn.fhir.model.primitive.IdDt;
+
 /*
  * #%L
  * HAPI FHIR Library
@@ -42,14 +44,22 @@ public class ReferenceParam implements IParam {
 	 * Match the referenced resource if the resource has the given ID (this can be
 	 * the logical ID or the absolute URL of the resource)
 	 */
+	public ICriterion hasId(IdDt theId) {
+		return new StringCriterion(getParamName(), theId.getValueAsString());
+	}
+
+	/**
+	 * Match the referenced resource if the resource has the given ID (this can be
+	 * the logical ID or the absolute URL of the resource)
+	 */
 	public ICriterion hasId(String theId) {
 		return new StringCriterion(getParamName(), theId);
 	}
 
 	private static class ReferenceChainCriterion implements ICriterion, ICriterionInternal {
 
-		private ICriterionInternal myWrappedCriterion;
 		private String myParamName;
+		private ICriterionInternal myWrappedCriterion;
 
 		public ReferenceChainCriterion(String theParamName, ICriterion theWrappedCriterion) {
 			myParamName = theParamName;
@@ -57,13 +67,13 @@ public class ReferenceParam implements IParam {
 		}
 
 		@Override
-		public String getParameterValue() {
-			return myWrappedCriterion.getParameterValue();
+		public String getParameterName() {
+			return myParamName + "." + myWrappedCriterion.getParameterName();
 		}
 
 		@Override
-		public String getParameterName() {
-			return myParamName + "." + myWrappedCriterion.getParameterName();
+		public String getParameterValue() {
+			return myWrappedCriterion.getParameterValue();
 		}
 
 	}

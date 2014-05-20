@@ -175,8 +175,7 @@ public class ResourceReferenceDt
      * </p> 
 	 */
 	public ResourceReferenceDt setReference( String theString) {
-		myReference = new StringDt(theString); 
-		return this; 
+		return setReference(new StringDt(theString)); 
 	}
 
  

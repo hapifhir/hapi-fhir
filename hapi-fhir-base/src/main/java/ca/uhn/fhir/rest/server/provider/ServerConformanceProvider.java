@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.server.provider;
  * #L%
  */
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -89,7 +90,7 @@ public class ServerConformanceProvider {
 			resource.getProfile().setId(new IdDt(def.getResourceProfile()));
 
 			Map<String, Conformance.RestResourceSearchParam> nameToSearchParam = new HashMap<String, Conformance.RestResourceSearchParam>();
-			for (BaseMethodBinding nextMethodBinding : next.getMethodBindings()) {
+			for (BaseMethodBinding<?> nextMethodBinding : next.getMethodBindings()) {
 				RestfulOperationTypeEnum resOp = nextMethodBinding.getResourceOperationType();
 				if (resOp != null) {
 					if (resourceOps.contains(resOp) == false) {
@@ -108,19 +109,34 @@ public class ServerConformanceProvider {
 
 				if (nextMethodBinding instanceof SearchMethodBinding) {
 					List<IParameter> params = ((SearchMethodBinding) nextMethodBinding).getParameters();
-					// TODO: this would probably work best if we sorted these by
-					// required first, then optional
-
+					List<SearchParameter> searchParameters = new ArrayList<SearchParameter>(); 
+					for (IParameter nextParameter : params) {
+						if ((nextParameter instanceof SearchParameter)) {
+							searchParameters.add((SearchParameter) nextParameter);
+						}
+					}
+					Collections.sort(searchParameters, new Comparator<SearchParameter>() {
+						@Override
+						public int compare(SearchParameter theO1, SearchParameter theO2) {
+							if (theO1.isRequired() == theO2.isRequired()) {
+								return 0;
+							}
+							if (theO1.isRequired()) {
+								return 1;
+							}
+							return -1;
+						}
+					});
+					if (searchParameters.isEmpty()) {
+						continue;
+					}
+					boolean allOptional = searchParameters.get(0).isRequired()==false; 
+							
 					RestResourceSearchParam searchParam = null;
 					ExtensionDt searchParamChain = null;
-					for (IParameter nextParameterObj : params) {
-						if (!(nextParameterObj instanceof SearchParameter)) {
-							continue;
-						}
+					for (SearchParameter nextParameter : searchParameters) {
 
-						SearchParameter nextParameter = (SearchParameter) nextParameterObj;
-
-						if (searchParam == null) {
+						if (searchParam == null || allOptional) {
 							if (!nameToSearchParam.containsKey(nextParameter.getName())) {
 								RestResourceSearchParam param = resource.addSearchParam();
 								param.setName(nextParameter.getName());

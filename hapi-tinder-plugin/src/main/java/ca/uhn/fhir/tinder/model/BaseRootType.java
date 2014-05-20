@@ -25,6 +25,16 @@ public abstract class BaseRootType extends BaseElement {
 		return mySearchParameters;
 	}
 
+	public List<SearchParameter> getSearchParametersWithoutComposite() {
+		ArrayList<SearchParameter> retVal = new ArrayList<SearchParameter>();
+		for(SearchParameter next:getSearchParameters()) {
+			if(!next.getType().equals("composite")) {
+				retVal.add(next);
+			}
+		}
+		return retVal;
+	}
+
 	@Override
 	public String getTypeSuffix() {
 		return "";

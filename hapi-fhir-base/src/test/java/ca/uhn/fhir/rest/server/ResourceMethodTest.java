@@ -96,7 +96,9 @@ public class ResourceMethodTest {
 		inputParams.add("lastName");
 		inputParams.add("mrn");
 
-		assertEquals(true, rm.incomingServerRequestMatchesMethod(Request.withResourceAndParams("Patient", RequestType.GET, inputParams))); // True
+		Request params = Request.withResourceAndParams("Patient", RequestType.GET, inputParams);
+		boolean actual = rm.incomingServerRequestMatchesMethod(params);
+		assertTrue( actual); // True
 	}
 
 	@Test

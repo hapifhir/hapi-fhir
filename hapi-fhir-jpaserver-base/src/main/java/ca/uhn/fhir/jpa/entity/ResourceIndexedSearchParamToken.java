@@ -2,18 +2,20 @@ package ca.uhn.fhir.jpa.entity;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.ForeignKey;
+import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "IDX_SP_TOKEN")
+@Table(name = "SPIDX_TOKEN", indexes= {@Index(name="IDX_SP_STRING", columnList="mySystem,myValue")})
 public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchParam {
 
 	private static final long serialVersionUID = 1L;
 
 	@ManyToOne(optional = false)
-	@JoinColumn(name = "RESOURCE_PID", nullable = false)
+	@JoinColumn(name = "RESOURCE_PID", nullable = false, foreignKey=@ForeignKey(name="FK_IST_RESOURCE"))
 	private BaseResourceTable<?> myResource;
 
 	@Column(name = "RESOURCE_PID", insertable=false, updatable=false)
@@ -33,6 +35,9 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 		mySystem = theSystem;
 	}
 
+	public ResourceIndexedSearchParamToken() {
+	}
+	
 	public ResourceIndexedSearchParamToken(String theName, String theSystem, String theValue) {
 		setName(theName);
 		setSystem(theSystem);

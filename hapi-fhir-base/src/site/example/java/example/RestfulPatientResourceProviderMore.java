@@ -59,6 +59,7 @@ import ca.uhn.fhir.rest.client.api.IRestfulClient;
 import ca.uhn.fhir.rest.param.CodingListParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.QualifiedDateParam;
+import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -89,6 +90,34 @@ public List<Patient> findPatients(
  return retVal;
 }
 //END SNIPPET: underlyingReq
+
+//START SNIPPET: reference
+@Search
+public List<Patient> findPatients(
+		@RequiredParam(name=Patient.SP_PROVIDER) ReferenceParam theProvider
+		) {
+
+// May be populated with the resource type (e.g. "Patient") if the client requested one
+String type = theProvider.getResourceType(); 
+
+// May be populated with the chain (e.g. "name") if the client requested one
+String chain = theProvider.getChain();
+
+/* The actual parameter value. This will be the resource ID if no chain was provided,
+ * but refers to the value of a specific property noted by the chain if one was given.
+ * For example, the following request: 
+ * http://example.com/fhir/Patient?provider:Organization.name=FooOrg
+ * has a type of "Organization" and a chain of "name", meaning that
+ * the returned patients should have a provider which is an Organization
+ * with a name matching "FooOrg".
+ */
+String value = theProvider.getValue();
+
+List<Patient> retVal=new ArrayList<Patient>(); // populate this
+return retVal;
+
+}
+//END SNIPPET: reference
 
 
 //START SNIPPET: read
@@ -557,7 +586,7 @@ private interface IPatientClient extends IBasicClient
   // Only one method is shown here, but many methods may be 
   // added to the same client interface!
 }
-//START SNIPPET: clientReadInterface
+//END SNIPPET: clientReadInterface
 
 public void clientRead() {
 //START SNIPPET: clientReadTags

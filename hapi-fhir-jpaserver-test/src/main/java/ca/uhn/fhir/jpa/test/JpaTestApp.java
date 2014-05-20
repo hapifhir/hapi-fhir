@@ -10,6 +10,7 @@ import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.dstu.resource.Questionnaire;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.tester.RestfulServerTesterServlet;
+import ca.uhn.test.jpasrv.PatientResourceProvider;
 
 public class JpaTestApp {
 

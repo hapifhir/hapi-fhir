@@ -154,15 +154,24 @@ public abstract class BaseClient {
 			}
 
 			if (response.getStatusLine().getStatusCode() < 200 || response.getStatusLine().getStatusCode() > 299) {
-				BaseServerResponseException exception = BaseServerResponseException.newInstance(response.getStatusLine().getStatusCode(), response.getStatusLine().getReasonPhrase());
-
+				String body=null;
 				try {
-					String body = IOUtils.toString(reader);
-					exception.setResponseBody(body);
+					body = IOUtils.toString(reader);
 				} catch (Exception e) {
 					ourLog.debug("Failed to read input stream", e);
 				} finally {
 					IOUtils.closeQuietly(reader);
+				}
+				
+				String message = "HTTP " + response.getStatusLine().getStatusCode()+" " +response.getStatusLine().getReasonPhrase();
+				if (Constants.CT_TEXT.equals(mimeType)) {
+					message = message+": " + body;
+				}
+				
+				BaseServerResponseException exception = BaseServerResponseException.newInstance(response.getStatusLine().getStatusCode(), message);
+
+				if(body!=null) {
+					exception.setResponseBody(body);
 				}
 
 				throw exception;

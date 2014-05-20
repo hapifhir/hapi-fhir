@@ -23,6 +23,10 @@ package ca.uhn.fhir.rest.method;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.IQueryParameterOr;
+import ca.uhn.fhir.model.api.IQueryParameterType;
+
 public class QualifiedParamList extends ArrayList<String> {
 
 	private static final long serialVersionUID = 1L;
@@ -35,6 +39,15 @@ public class QualifiedParamList extends ArrayList<String> {
 	
 	public QualifiedParamList(int theCapacity) {
 		super(theCapacity);
+	}
+
+	public QualifiedParamList(FhirContext theContext, IQueryParameterOr theNextOr) {
+		for (IQueryParameterType next : theNextOr.getValuesAsQueryTokens()) {
+			if (myQualifier==null) {
+				myQualifier=next.getQueryParameterQualifier(theContext);
+			}
+			add(next.getValueAsQueryToken());
+		}
 	}
 
 	public String getQualifier() {

@@ -14,22 +14,22 @@
 	<context:mbean-server />
 
 	<bean id="myPatientDao" class="ca.uhn.fhir.jpa.dao.FhirResourceDao">
-		<property name="tableType" value="ca.uhn.fhir.jpa.entity.PatientResourceTable"/>
+		<property name="tableType" value="ca.uhn.fhir.jpa.testentity.PatientResourceTable"/>
 	</bean>
 	<bean id="myObservationDao" class="ca.uhn.fhir.jpa.dao.FhirResourceDao">
-		<property name="tableType" value="ca.uhn.fhir.jpa.entity.ObservationResourceTable"/>
+		<property name="tableType" value="ca.uhn.fhir.jpa.testentity.ObservationResourceTable"/>
 	</bean>
 	<bean id="myDiagnosticReportDao" class="ca.uhn.fhir.jpa.dao.FhirResourceDao">
-		<property name="tableType" value="ca.uhn.fhir.jpa.entity.DiagnosticReportResourceTable"/>
+		<property name="tableType" value="ca.uhn.fhir.jpa.testentity.DiagnosticReportResourceTable"/>
 	</bean>
 	<bean id="myDeviceDao" class="ca.uhn.fhir.jpa.dao.FhirResourceDao">
-		<property name="tableType" value="ca.uhn.fhir.jpa.entity.DeviceResourceTable"/>
+		<property name="tableType" value="ca.uhn.fhir.jpa.testentity.DeviceResourceTable"/>
 	</bean>
 	<bean id="myLocationDao" class="ca.uhn.fhir.jpa.dao.FhirResourceDao">
-		<property name="tableType" value="ca.uhn.fhir.jpa.entity.LocationResourceTable"/>
+		<property name="tableType" value="ca.uhn.fhir.jpa.testentity.LocationResourceTable"/>
 	</bean>
 	<bean id="myOrganizationDao" class="ca.uhn.fhir.jpa.dao.FhirResourceDao">
-		<property name="tableType" value="ca.uhn.fhir.jpa.entity.OrganizationResourceTable"/>
+		<property name="tableType" value="ca.uhn.fhir.jpa.testentity.OrganizationResourceTable"/>
 	</bean>
 
 	<bean id="myPersistenceDataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource" lazy-init="true">

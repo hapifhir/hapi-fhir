@@ -20,32 +20,33 @@ package ca.uhn.fhir.model.api;
  * #L%
  */
 
+import java.util.List;
+
 import ca.uhn.fhir.rest.method.QualifiedParamList;
 
 public interface IQueryParameterOr {
 
 	/**
-	 * Sets the value of this type using the <b>token</b> format. This 
-	 * format is used in HTTP queries as a parameter format.
+	 * Sets the value of this type using the <b>token</b> format. This format is used in HTTP queries as a parameter
+	 * format.
 	 * <p>
-	 * See FHIR specification 
-	 *    <a href="http://www.hl7.org/implement/standards/fhir/search.html#ptypes">2.2.2 Search SearchParameter Types</a>
-	 *    for information on the <b>token</b> format
+	 * See FHIR specification <a href="http://www.hl7.org/implement/standards/fhir/search.html#ptypes">2.2.2 Search
+	 * SearchParameter Types</a> for information on the <b>token</b> format
 	 * </p>
 	 */
 	public void setValuesAsQueryTokens(QualifiedParamList theParameters);
 
+	// public void setValuesAsQueryTokens(List<IQueryParameterType> theParameters);
+
 	/**
-	 * Returns the value of this type using the <b>token</b> format. This 
-	 * format is used in HTTP queries as a parameter format.
+	 * Returns the value of this type using the <b>token</b> format. This format is used in HTTP queries as a parameter
+	 * format.
 	 * 
 	 * <p>
-	 * See FHIR specification 
-	 *    <a href="http://www.hl7.org/implement/standards/fhir/search.html#ptypes">2.2.2 Search SearchParameter Types</a>
-	 *    for information on the <b>token</b> format
+	 * See FHIR specification <a href="http://www.hl7.org/implement/standards/fhir/search.html#ptypes">2.2.2 Search
+	 * SearchParameter Types</a> for information on the <b>token</b> format
 	 * </p>
 	 */
-	public QualifiedParamList getValuesAsQueryTokens();
+	public List<IQueryParameterType> getValuesAsQueryTokens();
 
-	
 }

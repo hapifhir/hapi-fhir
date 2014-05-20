@@ -159,6 +159,8 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 					return false;
 
 				}
+			} else {
+				methodParamsTemp.add(name);
 			}
 		}
 		if (myQueryName != null) {
@@ -181,11 +183,17 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 				methodParamsTemp.add(next);
 			}
 		}
-		boolean retVal = methodParamsTemp.containsAll(theRequest.getParameters().keySet());
+		Set<String> keySet = theRequest.getParameters().keySet();
+		for (String next : keySet) {
+			if (next.startsWith("_")) {
+				continue;
+			}
+			if (!methodParamsTemp.contains(next)) {
+				return false;
+			}
+		}
 
-		ourLog.trace("Method {} matches: {}", getMethod().getName(), retVal);
-
-		return retVal;
+		return true;
 	}
 
 	public void setResourceType(Class<?> resourceType) {

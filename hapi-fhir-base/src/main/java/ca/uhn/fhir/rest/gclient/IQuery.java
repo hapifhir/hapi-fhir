@@ -45,5 +45,7 @@ public interface IQuery {
 	 * can be useful for debugging, but is generally not desirable in a production situation.
 	 */
 	IQuery andLogRequestAndResponse(boolean theLogRequestAndResponse);
+
+	IQuery prettyPrint();
 	
 }

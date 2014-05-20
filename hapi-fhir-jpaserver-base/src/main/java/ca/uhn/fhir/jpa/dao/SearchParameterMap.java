@@ -5,15 +5,17 @@ import java.util.HashMap;
 import java.util.List;
 
 import ca.uhn.fhir.model.api.IQueryParameterAnd;
+import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.rest.method.QualifiedParamList;
-import ca.uhn.fhir.rest.param.DateRangeParam;
 
 public class SearchParameterMap extends HashMap<String, List<List<IQueryParameterType>>> {
 
 	private static final long serialVersionUID = 1L;
 
 	public void add(String theName, IQueryParameterType theParam) {
+		if (theParam == null) {
+			return;
+		}
 		if (!containsKey(theName)) {
 			put(theName, new ArrayList<List<IQueryParameterType>>());
 		}
@@ -22,13 +24,19 @@ public class SearchParameterMap extends HashMap<String, List<List<IQueryParamete
 		get(theName).add(list);
 	}
 
-	public void add(String theName, IQueryParameterAnd theBirthdate) {
+	public void add(String theName, IQueryParameterAnd theAnd) {
+		if (theAnd==null) {
+			return;
+		}
 		if (!containsKey(theName)) {
 			put(theName, new ArrayList<List<IQueryParameterType>>());
 		}
 
-		for (QualifiedParamList next : theBirthdate.getValuesAsQueryTokens()) {
-			next.get
+		for (IQueryParameterOr next : theAnd.getValuesAsQueryTokens()) {
+			if (next==null) {
+				continue;
+			}
+			get(theName).add(next.getValuesAsQueryTokens());
 		}
 	}
 

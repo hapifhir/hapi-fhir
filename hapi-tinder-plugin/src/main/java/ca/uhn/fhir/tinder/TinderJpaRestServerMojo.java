@@ -45,7 +45,7 @@ public class TinderJpaRestServerMojo extends AbstractMojo {
 	private String packageBase;
 
 	@Parameter(required = true)
-	private List<String> resources;
+	private List<String> baseResourceNames;
 
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException {
@@ -54,14 +54,20 @@ public class TinderJpaRestServerMojo extends AbstractMojo {
 		directoryBase.mkdirs();
 		
 		ResourceGeneratorUsingSpreadsheet gen = new ResourceGeneratorUsingSpreadsheet();
-		gen.setBaseResourceNames(resources);
+		gen.setBaseResourceNames(baseResourceNames);
 
-		gen.setFilenameSuffix("ResourceProvider");
-		gen.setTemplate("/vm/jpa_resource_provider.vm");
 		
 		try {
 			gen.parse();
+			
+			gen.setFilenameSuffix("ResourceProvider");
+			gen.setTemplate("/vm/jpa_resource_provider.vm");
 			gen.writeAll(directoryBase, packageBase);
+			
+			gen.setFilenameSuffix("ResourceTable");
+			gen.setTemplate("/vm/jpa_resource_table.vm");
+			gen.writeAll(directoryBase, packageBase);
+			
 		} catch (Exception e) {
 			throw new MojoFailureException("Failed to generate server",e);
 		}
@@ -114,7 +120,7 @@ public class TinderJpaRestServerMojo extends AbstractMojo {
 
 		TinderJpaRestServerMojo mojo = new TinderJpaRestServerMojo();
 		mojo.packageBase = "ca.uhn.test";
-		mojo.resources =java.util.Collections.singletonList("patient");
+		mojo.baseResourceNames =java.util.Collections.singletonList("patient");
 		mojo.targetDirectory = new File("target/gen");
 		mojo.execute();
 	}

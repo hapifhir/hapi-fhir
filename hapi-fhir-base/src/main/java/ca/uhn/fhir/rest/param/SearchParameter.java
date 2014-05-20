@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.param;
  * #L%
  */
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -63,7 +64,14 @@ public class SearchParameter extends BaseQueryParameter {
 	 */
 	@Override
 	public List<QualifiedParamList> encode(FhirContext theContext, Object theObject) throws InternalErrorException {
-		return myParamBinder.encode(theContext, theObject);
+		ArrayList<QualifiedParamList> retVal = new ArrayList<QualifiedParamList>();
+
+		List<IQueryParameterOr> val = myParamBinder.encode(theContext, theObject);
+		for (IQueryParameterOr nextOr : val) {
+			retVal.add(new QualifiedParamList(theContext, nextOr));
+		}
+
+		return retVal;
 	}
 
 	public String getDescription() {
@@ -131,7 +139,7 @@ public class SearchParameter extends BaseQueryParameter {
 		} else if (IQueryParameterAnd.class.isAssignableFrom(type)) {
 			myParamBinder = new QueryParameterAndBinder((Class<? extends IQueryParameterAnd>) type);
 		} else if (String.class.equals(type)) {
-			myParamBinder=new StringBinder();
+			myParamBinder = new StringBinder();
 		} else {
 			throw new ConfigurationException("Unsupported data type for parameter: " + type.getCanonicalName());
 		}
@@ -150,6 +158,8 @@ public class SearchParameter extends BaseQueryParameter {
 			myParamType = SearchParamTypeEnum.TOKEN;
 		} else if (QuantityDt.class.isAssignableFrom(type)) {
 			myParamType = SearchParamTypeEnum.QUANTITY;
+		} else if (ReferenceParam.class.isAssignableFrom(type)) {
+			myParamType = SearchParamTypeEnum.REFERENCE;
 		} else {
 			throw new ConfigurationException("Unknown search parameter type: " + type);
 		}

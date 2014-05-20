@@ -41,6 +41,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.time.DateUtils;
 
 import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.model.api.IQueryParameterOr;
+import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.PathSpecification;
 import ca.uhn.fhir.model.api.TagList;
@@ -56,7 +58,9 @@ import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.ServerBase;
 import ca.uhn.fhir.rest.annotation.Since;
+import ca.uhn.fhir.rest.annotation.Sort;
 import ca.uhn.fhir.rest.annotation.VersionIdParam;
+import ca.uhn.fhir.rest.method.QualifiedParamList;
 import ca.uhn.fhir.util.ReflectionUtil;
 
 public class ParameterUtil {
@@ -69,7 +73,7 @@ public class ParameterUtil {
 		intTypes.add(IntegerDt.class);
 		intTypes.add(Integer.class);
 		BINDABLE_INTEGER_TYPES = Collections.unmodifiableSet(intTypes);
-		
+
 		HashSet<Class<?>> timeTypes = new HashSet<Class<?>>();
 		timeTypes.add(InstantDt.class);
 		timeTypes.add(Date.class);
@@ -135,6 +139,7 @@ public class ParameterUtil {
 	public static Set<Class<?>> getBindableInstantTypes() {
 		return BINDABLE_TIME_TYPES;
 	}
+
 	public static Set<Class<?>> getBindableIntegerTypes() {
 		return BINDABLE_INTEGER_TYPES;
 	}
@@ -153,7 +158,7 @@ public class ParameterUtil {
 			Class<? extends java.util.Collection<?>> innerCollectionType = null;
 			if (TagList.class.isAssignableFrom(parameterType)) {
 				// TagList is handled directly within the method bindings
-				param=new NullParameter();
+				param = new NullParameter();
 			} else {
 				if (Collection.class.isAssignableFrom(parameterType)) {
 					innerCollectionType = (Class<? extends java.util.Collection<?>>) parameterType;
@@ -218,6 +223,8 @@ public class ParameterUtil {
 						param = new SinceParameter();
 					} else if (nextAnnotation instanceof Count) {
 						param = new CountParameter();
+					} else if (nextAnnotation instanceof Sort) {
+						param = new SortParameter();
 					} else {
 						continue;
 					}
@@ -227,7 +234,7 @@ public class ParameterUtil {
 			}
 
 			if (param == null) {
-				throw new ConfigurationException("Parameter #" + paramIndex + " of method '" + theMethod.getName() + "' on type '" + theMethod.getDeclaringClass().getCanonicalName()
+				throw new ConfigurationException("Parameter #" + ((paramIndex+1))+"/" + (parameterTypes.length) + " of method '" + theMethod.getName() + "' on type '" + theMethod.getDeclaringClass().getCanonicalName()
 						+ "' has no recognized FHIR interface parameter annotations. Don't know how to handle this parameter");
 			}
 
@@ -288,6 +295,27 @@ public class ParameterUtil {
 			paramIndex++;
 		}
 		return null;
+	}
+
+	public static IQueryParameterOr singleton(final IQueryParameterType theParam) {
+		return new IQueryParameterOr() {
+
+			@Override
+			public void setValuesAsQueryTokens(QualifiedParamList theParameters) {
+				if (theParameters.isEmpty()) {
+					return;
+				}
+				if (theParameters.size() > 1) {
+					throw new IllegalArgumentException("Type " + theParam.getClass().getCanonicalName() + " does not support multiple values");
+				}
+				theParam.setValueAsQueryToken(theParameters.getQualifier(), theParameters.get(0));
+			}
+
+			@Override
+			public List<IQueryParameterType> getValuesAsQueryTokens() {
+				return Collections.singletonList(theParam);
+			}
+		};
 	}
 
 }

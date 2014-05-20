@@ -24,6 +24,7 @@ import java.util.Collections;
 import java.util.List;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.method.QualifiedParamList;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -37,11 +38,9 @@ final class QueryParameterTypeBinder implements IParamBinder {
 	}
 
 	@Override
-	public List<QualifiedParamList> encode(FhirContext theContext, Object theString) throws InternalErrorException {
+	public List<IQueryParameterOr> encode(FhirContext theContext, Object theString) throws InternalErrorException {
 		IQueryParameterType param = (IQueryParameterType) theString;
-		String retVal = param.getValueAsQueryToken();
-		String qualifier=param.getQueryParameterQualifier(theContext);
-		return Collections.singletonList(QualifiedParamList.singleton(qualifier, retVal));
+		return Collections.singletonList(ParameterUtil.singleton(param));
 	}
 
 	@Override

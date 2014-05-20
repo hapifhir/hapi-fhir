@@ -37,8 +37,8 @@ final class QueryParameterOrBinder implements IParamBinder {
 	}
 
 	@Override
-	public List<QualifiedParamList> encode(FhirContext theContext, Object theString) throws InternalErrorException {
-		QualifiedParamList retVal = ((IQueryParameterOr) theString).getValuesAsQueryTokens();
+	public List<IQueryParameterOr> encode(FhirContext theContext, Object theString) throws InternalErrorException {
+		IQueryParameterOr retVal = ((IQueryParameterOr) theString);
 		return Collections.singletonList(retVal);
 	}
 

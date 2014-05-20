@@ -28,16 +28,28 @@ import ca.uhn.fhir.model.primitive.IdDt;
 @DiscriminatorColumn(name = "SVCVER_TYPE", length = 20, discriminatorType = DiscriminatorType.STRING)
 public abstract class BaseResourceTable<T extends IResource> extends BaseHasResource {
 
+	@Column(name = "SP_HAS_LINKS")
+	private boolean myHasLinks;
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	@Column(name = "RES_ID")
 	private Long myId;
+
+	@OneToMany(mappedBy = "myTargetResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
+	private Collection<ResourceLink> myIncomingResourceLinks;
 
 	@OneToMany(mappedBy = "myResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
 	private Collection<ResourceIndexedSearchParamDate> myParamsDate;
 
 	@Column(name = "SP_DATE_PRESENT")
 	private boolean myParamsDatePopulated;
+
+	@OneToMany(mappedBy = "myResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
+	private Collection<ResourceIndexedSearchParamNumber> myParamsNumber;
+
+	@Column(name = "SP_NUMBER_PRESENT")
+	private boolean myParamsNumberPopulated;
 
 	@OneToMany(mappedBy = "myResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
 	private Collection<ResourceIndexedSearchParamString> myParamsString;
@@ -50,6 +62,9 @@ public abstract class BaseResourceTable<T extends IResource> extends BaseHasReso
 
 	@Column(name = "SP_TOKEN_PRESENT")
 	private boolean myParamsTokenPopulated;
+
+	@OneToMany(mappedBy = "mySourceResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
+	private Collection<ResourceLink> myResourceLinks;
 
 	@OneToMany(mappedBy = "myResource", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
 	private Collection<ResourceTag> myTags;
@@ -67,12 +82,12 @@ public abstract class BaseResourceTable<T extends IResource> extends BaseHasReso
 		getTags().add(new ResourceTag(this, theTerm, theLabel, theScheme));
 	}
 
-	public Long getIdAsLong() {
-		return myId;
-	}
-
 	public IdDt getId() {
 		return new IdDt(myId);
+	}
+
+	public Long getIdAsLong() {
+		return myId;
 	}
 
 	public Collection<ResourceIndexedSearchParamDate> getParamsDate() {
@@ -80,6 +95,13 @@ public abstract class BaseResourceTable<T extends IResource> extends BaseHasReso
 			myParamsDate = new ArrayList<>();
 		}
 		return myParamsDate;
+	}
+
+	public Collection<ResourceIndexedSearchParamNumber> getParamsNumber() {
+		if (myParamsNumber == null) {
+			myParamsNumber = new ArrayList<>();
+		}
+		return myParamsNumber;
 	}
 
 	public Collection<ResourceIndexedSearchParamString> getParamsString() {
@@ -96,6 +118,13 @@ public abstract class BaseResourceTable<T extends IResource> extends BaseHasReso
 		return myParamsToken;
 	}
 
+	public Collection<ResourceLink> getResourceLinks() {
+		if (myResourceLinks == null) {
+			myResourceLinks = new ArrayList<>();
+		}
+		return myResourceLinks;
+	}
+
 	public abstract Class<T> getResourceType();
 
 	public Collection<ResourceTag> getTags() {
@@ -109,8 +138,16 @@ public abstract class BaseResourceTable<T extends IResource> extends BaseHasReso
 		return new IdDt(myVersion);
 	}
 
+	public boolean isHasLinks() {
+		return myHasLinks;
+	}
+
 	public boolean isParamsDatePopulated() {
 		return myParamsDatePopulated;
+	}
+
+	public boolean isParamsNumberPopulated() {
+		return myParamsNumberPopulated;
 	}
 
 	public boolean isParamsStringPopulated() {
@@ -119,6 +156,10 @@ public abstract class BaseResourceTable<T extends IResource> extends BaseHasReso
 
 	public boolean isParamsTokenPopulated() {
 		return myParamsTokenPopulated;
+	}
+
+	public void setHasLinks(boolean theHasLinks) {
+		myHasLinks = theHasLinks;
 	}
 
 	public void setId(IdDt theId) {
@@ -131,6 +172,10 @@ public abstract class BaseResourceTable<T extends IResource> extends BaseHasReso
 
 	public void setParamsDatePopulated(boolean theParamsDatePopulated) {
 		myParamsDatePopulated = theParamsDatePopulated;
+	}
+
+	public void setParamsNumberPopulated(boolean theParamsNumberPopulated) {
+		myParamsNumberPopulated = theParamsNumberPopulated;
 	}
 
 	public void setParamsString(Collection<ResourceIndexedSearchParamString> theParamsString) {

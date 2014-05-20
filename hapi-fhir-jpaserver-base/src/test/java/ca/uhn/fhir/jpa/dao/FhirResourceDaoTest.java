@@ -1,18 +1,14 @@
 package ca.uhn.fhir.jpa.dao;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.hamcrest.core.StringContains;
 import org.junit.AfterClass;
@@ -190,7 +186,7 @@ public class FhirResourceDaoTest {
 		found = ourPatientDao.search(Patient.SP_GENDER, new IdentifierDt(null, "F"));
 		assertEquals(0, found.size());
 
-		Map<String, List<List<IQueryParameterType>>> map = new HashMap<>();
+		SearchParameterMap map = new SearchParameterMap();
 		map.put(Patient.SP_IDENTIFIER, new ArrayList<List<IQueryParameterType>>());
 		map.get(Patient.SP_IDENTIFIER).add(new ArrayList<IQueryParameterType>());
 		map.get(Patient.SP_IDENTIFIER).get(0).add(new IdentifierDt("urn:system", "001testPersistSearchParams"));
@@ -201,7 +197,7 @@ public class FhirResourceDaoTest {
 		assertEquals(1, found.size());
 		assertEquals(id, found.get(0).getId().asLong().longValue());
 
-		map = new HashMap<>();
+		map = new SearchParameterMap();
 		map.put(Patient.SP_IDENTIFIER, new ArrayList<List<IQueryParameterType>>());
 		map.get(Patient.SP_IDENTIFIER).add(new ArrayList<IQueryParameterType>());
 		map.get(Patient.SP_IDENTIFIER).get(0).add(new IdentifierDt("urn:system", "001testPersistSearchParams"));
@@ -358,7 +354,7 @@ public class FhirResourceDaoTest {
 		result = ourObservationDao.search(Observation.SP_SUBJECT, new ReferenceParam(Patient.SP_NAME, "testSearchResourceLinkWithChainWithMultipleTypesYY"));
 		assertEquals(0,result.size());
 
-		result = ourObservationDao.search(Observation.SP_SUBJECT, new ReferenceParam(Patient.class, Patient.SP_NAME, "testSearchResourceLinkWithChainWithMultipleTypes01"));
+		result = ourObservationDao.search(Observation.SP_SUBJECT, new ReferenceParam("Patient", Patient.SP_NAME, "testSearchResourceLinkWithChainWithMultipleTypes01"));
 		assertEquals(1,result.size());
 		assertEquals(obsId01, result.get(0).getId());
 
@@ -505,6 +501,36 @@ public class FhirResourceDaoTest {
 
 	}
 
+	
+	@Test
+	public void testUpdateMaintainsSearchParams() throws InterruptedException {
+		Patient p1 = new Patient();
+		p1.addIdentifier("urn:system", "testUpdateMaintainsSearchParamsAAA");
+		p1.addName().addFamily("Tester").addGiven("testUpdateMaintainsSearchParamsAAA");
+		IdDt p1id = ourPatientDao.create(p1).getId();
+
+		Patient p2 = new Patient();
+		p2.addIdentifier("urn:system", "testUpdateMaintainsSearchParamsBBB");
+		p2.addName().addFamily("Tester").addGiven("testUpdateMaintainsSearchParamsBBB");
+		IdDt p2id = ourPatientDao.create(p2).getId();
+		
+		Set<Long> ids = ourPatientDao.searchForIds(Patient.SP_GIVEN, new StringDt("testUpdateMaintainsSearchParamsAAA"));
+		assertEquals(1,ids.size());
+		assertThat(ids, contains(p1id.asLong()));
+		
+		// Update the name
+		p1.getNameFirstRep().getGivenFirstRep().setValue("testUpdateMaintainsSearchParamsBBB");
+		ourPatientDao.update(p1, p1id);
+
+		ids = ourPatientDao.searchForIds(Patient.SP_GIVEN, new StringDt("testUpdateMaintainsSearchParamsAAA"));
+		assertEquals(0,ids.size());
+
+		ids = ourPatientDao.searchForIds(Patient.SP_GIVEN, new StringDt("testUpdateMaintainsSearchParamsBBB"));
+		assertEquals(2,ids.size());
+
+	}
+
+	
 	@AfterClass
 	public static void afterClass() {
 		ourCtx.close();
@@ -514,7 +540,7 @@ public class FhirResourceDaoTest {
 	@BeforeClass
 	public static void beforeClass() {
 		ourTestStarted = new Date();
-		ourCtx = new ClassPathXmlApplicationContext("fhir-spring-test-config.xml");
+		ourCtx = new ClassPathXmlApplicationContext("fhir-jpabase-spring-test-config.xml");
 		ourPatientDao = ourCtx.getBean("myPatientDao", IFhirResourceDao.class);
 		ourObservationDao = ourCtx.getBean("myObservationDao", IFhirResourceDao.class);
 		ourDiagnosticReportDao = ourCtx.getBean("myDiagnosticReportDao", IFhirResourceDao.class);

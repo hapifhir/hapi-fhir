@@ -3,18 +3,20 @@ package ca.uhn.fhir.jpa.entity;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.ForeignKey;
+import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "IDX_SP_STRING")
+@Table(name = "SPIDX_STRING", indexes= {@Index(name="IDX_SP_STRING", columnList="myValueNormalized")})
 public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchParam {
 
 	private static final long serialVersionUID = 1L;
 
 	@ManyToOne(optional = false, cascade = {}, fetch = FetchType.LAZY)
-	@JoinColumn(name = "RESOURCE_PID", nullable = false)
+	@JoinColumn(name = "RESOURCE_PID", nullable = false, foreignKey=@ForeignKey(name="FK_ISS_RESOURCE"))
 	private BaseResourceTable<?> myResource;
 
 	@Column(name = "RESOURCE_PID", insertable=false, updatable=false)

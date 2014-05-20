@@ -4,12 +4,14 @@ import java.math.BigDecimal;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.ForeignKey;
+import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "IDX_SP_NUMBER")
+@Table(name = "SPIDX_NUMBER", indexes= {@Index(name="IDX_SP_NUMBER", columnList="myValue")})
 public class ResourceIndexedSearchParamNumber extends BaseResourceIndexedSearchParam {
 
 	private static final long serialVersionUID = 1L;
@@ -24,7 +26,7 @@ public class ResourceIndexedSearchParamNumber extends BaseResourceIndexedSearchP
 	public BigDecimal myValue;
 
 	@ManyToOne(optional = false)
-	@JoinColumn(name = "RESOURCE_PID", nullable = false)
+	@JoinColumn(name = "RESOURCE_PID", nullable = false, foreignKey=@ForeignKey(name="FK_ISN_RESOURCE"))
 	private BaseResourceTable<?> myResource;
 
 	@Column(name = "RESOURCE_PID", insertable = false, updatable = false)
