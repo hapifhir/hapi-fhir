@@ -44,7 +44,7 @@ public class QualifiedParamList extends ArrayList<String> {
 	public QualifiedParamList(FhirContext theContext, IQueryParameterOr theNextOr) {
 		for (IQueryParameterType next : theNextOr.getValuesAsQueryTokens()) {
 			if (myQualifier==null) {
-				myQualifier=next.getQueryParameterQualifier(theContext);
+				myQualifier=next.getQueryParameterQualifier();
 			}
 			add(next.getValueAsQueryToken());
 		}

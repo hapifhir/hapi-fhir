@@ -54,7 +54,7 @@ public class ReferenceParam implements IQueryParameterType {
 	}
 
 	@Override
-	public String getQueryParameterQualifier(FhirContext theContext) {
+	public String getQueryParameterQualifier() {
 		StringBuilder b = new StringBuilder();
 		if (isNotBlank(myResourceType)) {
 			b.append(':');

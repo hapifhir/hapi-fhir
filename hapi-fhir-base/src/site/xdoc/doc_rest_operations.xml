@@ -915,6 +915,43 @@
 
 			</subsection>
 
+			<subsection name="Sorting (_sort)">
+
+				<p>
+					FHIR supports
+					<a href="http://www.hl7.org/implement/standards/fhir/search.html#sort">sorting</a>
+					according to a specific set of rules.
+				</p>
+
+				<p>
+					According to the specification, sorting is requested by the client using a 
+					search param as the sort key. For example, when searching Patient resources,
+					a sort key of "given" requests the "given" search param as the sort key. That
+					param maps to the values in the field "Patient.name.given". 
+				</p>
+
+				<p>
+					Sort specifications can be passed into handler methods by adding a parameter
+					of type 
+					SortSpec,
+					which has been annotated with the
+					@Sort
+					annotation, as shown in the following example:
+				</p>
+
+				<macro name="snippet">
+					<param name="id" value="sort" />
+					<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
+				</macro>
+
+				<p>
+					Example URL to invoke this method:
+					<br />
+					<code>http://fhir.example.com/Patient?_identifier=urn:foo|123&amp;_sort=given</code>
+				</p>
+
+			</subsection>
+			
 			<a name="type_validate" />
 		</section>
 

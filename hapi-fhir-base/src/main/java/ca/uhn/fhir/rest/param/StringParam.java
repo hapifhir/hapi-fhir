@@ -20,7 +20,6 @@ package ca.uhn.fhir.rest.param;
  * #L%
  */
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.server.Constants;
 
@@ -51,7 +50,7 @@ public class StringParam extends StringDt {
 	}
 
 	@Override
-	public String getQueryParameterQualifier(FhirContext theContext) {
+	public String getQueryParameterQualifier() {
 		if (isExact()) {
 			return Constants.PARAMQUALIFIER_STRING_EXACT;
 		} else {

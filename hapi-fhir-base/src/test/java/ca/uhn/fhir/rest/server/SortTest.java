@@ -53,47 +53,47 @@ public class SortTest {
 		assertEquals(1, p.getName().size());
 		assertEquals("Hello", p.getNameFirstRep().getFamilyFirstRep().getValue());
 	}
-	
+
 	@Test
 	public void testSingleSort() throws Exception {
 		{
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?name=Hello&_sort=given");
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		Bundle bundle = new FhirContext().newXmlParser().parseBundle(responseContent);
-		assertEquals(1, bundle.size());
+			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?name=Hello&_sort=given");
+			HttpResponse status = ourClient.execute(httpGet);
+			String responseContent = IOUtils.toString(status.getEntity().getContent());
+			assertEquals(200, status.getStatusLine().getStatusCode());
+			Bundle bundle = new FhirContext().newXmlParser().parseBundle(responseContent);
+			assertEquals(1, bundle.size());
 
-		Patient p = bundle.getResources(Patient.class).get(0);
-		assertEquals(2, p.getName().size());
-		assertEquals("Hello", p.getNameFirstRep().getFamilyFirstRep().getValue());
-		assertEquals("given|null", p.getName().get(1).getFamilyFirstRep().getValue());
+			Patient p = bundle.getResources(Patient.class).get(0);
+			assertEquals(2, p.getName().size());
+			assertEquals("Hello", p.getNameFirstRep().getFamilyFirstRep().getValue());
+			assertEquals("given|null", p.getName().get(1).getFamilyFirstRep().getValue());
 		}
 		{
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?name=Hello&_sort:asc=given");
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		Bundle bundle = new FhirContext().newXmlParser().parseBundle(responseContent);
-		assertEquals(1, bundle.size());
+			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?name=Hello&_sort:asc=given");
+			HttpResponse status = ourClient.execute(httpGet);
+			String responseContent = IOUtils.toString(status.getEntity().getContent());
+			assertEquals(200, status.getStatusLine().getStatusCode());
+			Bundle bundle = new FhirContext().newXmlParser().parseBundle(responseContent);
+			assertEquals(1, bundle.size());
 
-		Patient p = bundle.getResources(Patient.class).get(0);
-		assertEquals(2, p.getName().size());
-		assertEquals("Hello", p.getNameFirstRep().getFamilyFirstRep().getValue());
-		assertEquals("given|ASC", p.getName().get(1).getFamilyFirstRep().getValue());
+			Patient p = bundle.getResources(Patient.class).get(0);
+			assertEquals(2, p.getName().size());
+			assertEquals("Hello", p.getNameFirstRep().getFamilyFirstRep().getValue());
+			assertEquals("given|ASC", p.getName().get(1).getFamilyFirstRep().getValue());
 		}
 		{
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?name=Hello&_sort:desc=given");
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		Bundle bundle = new FhirContext().newXmlParser().parseBundle(responseContent);
-		assertEquals(1, bundle.size());
+			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?name=Hello&_sort:desc=given");
+			HttpResponse status = ourClient.execute(httpGet);
+			String responseContent = IOUtils.toString(status.getEntity().getContent());
+			assertEquals(200, status.getStatusLine().getStatusCode());
+			Bundle bundle = new FhirContext().newXmlParser().parseBundle(responseContent);
+			assertEquals(1, bundle.size());
 
-		Patient p = bundle.getResources(Patient.class).get(0);
-		assertEquals(2, p.getName().size());
-		assertEquals("Hello", p.getNameFirstRep().getFamilyFirstRep().getValue());
-		assertEquals("given|DESC", p.getName().get(1).getFamilyFirstRep().getValue());
+			Patient p = bundle.getResources(Patient.class).get(0);
+			assertEquals(2, p.getName().size());
+			assertEquals("Hello", p.getNameFirstRep().getFamilyFirstRep().getValue());
+			assertEquals("given|DESC", p.getName().get(1).getFamilyFirstRep().getValue());
 		}
 
 	}
@@ -101,23 +101,23 @@ public class SortTest {
 	@Test
 	public void testSortChain() throws Exception {
 		{
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?name=Hello&_sort=given&_sort=family&_sort=name");
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		Bundle bundle = new FhirContext().newXmlParser().parseBundle(responseContent);
-		assertEquals(1, bundle.size());
+			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?name=Hello&_sort=given&_sort=family&_sort=name");
+			HttpResponse status = ourClient.execute(httpGet);
+			String responseContent = IOUtils.toString(status.getEntity().getContent());
+			assertEquals(200, status.getStatusLine().getStatusCode());
+			Bundle bundle = new FhirContext().newXmlParser().parseBundle(responseContent);
+			assertEquals(1, bundle.size());
 
-		Patient p = bundle.getResources(Patient.class).get(0);
-		assertEquals(4, p.getName().size());
-		assertEquals("Hello", p.getNameFirstRep().getFamilyFirstRep().getValue());
-		assertEquals("given|null", p.getName().get(1).getFamilyFirstRep().getValue());
-		assertEquals("family|null", p.getName().get(2).getFamilyFirstRep().getValue());
-		assertEquals("name|null", p.getName().get(3).getFamilyFirstRep().getValue());
+			Patient p = bundle.getResources(Patient.class).get(0);
+			assertEquals(4, p.getName().size());
+			assertEquals("Hello", p.getNameFirstRep().getFamilyFirstRep().getValue());
+			assertEquals("given|null", p.getName().get(1).getFamilyFirstRep().getValue());
+			assertEquals("family|null", p.getName().get(2).getFamilyFirstRep().getValue());
+			assertEquals("name|null", p.getName().get(3).getFamilyFirstRep().getValue());
 		}
-		
 
 	}
+
 	@AfterClass
 	public static void afterClass() throws Exception {
 		ourServer.stop();
@@ -158,7 +158,7 @@ public class SortTest {
 			p.addName().addFamily().setValue(theName.getValue());
 			SortSpec sort = theSort;
 			while (sort != null) {
-				p.addName().addFamily().setValue(sort.getFieldName() + "|" + sort.getOrder());
+				p.addName().addFamily().setValue(sort.getParamName() + "|" + sort.getOrder());
 				sort = sort.getChain();
 			}
 

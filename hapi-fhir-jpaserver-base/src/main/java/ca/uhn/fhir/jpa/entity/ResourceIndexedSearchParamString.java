@@ -10,7 +10,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "SPIDX_STRING", indexes= {@Index(name="IDX_SP_STRING", columnList="myValueNormalized")})
+@Table(name = "SPIDX_STRING", indexes= {@Index(name="IDX_SP_STRING", columnList="SP_VALUE_NORMALIZED")})
 public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchParam {
 
 	private static final long serialVersionUID = 1L;

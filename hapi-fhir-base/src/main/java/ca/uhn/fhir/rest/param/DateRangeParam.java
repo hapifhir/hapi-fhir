@@ -50,7 +50,7 @@ public class DateRangeParam implements IQueryParameterAnd {
 	 * @param theLowerBound
 	 *            A qualified date param representing the lower date bound (optionally may include time), e.g.
 	 *            "2011-02-22" or "2011-02-22T13:12:00". Will be treated inclusively.
-	 * @param theLowerBound
+	 * @param theUpperBound
 	 *            A qualified date param representing the upper date bound (optionally may include time), e.g.
 	 *            "2011-02-22" or "2011-02-22T13:12:00". Will be treated inclusively.
 	 */
@@ -98,7 +98,7 @@ public class DateRangeParam implements IQueryParameterAnd {
 	 * @param theLowerBound
 	 *            A qualified date param representing the lower date bound (optionally may include time), e.g.
 	 *            "2011-02-22" or "2011-02-22T13:12:00"
-	 * @param theLowerBound
+	 * @param theUpperBound
 	 *            A qualified date param representing the upper date bound (optionally may include time), e.g.
 	 *            "2011-02-22" or "2011-02-22T13:12:00"
 	 */
@@ -179,7 +179,7 @@ public class DateRangeParam implements IQueryParameterAnd {
 	 * @param theLowerBound
 	 *            A qualified date param representing the lower date bound (optionally may include time), e.g.
 	 *            "2011-02-22" or "2011-02-22T13:12:00". Will be treated inclusively.
-	 * @param theLowerBound
+	 * @param theUpperBound
 	 *            A qualified date param representing the upper date bound (optionally may include time), e.g.
 	 *            "2011-02-22" or "2011-02-22T13:12:00". Will be treated inclusively.
 	 */
@@ -195,7 +195,7 @@ public class DateRangeParam implements IQueryParameterAnd {
 	 * @param theLowerBound
 	 *            A qualified date param representing the lower date bound (optionally may include time), e.g.
 	 *            "2011-02-22" or "2011-02-22T13:12:00". Will be treated inclusively.
-	 * @param theLowerBound
+	 * @param theUpperBound
 	 *            A qualified date param representing the upper date bound (optionally may include time), e.g.
 	 *            "2011-02-22" or "2011-02-22T13:12:00". Will be treated inclusively.
 	 */

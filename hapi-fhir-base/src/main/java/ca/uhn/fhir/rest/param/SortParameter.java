@@ -44,25 +44,24 @@ public class SortParameter implements IParameter {
 	@Override
 	public void translateClientArgumentIntoQueryArgument(FhirContext theContext, Object theSourceClientArgument, Map<String, List<String>> theTargetQueryArguments, BaseClientInvocation theClientInvocation) throws InternalErrorException {
 		SortSpec ss = (SortSpec) theSourceClientArgument;
-		if (ss == null) {
-			return;
-		}
-		String name;
-		if (ss.getOrder() == null) {
-			name = Constants.PARAM_SORT;
-		} else if (ss.getOrder() == SortOrderEnum.ASC) {
-			name = Constants.PARAM_SORT_ASC;
-		} else {
-			name = Constants.PARAM_SORT_DESC;
-		}
-
-		if (ss.getFieldName() != null) {
-			if (!theTargetQueryArguments.containsKey(name)) {
-				theTargetQueryArguments.put(name, new ArrayList<String>());
+		while (ss != null) {
+			String name;
+			if (ss.getOrder() == null) {
+				name = Constants.PARAM_SORT;
+			} else if (ss.getOrder() == SortOrderEnum.ASC) {
+				name = Constants.PARAM_SORT_ASC;
+			} else {
+				name = Constants.PARAM_SORT_DESC;
 			}
-			theTargetQueryArguments.get(name).add(ss.getFieldName());
-		}
 
+			if (ss.getParamName() != null) {
+				if (!theTargetQueryArguments.containsKey(name)) {
+					theTargetQueryArguments.put(name, new ArrayList<String>());
+				}
+				theTargetQueryArguments.get(name).add(ss.getParamName());
+			}
+			ss = ss.getChain();
+		}
 	}
 
 	@Override
@@ -95,7 +94,7 @@ public class SortParameter implements IParameter {
 					if (isNotBlank(nextValue)) {
 						SortSpec spec = new SortSpec();
 						spec.setOrder(order);
-						spec.setFieldName(nextValue);
+						spec.setParamName(nextValue);
 						if (innerSpec == null) {
 							outerSpec = spec;
 							innerSpec = spec;
@@ -113,11 +112,11 @@ public class SortParameter implements IParameter {
 
 	@Override
 	public void initializeTypes(Method theMethod, Class<? extends Collection<?>> theOuterCollectionType, Class<? extends Collection<?>> theInnerCollectionType, Class<?> theParameterType) {
-		if (theOuterCollectionType != null || theInnerCollectionType!=null) {
-			throw new ConfigurationException("Method '" + theMethod.getName() + "' in type '" +theMethod.getDeclaringClass().getCanonicalName()+ "' is annotated with @" + Sort.class.getName() + " but can not be of collection type");
+		if (theOuterCollectionType != null || theInnerCollectionType != null) {
+			throw new ConfigurationException("Method '" + theMethod.getName() + "' in type '" + theMethod.getDeclaringClass().getCanonicalName() + "' is annotated with @" + Sort.class.getName() + " but can not be of collection type");
 		}
 		if (!theParameterType.equals(SortSpec.class)) {
-			throw new ConfigurationException("Method '" + theMethod.getName() + "' in type '"+theMethod.getDeclaringClass().getCanonicalName() + "' is annotated with @" + Sort.class.getName() + " but is an invalid type, must be: " + SortSpec.class.getCanonicalName());
+			throw new ConfigurationException("Method '" + theMethod.getName() + "' in type '" + theMethod.getDeclaringClass().getCanonicalName() + "' is annotated with @" + Sort.class.getName() + " but is an invalid type, must be: " + SortSpec.class.getCanonicalName());
 		}
 
 	}

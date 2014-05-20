@@ -85,7 +85,8 @@ public class ServerConformanceProviderTest {
 		String conf = new FhirContext().newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
 
-		assertThat(conf, containsString("<documentation value=\"The patient's identifier (MRN or other card number)\"/>"));
+		assertThat(conf, containsString("<documentation value=\"The patient's identifier\"/>"));
+		assertThat(conf, containsString("<documentation value=\"The patient's name\"/>"));
 		assertThat(conf, containsString("<type value=\"token\"/>"));
 	}
 

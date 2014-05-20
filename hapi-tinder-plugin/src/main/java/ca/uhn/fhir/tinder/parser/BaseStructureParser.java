@@ -84,7 +84,8 @@ public abstract class BaseStructureParser {
 		}
 	}
 
-	private ca.uhn.fhir.model.api.annotation.SimpleSetter.Parameter findAnnotation(Class<?> theBase, Annotation[] theAnnotations, Class<ca.uhn.fhir.model.api.annotation.SimpleSetter.Parameter> theClass) {
+	private ca.uhn.fhir.model.api.annotation.SimpleSetter.Parameter findAnnotation(Class<?> theBase, Annotation[] theAnnotations,
+			Class<ca.uhn.fhir.model.api.annotation.SimpleSetter.Parameter> theClass) {
 		for (Annotation next : theAnnotations) {
 			if (theClass.equals(next.annotationType())) {
 				return (ca.uhn.fhir.model.api.annotation.SimpleSetter.Parameter) next;
@@ -279,6 +280,7 @@ public abstract class BaseStructureParser {
 		} else {
 			ctx.put("className", (theResource.getName()));
 		} // HumanName}
+		ctx.put("elementName", theResource.getElementName());
 		ctx.put("classNameComplete", (theResource.getName()) + getFilenameSuffix()); // HumanNameDt
 		ctx.put("shortName", defaultString(theResource.getShortName()));
 		ctx.put("definition", defaultString(theResource.getDefinition()));
@@ -337,7 +339,8 @@ public abstract class BaseStructureParser {
 
 			// File f = new File(theOutputDirectory, (next.getDeclaringClassNameComplete()) /*+ getFilenameSuffix()*/ +
 			// ".java");
-			File f = new File(theOutputDirectory, (next.getElementName()) + getFilenameSuffix() + ".java");
+			String elementName = translateClassName(next.getElementName());
+			File f = new File(theOutputDirectory, elementName + getFilenameSuffix() + ".java");
 			try {
 				write(next, f, thePackageBase);
 			} catch (IOException e) {
@@ -346,16 +349,16 @@ public abstract class BaseStructureParser {
 		}
 	}
 
-	// private String translateClassName(String theName) {
-	// if ("List".equals(theName)) {
-	// return "ListResource";
-	// }
-	// return theName;
-	// }
+	private String translateClassName(String theName) {
+		if ("List".equals(theName)) {
+			return "ListResource";
+		}
+		return theName;
+	}
 
 	/**
-	 * Example: Encounter has an internal block class named "Location", but it also has a reference to the Location
-	 * resource type, so we need to use the fully qualified name for that resource reference
+	 * Example: Encounter has an internal block class named "Location", but it also has a reference to the Location resource type, so we need to use the fully qualified name for that resource
+	 * reference
 	 */
 	private void fixResourceReferenceClassNames(BaseElement theNext, String thePackageBase) {
 		for (BaseElement next : theNext.getChildren()) {

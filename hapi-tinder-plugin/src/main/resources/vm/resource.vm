@@ -16,7 +16,7 @@ import ${import};
 ##import ${packageBase}.valueset.*;
 
 /**
- * HAPI/FHIR <b>${className}</b> Resource
+ * HAPI/FHIR <b>${elementName}</b> Resource
  * (${shortName})
  *
  * <p>
@@ -37,7 +37,7 @@ import ${import};
  *
 #end
  */
-@ResourceDef(name="${className}", profile="${profile}", id="${id}")
+@ResourceDef(name="${elementName}", profile="${profile}", id="${id}")
 public class ${className} extends BaseResource implements IResource {
 
 #foreach ( $param in $searchParams )

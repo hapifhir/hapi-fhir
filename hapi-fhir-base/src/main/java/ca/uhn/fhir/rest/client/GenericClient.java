@@ -176,7 +176,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			String qualifier = null;
 			for (IQueryParameterType nextValue : nextEntry.getValue()) {
 				valueList.add(nextValue.getValueAsQueryToken());
-				qualifier = nextValue.getQueryParameterQualifier(myContext);
+				qualifier = nextValue.getQueryParameterQualifier();
 			}
 			qualifier = StringUtils.defaultString(qualifier);
 			params.put(nextEntry.getKey()+qualifier, valueList);

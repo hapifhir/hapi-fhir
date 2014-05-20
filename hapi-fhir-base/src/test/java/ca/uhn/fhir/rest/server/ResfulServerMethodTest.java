@@ -354,7 +354,11 @@ public class ResfulServerMethodTest {
 			IParser p = ourCtx.newXmlParser().setPrettyPrint(true);
 			String enc = p.encodeResourceToString(bundle);
 			ourLog.info("Response:\n{}", enc);
-			assertTrue(enc.contains(ExtensionConstants.CONF_ADDITIONAL_PARAM));
+
+			p = ourCtx.newXmlParser().setPrettyPrint(false);
+			enc = p.encodeResourceToString(bundle);
+			ourLog.info("Response:\n{}", enc);
+			assertThat(enc, StringContains.containsString("<searchParam><name value=\"quantityParam\"/><type value=\"quantity\"/></searchParam>"));
 		}
 		// {
 		// IParser p = ourCtx.newJsonParser().setPrettyPrint(true);
@@ -536,14 +540,14 @@ public class ResfulServerMethodTest {
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		ourLog.info("Response was:\n{}", responseContent);
 
-		assertEquals(Constants.STATUS_HTTP_404_NOT_FOUND, status.getStatusLine().getStatusCode());
+		assertEquals(Constants.STATUS_HTTP_400_BAD_REQUEST, status.getStatusLine().getStatusCode());
 
 	}
 
 	@Test
 	public void testSearchAll() throws Exception {
 
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient");
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/AdverseReaction");
 		HttpResponse status = ourClient.execute(httpGet);
 
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
@@ -554,7 +558,7 @@ public class ResfulServerMethodTest {
 
 		assertEquals(2, bundle.getEntries().size());
 
-		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/_search");
+		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/AdverseReaction/_search");
 		status = ourClient.execute(httpPost);
 
 		responseContent = IOUtils.toString(status.getEntity().getContent());
@@ -1205,6 +1209,15 @@ public class ResfulServerMethodTest {
 			IdDt version = new IdDt(thePatient.getIdentifier().get(1).getValue().getValue());
 			return new MethodOutcome(id, version);
 		}
+		
+		@Search()
+		public Collection<AdverseReaction> getAllResources() {
+			ArrayList<AdverseReaction> retVal = new ArrayList<AdverseReaction>();
+			retVal.add(new AdverseReaction());
+			retVal.add(new AdverseReaction());
+			return retVal;
+		}
+
 
 		@Override
 		public Class<? extends IResource> getResourceType() {
@@ -1499,11 +1512,6 @@ public class ResfulServerMethodTest {
 			Patient retVal = getIdToPatient().get(theId.getValue());
 			retVal.getName().get(0).setText(theVersionId.getValue());
 			return retVal;
-		}
-
-		@Search()
-		public Collection<Patient> getResources() {
-			return getIdToPatient().values();
 		}
 
 		@Override

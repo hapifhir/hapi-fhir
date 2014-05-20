@@ -25,7 +25,6 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.BaseElement;
 import ca.uhn.fhir.model.api.ICompositeDatatype;
 import ca.uhn.fhir.model.api.IElement;
@@ -434,7 +433,7 @@ public class QuantityDt extends BaseElement implements ICompositeDatatype, IQuer
 	
 
 	@Override
-	public String getQueryParameterQualifier(FhirContext theContext) {
+	public String getQueryParameterQualifier() {
 		return null;
 	}	
 

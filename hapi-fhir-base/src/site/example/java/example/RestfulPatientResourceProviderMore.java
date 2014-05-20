@@ -49,10 +49,13 @@ import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.annotation.Since;
+import ca.uhn.fhir.rest.annotation.Sort;
 import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.annotation.Validate;
 import ca.uhn.fhir.rest.annotation.VersionIdParam;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.SortOrderEnum;
+import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.client.ITestClient;
 import ca.uhn.fhir.rest.client.api.IBasicClient;
 import ca.uhn.fhir.rest.client.api.IRestfulClient;
@@ -79,6 +82,32 @@ public List<Organization> getAllOrganizations() {
    return retVal;
 }
 //END SNIPPET: searchAll
+
+//START SNIPPET: sort
+@Search
+public List<Patient> findPatients(
+		@RequiredParam(name=Patient.SP_IDENTIFIER) StringParam theParameter,
+		@Sort SortSpec theSort) {
+   List<Patient> retVal=new ArrayList<Patient>(); // populate this
+
+   // theSort is null unless a _sort parameter is actually provided 
+   if (theSort != null) {
+      
+      // The name of the param to sort by
+      String param = theSort.getParamName();
+
+      // The sort order, or null
+      SortOrderEnum order = theSort.getOrder();
+
+      // This will be populated if a second _sort was specified
+      SortSpec subSort = theSort.getChain();
+      
+      // ...apply the sort...
+   }
+
+   return retVal;
+}
+//END SNIPPET: sort
 
 //START SNIPPET: underlyingReq
 @Search
@@ -258,6 +287,21 @@ QualifiedDateParam param = new QualifiedDateParam(QuantityCompararatorEnum.GREAT
 List<Patient> response = client.getPatientByDob(param);
 //END SNIPPET: dateClient
 }
+
+//START SNIPPET: dateRange
+@Search()
+public List<Observation> searchByDateRange(
+    @RequiredParam(name=Observation.SP_DATE) DateRangeParam theRange ) {
+  
+  Date from = theRange.getLowerBoundAsInstant();
+  Date to = theRange.getUpperBoundAsInstant();
+	
+  List<Observation> retVal = new ArrayList<Observation>();
+  // ...populate...
+  return retVal;
+}
+//END SNIPPET: dateRange
+
 
 private ITestClient provideTc() {
 	return null;

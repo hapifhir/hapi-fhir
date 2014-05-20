@@ -1,6 +1,5 @@
 package ca.uhn.fhir.model.api;
 
-import ca.uhn.fhir.context.FhirContext;
 
 /*
  * #%L
@@ -55,8 +54,7 @@ public interface IQueryParameterType {
 	 * This method is generally only called by HAPI itself, and should not need to be called from user code. 
 	 *
 	 * This method will return any qualifier that should be appended to the parameter name (e.g ":exact")
-	 * @param theContext TODO
 	 */
-	public String getQueryParameterQualifier(FhirContext theContext);
+	public String getQueryParameterQualifier();
 
 }

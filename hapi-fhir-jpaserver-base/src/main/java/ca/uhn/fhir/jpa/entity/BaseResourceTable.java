@@ -24,7 +24,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
 
 @Entity
 @Table(name = "BASE_RES", uniqueConstraints = {})
-@Inheritance(strategy = InheritanceType.JOINED)
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "SVCVER_TYPE", length = 20, discriminatorType = DiscriminatorType.STRING)
 public abstract class BaseResourceTable<T extends IResource> extends BaseHasResource {
 

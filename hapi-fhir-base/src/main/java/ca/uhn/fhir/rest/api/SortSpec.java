@@ -27,8 +27,57 @@ package ca.uhn.fhir.rest.api;
 public class SortSpec {
 
 	private SortSpec myChain;
-	private String myFieldName;
+	private String myParamName;
 	private SortOrderEnum myOrder;
+
+	/**
+	 * Constructor
+	 */
+	public SortSpec() {
+	}
+
+	/**
+	 * Constructor
+	 * 
+	 * @param theParamName
+	 *            The search name to sort on. See {@link #setParamName(String)} for more information.
+	 */
+	public SortSpec(String theParamName) {
+		super();
+		myParamName = theParamName;
+	}
+
+	/**
+	 * Constructor
+	 * 
+	 * @param theParamName
+	 *            The search name to sort on. See {@link #setParamName(String)} for more information.
+	 * @param theOrder
+	 *            The order, or <code>null</code>. See {@link #setOrder(SortOrderEnum)} for more information.
+	 */
+	public SortSpec(String theParamName, SortOrderEnum theOrder) {
+		super();
+		myParamName = theParamName;
+		myOrder = theOrder;
+	}
+
+	/**
+	 * Constructor
+	 * 
+	 * @param theParamName
+	 *            The search name to sort on. See {@link #setParamName(String)} for more information.
+	 * @param theOrder
+	 *            The order, or <code>null</code>. See {@link #setOrder(SortOrderEnum)} for more information.
+	 * @param theChain
+	 *            The next sorting spec, to be applied only when this spec makes two entries equal. See
+	 *            {@link #setChain(SortSpec)} for more information.
+	 */
+	public SortSpec(String theParamName, SortOrderEnum theOrder, SortSpec theChain) {
+		super();
+		myParamName = theParamName;
+		myOrder = theOrder;
+		myChain = theChain;
+	}
 
 	/**
 	 * Gets the chained sort specification, or <code>null</code> if none. If multiple sort parameters are chained
@@ -39,14 +88,14 @@ public class SortSpec {
 	}
 
 	/**
-	 * Returns the actual name of the field to sort by
+	 * Returns the actual name of the search param to sort by
 	 */
-	public String getFieldName() {
-		return myFieldName;
+	public String getParamName() {
+		return myParamName;
 	}
 
 	/**
-	 * Returns the sort order specified by this parameter, or <code>null</code> if none is explicitly defined (which
+	 * Returns the sort order specified by this parameter, or <code>null</code> if none is explicitly provided (which
 	 * means {@link SortOrderEnum#ASC} according to the <a
 	 * href="http://hl7.org/implement/standards/fhir/search.html#sort">FHIR specification</a>)
 	 */
@@ -59,19 +108,22 @@ public class SortSpec {
 	 * (indicating a sub-sort), the second level sort is chained via this property.
 	 */
 	public void setChain(SortSpec theChain) {
+		if (theChain == this) {
+			throw new IllegalArgumentException("Can not chain this to itself");
+		}
 		myChain = theChain;
 	}
 
 	/**
-	 * Sets the actual name of the field to sort by
+	 * Sets the actual name of the search param to sort by
 	 */
-	public void setFieldName(String theFieldName) {
-		myFieldName = theFieldName;
+	public void setParamName(String theFieldName) {
+		myParamName = theFieldName;
 	}
 
 	/**
-	 * Sets the sort order specified by this parameter, or <code>null</code> if none is explicitly defined (which means
-	 * {@link SortOrderEnum#ASC} according to the <a
+	 * Sets the sort order specified by this parameter, or <code>null</code> if none should be explicitly defined (which
+	 * means {@link SortOrderEnum#ASC} according to the <a
 	 * href="http://hl7.org/implement/standards/fhir/search.html#sort">FHIR specification</a>)
 	 */
 	public void setOrder(SortOrderEnum theOrder) {

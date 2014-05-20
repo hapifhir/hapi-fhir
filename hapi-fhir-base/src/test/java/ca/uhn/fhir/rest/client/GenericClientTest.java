@@ -303,7 +303,7 @@ public class GenericClientTest {
 			client.search().forResource(Patient.class).execute();
 			fail();
 		} catch (InternalErrorException e) {
-			assertEquals(e.getMessage(), "INTERNAL ERRORS");
+			assertEquals(e.getMessage(), "HTTP 500 INTERNAL ERRORS: Server Issues!");
 			assertEquals(e.getResponseBody(), "Server Issues!");
 		}
 
