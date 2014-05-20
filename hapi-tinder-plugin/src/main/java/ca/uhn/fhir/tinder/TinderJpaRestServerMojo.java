@@ -13,9 +13,11 @@ import org.apache.http.ParseException;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.project.MavenProject;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 
@@ -47,6 +49,9 @@ public class TinderJpaRestServerMojo extends AbstractMojo {
 	@Parameter(required = true)
 	private List<String> baseResourceNames;
 
+	@Component
+	private MavenProject myProject;
+
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException {
 
@@ -71,6 +76,8 @@ public class TinderJpaRestServerMojo extends AbstractMojo {
 		} catch (Exception e) {
 			throw new MojoFailureException("Failed to generate server",e);
 		}
+
+		myProject.addCompileSourceRoot(directoryBase.getAbsolutePath());
 
 	}
 
