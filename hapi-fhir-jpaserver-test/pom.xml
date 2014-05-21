@@ -113,63 +113,6 @@
 				</executions>
 			</plugin>
 			<plugin>
-				<groupId>de.juplo</groupId>
-				<artifactId>hibernate4-maven-plugin</artifactId>
-				<version>1.0.2</version>
-				<configuration>
-					<force>true</force>
-					<target>SCRIPT</target>
-					<skip>false</skip>
-					<scanTestClasses>true</scanTestClasses>
-				</configuration>
-				<executions>
-					<execution>
-						<id>o10g</id>
-						<goals>
-							<goal>export</goal>
-						</goals>
-						<phase>test</phase>
-						<configuration>
-							<hibernateDialect>org.hibernate.dialect.Oracle10gDialect</hibernateDialect>
-							<outputFile>${project.build.directory}/schema_oracle_10g.sql</outputFile>
-						</configuration>
-					</execution>
-					<execution>
-						<id>derby</id>
-						<goals>
-							<goal>export</goal>
-						</goals>
-						<phase>test</phase>
-						<configuration>
-							<hibernateDialect>org.hibernate.dialect.DerbyTenSevenDialect</hibernateDialect>
-							<outputFile>${project.build.directory}/schema_derby.sql</outputFile>
-						</configuration>
-					</execution>
-					<execution>
-						<id>hsql</id>
-						<goals>
-							<goal>export</goal>
-						</goals>
-						<phase>test</phase>
-						<configuration>
-							<hibernateDialect>org.hibernate.dialect.HSQLDialect</hibernateDialect>
-							<outputFile>${project.build.directory}/schema_hsql.sql</outputFile>
-						</configuration>
-					</execution>
-					<execution>
-						<id>mysql5</id>
-						<goals>
-							<goal>export</goal>
-						</goals>
-						<phase>test</phase>
-						<configuration>
-							<hibernateDialect>org.hibernate.dialect.MySQL5Dialect</hibernateDialect>
-							<outputFile>${project.build.directory}/schema_mysql_5.sql</outputFile>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-deploy-plugin</artifactId>
 				<configuration>
