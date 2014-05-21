@@ -41,7 +41,7 @@ public abstract class BaseHasResource {
 
 	public abstract Collection<? extends BaseTag> getTags();
 
-	public abstract IdDt getId();
+	public abstract IdDt getIdDt();
 
 	public InstantDt getPublished() {
 		return new InstantDt(myPublished);

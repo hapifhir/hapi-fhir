@@ -31,7 +31,7 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 	private Collection<ResourceHistoryTag> myTags;
 
 	@Override
-	public IdDt getId() {
+	public IdDt getIdDt() {
 		return new IdDt(myPk.getId());
 	}
 

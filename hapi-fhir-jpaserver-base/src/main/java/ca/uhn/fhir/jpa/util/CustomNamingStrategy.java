@@ -22,6 +22,12 @@ public class CustomNamingStrategy extends ImprovedNamingStrategy {
     }
 
     @Override
+	public String foreignKeyColumnName(String thePropertyName, String thePropertyEntityName, String thePropertyTableName, String theReferencedColumnName) {
+		String foreignKeyColumnName = super.foreignKeyColumnName(thePropertyName, thePropertyEntityName, thePropertyTableName, theReferencedColumnName);
+		return foreignKeyColumnName;
+	}
+
+	@Override
     public String logicalCollectionTableName(final String tableName,
             final String ownerEntityTable, final String associatedEntityTable,
             final String propertyName) {

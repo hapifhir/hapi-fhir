@@ -2,11 +2,7 @@ package ca.uhn.fhir.jpa.entity;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.ForeignKey;
 import javax.persistence.Index;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 @Entity
@@ -14,13 +10,6 @@ import javax.persistence.Table;
 public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchParam {
 
 	private static final long serialVersionUID = 1L;
-
-	@ManyToOne(optional = false, cascade = {}, fetch = FetchType.LAZY)
-	@JoinColumn(name = "RESOURCE_PID", nullable = false, foreignKey=@ForeignKey(name="FK_ISS_RESOURCE"))
-	private BaseResourceTable<?> myResource;
-
-	@Column(name = "RESOURCE_PID", insertable=false, updatable=false)
-	private Long myResourcePid;
 
 	@Column(name = "SP_VALUE_NORMALIZED", length = 100, nullable = true)
 	public String myValueNormalized;
@@ -35,15 +24,6 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 		setName(theName);
 		setValueNormalized(theValueNormalized);
 		setValueExact(theValueExact);
-	}
-
-	public BaseResourceTable<?> getResource() {
-		return myResource;
-	}
-
-
-	protected void setResource(BaseResourceTable<?> theResource) {
-		myResource = theResource;
 	}
 
 	public String getValueNormalized() {

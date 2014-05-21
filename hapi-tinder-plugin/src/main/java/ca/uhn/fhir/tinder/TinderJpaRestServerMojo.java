@@ -69,9 +69,9 @@ public class TinderJpaRestServerMojo extends AbstractMojo {
 			gen.setTemplate("/vm/jpa_resource_provider.vm");
 			gen.writeAll(directoryBase, packageBase);
 			
-			gen.setFilenameSuffix("ResourceTable");
-			gen.setTemplate("/vm/jpa_resource_table.vm");
-			gen.writeAll(directoryBase, packageBase);
+//			gen.setFilenameSuffix("ResourceTable");
+//			gen.setTemplate("/vm/jpa_resource_table.vm");
+//			gen.writeAll(directoryBase, packageBase);
 			
 		} catch (Exception e) {
 			throw new MojoFailureException("Failed to generate server",e);

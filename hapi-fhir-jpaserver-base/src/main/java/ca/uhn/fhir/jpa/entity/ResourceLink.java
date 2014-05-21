@@ -4,7 +4,6 @@ import java.io.Serializable;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.ForeignKey;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -28,17 +27,17 @@ public class ResourceLink implements Serializable {
 	private String mySourcePath;
 
 	@ManyToOne(optional = false)
-	@JoinColumn(name = "SRC_RESOURCE_PID", nullable = false, foreignKey = @ForeignKey(name = "FK_RES_LINK_SRC_RES"))
-	private BaseResourceTable<?> mySourceResource;
+	@JoinColumn(name = "SRC_RESOURCE_ID", referencedColumnName="RES_ID")
+	private ResourceTable mySourceResource;
 
-	@Column(name = "SRC_RESOURCE_PID", insertable = false, updatable = false)
+	@Column(name = "SRC_RESOURCE_ID", insertable = false, updatable = false)
 	private Long mySourceResourcePid;
 
 	@ManyToOne(optional = false)
-	@JoinColumn(name = "TARGET_RESOURCE_PID", nullable = false, foreignKey = @ForeignKey(name = "FK_RES_LINK_TARGET_RES"))
-	private BaseResourceTable<?> myTargetResource;
+	@JoinColumn(name = "TARGET_RESOURCE_ID", referencedColumnName="RES_ID")
+	private ResourceTable myTargetResource;
 
-	@Column(name = "TARGET_RESOURCE_PID", insertable = false, updatable = false)
+	@Column(name = "TARGET_RESOURCE_ID", insertable = false, updatable = false)
 	private Long myTargetResourcePid;
 
 	public ResourceLink() {
@@ -50,14 +49,14 @@ public class ResourceLink implements Serializable {
 		StringBuilder b = new StringBuilder();
 		b.append("ResourceLink[");
 		b.append("path=").append(mySourcePath);
-		b.append(", src=").append(mySourceResource.getIdAsLong());
-		b.append(", target=").append(myTargetResource.getIdAsLong());
+		b.append(", src=").append(mySourceResource.getId());
+		b.append(", target=").append(myTargetResource.getId());
 		
 		b.append("]");
 		return b.toString();
 	}
 
-	public ResourceLink(String theSourcePath, BaseResourceTable<?> theSourceResource, BaseResourceTable<?> theTargetResource) {
+	public ResourceLink(String theSourcePath, ResourceTable theSourceResource, ResourceTable theTargetResource) {
 		super();
 		mySourcePath = theSourcePath;
 		mySourceResource = theSourceResource;
@@ -68,7 +67,7 @@ public class ResourceLink implements Serializable {
 		return mySourcePath;
 	}
 
-	public BaseResourceTable<?> getSourceResource() {
+	public ResourceTable getSourceResource() {
 		return mySourceResource;
 	}
 
@@ -76,7 +75,7 @@ public class ResourceLink implements Serializable {
 		return mySourceResourcePid;
 	}
 
-	public BaseResourceTable<?> getTargetResource() {
+	public ResourceTable getTargetResource() {
 		return myTargetResource;
 	}
 
@@ -88,7 +87,7 @@ public class ResourceLink implements Serializable {
 		mySourcePath = theSourcePath;
 	}
 
-	public void setSourceResource(BaseResourceTable<?> theSourceResource) {
+	public void setSourceResource(ResourceTable theSourceResource) {
 		mySourceResource = theSourceResource;
 	}
 
@@ -96,7 +95,7 @@ public class ResourceLink implements Serializable {
 		mySourceResourcePid = theSourceResourcePid;
 	}
 
-	public void setTargetResource(BaseResourceTable<?> theTargetResource) {
+	public void setTargetResource(ResourceTable theTargetResource) {
 		Validate.notNull(theTargetResource);
 		myTargetResource = theTargetResource;
 	}

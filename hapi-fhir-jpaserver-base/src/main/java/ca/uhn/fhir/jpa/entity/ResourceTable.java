@@ -1,12 +1,11 @@
 package ca.uhn.fhir.jpa.entity;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
-import javax.persistence.DiscriminatorColumn;
-import javax.persistence.DiscriminatorType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -19,14 +18,13 @@ import javax.persistence.Table;
 import javax.persistence.Version;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.primitive.IdDt;
 
 @Entity
-@Table(name = "BASE_RES", uniqueConstraints = {})
-@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@DiscriminatorColumn(name = "SVCVER_TYPE", length = 20, discriminatorType = DiscriminatorType.STRING)
-public abstract class BaseResourceTable<T extends IResource> extends BaseHasResource {
+@Table(name = "RESOURCE", uniqueConstraints = {})
+@Inheritance(strategy = InheritanceType.JOINED)
+public class ResourceTable extends BaseHasResource implements Serializable {
+	private static final long serialVersionUID = 1L;
 
 	@Column(name = "SP_HAS_LINKS")
 	private boolean myHasLinks;
@@ -66,6 +64,9 @@ public abstract class BaseResourceTable<T extends IResource> extends BaseHasReso
 	@OneToMany(mappedBy = "mySourceResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
 	private Collection<ResourceLink> myResourceLinks;
 
+	@Column(name = "RES_TYPE", length = 30)
+	private String myResourceType;
+
 	@OneToMany(mappedBy = "myResource", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
 	private Collection<ResourceTag> myTags;
 
@@ -82,11 +83,11 @@ public abstract class BaseResourceTable<T extends IResource> extends BaseHasReso
 		getTags().add(new ResourceTag(this, theTerm, theLabel, theScheme));
 	}
 
-	public IdDt getId() {
+	public IdDt getIdDt() {
 		return new IdDt(myId);
 	}
 
-	public Long getIdAsLong() {
+	public Long getId() {
 		return myId;
 	}
 
@@ -125,7 +126,9 @@ public abstract class BaseResourceTable<T extends IResource> extends BaseHasReso
 		return myResourceLinks;
 	}
 
-	public abstract Class<T> getResourceType();
+	public String getResourceType() {
+		return myResourceType;
+	}
 
 	public Collection<ResourceTag> getTags() {
 		if (myTags == null) {
@@ -162,8 +165,8 @@ public abstract class BaseResourceTable<T extends IResource> extends BaseHasReso
 		myHasLinks = theHasLinks;
 	}
 
-	public void setId(IdDt theId) {
-		myId = theId.asLong();
+	public void setId(Long theId) {
+		myId = theId;
 	}
 
 	public void setParamsDate(Collection<ResourceIndexedSearchParamDate> theParamsDate) {
@@ -194,6 +197,10 @@ public abstract class BaseResourceTable<T extends IResource> extends BaseHasReso
 		myParamsTokenPopulated = theParamsTokenPopulated;
 	}
 
+	public void setResourceType(String theResourceType) {
+		myResourceType = theResourceType;
+	}
+
 	public void setVersion(IdDt theVersion) {
 		myVersion = theVersion.asLong();
 	}
@@ -203,7 +210,7 @@ public abstract class BaseResourceTable<T extends IResource> extends BaseHasReso
 
 		ResourceHistoryTablePk pk = new ResourceHistoryTablePk();
 		pk.setId(myId);
-		pk.setResourceType(theCtx.getResourceDefinition(getResourceType()).getName());
+		pk.setResourceType(myResourceType);
 		pk.setVersion(myVersion);
 		retVal.setPk(pk);
 

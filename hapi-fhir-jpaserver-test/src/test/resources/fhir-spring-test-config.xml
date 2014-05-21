@@ -14,19 +14,19 @@
 	<context:mbean-server />
 
 	<bean id="myPatientDao" class="ca.uhn.fhir.jpa.dao.FhirResourceDao">
-		<property name="tableType" value="ca.uhn.test.jpasrv.PatientResourceTable"/>
+		<property name="resourceType" value="ca.uhn.fhir.model.dstu.resource.Patient"/>
 	</bean>
 	<bean id="myObservationDao" class="ca.uhn.fhir.jpa.dao.FhirResourceDao">
-		<property name="tableType" value="ca.uhn.test.jpasrv.ObservationResourceTable"/>
+		<property name="resourceType" value="ca.uhn.fhir.model.dstu.resource.Observation"/>
 	</bean>
 	<bean id="myOrganizationDao" class="ca.uhn.fhir.jpa.dao.FhirResourceDao">
-		<property name="tableType" value="ca.uhn.test.jpasrv.OrganizationResourceTable"/>
+		<property name="resourceType" value="ca.uhn.fhir.model.dstu.resource.Organization"/>
 	</bean>
 	<bean id="myLocationDao" class="ca.uhn.fhir.jpa.dao.FhirResourceDao">
-		<property name="tableType" value="ca.uhn.test.jpasrv.LocationResourceTable"/>
+		<property name="resourceType" value="ca.uhn.fhir.model.dstu.resource.Location"/>
 	</bean>
 	<bean id="myQuestionnaireDao" class="ca.uhn.fhir.jpa.dao.FhirResourceDao">
-		<property name="tableType" value="ca.uhn.test.jpasrv.QuestionnaireResourceTable"/>
+		<property name="resourceType" value="ca.uhn.fhir.model.dstu.resource.Questionnaire"/>
 	</bean>
 
 	<bean id="myPersistenceDataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource" lazy-init="true">

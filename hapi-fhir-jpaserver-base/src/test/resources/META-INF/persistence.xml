@@ -8,15 +8,7 @@
 		<provider>org.hibernate.ejb.HibernatePersistence</provider>
 		<!-- <class>ca.uhn.fhir.jpa.entity.PatientResourceTable</class>  -->
 		
-		<class>ca.uhn.fhir.jpa.testentity.DeviceResourceTable</class>
-		<class>ca.uhn.fhir.jpa.testentity.DiagnosticReportResourceTable</class>
-		<class>ca.uhn.fhir.jpa.testentity.LocationResourceTable</class>
-		<class>ca.uhn.fhir.jpa.testentity.ObservationResourceTable</class>
-		<class>ca.uhn.fhir.jpa.testentity.OrganizationResourceTable</class>
-		<class>ca.uhn.fhir.jpa.testentity.PatientResourceTable</class>
-		<class>ca.uhn.fhir.jpa.testentity.QuestionnaireResourceTable</class>
-		<class>ca.uhn.fhir.jpa.testentity.QuestionnaireResourceTable</class>
-
+		<class>ca.uhn.fhir.jpa.entity.ResourceTable</class>
 		<class>ca.uhn.fhir.jpa.entity.ResourceHistoryTable</class>
 		<class>ca.uhn.fhir.jpa.entity.ResourceHistoryTag</class>
 		<class>ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamDate</class>

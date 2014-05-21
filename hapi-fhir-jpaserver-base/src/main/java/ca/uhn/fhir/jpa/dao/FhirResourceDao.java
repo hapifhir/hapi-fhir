@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.dao;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 import java.text.Normalizer;
 import java.util.ArrayList;
@@ -41,7 +41,7 @@ import ca.uhn.fhir.context.RuntimeChildResourceDefinition;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.entity.BaseHasResource;
-import ca.uhn.fhir.jpa.entity.BaseResourceTable;
+import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.jpa.entity.BaseTag;
 import ca.uhn.fhir.jpa.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamDate;
@@ -75,12 +75,11 @@ import ca.uhn.fhir.rest.param.QualifiedDateParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.EncodingEnum;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.FhirTerser;
 
-public class FhirResourceDao<T extends IResource, X extends BaseResourceTable<T>> implements IFhirResourceDao<T> {
+public class FhirResourceDao<T extends IResource> implements IFhirResourceDao<T> {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDao.class);
 	private FhirContext myCtx;
@@ -96,16 +95,15 @@ public class FhirResourceDao<T extends IResource, X extends BaseResourceTable<T>
 	private Class<T> myResourceType;
 	private Map<Class<? extends IResource>, IFhirResourceDao<?>> myResourceTypeToDao;
 
-	private Class<X> myTableType;
-
 	@Transactional(propagation = Propagation.REQUIRED, readOnly = true)
 	@Override
 	public MethodOutcome create(T theResource) {
 
-		final X entity = toEntity(theResource);
+		final ResourceTable entity = toEntity(theResource);
 
 		entity.setPublished(new Date());
 		entity.setUpdated(entity.getPublished());
+		entity.setResourceType(toResourceName(theResource));
 
 		final List<ResourceIndexedSearchParamString> stringParams = extractSearchParamStrings(entity, theResource);
 		final List<ResourceIndexedSearchParamToken> tokenParams = extractSearchParamTokens(entity, theResource);
@@ -118,9 +116,9 @@ public class FhirResourceDao<T extends IResource, X extends BaseResourceTable<T>
 		TransactionTemplate template = new TransactionTemplate(myPlatformTransactionManager);
 		template.setPropagationBehavior(TransactionTemplate.PROPAGATION_REQUIRES_NEW);
 		template.setReadOnly(false);
-		template.execute(new TransactionCallback<X>() {
+		template.execute(new TransactionCallback<ResourceTable>() {
 			@Override
-			public X doInTransaction(TransactionStatus theStatus) {
+			public ResourceTable doInTransaction(TransactionStatus theStatus) {
 				myEntityManager.persist(entity);
 				for (ResourceIndexedSearchParamString next : stringParams) {
 					myEntityManager.persist(next);
@@ -145,14 +143,15 @@ public class FhirResourceDao<T extends IResource, X extends BaseResourceTable<T>
 		return outcome;
 	}
 
+	private String toResourceName(T theResource) {
+		return myCtx.getResourceDefinition(theResource).getName();
+	}
+
 	public Class<T> getResourceType() {
 		return myResourceType;
 	}
 
-	@Override
-	public Class<X> getTableType() {
-		return myTableType;
-	}
+
 
 	@Transactional(propagation = Propagation.REQUIRED)
 	@Override
@@ -186,7 +185,6 @@ public class FhirResourceDao<T extends IResource, X extends BaseResourceTable<T>
 
 	@PostConstruct
 	public void postConstruct() throws Exception {
-		myResourceType = myTableType.newInstance().getResourceType();
 		myCtx = new FhirContext(myResourceType);
 		myResourceName = myCtx.getResourceDefinition(myResourceType).getName();
 	}
@@ -194,7 +192,7 @@ public class FhirResourceDao<T extends IResource, X extends BaseResourceTable<T>
 	@Transactional(propagation = Propagation.REQUIRED)
 	@Override
 	public T read(IdDt theId) {
-		X entity = readEntity(theId);
+		ResourceTable entity = readEntity(theId);
 
 		T retVal = toResource(entity);
 		return retVal;
@@ -226,15 +224,16 @@ public class FhirResourceDao<T extends IResource, X extends BaseResourceTable<T>
 		// Execute the query and make sure we return distinct results
 		{
 			CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
-			CriteriaQuery<X> cq = builder.createQuery(myTableType);
-			Root<X> from = cq.from(myTableType);
+			CriteriaQuery<ResourceTable> cq = builder.createQuery(ResourceTable.class);
+			Root<ResourceTable> from = cq.from(ResourceTable.class);
+			cq.where(builder.equal(from.get("myResourceType"), myCtx.getResourceDefinition(myResourceType).getName()));
 			if (!theParams.isEmpty()) {
 				cq.where(from.get("myId").in(pids));
 			}
-			TypedQuery<X> q = myEntityManager.createQuery(cq);
+			TypedQuery<ResourceTable> q = myEntityManager.createQuery(cq);
 
 			List<T> retVal = new ArrayList<>();
-			for (X next : q.getResultList()) {
+			for (ResourceTable next : q.getResultList()) {
 				T resource = toResource(next);
 				retVal.add(resource);
 			}
@@ -321,9 +320,10 @@ public class FhirResourceDao<T extends IResource, X extends BaseResourceTable<T>
 		return pids;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Required
-	public void setTableType(Class<X> theTableType) {
-		myTableType = theTableType;
+	public void setResourceType(Class<? extends IResource> theTableType) {
+		myResourceType = (Class<T>) theTableType;
 	}
 
 	@Transactional(propagation = Propagation.SUPPORTS)
@@ -331,11 +331,11 @@ public class FhirResourceDao<T extends IResource, X extends BaseResourceTable<T>
 	public MethodOutcome update(final T theResource, final IdDt theId) {
 
 		TransactionTemplate template = new TransactionTemplate(myPlatformTransactionManager);
-		X savedEntity = template.execute(new TransactionCallback<X>() {
+		ResourceTable savedEntity = template.execute(new TransactionCallback<ResourceTable>() {
 			@Override
-			public X doInTransaction(TransactionStatus theStatus) {
+			public ResourceTable doInTransaction(TransactionStatus theStatus) {
 
-				final X entity = readEntity(theId);
+				final ResourceTable entity = readEntity(theId);
 				entity.setUpdated(entity.getPublished());
 
 				final ResourceHistoryTable historyEntry = entity.toHistory(myCtx);
@@ -733,7 +733,7 @@ public class FhirResourceDao<T extends IResource, X extends BaseResourceTable<T>
 		return new HashSet<Long>(q.getResultList());
 	}
 
-	private List<ResourceLink> extractResourceLinks(X theEntity, T theResource) {
+	private List<ResourceLink> extractResourceLinks(ResourceTable theEntity, T theResource) {
 		ArrayList<ResourceLink> retVal = new ArrayList<ResourceLink>();
 
 		RuntimeResourceDefinition def = myCtx.getResourceDefinition(theResource);
@@ -770,7 +770,10 @@ public class FhirResourceDao<T extends IResource, X extends BaseResourceTable<T>
 					}
 
 					Map<Class<? extends IResource>, IFhirResourceDao<?>> resourceTypeToDao = getResourceTypeToDao();
-					Class<? extends BaseResourceTable<?>> tableType = resourceTypeToDao.get(type).getTableType();
+					IFhirResourceDao<?> dao = resourceTypeToDao.get(type);
+					if (dao == null) {
+						throw new InvalidRequestException("This server is not able to handle resources of type: " + nextValue.getResourceType());
+					}
 					Long valueOf;
 					try {
 						valueOf = Long.valueOf(id);
@@ -778,7 +781,7 @@ public class FhirResourceDao<T extends IResource, X extends BaseResourceTable<T>
 						String resName = myCtx.getResourceDefinition(type).getName();
 						throw new InvalidRequestException("Resource ID " + resName + "/" + id + " is invalid (must be numeric), specified in path: " + nextPath);
 					}
-					BaseResourceTable<?> target = myEntityManager.find(tableType, valueOf);
+					ResourceTable target = myEntityManager.find(ResourceTable.class, valueOf);
 					if (target == null) {
 						String resName = myCtx.getResourceDefinition(type).getName();
 						throw new InvalidRequestException("Resource " + resName + "/" + id + " not found, specified in path: " + nextPath);
@@ -802,7 +805,7 @@ public class FhirResourceDao<T extends IResource, X extends BaseResourceTable<T>
 		return retVal;
 	}
 
-	private List<ResourceIndexedSearchParamDate> extractSearchParamDates(X theEntity, T theResource) {
+	private List<ResourceIndexedSearchParamDate> extractSearchParamDates(ResourceTable theEntity, T theResource) {
 		ArrayList<ResourceIndexedSearchParamDate> retVal = new ArrayList<ResourceIndexedSearchParamDate>();
 
 		RuntimeResourceDefinition def = myCtx.getResourceDefinition(theResource);
@@ -840,7 +843,7 @@ public class FhirResourceDao<T extends IResource, X extends BaseResourceTable<T>
 					}
 				}
 				if (nextEntity != null) {
-					nextEntity.setResource(theEntity, def.getName());
+					nextEntity.setResource(theEntity);
 					retVal.add(nextEntity);
 				}
 			}
@@ -851,7 +854,7 @@ public class FhirResourceDao<T extends IResource, X extends BaseResourceTable<T>
 		return retVal;
 	}
 
-	private ArrayList<ResourceIndexedSearchParamNumber> extractSearchParamNumber(X theEntity, T theResource) {
+	private ArrayList<ResourceIndexedSearchParamNumber> extractSearchParamNumber(ResourceTable theEntity, T theResource) {
 		ArrayList<ResourceIndexedSearchParamNumber> retVal = new ArrayList<ResourceIndexedSearchParamNumber>();
 
 		RuntimeResourceDefinition def = myCtx.getResourceDefinition(theResource);
@@ -877,7 +880,7 @@ public class FhirResourceDao<T extends IResource, X extends BaseResourceTable<T>
 				if (nextObject instanceof QuantityDt) {
 					QuantityDt nextValue = (QuantityDt) nextObject;
 					ResourceIndexedSearchParamNumber nextEntity = new ResourceIndexedSearchParamNumber(resourceName, nextValue.getValue().getValue(), nextValue.getSystem().getValueAsString(), nextValue.getUnits().getValue());
-					nextEntity.setResource(theEntity, def.getName());
+					nextEntity.setResource(theEntity);
 					retVal.add(nextEntity);
 				} else {
 					if (!multiType) {
@@ -894,7 +897,7 @@ public class FhirResourceDao<T extends IResource, X extends BaseResourceTable<T>
 		return retVal;
 	}
 
-	private List<ResourceIndexedSearchParamString> extractSearchParamStrings(X theEntity, T theResource) {
+	private List<ResourceIndexedSearchParamString> extractSearchParamStrings(ResourceTable theEntity, T theResource) {
 		ArrayList<ResourceIndexedSearchParamString> retVal = new ArrayList<ResourceIndexedSearchParamString>();
 
 		RuntimeResourceDefinition def = myCtx.getResourceDefinition(theResource);
@@ -924,7 +927,7 @@ public class FhirResourceDao<T extends IResource, X extends BaseResourceTable<T>
 				if (nextObject instanceof IPrimitiveDatatype<?>) {
 					IPrimitiveDatatype<?> nextValue = (IPrimitiveDatatype<?>) nextObject;
 					ResourceIndexedSearchParamString nextEntity = new ResourceIndexedSearchParamString(resourceName, normalizeString(nextValue.getValueAsString()), nextValue.getValueAsString());
-					nextEntity.setResource(theEntity, def.getName());
+					nextEntity.setResource(theEntity);
 					retVal.add(nextEntity);
 				} else {
 					if (nextObject instanceof HumanNameDt) {
@@ -937,7 +940,7 @@ public class FhirResourceDao<T extends IResource, X extends BaseResourceTable<T>
 								continue;
 							}
 							ResourceIndexedSearchParamString nextEntity = new ResourceIndexedSearchParamString(resourceName, normalizeString(nextName.getValueAsString()), nextName.getValueAsString());
-							nextEntity.setResource(theEntity, def.getName());
+							nextEntity.setResource(theEntity);
 							retVal.add(nextEntity);
 						}
 					} else if (nextObject instanceof AddressDt) {
@@ -953,14 +956,14 @@ public class FhirResourceDao<T extends IResource, X extends BaseResourceTable<T>
 								continue;
 							}
 							ResourceIndexedSearchParamString nextEntity = new ResourceIndexedSearchParamString(resourceName, normalizeString(nextName.getValueAsString()), nextName.getValueAsString());
-							nextEntity.setResource(theEntity, def.getName());
+							nextEntity.setResource(theEntity);
 							retVal.add(nextEntity);
 						}
 					} else if (nextObject instanceof ContactDt) {
 						ContactDt nextContact = (ContactDt) nextObject;
 						if (nextContact.getValue().isEmpty() == false) {
 							ResourceIndexedSearchParamString nextEntity = new ResourceIndexedSearchParamString(resourceName, normalizeString(nextContact.getValue().getValueAsString()), nextContact.getValue().getValueAsString());
-							nextEntity.setResource(theEntity, def.getName());
+							nextEntity.setResource(theEntity);
 							retVal.add(nextEntity);
 						}
 					} else {
@@ -977,7 +980,7 @@ public class FhirResourceDao<T extends IResource, X extends BaseResourceTable<T>
 		return retVal;
 	}
 
-	private List<ResourceIndexedSearchParamToken> extractSearchParamTokens(X theEntity, T theResource) {
+	private List<ResourceIndexedSearchParamToken> extractSearchParamTokens(ResourceTable theEntity, T theResource) {
 		ArrayList<ResourceIndexedSearchParamToken> retVal = new ArrayList<ResourceIndexedSearchParamToken>();
 
 		RuntimeResourceDefinition def = myCtx.getResourceDefinition(theResource);
@@ -1019,7 +1022,7 @@ public class FhirResourceDao<T extends IResource, X extends BaseResourceTable<T>
 							continue;
 						}
 						nextEntity = new ResourceIndexedSearchParamToken(nextSpDef.getName(), nextCoding.getSystem().getValueAsString(), nextCoding.getCode().getValue());
-						nextEntity.setResource(theEntity, def.getName());
+						nextEntity.setResource(theEntity);
 						retVal.add(nextEntity);
 					}
 					nextEntity = null;
@@ -1031,7 +1034,7 @@ public class FhirResourceDao<T extends IResource, X extends BaseResourceTable<T>
 					}
 				}
 				if (nextEntity != null) {
-					nextEntity.setResource(theEntity, def.getName());
+					nextEntity.setResource(theEntity);
 					retVal.add(nextEntity);
 				}
 			}
@@ -1067,43 +1070,38 @@ public class FhirResourceDao<T extends IResource, X extends BaseResourceTable<T>
 		return new String(out).toUpperCase();
 	}
 
-	private void populateResourceIntoEntity(T theResource, X retVal) {
-		retVal.setResource(myCtx.newJsonParser().encodeResourceToString(theResource));
-		retVal.setEncoding(EncodingEnum.JSON);
+	private void populateResourceIntoEntity(T theResource, ResourceTable theEntity) {
+		theEntity.setResource(myCtx.newJsonParser().encodeResourceToString(theResource));
+		theEntity.setEncoding(EncodingEnum.JSON);
 
 		TagList tagList = (TagList) theResource.getResourceMetadata().get(ResourceMetadataKeyEnum.TAG_LIST);
 		if (tagList != null) {
 			for (Tag next : tagList) {
-				retVal.addTag(next.getTerm(), next.getLabel(), next.getScheme());
+				theEntity.addTag(next.getTerm(), next.getLabel(), next.getScheme());
 			}
 		}
 
 	}
 
-	private X readEntity(IdDt theId) {
-		X entity = (X) myEntityManager.find(myTableType, theId.asLong());
+	private ResourceTable readEntity(IdDt theId) {
+		ResourceTable entity = myEntityManager.find(ResourceTable.class, theId.asLong());
 		if (entity == null) {
 			throw new ResourceNotFoundException(theId);
 		}
 		return entity;
 	}
 
-	private X toEntity(T theResource) {
-		X retVal;
-		try {
-			retVal = myTableType.newInstance();
-		} catch (InstantiationException | IllegalAccessException e) {
-			throw new InternalErrorException(e);
-		}
-
+	private ResourceTable toEntity(T theResource) {
+		ResourceTable retVal = new ResourceTable();
+		
 		populateResourceIntoEntity(theResource, retVal);
 
 		return retVal;
 	}
 
-	private MethodOutcome toMethodOutcome(final X entity) {
+	private MethodOutcome toMethodOutcome(final ResourceTable entity) {
 		MethodOutcome outcome = new MethodOutcome();
-		outcome.setId(entity.getId());
+		outcome.setId(new IdDt(entity.getId()));
 		outcome.setVersionId(entity.getVersion());
 		return outcome;
 	}
@@ -1139,7 +1137,7 @@ public class FhirResourceDao<T extends IResource, X extends BaseResourceTable<T>
 		String resourceText = theEntity.getResource();
 		IParser parser = theEntity.getEncoding().newParser(myCtx);
 		T retVal = parser.parseResource(myResourceType, resourceText);
-		retVal.setId(theEntity.getId());
+		retVal.setId(theEntity.getIdDt());
 		retVal.getResourceMetadata().put(ResourceMetadataKeyEnum.VERSION_ID, theEntity.getVersion());
 		retVal.getResourceMetadata().put(ResourceMetadataKeyEnum.PUBLISHED, theEntity.getPublished());
 		retVal.getResourceMetadata().put(ResourceMetadataKeyEnum.UPDATED, theEntity.getUpdated());

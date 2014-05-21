@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import ca.uhn.fhir.jpa.entity.BaseResourceTable;
+import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -34,8 +34,6 @@ public interface IFhirResourceDao<T extends IResource> {
 	List<T> search(SearchParameterMap theMap);
 
 	Class<T> getResourceType();
-
-	Class<? extends BaseResourceTable<T>> getTableType();
 
 	Set<Long> searchForIds(String theParameterName, IQueryParameterType theValue);
 

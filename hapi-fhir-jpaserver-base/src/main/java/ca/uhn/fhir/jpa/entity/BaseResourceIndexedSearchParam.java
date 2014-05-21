@@ -6,6 +6,8 @@ import javax.persistence.Column;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.MappedSuperclass;
 
 @MappedSuperclass
@@ -15,14 +17,21 @@ public abstract class BaseResourceIndexedSearchParam implements Serializable {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
-	@Column(name = "RES_ID")
+	@Column(name = "SP_ID")
 	private Long myId;
-	
-	@Column(name="SP_NAME", length=100)
+
+	@Column(name = "SP_NAME", length = 100, nullable=false)
 	private String myName;
 
-	@Column(name = "RES_TYPE",length=100,nullable=false)
+	@ManyToOne(optional = false)
+	@JoinColumn(name = "RES_ID", referencedColumnName="RES_ID")
+	private ResourceTable myResource;
+
+	@Column(name = "RES_TYPE", nullable=false)
 	private String myResourceType;
+
+	@Column(name = "RES_ID", insertable = false, updatable = false)
+	private Long myResourcePid;
 
 	public String getName() {
 		return myName;
@@ -32,23 +41,13 @@ public abstract class BaseResourceIndexedSearchParam implements Serializable {
 		myName = theName;
 	}
 
-	public abstract BaseResourceTable<?> getResource();
-
-	protected abstract void setResource(BaseResourceTable<?> theResource);
-
-	public void setResource(BaseResourceTable<?> theResource, String theResourceType) {
-		setResource(theResource);
-		setResourceType(theResourceType);
+	public ResourceTable getResource() {
+		return myResource;
 	}
 
-	public String getResourceType() {
-		return myResourceType;
+	public void setResource(ResourceTable theResource) {
+		myResource = theResource;
+		myResourceType = theResource.getResourceType();
 	}
 
-	public void setResourceType(String theResourceType) {
-		myResourceType = theResourceType;
-	}
-
-	
-	
 }

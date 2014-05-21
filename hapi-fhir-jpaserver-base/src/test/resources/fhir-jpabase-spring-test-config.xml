@@ -13,23 +13,26 @@
 	<context:annotation-config />
 	<context:mbean-server />
 
-	<bean id="myPatientDao" class="ca.uhn.fhir.jpa.dao.FhirResourceDao">
-		<property name="tableType" value="ca.uhn.fhir.jpa.testentity.PatientResourceTable"/>
-	</bean>
-	<bean id="myObservationDao" class="ca.uhn.fhir.jpa.dao.FhirResourceDao">
-		<property name="tableType" value="ca.uhn.fhir.jpa.testentity.ObservationResourceTable"/>
-	</bean>
 	<bean id="myDiagnosticReportDao" class="ca.uhn.fhir.jpa.dao.FhirResourceDao">
-		<property name="tableType" value="ca.uhn.fhir.jpa.testentity.DiagnosticReportResourceTable"/>
+		<property name="resourceType" value="ca.uhn.fhir.model.dstu.resource.DiagnosticReport"/>
 	</bean>
 	<bean id="myDeviceDao" class="ca.uhn.fhir.jpa.dao.FhirResourceDao">
-		<property name="tableType" value="ca.uhn.fhir.jpa.testentity.DeviceResourceTable"/>
+		<property name="resourceType" value="ca.uhn.fhir.model.dstu.resource.Device"/>
 	</bean>
-	<bean id="myLocationDao" class="ca.uhn.fhir.jpa.dao.FhirResourceDao">
-		<property name="tableType" value="ca.uhn.fhir.jpa.testentity.LocationResourceTable"/>
+	<bean id="myPatientDao" class="ca.uhn.fhir.jpa.dao.FhirResourceDao">
+		<property name="resourceType" value="ca.uhn.fhir.model.dstu.resource.Patient"/>
+	</bean>
+	<bean id="myObservationDao" class="ca.uhn.fhir.jpa.dao.FhirResourceDao">
+		<property name="resourceType" value="ca.uhn.fhir.model.dstu.resource.Observation"/>
 	</bean>
 	<bean id="myOrganizationDao" class="ca.uhn.fhir.jpa.dao.FhirResourceDao">
-		<property name="tableType" value="ca.uhn.fhir.jpa.testentity.OrganizationResourceTable"/>
+		<property name="resourceType" value="ca.uhn.fhir.model.dstu.resource.Organization"/>
+	</bean>
+	<bean id="myLocationDao" class="ca.uhn.fhir.jpa.dao.FhirResourceDao">
+		<property name="resourceType" value="ca.uhn.fhir.model.dstu.resource.Location"/>
+	</bean>
+	<bean id="myQuestionnaireDao" class="ca.uhn.fhir.jpa.dao.FhirResourceDao">
+		<property name="resourceType" value="ca.uhn.fhir.model.dstu.resource.Questionnaire"/>
 	</bean>
 
 	<bean id="myPersistenceDataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource" lazy-init="true">

@@ -26,22 +26,13 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 	@Temporal(TemporalType.TIMESTAMP)
 	public Date myValueLow;
 
-	@ManyToOne(optional = false)
-	@JoinColumn(name = "RESOURCE_PID", nullable = false, foreignKey=@ForeignKey(name="FK_ISD_RESOURCE"))
-	private BaseResourceTable<?> myResource;
-
-	@Column(name = "RESOURCE_PID", insertable = false, updatable = false)
-	private Long myResourcePid;
-
 	public ResourceIndexedSearchParamDate(String theName, Date theLow, Date theHigh) {
 		setName(theName);
 		setValueLow(theLow);
 		setValueHigh(theHigh);
 	}
 
-	public BaseResourceTable<?> getResource() {
-		return myResource;
-	}
+	
 
 	public Date getValueHigh() {
 		return myValueHigh;
@@ -59,8 +50,6 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 		myValueLow = theValueLow;
 	}
 
-	protected void setResource(BaseResourceTable<?> theResource) {
-		myResource = theResource;
-	}
+	
 
 }

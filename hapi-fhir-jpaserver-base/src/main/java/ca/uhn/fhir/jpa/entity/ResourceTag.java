@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.entity;
 
 import javax.persistence.Entity;
-import javax.persistence.ForeignKey;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -20,24 +19,24 @@ public class ResourceTag extends BaseTag {
 	private Long myId;
 	
 	@ManyToOne(cascade= {})
-	@JoinColumn(name = "RESOURCE_PID", nullable=false, foreignKey=@ForeignKey(name="FK_RESTAG_RESOURCE"))
-	private BaseResourceTable<?> myResource;
+	@JoinColumn(name = "RES_ID", referencedColumnName="RES_ID")
+	private ResourceTable myResource;
 
 	public ResourceTag() {
 	}
 
-	public ResourceTag(BaseResourceTable<?> theResource, String theTerm, String theLabel, String theScheme) {
+	public ResourceTag(ResourceTable theResource, String theTerm, String theLabel, String theScheme) {
 		myResource = theResource;
 		setTerm(theTerm);
 		setLabel(theLabel);
 		setScheme(theScheme);
 	}
 
-	public BaseResourceTable<?> getResource() {
+	public ResourceTable getResource() {
 		return myResource;
 	}
 
-	public void setResource(BaseResourceTable<?> theResource) {
+	public void setResource(ResourceTable theResource) {
 		myResource = theResource;
 	}
 
