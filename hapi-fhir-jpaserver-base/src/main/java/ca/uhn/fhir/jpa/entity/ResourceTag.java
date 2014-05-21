@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.entity;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -9,13 +10,14 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "RES_TAG")
+@Table(name = "HFJ_RES_TAG")
 public class ResourceTag extends BaseTag {
 
 	private static final long serialVersionUID = 1L;
 	
 	@GeneratedValue(strategy=GenerationType.AUTO)
 	@Id
+	@Column(name = "PID")
 	private Long myId;
 	
 	@ManyToOne(cascade= {})

@@ -13,7 +13,8 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
 @Entity
-@Table(name = "SPIDX_DATE", indexes= {@Index(name="IDX_SP_DATE", columnList="SP_VALUE_LOW,SP_VALUE_HIGH")})
+@Table(name = "HFJ_SPIDX_DATE", indexes= {@Index(name="IDX_SP_DATE", columnList="SP_VALUE_LOW,SP_VALUE_HIGH")})
+//@org.hibernate.annotations.Table(appliesTo="HFJ_SPIDX_DATE",indexes= {@Index(name="IDX_SP_DATE", columnList="SP_VALUE_LOW,SP_VALUE_HIGH")})
 public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchParam {
 
 	private static final long serialVersionUID = 1L;

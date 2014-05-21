@@ -14,13 +14,14 @@ import javax.persistence.Table;
 import org.apache.commons.lang3.Validate;
 
 @Entity
-@Table(name = "RES_LINK")
+@Table(name = "HFJ_RES_LINK")
 public class ResourceLink implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	@Id
+	@Column(name = "PID")
 	private Long myId;
 
 	@Column(name = "SRC_PATH", length = 100, nullable = false)

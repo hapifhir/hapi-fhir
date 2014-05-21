@@ -21,7 +21,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.primitive.IdDt;
 
 @Entity
-@Table(name = "RESOURCE", uniqueConstraints = {})
+@Table(name = "HFJ_RESOURCE", uniqueConstraints = {})
 @Inheritance(strategy = InheritanceType.JOINED)
 public class ResourceTable extends BaseHasResource implements Serializable {
 	private static final long serialVersionUID = 1L;

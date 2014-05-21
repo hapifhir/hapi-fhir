@@ -8,7 +8,7 @@ import javax.persistence.Index;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "SPIDX_NUMBER", indexes= {@Index(name="IDX_SP_NUMBER", columnList="SP_VALUE")})
+@Table(name = "HFJ_SPIDX_NUMBER", indexes= {@Index(name="IDX_SP_NUMBER", columnList="SP_VALUE")})
 public class ResourceIndexedSearchParamNumber extends BaseResourceIndexedSearchParam {
 
 	private static final long serialVersionUID = 1L;

@@ -17,7 +17,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 
 @Entity
-@Table(name = "RES_VER", uniqueConstraints = {})
+@Table(name = "HFJ_RES_VER", uniqueConstraints = {})
 public class ResourceHistoryTable extends BaseHasResource implements Serializable {
 
 	public static final String Q_GETALL = "SELECT h FROM ResourceHistoryTable h WHERE h.myPk.myId = :PID AND h.myPk.myResourceType = :RESTYPE ORDER BY h.myUpdated ASC";

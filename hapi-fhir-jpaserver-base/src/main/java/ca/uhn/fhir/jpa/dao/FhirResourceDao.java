@@ -770,7 +770,12 @@ public class FhirResourceDao<T extends IResource> implements IFhirResourceDao<T>
 					}
 
 					Map<Class<? extends IResource>, IFhirResourceDao<?>> resourceTypeToDao = getResourceTypeToDao();
-					IFhirResourceDao<?> dao = resourceTypeToDao.get(type);
+					IFhirResourceDao<?> dao;
+					if (type.equals(myResourceType)) {
+						dao = this;
+					}else {
+						dao = resourceTypeToDao.get(type);
+					}
 					if (dao == null) {
 						throw new InvalidRequestException("This server is not able to handle resources of type: " + nextValue.getResourceType());
 					}
