@@ -34,21 +34,41 @@ public class BundleEntry extends BaseBundle {
 	 * NB: add any new fields to the isEmpty() method!!!
 	 *****************************************************/
 	//@formatter:on
+	private TagList myCategories;
+	private boolean myDeleted;
+	private InstantDt myDeletedAt;
 	private StringDt myLinkSelf;
 	private InstantDt myPublished;
 	private IResource myResource;
+	private XhtmlDt mySummary;
 	private StringDt myTitle;
 	private InstantDt myUpdated;
-	private XhtmlDt mySummary;
-	private TagList myCategories;
 
-	@Override
-	public boolean isEmpty() {
-		//@formatter:off
-		return super.isEmpty() && 
-				ElementUtil.isEmpty(myLinkSelf, myPublished, myResource, myTitle, myUpdated, mySummary) &&
-				ElementUtil.isEmpty(myCategories);
-		//@formatter:on
+	public Tag addCategory() {
+		Tag retVal = new Tag();
+		getCategories().add(retVal);
+		return retVal;
+	}
+
+	public void addCategory(Tag theTag) {
+		getCategories().add(theTag);
+	}
+
+	public TagList getCategories() {
+		if (myCategories == null) {
+			myCategories = new TagList();
+		}
+		return myCategories;
+	}
+
+	/**
+	 * Gets the date/time that thius entry was deleted. 
+	 */
+	public InstantDt getDeletedAt() {
+		if (myDeletedAt==null) {
+			myDeletedAt=new InstantDt();
+		}
+		return myDeletedAt;
 	}
 
 	public StringDt getLinkSelf() {
@@ -69,6 +89,13 @@ public class BundleEntry extends BaseBundle {
 		return myResource;
 	}
 
+	public XhtmlDt getSummary() {
+		if (mySummary == null) {
+			mySummary = new XhtmlDt();
+		}
+		return mySummary;
+	}
+
 	public StringDt getTitle() {
 		if (myTitle == null) {
 			myTitle = new StringDt();
@@ -83,6 +110,29 @@ public class BundleEntry extends BaseBundle {
 		return myUpdated;
 	}
 
+	public boolean isDeleted() {
+		return myDeleted;
+	}
+
+	@Override
+	public boolean isEmpty() {
+		//@formatter:off
+		return super.isEmpty() && 
+				ElementUtil.isEmpty(myCategories, myDeletedAt, myLinkSelf, myPublished, myResource, mySummary, myTitle, myUpdated);
+		//@formatter:on
+	}
+
+	public void setDeleted(boolean theDeleted) {
+		myDeleted = theDeleted;
+	}
+
+	/**
+	 * Sets the date/time that this entry was deleted. 
+	 */
+	public void setDeleted(InstantDt theDeletedAt) {
+		myDeletedAt = theDeletedAt;
+	}
+
 	public void setLinkSelf(StringDt theLinkSelf) {
 		if (myLinkSelf == null) {
 			myLinkSelf = new StringDt();
@@ -90,42 +140,18 @@ public class BundleEntry extends BaseBundle {
 		myLinkSelf = theLinkSelf;
 	}
 
-	public void setResource(IResource theResource) {
-		myResource = theResource;
-	}
-
-	public XhtmlDt getSummary() {
-		if (mySummary == null) {
-			mySummary = new XhtmlDt();
-		}
-		return mySummary;
-	}
-
-	public Tag addCategory() {
-		Tag retVal = new Tag();
-		getCategories().add(retVal);
-		return retVal;
-	}
-
-	public TagList getCategories() {
-		if (myCategories == null) {
-			myCategories = new TagList();
-		}
-		return myCategories;
-	}
-
 	public void setPublished(InstantDt thePublished) {
 		Validate.notNull(thePublished, "Published may not be null");
 		myPublished = thePublished;
 	}
 
+	public void setResource(IResource theResource) {
+		myResource = theResource;
+	}
+
 	public void setUpdated(InstantDt theUpdated) {
 		Validate.notNull(theUpdated, "Updated may not be null");
 		myUpdated = theUpdated;
-	}
-
-	public void addCategory(Tag theTag) {
-		getCategories().add(theTag);
 	}
 
 }

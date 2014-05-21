@@ -469,6 +469,26 @@ public class XmlParserTest {
 		assertTrue(d.toString(), d.identical());
 	}
 
+	
+	@Test
+	public void testParseWithXmlHeader() throws ConfigurationException, DataFormatException {
+		FhirContext ctx = new FhirContext(Patient.class);
+		IParser p = new XmlParser(ctx);
+
+		//@formatter:off
+		String msg = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
+				"<Patient xmlns=\"http://hl7.org/fhir\">\n" + 
+				"	<identifier>\n" + 
+				"		<label value=\"IdentifierLabel\"/>\n" + 
+				"	</identifier>\n" + 
+				"</Patient>";
+		//@formatter:on
+
+		Patient resource = (Patient) p.parseResource(msg);
+		assertEquals("IdentifierLabel", resource.getIdentifier().get(0).getLabel().getValue());
+	}
+	
+	
 	@Test
 	public void testLoadObservation() throws ConfigurationException, DataFormatException, IOException {
 
@@ -659,6 +679,33 @@ public class XmlParserTest {
 
 	}
 
+	@Test
+	public void testParseBundleDeletedEntry() {
+
+		//@formatter:off
+		String msg = "<feed xmlns=\"http://www.w3.org/2005/Atom\">\n" + 
+				"  <title>FHIR Core Valuesets</title>\n" + 
+				"  <id>http://hl7.org/fhir/profile/valuesets</id>\n" + 
+				"  <link href=\"http://hl7.org/implement/standards/fhir/valuesets.xml\" rel=\"self\"/>\n" + 
+				"  <updated>2014-02-10T04:11:24.435-00:00</updated>\n" +
+				"   <at:deleted-entry xmlns:at=\"http://purl.org/atompub/tombstones/1.0\" " + 
+				"      ref=\"http://foo/Patient/1\" when=\"2013-02-10T04:11:24.435-00:00\">\n" + 
+				"    <link rel=\"self\" href=\"http://foo/Patient/1/_history/2\"></link>\n" + 
+				"  </at:deleted-entry>" +
+				"</feed>";
+		//@formatter:on
+
+		IParser p = new FhirContext(ValueSet.class).newXmlParser();
+		Bundle bundle = p.parseBundle(msg);
+
+		BundleEntry entry = bundle.getEntries().get(0);
+		assertTrue(entry.isDeleted());
+		assertEquals("http://foo/Patient/1", entry.getId().getValue());
+		assertEquals("2013-02-10T04:11:24.435+00:00", entry.getDeletedAt().getValueAsString());
+		assertEquals("http://foo/Patient/1/_history/2", entry.getLinkSelf().getValue());
+	}
+
+	
 	@Test
 	public void testParseBundleLarge() throws IOException {
 

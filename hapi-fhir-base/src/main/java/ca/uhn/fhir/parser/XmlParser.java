@@ -82,6 +82,7 @@ public class XmlParser extends BaseParser implements IParser {
 	static final String ATOM_NS = "http://www.w3.org/2005/Atom";
 	static final String FHIR_NS = "http://hl7.org/fhir";
 	static final String OPENSEARCH_NS = "http://a9.com/-/spec/opensearch/1.1/";
+	static final String TOMBSTONES_NS = "http://purl.org/atompub/tombstones/1.0";
 	static final String XHTML_NS = "http://www.w3.org/1999/xhtml";
 
 	// private static final Set<String> RESOURCE_NAMESPACES;

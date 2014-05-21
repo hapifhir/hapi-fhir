@@ -160,14 +160,15 @@ public class JsonParser extends BaseParser implements IParser {
 		writeOptionalTagWithTextNode(eventWriter, "updated", theBundle.getUpdated());
 		writeOptionalTagWithTextNode(eventWriter, "published", theBundle.getPublished());
 
-		eventWriter.writeStartArray("link");
-		writeAtomLink(eventWriter, "self", theBundle.getLinkSelf());
-		writeAtomLink(eventWriter, "first", theBundle.getLinkFirst());
-		writeAtomLink(eventWriter, "previous", theBundle.getLinkPrevious());
-		writeAtomLink(eventWriter, "next", theBundle.getLinkNext());
-		writeAtomLink(eventWriter, "last", theBundle.getLinkLast());
-		writeAtomLink(eventWriter, "fhir-base", theBundle.getLinkBase());
-		eventWriter.writeEnd();
+		boolean linkStarted = false;
+		linkStarted = writeAtomLink(eventWriter, "self", theBundle.getLinkSelf(), linkStarted);
+		linkStarted = writeAtomLink(eventWriter, "first", theBundle.getLinkFirst(), linkStarted);
+		linkStarted = writeAtomLink(eventWriter, "previous", theBundle.getLinkPrevious(), linkStarted);
+		linkStarted = writeAtomLink(eventWriter, "next", theBundle.getLinkNext(), linkStarted);
+		linkStarted = writeAtomLink(eventWriter, "last", theBundle.getLinkLast(), linkStarted);
+		linkStarted = writeAtomLink(eventWriter, "fhir-base", theBundle.getLinkBase(), linkStarted);
+		if (linkStarted) {
+		eventWriter.writeEnd();}
 
 		writeOptionalTagWithTextNode(eventWriter, "totalResults", theBundle.getTotalResults());
 
@@ -177,17 +178,19 @@ public class JsonParser extends BaseParser implements IParser {
 		for (BundleEntry nextEntry : theBundle.getEntries()) {
 			eventWriter.writeStartObject();
 
+			writeTagWithTextNode(eventWriter, "deleted", nextEntry.getDeletedAt());
 			writeTagWithTextNode(eventWriter, "title", nextEntry.getTitle());
 			writeTagWithTextNode(eventWriter, "id", nextEntry.getId());
-
-			eventWriter.writeStartArray("link");
-			writeAtomLink(eventWriter, "self", nextEntry.getLinkSelf());
-			eventWriter.writeEnd();
+			
+			linkStarted = false;
+			linkStarted=writeAtomLink(eventWriter, "self", nextEntry.getLinkSelf(), linkStarted);
+			if (linkStarted) {
+				eventWriter.writeEnd();}
 
 			writeOptionalTagWithTextNode(eventWriter, "updated", nextEntry.getUpdated());
 			writeOptionalTagWithTextNode(eventWriter, "published", nextEntry.getPublished());
 
-			if (nextEntry.getCategories() != null) {
+			if (nextEntry.getCategories() != null && nextEntry.getCategories().size() > 0) {
 				eventWriter.writeStartArray("category");
 				for (Tag next : nextEntry.getCategories()) {
 					eventWriter.writeStartObject();
@@ -202,8 +205,10 @@ public class JsonParser extends BaseParser implements IParser {
 			writeAuthor(nextEntry, eventWriter);
 
 			IResource resource = nextEntry.getResource();
-			RuntimeResourceDefinition resDef = myContext.getResourceDefinition(resource);
-			encodeResourceToJsonStreamWriter(resDef, resource, eventWriter, "content");
+			if (resource != null) {
+				RuntimeResourceDefinition resDef = myContext.getResourceDefinition(resource);
+				encodeResourceToJsonStreamWriter(resDef, resource, eventWriter, "content");
+			}
 
 			eventWriter.writeEnd(); // entry object
 		}
@@ -213,8 +218,7 @@ public class JsonParser extends BaseParser implements IParser {
 		eventWriter.close();
 	}
 
-	private void encodeChildElementToStreamWriter(RuntimeResourceDefinition theResDef, IResource theResource, JsonGenerator theWriter, IElement theValue, BaseRuntimeElementDefinition<?> theChildDef,
-			String theChildName) throws IOException {
+	private void encodeChildElementToStreamWriter(RuntimeResourceDefinition theResDef, IResource theResource, JsonGenerator theWriter, IElement theValue, BaseRuntimeElementDefinition<?> theChildDef, String theChildName) throws IOException {
 
 		switch (theChildDef.getChildType()) {
 		case PRIMITIVE_DATATYPE: {
@@ -316,8 +320,7 @@ public class JsonParser extends BaseParser implements IParser {
 
 	}
 
-	private void encodeCompositeElementChildrenToStreamWriter(RuntimeResourceDefinition theResDef, IResource theResource, IElement theElement, JsonGenerator theEventWriter,
-			List<? extends BaseRuntimeChildDefinition> theChildren) throws IOException {
+	private void encodeCompositeElementChildrenToStreamWriter(RuntimeResourceDefinition theResDef, IResource theResource, IElement theElement, JsonGenerator theEventWriter, List<? extends BaseRuntimeChildDefinition> theChildren) throws IOException {
 		for (BaseRuntimeChildDefinition nextChild : theChildren) {
 			if (nextChild instanceof RuntimeChildNarrativeDefinition) {
 				INarrativeGenerator gen = myContext.getNarrativeGenerator();
@@ -449,8 +452,7 @@ public class JsonParser extends BaseParser implements IParser {
 		}
 	}
 
-	private void encodeCompositeElementToStreamWriter(RuntimeResourceDefinition theResDef, IResource theResource, IElement theElement, JsonGenerator theEventWriter,
-			BaseRuntimeElementCompositeDefinition<?> resDef) throws IOException, DataFormatException {
+	private void encodeCompositeElementToStreamWriter(RuntimeResourceDefinition theResDef, IResource theResource, IElement theElement, JsonGenerator theEventWriter, BaseRuntimeElementCompositeDefinition<?> resDef) throws IOException, DataFormatException {
 		encodeCompositeElementChildrenToStreamWriter(theResDef, theResource, theElement, theEventWriter, resDef.getExtensions());
 		encodeCompositeElementChildrenToStreamWriter(theResDef, theResource, theElement, theEventWriter, resDef.getChildren());
 	}
@@ -520,10 +522,10 @@ public class JsonParser extends BaseParser implements IParser {
 	}
 
 	/**
-	 * This is useful only for the two cases where extensions are encoded as direct children (e.g. not in some object called _name): resource extensions, and extension extensions
+	 * This is useful only for the two cases where extensions are encoded as direct children (e.g. not in some object
+	 * called _name): resource extensions, and extension extensions
 	 */
-	private void extractAndWriteExtensionsAsDirectChild(IElement theElement, JsonGenerator theEventWriter, BaseRuntimeElementDefinition<?> theElementDef, RuntimeResourceDefinition theResDef,
-			IResource theResource) throws IOException {
+	private void extractAndWriteExtensionsAsDirectChild(IElement theElement, JsonGenerator theEventWriter, BaseRuntimeElementDefinition<?> theElementDef, RuntimeResourceDefinition theResDef, IResource theResource) throws IOException {
 		List<HeldExtension> extensions = new ArrayList<HeldExtension>(0);
 		List<HeldExtension> modifierExtensions = new ArrayList<HeldExtension>(0);
 
@@ -833,13 +835,20 @@ public class JsonParser extends BaseParser implements IParser {
 		return this;
 	}
 
-	private void writeAtomLink(JsonGenerator theEventWriter, String theRel, StringDt theLink) {
+	private boolean writeAtomLink(JsonGenerator theEventWriter, String theRel, StringDt theLink, boolean theStarted) {
+		boolean retVal = false;
 		if (isNotBlank(theLink.getValue())) {
+			if (theStarted==false) {
+				theEventWriter.writeStartArray("link");
+				retVal=true;
+			}
+			
 			theEventWriter.writeStartObject();
 			theEventWriter.write("rel", theRel);
 			theEventWriter.write("href", theLink.getValue());
 			theEventWriter.writeEnd();
 		}
+		return retVal;
 	}
 
 	private void writeAuthor(BaseBundle theBundle, JsonGenerator eventWriter) {
@@ -853,8 +862,7 @@ public class JsonParser extends BaseParser implements IParser {
 		}
 	}
 
-	private void writeExtensionsAsDirectChild(IResource theResource, JsonGenerator theEventWriter, RuntimeResourceDefinition resDef, List<HeldExtension> extensions,
-			List<HeldExtension> modifierExtensions) throws IOException {
+	private void writeExtensionsAsDirectChild(IResource theResource, JsonGenerator theEventWriter, RuntimeResourceDefinition resDef, List<HeldExtension> extensions, List<HeldExtension> modifierExtensions) throws IOException {
 		if (extensions.isEmpty() == false) {
 			theEventWriter.writeStartArray("extension");
 			for (HeldExtension next : extensions) {
@@ -878,9 +886,9 @@ public class JsonParser extends BaseParser implements IParser {
 		}
 	}
 
-	private void writeTagWithTextNode(JsonGenerator theEventWriter, String theElementName, IdDt theIdDt) {
-		if (StringUtils.isNotBlank(theIdDt.getValue())) {
-			theEventWriter.write(theElementName, theIdDt.getValue());
+	private void writeTagWithTextNode(JsonGenerator theEventWriter, String theElementName, IPrimitiveDatatype<?> theIdDt) {
+		if (theIdDt != null && !theIdDt.isEmpty()) {
+			theEventWriter.write(theElementName, theIdDt.getValueAsString());
 		} else {
 			theEventWriter.writeNull(theElementName);
 		}
@@ -889,9 +897,10 @@ public class JsonParser extends BaseParser implements IParser {
 	private void writeTagWithTextNode(JsonGenerator theEventWriter, String theElementName, StringDt theStringDt) {
 		if (StringUtils.isNotBlank(theStringDt.getValue())) {
 			theEventWriter.write(theElementName, theStringDt.getValue());
-		} else {
-			theEventWriter.writeNull(theElementName);
-		}
+		} 
+//		else {
+//			theEventWriter.writeNull(theElementName);
+//		}
 	}
 
 	private class HeldExtension {

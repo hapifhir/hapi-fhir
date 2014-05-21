@@ -23,7 +23,6 @@ package ca.uhn.fhir.parser;
 import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-import java.io.ObjectInputStream.GetField;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -40,7 +39,6 @@ import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeChildDeclaredExtensionDefinition;
-import ca.uhn.fhir.context.RuntimeChildResourceDefinition;
 import ca.uhn.fhir.context.RuntimeElemContainedResources;
 import ca.uhn.fhir.context.RuntimePrimitiveDatatypeDefinition;
 import ca.uhn.fhir.context.RuntimePrimitiveDatatypeNarrativeDefinition;
@@ -64,6 +62,7 @@ import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.dstu.composite.ContainedDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.XhtmlDt;
 import ca.uhn.fhir.rest.server.Constants;
 
@@ -274,6 +273,10 @@ class ParserState<T> {
 			theInstance.getEntries().add(myEntry);
 		}
 
+		protected BundleEntry getEntry() {
+			return myEntry;
+		}
+
 		@Override
 		public void endingElement() throws DataFormatException {
 			populateResourceMetadata();
@@ -300,6 +303,10 @@ class ParserState<T> {
 				push(new XhtmlState(getPreResourceState(), myEntry.getSummary(), false));
 			} else if ("category".equals(theLocalPart)) {
 				push(new AtomCategoryState(myEntry.addCategory()));
+			} else if ("deleted".equals(theLocalPart) && myJsonMode) {
+				// JSON and XML deleted entries are completely different for some reason
+				myEntry.setDeleted(true);
+				push(new AtomDeletedJsonWhenState(myEntry.getDeletedAt()));
 			} else {
 				throw new DataFormatException("Unexpected element in entry: " + theLocalPart);
 			}
@@ -373,6 +380,28 @@ class ParserState<T> {
 		}
 
 	}
+	
+	
+	public class AtomDeletedEntryState extends AtomEntryState {
+
+		public AtomDeletedEntryState(Bundle theInstance, Class<? extends IResource> theResourceType) {
+			super(theInstance, theResourceType);
+			
+			getEntry().setDeleted(true);
+		}
+
+		@Override
+		public void attributeValue(String theName, String theValue) throws DataFormatException {
+			if ("ref".equals(theName)) {
+				getEntry().setId(new IdDt(theValue));
+			} else if ("when".equals(theName)) {
+				getEntry().setDeleted(new InstantDt(theValue));
+			}
+		}
+
+		
+	}
+	
 
 	private class AtomLinkState extends BaseState {
 
@@ -441,6 +470,14 @@ class ParserState<T> {
 		}
 
 		@Override
+		public void attributeValue(String theName, String theValue) throws DataFormatException {
+			if (myJsonMode) {
+				string(theValue);
+			}
+			super.attributeValue(theName, theValue);
+		}
+
+		@Override
 		public void endingElement() throws DataFormatException {
 			myPrimitive.setValueAsString(myData);
 			pop();
@@ -469,6 +506,42 @@ class ParserState<T> {
 
 	}
 
+	
+	private class AtomDeletedJsonWhenState extends BaseState {
+
+		private String myData;
+		private IPrimitiveDatatype<?> myPrimitive;
+
+		public AtomDeletedJsonWhenState(IPrimitiveDatatype<?> thePrimitive) {
+			super(null);
+			Validate.notNull(thePrimitive, "thePrimitive");
+			myPrimitive = thePrimitive;
+		}
+
+		@Override
+		public void endingElement() throws DataFormatException {
+			myPrimitive.setValueAsString(myData);
+			pop();
+		}
+
+		@Override
+		public void enteringNewElement(String theNamespaceURI, String theLocalPart) throws DataFormatException {
+			throw new DataFormatException("Unexpected nested element in atom tag: " + theLocalPart);
+		}
+
+		
+		@Override
+		public void attributeValue(String theName, String theValue) throws DataFormatException {
+			myData = theValue;
+		}
+
+		@Override
+		protected IElement getCurrentElement() {
+			return null;
+		}
+
+	}
+	
 	private class AtomState extends BaseState {
 
 		private Bundle myInstance;
@@ -503,6 +576,8 @@ class ParserState<T> {
 				push(new AtomPrimitiveState(myInstance.getUpdated()));
 			} else if ("author".equals(theLocalPart)) {
 				push(new AtomAuthorState(myInstance));
+			} else if ("deleted-entry".equals(theLocalPart) && verifyNamespace(XmlParser.TOMBSTONES_NS, theNamespaceURI)) {
+				push(new AtomDeletedEntryState(myInstance,myResourceType));
 			} else {
 				if (theNamespaceURI != null) {
 					throw new DataFormatException("Unexpected element: {" + theNamespaceURI + "}" + theLocalPart);
