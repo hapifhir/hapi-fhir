@@ -89,12 +89,10 @@ public class RestfulServer extends HttpServlet {
 	}
 
 	/**
-	 * This method is called prior to sending a response to incoming requests.
-	 * It is used to add custom headers.
+	 * This method is called prior to sending a response to incoming requests. It is used to add custom headers.
 	 * <p>
-	 * Use caution if overriding this method: it is recommended to call
-	 * <code>super.addHeadersToResponse</code> to avoid inadvertantly disabling
-	 * functionality.
+	 * Use caution if overriding this method: it is recommended to call <code>super.addHeadersToResponse</code> to avoid
+	 * inadvertantly disabling functionality.
 	 * </p>
 	 */
 	public void addHeadersToResponse(HttpServletResponse theHttpResponse) {
@@ -102,17 +100,15 @@ public class RestfulServer extends HttpServlet {
 	}
 
 	/**
-	 * Gets the {@link FhirContext} associated with this server. For efficient
-	 * processing, resource providers and plain providers should generally use
-	 * this context if one is needed, as opposed to creating their own.
+	 * Gets the {@link FhirContext} associated with this server. For efficient processing, resource providers and plain
+	 * providers should generally use this context if one is needed, as opposed to creating their own.
 	 */
 	public FhirContext getFhirContext() {
 		return myFhirContext;
 	}
 
 	/**
-	 * Provides the non-resource specific providers which implement method calls
-	 * on this server
+	 * Provides the non-resource specific providers which implement method calls on this server
 	 * 
 	 * @see #getResourceProviders()
 	 */
@@ -139,12 +135,11 @@ public class RestfulServer extends HttpServlet {
 	}
 
 	/**
-	 * Returns the server conformance provider, which is the provider that is
-	 * used to generate the server's conformance (metadata) statement.
+	 * Returns the server conformance provider, which is the provider that is used to generate the server's conformance
+	 * (metadata) statement.
 	 * <p>
-	 * By default, the {@link ServerConformanceProvider} is used, but this can
-	 * be changed, or set to <code>null</code> if you do not wish to export a
-	 * conformance statement.
+	 * By default, the {@link ServerConformanceProvider} is used, but this can be changed, or set to <code>null</code>
+	 * if you do not wish to export a conformance statement.
 	 * </p>
 	 */
 	public Object getServerConformanceProvider() {
@@ -152,9 +147,8 @@ public class RestfulServer extends HttpServlet {
 	}
 
 	/**
-	 * Gets the server's name, as exported in conformance profiles exported by
-	 * the server. This is informational only, but can be helpful to set with
-	 * something appropriate.
+	 * Gets the server's name, as exported in conformance profiles exported by the server. This is informational only,
+	 * but can be helpful to set with something appropriate.
 	 * 
 	 * @see RestfulServer#setServerName(StringDt)
 	 */
@@ -167,19 +161,17 @@ public class RestfulServer extends HttpServlet {
 	}
 
 	/**
-	 * Gets the server's version, as exported in conformance profiles exported
-	 * by the server. This is informational only, but can be helpful to set with
-	 * something appropriate.
+	 * Gets the server's version, as exported in conformance profiles exported by the server. This is informational
+	 * only, but can be helpful to set with something appropriate.
 	 */
 	public String getServerVersion() {
 		return myServerVersion;
 	}
 
 	/**
-	 * Initializes the server. Note that this method is final to avoid
-	 * accidentally introducing bugs in implementations, but subclasses may put
-	 * initialization code in {@link #initialize()}, which is called immediately
-	 * before beginning initialization of the restful server's internal init.
+	 * Initializes the server. Note that this method is final to avoid accidentally introducing bugs in implementations,
+	 * but subclasses may put initialization code in {@link #initialize()}, which is called immediately before beginning
+	 * initialization of the restful server's internal init.
 	 */
 	@Override
 	public final void init() throws ServletException {
@@ -237,8 +229,7 @@ public class RestfulServer extends HttpServlet {
 	}
 
 	/**
-	 * Sets the non-resource specific providers which implement method calls on
-	 * this server.
+	 * Sets the non-resource specific providers which implement method calls on this server.
 	 * 
 	 * @see #setResourceProviders(Collection)
 	 */
@@ -247,8 +238,7 @@ public class RestfulServer extends HttpServlet {
 	}
 
 	/**
-	 * Sets the non-resource specific providers which implement method calls on
-	 * this server.
+	 * Sets the non-resource specific providers which implement method calls on this server.
 	 * 
 	 * @see #setResourceProviders(Collection)
 	 */
@@ -257,8 +247,7 @@ public class RestfulServer extends HttpServlet {
 	}
 
 	/**
-	 * Sets the non-resource specific providers which implement method calls on
-	 * this server
+	 * Sets the non-resource specific providers which implement method calls on this server
 	 * 
 	 * @see #setResourceProviders(Collection)
 	 */
@@ -288,19 +277,16 @@ public class RestfulServer extends HttpServlet {
 	}
 
 	/**
-	 * Returns the server conformance provider, which is the provider that is
-	 * used to generate the server's conformance (metadata) statement.
+	 * Returns the server conformance provider, which is the provider that is used to generate the server's conformance
+	 * (metadata) statement.
 	 * <p>
-	 * By default, the {@link ServerConformanceProvider} is used, but this can
-	 * be changed, or set to <code>null</code> if you do not wish to export a
-	 * conformance statement.
+	 * By default, the {@link ServerConformanceProvider} is used, but this can be changed, or set to <code>null</code>
+	 * if you do not wish to export a conformance statement.
 	 * </p>
-	 * Note that this method can only be called before the server is
-	 * initialized.
+	 * Note that this method can only be called before the server is initialized.
 	 * 
 	 * @throws IllegalStateException
-	 *             Note that this method can only be called prior to
-	 *             {@link #init() initialization} and will throw an
+	 *             Note that this method can only be called prior to {@link #init() initialization} and will throw an
 	 *             {@link IllegalStateException} if called after that.
 	 */
 	public void setServerConformanceProvider(Object theServerConformanceProvider) {
@@ -311,9 +297,8 @@ public class RestfulServer extends HttpServlet {
 	}
 
 	/**
-	 * Gets the server's name, as exported in conformance profiles exported by
-	 * the server. This is informational only, but can be helpful to set with
-	 * something appropriate.
+	 * Gets the server's name, as exported in conformance profiles exported by the server. This is informational only,
+	 * but can be helpful to set with something appropriate.
 	 * 
 	 * @see RestfulServer#setServerName(StringDt)
 	 */
@@ -322,18 +307,16 @@ public class RestfulServer extends HttpServlet {
 	}
 
 	/**
-	 * Gets the server's version, as exported in conformance profiles exported
-	 * by the server. This is informational only, but can be helpful to set with
-	 * something appropriate.
+	 * Gets the server's version, as exported in conformance profiles exported by the server. This is informational
+	 * only, but can be helpful to set with something appropriate.
 	 */
 	public void setServerVersion(String theServerVersion) {
 		myServerVersion = theServerVersion;
 	}
 
 	/**
-	 * If set to <code>true</code> (default is false), the server will use
-	 * browser friendly content-types (instead of standard FHIR ones) when it
-	 * detects that the request is coming from a browser instead of a FHIR
+	 * If set to <code>true</code> (default is false), the server will use browser friendly content-types (instead of
+	 * standard FHIR ones) when it detects that the request is coming from a browser instead of a FHIR
 	 */
 	public void setUseBrowserFriendlyContentTypes(boolean theUseBrowserFriendlyContentTypes) {
 		myUseBrowserFriendlyContentTypes = theUseBrowserFriendlyContentTypes;
@@ -361,7 +344,7 @@ public class RestfulServer extends HttpServlet {
 	private void findResourceMethods(Object theProvider, Class<?> clazz) {
 		for (Method m : clazz.getDeclaredMethods()) {
 			if (!Modifier.isPublic(m.getModifiers())) {
-				ourLog.debug("Ignoring non-public method: {}",m);
+				ourLog.debug("Ignoring non-public method: {}", m);
 			} else {
 				if (!Modifier.isStatic(m.getModifiers())) {
 					ourLog.debug("Scanning public method: {}#{}", theProvider.getClass(), m.getName());
@@ -521,13 +504,12 @@ public class RestfulServer extends HttpServlet {
 			Map<String, String[]> params = new HashMap<String, String[]>(theRequest.getParameterMap());
 
 			StringTokenizer tok = new StringTokenizer(requestPath, "/");
-			if (!tok.hasMoreTokens()) {
-				throw new ResourceNotFoundException("No resource name specified");
-			}
-			resourceName = tok.nextToken();
-			if (resourceName.startsWith("_")) {
-				operation = resourceName;
-				resourceName = null;
+			if (tok.hasMoreTokens()) {
+				resourceName = tok.nextToken();
+				if (resourceName.startsWith("_")) {
+					operation = resourceName;
+					resourceName = null;
+				}
 			}
 
 			ResourceBinding resourceBinding = null;
@@ -570,16 +552,16 @@ public class RestfulServer extends HttpServlet {
 			}
 
 			// Secondary is for things like ..../_tags/_delete
-			String secondaryOperation=null;
-			
+			String secondaryOperation = null;
+
 			while (tok.hasMoreTokens()) {
 				String nextString = tok.nextToken();
 				if (operation == null) {
 					operation = nextString;
-				}else if (secondaryOperation==null) {
-					secondaryOperation=nextString;
-				}else {
-					throw new InvalidRequestException("URL path has unexpected token '"+nextString + "' at the end: " + requestPath);
+				} else if (secondaryOperation == null) {
+					secondaryOperation = nextString;
+				} else {
+					throw new InvalidRequestException("URL path has unexpected token '" + nextString + "' at the end: " + requestPath);
 				}
 			}
 
@@ -653,8 +635,8 @@ public class RestfulServer extends HttpServlet {
 	}
 
 	/**
-	 * This method may be overridden by subclasses to do perform initialization
-	 * that needs to be performed prior to the server being used.
+	 * This method may be overridden by subclasses to do perform initialization that needs to be performed prior to the
+	 * server being used.
 	 */
 	protected void initialize() {
 		// nothing by default

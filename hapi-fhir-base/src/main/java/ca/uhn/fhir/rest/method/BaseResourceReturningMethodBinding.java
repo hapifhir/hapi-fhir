@@ -209,13 +209,15 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 		if (uaHeader != null && uaHeader.contains("Mozilla")) {
 			requestIsBrowser = true;
 		}
+		
+		Object requestObject = parseRequestObject(theRequest);
 
 		// Method params
 		Object[] params = new Object[getParameters().size()];
 		for (int i = 0; i < getParameters().size(); i++) {
 			IParameter param = getParameters().get(i);
 			if (param != null) {
-				params[i] = param.translateQueryParametersIntoServerArgument(theRequest, null);
+				params[i] = param.translateQueryParametersIntoServerArgument(theRequest, requestObject);
 			}
 		}
 
@@ -233,6 +235,13 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 			streamResponseAsResource(theServer, theResponse, result.get(0), responseEncoding, prettyPrint, requestIsBrowser, narrativeMode);
 			break;
 		}
+	}
+
+	/** 
+	 * Subclasses may override 
+	 */
+	protected Object parseRequestObject(@SuppressWarnings("unused") Request theRequest) {
+		return null;
 	}
 
 	protected static IdDt getIdFromMetadataOrNullIfNone(Map<ResourceMetadataKeyEnum, Object> theResourceMetadata, ResourceMetadataKeyEnum theKey) {

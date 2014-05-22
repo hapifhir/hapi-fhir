@@ -56,6 +56,7 @@ import ca.uhn.fhir.rest.annotation.History;
 import ca.uhn.fhir.rest.annotation.Metadata;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.annotation.Transaction;
 import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.annotation.Validate;
 import ca.uhn.fhir.rest.api.MethodOutcome;
@@ -172,8 +173,9 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 		GetTags getTags = theMethod.getAnnotation(GetTags.class);
 		AddTags addTags = theMethod.getAnnotation(AddTags.class);
 		DeleteTags deleteTags = theMethod.getAnnotation(DeleteTags.class);
+		Transaction transaction = theMethod.getAnnotation(Transaction.class);
 		// ** if you add another annotation above, also add it to the next line:
-		if (!verifyMethodHasZeroOrOneOperationAnnotation(theMethod, read, search, conformance, create, update, delete, history, validate, getTags, addTags, deleteTags)) {
+		if (!verifyMethodHasZeroOrOneOperationAnnotation(theMethod, read, search, conformance, create, update, delete, history, validate, getTags, addTags, deleteTags,transaction)) {
 			return null;
 		}
 
@@ -283,6 +285,8 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 			return new AddTagsMethodBinding(theMethod, theContext, theProvider, addTags);
 		} else if (deleteTags != null) {
 			return new DeleteTagsMethodBinding(theMethod, theContext, theProvider, deleteTags);
+		} else if (transaction != null) {
+			return new TransactionMethodBinding(theMethod, theContext, theProvider);
 		} else {
 			throw new ConfigurationException("Did not detect any FHIR annotations on method '" + theMethod.getName() + "' on type: " + theMethod.getDeclaringClass().getCanonicalName());
 		}

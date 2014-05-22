@@ -1,45 +1,45 @@
 package ca.uhn.fhir.rest.method;
 
-import java.io.IOException;
-import java.io.Reader;
+import static org.apache.commons.lang3.StringUtils.*;
+
 import java.lang.reflect.Method;
 import java.util.List;
-import java.util.Map;
 
-import javax.servlet.http.HttpServletResponse;
-
+import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
+import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.annotation.TransactionParam;
 import ca.uhn.fhir.rest.client.BaseClientInvocation;
-import ca.uhn.fhir.rest.server.RestfulServer;
-import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
+import ca.uhn.fhir.rest.method.SearchMethodBinding.RequestType;
+import ca.uhn.fhir.rest.param.TransactionParameter;
+import ca.uhn.fhir.rest.param.IParameter;
+import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 public class TransactionMethodBinding extends BaseResourceReturningMethodBinding {
 
+	private int myResourceParameterIndex;
 
 	public TransactionMethodBinding(Method theMethod, FhirContext theConetxt, Object theProvider) {
 		super(null, theMethod, theConetxt, theProvider);
-	}
+		
+		myResourceParameterIndex = -1;
+				int index=0;
+		for (IParameter next : getParameters()) {
+			if (next instanceof TransactionParameter) {
+				myResourceParameterIndex = index;
+			}
+			index++;
+		}
 
-	@Override
-	public Bundle invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException, BaseServerResponseException {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public String getResourceName() {
-		return null;
-	}
-
-	@Override
-	public RestfulOperationTypeEnum getResourceOperationType() {
-		return null;
+		if (myResourceParameterIndex==-1) {
+			throw new ConfigurationException("Method '" + theMethod.getName() + "' in type " + theMethod.getDeclaringClass().getCanonicalName() + " does not have a parameter annotated with the @" + TransactionParam.class + " annotation");
+		}
 	}
 
 	@Override
@@ -47,22 +47,19 @@ public class TransactionMethodBinding extends BaseResourceReturningMethodBinding
 		return RestfulOperationSystemEnum.TRANSACTION;
 	}
 
-	@Override
-	public BaseClientInvocation invokeClient(Object[] theArgs) throws InternalErrorException {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public void invokeServer(RestfulServer theServer, Request theRequest, HttpServletResponse theResponse) throws BaseServerResponseException, IOException {
-		// TODO Auto-generated method stub
-		
-	}
 
 	@Override
 	public boolean incomingServerRequestMatchesMethod(Request theRequest) {
-		// TODO Auto-generated method stub
-		return false;
+		if (theRequest.getRequestType() != RequestType.POST) {
+			return false;
+		}
+		if (isNotBlank(theRequest.getOperation())) {
+			return false;
+		}
+		if (isNotBlank(theRequest.getResourceName())) {
+			return false;
+		}
+		return true;
 	}
 
 	@Override
@@ -72,6 +69,26 @@ public class TransactionMethodBinding extends BaseResourceReturningMethodBinding
 
 	@Override
 	public List<IResource> invokeServer(Request theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException {
+		@SuppressWarnings("unchecked")
+		List<IResource> retVal=(List<IResource>) invokeServerMethod(theMethodParams);
+		return retVal;
+	}
+
+	@Override
+	protected Object parseRequestObject(Request theRequest) {
+		EncodingEnum encoding = determineResponseEncoding(theRequest);
+		IParser parser = encoding.newParser(getContext());
+		Bundle bundle = parser.parseBundle(theRequest.getInputReader());
+		return bundle;
+	}
+
+	@Override
+	public RestfulOperationTypeEnum getResourceOperationType() {
+		return null;
+	}
+
+	@Override
+	public BaseClientInvocation invokeClient(Object[] theArgs) throws InternalErrorException {
 		// TODO Auto-generated method stub
 		return null;
 	}
