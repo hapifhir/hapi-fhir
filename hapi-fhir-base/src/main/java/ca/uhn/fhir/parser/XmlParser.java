@@ -142,10 +142,21 @@ public class XmlParser extends BaseParser implements IParser {
 			}
 
 			for (BundleEntry nextEntry : theBundle.getEntries()) {
-				eventWriter.writeStartElement("entry");
+				boolean deleted=false;
+				if (nextEntry.getDeletedAt() != null && nextEntry.getDeletedAt().isEmpty()==false) {
+					deleted=true;
+					eventWriter.writeStartElement("at","deleted-entry",TOMBSTONES_NS);
+					eventWriter.writeNamespace("at", TOMBSTONES_NS);
+					eventWriter.writeAttribute("ref", nextEntry.getId().getValueAsString());
+					eventWriter.writeAttribute("when", nextEntry.getDeletedAt().getValueAsString());
+				}else {
+					eventWriter.writeStartElement("entry");
+				}
 
-				writeTagWithTextNode(eventWriter, "title", nextEntry.getTitle());
-				writeTagWithTextNode(eventWriter, "id", nextEntry.getId());
+				writeOptionalTagWithTextNode(eventWriter, "title", nextEntry.getTitle());
+				if (!deleted) {
+					writeTagWithTextNode(eventWriter, "id", nextEntry.getId());
+				}
 				writeOptionalTagWithTextNode(eventWriter, "updated", nextEntry.getUpdated());
 				writeOptionalTagWithTextNode(eventWriter, "published", nextEntry.getPublished());
 
@@ -163,17 +174,17 @@ public class XmlParser extends BaseParser implements IParser {
 					writeAtomLink(eventWriter, "self", nextEntry.getLinkSelf());
 				}
 
-				eventWriter.writeStartElement("content");
-				eventWriter.writeAttribute("type", "text/xml");
 
 				IResource resource = nextEntry.getResource();
 				if (resource != null) {
+					eventWriter.writeStartElement("content");
+					eventWriter.writeAttribute("type", "text/xml");
 					encodeResourceToXmlStreamWriter(resource, eventWriter, false);
+					eventWriter.writeEndElement(); // content
 				} else {
-					ourLog.warn("Bundle entry contains null resource");
+					ourLog.debug("Bundle entry contains null resource");
 				}
 
-				eventWriter.writeEndElement(); // content
 				eventWriter.writeEndElement(); // entry
 			}
 
