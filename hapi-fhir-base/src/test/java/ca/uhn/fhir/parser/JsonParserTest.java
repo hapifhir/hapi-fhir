@@ -1,10 +1,7 @@
 package ca.uhn.fhir.parser;
 
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -28,6 +25,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.api.ExtensionDt;
+import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Extension;
@@ -49,6 +47,7 @@ import ca.uhn.fhir.model.dstu.resource.ValueSet.DefineConcept;
 import ca.uhn.fhir.model.dstu.valueset.AddressUseEnum;
 import ca.uhn.fhir.model.dstu.valueset.NarrativeStatusEnum;
 import ca.uhn.fhir.model.primitive.DecimalDt;
+import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.XhtmlDt;
 import ca.uhn.fhir.narrative.INarrativeGenerator;
@@ -152,8 +151,7 @@ public class JsonParserTest {
 		assertEquals("term", b.getEntries().get(0).getCategories().get(0).getTerm());
 		assertEquals("label", b.getEntries().get(0).getCategories().get(0).getLabel());
 		assertEquals("scheme", b.getEntries().get(0).getCategories().get(0).getScheme());
-		assertNotNull(b.getEntries().get(0).getResource());
-		assertEquals(Patient.class, b.getEntries().get(0).getResource().getClass());
+		assertNull(b.getEntries().get(0).getResource());
 
 	}
 
@@ -221,7 +219,7 @@ public class JsonParserTest {
 
 		MyPatientWithOneDeclaredExtension patient = new MyPatientWithOneDeclaredExtension();
 		patient.addAddress().setUse(AddressUseEnum.HOME);
-		patient.setFoo(new ResourceReferenceDt(Organization.class, "123"));
+		patient.setFoo(new ResourceReferenceDt("Organization/123"));
 
 		String val = parser.encodeResourceToString(patient);
 		ourLog.info(val);
@@ -230,7 +228,7 @@ public class JsonParserTest {
 		MyPatientWithOneDeclaredExtension actual = parser.parseResource(MyPatientWithOneDeclaredExtension.class, val);
 		assertEquals(AddressUseEnum.HOME, patient.getAddressFirstRep().getUse().getValueAsEnum());
 		ResourceReferenceDt ref = actual.getFoo();
-		assertEquals("Organization/123", ref.getResourceUrl());
+		assertEquals("Organization/123", ref.getResourceId().getValue());
 
 	}
 	
@@ -257,7 +255,7 @@ public class JsonParserTest {
 
 		Patient patient = new Patient();
 		patient.addAddress().setUse(AddressUseEnum.HOME);
-		patient.addUndeclaredExtension(false, "urn:foo", new ResourceReferenceDt(Organization.class, "123"));
+		patient.addUndeclaredExtension(false, "urn:foo", new ResourceReferenceDt("Organization/123"));
 
 		String val = parser.encodeResourceToString(patient);
 		ourLog.info(val);
@@ -268,7 +266,7 @@ public class JsonParserTest {
 		List<ExtensionDt> ext = actual.getUndeclaredExtensionsByUrl("urn:foo");
 		assertEquals(1, ext.size());
 		ResourceReferenceDt ref = (ResourceReferenceDt) ext.get(0).getValue();
-		assertEquals("Organization/123", ref.getResourceUrl());
+		assertEquals("Organization/123", ref.getReference().getValue());
 
 	}
 
@@ -297,7 +295,7 @@ public class JsonParserTest {
 		String str = p.encodeResourceToString(patient);
 		assertThat(str, IsNot.not(StringContains.containsString("managingOrganization")));
 
-		patient.setManagingOrganization(new ResourceReferenceDt(Organization.class, "123"));
+		patient.setManagingOrganization(new ResourceReferenceDt("Organization/123"));
 		str = p.encodeResourceToString(patient);
 		assertThat(str, StringContains.containsString("\"managingOrganization\":{\"resource\":\"Organization/123\"}"));
 
@@ -529,9 +527,11 @@ public class JsonParserTest {
 		
 		Bundle bundle = ourCtx.newJsonParser().parseBundle(bundleString);
 		BundleEntry entry = bundle.getEntries().get(0);
-		assertTrue(entry.isDeleted());
 		assertEquals("2012-05-29T23:45:32+00:00", entry.getDeletedAt().getValueAsString());
 		assertEquals("http://fhir.furore.com/fhir/Patient/1/_history/2", entry.getLinkSelf().getValue());
+		assertEquals("1", entry.getResource().getId().getUnqualifiedId());
+		assertEquals("2", entry.getResource().getId().getUnqualifiedVersionId());
+		assertEquals(new InstantDt("2012-05-29T23:45:32+00:00"), entry.getResource().getResourceMetadata().get(ResourceMetadataKeyEnum.DELETED_AT));
 		
 		// Now encode
 		

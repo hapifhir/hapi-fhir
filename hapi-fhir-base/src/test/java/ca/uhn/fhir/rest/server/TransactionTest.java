@@ -44,21 +44,26 @@ public class TransactionTest {
 
 	@Test
 	public void testTransaction() throws Exception {
-		Bundle b= new Bundle();
+		Bundle b = new Bundle();
 		
 		Patient p1 = new Patient();
-		p1.getId().setValue("1");
-		b.addEntry().setResource(p1);
+		p1.addName().addFamily("Family1");
+		BundleEntry entry = b.addEntry();
+		entry.getId().setValue("1");
+		entry.setResource(p1);
 
 		Patient p2 = new Patient();
-		p2.getId().setValue("2");
-		b.addEntry().setResource(p2);
+		p2.addName().addFamily("Family2");
+		entry = b.addEntry();
+		entry.getId().setValue("2");
+		entry.setResource(p2);
 		
 		BundleEntry deletedEntry = b.addEntry();
-		deletedEntry.setId(new IdDt("3"));
-		deletedEntry.setDeleted(new InstantDt());
+		deletedEntry.setId(new IdDt("Patient/3"));
+		deletedEntry.setDeleted(InstantDt.withCurrentTime());
 		
-		String bundleString = ourCtx.newXmlParser().encodeBundleToString(b);
+		String bundleString = ourCtx.newXmlParser().setPrettyPrint(true).encodeBundleToString(b);
+		ourLog.info(bundleString);
 		
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/");
 		httpPost.setEntity(new StringEntity(bundleString, ContentType.create(Constants.CT_ATOM_XML, "UTF-8")));

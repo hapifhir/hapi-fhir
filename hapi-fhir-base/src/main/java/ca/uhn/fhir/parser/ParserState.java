@@ -120,9 +120,8 @@ class ParserState<T> {
 	}
 
 	/**
-	 * Invoked after any new XML event is individually processed, containing a
-	 * copy of the XML event. This is basically intended for embedded XHTML
-	 * content
+	 * Invoked after any new XML event is individually processed, containing a copy of the XML event. This is basically
+	 * intended for embedded XHTML content
 	 */
 	public void xmlEvent(XMLEvent theNextEvent) {
 		myState.xmlEvent(theNextEvent);
@@ -215,8 +214,8 @@ class ParserState<T> {
 				myInstance.setScheme(theValue);
 			} else if ("value".equals(theName)) {
 				/*
-				 * This handles XML parsing, which is odd for this quasi-resource type,
-				 * since the tag has three values instead of one like everything else.
+				 * This handles XML parsing, which is odd for this quasi-resource type, since the tag has three values
+				 * instead of one like everything else.
 				 */
 				switch (myCatState) {
 				case STATE_LABEL:
@@ -261,10 +260,32 @@ class ParserState<T> {
 
 	}
 
+	private void putPlacerResourceInDeletedEntry(BundleEntry entry) {
+		IdDt id = null;
+		if (entry.getLinkSelf() != null && entry.getLinkSelf().isEmpty() == false) {
+			id = new IdDt(entry.getLinkSelf().getValue());
+		} else {
+			id = entry.getId();
+		}
+		
+		IResource resource = entry.getResource();
+		if (resource == null && id != null && isNotBlank(id.getResourceType())) {
+			resource = myContext.getResourceDefinition(id.getResourceType()).newInstance();
+			resource.setId(id);
+			entry.setResource(resource);
+		}
+		
+		if (resource != null) {
+			resource.getResourceMetadata().put(ResourceMetadataKeyEnum.DELETED_AT, entry.getDeletedAt());
+			resource.getResourceMetadata().put(ResourceMetadataKeyEnum.VERSION_ID, id);
+		}
+	}
+
 	public class AtomEntryState extends BaseState {
 
 		private BundleEntry myEntry;
 		private Class<? extends IResource> myResourceType;
+		private boolean myDeleted;
 
 		public AtomEntryState(Bundle theInstance, Class<? extends IResource> theResourceType) {
 			super(null);
@@ -281,6 +302,10 @@ class ParserState<T> {
 		public void endingElement() throws DataFormatException {
 			populateResourceMetadata();
 			pop();
+
+			if (myDeleted) {
+				putPlacerResourceInDeletedEntry(myEntry);
+			}
 		}
 
 		@Override
@@ -305,7 +330,7 @@ class ParserState<T> {
 				push(new AtomCategoryState(myEntry.addCategory()));
 			} else if ("deleted".equals(theLocalPart) && myJsonMode) {
 				// JSON and XML deleted entries are completely different for some reason
-				myEntry.setDeleted(true);
+				myDeleted = true;
 				push(new AtomDeletedJsonWhenState(myEntry.getDeletedAt()));
 			} else {
 				throw new DataFormatException("Unexpected element in entry: " + theLocalPart);
@@ -314,6 +339,7 @@ class ParserState<T> {
 			// TODO: handle category
 		}
 
+		@SuppressWarnings("deprecation")
 		private void populateResourceMetadata() {
 			if (myEntry.getResource() == null) {
 				return;
@@ -335,59 +361,21 @@ class ParserState<T> {
 			}
 			if (!myEntry.getLinkSelf().isEmpty()) {
 				String linkSelfValue = myEntry.getLinkSelf().getValue();
-				/*
-				 * Find resource ID if it is there
-				 */
-				String resNameLc = myContext.getResourceDefinition(myEntry.getResource()).getName().toLowerCase();
-				String subStrId = "/" + resNameLc + "/";
-				int idIdx = linkSelfValue.toLowerCase().lastIndexOf(subStrId);
-				if (idIdx != -1) {
-					int endIndex = linkSelfValue.indexOf('/', idIdx + subStrId.length());
-					String id;
-					if (endIndex == -1) {
-						id = linkSelfValue.substring(idIdx + subStrId.length());
-					} else {
-						id = linkSelfValue.substring(idIdx + subStrId.length(), endIndex);
-					}
-					myEntry.getResource().setId(new IdDt(id));
-				}
-
-				/*
-				 * Find resource version ID if it is there
-				 */
-				String subStrVid = "/" + Constants.PARAM_HISTORY + "/";
-				int startIndex = linkSelfValue.indexOf(subStrVid);
-				if (startIndex > 0) {
-					startIndex = startIndex + subStrVid.length();
-					int endIndex = linkSelfValue.indexOf('?', startIndex);
-					if (endIndex == -1) {
-						endIndex = linkSelfValue.length();
-					}
-					String versionId = linkSelfValue.substring(startIndex, endIndex);
-					if (isNotBlank(versionId)) {
-						int idx = versionId.indexOf('/');
-						if (idx != -1) {
-							// Just in case
-							ourLog.warn("Bundle entry link-self contains path information beyond version (this will be ignored): {}", versionId);
-							versionId = versionId.substring(0, idx);
-						}
-						metadata.put(ResourceMetadataKeyEnum.VERSION_ID, new IdDt(versionId));
-
-					}
+				IdDt id = new IdDt(linkSelfValue);
+				myEntry.getResource().setId(id);
+				if (isNotBlank(id.getUnqualifiedVersionId())) {
+					metadata.put(ResourceMetadataKeyEnum.VERSION_ID, id);
 				}
 			}
 
 		}
 
 	}
-	
-	
+
 	public class AtomDeletedEntryState extends AtomEntryState {
 
 		public AtomDeletedEntryState(Bundle theInstance, Class<? extends IResource> theResourceType) {
 			super(theInstance, theResourceType);
-			
-			getEntry().setDeleted(true);
 		}
 
 		@Override
@@ -399,9 +387,13 @@ class ParserState<T> {
 			}
 		}
 
-		
+		@Override
+		public void endingElement() throws DataFormatException {
+			putPlacerResourceInDeletedEntry(getEntry());
+			super.endingElement();
+		}
+
 	}
-	
 
 	private class AtomLinkState extends BaseState {
 
@@ -506,7 +498,6 @@ class ParserState<T> {
 
 	}
 
-	
 	private class AtomDeletedJsonWhenState extends BaseState {
 
 		private String myData;
@@ -529,7 +520,6 @@ class ParserState<T> {
 			throw new DataFormatException("Unexpected nested element in atom tag: " + theLocalPart);
 		}
 
-		
 		@Override
 		public void attributeValue(String theName, String theValue) throws DataFormatException {
 			myData = theValue;
@@ -541,7 +531,7 @@ class ParserState<T> {
 		}
 
 	}
-	
+
 	private class AtomState extends BaseState {
 
 		private Bundle myInstance;
@@ -577,7 +567,7 @@ class ParserState<T> {
 			} else if ("author".equals(theLocalPart)) {
 				push(new AtomAuthorState(myInstance));
 			} else if ("deleted-entry".equals(theLocalPart) && verifyNamespace(XmlParser.TOMBSTONES_NS, theNamespaceURI)) {
-				push(new AtomDeletedEntryState(myInstance,myResourceType));
+				push(new AtomDeletedEntryState(myInstance, myResourceType));
 			} else {
 				if (theNamespaceURI != null) {
 					throw new DataFormatException("Unexpected element: {" + theNamespaceURI + "}" + theLocalPart);
@@ -740,7 +730,7 @@ class ParserState<T> {
 			case RESOURCE_REF: {
 				ResourceReferenceDt newChildInstance = new ResourceReferenceDt();
 				myDefinition.getMutator().addValue(myParentInstance, newChildInstance);
-				ResourceReferenceState newState = new ResourceReferenceState(getPreResourceState(), (RuntimeResourceReferenceDefinition)target, newChildInstance);
+				ResourceReferenceState newState = new ResourceReferenceState(getPreResourceState(), (RuntimeResourceReferenceDefinition) target, newChildInstance);
 				push(newState);
 				return;
 			}
@@ -1221,25 +1211,25 @@ class ParserState<T> {
 			case INITIAL:
 				throw new DataFormatException("Unexpected attribute: " + theValue);
 			case REFERENCE:
-				int lastSlash = theValue.lastIndexOf('/');
-				if (lastSlash==-1) {
-					myInstance.setResourceId(theValue);
-				} else if (lastSlash==0) {
-					myInstance.setResourceId(theValue.substring(1));
-				}else {
-					int secondLastSlash=theValue.lastIndexOf('/', lastSlash-1);
-					String resourceTypeName;
-					if (secondLastSlash==-1) {
-						resourceTypeName=theValue.substring(0,lastSlash);
-					}else {
-						resourceTypeName=theValue.substring(secondLastSlash+1,lastSlash);
-					}
-					myInstance.setResourceId(theValue.substring(lastSlash+1));
-					RuntimeResourceDefinition def = myContext.getResourceDefinition(resourceTypeName);
-					if(def!=null) {
-						myInstance.setResourceType(def.getImplementingClass());
-					}
-				}
+				// int lastSlash = theValue.lastIndexOf('/');
+				// if (lastSlash==-1) {
+				// myInstance.setResourceId(theValue);
+				// } else if (lastSlash==0) {
+				// myInstance.setResourceId(theValue.substring(1));
+				// }else {
+				// int secondLastSlash=theValue.lastIndexOf('/', lastSlash-1);
+				// String resourceTypeName;
+				// if (secondLastSlash==-1) {
+				// resourceTypeName=theValue.substring(0,lastSlash);
+				// }else {
+				// resourceTypeName=theValue.substring(secondLastSlash+1,lastSlash);
+				// }
+				// myInstance.setResourceId(theValue.substring(lastSlash+1));
+				// RuntimeResourceDefinition def = myContext.getResourceDefinition(resourceTypeName);
+				// if(def!=null) {
+				// myInstance.setResourceType(def.getImplementingClass());
+				// }
+				// }
 				myInstance.setReference(theValue);
 				break;
 			}

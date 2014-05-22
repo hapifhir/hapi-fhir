@@ -35,7 +35,6 @@ public class BundleEntry extends BaseBundle {
 	 *****************************************************/
 	//@formatter:on
 	private TagList myCategories;
-	private boolean myDeleted;
 	private InstantDt myDeletedAt;
 	private StringDt myLinkSelf;
 	private InstantDt myPublished;
@@ -62,11 +61,11 @@ public class BundleEntry extends BaseBundle {
 	}
 
 	/**
-	 * Gets the date/time that thius entry was deleted. 
+	 * Gets the date/time that thius entry was deleted.
 	 */
 	public InstantDt getDeletedAt() {
-		if (myDeletedAt==null) {
-			myDeletedAt=new InstantDt();
+		if (myDeletedAt == null) {
+			myDeletedAt = new InstantDt();
 		}
 		return myDeletedAt;
 	}
@@ -110,10 +109,6 @@ public class BundleEntry extends BaseBundle {
 		return myUpdated;
 	}
 
-	public boolean isDeleted() {
-		return myDeleted;
-	}
-
 	@Override
 	public boolean isEmpty() {
 		//@formatter:off
@@ -122,12 +117,8 @@ public class BundleEntry extends BaseBundle {
 		//@formatter:on
 	}
 
-	public void setDeleted(boolean theDeleted) {
-		myDeleted = theDeleted;
-	}
-
 	/**
-	 * Sets the date/time that this entry was deleted. 
+	 * Sets the date/time that this entry was deleted.
 	 */
 	public void setDeleted(InstantDt theDeletedAt) {
 		myDeletedAt = theDeletedAt;

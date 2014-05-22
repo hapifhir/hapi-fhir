@@ -235,13 +235,13 @@ public class TagsServerTest {
 
 		@AddTags(type = Patient.class)
 		public void addTagsPatient(@IdParam IdDt theId, @VersionIdParam IdDt theVersion, @TagListParam TagList theTagList) {
-			ourLastOutcome = "add" + theId.getValue() + theVersion.getValue();
+			ourLastOutcome = "add" + theId.getUnqualifiedId() + theVersion.getUnqualifiedVersionId();
 			ourLastTagList=theTagList;
 		}
 
 		@AddTags(type = Patient.class)
 		public void addTagsPatient(@IdParam IdDt theId, @TagListParam TagList theTagList) {
-			ourLastOutcome = "add" + theId.getValue();
+			ourLastOutcome = "add" + theId.getUnqualifiedId();
 			ourLastTagList=theTagList;
 		}
 
@@ -264,7 +264,7 @@ public class TagsServerTest {
 		@GetTags(type = Patient.class)
 		public TagList getAllTagsPatientId(@IdParam IdDt theId) {
 			TagList tagList = new TagList();
-			tagList.add(new Tag("Patient" + theId.getValue(), "DogLabel", (String) null));
+			tagList.add(new Tag("Patient" + theId.getUnqualifiedId(), "DogLabel", (String) null));
 			tagList.add(new Tag("AllCat", "CatLabel", "http://cats"));
 			return tagList;
 		}
@@ -272,20 +272,20 @@ public class TagsServerTest {
 		@GetTags(type = Patient.class)
 		public TagList getAllTagsPatientIdVersion(@IdParam IdDt theId, @VersionIdParam IdDt theVersion) {
 			TagList tagList = new TagList();
-			tagList.add(new Tag("Patient" + theId.getValue() + theVersion.getValue(), "DogLabel", (String) null));
+			tagList.add(new Tag("Patient" + theId.getUnqualifiedId() + theVersion.getUnqualifiedVersionId(), "DogLabel", (String) null));
 			tagList.add(new Tag("AllCat", "CatLabel", "http://cats"));
 			return tagList;
 		}
 
 		@DeleteTags(type = Patient.class)
 		public void RemoveTagsPatient(@IdParam IdDt theId, @VersionIdParam IdDt theVersion, @TagListParam TagList theTagList) {
-			ourLastOutcome = "Remove" + theId.getValue() + theVersion.getValue();
+			ourLastOutcome = "Remove" + theId.getUnqualifiedId() + theVersion.getUnqualifiedVersionId();
 			ourLastTagList=theTagList;
 		}
 
 		@DeleteTags(type = Patient.class)
 		public void RemoveTagsPatient(@IdParam IdDt theId, @TagListParam TagList theTagList) {
-			ourLastOutcome = "Remove" + theId.getValue();
+			ourLastOutcome = "Remove" + theId.getUnqualifiedId();
 			ourLastTagList=theTagList;
 		}
 

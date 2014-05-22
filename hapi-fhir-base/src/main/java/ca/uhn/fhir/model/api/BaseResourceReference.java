@@ -23,7 +23,6 @@ package ca.uhn.fhir.model.api;
 import java.io.IOException;
 import java.io.Reader;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -31,7 +30,6 @@ import org.apache.http.client.methods.HttpGet;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.client.BaseClient;
 import ca.uhn.fhir.rest.client.api.IRestfulClient;
@@ -40,34 +38,23 @@ public abstract class BaseResourceReference extends BaseElement {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseResourceReference.class);
 	private IResource myResource;
-	private String myResourceId;
-	private Class<? extends IResource> myResourceType;
 
 	/**
 	 * Constructor
-	 */
+	 * @param theResource
+	 */ 
 	public BaseResourceReference() {
 		// nothing
 	}
-	
-	/**
-	 * Constructor
-	 */
-	public BaseResourceReference(Class<? extends IResource> theResourceType, IdDt theResourceId) {
-		myResourceType = theResourceType;
-		myResourceId = theResourceId.getValue();
-	}
 
 	/**
 	 * Constructor
+	 * 
+	 * @param theResource The loaded resource itself 
 	 */
-	public BaseResourceReference(Class<? extends IResource> theResourceType, String theResourceId) {
-		myResourceType = theResourceType;
-		myResourceId = theResourceId;
-	}
-
 	public BaseResourceReference(IResource theResource) {
-		myResource=theResource;
+		myResource = theResource;
+		setResourceId(theResource.getId());
 	}
 
 	/**
@@ -79,7 +66,18 @@ public abstract class BaseResourceReference extends BaseElement {
 	 * version specific. Internal fragment references (start with '#') refer to contained resources
 	 * </p>
 	 */
-	public abstract StringDt getReference();
+	public abstract IdDt getResourceId();
+
+	/**
+	 * Sets the resource ID 
+	 * 
+	 * <p>
+	 * <b>Definition:</b> A reference to a location at which the other resource is found. The reference may a relative reference, in which case it is relative to the service base URL, or an absolute
+	 * URL that resolves to the location where the resource is found. The reference may be version specific or not. If the reference is not to a FHIR RESTful server, then it should be assumed to be
+	 * version specific. Internal fragment references (start with '#') refer to contained resources
+	 * </p>
+	 */
+	public abstract void setResourceId(IdDt theResourceId);
 
 	/**
 	 * Gets the actual loaded and parsed resource instance, <b>if it is already present</b>. This
@@ -94,21 +92,10 @@ public abstract class BaseResourceReference extends BaseElement {
 		return myResource;
 	}
 
-	public String getResourceId() {
-		return myResourceId;
-	}
-
-	public Class<? extends IResource> getResourceType() {
-		return myResourceType;
-	}
-
-	public String getResourceUrl() {
-		return getReference().getValue();
-	}
 
 	@Override
 	protected boolean isBaseEmpty() {
-		return super.isBaseEmpty() && myResource == null && myResourceType == null && StringUtils.isBlank(myResourceId);
+		return super.isBaseEmpty() && myResource == null;
 	}
 
 	/**
@@ -120,12 +107,18 @@ public abstract class BaseResourceReference extends BaseElement {
 			return myResource;
 		}
 
-		ourLog.debug("Loading resource at URL: {}", getResourceUrl());
+		IdDt resourceId = getResourceId();
+		if (resourceId == null) {
+			throw new IllegalStateException("Reference has no resource ID defined");
+		}
+		
+		String resourceUrl = resourceId.getValue();
+		
+		ourLog.debug("Loading resource at URL: {}", resourceUrl);
 
 		HttpClient httpClient = theClient.getHttpClient();
 		FhirContext context = theClient.getFhirContext();
 
-		String resourceUrl = getResourceUrl();
 		if (!resourceUrl.startsWith("http")) {
 			resourceUrl = theClient.getServerBase() + resourceUrl;
 		}
@@ -150,14 +143,6 @@ public abstract class BaseResourceReference extends BaseElement {
 
 	public void setResource(IResource theResource) {
 		myResource = theResource;
-	}
-
-	public void setResourceId(String theResourceId) {
-		myResourceId = theResourceId;
-	}
-
-	public void setResourceType(Class<? extends IResource> theResourceType) {
-		myResourceType = theResourceType;
 	}
 
 }

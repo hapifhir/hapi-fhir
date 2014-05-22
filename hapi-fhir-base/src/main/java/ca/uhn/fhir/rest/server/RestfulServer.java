@@ -51,7 +51,6 @@ import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.provider.ServerConformanceProvider;
 import ca.uhn.fhir.rest.server.provider.ServerProfileProvider;
 import ca.uhn.fhir.util.VersionUtil;
@@ -539,7 +538,10 @@ public class RestfulServer extends HttpServlet {
 				if (nextString.equals(Constants.PARAM_HISTORY)) {
 					if (tok.hasMoreTokens()) {
 						String versionString = tok.nextToken();
-						versionId = new IdDt(versionString);
+						if (id == null) {
+							throw new InvalidRequestException("Don't know how to handle request path: " + requestPath);
+						}
+						versionId = new IdDt(resourceName + "/" + id.getUnqualifiedId() + "/_history/" + versionString);
 					} else {
 						operation = Constants.PARAM_HISTORY;
 					}
@@ -568,11 +570,7 @@ public class RestfulServer extends HttpServlet {
 			if (theRequestType == RequestType.PUT && versionId == null) {
 				String contentLocation = theRequest.getHeader("Content-Location");
 				if (contentLocation != null) {
-					int idx = contentLocation.indexOf("/_history/");
-					if (idx != -1) {
-						String versionIdString = contentLocation.substring(idx + "/_history/".length());
-						versionId = new IdDt(versionIdString);
-					}
+					versionId = new IdDt(contentLocation);
 				}
 			}
 

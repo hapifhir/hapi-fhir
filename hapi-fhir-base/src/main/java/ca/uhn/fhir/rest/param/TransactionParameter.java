@@ -21,6 +21,7 @@ package ca.uhn.fhir.rest.param;
  */
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -28,6 +29,7 @@ import java.util.Map;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
+import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.rest.annotation.TransactionParam;
 import ca.uhn.fhir.rest.client.BaseClientInvocation;
@@ -49,7 +51,15 @@ public class TransactionParameter implements IParameter {
 	@Override
 	public Object translateQueryParametersIntoServerArgument(Request theRequest, Object theRequestContents) throws InternalErrorException, InvalidRequestException {
 		Bundle resource = (Bundle) theRequestContents;
-		return resource;
+		
+		ArrayList<IResource> retVal = new ArrayList<IResource>();
+		for (BundleEntry next : resource.getEntries()) {
+			if (next.getResource() != null) {
+				retVal.add(next.getResource());
+			}
+		}
+		
+		return retVal;
 	}
 
 	@Override

@@ -70,7 +70,22 @@ public enum ResourceMetadataKeyEnum {
 	 * <p>
 	 * Values for this key are of type <b>{@link IdDt}</b>
 	 * </p>
+	 * 
+	 * @deprecated The {@link IResource#getId()} resource ID will now be populated with the version ID via the {@link IdDt#getUnqualifiedVersionId()} method
 	 */
-	VERSION_ID;
+	@Deprecated
+	VERSION_ID, 
+	
+	
+	/**
+	 * If present and populated with a date/time (as an instance of {@link InstantDt}),
+	 * this value is an indication that the resource is in the deleted state. This key
+	 * is only used in a limited number of scenarios, such as POSTing transaction bundles
+	 * to a server, or returning resource history.  
+	 * <p>
+	 * Values for this key are of type <b>{@link InstantDt}</b>
+	 * </p>
+	 */
+	DELETED_AT;
 
 }

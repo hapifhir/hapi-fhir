@@ -176,7 +176,7 @@ public class XmlParser extends BaseParser implements IParser {
 
 
 				IResource resource = nextEntry.getResource();
-				if (resource != null) {
+				if (resource != null && !resource.isEmpty()) {
 					eventWriter.writeStartElement("content");
 					eventWriter.writeAttribute("type", "text/xml");
 					encodeResourceToXmlStreamWriter(resource, eventWriter, false);
@@ -506,11 +506,11 @@ public class XmlParser extends BaseParser implements IParser {
 
 	private void encodeResourceReferenceToStreamWriter(XMLStreamWriter theEventWriter, ResourceReferenceDt theRef) throws XMLStreamException {
 		String reference = theRef.getReference().getValue();
-		if (StringUtils.isBlank(reference)) {
-			if (theRef.getResourceType() != null && StringUtils.isNotBlank(theRef.getResourceId())) {
-				reference = myContext.getResourceDefinition(theRef.getResourceType()).getName() + '/' + theRef.getResourceId();
-			}
-		}
+//		if (StringUtils.isBlank(reference)) {
+//			if (theRef.getResourceType() != null && StringUtils.isNotBlank(theRef.getResourceId())) {
+//				reference = myContext.getResourceDefinition(theRef.getResourceType()).getName() + '/' + theRef.getResourceId();
+//			}
+//		}
 
 		if (!(theRef.getDisplay().isEmpty())) {
 			theEventWriter.writeStartElement("display");

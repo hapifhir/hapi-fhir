@@ -205,7 +205,7 @@ public class JsonParser extends BaseParser implements IParser {
 			writeAuthor(nextEntry, eventWriter);
 
 			IResource resource = nextEntry.getResource();
-			if (resource != null) {
+			if (resource != null && !resource.isEmpty()) {
 				RuntimeResourceDefinition resDef = myContext.getResourceDefinition(resource);
 				encodeResourceToJsonStreamWriter(resDef, resource, eventWriter, "content");
 			}
@@ -264,25 +264,26 @@ public class JsonParser extends BaseParser implements IParser {
 			break;
 		}
 		case RESOURCE_REF: {
-			ResourceReferenceDt value = (ResourceReferenceDt) theValue;
+			ResourceReferenceDt referenceDt = (ResourceReferenceDt) theValue;
+			IdDt value = referenceDt.getResourceId();
 			if (theChildName != null) {
 				theWriter.writeStartObject(theChildName);
 			} else {
 				theWriter.writeStartObject();
 			}
 
-			String reference = value.getReference().getValue();
+			String reference = value.getValue();
 			if (StringUtils.isBlank(reference)) {
-				if (value.getResourceType() != null && StringUtils.isNotBlank(value.getResourceId())) {
-					reference = myContext.getResourceDefinition(value.getResourceType()).getName() + '/' + value.getResourceId();
+				if (value.getResourceType() != null && StringUtils.isNotBlank(value.getUnqualifiedId())) {
+					reference = myContext.getResourceDefinition(value.getResourceType()).getName() + '/' + value.getUnqualifiedId();
 				}
 			}
 
 			if (StringUtils.isNotBlank(reference)) {
 				theWriter.write("resource", reference);
 			}
-			if (value.getDisplay().isEmpty() == false) {
-				theWriter.write("display", value.getDisplay().getValueAsString());
+			if (referenceDt.getDisplay().isEmpty() == false) {
+				theWriter.write("display", referenceDt.getDisplay().getValueAsString());
 			}
 			theWriter.writeEnd();
 			break;
@@ -836,7 +837,7 @@ public class JsonParser extends BaseParser implements IParser {
 	}
 
 	private boolean writeAtomLink(JsonGenerator theEventWriter, String theRel, StringDt theLink, boolean theStarted) {
-		boolean retVal = false;
+		boolean retVal = theStarted;
 		if (isNotBlank(theLink.getValue())) {
 			if (theStarted==false) {
 				theEventWriter.writeStartArray("link");

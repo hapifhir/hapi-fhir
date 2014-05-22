@@ -88,7 +88,7 @@ public class CompleteResourceProviderTest {
 		Patient p1 = new Patient();
 		p1.addIdentifier().setSystem("urn:system").setValue("testSearchByResourceChain01");
 		p1.addName().addFamily("testSearchByResourceChainFamily01").addGiven("testSearchByResourceChainGiven01");
-		p1.setManagingOrganization(new ResourceReferenceDt(Organization.class, o1id));
+		p1.setManagingOrganization(new ResourceReferenceDt("Organization/o1id"));
 		IdDt p1Id = ourClient.create(p1).getId();
 
 		//@formatter:off
@@ -107,7 +107,7 @@ public class CompleteResourceProviderTest {
 		Patient p1 = new Patient();
 		p1.addIdentifier().setSystem("urn:system").setValue("testSearchByResourceChain01");
 		p1.addName().addFamily("testSearchByResourceChainFamily01").addGiven("testSearchByResourceChainGiven01");
-		p1.setManagingOrganization(new ResourceReferenceDt(Organization.class, "132312323"));
+		p1.setManagingOrganization(new ResourceReferenceDt("Organization/132312323"));
 		
 		try {
 		ourClient.create(p1).getId();

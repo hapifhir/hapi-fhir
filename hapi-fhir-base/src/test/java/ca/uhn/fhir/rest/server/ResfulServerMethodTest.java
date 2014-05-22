@@ -220,6 +220,7 @@ public class ResfulServerMethodTest {
 		status = ourClient.execute(httpGet);
 		responseContent = IOUtils.toString(status.getEntity().getContent());
 		assertEquals(200, status.getStatusLine().getStatusCode());
+		ourLog.info(responseContent);
 		bundle = ourCtx.newJsonParser().parseBundle(responseContent);
 		entry0 = bundle.getEntries().get(0);
 		assertEquals("http://localhost:" + ourPort + "/Patient/1?_format=json", entry0.getLinkSelf().getValue());

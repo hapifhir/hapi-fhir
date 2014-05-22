@@ -21,6 +21,9 @@
 			<action type="add">
 				Parsers (XML/JSON) now support deleted entries in bundles
 			</action>
+			<action type="add">
+				Transaction method now supported in servers
+			</action>
         </release>			
 	</body>
 </document>

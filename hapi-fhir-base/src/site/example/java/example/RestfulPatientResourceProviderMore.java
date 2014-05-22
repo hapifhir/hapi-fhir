@@ -32,6 +32,7 @@ import ca.uhn.fhir.model.dstu.valueset.IssueSeverityEnum;
 import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
 import ca.uhn.fhir.model.primitive.DecimalDt;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.annotation.AddTags;
@@ -50,6 +51,8 @@ import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.annotation.Since;
 import ca.uhn.fhir.rest.annotation.Sort;
+import ca.uhn.fhir.rest.annotation.Transaction;
+import ca.uhn.fhir.rest.annotation.TransactionParam;
 import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.annotation.Validate;
 import ca.uhn.fhir.rest.annotation.VersionIdParam;
@@ -741,6 +744,31 @@ public class TagMethodProvider
 
 }
 //END SNIPPET: tagMethodProvider
+
+//START SNIPPET: transaction
+@Transaction
+public List<IResource> transaction(@TransactionParam List<IResource> theResources) {
+   // theResources will contain a complete bundle of all resources to persist
+   // in a single transaction
+   for (IResource next : theResources) {
+      InstantDt deleted = (InstantDt) next.getResourceMetadata().get(ResourceMetadataKeyEnum.DELETED_AT);
+      if (deleted != null && deleted.isEmpty() == false) {
+         // delete this resource
+      } else {
+         // create or update this resource
+      }
+   }
+
+   ArrayList<IResource> retVal = new ArrayList<IResource>();
+   /*
+    * According to the specification, a bundle must be returned. This bundle will contain
+    * all of the created/updated/deleted resources, including their new/updated identities.
+    * 
+    * Implementing this will depend on your specific application
+    */
+   return retVal;
+}
+//END SNIPPET: transaction
 
 
 }

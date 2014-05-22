@@ -110,7 +110,7 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding {
 	public List<IResource> invokeServer(Request theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException {
 		theMethodParams[myIdIndex] = theRequest.getId();
 		if (myVersionIdIndex != null) {
-			theMethodParams[myVersionIdIndex] = theRequest.getVersionId();
+			theMethodParams[myVersionIdIndex] = new IdDt(theRequest.getVersionId().getUnqualifiedVersionId());
 		}
 
 		Object response = invokeServerMethod(theMethodParams);
@@ -140,11 +140,11 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding {
 	}
 
 	public static GetClientInvocation createVReadInvocation(IdDt theId, IdDt vid, String resourceName) {
-		return new GetClientInvocation(resourceName, theId.getValue(), Constants.URL_TOKEN_HISTORY, vid.getValue());
+		return new GetClientInvocation(resourceName, theId.getUnqualifiedId(), Constants.URL_TOKEN_HISTORY, vid.getUnqualifiedId());
 	}
 
 	public static GetClientInvocation createReadInvocation(IdDt theId, String resourceName) {
-		return new GetClientInvocation(resourceName, theId.getValue());
+		return new GetClientInvocation(resourceName, theId.getUnqualifiedId());
 	}
 
 	@Override

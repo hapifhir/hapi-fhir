@@ -3,6 +3,7 @@ package ca.uhn.fhir.parser;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.eq;
@@ -13,6 +14,8 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.StringReader;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
@@ -20,6 +23,7 @@ import org.custommonkey.xmlunit.Diff;
 import org.custommonkey.xmlunit.XMLUnit;
 import org.hamcrest.core.IsNot;
 import org.hamcrest.core.StringContains;
+import org.hamcrest.text.StringContainsInOrder;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xml.sax.SAXException;
@@ -52,6 +56,7 @@ import ca.uhn.fhir.model.dstu.valueset.NarrativeStatusEnum;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.DecimalDt;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.XhtmlDt;
 import ca.uhn.fhir.narrative.INarrativeGenerator;
@@ -142,7 +147,7 @@ public class XmlParserTest {
 
 		Patient patient = new Patient();
 		patient.addAddress().setUse(AddressUseEnum.HOME);
-		patient.addUndeclaredExtension(false, "urn:foo", new ResourceReferenceDt(Organization.class, "123"));
+		patient.addUndeclaredExtension(false, "urn:foo", new ResourceReferenceDt("Organization/123"));
 
 		String val = parser.encodeResourceToString(patient);
 		ourLog.info(val);
@@ -153,7 +158,7 @@ public class XmlParserTest {
 		List<ExtensionDt> ext = actual.getUndeclaredExtensionsByUrl("urn:foo");
 		assertEquals(1, ext.size());
 		ResourceReferenceDt ref = (ResourceReferenceDt) ext.get(0).getValue();
-		assertEquals("Organization/123", ref.getResourceUrl());
+		assertEquals("Organization/123", ref.getReference().getValue());
 
 	}
 
@@ -163,7 +168,7 @@ public class XmlParserTest {
 
 		MyPatientWithOneDeclaredExtension patient = new MyPatientWithOneDeclaredExtension();
 		patient.addAddress().setUse(AddressUseEnum.HOME);
-		patient.setFoo(new ResourceReferenceDt(Organization.class, "123"));
+		patient.setFoo(new ResourceReferenceDt("Organization/123"));
 
 		String val = parser.encodeResourceToString(patient);
 		ourLog.info(val);
@@ -172,7 +177,7 @@ public class XmlParserTest {
 		MyPatientWithOneDeclaredExtension actual = parser.parseResource(MyPatientWithOneDeclaredExtension.class, val);
 		assertEquals(AddressUseEnum.HOME, patient.getAddressFirstRep().getUse().getValueAsEnum());
 		ResourceReferenceDt ref = actual.getFoo();
-		assertEquals("Organization/123", ref.getResourceUrl());
+		assertEquals("Organization/123", ref.getReference().getValue());
 
 	}
 
@@ -246,11 +251,41 @@ public class XmlParserTest {
 		assertEquals("term", b.getEntries().get(0).getCategories().get(0).getTerm());
 		assertEquals("label", b.getEntries().get(0).getCategories().get(0).getLabel());
 		assertEquals("scheme", b.getEntries().get(0).getCategories().get(0).getScheme());
-		assertNotNull(b.getEntries().get(0).getResource());
-		assertEquals(Patient.class, b.getEntries().get(0).getResource().getClass());
+		assertNull(b.getEntries().get(0).getResource());
 
 	}
 
+	@Test
+	public void testEncodeBundle() {
+		Bundle b= new Bundle();
+		
+		Patient p1 = new Patient();
+		p1.addName().addFamily("Family1");
+		BundleEntry entry = b.addEntry();
+		entry.getId().setValue("1");
+		entry.setResource(p1);
+
+		Patient p2 = new Patient();
+		p2.addName().addFamily("Family2");
+		entry = b.addEntry();
+		entry.getId().setValue("2");
+		entry.setResource(p2);
+		
+		BundleEntry deletedEntry = b.addEntry();
+		deletedEntry.setId(new IdDt("Patient/3"));
+		deletedEntry.setDeleted(InstantDt.withCurrentTime());
+		
+		String bundleString = ourCtx.newXmlParser().setPrettyPrint(true).encodeBundleToString(b);
+		ourLog.info(bundleString);
+
+		List<String> strings = new ArrayList<String>();
+		strings.addAll(Arrays.asList("<entry>", "<id>1</id>", "</entry>"));
+		strings.addAll(Arrays.asList("<entry>", "<id>2</id>", "</entry>"));
+		strings.addAll(Arrays.asList("<at:deleted-entry", "ref=\"Patient/3", "/>"));
+		assertThat(bundleString, StringContainsInOrder.stringContainsInOrder(strings));
+		
+	}
+	
 	@Test
 	public void testEncodeContainedResources() {
 
@@ -298,7 +333,7 @@ public class XmlParserTest {
 		String str = p.encodeResourceToString(patient);
 		assertThat(str, IsNot.not(StringContains.containsString("managingOrganization")));
 
-		patient.setManagingOrganization(new ResourceReferenceDt(Organization.class, "123"));
+		patient.setManagingOrganization(new ResourceReferenceDt("Organization/123"));
 		str = p.encodeResourceToString(patient);
 		assertThat(str, StringContains.containsString("<managingOrganization><reference value=\"Organization/123\"/></managingOrganization>"));
 
@@ -362,7 +397,7 @@ public class XmlParserTest {
 
 	@Test
 	public void testLoadAndEncodeDeclaredExtensions() throws ConfigurationException, DataFormatException, SAXException, IOException {
-		IParser p = ourCtx.newXmlParser();
+		IParser p = new FhirContext(ResourceWithExtensionsA.class).newXmlParser();
 
 		//@formatter:off
 		String msg = "<ResourceWithExtensionsA xmlns=\"http://hl7.org/fhir\">\n" + 
@@ -662,13 +697,14 @@ public class XmlParserTest {
 		assertEquals("label", tl.get(0).getLabel());
 		assertEquals("http://foo", tl.get(0).getScheme());
 
-		assertEquals(new IdDt("256a5231-a2bb-49bd-9fea-f349d428b70d"), resource.getId());
+		assertEquals("256a5231-a2bb-49bd-9fea-f349d428b70d", resource.getId().getUnqualifiedId());
 
 		msg = msg.replace("<link href=\"http://hl7.org/implement/standards/fhir/valueset/256a5231-a2bb-49bd-9fea-f349d428b70d\" rel=\"self\"/>", "<link href=\"http://hl7.org/implement/standards/fhir/valueset/256a5231-a2bb-49bd-9fea-f349d428b70d/_history/12345\" rel=\"self\"/>");
 		entry = p.parseBundle(msg).getEntries().get(0);
 		resource = (ValueSet) entry.getResource();
-		assertEquals(new IdDt("256a5231-a2bb-49bd-9fea-f349d428b70d"), resource.getId());
-		assertEquals(new IdDt("12345"), resource.getResourceMetadata().get(ResourceMetadataKeyEnum.VERSION_ID));
+		assertEquals("256a5231-a2bb-49bd-9fea-f349d428b70d", resource.getId().getUnqualifiedId());
+		assertEquals("12345", resource.getId().getUnqualifiedVersionId());
+		assertEquals("12345", ((IdDt)resource.getResourceMetadata().get(ResourceMetadataKeyEnum.VERSION_ID)).getUnqualifiedVersionId());
 
 	}
 
@@ -691,10 +727,13 @@ public class XmlParserTest {
 		Bundle bundle = p.parseBundle(msg);
 
 		BundleEntry entry = bundle.getEntries().get(0);
-		assertTrue(entry.isDeleted());
 		assertEquals("http://foo/Patient/1", entry.getId().getValue());
 		assertEquals("2013-02-10T04:11:24.435+00:00", entry.getDeletedAt().getValueAsString());
 		assertEquals("http://foo/Patient/1/_history/2", entry.getLinkSelf().getValue());
+		assertEquals("1", entry.getResource().getId().getUnqualifiedId());
+		assertEquals("2", entry.getResource().getId().getUnqualifiedVersionId());
+		assertEquals("2", ((IdDt)entry.getResource().getResourceMetadata().get(ResourceMetadataKeyEnum.VERSION_ID)).getUnqualifiedVersionId());
+		assertEquals(new InstantDt("2013-02-10T04:11:24.435+00:00"), entry.getResource().getResourceMetadata().get(ResourceMetadataKeyEnum.DELETED_AT));
 		
 		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeBundleToString(bundle));
 		
@@ -714,7 +753,7 @@ public class XmlParserTest {
 		assertEquals("http://spark.furore.com/fhir/_snapshot?id=327d6bb9-83b0-4929-aa91-6dd9c41e587b&start=0&_count=20", bundle.getLinkSelf().getValue());
 		assertEquals("Patient resource with id 3216379", bundle.getEntries().get(0).getTitle().getValue());
 		assertEquals("http://spark.furore.com/fhir/Patient/3216379", bundle.getEntries().get(0).getId().getValue());
-		assertEquals("3216379", bundle.getEntries().get(0).getResource().getId().getValue());
+		assertEquals("3216379", bundle.getEntries().get(0).getResource().getId().getUnqualifiedId());
 
 	}
 
