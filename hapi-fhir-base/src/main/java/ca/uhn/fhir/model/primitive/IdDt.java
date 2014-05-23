@@ -20,6 +20,8 @@ package ca.uhn.fhir.model.primitive;
  * #L%
  */
 
+import static org.apache.commons.lang3.StringUtils.*;
+
 import java.math.BigDecimal;
 
 import org.apache.commons.lang3.StringUtils;
@@ -99,10 +101,11 @@ public class IdDt extends BasePrimitive<String> {
 	 *             If the value is not a valid BigDecimal
 	 */
 	public BigDecimal asBigDecimal() {
-		if (getValue() == null) {
+		String val = getUnqualifiedId();
+		if (isBlank(val)) {
 			return null;
 		}
-		return new BigDecimal(getValueAsString());
+		return new BigDecimal(val);
 	}
 
 	/**
@@ -112,10 +115,11 @@ public class IdDt extends BasePrimitive<String> {
 	 *             If the value is not a valid Long
 	 */
 	public Long asLong() {
-		if (getValue() == null) {
+		String val = getUnqualifiedId();
+		if (isBlank(val)) {
 			return null;
 		}
-		return Long.parseLong(getValueAsString());
+		return Long.parseLong(val);
 	}
 
 	/**

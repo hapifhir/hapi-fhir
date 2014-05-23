@@ -395,7 +395,19 @@ public class ${className}
 		return null;
 	}	
 #end
+#if ( ${className} == "ResourceReferenceDt" )
+	/** TODO: document */
+	@Override
+	public IdDt getResourceId() {
+		return new IdDt(myReference.getValue());
+	}
 
+	/** TODO: document */
+	@Override
+	public void setResourceId(IdDt theResourceId) {
+		myReference = new StringDt(theResourceId.getValue());
+	}
+#end
 #childExtensionTypes( $childExtensionTypes )
 
 }
