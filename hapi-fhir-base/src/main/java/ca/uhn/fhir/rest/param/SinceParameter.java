@@ -33,7 +33,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.annotation.Since;
-import ca.uhn.fhir.rest.client.BaseClientInvocation;
+import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.method.Request;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -44,7 +44,7 @@ public class SinceParameter implements IParameter {
 	private Class<?> myType;
 
 	@Override
-	public void translateClientArgumentIntoQueryArgument(FhirContext theContext, Object theSourceClientArgument, Map<String, List<String>> theTargetQueryArguments, BaseClientInvocation theClientInvocation) throws InternalErrorException {
+	public void translateClientArgumentIntoQueryArgument(FhirContext theContext, Object theSourceClientArgument, Map<String, List<String>> theTargetQueryArguments, BaseHttpClientInvocation theClientInvocation) throws InternalErrorException {
 		if (theSourceClientArgument != null) {
 			InstantDt since = ParameterUtil.toInstant(theSourceClientArgument);
 			if (since.isEmpty() == false) {

@@ -31,7 +31,7 @@ import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.Tag;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
-import ca.uhn.fhir.rest.client.BaseClientInvocation;
+import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.param.IParameter;
 import ca.uhn.fhir.rest.param.ResourceParameter;
 import ca.uhn.fhir.rest.server.Constants;
@@ -88,13 +88,13 @@ abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOu
 	}
 
 	@Override
-	public BaseClientInvocation invokeClient(Object[] theArgs) throws InternalErrorException {
+	public BaseHttpClientInvocation invokeClient(Object[] theArgs) throws InternalErrorException {
 		IResource resource = (IResource) theArgs[myResourceParameterIndex];
 		if (resource == null) {
 			throw new NullPointerException("Resource can not be null");
 		}
 
-		BaseClientInvocation retVal = createClientInvocation(theArgs, resource);
+		BaseHttpClientInvocation retVal = createClientInvocation(theArgs, resource);
 		
 		TagList list = (TagList) resource.getResourceMetadata().get(ResourceMetadataKeyEnum.TAG_LIST);
 		if (list != null) {

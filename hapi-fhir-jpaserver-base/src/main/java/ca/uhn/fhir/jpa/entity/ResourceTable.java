@@ -19,6 +19,7 @@ import javax.persistence.Version;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.server.Constants;
 
 @Entity
 @Table(name = "HFJ_RESOURCE", uniqueConstraints = {})
@@ -72,7 +73,7 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 
 	@Version()
 	@Column(name = "RES_VER")
-	private Long myVersion;
+	private long myVersion;
 
 	public void addTag(String theTerm, String theLabel, String theScheme) {
 		for (ResourceTag next : getTags()) {
@@ -84,7 +85,7 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 	}
 
 	public IdDt getIdDt() {
-		return new IdDt(myId);
+		return new IdDt(myResourceType + '/' + myId + '/' + Constants.PARAM_HISTORY + '/' + myVersion);
 	}
 
 	public Long getId() {
@@ -137,8 +138,8 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 		return myTags;
 	}
 
-	public IdDt getVersion() {
-		return new IdDt(myVersion);
+	public long getVersion() {
+		return myVersion;
 	}
 
 	public boolean isHasLinks() {
@@ -201,8 +202,8 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 		myResourceType = theResourceType;
 	}
 
-	public void setVersion(IdDt theVersion) {
-		myVersion = theVersion.asLong();
+	public void setVersion(long theVersion) {
+		myVersion = theVersion;
 	}
 
 	public ResourceHistoryTable toHistory(FhirContext theCtx) {

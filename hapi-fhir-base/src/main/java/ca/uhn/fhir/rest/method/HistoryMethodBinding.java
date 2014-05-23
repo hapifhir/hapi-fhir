@@ -34,8 +34,7 @@ import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.History;
-import ca.uhn.fhir.rest.client.BaseClientInvocation;
-import ca.uhn.fhir.rest.client.GetClientInvocation;
+import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.param.IParameter;
 import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.Constants;
@@ -103,7 +102,7 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 	}
 
 	@Override
-	public BaseClientInvocation invokeClient(Object[] theArgs) throws InternalErrorException {
+	public BaseHttpClientInvocation invokeClient(Object[] theArgs) throws InternalErrorException {
 		IdDt id = null;
 		String resourceName = myResourceName;
 		if (myIdParamIndex != null) {
@@ -113,7 +112,7 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 			}
 		}
 		
-		GetClientInvocation retVal = createHistoryInvocation(resourceName, id);
+		HttpGetClientInvocation retVal = createHistoryInvocation(resourceName, id);
 
 		if (theArgs != null) {
 			for (int idx = 0; idx < theArgs.length; idx++) {
@@ -125,7 +124,7 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 		return retVal;
 	}
 
-	public static GetClientInvocation createHistoryInvocation(String theResourceName, IdDt theId) {
+	public static HttpGetClientInvocation createHistoryInvocation(String theResourceName, IdDt theId) {
 		StringBuilder b = new StringBuilder();
 		if (theResourceName != null) {
 			b.append(theResourceName);
@@ -138,7 +137,7 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 			b.append('/');
 		}
 		b.append(Constants.PARAM_HISTORY);
-		GetClientInvocation retVal = new GetClientInvocation(b.toString());
+		HttpGetClientInvocation retVal = new HttpGetClientInvocation(b.toString());
 		return retVal;
 	}
 

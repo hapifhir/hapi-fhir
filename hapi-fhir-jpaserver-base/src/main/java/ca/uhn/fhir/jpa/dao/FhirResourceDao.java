@@ -64,6 +64,7 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.QualifiedDateParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 
 public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements IFhirResourceDao<T> {
@@ -80,7 +81,7 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 
 	@Transactional(propagation = Propagation.REQUIRED, readOnly = true)
 	@Override
-	public MethodOutcome create(T theResource) {
+	public MethodOutcome create(final T theResource) {
 
 		final ResourceTable entity = toEntity(theResource);
 
@@ -88,13 +89,13 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 		entity.setUpdated(entity.getPublished());
 		entity.setResourceType(toResourceName(theResource));
 
-		final List<ResourceIndexedSearchParamString> stringParams = extractSearchParamStrings(entity, theResource);
-		final List<ResourceIndexedSearchParamToken> tokenParams = extractSearchParamTokens(entity, theResource);
-		final List<ResourceIndexedSearchParamNumber> numberParams = extractSearchParamNumber(entity, theResource);
-		final List<ResourceIndexedSearchParamDate> dateParams = extractSearchParamDates(entity, theResource);
-		final List<ResourceLink> links = extractResourceLinks(entity, theResource);
+//		final List<ResourceIndexedSearchParamString> stringParams = extractSearchParamStrings(entity, theResource);
+//		final List<ResourceIndexedSearchParamToken> tokenParams = extractSearchParamTokens(entity, theResource);
+//		final List<ResourceIndexedSearchParamNumber> numberParams = extractSearchParamNumber(entity, theResource);
+//		final List<ResourceIndexedSearchParamDate> dateParams = extractSearchParamDates(entity, theResource);
+//		final List<ResourceLink> links = extractResourceLinks(entity, theResource);
 
-		ourLog.info("Saving links: {}", links);
+//		ourLog.info("Saving links: {}", links);
 
 		TransactionTemplate template = new TransactionTemplate(myPlatformTransactionManager);
 		template.setPropagationBehavior(TransactionTemplate.PROPAGATION_REQUIRES_NEW);
@@ -102,22 +103,23 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 		template.execute(new TransactionCallback<ResourceTable>() {
 			@Override
 			public ResourceTable doInTransaction(TransactionStatus theStatus) {
-				myEntityManager.persist(entity);
-				for (ResourceIndexedSearchParamString next : stringParams) {
-					myEntityManager.persist(next);
-				}
-				for (ResourceIndexedSearchParamToken next : tokenParams) {
-					myEntityManager.persist(next);
-				}
-				for (ResourceIndexedSearchParamNumber next : numberParams) {
-					myEntityManager.persist(next);
-				}
-				for (ResourceIndexedSearchParamDate next : dateParams) {
-					myEntityManager.persist(next);
-				}
-				for (ResourceLink next : links) {
-					myEntityManager.persist(next);
-				}
+//				myEntityManager.persist(entity);
+//				for (ResourceIndexedSearchParamString next : stringParams) {
+//					myEntityManager.persist(next);
+//				}
+//				for (ResourceIndexedSearchParamToken next : tokenParams) {
+//					myEntityManager.persist(next);
+//				}
+//				for (ResourceIndexedSearchParamNumber next : numberParams) {
+//					myEntityManager.persist(next);
+//				}
+//				for (ResourceIndexedSearchParamDate next : dateParams) {
+//					myEntityManager.persist(next);
+//				}
+//				for (ResourceLink next : links) {
+//					myEntityManager.persist(next);
+//				}
+				updateEntity(theResource, entity,false);
 				return entity;
 			}
 		});
@@ -125,7 +127,6 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 		MethodOutcome outcome = toMethodOutcome(entity);
 		return outcome;
 	}
-
 
 	public Class<T> getResourceType() {
 		return myResourceType;
@@ -303,83 +304,26 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 		myResourceType = (Class<T>) theTableType;
 	}
 
-	@Transactional(propagation = Propagation.SUPPORTS)
+	@Transactional(propagation = Propagation.REQUIRED)
 	@Override
 	public MethodOutcome update(final T theResource, final IdDt theId) {
 
-		TransactionTemplate template = new TransactionTemplate(myPlatformTransactionManager);
-		ResourceTable savedEntity = template.execute(new TransactionCallback<ResourceTable>() {
-			@Override
-			public ResourceTable doInTransaction(TransactionStatus theStatus) {
+//		TransactionTemplate template = new TransactionTemplate(myPlatformTransactionManager);
+//		ResourceTable savedEntity = template.execute(new TransactionCallback<ResourceTable>() {
+//			@Override
+//			public ResourceTable doInTransaction(TransactionStatus theStatus) {
+//				final ResourceTable entity = readEntity(theId);
+//				return updateEntity(theResource, entity,true);
+//			}
+//		});
 
-				final ResourceTable entity = readEntity(theId);
-				entity.setUpdated(entity.getPublished());
-
-				final ResourceHistoryTable historyEntry = entity.toHistory(getContext());
-
-				final List<ResourceIndexedSearchParamString> stringParams = extractSearchParamStrings(entity, theResource);
-				final List<ResourceIndexedSearchParamToken> tokenParams = extractSearchParamTokens(entity, theResource);
-				final List<ResourceIndexedSearchParamNumber> numberParams = extractSearchParamNumber(entity, theResource);
-				final List<ResourceIndexedSearchParamDate> dateParams = extractSearchParamDates(entity, theResource);
-				final List<ResourceLink> links = extractResourceLinks(entity, theResource);
-
-				populateResourceIntoEntity(theResource, entity);
-				myEntityManager.persist(historyEntry);
-
-				entity.setUpdated(new Date());
-				myEntityManager.persist(entity);
-
-				if (entity.isParamsStringPopulated()) {
-					for (ResourceIndexedSearchParamString next : entity.getParamsString()) {
-						myEntityManager.remove(next);
-					}
-				}
-				for (ResourceIndexedSearchParamString next : stringParams) {
-					myEntityManager.persist(next);
-				}
-
-				if (entity.isParamsTokenPopulated()) {
-					for (ResourceIndexedSearchParamToken next : entity.getParamsToken()) {
-						myEntityManager.remove(next);
-					}
-				}
-				for (ResourceIndexedSearchParamToken next : tokenParams) {
-					myEntityManager.persist(next);
-				}
-
-				if (entity.isParamsNumberPopulated()) {
-					for (ResourceIndexedSearchParamNumber next : entity.getParamsNumber()) {
-						myEntityManager.remove(next);
-					}
-				}
-				for (ResourceIndexedSearchParamNumber next : numberParams) {
-					myEntityManager.persist(next);
-				}
-
-				if (entity.isParamsDatePopulated()) {
-					for (ResourceIndexedSearchParamDate next : entity.getParamsDate()) {
-						myEntityManager.remove(next);
-					}
-				}
-				for (ResourceIndexedSearchParamDate next : dateParams) {
-					myEntityManager.persist(next);
-				}
-
-				if (entity.isHasLinks()) {
-					for (ResourceLink next : entity.getResourceLinks()) {
-						myEntityManager.remove(next);
-					}
-				}
-				for (ResourceLink next : links) {
-					myEntityManager.persist(next);
-				}
-
-				return entity;
-			}
-		});
+		final ResourceTable entity = readEntity(theId);
+		ResourceTable savedEntity = updateEntity(theResource, entity,true);
 
 		return toMethodOutcome(savedEntity);
 	}
+
+	
 
 	private Set<Long> addPredicateDate(Set<Long> thePids, List<IQueryParameterType> theOrParams) {
 		if (theOrParams == null || theOrParams.isEmpty()) {
@@ -710,8 +654,6 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 		return new HashSet<Long>(q.getResultList());
 	}
 
-
-
 	private ResourceTable readEntity(IdDt theId) {
 		ResourceTable entity = myEntityManager.find(ResourceTable.class, theId.asLong());
 		if (entity == null) {
@@ -720,11 +662,10 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 		return entity;
 	}
 
-
 	private MethodOutcome toMethodOutcome(final ResourceTable entity) {
 		MethodOutcome outcome = new MethodOutcome();
-		outcome.setId(new IdDt(entity.getResourceType() + '/' + entity.getId()));
-		outcome.setVersionId(entity.getVersion());
+		outcome.setId(new IdDt(entity.getResourceType() + '/' + entity.getId() + '/' + Constants.PARAM_HISTORY + '/' + entity.getVersion()));
+		outcome.setVersionId(new IdDt(entity.getVersion()));
 		return outcome;
 	}
 
@@ -759,10 +700,9 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 	protected IFhirResourceDao<? extends IResource> getDao(Class<? extends IResource> theType) {
 		if (theType.equals(myResourceType)) {
 			return this;
-		} 
+		}
 		return super.getDao(theType);
 	}
-
 
 	private T toResource(BaseHasResource theEntity) {
 		String resourceText = theEntity.getResource();

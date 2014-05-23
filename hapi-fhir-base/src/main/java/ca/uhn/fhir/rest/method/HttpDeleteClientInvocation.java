@@ -1,4 +1,4 @@
-package ca.uhn.fhir.rest.client;
+package ca.uhn.fhir.rest.method;
 
 /*
  * #%L
@@ -27,13 +27,14 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpRequestBase;
 
+import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 
-public class DeleteClientInvocation extends BaseClientInvocation {
+public class HttpDeleteClientInvocation extends BaseHttpClientInvocation {
 
 	private String myUrlPath;
 
-	public DeleteClientInvocation(String... theUrlFragments) {
+	public HttpDeleteClientInvocation(String... theUrlFragments) {
 		super();
 		myUrlPath = StringUtils.join(theUrlFragments, '/');
 	}

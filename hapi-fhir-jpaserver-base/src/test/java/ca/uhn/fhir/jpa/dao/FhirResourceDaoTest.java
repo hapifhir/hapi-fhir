@@ -454,6 +454,8 @@ public class FhirResourceDaoTest {
 		assertNotNull(outcome.getId());
 		assertFalse(outcome.getId().isEmpty());
 
+		assertEquals("1", outcome.getId().getUnqualifiedVersionId());
+		
 		Date now = new Date();
 		Patient retrieved = ourPatientDao.read(outcome.getId());
 		InstantDt published = (InstantDt) retrieved.getResourceMetadata().get(ResourceMetadataKeyEnum.PUBLISHED);
@@ -465,12 +467,17 @@ public class FhirResourceDaoTest {
 
 		retrieved.getIdentifierFirstRep().setValue("002");
 		MethodOutcome outcome2 = ourPatientDao.update(retrieved, outcome.getId());
-		assertEquals(outcome.getId(), outcome2.getId());
+		assertEquals(outcome.getId().getUnqualifiedId(), outcome2.getId().getUnqualifiedId());
+		assertNotEquals(outcome.getId().getUnqualifiedVersionId(), outcome2.getId().getUnqualifiedVersionId());
 		assertNotEquals(outcome.getVersionId(), outcome2.getVersionId());
+
+		assertEquals("2", outcome2.getId().getUnqualifiedVersionId());
 
 		Date now2 = new Date();
 
 		Patient retrieved2 = ourPatientDao.read(outcome.getId());
+
+		assertEquals("2", retrieved2.getId().getUnqualifiedVersionId());
 		assertEquals("002", retrieved2.getIdentifierFirstRep().getValue().getValue());
 		InstantDt published2 = (InstantDt) retrieved2.getResourceMetadata().get(ResourceMetadataKeyEnum.PUBLISHED);
 		InstantDt updated2 = (InstantDt) retrieved2.getResourceMetadata().get(ResourceMetadataKeyEnum.UPDATED);

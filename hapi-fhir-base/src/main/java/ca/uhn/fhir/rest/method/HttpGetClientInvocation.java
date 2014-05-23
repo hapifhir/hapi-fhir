@@ -1,4 +1,4 @@
-package ca.uhn.fhir.rest.client;
+package ca.uhn.fhir.rest.method;
 
 /*
  * #%L
@@ -32,24 +32,25 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpRequestBase;
 
 import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 
-public class GetClientInvocation extends BaseClientInvocation {
+public class HttpGetClientInvocation extends BaseHttpClientInvocation {
 
 	private final Map<String, List<String>> myParameters;
 	private final String myUrlPath;
 
-	public GetClientInvocation(Map<String, List<String>> theParameters, String... theUrlFragments) {
+	public HttpGetClientInvocation(Map<String, List<String>> theParameters, String... theUrlFragments) {
 		myParameters = theParameters;
 		myUrlPath = StringUtils.join(theUrlFragments, '/');
 	}
 
-	public GetClientInvocation(String theUrlPath) {
+	public HttpGetClientInvocation(String theUrlPath) {
 		myParameters = new HashMap<String, List<String>>();
 		myUrlPath = theUrlPath;
 	}
 
-	public GetClientInvocation(String... theUrlFragments) {
+	public HttpGetClientInvocation(String... theUrlFragments) {
 		myParameters = new HashMap<String, List<String>>();
 		myUrlPath = StringUtils.join(theUrlFragments, '/');
 	}

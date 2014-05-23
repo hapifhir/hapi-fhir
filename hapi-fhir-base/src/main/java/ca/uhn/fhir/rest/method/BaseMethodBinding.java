@@ -60,7 +60,7 @@ import ca.uhn.fhir.rest.annotation.Transaction;
 import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.annotation.Validate;
 import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.client.BaseClientInvocation;
+import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.client.exceptions.NonFhirResponseException;
 import ca.uhn.fhir.rest.param.IParameter;
 import ca.uhn.fhir.rest.param.ParameterUtil;
@@ -118,7 +118,7 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 
 	public abstract RestfulOperationSystemEnum getSystemOperationType();
 
-	public abstract BaseClientInvocation invokeClient(Object[] theArgs) throws InternalErrorException;
+	public abstract BaseHttpClientInvocation invokeClient(Object[] theArgs) throws InternalErrorException;
 
 	public abstract void invokeServer(RestfulServer theServer, Request theRequest, HttpServletResponse theResponse) throws BaseServerResponseException, IOException;
 

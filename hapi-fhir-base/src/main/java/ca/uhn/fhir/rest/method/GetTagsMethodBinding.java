@@ -39,8 +39,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.annotation.GetTags;
 import ca.uhn.fhir.rest.annotation.IdParam;
-import ca.uhn.fhir.rest.client.BaseClientInvocation;
-import ca.uhn.fhir.rest.client.GetClientInvocation;
+import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.method.SearchMethodBinding.RequestType;
 import ca.uhn.fhir.rest.param.IParameter;
 import ca.uhn.fhir.rest.param.ParameterUtil;
@@ -107,8 +106,8 @@ public class GetTagsMethodBinding extends BaseMethodBinding<TagList> {
 	}
 
 	@Override
-	public BaseClientInvocation invokeClient(Object[] theArgs) throws InternalErrorException {
-		GetClientInvocation retVal;
+	public BaseHttpClientInvocation invokeClient(Object[] theArgs) throws InternalErrorException {
+		HttpGetClientInvocation retVal;
 
 		IdDt id = null;
 		IdDt versionId = null;
@@ -122,15 +121,15 @@ public class GetTagsMethodBinding extends BaseMethodBinding<TagList> {
 		if (myType != IResource.class) {
 			if (id != null) {
 				if (versionId != null) {
-					retVal = new GetClientInvocation(getResourceName(), id.getValue(), Constants.PARAM_HISTORY, versionId.getValue(), Constants.PARAM_TAGS);
+					retVal = new HttpGetClientInvocation(getResourceName(), id.getValue(), Constants.PARAM_HISTORY, versionId.getValue(), Constants.PARAM_TAGS);
 				} else {
-					retVal = new GetClientInvocation(getResourceName(), id.getValue(), Constants.PARAM_TAGS);
+					retVal = new HttpGetClientInvocation(getResourceName(), id.getValue(), Constants.PARAM_TAGS);
 				}
 			} else {
-				retVal = new GetClientInvocation(getResourceName(), Constants.PARAM_TAGS);
+				retVal = new HttpGetClientInvocation(getResourceName(), Constants.PARAM_TAGS);
 			}
 		} else {
-			retVal = new GetClientInvocation(Constants.PARAM_TAGS);
+			retVal = new HttpGetClientInvocation(Constants.PARAM_TAGS);
 		}
 
 		if (theArgs != null) {

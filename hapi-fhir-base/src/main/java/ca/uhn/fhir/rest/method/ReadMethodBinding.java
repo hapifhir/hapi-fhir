@@ -32,7 +32,6 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.rest.client.GetClientInvocation;
 import ca.uhn.fhir.rest.method.SearchMethodBinding.RequestType;
 import ca.uhn.fhir.rest.param.IParameter;
 import ca.uhn.fhir.rest.param.ParameterUtil;
@@ -119,8 +118,8 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding {
 	}
 
 	@Override
-	public GetClientInvocation invokeClient(Object[] theArgs) {
-		GetClientInvocation retVal;
+	public HttpGetClientInvocation invokeClient(Object[] theArgs) {
+		HttpGetClientInvocation retVal;
 		IdDt id = ((IdDt) theArgs[myIdIndex]);
 		if (myVersionIdIndex == null) {
 			String resourceName = getResourceName();
@@ -139,12 +138,12 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding {
 		return retVal;
 	}
 
-	public static GetClientInvocation createVReadInvocation(IdDt theId, IdDt vid, String resourceName) {
-		return new GetClientInvocation(resourceName, theId.getUnqualifiedId(), Constants.URL_TOKEN_HISTORY, vid.getUnqualifiedId());
+	public static HttpGetClientInvocation createVReadInvocation(IdDt theId, IdDt vid, String resourceName) {
+		return new HttpGetClientInvocation(resourceName, theId.getUnqualifiedId(), Constants.URL_TOKEN_HISTORY, vid.getUnqualifiedId());
 	}
 
-	public static GetClientInvocation createReadInvocation(IdDt theId, String resourceName) {
-		return new GetClientInvocation(resourceName, theId.getUnqualifiedId());
+	public static HttpGetClientInvocation createReadInvocation(IdDt theId, String resourceName) {
+		return new HttpGetClientInvocation(resourceName, theId.getUnqualifiedId());
 	}
 
 	@Override

@@ -34,7 +34,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
-import ca.uhn.fhir.rest.client.GetClientInvocation;
 import ca.uhn.fhir.rest.param.BaseQueryParameter;
 import ca.uhn.fhir.rest.param.IParameter;
 import ca.uhn.fhir.rest.server.Constants;
@@ -76,7 +75,7 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 	}
 
 	@Override
-	public GetClientInvocation invokeClient(Object[] theArgs) throws InternalErrorException {
+	public HttpGetClientInvocation invokeClient(Object[] theArgs) throws InternalErrorException {
 		assert (myQueryName == null || ((theArgs != null ? theArgs.length : 0) == getParameters().size())) : "Wrong number of arguments: " + (theArgs != null ? theArgs.length : "null");
 
 		Map<String, List<String>> queryStringArgs = new LinkedHashMap<String, List<String>>();
@@ -86,7 +85,7 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 		}
 
 		String resourceName = getResourceName();
-		GetClientInvocation retVal = createSearchInvocation(resourceName, queryStringArgs);
+		HttpGetClientInvocation retVal = createSearchInvocation(resourceName, queryStringArgs);
 
 		if (theArgs != null) {
 			for (int idx = 0; idx < theArgs.length; idx++) {
@@ -98,8 +97,8 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 		return retVal;
 	}
 
-	public static GetClientInvocation createSearchInvocation(String theResourceName, Map<String, List<String>> theParameters) {
-		return new GetClientInvocation(theParameters, theResourceName);
+	public static HttpGetClientInvocation createSearchInvocation(String theResourceName, Map<String, List<String>> theParameters) {
+		return new HttpGetClientInvocation(theParameters, theResourceName);
 	}
 
 	@Override

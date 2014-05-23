@@ -4,6 +4,7 @@ import static org.apache.commons.lang3.StringUtils.*;
 
 import java.text.Normalizer;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,6 +20,7 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.jpa.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamNumber;
 import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamString;
@@ -47,7 +49,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.FhirTerser;
 
 public abstract class BaseFhirDao {
-	private FhirContext myContext=new FhirContext();
+	private FhirContext myContext = new FhirContext();
 	@PersistenceContext(name = "FHIR_UT", type = PersistenceContextType.TRANSACTION, unitName = "FHIR_UT")
 	private EntityManager myEntityManager;
 	@Autowired
@@ -58,8 +60,85 @@ public abstract class BaseFhirDao {
 	public FhirContext getContext() {
 		return myContext;
 	}
+
 	public void setContext(FhirContext theContext) {
 		myContext = theContext;
+	}
+
+	protected ResourceTable updateEntity(final IResource theResource,  ResourceTable entity, boolean theUpdateHistory) {
+		if (entity.getPublished() == null) {
+			entity.setPublished(new Date());
+		}
+		
+		if (theUpdateHistory) {
+			final ResourceHistoryTable historyEntry = entity.toHistory(getContext());
+			myEntityManager.persist(historyEntry);
+		}
+		
+		entity.setVersion(entity.getVersion()+1);
+		
+		final List<ResourceIndexedSearchParamString> stringParams = extractSearchParamStrings(entity, theResource);
+		final List<ResourceIndexedSearchParamToken> tokenParams = extractSearchParamTokens(entity, theResource);
+		final List<ResourceIndexedSearchParamNumber> numberParams = extractSearchParamNumber(entity, theResource);
+		final List<ResourceIndexedSearchParamDate> dateParams = extractSearchParamDates(entity, theResource);
+		final List<ResourceLink> links = extractResourceLinks(entity, theResource);
+
+		populateResourceIntoEntity(theResource, entity);
+
+		entity.setUpdated(new Date());
+		
+		if (entity.getId() == null) {
+		myEntityManager.persist(entity);
+		} else {
+			entity = myEntityManager.merge(entity);
+		}
+
+		if (entity.isParamsStringPopulated()) {
+			for (ResourceIndexedSearchParamString next : entity.getParamsString()) {
+				myEntityManager.remove(next);
+			}
+		}
+		for (ResourceIndexedSearchParamString next : stringParams) {
+			myEntityManager.persist(next);
+		}
+
+		if (entity.isParamsTokenPopulated()) {
+			for (ResourceIndexedSearchParamToken next : entity.getParamsToken()) {
+				myEntityManager.remove(next);
+			}
+		}
+		for (ResourceIndexedSearchParamToken next : tokenParams) {
+			myEntityManager.persist(next);
+		}
+
+		if (entity.isParamsNumberPopulated()) {
+			for (ResourceIndexedSearchParamNumber next : entity.getParamsNumber()) {
+				myEntityManager.remove(next);
+			}
+		}
+		for (ResourceIndexedSearchParamNumber next : numberParams) {
+			myEntityManager.persist(next);
+		}
+
+		if (entity.isParamsDatePopulated()) {
+			for (ResourceIndexedSearchParamDate next : entity.getParamsDate()) {
+				myEntityManager.remove(next);
+			}
+		}
+		for (ResourceIndexedSearchParamDate next : dateParams) {
+			myEntityManager.persist(next);
+		}
+
+		if (entity.isHasLinks()) {
+			for (ResourceLink next : entity.getResourceLinks()) {
+				myEntityManager.remove(next);
+			}
+		}
+		for (ResourceLink next : links) {
+			myEntityManager.persist(next);
+		}
+
+		return entity;
 	}
 
 	protected List<ResourceLink> extractResourceLinks(ResourceTable theEntity, IResource theResource) {
@@ -211,7 +290,8 @@ public abstract class BaseFhirDao {
 
 				if (nextObject instanceof QuantityDt) {
 					QuantityDt nextValue = (QuantityDt) nextObject;
-					ResourceIndexedSearchParamNumber nextEntity = new ResourceIndexedSearchParamNumber(resourceName, nextValue.getValue().getValue(), nextValue.getSystem().getValueAsString(), nextValue.getUnits().getValue());
+					ResourceIndexedSearchParamNumber nextEntity = new ResourceIndexedSearchParamNumber(resourceName, nextValue.getValue().getValue(), nextValue.getSystem().getValueAsString(),
+							nextValue.getUnits().getValue());
 					nextEntity.setResource(theEntity);
 					retVal.add(nextEntity);
 				} else {
@@ -294,7 +374,8 @@ public abstract class BaseFhirDao {
 					} else if (nextObject instanceof ContactDt) {
 						ContactDt nextContact = (ContactDt) nextObject;
 						if (nextContact.getValue().isEmpty() == false) {
-							ResourceIndexedSearchParamString nextEntity = new ResourceIndexedSearchParamString(resourceName, normalizeString(nextContact.getValue().getValueAsString()), nextContact.getValue().getValueAsString());
+							ResourceIndexedSearchParamString nextEntity = new ResourceIndexedSearchParamString(resourceName, normalizeString(nextContact.getValue().getValueAsString()), nextContact
+									.getValue().getValueAsString());
 							nextEntity.setResource(theEntity);
 							retVal.add(nextEntity);
 						}
@@ -311,7 +392,7 @@ public abstract class BaseFhirDao {
 
 		return retVal;
 	}
-	
+
 	protected List<ResourceIndexedSearchParamToken> extractSearchParamTokens(ResourceTable theEntity, IResource theResource) {
 		ArrayList<ResourceIndexedSearchParamToken> retVal = new ArrayList<ResourceIndexedSearchParamToken>();
 
@@ -377,7 +458,7 @@ public abstract class BaseFhirDao {
 		return retVal;
 	}
 
-	protected  IFhirResourceDao<? extends IResource> getDao(Class<? extends IResource> theType) {
+	protected IFhirResourceDao<? extends IResource> getDao(Class<? extends IResource> theType) {
 		if (myResourceTypeToDao == null) {
 			myResourceTypeToDao = new HashMap<>();
 			for (IFhirResourceDao<?> next : myResourceDaos) {
@@ -403,6 +484,8 @@ public abstract class BaseFhirDao {
 	}
 
 	protected void populateResourceIntoEntity(IResource theResource, ResourceTable theEntity) {
+
+		theEntity.setResourceType(toResourceName(theResource));
 		theEntity.setResource(getContext().newJsonParser().encodeResourceToString(theResource));
 		theEntity.setEncoding(EncodingEnum.JSON);
 
@@ -426,6 +509,5 @@ public abstract class BaseFhirDao {
 	protected String toResourceName(IResource theResource) {
 		return myContext.getResourceDefinition(theResource).getName();
 	}
-
 
 }

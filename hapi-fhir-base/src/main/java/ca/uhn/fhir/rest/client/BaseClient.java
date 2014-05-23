@@ -100,11 +100,11 @@ public abstract class BaseClient {
 		return myUrlBase;
 	}
 
-	<T> T invokeClient(IClientResponseHandler<T> binding, BaseClientInvocation clientInvocation) {
+	<T> T invokeClient(IClientResponseHandler<T> binding, BaseHttpClientInvocation clientInvocation) {
 		return invokeClient(binding, clientInvocation, false);
 	}
 
-	<T> T invokeClient(IClientResponseHandler<T> binding, BaseClientInvocation clientInvocation, boolean theLogRequestAndResponse) {
+	<T> T invokeClient(IClientResponseHandler<T> binding, BaseHttpClientInvocation clientInvocation, boolean theLogRequestAndResponse) {
 		// TODO: handle non 2xx status codes by throwing the correct exception,
 		// and ensure it's passed upwards
 		HttpRequestBase httpRequest;

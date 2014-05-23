@@ -236,4 +236,21 @@ public class IdDt extends BasePrimitive<String> {
 		return myValue;
 	}
 
+	/**
+	 * Returns <code>true</code> if the unqualified ID is a valid {@link Long} value (in other
+	 * words, it consists only of digits)
+	 */
+	public boolean isValidLong() {
+		String id = getUnqualifiedId();
+		if (StringUtils.isBlank(id)) {
+			return false;
+		}
+		for (int i = 0; i < id.length(); i++) {
+			if (Character.isDigit(id.charAt(i)) == false) {
+				return false;
+			}
+		}
+		return true;
+	}
+
 }

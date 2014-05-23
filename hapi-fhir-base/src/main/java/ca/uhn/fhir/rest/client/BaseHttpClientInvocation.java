@@ -33,7 +33,7 @@ import org.apache.http.message.BasicHeader;
 
 import ca.uhn.fhir.rest.server.EncodingEnum;
 
-public abstract class BaseClientInvocation {
+public abstract class BaseHttpClientInvocation {
 
 	private List<Header> myHeaders;
 

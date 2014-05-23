@@ -15,6 +15,11 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamDate;
+import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamNumber;
+import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamString;
+import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamToken;
+import ca.uhn.fhir.jpa.entity.ResourceLink;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
@@ -35,13 +40,13 @@ public class FhirSystemDao extends BaseFhirDao implements IFhirSystemDao {
 		ourLog.info("Beginning transaction with {} resources", theResources.size());
 
 		FhirTerser terser = myContext.newTerser();
-		
+
 		Map<IdDt, IdDt> idConversions = new HashMap<>();
 		List<ResourceTable> persistedResources = new ArrayList<>();
 		for (IResource nextResource : theResources) {
 			IdDt nextId = nextResource.getId();
-			if (isBlank(nextId.getUnqualifiedId())) {
-				continue;
+			if (nextId == null) {
+				nextId = new IdDt();
 			}
 
 			String resourceName = toResourceName(nextResource);
@@ -52,19 +57,28 @@ public class FhirSystemDao extends BaseFhirDao implements IFhirSystemDao {
 			// nextResource.getResourceId().getResourceType());
 			// }
 
-			ResourceTable entity = myEntityManager.find(ResourceTable.class, nextId.asLong());
+			ResourceTable entity;
+			if (nextId.isEmpty()) {
+				entity = null;
+			} else if (!nextId.isValidLong()) {
+				entity = null;
+			} else {
+				entity = myEntityManager.find(ResourceTable.class, nextId.asLong());
+			}
+			
 			if (entity == null) {
 				entity = toEntity(nextResource);
 				myEntityManager.persist(entity);
 				myEntityManager.flush();
 			}
+			
 			idConversions.put(nextId, new IdDt(resourceName + '/' + entity.getId()));
 			persistedResources.add(entity);
-			
+
 		}
 
 		for (IResource nextResource : theResources) {
-			List<ResourceReferenceDt> allRefs = terser.getAllPopulatedChildElementsOfType(nextResource, ResourceReferenceDt.class); 
+			List<ResourceReferenceDt> allRefs = terser.getAllPopulatedChildElementsOfType(nextResource, ResourceReferenceDt.class);
 			for (ResourceReferenceDt nextRef : allRefs) {
 				IdDt nextId = nextRef.getResourceId();
 				if (idConversions.containsKey(nextId)) {
@@ -74,8 +88,13 @@ public class FhirSystemDao extends BaseFhirDao implements IFhirSystemDao {
 				}
 			}
 		}
-		
-	
+
+		for (int i = 0; i < theResources.size(); i++) {
+			IResource resource = theResources.get(i);
+			ResourceTable table = persistedResources.get(i);
+			updateEntity(resource, table, table.getId() != null);
+		}
+
 		return null;
 	}
 

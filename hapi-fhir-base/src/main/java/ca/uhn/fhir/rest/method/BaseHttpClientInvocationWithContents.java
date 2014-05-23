@@ -1,4 +1,4 @@
-package ca.uhn.fhir.rest.client;
+package ca.uhn.fhir.rest.method;
 
 /*
  * #%L
@@ -29,29 +29,34 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
+import ca.uhn.fhir.rest.server.RestfulServer.NarrativeModeEnum;
 
-public abstract class BaseClientInvocationWithContents extends BaseClientInvocation {
+public abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvocation {
 
 	private final FhirContext myContext;
 	private final IResource myResource;
 	private final String myUrlExtension;
 	private final TagList myTagList;
+	private final List<IResource> myResources;
 
-	public BaseClientInvocationWithContents(FhirContext theContext, IResource theResource, String theUrlExtension) {
+	public BaseHttpClientInvocationWithContents(FhirContext theContext, IResource theResource, String theUrlExtension) {
 		super();
 		myContext = theContext;
 		myResource = theResource;
 		myUrlExtension = theUrlExtension;
 		myTagList = null;
+		myResources=null;
 	}
 
-	public BaseClientInvocationWithContents(FhirContext theContext, TagList theTagList, String... theUrlExtension) {
+	public BaseHttpClientInvocationWithContents(FhirContext theContext, TagList theTagList, String... theUrlExtension) {
 		super();
 		if (theTagList == null) {
 			throw new NullPointerException("Tag list must not be null");
@@ -60,8 +65,17 @@ public abstract class BaseClientInvocationWithContents extends BaseClientInvocat
 		myResource = null;
 		myContext = theContext;
 		myTagList = theTagList;
+		myResources=null;
 
 		myUrlExtension = StringUtils.join(theUrlExtension, '/');
+	}
+
+	public BaseHttpClientInvocationWithContents(FhirContext theContext, List<IResource> theResources) {
+		myContext=theContext;
+		myResource=null;
+		myTagList=null;
+		myUrlExtension=null;
+		myResources = theResources;
 	}
 
 	@Override
@@ -88,6 +102,9 @@ public abstract class BaseClientInvocationWithContents extends BaseClientInvocat
 		String contents;
 		if (myTagList != null) {
 			contents = parser.encodeTagListToString(myTagList);
+		} else if (myResources != null) {
+			Bundle bundle = BaseResourceReturningMethodBinding.createBundleFromResourceList(myContext, "", myResources, theEncoding, theUrlBase, "", false, NarrativeModeEnum.NORMAL);
+			contents = parser.encodeBundleToString(bundle);
 		} else {
 			contents = parser.encodeResourceToString(myResource);
 		}

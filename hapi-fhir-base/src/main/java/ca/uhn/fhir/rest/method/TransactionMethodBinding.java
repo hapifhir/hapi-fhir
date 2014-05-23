@@ -28,12 +28,13 @@ import java.util.List;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
+import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.annotation.TransactionParam;
-import ca.uhn.fhir.rest.client.BaseClientInvocation;
+import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.method.SearchMethodBinding.RequestType;
 import ca.uhn.fhir.rest.param.TransactionParameter;
 import ca.uhn.fhir.rest.param.IParameter;
@@ -108,9 +109,11 @@ public class TransactionMethodBinding extends BaseResourceReturningMethodBinding
 	}
 
 	@Override
-	public BaseClientInvocation invokeClient(Object[] theArgs) throws InternalErrorException {
-		// TODO Auto-generated method stub
-		return null;
+	public BaseHttpClientInvocation invokeClient(Object[] theArgs) throws InternalErrorException {
+		List<IResource> resources = (List<IResource>) theArgs[myResourceParameterIndex];
+		FhirContext context = getContext();
+		
+		return new HttpPostClientInvocation(context, resources);
 	}
 
 }

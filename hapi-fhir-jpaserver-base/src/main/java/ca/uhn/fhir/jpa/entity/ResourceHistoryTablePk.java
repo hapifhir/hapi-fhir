@@ -16,7 +16,7 @@ public class ResourceHistoryTablePk implements Serializable {
 	@Column(name="RES_TYPE", length=30, nullable=false)
 	private String myResourceType;
 
-	@Column(name="VERSION")
+	@Column(name="VERSION", nullable=false)
 	private Long myVersion;
 
 	public Long getId() {

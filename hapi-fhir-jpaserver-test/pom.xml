@@ -12,7 +12,7 @@
 	<artifactId>hapi-fhir-jpaserver-test</artifactId>
 	<packaging>jar</packaging>
 
-	<name>HAPI FHIR JPA Server - Tester</name>
+	<name>HAPI FHIR JPA Server - Test Project</name>
 
 	<dependencies>
 		<dependency>

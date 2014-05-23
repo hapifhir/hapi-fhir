@@ -3,15 +3,11 @@ package ca.uhn.fhir.jpa.entity;
 import java.util.Collection;
 import java.util.Date;
 
-import javax.persistence.Basic;
 import javax.persistence.Column;
-import javax.persistence.FetchType;
 import javax.persistence.Lob;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-
-import org.hibernate.annotations.Fetch;
 
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
@@ -55,7 +51,7 @@ public abstract class BaseHasResource {
 		return new InstantDt(myUpdated);
 	}
 
-	public abstract IdDt getVersion();
+	public abstract long getVersion();
 
 	public void setEncoding(EncodingEnum theEncoding) {
 		myEncoding = theEncoding;

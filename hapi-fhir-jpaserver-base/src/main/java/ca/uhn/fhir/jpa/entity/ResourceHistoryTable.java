@@ -14,6 +14,7 @@ import javax.persistence.Table;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 
 @Entity
@@ -32,7 +33,7 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 
 	@Override
 	public IdDt getIdDt() {
-		return new IdDt(myPk.getId());
+		return new IdDt(myPk.getResourceType() + '/' + myPk.getId() + '/' + Constants.PARAM_HISTORY + '/' + myPk.getVersion());
 	}
 
 	public ResourceHistoryTablePk getPk() {
@@ -56,8 +57,8 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 	}
 
 	@Override
-	public IdDt getVersion() {
-		return new IdDt(myPk.getVersion());
+	public long getVersion() {
+		return myPk.getVersion();
 	}
 
 	public void setPk(ResourceHistoryTablePk thePk) {

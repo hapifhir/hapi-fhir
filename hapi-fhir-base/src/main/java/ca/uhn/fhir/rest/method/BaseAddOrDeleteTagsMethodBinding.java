@@ -39,8 +39,7 @@ import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.annotation.IdParam;
-import ca.uhn.fhir.rest.client.BaseClientInvocation;
-import ca.uhn.fhir.rest.client.PostClientInvocation;
+import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.method.SearchMethodBinding.RequestType;
 import ca.uhn.fhir.rest.param.IParameter;
 import ca.uhn.fhir.rest.param.ParameterUtil;
@@ -119,8 +118,8 @@ public abstract class BaseAddOrDeleteTagsMethodBinding extends BaseMethodBinding
 	protected abstract boolean isDelete();
 
 	@Override
-	public BaseClientInvocation invokeClient(Object[] theArgs) throws InternalErrorException {
-		PostClientInvocation retVal;
+	public BaseHttpClientInvocation invokeClient(Object[] theArgs) throws InternalErrorException {
+		HttpPostClientInvocation retVal;
 
 		IdDt id = (IdDt) theArgs[myIdParamIndex];
 		if (id == null || id.isEmpty()) {
@@ -139,15 +138,15 @@ public abstract class BaseAddOrDeleteTagsMethodBinding extends BaseMethodBinding
 
 		if (isDelete()) {
 			if (versionId != null) {
-				retVal = new PostClientInvocation(getContext(), tagList, getResourceName(), id.getValue(), Constants.PARAM_HISTORY, versionId.getValue(), Constants.PARAM_TAGS, Constants.PARAM_DELETE);
+				retVal = new HttpPostClientInvocation(getContext(), tagList, getResourceName(), id.getValue(), Constants.PARAM_HISTORY, versionId.getValue(), Constants.PARAM_TAGS, Constants.PARAM_DELETE);
 			} else {
-				retVal = new PostClientInvocation(getContext(), tagList, getResourceName(), id.getValue(), Constants.PARAM_TAGS, Constants.PARAM_DELETE);
+				retVal = new HttpPostClientInvocation(getContext(), tagList, getResourceName(), id.getValue(), Constants.PARAM_TAGS, Constants.PARAM_DELETE);
 			}
 		} else {
 			if (versionId != null) {
-				retVal = new PostClientInvocation(getContext(), tagList, getResourceName(), id.getValue(), Constants.PARAM_HISTORY, versionId.getValue(), Constants.PARAM_TAGS);
+				retVal = new HttpPostClientInvocation(getContext(), tagList, getResourceName(), id.getValue(), Constants.PARAM_HISTORY, versionId.getValue(), Constants.PARAM_TAGS);
 			} else {
-				retVal = new PostClientInvocation(getContext(), tagList, getResourceName(), id.getValue(), Constants.PARAM_TAGS);
+				retVal = new HttpPostClientInvocation(getContext(), tagList, getResourceName(), id.getValue(), Constants.PARAM_TAGS);
 			}
 		}
 		for (int idx = 0; idx < theArgs.length; idx++) {

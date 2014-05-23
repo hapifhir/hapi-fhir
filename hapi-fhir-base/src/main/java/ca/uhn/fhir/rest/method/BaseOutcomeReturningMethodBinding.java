@@ -47,7 +47,7 @@ import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.client.BaseClientInvocation;
+import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.method.SearchMethodBinding.RequestType;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
@@ -334,7 +334,7 @@ public abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBindin
 		return false;
 	}
 
-	protected abstract BaseClientInvocation createClientInvocation(Object[] theArgs, IResource resource);
+	protected abstract BaseHttpClientInvocation createClientInvocation(Object[] theArgs, IResource resource);
 
 	/**
 	 * For servers, this method will match only incoming requests that match the

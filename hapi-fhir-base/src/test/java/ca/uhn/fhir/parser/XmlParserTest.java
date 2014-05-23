@@ -324,6 +324,42 @@ public class XmlParserTest {
 	}
 
 	@Test
+	public void testEncodePrettyPrint() throws DataFormatException {
+
+		Patient patient = new Patient();
+		patient.getText().getDiv().setValueAsString("<div>\n  <i>  hello  </i>\n</div>");
+		patient.addName().addFamily("Family").addGiven("Given");
+		
+		//@formatter:off
+		String encoded = new FhirContext().newXmlParser().setPrettyPrint(false).encodeResourceToString(patient);
+		ourLog.info(encoded);
+		String expected = "<Patient xmlns=\"http://hl7.org/fhir\"><text><div xmlns=\"http://www.w3.org/1999/xhtml\">\n" + 
+				"  <i>  hello  </i>\n" + 
+				"</div></text><name><family value=\"Family\"/><given value=\"Given\"/></name></Patient>";
+		assertEquals(expected, encoded);
+
+		encoded = new FhirContext().newXmlParser().setPrettyPrint(true).encodeResourceToString(patient);
+		ourLog.info(encoded);
+		expected = "<Patient xmlns=\"http://hl7.org/fhir\">\n"
+				+ "   <text>\n"
+				+ "      <div xmlns=\"http://www.w3.org/1999/xhtml\">\n"  
+				+ "  <i>  hello  </i>\n" 
+				+ "</div>\n"
+				+ "   </text>\n"
+				+ "   <name>\n"
+				+ "      <family value=\"Family\"/>\n"
+				+ "      <given value=\"Given\"/>\n"
+				+ "   </name>\n"
+				+ "</Patient>";
+		//@formatter:on
+		
+		// Whitespace should be preserved and not reformatted in narrative blocks
+		assertEquals(expected, encoded);
+
+	}
+
+	
+	@Test
 	public void testEncodeResourceRef() throws DataFormatException {
 
 		Patient patient = new Patient();

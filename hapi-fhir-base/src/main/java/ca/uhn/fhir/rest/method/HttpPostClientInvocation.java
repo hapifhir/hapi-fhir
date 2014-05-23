@@ -1,4 +1,4 @@
-package ca.uhn.fhir.rest.client;
+package ca.uhn.fhir.rest.method;
 
 /*
  * #%L
@@ -20,25 +20,37 @@ package ca.uhn.fhir.rest.client;
  * #L%
  */
 
-import org.apache.http.client.methods.HttpPut;
-import org.apache.http.client.methods.HttpRequestBase;
+import java.util.List;
+
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.TagList;
 
-public class PutClientInvocation extends BaseClientInvocationWithContents {
+public class HttpPostClientInvocation extends BaseHttpClientInvocationWithContents {
 
-	public PutClientInvocation(FhirContext theContext, IResource theResource, String theUrlExtension) {
+	public HttpPostClientInvocation(FhirContext theContext, IResource theResource, String theUrlExtension) {
 		super(theContext, theResource, theUrlExtension);
 	}
 
+	
+	public HttpPostClientInvocation(FhirContext theContext, TagList theTagList, String... theUrlExtension) {
+		super(theContext, theTagList, theUrlExtension);
+	}
+
+
+	public HttpPostClientInvocation(FhirContext theContext, List<IResource> theResources) {
+		super(theContext, theResources);
+	}
+
+
 	@Override
-	protected HttpRequestBase createRequest(String url, StringEntity theEntity) {
-		HttpPut retVal = new HttpPut(url);
+	protected HttpPost createRequest(String url, StringEntity theEntity) {
+		HttpPost retVal = new HttpPost(url);
 		retVal.setEntity(theEntity);
 		return retVal;
 	}
-
 
 }
