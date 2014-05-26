@@ -25,11 +25,13 @@ import static org.apache.commons.lang3.StringUtils.*;
 import java.math.BigDecimal;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 
 import ca.uhn.fhir.model.api.BasePrimitive;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.SimpleSetter;
 import ca.uhn.fhir.parser.DataFormatException;
+import ca.uhn.fhir.rest.server.Constants;
 
 /**
  * Represents the FHIR ID type. This is the actual resource ID, meaning the ID that will be used in RESTful URLs,
@@ -95,6 +97,27 @@ public class IdDt extends BasePrimitive<String> {
 	}
 
 	/**
+	 * Constructor
+	 * 
+	 * @param theResourceType The resource type (e.g. "Patient")
+	 * @param theId The ID (e.g. "123")
+	 * @param theVersionId The version ID ("e.g. "456")
+	 */
+	public IdDt(String theResourceType, String theId, String theVersionId) {
+		Validate.notBlank(theResourceType, "Resource type must not be blank");
+		Validate.notBlank(theId, "ID must not be blank");
+		
+		myResourceType = theResourceType;
+		myUnqualifiedId = theId;
+		myUnqualifiedVersionId = StringUtils.defaultIfBlank(theVersionId, null);
+		if (myUnqualifiedVersionId != null) {
+			myValue = myResourceType + '/' + myUnqualifiedId + '/' + Constants.PARAM_HISTORY + '/' + myUnqualifiedVersionId;
+		} else {
+			myValue = myResourceType + '/' + myUnqualifiedId;
+		}
+	}
+
+	/**
 	 * Returns the unqualified portion of this ID as a big decimal, or <code>null</code> if the value is null
 	 * 
 	 * @throws NumberFormatException
@@ -144,8 +167,8 @@ public class IdDt extends BasePrimitive<String> {
 	}
 
 	/**
-	 * Returns the value of this ID. Note that this value may be a fully qualified URL, a relative/partial URL, or
-	 * a simple ID. Use {@link #getUnqualifiedId()} to get just the ID portion.
+	 * Returns the value of this ID. Note that this value may be a fully qualified URL, a relative/partial URL, or a
+	 * simple ID. Use {@link #getUnqualifiedId()} to get just the ID portion.
 	 * 
 	 * @see #getUnqualifiedId()
 	 */
@@ -200,15 +223,15 @@ public class IdDt extends BasePrimitive<String> {
 				myUnqualifiedId = theValue.substring(idIndex + 1);
 				myUnqualifiedVersionId = null;
 			}
-			
+
 			if (idIndex <= 0) {
 				myResourceType = null;
-			}else {
+			} else {
 				int typeIndex = theValue.lastIndexOf('/', idIndex - 1);
 				if (typeIndex == -1) {
-					myResourceType = theValue.substring(0,idIndex);
+					myResourceType = theValue.substring(0, idIndex);
 				} else {
-					myResourceType = theValue.substring(typeIndex+1, idIndex);
+					myResourceType = theValue.substring(typeIndex + 1, idIndex);
 				}
 			}
 
@@ -237,8 +260,8 @@ public class IdDt extends BasePrimitive<String> {
 	}
 
 	/**
-	 * Returns <code>true</code> if the unqualified ID is a valid {@link Long} value (in other
-	 * words, it consists only of digits)
+	 * Returns <code>true</code> if the unqualified ID is a valid {@link Long} value (in other words, it consists only
+	 * of digits)
 	 */
 	public boolean isValidLong() {
 		String id = getUnqualifiedId();
@@ -251,6 +274,35 @@ public class IdDt extends BasePrimitive<String> {
 			}
 		}
 		return true;
+	}
+
+	/**
+	 * Returns a view of this ID as a fully qualified URL, given a server base and resource name
+	 * (which will only be used if the ID does not already contain those respective parts). Essentially,
+	 * because IdDt can contain either a complete URL or a partial one (or even jut a simple ID), this
+	 * method may be used to translate into a complete URL.
+	 * 
+	 * @param theServerBase The server base (e.g. "http://example.com/fhir")
+	 * @param theResourceType The resource name (e.g. "Patient")
+	 * @return A fully qualified URL for this ID (e.g. "http://example.com/fhir/Patient/1")
+	 */
+	public String toQualifiedUrl(String theServerBase, String theResourceType) {
+		if (getValue().startsWith("http")) {
+			return getValue();
+		}
+		StringBuilder retVal = new StringBuilder();
+		retVal.append(theServerBase);
+		if (retVal.charAt(retVal.length()-1) != '/') {
+			retVal.append('/');
+		}
+		if (isNotBlank(getResourceType())) {
+			retVal.append(getResourceType());
+		}else {
+			retVal.append(theResourceType);
+		}
+		retVal.append('/');
+		retVal.append(getUnqualifiedId());
+		return retVal.toString();
 	}
 
 }

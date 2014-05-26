@@ -75,6 +75,7 @@ import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.XhtmlDt;
 import ca.uhn.fhir.narrative.INarrativeGenerator;
+import ca.uhn.fhir.util.NonPrettyPrintWriterWrapper;
 import ca.uhn.fhir.util.PrettyPrintWriterWrapper;
 
 public class XmlParser extends BaseParser implements IParser {
@@ -149,7 +150,7 @@ public class XmlParser extends BaseParser implements IParser {
 					eventWriter.writeNamespace("at", TOMBSTONES_NS);
 					eventWriter.writeAttribute("ref", nextEntry.getId().getValueAsString());
 					eventWriter.writeAttribute("when", nextEntry.getDeletedAt().getValueAsString());
-				}else {
+				} else {
 					eventWriter.writeStartElement("entry");
 				}
 
@@ -174,6 +175,9 @@ public class XmlParser extends BaseParser implements IParser {
 					writeAtomLink(eventWriter, "self", nextEntry.getLinkSelf());
 				}
 
+				if (!nextEntry.getLinkAlternate().isEmpty()) {
+					writeAtomLink(eventWriter, "alternate", nextEntry.getLinkAlternate());
+				}
 
 				IResource resource = nextEntry.getResource();
 				if (resource != null && !resource.isEmpty()) {
@@ -302,7 +306,8 @@ public class XmlParser extends BaseParser implements IParser {
 			PrettyPrintWriterWrapper retVal = new PrettyPrintWriterWrapper(eventWriter);
 			return retVal;
 		} else {
-			return eventWriter;
+			NonPrettyPrintWriterWrapper retVal = new NonPrettyPrintWriterWrapper(eventWriter);
+			return retVal;
 		}
 	}
 

@@ -345,6 +345,11 @@ class ParserState<T> {
 				return;
 			}
 
+			IdDt id = myEntry.getId();
+			if(id!=null && id.isEmpty()==false) {
+				myEntry.getResource().setId(id);
+			}
+			
 			Map<ResourceMetadataKeyEnum, Object> metadata = myEntry.getResource().getResourceMetadata();
 			if (myEntry.getPublished().isEmpty() == false) {
 				metadata.put(ResourceMetadataKeyEnum.PUBLISHED, myEntry.getPublished());
@@ -361,10 +366,10 @@ class ParserState<T> {
 			}
 			if (!myEntry.getLinkSelf().isEmpty()) {
 				String linkSelfValue = myEntry.getLinkSelf().getValue();
-				IdDt id = new IdDt(linkSelfValue);
-				myEntry.getResource().setId(id);
-				if (isNotBlank(id.getUnqualifiedVersionId())) {
-					metadata.put(ResourceMetadataKeyEnum.VERSION_ID, id);
+				IdDt linkSelf = new IdDt(linkSelfValue);
+				myEntry.getResource().setId(linkSelf);
+				if (isNotBlank(linkSelf.getUnqualifiedVersionId())) {
+					metadata.put(ResourceMetadataKeyEnum.VERSION_ID, linkSelf);
 				}
 			}
 
@@ -438,7 +443,11 @@ class ParserState<T> {
 					myInstance.getLinkBase().setValueAsString(myHref);
 				}
 			} else {
-				myEntry.getLinkSelf().setValueAsString(myHref);
+				if ("self".equals(myRel)) {
+					myEntry.getLinkSelf().setValueAsString(myHref);
+				} else if ("alternate".equals(myRel)) {
+					myEntry.getLinkAlternate().setValueAsString(myHref);
+				}
 			}
 			pop();
 		}

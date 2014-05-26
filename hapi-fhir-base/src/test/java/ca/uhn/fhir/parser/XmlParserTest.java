@@ -269,6 +269,7 @@ public class XmlParserTest {
 		p2.addName().addFamily("Family2");
 		entry = b.addEntry();
 		entry.getId().setValue("2");
+		entry.setLinkAlternate(new StringDt("http://foo/bar"));
 		entry.setResource(p2);
 		
 		BundleEntry deletedEntry = b.addEntry();
@@ -280,7 +281,7 @@ public class XmlParserTest {
 
 		List<String> strings = new ArrayList<String>();
 		strings.addAll(Arrays.asList("<entry>", "<id>1</id>", "</entry>"));
-		strings.addAll(Arrays.asList("<entry>", "<id>2</id>", "</entry>"));
+		strings.addAll(Arrays.asList("<entry>", "<id>2</id>", "<link rel=\"alternate\" href=\"http://foo/bar\"/>", "</entry>"));
 		strings.addAll(Arrays.asList("<at:deleted-entry", "ref=\"Patient/3", "/>"));
 		assertThat(bundleString, StringContainsInOrder.stringContainsInOrder(strings));
 		
@@ -327,24 +328,31 @@ public class XmlParserTest {
 	public void testEncodePrettyPrint() throws DataFormatException {
 
 		Patient patient = new Patient();
-		patient.getText().getDiv().setValueAsString("<div>\n  <i>  hello  </i>\n</div>");
+		patient.getText().getDiv().setValueAsString("<div>\n  <i>  hello     <pre>\n  LINE1\n  LINE2</pre></i>\n\n\n\n</div>");
 		patient.addName().addFamily("Family").addGiven("Given");
 		
 		//@formatter:off
 		String encoded = new FhirContext().newXmlParser().setPrettyPrint(false).encodeResourceToString(patient);
 		ourLog.info(encoded);
-		String expected = "<Patient xmlns=\"http://hl7.org/fhir\"><text><div xmlns=\"http://www.w3.org/1999/xhtml\">\n" + 
-				"  <i>  hello  </i>\n" + 
-				"</div></text><name><family value=\"Family\"/><given value=\"Given\"/></name></Patient>";
+		/*
+		 * Note at least one space is placed where any whitespace was, as
+		 * it is hard to tell what whitespace had no purpose
+		 */
+		String expected = "<Patient xmlns=\"http://hl7.org/fhir\"><text><div xmlns=\"http://www.w3.org/1999/xhtml\">"
+				+ " <i> hello "
+				+ "<pre>\n  LINE1\n  LINE2</pre>"
+				+ "</i> </div></text><name><family value=\"Family\"/><given value=\"Given\"/></name></Patient>";
 		assertEquals(expected, encoded);
 
 		encoded = new FhirContext().newXmlParser().setPrettyPrint(true).encodeResourceToString(patient);
 		ourLog.info(encoded);
 		expected = "<Patient xmlns=\"http://hl7.org/fhir\">\n"
 				+ "   <text>\n"
-				+ "      <div xmlns=\"http://www.w3.org/1999/xhtml\">\n"  
-				+ "  <i>  hello  </i>\n" 
-				+ "</div>\n"
+				+ "      <div xmlns=\"http://www.w3.org/1999/xhtml\"> \n"  
+				+ "         <i> hello \n" 
+				+ "            <pre>\n  LINE1\n  LINE2</pre>\n"
+				+ "         </i> \n"
+				+ "      </div>\n"
 				+ "   </text>\n"
 				+ "   <name>\n"
 				+ "      <family value=\"Family\"/>\n"
@@ -645,6 +653,7 @@ public class XmlParserTest {
 		assertThat(str, StringContains.containsString("<Patient xmlns=\"http://hl7.org/fhir\">"));
 	}
 
+	@SuppressWarnings("deprecation")
 	@Test
 	public void testParseBundle() {
 
@@ -664,6 +673,7 @@ public class XmlParserTest {
 				"    <title>Valueset &quot;256a5231-a2bb-49bd-9fea-f349d428b70d&quot; to support automated processing</title>\n" + 
 				"    <id>http://hl7.org/fhir/valueset/256a5231-a2bb-49bd-9fea-f349d428b70d</id>\n" + 
 				"    <link href=\"http://hl7.org/implement/standards/fhir/valueset/256a5231-a2bb-49bd-9fea-f349d428b70d\" rel=\"self\"/>\n" + 
+				"    <link href=\"http://hl7.org/foo\" rel=\"alternate\"/>\n" + 
 				"    <updated>2014-02-10T04:10:46.987-00:00</updated>\n" + 
 				"    <author>\n" + 
 				"      <name>HL7, Inc (FHIR Project)</name>\n" + 
@@ -718,6 +728,7 @@ public class XmlParserTest {
 		BundleEntry entry = bundle.getEntries().get(0);
 		assertEquals("HL7, Inc (FHIR Project)", entry.getAuthorName().getValue());
 		assertEquals("http://hl7.org/fhir/valueset/256a5231-a2bb-49bd-9fea-f349d428b70d", entry.getId().getValue());
+		assertEquals("http://hl7.org/foo", entry.getLinkAlternate().getValue());
 		assertEquals(1, entry.getCategories().size());
 		assertEquals("term", entry.getCategories().get(0).getTerm());
 		assertEquals("label", entry.getCategories().get(0).getLabel());
@@ -744,6 +755,7 @@ public class XmlParserTest {
 
 	}
 
+	@SuppressWarnings("deprecation")
 	@Test
 	public void testParseBundleDeletedEntry() {
 

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao;
 
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 import java.util.Arrays;
@@ -46,20 +47,51 @@ public class FhirSystemDaoTest {
 		obs.getName().addCoding().setSystem("urn:system").setCode("testPersistWithSimpleLinkO01");
 		obs.setSubject(new ResourceReferenceDt("Patient/testPersistWithSimpleLinkP01"));
 
-		List<IResource> response = ourSystemDao.transaction(Arrays.asList((IResource)patient, obs));
+		ourSystemDao.transaction(Arrays.asList((IResource) patient, obs));
+
+		long patientId = Long.parseLong(patient.getId().getUnqualifiedId());
+		long patientVersion = Long.parseLong(patient.getId().getUnqualifiedVersionId());
+		long obsId = Long.parseLong(obs.getId().getUnqualifiedId());
+		long obsVersion = Long.parseLong(obs.getId().getUnqualifiedVersionId());
+
+		assertThat(patientId, greaterThan(0L));
+		assertEquals(patientVersion, 1L);
+		assertThat(obsId, greaterThan(patientId));
+		assertEquals(obsVersion, 1L);
+
+		// Try to search
 		
-		List<Observation> obsResults = ourObservationDao.search(Observation.SP_NAME, new IdentifierDt("urn:system","testPersistWithSimpleLinkO01"));
+		List<Observation> obsResults = ourObservationDao.search(Observation.SP_NAME, new IdentifierDt("urn:system", "testPersistWithSimpleLinkO01"));
 		assertEquals(1, obsResults.size());
-		
-		List<Patient> patResults = ourPatientDao.search(Patient.SP_IDENTIFIER, new IdentifierDt("urn:system","testPersistWithSimpleLinkP01"));
+
+		List<Patient> patResults = ourPatientDao.search(Patient.SP_IDENTIFIER, new IdentifierDt("urn:system", "testPersistWithSimpleLinkP01"));
 		assertEquals(1, obsResults.size());
-		
-		IdDt patientId = patResults.get(0).getId();
+
+		IdDt foundPatientId = patResults.get(0).getId();
 		ResourceReferenceDt subject = obs.getSubject();
-		assertEquals(patientId.getUnqualifiedId(), subject.getResourceId().getUnqualifiedId());
+		assertEquals(foundPatientId.getUnqualifiedId(), subject.getResourceId().getUnqualifiedId());
+
+		// Update
+		
+		patient = patResults.get(0);
+		obs = obsResults.get(0);
+		patient.addIdentifier("urn:system", "testPersistWithSimpleLinkP02");
+		obs.getName().addCoding().setSystem("urn:system").setCode("testPersistWithSimpleLinkO02");
+
+		ourSystemDao.transaction(Arrays.asList((IResource) patient, obs));
+
+		long patientId2 = Long.parseLong(patient.getId().getUnqualifiedId());
+		long patientVersion2 = Long.parseLong(patient.getId().getUnqualifiedVersionId());
+		long obsId2 = Long.parseLong(obs.getId().getUnqualifiedId());
+		long obsVersion2 = Long.parseLong(obs.getId().getUnqualifiedVersionId());
+
+		assertEquals(patientId, patientId2);
+		assertEquals(patientVersion2, 2L);
+		assertEquals(obsId, obsId2);
+		assertEquals(obsVersion2, 2L);
+
 	}
 
-	
 	@AfterClass
 	public static void afterClass() {
 		ourCtx.close();

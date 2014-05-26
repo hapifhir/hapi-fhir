@@ -75,6 +75,7 @@ public class Constants {
 	public static final String FORMAT_JSON = "json";
 	public static final String PARAM_INCLUDE = "_include";
 	public static final String PARAMQUALIFIER_STRING_EXACT = ":exact";
+	public static final String HEADER_ACCEPT = "Accept";
 
 	static {
 		Map<String, EncodingEnum> valToEncoding = new HashMap<String, EncodingEnum>();

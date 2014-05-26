@@ -20,12 +20,15 @@ package ca.uhn.fhir.rest.server;
  * #L%
  */
 
+import static org.apache.commons.lang3.StringUtils.*;
+
 import java.io.IOException;
 import java.io.StringReader;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
@@ -448,6 +451,13 @@ public class RestfulServer extends HttpServlet {
 		handleRequest(SearchMethodBinding.RequestType.PUT, request, response);
 	}
 
+	private static String getBaseUrl(HttpServletRequest request) {
+		if (("http".equals(request.getScheme()) && request.getServerPort() == 80) || ("https".equals(request.getScheme()) && request.getServerPort() == 443))
+			return request.getScheme() + "://" + request.getServerName() + request.getContextPath();
+		else
+			return request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath();
+	}
+
 	protected void handleRequest(SearchMethodBinding.RequestType theRequestType, HttpServletRequest theRequest, HttpServletResponse theResponse) throws ServletException, IOException {
 		try {
 
@@ -457,8 +467,6 @@ public class RestfulServer extends HttpServlet {
 
 			String resourceName = null;
 			String requestFullPath = StringUtils.defaultString(theRequest.getRequestURI());
-			// String contextPath =
-			// StringUtils.defaultString(request.getContextPath());
 			String servletPath = StringUtils.defaultString(theRequest.getServletPath());
 			StringBuffer requestUrl = theRequest.getRequestURL();
 			String servletContextPath = "";
@@ -475,25 +483,30 @@ public class RestfulServer extends HttpServlet {
 				ourLog.trace("Context Path: {}", servletContextPath);
 			}
 
-			servletPath = servletContextPath;
-
 			IdDt id = null;
 			IdDt versionId = null;
 			String operation = null;
 
-			String requestPath = requestFullPath.substring(servletPath.length());
+			String requestPath = requestFullPath.substring(servletContextPath.length() + servletPath.length());
 			if (requestPath.length() > 0 && requestPath.charAt(0) == '/') {
 				requestPath = requestPath.substring(1);
 			}
 
 			int contextIndex;
 			if (servletPath.length() == 0) {
-				contextIndex = requestUrl.indexOf(requestPath);
+				if (requestPath.length() == 0) {
+					contextIndex = requestUrl.length();
+				} else {
+					contextIndex = requestUrl.indexOf(requestPath);
+				}
 			} else {
 				contextIndex = requestUrl.indexOf(servletPath);
 			}
 
-			String fhirServerBase = requestUrl.substring(0, contextIndex + servletPath.length());
+			String fhirServerBase;
+			int length = contextIndex + servletPath.length();
+			fhirServerBase = requestUrl.substring(0, length);
+
 			if (fhirServerBase.endsWith("/")) {
 				fhirServerBase = fhirServerBase.substring(0, fhirServerBase.length() - 1);
 			}
@@ -638,6 +651,67 @@ public class RestfulServer extends HttpServlet {
 	 */
 	protected void initialize() {
 		// nothing by default
+	}
+
+	public static boolean prettyPrintResponse(Request theRequest) {
+		Map<String, String[]> requestParams = theRequest.getParameters();
+		String[] pretty = requestParams.remove(Constants.PARAM_PRETTY);
+		boolean prettyPrint;
+		if (pretty != null && pretty.length > 0) {
+			if (Constants.PARAM_PRETTY_VALUE_TRUE.equals(pretty[0])) {
+				prettyPrint = true;
+			} else {
+				prettyPrint = false;
+			}
+		} else {
+			prettyPrint = false;
+			Enumeration<String> acceptValues = theRequest.getServletRequest().getHeaders(Constants.HEADER_ACCEPT);
+			if (acceptValues != null) {
+				while (acceptValues.hasMoreElements()) {
+					String nextAcceptHeaderValue = acceptValues.nextElement();
+					if (nextAcceptHeaderValue.contains("pretty=true")) {
+						prettyPrint = true;
+					}
+				}
+			}
+		}
+		return prettyPrint;
+	}
+
+	public static EncodingEnum determineResponseEncoding(Request theReq) {
+		String[] format = theReq.getParameters().remove(Constants.PARAM_FORMAT);
+		if (format != null) {
+			for (String nextFormat : format) {
+				EncodingEnum retVal = Constants.FORMAT_VAL_TO_ENCODING.get(nextFormat);
+				if (retVal != null) {
+					return retVal;
+				}
+			}
+		}
+
+		Enumeration<String> acceptValues = theReq.getServletRequest().getHeaders(Constants.HEADER_ACCEPT);
+		if (acceptValues != null) {
+			while (acceptValues.hasMoreElements()) {
+				String nextAcceptHeaderValue = acceptValues.nextElement();
+				if (nextAcceptHeaderValue != null && isNotBlank(nextAcceptHeaderValue)) {
+					for (String nextPart : nextAcceptHeaderValue.split(",")) {
+						int scIdx = nextPart.indexOf(';');
+						if (scIdx == 0) {
+							continue;
+						}
+						if (scIdx != -1) {
+							nextPart = nextPart.substring(0, scIdx);
+						}
+						nextPart = nextPart.trim();
+						EncodingEnum retVal = Constants.FORMAT_VAL_TO_ENCODING.get(nextPart);
+						if (retVal != null) {
+							return retVal;
+						}
+					}
+				}
+			}
+		}
+		return EncodingEnum.XML;
 	}
 
 	public enum NarrativeModeEnum {

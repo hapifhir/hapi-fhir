@@ -507,30 +507,7 @@ public class ResfulServerMethodTest {
 
 	}
 
-	@Test
-	public void testPrettyPrint() throws Exception {
-
-		// HttpPost httpPost = new HttpPost("http://localhost:" + ourPort +
-		// "/Patient/1");
-		// httpPost.setEntity(new StringEntity("test",
-		// ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
-
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		assertThat(responseContent, StringContains.containsString("<identifier><use"));
-
-		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1?_pretty=false");
-		status = ourClient.execute(httpGet);
-		responseContent = IOUtils.toString(status.getEntity().getContent());
-		assertThat(responseContent, StringContains.containsString("<identifier><use"));
-
-		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1?_pretty=true");
-		status = ourClient.execute(httpGet);
-		responseContent = IOUtils.toString(status.getEntity().getContent());
-		assertThat(responseContent, IsNot.not(StringContains.containsString("<identifier><use")));
-
-	}
+	
 
 	@Test
 	public void testReadOnTypeThatDoesntSupportRead() throws Exception {

@@ -177,7 +177,7 @@ public abstract class BaseAddOrDeleteTagsMethodBinding extends BaseMethodBinding
 		}
 		invokeServerMethod(params);
 
-		EncodingEnum responseEncoding = determineResponseEncoding(theRequest);
+		EncodingEnum responseEncoding = RestfulServer.determineResponseEncoding(theRequest);
 
 		theResponse.setContentType(responseEncoding.getResourceContentType());
 		theResponse.setStatus(Constants.STATUS_HTTP_200_OK);

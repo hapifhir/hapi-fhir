@@ -1,9 +1,12 @@
-package ca.uhn.fhir.jpa.dao;
+package ca.uhn.fhir.jpa.provider;
 
 import java.util.HashMap;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Required;
+
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -50,6 +53,7 @@ public abstract class BaseJpaResourceProvider<T extends IResource> implements IR
 		return myDao.search(new HashMap<String, IQueryParameterType>());
 	}
 
+	@Required
 	public void setDao(IFhirResourceDao<T> theDao) {
 		myDao = theDao;
 	}

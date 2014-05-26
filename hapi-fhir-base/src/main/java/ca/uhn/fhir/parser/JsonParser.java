@@ -168,7 +168,8 @@ public class JsonParser extends BaseParser implements IParser {
 		linkStarted = writeAtomLink(eventWriter, "last", theBundle.getLinkLast(), linkStarted);
 		linkStarted = writeAtomLink(eventWriter, "fhir-base", theBundle.getLinkBase(), linkStarted);
 		if (linkStarted) {
-		eventWriter.writeEnd();}
+			eventWriter.writeEnd();
+		}
 
 		writeOptionalTagWithTextNode(eventWriter, "totalResults", theBundle.getTotalResults());
 
@@ -181,11 +182,13 @@ public class JsonParser extends BaseParser implements IParser {
 			writeTagWithTextNode(eventWriter, "deleted", nextEntry.getDeletedAt());
 			writeTagWithTextNode(eventWriter, "title", nextEntry.getTitle());
 			writeTagWithTextNode(eventWriter, "id", nextEntry.getId());
-			
+
 			linkStarted = false;
-			linkStarted=writeAtomLink(eventWriter, "self", nextEntry.getLinkSelf(), linkStarted);
+			linkStarted = writeAtomLink(eventWriter, "self", nextEntry.getLinkSelf(), linkStarted);
+			linkStarted = writeAtomLink(eventWriter, "alternate", nextEntry.getLinkAlternate(), linkStarted);
 			if (linkStarted) {
-				eventWriter.writeEnd();}
+				eventWriter.writeEnd();
+			}
 
 			writeOptionalTagWithTextNode(eventWriter, "updated", nextEntry.getUpdated());
 			writeOptionalTagWithTextNode(eventWriter, "published", nextEntry.getPublished());
@@ -839,11 +842,11 @@ public class JsonParser extends BaseParser implements IParser {
 	private boolean writeAtomLink(JsonGenerator theEventWriter, String theRel, StringDt theLink, boolean theStarted) {
 		boolean retVal = theStarted;
 		if (isNotBlank(theLink.getValue())) {
-			if (theStarted==false) {
+			if (theStarted == false) {
 				theEventWriter.writeStartArray("link");
-				retVal=true;
+				retVal = true;
 			}
-			
+
 			theEventWriter.writeStartObject();
 			theEventWriter.write("rel", theRel);
 			theEventWriter.write("href", theLink.getValue());
@@ -898,10 +901,10 @@ public class JsonParser extends BaseParser implements IParser {
 	private void writeTagWithTextNode(JsonGenerator theEventWriter, String theElementName, StringDt theStringDt) {
 		if (StringUtils.isNotBlank(theStringDt.getValue())) {
 			theEventWriter.write(theElementName, theStringDt.getValue());
-		} 
-//		else {
-//			theEventWriter.writeNull(theElementName);
-//		}
+		}
+		// else {
+		// theEventWriter.writeNull(theElementName);
+		// }
 	}
 
 	private class HeldExtension {

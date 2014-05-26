@@ -112,7 +112,7 @@ public abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBindin
 
 	@Override
 	public void invokeServer(RestfulServer theServer, Request theRequest, HttpServletResponse theResponse) throws BaseServerResponseException, IOException {
-		EncodingEnum encoding = determineResponseEncoding(theRequest);
+		EncodingEnum encoding = RestfulServer.determineResponseEncoding(theRequest);
 		IParser parser = encoding.newParser(getContext());
 		IResource resource;
 		if (requestContainsResource()) {
@@ -174,7 +174,7 @@ public abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBindin
 		if (response != null && response.getOperationOutcome() != null) {
 			theResponse.setContentType(encoding.getResourceContentType());
 			Writer writer = theResponse.getWriter();
-			parser.setPrettyPrint(prettyPrintResponse(theRequest));
+			parser.setPrettyPrint(RestfulServer.prettyPrintResponse(theRequest));
 			try {
 				parser.encodeResourceToWriter(response.getOperationOutcome(), writer);
 			} finally {
@@ -361,7 +361,7 @@ public abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBindin
 		if (theE.getOperationOutcome() != null) {
 			theResponse.setContentType(theEncoding.getResourceContentType());
 			IParser parser = theEncoding.newParser(theServer.getFhirContext());
-			parser.setPrettyPrint(prettyPrintResponse(theRequest));
+			parser.setPrettyPrint(RestfulServer.prettyPrintResponse(theRequest));
 			Writer writer = theResponse.getWriter();
 			try {
 				parser.encodeResourceToWriter(theE.getOperationOutcome(), writer);

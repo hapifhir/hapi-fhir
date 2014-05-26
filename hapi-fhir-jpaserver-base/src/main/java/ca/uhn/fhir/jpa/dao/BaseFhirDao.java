@@ -43,6 +43,7 @@ import ca.uhn.fhir.model.dstu.composite.QuantityDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.valueset.SearchParamTypeEnum;
 import ca.uhn.fhir.model.primitive.BaseDateTimeDt;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -65,18 +66,19 @@ public abstract class BaseFhirDao {
 		myContext = theContext;
 	}
 
-	protected ResourceTable updateEntity(final IResource theResource,  ResourceTable entity, boolean theUpdateHistory) {
+	protected ResourceTable updateEntity(final IResource theResource, ResourceTable entity, boolean theUpdateHistory) {
 		if (entity.getPublished() == null) {
 			entity.setPublished(new Date());
 		}
-		
+
 		if (theUpdateHistory) {
 			final ResourceHistoryTable historyEntry = entity.toHistory(getContext());
 			myEntityManager.persist(historyEntry);
 		}
-		
-		entity.setVersion(entity.getVersion()+1);
-		
+
+		entity.setVersion(entity.getVersion() + 1);
+		theResource.setId(new IdDt(entity.getResourceType(), entity.getId().toString(), Long.toString(entity.getVersion())));
+
 		final List<ResourceIndexedSearchParamString> stringParams = extractSearchParamStrings(entity, theResource);
 		final List<ResourceIndexedSearchParamToken> tokenParams = extractSearchParamTokens(entity, theResource);
 		final List<ResourceIndexedSearchParamNumber> numberParams = extractSearchParamNumber(entity, theResource);
@@ -86,9 +88,9 @@ public abstract class BaseFhirDao {
 		populateResourceIntoEntity(theResource, entity);
 
 		entity.setUpdated(new Date());
-		
+
 		if (entity.getId() == null) {
-		myEntityManager.persist(entity);
+			myEntityManager.persist(entity);
 		} else {
 			entity = myEntityManager.merge(entity);
 		}
@@ -290,8 +292,7 @@ public abstract class BaseFhirDao {
 
 				if (nextObject instanceof QuantityDt) {
 					QuantityDt nextValue = (QuantityDt) nextObject;
-					ResourceIndexedSearchParamNumber nextEntity = new ResourceIndexedSearchParamNumber(resourceName, nextValue.getValue().getValue(), nextValue.getSystem().getValueAsString(),
-							nextValue.getUnits().getValue());
+					ResourceIndexedSearchParamNumber nextEntity = new ResourceIndexedSearchParamNumber(resourceName, nextValue.getValue().getValue(), nextValue.getSystem().getValueAsString(), nextValue.getUnits().getValue());
 					nextEntity.setResource(theEntity);
 					retVal.add(nextEntity);
 				} else {
@@ -374,8 +375,7 @@ public abstract class BaseFhirDao {
 					} else if (nextObject instanceof ContactDt) {
 						ContactDt nextContact = (ContactDt) nextObject;
 						if (nextContact.getValue().isEmpty() == false) {
-							ResourceIndexedSearchParamString nextEntity = new ResourceIndexedSearchParamString(resourceName, normalizeString(nextContact.getValue().getValueAsString()), nextContact
-									.getValue().getValueAsString());
+							ResourceIndexedSearchParamString nextEntity = new ResourceIndexedSearchParamString(resourceName, normalizeString(nextContact.getValue().getValueAsString()), nextContact.getValue().getValueAsString());
 							nextEntity.setResource(theEntity);
 							retVal.add(nextEntity);
 						}

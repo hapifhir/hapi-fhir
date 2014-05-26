@@ -26,6 +26,27 @@ import ca.uhn.fhir.model.primitive.InstantDt;
 public enum ResourceMetadataKeyEnum {
 
 	/**
+	 * If present and populated with a date/time (as an instance of {@link InstantDt}),
+	 * this value is an indication that the resource is in the deleted state. This key
+	 * is only used in a limited number of scenarios, such as POSTing transaction bundles
+	 * to a server, or returning resource history.  
+	 * <p>
+	 * Values for this key are of type <b>{@link InstantDt}</b>
+	 * </p>
+	 */
+	DELETED_AT,
+
+	/**
+	 * The value for this key represents a previous ID used to identify
+	 * this resource. This key is currently only used internally during
+	 * transaction method processing. 
+	 * <p>
+	 * Values for this key are of type <b>{@link IdDt}</b>
+	 * </p>
+	 */
+	PREVIOUS_ID,
+
+	/**
 	 * The value for this key is the bundle entry <b>Published</b> time. This is
 	 * defined by FHIR as "Time resource copied into the feed", which is
 	 * generally best left to the current time.
@@ -50,8 +71,9 @@ public enum ResourceMetadataKeyEnum {
 	 * 
 	 * @see TagList
 	 */
-	TAG_LIST,
-
+	TAG_LIST, 
+	
+	
 	/**
 	 * The value for this key is the bundle entry <b>Updated</b> time. This is
 	 * defined by FHIR as "Last Updated for resource". This value is also used
@@ -63,8 +85,8 @@ public enum ResourceMetadataKeyEnum {
 	 * 
 	 * @see InstantDt
 	 */
-	UPDATED,
-
+	UPDATED, 
+	
 	/**
 	 * The value for this key is the version ID of the resource object.
 	 * <p>
@@ -74,18 +96,6 @@ public enum ResourceMetadataKeyEnum {
 	 * @deprecated The {@link IResource#getId()} resource ID will now be populated with the version ID via the {@link IdDt#getUnqualifiedVersionId()} method
 	 */
 	@Deprecated
-	VERSION_ID, 
-	
-	
-	/**
-	 * If present and populated with a date/time (as an instance of {@link InstantDt}),
-	 * this value is an indication that the resource is in the deleted state. This key
-	 * is only used in a limited number of scenarios, such as POSTing transaction bundles
-	 * to a server, or returning resource history.  
-	 * <p>
-	 * Values for this key are of type <b>{@link InstantDt}</b>
-	 * </p>
-	 */
-	DELETED_AT;
+	VERSION_ID;
 
 }

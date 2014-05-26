@@ -759,13 +759,24 @@ public List<IResource> transaction(@TransactionParam List<IResource> theResource
       }
    }
 
-   ArrayList<IResource> retVal = new ArrayList<IResource>();
    /*
     * According to the specification, a bundle must be returned. This bundle will contain
     * all of the created/updated/deleted resources, including their new/updated identities.
     * 
-    * Implementing this will depend on your specific application
+    * The returned list must be the exact same size as the list of resources
+    * passed in, and it is acceptable to return the same list instance that was
+    * passed in. 
     */
+   List<IResource> retVal = theResources;
+   for (IResource next : theResources) {
+      /*
+       * Populate each returned resource with the new ID for that resource,
+       * including the new version if the server supports versioning.
+       */
+      IdDt newId = new IdDt("Patient", "1", "2"); 
+      next.setId(newId);
+   }
+   
    return retVal;
 }
 //END SNIPPET: transaction

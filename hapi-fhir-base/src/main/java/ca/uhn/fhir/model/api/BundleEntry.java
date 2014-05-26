@@ -36,6 +36,7 @@ public class BundleEntry extends BaseBundle {
 	//@formatter:on
 	private TagList myCategories;
 	private InstantDt myDeletedAt;
+	private StringDt myLinkAlternate;
 	private StringDt myLinkSelf;
 	private InstantDt myPublished;
 	private IResource myResource;
@@ -68,6 +69,13 @@ public class BundleEntry extends BaseBundle {
 			myDeletedAt = new InstantDt();
 		}
 		return myDeletedAt;
+	}
+
+	public StringDt getLinkAlternate() {
+		if (myLinkAlternate == null) {
+			myLinkAlternate = new StringDt();
+		}
+		return myLinkAlternate;
 	}
 
 	public StringDt getLinkSelf() {
@@ -113,7 +121,7 @@ public class BundleEntry extends BaseBundle {
 	public boolean isEmpty() {
 		//@formatter:off
 		return super.isEmpty() && 
-				ElementUtil.isEmpty(myCategories, myDeletedAt, myLinkSelf, myPublished, myResource, mySummary, myTitle, myUpdated);
+				ElementUtil.isEmpty(myCategories, myDeletedAt, myLinkAlternate, myLinkSelf, myPublished, myResource, mySummary, myTitle, myUpdated);
 		//@formatter:on
 	}
 
@@ -122,6 +130,10 @@ public class BundleEntry extends BaseBundle {
 	 */
 	public void setDeleted(InstantDt theDeletedAt) {
 		myDeletedAt = theDeletedAt;
+	}
+
+	public void setLinkAlternate(StringDt theLinkAlternate) {
+		myLinkAlternate = theLinkAlternate;
 	}
 
 	public void setLinkSelf(StringDt theLinkSelf) {

@@ -10,6 +10,8 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.StringReader;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import net.sf.json.JSON;
@@ -18,6 +20,7 @@ import net.sf.json.JSONSerializer;
 import org.apache.commons.io.IOUtils;
 import org.hamcrest.core.IsNot;
 import org.hamcrest.core.StringContains;
+import org.hamcrest.text.StringContainsInOrder;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -47,6 +50,7 @@ import ca.uhn.fhir.model.dstu.resource.ValueSet.DefineConcept;
 import ca.uhn.fhir.model.dstu.valueset.AddressUseEnum;
 import ca.uhn.fhir.model.dstu.valueset.NarrativeStatusEnum;
 import ca.uhn.fhir.model.primitive.DecimalDt;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.XhtmlDt;
@@ -541,6 +545,38 @@ public class JsonParserTest {
 		
 	}
 	
+	@Test
+	public void testEncodeBundle() {
+		Bundle b= new Bundle();
+		
+		Patient p1 = new Patient();
+		p1.addName().addFamily("Family1");
+		BundleEntry entry = b.addEntry();
+		entry.getId().setValue("1");
+		entry.setResource(p1);
+
+		Patient p2 = new Patient();
+		p2.addName().addFamily("Family2");
+		entry = b.addEntry();
+		entry.getId().setValue("2");
+		entry.setLinkAlternate(new StringDt("http://foo/bar"));
+		entry.setResource(p2);
+		
+		BundleEntry deletedEntry = b.addEntry();
+		deletedEntry.setId(new IdDt("Patient/3"));
+		InstantDt nowDt = InstantDt.withCurrentTime();
+		deletedEntry.setDeleted(nowDt);
+		
+		String bundleString = ourCtx.newJsonParser().setPrettyPrint(true).encodeBundleToString(b);
+		ourLog.info(bundleString);
+
+		List<String> strings = new ArrayList<String>();
+		strings.addAll(Arrays.asList("\"id\":\"1\""));
+		strings.addAll(Arrays.asList("\"id\":\"2\"", "\"rel\":\"alternate\"", "\"href\":\"http://foo/bar\""));
+		strings.addAll(Arrays.asList("\"deleted\":\""+nowDt.getValueAsString()+"\"", "\"id\":\"Patient/3\""));
+		assertThat(bundleString, StringContainsInOrder.stringContainsInOrder(strings));
+		
+	}
 	@Test
 	public void testSimpleBundleEncode() throws IOException {
 

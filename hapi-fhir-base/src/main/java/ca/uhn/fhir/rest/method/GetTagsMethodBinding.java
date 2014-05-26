@@ -155,7 +155,7 @@ public class GetTagsMethodBinding extends BaseMethodBinding<TagList> {
 
 		TagList resp = (TagList) invokeServerMethod(params);
 
-		EncodingEnum responseEncoding = determineResponseEncoding(theRequest);
+		EncodingEnum responseEncoding = RestfulServer.determineResponseEncoding(theRequest);
 
 		theResponse.setContentType(responseEncoding.getResourceContentType());
 		theResponse.setStatus(Constants.STATUS_HTTP_200_OK);
@@ -164,7 +164,7 @@ public class GetTagsMethodBinding extends BaseMethodBinding<TagList> {
 		theServer.addHeadersToResponse(theResponse);
 
 		IParser parser = responseEncoding.newParser(getContext());
-		parser.setPrettyPrint(prettyPrintResponse(theRequest));
+		parser.setPrettyPrint(RestfulServer.prettyPrintResponse(theRequest));
 		PrintWriter writer = theResponse.getWriter();
 		try {
 			parser.encodeTagListToWriter(resp, writer);

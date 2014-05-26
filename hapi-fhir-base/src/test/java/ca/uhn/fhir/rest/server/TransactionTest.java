@@ -14,7 +14,6 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -24,6 +23,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
@@ -45,6 +45,7 @@ public class TransactionTest {
 	@Test
 	public void testTransaction() throws Exception {
 		Bundle b = new Bundle();
+		InstantDt nowInstant = InstantDt.withCurrentTime();
 		
 		Patient p1 = new Patient();
 		p1.addName().addFamily("Family1");
@@ -60,20 +61,38 @@ public class TransactionTest {
 		
 		BundleEntry deletedEntry = b.addEntry();
 		deletedEntry.setId(new IdDt("Patient/3"));
-		deletedEntry.setDeleted(InstantDt.withCurrentTime());
+		deletedEntry.setDeleted(nowInstant);
 		
 		String bundleString = ourCtx.newXmlParser().setPrettyPrint(true).encodeBundleToString(b);
 		ourLog.info(bundleString);
 		
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/");
+		httpPost.addHeader("Accept", Constants.CT_ATOM_XML + "; pretty=true"); 
 		httpPost.setEntity(new StringEntity(bundleString, ContentType.create(Constants.CT_ATOM_XML, "UTF-8")));
 		HttpResponse status = ourClient.execute(httpPost);
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		assertEquals(200, status.getStatusLine().getStatusCode());
+		
+		ourLog.info(responseContent);
+		
 		Bundle bundle = new FhirContext().newXmlParser().parseBundle(responseContent);
 		assertEquals(3, bundle.size());
 
-	}
+		BundleEntry entry0 = bundle.getEntries().get(0);
+		assertEquals("http://localhost:" + ourPort + "/Patient/81", entry0.getId().getValue());
+		assertEquals("http://localhost:" + ourPort + "/Patient/81/_history/91", entry0.getLinkSelf().getValue());
+		assertEquals("http://localhost:" + ourPort + "/Patient/1", entry0.getLinkAlternate().getValue());
+		
+		BundleEntry entry1 = bundle.getEntries().get(1);
+		assertEquals("http://localhost:" + ourPort + "/Patient/82", entry1.getId().getValue());
+		assertEquals("http://localhost:" + ourPort + "/Patient/82/_history/92", entry1.getLinkSelf().getValue());
+		assertEquals("http://localhost:" + ourPort + "/Patient/2", entry1.getLinkAlternate().getValue());
+
+		BundleEntry entry2 = bundle.getEntries().get(2);
+		assertEquals("http://localhost:" + ourPort + "/Patient/3", entry2.getId().getValue());
+		assertEquals("http://localhost:" + ourPort + "/Patient/3/_history/93", entry2.getLinkSelf().getValue());
+		assertEquals(nowInstant.getValueAsString(), entry2.getDeletedAt().getValueAsString());
+}
 
 	@AfterClass
 	public static void afterClass() throws Exception {
@@ -86,15 +105,19 @@ public class TransactionTest {
 		ourServer = new Server(ourPort);
 
 		DummyProvider patientProvider = new DummyProvider();
+		RestfulServer server = new RestfulServer();
+		server.setProviders(patientProvider);
+		
+		org.eclipse.jetty.servlet.ServletContextHandler proxyHandler = new org.eclipse.jetty.servlet.ServletContextHandler();
+		proxyHandler.setContextPath("/");
 
-		ServletHandler proxyHandler = new ServletHandler();
-		RestfulServer servlet = new RestfulServer();
-		servlet.setProviders(patientProvider);
-		ServletHolder servletHolder = new ServletHolder(servlet);
-		proxyHandler.addServletWithMapping(servletHolder, "/*");
+		ServletHolder handler = new ServletHolder();
+		handler.setServlet(server);
+		proxyHandler.addServlet(handler, "/*");
+
 		ourServer.setHandler(proxyHandler);
 		ourServer.start();
-
+		
 		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();
 		builder.setConnectionManager(connectionManager);
@@ -109,6 +132,15 @@ public class TransactionTest {
 
 		@Transaction
 		public List<IResource> transaction(@TransactionParam List<IResource> theResources) {
+			int index=1;
+			for (IResource next : theResources) {
+				String newId = "8"+Integer.toString(index);
+				if (next.getResourceMetadata().containsKey(ResourceMetadataKeyEnum.DELETED_AT)) {
+					newId = next.getId().getUnqualifiedId();
+				}
+				next.setId(new IdDt("Patient", newId, "9"+Integer.toString(index)));
+				index++;
+			}
 			return theResources;
 		}
 
