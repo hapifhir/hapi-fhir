@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -127,13 +128,22 @@ public abstract class BaseClient {
 
 			Reader reader = createReaderFromResponse(response);
 
-			if (ourLog.isTraceEnabled() || myKeepResponses) {
+			if (ourLog.isTraceEnabled() || myKeepResponses || theLogRequestAndResponse) {
 				String responseString = IOUtils.toString(reader);
 				if (myKeepResponses) {
 					myLastResponse = response;
 					myLastResponseBody = responseString;
 				}
-				ourLog.trace("FHIR response:\n{}\n{}", response, responseString);
+				if (theLogRequestAndResponse) {
+					String message = "HTTP " + response.getStatusLine().getStatusCode()+" " +response.getStatusLine().getReasonPhrase();
+					if (StringUtils.isNotBlank(responseString)) {
+						ourLog.info("Client response: {}\n{}", message, responseString);
+					}else {
+						ourLog.info("Client response: {}", message, responseString);
+					}
+				}else {
+					ourLog.trace("FHIR response:\n{}\n{}", response, responseString);
+				}
 				reader = new StringReader(responseString);
 			}
 

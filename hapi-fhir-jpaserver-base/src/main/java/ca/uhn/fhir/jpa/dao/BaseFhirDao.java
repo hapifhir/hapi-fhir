@@ -77,7 +77,6 @@ public abstract class BaseFhirDao {
 		}
 
 		entity.setVersion(entity.getVersion() + 1);
-		theResource.setId(new IdDt(entity.getResourceType(), entity.getId().toString(), Long.toString(entity.getVersion())));
 
 		final List<ResourceIndexedSearchParamString> stringParams = extractSearchParamStrings(entity, theResource);
 		final List<ResourceIndexedSearchParamToken> tokenParams = extractSearchParamTokens(entity, theResource);
@@ -140,6 +139,9 @@ public abstract class BaseFhirDao {
 			myEntityManager.persist(next);
 		}
 
+		myEntityManager.flush();
+		theResource.setId(new IdDt(entity.getResourceType(), entity.getId().toString(), Long.toString(entity.getVersion())));
+		
 		return entity;
 	}
 
@@ -175,7 +177,7 @@ public abstract class BaseFhirDao {
 
 					String typeString = nextValue.getResourceId().getResourceType();
 					if (isBlank(typeString)) {
-						continue;
+						throw new InvalidRequestException("Invalid resource reference found at path[" + nextPath + "] - Does not contain resource type - " + nextValue.getReference().getValue());
 					}
 					Class<? extends IResource> type = getContext().getResourceDefinition(typeString).getImplementingClass();
 					String id = nextValue.getResourceId().getUnqualifiedId();
@@ -344,7 +346,7 @@ public abstract class BaseFhirDao {
 					retVal.add(nextEntity);
 				} else {
 					if (nextObject instanceof HumanNameDt) {
-						ArrayList<StringDt> allNames = new ArrayList<>();
+						ArrayList<StringDt> allNames = new ArrayList<StringDt>();
 						HumanNameDt nextHumanName = (HumanNameDt) nextObject;
 						allNames.addAll(nextHumanName.getFamily());
 						allNames.addAll(nextHumanName.getGiven());
@@ -357,7 +359,7 @@ public abstract class BaseFhirDao {
 							retVal.add(nextEntity);
 						}
 					} else if (nextObject instanceof AddressDt) {
-						ArrayList<StringDt> allNames = new ArrayList<>();
+						ArrayList<StringDt> allNames = new ArrayList<StringDt>();
 						AddressDt nextAddress = (AddressDt) nextObject;
 						allNames.addAll(nextAddress.getLine());
 						allNames.add(nextAddress.getCity());
@@ -460,7 +462,7 @@ public abstract class BaseFhirDao {
 
 	protected IFhirResourceDao<? extends IResource> getDao(Class<? extends IResource> theType) {
 		if (myResourceTypeToDao == null) {
-			myResourceTypeToDao = new HashMap<>();
+			myResourceTypeToDao = new HashMap<Class<? extends IResource>, IFhirResourceDao<?>>();
 			for (IFhirResourceDao<?> next : myResourceDaos) {
 				myResourceTypeToDao.put(next.getResourceType(), next);
 			}

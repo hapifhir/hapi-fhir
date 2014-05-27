@@ -75,7 +75,7 @@ public class CompleteResourceProviderTest {
 
 		Bundle actual = ourClient.search().forResource(Patient.class).where(Patient.IDENTIFIER.exactly().systemAndCode("urn:system", "testSearchByIdentifier01")).encodedJson().prettyPrint().execute();
 		assertEquals(1, actual.size());
-		assertEquals(p1Id, actual.getEntries().get(0).getId());
+		assertEquals(p1Id.getUnqualifiedId(), actual.getEntries().get(0).getId().getUnqualifiedId());
 
 	}
 
@@ -88,30 +88,39 @@ public class CompleteResourceProviderTest {
 		Patient p1 = new Patient();
 		p1.addIdentifier().setSystem("urn:system").setValue("testSearchByResourceChain01");
 		p1.addName().addFamily("testSearchByResourceChainFamily01").addGiven("testSearchByResourceChainGiven01");
-		p1.setManagingOrganization(new ResourceReferenceDt("Organization/o1id"));
+		p1.setManagingOrganization(new ResourceReferenceDt(o1id));
 		IdDt p1Id = ourClient.create(p1).getId();
 
 		//@formatter:off
 		Bundle actual = ourClient.search()
 				.forResource(Patient.class)
-				.where(Patient.PROVIDER.hasId(o1id))
-				.encodedJson().prettyPrint().execute();
+				.where(Patient.PROVIDER.hasId(o1id.getUnqualifiedId()))
+				.encodedJson().andLogRequestAndResponse(true).prettyPrint().execute();
 		//@formatter:on
 		assertEquals(1, actual.size());
-		assertEquals(p1Id, actual.getEntries().get(0).getId());
+		assertEquals(p1Id.getUnqualifiedId(), actual.getEntries().get(0).getId().getUnqualifiedId());
+
+		//@formatter:off
+		actual = ourClient.search()
+				.forResource(Patient.class)
+				.where(Patient.PROVIDER.hasId(o1id.getValue()))
+				.encodedJson().andLogRequestAndResponse(true).prettyPrint().execute();
+		//@formatter:on
+		assertEquals(1, actual.size());
+		assertEquals(p1Id.getUnqualifiedId(), actual.getEntries().get(0).getId().getUnqualifiedId());
 
 	}
-	
+
 	@Test
 	public void testInsertBadReference() {
 		Patient p1 = new Patient();
 		p1.addIdentifier().setSystem("urn:system").setValue("testSearchByResourceChain01");
 		p1.addName().addFamily("testSearchByResourceChainFamily01").addGiven("testSearchByResourceChainGiven01");
 		p1.setManagingOrganization(new ResourceReferenceDt("Organization/132312323"));
-		
+
 		try {
-		ourClient.create(p1).getId();
-		fail();
+			ourClient.create(p1).getId();
+			fail();
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage(), containsString("Organization/132312323"));
 		}
@@ -172,6 +181,7 @@ public class CompleteResourceProviderTest {
 		ourCtx = restServer.getFhirContext();
 
 		ourClient = ourCtx.newRestfulGenericClient(serverBase);
+		ourClient.setLogRequestAndResponse(true);
 	}
 
 }

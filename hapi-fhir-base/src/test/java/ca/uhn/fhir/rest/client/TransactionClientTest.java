@@ -86,8 +86,9 @@ public class TransactionClientTest {
 		ourLog.info(ctx.newXmlParser().setPrettyPrint(true).encodeBundleToString(bundle));
 		
 		assertEquals(2, bundle.size());
-		assertEquals("Patient/testPersistWithSimpleLinkP01", bundle.getEntries().get(0).getId().getValue());
+		assertEquals("http://foo/Patient/testPersistWithSimpleLinkP01", bundle.getEntries().get(0).getId().getValue());
 		assertEquals("http://foo/Patient/testPersistWithSimpleLinkP01", bundle.getEntries().get(0).getLinkSelf().getValue());
+		assertEquals(null, bundle.getEntries().get(0).getLinkAlternate().getValue());
 
 		assertTrue(bundle.getEntries().get(1).getId().isEmpty());
 

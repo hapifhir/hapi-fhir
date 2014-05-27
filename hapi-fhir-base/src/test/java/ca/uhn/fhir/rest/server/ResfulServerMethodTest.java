@@ -214,7 +214,7 @@ public class ResfulServerMethodTest {
 		Bundle bundle = ourCtx.newXmlParser().parseBundle(responseContent);
 		BundleEntry entry0 = bundle.getEntries().get(0);
 		assertEquals("http://localhost:" + ourPort + "/Patient/1", entry0.getLinkSelf().getValue());
-		assertEquals("1", entry0.getId().getValue());
+		assertEquals("http://localhost:" + ourPort + "/Patient/1", entry0.getId().getValue());
 
 		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?withIncludes=include1&_include=include2&_include=include3&_format=json");
 		status = ourClient.execute(httpGet);
@@ -223,7 +223,8 @@ public class ResfulServerMethodTest {
 		ourLog.info(responseContent);
 		bundle = ourCtx.newJsonParser().parseBundle(responseContent);
 		entry0 = bundle.getEntries().get(0);
-		assertEquals("http://localhost:" + ourPort + "/Patient/1?_format=json", entry0.getLinkSelf().getValue());
+		// Should not include params such as _format=json
+		assertEquals("http://localhost:" + ourPort + "/Patient/1", entry0.getLinkSelf().getValue());
 
 	}
 
@@ -426,8 +427,8 @@ public class ResfulServerMethodTest {
 		// Older resource
 		{
 			BundleEntry olderEntry = bundle.getEntries().get(0);
-			assertEquals("222", olderEntry.getId().getValue());
-			assertThat(olderEntry.getLinkSelf().getValue(), StringEndsWith.endsWith("/Patient/222/_history/1"));
+			assertEquals("http://localhost:" + ourPort + "/Patient/222", olderEntry.getId().getValue());
+			assertEquals("http://localhost:" + ourPort + "/Patient/222/_history/1", olderEntry.getLinkSelf().getValue());
 			InstantDt pubExpected = new InstantDt(new Date(10000L));
 			InstantDt pubActualRes = (InstantDt) olderEntry.getResource().getResourceMetadata().get(ResourceMetadataKeyEnum.PUBLISHED);
 			InstantDt pubActualBundle = olderEntry.getPublished();
@@ -442,8 +443,8 @@ public class ResfulServerMethodTest {
 		// Newer resource
 		{
 			BundleEntry newerEntry = bundle.getEntries().get(1);
-			assertEquals("222", newerEntry.getId().getValue());
-			assertThat(newerEntry.getLinkSelf().getValue(), StringEndsWith.endsWith("/Patient/222/_history/2"));
+			assertEquals("http://localhost:" + ourPort + "/Patient/222", newerEntry.getId().getValue());
+			assertEquals("http://localhost:" + ourPort + "/Patient/222/_history/2", newerEntry.getLinkSelf().getValue());
 			InstantDt pubExpected = new InstantDt(new Date(10000L));
 			InstantDt pubActualRes = (InstantDt) newerEntry.getResource().getResourceMetadata().get(ResourceMetadataKeyEnum.PUBLISHED);
 			InstantDt pubActualBundle = newerEntry.getPublished();
@@ -475,7 +476,7 @@ public class ResfulServerMethodTest {
 		// Older resource
 		{
 			BundleEntry olderEntry = bundle.getEntries().get(0);
-			assertEquals("1", olderEntry.getId().getValue());
+			assertEquals("http://localhost:" + ourPort + "/Patient/1", olderEntry.getId().getValue());
 			assertThat(olderEntry.getLinkSelf().getValue(), StringEndsWith.endsWith("/Patient/1/_history/1"));
 			InstantDt pubExpected = new InstantDt(new Date(10000L));
 			InstantDt pubActualRes = (InstantDt) olderEntry.getResource().getResourceMetadata().get(ResourceMetadataKeyEnum.PUBLISHED);
@@ -491,7 +492,7 @@ public class ResfulServerMethodTest {
 		// Newer resource
 		{
 			BundleEntry newerEntry = bundle.getEntries().get(1);
-			assertEquals("1", newerEntry.getId().getValue());
+			assertEquals("http://localhost:" + ourPort + "/Patient/1", newerEntry.getId().getValue());
 			assertThat(newerEntry.getLinkSelf().getValue(), StringEndsWith.endsWith("/Patient/1/_history/2"));
 			InstantDt pubExpected = new InstantDt(new Date(10000L));
 			InstantDt pubActualRes = (InstantDt) newerEntry.getResource().getResourceMetadata().get(ResourceMetadataKeyEnum.PUBLISHED);

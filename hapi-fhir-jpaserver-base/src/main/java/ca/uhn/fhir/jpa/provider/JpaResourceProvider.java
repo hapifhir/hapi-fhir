@@ -20,10 +20,18 @@ import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 
-public abstract class BaseJpaResourceProvider<T extends IResource> implements IResourceProvider {
+public class JpaResourceProvider<T extends IResource> implements IResourceProvider {
 
 	private FhirContext myContext=new FhirContext();
 	private IFhirResourceDao<T> myDao;
+
+	public JpaResourceProvider() {
+		//nothing
+	}
+
+	public JpaResourceProvider(IFhirResourceDao<T> theDao) {
+		myDao=theDao;
+	}
 
 	@Create
 	public MethodOutcome create(@ResourceParam T theResource) {
@@ -61,6 +69,11 @@ public abstract class BaseJpaResourceProvider<T extends IResource> implements IR
 	@Update
 	public MethodOutcome update(@ResourceParam T theResource, @IdParam IdDt theId) {
 		return myDao.update(theResource, theId);
+	}
+
+	@Override
+	public Class<? extends IResource> getResourceType() {
+		return myDao.getResourceType();
 	}
 
 }

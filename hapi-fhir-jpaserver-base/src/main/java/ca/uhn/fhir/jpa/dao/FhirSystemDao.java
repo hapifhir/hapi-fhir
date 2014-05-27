@@ -22,7 +22,8 @@ import ca.uhn.fhir.util.FhirTerser;
 public class FhirSystemDao extends BaseFhirDao implements IFhirSystemDao {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirSystemDao.class);
 
-	@PersistenceContext(name = "FHIR_UT", type = PersistenceContextType.TRANSACTION, unitName = "FHIR_UT")
+	//name = "FHIR_UT", type = PersistenceContextType.TRANSACTION, unitName = "FHIR_UT"
+	@PersistenceContext()
 	private EntityManager myEntityManager;
 
 	private FhirContext myContext = new FhirContext();
@@ -34,8 +35,8 @@ public class FhirSystemDao extends BaseFhirDao implements IFhirSystemDao {
 
 		FhirTerser terser = myContext.newTerser();
 
-		Map<IdDt, IdDt> idConversions = new HashMap<>();
-		List<ResourceTable> persistedResources = new ArrayList<>();
+		Map<IdDt, IdDt> idConversions = new HashMap<IdDt, IdDt>();
+		List<ResourceTable> persistedResources = new ArrayList<ResourceTable>();
 		for (IResource nextResource : theResources) {
 			IdDt nextId = nextResource.getId();
 			if (nextId == null) {

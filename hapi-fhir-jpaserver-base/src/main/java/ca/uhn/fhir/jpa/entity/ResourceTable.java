@@ -94,35 +94,35 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 
 	public Collection<ResourceIndexedSearchParamDate> getParamsDate() {
 		if (myParamsDate == null) {
-			myParamsDate = new ArrayList<>();
+			myParamsDate = new ArrayList<ResourceIndexedSearchParamDate>();
 		}
 		return myParamsDate;
 	}
 
 	public Collection<ResourceIndexedSearchParamNumber> getParamsNumber() {
 		if (myParamsNumber == null) {
-			myParamsNumber = new ArrayList<>();
+			myParamsNumber = new ArrayList<ResourceIndexedSearchParamNumber>();
 		}
 		return myParamsNumber;
 	}
 
 	public Collection<ResourceIndexedSearchParamString> getParamsString() {
 		if (myParamsString == null) {
-			myParamsString = new ArrayList<>();
+			myParamsString = new ArrayList<ResourceIndexedSearchParamString>();
 		}
 		return myParamsString;
 	}
 
 	public Collection<ResourceIndexedSearchParamToken> getParamsToken() {
 		if (myParamsToken == null) {
-			myParamsToken = new ArrayList<>();
+			myParamsToken = new ArrayList<ResourceIndexedSearchParamToken>();
 		}
 		return myParamsToken;
 	}
 
 	public Collection<ResourceLink> getResourceLinks() {
 		if (myResourceLinks == null) {
-			myResourceLinks = new ArrayList<>();
+			myResourceLinks = new ArrayList<ResourceLink>();
 		}
 		return myResourceLinks;
 	}
@@ -133,7 +133,7 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 
 	public Collection<ResourceTag> getTags() {
 		if (myTags == null) {
-			myTags = new ArrayList<>();
+			myTags = new ArrayList<ResourceTag>();
 		}
 		return myTags;
 	}

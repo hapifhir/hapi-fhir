@@ -3,7 +3,6 @@ package ca.uhn.fhir.jpa.entity;
 import java.io.Serializable;
 
 import javax.persistence.Entity;
-import javax.persistence.ForeignKey;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -27,8 +26,7 @@ public class ResourceHistoryTag extends BaseTag implements Serializable {
 			@JoinColumn(name="RES_TYPE", referencedColumnName="RES_TYPE"),
 			@JoinColumn(name="PID", referencedColumnName="PID"),
 			@JoinColumn(name="VERSION", referencedColumnName="VERSION")
-	}, foreignKey=@ForeignKey(name="FK_HT_RT"))
-	@org.hibernate.annotations.ForeignKey(name="FK_HT_RT")
+	}/*, foreignKey=@ForeignKey(name="FK_HT_RT")*/)
 	private ResourceHistoryTable myResourceHistory;
 
 	public ResourceHistoryTag() {

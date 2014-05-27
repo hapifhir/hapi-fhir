@@ -420,15 +420,20 @@ public abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBindin
 	}
 
 	protected static void parseContentLocation(MethodOutcome theOutcomeToPopulate, String theResourceName, String theLocationHeader) {
+		if (StringUtils.isBlank(theLocationHeader)) {
+			return;
+		}
+		
+		theOutcomeToPopulate.setId(new IdDt(theLocationHeader));
+
 		String resourceNamePart = "/" + theResourceName + "/";
 		int resourceIndex = theLocationHeader.lastIndexOf(resourceNamePart);
 		if (resourceIndex > -1) {
 			int idIndexStart = resourceIndex + resourceNamePart.length();
 			int idIndexEnd = theLocationHeader.indexOf('/', idIndexStart);
 			if (idIndexEnd == -1) {
-				theOutcomeToPopulate.setId(new IdDt(theLocationHeader.substring(idIndexStart)));
+				// nothing
 			} else {
-				theOutcomeToPopulate.setId(new IdDt(theLocationHeader.substring(idIndexStart, idIndexEnd)));
 				String versionIdPart = "/_history/";
 				int historyIdStart = theLocationHeader.indexOf(versionIdPart, idIndexEnd);
 				if (historyIdStart != -1) {

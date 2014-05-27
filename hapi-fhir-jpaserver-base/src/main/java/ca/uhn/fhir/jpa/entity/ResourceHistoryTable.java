@@ -51,7 +51,7 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 
 	public Collection<ResourceHistoryTag> getTags() {
 		if (myTags == null) {
-			myTags = new ArrayList<>();
+			myTags = new ArrayList<ResourceHistoryTag>();
 		}
 		return myTags;
 	}

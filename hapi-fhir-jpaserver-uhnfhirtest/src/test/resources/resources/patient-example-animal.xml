@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Patient xmlns="http://hl7.org/fhir" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://hl7.org/fhir ../../schema/patient.xsd">
+  <text>
+    <status value="generated"/>
+    <div xmlns="http://www.w3.org/1999/xhtml">
+      <table>
+        <tbody>
+          <tr>
+            <td>Id</td>
+            <td>Kenzi (Dog: Golden Retriever)</td>
+          </tr>
+          <tr>
+            <td>Owner</td>
+            <td>Peter Chalmers, 534 Erewhon, Pleasantville, Vic, 3999</td>
+          </tr>
+          <tr>
+            <td>Contacts</td>
+            <td>Work: (03) 5555 6473</td>
+          </tr>
+          <tr>
+            <td>Id</td>
+            <td>Dog Tag: 1234123 (Maroondah City Council)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </text>
+
+  <!-- Dog tag, under Maroondah City council -->
+  <identifier>
+    <label value="Dog Tag"/>
+    <system value="http://www.maroondah.vic.gov.au/AnimalRegFees.aspx"/>
+    <value value="1234123"/>
+    <period>
+      <start value="2010-05-31"/>
+    </period>
+    <assigner>
+      <display value="Maroondah City Council"/>
+    </assigner>
+  </identifier>
+
+  <!-- Dog's name: Kenzi -->
+  <name>
+    <use value="usual"/>
+    <given value="Kenzi"/>
+  </name>
+  <gender>
+    <coding>
+      <system value="http://hl7.org/fhir/v3/AdministrativeGender"/>
+      <code value="F"/>
+    </coding>
+  </gender>
+  <birthDate value="2010-03-23"/>
+
+  <contact>
+    <relationship>
+      <coding>
+        <system value="http://hl7.org/fhir/patient-contact-relationship"/>
+        <code value="owner"/>
+      </coding>
+    </relationship>
+    <name>
+      <family value="Chalmers"/>
+      <given value="Peter"/>
+      <given value="James"/>
+    </name>
+    <telecom>
+      <system value="phone"/>
+      <value value="(03) 5555 6473"/>
+      <use value="work"/>
+    </telecom>
+  </contact>
+
+  <animal>
+    <species>
+      <coding>
+        <system value="http://hl7.org/fhir/animal-species"/>
+        <code value="canislf"/>
+        <display value="Dog"/>
+      </coding>
+    </species>
+    <breed>
+      <coding>
+        <system value="http://snomed.info/sct"/>
+        <code value="58108001"/>
+        <display value="Golden retriever"/>
+      </coding>
+      <coding>
+        <system value="http://hl7.org/fhir/animal-breed"/>
+        <code value="gret"/>
+        <display value="Golden Retriever"/>
+      </coding>
+    </breed>
+    <genderStatus>
+      <coding>
+        <system value="http://hl7.org/fhir/animal-genderstatus"/>
+        <code value="neutered"/>
+      </coding>
+    </genderStatus>
+  </animal>
+
+  <managingOrganization>
+    <display value="Pete's Vetinary Services"/>
+  </managingOrganization>
+
+  <active value="true"/>
+</Patient>

@@ -184,4 +184,13 @@ public interface IGenericClient {
 	 */
 	<T extends IResource> T vread(Class<T> theType, String theId, String theVersionId);
 
+	/**
+	 * If set to <code>true</code>, the client will log all requests and all responses. This
+	 * is probably not a good production setting since it will result in a lot of extra logging, but
+	 * it can be useful for troubleshooting.
+	 * 
+	 * @param theLogRequestAndResponse Should requests and responses be logged
+	 */
+	void setLogRequestAndResponse(boolean theLogRequestAndResponse);
+
 }

@@ -471,9 +471,9 @@ public class RestfulServer extends HttpServlet {
 			StringBuffer requestUrl = theRequest.getRequestURL();
 			String servletContextPath = "";
 			if (theRequest.getServletContext() != null) {
-				servletContextPath = StringUtils.defaultIfBlank(theRequest.getServletContext().getContextPath(), servletPath);
-			} else {
-				servletContextPath = servletPath;
+				servletContextPath = StringUtils.defaultString(theRequest.getServletContext().getContextPath());
+//			} else {
+				//servletContextPath = servletPath;
 			}
 
 			if (ourLog.isTraceEnabled()) {

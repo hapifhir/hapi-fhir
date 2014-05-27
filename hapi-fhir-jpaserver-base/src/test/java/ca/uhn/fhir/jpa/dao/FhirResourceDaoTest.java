@@ -220,7 +220,7 @@ public class FhirResourceDaoTest {
 			ourPatientDao.create(patient);
 		}
 
-		Map<String, IQueryParameterType> params = new HashMap<>();
+		Map<String, IQueryParameterType> params = new HashMap<String, IQueryParameterType>();
 		List<Patient> patients = ourPatientDao.search(params);
 		assertTrue(patients.size() >= 2);
 	}
@@ -241,19 +241,19 @@ public class FhirResourceDaoTest {
 			ourPatientDao.create(patient);
 		}
 
-		Map<String, IQueryParameterType> params = new HashMap<>();
+		Map<String, IQueryParameterType> params = new HashMap<String, IQueryParameterType>();
 		params.put(Patient.SP_FAMILY, new StringDt("testSearchNameParam01Fam"));
 		List<Patient> patients = ourPatientDao.search(params);
 		assertEquals(1, patients.size());
 		assertEquals(id1.getUnqualifiedId(), patients.get(0).getId().getUnqualifiedId());
 
-		params = new HashMap<>();
+		params = new HashMap<String, IQueryParameterType>();
 		params.put(Patient.SP_FAMILY, new StringDt("testSearchNameParam01Giv"));
 		patients = ourPatientDao.search(params);
 		assertEquals(1, patients.size());
 		assertEquals(id1.getUnqualifiedId(), patients.get(0).getId().getUnqualifiedId());
 
-		params = new HashMap<>();
+		params = new HashMap<String, IQueryParameterType>();
 		params.put(Patient.SP_FAMILY, new StringDt("testSearchNameParam01Foo"));
 		patients = ourPatientDao.search(params);
 		assertEquals(0, patients.size());
@@ -368,7 +368,7 @@ public class FhirResourceDaoTest {
 			ourPatientDao.create(patient);
 		}
 
-		Map<String, IQueryParameterType> params = new HashMap<>();
+		Map<String, IQueryParameterType> params = new HashMap<String, IQueryParameterType>();
 		params.put(Patient.SP_FAMILY, new StringDt("Tester_testSearchStringParam"));
 		List<Patient> patients = ourPatientDao.search(params);
 		assertEquals(2, patients.size());
@@ -394,7 +394,7 @@ public class FhirResourceDaoTest {
 			ourPatientDao.create(patient);
 		}
 
-		Map<String, IQueryParameterType> params = new HashMap<>();
+		Map<String, IQueryParameterType> params = new HashMap<String, IQueryParameterType>();
 		params.put(Patient.SP_FAMILY, new StringDt("testSearchStringParamWithNonNormalized_hora"));
 		List<Patient> patients = ourPatientDao.search(params);
 		assertEquals(2, patients.size());

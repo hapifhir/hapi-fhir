@@ -1,8 +1,11 @@
 package ca.uhn.fhir.rest.client;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.InputStream;
 import java.io.StringReader;
@@ -104,7 +107,7 @@ public class ClientTest {
 		assertEquals(HttpPost.class, capt.getValue().getClass());
 		HttpPost post = (HttpPost) capt.getValue();
 		assertThat(IOUtils.toString(post.getEntity().getContent()), StringContains.containsString("<Patient"));
-		assertEquals("100", response.getId().getValue());
+		assertEquals("http://example.com/fhir/Patient/100/_history/200", response.getId().getValue());
 		assertEquals("200", response.getVersionId().getValue());
 	}
 
@@ -151,7 +154,7 @@ public class ClientTest {
 		assertEquals(HttpPost.class, capt.getValue().getClass());
 		HttpPost post = (HttpPost) capt.getValue();
 		assertThat(IOUtils.toString(post.getEntity().getContent()), StringContains.containsString("<Patient"));
-		assertEquals("100", response.getId().getValue());
+		assertEquals("http://example.com/fhir/Patient/100/_history/200", response.getId().getValue());
 		assertEquals("200", response.getVersionId().getValue());
 	}
 
@@ -179,7 +182,7 @@ public class ClientTest {
 		assertEquals(HttpPost.class, capt.getValue().getClass());
 		HttpPost post = (HttpPost) capt.getValue();
 		assertThat(IOUtils.toString(post.getEntity().getContent()), StringContains.containsString("<Patient"));
-		assertEquals("100", response.getId().getValue());
+		assertEquals("http://example.com/fhir/Patient/100/_history/200", response.getId().getValue());
 		assertEquals("200", response.getVersionId().getValue());
 
 		Header[] headers = post.getHeaders("Category");
@@ -941,7 +944,7 @@ public class ClientTest {
 		HttpPut post = (HttpPut) capt.getValue();
 		assertThat(post.getURI().toASCIIString(), StringEndsWith.endsWith("/Patient/100"));
 		assertThat(IOUtils.toString(post.getEntity().getContent()), StringContains.containsString("<Patient"));
-		assertEquals("100", response.getId().getValue());
+		assertEquals("http://example.com/fhir/Patient/100/_history/200", response.getId().getValue());
 		assertEquals("200", response.getVersionId().getValue());
 	}
 
@@ -1003,7 +1006,7 @@ public class ClientTest {
 		assertThat(post.getURI().toASCIIString(), StringEndsWith.endsWith("/Patient/100"));
 		assertThat(IOUtils.toString(post.getEntity().getContent()), StringContains.containsString("<Patient"));
 		assertThat(post.getFirstHeader("Content-Location").getValue(), StringEndsWith.endsWith("/Patient/100/_history/200"));
-		assertEquals("100", response.getId().getValue());
+		assertEquals("http://example.com/fhir/Patient/100/_history/200", response.getId().getValue());
 		assertEquals("200", response.getVersionId().getValue());
 	}
 
@@ -1027,7 +1030,7 @@ public class ClientTest {
 		HttpPost post = (HttpPost) capt.getValue();
 		assertThat(post.getURI().toASCIIString(), StringEndsWith.endsWith("/Patient/_validate"));
 		assertThat(IOUtils.toString(post.getEntity().getContent()), StringContains.containsString("<Patient"));
-		assertEquals("100", response.getId().getValue());
+		assertEquals("http://example.com/fhir/Patient/100/_history/200", response.getId().getValue());
 		assertEquals("200", response.getVersionId().getValue());
 
 	}

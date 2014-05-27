@@ -9,10 +9,19 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.rest.annotation.Transaction;
 import ca.uhn.fhir.rest.annotation.TransactionParam;
 
-public class SystemProvider {
+public class JpaSystemProvider {
 
 	private IFhirSystemDao myDao;
 
+	public JpaSystemProvider() {
+		//nothing
+	}
+
+	public JpaSystemProvider(IFhirSystemDao theDao) {
+		myDao=theDao;
+	}
+
+	
 	@Required
 	public void setDao(IFhirSystemDao theDao) {
 		myDao = theDao;

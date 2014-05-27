@@ -1,0 +1,17 @@
+<web-app xmlns="http://java.sun.com/xml/ns/javaee" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	version="3.0" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee ./xsd/web-app_3_0.xsd">
+
+  <!-- Servlets -->
+	<servlet>
+		<servlet-name>fhirServlet</servlet-name>
+		<servlet-class>ca.uhn.fhirtest.TestRestfulServer</servlet-class>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>fhirServlet</servlet-name>
+		<url-pattern>/base/*</url-pattern>
+	</servlet-mapping>
+
+</web-app>

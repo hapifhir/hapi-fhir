@@ -71,7 +71,8 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDao.class);
 
-	@PersistenceContext(name = "FHIR_UT", type = PersistenceContextType.TRANSACTION, unitName = "FHIR_UT")
+	// name = "FHIR_UT", type = PersistenceContextType.TRANSACTION, unitName = "FHIR_UT"
+	@PersistenceContext()
 	private EntityManager myEntityManager;
 
 	@Autowired
@@ -97,12 +98,12 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 
 //		ourLog.info("Saving links: {}", links);
 
-		TransactionTemplate template = new TransactionTemplate(myPlatformTransactionManager);
-		template.setPropagationBehavior(TransactionTemplate.PROPAGATION_REQUIRES_NEW);
-		template.setReadOnly(false);
-		template.execute(new TransactionCallback<ResourceTable>() {
-			@Override
-			public ResourceTable doInTransaction(TransactionStatus theStatus) {
+//		TransactionTemplate template = new TransactionTemplate(myPlatformTransactionManager);
+//		template.setPropagationBehavior(TransactionTemplate.PROPAGATION_REQUIRES_NEW);
+//		template.setReadOnly(false);
+//		template.execute(new TransactionCallback<ResourceTable>() {
+//			@Override
+//			public ResourceTable doInTransaction(TransactionStatus theStatus) {
 //				myEntityManager.persist(entity);
 //				for (ResourceIndexedSearchParamString next : stringParams) {
 //					myEntityManager.persist(next);
@@ -120,9 +121,9 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 //					myEntityManager.persist(next);
 //				}
 				updateEntity(theResource, entity,false);
-				return entity;
-			}
-		});
+//				return entity;
+//			}
+//		});
 
 		MethodOutcome outcome = toMethodOutcome(entity);
 		return outcome;
@@ -163,7 +164,7 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 	}
 
 	@PostConstruct
-	public void postConstruct() throws Exception {
+	public void postConstruct() {
 		myResourceName = getContext().getResourceDefinition(myResourceType).getName();
 	}
 
@@ -195,7 +196,7 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 		} else {
 			pids = searchForIdsWithAndOr(theParams);
 			if (pids.isEmpty()) {
-				return new ArrayList<>();
+				return new ArrayList<T>();
 			}
 		}
 
@@ -210,7 +211,7 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 			}
 			TypedQuery<ResourceTable> q = myEntityManager.createQuery(cq);
 
-			List<T> retVal = new ArrayList<>();
+			List<T> retVal = new ArrayList<T>();
 			for (ResourceTable next : q.getResultList()) {
 				T resource = toResource(next);
 				retVal.add(resource);
@@ -489,8 +490,14 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 			if (params instanceof ReferenceParam) {
 				ReferenceParam ref = (ReferenceParam) params;
 
+				String resourceId = ref.getValueAsQueryToken();
+				if (resourceId.contains("/")) {
+					IdDt dt = new IdDt(resourceId);
+					resourceId = dt.getUnqualifiedId();
+				}
+				
 				if (isBlank(ref.getChain())) {
-					Long targetPid = Long.valueOf(ref.getValueAsQueryToken());
+					Long targetPid = Long.valueOf(resourceId);
 					ourLog.info("Searching for resource link with target PID: {}", targetPid);
 					Predicate eq = builder.equal(from.get("myTargetResourcePid"), targetPid);
 					codePredicates.add(eq);
@@ -505,7 +512,7 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 						RuntimeChildResourceDefinition resDef = (RuntimeChildResourceDefinition) def;
 						resourceTypes = resDef.getResourceTypes();
 					} else {
-						resourceTypes = new ArrayList<>();
+						resourceTypes = new ArrayList<Class<? extends IResource>>();
 						RuntimeResourceDefinition resDef = getContext().getResourceDefinition(ref.getResourceType());
 						resourceTypes.add(resDef.getImplementingClass());
 					}
@@ -522,7 +529,7 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 							continue;
 						}
 
-						IQueryParameterType chainValue = toParameterType(param.getParamType(), ref.getValueAsQueryToken());
+						IQueryParameterType chainValue = toParameterType(param.getParamType(), resourceId);
 						Set<Long> pids = dao.searchForIds(ref.getChain(), chainValue);
 						if (pids.isEmpty()) {
 							continue;
