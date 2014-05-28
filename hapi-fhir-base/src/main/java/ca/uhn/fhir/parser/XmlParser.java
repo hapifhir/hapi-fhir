@@ -70,6 +70,7 @@ import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.dstu.composite.ContainedDt;
 import ca.uhn.fhir.model.dstu.composite.NarrativeDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.dstu.resource.Binary;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.StringDt;
@@ -551,7 +552,13 @@ public class XmlParser extends BaseParser implements IParser {
 			theEventWriter.writeAttribute("id", theResource.getId().getValue());
 		}
 
-		encodeCompositeElementToStreamWriter(resDef, theResource, theResource, theEventWriter, resDef, theIncludedResource);
+		if (theResource instanceof Binary) {
+			Binary bin = (Binary) theResource;
+			theEventWriter.writeAttribute("contentType", bin.getContentType());
+			theEventWriter.writeCharacters(bin.getContentAsBase64());
+		} else {
+			encodeCompositeElementToStreamWriter(resDef, theResource, theResource, theEventWriter, resDef, theIncludedResource);
+		}
 
 		theEventWriter.writeEndElement();
 	}

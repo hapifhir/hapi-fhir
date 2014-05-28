@@ -39,6 +39,7 @@ import ca.uhn.fhir.model.dstu.composite.NarrativeDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.resource.Conformance;
 import ca.uhn.fhir.model.dstu.resource.Conformance.RestResource;
+import ca.uhn.fhir.model.dstu.resource.Binary;
 import ca.uhn.fhir.model.dstu.resource.DiagnosticReport;
 import ca.uhn.fhir.model.dstu.resource.Observation;
 import ca.uhn.fhir.model.dstu.resource.Organization;
@@ -69,6 +70,28 @@ public class JsonParserTest {
 		assertEquals("{\"resourceType\":\"Patient\",\"extension\":[{\"url\":\"http://foo#bar\"}]}", str);
 	}
 
+	@Test
+	public void testEncodeBinaryResource() {
+
+		Binary patient = new Binary();
+		patient.setContentType("foo");
+		patient.setContent(new byte[] {1,2,3,4});
+		
+		String val = ourCtx.newJsonParser().encodeResourceToString(patient);
+		assertEquals("{\"resourceType\":\"Binary\",\"contentType\":\"foo\",\"content\":\"AQIDBA==\"}",val);
+		
+	}
+
+	
+	@Test
+	public void testParseBinaryResource() {
+
+		Binary val = ourCtx.newJsonParser().parseResource(Binary.class, "{\"resourceType\":\"Binary\",\"contentType\":\"foo\",\"content\":\"AQIDBA==\"}");
+		assertEquals("foo", val.getContentType());
+		assertArrayEquals(new byte[] {1,2,3,4}, val.getContent());
+
+	}
+	
 	@Test
 	public void testTagList() {
 		

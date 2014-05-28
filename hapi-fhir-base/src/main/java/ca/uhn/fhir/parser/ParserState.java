@@ -61,6 +61,7 @@ import ca.uhn.fhir.model.api.Tag;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.dstu.composite.ContainedDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.dstu.resource.Binary;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.XhtmlDt;
@@ -267,14 +268,14 @@ class ParserState<T> {
 		} else {
 			id = entry.getId();
 		}
-		
+
 		IResource resource = entry.getResource();
 		if (resource == null && id != null && isNotBlank(id.getResourceType())) {
 			resource = myContext.getResourceDefinition(id.getResourceType()).newInstance();
 			resource.setId(id);
 			entry.setResource(resource);
 		}
-		
+
 		if (resource != null) {
 			resource.getResourceMetadata().put(ResourceMetadataKeyEnum.DELETED_AT, entry.getDeletedAt());
 			resource.getResourceMetadata().put(ResourceMetadataKeyEnum.VERSION_ID, id);
@@ -346,10 +347,10 @@ class ParserState<T> {
 			}
 
 			IdDt id = myEntry.getId();
-			if(id!=null && id.isEmpty()==false) {
+			if (id != null && id.isEmpty() == false) {
 				myEntry.getResource().setId(id);
 			}
-			
+
 			Map<ResourceMetadataKeyEnum, Object> metadata = myEntry.getResource().getResourceMetadata();
 			if (myEntry.getPublished().isEmpty() == false) {
 				metadata.put(ResourceMetadataKeyEnum.PUBLISHED, myEntry.getPublished());
@@ -455,6 +456,77 @@ class ParserState<T> {
 		@Override
 		public void enteringNewElement(String theNamespaceURI, String theLocalPart) throws DataFormatException {
 			throw new DataFormatException("Found unexpected element content '" + theLocalPart + "' within <link>");
+		}
+
+	}
+
+	private class BinaryResourceState extends BaseState {
+
+		private static final int SUBSTATE_CT = 1;
+		private static final int SUBSTATE_CONTENT = 2;
+		private Binary myInstance;
+		private String myData;
+		private int mySubState = 0;
+
+		public BinaryResourceState(PreResourceState thePreResourceState, Binary theInstance) {
+			super(thePreResourceState);
+			myInstance = theInstance;
+		}
+
+		@Override
+		public void attributeValue(String theName, String theValue) throws DataFormatException {
+			if ("contentType".equals(theName)) {
+				myInstance.setContentType(theValue);
+			} else if (myJsonMode && "value".equals(theName)) {
+				string(theValue);
+			}
+		}
+
+		@Override
+		public void endingElement() throws DataFormatException {
+			if (mySubState == SUBSTATE_CT) {
+				myInstance.setContentType(myData);
+				mySubState = 0;
+				myData=null;
+				return;
+			} else if (mySubState == SUBSTATE_CONTENT) {
+				myInstance.setContentAsBase64(myData);
+				mySubState = 0;
+				myData=null;
+				return;
+			} else {
+				if (!myJsonMode) {
+				myInstance.setContentAsBase64(myData);
+				}
+				pop();
+			}
+		}
+
+		@Override
+		public void enteringNewElement(String theNamespaceURI, String theLocalPart) throws DataFormatException {
+			if (myJsonMode && "contentType".equals(theLocalPart) && mySubState == 0) {
+				mySubState = SUBSTATE_CT;
+			} else if (myJsonMode && "content".equals(theLocalPart) && mySubState == 0) {
+				mySubState = SUBSTATE_CONTENT;
+			} else {
+				throw new DataFormatException("Unexpected nested element in atom tag: " + theLocalPart);
+			}
+		}
+
+		@Override
+		public void string(String theData) {
+			if (myData == null) {
+				myData = theData;
+			} else {
+				// this shouldn't generally happen so it's ok that it's
+				// inefficient
+				myData = myData + theData;
+			}
+		}
+
+		@Override
+		protected IElement getCurrentElement() {
+			return null;
 		}
 
 	}
@@ -1061,7 +1133,11 @@ class ParserState<T> {
 				myEntry.setResource(myInstance);
 			}
 
-			push(new ElementCompositeState(this, def, myInstance));
+			if ("Binary".equals(def.getName())) {
+				push(new BinaryResourceState(this, (Binary) myInstance));
+			} else {
+				push(new ElementCompositeState(this, def, myInstance));
+			}
 		}
 
 		public Map<String, IResource> getContainedResources() {

@@ -112,11 +112,9 @@ public abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBindin
 
 	@Override
 	public void invokeServer(RestfulServer theServer, Request theRequest, HttpServletResponse theResponse) throws BaseServerResponseException, IOException {
-		EncodingEnum encoding = RestfulServer.determineResponseEncoding(theRequest);
-		IParser parser = encoding.newParser(getContext());
 		IResource resource;
 		if (requestContainsResource()) {
-			resource = parser.parseResource(theRequest.getInputReader());
+			resource = parseIncomingServerResource(theRequest);
 			TagList tagList = new TagList();
 			for (Enumeration<String> enumeration = theRequest.getServletRequest().getHeaders(Constants.HEADER_CATEGORY); enumeration.hasMoreElements();) {
 				String nextTagComplete = enumeration.nextElement();
@@ -138,10 +136,12 @@ public abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBindin
 			response = (MethodOutcome) invokeServerMethod(params);
 		} catch (InternalErrorException e) {
 			ourLog.error("Internal error during method invocation", e);
+			EncodingEnum encoding = RestfulServer.determineResponseEncoding(theRequest);
 			streamOperationOutcome(e, theServer, encoding, theResponse, theRequest);
 			return;
 		} catch (BaseServerResponseException e) {
 			ourLog.info("Exception during method invocation: " + e.getMessage());
+			EncodingEnum encoding = RestfulServer.determineResponseEncoding(theRequest);
 			streamOperationOutcome(e, theServer, encoding, theResponse, theRequest);
 			return;
 		}
@@ -172,8 +172,10 @@ public abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBindin
 		theServer.addHeadersToResponse(theResponse);
 
 		if (response != null && response.getOperationOutcome() != null) {
+			EncodingEnum encoding = RestfulServer.determineResponseEncoding(theRequest);
 			theResponse.setContentType(encoding.getResourceContentType());
 			Writer writer = theResponse.getWriter();
+			IParser parser = encoding.newParser(getContext());
 			parser.setPrettyPrint(RestfulServer.prettyPrintResponse(theRequest));
 			try {
 				parser.encodeResourceToWriter(response.getOperationOutcome(), writer);
@@ -187,6 +189,14 @@ public abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBindin
 		}
 
 		// getMethod().in
+	}
+
+	private IResource parseIncomingServerResource(Request theRequest) {
+		IResource resource;
+		EncodingEnum encoding = RestfulServer.determineResponseEncoding(theRequest);
+		IParser parser = encoding.newParser(getContext());
+		resource = parser.parseResource(theRequest.getInputReader());
+		return resource;
 	}
 
 	/*

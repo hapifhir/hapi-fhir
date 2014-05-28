@@ -1,11 +1,7 @@
 package ca.uhn.fhir.parser;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -43,6 +39,7 @@ import ca.uhn.fhir.model.dstu.composite.NarrativeDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.resource.Conformance;
 import ca.uhn.fhir.model.dstu.resource.Conformance.RestResource;
+import ca.uhn.fhir.model.dstu.resource.Binary;
 import ca.uhn.fhir.model.dstu.resource.DiagnosticReport;
 import ca.uhn.fhir.model.dstu.resource.Observation;
 import ca.uhn.fhir.model.dstu.resource.Organization;
@@ -82,6 +79,28 @@ public class XmlParserTest {
 	}
 
 	@Test
+	public void testEncodeBinaryResource() {
+
+		Binary patient = new Binary();
+		patient.setContentType("foo");
+		patient.setContent(new byte[] {1,2,3,4});
+		
+		String val = ourCtx.newXmlParser().encodeResourceToString(patient);
+		assertEquals("<Binary xmlns=\"http://hl7.org/fhir\" contentType=\"foo\">AQIDBA==</Binary>", val);
+		
+	}
+
+	
+	@Test
+	public void testParseBinaryResource() {
+
+		Binary val = ourCtx.newXmlParser().parseResource(Binary.class, "<Binary xmlns=\"http://hl7.org/fhir\" contentType=\"foo\">AQIDBA==</Binary>");
+		assertEquals("foo", val.getContentType());
+		assertArrayEquals(new byte[] {1,2,3,4}, val.getContent());
+
+	}
+
+	@Test
 	public void testTagList() {
 		
 		//@formatter:off
@@ -92,7 +111,7 @@ public class XmlParserTest {
 				"</taglist>";
 		//@formatter:on
 		
-		TagList tagList = new FhirContext().newXmlParser().parseTagList(tagListStr);
+		TagList tagList = ourCtx.newXmlParser().parseTagList(tagListStr);
 		assertEquals(3, tagList.size());
 		assertEquals("term0", tagList.get(0).getTerm());
 		assertEquals("label0", tagList.get(0).getLabel());

@@ -76,6 +76,7 @@ import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.dstu.composite.ContainedDt;
 import ca.uhn.fhir.model.dstu.composite.NarrativeDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.dstu.resource.Binary;
 import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.model.primitive.DecimalDt;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -477,10 +478,14 @@ public class JsonParser extends BaseParser implements IParser {
 			theEventWriter.write("id", theResource.getId().getValue());
 		}
 
-		extractAndWriteExtensionsAsDirectChild(theResource, theEventWriter, resDef, theResDef, theResource);
-
-		encodeCompositeElementToStreamWriter(theResDef, theResource, theResource, theEventWriter, resDef);
-
+		if (theResource instanceof Binary) {
+			Binary bin = (Binary) theResource;
+			theEventWriter.write("contentType", bin.getContentType());
+			theEventWriter.write("content",bin.getContentAsBase64());
+		} else {
+			extractAndWriteExtensionsAsDirectChild(theResource, theEventWriter, resDef, theResDef, theResource);
+			encodeCompositeElementToStreamWriter(theResDef, theResource, theResource, theEventWriter, resDef);
+		}
 		theEventWriter.writeEnd();
 	}
 

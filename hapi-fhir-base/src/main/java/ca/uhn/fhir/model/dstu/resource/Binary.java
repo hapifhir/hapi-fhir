@@ -20,38 +20,64 @@ package ca.uhn.fhir.model.dstu.resource;
  * #L%
  */
 
+import java.util.Collections;
 import java.util.List;
+
+import org.apache.commons.lang3.StringUtils;
 
 import ca.uhn.fhir.model.api.BaseResource;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.model.dstu.composite.ContainedDt;
 import ca.uhn.fhir.model.dstu.composite.NarrativeDt;
+import ca.uhn.fhir.model.primitive.Base64BinaryDt;
 
-@ResourceDef(name="Binary", profile="http://hl7.org/fhir/profiles/Binary", id="binary")
-public class Binary  extends BaseResource implements IResource {
+@ResourceDef(name = "Binary", profile = "http://hl7.org/fhir/profiles/Binary", id = "binary")
+public class Binary extends BaseResource implements IResource {
 
-	// TODO: implement binary
-	
-	@Override
-	public boolean isEmpty() {
-		return true;
-	}
+	private Base64BinaryDt myContent = new Base64BinaryDt();
+	private String myContentType;
 
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
-		return null;
+		return Collections.emptyList();
 	}
 
-	@Override
-	public ContainedDt getContained() {
-		return null;
+	public byte[] getContent() {
+		return myContent.getValue();
 	}
 
+	public String getContentAsBase64() {
+		return myContent.getValueAsString();
+	}
+
+	public String getContentType() {
+		return myContentType;
+	}
+
+	/**
+	 * Do not call - throws {@link UnsupportedOperationException}
+	 */
 	@Override
 	public NarrativeDt getText() {
-		throw new IllegalStateException();
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public boolean isEmpty() {
+		return (myContent.isEmpty()) && StringUtils.isBlank(myContentType);
+	}
+
+	public void setContent(byte[] theContent) {
+		myContent.setValue(theContent);
+	}
+
+	public void setContentAsBase64(String theContent) {
+		myContent.setValueAsString(theContent);
+	}
+
+	public void setContentType(String theContentType) {
+		myContentType = theContentType;
 	}
 
 }

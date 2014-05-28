@@ -20,7 +20,7 @@ package ca.uhn.fhir.rest.method;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -35,6 +35,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
@@ -50,8 +51,7 @@ import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.Tag;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
-import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
+import ca.uhn.fhir.model.dstu.resource.Binary;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.parser.IParser;
@@ -289,6 +289,24 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 	private void streamResponseAsResource(RestfulServer theServer, HttpServletResponse theHttpResponse, IResource theResource, EncodingEnum theResponseEncoding, boolean thePrettyPrint, boolean theRequestIsBrowser, NarrativeModeEnum theNarrativeMode) throws IOException {
 
 		theHttpResponse.setStatus(200);
+		
+		if (theResource instanceof Binary) {
+			Binary bin = (Binary) theResource;
+			if (isNotBlank(bin.getContentType())) {
+				theHttpResponse.setContentType(bin.getContentType());
+			}else {
+				theHttpResponse.setContentType(Constants.CT_OCTET_STREAM);				
+			}
+			if (bin.getContent()==null || bin.getContent().length==0) {
+				return;
+			}
+			theHttpResponse.setContentLength(bin.getContent().length);
+			ServletOutputStream oos = theHttpResponse.getOutputStream();
+			oos.write(bin.getContent());
+			oos.close();
+			return;
+		}
+		
 		if (theRequestIsBrowser && theServer.isUseBrowserFriendlyContentTypes()) {
 			theHttpResponse.setContentType(theResponseEncoding.getBrowserFriendlyBundleContentType());
 		} else if (theNarrativeMode == NarrativeModeEnum.ONLY) {

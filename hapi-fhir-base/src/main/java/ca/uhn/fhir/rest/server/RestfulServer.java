@@ -343,39 +343,48 @@ public class RestfulServer extends HttpServlet {
 		findResourceMethods(theProvider, clazz);
 	}
 
-	private void findResourceMethods(Object theProvider, Class<?> clazz) {
+	private void findResourceMethods(Object theProvider, Class<?> clazz) throws ConfigurationException {
+		int count = 0;
+
 		for (Method m : clazz.getDeclaredMethods()) {
+			BaseMethodBinding<?> foundMethodBinding = BaseMethodBinding.bindMethod(m, myFhirContext, theProvider);
+			if (foundMethodBinding == null) {
+				continue;
+			}
+
+			count++;
+
 			if (!Modifier.isPublic(m.getModifiers())) {
-				ourLog.debug("Ignoring non-public method: {}", m);
+				throw new ConfigurationException("Method '" + m.getName() + "' is not public, FHIR RESTful methods must be public");
 			} else {
-				if (!Modifier.isStatic(m.getModifiers())) {
+				if (Modifier.isStatic(m.getModifiers())) {
+					throw new ConfigurationException("Method '" + m.getName() + "' is static, FHIR RESTful methods must not be static");
+				} else {
 					ourLog.debug("Scanning public method: {}#{}", theProvider.getClass(), m.getName());
 
-					BaseMethodBinding<?> foundMethodBinding = BaseMethodBinding.bindMethod(m, myFhirContext, theProvider);
-					if (foundMethodBinding != null) {
-
-						String resourceName = foundMethodBinding.getResourceName();
-						ResourceBinding resourceBinding;
-						if (resourceName == null) {
-							resourceBinding = myNullResourceBinding;
-						} else {
-							RuntimeResourceDefinition definition = myFhirContext.getResourceDefinition(resourceName);
-							if (myResourceNameToProvider.containsKey(definition.getName())) {
-								resourceBinding = myResourceNameToProvider.get(definition.getName());
-							} else {
-								resourceBinding = new ResourceBinding();
-								resourceBinding.setResourceName(resourceName);
-								myResourceNameToProvider.put(resourceName, resourceBinding);
-							}
-						}
-
-						resourceBinding.addMethod(foundMethodBinding);
-						ourLog.debug(" * Method: {}#{} is a handler", theProvider.getClass(), m.getName());
+					String resourceName = foundMethodBinding.getResourceName();
+					ResourceBinding resourceBinding;
+					if (resourceName == null) {
+						resourceBinding = myNullResourceBinding;
 					} else {
-						ourLog.debug(" * Method: {}#{} is not a handler", theProvider.getClass(), m.getName());
+						RuntimeResourceDefinition definition = myFhirContext.getResourceDefinition(resourceName);
+						if (myResourceNameToProvider.containsKey(definition.getName())) {
+							resourceBinding = myResourceNameToProvider.get(definition.getName());
+						} else {
+							resourceBinding = new ResourceBinding();
+							resourceBinding.setResourceName(resourceName);
+							myResourceNameToProvider.put(resourceName, resourceBinding);
+						}
 					}
+
+					resourceBinding.addMethod(foundMethodBinding);
+					ourLog.debug(" * Method: {}#{} is a handler", theProvider.getClass(), m.getName());
 				}
 			}
+		}
+
+		if (count == 0) {
+			throw new ConfigurationException("Did not find any annotated RESTful methods on provider class " + theProvider.getClass().getCanonicalName());
 		}
 	}
 
@@ -472,8 +481,8 @@ public class RestfulServer extends HttpServlet {
 			String servletContextPath = "";
 			if (theRequest.getServletContext() != null) {
 				servletContextPath = StringUtils.defaultString(theRequest.getServletContext().getContextPath());
-//			} else {
-				//servletContextPath = servletPath;
+				// } else {
+				// servletContextPath = servletPath;
 			}
 
 			if (ourLog.isTraceEnabled()) {
