@@ -263,6 +263,9 @@ public class JsonParser extends BaseParser implements IParser {
 			} else {
 				theWriter.writeStartObject();
 			}
+			if (theValue instanceof ExtensionDt) {
+				theWriter.write("url", ((ExtensionDt) theValue).getUrlAsString());
+			}
 			encodeCompositeElementToStreamWriter(theResDef, theResource, theValue, theWriter, childCompositeDef);
 			theWriter.writeEnd();
 			break;

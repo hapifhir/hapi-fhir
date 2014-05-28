@@ -42,6 +42,7 @@ import java.util.TreeSet;
 
 import ca.uhn.fhir.model.api.BaseResourceReference;
 import ca.uhn.fhir.model.api.CodeableConceptElement;
+import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.api.ICodeEnum;
 import ca.uhn.fhir.model.api.ICompositeDatatype;
 import ca.uhn.fhir.model.api.ICompositeElement;
@@ -164,10 +165,10 @@ class ModelScanner {
 					@SuppressWarnings("unchecked")
 					Class<? extends IElement> nextClass = (Class<? extends IElement>) Class.forName((String) nextValue);
 					if (!IElement.class.isAssignableFrom(nextClass)) {
-						ourLog.warn("Class is not assignable from " + IElement.class.getSimpleName()+": " + nextValue);
+						ourLog.warn("Class is not assignable from " + IElement.class.getSimpleName() + ": " + nextValue);
 						continue;
 					}
-					
+
 					toScan.add(nextClass);
 				} catch (ClassNotFoundException e) {
 					ourLog.warn("Unknown class exception: " + nextValue, e);
@@ -182,7 +183,7 @@ class ModelScanner {
 		// toScan.add(DecimalDt.class);
 		// toScan.add(AttachmentDt.class);
 		// toScan.add(ResourceReferenceDt.class);
-		// toScan.add(QuantityDt.class); 
+		// toScan.add(QuantityDt.class);
 
 		do {
 			for (Class<? extends IElement> nextClass : toScan) {
@@ -289,7 +290,12 @@ class ModelScanner {
 	private void scanCompositeDatatype(Class<? extends ICompositeDatatype> theClass, DatatypeDef theDatatypeDefinition) {
 		ourLog.debug("Scanning resource class: {}", theClass.getName());
 
-		RuntimeCompositeDatatypeDefinition resourceDef = new RuntimeCompositeDatatypeDefinition(theDatatypeDefinition, theClass);
+		RuntimeCompositeDatatypeDefinition resourceDef;
+		if (theClass.equals(ExtensionDt.class)) {
+			resourceDef = new RuntimeExtensionDtDefinition(theDatatypeDefinition, theClass);
+		} else {
+			resourceDef = new RuntimeCompositeDatatypeDefinition(theDatatypeDefinition, theClass);
+		}
 		myClassToElementDefinitions.put(theClass, resourceDef);
 		scanCompositeElementForChildren(theClass, resourceDef);
 	}
@@ -376,9 +382,8 @@ class ModelScanner {
 			}
 
 			/*
-			 * Anything that's marked as unknown is given a new ID that is <0 so
-			 * that it doesn't conflict wityh any given IDs and can be figured
-			 * out later
+			 * Anything that's marked as unknown is given a new ID that is <0 so that it doesn't conflict wityh any
+			 * given IDs and can be figured out later
 			 */
 			while (order == Child.ORDER_UNKNOWN && orderMap.containsKey(order)) {
 				order--;
@@ -416,6 +421,14 @@ class ModelScanner {
 				RuntimeChildChoiceDefinition def = new RuntimeChildChoiceDefinition(next, elementName, childAnnotation, descriptionAnnotation, choiceTypes);
 				orderMap.put(order, def);
 
+			} else if (next.getType().equals(ExtensionDt.class)) {
+
+				RuntimeChildExtensionDt def = new RuntimeChildExtensionDt(next, elementName, childAnnotation, descriptionAnnotation);
+				orderMap.put(order, def);
+				if (IElement.class.isAssignableFrom(nextElementType)) {
+					addScanAlso((Class<? extends IElement>) nextElementType);
+				}
+
 			} else if (extensionAttr != null) {
 				/*
 				 * Child is an extension
@@ -443,8 +456,8 @@ class ModelScanner {
 
 			} else if (IResourceBlock.class.isAssignableFrom(nextElementType)) {
 				/*
-				 * Child is a resource block (i.e. a sub-tag within a resource)
-				 * TODO: do these have a better name according to HL7?
+				 * Child is a resource block (i.e. a sub-tag within a resource) TODO: do these have a better name
+				 * according to HL7?
 				 */
 
 				Class<? extends IResourceBlock> blockDef = (Class<? extends IResourceBlock>) nextElementType;
@@ -452,7 +465,7 @@ class ModelScanner {
 				RuntimeChildResourceBlockDefinition def = new RuntimeChildResourceBlockDefinition(next, childAnnotation, descriptionAnnotation, elementName, blockDef);
 				orderMap.put(order, def);
 
-			} else if (IDatatype.class.equals(nextElementType)) {
+			} else if (IDatatype.class.equals(nextElementType) || IElement.class.equals(nextElementType)) {
 
 				RuntimeChildAny def = new RuntimeChildAny(next, elementName, childAnnotation, descriptionAnnotation);
 				orderMap.put(order, def);
@@ -575,8 +588,8 @@ class ModelScanner {
 			SearchParamDefinition searchParam = nextField.getAnnotation(SearchParamDefinition.class);
 			if (searchParam != null) {
 				SearchParamTypeEnum paramType = SearchParamTypeEnum.valueOf(searchParam.type().toUpperCase());
-				if (paramType ==null) {
-					throw new ConfigurationException("Searc param "+searchParam.name()+" has an invalid type: "+searchParam.type());
+				if (paramType == null) {
+					throw new ConfigurationException("Searc param " + searchParam.name() + " has an invalid type: " + searchParam.type());
 				}
 				RuntimeSearchParam param = new RuntimeSearchParam(searchParam.name(), searchParam.description(), searchParam.path(), paramType);
 				theResourceDef.addSearchParam(param);

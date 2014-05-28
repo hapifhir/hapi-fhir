@@ -862,6 +862,8 @@ class ParserState<T> {
 		public void attributeValue(String theName, String theValue) throws DataFormatException {
 			if ("id".equals(theName)) {
 				myInstance.setId(new IdDt(theValue));
+			} else if ("url".equals(theName) && myInstance instanceof ExtensionDt) {
+				((ExtensionDt)myInstance).setUrl(theValue);
 			}
 		}
 

@@ -44,6 +44,7 @@ import ca.uhn.fhir.model.dstu.resource.DiagnosticReport;
 import ca.uhn.fhir.model.dstu.resource.Observation;
 import ca.uhn.fhir.model.dstu.resource.Organization;
 import ca.uhn.fhir.model.dstu.resource.Patient;
+import ca.uhn.fhir.model.dstu.resource.Query;
 import ca.uhn.fhir.model.dstu.resource.Specimen;
 import ca.uhn.fhir.model.dstu.resource.ValueSet;
 import ca.uhn.fhir.model.dstu.resource.ValueSet.Define;
@@ -82,6 +83,58 @@ public class JsonParserTest {
 		
 	}
 
+	@Test
+	public void testParseQuery() {
+		String msg = "{\n" + 
+				"  \"resourceType\": \"Query\",\n" + 
+				"  \"text\": {\n" + 
+				"    \"status\": \"generated\",\n" + 
+				"    \"div\": \"<div>[Put rendering here]</div>\"\n" + 
+				"  },\n" + 
+				"  \"identifier\": \"urn:uuid:42b253f5-fa17-40d0-8da5-44aeb4230376\",\n" + 
+				"  \"parameter\": [\n" + 
+				"    {\n" + 
+				"      \"url\": \"http://hl7.org/fhir/query#_query\",\n" + 
+				"      \"valueString\": \"example\"\n" + 
+				"    }\n" + 
+				"  ]\n" + 
+				"}";
+		Query query = ourCtx.newJsonParser().parseResource(Query.class, msg);
+		
+		assertEquals("urn:uuid:42b253f5-fa17-40d0-8da5-44aeb4230376", query.getIdentifier().getValueAsString());
+		assertEquals("http://hl7.org/fhir/query#_query", query.getParameterFirstRep().getUrlAsString());
+		assertEquals("example", query.getParameterFirstRep().getValueAsPrimitive().getValueAsString());
+		
+	}
+	
+	@Test
+	public void testEncodeQuery() {
+		Query q = new Query();
+		ExtensionDt parameter = q.addParameter();
+		parameter.setUrl("http://hl7.org/fhir/query#_query").setValue(new StringDt("example"));
+		
+		
+		String val = new FhirContext().newJsonParser().encodeResourceToString(q);
+		ourLog.info(val);
+
+		//@formatter:off
+		String expected = 
+				"{" + 
+					"\"resourceType\":\"Query\"," + 
+					"\"parameter\":[" + 
+						"{" + 
+							"\"url\":\"http://hl7.org/fhir/query#_query\"," + 
+							"\"valueString\":\"example\"" + 
+						"}" + 
+					"]" + 
+				"}";
+		//@formatter:on
+
+		ourLog.info("Expect: {}", expected);
+		ourLog.info("Got   : {}", val);
+		assertEquals(expected, val);
+		
+	}
 	
 	@Test
 	public void testParseBinaryResource() {

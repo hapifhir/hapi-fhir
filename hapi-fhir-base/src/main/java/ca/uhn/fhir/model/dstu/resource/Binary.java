@@ -38,6 +38,26 @@ public class Binary extends BaseResource implements IResource {
 	private Base64BinaryDt myContent = new Base64BinaryDt();
 	private String myContentType;
 
+	/**
+	 * Constructor
+	 */
+	public Binary() {
+		// nothing
+	}
+
+	/**
+	 * Constructor
+	 * 
+	 * @param theContentType
+	 *            The content type
+	 * @param theContent
+	 *            The binary contents
+	 */
+	public Binary(String theContentType, byte[] theContent) {
+		setContentType(theContentType);
+		setContent(theContent);
+	}
+
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return Collections.emptyList();

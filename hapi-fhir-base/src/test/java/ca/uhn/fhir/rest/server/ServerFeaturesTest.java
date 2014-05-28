@@ -2,7 +2,9 @@ package ca.uhn.fhir.rest.server;
 
 import static org.junit.Assert.*;
 
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -30,6 +32,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
+import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.testutil.RandomServerPortProvider;
 
 /**
@@ -149,6 +152,19 @@ public class ServerFeaturesTest {
 		assertThat(responseContent, StringContains.containsString("\",\n"));
 
 	}
+	
+	
+	@Test
+	public void testInternalErrorIfNoId() throws Exception {
+
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/?_query=findPatientsWithNoIdSpecified");
+		httpGet.addHeader("Accept", Constants.CT_FHIR_XML+ "; pretty=true");
+		CloseableHttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		assertEquals(500, status.getStatusLine().getStatusCode());
+		assertThat(responseContent, StringContains.containsString("ID"));
+
+	}
 
 	@AfterClass
 	public static void afterClass() throws Exception {
@@ -214,6 +230,13 @@ public class ServerFeaturesTest {
 		@Read()
 		public Patient getResourceById(@IdParam IdDt theId) {
 			return getIdToPatient().get(theId.getValue());
+		}
+		
+		@Search(queryName="findPatientsWithNoIdSpecified")
+		public List<Patient> findPatientsWithNoIdSpecified() {
+			Patient p = new Patient();
+			p.addIdentifier().setSystem("foo");
+			return Collections.singletonList(p);
 		}
 
 		@Override

@@ -77,6 +77,7 @@ public class Constants {
 	public static final int STATUS_HTTP_422_UNPROCESSABLE_ENTITY = 422;
 	public static final int STATUS_HTTP_500_INTERNAL_ERROR = 500;
 	public static final String URL_TOKEN_HISTORY = "_history";
+	public static final String HEADER_CONTENT_TYPE = "Content-Type";
 
 	static {
 		Map<String, EncodingEnum> valToEncoding = new HashMap<String, EncodingEnum>();

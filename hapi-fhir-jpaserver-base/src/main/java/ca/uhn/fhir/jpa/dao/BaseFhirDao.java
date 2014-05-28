@@ -194,7 +194,7 @@ public abstract class BaseFhirDao {
 						valueOf = Long.valueOf(id);
 					} catch (Exception e) {
 						String resName = getContext().getResourceDefinition(type).getName();
-						throw new InvalidRequestException("Resource ID " + resName + "/" + id + " is invalid (must be numeric), specified in path: " + nextPath);
+						throw new InvalidRequestException("Resource " + resName + "/" + id + " not found, specified in path: " + nextPath + " (this is an invalid ID, must be numeric on this server)");
 					}
 					ResourceTable target = myEntityManager.find(ResourceTable.class, valueOf);
 					if (target == null) {

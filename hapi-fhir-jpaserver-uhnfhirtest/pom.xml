@@ -70,8 +70,6 @@
 						<configuration>
 							<packageBase>ca.uhn.test.jpasrv</packageBase>
 							<baseResourceNames>
-								<!-- <baseResourceName>account</baseResourceName>  -->
-								<!-- <baseResourceName>activitydefinition-extensions</baseResourceName>  -->
 								<baseResourceName>adversereaction</baseResourceName>
 								<baseResourceName>alert</baseResourceName>
 								<baseResourceName>allergyintolerance</baseResourceName>
@@ -92,7 +90,6 @@
 								<baseResourceName>documentmanifest</baseResourceName>
 								<baseResourceName>documentreference</baseResourceName>
 								<baseResourceName>encounter</baseResourceName>
-								<!-- <baseResourceName>familyhistory-genetics-profile</baseResourceName>  -->
 								<baseResourceName>familyhistory</baseResourceName>
 								<baseResourceName>geneexpression</baseResourceName>
 								<baseResourceName>geneticanalysis</baseResourceName>
@@ -112,7 +109,6 @@
 								<baseResourceName>medicationstatement</baseResourceName>
 								<baseResourceName>messageheader</baseResourceName>
 								<baseResourceName>microarray</baseResourceName>
-								<!-- <baseResourceName>namespace</baseResourceName>  -->
 								<baseResourceName>observation</baseResourceName>
 								<baseResourceName>operationoutcome</baseResourceName>
 								<baseResourceName>orderresponse</baseResourceName>
@@ -120,34 +116,24 @@
 								<baseResourceName>organization</baseResourceName>
 								<baseResourceName>other</baseResourceName>
 								<baseResourceName>patient</baseResourceName>
-								<!--<baseResourceName>person</baseResourceName>-->
 								<baseResourceName>practitioner</baseResourceName>
 								<baseResourceName>procedure</baseResourceName>
 								<baseResourceName>profile</baseResourceName>
-								<!-- <baseResourceName>protocol</baseResourceName> -->
-								<!-- <baseResourceName>provenance-extensions</baseResourceName> -->
 								<baseResourceName>provenance</baseResourceName>
 								<baseResourceName>query</baseResourceName>
-								<!-- <baseResourceName>questionnaire-extensions</baseResourceName> -->
 								<baseResourceName>questionnaire</baseResourceName>
 								<baseResourceName>relatedperson</baseResourceName>
 								<baseResourceName>remittance</baseResourceName>
-								<!-- <baseResourceName>resource</baseResourceName> -->
 								<baseResourceName>securityevent</baseResourceName>
-								<!--<baseResourceName>sequence</baseResourceName>-->
 								<baseResourceName>sequencinganalysis</baseResourceName>
 								<baseResourceName>sequencinglab</baseResourceName>
 								<baseResourceName>slot</baseResourceName>
 								<baseResourceName>specimen</baseResourceName>
 								<baseResourceName>substance</baseResourceName>
 								<baseResourceName>supply</baseResourceName>
-								<!--<baseResourceName>template</baseResourceName>-->
-								<baseResourceName>test</baseResourceName>
+								<!-- <baseResourceName>test</baseResourceName>  -->
 								<baseResourceName>user</baseResourceName>
-								<!-- <baseResourceName>valueset-extensions</baseResourceName>  -->
 								<baseResourceName>valueset</baseResourceName>
-								<!--<baseResourceName>vcfmeta</baseResourceName>-->
-								<!--<baseResourceName>vcfvariant</baseResourceName>-->
 							</baseResourceNames>
 							<buildDatatypes>true</buildDatatypes>
 						</configuration>
@@ -162,6 +148,7 @@
 				</configuration>
 			</plugin>
 		</plugins>
+		<finalName>hapi-fhir-jpaserver</finalName>
 	</build>
 
 	<packaging>war</packaging>

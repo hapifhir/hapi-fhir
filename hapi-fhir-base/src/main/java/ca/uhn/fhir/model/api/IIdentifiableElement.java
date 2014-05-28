@@ -24,9 +24,16 @@ import ca.uhn.fhir.model.primitive.IdDt;
 
 public interface IIdentifiableElement extends IElement {
 
-	public void setId(IdDt theId);
+	void setId(IdDt theId);
 
-	public IdDt getId();
-	
-	
+	IdDt getId();
+
+	/**
+	 * Convenience method for {@link #setId(IdDt)} which creates a new IdDt and provides the
+	 * given string as the ID.
+	 *   
+	 * @param theId The ID string. Can be a complete URL, a partial URL or even a simple identifier.
+	 */
+	void setId(String theId);
+
 }

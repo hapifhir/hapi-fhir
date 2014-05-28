@@ -168,7 +168,7 @@ public abstract class BaseAddOrDeleteTagsMethodBinding extends BaseMethodBinding
 		}
 
 		IParser parser = createAppropriateParserForParsingServerRequest(theRequest);
-		Reader reader = theRequest.getInputReader();
+		Reader reader = theRequest.getServletRequest().getReader();
 		try {
 			TagList tagList = parser.parseTagList(reader);
 			params[myTagListParamIndex] = tagList;

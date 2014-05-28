@@ -191,11 +191,13 @@ public abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBindin
 		// getMethod().in
 	}
 
-	private IResource parseIncomingServerResource(Request theRequest) {
-		IResource resource;
-		EncodingEnum encoding = RestfulServer.determineResponseEncoding(theRequest);
+	/**
+	 * @throws IOException  
+	 */
+	protected IResource parseIncomingServerResource(Request theRequest) throws IOException {
+		EncodingEnum encoding = RestfulServer.determineRequestEncoding(theRequest);
 		IParser parser = encoding.newParser(getContext());
-		resource = parser.parseResource(theRequest.getInputReader());
+		IResource resource = parser.parseResource(theRequest.getServletRequest().getReader());
 		return resource;
 	}
 

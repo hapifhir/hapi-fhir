@@ -22,6 +22,7 @@ package ca.uhn.fhir.rest.method;
 
 import static org.apache.commons.lang3.StringUtils.*;
 
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -125,10 +126,10 @@ public class TransactionMethodBinding extends BaseResourceReturningMethodBinding
 	}
 
 	@Override
-	protected Object parseRequestObject(Request theRequest) {
+	protected Object parseRequestObject(Request theRequest) throws IOException {
 		EncodingEnum encoding = RestfulServer.determineResponseEncoding(theRequest);
 		IParser parser = encoding.newParser(getContext());
-		Bundle bundle = parser.parseBundle(theRequest.getInputReader());
+		Bundle bundle = parser.parseBundle(theRequest.getServletRequest().getReader());
 		return bundle;
 	}
 
@@ -139,10 +140,15 @@ public class TransactionMethodBinding extends BaseResourceReturningMethodBinding
 
 	@Override
 	public BaseHttpClientInvocation invokeClient(Object[] theArgs) throws InternalErrorException {
+		@SuppressWarnings("unchecked")
 		List<IResource> resources = (List<IResource>) theArgs[myTransactionParamIndex];
 		FhirContext context = getContext();
 		
-		return new HttpPostClientInvocation(context, resources);
+		return createTransactionInvocation(resources, context);
+	}
+
+	public static BaseHttpClientInvocation createTransactionInvocation(List<IResource> resources, FhirContext theContext) {
+		return new HttpPostClientInvocation(theContext, resources);
 	}
 
 }

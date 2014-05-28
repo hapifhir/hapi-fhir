@@ -476,8 +476,13 @@ public class XmlParser extends BaseParser implements IParser {
 				if (childDef == null) {
 					super.throwExceptionForUnknownChildType(nextChild, type);
 				}
-
-				if (extensionUrl != null && childName.equals("extension") == false) {
+				
+				if (nextValue instanceof ExtensionDt) {
+					
+					extensionUrl = ((ExtensionDt) nextValue).getUrlAsString();
+					encodeChildElementToStreamWriter(theResDef, theResource, theEventWriter, nextValue, childName, childDef, extensionUrl, theIncludedResource);
+					
+				} else	if (extensionUrl != null && childName.equals("extension") == false) {
 					RuntimeChildDeclaredExtensionDefinition extDef = (RuntimeChildDeclaredExtensionDefinition) nextChild;
 					if (extDef.isModifier()) {
 						theEventWriter.writeStartElement("modifierExtension");

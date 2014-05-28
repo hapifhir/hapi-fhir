@@ -20,15 +20,22 @@ package ca.uhn.fhir.rest.method;
  * #L%
  */
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Method;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.dstu.resource.Binary;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -36,10 +43,11 @@ import ca.uhn.fhir.rest.method.SearchMethodBinding.RequestType;
 import ca.uhn.fhir.rest.param.IParameter;
 import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.Constants;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
-public class ReadMethodBinding extends BaseResourceReturningMethodBinding {
+public class ReadMethodBinding extends BaseResourceReturningMethodBinding implements IClientResponseHandlerHandlesBinary<Object> {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ReadMethodBinding.class);
 
 	private Integer myIdIndex;
@@ -154,6 +162,28 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding {
 	@Override
 	public RestfulOperationSystemEnum getSystemOperationType() {
 		return null;
+	}
+
+	@Override
+	public boolean isBinary() {
+		return "Binary".equals(getResourceName());
+	}
+
+	@Override
+	public Object invokeClient(String theResponseMimeType, InputStream theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException, BaseServerResponseException {
+		byte[] contents = IOUtils.toByteArray(theResponseReader);
+		Binary resource = new Binary(theResponseMimeType, contents);
+		
+		switch (getMethodReturnType()) {
+		case BUNDLE:
+			return Bundle.withSingleResource(resource);
+		case LIST_OF_RESOURCES:
+			return Collections.singletonList(resource);
+		case RESOURCE:
+			return resource;
+		}
+		
+		throw new IllegalStateException(""+getMethodReturnType()); // should not happen
 	}
 
 }

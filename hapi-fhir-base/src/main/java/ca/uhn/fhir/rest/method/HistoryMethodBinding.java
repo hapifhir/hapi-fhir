@@ -155,7 +155,7 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 			if (nextResource.getId() == null || nextResource.getId().isEmpty()) {
 				throw new InternalErrorException("Server provided resource at index " + index + " with no ID set (using IResource#setId(IdDt))");
 			}
-			IdDt versionId = getIdFromMetadataOrNullIfNone(nextResource.getResourceMetadata(),ResourceMetadataKeyEnum.VERSION_ID);
+			IdDt versionId = (IdDt) ResourceMetadataKeyEnum.VERSION_ID.get(nextResource);
 			if (versionId == null||versionId.isEmpty()) {
 				throw new InternalErrorException("Server provided resource at index " + index + " with no Version ID set (using IResource#Resource.getResourceMetadata().put(ResourceMetadataKeyEnum.VERSION_ID, Object))");
 			}

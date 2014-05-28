@@ -25,6 +25,8 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.entity.AbstractHttpEntity;
+import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 
@@ -32,6 +34,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.TagList;
+import ca.uhn.fhir.model.dstu.resource.Binary;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
@@ -88,7 +91,15 @@ public abstract class BaseHttpClientInvocationWithContents extends BaseHttpClien
 		b.append(StringUtils.defaultString(myUrlExtension));
 
 		appendExtraParamsWithQuestionMark(theExtraParams, b, true);
+		String url = b.toString();
 
+		if (myResource != null && Binary.class.isAssignableFrom(myResource.getClass())) {
+			Binary binary = (Binary)myResource;
+			ByteArrayEntity entity = new ByteArrayEntity(binary.getContent(), ContentType.parse(binary.getContentType()));
+			HttpRequestBase retVal = createRequest(url, entity);
+			return retVal;
+		}
+		
 		IParser parser;
 		String contentType;
 		if (theEncoding == EncodingEnum.JSON) {
@@ -111,11 +122,11 @@ public abstract class BaseHttpClientInvocationWithContents extends BaseHttpClien
 
 		StringEntity entity = new StringEntity(contents, ContentType.create(contentType, "UTF-8"));
 
-		HttpRequestBase retVal = createRequest(b.toString(), entity);
+		HttpRequestBase retVal = createRequest(url, entity);
 		super.addHeadersToRequest(retVal);
 		return retVal;
 	}
 
-	protected abstract HttpRequestBase createRequest(String url, StringEntity theEntity);
+	protected abstract HttpRequestBase createRequest(String url, AbstractHttpEntity theEntity);
 
 }

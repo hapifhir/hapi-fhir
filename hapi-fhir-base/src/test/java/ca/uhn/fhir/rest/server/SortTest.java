@@ -155,6 +155,7 @@ public class SortTest {
 			ArrayList<Patient> retVal = new ArrayList<Patient>();
 
 			Patient p = new Patient();
+			p.setId("1");
 			p.addName().addFamily().setValue(theName.getValue());
 			SortSpec sort = theSort;
 			while (sort != null) {

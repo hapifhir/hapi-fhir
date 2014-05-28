@@ -20,16 +20,26 @@ package ca.uhn.fhir.model.api;
  * #L%
  */
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+import org.apache.commons.lang3.StringUtils;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.util.ElementUtil;
 
-public class Bundle extends BaseBundle /*implements IElement*/ {
-	
+public class Bundle extends BaseBundle /* implements IElement */{
+
 	//@formatter:off
 	/* ****************************************************
 	 * NB: add any new fields to the isEmpty() method!!!
@@ -71,6 +81,14 @@ public class Bundle extends BaseBundle /*implements IElement*/ {
 			myEntries = new ArrayList<BundleEntry>();
 		}
 		return myEntries;
+	}
+
+	@Override
+	public String toString() {
+		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
+		b.append(getEntries().size() + " entries");
+		b.append("id", getId());
+		return b.toString();
 	}
 
 	public StringDt getBundleId() {
@@ -179,13 +197,99 @@ public class Bundle extends BaseBundle /*implements IElement*/ {
 	public <T extends IResource> List<T> getResources(Class<T> theClass) {
 		ArrayList<T> retVal = new ArrayList<T>();
 		for (BundleEntry next : getEntries()) {
-			if (next.getResource()!=null && theClass.isAssignableFrom(next.getResource().getClass())) {
+			if (next.getResource() != null && theClass.isAssignableFrom(next.getResource().getClass())) {
 				@SuppressWarnings("unchecked")
 				T resource = (T) next.getResource();
 				retVal.add(resource);
 			}
 		}
 		return retVal;
+	}
+
+	/**
+	 * Creates a new entry using the given resource and populates it accordingly
+	 * 
+	 * @param theResource
+	 *            The resource to add
+	 */
+	public void addResource(IResource theResource, FhirContext theContext, String theServerBase) {
+		BundleEntry entry = addEntry();
+		entry.setResource(theResource);
+
+		entry.setResource(theResource);
+		TagList list = (TagList) theResource.getResourceMetadata().get(ResourceMetadataKeyEnum.TAG_LIST);
+		if (list != null) {
+			for (Tag tag : list) {
+				if (StringUtils.isNotBlank(tag.getTerm())) {
+					entry.addCategory().setTerm(tag.getTerm()).setLabel(tag.getLabel()).setScheme(tag.getScheme());
+				}
+			}
+		}
+
+		RuntimeResourceDefinition def = theContext.getResourceDefinition(theResource);
+
+		if (theResource.getId() != null && StringUtils.isNotBlank(theResource.getId().getValue())) {
+			entry.getTitle().setValue(def.getName() + " " + theResource.getId().getValue());
+
+			StringBuilder b = new StringBuilder();
+			b.append(theServerBase);
+			if (b.length() > 0 && b.charAt(b.length() - 1) != '/') {
+				b.append('/');
+			}
+			b.append(def.getName());
+			b.append('/');
+			String resId = theResource.getId().getUnqualifiedId();
+			b.append(resId);
+
+			entry.getId().setValue(b.toString());
+
+			if (isNotBlank(theResource.getId().getUnqualifiedVersionId())) {
+				b.append('/');
+				b.append(Constants.PARAM_HISTORY);
+				b.append('/');
+				b.append(theResource.getId().getUnqualifiedVersionId());
+			} else {
+				IdDt versionId = (IdDt) ResourceMetadataKeyEnum.VERSION_ID.get(theResource);
+				if (versionId != null) {
+					b.append('/');
+					b.append(Constants.PARAM_HISTORY);
+					b.append('/');
+					b.append(versionId.getValue());
+				}
+			}
+
+			entry.getLinkSelf().setValue(b.toString());
+		}
+
+		InstantDt published = (InstantDt) ResourceMetadataKeyEnum.PUBLISHED.get(theResource);
+		if (published == null) {
+			entry.getPublished().setToCurrentTimeInLocalTimeZone();
+		} else {
+			entry.setPublished(published);
+		}
+
+		InstantDt updated = (InstantDt) ResourceMetadataKeyEnum.UPDATED.get(theResource);
+		if (updated != null) {
+			entry.setUpdated(updated);
+		}
+
+		InstantDt deleted = (InstantDt) ResourceMetadataKeyEnum.DELETED_AT.get(theResource);
+		if (deleted != null) {
+			entry.setDeleted(deleted);
+		}
+
+		IdDt previous = (IdDt) ResourceMetadataKeyEnum.PREVIOUS_ID.get(theResource);
+		if (previous != null) {
+			entry.getLinkAlternate().setValue(previous.toQualifiedUrl(theServerBase, def.getName()));
+		}
+
+		TagList tagList = (TagList) ResourceMetadataKeyEnum.TAG_LIST.get(theResource);
+		if (tagList != null) {
+			for (Tag nextTag : tagList) {
+				entry.addCategory(nextTag);
+			}
+		}
+
 	}
 
 }

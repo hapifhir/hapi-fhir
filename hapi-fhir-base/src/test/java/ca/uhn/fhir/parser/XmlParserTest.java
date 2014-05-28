@@ -44,6 +44,7 @@ import ca.uhn.fhir.model.dstu.resource.DiagnosticReport;
 import ca.uhn.fhir.model.dstu.resource.Observation;
 import ca.uhn.fhir.model.dstu.resource.Organization;
 import ca.uhn.fhir.model.dstu.resource.Patient;
+import ca.uhn.fhir.model.dstu.resource.Query;
 import ca.uhn.fhir.model.dstu.resource.Specimen;
 import ca.uhn.fhir.model.dstu.resource.ValueSet;
 import ca.uhn.fhir.model.dstu.valueset.AddressUseEnum;
@@ -78,6 +79,45 @@ public class XmlParserTest {
 
 	}
 
+
+	@Test
+	public void testParseQuery() {
+		String msg = "<Query xmlns=\"http://hl7.org/fhir\">\n" + 
+				"  <text>\n" + 
+				"    <status value=\"generated\"/>\n" + 
+				"    <div xmlns=\"http://www.w3.org/1999/xhtml\">[Put rendering here]</div>\n" + 
+				"  </text>\n" + 
+				"\n" + 
+				"  <!--   this is an extermely simple query - a request to execute the query 'example' on the\n" + 
+				"   responder   -->\n" + 
+				"  <identifier value=\"urn:uuid:42b253f5-fa17-40d0-8da5-44aeb4230376\"/>\n" + 
+				"  <parameter url=\"http://hl7.org/fhir/query#_query\">\n" + 
+				"    <valueString value=\"example\"/>\n" + 
+				"  </parameter>\n" + 
+				"</Query>";
+		Query query = ourCtx.newXmlParser().parseResource(Query.class, msg);
+		
+		assertEquals("urn:uuid:42b253f5-fa17-40d0-8da5-44aeb4230376", query.getIdentifier().getValueAsString());
+		assertEquals("http://hl7.org/fhir/query#_query", query.getParameterFirstRep().getUrlAsString());
+		assertEquals("example", query.getParameterFirstRep().getValueAsPrimitive().getValueAsString());
+		
+	}
+	
+	@Test
+	public void testEncodeQuery() {
+		Query q = new Query();
+		ExtensionDt parameter = q.addParameter();
+		parameter.setUrl("http://foo").setValue(new StringDt("bar"));
+		
+		
+		String val = new FhirContext().newXmlParser().encodeResourceToString(q);
+		ourLog.info(val);
+
+		assertEquals("<Query xmlns=\"http://hl7.org/fhir\"><parameter url=\"http://foo\"><valueString value=\"bar\"/></parameter></Query>", val);
+		
+	}
+
+	
 	@Test
 	public void testEncodeBinaryResource() {
 

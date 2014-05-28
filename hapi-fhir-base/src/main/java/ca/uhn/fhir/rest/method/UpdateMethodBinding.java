@@ -78,6 +78,13 @@ public class UpdateMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 		 * we allow it in the PUT URL as well..
 		 */
 		String locationHeader = theRequest.getServletRequest().getHeader(Constants.HEADER_CONTENT_LOCATION);
+		IdDt id = new IdDt(locationHeader);
+		if (isNotBlank(id.getResourceType())) {
+			if (!getResourceName().equals(id.getResourceType())) {
+				throw new InvalidRequestException("Attempting to update '"+getResourceName()+ "' but content-location header specifies different resource type '"+id.getResourceType()+"' - header value: " + locationHeader);
+			}
+		}
+		
 		if (isNotBlank(locationHeader)) {
 			MethodOutcome mo = new MethodOutcome();
 			parseContentLocation(mo, getResourceName(), locationHeader);

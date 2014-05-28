@@ -47,6 +47,16 @@ public interface IGenericClient {
 	 */
 	MethodOutcome create(IResource theResource);
 
+	
+	/**
+	 * Implementation of the "transaction" method.
+	 * 
+	 * @param theResources
+	 *            The resources to create/update in a single transaction
+	 * @return A list of resource stubs (<b>these will not be fully populated</b>) containing IDs and other {@link IResource#getResourceMetadata() metadata}
+	 */
+	List<IResource> transaction(List<IResource> theResources);
+	
 	/**
 	 * Implementation of the "delete instance" method.
 	 * 

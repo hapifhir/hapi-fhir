@@ -17,6 +17,7 @@ import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.FhirTerser;
 
 public class FhirSystemDao extends BaseFhirDao implements IFhirSystemDao {
@@ -66,7 +67,9 @@ public class FhirSystemDao extends BaseFhirDao implements IFhirSystemDao {
 				myEntityManager.flush();
 			}
 			
-			idConversions.put(nextId, new IdDt(resourceName + '/' + entity.getId()));
+			IdDt newId = new IdDt(resourceName + '/' + entity.getId());
+			ourLog.info("Incoming ID[{}] has been assigned ID[{}]", nextId, newId);
+			idConversions.put(nextId, newId);
 			persistedResources.add(entity);
 
 		}

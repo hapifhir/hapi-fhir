@@ -59,6 +59,7 @@ import ca.uhn.fhir.rest.method.HttpGetClientInvocation;
 import ca.uhn.fhir.rest.method.IClientResponseHandler;
 import ca.uhn.fhir.rest.method.ReadMethodBinding;
 import ca.uhn.fhir.rest.method.SearchMethodBinding;
+import ca.uhn.fhir.rest.method.TransactionMethodBinding;
 import ca.uhn.fhir.rest.method.UpdateMethodBinding;
 import ca.uhn.fhir.rest.method.ValidateMethodBinding;
 import ca.uhn.fhir.rest.server.Constants;
@@ -214,6 +215,18 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	private String toResourceName(Class<? extends IResource> theType) {
 		return myContext.getResourceDefinition(theType).getName();
+	}
+
+	@Override
+	public List<IResource> transaction(List<IResource> theResources) {
+		BaseHttpClientInvocation invocation = TransactionMethodBinding.createTransactionInvocation(theResources, myContext);
+		if (isKeepResponses()) {
+			myLastRequest = invocation.asHttpRequest(getServerBase(), createExtraParams(), getEncoding());
+		}
+
+		Bundle resp = invokeClient(new BundleResponseHandler(null), invocation, myLogRequestAndResponse);
+
+		return resp.toListOfResources();
 	}
 
 	@Override

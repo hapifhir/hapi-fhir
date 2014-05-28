@@ -28,7 +28,7 @@ public class TestRestfulServer extends RestfulServer {
 			ourLog.info("Failed to create database: {}",e.getMessage());
 		}
 		
-		myAppCtx = new ClassPathXmlApplicationContext("fhir-spring-uhnfhirtest-config.xml");
+		myAppCtx = new ClassPathXmlApplicationContext("fhir-spring-uhnfhirtest-config.xml", "hapi-jpaserver-springbeans.xml");
 		
 		Collection<IResourceProvider> beans = myAppCtx.getBeansOfType(IResourceProvider.class).values();
 		for (IResourceProvider nextResourceProvider : beans) {

@@ -4,10 +4,18 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
+import ca.uhn.fhir.model.dstu.resource.CarePlan;
 import ca.uhn.fhir.parser.DataFormatException;
 
 public class ModelScannerTest {
 
+	/** This failed at one point */
+	@SuppressWarnings("unused")
+	@Test
+	public void testCarePlan() throws DataFormatException {
+		new ModelScanner(CarePlan.class);
+	}
+	
 	
 	@Test
 	public void testScanExtensionTypes() throws DataFormatException {

@@ -1,4 +1,4 @@
-package ca.uhn.fhir.model.api;
+package ca.uhn.fhir.context;
 
 /*
  * #%L
@@ -20,11 +20,21 @@ package ca.uhn.fhir.model.api;
  * #L%
  */
 
+import java.lang.reflect.Field;
 
+import ca.uhn.fhir.model.api.ExtensionDt;
+import ca.uhn.fhir.model.api.IElement;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
 
-public interface IElement {
+public class RuntimeChildExtensionDt extends RuntimeChildAny {
 
-	boolean isEmpty();
+	public RuntimeChildExtensionDt(Field theField, String theElementName, Child theChildAnnotation, Description theDescriptionAnnotation) {
+		super(theField, theElementName, theChildAnnotation, theDescriptionAnnotation);
+	}
 
-	
+	public IElement newInstance() {
+		return new ExtensionDt();
+	}
+
 }

@@ -20,6 +20,8 @@ package ca.uhn.fhir.model.api;
  * #L%
  */
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.apache.commons.lang3.Validate;
 
 import ca.uhn.fhir.model.primitive.InstantDt;
@@ -48,6 +50,18 @@ public class BundleEntry extends BaseBundle {
 		Tag retVal = new Tag();
 		getCategories().add(retVal);
 		return retVal;
+	}
+
+	@Override
+	public String toString() {
+		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
+		if (getResource() != null) {
+			b.append("type", getResource().getClass().getSimpleName());
+		} else {
+			b.append("No resource");
+		}
+		b.append("id", getId());
+		return b.toString();
 	}
 
 	public void addCategory(Tag theTag) {

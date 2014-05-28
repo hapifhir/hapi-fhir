@@ -24,6 +24,12 @@
 			<action type="add">
 				Transaction method now supported in servers
 			</action>
+			<action type="add">
+				Support for Binary resources added (in servers, clients, parsers, etc.)
+			</action>
+			<action type="fix">
+				Support for Query resources fixed (in parser)
+			</action>
         </release>			
 	</body>
 </document>

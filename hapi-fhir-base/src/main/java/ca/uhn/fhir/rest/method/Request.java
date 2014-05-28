@@ -39,7 +39,6 @@ public class Request {
 	private String myCompleteUrl;
 	private String myFhirServerBase;
 	private IdDt myId;
-	private Reader myInputReader;
 	private String myOperation;
 	private Map<String, String[]> myParameters;
 	private RequestType myRequestType;
@@ -60,10 +59,6 @@ public class Request {
 
 	public IdDt getId() {
 		return myId;
-	}
-
-	public Reader getInputReader() {
-		return myInputReader;
 	}
 
 	public String getOperation() {
@@ -109,10 +104,6 @@ public class Request {
 
 	public void setId(IdDt theId) {
 		myId = theId;
-	}
-
-	public void setInputReader(Reader theReader) {
-		myInputReader = theReader;
 	}
 
 	public void setOperation(String theOperation) {

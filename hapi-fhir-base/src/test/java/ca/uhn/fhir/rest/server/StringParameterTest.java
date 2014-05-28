@@ -61,7 +61,7 @@ public class StringParameterTest {
 			assertEquals(0, new FhirContext().newXmlParser().parseBundle(responseContent).getEntries().size());
 		}
 	}
-	
+
 	@Test
 	public void testRawString() throws Exception {
 		{
@@ -104,7 +104,7 @@ public class StringParameterTest {
 			assertEquals(0, new FhirContext().newXmlParser().parseBundle(responseContent).getEntries().size());
 		}
 	}
-	
+
 	@AfterClass
 	public static void afterClass() throws Exception {
 		ourServer.stop();
@@ -142,27 +142,32 @@ public class StringParameterTest {
 			ArrayList<Patient> retVal = new ArrayList<Patient>();
 
 			if (theParam.isExact() && theParam.getValue().equals("aaa")) {
-				retVal.add(new Patient());
+				Patient patient = new Patient();
+				patient.setId("1");
+				retVal.add(patient);
 			}
 			if (!theParam.isExact() && theParam.getValue().toLowerCase().equals("aaa")) {
-				retVal.add(new Patient());
+				Patient patient = new Patient();
+				patient.setId("2");
+				retVal.add(patient);
 			}
 
 			return retVal;
 		}
 
-		
 		@Search
 		public List<Patient> findPatient(@RequiredParam(name = "plain") String theParam) {
 			ArrayList<Patient> retVal = new ArrayList<Patient>();
 
 			if (theParam.toLowerCase().equals("aaa")) {
-				retVal.add(new Patient());
+				Patient patient = new Patient();
+				patient.setId("1");
+				retVal.add(patient);
 			}
 
 			return retVal;
 		}
-		
+
 		@Override
 		public Class<? extends IResource> getResourceType() {
 			return Patient.class;

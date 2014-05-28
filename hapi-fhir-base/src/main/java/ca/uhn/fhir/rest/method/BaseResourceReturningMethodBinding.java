@@ -38,6 +38,7 @@ import java.util.UUID;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.utils.DateUtils;
 
@@ -255,6 +256,12 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 			NarrativeModeEnum theNarrativeMode) throws IOException {
 		assert !theServerBase.endsWith("/");
 
+		for (IResource next : theResult) {
+			if (next.getId() == null || next.getId().isEmpty()) {
+				throw new InternalErrorException("Server method returned resource of type[" + next.getClass().getSimpleName() + "] with no ID specified (IResource#setId(IdDt) must be called)");
+			}
+		}
+		
 		theHttpResponse.setStatus(200);
 
 		if (theRequestIsBrowser && theServer.isUseBrowserFriendlyContentTypes()) {
@@ -318,7 +325,7 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 
 		theServer.addHeadersToResponse(theHttpResponse);
 
-		InstantDt lastUpdated = getInstantFromMetadataOrNullIfNone(theResource.getResourceMetadata(), ResourceMetadataKeyEnum.UPDATED);
+		InstantDt lastUpdated = (InstantDt) ResourceMetadataKeyEnum.UPDATED.get(theResource);
 		if (lastUpdated != null) {
 			theHttpResponse.addHeader(Constants.HEADER_LAST_MODIFIED, lastUpdated.getValueAsString());
 		}
@@ -348,7 +355,7 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 	/**
 	 * Subclasses may override
 	 */
-	protected Object parseRequestObject(@SuppressWarnings("unused") Request theRequest) {
+	protected Object parseRequestObject(@SuppressWarnings("unused") Request theRequest) throws IOException {
 		return null;
 	}
 
@@ -361,154 +368,14 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 		bundle.getLinkSelf().setValue(theCompleteUrl);
 
 		for (IResource next : theResult) {
-			BundleEntry entry = new BundleEntry();
-			bundle.getEntries().add(entry);
-
-			entry.setResource(next);
-			TagList list = (TagList) next.getResourceMetadata().get(ResourceMetadataKeyEnum.TAG_LIST);
-			if (list != null) {
-				for (Tag tag : list) {
-					if (StringUtils.isNotBlank(tag.getTerm())) {
-						entry.addCategory().setTerm(tag.getTerm()).setLabel(tag.getLabel()).setScheme(tag.getScheme());
-					}
-				}
-			}
-
-			RuntimeResourceDefinition def = theContext.getResourceDefinition(next);
-
-			if (next.getId() != null && StringUtils.isNotBlank(next.getId().getValue())) {
-				entry.getTitle().setValue(def.getName() + " " + next.getId().getValue());
-
-				StringBuilder b = new StringBuilder();
-				b.append(theServerBase);
-				if (b.length() > 0 && b.charAt(b.length() - 1) != '/') {
-					b.append('/');
-				}
-				b.append(def.getName());
-				b.append('/');
-				String resId = next.getId().getUnqualifiedId();
-				b.append(resId);
-
-				entry.getId().setValue(b.toString());
-
-				if (isNotBlank(next.getId().getUnqualifiedVersionId())) {
-					b.append('/');
-					b.append(Constants.PARAM_HISTORY);
-					b.append('/');
-					b.append(next.getId().getUnqualifiedVersionId());
-				} else {
-					IdDt versionId = getIdFromMetadataOrNullIfNone(next.getResourceMetadata(), ResourceMetadataKeyEnum.VERSION_ID);
-					if (versionId != null) {
-						b.append('/');
-						b.append(Constants.PARAM_HISTORY);
-						b.append('/');
-						b.append(versionId.getValue());
-					}
-				}
-
-				InstantDt published = getInstantFromMetadataOrNullIfNone(next.getResourceMetadata(), ResourceMetadataKeyEnum.PUBLISHED);
-				if (published == null) {
-					entry.getPublished().setToCurrentTimeInLocalTimeZone();
-				} else {
-					entry.setPublished(published);
-				}
-
-				InstantDt updated = getInstantFromMetadataOrNullIfNone(next.getResourceMetadata(), ResourceMetadataKeyEnum.UPDATED);
-				if (updated != null) {
-					entry.setUpdated(updated);
-				}
-
-				InstantDt deleted = getInstantFromMetadataOrNullIfNone(next.getResourceMetadata(), ResourceMetadataKeyEnum.DELETED_AT);
-				if (deleted != null) {
-					entry.setDeleted(deleted);
-				}
-
-				IdDt previous = getIdFromMetadataOrNullIfNone(next.getResourceMetadata(), ResourceMetadataKeyEnum.PREVIOUS_ID);
-				if (previous != null) {
-					entry.getLinkAlternate().setValue(previous.toQualifiedUrl(theServerBase, def.getName()));
-				}
-
-				TagList tagList = getTagListFromMetadataOrNullIfNone(next.getResourceMetadata(), ResourceMetadataKeyEnum.TAG_LIST);
-				if (tagList != null) {
-					for (Tag nextTag : tagList) {
-						entry.addCategory(nextTag);
-					}
-				}
-
-//				boolean haveQ = false;
-//				if (thePrettyPrint) {
-//					b.append('?').append(Constants.PARAM_PRETTY).append("=true");
-//					haveQ = true;
-//				}
-//				if (theResponseEncoding == EncodingEnum.JSON) {
-//					if (!haveQ) {
-//						b.append('?');
-//						haveQ = true;
-//					} else {
-//						b.append('&');
-//					}
-//					b.append(Constants.PARAM_FORMAT).append("=json");
-//				}
-//				if (theNarrativeMode != NarrativeModeEnum.NORMAL) {
-//					b.append(Constants.PARAM_NARRATIVE).append("=").append(theNarrativeMode.name().toLowerCase());
-//				}
-				entry.getLinkSelf().setValue(b.toString());
-			}
+			bundle.addResource(next, theContext, theServerBase);
 		}
 
 		bundle.getTotalResults().setValue(theResult.size());
 		return bundle;
 	}
 
-	private static InstantDt getInstantFromMetadataOrNullIfNone(Map<ResourceMetadataKeyEnum, Object> theResourceMetadata, ResourceMetadataKeyEnum theKey) {
-		Object retValObj = theResourceMetadata.get(theKey);
-		if (retValObj == null) {
-			return null;
-		} else if (retValObj instanceof Date) {
-			return new InstantDt((Date) retValObj);
-		} else if (retValObj instanceof InstantDt) {
-			if (((InstantDt) retValObj).isEmpty()) {
-				return null;
-			} else {
-				return (InstantDt) retValObj;
-			}
-		}
-		throw new InternalErrorException("Found an object of type '" + retValObj.getClass().getCanonicalName() + "' in resource metadata for key " + theKey.name() + " - Expected " + InstantDt.class.getCanonicalName());
-	}
 
-	private static TagList getTagListFromMetadataOrNullIfNone(Map<ResourceMetadataKeyEnum, Object> theResourceMetadata, ResourceMetadataKeyEnum theKey) {
-		Object retValObj = theResourceMetadata.get(theKey);
-		if (retValObj == null) {
-			return null;
-		} else if (retValObj instanceof TagList) {
-			if (((TagList) retValObj).isEmpty()) {
-				return null;
-			} else {
-				return (TagList) retValObj;
-			}
-		}
-		throw new InternalErrorException("Found an object of type '" + retValObj.getClass().getCanonicalName() + "' in resource metadata for key " + theKey.name() + " - Expected " + TagList.class.getCanonicalName());
-	}
-
-	protected static IdDt getIdFromMetadataOrNullIfNone(Map<ResourceMetadataKeyEnum, Object> theResourceMetadata, ResourceMetadataKeyEnum theKey) {
-		Object retValObj = theResourceMetadata.get(theKey);
-		if (retValObj == null) {
-			return null;
-		} else if (retValObj instanceof String) {
-			if (isNotBlank((String) retValObj)) {
-				return new IdDt((String) retValObj);
-			} else {
-				return null;
-			}
-		} else if (retValObj instanceof IdDt) {
-			if (((IdDt) retValObj).isEmpty()) {
-				return null;
-			} else {
-				return (IdDt) retValObj;
-			}
-		}
-		throw new InternalErrorException("Found an object of type '" + retValObj.getClass().getCanonicalName() + "' in resource metadata for key " + theKey.name() + " - Expected " + IdDt.class.getCanonicalName());
-	}
 
 	public enum MethodReturnTypeEnum {
 		BUNDLE, LIST_OF_RESOURCES, RESOURCE

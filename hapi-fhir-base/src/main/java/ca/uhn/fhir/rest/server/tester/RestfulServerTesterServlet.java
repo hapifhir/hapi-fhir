@@ -176,7 +176,8 @@ public class RestfulServerTesterServlet extends HttpServlet {
 		GenericClient client = (GenericClient) myCtx.newRestfulGenericClient(myServerBase);
 		client.setKeepResponses(true);
 		boolean returnsResource;
-
+		long latency=0;
+		
 		try {
 			String method = theReq.getParameter("method");
 
@@ -190,127 +191,129 @@ public class RestfulServerTesterServlet extends HttpServlet {
 				client.setEncoding(EncodingEnum.JSON);
 			}
 
-				if ("conformance".equals(method)) {
-					returnsResource = true;
-					client.conformance();
-				} else if ("read".equals(method)) {
-					RuntimeResourceDefinition def = getResourceType(theReq);
-					String id = StringUtils.defaultString(theReq.getParameter("id"));
-					if (StringUtils.isBlank(id)) {
-						theResp.sendError(Constants.STATUS_HTTP_400_BAD_REQUEST, "No ID specified");
-					}
-					returnsResource = true;
+			long start = System.currentTimeMillis();
+			if ("conformance".equals(method)) {
+				returnsResource = true;
+				client.conformance();
+			} else if ("read".equals(method)) {
+				RuntimeResourceDefinition def = getResourceType(theReq);
+				String id = StringUtils.defaultString(theReq.getParameter("id"));
+				if (StringUtils.isBlank(id)) {
+					theResp.sendError(Constants.STATUS_HTTP_400_BAD_REQUEST, "No ID specified");
+				}
+				returnsResource = true;
 
-					client.read(def.getImplementingClass(), new IdDt(id));
+				client.read(def.getImplementingClass(), new IdDt(id));
 
-				} else if ("vread".equals(method)) {
-					RuntimeResourceDefinition def = getResourceType(theReq);
-					String id = StringUtils.defaultString(theReq.getParameter("id"));
-					if (StringUtils.isBlank(id)) {
-						theResp.sendError(Constants.STATUS_HTTP_400_BAD_REQUEST, "No ID specified");
-					}
-
-					String versionId = StringUtils.defaultString(theReq.getParameter("versionid"));
-					if (StringUtils.isBlank(versionId)) {
-						theResp.sendError(Constants.STATUS_HTTP_400_BAD_REQUEST, "No Version ID specified");
-					}
-					returnsResource = true;
-
-					client.vread(def.getImplementingClass(), new IdDt(id), new IdDt(versionId));
-
-				} else if ("delete".equals(method)) {
-					RuntimeResourceDefinition def = getResourceType(theReq);
-					String id = StringUtils.defaultString(theReq.getParameter("id"));
-					if (StringUtils.isBlank(id)) {
-						theResp.sendError(Constants.STATUS_HTTP_400_BAD_REQUEST, "No ID specified");
-					}
-
-					returnsResource = false;
-
-					client.delete(def.getImplementingClass(), new IdDt(id));
-
-				} else if ("history-instance".equals(method)) {
-					RuntimeResourceDefinition def = getResourceType(theReq);
-					String id = StringUtils.defaultString(theReq.getParameter("id"));
-					if (StringUtils.isBlank(id)) {
-						theResp.sendError(Constants.STATUS_HTTP_400_BAD_REQUEST, "No ID specified");
-					}
-
-					returnsResource = false;
-
-					client.history(def.getImplementingClass(), new IdDt(id));
-
-				} else if ("create".equals(method)) {
-					IResource resource = parseIncomingResource(theReq, theResp, client);
-					returnsResource = false;
-
-					client.create(resource);
-
-				} else if ("validate".equals(method)) {
-					IResource resource = parseIncomingResource(theReq, theResp, client);
-					returnsResource = false;
-
-					client.validate(resource);
-
-				} else if ("update".equals(method)) {
-					String id = StringUtils.defaultString(theReq.getParameter("id"));
-					if (StringUtils.isBlank(id)) {
-						theResp.sendError(Constants.STATUS_HTTP_400_BAD_REQUEST, "No ID specified");
-					}
-
-					IResource resource = parseIncomingResource(theReq, theResp, client);
-					returnsResource = false;
-
-					client.update(new IdDt(id), resource);
-
-				} else if ("searchType".equals(method)) {
-					Map<String, List<IQueryParameterType>> params = new HashMap<String, List<IQueryParameterType>>();
-
-					HashSet<String> hashSet = new HashSet<String>(theReq.getParameterMap().keySet());
-					String paramName = null;
-					IQueryParameterType paramValue = null;
-					while (hashSet.isEmpty() == false) {
-
-						String nextKey = hashSet.iterator().next();
-						String nextValue = theReq.getParameter(nextKey);
-						paramName = null;
-						paramValue = null;
-
-						if (nextKey.startsWith("param.token.")) {
-							int prefixLength = "param.token.".length();
-							paramName = nextKey.substring(prefixLength + 2);
-							String systemKey = "param.token." + "1." + paramName;
-							String valueKey = "param.token." + "2." + paramName;
-							String system = theReq.getParameter(systemKey);
-							String value = theReq.getParameter(valueKey);
-							paramValue = new IdentifierDt(system, value);
-							hashSet.remove(systemKey);
-							hashSet.remove(valueKey);
-						} else if (nextKey.startsWith("param.string.")) {
-							paramName = nextKey.substring("param.string.".length());
-							paramValue = new StringDt(nextValue);
-						}
-
-						if (paramName != null) {
-							if (params.containsKey(paramName) == false) {
-								params.put(paramName, new ArrayList<IQueryParameterType>());
-							}
-							params.get(paramName).add(paramValue);
-						}
-
-						hashSet.remove(nextKey);
-					}
-
-					RuntimeResourceDefinition def = getResourceType(theReq);
-
-					returnsResource = false;
-					client.search(def.getImplementingClass(), params);
-
-				} else {
-					theResp.sendError(Constants.STATUS_HTTP_400_BAD_REQUEST, "Invalid method: " + method);
-					return;
+			} else if ("vread".equals(method)) {
+				RuntimeResourceDefinition def = getResourceType(theReq);
+				String id = StringUtils.defaultString(theReq.getParameter("id"));
+				if (StringUtils.isBlank(id)) {
+					theResp.sendError(Constants.STATUS_HTTP_400_BAD_REQUEST, "No ID specified");
 				}
 
+				String versionId = StringUtils.defaultString(theReq.getParameter("versionid"));
+				if (StringUtils.isBlank(versionId)) {
+					theResp.sendError(Constants.STATUS_HTTP_400_BAD_REQUEST, "No Version ID specified");
+				}
+				returnsResource = true;
+
+				client.vread(def.getImplementingClass(), new IdDt(id), new IdDt(versionId));
+
+			} else if ("delete".equals(method)) {
+				RuntimeResourceDefinition def = getResourceType(theReq);
+				String id = StringUtils.defaultString(theReq.getParameter("id"));
+				if (StringUtils.isBlank(id)) {
+					theResp.sendError(Constants.STATUS_HTTP_400_BAD_REQUEST, "No ID specified");
+				}
+
+				returnsResource = false;
+
+				client.delete(def.getImplementingClass(), new IdDt(id));
+
+			} else if ("history-instance".equals(method)) {
+				RuntimeResourceDefinition def = getResourceType(theReq);
+				String id = StringUtils.defaultString(theReq.getParameter("id"));
+				if (StringUtils.isBlank(id)) {
+					theResp.sendError(Constants.STATUS_HTTP_400_BAD_REQUEST, "No ID specified");
+				}
+
+				returnsResource = false;
+
+				client.history(def.getImplementingClass(), new IdDt(id));
+
+			} else if ("create".equals(method)) {
+				IResource resource = parseIncomingResource(theReq, theResp, client);
+				returnsResource = false;
+
+				client.create(resource);
+
+			} else if ("validate".equals(method)) {
+				IResource resource = parseIncomingResource(theReq, theResp, client);
+				returnsResource = false;
+
+				client.validate(resource);
+
+			} else if ("update".equals(method)) {
+				String id = StringUtils.defaultString(theReq.getParameter("id"));
+				if (StringUtils.isBlank(id)) {
+					theResp.sendError(Constants.STATUS_HTTP_400_BAD_REQUEST, "No ID specified");
+				}
+
+				IResource resource = parseIncomingResource(theReq, theResp, client);
+				returnsResource = false;
+
+				client.update(new IdDt(id), resource);
+
+			} else if ("searchType".equals(method)) {
+				Map<String, List<IQueryParameterType>> params = new HashMap<String, List<IQueryParameterType>>();
+
+				HashSet<String> hashSet = new HashSet<String>(theReq.getParameterMap().keySet());
+				String paramName = null;
+				IQueryParameterType paramValue = null;
+				while (hashSet.isEmpty() == false) {
+
+					String nextKey = hashSet.iterator().next();
+					String nextValue = theReq.getParameter(nextKey);
+					paramName = null;
+					paramValue = null;
+
+					if (nextKey.startsWith("param.token.")) {
+						int prefixLength = "param.token.".length();
+						paramName = nextKey.substring(prefixLength + 2);
+						String systemKey = "param.token." + "1." + paramName;
+						String valueKey = "param.token." + "2." + paramName;
+						String system = theReq.getParameter(systemKey);
+						String value = theReq.getParameter(valueKey);
+						paramValue = new IdentifierDt(system, value);
+						hashSet.remove(systemKey);
+						hashSet.remove(valueKey);
+					} else if (nextKey.startsWith("param.string.")) {
+						paramName = nextKey.substring("param.string.".length());
+						paramValue = new StringDt(nextValue);
+					}
+
+					if (paramName != null) {
+						if (params.containsKey(paramName) == false) {
+							params.put(paramName, new ArrayList<IQueryParameterType>());
+						}
+						params.get(paramName).add(paramValue);
+					}
+
+					hashSet.remove(nextKey);
+				}
+
+				RuntimeResourceDefinition def = getResourceType(theReq);
+
+				returnsResource = false;
+				client.search(def.getImplementingClass(), params);
+
+			} else {
+				theResp.sendError(Constants.STATUS_HTTP_400_BAD_REQUEST, "Invalid method: " + method);
+				return;
+			}
+
+			latency = System.currentTimeMillis() - start;
 		} catch (DataFormatException e) {
 			ourLog.error("Failed to invoke method", e);
 			returnsResource = false;
@@ -350,13 +353,13 @@ public class RestfulServerTesterServlet extends HttpServlet {
 				}
 			}
 			String resultSyntaxHighlighterClass;
-			String requestUrl = lastRequest!=null?lastRequest.getURI().toASCIIString():null;
-			String action = client.getLastRequest()!=null?client.getLastRequest().getMethod():null;
-			String resultStatus = client.getLastResponse()!=null?client.getLastResponse().getStatusLine().toString():null;
+			String requestUrl = lastRequest != null ? lastRequest.getURI().toASCIIString() : null;
+			String action = client.getLastRequest() != null ? client.getLastRequest().getMethod() : null;
+			String resultStatus = client.getLastResponse() != null ? client.getLastResponse().getStatusLine().toString() : null;
 			String resultBody = client.getLastResponseBody();
 
 			HttpResponse lastResponse = client.getLastResponse();
-			ContentType ct = lastResponse!=null?ContentType.get(lastResponse.getEntity()):null;
+			ContentType ct = lastResponse != null ? ContentType.get(lastResponse.getEntity()) : null;
 			String mimeType = ct != null ? ct.getMimeType() : null;
 			EncodingEnum ctEnum = EncodingEnum.forContentType(mimeType);
 			String narrativeString = "";
@@ -381,8 +384,8 @@ public class RestfulServerTesterServlet extends HttpServlet {
 				}
 			}
 
-			Header[] requestHeaders = lastRequest!=null?applyHeaderFilters(lastRequest.getAllHeaders()): new Header[0];
-			Header[] responseHeaders = lastResponse!=null?applyHeaderFilters(lastResponse.getAllHeaders()):new Header[0];
+			Header[] requestHeaders = lastRequest != null ? applyHeaderFilters(lastRequest.getAllHeaders()) : new Header[0];
+			Header[] responseHeaders = lastResponse != null ? applyHeaderFilters(lastResponse.getAllHeaders()) : new Header[0];
 
 			WebContext ctx = new WebContext(theReq, theResp, theReq.getServletContext(), theReq.getLocale());
 			ctx.setVariable("base", myServerBase);
@@ -396,6 +399,7 @@ public class RestfulServerTesterServlet extends HttpServlet {
 			ctx.setVariable("requestHeaders", requestHeaders);
 			ctx.setVariable("responseHeaders", responseHeaders);
 			ctx.setVariable("narrative", narrativeString);
+			ctx.setVariable("latencyMs", latency);
 
 			myTemplateEngine.process(PUBLIC_TESTER_RESULT_HTML, ctx, theResp.getWriter());
 		} catch (Exception e) {
@@ -415,8 +419,8 @@ public class RestfulServerTesterServlet extends HttpServlet {
 		if (theClient.getEncoding() == null) {
 			if (resourceText.trim().startsWith("{")) {
 				resource = myCtx.newJsonParser().parseResource(def.getImplementingClass(), resourceText);
-			}else {
-				resource = myCtx.newXmlParser().parseResource(def.getImplementingClass(), resourceText);				
+			} else {
+				resource = myCtx.newXmlParser().parseResource(def.getImplementingClass(), resourceText);
 			}
 		} else if (theClient.getEncoding() == EncodingEnum.XML) {
 			resource = myCtx.newXmlParser().parseResource(def.getImplementingClass(), resourceText);

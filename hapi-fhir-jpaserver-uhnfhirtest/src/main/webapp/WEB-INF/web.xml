@@ -9,9 +9,20 @@
 		<load-on-startup>1</load-on-startup>
 	</servlet>
 
+	<servlet>
+		<servlet-name>testerServlet</servlet-name>
+		<servlet-class>ca.uhn.fhirtest.TesterServlet</servlet-class>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+
 	<servlet-mapping>
 		<servlet-name>fhirServlet</servlet-name>
 		<url-pattern>/base/*</url-pattern>
+	</servlet-mapping>
+
+	<servlet-mapping>
+		<servlet-name>testerServlet</servlet-name>
+		<url-pattern>/*</url-pattern>
 	</servlet-mapping>
 
 </web-app>

@@ -13,47 +13,7 @@
 	<context:annotation-config />
 	<context:mbean-server />
 
-	<bean id="myDiagnosticReportDao" class="ca.uhn.fhir.jpa.dao.FhirResourceDao">
-		<property name="resourceType" value="ca.uhn.fhir.model.dstu.resource.DiagnosticReport"/>
-	</bean>
-	<bean id="myDiagnosticReportRp" class="ca.uhn.test.jpasrv.DiagnosticReportResourceProvider">
-		<property name="dao" ref="myDiagnosticReportDao"/>
-	</bean>
-
-	<bean id="myPatientDao" class="ca.uhn.fhir.jpa.dao.FhirResourceDao">
-		<property name="resourceType" value="ca.uhn.fhir.model.dstu.resource.Patient"/>
-	</bean>
-	<bean id="myPatientRp" class="ca.uhn.test.jpasrv.PatientResourceProvider">
-		<property name="dao" ref="myPatientDao"/>
-	</bean>
-
-	<bean id="myObservationDao" class="ca.uhn.fhir.jpa.dao.FhirResourceDao">
-		<property name="resourceType" value="ca.uhn.fhir.model.dstu.resource.Observation"/>
-	</bean>
-	<bean id="myObservationRp" class="ca.uhn.test.jpasrv.ObservationResourceProvider">
-		<property name="dao" ref="myObservationDao"/>
-	</bean>
-
-	<bean id="myOrganizationDao" class="ca.uhn.fhir.jpa.dao.FhirResourceDao">
-		<property name="resourceType" value="ca.uhn.fhir.model.dstu.resource.Organization"/>
-	</bean>
-	<bean id="myOrganizationRp" class="ca.uhn.test.jpasrv.OrganizationResourceProvider">
-		<property name="dao" ref="myOrganizationDao"/>
-	</bean>
-
-	<bean id="myLocationDao" class="ca.uhn.fhir.jpa.dao.FhirResourceDao">
-		<property name="resourceType" value="ca.uhn.fhir.model.dstu.resource.Location"/>
-	</bean>
-	<bean id="myLocationRp" class="ca.uhn.test.jpasrv.LocationResourceProvider">
-		<property name="dao" ref="myLocationDao"/>
-	</bean>
-
-	<bean id="myQuestionnaireDao" class="ca.uhn.fhir.jpa.dao.FhirResourceDao">
-		<property name="resourceType" value="ca.uhn.fhir.model.dstu.resource.Questionnaire"/>
-	</bean>
-	<bean id="myQuestionnaireRp" class="ca.uhn.test.jpasrv.QuestionnaireResourceProvider">
-		<property name="dao" ref="myQuestionnaireDao"/>
-	</bean>
+	<!-- <import resource="classpath:hapi-jpaserver-springbeans.xml" /> -->
 
 	<bean id="mySystemDao" class="ca.uhn.fhir.jpa.dao.FhirSystemDao">
 	</bean>

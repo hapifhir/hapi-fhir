@@ -41,6 +41,7 @@ public class RuntimeCompositeDatatypeDefinition extends BaseRuntimeElementCompos
 
 	}
 
+	@Override
 	public boolean isSpecialization() {
 		return mySpecialization;
 	}

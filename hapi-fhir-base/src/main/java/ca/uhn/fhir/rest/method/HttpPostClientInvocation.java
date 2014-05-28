@@ -23,7 +23,7 @@ package ca.uhn.fhir.rest.method;
 import java.util.List;
 
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
+import org.apache.http.entity.AbstractHttpEntity;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
@@ -47,7 +47,7 @@ public class HttpPostClientInvocation extends BaseHttpClientInvocationWithConten
 
 
 	@Override
-	protected HttpPost createRequest(String url, StringEntity theEntity) {
+	protected HttpPost createRequest(String url, AbstractHttpEntity theEntity) {
 		HttpPost retVal = new HttpPost(url);
 		retVal.setEntity(theEntity);
 		return retVal;

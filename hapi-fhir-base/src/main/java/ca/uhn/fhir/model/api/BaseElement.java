@@ -116,6 +116,11 @@ public abstract class BaseElement implements IIdentifiableElement, ISupportsUnde
 		myId = theId;
 	}
 
+	@Override
+	public void setId(String theId) {
+		myId = new IdDt(theId);
+	}
+
 	/**
 	 * Intended to be called by extending classes {@link #isEmpty()}
 	 * implementations, returns <code>true</code> if all content in this

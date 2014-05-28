@@ -20,11 +20,18 @@ package ca.uhn.fhir.model.api;
  * #L%
  */
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
+import java.util.Date;
+import java.util.Map;
+
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 
 public enum ResourceMetadataKeyEnum {
 
+		
 	/**
 	 * If present and populated with a date/time (as an instance of {@link InstantDt}),
 	 * this value is an indication that the resource is in the deleted state. This key
@@ -34,7 +41,12 @@ public enum ResourceMetadataKeyEnum {
 	 * Values for this key are of type <b>{@link InstantDt}</b>
 	 * </p>
 	 */
-	DELETED_AT,
+	DELETED_AT {
+		@Override
+		public InstantDt get(IResource theResource) {
+			return getInstantFromMetadataOrNullIfNone(theResource.getResourceMetadata(), DELETED_AT);
+		}
+	},
 
 	/**
 	 * The value for this key represents a previous ID used to identify
@@ -44,7 +56,12 @@ public enum ResourceMetadataKeyEnum {
 	 * Values for this key are of type <b>{@link IdDt}</b>
 	 * </p>
 	 */
-	PREVIOUS_ID,
+	PREVIOUS_ID {
+		@Override
+		public IdDt get(IResource theResource) {
+			return getIdFromMetadataOrNullIfNone(theResource.getResourceMetadata(), PREVIOUS_ID);
+		}
+	},
 
 	/**
 	 * The value for this key is the bundle entry <b>Published</b> time. This is
@@ -61,8 +78,14 @@ public enum ResourceMetadataKeyEnum {
 	 * 
 	 * @see InstantDt
 	 */
-	PUBLISHED,
+	PUBLISHED {
+		@Override
+		public InstantDt get(IResource theResource) {
+			return getInstantFromMetadataOrNullIfNone(theResource.getResourceMetadata(), PUBLISHED);
+		}
+	},
 
+	
 	/**
 	 * The value for this key is the list of tags associated with this resource
 	 * <p>
@@ -71,7 +94,22 @@ public enum ResourceMetadataKeyEnum {
 	 * 
 	 * @see TagList
 	 */
-	TAG_LIST, 
+	TAG_LIST {
+		@Override
+		public TagList get(IResource theResource) {
+			Object retValObj = theResource.getResourceMetadata().get(TAG_LIST);
+			if (retValObj == null) {
+				return null;
+			} else if (retValObj instanceof TagList) {
+				if (((TagList) retValObj).isEmpty()) {
+					return null;
+				} else {
+					return (TagList) retValObj;
+				}
+			}
+			throw new InternalErrorException("Found an object of type '" + retValObj.getClass().getCanonicalName() + "' in resource metadata for key " + TAG_LIST.name() + " - Expected " + TagList.class.getCanonicalName());
+		}
+	}, 
 	
 	
 	/**
@@ -85,7 +123,12 @@ public enum ResourceMetadataKeyEnum {
 	 * 
 	 * @see InstantDt
 	 */
-	UPDATED, 
+	UPDATED {
+		@Override
+		public InstantDt get(IResource theResource) {
+			return getInstantFromMetadataOrNullIfNone(theResource.getResourceMetadata(), UPDATED);
+		}
+	}, 
 	
 	/**
 	 * The value for this key is the version ID of the resource object.
@@ -96,6 +139,49 @@ public enum ResourceMetadataKeyEnum {
 	 * @deprecated The {@link IResource#getId()} resource ID will now be populated with the version ID via the {@link IdDt#getUnqualifiedVersionId()} method
 	 */
 	@Deprecated
-	VERSION_ID;
+	VERSION_ID {
+		@Override
+		public IdDt get(IResource theResource) {
+			return getIdFromMetadataOrNullIfNone(theResource.getResourceMetadata(), VERSION_ID);
+		}
+	};
 
+	public abstract Object get(IResource theResource);
+
+	private static IdDt getIdFromMetadataOrNullIfNone(Map<ResourceMetadataKeyEnum, Object> theResourceMetadata, ResourceMetadataKeyEnum theKey) {
+		Object retValObj = theResourceMetadata.get(theKey);
+		if (retValObj == null) {
+			return null;
+		} else if (retValObj instanceof String) {
+			if (isNotBlank((String) retValObj)) {
+				return new IdDt((String) retValObj);
+			} else {
+				return null;
+			}
+		} else if (retValObj instanceof IdDt) {
+			if (((IdDt) retValObj).isEmpty()) {
+				return null;
+			} else {
+				return (IdDt) retValObj;
+			}
+		}
+		throw new InternalErrorException("Found an object of type '" + retValObj.getClass().getCanonicalName() + "' in resource metadata for key " + theKey.name() + " - Expected " + IdDt.class.getCanonicalName());
+	}
+
+	private static InstantDt getInstantFromMetadataOrNullIfNone(Map<ResourceMetadataKeyEnum, Object> theResourceMetadata, ResourceMetadataKeyEnum theKey) {
+		Object retValObj = theResourceMetadata.get(theKey);
+		if (retValObj == null) {
+			return null;
+		} else if (retValObj instanceof Date) {
+			return new InstantDt((Date) retValObj);
+		} else if (retValObj instanceof InstantDt) {
+			if (((InstantDt) retValObj).isEmpty()) {
+				return null;
+			} else {
+				return (InstantDt) retValObj;
+			}
+		}
+		throw new InternalErrorException("Found an object of type '" + retValObj.getClass().getCanonicalName() + "' in resource metadata for key " + theKey.name() + " - Expected " + InstantDt.class.getCanonicalName());
+	}
+	
 }

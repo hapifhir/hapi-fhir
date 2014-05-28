@@ -606,11 +606,6 @@ public class RestfulServer extends HttpServlet {
 			r.setSecondaryOperation(secondaryOperation);
 			r.setParameters(params);
 			r.setRequestType(theRequestType);
-			if ("application/x-www-form-urlencoded".equals(theRequest.getContentType())) {
-				r.setInputReader(new StringReader(""));
-			} else {
-				r.setInputReader(theRequest.getReader());
-			}
 			r.setFhirServerBase(fhirServerBase);
 			r.setCompleteUrl(completeUrl);
 			r.setServletRequest(theRequest);
@@ -699,6 +694,32 @@ public class RestfulServer extends HttpServlet {
 		}
 
 		Enumeration<String> acceptValues = theReq.getServletRequest().getHeaders(Constants.HEADER_ACCEPT);
+		if (acceptValues != null) {
+			while (acceptValues.hasMoreElements()) {
+				String nextAcceptHeaderValue = acceptValues.nextElement();
+				if (nextAcceptHeaderValue != null && isNotBlank(nextAcceptHeaderValue)) {
+					for (String nextPart : nextAcceptHeaderValue.split(",")) {
+						int scIdx = nextPart.indexOf(';');
+						if (scIdx == 0) {
+							continue;
+						}
+						if (scIdx != -1) {
+							nextPart = nextPart.substring(0, scIdx);
+						}
+						nextPart = nextPart.trim();
+						EncodingEnum retVal = Constants.FORMAT_VAL_TO_ENCODING.get(nextPart);
+						if (retVal != null) {
+							return retVal;
+						}
+					}
+				}
+			}
+		}
+		return EncodingEnum.XML;
+	}
+
+	public static EncodingEnum determineRequestEncoding(Request theReq) {
+		Enumeration<String> acceptValues = theReq.getServletRequest().getHeaders(Constants.HEADER_CONTENT_TYPE);
 		if (acceptValues != null) {
 			while (acceptValues.hasMoreElements()) {
 				String nextAcceptHeaderValue = acceptValues.nextElement();

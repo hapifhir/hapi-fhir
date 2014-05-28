@@ -11,6 +11,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
+import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -72,6 +73,18 @@ public class BinaryTest {
 	
 	@Test
 	public void testCreate() throws Exception {
+		HttpPost http = new HttpPost("http://localhost:" + ourPort + "/Binary");
+		http.setEntity(new ByteArrayEntity(new byte[] {1,2,3,4}, ContentType.create("foo/bar", "UTF-8")));
+		
+		HttpResponse status = ourClient.execute(http);
+		assertEquals(201, status.getStatusLine().getStatusCode());
+		
+		assertEquals("foo/bar; charset=UTF-8", ourLast.getContentType());
+		assertArrayEquals(new byte[] { 1, 2, 3, 4 }, ourLast.getContent());
+
+	}
+
+	public void testCreateWrongType() throws Exception {
 		Binary res = new Binary();
 		res.setContent(new byte[] { 1, 2, 3, 4 });
 		res.setContentType("text/plain");
@@ -87,7 +100,7 @@ public class BinaryTest {
 		assertArrayEquals(new byte[] { 1, 2, 3, 4 }, ourLast.getContent());
 
 	}
-	
+
 	@Test
 	public void testSearch() throws Exception {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Binary?");
@@ -150,6 +163,7 @@ public class BinaryTest {
 		@Read
 		public Binary read(@IdParam IdDt theId) {
 			Binary retVal = new Binary();
+			retVal.setId("1");
 			retVal.setContent(new byte[] { 1, 2, 3, 4 });
 			retVal.setContentType(theId.getUnqualifiedId());
 			return retVal;
@@ -160,6 +174,7 @@ public class BinaryTest {
 		@Search
 		public List<Binary> search() {
 			Binary retVal = new Binary();
+			retVal.setId("1");
 			retVal.setContent(new byte[] { 1, 2, 3, 4 });
 			retVal.setContentType("text/plain");
 			return Collections.singletonList(retVal);

@@ -190,6 +190,11 @@ public class ResourceWithExtensionsA extends BaseResource {
 			return myId;
 		}
 
+		@Override
+		public void setId(String theId) {
+			myId=new IdDt(theId);
+		}
+
 
 	}
 

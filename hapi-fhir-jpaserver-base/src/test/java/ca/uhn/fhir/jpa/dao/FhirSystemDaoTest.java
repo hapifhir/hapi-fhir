@@ -22,6 +22,7 @@ import ca.uhn.fhir.model.dstu.resource.Observation;
 import ca.uhn.fhir.model.dstu.resource.Organization;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 public class FhirSystemDaoTest {
 
@@ -60,7 +61,7 @@ public class FhirSystemDaoTest {
 		assertEquals(obsVersion, 1L);
 
 		// Try to search
-		
+
 		List<Observation> obsResults = ourObservationDao.search(Observation.SP_NAME, new IdentifierDt("urn:system", "testPersistWithSimpleLinkO01"));
 		assertEquals(1, obsResults.size());
 
@@ -72,7 +73,7 @@ public class FhirSystemDaoTest {
 		assertEquals(foundPatientId.getUnqualifiedId(), subject.getResourceId().getUnqualifiedId());
 
 		// Update
-		
+
 		patient = patResults.get(0);
 		obs = obsResults.get(0);
 		patient.addIdentifier("urn:system", "testPersistWithSimpleLinkP02");
@@ -89,6 +90,30 @@ public class FhirSystemDaoTest {
 		assertEquals(patientVersion2, 2L);
 		assertEquals(obsId, obsId2);
 		assertEquals(obsVersion2, 2L);
+
+	}
+
+	@Test
+	public void testPersistWithUnknownId() {
+		Observation obs = new Observation();
+		obs.getName().addCoding().setSystem("urn:system").setCode("testPersistWithSimpleLinkO01");
+		obs.setSubject(new ResourceReferenceDt("Patient/999998888888"));
+
+		try {
+			ourSystemDao.transaction(Arrays.asList((IResource) obs));
+		} catch (InvalidRequestException e) {
+			assertThat(e.getMessage(), containsString("Resource Patient/999998888888 not found, specified in path: Observation.subject"));
+		}
+
+		obs = new Observation();
+		obs.getName().addCoding().setSystem("urn:system").setCode("testPersistWithSimpleLinkO01");
+		obs.setSubject(new ResourceReferenceDt("Patient/1.2.3.4"));
+
+		try {
+			ourSystemDao.transaction(Arrays.asList((IResource) obs));
+		} catch (InvalidRequestException e) {
+			assertThat(e.getMessage(), containsString("Resource Patient/1.2.3.4 not found, specified in path: Observation.subject"));
+		}
 
 	}
 

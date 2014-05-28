@@ -144,6 +144,7 @@ public class ReferenceParameterTest {
 			ArrayList<Patient> retVal = new ArrayList<Patient>();
 
 			Patient p = new Patient();
+			p.setId("1");
 			p.addName().addFamily("0"+theParam.getValueAsQueryToken());
 			p.addName().addFamily("1"+defaultString(theParam.getResourceType()));
 			p.addName().addFamily("2"+defaultString(theParam.getChain()));

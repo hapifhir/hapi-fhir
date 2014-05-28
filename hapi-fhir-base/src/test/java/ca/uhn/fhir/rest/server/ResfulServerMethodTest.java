@@ -130,6 +130,27 @@ public class ResfulServerMethodTest {
 
 	}
 
+	
+	@Test
+	public void testCreateJson() throws Exception {
+
+		Patient patient = new Patient();
+		patient.addIdentifier().setValue("001");
+		patient.addIdentifier().setValue("002");
+
+		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
+		httpPost.setEntity(new StringEntity(new FhirContext().newJsonParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_JSON, "UTF-8")));
+
+		HttpResponse status = ourClient.execute(httpPost);
+
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		ourLog.info("Response was:\n{}", responseContent);
+
+		assertEquals(201, status.getStatusLine().getStatusCode());
+		assertEquals("http://localhost:" + ourPort + "/Patient/001/_history/002", status.getFirstHeader("Location").getValue());
+
+	}
+	
 	@Test
 	public void testCreateWithUnprocessableEntity() throws Exception {
 
@@ -1033,10 +1054,10 @@ public class ResfulServerMethodTest {
 		httpPut.setEntity(new StringEntity(new FhirContext().newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
 		CloseableHttpResponse results = ourClient.execute(httpPut);
+		assertEquals(400, results.getStatusLine().getStatusCode());
 		String responseContent = IOUtils.toString(results.getEntity().getContent());
 		ourLog.info("Response was:\n{}", responseContent);
 
-		assertEquals(400, results.getStatusLine().getStatusCode());
 	}
 
 	public void testUpdateWrongResourceType() throws Exception {
@@ -1192,8 +1213,15 @@ public class ResfulServerMethodTest {
 		@Search()
 		public Collection<AdverseReaction> getAllResources() {
 			ArrayList<AdverseReaction> retVal = new ArrayList<AdverseReaction>();
-			retVal.add(new AdverseReaction());
-			retVal.add(new AdverseReaction());
+			
+			AdverseReaction ar1 = new AdverseReaction();
+			ar1.setId("1");
+			retVal.add(ar1);
+			
+			AdverseReaction ar2 = new AdverseReaction();
+			ar2.setId("2");
+			retVal.add(ar2);
+
 			return retVal;
 		}
 

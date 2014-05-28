@@ -20,25 +20,21 @@ package ca.uhn.fhir.rest.method;
  * #L%
  */
 
-import org.apache.http.client.methods.HttpPut;
-import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.entity.AbstractHttpEntity;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Reader;
+import java.util.List;
+import java.util.Map;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 
-public class HttpPutClientInvocation extends BaseHttpClientInvocationWithContents {
+public interface IClientResponseHandlerHandlesBinary<T> extends IClientResponseHandler<T> {
 
-	public HttpPutClientInvocation(FhirContext theContext, IResource theResource, String theUrlExtension) {
-		super(theContext, theResource, theUrlExtension);
-	}
-
-	@Override
-	protected HttpRequestBase createRequest(String url, AbstractHttpEntity theEntity) {
-		HttpPut retVal = new HttpPut(url);
-		retVal.setEntity(theEntity);
-		return retVal;
-	}
-
+	/**
+	 * If this method returns true, {@link #invokeClient(String, InputStream, int, Map)} should be invoked instead of {@link #invokeClient(String, Reader, int, Map)}
+	 */
+	boolean isBinary();
+	
+	T invokeClient(String theResponseMimeType, InputStream theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException, BaseServerResponseException;
 
 }

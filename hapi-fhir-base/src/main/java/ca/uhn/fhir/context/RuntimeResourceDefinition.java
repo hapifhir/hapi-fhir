@@ -57,10 +57,12 @@ public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefini
 	private Profile myProfileDef;
 	private String myResourceProfile;
 	private List<RuntimeSearchParam> mySearchParams;
+	private String myId;
 
 	public RuntimeResourceDefinition(Class<? extends IResource> theClass, ResourceDef theResourceAnnotation) {
 		super(theResourceAnnotation.name(), theClass);
 		myResourceProfile = theResourceAnnotation.profile();
+		myId = theResourceAnnotation.id();
 	}
 
 	public void addSearchParam(RuntimeSearchParam theParam) {
@@ -313,8 +315,15 @@ public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefini
 		}
 
 		Profile retVal = new Profile();
+		
 		RuntimeResourceDefinition def = this;
 
+		if (StringUtils.isNotBlank(myId)) {
+			retVal.setId(myId);
+		}else {
+			throw new ConfigurationException("Resource class " + getImplementingClass().getCanonicalName() + " has no ID specified");
+		}
+		
 		// Scan for extensions
 		scanForExtensions(retVal, def);
 		Collections.sort(retVal.getExtensionDefn(), new Comparator<ExtensionDefn>() {
