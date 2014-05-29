@@ -111,13 +111,13 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 				throw new NullPointerException("ID can not be null");
 			}
 		}
-		
+
 		HttpGetClientInvocation retVal = createHistoryInvocation(resourceName, id);
 
 		if (theArgs != null) {
 			for (int idx = 0; idx < theArgs.length; idx++) {
 				IParameter nextParam = getParameters().get(idx);
-				nextParam.translateClientArgumentIntoQueryArgument(getContext(), theArgs[idx], retVal.getParameters(),retVal);
+				nextParam.translateClientArgumentIntoQueryArgument(getContext(), theArgs[idx], retVal.getParameters(), retVal);
 			}
 		}
 
@@ -150,18 +150,20 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 		Object response = invokeServerMethod(theMethodParams);
 
 		List<IResource> resources = toResourceList(response);
-		int index=0;
+		int index = 0;
 		for (IResource nextResource : resources) {
 			if (nextResource.getId() == null || nextResource.getId().isEmpty()) {
 				throw new InternalErrorException("Server provided resource at index " + index + " with no ID set (using IResource#setId(IdDt))");
 			}
 			IdDt versionId = (IdDt) ResourceMetadataKeyEnum.VERSION_ID.get(nextResource);
-			if (versionId == null||versionId.isEmpty()) {
-				throw new InternalErrorException("Server provided resource at index " + index + " with no Version ID set (using IResource#Resource.getResourceMetadata().put(ResourceMetadataKeyEnum.VERSION_ID, Object))");
+			if (versionId == null || versionId.isEmpty()) {
+				if (nextResource.getId().getUnqualifiedVersionId() == null) {
+					throw new InternalErrorException("Server provided resource at index " + index + " with no Version ID set (using IResource#setId(IdDt))");
+				}
 			}
 			index++;
 		}
-		
+
 		return resources;
 	}
 

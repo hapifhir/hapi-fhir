@@ -4,14 +4,24 @@ import static org.apache.commons.lang3.StringUtils.*;
 
 import java.text.Normalizer;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
+import javax.persistence.Tuple;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,13 +30,17 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.jpa.entity.BaseHasResource;
+import ca.uhn.fhir.jpa.entity.BaseTag;
 import ca.uhn.fhir.jpa.entity.ResourceHistoryTable;
+import ca.uhn.fhir.jpa.entity.ResourceHistoryTablePk;
 import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamNumber;
 import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.entity.ResourceLink;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
+import ca.uhn.fhir.jpa.entity.TagDefinition;
 import ca.uhn.fhir.model.api.IDatatype;
 import ca.uhn.fhir.model.api.IPrimitiveDatatype;
 import ca.uhn.fhir.model.api.IResource;
@@ -45,9 +59,14 @@ import ca.uhn.fhir.model.dstu.valueset.SearchParamTypeEnum;
 import ca.uhn.fhir.model.primitive.BaseDateTimeDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.FhirTerser;
+
+import com.google.common.base.Function;
+import com.google.common.collect.Collections2;
+import com.google.common.collect.Lists;
 
 public abstract class BaseFhirDao {
 	private FhirContext myContext = new FhirContext();
@@ -66,83 +85,128 @@ public abstract class BaseFhirDao {
 		myContext = theContext;
 	}
 
-	protected ResourceTable updateEntity(final IResource theResource, ResourceTable entity, boolean theUpdateHistory) {
-		if (entity.getPublished() == null) {
-			entity.setPublished(new Date());
-		}
+	private void searchHistoryCurrentVersion(String theResourceName, Long theId, Date theSince, int theLimit, List<HistoryTuple> tuples) {
+		CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
+		CriteriaQuery<Tuple> cq = builder.createTupleQuery();
+		Root<?> from = cq.from(ResourceTable.class);
+		cq.multiselect(from.get("myId").as(Long.class), from.get("myUpdated").as(Date.class));
 
-		if (theUpdateHistory) {
-			final ResourceHistoryTable historyEntry = entity.toHistory(getContext());
-			myEntityManager.persist(historyEntry);
+		List<Predicate> predicates = new ArrayList<Predicate>();
+		if (theSince != null) {
+			Predicate low = builder.greaterThanOrEqualTo(from.<Date> get("myUpdated"), theSince);
+			predicates.add(low);
 		}
-
-		entity.setVersion(entity.getVersion() + 1);
-
-		final List<ResourceIndexedSearchParamString> stringParams = extractSearchParamStrings(entity, theResource);
-		final List<ResourceIndexedSearchParamToken> tokenParams = extractSearchParamTokens(entity, theResource);
-		final List<ResourceIndexedSearchParamNumber> numberParams = extractSearchParamNumber(entity, theResource);
-		final List<ResourceIndexedSearchParamDate> dateParams = extractSearchParamDates(entity, theResource);
-		final List<ResourceLink> links = extractResourceLinks(entity, theResource);
-
-		populateResourceIntoEntity(theResource, entity);
-
-		entity.setUpdated(new Date());
-
-		if (entity.getId() == null) {
-			myEntityManager.persist(entity);
-		} else {
-			entity = myEntityManager.merge(entity);
-		}
-
-		if (entity.isParamsStringPopulated()) {
-			for (ResourceIndexedSearchParamString next : entity.getParamsString()) {
-				myEntityManager.remove(next);
-			}
-		}
-		for (ResourceIndexedSearchParamString next : stringParams) {
-			myEntityManager.persist(next);
-		}
-
-		if (entity.isParamsTokenPopulated()) {
-			for (ResourceIndexedSearchParamToken next : entity.getParamsToken()) {
-				myEntityManager.remove(next);
-			}
-		}
-		for (ResourceIndexedSearchParamToken next : tokenParams) {
-			myEntityManager.persist(next);
-		}
-
-		if (entity.isParamsNumberPopulated()) {
-			for (ResourceIndexedSearchParamNumber next : entity.getParamsNumber()) {
-				myEntityManager.remove(next);
-			}
-		}
-		for (ResourceIndexedSearchParamNumber next : numberParams) {
-			myEntityManager.persist(next);
-		}
-
-		if (entity.isParamsDatePopulated()) {
-			for (ResourceIndexedSearchParamDate next : entity.getParamsDate()) {
-				myEntityManager.remove(next);
-			}
-		}
-		for (ResourceIndexedSearchParamDate next : dateParams) {
-			myEntityManager.persist(next);
-		}
-
-		if (entity.isHasLinks()) {
-			for (ResourceLink next : entity.getResourceLinks()) {
-				myEntityManager.remove(next);
-			}
-		}
-		for (ResourceLink next : links) {
-			myEntityManager.persist(next);
-		}
-
-		myEntityManager.flush();
-		theResource.setId(new IdDt(entity.getResourceType(), entity.getId().toString(), Long.toString(entity.getVersion())));
 		
-		return entity;
+		if (theResourceName != null) {
+			predicates.add(builder.equal(from.get("myResourceType"), theResourceName));
+		}
+		if (theId != null) {
+			predicates.add(builder.equal(from.get("myId"), theId));
+		}
+		
+		cq.where(builder.and(predicates.toArray(new Predicate[0])));
+
+		cq.orderBy(builder.desc(from.get("myUpdated")));
+		TypedQuery<Tuple> q = myEntityManager.createQuery(cq);
+		if (theLimit > 0) {
+			q.setMaxResults(theLimit);
+		}
+		for (Tuple next : q.getResultList()) {
+			long id = (Long) next.get(0);
+			Date updated = (Date) next.get(1);
+			tuples.add(new HistoryTuple(ResourceTable.class, updated, id));
+		}
+	}
+
+	private void searchHistoryCurrentVersion(List<HistoryTuple> theTuples, List<BaseHasResource> theRetVal) {
+		Collection<HistoryTuple> tuples = Collections2.filter(theTuples, new com.google.common.base.Predicate<HistoryTuple>() {
+			@Override
+			public boolean apply(HistoryTuple theInput) {
+				return theInput.getTable().equals(ResourceTable.class);
+			}
+		});
+		Collection<Long> ids = Collections2.transform(tuples, new Function<HistoryTuple, Long>() {
+			@Override
+			public Long apply(HistoryTuple theInput) {
+				return (Long) theInput.getId();
+			}
+		});
+		if (ids.isEmpty()) {
+			return;
+		}
+
+		CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
+		CriteriaQuery<ResourceTable> cq = builder.createQuery(ResourceTable.class);
+		Root<ResourceTable> from = cq.from(ResourceTable.class);
+		cq.where(from.get("myId").in(ids));
+
+		cq.orderBy(builder.desc(from.get("myUpdated")));
+		TypedQuery<ResourceTable> q = myEntityManager.createQuery(cq);
+		for (ResourceTable next : q.getResultList()) {
+			theRetVal.add(next);
+		}
+	}
+
+	private void searchHistoryHistory(String theResourceName, Long theId, Date theSince, int theLimit, List<HistoryTuple> tuples) {
+		CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
+		CriteriaQuery<Tuple> cq = builder.createTupleQuery();
+		Root<?> from = cq.from(ResourceHistoryTable.class);
+		cq.multiselect(from.get("myPk").as(ResourceHistoryTablePk.class), from.get("myUpdated").as(Date.class));
+
+		List<Predicate> predicates = new ArrayList<Predicate>();
+		if (theSince != null) {
+			Predicate low = builder.greaterThanOrEqualTo(from.<Date> get("myUpdated"), theSince);
+			predicates.add(low);
+		}
+		
+		if (theResourceName != null) {
+			predicates.add(builder.equal(from.get("myResourceType"), theResourceName));
+		}
+		if (theId != null) {
+			predicates.add(builder.equal(from.get("myId"), theId));
+		}
+		
+		cq.where(builder.and(predicates.toArray(new Predicate[0])));
+
+		cq.orderBy(builder.desc(from.get("myUpdated")));
+		TypedQuery<Tuple> q = myEntityManager.createQuery(cq);
+		if (theLimit > 0) {
+			q.setMaxResults(theLimit);
+		}
+		for (Tuple next : q.getResultList()) {
+			ResourceHistoryTablePk id = (ResourceHistoryTablePk) next.get(0);
+			Date updated = (Date) next.get(1);
+			tuples.add(new HistoryTuple(ResourceHistoryTable.class, updated, id));
+		}
+	}
+
+	private void searchHistoryHistory(List<HistoryTuple> theTuples, List<BaseHasResource> theRetVal) {
+		Collection<HistoryTuple> tuples = Collections2.filter(theTuples, new com.google.common.base.Predicate<HistoryTuple>() {
+			@Override
+			public boolean apply(HistoryTuple theInput) {
+				return theInput.getTable().equals(ResourceHistoryTable.class);
+			}
+		});
+		Collection<ResourceHistoryTablePk> ids = Collections2.transform(tuples, new Function<HistoryTuple, ResourceHistoryTablePk>() {
+			@Override
+			public ResourceHistoryTablePk apply(HistoryTuple theInput) {
+				return (ResourceHistoryTablePk) theInput.getId();
+			}
+		});
+		if (ids.isEmpty()) {
+			return;
+		}
+
+		CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
+		CriteriaQuery<ResourceHistoryTable> cq = builder.createQuery(ResourceHistoryTable.class);
+		Root<ResourceHistoryTable> from = cq.from(ResourceHistoryTable.class);
+		cq.where(from.get("myPk").in(ids));
+
+		cq.orderBy(builder.desc(from.get("myUpdated")));
+		TypedQuery<ResourceHistoryTable> q = myEntityManager.createQuery(cq);
+		for (ResourceHistoryTable next : q.getResultList()) {
+			theRetVal.add(next);
+		}
 	}
 
 	protected List<ResourceLink> extractResourceLinks(ResourceTable theEntity, IResource theResource) {
@@ -472,6 +536,41 @@ public abstract class BaseFhirDao {
 		return resourceTypeToDao.get(theType);
 	}
 
+	protected ArrayList<IResource> history(String theResourceName, Long theId, Date theSince, int theLimit) {
+		List<HistoryTuple> tuples = new ArrayList<HistoryTuple>();
+
+		// Get list of IDs
+		searchHistoryCurrentVersion(theResourceName, theId, theSince, theLimit, tuples);
+		assert tuples.size() < 2 || !tuples.get(tuples.size() - 2).getUpdated().before(tuples.get(tuples.size() - 1).getUpdated());
+		searchHistoryHistory(theResourceName, theId, theSince, theLimit, tuples);
+		assert tuples.size() < 2 || !tuples.get(tuples.size() - 2).getUpdated().before(tuples.get(tuples.size() - 1).getUpdated());
+
+		// Sort merged list
+		Collections.sort(tuples, Collections.reverseOrder());
+		assert tuples.size() < 2 || !tuples.get(tuples.size() - 2).getUpdated().before(tuples.get(tuples.size() - 1).getUpdated());
+
+		// Pull actual resources
+		List<BaseHasResource> resEntities = Lists.newArrayList();
+		searchHistoryCurrentVersion(tuples, resEntities);
+		searchHistoryHistory(tuples, resEntities);
+
+		Collections.sort(resEntities, new Comparator<BaseHasResource>() {
+			@Override
+			public int compare(BaseHasResource theO1, BaseHasResource theO2) {
+				return theO2.getUpdated().getValue().compareTo(theO1.getUpdated().getValue());
+			}
+		});
+		if (resEntities.size() > theLimit) {
+			resEntities = resEntities.subList(0, theLimit);
+		}
+
+		ArrayList<IResource> retVal = new ArrayList<IResource>();
+		for (BaseHasResource next : resEntities) {
+			retVal.add(toResource(next));
+		}
+		return retVal;
+	}
+
 	protected String normalizeString(String theString) {
 		char[] out = new char[theString.length()];
 		theString = Normalizer.normalize(theString, Normalizer.Form.NFD);
@@ -485,8 +584,29 @@ public abstract class BaseFhirDao {
 		return new String(out).toUpperCase();
 	}
 
+	
+	private TagDefinition getTag(String theScheme, String theTerm, String theLabel) {
+		CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
+		CriteriaQuery<TagDefinition> cq = builder.createQuery(TagDefinition.class);
+		Root<TagDefinition> from = cq.from(TagDefinition.class);
+		cq.where(builder.and(builder.equal(from.get("myScheme"),theScheme), builder.equal(from.get("myTerm"),theTerm)));
+		TypedQuery<TagDefinition> q = myEntityManager.createQuery(cq);
+		try {
+			return q.getSingleResult();
+		} catch (NoResultException e) {
+			TagDefinition retVal = new TagDefinition(theTerm, theLabel, theScheme);
+			myEntityManager.persist(retVal);
+			return retVal;
+		}
+	}
+	
 	protected void populateResourceIntoEntity(IResource theResource, ResourceTable theEntity) {
 
+		if (theEntity.getPublished().isEmpty()) {
+			theEntity.setPublished(new Date());
+		}
+		theEntity.setUpdated(new Date());
+		
 		theEntity.setResourceType(toResourceName(theResource));
 		theEntity.setResource(getContext().newJsonParser().encodeResourceToString(theResource));
 		theEntity.setEncoding(EncodingEnum.JSON);
@@ -494,7 +614,8 @@ public abstract class BaseFhirDao {
 		TagList tagList = (TagList) theResource.getResourceMetadata().get(ResourceMetadataKeyEnum.TAG_LIST);
 		if (tagList != null) {
 			for (Tag next : tagList) {
-				theEntity.addTag(next.getTerm(), next.getLabel(), next.getScheme());
+				TagDefinition tag = getTag(next.getScheme(), next.getTerm(),next.getLabel());
+				theEntity.addTag(tag);
 			}
 		}
 
@@ -508,8 +629,110 @@ public abstract class BaseFhirDao {
 		return retVal;
 	}
 
+	protected IResource toResource(BaseHasResource theEntity) {
+		RuntimeResourceDefinition type = myContext.getResourceDefinition(theEntity.getResourceType());
+		return toResource(type.getImplementingClass(), theEntity);
+	}
+
+	protected <T extends IResource> T toResource(Class<T> theResourceType, BaseHasResource theEntity) {
+		String resourceText = theEntity.getResource();
+		IParser parser = theEntity.getEncoding().newParser(getContext());
+		T retVal = parser.parseResource(theResourceType, resourceText);
+		retVal.setId(theEntity.getIdDt());
+		retVal.getResourceMetadata().put(ResourceMetadataKeyEnum.VERSION_ID, theEntity.getVersion());
+		retVal.getResourceMetadata().put(ResourceMetadataKeyEnum.PUBLISHED, theEntity.getPublished());
+		retVal.getResourceMetadata().put(ResourceMetadataKeyEnum.UPDATED, theEntity.getUpdated());
+		if (theEntity.getTags().size() > 0) {
+			TagList tagList = new TagList();
+			for (BaseTag next : theEntity.getTags()) {
+				tagList.add(new Tag(next.getTag().getTerm(), next.getTag().getLabel(), next.getTag().getScheme()));
+			}
+			retVal.getResourceMetadata().put(ResourceMetadataKeyEnum.TAG_LIST, tagList);
+		}
+		return retVal;
+	}
+
 	protected String toResourceName(IResource theResource) {
 		return myContext.getResourceDefinition(theResource).getName();
+	}
+
+	protected ResourceTable updateEntity(final IResource theResource, ResourceTable entity, boolean theUpdateHistory) {
+		if (entity.getPublished() == null) {
+			entity.setPublished(new Date());
+		}
+
+		if (theUpdateHistory) {
+			final ResourceHistoryTable historyEntry = entity.toHistory(getContext());
+			myEntityManager.persist(historyEntry);
+		}
+
+		entity.setVersion(entity.getVersion() + 1);
+
+		final List<ResourceIndexedSearchParamString> stringParams = extractSearchParamStrings(entity, theResource);
+		final List<ResourceIndexedSearchParamToken> tokenParams = extractSearchParamTokens(entity, theResource);
+		final List<ResourceIndexedSearchParamNumber> numberParams = extractSearchParamNumber(entity, theResource);
+		final List<ResourceIndexedSearchParamDate> dateParams = extractSearchParamDates(entity, theResource);
+		final List<ResourceLink> links = extractResourceLinks(entity, theResource);
+
+		populateResourceIntoEntity(theResource, entity);
+
+		entity.setUpdated(new Date());
+
+		if (entity.getId() == null) {
+			myEntityManager.persist(entity);
+		} else {
+			entity = myEntityManager.merge(entity);
+		}
+
+		if (entity.isParamsStringPopulated()) {
+			for (ResourceIndexedSearchParamString next : entity.getParamsString()) {
+				myEntityManager.remove(next);
+			}
+		}
+		for (ResourceIndexedSearchParamString next : stringParams) {
+			myEntityManager.persist(next);
+		}
+
+		if (entity.isParamsTokenPopulated()) {
+			for (ResourceIndexedSearchParamToken next : entity.getParamsToken()) {
+				myEntityManager.remove(next);
+			}
+		}
+		for (ResourceIndexedSearchParamToken next : tokenParams) {
+			myEntityManager.persist(next);
+		}
+
+		if (entity.isParamsNumberPopulated()) {
+			for (ResourceIndexedSearchParamNumber next : entity.getParamsNumber()) {
+				myEntityManager.remove(next);
+			}
+		}
+		for (ResourceIndexedSearchParamNumber next : numberParams) {
+			myEntityManager.persist(next);
+		}
+
+		if (entity.isParamsDatePopulated()) {
+			for (ResourceIndexedSearchParamDate next : entity.getParamsDate()) {
+				myEntityManager.remove(next);
+			}
+		}
+		for (ResourceIndexedSearchParamDate next : dateParams) {
+			myEntityManager.persist(next);
+		}
+
+		if (entity.isHasLinks()) {
+			for (ResourceLink next : entity.getResourceLinks()) {
+				myEntityManager.remove(next);
+			}
+		}
+		for (ResourceLink next : links) {
+			myEntityManager.persist(next);
+		}
+
+		myEntityManager.flush();
+		theResource.setId(new IdDt(entity.getResourceType(), entity.getId().toString(), Long.toString(entity.getVersion())));
+
+		return entity;
 	}
 
 }

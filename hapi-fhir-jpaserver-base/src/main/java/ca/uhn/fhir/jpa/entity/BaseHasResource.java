@@ -9,6 +9,7 @@ import javax.persistence.MappedSuperclass;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.server.EncodingEnum;
@@ -16,25 +17,27 @@ import ca.uhn.fhir.rest.server.EncodingEnum;
 @MappedSuperclass
 public abstract class BaseHasResource {
 
-	@Column(name = "ENCODING")
+	@Column(name = "RES_ENCODING", nullable = false)
 	private EncodingEnum myEncoding;
 
 	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name = "PUBLISHED")
+	@Column(name = "RES_PUBLISHED", nullable = false)
 	private Date myPublished;
 
-	@Column(name = "RESOURCE_TEXT", length = Integer.MAX_VALUE - 1)
+	@Column(name = "RES_TEXT", length = Integer.MAX_VALUE - 1, nullable = false)
 	@Lob()
 	private String myResource;
 
 	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name = "UPDATED")
+	@Column(name = "RES_UPDATED", nullable = false)
 	private Date myUpdated;
 
 	public EncodingEnum getEncoding() {
 		return myEncoding;
 	}
 
+	public abstract String getResourceType();
+	
 	public abstract Collection<? extends BaseTag> getTags();
 
 	public abstract IdDt getIdDt();

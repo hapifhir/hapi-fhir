@@ -32,11 +32,10 @@ public class ResourceHistoryTag extends BaseTag implements Serializable {
 	public ResourceHistoryTag() {
 	}
 	
-	public ResourceHistoryTag(ResourceHistoryTable theResourceHistory, String theTerm, String theLabel, String theScheme) {
-		myResourceHistory = theResourceHistory;
-		setTerm(theTerm);
-		setLabel(theLabel);
-		setScheme(theScheme);
+
+	public ResourceHistoryTag(ResourceHistoryTable theResourceHistoryTable, TagDefinition theTag) {
+		myResourceHistory=theResourceHistoryTable;
+		setTag(theTag);
 	}
 
 	public ResourceHistoryTable getResourceHistory() {

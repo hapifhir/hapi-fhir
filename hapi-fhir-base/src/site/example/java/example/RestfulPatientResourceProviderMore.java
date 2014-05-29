@@ -589,7 +589,7 @@ public interface HistoryClient extends IBasicClient {
    * also be included in any of the methods above.
    */
   @History
-  Bundle getHistoryServerWithCriteria(@Since Date theDate, @Count int theCount);
+  Bundle getHistoryServerWithCriteria(@Since Date theDate, @Count Integer theCount);
 
 }
 //END SNIPPET: historyClient

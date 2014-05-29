@@ -17,13 +17,17 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Version;
 
+import org.hibernate.annotations.Index;
+
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.Tag;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.Constants;
 
 @Entity
 @Table(name = "HFJ_RESOURCE", uniqueConstraints = {})
 @Inheritance(strategy = InheritanceType.JOINED)
+@org.hibernate.annotations.Table(appliesTo="HFJ_RESOURCE", indexes= {@Index(name="IDX_RES_DATE", columnNames= {"RES_UPDATED"})})
 public class ResourceTable extends BaseHasResource implements Serializable {
 	private static final long serialVersionUID = 1L;
 
@@ -75,13 +79,13 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 	@Column(name = "RES_VER")
 	private long myVersion;
 
-	public void addTag(String theTerm, String theLabel, String theScheme) {
+	public boolean hasTag(String theTerm, String theLabel, String theScheme) {
 		for (ResourceTag next : getTags()) {
-			if (next.getTerm().equals(theTerm)) {
-				return;
+			if (next.getTag().getTerm().equals(theTerm)) {
+				return true;
 			}
 		}
-		getTags().add(new ResourceTag(this, theTerm, theLabel, theScheme));
+		return false;
 	}
 
 	public IdDt getIdDt() {
@@ -221,9 +225,13 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 		retVal.setResource(getResource());
 
 		for (ResourceTag next : getTags()) {
-			retVal.addTag(next.getTerm(), next.getLabel(), next.getScheme());
+			retVal.addTag(next);
 		}
 
 		return retVal;
+	}
+
+	public void addTag(TagDefinition theTag) {
+		getTags().add(new ResourceTag(this, theTag));
 	}
 }

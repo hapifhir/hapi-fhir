@@ -27,11 +27,9 @@ public class ResourceTag extends BaseTag {
 	public ResourceTag() {
 	}
 
-	public ResourceTag(ResourceTable theResource, String theTerm, String theLabel, String theScheme) {
-		myResource = theResource;
-		setTerm(theTerm);
-		setLabel(theLabel);
-		setScheme(theScheme);
+	public ResourceTag(ResourceTable theResourceTable, TagDefinition theTag) {
+		myResource=theResourceTable;
+		setTag(theTag);
 	}
 
 	public ResourceTable getResource() {

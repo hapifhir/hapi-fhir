@@ -333,17 +333,23 @@ public class RestfulServer extends HttpServlet {
 	private void findResourceMethods(Object theProvider) throws Exception {
 
 		ourLog.info("Scanning type for RESTful methods: {}", theProvider.getClass());
+		int count = 0;
 
 		Class<?> clazz = theProvider.getClass();
 		Class<?> supertype = clazz.getSuperclass();
-		if (!Object.class.equals(supertype)) {
-			findResourceMethods(theProvider, supertype);
+		while (!Object.class.equals(supertype)) {
+			count += findResourceMethods(theProvider, supertype);
+			supertype = supertype.getSuperclass();
 		}
 
-		findResourceMethods(theProvider, clazz);
+		count += findResourceMethods(theProvider, clazz);
+
+		if (count == 0) {
+			throw new ConfigurationException("Did not find any annotated RESTful methods on provider class " + theProvider.getClass().getCanonicalName());
+		}
 	}
 
-	private void findResourceMethods(Object theProvider, Class<?> clazz) throws ConfigurationException {
+	private int findResourceMethods(Object theProvider, Class<?> clazz) throws ConfigurationException {
 		int count = 0;
 
 		for (Method m : clazz.getDeclaredMethods()) {
@@ -383,9 +389,7 @@ public class RestfulServer extends HttpServlet {
 			}
 		}
 
-		if (count == 0) {
-			throw new ConfigurationException("Did not find any annotated RESTful methods on provider class " + theProvider.getClass().getCanonicalName());
-		}
+		return count;
 	}
 
 	private void findSystemMethods(Object theSystemProvider) {

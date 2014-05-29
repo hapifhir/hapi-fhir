@@ -6,7 +6,6 @@
 
 	<persistence-unit name="FHIR_UT" transaction-type="RESOURCE_LOCAL">
 		<provider>org.hibernate.ejb.HibernatePersistence</provider>
-		<class>ca.uhn.test.jpasrv.PatientResourceTable</class>
 		<class>ca.uhn.fhir.jpa.entity.ResourceHistoryTable</class>
 		<class>ca.uhn.fhir.jpa.entity.ResourceHistoryTag</class>
 		<class>ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamDate</class>
@@ -16,6 +15,7 @@
 		<class>ca.uhn.fhir.jpa.entity.ResourceLink</class>
 		<class>ca.uhn.fhir.jpa.entity.ResourceTable</class>
 		<class>ca.uhn.fhir.jpa.entity.ResourceTag</class>
+		<class>ca.uhn.fhir.jpa.entity.TagDefinition</class>
 		
 		<exclude-unlisted-classes>true</exclude-unlisted-classes>
 		<properties>

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
@@ -10,12 +11,14 @@ import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.annotation.Count;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.History;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.annotation.Since;
 import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.IResourceProvider;
@@ -74,6 +77,16 @@ public class JpaResourceProvider<T extends IResource> implements IResourceProvid
 	@Override
 	public Class<? extends IResource> getResourceType() {
 		return myDao.getResourceType();
+	}
+
+	@History
+	public List<IResource> getHistoryServerWithCriteria(@Since Date theDate, @Count Integer theCount) {
+		return myDao.history(theDate, theCount);
+	}
+
+	@History
+	public List<IResource> getHistoryServerWithCriteria(@IdParam IdDt theId, @Since Date theDate, @Count Integer theCount) {
+		return myDao.history(theId.asLong(), theDate, theCount);
 	}
 
 }

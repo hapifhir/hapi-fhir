@@ -15,7 +15,6 @@ import java.util.Set;
 import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.persistence.PersistenceContextType;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -26,19 +25,14 @@ import javax.persistence.criteria.Root;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Required;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionCallback;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.RuntimeChildResourceDefinition;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
-import ca.uhn.fhir.jpa.entity.BaseHasResource;
-import ca.uhn.fhir.jpa.entity.BaseTag;
 import ca.uhn.fhir.jpa.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamNumber;
@@ -49,16 +43,12 @@ import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.model.api.IPrimitiveDatatype;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
-import ca.uhn.fhir.model.api.Tag;
-import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.dstu.composite.CodingDt;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.composite.QuantityDt;
 import ca.uhn.fhir.model.dstu.valueset.SearchParamTypeEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
-import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.QualifiedDateParam;
@@ -84,10 +74,11 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 	@Override
 	public MethodOutcome create(final T theResource) {
 
-		final ResourceTable entity = toEntity(theResource);
-
-		entity.setPublished(new Date());
-		entity.setUpdated(entity.getPublished());
+//		final ResourceTable entity = toEntity(theResource);
+//
+//		entity.setPublished(new Date());
+//		entity.setUpdated(entity.getPublished());
+		ResourceTable entity = new ResourceTable();
 		entity.setResourceType(toResourceName(theResource));
 
 //		final List<ResourceIndexedSearchParamString> stringParams = extractSearchParamStrings(entity, theResource);
@@ -147,7 +138,7 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 		// myEntityManager.createQuery(criteriaQuery);
 		List<ResourceHistoryTable> results = q.getResultList();
 		for (ResourceHistoryTable next : results) {
-			retVal.add(toResource(next));
+			retVal.add(toResource(myResourceType,next));
 		}
 
 		try {
@@ -173,7 +164,7 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 	public T read(IdDt theId) {
 		ResourceTable entity = readEntity(theId);
 
-		T retVal = toResource(entity);
+		T retVal = toResource(myResourceType,entity);
 		return retVal;
 	}
 
@@ -187,6 +178,11 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 		return search(map);
 	}
 
+	@Override
+	public List<T> history() {
+		return null;
+	}
+	
 	@Override
 	public List<T> search(SearchParameterMap theParams) {
 
@@ -213,13 +209,23 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 
 			List<T> retVal = new ArrayList<T>();
 			for (ResourceTable next : q.getResultList()) {
-				T resource = toResource(next);
+				T resource = toResource(myResourceType,next);
 				retVal.add(resource);
 			}
 			return retVal;
 		}
 	}
 
+	@Override
+	public List<IResource> history(Date theSince, int theLimit) {
+		return super.history(myResourceName, null, theSince, theLimit);
+	}
+
+	@Override
+	public List<IResource> history(Long theId, Date theSince, int theLimit) {
+		return super.history(myResourceName, theId, theSince, theLimit);
+	}
+	
 	@Override
 	public List<T> search(String theParameterName, IQueryParameterType theValue) {
 		return search(Collections.singletonMap(theParameterName, theValue));
@@ -711,21 +717,5 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 		return super.getDao(theType);
 	}
 
-	private T toResource(BaseHasResource theEntity) {
-		String resourceText = theEntity.getResource();
-		IParser parser = theEntity.getEncoding().newParser(getContext());
-		T retVal = parser.parseResource(myResourceType, resourceText);
-		retVal.setId(theEntity.getIdDt());
-		retVal.getResourceMetadata().put(ResourceMetadataKeyEnum.VERSION_ID, theEntity.getVersion());
-		retVal.getResourceMetadata().put(ResourceMetadataKeyEnum.PUBLISHED, theEntity.getPublished());
-		retVal.getResourceMetadata().put(ResourceMetadataKeyEnum.UPDATED, theEntity.getUpdated());
-		if (theEntity.getTags().size() > 0) {
-			TagList tagList = new TagList();
-			for (BaseTag next : theEntity.getTags()) {
-				tagList.add(new Tag(next.getTerm(), next.getLabel(), next.getScheme()));
-			}
-			retVal.getResourceMetadata().put(ResourceMetadataKeyEnum.TAG_LIST, tagList);
-		}
-		return retVal;
-	}
+
 }

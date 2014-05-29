@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -8,6 +9,7 @@ import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 
@@ -40,5 +42,11 @@ public interface IFhirResourceDao<T extends IResource> {
 	Set<Long> searchForIds(Map<String, IQueryParameterType> theParams);
 
 	Set<Long> searchForIdsWithAndOr(Map<String, List<List<IQueryParameterType>>> theMap);
+
+	List<T> history();
+
+	List<IResource> history(Date theDate, int theLimit);
+
+	List<IResource> history(Long theId, Date theSince, int theLimit);
 	
 }

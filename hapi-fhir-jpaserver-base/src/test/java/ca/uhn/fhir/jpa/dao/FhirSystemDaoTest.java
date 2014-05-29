@@ -22,6 +22,8 @@ import ca.uhn.fhir.model.dstu.resource.Observation;
 import ca.uhn.fhir.model.dstu.resource.Organization;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.model.primitive.InstantDt;
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 public class FhirSystemDaoTest {
@@ -37,6 +39,50 @@ public class FhirSystemDaoTest {
 	private static Date ourTestStarted;
 	private static IFhirSystemDao ourSystemDao;
 
+	@Test
+	public void testHistory() throws Exception {
+		Date start = new Date();
+		Thread.sleep(10);
+		
+		Patient patient = new Patient();
+		patient.addIdentifier("urn:system", "testHistory");
+		patient.addName().addFamily("Tester").addGiven("Joe");
+		IdDt pid = ourPatientDao.create(patient).getId();
+		
+		Thread.sleep(10);
+		IdDt newpid = ourPatientDao.update(patient, pid).getId();
+
+		Thread.sleep(10);
+		IdDt newpid2 = ourPatientDao.update(patient, pid).getId();
+
+		Thread.sleep(10);
+		IdDt newpid3 = ourPatientDao.update(patient, pid).getId();
+
+		List<IResource> values = ourSystemDao.history(start, 1000);
+		assertEquals(4, values.size());
+		
+		assertEquals(newpid3, values.get(0).getId());
+		assertEquals(newpid2, values.get(1).getId());
+		assertEquals(newpid, values.get(2).getId());
+		assertEquals(pid, values.get(3).getId());
+		
+		
+		Location loc = new Location();
+		loc.getAddress().addLine("AAA");
+		IdDt lid = ourLocationDao.create(loc).getId();
+		
+		Location loc2 = new Location();
+		loc2.getAddress().addLine("AAA");
+		ourLocationDao.create(loc2).getId();
+
+		values = ourLocationDao.history(start, 1000);
+		assertEquals(2, values.size());
+		
+		values = ourLocationDao.history(lid.asLong(), start, 1000);
+		assertEquals(1, values.size());
+
+	}
+	
 	@Test
 	public void testPersistWithSimpleLink() {
 		Patient patient = new Patient();
