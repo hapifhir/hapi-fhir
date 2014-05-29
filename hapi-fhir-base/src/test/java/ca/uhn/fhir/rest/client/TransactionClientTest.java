@@ -79,15 +79,15 @@ public class TransactionClientTest {
 		client.searchWithParam(resources);
 
 		assertEquals(HttpPost.class, capt.getValue().getClass());
-		HttpPost get = (HttpPost) capt.getValue();
-		assertEquals("http://foo/", get.getURI().toString());
+		HttpPost post = (HttpPost) capt.getValue();
+		assertEquals("http://foo/", post.getURI().toString());
 
-		Bundle bundle = ctx.newXmlParser().parseBundle(new InputStreamReader(get.getEntity().getContent()));
+		Bundle bundle = ctx.newXmlParser().parseBundle(new InputStreamReader(post.getEntity().getContent()));
 		ourLog.info(ctx.newXmlParser().setPrettyPrint(true).encodeBundleToString(bundle));
 		
 		assertEquals(2, bundle.size());
-		assertEquals("http://foo/Patient/testPersistWithSimpleLinkP01", bundle.getEntries().get(0).getId().getValue());
-		assertEquals("http://foo/Patient/testPersistWithSimpleLinkP01", bundle.getEntries().get(0).getLinkSelf().getValue());
+		assertEquals("Patient/testPersistWithSimpleLinkP01", bundle.getEntries().get(0).getId().getValue());
+		assertEquals("Patient/testPersistWithSimpleLinkP01", bundle.getEntries().get(0).getLinkSelf().getValue());
 		assertEquals(null, bundle.getEntries().get(0).getLinkAlternate().getValue());
 
 		assertTrue(bundle.getEntries().get(1).getId().isEmpty());

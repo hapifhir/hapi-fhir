@@ -292,4 +292,12 @@ public class Bundle extends BaseBundle /* implements IElement */{
 
 	}
 
+	public static Bundle withResources(ArrayList<IResource> theUploadBundle, FhirContext theContext, String theServerBase) {
+		Bundle retVal = new Bundle();
+		for (IResource next : theUploadBundle) {
+			retVal.addResource(next, theContext, theServerBase);
+		}
+		return retVal;
+	}
+
 }

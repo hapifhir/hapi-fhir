@@ -23,9 +23,10 @@ public class TestRestfulServer extends RestfulServer {
 		super.initialize();
 		
 		try {
+			ourLog.info("Creating database");
 			DriverManager.getConnection("jdbc:derby:directory:" + System.getProperty("fhir.db.location") + ";create=true");
 		} catch (Exception e) {
-			ourLog.info("Failed to create database: {}",e.getMessage());
+			ourLog.error("Failed to create database: {}",e);
 		}
 		
 		myAppCtx = new ClassPathXmlApplicationContext("fhir-spring-uhnfhirtest-config.xml", "hapi-jpaserver-springbeans.xml");
@@ -46,6 +47,13 @@ public class TestRestfulServer extends RestfulServer {
 		super.destroy();
 		
 		myAppCtx.close();
+		
+		try {
+			ourLog.info("Shutting down derby");
+			DriverManager.getConnection("jdbc:derby:directory:" + System.getProperty("fhir.db.location") + ";shutdown=true");
+		} catch (Exception e) {
+			ourLog.info("Failed to create database: {}",e.getMessage());
+		}
 	}
 
 }

@@ -114,7 +114,7 @@ public abstract class BaseHttpClientInvocationWithContents extends BaseHttpClien
 		if (myTagList != null) {
 			contents = parser.encodeTagListToString(myTagList);
 		} else if (myResources != null) {
-			Bundle bundle = BaseResourceReturningMethodBinding.createBundleFromResourceList(myContext, "", myResources, theEncoding, theUrlBase, "", false, NarrativeModeEnum.NORMAL);
+			Bundle bundle = BaseResourceReturningMethodBinding.createBundleFromResourceList(myContext, "", myResources, theEncoding, "", "", false, NarrativeModeEnum.NORMAL);
 			contents = parser.encodeBundleToString(bundle);
 		} else {
 			contents = parser.encodeResourceToString(myResource);

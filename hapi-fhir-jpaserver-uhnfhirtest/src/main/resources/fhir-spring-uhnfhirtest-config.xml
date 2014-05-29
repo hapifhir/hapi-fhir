@@ -20,7 +20,7 @@
 
 	<bean id="myPersistenceDataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource" lazy-init="true">
 		<!-- ;create=true /opt/glassfish/glassfish4/glassfish/nodes/localhost-domain1/fhirtest/fhirdb -->
-		<property name="url" value="jdbc:derby:directory:#{systemProperties['fhir.db.location']}" />
+		<property name="url" value="jdbc:derby:directory:#{systemProperties['fhir.db.location']};create=true" />
 	</bean>
 
 	<bean id="myEntityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">

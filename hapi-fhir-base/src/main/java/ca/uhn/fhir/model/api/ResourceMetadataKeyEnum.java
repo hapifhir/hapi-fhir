@@ -164,6 +164,8 @@ public enum ResourceMetadataKeyEnum {
 			} else {
 				return (IdDt) retValObj;
 			}
+		} else if (retValObj instanceof Number) {
+			return new IdDt(((Number)retValObj).toString());
 		}
 		throw new InternalErrorException("Found an object of type '" + retValObj.getClass().getCanonicalName() + "' in resource metadata for key " + theKey.name() + " - Expected " + IdDt.class.getCanonicalName());
 	}

@@ -38,7 +38,7 @@ public class JpaSystemProvider {
 	}
 
 	@History
-	List<IResource> getHistoryServerWithCriteria(@Since Date theDate, @Count Integer theCount) {
+	public List<IResource> getHistoryServerWithCriteria(@Since Date theDate, @Count Integer theCount) {
 		return myDao.history(theDate, theCount);
 	}
 }

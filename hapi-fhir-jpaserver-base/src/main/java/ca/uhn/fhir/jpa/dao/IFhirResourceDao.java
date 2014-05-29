@@ -45,8 +45,8 @@ public interface IFhirResourceDao<T extends IResource> {
 
 	List<T> history();
 
-	List<IResource> history(Date theDate, int theLimit);
+	List<IResource> history(Date theDate, Integer theLimit);
 
-	List<IResource> history(Long theId, Date theSince, int theLimit);
+	List<IResource> history(Long theId, Date theSince, Integer theLimit);
 	
 }

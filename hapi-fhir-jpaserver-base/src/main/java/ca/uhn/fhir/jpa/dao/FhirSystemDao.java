@@ -73,8 +73,15 @@ public class FhirSystemDao extends BaseFhirDao implements IFhirSystemDao {
 			}
 
 			IdDt newId = new IdDt(resourceName + '/' + entity.getId());
-			ourLog.info("Incoming ID[{}] has been assigned ID[{}]", nextId, newId);
-			idConversions.put(nextId, newId);
+			if (nextId.isEmpty()) {
+				ourLog.info("Transaction resource (with no preexisting ID) has been assigned new ID[{}]", nextId, newId);
+			} else if (newId.equals(entity.getId())) {
+				ourLog.info("Transaction resource ID[{}] is being updated", newId);
+			} else {
+				ourLog.info("Transaction resource ID[{}] has been assigned new ID[{}]", nextId, newId);
+				idConversions.put(nextId, newId);
+			}
+			
 			persistedResources.add(entity);
 
 		}
@@ -87,6 +94,8 @@ public class FhirSystemDao extends BaseFhirDao implements IFhirSystemDao {
 					IdDt newId = idConversions.get(nextId);
 					ourLog.info(" * Replacing resource ref {} with {}", nextId, newId);
 					nextRef.setResourceId(newId);
+				} else {
+					ourLog.info(" * Reference [{}] does not exist in bundle", nextId);
 				}
 			}
 		}
@@ -106,38 +115,38 @@ public class FhirSystemDao extends BaseFhirDao implements IFhirSystemDao {
 
 	@Override
 	public TagList getAllTags() {
-//		CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
-//		CriteriaQuery<Tuple> cq = builder.createQuery(Tag)
-//		Root<?> from = cq.from(ResourceTable.class);
-//		cq.multiselect(from.get("myId").as(Long.class), from.get("myUpdated").as(Date.class));
-//
-//		List<Predicate> predicates = new ArrayList<Predicate>();
-//		if (theSince != null) {
-//			Predicate low = builder.greaterThanOrEqualTo(from.<Date> get("myUpdated"), theSince);
-//			predicates.add(low);
-//		}
-//		
-//		if (theResourceName != null) {
-//			predicates.add(builder.equal(from.get("myResourceType"), theResourceName));
-//		}
-//		if (theId != null) {
-//			predicates.add(builder.equal(from.get("myId"), theId));
-//		}
-//		
-//		cq.where(builder.and(predicates.toArray(new Predicate[0])));
-//
-//		cq.orderBy(builder.desc(from.get("myUpdated")));
-//		TypedQuery<Tuple> q = myEntityManager.createQuery(cq);
-//		if (theLimit > 0) {
-//			q.setMaxResults(theLimit);
-//		}
-//		for (Tuple next : q.getResultList()) {
-//			long id = (Long) next.get(0);
-//			Date updated = (Date) next.get(1);
-//			tuples.add(new HistoryTuple(ResourceTable.class, updated, id));
-//		}
+		// CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
+		// CriteriaQuery<Tuple> cq = builder.createQuery(Tag)
+		// Root<?> from = cq.from(ResourceTable.class);
+		// cq.multiselect(from.get("myId").as(Long.class), from.get("myUpdated").as(Date.class));
+		//
+		// List<Predicate> predicates = new ArrayList<Predicate>();
+		// if (theSince != null) {
+		// Predicate low = builder.greaterThanOrEqualTo(from.<Date> get("myUpdated"), theSince);
+		// predicates.add(low);
+		// }
+		//
+		// if (theResourceName != null) {
+		// predicates.add(builder.equal(from.get("myResourceType"), theResourceName));
+		// }
+		// if (theId != null) {
+		// predicates.add(builder.equal(from.get("myId"), theId));
+		// }
+		//
+		// cq.where(builder.and(predicates.toArray(new Predicate[0])));
+		//
+		// cq.orderBy(builder.desc(from.get("myUpdated")));
+		// TypedQuery<Tuple> q = myEntityManager.createQuery(cq);
+		// if (theLimit > 0) {
+		// q.setMaxResults(theLimit);
+		// }
+		// for (Tuple next : q.getResultList()) {
+		// long id = (Long) next.get(0);
+		// Date updated = (Date) next.get(1);
+		// tuples.add(new HistoryTuple(ResourceTable.class, updated, id));
+		// }
 
-			return null;
+		return null;
 	}
 
 }

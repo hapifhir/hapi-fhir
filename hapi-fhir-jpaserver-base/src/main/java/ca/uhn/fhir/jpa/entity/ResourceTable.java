@@ -20,7 +20,6 @@ import javax.persistence.Version;
 import org.hibernate.annotations.Index;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.Tag;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.Constants;
 

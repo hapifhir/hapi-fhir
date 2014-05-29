@@ -10,7 +10,7 @@ public interface IFhirSystemDao {
 
 	void transaction(List<IResource> theResources);
 
-	List<IResource> history(Date theDate, int theLimit);
+	List<IResource> history(Date theDate, Integer theLimit);
 
 	TagList getAllTags();
 

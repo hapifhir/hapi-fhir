@@ -21,6 +21,7 @@ package ca.uhn.fhir.rest.server.provider;
  */
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -79,7 +80,14 @@ public class ServerConformanceProvider {
 
 		Set<RestfulOperationSystemEnum> systemOps = new HashSet<RestfulOperationSystemEnum>();
 
-		for (ResourceBinding next : myRestfulServer.getResourceBindings()) {
+		List<ResourceBinding> bindings = new ArrayList<ResourceBinding>(myRestfulServer.getResourceBindings());
+		Collections.sort(bindings, new Comparator<ResourceBinding>() {
+			@Override
+			public int compare(ResourceBinding theArg0, ResourceBinding theArg1) {
+				return theArg0.getResourceName().compareToIgnoreCase(theArg1.getResourceName());
+			}});
+		
+		for (ResourceBinding next : bindings) {
 
 			Set<RestfulOperationTypeEnum> resourceOps = new HashSet<RestfulOperationTypeEnum>();
 			RestResource resource = rest.addResource();

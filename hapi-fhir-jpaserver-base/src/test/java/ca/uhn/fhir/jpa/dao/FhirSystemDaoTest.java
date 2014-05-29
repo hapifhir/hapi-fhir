@@ -3,15 +3,20 @@ package ca.uhn.fhir.jpa.dao;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.io.IOUtils;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
@@ -81,6 +86,16 @@ public class FhirSystemDaoTest {
 		values = ourLocationDao.history(lid.asLong(), start, 1000);
 		assertEquals(1, values.size());
 
+	}
+	
+	@Test
+	public void testTransactionFromBundle() throws Exception {
+
+		InputStream bundleRes = FhirSystemDaoTest.class.getResourceAsStream("/bundle.json");
+		Bundle bundle = new FhirContext().newJsonParser().parseBundle(new InputStreamReader(bundleRes));
+		List<IResource> res = bundle.toListOfResources();
+		
+		ourSystemDao.transaction(res);
 	}
 	
 	@Test

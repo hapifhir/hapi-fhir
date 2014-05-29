@@ -238,6 +238,10 @@ public abstract class BaseFhirDao {
 					if (nextValue.isEmpty()) {
 						continue;
 					}
+					if (nextValue.getReference().getValue().startsWith("#")) {
+						// This is a contained resource reference
+						continue;
+					}
 
 					String typeString = nextValue.getResourceId().getResourceType();
 					if (isBlank(typeString)) {
