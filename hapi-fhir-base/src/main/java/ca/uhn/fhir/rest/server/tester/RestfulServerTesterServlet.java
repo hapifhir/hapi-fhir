@@ -156,7 +156,8 @@ public class RestfulServerTesterServlet extends HttpServlet {
 			ctx.setVariable("conf", conformance);
 			ctx.setVariable("base", myServerBase);
 			ctx.setVariable("jsonEncodedConf", myCtx.newJsonParser().encodeResourceToString(conformance));
-
+			addStandardVariables(ctx, theReq.getParameterMap());
+			
 			theResp.setContentType("text/html");
 			theResp.setCharacterEncoding("UTF-8");
 
@@ -164,6 +165,17 @@ public class RestfulServerTesterServlet extends HttpServlet {
 		} catch (Exception e) {
 			ourLog.error("Failed to respond", e);
 			theResp.sendError(500, e.getMessage());
+		}
+	}
+
+	private void addStandardVariables(WebContext theCtx, Map<String, String[]> theParameterMap) {
+		addStandardVariable(theCtx, theParameterMap, "configEncoding");
+		addStandardVariable(theCtx, theParameterMap, "configPretty");
+	}
+
+	private void addStandardVariable(WebContext theCtx, Map<String, String[]> theParameterMap, String key) {
+		if (theParameterMap.containsKey(key) && theParameterMap.get(key).length > 0) {
+			theCtx.setVariable(key, theParameterMap.get(key)[0]);
 		}
 	}
 

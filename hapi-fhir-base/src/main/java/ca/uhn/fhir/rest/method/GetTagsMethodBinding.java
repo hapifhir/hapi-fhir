@@ -121,9 +121,11 @@ public class GetTagsMethodBinding extends BaseMethodBinding<TagList> {
 		if (myType != IResource.class) {
 			if (id != null) {
 				if (versionId != null) {
-					retVal = new HttpGetClientInvocation(getResourceName(), id.getValue(), Constants.PARAM_HISTORY, versionId.getValue(), Constants.PARAM_TAGS);
+					retVal = new HttpGetClientInvocation(getResourceName(), id.getUnqualifiedId(), Constants.PARAM_HISTORY, versionId.getValue(), Constants.PARAM_TAGS);
+				} else if (id.hasUnqualifiedVersionId()){
+					retVal = new HttpGetClientInvocation(getResourceName(), id.getUnqualifiedId(), Constants.PARAM_HISTORY, id.getUnqualifiedVersionId(), Constants.PARAM_TAGS);
 				} else {
-					retVal = new HttpGetClientInvocation(getResourceName(), id.getValue(), Constants.PARAM_TAGS);
+					retVal = new HttpGetClientInvocation(getResourceName(), id.getUnqualifiedId(), Constants.PARAM_TAGS);
 				}
 			} else {
 				retVal = new HttpGetClientInvocation(getResourceName(), Constants.PARAM_TAGS);
@@ -192,9 +194,9 @@ public class GetTagsMethodBinding extends BaseMethodBinding<TagList> {
 		if ((myIdParamIndex != null) != (theRequest.getId() != null)) {
 			return false;
 		}
-		if ((myVersionIdParamIndex != null) != (theRequest.getVersionId() != null)) {
-			return false;
-		}
+//		if ((myVersionIdParamIndex != null) != (theRequest.getVersionId() != null)) {
+//			return false;
+//		}
 		return true;
 	}
 

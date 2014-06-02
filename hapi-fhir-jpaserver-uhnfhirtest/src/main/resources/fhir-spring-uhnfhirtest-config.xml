@@ -15,6 +15,9 @@
 
 	<!-- <import resource="classpath:hapi-jpaserver-springbeans.xml" /> -->
 
+	<bean id="myDaoConfig" class="ca.uhn.fhir.jpa.dao.DaoConfig">
+	</bean>
+
 	<bean id="mySystemDao" class="ca.uhn.fhir.jpa.dao.FhirSystemDao">
 	</bean>
 

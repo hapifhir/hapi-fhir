@@ -18,6 +18,8 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
+import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.resource.Device;
@@ -86,6 +88,80 @@ public class FhirSystemDaoTest {
 		values = ourLocationDao.history(lid.asLong(), start, 1000);
 		assertEquals(1, values.size());
 
+	}
+
+	@Test
+	public void testTagOperationss() throws Exception {
+
+		TagList preSystemTl = ourSystemDao.getAllTags();
+		
+		TagList tl1 = new TagList();
+		tl1.addTag("testGetAllTagsScheme1", "testGetAllTagsTerm1", "testGetAllTagsLabel1");
+		Patient p1 = new Patient();
+		p1.addIdentifier("foo", "testGetAllTags01");
+		ResourceMetadataKeyEnum.TAG_LIST.put(p1, tl1);		
+		ourPatientDao.create(p1);
+		
+		TagList tl2 = new TagList();
+		tl2.addTag("testGetAllTagsScheme2", "testGetAllTagsTerm2", "testGetAllTagsLabel2");
+		Observation o1 = new Observation();
+		o1.getName().setText("testGetAllTags02");
+		ResourceMetadataKeyEnum.TAG_LIST.put(o1, tl2);
+		IdDt o1id = ourObservationDao.create(o1).getId();
+		assertTrue(o1id.getUnqualifiedVersionId() != null);
+		
+		TagList postSystemTl = ourSystemDao.getAllTags();
+		assertEquals(preSystemTl.size() + 2, postSystemTl.size());
+		assertEquals("testGetAllTagsLabel1", postSystemTl.getTag("testGetAllTagsScheme1", "testGetAllTagsTerm1").getLabel());
+		
+		TagList tags = ourPatientDao.getAllResourceTags();
+		assertEquals("testGetAllTagsLabel1", tags.getTag("testGetAllTagsScheme1", "testGetAllTagsTerm1").getLabel());
+		assertNull(tags.getTag("testGetAllTagsScheme2", "testGetAllTagsTerm2"));
+		
+		TagList tags2 = ourObservationDao.getTags(o1id);
+		assertNull(tags2.getTag("testGetAllTagsScheme1", "testGetAllTagsTerm1"));
+		assertEquals("testGetAllTagsLabel2", tags2.getTag("testGetAllTagsScheme2", "testGetAllTagsTerm2").getLabel());
+		
+		o1.getResourceMetadata().remove(ResourceMetadataKeyEnum.TAG_LIST);
+		IdDt o1id2 = ourObservationDao.update(o1, o1id).getId();
+		assertTrue(o1id2.getUnqualifiedVersionId() != null);
+		
+		tags2 = ourObservationDao.getTags(o1id);
+		assertNull(tags2.getTag("testGetAllTagsScheme1", "testGetAllTagsTerm1"));
+		assertEquals("testGetAllTagsLabel2", tags2.getTag("testGetAllTagsScheme2", "testGetAllTagsTerm2").getLabel());
+
+		tags2 = ourObservationDao.getTags(o1id2);
+		assertNull(tags2.getTag("testGetAllTagsScheme1", "testGetAllTagsTerm1"));
+		assertNotNull(tags2.getTag("testGetAllTagsScheme2", "testGetAllTagsTerm2"));
+
+		/*
+		 * Remove a tag from a version
+		 */
+		
+		ourObservationDao.removeTag(o1id2, "testGetAllTagsScheme2", "testGetAllTagsTerm2");
+		tags2 = ourObservationDao.getTags(o1id2);
+		assertNull(tags2.getTag("testGetAllTagsScheme1", "testGetAllTagsTerm1"));
+		assertNull(tags2.getTag("testGetAllTagsScheme2", "testGetAllTagsTerm2"));
+
+		tags2 = ourObservationDao.getTags(o1id);
+		assertNull(tags2.getTag("testGetAllTagsScheme1", "testGetAllTagsTerm1"));
+		assertNotNull(tags2.getTag("testGetAllTagsScheme2", "testGetAllTagsTerm2"));
+
+		/*
+		 * Add a tag 
+		 */
+		ourObservationDao.addTag(o1id2, "testGetAllTagsScheme3", "testGetAllTagsTerm3", "testGetAllTagsLabel3");
+		tags2 = ourObservationDao.getTags(o1id2);
+		assertNull(tags2.getTag("testGetAllTagsScheme1", "testGetAllTagsTerm1"));
+		assertNull(tags2.getTag("testGetAllTagsScheme2", "testGetAllTagsTerm2"));
+		assertNotNull(tags2.getTag("testGetAllTagsScheme3", "testGetAllTagsTerm3"));
+		assertEquals("testGetAllTagsLabel3", tags2.getTag("testGetAllTagsScheme3", "testGetAllTagsTerm3").getLabel());
+		
+		tags2 = ourObservationDao.getTags(o1id);
+		assertNull(tags2.getTag("testGetAllTagsScheme1", "testGetAllTagsTerm1"));
+		assertNotNull(tags2.getTag("testGetAllTagsScheme2", "testGetAllTagsTerm2"));
+
+		
 	}
 	
 	@Test

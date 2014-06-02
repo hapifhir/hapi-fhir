@@ -15,11 +15,13 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
+import org.hamcrest.generator.qdox.parser.structs.TagDef;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
+import ca.uhn.fhir.jpa.entity.TagDefinition;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
@@ -109,44 +111,13 @@ public class FhirSystemDao extends BaseFhirDao implements IFhirSystemDao {
 	}
 
 	@Override
-	public List<IResource> history(Date theSince, int theLimit) {
+	public List<IResource> history(Date theSince, Integer theLimit) {
 		return super.history(null, null, theSince, theLimit);
 	}
 
 	@Override
 	public TagList getAllTags() {
-		// CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
-		// CriteriaQuery<Tuple> cq = builder.createQuery(Tag)
-		// Root<?> from = cq.from(ResourceTable.class);
-		// cq.multiselect(from.get("myId").as(Long.class), from.get("myUpdated").as(Date.class));
-		//
-		// List<Predicate> predicates = new ArrayList<Predicate>();
-		// if (theSince != null) {
-		// Predicate low = builder.greaterThanOrEqualTo(from.<Date> get("myUpdated"), theSince);
-		// predicates.add(low);
-		// }
-		//
-		// if (theResourceName != null) {
-		// predicates.add(builder.equal(from.get("myResourceType"), theResourceName));
-		// }
-		// if (theId != null) {
-		// predicates.add(builder.equal(from.get("myId"), theId));
-		// }
-		//
-		// cq.where(builder.and(predicates.toArray(new Predicate[0])));
-		//
-		// cq.orderBy(builder.desc(from.get("myUpdated")));
-		// TypedQuery<Tuple> q = myEntityManager.createQuery(cq);
-		// if (theLimit > 0) {
-		// q.setMaxResults(theLimit);
-		// }
-		// for (Tuple next : q.getResultList()) {
-		// long id = (Long) next.get(0);
-		// Date updated = (Date) next.get(1);
-		// tuples.add(new HistoryTuple(ResourceTable.class, updated, id));
-		// }
-
-		return null;
+		return super.getTags(null, null);
 	}
 
 }

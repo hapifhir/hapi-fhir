@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.entity;
 
 import java.io.Serializable;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -28,6 +29,32 @@ public class ResourceHistoryTag extends BaseTag implements Serializable {
 			@JoinColumn(name="VERSION", referencedColumnName="VERSION")
 	}/*, foreignKey=@ForeignKey(name="FK_HT_RT")*/)
 	private ResourceHistoryTable myResourceHistory;
+
+	@Column(name = "RES_TYPE", length = ResourceTable.RESTYPE_LEN,nullable=false, insertable=false, updatable=false)
+	private String myResourceType;
+
+	@Column(name="PID", insertable=false,updatable=false)
+	private Long myResourceId;
+
+	public String getResourceType() {
+		return myResourceType;
+	}
+
+
+	public void setResourceType(String theResourceType) {
+		myResourceType = theResourceType;
+	}
+
+
+	public Long getResourceId() {
+		return myResourceId;
+	}
+
+
+	public void setResourceId(Long theResourceId) {
+		myResourceId = theResourceId;
+	}
+
 
 	public ResourceHistoryTag() {
 	}

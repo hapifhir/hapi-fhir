@@ -48,10 +48,10 @@ import ca.uhn.fhir.rest.server.Constants;
 @DatatypeDef(name = "id")
 public class IdDt extends BasePrimitive<String> {
 
-	private String myUnqualifiedId;
-	private String myValue;
-	private String myUnqualifiedVersionId;
 	private String myResourceType;
+	private String myUnqualifiedId;
+	private String myUnqualifiedVersionId;
+	private String myValue;
 
 	/**
 	 * Create a new empty ID
@@ -71,7 +71,7 @@ public class IdDt extends BasePrimitive<String> {
 			setValue(null);
 		}
 	}
-
+	
 	/**
 	 * Create a new ID using a long
 	 */
@@ -166,6 +166,14 @@ public class IdDt extends BasePrimitive<String> {
 		return myUnqualifiedVersionId;
 	}
 
+	public Long getUnqualifiedVersionIdAsLong() {
+		if (!hasUnqualifiedVersionId()) {
+			return null;
+		}else {
+			return Long.parseLong(getUnqualifiedVersionId());
+		}
+	}
+
 	/**
 	 * Returns the value of this ID. Note that this value may be a fully qualified URL, a relative/partial URL, or a
 	 * simple ID. Use {@link #getUnqualifiedId()} to get just the ID portion.
@@ -180,6 +188,31 @@ public class IdDt extends BasePrimitive<String> {
 	@Override
 	public String getValueAsString() {
 		return myValue;
+	}
+
+	public boolean hasUnqualifiedId() {
+		return isNotBlank(getUnqualifiedId());
+	}
+
+	public boolean hasUnqualifiedVersionId() {
+		return isNotBlank(getUnqualifiedVersionId());
+	}
+
+	/**
+	 * Returns <code>true</code> if the unqualified ID is a valid {@link Long} value (in other words, it consists only
+	 * of digits)
+	 */
+	public boolean isValidLong() {
+		String id = getUnqualifiedId();
+		if (StringUtils.isBlank(id)) {
+			return false;
+		}
+		for (int i = 0; i < id.length(); i++) {
+			if (Character.isDigit(id.charAt(i)) == false) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	/**
@@ -254,28 +287,6 @@ public class IdDt extends BasePrimitive<String> {
 		setValue(theValue);
 	}
 
-	@Override
-	public String toString() {
-		return myValue;
-	}
-
-	/**
-	 * Returns <code>true</code> if the unqualified ID is a valid {@link Long} value (in other words, it consists only
-	 * of digits)
-	 */
-	public boolean isValidLong() {
-		String id = getUnqualifiedId();
-		if (StringUtils.isBlank(id)) {
-			return false;
-		}
-		for (int i = 0; i < id.length(); i++) {
-			if (Character.isDigit(id.charAt(i)) == false) {
-				return false;
-			}
-		}
-		return true;
-	}
-
 	/**
 	 * Returns a view of this ID as a fully qualified URL, given a server base and resource name
 	 * (which will only be used if the ID does not already contain those respective parts). Essentially,
@@ -304,5 +315,21 @@ public class IdDt extends BasePrimitive<String> {
 		retVal.append(getUnqualifiedId());
 		return retVal.toString();
 	}
+
+	@Override
+	public String toString() {
+		return myValue;
+	}
+
+	public IdDt withoutVersion() {
+		int i = myValue.indexOf(Constants.PARAM_HISTORY);
+		if (i > 1) {
+			return new IdDt(myValue.substring(0, i-1));
+		}else {
+			return this;
+		}
+	}
+
+
 
 }

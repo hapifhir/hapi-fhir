@@ -20,7 +20,7 @@ package ca.uhn.fhir.model.api;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 import java.util.Date;
 import java.util.Map;
@@ -46,6 +46,12 @@ public enum ResourceMetadataKeyEnum {
 		public InstantDt get(IResource theResource) {
 			return getInstantFromMetadataOrNullIfNone(theResource.getResourceMetadata(), DELETED_AT);
 		}
+
+		@Override
+		public void put(IResource theResource, Object theObject) {
+			InstantDt obj = (InstantDt) theObject;
+			theResource.getResourceMetadata().put(DELETED_AT, obj);
+		}
 	},
 
 	/**
@@ -60,6 +66,12 @@ public enum ResourceMetadataKeyEnum {
 		@Override
 		public IdDt get(IResource theResource) {
 			return getIdFromMetadataOrNullIfNone(theResource.getResourceMetadata(), PREVIOUS_ID);
+		}
+
+		@Override
+		public void put(IResource theResource, Object theObject) {
+			IdDt obj = (IdDt) theObject;
+			theResource.getResourceMetadata().put(PREVIOUS_ID, obj);
 		}
 	},
 
@@ -82,6 +94,12 @@ public enum ResourceMetadataKeyEnum {
 		@Override
 		public InstantDt get(IResource theResource) {
 			return getInstantFromMetadataOrNullIfNone(theResource.getResourceMetadata(), PUBLISHED);
+		}
+
+		@Override
+		public void put(IResource theResource, Object theObject) {
+			InstantDt obj = (InstantDt) theObject;
+			theResource.getResourceMetadata().put(PUBLISHED, obj);
 		}
 	},
 
@@ -109,6 +127,12 @@ public enum ResourceMetadataKeyEnum {
 			}
 			throw new InternalErrorException("Found an object of type '" + retValObj.getClass().getCanonicalName() + "' in resource metadata for key " + TAG_LIST.name() + " - Expected " + TagList.class.getCanonicalName());
 		}
+
+		@Override
+		public void put(IResource theResource, Object theObject) {
+			TagList obj = (TagList) theObject;
+			theResource.getResourceMetadata().put(TAG_LIST, obj);
+		}
 	}, 
 	
 	
@@ -128,6 +152,12 @@ public enum ResourceMetadataKeyEnum {
 		public InstantDt get(IResource theResource) {
 			return getInstantFromMetadataOrNullIfNone(theResource.getResourceMetadata(), UPDATED);
 		}
+
+		@Override
+		public void put(IResource theResource, Object theObject) {
+			InstantDt obj = (InstantDt) theObject;
+			theResource.getResourceMetadata().put(UPDATED, obj);
+		}
 	}, 
 	
 	/**
@@ -143,6 +173,12 @@ public enum ResourceMetadataKeyEnum {
 		@Override
 		public IdDt get(IResource theResource) {
 			return getIdFromMetadataOrNullIfNone(theResource.getResourceMetadata(), VERSION_ID);
+		}
+
+		@Override
+		public void put(IResource theResource, Object theObject) {
+			IdDt obj = (IdDt) theObject;
+			theResource.getResourceMetadata().put(VERSION_ID, obj);
 		}
 	};
 
@@ -185,5 +221,7 @@ public enum ResourceMetadataKeyEnum {
 		}
 		throw new InternalErrorException("Found an object of type '" + retValObj.getClass().getCanonicalName() + "' in resource metadata for key " + theKey.name() + " - Expected " + InstantDt.class.getCanonicalName());
 	}
+
+	public abstract void put(IResource theResource, Object theObject);
 	
 }

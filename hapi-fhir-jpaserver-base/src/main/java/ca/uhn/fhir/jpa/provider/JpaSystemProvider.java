@@ -6,9 +6,10 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Required;
 
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
-import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.rest.annotation.Count;
+import ca.uhn.fhir.rest.annotation.GetTags;
 import ca.uhn.fhir.rest.annotation.History;
 import ca.uhn.fhir.rest.annotation.Since;
 import ca.uhn.fhir.rest.annotation.Transaction;
@@ -38,7 +39,13 @@ public class JpaSystemProvider {
 	}
 
 	@History
-	public List<IResource> getHistoryServerWithCriteria(@Since Date theDate, @Count Integer theCount) {
+	public List<IResource> historyServer(@Since Date theDate, @Count Integer theCount) {
 		return myDao.history(theDate, theCount);
 	}
+	
+	@GetTags
+	public TagList getAllTagsOnServer() {
+		return myDao.getAllTags();
+	}
+	
 }

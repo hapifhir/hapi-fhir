@@ -231,6 +231,28 @@ public class TagsClientTest {
 		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(ser), Charset.forName("UTF-8")));
 
 		IClient client = ctx.newRestfulClient(IClient.class, "http://foo");
+		TagList response = client.getAllTagsPatientId(new IdDt("Patient", "111", "222"));
+		assertEquals(tagList, response);
+
+		assertEquals(HttpGet.class, capt.getValue().getClass());
+		HttpGet get = (HttpGet) capt.getValue();
+		assertEquals("http://foo/Patient/111/_history/222/_tags", get.getURI().toString());
+	}
+
+	@Test
+	public void testGetAllTagsPatientIdVersionOld() throws Exception {
+
+		TagList tagList = new TagList();
+		tagList.add(new Tag("AAA", "BBB", "CCC"));
+		String ser = ctx.newXmlParser().encodeTagListToString(tagList);
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
+		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(ser), Charset.forName("UTF-8")));
+
+		IClient client = ctx.newRestfulClient(IClient.class, "http://foo");
 		TagList response = client.getAllTagsPatientIdVersion(new IdDt("111"), new IdDt("222"));
 		assertEquals(tagList, response);
 

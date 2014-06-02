@@ -16,6 +16,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.provider.JpaSystemProvider;
+import ca.uhn.fhir.jpa.testutil.RandomServerPortProvider;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.resource.Observation;
@@ -82,7 +83,7 @@ public class SystemTest {
 		restServer.setResourceProviders(patientRp, questionnaireRp, observationRp, organizationRp);
 		restServer.setPlainProviders(new JpaSystemProvider(systemDao));
 
-		int myPort = 8888;
+		int myPort = RandomServerPortProvider.findFreePort();
 		ourServer = new Server(myPort);
 
 		ServletContextHandler proxyHandler = new ServletContextHandler();

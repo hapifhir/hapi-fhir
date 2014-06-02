@@ -28,6 +28,8 @@ import ca.uhn.fhir.rest.server.Constants;
 @Inheritance(strategy = InheritanceType.JOINED)
 @org.hibernate.annotations.Table(appliesTo="HFJ_RESOURCE", indexes= {@Index(name="IDX_RES_DATE", columnNames= {"RES_UPDATED"})})
 public class ResourceTable extends BaseHasResource implements Serializable {
+	static final int RESTYPE_LEN = 30;
+
 	private static final long serialVersionUID = 1L;
 
 	@Column(name = "SP_HAS_LINKS")
@@ -68,7 +70,7 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 	@OneToMany(mappedBy = "mySourceResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
 	private Collection<ResourceLink> myResourceLinks;
 
-	@Column(name = "RES_TYPE", length = 30)
+	@Column(name = "RES_TYPE", length = RESTYPE_LEN)
 	private String myResourceType;
 
 	@OneToMany(mappedBy = "myResource", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
@@ -230,7 +232,10 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 		return retVal;
 	}
 
-	public void addTag(TagDefinition theTag) {
-		getTags().add(new ResourceTag(this, theTag));
+	public ResourceTag addTag(TagDefinition theTag) {
+		ResourceTag tag = new ResourceTag(this, theTag);
+		tag.setResourceType(getResourceType());
+		getTags().add(tag);
+		return tag;
 	}
 }

@@ -1,14 +1,19 @@
 package ca.uhn.fhir.jpa.entity;
 
 import java.io.Serializable;
+import java.util.Collection;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+
+import ca.uhn.fhir.model.api.Tag;
 
 @Entity
 @Table(name = "HFJ_TAG_DEF", uniqueConstraints= {@UniqueConstraint(columnNames= {"TAG_SCHEME","TAG_TERM"})})
@@ -16,6 +21,12 @@ import javax.persistence.UniqueConstraint;
 public class TagDefinition implements Serializable {
 
 	private static final long serialVersionUID = 1L;
+
+	@OneToMany(cascade= {}, fetch= FetchType.LAZY, mappedBy= "myTag")
+	private Collection<ResourceTag> myResources;
+
+	@OneToMany(cascade= {}, fetch= FetchType.LAZY, mappedBy= "myTag")
+	private Collection<ResourceHistoryTag> myResourceVersions;
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
@@ -62,6 +73,10 @@ public class TagDefinition implements Serializable {
 
 	public void setTerm(String theTerm) {
 		myTerm = theTerm;
+	}
+
+	public Tag toTag() {
+		return new Tag( getTerm(), getLabel(),getScheme());
 	}
 
 }

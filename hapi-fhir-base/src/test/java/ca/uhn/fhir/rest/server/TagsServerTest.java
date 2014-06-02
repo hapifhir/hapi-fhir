@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.apache.commons.lang.StringUtils.*;
 import static org.junit.Assert.*;
 
 import java.util.concurrent.TimeUnit;
@@ -25,6 +26,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Tag;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.api.annotation.TagListParam;
+import ca.uhn.fhir.model.dstu.resource.Observation;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.AddTags;
@@ -58,7 +60,7 @@ public class TagsServerTest {
 	public void testAddTagsById() throws Exception {
 
 		TagList tagList = new TagList();
-		tagList.addTag("term", "label", "scheme");
+		tagList.addTag("scheme", "term", "label");
 
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/111/_tags");
 		httpPost.setEntity(new StringEntity(ourCtx.newJsonParser().encodeTagListToString(tagList), ContentType.create(EncodingEnum.JSON.getResourceContentType(), "UTF-8")));
@@ -76,7 +78,7 @@ public class TagsServerTest {
 	public void testAddTagsByIdAndVersion() throws Exception {
 
 		TagList tagList = new TagList();
-		tagList.addTag("term", "label", "scheme");
+		tagList.addTag("scheme", "term", "label");
 
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/111/_history/222/_tags");
 		httpPost.setEntity(new StringEntity(ourCtx.newJsonParser().encodeTagListToString(tagList), ContentType.create(EncodingEnum.JSON.getResourceContentType(), "UTF-8")));
@@ -168,10 +170,27 @@ public class TagsServerTest {
 	}
 
 	@Test
+	public void testGetAllTagsObservationIdVersion() throws Exception {
+
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Observation/111/_history/222/_tags");
+		HttpResponse status = ourClient.execute(httpGet);
+
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		ourLog.info("Response was:\n{}", responseContent);
+
+		assertEquals(200, status.getStatusLine().getStatusCode());
+
+		TagList actual = ourCtx.newXmlParser().parseTagList(responseContent);
+		TagList expected = ourProvider.getAllTags();
+		expected.get(0).setTerm("Patient111222");
+		assertEquals(expected, actual);
+	}
+	
+	@Test
 	public void testRemoveTagsById() throws Exception {
 
 		TagList tagList = new TagList();
-		tagList.addTag("term", "label", "scheme");
+		tagList.addTag("scheme", "term", "label");
 
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/111/_tags/_delete");
 		httpPost.setEntity(new StringEntity(ourCtx.newJsonParser().encodeTagListToString(tagList), ContentType.create(EncodingEnum.JSON.getResourceContentType(), "UTF-8")));
@@ -189,7 +208,7 @@ public class TagsServerTest {
 	public void testRemoveTagsByIdAndVersion() throws Exception {
 
 		TagList tagList = new TagList();
-		tagList.addTag("term", "label", "scheme");
+		tagList.addTag("scheme", "term", "label");
 
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/111/_history/222/_tags/_delete");
 		httpPost.setEntity(new StringEntity(ourCtx.newJsonParser().encodeTagListToString(tagList), ContentType.create(EncodingEnum.JSON.getResourceContentType(), "UTF-8")));
@@ -264,7 +283,7 @@ public class TagsServerTest {
 		@GetTags(type = Patient.class)
 		public TagList getAllTagsPatientId(@IdParam IdDt theId) {
 			TagList tagList = new TagList();
-			tagList.add(new Tag("Patient" + theId.getUnqualifiedId(), "DogLabel", (String) null));
+			tagList.add(new Tag("Patient" + theId.getUnqualifiedId() + defaultString(theId.getUnqualifiedVersionId()), "DogLabel", (String) null));
 			tagList.add(new Tag("AllCat", "CatLabel", "http://cats"));
 			return tagList;
 		}
@@ -273,6 +292,14 @@ public class TagsServerTest {
 		public TagList getAllTagsPatientIdVersion(@IdParam IdDt theId, @VersionIdParam IdDt theVersion) {
 			TagList tagList = new TagList();
 			tagList.add(new Tag("Patient" + theId.getUnqualifiedId() + theVersion.getUnqualifiedVersionId(), "DogLabel", (String) null));
+			tagList.add(new Tag("AllCat", "CatLabel", "http://cats"));
+			return tagList;
+		}
+
+		@GetTags(type = Observation.class)
+		public TagList getAllTagsObservationIdVersion(@IdParam IdDt theId) {
+			TagList tagList = new TagList();
+			tagList.add(new Tag("Patient" + theId.getUnqualifiedId() + theId.getUnqualifiedVersionId(), "DogLabel", (String) null));
 			tagList.add(new Tag("AllCat", "CatLabel", "http://cats"));
 			return tagList;
 		}

@@ -341,6 +341,15 @@ function newUniqueId() {
     return "uid" + uniqueIdSeed++;
 }
 
+function selectResourceType() {
+	$('.resourceTypeContainer').each(function() {
+		$(this).hide();
+	});
+	var cr = document.getElementById('configResource');
+	var selected = cr.options[cr.selectedIndex].value;
+	$('#res' + selected).show();
+}
+
 /** Show a newly created tester form */
 function showNewForm() {
 	var time = 0;

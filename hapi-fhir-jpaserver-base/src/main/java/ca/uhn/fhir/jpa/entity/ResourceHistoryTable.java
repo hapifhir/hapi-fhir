@@ -92,7 +92,16 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 	}
 
 	public void addTag(ResourceTag theTag) {
-		getTags().add(new ResourceHistoryTag(this, theTag.getTag()));
+		ResourceHistoryTag tag = new ResourceHistoryTag(this, theTag.getTag());
+		tag.setResourceType(theTag.getResourceType());
+		getTags().add(tag);
+	}
+
+	@Override
+	public BaseTag addTag(TagDefinition theDef) {
+		ResourceHistoryTag historyTag = new ResourceHistoryTag(this, theDef);
+		getTags().add(historyTag);
+		return historyTag;
 	}
 
 }

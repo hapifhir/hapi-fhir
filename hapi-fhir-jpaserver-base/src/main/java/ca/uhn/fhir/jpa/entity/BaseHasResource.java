@@ -11,7 +11,6 @@ import javax.persistence.MappedSuperclass;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
-import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.server.EncodingEnum;
@@ -82,5 +81,7 @@ public abstract class BaseHasResource {
 	public void setUpdated(InstantDt theUpdated) {
 		myUpdated = theUpdated.getValue();
 	}
+
+	public abstract  BaseTag addTag(TagDefinition theDef);
 
 }

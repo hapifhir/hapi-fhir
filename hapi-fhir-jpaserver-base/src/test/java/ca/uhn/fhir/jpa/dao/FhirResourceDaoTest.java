@@ -413,8 +413,8 @@ public class FhirResourceDaoTest {
 		patient.addIdentifier("urn:system", "testTagsWithCreateAndReadAndSearch");
 		patient.addName().addFamily("Tester").addGiven("Joe");
 		TagList tagList = new TagList();
-		tagList.addTag("Dog", "Puppies", null);
-		tagList.addTag("Cat", "Kittens", "http://foo");
+		tagList.addTag(null, "Dog", "Puppies");
+		tagList.addTag("http://foo", "Cat", "Kittens");
 		patient.getResourceMetadata().put(ResourceMetadataKeyEnum.TAG_LIST, tagList);
 
 		MethodOutcome outcome = ourPatientDao.create(patient);
@@ -475,7 +475,7 @@ public class FhirResourceDaoTest {
 
 		Date now2 = new Date();
 
-		Patient retrieved2 = ourPatientDao.read(outcome.getId());
+		Patient retrieved2 = ourPatientDao.read(outcome.getId().withoutVersion());
 
 		assertEquals("2", retrieved2.getId().getUnqualifiedVersionId());
 		assertEquals("002", retrieved2.getIdentifierFirstRep().getValue().getValue());
@@ -490,7 +490,11 @@ public class FhirResourceDaoTest {
 		 */
 
 		List<Patient> history = ourPatientDao.history(outcome.getId());
+
 		assertEquals(2, history.size());
+		assertEquals("1", history.get(0).getId().getUnqualifiedVersionId());
+		assertEquals("2", history.get(1).getId().getUnqualifiedVersionId());
+		assertEquals(published, history.get(0).getResourceMetadata().get(ResourceMetadataKeyEnum.PUBLISHED));
 		assertEquals(published, history.get(0).getResourceMetadata().get(ResourceMetadataKeyEnum.PUBLISHED));
 		assertEquals(updated, history.get(0).getResourceMetadata().get(ResourceMetadataKeyEnum.UPDATED));
 		assertEquals("001", history.get(0).getIdentifierFirstRep().getValue().getValue());
@@ -518,13 +522,20 @@ public class FhirResourceDaoTest {
 
 		// Update the name
 		p1.getNameFirstRep().getGivenFirstRep().setValue("testUpdateMaintainsSearchParamsBBB");
-		ourPatientDao.update(p1, p1id);
+		IdDt p1id2 = ourPatientDao.update(p1, p1id).getId();
 
 		ids = ourPatientDao.searchForIds(Patient.SP_GIVEN, new StringDt("testUpdateMaintainsSearchParamsAAA"));
 		assertEquals(0, ids.size());
 
 		ids = ourPatientDao.searchForIds(Patient.SP_GIVEN, new StringDt("testUpdateMaintainsSearchParamsBBB"));
 		assertEquals(2, ids.size());
+
+		// Make sure vreads work
+		p1 = ourPatientDao.read(p1id);
+		assertEquals("testUpdateMaintainsSearchParamsAAA", p1.getNameFirstRep().getGivenAsSingleString());
+
+		p1 = ourPatientDao.read(p1id2);
+		assertEquals("testUpdateMaintainsSearchParamsBBB", p1.getNameFirstRep().getGivenAsSingleString());
 
 	}
 

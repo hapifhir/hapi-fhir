@@ -5,17 +5,31 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import ca.uhn.fhir.jpa.entity.ResourceTable;
+import ca.uhn.fhir.jpa.entity.BaseHasResource;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 
 public interface IFhirResourceDao<T extends IResource> {
 
 	MethodOutcome create(T theResource);
+
+	TagList getAllResourceTags();
+
+	Class<T> getResourceType();
+
+	TagList getTags(IdDt theResourceId);
+
+	List<T> history();
+
+	List<IResource> history(Date theDate, Integer theLimit);
+
+	List<T> history(IdDt theId);
+
+	List<IResource> history(Long theId, Date theSince, Integer theLimit);
 
 	/**
 	 * 
@@ -25,28 +39,24 @@ public interface IFhirResourceDao<T extends IResource> {
 	 */
 	T read(IdDt theId);
 
-	MethodOutcome update(T theResource, IdDt theId);
-
-	List<T> history(IdDt theId);
+	BaseHasResource readEntity(IdDt theId);
 
 	List<T> search(Map<String, IQueryParameterType> theParams);
 
-	List<T> search(String theParameterName, IQueryParameterType theValue);
-
 	List<T> search(SearchParameterMap theMap);
 
-	Class<T> getResourceType();
-
-	Set<Long> searchForIds(String theParameterName, IQueryParameterType theValue);
+	List<T> search(String theParameterName, IQueryParameterType theValue);
 
 	Set<Long> searchForIds(Map<String, IQueryParameterType> theParams);
 
+	Set<Long> searchForIds(String theParameterName, IQueryParameterType theValue);
+
 	Set<Long> searchForIdsWithAndOr(Map<String, List<List<IQueryParameterType>>> theMap);
 
-	List<T> history();
+	MethodOutcome update(T theResource, IdDt theId);
 
-	List<IResource> history(Date theDate, Integer theLimit);
+	void removeTag(IdDt theId, String theScheme, String theTerm);
 
-	List<IResource> history(Long theId, Date theSince, Integer theLimit);
+	void addTag(IdDt theId, String theScheme, String theTerm, String theLabel);
 	
 }

@@ -13,6 +13,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.testutil.RandomServerPortProvider;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.resource.Observation;
@@ -157,7 +158,7 @@ public class CompleteResourceProviderTest {
 		RestfulServer restServer = new RestfulServer();
 		restServer.setResourceProviders(patientRp, questionnaireRp, observationRp, organizationRp);
 
-		int myPort = 8888;
+		int myPort = RandomServerPortProvider.findFreePort();
 		ourServer = new Server(myPort);
 
 		ServletContextHandler proxyHandler = new ServletContextHandler();

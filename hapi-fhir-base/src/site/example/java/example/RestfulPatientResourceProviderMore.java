@@ -613,8 +613,8 @@ public Patient readPatient(@IdParam IdDt theId) {
  
   // Create a TagList and place a complete list of the patient's tags inside
   TagList tags = new TagList();
-  tags.addTag("Dog", "Canine Patient", "http://animals"); // TODO: more realistic example
-  tags.addTag("Friendly", "Friendly", "http://personality"); // TODO: more realistic example
+  tags.addTag("http://animals", "Dog", "Canine Patient"); // TODO: more realistic example
+  tags.addTag("http://personality", "Friendly", "Friendly"); // TODO: more realistic example
   
   // The tags are then stored in the Patient resource instance
   retVal.getResourceMetadata().put(ResourceMetadataKeyEnum.TAG_LIST, tags);
@@ -656,8 +656,8 @@ newPatient.addName().addFamily("Jones").addGiven("Frank");
 
 // Populate tags
 TagList tags = new TagList();
-tags.addTag("Dog", "Canine Patient", "http://animals"); // TODO: more realistic example
-tags.addTag("Friendly", "Friendly", "http://personality"); // TODO: more realistic example
+tags.addTag("http://animals", "Dog", "Canine Patient"); // TODO: more realistic example
+tags.addTag("http://personality", "Friendly", "Friendly"); // TODO: more realistic example
 newPatient.getResourceMetadata().put(ResourceMetadataKeyEnum.TAG_LIST, tags);
 
 // ...invoke the create method on the client...

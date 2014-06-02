@@ -23,7 +23,6 @@ package ca.uhn.fhir.rest.server;
 import static org.apache.commons.lang3.StringUtils.*;
 
 import java.io.IOException;
-import java.io.StringReader;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
@@ -567,7 +566,8 @@ public class RestfulServer extends HttpServlet {
 						if (id == null) {
 							throw new InvalidRequestException("Don't know how to handle request path: " + requestPath);
 						}
-						versionId = new IdDt(resourceName + "/" + id.getUnqualifiedId() + "/_history/" + versionString);
+						id = new IdDt(resourceName + "/" + id.getUnqualifiedId() + "/_history/" + versionString);
+						versionId = id;
 					} else {
 						operation = Constants.PARAM_HISTORY;
 					}
