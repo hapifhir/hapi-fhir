@@ -30,7 +30,6 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.resource.Conformance;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
-import ca.uhn.fhir.rest.client.GetClientInvocation;
 import ca.uhn.fhir.rest.method.SearchMethodBinding.RequestType;
 import ca.uhn.fhir.rest.param.IParameter;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
@@ -53,8 +52,8 @@ public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding
 	}
 
 	@Override
-	public GetClientInvocation invokeClient(Object[] theArgs) throws InternalErrorException {
-		GetClientInvocation retVal = createConformanceInvocation();
+	public HttpGetClientInvocation invokeClient(Object[] theArgs) throws InternalErrorException {
+		HttpGetClientInvocation retVal = createConformanceInvocation();
 
 		if (theArgs != null) {
 			for (int idx = 0; idx < theArgs.length; idx++) {
@@ -66,8 +65,8 @@ public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding
 		return retVal;
 	}
 
-	public static GetClientInvocation createConformanceInvocation() {
-		return new GetClientInvocation("metadata");
+	public static HttpGetClientInvocation createConformanceInvocation() {
+		return new HttpGetClientInvocation("metadata");
 	}
 
 	@Override

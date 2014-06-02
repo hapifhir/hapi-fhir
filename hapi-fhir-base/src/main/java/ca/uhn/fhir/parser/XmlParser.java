@@ -70,11 +70,13 @@ import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.dstu.composite.ContainedDt;
 import ca.uhn.fhir.model.dstu.composite.NarrativeDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.dstu.resource.Binary;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.XhtmlDt;
 import ca.uhn.fhir.narrative.INarrativeGenerator;
+import ca.uhn.fhir.util.NonPrettyPrintWriterWrapper;
 import ca.uhn.fhir.util.PrettyPrintWriterWrapper;
 
 public class XmlParser extends BaseParser implements IParser {
@@ -82,6 +84,7 @@ public class XmlParser extends BaseParser implements IParser {
 	static final String ATOM_NS = "http://www.w3.org/2005/Atom";
 	static final String FHIR_NS = "http://hl7.org/fhir";
 	static final String OPENSEARCH_NS = "http://a9.com/-/spec/opensearch/1.1/";
+	static final String TOMBSTONES_NS = "http://purl.org/atompub/tombstones/1.0";
 	static final String XHTML_NS = "http://www.w3.org/1999/xhtml";
 
 	// private static final Set<String> RESOURCE_NAMESPACES;
@@ -141,10 +144,21 @@ public class XmlParser extends BaseParser implements IParser {
 			}
 
 			for (BundleEntry nextEntry : theBundle.getEntries()) {
-				eventWriter.writeStartElement("entry");
+				boolean deleted=false;
+				if (nextEntry.getDeletedAt() != null && nextEntry.getDeletedAt().isEmpty()==false) {
+					deleted=true;
+					eventWriter.writeStartElement("at","deleted-entry",TOMBSTONES_NS);
+					eventWriter.writeNamespace("at", TOMBSTONES_NS);
+					eventWriter.writeAttribute("ref", nextEntry.getId().getValueAsString());
+					eventWriter.writeAttribute("when", nextEntry.getDeletedAt().getValueAsString());
+				} else {
+					eventWriter.writeStartElement("entry");
+				}
 
-				writeTagWithTextNode(eventWriter, "title", nextEntry.getTitle());
-				writeTagWithTextNode(eventWriter, "id", nextEntry.getId());
+				writeOptionalTagWithTextNode(eventWriter, "title", nextEntry.getTitle());
+				if (!deleted) {
+					writeTagWithTextNode(eventWriter, "id", nextEntry.getId());
+				}
 				writeOptionalTagWithTextNode(eventWriter, "updated", nextEntry.getUpdated());
 				writeOptionalTagWithTextNode(eventWriter, "published", nextEntry.getPublished());
 
@@ -162,17 +176,20 @@ public class XmlParser extends BaseParser implements IParser {
 					writeAtomLink(eventWriter, "self", nextEntry.getLinkSelf());
 				}
 
-				eventWriter.writeStartElement("content");
-				eventWriter.writeAttribute("type", "text/xml");
-
-				IResource resource = nextEntry.getResource();
-				if (resource != null) {
-					encodeResourceToXmlStreamWriter(resource, eventWriter, false);
-				} else {
-					ourLog.warn("Bundle entry contains null resource");
+				if (!nextEntry.getLinkAlternate().isEmpty()) {
+					writeAtomLink(eventWriter, "alternate", nextEntry.getLinkAlternate());
 				}
 
-				eventWriter.writeEndElement(); // content
+				IResource resource = nextEntry.getResource();
+				if (resource != null && !resource.isEmpty()) {
+					eventWriter.writeStartElement("content");
+					eventWriter.writeAttribute("type", "text/xml");
+					encodeResourceToXmlStreamWriter(resource, eventWriter, false);
+					eventWriter.writeEndElement(); // content
+				} else {
+					ourLog.debug("Bundle entry contains null resource");
+				}
+
 				eventWriter.writeEndElement(); // entry
 			}
 
@@ -290,7 +307,8 @@ public class XmlParser extends BaseParser implements IParser {
 			PrettyPrintWriterWrapper retVal = new PrettyPrintWriterWrapper(eventWriter);
 			return retVal;
 		} else {
-			return eventWriter;
+			NonPrettyPrintWriterWrapper retVal = new NonPrettyPrintWriterWrapper(eventWriter);
+			return retVal;
 		}
 	}
 
@@ -458,8 +476,13 @@ public class XmlParser extends BaseParser implements IParser {
 				if (childDef == null) {
 					super.throwExceptionForUnknownChildType(nextChild, type);
 				}
-
-				if (extensionUrl != null && childName.equals("extension") == false) {
+				
+				if (nextValue instanceof ExtensionDt) {
+					
+					extensionUrl = ((ExtensionDt) nextValue).getUrlAsString();
+					encodeChildElementToStreamWriter(theResDef, theResource, theEventWriter, nextValue, childName, childDef, extensionUrl, theIncludedResource);
+					
+				} else	if (extensionUrl != null && childName.equals("extension") == false) {
 					RuntimeChildDeclaredExtensionDefinition extDef = (RuntimeChildDeclaredExtensionDefinition) nextChild;
 					if (extDef.isModifier()) {
 						theEventWriter.writeStartElement("modifierExtension");
@@ -494,11 +517,11 @@ public class XmlParser extends BaseParser implements IParser {
 
 	private void encodeResourceReferenceToStreamWriter(XMLStreamWriter theEventWriter, ResourceReferenceDt theRef) throws XMLStreamException {
 		String reference = theRef.getReference().getValue();
-		if (StringUtils.isBlank(reference)) {
-			if (theRef.getResourceType() != null && StringUtils.isNotBlank(theRef.getResourceId())) {
-				reference = myContext.getResourceDefinition(theRef.getResourceType()).getName() + '/' + theRef.getResourceId();
-			}
-		}
+//		if (StringUtils.isBlank(reference)) {
+//			if (theRef.getResourceType() != null && StringUtils.isNotBlank(theRef.getResourceId())) {
+//				reference = myContext.getResourceDefinition(theRef.getResourceType()).getName() + '/' + theRef.getResourceId();
+//			}
+//		}
 
 		if (!(theRef.getDisplay().isEmpty())) {
 			theEventWriter.writeStartElement("display");
@@ -534,7 +557,13 @@ public class XmlParser extends BaseParser implements IParser {
 			theEventWriter.writeAttribute("id", theResource.getId().getValue());
 		}
 
-		encodeCompositeElementToStreamWriter(resDef, theResource, theResource, theEventWriter, resDef, theIncludedResource);
+		if (theResource instanceof Binary) {
+			Binary bin = (Binary) theResource;
+			theEventWriter.writeAttribute("contentType", bin.getContentType());
+			theEventWriter.writeCharacters(bin.getContentAsBase64());
+		} else {
+			encodeCompositeElementToStreamWriter(resDef, theResource, theResource, theEventWriter, resDef, theIncludedResource);
+		}
 
 		theEventWriter.writeEndElement();
 	}

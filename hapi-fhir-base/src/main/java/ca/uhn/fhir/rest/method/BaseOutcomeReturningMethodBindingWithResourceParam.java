@@ -20,8 +20,10 @@ package ca.uhn.fhir.rest.method;
  * #L%
  */
 
+import java.io.IOException;
 import java.lang.reflect.Method;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import ca.uhn.fhir.context.ConfigurationException;
@@ -30,8 +32,11 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.Tag;
 import ca.uhn.fhir.model.api.TagList;
+import ca.uhn.fhir.model.dstu.resource.Binary;
+import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
+import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
-import ca.uhn.fhir.rest.client.BaseClientInvocation;
+import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.param.IParameter;
 import ca.uhn.fhir.rest.param.ResourceParameter;
 import ca.uhn.fhir.rest.server.Constants;
@@ -41,6 +46,7 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOutcomeReturningMethodBinding {
 	private int myResourceParameterIndex;
 	private String myResourceName;
+	private boolean myBinary;
 
 	public BaseOutcomeReturningMethodBindingWithResourceParam(Method theMethod, FhirContext theContext, Class<?> theMethodAnnotation, Object theProvider) {
 		super(theMethod, theContext, theMethodAnnotation, theProvider);
@@ -57,6 +63,10 @@ abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOu
 					resourceType=((IResourceProvider) theProvider).getResourceType();
 				}
 				
+				if (resourceType.isAssignableFrom(Binary.class)) {
+					myBinary = true;
+				}
+				
 				myResourceName = theContext.getResourceDefinition(resourceType).getName();
 				
 				myResourceParameterIndex = index;
@@ -68,6 +78,29 @@ abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOu
 			throw new ConfigurationException("Method " + theMethod.getName() + " in type " + theMethod.getDeclaringClass().getCanonicalName() + " does not have a parameter annotated with @" + ResourceParam.class.getSimpleName());
 		}
 
+	}
+
+	@Override
+	protected IResource parseIncomingServerResource(Request theRequest) throws IOException {
+		if (myBinary) {
+			String ct = theRequest.getServletRequest().getHeader(Constants.HEADER_CONTENT_TYPE);
+			byte[] contents = IOUtils.toByteArray(theRequest.getServletRequest().getInputStream());
+			return new Binary(ct, contents);
+		}else {
+			return super.parseIncomingServerResource(theRequest);
+		}
+	}
+
+	@Override
+	public RestfulOperationTypeEnum getResourceOperationType() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public RestfulOperationSystemEnum getSystemOperationType() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	/**
@@ -88,13 +121,13 @@ abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOu
 	}
 
 	@Override
-	public BaseClientInvocation invokeClient(Object[] theArgs) throws InternalErrorException {
+	public BaseHttpClientInvocation invokeClient(Object[] theArgs) throws InternalErrorException {
 		IResource resource = (IResource) theArgs[myResourceParameterIndex];
 		if (resource == null) {
 			throw new NullPointerException("Resource can not be null");
 		}
 
-		BaseClientInvocation retVal = createClientInvocation(theArgs, resource);
+		BaseHttpClientInvocation retVal = createClientInvocation(theArgs, resource);
 		
 		TagList list = (TagList) resource.getResourceMetadata().get(ResourceMetadataKeyEnum.TAG_LIST);
 		if (list != null) {

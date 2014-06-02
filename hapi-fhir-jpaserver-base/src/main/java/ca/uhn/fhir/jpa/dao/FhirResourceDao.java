@@ -2,7 +2,6 @@ package ca.uhn.fhir.jpa.dao;
 
 import static org.apache.commons.lang3.StringUtils.*;
 
-import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -16,7 +15,6 @@ import java.util.Set;
 import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.persistence.PersistenceContextType;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -24,141 +22,120 @@ import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Required;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionCallback;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.ConfigurationException;
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeChildResourceDefinition;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.entity.BaseHasResource;
-import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.jpa.entity.BaseTag;
 import ca.uhn.fhir.jpa.entity.ResourceHistoryTable;
+import ca.uhn.fhir.jpa.entity.ResourceHistoryTablePk;
 import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamNumber;
 import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.entity.ResourceLink;
-import ca.uhn.fhir.model.api.IDatatype;
+import ca.uhn.fhir.jpa.entity.ResourceTable;
+import ca.uhn.fhir.jpa.entity.TagDefinition;
 import ca.uhn.fhir.model.api.IPrimitiveDatatype;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
-import ca.uhn.fhir.model.api.Tag;
 import ca.uhn.fhir.model.api.TagList;
-import ca.uhn.fhir.model.dstu.composite.AddressDt;
-import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu.composite.CodingDt;
-import ca.uhn.fhir.model.dstu.composite.ContactDt;
-import ca.uhn.fhir.model.dstu.composite.HumanNameDt;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.composite.QuantityDt;
-import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.valueset.SearchParamTypeEnum;
-import ca.uhn.fhir.model.primitive.BaseDateTimeDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
-import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.QualifiedDateParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
-import ca.uhn.fhir.rest.server.EncodingEnum;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import ca.uhn.fhir.util.FhirTerser;
 
-public class FhirResourceDao<T extends IResource> implements IFhirResourceDao<T> {
+@Transactional(propagation = Propagation.REQUIRED)
+public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements IFhirResourceDao<T> {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDao.class);
-	private FhirContext myCtx;
 
-	@PersistenceContext(name = "FHIR_UT", type = PersistenceContextType.TRANSACTION, unitName = "FHIR_UT")
+	// name = "FHIR_UT", type = PersistenceContextType.TRANSACTION, unitName = "FHIR_UT"
+	@PersistenceContext()
 	private EntityManager myEntityManager;
 
 	@Autowired
 	private PlatformTransactionManager myPlatformTransactionManager;
-	@Autowired
-	private List<IFhirResourceDao<?>> myResourceDaos;
 	private String myResourceName;
 	private Class<T> myResourceType;
-	private Map<Class<? extends IResource>, IFhirResourceDao<?>> myResourceTypeToDao;
 
-	@Transactional(propagation = Propagation.REQUIRED, readOnly = true)
 	@Override
-	public MethodOutcome create(T theResource) {
+	public void addTag(IdDt theId, String theScheme, String theTerm, String theLabel) {
+		BaseHasResource entity = readEntity(theId);
+		if (entity == null) {
+			throw new ResourceNotFoundException(theId);
+		}
 
-		final ResourceTable entity = toEntity(theResource);
+		for (BaseTag next : new ArrayList<BaseTag>(entity.getTags())) {
+			if (next.getTag().getScheme().equals(theScheme) && next.getTag().getTerm().equals(theTerm)) {
+				return;
+			}
+		}
 
-		entity.setPublished(new Date());
-		entity.setUpdated(entity.getPublished());
+		TagDefinition def = getTag(theScheme, theTerm, theLabel);
+		BaseTag newEntity = entity.addTag(def);
+
+		myEntityManager.persist(newEntity);
+		myEntityManager.merge(entity);
+	}
+
+	@Override
+	public MethodOutcome create(final T theResource) {
+		ResourceTable entity = new ResourceTable();
 		entity.setResourceType(toResourceName(theResource));
 
-		final List<ResourceIndexedSearchParamString> stringParams = extractSearchParamStrings(entity, theResource);
-		final List<ResourceIndexedSearchParamToken> tokenParams = extractSearchParamTokens(entity, theResource);
-		final List<ResourceIndexedSearchParamNumber> numberParams = extractSearchParamNumber(entity, theResource);
-		final List<ResourceIndexedSearchParamDate> dateParams = extractSearchParamDates(entity, theResource);
-		final List<ResourceLink> links = extractResourceLinks(entity, theResource);
-
-		ourLog.info("Saving links: {}", links);
-
-		TransactionTemplate template = new TransactionTemplate(myPlatformTransactionManager);
-		template.setPropagationBehavior(TransactionTemplate.PROPAGATION_REQUIRES_NEW);
-		template.setReadOnly(false);
-		template.execute(new TransactionCallback<ResourceTable>() {
-			@Override
-			public ResourceTable doInTransaction(TransactionStatus theStatus) {
-				myEntityManager.persist(entity);
-				for (ResourceIndexedSearchParamString next : stringParams) {
-					myEntityManager.persist(next);
-				}
-				for (ResourceIndexedSearchParamToken next : tokenParams) {
-					myEntityManager.persist(next);
-				}
-				for (ResourceIndexedSearchParamNumber next : numberParams) {
-					myEntityManager.persist(next);
-				}
-				for (ResourceIndexedSearchParamDate next : dateParams) {
-					myEntityManager.persist(next);
-				}
-				for (ResourceLink next : links) {
-					myEntityManager.persist(next);
-				}
-				return entity;
-			}
-		});
+		updateEntity(theResource, entity, false);
 
 		MethodOutcome outcome = toMethodOutcome(entity);
 		return outcome;
 	}
 
-	private String toResourceName(T theResource) {
-		return myCtx.getResourceDefinition(theResource).getName();
+	@Override
+	public TagList getAllResourceTags() {
+		return super.getTags(myResourceType, null);
 	}
 
 	public Class<T> getResourceType() {
 		return myResourceType;
 	}
 
+	@Override
+	public TagList getTags(IdDt theResourceId) {
+		return super.getTags(myResourceType, theResourceId);
+	}
 
+	@Override
+	public List<T> history() {
+		return null;
+	}
 
-	@Transactional(propagation = Propagation.REQUIRED)
+	@Override
+	public List<IResource> history(Date theSince, Integer theLimit) {
+		return super.history(myResourceName, null, theSince, theLimit);
+	}
+
 	@Override
 	public List<T> history(IdDt theId) {
 		ArrayList<T> retVal = new ArrayList<T>();
 
-		String resourceType = myCtx.getResourceDefinition(myResourceType).getName();
+		String resourceType = getContext().getResourceDefinition(myResourceType).getName();
 		TypedQuery<ResourceHistoryTable> q = myEntityManager.createQuery(ResourceHistoryTable.Q_GETALL, ResourceHistoryTable.class);
 		q.setParameter("PID", theId.asLong());
 		q.setParameter("RESTYPE", resourceType);
@@ -167,11 +144,11 @@ public class FhirResourceDao<T extends IResource> implements IFhirResourceDao<T>
 		// myEntityManager.createQuery(criteriaQuery);
 		List<ResourceHistoryTable> results = q.getResultList();
 		for (ResourceHistoryTable next : results) {
-			retVal.add(toResource(next));
+			retVal.add(toResource(myResourceType, next));
 		}
 
 		try {
-			retVal.add(read(theId));
+			retVal.add(read(theId.withoutVersion()));
 		} catch (ResourceNotFoundException e) {
 			// ignore
 		}
@@ -183,19 +160,59 @@ public class FhirResourceDao<T extends IResource> implements IFhirResourceDao<T>
 		return retVal;
 	}
 
-	@PostConstruct
-	public void postConstruct() throws Exception {
-		myCtx = new FhirContext(myResourceType);
-		myResourceName = myCtx.getResourceDefinition(myResourceType).getName();
+	@Override
+	public List<IResource> history(Long theId, Date theSince, Integer theLimit) {
+		return super.history(myResourceName, theId, theSince, theLimit);
 	}
 
-	@Transactional(propagation = Propagation.REQUIRED)
+	@PostConstruct
+	public void postConstruct() {
+		myResourceName = getContext().getResourceDefinition(myResourceType).getName();
+	}
+
 	@Override
 	public T read(IdDt theId) {
-		ResourceTable entity = readEntity(theId);
+		BaseHasResource entity = readEntity(theId);
 
-		T retVal = toResource(entity);
+		T retVal = toResource(myResourceType, entity);
 		return retVal;
+	}
+
+	@Override
+	public BaseHasResource readEntity(IdDt theId) {
+		BaseHasResource entity = myEntityManager.find(ResourceTable.class, theId.asLong());
+		if (theId.hasUnqualifiedVersionId()) {
+			if (entity.getVersion() != theId.getUnqualifiedVersionIdAsLong()) {
+				entity = null;
+			}
+		}
+
+		if (entity == null) {
+			if (theId.hasUnqualifiedVersionId()) {
+				entity = myEntityManager.find(ResourceHistoryTable.class, new ResourceHistoryTablePk(myResourceName, theId.asLong(), theId.getUnqualifiedVersionIdAsLong()));
+			}
+			if (entity == null) {
+				throw new ResourceNotFoundException(theId);
+			}
+		}
+		return entity;
+	}
+
+	@Override
+	public void removeTag(IdDt theId, String theScheme, String theTerm) {
+		BaseHasResource entity = readEntity(theId);
+		if (entity == null) {
+			throw new ResourceNotFoundException(theId);
+		}
+
+		for (BaseTag next : new ArrayList<BaseTag>(entity.getTags())) {
+			if (next.getTag().getScheme().equals(theScheme) && next.getTag().getTerm().equals(theTerm)) {
+				myEntityManager.remove(next);
+				entity.getTags().remove(next);
+			}
+		}
+
+		myEntityManager.merge(entity);
 	}
 
 	@Override
@@ -217,7 +234,7 @@ public class FhirResourceDao<T extends IResource> implements IFhirResourceDao<T>
 		} else {
 			pids = searchForIdsWithAndOr(theParams);
 			if (pids.isEmpty()) {
-				return new ArrayList<>();
+				return new ArrayList<T>();
 			}
 		}
 
@@ -226,15 +243,15 @@ public class FhirResourceDao<T extends IResource> implements IFhirResourceDao<T>
 			CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
 			CriteriaQuery<ResourceTable> cq = builder.createQuery(ResourceTable.class);
 			Root<ResourceTable> from = cq.from(ResourceTable.class);
-			cq.where(builder.equal(from.get("myResourceType"), myCtx.getResourceDefinition(myResourceType).getName()));
+			cq.where(builder.equal(from.get("myResourceType"), getContext().getResourceDefinition(myResourceType).getName()));
 			if (!theParams.isEmpty()) {
 				cq.where(from.get("myId").in(pids));
 			}
 			TypedQuery<ResourceTable> q = myEntityManager.createQuery(cq);
 
-			List<T> retVal = new ArrayList<>();
+			List<T> retVal = new ArrayList<T>();
 			for (ResourceTable next : q.getResultList()) {
-				T resource = toResource(next);
+				T resource = toResource(myResourceType, next);
 				retVal.add(resource);
 			}
 			return retVal;
@@ -268,7 +285,7 @@ public class FhirResourceDao<T extends IResource> implements IFhirResourceDao<T>
 			params = Collections.emptyMap();
 		}
 
-		RuntimeResourceDefinition resourceDef = myCtx.getResourceDefinition(myResourceType);
+		RuntimeResourceDefinition resourceDef = getContext().getResourceDefinition(myResourceType);
 
 		Set<Long> pids = new HashSet<Long>();
 
@@ -326,80 +343,20 @@ public class FhirResourceDao<T extends IResource> implements IFhirResourceDao<T>
 		myResourceType = (Class<T>) theTableType;
 	}
 
-	@Transactional(propagation = Propagation.SUPPORTS)
 	@Override
 	public MethodOutcome update(final T theResource, final IdDt theId) {
 
-		TransactionTemplate template = new TransactionTemplate(myPlatformTransactionManager);
-		ResourceTable savedEntity = template.execute(new TransactionCallback<ResourceTable>() {
-			@Override
-			public ResourceTable doInTransaction(TransactionStatus theStatus) {
+		// TransactionTemplate template = new TransactionTemplate(myPlatformTransactionManager);
+		// ResourceTable savedEntity = template.execute(new TransactionCallback<ResourceTable>() {
+		// @Override
+		// public ResourceTable doInTransaction(TransactionStatus theStatus) {
+		// final ResourceTable entity = readEntity(theId);
+		// return updateEntity(theResource, entity,true);
+		// }
+		// });
 
-				final ResourceTable entity = readEntity(theId);
-				entity.setUpdated(entity.getPublished());
-
-				final ResourceHistoryTable historyEntry = entity.toHistory(myCtx);
-
-				final List<ResourceIndexedSearchParamString> stringParams = extractSearchParamStrings(entity, theResource);
-				final List<ResourceIndexedSearchParamToken> tokenParams = extractSearchParamTokens(entity, theResource);
-				final List<ResourceIndexedSearchParamNumber> numberParams = extractSearchParamNumber(entity, theResource);
-				final List<ResourceIndexedSearchParamDate> dateParams = extractSearchParamDates(entity, theResource);
-				final List<ResourceLink> links = extractResourceLinks(entity, theResource);
-
-				populateResourceIntoEntity(theResource, entity);
-				myEntityManager.persist(historyEntry);
-
-				entity.setUpdated(new Date());
-				myEntityManager.persist(entity);
-
-				if (entity.isParamsStringPopulated()) {
-					for (ResourceIndexedSearchParamString next : entity.getParamsString()) {
-						myEntityManager.remove(next);
-					}
-				}
-				for (ResourceIndexedSearchParamString next : stringParams) {
-					myEntityManager.persist(next);
-				}
-				
-				if (entity.isParamsTokenPopulated()) {
-					for (ResourceIndexedSearchParamToken next : entity.getParamsToken()) {
-						myEntityManager.remove(next);
-					}
-				}
-				for (ResourceIndexedSearchParamToken next : tokenParams) {
-					myEntityManager.persist(next);
-				}
-
-				if (entity.isParamsNumberPopulated()) {
-					for (ResourceIndexedSearchParamNumber next : entity.getParamsNumber()) {
-						myEntityManager.remove(next);
-					}
-				}
-				for (ResourceIndexedSearchParamNumber next : numberParams) {
-					myEntityManager.persist(next);
-				}
-				
-				if (entity.isParamsDatePopulated()) {
-					for (ResourceIndexedSearchParamDate next : entity.getParamsDate()) {
-						myEntityManager.remove(next);
-					}
-				}
-				for (ResourceIndexedSearchParamDate next : dateParams) {
-					myEntityManager.persist(next);
-				}
-				
-				if (entity.isHasLinks()) {
-					for (ResourceLink next : entity.getResourceLinks()) {
-						myEntityManager.remove(next);
-					}
-				}
-				for (ResourceLink next : links) {
-					myEntityManager.persist(next);
-				}
-
-				return entity;
-			}
-		});
+		final ResourceTable entity = readEntityLatestVersion(theId);
+		ResourceTable savedEntity = updateEntity(theResource, entity, true);
 
 		return toMethodOutcome(savedEntity);
 	}
@@ -568,14 +525,20 @@ public class FhirResourceDao<T extends IResource> implements IFhirResourceDao<T>
 			if (params instanceof ReferenceParam) {
 				ReferenceParam ref = (ReferenceParam) params;
 
+				String resourceId = ref.getValueAsQueryToken();
+				if (resourceId.contains("/")) {
+					IdDt dt = new IdDt(resourceId);
+					resourceId = dt.getUnqualifiedId();
+				}
+
 				if (isBlank(ref.getChain())) {
-					Long targetPid = Long.valueOf(ref.getValueAsQueryToken());
+					Long targetPid = Long.valueOf(resourceId);
 					ourLog.info("Searching for resource link with target PID: {}", targetPid);
 					Predicate eq = builder.equal(from.get("myTargetResourcePid"), targetPid);
 					codePredicates.add(eq);
 				} else {
-					String chain = myCtx.getResourceDefinition(myResourceType).getSearchParam(theParamName).getPath();
-					BaseRuntimeChildDefinition def = myCtx.newTerser().getDefinition(myResourceType, chain);
+					String chain = getContext().getResourceDefinition(myResourceType).getSearchParam(theParamName).getPath();
+					BaseRuntimeChildDefinition def = getContext().newTerser().getDefinition(myResourceType, chain);
 					if (!(def instanceof RuntimeChildResourceDefinition)) {
 						throw new ConfigurationException("Property " + chain + " of type " + myResourceName + " is not a resource: " + def.getClass());
 					}
@@ -584,24 +547,24 @@ public class FhirResourceDao<T extends IResource> implements IFhirResourceDao<T>
 						RuntimeChildResourceDefinition resDef = (RuntimeChildResourceDefinition) def;
 						resourceTypes = resDef.getResourceTypes();
 					} else {
-						resourceTypes = new ArrayList<>();
-						RuntimeResourceDefinition resDef = myCtx.getResourceDefinition(ref.getResourceType());
+						resourceTypes = new ArrayList<Class<? extends IResource>>();
+						RuntimeResourceDefinition resDef = getContext().getResourceDefinition(ref.getResourceType());
 						resourceTypes.add(resDef.getImplementingClass());
 					}
 					for (Class<? extends IResource> nextType : resourceTypes) {
-						RuntimeResourceDefinition typeDef = myCtx.getResourceDefinition(nextType);
+						RuntimeResourceDefinition typeDef = getContext().getResourceDefinition(nextType);
 						RuntimeSearchParam param = typeDef.getSearchParam(ref.getChain());
 						if (param == null) {
 							ourLog.debug("Type {} doesn't have search param {}", nextType.getSimpleName(), param);
 							continue;
 						}
-						IFhirResourceDao<?> dao = getResourceTypeToDao().get(nextType);
+						IFhirResourceDao<?> dao = getDao(nextType);
 						if (dao == null) {
 							ourLog.debug("Don't have a DAO for type {}", nextType.getSimpleName(), param);
 							continue;
 						}
 
-						IQueryParameterType chainValue = toParameterType(param.getParamType(), ref.getValueAsQueryToken());
+						IQueryParameterType chainValue = toParameterType(param.getParamType(), resourceId);
 						Set<Long> pids = dao.searchForIds(ref.getChain(), chainValue);
 						if (pids.isEmpty()) {
 							continue;
@@ -621,9 +584,9 @@ public class FhirResourceDao<T extends IResource> implements IFhirResourceDao<T>
 
 		Predicate masterCodePredicate = builder.or(codePredicates.toArray(new Predicate[0]));
 
-		RuntimeSearchParam param = myCtx.getResourceDefinition(getResourceType()).getSearchParam(theParamName);
+		RuntimeSearchParam param = getContext().getResourceDefinition(getResourceType()).getSearchParam(theParamName);
 		String path = param.getPath();
-		
+
 		Predicate type = builder.equal(from.get("mySourcePath"), path);
 		if (pidsToRetain.size() > 0) {
 			Predicate inPids = (from.get("mySourceResourcePid").in(pidsToRetain));
@@ -733,357 +696,7 @@ public class FhirResourceDao<T extends IResource> implements IFhirResourceDao<T>
 		return new HashSet<Long>(q.getResultList());
 	}
 
-	private List<ResourceLink> extractResourceLinks(ResourceTable theEntity, T theResource) {
-		ArrayList<ResourceLink> retVal = new ArrayList<ResourceLink>();
-
-		RuntimeResourceDefinition def = myCtx.getResourceDefinition(theResource);
-		FhirTerser t = myCtx.newTerser();
-		for (RuntimeSearchParam nextSpDef : def.getSearchParams()) {
-			if (nextSpDef.getParamType() != SearchParamTypeEnum.REFERENCE) {
-				continue;
-			}
-
-			String nextPath = nextSpDef.getPath();
-
-			boolean multiType = false;
-			if (nextPath.endsWith("[x]")) {
-				multiType = true;
-			}
-
-			List<Object> values = t.getValues(theResource, nextPath);
-			for (Object nextObject : values) {
-				if (nextObject == null) {
-					continue;
-				}
-
-				ResourceLink nextEntity;
-				if (nextObject instanceof ResourceReferenceDt) {
-					ResourceReferenceDt nextValue = (ResourceReferenceDt) nextObject;
-					if (nextValue.isEmpty()) {
-						continue;
-					}
-
-					Class<? extends IResource> type = nextValue.getResourceType();
-					String id = nextValue.getResourceId();
-					if (StringUtils.isBlank(id)) {
-						continue;
-					}
-
-					Map<Class<? extends IResource>, IFhirResourceDao<?>> resourceTypeToDao = getResourceTypeToDao();
-					IFhirResourceDao<?> dao = resourceTypeToDao.get(type);
-					if (dao == null) {
-						throw new InvalidRequestException("This server is not able to handle resources of type: " + nextValue.getResourceType());
-					}
-					Long valueOf;
-					try {
-						valueOf = Long.valueOf(id);
-					} catch (Exception e) {
-						String resName = myCtx.getResourceDefinition(type).getName();
-						throw new InvalidRequestException("Resource ID " + resName + "/" + id + " is invalid (must be numeric), specified in path: " + nextPath);
-					}
-					ResourceTable target = myEntityManager.find(ResourceTable.class, valueOf);
-					if (target == null) {
-						String resName = myCtx.getResourceDefinition(type).getName();
-						throw new InvalidRequestException("Resource " + resName + "/" + id + " not found, specified in path: " + nextPath);
-					}
-					nextEntity = new ResourceLink(nextPath, theEntity, target);
-				} else {
-					if (!multiType) {
-						throw new ConfigurationException("Search param " + nextSpDef.getName() + " is of unexpected datatype: " + nextObject.getClass());
-					} else {
-						continue;
-					}
-				}
-				if (nextEntity != null) {
-					retVal.add(nextEntity);
-				}
-			}
-		}
-
-		theEntity.setHasLinks(retVal.size() > 0);
-
-		return retVal;
-	}
-
-	private List<ResourceIndexedSearchParamDate> extractSearchParamDates(ResourceTable theEntity, T theResource) {
-		ArrayList<ResourceIndexedSearchParamDate> retVal = new ArrayList<ResourceIndexedSearchParamDate>();
-
-		RuntimeResourceDefinition def = myCtx.getResourceDefinition(theResource);
-		FhirTerser t = myCtx.newTerser();
-		for (RuntimeSearchParam nextSpDef : def.getSearchParams()) {
-			if (nextSpDef.getParamType() != SearchParamTypeEnum.DATE) {
-				continue;
-			}
-
-			String nextPath = nextSpDef.getPath();
-
-			boolean multiType = false;
-			if (nextPath.endsWith("[x]")) {
-				multiType = true;
-			}
-
-			List<Object> values = t.getValues(theResource, nextPath);
-			for (Object nextObject : values) {
-				if (nextObject == null) {
-					continue;
-				}
-
-				ResourceIndexedSearchParamDate nextEntity;
-				if (nextObject instanceof BaseDateTimeDt) {
-					BaseDateTimeDt nextValue = (BaseDateTimeDt) nextObject;
-					if (nextValue.isEmpty()) {
-						continue;
-					}
-					nextEntity = new ResourceIndexedSearchParamDate(nextSpDef.getName(), nextValue.getValue(), nextValue.getValue());
-				} else {
-					if (!multiType) {
-						throw new ConfigurationException("Search param " + nextSpDef.getName() + " is of unexpected datatype: " + nextObject.getClass());
-					} else {
-						continue;
-					}
-				}
-				if (nextEntity != null) {
-					nextEntity.setResource(theEntity);
-					retVal.add(nextEntity);
-				}
-			}
-		}
-
-		theEntity.setParamsDatePopulated(retVal.size() > 0);
-
-		return retVal;
-	}
-
-	private ArrayList<ResourceIndexedSearchParamNumber> extractSearchParamNumber(ResourceTable theEntity, T theResource) {
-		ArrayList<ResourceIndexedSearchParamNumber> retVal = new ArrayList<ResourceIndexedSearchParamNumber>();
-
-		RuntimeResourceDefinition def = myCtx.getResourceDefinition(theResource);
-		FhirTerser t = myCtx.newTerser();
-		for (RuntimeSearchParam nextSpDef : def.getSearchParams()) {
-			if (nextSpDef.getParamType() != SearchParamTypeEnum.NUMBER && nextSpDef.getParamType() != SearchParamTypeEnum.QUANTITY) {
-				continue;
-			}
-
-			String nextPath = nextSpDef.getPath();
-			List<Object> values = t.getValues(theResource, nextPath);
-			for (Object nextObject : values) {
-				if (nextObject == null || ((IDatatype) nextObject).isEmpty()) {
-					continue;
-				}
-
-				String resourceName = nextSpDef.getName();
-				boolean multiType = false;
-				if (nextPath.endsWith("[x]")) {
-					multiType = true;
-				}
-
-				if (nextObject instanceof QuantityDt) {
-					QuantityDt nextValue = (QuantityDt) nextObject;
-					ResourceIndexedSearchParamNumber nextEntity = new ResourceIndexedSearchParamNumber(resourceName, nextValue.getValue().getValue(), nextValue.getSystem().getValueAsString(), nextValue.getUnits().getValue());
-					nextEntity.setResource(theEntity);
-					retVal.add(nextEntity);
-				} else {
-					if (!multiType) {
-						throw new ConfigurationException("Search param " + resourceName + " is of unexpected datatype: " + nextObject.getClass());
-					} else {
-						continue;
-					}
-				}
-			}
-		}
-
-		theEntity.setParamsNumberPopulated(retVal.size() > 0);
-
-		return retVal;
-	}
-
-	private List<ResourceIndexedSearchParamString> extractSearchParamStrings(ResourceTable theEntity, T theResource) {
-		ArrayList<ResourceIndexedSearchParamString> retVal = new ArrayList<ResourceIndexedSearchParamString>();
-
-		RuntimeResourceDefinition def = myCtx.getResourceDefinition(theResource);
-		FhirTerser t = myCtx.newTerser();
-		for (RuntimeSearchParam nextSpDef : def.getSearchParams()) {
-			if (nextSpDef.getParamType() != SearchParamTypeEnum.STRING) {
-				continue;
-			}
-			if (nextSpDef.getPath().isEmpty()) {
-				continue; // TODO: implement phoenetic, and any others that have
-							// no path
-			}
-
-			String nextPath = nextSpDef.getPath();
-			List<Object> values = t.getValues(theResource, nextPath);
-			for (Object nextObject : values) {
-				if (nextObject == null || ((IDatatype) nextObject).isEmpty()) {
-					continue;
-				}
-
-				String resourceName = nextSpDef.getName();
-				boolean multiType = false;
-				if (nextPath.endsWith("[x]")) {
-					multiType = true;
-				}
-
-				if (nextObject instanceof IPrimitiveDatatype<?>) {
-					IPrimitiveDatatype<?> nextValue = (IPrimitiveDatatype<?>) nextObject;
-					ResourceIndexedSearchParamString nextEntity = new ResourceIndexedSearchParamString(resourceName, normalizeString(nextValue.getValueAsString()), nextValue.getValueAsString());
-					nextEntity.setResource(theEntity);
-					retVal.add(nextEntity);
-				} else {
-					if (nextObject instanceof HumanNameDt) {
-						ArrayList<StringDt> allNames = new ArrayList<>();
-						HumanNameDt nextHumanName = (HumanNameDt) nextObject;
-						allNames.addAll(nextHumanName.getFamily());
-						allNames.addAll(nextHumanName.getGiven());
-						for (StringDt nextName : allNames) {
-							if (nextName.isEmpty()) {
-								continue;
-							}
-							ResourceIndexedSearchParamString nextEntity = new ResourceIndexedSearchParamString(resourceName, normalizeString(nextName.getValueAsString()), nextName.getValueAsString());
-							nextEntity.setResource(theEntity);
-							retVal.add(nextEntity);
-						}
-					} else if (nextObject instanceof AddressDt) {
-						ArrayList<StringDt> allNames = new ArrayList<>();
-						AddressDt nextAddress = (AddressDt) nextObject;
-						allNames.addAll(nextAddress.getLine());
-						allNames.add(nextAddress.getCity());
-						allNames.add(nextAddress.getState());
-						allNames.add(nextAddress.getCountry());
-						allNames.add(nextAddress.getZip());
-						for (StringDt nextName : allNames) {
-							if (nextName.isEmpty()) {
-								continue;
-							}
-							ResourceIndexedSearchParamString nextEntity = new ResourceIndexedSearchParamString(resourceName, normalizeString(nextName.getValueAsString()), nextName.getValueAsString());
-							nextEntity.setResource(theEntity);
-							retVal.add(nextEntity);
-						}
-					} else if (nextObject instanceof ContactDt) {
-						ContactDt nextContact = (ContactDt) nextObject;
-						if (nextContact.getValue().isEmpty() == false) {
-							ResourceIndexedSearchParamString nextEntity = new ResourceIndexedSearchParamString(resourceName, normalizeString(nextContact.getValue().getValueAsString()), nextContact.getValue().getValueAsString());
-							nextEntity.setResource(theEntity);
-							retVal.add(nextEntity);
-						}
-					} else {
-						if (!multiType) {
-							throw new ConfigurationException("Search param " + resourceName + " is of unexpected datatype: " + nextObject.getClass());
-						}
-					}
-				}
-			}
-		}
-		
-		theEntity.setParamsStringPopulated(retVal.size() > 0);
-
-		return retVal;
-	}
-
-	private List<ResourceIndexedSearchParamToken> extractSearchParamTokens(ResourceTable theEntity, T theResource) {
-		ArrayList<ResourceIndexedSearchParamToken> retVal = new ArrayList<ResourceIndexedSearchParamToken>();
-
-		RuntimeResourceDefinition def = myCtx.getResourceDefinition(theResource);
-		FhirTerser t = myCtx.newTerser();
-		for (RuntimeSearchParam nextSpDef : def.getSearchParams()) {
-			if (nextSpDef.getParamType() != SearchParamTypeEnum.TOKEN) {
-				continue;
-			}
-
-			String nextPath = nextSpDef.getPath();
-			if (nextPath.isEmpty()) {
-				continue;
-			}
-
-			boolean multiType = false;
-			if (nextPath.endsWith("[x]")) {
-				multiType = true;
-			}
-
-			List<Object> values = t.getValues(theResource, nextPath);
-			for (Object nextObject : values) {
-				ResourceIndexedSearchParamToken nextEntity;
-				if (nextObject instanceof IdentifierDt) {
-					IdentifierDt nextValue = (IdentifierDt) nextObject;
-					if (nextValue.isEmpty()) {
-						continue;
-					}
-					nextEntity = new ResourceIndexedSearchParamToken(nextSpDef.getName(), nextValue.getSystem().getValueAsString(), nextValue.getValue().getValue());
-				} else if (nextObject instanceof IPrimitiveDatatype<?>) {
-					IPrimitiveDatatype<?> nextValue = (IPrimitiveDatatype<?>) nextObject;
-					if (nextValue.isEmpty()) {
-						continue;
-					}
-					nextEntity = new ResourceIndexedSearchParamToken(nextSpDef.getName(), null, nextValue.getValueAsString());
-				} else if (nextObject instanceof CodeableConceptDt) {
-					CodeableConceptDt nextCC = (CodeableConceptDt) nextObject;
-					for (CodingDt nextCoding : nextCC.getCoding()) {
-						if (nextCoding.isEmpty()) {
-							continue;
-						}
-						nextEntity = new ResourceIndexedSearchParamToken(nextSpDef.getName(), nextCoding.getSystem().getValueAsString(), nextCoding.getCode().getValue());
-						nextEntity.setResource(theEntity);
-						retVal.add(nextEntity);
-					}
-					nextEntity = null;
-				} else {
-					if (!multiType) {
-						throw new ConfigurationException("Search param " + nextSpDef.getName() + " is of unexpected datatype: " + nextObject.getClass());
-					} else {
-						continue;
-					}
-				}
-				if (nextEntity != null) {
-					nextEntity.setResource(theEntity);
-					retVal.add(nextEntity);
-				}
-			}
-		}
-
-		theEntity.setParamsTokenPopulated(retVal.size() > 0);
-
-		return retVal;
-	}
-
-	private Map<Class<? extends IResource>, IFhirResourceDao<?>> getResourceTypeToDao() {
-		if (myResourceTypeToDao == null) {
-			myResourceTypeToDao = new HashMap<>();
-			for (IFhirResourceDao<?> next : myResourceDaos) {
-				myResourceTypeToDao.put(next.getResourceType(), next);
-			}
-		}
-
-		Map<Class<? extends IResource>, IFhirResourceDao<?>> resourceTypeToDao = myResourceTypeToDao;
-		return resourceTypeToDao;
-	}
-
-	private String normalizeString(String theString) {
-		char[] out = new char[theString.length()];
-		theString = Normalizer.normalize(theString, Normalizer.Form.NFD);
-		int j = 0;
-		for (int i = 0, n = theString.length(); i < n; ++i) {
-			char c = theString.charAt(i);
-			if (c <= '\u007F') {
-				out[j++] = c;
-			}
-		}
-		return new String(out).toUpperCase();
-	}
-
-	private void populateResourceIntoEntity(T theResource, ResourceTable theEntity) {
-		theEntity.setResource(myCtx.newJsonParser().encodeResourceToString(theResource));
-		theEntity.setEncoding(EncodingEnum.JSON);
-
-		TagList tagList = (TagList) theResource.getResourceMetadata().get(ResourceMetadataKeyEnum.TAG_LIST);
-		if (tagList != null) {
-			for (Tag next : tagList) {
-				theEntity.addTag(next.getTerm(), next.getLabel(), next.getScheme());
-			}
-		}
-
-	}
-
-	private ResourceTable readEntity(IdDt theId) {
+	private ResourceTable readEntityLatestVersion(IdDt theId) {
 		ResourceTable entity = myEntityManager.find(ResourceTable.class, theId.asLong());
 		if (entity == null) {
 			throw new ResourceNotFoundException(theId);
@@ -1091,18 +704,10 @@ public class FhirResourceDao<T extends IResource> implements IFhirResourceDao<T>
 		return entity;
 	}
 
-	private ResourceTable toEntity(T theResource) {
-		ResourceTable retVal = new ResourceTable();
-		
-		populateResourceIntoEntity(theResource, retVal);
-
-		return retVal;
-	}
-
 	private MethodOutcome toMethodOutcome(final ResourceTable entity) {
 		MethodOutcome outcome = new MethodOutcome();
-		outcome.setId(new IdDt(entity.getId()));
-		outcome.setVersionId(entity.getVersion());
+		outcome.setId(new IdDt(entity.getResourceType() + '/' + entity.getId() + '/' + Constants.PARAM_HISTORY + '/' + entity.getVersion()));
+		outcome.setVersionId(new IdDt(entity.getVersion()));
 		return outcome;
 	}
 
@@ -1133,21 +738,4 @@ public class FhirResourceDao<T extends IResource> implements IFhirResourceDao<T>
 		}
 	}
 
-	private T toResource(BaseHasResource theEntity) {
-		String resourceText = theEntity.getResource();
-		IParser parser = theEntity.getEncoding().newParser(myCtx);
-		T retVal = parser.parseResource(myResourceType, resourceText);
-		retVal.setId(theEntity.getIdDt());
-		retVal.getResourceMetadata().put(ResourceMetadataKeyEnum.VERSION_ID, theEntity.getVersion());
-		retVal.getResourceMetadata().put(ResourceMetadataKeyEnum.PUBLISHED, theEntity.getPublished());
-		retVal.getResourceMetadata().put(ResourceMetadataKeyEnum.UPDATED, theEntity.getUpdated());
-		if (theEntity.getTags().size() > 0) {
-			TagList tagList = new TagList();
-			for (BaseTag next : theEntity.getTags()) {
-				tagList.add(new Tag(next.getTerm(), next.getLabel(), next.getScheme()));
-			}
-			retVal.getResourceMetadata().put(ResourceMetadataKeyEnum.TAG_LIST, tagList);
-		}
-		return retVal;
-	}
 }

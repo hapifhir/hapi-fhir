@@ -22,8 +22,10 @@ package ca.uhn.fhir.model.primitive;
 
 import ca.uhn.fhir.model.api.BasePrimitive;
 import ca.uhn.fhir.model.api.IElement;
+import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.parser.DataFormatException;
 
+@DatatypeDef(name = "idref")
 public class IdrefDt extends BasePrimitive<String> {
 
 	private IElement myTarget;

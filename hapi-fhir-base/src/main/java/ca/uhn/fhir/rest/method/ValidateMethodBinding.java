@@ -30,8 +30,7 @@ import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.Validate;
-import ca.uhn.fhir.rest.client.BaseClientInvocation;
-import ca.uhn.fhir.rest.client.PostClientInvocation;
+import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.method.SearchMethodBinding.RequestType;
 import ca.uhn.fhir.rest.param.IParameter;
 import ca.uhn.fhir.rest.param.ParameterUtil;
@@ -65,7 +64,7 @@ public class ValidateMethodBinding extends BaseOutcomeReturningMethodBindingWith
 	}
 
 	@Override
-	protected BaseClientInvocation createClientInvocation(Object[] theArgs, IResource theResource) {
+	protected BaseHttpClientInvocation createClientInvocation(Object[] theArgs, IResource theResource) {
 		FhirContext context = getContext();
 		
 		IdDt idDt=null;
@@ -73,7 +72,7 @@ public class ValidateMethodBinding extends BaseOutcomeReturningMethodBindingWith
 			idDt = (IdDt) theArgs[myIdParameterIndex];
 		}
 
-		PostClientInvocation retVal = createValidateInvocation(theResource, idDt, context);
+		HttpPostClientInvocation retVal = createValidateInvocation(theResource, idDt, context);
 		
 		for (int idx = 0; idx < theArgs.length; idx++) {
 			IParameter nextParam = getParameters().get(idx);
@@ -83,7 +82,7 @@ public class ValidateMethodBinding extends BaseOutcomeReturningMethodBindingWith
 		return retVal;
 	}
 
-	public static PostClientInvocation createValidateInvocation(IResource theResource, IdDt theId, FhirContext theContext) {
+	public static HttpPostClientInvocation createValidateInvocation(IResource theResource, IdDt theId, FhirContext theContext) {
 		StringBuilder urlExtension = new StringBuilder();
 		urlExtension.append(theContext.getResourceDefinition(theResource).getName());
 		urlExtension.append('/');
@@ -95,7 +94,7 @@ public class ValidateMethodBinding extends BaseOutcomeReturningMethodBindingWith
 			urlExtension.append(id);
 		}
 		// TODO: is post correct here?
-		PostClientInvocation retVal = new PostClientInvocation(theContext, theResource, urlExtension.toString());
+		HttpPostClientInvocation retVal = new HttpPostClientInvocation(theContext, theResource, urlExtension.toString());
 		return retVal;
 	}
 

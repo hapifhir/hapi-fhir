@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- PID|||AB60001^^^A^PI||BROOKS^ALBERT^^^^^L -->
+<Patient xmlns="http://hl7.org/fhir" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://hl7.org/fhir ../../schema/patient.xsd">
+  <text>
+    <status value="generated"/>
+    <div xmlns="http://www.w3.org/1999/xhtml">Albert Brooks, Id: AB60001</div>
+  </text>
+
+  <!-- MRN assigned by ACME healthcare on 6-May 2001 -->
+  <identifier>
+    <label value="Internal Identifier"/>
+    <value value="AB60001"/>
+  </identifier>
+
+  <!-- Peter James Chalmers, but called "Jim" -->
+  <name>
+    <family value="BROOKS"/>
+    <given value="ALBERT"/>
+  </name>
+
+
+  <active value="true"/>
+</Patient>

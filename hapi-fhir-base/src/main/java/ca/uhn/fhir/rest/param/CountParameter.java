@@ -33,7 +33,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.annotation.Since;
-import ca.uhn.fhir.rest.client.BaseClientInvocation;
+import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.method.Request;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -44,7 +44,7 @@ public class CountParameter implements IParameter {
 	private Class<?> myType;
 
 	@Override
-	public void translateClientArgumentIntoQueryArgument(FhirContext theContext, Object theSourceClientArgument, Map<String, List<String>> theTargetQueryArguments, BaseClientInvocation theClientInvocation) throws InternalErrorException {
+	public void translateClientArgumentIntoQueryArgument(FhirContext theContext, Object theSourceClientArgument, Map<String, List<String>> theTargetQueryArguments, BaseHttpClientInvocation theClientInvocation) throws InternalErrorException {
 		if (theSourceClientArgument != null) {
 			IntegerDt since = ParameterUtil.toInteger(theSourceClientArgument);
 			if (since.isEmpty() == false) {
@@ -74,10 +74,10 @@ public class CountParameter implements IParameter {
 	@Override
 	public void initializeTypes(Method theMethod, Class<? extends Collection<?>> theOuterCollectionType, Class<? extends Collection<?>> theInnerCollectionType, Class<?> theParameterType) {
 		if (theOuterCollectionType != null) {
-			throw new ConfigurationException("Method '" + theMethod.getName() + "' in type '" + "' is annotated with @" + Since.class.getName() + " but can not be of collection type");
+			throw new ConfigurationException("Method '" + theMethod.getName() + "' in type '" +theMethod.getDeclaringClass().getCanonicalName()+ "' is annotated with @" + Since.class.getName() + " but can not be of collection type");
 		}
 		if (!ParameterUtil.getBindableIntegerTypes().contains(theParameterType)) {
-			throw new ConfigurationException("Method '" + theMethod.getName() + "' in type '" + "' is annotated with @" + Since.class.getName() + " but type '" + theParameterType + "' is an invalid type, must be one of: " + ParameterUtil.getBindableInstantTypes());
+			throw new ConfigurationException("Method '" + theMethod.getName() + "' in type '" +theMethod.getDeclaringClass().getCanonicalName()+ "' is annotated with @" + Since.class.getName() + " but type '" + theParameterType + "' is an invalid type, must be one of: " + ParameterUtil.getBindableIntegerTypes());
 		}
 		myType = theParameterType;
 	}

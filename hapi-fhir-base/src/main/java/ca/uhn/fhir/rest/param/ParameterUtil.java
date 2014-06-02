@@ -50,6 +50,7 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.TagListParam;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
+import ca.uhn.fhir.rest.annotation.TransactionParam;
 import ca.uhn.fhir.rest.annotation.Count;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.IncludeParam;
@@ -225,6 +226,8 @@ public class ParameterUtil {
 						param = new CountParameter();
 					} else if (nextAnnotation instanceof Sort) {
 						param = new SortParameter();
+					} else if (nextAnnotation instanceof TransactionParam) {
+						param = new TransactionParameter();
 					} else {
 						continue;
 					}

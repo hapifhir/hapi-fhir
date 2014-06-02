@@ -20,12 +20,14 @@ package ca.uhn.fhir.rest.server;
  * #L%
  */
 
+import static org.apache.commons.lang3.StringUtils.*;
+
 import java.io.IOException;
-import java.io.StringReader;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
@@ -51,7 +53,6 @@ import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.provider.ServerConformanceProvider;
 import ca.uhn.fhir.rest.server.provider.ServerProfileProvider;
 import ca.uhn.fhir.util.VersionUtil;
@@ -89,12 +90,10 @@ public class RestfulServer extends HttpServlet {
 	}
 
 	/**
-	 * This method is called prior to sending a response to incoming requests.
-	 * It is used to add custom headers.
+	 * This method is called prior to sending a response to incoming requests. It is used to add custom headers.
 	 * <p>
-	 * Use caution if overriding this method: it is recommended to call
-	 * <code>super.addHeadersToResponse</code> to avoid inadvertantly disabling
-	 * functionality.
+	 * Use caution if overriding this method: it is recommended to call <code>super.addHeadersToResponse</code> to avoid
+	 * inadvertantly disabling functionality.
 	 * </p>
 	 */
 	public void addHeadersToResponse(HttpServletResponse theHttpResponse) {
@@ -102,17 +101,15 @@ public class RestfulServer extends HttpServlet {
 	}
 
 	/**
-	 * Gets the {@link FhirContext} associated with this server. For efficient
-	 * processing, resource providers and plain providers should generally use
-	 * this context if one is needed, as opposed to creating their own.
+	 * Gets the {@link FhirContext} associated with this server. For efficient processing, resource providers and plain
+	 * providers should generally use this context if one is needed, as opposed to creating their own.
 	 */
 	public FhirContext getFhirContext() {
 		return myFhirContext;
 	}
 
 	/**
-	 * Provides the non-resource specific providers which implement method calls
-	 * on this server
+	 * Provides the non-resource specific providers which implement method calls on this server
 	 * 
 	 * @see #getResourceProviders()
 	 */
@@ -139,12 +136,11 @@ public class RestfulServer extends HttpServlet {
 	}
 
 	/**
-	 * Returns the server conformance provider, which is the provider that is
-	 * used to generate the server's conformance (metadata) statement.
+	 * Returns the server conformance provider, which is the provider that is used to generate the server's conformance
+	 * (metadata) statement.
 	 * <p>
-	 * By default, the {@link ServerConformanceProvider} is used, but this can
-	 * be changed, or set to <code>null</code> if you do not wish to export a
-	 * conformance statement.
+	 * By default, the {@link ServerConformanceProvider} is used, but this can be changed, or set to <code>null</code>
+	 * if you do not wish to export a conformance statement.
 	 * </p>
 	 */
 	public Object getServerConformanceProvider() {
@@ -152,9 +148,8 @@ public class RestfulServer extends HttpServlet {
 	}
 
 	/**
-	 * Gets the server's name, as exported in conformance profiles exported by
-	 * the server. This is informational only, but can be helpful to set with
-	 * something appropriate.
+	 * Gets the server's name, as exported in conformance profiles exported by the server. This is informational only,
+	 * but can be helpful to set with something appropriate.
 	 * 
 	 * @see RestfulServer#setServerName(StringDt)
 	 */
@@ -167,19 +162,17 @@ public class RestfulServer extends HttpServlet {
 	}
 
 	/**
-	 * Gets the server's version, as exported in conformance profiles exported
-	 * by the server. This is informational only, but can be helpful to set with
-	 * something appropriate.
+	 * Gets the server's version, as exported in conformance profiles exported by the server. This is informational
+	 * only, but can be helpful to set with something appropriate.
 	 */
 	public String getServerVersion() {
 		return myServerVersion;
 	}
 
 	/**
-	 * Initializes the server. Note that this method is final to avoid
-	 * accidentally introducing bugs in implementations, but subclasses may put
-	 * initialization code in {@link #initialize()}, which is called immediately
-	 * before beginning initialization of the restful server's internal init.
+	 * Initializes the server. Note that this method is final to avoid accidentally introducing bugs in implementations,
+	 * but subclasses may put initialization code in {@link #initialize()}, which is called immediately before beginning
+	 * initialization of the restful server's internal init.
 	 */
 	@Override
 	public final void init() throws ServletException {
@@ -237,8 +230,7 @@ public class RestfulServer extends HttpServlet {
 	}
 
 	/**
-	 * Sets the non-resource specific providers which implement method calls on
-	 * this server.
+	 * Sets the non-resource specific providers which implement method calls on this server.
 	 * 
 	 * @see #setResourceProviders(Collection)
 	 */
@@ -247,8 +239,7 @@ public class RestfulServer extends HttpServlet {
 	}
 
 	/**
-	 * Sets the non-resource specific providers which implement method calls on
-	 * this server.
+	 * Sets the non-resource specific providers which implement method calls on this server.
 	 * 
 	 * @see #setResourceProviders(Collection)
 	 */
@@ -257,8 +248,7 @@ public class RestfulServer extends HttpServlet {
 	}
 
 	/**
-	 * Sets the non-resource specific providers which implement method calls on
-	 * this server
+	 * Sets the non-resource specific providers which implement method calls on this server
 	 * 
 	 * @see #setResourceProviders(Collection)
 	 */
@@ -288,19 +278,16 @@ public class RestfulServer extends HttpServlet {
 	}
 
 	/**
-	 * Returns the server conformance provider, which is the provider that is
-	 * used to generate the server's conformance (metadata) statement.
+	 * Returns the server conformance provider, which is the provider that is used to generate the server's conformance
+	 * (metadata) statement.
 	 * <p>
-	 * By default, the {@link ServerConformanceProvider} is used, but this can
-	 * be changed, or set to <code>null</code> if you do not wish to export a
-	 * conformance statement.
+	 * By default, the {@link ServerConformanceProvider} is used, but this can be changed, or set to <code>null</code>
+	 * if you do not wish to export a conformance statement.
 	 * </p>
-	 * Note that this method can only be called before the server is
-	 * initialized.
+	 * Note that this method can only be called before the server is initialized.
 	 * 
 	 * @throws IllegalStateException
-	 *             Note that this method can only be called prior to
-	 *             {@link #init() initialization} and will throw an
+	 *             Note that this method can only be called prior to {@link #init() initialization} and will throw an
 	 *             {@link IllegalStateException} if called after that.
 	 */
 	public void setServerConformanceProvider(Object theServerConformanceProvider) {
@@ -311,9 +298,8 @@ public class RestfulServer extends HttpServlet {
 	}
 
 	/**
-	 * Gets the server's name, as exported in conformance profiles exported by
-	 * the server. This is informational only, but can be helpful to set with
-	 * something appropriate.
+	 * Gets the server's name, as exported in conformance profiles exported by the server. This is informational only,
+	 * but can be helpful to set with something appropriate.
 	 * 
 	 * @see RestfulServer#setServerName(StringDt)
 	 */
@@ -322,18 +308,16 @@ public class RestfulServer extends HttpServlet {
 	}
 
 	/**
-	 * Gets the server's version, as exported in conformance profiles exported
-	 * by the server. This is informational only, but can be helpful to set with
-	 * something appropriate.
+	 * Gets the server's version, as exported in conformance profiles exported by the server. This is informational
+	 * only, but can be helpful to set with something appropriate.
 	 */
 	public void setServerVersion(String theServerVersion) {
 		myServerVersion = theServerVersion;
 	}
 
 	/**
-	 * If set to <code>true</code> (default is false), the server will use
-	 * browser friendly content-types (instead of standard FHIR ones) when it
-	 * detects that the request is coming from a browser instead of a FHIR
+	 * If set to <code>true</code> (default is false), the server will use browser friendly content-types (instead of
+	 * standard FHIR ones) when it detects that the request is coming from a browser instead of a FHIR
 	 */
 	public void setUseBrowserFriendlyContentTypes(boolean theUseBrowserFriendlyContentTypes) {
 		myUseBrowserFriendlyContentTypes = theUseBrowserFriendlyContentTypes;
@@ -348,50 +332,63 @@ public class RestfulServer extends HttpServlet {
 	private void findResourceMethods(Object theProvider) throws Exception {
 
 		ourLog.info("Scanning type for RESTful methods: {}", theProvider.getClass());
+		int count = 0;
 
 		Class<?> clazz = theProvider.getClass();
 		Class<?> supertype = clazz.getSuperclass();
-		if (!Object.class.equals(supertype)) {
-			findResourceMethods(theProvider, supertype);
+		while (!Object.class.equals(supertype)) {
+			count += findResourceMethods(theProvider, supertype);
+			supertype = supertype.getSuperclass();
 		}
 
-		findResourceMethods(theProvider, clazz);
+		count += findResourceMethods(theProvider, clazz);
+
+		if (count == 0) {
+			throw new ConfigurationException("Did not find any annotated RESTful methods on provider class " + theProvider.getClass().getCanonicalName());
+		}
 	}
 
-	private void findResourceMethods(Object theProvider, Class<?> clazz) {
+	private int findResourceMethods(Object theProvider, Class<?> clazz) throws ConfigurationException {
+		int count = 0;
+
 		for (Method m : clazz.getDeclaredMethods()) {
+			BaseMethodBinding<?> foundMethodBinding = BaseMethodBinding.bindMethod(m, myFhirContext, theProvider);
+			if (foundMethodBinding == null) {
+				continue;
+			}
+
+			count++;
+
 			if (!Modifier.isPublic(m.getModifiers())) {
-				ourLog.debug("Ignoring non-public method: {}",m);
+				throw new ConfigurationException("Method '" + m.getName() + "' is not public, FHIR RESTful methods must be public");
 			} else {
-				if (!Modifier.isStatic(m.getModifiers())) {
+				if (Modifier.isStatic(m.getModifiers())) {
+					throw new ConfigurationException("Method '" + m.getName() + "' is static, FHIR RESTful methods must not be static");
+				} else {
 					ourLog.debug("Scanning public method: {}#{}", theProvider.getClass(), m.getName());
 
-					BaseMethodBinding<?> foundMethodBinding = BaseMethodBinding.bindMethod(m, myFhirContext, theProvider);
-					if (foundMethodBinding != null) {
-
-						String resourceName = foundMethodBinding.getResourceName();
-						ResourceBinding resourceBinding;
-						if (resourceName == null) {
-							resourceBinding = myNullResourceBinding;
-						} else {
-							RuntimeResourceDefinition definition = myFhirContext.getResourceDefinition(resourceName);
-							if (myResourceNameToProvider.containsKey(definition.getName())) {
-								resourceBinding = myResourceNameToProvider.get(definition.getName());
-							} else {
-								resourceBinding = new ResourceBinding();
-								resourceBinding.setResourceName(resourceName);
-								myResourceNameToProvider.put(resourceName, resourceBinding);
-							}
-						}
-
-						resourceBinding.addMethod(foundMethodBinding);
-						ourLog.debug(" * Method: {}#{} is a handler", theProvider.getClass(), m.getName());
+					String resourceName = foundMethodBinding.getResourceName();
+					ResourceBinding resourceBinding;
+					if (resourceName == null) {
+						resourceBinding = myNullResourceBinding;
 					} else {
-						ourLog.debug(" * Method: {}#{} is not a handler", theProvider.getClass(), m.getName());
+						RuntimeResourceDefinition definition = myFhirContext.getResourceDefinition(resourceName);
+						if (myResourceNameToProvider.containsKey(definition.getName())) {
+							resourceBinding = myResourceNameToProvider.get(definition.getName());
+						} else {
+							resourceBinding = new ResourceBinding();
+							resourceBinding.setResourceName(resourceName);
+							myResourceNameToProvider.put(resourceName, resourceBinding);
+						}
 					}
+
+					resourceBinding.addMethod(foundMethodBinding);
+					ourLog.debug(" * Method: {}#{} is a handler", theProvider.getClass(), m.getName());
 				}
 			}
 		}
+
+		return count;
 	}
 
 	private void findSystemMethods(Object theSystemProvider) {
@@ -466,6 +463,13 @@ public class RestfulServer extends HttpServlet {
 		handleRequest(SearchMethodBinding.RequestType.PUT, request, response);
 	}
 
+	private static String getBaseUrl(HttpServletRequest request) {
+		if (("http".equals(request.getScheme()) && request.getServerPort() == 80) || ("https".equals(request.getScheme()) && request.getServerPort() == 443))
+			return request.getScheme() + "://" + request.getServerName() + request.getContextPath();
+		else
+			return request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath();
+	}
+
 	protected void handleRequest(SearchMethodBinding.RequestType theRequestType, HttpServletRequest theRequest, HttpServletResponse theResponse) throws ServletException, IOException {
 		try {
 
@@ -475,15 +479,13 @@ public class RestfulServer extends HttpServlet {
 
 			String resourceName = null;
 			String requestFullPath = StringUtils.defaultString(theRequest.getRequestURI());
-			// String contextPath =
-			// StringUtils.defaultString(request.getContextPath());
 			String servletPath = StringUtils.defaultString(theRequest.getServletPath());
 			StringBuffer requestUrl = theRequest.getRequestURL();
 			String servletContextPath = "";
 			if (theRequest.getServletContext() != null) {
-				servletContextPath = StringUtils.defaultIfBlank(theRequest.getServletContext().getContextPath(), servletPath);
-			} else {
-				servletContextPath = servletPath;
+				servletContextPath = StringUtils.defaultString(theRequest.getServletContext().getContextPath());
+				// } else {
+				// servletContextPath = servletPath;
 			}
 
 			if (ourLog.isTraceEnabled()) {
@@ -493,25 +495,30 @@ public class RestfulServer extends HttpServlet {
 				ourLog.trace("Context Path: {}", servletContextPath);
 			}
 
-			servletPath = servletContextPath;
-
 			IdDt id = null;
 			IdDt versionId = null;
 			String operation = null;
 
-			String requestPath = requestFullPath.substring(servletPath.length());
+			String requestPath = requestFullPath.substring(servletContextPath.length() + servletPath.length());
 			if (requestPath.length() > 0 && requestPath.charAt(0) == '/') {
 				requestPath = requestPath.substring(1);
 			}
 
 			int contextIndex;
 			if (servletPath.length() == 0) {
-				contextIndex = requestUrl.indexOf(requestPath);
+				if (requestPath.length() == 0) {
+					contextIndex = requestUrl.length();
+				} else {
+					contextIndex = requestUrl.indexOf(requestPath);
+				}
 			} else {
 				contextIndex = requestUrl.indexOf(servletPath);
 			}
 
-			String fhirServerBase = requestUrl.substring(0, contextIndex + servletPath.length());
+			String fhirServerBase;
+			int length = contextIndex + servletPath.length();
+			fhirServerBase = requestUrl.substring(0, length);
+
 			if (fhirServerBase.endsWith("/")) {
 				fhirServerBase = fhirServerBase.substring(0, fhirServerBase.length() - 1);
 			}
@@ -521,13 +528,12 @@ public class RestfulServer extends HttpServlet {
 			Map<String, String[]> params = new HashMap<String, String[]>(theRequest.getParameterMap());
 
 			StringTokenizer tok = new StringTokenizer(requestPath, "/");
-			if (!tok.hasMoreTokens()) {
-				throw new ResourceNotFoundException("No resource name specified");
-			}
-			resourceName = tok.nextToken();
-			if (resourceName.startsWith("_")) {
-				operation = resourceName;
-				resourceName = null;
+			if (tok.hasMoreTokens()) {
+				resourceName = tok.nextToken();
+				if (resourceName.startsWith("_")) {
+					operation = resourceName;
+					resourceName = null;
+				}
 			}
 
 			ResourceBinding resourceBinding = null;
@@ -557,7 +563,11 @@ public class RestfulServer extends HttpServlet {
 				if (nextString.equals(Constants.PARAM_HISTORY)) {
 					if (tok.hasMoreTokens()) {
 						String versionString = tok.nextToken();
-						versionId = new IdDt(versionString);
+						if (id == null) {
+							throw new InvalidRequestException("Don't know how to handle request path: " + requestPath);
+						}
+						id = new IdDt(resourceName + "/" + id.getUnqualifiedId() + "/_history/" + versionString);
+						versionId = id;
 					} else {
 						operation = Constants.PARAM_HISTORY;
 					}
@@ -570,27 +580,23 @@ public class RestfulServer extends HttpServlet {
 			}
 
 			// Secondary is for things like ..../_tags/_delete
-			String secondaryOperation=null;
-			
+			String secondaryOperation = null;
+
 			while (tok.hasMoreTokens()) {
 				String nextString = tok.nextToken();
 				if (operation == null) {
 					operation = nextString;
-				}else if (secondaryOperation==null) {
-					secondaryOperation=nextString;
-				}else {
-					throw new InvalidRequestException("URL path has unexpected token '"+nextString + "' at the end: " + requestPath);
+				} else if (secondaryOperation == null) {
+					secondaryOperation = nextString;
+				} else {
+					throw new InvalidRequestException("URL path has unexpected token '" + nextString + "' at the end: " + requestPath);
 				}
 			}
 
 			if (theRequestType == RequestType.PUT && versionId == null) {
 				String contentLocation = theRequest.getHeader("Content-Location");
 				if (contentLocation != null) {
-					int idx = contentLocation.indexOf("/_history/");
-					if (idx != -1) {
-						String versionIdString = contentLocation.substring(idx + "/_history/".length());
-						versionId = new IdDt(versionIdString);
-					}
+					versionId = new IdDt(contentLocation);
 				}
 			}
 
@@ -604,11 +610,6 @@ public class RestfulServer extends HttpServlet {
 			r.setSecondaryOperation(secondaryOperation);
 			r.setParameters(params);
 			r.setRequestType(theRequestType);
-			if ("application/x-www-form-urlencoded".equals(theRequest.getContentType())) {
-				r.setInputReader(new StringReader(""));
-			} else {
-				r.setInputReader(theRequest.getReader());
-			}
 			r.setFhirServerBase(fhirServerBase);
 			r.setCompleteUrl(completeUrl);
 			r.setServletRequest(theRequest);
@@ -653,11 +654,98 @@ public class RestfulServer extends HttpServlet {
 	}
 
 	/**
-	 * This method may be overridden by subclasses to do perform initialization
-	 * that needs to be performed prior to the server being used.
+	 * This method may be overridden by subclasses to do perform initialization that needs to be performed prior to the
+	 * server being used.
 	 */
 	protected void initialize() {
 		// nothing by default
+	}
+
+	public static boolean prettyPrintResponse(Request theRequest) {
+		Map<String, String[]> requestParams = theRequest.getParameters();
+		String[] pretty = requestParams.remove(Constants.PARAM_PRETTY);
+		boolean prettyPrint;
+		if (pretty != null && pretty.length > 0) {
+			if (Constants.PARAM_PRETTY_VALUE_TRUE.equals(pretty[0])) {
+				prettyPrint = true;
+			} else {
+				prettyPrint = false;
+			}
+		} else {
+			prettyPrint = false;
+			Enumeration<String> acceptValues = theRequest.getServletRequest().getHeaders(Constants.HEADER_ACCEPT);
+			if (acceptValues != null) {
+				while (acceptValues.hasMoreElements()) {
+					String nextAcceptHeaderValue = acceptValues.nextElement();
+					if (nextAcceptHeaderValue.contains("pretty=true")) {
+						prettyPrint = true;
+					}
+				}
+			}
+		}
+		return prettyPrint;
+	}
+
+	public static EncodingEnum determineResponseEncoding(Request theReq) {
+		String[] format = theReq.getParameters().remove(Constants.PARAM_FORMAT);
+		if (format != null) {
+			for (String nextFormat : format) {
+				EncodingEnum retVal = Constants.FORMAT_VAL_TO_ENCODING.get(nextFormat);
+				if (retVal != null) {
+					return retVal;
+				}
+			}
+		}
+
+		Enumeration<String> acceptValues = theReq.getServletRequest().getHeaders(Constants.HEADER_ACCEPT);
+		if (acceptValues != null) {
+			while (acceptValues.hasMoreElements()) {
+				String nextAcceptHeaderValue = acceptValues.nextElement();
+				if (nextAcceptHeaderValue != null && isNotBlank(nextAcceptHeaderValue)) {
+					for (String nextPart : nextAcceptHeaderValue.split(",")) {
+						int scIdx = nextPart.indexOf(';');
+						if (scIdx == 0) {
+							continue;
+						}
+						if (scIdx != -1) {
+							nextPart = nextPart.substring(0, scIdx);
+						}
+						nextPart = nextPart.trim();
+						EncodingEnum retVal = Constants.FORMAT_VAL_TO_ENCODING.get(nextPart);
+						if (retVal != null) {
+							return retVal;
+						}
+					}
+				}
+			}
+		}
+		return EncodingEnum.XML;
+	}
+
+	public static EncodingEnum determineRequestEncoding(Request theReq) {
+		Enumeration<String> acceptValues = theReq.getServletRequest().getHeaders(Constants.HEADER_CONTENT_TYPE);
+		if (acceptValues != null) {
+			while (acceptValues.hasMoreElements()) {
+				String nextAcceptHeaderValue = acceptValues.nextElement();
+				if (nextAcceptHeaderValue != null && isNotBlank(nextAcceptHeaderValue)) {
+					for (String nextPart : nextAcceptHeaderValue.split(",")) {
+						int scIdx = nextPart.indexOf(';');
+						if (scIdx == 0) {
+							continue;
+						}
+						if (scIdx != -1) {
+							nextPart = nextPart.substring(0, scIdx);
+						}
+						nextPart = nextPart.trim();
+						EncodingEnum retVal = Constants.FORMAT_VAL_TO_ENCODING.get(nextPart);
+						if (retVal != null) {
+							return retVal;
+						}
+					}
+				}
+			}
+		}
+		return EncodingEnum.XML;
 	}
 
 	public enum NarrativeModeEnum {

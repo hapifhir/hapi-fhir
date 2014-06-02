@@ -100,6 +100,7 @@ public class ClientIntegrationTest {
 			myAuthorizationHeader = theRequest.getHeader("authorization");
 
 			Patient retVal = new Patient();
+			retVal.setId("1");
 			retVal.addName().addFamily(theFooParam.getValue());
 			return Collections.singletonList(retVal);
 		}

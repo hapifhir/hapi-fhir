@@ -47,6 +47,16 @@ public interface IGenericClient {
 	 */
 	MethodOutcome create(IResource theResource);
 
+	
+	/**
+	 * Implementation of the "transaction" method.
+	 * 
+	 * @param theResources
+	 *            The resources to create/update in a single transaction
+	 * @return A list of resource stubs (<b>these will not be fully populated</b>) containing IDs and other {@link IResource#getResourceMetadata() metadata}
+	 */
+	List<IResource> transaction(List<IResource> theResources);
+	
 	/**
 	 * Implementation of the "delete instance" method.
 	 * 
@@ -183,5 +193,14 @@ public interface IGenericClient {
 	 * @return The resource
 	 */
 	<T extends IResource> T vread(Class<T> theType, String theId, String theVersionId);
+
+	/**
+	 * If set to <code>true</code>, the client will log all requests and all responses. This
+	 * is probably not a good production setting since it will result in a lot of extra logging, but
+	 * it can be useful for troubleshooting.
+	 * 
+	 * @param theLogRequestAndResponse Should requests and responses be logged
+	 */
+	void setLogRequestAndResponse(boolean theLogRequestAndResponse);
 
 }

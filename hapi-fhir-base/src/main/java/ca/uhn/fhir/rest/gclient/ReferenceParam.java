@@ -45,7 +45,7 @@ public class ReferenceParam implements IParam {
 	 * the logical ID or the absolute URL of the resource)
 	 */
 	public ICriterion hasId(IdDt theId) {
-		return new StringCriterion(getParamName(), theId.getValueAsString());
+		return new StringCriterion(getParamName(), theId.getValue());
 	}
 
 	/**

@@ -44,8 +44,8 @@ public class RuntimeChildChoiceDefinition extends BaseRuntimeDeclaredChildDefini
 
 	public RuntimeChildChoiceDefinition(Field theField, String theElementName, Child theChildAnnotation, Description theDescriptionAnnotation, List<Class<? extends IElement>> theChoiceTypes) {
 		super(theField, theChildAnnotation, theDescriptionAnnotation, theElementName);
-		
-		myChoiceTypes= Collections.unmodifiableList(theChoiceTypes);
+
+		myChoiceTypes = Collections.unmodifiableList(theChoiceTypes);
 	}
 
 	/**
@@ -71,7 +71,7 @@ public class RuntimeChildChoiceDefinition extends BaseRuntimeDeclaredChildDefini
 	@Override
 	public BaseRuntimeElementDefinition<?> getChildByName(String theName) {
 		assert myNameToChildDefinition.containsKey(theName);
-		
+
 		return myNameToChildDefinition.get(theName);
 	}
 
@@ -80,37 +80,37 @@ public class RuntimeChildChoiceDefinition extends BaseRuntimeDeclaredChildDefini
 	void sealAndInitialize(Map<Class<? extends IElement>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
 		myNameToChildDefinition = new HashMap<String, BaseRuntimeElementDefinition<?>>();
 		myDatatypeToElementName = new HashMap<Class<? extends IElement>, String>();
-		myDatatypeToElementDefinition =new HashMap<Class<? extends IElement>, BaseRuntimeElementDefinition<?>>();
-		
+		myDatatypeToElementDefinition = new HashMap<Class<? extends IElement>, BaseRuntimeElementDefinition<?>>();
+
 		for (Class<? extends IElement> next : myChoiceTypes) {
-			
+
 			String elementName;
-			String alternateElementName=null;
+			String alternateElementName = null;
 			BaseRuntimeElementDefinition<?> nextDef;
 			if (IResource.class.isAssignableFrom(next)) {
 				elementName = getElementName() + StringUtils.capitalize(next.getSimpleName());
 				alternateElementName = getElementName() + "Resource";
 				List<Class<? extends IResource>> types = new ArrayList<Class<? extends IResource>>();
-				types.add((Class<? extends IResource>)next);
+				types.add((Class<? extends IResource>) next);
 				nextDef = new RuntimeResourceReferenceDefinition(elementName, types);
 				nextDef.sealAndInitialize(theClassToElementDefinitions);
 			} else {
 				nextDef = theClassToElementDefinitions.get(next);
 				elementName = getElementName() + StringUtils.capitalize(nextDef.getName());
 			}
-			
+
 			myNameToChildDefinition.put(elementName, nextDef);
-			if (alternateElementName!=null) {
+			if (alternateElementName != null) {
 				myNameToChildDefinition.put(alternateElementName, nextDef);
 			}
 			myDatatypeToElementDefinition.put(next, nextDef);
 			myDatatypeToElementName.put(next, elementName);
 		}
-		
+
 		myNameToChildDefinition = Collections.unmodifiableMap(myNameToChildDefinition);
-		myDatatypeToElementName=Collections.unmodifiableMap(myDatatypeToElementName);
-		myDatatypeToElementDefinition=Collections.unmodifiableMap(myDatatypeToElementDefinition);
-		
+		myDatatypeToElementName = Collections.unmodifiableMap(myDatatypeToElementName);
+		myDatatypeToElementDefinition = Collections.unmodifiableMap(myDatatypeToElementDefinition);
+
 	}
 
 	@Override
@@ -126,6 +126,5 @@ public class RuntimeChildChoiceDefinition extends BaseRuntimeDeclaredChildDefini
 	public Set<Class<? extends IElement>> getValidChildTypes() {
 		return Collections.unmodifiableSet((myDatatypeToElementDefinition.keySet()));
 	}
-
 
 }

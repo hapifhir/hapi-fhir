@@ -29,7 +29,7 @@ public class TagList extends ArrayList<Tag> {
 	public static final String ELEMENT_NAME = "TagList";
 	public static final String ELEMENT_NAME_LC = ELEMENT_NAME.toLowerCase();
 
-	public Tag addTag(String theTerm, String theLabel, String theScheme) {
+	public Tag addTag(String theScheme, String theTerm, String theLabel) {
 		Tag retVal = new Tag(theTerm, theLabel, theScheme);
 		add(retVal);
 		return retVal;
@@ -38,5 +38,14 @@ public class TagList extends ArrayList<Tag> {
 	public Tag addTag() {
 		return addTag(null, null, null);
 	}
-	
+
+	public Tag getTag(String theScheme, String theTerm) {
+		for (Tag next : this) {
+			if (theScheme.equals(next.getScheme()) && theTerm.equals(next.getTerm())) {
+				return next;
+			}
+		}
+		return null;
+	}
+
 }

@@ -20,7 +20,7 @@ package ca.uhn.fhir.rest.method;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -30,9 +30,7 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Enumeration;
 import java.util.List;
-import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -56,10 +54,11 @@ import ca.uhn.fhir.rest.annotation.History;
 import ca.uhn.fhir.rest.annotation.Metadata;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.annotation.Transaction;
 import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.annotation.Validate;
 import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.client.BaseClientInvocation;
+import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.client.exceptions.NonFhirResponseException;
 import ca.uhn.fhir.rest.param.IParameter;
 import ca.uhn.fhir.rest.param.ParameterUtil;
@@ -80,9 +79,11 @@ import ca.uhn.fhir.util.ReflectionUtil;
 
 public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> {
 
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseMethodBinding.class);
 	private FhirContext myContext;
 	private Method myMethod;
 	private List<IParameter> myParameters;
+
 	private Object myProvider;
 
 	public BaseMethodBinding(Method theMethod, FhirContext theContext, Object theProvider) {
@@ -103,13 +104,17 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 		return myMethod;
 	}
 
+	public List<IParameter> getParameters() {
+		return myParameters;
+	}
+
 	public Object getProvider() {
 		return myProvider;
 	}
 
 	/**
-	 * Returns the name of the resource this method handles, or
-	 * <code>null</code> if this method is not resource specific
+	 * Returns the name of the resource this method handles, or <code>null</code> if this method is not resource
+	 * specific
 	 */
 	public abstract String getResourceName();
 
@@ -117,26 +122,60 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 
 	public abstract RestfulOperationSystemEnum getSystemOperationType();
 
-	public abstract BaseClientInvocation invokeClient(Object[] theArgs) throws InternalErrorException;
+	public abstract boolean incomingServerRequestMatchesMethod(Request theRequest);
+
+	public abstract BaseHttpClientInvocation invokeClient(Object[] theArgs) throws InternalErrorException;
 
 	public abstract void invokeServer(RestfulServer theServer, Request theRequest, HttpServletResponse theResponse) throws BaseServerResponseException, IOException;
 
-	public abstract boolean incomingServerRequestMatchesMethod(Request theRequest);
+	/** For unit tests only */
+	public void setParameters(List<IParameter> theParameters) {
+		myParameters = theParameters;
+	}
 
 	protected IParser createAppropriateParserForParsingResponse(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode) {
-		EncodingEnum encoding = EncodingEnum.forContentType(theResponseMimeType);		
-		if (encoding==null) {
+		EncodingEnum encoding = EncodingEnum.forContentType(theResponseMimeType);
+		if (encoding == null) {
 			NonFhirResponseException ex = NonFhirResponseException.newInstance(theResponseStatusCode, theResponseMimeType, theResponseReader);
 			populateException(ex, theResponseReader);
 			throw ex;
 		}
-		
-		IParser parser=encoding.newParser(getContext());
+
+		IParser parser = encoding.newParser(getContext());
 		return parser;
 	}
 
-	public List<IParameter> getParameters() {
-		return myParameters;
+	protected IParser createAppropriateParserForParsingServerRequest(Request theRequest) {
+		String contentTypeHeader = theRequest.getServletRequest().getHeader("content-type");
+		EncodingEnum encoding;
+		if (isBlank(contentTypeHeader)) {
+			encoding = EncodingEnum.XML;
+		} else {
+			int semicolon = contentTypeHeader.indexOf(';');
+			if (semicolon != -1) {
+				contentTypeHeader = contentTypeHeader.substring(0, semicolon);
+			}
+			encoding = EncodingEnum.forContentType(contentTypeHeader);
+		}
+
+		if (encoding == null) {
+			throw new InvalidRequestException("Request contins non-FHIR conent-type header value: " + contentTypeHeader);
+		}
+
+		IParser parser = encoding.newParser(getContext());
+		return parser;
+	}
+
+	protected Object[] createParametersForServerRequest(Request theRequest, IResource theResource) {
+		Object[] params = new Object[getParameters().size()];
+		for (int i = 0; i < getParameters().size(); i++) {
+			IParameter param = getParameters().get(i);
+			if (param == null) {
+				continue;
+			}
+			params[i] = param.translateQueryParametersIntoServerArgument(theRequest, theResource);
+		}
+		return params;
 	}
 
 	protected Object invokeServerMethod(Object[] theMethodParams) {
@@ -154,9 +193,36 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 		}
 	}
 
-	/** For unit tests only */
-	public void setParameters(List<IParameter> theParameters) {
-		myParameters = theParameters;
+	protected BaseServerResponseException processNon2xxResponseAndReturnExceptionToThrow(int theStatusCode, String theResponseMimeType, Reader theResponseReader) {
+		BaseServerResponseException ex;
+		switch (theStatusCode) {
+		case Constants.STATUS_HTTP_400_BAD_REQUEST:
+			ex = new InvalidRequestException("Server responded with HTTP 400");
+			break;
+		case Constants.STATUS_HTTP_404_NOT_FOUND:
+			ex = new ResourceNotFoundException("Server responded with HTTP 404");
+			break;
+		case Constants.STATUS_HTTP_405_METHOD_NOT_ALLOWED:
+			ex = new MethodNotAllowedException("Server responded with HTTP 405");
+			break;
+		case Constants.STATUS_HTTP_409_CONFLICT:
+			ex = new ResourceVersionConflictException("Server responded with HTTP 409");
+			break;
+		case Constants.STATUS_HTTP_412_PRECONDITION_FAILED:
+			ex = new ResourceVersionNotSpecifiedException("Server responded with HTTP 412");
+			break;
+		case Constants.STATUS_HTTP_422_UNPROCESSABLE_ENTITY:
+			IParser parser = createAppropriateParserForParsingResponse(theResponseMimeType, theResponseReader, theStatusCode);
+			OperationOutcome operationOutcome = parser.parseResource(OperationOutcome.class, theResponseReader);
+			ex = new UnprocessableEntityException(operationOutcome);
+			break;
+		default:
+			ex = new UnclassifiedServerFailureException(theStatusCode, "Server responded with HTTP " + theStatusCode);
+			break;
+		}
+
+		populateException(ex, theResponseReader);
+		return ex;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -172,8 +238,9 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 		GetTags getTags = theMethod.getAnnotation(GetTags.class);
 		AddTags addTags = theMethod.getAnnotation(AddTags.class);
 		DeleteTags deleteTags = theMethod.getAnnotation(DeleteTags.class);
+		Transaction transaction = theMethod.getAnnotation(Transaction.class);
 		// ** if you add another annotation above, also add it to the next line:
-		if (!verifyMethodHasZeroOrOneOperationAnnotation(theMethod, read, search, conformance, create, update, delete, history, validate, getTags, addTags, deleteTags)) {
+		if (!verifyMethodHasZeroOrOneOperationAnnotation(theMethod, read, search, conformance, create, update, delete, history, validate, getTags, addTags, deleteTags, transaction)) {
 			return null;
 		}
 
@@ -283,6 +350,8 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 			return new AddTagsMethodBinding(theMethod, theContext, theProvider, addTags);
 		} else if (deleteTags != null) {
 			return new DeleteTagsMethodBinding(theMethod, theContext, theProvider, deleteTags);
+		} else if (transaction != null) {
+			return new TransactionMethodBinding(theMethod, theContext, theProvider);
 		} else {
 			throw new ConfigurationException("Did not detect any FHIR annotations on method '" + theMethod.getName() + "' on type: " + theMethod.getDeclaringClass().getCanonicalName());
 		}
@@ -309,50 +378,6 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 		// return sm;
 	}
 
-	public static EncodingEnum determineResponseEncoding(Request theReq) {
-		String[] format = theReq.getParameters().remove(Constants.PARAM_FORMAT);
-		if (format != null) {
-			for (String nextFormat : format) {
-				EncodingEnum retVal = Constants.FORMAT_VAL_TO_ENCODING.get(nextFormat);
-				if (retVal != null) {
-					return retVal;
-				}
-			}
-		}
-
-		Enumeration<String> acceptValues = theReq.getServletRequest().getHeaders("Accept");
-		if (acceptValues != null) {
-			while (acceptValues.hasMoreElements()) {
-				EncodingEnum retVal = Constants.FORMAT_VAL_TO_ENCODING.get(acceptValues.nextElement());
-				if (retVal != null) {
-					return retVal;
-				}
-			}
-		}
-		return EncodingEnum.XML;
-	}
-
-	protected IParser createAppropriateParserForParsingServerRequest(Request theRequest) {
-		String contentTypeHeader = theRequest.getServletRequest().getHeader("content-type");
-		EncodingEnum encoding;
-		if (isBlank(contentTypeHeader)) {
-			encoding = EncodingEnum.XML;
-		} else {
-			int semicolon = contentTypeHeader.indexOf(';');
-			if (semicolon!=-1) {
-				contentTypeHeader=contentTypeHeader.substring(0,semicolon);
-			}
-			encoding = EncodingEnum.forContentType(contentTypeHeader);
-		}
-		
-		if (encoding==null) {
-			throw new InvalidRequestException("Request contins non-FHIR conent-type header value: " + contentTypeHeader);
-		}
-		
-		IParser parser=encoding.newParser(getContext());
-		return parser;
-	}
-
 	public static boolean verifyMethodHasZeroOrOneOperationAnnotation(Method theNextMethod, Object... theAnnotations) {
 		Object obj1 = null;
 		for (Object object : theAnnotations) {
@@ -376,6 +401,15 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 		return true;
 	}
 
+	private static void populateException(BaseServerResponseException theEx, Reader theResponseReader) {
+		try {
+			String responseText = IOUtils.toString(theResponseReader);
+			theEx.setResponseBody(responseText);
+		} catch (IOException e) {
+			ourLog.debug("Failed to read response", e);
+		}
+	}
+
 	private static String toLogString(Class<?> theType) {
 		if (theType == null) {
 			return null;
@@ -394,18 +428,6 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 		return retVal;
 	}
 
-	protected Object[] createParametersForServerRequest(Request theRequest, IResource theResource) {
-		Object[] params = new Object[getParameters().size()];
-		for (int i = 0; i < getParameters().size(); i++) {
-			IParameter param = getParameters().get(i);
-			if (param == null) {
-				continue;
-			}
-			params[i] = param.translateQueryParametersIntoServerArgument(theRequest, theResource);
-		}
-		return params;
-	}
-
 	protected static List<IResource> toResourceList(Object response) throws InternalErrorException {
 		if (response == null) {
 			return Collections.emptyList();
@@ -419,61 +441,6 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 			return retVal;
 		} else {
 			throw new InternalErrorException("Unexpected return type: " + response.getClass().getCanonicalName());
-		}
-	}
-
-	protected static boolean prettyPrintResponse(Request theRequest) {
-		Map<String, String[]> requestParams = theRequest.getParameters();
-		String[] pretty = requestParams.remove(Constants.PARAM_PRETTY);
-		boolean prettyPrint = false;
-		if (pretty != null && pretty.length > 0) {
-			if (Constants.PARAM_PRETTY_VALUE_TRUE.equals(pretty[0])) {
-				prettyPrint = true;
-			}
-		}
-		return prettyPrint;
-	}
-
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseMethodBinding.class);
-
-	protected BaseServerResponseException processNon2xxResponseAndReturnExceptionToThrow(int theStatusCode, String theResponseMimeType, Reader theResponseReader) {
-		BaseServerResponseException ex;
-		switch (theStatusCode) {
-		case Constants.STATUS_HTTP_400_BAD_REQUEST:
-			ex = new InvalidRequestException("Server responded with HTTP 400");
-			break;
-		case Constants.STATUS_HTTP_404_NOT_FOUND:
-			ex = new ResourceNotFoundException("Server responded with HTTP 404");
-			break;
-		case Constants.STATUS_HTTP_405_METHOD_NOT_ALLOWED:
-			ex = new MethodNotAllowedException("Server responded with HTTP 405");
-			break;
-		case Constants.STATUS_HTTP_409_CONFLICT:
-			ex = new ResourceVersionConflictException("Server responded with HTTP 409");
-			break;
-		case Constants.STATUS_HTTP_412_PRECONDITION_FAILED:
-			ex = new ResourceVersionNotSpecifiedException("Server responded with HTTP 412");
-			break;
-		case Constants.STATUS_HTTP_422_UNPROCESSABLE_ENTITY:
-			IParser parser = createAppropriateParserForParsingResponse(theResponseMimeType, theResponseReader, theStatusCode);
-			OperationOutcome operationOutcome = parser.parseResource(OperationOutcome.class, theResponseReader);
-			ex = new UnprocessableEntityException(operationOutcome);
-			break;
-		default:
-			ex = new UnclassifiedServerFailureException(theStatusCode, "Server responded with HTTP " + theStatusCode);
-			break;
-		}
-
-		populateException(ex, theResponseReader);
-		return ex;
-	}
-
-	private static void populateException(BaseServerResponseException theEx, Reader theResponseReader) {
-		try {
-			String responseText = IOUtils.toString(theResponseReader);
-			theEx.setResponseBody(responseText);
-		} catch (IOException e) {
-			ourLog.debug("Failed to read response", e);
 		}
 	}
 

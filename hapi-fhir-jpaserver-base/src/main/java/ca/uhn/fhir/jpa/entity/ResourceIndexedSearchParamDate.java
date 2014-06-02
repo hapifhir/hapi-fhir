@@ -4,16 +4,13 @@ import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.ForeignKey;
-import javax.persistence.Index;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
 @Entity
-@Table(name = "SPIDX_DATE", indexes= {@Index(name="IDX_SP_DATE", columnList="SP_VALUE_LOW,SP_VALUE_HIGH")})
+@Table(name = "HFJ_SPIDX_DATE" /*, indexes= {@Index(name="IDX_SP_DATE", columnList= "SP_VALUE_LOW,SP_VALUE_HIGH")}*/)
+@org.hibernate.annotations.Table(appliesTo = "HFJ_SPIDX_DATE", indexes= {@org.hibernate.annotations.Index(name="IDX_SP_DATE", columnNames= {"SP_VALUE_LOW","SP_VALUE_HIGH"})})
 public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchParam {
 
 	private static final long serialVersionUID = 1L;

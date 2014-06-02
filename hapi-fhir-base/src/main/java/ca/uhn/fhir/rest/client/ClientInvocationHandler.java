@@ -72,7 +72,7 @@ public class ClientInvocationHandler extends BaseClient implements InvocationHan
 
 		BaseMethodBinding<?> binding = myBindings.get(theMethod);
 		if (binding != null) {
-			BaseClientInvocation clientInvocation = binding.invokeClient(theArgs);
+			BaseHttpClientInvocation clientInvocation = binding.invokeClient(theArgs);
 			return invokeClient(binding, clientInvocation);
 		}
 

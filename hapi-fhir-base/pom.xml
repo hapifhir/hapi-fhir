@@ -149,8 +149,8 @@
 			<version>9.1.1.v20140108</version>
 			<scope>test</scope>
 		</dependency>
-		
-		
+
+
 		<dependency>
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-all</artifactId>
@@ -290,7 +290,7 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-linkcheck-plugin</artifactId>
 				<version>1.1</version>
-			</plugin>			
+			</plugin>
 		</plugins>
 	</reporting>
 
@@ -303,35 +303,14 @@
 			<plugins>
 				<plugin>
 					<artifactId>maven-site-plugin</artifactId>
-						<configuration>
-							<skip>false</skip>
-							<skipDeploy>false</skipDeploy>
-						</configuration>
+					<configuration>
+						<skip>false</skip>
+						<skipDeploy>false</skipDeploy>
+					</configuration>
 				</plugin>
 			</plugins>
 		</pluginManagement>
 		<plugins>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>license-maven-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>first</id>
-						<goals>
-							<goal>update-file-header</goal>
-						</goals>
-						<phase>process-sources</phase>
-						<configuration>
-							<licenseName>apache_v2</licenseName>
-							<canUpdateDescription>true</canUpdateDescription>
-							<canUpdateCopyright>true</canUpdateCopyright>
-							<roots>
-								<root>src/main/java</root>
-							</roots>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
 			<plugin>
 				<artifactId>maven-antrun-plugin</artifactId>
 				<version>1.7</version>
@@ -461,57 +440,6 @@
 					</execution>
 				</executions>
 			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-javadoc-plugin</artifactId>
-				<inherited>true</inherited>
-				<configuration>
-					<minmemory>128m</minmemory>
-					<maxmemory>1g</maxmemory>
-					<linksource>true</linksource>
-					<verbose>false</verbose>
-					<debug>false</debug>
-				</configuration>
-				<executions>
-					<execution>
-						<phase>package</phase>
-						<goals>
-							<goal>jar</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-source-plugin</artifactId>
-				<executions>
-					<execution>
-						<phase>package</phase>
-						<goals>
-							<goal>jar-no-fork</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<artifactId>maven-assembly-plugin</artifactId>
-				<version>2.4</version>
-				<executions>
-					<execution>
-						<phase>package</phase>
-						<goals>
-							<goal>single</goal>
-						</goals>
-						<configuration>
-							<attach>false</attach>
-							<descriptors>
-								<descriptor>${project.basedir}/src/assembly/hapi-fhir-all.xml</descriptor>
-								<!-- <descriptor>src/assembly/hapi-jdk14.xml</descriptor> -->
-							</descriptors>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
 		</plugins>
 		<resources>
 			<resource>
@@ -520,5 +448,87 @@
 			</resource>
 		</resources>
 	</build>
+
+	<profiles>
+		<profile>
+			<id>DIST</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-javadoc-plugin</artifactId>
+						<inherited>true</inherited>
+						<configuration>
+							<minmemory>128m</minmemory>
+							<maxmemory>1g</maxmemory>
+							<linksource>true</linksource>
+							<verbose>false</verbose>
+							<debug>false</debug>
+						</configuration>
+						<executions>
+							<execution>
+								<phase>package</phase>
+								<goals>
+									<goal>jar</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-source-plugin</artifactId>
+						<executions>
+							<execution>
+								<phase>package</phase>
+								<goals>
+									<goal>jar-no-fork</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<artifactId>maven-assembly-plugin</artifactId>
+						<version>2.4</version>
+						<executions>
+							<execution>
+								<phase>package</phase>
+								<goals>
+									<goal>single</goal>
+								</goals>
+								<configuration>
+									<attach>false</attach>
+									<descriptors>
+										<descriptor>${project.basedir}/src/assembly/hapi-fhir-all.xml</descriptor>
+										<!-- <descriptor>src/assembly/hapi-jdk14.xml</descriptor> -->
+									</descriptors>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>license-maven-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>first</id>
+								<goals>
+									<goal>update-file-header</goal>
+								</goals>
+								<phase>process-sources</phase>
+								<configuration>
+									<licenseName>apache_v2</licenseName>
+									<canUpdateDescription>true</canUpdateDescription>
+									<canUpdateCopyright>true</canUpdateCopyright>
+									<roots>
+										<root>src/main/java</root>
+									</roots>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 
 </project>

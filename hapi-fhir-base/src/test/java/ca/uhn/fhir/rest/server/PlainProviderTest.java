@@ -239,6 +239,7 @@ public class PlainProviderTest {
 
 	private static Patient createPatient() {
 		Patient patient = new Patient();
+		patient.setId("1");
 		patient.addIdentifier();
 		patient.getIdentifier().get(0).setUse(IdentifierUseEnum.OFFICIAL);
 		patient.getIdentifier().get(0).setSystem(new UriDt("urn:hapitest:mrns"));
@@ -252,6 +253,7 @@ public class PlainProviderTest {
 
 	private static Organization createOrganization() {
 		Organization retVal = new Organization();
+		retVal.setId("1");
 		retVal.addIdentifier();
 		retVal.getIdentifier().get(0).setUse(IdentifierUseEnum.OFFICIAL);
 		retVal.getIdentifier().get(0).setSystem(new UriDt("urn:hapitest:mrns"));

@@ -81,6 +81,14 @@ function displayConformance(button, expandoTr) {
 	clearCurrentForm(postCompleteFunction);
 }
 
+function minifyTextarea(self) {
+	var value = value;
+	value = value.replace(/[\u00A0\u1680​\u180e\u2000-\u2009\u200a​\u200b​\u202f\u205f​\u3000]/g,' ');
+	//value = JSON.minify(value);
+	$('#textarea').val(value);
+	return addConfigElementsToForm(self);
+}
+
 /** Create a tester form for the 'read' method */
 function displayCreate(button, expandoTr, resourceName) {
 	highlightSelectedLink(button);
@@ -89,11 +97,11 @@ function displayCreate(button, expandoTr, resourceName) {
 			$('<tr class="testerNameRow" style="display: none;" />').append(
 				$('<td class="testerNameCell">Create</td>'),
 				$('<td />').append(
-					$('<form/>', { action: 'PublicTesterResult.html', method: 'POST', onsubmit: "addConfigElementsToForm(this);" }).append(
+					$('<form/>', { action: 'PublicTesterResult.html', method: 'POST', onsubmit: "minifyTextarea(this);" }).append(
 				        $('<input />', { name: 'method', value: 'create', type: 'hidden' }),
 				        $('<input />', { name: 'resourceName', value: resourceName, type: 'hidden' }),
 				        $('<div class="textareaWrapper">').append(
-				        	$('<textarea />', { name: 'resource', rows: 10, style: 'white-space: nowrap;' })
+				        	$('<textarea />', { id: 'textarea', name: 'resource', rows: 10, style: 'white-space: nowrap;' })
 				        ),
 				        $('<br />'),
 				        $('<input />', { type: 'submit', value: 'Submit' })
@@ -137,11 +145,11 @@ function displayUpdate(button, expandoTr, resourceName) {
 			$('<tr class="testerNameRow" style="display: none;" />').append(
 				$('<td class="testerNameCell">Update</td>'),
 				$('<td />').append(
-					$('<form/>', { action: 'PublicTesterResult.html', method: 'POST', onsubmit: "addConfigElementsToForm(this);" }).append(
+					$('<form/>', { action: 'PublicTesterResult.html', method: 'POST', onsubmit: "minifyTextarea(this);" }).append(
 				        $('<input />', { name: 'method', value: 'update', type: 'hidden' }),
 				        $('<input />', { name: 'resourceName', value: resourceName, type: 'hidden' }),
 				        $('<input />', { name: 'id', placeholder: 'Resource ID', type: 'text' }),
-				        $('<textarea />', { name: 'resource', cols: 100, rows: 10, style: 'white-space: nowrap;' }),
+				        $('<textarea />', { id: 'textarea', name: 'resource', cols: 100, rows: 10, style: 'white-space: nowrap;' }),
 				        $('<br />'),
 				        $('<input />', { type: 'submit', value: 'Submit' })
 				    )
@@ -282,10 +290,10 @@ function displayValidate(button, expandoTr, resourceName) {
 			$('<tr class="testerNameRow" style="display: none;" />').append(
 				$('<td class="testerNameCell">Validate</td>'),
 				$('<td />').append(
-					$('<form/>', { action: 'PublicTesterResult.html', method: 'POST', onsubmit: "addConfigElementsToForm(this);" }).append(
+					$('<form/>', { action: 'PublicTesterResult.html', method: 'POST', onsubmit: "minifyTextarea(this);" }).append(
 				        $('<input />', { name: 'method', value: 'validate', type: 'hidden' }),
 				        $('<input />', { name: 'resourceName', value: resourceName, type: 'hidden' }),
-				        $('<textarea />', { name: 'resource', cols: 100, rows: 10, style: 'white-space: nowrap;' }),
+				        $('<textarea />', { id: 'textarea', name: 'resource', cols: 100, rows: 10, style: 'white-space: nowrap;' }),
 				        $('<br />'),
 				        $('<input />', { type: 'submit', value: 'Submit' })
 				    )
@@ -331,6 +339,15 @@ function highlightSelectedLink(button) {
 /** Generate a unique ID */
 function newUniqueId() {
     return "uid" + uniqueIdSeed++;
+}
+
+function selectResourceType() {
+	$('.resourceTypeContainer').each(function() {
+		$(this).hide();
+	});
+	var cr = document.getElementById('configResource');
+	var selected = cr.options[cr.selectedIndex].value;
+	$('#res' + selected).show();
 }
 
 /** Show a newly created tester form */

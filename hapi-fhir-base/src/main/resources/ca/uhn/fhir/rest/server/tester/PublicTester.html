@@ -14,8 +14,11 @@ This file is a Thymeleaf template for the
 		<script type="text/javascript" src="jquery-2.1.0.min.js"></script>
 		<script type="text/javascript" src="PublicTester.js"></script>
 		<link rel="stylesheet" type="text/css" href="PublicTester.css"/>
+		<meta charset="UTF-8"/>
+		<script type="text/javascript" src="json2.js"></script>
+		<script type="text/javascript" src="minify.json.js"></script>
 	</head>
-	<body>
+	<body onload="selectResourceType();">
 		<table border="0" width="100%">
 			<tr>
 				<td align="left"><img src="hapi_fhir_banner.png"/></td>
@@ -53,17 +56,30 @@ This file is a Thymeleaf template for the
 						<tr>
 							<td class="propertyKeyCell">Encoding</td>
 							<td>
-								<select id="configEncoding">
-									<option value="" selected="true">(default)</option>
-									<option value="xml">XML</option>
-									<option value="json">JSON</option>
+								<select id="configEncoding" th:switch="${configEncoding}">
+									<th:block th:case="'xml'">
+										<option value="">(default)</option>
+										<option value="xml" selected="selected">XML</option>
+										<option value="json">JSON</option>
+									</th:block>
+									<th:block th:case="'json'">
+										<option value="">(default)</option>
+										<option value="xml">XML</option>
+										<option value="json" selected="selected">JSON</option>
+									</th:block>
+									<th:block th:case="*">
+										<option value="" selected="selected">(default)</option>
+										<option value="xml">XML</option>
+										<option value="json">JSON</option>
+									</th:block>
 								</select>
 							</td>
 						</tr>
 						<tr>
 							<td class="propertyKeyCell">Pretty Printing</td>
-							<td>
-								<input type="checkbox" id="configPretty"/>
+							<td th:switch="${configPretty}">
+								<input th:case="'false'" type="checkbox" id="configPretty"/>
+								<input th:case="*" type="checkbox" id="configPretty" checked="checked"/>
 							</td>
 						</tr>
 					</table>
@@ -91,7 +107,24 @@ This file is a Thymeleaf template for the
 							</tr>
 						</table>
 
-						<th:block th:each="resource, resIterStat : ${rest.resource}" th:with="expandoId='resExpando'+${resIterStat.count}">
+						<div class="bodyHeaderBlock">
+							Resources 
+						</div>
+
+						<table border="0" th:id="systemExpando" class="propertyTable">
+							<tr>
+								<td valign="top" class="propertyKeyCell">Select Resource:</td>
+								<td valign="top">
+									<select id="configResource" onchange="selectResourceType();">
+										<th:block th:each="resource, resIterStat : ${rest.resource}">
+											<option th:value="${resource.type.valueAsString}" th:text="${resource.type.valueAsString}"/>
+										</th:block>
+									</select>
+								</td>
+							</tr>
+						</table>
+
+						<div th:each="resource, resIterStat : ${rest.resource}" th:with="expandoId='resExpando'+${resIterStat.count}" th:id="'res' + ${resource.type.valueAsString}" class="resourceTypeContainer" style="display:none;">
 							<div class="bodyHeaderBlock">
 								Resource: <th:block th:text="${resource.type.valueAsString}"/> 
 							</div>
@@ -115,9 +148,8 @@ This file is a Thymeleaf template for the
 									</td>
 								</tr>
 							</table>
-						</th:block>
+						</div>
 					</th:block>
-				
 				</td>
 			</tr>
 		</table>

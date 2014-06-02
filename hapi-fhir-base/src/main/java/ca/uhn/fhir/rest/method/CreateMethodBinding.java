@@ -30,8 +30,7 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
 import ca.uhn.fhir.rest.annotation.Create;
-import ca.uhn.fhir.rest.client.BaseClientInvocation;
-import ca.uhn.fhir.rest.client.PostClientInvocation;
+import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.method.SearchMethodBinding.RequestType;
 import ca.uhn.fhir.rest.param.IParameter;
 
@@ -57,10 +56,10 @@ public class CreateMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 	}
 
 	@Override
-	protected BaseClientInvocation createClientInvocation(Object[] theArgs, IResource resource) {
+	protected BaseHttpClientInvocation createClientInvocation(Object[] theArgs, IResource resource) {
 		FhirContext context = getContext();
 
-		BaseClientInvocation retVal = createCreateInvocation(resource, context);
+		BaseHttpClientInvocation retVal = createCreateInvocation(resource, context);
 		
 		if (theArgs != null) {
 			for (int idx = 0; idx < theArgs.length; idx++) {
@@ -72,14 +71,14 @@ public class CreateMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 		return retVal;
 	}
 
-	public static PostClientInvocation createCreateInvocation(IResource resource, FhirContext context) {
+	public static HttpPostClientInvocation createCreateInvocation(IResource resource, FhirContext context) {
 		RuntimeResourceDefinition def = context.getResourceDefinition(resource);
 		String resourceName = def.getName();
 
 		StringBuilder urlExtension = new StringBuilder();
 		urlExtension.append(resourceName);
 
-		return new PostClientInvocation(context, resource, urlExtension.toString());
+		return new HttpPostClientInvocation(context, resource, urlExtension.toString());
 	}
 
 	@Override

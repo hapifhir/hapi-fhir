@@ -134,6 +134,7 @@ public class ResfulServerSelfReferenceTest {
 			Map<String, Patient> idToPatient = new HashMap<String, Patient>();
 			{
 				Patient patient = new Patient();
+				patient.setId("1");
 				patient.addIdentifier();
 				patient.getIdentifier().get(0).setUse(IdentifierUseEnum.OFFICIAL);
 				patient.getIdentifier().get(0).setSystem(new UriDt("urn:hapitest:mrns"));
@@ -146,6 +147,7 @@ public class ResfulServerSelfReferenceTest {
 			}
 			{
 				Patient patient = new Patient();
+				patient.setId("2");
 				patient.getIdentifier().add(new IdentifierDt());
 				patient.getIdentifier().get(0).setUse(IdentifierUseEnum.OFFICIAL);
 				patient.getIdentifier().get(0).setSystem(new UriDt("urn:hapitest:mrns"));

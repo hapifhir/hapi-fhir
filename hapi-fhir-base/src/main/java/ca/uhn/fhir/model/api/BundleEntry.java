@@ -20,6 +20,8 @@ package ca.uhn.fhir.model.api;
  * #L%
  */
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.apache.commons.lang3.Validate;
 
 import ca.uhn.fhir.model.primitive.InstantDt;
@@ -34,21 +36,60 @@ public class BundleEntry extends BaseBundle {
 	 * NB: add any new fields to the isEmpty() method!!!
 	 *****************************************************/
 	//@formatter:on
+	private TagList myCategories;
+	private InstantDt myDeletedAt;
+	private StringDt myLinkAlternate;
 	private StringDt myLinkSelf;
 	private InstantDt myPublished;
 	private IResource myResource;
+	private XhtmlDt mySummary;
 	private StringDt myTitle;
 	private InstantDt myUpdated;
-	private XhtmlDt mySummary;
-	private TagList myCategories;
+
+	public Tag addCategory() {
+		Tag retVal = new Tag();
+		getCategories().add(retVal);
+		return retVal;
+	}
 
 	@Override
-	public boolean isEmpty() {
-		//@formatter:off
-		return super.isEmpty() && 
-				ElementUtil.isEmpty(myLinkSelf, myPublished, myResource, myTitle, myUpdated, mySummary) &&
-				ElementUtil.isEmpty(myCategories);
-		//@formatter:on
+	public String toString() {
+		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
+		if (getResource() != null) {
+			b.append("type", getResource().getClass().getSimpleName());
+		} else {
+			b.append("No resource");
+		}
+		b.append("id", getId());
+		return b.toString();
+	}
+
+	public void addCategory(Tag theTag) {
+		getCategories().add(theTag);
+	}
+
+	public TagList getCategories() {
+		if (myCategories == null) {
+			myCategories = new TagList();
+		}
+		return myCategories;
+	}
+
+	/**
+	 * Gets the date/time that thius entry was deleted.
+	 */
+	public InstantDt getDeletedAt() {
+		if (myDeletedAt == null) {
+			myDeletedAt = new InstantDt();
+		}
+		return myDeletedAt;
+	}
+
+	public StringDt getLinkAlternate() {
+		if (myLinkAlternate == null) {
+			myLinkAlternate = new StringDt();
+		}
+		return myLinkAlternate;
 	}
 
 	public StringDt getLinkSelf() {
@@ -69,6 +110,13 @@ public class BundleEntry extends BaseBundle {
 		return myResource;
 	}
 
+	public XhtmlDt getSummary() {
+		if (mySummary == null) {
+			mySummary = new XhtmlDt();
+		}
+		return mySummary;
+	}
+
 	public StringDt getTitle() {
 		if (myTitle == null) {
 			myTitle = new StringDt();
@@ -83,6 +131,25 @@ public class BundleEntry extends BaseBundle {
 		return myUpdated;
 	}
 
+	@Override
+	public boolean isEmpty() {
+		//@formatter:off
+		return super.isEmpty() && 
+				ElementUtil.isEmpty(myCategories, myDeletedAt, myLinkAlternate, myLinkSelf, myPublished, myResource, mySummary, myTitle, myUpdated);
+		//@formatter:on
+	}
+
+	/**
+	 * Sets the date/time that this entry was deleted.
+	 */
+	public void setDeleted(InstantDt theDeletedAt) {
+		myDeletedAt = theDeletedAt;
+	}
+
+	public void setLinkAlternate(StringDt theLinkAlternate) {
+		myLinkAlternate = theLinkAlternate;
+	}
+
 	public void setLinkSelf(StringDt theLinkSelf) {
 		if (myLinkSelf == null) {
 			myLinkSelf = new StringDt();
@@ -90,42 +157,18 @@ public class BundleEntry extends BaseBundle {
 		myLinkSelf = theLinkSelf;
 	}
 
-	public void setResource(IResource theResource) {
-		myResource = theResource;
-	}
-
-	public XhtmlDt getSummary() {
-		if (mySummary == null) {
-			mySummary = new XhtmlDt();
-		}
-		return mySummary;
-	}
-
-	public Tag addCategory() {
-		Tag retVal = new Tag();
-		getCategories().add(retVal);
-		return retVal;
-	}
-
-	public TagList getCategories() {
-		if (myCategories == null) {
-			myCategories = new TagList();
-		}
-		return myCategories;
-	}
-
 	public void setPublished(InstantDt thePublished) {
 		Validate.notNull(thePublished, "Published may not be null");
 		myPublished = thePublished;
 	}
 
+	public void setResource(IResource theResource) {
+		myResource = theResource;
+	}
+
 	public void setUpdated(InstantDt theUpdated) {
 		Validate.notNull(theUpdated, "Updated may not be null");
 		myUpdated = theUpdated;
-	}
-
-	public void addCategory(Tag theTag) {
-		getCategories().add(theTag);
 	}
 
 }

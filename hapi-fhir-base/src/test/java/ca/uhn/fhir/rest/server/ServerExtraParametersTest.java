@@ -80,6 +80,7 @@ public class ServerExtraParametersTest {
 			myServerBase = theServerBase;
 
 			Patient retVal = new Patient();
+			retVal.setId("1");
 			retVal.addName().addFamily(theFooParam.getValue());
 			return Collections.singletonList(retVal);
 		}

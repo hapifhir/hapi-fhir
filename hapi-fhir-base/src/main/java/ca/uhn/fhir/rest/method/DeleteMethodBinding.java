@@ -34,9 +34,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.Delete;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.VersionIdParam;
-import ca.uhn.fhir.rest.client.BaseClientInvocation;
-import ca.uhn.fhir.rest.client.DeleteClientInvocation;
-import ca.uhn.fhir.rest.client.PostClientInvocation;
+import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.method.SearchMethodBinding.RequestType;
 import ca.uhn.fhir.rest.param.IParameter;
 import ca.uhn.fhir.rest.param.ParameterUtil;
@@ -106,11 +104,11 @@ public class DeleteMethodBinding extends BaseOutcomeReturningMethodBinding {
 	}
 
 	@Override
-	protected BaseClientInvocation createClientInvocation(Object[] theArgs, IResource theResource) {
+	protected BaseHttpClientInvocation createClientInvocation(Object[] theArgs, IResource theResource) {
 		StringBuilder urlExtension = new StringBuilder();
 		urlExtension.append(getContext().getResourceDefinition(theResource).getName());
 
-		return new PostClientInvocation(getContext(), theResource, urlExtension.toString());
+		return new HttpPostClientInvocation(getContext(), theResource, urlExtension.toString());
 	}
 
 	@Override
@@ -119,14 +117,14 @@ public class DeleteMethodBinding extends BaseOutcomeReturningMethodBinding {
 	}
 
 	@Override
-	public BaseClientInvocation invokeClient(Object[] theArgs) throws InternalErrorException {
+	public BaseHttpClientInvocation invokeClient(Object[] theArgs) throws InternalErrorException {
 		IdDt idDt = (IdDt) theArgs[myIdParameterIndex];
 		if (idDt == null) {
 			throw new NullPointerException("ID can not be null");
 		}
 		String resourceName = getResourceName();
 		
-		DeleteClientInvocation retVal = createDeleteInvocation(resourceName, idDt);
+		HttpDeleteClientInvocation retVal = createDeleteInvocation(resourceName, idDt);
 
 		for (int idx = 0; idx < theArgs.length; idx++) {
 			IParameter nextParam = getParameters().get(idx);
@@ -136,9 +134,9 @@ public class DeleteMethodBinding extends BaseOutcomeReturningMethodBinding {
 		return retVal;
 	}
 
-	public static DeleteClientInvocation createDeleteInvocation(String theResourceName, IdDt idDt) {
+	public static HttpDeleteClientInvocation createDeleteInvocation(String theResourceName, IdDt idDt) {
 		String id = idDt.getValue();
-		DeleteClientInvocation retVal = new DeleteClientInvocation(theResourceName, id);
+		HttpDeleteClientInvocation retVal = new HttpDeleteClientInvocation(theResourceName, id);
 		return retVal;
 	}
 

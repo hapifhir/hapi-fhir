@@ -20,6 +20,9 @@ package ca.uhn.fhir.model.api;
  * #L%
  */
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.commons.lang3.Validate;
 
 import ca.uhn.fhir.model.api.annotation.Child;
@@ -27,11 +30,11 @@ import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.primitive.StringDt;
 
 @DatatypeDef(name="Extension") 
-public class ExtensionDt extends BaseElement {
+public class ExtensionDt extends BaseElement implements ICompositeDatatype {
 
 	private boolean myModifier;
 	
-	@Child(name="use", type=StringDt.class, order=0, min=1, max=1)	
+	@Child(name="url", type=StringDt.class, order=0, min=1, max=1)	
 	private StringDt myUrl;
 
 	@Child(name="value", type=IDatatype.class, order=1, min=0, max=1)	
@@ -68,7 +71,7 @@ public class ExtensionDt extends BaseElement {
 	}
 
 	public String getUrlAsString() {
-		return myUrl.getValue();
+		return getUrl().getValue();
 	}
 
 	/**
@@ -110,16 +113,23 @@ public class ExtensionDt extends BaseElement {
 		myModifier = theModifier;
 	}
 
-	public void setUrl(String theUrl) {
+	public ExtensionDt setUrl(String theUrl) {
 		myUrl = new StringDt(theUrl);
+		return this;
 	}
 
-	public void setUrl(StringDt theUrl) {
+	public ExtensionDt setUrl(StringDt theUrl) {
 		myUrl = theUrl;
+		return this;
 	}
 
 	public void setValue(IElement theValue) {
 		myValue = theValue;
+	}
+
+	@Override
+	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
+		return new ArrayList<T>();
 	}
 
 }

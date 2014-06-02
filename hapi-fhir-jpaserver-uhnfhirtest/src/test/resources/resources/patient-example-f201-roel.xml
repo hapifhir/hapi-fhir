@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Patient xmlns="http://hl7.org/fhir" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://hl7.org/fhir ../../schema/patient.xsd">
+    <identifier>
+        <!--The identifier for the person as this patient (fictive)-->
+        <use value="official"/>
+        <label value="BSN"/>
+        <system value="urn:oid:2.16.840.1.113883.2.4.6.3"/>
+        <value value="123456789"/>
+    </identifier>
+    <!--Demographics-->
+    <identifier>
+        <!--The identifier for this individual-->
+        <use value="official"/>
+        <label value="BSN"/>
+        <system value="urn:oid:2.16.840.1.113883.2.4.6.3"/>
+        <value value="123456789"/>
+    </identifier>
+    <name>
+        <!--The name associated with the individual (fictive)-->
+        <use value="official"/>
+        <text value="Roel"/>
+        <family value="Bor"/>
+        <given value="Roelof Olaf"/>
+        <prefix value="Drs."/>
+        <suffix value="PDEng."/>
+    </name>
+    <telecom>
+        <!--The mobile contact detail for the individual-->
+        <system value="phone"/>
+        <value value="+31612345678"/>
+        <use value="mobile"/>
+    </telecom>
+    <telecom>
+        <!--The home contact detail for the individual-->
+        <system value="phone"/>
+        <value value="+31201234567"/>
+        <use value="home"/>
+    </telecom>
+    <gender>
+        <!--The gender for administrative purposes-->
+        <coding>
+            <system value="http://snomed.info/sct"/>
+            <code value="248153007"/>
+            <display value="Male"/>
+        </coding>
+        <coding>
+            <system value="http://hl7.org/fhir/v3/AdministrativeGender"/>
+            <code value="M"/>
+            <display value="Male"/>
+        </coding>
+    </gender>
+    <birthDate value="1960-03-13"/>
+    <!--The date and time of birth for the individual -->
+    <deceasedBoolean value="false"/>
+    <!--Indicates that the individual is not deceased-->
+    <address><!--Home address for the individual-->
+            <use value="home"/>
+            <line value="Bos en Lommerplein 280"/>
+            <city value="Amsterdam"/>
+            <zip value="1055RW"/>
+            <country value="NLD"/><!--ISO 3166 3 letter code-->
+        </address>
+    <maritalStatus>
+        <!--Marital status of the person-->
+        <coding>
+            <system value="http://snomed.info/sct"/>
+            <code value="36629006"/>
+            <display value="Legally married"/>
+        </coding>
+        <coding>
+            <system value="http://hl7.org/fhir/v3/MaritalStatus"/>
+            <code value="M"/>
+        </coding>
+    </maritalStatus>
+    <multipleBirthBoolean value="false"/>
+    <photo>
+        <contentType value="image/jpeg" />
+        <url value="binary/@f006"/>
+    </photo>
+    <contact>
+        <!--Contact of the patient-->
+        <relationship>
+            <!--Indicates that the contact is the patient's wife-->
+            <coding>
+                <system value="http://snomed.info/sct"/>
+                <code value="127850001"/>
+                <display value="Wife"/>
+            </coding>
+            <coding>
+                <system value="http://hl7.org/fhir/patient-contact-relationship"/>
+                <code value="partner"/>
+            </coding>
+        </relationship>
+        <name>
+            <!--The name of the contact-->
+            <use value="usual"/>
+            <text value="Ariadne Bor-Jansma"/>
+        </name>
+        <telecom>
+            <!--The home contact detail-->
+            <system value="phone"/>
+            <value value="+31201234567"/>
+            <use value="home"/>
+        </telecom>
+    </contact>
+    <communication>
+            <coding>
+                <system value="urn:std:iso:639-1"/>
+                <code value="nl-NL"/>
+                <display value="Dutch"/>
+            </coding>
+    </communication>
+    <managingOrganization>
+        <reference value="Organization/f201"/>
+        <display value="AUMC"/>
+    </managingOrganization>
+
+    <!--Indicates that the patient is not part of a multiple birth -->
+    <active value="true"/>
+</Patient>

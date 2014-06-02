@@ -37,8 +37,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.client.BaseClientInvocation;
-import ca.uhn.fhir.rest.client.PutClientInvocation;
+import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.method.SearchMethodBinding.RequestType;
 import ca.uhn.fhir.rest.param.IParameter;
 import ca.uhn.fhir.rest.param.ParameterUtil;
@@ -79,6 +78,13 @@ public class UpdateMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 		 * we allow it in the PUT URL as well..
 		 */
 		String locationHeader = theRequest.getServletRequest().getHeader(Constants.HEADER_CONTENT_LOCATION);
+		IdDt id = new IdDt(locationHeader);
+		if (isNotBlank(id.getResourceType())) {
+			if (!getResourceName().equals(id.getResourceType())) {
+				throw new InvalidRequestException("Attempting to update '"+getResourceName()+ "' but content-location header specifies different resource type '"+id.getResourceType()+"' - header value: " + locationHeader);
+			}
+		}
+		
 		if (isNotBlank(locationHeader)) {
 			MethodOutcome mo = new MethodOutcome();
 			parseContentLocation(mo, getResourceName(), locationHeader);
@@ -97,7 +103,7 @@ public class UpdateMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 	}
 
 	@Override
-	protected BaseClientInvocation createClientInvocation(Object[] theArgs, IResource theResource) {
+	protected BaseHttpClientInvocation createClientInvocation(Object[] theArgs, IResource theResource) {
 		IdDt idDt = (IdDt) theArgs[myIdParameterIndex];
 		if (idDt == null) {
 			throw new NullPointerException("ID can not be null");
@@ -109,7 +115,7 @@ public class UpdateMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 		}
 		FhirContext context = getContext();
 
-		PutClientInvocation retVal = createUpdateInvocation(theResource, idDt, versionIdDt, context);
+		HttpPutClientInvocation retVal = createUpdateInvocation(theResource, idDt, versionIdDt, context);
 
 		for (int idx = 0; idx < theArgs.length; idx++) {
 			IParameter nextParam = getParameters().get(idx);
@@ -119,14 +125,14 @@ public class UpdateMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 		return retVal;
 	}
 
-	public static PutClientInvocation createUpdateInvocation(IResource theResource, IdDt idDt, IdDt versionIdDt, FhirContext context) {
+	public static HttpPutClientInvocation createUpdateInvocation(IResource theResource, IdDt idDt, IdDt versionIdDt, FhirContext context) {
 		String id = idDt.getValue();
 		String resourceName = context.getResourceDefinition(theResource).getName();
 		StringBuilder urlExtension = new StringBuilder();
 		urlExtension.append(resourceName);
 		urlExtension.append('/');
 		urlExtension.append(id);
-		PutClientInvocation retVal = new PutClientInvocation(context, theResource, urlExtension.toString());
+		HttpPutClientInvocation retVal = new HttpPutClientInvocation(context, theResource, urlExtension.toString());
 
 		if (versionIdDt != null) {
 			String versionId = versionIdDt.getValue();

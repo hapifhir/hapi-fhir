@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Patient xmlns="http://hl7.org/fhir" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://hl7.org/fhir ../../schema/patient.xsd">
+  <text>
+    <status value="generated"/>
+    <div xmlns="http://www.w3.org/1999/xhtml">
+      <table>
+        <tbody>
+          <tr>
+            <td>Name</td>
+            <td>Peter James <b>Chalmers</b> ("Jim")</td>
+          </tr>
+          <tr>
+            <td>Address</td>
+            <td>534 Erewhon, Pleasantville, Vic, 3999</td>
+          </tr>
+          <tr>
+            <td>Contacts</td>
+            <td>Home: unknown. Work: (03) 5555 6473</td>
+          </tr>
+          <tr>
+            <td>Id</td>
+            <td>MRN: 12345 (Acme Healthcare)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </text>
+
+  <!-- MRN assigned by ACME healthcare on 6-May 2001 -->
+  <identifier>
+    <use value="usual"/>
+    <label value="MRN"/>
+    <system value="urn:oid:1.2.36.146.595.217.0.1"/>
+    <value value="12345"/>
+    <period>
+      <start value="2001-05-06"/>
+    </period>
+    <assigner>
+      <display value="Acme Healthcare"/>
+    </assigner>
+  </identifier>
+
+  <!-- Peter James Chalmers, but called "Jim" -->
+  <name>
+    <use value="official"/>
+    <family value="Chalmers"/>
+    <given value="Peter"/>
+    <given value="James"/>
+  </name>
+  <name>
+    <use value="usual"/>
+    <given value="Jim"/>
+  </name>
+
+  <telecom>
+    <use value="home"/>
+    <!-- home communication details aren't known -->
+  </telecom>
+  <telecom>
+    <system value="phone"/>
+    <value value="(03) 5555 6473"/>
+    <use value="work"/>
+  </telecom>
+
+  <!-- use FHIR code system for male / female -->
+  <gender>
+    <coding>
+      <system value="http://hl7.org/fhir/v3/AdministrativeGender"/>
+      <code value="M"/>
+      <display value="Male"/>
+    </coding>
+  </gender>
+  <birthDate value="1974-12-25"/>
+  <deceasedBoolean value="false"/>
+
+  <address>
+    <use value="home"/>
+    <line value="534 Erewhon St"/>
+    <city value="PleasantVille"/>
+    <state value="Vic"/>
+    <zip value="3999"/>
+  </address>
+
+  <contact>
+    <relationship>
+      <coding>
+        <system value="http://hl7.org/fhir/patient-contact-relationship"/>
+        <code value="partner"/>
+      </coding>
+    </relationship>
+
+    <name>
+      <family value="du">
+        <!-- the "du" part is a family name prefix (VV in iso 21090) -->
+        <extension url="http://hl7.org/fhir/Profile/iso-21090#qualifier">
+          <valueCode value="VV"/>
+        </extension>
+      </family>
+      <family value="Marché"/>
+      <given value="Bénédicte"/>
+    </name>
+
+    <telecom>
+      <system value="phone"/>
+      <value value="+33 (237) 998327"/>
+    </telecom>
+  </contact>
+
+  <managingOrganization>
+    <reference value="Organization/1"/>
+  </managingOrganization>
+
+  <active value="true"/>
+
+</Patient>

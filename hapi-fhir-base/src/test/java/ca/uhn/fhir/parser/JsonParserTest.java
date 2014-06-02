@@ -1,14 +1,17 @@
 package ca.uhn.fhir.parser;
 
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.StringReader;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import net.sf.json.JSON;
@@ -17,12 +20,15 @@ import net.sf.json.JSONSerializer;
 import org.apache.commons.io.IOUtils;
 import org.hamcrest.core.IsNot;
 import org.hamcrest.core.StringContains;
+import org.hamcrest.text.StringContainsInOrder;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.api.ExtensionDt;
+import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Extension;
@@ -33,10 +39,12 @@ import ca.uhn.fhir.model.dstu.composite.NarrativeDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.resource.Conformance;
 import ca.uhn.fhir.model.dstu.resource.Conformance.RestResource;
+import ca.uhn.fhir.model.dstu.resource.Binary;
 import ca.uhn.fhir.model.dstu.resource.DiagnosticReport;
 import ca.uhn.fhir.model.dstu.resource.Observation;
 import ca.uhn.fhir.model.dstu.resource.Organization;
 import ca.uhn.fhir.model.dstu.resource.Patient;
+import ca.uhn.fhir.model.dstu.resource.Query;
 import ca.uhn.fhir.model.dstu.resource.Specimen;
 import ca.uhn.fhir.model.dstu.resource.ValueSet;
 import ca.uhn.fhir.model.dstu.resource.ValueSet.Define;
@@ -44,12 +52,15 @@ import ca.uhn.fhir.model.dstu.resource.ValueSet.DefineConcept;
 import ca.uhn.fhir.model.dstu.valueset.AddressUseEnum;
 import ca.uhn.fhir.model.dstu.valueset.NarrativeStatusEnum;
 import ca.uhn.fhir.model.primitive.DecimalDt;
+import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.XhtmlDt;
 import ca.uhn.fhir.narrative.INarrativeGenerator;
 
 public class JsonParserTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(JsonParserTest.class);
+	private static FhirContext ourCtx;
 
 	@Test
 	public void testEncodingNullExtension() {
@@ -60,6 +71,80 @@ public class JsonParserTest {
 		assertEquals("{\"resourceType\":\"Patient\",\"extension\":[{\"url\":\"http://foo#bar\"}]}", str);
 	}
 
+	@Test
+	public void testEncodeBinaryResource() {
+
+		Binary patient = new Binary();
+		patient.setContentType("foo");
+		patient.setContent(new byte[] {1,2,3,4});
+		
+		String val = ourCtx.newJsonParser().encodeResourceToString(patient);
+		assertEquals("{\"resourceType\":\"Binary\",\"contentType\":\"foo\",\"content\":\"AQIDBA==\"}",val);
+		
+	}
+
+	@Test
+	public void testParseQuery() {
+		String msg = "{\n" + 
+				"  \"resourceType\": \"Query\",\n" + 
+				"  \"text\": {\n" + 
+				"    \"status\": \"generated\",\n" + 
+				"    \"div\": \"<div>[Put rendering here]</div>\"\n" + 
+				"  },\n" + 
+				"  \"identifier\": \"urn:uuid:42b253f5-fa17-40d0-8da5-44aeb4230376\",\n" + 
+				"  \"parameter\": [\n" + 
+				"    {\n" + 
+				"      \"url\": \"http://hl7.org/fhir/query#_query\",\n" + 
+				"      \"valueString\": \"example\"\n" + 
+				"    }\n" + 
+				"  ]\n" + 
+				"}";
+		Query query = ourCtx.newJsonParser().parseResource(Query.class, msg);
+		
+		assertEquals("urn:uuid:42b253f5-fa17-40d0-8da5-44aeb4230376", query.getIdentifier().getValueAsString());
+		assertEquals("http://hl7.org/fhir/query#_query", query.getParameterFirstRep().getUrlAsString());
+		assertEquals("example", query.getParameterFirstRep().getValueAsPrimitive().getValueAsString());
+		
+	}
+	
+	@Test
+	public void testEncodeQuery() {
+		Query q = new Query();
+		ExtensionDt parameter = q.addParameter();
+		parameter.setUrl("http://hl7.org/fhir/query#_query").setValue(new StringDt("example"));
+		
+		
+		String val = new FhirContext().newJsonParser().encodeResourceToString(q);
+		ourLog.info(val);
+
+		//@formatter:off
+		String expected = 
+				"{" + 
+					"\"resourceType\":\"Query\"," + 
+					"\"parameter\":[" + 
+						"{" + 
+							"\"url\":\"http://hl7.org/fhir/query#_query\"," + 
+							"\"valueString\":\"example\"" + 
+						"}" + 
+					"]" + 
+				"}";
+		//@formatter:on
+
+		ourLog.info("Expect: {}", expected);
+		ourLog.info("Got   : {}", val);
+		assertEquals(expected, val);
+		
+	}
+	
+	@Test
+	public void testParseBinaryResource() {
+
+		Binary val = ourCtx.newJsonParser().parseResource(Binary.class, "{\"resourceType\":\"Binary\",\"contentType\":\"foo\",\"content\":\"AQIDBA==\"}");
+		assertEquals("foo", val.getContentType());
+		assertArrayEquals(new byte[] {1,2,3,4}, val.getContent());
+
+	}
+	
 	@Test
 	public void testTagList() {
 		
@@ -146,8 +231,7 @@ public class JsonParserTest {
 		assertEquals("term", b.getEntries().get(0).getCategories().get(0).getTerm());
 		assertEquals("label", b.getEntries().get(0).getCategories().get(0).getLabel());
 		assertEquals("scheme", b.getEntries().get(0).getCategories().get(0).getScheme());
-		assertNotNull(b.getEntries().get(0).getResource());
-		assertEquals(Patient.class, b.getEntries().get(0).getResource().getClass());
+		assertNull(b.getEntries().get(0).getResource());
 
 	}
 
@@ -156,11 +240,10 @@ public class JsonParserTest {
 	public void testEncodeContainedResources() throws IOException {
 
 		String msg = IOUtils.toString(XmlParser.class.getResourceAsStream("/contained-diagnosticreport.xml"));
-		FhirContext ctx = new FhirContext(DiagnosticReport.class);
-		IParser p = ctx.newXmlParser();
+		IParser p = ourCtx.newXmlParser();
 		DiagnosticReport res = p.parseResource(DiagnosticReport.class, msg);
 
-		String encoded = ctx.newJsonParser().setPrettyPrint(true).encodeResourceToString(res);
+		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(res);
 		ourLog.info(encoded);
 
 	}
@@ -216,7 +299,7 @@ public class JsonParserTest {
 
 		MyPatientWithOneDeclaredExtension patient = new MyPatientWithOneDeclaredExtension();
 		patient.addAddress().setUse(AddressUseEnum.HOME);
-		patient.setFoo(new ResourceReferenceDt(Organization.class, "123"));
+		patient.setFoo(new ResourceReferenceDt("Organization/123"));
 
 		String val = parser.encodeResourceToString(patient);
 		ourLog.info(val);
@@ -225,7 +308,7 @@ public class JsonParserTest {
 		MyPatientWithOneDeclaredExtension actual = parser.parseResource(MyPatientWithOneDeclaredExtension.class, val);
 		assertEquals(AddressUseEnum.HOME, patient.getAddressFirstRep().getUse().getValueAsEnum());
 		ResourceReferenceDt ref = actual.getFoo();
-		assertEquals("Organization/123", ref.getResourceUrl());
+		assertEquals("Organization/123", ref.getResourceId().getValue());
 
 	}
 	
@@ -252,7 +335,7 @@ public class JsonParserTest {
 
 		Patient patient = new Patient();
 		patient.addAddress().setUse(AddressUseEnum.HOME);
-		patient.addUndeclaredExtension(false, "urn:foo", new ResourceReferenceDt(Organization.class, "123"));
+		patient.addUndeclaredExtension(false, "urn:foo", new ResourceReferenceDt("Organization/123"));
 
 		String val = parser.encodeResourceToString(patient);
 		ourLog.info(val);
@@ -263,7 +346,7 @@ public class JsonParserTest {
 		List<ExtensionDt> ext = actual.getUndeclaredExtensionsByUrl("urn:foo");
 		assertEquals(1, ext.size());
 		ResourceReferenceDt ref = (ResourceReferenceDt) ext.get(0).getValue();
-		assertEquals("Organization/123", ref.getResourceUrl());
+		assertEquals("Organization/123", ref.getReference().getValue());
 
 	}
 
@@ -292,7 +375,7 @@ public class JsonParserTest {
 		String str = p.encodeResourceToString(patient);
 		assertThat(str, IsNot.not(StringContains.containsString("managingOrganization")));
 
-		patient.setManagingOrganization(new ResourceReferenceDt(Organization.class, "123"));
+		patient.setManagingOrganization(new ResourceReferenceDt("Organization/123"));
 		str = p.encodeResourceToString(patient);
 		assertThat(str, StringContains.containsString("\"managingOrganization\":{\"resource\":\"Organization/123\"}"));
 
@@ -444,11 +527,10 @@ public class JsonParserTest {
 	public void testParseBundle() throws DataFormatException, IOException {
 
 		String msg = IOUtils.toString(XmlParser.class.getResourceAsStream("/atom-document-large.json"));
-		FhirContext ctx = new FhirContext(Patient.class);
-		IParser p = ctx.newJsonParser();
+		IParser p = ourCtx.newJsonParser();
 		Bundle bundle = p.parseBundle(msg);
 
-		String encoded = ctx.newXmlParser().setPrettyPrint(true).encodeBundleToString(bundle);
+		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeBundleToString(bundle);
 		ourLog.info(encoded);
 
 		assertEquals("http://fhir.healthintersections.com.au/open/DiagnosticReport/_search?_format=application/json+fhir&search-id=46d5f0e7-9240-4d4f-9f51-f8ac975c65&search-sort=_id", bundle
@@ -472,7 +554,7 @@ public class JsonParserTest {
 	public void testParseFuroreMetadataWithExtraElements() throws IOException {
 		String msg = IOUtils.toString(JsonParserTest.class.getResourceAsStream("/furore-conformance.json"));
 
-		IParser p = new FhirContext(ValueSet.class).newJsonParser();
+		IParser p = ourCtx.newJsonParser();
 		Conformance conf = p.parseResource(Conformance.class, msg);
 		RestResource res = conf.getRestFirstRep().getResourceFirstRep();
 		assertEquals("_id", res.getSearchParam().get(1).getName().getValue());
@@ -482,12 +564,11 @@ public class JsonParserTest {
 	public void testParseWithContained() throws DataFormatException, IOException {
 
 		String msg = IOUtils.toString(XmlParser.class.getResourceAsStream("/diagnostic-report.json"));
-		FhirContext ctx = new FhirContext(Patient.class);
-		IParser p = ctx.newJsonParser();
+		IParser p = ourCtx.newJsonParser();
 		// ourLog.info("Reading in message: {}", msg);
 		DiagnosticReport res = p.parseResource(DiagnosticReport.class, msg);
 
-		String encoded = ctx.newXmlParser().setPrettyPrint(true).encodeResourceToString(res);
+		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(res);
 		ourLog.info(encoded);
 
 		ResourceReferenceDt reference = res.getResult().get(1);
@@ -496,14 +577,89 @@ public class JsonParserTest {
 		assertEquals("789-8", obs.getName().getCoding().get(0).getCode().getValue());
 	}
 
+	@BeforeClass
+	public static void beforeClass() {
+		ourCtx = new FhirContext();
+	}
+	
+	@Test
+	public void testParseBundleDeletedEntry() {
+		
+		//@formatter:off
+		String bundleString = 
+				"{" + 
+					"\"resourceType\":\"Bundle\"," + 
+					"\"totalResults\":\"1\"," + 
+					"\"entry\":[" +
+						"{" + 
+							"\"deleted\":\"2012-05-29T23:45:32+00:00\"," + 
+							"\"id\":\"http://fhir.furore.com/fhir/Patient/1\"," + 
+							"\"link\":[" +
+								"{" + 
+									"\"rel\":\"self\"," + 
+									"\"href\":\"http://fhir.furore.com/fhir/Patient/1/_history/2\"" + 
+								"}" +
+							"]" + 
+						"}" +
+					"]" + 
+				"}";
+		//@formatter:on
+		
+		Bundle bundle = ourCtx.newJsonParser().parseBundle(bundleString);
+		BundleEntry entry = bundle.getEntries().get(0);
+		assertEquals("2012-05-29T23:45:32+00:00", entry.getDeletedAt().getValueAsString());
+		assertEquals("http://fhir.furore.com/fhir/Patient/1/_history/2", entry.getLinkSelf().getValue());
+		assertEquals("1", entry.getResource().getId().getUnqualifiedId());
+		assertEquals("2", entry.getResource().getId().getUnqualifiedVersionId());
+		assertEquals(new InstantDt("2012-05-29T23:45:32+00:00"), entry.getResource().getResourceMetadata().get(ResourceMetadataKeyEnum.DELETED_AT));
+		
+		// Now encode
+		
+		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeBundleToString(bundle));
+		String encoded = ourCtx.newJsonParser().encodeBundleToString(bundle);
+		assertEquals(bundleString,encoded);
+		
+	}
+	
+	@Test
+	public void testEncodeBundle() {
+		Bundle b= new Bundle();
+		
+		Patient p1 = new Patient();
+		p1.addName().addFamily("Family1");
+		BundleEntry entry = b.addEntry();
+		entry.getId().setValue("1");
+		entry.setResource(p1);
+
+		Patient p2 = new Patient();
+		p2.addName().addFamily("Family2");
+		entry = b.addEntry();
+		entry.getId().setValue("2");
+		entry.setLinkAlternate(new StringDt("http://foo/bar"));
+		entry.setResource(p2);
+		
+		BundleEntry deletedEntry = b.addEntry();
+		deletedEntry.setId(new IdDt("Patient/3"));
+		InstantDt nowDt = InstantDt.withCurrentTime();
+		deletedEntry.setDeleted(nowDt);
+		
+		String bundleString = ourCtx.newJsonParser().setPrettyPrint(true).encodeBundleToString(b);
+		ourLog.info(bundleString);
+
+		List<String> strings = new ArrayList<String>();
+		strings.addAll(Arrays.asList("\"id\":\"1\""));
+		strings.addAll(Arrays.asList("\"id\":\"2\"", "\"rel\":\"alternate\"", "\"href\":\"http://foo/bar\""));
+		strings.addAll(Arrays.asList("\"deleted\":\""+nowDt.getValueAsString()+"\"", "\"id\":\"Patient/3\""));
+		assertThat(bundleString, StringContainsInOrder.stringContainsInOrder(strings));
+		
+	}
 	@Test
 	public void testSimpleBundleEncode() throws IOException {
 
-		FhirContext ctx = new FhirContext(Observation.class, Patient.class);
 		String xmlString = IOUtils.toString(JsonParser.class.getResourceAsStream("/atom-document-large.xml"), Charset.forName("UTF-8"));
-		Bundle obs = ctx.newXmlParser().parseBundle(xmlString);
+		Bundle obs = ourCtx.newXmlParser().parseBundle(xmlString);
 
-		String encoded = ctx.newJsonParser().encodeBundleToString(obs);
+		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeBundleToString(obs);
 		ourLog.info(encoded);
 
 	}
@@ -512,15 +668,14 @@ public class JsonParserTest {
 	public void testSimpleParse() throws DataFormatException, IOException {
 
 		String msg = IOUtils.toString(XmlParser.class.getResourceAsStream("/example-patient-general.json"));
-		FhirContext ctx = new FhirContext(Patient.class);
-		IParser p = ctx.newJsonParser();
+		IParser p = ourCtx.newJsonParser();
 		// ourLog.info("Reading in message: {}", msg);
 		Patient res = p.parseResource(Patient.class, msg);
 
 		assertEquals(2, res.getUndeclaredExtensions().size());
 		assertEquals(1, res.getUndeclaredModifierExtensions().size());
 
-		String encoded = ctx.newXmlParser().setPrettyPrint(true).encodeResourceToString(res);
+		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(res);
 		ourLog.info(encoded);
 
 	}
@@ -528,17 +683,16 @@ public class JsonParserTest {
 	@Test
 	public void testSimpleResourceEncode() throws IOException {
 
-		FhirContext ctx = new FhirContext(Observation.class);
 		String xmlString = IOUtils.toString(JsonParser.class.getResourceAsStream("/example-patient-general.xml"), Charset.forName("UTF-8"));
-		Patient obs = ctx.newXmlParser().parseResource(Patient.class, xmlString);
+		Patient obs = ourCtx.newXmlParser().parseResource(Patient.class, xmlString);
 
 		List<ExtensionDt> undeclaredExtensions = obs.getContact().get(0).getName().getFamily().get(0).getUndeclaredExtensions();
 		ExtensionDt undeclaredExtension = undeclaredExtensions.get(0);
 		assertEquals("http://hl7.org/fhir/Profile/iso-21090#qualifier", undeclaredExtension.getUrl().getValue());
 
-		ctx.newJsonParser().setPrettyPrint(true).encodeResourceToWriter(obs, new OutputStreamWriter(System.out));
+		ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToWriter(obs, new OutputStreamWriter(System.out));
 
-		IParser jsonParser = ctx.newJsonParser();
+		IParser jsonParser = ourCtx.newJsonParser();
 		String encoded = jsonParser.encodeResourceToString(obs);
 		ourLog.info(encoded);
 
@@ -556,9 +710,9 @@ public class JsonParserTest {
 	@Test
 	public void testSimpleResourceEncodeWithCustomType() throws IOException {
 
-		FhirContext ctx = new FhirContext(MyObservationWithExtensions.class);
+		FhirContext fhirCtx = new FhirContext(MyObservationWithExtensions.class);
 		String xmlString = IOUtils.toString(JsonParser.class.getResourceAsStream("/example-patient-general.xml"), Charset.forName("UTF-8"));
-		MyObservationWithExtensions obs = ctx.newXmlParser().parseResource(MyObservationWithExtensions.class, xmlString);
+		MyObservationWithExtensions obs = fhirCtx.newXmlParser().parseResource(MyObservationWithExtensions.class, xmlString);
 
 		assertEquals(0, obs.getAllUndeclaredExtensions().size());
 		assertEquals("aaaa", obs.getExtAtt().getContentType().getValue());
@@ -569,9 +723,9 @@ public class JsonParserTest {
 		ExtensionDt undeclaredExtension = undeclaredExtensions.get(0);
 		assertEquals("http://hl7.org/fhir/Profile/iso-21090#qualifier", undeclaredExtension.getUrl().getValue());
 
-		ctx.newJsonParser().setPrettyPrint(true).encodeResourceToWriter(obs, new OutputStreamWriter(System.out));
+		fhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToWriter(obs, new OutputStreamWriter(System.out));
 
-		IParser jsonParser = ctx.newJsonParser();
+		IParser jsonParser = fhirCtx.newJsonParser();
 		String encoded = jsonParser.encodeResourceToString(obs);
 		ourLog.info(encoded);
 

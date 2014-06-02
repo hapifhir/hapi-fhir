@@ -2,11 +2,12 @@ package ca.uhn.fhir.jpa.entity;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.Index;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "SPIDX_TOKEN", indexes = { @Index(name = "IDX_SP_STRING", columnList = "SP_SYSTEM,SP_VALUE") })
+@Table(name = "HFJ_SPIDX_TOKEN" /*, indexes = { @Index(name = "IDX_SP_TOKEN", columnList = "SP_SYSTEM,SP_VALUE") }*/)
+@org.hibernate.annotations.Table(appliesTo="HFJ_SPIDX_TOKEN", indexes= {
+		@org.hibernate.annotations.Index(name="IDX_SP_TOKEN", columnNames= {"SP_SYSTEM","SP_VALUE"})})
 public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchParam {
 
 	private static final long serialVersionUID = 1L;

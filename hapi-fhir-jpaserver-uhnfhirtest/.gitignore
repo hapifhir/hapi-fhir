@@ -1,0 +1,4 @@
+myUnitTestDB/
+target/
+/bin
+nohup.out

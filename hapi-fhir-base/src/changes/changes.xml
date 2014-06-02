@@ -18,6 +18,18 @@
 				Introduce StringParameter type which can be used as a RESTful operation search parameter
 				type. StringParameter allows ":exact" matches to be specified in clients, and handled in servers.
 			</action>
+			<action type="add">
+				Parsers (XML/JSON) now support deleted entries in bundles
+			</action>
+			<action type="add">
+				Transaction method now supported in servers
+			</action>
+			<action type="add">
+				Support for Binary resources added (in servers, clients, parsers, etc.)
+			</action>
+			<action type="fix">
+				Support for Query resources fixed (in parser)
+			</action>
         </release>			
 	</body>
 </document>

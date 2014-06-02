@@ -55,4 +55,6 @@ TD.testerNameCell {
 
 .syntaxhighlighter {
 	font-size: 0.85em !important;
+	min-height: 1.4em;
+	max-width: 800px;
 }

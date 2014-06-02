@@ -1,5 +1,7 @@
 package ca.uhn.fhir.tinder;
 
+import static org.apache.commons.lang.StringUtils.defaultString;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -8,8 +10,10 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.ParseException;
+import org.apache.maven.model.Resource;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -21,19 +25,9 @@ import org.apache.maven.project.MavenProject;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.dstu.resource.Conformance;
-import ca.uhn.fhir.model.dstu.resource.Conformance.Rest;
-import ca.uhn.fhir.model.dstu.resource.Conformance.RestResource;
-import ca.uhn.fhir.model.dstu.resource.Profile;
-import ca.uhn.fhir.model.dstu.valueset.RestfulConformanceModeEnum;
-import ca.uhn.fhir.rest.client.api.IBasicClient;
 import ca.uhn.fhir.tinder.model.BaseRootType;
-import ca.uhn.fhir.tinder.model.RestResourceTm;
-import ca.uhn.fhir.tinder.model.SearchParameter;
-import ca.uhn.fhir.tinder.parser.ProfileParser;
+import ca.uhn.fhir.tinder.model.Extension;
 import ca.uhn.fhir.tinder.parser.ResourceGeneratorUsingSpreadsheet;
-import edu.emory.mathcs.backport.java.util.Collections;
 
 @Mojo(name = "generate-jparest-server", defaultPhase = LifecyclePhase.GENERATE_SOURCES)
 public class TinderJpaRestServerMojo extends AbstractMojo {
@@ -42,6 +36,12 @@ public class TinderJpaRestServerMojo extends AbstractMojo {
 
 	@Parameter(required = true, defaultValue = "${project.build.directory}/generated-sources/tinder")
 	private File targetDirectory;
+
+	@Parameter(required = true, defaultValue = "${project.build.directory}/generated-resources/tinder")
+	private File targetResourceDirectory;
+
+	@Parameter(required = true, defaultValue = "hapi-jpaserver-springbeans.xml")
+	private String targetResourceSpringBeansFile;
 
 	@Parameter(required = true)
 	private String packageBase;
@@ -57,55 +57,78 @@ public class TinderJpaRestServerMojo extends AbstractMojo {
 
 		File directoryBase = new File(targetDirectory, packageBase.replace(".", File.separatorChar + ""));
 		directoryBase.mkdirs();
-		
+
 		ResourceGeneratorUsingSpreadsheet gen = new ResourceGeneratorUsingSpreadsheet();
 		gen.setBaseResourceNames(baseResourceNames);
 
-		
 		try {
 			gen.parse();
-			
+
 			gen.setFilenameSuffix("ResourceProvider");
 			gen.setTemplate("/vm/jpa_resource_provider.vm");
 			gen.writeAll(directoryBase, packageBase);
-			
-//			gen.setFilenameSuffix("ResourceTable");
-//			gen.setTemplate("/vm/jpa_resource_table.vm");
-//			gen.writeAll(directoryBase, packageBase);
-			
+
+			// gen.setFilenameSuffix("ResourceTable");
+			// gen.setTemplate("/vm/jpa_resource_table.vm");
+			// gen.writeAll(directoryBase, packageBase);
+
 		} catch (Exception e) {
-			throw new MojoFailureException("Failed to generate server",e);
+			throw new MojoFailureException("Failed to generate server", e);
 		}
 
 		myProject.addCompileSourceRoot(directoryBase.getAbsolutePath());
 
+		try {
+			VelocityContext ctx = new VelocityContext();
+			ctx.put("resources", gen.getResources());
+
+			VelocityEngine v = new VelocityEngine();
+			v.setProperty("resource.loader", "cp");
+			v.setProperty("cp.resource.loader.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
+			v.setProperty("runtime.references.strict", Boolean.TRUE);
+
+			InputStream templateIs = ResourceGeneratorUsingSpreadsheet.class.getResourceAsStream("/vm/jpa_spring_beans.vm");
+			InputStreamReader templateReader = new InputStreamReader(templateIs);
+
+			targetResourceDirectory.mkdirs();
+			FileWriter w = new FileWriter(new File(targetResourceDirectory, targetResourceSpringBeansFile));
+			v.evaluate(ctx, w, "", templateReader);
+
+			w.close();
+
+			Resource resource = new Resource();
+			resource.setDirectory(targetResourceDirectory.getAbsolutePath());
+			resource.addInclude(targetResourceSpringBeansFile);
+			myProject.addResource(resource);
+		} catch (Exception e) {
+			throw new MojoFailureException("Failed to generate server", e);
+		}
 	}
 
-
 	private void write() throws IOException {
-//		File directoryBase;
-//		directoryBase.mkdirs();
-//
-//		File file = new File(directoryBase, myClientClassSimpleName + ".java");
-//		FileWriter w = new FileWriter(file, false);
-//
-//		ourLog.info("Writing file: {}", file.getAbsolutePath());
-//
-//		VelocityContext ctx = new VelocityContext();
-//		ctx.put("packageBase", packageBase);
-//		ctx.put("className", myClientClassSimpleName);
-//		ctx.put("resources", myResources);
-//
-//		VelocityEngine v = new VelocityEngine();
-//		v.setProperty("resource.loader", "cp");
-//		v.setProperty("cp.resource.loader.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
-//		v.setProperty("runtime.references.strict", Boolean.TRUE);
-//
-//		InputStream templateIs = ResourceGeneratorUsingSpreadsheet.class.getResourceAsStream("/vm/client.vm");
-//		InputStreamReader templateReader = new InputStreamReader(templateIs);
-//		v.evaluate(ctx, w, "", templateReader);
-//
-//		w.close();
+		// File directoryBase;
+		// directoryBase.mkdirs();
+		//
+		// File file = new File(directoryBase, myClientClassSimpleName + ".java");
+		// FileWriter w = new FileWriter(file, false);
+		//
+		// ourLog.info("Writing file: {}", file.getAbsolutePath());
+		//
+		// VelocityContext ctx = new VelocityContext();
+		// ctx.put("packageBase", packageBase);
+		// ctx.put("className", myClientClassSimpleName);
+		// ctx.put("resources", myResources);
+		//
+		// VelocityEngine v = new VelocityEngine();
+		// v.setProperty("resource.loader", "cp");
+		// v.setProperty("cp.resource.loader.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
+		// v.setProperty("runtime.references.strict", Boolean.TRUE);
+		//
+		// InputStream templateIs = ResourceGeneratorUsingSpreadsheet.class.getResourceAsStream("/vm/client.vm");
+		// InputStreamReader templateReader = new InputStreamReader(templateIs);
+		// v.evaluate(ctx, w, "", templateReader);
+		//
+		// w.close();
 	}
 
 	public static void main(String[] args) throws ParseException, IOException, MojoFailureException, MojoExecutionException {
@@ -127,7 +150,7 @@ public class TinderJpaRestServerMojo extends AbstractMojo {
 
 		TinderJpaRestServerMojo mojo = new TinderJpaRestServerMojo();
 		mojo.packageBase = "ca.uhn.test";
-		mojo.baseResourceNames =java.util.Collections.singletonList("patient");
+		mojo.baseResourceNames = java.util.Collections.singletonList("patient");
 		mojo.targetDirectory = new File("target/gen");
 		mojo.execute();
 	}

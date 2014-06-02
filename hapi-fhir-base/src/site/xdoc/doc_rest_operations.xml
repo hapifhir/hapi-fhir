@@ -1090,8 +1090,30 @@
 		<section name="System Level - Transaction">
 
 			<p>
-				Not yet implemented - Get in touch if you would like to help!
+				The 
+				<a href="http://hl7.org/implement/standards/fhir/http.html#transaction">transaction</a>
+				action is among the most challenging parts of the FHIR specification to implement. It allows the
+				user to submit a bundle containing a number of resources to be created/updated/deleted as a single
+				atomic transaction.
 			</p>
+
+			<p>
+				HAPI provides a skeleton for implementing this action, although most of the effort
+				will depend on the underlying implementation. The following example shows
+				how to define a <i>transaction</i> method.
+			</p>
+			<macro name="snippet">
+				<param name="id" value="transaction" />
+				<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
+			</macro>
+			
+			<p>
+				Example URL to invoke this method:
+				<br />
+				<code>POST http://fhir.example.com/</code><br/>
+				<i>(note that the content of this POST will be a bundle)</i>
+			</p>
+			
 
 			<a name="system_search" />
 		</section>

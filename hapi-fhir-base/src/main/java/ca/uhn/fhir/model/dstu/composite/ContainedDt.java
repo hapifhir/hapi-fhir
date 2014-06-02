@@ -60,4 +60,9 @@ public class ContainedDt implements IDatatype {
 	public IdDt getId() {
 		throw new UnsupportedOperationException();
 	}
+
+	@Override
+	public void setId(String theId) {
+		throw new UnsupportedOperationException();
+	}
 }

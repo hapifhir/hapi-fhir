@@ -13,6 +13,12 @@
 	<context:annotation-config />
 	<context:mbean-server />
 
+	<bean id="myDaoConfig" class="ca.uhn.fhir.jpa.dao.DaoConfig">
+	</bean>
+
+	<bean id="mySystemDao" class="ca.uhn.fhir.jpa.dao.FhirSystemDao">
+	</bean>
+
 	<bean id="myPatientDao" class="ca.uhn.fhir.jpa.dao.FhirResourceDao">
 		<property name="resourceType" value="ca.uhn.fhir.model.dstu.resource.Patient"/>
 	</bean>

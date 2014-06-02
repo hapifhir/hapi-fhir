@@ -130,6 +130,27 @@ public class ResfulServerMethodTest {
 
 	}
 
+	
+	@Test
+	public void testCreateJson() throws Exception {
+
+		Patient patient = new Patient();
+		patient.addIdentifier().setValue("001");
+		patient.addIdentifier().setValue("002");
+
+		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
+		httpPost.setEntity(new StringEntity(new FhirContext().newJsonParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_JSON, "UTF-8")));
+
+		HttpResponse status = ourClient.execute(httpPost);
+
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		ourLog.info("Response was:\n{}", responseContent);
+
+		assertEquals(201, status.getStatusLine().getStatusCode());
+		assertEquals("http://localhost:" + ourPort + "/Patient/001/_history/002", status.getFirstHeader("Location").getValue());
+
+	}
+	
 	@Test
 	public void testCreateWithUnprocessableEntity() throws Exception {
 
@@ -214,15 +235,17 @@ public class ResfulServerMethodTest {
 		Bundle bundle = ourCtx.newXmlParser().parseBundle(responseContent);
 		BundleEntry entry0 = bundle.getEntries().get(0);
 		assertEquals("http://localhost:" + ourPort + "/Patient/1", entry0.getLinkSelf().getValue());
-		assertEquals("1", entry0.getId().getValue());
+		assertEquals("http://localhost:" + ourPort + "/Patient/1", entry0.getId().getValue());
 
 		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?withIncludes=include1&_include=include2&_include=include3&_format=json");
 		status = ourClient.execute(httpGet);
 		responseContent = IOUtils.toString(status.getEntity().getContent());
 		assertEquals(200, status.getStatusLine().getStatusCode());
+		ourLog.info(responseContent);
 		bundle = ourCtx.newJsonParser().parseBundle(responseContent);
 		entry0 = bundle.getEntries().get(0);
-		assertEquals("http://localhost:" + ourPort + "/Patient/1?_format=json", entry0.getLinkSelf().getValue());
+		// Should not include params such as _format=json
+		assertEquals("http://localhost:" + ourPort + "/Patient/1", entry0.getLinkSelf().getValue());
 
 	}
 
@@ -425,8 +448,8 @@ public class ResfulServerMethodTest {
 		// Older resource
 		{
 			BundleEntry olderEntry = bundle.getEntries().get(0);
-			assertEquals("222", olderEntry.getId().getValue());
-			assertThat(olderEntry.getLinkSelf().getValue(), StringEndsWith.endsWith("/Patient/222/_history/1"));
+			assertEquals("http://localhost:" + ourPort + "/Patient/222", olderEntry.getId().getValue());
+			assertEquals("http://localhost:" + ourPort + "/Patient/222/_history/1", olderEntry.getLinkSelf().getValue());
 			InstantDt pubExpected = new InstantDt(new Date(10000L));
 			InstantDt pubActualRes = (InstantDt) olderEntry.getResource().getResourceMetadata().get(ResourceMetadataKeyEnum.PUBLISHED);
 			InstantDt pubActualBundle = olderEntry.getPublished();
@@ -441,8 +464,8 @@ public class ResfulServerMethodTest {
 		// Newer resource
 		{
 			BundleEntry newerEntry = bundle.getEntries().get(1);
-			assertEquals("222", newerEntry.getId().getValue());
-			assertThat(newerEntry.getLinkSelf().getValue(), StringEndsWith.endsWith("/Patient/222/_history/2"));
+			assertEquals("http://localhost:" + ourPort + "/Patient/222", newerEntry.getId().getValue());
+			assertEquals("http://localhost:" + ourPort + "/Patient/222/_history/2", newerEntry.getLinkSelf().getValue());
 			InstantDt pubExpected = new InstantDt(new Date(10000L));
 			InstantDt pubActualRes = (InstantDt) newerEntry.getResource().getResourceMetadata().get(ResourceMetadataKeyEnum.PUBLISHED);
 			InstantDt pubActualBundle = newerEntry.getPublished();
@@ -474,7 +497,7 @@ public class ResfulServerMethodTest {
 		// Older resource
 		{
 			BundleEntry olderEntry = bundle.getEntries().get(0);
-			assertEquals("1", olderEntry.getId().getValue());
+			assertEquals("http://localhost:" + ourPort + "/Patient/1", olderEntry.getId().getValue());
 			assertThat(olderEntry.getLinkSelf().getValue(), StringEndsWith.endsWith("/Patient/1/_history/1"));
 			InstantDt pubExpected = new InstantDt(new Date(10000L));
 			InstantDt pubActualRes = (InstantDt) olderEntry.getResource().getResourceMetadata().get(ResourceMetadataKeyEnum.PUBLISHED);
@@ -490,7 +513,7 @@ public class ResfulServerMethodTest {
 		// Newer resource
 		{
 			BundleEntry newerEntry = bundle.getEntries().get(1);
-			assertEquals("1", newerEntry.getId().getValue());
+			assertEquals("http://localhost:" + ourPort + "/Patient/1", newerEntry.getId().getValue());
 			assertThat(newerEntry.getLinkSelf().getValue(), StringEndsWith.endsWith("/Patient/1/_history/2"));
 			InstantDt pubExpected = new InstantDt(new Date(10000L));
 			InstantDt pubActualRes = (InstantDt) newerEntry.getResource().getResourceMetadata().get(ResourceMetadataKeyEnum.PUBLISHED);
@@ -506,30 +529,7 @@ public class ResfulServerMethodTest {
 
 	}
 
-	@Test
-	public void testPrettyPrint() throws Exception {
-
-		// HttpPost httpPost = new HttpPost("http://localhost:" + ourPort +
-		// "/Patient/1");
-		// httpPost.setEntity(new StringEntity("test",
-		// ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
-
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		assertThat(responseContent, StringContains.containsString("<identifier><use"));
-
-		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1?_pretty=false");
-		status = ourClient.execute(httpGet);
-		responseContent = IOUtils.toString(status.getEntity().getContent());
-		assertThat(responseContent, StringContains.containsString("<identifier><use"));
-
-		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1?_pretty=true");
-		status = ourClient.execute(httpGet);
-		responseContent = IOUtils.toString(status.getEntity().getContent());
-		assertThat(responseContent, IsNot.not(StringContains.containsString("<identifier><use")));
-
-	}
+	
 
 	@Test
 	public void testReadOnTypeThatDoesntSupportRead() throws Exception {
@@ -1054,10 +1054,10 @@ public class ResfulServerMethodTest {
 		httpPut.setEntity(new StringEntity(new FhirContext().newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
 		CloseableHttpResponse results = ourClient.execute(httpPut);
+		assertEquals(400, results.getStatusLine().getStatusCode());
 		String responseContent = IOUtils.toString(results.getEntity().getContent());
 		ourLog.info("Response was:\n{}", responseContent);
 
-		assertEquals(400, results.getStatusLine().getStatusCode());
 	}
 
 	public void testUpdateWrongResourceType() throws Exception {
@@ -1213,8 +1213,15 @@ public class ResfulServerMethodTest {
 		@Search()
 		public Collection<AdverseReaction> getAllResources() {
 			ArrayList<AdverseReaction> retVal = new ArrayList<AdverseReaction>();
-			retVal.add(new AdverseReaction());
-			retVal.add(new AdverseReaction());
+			
+			AdverseReaction ar1 = new AdverseReaction();
+			ar1.setId("1");
+			retVal.add(ar1);
+			
+			AdverseReaction ar2 = new AdverseReaction();
+			ar2.setId("2");
+			retVal.add(ar2);
+
 			return retVal;
 		}
 
@@ -1509,8 +1516,11 @@ public class ResfulServerMethodTest {
 
 		@Read()
 		public Patient getResourceById(@IdParam IdDt theId, @VersionIdParam IdDt theVersionId) {
-			Patient retVal = getIdToPatient().get(theId.getValue());
-			retVal.getName().get(0).setText(theVersionId.getValue());
+			Patient retVal = getIdToPatient().get(theId.getUnqualifiedId());
+			List<HumanNameDt> name = retVal.getName();
+			HumanNameDt nameDt = name.get(0);
+			String value = theVersionId.getValue();
+			nameDt.setText(value);
 			return retVal;
 		}
 

@@ -62,6 +62,9 @@ public class MethodOutcome {
 		return myOperationOutcome;
 	}
 
+	/**
+	 * @deprecated {@link MethodOutcome#getId()} should return the complete ID including version if it is available
+	 */
 	public IdDt getVersionId() {
 		return myVersionId;
 	}

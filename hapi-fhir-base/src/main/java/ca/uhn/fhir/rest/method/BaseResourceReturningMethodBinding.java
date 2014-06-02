@@ -20,7 +20,7 @@ package ca.uhn.fhir.rest.method;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -35,8 +35,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.utils.DateUtils;
 
@@ -50,8 +52,7 @@ import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.Tag;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
-import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
+import ca.uhn.fhir.model.dstu.resource.Binary;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.parser.IParser;
@@ -187,7 +188,7 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 	public void invokeServer(RestfulServer theServer, Request theRequest, HttpServletResponse theResponse) throws BaseServerResponseException, IOException {
 
 		// Pretty print
-		boolean prettyPrint = prettyPrintResponse(theRequest);
+		boolean prettyPrint = RestfulServer.prettyPrintResponse(theRequest);
 
 		// Narrative mode
 		Map<String, String[]> requestParams = theRequest.getParameters();
@@ -201,7 +202,7 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 		}
 
 		// Determine response encoding
-		EncodingEnum responseEncoding = determineResponseEncoding(theRequest);
+		EncodingEnum responseEncoding = RestfulServer.determineResponseEncoding(theRequest);
 
 		// Is this request coming from a browser
 		String uaHeader = theRequest.getServletRequest().getHeader("user-agent");
@@ -210,12 +211,14 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 			requestIsBrowser = true;
 		}
 
+		Object requestObject = parseRequestObject(theRequest);
+
 		// Method params
 		Object[] params = new Object[getParameters().size()];
 		for (int i = 0; i < getParameters().size(); i++) {
 			IParameter param = getParameters().get(i);
 			if (param != null) {
-				params[i] = param.translateQueryParametersIntoServerArgument(theRequest, null);
+				params[i] = param.translateQueryParametersIntoServerArgument(theRequest, requestObject);
 			}
 		}
 
@@ -233,56 +236,6 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 			streamResponseAsResource(theServer, theResponse, result.get(0), responseEncoding, prettyPrint, requestIsBrowser, narrativeMode);
 			break;
 		}
-	}
-
-	protected static IdDt getIdFromMetadataOrNullIfNone(Map<ResourceMetadataKeyEnum, Object> theResourceMetadata, ResourceMetadataKeyEnum theKey) {
-		Object retValObj = theResourceMetadata.get(theKey);
-		if (retValObj == null) {
-			return null;
-		} else if (retValObj instanceof String) {
-			if (isNotBlank((String) retValObj)) {
-				return new IdDt((String) retValObj);
-			} else {
-				return null;
-			}
-		} else if (retValObj instanceof IdDt) {
-			if (((IdDt) retValObj).isEmpty()) {
-				return null;
-			} else {
-				return (IdDt) retValObj;
-			}
-		}
-		throw new InternalErrorException("Found an object of type '" + retValObj.getClass().getCanonicalName() + "' in resource metadata for key " + theKey.name() + " - Expected " + IdDt.class.getCanonicalName());
-	}
-
-	private InstantDt getInstantFromMetadataOrNullIfNone(Map<ResourceMetadataKeyEnum, Object> theResourceMetadata, ResourceMetadataKeyEnum theKey) {
-		Object retValObj = theResourceMetadata.get(theKey);
-		if (retValObj == null) {
-			return null;
-		} else if (retValObj instanceof Date) {
-			return new InstantDt((Date) retValObj);
-		} else if (retValObj instanceof InstantDt) {
-			if (((InstantDt) retValObj).isEmpty()) {
-				return null;
-			} else {
-				return (InstantDt) retValObj;
-			}
-		}
-		throw new InternalErrorException("Found an object of type '" + retValObj.getClass().getCanonicalName() + "' in resource metadata for key " + theKey.name() + " - Expected " + InstantDt.class.getCanonicalName());
-	}
-
-	private TagList getTagListFromMetadataOrNullIfNone(Map<ResourceMetadataKeyEnum, Object> theResourceMetadata, ResourceMetadataKeyEnum theKey) {
-		Object retValObj = theResourceMetadata.get(theKey);
-		if (retValObj == null) {
-			return null;
-		} else if (retValObj instanceof TagList) {
-			if (((TagList) retValObj).isEmpty()) {
-				return null;
-			} else {
-				return (TagList) retValObj;
-			}
-		}
-		throw new InternalErrorException("Found an object of type '" + retValObj.getClass().getCanonicalName() + "' in resource metadata for key " + theKey.name() + " - Expected " + TagList.class.getCanonicalName());
 	}
 
 	private IParser getNewParser(EncodingEnum theResponseEncoding, boolean thePrettyPrint, NarrativeModeEnum theNarrativeMode) {
@@ -303,6 +256,12 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 			NarrativeModeEnum theNarrativeMode) throws IOException {
 		assert !theServerBase.endsWith("/");
 
+		for (IResource next : theResult) {
+			if (next.getId() == null || next.getId().isEmpty()) {
+				throw new InternalErrorException("Server method returned resource of type[" + next.getClass().getSimpleName() + "] with no ID specified (IResource#setId(IdDt) must be called)");
+			}
+		}
+		
 		theHttpResponse.setStatus(200);
 
 		if (theRequestIsBrowser && theServer.isUseBrowserFriendlyContentTypes()) {
@@ -317,98 +276,7 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 
 		theServer.addHeadersToResponse(theHttpResponse);
 
-		Bundle bundle = new Bundle();
-		bundle.getAuthorName().setValue(getClass().getCanonicalName());
-		bundle.getBundleId().setValue(UUID.randomUUID().toString());
-		bundle.getPublished().setToCurrentTimeInLocalTimeZone();
-		bundle.getLinkBase().setValue(theServerBase);
-		bundle.getLinkSelf().setValue(theCompleteUrl);
-
-		for (IResource next : theResult) {
-			BundleEntry entry = new BundleEntry();
-			bundle.getEntries().add(entry);
-
-			entry.setResource(next);
-			TagList list = (TagList) next.getResourceMetadata().get(ResourceMetadataKeyEnum.TAG_LIST);
-			if (list != null) {
-				for (Tag tag : list) {
-					if (StringUtils.isNotBlank(tag.getTerm())) {
-						entry.addCategory().setTerm(tag.getTerm()).setLabel(tag.getLabel()).setScheme(tag.getScheme());
-					}
-				}
-			}
-
-			RuntimeResourceDefinition def = getContext().getResourceDefinition(next);
-
-			if (next.getId() != null && StringUtils.isNotBlank(next.getId().getValue())) {
-				entry.getId().setValue(next.getId().getValue());
-				entry.getTitle().setValue(def.getName() + " " + next.getId().getValue());
-
-				StringBuilder b = new StringBuilder();
-				b.append(theServerBase);
-				b.append('/');
-				b.append(def.getName());
-				b.append('/');
-				String resId = next.getId().getValue();
-				b.append(resId);
-
-				/*
-				 * If this is a history operation, we add the version of the
-				 * resource to the self link to indicate the version
-				 */
-				if (getResourceOperationType() == RestfulOperationTypeEnum.HISTORY_INSTANCE || getResourceOperationType() == RestfulOperationTypeEnum.HISTORY_TYPE || getSystemOperationType() == RestfulOperationSystemEnum.HISTORY_SYSTEM) {
-					IdDt versionId = getIdFromMetadataOrNullIfNone(next.getResourceMetadata(), ResourceMetadataKeyEnum.VERSION_ID);
-					if (versionId != null) {
-						b.append('/');
-						b.append(Constants.PARAM_HISTORY);
-						b.append('/');
-						b.append(versionId.getValue());
-					} else {
-						throw new InternalErrorException("Server did not provide a VERSION_ID in the resource metadata for resource with ID " + resId);
-					}
-				}
-
-				InstantDt published = getInstantFromMetadataOrNullIfNone(next.getResourceMetadata(), ResourceMetadataKeyEnum.PUBLISHED);
-				if (published == null) {
-					entry.getPublished().setToCurrentTimeInLocalTimeZone();
-				} else {
-					entry.setPublished(published);
-				}
-
-				InstantDt updated = getInstantFromMetadataOrNullIfNone(next.getResourceMetadata(), ResourceMetadataKeyEnum.UPDATED);
-				if (updated != null) {
-					entry.setUpdated(updated);
-				}
-
-				TagList tagList = getTagListFromMetadataOrNullIfNone(next.getResourceMetadata(), ResourceMetadataKeyEnum.TAG_LIST);
-				if (tagList != null) {
-					for (Tag nextTag : tagList) {
-						entry.addCategory(nextTag);
-					}
-				}
-
-				boolean haveQ = false;
-				if (thePrettyPrint) {
-					b.append('?').append(Constants.PARAM_PRETTY).append("=true");
-					haveQ = true;
-				}
-				if (theResponseEncoding == EncodingEnum.JSON) {
-					if (!haveQ) {
-						b.append('?');
-						haveQ = true;
-					} else {
-						b.append('&');
-					}
-					b.append(Constants.PARAM_FORMAT).append("=json");
-				}
-				if (theNarrativeMode != NarrativeModeEnum.NORMAL) {
-					b.append(Constants.PARAM_NARRATIVE).append("=").append(theNarrativeMode.name().toLowerCase());
-				}
-				entry.getLinkSelf().setValue(b.toString());
-			}
-		}
-
-		bundle.getTotalResults().setValue(theResult.size());
+		Bundle bundle = createBundleFromResourceList(getContext(), getClass().getCanonicalName(), theResult, theResponseEncoding, theServerBase, theCompleteUrl, thePrettyPrint, theNarrativeMode);
 
 		PrintWriter writer = theHttpResponse.getWriter();
 		try {
@@ -428,6 +296,24 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 	private void streamResponseAsResource(RestfulServer theServer, HttpServletResponse theHttpResponse, IResource theResource, EncodingEnum theResponseEncoding, boolean thePrettyPrint, boolean theRequestIsBrowser, NarrativeModeEnum theNarrativeMode) throws IOException {
 
 		theHttpResponse.setStatus(200);
+		
+		if (theResource instanceof Binary) {
+			Binary bin = (Binary) theResource;
+			if (isNotBlank(bin.getContentType())) {
+				theHttpResponse.setContentType(bin.getContentType());
+			}else {
+				theHttpResponse.setContentType(Constants.CT_OCTET_STREAM);				
+			}
+			if (bin.getContent()==null || bin.getContent().length==0) {
+				return;
+			}
+			theHttpResponse.setContentLength(bin.getContent().length);
+			ServletOutputStream oos = theHttpResponse.getOutputStream();
+			oos.write(bin.getContent());
+			oos.close();
+			return;
+		}
+		
 		if (theRequestIsBrowser && theServer.isUseBrowserFriendlyContentTypes()) {
 			theHttpResponse.setContentType(theResponseEncoding.getBrowserFriendlyBundleContentType());
 		} else if (theNarrativeMode == NarrativeModeEnum.ONLY) {
@@ -439,7 +325,7 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 
 		theServer.addHeadersToResponse(theHttpResponse);
 
-		InstantDt lastUpdated = getInstantFromMetadataOrNullIfNone(theResource.getResourceMetadata(), ResourceMetadataKeyEnum.UPDATED);
+		InstantDt lastUpdated = (InstantDt) ResourceMetadataKeyEnum.UPDATED.get(theResource);
 		if (lastUpdated != null) {
 			theHttpResponse.addHeader(Constants.HEADER_LAST_MODIFIED, lastUpdated.getValueAsString());
 		}
@@ -465,6 +351,31 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 		}
 
 	}
+
+	/**
+	 * Subclasses may override
+	 */
+	protected Object parseRequestObject(@SuppressWarnings("unused") Request theRequest) throws IOException {
+		return null;
+	}
+
+	public static Bundle createBundleFromResourceList(FhirContext theContext, String theAuthor, List<IResource> theResult, EncodingEnum theResponseEncoding, String theServerBase, String theCompleteUrl, boolean thePrettyPrint, NarrativeModeEnum theNarrativeMode) {
+		Bundle bundle = new Bundle();
+		bundle.getAuthorName().setValue(theAuthor);
+		bundle.getBundleId().setValue(UUID.randomUUID().toString());
+		bundle.getPublished().setToCurrentTimeInLocalTimeZone();
+		bundle.getLinkBase().setValue(theServerBase);
+		bundle.getLinkSelf().setValue(theCompleteUrl);
+
+		for (IResource next : theResult) {
+			bundle.addResource(next, theContext, theServerBase);
+		}
+
+		bundle.getTotalResults().setValue(theResult.size());
+		return bundle;
+	}
+
+
 
 	public enum MethodReturnTypeEnum {
 		BUNDLE, LIST_OF_RESOURCES, RESOURCE

@@ -8,11 +8,10 @@
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
-	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir-jpaserver-test</artifactId>
 	<packaging>jar</packaging>
 
-	<name>HAPI FHIR JPA Server - Tester</name>
+	<name>HAPI FHIR JPA Server - Test Project</name>
 
 	<dependencies>
 		<dependency>
@@ -24,6 +23,11 @@
 			<groupId>org.thymeleaf</groupId>
 			<artifactId>thymeleaf</artifactId>
 			<version>2.1.2.RELEASE</version>
+		</dependency>
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+			<version>1.1.1</version>
 		</dependency>
 
 		<dependency>

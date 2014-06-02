@@ -17,13 +17,19 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Version;
 
+import org.hibernate.annotations.Index;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.server.Constants;
 
 @Entity
-@Table(name = "RESOURCE", uniqueConstraints = {})
+@Table(name = "HFJ_RESOURCE", uniqueConstraints = {})
 @Inheritance(strategy = InheritanceType.JOINED)
+@org.hibernate.annotations.Table(appliesTo="HFJ_RESOURCE", indexes= {@Index(name="IDX_RES_DATE", columnNames= {"RES_UPDATED"})})
 public class ResourceTable extends BaseHasResource implements Serializable {
+	static final int RESTYPE_LEN = 30;
+
 	private static final long serialVersionUID = 1L;
 
 	@Column(name = "SP_HAS_LINKS")
@@ -64,7 +70,7 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 	@OneToMany(mappedBy = "mySourceResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
 	private Collection<ResourceLink> myResourceLinks;
 
-	@Column(name = "RES_TYPE", length = 30)
+	@Column(name = "RES_TYPE", length = RESTYPE_LEN)
 	private String myResourceType;
 
 	@OneToMany(mappedBy = "myResource", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
@@ -72,19 +78,19 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 
 	@Version()
 	@Column(name = "RES_VER")
-	private Long myVersion;
+	private long myVersion;
 
-	public void addTag(String theTerm, String theLabel, String theScheme) {
+	public boolean hasTag(String theTerm, String theLabel, String theScheme) {
 		for (ResourceTag next : getTags()) {
-			if (next.getTerm().equals(theTerm)) {
-				return;
+			if (next.getTag().getTerm().equals(theTerm)) {
+				return true;
 			}
 		}
-		getTags().add(new ResourceTag(this, theTerm, theLabel, theScheme));
+		return false;
 	}
 
 	public IdDt getIdDt() {
-		return new IdDt(myId);
+		return new IdDt(myResourceType + '/' + myId + '/' + Constants.PARAM_HISTORY + '/' + myVersion);
 	}
 
 	public Long getId() {
@@ -93,35 +99,35 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 
 	public Collection<ResourceIndexedSearchParamDate> getParamsDate() {
 		if (myParamsDate == null) {
-			myParamsDate = new ArrayList<>();
+			myParamsDate = new ArrayList<ResourceIndexedSearchParamDate>();
 		}
 		return myParamsDate;
 	}
 
 	public Collection<ResourceIndexedSearchParamNumber> getParamsNumber() {
 		if (myParamsNumber == null) {
-			myParamsNumber = new ArrayList<>();
+			myParamsNumber = new ArrayList<ResourceIndexedSearchParamNumber>();
 		}
 		return myParamsNumber;
 	}
 
 	public Collection<ResourceIndexedSearchParamString> getParamsString() {
 		if (myParamsString == null) {
-			myParamsString = new ArrayList<>();
+			myParamsString = new ArrayList<ResourceIndexedSearchParamString>();
 		}
 		return myParamsString;
 	}
 
 	public Collection<ResourceIndexedSearchParamToken> getParamsToken() {
 		if (myParamsToken == null) {
-			myParamsToken = new ArrayList<>();
+			myParamsToken = new ArrayList<ResourceIndexedSearchParamToken>();
 		}
 		return myParamsToken;
 	}
 
 	public Collection<ResourceLink> getResourceLinks() {
 		if (myResourceLinks == null) {
-			myResourceLinks = new ArrayList<>();
+			myResourceLinks = new ArrayList<ResourceLink>();
 		}
 		return myResourceLinks;
 	}
@@ -132,13 +138,13 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 
 	public Collection<ResourceTag> getTags() {
 		if (myTags == null) {
-			myTags = new ArrayList<>();
+			myTags = new ArrayList<ResourceTag>();
 		}
 		return myTags;
 	}
 
-	public IdDt getVersion() {
-		return new IdDt(myVersion);
+	public long getVersion() {
+		return myVersion;
 	}
 
 	public boolean isHasLinks() {
@@ -201,8 +207,8 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 		myResourceType = theResourceType;
 	}
 
-	public void setVersion(IdDt theVersion) {
-		myVersion = theVersion.asLong();
+	public void setVersion(long theVersion) {
+		myVersion = theVersion;
 	}
 
 	public ResourceHistoryTable toHistory(FhirContext theCtx) {
@@ -220,9 +226,16 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 		retVal.setResource(getResource());
 
 		for (ResourceTag next : getTags()) {
-			retVal.addTag(next.getTerm(), next.getLabel(), next.getScheme());
+			retVal.addTag(next);
 		}
 
 		return retVal;
+	}
+
+	public ResourceTag addTag(TagDefinition theTag) {
+		ResourceTag tag = new ResourceTag(this, theTag);
+		tag.setResourceType(getResourceType());
+		getTags().add(tag);
+		return tag;
 	}
 }

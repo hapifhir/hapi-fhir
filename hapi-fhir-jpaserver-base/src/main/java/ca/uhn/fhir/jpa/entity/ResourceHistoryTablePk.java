@@ -10,19 +10,30 @@ public class ResourceHistoryTablePk implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	@Column(name="PID")
+	@Column(name = "PID")
 	private Long myId;
-	
-	@Column(name="RES_TYPE", length=30, nullable=false)
+
+	@Column(name = "RES_TYPE", length = 30, nullable = false)
 	private String myResourceType;
 
-	@Column(name="VERSION")
+	@Column(name = "VERSION", nullable = false)
 	private Long myVersion;
+
+	public ResourceHistoryTablePk() {
+		// nothing
+	}
+
+	public ResourceHistoryTablePk(String theResourceType, Long theResourceId, Long theVersion) {
+		super();
+		myResourceType = theResourceType;
+		myId = theResourceId;
+		myVersion = theVersion;
+	}
 
 	public Long getId() {
 		return myId;
 	}
-	
+
 	public String getResourceType() {
 		return myResourceType;
 	}
@@ -43,5 +54,4 @@ public class ResourceHistoryTablePk implements Serializable {
 		myVersion = theVersion;
 	}
 
-	
 }

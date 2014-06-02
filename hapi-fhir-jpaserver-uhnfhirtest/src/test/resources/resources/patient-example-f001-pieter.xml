@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Patient xmlns="http://hl7.org/fhir" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://hl7.org/fhir ../../schema/patient.xsd">
+  <identifier>
+    <use value="usual"/>
+    <system value="urn:oid:2.16.840.1.113883.2.4.6.3"/>
+    <!-- BSN identification system -->
+    <value value="738472983"/>
+  </identifier>
+  <identifier>
+    <use value="usual"/>
+    <system value="urn:oid:2.16.840.1.113883.2.4.6.3"/>
+    <!-- BSN identification system -->
+  </identifier>
+  <name>
+    <use value="usual"/>
+    <family value="van de Heuvel"/>
+    <given value="Pieter"/>
+    <suffix value="MSc"/>
+  </name>
+  <telecom>
+    <system value="phone"/>
+    <value value="0648352638"/>
+    <use value="mobile"/>
+  </telecom>
+  <telecom>
+    <system value="email"/>
+    <value value="p.heuvel@gmail.com"/>
+    <use value="home"/>
+  </telecom>
+  <gender>
+    <coding>
+      <system value="http://hl7.org/fhir/v3/AdministrativeGender"/>
+      <code value="M"/>
+      <display value="Male"/>
+    </coding>
+  </gender>
+  <birthDate value="1944-11-17"/>
+  <deceasedBoolean value="false"/>
+  <address>
+      <use value="home"/>
+      <line value="Van Egmondkade 23"/>
+      <city value="Amsterdam"/>
+      <zip value="1024 RJ"/>
+      <country value="NLD"/> <!-- ISO 3166 Codes (Countries) -->
+    </address>
+  <maritalStatus>
+    <coding>
+      <system value="http://hl7.org/fhir/v3/MaritalStatus"/>
+      <code value="M"/>
+      <display value="Married"/>
+    </coding>
+    <text value="Getrouwd"/>
+  </maritalStatus>
+  <multipleBirthBoolean value="true"/>
+  <contact>
+    <relationship>
+      <coding>
+        <system value="http://hl7.org/fhir/patient-contact-relationship"/>
+        <code value="partner"/>
+      </coding>
+    </relationship>
+    <name>
+      <use value="usual"/>
+      <family value="Abels"/>
+      <given value="Sarah"/>
+    </name>
+    <telecom>
+      <system value="phone"/>
+      <value value="0690383372"/>
+      <use value="mobile"/>
+    </telecom>
+  </contact>
+  <communication>
+    <coding>
+      <system value="urn:ietf:bcp:47"/>
+      <!-- IETF language tag -->
+      <code value="nl"/>
+      <display value="Dutch"/>
+    </coding>
+    <text value="Nederlands"/>
+  </communication>
+  <managingOrganization>
+    <reference value="Organization/f001"/>
+    <display value="Burgers University Medical Centre"/>
+  </managingOrganization>
+
+  <active value="true"/>
+</Patient>

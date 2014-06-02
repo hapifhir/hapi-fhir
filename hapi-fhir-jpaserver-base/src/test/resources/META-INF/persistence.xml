@@ -17,6 +17,7 @@
 		<class>ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamToken</class>
 		<class>ca.uhn.fhir.jpa.entity.ResourceLink</class>
 		<class>ca.uhn.fhir.jpa.entity.ResourceTag</class>
+		<class>ca.uhn.fhir.jpa.entity.TagDefinition</class>
 		
 		<exclude-unlisted-classes>false</exclude-unlisted-classes>
 		<properties>
@@ -32,7 +33,9 @@
 			<property name="hibernate.cache.use_query_cache" value="false" />
 			<property name="hibernate.cache.use_second_level_cache" value="false" />
 			<property name="hibernate.cache.use_structured_entries" value="false" />
+			<!-- 
 			<property name="hibernate.ejb.naming_strategy" value="ca.uhn.fhir.jpa.util.CustomNamingStrategy" />
+			 -->
 			<!-- 
 			<property name="hibernate.cache.region.factory_class" value="org.hibernate.cache.ehcache.SingletonEhCacheRegionFactory" />
 			 -->

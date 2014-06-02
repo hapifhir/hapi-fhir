@@ -20,7 +20,9 @@ package ca.uhn.fhir.rest.client;
  * #L%
  */
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
@@ -33,6 +35,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -44,6 +47,7 @@ import org.apache.http.entity.ContentType;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.client.exceptions.FhirClientConnectionException;
 import ca.uhn.fhir.rest.method.IClientResponseHandler;
+import ca.uhn.fhir.rest.method.IClientResponseHandlerHandlesBinary;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
@@ -100,11 +104,11 @@ public abstract class BaseClient {
 		return myUrlBase;
 	}
 
-	<T> T invokeClient(IClientResponseHandler<T> binding, BaseClientInvocation clientInvocation) {
+	<T> T invokeClient(IClientResponseHandler<T> binding, BaseHttpClientInvocation clientInvocation) {
 		return invokeClient(binding, clientInvocation, false);
 	}
 
-	<T> T invokeClient(IClientResponseHandler<T> binding, BaseClientInvocation clientInvocation, boolean theLogRequestAndResponse) {
+	<T> T invokeClient(IClientResponseHandler<T> binding, BaseHttpClientInvocation clientInvocation, boolean theLogRequestAndResponse) {
 		// TODO: handle non 2xx status codes by throwing the correct exception,
 		// and ensure it's passed upwards
 		HttpRequestBase httpRequest;
@@ -124,19 +128,6 @@ public abstract class BaseClient {
 		}
 
 		try {
-
-			Reader reader = createReaderFromResponse(response);
-
-			if (ourLog.isTraceEnabled() || myKeepResponses) {
-				String responseString = IOUtils.toString(reader);
-				if (myKeepResponses) {
-					myLastResponse = response;
-					myLastResponseBody = responseString;
-				}
-				ourLog.trace("FHIR response:\n{}\n{}", response, responseString);
-				reader = new StringReader(responseString);
-			}
-
 			ContentType ct = ContentType.get(response.getEntity());
 			String mimeType = ct != null ? ct.getMimeType() : null;
 
@@ -155,7 +146,9 @@ public abstract class BaseClient {
 
 			if (response.getStatusLine().getStatusCode() < 200 || response.getStatusLine().getStatusCode() > 299) {
 				String body=null;
+				Reader reader=null;
 				try {
+					reader = createReaderFromResponse(response);
 					body = IOUtils.toString(reader);
 				} catch (Exception e) {
 					ourLog.debug("Failed to read input stream", e);
@@ -175,6 +168,54 @@ public abstract class BaseClient {
 				}
 
 				throw exception;
+			}
+			if (binding instanceof IClientResponseHandlerHandlesBinary) {
+				IClientResponseHandlerHandlesBinary<T> handlesBinary = (IClientResponseHandlerHandlesBinary<T>) binding;
+				if (handlesBinary.isBinary()) {
+					InputStream reader = response.getEntity().getContent();
+					try {
+					
+					if (ourLog.isTraceEnabled() || myKeepResponses || theLogRequestAndResponse) {
+						byte[] responseBytes = IOUtils.toByteArray(reader);
+						if (myKeepResponses) {
+							myLastResponse = response;
+							myLastResponseBody = null;
+						}
+						String message = "HTTP " + response.getStatusLine().getStatusCode()+" " +response.getStatusLine().getReasonPhrase();
+						if (theLogRequestAndResponse) {
+							ourLog.info("Client response: {} - {} bytes", message, responseBytes.length);
+						}else {
+							ourLog.trace("Client response: {} - {} bytes", message, responseBytes.length);
+						}
+						reader = new ByteArrayInputStream(responseBytes);
+					}
+
+						return handlesBinary.invokeClient(mimeType, reader, response.getStatusLine().getStatusCode(), headers);
+					} finally {
+						IOUtils.closeQuietly(reader);
+					}
+				}
+			}
+			
+			Reader reader = createReaderFromResponse(response);
+
+			if (ourLog.isTraceEnabled() || myKeepResponses || theLogRequestAndResponse) {
+				String responseString = IOUtils.toString(reader);
+				if (myKeepResponses) {
+					myLastResponse = response;
+					myLastResponseBody = responseString;
+				}
+				if (theLogRequestAndResponse) {
+					String message = "HTTP " + response.getStatusLine().getStatusCode()+" " +response.getStatusLine().getReasonPhrase();
+					if (StringUtils.isNotBlank(responseString)) {
+						ourLog.info("Client response: {}\n{}", message, responseString);
+					}else {
+						ourLog.info("Client response: {}", message, responseString);
+					}
+				}else {
+					ourLog.trace("FHIR response:\n{}\n{}", response, responseString);
+				}
+				reader = new StringReader(responseString);
 			}
 
 			try {

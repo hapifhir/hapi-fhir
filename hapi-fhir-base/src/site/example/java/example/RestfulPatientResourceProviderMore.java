@@ -32,6 +32,7 @@ import ca.uhn.fhir.model.dstu.valueset.IssueSeverityEnum;
 import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
 import ca.uhn.fhir.model.primitive.DecimalDt;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.annotation.AddTags;
@@ -50,6 +51,8 @@ import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.annotation.Since;
 import ca.uhn.fhir.rest.annotation.Sort;
+import ca.uhn.fhir.rest.annotation.Transaction;
+import ca.uhn.fhir.rest.annotation.TransactionParam;
 import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.annotation.Validate;
 import ca.uhn.fhir.rest.annotation.VersionIdParam;
@@ -586,7 +589,7 @@ public interface HistoryClient extends IBasicClient {
    * also be included in any of the methods above.
    */
   @History
-  Bundle getHistoryServerWithCriteria(@Since Date theDate, @Count int theCount);
+  Bundle getHistoryServerWithCriteria(@Since Date theDate, @Count Integer theCount);
 
 }
 //END SNIPPET: historyClient
@@ -610,8 +613,8 @@ public Patient readPatient(@IdParam IdDt theId) {
  
   // Create a TagList and place a complete list of the patient's tags inside
   TagList tags = new TagList();
-  tags.addTag("Dog", "Canine Patient", "http://animals"); // TODO: more realistic example
-  tags.addTag("Friendly", "Friendly", "http://personality"); // TODO: more realistic example
+  tags.addTag("http://animals", "Dog", "Canine Patient"); // TODO: more realistic example
+  tags.addTag("http://personality", "Friendly", "Friendly"); // TODO: more realistic example
   
   // The tags are then stored in the Patient resource instance
   retVal.getResourceMetadata().put(ResourceMetadataKeyEnum.TAG_LIST, tags);
@@ -653,8 +656,8 @@ newPatient.addName().addFamily("Jones").addGiven("Frank");
 
 // Populate tags
 TagList tags = new TagList();
-tags.addTag("Dog", "Canine Patient", "http://animals"); // TODO: more realistic example
-tags.addTag("Friendly", "Friendly", "http://personality"); // TODO: more realistic example
+tags.addTag("http://animals", "Dog", "Canine Patient"); // TODO: more realistic example
+tags.addTag("http://personality", "Friendly", "Friendly"); // TODO: more realistic example
 newPatient.getResourceMetadata().put(ResourceMetadataKeyEnum.TAG_LIST, tags);
 
 // ...invoke the create method on the client...
@@ -741,6 +744,42 @@ public class TagMethodProvider
 
 }
 //END SNIPPET: tagMethodProvider
+
+//START SNIPPET: transaction
+@Transaction
+public List<IResource> transaction(@TransactionParam List<IResource> theResources) {
+   // theResources will contain a complete bundle of all resources to persist
+   // in a single transaction
+   for (IResource next : theResources) {
+      InstantDt deleted = (InstantDt) next.getResourceMetadata().get(ResourceMetadataKeyEnum.DELETED_AT);
+      if (deleted != null && deleted.isEmpty() == false) {
+         // delete this resource
+      } else {
+         // create or update this resource
+      }
+   }
+
+   /*
+    * According to the specification, a bundle must be returned. This bundle will contain
+    * all of the created/updated/deleted resources, including their new/updated identities.
+    * 
+    * The returned list must be the exact same size as the list of resources
+    * passed in, and it is acceptable to return the same list instance that was
+    * passed in. 
+    */
+   List<IResource> retVal = theResources;
+   for (IResource next : theResources) {
+      /*
+       * Populate each returned resource with the new ID for that resource,
+       * including the new version if the server supports versioning.
+       */
+      IdDt newId = new IdDt("Patient", "1", "2"); 
+      next.setId(newId);
+   }
+   
+   return retVal;
+}
+//END SNIPPET: transaction
 
 
 }

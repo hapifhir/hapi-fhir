@@ -20,10 +20,60 @@ package ca.uhn.fhir.model.api;
  * #L%
  */
 
+import static org.apache.commons.lang3.StringUtils.*;
+
+import java.util.Date;
+import java.util.Map;
+
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 
 public enum ResourceMetadataKeyEnum {
+
+		
+	/**
+	 * If present and populated with a date/time (as an instance of {@link InstantDt}),
+	 * this value is an indication that the resource is in the deleted state. This key
+	 * is only used in a limited number of scenarios, such as POSTing transaction bundles
+	 * to a server, or returning resource history.  
+	 * <p>
+	 * Values for this key are of type <b>{@link InstantDt}</b>
+	 * </p>
+	 */
+	DELETED_AT {
+		@Override
+		public InstantDt get(IResource theResource) {
+			return getInstantFromMetadataOrNullIfNone(theResource.getResourceMetadata(), DELETED_AT);
+		}
+
+		@Override
+		public void put(IResource theResource, Object theObject) {
+			InstantDt obj = (InstantDt) theObject;
+			theResource.getResourceMetadata().put(DELETED_AT, obj);
+		}
+	},
+
+	/**
+	 * The value for this key represents a previous ID used to identify
+	 * this resource. This key is currently only used internally during
+	 * transaction method processing. 
+	 * <p>
+	 * Values for this key are of type <b>{@link IdDt}</b>
+	 * </p>
+	 */
+	PREVIOUS_ID {
+		@Override
+		public IdDt get(IResource theResource) {
+			return getIdFromMetadataOrNullIfNone(theResource.getResourceMetadata(), PREVIOUS_ID);
+		}
+
+		@Override
+		public void put(IResource theResource, Object theObject) {
+			IdDt obj = (IdDt) theObject;
+			theResource.getResourceMetadata().put(PREVIOUS_ID, obj);
+		}
+	},
 
 	/**
 	 * The value for this key is the bundle entry <b>Published</b> time. This is
@@ -40,8 +90,20 @@ public enum ResourceMetadataKeyEnum {
 	 * 
 	 * @see InstantDt
 	 */
-	PUBLISHED,
+	PUBLISHED {
+		@Override
+		public InstantDt get(IResource theResource) {
+			return getInstantFromMetadataOrNullIfNone(theResource.getResourceMetadata(), PUBLISHED);
+		}
 
+		@Override
+		public void put(IResource theResource, Object theObject) {
+			InstantDt obj = (InstantDt) theObject;
+			theResource.getResourceMetadata().put(PUBLISHED, obj);
+		}
+	},
+
+	
 	/**
 	 * The value for this key is the list of tags associated with this resource
 	 * <p>
@@ -50,8 +112,30 @@ public enum ResourceMetadataKeyEnum {
 	 * 
 	 * @see TagList
 	 */
-	TAG_LIST,
+	TAG_LIST {
+		@Override
+		public TagList get(IResource theResource) {
+			Object retValObj = theResource.getResourceMetadata().get(TAG_LIST);
+			if (retValObj == null) {
+				return null;
+			} else if (retValObj instanceof TagList) {
+				if (((TagList) retValObj).isEmpty()) {
+					return null;
+				} else {
+					return (TagList) retValObj;
+				}
+			}
+			throw new InternalErrorException("Found an object of type '" + retValObj.getClass().getCanonicalName() + "' in resource metadata for key " + TAG_LIST.name() + " - Expected " + TagList.class.getCanonicalName());
+		}
 
+		@Override
+		public void put(IResource theResource, Object theObject) {
+			TagList obj = (TagList) theObject;
+			theResource.getResourceMetadata().put(TAG_LIST, obj);
+		}
+	}, 
+	
+	
 	/**
 	 * The value for this key is the bundle entry <b>Updated</b> time. This is
 	 * defined by FHIR as "Last Updated for resource". This value is also used
@@ -63,14 +147,81 @@ public enum ResourceMetadataKeyEnum {
 	 * 
 	 * @see InstantDt
 	 */
-	UPDATED,
+	UPDATED {
+		@Override
+		public InstantDt get(IResource theResource) {
+			return getInstantFromMetadataOrNullIfNone(theResource.getResourceMetadata(), UPDATED);
+		}
 
+		@Override
+		public void put(IResource theResource, Object theObject) {
+			InstantDt obj = (InstantDt) theObject;
+			theResource.getResourceMetadata().put(UPDATED, obj);
+		}
+	}, 
+	
 	/**
 	 * The value for this key is the version ID of the resource object.
 	 * <p>
 	 * Values for this key are of type <b>{@link IdDt}</b>
 	 * </p>
+	 * 
+	 * @deprecated The {@link IResource#getId()} resource ID will now be populated with the version ID via the {@link IdDt#getUnqualifiedVersionId()} method
 	 */
-	VERSION_ID;
+	@Deprecated
+	VERSION_ID {
+		@Override
+		public IdDt get(IResource theResource) {
+			return getIdFromMetadataOrNullIfNone(theResource.getResourceMetadata(), VERSION_ID);
+		}
 
+		@Override
+		public void put(IResource theResource, Object theObject) {
+			IdDt obj = (IdDt) theObject;
+			theResource.getResourceMetadata().put(VERSION_ID, obj);
+		}
+	};
+
+	public abstract Object get(IResource theResource);
+
+	private static IdDt getIdFromMetadataOrNullIfNone(Map<ResourceMetadataKeyEnum, Object> theResourceMetadata, ResourceMetadataKeyEnum theKey) {
+		Object retValObj = theResourceMetadata.get(theKey);
+		if (retValObj == null) {
+			return null;
+		} else if (retValObj instanceof String) {
+			if (isNotBlank((String) retValObj)) {
+				return new IdDt((String) retValObj);
+			} else {
+				return null;
+			}
+		} else if (retValObj instanceof IdDt) {
+			if (((IdDt) retValObj).isEmpty()) {
+				return null;
+			} else {
+				return (IdDt) retValObj;
+			}
+		} else if (retValObj instanceof Number) {
+			return new IdDt(((Number)retValObj).toString());
+		}
+		throw new InternalErrorException("Found an object of type '" + retValObj.getClass().getCanonicalName() + "' in resource metadata for key " + theKey.name() + " - Expected " + IdDt.class.getCanonicalName());
+	}
+
+	private static InstantDt getInstantFromMetadataOrNullIfNone(Map<ResourceMetadataKeyEnum, Object> theResourceMetadata, ResourceMetadataKeyEnum theKey) {
+		Object retValObj = theResourceMetadata.get(theKey);
+		if (retValObj == null) {
+			return null;
+		} else if (retValObj instanceof Date) {
+			return new InstantDt((Date) retValObj);
+		} else if (retValObj instanceof InstantDt) {
+			if (((InstantDt) retValObj).isEmpty()) {
+				return null;
+			} else {
+				return (InstantDt) retValObj;
+			}
+		}
+		throw new InternalErrorException("Found an object of type '" + retValObj.getClass().getCanonicalName() + "' in resource metadata for key " + theKey.name() + " - Expected " + InstantDt.class.getCanonicalName());
+	}
+
+	public abstract void put(IResource theResource, Object theObject);
+	
 }

@@ -20,27 +20,34 @@ package ca.uhn.fhir.rest.method;
  * #L%
  */
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Method;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.dstu.resource.Binary;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.rest.client.GetClientInvocation;
 import ca.uhn.fhir.rest.method.SearchMethodBinding.RequestType;
 import ca.uhn.fhir.rest.param.IParameter;
 import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.Constants;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
-public class ReadMethodBinding extends BaseResourceReturningMethodBinding {
+public class ReadMethodBinding extends BaseResourceReturningMethodBinding implements IClientResponseHandlerHandlesBinary<Object> {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ReadMethodBinding.class);
 
 	private Integer myIdIndex;
@@ -110,7 +117,7 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding {
 	public List<IResource> invokeServer(Request theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException {
 		theMethodParams[myIdIndex] = theRequest.getId();
 		if (myVersionIdIndex != null) {
-			theMethodParams[myVersionIdIndex] = theRequest.getVersionId();
+			theMethodParams[myVersionIdIndex] = new IdDt(theRequest.getVersionId().getUnqualifiedVersionId());
 		}
 
 		Object response = invokeServerMethod(theMethodParams);
@@ -119,8 +126,8 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding {
 	}
 
 	@Override
-	public GetClientInvocation invokeClient(Object[] theArgs) {
-		GetClientInvocation retVal;
+	public HttpGetClientInvocation invokeClient(Object[] theArgs) {
+		HttpGetClientInvocation retVal;
 		IdDt id = ((IdDt) theArgs[myIdIndex]);
 		if (myVersionIdIndex == null) {
 			String resourceName = getResourceName();
@@ -139,12 +146,12 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding {
 		return retVal;
 	}
 
-	public static GetClientInvocation createVReadInvocation(IdDt theId, IdDt vid, String resourceName) {
-		return new GetClientInvocation(resourceName, theId.getValue(), Constants.URL_TOKEN_HISTORY, vid.getValue());
+	public static HttpGetClientInvocation createVReadInvocation(IdDt theId, IdDt vid, String resourceName) {
+		return new HttpGetClientInvocation(resourceName, theId.getUnqualifiedId(), Constants.URL_TOKEN_HISTORY, vid.getUnqualifiedId());
 	}
 
-	public static GetClientInvocation createReadInvocation(IdDt theId, String resourceName) {
-		return new GetClientInvocation(resourceName, theId.getValue());
+	public static HttpGetClientInvocation createReadInvocation(IdDt theId, String resourceName) {
+		return new HttpGetClientInvocation(resourceName, theId.getUnqualifiedId());
 	}
 
 	@Override
@@ -155,6 +162,28 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding {
 	@Override
 	public RestfulOperationSystemEnum getSystemOperationType() {
 		return null;
+	}
+
+	@Override
+	public boolean isBinary() {
+		return "Binary".equals(getResourceName());
+	}
+
+	@Override
+	public Object invokeClient(String theResponseMimeType, InputStream theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException, BaseServerResponseException {
+		byte[] contents = IOUtils.toByteArray(theResponseReader);
+		Binary resource = new Binary(theResponseMimeType, contents);
+		
+		switch (getMethodReturnType()) {
+		case BUNDLE:
+			return Bundle.withSingleResource(resource);
+		case LIST_OF_RESOURCES:
+			return Collections.singletonList(resource);
+		case RESOURCE:
+			return resource;
+		}
+		
+		throw new IllegalStateException(""+getMethodReturnType()); // should not happen
 	}
 
 }

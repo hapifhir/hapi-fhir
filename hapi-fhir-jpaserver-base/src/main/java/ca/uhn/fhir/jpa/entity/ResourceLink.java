@@ -14,13 +14,16 @@ import javax.persistence.Table;
 import org.apache.commons.lang3.Validate;
 
 @Entity
-@Table(name = "RES_LINK")
+@Table(name = "HFJ_RES_LINK"/*, indexes= {@Index(name="IDX_RL_TPATHRES", columnList= "SRC_PATH,TARGET_RESOURCE_ID")}*/)
+@org.hibernate.annotations.Table(appliesTo="HFJ_RES_LINK",indexes= {
+		@org.hibernate.annotations.Index(name="IDX_RL_TPATHRES", columnNames= {"SRC_PATH","TARGET_RESOURCE_ID"})})
 public class ResourceLink implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	@Id
+	@Column(name = "PID")
 	private Long myId;
 
 	@Column(name = "SRC_PATH", length = 100, nullable = false)

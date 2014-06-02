@@ -47,7 +47,7 @@ import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.client.BaseClientInvocation;
+import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.method.SearchMethodBinding.RequestType;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
@@ -112,11 +112,9 @@ public abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBindin
 
 	@Override
 	public void invokeServer(RestfulServer theServer, Request theRequest, HttpServletResponse theResponse) throws BaseServerResponseException, IOException {
-		EncodingEnum encoding = determineResponseEncoding(theRequest);
-		IParser parser = encoding.newParser(getContext());
 		IResource resource;
 		if (requestContainsResource()) {
-			resource = parser.parseResource(theRequest.getInputReader());
+			resource = parseIncomingServerResource(theRequest);
 			TagList tagList = new TagList();
 			for (Enumeration<String> enumeration = theRequest.getServletRequest().getHeaders(Constants.HEADER_CATEGORY); enumeration.hasMoreElements();) {
 				String nextTagComplete = enumeration.nextElement();
@@ -138,10 +136,12 @@ public abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBindin
 			response = (MethodOutcome) invokeServerMethod(params);
 		} catch (InternalErrorException e) {
 			ourLog.error("Internal error during method invocation", e);
+			EncodingEnum encoding = RestfulServer.determineResponseEncoding(theRequest);
 			streamOperationOutcome(e, theServer, encoding, theResponse, theRequest);
 			return;
 		} catch (BaseServerResponseException e) {
 			ourLog.info("Exception during method invocation: " + e.getMessage());
+			EncodingEnum encoding = RestfulServer.determineResponseEncoding(theRequest);
 			streamOperationOutcome(e, theServer, encoding, theResponse, theRequest);
 			return;
 		}
@@ -172,9 +172,11 @@ public abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBindin
 		theServer.addHeadersToResponse(theResponse);
 
 		if (response != null && response.getOperationOutcome() != null) {
+			EncodingEnum encoding = RestfulServer.determineResponseEncoding(theRequest);
 			theResponse.setContentType(encoding.getResourceContentType());
 			Writer writer = theResponse.getWriter();
-			parser.setPrettyPrint(prettyPrintResponse(theRequest));
+			IParser parser = encoding.newParser(getContext());
+			parser.setPrettyPrint(RestfulServer.prettyPrintResponse(theRequest));
 			try {
 				parser.encodeResourceToWriter(response.getOperationOutcome(), writer);
 			} finally {
@@ -187,6 +189,16 @@ public abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBindin
 		}
 
 		// getMethod().in
+	}
+
+	/**
+	 * @throws IOException  
+	 */
+	protected IResource parseIncomingServerResource(Request theRequest) throws IOException {
+		EncodingEnum encoding = RestfulServer.determineRequestEncoding(theRequest);
+		IParser parser = encoding.newParser(getContext());
+		IResource resource = parser.parseResource(theRequest.getServletRequest().getReader());
+		return resource;
 	}
 
 	/*
@@ -334,7 +346,7 @@ public abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBindin
 		return false;
 	}
 
-	protected abstract BaseClientInvocation createClientInvocation(Object[] theArgs, IResource resource);
+	protected abstract BaseHttpClientInvocation createClientInvocation(Object[] theArgs, IResource resource);
 
 	/**
 	 * For servers, this method will match only incoming requests that match the
@@ -361,7 +373,7 @@ public abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBindin
 		if (theE.getOperationOutcome() != null) {
 			theResponse.setContentType(theEncoding.getResourceContentType());
 			IParser parser = theEncoding.newParser(theServer.getFhirContext());
-			parser.setPrettyPrint(prettyPrintResponse(theRequest));
+			parser.setPrettyPrint(RestfulServer.prettyPrintResponse(theRequest));
 			Writer writer = theResponse.getWriter();
 			try {
 				parser.encodeResourceToWriter(theE.getOperationOutcome(), writer);
@@ -420,15 +432,20 @@ public abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBindin
 	}
 
 	protected static void parseContentLocation(MethodOutcome theOutcomeToPopulate, String theResourceName, String theLocationHeader) {
+		if (StringUtils.isBlank(theLocationHeader)) {
+			return;
+		}
+		
+		theOutcomeToPopulate.setId(new IdDt(theLocationHeader));
+
 		String resourceNamePart = "/" + theResourceName + "/";
 		int resourceIndex = theLocationHeader.lastIndexOf(resourceNamePart);
 		if (resourceIndex > -1) {
 			int idIndexStart = resourceIndex + resourceNamePart.length();
 			int idIndexEnd = theLocationHeader.indexOf('/', idIndexStart);
 			if (idIndexEnd == -1) {
-				theOutcomeToPopulate.setId(new IdDt(theLocationHeader.substring(idIndexStart)));
+				// nothing
 			} else {
-				theOutcomeToPopulate.setId(new IdDt(theLocationHeader.substring(idIndexStart, idIndexEnd)));
 				String versionIdPart = "/_history/";
 				int historyIdStart = theLocationHeader.indexOf(versionIdPart, idIndexEnd);
 				if (historyIdStart != -1) {

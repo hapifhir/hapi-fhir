@@ -2,11 +2,12 @@ package ca.uhn.fhir.jpa.entity;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.Index;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "SPIDX_STRING", indexes= {@Index(name="IDX_SP_STRING", columnList="SP_VALUE_NORMALIZED")})
+@Table(name = "HFJ_SPIDX_STRING"/*, indexes= {@Index(name="IDX_SP_STRING", columnList="SP_VALUE_NORMALIZED")}*/)
+@org.hibernate.annotations.Table(appliesTo="HFJ_SPIDX_STRING",indexes= {
+		@org.hibernate.annotations.Index(name="IDX_SP_STRING", columnNames= {"SP_VALUE_NORMALIZED"})})
 public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchParam {
 
 	private static final long serialVersionUID = 1L;
