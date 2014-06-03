@@ -30,6 +30,12 @@
 			<action type="fix">
 				Support for Query resources fixed (in parser)
 			</action>
+			<action type="fix">
+				Nested contained resources (e.g. encoding a resource with a contained resource that itself contains a resource)
+				now parse and encode correctly, meaning that all contained resources are placed in the "contained" element
+				of the root resource, and the parser looks in the root resource for all container levels when stitching
+				contained resources back together.
+			</action>
         </release>			
 	</body>
 </document>

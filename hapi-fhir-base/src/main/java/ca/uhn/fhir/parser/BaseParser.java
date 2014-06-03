@@ -33,6 +33,7 @@ import java.util.UUID;
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeDeclaredChildDefinition;
 import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeChildChoiceDefinition;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IElement;
@@ -44,6 +45,11 @@ import ca.uhn.fhir.model.primitive.IdDt;
 public abstract class BaseParser implements IParser {
 
 	private boolean mySuppressNarratives;
+	private FhirContext myContext;
+	
+	public BaseParser(FhirContext theContext) {
+		myContext = theContext;
+	}
 
 	@Override
 	public TagList parseTagList(String theString) {
@@ -116,7 +122,13 @@ public abstract class BaseParser implements IParser {
 	}
 
 	public void containResourcesForEncoding(IResource theResource) {
-		List<ResourceReferenceDt> allElements = theResource.getAllPopulatedChildElementsOfType(ResourceReferenceDt.class);
+		containResourcesForEncoding(theResource, theResource);
+	}
+
+	private long myNextContainedId = 1;
+	
+	private void containResourcesForEncoding(IResource theResource, IResource theTarget) {
+		List<ResourceReferenceDt> allElements = myContext.newTerser().getAllPopulatedChildElementsOfType(theResource, ResourceReferenceDt.class);
 
 		Set<String> allIds = new HashSet<String>();
 
@@ -124,15 +136,18 @@ public abstract class BaseParser implements IParser {
 			IResource resource = next.getResource();
 			if (resource != null) {
 				if (resource.getId().isEmpty()) {
-					resource.setId(new IdDt(UUID.randomUUID().toString()));
+					resource.setId(new IdDt(myNextContainedId++));
+//					resource.setId(new IdDt(UUID.randomUUID().toString()));
 				}
 
 				if (!allIds.contains(resource.getId().getValue())) {
-					theResource.getContained().getContainedResources().add(resource);
+					theTarget.getContained().getContainedResources().add(resource);
 					allIds.add(resource.getId().getValue());
 				}
 
 				next.setReference("#" + resource.getId().getValue());
+				
+				containResourcesForEncoding(resource, theTarget);
 			}
 		}
 

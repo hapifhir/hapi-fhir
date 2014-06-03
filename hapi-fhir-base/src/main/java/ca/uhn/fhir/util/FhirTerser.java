@@ -36,6 +36,7 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ISupportsUndeclaredExtensions;
 import ca.uhn.fhir.model.dstu.composite.ContainedDt;
 import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.parser.DataFormatException;
 
 public class FhirTerser {
 
@@ -147,7 +148,13 @@ public class FhirTerser {
 						if (nextValue == null) {
 							continue;
 						}
+						if (nextValue.isEmpty()) {
+							continue;
+						}
 						BaseRuntimeElementDefinition<?> childElementDef = nextChild.getChildElementDefinitionByDatatype(nextValue.getClass());
+						if (childElementDef == null) {
+							throw new DataFormatException("Found value of type[" + nextValue.getClass().getSimpleName() + "] which is not valid for field[" + nextChild.getElementName() + "] in " + childDef.getName());
+						}
 						getAllChildElementsOfType(nextValue, childElementDef, theType, theList);
 					}
 				}

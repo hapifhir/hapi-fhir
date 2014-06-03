@@ -1,6 +1,7 @@
 package ca.uhn.fhir.parser;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
@@ -83,6 +84,44 @@ public class JsonParserTest {
 		
 	}
 
+	@Test
+	public void testNestedContainedResources() {
+
+		Observation A = new Observation();
+		A.getName().setText("A");
+		
+		Observation B = new Observation();
+		B.getName().setText("B");
+		A.addRelated().setTarget(new ResourceReferenceDt(B));
+		
+		Observation C = new Observation();
+		C.getName().setText("C");
+		B.addRelated().setTarget(new ResourceReferenceDt(C));
+
+		String str = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(A);
+		ourLog.info(str);
+		
+		assertThat(str, stringContainsInOrder(Arrays.asList("\"text\":\"B\"", "\"text\":\"C\"", "\"text\":\"A\"")));
+		
+		// Only one (outer) contained block
+		int idx0 = str.indexOf("\"contained\"");
+		int idx1 = str.indexOf("\"contained\"",idx0+1);
+		
+		assertNotEquals(-1, idx0);
+		assertEquals(-1, idx1);
+		
+		Observation obs = ourCtx.newJsonParser().parseResource(Observation.class, str);
+		assertEquals("A",obs.getName().getText().getValue());
+		
+		Observation obsB = (Observation) obs.getRelatedFirstRep().getTarget().getResource();
+		assertEquals("B",obsB.getName().getText().getValue());
+
+		Observation obsC = (Observation) obsB.getRelatedFirstRep().getTarget().getResource();
+		assertEquals("C",obsC.getName().getText().getValue());
+
+		
+	}
+	
 	@Test
 	public void testParseQuery() {
 		String msg = "{\n" + 

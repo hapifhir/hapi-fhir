@@ -147,4 +147,9 @@ public class RuntimeChildUndeclaredExtensionDefinition extends BaseRuntimeChildD
 		return 0;
 	}
 
+	@Override
+	public String getElementName() {
+		return "extension";
+	}
+
 }

@@ -43,6 +43,15 @@ public class ${className}
 #########################
 ### Type-specific constructors
 #########################
+#if ( ${className} == "CodeableConceptDt" )
+	/**
+	 * Constructor which creates a CodeableConceptDt with one coding repetition, containing
+	 * the given system and code
+	 */
+	public CodeableConceptDt(String theSystem, String theCode) {
+		addCoding().setSystem(theSystem).setCode(theCode);
+	}
+#end
 #if ( ${className} == "CodingDt" )
 	/**
 	 * Creates a new Coding with the given system and code
