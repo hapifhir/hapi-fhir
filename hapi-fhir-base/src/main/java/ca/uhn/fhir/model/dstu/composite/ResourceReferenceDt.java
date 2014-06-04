@@ -201,6 +201,9 @@ public class ResourceReferenceDt extends BaseResourceReference implements ICompo
 
 	@Override
 	public IdDt getResourceId() {
+		if (myReference == null) {
+			return new IdDt();
+		}
 		return new IdDt(myReference.getValue());
 	}
 
