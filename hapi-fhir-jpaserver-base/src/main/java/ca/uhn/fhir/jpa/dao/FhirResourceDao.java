@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.dao;
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -36,7 +36,6 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.entity.BaseHasResource;
 import ca.uhn.fhir.jpa.entity.BaseTag;
 import ca.uhn.fhir.jpa.entity.ResourceHistoryTable;
-import ca.uhn.fhir.jpa.entity.ResourceHistoryTablePk;
 import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamNumber;
 import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamString;
@@ -493,7 +492,7 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 		ArrayList<T> retVal = new ArrayList<T>();
 
 		String resourceType = getContext().getResourceDefinition(myResourceType).getName();
-		TypedQuery<ResourceHistoryTable> q = myEntityManager.createQuery(ResourceHistoryTable.Q_GETALL, ResourceHistoryTable.class);
+		TypedQuery<ResourceHistoryTable> q = myEntityManager.createQuery("SELECT h FROM ResourceHistoryTable h WHERE h.myResourceId = :PID AND h.myResourceType = :RESTYPE ORDER BY h.myUpdated ASC", ResourceHistoryTable.class);
 		q.setParameter("PID", theId.asLong());
 		q.setParameter("RESTYPE", resourceType);
 
@@ -558,7 +557,11 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 
 		if (entity == null) {
 			if (theId.hasUnqualifiedVersionId()) {
-				entity = myEntityManager.find(ResourceHistoryTable.class, new ResourceHistoryTablePk(myResourceName, theId.asLong(), theId.getUnqualifiedVersionIdAsLong()));
+				TypedQuery<ResourceHistoryTable> q = myEntityManager.createQuery("SELECT t from ResourceHistoryTable t WHERE t.myResourceId = :RID AND t.myResourceType = :RTYP AND t.myResourceVersion = :RVER", ResourceHistoryTable.class);
+				q.setParameter("RID", theId.asLong());
+				q.setParameter("RTYP", myResourceName);
+				q.setParameter("RVER", theId.getUnqualifiedVersionIdAsLong());
+				entity = q.getSingleResult();
 			}
 			if (entity == null) {
 				throw new ResourceNotFoundException(theId);

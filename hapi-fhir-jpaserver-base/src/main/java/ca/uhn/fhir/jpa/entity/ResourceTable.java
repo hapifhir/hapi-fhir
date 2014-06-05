@@ -250,11 +250,9 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 	public ResourceHistoryTable toHistory(FhirContext theCtx) {
 		ResourceHistoryTable retVal = new ResourceHistoryTable();
 
-		ResourceHistoryTablePk pk = new ResourceHistoryTablePk();
-		pk.setId(myId);
-		pk.setResourceType(myResourceType);
-		pk.setVersion(myVersion);
-		retVal.setPk(pk);
+		retVal.setResourceId(myId);
+		retVal.setResourceType(myResourceType);
+		retVal.setVersion(myVersion);
 
 		retVal.setPublished(getPublished());
 		retVal.setUpdated(getUpdated());

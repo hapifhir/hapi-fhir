@@ -35,7 +35,6 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.entity.BaseHasResource;
 import ca.uhn.fhir.jpa.entity.BaseTag;
 import ca.uhn.fhir.jpa.entity.ResourceHistoryTable;
-import ca.uhn.fhir.jpa.entity.ResourceHistoryTablePk;
 import ca.uhn.fhir.jpa.entity.ResourceHistoryTag;
 import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamNumber;
@@ -127,9 +126,9 @@ public abstract class BaseFhirDao {
 			q.setMaxResults(myConfig.getHardSearchLimit());
 		}
 		for (Tuple next : q.getResultList()) {
-			long id = (Long) next.get(0);
-			Date updated = (Date) next.get(1);
-			tuples.add(new HistoryTuple(ResourceTable.class, updated, id));
+			long id = next.get(0, Long.class);
+			Date updated = next.get(1, Date.class);
+			tuples.add(new HistoryTuple(false, updated, id));
 		}
 	}
 
@@ -137,13 +136,13 @@ public abstract class BaseFhirDao {
 		Collection<HistoryTuple> tuples = Collections2.filter(theTuples, new com.google.common.base.Predicate<HistoryTuple>() {
 			@Override
 			public boolean apply(HistoryTuple theInput) {
-				return theInput.getTable().equals(ResourceTable.class);
+				return theInput.isHistory() == false;
 			}
 		});
 		Collection<Long> ids = Collections2.transform(tuples, new Function<HistoryTuple, Long>() {
 			@Override
 			public Long apply(HistoryTuple theInput) {
-				return (Long) theInput.getId();
+				return theInput.getId();
 			}
 		});
 		if (ids.isEmpty()) {
@@ -162,11 +161,11 @@ public abstract class BaseFhirDao {
 		}
 	}
 
-	private void searchHistoryHistory(String theResourceName, Long theId, Date theSince, Integer theLimit, List<HistoryTuple> tuples) {
+	private void searchHistoryHistory(String theResourceName, Long theResourceId, Date theSince, Integer theLimit, List<HistoryTuple> tuples) {
 		CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
 		CriteriaQuery<Tuple> cq = builder.createTupleQuery();
 		Root<?> from = cq.from(ResourceHistoryTable.class);
-		cq.multiselect(from.get("myPk").as(ResourceHistoryTablePk.class), from.get("myUpdated").as(Date.class));
+		cq.multiselect(from.get("myId").as(Long.class), from.get("myUpdated").as(Date.class));
 
 		List<Predicate> predicates = new ArrayList<Predicate>();
 		if (theSince != null) {
@@ -177,8 +176,8 @@ public abstract class BaseFhirDao {
 		if (theResourceName != null) {
 			predicates.add(builder.equal(from.get("myResourceType"), theResourceName));
 		}
-		if (theId != null) {
-			predicates.add(builder.equal(from.get("myId"), theId));
+		if (theResourceId != null) {
+			predicates.add(builder.equal(from.get("myResourceId"), theResourceId));
 		}
 
 		cq.where(builder.and(predicates.toArray(new Predicate[0])));
@@ -191,9 +190,9 @@ public abstract class BaseFhirDao {
 			q.setMaxResults(myConfig.getHardSearchLimit());
 		}
 		for (Tuple next : q.getResultList()) {
-			ResourceHistoryTablePk id = (ResourceHistoryTablePk) next.get(0);
+			Long id = next.get(0, Long.class);
 			Date updated = (Date) next.get(1);
-			tuples.add(new HistoryTuple(ResourceHistoryTable.class, updated, id));
+			tuples.add(new HistoryTuple(true, updated, id));
 		}
 	}
 
@@ -203,13 +202,13 @@ public abstract class BaseFhirDao {
 		Collection<HistoryTuple> tuples = Collections2.filter(theTuples, new com.google.common.base.Predicate<HistoryTuple>() {
 			@Override
 			public boolean apply(HistoryTuple theInput) {
-				return theInput.getTable().equals(ResourceHistoryTable.class);
+				return theInput.isHistory()==true;
 			}
 		});
-		Collection<ResourceHistoryTablePk> ids = Collections2.transform(tuples, new Function<HistoryTuple, ResourceHistoryTablePk>() {
+		Collection<Long> ids = Collections2.transform(tuples, new Function<HistoryTuple, Long>() {
 			@Override
-			public ResourceHistoryTablePk apply(HistoryTuple theInput) {
-				return (ResourceHistoryTablePk) theInput.getId();
+			public Long apply(HistoryTuple theInput) {
+				return (Long) theInput.getId();
 			}
 		});
 		if (ids.isEmpty()) {
@@ -221,7 +220,7 @@ public abstract class BaseFhirDao {
 		CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
 		CriteriaQuery<ResourceHistoryTable> cq = builder.createQuery(ResourceHistoryTable.class);
 		Root<ResourceHistoryTable> from = cq.from(ResourceHistoryTable.class);
-		cq.where(from.get("myPk").in(ids));
+		cq.where(from.get("myId").in(ids));
 
 		cq.orderBy(builder.desc(from.get("myUpdated")));
 		TypedQuery<ResourceHistoryTable> q = myEntityManager.createQuery(cq);
