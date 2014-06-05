@@ -24,8 +24,8 @@ public class IdDtTest {
 
 		Patient actual = parseAndEncode(patient);
 		ResourceReferenceDt ref = actual.getManagingOrganization();
-		assertEquals("Organization", ref.getResourceId().getResourceType());
-		assertEquals("123", ref.getResourceId().getUnqualifiedId());
+		assertEquals("Organization", ref.getReference().getResourceType());
+		assertEquals("123", ref.getReference().getUnqualifiedId());
 
 	}
 
@@ -38,9 +38,9 @@ public class IdDtTest {
 
 		Patient actual = parseAndEncode(patient);
 		ResourceReferenceDt ref = actual.getManagingOrganization();
-		assertEquals("Organization", ref.getResourceId().getResourceType());
-		assertEquals("123", ref.getResourceId().getUnqualifiedId());
-		assertEquals("999", ref.getResourceId().getUnqualifiedVersionId());
+		assertEquals("Organization", ref.getReference().getResourceType());
+		assertEquals("123", ref.getReference().getUnqualifiedId());
+		assertEquals("999", ref.getReference().getUnqualifiedVersionId());
 
 	}
 
@@ -53,9 +53,9 @@ public class IdDtTest {
 
 		Patient actual = parseAndEncode(patient);
 		ResourceReferenceDt ref = actual.getManagingOrganization();
-		assertEquals(null, ref.getResourceId().getResourceType());
-		assertEquals("123", ref.getResourceId().getUnqualifiedId());
-		assertEquals("999", ref.getResourceId().getUnqualifiedVersionId());
+		assertEquals(null, ref.getReference().getResourceType());
+		assertEquals("123", ref.getReference().getUnqualifiedId());
+		assertEquals("999", ref.getReference().getUnqualifiedVersionId());
 
 	}
 
@@ -69,8 +69,8 @@ public class IdDtTest {
 
 		Patient actual = parseAndEncode(patient);
 		ResourceReferenceDt ref = actual.getManagingOrganization();
-		assertEquals(null, ref.getResourceId().getResourceType());
-		assertEquals("123", ref.getResourceId().getUnqualifiedId());
+		assertEquals(null, ref.getReference().getResourceType());
+		assertEquals("123", ref.getReference().getUnqualifiedId());
 
 	}
 
@@ -83,8 +83,8 @@ public class IdDtTest {
 
 		Patient actual = parseAndEncode(patient);
 		ResourceReferenceDt ref = actual.getManagingOrganization();
-		assertEquals(null, ref.getResourceId().getResourceType());
-		assertEquals("123", ref.getResourceId().getUnqualifiedId());
+		assertEquals(null, ref.getReference().getResourceType());
+		assertEquals("123", ref.getReference().getUnqualifiedId());
 
 	}
 
@@ -97,8 +97,8 @@ public class IdDtTest {
 
 		Patient actual = parseAndEncode(patient);
 		ResourceReferenceDt ref = actual.getManagingOrganization();
-		assertEquals("Organization", ref.getResourceId().getResourceType());
-		assertEquals("123", ref.getResourceId().getUnqualifiedId());
+		assertEquals("Organization", ref.getReference().getResourceType());
+		assertEquals("123", ref.getReference().getUnqualifiedId());
 
 	}
 
@@ -111,8 +111,8 @@ public class IdDtTest {
 
 		Patient actual = parseAndEncode(patient);
 		ResourceReferenceDt ref = actual.getManagingOrganization();
-		assertEquals("Organization", ref.getResourceId().getResourceType());
-		assertEquals("123", ref.getResourceId().getUnqualifiedId());
+		assertEquals("Organization", ref.getReference().getResourceType());
+		assertEquals("123", ref.getReference().getUnqualifiedId());
 
 	}
 

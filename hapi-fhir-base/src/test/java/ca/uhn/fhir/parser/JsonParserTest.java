@@ -347,7 +347,7 @@ public class JsonParserTest {
 		MyPatientWithOneDeclaredExtension actual = parser.parseResource(MyPatientWithOneDeclaredExtension.class, val);
 		assertEquals(AddressUseEnum.HOME, patient.getAddressFirstRep().getUse().getValueAsEnum());
 		ResourceReferenceDt ref = actual.getFoo();
-		assertEquals("Organization/123", ref.getResourceId().getValue());
+		assertEquals("Organization/123", ref.getReference().getValue());
 
 	}
 	
@@ -400,7 +400,7 @@ public class JsonParserTest {
 		try {
 			p.encodeResourceToString(obs);
 		} catch (DataFormatException e) {
-			assertThat(e.getMessage(), StringContains.containsString("PeriodDt"));
+			assertThat(e.getMessage(), StringContains.containsString("DecimalDt"));
 		}
 	}
 	

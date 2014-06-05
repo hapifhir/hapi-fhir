@@ -135,6 +135,23 @@
 #end
 #if ( ${child.boundCode} && ${child.repeatable} )
 	/**
+	 * Add a value for <b>${child.elementName}</b> (${child.shortName}) using an enumerated type. This
+	 * is intended as a convenience method for situations where the FHIR defined ValueSets are mandatory
+	 * or contain the desirable codes. If you wish to use codes other than those which are built-in, 
+	 * you may also use the {@link ${hash}addType()} method.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * ${child.definition}
+     * </p> 
+	 */
+	public ${child.boundDatatype}<${child.bindingClass}> add${child.methodName}(${child.bindingClass} theValue) {
+		${child.boundDatatype}<${child.bindingClass}> retVal = new ${child.boundDatatype}<${child.bindingClass}>(${child.bindingClass}.VALUESET_BINDER, theValue);
+		get${child.methodName}().add(retVal);
+		return retVal;
+	}
+
+	/**
 	 * Add a value for <b>${child.elementName}</b> (${child.shortName})
 	 *
      * <p>
@@ -142,8 +159,10 @@
      * ${child.definition}
      * </p> 
 	 */
-	public void add${child.methodName}(${child.bindingClass} theValue) {
-		get${child.methodName}().add(new ${child.boundDatatype}<${child.bindingClass}>(${child.bindingClass}.VALUESET_BINDER, theValue));
+	public ${child.boundDatatype}<${child.bindingClass}> add${child.methodName}() {
+		${child.boundDatatype}<${child.bindingClass}> retVal = new ${child.boundDatatype}<${child.bindingClass}>(${child.bindingClass}.VALUESET_BINDER);
+		get${child.methodName}().add(retVal);
+		return retVal;
 	}
 
 	/**

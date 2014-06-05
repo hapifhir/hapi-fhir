@@ -420,7 +420,7 @@ public class XmlParserTest {
 		try {
 			p.encodeResourceToString(obs);
 		} catch (DataFormatException e) {
-			assertThat(e.getMessage(), StringContains.containsString("PeriodDt"));
+			assertThat(e.getMessage(), StringContains.containsString("DecimalDt"));
 		}
 	}
 

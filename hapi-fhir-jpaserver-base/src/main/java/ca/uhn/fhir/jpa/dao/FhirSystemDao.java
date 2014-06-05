@@ -91,11 +91,11 @@ public class FhirSystemDao extends BaseFhirDao implements IFhirSystemDao {
 		for (IResource nextResource : theResources) {
 			List<ResourceReferenceDt> allRefs = terser.getAllPopulatedChildElementsOfType(nextResource, ResourceReferenceDt.class);
 			for (ResourceReferenceDt nextRef : allRefs) {
-				IdDt nextId = nextRef.getResourceId();
+				IdDt nextId = nextRef.getReference();
 				if (idConversions.containsKey(nextId)) {
 					IdDt newId = idConversions.get(nextId);
 					ourLog.info(" * Replacing resource ref {} with {}", nextId, newId);
-					nextRef.setResourceId(newId);
+					nextRef.setReference(newId);
 				} else {
 					ourLog.info(" * Reference [{}] does not exist in bundle", nextId);
 				}

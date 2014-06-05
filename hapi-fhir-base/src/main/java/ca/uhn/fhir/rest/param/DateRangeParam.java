@@ -24,6 +24,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
+
 import ca.uhn.fhir.model.api.IQueryParameterAnd;
 import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
@@ -184,8 +186,12 @@ public class DateRangeParam implements IQueryParameterAnd {
 	 *            "2011-02-22" or "2011-02-22T13:12:00". Will be treated inclusively.
 	 */
 	public void setRangeFromDatesInclusive(Date theLowerBound, Date theUpperBound) {
-		myLowerBound = new QualifiedDateParam(QuantityCompararatorEnum.GREATERTHAN_OR_EQUALS, theLowerBound);
-		myUpperBound = new QualifiedDateParam(QuantityCompararatorEnum.LESSTHAN_OR_EQUALS, theUpperBound);
+		if (theLowerBound != null) {
+			myLowerBound = new QualifiedDateParam(QuantityCompararatorEnum.GREATERTHAN_OR_EQUALS, theLowerBound);
+		}
+		if (theUpperBound != null) {
+			myUpperBound = new QualifiedDateParam(QuantityCompararatorEnum.LESSTHAN_OR_EQUALS, theUpperBound);
+		}
 		validateAndThrowDataFormatExceptionIfInvalid();
 	}
 
@@ -200,8 +206,12 @@ public class DateRangeParam implements IQueryParameterAnd {
 	 *            "2011-02-22" or "2011-02-22T13:12:00". Will be treated inclusively.
 	 */
 	public void setRangeFromDatesInclusive(String theLowerBound, String theUpperBound) {
-		myLowerBound = new QualifiedDateParam(QuantityCompararatorEnum.GREATERTHAN_OR_EQUALS, theLowerBound);
-		myUpperBound = new QualifiedDateParam(QuantityCompararatorEnum.LESSTHAN_OR_EQUALS, theUpperBound);
+		if (StringUtils.isNotBlank(theLowerBound)) {
+			myLowerBound = new QualifiedDateParam(QuantityCompararatorEnum.GREATERTHAN_OR_EQUALS, theLowerBound);
+		}
+		if (StringUtils.isNotBlank(theUpperBound)) {
+			myUpperBound = new QualifiedDateParam(QuantityCompararatorEnum.LESSTHAN_OR_EQUALS, theUpperBound);
+		}
 		validateAndThrowDataFormatExceptionIfInvalid();
 	}
 

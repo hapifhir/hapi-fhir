@@ -256,7 +256,7 @@ public class ${className}
 	 *            The reference itself
 	 */
 	public ResourceReferenceDt(String theId) {
-		setResourceId(new IdDt(theId));
+		setReference(new IdDt(theId));
 	}
 
 	/**
@@ -267,7 +267,7 @@ public class ${className}
 	 *            The reference itself
 	 */
 	public ResourceReferenceDt(IdDt theResourceId) {
-		setResourceId(theResourceId);
+		setReference(theResourceId);
 	}
 #end
 
@@ -403,19 +403,6 @@ public class ${className}
 	public String getQueryParameterQualifier() {
 		return null;
 	}	
-#end
-#if ( ${className} == "ResourceReferenceDt" )
-	/** TODO: document */
-	@Override
-	public IdDt getResourceId() {
-		return new IdDt(myReference.getValue());
-	}
-
-	/** TODO: document */
-	@Override
-	public void setResourceId(IdDt theResourceId) {
-		myReference = new StringDt(theResourceId.getValue());
-	}
 #end
 #childExtensionTypes( $childExtensionTypes )
 

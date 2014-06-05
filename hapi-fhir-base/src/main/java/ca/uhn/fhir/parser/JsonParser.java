@@ -273,7 +273,7 @@ public class JsonParser extends BaseParser implements IParser {
 		}
 		case RESOURCE_REF: {
 			ResourceReferenceDt referenceDt = (ResourceReferenceDt) theValue;
-			IdDt value = referenceDt.getResourceId();
+			IdDt value = referenceDt.getReference();
 			if (theChildName != null) {
 				theWriter.writeStartObject(theChildName);
 			} else {

@@ -24,6 +24,7 @@ import ca.uhn.fhir.model.dstu.composite.QuantityDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.resource.Device;
 import ca.uhn.fhir.model.dstu.resource.DiagnosticReport;
+import ca.uhn.fhir.model.dstu.resource.Encounter;
 import ca.uhn.fhir.model.dstu.resource.Location;
 import ca.uhn.fhir.model.dstu.resource.Observation;
 import ca.uhn.fhir.model.dstu.resource.Organization;
@@ -35,6 +36,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.QualifiedDateParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
@@ -52,6 +54,7 @@ public class FhirResourceDaoTest {
 	private static IFhirResourceDao<Location> ourLocationDao;
 
 	private static Date ourTestStarted;
+	private static IFhirResourceDao<Encounter> ourEncounterDao;
 
 	@Test
 	public void testPersistAndReadResource() {
@@ -378,7 +381,146 @@ public class FhirResourceDaoTest {
 		assertEquals(0, patients.size());
 
 	}
+	
+	
+	@Test
+	public void testDatePeriodParamStartOnly() {
+		{
+			Encounter enc = new Encounter();
+			enc.addIdentifier("testDatePeriodParam", "01");
+			enc.getPeriod().getStart().setValueAsString("2001-01-02");
+			ourEncounterDao.create(enc);
+		}
 
+		SearchParameterMap params = new SearchParameterMap();
+		params.add(Encounter.SP_DATE, new DateRangeParam("2001-01-01", "2001-01-03"));
+		params.add(Encounter.SP_IDENTIFIER, new IdentifierDt("testDatePeriodParam", "01"));
+		List<Encounter> encs = ourEncounterDao.search(params);
+		assertEquals(1, encs.size());
+
+		params = new SearchParameterMap();
+		params.add(Encounter.SP_DATE, new DateRangeParam("2001-01-01", null));
+		params.add(Encounter.SP_IDENTIFIER, new IdentifierDt("testDatePeriodParam", "01"));
+		encs = ourEncounterDao.search(params);
+		assertEquals(1, encs.size());
+
+		params = new SearchParameterMap();
+		params.add(Encounter.SP_DATE, new DateRangeParam(null, "2001-01-03"));
+		params.add(Encounter.SP_IDENTIFIER, new IdentifierDt("testDatePeriodParam", "01"));
+		encs = ourEncounterDao.search(params);
+		assertEquals(1, encs.size());
+
+		params = new SearchParameterMap();
+		params.add(Encounter.SP_DATE, new DateRangeParam(null, "2001-01-01"));
+		params.add(Encounter.SP_IDENTIFIER, new IdentifierDt("testDatePeriodParam", "01"));
+		encs = ourEncounterDao.search(params);
+		assertEquals(0, encs.size());
+
+		params = new SearchParameterMap();
+		params.add(Encounter.SP_DATE, new DateRangeParam("2001-01-03",null));
+		params.add(Encounter.SP_IDENTIFIER, new IdentifierDt("testDatePeriodParam", "01"));
+		encs = ourEncounterDao.search(params);
+		assertEquals(0, encs.size());
+
+	}
+
+	@Test
+	public void testDatePeriodParamEndOnly() {
+		{
+			Encounter enc = new Encounter();
+			enc.addIdentifier("testDatePeriodParam", "02");
+			enc.getPeriod().getEnd().setValueAsString("2001-01-02");
+			ourEncounterDao.create(enc);
+		}
+
+		SearchParameterMap params = new SearchParameterMap();
+		params.add(Encounter.SP_DATE, new DateRangeParam("2001-01-01", "2001-01-03"));
+		params.add(Encounter.SP_IDENTIFIER, new IdentifierDt("testDatePeriodParam", "02"));
+		List<Encounter> encs = ourEncounterDao.search(params);
+		assertEquals(1, encs.size());
+
+		params = new SearchParameterMap();
+		params.add(Encounter.SP_DATE, new DateRangeParam("2001-01-01", null));
+		params.add(Encounter.SP_IDENTIFIER, new IdentifierDt("testDatePeriodParam", "02"));
+		encs = ourEncounterDao.search(params);
+		assertEquals(1, encs.size());
+
+		params = new SearchParameterMap();
+		params.add(Encounter.SP_DATE, new DateRangeParam(null, "2001-01-03"));
+		params.add(Encounter.SP_IDENTIFIER, new IdentifierDt("testDatePeriodParam", "02"));
+		encs = ourEncounterDao.search(params);
+		assertEquals(1, encs.size());
+
+		params = new SearchParameterMap();
+		params.add(Encounter.SP_DATE, new DateRangeParam(null, "2001-01-01"));
+		params.add(Encounter.SP_IDENTIFIER, new IdentifierDt("testDatePeriodParam", "02"));
+		encs = ourEncounterDao.search(params);
+		assertEquals(0, encs.size());
+
+		params = new SearchParameterMap();
+		params.add(Encounter.SP_DATE, new DateRangeParam( "2001-01-03",null));
+		params.add(Encounter.SP_IDENTIFIER, new IdentifierDt("testDatePeriodParam", "02"));
+		encs = ourEncounterDao.search(params);
+		assertEquals(0, encs.size());
+
+	}
+
+	
+	@Test
+	public void testDatePeriodParamStartAndEnd() {
+		{
+			Encounter enc = new Encounter();
+			enc.addIdentifier("testDatePeriodParam", "03");
+			enc.getPeriod().getStart().setValueAsString("2001-01-02");
+			enc.getPeriod().getEnd().setValueAsString("2001-01-03");
+			ourEncounterDao.create(enc);
+		}
+
+		SearchParameterMap params = new SearchParameterMap();
+		params.add(Encounter.SP_DATE, new DateRangeParam("2001-01-01", "2001-01-03"));
+		params.add(Encounter.SP_IDENTIFIER, new IdentifierDt("testDatePeriodParam", "03"));
+		List<Encounter> encs = ourEncounterDao.search(params);
+		assertEquals(1, encs.size());
+
+		 params = new SearchParameterMap();
+		params.add(Encounter.SP_DATE, new DateRangeParam("2001-01-02", "2001-01-06"));
+		params.add(Encounter.SP_IDENTIFIER, new IdentifierDt("testDatePeriodParam", "03"));
+		 encs = ourEncounterDao.search(params);
+		assertEquals(1, encs.size());
+
+		params = new SearchParameterMap();
+		params.add(Encounter.SP_DATE, new DateRangeParam("2001-01-01", null));
+		params.add(Encounter.SP_IDENTIFIER, new IdentifierDt("testDatePeriodParam", "03"));
+		encs = ourEncounterDao.search(params);
+		assertEquals(1, encs.size());
+
+		params = new SearchParameterMap();
+		params.add(Encounter.SP_DATE, new DateRangeParam(null, "2001-01-03"));
+		params.add(Encounter.SP_IDENTIFIER, new IdentifierDt("testDatePeriodParam", "03"));
+		encs = ourEncounterDao.search(params);
+		assertEquals(1, encs.size());
+
+		params = new SearchParameterMap();
+		params.add(Encounter.SP_DATE, new DateRangeParam(null, "2001-01-05"));
+		params.add(Encounter.SP_IDENTIFIER, new IdentifierDt("testDatePeriodParam", "03"));
+		encs = ourEncounterDao.search(params);
+		assertEquals(1, encs.size());
+
+		params = new SearchParameterMap();
+		params.add(Encounter.SP_DATE, new DateRangeParam(null, "2001-01-01"));
+		params.add(Encounter.SP_IDENTIFIER, new IdentifierDt("testDatePeriodParam", "03"));
+		encs = ourEncounterDao.search(params);
+		assertEquals(0, encs.size());
+
+		params = new SearchParameterMap();
+		params.add(Encounter.SP_DATE, new DateRangeParam( "2001-01-05",null));
+		params.add(Encounter.SP_IDENTIFIER, new IdentifierDt("testDatePeriodParam", "03"));
+		encs = ourEncounterDao.search(params);
+		assertEquals(0, encs.size());
+
+	}
+
+	
 	@Test
 	public void testSearchStringParamWithNonNormalized() {
 		{
@@ -522,7 +664,8 @@ public class FhirResourceDaoTest {
 
 		// Update the name
 		p1.getNameFirstRep().getGivenFirstRep().setValue("testUpdateMaintainsSearchParamsBBB");
-		IdDt p1id2 = ourPatientDao.update(p1, p1id).getId();
+		MethodOutcome update2 = ourPatientDao.update(p1, p1id);
+		IdDt p1id2 = update2.getId();
 
 		ids = ourPatientDao.searchForIds(Patient.SP_GIVEN, new StringDt("testUpdateMaintainsSearchParamsAAA"));
 		assertEquals(0, ids.size());
@@ -555,6 +698,7 @@ public class FhirResourceDaoTest {
 		ourDeviceDao = ourCtx.getBean("myDeviceDao", IFhirResourceDao.class);
 		ourOrganizationDao = ourCtx.getBean("myOrganizationDao", IFhirResourceDao.class);
 		ourLocationDao = ourCtx.getBean("myLocationDao", IFhirResourceDao.class);
+		ourEncounterDao = ourCtx.getBean("myEncounterDao", IFhirResourceDao.class);
 	}
 
 }

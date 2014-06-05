@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.entity;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -26,7 +27,7 @@ import ca.uhn.fhir.rest.server.Constants;
 @Entity
 @Table(name = "HFJ_RESOURCE", uniqueConstraints = {})
 @Inheritance(strategy = InheritanceType.JOINED)
-@org.hibernate.annotations.Table(appliesTo="HFJ_RESOURCE", indexes= {@Index(name="IDX_RES_DATE", columnNames= {"RES_UPDATED"})})
+@org.hibernate.annotations.Table(appliesTo = "HFJ_RESOURCE", indexes = { @Index(name = "IDX_RES_DATE", columnNames = { "RES_UPDATED" }) })
 public class ResourceTable extends BaseHasResource implements Serializable {
 	static final int RESTYPE_LEN = 30;
 
@@ -80,21 +81,19 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 	@Column(name = "RES_VER")
 	private long myVersion;
 
-	public boolean hasTag(String theTerm, String theLabel, String theScheme) {
-		for (ResourceTag next : getTags()) {
-			if (next.getTag().getTerm().equals(theTerm)) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	public IdDt getIdDt() {
-		return new IdDt(myResourceType + '/' + myId + '/' + Constants.PARAM_HISTORY + '/' + myVersion);
+	public ResourceTag addTag(TagDefinition theTag) {
+		ResourceTag tag = new ResourceTag(this, theTag);
+		tag.setResourceType(getResourceType());
+		getTags().add(tag);
+		return tag;
 	}
 
 	public Long getId() {
 		return myId;
+	}
+
+	public IdDt getIdDt() {
+		return new IdDt(myResourceType + '/' + myId + '/' + Constants.PARAM_HISTORY + '/' + myVersion);
 	}
 
 	public Collection<ResourceIndexedSearchParamDate> getParamsDate() {
@@ -147,6 +146,15 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 		return myVersion;
 	}
 
+	public boolean hasTag(String theTerm, String theLabel, String theScheme) {
+		for (ResourceTag next : getTags()) {
+			if (next.getTag().getTerm().equals(theTerm)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	public boolean isHasLinks() {
 		return myHasLinks;
 	}
@@ -176,11 +184,23 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 	}
 
 	public void setParamsDate(Collection<ResourceIndexedSearchParamDate> theParamsDate) {
-		myParamsDate = theParamsDate;
+		if (!isParamsDatePopulated() && theParamsDate.isEmpty()) {
+			return;
+		}
+		getParamsDate().clear();
+		getParamsDate().addAll(theParamsDate);
 	}
 
 	public void setParamsDatePopulated(boolean theParamsDatePopulated) {
 		myParamsDatePopulated = theParamsDatePopulated;
+	}
+
+	public void setParamsNumber(List<ResourceIndexedSearchParamNumber> theNumberParams) {
+		if (!isParamsNumberPopulated() && theNumberParams.isEmpty()) {
+			return;
+		}
+		getParamsNumber().clear();
+		getParamsNumber().addAll(theNumberParams);
 	}
 
 	public void setParamsNumberPopulated(boolean theParamsNumberPopulated) {
@@ -188,7 +208,11 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 	}
 
 	public void setParamsString(Collection<ResourceIndexedSearchParamString> theParamsString) {
-		myParamsString = theParamsString;
+		if (!isParamsStringPopulated() && theParamsString.isEmpty()) {
+			return;
+		}
+		getParamsString().clear();
+		getParamsString().addAll(theParamsString);
 	}
 
 	public void setParamsStringPopulated(boolean theParamsStringPopulated) {
@@ -196,11 +220,23 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 	}
 
 	public void setParamsToken(Collection<ResourceIndexedSearchParamToken> theParamsToken) {
-		myParamsToken = theParamsToken;
+		if (!isParamsTokenPopulated() && theParamsToken.isEmpty()) {
+			return;
+		}
+		getParamsToken().clear();
+		getParamsToken().addAll(theParamsToken);
 	}
 
 	public void setParamsTokenPopulated(boolean theParamsTokenPopulated) {
 		myParamsTokenPopulated = theParamsTokenPopulated;
+	}
+
+	public void setResourceLinks(List<ResourceLink> theLinks) {
+		if (!isHasLinks() && theLinks.isEmpty()) {
+			return;
+		}
+		getResourceLinks().clear();
+		getResourceLinks().addAll(theLinks);
 	}
 
 	public void setResourceType(String theResourceType) {
@@ -230,12 +266,5 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 		}
 
 		return retVal;
-	}
-
-	public ResourceTag addTag(TagDefinition theTag) {
-		ResourceTag tag = new ResourceTag(this, theTag);
-		tag.setResourceType(getResourceType());
-		getTags().add(tag);
-		return tag;
 	}
 }

@@ -10,6 +10,15 @@
         </release>			
 		<release version="0.4" date="TBD">
 			<action type="add">
+				<![CDATA[<b>BREAKING CHANGE:</b>]]>: IdDt has been modified so that it 
+				contains a partial or complete resource identity. Previously it contained
+				only the simple alphanumeric id of the resource (the part at the end of the "read" URL for
+				that resource) but it can now contain a complete URL or even a partial URL (e.g. "Patient/123")
+				and can optionally contain a version (e.g. "Patient/123/_history/456"). New methods have
+				been added to this datatype which provide just the numeric portion. See the JavaDoc
+				for more information. 
+			</action>
+			<action type="add">
 				Allow use of QuantityDt as a service parameter to support the "quantity" type. Previously
 				QuantityDt did not implement IQueryParameterType so it was not valid, and there was no way to
 				support quantity search parameters on the server (e.g. Observation.value-quantity)

@@ -65,7 +65,7 @@ public class FhirSystemDaoTest {
 		Thread.sleep(10);
 		IdDt newpid3 = ourPatientDao.update(patient, pid).getId();
 
-		List<IResource> values = ourSystemDao.history(start, 1000);
+		List<IResource> values = ourSystemDao.history(start, null);
 		assertEquals(4, values.size());
 		
 		assertEquals(newpid3, values.get(0).getId());
@@ -207,7 +207,7 @@ public class FhirSystemDaoTest {
 
 		IdDt foundPatientId = patResults.get(0).getId();
 		ResourceReferenceDt subject = obs.getSubject();
-		assertEquals(foundPatientId.getUnqualifiedId(), subject.getResourceId().getUnqualifiedId());
+		assertEquals(foundPatientId.getUnqualifiedId(), subject.getReference().getUnqualifiedId());
 
 		// Update
 
