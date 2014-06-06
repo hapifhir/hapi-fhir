@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.dao;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
+import java.io.UnsupportedEncodingException;
 import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -34,6 +35,7 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.entity.BaseHasResource;
 import ca.uhn.fhir.jpa.entity.BaseTag;
+import ca.uhn.fhir.jpa.entity.ResourceEncodingEnum;
 import ca.uhn.fhir.jpa.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.entity.ResourceHistoryTag;
 import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamDate;
@@ -44,6 +46,7 @@ import ca.uhn.fhir.jpa.entity.ResourceLink;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.jpa.entity.ResourceTag;
 import ca.uhn.fhir.jpa.entity.TagDefinition;
+import ca.uhn.fhir.jpa.util.StopWatch;
 import ca.uhn.fhir.model.api.IDatatype;
 import ca.uhn.fhir.model.api.IPrimitiveDatatype;
 import ca.uhn.fhir.model.api.IResource;
@@ -73,7 +76,9 @@ import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
 
 public abstract class BaseFhirDao {
-	private FhirContext myContext = new FhirContext();
+	
+	@Autowired(required=true)
+	private FhirContext myContext;
 	
 	@PersistenceContext(name = "FHIR_UT", type = PersistenceContextType.TRANSACTION, unitName = "FHIR_UT")
 	private EntityManager myEntityManager;
@@ -576,11 +581,16 @@ public abstract class BaseFhirDao {
 	protected ArrayList<IResource> history(String theResourceName, Long theId, Date theSince, Integer theLimit) {
 		List<HistoryTuple> tuples = new ArrayList<HistoryTuple>();
 
+		StopWatch timer = new StopWatch();
+		
 		// Get list of IDs
 		searchHistoryCurrentVersion(theResourceName, theId, theSince, theLimit, tuples);
 		assert tuples.size() < 2 || !tuples.get(tuples.size() - 2).getUpdated().before(tuples.get(tuples.size() - 1).getUpdated());
+		ourLog.info("Retrieved {} history IDs from current versions in {} ms", tuples.size(), timer.getMillisAndRestart());
+		
 		searchHistoryHistory(theResourceName, theId, theSince, theLimit, tuples);
 		assert tuples.size() < 2 || !tuples.get(tuples.size() - 2).getUpdated().before(tuples.get(tuples.size() - 1).getUpdated());
+		ourLog.info("Retrieved {} history IDs from previous versions in {} ms", tuples.size(), timer.getMillisAndRestart());
 
 		// Sort merged list
 		Collections.sort(tuples, Collections.reverseOrder());
@@ -588,8 +598,23 @@ public abstract class BaseFhirDao {
 
 		// Pull actual resources
 		List<BaseHasResource> resEntities = Lists.newArrayList();
+
+		int limit;
+		if (theLimit != null && theLimit < myConfig.getHardSearchLimit()) {
+			limit = theLimit;
+		} else {
+			limit = myConfig.getHardSearchLimit();
+		}
+
+		if (tuples.size() > limit) {
+			tuples = tuples.subList(0, limit);
+		}
+		
 		searchHistoryCurrentVersion(tuples, resEntities);
+		ourLog.info("Loaded history from current versions in {} ms", timer.getMillisAndRestart());
+		
 		searchHistoryHistory(tuples, resEntities);
+		ourLog.info("Loaded history from previous versions in {} ms", timer.getMillisAndRestart());
 
 		Collections.sort(resEntities, new Comparator<BaseHasResource>() {
 			@Override
@@ -598,12 +623,6 @@ public abstract class BaseFhirDao {
 			}
 		});
 
-		int limit;
-		if (theLimit != null && theLimit < myConfig.getHardSearchLimit()) {
-			limit = theLimit;
-		} else {
-			limit = myConfig.getHardSearchLimit();
-		}
 		if (resEntities.size() > limit) {
 			resEntities = resEntities.subList(0, limit);
 		}
@@ -651,9 +670,22 @@ public abstract class BaseFhirDao {
 		theEntity.setUpdated(new Date());
 
 		theEntity.setResourceType(toResourceName(theResource));
-		theEntity.setResource(getContext().newJsonParser().encodeResourceToString(theResource));
-		theEntity.setEncoding(EncodingEnum.JSON);
-
+		
+		String encoded = myConfig.getResourceEncoding().newParser(myContext).encodeResourceToString(theResource);
+		ResourceEncodingEnum  encoding = myConfig.getResourceEncoding();
+		theEntity.setEncoding(encoding);
+		try {
+		switch (encoding) {
+		case JSON:
+				theEntity.setResource(encoded.getBytes("UTF-8"));
+			break;
+		case JSONC:
+			theEntity.setResource(GZipUtil.compress(encoded));
+			break;
+		}
+		} catch (UnsupportedEncodingException e) {
+		}
+		
 		TagList tagList = (TagList) theResource.getResourceMetadata().get(ResourceMetadataKeyEnum.TAG_LIST);
 		if (tagList != null) {
 			for (Tag next : tagList) {
@@ -678,7 +710,20 @@ public abstract class BaseFhirDao {
 	}
 
 	protected <T extends IResource> T toResource(Class<T> theResourceType, BaseHasResource theEntity) {
-		String resourceText = theEntity.getResource();
+		String resourceText=null;
+		switch (theEntity.getEncoding()) {
+		case JSON:
+			try {
+				resourceText = new String(theEntity.getResource(), "UTF-8");
+			} catch (UnsupportedEncodingException e) {
+				throw new Error("Should not happen", e);
+			}
+			break;
+		case JSONC:
+			resourceText = GZipUtil.decompress(theEntity.getResource());
+			break;
+		}
+		
 		IParser parser = theEntity.getEncoding().newParser(getContext());
 		T retVal = parser.parseResource(theResourceType, resourceText);
 		retVal.setId(theEntity.getIdDt());

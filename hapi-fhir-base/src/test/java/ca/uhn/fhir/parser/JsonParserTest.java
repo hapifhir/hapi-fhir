@@ -1,7 +1,6 @@
 package ca.uhn.fhir.parser;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.stringContainsInOrder;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
@@ -24,6 +23,7 @@ import org.hamcrest.core.StringContains;
 import org.hamcrest.text.StringContainsInOrder;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.mockito.internal.matchers.Not;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
@@ -690,8 +690,14 @@ public class JsonParserTest {
 		strings.addAll(Arrays.asList("\"id\":\"2\"", "\"rel\":\"alternate\"", "\"href\":\"http://foo/bar\""));
 		strings.addAll(Arrays.asList("\"deleted\":\""+nowDt.getValueAsString()+"\"", "\"id\":\"Patient/3\""));
 		assertThat(bundleString, StringContainsInOrder.stringContainsInOrder(strings));
+	
+		b.getEntries().remove(2);
+		bundleString = ourCtx.newJsonParser().setPrettyPrint(true).encodeBundleToString(b);
+		assertThat(bundleString, not(containsString("deleted")));
+		
 		
 	}
+
 	@Test
 	public void testSimpleBundleEncode() throws IOException {
 

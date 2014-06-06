@@ -69,6 +69,14 @@ public class ResourceReferenceDt
 		super(theResource);
 	}
 
+	@Override
+	public String toString() {
+		org.apache.commons.lang3.builder.ToStringBuilder b = new org.apache.commons.lang3.builder.ToStringBuilder(this, org.apache.commons.lang3.builder.ToStringStyle.SHORT_PREFIX_STYLE);
+		b.append("reference", getReference().getValueAsString());
+		b.append("loaded", getResource()!=null);
+		return b.toString();
+	}
+
 	/**
 	 * Constructor which accepts a reference directly (this can be an ID, a partial/relative URL or a complete/absolute
 	 * URL)

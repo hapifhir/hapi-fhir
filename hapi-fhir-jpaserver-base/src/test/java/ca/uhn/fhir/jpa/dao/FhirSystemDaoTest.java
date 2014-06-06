@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -163,6 +164,50 @@ public class FhirSystemDaoTest {
 
 		
 	}
+
+	@Test
+	public void testTransactionWithUpdate() throws Exception {
+		List<IResource> res = new ArrayList<IResource>();
+		
+		Patient p1 = new Patient();
+		p1.getId().setValue("testTransactionWithUpdateXXX01");
+		p1.addIdentifier("system", "testTransactionWithUpdate01");
+		res.add(p1);
+		
+		Observation p2 = new Observation();
+		p2.getId().setValue("testTransactionWithUpdateXXX02");
+		p2.getIdentifier().setSystem("system").setValue("testTransactionWithUpdate02");
+		p2.setSubject(new ResourceReferenceDt("Patient/testTransactionWithUpdateXXX01"));
+		res.add(p2);
+		
+		ourSystemDao.transaction(res);
+		
+		assertFalse(p1.getId().isEmpty());
+		assertNotEquals("testTransactionWithUpdateXXX01", p1.getId().getUnqualifiedVersionId());
+		assertFalse(p2.getId().isEmpty());
+		assertNotEquals("testTransactionWithUpdateXXX02", p2.getId().getUnqualifiedVersionId());
+		assertEquals(p1.getId().unqualified().withoutVersion(), p2.getSubject().getReference());
+		
+		IdDt p1id = p1.getId().unqualified().withoutVersion();
+		IdDt p1idWithVer = p1.getId().unqualified();
+		IdDt p2id = p2.getId().unqualified().withoutVersion();
+		IdDt p2idWithVer = p2.getId().unqualified();
+		
+		p1.addName().addFamily("Name1");
+		p1.setId(p1.getId().unqualified().withoutVersion());
+		
+		p2.addReferenceRange().setHigh(123L);
+		p2.setId(p2.getId().unqualified().withoutVersion());
+
+		ourSystemDao.transaction(res);
+		
+		assertEquals(p1id, p1.getId().unqualified().withoutVersion());
+		assertEquals(p2id, p2.getId().unqualified().withoutVersion());
+		assertNotEquals(p1idWithVer, p1.getId().unqualified());
+		assertNotEquals(p2idWithVer, p2.getId().unqualified());
+		
+	}
+
 	
 	@Test
 	public void testTransactionFromBundle() throws Exception {

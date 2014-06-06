@@ -24,6 +24,7 @@ import static org.apache.commons.lang3.StringUtils.*;
 
 import java.math.BigDecimal;
 
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 
@@ -328,6 +329,27 @@ public class IdDt extends BasePrimitive<String> {
 		}else {
 			return this;
 		}
+	}
+
+	public IdDt unqualified() {
+		return new IdDt(getResourceType(), getUnqualifiedId(), getUnqualifiedVersionId());
+	}
+
+	/**
+	 * Returns true if this IdDt matches the given IdDt in terms of resource type and ID, but ignores the URL base
+	 */
+	@SuppressWarnings("deprecation")
+	public boolean equalsIgnoreBase(IdDt theId) {
+		if (theId==null) {
+		return false;
+		}
+		if (theId.isEmpty()) {
+			return isEmpty();
+		}
+		return 
+			ObjectUtils.equals(getResourceType(),theId.getResourceType())
+			&& ObjectUtils.equals(getUnqualifiedId(),theId.getUnqualifiedId())
+			&& ObjectUtils.equals(getUnqualifiedVersionId(),theId.getUnqualifiedVersionId());
 	}
 
 

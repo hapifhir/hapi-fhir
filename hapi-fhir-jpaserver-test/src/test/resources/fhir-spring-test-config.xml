@@ -13,6 +13,8 @@
 	<context:annotation-config />
 	<context:mbean-server />
 
+	<bean class="ca.uhn.fhir.context.FhirContext"></bean>
+
 	<bean id="myDaoConfig" class="ca.uhn.fhir.jpa.dao.DaoConfig">
 	</bean>
 

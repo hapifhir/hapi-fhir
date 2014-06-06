@@ -181,7 +181,9 @@ public class JsonParser extends BaseParser implements IParser {
 		for (BundleEntry nextEntry : theBundle.getEntries()) {
 			eventWriter.writeStartObject();
 
-			writeTagWithTextNode(eventWriter, "deleted", nextEntry.getDeletedAt());
+			if (nextEntry.getDeletedAt() !=null&&nextEntry.getDeletedAt().isEmpty()==false) {
+				writeTagWithTextNode(eventWriter, "deleted", nextEntry.getDeletedAt());
+			}
 			writeTagWithTextNode(eventWriter, "title", nextEntry.getTitle());
 			writeTagWithTextNode(eventWriter, "id", nextEntry.getId());
 
