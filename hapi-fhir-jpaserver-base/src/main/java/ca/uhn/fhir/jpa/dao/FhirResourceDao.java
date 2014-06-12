@@ -22,6 +22,7 @@ import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Required;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -412,11 +413,15 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 			}
 
 			ArrayList<Predicate> singleCodePredicates = (new ArrayList<Predicate>());
-			if (system != null) {
+			if (StringUtils.isNotBlank(system)) {
 				singleCodePredicates.add(builder.equal(from.get("mySystem"), system));
+			} else {
+				singleCodePredicates.add(builder.isNull(from.get("mySystem")));
 			}
-			if (code != null) {
+			if (StringUtils.isNotBlank(code)) {
 				singleCodePredicates.add(builder.equal(from.get("myValue"), code));
+			}else {
+				singleCodePredicates.add(builder.isNull(from.get("myValue")));
 			}
 			Predicate singleCode = builder.and(singleCodePredicates.toArray(new Predicate[0]));
 			codePredicates.add(singleCode);
