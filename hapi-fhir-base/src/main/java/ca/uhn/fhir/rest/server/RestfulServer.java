@@ -625,6 +625,11 @@ public class RestfulServer extends HttpServlet {
 			resourceMethod.invokeServer(this, r, theResponse);
 
 		} catch (AuthenticationException e) {
+			String userAgent = theRequest.getHeader("User-Agent");
+			if (userAgent != null && userAgent.contains("Mozilla")) {
+				//if request is coming from a browser, prompt the user to enter login credentials
+				theResponse.setHeader("WWW-Authenticate", "BASIC realm=\"FHIR\"");	
+			}
 			theResponse.setStatus(e.getStatusCode());
 			addHeadersToResponse(theResponse);
 			theResponse.setContentType("text/plain");
