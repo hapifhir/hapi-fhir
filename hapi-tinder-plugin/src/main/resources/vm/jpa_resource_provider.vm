@@ -56,7 +56,7 @@ public class ${className}ResourceProvider extends JpaResourceProvider<${classNam
 #end				 
 #end
 			}) 
-			Set<PathSpecification> theIncludes			
+			Set<Include> theIncludes			
 	) {
 		SearchParameterMap paramMap = new SearchParameterMap();
 		paramMap.add("_id", theId);					

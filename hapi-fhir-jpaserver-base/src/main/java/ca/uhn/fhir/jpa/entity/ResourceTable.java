@@ -16,7 +16,6 @@ import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.persistence.Version;
 
 import org.hibernate.annotations.Index;
 
@@ -77,7 +76,6 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 	@OneToMany(mappedBy = "myResource", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
 	private Collection<ResourceTag> myTags;
 
-	@Version()
 	@Column(name = "RES_VER")
 	private long myVersion;
 
