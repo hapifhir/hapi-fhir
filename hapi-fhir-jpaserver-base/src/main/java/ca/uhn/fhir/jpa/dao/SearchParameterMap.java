@@ -6,6 +6,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
 import ca.uhn.fhir.model.api.IQueryParameterAnd;
 import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -16,9 +18,9 @@ public class SearchParameterMap extends HashMap<String, List<List<IQueryParamete
 	private static final long serialVersionUID = 1L;
 
 	private Set<Include> myIncludes;
-	
+
 	public void add(String theName, IQueryParameterAnd theAnd) {
-		if (theAnd==null) {
+		if (theAnd == null) {
 			return;
 		}
 		if (!containsKey(theName)) {
@@ -26,7 +28,7 @@ public class SearchParameterMap extends HashMap<String, List<List<IQueryParamete
 		}
 
 		for (IQueryParameterOr next : theAnd.getValuesAsQueryTokens()) {
-			if (next==null) {
+			if (next == null) {
 				continue;
 			}
 			get(theName).add(next.getValuesAsQueryTokens());
@@ -46,8 +48,8 @@ public class SearchParameterMap extends HashMap<String, List<List<IQueryParamete
 	}
 
 	public Set<Include> getIncludes() {
-		if (myIncludes==null) {
-			myIncludes=new HashSet<Include>(); 
+		if (myIncludes == null) {
+			myIncludes = new HashSet<Include>();
 		}
 		return myIncludes;
 	}
@@ -59,7 +61,17 @@ public class SearchParameterMap extends HashMap<String, List<List<IQueryParamete
 	public void addInclude(Include theInclude) {
 		getIncludes().add(theInclude);
 	}
-	
-	
+
+	@Override
+	public String toString() {
+		ToStringBuilder b = new ToStringBuilder(this);
+		if (isEmpty() == false) {
+			b.append("params", super.toString());
+		}
+		if (getIncludes().isEmpty() == false) {
+			b.append("includes", getIncludes());
+		}
+		return b.toString();
+	}
 
 }

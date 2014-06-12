@@ -626,7 +626,7 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 		}
 
 		// Execute the query and make sure we return distinct results
-		List<T> retVal=new ArrayList<T>();
+		List<T> retVal = new ArrayList<T>();
 		loadResourcesByPid(loadPids, retVal);
 
 		// Load _include resources
@@ -654,7 +654,7 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 					}
 				}
 			}
-			
+
 			if (!includePids.isEmpty()) {
 				ourLog.info("Loading {} included resources");
 				loadResourcesByPid(includePids, retVal);
@@ -713,6 +713,36 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 
 		for (Entry<String, List<List<IQueryParameterType>>> nextParamEntry : params.entrySet()) {
 			String nextParamName = nextParamEntry.getKey();
+			if (nextParamName.equals("_id")) {
+				if (nextParamEntry.getValue().isEmpty()) {
+					continue;
+				} else if (nextParamEntry.getValue().size() > 1) {
+					throw new InvalidRequestException("AND queries not supported for _id (Multiple instances of this param found)");
+				} else {
+					Set<Long> joinPids = new HashSet<Long>();
+					List<IQueryParameterType> nextValue = nextParamEntry.getValue().get(0);
+					if (nextValue == null || nextValue.size() == 0) {
+						continue;
+					} else {
+						for (IQueryParameterType next : nextValue) {
+							String value = next.getValueAsQueryToken();
+							long valueLong = Long.parseLong(value);
+							joinPids.add(valueLong);
+						}
+						if (joinPids.isEmpty()) {
+							continue;
+						}
+					}
+
+					if (pids.isEmpty()) {
+						pids.addAll(joinPids);
+					} else {
+						pids.retainAll(joinPids);
+					}
+
+				}
+			}
+
 			RuntimeSearchParam nextParamDef = resourceDef.getSearchParam(nextParamName);
 			if (nextParamDef != null) {
 				if (nextParamDef.getParamType() == SearchParamTypeEnum.TOKEN) {

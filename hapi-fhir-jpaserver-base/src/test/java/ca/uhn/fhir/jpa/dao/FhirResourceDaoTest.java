@@ -57,7 +57,7 @@ public class FhirResourceDaoTest {
 	private static IFhirResourceDao<Encounter> ourEncounterDao;
 
 	@Test
-	public void testPersistAndReadResource() {
+	public void testIdParam() {
 		Patient patient = new Patient();
 		patient.addIdentifier("urn:system", "001");
 		patient.addName().addFamily("Tester").addGiven("Joe");
@@ -68,11 +68,48 @@ public class FhirResourceDaoTest {
 
 		Date now = new Date();
 
+		{
 		Patient retrieved = ourPatientDao.read(outcome.getId());
 		InstantDt published = (InstantDt) retrieved.getResourceMetadata().get(ResourceMetadataKeyEnum.PUBLISHED);
 		InstantDt updated = (InstantDt) retrieved.getResourceMetadata().get(ResourceMetadataKeyEnum.UPDATED);
 		assertTrue(published.before(now));
 		assertTrue(updated.before(now));
+		}
+		
+		// Now search by _id
+		{
+			SearchParameterMap paramMap = new SearchParameterMap();
+			paramMap.add("_id", new StringParam(outcome.getId().getUnqualifiedId()));
+			List<Patient> ret = ourPatientDao.search(paramMap);
+			assertEquals(1,ret.size());
+			Patient p = ret.get(0);
+			assertEquals("Tester", p.getNameFirstRep().getFamilyAsSingleString());
+		}
+		{
+			SearchParameterMap paramMap = new SearchParameterMap();
+			paramMap.add("_id", new StringParam(outcome.getId().getUnqualifiedId()));
+			paramMap.add(Patient.SP_NAME, new StringParam("tester"));
+			List<Patient> ret = ourPatientDao.search(paramMap);
+			assertEquals(1,ret.size());
+			Patient p = ret.get(0);
+			assertEquals("Tester", p.getNameFirstRep().getFamilyAsSingleString());
+		}
+		{
+			SearchParameterMap paramMap = new SearchParameterMap();
+			paramMap.add(Patient.SP_NAME, new StringParam("tester"));
+			paramMap.add("_id", new StringParam(outcome.getId().getUnqualifiedId()));
+			List<Patient> ret = ourPatientDao.search(paramMap);
+			assertEquals(1,ret.size());
+			Patient p = ret.get(0);
+			assertEquals("Tester", p.getNameFirstRep().getFamilyAsSingleString());
+		}
+		{
+			SearchParameterMap paramMap = new SearchParameterMap();
+			paramMap.add(Patient.SP_NAME, new StringParam("tester"));
+			paramMap.add("_id", new StringParam("000"));
+			List<Patient> ret = ourPatientDao.search(paramMap);
+			assertEquals(0,ret.size());
+		}
 	}
 
 	@Test

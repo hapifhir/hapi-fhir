@@ -65,6 +65,8 @@ public class ${className}ResourceProvider extends JpaResourceProvider<${classNam
 #end
 
 		paramMap.setIncludes(theIncludes);
+
+
 		
 		return getDao().search(paramMap);
 	}

@@ -49,6 +49,10 @@
 				Server methods with @Include parameter would sometimes fail when no _include was actually
 				specified in query strings.
 			</action>
+			<action type="fix">
+				Client requests for IdentifierDt types (such as Patient.identifier) did not create the correct
+				query string if the system is null.
+			</action>
         </release>			
 	</body>
 </document>
