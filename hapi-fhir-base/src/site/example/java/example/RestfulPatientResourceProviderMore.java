@@ -12,7 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.api.PathSpecification;
+import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.Tag;
 import ca.uhn.fhir.model.api.TagList;
@@ -186,8 +186,7 @@ public List<Patient> getPatientHistory(@IdParam IdDt theId) {
    patient.addName().addFamily("Smith");
    
    // Set the ID and version
-   patient.setId(theId);
-   patient.getResourceMetadata().put(ResourceMetadataKeyEnum.VERSION_ID, new IdDt("1"));
+   patient.setId(theId.withVersion("1"));
    
    // ...populate the rest...
    return retVal;
@@ -322,14 +321,14 @@ public List<DiagnosticReport> getDiagnosticReport(
                @RequiredParam(name=DiagnosticReport.SP_IDENTIFIER) 
                IdentifierDt theIdentifier,
                @IncludeParam(allow= {"DiagnosticReport.subject"}) 
-               Set<PathSpecification> theIncludes ) {
+               Set<Include> theIncludes ) {
   List<DiagnosticReport> retVal = new ArrayList<DiagnosticReport>();
  
   // Assume this method exists and loads the report from the DB
   DiagnosticReport report = loadSomeDiagnosticReportFromDatabase(theIdentifier);
 
   // If the client has asked for the subject to be included:
-  if (theIncludes.contains(new PathSpecification("DiagnosticReport.subject"))) {
+  if (theIncludes.contains(new Include("DiagnosticReport.subject"))) {
 	 
     // The resource reference should contain the ID of the patient
     IdDt subjectId = report.getSubject().getId();

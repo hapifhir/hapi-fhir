@@ -37,6 +37,7 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.dstu.resource.Conformance;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.parser.IParser;
@@ -48,7 +49,6 @@ import ca.uhn.fhir.rest.gclient.IParam;
 import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.gclient.ISort;
 import ca.uhn.fhir.rest.gclient.IUntypedQuery;
-import ca.uhn.fhir.rest.gclient.Include;
 import ca.uhn.fhir.rest.method.BaseOutcomeReturningMethodBinding;
 import ca.uhn.fhir.rest.method.ConformanceMethodBinding;
 import ca.uhn.fhir.rest.method.CreateMethodBinding;
@@ -369,7 +369,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			}
 
 			for (Include next : myInclude) {
-				addParam(params, Constants.PARAM_INCLUDE, next.getInclude());
+				addParam(params, Constants.PARAM_INCLUDE, next.getValue());
 			}
 
 			for (SortInternal next : mySort) {

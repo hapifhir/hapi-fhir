@@ -16,6 +16,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
+import ch.qos.logback.core.pattern.color.BlackCompositeConverter;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
@@ -217,6 +218,12 @@ public class FhirSystemDaoTest {
 		List<IResource> res = bundle.toListOfResources();
 		
 		ourSystemDao.transaction(res);
+		
+		Patient p1 = (Patient) res.get(0);
+		String id = p1.getId().getValue();
+		ourLog.info("ID: {}",id);
+		assertThat(id, not(containsString("5556918")));
+		assertThat(id, not(equalToIgnoringCase("")));
 	}
 	
 	@Test

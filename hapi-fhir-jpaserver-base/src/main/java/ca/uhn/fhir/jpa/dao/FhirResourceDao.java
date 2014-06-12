@@ -46,10 +46,12 @@ import ca.uhn.fhir.jpa.entity.TagDefinition;
 import ca.uhn.fhir.model.api.IPrimitiveDatatype;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.dstu.composite.CodingDt;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.composite.QuantityDt;
+import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.valueset.SearchParamTypeEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
@@ -59,7 +61,9 @@ import ca.uhn.fhir.rest.param.QualifiedDateParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.Constants;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.util.FhirTerser;
 
 @Transactional(propagation = Propagation.REQUIRED)
 public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements IFhirResourceDao<T> {
@@ -492,7 +496,8 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 		ArrayList<T> retVal = new ArrayList<T>();
 
 		String resourceType = getContext().getResourceDefinition(myResourceType).getName();
-		TypedQuery<ResourceHistoryTable> q = myEntityManager.createQuery("SELECT h FROM ResourceHistoryTable h WHERE h.myResourceId = :PID AND h.myResourceType = :RESTYPE ORDER BY h.myUpdated ASC", ResourceHistoryTable.class);
+		TypedQuery<ResourceHistoryTable> q = myEntityManager.createQuery("SELECT h FROM ResourceHistoryTable h WHERE h.myResourceId = :PID AND h.myResourceType = :RESTYPE ORDER BY h.myUpdated ASC",
+				ResourceHistoryTable.class);
 		q.setParameter("PID", theId.asLong());
 		q.setParameter("RESTYPE", resourceType);
 
@@ -531,8 +536,9 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 			if (sp == null) {
 				throw new ConfigurationException("Unknown search param on resource[" + myResourceName + "] for secondary key[" + mySecondaryPrimaryKeyParamName + "]");
 			}
-			if (sp.getParamType()!=SearchParamTypeEnum.TOKEN) {
-				throw new ConfigurationException("Search param on resource[" + myResourceName + "] for secondary key[" + mySecondaryPrimaryKeyParamName + "] is not a token type, only token is supported");
+			if (sp.getParamType() != SearchParamTypeEnum.TOKEN) {
+				throw new ConfigurationException("Search param on resource[" + myResourceName + "] for secondary key[" + mySecondaryPrimaryKeyParamName
+						+ "] is not a token type, only token is supported");
 			}
 		}
 
@@ -557,7 +563,8 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 
 		if (entity == null) {
 			if (theId.hasUnqualifiedVersionId()) {
-				TypedQuery<ResourceHistoryTable> q = myEntityManager.createQuery("SELECT t from ResourceHistoryTable t WHERE t.myResourceId = :RID AND t.myResourceType = :RTYP AND t.myResourceVersion = :RVER", ResourceHistoryTable.class);
+				TypedQuery<ResourceHistoryTable> q = myEntityManager.createQuery(
+						"SELECT t from ResourceHistoryTable t WHERE t.myResourceId = :RID AND t.myResourceType = :RTYP AND t.myResourceVersion = :RVER", ResourceHistoryTable.class);
 				q.setParameter("RID", theId.asLong());
 				q.setParameter("RTYP", myResourceName);
 				q.setParameter("RVER", theId.getUnqualifiedVersionIdAsLong());
@@ -608,33 +615,68 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 	@Override
 	public List<T> search(SearchParameterMap theParams) {
 
-		Set<Long> pids;
+		Set<Long> loadPids;
 		if (theParams.isEmpty()) {
-			pids = null;
+			loadPids = null;
 		} else {
-			pids = searchForIdsWithAndOr(theParams);
-			if (pids.isEmpty()) {
+			loadPids = searchForIdsWithAndOr(theParams);
+			if (loadPids.isEmpty()) {
 				return new ArrayList<T>();
 			}
 		}
 
 		// Execute the query and make sure we return distinct results
-		{
-			CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
-			CriteriaQuery<ResourceTable> cq = builder.createQuery(ResourceTable.class);
-			Root<ResourceTable> from = cq.from(ResourceTable.class);
-			cq.where(builder.equal(from.get("myResourceType"), getContext().getResourceDefinition(myResourceType).getName()));
-			if (!theParams.isEmpty()) {
-				cq.where(from.get("myId").in(pids));
-			}
-			TypedQuery<ResourceTable> q = myEntityManager.createQuery(cq);
+		List<T> retVal=new ArrayList<T>();
+		loadResourcesByPid(loadPids, retVal);
 
-			List<T> retVal = new ArrayList<T>();
-			for (ResourceTable next : q.getResultList()) {
-				T resource = toResource(myResourceType, next);
-				retVal.add(resource);
+		// Load _include resources
+		if (theParams.getIncludes() != null && theParams.isEmpty() == false) {
+			Set<Long> includePids = new HashSet<Long>();
+			FhirTerser t = getContext().newTerser();
+			for (Include next : theParams.getIncludes()) {
+				for (T nextResource : retVal) {
+					List<Object> values = t.getValues(nextResource, next.getValue());
+					for (Object object : values) {
+						if (object == null) {
+							continue;
+						}
+						if (!(object instanceof ResourceReferenceDt)) {
+							throw new InvalidRequestException("Path '" + next.getValue() + "' produced non ResourceReferenceDt value: " + object.getClass());
+						}
+						ResourceReferenceDt rr = (ResourceReferenceDt) object;
+						if (rr.getReference().isEmpty()) {
+							continue;
+						}
+						if (rr.getReference().isLocal()) {
+							continue;
+						}
+						includePids.add(rr.getReference().asLong());
+					}
+				}
 			}
-			return retVal;
+			
+			if (!includePids.isEmpty()) {
+				ourLog.info("Loading {} included resources");
+				loadResourcesByPid(includePids, retVal);
+			}
+		}
+
+		return retVal;
+	}
+
+	private void loadResourcesByPid(Set<Long> thePids, List<T> theResourceListToPopulate) {
+		CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
+		CriteriaQuery<ResourceTable> cq = builder.createQuery(ResourceTable.class);
+		Root<ResourceTable> from = cq.from(ResourceTable.class);
+		cq.where(builder.equal(from.get("myResourceType"), getContext().getResourceDefinition(myResourceType).getName()));
+		if (thePids != null) {
+			cq.where(from.get("myId").in(thePids));
+		}
+		TypedQuery<ResourceTable> q = myEntityManager.createQuery(cq);
+
+		for (ResourceTable next : q.getResultList()) {
+			T resource = toResource(myResourceType, next);
+			theResourceListToPopulate.add(resource);
 		}
 	}
 

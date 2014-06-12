@@ -45,6 +45,10 @@
 				of the root resource, and the parser looks in the root resource for all container levels when stitching
 				contained resources back together.
 			</action>
+			<action type="fix">
+				Server methods with @Include parameter would sometimes fail when no _include was actually
+				specified in query strings.
+			</action>
         </release>			
 	</body>
 </document>

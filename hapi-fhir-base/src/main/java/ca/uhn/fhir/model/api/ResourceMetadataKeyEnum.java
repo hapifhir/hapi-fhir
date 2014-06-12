@@ -29,7 +29,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 
-public enum ResourceMetadataKeyEnum {
+public abstract class ResourceMetadataKeyEnum<T> {
 
 		
 	/**
@@ -41,18 +41,17 @@ public enum ResourceMetadataKeyEnum {
 	 * Values for this key are of type <b>{@link InstantDt}</b>
 	 * </p>
 	 */
-	DELETED_AT {
+	public static final ResourceMetadataKeyEnum<InstantDt> DELETED_AT = new ResourceMetadataKeyEnum<InstantDt>("DELETED_AT") {
 		@Override
 		public InstantDt get(IResource theResource) {
 			return getInstantFromMetadataOrNullIfNone(theResource.getResourceMetadata(), DELETED_AT);
 		}
 
 		@Override
-		public void put(IResource theResource, Object theObject) {
-			InstantDt obj = (InstantDt) theObject;
-			theResource.getResourceMetadata().put(DELETED_AT, obj);
+		public void put(IResource theResource, InstantDt theObject) {
+			theResource.getResourceMetadata().put(DELETED_AT, theObject);
 		}
-	},
+	};
 
 	/**
 	 * The value for this key represents a previous ID used to identify
@@ -62,18 +61,17 @@ public enum ResourceMetadataKeyEnum {
 	 * Values for this key are of type <b>{@link IdDt}</b>
 	 * </p>
 	 */
-	PREVIOUS_ID {
+	public static final ResourceMetadataKeyEnum<IdDt> PREVIOUS_ID = new ResourceMetadataKeyEnum<IdDt>("PREVIOUS_ID") {
 		@Override
 		public IdDt get(IResource theResource) {
 			return getIdFromMetadataOrNullIfNone(theResource.getResourceMetadata(), PREVIOUS_ID);
 		}
 
 		@Override
-		public void put(IResource theResource, Object theObject) {
-			IdDt obj = (IdDt) theObject;
-			theResource.getResourceMetadata().put(PREVIOUS_ID, obj);
+		public void put(IResource theResource, IdDt theObject) {
+			theResource.getResourceMetadata().put(PREVIOUS_ID, theObject);
 		}
-	},
+	};
 
 	/**
 	 * The value for this key is the bundle entry <b>Published</b> time. This is
@@ -90,19 +88,18 @@ public enum ResourceMetadataKeyEnum {
 	 * 
 	 * @see InstantDt
 	 */
-	PUBLISHED {
+	public static final ResourceMetadataKeyEnum<InstantDt> PUBLISHED = new ResourceMetadataKeyEnum<InstantDt>("PUBLISHED") {
 		@Override
 		public InstantDt get(IResource theResource) {
 			return getInstantFromMetadataOrNullIfNone(theResource.getResourceMetadata(), PUBLISHED);
 		}
 
 		@Override
-		public void put(IResource theResource, Object theObject) {
-			InstantDt obj = (InstantDt) theObject;
-			theResource.getResourceMetadata().put(PUBLISHED, obj);
+		public void put(IResource theResource, InstantDt theObject) {
+			theResource.getResourceMetadata().put(PUBLISHED, theObject);
 		}
-	},
-
+	};
+	
 	
 	/**
 	 * The value for this key is the list of tags associated with this resource
@@ -112,7 +109,7 @@ public enum ResourceMetadataKeyEnum {
 	 * 
 	 * @see TagList
 	 */
-	TAG_LIST {
+	public static final ResourceMetadataKeyEnum<TagList> TAG_LIST = new ResourceMetadataKeyEnum<TagList>("TAG_LIST") {
 		@Override
 		public TagList get(IResource theResource) {
 			Object retValObj = theResource.getResourceMetadata().get(TAG_LIST);
@@ -129,11 +126,10 @@ public enum ResourceMetadataKeyEnum {
 		}
 
 		@Override
-		public void put(IResource theResource, Object theObject) {
-			TagList obj = (TagList) theObject;
-			theResource.getResourceMetadata().put(TAG_LIST, obj);
+		public void put(IResource theResource, TagList theObject) {
+			theResource.getResourceMetadata().put(TAG_LIST, theObject);
 		}
-	}, 
+	}; 
 	
 	
 	/**
@@ -147,18 +143,17 @@ public enum ResourceMetadataKeyEnum {
 	 * 
 	 * @see InstantDt
 	 */
-	UPDATED {
+	public static final ResourceMetadataKeyEnum<InstantDt> UPDATED = new ResourceMetadataKeyEnum<InstantDt>("UPDATED") {
 		@Override
 		public InstantDt get(IResource theResource) {
 			return getInstantFromMetadataOrNullIfNone(theResource.getResourceMetadata(), UPDATED);
 		}
 
 		@Override
-		public void put(IResource theResource, Object theObject) {
-			InstantDt obj = (InstantDt) theObject;
-			theResource.getResourceMetadata().put(UPDATED, obj);
+		public void put(IResource theResource, InstantDt theObject) {
+			theResource.getResourceMetadata().put(UPDATED, theObject);
 		}
-	}, 
+	};
 	
 	/**
 	 * The value for this key is the version ID of the resource object.
@@ -169,22 +164,52 @@ public enum ResourceMetadataKeyEnum {
 	 * @deprecated The {@link IResource#getId()} resource ID will now be populated with the version ID via the {@link IdDt#getUnqualifiedVersionId()} method
 	 */
 	@Deprecated
-	VERSION_ID {
+	public static final ResourceMetadataKeyEnum<IdDt> VERSION_ID = new ResourceMetadataKeyEnum<IdDt>("VERSION_ID") {
 		@Override
 		public IdDt get(IResource theResource) {
 			return getIdFromMetadataOrNullIfNone(theResource.getResourceMetadata(), VERSION_ID);
 		}
 
 		@Override
-		public void put(IResource theResource, Object theObject) {
-			IdDt obj = (IdDt) theObject;
-			theResource.getResourceMetadata().put(VERSION_ID, obj);
+		public void put(IResource theResource, IdDt theObject) {
+			theResource.getResourceMetadata().put(VERSION_ID, theObject);
 		}
 	};
 
-	public abstract Object get(IResource theResource);
+	private final String myValue;
 
-	private static IdDt getIdFromMetadataOrNullIfNone(Map<ResourceMetadataKeyEnum, Object> theResourceMetadata, ResourceMetadataKeyEnum theKey) {
+	
+
+	public ResourceMetadataKeyEnum(String theValue) {
+		myValue = theValue;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((myValue == null) ? 0 : myValue.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		ResourceMetadataKeyEnum<?> other = (ResourceMetadataKeyEnum<?>) obj;
+		if (myValue == null) {
+			if (other.myValue != null)
+				return false;
+		} else if (!myValue.equals(other.myValue))
+			return false;
+		return true;
+	}
+
+	private static IdDt getIdFromMetadataOrNullIfNone(Map<ResourceMetadataKeyEnum<?>, Object> theResourceMetadata, ResourceMetadataKeyEnum<?> theKey) {
 		Object retValObj = theResourceMetadata.get(theKey);
 		if (retValObj == null) {
 			return null;
@@ -206,7 +231,11 @@ public enum ResourceMetadataKeyEnum {
 		throw new InternalErrorException("Found an object of type '" + retValObj.getClass().getCanonicalName() + "' in resource metadata for key " + theKey.name() + " - Expected " + IdDt.class.getCanonicalName());
 	}
 
-	private static InstantDt getInstantFromMetadataOrNullIfNone(Map<ResourceMetadataKeyEnum, Object> theResourceMetadata, ResourceMetadataKeyEnum theKey) {
+	private String name() {
+		return myValue;
+	}
+
+	private static InstantDt getInstantFromMetadataOrNullIfNone(Map<ResourceMetadataKeyEnum<?>, Object> theResourceMetadata, ResourceMetadataKeyEnum<InstantDt> theKey) {
 		Object retValObj = theResourceMetadata.get(theKey);
 		if (retValObj == null) {
 			return null;
@@ -222,6 +251,8 @@ public enum ResourceMetadataKeyEnum {
 		throw new InternalErrorException("Found an object of type '" + retValObj.getClass().getCanonicalName() + "' in resource metadata for key " + theKey.name() + " - Expected " + InstantDt.class.getCanonicalName());
 	}
 
-	public abstract void put(IResource theResource, Object theObject);
-	
+		public abstract T get(IResource theResource);
+		
+		public abstract void put(IResource theResource, T theObject);
+		
 }

@@ -352,10 +352,13 @@ public class JsonParserTest {
 	}
 	
 	
+	
 	@Test
 	public void testEncodeExt() throws Exception {
 
 		ValueSet valueSet = new ValueSet();
+		valueSet.setId("123456");
+		
 		Define define = valueSet.getDefine();
 		DefineConcept code = define.addConcept();
 		code.setCode("someCode");
@@ -365,6 +368,9 @@ public class JsonParserTest {
 		String encoded = new FhirContext().newJsonParser().encodeResourceToString(valueSet);
 		ourLog.info(encoded);
 
+		assertThat(encoded, not(containsString("123456")));
+		assertThat(encoded, containsString("\"define\":{\"concept\":[{\"code\":\"someCode\",\"display\":\"someDisplay\"}],\"_concept\":[{\"extension\":[{\"url\":\"urn:alt\",\"valueString\":\"alt name\"}]}]}"));
+		
 	}
 
 	

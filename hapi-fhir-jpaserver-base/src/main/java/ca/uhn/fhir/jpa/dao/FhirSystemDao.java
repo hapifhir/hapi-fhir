@@ -46,7 +46,9 @@ public class FhirSystemDao extends BaseFhirDao implements IFhirSystemDao {
 		int updates = 0;
 		
 		Map<IdDt, IdDt> idConversions = new HashMap<IdDt, IdDt>();
+		
 		List<ResourceTable> persistedResources = new ArrayList<ResourceTable>();
+		
 		for (IResource nextResource : theResources) {
 			IdDt nextId = nextResource.getId();
 			if (nextId == null) {
@@ -73,7 +75,7 @@ public class FhirSystemDao extends BaseFhirDao implements IFhirSystemDao {
 			if (entity == null) {
 				entity = toEntity(nextResource);
 				myEntityManager.persist(entity);
-				myEntityManager.flush();
+//				myEntityManager.flush();
 				creations++;
 				ourLog.info("Resource Type[{}] with ID[{}] does not exist, creating it", resourceName, nextId);
 			} else {
@@ -81,8 +83,19 @@ public class FhirSystemDao extends BaseFhirDao implements IFhirSystemDao {
 				ourLog.info("Resource Type[{}] with ID[{}] exists, updating it", resourceName, nextId);
 			}
 
+			persistedResources.add(entity);
+
+		}
+
+		myEntityManager.flush();
+
+		for (int i = 0; i < persistedResources.size();i++) {
+			ResourceTable entity = persistedResources.get(i);
+			String resourceName = toResourceName(theResources.get(i));
+			IdDt nextId = theResources.get(i).getId();
+
 			IdDt newId = new IdDt(resourceName + '/' + entity.getId());
-			if (nextId.isEmpty()) {
+			if (nextId == null || nextId.isEmpty()) {
 				ourLog.info("Transaction resource (with no preexisting ID) has been assigned new ID[{}]", nextId, newId);
 			} else if (newId.equals(entity.getId())) {
 				ourLog.info("Transaction resource ID[{}] is being updated", newId);
@@ -93,11 +106,9 @@ public class FhirSystemDao extends BaseFhirDao implements IFhirSystemDao {
 					idConversions.put(nextId, newId);
 				}
 			}
-			
-			persistedResources.add(entity);
 
 		}
-
+		
 		for (IResource nextResource : theResources) {
 			List<ResourceReferenceDt> allRefs = terser.getAllPopulatedChildElementsOfType(nextResource, ResourceReferenceDt.class);
 			for (ResourceReferenceDt nextRef : allRefs) {

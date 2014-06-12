@@ -9,7 +9,6 @@
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
-	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir-structures-dstu</artifactId>
 	<packaging>jar</packaging>
 

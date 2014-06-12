@@ -468,8 +468,8 @@ public class JsonParser extends BaseParser implements IParser {
 		encodeCompositeElementChildrenToStreamWriter(theResDef, theResource, theElement, theEventWriter, resDef.getChildren());
 	}
 
-	private void encodeResourceToJsonStreamWriter(RuntimeResourceDefinition theResDef, IResource theResource, JsonGenerator theEventWriter, String theObjectNameOrNull, boolean theIncludedResource) throws IOException {
-		if (!theIncludedResource) {
+	private void encodeResourceToJsonStreamWriter(RuntimeResourceDefinition theResDef, IResource theResource, JsonGenerator theEventWriter, String theObjectNameOrNull, boolean theIsSubElementWithinResource) throws IOException {
+		if (!theIsSubElementWithinResource) {
 			super.containResourcesForEncoding(theResource);
 		}
 
@@ -482,7 +482,7 @@ public class JsonParser extends BaseParser implements IParser {
 		}
 
 		theEventWriter.write("resourceType", resDef.getName());
-		if (theResource.getId() != null && isNotBlank(theResource.getId().getValue())) {
+		if (theIsSubElementWithinResource && theResource.getId() != null && isNotBlank(theResource.getId().getValue())) {
 			theEventWriter.write("id", theResource.getId().getValue());
 		}
 

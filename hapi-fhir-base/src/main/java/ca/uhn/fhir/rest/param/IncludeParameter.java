@@ -49,12 +49,12 @@ public class IncludeParameter extends BaseQueryParameter {
 				myAllow.add(next);
 			}
 		}
-		
+
 		mySpecType = theSpecType;
 		if (mySpecType != PathSpecification.class && mySpecType != String.class) {
 			throw new ConfigurationException("Invalid @" + IncludeParam.class.getSimpleName() + " parameter type: " + mySpecType);
 		}
-		
+
 	}
 
 	@SuppressWarnings("unchecked")
@@ -64,17 +64,17 @@ public class IncludeParameter extends BaseQueryParameter {
 
 		if (myInstantiableCollectionType == null) {
 			if (mySpecType == PathSpecification.class) {
-				retVal.add(QualifiedParamList.singleton(((PathSpecification)theObject).getValue()));
+				retVal.add(QualifiedParamList.singleton(((PathSpecification) theObject).getValue()));
 			} else {
-				retVal.add(QualifiedParamList.singleton(((String)theObject)));
+				retVal.add(QualifiedParamList.singleton(((String) theObject)));
 			}
-		}else {
+		} else {
 			Collection<PathSpecification> val = (Collection<PathSpecification>) theObject;
 			for (PathSpecification pathSpec : val) {
 				retVal.add(QualifiedParamList.singleton(pathSpec.getValue()));
 			}
 		}
-		
+
 		return retVal;
 	}
 
@@ -86,14 +86,14 @@ public class IncludeParameter extends BaseQueryParameter {
 	@Override
 	public Object parse(List<QualifiedParamList> theString) throws InternalErrorException, InvalidRequestException {
 		Collection<PathSpecification> retValCollection = null;
-		if (myInstantiableCollectionType!=null) {
-		try {
-			retValCollection = myInstantiableCollectionType.newInstance();
-		} catch (Exception e) {
-			throw new InternalErrorException("Failed to instantiate " + myInstantiableCollectionType.getName(), e);
+		if (myInstantiableCollectionType != null) {
+			try {
+				retValCollection = myInstantiableCollectionType.newInstance();
+			} catch (Exception e) {
+				throw new InternalErrorException("Failed to instantiate " + myInstantiableCollectionType.getName(), e);
+			}
 		}
-		}
-		
+
 		for (List<String> nextParamList : theString) {
 			if (nextParamList.isEmpty()) {
 				continue;
@@ -101,7 +101,7 @@ public class IncludeParameter extends BaseQueryParameter {
 			if (nextParamList.size() > 1) {
 				throw new InvalidRequestException("'OR' query parameters (values containing ',') are not supported in _include parameters");
 			}
-			
+
 			String value = nextParamList.get(0);
 			if (myAllow != null) {
 				if (!myAllow.contains(value)) {
@@ -114,11 +114,11 @@ public class IncludeParameter extends BaseQueryParameter {
 				} else {
 					return new PathSpecification(value);
 				}
-			}else {
+			} else {
 				retValCollection.add(new PathSpecification(value));
 			}
 		}
-		
+
 		return retValCollection;
 	}
 
@@ -136,6 +136,5 @@ public class IncludeParameter extends BaseQueryParameter {
 	public boolean handlesMissing() {
 		return true;
 	}
-
 
 }

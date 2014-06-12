@@ -405,19 +405,19 @@ class ParserState<T> {
 				myEntry.getResource().setId(id);
 			}
 
-			Map<ResourceMetadataKeyEnum, Object> metadata = myEntry.getResource().getResourceMetadata();
+			Map<ResourceMetadataKeyEnum<?>, Object> metadata = myEntry.getResource().getResourceMetadata();
 			if (myEntry.getPublished().isEmpty() == false) {
-				metadata.put(ResourceMetadataKeyEnum.PUBLISHED, myEntry.getPublished());
+				ResourceMetadataKeyEnum.PUBLISHED.put(myEntry.getResource(), myEntry.getPublished());
 			}
 			if (myEntry.getUpdated().isEmpty() == false) {
-				metadata.put(ResourceMetadataKeyEnum.UPDATED, myEntry.getUpdated());
+				ResourceMetadataKeyEnum.UPDATED.put(myEntry.getResource(), myEntry.getUpdated());
 			}
 			if (myEntry.getCategories().isEmpty() == false) {
 				TagList tagList = new TagList();
 				for (Tag next : myEntry.getCategories()) {
 					tagList.add(next);
 				}
-				metadata.put(ResourceMetadataKeyEnum.TAG_LIST, tagList);
+				ResourceMetadataKeyEnum.TAG_LIST.put(myEntry.getResource(), tagList);
 			}
 			if (!myEntry.getLinkSelf().isEmpty()) {
 				String linkSelfValue = myEntry.getLinkSelf().getValue();
@@ -808,7 +808,7 @@ class ParserState<T> {
 			case RESOURCE_REF: {
 				ResourceReferenceDt newChildInstance = new ResourceReferenceDt();
 				myDefinition.getMutator().addValue(myParentInstance, newChildInstance);
-				ResourceReferenceState newState = new ResourceReferenceState(getPreResourceState(), (RuntimeResourceReferenceDefinition) target, newChildInstance);
+				ResourceReferenceState newState = new ResourceReferenceState(getPreResourceState(), newChildInstance);
 				push(newState);
 				return;
 			}
@@ -914,7 +914,7 @@ class ParserState<T> {
 				ResourceReferenceDt newChildInstance = new ResourceReferenceDt();
 				getPreResourceState().getResourceReferences().add(newChildInstance);
 				child.getMutator().addValue(myInstance, newChildInstance);
-				ResourceReferenceState newState = new ResourceReferenceState(getPreResourceState(), resourceRefTarget, newChildInstance);
+				ResourceReferenceState newState = new ResourceReferenceState(getPreResourceState(), newChildInstance);
 				push(newState);
 				return;
 			}
@@ -1021,7 +1021,7 @@ class ParserState<T> {
 			case RESOURCE_REF: {
 				ResourceReferenceDt newChildInstance = new ResourceReferenceDt();
 				myExtension.setValue(newChildInstance);
-				ResourceReferenceState newState = new ResourceReferenceState(getPreResourceState(), null, newChildInstance);
+				ResourceReferenceState newState = new ResourceReferenceState(getPreResourceState(), newChildInstance);
 				push(newState);
 				return;
 			}
@@ -1286,7 +1286,7 @@ class ParserState<T> {
 		private ResourceReferenceDt myInstance;
 		private ResourceReferenceSubState mySubState;
 
-		public ResourceReferenceState(PreResourceState thePreResourceState, RuntimeResourceReferenceDefinition theTarget, ResourceReferenceDt theInstance) {
+		public ResourceReferenceState(PreResourceState thePreResourceState, ResourceReferenceDt theInstance) {
 			super(thePreResourceState);
 			myInstance = theInstance;
 			mySubState = ResourceReferenceSubState.INITIAL;

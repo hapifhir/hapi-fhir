@@ -72,7 +72,7 @@ public class IdDt extends BasePrimitive<String> {
 			setValue(null);
 		}
 	}
-	
+
 	/**
 	 * Create a new ID using a long
 	 */
@@ -100,14 +100,17 @@ public class IdDt extends BasePrimitive<String> {
 	/**
 	 * Constructor
 	 * 
-	 * @param theResourceType The resource type (e.g. "Patient")
-	 * @param theId The ID (e.g. "123")
-	 * @param theVersionId The version ID ("e.g. "456")
+	 * @param theResourceType
+	 *            The resource type (e.g. "Patient")
+	 * @param theId
+	 *            The ID (e.g. "123")
+	 * @param theVersionId
+	 *            The version ID ("e.g. "456")
 	 */
 	public IdDt(String theResourceType, String theId, String theVersionId) {
 		Validate.notBlank(theResourceType, "Resource type must not be blank");
 		Validate.notBlank(theId, "ID must not be blank");
-		
+
 		myResourceType = theResourceType;
 		myUnqualifiedId = theId;
 		myUnqualifiedVersionId = StringUtils.defaultIfBlank(theVersionId, null);
@@ -170,7 +173,7 @@ public class IdDt extends BasePrimitive<String> {
 	public Long getUnqualifiedVersionIdAsLong() {
 		if (!hasUnqualifiedVersionId()) {
 			return null;
-		}else {
+		} else {
 			return Long.parseLong(getUnqualifiedVersionId());
 		}
 	}
@@ -289,13 +292,15 @@ public class IdDt extends BasePrimitive<String> {
 	}
 
 	/**
-	 * Returns a view of this ID as a fully qualified URL, given a server base and resource name
-	 * (which will only be used if the ID does not already contain those respective parts). Essentially,
-	 * because IdDt can contain either a complete URL or a partial one (or even jut a simple ID), this
-	 * method may be used to translate into a complete URL.
+	 * Returns a view of this ID as a fully qualified URL, given a server base and resource name (which will only be
+	 * used if the ID does not already contain those respective parts). Essentially, because IdDt can contain either a
+	 * complete URL or a partial one (or even jut a simple ID), this method may be used to translate into a complete
+	 * URL.
 	 * 
-	 * @param theServerBase The server base (e.g. "http://example.com/fhir")
-	 * @param theResourceType The resource name (e.g. "Patient")
+	 * @param theServerBase
+	 *            The server base (e.g. "http://example.com/fhir")
+	 * @param theResourceType
+	 *            The resource name (e.g. "Patient")
 	 * @return A fully qualified URL for this ID (e.g. "http://example.com/fhir/Patient/1")
 	 */
 	public String toQualifiedUrl(String theServerBase, String theResourceType) {
@@ -304,12 +309,12 @@ public class IdDt extends BasePrimitive<String> {
 		}
 		StringBuilder retVal = new StringBuilder();
 		retVal.append(theServerBase);
-		if (retVal.charAt(retVal.length()-1) != '/') {
+		if (retVal.charAt(retVal.length() - 1) != '/') {
 			retVal.append('/');
 		}
 		if (isNotBlank(getResourceType())) {
 			retVal.append(getResourceType());
-		}else {
+		} else {
 			retVal.append(theResourceType);
 		}
 		retVal.append('/');
@@ -325,8 +330,8 @@ public class IdDt extends BasePrimitive<String> {
 	public IdDt withoutVersion() {
 		int i = myValue.indexOf(Constants.PARAM_HISTORY);
 		if (i > 1) {
-			return new IdDt(myValue.substring(0, i-1));
-		}else {
+			return new IdDt(myValue.substring(0, i - 1));
+		} else {
 			return this;
 		}
 	}
@@ -340,18 +345,43 @@ public class IdDt extends BasePrimitive<String> {
 	 */
 	@SuppressWarnings("deprecation")
 	public boolean equalsIgnoreBase(IdDt theId) {
-		if (theId==null) {
-		return false;
+		if (theId == null) {
+			return false;
 		}
 		if (theId.isEmpty()) {
 			return isEmpty();
 		}
-		return 
-			ObjectUtils.equals(getResourceType(),theId.getResourceType())
-			&& ObjectUtils.equals(getUnqualifiedId(),theId.getUnqualifiedId())
-			&& ObjectUtils.equals(getUnqualifiedVersionId(),theId.getUnqualifiedVersionId());
+		return ObjectUtils.equals(getResourceType(), theId.getResourceType()) && ObjectUtils.equals(getUnqualifiedId(), theId.getUnqualifiedId()) && ObjectUtils.equals(getUnqualifiedVersionId(), theId.getUnqualifiedVersionId());
 	}
 
+	/**
+	 * Returns <code>true</code> if the ID is a local reference (in other words, it begins with the '#' character)
+	 */
+	public boolean isLocal() {
+		return myUnqualifiedId != null && myUnqualifiedId.isEmpty() == false && myUnqualifiedId.charAt(0) == '#';
+	}
 
+	/**
+	 * Creates a new instance of this ID which is identical, but refers to the specific version of this resource ID
+	 * noted by theVersion.
+	 * 
+	 * @param theVersion
+	 *            The actual version string, e.g. "1"
+	 * @return A new instance of IdDt which is identical, but refers to the specific version of this resource ID noted
+	 *         by theVersion.
+	 */
+	public IdDt withVersion(String theVersion) {
+		Validate.notBlank(theVersion, "Version may not be null or empty");
+		
+		int i = myValue.indexOf(Constants.PARAM_HISTORY);
+		String value;
+		if (i > 1) {
+			value = myValue.substring(0, i - 1);
+		} else {
+			value = myValue;
+		}
+		
+		return new IdDt(value + '/' + Constants.PARAM_HISTORY + '/' + theVersion);
+	}
 
 }

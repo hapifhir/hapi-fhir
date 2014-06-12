@@ -1,7 +1,6 @@
 package ca.uhn.fhirtest;
 
 import java.sql.DriverManager;
-import java.sql.SQLException;
 import java.util.Collection;
 
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -40,6 +39,8 @@ public class TestRestfulServer extends RestfulServer {
 		IFhirSystemDao systemDao = myAppCtx.getBean(IFhirSystemDao.class);
 		JpaSystemProvider sp = new JpaSystemProvider(systemDao);
 		setPlainProviders(sp);
+		
+		setUseBrowserFriendlyContentTypes(true);
 	}
 
 	@Override
