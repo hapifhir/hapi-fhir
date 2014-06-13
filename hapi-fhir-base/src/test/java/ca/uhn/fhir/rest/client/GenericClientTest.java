@@ -101,6 +101,32 @@ public class GenericClientTest {
 
 	}
 
+	
+	@SuppressWarnings("unused")
+	@Test
+	public void testSearchAllResources() throws Exception {
+
+		String msg = getPatientFeedWithOneResult();
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
+
+		IGenericClient client = myCtx.newRestfulGenericClient("http://example.com/fhir");
+
+		//@formatter:off
+		Bundle response = client.search()
+				.forAllResources()
+				.where(Patient.NAME.matches().value("james"))
+				.execute();
+		//@formatter:on
+
+		assertEquals("http://example.com/fhir/?name=james", capt.getValue().getURI().toString());
+
+	}
+	
 	@SuppressWarnings("unused")
 	@Test
 	public void testSearchByStringExact() throws Exception {

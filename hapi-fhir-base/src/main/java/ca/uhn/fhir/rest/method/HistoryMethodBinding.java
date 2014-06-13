@@ -32,6 +32,7 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
+import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.History;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
@@ -112,7 +113,7 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 			}
 		}
 
-		HttpGetClientInvocation retVal = createHistoryInvocation(resourceName, id);
+		HttpGetClientInvocation retVal = createHistoryInvocation(resourceName, id, null, null);
 
 		if (theArgs != null) {
 			for (int idx = 0; idx < theArgs.length; idx++) {
@@ -124,11 +125,11 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 		return retVal;
 	}
 
-	public static HttpGetClientInvocation createHistoryInvocation(String theResourceName, IdDt theId) {
+	public static HttpGetClientInvocation createHistoryInvocation(String theResourceName, IdDt theId, DateTimeDt theSince, Integer theLimit) {
 		StringBuilder b = new StringBuilder();
 		if (theResourceName != null) {
 			b.append(theResourceName);
-			if (theId != null) {
+			if (theId != null && !theId.isEmpty()) {
 				b.append('/');
 				b.append(theId.getValue());
 			}
@@ -137,6 +138,17 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 			b.append('/');
 		}
 		b.append(Constants.PARAM_HISTORY);
+		
+		boolean haveParam=false;
+		if (theSince != null && !theSince.isEmpty()) {
+			haveParam=true;
+			b.append('?').append(Constants.PARAM_SINCE).append('=').append(theSince.getValueAsString());
+		}
+		if (theLimit != null) {
+			b.append(haveParam?'&':'?');
+			b.append(Constants.PARAM_COUNT).append('=').append(theLimit);
+		}
+		
 		HttpGetClientInvocation retVal = new HttpGetClientInvocation(b.toString());
 		return retVal;
 	}

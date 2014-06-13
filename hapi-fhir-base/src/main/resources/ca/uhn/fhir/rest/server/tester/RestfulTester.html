@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta name="description" content="" />
+		<meta name="author" content="" />
+		<script src="js/jquery-2.1.0.min.js"></script>
+		
+		<title>RESTful Tester</title>
+	
+		<script type="text/javascript">
+			var conformance = <th:block th:utext="${jsonEncodedConf}"/>;
+			var resourceName = '<th:block th:utext="${resourceName}"/>';
+		</script>
+	
+		<!-- Bootstrap core CSS -->
+		<link href="css/bootstrap.min.css" rel="stylesheet" />
+		
+		<!-- Custom styles for this template -->
+		<link href="css/tester.css" rel="stylesheet" />
+		
+		<script type="text/javascript" src="js/moment.min.js"></script>
+		
+		<!-- Datetimepicker Component -->
+		<link href="css/bootstrap-datetimepicker.min.css" rel="stylesheet" />
+		<script src="js/bootstrap-datetimepicker.min.js"></script>
+	
+		<!-- Select2 component -->
+		<link href="css/select2.css" rel="stylesheet"/>
+    	<script src="js/select2.min.js"></script>
+    
+	</head>
+
+<body>
+	<form action="" method="get" id="outerForm">
+
+		<div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+			<div class="container-fluid">
+				<div class="navbar-header">
+					<button type="button" class="navbar-toggle" data-toggle="collapse"
+						data-target=".navbar-collapse">
+						<span class="sr-only">Toggle navigation</span> <span
+							class="icon-bar"></span> <span class="icon-bar"></span> <span
+							class="icon-bar"></span>
+					</button>
+					<a class="navbar-brand" href="#">HAPI FHIR RESTful Server</a>
+				</div>
+				<div class="navbar-collapse collapse">
+					<ul class="nav navbar-nav navbar-right">
+						<li><a href="#">Help</a></li>
+					</ul>
+				</div>
+			</div>
+		</div>
+
+		<div class="container-fluid">
+			<div class="row">
+
+				<div class="col-sm-3 col-md-3 sidebar">
+
+					<h4>Options</h4>
+
+					<label class="navBarButtonLabel">Encoding</label>
+					<div class="btn-group " data-toggle="buttons" id="encodingBtnGroup">
+						<label class="btn btn-sm btn-default active"> <input
+							type="radio" name="encoding" id="encode-default" value="" />(default)
+						</label> <label class="btn btn-sm btn-default"> <input
+							type="radio" name="encoding" id="encode-xml" value="xml" />XML
+						</label> <label class="btn btn-sm btn-default"> <input
+							type="radio" name="encoding" id="encode-json" value="json" />JSON
+						</label>
+					</div>
+
+					<br /> <label class="navBarButtonLabel">Pretty</label>
+					<div class="btn-group" data-toggle="buttons">
+						<label class="btn btn-sm btn-default active"> <input
+							type="radio" name="pretty" id="pretty-default" value="" />(default)
+						</label> <label class="btn btn-sm btn-default"> <input
+							type="radio" name="pretty" id="pretty-true" value="true" />On
+						</label> <label class="btn btn-sm btn-default"> <input
+							type="radio" name="pretty" id="pretty-false" value="false" />Off
+						</label>
+					</div>
+
+					<script type="text/javascript">
+					$( document ).ready(function() {
+						<th:block th:switch="${encoding}">
+							<th:block th:case="'xml'">
+								$('#encode-xml').trigger("click");
+							</th:block>
+							<th:block th:case="'json'">
+								$('#encode-json').trigger("click");
+							</th:block>
+						</th:block>
+						<th:block th:switch="${pretty}">
+							<th:block th:case="'true'">
+								$('#pretty-true').trigger("click");
+							</th:block>
+							<th:block th:case="'false'">
+								$('#pretty-false').trigger("click");
+							</th:block>
+						</th:block>
+					});
+					
+					function doAction(source, action, resourceName) {
+						var abtn = $('<input />', { type: 'hidden', name: 'action', value: action });
+						$(source).append(abtn);
+						if (resourceName != null) {
+							var rbtn = $('<input />', { type: 'hidden', name: 'resource', value: resourceName });
+							$(source).append(rbtn);
+						}
+						$('#outerForm').submit();
+					}
+					</script>
+
+					<h4>Query Mode</h4>
+
+					<ul class="nav nav-sidebar">
+						<li th:class="${resourceName.empty} ? 'active' : ''">
+							<a href="#" onclick="doAction(this, 'home', null);">RESTful Server</a>
+						</li>
+						<th:block
+							th:each="resource, resIterStat : ${conf.restFirstRep.resource}">
+							<li th:class="${resourceName} == ${resource.type.valueAsString} ? 'active' : ''">
+								<a href="#" th:text="${resource.type.valueAsString}" th:onclick="'doAction(this, \'home\', \'' + ${resource.type.valueAsString} + '\');'">Patient</a>
+							</li>
+						</th:block>
+					</ul>
+					
+					<input th:if="${resourceName.empty} == false" type="hidden" name="resource" th:value="${resourceName}"/>
+				
+				</div>
+
+
+				<div class="col-sm-9 col-sm-offset-3 col-md-9 col-md-offset-3 main">
+
+					<div class="row">
+						<div class="col-md-8">
+							<img src="img/hapi_fhir_banner.png" />
+						</div>
+						<div class="col-md-4">
+							<img src="img/hapi_fhir_banner_right.png" align="right" />
+						</div>
+					</div>
+
+					<div class="alert  alert-danger alert-dismissable" th:if="${errorMsg} != null">
+						<strong>Warning!</strong>
+						<p th:text="${errorMsg}"></p>
+					</div>
+
+					<!-- ********************************************************** -->
+					<!-- ** Default Home                                         ** -->
+					<!-- ********************************************************** -->
+
+					<div th:if="${requestUrl} == null">
+						<div class="well">
+							This is a RESTful server tester, which can be used to send
+							requests to, and receive responses from the server at the
+							following URL: <a href="http://foo.com/fhir" th:href="${base}"
+								th:text="${base}">http://foo.com/fhir</a>
+						</div>
+
+						<table class="table table-bordered table-striped">
+							<colgroup>
+								<col class="col-xs-1" />
+								<col class="col-xs-7" />
+							</colgroup>
+							<tbody>
+								<tr>
+									<td>Software</td>
+									<td th:text="${conf.software.name}">HAPI Restful Server</td>
+								</tr>
+								<tr>
+									<td>Version</td>
+									<td th:text="${conf.software.version}">1.1.1</td>
+								</tr>
+							</tbody>
+						</table>
+
+						<!-- ************************************************ -->
+						<!-- ** Server Actions (no resource selected)      ** -->
+						<!-- ************************************************ -->
+
+						<div class="panel panel-default" th:if="${resourceName.empty}">
+							<div class="panel-heading">
+								<h3 class="panel-title">Server Actions</h3>
+							</div>
+							<div class="panel-body">
+								<div class="container-fluid">
+							
+								<!-- Conformance -->
+								
+									<div class="row-fluid">
+										Retrieve the server's <b>conformance</b> statement.										
+									</div>
+								    <div class="row-fluid">
+								    	<div class="col-sm-2">
+											<button type="submit" id="fetch-conformance-btn"
+												data-loading-text="Loading..." class="btn btn-primary btn-block"
+												name="action" value="conformance">Fetch
+												Conformance</button>
+											<script type="text/javascript">
+												$('#fetch-conformance-btn').click(
+														function() {
+															var btn = $(this);
+															btn.button('loading');
+														});
+											</script>
+										</div>
+									</div>
+																	
+								<!-- Server History -->
+								
+									<div class="row-fluid">
+										Retrieve the update <b>history</b> across all resource types on
+										the server.										
+									</div>
+								    <div class="row-fluid top-buffer">
+								    	<div class="col-sm-2">
+										<button type="submit" id="server-history-btn"
+											data-loading-text="Loading..." class="btn btn-primary btn-block"
+											name="action" value="history-server">Server History</button>
+								    	</div>
+								        <div class='col-sm-4'>
+								            <div class="form-group">
+								                <div class='input-group date' id='server-history-datetime' data-date-format="YYYY-MM-DDTHH:mm:ss">
+								                    <div class="input-group-addon">
+								                    Since
+								                    </div>
+								                    <input type='text' class="form-control" id="server-history-since"/>
+								                    <div class="input-group-addon">
+								                    <span class="glyphicon glyphicon-calendar"></span>
+								                    </div>
+								                </div>
+								            </div>
+								        </div>								        
+										<div class='col-sm-3'>
+								            <div class="form-group">
+								                <div class='input-group date'>
+								                    <div class="input-group-addon">
+								                    Limit #
+								                    </div>
+								                    <input type="text" class="form-control" id="server-history-limit" placeholder="(opt)"/>
+								                </div>
+								            </div>
+								        </div>
+								        <script type="text/javascript">
+								            $(function () {
+								                $('#server-history-datetime').datetimepicker({
+								                	sideBySide: true,
+								                	use24hours: true,
+								                	showToday: true
+								                });
+								            });
+								            $('#server-history-btn').click(
+												function() {
+													var btn = $(this);
+													btn.button('loading');
+													var limit = $('#server-history-limit').val();
+													if (limit != null) btn.append($('<input />', { type: 'hidden', name: 'limit', value: limit }));
+													var since = $('#server-history-since').val();
+													if (since != null) btn.append($('<input />', { type: 'hidden', name: 'since', value: since }));
+												});								            
+								        </script>
+								        
+								    </div>
+								    
+								<!-- Next Server Action? -->
+								    
+								</div>
+							</div>
+						</div>
+
+						<!-- ************************************************ -->
+						<!-- ** Resource Actions                           ** -->
+						<!-- ************************************************ -->
+						
+						<div class="panel panel-default" th:if="${resourceName.empty} == false">
+							<div class="panel-heading">
+								<h3 class="panel-title" th:text="'Resource: ' + ${resourceName}">Resource: <b>Patient</b></h3>
+							</div>
+							<div class="panel-body">
+								This page contains various operations for interacting with
+								the <th:block th:text="${resourceName}"/> resource.
+							</div>
+						</div>
+						
+						<div class="panel panel-default" th:if="${resourceName.empty} == false">
+							<div class="panel-heading">
+								<h3 class="panel-title">Search</h3>
+							</div>
+							<div class="panel-body">
+								<div class="container-fluid">
+									<div class="row-fluid">
+								    	<div class="col-sm-2">
+											<button type="submit" id="read-btn"	data-loading-text="Loading..." class="btn btn-primary btn-block" name="action" value="search">
+												<span class="glyphicon glyphicon-search"></span>
+												Search
+											</button>
+										</div>												
+									</div>
+									<br clear="all"/>
+									
+									<div class="row-fluid">
+										<h4>Search Parameters <small>Optionally add parameter(s) to the search</small></h4>
+									</div>
+									
+									<div id="search-param-rows" style="padding-left: 15px;">
+										<!-- Placeholder: gets populated by script below -->
+									</div>
+									
+									<br clear="all"/>
+									
+									<!-- 
+							    	<div class="col-sm-1">
+										<button type="button" class="btn btn-success btn-block">Add
+											<span class="glyphicon glyphicon-plus"></span>
+										</button>
+									</div>
+									 -->
+									 
+								</div>						
+							</div>
+						</div>
+						<script type="text/javascript">
+							var numRows = 0;
+							function addSearchParamRow() {
+								var nextRow = numRows++;
+								var select = $('<select/>', {/*style:'margin-left:30px;'*/});
+								var plusBtn = $('<button />', {type:'button', 'class':'btn btn-success btn-block'});
+								plusBtn.append($('<span />', {'class':'glyphicon glyphicon-plus'}));
+								plusBtn.isAdd = true;
+
+								var rowDiv = $('<div />', { 'class': 'row top-buffer', id: 'search-param-row-' + nextRow }).append(
+										$('<div />', { 'class': 'col-sm-1' }).append(plusBtn),
+										$('<div />', { 'class': 'col-sm-5' }).append(select),
+										$('<div />', { id: 'search-param-rowopts-' + nextRow })
+								);
+								$("#search-param-rows").append(rowDiv);
+								
+								plusBtn.click(function() {
+									addSearchParamRow();
+								});
+								
+								var params = new Array();
+								conformance.rest.forEach(function(rest){
+									rest.resource.forEach(function(restResource){
+										if (restResource.type == resourceName) {
+											if (restResource.searchParam) {
+												restResource.searchParam.forEach(function(searchParam){
+													params[searchParam.name] = searchParam;
+													select.append(
+														$('<option />', { value: searchParam.name }).text(searchParam.name + ' - ' + searchParam.documentation)														
+													);
+												});
+											}
+										}				
+									});
+								});	
+								select.select2();
+								handleSearchParamTypeChange(select, params, nextRow);
+								select.change(function(){ handleSearchParamTypeChange(select, params, nextRow); });
+							}
+							
+							function handleSearchParamTypeChange(select, params, rowNum) {
+								var oldVal = select.prevVal;
+								var newVal = select.val();
+								if (oldVal == newVal) {
+									return;
+								}
+								$('#search-param-rowopts-' + rowNum).empty();
+								var searchParam = params[newVal];
+							    if (searchParam.type == 'token') {
+							    	$('#search-param-rowopts-' + rowNum).append(
+							    		$('<div />', { 'class': 'col-sm-3' }).append(
+									    	$('<input />', { name: 'param.' + rowNum + '.name', type: 'hidden', value: searchParam.name }),
+									    	$('<input />', { name: 'param.' + rowNum + '.0', placeholder: 'system/namespace', type: 'text', 'class': 'form-control' })
+									    ),
+							    		$('<div />', { 'class': 'col-sm-3' }).append(
+									    	$('<input />', { name: 'param.' + rowNum + '.1', type: 'hidden', value: '|' }),
+									    	$('<input />', { name: 'param.' + rowNum + '.2', placeholder: 'value', type: 'text', 'class': 'form-control' })
+									    )
+							    	);
+							    } else if (searchParam.type == 'string' || searchParam.type == 'number') {
+							    	$('#search-param-rowopts-' + rowNum).append(
+							    		$('<div />', { 'class': 'col-sm-3' }).append(
+									    	$('<input />', { name: 'param.' + rowNum + '.name', type: 'hidden', value: searchParam.name }),
+									    	$('<input />', { name: 'param.' + rowNum + '.0', placeholder: 'value', type: 'text', 'class': 'form-control' })
+								    	)
+								    );
+							    } else if (searchParam.type == 'date') {
+							    	if (/date$/.test(searchParam.name)) {
+										var input = $('<div />', { 'class':'input-group date', 'data-date-format':'YYYY-MM-DD' }).append(
+											$('<input />', { type:'text', 'class':'form-control', name: 'param.' + rowNum + '.1' }),
+											$('<div />', { 'class':'input-group-addon'}).append(
+												$('<span />', { 'class':'glyphicon glyphicon-calendar'})
+											)
+										);
+						                input.datetimepicker({
+						                	pickTime: false,
+						                	showToday: true
+						                });
+							    	} else {
+										var input = $('<div />', { 'class':'input-group date', 'data-date-format':'YYYY-MM-DDTHH:mm:ss' }).append(
+											$('<input />', { type:'text', 'class':'form-control', name: 'param.' + rowNum + '.1' }),
+											$('<div />', { 'class':'input-group-addon'}).append(
+												$('<span />', { 'class':'glyphicon glyphicon-calendar'})
+											)
+										);
+						                input.datetimepicker({
+						                	sideBySide: true,
+						                	use24hours: true,
+						                	showToday: true
+						                });
+							    	}
+
+							    	$('#search-param-rowopts-' + rowNum).append(
+							    		$('<div />', { 'class': 'col-sm-1 btn-group' }).append(
+						    				$('<select />', {type:'text', name:'param.'+rowNum+'.0', 'class':'form-control', autocomplete:'off'}).append(
+						    					$('<option value="">(qual)</option>'),
+						    					$('<option value="=">=</option>'),
+						    					$('<option value=">=">&gt;=</option>'),
+						    					$('<option value=">">&gt;</option>'),
+						    					$('<option value="&lt;=">&lt;=</option>'),
+						    					$('<option value="&lt;">&lt;</option>')
+						    				)
+								    	),							    			
+							    		$('<div />', { 'class': 'col-sm-4' }).append(
+									    	$('<input />', { name: 'param.' + rowNum + '.name', type: 'hidden', value: searchParam.name }),
+									    	input
+								    	)
+								    );
+							    }
+								
+								select.prevVal = newVal;
+							}
+							
+							$( document ).ready(function() {
+								addSearchParamRow();
+							});							
+						</script>
+						
+						<div class="panel panel-default" th:if="${resourceName.empty} == false">
+							<div class="panel-heading">
+								<h3 class="panel-title">Operations</h3>
+							</div>
+							<div class="panel-body">
+								<div class="container-fluid">
+
+								<!-- Read/VRead -->
+								
+									<div class="row-fluid">
+										<div>
+											<b>Read</b> an individual resource instance given its
+											ID (and optionally a version ID to retrieve a specific version
+											of that instance to <b>vread</b> that instance)
+										</div>										
+									</div>
+								    <div class="row-fluid">
+								    	<div class="col-sm-2">
+											<button type="submit" id="read-btn"
+												data-loading-text="Loading..." class="btn btn-primary btn-block"
+												name="action" value="read">Read</button>
+										</div>												
+										<div class='col-sm-3'>
+								            <div class="form-group">
+								                <div class='input-group date'>
+								                    <div class="input-group-addon">
+								                    ID
+								                    </div>
+								                    <input type="text" class="form-control" id="read-id"/>
+								                </div>
+								            </div>
+								        </div>											
+										<div class='col-sm-4'>
+								            <div class="form-group">
+								                <div class='input-group date'>
+								                    <div class="input-group-addon">
+								                    Version ID
+								                    </div>
+								                    <input type="text" class="form-control" id="read-vid" placeholder="(opt)"/>
+								                </div>
+								            </div>
+								        </div>											
+										<script type="text/javascript">
+											$('#read-btn').click(
+												function() {
+													var btn = $(this);
+													btn.button('loading');
+													var id = $('#read-id').val();
+													if (id != null) btn.append($('<input />', { type: 'hidden', name: 'id', value: id }));
+													var vid = $('#read-vid').val();
+													if (vid != null) btn.append($('<input />', { type: 'hidden', name: 'vid', value: vid }));
+													btn.append($('<input />', { type: 'hidden', name: 'resource', value: '<th:block th:text="${resourceName}"/>' }));
+												});
+										</script>
+									</div>
+									<br clear="all"/>
+									
+								<!-- Resource History -->
+								
+									<div class="row-fluid">
+										Retrieve the update <b>history</b> across the <th:block th:text="${resourceName}"/> 
+										resource type, or against a specific instance of this resource type if
+										an ID is specified. 			
+									</div>
+								    <div class="row-fluid top-buffer">
+								    	<div class="col-sm-2">
+											<button type="submit" id="resource-history-btn"
+												data-loading-text="Loading..." class="btn btn-primary btn-block"
+												name="action" value="history-resource">History</button>
+								    	</div>
+										<div class='col-sm-3'>
+								            <div class="form-group">
+								                <div class='input-group date'>
+								                    <div class="input-group-addon">
+								                    ID
+								                    </div>
+								                    <input type="text" class="form-control" id="resource-history-id" placeholder="(opt)"/>
+								                </div>
+								            </div>
+								        </div>											
+								        <div class='col-sm-4'>
+								            <div class="form-group">
+								                <div class='input-group date' id='resource-history-datetime' data-date-format="YYYY-MM-DDTHH:mm:ss">
+								                    <div class="input-group-addon">
+								                    Since
+								                    </div>
+								                    <input type='text' class="form-control" id="resource-history-since" placeholder="(opt)"/>
+								                    <div class="input-group-addon">
+								                    <span class="glyphicon glyphicon-calendar"></span>
+								                    </div>
+								                </div>
+								            </div>
+								        </div>								        
+										<div class='col-sm-2'>
+								            <div class="form-group">
+								                <div class='input-group date'>
+								                    <div class="input-group-addon">
+								                    Limit #
+								                    </div>
+								                    <input type="text" class="form-control" id="resource-history-limit" placeholder="(opt)"/>
+								                </div>
+								            </div>
+								        </div>
+								        <script type="text/javascript">
+								            $(function () {
+								                $('#resource-history-datetime').datetimepicker({
+								                	sideBySide: true,
+								                	use24hours: true,
+								                	showToday: true
+								                });
+								            });
+								            $('#resource-history-btn').click(
+												function() {
+													var btn = $(this);
+													btn.button('loading');
+													var limit = $('#resource-history-limit').val();
+													if (limit != null) btn.append($('<input />', { type: 'hidden', name: 'limit', value: limit }));
+													var since = $('#resource-history-since').val();
+													if (since != null) btn.append($('<input />', { type: 'hidden', name: 'since', value: since }));
+													var id = $('#resource-history-id').val();
+													if (id != null) btn.append($('<input />', { type: 'hidden', name: 'resource-history-id', value: id }));
+												});								            
+								        </script>								        
+								    </div>
+									<br clear="all"/>
+																	
+								<!-- Delete -->
+								
+									<div class="row-fluid">
+										<b>Delete</b> an individual instance of the resource 			
+									</div>
+								    <div class="row-fluid top-buffer">
+								    	<div class="col-sm-2">
+											<button type="submit" id="resource-delete-btn"
+												data-loading-text="Loading..." class="btn btn-primary btn-block"
+												name="action" value="delete">Delete</button>
+								    	</div>
+										<div class='col-sm-3'>
+								            <div class="form-group">
+								                <div class='input-group date'>
+								                    <div class="input-group-addon">
+								                    ID
+								                    </div>
+								                    <input type="text" class="form-control" id="resource-delete-id"/>
+								                </div>
+								            </div>
+								        </div>											
+								        <script type="text/javascript">
+								            $('#resource-delete-btn').click(
+												function() {
+													var btn = $(this);
+													btn.button('loading');
+													var id = $('#resource-delete-id').val();
+													if (id != null) btn.append($('<input />', { type: 'hidden', name: 'resource-delete-id', value: id }));
+												});								            
+								        </script>								        
+								    </div>
+									<br clear="all"/>
+																	
+								<!-- Create/Update -->
+								
+									<div class="row-fluid">
+										<b>Create/Update</b> an instance of the resource. If no ID is specified, 
+										a new resource will be created. If an ID is specified, the existing
+										resource with that ID will be updated.
+									</div>
+								    <div class="row-fluid top-buffer">
+								    	<div class="col-sm-2">
+											<button type="submit" id="resource-create-btn"
+												data-loading-text="Loading..." class="btn btn-primary btn-block"
+												name="action" value="create">Create</button>
+								    	</div>
+										<div class='col-sm-3'>
+								            <div class="form-group">
+								                <div class='input-group date'>
+								                    <div class="input-group-addon">
+								                    ID
+								                    </div>
+								                    <input type="text" class="form-control" id="resource-create-id" placeholder="(opt)" />
+								                </div>
+								            </div>
+								        </div>											
+										<div class='col-sm-7'>
+								            <div class="form-group">
+								                <div class='input-group date'>
+								                    <div class="input-group-addon">
+								                    Contents
+								                    </div>
+								                    <textarea class="form-control" id="resource-create-body" style="white-space: nowrap; overflow: auto;" placeholder="(place resource body here)" rows="1"></textarea>
+								                </div>
+								            </div>
+								        </div>											
+								        <script type="text/javascript">
+											var buttonChanger = function() {
+								        		var val = $('#resource-create-id').val();
+								        		if (val != "") {
+								        			//$('#resource-create-btn').text("Update");
+								        			$("#resource-create-btn").fadeOut(function() {
+								        				  $(this).text("Update").fadeIn();
+								        			});
+								        		} else {
+								        			$("#resource-create-btn").fadeOut(function() {
+								        				  $(this).text("Create").fadeIn();
+								        			});
+								        			//$('#resource-create-btn').text("Create");
+								        		}
+								        	};
+								        	$('#resource-create-id').change(buttonChanger);
+								        	$('#resource-create-id').keyup(buttonChanger);
+								        	$('#resource-create-body').focus(
+								        		function() {
+								        			createBodyOriginalHeight = $('#resource-create-body').height();
+								        			$('#resource-create-body').animate({height: "200px"}, 500);
+								        		});
+								        	/*$('#resource-create-body').blur(
+								        		function() {
+								        			$('#resource-create-body').animate({height: "34px"}, 500);
+								        		});*/
+								            $('#resource-create-btn').click(
+												function() {
+													var btn = $(this);
+													btn.button('loading');
+													var id = $('#resource-create-id').val();
+													if (id != null) btn.append($('<input />', { type: 'hidden', name: 'resource-create-id', value: id }));
+													var body = $('#resource-create-body').val();
+													btn.append($('<input />', { type: 'hidden', name: 'resource-create-body', value: body }));
+												});								            
+								        </script>								        
+								    </div>
+									<br clear="all"/>
+
+								<!-- Validate -->
+								
+									<div class="row-fluid">
+										<b>Validate</b> an instance of the resource to check whether it
+										would be acceptable for creating/updating, without actually
+										storing it on the server.
+									</div>
+								    <div class="row-fluid top-buffer">
+								    	<div class="col-sm-2">
+											<button type="submit" id="resource-validate-btn"
+												data-loading-text="Loading..." class="btn btn-primary btn-block"
+												name="action" value="validate">Validate</button>
+								    	</div>
+										<div class='col-sm-10'>
+								            <div class="form-group">
+								                <div class='input-group date'>
+								                    <div class="input-group-addon">
+								                    Contents
+								                    </div>
+								                    <textarea class="form-control" id="resource-validate-body" style="white-space: nowrap; overflow: auto;" placeholder="(place resource body here)" rows="1"></textarea>
+								                </div>
+								            </div>
+								        </div>											
+								        <script type="text/javascript">
+								        	$('#resource-validate-body').focus(
+								        		function() {
+								        			validateBodyOriginalHeight = $('#resource-validate-body').height();
+								        			$('#resource-validate-body').animate({height: "200px"}, 500);
+								        		});
+								            $('#resource-validate-btn').click(
+												function() {
+													var btn = $(this);
+													btn.button('loading');
+													var body = $('#resource-validate-body').val();
+													btn.append($('<input />', { type: 'hidden', name: 'resource-validate-body', value: body }));
+												});								            
+								        </script>								        
+								    </div>
+									<br clear="all"/>
+
+								</div>								
+							</div>
+						</div>
+						
+					</div>
+
+					<!-- *************************************************** -->
+					<!-- ** Response                                      ** -->
+					<!-- *************************************************** -->
+
+					<div th:if="${requestUrl} != null">
+						
+						<div class="well" id="resultWell">
+							Executed request against FHIR RESTful server in 
+							<th:block th:text="${latencyMs} + 'ms'"/>
+						</div>
+
+						<table class="table table-bordered table-striped" id="requestTable">
+							<colgroup>
+								<col class="col-xs-1" />
+								<col class="col-xs-7" />
+							</colgroup>
+							<tbody>
+								<tr>
+									<td style="white-space: nowrap;">
+										<span class="glyphicon glyphicon glyphicon-chevron-right"></span>
+										Request
+									</td>
+									<td>
+										<th:block th:text="${action}"/>
+										<a th:href="${requestUrl}" th:text="${requestUrl}"/>
+									</td>
+								</tr>
+								<tr th:if="${requestHeaders.length} > 0">
+									<td>Request Headers</td>
+									<td class="headerBox">
+										<div th:each="header : ${requestHeaders}">
+											<span class="headerName" th:text="${header.name} + ': '"/>
+											<span class="headerValue" th:text="${header.value}"/>
+										</div>
+									</td>
+								</tr>
+								<tr th:if="${#strings.isEmpty(requestBody)} == false">
+									<td>Request Body</td>
+									<td valign="top">
+										<pre class="requestBodyPre" id="requestBodyPlaceholder">...loading...</pre>
+										<pre th:text="${requestBody}" class="requestBodyPre pre-scrollable" id="requestBodyActual" style="display: none;">{}</pre>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+
+						<table class="table table-bordered table-striped" id="resultTable">
+							<colgroup>
+								<col class="col-xs-1" />
+								<col class="col-xs-7" />
+							</colgroup>
+							<tbody>
+								<tr>
+									<td style="white-space: nowrap;">
+										<span class="glyphicon glyphicon glyphicon-chevron-left"></span>
+										Response
+									</td>
+									<td th:text="${resultStatus}">HTTP 200 OK</td>
+								</tr>
+								<tr>
+									<td>Response Headers</td>
+									<td class="headerBox">
+										<div th:each="header : ${responseHeaders}">
+											<span class="headerName" th:text="${header.name} + ': '"/>
+											<span class="headerValue" th:text="${header.value}"/>
+										</div>
+									</td>
+								</tr>
+								<tr th:if="${!#strings.isEmpty(resultBody)}">
+									<td>Result Body</td>
+									<td valign="top">
+										<pre class="resultBodyPre" id="resultBodyPlaceholder">...loading...</pre>
+										<pre th:text="${resultBody}" class="resultBodyPre pre-scrollable" id="resultBodyActual" style="display: none;">{}</pre>
+									</td>
+								</tr>
+								<tr th:if="${!#strings.isEmpty(narrative)}">
+									<td class="propertyKeyCell">Result Narrative</td>
+									<td th:utext="${narrative}"></td>
+								</tr>
+							</tbody>
+						</table>
+						
+						<script type="text/javascript">
+							$( document ).ready(function() {
+								var width = $('#resultBodyPlaceholder').width();
+								$('#resultBodyPlaceholder').hide();
+								$('#resultBodyActual').width(width);
+								$('#resultBodyActual').show();
+								
+								if ($('#requestBodyPlaceholder') != null) {
+									width = $('#requestBodyPlaceholder').width();
+									$('#requestBodyPlaceholder').hide();
+									$('#requestBodyActual').width(width);
+									$('#requestBodyActual').show();
+								}
+							});							
+						</script>
+						
+					</div>
+
+
+				</div>
+			</div>
+		</div>
+
+		<!-- Bootstrap core JavaScript
+    ================================================== -->
+		<!-- Placed at the end of the document so the pages load faster -->
+		<script src="js/bootstrap.min.js"></script>
+	</form>
+</body>
+</html>

@@ -90,7 +90,7 @@ public abstract class BaseHttpClientInvocationWithContents extends BaseHttpClien
 		}
 		b.append(StringUtils.defaultString(myUrlExtension));
 
-		appendExtraParamsWithQuestionMark(theExtraParams, b, true);
+		appendExtraParamsWithQuestionMark(theExtraParams, b, b.indexOf("?") == -1);
 		String url = b.toString();
 
 		if (myResource != null && Binary.class.isAssignableFrom(myResource.getClass())) {

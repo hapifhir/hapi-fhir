@@ -23,7 +23,7 @@ patient.getNameFirstRep().getFamilyFirstRep().setValue("Jones");
 client.update("1", patient);
 
 // Return the version history for that patient
-Bundle versions = client.history(Patient.class, "1");
+Bundle versions = client.history(Patient.class, "1",null,null);
 // END SNIPPET: simple	
 }
 

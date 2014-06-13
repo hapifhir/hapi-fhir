@@ -25,6 +25,8 @@ import ca.uhn.fhir.model.api.IResource;
 
 public interface IUntypedQuery {
 
+	IQuery forAllResources();
+
 	IQuery forResource(String theResourceName);
 
 	IQuery forResource(Class<? extends IResource> theClass);

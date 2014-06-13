@@ -38,6 +38,7 @@ import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.resource.Conformance;
+import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.MethodOutcome;
@@ -134,8 +135,10 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	}
 
 	@Override
-	public <T extends IResource> Bundle history(final Class<T> theType, IdDt theIdDt) {
-		HttpGetClientInvocation invocation = HistoryMethodBinding.createHistoryInvocation(toResourceName(theType), theIdDt);
+	public <T extends IResource> Bundle history(final Class<T> theType, IdDt theIdDt, DateTimeDt theSince, Integer theLimit) {
+		String resourceName = theType != null ? toResourceName(theType) : null;
+		IdDt id = theIdDt != null && theIdDt.isEmpty() == false ? theIdDt : null;
+		HttpGetClientInvocation invocation = HistoryMethodBinding.createHistoryInvocation(resourceName, id, theSince, theLimit);
 		if (isKeepResponses()) {
 			myLastRequest = invocation.asHttpRequest(getServerBase(), createExtraParams(), getEncoding());
 		}
@@ -147,8 +150,8 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	}
 
 	@Override
-	public <T extends IResource> Bundle history(Class<T> theType, String theId) {
-		return history(theType, new IdDt(theId));
+	public <T extends IResource> Bundle history(Class<T> theType, String theId, DateTimeDt theSince, Integer theLimit) {
+		return history(theType, new IdDt(theId), theSince, theLimit);
 	}
 
 	public boolean isLogRequestAndResponse() {
@@ -307,8 +310,8 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		private EncodingEnum myParamEncoding;
 		private Integer myParamLimit;
 		private boolean myQueryLogRequestAndResponse;
-		private String myResourceName;
-		private Class<? extends IResource> myResourceType;
+		private final String myResourceName;
+		private final Class<? extends IResource> myResourceType;
 		private List<SortInternal> mySort = new ArrayList<SortInternal>();
 
 		public ForInternal(Class<? extends IResource> theResourceType) {
@@ -319,6 +322,11 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		public ForInternal(String theResourceName) {
 			myResourceType = myContext.getResourceDefinition(theResourceName).getImplementingClass();
 			myResourceName = theResourceName;
+		}
+
+		public ForInternal() {
+			myResourceType = null;
+			myResourceName = null;
 		}
 
 		private void addParam(Map<String, List<String>> params, String parameterName, String parameterValue) {
@@ -357,8 +365,10 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 			StringBuilder b = new StringBuilder();
 			b.append(getServerBase());
-			b.append('/');
-			b.append(myResourceType);
+			if (myResourceType != null) {
+				b.append('/');
+				b.append(myResourceType);
+			}
 			b.append('?');
 
 			Map<String, List<String>> params = new LinkedHashMap<String, List<String>>();
@@ -457,6 +467,11 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		@Override
 		public IQuery forResource(String theResourceName) {
 			return new ForInternal(theResourceName);
+		}
+
+		@Override
+		public IQuery forAllResources() {
+			return new ForInternal();
 		}
 
 	}

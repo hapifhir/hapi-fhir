@@ -20,13 +20,14 @@ package ca.uhn.fhir.rest.server.tester;
  * #L%
  */
 
+import static org.apache.commons.lang3.StringUtils.*;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -55,23 +56,26 @@ import org.thymeleaf.templateresolver.TemplateResolver;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.resource.Conformance;
+import ca.uhn.fhir.model.dstu.resource.Conformance.Rest;
+import ca.uhn.fhir.model.dstu.resource.Conformance.RestResource;
+import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.annotation.Metadata;
 import ca.uhn.fhir.rest.client.GenericClient;
 import ca.uhn.fhir.rest.client.api.IBasicClient;
-import ca.uhn.fhir.rest.server.Constants;
+import ca.uhn.fhir.rest.gclient.IQuery;
+import ca.uhn.fhir.rest.gclient.IUntypedQuery;
+import ca.uhn.fhir.rest.gclient.StringParam;
 import ca.uhn.fhir.rest.server.EncodingEnum;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 
-public class RestfulServerTesterServlet extends HttpServlet {
+public class RestfulTesterServlet extends HttpServlet {
 
 	private static final boolean DEBUGMODE = true;
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RestfulServerTesterServlet.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RestfulTesterServlet.class);
 	private static final String PUBLIC_TESTER_RESULT_HTML = "/PublicTesterResult.html";
 	private static final long serialVersionUID = 1L;
 	private FhirContext myCtx;
@@ -81,7 +85,7 @@ public class RestfulServerTesterServlet extends HttpServlet {
 	private TemplateEngine myTemplateEngine;
 	private Set<String> myFilterHeaders;
 
-	public RestfulServerTesterServlet() {
+	public RestfulTesterServlet() {
 		myStaticResources = new HashMap<String, String>();
 		myStaticResources.put("jquery-2.1.0.min.js", "text/javascript");
 		myStaticResources.put("PublicTester.js", "text/javascript");
@@ -97,6 +101,27 @@ public class RestfulServerTesterServlet extends HttpServlet {
 		myStaticResources.put("json2.js", "text/javascript");
 		myStaticResources.put("minify.json.js", "text/javascript");
 
+		myStaticResources.put("css/bootstrap.min.css", "text/css");
+		myStaticResources.put("css/tester.css", "text/css");
+		myStaticResources.put("img/hapi_fhir_banner.png", "image/png");
+		myStaticResources.put("img/hapi_fhir_banner_right.png", "image/png");
+		myStaticResources.put("js/bootstrap.min.js", "text/javascript");
+		myStaticResources.put("js/jquery-2.1.0.min.js", "text/javascript");
+
+		myStaticResources.put("css/bootstrap-datetimepicker.min.css", "text/css");
+		myStaticResources.put("js/bootstrap-datetimepicker.min.js", "text/javascript");
+		myStaticResources.put("js/moment.min.js", "text/javascript");
+
+		myStaticResources.put("js/select2.min.js", "text/javascript");
+		myStaticResources.put("css/select2.css", "text/css");
+		myStaticResources.put("css/select2.png", "image/png");
+		myStaticResources.put("css/select2x2.png", "image/png");
+		myStaticResources.put("css/select2-spinner.gif", "image/gif");
+
+		myStaticResources.put("fonts/glyphicons-halflings-regular.eot", "application/octet-stream");
+		myStaticResources.put("fonts/glyphicons-halflings-regular.svg", "application/octet-stream");
+		myStaticResources.put("fonts/glyphicons-halflings-regular.ttf", "application/octet-stream");
+		myStaticResources.put("fonts/glyphicons-halflings-regular.woff", "application/octet-stream");
 		myCtx = new FhirContext();
 	}
 
@@ -120,7 +145,7 @@ public class RestfulServerTesterServlet extends HttpServlet {
 	}
 
 	private RuntimeResourceDefinition getResourceType(HttpServletRequest theReq) throws ServletException {
-		String resourceName = StringUtils.defaultString(theReq.getParameter("resourceName"));
+		String resourceName = StringUtils.defaultString(theReq.getParameter("resource"));
 		RuntimeResourceDefinition def = myCtx.getResourceDefinition(resourceName);
 		if (def == null) {
 			throw new ServletException("Invalid resourceName: " + resourceName);
@@ -129,204 +154,177 @@ public class RestfulServerTesterServlet extends HttpServlet {
 	}
 
 	private void streamResponse(String theResourceName, String theContentType, HttpServletResponse theResp) throws IOException {
-		InputStream res = RestfulServerTesterServlet.class.getResourceAsStream("/ca/uhn/fhir/rest/server/tester/" + theResourceName);
+		InputStream res = RestfulTesterServlet.class.getResourceAsStream("/ca/uhn/fhir/rest/server/tester/" + theResourceName);
 		theResp.setContentType(theContentType);
 		IOUtils.copy(res, theResp.getOutputStream());
 	}
 
-	@Override
-	protected void doGet(HttpServletRequest theReq, HttpServletResponse theResp) throws ServletException, IOException {
-		if (DEBUGMODE) {
-			myTemplateEngine.getCacheManager().clearAllCaches();
-		}
-
-		try {
-			ourLog.info("RequestURI: {}", theReq.getPathInfo());
-
-			String resName = theReq.getPathInfo().substring(1);
-			if (myStaticResources.containsKey(resName)) {
-				streamResponse(resName, myStaticResources.get(resName), theResp);
-				return;
-			}
-
-			ConformanceClient client = myCtx.newRestfulClient(ConformanceClient.class, myServerBase);
-			Conformance conformance = client.getConformance();
-
-			WebContext ctx = new WebContext(theReq, theResp, theReq.getServletContext(), theReq.getLocale());
-			ctx.setVariable("conf", conformance);
-			ctx.setVariable("base", myServerBase);
-			ctx.setVariable("jsonEncodedConf", myCtx.newJsonParser().encodeResourceToString(conformance));
-			addStandardVariables(ctx, theReq.getParameterMap());
-			
-			theResp.setContentType("text/html");
-			theResp.setCharacterEncoding("UTF-8");
-
-			myTemplateEngine.process(theReq.getPathInfo(), ctx, theResp.getWriter());
-		} catch (Exception e) {
-			ourLog.error("Failed to respond", e);
-			theResp.sendError(500, e.getMessage());
-		}
-	}
-
-	private void addStandardVariables(WebContext theCtx, Map<String, String[]> theParameterMap) {
-		addStandardVariable(theCtx, theParameterMap, "configEncoding");
-		addStandardVariable(theCtx, theParameterMap, "configPretty");
-	}
-
-	private void addStandardVariable(WebContext theCtx, Map<String, String[]> theParameterMap, String key) {
-		if (theParameterMap.containsKey(key) && theParameterMap.get(key).length > 0) {
-			theCtx.setVariable(key, theParameterMap.get(key)[0]);
-		}
-	}
-
-	@Override
-	protected void doPost(HttpServletRequest theReq, HttpServletResponse theResp) throws ServletException, IOException {
-		if (DEBUGMODE) {
-			myTemplateEngine.getCacheManager().clearAllCaches();
-		}
+	private void processAction(HttpServletRequest theReq, WebContext theContext) {
 
 		GenericClient client = (GenericClient) myCtx.newRestfulGenericClient(myServerBase);
 		client.setKeepResponses(true);
 		boolean returnsResource;
-		long latency=0;
-		
-		try {
-			String method = theReq.getParameter("method");
+		long latency = 0;
 
-			String prettyParam = theReq.getParameter("configPretty");
-			if ("on".equals(prettyParam)) {
+		try {
+			String method = theReq.getParameter("action");
+
+			String prettyParam = theReq.getParameter("pretty");
+			if ("true".equals(prettyParam)) {
 				client.setPrettyPrint(true);
+			} else if ("false".equals(prettyParam)) {
+				client.setPrettyPrint(false);
 			}
-			if ("xml".equals(theReq.getParameter("configEncoding"))) {
+			if ("xml".equals(theReq.getParameter("encoding"))) {
 				client.setEncoding(EncodingEnum.XML);
 			} else if ("json".equals(theReq.getParameter("configEncoding"))) {
 				client.setEncoding(EncodingEnum.JSON);
 			}
 
 			long start = System.currentTimeMillis();
-			if ("conformance".equals(method)) {
+			if ("home".equals(method)) {
+				return;
+			} else if ("conformance".equals(method)) {
 				returnsResource = true;
 				client.conformance();
 			} else if ("read".equals(method)) {
 				RuntimeResourceDefinition def = getResourceType(theReq);
 				String id = StringUtils.defaultString(theReq.getParameter("id"));
 				if (StringUtils.isBlank(id)) {
-					theResp.sendError(Constants.STATUS_HTTP_400_BAD_REQUEST, "No ID specified");
+					theContext.getVariables().put("errorMsg", "No ID specified");
+					return;
 				}
 				returnsResource = true;
 
-				client.read(def.getImplementingClass(), new IdDt(id));
-
-			} else if ("vread".equals(method)) {
-				RuntimeResourceDefinition def = getResourceType(theReq);
-				String id = StringUtils.defaultString(theReq.getParameter("id"));
-				if (StringUtils.isBlank(id)) {
-					theResp.sendError(Constants.STATUS_HTTP_400_BAD_REQUEST, "No ID specified");
-				}
-
-				String versionId = StringUtils.defaultString(theReq.getParameter("versionid"));
+				String versionId = StringUtils.defaultString(theReq.getParameter("vid"));
 				if (StringUtils.isBlank(versionId)) {
-					theResp.sendError(Constants.STATUS_HTTP_400_BAD_REQUEST, "No Version ID specified");
+					versionId = null;
 				}
-				returnsResource = true;
 
-				client.vread(def.getImplementingClass(), new IdDt(id), new IdDt(versionId));
+				client.read(def.getImplementingClass(), new IdDt(def.getName(), id, versionId));
 
 			} else if ("delete".equals(method)) {
 				RuntimeResourceDefinition def = getResourceType(theReq);
-				String id = StringUtils.defaultString(theReq.getParameter("id"));
+				String id = StringUtils.defaultString(theReq.getParameter("resource-delete-id"));
 				if (StringUtils.isBlank(id)) {
-					theResp.sendError(Constants.STATUS_HTTP_400_BAD_REQUEST, "No ID specified");
+					theContext.getVariables().put("errorMsg", "No ID specified");
+					return;
 				}
 
 				returnsResource = false;
 
 				client.delete(def.getImplementingClass(), new IdDt(id));
 
-			} else if ("history-instance".equals(method) || "history-server".equals(method) || "history-type".equals(method)) {
-				RuntimeResourceDefinition def = getResourceType(theReq);
-				String id = StringUtils.defaultString(theReq.getParameter("id"));
-				if (StringUtils.isBlank(id)) {
-					theResp.sendError(Constants.STATUS_HTTP_400_BAD_REQUEST, "No ID specified");
-				}
-
-				returnsResource = false;
-
-				client.history(def.getImplementingClass(), new IdDt(id),null,null);
-
-			} else if ("create".equals(method)) {
-				IResource resource = parseIncomingResource(theReq, theResp, client);
-				returnsResource = false;
-
-				client.create(resource);
-
-			} else if ("validate".equals(method)) {
-				IResource resource = parseIncomingResource(theReq, theResp, client);
-				returnsResource = false;
-
-				client.validate(resource);
-
-			} else if ("update".equals(method)) {
-				String id = StringUtils.defaultString(theReq.getParameter("id"));
-				if (StringUtils.isBlank(id)) {
-					theResp.sendError(Constants.STATUS_HTTP_400_BAD_REQUEST, "No ID specified");
-				}
-
-				IResource resource = parseIncomingResource(theReq, theResp, client);
-				returnsResource = false;
-
-				client.update(new IdDt(id), resource);
-
-			} else if ("searchType".equals(method)) {
-				Map<String, List<IQueryParameterType>> params = new HashMap<String, List<IQueryParameterType>>();
-
-				HashSet<String> hashSet = new HashSet<String>(theReq.getParameterMap().keySet());
-				String paramName = null;
-				IQueryParameterType paramValue = null;
-				while (hashSet.isEmpty() == false) {
-
-					String nextKey = hashSet.iterator().next();
-					String nextValue = theReq.getParameter(nextKey);
-					paramName = null;
-					paramValue = null;
-
-					if (nextKey.startsWith("param.token.")) {
-						int prefixLength = "param.token.".length();
-						paramName = nextKey.substring(prefixLength + 2);
-						String systemKey = "param.token." + "1." + paramName;
-						String valueKey = "param.token." + "2." + paramName;
-						String system = theReq.getParameter(systemKey);
-						String value = theReq.getParameter(valueKey);
-						paramValue = new IdentifierDt(system, value);
-						hashSet.remove(systemKey);
-						hashSet.remove(valueKey);
-					} else if (nextKey.startsWith("param.string.")) {
-						paramName = nextKey.substring("param.string.".length());
-						paramValue = new StringDt(nextValue);
-					}
-
-					if (paramName != null) {
-						if (params.containsKey(paramName) == false) {
-							params.put(paramName, new ArrayList<IQueryParameterType>());
+			} else if ("history-resource".equals(method) || "history-server".equals(method)) {
+				String id = null;
+				Class<? extends IResource> type = null; // def.getImplementingClass();
+				if (!"history-server".equals(method)) {
+					RuntimeResourceDefinition def = getResourceType(theReq);
+					type = def.getImplementingClass();
+					id = StringUtils.defaultString(theReq.getParameter("resource-history-id"));
+					if (StringUtils.isBlank(id)) {
+						if ("history-instance".equals(method)) {
+							theContext.getVariables().put("errorMsg", "No ID specified");
+							return;
+						} else {
+							id = null;
 						}
-						params.get(paramName).add(paramValue);
 					}
-
-					hashSet.remove(nextKey);
 				}
 
-				RuntimeResourceDefinition def = getResourceType(theReq);
+				DateTimeDt since = null;
+				String sinceStr = theReq.getParameter("since");
+				if (isNotBlank(sinceStr)) {
+					since = new DateTimeDt(sinceStr);
+				}
+
+				Integer limit = null;
+				String limitStr = theReq.getParameter("limit");
+				if (isNotBlank(limitStr)) {
+					limit = Integer.parseInt(limitStr);
+				}
 
 				returnsResource = false;
-				client.search(def.getImplementingClass(), params);
+
+				client.history(type, id, since, limit);
+
+			} else if ("create".equals(method) || "validate".equals(method)) {
+				boolean validate = "validate".equals(method);
+
+				String body = validate ? theReq.getParameter("resource-validate-body") : theReq.getParameter("resource-create-body");
+				if (isBlank(body)) {
+					theContext.getVariables().put("errorMsg", "No message body specified");
+					return;
+				}
+
+				body = body.trim();
+				IResource resource;
+				try {
+					if (body.startsWith("{")) {
+						resource = myCtx.newJsonParser().parseResource(body);
+					} else if (body.startsWith("<")) {
+						resource = myCtx.newXmlParser().parseResource(body);
+					} else {
+						theContext.getVariables().put("errorMsg", "Message body does not appear to be a valid FHIR resource instance document. Body should start with '<' (for XML encoding) or '{' (for JSON encoding).");
+						return;
+					}
+				} catch (DataFormatException e) {
+					ourLog.warn("Failed to parse resource", e);
+					theContext.getVariables().put("errorMsg", "Failed to parse message body. Error was: " + e.getMessage());
+					return;
+				}
+
+				if (validate) {
+					client.validate(resource);
+				} else {
+					String id = theReq.getParameter("resource-create-id");
+					if (isNotBlank(id)) {
+						client.update(id, resource);
+					} else {
+						client.create(resource);
+					}
+				}
+				returnsResource = false;
+
+			} else if ("search".equals(method)) {
+				IUntypedQuery search = client.search();
+				IQuery query;
+				if (isNotBlank(theReq.getParameter("resource"))) {
+					query = search.forResource(getResourceType(theReq).getImplementingClass());
+				} else {
+					query = search.forAllResources();
+				}
+
+				int paramIdx = 0;
+				while (true) {
+					String nextName = theReq.getParameter("param." + paramIdx + ".name");
+					if (isBlank(nextName)) {
+						break;
+					}
+
+					StringBuilder b = new StringBuilder();
+					for (int i = 0; i < 100; i++) {
+						b.append(defaultString(theReq.getParameter("param." + paramIdx + "." + i)));
+					}
+
+					query.where(new StringParam(nextName).matches().value(b.toString()));
+
+					paramIdx++;
+				}
+
+				query.execute();
+				returnsResource = false;
 
 			} else {
-				theResp.sendError(Constants.STATUS_HTTP_400_BAD_REQUEST, "Invalid method: " + method);
+				theContext.getVariables().put("errorMsg", "Invalid action: " + method);
 				return;
 			}
 
 			latency = System.currentTimeMillis() - start;
 		} catch (DataFormatException e) {
+			ourLog.error("Failed to invoke method", e);
+			returnsResource = false;
+		} catch (BaseServerResponseException e) {
 			ourLog.error("Failed to invoke method", e);
 			returnsResource = false;
 		} catch (Exception e) {
@@ -399,47 +397,79 @@ public class RestfulServerTesterServlet extends HttpServlet {
 			Header[] requestHeaders = lastRequest != null ? applyHeaderFilters(lastRequest.getAllHeaders()) : new Header[0];
 			Header[] responseHeaders = lastResponse != null ? applyHeaderFilters(lastResponse.getAllHeaders()) : new Header[0];
 
-			WebContext ctx = new WebContext(theReq, theResp, theReq.getServletContext(), theReq.getLocale());
-			ctx.setVariable("base", myServerBase);
-			ctx.setVariable("requestUrl", requestUrl);
-			ctx.setVariable("action", action);
-			ctx.setVariable("resultStatus", resultStatus);
-			ctx.setVariable("requestBody", StringEscapeUtils.escapeHtml4(requestBody));
-			ctx.setVariable("requestSyntaxHighlighterClass", requestSyntaxHighlighterClass);
-			ctx.setVariable("resultBody", StringEscapeUtils.escapeHtml4(resultBody));
-			ctx.setVariable("resultSyntaxHighlighterClass", resultSyntaxHighlighterClass);
-			ctx.setVariable("requestHeaders", requestHeaders);
-			ctx.setVariable("responseHeaders", responseHeaders);
-			ctx.setVariable("narrative", narrativeString);
-			ctx.setVariable("latencyMs", latency);
+			theContext.setVariable("action", action);
+			theContext.setVariable("resultStatus", resultStatus);
+			theContext.setVariable("requestUrl", requestUrl);
+			requestBody = StringEscapeUtils.escapeHtml4(requestBody);
+			theContext.setVariable("requestBody", requestBody);
+			theContext.setVariable("requestSyntaxHighlighterClass", requestSyntaxHighlighterClass);
+			theContext.setVariable("resultBody", StringEscapeUtils.escapeHtml4(resultBody));
+			theContext.setVariable("resultSyntaxHighlighterClass", resultSyntaxHighlighterClass);
+			theContext.setVariable("requestHeaders", requestHeaders);
+			theContext.setVariable("responseHeaders", responseHeaders);
+			theContext.setVariable("narrative", narrativeString);
+			theContext.setVariable("latencyMs", latency);
 
-			myTemplateEngine.process(PUBLIC_TESTER_RESULT_HTML, ctx, theResp.getWriter());
 		} catch (Exception e) {
 			ourLog.error("Failure during processing", e);
-			theResp.sendError(500, e.toString());
+			theContext.getVariables().put("errorMsg", "Error during processing: " + e.getMessage());
 		}
 	}
 
-	private IResource parseIncomingResource(HttpServletRequest theReq, HttpServletResponse theResp, GenericClient theClient) throws ServletException, IOException {
-		RuntimeResourceDefinition def = getResourceType(theReq);
-		String resourceText = StringUtils.defaultString(theReq.getParameter("resource"));
-		if (StringUtils.isBlank(resourceText)) {
-			theResp.sendError(Constants.STATUS_HTTP_400_BAD_REQUEST, "No resource content specified");
+	@Override
+	protected void doGet(HttpServletRequest theReq, HttpServletResponse theResp) throws ServletException, IOException {
+		if (DEBUGMODE) {
+			myTemplateEngine.getCacheManager().clearAllCaches();
 		}
 
-		IResource resource;
-		if (theClient.getEncoding() == null) {
-			if (resourceText.trim().startsWith("{")) {
-				resource = myCtx.newJsonParser().parseResource(def.getImplementingClass(), resourceText);
-			} else {
-				resource = myCtx.newXmlParser().parseResource(def.getImplementingClass(), resourceText);
+		try {
+			ourLog.info("RequestURI: {}", theReq.getPathInfo());
+
+			String resName = theReq.getPathInfo().substring(1);
+			if (myStaticResources.containsKey(resName)) {
+				streamResponse(resName, myStaticResources.get(resName), theResp);
+				return;
 			}
-		} else if (theClient.getEncoding() == EncodingEnum.XML) {
-			resource = myCtx.newXmlParser().parseResource(def.getImplementingClass(), resourceText);
-		} else {
-			resource = myCtx.newJsonParser().parseResource(def.getImplementingClass(), resourceText);
+
+			ConformanceClient client = myCtx.newRestfulClient(ConformanceClient.class, myServerBase);
+			Conformance conformance = client.getConformance();
+
+			WebContext ctx = new WebContext(theReq, theResp, theReq.getServletContext(), theReq.getLocale());
+			ctx.setVariable("conf", conformance);
+			ctx.setVariable("base", myServerBase);
+			String resourceName = defaultString(theReq.getParameter("resource"));
+			ctx.setVariable("resourceName", resourceName);
+			ctx.setVariable("jsonEncodedConf", myCtx.newJsonParser().encodeResourceToString(conformance));
+			addStandardVariables(ctx, theReq.getParameterMap());
+
+			if (isNotBlank(theReq.getParameter("action"))) {
+				processAction(theReq, ctx);
+			}
+
+			if (isNotBlank(resourceName)) {
+				RuntimeResourceDefinition def = myCtx.getResourceDefinition(resourceName);
+//				myCtx.newTerser().
+			}
+			
+			theResp.setContentType("text/html");
+			theResp.setCharacterEncoding("UTF-8");
+
+			myTemplateEngine.process(theReq.getPathInfo(), ctx, theResp.getWriter());
+		} catch (Exception e) {
+			ourLog.error("Failed to respond", e);
+			theResp.sendError(500, e.getMessage());
 		}
-		return resource;
+	}
+
+	private void addStandardVariables(WebContext theCtx, Map<String, String[]> theParameterMap) {
+		addStandardVariable(theCtx, theParameterMap, "encoding");
+		addStandardVariable(theCtx, theParameterMap, "pretty");
+	}
+
+	private void addStandardVariable(WebContext theCtx, Map<String, String[]> theParameterMap, String key) {
+		if (theParameterMap.containsKey(key) && theParameterMap.get(key).length > 0) {
+			theCtx.setVariable(key, theParameterMap.get(key)[0]);
+		}
 	}
 
 	private Header[] applyHeaderFilters(Header[] theAllHeaders) {
@@ -495,10 +525,10 @@ public class RestfulServerTesterServlet extends HttpServlet {
 		public InputStream getResourceAsStream(TemplateProcessingParameters theTemplateProcessingParameters, String theName) {
 			ourLog.debug("Loading template: {}", theName);
 			if ("/".equals(theName)) {
-				return RestfulServerTesterServlet.class.getResourceAsStream("/ca/uhn/fhir/rest/server/tester/PublicTester.html");
+				return RestfulTesterServlet.class.getResourceAsStream("/ca/uhn/fhir/rest/server/tester/RestfulTester.html");
 			}
 			if (PUBLIC_TESTER_RESULT_HTML.equals(theName)) {
-				return RestfulServerTesterServlet.class.getResourceAsStream("/ca/uhn/fhir/rest/server/tester/PublicTesterResult.html");
+				return RestfulTesterServlet.class.getResourceAsStream("/ca/uhn/fhir/rest/server/tester/PublicTesterResult.html");
 			}
 
 			return null;

@@ -72,7 +72,7 @@ public class HttpGetClientInvocation extends BaseHttpClientInvocation {
 		}
 		b.append(myUrlPath);
 
-		boolean first = true;
+		boolean first = b.indexOf("?") == -1;
 		for (Entry<String, List<String>> next : myParameters.entrySet()) {
 			if (next.getValue() == null || next.getValue().isEmpty()) {
 				continue;
