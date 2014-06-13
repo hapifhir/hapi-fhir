@@ -415,7 +415,7 @@ public class IdentifierDt
 		if (org.apache.commons.lang3.StringUtils.isNotBlank(getSystem().getValueAsString())) {
 			return getSystem().getValueAsString() + '|' + getValue().getValueAsString(); 
 		} else {
-			return getValue().getValueAsString();
+			return '|' + getValue().getValueAsString();
 		}
 	}
 

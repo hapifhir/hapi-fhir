@@ -45,6 +45,7 @@ import ca.uhn.fhir.model.api.BaseResource;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.IResourceBlock;
+import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.api.annotation.Block;
 import ca.uhn.fhir.model.api.annotation.Child;
@@ -58,7 +59,6 @@ import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
-import ca.uhn.fhir.rest.gclient.Include;
 import ca.uhn.fhir.rest.gclient.ReferenceParam;
 import ca.uhn.fhir.rest.gclient.StringParam;
 

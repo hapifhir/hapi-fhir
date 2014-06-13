@@ -13,7 +13,7 @@
 	<context:annotation-config />
 	<context:mbean-server />
 
-	<!-- <import resource="classpath:hapi-jpaserver-springbeans.xml" /> -->
+	<bean class="ca.uhn.fhir.context.FhirContext"></bean>
 
 	<bean id="myDaoConfig" class="ca.uhn.fhir.jpa.dao.DaoConfig">
 	</bean>

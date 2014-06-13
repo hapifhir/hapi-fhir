@@ -1,5 +1,7 @@
 package ca.uhn.fhir.rest.gclient;
 
+import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
+
 /*
  * #%L
  * HAPI FHIR Library
@@ -58,6 +60,11 @@ public class TokenParam implements IParam {
 			public ICriterion identifier(String theIdentifier) {
 				return new TokenCriterion(getParamName(), null, theIdentifier);
 			}
+
+			@Override
+			public ICriterion identifier(IdentifierDt theIdentifier) {
+				return new TokenCriterion(getParamName(), theIdentifier.getSystem().getValueAsString(), theIdentifier.getValue().getValue());
+			}
 		};
 	}
 
@@ -101,6 +108,15 @@ public class TokenParam implements IParam {
 		 * @return A criterion
 		 */
 		ICriterion code(String theIdentifier);
+
+		/**
+		 * Creates a search criterion that matches against the given identifier (system and code if both are present, or whatever is present)
+		 * 
+		 * @param theIdentifier
+		 *            The identifier
+		 * @return A criterion
+		 */
+		ICriterion identifier(IdentifierDt theIdentifier);
 	}
 
 }

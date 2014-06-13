@@ -39,7 +39,7 @@ public abstract class BaseResource extends BaseElement implements IResource {
 	@Child(name = "language", order = 0, min = 0, max = Child.MAX_UNLIMITED)
 	private CodeDt myLanguage;
 
-	private Map<ResourceMetadataKeyEnum, Object> myResourceMetadata;
+	private Map<ResourceMetadataKeyEnum<?>, Object> myResourceMetadata;
 
 	@Child(name = "text", order = 1, min = 0, max = 1)
 	private NarrativeDt myText;
@@ -57,9 +57,9 @@ public abstract class BaseResource extends BaseElement implements IResource {
 	}
 
 	@Override
-	public Map<ResourceMetadataKeyEnum, Object> getResourceMetadata() {
+	public Map<ResourceMetadataKeyEnum<?>, Object> getResourceMetadata() {
 		if (myResourceMetadata == null) {
-			myResourceMetadata = new HashMap<ResourceMetadataKeyEnum, Object>();
+			myResourceMetadata = new HashMap<ResourceMetadataKeyEnum<?>, Object>();
 		}
 		return myResourceMetadata;
 	}
@@ -81,7 +81,7 @@ public abstract class BaseResource extends BaseElement implements IResource {
 	}
 
 	@Override
-	public void setResourceMetadata(Map<ResourceMetadataKeyEnum, Object> theMap) {
+	public void setResourceMetadata(Map<ResourceMetadataKeyEnum<?>, Object> theMap) {
 		Validate.notNull(theMap, "The Map must not be null");
 		myResourceMetadata = theMap;
 	}

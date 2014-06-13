@@ -13,14 +13,13 @@ import javax.persistence.TemporalType;
 
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
-import ca.uhn.fhir.rest.server.EncodingEnum;
 
 @MappedSuperclass
 public abstract class BaseHasResource {
 
-	@Column(name = "RES_ENCODING", nullable = false, length=4)
+	@Column(name = "RES_ENCODING", nullable = false, length=5)
 	@Enumerated(EnumType.STRING)
-	private EncodingEnum myEncoding;
+	private ResourceEncodingEnum myEncoding;
 
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "RES_PUBLISHED", nullable = false)
@@ -28,13 +27,13 @@ public abstract class BaseHasResource {
 
 	@Column(name = "RES_TEXT", length = Integer.MAX_VALUE - 1, nullable = false)
 	@Lob()
-	private String myResource;
+	private byte[] myResource;
 
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "RES_UPDATED", nullable = false)
 	private Date myUpdated;
 
-	public EncodingEnum getEncoding() {
+	public ResourceEncodingEnum getEncoding() {
 		return myEncoding;
 	}
 
@@ -48,7 +47,7 @@ public abstract class BaseHasResource {
 		return new InstantDt(myPublished);
 	}
 
-	public String getResource() {
+	public byte[] getResource() {
 		return myResource;
 	}
 
@@ -58,7 +57,7 @@ public abstract class BaseHasResource {
 
 	public abstract long getVersion();
 
-	public void setEncoding(EncodingEnum theEncoding) {
+	public void setEncoding(ResourceEncodingEnum theEncoding) {
 		myEncoding = theEncoding;
 	}
 
@@ -70,7 +69,7 @@ public abstract class BaseHasResource {
 		myPublished = thePublished.getValue();
 	}
 
-	public void setResource(String theResource) {
+	public void setResource(byte[] theResource) {
 		myResource = theResource;
 	}
 

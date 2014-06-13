@@ -42,6 +42,7 @@ import java.util.List;
 import ca.uhn.fhir.model.api.BaseResource;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
@@ -54,7 +55,6 @@ import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.StringDt;
-import ca.uhn.fhir.rest.gclient.Include;
 import ca.uhn.fhir.rest.gclient.ReferenceParam;
 
 

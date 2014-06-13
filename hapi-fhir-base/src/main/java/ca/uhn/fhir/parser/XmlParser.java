@@ -95,6 +95,7 @@ public class XmlParser extends BaseParser implements IParser {
 	private XMLOutputFactory myXmlOutputFactory;
 
 	public XmlParser(FhirContext theContext) {
+		super(theContext);
 		myContext = theContext;
 		myXmlInputFactory = XMLInputFactory.newInstance();
 		myXmlOutputFactory = XMLOutputFactory.newInstance();
@@ -543,7 +544,9 @@ public class XmlParser extends BaseParser implements IParser {
 	 * 
 	 */
 	private void encodeResourceToXmlStreamWriter(IResource theResource, XMLStreamWriter theEventWriter, boolean theIncludedResource) throws XMLStreamException, DataFormatException {
-		super.containResourcesForEncoding(theResource);
+		if (!theIncludedResource) {
+			super.containResourcesForEncoding(theResource);
+		}
 
 		RuntimeResourceDefinition resDef = myContext.getResourceDefinition(theResource);
 		if (resDef == null) {

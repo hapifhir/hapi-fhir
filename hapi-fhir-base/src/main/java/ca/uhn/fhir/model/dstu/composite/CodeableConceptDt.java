@@ -71,6 +71,13 @@ public class CodeableConceptDt
 		// nothing
 	}
 
+	/**
+	 * Constructor which creates a CodeableConceptDt with one coding repetition, containing
+	 * the given system and code
+	 */
+	public CodeableConceptDt(String theSystem, String theCode) {
+		addCoding().setSystem(theSystem).setCode(theCode);
+	}
 
 	@Child(name="coding", type=CodingDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)	
 	@Description(

@@ -11,7 +11,7 @@ public class TestProfileGenerator {
 	@Test
 	public void testIncludes() {
 		
-		assertEquals("Patient.link.other", Patient.INCLUDE_LINK_OTHER.getInclude());
+		assertEquals("Patient.link.other", Patient.INCLUDE_LINK_OTHER.getValue());
 		
 	}
 	

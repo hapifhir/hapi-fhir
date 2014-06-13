@@ -1,6 +1,6 @@
 package ca.uhn.fhir.parser;
 
-import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
@@ -23,6 +23,7 @@ import org.hamcrest.core.StringContains;
 import org.hamcrest.text.StringContainsInOrder;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.mockito.internal.matchers.Not;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
@@ -83,6 +84,44 @@ public class JsonParserTest {
 		
 	}
 
+	@Test
+	public void testNestedContainedResources() {
+
+		Observation A = new Observation();
+		A.getName().setText("A");
+		
+		Observation B = new Observation();
+		B.getName().setText("B");
+		A.addRelated().setTarget(new ResourceReferenceDt(B));
+		
+		Observation C = new Observation();
+		C.getName().setText("C");
+		B.addRelated().setTarget(new ResourceReferenceDt(C));
+
+		String str = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(A);
+		ourLog.info(str);
+		
+		assertThat(str, stringContainsInOrder(Arrays.asList("\"text\":\"B\"", "\"text\":\"C\"", "\"text\":\"A\"")));
+		
+		// Only one (outer) contained block
+		int idx0 = str.indexOf("\"contained\"");
+		int idx1 = str.indexOf("\"contained\"",idx0+1);
+		
+		assertNotEquals(-1, idx0);
+		assertEquals(-1, idx1);
+		
+		Observation obs = ourCtx.newJsonParser().parseResource(Observation.class, str);
+		assertEquals("A",obs.getName().getText().getValue());
+		
+		Observation obsB = (Observation) obs.getRelatedFirstRep().getTarget().getResource();
+		assertEquals("B",obsB.getName().getText().getValue());
+
+		Observation obsC = (Observation) obsB.getRelatedFirstRep().getTarget().getResource();
+		assertEquals("C",obsC.getName().getText().getValue());
+
+		
+	}
+	
 	@Test
 	public void testParseQuery() {
 		String msg = "{\n" + 
@@ -308,15 +347,18 @@ public class JsonParserTest {
 		MyPatientWithOneDeclaredExtension actual = parser.parseResource(MyPatientWithOneDeclaredExtension.class, val);
 		assertEquals(AddressUseEnum.HOME, patient.getAddressFirstRep().getUse().getValueAsEnum());
 		ResourceReferenceDt ref = actual.getFoo();
-		assertEquals("Organization/123", ref.getResourceId().getValue());
+		assertEquals("Organization/123", ref.getReference().getValue());
 
 	}
+	
 	
 	
 	@Test
 	public void testEncodeExt() throws Exception {
 
 		ValueSet valueSet = new ValueSet();
+		valueSet.setId("123456");
+		
 		Define define = valueSet.getDefine();
 		DefineConcept code = define.addConcept();
 		code.setCode("someCode");
@@ -326,6 +368,9 @@ public class JsonParserTest {
 		String encoded = new FhirContext().newJsonParser().encodeResourceToString(valueSet);
 		ourLog.info(encoded);
 
+		assertThat(encoded, not(containsString("123456")));
+		assertThat(encoded, containsString("\"define\":{\"concept\":[{\"code\":\"someCode\",\"display\":\"someDisplay\"}],\"_concept\":[{\"extension\":[{\"url\":\"urn:alt\",\"valueString\":\"alt name\"}]}]}"));
+		
 	}
 
 	
@@ -361,7 +406,7 @@ public class JsonParserTest {
 		try {
 			p.encodeResourceToString(obs);
 		} catch (DataFormatException e) {
-			assertThat(e.getMessage(), StringContains.containsString("PeriodDt"));
+			assertThat(e.getMessage(), StringContains.containsString("DecimalDt"));
 		}
 	}
 	
@@ -651,8 +696,14 @@ public class JsonParserTest {
 		strings.addAll(Arrays.asList("\"id\":\"2\"", "\"rel\":\"alternate\"", "\"href\":\"http://foo/bar\""));
 		strings.addAll(Arrays.asList("\"deleted\":\""+nowDt.getValueAsString()+"\"", "\"id\":\"Patient/3\""));
 		assertThat(bundleString, StringContainsInOrder.stringContainsInOrder(strings));
+	
+		b.getEntries().remove(2);
+		bundleString = ourCtx.newJsonParser().setPrettyPrint(true).encodeBundleToString(b);
+		assertThat(bundleString, not(containsString("deleted")));
+		
 		
 	}
+
 	@Test
 	public void testSimpleBundleEncode() throws IOException {
 

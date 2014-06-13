@@ -17,6 +17,7 @@ import java.util.List;
 import org.apache.commons.io.IOUtils;
 import org.custommonkey.xmlunit.Diff;
 import org.custommonkey.xmlunit.XMLUnit;
+import org.hamcrest.Matchers;
 import org.hamcrest.core.IsNot;
 import org.hamcrest.core.StringContains;
 import org.hamcrest.text.StringContainsInOrder;
@@ -79,6 +80,46 @@ public class XmlParserTest {
 
 	}
 
+
+	@Test
+	public void testNestedContainedResources() {
+
+		Observation A = new Observation();
+		A.getName().setText("A");
+		
+		Observation B = new Observation();
+		B.getName().setText("B");
+		A.addRelated().setTarget(new ResourceReferenceDt(B));
+		
+		Observation C = new Observation();
+		C.getName().setText("C");
+		B.addRelated().setTarget(new ResourceReferenceDt(C));
+
+		String str = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(A);
+		ourLog.info(str);
+		
+		assertThat(str, stringContainsInOrder(Arrays.asList("<text value=\"B\"/>", "<text value=\"C\"/>", "<text value=\"A\"/>")));
+		assertThat(str, stringContainsInOrder(Arrays.asList("<contained>", "</contained>")));
+		
+		// Only one (outer) contained block
+		int idx0 = str.indexOf("<contained>");
+		int idx1 = str.indexOf("<contained>",idx0+1);
+		assertNotEquals(-1, idx0);
+		assertEquals(-1, idx1);
+		
+		Observation obs = ourCtx.newXmlParser().parseResource(Observation.class, str);
+		assertEquals("A",obs.getName().getText().getValue());
+		
+		Observation obsB = (Observation) obs.getRelatedFirstRep().getTarget().getResource();
+		assertEquals("B",obsB.getName().getText().getValue());
+
+		Observation obsC = (Observation) obsB.getRelatedFirstRep().getTarget().getResource();
+		assertEquals("C",obsC.getName().getText().getValue());
+
+		
+	}
+
+	
 
 	@Test
 	public void testParseQuery() {
@@ -379,7 +420,7 @@ public class XmlParserTest {
 		try {
 			p.encodeResourceToString(obs);
 		} catch (DataFormatException e) {
-			assertThat(e.getMessage(), StringContains.containsString("PeriodDt"));
+			assertThat(e.getMessage(), StringContains.containsString("DecimalDt"));
 		}
 	}
 

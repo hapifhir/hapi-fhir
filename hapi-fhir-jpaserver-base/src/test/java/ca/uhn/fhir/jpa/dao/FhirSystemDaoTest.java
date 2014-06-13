@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -15,6 +16,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
+import ch.qos.logback.core.pattern.color.BlackCompositeConverter;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
@@ -65,7 +67,7 @@ public class FhirSystemDaoTest {
 		Thread.sleep(10);
 		IdDt newpid3 = ourPatientDao.update(patient, pid).getId();
 
-		List<IResource> values = ourSystemDao.history(start, 1000);
+		List<IResource> values = ourSystemDao.history(start, null);
 		assertEquals(4, values.size());
 		
 		assertEquals(newpid3, values.get(0).getId());
@@ -163,6 +165,50 @@ public class FhirSystemDaoTest {
 
 		
 	}
+
+	@Test
+	public void testTransactionWithUpdate() throws Exception {
+		List<IResource> res = new ArrayList<IResource>();
+		
+		Patient p1 = new Patient();
+		p1.getId().setValue("testTransactionWithUpdateXXX01");
+		p1.addIdentifier("system", "testTransactionWithUpdate01");
+		res.add(p1);
+		
+		Observation p2 = new Observation();
+		p2.getId().setValue("testTransactionWithUpdateXXX02");
+		p2.getIdentifier().setSystem("system").setValue("testTransactionWithUpdate02");
+		p2.setSubject(new ResourceReferenceDt("Patient/testTransactionWithUpdateXXX01"));
+		res.add(p2);
+		
+		ourSystemDao.transaction(res);
+		
+		assertFalse(p1.getId().isEmpty());
+		assertNotEquals("testTransactionWithUpdateXXX01", p1.getId().getUnqualifiedVersionId());
+		assertFalse(p2.getId().isEmpty());
+		assertNotEquals("testTransactionWithUpdateXXX02", p2.getId().getUnqualifiedVersionId());
+		assertEquals(p1.getId().unqualified().withoutVersion(), p2.getSubject().getReference());
+		
+		IdDt p1id = p1.getId().unqualified().withoutVersion();
+		IdDt p1idWithVer = p1.getId().unqualified();
+		IdDt p2id = p2.getId().unqualified().withoutVersion();
+		IdDt p2idWithVer = p2.getId().unqualified();
+		
+		p1.addName().addFamily("Name1");
+		p1.setId(p1.getId().unqualified().withoutVersion());
+		
+		p2.addReferenceRange().setHigh(123L);
+		p2.setId(p2.getId().unqualified().withoutVersion());
+
+		ourSystemDao.transaction(res);
+		
+		assertEquals(p1id, p1.getId().unqualified().withoutVersion());
+		assertEquals(p2id, p2.getId().unqualified().withoutVersion());
+		assertNotEquals(p1idWithVer, p1.getId().unqualified());
+		assertNotEquals(p2idWithVer, p2.getId().unqualified());
+		
+	}
+
 	
 	@Test
 	public void testTransactionFromBundle() throws Exception {
@@ -172,6 +218,12 @@ public class FhirSystemDaoTest {
 		List<IResource> res = bundle.toListOfResources();
 		
 		ourSystemDao.transaction(res);
+		
+		Patient p1 = (Patient) res.get(0);
+		String id = p1.getId().getValue();
+		ourLog.info("ID: {}",id);
+		assertThat(id, not(containsString("5556918")));
+		assertThat(id, not(equalToIgnoringCase("")));
 	}
 	
 	@Test
@@ -207,7 +259,7 @@ public class FhirSystemDaoTest {
 
 		IdDt foundPatientId = patResults.get(0).getId();
 		ResourceReferenceDt subject = obs.getSubject();
-		assertEquals(foundPatientId.getUnqualifiedId(), subject.getResourceId().getUnqualifiedId());
+		assertEquals(foundPatientId.getUnqualifiedId(), subject.getReference().getUnqualifiedId());
 
 		// Update
 

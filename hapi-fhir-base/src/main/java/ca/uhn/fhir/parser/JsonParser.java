@@ -104,6 +104,7 @@ public class JsonParser extends BaseParser implements IParser {
 	private boolean myPrettyPrint;
 
 	public JsonParser(FhirContext theContext) {
+		super(theContext);
 		myContext = theContext;
 	}
 
@@ -180,7 +181,9 @@ public class JsonParser extends BaseParser implements IParser {
 		for (BundleEntry nextEntry : theBundle.getEntries()) {
 			eventWriter.writeStartObject();
 
-			writeTagWithTextNode(eventWriter, "deleted", nextEntry.getDeletedAt());
+			if (nextEntry.getDeletedAt() !=null&&nextEntry.getDeletedAt().isEmpty()==false) {
+				writeTagWithTextNode(eventWriter, "deleted", nextEntry.getDeletedAt());
+			}
 			writeTagWithTextNode(eventWriter, "title", nextEntry.getTitle());
 			writeTagWithTextNode(eventWriter, "id", nextEntry.getId());
 
@@ -211,7 +214,7 @@ public class JsonParser extends BaseParser implements IParser {
 			IResource resource = nextEntry.getResource();
 			if (resource != null && !resource.isEmpty()) {
 				RuntimeResourceDefinition resDef = myContext.getResourceDefinition(resource);
-				encodeResourceToJsonStreamWriter(resDef, resource, eventWriter, "content");
+				encodeResourceToJsonStreamWriter(resDef, resource, eventWriter, "content", false);
 			}
 
 			eventWriter.writeEnd(); // entry object
@@ -272,7 +275,7 @@ public class JsonParser extends BaseParser implements IParser {
 		}
 		case RESOURCE_REF: {
 			ResourceReferenceDt referenceDt = (ResourceReferenceDt) theValue;
-			IdDt value = referenceDt.getResourceId();
+			IdDt value = referenceDt.getReference();
 			if (theChildName != null) {
 				theWriter.writeStartObject(theChildName);
 			} else {
@@ -299,7 +302,7 @@ public class JsonParser extends BaseParser implements IParser {
 			theWriter.writeStartArray(theChildName);
 			ContainedDt value = (ContainedDt) theValue;
 			for (IResource next : value.getContainedResources()) {
-				encodeResourceToJsonStreamWriter(theResDef, next, theWriter, null);
+				encodeResourceToJsonStreamWriter(theResDef, next, theWriter, null, true);
 			}
 			theWriter.writeEnd();
 			break;
@@ -465,8 +468,10 @@ public class JsonParser extends BaseParser implements IParser {
 		encodeCompositeElementChildrenToStreamWriter(theResDef, theResource, theElement, theEventWriter, resDef.getChildren());
 	}
 
-	private void encodeResourceToJsonStreamWriter(RuntimeResourceDefinition theResDef, IResource theResource, JsonGenerator theEventWriter, String theObjectNameOrNull) throws IOException {
-		super.containResourcesForEncoding(theResource);
+	private void encodeResourceToJsonStreamWriter(RuntimeResourceDefinition theResDef, IResource theResource, JsonGenerator theEventWriter, String theObjectNameOrNull, boolean theIsSubElementWithinResource) throws IOException {
+		if (!theIsSubElementWithinResource) {
+			super.containResourcesForEncoding(theResource);
+		}
 
 		RuntimeResourceDefinition resDef = myContext.getResourceDefinition(theResource);
 
@@ -477,7 +482,7 @@ public class JsonParser extends BaseParser implements IParser {
 		}
 
 		theEventWriter.write("resourceType", resDef.getName());
-		if (theResource.getId() != null && isNotBlank(theResource.getId().getValue())) {
+		if (theIsSubElementWithinResource && theResource.getId() != null && isNotBlank(theResource.getId().getValue())) {
 			theEventWriter.write("id", theResource.getId().getValue());
 		}
 
@@ -499,7 +504,7 @@ public class JsonParser extends BaseParser implements IParser {
 		JsonGenerator eventWriter = createJsonGenerator(theWriter);
 
 		RuntimeResourceDefinition resDef = myContext.getResourceDefinition(theResource);
-		encodeResourceToJsonStreamWriter(resDef, theResource, eventWriter, null);
+		encodeResourceToJsonStreamWriter(resDef, theResource, eventWriter, null,false);
 		eventWriter.flush();
 	}
 

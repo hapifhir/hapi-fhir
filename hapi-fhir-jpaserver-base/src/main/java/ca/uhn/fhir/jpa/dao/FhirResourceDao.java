@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.dao;
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -22,6 +22,7 @@ import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Required;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -36,7 +37,6 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.entity.BaseHasResource;
 import ca.uhn.fhir.jpa.entity.BaseTag;
 import ca.uhn.fhir.jpa.entity.ResourceHistoryTable;
-import ca.uhn.fhir.jpa.entity.ResourceHistoryTablePk;
 import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamNumber;
 import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamString;
@@ -47,10 +47,12 @@ import ca.uhn.fhir.jpa.entity.TagDefinition;
 import ca.uhn.fhir.model.api.IPrimitiveDatatype;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.dstu.composite.CodingDt;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.composite.QuantityDt;
+import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.valueset.SearchParamTypeEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
@@ -60,306 +62,24 @@ import ca.uhn.fhir.rest.param.QualifiedDateParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.Constants;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.util.FhirTerser;
 
 @Transactional(propagation = Propagation.REQUIRED)
 public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements IFhirResourceDao<T> {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDao.class);
 
-	// name = "FHIR_UT", type = PersistenceContextType.TRANSACTION, unitName = "FHIR_UT"
 	@PersistenceContext()
 	private EntityManager myEntityManager;
 
 	@Autowired
 	private PlatformTransactionManager myPlatformTransactionManager;
+
 	private String myResourceName;
 	private Class<T> myResourceType;
-
-	@Override
-	public void addTag(IdDt theId, String theScheme, String theTerm, String theLabel) {
-		BaseHasResource entity = readEntity(theId);
-		if (entity == null) {
-			throw new ResourceNotFoundException(theId);
-		}
-
-		for (BaseTag next : new ArrayList<BaseTag>(entity.getTags())) {
-			if (next.getTag().getScheme().equals(theScheme) && next.getTag().getTerm().equals(theTerm)) {
-				return;
-			}
-		}
-
-		TagDefinition def = getTag(theScheme, theTerm, theLabel);
-		BaseTag newEntity = entity.addTag(def);
-
-		myEntityManager.persist(newEntity);
-		myEntityManager.merge(entity);
-	}
-
-	@Override
-	public MethodOutcome create(final T theResource) {
-		ResourceTable entity = new ResourceTable();
-		entity.setResourceType(toResourceName(theResource));
-
-		updateEntity(theResource, entity, false);
-
-		MethodOutcome outcome = toMethodOutcome(entity);
-		return outcome;
-	}
-
-	@Override
-	public TagList getAllResourceTags() {
-		return super.getTags(myResourceType, null);
-	}
-
-	public Class<T> getResourceType() {
-		return myResourceType;
-	}
-
-	@Override
-	public TagList getTags(IdDt theResourceId) {
-		return super.getTags(myResourceType, theResourceId);
-	}
-
-	@Override
-	public List<T> history() {
-		return null;
-	}
-
-	@Override
-	public List<IResource> history(Date theSince, Integer theLimit) {
-		return super.history(myResourceName, null, theSince, theLimit);
-	}
-
-	@Override
-	public List<T> history(IdDt theId) {
-		ArrayList<T> retVal = new ArrayList<T>();
-
-		String resourceType = getContext().getResourceDefinition(myResourceType).getName();
-		TypedQuery<ResourceHistoryTable> q = myEntityManager.createQuery(ResourceHistoryTable.Q_GETALL, ResourceHistoryTable.class);
-		q.setParameter("PID", theId.asLong());
-		q.setParameter("RESTYPE", resourceType);
-
-		// TypedQuery<ResourceHistoryTable> query =
-		// myEntityManager.createQuery(criteriaQuery);
-		List<ResourceHistoryTable> results = q.getResultList();
-		for (ResourceHistoryTable next : results) {
-			retVal.add(toResource(myResourceType, next));
-		}
-
-		try {
-			retVal.add(read(theId.withoutVersion()));
-		} catch (ResourceNotFoundException e) {
-			// ignore
-		}
-
-		if (retVal.isEmpty()) {
-			throw new ResourceNotFoundException(theId);
-		}
-
-		return retVal;
-	}
-
-	@Override
-	public List<IResource> history(Long theId, Date theSince, Integer theLimit) {
-		return super.history(myResourceName, theId, theSince, theLimit);
-	}
-
-	@PostConstruct
-	public void postConstruct() {
-		myResourceName = getContext().getResourceDefinition(myResourceType).getName();
-	}
-
-	@Override
-	public T read(IdDt theId) {
-		BaseHasResource entity = readEntity(theId);
-
-		T retVal = toResource(myResourceType, entity);
-		return retVal;
-	}
-
-	@Override
-	public BaseHasResource readEntity(IdDt theId) {
-		BaseHasResource entity = myEntityManager.find(ResourceTable.class, theId.asLong());
-		if (theId.hasUnqualifiedVersionId()) {
-			if (entity.getVersion() != theId.getUnqualifiedVersionIdAsLong()) {
-				entity = null;
-			}
-		}
-
-		if (entity == null) {
-			if (theId.hasUnqualifiedVersionId()) {
-				entity = myEntityManager.find(ResourceHistoryTable.class, new ResourceHistoryTablePk(myResourceName, theId.asLong(), theId.getUnqualifiedVersionIdAsLong()));
-			}
-			if (entity == null) {
-				throw new ResourceNotFoundException(theId);
-			}
-		}
-		return entity;
-	}
-
-	@Override
-	public void removeTag(IdDt theId, String theScheme, String theTerm) {
-		BaseHasResource entity = readEntity(theId);
-		if (entity == null) {
-			throw new ResourceNotFoundException(theId);
-		}
-
-		for (BaseTag next : new ArrayList<BaseTag>(entity.getTags())) {
-			if (next.getTag().getScheme().equals(theScheme) && next.getTag().getTerm().equals(theTerm)) {
-				myEntityManager.remove(next);
-				entity.getTags().remove(next);
-			}
-		}
-
-		myEntityManager.merge(entity);
-	}
-
-	@Override
-	public List<T> search(Map<String, IQueryParameterType> theParams) {
-		SearchParameterMap map = new SearchParameterMap();
-		for (Entry<String, IQueryParameterType> nextEntry : theParams.entrySet()) {
-			map.put(nextEntry.getKey(), new ArrayList<List<IQueryParameterType>>());
-			map.get(nextEntry.getKey()).add(Collections.singletonList(nextEntry.getValue()));
-		}
-		return search(map);
-	}
-
-	@Override
-	public List<T> search(SearchParameterMap theParams) {
-
-		Set<Long> pids;
-		if (theParams.isEmpty()) {
-			pids = null;
-		} else {
-			pids = searchForIdsWithAndOr(theParams);
-			if (pids.isEmpty()) {
-				return new ArrayList<T>();
-			}
-		}
-
-		// Execute the query and make sure we return distinct results
-		{
-			CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
-			CriteriaQuery<ResourceTable> cq = builder.createQuery(ResourceTable.class);
-			Root<ResourceTable> from = cq.from(ResourceTable.class);
-			cq.where(builder.equal(from.get("myResourceType"), getContext().getResourceDefinition(myResourceType).getName()));
-			if (!theParams.isEmpty()) {
-				cq.where(from.get("myId").in(pids));
-			}
-			TypedQuery<ResourceTable> q = myEntityManager.createQuery(cq);
-
-			List<T> retVal = new ArrayList<T>();
-			for (ResourceTable next : q.getResultList()) {
-				T resource = toResource(myResourceType, next);
-				retVal.add(resource);
-			}
-			return retVal;
-		}
-	}
-
-	@Override
-	public List<T> search(String theParameterName, IQueryParameterType theValue) {
-		return search(Collections.singletonMap(theParameterName, theValue));
-	}
-
-	@Override
-	public Set<Long> searchForIds(Map<String, IQueryParameterType> theParams) {
-		Map<String, List<List<IQueryParameterType>>> map = new HashMap<String, List<List<IQueryParameterType>>>();
-		for (Entry<String, IQueryParameterType> nextEntry : theParams.entrySet()) {
-			map.put(nextEntry.getKey(), new ArrayList<List<IQueryParameterType>>());
-			map.get(nextEntry.getKey()).add(Collections.singletonList(nextEntry.getValue()));
-		}
-		return searchForIdsWithAndOr(map);
-	}
-
-	@Override
-	public Set<Long> searchForIds(String theParameterName, IQueryParameterType theValue) {
-		return searchForIds(Collections.singletonMap(theParameterName, theValue));
-	}
-
-	@Override
-	public Set<Long> searchForIdsWithAndOr(Map<String, List<List<IQueryParameterType>>> theParams) {
-		Map<String, List<List<IQueryParameterType>>> params = theParams;
-		if (params == null) {
-			params = Collections.emptyMap();
-		}
-
-		RuntimeResourceDefinition resourceDef = getContext().getResourceDefinition(myResourceType);
-
-		Set<Long> pids = new HashSet<Long>();
-
-		for (Entry<String, List<List<IQueryParameterType>>> nextParamEntry : params.entrySet()) {
-			String nextParamName = nextParamEntry.getKey();
-			RuntimeSearchParam nextParamDef = resourceDef.getSearchParam(nextParamName);
-			if (nextParamDef != null) {
-				if (nextParamDef.getParamType() == SearchParamTypeEnum.TOKEN) {
-					for (List<IQueryParameterType> nextAnd : nextParamEntry.getValue()) {
-						pids = addPredicateToken(pids, nextAnd);
-						if (pids.isEmpty()) {
-							return new HashSet<Long>();
-						}
-					}
-				} else if (nextParamDef.getParamType() == SearchParamTypeEnum.STRING) {
-					for (List<IQueryParameterType> nextAnd : nextParamEntry.getValue()) {
-						pids = addPredicateString(pids, nextAnd);
-						if (pids.isEmpty()) {
-							return new HashSet<Long>();
-						}
-					}
-				} else if (nextParamDef.getParamType() == SearchParamTypeEnum.QUANTITY) {
-					for (List<IQueryParameterType> nextAnd : nextParamEntry.getValue()) {
-						pids = addPredicateQuantity(pids, nextAnd);
-						if (pids.isEmpty()) {
-							return new HashSet<Long>();
-						}
-					}
-				} else if (nextParamDef.getParamType() == SearchParamTypeEnum.DATE) {
-					for (List<IQueryParameterType> nextAnd : nextParamEntry.getValue()) {
-						pids = addPredicateDate(pids, nextAnd);
-						if (pids.isEmpty()) {
-							return new HashSet<Long>();
-						}
-					}
-				} else if (nextParamDef.getParamType() == SearchParamTypeEnum.REFERENCE) {
-					for (List<IQueryParameterType> nextAnd : nextParamEntry.getValue()) {
-						pids = addPredicateReference(nextParamName, pids, nextAnd);
-						if (pids.isEmpty()) {
-							return new HashSet<Long>();
-						}
-					}
-				} else {
-					throw new IllegalArgumentException("Don't know how to handle parameter of type: " + nextParamDef.getParamType());
-				}
-			}
-		}
-
-		return pids;
-	}
-
-	@SuppressWarnings("unchecked")
-	@Required
-	public void setResourceType(Class<? extends IResource> theTableType) {
-		myResourceType = (Class<T>) theTableType;
-	}
-
-	@Override
-	public MethodOutcome update(final T theResource, final IdDt theId) {
-
-		// TransactionTemplate template = new TransactionTemplate(myPlatformTransactionManager);
-		// ResourceTable savedEntity = template.execute(new TransactionCallback<ResourceTable>() {
-		// @Override
-		// public ResourceTable doInTransaction(TransactionStatus theStatus) {
-		// final ResourceTable entity = readEntity(theId);
-		// return updateEntity(theResource, entity,true);
-		// }
-		// });
-
-		final ResourceTable entity = readEntityLatestVersion(theId);
-		ResourceTable savedEntity = updateEntity(theResource, entity, true);
-
-		return toMethodOutcome(savedEntity);
-	}
+	private String mySecondaryPrimaryKeyParamName;
 
 	private Set<Long> addPredicateDate(Set<Long> thePids, List<IQueryParameterType> theOrParams) {
 		if (theOrParams == null || theOrParams.isEmpty()) {
@@ -403,21 +123,42 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 	}
 
 	private void addPredicateDateFromRange(CriteriaBuilder builder, Root<ResourceIndexedSearchParamDate> from, List<Predicate> codePredicates, DateRangeParam range) {
-		Predicate singleCode;
 		Date lowerBound = range.getLowerBoundAsInstant();
 		Date upperBound = range.getUpperBoundAsInstant();
 
-		if (lowerBound != null && upperBound != null) {
-			Predicate low = builder.greaterThanOrEqualTo(from.<Date> get("myValueLow"), lowerBound);
-			Predicate high = builder.lessThanOrEqualTo(from.<Date> get("myValueHigh"), upperBound);
-			singleCode = builder.and(low, high);
-		} else if (lowerBound != null) {
-			singleCode = builder.greaterThanOrEqualTo(from.<Date> get("myValueLow"), lowerBound);
-		} else {
-			singleCode = builder.lessThanOrEqualTo(from.<Date> get("myValueHigh"), upperBound);
+		Predicate lb = null;
+		if (lowerBound != null) {
+			Predicate gt = builder.greaterThanOrEqualTo(from.<Date> get("myValueLow"), lowerBound);
+			Predicate gin = builder.isNull(from.get("myValueLow"));
+			Predicate lbo = builder.or(gt, gin);
+
+			Predicate lt = builder.greaterThanOrEqualTo(from.<Date> get("myValueHigh"), lowerBound);
+			Predicate lin = builder.isNull(from.get("myValueHigh"));
+			Predicate hbo = builder.or(lt, lin);
+
+			lb = builder.and(lbo, hbo);
 		}
 
-		codePredicates.add(singleCode);
+		Predicate ub = null;
+		if (upperBound != null) {
+			Predicate gt = builder.lessThanOrEqualTo(from.<Date> get("myValueLow"), upperBound);
+			Predicate gin = builder.isNull(from.get("myValueLow"));
+			Predicate lbo = builder.or(gt, gin);
+
+			Predicate lt = builder.lessThanOrEqualTo(from.<Date> get("myValueHigh"), upperBound);
+			Predicate lin = builder.isNull(from.get("myValueHigh"));
+			Predicate ubo = builder.or(lt, lin);
+
+			ub = builder.and(ubo, lbo);
+		}
+
+		if (lb != null && ub != null) {
+			codePredicates.add(builder.and(lb, ub));
+		} else if (lb != null) {
+			codePredicates.add(lb);
+		} else {
+			codePredicates.add(ub);
+		}
 	}
 
 	private Set<Long> addPredicateQuantity(Set<Long> thePids, List<IQueryParameterType> theOrParams) {
@@ -672,11 +413,15 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 			}
 
 			ArrayList<Predicate> singleCodePredicates = (new ArrayList<Predicate>());
-			if (system != null) {
+			if (StringUtils.isNotBlank(system)) {
 				singleCodePredicates.add(builder.equal(from.get("mySystem"), system));
+			} else {
+				singleCodePredicates.add(builder.isNull(from.get("mySystem")));
 			}
-			if (code != null) {
+			if (StringUtils.isNotBlank(code)) {
 				singleCodePredicates.add(builder.equal(from.get("myValue"), code));
+			}else {
+				singleCodePredicates.add(builder.isNull(from.get("myValue")));
 			}
 			Predicate singleCode = builder.and(singleCodePredicates.toArray(new Predicate[0]));
 			codePredicates.add(singleCode);
@@ -696,12 +441,370 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 		return new HashSet<Long>(q.getResultList());
 	}
 
+	@Override
+	public void addTag(IdDt theId, String theScheme, String theTerm, String theLabel) {
+		BaseHasResource entity = readEntity(theId);
+		if (entity == null) {
+			throw new ResourceNotFoundException(theId);
+		}
+
+		for (BaseTag next : new ArrayList<BaseTag>(entity.getTags())) {
+			if (next.getTag().getScheme().equals(theScheme) && next.getTag().getTerm().equals(theTerm)) {
+				return;
+			}
+		}
+
+		TagDefinition def = getTag(theScheme, theTerm, theLabel);
+		BaseTag newEntity = entity.addTag(def);
+
+		myEntityManager.persist(newEntity);
+		myEntityManager.merge(entity);
+	}
+
+	@Override
+	public MethodOutcome create(final T theResource) {
+		ResourceTable entity = new ResourceTable();
+		entity.setResourceType(toResourceName(theResource));
+
+		updateEntity(theResource, entity, false);
+
+		MethodOutcome outcome = toMethodOutcome(entity);
+		return outcome;
+	}
+
+	@Override
+	public TagList getAllResourceTags() {
+		return super.getTags(myResourceType, null);
+	}
+
+	public Class<T> getResourceType() {
+		return myResourceType;
+	}
+
+	@Override
+	public TagList getTags(IdDt theResourceId) {
+		return super.getTags(myResourceType, theResourceId);
+	}
+
+	@Override
+	public List<T> history() {
+		return null;
+	}
+
+	@Override
+	public List<IResource> history(Date theSince, Integer theLimit) {
+		return super.history(myResourceName, null, theSince, theLimit);
+	}
+
+	@Override
+	public List<T> history(IdDt theId) {
+		ArrayList<T> retVal = new ArrayList<T>();
+
+		String resourceType = getContext().getResourceDefinition(myResourceType).getName();
+		TypedQuery<ResourceHistoryTable> q = myEntityManager.createQuery("SELECT h FROM ResourceHistoryTable h WHERE h.myResourceId = :PID AND h.myResourceType = :RESTYPE ORDER BY h.myUpdated ASC",
+				ResourceHistoryTable.class);
+		q.setParameter("PID", theId.asLong());
+		q.setParameter("RESTYPE", resourceType);
+
+		// TypedQuery<ResourceHistoryTable> query =
+		// myEntityManager.createQuery(criteriaQuery);
+		List<ResourceHistoryTable> results = q.getResultList();
+		for (ResourceHistoryTable next : results) {
+			retVal.add(toResource(myResourceType, next));
+		}
+
+		try {
+			retVal.add(read(theId.withoutVersion()));
+		} catch (ResourceNotFoundException e) {
+			// ignore
+		}
+
+		if (retVal.isEmpty()) {
+			throw new ResourceNotFoundException(theId);
+		}
+
+		return retVal;
+	}
+
+	@Override
+	public List<IResource> history(Long theId, Date theSince, Integer theLimit) {
+		return super.history(myResourceName, theId, theSince, theLimit);
+	}
+
+	@PostConstruct
+	public void postConstruct() {
+		RuntimeResourceDefinition def = getContext().getResourceDefinition(myResourceType);
+		myResourceName = def.getName();
+
+		if (mySecondaryPrimaryKeyParamName != null) {
+			RuntimeSearchParam sp = def.getSearchParam(mySecondaryPrimaryKeyParamName);
+			if (sp == null) {
+				throw new ConfigurationException("Unknown search param on resource[" + myResourceName + "] for secondary key[" + mySecondaryPrimaryKeyParamName + "]");
+			}
+			if (sp.getParamType() != SearchParamTypeEnum.TOKEN) {
+				throw new ConfigurationException("Search param on resource[" + myResourceName + "] for secondary key[" + mySecondaryPrimaryKeyParamName
+						+ "] is not a token type, only token is supported");
+			}
+		}
+
+	}
+
+	@Override
+	public T read(IdDt theId) {
+		BaseHasResource entity = readEntity(theId);
+
+		T retVal = toResource(myResourceType, entity);
+		return retVal;
+	}
+
+	@Override
+	public BaseHasResource readEntity(IdDt theId) {
+		BaseHasResource entity = myEntityManager.find(ResourceTable.class, theId.asLong());
+		if (theId.hasUnqualifiedVersionId()) {
+			if (entity.getVersion() != theId.getUnqualifiedVersionIdAsLong()) {
+				entity = null;
+			}
+		}
+
+		if (entity == null) {
+			if (theId.hasUnqualifiedVersionId()) {
+				TypedQuery<ResourceHistoryTable> q = myEntityManager.createQuery(
+						"SELECT t from ResourceHistoryTable t WHERE t.myResourceId = :RID AND t.myResourceType = :RTYP AND t.myResourceVersion = :RVER", ResourceHistoryTable.class);
+				q.setParameter("RID", theId.asLong());
+				q.setParameter("RTYP", myResourceName);
+				q.setParameter("RVER", theId.getUnqualifiedVersionIdAsLong());
+				entity = q.getSingleResult();
+			}
+			if (entity == null) {
+				throw new ResourceNotFoundException(theId);
+			}
+		}
+		return entity;
+	}
+
 	private ResourceTable readEntityLatestVersion(IdDt theId) {
 		ResourceTable entity = myEntityManager.find(ResourceTable.class, theId.asLong());
 		if (entity == null) {
 			throw new ResourceNotFoundException(theId);
 		}
 		return entity;
+	}
+
+	@Override
+	public void removeTag(IdDt theId, String theScheme, String theTerm) {
+		BaseHasResource entity = readEntity(theId);
+		if (entity == null) {
+			throw new ResourceNotFoundException(theId);
+		}
+
+		for (BaseTag next : new ArrayList<BaseTag>(entity.getTags())) {
+			if (next.getTag().getScheme().equals(theScheme) && next.getTag().getTerm().equals(theTerm)) {
+				myEntityManager.remove(next);
+				entity.getTags().remove(next);
+			}
+		}
+
+		myEntityManager.merge(entity);
+	}
+
+	@Override
+	public List<T> search(Map<String, IQueryParameterType> theParams) {
+		SearchParameterMap map = new SearchParameterMap();
+		for (Entry<String, IQueryParameterType> nextEntry : theParams.entrySet()) {
+			map.put(nextEntry.getKey(), new ArrayList<List<IQueryParameterType>>());
+			map.get(nextEntry.getKey()).add(Collections.singletonList(nextEntry.getValue()));
+		}
+		return search(map);
+	}
+
+	@Override
+	public List<T> search(SearchParameterMap theParams) {
+
+		Set<Long> loadPids;
+		if (theParams.isEmpty()) {
+			loadPids = null;
+		} else {
+			loadPids = searchForIdsWithAndOr(theParams);
+			if (loadPids.isEmpty()) {
+				return new ArrayList<T>();
+			}
+		}
+
+		// Execute the query and make sure we return distinct results
+		List<T> retVal = new ArrayList<T>();
+		loadResourcesByPid(loadPids, retVal);
+
+		// Load _include resources
+		if (theParams.getIncludes() != null && theParams.isEmpty() == false) {
+			Set<Long> includePids = new HashSet<Long>();
+			FhirTerser t = getContext().newTerser();
+			for (Include next : theParams.getIncludes()) {
+				for (T nextResource : retVal) {
+					List<Object> values = t.getValues(nextResource, next.getValue());
+					for (Object object : values) {
+						if (object == null) {
+							continue;
+						}
+						if (!(object instanceof ResourceReferenceDt)) {
+							throw new InvalidRequestException("Path '" + next.getValue() + "' produced non ResourceReferenceDt value: " + object.getClass());
+						}
+						ResourceReferenceDt rr = (ResourceReferenceDt) object;
+						if (rr.getReference().isEmpty()) {
+							continue;
+						}
+						if (rr.getReference().isLocal()) {
+							continue;
+						}
+						includePids.add(rr.getReference().asLong());
+					}
+				}
+			}
+
+			if (!includePids.isEmpty()) {
+				ourLog.info("Loading {} included resources");
+				loadResourcesByPid(includePids, retVal);
+			}
+		}
+
+		return retVal;
+	}
+
+	private void loadResourcesByPid(Set<Long> thePids, List<T> theResourceListToPopulate) {
+		CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
+		CriteriaQuery<ResourceTable> cq = builder.createQuery(ResourceTable.class);
+		Root<ResourceTable> from = cq.from(ResourceTable.class);
+		cq.where(builder.equal(from.get("myResourceType"), getContext().getResourceDefinition(myResourceType).getName()));
+		if (thePids != null) {
+			cq.where(from.get("myId").in(thePids));
+		}
+		TypedQuery<ResourceTable> q = myEntityManager.createQuery(cq);
+
+		for (ResourceTable next : q.getResultList()) {
+			T resource = toResource(myResourceType, next);
+			theResourceListToPopulate.add(resource);
+		}
+	}
+
+	@Override
+	public List<T> search(String theParameterName, IQueryParameterType theValue) {
+		return search(Collections.singletonMap(theParameterName, theValue));
+	}
+
+	@Override
+	public Set<Long> searchForIds(Map<String, IQueryParameterType> theParams) {
+		Map<String, List<List<IQueryParameterType>>> map = new HashMap<String, List<List<IQueryParameterType>>>();
+		for (Entry<String, IQueryParameterType> nextEntry : theParams.entrySet()) {
+			map.put(nextEntry.getKey(), new ArrayList<List<IQueryParameterType>>());
+			map.get(nextEntry.getKey()).add(Collections.singletonList(nextEntry.getValue()));
+		}
+		return searchForIdsWithAndOr(map);
+	}
+
+	@Override
+	public Set<Long> searchForIds(String theParameterName, IQueryParameterType theValue) {
+		return searchForIds(Collections.singletonMap(theParameterName, theValue));
+	}
+
+	@Override
+	public Set<Long> searchForIdsWithAndOr(Map<String, List<List<IQueryParameterType>>> theParams) {
+		Map<String, List<List<IQueryParameterType>>> params = theParams;
+		if (params == null) {
+			params = Collections.emptyMap();
+		}
+
+		RuntimeResourceDefinition resourceDef = getContext().getResourceDefinition(myResourceType);
+
+		Set<Long> pids = new HashSet<Long>();
+
+		for (Entry<String, List<List<IQueryParameterType>>> nextParamEntry : params.entrySet()) {
+			String nextParamName = nextParamEntry.getKey();
+			if (nextParamName.equals("_id")) {
+				if (nextParamEntry.getValue().isEmpty()) {
+					continue;
+				} else if (nextParamEntry.getValue().size() > 1) {
+					throw new InvalidRequestException("AND queries not supported for _id (Multiple instances of this param found)");
+				} else {
+					Set<Long> joinPids = new HashSet<Long>();
+					List<IQueryParameterType> nextValue = nextParamEntry.getValue().get(0);
+					if (nextValue == null || nextValue.size() == 0) {
+						continue;
+					} else {
+						for (IQueryParameterType next : nextValue) {
+							String value = next.getValueAsQueryToken();
+							long valueLong = Long.parseLong(value);
+							joinPids.add(valueLong);
+						}
+						if (joinPids.isEmpty()) {
+							continue;
+						}
+					}
+
+					if (pids.isEmpty()) {
+						pids.addAll(joinPids);
+					} else {
+						pids.retainAll(joinPids);
+					}
+
+				}
+			}
+
+			RuntimeSearchParam nextParamDef = resourceDef.getSearchParam(nextParamName);
+			if (nextParamDef != null) {
+				if (nextParamDef.getParamType() == SearchParamTypeEnum.TOKEN) {
+					for (List<IQueryParameterType> nextAnd : nextParamEntry.getValue()) {
+						pids = addPredicateToken(pids, nextAnd);
+						if (pids.isEmpty()) {
+							return new HashSet<Long>();
+						}
+					}
+				} else if (nextParamDef.getParamType() == SearchParamTypeEnum.STRING) {
+					for (List<IQueryParameterType> nextAnd : nextParamEntry.getValue()) {
+						pids = addPredicateString(pids, nextAnd);
+						if (pids.isEmpty()) {
+							return new HashSet<Long>();
+						}
+					}
+				} else if (nextParamDef.getParamType() == SearchParamTypeEnum.QUANTITY) {
+					for (List<IQueryParameterType> nextAnd : nextParamEntry.getValue()) {
+						pids = addPredicateQuantity(pids, nextAnd);
+						if (pids.isEmpty()) {
+							return new HashSet<Long>();
+						}
+					}
+				} else if (nextParamDef.getParamType() == SearchParamTypeEnum.DATE) {
+					for (List<IQueryParameterType> nextAnd : nextParamEntry.getValue()) {
+						pids = addPredicateDate(pids, nextAnd);
+						if (pids.isEmpty()) {
+							return new HashSet<Long>();
+						}
+					}
+				} else if (nextParamDef.getParamType() == SearchParamTypeEnum.REFERENCE) {
+					for (List<IQueryParameterType> nextAnd : nextParamEntry.getValue()) {
+						pids = addPredicateReference(nextParamName, pids, nextAnd);
+						if (pids.isEmpty()) {
+							return new HashSet<Long>();
+						}
+					}
+				} else {
+					throw new IllegalArgumentException("Don't know how to handle parameter of type: " + nextParamDef.getParamType());
+				}
+			}
+		}
+
+		return pids;
+	}
+
+	@SuppressWarnings("unchecked")
+	@Required
+	public void setResourceType(Class<? extends IResource> theTableType) {
+		myResourceType = (Class<T>) theTableType;
+	}
+
+	/**
+	 * If set, the given param will be treated as a secondary primary key, and multiple resources will not be able to share the same value.
+	 */
+	public void setSecondaryPrimaryKeyParamName(String theSecondaryPrimaryKeyParamName) {
+		mySecondaryPrimaryKeyParamName = theSecondaryPrimaryKeyParamName;
 	}
 
 	private MethodOutcome toMethodOutcome(final ResourceTable entity) {
@@ -736,6 +839,24 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 		default:
 			throw new IllegalStateException("Don't know how to convert param type: " + theParamType);
 		}
+	}
+
+	@Override
+	public MethodOutcome update(final T theResource, final IdDt theId) {
+
+		// TransactionTemplate template = new TransactionTemplate(myPlatformTransactionManager);
+		// ResourceTable savedEntity = template.execute(new TransactionCallback<ResourceTable>() {
+		// @Override
+		// public ResourceTable doInTransaction(TransactionStatus theStatus) {
+		// final ResourceTable entity = readEntity(theId);
+		// return updateEntity(theResource, entity,true);
+		// }
+		// });
+
+		final ResourceTable entity = readEntityLatestVersion(theId);
+		ResourceTable savedEntity = updateEntity(theResource, entity, true);
+
+		return toMethodOutcome(savedEntity);
 	}
 
 }

@@ -183,24 +183,24 @@ public class TinderStructuresMojo extends AbstractMojo {
 
 	public static void main(String[] args) throws Exception {
 
-//		 ValueSetGenerator vsp = new ValueSetGenerator();
+		 ValueSetGenerator vsp = new ValueSetGenerator();
 //		 vsp.setDirectory("src/test/resources/vs/");
-//		 vsp.parse();
-//		
-//		 DatatypeGeneratorUsingSpreadsheet dtp = new DatatypeGeneratorUsingSpreadsheet();
-//		 dtp.parse();
-//		 dtp.bindValueSets(vsp);
-//		
-//		 String dtOutputDir = "target/generated/valuesets/ca/uhn/fhir/model/dstu/composite";
-//		 dtp.writeAll(dtOutputDir);
-//		
+		 vsp.parse();
+		
+		 DatatypeGeneratorUsingSpreadsheet dtp = new DatatypeGeneratorUsingSpreadsheet();
+		 dtp.parse();
+		 dtp.bindValueSets(vsp);
+		
+		 String dtOutputDir = "target/generated/valuesets/ca/uhn/fhir/model/dstu/composite";
+		 dtp.writeAll(new File(dtOutputDir), "ca.uhn.fhir.model.dstu");
+		
 		 ResourceGeneratorUsingSpreadsheet rp = new ResourceGeneratorUsingSpreadsheet();
-		 rp.setBaseResourceNames(Arrays.asList("list"));
+		 rp.setBaseResourceNames(Arrays.asList("list", "encounter"));
 		 rp.parse();
 //		 rp.bindValueSets(vsp);
 		
 		 String rpOutputDir = "target/generated/valuesets/ca/uhn/fhir/model/dstu/resource";
-		 rp.writeAll(new File(rpOutputDir), "ca.uhn.test");
+		 rp.writeAll(new File(rpOutputDir), "ca.uhn.fhir.model.dstu");
 //		
 //		 String vsOutputDir = "target/generated/valuesets/ca/uhn/fhir/model/dstu/valueset";
 //		 vsp.writeMarkedValueSets(vsOutputDir);

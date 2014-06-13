@@ -13,6 +13,12 @@ public abstract class Child extends BaseElement {
 
 	private List<SimpleSetter> mySimpleStters = new ArrayList<SimpleSetter>();
 
+	@Override
+	public void clearTypes() {
+		super.clearTypes();
+		mySimpleStters.clear();
+	}
+
 	public String getAnnotationType() {
 		return getSingleType();
 	}

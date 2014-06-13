@@ -78,7 +78,7 @@ public class PatientResourceProvider implements IResourceProvider {
 			publishedDate = InstantDt.withCurrentTime();
 		} else {
 			Patient currentPatitne = myIdToPatientVersions.get(theId).getLast();
-			Map<ResourceMetadataKeyEnum, Object> resourceMetadata = currentPatitne.getResourceMetadata();
+			Map<ResourceMetadataKeyEnum<?>, Object> resourceMetadata = currentPatitne.getResourceMetadata();
 			publishedDate = (InstantDt) resourceMetadata.get(ResourceMetadataKeyEnum.PUBLISHED);
 		}
 

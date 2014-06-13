@@ -4,13 +4,13 @@ import java.util.Date;
 
 class HistoryTuple implements Comparable<HistoryTuple> {
 
-	private Object myId;
-	private Class<?> myTable;
+	private Long myId;
+	private boolean myIsHistory;
 	private Date myUpdated;
 
-	public HistoryTuple(Class<?> theTable, Date theUpdated, Object theId) {
+	public HistoryTuple(boolean theIsHistory, Date theUpdated, Long theId) {
 		super();
-		myTable = theTable;
+		myIsHistory = theIsHistory;
 		myUpdated = theUpdated;
 		myId = theId;
 	}
@@ -20,24 +20,24 @@ class HistoryTuple implements Comparable<HistoryTuple> {
 		return myUpdated.compareTo(theO.myUpdated);
 	}
 
-	public Object getId() {
+	public Long getId() {
 		return myId;
 	}
 
-	public Class<?> getTable() {
-		return myTable;
+	public boolean isHistory() {
+		return myIsHistory;
 	}
 
 	public Date getUpdated() {
 		return myUpdated;
 	}
 
-	public void setId(Object theId) {
+	public void setId(Long theId) {
 		myId = theId;
 	}
 
-	public void setTable(Class<?> theTable) {
-		myTable = theTable;
+	public void setIsHistory(boolean theIsHistory) {
+		myIsHistory = theIsHistory;
 	}
 
 	public void setUpdated(Date theUpdated) {

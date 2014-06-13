@@ -21,6 +21,7 @@ package ca.uhn.fhir.rest.gclient;
  */
 
 import ca.uhn.fhir.model.api.Bundle;
+import ca.uhn.fhir.model.api.Include;
 
 public interface IQuery {
 

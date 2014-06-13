@@ -217,6 +217,10 @@ public abstract class BaseElement {
 		myShortName = theShortName;
 	}
 
+	public void clearTypes() {
+		getType().clear();
+	}
+	
 	public void setTypeFromString(String theType) {
 		if (theType == null) {
 			myType = null;

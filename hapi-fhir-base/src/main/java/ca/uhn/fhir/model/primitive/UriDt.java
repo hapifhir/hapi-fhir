@@ -121,4 +121,18 @@ public class UriDt extends BasePrimitive<URI> {
 		return true;
 	}
 
+	/**
+	 * Creates a new UriDt instance which uses the given OID as the content (and prepends "urn:oid:" to the 
+	 * OID string in the value of the newly created UriDt, per the FHIR specification).
+	 *  
+	 * @param theOid The OID to use (<code>null</code> is acceptable and will result in a UriDt instance with a <code>null</code> value)
+	 * @return A new UriDt instance
+	 */
+	public static UriDt fromOid(String theOid) {
+		if (theOid == null) {
+			return new UriDt();
+		}
+		return new UriDt("urn:oid:" + theOid);
+	}
+
 }

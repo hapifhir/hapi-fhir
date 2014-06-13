@@ -2,3 +2,4 @@
 /target
 *.log
 *.log*
+nohup.out

@@ -34,17 +34,21 @@ public class FhirSystemDao extends BaseFhirDao implements IFhirSystemDao {
 	@PersistenceContext()
 	private EntityManager myEntityManager;
 
-	private FhirContext myContext = new FhirContext();
-
 	@Transactional(propagation = Propagation.REQUIRED)
 	@Override
 	public void transaction(List<IResource> theResources) {
 		ourLog.info("Beginning transaction with {} resources", theResources.size());
+		long start = System.currentTimeMillis();
 
-		FhirTerser terser = myContext.newTerser();
+		FhirTerser terser = getContext().newTerser();
 
+		int creations = 0;
+		int updates = 0;
+		
 		Map<IdDt, IdDt> idConversions = new HashMap<IdDt, IdDt>();
+		
 		List<ResourceTable> persistedResources = new ArrayList<ResourceTable>();
+		
 		for (IResource nextResource : theResources) {
 			IdDt nextId = nextResource.getId();
 			if (nextId == null) {
@@ -71,33 +75,50 @@ public class FhirSystemDao extends BaseFhirDao implements IFhirSystemDao {
 			if (entity == null) {
 				entity = toEntity(nextResource);
 				myEntityManager.persist(entity);
-				myEntityManager.flush();
+//				myEntityManager.flush();
+				creations++;
+				ourLog.info("Resource Type[{}] with ID[{}] does not exist, creating it", resourceName, nextId);
+			} else {
+				updates++;
+				ourLog.info("Resource Type[{}] with ID[{}] exists, updating it", resourceName, nextId);
 			}
 
-			IdDt newId = new IdDt(resourceName + '/' + entity.getId());
-			if (nextId.isEmpty()) {
-				ourLog.info("Transaction resource (with no preexisting ID) has been assigned new ID[{}]", nextId, newId);
-			} else if (newId.equals(entity.getId())) {
-				ourLog.info("Transaction resource ID[{}] is being updated", newId);
-			} else {
-				ourLog.info("Transaction resource ID[{}] has been assigned new ID[{}]", nextId, newId);
-				idConversions.put(nextId, newId);
-			}
-			
 			persistedResources.add(entity);
 
 		}
 
+		myEntityManager.flush();
+
+		for (int i = 0; i < persistedResources.size();i++) {
+			ResourceTable entity = persistedResources.get(i);
+			String resourceName = toResourceName(theResources.get(i));
+			IdDt nextId = theResources.get(i).getId();
+
+			IdDt newId = new IdDt(resourceName + '/' + entity.getId());
+			if (nextId == null || nextId.isEmpty()) {
+				ourLog.info("Transaction resource (with no preexisting ID) has been assigned new ID[{}]", nextId, newId);
+			} else if (newId.equals(entity.getId())) {
+				ourLog.info("Transaction resource ID[{}] is being updated", newId);
+			} else {
+				if (!nextId.getUnqualifiedId().startsWith("#")) {
+					nextId = new IdDt(resourceName + '/' + nextId.getUnqualifiedId());
+					ourLog.info("Transaction resource ID[{}] has been assigned new ID[{}]", nextId, newId);
+					idConversions.put(nextId, newId);
+				}
+			}
+
+		}
+		
 		for (IResource nextResource : theResources) {
 			List<ResourceReferenceDt> allRefs = terser.getAllPopulatedChildElementsOfType(nextResource, ResourceReferenceDt.class);
 			for (ResourceReferenceDt nextRef : allRefs) {
-				IdDt nextId = nextRef.getResourceId();
+				IdDt nextId = nextRef.getReference();
 				if (idConversions.containsKey(nextId)) {
 					IdDt newId = idConversions.get(nextId);
 					ourLog.info(" * Replacing resource ref {} with {}", nextId, newId);
-					nextRef.setResourceId(newId);
+					nextRef.setReference(newId);
 				} else {
-					ourLog.info(" * Reference [{}] does not exist in bundle", nextId);
+					ourLog.debug(" * Reference [{}] does not exist in bundle", nextId);
 				}
 			}
 		}
@@ -107,6 +128,9 @@ public class FhirSystemDao extends BaseFhirDao implements IFhirSystemDao {
 			ResourceTable table = persistedResources.get(i);
 			updateEntity(resource, table, table.getId() != null);
 		}
+		
+		long delay = System.currentTimeMillis() - start;
+		ourLog.info("Transaction completed in {}ms with {} creations and {} updates", new Object[] {delay, creations, updates});
 
 	}
 

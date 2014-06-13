@@ -24,33 +24,50 @@ public class ${className}ResourceProvider extends JpaResourceProvider<${classNam
 
 	@Search()
 	public List<${className}> search(
+			@Description(shortDefinition="The resource identity")
+			@OptionalParam(name="_id")
+			StringParam theId, 
 #foreach ( $param in $searchParamsWithoutComposite ) #{if}(true) #{end} 
 
 			@Description(shortDefinition="${param.description}")
 			@OptionalParam(name="${param.name}")
 #if (${param.type} == 'string' )
-			StringParam the${param.nameCapitalized} #{if}($foreach.hasNext), #{end} 
+			StringParam the${param.nameCapitalized}, 
 #elseif (${param.type} == 'token' )
-			IdentifierDt the${param.nameCapitalized} #{if}($foreach.hasNext), #{end} 
+			IdentifierDt the${param.nameCapitalized}, 
 #elseif (${param.type} == 'date' )
-			DateRangeParam the${param.nameCapitalized} #{if}($foreach.hasNext), #{end} 
+			DateRangeParam the${param.nameCapitalized}, 
 #elseif (${param.type} == 'quantity' )
-			QuantityDt the${param.nameCapitalized} #{if}($foreach.hasNext), #{end} 
+			QuantityDt the${param.nameCapitalized}, 
 #elseif (${param.type} == 'number' )
-			QuantityDt the${param.nameCapitalized} #{if}($foreach.hasNext), #{end} 
+			QuantityDt the${param.nameCapitalized}, 
 #elseif (${param.type} == 'reference' )
-			ReferenceParam the${param.nameCapitalized} #{if}($foreach.hasNext), #{end} 
+			ReferenceParam the${param.nameCapitalized}, 
 #elseif (${param.type} == 'composite' )
-			ReferenceParam the${param.nameCapitalized} #{if}($foreach.hasNext), #{end} 
+			ReferenceParam the${param.nameCapitalized}, 
 #end
 #end	
+
+			@IncludeParam(allow= {
+#foreach ( $param in $searchParamsReference )
+#set ( $haveMore = $foreach.hasNext )
+#foreach ( $include in $param.paths )
+				"${include.path}" #{if}($foreach.hasNext || $haveMore), #{end}
+#end				 
+#end
+			}) 
+			Set<Include> theIncludes			
 	) {
 		SearchParameterMap paramMap = new SearchParameterMap();
-					
+		paramMap.add("_id", theId);					
 #foreach ( $param in $searchParamsWithoutComposite ) 
 		paramMap.add("${param.name}", the${param.nameCapitalized});	
 #end
 
+		paramMap.setIncludes(theIncludes);
+
+
+		
 		return getDao().search(paramMap);
 	}
 }

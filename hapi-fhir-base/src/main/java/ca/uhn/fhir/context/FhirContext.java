@@ -70,6 +70,7 @@ public class FhirContext {
 	 * Default constructor. In most cases this is the right constructor to use.
 	 */
 	public FhirContext() {
+		super();
 	}
 
 	public FhirContext(Class<? extends IResource> theResourceType) {

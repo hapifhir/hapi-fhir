@@ -23,6 +23,11 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 	@Temporal(TemporalType.TIMESTAMP)
 	public Date myValueLow;
 
+	
+	
+	public ResourceIndexedSearchParamDate() {
+	}
+	
 	public ResourceIndexedSearchParamDate(String theName, Date theLow, Date theHigh) {
 		setName(theName);
 		setValueLow(theLow);
