@@ -10,7 +10,7 @@ import javax.persistence.TemporalType;
 
 @Entity
 @Table(name = "HFJ_SPIDX_DATE" /*, indexes= {@Index(name="IDX_SP_DATE", columnList= "SP_VALUE_LOW,SP_VALUE_HIGH")}*/)
-@org.hibernate.annotations.Table(appliesTo = "HFJ_SPIDX_DATE", indexes= {@org.hibernate.annotations.Index(name="IDX_SP_DATE", columnNames= {"SP_VALUE_LOW","SP_VALUE_HIGH"})})
+@org.hibernate.annotations.Table(appliesTo = "HFJ_SPIDX_DATE", indexes= {@org.hibernate.annotations.Index(name="IDX_SP_DATE", columnNames= {"RES_TYPE", "SP_NAME", "SP_VALUE_LOW","SP_VALUE_HIGH"})})
 public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchParam {
 
 	private static final long serialVersionUID = 1L;
@@ -29,7 +29,7 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 	}
 	
 	public ResourceIndexedSearchParamDate(String theName, Date theLow, Date theHigh) {
-		setName(theName);
+		setParamName(theName);
 		setValueLow(theLow);
 		setValueHigh(theHigh);
 	}

@@ -160,8 +160,12 @@ public class FhirResourceDaoTest {
 
 		ourPatientDao.create(patient);
 
-		List<Patient> found = ourPatientDao.search("birthdate", new QualifiedDateParam(QuantityCompararatorEnum.GREATERTHAN, "2000-01-01"));
+		List<Patient> found = ourPatientDao.search(Patient.SP_BIRTHDATE, new QualifiedDateParam(QuantityCompararatorEnum.GREATERTHAN, "2000-01-01"));
 		assertEquals(1, found.size());
+
+		// If this throws an exception, that would be an acceptable outcome as well..
+		found = ourPatientDao.search(Patient.SP_BIRTHDATE+"AAAA", new QualifiedDateParam(QuantityCompararatorEnum.GREATERTHAN, "2000-01-01"));
+		assertEquals(0, found.size());
 
 	}
 
@@ -228,7 +232,7 @@ public class FhirResourceDaoTest {
 		map.get(Patient.SP_IDENTIFIER).get(0).add(new IdentifierDt("urn:system", "001testPersistSearchParams"));
 		map.put(Patient.SP_GENDER, new ArrayList<List<IQueryParameterType>>());
 		map.get(Patient.SP_GENDER).add(new ArrayList<IQueryParameterType>());
-		map.get(Patient.SP_GENDER).get(0).add(new IdentifierDt(null, "M"));
+		map.get(Patient.SP_GENDER).get(0).add(new IdentifierDt(AdministrativeGenderCodesEnum.M.getSystem(), "M"));
 		found = ourPatientDao.search(map);
 		assertEquals(1, found.size());
 		assertEquals(id, found.get(0).getId().asLong().longValue());
@@ -239,7 +243,7 @@ public class FhirResourceDaoTest {
 		map.get(Patient.SP_IDENTIFIER).get(0).add(new IdentifierDt("urn:system", "001testPersistSearchParams"));
 		map.put(Patient.SP_GENDER, new ArrayList<List<IQueryParameterType>>());
 		map.get(Patient.SP_GENDER).add(new ArrayList<IQueryParameterType>());
-		map.get(Patient.SP_GENDER).get(0).add(new IdentifierDt(null, "F"));
+		map.get(Patient.SP_GENDER).get(0).add(new IdentifierDt(AdministrativeGenderCodesEnum.M.getSystem(), "F"));
 		found = ourPatientDao.search(map);
 		assertEquals(0, found.size());
 
@@ -287,12 +291,25 @@ public class FhirResourceDaoTest {
 		assertEquals(1, patients.size());
 		assertEquals(id1.getUnqualifiedId(), patients.get(0).getId().getUnqualifiedId());
 
+		// Given name shouldn't return for family param
 		params = new HashMap<String, IQueryParameterType>();
 		params.put(Patient.SP_FAMILY, new StringDt("testSearchNameParam01Giv"));
+		patients = ourPatientDao.search(params);
+		assertEquals(0, patients.size());
+
+		params = new HashMap<String, IQueryParameterType>();
+		params.put(Patient.SP_NAME, new StringDt("testSearchNameParam01Fam"));
 		patients = ourPatientDao.search(params);
 		assertEquals(1, patients.size());
 		assertEquals(id1.getUnqualifiedId(), patients.get(0).getId().getUnqualifiedId());
 
+		params = new HashMap<String, IQueryParameterType>();
+		params.put(Patient.SP_NAME, new StringDt("testSearchNameParam01Giv"));
+		patients = ourPatientDao.search(params);
+		assertEquals(1, patients.size());
+		assertEquals(id1.getUnqualifiedId(), patients.get(0).getId().getUnqualifiedId());
+
+		
 		params = new HashMap<String, IQueryParameterType>();
 		params.put(Patient.SP_FAMILY, new StringDt("testSearchNameParam01Foo"));
 		patients = ourPatientDao.search(params);
@@ -329,14 +346,14 @@ public class FhirResourceDaoTest {
 
 		ourLog.info("P1[{}] P2[{}] O1[{}] O2[{}] D1[{}]", new Object[] { patientId01, patientId02, obsId01, obsId02, drId01 });
 
-		List<Observation> result = ourObservationDao.search(Observation.SP_SUBJECT, new ReferenceParam(Patient.SP_IDENTIFIER, "testSearchResourceLinkWithChain01"));
+		List<Observation> result = ourObservationDao.search(Observation.SP_SUBJECT, new ReferenceParam(Patient.SP_IDENTIFIER, "urn:system|testSearchResourceLinkWithChain01"));
 		assertEquals(1, result.size());
 		assertEquals(obsId01.getUnqualifiedId(), result.get(0).getId().getUnqualifiedId());
 
 		result = ourObservationDao.search(Observation.SP_SUBJECT, new ReferenceParam(Patient.SP_IDENTIFIER, "999999999999"));
 		assertEquals(0, result.size());
 
-		result = ourObservationDao.search(Observation.SP_SUBJECT, new ReferenceParam(Patient.SP_IDENTIFIER, "testSearchResourceLinkWithChainXX"));
+		result = ourObservationDao.search(Observation.SP_SUBJECT, new ReferenceParam(Patient.SP_IDENTIFIER, "urn:system|testSearchResourceLinkWithChainXX"));
 		assertEquals(2, result.size());
 
 	}
@@ -607,13 +624,13 @@ public class FhirResourceDaoTest {
 		}
 
 		Map<String, IQueryParameterType> params = new HashMap<String, IQueryParameterType>();
-		params.put(Patient.SP_FAMILY, new StringDt("testSearchStringParamWithNonNormalized_hora"));
+		params.put(Patient.SP_GIVEN, new StringDt("testSearchStringParamWithNonNormalized_hora"));
 		List<Patient> patients = ourPatientDao.search(params);
 		assertEquals(2, patients.size());
 
 		StringParam parameter = new StringParam("testSearchStringParamWithNonNormalized_hora");
 		parameter.setExact(true);
-		params.put(Patient.SP_FAMILY, parameter);
+		params.put(Patient.SP_GIVEN, parameter);
 		patients = ourPatientDao.search(params);
 		assertEquals(0, patients.size());
 

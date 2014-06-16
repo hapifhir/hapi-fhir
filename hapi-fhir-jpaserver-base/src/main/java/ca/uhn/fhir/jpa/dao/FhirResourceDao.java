@@ -81,7 +81,7 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 	private Class<T> myResourceType;
 	private String mySecondaryPrimaryKeyParamName;
 
-	private Set<Long> addPredicateDate(Set<Long> thePids, List<IQueryParameterType> theOrParams) {
+	private Set<Long> addPredicateDate(String theParamName, Set<Long> thePids, List<IQueryParameterType> theOrParams) {
 		if (theOrParams == null || theOrParams.isEmpty()) {
 			return thePids;
 		}
@@ -111,11 +111,12 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 		Predicate masterCodePredicate = builder.or(codePredicates.toArray(new Predicate[0]));
 
 		Predicate type = builder.equal(from.get("myResourceType"), myResourceName);
+		Predicate name = builder.equal(from.get("myParamName"), theParamName);
 		if (thePids.size() > 0) {
 			Predicate inPids = (from.get("myResourcePid").in(thePids));
-			cq.where(builder.and(type, inPids, masterCodePredicate));
+			cq.where(builder.and(type, name, masterCodePredicate,inPids));
 		} else {
-			cq.where(builder.and(type, masterCodePredicate));
+			cq.where(builder.and(type, name,masterCodePredicate));
 		}
 
 		TypedQuery<Long> q = myEntityManager.createQuery(cq);
@@ -161,7 +162,7 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 		}
 	}
 
-	private Set<Long> addPredicateQuantity(Set<Long> thePids, List<IQueryParameterType> theOrParams) {
+	private Set<Long> addPredicateQuantity(String theParamName, Set<Long> thePids, List<IQueryParameterType> theOrParams) {
 		if (theOrParams == null || theOrParams.isEmpty()) {
 			return thePids;
 		}
@@ -234,11 +235,12 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 		Predicate masterCodePredicate = builder.or(codePredicates.toArray(new Predicate[0]));
 
 		Predicate type = builder.equal(from.get("myResourceType"), myResourceName);
+		Predicate name = builder.equal(from.get("myParamName"), theParamName);
 		if (thePids.size() > 0) {
 			Predicate inPids = (from.get("myResourcePid").in(thePids));
-			cq.where(builder.and(type, inPids, masterCodePredicate));
+			cq.where(builder.and(type, name, masterCodePredicate, inPids));
 		} else {
-			cq.where(builder.and(type, masterCodePredicate));
+			cq.where(builder.and(type, name, masterCodePredicate));
 		}
 
 		TypedQuery<Long> q = myEntityManager.createQuery(cq);
@@ -276,7 +278,9 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 					Long targetPid = Long.valueOf(resourceId);
 					ourLog.info("Searching for resource link with target PID: {}", targetPid);
 					Predicate eq = builder.equal(from.get("myTargetResourcePid"), targetPid);
+					
 					codePredicates.add(eq);
+					
 				} else {
 					String chain = getContext().getResourceDefinition(myResourceType).getSearchParam(theParamName).getPath();
 					BaseRuntimeChildDefinition def = getContext().newTerser().getDefinition(myResourceType, chain);
@@ -331,7 +335,7 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 		Predicate type = builder.equal(from.get("mySourcePath"), path);
 		if (pidsToRetain.size() > 0) {
 			Predicate inPids = (from.get("mySourceResourcePid").in(pidsToRetain));
-			cq.where(builder.and(type, inPids, masterCodePredicate));
+			cq.where(builder.and(type, masterCodePredicate, inPids));
 		} else {
 			cq.where(builder.and(type, masterCodePredicate));
 		}
@@ -340,7 +344,7 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 		return new HashSet<Long>(q.getResultList());
 	}
 
-	private Set<Long> addPredicateString(Set<Long> thePids, List<IQueryParameterType> theOrParams) {
+	private Set<Long> addPredicateString(String theParamName, Set<Long> thePids, List<IQueryParameterType> theOrParams) {
 		if (theOrParams == null || theOrParams.isEmpty()) {
 			return thePids;
 		}
@@ -373,18 +377,19 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 		Predicate masterCodePredicate = builder.or(codePredicates.toArray(new Predicate[0]));
 
 		Predicate type = builder.equal(from.get("myResourceType"), myResourceName);
+		Predicate name = builder.equal(from.get("myParamName"), theParamName);
 		if (thePids.size() > 0) {
 			Predicate inPids = (from.get("myResourcePid").in(thePids));
-			cq.where(builder.and(type, inPids, masterCodePredicate));
+			cq.where(builder.and(type, name, masterCodePredicate, inPids));
 		} else {
-			cq.where(builder.and(type, masterCodePredicate));
+			cq.where(builder.and(type, name, masterCodePredicate));
 		}
 
 		TypedQuery<Long> q = myEntityManager.createQuery(cq);
 		return new HashSet<Long>(q.getResultList());
 	}
 
-	private Set<Long> addPredicateToken(Set<Long> thePids, List<IQueryParameterType> theOrParams) {
+	private Set<Long> addPredicateToken(String theParamName, Set<Long> thePids, List<IQueryParameterType> theOrParams) {
 		if (theOrParams == null || theOrParams.isEmpty()) {
 			return thePids;
 		}
@@ -430,11 +435,12 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 		Predicate masterCodePredicate = builder.or(codePredicates.toArray(new Predicate[0]));
 
 		Predicate type = builder.equal(from.get("myResourceType"), myResourceName);
+		Predicate name = builder.equal(from.get("myParamName"), theParamName);
 		if (thePids.size() > 0) {
 			Predicate inPids = (from.get("myResourcePid").in(thePids));
-			cq.where(builder.and(type, inPids, masterCodePredicate));
+			cq.where(builder.and(type, name, masterCodePredicate,inPids));
 		} else {
-			cq.where(builder.and(type, masterCodePredicate));
+			cq.where(builder.and(type, name, masterCodePredicate));
 		}
 
 		TypedQuery<Long> q = myEntityManager.createQuery(cq);
@@ -752,28 +758,28 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 			if (nextParamDef != null) {
 				if (nextParamDef.getParamType() == SearchParamTypeEnum.TOKEN) {
 					for (List<IQueryParameterType> nextAnd : nextParamEntry.getValue()) {
-						pids = addPredicateToken(pids, nextAnd);
+						pids = addPredicateToken(nextParamName, pids, nextAnd);
 						if (pids.isEmpty()) {
 							return new HashSet<Long>();
 						}
 					}
 				} else if (nextParamDef.getParamType() == SearchParamTypeEnum.STRING) {
 					for (List<IQueryParameterType> nextAnd : nextParamEntry.getValue()) {
-						pids = addPredicateString(pids, nextAnd);
+						pids = addPredicateString(nextParamName, pids, nextAnd);
 						if (pids.isEmpty()) {
 							return new HashSet<Long>();
 						}
 					}
 				} else if (nextParamDef.getParamType() == SearchParamTypeEnum.QUANTITY) {
 					for (List<IQueryParameterType> nextAnd : nextParamEntry.getValue()) {
-						pids = addPredicateQuantity(pids, nextAnd);
+						pids = addPredicateQuantity(nextParamName, pids, nextAnd);
 						if (pids.isEmpty()) {
 							return new HashSet<Long>();
 						}
 					}
 				} else if (nextParamDef.getParamType() == SearchParamTypeEnum.DATE) {
 					for (List<IQueryParameterType> nextAnd : nextParamEntry.getValue()) {
-						pids = addPredicateDate(pids, nextAnd);
+						pids = addPredicateDate(nextParamName, pids, nextAnd);
 						if (pids.isEmpty()) {
 							return new HashSet<Long>();
 						}

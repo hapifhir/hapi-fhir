@@ -8,7 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 
 @Entity
 @Table(name = "HFJ_SPIDX_TOKEN" /* , indexes = { @Index(name = "IDX_SP_TOKEN", columnList = "SP_SYSTEM,SP_VALUE") } */)
-@org.hibernate.annotations.Table(appliesTo = "HFJ_SPIDX_TOKEN", indexes = { @org.hibernate.annotations.Index(name = "IDX_SP_TOKEN", columnNames = { "SP_SYSTEM", "SP_VALUE" }) })
+@org.hibernate.annotations.Table(appliesTo = "HFJ_SPIDX_TOKEN", indexes = { @org.hibernate.annotations.Index(name = "IDX_SP_TOKEN", columnNames = { "RES_TYPE", "SP_NAME", "SP_SYSTEM", "SP_VALUE" }) })
 public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchParam {
 
 	private static final long serialVersionUID = 1L;
@@ -23,7 +23,7 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 	}
 
 	public ResourceIndexedSearchParamToken(String theName, String theSystem, String theValue) {
-		setName(theName);
+		setParamName(theName);
 		setSystem(theSystem);
 		setValue(theValue);
 	}
