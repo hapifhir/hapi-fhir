@@ -56,10 +56,10 @@ public class CreateMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 	}
 
 	@Override
-	protected BaseHttpClientInvocation createClientInvocation(Object[] theArgs, IResource resource) {
+	protected BaseHttpClientInvocation createClientInvocation(Object[] theArgs, IResource theResource) {
 		FhirContext context = getContext();
 
-		BaseHttpClientInvocation retVal = createCreateInvocation(resource, context);
+		BaseHttpClientInvocation retVal = createCreateInvocation(theResource, context);
 		
 		if (theArgs != null) {
 			for (int idx = 0; idx < theArgs.length; idx++) {
@@ -71,14 +71,18 @@ public class CreateMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 		return retVal;
 	}
 
-	public static HttpPostClientInvocation createCreateInvocation(IResource resource, FhirContext context) {
-		RuntimeResourceDefinition def = context.getResourceDefinition(resource);
+	public static HttpPostClientInvocation createCreateInvocation(IResource theResource, FhirContext theContext) {
+		RuntimeResourceDefinition def = theContext.getResourceDefinition(theResource);
 		String resourceName = def.getName();
+
 
 		StringBuilder urlExtension = new StringBuilder();
 		urlExtension.append(resourceName);
 
-		return new HttpPostClientInvocation(context, resource, urlExtension.toString());
+		HttpPostClientInvocation retVal = new HttpPostClientInvocation(theContext, theResource, urlExtension.toString());
+		addTagsToPostOrPut(theResource, retVal);
+		
+		return retVal;
 	}
 
 	@Override

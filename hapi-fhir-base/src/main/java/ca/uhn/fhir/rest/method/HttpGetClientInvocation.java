@@ -45,12 +45,23 @@ public class HttpGetClientInvocation extends BaseHttpClientInvocation {
 		myUrlPath = StringUtils.join(theUrlFragments, '/');
 	}
 
+	public HttpGetClientInvocation(Map<String, List<String>> theParameters, List<String> theUrlFragments) {
+		myParameters = theParameters;
+		myUrlPath = StringUtils.join(theUrlFragments, '/');
+	}
+
 	public HttpGetClientInvocation(String theUrlPath) {
 		myParameters = new HashMap<String, List<String>>();
 		myUrlPath = theUrlPath;
 	}
 
 	public HttpGetClientInvocation(String... theUrlFragments) {
+		myParameters = new HashMap<String, List<String>>();
+		myUrlPath = StringUtils.join(theUrlFragments, '/');
+	}
+
+
+	public HttpGetClientInvocation(List<String> theUrlFragments) {
 		myParameters = new HashMap<String, List<String>>();
 		myUrlPath = StringUtils.join(theUrlFragments, '/');
 	}
@@ -92,9 +103,10 @@ public class HttpGetClientInvocation extends BaseHttpClientInvocation {
 	}
 
 	private boolean addQueryParameter(StringBuilder b, boolean first, String nextKey, String nextValue) {
-		if (first) {
+		boolean retVal = first;
+		if (retVal) {
 			b.append('?');
-			first = false;
+			retVal = false;
 		} else {
 			b.append('&');
 		}
@@ -105,7 +117,7 @@ public class HttpGetClientInvocation extends BaseHttpClientInvocation {
 		} catch (UnsupportedEncodingException e) {
 			throw new ConfigurationException("Could not find UTF-8 encoding. This shouldn't happen.", e);
 		}
-		return first;
+		return retVal;
 	}
 
 }

@@ -30,6 +30,7 @@ import ca.uhn.fhir.model.dstu.resource.Conformance;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.gclient.IGetTags;
 import ca.uhn.fhir.rest.gclient.IUntypedQuery;
 
 public interface IGenericClient {
@@ -219,5 +220,10 @@ public interface IGenericClient {
 	 *            Should requests and responses be logged
 	 */
 	void setLogRequestAndResponse(boolean theLogRequestAndResponse);
+
+	/**
+	 * Fluent method for the "get tags" operation
+	 */
+	IGetTags getTags();
 
 }

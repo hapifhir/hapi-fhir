@@ -103,6 +103,7 @@
 							<packageBase>ca.uhn.test.jpasrv</packageBase>
 							<baseResourceNames>
 								<baseResourceName>device</baseResourceName>
+								<baseResourceName>diagnosticreport</baseResourceName>
 								<baseResourceName>location</baseResourceName>
 								<baseResourceName>observation</baseResourceName>
 								<baseResourceName>organization</baseResourceName>

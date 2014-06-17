@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
 import org.junit.AfterClass;
@@ -281,6 +282,35 @@ public class FhirSystemDaoTest {
 		assertEquals(obsVersion2, 2L);
 
 	}
+
+	
+	
+	@Test
+	public void testGetResourceCounts() {
+		Observation obs = new Observation();
+		obs.getName().addCoding().setSystem("urn:system").setCode("testGetResourceCountsO01");
+		ourObservationDao.create(obs);
+
+		Map<String, Long> oldCounts = ourSystemDao.getResourceCounts();
+
+		Patient patient = new Patient();
+		patient.addIdentifier("urn:system", "testGetResourceCountsP01");
+		patient.addName().addFamily("Tester").addGiven("Joe");
+		ourPatientDao.create(patient);
+
+		Map<String, Long> newCounts = ourSystemDao.getResourceCounts();
+		
+		if (oldCounts.containsKey("Patient")) {
+			assertEquals(oldCounts.get("Patient")+1, (long)newCounts.get("Patient"));
+		}else {
+			assertEquals(1L, (long)newCounts.get("Patient"));
+		}
+
+		assertEquals((long)oldCounts.get("Observation"), (long)newCounts.get("Observation"));
+		
+	}
+	
+	
 
 	@Test
 	public void testPersistWithUnknownId() {

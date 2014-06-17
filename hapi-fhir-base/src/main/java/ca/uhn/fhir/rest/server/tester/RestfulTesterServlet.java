@@ -26,10 +26,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -56,11 +60,17 @@ import org.thymeleaf.templateresolver.TemplateResolver;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.Include;
+import ca.uhn.fhir.model.dstu.composite.QuantityDt;
 import ca.uhn.fhir.model.dstu.resource.Conformance;
 import ca.uhn.fhir.model.dstu.resource.Conformance.Rest;
 import ca.uhn.fhir.model.dstu.resource.Conformance.RestResource;
+import ca.uhn.fhir.model.dstu.valueset.SearchParamTypeEnum;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
+import ca.uhn.fhir.model.primitive.DecimalDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.annotation.Metadata;
@@ -69,10 +79,15 @@ import ca.uhn.fhir.rest.client.api.IBasicClient;
 import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.gclient.IUntypedQuery;
 import ca.uhn.fhir.rest.gclient.StringParam;
+import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 
 public class RestfulTesterServlet extends HttpServlet {
+
+	private static final String PARAM_RESOURCE = "resource";
+
+	private static final String RESOURCE_COUNT_EXT_URL = "http://hl7api.sourceforge.net/hapi-fhir/res/extdefs.html#resourceCount";
 
 	private static final boolean DEBUGMODE = true;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RestfulTesterServlet.class);
@@ -145,7 +160,7 @@ public class RestfulTesterServlet extends HttpServlet {
 	}
 
 	private RuntimeResourceDefinition getResourceType(HttpServletRequest theReq) throws ServletException {
-		String resourceName = StringUtils.defaultString(theReq.getParameter("resource"));
+		String resourceName = StringUtils.defaultString(theReq.getParameter(PARAM_RESOURCE));
 		RuntimeResourceDefinition def = myCtx.getResourceDefinition(resourceName);
 		if (def == null) {
 			throw new ServletException("Invalid resourceName: " + resourceName);
@@ -166,6 +181,7 @@ public class RestfulTesterServlet extends HttpServlet {
 		boolean returnsResource;
 		long latency = 0;
 
+		String outcomeDescription = null;
 		try {
 			String method = theReq.getParameter("action");
 
@@ -199,9 +215,35 @@ public class RestfulTesterServlet extends HttpServlet {
 				String versionId = StringUtils.defaultString(theReq.getParameter("vid"));
 				if (StringUtils.isBlank(versionId)) {
 					versionId = null;
+					outcomeDescription = "Read Resource";
+				} else {
+					outcomeDescription = "VRead Resource";
 				}
 
 				client.read(def.getImplementingClass(), new IdDt(def.getName(), id, versionId));
+
+			} else if ("get-tags".equals(method)) {
+
+				Class<? extends IResource> resType = null;
+				if (isNotBlank(theReq.getParameter(PARAM_RESOURCE))) {
+					RuntimeResourceDefinition def = getResourceType(theReq);
+					resType = def.getImplementingClass();
+					String id = theReq.getParameter("resource-tags-id");
+					if (isNotBlank(id)) {
+						String vid = theReq.getParameter("resource-tags-vid");
+						if (isNotBlank(vid)) {
+							client.getTags().forResource(resType, id, vid).execute();
+						} else {
+							client.getTags().forResource(resType, id).execute();
+						}
+					} else {
+						client.getTags().forResource(resType).execute();
+					}
+				} else {
+					client.getTags().execute();
+				}
+				returnsResource = false;
+				outcomeDescription = "Tag List";
 
 			} else if ("delete".equals(method)) {
 				RuntimeResourceDefinition def = getResourceType(theReq);
@@ -212,6 +254,7 @@ public class RestfulTesterServlet extends HttpServlet {
 				}
 
 				returnsResource = false;
+				outcomeDescription = "Delete Resource";
 
 				client.delete(def.getImplementingClass(), new IdDt(id));
 
@@ -245,6 +288,7 @@ public class RestfulTesterServlet extends HttpServlet {
 				}
 
 				returnsResource = false;
+				outcomeDescription = "Resource History";
 
 				client.history(type, id, since, limit);
 
@@ -276,11 +320,14 @@ public class RestfulTesterServlet extends HttpServlet {
 
 				if (validate) {
 					client.validate(resource);
+					outcomeDescription = "Validate Resource";
 				} else {
 					String id = theReq.getParameter("resource-create-id");
 					if (isNotBlank(id)) {
+						outcomeDescription = "Update Resource";
 						client.update(id, resource);
 					} else {
+						outcomeDescription = "Create Resource";
 						client.create(resource);
 					}
 				}
@@ -295,21 +342,54 @@ public class RestfulTesterServlet extends HttpServlet {
 					query = search.forAllResources();
 				}
 
-				int paramIdx = 0;
+				outcomeDescription = "Search for Resources";
+
+				int paramIdx = -1;
 				while (true) {
+					paramIdx++;
+
 					String nextName = theReq.getParameter("param." + paramIdx + ".name");
 					if (isBlank(nextName)) {
 						break;
 					}
+					String nextType = theReq.getParameter("param." + paramIdx + ".type");
 
 					StringBuilder b = new StringBuilder();
 					for (int i = 0; i < 100; i++) {
 						b.append(defaultString(theReq.getParameter("param." + paramIdx + "." + i)));
 					}
 
-					query.where(new StringParam(nextName).matches().value(b.toString()));
+					String paramValue = b.toString();
+					if (isBlank(paramValue)) {
+						continue;
+					}
 
-					paramIdx++;
+					if ("token".equals(nextType)) {
+						if (paramValue.length() < 2) {
+							continue;
+						}
+					}
+
+					query.where(new StringParam(nextName).matches().value(paramValue));
+
+				}
+
+				String[] incValues = theReq.getParameterValues(Constants.PARAM_INCLUDE);
+				if (incValues != null) {
+					for (String next : incValues) {
+						if (isNotBlank(next)) {
+							query.include(new Include(next));
+						}
+					}
+				}
+
+				String limit = theReq.getParameter("resource-search-limit");
+				if (isNotBlank(limit)) {
+					if (!limit.matches("[0-9]+")) {
+						theContext.getVariables().put("errorMsg", "Search limit must be a numeric value.");
+						return;
+					}
+					query.limitTo(Integer.parseInt(limit));
 				}
 
 				query.execute();
@@ -374,14 +454,19 @@ public class RestfulTesterServlet extends HttpServlet {
 			EncodingEnum ctEnum = EncodingEnum.forContentType(mimeType);
 			String narrativeString = "";
 
+			String resultDescription;
 			if (ctEnum == null) {
 				resultSyntaxHighlighterClass = "brush: plain";
+				resultDescription = "Non-FHIR response";
 			} else {
 				switch (ctEnum) {
 				case JSON:
 					resultSyntaxHighlighterClass = "brush: jscript";
 					if (returnsResource) {
 						narrativeString = parseNarrative(ctEnum, resultBody);
+						resultDescription = "JSON encoded resource";
+					} else {
+						resultDescription = "JSON encoded bundle";
 					}
 					break;
 				case XML:
@@ -389,6 +474,9 @@ public class RestfulTesterServlet extends HttpServlet {
 					resultSyntaxHighlighterClass = "brush: xml";
 					if (returnsResource) {
 						narrativeString = parseNarrative(ctEnum, resultBody);
+						resultDescription = "XML encoded resource";
+					} else {
+						resultDescription = "XML encoded bundle";
 					}
 					break;
 				}
@@ -397,6 +485,8 @@ public class RestfulTesterServlet extends HttpServlet {
 			Header[] requestHeaders = lastRequest != null ? applyHeaderFilters(lastRequest.getAllHeaders()) : new Header[0];
 			Header[] responseHeaders = lastResponse != null ? applyHeaderFilters(lastResponse.getAllHeaders()) : new Header[0];
 
+			theContext.setVariable("outcomeDescription", outcomeDescription);
+			theContext.setVariable("resultDescription", resultDescription);
 			theContext.setVariable("action", action);
 			theContext.setVariable("resultStatus", resultStatus);
 			theContext.setVariable("requestUrl", requestUrl);
@@ -435,9 +525,48 @@ public class RestfulTesterServlet extends HttpServlet {
 			Conformance conformance = client.getConformance();
 
 			WebContext ctx = new WebContext(theReq, theResp, theReq.getServletContext(), theReq.getLocale());
+
+			Map<String, Number> resourceCounts = new HashMap<String, Number>();
+			long total = 0;
+			for (Rest nextRest : conformance.getRest()) {
+				for (RestResource nextResource : nextRest.getResource()) {
+					List<ExtensionDt> exts = nextResource.getUndeclaredExtensionsByUrl(RESOURCE_COUNT_EXT_URL);
+					if (exts != null && exts.size() > 0) {
+						Number nextCount = ((DecimalDt) (exts.get(0).getValue())).getValueAsNumber();
+						resourceCounts.put(nextResource.getType().getValue(), nextCount);
+						total += nextCount.longValue();
+					}
+				}
+			}
+			if (total > 0) {
+				for (Rest nextRest : conformance.getRest()) {
+					Collections.sort(nextRest.getResource(), new Comparator<RestResource>() {
+						@Override
+						public int compare(RestResource theO1, RestResource theO2) {
+							DecimalDt count1 = new DecimalDt();
+							List<ExtensionDt> count1exts = theO1.getUndeclaredExtensionsByUrl(RESOURCE_COUNT_EXT_URL);
+							if (count1exts != null && count1exts.size() > 0) {
+								count1 = (DecimalDt) count1exts.get(0).getValue();
+							}
+							DecimalDt count2 = new DecimalDt();
+							List<ExtensionDt> count2exts = theO2.getUndeclaredExtensionsByUrl(RESOURCE_COUNT_EXT_URL);
+							if (count2exts != null && count2exts.size() > 0) {
+								count2 = (DecimalDt) count2exts.get(0).getValue();
+							}
+							int retVal = count2.compareTo(count1);
+							if (retVal == 0) {
+								retVal = theO1.getType().getValue().compareTo(theO2.getType().getValue());
+							}
+							return retVal;
+						}
+					});
+				}
+			}
+
+			ctx.setVariable("resourceCounts", resourceCounts);
 			ctx.setVariable("conf", conformance);
 			ctx.setVariable("base", myServerBase);
-			String resourceName = defaultString(theReq.getParameter("resource"));
+			String resourceName = defaultString(theReq.getParameter(PARAM_RESOURCE));
 			ctx.setVariable("resourceName", resourceName);
 			ctx.setVariable("jsonEncodedConf", myCtx.newJsonParser().encodeResourceToString(conformance));
 			addStandardVariables(ctx, theReq.getParameterMap());
@@ -448,9 +577,18 @@ public class RestfulTesterServlet extends HttpServlet {
 
 			if (isNotBlank(resourceName)) {
 				RuntimeResourceDefinition def = myCtx.getResourceDefinition(resourceName);
-//				myCtx.newTerser().
+				TreeSet<String> includes = new TreeSet<String>();
+				for (RuntimeSearchParam nextSpDef : def.getSearchParams()) {
+					if (nextSpDef.getParamType() != SearchParamTypeEnum.REFERENCE) {
+						continue;
+					}
+
+					String nextPath = nextSpDef.getPath();
+					includes.add(nextPath);
+				}
+				ctx.setVariable("includes", includes);
 			}
-			
+
 			theResp.setContentType("text/html");
 			theResp.setCharacterEncoding("UTF-8");
 

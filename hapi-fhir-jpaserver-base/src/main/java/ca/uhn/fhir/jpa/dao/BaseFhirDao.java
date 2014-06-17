@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.dao;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 import java.io.UnsupportedEncodingException;
 import java.text.Normalizer;
@@ -67,7 +67,6 @@ import ca.uhn.fhir.model.primitive.BaseDateTimeDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.FhirTerser;
 
@@ -733,7 +732,7 @@ public abstract class BaseFhirDao {
 		if (theEntity.getTags().size() > 0) {
 			TagList tagList = new TagList();
 			for (BaseTag next : theEntity.getTags()) {
-				tagList.add(new Tag(next.getTag().getTerm(), next.getTag().getLabel(), next.getTag().getScheme()));
+				tagList.add(new Tag(next.getTag().getScheme(), next.getTag().getTerm(), next.getTag().getLabel()));
 			}
 			retVal.getResourceMetadata().put(ResourceMetadataKeyEnum.TAG_LIST, tagList);
 		}

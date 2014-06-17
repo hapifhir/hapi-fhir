@@ -15,6 +15,14 @@
 			var resourceName = '<th:block th:utext="${resourceName}"/>';
 		</script>
 	
+		<!-- Syntaxhighlighter -->
+		<script src="shCore.js" type="text/javascript"></script>
+		<script src="shBrushJScript.js" type="text/javascript"></script>
+		<script src="shBrushXml.js" type="text/javascript"></script>
+		<script src="shBrushPlain.js" type="text/javascript"></script>
+		<link rel="stylesheet" type="text/css" href="shCore.css"/>
+		<link rel="stylesheet" type="text/css" href="shThemeDefault.css"/>
+	
 		<!-- Bootstrap core CSS -->
 		<link href="css/bootstrap.min.css" rel="stylesheet" />
 		
@@ -45,7 +53,17 @@
 							class="icon-bar"></span> <span class="icon-bar"></span> <span
 							class="icon-bar"></span>
 					</button>
-					<a class="navbar-brand" href="#">HAPI FHIR RESTful Server</a>
+					<a class="navbar-brand" th:href="'?encoding=' + ${encoding} + '&amp;pretty=' + ${pretty}">
+						HAPI FHIR RESTful Server
+					</a>
+					<a class="navbar-left navbarBreadcrumb" th:if="${resourceName.empty} == false" th:href="'?encoding=' + ${encoding} + '&amp;pretty=' + ${pretty} + '&amp;resource=' + ${resourceName}">
+						<span class="glyphicon glyphicon-chevron-right"></span>
+						<span th:text="'Resource[' + ${resourceName} + ']'"></span>
+					</a>
+					<div class="navbar-left navbarBreadcrumb" th:if="${outcomeDescription} != null">
+						<span class="glyphicon glyphicon-chevron-right"></span>
+						<span th:text="${outcomeDescription}"></span>
+					</div>
 				</div>
 				<div class="navbar-collapse collapse">
 					<ul class="nav navbar-nav navbar-right">
@@ -74,7 +92,7 @@
 					</div>
 
 					<br /> <label class="navBarButtonLabel">Pretty</label>
-					<div class="btn-group" data-toggle="buttons">
+					<div class="btn-group top-buffer" data-toggle="buttons">
 						<label class="btn btn-sm btn-default active"> <input
 							type="radio" name="pretty" id="pretty-default" value="" />(default)
 						</label> <label class="btn btn-sm btn-default"> <input
@@ -110,6 +128,11 @@
 						if (resourceName != null) {
 							var rbtn = $('<input />', { type: 'hidden', name: 'resource', value: resourceName });
 							$(source).append(rbtn);
+						} else {
+							var resource = $('#resource');
+							if (resource) {
+								resource.val('');
+							}
 						}
 						$('#outerForm').submit();
 					}
@@ -124,12 +147,15 @@
 						<th:block
 							th:each="resource, resIterStat : ${conf.restFirstRep.resource}">
 							<li th:class="${resourceName} == ${resource.type.valueAsString} ? 'active' : ''">
-								<a href="#" th:text="${resource.type.valueAsString}" th:onclick="'doAction(this, \'home\', \'' + ${resource.type.valueAsString} + '\');'">Patient</a>
+								<a href="#" th:onclick="'doAction(this, \'home\', \'' + ${resource.type.valueAsString} + '\');'">
+									<th:block th:text="${resource.type.valueAsString}" >Patient</th:block>
+									<span class="badge" th:if="${resourceCounts[resource.type.valueAsString]} != null" th:text="${resourceCounts[resource.type.valueAsString]}"/>
+								</a>
 							</li>
 						</th:block>
 					</ul>
 					
-					<input th:if="${resourceName.empty} == false" type="hidden" name="resource" th:value="${resourceName}"/>
+					<input th:if="${resourceName.empty} == false" type="hidden" id="resource" name="resource" th:value="${resourceName}"/>
 				
 				</div>
 
@@ -199,8 +225,7 @@
 								    	<div class="col-sm-2">
 											<button type="submit" id="fetch-conformance-btn"
 												data-loading-text="Loading..." class="btn btn-primary btn-block"
-												name="action" value="conformance">Fetch
-												Conformance</button>
+												name="action" value="conformance">Conformance</button>
 											<script type="text/javascript">
 												$('#fetch-conformance-btn').click(
 														function() {
@@ -210,9 +235,10 @@
 											</script>
 										</div>
 									</div>
-																	
+									
 								<!-- Server History -->
 								
+									<br clear="all"/>
 									<div class="row-fluid">
 										Retrieve the update <b>history</b> across all resource types on
 										the server.										
@@ -223,7 +249,7 @@
 											data-loading-text="Loading..." class="btn btn-primary btn-block"
 											name="action" value="history-server">Server History</button>
 								    	</div>
-								        <div class='col-sm-4'>
+								        <div class='col-sm-5'>
 								            <div class="form-group">
 								                <div class='input-group date' id='server-history-datetime' data-date-format="YYYY-MM-DDTHH:mm:ss">
 								                    <div class="input-group-addon">
@@ -238,7 +264,7 @@
 								        </div>								        
 										<div class='col-sm-3'>
 								            <div class="form-group">
-								                <div class='input-group date'>
+								                <div class='input-group'>
 								                    <div class="input-group-addon">
 								                    Limit #
 								                    </div>
@@ -267,6 +293,27 @@
 								        
 								    </div>
 								    
+								<!-- Get Tags -->
+								
+									<br clear="all"/>
+									<div class="row-fluid">
+										Show all of the tags currently in use on the server										
+									</div>
+								    <div class="row-fluid">
+								    	<div class="col-sm-2">
+											<button type="submit" id="get-server-tags-btn"
+												data-loading-text="Loading..." class="btn btn-primary btn-block"
+												name="action" value="get-tags">Get Tags</button>
+											<script type="text/javascript">
+												$('#get-server-tags-btn').click(
+														function() {
+															var btn = $(this);
+															btn.button('loading');
+														});
+											</script>
+										</div>
+									</div>
+
 								<!-- Next Server Action? -->
 								    
 								</div>
@@ -295,7 +342,7 @@
 								<div class="container-fluid">
 									<div class="row-fluid">
 								    	<div class="col-sm-2">
-											<button type="submit" id="read-btn"	data-loading-text="Loading..." class="btn btn-primary btn-block" name="action" value="search">
+											<button type="submit" id="search-btn" class="btn btn-primary btn-block" name="action" value="search">
 												<span class="glyphicon glyphicon-search"></span>
 												Search
 											</button>
@@ -311,8 +358,36 @@
 										<!-- Placeholder: gets populated by script below -->
 									</div>
 									
-									<br clear="all"/>
+									<div class="row-fluid">
+										<h4>Includes <small>Also load and include referenced resources in results</small></h4>
+									</div>
 									
+									<div class="row-fluid">
+										<span th:each="include : ${includes}" class="includeCheckContainer">
+											<span class="includeCheckCheck">
+				                    			<input type="checkbox" name="_include" th:value="${include}" th:id="'inc_' + ${include}" />
+				                    		</span>
+											<span class="includeCheckName" th:text="${include}"/>
+				                    	</span>
+									</div>
+
+									<div class="row-fluid">
+										<h4>Other Options</h4>
+									</div>
+									
+									<div class="row-fluid">
+										<div class='col-sm-3'>
+								            <div class="form-group">
+								                <div class='input-group date'>
+								                    <div class="input-group-addon">
+								                    Limit
+								                    </div>
+								                    <input type="text" class="form-control" name="resource-search-limit" placeholder="max # returned"/>
+								                </div>
+								            </div>
+								        </div>
+									</div>
+																		
 									<!-- 
 							    	<div class="col-sm-1">
 										<button type="button" class="btn btn-success btn-block">Add
@@ -320,11 +395,20 @@
 										</button>
 									</div>
 									 -->
+									<br clear="all"/>
 									 
 								</div>						
 							</div>
 						</div>
 						<script type="text/javascript">
+						/*
+							$('#search-btn').click(
+							function() {
+								$(this).html('<i class="fa fa-cog fa-spin"></i> Searching...')
+								//btn.button('loading');
+							});
+						*/
+						
 							var numRows = 0;
 							function addSearchParamRow() {
 								var nextRow = numRows++;
@@ -372,10 +456,14 @@
 								}
 								$('#search-param-rowopts-' + rowNum).empty();
 								var searchParam = params[newVal];
+								$('#search-param-rowopts-' + rowNum).append(
+						    		$('<input />', { name: 'param.' + rowNum + '.name', type: 'hidden', value: searchParam.name }),
+						    		$('<input />', { name: 'param.' + rowNum + '.type', type: 'hidden', value: searchParam.type })
+						    	);
+						    	
 							    if (searchParam.type == 'token') {
 							    	$('#search-param-rowopts-' + rowNum).append(
 							    		$('<div />', { 'class': 'col-sm-3' }).append(
-									    	$('<input />', { name: 'param.' + rowNum + '.name', type: 'hidden', value: searchParam.name }),
 									    	$('<input />', { name: 'param.' + rowNum + '.0', placeholder: 'system/namespace', type: 'text', 'class': 'form-control' })
 									    ),
 							    		$('<div />', { 'class': 'col-sm-3' }).append(
@@ -386,7 +474,6 @@
 							    } else if (searchParam.type == 'string' || searchParam.type == 'number') {
 							    	$('#search-param-rowopts-' + rowNum).append(
 							    		$('<div />', { 'class': 'col-sm-3' }).append(
-									    	$('<input />', { name: 'param.' + rowNum + '.name', type: 'hidden', value: searchParam.name }),
 									    	$('<input />', { name: 'param.' + rowNum + '.0', placeholder: 'value', type: 'text', 'class': 'form-control' })
 								    	)
 								    );
@@ -417,9 +504,9 @@
 							    	}
 
 							    	$('#search-param-rowopts-' + rowNum).append(
-							    		$('<div />', { 'class': 'col-sm-1 btn-group' }).append(
+							    		$('<div />', { 'class': 'col-sm-2 btn-group' }).append(
 						    				$('<select />', {type:'text', name:'param.'+rowNum+'.0', 'class':'form-control', autocomplete:'off'}).append(
-						    					$('<option value="">(qual)</option>'),
+						    					$('<option value="">(qualifier)</option>'),
 						    					$('<option value="=">=</option>'),
 						    					$('<option value=">=">&gt;=</option>'),
 						    					$('<option value=">">&gt;</option>'),
@@ -428,7 +515,6 @@
 						    				)
 								    	),							    			
 							    		$('<div />', { 'class': 'col-sm-4' }).append(
-									    	$('<input />', { name: 'param.' + rowNum + '.name', type: 'hidden', value: searchParam.name }),
 									    	input
 								    	)
 								    );
@@ -469,6 +555,7 @@
 								                <div class='input-group date'>
 								                    <div class="input-group-addon">
 								                    ID
+								                    <span class="loadingStar">*</span>
 								                    </div>
 								                    <input type="text" class="form-control" id="read-id"/>
 								                </div>
@@ -480,7 +567,7 @@
 								                    <div class="input-group-addon">
 								                    Version ID
 								                    </div>
-								                    <input type="text" class="form-control" id="read-vid" placeholder="(opt)"/>
+								                    <input type="text" class="form-control" id="read-vid" placeholder="(add for vread)"/>
 								                </div>
 								            </div>
 								        </div>											
@@ -518,11 +605,11 @@
 								                    <div class="input-group-addon">
 								                    ID
 								                    </div>
-								                    <input type="text" class="form-control" id="resource-history-id" placeholder="(opt)"/>
+								                    <input type="text" class="form-control" id="resource-history-id" placeholder="(instance ID)"/>
 								                </div>
 								            </div>
 								        </div>											
-								        <div class='col-sm-4'>
+								        <div class='col-sm-5'>
 								            <div class="form-group">
 								                <div class='input-group date' id='resource-history-datetime' data-date-format="YYYY-MM-DDTHH:mm:ss">
 								                    <div class="input-group-addon">
@@ -539,9 +626,9 @@
 								            <div class="form-group">
 								                <div class='input-group date'>
 								                    <div class="input-group-addon">
-								                    Limit #
+								                    Limit
 								                    </div>
-								                    <input type="text" class="form-control" id="resource-history-limit" placeholder="(opt)"/>
+								                    <input type="text" class="form-control" id="resource-history-limit" placeholder="(#)"/>
 								                </div>
 								            </div>
 								        </div>
@@ -584,6 +671,7 @@
 								                <div class='input-group date'>
 								                    <div class="input-group-addon">
 								                    ID
+								                    <span class="loadingStar">*</span>
 								                    </div>
 								                    <input type="text" class="form-control" id="resource-delete-id"/>
 								                </div>
@@ -620,7 +708,7 @@
 								                    <div class="input-group-addon">
 								                    ID
 								                    </div>
-								                    <input type="text" class="form-control" id="resource-create-id" placeholder="(opt)" />
+								                    <input type="text" class="form-control" id="resource-create-id" placeholder="(add for update)" />
 								                </div>
 								            </div>
 								        </div>											
@@ -629,6 +717,7 @@
 								                <div class='input-group date'>
 								                    <div class="input-group-addon">
 								                    Contents
+								                    <span class="loadingStar">*</span>
 								                    </div>
 								                    <textarea class="form-control" id="resource-create-body" style="white-space: nowrap; overflow: auto;" placeholder="(place resource body here)" rows="1"></textarea>
 								                </div>
@@ -691,6 +780,7 @@
 								                <div class='input-group date'>
 								                    <div class="input-group-addon">
 								                    Contents
+								                    <span class="loadingStar">*</span>
 								                    </div>
 								                    <textarea class="form-control" id="resource-validate-body" style="white-space: nowrap; overflow: auto;" placeholder="(place resource body here)" rows="1"></textarea>
 								                </div>
@@ -711,7 +801,53 @@
 												});								            
 								        </script>								        
 								    </div>
+
+								<!-- Get Tags -->
+								
 									<br clear="all"/>
+									<div class="row-fluid">
+										Show all of the tags currently in use on the server for this resource type. If an ID is specified,
+										returns only tags posted to the given version. If an ID and a version are specified, 
+										returns only the tags posted to the given resource version.									
+									</div>
+								    <div class="row-fluid">
+								    	<div class="col-sm-2">
+											<button type="submit" id="get-resource-tags-btn"
+												data-loading-text="Loading..." class="btn btn-primary btn-block"
+												name="action" value="get-tags">Get Tags</button>
+										</div>
+										<div class='col-sm-3'>
+								            <div class="form-group">
+								                <div class='input-group date'>
+								                    <div class="input-group-addon">
+								                    ID
+								                    </div>
+								                    <input type="text" class="form-control" id="resource-tags-id" placeholder="(instance ID)"/>
+								                </div>
+								            </div>
+								        </div>																					
+										<div class='col-sm-3'>
+								            <div class="form-group">
+								                <div class='input-group date'>
+								                    <div class="input-group-addon">
+								                    VID
+								                    </div>
+								                    <input type="text" class="form-control" id="resource-tags-vid" placeholder="(version)"/>
+								                </div>
+								            </div>
+								        </div>																					
+										<script type="text/javascript">
+											$('#get-resource-tags-btn').click(
+												function() {
+													var btn = $(this);
+													btn.button('loading');
+													var id = $('#resource-tags-id').val();
+													if (id != null) btn.append($('<input />', { type: 'hidden', name: 'resource-tags-id', value: id }));
+													var vid = $('#resource-tags-vid').val();
+													if (vid != null) btn.append($('<input />', { type: 'hvidden', name: 'resource-tags-vid', value: vid }));
+											});
+										</script>
+									</div>
 
 								</div>								
 							</div>
@@ -757,9 +893,9 @@
 								</tr>
 								<tr th:if="${#strings.isEmpty(requestBody)} == false">
 									<td>Request Body</td>
-									<td valign="top">
-										<pre class="requestBodyPre" id="requestBodyPlaceholder">...loading...</pre>
-										<pre th:text="${requestBody}" class="requestBodyPre pre-scrollable" id="requestBodyActual" style="display: none;">{}</pre>
+									<td valign="top" style="margin: 0px; padding: 0px;">
+										<pre class="requestBodyPre resultBodyPlaceholder" id="requestBodyPlaceholder">...loading...</pre>
+										<pre th:text="${requestBody}" th:class="${requestSyntaxHighlighterClass} + ' resultBodyPre pre-scrollable'" id="requestBodyActual" style="display: none;">{}</pre>
 									</td>
 								</tr>
 							</tbody>
@@ -788,10 +924,17 @@
 									</td>
 								</tr>
 								<tr th:if="${!#strings.isEmpty(resultBody)}">
-									<td>Result Body</td>
-									<td valign="top">
-										<pre class="resultBodyPre" id="resultBodyPlaceholder">...loading...</pre>
-										<pre th:text="${resultBody}" class="resultBodyPre pre-scrollable" id="resultBodyActual" style="display: none;">{}</pre>
+									<td rowspan="2">Result Body</td>
+									<td>
+										<span th:text="${resultDescription}"/>
+									</td>
+								</tr>
+								<tr th:if="${!#strings.isEmpty(resultBody)}">
+									<td valign="top" style="margin: 0px; padding: 0px;">
+										<pre class="resultBodyPre resultBodyPlaceholder" id="resultBodyPlaceholder">...loading...</pre>
+										<div id="resultBodyActual" class="resultBodyActual">
+											<pre th:text="${resultBody}" th:class="${resultSyntaxHighlighterClass} + ' resultBodyPre pre-scrollable'" style="display: none;">{}</pre>
+										</div>
 									</td>
 								</tr>
 								<tr th:if="${!#strings.isEmpty(narrative)}">
@@ -803,18 +946,24 @@
 						
 						<script type="text/javascript">
 							$( document ).ready(function() {
-								var width = $('#resultBodyPlaceholder').width();
+								var reswidth = $('#resultBodyPlaceholder').width();
+								var reqwidth = 0;
+								if ($('#requestBodyPlaceholder') != null) {
+									reqwidth = $('#requestBodyPlaceholder').width();
+								}
+								
+								SyntaxHighlighter.all();
+
 								$('#resultBodyPlaceholder').hide();
-								$('#resultBodyActual').width(width);
+								$('#resultBodyActual').width(reswidth);
 								$('#resultBodyActual').show();
 								
 								if ($('#requestBodyPlaceholder') != null) {
-									width = $('#requestBodyPlaceholder').width();
 									$('#requestBodyPlaceholder').hide();
-									$('#requestBodyActual').width(width);
+									$('#requestBodyActual').width(reqwidth);
 									$('#requestBodyActual').show();
 								}
-							});							
+							});
 						</script>
 						
 					</div>
@@ -828,6 +977,7 @@
     ================================================== -->
 		<!-- Placed at the end of the document so the pages load faster -->
 		<script src="js/bootstrap.min.js"></script>
+		
 	</form>
 </body>
 </html>

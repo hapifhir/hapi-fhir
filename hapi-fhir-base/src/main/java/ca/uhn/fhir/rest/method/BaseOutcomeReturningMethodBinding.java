@@ -324,10 +324,10 @@ public abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBindin
 			while (theBuffer.length() > 0 && theBuffer.charAt(0) == ' ') {
 				theBuffer.deleteCharAt(0);
 			}
-			theTagList.add(new Tag(term, label, scheme));
+			theTagList.add(new Tag(scheme, term, label));
 			parseTagValue(theTagList, theCompleteHeaderValue, theBuffer);
 		} else {
-			theTagList.add(new Tag(term, label, scheme));
+			theTagList.add(new Tag(scheme, term, label));
 		}
 
 		if (theBuffer.length() > 0) {

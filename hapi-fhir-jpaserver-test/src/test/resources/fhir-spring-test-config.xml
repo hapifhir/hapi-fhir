@@ -21,6 +21,9 @@
 	<bean id="mySystemDao" class="ca.uhn.fhir.jpa.dao.FhirSystemDao">
 	</bean>
 
+	<bean id="myDiagnosticReportDao" class="ca.uhn.fhir.jpa.dao.FhirResourceDao">
+		<property name="resourceType" value="ca.uhn.fhir.model.dstu.resource.DiagnosticReport"/>
+	</bean>
 	<bean id="myPatientDao" class="ca.uhn.fhir.jpa.dao.FhirResourceDao">
 		<property name="resourceType" value="ca.uhn.fhir.model.dstu.resource.Patient"/>
 	</bean>

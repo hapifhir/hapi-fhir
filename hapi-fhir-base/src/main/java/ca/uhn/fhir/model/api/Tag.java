@@ -47,21 +47,23 @@ public class Tag extends BaseElement implements IElement {
 	}
 
 	public Tag(String theTerm) {
-		this(theTerm, null, (String) null);
+		this((String)null, theTerm, null);
 	}
 
-	public Tag(String theTerm, String theLabel, String theScheme) {
+	public Tag(String theScheme, String theTerm, String theLabel) {
 		myTerm = theTerm;
 		myLabel = theLabel;
 		myScheme = theScheme;
 	}
 
-	public Tag(String theTerm, String theLabel, URI theScheme) {
-		myTerm = theTerm;
-		myLabel = theLabel;
+	public Tag(URI theScheme, URI theTerm, String theLabel) {
 		if (theScheme != null) {
 			myScheme = theScheme.toASCIIString();
 		}
+		if (theTerm != null) {
+			myTerm = theTerm.toASCIIString();
+		}
+		myLabel = theLabel;
 	}
 
 	@Override
@@ -147,10 +149,10 @@ public class Tag extends BaseElement implements IElement {
 
 	@Override
 	public String toString() {
-		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SIMPLE_STYLE);
+		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
+		b.append("Scheme", myScheme);
 		b.append("Term", myTerm);
 		b.append("Label", myLabel);
-		b.append("Scheme", myScheme);
 		return b.toString();
 	}
 

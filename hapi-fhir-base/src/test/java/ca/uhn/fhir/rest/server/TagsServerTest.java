@@ -267,40 +267,40 @@ public class TagsServerTest {
 		@GetTags
 		public TagList getAllTags() {
 			TagList tagList = new TagList();
-			tagList.add(new Tag("AllDog", "DogLabel", (String) null));
-			tagList.add(new Tag("AllCat", "CatLabel", "http://cats"));
+			tagList.add(new Tag((String) null, "AllDog", "DogLabel"));
+			tagList.add(new Tag("http://cats", "AllCat", "CatLabel"));
 			return tagList;
 		}
 
 		@GetTags(type = Patient.class)
 		public TagList getAllTagsPatient() {
 			TagList tagList = new TagList();
-			tagList.add(new Tag("Patient", "DogLabel", (String) null));
-			tagList.add(new Tag("AllCat", "CatLabel", "http://cats"));
+			tagList.add(new Tag((String) null, "Patient", "DogLabel"));
+			tagList.add(new Tag("http://cats", "AllCat", "CatLabel"));
 			return tagList;
 		}
 
 		@GetTags(type = Patient.class)
 		public TagList getAllTagsPatientId(@IdParam IdDt theId) {
 			TagList tagList = new TagList();
-			tagList.add(new Tag("Patient" + theId.getUnqualifiedId() + defaultString(theId.getUnqualifiedVersionId()), "DogLabel", (String) null));
-			tagList.add(new Tag("AllCat", "CatLabel", "http://cats"));
+			tagList.add(new Tag((String) null, "Patient" + theId.getUnqualifiedId() + defaultString(theId.getUnqualifiedVersionId()), "DogLabel"));
+			tagList.add(new Tag("http://cats", "AllCat", "CatLabel"));
 			return tagList;
 		}
 
 		@GetTags(type = Patient.class)
 		public TagList getAllTagsPatientIdVersion(@IdParam IdDt theId, @VersionIdParam IdDt theVersion) {
 			TagList tagList = new TagList();
-			tagList.add(new Tag("Patient" + theId.getUnqualifiedId() + theVersion.getUnqualifiedVersionId(), "DogLabel", (String) null));
-			tagList.add(new Tag("AllCat", "CatLabel", "http://cats"));
+			tagList.add(new Tag((String) null, "Patient" + theId.getUnqualifiedId() + theVersion.getUnqualifiedVersionId(), "DogLabel"));
+			tagList.add(new Tag("http://cats", "AllCat", "CatLabel"));
 			return tagList;
 		}
 
 		@GetTags(type = Observation.class)
 		public TagList getAllTagsObservationIdVersion(@IdParam IdDt theId) {
 			TagList tagList = new TagList();
-			tagList.add(new Tag("Patient" + theId.getUnqualifiedId() + theId.getUnqualifiedVersionId(), "DogLabel", (String) null));
-			tagList.add(new Tag("AllCat", "CatLabel", "http://cats"));
+			tagList.add(new Tag((String) null, "Patient" + theId.getUnqualifiedId() + theId.getUnqualifiedVersionId(), "DogLabel"));
+			tagList.add(new Tag("http://cats", "AllCat", "CatLabel"));
 			return tagList;
 		}
 

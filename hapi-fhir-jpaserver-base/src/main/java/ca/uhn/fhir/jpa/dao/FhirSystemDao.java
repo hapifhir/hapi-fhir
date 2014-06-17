@@ -12,16 +12,12 @@ import javax.persistence.Tuple;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
-import org.hamcrest.generator.qdox.parser.structs.TagDef;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
-import ca.uhn.fhir.jpa.entity.TagDefinition;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
@@ -142,6 +138,25 @@ public class FhirSystemDao extends BaseFhirDao implements IFhirSystemDao {
 	@Override
 	public TagList getAllTags() {
 		return super.getTags(null, null);
+	}
+
+	@Override
+	public Map<String, Long> getResourceCounts() {
+		CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
+		CriteriaQuery<Tuple> cq = builder.createTupleQuery();
+		Root<?> from = cq.from(ResourceTable.class);
+		cq.multiselect(from.get("myResourceType").as(String.class), builder.count(from.get("myResourceType")).as(Long.class));
+		cq.groupBy(from.get("myResourceType"));
+		
+		TypedQuery<Tuple> q = myEntityManager.createQuery(cq);
+
+		Map<String, Long> retVal = new HashMap<String, Long>();
+		for (Tuple next : q.getResultList()) {
+			String resourceName = next.get(0, String.class);
+			Long count = next.get(1, Long.class);
+			retVal.put(resourceName, count);
+		}
+		return retVal;
 	}
 
 }

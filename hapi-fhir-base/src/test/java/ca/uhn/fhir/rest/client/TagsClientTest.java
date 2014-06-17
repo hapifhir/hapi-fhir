@@ -59,7 +59,7 @@ public class TagsClientTest {
 	public void testGetAllTags() throws Exception {
 
 		TagList tagList = new TagList();
-		tagList.add(new Tag("AAA", "BBB", "CCC"));
+		tagList.add(new Tag("CCC", "AAA", "BBB"));
 		String ser = ctx.newXmlParser().encodeTagListToString(tagList);
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
@@ -81,7 +81,7 @@ public class TagsClientTest {
 	public void testGetAllTagsPatient() throws Exception {
 
 		TagList tagList = new TagList();
-		tagList.add(new Tag("AAA", "BBB", "CCC"));
+		tagList.add(new Tag("CCC", "AAA", "BBB"));
 		String ser = ctx.newXmlParser().encodeTagListToString(tagList);
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
@@ -109,7 +109,7 @@ public class TagsClientTest {
 		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(""), Charset.forName("UTF-8")));
 
 		TagList tagList = new TagList();
-		tagList.add(new Tag("AAA", "BBB", "CCC"));
+		tagList.add(new Tag("CCC", "AAA", "BBB"));
 
 		IClient client = ctx.newRestfulClient(IClient.class, "http://foo");
 		client.deleteTags(new IdDt("111"), tagList);
@@ -133,7 +133,7 @@ public class TagsClientTest {
 		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(""), Charset.forName("UTF-8")));
 
 		TagList tagList = new TagList();
-		tagList.add(new Tag("AAA", "BBB", "CCC"));
+		tagList.add(new Tag("CCC", "AAA", "BBB"));
 
 		IClient client = ctx.newRestfulClient(IClient.class, "http://foo");
 		client.deleteTags(new IdDt("111"), new IdDt("222"),tagList);
@@ -157,7 +157,7 @@ public class TagsClientTest {
 		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(""), Charset.forName("UTF-8")));
 
 		TagList tagList = new TagList();
-		tagList.add(new Tag("AAA", "BBB", "CCC"));
+		tagList.add(new Tag("CCC", "AAA", "BBB"));
 
 		IClient client = ctx.newRestfulClient(IClient.class, "http://foo");
 		client.addTags(new IdDt("111"), tagList);
@@ -181,7 +181,7 @@ public class TagsClientTest {
 		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(""), Charset.forName("UTF-8")));
 
 		TagList tagList = new TagList();
-		tagList.add(new Tag("AAA", "BBB", "CCC"));
+		tagList.add(new Tag("CCC", "AAA", "BBB"));
 
 		IClient client = ctx.newRestfulClient(IClient.class, "http://foo");
 		client.addTags(new IdDt("111"), new IdDt("222"),tagList);
@@ -199,7 +199,7 @@ public class TagsClientTest {
 	public void testGetAllTagsPatientId() throws Exception {
 
 		TagList tagList = new TagList();
-		tagList.add(new Tag("AAA", "BBB", "CCC"));
+		tagList.add(new Tag("CCC", "AAA", "BBB"));
 		String ser = ctx.newXmlParser().encodeTagListToString(tagList);
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
@@ -221,7 +221,7 @@ public class TagsClientTest {
 	public void testGetAllTagsPatientIdVersion() throws Exception {
 
 		TagList tagList = new TagList();
-		tagList.add(new Tag("AAA", "BBB", "CCC"));
+		tagList.add(new Tag("CCC", "AAA", "BBB"));
 		String ser = ctx.newXmlParser().encodeTagListToString(tagList);
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
@@ -243,7 +243,7 @@ public class TagsClientTest {
 	public void testGetAllTagsPatientIdVersionOld() throws Exception {
 
 		TagList tagList = new TagList();
-		tagList.add(new Tag("AAA", "BBB", "CCC"));
+		tagList.add(new Tag("CCC", "AAA", "BBB"));
 		String ser = ctx.newXmlParser().encodeTagListToString(tagList);
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);

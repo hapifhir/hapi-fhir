@@ -30,7 +30,7 @@ import ca.uhn.fhir.model.api.annotation.SimpleSetter;
 import ca.uhn.fhir.parser.DataFormatException;
 
 @DatatypeDef(name = "decimal")
-public class DecimalDt extends BasePrimitive<BigDecimal> {
+public class DecimalDt extends BasePrimitive<BigDecimal> implements Comparable<DecimalDt> {
 
 	private BigDecimal myValue;
 
@@ -142,6 +142,20 @@ public class DecimalDt extends BasePrimitive<BigDecimal> {
 	 */
 	public int getValueAsInteger() {
 		return myValue.intValue();
+	}
+
+	@Override
+	public int compareTo(DecimalDt theObj) {
+		if (myValue == null && theObj.getValue() == null) {
+			return 0;
+		}
+		if (myValue != null && theObj.getValue() == null) {
+			return 1;
+		}
+		if (myValue == null && theObj.getValue() != null) {
+			return -1;
+		}
+		return myValue.compareTo(theObj.getValue());
 	}
 
 }

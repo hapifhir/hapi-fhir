@@ -1,29 +1,35 @@
 package ca.uhn.fhir.rest.client;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
 import java.io.StringReader;
 import java.nio.charset.Charset;
+import java.util.Arrays;
 
 import org.apache.commons.io.input.ReaderInputStream;
+import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.ProtocolVersion;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicStatusLine;
 import org.hamcrest.core.StringContains;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.internal.stubbing.defaultanswers.ReturnsDeepStubs;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
+import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
+import ca.uhn.fhir.model.api.Tag;
+import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.dstu.resource.Encounter;
 import ca.uhn.fhir.model.dstu.resource.Observation;
 import ca.uhn.fhir.model.dstu.resource.Organization;
@@ -34,13 +40,17 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 
 public class GenericClientTest {
 
-	private FhirContext myCtx;
+	private static FhirContext myCtx;
 	private HttpClient myHttpClient;
 	private HttpResponse myHttpResponse;
 
+	@BeforeClass
+	public static void beforeClass() {
+		myCtx = new FhirContext();
+	}
+	
 	@Before
 	public void before() {
-		myCtx = new FhirContext();
 
 		myHttpClient = mock(HttpClient.class, new ReturnsDeepStubs());
 		myCtx.getRestfulClientFactory().setHttpClient(myHttpClient);
@@ -48,6 +58,34 @@ public class GenericClientTest {
 		myHttpResponse = mock(HttpResponse.class, new ReturnsDeepStubs());
 	}
 
+	
+	@Test
+	public void testCreateWithTag() throws Exception {
+		
+		Patient p1 = new Patient();
+		p1.addIdentifier("foo:bar", "12345");
+		p1.addName().addFamily("Smith").addGiven("John");
+		TagList list = new TagList();
+		list.addTag("http://hl7.org/fhir/tag", "urn:happytag", "This is a happy resource");
+		ResourceMetadataKeyEnum.TAG_LIST.put(p1, list);
+		
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 201, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(""), Charset.forName("UTF-8")));
+
+		IGenericClient client = myCtx.newRestfulGenericClient("http://example.com/fhir");
+
+		client.create(p1);
+
+		assertEquals("http://example.com/fhir/Patient", capt.getValue().getURI().toString());
+		assertEquals("POST", capt.getValue().getMethod());
+		Header catH = capt.getValue().getFirstHeader("Category");
+		assertNotNull(Arrays.asList(capt.getValue().getAllHeaders()).toString(), catH);
+		assertEquals("urn:happytag; label=\"This is a happy resource\"; scheme=\"http://hl7.org/fhir/tag\"", catH.getValue());
+	}
+	
 	private String getPatientFeedWithOneResult() {
 		//@formatter:off
 		String msg = "<feed xmlns=\"http://www.w3.org/2005/Atom\">\n" + 
@@ -231,6 +269,45 @@ public class GenericClientTest {
 
 	@SuppressWarnings("unused")
 	@Test
+	public void testGetTags() throws Exception {
+
+		TagList tagList = new TagList();
+		tagList.add(new Tag("CCC", "AAA", "BBB"));
+		String msg = myCtx.newXmlParser().encodeTagListToString(tagList);
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
+
+		IGenericClient client = myCtx.newRestfulGenericClient("http://example.com/fhir");
+
+		//@formatter:off
+		TagList response = client.getTags()
+				.execute();
+		//@formatter:on
+
+		assertEquals("http://example.com/fhir/_tags", capt.getValue().getURI().toString());
+		assertEquals(1,response.size());
+		assertEquals("CCC", response.get(0).getScheme());
+
+		// Now for patient
+		
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
+		//@formatter:off
+		response = client.getTags().forResource(Patient.class)
+				.execute();
+		//@formatter:on
+
+		assertEquals("http://example.com/fhir/Patient/_tags", capt.getValue().getURI().toString());
+		assertEquals(1,response.size());
+		assertEquals("CCC", response.get(0).getScheme());
+
+	}
+	
+	@SuppressWarnings("unused")
+	@Test
 	public void testSearchByReferenceSimple() throws Exception {
 
 		String msg = getPatientFeedWithOneResult();
@@ -306,7 +383,7 @@ public class GenericClientTest {
 				.execute();
 		//@formatter:on
 
-		assertEquals("http://example.com/fhir/Patient?birthdate=%3C%3D2012-01-22&birthdate=%3E2011-01-01&_include=Patient.managingOrganization&_sort%3Aasc=birthdate&_sort%3Adesc=name&_format=json&_count=123", capt.getValue().getURI().toString());
+		assertEquals("http://example.com/fhir/Patient?birthdate=%3C%3D2012-01-22&birthdate=%3E2011-01-01&_include=Patient.managingOrganization&_sort%3Aasc=birthdate&_sort%3Adesc=name&_count=123&_format=json", capt.getValue().getURI().toString());
 
 	}
 

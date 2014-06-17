@@ -55,6 +55,10 @@ public class IntegerDt extends BasePrimitive<Integer> {
 		setValueAsString(theIntegerAsString);
 	}
 
+	public IntegerDt(Long theCount) {
+		// TODO Auto-generated constructor stub
+	}
+
 	@Override
 	public Integer getValue() {
 		return myValue;

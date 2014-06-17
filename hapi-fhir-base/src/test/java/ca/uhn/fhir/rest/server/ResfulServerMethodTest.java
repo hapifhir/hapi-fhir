@@ -956,8 +956,8 @@ public class ResfulServerMethodTest {
 		httpPost.setEntity(new StringEntity(new FhirContext().newXmlParser().encodeResourceToString(dr), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 		ourClient.execute(httpPost);
 		assertEquals(2, ourReportProvider.getLastTags().size());
-		assertEquals(new Tag("Dog", "aa", (String)null), ourReportProvider.getLastTags().get(0));
-		assertEquals(new Tag("Cat", "bb", (String)null), ourReportProvider.getLastTags().get(1));
+		assertEquals(new Tag((String)null, "Dog", "aa"), ourReportProvider.getLastTags().get(0));
+		assertEquals(new Tag((String)null, "Cat", "bb"), ourReportProvider.getLastTags().get(1));
 
 	}
 
@@ -987,14 +987,14 @@ public class ResfulServerMethodTest {
 		httpPost.setEntity(new StringEntity(new FhirContext().newXmlParser().encodeResourceToString(dr), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 		ourClient.execute(httpPost);
 		assertEquals(1, ourReportProvider.getLastTags().size());
-		assertEquals(new Tag("Dog", null, "http://foo"), ourReportProvider.getLastTags().get(0));
+		assertEquals(new Tag("http://foo", "Dog", null), ourReportProvider.getLastTags().get(0));
 
 		httpPost = new HttpPut("http://localhost:" + ourPort + "/DiagnosticReport/001");
 		httpPost.addHeader("Category", "Dog; scheme=\"http://foo\";");
 		httpPost.setEntity(new StringEntity(new FhirContext().newXmlParser().encodeResourceToString(dr), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 		ourClient.execute(httpPost);
 		assertEquals(1, ourReportProvider.getLastTags().size());
-		assertEquals(new Tag("Dog", null, "http://foo"), ourReportProvider.getLastTags().get(0));
+		assertEquals(new Tag("http://foo", "Dog", null), ourReportProvider.getLastTags().get(0));
 
 	}
 
@@ -1009,14 +1009,14 @@ public class ResfulServerMethodTest {
 		httpPost.setEntity(new StringEntity(new FhirContext().newXmlParser().encodeResourceToString(dr), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 		ourClient.execute(httpPost);
 		assertEquals(1, ourReportProvider.getLastTags().size());
-		assertEquals(new Tag("Dog", "aaaa", "http://foo"), ourReportProvider.getLastTags().get(0));
+		assertEquals(new Tag("http://foo", "Dog", "aaaa"), ourReportProvider.getLastTags().get(0));
 
 		httpPost = new HttpPut("http://localhost:" + ourPort + "/DiagnosticReport/001");
 		httpPost.addHeader("Category", "Dog; scheme=\"http://foo\"; label=\"aaaa\";   ");
 		httpPost.setEntity(new StringEntity(new FhirContext().newXmlParser().encodeResourceToString(dr), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 		ourClient.execute(httpPost);
 		assertEquals(1, ourReportProvider.getLastTags().size());
-		assertEquals(new Tag("Dog", "aaaa", "http://foo"), ourReportProvider.getLastTags().get(0));
+		assertEquals(new Tag("http://foo", "Dog", "aaaa"), ourReportProvider.getLastTags().get(0));
 
 	}
 

@@ -128,7 +128,10 @@ abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOu
 		}
 
 		BaseHttpClientInvocation retVal = createClientInvocation(theArgs, resource);
-		
+		return retVal;
+	}
+
+	static void addTagsToPostOrPut(IResource resource, BaseHttpClientInvocation retVal) {
 		TagList list = (TagList) resource.getResourceMetadata().get(ResourceMetadataKeyEnum.TAG_LIST);
 		if (list != null) {
 			for (Tag tag : list) {
@@ -137,8 +140,6 @@ abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOu
 				}
 			}
 		}
-
-		return retVal;
 	}
 
 }
