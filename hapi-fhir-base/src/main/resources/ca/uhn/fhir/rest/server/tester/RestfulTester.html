@@ -927,13 +927,25 @@
 									<td rowspan="2">Result Body</td>
 									<td>
 										<span th:text="${resultDescription}"/>
+										<button th:if="${resultBodyIsLong}" class="btn btn-info btn-sm" type="button" id="format-result-btn">
+											<span class="glyphicon glyphicon-eye-open"></span>
+											Colour
+										</button>
+										<script type="text/javascript" th:if="${resultBodyIsLong}">
+											$('#format-result-btn').click(function() {
+												//$('#resultBodyActualPre').setClass('<th:block th:text="${resultSyntaxHighlighterClass}"/>');
+												document.getElementById('resultBodyActualPre').className='<th:block th:text="${resultSyntaxHighlighterClass}"/>';
+												document.getElementById('format-result-btn').disabled ='disabled';
+												SyntaxHighlighter.highlight();
+											});
+										</script>
 									</td>
 								</tr>
 								<tr th:if="${!#strings.isEmpty(resultBody)}">
 									<td valign="top" style="margin: 0px; padding: 0px;">
 										<pre class="resultBodyPre resultBodyPlaceholder" id="resultBodyPlaceholder">...loading...</pre>
-										<div id="resultBodyActual" class="resultBodyActual">
-											<pre th:text="${resultBody}" th:class="${resultSyntaxHighlighterClass} + ' resultBodyPre pre-scrollable'" style="display: none;">{}</pre>
+										<div id="resultBodyActual" class="resultBodyActual" style="display: none;">
+											<pre id="resultBodyActualPre" th:text="${resultBody}" th:class="(${resultBodyIsLong} ? '' : ${resultSyntaxHighlighterClass}) + ' resultBodyPre pre-scrollable'">{}</pre>
 										</div>
 									</td>
 								</tr>

@@ -493,7 +493,9 @@ public class RestfulTesterServlet extends HttpServlet {
 			requestBody = StringEscapeUtils.escapeHtml4(requestBody);
 			theContext.setVariable("requestBody", requestBody);
 			theContext.setVariable("requestSyntaxHighlighterClass", requestSyntaxHighlighterClass);
-			theContext.setVariable("resultBody", StringEscapeUtils.escapeHtml4(resultBody));
+			String resultBodyText = StringEscapeUtils.escapeHtml4(resultBody);
+			theContext.setVariable("resultBody", resultBodyText);
+			theContext.setVariable("resultBodyIsLong", resultBodyText.length() > 1000);
 			theContext.setVariable("resultSyntaxHighlighterClass", resultSyntaxHighlighterClass);
 			theContext.setVariable("requestHeaders", requestHeaders);
 			theContext.setVariable("responseHeaders", responseHeaders);
