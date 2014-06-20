@@ -61,6 +61,7 @@ import org.thymeleaf.templateresolver.TemplateResolver;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.Include;
@@ -193,7 +194,7 @@ public class RestfulTesterServlet extends HttpServlet {
 			}
 			if ("xml".equals(theReq.getParameter("encoding"))) {
 				client.setEncoding(EncodingEnum.XML);
-			} else if ("json".equals(theReq.getParameter("configEncoding"))) {
+			} else if ("json".equals(theReq.getParameter("encoding"))) {
 				client.setEncoding(EncodingEnum.JSON);
 			}
 
@@ -370,6 +371,12 @@ public class RestfulTesterServlet extends HttpServlet {
 						}
 					}
 
+//					if ("xml".equals(theReq.getParameter("encoding"))) {
+//						query.encodedXml();
+//					}else if ("json".equals(theReq.getParameter("encoding"))) {
+//						query.encodedJson();
+//					} 
+					
 					query.where(new StringParam(nextName).matches().value(paramValue));
 
 				}
@@ -454,19 +461,22 @@ public class RestfulTesterServlet extends HttpServlet {
 			EncodingEnum ctEnum = EncodingEnum.forContentType(mimeType);
 			String narrativeString = "";
 
-			String resultDescription;
+			StringBuilder resultDescription=new StringBuilder();
+			Bundle bundle = null;
+			
 			if (ctEnum == null) {
 				resultSyntaxHighlighterClass = "brush: plain";
-				resultDescription = "Non-FHIR response";
+				resultDescription.append("Non-FHIR response");
 			} else {
 				switch (ctEnum) {
 				case JSON:
 					resultSyntaxHighlighterClass = "brush: jscript";
 					if (returnsResource) {
 						narrativeString = parseNarrative(ctEnum, resultBody);
-						resultDescription = "JSON encoded resource";
+						resultDescription.append( "JSON resource");
 					} else {
-						resultDescription = "JSON encoded bundle";
+						resultDescription.append( "JSON bundle");
+						bundle = myCtx.newJsonParser().parseBundle(resultBody);
 					}
 					break;
 				case XML:
@@ -474,20 +484,24 @@ public class RestfulTesterServlet extends HttpServlet {
 					resultSyntaxHighlighterClass = "brush: xml";
 					if (returnsResource) {
 						narrativeString = parseNarrative(ctEnum, resultBody);
-						resultDescription = "XML encoded resource";
+						resultDescription.append( "XML resource");
 					} else {
-						resultDescription = "XML encoded bundle";
+						resultDescription.append( "XML bundle");
+						bundle = myCtx.newXmlParser().parseBundle(resultBody);
 					}
 					break;
 				}
 			}
 
+			resultDescription.append(" (").append(resultBody.length() + " bytes)");
+			
 			Header[] requestHeaders = lastRequest != null ? applyHeaderFilters(lastRequest.getAllHeaders()) : new Header[0];
 			Header[] responseHeaders = lastResponse != null ? applyHeaderFilters(lastResponse.getAllHeaders()) : new Header[0];
 
 			theContext.setVariable("outcomeDescription", outcomeDescription);
-			theContext.setVariable("resultDescription", resultDescription);
+			theContext.setVariable("resultDescription", resultDescription.toString());
 			theContext.setVariable("action", action);
+			theContext.setVariable("bundle", bundle);
 			theContext.setVariable("resultStatus", resultStatus);
 			theContext.setVariable("requestUrl", requestUrl);
 			requestBody = StringEscapeUtils.escapeHtml4(requestBody);
@@ -515,7 +529,7 @@ public class RestfulTesterServlet extends HttpServlet {
 		}
 
 		try {
-			ourLog.info("RequestURI: {}", theReq.getPathInfo());
+			ourLog.trace("RequestURI: {}", theReq.getPathInfo());
 
 			String resName = theReq.getPathInfo().substring(1);
 			if (myStaticResources.containsKey(resName)) {

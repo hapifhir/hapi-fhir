@@ -5,6 +5,7 @@
 /* Move down content because we have a fixed navbar that is 50px tall */
 body {
   padding-top: 50px;
+  overflow-x: hidden;
 }
 
 label {
@@ -83,8 +84,10 @@ DIV.navbarBreadcrumb:HOVER, A.navbarBreadcrumb:HOVER {
 }
 
 DIV.resultBodyActual {
+	/*
 	max-height: 400px;
 	overflow: scroll;
+	*/
 }
 
 PRE.resultBodyPre {
@@ -92,6 +95,7 @@ PRE.resultBodyPre {
 	font-size: 0.8em;
 	border: none;
 	background-color: transparent;
+	overflow: visible;
 }
 
 /*
@@ -103,6 +107,13 @@ PRE.resultBodyPre {
   border-bottom: 1px solid #eee;
 }
 
+body .syntaxhighlighter .line {
+        white-space: pre-wrap !important; /* make code wrap */
+}
+
+.syntaxhighlight {
+    white-space: pre-wrap;
+}
 
 /*
  * Sidebar
@@ -185,6 +196,11 @@ PRE.resultBodyPre {
   border-radius: 50%;
 }
 
+TABLE.resultTable TR TD:FIRST-CHILD,
+TABLE.requestTable TR TD:FIRST-CHILD {
+	font-weight: bold;
+}
+
 PRE.resultBodyPlaceholder {
 	width:100%; 
 	padding: 0px;
@@ -204,8 +220,12 @@ PRE.resultBodyPlaceholder {
 	background-color: transparent !important;
 }
 
+.syntaxhighlighter {
+	overflow: visible !important;	
+}
+
 .syntaxhighlighter div {
-	font-size: 0.9em !important;	
+	font-size: 0.9em !important;
 }
 
 DIV.top-buffer {

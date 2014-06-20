@@ -866,7 +866,7 @@
 							<th:block th:text="${latencyMs} + 'ms'"/>
 						</div>
 
-						<table class="table table-bordered table-striped" id="requestTable">
+						<table class="table table-bordered table-striped requestTable" id="requestTable">
 							<colgroup>
 								<col class="col-xs-1" />
 								<col class="col-xs-7" />
@@ -895,13 +895,13 @@
 									<td>Request Body</td>
 									<td valign="top" style="margin: 0px; padding: 0px;">
 										<pre class="requestBodyPre resultBodyPlaceholder" id="requestBodyPlaceholder">...loading...</pre>
-										<pre th:text="${requestBody}" th:class="${requestSyntaxHighlighterClass} + ' resultBodyPre pre-scrollable'" id="requestBodyActual" style="display: none;">{}</pre>
+										<pre th:text="${requestBody}" th:class="${requestSyntaxHighlighterClass} + ' resultBodyPre pre'" id="requestBodyActual" style="display: none;">{}</pre>
 									</td>
 								</tr>
 							</tbody>
 						</table>
 
-						<table class="table table-bordered table-striped" id="resultTable">
+						<table class="table table-bordered table-striped resultTable" id="resultTable">
 							<colgroup>
 								<col class="col-xs-1" />
 								<col class="col-xs-7" />
@@ -924,9 +924,11 @@
 									</td>
 								</tr>
 								<tr th:if="${!#strings.isEmpty(resultBody)}">
-									<td rowspan="2">Result Body</td>
+									<td rowspan="2">
+										Result Body
+										<small th:text="${resultDescription}" style="font-weight: normal;"/>
+									</td>
 									<td>
-										<span th:text="${resultDescription}"/>
 										<button th:if="${resultBodyIsLong}" class="btn btn-info btn-sm" type="button" id="format-result-btn">
 											<span class="glyphicon glyphicon-eye-open"></span>
 											Colour
@@ -937,15 +939,30 @@
 												document.getElementById('resultBodyActualPre').className='<th:block th:text="${resultSyntaxHighlighterClass}"/>';
 												document.getElementById('format-result-btn').disabled ='disabled';
 												SyntaxHighlighter.highlight();
+												lineWrap();
 											});
 										</script>
+										
+										<th:block th:if="${bundle} != null and ${!bundle.linkNext.empty}">
+											<button	class="btn btn-success btn-sm" type="button" id="page-next-btn"	name="action" value="page">
+												<span class="glyphicon glyphicon-step-forward"></span>
+												Next Page
+											</button>
+											<script type="text/javascript" th:if="${resultBodyIsLong}">
+												$('#page-next-btn').click(function() {
+													var btn = $(this);
+													btn.button('loading');
+													btn.append($('<input />', { type: 'hidden', name: 'pageUrl', value: '<th:block th:text=""/>' }));
+												});
+											</script>
+										</th:block>
 									</td>
 								</tr>
 								<tr th:if="${!#strings.isEmpty(resultBody)}">
-									<td valign="top" style="margin: 0px; padding: 0px;">
+									<td valign="top" style="margin: 0px; padding: 0px; font-weight: normal;">
 										<pre class="resultBodyPre resultBodyPlaceholder" id="resultBodyPlaceholder">...loading...</pre>
 										<div id="resultBodyActual" class="resultBodyActual" style="display: none;">
-											<pre id="resultBodyActualPre" th:text="${resultBody}" th:class="(${resultBodyIsLong} ? '' : ${resultSyntaxHighlighterClass}) + ' resultBodyPre pre-scrollable'">{}</pre>
+											<pre id="resultBodyActualPre" th:text="${resultBody}" th:class="(${resultBodyIsLong} ? '' : ${resultSyntaxHighlighterClass}) + ' resultBodyPre pre'">{}</pre>
 										</div>
 									</td>
 								</tr>
@@ -956,12 +973,12 @@
 							</tbody>
 						</table>
 						
-						<script type="text/javascript">
+						<script type="text/javascript"><!--
 							$( document ).ready(function() {
-								var reswidth = $('#resultBodyPlaceholder').width();
+								var reswidth = $('#resultBodyPlaceholder').outerWidth(true);
 								var reqwidth = 0;
 								if ($('#requestBodyPlaceholder') != null) {
-									reqwidth = $('#requestBodyPlaceholder').width();
+									reqwidth = $('#requestBodyPlaceholder').outerWidth(true);
 								}
 								
 								SyntaxHighlighter.all();
@@ -976,7 +993,36 @@
 									$('#requestBodyActual').show();
 								}
 							});
-						</script>
+							
+							function lineWrap(){
+							    var wrap = function () {
+							        var elems = document.getElementsByClassName('syntaxhighlighter');
+							        for (var j = 0; j < elems.length; ++j) {
+							            var sh = elems[j];
+							            var gLines = sh.getElementsByClassName('gutter')[0].getElementsByClassName('line');
+							            var cLines = sh.getElementsByClassName('code')[0].getElementsByClassName('line');
+							            var stand = 15;
+							            for (var i = 0; i < gLines.length; ++i) {
+							                var h = $(cLines[i]).height();
+							                if (h != stand) {
+							                    console.log(i);
+							                    gLines[i].setAttribute('style', 'height: ' + h + 'px !important;');
+							                }
+							            }
+							        }
+							     };
+							    var whenReady = function () {
+							        if ($('.syntaxhighlighter').length === 0) {
+							            setTimeout(whenReady, 800);
+							        } else {
+							            wrap();
+							        }
+							    };
+							    whenReady();
+							};
+							lineWrap();
+							$(window).resize(function(){lineWrap()});							
+						--></script>
 						
 					</div>
 

@@ -129,7 +129,12 @@ class ParserState<T> {
 
 		IResource resource = entry.getResource();
 		if (resource == null && id != null && isNotBlank(id.getResourceType())) {
-			resource = myContext.getResourceDefinition(id.getResourceType()).newInstance();
+			String resourceType = id.getResourceType();
+			RuntimeResourceDefinition def = myContext.getResourceDefinition(resourceType);
+			if (def == null) {
+				throw new DataFormatException("Entry references unknown resource type: " + resourceType);
+			}
+			resource = def.newInstance();
 			resource.setId(id);
 			entry.setResource(resource);
 		}

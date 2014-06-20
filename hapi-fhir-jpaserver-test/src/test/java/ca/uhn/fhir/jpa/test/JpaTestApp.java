@@ -68,7 +68,7 @@ public class JpaTestApp {
 
 		RestfulTesterServlet testerServlet = new RestfulTesterServlet();
 		String base = "http://localhost:" + myPort + "/fhir/context";
-//		base = "http://fhir.healthintersections.com.au/open";
+		base = "http://fhir.healthintersections.com.au/open";
 		testerServlet.setServerBase(base);
 		ServletHolder handler = new ServletHolder();
 		handler.setName("Tester");

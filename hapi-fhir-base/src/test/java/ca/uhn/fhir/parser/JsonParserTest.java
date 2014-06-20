@@ -592,6 +592,27 @@ public class JsonParserTest {
 
 	}
 
+	@Test
+	public void testParseBundleFromHI() throws DataFormatException, IOException {
+
+		String msg = IOUtils.toString(XmlParser.class.getResourceAsStream("/bundle.json"));
+		IParser p = ourCtx.newJsonParser();
+		Bundle bundle = p.parseBundle(msg);
+
+		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeBundleToString(bundle);
+		ourLog.info(encoded);
+
+		BundleEntry entry = bundle.getEntries().get(0);
+
+		Patient res = (Patient) entry.getResource();
+		assertEquals("444111234", res.getIdentifierFirstRep().getValue().getValue());
+
+		BundleEntry deletedEntry = bundle.getEntries().get(3);
+		assertEquals("2014-06-20T20:15:49Z", deletedEntry.getDeletedAt().getValueAsString());
+		
+	}
+
+	
 	/**
 	 * This sample has extra elements in <searchParam> that are not actually a part of the spec any more..
 	 */
