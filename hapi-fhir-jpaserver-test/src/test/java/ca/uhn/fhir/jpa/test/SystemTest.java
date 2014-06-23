@@ -41,7 +41,7 @@ public class SystemTest {
 	@Test
 	public void testTransactionFromBundle() throws Exception {
 
-		InputStream bundleRes = SystemTest.class.getResourceAsStream("/bundle.json");
+		InputStream bundleRes = SystemTest.class.getResourceAsStream("/test-server-seed-bundle.json");
 		Bundle bundle = new FhirContext().newJsonParser().parseBundle(new InputStreamReader(bundleRes));
 		List<IResource> res = bundle.toListOfResources();
 		
