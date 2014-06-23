@@ -22,6 +22,7 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.util.FhirTerser;
 
 public class FhirSystemDao extends BaseFhirDao implements IFhirSystemDao {
@@ -62,10 +63,10 @@ public class FhirSystemDao extends BaseFhirDao implements IFhirSystemDao {
 			ResourceTable entity;
 			if (nextId.isEmpty()) {
 				entity = null;
-			} else if (!nextId.isValidLong()) {
+			} else if (!nextId.isIdPartValidLong()) {
 				entity = null;
 			} else {
-				entity = myEntityManager.find(ResourceTable.class, nextId.asLong());
+				entity = myEntityManager.find(ResourceTable.class, nextId.getIdPartAsLong());
 			}
 
 			if (entity == null) {
@@ -96,8 +97,8 @@ public class FhirSystemDao extends BaseFhirDao implements IFhirSystemDao {
 			} else if (newId.equals(entity.getId())) {
 				ourLog.info("Transaction resource ID[{}] is being updated", newId);
 			} else {
-				if (!nextId.getUnqualifiedId().startsWith("#")) {
-					nextId = new IdDt(resourceName + '/' + nextId.getUnqualifiedId());
+				if (!nextId.getIdPart().startsWith("#")) {
+					nextId = new IdDt(resourceName + '/' + nextId.getIdPart());
 					ourLog.info("Transaction resource ID[{}] has been assigned new ID[{}]", nextId, newId);
 					idConversions.put(nextId, newId);
 				}
@@ -131,8 +132,8 @@ public class FhirSystemDao extends BaseFhirDao implements IFhirSystemDao {
 	}
 
 	@Override
-	public List<IResource> history(Date theSince, Integer theLimit) {
-		return super.history(null, null, theSince, theLimit);
+	public IBundleProvider history(Date theSince) {
+		return super.history(null, null, theSince);
 	}
 
 	@Override

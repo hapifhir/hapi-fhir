@@ -21,8 +21,6 @@ package ca.uhn.fhir.rest.method;
  */
 
 import java.lang.reflect.Method;
-import java.util.Collections;
-import java.util.List;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
@@ -32,6 +30,8 @@ import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
 import ca.uhn.fhir.rest.method.SearchMethodBinding.RequestType;
 import ca.uhn.fhir.rest.param.IParameter;
+import ca.uhn.fhir.rest.server.IBundleProvider;
+import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 
@@ -70,9 +70,9 @@ public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding
 	}
 
 	@Override
-	public List<IResource> invokeServer(Request theRequest, Object[] theMethodParams) throws BaseServerResponseException {
+	public IBundleProvider invokeServer(Request theRequest, Object[] theMethodParams) throws BaseServerResponseException {
 		IResource conf = (IResource) invokeServerMethod(theMethodParams);
-		return Collections.singletonList(conf);
+		return new SimpleBundleProvider(conf);
 	}
 
 	@Override

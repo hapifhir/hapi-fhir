@@ -45,6 +45,7 @@ public class Constants {
 	public static final String HEADER_ACCEPT = "Accept";
 	public static final String HEADER_CATEGORY = "Category";
 	public static final String HEADER_CONTENT_LOCATION = "Content-Location";
+	public static final String HEADER_CONTENT_TYPE = "Content-Type";
 	public static final String HEADER_LAST_MODIFIED = "Last-Modified";
 	public static final String HEADER_LAST_MODIFIED_LOWERCASE = HEADER_LAST_MODIFIED.toLowerCase();
 	public static final String OPENSEARCH_NS_OLDER = "http://purl.org/atompub/tombstones/1.0";
@@ -54,6 +55,8 @@ public class Constants {
 	public static final String PARAM_HISTORY = "_history";
 	public static final String PARAM_INCLUDE = "_include";
 	public static final String PARAM_NARRATIVE = "_narrative";
+	public static final String PARAM_PAGINGACTION = "_getpages";
+	public static final String PARAM_PAGINGOFFSET = "_getpagesoffset";
 	public static final String PARAM_PRETTY = "_pretty";
 	public static final String PARAM_PRETTY_VALUE_TRUE = "true";
 	public static final String PARAM_QUERY = "_query";
@@ -73,11 +76,12 @@ public class Constants {
 	public static final int STATUS_HTTP_404_NOT_FOUND = 404;
 	public static final int STATUS_HTTP_405_METHOD_NOT_ALLOWED = 405;
 	public static final int STATUS_HTTP_409_CONFLICT = 409;
+	public static final int STATUS_HTTP_410_GONE = 410;
 	public static final int STATUS_HTTP_412_PRECONDITION_FAILED = 412;
 	public static final int STATUS_HTTP_422_UNPROCESSABLE_ENTITY = 422;
 	public static final int STATUS_HTTP_500_INTERNAL_ERROR = 500;
 	public static final String URL_TOKEN_HISTORY = "_history";
-	public static final String HEADER_CONTENT_TYPE = "Content-Type";
+	
 
 	static {
 		Map<String, EncodingEnum> valToEncoding = new HashMap<String, EncodingEnum>();

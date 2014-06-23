@@ -33,33 +33,29 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.utils.DateUtils;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.api.Bundle;
-import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.Tag;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.dstu.resource.Binary;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.client.exceptions.InvalidResponseException;
 import ca.uhn.fhir.rest.param.IParameter;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
+import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.RestfulServer.NarrativeModeEnum;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
@@ -92,6 +88,8 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 			myMethodReturnType = MethodReturnTypeEnum.RESOURCE;
 		} else if (Bundle.class.isAssignableFrom(methodReturnType)) {
 			myMethodReturnType = MethodReturnTypeEnum.BUNDLE;
+		} else if (IBundleProvider.class.isAssignableFrom(methodReturnType)) {
+			myMethodReturnType = MethodReturnTypeEnum.BUNDLE_PROVIDER;
 		} else {
 			throw new ConfigurationException("Invalid return type '" + methodReturnType.getCanonicalName() + "' on method '" + theMethod.getName() + "' on type: " + theMethod.getDeclaringClass().getCanonicalName());
 		}
@@ -143,6 +141,8 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 				} else {
 					throw new InvalidResponseException(theResponseStatusCode, "FHIR server call returned a bundle with multiple resources, but this method is only able to returns one.");
 				}
+			case BUNDLE_PROVIDER:
+				throw new IllegalStateException("Return type of " + IBundleProvider.class.getSimpleName() + " is not supported in clients");
 			}
 			break;
 		}
@@ -174,6 +174,8 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 				return Collections.singletonList(resource);
 			case RESOURCE:
 				return resource;
+			case BUNDLE_PROVIDER:
+				throw new IllegalStateException("Return type of " + IBundleProvider.class.getSimpleName() + " is not supported in clients");
 			}
 			break;
 		}
@@ -182,7 +184,7 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 		throw new IllegalStateException("Should not get here!");
 	}
 
-	public abstract List<IResource> invokeServer(Request theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException;
+	public abstract IBundleProvider invokeServer(Request theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException;
 
 	@Override
 	public void invokeServer(RestfulServer theServer, Request theRequest, HttpServletResponse theResponse) throws BaseServerResponseException, IOException {
@@ -191,15 +193,7 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 		boolean prettyPrint = RestfulServer.prettyPrintResponse(theRequest);
 
 		// Narrative mode
-		Map<String, String[]> requestParams = theRequest.getParameters();
-		String[] narrative = requestParams.remove(Constants.PARAM_NARRATIVE);
-		NarrativeModeEnum narrativeMode = null;
-		if (narrative != null && narrative.length > 0) {
-			narrativeMode = NarrativeModeEnum.valueOfCaseInsensitive(narrative[0]);
-		}
-		if (narrativeMode == null) {
-			narrativeMode = NarrativeModeEnum.NORMAL;
-		}
+		NarrativeModeEnum narrativeMode = RestfulServer.determineNarrativeMode(theRequest);
 
 		// Determine response encoding
 		EncodingEnum responseEncoding = RestfulServer.determineResponseEncoding(theRequest);
@@ -222,10 +216,12 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 			}
 		}
 
-		List<IResource> result = invokeServer(theRequest, params);
+		Integer count = RestfulServer.extractCountParameter(theRequest.getServletRequest());
+
+		IBundleProvider result = invokeServer(theRequest, params);
 		switch (getReturnType()) {
 		case BUNDLE:
-			streamResponseAsBundle(theServer, theResponse, result, responseEncoding, theRequest.getFhirServerBase(), theRequest.getCompleteUrl(), prettyPrint, requestIsBrowser, narrativeMode);
+			RestfulServer.streamResponseAsBundle(theServer, theResponse, result, responseEncoding, theRequest.getFhirServerBase(), theRequest.getCompleteUrl(), prettyPrint, requestIsBrowser, narrativeMode, 0, count, null);
 			break;
 		case RESOURCE:
 			if (result.size() == 0) {
@@ -233,78 +229,23 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 			} else if (result.size() > 1) {
 				throw new InternalErrorException("Method returned multiple resources");
 			}
-			streamResponseAsResource(theServer, theResponse, result.get(0), responseEncoding, prettyPrint, requestIsBrowser, narrativeMode);
+			streamResponseAsResource(theServer, theResponse, result.getResources(0, 1).get(0), responseEncoding, prettyPrint, requestIsBrowser, narrativeMode);
 			break;
-		}
-	}
-
-	private IParser getNewParser(EncodingEnum theResponseEncoding, boolean thePrettyPrint, NarrativeModeEnum theNarrativeMode) {
-		IParser parser;
-		switch (theResponseEncoding) {
-		case JSON:
-			parser = getContext().newJsonParser();
-			break;
-		case XML:
-		default:
-			parser = getContext().newXmlParser();
-			break;
-		}
-		return parser.setPrettyPrint(thePrettyPrint).setSuppressNarratives(theNarrativeMode == NarrativeModeEnum.SUPPRESS);
-	}
-
-	private void streamResponseAsBundle(RestfulServer theServer, HttpServletResponse theHttpResponse, List<IResource> theResult, EncodingEnum theResponseEncoding, String theServerBase, String theCompleteUrl, boolean thePrettyPrint, boolean theRequestIsBrowser,
-			NarrativeModeEnum theNarrativeMode) throws IOException {
-		assert !theServerBase.endsWith("/");
-
-		for (IResource next : theResult) {
-			if (next.getId() == null || next.getId().isEmpty()) {
-				throw new InternalErrorException("Server method returned resource of type[" + next.getClass().getSimpleName() + "] with no ID specified (IResource#setId(IdDt) must be called)");
-			}
-		}
-		
-		theHttpResponse.setStatus(200);
-
-		if (theRequestIsBrowser && theServer.isUseBrowserFriendlyContentTypes()) {
-			theHttpResponse.setContentType(theResponseEncoding.getBrowserFriendlyBundleContentType());
-		} else if (theNarrativeMode == NarrativeModeEnum.ONLY) {
-			theHttpResponse.setContentType(Constants.CT_HTML);
-		} else {
-			theHttpResponse.setContentType(theResponseEncoding.getBundleContentType());
-		}
-
-		theHttpResponse.setCharacterEncoding(Constants.CHARSET_UTF_8);
-
-		theServer.addHeadersToResponse(theHttpResponse);
-
-		Bundle bundle = createBundleFromResourceList(getContext(), getClass().getCanonicalName(), theResult, theResponseEncoding, theServerBase, theCompleteUrl, thePrettyPrint, theNarrativeMode);
-
-		PrintWriter writer = theHttpResponse.getWriter();
-		try {
-			if (theNarrativeMode == NarrativeModeEnum.ONLY) {
-				for (IResource next : theResult) {
-					writer.append(next.getText().getDiv().getValueAsString());
-					writer.append("<hr/>");
-				}
-			} else {
-				getNewParser(theResponseEncoding, thePrettyPrint, theNarrativeMode).encodeBundleToWriter(bundle, writer);
-			}
-		} finally {
-			writer.close();
 		}
 	}
 
 	private void streamResponseAsResource(RestfulServer theServer, HttpServletResponse theHttpResponse, IResource theResource, EncodingEnum theResponseEncoding, boolean thePrettyPrint, boolean theRequestIsBrowser, NarrativeModeEnum theNarrativeMode) throws IOException {
 
 		theHttpResponse.setStatus(200);
-		
+
 		if (theResource instanceof Binary) {
 			Binary bin = (Binary) theResource;
 			if (isNotBlank(bin.getContentType())) {
 				theHttpResponse.setContentType(bin.getContentType());
-			}else {
-				theHttpResponse.setContentType(Constants.CT_OCTET_STREAM);				
+			} else {
+				theHttpResponse.setContentType(Constants.CT_OCTET_STREAM);
 			}
-			if (bin.getContent()==null || bin.getContent().length==0) {
+			if (bin.getContent() == null || bin.getContent().length == 0) {
 				return;
 			}
 			theHttpResponse.setContentLength(bin.getContent().length);
@@ -313,7 +254,7 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 			oos.close();
 			return;
 		}
-		
+
 		if (theRequestIsBrowser && theServer.isUseBrowserFriendlyContentTypes()) {
 			theHttpResponse.setContentType(theResponseEncoding.getBrowserFriendlyBundleContentType());
 		} else if (theNarrativeMode == NarrativeModeEnum.ONLY) {
@@ -325,7 +266,7 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 
 		theServer.addHeadersToResponse(theHttpResponse);
 
-		InstantDt lastUpdated = (InstantDt) ResourceMetadataKeyEnum.UPDATED.get(theResource);
+		InstantDt lastUpdated = ResourceMetadataKeyEnum.UPDATED.get(theResource);
 		if (lastUpdated != null) {
 			theHttpResponse.addHeader(Constants.HEADER_LAST_MODIFIED, lastUpdated.getValueAsString());
 		}
@@ -344,7 +285,7 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 			if (theNarrativeMode == NarrativeModeEnum.ONLY) {
 				writer.append(theResource.getText().getDiv().getValueAsString());
 			} else {
-				getNewParser(theResponseEncoding, thePrettyPrint, theNarrativeMode).encodeResourceToWriter(theResource, writer);
+				RestfulServer.getNewParser(theServer.getFhirContext(), theResponseEncoding, thePrettyPrint, theNarrativeMode).encodeResourceToWriter(theResource, writer);
 			}
 		} finally {
 			writer.close();
@@ -354,31 +295,16 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 
 	/**
 	 * Subclasses may override
+	 * 
+	 * @throws IOException
+	 *             Subclasses may throw this in the event of an IO exception
 	 */
 	protected Object parseRequestObject(@SuppressWarnings("unused") Request theRequest) throws IOException {
 		return null;
 	}
 
-	public static Bundle createBundleFromResourceList(FhirContext theContext, String theAuthor, List<IResource> theResult, EncodingEnum theResponseEncoding, String theServerBase, String theCompleteUrl, boolean thePrettyPrint, NarrativeModeEnum theNarrativeMode) {
-		Bundle bundle = new Bundle();
-		bundle.getAuthorName().setValue(theAuthor);
-		bundle.getBundleId().setValue(UUID.randomUUID().toString());
-		bundle.getPublished().setToCurrentTimeInLocalTimeZone();
-		bundle.getLinkBase().setValue(theServerBase);
-		bundle.getLinkSelf().setValue(theCompleteUrl);
-
-		for (IResource next : theResult) {
-			bundle.addResource(next, theContext, theServerBase);
-		}
-
-		bundle.getTotalResults().setValue(theResult.size());
-		return bundle;
-	}
-
-
-
 	public enum MethodReturnTypeEnum {
-		BUNDLE, LIST_OF_RESOURCES, RESOURCE
+		BUNDLE, LIST_OF_RESOURCES, RESOURCE, BUNDLE_PROVIDER
 	}
 
 	public enum ReturnTypeEnum {

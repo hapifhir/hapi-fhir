@@ -40,7 +40,7 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
-import ca.uhn.fhir.rest.server.RestfulServer.NarrativeModeEnum;
+import ca.uhn.fhir.rest.server.RestfulServer;
 
 public abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvocation {
 
@@ -56,7 +56,7 @@ public abstract class BaseHttpClientInvocationWithContents extends BaseHttpClien
 		myResource = theResource;
 		myUrlExtension = theUrlExtension;
 		myTagList = null;
-		myResources=null;
+		myResources = null;
 	}
 
 	public BaseHttpClientInvocationWithContents(FhirContext theContext, TagList theTagList, String... theUrlExtension) {
@@ -68,16 +68,16 @@ public abstract class BaseHttpClientInvocationWithContents extends BaseHttpClien
 		myResource = null;
 		myContext = theContext;
 		myTagList = theTagList;
-		myResources=null;
+		myResources = null;
 
 		myUrlExtension = StringUtils.join(theUrlExtension, '/');
 	}
 
 	public BaseHttpClientInvocationWithContents(FhirContext theContext, List<IResource> theResources) {
-		myContext=theContext;
-		myResource=null;
-		myTagList=null;
-		myUrlExtension=null;
+		myContext = theContext;
+		myResource = null;
+		myTagList = null;
+		myUrlExtension = null;
 		myResources = theResources;
 	}
 
@@ -94,12 +94,12 @@ public abstract class BaseHttpClientInvocationWithContents extends BaseHttpClien
 		String url = b.toString();
 
 		if (myResource != null && Binary.class.isAssignableFrom(myResource.getClass())) {
-			Binary binary = (Binary)myResource;
+			Binary binary = (Binary) myResource;
 			ByteArrayEntity entity = new ByteArrayEntity(binary.getContent(), ContentType.parse(binary.getContentType()));
 			HttpRequestBase retVal = createRequest(url, entity);
 			return retVal;
 		}
-		
+
 		IParser parser;
 		String contentType;
 		if (theEncoding == EncodingEnum.JSON) {
@@ -114,7 +114,7 @@ public abstract class BaseHttpClientInvocationWithContents extends BaseHttpClien
 		if (myTagList != null) {
 			contents = parser.encodeTagListToString(myTagList);
 		} else if (myResources != null) {
-			Bundle bundle = BaseResourceReturningMethodBinding.createBundleFromResourceList(myContext, "", myResources, theEncoding, "", "", false, NarrativeModeEnum.NORMAL);
+			Bundle bundle = RestfulServer.createBundleFromResourceList(myContext, "", myResources, "", "", myResources.size());
 			contents = parser.encodeBundleToString(bundle);
 		} else {
 			contents = parser.encodeResourceToString(myResource);

@@ -238,16 +238,16 @@ public class Bundle extends BaseBundle /* implements IElement */{
 			}
 			b.append(def.getName());
 			b.append('/');
-			String resId = theResource.getId().getUnqualifiedId();
+			String resId = theResource.getId().getIdPart();
 			b.append(resId);
 
 			entry.getId().setValue(b.toString());
 
-			if (isNotBlank(theResource.getId().getUnqualifiedVersionId())) {
+			if (isNotBlank(theResource.getId().getVersionIdPart())) {
 				b.append('/');
 				b.append(Constants.PARAM_HISTORY);
 				b.append('/');
-				b.append(theResource.getId().getUnqualifiedVersionId());
+				b.append(theResource.getId().getVersionIdPart());
 			} else {
 				IdDt versionId = (IdDt) ResourceMetadataKeyEnum.VERSION_ID.get(theResource);
 				if (versionId != null) {
@@ -261,29 +261,29 @@ public class Bundle extends BaseBundle /* implements IElement */{
 			entry.getLinkSelf().setValue(b.toString());
 		}
 
-		InstantDt published = (InstantDt) ResourceMetadataKeyEnum.PUBLISHED.get(theResource);
+		InstantDt published = ResourceMetadataKeyEnum.PUBLISHED.get(theResource);
 		if (published == null) {
 			entry.getPublished().setToCurrentTimeInLocalTimeZone();
 		} else {
 			entry.setPublished(published);
 		}
 
-		InstantDt updated = (InstantDt) ResourceMetadataKeyEnum.UPDATED.get(theResource);
+		InstantDt updated = ResourceMetadataKeyEnum.UPDATED.get(theResource);
 		if (updated != null) {
 			entry.setUpdated(updated);
 		}
 
-		InstantDt deleted = (InstantDt) ResourceMetadataKeyEnum.DELETED_AT.get(theResource);
+		InstantDt deleted = ResourceMetadataKeyEnum.DELETED_AT.get(theResource);
 		if (deleted != null) {
 			entry.setDeleted(deleted);
 		}
 
-		IdDt previous = (IdDt) ResourceMetadataKeyEnum.PREVIOUS_ID.get(theResource);
+		IdDt previous = ResourceMetadataKeyEnum.PREVIOUS_ID.get(theResource);
 		if (previous != null) {
-			entry.getLinkAlternate().setValue(previous.toQualifiedUrl(theServerBase, def.getName()));
+			entry.getLinkAlternate().setValue(previous.withServerBase(theServerBase, def.getName()));
 		}
 
-		TagList tagList = (TagList) ResourceMetadataKeyEnum.TAG_LIST.get(theResource);
+		TagList tagList = ResourceMetadataKeyEnum.TAG_LIST.get(theResource);
 		if (tagList != null) {
 			for (Tag nextTag : tagList) {
 				entry.addCategory(nextTag);
@@ -298,6 +298,10 @@ public class Bundle extends BaseBundle /* implements IElement */{
 			retVal.addResource(next, theContext, theServerBase);
 		}
 		return retVal;
+	}
+
+	public void setPublished(InstantDt thePublished) {
+		myPublished = thePublished;
 	}
 
 }

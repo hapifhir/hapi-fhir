@@ -20,6 +20,7 @@ import ca.uhn.fhir.model.dstu.resource.Organization;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.dstu.resource.Questionnaire;
 import ca.uhn.fhir.rest.client.IGenericClient;
+import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.tester.RestfulTesterServlet;
 import ca.uhn.test.jpasrv.DiagnosticReportResourceProvider;
@@ -56,6 +57,7 @@ public class JpaTestApp {
 		RestfulServer restServer = new RestfulServer();
 		restServer.setResourceProviders(diagnosticReportRp,patientRp, questionnaireRp, organizationRp);
 		restServer.setProviders(systemProvider);
+		restServer.setPagingProvider(new FifoMemoryPagingProvider(10));
 		
 		JpaConformanceProvider confProvider = new JpaConformanceProvider(restServer, systemDao);
 		restServer.setServerConformanceProvider(confProvider);
@@ -68,7 +70,7 @@ public class JpaTestApp {
 
 		RestfulTesterServlet testerServlet = new RestfulTesterServlet();
 		String base = "http://localhost:" + myPort + "/fhir/context";
-		base = "http://fhir.healthintersections.com.au/open";
+//		base = "http://fhir.healthintersections.com.au/open";
 		testerServlet.setServerBase(base);
 		ServletHolder handler = new ServletHolder();
 		handler.setName("Tester");
@@ -94,8 +96,27 @@ public class JpaTestApp {
 			ResourceMetadataKeyEnum.TAG_LIST.put(p1, list);
 			client.create(p1);
 			
-			List<IResource> resources = restServer.getFhirContext().newJsonParser().parseBundle(IOUtils.toString(JpaTestApp.class.getResourceAsStream("/bundle.json"))).toListOfResources();
+			List<IResource> resources = restServer.getFhirContext().newJsonParser().parseBundle(IOUtils.toString(JpaTestApp.class.getResourceAsStream("/test-server-seed-bundle.json"))).toListOfResources();
 			client.transaction(resources);
+			
+			client.create(p1);
+			client.create(p1);
+			client.create(p1);
+			client.create(p1);
+			client.create(p1);
+			client.create(p1);
+			client.create(p1);
+			client.create(p1);
+			client.create(p1);
+			client.create(p1);
+			client.create(p1);
+			client.create(p1);
+			client.create(p1);
+			client.create(p1);
+			
+			client.setLogRequestAndResponse(true);
+			client.create(p1);
+
 		}
 	}
 

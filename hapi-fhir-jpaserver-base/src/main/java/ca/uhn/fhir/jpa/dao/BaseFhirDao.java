@@ -5,6 +5,7 @@ import static org.apache.commons.lang3.StringUtils.*;
 import java.io.UnsupportedEncodingException;
 import java.text.Normalizer;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -27,6 +28,7 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import ca.uhn.fhir.context.ConfigurationException;
@@ -65,8 +67,10 @@ import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.valueset.SearchParamTypeEnum;
 import ca.uhn.fhir.model.primitive.BaseDateTimeDt;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.FhirTerser;
 
@@ -86,6 +90,27 @@ public abstract class BaseFhirDao {
 
 	private Map<Class<? extends IResource>, IFhirResourceDao<?>> myResourceTypeToDao;
 	
+	protected void loadResourcesById(Set<IdDt> theIncludePids, List<IResource> theResourceListToPopulate) {
+		Set<Long> pids = new HashSet<Long>();
+		for (IdDt next : theIncludePids) {
+			pids.add(next.getIdPartAsLong());
+		}
+		
+		CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
+		CriteriaQuery<ResourceTable> cq = builder.createQuery(ResourceTable.class);
+		Root<ResourceTable> from = cq.from(ResourceTable.class);
+//		cq.where(builder.equal(from.get("myResourceType"), getContext().getResourceDefinition(myResourceType).getName()));
+//		if (theIncludePids != null) {
+			cq.where(from.get("myId").in(pids));
+//		}
+		TypedQuery<ResourceTable> q = myEntityManager.createQuery(cq);
+
+		for (ResourceTable next : q.getResultList()) {
+			IResource resource = toResource(next);
+			theResourceListToPopulate.add(resource);
+		}
+	}
+
 	public FhirContext getContext() {
 		return myContext;
 	}
@@ -101,7 +126,7 @@ public abstract class BaseFhirDao {
 	@Autowired(required = true)
 	private DaoConfig myConfig;
 
-	private void searchHistoryCurrentVersion(String theResourceName, Long theId, Date theSince, Integer theLimit, List<HistoryTuple> tuples) {
+	private void searchHistoryCurrentVersion(String theResourceName, Long theId, Date theSince, Date theEnd, Integer theLimit, List<HistoryTuple> tuples) {
 		CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
 		CriteriaQuery<Tuple> cq = builder.createTupleQuery();
 		Root<?> from = cq.from(ResourceTable.class);
@@ -112,6 +137,9 @@ public abstract class BaseFhirDao {
 			Predicate low = builder.greaterThanOrEqualTo(from.<Date> get("myUpdated"), theSince);
 			predicates.add(low);
 		}
+
+		Predicate high = builder.lessThan(from.<Date> get("myUpdated"), theEnd);
+		predicates.add(high);
 
 		if (theResourceName != null) {
 			predicates.add(builder.equal(from.get("myResourceType"), theResourceName));
@@ -165,7 +193,7 @@ public abstract class BaseFhirDao {
 		}
 	}
 
-	private void searchHistoryHistory(String theResourceName, Long theResourceId, Date theSince, Integer theLimit, List<HistoryTuple> tuples) {
+	private void searchHistoryHistory(String theResourceName, Long theResourceId, Date theSince,Date theEnd, Integer theLimit, List<HistoryTuple> tuples) {
 		CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
 		CriteriaQuery<Tuple> cq = builder.createTupleQuery();
 		Root<?> from = cq.from(ResourceHistoryTable.class);
@@ -176,6 +204,9 @@ public abstract class BaseFhirDao {
 			Predicate low = builder.greaterThanOrEqualTo(from.<Date> get("myUpdated"), theSince);
 			predicates.add(low);
 		}
+
+		Predicate high = builder.lessThan(from.<Date> get("myUpdated"), theEnd);
+		predicates.add(high);
 
 		if (theResourceName != null) {
 			predicates.add(builder.equal(from.get("myResourceType"), theResourceName));
@@ -272,7 +303,7 @@ public abstract class BaseFhirDao {
 						throw new InvalidRequestException("Invalid resource reference found at path[" + nextPath + "] - Does not contain resource type - " + nextValue.getReference().getValue());
 					}
 					Class<? extends IResource> type = getContext().getResourceDefinition(typeString).getImplementingClass();
-					String id = nextValue.getReference().getUnqualifiedId();
+					String id = nextValue.getReference().getIdPart();
 					if (StringUtils.isBlank(id)) {
 						continue;
 					}
@@ -577,17 +608,21 @@ public abstract class BaseFhirDao {
 		return myResourceTypeToDao.get(theType);
 	}
 
-	protected ArrayList<IResource> history(String theResourceName, Long theId, Date theSince, Integer theLimit) {
-		List<HistoryTuple> tuples = new ArrayList<HistoryTuple>();
+	protected IBundleProvider history(String theResourceName, Long theId, Date theSince) {
+		final List<HistoryTuple> tuples = new ArrayList<HistoryTuple>();
+		
+		final InstantDt end = createHistoryToTimestamp();
 
 		StopWatch timer = new StopWatch();
 		
+		int limit = 10000;
+		
 		// Get list of IDs
-		searchHistoryCurrentVersion(theResourceName, theId, theSince, theLimit, tuples);
+		searchHistoryCurrentVersion(theResourceName, theId, theSince, end.getValue(), limit, tuples);
 		assert tuples.size() < 2 || !tuples.get(tuples.size() - 2).getUpdated().before(tuples.get(tuples.size() - 1).getUpdated());
 		ourLog.info("Retrieved {} history IDs from current versions in {} ms", tuples.size(), timer.getMillisAndRestart());
 		
-		searchHistoryHistory(theResourceName, theId, theSince, theLimit, tuples);
+		searchHistoryHistory(theResourceName, theId, theSince, end.getValue() , limit, tuples);
 		assert tuples.size() < 2 || !tuples.get(tuples.size() - 2).getUpdated().before(tuples.get(tuples.size() - 1).getUpdated());
 		ourLog.info("Retrieved {} history IDs from previous versions in {} ms", tuples.size(), timer.getMillisAndRestart());
 
@@ -595,42 +630,54 @@ public abstract class BaseFhirDao {
 		Collections.sort(tuples, Collections.reverseOrder());
 		assert tuples.size() < 2 || !tuples.get(tuples.size() - 2).getUpdated().before(tuples.get(tuples.size() - 1).getUpdated());
 
-		// Pull actual resources
-		List<BaseHasResource> resEntities = Lists.newArrayList();
-
-		int limit;
-		if (theLimit != null && theLimit < myConfig.getHardSearchLimit()) {
-			limit = theLimit;
-		} else {
-			limit = myConfig.getHardSearchLimit();
-		}
-
-		if (tuples.size() > limit) {
-			tuples = tuples.subList(0, limit);
-		}
-		
-		searchHistoryCurrentVersion(tuples, resEntities);
-		ourLog.info("Loaded history from current versions in {} ms", timer.getMillisAndRestart());
-		
-		searchHistoryHistory(tuples, resEntities);
-		ourLog.info("Loaded history from previous versions in {} ms", timer.getMillisAndRestart());
-
-		Collections.sort(resEntities, new Comparator<BaseHasResource>() {
+		return new IBundleProvider() {
+			
 			@Override
-			public int compare(BaseHasResource theO1, BaseHasResource theO2) {
-				return theO2.getUpdated().getValue().compareTo(theO1.getUpdated().getValue());
+			public int size() {
+				return tuples.size();
 			}
-		});
+			
+			@Override
+			public List<IResource> getResources(int theFromIndex, int theToIndex) {
+				StopWatch timer = new StopWatch();
+				List<BaseHasResource> resEntities = Lists.newArrayList();
+				
+				List<HistoryTuple> tupleSubList = tuples.subList(theFromIndex, theToIndex);
+				searchHistoryCurrentVersion(tupleSubList, resEntities);
+				ourLog.info("Loaded history from current versions in {} ms", timer.getMillisAndRestart());
+				
+				searchHistoryHistory(tupleSubList, resEntities);
+				ourLog.info("Loaded history from previous versions in {} ms", timer.getMillisAndRestart());
 
-		if (resEntities.size() > limit) {
-			resEntities = resEntities.subList(0, limit);
-		}
+				Collections.sort(resEntities, new Comparator<BaseHasResource>() {
+					@Override
+					public int compare(BaseHasResource theO1, BaseHasResource theO2) {
+						return theO2.getUpdated().getValue().compareTo(theO1.getUpdated().getValue());
+					}
+				});
 
-		ArrayList<IResource> retVal = new ArrayList<IResource>();
-		for (BaseHasResource next : resEntities) {
-			retVal.add(toResource(next));
-		}
-		return retVal;
+				int limit = theToIndex-theFromIndex;
+				if (resEntities.size() > limit) {
+					resEntities = resEntities.subList(0, limit);
+				}
+
+				ArrayList<IResource> retVal = new ArrayList<IResource>();
+				for (BaseHasResource next : resEntities) {
+					retVal.add(toResource(next));
+				}
+				return retVal;
+			}
+			
+			@Override
+			public InstantDt getPublished() {
+				return end;
+			}
+		};
+	}
+
+	InstantDt createHistoryToTimestamp() {
+//		final InstantDt end = new InstantDt(DateUtils.addSeconds(DateUtils.truncate(new Date(), Calendar.SECOND), -1));
+		return InstantDt.withCurrentTime();
 	}
 
 	protected String normalizeString(String theString) {
@@ -846,7 +893,7 @@ public abstract class BaseFhirDao {
 		String resourceName = null;
 		if (theResourceType != null) {
 			resourceName = toResourceName(theResourceType);
-			if (theResourceId != null && theResourceId.hasUnqualifiedVersionId()) {
+			if (theResourceId != null && theResourceId.hasVersionIdPart()) {
 				IFhirResourceDao<? extends IResource> dao = getDao(theResourceType);
 				BaseHasResource entity = dao.readEntity(theResourceId);
 				TagList retVal = new TagList();
@@ -891,7 +938,7 @@ public abstract class BaseFhirDao {
 			if (theResourceName != null) {
 				Predicate typePredicate = builder.equal(from.get("myResourceType"), theResourceName);
 				if (theResourceId != null) {
-					cq.where(typePredicate, builder.equal(from.get("myResourceId"), theResourceId.asLong()));
+					cq.where(typePredicate, builder.equal(from.get("myResourceId"), theResourceId.getIdPartAsLong()));
 				} else {
 					cq.where(typePredicate);
 				}

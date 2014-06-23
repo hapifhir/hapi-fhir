@@ -6,12 +6,13 @@ import java.util.Map;
 
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.TagList;
+import ca.uhn.fhir.rest.server.IBundleProvider;
 
 public interface IFhirSystemDao {
 
 	void transaction(List<IResource> theResources);
 
-	List<IResource> history(Date theDate, Integer theLimit);
+	IBundleProvider history(Date theDate);
 
 	TagList getAllTags();
 

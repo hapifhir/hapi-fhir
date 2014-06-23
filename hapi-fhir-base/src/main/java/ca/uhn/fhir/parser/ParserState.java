@@ -428,7 +428,7 @@ class ParserState<T> {
 				String linkSelfValue = myEntry.getLinkSelf().getValue();
 				IdDt linkSelf = new IdDt(linkSelfValue);
 				myEntry.getResource().setId(linkSelf);
-				if (isNotBlank(linkSelf.getUnqualifiedVersionId())) {
+				if (isNotBlank(linkSelf.getVersionIdPart())) {
 					metadata.put(ResourceMetadataKeyEnum.VERSION_ID, linkSelf);
 				}
 			}
@@ -1129,7 +1129,10 @@ class ParserState<T> {
 			} else {
 				definition = myContext.getResourceDefinition(myResourceType);
 				if (!StringUtils.equals(theLocalPart, definition.getName())) {
-					throw new DataFormatException("Incorrect resource root element '" + theLocalPart + "', expected: '" + definition.getName() + "'");
+					definition = myContext.getResourceDefinition(theLocalPart);
+					if (!(definition instanceof RuntimeResourceDefinition)) {
+						throw new DataFormatException("Element '" + theLocalPart + "' is not a resource, expected a resource at this position");
+					}
 				}
 			}
 

@@ -11,9 +11,12 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 
 public interface IFhirResourceDao<T extends IResource> {
+
+	void addTag(IdDt theId, String theScheme, String theTerm, String theLabel);
 
 	MethodOutcome create(T theResource);
 
@@ -23,13 +26,11 @@ public interface IFhirResourceDao<T extends IResource> {
 
 	TagList getTags(IdDt theResourceId);
 
-	List<T> history();
+	IBundleProvider history(Date theSince);
 
-	List<IResource> history(Date theDate, Integer theLimit);
+	IBundleProvider history(IdDt theId,Date theSince);
 
-	List<T> history(IdDt theId);
-
-	List<IResource> history(Long theId, Date theSince, Integer theLimit);
+	IBundleProvider history(Long theId, Date theSince);
 
 	/**
 	 * 
@@ -41,11 +42,13 @@ public interface IFhirResourceDao<T extends IResource> {
 
 	BaseHasResource readEntity(IdDt theId);
 
-	List<T> search(Map<String, IQueryParameterType> theParams);
+	void removeTag(IdDt theId, String theScheme, String theTerm);
 
-	List<T> search(SearchParameterMap theMap);
+	IBundleProvider search(Map<String, IQueryParameterType> theParams);
 
-	List<T> search(String theParameterName, IQueryParameterType theValue);
+	IBundleProvider search(SearchParameterMap theMap);
+
+	IBundleProvider search(String theParameterName, IQueryParameterType theValue);
 
 	Set<Long> searchForIds(Map<String, IQueryParameterType> theParams);
 
@@ -54,9 +57,5 @@ public interface IFhirResourceDao<T extends IResource> {
 	Set<Long> searchForIdsWithAndOr(Map<String, List<List<IQueryParameterType>>> theMap);
 
 	MethodOutcome update(T theResource, IdDt theId);
-
-	void removeTag(IdDt theId, String theScheme, String theTerm);
-
-	void addTag(IdDt theId, String theScheme, String theTerm, String theLabel);
 	
 }

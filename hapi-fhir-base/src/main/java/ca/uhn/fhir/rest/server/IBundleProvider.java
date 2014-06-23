@@ -32,5 +32,5 @@ public interface IBundleProvider {
 	int size();
 	
 	InstantDt getPublished();
-	
+
 }

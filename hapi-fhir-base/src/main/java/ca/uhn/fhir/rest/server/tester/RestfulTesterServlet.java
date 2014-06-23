@@ -65,7 +65,6 @@ import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.Include;
-import ca.uhn.fhir.model.dstu.composite.QuantityDt;
 import ca.uhn.fhir.model.dstu.resource.Conformance;
 import ca.uhn.fhir.model.dstu.resource.Conformance.Rest;
 import ca.uhn.fhir.model.dstu.resource.Conformance.RestResource;
@@ -175,11 +174,15 @@ public class RestfulTesterServlet extends HttpServlet {
 		IOUtils.copy(res, theResp.getOutputStream());
 	}
 
+	private enum ResultType {
+		RESOURCE, BUNDLE, TAGLIST, NONE
+	}
+
 	private void processAction(HttpServletRequest theReq, WebContext theContext) {
 
 		GenericClient client = (GenericClient) myCtx.newRestfulGenericClient(myServerBase);
 		client.setKeepResponses(true);
-		boolean returnsResource;
+		ResultType returnsResource;
 		long latency = 0;
 
 		String outcomeDescription = null;
@@ -202,7 +205,7 @@ public class RestfulTesterServlet extends HttpServlet {
 			if ("home".equals(method)) {
 				return;
 			} else if ("conformance".equals(method)) {
-				returnsResource = true;
+				returnsResource = ResultType.RESOURCE;
 				client.conformance();
 			} else if ("read".equals(method)) {
 				RuntimeResourceDefinition def = getResourceType(theReq);
@@ -211,7 +214,7 @@ public class RestfulTesterServlet extends HttpServlet {
 					theContext.getVariables().put("errorMsg", "No ID specified");
 					return;
 				}
-				returnsResource = true;
+				returnsResource = ResultType.RESOURCE;
 
 				String versionId = StringUtils.defaultString(theReq.getParameter("vid"));
 				if (StringUtils.isBlank(versionId)) {
@@ -243,7 +246,7 @@ public class RestfulTesterServlet extends HttpServlet {
 				} else {
 					client.getTags().execute();
 				}
-				returnsResource = false;
+				returnsResource = ResultType.TAGLIST;
 				outcomeDescription = "Tag List";
 
 			} else if ("delete".equals(method)) {
@@ -254,7 +257,7 @@ public class RestfulTesterServlet extends HttpServlet {
 					return;
 				}
 
-				returnsResource = false;
+				returnsResource = ResultType.BUNDLE;
 				outcomeDescription = "Delete Resource";
 
 				client.delete(def.getImplementingClass(), new IdDt(id));
@@ -288,7 +291,7 @@ public class RestfulTesterServlet extends HttpServlet {
 					limit = Integer.parseInt(limitStr);
 				}
 
-				returnsResource = false;
+				returnsResource = ResultType.BUNDLE;
 				outcomeDescription = "Resource History";
 
 				client.history(type, id, since, limit);
@@ -332,7 +335,7 @@ public class RestfulTesterServlet extends HttpServlet {
 						client.create(resource);
 					}
 				}
-				returnsResource = false;
+				returnsResource = ResultType.RESOURCE;
 
 			} else if ("search".equals(method)) {
 				IUntypedQuery search = client.search();
@@ -371,12 +374,12 @@ public class RestfulTesterServlet extends HttpServlet {
 						}
 					}
 
-//					if ("xml".equals(theReq.getParameter("encoding"))) {
-//						query.encodedXml();
-//					}else if ("json".equals(theReq.getParameter("encoding"))) {
-//						query.encodedJson();
-//					} 
-					
+					// if ("xml".equals(theReq.getParameter("encoding"))) {
+					// query.encodedXml();
+					// }else if ("json".equals(theReq.getParameter("encoding"))) {
+					// query.encodedJson();
+					// }
+
 					query.where(new StringParam(nextName).matches().value(paramValue));
 
 				}
@@ -400,7 +403,7 @@ public class RestfulTesterServlet extends HttpServlet {
 				}
 
 				query.execute();
-				returnsResource = false;
+				returnsResource = ResultType.BUNDLE;
 
 			} else {
 				theContext.getVariables().put("errorMsg", "Invalid action: " + method);
@@ -410,13 +413,13 @@ public class RestfulTesterServlet extends HttpServlet {
 			latency = System.currentTimeMillis() - start;
 		} catch (DataFormatException e) {
 			ourLog.error("Failed to invoke method", e);
-			returnsResource = false;
+			returnsResource = ResultType.NONE;
 		} catch (BaseServerResponseException e) {
 			ourLog.error("Failed to invoke method", e);
-			returnsResource = false;
+			returnsResource = ResultType.NONE;
 		} catch (Exception e) {
 			ourLog.error("Failure during processing", e);
-			returnsResource = false;
+			returnsResource = ResultType.NONE;
 		}
 
 		try {
@@ -461,9 +464,9 @@ public class RestfulTesterServlet extends HttpServlet {
 			EncodingEnum ctEnum = EncodingEnum.forContentType(mimeType);
 			String narrativeString = "";
 
-			StringBuilder resultDescription=new StringBuilder();
+			StringBuilder resultDescription = new StringBuilder();
 			Bundle bundle = null;
-			
+
 			if (ctEnum == null) {
 				resultSyntaxHighlighterClass = "brush: plain";
 				resultDescription.append("Non-FHIR response");
@@ -471,22 +474,22 @@ public class RestfulTesterServlet extends HttpServlet {
 				switch (ctEnum) {
 				case JSON:
 					resultSyntaxHighlighterClass = "brush: jscript";
-					if (returnsResource) {
+					if (returnsResource == ResultType.RESOURCE) {
 						narrativeString = parseNarrative(ctEnum, resultBody);
-						resultDescription.append( "JSON resource");
-					} else {
-						resultDescription.append( "JSON bundle");
+						resultDescription.append("JSON resource");
+					} else if (returnsResource == ResultType.BUNDLE) {
+						resultDescription.append("JSON bundle");
 						bundle = myCtx.newJsonParser().parseBundle(resultBody);
 					}
 					break;
 				case XML:
 				default:
 					resultSyntaxHighlighterClass = "brush: xml";
-					if (returnsResource) {
+					if (returnsResource == ResultType.RESOURCE) {
 						narrativeString = parseNarrative(ctEnum, resultBody);
-						resultDescription.append( "XML resource");
-					} else {
-						resultDescription.append( "XML bundle");
+						resultDescription.append("XML resource");
+					} else if (returnsResource == ResultType.BUNDLE) {
+						resultDescription.append("XML bundle");
 						bundle = myCtx.newXmlParser().parseBundle(resultBody);
 					}
 					break;
@@ -494,7 +497,7 @@ public class RestfulTesterServlet extends HttpServlet {
 			}
 
 			resultDescription.append(" (").append(resultBody.length() + " bytes)");
-			
+
 			Header[] requestHeaders = lastRequest != null ? applyHeaderFilters(lastRequest.getAllHeaders()) : new Header[0];
 			Header[] responseHeaders = lastResponse != null ? applyHeaderFilters(lastResponse.getAllHeaders()) : new Header[0];
 

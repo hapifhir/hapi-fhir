@@ -96,6 +96,18 @@ public class IdDt extends BasePrimitive<String> {
 	public IdDt(@SimpleSetter.Parameter(name = "theId") String theValue) {
 		setValue(theValue);
 	}
+	
+	/**
+	 * Constructor
+	 * 
+	 * @param theResourceType
+	 *            The resource type (e.g. "Patient")
+	 * @param theId
+	 *            The ID (e.g. "123")
+	 */
+	public IdDt(String theResourceType, String theId) {
+		this(theResourceType,theId,null);
+	}
 
 	/**
 	 * Constructor
@@ -122,13 +134,40 @@ public class IdDt extends BasePrimitive<String> {
 	}
 
 	/**
+	 * Returns true if this IdDt matches the given IdDt in terms of resource type and ID, but ignores the URL base
+	 */
+	@SuppressWarnings("deprecation")
+	public boolean equalsIgnoreBase(IdDt theId) {
+		if (theId == null) {
+			return false;
+		}
+		if (theId.isEmpty()) {
+			return isEmpty();
+		}
+		return ObjectUtils.equals(getResourceType(), theId.getResourceType()) && ObjectUtils.equals(getIdPart(), theId.getIdPart()) && ObjectUtils.equals(getVersionIdPart(), theId.getVersionIdPart());
+	}
+
+	/**
+	 * Returns a reference to <code>this</code> IdDt. It is generally not neccesary to use this method but it is
+	 * provided for consistency with the rest of the API.
+	 */
+	@Override
+	public IdDt getId() {
+		return this;
+	}
+
+	public String getIdPart() {
+		return myUnqualifiedId;
+	}
+
+	/**
 	 * Returns the unqualified portion of this ID as a big decimal, or <code>null</code> if the value is null
 	 * 
 	 * @throws NumberFormatException
 	 *             If the value is not a valid BigDecimal
 	 */
-	public BigDecimal asBigDecimal() {
-		String val = getUnqualifiedId();
+	public BigDecimal getIdPartAsBigDecimal() {
+		String val = getIdPart();
 		if (isBlank(val)) {
 			return null;
 		}
@@ -141,48 +180,23 @@ public class IdDt extends BasePrimitive<String> {
 	 * @throws NumberFormatException
 	 *             If the value is not a valid Long
 	 */
-	public Long asLong() {
-		String val = getUnqualifiedId();
+	public Long getIdPartAsLong() {
+		String val = getIdPart();
 		if (isBlank(val)) {
 			return null;
 		}
 		return Long.parseLong(val);
 	}
 
-	/**
-	 * Returns a reference to <code>this</code> IdDt. It is generally not neccesary to use this method but it is
-	 * provided for consistency with the rest of the API.
-	 */
-	@Override
-	public IdDt getId() {
-		return this;
-	}
-
 	public String getResourceType() {
 		return myResourceType;
 	}
 
-	public String getUnqualifiedId() {
-		return myUnqualifiedId;
-	}
-
-	public String getUnqualifiedVersionId() {
-		return myUnqualifiedVersionId;
-	}
-
-	public Long getUnqualifiedVersionIdAsLong() {
-		if (!hasUnqualifiedVersionId()) {
-			return null;
-		} else {
-			return Long.parseLong(getUnqualifiedVersionId());
-		}
-	}
-
 	/**
 	 * Returns the value of this ID. Note that this value may be a fully qualified URL, a relative/partial URL, or a
-	 * simple ID. Use {@link #getUnqualifiedId()} to get just the ID portion.
+	 * simple ID. Use {@link #getIdPart()} to get just the ID portion.
 	 * 
-	 * @see #getUnqualifiedId()
+	 * @see #getIdPart()
 	 */
 	@Override
 	public String getValue() {
@@ -194,20 +208,39 @@ public class IdDt extends BasePrimitive<String> {
 		return myValue;
 	}
 
-	public boolean hasUnqualifiedId() {
-		return isNotBlank(getUnqualifiedId());
+	public String getVersionIdPart() {
+		return myUnqualifiedVersionId;
 	}
 
-	public boolean hasUnqualifiedVersionId() {
-		return isNotBlank(getUnqualifiedVersionId());
+	public Long getVersionIdPartAsLong() {
+		if (!hasVersionIdPart()) {
+			return null;
+		} else {
+			return Long.parseLong(getVersionIdPart());
+		}
+	}
+
+	public boolean hasIdPart() {
+		return isNotBlank(getIdPart());
+	}
+
+	public boolean hasVersionIdPart() {
+		return isNotBlank(getVersionIdPart());
+	}
+
+	/**
+	 * Returns <code>true</code> if the ID is a local reference (in other words, it begins with the '#' character)
+	 */
+	public boolean isLocal() {
+		return myUnqualifiedId != null && myUnqualifiedId.isEmpty() == false && myUnqualifiedId.charAt(0) == '#';
 	}
 
 	/**
 	 * Returns <code>true</code> if the unqualified ID is a valid {@link Long} value (in other words, it consists only
 	 * of digits)
 	 */
-	public boolean isValidLong() {
-		String id = getUnqualifiedId();
+	public boolean isIdPartValidLong() {
+		String id = getIdPart();
 		if (StringUtils.isBlank(id)) {
 			return false;
 		}
@@ -291,6 +324,28 @@ public class IdDt extends BasePrimitive<String> {
 		setValue(theValue);
 	}
 
+	@Override
+	public String toString() {
+		return myValue;
+	}
+
+	public IdDt toUnqualified() {
+		return new IdDt(getResourceType(), getIdPart(), getVersionIdPart());
+	}
+
+	public IdDt toUnqualifiedVersionless() {
+		return new IdDt(getResourceType(), getIdPart());
+	}
+
+	public IdDt toVersionless() {
+		int i = myValue.indexOf(Constants.PARAM_HISTORY);
+		if (i > 1) {
+			return new IdDt(myValue.substring(0, i - 1));
+		} else {
+			return this;
+		}
+	}
+
 	/**
 	 * Returns a view of this ID as a fully qualified URL, given a server base and resource name (which will only be
 	 * used if the ID does not already contain those respective parts). Essentially, because IdDt can contain either a
@@ -303,7 +358,7 @@ public class IdDt extends BasePrimitive<String> {
 	 *            The resource name (e.g. "Patient")
 	 * @return A fully qualified URL for this ID (e.g. "http://example.com/fhir/Patient/1")
 	 */
-	public String toQualifiedUrl(String theServerBase, String theResourceType) {
+	public String withServerBase(String theServerBase, String theResourceType) {
 		if (getValue().startsWith("http")) {
 			return getValue();
 		}
@@ -318,47 +373,8 @@ public class IdDt extends BasePrimitive<String> {
 			retVal.append(theResourceType);
 		}
 		retVal.append('/');
-		retVal.append(getUnqualifiedId());
+		retVal.append(getIdPart());
 		return retVal.toString();
-	}
-
-	@Override
-	public String toString() {
-		return myValue;
-	}
-
-	public IdDt withoutVersion() {
-		int i = myValue.indexOf(Constants.PARAM_HISTORY);
-		if (i > 1) {
-			return new IdDt(myValue.substring(0, i - 1));
-		} else {
-			return this;
-		}
-	}
-
-	public IdDt unqualified() {
-		return new IdDt(getResourceType(), getUnqualifiedId(), getUnqualifiedVersionId());
-	}
-
-	/**
-	 * Returns true if this IdDt matches the given IdDt in terms of resource type and ID, but ignores the URL base
-	 */
-	@SuppressWarnings("deprecation")
-	public boolean equalsIgnoreBase(IdDt theId) {
-		if (theId == null) {
-			return false;
-		}
-		if (theId.isEmpty()) {
-			return isEmpty();
-		}
-		return ObjectUtils.equals(getResourceType(), theId.getResourceType()) && ObjectUtils.equals(getUnqualifiedId(), theId.getUnqualifiedId()) && ObjectUtils.equals(getUnqualifiedVersionId(), theId.getUnqualifiedVersionId());
-	}
-
-	/**
-	 * Returns <code>true</code> if the ID is a local reference (in other words, it begins with the '#' character)
-	 */
-	public boolean isLocal() {
-		return myUnqualifiedId != null && myUnqualifiedId.isEmpty() == false && myUnqualifiedId.charAt(0) == '#';
 	}
 
 	/**

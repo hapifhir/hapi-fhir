@@ -23,7 +23,7 @@ public class ${className}ResourceProvider extends JpaResourceProvider<${classNam
 	}
 
 	@Search()
-	public List<${className}> search(
+	public ca.uhn.fhir.rest.server.IBundleProvider search(
 			@Description(shortDefinition="The resource identity")
 			@OptionalParam(name="_id")
 			StringParam theId, 

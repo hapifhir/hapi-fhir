@@ -43,6 +43,7 @@ import ca.uhn.fhir.rest.method.SearchMethodBinding.RequestType;
 import ca.uhn.fhir.rest.param.IParameter;
 import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.Constants;
+import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -114,10 +115,10 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding implem
 	}
 
 	@Override
-	public List<IResource> invokeServer(Request theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException {
+	public IBundleProvider invokeServer(Request theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException {
 		theMethodParams[myIdIndex] = theRequest.getId();
 		if (myVersionIdIndex != null) {
-			theMethodParams[myVersionIdIndex] = new IdDt(theRequest.getVersionId().getUnqualifiedVersionId());
+			theMethodParams[myVersionIdIndex] = new IdDt(theRequest.getVersionId().getVersionIdPart());
 		}
 
 		Object response = invokeServerMethod(theMethodParams);
@@ -147,11 +148,11 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding implem
 	}
 
 	public static HttpGetClientInvocation createVReadInvocation(IdDt theId, IdDt vid, String resourceName) {
-		return new HttpGetClientInvocation(resourceName, theId.getUnqualifiedId(), Constants.URL_TOKEN_HISTORY, vid.getUnqualifiedId());
+		return new HttpGetClientInvocation(resourceName, theId.getIdPart(), Constants.URL_TOKEN_HISTORY, vid.getIdPart());
 	}
 
 	public static HttpGetClientInvocation createReadInvocation(IdDt theId, String resourceName) {
-		return new HttpGetClientInvocation(resourceName, theId.getUnqualifiedId());
+		return new HttpGetClientInvocation(resourceName, theId.getIdPart());
 	}
 
 	@Override

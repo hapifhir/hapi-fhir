@@ -20,6 +20,7 @@ import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Since;
 import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 
 public class JpaResourceProvider<T extends IResource> implements IResourceProvider {
@@ -49,13 +50,13 @@ public class JpaResourceProvider<T extends IResource> implements IResourceProvid
 	}
 
 	@History
-	public List<IResource> getHistoryForResourceType(@Since Date theDate, @Count Integer theCount) {
-		return myDao.history(theDate, theCount);
+	public IBundleProvider getHistoryForResourceType(@Since Date theDate) {
+		return myDao.history(theDate);
 	}
 
 	@History
-	public List<IResource> getHistoryForResourceInstance(@IdParam IdDt theId, @Since Date theDate, @Count Integer theCount) {
-		return myDao.history(theId.asLong(), theDate, theCount);
+	public IBundleProvider getHistoryForResourceInstance(@IdParam IdDt theId, @Since Date theDate) {
+		return myDao.history(theId.getIdPartAsLong(), theDate);
 	}
 
 	@Override
@@ -71,11 +72,6 @@ public class JpaResourceProvider<T extends IResource> implements IResourceProvid
 	@GetTags
 	public TagList getTagsForResourceInstance(@IdParam IdDt theResourceId) {
 		return myDao.getTags(theResourceId);
-	}
-
-	@History
-	public List<T> history(@IdParam IdDt theId) {
-		return myDao.history(theId);
 	}
 
 	@Read()

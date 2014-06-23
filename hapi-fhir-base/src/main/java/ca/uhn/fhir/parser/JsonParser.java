@@ -284,8 +284,8 @@ public class JsonParser extends BaseParser implements IParser {
 
 			String reference = value.getValue();
 			if (StringUtils.isBlank(reference)) {
-				if (value.getResourceType() != null && StringUtils.isNotBlank(value.getUnqualifiedId())) {
-					reference = myContext.getResourceDefinition(value.getResourceType()).getName() + '/' + value.getUnqualifiedId();
+				if (value.getResourceType() != null && StringUtils.isNotBlank(value.getIdPart())) {
+					reference = myContext.getResourceDefinition(value.getResourceType()).getName() + '/' + value.getIdPart();
 				}
 			}
 

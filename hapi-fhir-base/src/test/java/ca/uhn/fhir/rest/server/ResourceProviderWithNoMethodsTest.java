@@ -80,7 +80,7 @@ public class ResourceProviderWithNoMethodsTest {
 		public Binary read(@IdParam IdDt theId) {
 			Binary retVal = new Binary();
 			retVal.setContent(new byte[] { 1, 2, 3, 4 });
-			retVal.setContentType(theId.getUnqualifiedId());
+			retVal.setContentType(theId.getIdPart());
 			return retVal;
 		}
 
@@ -97,7 +97,7 @@ public class ResourceProviderWithNoMethodsTest {
 		protected Binary read(@IdParam IdDt theId) {
 			Binary retVal = new Binary();
 			retVal.setContent(new byte[] { 1, 2, 3, 4 });
-			retVal.setContentType(theId.getUnqualifiedId());
+			retVal.setContentType(theId.getIdPart());
 			return retVal;
 		}
 

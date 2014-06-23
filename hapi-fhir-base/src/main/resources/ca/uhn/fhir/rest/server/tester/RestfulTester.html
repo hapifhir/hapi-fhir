@@ -944,7 +944,7 @@
 										</script>
 										
 										<th:block th:if="${bundle} != null and ${!bundle.linkNext.empty}">
-											<button	class="btn btn-success btn-sm" type="button" id="page-next-btn"	name="action" value="page">
+											<button	class="btn btn-success btn-sm" type="submit" id="page-next-btn"	name="action" value="page">
 												<span class="glyphicon glyphicon-step-forward"></span>
 												Next Page
 											</button>
@@ -952,7 +952,7 @@
 												$('#page-next-btn').click(function() {
 													var btn = $(this);
 													btn.button('loading');
-													btn.append($('<input />', { type: 'hidden', name: 'pageUrl', value: '<th:block th:text=""/>' }));
+													btn.append($('<input />', { type: 'hidden', name: 'pageUrl', value: '<th:block th:text="${bundle.linkNext}"/>' }));
 												});
 											</script>
 										</th:block>

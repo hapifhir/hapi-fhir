@@ -675,8 +675,8 @@ public class JsonParserTest {
 		BundleEntry entry = bundle.getEntries().get(0);
 		assertEquals("2012-05-29T23:45:32+00:00", entry.getDeletedAt().getValueAsString());
 		assertEquals("http://fhir.furore.com/fhir/Patient/1/_history/2", entry.getLinkSelf().getValue());
-		assertEquals("1", entry.getResource().getId().getUnqualifiedId());
-		assertEquals("2", entry.getResource().getId().getUnqualifiedVersionId());
+		assertEquals("1", entry.getResource().getId().getIdPart());
+		assertEquals("2", entry.getResource().getId().getVersionIdPart());
 		assertEquals(new InstantDt("2012-05-29T23:45:32+00:00"), entry.getResource().getResourceMetadata().get(ResourceMetadataKeyEnum.DELETED_AT));
 		
 		// Now encode
@@ -688,9 +688,13 @@ public class JsonParserTest {
 	}
 	
 	@Test
-	public void testEncodeBundle() {
+	public void testEncodeBundle() throws InterruptedException {
 		Bundle b= new Bundle();
 		
+		InstantDt pub = InstantDt.withCurrentTime();
+		b.setPublished(pub);
+		Thread.sleep(2);
+
 		Patient p1 = new Patient();
 		p1.addName().addFamily("Family1");
 		BundleEntry entry = b.addEntry();
@@ -713,6 +717,7 @@ public class JsonParserTest {
 		ourLog.info(bundleString);
 
 		List<String> strings = new ArrayList<String>();
+		strings.addAll(Arrays.asList("\"published\":\""+pub.getValueAsString()+"\""));
 		strings.addAll(Arrays.asList("\"id\":\"1\""));
 		strings.addAll(Arrays.asList("\"id\":\"2\"", "\"rel\":\"alternate\"", "\"href\":\"http://foo/bar\""));
 		strings.addAll(Arrays.asList("\"deleted\":\""+nowDt.getValueAsString()+"\"", "\"id\":\"Patient/3\""));

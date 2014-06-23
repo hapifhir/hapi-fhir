@@ -1516,7 +1516,7 @@ public class ResfulServerMethodTest {
 
 		@Read()
 		public Patient getResourceById(@IdParam IdDt theId, @VersionIdParam IdDt theVersionId) {
-			Patient retVal = getIdToPatient().get(theId.getUnqualifiedId());
+			Patient retVal = getIdToPatient().get(theId.getIdPart());
 			List<HumanNameDt> name = retVal.getName();
 			HumanNameDt nameDt = name.get(0);
 			String value = theVersionId.getValue();

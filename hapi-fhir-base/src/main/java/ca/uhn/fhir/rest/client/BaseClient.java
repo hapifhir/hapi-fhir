@@ -38,6 +38,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -118,6 +119,13 @@ public abstract class BaseClient {
 
 			if (theLogRequestAndResponse) {
 				ourLog.info("Client invoking: {}", httpRequest);
+				if (httpRequest instanceof HttpEntityEnclosingRequest) {
+					HttpEntity entity = ((HttpEntityEnclosingRequest) httpRequest).getEntity();
+					if (entity.isRepeatable()) {
+						String content = IOUtils.toString(entity.getContent());
+						ourLog.info("Client request body: {}", content);
+					}
+				}
 			}
 
 			response = myClient.execute(httpRequest);

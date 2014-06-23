@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+
 /*
  * #%L
  * HAPI FHIR Library
@@ -22,4 +23,18 @@ package ca.uhn.fhir.rest.server;
 
 public interface IPagingProvider {
 
+	int getDefaultPageSize();
+		
+	int getMaximumPageSize();
+	
+	/**
+	 * Stores a result list and returns an ID with which that list can be returned
+	 */
+	public String storeResultList(IBundleProvider theList);
+	
+	/**
+	 * Retrieve a result list by ID
+	 */
+	public IBundleProvider retrieveResultList(String theId);
+	
 }

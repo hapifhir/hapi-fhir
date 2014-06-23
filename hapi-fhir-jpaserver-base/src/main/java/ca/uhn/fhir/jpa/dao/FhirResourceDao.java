@@ -1,8 +1,9 @@
 package ca.uhn.fhir.jpa.dao;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -15,6 +16,8 @@ import java.util.Set;
 import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.TemporalType;
+import javax.persistence.Tuple;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -48,6 +51,7 @@ import ca.uhn.fhir.model.api.IPrimitiveDatatype;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.Include;
+import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.dstu.composite.CodingDt;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
@@ -55,6 +59,7 @@ import ca.uhn.fhir.model.dstu.composite.QuantityDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.valueset.SearchParamTypeEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.param.DateRangeParam;
@@ -62,6 +67,8 @@ import ca.uhn.fhir.rest.param.QualifiedDateParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.Constants;
+import ca.uhn.fhir.rest.server.IBundleProvider;
+import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.FhirTerser;
@@ -114,9 +121,9 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 		Predicate name = builder.equal(from.get("myParamName"), theParamName);
 		if (thePids.size() > 0) {
 			Predicate inPids = (from.get("myResourcePid").in(thePids));
-			cq.where(builder.and(type, name, masterCodePredicate,inPids));
+			cq.where(builder.and(type, name, masterCodePredicate, inPids));
 		} else {
-			cq.where(builder.and(type, name,masterCodePredicate));
+			cq.where(builder.and(type, name, masterCodePredicate));
 		}
 
 		TypedQuery<Long> q = myEntityManager.createQuery(cq);
@@ -271,16 +278,16 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 				String resourceId = ref.getValueAsQueryToken();
 				if (resourceId.contains("/")) {
 					IdDt dt = new IdDt(resourceId);
-					resourceId = dt.getUnqualifiedId();
+					resourceId = dt.getIdPart();
 				}
 
 				if (isBlank(ref.getChain())) {
 					Long targetPid = Long.valueOf(resourceId);
 					ourLog.info("Searching for resource link with target PID: {}", targetPid);
 					Predicate eq = builder.equal(from.get("myTargetResourcePid"), targetPid);
-					
+
 					codePredicates.add(eq);
-					
+
 				} else {
 					String chain = getContext().getResourceDefinition(myResourceType).getSearchParam(theParamName).getPath();
 					BaseRuntimeChildDefinition def = getContext().newTerser().getDefinition(myResourceType, chain);
@@ -425,7 +432,7 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 			}
 			if (StringUtils.isNotBlank(code)) {
 				singleCodePredicates.add(builder.equal(from.get("myValue"), code));
-			}else {
+			} else {
 				singleCodePredicates.add(builder.isNull(from.get("myValue")));
 			}
 			Predicate singleCode = builder.and(singleCodePredicates.toArray(new Predicate[0]));
@@ -438,7 +445,7 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 		Predicate name = builder.equal(from.get("myParamName"), theParamName);
 		if (thePids.size() > 0) {
 			Predicate inPids = (from.get("myResourcePid").in(thePids));
-			cq.where(builder.and(type, name, masterCodePredicate,inPids));
+			cq.where(builder.and(type, name, masterCodePredicate, inPids));
 		} else {
 			cq.where(builder.and(type, name, masterCodePredicate));
 		}
@@ -493,48 +500,99 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 	}
 
 	@Override
-	public List<T> history() {
-		return null;
+	public IBundleProvider history(Date theSince) {
+		return super.history(myResourceName, null, theSince);
 	}
 
 	@Override
-	public List<IResource> history(Date theSince, Integer theLimit) {
-		return super.history(myResourceName, null, theSince, theLimit);
-	}
+	public IBundleProvider history(final IdDt theId, final Date theSince) {
+		final InstantDt end = createHistoryToTimestamp();
+		final String resourceType = getContext().getResourceDefinition(myResourceType).getName();
 
-	@Override
-	public List<T> history(IdDt theId) {
-		ArrayList<T> retVal = new ArrayList<T>();
-
-		String resourceType = getContext().getResourceDefinition(myResourceType).getName();
-		TypedQuery<ResourceHistoryTable> q = myEntityManager.createQuery("SELECT h FROM ResourceHistoryTable h WHERE h.myResourceId = :PID AND h.myResourceType = :RESTYPE ORDER BY h.myUpdated ASC",
-				ResourceHistoryTable.class);
-		q.setParameter("PID", theId.asLong());
-		q.setParameter("RESTYPE", resourceType);
-
-		// TypedQuery<ResourceHistoryTable> query =
-		// myEntityManager.createQuery(criteriaQuery);
-		List<ResourceHistoryTable> results = q.getResultList();
-		for (ResourceHistoryTable next : results) {
-			retVal.add(toResource(myResourceType, next));
-		}
-
+		T currentTmp;
 		try {
-			retVal.add(read(theId.withoutVersion()));
+			currentTmp = read(theId.toVersionless());
+			if (ResourceMetadataKeyEnum.UPDATED.get(currentTmp).after(end.getValue())) {
+				currentTmp = null;
+			}
 		} catch (ResourceNotFoundException e) {
-			// ignore
+			currentTmp = null;
 		}
 
-		if (retVal.isEmpty()) {
+		final T current = currentTmp;
+
+		String querySring = "SELECT count(h) FROM ResourceHistoryTable h " + "WHERE h.myResourceId = :PID AND h.myResourceType = :RESTYPE" + " AND h.myUpdated < :END" + (theSince != null ? " AND h.myUpdated >= :SINCE" : "");
+		TypedQuery<Long> countQuery = myEntityManager.createQuery(querySring, Long.class);
+		countQuery.setParameter("PID", theId.getIdPartAsLong());
+		countQuery.setParameter("RESTYPE", resourceType);
+		countQuery.setParameter("END", end.getValue(), TemporalType.TIMESTAMP);
+		if (theSince != null) {
+			countQuery.setParameter("SINCE", theSince, TemporalType.TIMESTAMP);
+		}
+		int historyCount = countQuery.getSingleResult().intValue();
+
+		final int offset;
+		final int count;
+		if (current != null) {
+			count = historyCount + 1;
+			offset = 1;
+		} else {
+			offset = 0;
+			count = historyCount;
+		}
+
+		if (count == 0) {
 			throw new ResourceNotFoundException(theId);
 		}
 
-		return retVal;
+		return new IBundleProvider() {
+
+			@Override
+			public int size() {
+				return count;
+			}
+
+			@Override
+			public List<IResource> getResources(int theFromIndex, int theToIndex) {
+				ArrayList<IResource> retVal = new ArrayList<IResource>();
+				if (theFromIndex == 0 && current != null) {
+					retVal.add(current);
+				}
+
+				TypedQuery<ResourceHistoryTable> q = myEntityManager.createQuery("SELECT h FROM ResourceHistoryTable h WHERE h.myResourceId = :PID AND h.myResourceType = :RESTYPE AND h.myUpdated < :END " + (theSince != null ? " AND h.myUpdated >= :SINCE" : "")
+						+ " ORDER BY h.myUpdated ASC", ResourceHistoryTable.class);
+				q.setParameter("PID", theId.getIdPartAsLong());
+				q.setParameter("RESTYPE", resourceType);
+				q.setParameter("END", end.getValue(), TemporalType.TIMESTAMP);
+				if (theSince != null) {
+					q.setParameter("SINCE", theSince, TemporalType.TIMESTAMP);
+				}
+
+				q.setFirstResult(Math.max(0, theFromIndex - offset));
+				q.setMaxResults(theToIndex - theFromIndex);
+
+				List<ResourceHistoryTable> results = q.getResultList();
+				for (ResourceHistoryTable next : results) {
+					if (retVal.size() == (theToIndex - theFromIndex)) {
+						break;
+					}
+					retVal.add(toResource(myResourceType, next));
+				}
+
+				return retVal;
+			}
+
+			@Override
+			public InstantDt getPublished() {
+				return end;
+			}
+		};
+
 	}
 
 	@Override
-	public List<IResource> history(Long theId, Date theSince, Integer theLimit) {
-		return super.history(myResourceName, theId, theSince, theLimit);
+	public IBundleProvider history(Long theId, Date theSince) {
+		return super.history(myResourceName, theId, theSince);
 	}
 
 	@PostConstruct
@@ -548,8 +606,7 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 				throw new ConfigurationException("Unknown search param on resource[" + myResourceName + "] for secondary key[" + mySecondaryPrimaryKeyParamName + "]");
 			}
 			if (sp.getParamType() != SearchParamTypeEnum.TOKEN) {
-				throw new ConfigurationException("Search param on resource[" + myResourceName + "] for secondary key[" + mySecondaryPrimaryKeyParamName
-						+ "] is not a token type, only token is supported");
+				throw new ConfigurationException("Search param on resource[" + myResourceName + "] for secondary key[" + mySecondaryPrimaryKeyParamName + "] is not a token type, only token is supported");
 			}
 		}
 
@@ -565,20 +622,19 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 
 	@Override
 	public BaseHasResource readEntity(IdDt theId) {
-		BaseHasResource entity = myEntityManager.find(ResourceTable.class, theId.asLong());
-		if (theId.hasUnqualifiedVersionId()) {
-			if (entity.getVersion() != theId.getUnqualifiedVersionIdAsLong()) {
+		BaseHasResource entity = myEntityManager.find(ResourceTable.class, theId.getIdPartAsLong());
+		if (theId.hasVersionIdPart()) {
+			if (entity.getVersion() != theId.getVersionIdPartAsLong()) {
 				entity = null;
 			}
 		}
 
 		if (entity == null) {
-			if (theId.hasUnqualifiedVersionId()) {
-				TypedQuery<ResourceHistoryTable> q = myEntityManager.createQuery(
-						"SELECT t from ResourceHistoryTable t WHERE t.myResourceId = :RID AND t.myResourceType = :RTYP AND t.myResourceVersion = :RVER", ResourceHistoryTable.class);
-				q.setParameter("RID", theId.asLong());
+			if (theId.hasVersionIdPart()) {
+				TypedQuery<ResourceHistoryTable> q = myEntityManager.createQuery("SELECT t from ResourceHistoryTable t WHERE t.myResourceId = :RID AND t.myResourceType = :RTYP AND t.myResourceVersion = :RVER", ResourceHistoryTable.class);
+				q.setParameter("RID", theId.getIdPartAsLong());
 				q.setParameter("RTYP", myResourceName);
-				q.setParameter("RVER", theId.getUnqualifiedVersionIdAsLong());
+				q.setParameter("RVER", theId.getVersionIdPartAsLong());
 				entity = q.getSingleResult();
 			}
 			if (entity == null) {
@@ -589,7 +645,7 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 	}
 
 	private ResourceTable readEntityLatestVersion(IdDt theId) {
-		ResourceTable entity = myEntityManager.find(ResourceTable.class, theId.asLong());
+		ResourceTable entity = myEntityManager.find(ResourceTable.class, theId.getIdPartAsLong());
 		if (entity == null) {
 			throw new ResourceNotFoundException(theId);
 		}
@@ -614,7 +670,7 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 	}
 
 	@Override
-	public List<T> search(Map<String, IQueryParameterType> theParams) {
+	public IBundleProvider search(Map<String, IQueryParameterType> theParams) {
 		SearchParameterMap map = new SearchParameterMap();
 		for (Entry<String, IQueryParameterType> nextEntry : theParams.entrySet()) {
 			map.put(nextEntry.getKey(), new ArrayList<List<IQueryParameterType>>());
@@ -624,64 +680,99 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 	}
 
 	@Override
-	public List<T> search(SearchParameterMap theParams) {
+	public IBundleProvider search(final SearchParameterMap theParams) {
+		final InstantDt now = InstantDt.withCurrentTime();
 
 		Set<Long> loadPids;
 		if (theParams.isEmpty()) {
-			loadPids = null;
+			loadPids = new HashSet<Long>();
+			CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
+			CriteriaQuery<Tuple> cq = builder.createTupleQuery();
+			Root<ResourceTable> from = cq.from(ResourceTable.class);
+			cq.multiselect(from.get("myId").as(Long.class));
+			cq.where(builder.equal(from.get("myResourceType"), myResourceName));
+
+			TypedQuery<Tuple> query = myEntityManager.createQuery(cq);
+			for (Tuple next : query.getResultList()) {
+				loadPids.add(next.get(0, Long.class));
+			}
 		} else {
 			loadPids = searchForIdsWithAndOr(theParams);
 			if (loadPids.isEmpty()) {
-				return new ArrayList<T>();
+				return new SimpleBundleProvider();
 			}
 		}
 
-		// Execute the query and make sure we return distinct results
-		List<T> retVal = new ArrayList<T>();
-		loadResourcesByPid(loadPids, retVal);
+		final ArrayList<Long> pids = new ArrayList<Long>(loadPids);
 
-		// Load _include resources
-		if (theParams.getIncludes() != null && theParams.isEmpty() == false) {
-			Set<Long> includePids = new HashSet<Long>();
-			FhirTerser t = getContext().newTerser();
-			for (Include next : theParams.getIncludes()) {
-				for (T nextResource : retVal) {
-					List<Object> values = t.getValues(nextResource, next.getValue());
-					for (Object object : values) {
-						if (object == null) {
-							continue;
+		return new IBundleProvider() {
+
+			@Override
+			public int size() {
+				return pids.size();
+			}
+
+			@Override
+			public List<IResource> getResources(int theFromIndex, int theToIndex) {
+				List<Long> pidsSubList = pids.subList(theFromIndex, theToIndex);
+
+				// Execute the query and make sure we return distinct results
+				List<IResource> retVal = new ArrayList<IResource>();
+				loadResourcesByPid(pidsSubList, retVal);
+
+				// Load _include resources
+				if (theParams.getIncludes() != null && theParams.getIncludes().isEmpty() == false) {
+					Set<IdDt> includePids = new HashSet<IdDt>();
+					FhirTerser t = getContext().newTerser();
+					for (Include next : theParams.getIncludes()) {
+						for (IResource nextResource : retVal) {
+							assert myResourceType.isAssignableFrom(nextResource.getClass());
+							
+							List<Object> values = t.getValues(nextResource, next.getValue());
+							for (Object object : values) {
+								if (object == null) {
+									continue;
+								}
+								if (!(object instanceof ResourceReferenceDt)) {
+									throw new InvalidRequestException("Path '" + next.getValue() + "' produced non ResourceReferenceDt value: " + object.getClass());
+								}
+								ResourceReferenceDt rr = (ResourceReferenceDt) object;
+								if (rr.getReference().isEmpty()) {
+									continue;
+								}
+								if (rr.getReference().isLocal()) {
+									continue;
+								}
+								includePids.add(rr.getReference().toUnqualified());
+							}
 						}
-						if (!(object instanceof ResourceReferenceDt)) {
-							throw new InvalidRequestException("Path '" + next.getValue() + "' produced non ResourceReferenceDt value: " + object.getClass());
-						}
-						ResourceReferenceDt rr = (ResourceReferenceDt) object;
-						if (rr.getReference().isEmpty()) {
-							continue;
-						}
-						if (rr.getReference().isLocal()) {
-							continue;
-						}
-						includePids.add(rr.getReference().asLong());
+					}
+
+					if (!includePids.isEmpty()) {
+						ourLog.info("Loading {} included resources", includePids.size());
+						loadResourcesById(includePids, retVal);
 					}
 				}
+
+				return retVal;
 			}
 
-			if (!includePids.isEmpty()) {
-				ourLog.info("Loading {} included resources");
-				loadResourcesByPid(includePids, retVal);
+			@Override
+			public InstantDt getPublished() {
+				return now;
 			}
-		}
-
-		return retVal;
+		};
 	}
 
-	private void loadResourcesByPid(Set<Long> thePids, List<T> theResourceListToPopulate) {
+
+	
+	private void loadResourcesByPid(Collection<Long> theIncludePids, List<IResource> theResourceListToPopulate) {
 		CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
 		CriteriaQuery<ResourceTable> cq = builder.createQuery(ResourceTable.class);
 		Root<ResourceTable> from = cq.from(ResourceTable.class);
 		cq.where(builder.equal(from.get("myResourceType"), getContext().getResourceDefinition(myResourceType).getName()));
-		if (thePids != null) {
-			cq.where(from.get("myId").in(thePids));
+		if (theIncludePids != null) {
+			cq.where(from.get("myId").in(theIncludePids));
 		}
 		TypedQuery<ResourceTable> q = myEntityManager.createQuery(cq);
 
@@ -692,7 +783,7 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 	}
 
 	@Override
-	public List<T> search(String theParameterName, IQueryParameterType theValue) {
+	public IBundleProvider search(String theParameterName, IQueryParameterType theValue) {
 		return search(Collections.singletonMap(theParameterName, theValue));
 	}
 
@@ -807,7 +898,8 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 	}
 
 	/**
-	 * If set, the given param will be treated as a secondary primary key, and multiple resources will not be able to share the same value.
+	 * If set, the given param will be treated as a secondary primary key, and multiple resources will not be able to
+	 * share the same value.
 	 */
 	public void setSecondaryPrimaryKeyParamName(String theSecondaryPrimaryKeyParamName) {
 		mySecondaryPrimaryKeyParamName = theSecondaryPrimaryKeyParamName;

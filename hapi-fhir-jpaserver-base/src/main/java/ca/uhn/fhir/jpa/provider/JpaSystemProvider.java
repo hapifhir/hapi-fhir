@@ -8,12 +8,12 @@ import org.springframework.beans.factory.annotation.Required;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.TagList;
-import ca.uhn.fhir.rest.annotation.Count;
 import ca.uhn.fhir.rest.annotation.GetTags;
 import ca.uhn.fhir.rest.annotation.History;
 import ca.uhn.fhir.rest.annotation.Since;
 import ca.uhn.fhir.rest.annotation.Transaction;
 import ca.uhn.fhir.rest.annotation.TransactionParam;
+import ca.uhn.fhir.rest.server.IBundleProvider;
 
 public class JpaSystemProvider {
 
@@ -39,8 +39,8 @@ public class JpaSystemProvider {
 	}
 
 	@History
-	public List<IResource> historyServer(@Since Date theDate, @Count Integer theCount) {
-		return myDao.history(theDate, theCount);
+	public IBundleProvider historyServer(@Since Date theDate) {
+		return myDao.history(theDate);
 	}
 	
 	@GetTags

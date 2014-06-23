@@ -54,7 +54,7 @@ public class IncludeTest {
 
 		Patient p = bundle.getResources(Patient.class).get(0);
 		assertEquals(0, p.getName().size());
-		assertEquals("Hello", p.getId().getUnqualifiedId());
+		assertEquals("Hello", p.getId().getIdPart());
 	}
 
 	@Test
@@ -68,7 +68,7 @@ public class IncludeTest {
 
 		Patient p = bundle.getResources(Patient.class).get(0);
 		assertEquals(1, p.getName().size());
-		assertEquals("Hello", p.getId().getUnqualifiedId());
+		assertEquals("Hello", p.getId().getIdPart());
 		assertEquals("foo", p.getName().get(0).getFamilyFirstRep().getValue());
 	}
 
@@ -83,7 +83,7 @@ public class IncludeTest {
 
 		Patient p = bundle.getResources(Patient.class).get(0);
 		assertEquals(2, p.getName().size());
-		assertEquals("Hello", p.getId().getUnqualifiedId());
+		assertEquals("Hello", p.getId().getIdPart());
 		assertEquals("foo", p.getName().get(0).getFamilyFirstRep().getValue());
 		assertEquals("bar", p.getName().get(1).getFamilyFirstRep().getValue());
 	}
