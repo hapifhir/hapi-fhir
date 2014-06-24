@@ -39,6 +39,9 @@
 		<link href="css/select2.css" rel="stylesheet"/>
     	<script src="js/select2.min.js"></script>
     
+    	<!-- Fontawesome -->
+		<link href="fa/css/font-awesome.min.css" rel="stylesheet" />
+		    
 	</head>
 
 <body>
@@ -956,6 +959,44 @@
 												});
 											</script>
 										</th:block>
+										
+										<div th:if="${bundle} != null" class="panel-group" id="accordion">
+											<div class="panel panel-default">
+												<div class="panel-heading">
+													<h4 class="panel-title">
+														<a data-toggle="collapse" data-parent="#accordion" href="#collapseOne">
+															<i id="collapseOneIcon" class="fa fa-minus-square-o"></i>
+															<span th:text="'Bundle contains ' + ${bundle.entries.size} + ' entries'"/>
+														</a>
+													</h4>
+												</div>
+												<div id="collapseOne" class="panel-collapse collapse in">
+													<div class="panel-body">
+														<table class="table table-condensed">
+															<tr th:each="entry : ${bundle.entries}">
+																<td>
+																	<button class="btn btn-primary btn-xs">Read</button>
+																	<button class="btn btn-primary btn-xs">Update</button>
+																</td>
+																<td th:text="${entry.title}">
+																</td>
+															</tr>
+														</table>										
+													</div>
+												</div>
+												<script type="text/javascript">
+													$('#collapseOne').on('hidden.bs.collapse', function () {
+													   $("#collapseOneIcon").removeClass("fa-minus-square-o").addClass("fa-plus-square-o");
+													});
+	
+													$('#collapseOne').on('shown.bs.collapse', function () {
+													   $("#collapseOneIcon").removeClass("fa-plus-square-o").addClass("fa-minus-square-o");
+													});
+												</script>
+											</div>
+										</div>										
+										
+										
 									</td>
 								</tr>
 								<tr th:if="${!#strings.isEmpty(resultBody)}">
