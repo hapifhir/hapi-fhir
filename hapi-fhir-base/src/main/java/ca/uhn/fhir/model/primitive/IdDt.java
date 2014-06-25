@@ -400,4 +400,12 @@ public class IdDt extends BasePrimitive<String> {
 		return new IdDt(value + '/' + Constants.PARAM_HISTORY + '/' + theVersion);
 	}
 
+	/**
+	 * @deprecated Use {@link #getIdPartAsBigDecimal()} instead
+	 */
+	public BigDecimal asBigDecimal() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }
