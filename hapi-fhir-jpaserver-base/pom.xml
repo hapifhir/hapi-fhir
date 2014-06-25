@@ -167,6 +167,8 @@
 		<mockito_version>1.9.5</mockito_version>
 		<slf4j_version>1.7.2</slf4j_version>
 		<spring_version>4.0.1.RELEASE</spring_version>
+		
+		<skip-hib4>false</skip-hib4>
 	</properties>
 
 	<build>
@@ -190,7 +192,7 @@
 				<configuration>
 					<force>true</force>
 					<target>SCRIPT</target>
-					<skip>false</skip>
+					<skip>${skip-hib4}</skip>
 				</configuration>
 				<dependencies>
 					<dependency>
@@ -255,5 +257,14 @@
 			</plugin>
 		</plugins>
 	</build>
+
+	<profiles>
+		<profile>
+			<id>JENKINS</id>
+			<properties>
+				<skip-hib4>true</skip-hib4>
+			</properties>
+		</profile>
+	</profiles>
 
 </project>
