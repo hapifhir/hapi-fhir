@@ -711,7 +711,7 @@
 								                    <div class="input-group-addon">
 								                    ID
 								                    </div>
-								                    <input type="text" class="form-control" id="resource-create-id" placeholder="(add for update)" />
+								                    <input type="text" class="form-control" id="resource-create-id" placeholder="(add for update)" th:value="${#strings.defaultString(updateResourceId,'')}"/>
 								                </div>
 								            </div>
 								        </div>											
@@ -722,7 +722,9 @@
 								                    Contents
 								                    <span class="loadingStar">*</span>
 								                    </div>
-								                    <textarea class="form-control" id="resource-create-body" style="white-space: nowrap; overflow: auto;" placeholder="(place resource body here)" rows="1"></textarea>
+								                    <textarea class="form-control" id="resource-create-body" style="white-space: nowrap; overflow: auto;" placeholder="(place resource body here)" rows="1">
+								                    	<th:block th:if="${updateResource} != null" th:text="${updateResource}"/>
+								                    </textarea>
 								                </div>
 								            </div>
 								        </div>											
@@ -741,13 +743,13 @@
 								        			//$('#resource-create-btn').text("Create");
 								        		}
 								        	};
+							        		var textAreaChanger = function() {
+							        			createBodyOriginalHeight = $('#resource-create-body').height();
+							        			$('#resource-create-body').animate({height: "200px"}, 500);
+							        		}								        	
 								        	$('#resource-create-id').change(buttonChanger);
 								        	$('#resource-create-id').keyup(buttonChanger);
-								        	$('#resource-create-body').focus(
-								        		function() {
-								        			createBodyOriginalHeight = $('#resource-create-body').height();
-								        			$('#resource-create-body').animate({height: "200px"}, 500);
-								        		});
+								        	$('#resource-create-body').focus(textAreaChanger);
 								        	/*$('#resource-create-body').blur(
 								        		function() {
 								        			$('#resource-create-body').animate({height: "34px"}, 500);
@@ -760,7 +762,14 @@
 													if (id != null) btn.append($('<input />', { type: 'hidden', name: 'resource-create-id', value: id }));
 													var body = $('#resource-create-body').val();
 													btn.append($('<input />', { type: 'hidden', name: 'resource-create-body', value: body }));
-												});								            
+												});		
+											$( document ).ready(function() {
+												if ($('#resource-create-id').val() != "") {
+													buttonChanger();
+													textAreaChanger();
+													$('#resource-create-body').focus();
+												}
+											});
 								        </script>								        
 								    </div>
 									<br clear="all"/>
@@ -931,36 +940,14 @@
 										Result Body
 										<small th:text="${resultDescription}" style="font-weight: normal;"/>
 									</td>
-									<td>
-										<button th:if="${resultBodyIsLong}" class="btn btn-info btn-sm" type="button" id="format-result-btn">
-											<span class="glyphicon glyphicon-eye-open"></span>
-											Colour
-										</button>
-										<script type="text/javascript" th:if="${resultBodyIsLong}">
-											$('#format-result-btn').click(function() {
-												//$('#resultBodyActualPre').setClass('<th:block th:text="${resultSyntaxHighlighterClass}"/>');
-												document.getElementById('resultBodyActualPre').className='<th:block th:text="${resultSyntaxHighlighterClass}"/>';
-												document.getElementById('format-result-btn').disabled ='disabled';
-												SyntaxHighlighter.highlight();
-												lineWrap();
-											});
-										</script>
-										
-										<th:block th:if="${bundle} != null and ${!bundle.linkNext.empty}">
-											<button	class="btn btn-success btn-sm" type="submit" id="page-next-btn"	name="action" value="page">
-												<span class="glyphicon glyphicon-step-forward"></span>
-												Next Page
-											</button>
-											<script type="text/javascript" th:if="${resultBodyIsLong}">
-												$('#page-next-btn').click(function() {
-													var btn = $(this);
-													btn.button('loading');
-													btn.append($('<input />', { type: 'hidden', name: 'pageUrl', value: '<th:block th:text="${bundle.linkNext}"/>' }));
-												});
-											</script>
-										</th:block>
-										
-										<div th:if="${bundle} != null" class="panel-group" id="accordion">
+									<td style="border-width: 0px; padding: 0px;">
+														
+										<!-- 
+										If the response is a bundle, this block will contain a collapsible
+										table with a summary of each entry as well as paging buttons and
+										controls for viewing/editing/etc results
+										-->															
+										<div th:if="${bundle} != null" class="panel-group" id="accordion" style="margin-bottom: 0px;">
 											<div class="panel panel-default">
 												<div class="panel-heading">
 													<h4 class="panel-title">
@@ -968,20 +955,74 @@
 															<i id="collapseOneIcon" class="fa fa-minus-square-o"></i>
 															<span th:text="'Bundle contains ' + ${bundle.entries.size} + ' entries'"/>
 														</a>
+
+														<!-- Prev/Next Page Buttons -->
+														<button	class="btn btn-success btn-sm" type="submit" id="page-prev-btn"	name="action" value="page" style="margin-left: 15px;">
+															<span class="glyphicon glyphicon-step-backward"></span>
+															Prev Page
+														</button>
+														<script type="text/javascript">
+															if (<th:block th:text="${bundle.linkPrevious.empty}"/>) {
+																$('#page-prev-btn').prop('disabled', true);
+															}
+															$('#page-prev-btn').click(function() {
+																var btn = $(this);
+																btn.button('loading');
+																btn.append($('<input />', { type: 'hidden', name: 'pageUrl', value: '<th:block th:text="${bundle.linkPrevious}"/>' }));
+															});
+														</script>
+
+														<button	class="btn btn-success btn-sm" type="submit" id="page-next-btn"	name="action" value="page">
+															<span class="glyphicon glyphicon-step-forward"></span>
+															Next Page
+														</button>
+														<script type="text/javascript">
+															if (<th:block th:text="${bundle.linkNext.empty}"/>) {
+																$('#page-next-btn').prop('disabled', true);
+															}
+															$('#page-next-btn').click(function() {
+																var btn = $(this);
+																btn.button('loading');
+																btn.append($('<input />', { type: 'hidden', name: 'pageUrl', value: '<th:block th:text="${bundle.linkNext}"/>' }));
+															});
+														</script>
+														
 													</h4>
 												</div>
 												<div id="collapseOne" class="panel-collapse collapse in">
-													<div class="panel-body">
-														<table class="table table-condensed">
+													<div class="panel-body" style="padding-bottom: 0px;">
+														<table class="table table-condensed" style="padding-bottom: 0px; margin-bottom: 0px;">
 															<tr th:each="entry : ${bundle.entries}">
 																<td>
-																	<button class="btn btn-primary btn-xs">Read</button>
-																	<button class="btn btn-primary btn-xs">Update</button>
+																	<button class="btn btn-primary btn-xs" th:onclick="'readFromEntriesTable(this, \'' + ${entry.resource.id.resourceType} + '\', \'' + ${entry.resource.id.idPart} + '\', \'' + ${entry.resource.id.versionIdPart} + '\');'" type="submit" name="action" value="read">Read</button>
+																	<button class="btn btn-primary btn-xs" th:onclick="'updateFromEntriesTable(this, \'' + ${entry.resource.id.resourceType} + '\', \'' + ${entry.resource.id.idPart} + '\', \'' + ${entry.resource.id.versionIdPart} + '\');'" type="submit" name="action" value="home">Update</button>
 																</td>
 																<td th:text="${entry.title}">
 																</td>
 															</tr>
 														</table>										
+														<script type="text/javascript">
+															function readFromEntriesTable(source, type, id, vid) {
+																var btn = $(source);
+																var resId = source.resourceid;
+																btn.append($('<input />', { type: 'hidden', name: 'id', value: id }));
+																var resVid = source.resourcevid;
+																if (resVid != '') {
+																	btn.append($('<input />', { type: 'hidden', name: 'vid', value: vid }));
+																}
+																btn.append($('<input />', { type: 'hidden', name: 'resource', value: type }));
+															}															
+															function updateFromEntriesTable(source, type, id, vid) {
+																var btn = $(source);
+																var resId = source.resourceid;
+																btn.append($('<input />', { type: 'hidden', name: 'update-id', value: id }));
+																var resVid = source.resourcevid;
+																if (resVid != '') {
+																	btn.append($('<input />', { type: 'hidden', name: 'update-vid', value: vid }));
+																}
+																btn.append($('<input />', { type: 'hidden', name: 'resource', value: type }));
+															}															
+														</script>
 													</div>
 												</div>
 												<script type="text/javascript">
@@ -995,8 +1036,24 @@
 												</script>
 											</div>
 										</div>										
-										
-										
+										<div class="panel-heading" sstyle="margin: 5px;">
+											<h4 class="panel-title">
+												Raw Message
+												<button th:if="${resultBodyIsLong}" class="btn btn-info btn-sm" type="button" id="format-result-btn">
+													<span class="glyphicon glyphicon-eye-open"></span>
+													Colour
+												</button>
+											</h4>										
+											<script type="text/javascript" th:if="${resultBodyIsLong}">
+												$('#format-result-btn').click(function() {
+													//$('#resultBodyActualPre').setClass('<th:block th:text="${resultSyntaxHighlighterClass}"/>');
+													document.getElementById('resultBodyActualPre').className='<th:block th:text="${resultSyntaxHighlighterClass}"/>';
+													document.getElementById('format-result-btn').disabled ='disabled';
+													SyntaxHighlighter.highlight();
+													lineWrap();
+												});
+											</script>
+										</div>										
 									</td>
 								</tr>
 								<tr th:if="${!#strings.isEmpty(resultBody)}">

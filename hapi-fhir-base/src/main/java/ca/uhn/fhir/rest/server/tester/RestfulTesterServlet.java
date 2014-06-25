@@ -75,6 +75,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.annotation.Metadata;
 import ca.uhn.fhir.rest.client.GenericClient;
+import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.client.api.IBasicClient;
 import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.gclient.IUntypedQuery;
@@ -230,11 +231,8 @@ public class RestfulTesterServlet extends HttpServlet {
 			} else if ("false".equals(prettyParam)) {
 				client.setPrettyPrint(false);
 			}
-			if ("xml".equals(theReq.getParameter("encoding"))) {
-				client.setEncoding(EncodingEnum.XML);
-			} else if ("json".equals(theReq.getParameter("encoding"))) {
-				client.setEncoding(EncodingEnum.JSON);
-			}
+			EncodingEnum encoding = getRequestEncoding(theReq);
+			client.setEncoding(encoding);
 
 			long start = System.currentTimeMillis();
 			if ("home".equals(method)) {
@@ -560,6 +558,18 @@ public class RestfulTesterServlet extends HttpServlet {
 		}
 	}
 
+	private EncodingEnum getRequestEncoding(HttpServletRequest theReq) {
+		EncodingEnum encoding;
+		if ("xml".equals(theReq.getParameter("encoding"))) {
+			encoding = EncodingEnum.XML;
+		} else if ("json".equals(theReq.getParameter("encoding"))) {
+			encoding=(EncodingEnum.JSON);
+		}else {
+			encoding=null;
+		}
+		return encoding;
+	}
+
 	@Override
 	protected void doGet(HttpServletRequest theReq, HttpServletResponse theResp) throws ServletException, IOException {
 		if (DEBUGMODE) {
@@ -575,8 +585,8 @@ public class RestfulTesterServlet extends HttpServlet {
 				return;
 			}
 
-			ConformanceClient client = myCtx.newRestfulClient(ConformanceClient.class, myServerBase);
-			Conformance conformance = client.getConformance();
+			IGenericClient client = myCtx.newRestfulGenericClient(myServerBase);
+			Conformance conformance = client.conformance();
 
 			WebContext ctx = new WebContext(theReq, theResp, theReq.getServletContext(), theReq.getLocale());
 
@@ -616,7 +626,8 @@ public class RestfulTesterServlet extends HttpServlet {
 					});
 				}
 			}
-
+		
+			
 			ctx.setVariable("resourceCounts", resourceCounts);
 			ctx.setVariable("conf", conformance);
 			ctx.setVariable("base", myServerBase);
@@ -641,6 +652,20 @@ public class RestfulTesterServlet extends HttpServlet {
 					includes.add(nextPath);
 				}
 				ctx.setVariable("includes", includes);
+				
+				if (isNotBlank(theReq.getParameter("update-id"))) {
+					String updateId = theReq.getParameter("update-id");
+					String updateVid = defaultIfEmpty(theReq.getParameter("update-vid"),null);
+					IResource updateResource = client.read(def.getImplementingClass(), new IdDt(resourceName, updateId, updateVid));
+					EncodingEnum encoding = getRequestEncoding(theReq);
+					if (encoding==null) {
+						encoding=EncodingEnum.XML;
+					}
+					String updateResourceString = encoding.newParser(myCtx).setPrettyPrint(true).encodeResourceToString(updateResource);
+					ctx.setVariable("updateResource", updateResourceString);
+					ctx.setVariable("updateResourceId", updateId);
+				}
+
 			}
 
 			theResp.setContentType("text/html");

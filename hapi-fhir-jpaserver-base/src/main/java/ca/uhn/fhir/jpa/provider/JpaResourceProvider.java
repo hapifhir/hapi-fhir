@@ -74,7 +74,7 @@ public class JpaResourceProvider<T extends IResource> implements IResourceProvid
 		return myDao.getTags(theResourceId);
 	}
 
-	@Read()
+	@Read(version=true)
 	public T read(@IdParam IdDt theId) {
 		return myDao.read(theId);
 	}

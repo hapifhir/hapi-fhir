@@ -2,6 +2,13 @@
  * Base structure
  */
 
+.btn.disabled,
+.btn[disabled],
+fieldset[disabled].btn {
+	opacity: .45;
+	filter:alpha(opacity=45);
+}
+
 /* Move down content because we have a fixed navbar that is 50px tall */
 body {
   padding-top: 50px;
@@ -63,11 +70,12 @@ SPAN.includeCheckName {
 }
 
 SPAN.loadingStar {
-	color: #F88;
+	color: #C66;
 	display: inline-block !important;
 	margin: 0px !important;
 	padding: 0px !important;
 	width: 3px !important;
+	font-weight: bold;
 }
 
 DIV.navbarBreadcrumb, A.navbarBreadcrumb {
