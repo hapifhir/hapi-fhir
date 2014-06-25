@@ -711,7 +711,7 @@
 								                    <div class="input-group-addon">
 								                    ID
 								                    </div>
-								                    <input type="text" class="form-control" id="resource-create-id" placeholder="(add for update)" th:value="${#strings.defaultString(updateResourceId,'')}"/>
+								                    <input type="text" class="form-control" id="resource-create-id" placeholder="(add for update)" th:value="${updateResourceId}"/>
 								                </div>
 								            </div>
 								        </div>											
@@ -1045,19 +1045,12 @@
 												</button>
 											</h4>										
 											<script type="text/javascript" th:if="${resultBodyIsLong}">
-<<<<<<< HEAD
-												$('#page-next-btn').click(function() {
-													var btn = $(this);
-													btn.button('loading');
-													btn.append($('<input />', { type: 'hidden', name: 'page-url', value: '<th:block th:text="${bundle.linkNext}"/>' }));
-=======
 												$('#format-result-btn').click(function() {
 													//$('#resultBodyActualPre').setClass('<th:block th:text="${resultSyntaxHighlighterClass}"/>');
 													document.getElementById('resultBodyActualPre').className='<th:block th:text="${resultSyntaxHighlighterClass}"/>';
 													document.getElementById('format-result-btn').disabled ='disabled';
 													SyntaxHighlighter.highlight();
 													lineWrap();
->>>>>>> 68ea31495cec63706de85e729f19eb863cc835f9
 												});
 											</script>
 										</div>										
@@ -1136,11 +1129,7 @@
 			</div>
 		</div>
 
-		<!-- Bootstrap core JavaScript
-    ================================================== -->
-		<!-- Placed at the end of the document so the pages load faster -->
 		<script src="js/bootstrap.min.js"></script>
-		
 	</form>
 </body>
 </html>

@@ -92,8 +92,10 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding implem
 				return false;
 			}
 		}
-		if ((theRequest.getVersionId() == null) != (mySupportsVersion == false && myVersionIdIndex == null)) {
-			return false;
+		if (mySupportsVersion == false) {
+			if ((theRequest.getVersionId() == null) != (myVersionIdIndex == null)) {
+				return false;
+			}
 		}
 		if (theRequest.getId() == null) {
 			return false;
