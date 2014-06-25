@@ -53,6 +53,9 @@
 				Client requests for IdentifierDt types (such as Patient.identifier) did not create the correct
 				query string if the system is null.
 			</action>
+			<action type="add">
+				Add support for paging responses from RESTful servers.
+			</action>
         </release>			
 	</body>
 </document>

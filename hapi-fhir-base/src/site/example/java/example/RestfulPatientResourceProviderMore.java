@@ -195,9 +195,8 @@ public List<Patient> getPatientHistory(@IdParam IdDt theId) {
 
 
 //START SNIPPET: vread
-@Read()
-public Patient getResourceById(@IdParam IdDt theId, 
-                               @VersionIdParam IdDt theVersionId) {
+@Read(version=true)
+public Patient readOrVread(@IdParam IdDt theId) {
    Patient retVal = new Patient();
    // ...populate...
    return retVal;

@@ -75,6 +75,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.annotation.Metadata;
 import ca.uhn.fhir.rest.client.GenericClient;
+import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.client.api.IBasicClient;
 import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.gclient.IUntypedQuery;
@@ -137,6 +138,41 @@ public class RestfulTesterServlet extends HttpServlet {
 		myStaticResources.put("fonts/glyphicons-halflings-regular.svg", "application/octet-stream");
 		myStaticResources.put("fonts/glyphicons-halflings-regular.ttf", "application/octet-stream");
 		myStaticResources.put("fonts/glyphicons-halflings-regular.woff", "application/octet-stream");
+		
+		myStaticResources.put("fa/css/font-awesome.css", "text/css");
+		myStaticResources.put("fa/css/font-awesome.min.css", "text/css");
+		myStaticResources.put("fa/fonts/fontawesome-webfont.eot", "application/octet-stream");
+		myStaticResources.put("fa/fonts/fontawesome-webfont.svg", "application/octet-stream");
+		myStaticResources.put("fa/fonts/fontawesome-webfont.ttf", "application/octet-stream");
+		myStaticResources.put("fa/fonts/fontawesome-webfont.woff", "application/octet-stream");
+		myStaticResources.put("fa/fonts/FontAwesome.otf", "application/octet-stream");
+		myStaticResources.put("fa/less/bordered-pulled.less", "text/css");
+		myStaticResources.put("fa/less/core.less", "text/css");
+		myStaticResources.put("fa/less/fixed-width.less", "text/css");
+		myStaticResources.put("fa/less/font-awesome.less", "text/css");
+		myStaticResources.put("fa/less/icons.less", "text/css");
+		myStaticResources.put("fa/less/larger.less", "text/css");
+		myStaticResources.put("fa/less/list.less", "text/css");
+		myStaticResources.put("fa/less/mixins.less", "text/css");
+		myStaticResources.put("fa/less/path.less", "text/css");
+		myStaticResources.put("fa/less/rotated-flipped.less", "text/css");
+		myStaticResources.put("fa/less/spinning.less", "text/css");
+		myStaticResources.put("fa/less/stacked.less", "text/css");
+		myStaticResources.put("fa/less/variables.less", "text/css");
+		myStaticResources.put("fa/scss/_bordered-pulled.scss", "text/css");
+		myStaticResources.put("fa/scss/_core.scss", "text/css");
+		myStaticResources.put("fa/scss/_fixed-width.scss", "text/css");
+		myStaticResources.put("fa/scss/_icons.scss", "text/css");
+		myStaticResources.put("fa/scss/_larger.scss", "text/css");
+		myStaticResources.put("fa/scss/_list.scss", "text/css");
+		myStaticResources.put("fa/scss/_mixins.scss", "text/css");
+		myStaticResources.put("fa/scss/_path.scss", "text/css");
+		myStaticResources.put("fa/scss/_rotated-flipped.scss", "text/css");
+		myStaticResources.put("fa/scss/_spinning.scss", "text/css");
+		myStaticResources.put("fa/scss/_stacked.scss", "text/css");
+		myStaticResources.put("fa/scss/_variables.scss", "text/css");
+		myStaticResources.put("fa/scss/font-awesome.scss"		, "text/css");
+		
 		myCtx = new FhirContext();
 	}
 
@@ -195,11 +231,8 @@ public class RestfulTesterServlet extends HttpServlet {
 			} else if ("false".equals(prettyParam)) {
 				client.setPrettyPrint(false);
 			}
-			if ("xml".equals(theReq.getParameter("encoding"))) {
-				client.setEncoding(EncodingEnum.XML);
-			} else if ("json".equals(theReq.getParameter("encoding"))) {
-				client.setEncoding(EncodingEnum.JSON);
-			}
+			EncodingEnum encoding = getRequestEncoding(theReq);
+			client.setEncoding(encoding);
 
 			long start = System.currentTimeMillis();
 			if ("home".equals(method)) {
@@ -536,6 +569,18 @@ public class RestfulTesterServlet extends HttpServlet {
 		}
 	}
 
+	private EncodingEnum getRequestEncoding(HttpServletRequest theReq) {
+		EncodingEnum encoding;
+		if ("xml".equals(theReq.getParameter("encoding"))) {
+			encoding = EncodingEnum.XML;
+		} else if ("json".equals(theReq.getParameter("encoding"))) {
+			encoding=(EncodingEnum.JSON);
+		}else {
+			encoding=null;
+		}
+		return encoding;
+	}
+
 	@Override
 	protected void doGet(HttpServletRequest theReq, HttpServletResponse theResp) throws ServletException, IOException {
 		if (DEBUGMODE) {
@@ -551,8 +596,8 @@ public class RestfulTesterServlet extends HttpServlet {
 				return;
 			}
 
-			ConformanceClient client = myCtx.newRestfulClient(ConformanceClient.class, myServerBase);
-			Conformance conformance = client.getConformance();
+			IGenericClient client = myCtx.newRestfulGenericClient(myServerBase);
+			Conformance conformance = client.conformance();
 
 			WebContext ctx = new WebContext(theReq, theResp, theReq.getServletContext(), theReq.getLocale());
 
@@ -592,7 +637,8 @@ public class RestfulTesterServlet extends HttpServlet {
 					});
 				}
 			}
-
+		
+			
 			ctx.setVariable("resourceCounts", resourceCounts);
 			ctx.setVariable("conf", conformance);
 			ctx.setVariable("base", myServerBase);
@@ -617,6 +663,20 @@ public class RestfulTesterServlet extends HttpServlet {
 					includes.add(nextPath);
 				}
 				ctx.setVariable("includes", includes);
+				
+				if (isNotBlank(theReq.getParameter("update-id"))) {
+					String updateId = theReq.getParameter("update-id");
+					String updateVid = defaultIfEmpty(theReq.getParameter("update-vid"),null);
+					IResource updateResource = client.read(def.getImplementingClass(), new IdDt(resourceName, updateId, updateVid));
+					EncodingEnum encoding = getRequestEncoding(theReq);
+					if (encoding==null) {
+						encoding=EncodingEnum.XML;
+					}
+					String updateResourceString = encoding.newParser(myCtx).setPrettyPrint(true).encodeResourceToString(updateResource);
+					ctx.setVariable("updateResource", updateResourceString);
+					ctx.setVariable("updateResourceId", updateId);
+				}
+
 			}
 
 			theResp.setContentType("text/html");
