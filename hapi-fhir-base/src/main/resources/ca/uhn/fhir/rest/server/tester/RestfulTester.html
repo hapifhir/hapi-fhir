@@ -952,7 +952,7 @@
 												$('#page-next-btn').click(function() {
 													var btn = $(this);
 													btn.button('loading');
-													btn.append($('<input />', { type: 'hidden', name: 'pageUrl', value: '<th:block th:text="${bundle.linkNext}"/>' }));
+													btn.append($('<input />', { type: 'hidden', name: 'page-url', value: '<th:block th:text="${bundle.linkNext}"/>' }));
 												});
 											</script>
 										</th:block>

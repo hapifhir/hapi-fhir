@@ -64,4 +64,6 @@ public interface IRestfulClient {
 	 */
 	String getServerBase();
 	
+	
+
 }

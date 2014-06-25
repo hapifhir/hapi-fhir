@@ -51,6 +51,8 @@ import ca.uhn.fhir.rest.client.exceptions.NonFhirResponseException;
 import ca.uhn.fhir.rest.gclient.IClientExecutable;
 import ca.uhn.fhir.rest.gclient.ICriterion;
 import ca.uhn.fhir.rest.gclient.ICriterionInternal;
+import ca.uhn.fhir.rest.gclient.IGetPage;
+import ca.uhn.fhir.rest.gclient.IGetPageTyped;
 import ca.uhn.fhir.rest.gclient.IGetTags;
 import ca.uhn.fhir.rest.gclient.IParam;
 import ca.uhn.fhir.rest.gclient.IQuery;
@@ -63,6 +65,7 @@ import ca.uhn.fhir.rest.method.DeleteMethodBinding;
 import ca.uhn.fhir.rest.method.HistoryMethodBinding;
 import ca.uhn.fhir.rest.method.HttpDeleteClientInvocation;
 import ca.uhn.fhir.rest.method.HttpGetClientInvocation;
+import ca.uhn.fhir.rest.method.HttpSimpleGetClientInvocation;
 import ca.uhn.fhir.rest.method.IClientResponseHandler;
 import ca.uhn.fhir.rest.method.ReadMethodBinding;
 import ca.uhn.fhir.rest.method.SearchMethodBinding;
@@ -334,7 +337,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			params.get(parameterName).add(parameterValue);
 		}
 
-		protected <Z> Z invoke(Map<String, List<String>> theParams, IClientResponseHandler<Z> theHandler, HttpGetClientInvocation theInvocation) {
+		protected <Z> Z invoke(Map<String, List<String>> theParams, IClientResponseHandler<Z> theHandler, BaseHttpClientInvocation theInvocation) {
 			if (myParamEncoding != null) {
 				theParams.put(Constants.PARAM_FORMAT, Collections.singletonList(myParamEncoding.getFormatContentType()));
 			}
@@ -519,15 +522,15 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		@Override
 		public IGetTags forResource(Class<? extends IResource> theClass, String theId) {
 			setResourceClass(theClass);
-			myId=theId;
+			myId = theId;
 			return this;
 		}
 
 		@Override
 		public IGetTags forResource(Class<? extends IResource> theClass, String theId, String theVersionId) {
 			setResourceClass(theClass);
-			myId=theId;
-			myVersionId=theVersionId;
+			myId = theId;
+			myVersionId = theVersionId;
 			return this;
 		}
 
@@ -631,6 +634,51 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			IParser parser = respType.newParser(myContext);
 			return parser.parseTagList(theResponseReader);
 		}
+	}
+
+	@Override
+	public IGetPage loadPage() {
+		return new LoadPageInternal();
+	}
+
+	private final class LoadPageInternal implements IGetPage {
+
+		@Override
+		public IGetPageTyped previous(Bundle theBundle) {
+			return new GetPageInternal(theBundle.getLinkPrevious().getValue());
+		}
+
+		@Override
+		public IGetPageTyped next(Bundle theBundle) {
+			return new GetPageInternal(theBundle.getLinkNext().getValue());
+		}
+
+		@Override
+		public IGetPageTyped url(String thePageUrl) {
+			return new GetPageInternal(thePageUrl);
+		}
+
+	}
+
+	private class GetPageInternal extends BaseClientExecutable<IGetPageTyped, Bundle> implements IGetPageTyped {
+
+		private String myUrl;
+
+		public GetPageInternal(String theUrl) {
+			myUrl = theUrl;
+		}
+
+		@Override
+		public Bundle execute() {
+
+			BundleResponseHandler binding = new BundleResponseHandler(null);
+			HttpSimpleGetClientInvocation invocation = new HttpSimpleGetClientInvocation(myUrl);
+
+			Map<String, List<String>> params = null;
+			return invoke(params, binding, invocation);
+
+		}
+
 	}
 
 }

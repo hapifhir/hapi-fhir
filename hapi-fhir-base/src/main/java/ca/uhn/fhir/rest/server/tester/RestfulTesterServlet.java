@@ -249,6 +249,17 @@ public class RestfulTesterServlet extends HttpServlet {
 				returnsResource = ResultType.TAGLIST;
 				outcomeDescription = "Tag List";
 
+			} else if ("page".equals(method)) {
+
+				String url = defaultString(theReq.getParameter("page-url"));
+				if (!url.startsWith(myServerBase)) {
+					theContext.getVariables().put("errorMsg", "Invalid page URL: " + url);
+					return;
+				}
+				
+				returnsResource = ResultType.TAGLIST;
+				outcomeDescription = "Tag List";
+
 			} else if ("delete".equals(method)) {
 				RuntimeResourceDefinition def = getResourceType(theReq);
 				String id = StringUtils.defaultString(theReq.getParameter("resource-delete-id"));

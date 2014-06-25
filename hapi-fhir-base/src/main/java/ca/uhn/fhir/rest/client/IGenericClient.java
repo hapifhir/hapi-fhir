@@ -30,6 +30,8 @@ import ca.uhn.fhir.model.dstu.resource.Conformance;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.gclient.IGetPage;
+import ca.uhn.fhir.rest.gclient.IGetPageTyped;
 import ca.uhn.fhir.rest.gclient.IGetTags;
 import ca.uhn.fhir.rest.gclient.IUntypedQuery;
 
@@ -225,5 +227,13 @@ public interface IGenericClient {
 	 * Fluent method for the "get tags" operation
 	 */
 	IGetTags getTags();
+
+	/**
+	 * Loads the previous/next bundle of resources from a paged set, using the link specified in the 
+	 * "link type=next" tag within the atom bundle. 
+	 * 
+	 * @see Bundle#getLinkNext()
+	 */
+	IGetPage loadPage();
 
 }

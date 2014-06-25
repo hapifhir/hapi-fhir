@@ -546,6 +546,8 @@ public class RestfulServer extends HttpServlet {
 
 		Bundle bundle = createBundleFromResourceList(theServer.getFhirContext(), theServer.getServerName(), resourceList, theServerBase, theCompleteUrl, theResult.size());
 
+		bundle.setPublished(theResult.getPublished());
+		
 		if (searchId != null) {
 			if (theOffset + numToReturn < theResult.size()) {
 				bundle.getLinkNext().setValue(createPagingLink(theServerBase, searchId, theOffset + numToReturn, numToReturn));
