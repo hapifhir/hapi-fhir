@@ -76,10 +76,24 @@ public class CompleteResourceProviderTest {
 
 		Bundle actual = ourClient.search().forResource(Patient.class).where(Patient.IDENTIFIER.exactly().systemAndCode("urn:system", "testSearchByIdentifier01")).encodedJson().prettyPrint().execute();
 		assertEquals(1, actual.size());
-		assertEquals(p1Id.getUnqualifiedId(), actual.getEntries().get(0).getId().getUnqualifiedId());
+		assertEquals(p1Id.getIdPart(), actual.getEntries().get(0).getId().getIdPart());
 
 	}
 
+	
+	@Test
+	public void testSearchByIdentifierWithoutSystem() {
+		Patient p1 = new Patient();
+		p1.addIdentifier().setValue("testSearchByIdentifierWithoutSystem01");
+		IdDt p1Id = ourClient.create(p1).getId();
+
+		Bundle actual = ourClient.search().forResource(Patient.class).where(Patient.IDENTIFIER.exactly().systemAndCode(null, "testSearchByIdentifierWithoutSystem01")).encodedJson().prettyPrint().execute();
+		assertEquals(1, actual.size());
+		assertEquals(p1Id.getIdPart(), actual.getEntries().get(0).getId().getIdPart());
+
+	}
+
+	
 	@Test
 	public void testSearchByResourceChain() {
 		Organization o1 = new Organization();
@@ -95,11 +109,11 @@ public class CompleteResourceProviderTest {
 		//@formatter:off
 		Bundle actual = ourClient.search()
 				.forResource(Patient.class)
-				.where(Patient.PROVIDER.hasId(o1id.getUnqualifiedId()))
+				.where(Patient.PROVIDER.hasId(o1id.getIdPart()))
 				.encodedJson().andLogRequestAndResponse(true).prettyPrint().execute();
 		//@formatter:on
 		assertEquals(1, actual.size());
-		assertEquals(p1Id.getUnqualifiedId(), actual.getEntries().get(0).getId().getUnqualifiedId());
+		assertEquals(p1Id.getIdPart(), actual.getEntries().get(0).getId().getIdPart());
 
 		//@formatter:off
 		actual = ourClient.search()
@@ -108,7 +122,7 @@ public class CompleteResourceProviderTest {
 				.encodedJson().andLogRequestAndResponse(true).prettyPrint().execute();
 		//@formatter:on
 		assertEquals(1, actual.size());
-		assertEquals(p1Id.getUnqualifiedId(), actual.getEntries().get(0).getId().getUnqualifiedId());
+		assertEquals(p1Id.getIdPart(), actual.getEntries().get(0).getId().getIdPart());
 
 	}
 

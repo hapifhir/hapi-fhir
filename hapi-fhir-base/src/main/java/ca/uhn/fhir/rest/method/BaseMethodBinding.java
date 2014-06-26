@@ -29,7 +29,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
@@ -62,8 +61,10 @@ import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.client.exceptions.NonFhirResponseException;
 import ca.uhn.fhir.rest.param.IParameter;
 import ca.uhn.fhir.rest.param.ParameterUtil;
+import ca.uhn.fhir.rest.server.BundleProviders;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
+import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
@@ -261,6 +262,8 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 			}
 		} else if (MethodOutcome.class.equals(returnTypeFromMethod)) {
 			// returns a method outcome
+		} else if (IBundleProvider.class.equals(returnTypeFromMethod)) {
+			// returns a bundle provider
 		} else if (Bundle.class.equals(returnTypeFromMethod)) {
 			// returns a bundle
 		} else if (void.class.equals(returnTypeFromMethod)) {
@@ -274,7 +277,7 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 		} else {
 			if (!IResource.class.equals(returnTypeFromMethod) && !verifyIsValidResourceReturnType(returnTypeFromMethod)) {
 				throw new ConfigurationException("Method '" + theMethod.getName() + "' from " + IResourceProvider.class.getSimpleName() + " type " + theMethod.getDeclaringClass().getCanonicalName() + " returns " + toLogString(returnTypeFromMethod)
-						+ " - Must return a resource type");
+						+ " - Must return a resource type (eg Patient, " + Bundle.class.getSimpleName() + ", " + IBundleProvider.class.getSimpleName() + ", etc., see the documentation for more details)");
 			}
 		}
 
@@ -428,17 +431,19 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 		return retVal;
 	}
 
-	protected static List<IResource> toResourceList(Object response) throws InternalErrorException {
+	protected static IBundleProvider toResourceList(Object response) throws InternalErrorException {
 		if (response == null) {
-			return Collections.emptyList();
+			return BundleProviders.newEmptyList();
+		} else if (response instanceof IBundleProvider) {
+			return (IBundleProvider) response;
 		} else if (response instanceof IResource) {
-			return Collections.singletonList((IResource) response);
+			return BundleProviders.newList((IResource) response);
 		} else if (response instanceof Collection) {
 			List<IResource> retVal = new ArrayList<IResource>();
 			for (Object next : ((Collection<?>) response)) {
 				retVal.add((IResource) next);
 			}
-			return retVal;
+			return BundleProviders.newList(retVal);
 		} else {
 			throw new InternalErrorException("Unexpected return type: " + response.getClass().getCanonicalName());
 		}

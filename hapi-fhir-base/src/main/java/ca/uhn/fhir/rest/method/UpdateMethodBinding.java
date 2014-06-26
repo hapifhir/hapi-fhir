@@ -145,6 +145,9 @@ public class UpdateMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 				retVal.addHeader(Constants.HEADER_CONTENT_LOCATION, b.toString());
 			}
 		}
+		
+		addTagsToPostOrPut(theResource, retVal);
+
 		return retVal;
 	}
 

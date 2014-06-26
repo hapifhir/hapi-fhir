@@ -173,8 +173,8 @@ public class ClientTest {
 
 		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
 		TagList tagList = new TagList();
-		tagList.add(new Tag("Dog", "DogLabel", (String) null));
-		tagList.add(new Tag("Cat", "CatLabel", "http://cats"));
+		tagList.add(new Tag((String) null, "Dog", "DogLabel"));
+		tagList.add(new Tag("http://cats", "Cat", "CatLabel"));
 		patient.getResourceMetadata().put(ResourceMetadataKeyEnum.TAG_LIST, tagList);
 
 		MethodOutcome response = client.createPatient(patient);

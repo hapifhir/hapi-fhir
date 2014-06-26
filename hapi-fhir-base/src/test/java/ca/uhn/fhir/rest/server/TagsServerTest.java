@@ -254,65 +254,65 @@ public class TagsServerTest {
 
 		@AddTags(type = Patient.class)
 		public void addTagsPatient(@IdParam IdDt theId, @VersionIdParam IdDt theVersion, @TagListParam TagList theTagList) {
-			ourLastOutcome = "add" + theId.getUnqualifiedId() + theVersion.getUnqualifiedVersionId();
+			ourLastOutcome = "add" + theId.getIdPart() + theVersion.getVersionIdPart();
 			ourLastTagList=theTagList;
 		}
 
 		@AddTags(type = Patient.class)
 		public void addTagsPatient(@IdParam IdDt theId, @TagListParam TagList theTagList) {
-			ourLastOutcome = "add" + theId.getUnqualifiedId();
+			ourLastOutcome = "add" + theId.getIdPart();
 			ourLastTagList=theTagList;
 		}
 
 		@GetTags
 		public TagList getAllTags() {
 			TagList tagList = new TagList();
-			tagList.add(new Tag("AllDog", "DogLabel", (String) null));
-			tagList.add(new Tag("AllCat", "CatLabel", "http://cats"));
+			tagList.add(new Tag((String) null, "AllDog", "DogLabel"));
+			tagList.add(new Tag("http://cats", "AllCat", "CatLabel"));
 			return tagList;
 		}
 
 		@GetTags(type = Patient.class)
 		public TagList getAllTagsPatient() {
 			TagList tagList = new TagList();
-			tagList.add(new Tag("Patient", "DogLabel", (String) null));
-			tagList.add(new Tag("AllCat", "CatLabel", "http://cats"));
+			tagList.add(new Tag((String) null, "Patient", "DogLabel"));
+			tagList.add(new Tag("http://cats", "AllCat", "CatLabel"));
 			return tagList;
 		}
 
 		@GetTags(type = Patient.class)
 		public TagList getAllTagsPatientId(@IdParam IdDt theId) {
 			TagList tagList = new TagList();
-			tagList.add(new Tag("Patient" + theId.getUnqualifiedId() + defaultString(theId.getUnqualifiedVersionId()), "DogLabel", (String) null));
-			tagList.add(new Tag("AllCat", "CatLabel", "http://cats"));
+			tagList.add(new Tag((String) null, "Patient" + theId.getIdPart() + defaultString(theId.getVersionIdPart()), "DogLabel"));
+			tagList.add(new Tag("http://cats", "AllCat", "CatLabel"));
 			return tagList;
 		}
 
 		@GetTags(type = Patient.class)
 		public TagList getAllTagsPatientIdVersion(@IdParam IdDt theId, @VersionIdParam IdDt theVersion) {
 			TagList tagList = new TagList();
-			tagList.add(new Tag("Patient" + theId.getUnqualifiedId() + theVersion.getUnqualifiedVersionId(), "DogLabel", (String) null));
-			tagList.add(new Tag("AllCat", "CatLabel", "http://cats"));
+			tagList.add(new Tag((String) null, "Patient" + theId.getIdPart() + theVersion.getVersionIdPart(), "DogLabel"));
+			tagList.add(new Tag("http://cats", "AllCat", "CatLabel"));
 			return tagList;
 		}
 
 		@GetTags(type = Observation.class)
 		public TagList getAllTagsObservationIdVersion(@IdParam IdDt theId) {
 			TagList tagList = new TagList();
-			tagList.add(new Tag("Patient" + theId.getUnqualifiedId() + theId.getUnqualifiedVersionId(), "DogLabel", (String) null));
-			tagList.add(new Tag("AllCat", "CatLabel", "http://cats"));
+			tagList.add(new Tag((String) null, "Patient" + theId.getIdPart() + theId.getVersionIdPart(), "DogLabel"));
+			tagList.add(new Tag("http://cats", "AllCat", "CatLabel"));
 			return tagList;
 		}
 
 		@DeleteTags(type = Patient.class)
 		public void RemoveTagsPatient(@IdParam IdDt theId, @VersionIdParam IdDt theVersion, @TagListParam TagList theTagList) {
-			ourLastOutcome = "Remove" + theId.getUnqualifiedId() + theVersion.getUnqualifiedVersionId();
+			ourLastOutcome = "Remove" + theId.getIdPart() + theVersion.getVersionIdPart();
 			ourLastTagList=theTagList;
 		}
 
 		@DeleteTags(type = Patient.class)
 		public void RemoveTagsPatient(@IdParam IdDt theId, @TagListParam TagList theTagList) {
-			ourLastOutcome = "Remove" + theId.getUnqualifiedId();
+			ourLastOutcome = "Remove" + theId.getIdPart();
 			ourLastTagList=theTagList;
 		}
 

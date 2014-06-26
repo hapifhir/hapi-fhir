@@ -16,7 +16,7 @@ import org.apache.commons.lang3.Validate;
 @Entity
 @Table(name = "HFJ_RES_LINK"/*, indexes= {@Index(name="IDX_RL_TPATHRES", columnList= "SRC_PATH,TARGET_RESOURCE_ID")}*/)
 @org.hibernate.annotations.Table(appliesTo="HFJ_RES_LINK",indexes= {
-		@org.hibernate.annotations.Index(name="IDX_RL_TPATHRES", columnNames= {"SRC_PATH","TARGET_RESOURCE_ID"})})
+		@org.hibernate.annotations.Index(name="IDX_RL_TPATHRES", columnNames= {"SRC_PATH", "TARGET_RESOURCE_ID"})})
 public class ResourceLink implements Serializable {
 
 	private static final long serialVersionUID = 1L;

@@ -181,7 +181,9 @@ public class JsonParser extends BaseParser implements IParser {
 		for (BundleEntry nextEntry : theBundle.getEntries()) {
 			eventWriter.writeStartObject();
 
-			writeTagWithTextNode(eventWriter, "deleted", nextEntry.getDeletedAt());
+			if (nextEntry.getDeletedAt() !=null&&nextEntry.getDeletedAt().isEmpty()==false) {
+				writeTagWithTextNode(eventWriter, "deleted", nextEntry.getDeletedAt());
+			}
 			writeTagWithTextNode(eventWriter, "title", nextEntry.getTitle());
 			writeTagWithTextNode(eventWriter, "id", nextEntry.getId());
 
@@ -273,7 +275,7 @@ public class JsonParser extends BaseParser implements IParser {
 		}
 		case RESOURCE_REF: {
 			ResourceReferenceDt referenceDt = (ResourceReferenceDt) theValue;
-			IdDt value = referenceDt.getResourceId();
+			IdDt value = referenceDt.getReference();
 			if (theChildName != null) {
 				theWriter.writeStartObject(theChildName);
 			} else {
@@ -282,8 +284,8 @@ public class JsonParser extends BaseParser implements IParser {
 
 			String reference = value.getValue();
 			if (StringUtils.isBlank(reference)) {
-				if (value.getResourceType() != null && StringUtils.isNotBlank(value.getUnqualifiedId())) {
-					reference = myContext.getResourceDefinition(value.getResourceType()).getName() + '/' + value.getUnqualifiedId();
+				if (value.getResourceType() != null && StringUtils.isNotBlank(value.getIdPart())) {
+					reference = myContext.getResourceDefinition(value.getResourceType()).getName() + '/' + value.getIdPart();
 				}
 			}
 
@@ -466,8 +468,8 @@ public class JsonParser extends BaseParser implements IParser {
 		encodeCompositeElementChildrenToStreamWriter(theResDef, theResource, theElement, theEventWriter, resDef.getChildren());
 	}
 
-	private void encodeResourceToJsonStreamWriter(RuntimeResourceDefinition theResDef, IResource theResource, JsonGenerator theEventWriter, String theObjectNameOrNull, boolean theIncludedResource) throws IOException {
-		if (!theIncludedResource) {
+	private void encodeResourceToJsonStreamWriter(RuntimeResourceDefinition theResDef, IResource theResource, JsonGenerator theEventWriter, String theObjectNameOrNull, boolean theIsSubElementWithinResource) throws IOException {
+		if (!theIsSubElementWithinResource) {
 			super.containResourcesForEncoding(theResource);
 		}
 
@@ -480,7 +482,7 @@ public class JsonParser extends BaseParser implements IParser {
 		}
 
 		theEventWriter.write("resourceType", resDef.getName());
-		if (theResource.getId() != null && isNotBlank(theResource.getId().getValue())) {
+		if (theIsSubElementWithinResource && theResource.getId() != null && isNotBlank(theResource.getId().getValue())) {
 			theEventWriter.write("id", theResource.getId().getValue());
 		}
 

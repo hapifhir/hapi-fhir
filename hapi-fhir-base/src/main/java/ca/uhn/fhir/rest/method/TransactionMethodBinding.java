@@ -42,6 +42,7 @@ import ca.uhn.fhir.rest.method.SearchMethodBinding.RequestType;
 import ca.uhn.fhir.rest.param.IParameter;
 import ca.uhn.fhir.rest.param.TransactionParameter;
 import ca.uhn.fhir.rest.server.EncodingEnum;
+import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -94,7 +95,7 @@ public class TransactionMethodBinding extends BaseResourceReturningMethodBinding
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<IResource> invokeServer(Request theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException {
+	public IBundleProvider invokeServer(Request theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException {
 		List<IResource> resources = (List<IResource>) theMethodParams[myTransactionParamIndex];
 		
 		List<IdDt> oldIds= new ArrayList<IdDt>();
@@ -102,15 +103,17 @@ public class TransactionMethodBinding extends BaseResourceReturningMethodBinding
 			oldIds.add(next.getId());
 		}
 		
-		List<IResource> retVal=(List<IResource>) invokeServerMethod(theMethodParams);
+		Object response= invokeServerMethod(theMethodParams);
+		IBundleProvider retVal = toResourceList(response);
 		
 		if (retVal.size() != resources.size()) {
 			throw new InternalErrorException("Transaction bundle contained " + resources.size() + " entries, but server method response contained " + retVal.size() + " entries (must be the same)");
 		}
 		
+		List<IResource> retResources = retVal.getResources(0, retVal.size()); 
 		for (int i =0; i < resources.size(); i++) {
 			IdDt oldId = oldIds.get(i);
-			IResource newRes = retVal.get(i);
+			IResource newRes = retResources.get(i);
 			if (newRes.getId() == null || newRes.getId().isEmpty()) {
 				throw new InternalErrorException("Transaction method returned resource at index " + i + " with no id specified - IResource#setId(IdDt)");
 			}

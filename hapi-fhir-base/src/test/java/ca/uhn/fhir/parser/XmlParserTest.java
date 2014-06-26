@@ -2,11 +2,11 @@ package ca.uhn.fhir.parser;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Matchers.*;
+import static org.mockito.Mockito.*;
 
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.StringReader;
 import java.nio.charset.Charset;
@@ -17,7 +17,6 @@ import java.util.List;
 import org.apache.commons.io.IOUtils;
 import org.custommonkey.xmlunit.Diff;
 import org.custommonkey.xmlunit.XMLUnit;
-import org.hamcrest.Matchers;
 import org.hamcrest.core.IsNot;
 import org.hamcrest.core.StringContains;
 import org.hamcrest.text.StringContainsInOrder;
@@ -38,9 +37,9 @@ import ca.uhn.fhir.model.dstu.composite.AddressDt;
 import ca.uhn.fhir.model.dstu.composite.HumanNameDt;
 import ca.uhn.fhir.model.dstu.composite.NarrativeDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.dstu.resource.Binary;
 import ca.uhn.fhir.model.dstu.resource.Conformance;
 import ca.uhn.fhir.model.dstu.resource.Conformance.RestResource;
-import ca.uhn.fhir.model.dstu.resource.Binary;
 import ca.uhn.fhir.model.dstu.resource.DiagnosticReport;
 import ca.uhn.fhir.model.dstu.resource.Observation;
 import ca.uhn.fhir.model.dstu.resource.Organization;
@@ -356,8 +355,12 @@ public class XmlParserTest {
 	}
 
 	@Test
-	public void testEncodeBundle() {
+	public void testEncodeBundle() throws InterruptedException {
 		Bundle b= new Bundle();
+		
+		InstantDt pub = InstantDt.withCurrentTime();
+		b.setPublished(pub);
+		Thread.sleep(2);
 		
 		Patient p1 = new Patient();
 		p1.addName().addFamily("Family1");
@@ -380,6 +383,7 @@ public class XmlParserTest {
 		ourLog.info(bundleString);
 
 		List<String> strings = new ArrayList<String>();
+		strings.addAll(Arrays.asList("<published>", pub.getValueAsString(), "</published>"));
 		strings.addAll(Arrays.asList("<entry>", "<id>1</id>", "</entry>"));
 		strings.addAll(Arrays.asList("<entry>", "<id>2</id>", "<link rel=\"alternate\" href=\"http://foo/bar\"/>", "</entry>"));
 		strings.addAll(Arrays.asList("<at:deleted-entry", "ref=\"Patient/3", "/>"));
@@ -420,7 +424,7 @@ public class XmlParserTest {
 		try {
 			p.encodeResourceToString(obs);
 		} catch (DataFormatException e) {
-			assertThat(e.getMessage(), StringContains.containsString("PeriodDt"));
+			assertThat(e.getMessage(), StringContains.containsString("DecimalDt"));
 		}
 	}
 
@@ -753,6 +757,15 @@ public class XmlParserTest {
 		assertThat(str, StringContains.containsString("<Patient xmlns=\"http://hl7.org/fhir\">"));
 	}
 
+	@Test
+	public void testParseBundleWithMixedReturnTypes() {
+		InputStreamReader str = new InputStreamReader(getClass().getResourceAsStream("/mixed-return-bundle.xml"));
+		Bundle b = ourCtx.newXmlParser().parseBundle(Patient.class, str);
+		assertEquals(Patient.class, b.getEntries().get(0).getResource().getClass());
+		assertEquals(Patient.class, b.getEntries().get(1).getResource().getClass());
+		assertEquals(Organization.class, b.getEntries().get(2).getResource().getClass());
+	}
+	
 	@SuppressWarnings("deprecation")
 	@Test
 	public void testParseBundle() {
@@ -844,14 +857,14 @@ public class XmlParserTest {
 		assertEquals("label", tl.get(0).getLabel());
 		assertEquals("http://foo", tl.get(0).getScheme());
 
-		assertEquals("256a5231-a2bb-49bd-9fea-f349d428b70d", resource.getId().getUnqualifiedId());
+		assertEquals("256a5231-a2bb-49bd-9fea-f349d428b70d", resource.getId().getIdPart());
 
 		msg = msg.replace("<link href=\"http://hl7.org/implement/standards/fhir/valueset/256a5231-a2bb-49bd-9fea-f349d428b70d\" rel=\"self\"/>", "<link href=\"http://hl7.org/implement/standards/fhir/valueset/256a5231-a2bb-49bd-9fea-f349d428b70d/_history/12345\" rel=\"self\"/>");
 		entry = p.parseBundle(msg).getEntries().get(0);
 		resource = (ValueSet) entry.getResource();
-		assertEquals("256a5231-a2bb-49bd-9fea-f349d428b70d", resource.getId().getUnqualifiedId());
-		assertEquals("12345", resource.getId().getUnqualifiedVersionId());
-		assertEquals("12345", ((IdDt)resource.getResourceMetadata().get(ResourceMetadataKeyEnum.VERSION_ID)).getUnqualifiedVersionId());
+		assertEquals("256a5231-a2bb-49bd-9fea-f349d428b70d", resource.getId().getIdPart());
+		assertEquals("12345", resource.getId().getVersionIdPart());
+		assertEquals("12345", ((IdDt)resource.getResourceMetadata().get(ResourceMetadataKeyEnum.VERSION_ID)).getVersionIdPart());
 
 	}
 
@@ -878,9 +891,9 @@ public class XmlParserTest {
 		assertEquals("http://foo/Patient/1", entry.getId().getValue());
 		assertEquals("2013-02-10T04:11:24.435+00:00", entry.getDeletedAt().getValueAsString());
 		assertEquals("http://foo/Patient/1/_history/2", entry.getLinkSelf().getValue());
-		assertEquals("1", entry.getResource().getId().getUnqualifiedId());
-		assertEquals("2", entry.getResource().getId().getUnqualifiedVersionId());
-		assertEquals("2", ((IdDt)entry.getResource().getResourceMetadata().get(ResourceMetadataKeyEnum.VERSION_ID)).getUnqualifiedVersionId());
+		assertEquals("1", entry.getResource().getId().getIdPart());
+		assertEquals("2", entry.getResource().getId().getVersionIdPart());
+		assertEquals("2", ((IdDt)entry.getResource().getResourceMetadata().get(ResourceMetadataKeyEnum.VERSION_ID)).getVersionIdPart());
 		assertEquals(new InstantDt("2013-02-10T04:11:24.435+00:00"), entry.getResource().getResourceMetadata().get(ResourceMetadataKeyEnum.DELETED_AT));
 		
 		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeBundleToString(bundle));
@@ -901,7 +914,7 @@ public class XmlParserTest {
 		assertEquals("http://spark.furore.com/fhir/_snapshot?id=327d6bb9-83b0-4929-aa91-6dd9c41e587b&start=0&_count=20", bundle.getLinkSelf().getValue());
 		assertEquals("Patient resource with id 3216379", bundle.getEntries().get(0).getTitle().getValue());
 		assertEquals("http://spark.furore.com/fhir/Patient/3216379", bundle.getEntries().get(0).getId().getValue());
-		assertEquals("3216379", bundle.getEntries().get(0).getResource().getId().getUnqualifiedId());
+		assertEquals("3216379", bundle.getEntries().get(0).getResource().getId().getIdPart());
 
 	}
 

@@ -256,7 +256,7 @@ public class ${className}
 	 *            The reference itself
 	 */
 	public ResourceReferenceDt(String theId) {
-		setResourceId(new IdDt(theId));
+		setReference(new IdDt(theId));
 	}
 
 	/**
@@ -267,7 +267,7 @@ public class ${className}
 	 *            The reference itself
 	 */
 	public ResourceReferenceDt(IdDt theResourceId) {
-		setResourceId(theResourceId);
+		setReference(theResourceId);
 	}
 #end
 
@@ -405,17 +405,14 @@ public class ${className}
 	}	
 #end
 #if ( ${className} == "ResourceReferenceDt" )
-	/** TODO: document */
 	@Override
-	public IdDt getResourceId() {
-		return new IdDt(myReference.getValue());
+	public String toString() {
+		org.apache.commons.lang3.builder.ToStringBuilder b = new org.apache.commons.lang3.builder.ToStringBuilder(this, org.apache.commons.lang3.builder.ToStringStyle.SHORT_PREFIX_STYLE);
+		b.append("reference", getReference().getValueAsString());
+		b.append("loaded", getResource()!=null);
+		return b.toString();
 	}
 
-	/** TODO: document */
-	@Override
-	public void setResourceId(IdDt theResourceId) {
-		myReference = new StringDt(theResourceId.getValue());
-	}
 #end
 #childExtensionTypes( $childExtensionTypes )
 

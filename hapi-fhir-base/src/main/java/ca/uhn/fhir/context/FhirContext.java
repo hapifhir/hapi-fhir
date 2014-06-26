@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.text.WordUtils;
 
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IResource;
@@ -70,6 +71,7 @@ public class FhirContext {
 	 * Default constructor. In most cases this is the right constructor to use.
 	 */
 	public FhirContext() {
+		super();
 	}
 
 	public FhirContext(Class<? extends IResource> theResourceType) {
@@ -122,13 +124,24 @@ public class FhirContext {
 	 */
 	@SuppressWarnings("unchecked")
 	public RuntimeResourceDefinition getResourceDefinition(String theResourceName) {
-		Validate.notBlank(theResourceName, "Resource name must not be blank");
+		String resourceName = theResourceName;
+		
+		/*
+		 * TODO: this is a bit of a hack, really we should have a translation table 
+		 * based on a property file or something so that we can detect names like
+		 * diagnosticreport 
+		 */
+		if (Character.isLowerCase(resourceName.charAt(0))) {
+			resourceName = WordUtils.capitalize(resourceName);
+		}
+		
+		Validate.notBlank(resourceName, "Resource name must not be blank");
 
-		RuntimeResourceDefinition retVal = myNameToElementDefinition.get(theResourceName);
+		RuntimeResourceDefinition retVal = myNameToElementDefinition.get(resourceName);
 
 		if (retVal == null) {
 			try {
-				String candidateName = Patient.class.getPackage().getName() + "." + theResourceName;
+				String candidateName = Patient.class.getPackage().getName() + "." + resourceName;
 				Class<?> clazz = Class.forName(candidateName);
 				if (IResource.class.isAssignableFrom(clazz)) {
 					retVal = scanResourceType((Class<? extends IResource>) clazz);

@@ -39,10 +39,12 @@ import ca.uhn.fhir.model.dstu.resource.Binary;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.method.SearchMethodBinding.RequestType;
 import ca.uhn.fhir.rest.param.IParameter;
 import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.Constants;
+import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -52,6 +54,7 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding implem
 
 	private Integer myIdIndex;
 	private Integer myVersionIdIndex;
+	private boolean mySupportsVersion;
 
 	public ReadMethodBinding(Class<? extends IResource> theAnnotatedResourceType, Method theMethod, FhirContext theContext, Object theProvider) {
 		super(theAnnotatedResourceType, theMethod, theContext, theProvider);
@@ -61,6 +64,7 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding implem
 		Integer idIndex = ParameterUtil.findIdParameterIndex(theMethod);
 		Integer versionIdIndex = ParameterUtil.findVersionIdParameterIndex(theMethod);
 
+		mySupportsVersion = theMethod.getAnnotation(Read.class).version();		
 		myIdIndex = idIndex;
 		myVersionIdIndex = versionIdIndex;
 
@@ -75,7 +79,7 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding implem
 	}
 
 	public boolean isVread() {
-		return myVersionIdIndex != null;
+		return mySupportsVersion || myVersionIdIndex != null;
 	}
 
 	@Override
@@ -88,8 +92,10 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding implem
 				return false;
 			}
 		}
-		if ((theRequest.getVersionId() == null) != (myVersionIdIndex == null)) {
-			return false;
+		if (mySupportsVersion == false) {
+			if ((theRequest.getVersionId() == null) != (myVersionIdIndex == null)) {
+				return false;
+			}
 		}
 		if (theRequest.getId() == null) {
 			return false;
@@ -99,7 +105,7 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding implem
 			return false;
 		}
 		if (Constants.PARAM_HISTORY.equals(theRequest.getOperation())) {
-			if (myVersionIdIndex == null) {
+			if (mySupportsVersion == false && myVersionIdIndex == null) {
 				return false;
 			}
 		} else if (!StringUtils.isBlank(theRequest.getOperation())) {
@@ -114,10 +120,10 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding implem
 	}
 
 	@Override
-	public List<IResource> invokeServer(Request theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException {
+	public IBundleProvider invokeServer(Request theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException {
 		theMethodParams[myIdIndex] = theRequest.getId();
 		if (myVersionIdIndex != null) {
-			theMethodParams[myVersionIdIndex] = new IdDt(theRequest.getVersionId().getUnqualifiedVersionId());
+			theMethodParams[myVersionIdIndex] = new IdDt(theRequest.getVersionId().getVersionIdPart());
 		}
 
 		Object response = invokeServerMethod(theMethodParams);
@@ -137,21 +143,25 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding implem
 			String resourceName = getResourceName();
 			retVal = createVReadInvocation(id, vid, resourceName);
 		}
-		
+
 		for (int idx = 0; idx < theArgs.length; idx++) {
 			IParameter nextParam = getParameters().get(idx);
 			nextParam.translateClientArgumentIntoQueryArgument(getContext(), theArgs[idx], null, retVal);
 		}
-		
+
 		return retVal;
 	}
 
 	public static HttpGetClientInvocation createVReadInvocation(IdDt theId, IdDt vid, String resourceName) {
-		return new HttpGetClientInvocation(resourceName, theId.getUnqualifiedId(), Constants.URL_TOKEN_HISTORY, vid.getUnqualifiedId());
+		return new HttpGetClientInvocation(resourceName, theId.getIdPart(), Constants.URL_TOKEN_HISTORY, vid.getIdPart());
 	}
 
 	public static HttpGetClientInvocation createReadInvocation(IdDt theId, String resourceName) {
-		return new HttpGetClientInvocation(resourceName, theId.getUnqualifiedId());
+		if (theId.hasVersionIdPart()) {
+			return new HttpGetClientInvocation(resourceName, theId.getIdPart(), Constants.URL_TOKEN_HISTORY, theId.getVersionIdPart());
+		} else {
+			return new HttpGetClientInvocation(resourceName, theId.getIdPart());
+		}
 	}
 
 	@Override
@@ -173,7 +183,7 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding implem
 	public Object invokeClient(String theResponseMimeType, InputStream theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException, BaseServerResponseException {
 		byte[] contents = IOUtils.toByteArray(theResponseReader);
 		Binary resource = new Binary(theResponseMimeType, contents);
-		
+
 		switch (getMethodReturnType()) {
 		case BUNDLE:
 			return Bundle.withSingleResource(resource);
@@ -182,8 +192,8 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding implem
 		case RESOURCE:
 			return resource;
 		}
-		
-		throw new IllegalStateException(""+getMethodReturnType()); // should not happen
+
+		throw new IllegalStateException("" + getMethodReturnType()); // should not happen
 	}
 
 }

@@ -136,7 +136,7 @@ public class TransactionTest {
 			for (IResource next : theResources) {
 				String newId = "8"+Integer.toString(index);
 				if (next.getResourceMetadata().containsKey(ResourceMetadataKeyEnum.DELETED_AT)) {
-					newId = next.getId().getUnqualifiedId();
+					newId = next.getId().getIdPart();
 				}
 				next.setId(new IdDt("Patient", newId, "9"+Integer.toString(index)));
 				index++;

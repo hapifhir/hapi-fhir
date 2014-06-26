@@ -21,7 +21,6 @@ package ca.uhn.fhir.rest.server.provider;
  */
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -58,6 +57,7 @@ public class ServerConformanceProvider {
 
 	private volatile Conformance myConformance;
 	private final RestfulServer myRestfulServer;
+	private boolean myCache = true;
 
 	public ServerConformanceProvider(RestfulServer theRestfulServer) {
 		myRestfulServer = theRestfulServer;
@@ -65,7 +65,7 @@ public class ServerConformanceProvider {
 
 	@Metadata
 	public Conformance getServerConformance() {
-		if (myConformance != null) {
+		if (myConformance != null && myCache) {
 			return myConformance;
 		}
 
@@ -85,8 +85,9 @@ public class ServerConformanceProvider {
 			@Override
 			public int compare(ResourceBinding theArg0, ResourceBinding theArg1) {
 				return theArg0.getResourceName().compareToIgnoreCase(theArg1.getResourceName());
-			}});
-		
+			}
+		});
+
 		for (ResourceBinding next : bindings) {
 
 			Set<RestfulOperationTypeEnum> resourceOps = new HashSet<RestfulOperationTypeEnum>();
@@ -117,7 +118,7 @@ public class ServerConformanceProvider {
 
 				if (nextMethodBinding instanceof SearchMethodBinding) {
 					List<IParameter> params = ((SearchMethodBinding) nextMethodBinding).getParameters();
-					List<SearchParameter> searchParameters = new ArrayList<SearchParameter>(); 
+					List<SearchParameter> searchParameters = new ArrayList<SearchParameter>();
 					for (IParameter nextParameter : params) {
 						if ((nextParameter instanceof SearchParameter)) {
 							searchParameters.add((SearchParameter) nextParameter);
@@ -138,8 +139,8 @@ public class ServerConformanceProvider {
 					if (searchParameters.isEmpty()) {
 						continue;
 					}
-					boolean allOptional = searchParameters.get(0).isRequired()==false; 
-							
+					boolean allOptional = searchParameters.get(0).isRequired() == false;
+
 					RestResourceSearchParam searchParam = null;
 					ExtensionDt searchParamChain = null;
 					for (SearchParameter nextParameter : searchParameters) {
@@ -162,11 +163,12 @@ public class ServerConformanceProvider {
 						} else {
 
 							searchParamChain = searchParam.addUndeclaredExtension(false, ExtensionConstants.CONF_ADDITIONAL_PARAM);
-							
-//							if (searchParamChain == null) {
-//							} else {
-//								searchParamChain = searchParamChain.addUndeclaredExtension(false, ExtensionConstants.CONF_ADDITIONAL_PARAM);
-//							}
+
+							// if (searchParamChain == null) {
+							// } else {
+							// searchParamChain = searchParamChain.addUndeclaredExtension(false,
+							// ExtensionConstants.CONF_ADDITIONAL_PARAM);
+							// }
 
 							ExtensionDt ext = new ExtensionDt();
 							ext.setUrl(ExtensionConstants.CONF_ADDITIONAL_PARAM_NAME);
@@ -219,5 +221,13 @@ public class ServerConformanceProvider {
 
 		myConformance = retVal;
 		return retVal;
+	}
+
+	/**
+	 * Sets the cache property (default is true). If set to true, the same response will be returned for each
+	 * invocation.
+	 */
+	public void setCache(boolean theCache) {
+		myCache = theCache;
 	}
 }

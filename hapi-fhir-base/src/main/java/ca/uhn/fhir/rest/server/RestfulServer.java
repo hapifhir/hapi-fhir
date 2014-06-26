@@ -23,27 +23,35 @@ package ca.uhn.fhir.rest.server;
 import static org.apache.commons.lang3.StringUtils.*;
 
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
+import java.util.UUID;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.StringUtils;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.method.ConformanceMethodBinding;
 import ca.uhn.fhir.rest.method.Request;
@@ -65,6 +73,7 @@ public class RestfulServer extends HttpServlet {
 
 	private FhirContext myFhirContext;
 	private ResourceBinding myNullResourceBinding = new ResourceBinding();
+	private IPagingProvider myPagingProvider;
 	private Collection<Object> myPlainProviders;
 	private Map<String, ResourceBinding> myResourceNameToProvider = new HashMap<String, ResourceBinding>();
 	private Collection<IResourceProvider> myResourceProviders;
@@ -72,7 +81,7 @@ public class RestfulServer extends HttpServlet {
 	private BaseMethodBinding<?> myServerConformanceMethod;
 	private Object myServerConformanceProvider;
 	private String myServerName = "HAPI FHIR Server";
-	/** This is configurable but by default we jsut use HAPI version */
+	/** This is configurable but by default we just use HAPI version */
 	private String myServerVersion = VersionUtil.getVersion();
 	private boolean myStarted;
 	private boolean myUseBrowserFriendlyContentTypes;
@@ -106,6 +115,10 @@ public class RestfulServer extends HttpServlet {
 	 */
 	public FhirContext getFhirContext() {
 		return myFhirContext;
+	}
+
+	public IPagingProvider getPagingProvider() {
+		return myPagingProvider;
 	}
 
 	/**
@@ -227,6 +240,13 @@ public class RestfulServer extends HttpServlet {
 
 	public boolean isUseBrowserFriendlyContentTypes() {
 		return myUseBrowserFriendlyContentTypes;
+	}
+
+	/**
+	 * Sets the paging provider to use, or <code>null</code> to use no paging (which is the default)
+	 */
+	public void setPagingProvider(IPagingProvider thePagingProvider) {
+		myPagingProvider = thePagingProvider;
 	}
 
 	/**
@@ -438,6 +458,191 @@ public class RestfulServer extends HttpServlet {
 	// myNarrativeGenerator = theNarrativeGenerator;
 	// }
 
+	private void handlePagingRequest(Request theRequest, HttpServletResponse theResponse, String thePagingAction) throws IOException {
+		IBundleProvider resultList = getPagingProvider().retrieveResultList(thePagingAction);
+		if (resultList == null) {
+			ourLog.info("Client requested unknown paging ID[{}]", thePagingAction);
+			theResponse.setStatus(Constants.STATUS_HTTP_410_GONE);
+			addHeadersToResponse(theResponse);
+			theResponse.setContentType("text/plain");
+			theResponse.setCharacterEncoding("UTF-8");
+			theResponse.getWriter().append("Search ID[" + thePagingAction + "] does not exist and may have expired.");
+			theResponse.getWriter().close();
+			return;
+		}
+
+		Integer count = extractCountParameter(theRequest.getServletRequest());
+		if (count == null) {
+			count = getPagingProvider().getDefaultPageSize();
+		} else if (count > getPagingProvider().getMaximumPageSize()) {
+			count = getPagingProvider().getMaximumPageSize();
+		}
+
+		Integer offsetI = tryToExtractNamedParameter(theRequest.getServletRequest(), Constants.PARAM_PAGINGOFFSET);
+		if (offsetI == null || offsetI < 0) {
+			offsetI = 0;
+		}
+
+		int start = Math.min(offsetI, resultList.size() - 1);
+
+		EncodingEnum responseEncoding = determineRequestEncoding(theRequest);
+		boolean prettyPrint = prettyPrintResponse(theRequest);
+		boolean requestIsBrowser = requestIsBrowser(theRequest.getServletRequest());
+		NarrativeModeEnum narrativeMode = determineNarrativeMode(theRequest);
+		streamResponseAsBundle(this, theResponse, resultList, responseEncoding, theRequest.getFhirServerBase(), theRequest.getCompleteUrl(), prettyPrint, requestIsBrowser, narrativeMode, start, count, thePagingAction);
+
+	}
+
+	public static void streamResponseAsBundle(RestfulServer theServer, HttpServletResponse theHttpResponse, IBundleProvider theResult, EncodingEnum theResponseEncoding, String theServerBase, String theCompleteUrl, boolean thePrettyPrint, boolean theRequestIsBrowser,
+			NarrativeModeEnum theNarrativeMode, int theOffset, Integer theLimit, String theSearchId) throws IOException {
+		assert !theServerBase.endsWith("/");
+
+		theHttpResponse.setStatus(200);
+
+		if (theRequestIsBrowser && theServer.isUseBrowserFriendlyContentTypes()) {
+			theHttpResponse.setContentType(theResponseEncoding.getBrowserFriendlyBundleContentType());
+		} else if (theNarrativeMode == NarrativeModeEnum.ONLY) {
+			theHttpResponse.setContentType(Constants.CT_HTML);
+		} else {
+			theHttpResponse.setContentType(theResponseEncoding.getBundleContentType());
+		}
+
+		theHttpResponse.setCharacterEncoding(Constants.CHARSET_UTF_8);
+
+		theServer.addHeadersToResponse(theHttpResponse);
+
+		int numToReturn;
+		String searchId = null;
+		List<IResource> resourceList;
+		if (theServer.getPagingProvider() == null) {
+			numToReturn = theResult.size();
+			resourceList = theResult.getResources(0, numToReturn);
+		} else {
+			IPagingProvider pagingProvider = theServer.getPagingProvider();
+			if (theLimit == null) {
+				numToReturn = pagingProvider.getDefaultPageSize();
+			} else {
+				numToReturn = Math.min(pagingProvider.getMaximumPageSize(), theLimit);
+			}
+
+			numToReturn = Math.min(numToReturn, theResult.size() - theOffset);
+			resourceList = theResult.getResources(theOffset, numToReturn + theOffset);
+
+			if (theSearchId != null) {
+				searchId = theSearchId;
+			} else {
+				if (theResult.size() > numToReturn) {
+					searchId = pagingProvider.storeResultList(theResult);
+					Validate.notNull(searchId, "Paging provider returned null searchId");
+				}
+			}
+		}
+
+		for (IResource next : resourceList) {
+			if (next.getId() == null || next.getId().isEmpty()) {
+				throw new InternalErrorException("Server method returned resource of type[" + next.getClass().getSimpleName() + "] with no ID specified (IResource#setId(IdDt) must be called)");
+			}
+		}
+
+		Bundle bundle = createBundleFromResourceList(theServer.getFhirContext(), theServer.getServerName(), resourceList, theServerBase, theCompleteUrl, theResult.size());
+
+		bundle.setPublished(theResult.getPublished());
+		
+		if (searchId != null) {
+			if (theOffset + numToReturn < theResult.size()) {
+				bundle.getLinkNext().setValue(createPagingLink(theServerBase, searchId, theOffset + numToReturn, numToReturn));
+			}
+			if (theOffset > 0) {
+				int start = Math.max(0, theOffset - numToReturn);
+				bundle.getLinkPrevious().setValue(createPagingLink(theServerBase, searchId, start, numToReturn));
+			}
+		}
+
+		PrintWriter writer = theHttpResponse.getWriter();
+		try {
+			if (theNarrativeMode == NarrativeModeEnum.ONLY) {
+				for (IResource next : resourceList) {
+					writer.append(next.getText().getDiv().getValueAsString());
+					writer.append("<hr/>");
+				}
+			} else {
+				RestfulServer.getNewParser(theServer.getFhirContext(), theResponseEncoding, thePrettyPrint, theNarrativeMode).encodeBundleToWriter(bundle, writer);
+			}
+		} finally {
+			writer.close();
+		}
+	}
+
+	public static String createPagingLink(String theServerBase, String theSearchId, int theOffset, int theCount) {
+		StringBuilder b = new StringBuilder();
+		b.append(theServerBase);
+		b.append('?');
+		b.append(Constants.PARAM_PAGINGACTION);
+		b.append('=');
+		try {
+			b.append(URLEncoder.encode(theSearchId, "UTF-8"));
+		} catch (UnsupportedEncodingException e) {
+			throw new Error("UTF-8 not supported", e);// should not happen
+		}
+		b.append('&');
+		b.append(Constants.PARAM_PAGINGOFFSET);
+		b.append('=');
+		b.append(theOffset);
+		b.append('&');
+		b.append(Constants.PARAM_COUNT);
+		b.append('=');
+		b.append(theCount);
+		return b.toString();
+	}
+
+	public static Bundle createBundleFromResourceList(FhirContext theContext, String theAuthor, List<IResource> theResult, String theServerBase, String theCompleteUrl, int theTotalResults) {
+		Bundle bundle = new Bundle();
+		bundle.getAuthorName().setValue(theAuthor);
+		bundle.getBundleId().setValue(UUID.randomUUID().toString());
+		bundle.getPublished().setToCurrentTimeInLocalTimeZone();
+		bundle.getLinkBase().setValue(theServerBase);
+		bundle.getLinkSelf().setValue(theCompleteUrl);
+
+		for (IResource next : theResult) {
+			bundle.addResource(next, theContext, theServerBase);
+		}
+
+		bundle.getTotalResults().setValue(theTotalResults);
+		return bundle;
+	}
+
+	public static IParser getNewParser(FhirContext theContext, EncodingEnum theResponseEncoding, boolean thePrettyPrint, NarrativeModeEnum theNarrativeMode) {
+		IParser parser;
+		switch (theResponseEncoding) {
+		case JSON:
+			parser = theContext.newJsonParser();
+			break;
+		case XML:
+		default:
+			parser = theContext.newXmlParser();
+			break;
+		}
+		return parser.setPrettyPrint(thePrettyPrint).setSuppressNarratives(theNarrativeMode == NarrativeModeEnum.SUPPRESS);
+	}
+
+	public static Integer extractCountParameter(HttpServletRequest theRequest) {
+		String name = Constants.PARAM_COUNT;
+		return tryToExtractNamedParameter(theRequest, name);
+	}
+
+	private static Integer tryToExtractNamedParameter(HttpServletRequest theRequest, String name) {
+		String countString = theRequest.getParameter(name);
+		Integer count = null;
+		if (isNotBlank(countString)) {
+			try {
+				count = Integer.parseInt(countString);
+			} catch (NumberFormatException e) {
+				ourLog.debug("Failed to parse _count value '{}': {}", countString, e);
+			}
+		}
+		return count;
+	}
+
 	@Override
 	protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		handleRequest(SearchMethodBinding.RequestType.DELETE, request, response);
@@ -461,13 +666,6 @@ public class RestfulServer extends HttpServlet {
 	@Override
 	protected void doPut(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		handleRequest(SearchMethodBinding.RequestType.PUT, request, response);
-	}
-
-	private static String getBaseUrl(HttpServletRequest request) {
-		if (("http".equals(request.getScheme()) && request.getServerPort() == 80) || ("https".equals(request.getScheme()) && request.getServerPort() == 443))
-			return request.getScheme() + "://" + request.getServerName() + request.getContextPath();
-		else
-			return request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath();
 	}
 
 	protected void handleRequest(SearchMethodBinding.RequestType theRequestType, HttpServletRequest theRequest, HttpServletResponse theResponse) throws ServletException, IOException {
@@ -566,7 +764,7 @@ public class RestfulServer extends HttpServlet {
 						if (id == null) {
 							throw new InvalidRequestException("Don't know how to handle request path: " + requestPath);
 						}
-						id = new IdDt(resourceName + "/" + id.getUnqualifiedId() + "/_history/" + versionString);
+						id = new IdDt(resourceName + "/" + id.getIdPart() + "/_history/" + versionString);
 						versionId = id;
 					} else {
 						operation = Constants.PARAM_HISTORY;
@@ -615,6 +813,12 @@ public class RestfulServer extends HttpServlet {
 			r.setServletRequest(theRequest);
 			r.setServletResponse(theResponse);
 
+			String pagingAction = theRequest.getParameter(Constants.PARAM_PAGINGACTION);
+			if (getPagingProvider() != null && isNotBlank(pagingAction)) {
+				handlePagingRequest(r, theResponse, pagingAction);
+				return;
+			}
+
 			if (resourceMethod == null && resourceBinding != null) {
 				resourceMethod = resourceBinding.getMethod(r);
 			}
@@ -625,6 +829,10 @@ public class RestfulServer extends HttpServlet {
 			resourceMethod.invokeServer(this, r, theResponse);
 
 		} catch (AuthenticationException e) {
+			if (requestIsBrowser(theRequest)) {
+				// if request is coming from a browser, prompt the user to enter login credentials
+				theResponse.setHeader("WWW-Authenticate", "BASIC realm=\"FHIR\"");
+			}
 			theResponse.setStatus(e.getStatusCode());
 			addHeadersToResponse(theResponse);
 			theResponse.setContentType("text/plain");
@@ -653,6 +861,11 @@ public class RestfulServer extends HttpServlet {
 
 	}
 
+	private boolean requestIsBrowser(HttpServletRequest theRequest) {
+		String userAgent = theRequest.getHeader("User-Agent");
+		return userAgent != null && userAgent.contains("Mozilla");
+	}
+
 	/**
 	 * This method may be overridden by subclasses to do perform initialization that needs to be performed prior to the
 	 * server being used.
@@ -661,29 +874,30 @@ public class RestfulServer extends HttpServlet {
 		// nothing by default
 	}
 
-	public static boolean prettyPrintResponse(Request theRequest) {
-		Map<String, String[]> requestParams = theRequest.getParameters();
-		String[] pretty = requestParams.remove(Constants.PARAM_PRETTY);
-		boolean prettyPrint;
-		if (pretty != null && pretty.length > 0) {
-			if (Constants.PARAM_PRETTY_VALUE_TRUE.equals(pretty[0])) {
-				prettyPrint = true;
-			} else {
-				prettyPrint = false;
-			}
-		} else {
-			prettyPrint = false;
-			Enumeration<String> acceptValues = theRequest.getServletRequest().getHeaders(Constants.HEADER_ACCEPT);
-			if (acceptValues != null) {
-				while (acceptValues.hasMoreElements()) {
-					String nextAcceptHeaderValue = acceptValues.nextElement();
-					if (nextAcceptHeaderValue.contains("pretty=true")) {
-						prettyPrint = true;
+	public static EncodingEnum determineRequestEncoding(Request theReq) {
+		Enumeration<String> acceptValues = theReq.getServletRequest().getHeaders(Constants.HEADER_CONTENT_TYPE);
+		if (acceptValues != null) {
+			while (acceptValues.hasMoreElements()) {
+				String nextAcceptHeaderValue = acceptValues.nextElement();
+				if (nextAcceptHeaderValue != null && isNotBlank(nextAcceptHeaderValue)) {
+					for (String nextPart : nextAcceptHeaderValue.split(",")) {
+						int scIdx = nextPart.indexOf(';');
+						if (scIdx == 0) {
+							continue;
+						}
+						if (scIdx != -1) {
+							nextPart = nextPart.substring(0, scIdx);
+						}
+						nextPart = nextPart.trim();
+						EncodingEnum retVal = Constants.FORMAT_VAL_TO_ENCODING.get(nextPart);
+						if (retVal != null) {
+							return retVal;
+						}
 					}
 				}
 			}
 		}
-		return prettyPrint;
+		return EncodingEnum.XML;
 	}
 
 	public static EncodingEnum determineResponseEncoding(Request theReq) {
@@ -722,30 +936,49 @@ public class RestfulServer extends HttpServlet {
 		return EncodingEnum.XML;
 	}
 
-	public static EncodingEnum determineRequestEncoding(Request theReq) {
-		Enumeration<String> acceptValues = theReq.getServletRequest().getHeaders(Constants.HEADER_CONTENT_TYPE);
-		if (acceptValues != null) {
-			while (acceptValues.hasMoreElements()) {
-				String nextAcceptHeaderValue = acceptValues.nextElement();
-				if (nextAcceptHeaderValue != null && isNotBlank(nextAcceptHeaderValue)) {
-					for (String nextPart : nextAcceptHeaderValue.split(",")) {
-						int scIdx = nextPart.indexOf(';');
-						if (scIdx == 0) {
-							continue;
-						}
-						if (scIdx != -1) {
-							nextPart = nextPart.substring(0, scIdx);
-						}
-						nextPart = nextPart.trim();
-						EncodingEnum retVal = Constants.FORMAT_VAL_TO_ENCODING.get(nextPart);
-						if (retVal != null) {
-							return retVal;
-						}
+	public static boolean prettyPrintResponse(Request theRequest) {
+		Map<String, String[]> requestParams = theRequest.getParameters();
+		String[] pretty = requestParams.remove(Constants.PARAM_PRETTY);
+		boolean prettyPrint;
+		if (pretty != null && pretty.length > 0) {
+			if (Constants.PARAM_PRETTY_VALUE_TRUE.equals(pretty[0])) {
+				prettyPrint = true;
+			} else {
+				prettyPrint = false;
+			}
+		} else {
+			prettyPrint = false;
+			Enumeration<String> acceptValues = theRequest.getServletRequest().getHeaders(Constants.HEADER_ACCEPT);
+			if (acceptValues != null) {
+				while (acceptValues.hasMoreElements()) {
+					String nextAcceptHeaderValue = acceptValues.nextElement();
+					if (nextAcceptHeaderValue.contains("pretty=true")) {
+						prettyPrint = true;
 					}
 				}
 			}
 		}
-		return EncodingEnum.XML;
+		return prettyPrint;
+	}
+
+	private static String getBaseUrl(HttpServletRequest request) {
+		if (("http".equals(request.getScheme()) && request.getServerPort() == 80) || ("https".equals(request.getScheme()) && request.getServerPort() == 443))
+			return request.getScheme() + "://" + request.getServerName() + request.getContextPath();
+		else
+			return request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath();
+	}
+
+	public static NarrativeModeEnum determineNarrativeMode(Request theRequest) {
+		Map<String, String[]> requestParams = theRequest.getParameters();
+		String[] narrative = requestParams.remove(Constants.PARAM_NARRATIVE);
+		NarrativeModeEnum narrativeMode = null;
+		if (narrative != null && narrative.length > 0) {
+			narrativeMode = NarrativeModeEnum.valueOfCaseInsensitive(narrative[0]);
+		}
+		if (narrativeMode == null) {
+			narrativeMode = NarrativeModeEnum.NORMAL;
+		}
+		return narrativeMode;
 	}
 
 	public enum NarrativeModeEnum {

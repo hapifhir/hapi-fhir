@@ -20,6 +20,9 @@ package ca.uhn.fhir.rest.param;
  * #L%
  */
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.server.Constants;
 
@@ -60,6 +63,16 @@ public class StringParam extends StringDt {
 
 	public boolean isExact() {
 		return myExact;
+	}
+
+	@Override
+	public String toString() {
+		ToStringBuilder builder = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
+		builder.append("value", getValue());
+		if (myExact) {
+			builder.append("exact", myExact);
+		}
+		return builder.toString();
 	}
 
 	public void setExact(boolean theExact) {

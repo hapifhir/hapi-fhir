@@ -243,7 +243,7 @@ public class RestfulServerTesterServlet extends HttpServlet {
 
 				client.delete(def.getImplementingClass(), new IdDt(id));
 
-			} else if ("history-instance".equals(method)) {
+			} else if ("history-instance".equals(method) || "history-server".equals(method) || "history-type".equals(method)) {
 				RuntimeResourceDefinition def = getResourceType(theReq);
 				String id = StringUtils.defaultString(theReq.getParameter("id"));
 				if (StringUtils.isBlank(id)) {
@@ -252,7 +252,7 @@ public class RestfulServerTesterServlet extends HttpServlet {
 
 				returnsResource = false;
 
-				client.history(def.getImplementingClass(), new IdDt(id));
+				client.history(def.getImplementingClass(), new IdDt(id),null,null);
 
 			} else if ("create".equals(method)) {
 				IResource resource = parseIncomingResource(theReq, theResp, client);

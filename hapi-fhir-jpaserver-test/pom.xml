@@ -86,6 +86,31 @@
 						<target>1.7</target>
 					</configuration>
 				</plugin>
+				<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
+				<plugin>
+					<groupId>org.eclipse.m2e</groupId>
+					<artifactId>lifecycle-mapping</artifactId>
+					<version>1.0.0</version>
+					<configuration>
+						<lifecycleMappingMetadata>
+							<pluginExecutions>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>ca.uhn.hapi.fhir</groupId>
+										<artifactId>hapi-tinder-plugin</artifactId>
+										<versionRange>[0.4-SNAPSHOT,)</versionRange>
+										<goals>
+											<goal>generate-jparest-server</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore></ignore>
+									</action>
+								</pluginExecution>
+							</pluginExecutions>
+						</lifecycleMappingMetadata>
+					</configuration>
+				</plugin>
 			</plugins>
 		</pluginManagement>
 		<plugins>
@@ -103,6 +128,7 @@
 							<packageBase>ca.uhn.test.jpasrv</packageBase>
 							<baseResourceNames>
 								<baseResourceName>device</baseResourceName>
+								<baseResourceName>diagnosticreport</baseResourceName>
 								<baseResourceName>location</baseResourceName>
 								<baseResourceName>observation</baseResourceName>
 								<baseResourceName>organization</baseResourceName>

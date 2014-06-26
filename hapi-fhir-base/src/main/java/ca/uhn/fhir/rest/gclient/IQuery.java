@@ -21,31 +21,18 @@ package ca.uhn.fhir.rest.gclient;
  */
 
 import ca.uhn.fhir.model.api.Bundle;
+import ca.uhn.fhir.model.api.Include;
 
-public interface IQuery {
+public interface IQuery extends IClientExecutable<IQuery,Bundle> {
 
 	IQuery where(ICriterion theCriterion);
-	
+
 	IQuery and(ICriterion theCriterion);
-	
-	Bundle execute();
 
 	IQuery include(Include theIncludeManagingorganization);
-
-	IQuery encodedJson();
-
-	IQuery encodedXml();
 
 	ISort sort();
 
 	IQuery limitTo(int theLimitTo);
 
-	/**
-	 * If set to true, the client will log the request and response to the SLF4J logger. This 
-	 * can be useful for debugging, but is generally not desirable in a production situation.
-	 */
-	IQuery andLogRequestAndResponse(boolean theLogRequestAndResponse);
-
-	IQuery prettyPrint();
-	
 }

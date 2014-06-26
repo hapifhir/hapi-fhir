@@ -289,6 +289,7 @@ public abstract class BaseStructureParser {
 		ctx.put("resourceBlockChildren", theResource.getResourceBlockChildren());
 		ctx.put("childExtensionTypes", ObjectUtils.defaultIfNull(myExtensions, new ArrayList<Extension>()));
 		ctx.put("searchParams", (theResource.getSearchParameters()));
+		ctx.put("searchParamsReference", (theResource.getSearchParametersResource()));
 		ctx.put("searchParamsWithoutComposite", (theResource.getSearchParametersWithoutComposite()));
 
 		VelocityEngine v = new VelocityEngine();
@@ -334,6 +335,7 @@ public abstract class BaseStructureParser {
 		for (BaseRootType next : myResources) {
 			ourLog.info("Writing Resource {}", next.getName());
 
+			scanForCorrections(next);
 			scanForTypeNameConflicts(next);
 			fixResourceReferenceClassNames(next, thePackageBase);
 
@@ -345,6 +347,18 @@ public abstract class BaseStructureParser {
 				write(next, f, thePackageBase);
 			} catch (IOException e) {
 				throw new MojoFailureException("Failed to write structure", e);
+			}
+		}
+	}
+
+	private void scanForCorrections(BaseRootType theNext) {
+		if (theNext.getElementName().equals("ResourceReference")) {
+			for (BaseElement next : theNext.getChildren()) {
+				if (next.getElementName().equals("reference")) {
+					next.clearTypes();
+					next.setTypeFromString("id");
+					scanForSimpleSetters((Child) next);
+				}
 			}
 		}
 	}

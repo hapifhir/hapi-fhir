@@ -32,7 +32,7 @@ class TokenCriterion implements ICriterion, ICriterionInternal {
 		if (StringUtils.isNotBlank(theSystem)) {
 			myValue = theSystem + "|" + StringUtils.defaultString(theCode);
 		} else {
-			myValue = StringUtils.defaultString(theCode);
+			myValue = "|" + StringUtils.defaultString(theCode);
 		}
 	}
 

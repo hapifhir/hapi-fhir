@@ -59,4 +59,9 @@ public @interface Read {
 	// NB: Read, Search (maybe others) share this annotation, so update the javadocs everywhere
 	Class<? extends IResource> type() default IResource.class;
 
+	/**
+	 * If set to true (default is false), this method supports vread operation as well as read
+	 */
+	boolean version() default false;
+
 }

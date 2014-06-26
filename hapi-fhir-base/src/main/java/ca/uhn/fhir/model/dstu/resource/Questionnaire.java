@@ -46,6 +46,7 @@ import ca.uhn.fhir.model.api.IDatatype;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.IResourceBlock;
+import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.api.annotation.Block;
 import ca.uhn.fhir.model.api.annotation.Child;
@@ -71,7 +72,6 @@ import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.gclient.DateParam;
-import ca.uhn.fhir.rest.gclient.Include;
 import ca.uhn.fhir.rest.gclient.ReferenceParam;
 import ca.uhn.fhir.rest.gclient.TokenParam;
 
@@ -454,7 +454,10 @@ public class Questionnaire extends BaseResource implements IResource {
      * The subject of the questionnaires: this is the patient that the answers apply to, but this person is not necessarily the source of information
      * </p> 
 	 */
-	public ResourceReferenceDt getSubject() {  
+	public ResourceReferenceDt getSubject() {
+		if (mySubject==null) {
+			mySubject = new ResourceReferenceDt();
+		}
 		return mySubject;
 	}
 

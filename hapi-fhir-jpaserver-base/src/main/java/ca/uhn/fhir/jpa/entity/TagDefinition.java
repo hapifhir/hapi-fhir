@@ -76,7 +76,7 @@ public class TagDefinition implements Serializable {
 	}
 
 	public Tag toTag() {
-		return new Tag( getTerm(), getLabel(),getScheme());
+		return new Tag( getScheme(), getTerm(),getLabel());
 	}
 
 }

@@ -21,7 +21,7 @@ public abstract class BaseResourceIndexedSearchParam implements Serializable {
 	private Long myId;
 
 	@Column(name = "SP_NAME", length = 100, nullable=false)
-	private String myName;
+	private String myParamName;
 
 	@ManyToOne(optional = false)
 	@JoinColumn(name = "RES_ID", referencedColumnName="RES_ID")
@@ -33,12 +33,12 @@ public abstract class BaseResourceIndexedSearchParam implements Serializable {
 	@Column(name = "RES_ID", insertable = false, updatable = false)
 	private Long myResourcePid;
 
-	public String getName() {
-		return myName;
+	public String getParamName() {
+		return myParamName;
 	}
 
-	public void setName(String theName) {
-		myName = theName;
+	public void setParamName(String theName) {
+		myParamName = theName;
 	}
 
 	public ResourceTable getResource() {

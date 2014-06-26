@@ -54,31 +54,13 @@ public abstract class BaseResourceReference extends BaseElement {
 	 */
 	public BaseResourceReference(IResource theResource) {
 		myResource = theResource;
-		setResourceId(theResource.getId());
+		setReference(theResource.getId());
 	}
 
-	/**
-	 * Gets the value(s) for <b>reference</b> (Relative, internal or absolute URL reference). creating it if it does not exist. Will not return <code>null</code>.
-	 * 
-	 * <p>
-	 * <b>Definition:</b> A reference to a location at which the other resource is found. The reference may a relative reference, in which case it is relative to the service base URL, or an absolute
-	 * URL that resolves to the location where the resource is found. The reference may be version specific or not. If the reference is not to a FHIR RESTful server, then it should be assumed to be
-	 * version specific. Internal fragment references (start with '#') refer to contained resources
-	 * </p>
-	 */
-	public abstract IdDt getResourceId();
 
-	/**
-	 * Sets the resource ID 
-	 * 
-	 * <p>
-	 * <b>Definition:</b> A reference to a location at which the other resource is found. The reference may a relative reference, in which case it is relative to the service base URL, or an absolute
-	 * URL that resolves to the location where the resource is found. The reference may be version specific or not. If the reference is not to a FHIR RESTful server, then it should be assumed to be
-	 * version specific. Internal fragment references (start with '#') refer to contained resources
-	 * </p>
-	 */
-	public abstract void setResourceId(IdDt theResourceId);
-
+	public abstract BaseResourceReference setReference(IdDt theReference);
+	
+	
 	/**
 	 * Gets the actual loaded and parsed resource instance, <b>if it is already present</b>. This
 	 * method will return the resource instance only if it has previously been loaded using
@@ -107,7 +89,7 @@ public abstract class BaseResourceReference extends BaseElement {
 			return myResource;
 		}
 
-		IdDt resourceId = getResourceId();
+		IdDt resourceId = getReference();
 		if (resourceId == null) {
 			throw new IllegalStateException("Reference has no resource ID defined");
 		}
@@ -140,6 +122,8 @@ public abstract class BaseResourceReference extends BaseElement {
 
 		return myResource;
 	}
+
+	protected abstract IdDt getReference();
 
 	public void setResource(IResource theResource) {
 		myResource = theResource;

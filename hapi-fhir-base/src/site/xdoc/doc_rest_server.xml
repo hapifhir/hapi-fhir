@@ -179,6 +179,100 @@
 			
 		</section>
 
+		<section name="Paging Responses">
+			
+			<p>
+				The <b>Search</b> and <b>History</b> operations both return a bundle
+				which contain zero or more resources. FHIR RESTful servers may optionaly
+				support paging responses, meaning that (for example) if a search returns 500
+				resources, the server can return a bundle containing only the first 20 and a link
+				which will return the next 20, etc. 
+			</p>
+			
+			<p>
+				By default, RESTful servers will not page, but will rather return all resources
+				immediately in a single bundle. There are two complimentary parts to the paging support: paging
+				prividers, and bundle providers. 
+			</p>
+
+			<subsection name="Paging Providers">
+			
+				<p>
+					To support paging, a server must have an <code>IPagingProvider</code>
+					implementation set. The paging provider is used to store resource
+					return lists between incoming calls by clients.
+				</p>
+				
+				<p>
+					A paging provider provides two key methods:
+				</p>
+				<ul>
+					<li>
+						<code>storeResultList</code>, which takes a bundle provider (see below)
+						and stores it for later retrieval. This might be by simply keeping it
+						in memory, but it might also store it on disk, in a database, etc. This
+						method must return a textual ID which can be used to retrieve this
+						list later.
+					</li>
+					<li>
+						<code>retrieveResultList</code>, which takes an ID obtained by a 
+						previous call to <code>storeResultList</code> and returns the corresponding
+						result list.
+					</li>
+				</ul> 
+				
+				<p>
+					Note that the IPagingProvider is intended to be simple and implementable and
+					you are encouraged to provide your own implementations.
+				</p>				
+
+				<p>
+					The following example shows a server implementation with paging
+					support.
+				</p>
+				
+				<macro name="snippet">
+					<param name="id" value="provider" />
+					<param name="file" value="src/site/example/java/example/PagingServer.java" />
+				</macro>
+			
+			</subsection>			
+			
+			<subsection name="Bundle Providers">
+
+				<p>
+					If a server supports a paging provider, a further optimization is to
+					also use a bundle provider. A bundle provider simply takes the place of
+					the <code>List&lt;IResource&gt;</code> return type in your provider methods.				
+				</p>
+				
+				<p>
+					When using a bundle provider however, the server will only request small sublists
+					of resources as they are actually being returned. This allows servers to optimize
+					by not loading all resources into memory until they are actually needed.
+				</p>
+				
+				<p>
+					One implementation of a bundle provider is shown below. This provider example works
+					by only keeping the resource IDs in memory, but there are other possible implementation
+					strategies that would work as well.
+				</p>
+				
+				<p>
+					Note that the IBundleProvider is intended to be simple and implementable and
+					you are encouraged to provide your own implementations.
+				</p>
+				
+				<macro name="snippet">
+					<param name="id" value="provider" />
+					<param name="file" value="src/site/example/java/example/PagingPatientProvider.java" />
+				</macro>
+			
+			</subsection>
+			
+		</section>
+			
+
 		<section name="Common Method Parameters">
 		
 			<p>

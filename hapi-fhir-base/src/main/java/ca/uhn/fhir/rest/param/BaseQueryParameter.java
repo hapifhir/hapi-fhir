@@ -100,7 +100,7 @@ public abstract class BaseQueryParameter implements IParameter {
 
 		if (paramList.isEmpty()) {
 			if (handlesMissing()) {
-				return paramList;
+				return parse(paramList);
 			} else {
 				return null;
 			}

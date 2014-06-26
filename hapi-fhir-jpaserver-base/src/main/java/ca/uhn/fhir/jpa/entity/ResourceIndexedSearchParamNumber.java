@@ -8,7 +8,7 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "HFJ_SPIDX_NUMBER" /*, indexes= {@Index(name="IDX_SP_NUMBER", columnList="SP_VALUE")}*/ )
-@org.hibernate.annotations.Table(appliesTo = "HFJ_SPIDX_NUMBER", indexes= {@org.hibernate.annotations.Index(name="IDX_SP_NUMBER", columnNames= {"SP_VALUE"})})
+@org.hibernate.annotations.Table(appliesTo = "HFJ_SPIDX_NUMBER", indexes= {@org.hibernate.annotations.Index(name="IDX_SP_NUMBER", columnNames= {"RES_TYPE", "SP_NAME", "SP_VALUE"})})
 public class ResourceIndexedSearchParamNumber extends BaseResourceIndexedSearchParam {
 
 	private static final long serialVersionUID = 1L;
@@ -23,7 +23,7 @@ public class ResourceIndexedSearchParamNumber extends BaseResourceIndexedSearchP
 	public BigDecimal myValue;
 
 	public ResourceIndexedSearchParamNumber(String theParamName, BigDecimal theValue, String theSystem, String theUnits) {
-		setName(theParamName);
+		setParamName(theParamName);
 		setSystem(theSystem);
 		setValue(theValue);
 		setUnits(theUnits);

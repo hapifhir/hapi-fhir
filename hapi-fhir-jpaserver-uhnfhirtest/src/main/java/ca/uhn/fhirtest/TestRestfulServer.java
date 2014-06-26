@@ -1,13 +1,14 @@
 package ca.uhn.fhirtest;
 
 import java.sql.DriverManager;
-import java.sql.SQLException;
 import java.util.Collection;
 
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
+import ca.uhn.fhir.jpa.provider.JpaConformanceProvider;
 import ca.uhn.fhir.jpa.provider.JpaSystemProvider;
+import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 
@@ -40,6 +41,14 @@ public class TestRestfulServer extends RestfulServer {
 		IFhirSystemDao systemDao = myAppCtx.getBean(IFhirSystemDao.class);
 		JpaSystemProvider sp = new JpaSystemProvider(systemDao);
 		setPlainProviders(sp);
+		
+		JpaConformanceProvider confProvider = new JpaConformanceProvider(this, systemDao);
+		setServerConformanceProvider(confProvider);
+		
+		setUseBrowserFriendlyContentTypes(true);
+		
+		setPagingProvider(new FifoMemoryPagingProvider(10));
+		
 	}
 
 	@Override

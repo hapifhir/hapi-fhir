@@ -1,7 +1,6 @@
 package ca.uhn.fhir.parser;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.stringContainsInOrder;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
@@ -24,6 +23,7 @@ import org.hamcrest.core.StringContains;
 import org.hamcrest.text.StringContainsInOrder;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.mockito.internal.matchers.Not;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
@@ -347,15 +347,18 @@ public class JsonParserTest {
 		MyPatientWithOneDeclaredExtension actual = parser.parseResource(MyPatientWithOneDeclaredExtension.class, val);
 		assertEquals(AddressUseEnum.HOME, patient.getAddressFirstRep().getUse().getValueAsEnum());
 		ResourceReferenceDt ref = actual.getFoo();
-		assertEquals("Organization/123", ref.getResourceId().getValue());
+		assertEquals("Organization/123", ref.getReference().getValue());
 
 	}
+	
 	
 	
 	@Test
 	public void testEncodeExt() throws Exception {
 
 		ValueSet valueSet = new ValueSet();
+		valueSet.setId("123456");
+		
 		Define define = valueSet.getDefine();
 		DefineConcept code = define.addConcept();
 		code.setCode("someCode");
@@ -365,6 +368,9 @@ public class JsonParserTest {
 		String encoded = new FhirContext().newJsonParser().encodeResourceToString(valueSet);
 		ourLog.info(encoded);
 
+		assertThat(encoded, not(containsString("123456")));
+		assertThat(encoded, containsString("\"define\":{\"concept\":[{\"code\":\"someCode\",\"display\":\"someDisplay\"}],\"_concept\":[{\"extension\":[{\"url\":\"urn:alt\",\"valueString\":\"alt name\"}]}]}"));
+		
 	}
 
 	
@@ -400,7 +406,7 @@ public class JsonParserTest {
 		try {
 			p.encodeResourceToString(obs);
 		} catch (DataFormatException e) {
-			assertThat(e.getMessage(), StringContains.containsString("PeriodDt"));
+			assertThat(e.getMessage(), StringContains.containsString("DecimalDt"));
 		}
 	}
 	
@@ -586,6 +592,27 @@ public class JsonParserTest {
 
 	}
 
+	@Test
+	public void testParseBundleFromHI() throws DataFormatException, IOException {
+
+		String msg = IOUtils.toString(XmlParser.class.getResourceAsStream("/bundle.json"));
+		IParser p = ourCtx.newJsonParser();
+		Bundle bundle = p.parseBundle(msg);
+
+		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeBundleToString(bundle);
+		ourLog.info(encoded);
+
+		BundleEntry entry = bundle.getEntries().get(0);
+
+		Patient res = (Patient) entry.getResource();
+		assertEquals("444111234", res.getIdentifierFirstRep().getValue().getValue());
+
+		BundleEntry deletedEntry = bundle.getEntries().get(3);
+		assertEquals("2014-06-20T20:15:49Z", deletedEntry.getDeletedAt().getValueAsString());
+		
+	}
+
+	
 	/**
 	 * This sample has extra elements in <searchParam> that are not actually a part of the spec any more..
 	 */
@@ -648,8 +675,8 @@ public class JsonParserTest {
 		BundleEntry entry = bundle.getEntries().get(0);
 		assertEquals("2012-05-29T23:45:32+00:00", entry.getDeletedAt().getValueAsString());
 		assertEquals("http://fhir.furore.com/fhir/Patient/1/_history/2", entry.getLinkSelf().getValue());
-		assertEquals("1", entry.getResource().getId().getUnqualifiedId());
-		assertEquals("2", entry.getResource().getId().getUnqualifiedVersionId());
+		assertEquals("1", entry.getResource().getId().getIdPart());
+		assertEquals("2", entry.getResource().getId().getVersionIdPart());
 		assertEquals(new InstantDt("2012-05-29T23:45:32+00:00"), entry.getResource().getResourceMetadata().get(ResourceMetadataKeyEnum.DELETED_AT));
 		
 		// Now encode
@@ -661,9 +688,13 @@ public class JsonParserTest {
 	}
 	
 	@Test
-	public void testEncodeBundle() {
+	public void testEncodeBundle() throws InterruptedException {
 		Bundle b= new Bundle();
 		
+		InstantDt pub = InstantDt.withCurrentTime();
+		b.setPublished(pub);
+		Thread.sleep(2);
+
 		Patient p1 = new Patient();
 		p1.addName().addFamily("Family1");
 		BundleEntry entry = b.addEntry();
@@ -686,12 +717,19 @@ public class JsonParserTest {
 		ourLog.info(bundleString);
 
 		List<String> strings = new ArrayList<String>();
+		strings.addAll(Arrays.asList("\"published\":\""+pub.getValueAsString()+"\""));
 		strings.addAll(Arrays.asList("\"id\":\"1\""));
 		strings.addAll(Arrays.asList("\"id\":\"2\"", "\"rel\":\"alternate\"", "\"href\":\"http://foo/bar\""));
 		strings.addAll(Arrays.asList("\"deleted\":\""+nowDt.getValueAsString()+"\"", "\"id\":\"Patient/3\""));
 		assertThat(bundleString, StringContainsInOrder.stringContainsInOrder(strings));
+	
+		b.getEntries().remove(2);
+		bundleString = ourCtx.newJsonParser().setPrettyPrint(true).encodeBundleToString(b);
+		assertThat(bundleString, not(containsString("deleted")));
+		
 		
 	}
+
 	@Test
 	public void testSimpleBundleEncode() throws IOException {
 

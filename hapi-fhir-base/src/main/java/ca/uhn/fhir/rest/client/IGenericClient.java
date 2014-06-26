@@ -27,8 +27,12 @@ import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.resource.Conformance;
+import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.gclient.IGetPage;
+import ca.uhn.fhir.rest.gclient.IGetPageTyped;
+import ca.uhn.fhir.rest.gclient.IGetTags;
 import ca.uhn.fhir.rest.gclient.IUntypedQuery;
 
 public interface IGenericClient {
@@ -47,16 +51,16 @@ public interface IGenericClient {
 	 */
 	MethodOutcome create(IResource theResource);
 
-	
 	/**
 	 * Implementation of the "transaction" method.
 	 * 
 	 * @param theResources
 	 *            The resources to create/update in a single transaction
-	 * @return A list of resource stubs (<b>these will not be fully populated</b>) containing IDs and other {@link IResource#getResourceMetadata() metadata}
+	 * @return A list of resource stubs (<b>these will not be fully populated</b>) containing IDs and other
+	 *         {@link IResource#getResourceMetadata() metadata}
 	 */
 	List<IResource> transaction(List<IResource> theResources);
-	
+
 	/**
 	 * Implementation of the "delete instance" method.
 	 * 
@@ -83,23 +87,39 @@ public interface IGenericClient {
 	 * Implementation of the "history instance" method.
 	 * 
 	 * @param theType
-	 *            The type of resource to return the history for
+	 *            The type of resource to return the history for, or
+	 *            <code>null<code> to search for history across all resources
 	 * @param theId
-	 *            the ID of the resource to return the history for
-	 * @return An outcome
+	 *            The ID of the resource to return the history for, or <code>null</code> to search for all resource
+	 *            instances. Note that if this param is not null, <code>theType</code> must also not be null
+	 * @param theSince
+	 *            If not null, request that the server only return resources updated since this time
+	 * @param theLimit
+	 *            If not null, request that the server return no more than this number of resources. Note that the
+	 *            server may return less even if more are available, but should not return more according to the FHIR
+	 *            specification.
+	 * @return A bundle containing returned resources
 	 */
-	<T extends IResource> Bundle history(Class<T> theType, IdDt theIdDt);
+	<T extends IResource> Bundle history(Class<T> theType, IdDt theIdDt, DateTimeDt theSince, Integer theLimit);
 
 	/**
 	 * Implementation of the "history instance" method.
 	 * 
 	 * @param theType
-	 *            The type of resource to return the history for
+	 *            The type of resource to return the history for, or
+	 *            <code>null<code> to search for history across all resources
 	 * @param theId
-	 *            the ID of the resource to return the history for
-	 * @return An outcome
+	 *            The ID of the resource to return the history for, or <code>null</code> to search for all resource
+	 *            instances. Note that if this param is not null, <code>theType</code> must also not be null
+	 * @param theSince
+	 *            If not null, request that the server only return resources updated since this time
+	 * @param theLimit
+	 *            If not null, request that the server return no more than this number of resources. Note that the
+	 *            server may return less even if more are available, but should not return more according to the FHIR
+	 *            specification.
+	 * @return A bundle containing returned resources
 	 */
-	<T extends IResource> Bundle history(Class<T> theType, String theIdDt);
+	<T extends IResource> Bundle history(Class<T> theType, String theIdDt, DateTimeDt theSince, Integer theLimit);
 
 	/**
 	 * Implementation of the "instance read" method.
@@ -195,12 +215,25 @@ public interface IGenericClient {
 	<T extends IResource> T vread(Class<T> theType, String theId, String theVersionId);
 
 	/**
-	 * If set to <code>true</code>, the client will log all requests and all responses. This
-	 * is probably not a good production setting since it will result in a lot of extra logging, but
-	 * it can be useful for troubleshooting.
+	 * If set to <code>true</code>, the client will log all requests and all responses. This is probably not a good
+	 * production setting since it will result in a lot of extra logging, but it can be useful for troubleshooting.
 	 * 
-	 * @param theLogRequestAndResponse Should requests and responses be logged
+	 * @param theLogRequestAndResponse
+	 *            Should requests and responses be logged
 	 */
 	void setLogRequestAndResponse(boolean theLogRequestAndResponse);
+
+	/**
+	 * Fluent method for the "get tags" operation
+	 */
+	IGetTags getTags();
+
+	/**
+	 * Loads the previous/next bundle of resources from a paged set, using the link specified in the 
+	 * "link type=next" tag within the atom bundle. 
+	 * 
+	 * @see Bundle#getLinkNext()
+	 */
+	IGetPage loadPage();
 
 }

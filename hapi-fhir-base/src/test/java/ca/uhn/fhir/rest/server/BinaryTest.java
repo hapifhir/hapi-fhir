@@ -165,7 +165,7 @@ public class BinaryTest {
 			Binary retVal = new Binary();
 			retVal.setId("1");
 			retVal.setContent(new byte[] { 1, 2, 3, 4 });
-			retVal.setContentType(theId.getUnqualifiedId());
+			retVal.setContentType(theId.getIdPart());
 			return retVal;
 		}
 

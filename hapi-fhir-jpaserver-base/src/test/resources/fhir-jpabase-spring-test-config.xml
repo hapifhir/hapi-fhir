@@ -13,6 +13,8 @@
 	<context:annotation-config />
 	<context:mbean-server />
 
+	<bean class="ca.uhn.fhir.context.FhirContext"></bean>
+
 	<bean id="myDaoConfig" class="ca.uhn.fhir.jpa.dao.DaoConfig">
 	</bean>
 
@@ -40,6 +42,9 @@
 	<bean id="myQuestionnaireDao" class="ca.uhn.fhir.jpa.dao.FhirResourceDao">
 		<property name="resourceType" value="ca.uhn.fhir.model.dstu.resource.Questionnaire"/>
 	</bean>
+	<bean id="myEncounterDao" class="ca.uhn.fhir.jpa.dao.FhirResourceDao">
+		<property name="resourceType" value="ca.uhn.fhir.model.dstu.resource.Encounter"/>
+	</bean>
 
 	<bean id="myPersistenceDataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource" lazy-init="true">
 		<property name="url" value="jdbc:derby:memory:myUnitTestDB;create=true" />
@@ -60,7 +65,7 @@
 		<property name="persistenceUnitName" value="FHIR_UT" />
 		<property name="jpaVendorAdapter">
 			<bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
-				<property name="showSql" value="true" />
+				<property name="showSql" value="false" />
 				<property name="generateDdl" value="true" />
 				<!-- <property name="databasePlatform" value="org.hibernate.dialect.HSQLDialect" />  -->
 				<property name="databasePlatform" value="org.hibernate.dialect.DerbyTenSevenDialect" />

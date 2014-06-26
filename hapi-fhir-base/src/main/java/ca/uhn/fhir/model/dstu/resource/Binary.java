@@ -75,14 +75,6 @@ public class Binary extends BaseResource implements IResource {
 		return myContentType;
 	}
 
-	/**
-	 * Do not call - throws {@link UnsupportedOperationException}
-	 */
-	@Override
-	public NarrativeDt getText() {
-		throw new UnsupportedOperationException();
-	}
-
 	@Override
 	public boolean isEmpty() {
 		return (myContent.isEmpty()) && StringUtils.isBlank(myContentType);

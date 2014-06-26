@@ -78,7 +78,7 @@ public class PatientResourceProvider implements IResourceProvider {
 			publishedDate = InstantDt.withCurrentTime();
 		} else {
 			Patient currentPatitne = myIdToPatientVersions.get(theId).getLast();
-			Map<ResourceMetadataKeyEnum, Object> resourceMetadata = currentPatitne.getResourceMetadata();
+			Map<ResourceMetadataKeyEnum<?>, Object> resourceMetadata = currentPatitne.getResourceMetadata();
 			publishedDate = (InstantDt) resourceMetadata.get(ResourceMetadataKeyEnum.PUBLISHED);
 		}
 
@@ -178,7 +178,7 @@ public class PatientResourceProvider implements IResourceProvider {
 	public Patient readPatient(@IdParam IdDt theId) {
 		Deque<Patient> retVal;
 		try {
-			retVal = myIdToPatientVersions.get(theId.asLong());
+			retVal = myIdToPatientVersions.get(theId.getIdPartAsLong());
 		} catch (NumberFormatException e) {
 			/*
 			 * If we can't parse the ID as a long, it's not valid so this is an unknown resource
@@ -204,7 +204,7 @@ public class PatientResourceProvider implements IResourceProvider {
 
 		Long id;
 		try {
-			id = theId.asLong();
+			id = theId.getIdPartAsLong();
 		} catch (DataFormatException e) {
 			throw new InvalidRequestException("Invalid ID " + theId.getValue() + " - Must be numeric");
 		}
@@ -255,7 +255,7 @@ public class PatientResourceProvider implements IResourceProvider {
 	public Patient vreadPatient(@IdParam IdDt theId, @VersionIdParam IdDt theVersionId) {
 		Deque<Patient> versions;
 		try {
-			versions = myIdToPatientVersions.get(theId.asLong());
+			versions = myIdToPatientVersions.get(theId.getIdPartAsLong());
 		} catch (NumberFormatException e) {
 			/*
 			 * If we can't parse the ID as a long, it's not valid so this is an unknown resource

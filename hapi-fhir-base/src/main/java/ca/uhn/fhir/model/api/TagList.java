@@ -30,7 +30,7 @@ public class TagList extends ArrayList<Tag> {
 	public static final String ELEMENT_NAME_LC = ELEMENT_NAME.toLowerCase();
 
 	public Tag addTag(String theScheme, String theTerm, String theLabel) {
-		Tag retVal = new Tag(theTerm, theLabel, theScheme);
+		Tag retVal = new Tag(theScheme, theTerm, theLabel);
 		add(retVal);
 		return retVal;
 	}

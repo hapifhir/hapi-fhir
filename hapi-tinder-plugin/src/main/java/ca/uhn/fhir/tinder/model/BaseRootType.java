@@ -47,5 +47,15 @@ public abstract class BaseRootType extends BaseElement {
 	public void setProfile(String theProfile) {
 		myProfile = theProfile;
 	}
+	
+	public ArrayList<SearchParameter> getSearchParametersResource() {
+		ArrayList<SearchParameter> retVal = new ArrayList<SearchParameter>();
+		for(SearchParameter next:getSearchParameters()) {
+			if(next.getType().equals("reference")) {
+				retVal.add(next);
+			}
+		}
+		return retVal;
+	}
 
 }

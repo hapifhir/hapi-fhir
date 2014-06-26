@@ -16,26 +16,6 @@
 
 package ca.uhn.fhir.model.dstu.resource;
 
-/*
- * #%L
- * HAPI FHIR Library
- * %%
- * Copyright (C) 2014 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 
 import java.util.List;
 
@@ -44,6 +24,7 @@ import ca.uhn.fhir.model.api.BaseResource;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.IResourceBlock;
+import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.annotation.Block;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
@@ -66,7 +47,6 @@ import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.BoundCodeableConceptDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.rest.gclient.DateParam;
-import ca.uhn.fhir.rest.gclient.Include;
 import ca.uhn.fhir.rest.gclient.NumberParam;
 import ca.uhn.fhir.rest.gclient.ReferenceParam;
 import ca.uhn.fhir.rest.gclient.TokenParam;
@@ -184,33 +164,6 @@ public class Encounter extends BaseResource implements IResource {
 	 * the path value of "<b>Encounter.subject</b>".
 	 */
 	public static final Include INCLUDE_SUBJECT = new Include("Encounter.subject");
-
-	/**
-	 * Search parameter constant for <b>!fulfills</b>
-	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Encounter.fulfills</b><br/>
-	 * </p>
-	 */
-	@SearchParamDefinition(name="!fulfills", path="Encounter.fulfills", description="", type="reference")
-	public static final String SP_FULFILLS = "!fulfills";
-
-	/**
-	 * <b>Fluent Client</b> search parameter constant for <b>!fulfills</b>
-	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Encounter.fulfills</b><br/>
-	 * </p>
-	 */
-	public static final ReferenceParam FULFILLS = new ReferenceParam(SP_FULFILLS);
-
-	/**
-	 * Constant for fluent queries to be used to add include statements. Specifies
-	 * the path value of "<b>Encounter.fulfills</b>".
-	 */
-	public static final Include INCLUDE_FULFILLS = new Include("Encounter.fulfills");
 
 	/**
 	 * Search parameter constant for <b>length</b>
@@ -498,11 +451,11 @@ public class Encounter extends BaseResource implements IResource {
      *
      * @return Returns a reference to this object, to allow for simple chaining.
 	 */
-	public Encounter addIdentifier( IdentifierUseEnum theUse,  String theSystem,  String theValue,  String theLabel) {
+	public Encounter addIdentifier( String theSystem,  String theValue) {
 		if (myIdentifier == null) {
 			myIdentifier = new java.util.ArrayList<IdentifierDt>();
 		}
-		myIdentifier.add(new IdentifierDt(theUse, theSystem, theValue, theLabel));
+		myIdentifier.add(new IdentifierDt(theSystem, theValue));
 		return this; 
 	}
 
@@ -516,11 +469,11 @@ public class Encounter extends BaseResource implements IResource {
      *
      * @return Returns a reference to this object, to allow for simple chaining.
 	 */
-	public Encounter addIdentifier( String theSystem,  String theValue) {
+	public Encounter addIdentifier( IdentifierUseEnum theUse,  String theSystem,  String theValue,  String theLabel) {
 		if (myIdentifier == null) {
 			myIdentifier = new java.util.ArrayList<IdentifierDt>();
 		}
-		myIdentifier.add(new IdentifierDt(theSystem, theValue));
+		myIdentifier.add(new IdentifierDt(theUse, theSystem, theValue, theLabel));
 		return this; 
 	}
 
@@ -651,8 +604,24 @@ public class Encounter extends BaseResource implements IResource {
      * Specific type of encounter (e.g. e-mail consultation, surgical day-care, skilled nursing, rehabilitation)
      * </p> 
 	 */
-	public void addType(EncounterTypeEnum theValue) {
-		getType().add(new BoundCodeableConceptDt<EncounterTypeEnum>(EncounterTypeEnum.VALUESET_BINDER, theValue));
+	public BoundCodeableConceptDt<EncounterTypeEnum> addType(EncounterTypeEnum theValue) {
+		BoundCodeableConceptDt<EncounterTypeEnum> retVal = new BoundCodeableConceptDt<EncounterTypeEnum>(EncounterTypeEnum.VALUESET_BINDER, theValue);
+		getType().add(retVal);
+		return retVal;
+	}
+
+	/**
+	 * Add a value for <b>type</b> (Specific type of encounter)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Specific type of encounter (e.g. e-mail consultation, surgical day-care, skilled nursing, rehabilitation)
+     * </p> 
+	 */
+	public BoundCodeableConceptDt<EncounterTypeEnum> addType() {
+		BoundCodeableConceptDt<EncounterTypeEnum> retVal = new BoundCodeableConceptDt<EncounterTypeEnum>(EncounterTypeEnum.VALUESET_BINDER);
+		getType().add(retVal);
+		return retVal;
 	}
 
 	/**
@@ -1157,8 +1126,24 @@ public class Encounter extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public void addType(ParticipantTypeEnum theValue) {
-		getType().add(new BoundCodeableConceptDt<ParticipantTypeEnum>(ParticipantTypeEnum.VALUESET_BINDER, theValue));
+	public BoundCodeableConceptDt<ParticipantTypeEnum> addType(ParticipantTypeEnum theValue) {
+		BoundCodeableConceptDt<ParticipantTypeEnum> retVal = new BoundCodeableConceptDt<ParticipantTypeEnum>(ParticipantTypeEnum.VALUESET_BINDER, theValue);
+		getType().add(retVal);
+		return retVal;
+	}
+
+	/**
+	 * Add a value for <b>type</b> (Role of participant in encounter)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * 
+     * </p> 
+	 */
+	public BoundCodeableConceptDt<ParticipantTypeEnum> addType() {
+		BoundCodeableConceptDt<ParticipantTypeEnum> retVal = new BoundCodeableConceptDt<ParticipantTypeEnum>(ParticipantTypeEnum.VALUESET_BINDER);
+		getType().add(retVal);
+		return retVal;
 	}
 
 	/**
@@ -1187,6 +1172,9 @@ public class Encounter extends BaseResource implements IResource {
      * </p> 
 	 */
 	public ResourceReferenceDt getIndividual() {  
+		if (myIndividual == null) {
+			myIndividual = new ResourceReferenceDt();
+		}
 		return myIndividual;
 	}
 
@@ -1355,8 +1343,8 @@ public class Encounter extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public Hospitalization setPreAdmissionIdentifier( IdentifierUseEnum theUse,  String theSystem,  String theValue,  String theLabel) {
-		myPreAdmissionIdentifier = new IdentifierDt(theUse, theSystem, theValue, theLabel); 
+	public Hospitalization setPreAdmissionIdentifier( String theSystem,  String theValue) {
+		myPreAdmissionIdentifier = new IdentifierDt(theSystem, theValue); 
 		return this; 
 	}
 
@@ -1368,8 +1356,8 @@ public class Encounter extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public Hospitalization setPreAdmissionIdentifier( String theSystem,  String theValue) {
-		myPreAdmissionIdentifier = new IdentifierDt(theSystem, theValue); 
+	public Hospitalization setPreAdmissionIdentifier( IdentifierUseEnum theUse,  String theSystem,  String theValue,  String theLabel) {
+		myPreAdmissionIdentifier = new IdentifierDt(theUse, theSystem, theValue, theLabel); 
 		return this; 
 	}
 

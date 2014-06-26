@@ -61,7 +61,7 @@ public interface IResource extends ICompositeElement {
 	 * @see ResourceMetadataKeyEnum for a list of allowable keys and the object
 	 *      types that values of a given key must use.
 	 */
-	Map<ResourceMetadataKeyEnum, Object> getResourceMetadata();
+	Map<ResourceMetadataKeyEnum<?>, Object> getResourceMetadata();
 
 	/**
 	 * Sets the metadata map for this object. Metadata entries are used to
@@ -71,6 +71,6 @@ public interface IResource extends ICompositeElement {
 	 * @throws NullPointerException
 	 *             The map must not be null
 	 */
-	void setResourceMetadata(Map<ResourceMetadataKeyEnum, Object> theMap);
+	void setResourceMetadata(Map<ResourceMetadataKeyEnum<?>, Object> theMap);
 
 }

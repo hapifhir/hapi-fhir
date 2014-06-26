@@ -8,7 +8,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.JoinColumns;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
@@ -23,17 +22,13 @@ public class ResourceHistoryTag extends BaseTag implements Serializable {
 	private Long myId;
 	
 	@ManyToOne()
-	@JoinColumns(value= {
-			@JoinColumn(name="RES_TYPE", referencedColumnName="RES_TYPE"),
-			@JoinColumn(name="PID", referencedColumnName="PID"),
-			@JoinColumn(name="VERSION", referencedColumnName="VERSION")
-	}/*, foreignKey=@ForeignKey(name="FK_HT_RT")*/)
+	@JoinColumn(name="RES_VER_PID", referencedColumnName="PID", nullable=false)
 	private ResourceHistoryTable myResourceHistory;
 
-	@Column(name = "RES_TYPE", length = ResourceTable.RESTYPE_LEN,nullable=false, insertable=false, updatable=false)
+	@Column(name = "RES_TYPE", length = ResourceTable.RESTYPE_LEN, nullable=false)
 	private String myResourceType;
 
-	@Column(name="PID", insertable=false,updatable=false)
+	@Column(name="RES_ID", nullable=false)
 	private Long myResourceId;
 
 	public String getResourceType() {
@@ -63,6 +58,7 @@ public class ResourceHistoryTag extends BaseTag implements Serializable {
 	public ResourceHistoryTag(ResourceHistoryTable theResourceHistoryTable, TagDefinition theTag) {
 		myResourceHistory=theResourceHistoryTable;
 		setTag(theTag);
+		setResourceId(theResourceHistoryTable.getResourceId());
 	}
 
 	public ResourceHistoryTable getResourceHistory() {

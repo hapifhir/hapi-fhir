@@ -38,6 +38,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -118,6 +119,13 @@ public abstract class BaseClient {
 
 			if (theLogRequestAndResponse) {
 				ourLog.info("Client invoking: {}", httpRequest);
+				if (httpRequest instanceof HttpEntityEnclosingRequest) {
+					HttpEntity entity = ((HttpEntityEnclosingRequest) httpRequest).getEntity();
+					if (entity.isRepeatable()) {
+						String content = IOUtils.toString(entity.getContent());
+						ourLog.info("Client request body: {}", content);
+					}
+				}
 			}
 
 			response = myClient.execute(httpRequest);
@@ -161,6 +169,8 @@ public abstract class BaseClient {
 					message = message+": " + body;
 				}
 				
+				keepResponseAndLogIt(theLogRequestAndResponse, response, body);
+
 				BaseServerResponseException exception = BaseServerResponseException.newInstance(response.getStatusLine().getStatusCode(), message);
 
 				if(body!=null) {
@@ -201,20 +211,7 @@ public abstract class BaseClient {
 
 			if (ourLog.isTraceEnabled() || myKeepResponses || theLogRequestAndResponse) {
 				String responseString = IOUtils.toString(reader);
-				if (myKeepResponses) {
-					myLastResponse = response;
-					myLastResponseBody = responseString;
-				}
-				if (theLogRequestAndResponse) {
-					String message = "HTTP " + response.getStatusLine().getStatusCode()+" " +response.getStatusLine().getReasonPhrase();
-					if (StringUtils.isNotBlank(responseString)) {
-						ourLog.info("Client response: {}\n{}", message, responseString);
-					}else {
-						ourLog.info("Client response: {}", message, responseString);
-					}
-				}else {
-					ourLog.trace("FHIR response:\n{}\n{}", response, responseString);
-				}
+				keepResponseAndLogIt(theLogRequestAndResponse, response, responseString);
 				reader = new StringReader(responseString);
 			}
 
@@ -236,6 +233,23 @@ public abstract class BaseClient {
 					ourLog.debug("Failed to close response", e);
 				}
 			}
+		}
+	}
+
+	private void keepResponseAndLogIt(boolean theLogRequestAndResponse, HttpResponse response, String responseString) {
+		if (myKeepResponses) {
+			myLastResponse = response;
+			myLastResponseBody = responseString;
+		}
+		if (theLogRequestAndResponse) {
+			String message = "HTTP " + response.getStatusLine().getStatusCode()+" " +response.getStatusLine().getReasonPhrase();
+			if (StringUtils.isNotBlank(responseString)) {
+				ourLog.info("Client response: {}\n{}", message, responseString);
+			}else {
+				ourLog.info("Client response: {}", message, responseString);
+			}
+		}else {
+			ourLog.trace("FHIR response:\n{}\n{}", response, responseString);
 		}
 	}
 

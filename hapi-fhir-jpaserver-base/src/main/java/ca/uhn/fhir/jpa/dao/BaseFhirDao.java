@@ -2,8 +2,10 @@ package ca.uhn.fhir.jpa.dao;
 
 import static org.apache.commons.lang3.StringUtils.*;
 
+import java.io.UnsupportedEncodingException;
 import java.text.Normalizer;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -26,6 +28,7 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import ca.uhn.fhir.context.ConfigurationException;
@@ -34,8 +37,8 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.entity.BaseHasResource;
 import ca.uhn.fhir.jpa.entity.BaseTag;
+import ca.uhn.fhir.jpa.entity.ResourceEncodingEnum;
 import ca.uhn.fhir.jpa.entity.ResourceHistoryTable;
-import ca.uhn.fhir.jpa.entity.ResourceHistoryTablePk;
 import ca.uhn.fhir.jpa.entity.ResourceHistoryTag;
 import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamNumber;
@@ -45,6 +48,7 @@ import ca.uhn.fhir.jpa.entity.ResourceLink;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.jpa.entity.ResourceTag;
 import ca.uhn.fhir.jpa.entity.TagDefinition;
+import ca.uhn.fhir.jpa.util.StopWatch;
 import ca.uhn.fhir.model.api.IDatatype;
 import ca.uhn.fhir.model.api.IPrimitiveDatatype;
 import ca.uhn.fhir.model.api.IResource;
@@ -57,14 +61,16 @@ import ca.uhn.fhir.model.dstu.composite.CodingDt;
 import ca.uhn.fhir.model.dstu.composite.ContactDt;
 import ca.uhn.fhir.model.dstu.composite.HumanNameDt;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
+import ca.uhn.fhir.model.dstu.composite.PeriodDt;
 import ca.uhn.fhir.model.dstu.composite.QuantityDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.valueset.SearchParamTypeEnum;
 import ca.uhn.fhir.model.primitive.BaseDateTimeDt;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.rest.server.EncodingEnum;
+import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.FhirTerser;
 
@@ -73,13 +79,37 @@ import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
 
 public abstract class BaseFhirDao {
-	private FhirContext myContext = new FhirContext();
+	
+	@Autowired(required=true)
+	private FhirContext myContext;
+	
 	@PersistenceContext(name = "FHIR_UT", type = PersistenceContextType.TRANSACTION, unitName = "FHIR_UT")
 	private EntityManager myEntityManager;
 	@Autowired
 	private List<IFhirResourceDao<?>> myResourceDaos;
 
 	private Map<Class<? extends IResource>, IFhirResourceDao<?>> myResourceTypeToDao;
+	
+	protected void loadResourcesById(Set<IdDt> theIncludePids, List<IResource> theResourceListToPopulate) {
+		Set<Long> pids = new HashSet<Long>();
+		for (IdDt next : theIncludePids) {
+			pids.add(next.getIdPartAsLong());
+		}
+		
+		CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
+		CriteriaQuery<ResourceTable> cq = builder.createQuery(ResourceTable.class);
+		Root<ResourceTable> from = cq.from(ResourceTable.class);
+//		cq.where(builder.equal(from.get("myResourceType"), getContext().getResourceDefinition(myResourceType).getName()));
+//		if (theIncludePids != null) {
+			cq.where(from.get("myId").in(pids));
+//		}
+		TypedQuery<ResourceTable> q = myEntityManager.createQuery(cq);
+
+		for (ResourceTable next : q.getResultList()) {
+			IResource resource = toResource(next);
+			theResourceListToPopulate.add(resource);
+		}
+	}
 
 	public FhirContext getContext() {
 		return myContext;
@@ -96,7 +126,7 @@ public abstract class BaseFhirDao {
 	@Autowired(required = true)
 	private DaoConfig myConfig;
 
-	private void searchHistoryCurrentVersion(String theResourceName, Long theId, Date theSince, Integer theLimit, List<HistoryTuple> tuples) {
+	private void searchHistoryCurrentVersion(String theResourceName, Long theId, Date theSince, Date theEnd, Integer theLimit, List<HistoryTuple> tuples) {
 		CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
 		CriteriaQuery<Tuple> cq = builder.createTupleQuery();
 		Root<?> from = cq.from(ResourceTable.class);
@@ -107,6 +137,9 @@ public abstract class BaseFhirDao {
 			Predicate low = builder.greaterThanOrEqualTo(from.<Date> get("myUpdated"), theSince);
 			predicates.add(low);
 		}
+
+		Predicate high = builder.lessThan(from.<Date> get("myUpdated"), theEnd);
+		predicates.add(high);
 
 		if (theResourceName != null) {
 			predicates.add(builder.equal(from.get("myResourceType"), theResourceName));
@@ -125,9 +158,9 @@ public abstract class BaseFhirDao {
 			q.setMaxResults(myConfig.getHardSearchLimit());
 		}
 		for (Tuple next : q.getResultList()) {
-			long id = (Long) next.get(0);
-			Date updated = (Date) next.get(1);
-			tuples.add(new HistoryTuple(ResourceTable.class, updated, id));
+			long id = next.get(0, Long.class);
+			Date updated = next.get(1, Date.class);
+			tuples.add(new HistoryTuple(false, updated, id));
 		}
 	}
 
@@ -135,13 +168,13 @@ public abstract class BaseFhirDao {
 		Collection<HistoryTuple> tuples = Collections2.filter(theTuples, new com.google.common.base.Predicate<HistoryTuple>() {
 			@Override
 			public boolean apply(HistoryTuple theInput) {
-				return theInput.getTable().equals(ResourceTable.class);
+				return theInput.isHistory() == false;
 			}
 		});
 		Collection<Long> ids = Collections2.transform(tuples, new Function<HistoryTuple, Long>() {
 			@Override
 			public Long apply(HistoryTuple theInput) {
-				return (Long) theInput.getId();
+				return theInput.getId();
 			}
 		});
 		if (ids.isEmpty()) {
@@ -160,11 +193,11 @@ public abstract class BaseFhirDao {
 		}
 	}
 
-	private void searchHistoryHistory(String theResourceName, Long theId, Date theSince, Integer theLimit, List<HistoryTuple> tuples) {
+	private void searchHistoryHistory(String theResourceName, Long theResourceId, Date theSince,Date theEnd, Integer theLimit, List<HistoryTuple> tuples) {
 		CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
 		CriteriaQuery<Tuple> cq = builder.createTupleQuery();
 		Root<?> from = cq.from(ResourceHistoryTable.class);
-		cq.multiselect(from.get("myPk").as(ResourceHistoryTablePk.class), from.get("myUpdated").as(Date.class));
+		cq.multiselect(from.get("myId").as(Long.class), from.get("myUpdated").as(Date.class));
 
 		List<Predicate> predicates = new ArrayList<Predicate>();
 		if (theSince != null) {
@@ -172,11 +205,14 @@ public abstract class BaseFhirDao {
 			predicates.add(low);
 		}
 
+		Predicate high = builder.lessThan(from.<Date> get("myUpdated"), theEnd);
+		predicates.add(high);
+
 		if (theResourceName != null) {
 			predicates.add(builder.equal(from.get("myResourceType"), theResourceName));
 		}
-		if (theId != null) {
-			predicates.add(builder.equal(from.get("myId"), theId));
+		if (theResourceId != null) {
+			predicates.add(builder.equal(from.get("myResourceId"), theResourceId));
 		}
 
 		cq.where(builder.and(predicates.toArray(new Predicate[0])));
@@ -189,33 +225,37 @@ public abstract class BaseFhirDao {
 			q.setMaxResults(myConfig.getHardSearchLimit());
 		}
 		for (Tuple next : q.getResultList()) {
-			ResourceHistoryTablePk id = (ResourceHistoryTablePk) next.get(0);
+			Long id = next.get(0, Long.class);
 			Date updated = (Date) next.get(1);
-			tuples.add(new HistoryTuple(ResourceHistoryTable.class, updated, id));
+			tuples.add(new HistoryTuple(true, updated, id));
 		}
 	}
 
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseFhirDao.class);
+	
 	private void searchHistoryHistory(List<HistoryTuple> theTuples, List<BaseHasResource> theRetVal) {
 		Collection<HistoryTuple> tuples = Collections2.filter(theTuples, new com.google.common.base.Predicate<HistoryTuple>() {
 			@Override
 			public boolean apply(HistoryTuple theInput) {
-				return theInput.getTable().equals(ResourceHistoryTable.class);
+				return theInput.isHistory()==true;
 			}
 		});
-		Collection<ResourceHistoryTablePk> ids = Collections2.transform(tuples, new Function<HistoryTuple, ResourceHistoryTablePk>() {
+		Collection<Long> ids = Collections2.transform(tuples, new Function<HistoryTuple, Long>() {
 			@Override
-			public ResourceHistoryTablePk apply(HistoryTuple theInput) {
-				return (ResourceHistoryTablePk) theInput.getId();
+			public Long apply(HistoryTuple theInput) {
+				return (Long) theInput.getId();
 			}
 		});
 		if (ids.isEmpty()) {
 			return;
 		}
+		
+		ourLog.info("Retrieving {} history elements from ResourceHistoryTable", ids.size());
 
 		CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
 		CriteriaQuery<ResourceHistoryTable> cq = builder.createQuery(ResourceHistoryTable.class);
 		Root<ResourceHistoryTable> from = cq.from(ResourceHistoryTable.class);
-		cq.where(from.get("myPk").in(ids));
+		cq.where(from.get("myId").in(ids));
 
 		cq.orderBy(builder.desc(from.get("myUpdated")));
 		TypedQuery<ResourceHistoryTable> q = myEntityManager.createQuery(cq);
@@ -258,19 +298,19 @@ public abstract class BaseFhirDao {
 						continue;
 					}
 
-					String typeString = nextValue.getResourceId().getResourceType();
+					String typeString = nextValue.getReference().getResourceType();
 					if (isBlank(typeString)) {
 						throw new InvalidRequestException("Invalid resource reference found at path[" + nextPath + "] - Does not contain resource type - " + nextValue.getReference().getValue());
 					}
 					Class<? extends IResource> type = getContext().getResourceDefinition(typeString).getImplementingClass();
-					String id = nextValue.getResourceId().getUnqualifiedId();
+					String id = nextValue.getReference().getIdPart();
 					if (StringUtils.isBlank(id)) {
 						continue;
 					}
 
 					IFhirResourceDao<?> dao = getDao(type);
 					if (dao == null) {
-						throw new InvalidRequestException("This server is not able to handle resources of type: " + nextValue.getResourceId().getResourceType());
+						throw new InvalidRequestException("This server is not able to handle resources of type: " + nextValue.getReference().getResourceType());
 					}
 					Long valueOf;
 					try {
@@ -333,6 +373,12 @@ public abstract class BaseFhirDao {
 						continue;
 					}
 					nextEntity = new ResourceIndexedSearchParamDate(nextSpDef.getName(), nextValue.getValue(), nextValue.getValue());
+				} else if (nextObject instanceof PeriodDt) {
+					PeriodDt nextValue = (PeriodDt) nextObject;
+					if (nextValue.isEmpty()) {
+						continue;
+					}
+					nextEntity = new ResourceIndexedSearchParamDate(nextSpDef.getName(), nextValue.getStart().getValue(), nextValue.getEnd().getValue());
 				} else {
 					if (!multiType) {
 						throw new ConfigurationException("Search param " + nextSpDef.getName() + " is of unexpected datatype: " + nextObject.getClass());
@@ -377,7 +423,8 @@ public abstract class BaseFhirDao {
 
 				if (nextObject instanceof QuantityDt) {
 					QuantityDt nextValue = (QuantityDt) nextObject;
-					ResourceIndexedSearchParamNumber nextEntity = new ResourceIndexedSearchParamNumber(resourceName, nextValue.getValue().getValue(), nextValue.getSystem().getValueAsString(), nextValue.getUnits().getValue());
+					ResourceIndexedSearchParamNumber nextEntity = new ResourceIndexedSearchParamNumber(resourceName, nextValue.getValue().getValue(), nextValue.getSystem().getValueAsString(),
+							nextValue.getUnits().getValue());
 					nextEntity.setResource(theEntity);
 					retVal.add(nextEntity);
 				} else {
@@ -460,7 +507,8 @@ public abstract class BaseFhirDao {
 					} else if (nextObject instanceof ContactDt) {
 						ContactDt nextContact = (ContactDt) nextObject;
 						if (nextContact.getValue().isEmpty() == false) {
-							ResourceIndexedSearchParamString nextEntity = new ResourceIndexedSearchParamString(resourceName, normalizeString(nextContact.getValue().getValueAsString()), nextContact.getValue().getValueAsString());
+							ResourceIndexedSearchParamString nextEntity = new ResourceIndexedSearchParamString(resourceName, normalizeString(nextContact.getValue().getValueAsString()), nextContact
+									.getValue().getValueAsString());
 							nextEntity.setResource(theEntity);
 							retVal.add(nextEntity);
 						}
@@ -549,57 +597,87 @@ public abstract class BaseFhirDao {
 			for (IFhirResourceDao<?> next : myResourceDaos) {
 				myResourceTypeToDao.put(next.getResourceType(), next);
 			}
-			
+
 			if (this instanceof IFhirResourceDao<?>) {
 				IFhirResourceDao<?> thiz = (IFhirResourceDao<?>) this;
 				myResourceTypeToDao.put(thiz.getResourceType(), thiz);
 			}
-			
+
 		}
 
 		return myResourceTypeToDao.get(theType);
 	}
 
-	protected ArrayList<IResource> history(String theResourceName, Long theId, Date theSince, Integer theLimit) {
-		List<HistoryTuple> tuples = new ArrayList<HistoryTuple>();
+	protected IBundleProvider history(String theResourceName, Long theId, Date theSince) {
+		final List<HistoryTuple> tuples = new ArrayList<HistoryTuple>();
+		
+		final InstantDt end = createHistoryToTimestamp();
 
+		StopWatch timer = new StopWatch();
+		
+		int limit = 10000;
+		
 		// Get list of IDs
-		searchHistoryCurrentVersion(theResourceName, theId, theSince, theLimit, tuples);
+		searchHistoryCurrentVersion(theResourceName, theId, theSince, end.getValue(), limit, tuples);
 		assert tuples.size() < 2 || !tuples.get(tuples.size() - 2).getUpdated().before(tuples.get(tuples.size() - 1).getUpdated());
-		searchHistoryHistory(theResourceName, theId, theSince, theLimit, tuples);
+		ourLog.info("Retrieved {} history IDs from current versions in {} ms", tuples.size(), timer.getMillisAndRestart());
+		
+		searchHistoryHistory(theResourceName, theId, theSince, end.getValue() , limit, tuples);
 		assert tuples.size() < 2 || !tuples.get(tuples.size() - 2).getUpdated().before(tuples.get(tuples.size() - 1).getUpdated());
+		ourLog.info("Retrieved {} history IDs from previous versions in {} ms", tuples.size(), timer.getMillisAndRestart());
 
 		// Sort merged list
 		Collections.sort(tuples, Collections.reverseOrder());
 		assert tuples.size() < 2 || !tuples.get(tuples.size() - 2).getUpdated().before(tuples.get(tuples.size() - 1).getUpdated());
 
-		// Pull actual resources
-		List<BaseHasResource> resEntities = Lists.newArrayList();
-		searchHistoryCurrentVersion(tuples, resEntities);
-		searchHistoryHistory(tuples, resEntities);
-
-		Collections.sort(resEntities, new Comparator<BaseHasResource>() {
+		return new IBundleProvider() {
+			
 			@Override
-			public int compare(BaseHasResource theO1, BaseHasResource theO2) {
-				return theO2.getUpdated().getValue().compareTo(theO1.getUpdated().getValue());
+			public int size() {
+				return tuples.size();
 			}
-		});
+			
+			@Override
+			public List<IResource> getResources(int theFromIndex, int theToIndex) {
+				StopWatch timer = new StopWatch();
+				List<BaseHasResource> resEntities = Lists.newArrayList();
+				
+				List<HistoryTuple> tupleSubList = tuples.subList(theFromIndex, theToIndex);
+				searchHistoryCurrentVersion(tupleSubList, resEntities);
+				ourLog.info("Loaded history from current versions in {} ms", timer.getMillisAndRestart());
+				
+				searchHistoryHistory(tupleSubList, resEntities);
+				ourLog.info("Loaded history from previous versions in {} ms", timer.getMillisAndRestart());
 
-		int limit;
-		if (theLimit != null && theLimit < myConfig.getHardSearchLimit()) {
-			limit = theLimit;
-		} else {
-			limit = myConfig.getHardSearchLimit();
-		}
-		if (resEntities.size() > limit) {
-			resEntities = resEntities.subList(0, limit);
-		}
+				Collections.sort(resEntities, new Comparator<BaseHasResource>() {
+					@Override
+					public int compare(BaseHasResource theO1, BaseHasResource theO2) {
+						return theO2.getUpdated().getValue().compareTo(theO1.getUpdated().getValue());
+					}
+				});
 
-		ArrayList<IResource> retVal = new ArrayList<IResource>();
-		for (BaseHasResource next : resEntities) {
-			retVal.add(toResource(next));
-		}
-		return retVal;
+				int limit = theToIndex-theFromIndex;
+				if (resEntities.size() > limit) {
+					resEntities = resEntities.subList(0, limit);
+				}
+
+				ArrayList<IResource> retVal = new ArrayList<IResource>();
+				for (BaseHasResource next : resEntities) {
+					retVal.add(toResource(next));
+				}
+				return retVal;
+			}
+			
+			@Override
+			public InstantDt getPublished() {
+				return end;
+			}
+		};
+	}
+
+	InstantDt createHistoryToTimestamp() {
+//		final InstantDt end = new InstantDt(DateUtils.addSeconds(DateUtils.truncate(new Date(), Calendar.SECOND), -1));
+		return InstantDt.withCurrentTime();
 	}
 
 	protected String normalizeString(String theString) {
@@ -638,9 +716,22 @@ public abstract class BaseFhirDao {
 		theEntity.setUpdated(new Date());
 
 		theEntity.setResourceType(toResourceName(theResource));
-		theEntity.setResource(getContext().newJsonParser().encodeResourceToString(theResource));
-		theEntity.setEncoding(EncodingEnum.JSON);
-
+		
+		String encoded = myConfig.getResourceEncoding().newParser(myContext).encodeResourceToString(theResource);
+		ResourceEncodingEnum  encoding = myConfig.getResourceEncoding();
+		theEntity.setEncoding(encoding);
+		try {
+		switch (encoding) {
+		case JSON:
+				theEntity.setResource(encoded.getBytes("UTF-8"));
+			break;
+		case JSONC:
+			theEntity.setResource(GZipUtil.compress(encoded));
+			break;
+		}
+		} catch (UnsupportedEncodingException e) {
+		}
+		
 		TagList tagList = (TagList) theResource.getResourceMetadata().get(ResourceMetadataKeyEnum.TAG_LIST);
 		if (tagList != null) {
 			for (Tag next : tagList) {
@@ -665,7 +756,20 @@ public abstract class BaseFhirDao {
 	}
 
 	protected <T extends IResource> T toResource(Class<T> theResourceType, BaseHasResource theEntity) {
-		String resourceText = theEntity.getResource();
+		String resourceText=null;
+		switch (theEntity.getEncoding()) {
+		case JSON:
+			try {
+				resourceText = new String(theEntity.getResource(), "UTF-8");
+			} catch (UnsupportedEncodingException e) {
+				throw new Error("Should not happen", e);
+			}
+			break;
+		case JSONC:
+			resourceText = GZipUtil.decompress(theEntity.getResource());
+			break;
+		}
+		
 		IParser parser = theEntity.getEncoding().newParser(getContext());
 		T retVal = parser.parseResource(theResourceType, resourceText);
 		retVal.setId(theEntity.getIdDt());
@@ -675,7 +779,7 @@ public abstract class BaseFhirDao {
 		if (theEntity.getTags().size() > 0) {
 			TagList tagList = new TagList();
 			for (BaseTag next : theEntity.getTags()) {
-				tagList.add(new Tag(next.getTag().getTerm(), next.getTag().getLabel(), next.getTag().getScheme()));
+				tagList.add(new Tag(next.getTag().getScheme(), next.getTag().getTerm(), next.getTag().getLabel()));
 			}
 			retVal.getResourceMetadata().put(ResourceMetadataKeyEnum.TAG_LIST, tagList);
 		}
@@ -685,11 +789,11 @@ public abstract class BaseFhirDao {
 	protected String toResourceName(IResource theResource) {
 		return myContext.getResourceDefinition(theResource).getName();
 	}
+
 	protected String toResourceName(Class<? extends IResource> theResourceType) {
 		return myContext.getResourceDefinition(theResourceType).getName();
 	}
 
-	
 	protected ResourceTable updateEntity(final IResource theResource, ResourceTable entity, boolean theUpdateHistory) {
 		if (entity.getPublished() == null) {
 			entity.setPublished(new Date());
@@ -702,6 +806,12 @@ public abstract class BaseFhirDao {
 
 		entity.setVersion(entity.getVersion() + 1);
 
+		Collection<ResourceIndexedSearchParamString> paramsString = new ArrayList<ResourceIndexedSearchParamString>(entity.getParamsString());
+		Collection<ResourceIndexedSearchParamToken> paramsToken = new ArrayList<ResourceIndexedSearchParamToken>(entity.getParamsToken());
+		Collection<ResourceIndexedSearchParamNumber> paramsNumber = new ArrayList<ResourceIndexedSearchParamNumber>(entity.getParamsNumber());
+		Collection<ResourceIndexedSearchParamDate> paramsDate = new ArrayList<ResourceIndexedSearchParamDate>(entity.getParamsDate());
+		Collection<ResourceLink> resourceLinks = new ArrayList<ResourceLink>(entity.getResourceLinks());
+
 		final List<ResourceIndexedSearchParamString> stringParams = extractSearchParamStrings(entity, theResource);
 		final List<ResourceIndexedSearchParamToken> tokenParams = extractSearchParamTokens(entity, theResource);
 		final List<ResourceIndexedSearchParamNumber> numberParams = extractSearchParamNumber(entity, theResource);
@@ -711,6 +821,16 @@ public abstract class BaseFhirDao {
 		populateResourceIntoEntity(theResource, entity);
 
 		entity.setUpdated(new Date());
+		entity.setParamsString(stringParams);
+		entity.setParamsStringPopulated(stringParams.isEmpty()==false);
+		entity.setParamsToken(tokenParams);
+		entity.setParamsTokenPopulated(tokenParams.isEmpty()==false);
+		entity.setParamsNumber(numberParams);
+		entity.setParamsNumberPopulated(numberParams.isEmpty()==false);
+		entity.setParamsDate(dateParams);
+		entity.setParamsDatePopulated(dateParams.isEmpty()==false);
+		entity.setResourceLinks(links);
+		entity.setHasLinks(links.isEmpty()==false);
 
 		if (entity.getId() == null) {
 			myEntityManager.persist(entity);
@@ -719,16 +839,16 @@ public abstract class BaseFhirDao {
 		}
 
 		if (entity.isParamsStringPopulated()) {
-			for (ResourceIndexedSearchParamString next : entity.getParamsString()) {
+			for (ResourceIndexedSearchParamString next : paramsString) {
 				myEntityManager.remove(next);
 			}
 		}
 		for (ResourceIndexedSearchParamString next : stringParams) {
 			myEntityManager.persist(next);
 		}
-
+		
 		if (entity.isParamsTokenPopulated()) {
-			for (ResourceIndexedSearchParamToken next : entity.getParamsToken()) {
+			for (ResourceIndexedSearchParamToken next : paramsToken) {
 				myEntityManager.remove(next);
 			}
 		}
@@ -737,7 +857,7 @@ public abstract class BaseFhirDao {
 		}
 
 		if (entity.isParamsNumberPopulated()) {
-			for (ResourceIndexedSearchParamNumber next : entity.getParamsNumber()) {
+			for (ResourceIndexedSearchParamNumber next : paramsNumber) {
 				myEntityManager.remove(next);
 			}
 		}
@@ -746,7 +866,7 @@ public abstract class BaseFhirDao {
 		}
 
 		if (entity.isParamsDatePopulated()) {
-			for (ResourceIndexedSearchParamDate next : entity.getParamsDate()) {
+			for (ResourceIndexedSearchParamDate next : paramsDate) {
 				myEntityManager.remove(next);
 			}
 		}
@@ -755,14 +875,14 @@ public abstract class BaseFhirDao {
 		}
 
 		if (entity.isHasLinks()) {
-			for (ResourceLink next : entity.getResourceLinks()) {
+			for (ResourceLink next : resourceLinks) {
 				myEntityManager.remove(next);
 			}
 		}
 		for (ResourceLink next : links) {
 			myEntityManager.persist(next);
 		}
-
+		
 		myEntityManager.flush();
 		theResource.setId(new IdDt(entity.getResourceType(), entity.getId().toString(), Long.toString(entity.getVersion())));
 
@@ -770,10 +890,10 @@ public abstract class BaseFhirDao {
 	}
 
 	protected TagList getTags(Class<? extends IResource> theResourceType, IdDt theResourceId) {
-		String resourceName=null;
+		String resourceName = null;
 		if (theResourceType != null) {
 			resourceName = toResourceName(theResourceType);
-			if (theResourceId != null && theResourceId.hasUnqualifiedVersionId()) {
+			if (theResourceId != null && theResourceId.hasVersionIdPart()) {
 				IFhirResourceDao<? extends IResource> dao = getDao(theResourceType);
 				BaseHasResource entity = dao.readEntity(theResourceId);
 				TagList retVal = new TagList();
@@ -783,7 +903,7 @@ public abstract class BaseFhirDao {
 				return retVal;
 			}
 		}
-		
+
 		Set<Long> tagIds = new HashSet<Long>();
 		findMatchingTagIds(resourceName, theResourceId, tagIds, ResourceTag.class);
 		findMatchingTagIds(resourceName, theResourceId, tagIds, ResourceHistoryTag.class);
@@ -818,7 +938,7 @@ public abstract class BaseFhirDao {
 			if (theResourceName != null) {
 				Predicate typePredicate = builder.equal(from.get("myResourceType"), theResourceName);
 				if (theResourceId != null) {
-					cq.where(typePredicate, builder.equal(from.get("myResourceId"), theResourceId.asLong()));
+					cq.where(typePredicate, builder.equal(from.get("myResourceId"), theResourceId.getIdPartAsLong()));
 				} else {
 					cq.where(typePredicate);
 				}

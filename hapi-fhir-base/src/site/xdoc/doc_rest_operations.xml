@@ -235,11 +235,10 @@
 				<a href="http://hl7.org/implement/standards/fhir/http.html#vread">
 					<b>vread</b>
 				</a>
-				operation retrieves a specific version of a resource with a given ID. It looks exactly
-				like a "read" operation, but with a second <code>IdDt</code>
-				parameter annotated with the
-				<a href="./apidocs/ca/uhn/fhir/rest/annotation/VersionIdParam.html">@VersionIdParam</a>
-				annotation.
+				operation retrieves a specific version of a resource with a given ID.
+				To support vread, simply add "version=true" to your @Read annotation. This
+				means that the read method will support both "Read" and "VRead". The IdDt
+				may or may not have the version populated depending on the client request. 
 			</p>
 
 			<macro name="snippet">
@@ -253,13 +252,6 @@
 				<code>http://fhir.example.com/Patient/111/_history/2</code>
 			</p>
 			
-			<p>
-				To define a client method to handle a VRead method, the
-				syntax is the same as the <a href="#instance_vread">read</a> method
-				above, except that you will add a second <code>IdDt</code> parameter 
-				annotated with the <code>@VersionIdParam</code> annotation.
-			</p>
-
 			<a name="instance_update" />
 		</section>
 
