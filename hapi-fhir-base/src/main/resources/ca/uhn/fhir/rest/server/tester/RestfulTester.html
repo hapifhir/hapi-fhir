@@ -907,7 +907,7 @@
 									<td>Request Body</td>
 									<td valign="top" style="margin: 0px; padding: 0px;">
 										<pre class="requestBodyPre resultBodyPlaceholder" id="requestBodyPlaceholder">...loading...</pre>
-										<pre th:text="${requestBody}" th:class="${requestSyntaxHighlighterClass} + ' resultBodyPre pre'" id="requestBodyActual" style="display: none;">{}</pre>
+										<pre th:utext="${requestBody}" th:class="${requestSyntaxHighlighterClass} + ' resultBodyPre pre'" id="requestBodyActual" style="display: none;">{}</pre>
 									</td>
 								</tr>
 							</tbody>
@@ -953,7 +953,7 @@
 													<h4 class="panel-title">
 														<a data-toggle="collapse" data-parent="#accordion" href="#collapseOne">
 															<i id="collapseOneIcon" class="fa fa-minus-square-o"></i>
-															<span th:text="'Bundle contains ' + ${bundle.entries.size} + ' entries'"/>
+															<span th:text="'Bundle contains ' + ${bundle.totalResults.value} + ' entries'"/>
 														</a>
 
 														<!-- Prev/Next Page Buttons -->
@@ -968,7 +968,7 @@
 															$('#page-prev-btn').click(function() {
 																var btn = $(this);
 																btn.button('loading');
-																btn.append($('<input />', { type: 'hidden', name: 'pageUrl', value: '<th:block th:text="${bundle.linkPrevious}"/>' }));
+																btn.append($('<input />', { type: 'hidden', name: 'page-url', value: '<th:block th:text="${bundle.linkPrevious}"/>' }));
 															});
 														</script>
 
@@ -983,7 +983,7 @@
 															$('#page-next-btn').click(function() {
 																var btn = $(this);
 																btn.button('loading');
-																btn.append($('<input />', { type: 'hidden', name: 'pageUrl', value: '<th:block th:text="${bundle.linkNext}"/>' }));
+																btn.append($('<input />', { type: 'hidden', name: 'page-url', value: '<th:block th:text="${bundle.linkNext}"/>' }));
 															});
 														</script>
 														
@@ -992,6 +992,14 @@
 												<div id="collapseOne" class="panel-collapse collapse in">
 													<div class="panel-body" style="padding-bottom: 0px;">
 														<table class="table table-condensed" style="padding-bottom: 0px; margin-bottom: 0px;">
+															<thead>
+																<tr>
+																	<th></th>
+																	<th>Title</th>
+																	<th>Updated</th>
+																</tr>
+															</thead>
+															<tbody>
 															<tr th:each="entry : ${bundle.entries}">
 																<td>
 																	<button class="btn btn-primary btn-xs" th:onclick="'readFromEntriesTable(this, \'' + ${entry.resource.id.resourceType} + '\', \'' + ${entry.resource.id.idPart} + '\', \'' + ${entry.resource.id.versionIdPart} + '\');'" type="submit" name="action" value="read">Read</button>
@@ -999,7 +1007,11 @@
 																</td>
 																<td th:text="${entry.title}">
 																</td>
+																<td th:if="${entry.updated.value} == null"></td>
+																<td th:if="${entry.updated.value} != null and ${entry.updated.today} == true" th:text="${#dates.format(entry.updated.value, 'HH:mm:ss')}"></td>
+																<td th:if="${entry.updated.value} != null and ${entry.updated.today} == false" th:text="${#dates.format(entry.updated.value, 'yyyy-MM-dd')}"></td>
 															</tr>
+															</tbody>
 														</table>										
 														<script type="text/javascript">
 															function readFromEntriesTable(source, type, id, vid) {
@@ -1060,7 +1072,7 @@
 									<td valign="top" style="margin: 0px; padding: 0px; font-weight: normal;">
 										<pre class="resultBodyPre resultBodyPlaceholder" id="resultBodyPlaceholder">...loading...</pre>
 										<div id="resultBodyActual" class="resultBodyActual" style="display: none;">
-											<pre id="resultBodyActualPre" th:text="${resultBody}" th:class="(${resultBodyIsLong} ? '' : ${resultSyntaxHighlighterClass}) + ' resultBodyPre pre'">{}</pre>
+											<pre id="resultBodyActualPre" th:utext="${resultBody}" th:class="(${resultBodyIsLong} ? '' : ${resultSyntaxHighlighterClass}) + ' resultBodyPre pre'">{}</pre>
 										</div>
 									</td>
 								</tr>

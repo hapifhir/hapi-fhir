@@ -32,6 +32,22 @@ SPAN.headerName {
 	font-size: 0.8em;
 }
 
+.hlQuot {
+	color: #88F;
+}
+.hlAttr {
+	color: #888;
+}
+.hlTagName {
+	color: #006699;
+}
+.hlControl {
+	color: #660000;
+}
+.hlText {
+	color: #000000;
+}
+
 SPAN.headerValue {
 	color: #70A070;
 	font-family: monospace;

@@ -34,6 +34,8 @@ import java.util.TimeZone;
 
 import javax.xml.bind.DatatypeConverter;
 
+import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.time.DateUtils;
 import org.apache.commons.lang3.time.FastDateFormat;
 
 import ca.uhn.fhir.model.api.BasePrimitive;
@@ -44,17 +46,17 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 
 	private static final FastDateFormat ourYearFormat = FastDateFormat.getInstance("yyyy");
 	private static final FastDateFormat ourYearMonthDayFormat = FastDateFormat.getInstance("yyyy-MM-dd");
-	private static final FastDateFormat ourYearMonthFormat = FastDateFormat.getInstance("yyyy-MM");
 	private static final FastDateFormat ourYearMonthDayNoDashesFormat = FastDateFormat.getInstance("yyyyMMdd");
 	private static final FastDateFormat ourYearMonthDayTimeFormat = FastDateFormat.getInstance("yyyy-MM-dd'T'HH:mm:ss");
-	private static final FastDateFormat ourYearMonthDayTimeZoneFormat = FastDateFormat.getInstance("yyyy-MM-dd'T'HH:mm:ssZZ");
-	private static final FastDateFormat ourYearMonthDayTimeMilliZoneFormat = FastDateFormat.getInstance("yyyy-MM-dd'T'HH:mm:ss.SSSZZ");
 	private static final FastDateFormat ourYearMonthDayTimeMilliFormat = FastDateFormat.getInstance("yyyy-MM-dd'T'HH:mm:ss.SSS");
+	private static final FastDateFormat ourYearMonthDayTimeMilliZoneFormat = FastDateFormat.getInstance("yyyy-MM-dd'T'HH:mm:ss.SSSZZ");
+	private static final FastDateFormat ourYearMonthDayTimeZoneFormat = FastDateFormat.getInstance("yyyy-MM-dd'T'HH:mm:ssZZ");
+	private static final FastDateFormat ourYearMonthFormat = FastDateFormat.getInstance("yyyy-MM");
 
 	private TemporalPrecisionEnum myPrecision = TemporalPrecisionEnum.SECOND;
-	private Date myValue;
 	private TimeZone myTimeZone;
 	private boolean myTimeZoneZulu = false;
+	private Date myValue;
 
 	/**
 	 * Gets the precision for this datatype using field values from
@@ -65,6 +67,10 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 	 */
 	public TemporalPrecisionEnum getPrecision() {
 		return myPrecision;
+	}
+
+	public TimeZone getTimeZone() {
+		return myTimeZone;
 	}
 
 	@Override
@@ -113,6 +119,20 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 		}
 	}
 
+	public boolean isTimeZoneZulu() {
+		return myTimeZoneZulu;
+	}
+
+	/**
+	 * Returns <code>true</code> if this object represents a date that is today's date
+	 * 
+	 * @throws NullPointerException if {@link #getValue()} returns <code>null</code>
+	 */
+	public boolean isToday() {
+		Validate.notNull(myValue, getClass().getSimpleName() + " contains null value");
+		return DateUtils.isSameDay(new Date(), myValue);
+	}
+
 	/**
 	 * Sets the precision for this datatype using field values from
 	 * {@link Calendar}. Valid values are:
@@ -130,6 +150,14 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 			throw new NullPointerException("Precision may not be null");
 		}
 		myPrecision = thePrecision;
+	}
+
+	public void setTimeZone(TimeZone theTimeZone) {
+		myTimeZone = theTimeZone;
+	}
+
+	public void setTimeZoneZulu(boolean theTimeZoneZulu) {
+		myTimeZoneZulu = theTimeZoneZulu;
 	}
 
 	@Override
@@ -214,22 +242,6 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 		}
 	}
 
-	public TimeZone getTimeZone() {
-		return myTimeZone;
-	}
-
-	public void setTimeZone(TimeZone theTimeZone) {
-		myTimeZone = theTimeZone;
-	}
-
-	public boolean isTimeZoneZulu() {
-		return myTimeZoneZulu;
-	}
-
-	public void setTimeZoneZulu(boolean theTimeZoneZulu) {
-		myTimeZoneZulu = theTimeZoneZulu;
-	}
-
 	private void clearTimeZone() {
 		myTimeZone = null;
 		myTimeZoneZulu = false;
@@ -240,5 +252,5 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 	 * is allowed by this type
 	 */
 	abstract boolean isPrecisionAllowed(TemporalPrecisionEnum thePrecision);
-
+	
 }

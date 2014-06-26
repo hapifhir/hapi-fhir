@@ -25,6 +25,7 @@ import static org.apache.commons.lang3.StringUtils.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -138,7 +139,7 @@ public class RestfulTesterServlet extends HttpServlet {
 		myStaticResources.put("fonts/glyphicons-halflings-regular.svg", "application/octet-stream");
 		myStaticResources.put("fonts/glyphicons-halflings-regular.ttf", "application/octet-stream");
 		myStaticResources.put("fonts/glyphicons-halflings-regular.woff", "application/octet-stream");
-		
+
 		myStaticResources.put("fa/css/font-awesome.css", "text/css");
 		myStaticResources.put("fa/css/font-awesome.min.css", "text/css");
 		myStaticResources.put("fa/fonts/fontawesome-webfont.eot", "application/octet-stream");
@@ -171,8 +172,8 @@ public class RestfulTesterServlet extends HttpServlet {
 		myStaticResources.put("fa/scss/_spinning.scss", "text/css");
 		myStaticResources.put("fa/scss/_stacked.scss", "text/css");
 		myStaticResources.put("fa/scss/_variables.scss", "text/css");
-		myStaticResources.put("fa/scss/font-awesome.scss"		, "text/css");
-		
+		myStaticResources.put("fa/scss/font-awesome.scss", "text/css");
+
 		myCtx = new FhirContext();
 	}
 
@@ -289,9 +290,12 @@ public class RestfulTesterServlet extends HttpServlet {
 					theContext.getVariables().put("errorMsg", "Invalid page URL: " + url);
 					return;
 				}
-				
-				returnsResource = ResultType.TAGLIST;
-				outcomeDescription = "Tag List";
+
+				url = url.replace("&amp;", "&");
+				client.loadPage().url(url).execute();
+
+				returnsResource = ResultType.BUNDLE;
+				outcomeDescription = "Bundle Page";
 
 			} else if ("delete".equals(method)) {
 				RuntimeResourceDefinition def = getResourceType(theReq);
@@ -551,11 +555,11 @@ public class RestfulTesterServlet extends HttpServlet {
 			theContext.setVariable("bundle", bundle);
 			theContext.setVariable("resultStatus", resultStatus);
 			theContext.setVariable("requestUrl", requestUrl);
-			String requestBodyText = StringEscapeUtils.escapeHtml4(requestBody);
-			theContext.setVariable("requestBody", requestBody);
+			String requestBodyText = format(requestBody, ctEnum);
+			theContext.setVariable("requestBody", requestBodyText);
 			theContext.setVariable("requestSyntaxHighlighterClass", requestSyntaxHighlighterClass);
-			String resultBodyText = StringEscapeUtils.escapeHtml4(resultBody);
-			theContext.setVariable("resultBody", resultBody);
+			String resultBodyText = format(resultBody, ctEnum);
+			theContext.setVariable("resultBody", resultBodyText);
 			theContext.setVariable("resultBodyIsLong", resultBodyText.length() > 1000);
 			theContext.setVariable("resultSyntaxHighlighterClass", resultSyntaxHighlighterClass);
 			theContext.setVariable("requestHeaders", requestHeaders);
@@ -569,14 +573,125 @@ public class RestfulTesterServlet extends HttpServlet {
 		}
 	}
 
+	private String format(String theResultBody, EncodingEnum theEncodingEnum) {
+		String str = StringEscapeUtils.escapeHtml4(theResultBody);
+		if (str == null || theEncodingEnum == null) {
+			return str;
+		}
+
+		StringBuilder b = new StringBuilder();
+
+		if (theEncodingEnum == EncodingEnum.JSON) {
+
+			boolean inValue = false;
+			boolean inQuote = false;
+			for (int i = 0; i < str.length(); i++) {
+				char prevChar = (i > 0) ? str.charAt(i-1): ' ';
+				char nextChar = str.charAt(i);
+				char nextChar2 = (i + 1) < str.length() ? str.charAt(i + 1) : ' ';
+				char nextChar3 = (i + 2) < str.length() ? str.charAt(i + 2) : ' ';
+				char nextChar4 = (i + 3) < str.length() ? str.charAt(i + 3) : ' ';
+				char nextChar5 = (i + 4) < str.length() ? str.charAt(i + 4) : ' ';
+				char nextChar6 = (i + 5) < str.length() ? str.charAt(i + 5) : ' ';
+				if (inQuote) {
+					b.append(nextChar);
+					if (prevChar != '\\' && nextChar == '&' && nextChar2 == 'q' && nextChar3 == 'u' && nextChar4 == 'o' && nextChar5 == 't' && nextChar6 == ';') {
+						b.append("quot;</span>");
+						i += 5;
+						inQuote = false;
+					}else if (nextChar == '\\' && nextChar2 == '"') {
+						b.append("quot;</span>");
+						i += 5;
+						inQuote = false;
+					}
+				} else {
+					if (nextChar == ':') {
+						inValue = true;
+						b.append(nextChar);
+					}else if (nextChar == '[' || nextChar == '[') {
+						b.append("<span class='hlControl'>");
+						b.append(nextChar);
+						b.append("</span>");
+						inValue = false;
+					}else if (nextChar == '}' || nextChar == '}' || nextChar == ',') {
+						b.append("<span class='hlControl'>");
+						b.append(nextChar);
+						b.append("</span>");
+						inValue = false;
+					} else if (nextChar == '&' && nextChar2 == 'q' && nextChar3 == 'u' && nextChar4 == 'o' && nextChar5 == 't' && nextChar6 == ';') {
+						if (inValue) {
+							b.append("<span class='hlQuot'>&quot;");
+						}else {
+						b.append("<span class='hlTagName'>&quot;");
+						}
+						inQuote = true;
+						i += 5;
+					}else if (nextChar == ':') {
+						b.append("<span class='hlControl'>");
+						b.append(nextChar);
+						b.append("</span>");
+						inValue = true;
+					} else {
+						b.append(nextChar);
+					}
+				} 
+			}
+			
+		} else {
+			boolean inQuote = false;
+			boolean inTag = false;
+			for (int i = 0; i < str.length(); i++) {
+				char nextChar = str.charAt(i);
+				char nextChar2 = (i + 1) < str.length() ? str.charAt(i + 1) : ' ';
+				char nextChar3 = (i + 2) < str.length() ? str.charAt(i + 2) : ' ';
+				char nextChar4 = (i + 3) < str.length() ? str.charAt(i + 3) : ' ';
+				char nextChar5 = (i + 4) < str.length() ? str.charAt(i + 4) : ' ';
+				char nextChar6 = (i + 5) < str.length() ? str.charAt(i + 5) : ' ';
+				if (inQuote) {
+					b.append(nextChar);
+					if (nextChar == '&' && nextChar2 == 'q' && nextChar3 == 'u' && nextChar4 == 'o' && nextChar5 == 't' && nextChar6 == ';') {
+						b.append("quot;</span>");
+						i += 5;
+						inQuote = false;
+					}
+				} else if (inTag) {
+					if (nextChar == '&' && nextChar2 == 'g' && nextChar3 == 't' && nextChar4 == ';') {
+						b.append("</span><span class='hlControl'>&gt;</span>");
+						inTag = false;
+						i += 3;
+					} else if (nextChar == ' ') {
+						b.append("</span><span class='hlAttr'>");
+						b.append(nextChar);
+					} else if (nextChar == '&' && nextChar2 == 'q' && nextChar3 == 'u' && nextChar4 == 'o' && nextChar5 == 't' && nextChar6 == ';') {
+						b.append("<span class='hlQuot'>&quot;");
+						inQuote = true;
+						i += 5;
+					} else {
+						b.append(nextChar);
+					}
+				} else {
+					if (nextChar == '&' && nextChar2 == 'l' && nextChar3 == 't' && nextChar4 == ';') {
+						b.append("<span class='hlControl'>&lt;</span><span class='hlTagName'>");
+						inTag = true;
+						i += 3;
+					} else {
+						b.append(nextChar);
+					}
+				}
+			}
+		}
+
+		return b.toString();
+	}
+
 	private EncodingEnum getRequestEncoding(HttpServletRequest theReq) {
 		EncodingEnum encoding;
 		if ("xml".equals(theReq.getParameter("encoding"))) {
 			encoding = EncodingEnum.XML;
 		} else if ("json".equals(theReq.getParameter("encoding"))) {
-			encoding=(EncodingEnum.JSON);
-		}else {
-			encoding=null;
+			encoding = (EncodingEnum.JSON);
+		} else {
+			encoding = null;
 		}
 		return encoding;
 	}
@@ -637,8 +752,7 @@ public class RestfulTesterServlet extends HttpServlet {
 					});
 				}
 			}
-		
-			
+
 			ctx.setVariable("resourceCounts", resourceCounts);
 			ctx.setVariable("conf", conformance);
 			ctx.setVariable("base", myServerBase);
@@ -663,14 +777,14 @@ public class RestfulTesterServlet extends HttpServlet {
 					includes.add(nextPath);
 				}
 				ctx.setVariable("includes", includes);
-				
+
 				if (isNotBlank(theReq.getParameter("update-id"))) {
 					String updateId = theReq.getParameter("update-id");
-					String updateVid = defaultIfEmpty(theReq.getParameter("update-vid"),null);
+					String updateVid = defaultIfEmpty(theReq.getParameter("update-vid"), null);
 					IResource updateResource = client.read(def.getImplementingClass(), new IdDt(resourceName, updateId, updateVid));
 					EncodingEnum encoding = getRequestEncoding(theReq);
-					if (encoding==null) {
-						encoding=EncodingEnum.XML;
+					if (encoding == null) {
+						encoding = EncodingEnum.XML;
 					}
 					String updateResourceString = encoding.newParser(myCtx).setPrettyPrint(true).encodeResourceToString(updateResource);
 					ctx.setVariable("updateResource", updateResourceString);
