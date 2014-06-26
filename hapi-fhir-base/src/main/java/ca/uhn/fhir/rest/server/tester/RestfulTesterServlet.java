@@ -20,12 +20,13 @@ package ca.uhn.fhir.rest.server.tester;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.defaultIfEmpty;
+import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.StringWriter;
-import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -43,12 +44,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.io.output.WriterOutputStream;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.ContentType;
@@ -73,11 +71,10 @@ import ca.uhn.fhir.model.dstu.valueset.SearchParamTypeEnum;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.DecimalDt;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.parser.DataFormatException;
-import ca.uhn.fhir.rest.annotation.Metadata;
 import ca.uhn.fhir.rest.client.GenericClient;
 import ca.uhn.fhir.rest.client.IGenericClient;
-import ca.uhn.fhir.rest.client.api.IBasicClient;
 import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.gclient.IUntypedQuery;
 import ca.uhn.fhir.rest.gclient.StringParam;
@@ -122,6 +119,8 @@ public class RestfulTesterServlet extends HttpServlet {
 		myStaticResources.put("css/tester.css", "text/css");
 		myStaticResources.put("img/hapi_fhir_banner.png", "image/png");
 		myStaticResources.put("img/hapi_fhir_banner_right.png", "image/png");
+		myStaticResources.put("js/RestfulTester.js", "text/javascript");
+
 		myStaticResources.put("js/bootstrap.min.js", "text/javascript");
 		myStaticResources.put("js/jquery-2.1.0.min.js", "text/javascript");
 
@@ -361,7 +360,8 @@ public class RestfulTesterServlet extends HttpServlet {
 					} else if (body.startsWith("<")) {
 						resource = myCtx.newXmlParser().parseResource(body);
 					} else {
-						theContext.getVariables().put("errorMsg", "Message body does not appear to be a valid FHIR resource instance document. Body should start with '<' (for XML encoding) or '{' (for JSON encoding).");
+						theContext.getVariables().put("errorMsg",
+								"Message body does not appear to be a valid FHIR resource instance document. Body should start with '<' (for XML encoding) or '{' (for JSON encoding).");
 						return;
 					}
 				} catch (DataFormatException e) {
@@ -400,36 +400,11 @@ public class RestfulTesterServlet extends HttpServlet {
 				while (true) {
 					paramIdx++;
 
-					String nextName = theReq.getParameter("param." + paramIdx + ".name");
-					if (isBlank(nextName)) {
+					String paramIdxString = Integer.toString(paramIdx);
+					boolean shouldContinue = handleSearchParam(paramIdxString, theReq, query);
+					if (!shouldContinue) {
 						break;
 					}
-					String nextType = theReq.getParameter("param." + paramIdx + ".type");
-
-					StringBuilder b = new StringBuilder();
-					for (int i = 0; i < 100; i++) {
-						b.append(defaultString(theReq.getParameter("param." + paramIdx + "." + i)));
-					}
-
-					String paramValue = b.toString();
-					if (isBlank(paramValue)) {
-						continue;
-					}
-
-					if ("token".equals(nextType)) {
-						if (paramValue.length() < 2) {
-							continue;
-						}
-					}
-
-					// if ("xml".equals(theReq.getParameter("encoding"))) {
-					// query.encodedXml();
-					// }else if ("json".equals(theReq.getParameter("encoding"))) {
-					// query.encodedJson();
-					// }
-
-					query.where(new StringParam(nextName).matches().value(paramValue));
-
 				}
 
 				String[] incValues = theReq.getParameterValues(Constants.PARAM_INCLUDE);
@@ -473,34 +448,6 @@ public class RestfulTesterServlet extends HttpServlet {
 		try {
 			HttpRequestBase lastRequest = client.getLastRequest();
 			String requestBody = null;
-			String requestSyntaxHighlighterClass = null;
-
-			if (lastRequest instanceof HttpEntityEnclosingRequest) {
-				HttpEntityEnclosingRequest lastEERequest = (HttpEntityEnclosingRequest) lastRequest;
-				HttpEntity lastEE = lastEERequest.getEntity();
-				if (lastEE.isRepeatable()) {
-					StringWriter requestCapture = new StringWriter();
-					lastEE.writeTo(new WriterOutputStream(requestCapture, "UTF-8"));
-					requestBody = requestCapture.toString();
-					ContentType ct = ContentType.get(lastEE);
-					String mimeType = ct.getMimeType();
-					EncodingEnum ctEnum = EncodingEnum.forContentType(mimeType);
-					if (ctEnum == null) {
-						requestSyntaxHighlighterClass = "brush: plain";
-					} else {
-						switch (ctEnum) {
-						case JSON:
-							requestSyntaxHighlighterClass = "brush: jscript";
-							break;
-						case XML:
-						default:
-							requestSyntaxHighlighterClass = "brush: xml";
-							break;
-						}
-					}
-				}
-			}
-			String resultSyntaxHighlighterClass;
 			String requestUrl = lastRequest != null ? lastRequest.getURI().toASCIIString() : null;
 			String action = client.getLastRequest() != null ? client.getLastRequest().getMethod() : null;
 			String resultStatus = client.getLastResponse() != null ? client.getLastResponse().getStatusLine().toString() : null;
@@ -516,12 +463,10 @@ public class RestfulTesterServlet extends HttpServlet {
 			Bundle bundle = null;
 
 			if (ctEnum == null) {
-				resultSyntaxHighlighterClass = "brush: plain";
 				resultDescription.append("Non-FHIR response");
 			} else {
 				switch (ctEnum) {
 				case JSON:
-					resultSyntaxHighlighterClass = "brush: jscript";
 					if (returnsResource == ResultType.RESOURCE) {
 						narrativeString = parseNarrative(ctEnum, resultBody);
 						resultDescription.append("JSON resource");
@@ -532,7 +477,6 @@ public class RestfulTesterServlet extends HttpServlet {
 					break;
 				case XML:
 				default:
-					resultSyntaxHighlighterClass = "brush: xml";
 					if (returnsResource == ResultType.RESOURCE) {
 						narrativeString = parseNarrative(ctEnum, resultBody);
 						resultDescription.append("XML resource");
@@ -557,11 +501,9 @@ public class RestfulTesterServlet extends HttpServlet {
 			theContext.setVariable("requestUrl", requestUrl);
 			String requestBodyText = format(requestBody, ctEnum);
 			theContext.setVariable("requestBody", requestBodyText);
-			theContext.setVariable("requestSyntaxHighlighterClass", requestSyntaxHighlighterClass);
 			String resultBodyText = format(resultBody, ctEnum);
 			theContext.setVariable("resultBody", resultBodyText);
 			theContext.setVariable("resultBodyIsLong", resultBodyText.length() > 1000);
-			theContext.setVariable("resultSyntaxHighlighterClass", resultSyntaxHighlighterClass);
 			theContext.setVariable("requestHeaders", requestHeaders);
 			theContext.setVariable("responseHeaders", responseHeaders);
 			theContext.setVariable("narrative", narrativeString);
@@ -571,6 +513,47 @@ public class RestfulTesterServlet extends HttpServlet {
 			ourLog.error("Failure during processing", e);
 			theContext.getVariables().put("errorMsg", "Error during processing: " + e.getMessage());
 		}
+	}
+
+	private boolean handleSearchParam(String paramIdxString, HttpServletRequest theReq, IQuery theQuery) {
+		String nextName = theReq.getParameter("param." + paramIdxString + ".name");
+		if (isBlank(nextName)) {
+			return false;
+		}
+		
+		String nextQualifier = StringUtils.defaultString(theReq.getParameter("param." + paramIdxString + ".qualifier"));
+
+		String nextType = theReq.getParameter("param." + paramIdxString + ".type");
+
+		StringBuilder b = new StringBuilder();
+		for (int i = 0; i < 100; i++) {
+			b.append(defaultString(theReq.getParameter("param." + paramIdxString + "." + i)));
+		}
+
+		String paramValue = b.toString();
+		if (isBlank(paramValue)) {
+			return true;
+		}
+
+		if ("token".equals(nextType)) {
+			if (paramValue.length() < 2) {
+				return true;
+			}
+		}
+
+		// if ("xml".equals(theReq.getParameter("encoding"))) {
+		// query.encodedXml();
+		// }else if ("json".equals(theReq.getParameter("encoding"))) {
+		// query.encodedJson();
+		// }
+
+		theQuery.where(new StringParam(nextName + nextQualifier).matches().value(paramValue));
+		
+		if (StringUtils.isNotBlank(theReq.getParameter("param." + paramIdxString + ".0.name"))) {
+			handleSearchParam(paramIdxString+".0", theReq, theQuery);
+		}
+		
+		return true;
 	}
 
 	private String format(String theResultBody, EncodingEnum theEncodingEnum) {
@@ -586,7 +569,7 @@ public class RestfulTesterServlet extends HttpServlet {
 			boolean inValue = false;
 			boolean inQuote = false;
 			for (int i = 0; i < str.length(); i++) {
-				char prevChar = (i > 0) ? str.charAt(i-1): ' ';
+				char prevChar = (i > 0) ? str.charAt(i - 1) : ' ';
 				char nextChar = str.charAt(i);
 				char nextChar2 = (i + 1) < str.length() ? str.charAt(i + 1) : ' ';
 				char nextChar3 = (i + 2) < str.length() ? str.charAt(i + 2) : ' ';
@@ -599,7 +582,7 @@ public class RestfulTesterServlet extends HttpServlet {
 						b.append("quot;</span>");
 						i += 5;
 						inQuote = false;
-					}else if (nextChar == '\\' && nextChar2 == '"') {
+					} else if (nextChar == '\\' && nextChar2 == '"') {
 						b.append("quot;</span>");
 						i += 5;
 						inQuote = false;
@@ -608,12 +591,12 @@ public class RestfulTesterServlet extends HttpServlet {
 					if (nextChar == ':') {
 						inValue = true;
 						b.append(nextChar);
-					}else if (nextChar == '[' || nextChar == '[') {
+					} else if (nextChar == '[' || nextChar == '[') {
 						b.append("<span class='hlControl'>");
 						b.append(nextChar);
 						b.append("</span>");
 						inValue = false;
-					}else if (nextChar == '}' || nextChar == '}' || nextChar == ',') {
+					} else if (nextChar == '}' || nextChar == '}' || nextChar == ',') {
 						b.append("<span class='hlControl'>");
 						b.append(nextChar);
 						b.append("</span>");
@@ -621,12 +604,12 @@ public class RestfulTesterServlet extends HttpServlet {
 					} else if (nextChar == '&' && nextChar2 == 'q' && nextChar3 == 'u' && nextChar4 == 'o' && nextChar5 == 't' && nextChar6 == ';') {
 						if (inValue) {
 							b.append("<span class='hlQuot'>&quot;");
-						}else {
-						b.append("<span class='hlTagName'>&quot;");
+						} else {
+							b.append("<span class='hlTagName'>&quot;");
 						}
 						inQuote = true;
 						i += 5;
-					}else if (nextChar == ':') {
+					} else if (nextChar == ':') {
 						b.append("<span class='hlControl'>");
 						b.append(nextChar);
 						b.append("</span>");
@@ -634,9 +617,9 @@ public class RestfulTesterServlet extends HttpServlet {
 					} else {
 						b.append(nextChar);
 					}
-				} 
+				}
 			}
-			
+
 		} else {
 			boolean inQuote = false;
 			boolean inTag = false;
@@ -768,13 +751,16 @@ public class RestfulTesterServlet extends HttpServlet {
 			if (isNotBlank(resourceName)) {
 				RuntimeResourceDefinition def = myCtx.getResourceDefinition(resourceName);
 				TreeSet<String> includes = new TreeSet<String>();
-				for (RuntimeSearchParam nextSpDef : def.getSearchParams()) {
-					if (nextSpDef.getParamType() != SearchParamTypeEnum.REFERENCE) {
-						continue;
+				for (Rest nextRest : conformance.getRest()) {
+					for (RestResource nextRes : nextRest.getResource()) {
+						if (nextRes.getType().getValue().equals(resourceName)) {
+							for (StringDt next : nextRes.getSearchInclude()) {
+								if (next.isEmpty() == false) {
+									includes.add(next.getValue());
+								}
+							}
+						}
 					}
-
-					String nextPath = nextSpDef.getPath();
-					includes.add(nextPath);
 				}
 				ctx.setVariable("includes", includes);
 
@@ -828,8 +814,8 @@ public class RestfulTesterServlet extends HttpServlet {
 	}
 
 	/**
-	 * If set, the headers named here will be stripped from requests/responses before they are displayed to the user.
-	 * This can be used, for instance, to filter out "Authorization" headers. Note that names are not case sensitive.
+	 * If set, the headers named here will be stripped from requests/responses before they are displayed to the user. This can be used, for instance, to filter out "Authorization" headers. Note that
+	 * names are not case sensitive.
 	 */
 	public void setFilterHeaders(String... theHeaderNames) {
 		myFilterHeaders = new HashSet<String>();
@@ -849,11 +835,6 @@ public class RestfulTesterServlet extends HttpServlet {
 			ourLog.error("Failed to parse resource", e);
 			return "";
 		}
-	}
-
-	private interface ConformanceClient extends IBasicClient {
-		@Metadata
-		Conformance getConformance();
 	}
 
 	private final class ProfileResourceResolver implements IResourceResolver {

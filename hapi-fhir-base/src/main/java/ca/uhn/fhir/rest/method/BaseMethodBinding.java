@@ -30,6 +30,8 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -60,7 +62,9 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.client.exceptions.NonFhirResponseException;
 import ca.uhn.fhir.rest.param.IParameter;
+import ca.uhn.fhir.rest.param.IncludeParameter;
 import ca.uhn.fhir.rest.param.ParameterUtil;
+import ca.uhn.fhir.rest.param.SearchParameter;
 import ca.uhn.fhir.rest.server.BundleProviders;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
@@ -97,6 +101,16 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 		myParameters = ParameterUtil.getResourceParameters(theMethod);
 	}
 
+	public Set<String> getIncludes() {
+		Set<String> retVal =new TreeSet<String>(); 
+		for (IParameter next : myParameters) {
+			if (next instanceof IncludeParameter) {
+				retVal.addAll(((IncludeParameter) next).getAllow());
+			}
+		}
+		return retVal;
+	}
+	
 	public FhirContext getContext() {
 		return myContext;
 	}

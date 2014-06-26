@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.test;
 
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
 import org.eclipse.jetty.server.Server;
@@ -13,14 +14,23 @@ import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.provider.JpaConformanceProvider;
 import ca.uhn.fhir.jpa.provider.JpaSystemProvider;
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.TagList;
+import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.resource.DiagnosticReport;
 import ca.uhn.fhir.model.dstu.resource.Organization;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.dstu.resource.Questionnaire;
+import ca.uhn.fhir.rest.annotation.IncludeParam;
+import ca.uhn.fhir.rest.annotation.OptionalParam;
+import ca.uhn.fhir.rest.annotation.RequiredParam;
+import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.client.IGenericClient;
+import ca.uhn.fhir.rest.param.CodingListParam;
+import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
+import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.tester.RestfulTesterServlet;
 import ca.uhn.test.jpasrv.DiagnosticReportResourceProvider;
@@ -51,11 +61,18 @@ public class JpaTestApp {
 		DiagnosticReportResourceProvider diagnosticReportRp = new DiagnosticReportResourceProvider();
 		diagnosticReportRp.setDao(diagnosticReportDao);
 
+		
+		
+		
 		IFhirSystemDao systemDao = appCtx.getBean("mySystemDao", IFhirSystemDao.class);
 		JpaSystemProvider systemProvider = new JpaSystemProvider(systemDao);
 
 		RestfulServer restServer = new RestfulServer();
-		restServer.setResourceProviders(diagnosticReportRp,patientRp, questionnaireRp, organizationRp);
+		
+		IResourceProvider rp = diagnosticReportRp;
+		rp = new ProviderWithRequiredAndOptional();
+		
+		restServer.setResourceProviders(rp,patientRp, questionnaireRp, organizationRp);
 		restServer.setProviders(systemProvider);
 		restServer.setPagingProvider(new FifoMemoryPagingProvider(10));
 		
@@ -119,5 +136,28 @@ public class JpaTestApp {
 
 		}
 	}
+	
+	
+	
+	public static class ProviderWithRequiredAndOptional implements IResourceProvider {
+		
+		@Search
+		public List<DiagnosticReport> findDiagnosticReportsByPatient (
+				@RequiredParam(name=DiagnosticReport.SP_SUBJECT + '.' + Patient.SP_IDENTIFIER) IdentifierDt thePatientId, 
+				@OptionalParam(name=DiagnosticReport.SP_NAME) CodingListParam theNames,
+				@OptionalParam(name=DiagnosticReport.SP_DATE) DateRangeParam theDateRange,
+				@IncludeParam(allow= {"DiagnosticReport.result"}) Set<Include> theIncludes
+				) throws Exception {
+			return null;
+		}
+
+		@Override
+		public Class<? extends IResource> getResourceType() {
+			return DiagnosticReport.class;
+		}
+
+		
+	}
+
 
 }

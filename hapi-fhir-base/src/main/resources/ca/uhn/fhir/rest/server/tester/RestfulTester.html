@@ -15,14 +15,6 @@
 			var resourceName = '<th:block th:utext="${resourceName}"/>';
 		</script>
 	
-		<!-- Syntaxhighlighter -->
-		<script src="shCore.js" type="text/javascript"></script>
-		<script src="shBrushJScript.js" type="text/javascript"></script>
-		<script src="shBrushXml.js" type="text/javascript"></script>
-		<script src="shBrushPlain.js" type="text/javascript"></script>
-		<link rel="stylesheet" type="text/css" href="shCore.css"/>
-		<link rel="stylesheet" type="text/css" href="shThemeDefault.css"/>
-	
 		<!-- Bootstrap core CSS -->
 		<link href="css/bootstrap.min.css" rel="stylesheet" />
 		
@@ -41,6 +33,8 @@
     
     	<!-- Fontawesome -->
 		<link href="fa/css/font-awesome.min.css" rel="stylesheet" />
+
+		<script src="js/RestfulTester.js" type="text/javascript" />
 		    
 	</head>
 
@@ -403,133 +397,6 @@
 								</div>						
 							</div>
 						</div>
-						<script type="text/javascript">
-						/*
-							$('#search-btn').click(
-							function() {
-								$(this).html('<i class="fa fa-cog fa-spin"></i> Searching...')
-								//btn.button('loading');
-							});
-						*/
-						
-							var numRows = 0;
-							function addSearchParamRow() {
-								var nextRow = numRows++;
-								var select = $('<select/>', {/*style:'margin-left:30px;'*/});
-								var plusBtn = $('<button />', {type:'button', 'class':'btn btn-success btn-block'});
-								plusBtn.append($('<span />', {'class':'glyphicon glyphicon-plus'}));
-								plusBtn.isAdd = true;
-
-								var rowDiv = $('<div />', { 'class': 'row top-buffer', id: 'search-param-row-' + nextRow }).append(
-										$('<div />', { 'class': 'col-sm-1' }).append(plusBtn),
-										$('<div />', { 'class': 'col-sm-5' }).append(select),
-										$('<div />', { id: 'search-param-rowopts-' + nextRow })
-								);
-								$("#search-param-rows").append(rowDiv);
-								
-								plusBtn.click(function() {
-									addSearchParamRow();
-								});
-								
-								var params = new Array();
-								conformance.rest.forEach(function(rest){
-									rest.resource.forEach(function(restResource){
-										if (restResource.type == resourceName) {
-											if (restResource.searchParam) {
-												restResource.searchParam.forEach(function(searchParam){
-													params[searchParam.name] = searchParam;
-													select.append(
-														$('<option />', { value: searchParam.name }).text(searchParam.name + ' - ' + searchParam.documentation)														
-													);
-												});
-											}
-										}				
-									});
-								});	
-								select.select2();
-								handleSearchParamTypeChange(select, params, nextRow);
-								select.change(function(){ handleSearchParamTypeChange(select, params, nextRow); });
-							}
-							
-							function handleSearchParamTypeChange(select, params, rowNum) {
-								var oldVal = select.prevVal;
-								var newVal = select.val();
-								if (oldVal == newVal) {
-									return;
-								}
-								$('#search-param-rowopts-' + rowNum).empty();
-								var searchParam = params[newVal];
-								$('#search-param-rowopts-' + rowNum).append(
-						    		$('<input />', { name: 'param.' + rowNum + '.name', type: 'hidden', value: searchParam.name }),
-						    		$('<input />', { name: 'param.' + rowNum + '.type', type: 'hidden', value: searchParam.type })
-						    	);
-						    	
-							    if (searchParam.type == 'token') {
-							    	$('#search-param-rowopts-' + rowNum).append(
-							    		$('<div />', { 'class': 'col-sm-3' }).append(
-									    	$('<input />', { name: 'param.' + rowNum + '.0', placeholder: 'system/namespace', type: 'text', 'class': 'form-control' })
-									    ),
-							    		$('<div />', { 'class': 'col-sm-3' }).append(
-									    	$('<input />', { name: 'param.' + rowNum + '.1', type: 'hidden', value: '|' }),
-									    	$('<input />', { name: 'param.' + rowNum + '.2', placeholder: 'value', type: 'text', 'class': 'form-control' })
-									    )
-							    	);
-							    } else if (searchParam.type == 'string' || searchParam.type == 'number') {
-							    	$('#search-param-rowopts-' + rowNum).append(
-							    		$('<div />', { 'class': 'col-sm-3' }).append(
-									    	$('<input />', { name: 'param.' + rowNum + '.0', placeholder: 'value', type: 'text', 'class': 'form-control' })
-								    	)
-								    );
-							    } else if (searchParam.type == 'date') {
-							    	if (/date$/.test(searchParam.name)) {
-										var input = $('<div />', { 'class':'input-group date', 'data-date-format':'YYYY-MM-DD' }).append(
-											$('<input />', { type:'text', 'class':'form-control', name: 'param.' + rowNum + '.1' }),
-											$('<div />', { 'class':'input-group-addon'}).append(
-												$('<span />', { 'class':'glyphicon glyphicon-calendar'})
-											)
-										);
-						                input.datetimepicker({
-						                	pickTime: false,
-						                	showToday: true
-						                });
-							    	} else {
-										var input = $('<div />', { 'class':'input-group date', 'data-date-format':'YYYY-MM-DDTHH:mm:ss' }).append(
-											$('<input />', { type:'text', 'class':'form-control', name: 'param.' + rowNum + '.1' }),
-											$('<div />', { 'class':'input-group-addon'}).append(
-												$('<span />', { 'class':'glyphicon glyphicon-calendar'})
-											)
-										);
-						                input.datetimepicker({
-						                	sideBySide: true,
-						                	use24hours: true,
-						                	showToday: true
-						                });
-							    	}
-
-							    	$('#search-param-rowopts-' + rowNum).append(
-							    		$('<div />', { 'class': 'col-sm-2 btn-group' }).append(
-						    				$('<select />', {type:'text', name:'param.'+rowNum+'.0', 'class':'form-control', autocomplete:'off'}).append(
-						    					$('<option value="">(qualifier)</option>'),
-						    					$('<option value="=">=</option>'),
-						    					$('<option value=">=">&gt;=</option>'),
-						    					$('<option value=">">&gt;</option>'),
-						    					$('<option value="&lt;=">&lt;=</option>'),
-						    					$('<option value="&lt;">&lt;</option>')
-						    				)
-								    	),							    			
-							    		$('<div />', { 'class': 'col-sm-4' }).append(
-									    	input
-								    	)
-								    );
-							    }
-								
-								select.prevVal = newVal;
-							}
-							
-							$( document ).ready(function() {
-								addSearchParamRow();
-							});							
-						</script>
 						
 						<div class="panel panel-default" th:if="${resourceName.empty} == false">
 							<div class="panel-heading">
@@ -907,7 +774,7 @@
 									<td>Request Body</td>
 									<td valign="top" style="margin: 0px; padding: 0px;">
 										<pre class="requestBodyPre resultBodyPlaceholder" id="requestBodyPlaceholder">...loading...</pre>
-										<pre th:utext="${requestBody}" th:class="${requestSyntaxHighlighterClass} + ' resultBodyPre pre'" id="requestBodyActual" style="display: none;">{}</pre>
+										<pre th:utext="${requestBody}" class="resultBodyPre pre" id="requestBodyActual" style="display: none;">{}</pre>
 									</td>
 								</tr>
 							</tbody>
@@ -1051,20 +918,7 @@
 										<div class="panel-heading" sstyle="margin: 5px;">
 											<h4 class="panel-title">
 												Raw Message
-												<button th:if="${resultBodyIsLong}" class="btn btn-info btn-sm" type="button" id="format-result-btn">
-													<span class="glyphicon glyphicon-eye-open"></span>
-													Colour
-												</button>
 											</h4>										
-											<script type="text/javascript" th:if="${resultBodyIsLong}">
-												$('#format-result-btn').click(function() {
-													//$('#resultBodyActualPre').setClass('<th:block th:text="${resultSyntaxHighlighterClass}"/>');
-													document.getElementById('resultBodyActualPre').className='<th:block th:text="${resultSyntaxHighlighterClass}"/>';
-													document.getElementById('format-result-btn').disabled ='disabled';
-													SyntaxHighlighter.highlight();
-													lineWrap();
-												});
-											</script>
 										</div>										
 									</td>
 								</tr>
@@ -1072,7 +926,7 @@
 									<td valign="top" style="margin: 0px; padding: 0px; font-weight: normal;">
 										<pre class="resultBodyPre resultBodyPlaceholder" id="resultBodyPlaceholder">...loading...</pre>
 										<div id="resultBodyActual" class="resultBodyActual" style="display: none;">
-											<pre id="resultBodyActualPre" th:utext="${resultBody}" th:class="(${resultBodyIsLong} ? '' : ${resultSyntaxHighlighterClass}) + ' resultBodyPre pre'">{}</pre>
+											<pre id="resultBodyActualPre" th:utext="${resultBody}" class="resultBodyPre pre">{}</pre>
 										</div>
 									</td>
 								</tr>
@@ -1091,8 +945,6 @@
 									reqwidth = $('#requestBodyPlaceholder').outerWidth(true);
 								}
 								
-								SyntaxHighlighter.all();
-
 								$('#resultBodyPlaceholder').hide();
 								$('#resultBodyActual').width(reswidth);
 								$('#resultBodyActual').show();

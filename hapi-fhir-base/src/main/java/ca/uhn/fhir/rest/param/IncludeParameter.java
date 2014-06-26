@@ -40,6 +40,10 @@ public class IncludeParameter extends BaseQueryParameter {
 
 	private Class<? extends Collection<Include>> myInstantiableCollectionType;
 	private HashSet<String> myAllow;
+	public HashSet<String> getAllow() {
+		return myAllow;
+	}
+
 	private Class<?> mySpecType;
 
 	public IncludeParameter(IncludeParam theAnnotation, Class<? extends Collection<Include>> theInstantiableCollectionType, Class<?> theSpecType) {

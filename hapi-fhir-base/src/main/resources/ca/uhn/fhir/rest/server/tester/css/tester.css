@@ -230,6 +230,18 @@ PRE.resultBodyPlaceholder {
 	padding: 0px;
 }
 
+SPAN.searchParamDescription {
+	font-size: 0.8em;
+	text-align: justify;
+	color: #000066;	
+}
+
+DIV.searchParamSeparator {
+	height: 1px;
+	border-top: 1px solid #CCC;
+	margin: 3px;
+}
+
 .select2-container {
 	width: 100% !important;
 }
