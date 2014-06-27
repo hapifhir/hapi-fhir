@@ -32,6 +32,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -46,7 +47,10 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.apache.http.Header;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.ContentType;
@@ -93,7 +97,8 @@ public class RestfulTesterServlet extends HttpServlet {
 	private static final String PUBLIC_TESTER_RESULT_HTML = "/PublicTesterResult.html";
 	private static final long serialVersionUID = 1L;
 	private FhirContext myCtx;
-	private String myServerBase;
+	private LinkedHashMap<String, String> myIdToServerName = new LinkedHashMap<String, String>();
+	private LinkedHashMap<String, String> myIdToServerBase = new LinkedHashMap<String, String>();
 	private HashMap<String, String> myStaticResources;
 
 	private TemplateEngine myTemplateEngine;
@@ -191,10 +196,15 @@ public class RestfulTesterServlet extends HttpServlet {
 		myTemplateEngine.initialize();
 	}
 
-	public void setServerBase(String theServerBase) {
-		myServerBase = theServerBase;
+	public void addServerBase(String theId, String theDisplayName, String theServerBase) {
+		Validate.notBlank(theId, "theId can not be blank");
+		Validate.notBlank(theDisplayName, "theDisplayName can not be blank");
+		Validate.notBlank(theServerBase, "theServerBase can not be blank");
+		myIdToServerBase.put(theId, theServerBase);
+		myIdToServerName.put(theId, theDisplayName);
 	}
 
+	
 	private RuntimeResourceDefinition getResourceType(HttpServletRequest theReq) throws ServletException {
 		String resourceName = StringUtils.defaultString(theReq.getParameter(PARAM_RESOURCE));
 		RuntimeResourceDefinition def = myCtx.getResourceDefinition(resourceName);
@@ -214,9 +224,9 @@ public class RestfulTesterServlet extends HttpServlet {
 		RESOURCE, BUNDLE, TAGLIST, NONE
 	}
 
-	private void processAction(HttpServletRequest theReq, WebContext theContext) {
+	private void processAction(HttpServletRequest theReq, WebContext theContext, IGenericClient theClient, String theServerBase) {
 
-		GenericClient client = (GenericClient) myCtx.newRestfulGenericClient(myServerBase);
+		GenericClient client = (GenericClient) theClient;
 		client.setKeepResponses(true);
 		ResultType returnsResource;
 		long latency = 0;
@@ -285,7 +295,7 @@ public class RestfulTesterServlet extends HttpServlet {
 			} else if ("page".equals(method)) {
 
 				String url = defaultString(theReq.getParameter("page-url"));
-				if (!url.startsWith(myServerBase)) {
+				if (!url.startsWith(theServerBase)) {
 					theContext.getVariables().put("errorMsg", "Invalid page URL: " + url);
 					return;
 				}
@@ -453,6 +463,13 @@ public class RestfulTesterServlet extends HttpServlet {
 			String resultStatus = client.getLastResponse() != null ? client.getLastResponse().getStatusLine().toString() : null;
 			String resultBody = client.getLastResponseBody();
 
+			if (lastRequest instanceof HttpEntityEnclosingRequest) {
+				HttpEntity entity = ((HttpEntityEnclosingRequest) lastRequest).getEntity();
+				if (entity.isRepeatable()) {
+					requestBody = IOUtils.toString(entity.getContent());
+				}
+			}
+			
 			HttpResponse lastResponse = client.getLastResponse();
 			ContentType ct = lastResponse != null ? ContentType.get(lastResponse.getEntity()) : null;
 			String mimeType = ct != null ? ct.getMimeType() : null;
@@ -591,7 +608,7 @@ public class RestfulTesterServlet extends HttpServlet {
 					if (nextChar == ':') {
 						inValue = true;
 						b.append(nextChar);
-					} else if (nextChar == '[' || nextChar == '[') {
+					} else if (nextChar == '[' || nextChar == '{') {
 						b.append("<span class='hlControl'>");
 						b.append(nextChar);
 						b.append("</span>");
@@ -694,7 +711,18 @@ public class RestfulTesterServlet extends HttpServlet {
 				return;
 			}
 
-			IGenericClient client = myCtx.newRestfulGenericClient(myServerBase);
+			String serverId = theReq.getParameter("server-id");
+			String serverBase;
+			String serverName;
+			if (isBlank(serverId) && !myIdToServerBase.containsKey(serverId)) {
+				serverBase = myIdToServerBase.entrySet().iterator().next().getValue();
+				serverName = myIdToServerName.entrySet().iterator().next().getValue();
+			}else {
+				serverBase = myIdToServerBase.get(serverId);
+				serverName = myIdToServerName.get(serverId);
+			}
+			
+			IGenericClient client = myCtx.newRestfulGenericClient(serverBase);
 			Conformance conformance = client.conformance();
 
 			WebContext ctx = new WebContext(theReq, theResp, theReq.getServletContext(), theReq.getLocale());
@@ -736,16 +764,19 @@ public class RestfulTesterServlet extends HttpServlet {
 				}
 			}
 
+			ctx.setVariable("serverId", serverId);
 			ctx.setVariable("resourceCounts", resourceCounts);
 			ctx.setVariable("conf", conformance);
-			ctx.setVariable("base", myServerBase);
+			ctx.setVariable("base", serverBase);
+			ctx.setVariable("baseName", serverName);
+			ctx.setVariable("serverEntries", myIdToServerName.entrySet());
 			String resourceName = defaultString(theReq.getParameter(PARAM_RESOURCE));
 			ctx.setVariable("resourceName", resourceName);
 			ctx.setVariable("jsonEncodedConf", myCtx.newJsonParser().encodeResourceToString(conformance));
 			addStandardVariables(ctx, theReq.getParameterMap());
 
 			if (isNotBlank(theReq.getParameter("action"))) {
-				processAction(theReq, ctx);
+				processAction(theReq, ctx, client, serverBase);
 			}
 
 			if (isNotBlank(resourceName)) {

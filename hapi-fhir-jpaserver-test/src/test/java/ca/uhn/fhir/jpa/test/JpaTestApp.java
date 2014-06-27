@@ -88,7 +88,13 @@ public class JpaTestApp {
 		RestfulTesterServlet testerServlet = new RestfulTesterServlet();
 		String base = "http://localhost:" + myPort + "/fhir/context";
 //		base = "http://fhir.healthintersections.com.au/open";
-		testerServlet.setServerBase(base);
+//		base = "http://spark.furore.com/fhir";
+		
+		testerServlet.addServerBase("local", "Localhost Server", base);
+		testerServlet.addServerBase("hi", "Health Intersections", "http://fhir.healthintersections.com.au/open");
+		testerServlet.addServerBase("furore", "Spark - Furore Reference Server", "http://spark.furore.com/fhir");
+		testerServlet.addServerBase("blaze", "Blaze (Orion Health)", "https://his-medicomp-gateway.orionhealth.com/blaze/fhir");
+		
 		ServletHolder handler = new ServletHolder();
 		handler.setName("Tester");
 		handler.setServlet(testerServlet);

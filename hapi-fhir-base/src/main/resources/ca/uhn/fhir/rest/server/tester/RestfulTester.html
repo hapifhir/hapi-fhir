@@ -40,6 +40,7 @@
 
 <body>
 	<form action="" method="get" id="outerForm">
+		<input type="hidden" id="server-id" name="server-id" th:value="${serverId}"/> 
 
 		<div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
 			<div class="container-fluid">
@@ -64,6 +65,18 @@
 				</div>
 				<div class="navbar-collapse collapse">
 					<ul class="nav navbar-nav navbar-right">
+						<li class="dropdown">
+							<a href="#" class="dropdown-toggle" data-toggle="dropdown">
+								<span class="glyphicon glyphicon-fire" style="color: #66AAFF"/>
+								<th:block th:text="'Server: ' + ${baseName}"/>
+								<span class="caret" />
+							</a>
+							<ul class="dropdown-menu" role="menu">
+								<li th:each="serverEntry : ${serverEntries}">
+									<a th:href="'javascript:selectServer(\'' + ${serverEntry.key} + '\');'" th:text="${serverEntry.value}">Action</a>
+								</li>
+							</ul>
+						</li>
 						<li><a href="#">Help</a></li>
 					</ul>
 				</div>
@@ -135,12 +148,17 @@
 					}
 					</script>
 
-					<h4>Query Mode</h4>
+					<h4>Server Home</h4>
 
 					<ul class="nav nav-sidebar">
 						<li th:class="${resourceName.empty} ? 'active' : ''">
 							<a href="#" onclick="doAction(this, 'home', null);">RESTful Server</a>
 						</li>
+					</ul>
+
+					<h4>Resources</h4>
+					
+					<ul class="nav nav-sidebar">
 						<th:block
 							th:each="resource, resIterStat : ${conf.restFirstRep.resource}">
 							<li th:class="${resourceName} == ${resource.type.valueAsString} ? 'active' : ''">

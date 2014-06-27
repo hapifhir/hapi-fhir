@@ -45,7 +45,7 @@ function addSearchParamRow() {
 				if (restResource.searchParam) {
 					for (var i = 0; i < restResource.searchParam.length; i++) {
 						var searchParam = restResource.searchParam[i];
-						params[searchParam.name] = searchParam;
+						params['_' + searchParam.name] = searchParam;
 						select.append(
 							$('<option />', { value: searchParam.name }).text(searchParam.name + ' - ' + searchParam.documentation)														
 						);
@@ -79,15 +79,15 @@ function addSearchParamRow() {
 	select.change(function(){ handleSearchParamTypeChange(select, params, nextRow); });
 }
 
-function addSerarchControls(searchParam, searchParamName, containerRowNum, rowNum) {
-	$('#search-param-rowopts-' + containerRowNum).append(
-		$('<br clear="all"/>'),
-		$('<div class="searchParamSeparator"/>'),
-		$('<div />', { 'class': 'col-sm-6' }).append(
-			$('<span class="searchParamDescription">' + searchParam.documentation + '</span>')
-		)
-	);
-	
+function addSearchControls(searchParam, searchParamName, containerRowNum, rowNum, isChild) {
+    if (searchParam.childParam || isChild) {
+		$('#search-param-rowopts-' + containerRowNum).append(
+			$('<br clear="all"/>'),
+			$('<div class="searchParamSeparator"/>'),
+			$('<div />', { 'class': 'col-sm-6 searchParamDescription' }).text(searchParam.documentation)
+		);
+    }
+    
 	if (searchParam.chain && searchParam.chain.length > 0) {
 		$('#search-param-rowopts-' + containerRowNum).append(
 				$('<input />', { name: 'param.' + rowNum + '.qualifier', type: 'hidden', value: '.' + searchParam.chain[0] })
@@ -167,7 +167,7 @@ function addSerarchControls(searchParam, searchParamName, containerRowNum, rowNu
 			*/
 			$('<input />', { name: 'param.' + rowNum + '.0.type', type: 'hidden', value: searchParam.childParam.type })
     	);
-    	addSerarchControls(searchParam.childParam, searchParamName, containerRowNum, rowNum + '.0');
+    	addSearchControls(searchParam.childParam, searchParamName, containerRowNum, rowNum + '.0', true);
     }
     
     
@@ -180,15 +180,24 @@ function handleSearchParamTypeChange(select, params, rowNum) {
 		return;
 	}
 	$('#search-param-rowopts-' + rowNum).empty();
-	var searchParam = params[newVal];
+	var searchParam = params['_' + newVal];
 	$('#search-param-rowopts-' + rowNum).append(
 		$('<input />', { name: 'param.' + rowNum + '.type', type: 'hidden', value: searchParam.type })
 	);
 	
-	addSerarchControls(searchParam, searchParam.name, rowNum, rowNum);
+	addSearchControls(searchParam, searchParam.name, rowNum, rowNum, false);
 	
 	select.prevVal = newVal;
 }
+
+function selectServer(serverId) {
+	$('#server-id').val(serverId);
+	$('#outerForm').append(
+		$('<input type="hidden" name="action" value="home"/>')
+	);
+	$('#outerForm').submit();
+}
+
 
 $( document ).ready(function() {
 	addSearchParamRow();

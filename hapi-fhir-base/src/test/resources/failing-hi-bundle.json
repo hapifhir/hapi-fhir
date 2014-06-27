@@ -1,0 +1,3371 @@
+{
+  "resourceType" : "Bundle",
+  "title" : "History for the whole system",
+  "id" : "urn:uuid:df38ebdd-6047-4259-81a0-2cf43ab5e0",
+  "link" : [
+    {
+      "href" : "http://fhir.healthintersections.com.au/open/",
+      "rel" : "fhir-base"
+    },
+    {
+      "href" : "http://fhir.healthintersections.com.au/open/_history?_prior=2014-06-27T12:06:48Z&_format=application/json+fhir&history-id=749a705d-f561-4e6d-a0c0-a042faea84",
+      "rel" : "self"
+    },
+    {
+      "href" : "http://fhir.healthintersections.com.au/open/_history?_prior=2014-06-27T12:06:48Z&_format=application/json+fhir&history-id=749a705d-f561-4e6d-a0c0-a042faea84&search-offset=0&_count=50",
+      "rel" : "first"
+    },
+    {
+      "href" : "http://fhir.healthintersections.com.au/open/_history?_prior=2014-06-27T12:06:48Z&_format=application/json+fhir&history-id=749a705d-f561-4e6d-a0c0-a042faea84&search-offset=50&_count=50",
+      "rel" : "next"
+    },
+    {
+      "href" : "http://fhir.healthintersections.com.au/open/_history?_prior=2014-06-27T12:06:48Z&_format=application/json+fhir&history-id=749a705d-f561-4e6d-a0c0-a042faea84&search-offset=7350&_count=50",
+      "rel" : "last"
+    }
+  ],
+  "updated" : "2014-06-27T12:06:48Z",
+  "totalResults" : "7382",
+  "entry" : [
+    {
+      "title" : "SecurityEvent \"2814\" Version \"1\"",
+      "id" : "http://fhir.healthintersections.com.au/open/SecurityEvent/2814",
+      "link" : [
+        {
+          "href" : "http://fhir.healthintersections.com.au/open/SecurityEvent/2814/_history/1",
+          "rel" : "self"
+        }
+      ],
+      "updated" : "2014-06-27T12:06:33Z",
+      "author" : [
+        {
+          "name" : "System"
+        }
+      ],
+      "published" : "2014-06-27T12:06:48Z",
+      "content" : {
+        "resourceType" : "SecurityEvent",
+        "event" : {
+          "type" : {
+            "coding" : [
+              {
+                "system" : "http://nema.org/dicom/dcid",
+                "code" : "110114",
+                "display" : "User Authentication"
+              }
+            ]
+          },
+          "subtype" : [
+            {
+              "coding" : [
+                {
+                  "system" : "http://nema.org/dicom/dcid",
+                  "code" : "110122",
+                  "display" : "Login"
+                }
+              ]
+            }
+          ],
+          "action" : "E",
+          "dateTime" : "2014-06-27T12:06:33Z",
+          "outcome" : "0"
+        },
+        "participant" : [
+          {
+            "userId" : "74.69.119.163",
+            "network" : {
+              "identifier" : "74.69.119.163",
+              "type" : "2"
+            }
+          }
+        ],
+        "source" : {
+          "site" : "Cloud",
+          "identifier" : "Health Intersections",
+          "type" : [
+            {
+              "system" : "http://hl7.org/fhir/security-source-type",
+              "code" : "3",
+              "display" : "Web Server"
+            }
+          ]
+        }
+      },
+      "summary" : "<?xml version=\"1.0\" encoding=\"UTF-8\"?><div xmlns=\"http://www.w3.org/1999/xhtml\">--No Summary for this resource--</div>"
+    },
+    {
+      "title" : "SecurityEvent \"2813\" Version \"1\"",
+      "id" : "http://fhir.healthintersections.com.au/open/SecurityEvent/2813",
+      "link" : [
+        {
+          "href" : "http://fhir.healthintersections.com.au/open/SecurityEvent/2813/_history/1",
+          "rel" : "self"
+        }
+      ],
+      "updated" : "2014-06-27T11:59:06Z",
+      "author" : [
+        {
+          "name" : "System"
+        }
+      ],
+      "published" : "2014-06-27T12:06:48Z",
+      "content" : {
+        "resourceType" : "SecurityEvent",
+        "event" : {
+          "type" : {
+            "coding" : [
+              {
+                "system" : "http://nema.org/dicom/dcid",
+                "code" : "110114",
+                "display" : "User Authentication"
+              }
+            ]
+          },
+          "subtype" : [
+            {
+              "coding" : [
+                {
+                  "system" : "http://nema.org/dicom/dcid",
+                  "code" : "110122",
+                  "display" : "Login"
+                }
+              ]
+            }
+          ],
+          "action" : "E",
+          "dateTime" : "2014-06-27T11:59:06Z",
+          "outcome" : "0"
+        },
+        "participant" : [
+          {
+            "userId" : "174.118.23.210",
+            "network" : {
+              "identifier" : "174.118.23.210",
+              "type" : "2"
+            }
+          }
+        ],
+        "source" : {
+          "site" : "Cloud",
+          "identifier" : "Health Intersections",
+          "type" : [
+            {
+              "system" : "http://hl7.org/fhir/security-source-type",
+              "code" : "3",
+              "display" : "Web Server"
+            }
+          ]
+        }
+      },
+      "summary" : "<?xml version=\"1.0\" encoding=\"UTF-8\"?><div xmlns=\"http://www.w3.org/1999/xhtml\">--No Summary for this resource--</div>"
+    },
+    {
+      "title" : "SecurityEvent \"2812\" Version \"1\"",
+      "id" : "http://fhir.healthintersections.com.au/open/SecurityEvent/2812",
+      "link" : [
+        {
+          "href" : "http://fhir.healthintersections.com.au/open/SecurityEvent/2812/_history/1",
+          "rel" : "self"
+        }
+      ],
+      "updated" : "2014-06-27T11:34:25Z",
+      "author" : [
+        {
+          "name" : "System"
+        }
+      ],
+      "published" : "2014-06-27T12:06:48Z",
+      "content" : {
+        "resourceType" : "SecurityEvent",
+        "event" : {
+          "type" : {
+            "coding" : [
+              {
+                "system" : "http://nema.org/dicom/dcid",
+                "code" : "110114",
+                "display" : "User Authentication"
+              }
+            ]
+          },
+          "subtype" : [
+            {
+              "coding" : [
+                {
+                  "system" : "http://nema.org/dicom/dcid",
+                  "code" : "110122",
+                  "display" : "Login"
+                }
+              ]
+            }
+          ],
+          "action" : "E",
+          "dateTime" : "2014-06-27T11:34:25Z",
+          "outcome" : "0"
+        },
+        "participant" : [
+          {
+            "userId" : "24.222.225.80",
+            "network" : {
+              "identifier" : "24.222.225.80",
+              "type" : "2"
+            }
+          }
+        ],
+        "source" : {
+          "site" : "Cloud",
+          "identifier" : "Health Intersections",
+          "type" : [
+            {
+              "system" : "http://hl7.org/fhir/security-source-type",
+              "code" : "3",
+              "display" : "Web Server"
+            }
+          ]
+        }
+      },
+      "summary" : "<?xml version=\"1.0\" encoding=\"UTF-8\"?><div xmlns=\"http://www.w3.org/1999/xhtml\">--No Summary for this resource--</div>"
+    },
+    {
+      "title" : "SecurityEvent \"2811\" Version \"1\"",
+      "id" : "http://fhir.healthintersections.com.au/open/SecurityEvent/2811",
+      "link" : [
+        {
+          "href" : "http://fhir.healthintersections.com.au/open/SecurityEvent/2811/_history/1",
+          "rel" : "self"
+        }
+      ],
+      "updated" : "2014-06-27T11:33:59Z",
+      "author" : [
+        {
+          "name" : "System"
+        }
+      ],
+      "published" : "2014-06-27T12:06:48Z",
+      "content" : {
+        "resourceType" : "SecurityEvent",
+        "event" : {
+          "type" : {
+            "coding" : [
+              {
+                "system" : "http://nema.org/dicom/dcid",
+                "code" : "110114",
+                "display" : "User Authentication"
+              }
+            ]
+          },
+          "subtype" : [
+            {
+              "coding" : [
+                {
+                  "system" : "http://nema.org/dicom/dcid",
+                  "code" : "110122",
+                  "display" : "Login"
+                }
+              ]
+            }
+          ],
+          "action" : "E",
+          "dateTime" : "2014-06-27T11:33:59Z",
+          "outcome" : "0"
+        },
+        "participant" : [
+          {
+            "userId" : "10.187.43.60",
+            "network" : {
+              "identifier" : "10.187.43.60",
+              "type" : "2"
+            }
+          }
+        ],
+        "source" : {
+          "site" : "Cloud",
+          "identifier" : "Health Intersections",
+          "type" : [
+            {
+              "system" : "http://hl7.org/fhir/security-source-type",
+              "code" : "3",
+              "display" : "Web Server"
+            }
+          ]
+        }
+      },
+      "summary" : "<?xml version=\"1.0\" encoding=\"UTF-8\"?><div xmlns=\"http://www.w3.org/1999/xhtml\">--No Summary for this resource--</div>"
+    },
+    {
+      "title" : "SecurityEvent \"2810\" Version \"1\"",
+      "id" : "http://fhir.healthintersections.com.au/open/SecurityEvent/2810",
+      "link" : [
+        {
+          "href" : "http://fhir.healthintersections.com.au/open/SecurityEvent/2810/_history/1",
+          "rel" : "self"
+        }
+      ],
+      "updated" : "2014-06-27T11:30:06Z",
+      "author" : [
+        {
+          "name" : "System"
+        }
+      ],
+      "published" : "2014-06-27T12:06:48Z",
+      "content" : {
+        "resourceType" : "SecurityEvent",
+        "event" : {
+          "type" : {
+            "coding" : [
+              {
+                "system" : "http://nema.org/dicom/dcid",
+                "code" : "110114",
+                "display" : "User Authentication"
+              }
+            ]
+          },
+          "subtype" : [
+            {
+              "coding" : [
+                {
+                  "system" : "http://nema.org/dicom/dcid",
+                  "code" : "110122",
+                  "display" : "Login"
+                }
+              ]
+            }
+          ],
+          "action" : "E",
+          "dateTime" : "2014-06-27T11:30:06Z",
+          "outcome" : "0"
+        },
+        "participant" : [
+          {
+            "userId" : "123.125.71.40",
+            "network" : {
+              "identifier" : "123.125.71.40",
+              "type" : "2"
+            }
+          }
+        ],
+        "source" : {
+          "site" : "Cloud",
+          "identifier" : "Health Intersections",
+          "type" : [
+            {
+              "system" : "http://hl7.org/fhir/security-source-type",
+              "code" : "3",
+              "display" : "Web Server"
+            }
+          ]
+        }
+      },
+      "summary" : "<?xml version=\"1.0\" encoding=\"UTF-8\"?><div xmlns=\"http://www.w3.org/1999/xhtml\">--No Summary for this resource--</div>"
+    },
+    {
+      "title" : "SecurityEvent \"2809\" Version \"1\"",
+      "id" : "http://fhir.healthintersections.com.au/open/SecurityEvent/2809",
+      "link" : [
+        {
+          "href" : "http://fhir.healthintersections.com.au/open/SecurityEvent/2809/_history/1",
+          "rel" : "self"
+        }
+      ],
+      "updated" : "2014-06-27T11:13:20Z",
+      "author" : [
+        {
+          "name" : "System"
+        }
+      ],
+      "published" : "2014-06-27T12:06:48Z",
+      "content" : {
+        "resourceType" : "SecurityEvent",
+        "event" : {
+          "type" : {
+            "coding" : [
+              {
+                "system" : "http://nema.org/dicom/dcid",
+                "code" : "110114",
+                "display" : "User Authentication"
+              }
+            ]
+          },
+          "subtype" : [
+            {
+              "coding" : [
+                {
+                  "system" : "http://nema.org/dicom/dcid",
+                  "code" : "110122",
+                  "display" : "Login"
+                }
+              ]
+            }
+          ],
+          "action" : "E",
+          "dateTime" : "2014-06-27T11:13:20Z",
+          "outcome" : "0"
+        },
+        "participant" : [
+          {
+            "userId" : "83.65.65.210",
+            "network" : {
+              "identifier" : "83.65.65.210",
+              "type" : "2"
+            }
+          }
+        ],
+        "source" : {
+          "site" : "Cloud",
+          "identifier" : "Health Intersections",
+          "type" : [
+            {
+              "system" : "http://hl7.org/fhir/security-source-type",
+              "code" : "3",
+              "display" : "Web Server"
+            }
+          ]
+        }
+      },
+      "summary" : "<?xml version=\"1.0\" encoding=\"UTF-8\"?><div xmlns=\"http://www.w3.org/1999/xhtml\">--No Summary for this resource--</div>"
+    },
+    {
+      "title" : "SecurityEvent \"2808\" Version \"1\"",
+      "id" : "http://fhir.healthintersections.com.au/open/SecurityEvent/2808",
+      "link" : [
+        {
+          "href" : "http://fhir.healthintersections.com.au/open/SecurityEvent/2808/_history/1",
+          "rel" : "self"
+        }
+      ],
+      "updated" : "2014-06-27T10:48:57Z",
+      "author" : [
+        {
+          "name" : "System"
+        }
+      ],
+      "published" : "2014-06-27T12:06:48Z",
+      "content" : {
+        "resourceType" : "SecurityEvent",
+        "event" : {
+          "type" : {
+            "coding" : [
+              {
+                "system" : "http://nema.org/dicom/dcid",
+                "code" : "110114",
+                "display" : "User Authentication"
+              }
+            ]
+          },
+          "subtype" : [
+            {
+              "coding" : [
+                {
+                  "system" : "http://nema.org/dicom/dcid",
+                  "code" : "110122",
+                  "display" : "Login"
+                }
+              ]
+            }
+          ],
+          "action" : "E",
+          "dateTime" : "2014-06-27T10:48:57Z",
+          "outcome" : "0"
+        },
+        "participant" : [
+          {
+            "userId" : "80.45.26.161",
+            "network" : {
+              "identifier" : "80.45.26.161",
+              "type" : "2"
+            }
+          }
+        ],
+        "source" : {
+          "site" : "Cloud",
+          "identifier" : "Health Intersections",
+          "type" : [
+            {
+              "system" : "http://hl7.org/fhir/security-source-type",
+              "code" : "3",
+              "display" : "Web Server"
+            }
+          ]
+        }
+      },
+      "summary" : "<?xml version=\"1.0\" encoding=\"UTF-8\"?><div xmlns=\"http://www.w3.org/1999/xhtml\">--No Summary for this resource--</div>"
+    },
+    {
+      "title" : "SecurityEvent \"2807\" Version \"1\"",
+      "id" : "http://fhir.healthintersections.com.au/open/SecurityEvent/2807",
+      "link" : [
+        {
+          "href" : "http://fhir.healthintersections.com.au/open/SecurityEvent/2807/_history/1",
+          "rel" : "self"
+        }
+      ],
+      "updated" : "2014-06-27T10:37:02Z",
+      "author" : [
+        {
+          "name" : "System"
+        }
+      ],
+      "published" : "2014-06-27T12:06:48Z",
+      "content" : {
+        "resourceType" : "SecurityEvent",
+        "event" : {
+          "type" : {
+            "coding" : [
+              {
+                "system" : "http://nema.org/dicom/dcid",
+                "code" : "110114",
+                "display" : "User Authentication"
+              }
+            ]
+          },
+          "subtype" : [
+            {
+              "coding" : [
+                {
+                  "system" : "http://nema.org/dicom/dcid",
+                  "code" : "110122",
+                  "display" : "Login"
+                }
+              ]
+            }
+          ],
+          "action" : "E",
+          "dateTime" : "2014-06-27T10:37:02Z",
+          "outcome" : "0"
+        },
+        "participant" : [
+          {
+            "userId" : "117.111.15.33",
+            "network" : {
+              "identifier" : "117.111.15.33",
+              "type" : "2"
+            }
+          }
+        ],
+        "source" : {
+          "site" : "Cloud",
+          "identifier" : "Health Intersections",
+          "type" : [
+            {
+              "system" : "http://hl7.org/fhir/security-source-type",
+              "code" : "3",
+              "display" : "Web Server"
+            }
+          ]
+        }
+      },
+      "summary" : "<?xml version=\"1.0\" encoding=\"UTF-8\"?><div xmlns=\"http://www.w3.org/1999/xhtml\">--No Summary for this resource--</div>"
+    },
+    {
+      "title" : "SecurityEvent \"2806\" Version \"1\"",
+      "id" : "http://fhir.healthintersections.com.au/open/SecurityEvent/2806",
+      "link" : [
+        {
+          "href" : "http://fhir.healthintersections.com.au/open/SecurityEvent/2806/_history/1",
+          "rel" : "self"
+        }
+      ],
+      "updated" : "2014-06-27T09:48:29Z",
+      "author" : [
+        {
+          "name" : "System"
+        }
+      ],
+      "published" : "2014-06-27T12:06:48Z",
+      "content" : {
+        "resourceType" : "SecurityEvent",
+        "event" : {
+          "type" : {
+            "coding" : [
+              {
+                "system" : "http://nema.org/dicom/dcid",
+                "code" : "110114",
+                "display" : "User Authentication"
+              }
+            ]
+          },
+          "subtype" : [
+            {
+              "coding" : [
+                {
+                  "system" : "http://nema.org/dicom/dcid",
+                  "code" : "110122",
+                  "display" : "Login"
+                }
+              ]
+            }
+          ],
+          "action" : "E",
+          "dateTime" : "2014-06-27T09:48:29Z",
+          "outcome" : "0"
+        },
+        "participant" : [
+          {
+            "userId" : "80.45.26.161",
+            "network" : {
+              "identifier" : "80.45.26.161",
+              "type" : "2"
+            }
+          }
+        ],
+        "source" : {
+          "site" : "Cloud",
+          "identifier" : "Health Intersections",
+          "type" : [
+            {
+              "system" : "http://hl7.org/fhir/security-source-type",
+              "code" : "3",
+              "display" : "Web Server"
+            }
+          ]
+        }
+      },
+      "summary" : "<?xml version=\"1.0\" encoding=\"UTF-8\"?><div xmlns=\"http://www.w3.org/1999/xhtml\">--No Summary for this resource--</div>"
+    },
+    {
+      "title" : "SecurityEvent \"2805\" Version \"1\"",
+      "id" : "http://fhir.healthintersections.com.au/open/SecurityEvent/2805",
+      "link" : [
+        {
+          "href" : "http://fhir.healthintersections.com.au/open/SecurityEvent/2805/_history/1",
+          "rel" : "self"
+        }
+      ],
+      "updated" : "2014-06-27T09:16:30Z",
+      "author" : [
+        {
+          "name" : "System"
+        }
+      ],
+      "published" : "2014-06-27T12:06:48Z",
+      "content" : {
+        "resourceType" : "SecurityEvent",
+        "event" : {
+          "type" : {
+            "coding" : [
+              {
+                "system" : "http://nema.org/dicom/dcid",
+                "code" : "110114",
+                "display" : "User Authentication"
+              }
+            ]
+          },
+          "subtype" : [
+            {
+              "coding" : [
+                {
+                  "system" : "http://nema.org/dicom/dcid",
+                  "code" : "110122",
+                  "display" : "Login"
+                }
+              ]
+            }
+          ],
+          "action" : "E",
+          "dateTime" : "2014-06-27T09:16:30Z",
+          "outcome" : "0"
+        },
+        "participant" : [
+          {
+            "userId" : "192.93.37.4",
+            "network" : {
+              "identifier" : "192.93.37.4",
+              "type" : "2"
+            }
+          }
+        ],
+        "source" : {
+          "site" : "Cloud",
+          "identifier" : "Health Intersections",
+          "type" : [
+            {
+              "system" : "http://hl7.org/fhir/security-source-type",
+              "code" : "3",
+              "display" : "Web Server"
+            }
+          ]
+        }
+      },
+      "summary" : "<?xml version=\"1.0\" encoding=\"UTF-8\"?><div xmlns=\"http://www.w3.org/1999/xhtml\">--No Summary for this resource--</div>"
+    },
+    {
+      "title" : "SecurityEvent \"2804\" Version \"1\"",
+      "id" : "http://fhir.healthintersections.com.au/open/SecurityEvent/2804",
+      "link" : [
+        {
+          "href" : "http://fhir.healthintersections.com.au/open/SecurityEvent/2804/_history/1",
+          "rel" : "self"
+        }
+      ],
+      "updated" : "2014-06-27T08:32:06Z",
+      "author" : [
+        {
+          "name" : "System"
+        }
+      ],
+      "published" : "2014-06-27T12:06:48Z",
+      "content" : {
+        "resourceType" : "SecurityEvent",
+        "event" : {
+          "type" : {
+            "coding" : [
+              {
+                "system" : "http://nema.org/dicom/dcid",
+                "code" : "110114",
+                "display" : "User Authentication"
+              }
+            ]
+          },
+          "subtype" : [
+            {
+              "coding" : [
+                {
+                  "system" : "http://nema.org/dicom/dcid",
+                  "code" : "110122",
+                  "display" : "Login"
+                }
+              ]
+            }
+          ],
+          "action" : "E",
+          "dateTime" : "2014-06-27T08:32:05Z",
+          "outcome" : "0"
+        },
+        "participant" : [
+          {
+            "userId" : "83.65.65.210",
+            "network" : {
+              "identifier" : "83.65.65.210",
+              "type" : "2"
+            }
+          }
+        ],
+        "source" : {
+          "site" : "Cloud",
+          "identifier" : "Health Intersections",
+          "type" : [
+            {
+              "system" : "http://hl7.org/fhir/security-source-type",
+              "code" : "3",
+              "display" : "Web Server"
+            }
+          ]
+        }
+      },
+      "summary" : "<?xml version=\"1.0\" encoding=\"UTF-8\"?><div xmlns=\"http://www.w3.org/1999/xhtml\">--No Summary for this resource--</div>"
+    },
+    {
+      "title" : "Encounter \"9\" Version \"1\"",
+      "id" : "http://fhir.healthintersections.com.au/open/Encounter/9",
+      "link" : [
+        {
+          "href" : "http://fhir.healthintersections.com.au/open/Encounter/9/_history/1",
+          "rel" : "self"
+        }
+      ],
+      "updated" : "2014-06-27T07:57:42Z",
+      "author" : [
+        {
+          "name" : "192.93.37.4"
+        }
+      ],
+      "published" : "2014-06-27T12:06:48Z",
+      "content" : {
+        "resourceType" : "Encounter",
+        "text" : {
+          "status" : "empty",
+          "div" : "<?xml version=\"1.0\" encoding=\"UTF-8\"?><div xmlns=\"http://www.w3.org/1999/xhtml\">No narrative template available for resource profile: http://hl7.org/fhir/profiles/Encounter</div>"
+        },
+        "status" : "planned",
+        "class" : "ambulatory",
+        "subject" : {
+          "reference" : "Patient/1"
+        },
+        "participant" : [
+          {
+            "individual" : {
+              "reference" : "Practitioner/1"
+            }
+          }
+        ]
+      },
+      "summary" : "<?xml version=\"1.0\" encoding=\"UTF-8\"?><div xmlns=\"http://www.w3.org/1999/xhtml\">No narrative template available for resource profile: http://hl7.org/fhir/profiles/Encounter</div>"
+    },
+    {
+      "title" : "Encounter \"8\" Version \"1\"",
+      "id" : "http://fhir.healthintersections.com.au/open/Encounter/8",
+      "link" : [
+        {
+          "href" : "http://fhir.healthintersections.com.au/open/Encounter/8/_history/1",
+          "rel" : "self"
+        }
+      ],
+      "updated" : "2014-06-27T07:47:13Z",
+      "author" : [
+        {
+          "name" : "192.93.37.4"
+        }
+      ],
+      "published" : "2014-06-27T12:06:48Z",
+      "content" : {
+        "resourceType" : "Encounter",
+        "status" : "planned",
+        "class" : "ambulatory"
+      },
+      "summary" : "<?xml version=\"1.0\" encoding=\"UTF-8\"?><div xmlns=\"http://www.w3.org/1999/xhtml\">--No Summary for this resource--</div>"
+    },
+    {
+      "title" : "Practitioner \"10004\" Version \"1\"",
+      "id" : "http://fhir.healthintersections.com.au/open/Practitioner/10004",
+      "link" : [
+        {
+          "href" : "http://fhir.healthintersections.com.au/open/Practitioner/10004/_history/1",
+          "rel" : "self"
+        }
+      ],
+      "updated" : "2014-06-27T07:41:13Z",
+      "author" : [
+        {
+          "name" : "192.93.37.4"
+        }
+      ],
+      "published" : "2014-06-27T12:06:48Z",
+      "content" : {
+        "resourceType" : "Practitioner",
+        "name" : {
+          "family" : [
+            "Nom Medecin"
+          ],
+          "given" : [
+            "Prenom Medecin"
+          ]
+        },
+        "role" : [
+          {
+            "coding" : [
+              {
+                "system" : "http://hl7.org/fhir/practitioner-role",
+                "code" : "doctor"
+              }
+            ]
+          }
+        ]
+      },
+      "summary" : "<?xml version=\"1.0\" encoding=\"UTF-8\"?><div xmlns=\"http://www.w3.org/1999/xhtml\">--No Summary for this resource--</div>"
+    },
+    {
+      "title" : "Patient \"84239378\" Version \"1\"",
+      "id" : "http://fhir.healthintersections.com.au/open/Patient/84239378",
+      "link" : [
+        {
+          "href" : "http://fhir.healthintersections.com.au/open/Patient/84239378/_history/1",
+          "rel" : "self"
+        }
+      ],
+      "updated" : "2014-06-27T07:41:12Z",
+      "author" : [
+        {
+          "name" : "192.93.37.4"
+        }
+      ],
+      "published" : "2014-06-27T12:06:48Z",
+      "content" : {
+        "resourceType" : "Patient",
+        "identifier" : [
+          {
+            "system" : "1",
+            "value" : "200102200"
+          }
+        ],
+        "name" : [
+          {
+            "family" : [
+              "Nom 200102200 F"
+            ],
+            "given" : [
+              "Prénom 200102200 F"
+            ]
+          }
+        ],
+        "gender" : {
+          "coding" : [
+            {
+              "system" : "http://hl7.org/fhir/v3/AdministrativeGender",
+              "code" : "F"
+            }
+          ]
+        },
+        "birthDate" : "1997-06-29T00:00:00+02:00",
+        "contact" : [
+          {
+            "telecom" : [
+              {
+                "system" : "phone",
+                "value" : "0299236953"
+              }
+            ]
+          }
+        ]
+      },
+      "summary" : "<?xml version=\"1.0\" encoding=\"UTF-8\"?><div xmlns=\"http://www.w3.org/1999/xhtml\">--No Summary for this resource--</div>"
+    },
+    {
+      "title" : "SecurityEvent \"2803\" Version \"1\"",
+      "id" : "http://fhir.healthintersections.com.au/open/SecurityEvent/2803",
+      "link" : [
+        {
+          "href" : "http://fhir.healthintersections.com.au/open/SecurityEvent/2803/_history/1",
+          "rel" : "self"
+        }
+      ],
+      "updated" : "2014-06-27T07:35:48Z",
+      "author" : [
+        {
+          "name" : "System"
+        }
+      ],
+      "published" : "2014-06-27T12:06:48Z",
+      "content" : {
+        "resourceType" : "SecurityEvent",
+        "event" : {
+          "type" : {
+            "coding" : [
+              {
+                "system" : "http://nema.org/dicom/dcid",
+                "code" : "110114",
+                "display" : "User Authentication"
+              }
+            ]
+          },
+          "subtype" : [
+            {
+              "coding" : [
+                {
+                  "system" : "http://nema.org/dicom/dcid",
+                  "code" : "110122",
+                  "display" : "Login"
+                }
+              ]
+            }
+          ],
+          "action" : "E",
+          "dateTime" : "2014-06-27T07:35:48Z",
+          "outcome" : "0"
+        },
+        "participant" : [
+          {
+            "userId" : "194.76.244.131",
+            "network" : {
+              "identifier" : "194.76.244.131",
+              "type" : "2"
+            }
+          }
+        ],
+        "source" : {
+          "site" : "Cloud",
+          "identifier" : "Health Intersections",
+          "type" : [
+            {
+              "system" : "http://hl7.org/fhir/security-source-type",
+              "code" : "3",
+              "display" : "Web Server"
+            }
+          ]
+        }
+      },
+      "summary" : "<?xml version=\"1.0\" encoding=\"UTF-8\"?><div xmlns=\"http://www.w3.org/1999/xhtml\">--No Summary for this resource--</div>"
+    },
+    {
+      "title" : "SecurityEvent \"2802\" Version \"1\"",
+      "id" : "http://fhir.healthintersections.com.au/open/SecurityEvent/2802",
+      "link" : [
+        {
+          "href" : "http://fhir.healthintersections.com.au/open/SecurityEvent/2802/_history/1",
+          "rel" : "self"
+        }
+      ],
+      "updated" : "2014-06-27T07:34:23Z",
+      "author" : [
+        {
+          "name" : "System"
+        }
+      ],
+      "published" : "2014-06-27T12:06:48Z",
+      "content" : {
+        "resourceType" : "SecurityEvent",
+        "event" : {
+          "type" : {
+            "coding" : [
+              {
+                "system" : "http://nema.org/dicom/dcid",
+                "code" : "110114",
+                "display" : "User Authentication"
+              }
+            ]
+          },
+          "subtype" : [
+            {
+              "coding" : [
+                {
+                  "system" : "http://nema.org/dicom/dcid",
+                  "code" : "110122",
+                  "display" : "Login"
+                }
+              ]
+            }
+          ],
+          "action" : "E",
+          "dateTime" : "2014-06-27T07:34:23Z",
+          "outcome" : "0"
+        },
+        "participant" : [
+          {
+            "userId" : "192.93.37.4",
+            "network" : {
+              "identifier" : "192.93.37.4",
+              "type" : "2"
+            }
+          }
+        ],
+        "source" : {
+          "site" : "Cloud",
+          "identifier" : "Health Intersections",
+          "type" : [
+            {
+              "system" : "http://hl7.org/fhir/security-source-type",
+              "code" : "3",
+              "display" : "Web Server"
+            }
+          ]
+        }
+      },
+      "summary" : "<?xml version=\"1.0\" encoding=\"UTF-8\"?><div xmlns=\"http://www.w3.org/1999/xhtml\">--No Summary for this resource--</div>"
+    },
+    {
+      "title" : "SecurityEvent \"2801\" Version \"1\"",
+      "id" : "http://fhir.healthintersections.com.au/open/SecurityEvent/2801",
+      "link" : [
+        {
+          "href" : "http://fhir.healthintersections.com.au/open/SecurityEvent/2801/_history/1",
+          "rel" : "self"
+        }
+      ],
+      "updated" : "2014-06-27T06:27:01Z",
+      "author" : [
+        {
+          "name" : "System"
+        }
+      ],
+      "published" : "2014-06-27T12:06:48Z",
+      "content" : {
+        "resourceType" : "SecurityEvent",
+        "event" : {
+          "type" : {
+            "coding" : [
+              {
+                "system" : "http://nema.org/dicom/dcid",
+                "code" : "110114",
+                "display" : "User Authentication"
+              }
+            ]
+          },
+          "subtype" : [
+            {
+              "coding" : [
+                {
+                  "system" : "http://nema.org/dicom/dcid",
+                  "code" : "110122",
+                  "display" : "Login"
+                }
+              ]
+            }
+          ],
+          "action" : "E",
+          "dateTime" : "2014-06-27T06:27:00Z",
+          "outcome" : "0"
+        },
+        "participant" : [
+          {
+            "userId" : "197.156.77.140",
+            "network" : {
+              "identifier" : "197.156.77.140",
+              "type" : "2"
+            }
+          }
+        ],
+        "source" : {
+          "site" : "Cloud",
+          "identifier" : "Health Intersections",
+          "type" : [
+            {
+              "system" : "http://hl7.org/fhir/security-source-type",
+              "code" : "3",
+              "display" : "Web Server"
+            }
+          ]
+        }
+      },
+      "summary" : "<?xml version=\"1.0\" encoding=\"UTF-8\"?><div xmlns=\"http://www.w3.org/1999/xhtml\">--No Summary for this resource--</div>"
+    },
+    {
+      "title" : "SecurityEvent \"2800\" Version \"1\"",
+      "id" : "http://fhir.healthintersections.com.au/open/SecurityEvent/2800",
+      "link" : [
+        {
+          "href" : "http://fhir.healthintersections.com.au/open/SecurityEvent/2800/_history/1",
+          "rel" : "self"
+        }
+      ],
+      "updated" : "2014-06-27T04:26:04Z",
+      "author" : [
+        {
+          "name" : "System"
+        }
+      ],
+      "published" : "2014-06-27T12:06:48Z",
+      "content" : {
+        "resourceType" : "SecurityEvent",
+        "event" : {
+          "type" : {
+            "coding" : [
+              {
+                "system" : "http://nema.org/dicom/dcid",
+                "code" : "110114",
+                "display" : "User Authentication"
+              }
+            ]
+          },
+          "subtype" : [
+            {
+              "coding" : [
+                {
+                  "system" : "http://nema.org/dicom/dcid",
+                  "code" : "110122",
+                  "display" : "Login"
+                }
+              ]
+            }
+          ],
+          "action" : "E",
+          "dateTime" : "2014-06-27T04:26:04Z",
+          "outcome" : "0"
+        },
+        "participant" : [
+          {
+            "userId" : "101.187.41.149",
+            "network" : {
+              "identifier" : "101.187.41.149",
+              "type" : "2"
+            }
+          }
+        ],
+        "source" : {
+          "site" : "Cloud",
+          "identifier" : "Health Intersections",
+          "type" : [
+            {
+              "system" : "http://hl7.org/fhir/security-source-type",
+              "code" : "3",
+              "display" : "Web Server"
+            }
+          ]
+        }
+      },
+      "summary" : "<?xml version=\"1.0\" encoding=\"UTF-8\"?><div xmlns=\"http://www.w3.org/1999/xhtml\">--No Summary for this resource--</div>"
+    },
+    {
+      "title" : "SecurityEvent \"2799\" Version \"1\"",
+      "id" : "http://fhir.healthintersections.com.au/open/SecurityEvent/2799",
+      "link" : [
+        {
+          "href" : "http://fhir.healthintersections.com.au/open/SecurityEvent/2799/_history/1",
+          "rel" : "self"
+        }
+      ],
+      "updated" : "2014-06-27T04:23:43Z",
+      "author" : [
+        {
+          "name" : "System"
+        }
+      ],
+      "published" : "2014-06-27T12:06:48Z",
+      "content" : {
+        "resourceType" : "SecurityEvent",
+        "event" : {
+          "type" : {
+            "coding" : [
+              {
+                "system" : "http://nema.org/dicom/dcid",
+                "code" : "110114",
+                "display" : "User Authentication"
+              }
+            ]
+          },
+          "subtype" : [
+            {
+              "coding" : [
+                {
+                  "system" : "http://nema.org/dicom/dcid",
+                  "code" : "110122",
+                  "display" : "Login"
+                }
+              ]
+            }
+          ],
+          "action" : "E",
+          "dateTime" : "2014-06-27T04:23:43Z",
+          "outcome" : "0"
+        },
+        "participant" : [
+          {
+            "userId" : "203.94.160.158",
+            "network" : {
+              "identifier" : "203.94.160.158",
+              "type" : "2"
+            }
+          }
+        ],
+        "source" : {
+          "site" : "Cloud",
+          "identifier" : "Health Intersections",
+          "type" : [
+            {
+              "system" : "http://hl7.org/fhir/security-source-type",
+              "code" : "3",
+              "display" : "Web Server"
+            }
+          ]
+        }
+      },
+      "summary" : "<?xml version=\"1.0\" encoding=\"UTF-8\"?><div xmlns=\"http://www.w3.org/1999/xhtml\">--No Summary for this resource--</div>"
+    },
+    {
+      "title" : "SecurityEvent \"2798\" Version \"1\"",
+      "id" : "http://fhir.healthintersections.com.au/open/SecurityEvent/2798",
+      "link" : [
+        {
+          "href" : "http://fhir.healthintersections.com.au/open/SecurityEvent/2798/_history/1",
+          "rel" : "self"
+        }
+      ],
+      "updated" : "2014-06-27T03:52:06Z",
+      "author" : [
+        {
+          "name" : "System"
+        }
+      ],
+      "published" : "2014-06-27T12:06:48Z",
+      "content" : {
+        "resourceType" : "SecurityEvent",
+        "event" : {
+          "type" : {
+            "coding" : [
+              {
+                "system" : "http://nema.org/dicom/dcid",
+                "code" : "110114",
+                "display" : "User Authentication"
+              }
+            ]
+          },
+          "subtype" : [
+            {
+              "coding" : [
+                {
+                  "system" : "http://nema.org/dicom/dcid",
+                  "code" : "110122",
+                  "display" : "Login"
+                }
+              ]
+            }
+          ],
+          "action" : "E",
+          "dateTime" : "2014-06-27T03:52:06Z",
+          "outcome" : "0"
+        },
+        "participant" : [
+          {
+            "userId" : "49.183.189.197",
+            "network" : {
+              "identifier" : "49.183.189.197",
+              "type" : "2"
+            }
+          }
+        ],
+        "source" : {
+          "site" : "Cloud",
+          "identifier" : "Health Intersections",
+          "type" : [
+            {
+              "system" : "http://hl7.org/fhir/security-source-type",
+              "code" : "3",
+              "display" : "Web Server"
+            }
+          ]
+        }
+      },
+      "summary" : "<?xml version=\"1.0\" encoding=\"UTF-8\"?><div xmlns=\"http://www.w3.org/1999/xhtml\">--No Summary for this resource--</div>"
+    },
+    {
+      "title" : "SecurityEvent \"2797\" Version \"1\"",
+      "id" : "http://fhir.healthintersections.com.au/open/SecurityEvent/2797",
+      "link" : [
+        {
+          "href" : "http://fhir.healthintersections.com.au/open/SecurityEvent/2797/_history/1",
+          "rel" : "self"
+        }
+      ],
+      "updated" : "2014-06-27T03:48:17Z",
+      "author" : [
+        {
+          "name" : "System"
+        }
+      ],
+      "published" : "2014-06-27T12:06:48Z",
+      "content" : {
+        "resourceType" : "SecurityEvent",
+        "event" : {
+          "type" : {
+            "coding" : [
+              {
+                "system" : "http://nema.org/dicom/dcid",
+                "code" : "110114",
+                "display" : "User Authentication"
+              }
+            ]
+          },
+          "subtype" : [
+            {
+              "coding" : [
+                {
+                  "system" : "http://nema.org/dicom/dcid",
+                  "code" : "110122",
+                  "display" : "Login"
+                }
+              ]
+            }
+          ],
+          "action" : "E",
+          "dateTime" : "2014-06-27T03:48:17Z",
+          "outcome" : "0"
+        },
+        "participant" : [
+          {
+            "userId" : "108.29.148.168",
+            "network" : {
+              "identifier" : "108.29.148.168",
+              "type" : "2"
+            }
+          }
+        ],
+        "source" : {
+          "site" : "Cloud",
+          "identifier" : "Health Intersections",
+          "type" : [
+            {
+              "system" : "http://hl7.org/fhir/security-source-type",
+              "code" : "3",
+              "display" : "Web Server"
+            }
+          ]
+        }
+      },
+      "summary" : "<?xml version=\"1.0\" encoding=\"UTF-8\"?><div xmlns=\"http://www.w3.org/1999/xhtml\">--No Summary for this resource--</div>"
+    },
+    {
+      "title" : "SecurityEvent \"2796\" Version \"1\"",
+      "id" : "http://fhir.healthintersections.com.au/open/SecurityEvent/2796",
+      "link" : [
+        {
+          "href" : "http://fhir.healthintersections.com.au/open/SecurityEvent/2796/_history/1",
+          "rel" : "self"
+        }
+      ],
+      "updated" : "2014-06-27T02:45:12Z",
+      "author" : [
+        {
+          "name" : "System"
+        }
+      ],
+      "published" : "2014-06-27T12:06:48Z",
+      "content" : {
+        "resourceType" : "SecurityEvent",
+        "event" : {
+          "type" : {
+            "coding" : [
+              {
+                "system" : "http://nema.org/dicom/dcid",
+                "code" : "110114",
+                "display" : "User Authentication"
+              }
+            ]
+          },
+          "subtype" : [
+            {
+              "coding" : [
+                {
+                  "system" : "http://nema.org/dicom/dcid",
+                  "code" : "110122",
+                  "display" : "Login"
+                }
+              ]
+            }
+          ],
+          "action" : "E",
+          "dateTime" : "2014-06-27T02:45:12Z",
+          "outcome" : "0"
+        },
+        "participant" : [
+          {
+            "userId" : "124.107.172.102",
+            "network" : {
+              "identifier" : "124.107.172.102",
+              "type" : "2"
+            }
+          }
+        ],
+        "source" : {
+          "site" : "Cloud",
+          "identifier" : "Health Intersections",
+          "type" : [
+            {
+              "system" : "http://hl7.org/fhir/security-source-type",
+              "code" : "3",
+              "display" : "Web Server"
+            }
+          ]
+        }
+      },
+      "summary" : "<?xml version=\"1.0\" encoding=\"UTF-8\"?><div xmlns=\"http://www.w3.org/1999/xhtml\">--No Summary for this resource--</div>"
+    },
+    {
+      "title" : "SecurityEvent \"2795\" Version \"1\"",
+      "id" : "http://fhir.healthintersections.com.au/open/SecurityEvent/2795",
+      "link" : [
+        {
+          "href" : "http://fhir.healthintersections.com.au/open/SecurityEvent/2795/_history/1",
+          "rel" : "self"
+        }
+      ],
+      "updated" : "2014-06-27T02:36:48Z",
+      "author" : [
+        {
+          "name" : "System"
+        }
+      ],
+      "published" : "2014-06-27T12:06:48Z",
+      "content" : {
+        "resourceType" : "SecurityEvent",
+        "event" : {
+          "type" : {
+            "coding" : [
+              {
+                "system" : "http://nema.org/dicom/dcid",
+                "code" : "110114",
+                "display" : "User Authentication"
+              }
+            ]
+          },
+          "subtype" : [
+            {
+              "coding" : [
+                {
+                  "system" : "http://nema.org/dicom/dcid",
+                  "code" : "110122",
+                  "display" : "Login"
+                }
+              ]
+            }
+          ],
+          "action" : "E",
+          "dateTime" : "2014-06-27T02:36:48Z",
+          "outcome" : "0"
+        },
+        "participant" : [
+          {
+            "userId" : "108.29.148.168",
+            "network" : {
+              "identifier" : "108.29.148.168",
+              "type" : "2"
+            }
+          }
+        ],
+        "source" : {
+          "site" : "Cloud",
+          "identifier" : "Health Intersections",
+          "type" : [
+            {
+              "system" : "http://hl7.org/fhir/security-source-type",
+              "code" : "3",
+              "display" : "Web Server"
+            }
+          ]
+        }
+      },
+      "summary" : "<?xml version=\"1.0\" encoding=\"UTF-8\"?><div xmlns=\"http://www.w3.org/1999/xhtml\">--No Summary for this resource--</div>"
+    },
+    {
+      "title" : "Patient \"84239377\" Version \"7\"",
+      "id" : "http://fhir.healthintersections.com.au/open/Patient/84239377",
+      "link" : [
+        {
+          "href" : "http://fhir.healthintersections.com.au/open/Patient/84239377/_history/7",
+          "rel" : "self"
+        }
+      ],
+      "updated" : "2014-06-27T02:28:33Z",
+      "author" : [
+        {
+          "name" : "108.29.148.168"
+        }
+      ],
+      "published" : "2014-06-27T12:06:48Z",
+      "content" : {
+        "resourceType" : "Patient",
+        "extension" : [
+          {
+            "url" : "http://spark.furore.com/fhir/Profile/demo#haircolour",
+            "valueString" : "brown"
+          }
+        ],
+        "text" : {
+          "status" : "generated",
+          "div" : "<?xml version=\"1.0\" encoding=\"UTF-8\"?><div xmlns=\"http://www.w3.org/1999/xhtml\">Nucleus, Chromosomes. SSN:&#x0A;            444999234</div>"
+        },
+        "identifier" : [
+          {
+            "label" : "SSN",
+            "system" : "http://hl7.org/fhir/sid/us-ssn",
+            "value" : "444999234"
+          }
+        ],
+        "name" : [
+          {
+            "use" : "official",
+            "family" : [
+              "Nucleus"
+            ],
+            "given" : [
+              "Chromosomes"
+            ]
+          }
+        ],
+        "telecom" : [
+          {
+            "system" : "phone",
+            "value" : "555-555-5009",
+            "use" : "work"
+          }
+        ],
+        "gender" : {
+          "coding" : [
+            {
+              "system" : "http://hl7.org/fhir/v3/AdministrativeGender",
+              "code" : "M"
+            }
+          ]
+        },
+        "deceasedDateTime" : "2012-09-21",
+        "address" : [
+          {
+            "use" : "home",
+            "line" : [
+              "9999 House Street"
+            ],
+            "city" : "Crown Heights",
+            "state" : "NY",
+            "zip" : "11225"
+          }
+        ],
+        "managingOrganization" : {
+          "reference" : "Organization/hl7"
+        },
+        "active" : true
+      },
+      "summary" : "<?xml version=\"1.0\" encoding=\"UTF-8\"?><div xmlns=\"http://www.w3.org/1999/xhtml\">Nucleus, Chromosomes. SSN:&#x0A;            444999234</div>"
+    },
+    {
+      "title" : "SecurityEvent \"2794\" Version \"1\"",
+      "id" : "http://fhir.healthintersections.com.au/open/SecurityEvent/2794",
+      "link" : [
+        {
+          "href" : "http://fhir.healthintersections.com.au/open/SecurityEvent/2794/_history/1",
+          "rel" : "self"
+        }
+      ],
+      "updated" : "2014-06-27T02:22:48Z",
+      "author" : [
+        {
+          "name" : "System"
+        }
+      ],
+      "published" : "2014-06-27T12:06:48Z",
+      "content" : {
+        "resourceType" : "SecurityEvent",
+        "event" : {
+          "type" : {
+            "coding" : [
+              {
+                "system" : "http://nema.org/dicom/dcid",
+                "code" : "110114",
+                "display" : "User Authentication"
+              }
+            ]
+          },
+          "subtype" : [
+            {
+              "coding" : [
+                {
+                  "system" : "http://nema.org/dicom/dcid",
+                  "code" : "110122",
+                  "display" : "Login"
+                }
+              ]
+            }
+          ],
+          "action" : "E",
+          "dateTime" : "2014-06-27T02:22:48Z",
+          "outcome" : "0"
+        },
+        "participant" : [
+          {
+            "userId" : "68.54.22.163",
+            "network" : {
+              "identifier" : "68.54.22.163",
+              "type" : "2"
+            }
+          }
+        ],
+        "source" : {
+          "site" : "Cloud",
+          "identifier" : "Health Intersections",
+          "type" : [
+            {
+              "system" : "http://hl7.org/fhir/security-source-type",
+              "code" : "3",
+              "display" : "Web Server"
+            }
+          ]
+        }
+      },
+      "summary" : "<?xml version=\"1.0\" encoding=\"UTF-8\"?><div xmlns=\"http://www.w3.org/1999/xhtml\">--No Summary for this resource--</div>"
+    },
+    {
+      "title" : "Patient \"84239377\" Version \"6\"",
+      "id" : "http://fhir.healthintersections.com.au/open/Patient/84239377",
+      "link" : [
+        {
+          "href" : "http://fhir.healthintersections.com.au/open/Patient/84239377/_history/6",
+          "rel" : "self"
+        }
+      ],
+      "updated" : "2014-06-27T02:17:47Z",
+      "author" : [
+        {
+          "name" : "108.29.148.168"
+        }
+      ],
+      "published" : "2014-06-27T12:06:48Z",
+      "content" : {
+        "resourceType" : "Patient",
+        "extension" : [
+          {
+            "url" : "http://spark.furore.com/fhir/Profile/demo#haircolour",
+            "valueString" : "brown"
+          }
+        ],
+        "text" : {
+          "status" : "generated",
+          "div" : "<?xml version=\"1.0\" encoding=\"UTF-8\"?><div xmlns=\"http://www.w3.org/1999/xhtml\">Nucleus, Chromosomes. SSN:&#x0A;            444999234</div>"
+        },
+        "identifier" : [
+          {
+            "label" : "SSN",
+            "system" : "http://hl7.org/fhir/sid/us-ssn",
+            "value" : "444999234"
+          }
+        ],
+        "name" : [
+          {
+            "use" : "official",
+            "family" : [
+              "Nucleus"
+            ],
+            "given" : [
+              "Chromosomes"
+            ]
+          }
+        ],
+        "telecom" : [
+          {
+            "system" : "phone",
+            "value" : "555-555-5009",
+            "use" : "work"
+          }
+        ],
+        "gender" : {
+          "coding" : [
+            {
+              "system" : "http://hl7.org/fhir/v3/AdministrativeGender",
+              "code" : "M"
+            }
+          ]
+        },
+        "deceasedDateTime" : "2012-09-21",
+        "address" : [
+          {
+            "use" : "home",
+            "line" : [
+              "9999 House Street"
+            ],
+            "city" : "Crown Heights",
+            "state" : "NY",
+            "zip" : "11225"
+          }
+        ],
+        "managingOrganization" : {
+          "reference" : "Organization/hl7"
+        },
+        "active" : true
+      },
+      "summary" : "<?xml version=\"1.0\" encoding=\"UTF-8\"?><div xmlns=\"http://www.w3.org/1999/xhtml\">Nucleus, Chromosomes. SSN:&#x0A;            444999234</div>"
+    },
+    {
+      "title" : "Patient \"84239377\" Version \"5\"",
+      "id" : "http://fhir.healthintersections.com.au/open/Patient/84239377",
+      "link" : [
+        {
+          "href" : "http://fhir.healthintersections.com.au/open/Patient/84239377/_history/5",
+          "rel" : "self"
+        }
+      ],
+      "updated" : "2014-06-27T02:15:07Z",
+      "author" : [
+        {
+          "name" : "108.29.148.168"
+        }
+      ],
+      "published" : "2014-06-27T12:06:48Z",
+      "content" : {
+        "resourceType" : "Patient",
+        "text" : {
+          "status" : "generated",
+          "div" : "<?xml version=\"1.0\" encoding=\"UTF-8\"?><div xmlns=\"http://www.w3.org/1999/xhtml\">Nucleus, Chromosomes. SSN:&#x0A;            444999234</div>"
+        },
+        "identifier" : [
+          {
+            "label" : "SSN",
+            "system" : "http://hl7.org/fhir/sid/us-ssn",
+            "value" : "444999234"
+          }
+        ],
+        "name" : [
+          {
+            "use" : "official",
+            "family" : [
+              "Nucleus"
+            ],
+            "given" : [
+              "Chromosomes"
+            ]
+          }
+        ],
+        "telecom" : [
+          {
+            "system" : "phone",
+            "value" : "555-555-5009",
+            "use" : "work"
+          }
+        ],
+        "gender" : {
+          "coding" : [
+            {
+              "system" : "http://hl7.org/fhir/v3/AdministrativeGender",
+              "code" : "M"
+            }
+          ]
+        },
+        "deceasedDateTime" : "2012-09-21",
+        "address" : [
+          {
+            "use" : "home",
+            "line" : [
+              "9999 House Street"
+            ],
+            "city" : "Crown Heights",
+            "state" : "NY",
+            "zip" : "11225"
+          }
+        ],
+        "managingOrganization" : {
+          "reference" : "Organization/hl7"
+        },
+        "active" : true
+      },
+      "summary" : "<?xml version=\"1.0\" encoding=\"UTF-8\"?><div xmlns=\"http://www.w3.org/1999/xhtml\">Nucleus, Chromosomes. SSN:&#x0A;            444999234</div>"
+    },
+    {
+      "title" : "SecurityEvent \"2793\" Version \"1\"",
+      "id" : "http://fhir.healthintersections.com.au/open/SecurityEvent/2793",
+      "link" : [
+        {
+          "href" : "http://fhir.healthintersections.com.au/open/SecurityEvent/2793/_history/1",
+          "rel" : "self"
+        }
+      ],
+      "updated" : "2014-06-27T02:09:59Z",
+      "author" : [
+        {
+          "name" : "System"
+        }
+      ],
+      "published" : "2014-06-27T12:06:48Z",
+      "content" : {
+        "resourceType" : "SecurityEvent",
+        "event" : {
+          "type" : {
+            "coding" : [
+              {
+                "system" : "http://nema.org/dicom/dcid",
+                "code" : "110114",
+                "display" : "User Authentication"
+              }
+            ]
+          },
+          "subtype" : [
+            {
+              "coding" : [
+                {
+                  "system" : "http://nema.org/dicom/dcid",
+                  "code" : "110122",
+                  "display" : "Login"
+                }
+              ]
+            }
+          ],
+          "action" : "E",
+          "dateTime" : "2014-06-27T02:09:59Z",
+          "outcome" : "0"
+        },
+        "participant" : [
+          {
+            "userId" : "24.52.168.102",
+            "network" : {
+              "identifier" : "24.52.168.102",
+              "type" : "2"
+            }
+          }
+        ],
+        "source" : {
+          "site" : "Cloud",
+          "identifier" : "Health Intersections",
+          "type" : [
+            {
+              "system" : "http://hl7.org/fhir/security-source-type",
+              "code" : "3",
+              "display" : "Web Server"
+            }
+          ]
+        }
+      },
+      "summary" : "<?xml version=\"1.0\" encoding=\"UTF-8\"?><div xmlns=\"http://www.w3.org/1999/xhtml\">--No Summary for this resource--</div>"
+    },
+    {
+      "title" : "SecurityEvent \"2792\" Version \"1\"",
+      "id" : "http://fhir.healthintersections.com.au/open/SecurityEvent/2792",
+      "link" : [
+        {
+          "href" : "http://fhir.healthintersections.com.au/open/SecurityEvent/2792/_history/1",
+          "rel" : "self"
+        }
+      ],
+      "updated" : "2014-06-27T02:09:02Z",
+      "author" : [
+        {
+          "name" : "System"
+        }
+      ],
+      "published" : "2014-06-27T12:06:48Z",
+      "content" : {
+        "resourceType" : "SecurityEvent",
+        "event" : {
+          "type" : {
+            "coding" : [
+              {
+                "system" : "http://nema.org/dicom/dcid",
+                "code" : "110114",
+                "display" : "User Authentication"
+              }
+            ]
+          },
+          "subtype" : [
+            {
+              "coding" : [
+                {
+                  "system" : "http://nema.org/dicom/dcid",
+                  "code" : "110122",
+                  "display" : "Login"
+                }
+              ]
+            }
+          ],
+          "action" : "E",
+          "dateTime" : "2014-06-27T02:09:02Z",
+          "outcome" : "0"
+        },
+        "participant" : [
+          {
+            "userId" : "184.145.94.211",
+            "network" : {
+              "identifier" : "184.145.94.211",
+              "type" : "2"
+            }
+          }
+        ],
+        "source" : {
+          "site" : "Cloud",
+          "identifier" : "Health Intersections",
+          "type" : [
+            {
+              "system" : "http://hl7.org/fhir/security-source-type",
+              "code" : "3",
+              "display" : "Web Server"
+            }
+          ]
+        }
+      },
+      "summary" : "<?xml version=\"1.0\" encoding=\"UTF-8\"?><div xmlns=\"http://www.w3.org/1999/xhtml\">--No Summary for this resource--</div>"
+    },
+    {
+      "title" : "SecurityEvent \"2791\" Version \"1\"",
+      "id" : "http://fhir.healthintersections.com.au/open/SecurityEvent/2791",
+      "link" : [
+        {
+          "href" : "http://fhir.healthintersections.com.au/open/SecurityEvent/2791/_history/1",
+          "rel" : "self"
+        }
+      ],
+      "updated" : "2014-06-27T02:03:44Z",
+      "author" : [
+        {
+          "name" : "System"
+        }
+      ],
+      "published" : "2014-06-27T12:06:48Z",
+      "content" : {
+        "resourceType" : "SecurityEvent",
+        "event" : {
+          "type" : {
+            "coding" : [
+              {
+                "system" : "http://nema.org/dicom/dcid",
+                "code" : "110114",
+                "display" : "User Authentication"
+              }
+            ]
+          },
+          "subtype" : [
+            {
+              "coding" : [
+                {
+                  "system" : "http://nema.org/dicom/dcid",
+                  "code" : "110122",
+                  "display" : "Login"
+                }
+              ]
+            }
+          ],
+          "action" : "E",
+          "dateTime" : "2014-06-27T02:03:44Z",
+          "outcome" : "0"
+        },
+        "participant" : [
+          {
+            "userId" : "49.183.189.197",
+            "network" : {
+              "identifier" : "49.183.189.197",
+              "type" : "2"
+            }
+          }
+        ],
+        "source" : {
+          "site" : "Cloud",
+          "identifier" : "Health Intersections",
+          "type" : [
+            {
+              "system" : "http://hl7.org/fhir/security-source-type",
+              "code" : "3",
+              "display" : "Web Server"
+            }
+          ]
+        }
+      },
+      "summary" : "<?xml version=\"1.0\" encoding=\"UTF-8\"?><div xmlns=\"http://www.w3.org/1999/xhtml\">--No Summary for this resource--</div>"
+    },
+    {
+      "title" : "Patient \"84239377\" Version \"4\"",
+      "id" : "http://fhir.healthintersections.com.au/open/Patient/84239377",
+      "link" : [
+        {
+          "href" : "http://fhir.healthintersections.com.au/open/Patient/84239377/_history/4",
+          "rel" : "self"
+        }
+      ],
+      "updated" : "2014-06-27T01:42:40Z",
+      "author" : [
+        {
+          "name" : "108.29.148.168"
+        }
+      ],
+      "published" : "2014-06-27T12:06:48Z",
+      "content" : {
+        "resourceType" : "Patient",
+        "text" : {
+          "status" : "generated",
+          "div" : "<?xml version=\"1.0\" encoding=\"UTF-8\"?><div xmlns=\"http://www.w3.org/1999/xhtml\">Nucleus, Chromosomes. SSN:&#x0A;            444999234</div>"
+        },
+        "identifier" : [
+          {
+            "label" : "SSN",
+            "system" : "http://hl7.org/fhir/sid/us-ssn",
+            "value" : "444999234"
+          }
+        ],
+        "name" : [
+          {
+            "use" : "official",
+            "family" : [
+              "Nucleus"
+            ],
+            "given" : [
+              "Chromosomes"
+            ]
+          }
+        ],
+        "telecom" : [
+          {
+            "system" : "phone",
+            "value" : "555-555-5009",
+            "use" : "work"
+          }
+        ],
+        "gender" : {
+          "coding" : [
+            {
+              "system" : "http://hl7.org/fhir/v3/AdministrativeGender",
+              "code" : "M"
+            }
+          ]
+        },
+        "deceasedDateTime" : "2012-09-21",
+        "address" : [
+          {
+            "use" : "home",
+            "line" : [
+              "9999 House Street"
+            ],
+            "city" : "Crown Heights",
+            "state" : "NY",
+            "zip" : "11225"
+          }
+        ],
+        "managingOrganization" : {
+          "reference" : "Organization/hl7"
+        },
+        "active" : true
+      },
+      "summary" : "<?xml version=\"1.0\" encoding=\"UTF-8\"?><div xmlns=\"http://www.w3.org/1999/xhtml\">Nucleus, Chromosomes. SSN:&#x0A;            444999234</div>"
+    },
+    {
+      "title" : "Patient \"84239375\" Version \"3\"",
+      "id" : "http://fhir.healthintersections.com.au/open/Patient/84239375",
+      "link" : [
+        {
+          "href" : "http://fhir.healthintersections.com.au/open/Patient/84239375/_history/3",
+          "rel" : "self"
+        }
+      ],
+      "updated" : "2014-06-27T01:37:11Z",
+      "author" : [
+        {
+          "name" : "184.145.94.211"
+        }
+      ],
+      "published" : "2014-06-27T12:06:48Z",
+      "content" : {
+        "resourceType" : "Patient",
+        "extension" : [
+          {
+            "url" : "http://clairol.org/colour",
+            "valueCode" : "B"
+          }
+        ],
+        "text" : {
+          "div" : "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+        },
+        "identifier" : [
+          {
+            "label" : "SSN",
+            "system" : "http://hl7.org/fhir/sid/us-ssn",
+            "value" : "444111236"
+          }
+        ],
+        "name" : [
+          {
+            "use" : "official",
+            "family" : [
+              "Duck"
+            ],
+            "given" : [
+              "Daffy"
+            ]
+          }
+        ],
+        "telecom" : [
+          {
+            "system" : "phone",
+            "value" : "555-555-5003",
+            "use" : "work"
+          }
+        ],
+        "gender" : {
+          "coding" : [
+            {
+              "system" : "http://hl7.org/fhir/v3/AdministrativeGender",
+              "code" : "M"
+            }
+          ]
+        },
+        "deceasedBoolean" : true,
+        "address" : [
+          {
+            "use" : "home",
+            "line" : [
+              "6668 Home Street"
+            ]
+          }
+        ],
+        "managingOrganization" : {
+          "reference" : "Organization/hl7"
+        },
+        "active" : true
+      },
+      "summary" : "<?xml version=\"1.0\" encoding=\"UTF-8\"?><div xmlns=\"http://www.w3.org/1999/xhtml\">--No Summary for this resource--</div>"
+    },
+    {
+      "title" : "SecurityEvent \"2790\" Version \"1\"",
+      "id" : "http://fhir.healthintersections.com.au/open/SecurityEvent/2790",
+      "link" : [
+        {
+          "href" : "http://fhir.healthintersections.com.au/open/SecurityEvent/2790/_history/1",
+          "rel" : "self"
+        }
+      ],
+      "updated" : "2014-06-27T01:36:30Z",
+      "author" : [
+        {
+          "name" : "System"
+        }
+      ],
+      "published" : "2014-06-27T12:06:48Z",
+      "content" : {
+        "resourceType" : "SecurityEvent",
+        "event" : {
+          "type" : {
+            "coding" : [
+              {
+                "system" : "http://nema.org/dicom/dcid",
+                "code" : "110114",
+                "display" : "User Authentication"
+              }
+            ]
+          },
+          "subtype" : [
+            {
+              "coding" : [
+                {
+                  "system" : "http://nema.org/dicom/dcid",
+                  "code" : "110122",
+                  "display" : "Login"
+                }
+              ]
+            }
+          ],
+          "action" : "E",
+          "dateTime" : "2014-06-27T01:36:30Z",
+          "outcome" : "0"
+        },
+        "participant" : [
+          {
+            "userId" : "80.152.243.114",
+            "network" : {
+              "identifier" : "80.152.243.114",
+              "type" : "2"
+            }
+          }
+        ],
+        "source" : {
+          "site" : "Cloud",
+          "identifier" : "Health Intersections",
+          "type" : [
+            {
+              "system" : "http://hl7.org/fhir/security-source-type",
+              "code" : "3",
+              "display" : "Web Server"
+            }
+          ]
+        }
+      },
+      "summary" : "<?xml version=\"1.0\" encoding=\"UTF-8\"?><div xmlns=\"http://www.w3.org/1999/xhtml\">--No Summary for this resource--</div>"
+    },
+    {
+      "title" : "Patient \"84239377\" Version \"3\"",
+      "id" : "http://fhir.healthintersections.com.au/open/Patient/84239377",
+      "link" : [
+        {
+          "href" : "http://fhir.healthintersections.com.au/open/Patient/84239377/_history/3",
+          "rel" : "self"
+        }
+      ],
+      "updated" : "2014-06-27T01:35:14Z",
+      "author" : [
+        {
+          "name" : "108.29.148.168"
+        }
+      ],
+      "published" : "2014-06-27T12:06:48Z",
+      "content" : {
+        "resourceType" : "Patient",
+        "text" : {
+          "status" : "generated",
+          "div" : "<?xml version=\"1.0\" encoding=\"UTF-8\"?><div xmlns=\"http://www.w3.org/1999/xhtml\">Nucleus, Chromosomes. SSN:&#x0A;            444999234</div>"
+        },
+        "identifier" : [
+          {
+            "label" : "SSN",
+            "system" : "http://hl7.org/fhir/sid/us-ssn",
+            "value" : "444999234"
+          }
+        ],
+        "name" : [
+          {
+            "use" : "official",
+            "family" : [
+              "Nucleus"
+            ],
+            "given" : [
+              "Chromosomes"
+            ]
+          }
+        ],
+        "telecom" : [
+          {
+            "system" : "phone",
+            "value" : "555-555-5009",
+            "use" : "work"
+          }
+        ],
+        "gender" : {
+          "coding" : [
+            {
+              "system" : "http://hl7.org/fhir/v3/AdministrativeGender",
+              "code" : "M"
+            }
+          ]
+        },
+        "deceasedDateTime" : "2012-09-21",
+        "address" : [
+          {
+            "use" : "home",
+            "line" : [
+              "9999 House Street"
+            ]
+          }
+        ],
+        "managingOrganization" : {
+          "reference" : "Organization/hl7"
+        },
+        "active" : true
+      },
+      "summary" : "<?xml version=\"1.0\" encoding=\"UTF-8\"?><div xmlns=\"http://www.w3.org/1999/xhtml\">Nucleus, Chromosomes. SSN:&#x0A;            444999234</div>"
+    },
+    {
+      "title" : "SecurityEvent \"2789\" Version \"1\"",
+      "id" : "http://fhir.healthintersections.com.au/open/SecurityEvent/2789",
+      "link" : [
+        {
+          "href" : "http://fhir.healthintersections.com.au/open/SecurityEvent/2789/_history/1",
+          "rel" : "self"
+        }
+      ],
+      "updated" : "2014-06-27T01:35:14Z",
+      "author" : [
+        {
+          "name" : "System"
+        }
+      ],
+      "published" : "2014-06-27T12:06:48Z",
+      "content" : {
+        "resourceType" : "SecurityEvent",
+        "event" : {
+          "type" : {
+            "coding" : [
+              {
+                "system" : "http://nema.org/dicom/dcid",
+                "code" : "110114",
+                "display" : "User Authentication"
+              }
+            ]
+          },
+          "subtype" : [
+            {
+              "coding" : [
+                {
+                  "system" : "http://nema.org/dicom/dcid",
+                  "code" : "110122",
+                  "display" : "Login"
+                }
+              ]
+            }
+          ],
+          "action" : "E",
+          "dateTime" : "2014-06-27T01:35:14Z",
+          "outcome" : "0"
+        },
+        "participant" : [
+          {
+            "userId" : "108.29.148.168",
+            "network" : {
+              "identifier" : "108.29.148.168",
+              "type" : "2"
+            }
+          }
+        ],
+        "source" : {
+          "site" : "Cloud",
+          "identifier" : "Health Intersections",
+          "type" : [
+            {
+              "system" : "http://hl7.org/fhir/security-source-type",
+              "code" : "3",
+              "display" : "Web Server"
+            }
+          ]
+        }
+      },
+      "summary" : "<?xml version=\"1.0\" encoding=\"UTF-8\"?><div xmlns=\"http://www.w3.org/1999/xhtml\">--No Summary for this resource--</div>"
+    },
+    {
+      "title" : "SecurityEvent \"2788\" Version \"1\"",
+      "id" : "http://fhir.healthintersections.com.au/open/SecurityEvent/2788",
+      "link" : [
+        {
+          "href" : "http://fhir.healthintersections.com.au/open/SecurityEvent/2788/_history/1",
+          "rel" : "self"
+        }
+      ],
+      "updated" : "2014-06-27T01:02:44Z",
+      "author" : [
+        {
+          "name" : "System"
+        }
+      ],
+      "published" : "2014-06-27T12:06:48Z",
+      "content" : {
+        "resourceType" : "SecurityEvent",
+        "event" : {
+          "type" : {
+            "coding" : [
+              {
+                "system" : "http://nema.org/dicom/dcid",
+                "code" : "110114",
+                "display" : "User Authentication"
+              }
+            ]
+          },
+          "subtype" : [
+            {
+              "coding" : [
+                {
+                  "system" : "http://nema.org/dicom/dcid",
+                  "code" : "110122",
+                  "display" : "Login"
+                }
+              ]
+            }
+          ],
+          "action" : "E",
+          "dateTime" : "2014-06-27T01:02:43Z",
+          "outcome" : "0"
+        },
+        "participant" : [
+          {
+            "userId" : "73.179.134.22",
+            "network" : {
+              "identifier" : "73.179.134.22",
+              "type" : "2"
+            }
+          }
+        ],
+        "source" : {
+          "site" : "Cloud",
+          "identifier" : "Health Intersections",
+          "type" : [
+            {
+              "system" : "http://hl7.org/fhir/security-source-type",
+              "code" : "3",
+              "display" : "Web Server"
+            }
+          ]
+        }
+      },
+      "summary" : "<?xml version=\"1.0\" encoding=\"UTF-8\"?><div xmlns=\"http://www.w3.org/1999/xhtml\">--No Summary for this resource--</div>"
+    },
+    {
+      "title" : "Patient \"84239375\" Version \"2\"",
+      "id" : "http://fhir.healthintersections.com.au/open/Patient/84239375",
+      "link" : [
+        {
+          "href" : "http://fhir.healthintersections.com.au/open/Patient/84239375/_history/2",
+          "rel" : "self"
+        }
+      ],
+      "updated" : "2014-06-27T00:42:05Z",
+      "author" : [
+        {
+          "name" : "184.145.94.211"
+        }
+      ],
+      "published" : "2014-06-27T12:06:48Z",
+      "content" : {
+        "resourceType" : "Patient",
+        "text" : {
+          "status" : "generated",
+          "div" : "<?xml version=\"1.0\" encoding=\"UTF-8\"?><div xmlns=\"http://www.w3.org/1999/xhtml\">Nuclear, DianeSooHoo. SSN:&#x0A;            444111236</div>"
+        },
+        "identifier" : [
+          {
+            "label" : "SSN",
+            "system" : "http://hl7.org/fhir/sid/us-ssn",
+            "value" : "444111236"
+          }
+        ],
+        "name" : [
+          {
+            "use" : "official",
+            "family" : [
+              "Duck"
+            ],
+            "given" : [
+              "Daffy"
+            ]
+          }
+        ],
+        "telecom" : [
+          {
+            "system" : "phone",
+            "value" : "555-555-5003",
+            "use" : "work"
+          }
+        ],
+        "gender" : {
+          "coding" : [
+            {
+              "system" : "http://hl7.org/fhir/v3/AdministrativeGender",
+              "code" : "M"
+            }
+          ]
+        },
+        "deceasedBoolean" : true,
+        "address" : [
+          {
+            "use" : "home",
+            "line" : [
+              "6668 Home Street"
+            ]
+          }
+        ],
+        "managingOrganization" : {
+          "reference" : "Organization/hl7"
+        },
+        "active" : true
+      },
+      "summary" : "<?xml version=\"1.0\" encoding=\"UTF-8\"?><div xmlns=\"http://www.w3.org/1999/xhtml\">Nuclear, DianeSooHoo. SSN:&#x0A;            444111236</div>"
+    },
+    {
+      "title" : "SecurityEvent \"2787\" Version \"1\"",
+      "id" : "http://fhir.healthintersections.com.au/open/SecurityEvent/2787",
+      "link" : [
+        {
+          "href" : "http://fhir.healthintersections.com.au/open/SecurityEvent/2787/_history/1",
+          "rel" : "self"
+        }
+      ],
+      "updated" : "2014-06-27T00:42:04Z",
+      "author" : [
+        {
+          "name" : "System"
+        }
+      ],
+      "published" : "2014-06-27T12:06:48Z",
+      "content" : {
+        "resourceType" : "SecurityEvent",
+        "event" : {
+          "type" : {
+            "coding" : [
+              {
+                "system" : "http://nema.org/dicom/dcid",
+                "code" : "110114",
+                "display" : "User Authentication"
+              }
+            ]
+          },
+          "subtype" : [
+            {
+              "coding" : [
+                {
+                  "system" : "http://nema.org/dicom/dcid",
+                  "code" : "110122",
+                  "display" : "Login"
+                }
+              ]
+            }
+          ],
+          "action" : "E",
+          "dateTime" : "2014-06-27T00:42:04Z",
+          "outcome" : "0"
+        },
+        "participant" : [
+          {
+            "userId" : "184.145.94.211",
+            "network" : {
+              "identifier" : "184.145.94.211",
+              "type" : "2"
+            }
+          }
+        ],
+        "source" : {
+          "site" : "Cloud",
+          "identifier" : "Health Intersections",
+          "type" : [
+            {
+              "system" : "http://hl7.org/fhir/security-source-type",
+              "code" : "3",
+              "display" : "Web Server"
+            }
+          ]
+        }
+      },
+      "summary" : "<?xml version=\"1.0\" encoding=\"UTF-8\"?><div xmlns=\"http://www.w3.org/1999/xhtml\">--No Summary for this resource--</div>"
+    },
+    {
+      "title" : "SecurityEvent \"2786\" Version \"1\"",
+      "id" : "http://fhir.healthintersections.com.au/open/SecurityEvent/2786",
+      "link" : [
+        {
+          "href" : "http://fhir.healthintersections.com.au/open/SecurityEvent/2786/_history/1",
+          "rel" : "self"
+        }
+      ],
+      "updated" : "2014-06-27T00:32:10Z",
+      "author" : [
+        {
+          "name" : "System"
+        }
+      ],
+      "published" : "2014-06-27T12:06:48Z",
+      "content" : {
+        "resourceType" : "SecurityEvent",
+        "event" : {
+          "type" : {
+            "coding" : [
+              {
+                "system" : "http://nema.org/dicom/dcid",
+                "code" : "110114",
+                "display" : "User Authentication"
+              }
+            ]
+          },
+          "subtype" : [
+            {
+              "coding" : [
+                {
+                  "system" : "http://nema.org/dicom/dcid",
+                  "code" : "110122",
+                  "display" : "Login"
+                }
+              ]
+            }
+          ],
+          "action" : "E",
+          "dateTime" : "2014-06-27T00:32:10Z",
+          "outcome" : "0"
+        },
+        "participant" : [
+          {
+            "userId" : "81.168.71.93",
+            "network" : {
+              "identifier" : "81.168.71.93",
+              "type" : "2"
+            }
+          }
+        ],
+        "source" : {
+          "site" : "Cloud",
+          "identifier" : "Health Intersections",
+          "type" : [
+            {
+              "system" : "http://hl7.org/fhir/security-source-type",
+              "code" : "3",
+              "display" : "Web Server"
+            }
+          ]
+        }
+      },
+      "summary" : "<?xml version=\"1.0\" encoding=\"UTF-8\"?><div xmlns=\"http://www.w3.org/1999/xhtml\">--No Summary for this resource--</div>"
+    },
+    {
+      "title" : "Patient \"84239377\" Version \"2\"",
+      "id" : "http://fhir.healthintersections.com.au/open/Patient/84239377",
+      "link" : [
+        {
+          "href" : "http://fhir.healthintersections.com.au/open/Patient/84239377/_history/2",
+          "rel" : "self"
+        }
+      ],
+      "updated" : "2014-06-27T00:21:01Z",
+      "author" : [
+        {
+          "name" : "108.29.148.168"
+        }
+      ],
+      "published" : "2014-06-27T12:06:48Z",
+      "content" : {
+        "resourceType" : "Patient",
+        "text" : {
+          "status" : "generated",
+          "div" : "<?xml version=\"1.0\" encoding=\"UTF-8\"?><div xmlns=\"http://www.w3.org/1999/xhtml\">Nucleus, Chromosomes. SSN:&#x0A;            444999234</div>"
+        },
+        "identifier" : [
+          {
+            "label" : "SSN",
+            "system" : "http://hl7.org/fhir/sid/us-ssn",
+            "value" : "444999234"
+          }
+        ],
+        "name" : [
+          {
+            "use" : "official",
+            "family" : [
+              "Nucleus"
+            ],
+            "given" : [
+              "Chromosomes"
+            ]
+          }
+        ],
+        "telecom" : [
+          {
+            "system" : "phone",
+            "value" : "555-555-5009",
+            "use" : "work"
+          }
+        ],
+        "gender" : {
+          "coding" : [
+            {
+              "system" : "http://hl7.org/fhir/v3/AdministrativeGender",
+              "code" : "M"
+            }
+          ]
+        },
+        "deceasedDateTime" : "2012-09-21",
+        "address" : [
+          {
+            "use" : "home",
+            "line" : [
+              "9999 House Street"
+            ]
+          }
+        ],
+        "managingOrganization" : {
+          "reference" : "Organization/hl7"
+        },
+        "active" : true
+      },
+      "summary" : "<?xml version=\"1.0\" encoding=\"UTF-8\"?><div xmlns=\"http://www.w3.org/1999/xhtml\">Nucleus, Chromosomes. SSN:&#x0A;            444999234</div>"
+    },
+    {
+      "title" : "SecurityEvent \"2785\" Version \"1\"",
+      "id" : "http://fhir.healthintersections.com.au/open/SecurityEvent/2785",
+      "link" : [
+        {
+          "href" : "http://fhir.healthintersections.com.au/open/SecurityEvent/2785/_history/1",
+          "rel" : "self"
+        }
+      ],
+      "updated" : "2014-06-27T00:14:04Z",
+      "author" : [
+        {
+          "name" : "System"
+        }
+      ],
+      "published" : "2014-06-27T12:06:48Z",
+      "content" : {
+        "resourceType" : "SecurityEvent",
+        "event" : {
+          "type" : {
+            "coding" : [
+              {
+                "system" : "http://nema.org/dicom/dcid",
+                "code" : "110114",
+                "display" : "User Authentication"
+              }
+            ]
+          },
+          "subtype" : [
+            {
+              "coding" : [
+                {
+                  "system" : "http://nema.org/dicom/dcid",
+                  "code" : "110122",
+                  "display" : "Login"
+                }
+              ]
+            }
+          ],
+          "action" : "E",
+          "dateTime" : "2014-06-27T00:14:04Z",
+          "outcome" : "0"
+        },
+        "participant" : [
+          {
+            "userId" : "80.152.243.114",
+            "network" : {
+              "identifier" : "80.152.243.114",
+              "type" : "2"
+            }
+          }
+        ],
+        "source" : {
+          "site" : "Cloud",
+          "identifier" : "Health Intersections",
+          "type" : [
+            {
+              "system" : "http://hl7.org/fhir/security-source-type",
+              "code" : "3",
+              "display" : "Web Server"
+            }
+          ]
+        }
+      },
+      "summary" : "<?xml version=\"1.0\" encoding=\"UTF-8\"?><div xmlns=\"http://www.w3.org/1999/xhtml\">--No Summary for this resource--</div>"
+    },
+    {
+      "title" : "Patient \"84239377\" Version \"1\"",
+      "id" : "http://fhir.healthintersections.com.au/open/Patient/84239377",
+      "link" : [
+        {
+          "href" : "http://fhir.healthintersections.com.au/open/Patient/84239377/_history/1",
+          "rel" : "self"
+        }
+      ],
+      "updated" : "2014-06-27T00:03:42Z",
+      "author" : [
+        {
+          "name" : "108.29.148.168"
+        }
+      ],
+      "published" : "2014-06-27T12:06:48Z",
+      "content" : {
+        "resourceType" : "Patient",
+        "text" : {
+          "status" : "generated",
+          "div" : "<?xml version=\"1.0\" encoding=\"UTF-8\"?><div xmlns=\"http://www.w3.org/1999/xhtml\">Nucleus, Chromosomes. SSN:&#x0A;            444999234</div>"
+        },
+        "identifier" : [
+          {
+            "label" : "SSN",
+            "system" : "http://hl7.org/fhir/sid/us-ssn",
+            "value" : "444999234"
+          }
+        ],
+        "name" : [
+          {
+            "use" : "official",
+            "family" : [
+              "Nucleus"
+            ],
+            "given" : [
+              "Chromosomes"
+            ]
+          }
+        ],
+        "telecom" : [
+          {
+            "system" : "phone",
+            "value" : "555-555-5009",
+            "use" : "work"
+          }
+        ],
+        "gender" : {
+          "coding" : [
+            {
+              "system" : "http://hl7.org/fhir/v3/AdministrativeGender",
+              "code" : "M"
+            }
+          ]
+        },
+        "deceasedBoolean" : true,
+        "address" : [
+          {
+            "use" : "home",
+            "line" : [
+              "9999 House Street"
+            ]
+          }
+        ],
+        "managingOrganization" : {
+          "reference" : "Organization/hl7"
+        },
+        "active" : true
+      },
+      "summary" : "<?xml version=\"1.0\" encoding=\"UTF-8\"?><div xmlns=\"http://www.w3.org/1999/xhtml\">Nucleus, Chromosomes. SSN:&#x0A;            444999234</div>"
+    },
+    {
+      "title" : "Patient \"84239376\" Version \"1\"",
+      "id" : "http://fhir.healthintersections.com.au/open/Patient/84239376",
+      "link" : [
+        {
+          "href" : "http://fhir.healthintersections.com.au/open/Patient/84239376/_history/1",
+          "rel" : "self"
+        }
+      ],
+      "updated" : "2014-06-27T00:01:31Z",
+      "author" : [
+        {
+          "name" : "108.29.148.168"
+        }
+      ],
+      "published" : "2014-06-27T12:06:48Z",
+      "content" : {
+        "resourceType" : "Patient",
+        "text" : {
+          "status" : "generated",
+          "div" : "<?xml version=\"1.0\" encoding=\"UTF-8\"?><div xmlns=\"http://www.w3.org/1999/xhtml\">Nucleus, Chromosomes. SSN:&#x0A;            444999234</div>"
+        },
+        "identifier" : [
+          {
+            "label" : "SSN",
+            "system" : "http://hl7.org/fhir/sid/us-ssn",
+            "value" : "444999234"
+          }
+        ],
+        "name" : [
+          {
+            "use" : "official",
+            "family" : [
+              "Nucleus"
+            ],
+            "given" : [
+              "Chromosomes"
+            ]
+          }
+        ],
+        "telecom" : [
+          {
+            "system" : "phone",
+            "value" : "555-555-5009",
+            "use" : "work"
+          }
+        ],
+        "gender" : {
+          "coding" : [
+            {
+              "system" : "http://hl7.org/fhir/v3/AdministrativeGender",
+              "code" : "M"
+            }
+          ]
+        },
+        "deceasedBoolean" : true,
+        "address" : [
+          {
+            "use" : "home",
+            "line" : [
+              "9999 House Street"
+            ]
+          }
+        ],
+        "managingOrganization" : {
+          "reference" : "Organization/hl7"
+        },
+        "active" : true
+      },
+      "summary" : "<?xml version=\"1.0\" encoding=\"UTF-8\"?><div xmlns=\"http://www.w3.org/1999/xhtml\">Nucleus, Chromosomes. SSN:&#x0A;            444999234</div>"
+    },
+    {
+      "title" : "Patient \"84239375\" Version \"1\"",
+      "id" : "http://fhir.healthintersections.com.au/open/Patient/84239375",
+      "link" : [
+        {
+          "href" : "http://fhir.healthintersections.com.au/open/Patient/84239375/_history/1",
+          "rel" : "self"
+        }
+      ],
+      "updated" : "2014-06-26T23:50:37Z",
+      "author" : [
+        {
+          "name" : "184.145.94.211"
+        }
+      ],
+      "published" : "2014-06-27T12:06:48Z",
+      "content" : {
+        "resourceType" : "Patient",
+        "text" : {
+          "status" : "generated",
+          "div" : "<?xml version=\"1.0\" encoding=\"UTF-8\"?><div xmlns=\"http://www.w3.org/1999/xhtml\">Nuclear, DianeSooHoo. SSN:&#x0A;            444111236</div>"
+        },
+        "identifier" : [
+          {
+            "label" : "SSN",
+            "system" : "http://hl7.org/fhir/sid/us-ssn",
+            "value" : "444111236"
+          }
+        ],
+        "name" : [
+          {
+            "use" : "official",
+            "family" : [
+              "Duck"
+            ],
+            "given" : [
+              "Daffy"
+            ]
+          }
+        ],
+        "telecom" : [
+          {
+            "system" : "phone",
+            "value" : "555-555-5003",
+            "use" : "work"
+          }
+        ],
+        "gender" : {
+          "coding" : [
+            {
+              "system" : "http://hl7.org/fhir/v3/AdministrativeGender",
+              "code" : "M"
+            }
+          ]
+        },
+        "address" : [
+          {
+            "use" : "home",
+            "line" : [
+              "6668 Home Street"
+            ]
+          }
+        ],
+        "managingOrganization" : {
+          "reference" : "Organization/hl7"
+        },
+        "active" : true
+      },
+      "summary" : "<?xml version=\"1.0\" encoding=\"UTF-8\"?><div xmlns=\"http://www.w3.org/1999/xhtml\">Nuclear, DianeSooHoo. SSN:&#x0A;            444111236</div>"
+    },
+    {
+      "title" : "SecurityEvent \"2784\" Version \"1\"",
+      "id" : "http://fhir.healthintersections.com.au/open/SecurityEvent/2784",
+      "link" : [
+        {
+          "href" : "http://fhir.healthintersections.com.au/open/SecurityEvent/2784/_history/1",
+          "rel" : "self"
+        }
+      ],
+      "updated" : "2014-06-26T23:49:13Z",
+      "author" : [
+        {
+          "name" : "System"
+        }
+      ],
+      "published" : "2014-06-27T12:06:48Z",
+      "content" : {
+        "resourceType" : "SecurityEvent",
+        "event" : {
+          "type" : {
+            "coding" : [
+              {
+                "system" : "http://nema.org/dicom/dcid",
+                "code" : "110114",
+                "display" : "User Authentication"
+              }
+            ]
+          },
+          "subtype" : [
+            {
+              "coding" : [
+                {
+                  "system" : "http://nema.org/dicom/dcid",
+                  "code" : "110122",
+                  "display" : "Login"
+                }
+              ]
+            }
+          ],
+          "action" : "E",
+          "dateTime" : "2014-06-26T23:49:13Z",
+          "outcome" : "0"
+        },
+        "participant" : [
+          {
+            "userId" : "202.124.114.114",
+            "network" : {
+              "identifier" : "202.124.114.114",
+              "type" : "2"
+            }
+          }
+        ],
+        "source" : {
+          "site" : "Cloud",
+          "identifier" : "Health Intersections",
+          "type" : [
+            {
+              "system" : "http://hl7.org/fhir/security-source-type",
+              "code" : "3",
+              "display" : "Web Server"
+            }
+          ]
+        }
+      },
+      "summary" : "<?xml version=\"1.0\" encoding=\"UTF-8\"?><div xmlns=\"http://www.w3.org/1999/xhtml\">--No Summary for this resource--</div>"
+    },
+    {
+      "title" : "SecurityEvent \"2783\" Version \"1\"",
+      "id" : "http://fhir.healthintersections.com.au/open/SecurityEvent/2783",
+      "link" : [
+        {
+          "href" : "http://fhir.healthintersections.com.au/open/SecurityEvent/2783/_history/1",
+          "rel" : "self"
+        }
+      ],
+      "updated" : "2014-06-26T23:32:25Z",
+      "author" : [
+        {
+          "name" : "System"
+        }
+      ],
+      "published" : "2014-06-27T12:06:48Z",
+      "content" : {
+        "resourceType" : "SecurityEvent",
+        "event" : {
+          "type" : {
+            "coding" : [
+              {
+                "system" : "http://nema.org/dicom/dcid",
+                "code" : "110114",
+                "display" : "User Authentication"
+              }
+            ]
+          },
+          "subtype" : [
+            {
+              "coding" : [
+                {
+                  "system" : "http://nema.org/dicom/dcid",
+                  "code" : "110122",
+                  "display" : "Login"
+                }
+              ]
+            }
+          ],
+          "action" : "E",
+          "dateTime" : "2014-06-26T23:32:25Z",
+          "outcome" : "0"
+        },
+        "participant" : [
+          {
+            "userId" : "108.29.148.168",
+            "network" : {
+              "identifier" : "108.29.148.168",
+              "type" : "2"
+            }
+          }
+        ],
+        "source" : {
+          "site" : "Cloud",
+          "identifier" : "Health Intersections",
+          "type" : [
+            {
+              "system" : "http://hl7.org/fhir/security-source-type",
+              "code" : "3",
+              "display" : "Web Server"
+            }
+          ]
+        }
+      },
+      "summary" : "<?xml version=\"1.0\" encoding=\"UTF-8\"?><div xmlns=\"http://www.w3.org/1999/xhtml\">--No Summary for this resource--</div>"
+    },
+    {
+      "title" : "SecurityEvent \"2782\" Version \"1\"",
+      "id" : "http://fhir.healthintersections.com.au/open/SecurityEvent/2782",
+      "link" : [
+        {
+          "href" : "http://fhir.healthintersections.com.au/open/SecurityEvent/2782/_history/1",
+          "rel" : "self"
+        }
+      ],
+      "updated" : "2014-06-26T23:29:40Z",
+      "author" : [
+        {
+          "name" : "System"
+        }
+      ],
+      "published" : "2014-06-27T12:06:48Z",
+      "content" : {
+        "resourceType" : "SecurityEvent",
+        "event" : {
+          "type" : {
+            "coding" : [
+              {
+                "system" : "http://nema.org/dicom/dcid",
+                "code" : "110114",
+                "display" : "User Authentication"
+              }
+            ]
+          },
+          "subtype" : [
+            {
+              "coding" : [
+                {
+                  "system" : "http://nema.org/dicom/dcid",
+                  "code" : "110122",
+                  "display" : "Login"
+                }
+              ]
+            }
+          ],
+          "action" : "E",
+          "dateTime" : "2014-06-26T23:29:40Z",
+          "outcome" : "0"
+        },
+        "participant" : [
+          {
+            "userId" : "142.177.217.0",
+            "network" : {
+              "identifier" : "142.177.217.0",
+              "type" : "2"
+            }
+          }
+        ],
+        "source" : {
+          "site" : "Cloud",
+          "identifier" : "Health Intersections",
+          "type" : [
+            {
+              "system" : "http://hl7.org/fhir/security-source-type",
+              "code" : "3",
+              "display" : "Web Server"
+            }
+          ]
+        }
+      },
+      "summary" : "<?xml version=\"1.0\" encoding=\"UTF-8\"?><div xmlns=\"http://www.w3.org/1999/xhtml\">--No Summary for this resource--</div>"
+    },
+    {
+      "title" : "SecurityEvent \"2781\" Version \"1\"",
+      "id" : "http://fhir.healthintersections.com.au/open/SecurityEvent/2781",
+      "link" : [
+        {
+          "href" : "http://fhir.healthintersections.com.au/open/SecurityEvent/2781/_history/1",
+          "rel" : "self"
+        }
+      ],
+      "updated" : "2014-06-26T23:29:07Z",
+      "author" : [
+        {
+          "name" : "System"
+        }
+      ],
+      "published" : "2014-06-27T12:06:48Z",
+      "content" : {
+        "resourceType" : "SecurityEvent",
+        "event" : {
+          "type" : {
+            "coding" : [
+              {
+                "system" : "http://nema.org/dicom/dcid",
+                "code" : "110114",
+                "display" : "User Authentication"
+              }
+            ]
+          },
+          "subtype" : [
+            {
+              "coding" : [
+                {
+                  "system" : "http://nema.org/dicom/dcid",
+                  "code" : "110122",
+                  "display" : "Login"
+                }
+              ]
+            }
+          ],
+          "action" : "E",
+          "dateTime" : "2014-06-26T23:29:06Z",
+          "outcome" : "0"
+        },
+        "participant" : [
+          {
+            "userId" : "184.145.94.211",
+            "network" : {
+              "identifier" : "184.145.94.211",
+              "type" : "2"
+            }
+          }
+        ],
+        "source" : {
+          "site" : "Cloud",
+          "identifier" : "Health Intersections",
+          "type" : [
+            {
+              "system" : "http://hl7.org/fhir/security-source-type",
+              "code" : "3",
+              "display" : "Web Server"
+            }
+          ]
+        }
+      },
+      "summary" : "<?xml version=\"1.0\" encoding=\"UTF-8\"?><div xmlns=\"http://www.w3.org/1999/xhtml\">--No Summary for this resource--</div>"
+    },
+    {
+      "title" : "SecurityEvent \"2780\" Version \"1\"",
+      "id" : "http://fhir.healthintersections.com.au/open/SecurityEvent/2780",
+      "link" : [
+        {
+          "href" : "http://fhir.healthintersections.com.au/open/SecurityEvent/2780/_history/1",
+          "rel" : "self"
+        }
+      ],
+      "updated" : "2014-06-26T23:28:16Z",
+      "author" : [
+        {
+          "name" : "System"
+        }
+      ],
+      "published" : "2014-06-27T12:06:48Z",
+      "content" : {
+        "resourceType" : "SecurityEvent",
+        "event" : {
+          "type" : {
+            "coding" : [
+              {
+                "system" : "http://nema.org/dicom/dcid",
+                "code" : "110114",
+                "display" : "User Authentication"
+              }
+            ]
+          },
+          "subtype" : [
+            {
+              "coding" : [
+                {
+                  "system" : "http://nema.org/dicom/dcid",
+                  "code" : "110122",
+                  "display" : "Login"
+                }
+              ]
+            }
+          ],
+          "action" : "E",
+          "dateTime" : "2014-06-26T23:28:16Z",
+          "outcome" : "0"
+        },
+        "participant" : [
+          {
+            "userId" : "10.187.43.60",
+            "network" : {
+              "identifier" : "10.187.43.60",
+              "type" : "2"
+            }
+          }
+        ],
+        "source" : {
+          "site" : "Cloud",
+          "identifier" : "Health Intersections",
+          "type" : [
+            {
+              "system" : "http://hl7.org/fhir/security-source-type",
+              "code" : "3",
+              "display" : "Web Server"
+            }
+          ]
+        }
+      },
+      "summary" : "<?xml version=\"1.0\" encoding=\"UTF-8\"?><div xmlns=\"http://www.w3.org/1999/xhtml\">--No Summary for this resource--</div>"
+    },
+    {
+      "title" : "SecurityEvent \"2779\" Version \"1\"",
+      "id" : "http://fhir.healthintersections.com.au/open/SecurityEvent/2779",
+      "link" : [
+        {
+          "href" : "http://fhir.healthintersections.com.au/open/SecurityEvent/2779/_history/1",
+          "rel" : "self"
+        }
+      ],
+      "updated" : "2014-06-26T23:05:00Z",
+      "author" : [
+        {
+          "name" : "System"
+        }
+      ],
+      "published" : "2014-06-27T12:06:48Z",
+      "content" : {
+        "resourceType" : "SecurityEvent",
+        "event" : {
+          "type" : {
+            "coding" : [
+              {
+                "system" : "http://nema.org/dicom/dcid",
+                "code" : "110114",
+                "display" : "User Authentication"
+              }
+            ]
+          },
+          "subtype" : [
+            {
+              "coding" : [
+                {
+                  "system" : "http://nema.org/dicom/dcid",
+                  "code" : "110122",
+                  "display" : "Login"
+                }
+              ]
+            }
+          ],
+          "action" : "E",
+          "dateTime" : "2014-06-26T23:04:59Z",
+          "outcome" : "0"
+        },
+        "participant" : [
+          {
+            "userId" : "68.63.197.88",
+            "network" : {
+              "identifier" : "68.63.197.88",
+              "type" : "2"
+            }
+          }
+        ],
+        "source" : {
+          "site" : "Cloud",
+          "identifier" : "Health Intersections",
+          "type" : [
+            {
+              "system" : "http://hl7.org/fhir/security-source-type",
+              "code" : "3",
+              "display" : "Web Server"
+            }
+          ]
+        }
+      },
+      "summary" : "<?xml version=\"1.0\" encoding=\"UTF-8\"?><div xmlns=\"http://www.w3.org/1999/xhtml\">--No Summary for this resource--</div>"
+    }
+  ]
+}

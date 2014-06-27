@@ -80,6 +80,10 @@ public class XhtmlDt extends BasePrimitive<List<XMLEvent>> {
 		if (!val.startsWith("<")) {
 			val = "<div>" + val + "</div>";
 		}
+		if (val.startsWith("<?") && val.endsWith("?>")) {
+			myValue = null;
+			return;
+		}
 		
 		try {
 			ArrayList<XMLEvent> value = new ArrayList<XMLEvent>();
@@ -99,7 +103,7 @@ public class XhtmlDt extends BasePrimitive<List<XMLEvent>> {
 			setValue(value);
 			
 		} catch (XMLStreamException e) {
-			throw new DataFormatException("String does not appear to be valid XML/XHTML: "+e.getMessage(), e);
+			throw new DataFormatException("String does not appear to be valid XML/XHTML (error is \""+e.getMessage() + "\"): " + theValue, e);
 		} catch (FactoryConfigurationError e) {
 			throw new ConfigurationException(e);
 		}

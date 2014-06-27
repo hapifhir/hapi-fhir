@@ -230,10 +230,10 @@ PRE.resultBodyPlaceholder {
 	padding: 0px;
 }
 
-SPAN.searchParamDescription {
+DIV.searchParamDescription {
 	font-size: 0.8em;
 	text-align: justify;
-	color: #000066;	
+	color: #668;	
 }
 
 DIV.searchParamSeparator {

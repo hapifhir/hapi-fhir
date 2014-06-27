@@ -25,10 +25,12 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.internal.matchers.Not;
 
+import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.api.ExtensionDt;
+import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.api.annotation.Child;
@@ -81,6 +83,25 @@ public class JsonParserTest {
 		
 		String val = ourCtx.newJsonParser().encodeResourceToString(patient);
 		assertEquals("{\"resourceType\":\"Binary\",\"contentType\":\"foo\",\"content\":\"AQIDBA==\"}",val);
+		
+	}
+
+	@Test
+	public void testParseEmptyNarrative() throws ConfigurationException, DataFormatException, IOException {
+		String text = "{\n" + 
+				"    \"resourceType\" : \"Patient\",\n" + 
+				"    \"extension\" : [\n" + 
+				"      {\n" + 
+				"        \"url\" : \"http://clairol.org/colour\",\n" + 
+				"        \"valueCode\" : \"B\"\n" + 
+				"      }\n" + 
+				"    ],\n" + 
+				"    \"text\" : {\n" + 
+				"      \"div\" : \"<?xml version=\\\"1.0\\\" encoding=\\\"UTF-8\\\"?>\"\n" + 
+				"    }" + 
+				"}";
+		
+		IResource res = ourCtx.newJsonParser().parseResource(text);
 		
 	}
 
