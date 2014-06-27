@@ -130,7 +130,7 @@ public class TransactionMethodBinding extends BaseResourceReturningMethodBinding
 
 	@Override
 	protected Object parseRequestObject(Request theRequest) throws IOException {
-		EncodingEnum encoding = RestfulServer.determineResponseEncoding(theRequest);
+		EncodingEnum encoding = RestfulServer.determineResponseEncoding(theRequest.getServletRequest());
 		IParser parser = encoding.newParser(getContext());
 		Bundle bundle = parser.parseBundle(theRequest.getServletRequest().getReader());
 		return bundle;

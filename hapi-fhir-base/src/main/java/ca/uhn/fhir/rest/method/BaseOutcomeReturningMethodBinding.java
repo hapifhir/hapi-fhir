@@ -118,8 +118,7 @@ public abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBindin
 			TagList tagList = new TagList();
 			for (Enumeration<String> enumeration = theRequest.getServletRequest().getHeaders(Constants.HEADER_CATEGORY); enumeration.hasMoreElements();) {
 				String nextTagComplete = enumeration.nextElement();
-				StringBuilder next = new StringBuilder(nextTagComplete);
-				parseTagValue(tagList, nextTagComplete, next);
+				parseTagValue(tagList, nextTagComplete);
 			}
 			if (tagList.isEmpty() == false) {
 				resource.getResourceMetadata().put(ResourceMetadataKeyEnum.TAG_LIST, tagList);
@@ -136,12 +135,12 @@ public abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBindin
 			response = (MethodOutcome) invokeServerMethod(params);
 		} catch (InternalErrorException e) {
 			ourLog.error("Internal error during method invocation", e);
-			EncodingEnum encoding = RestfulServer.determineResponseEncoding(theRequest);
+			EncodingEnum encoding = RestfulServer.determineResponseEncoding(theRequest.getServletRequest());
 			streamOperationOutcome(e, theServer, encoding, theResponse, theRequest);
 			return;
 		} catch (BaseServerResponseException e) {
 			ourLog.info("Exception during method invocation: " + e.getMessage());
-			EncodingEnum encoding = RestfulServer.determineResponseEncoding(theRequest);
+			EncodingEnum encoding = RestfulServer.determineResponseEncoding(theRequest.getServletRequest());
 			streamOperationOutcome(e, theServer, encoding, theResponse, theRequest);
 			return;
 		}
@@ -172,7 +171,7 @@ public abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBindin
 		theServer.addHeadersToResponse(theResponse);
 
 		if (response != null && response.getOperationOutcome() != null) {
-			EncodingEnum encoding = RestfulServer.determineResponseEncoding(theRequest);
+			EncodingEnum encoding = RestfulServer.determineResponseEncoding(theRequest.getServletRequest());
 			theResponse.setContentType(encoding.getResourceContentType());
 			Writer writer = theResponse.getWriter();
 			IParser parser = encoding.newParser(getContext());
@@ -189,6 +188,11 @@ public abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBindin
 		}
 
 		// getMethod().in
+	}
+
+	static void parseTagValue(TagList tagList, String nextTagComplete) {
+		StringBuilder next = new StringBuilder(nextTagComplete);
+		parseTagValue(tagList, nextTagComplete, next);
 	}
 
 	/**
@@ -264,7 +268,7 @@ public abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBindin
 		theResponse.addHeader("Location", b.toString());
 	}
 
-	private void parseTagValue(TagList theTagList, String theCompleteHeaderValue, StringBuilder theBuffer) {
+	private static void parseTagValue(TagList theTagList, String theCompleteHeaderValue, StringBuilder theBuffer) {
 		int firstSemicolon = theBuffer.indexOf(";");
 		int deleteTo;
 		if (firstSemicolon == -1) {

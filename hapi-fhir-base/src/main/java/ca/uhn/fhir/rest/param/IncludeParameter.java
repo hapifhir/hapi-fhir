@@ -22,8 +22,10 @@ package ca.uhn.fhir.rest.param;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.TreeSet;
 
 import ca.uhn.fhir.context.ConfigurationException;
@@ -38,12 +40,8 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 public class IncludeParameter extends BaseQueryParameter {
 
+	private Set<String> myAllow;
 	private Class<? extends Collection<Include>> myInstantiableCollectionType;
-	private HashSet<String> myAllow;
-	public HashSet<String> getAllow() {
-		return myAllow;
-	}
-
 	private Class<?> mySpecType;
 
 	public IncludeParameter(IncludeParam theAnnotation, Class<? extends Collection<Include>> theInstantiableCollectionType, Class<?> theSpecType) {
@@ -51,8 +49,12 @@ public class IncludeParameter extends BaseQueryParameter {
 		if (theAnnotation.allow().length > 0) {
 			myAllow = new HashSet<String>();
 			for (String next : theAnnotation.allow()) {
-				myAllow.add(next);
+				if (next != null) {
+					myAllow.add(next);
+				}
 			}
+		} else {
+			myAllow = Collections.emptySet();
 		}
 
 		mySpecType = theSpecType;
@@ -70,7 +72,7 @@ public class IncludeParameter extends BaseQueryParameter {
 		if (myInstantiableCollectionType == null) {
 			if (mySpecType == Include.class) {
 				retVal.add(QualifiedParamList.singleton(((Include) theObject).getValue()));
-			}else if (mySpecType == PathSpecification.class) {
+			} else if (mySpecType == PathSpecification.class) {
 				retVal.add(QualifiedParamList.singleton(((PathSpecification) theObject).getValue()));
 			} else {
 				retVal.add(QualifiedParamList.singleton(((String) theObject)));
@@ -85,9 +87,28 @@ public class IncludeParameter extends BaseQueryParameter {
 		return retVal;
 	}
 
+	public Set<String> getAllow() {
+		return myAllow;
+	}
+
 	@Override
 	public String getName() {
 		return "_include";
+	}
+
+	@Override
+	public SearchParamTypeEnum getParamType() {
+		return null;
+	}
+
+	@Override
+	public boolean handlesMissing() {
+		return true;
+	}
+
+	@Override
+	public boolean isRequired() {
+		return false;
 	}
 
 	@Override
@@ -133,21 +154,6 @@ public class IncludeParameter extends BaseQueryParameter {
 		}
 
 		return retValCollection;
-	}
-
-	@Override
-	public boolean isRequired() {
-		return false;
-	}
-
-	@Override
-	public SearchParamTypeEnum getParamType() {
-		return null;
-	}
-
-	@Override
-	public boolean handlesMissing() {
-		return true;
 	}
 
 }

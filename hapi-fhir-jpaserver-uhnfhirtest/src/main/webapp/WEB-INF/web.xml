@@ -19,6 +19,10 @@
 		<servlet-name>fhirServlet</servlet-name>
 		<url-pattern>/base/*</url-pattern>
 	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>fhirServlet</servlet-name>
+		<url-pattern>/base</url-pattern>
+	</servlet-mapping>
 
 	<servlet-mapping>
 		<servlet-name>testerServlet</servlet-name>

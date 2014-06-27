@@ -45,9 +45,10 @@ function addSearchParamRow() {
 				if (restResource.searchParam) {
 					for (var i = 0; i < restResource.searchParam.length; i++) {
 						var searchParam = restResource.searchParam[i];
-						params['_' + searchParam.name] = searchParam;
+						var nextName = searchParam.name + '_' + i; 
+						params[nextName] = searchParam;
 						select.append(
-							$('<option />', { value: searchParam.name }).text(searchParam.name + ' - ' + searchParam.documentation)														
+							$('<option />', { value: nextName }).text(searchParam.name + ' - ' + searchParam.documentation)														
 						);
 						
 						if (restResource._searchParam && restResource._searchParam[i] != null) {
@@ -84,7 +85,11 @@ function addSearchControls(searchParam, searchParamName, containerRowNum, rowNum
 		$('#search-param-rowopts-' + containerRowNum).append(
 			$('<br clear="all"/>'),
 			$('<div class="searchParamSeparator"/>'),
-			$('<div />', { 'class': 'col-sm-6 searchParamDescription' }).text(searchParam.documentation)
+			$('<div />', { 'class': 'col-sm-6' }).append(
+				$('<div class="searchParamDescription"/>').append(
+					$('<div />').text(searchParam.documentation)
+				)
+			)
 		);
     }
     
@@ -180,7 +185,7 @@ function handleSearchParamTypeChange(select, params, rowNum) {
 		return;
 	}
 	$('#search-param-rowopts-' + rowNum).empty();
-	var searchParam = params['_' + newVal];
+	var searchParam = params[newVal];
 	$('#search-param-rowopts-' + rowNum).append(
 		$('<input />', { name: 'param.' + rowNum + '.type', type: 'hidden', value: searchParam.type })
 	);
@@ -189,6 +194,37 @@ function handleSearchParamTypeChange(select, params, rowNum) {
 	
 	select.prevVal = newVal;
 }
+
+/*
+ * Handler for "read" button which appears on each entry in the
+ * summary at the top of a Bundle response view 
+ */
+function readFromEntriesTable(source, type, id, vid) {
+	var btn = $(source);
+	var resId = source.resourceid;
+	btn.append($('<input />', { type: 'hidden', name: 'id', value: id }));
+	var resVid = source.resourcevid;
+	if (resVid != '') {
+		btn.append($('<input />', { type: 'hidden', name: 'vid', value: vid }));
+	}
+	btn.append($('<input />', { type: 'hidden', name: 'resource', value: type }));
+}															
+
+/*
+ * Handler for "update" button which appears on each entry in the
+ * summary at the top of a Bundle response view 
+ */
+function updateFromEntriesTable(source, type, id, vid) {
+	var btn = $(source);
+	var resId = source.resourceid;
+	btn.append($('<input />', { type: 'hidden', name: 'update-id', value: id }));
+	var resVid = source.resourcevid;
+	if (resVid != '') {
+		btn.append($('<input />', { type: 'hidden', name: 'update-vid', value: vid }));
+	}
+	btn.append($('<input />', { type: 'hidden', name: 'resource', value: type }));
+}															
+
 
 function selectServer(serverId) {
 	$('#server-id').val(serverId);

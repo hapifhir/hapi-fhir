@@ -74,6 +74,8 @@ public class ServerConformanceProvider {
 		}
 
 		Conformance retVal = new Conformance();
+
+		retVal.getImplementation().setDescription(myRestfulServer.getImplementationDescription());
 		retVal.getSoftware().setName(myRestfulServer.getServerName());
 		retVal.getSoftware().setVersion(myRestfulServer.getServerVersion());
 		retVal.addFormat(Constants.CT_FHIR_XML);

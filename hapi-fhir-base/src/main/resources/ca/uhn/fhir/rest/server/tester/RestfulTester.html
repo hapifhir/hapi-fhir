@@ -135,12 +135,17 @@
 					function doAction(source, action, resourceName) {
 						var abtn = $('<input />', { type: 'hidden', name: 'action', value: action });
 						$(source).append(abtn);
+						var resource = $('#resource');
 						if (resourceName != null) {
-							var rbtn = $('<input />', { type: 'hidden', name: 'resource', value: resourceName });
-							$(source).append(rbtn);
+							var input = $('#resource');
+							if (resource.length) {
+								resource.val(resourceName);
+							} else {
+								var rbtn = $('<input />', { type: 'hidden', name: 'resource', value: resourceName });
+								$(source).append(rbtn);
+							}
 						} else {
-							var resource = $('#resource');
-							if (resource) {
+							if (resource.length) {
 								resource.val('');
 							}
 						}
@@ -199,23 +204,30 @@
 						<div class="well">
 							This is a RESTful server tester, which can be used to send
 							requests to, and receive responses from the server at the
-							following URL: <a href="http://foo.com/fhir" th:href="${base}"
-								th:text="${base}">http://foo.com/fhir</a>
+							following URL: 
 						</div>
 
-						<table class="table table-bordered table-striped">
+						<table class="table table-bordered table-striped" th:if="${resourceName.empty}">
 							<colgroup>
 								<col class="col-xs-1" />
 								<col class="col-xs-7" />
 							</colgroup>
 							<tbody>
-								<tr>
-									<td>Software</td>
-									<td th:text="${conf.software.name}">HAPI Restful Server</td>
+								<tr th:if="#{!string.isEmpty(conf.implementation.description)}">
+									<td>Server</td>
+									<td th:utext="${conf.implementation.description}">HAPI Restful Server</td>
 								</tr>
 								<tr>
-									<td>Version</td>
-									<td th:text="${conf.software.version}">1.1.1</td>
+									<td>FHIR Base</td>
+									<td>
+										<a th:href="${base}" th:text="${base}"></a>
+									</td>
+								</tr>
+								<tr th:if="#{!string.isEmpty(conf.software.name)} and #{!string.isEmpty(conf.software.version)}">
+									<td>Software</td>
+									<td>
+										<th:block th:utext="${conf.software.name}"/> - <th:block th:utext="${conf.software.version}"/>
+									</td>
 								</tr>
 							</tbody>
 						</table>
@@ -838,7 +850,8 @@
 													<h4 class="panel-title">
 														<a data-toggle="collapse" data-parent="#accordion" href="#collapseOne">
 															<i id="collapseOneIcon" class="fa fa-minus-square-o"></i>
-															<span th:text="'Bundle contains ' + ${bundle.totalResults.value} + ' entries'"/>
+															<span th:if="${bundle.totalResults.empty}" th:text="'Bundle contains ' + ${bundle.entries.size} + ' entries'"/>
+															<span th:unless="${bundle.totalResults.empty}" th:text="'Bundle contains ' + ${bundle.entries.size} + ' / ' + ${bundle.totalResults.value} + ' entries'"/>
 														</a>
 
 														<!-- Prev/Next Page Buttons -->
@@ -887,8 +900,8 @@
 															<tbody>
 															<tr th:each="entry : ${bundle.entries}">
 																<td>
-																	<button class="btn btn-primary btn-xs" th:onclick="'readFromEntriesTable(this, \'' + ${entry.resource.id.resourceType} + '\', \'' + ${entry.resource.id.idPart} + '\', \'' + ${entry.resource.id.versionIdPart} + '\');'" type="submit" name="action" value="read">Read</button>
-																	<button class="btn btn-primary btn-xs" th:onclick="'updateFromEntriesTable(this, \'' + ${entry.resource.id.resourceType} + '\', \'' + ${entry.resource.id.idPart} + '\', \'' + ${entry.resource.id.versionIdPart} + '\');'" type="submit" name="action" value="home">Update</button>
+																	<button class="btn btn-primary btn-xs" th:onclick="'readFromEntriesTable(this, \'' + ${entry.resource.id.resourceType} + '\', \'' + ${entry.resource.id.idPart} + '\', \'' + ${#strings.defaultString(entry.resource.id.versionIdPart,'')} + '\');'" type="submit" name="action" value="read">Read</button>
+																	<button class="btn btn-primary btn-xs" th:onclick="'updateFromEntriesTable(this, \'' + ${entry.resource.id.resourceType} + '\', \'' + ${entry.resource.id.idPart} + '\', \'' + ${#strings.defaultString(entry.resource.id.versionIdPart, '')} + '\');'" type="submit" name="action" value="home">Update</button>
 																</td>
 																<td th:text="${entry.title}">
 																</td>
@@ -898,28 +911,6 @@
 															</tr>
 															</tbody>
 														</table>										
-														<script type="text/javascript">
-															function readFromEntriesTable(source, type, id, vid) {
-																var btn = $(source);
-																var resId = source.resourceid;
-																btn.append($('<input />', { type: 'hidden', name: 'id', value: id }));
-																var resVid = source.resourcevid;
-																if (resVid != '') {
-																	btn.append($('<input />', { type: 'hidden', name: 'vid', value: vid }));
-																}
-																btn.append($('<input />', { type: 'hidden', name: 'resource', value: type }));
-															}															
-															function updateFromEntriesTable(source, type, id, vid) {
-																var btn = $(source);
-																var resId = source.resourceid;
-																btn.append($('<input />', { type: 'hidden', name: 'update-id', value: id }));
-																var resVid = source.resourcevid;
-																if (resVid != '') {
-																	btn.append($('<input />', { type: 'hidden', name: 'update-vid', value: vid }));
-																}
-																btn.append($('<input />', { type: 'hidden', name: 'resource', value: type }));
-															}															
-														</script>
 													</div>
 												</div>
 												<script type="text/javascript">

@@ -217,14 +217,6 @@ public class Bundle extends BaseBundle /* implements IElement */{
 		entry.setResource(theResource);
 
 		entry.setResource(theResource);
-		TagList list = (TagList) theResource.getResourceMetadata().get(ResourceMetadataKeyEnum.TAG_LIST);
-		if (list != null) {
-			for (Tag tag : list) {
-				if (StringUtils.isNotBlank(tag.getTerm())) {
-					entry.addCategory().setTerm(tag.getTerm()).setLabel(tag.getLabel()).setScheme(tag.getScheme());
-				}
-			}
-		}
 
 		RuntimeResourceDefinition def = theContext.getResourceDefinition(theResource);
 

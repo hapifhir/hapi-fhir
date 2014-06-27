@@ -204,7 +204,6 @@ public class RestfulTesterServlet extends HttpServlet {
 		myIdToServerName.put(theId, theDisplayName);
 	}
 
-	
 	private RuntimeResourceDefinition getResourceType(HttpServletRequest theReq) throws ServletException {
 		String resourceName = StringUtils.defaultString(theReq.getParameter(PARAM_RESOURCE));
 		RuntimeResourceDefinition def = myCtx.getResourceDefinition(resourceName);
@@ -469,7 +468,7 @@ public class RestfulTesterServlet extends HttpServlet {
 					requestBody = IOUtils.toString(entity.getContent());
 				}
 			}
-			
+
 			HttpResponse lastResponse = client.getLastResponse();
 			ContentType ct = lastResponse != null ? ContentType.get(lastResponse.getEntity()) : null;
 			String mimeType = ct != null ? ct.getMimeType() : null;
@@ -537,7 +536,7 @@ public class RestfulTesterServlet extends HttpServlet {
 		if (isBlank(nextName)) {
 			return false;
 		}
-		
+
 		String nextQualifier = StringUtils.defaultString(theReq.getParameter("param." + paramIdxString + ".qualifier"));
 
 		String nextType = theReq.getParameter("param." + paramIdxString + ".type");
@@ -565,11 +564,11 @@ public class RestfulTesterServlet extends HttpServlet {
 		// }
 
 		theQuery.where(new StringParam(nextName + nextQualifier).matches().value(paramValue));
-		
+
 		if (StringUtils.isNotBlank(theReq.getParameter("param." + paramIdxString + ".0.name"))) {
-			handleSearchParam(paramIdxString+".0", theReq, theQuery);
+			handleSearchParam(paramIdxString + ".0", theReq, theQuery);
 		}
-		
+
 		return true;
 	}
 
@@ -717,15 +716,23 @@ public class RestfulTesterServlet extends HttpServlet {
 			if (isBlank(serverId) && !myIdToServerBase.containsKey(serverId)) {
 				serverBase = myIdToServerBase.entrySet().iterator().next().getValue();
 				serverName = myIdToServerName.entrySet().iterator().next().getValue();
-			}else {
+			} else {
 				serverBase = myIdToServerBase.get(serverId);
 				serverName = myIdToServerName.get(serverId);
 			}
-			
+
 			IGenericClient client = myCtx.newRestfulGenericClient(serverBase);
-			Conformance conformance = client.conformance();
 
 			WebContext ctx = new WebContext(theReq, theResp, theReq.getServletContext(), theReq.getLocale());
+
+			Conformance conformance;
+			try {
+				conformance = client.conformance();
+			} catch (Exception e) {
+				ourLog.warn("Failed to load conformance statement", e);
+				ctx.getVariables().put("errorMsg", "Failed to load conformance statement, error was: " + e.toString());
+				conformance = new Conformance();
+			}
 
 			Map<String, Number> resourceCounts = new HashMap<String, Number>();
 			long total = 0;

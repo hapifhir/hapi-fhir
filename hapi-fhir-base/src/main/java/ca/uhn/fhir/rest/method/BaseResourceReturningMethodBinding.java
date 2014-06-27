@@ -196,7 +196,7 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 		NarrativeModeEnum narrativeMode = RestfulServer.determineNarrativeMode(theRequest);
 
 		// Determine response encoding
-		EncodingEnum responseEncoding = RestfulServer.determineResponseEncoding(theRequest);
+		EncodingEnum responseEncoding = RestfulServer.determineResponseEncoding(theRequest.getServletRequest());
 
 		// Is this request coming from a browser
 		String uaHeader = theRequest.getServletRequest().getHeader("user-agent");
@@ -229,69 +229,11 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 			} else if (result.size() > 1) {
 				throw new InternalErrorException("Method returned multiple resources");
 			}
-			streamResponseAsResource(theServer, theResponse, result.getResources(0, 1).get(0), responseEncoding, prettyPrint, requestIsBrowser, narrativeMode);
+			RestfulServer.streamResponseAsResource(theServer, theResponse, result.getResources(0, 1).get(0), responseEncoding, prettyPrint, requestIsBrowser, narrativeMode);
 			break;
 		}
 	}
 
-	private void streamResponseAsResource(RestfulServer theServer, HttpServletResponse theHttpResponse, IResource theResource, EncodingEnum theResponseEncoding, boolean thePrettyPrint, boolean theRequestIsBrowser, NarrativeModeEnum theNarrativeMode) throws IOException {
-
-		theHttpResponse.setStatus(200);
-
-		if (theResource instanceof Binary) {
-			Binary bin = (Binary) theResource;
-			if (isNotBlank(bin.getContentType())) {
-				theHttpResponse.setContentType(bin.getContentType());
-			} else {
-				theHttpResponse.setContentType(Constants.CT_OCTET_STREAM);
-			}
-			if (bin.getContent() == null || bin.getContent().length == 0) {
-				return;
-			}
-			theHttpResponse.setContentLength(bin.getContent().length);
-			ServletOutputStream oos = theHttpResponse.getOutputStream();
-			oos.write(bin.getContent());
-			oos.close();
-			return;
-		}
-
-		if (theRequestIsBrowser && theServer.isUseBrowserFriendlyContentTypes()) {
-			theHttpResponse.setContentType(theResponseEncoding.getBrowserFriendlyBundleContentType());
-		} else if (theNarrativeMode == NarrativeModeEnum.ONLY) {
-			theHttpResponse.setContentType(Constants.CT_HTML);
-		} else {
-			theHttpResponse.setContentType(theResponseEncoding.getResourceContentType());
-		}
-		theHttpResponse.setCharacterEncoding(Constants.CHARSET_UTF_8);
-
-		theServer.addHeadersToResponse(theHttpResponse);
-
-		InstantDt lastUpdated = ResourceMetadataKeyEnum.UPDATED.get(theResource);
-		if (lastUpdated != null) {
-			theHttpResponse.addHeader(Constants.HEADER_LAST_MODIFIED, lastUpdated.getValueAsString());
-		}
-
-		TagList list = (TagList) theResource.getResourceMetadata().get(ResourceMetadataKeyEnum.TAG_LIST);
-		if (list != null) {
-			for (Tag tag : list) {
-				if (StringUtils.isNotBlank(tag.getTerm())) {
-					theHttpResponse.addHeader(Constants.HEADER_CATEGORY, tag.toHeaderValue());
-				}
-			}
-		}
-
-		PrintWriter writer = theHttpResponse.getWriter();
-		try {
-			if (theNarrativeMode == NarrativeModeEnum.ONLY) {
-				writer.append(theResource.getText().getDiv().getValueAsString());
-			} else {
-				RestfulServer.getNewParser(theServer.getFhirContext(), theResponseEncoding, thePrettyPrint, theNarrativeMode).encodeResourceToWriter(theResource, writer);
-			}
-		} finally {
-			writer.close();
-		}
-
-	}
 
 	/**
 	 * Subclasses may override

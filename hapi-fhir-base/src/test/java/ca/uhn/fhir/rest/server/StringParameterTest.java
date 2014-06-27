@@ -38,6 +38,17 @@ public class StringParameterTest {
 	private static Server ourServer;
 
 	@Test
+	public void testSearchWithFormatAndPretty() throws Exception {
+		{
+			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?str=aaa&_format=xml&_pretty=true");
+			HttpResponse status = ourClient.execute(httpGet);
+			String responseContent = IOUtils.toString(status.getEntity().getContent());
+			assertEquals(200, status.getStatusLine().getStatusCode());
+			assertEquals(1, new FhirContext().newXmlParser().parseBundle(responseContent).getEntries().size());
+		}
+	}
+	
+	@Test
 	public void testSearchNormalMatch() throws Exception {
 		{
 			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?str=aaa");

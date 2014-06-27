@@ -232,8 +232,16 @@ PRE.resultBodyPlaceholder {
 
 DIV.searchParamDescription {
 	font-size: 0.8em;
-	text-align: justify;
-	color: #668;	
+	text-align: right;
+	color: #668;
+	min-height: 34px;
+	display: table;
+	width: 100%;
+}
+
+DIV.searchParamDescription DIV {
+	display: table-cell;
+	vertical-align: middle;
 }
 
 DIV.searchParamSeparator {

@@ -404,8 +404,7 @@ public class IdDt extends BasePrimitive<String> {
 	 * @deprecated Use {@link #getIdPartAsBigDecimal()} instead
 	 */
 	public BigDecimal asBigDecimal() {
-		// TODO Auto-generated method stub
-		return null;
+		return getIdPartAsBigDecimal();
 	}
 
 }

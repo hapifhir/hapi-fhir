@@ -75,6 +75,7 @@ public class JpaTestApp {
 		restServer.setResourceProviders(rp,patientRp, questionnaireRp, organizationRp);
 		restServer.setProviders(systemProvider);
 		restServer.setPagingProvider(new FifoMemoryPagingProvider(10));
+		restServer.setImplementationDescription("This is a great server!!!!");
 		
 		JpaConformanceProvider confProvider = new JpaConformanceProvider(restServer, systemDao);
 		restServer.setServerConformanceProvider(confProvider);
@@ -152,6 +153,16 @@ public class JpaTestApp {
 				@RequiredParam(name=DiagnosticReport.SP_SUBJECT + '.' + Patient.SP_IDENTIFIER) IdentifierDt thePatientId, 
 				@OptionalParam(name=DiagnosticReport.SP_NAME) CodingListParam theNames,
 				@OptionalParam(name=DiagnosticReport.SP_DATE) DateRangeParam theDateRange,
+				@IncludeParam(allow= {"DiagnosticReport.result"}) Set<Include> theIncludes
+				) throws Exception {
+			return null;
+		}
+
+		@Search
+		public List<DiagnosticReport> findDiagnosticReportsByPatientIssued (
+				@RequiredParam(name=DiagnosticReport.SP_SUBJECT + '.' + Patient.SP_IDENTIFIER) IdentifierDt thePatientId, 
+				@OptionalParam(name=DiagnosticReport.SP_NAME) CodingListParam theNames,
+				@OptionalParam(name=DiagnosticReport.SP_ISSUED) DateRangeParam theDateRange,
 				@IncludeParam(allow= {"DiagnosticReport.result"}) Set<Include> theIncludes
 				) throws Exception {
 			return null;

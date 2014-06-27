@@ -776,9 +776,10 @@ public abstract class BaseFhirDao {
 		retVal.getResourceMetadata().put(ResourceMetadataKeyEnum.VERSION_ID, theEntity.getVersion());
 		retVal.getResourceMetadata().put(ResourceMetadataKeyEnum.PUBLISHED, theEntity.getPublished());
 		retVal.getResourceMetadata().put(ResourceMetadataKeyEnum.UPDATED, theEntity.getUpdated());
-		if (theEntity.getTags().size() > 0) {
+		Collection<? extends BaseTag> tags = theEntity.getTags();
+		if (tags.size() > 0) {
 			TagList tagList = new TagList();
-			for (BaseTag next : theEntity.getTags()) {
+			for (BaseTag next : tags) {
 				tagList.add(new Tag(next.getTag().getScheme(), next.getTag().getTerm(), next.getTag().getLabel()));
 			}
 			retVal.getResourceMetadata().put(ResourceMetadataKeyEnum.TAG_LIST, tagList);
