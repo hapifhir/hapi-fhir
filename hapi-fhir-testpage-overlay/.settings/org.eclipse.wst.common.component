@@ -4,11 +4,10 @@
         <wb-resource deploy-path="/" source-path="/src/main/webapp" tag="defaultRootSource"/>
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/java"/>
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/resources"/>
-        <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/test/resources"/>
         <dependent-module archiveName="hapi-fhir-base-0.4-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/hapi-fhir-base/hapi-fhir-base">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <property name="context-root" value="hapi-fhir-tester-overlay"/>
         <property name="java-output-path" value="/hapi-fhir-tester-overlay/target/classes"/>
+        <property name="context-root" value="hapi-fhir-testpage-overlay"/>
     </wb-module>
 </project-modules>

@@ -44,7 +44,8 @@ public class SortTest {
 	public void testNoSort() throws Exception {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?name=Hello");
 		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		Bundle bundle = new FhirContext().newXmlParser().parseBundle(responseContent);
 		assertEquals(1, bundle.size());
@@ -59,7 +60,8 @@ public class SortTest {
 		{
 			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?name=Hello&_sort=given");
 			HttpResponse status = ourClient.execute(httpGet);
-			String responseContent = IOUtils.toString(status.getEntity().getContent());
+			String responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			Bundle bundle = new FhirContext().newXmlParser().parseBundle(responseContent);
 			assertEquals(1, bundle.size());
@@ -72,7 +74,8 @@ public class SortTest {
 		{
 			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?name=Hello&_sort:asc=given");
 			HttpResponse status = ourClient.execute(httpGet);
-			String responseContent = IOUtils.toString(status.getEntity().getContent());
+			String responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			Bundle bundle = new FhirContext().newXmlParser().parseBundle(responseContent);
 			assertEquals(1, bundle.size());
@@ -85,7 +88,8 @@ public class SortTest {
 		{
 			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?name=Hello&_sort:desc=given");
 			HttpResponse status = ourClient.execute(httpGet);
-			String responseContent = IOUtils.toString(status.getEntity().getContent());
+			String responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			Bundle bundle = new FhirContext().newXmlParser().parseBundle(responseContent);
 			assertEquals(1, bundle.size());
@@ -103,7 +107,8 @@ public class SortTest {
 		{
 			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?name=Hello&_sort=given&_sort=family&_sort=name");
 			HttpResponse status = ourClient.execute(httpGet);
-			String responseContent = IOUtils.toString(status.getEntity().getContent());
+			String responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			Bundle bundle = new FhirContext().newXmlParser().parseBundle(responseContent);
 			assertEquals(1, bundle.size());

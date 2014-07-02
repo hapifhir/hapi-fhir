@@ -70,7 +70,8 @@ public class TransactionTest {
 		httpPost.addHeader("Accept", Constants.CT_ATOM_XML + "; pretty=true"); 
 		httpPost.setEntity(new StringEntity(bundleString, ContentType.create(Constants.CT_ATOM_XML, "UTF-8")));
 		HttpResponse status = ourClient.execute(httpPost);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		
 		ourLog.info(responseContent);

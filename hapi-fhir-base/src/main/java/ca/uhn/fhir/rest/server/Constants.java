@@ -85,6 +85,8 @@ public class Constants {
 	public static final String HEADER_ACCEPT_ENCODING = "Accept-Encoding";
 	public static final String HEADER_CONTENT_ENCODING = "Content-Encoding";
 	public static final String ENCODING_GZIP = "gzip";
+	public static final String HEADER_LOCATION = "Location";
+	public static final String HEADER_LOCATION_LC = HEADER_LOCATION.toLowerCase();
 	
 
 	static {

@@ -103,7 +103,8 @@ public class ResfulServerMethodTest {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/DiagnosticReport?throw404=true");
 		HttpResponse status = ourClient.execute(httpGet);
 
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(404, status.getStatusLine().getStatusCode());
@@ -123,10 +124,11 @@ public class ResfulServerMethodTest {
 		HttpResponse status = ourClient.execute(httpPost);
 
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(201, status.getStatusLine().getStatusCode());
-		assertEquals("http://localhost:" + ourPort + "/Patient/001/_history/002", status.getFirstHeader("Location").getValue());
+		assertEquals("http://localhost:" + ourPort + "/Patient/001/_history/002", status.getFirstHeader("location").getValue());
 
 	}
 
@@ -143,11 +145,12 @@ public class ResfulServerMethodTest {
 
 		HttpResponse status = ourClient.execute(httpPost);
 
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(201, status.getStatusLine().getStatusCode());
-		assertEquals("http://localhost:" + ourPort + "/Patient/001/_history/002", status.getFirstHeader("Location").getValue());
+		assertEquals("http://localhost:" + ourPort + "/Patient/001/_history/002", status.getFirstHeader("location").getValue());
 
 	}
 	
@@ -162,7 +165,8 @@ public class ResfulServerMethodTest {
 
 		HttpResponse status = ourClient.execute(httpPost);
 
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(422, status.getStatusLine().getStatusCode());
@@ -183,7 +187,8 @@ public class ResfulServerMethodTest {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?dateRange=%3E%3D2011-01-01&dateRange=%3C%3D2021-01-01");
 		HttpResponse status = ourClient.execute(httpGet);
 
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
@@ -200,7 +205,8 @@ public class ResfulServerMethodTest {
 		HttpDelete httpGet = new HttpDelete("http://localhost:" + ourPort + "/Patient/1234");
 		HttpResponse status = ourClient.execute(httpGet);
 
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
@@ -230,7 +236,8 @@ public class ResfulServerMethodTest {
 
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?withIncludes=include1&_include=include2&_include=include3");
 		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		Bundle bundle = ourCtx.newXmlParser().parseBundle(responseContent);
 		BundleEntry entry0 = bundle.getEntries().get(0);
@@ -239,7 +246,8 @@ public class ResfulServerMethodTest {
 
 		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?withIncludes=include1&_include=include2&_include=include3&_format=json");
 		status = ourClient.execute(httpGet);
-		responseContent = IOUtils.toString(status.getEntity().getContent());
+		responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		ourLog.info(responseContent);
 		bundle = ourCtx.newJsonParser().parseBundle(responseContent);
@@ -260,7 +268,8 @@ public class ResfulServerMethodTest {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1?_format=json");
 		HttpResponse status = ourClient.execute(httpGet);
 
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
@@ -284,7 +293,8 @@ public class ResfulServerMethodTest {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1?_format=xml");
 		HttpResponse status = ourClient.execute(httpGet);
 
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
@@ -304,7 +314,8 @@ public class ResfulServerMethodTest {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
 		HttpResponse status = ourClient.execute(httpGet);
 
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
@@ -318,7 +329,8 @@ public class ResfulServerMethodTest {
 		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/2");
 		status = ourClient.execute(httpGet);
 
-		responseContent = IOUtils.toString(status.getEntity().getContent());
+		responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+
 		ourLog.debug("Response was:\n{}", responseContent);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
@@ -332,7 +344,8 @@ public class ResfulServerMethodTest {
 		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/9999999");
 		status = ourClient.execute(httpGet);
 
-		responseContent = IOUtils.toString(status.getEntity().getContent());
+		responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+
 		ourLog.debug("Response was:\n{}", responseContent);
 
 		assertEquals(404, status.getStatusLine().getStatusCode());
@@ -350,7 +363,8 @@ public class ResfulServerMethodTest {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1/_history/999");
 		HttpResponse status = ourClient.execute(httpGet);
 
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
@@ -366,7 +380,8 @@ public class ResfulServerMethodTest {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/metadata");
 		HttpResponse status = ourClient.execute(httpGet);
 
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+
 		// ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
@@ -401,7 +416,8 @@ public class ResfulServerMethodTest {
 			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/999/_history");
 			HttpResponse status = ourClient.execute(httpGet);
 
-			String responseContent = IOUtils.toString(status.getEntity().getContent());
+			String responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+
 			ourLog.info("Response was:\n{}", responseContent);
 
 			assertEquals(500, status.getStatusLine().getStatusCode());
@@ -410,7 +426,8 @@ public class ResfulServerMethodTest {
 			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/998/_history");
 			HttpResponse status = ourClient.execute(httpGet);
 
-			String responseContent = IOUtils.toString(status.getEntity().getContent());
+			String responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+
 			ourLog.info("Response was:\n{}", responseContent);
 
 			assertEquals(500, status.getStatusLine().getStatusCode());
@@ -437,7 +454,8 @@ public class ResfulServerMethodTest {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/222/_history");
 		HttpResponse status = ourClient.execute(httpGet);
 
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
@@ -486,7 +504,8 @@ public class ResfulServerMethodTest {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/_history");
 		HttpResponse status = ourClient.execute(httpGet);
 
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
@@ -537,7 +556,8 @@ public class ResfulServerMethodTest {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/AdverseReaction/223");
 		HttpResponse status = ourClient.execute(httpGet);
 
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(Constants.STATUS_HTTP_400_BAD_REQUEST, status.getStatusLine().getStatusCode());
@@ -550,7 +570,8 @@ public class ResfulServerMethodTest {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/AdverseReaction");
 		HttpResponse status = ourClient.execute(httpGet);
 
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
@@ -561,7 +582,8 @@ public class ResfulServerMethodTest {
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/AdverseReaction/_search");
 		status = ourClient.execute(httpPost);
 
-		responseContent = IOUtils.toString(status.getEntity().getContent());
+		responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
@@ -577,7 +599,8 @@ public class ResfulServerMethodTest {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Profile?");
 		HttpResponse status = ourClient.execute(httpGet);
 
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+
 		// ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
@@ -594,7 +617,8 @@ public class ResfulServerMethodTest {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?dob=2011-01-02");
 		HttpResponse status = ourClient.execute(httpGet);
 
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
@@ -613,7 +637,8 @@ public class ResfulServerMethodTest {
 		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?dob=%3E%3D2011-01-02");
 		status = ourClient.execute(httpGet);
 
-		responseContent = IOUtils.toString(status.getEntity().getContent());
+		responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
@@ -633,7 +658,8 @@ public class ResfulServerMethodTest {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/_search?dob=2011-01-02");
 		HttpResponse status = ourClient.execute(httpGet);
 
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
@@ -650,7 +676,8 @@ public class ResfulServerMethodTest {
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/_search?dob=2011-01-02");
 		status = ourClient.execute(httpPost);
 
-		responseContent = IOUtils.toString(status.getEntity().getContent());
+		responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
@@ -670,7 +697,8 @@ public class ResfulServerMethodTest {
 		httpPost.setEntity(new UrlEncodedFormEntity(urlParameters));
 		status = ourClient.execute(httpPost);
 
-		responseContent = IOUtils.toString(status.getEntity().getContent());
+		responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
@@ -690,7 +718,8 @@ public class ResfulServerMethodTest {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?ids=urn:aaa%7Caaa,urn:bbb%7Cbbb");
 		HttpResponse status = ourClient.execute(httpGet);
 
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
@@ -709,7 +738,8 @@ public class ResfulServerMethodTest {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?identifier=urn:hapitest:mrns%7C00001");
 		HttpResponse status = ourClient.execute(httpGet);
 
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
@@ -726,7 +756,8 @@ public class ResfulServerMethodTest {
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/_search?identifier=urn:hapitest:mrns%7C00001");
 		status = ourClient.execute(httpPost);
 
-		responseContent = IOUtils.toString(status.getEntity().getContent());
+		responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
@@ -743,7 +774,8 @@ public class ResfulServerMethodTest {
 		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/_search?identifier=urn:hapitest:mrns%7C00001");
 		status = ourClient.execute(httpGet);
 
-		responseContent = IOUtils.toString(status.getEntity().getContent());
+		responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
@@ -761,7 +793,8 @@ public class ResfulServerMethodTest {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/?_query=someQueryNoParams");
 		HttpResponse status = ourClient.execute(httpGet);
 
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
@@ -784,7 +817,8 @@ public class ResfulServerMethodTest {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/?_query=someQueryOneParam&param1=AAAA");
 		HttpResponse status = ourClient.execute(httpGet);
 
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
@@ -804,7 +838,8 @@ public class ResfulServerMethodTest {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/?quantityParam=%3E%3D123%7Cfoo%7Cbar");
 		HttpResponse status = ourClient.execute(httpGet);
 
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
@@ -822,7 +857,8 @@ public class ResfulServerMethodTest {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?withIncludes=include1&_include=include2&_include=include3");
 		HttpResponse status = ourClient.execute(httpGet);
 
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
@@ -841,7 +877,8 @@ public class ResfulServerMethodTest {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?withIncludes=include1&_include=include2&_include=include4");
 		HttpResponse status = ourClient.execute(httpGet);
 
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(400, status.getStatusLine().getStatusCode());
@@ -853,7 +890,8 @@ public class ResfulServerMethodTest {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?withIncludes=include1");
 		HttpResponse status = ourClient.execute(httpGet);
 
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+
 		ourLog.info("Response was:\n{}", responseContent);
 
 		// Make sure there is no crash
@@ -866,7 +904,8 @@ public class ResfulServerMethodTest {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?name1=AAA");
 		HttpResponse status = ourClient.execute(httpGet);
 
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
@@ -885,7 +924,8 @@ public class ResfulServerMethodTest {
 		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?name1=AAA&name2=BBB");
 		status = ourClient.execute(httpGet);
 
-		responseContent = IOUtils.toString(status.getEntity().getContent());
+		responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
@@ -910,14 +950,15 @@ public class ResfulServerMethodTest {
 
 		HttpResponse status = ourClient.execute(httpPost);
 
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+
 		ourLog.info("Response was:\n{}", responseContent);
 
 		OperationOutcome oo = new FhirContext().newXmlParser().parseResource(OperationOutcome.class, responseContent);
 		assertEquals("OODETAILS", oo.getIssueFirstRep().getDetails().getValue());
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertEquals("http://localhost:" + ourPort + "/Patient/001/_history/002", status.getFirstHeader("Location").getValue());
+		assertEquals("http://localhost:" + ourPort + "/Patient/001/_history/002", status.getFirstHeader("location").getValue());
 
 	}
 
@@ -933,7 +974,7 @@ public class ResfulServerMethodTest {
 		HttpResponse status = ourClient.execute(httpPost);
 
 		assertEquals(204, status.getStatusLine().getStatusCode());
-		assertEquals("http://localhost:" + ourPort + "/DiagnosticReport/001/_history/002", status.getFirstHeader("Location").getValue());
+		assertEquals("http://localhost:" + ourPort + "/DiagnosticReport/001/_history/002", status.getFirstHeader("location").getValue());
 
 	}
 
@@ -1087,7 +1128,8 @@ public class ResfulServerMethodTest {
 
 		HttpResponse status = ourClient.execute(httpPost);
 
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+
 		ourLog.info("Response was:\n{}", responseContent);
 		assertThat(responseContent, not(containsString("\n  ")));
 
@@ -1105,7 +1147,8 @@ public class ResfulServerMethodTest {
 
 		status = ourClient.execute(httpPost);
 
-		responseContent = IOUtils.toString(status.getEntity().getContent());
+		responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(422, status.getStatusLine().getStatusCode());
@@ -1142,7 +1185,8 @@ public class ResfulServerMethodTest {
 
 		HttpResponse status = ourClient.execute(httpPost);
 
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+
 		ourLog.info("Response was:\n{}", responseContent);
 		assertThat(responseContent, containsString("\n  "));
 	}
@@ -1153,7 +1197,8 @@ public class ResfulServerMethodTest {
 		HttpDelete httpGet = new HttpDelete("http://localhost:" + ourPort + "/Patient/1234?_pretty=true");
 		HttpResponse status = ourClient.execute(httpGet);
 
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());

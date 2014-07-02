@@ -47,7 +47,8 @@ public class IncludeTest {
 	public void testNoIncludes() throws Exception {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?name=Hello");
 		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		Bundle bundle = new FhirContext().newXmlParser().parseBundle(responseContent);
 		assertEquals(1, bundle.size());
@@ -61,7 +62,8 @@ public class IncludeTest {
 	public void testOneInclude() throws Exception {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?name=Hello&_include=foo");
 		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		Bundle bundle = new FhirContext().newXmlParser().parseBundle(responseContent);
 		assertEquals(1, bundle.size());
@@ -76,7 +78,8 @@ public class IncludeTest {
 	public void testTwoInclude() throws Exception {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?name=Hello&_include=foo&_include=bar");
 		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		Bundle bundle = new FhirContext().newXmlParser().parseBundle(responseContent);
 		assertEquals(1, bundle.size());
