@@ -46,6 +46,7 @@ public abstract class BaseServerResponseException extends RuntimeException {
 		registerExceptionType(ResourceVersionNotSpecifiedException.STATUS_CODE, ResourceVersionNotSpecifiedException.class);
 		registerExceptionType(ResourceVersionConflictException.STATUS_CODE, ResourceVersionConflictException.class);
 		registerExceptionType(UnprocessableEntityException.STATUS_CODE, UnprocessableEntityException.class);
+		registerExceptionType(ResourceGoneException.STATUS_CODE, ResourceGoneException.class);
 	}
 
 	private final OperationOutcome myOperationOutcome;

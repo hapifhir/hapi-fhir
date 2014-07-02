@@ -28,7 +28,8 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.http.client.HttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 
 import ca.uhn.fhir.context.ConfigurationException;
@@ -38,9 +39,12 @@ import ca.uhn.fhir.rest.method.BaseMethodBinding;
 
 public class RestfulClientFactory implements IRestfulClientFactory {
 
+	private int myConnectionRequestTimeout=10000;
+	private int myConnectTimeout=10000;
 	private FhirContext myContext;
 	private HttpClient myHttpClient;
 	private Map<Class<? extends IRestfulClient>, ClientInvocationHandler> myInvocationHandlers = new HashMap<Class<? extends IRestfulClient>, ClientInvocationHandler>();
+	private int mySocketTimeout = 10000;
 
 	/**
 	 * Constructor
@@ -48,14 +52,63 @@ public class RestfulClientFactory implements IRestfulClientFactory {
 	 * @param theContext
 	 *            The context
 	 */
-	public RestfulClientFactory(FhirContext theContext) {
+	public RestfulClientFactory(FhirContext theFhirContext) {
+		myContext=theFhirContext;
+	}
+
+	/**
+	 * Constructor
+	 */
+	public RestfulClientFactory() {
+	}
+
+	/**
+	 * Sets the context associated with this client factory. Must not be called
+	 * more than once.
+	 */
+	public void setFhirContext(FhirContext theContext) {
+		if(myContext!=null&&myContext!=theContext) {
+			throw new IllegalStateException("RestfulClientFactory instance is already associated with one FhirContext. RestfulClientFactory instances can not be shared.");
+		}
 		myContext = theContext;
 	}
 
-	@SuppressWarnings("unchecked")
-	private <T extends IRestfulClient> T instantiateProxy(Class<T> theClientType, InvocationHandler theInvocationHandler) {
-		T proxy = (T) Proxy.newProxyInstance(theClientType.getClassLoader(), new Class[] { theClientType }, theInvocationHandler);
-		return proxy;
+	public int getConnectionRequestTimeout() {
+		return myConnectionRequestTimeout;
+	}
+
+	public int getConnectTimeout() {
+		return myConnectTimeout;
+	}
+
+	@Override
+	public synchronized HttpClient getHttpClient() {
+		if (myHttpClient == null) {
+
+			PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+						
+			//@formatter:off
+			RequestConfig defaultRequestConfig = RequestConfig.custom()
+				    .setSocketTimeout(mySocketTimeout)
+				    .setConnectTimeout(myConnectTimeout)
+				    .setConnectionRequestTimeout(myConnectionRequestTimeout)
+				    .setStaleConnectionCheckEnabled(true)
+				    .build();
+			
+			myHttpClient = HttpClients.custom()
+				.setConnectionManager(connectionManager)
+				.setDefaultRequestConfig(defaultRequestConfig)
+				.disableCookieManagement()
+				.build();
+			//@formatter:on
+
+		}
+		
+		return myHttpClient;
+	}
+
+	public int getSocketTimeout() {
+		return mySocketTimeout;
 	}
 
 	/**
@@ -86,7 +139,7 @@ public class RestfulClientFactory implements IRestfulClientFactory {
 		if (invocationHandler == null) {
 			invocationHandler = new ClientInvocationHandler(client, myContext, serverBase, theClientType);
 			for (Method nextMethod : theClientType.getMethods()) {
-				BaseMethodBinding binding = BaseMethodBinding.bindMethod(nextMethod, myContext, null);
+				BaseMethodBinding<?> binding = BaseMethodBinding.bindMethod(nextMethod, myContext, null);
 				invocationHandler.addBinding(nextMethod, binding);
 			}
 			myInvocationHandlers.put(theClientType, invocationHandler);
@@ -98,14 +151,18 @@ public class RestfulClientFactory implements IRestfulClientFactory {
 	}
 
 	@Override
-	public synchronized HttpClient getHttpClient() {
-		if (myHttpClient == null) {
-			PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
-			HttpClientBuilder builder = HttpClientBuilder.create();
-			builder.setConnectionManager(connectionManager);
-			myHttpClient = builder.build();
-		}
-		return myHttpClient;
+	public IGenericClient newGenericClient(String theServerBase) {
+		return new GenericClient(myContext, getHttpClient(), theServerBase);
+	}
+
+	public synchronized void setConnectionRequestTimeout(int theConnectionRequestTimeout) {
+		myConnectionRequestTimeout = theConnectionRequestTimeout;
+		myHttpClient=null;
+	}
+
+	public synchronized void setConnectTimeout(int theConnectTimeout) {
+		myConnectTimeout = theConnectTimeout;
+		myHttpClient=null;
 	}
 
 	/**
@@ -120,9 +177,15 @@ public class RestfulClientFactory implements IRestfulClientFactory {
 		myHttpClient = theHttpClient;
 	}
 
-	@Override
-	public IGenericClient newGenericClient(String theServerBase) {
-		return new GenericClient(myContext, getHttpClient(), theServerBase);
+	public synchronized void setSocketTimeout(int theSocketTimeout) {
+		mySocketTimeout = theSocketTimeout;
+		myHttpClient=null;
+	}
+
+	@SuppressWarnings("unchecked")
+	private <T extends IRestfulClient> T instantiateProxy(Class<T> theClientType, InvocationHandler theInvocationHandler) {
+		T proxy = (T) Proxy.newProxyInstance(theClientType.getClassLoader(), new Class[] { theClientType }, theInvocationHandler);
+		return proxy;
 	}
 
 }

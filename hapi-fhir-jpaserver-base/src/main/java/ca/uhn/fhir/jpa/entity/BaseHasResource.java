@@ -17,7 +17,11 @@ import ca.uhn.fhir.model.primitive.InstantDt;
 @MappedSuperclass
 public abstract class BaseHasResource {
 
-	@Column(name = "RES_ENCODING", nullable = false, length=5)
+	@Column(name = "RES_DELETED_AT", nullable = true)
+	@Temporal(TemporalType.TIMESTAMP)
+	private Date myDeleted;
+
+	@Column(name = "RES_ENCODING", nullable = false, length = 5)
 	@Enumerated(EnumType.STRING)
 	private ResourceEncodingEnum myEncoding;
 
@@ -33,13 +37,15 @@ public abstract class BaseHasResource {
 	@Column(name = "RES_UPDATED", nullable = false)
 	private Date myUpdated;
 
+	public abstract BaseTag addTag(TagDefinition theDef);
+
+	public Date getDeleted() {
+		return myDeleted;
+	}
+
 	public ResourceEncodingEnum getEncoding() {
 		return myEncoding;
 	}
-
-	public abstract String getResourceType();
-	
-	public abstract Collection<? extends BaseTag> getTags();
 
 	public abstract IdDt getIdDt();
 
@@ -51,11 +57,19 @@ public abstract class BaseHasResource {
 		return myResource;
 	}
 
+	public abstract String getResourceType();
+
+	public abstract Collection<? extends BaseTag> getTags();
+
 	public InstantDt getUpdated() {
 		return new InstantDt(myUpdated);
 	}
 
 	public abstract long getVersion();
+
+	public void setDeleted(Date theDate) {
+		myDeleted = theDate;
+	}
 
 	public void setEncoding(ResourceEncodingEnum theEncoding) {
 		myEncoding = theEncoding;
@@ -80,7 +94,5 @@ public abstract class BaseHasResource {
 	public void setUpdated(InstantDt theUpdated) {
 		myUpdated = theUpdated.getValue();
 	}
-
-	public abstract  BaseTag addTag(TagDefinition theDef);
 
 }

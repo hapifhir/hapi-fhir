@@ -88,6 +88,7 @@ public class JsonParserTest {
 
 	@Test
 	public void testParseEmptyNarrative() throws ConfigurationException, DataFormatException, IOException {
+		//@formatter:off
 		String text = "{\n" + 
 				"    \"resourceType\" : \"Patient\",\n" + 
 				"    \"extension\" : [\n" + 
@@ -100,10 +101,12 @@ public class JsonParserTest {
 				"      \"div\" : \"<?xml version=\\\"1.0\\\" encoding=\\\"UTF-8\\\"?>\"\n" + 
 				"    }" + 
 				"}";
-		
+		//@formatter:on
 		IResource res = ourCtx.newJsonParser().parseResource(text);
 		
 	}
+
+	
 
 	@Test
 	public void testNestedContainedResources() {

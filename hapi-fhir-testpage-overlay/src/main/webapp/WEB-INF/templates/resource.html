@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head  th:include="tmpl-head :: head">
+		<title>RESTful Tester</title>
+	</head>
+
+	<body>
+		<form action="" method="get" id="outerForm">
+		<input type="hidden" id="serverId" name="serverId" th:value="${serverId}"/> 
+
+		<div th:replace="tmpl-navbar-top :: top" ></div>
+		
+		<div class="container-fluid">
+			<div class="row">
+
+				<div th:replace="tmpl-navbar-left :: left" ></div>
+
+				<div class="col-sm-9 col-sm-offset-3 col-md-9 col-md-offset-3 main">
+
+					<div th:replace="tmpl-banner :: banner"></div>
+
+					<!-- ********************************************************** -->
+					<!-- ** Default Home                                         ** -->
+					<!-- ********************************************************** -->
+
+						<div class="well">
+							This is a RESTful server tester, which can be used to send
+							requests to, and receive responses from the server at the
+							following URL: 
+						</div>
+
+						<!-- ************************************************ -->
+						<!-- ** Resource Actions                           ** -->
+						<!-- ************************************************ -->
+						
+						<div class="panel panel-default" th:if="${resourceName.empty} == false">
+							<div class="panel-heading">
+								<h3 class="panel-title" th:text="'Resource: ' + ${resourceName}">Resource: <b>Patient</b></h3>
+							</div>
+							<div class="panel-body">
+								This page contains various operations for interacting with
+								the <th:block th:text="${resourceName}"/> resource.
+							</div>
+						</div>
+						
+						<div class="panel panel-default" th:if="${resourceName.empty} == false">
+							<div class="panel-heading">
+								<h3 class="panel-title">Search</h3>
+							</div>
+							<div class="panel-body">
+								<div class="container-fluid">
+									<div class="row-fluid">
+								    	<div class="col-sm-2">
+											<button type="button" id="search-btn" class="btn btn-primary btn-block" 
+												data-loading-text="Searching &lt;i class='fa fa-spinner fa-spin'/&gt;" >
+												<span class="glyphicon glyphicon-search"></span>
+												Search
+											</button>
+										</div>												
+									</div>
+									<script type="text/javascript">
+										$('#search-btn').click(function() {
+											var btn = $(this);
+											btn.button('loading');
+											$("#outerForm").attr("action", "search").submit();
+										});
+									</script>
+									<br clear="all"/>
+									
+									<div class="row-fluid">
+										<h4>Search Parameters <small>Optionally add parameter(s) to the search</small></h4>
+									</div>
+									
+									<div id="search-param-rows" style="padding-left: 15px;">
+										<!-- Placeholder: gets populated by script below -->
+									</div>
+									
+									<div class="row-fluid">
+										<h4>Includes <small>Also load and include referenced resources in results</small></h4>
+									</div>
+									
+									<div class="row-fluid">
+										<span th:each="include : ${includes}" class="includeCheckContainer">
+											<span class="includeCheckCheck">
+				                    			<input type="checkbox" name="_include" th:value="${include}" th:id="'inc_' + ${include}" />
+				                    		</span>
+											<span class="includeCheckName" th:text="${include}"/>
+				                    	</span>
+									</div>
+
+									<div class="row-fluid">
+										<h4>Other Options</h4>
+									</div>
+									
+									<div class="row-fluid">
+										<div class='col-sm-3'>
+								            <div class="form-group">
+								                <div class='input-group date'>
+								                    <div class="input-group-addon">
+								                    Limit
+								                    </div>
+								                    <input type="text" class="form-control" name="resource-search-limit" placeholder="max # returned"/>
+								                </div>
+								            </div>
+								        </div>
+									</div>
+																		
+									<!-- 
+							    	<div class="col-sm-1">
+										<button type="button" class="btn btn-success btn-block">Add
+											<span class="glyphicon glyphicon-plus"></span>
+										</button>
+									</div>
+									 -->
+									<br clear="all"/>
+									 
+								</div>						
+							</div>
+						</div>
+						
+						<div class="panel panel-default" th:if="${resourceName.empty} == false">
+							<div class="panel-heading">
+								<h3 class="panel-title">Operations</h3>
+							</div>
+							<div class="panel-body">
+								<div class="container-fluid">
+
+								<!-- Read/VRead -->
+								
+									<div class="row-fluid">
+										<div>
+											<b>Read</b> an individual resource instance given its
+											ID (and optionally a version ID to retrieve a specific version
+											of that instance to <b>vread</b> that instance)
+										</div>										
+									</div>
+								    <div class="row-fluid">
+								    	<div class="col-sm-2">
+											<button type="button" id="read-btn"
+												data-loading-text="Loading &lt;i class='fa fa-spinner fa-spin'/&gt;"  class="btn btn-primary btn-block">
+												<i class="fa fa-book"></i>
+												Read
+											</button>
+										</div>												
+										<div class='col-sm-3'>
+								            <div class="form-group">
+								                <div class='input-group date'>
+								                    <div class="input-group-addon">
+								                    ID
+								                    <span class="loadingStar">*</span>
+								                    </div>
+								                    <input type="text" class="form-control" id="read-id"/>
+								                </div>
+								            </div>
+								        </div>											
+										<div class='col-sm-4'>
+								            <div class="form-group">
+								                <div class='input-group date'>
+								                    <div class="input-group-addon">
+								                    Version ID
+								                    </div>
+								                    <input type="text" class="form-control" id="read-vid" placeholder="(add for vread)"/>
+								                </div>
+								            </div>
+								        </div>											
+										<script type="text/javascript">
+											$('#read-btn').click(
+												function() {
+													var btn = $(this);
+													btn.button('loading');
+													var id = $('#read-id').val();
+													if (id != null) btn.append($('<input />', { type: 'hidden', name: 'id', value: id }));
+													var vid = $('#read-vid').val();
+													if (vid != null) btn.append($('<input />', { type: 'hidden', name: 'vid', value: vid }));
+													$("#outerForm").attr("action", "read").submit();
+												});
+										</script>
+									</div>
+									<br clear="all"/>
+									
+								<!-- Resource History -->
+								
+									<div class="row-fluid">
+										Retrieve the update <b>history</b> across the <th:block th:text="${resourceName}"/> 
+										resource type, or against a specific instance of this resource type if
+										an ID is specified. 			
+									</div>
+								    <div class="row-fluid top-buffer">
+								    	<div class="col-sm-2">
+											<button type="button" id="resource-history-btn"
+												data-loading-text="Loading &lt;i class='fa fa-spinner fa-spin'/&gt;"  class="btn btn-primary btn-block"
+												name="action-history-type">
+												<i class="fa fa-calendar"></i>
+												History
+											</button>
+								    	</div>
+										<div class='col-sm-3'>
+								            <div class="form-group">
+								                <div class='input-group date'>
+								                    <div class="input-group-addon">
+								                    ID
+								                    </div>
+								                    <input type="text" class="form-control" id="resource-history-id" placeholder="(instance ID)"/>
+								                </div>
+								            </div>
+								        </div>											
+								        <div class='col-sm-5'>
+								            <div class="form-group">
+								                <div class='input-group date' id='resource-history-datetime' data-date-format="YYYY-MM-DDTHH:mm:ss">
+								                    <div class="input-group-addon">
+								                    Since
+								                    </div>
+								                    <input type='text' class="form-control" id="resource-history-since" placeholder="(opt)"/>
+								                    <div class="input-group-addon">
+								                    <span class="glyphicon glyphicon-calendar"></span>
+								                    </div>
+								                </div>
+								            </div>
+								        </div>								        
+										<div class='col-sm-2'>
+								            <div class="form-group">
+								                <div class='input-group date'>
+								                    <div class="input-group-addon">
+								                    Limit
+								                    </div>
+								                    <input type="text" class="form-control" id="resource-history-limit" placeholder="(#)"/>
+								                </div>
+								            </div>
+								        </div>
+								        <script type="text/javascript">
+								            $(function () {
+								                $('#resource-history-datetime').datetimepicker({
+								                	sideBySide: true,
+								                	use24hours: true,
+								                	showToday: true
+								                });
+								            });
+								            $('#resource-history-btn').click(
+												function() {
+													var btn = $(this);
+													btn.button('loading');
+													var limit = $('#resource-history-limit').val();
+													if (limit != null) btn.append($('<input />', { type: 'hidden', name: 'limit', value: limit }));
+													var since = $('#resource-history-since').val();
+													if (since != null) btn.append($('<input />', { type: 'hidden', name: 'since', value: since }));
+													var id = $('#resource-history-id').val();
+													if (id != null) btn.append($('<input />', { type: 'hidden', name: 'resource-history-id', value: id }));
+													$("#outerForm").attr("action", "history-type").submit();
+												});								            
+								        </script>								        
+								    </div>
+									<br clear="all"/>
+																	
+								<!-- Delete -->
+								
+									<div class="row-fluid">
+										<b>Delete</b> an individual instance of the resource 			
+									</div>
+								    <div class="row-fluid top-buffer">
+								    	<div class="col-sm-2">
+											<button type="button" id="resource-delete-btn"
+												data-loading-text="Loading &lt;i class='fa fa-spinner fa-spin'/&gt;"  class="btn btn-primary btn-block">
+												<i class="fa fa-trash-o"></i>
+												Delete
+											</button>
+								    	</div>
+										<div class='col-sm-3'>
+								            <div class="form-group">
+								                <div class='input-group date'>
+								                    <div class="input-group-addon">
+								                    ID
+								                    <span class="loadingStar">*</span>
+								                    </div>
+								                    <input type="text" class="form-control" id="resource-delete-id"/>
+								                </div>
+								            </div>
+								        </div>											
+								        <script type="text/javascript">
+								            $('#resource-delete-btn').click(
+												function() {
+													var btn = $(this);
+													btn.button('loading');
+													var id = $('#resource-delete-id').val();
+													if (id != null) btn.append($('<input />', { type: 'hidden', name: 'resource-delete-id', value: id }));
+													$("#outerForm").attr("action", "delete").submit();
+												});								            
+								        </script>								        
+								    </div>
+									<br clear="all"/>
+																	
+								<!-- Create/Update -->
+								
+									<div class="row-fluid">
+										<b>Create/Update</b> an instance of the resource. If no ID is specified, 
+										a new resource will be created. If an ID is specified, the existing
+										resource with that ID will be updated.
+									</div>
+								    <div class="row-fluid top-buffer">
+								    	<div class="col-sm-2">
+											<button type="button" id="resource-create-btn"
+												data-loading-text="Loading &lt;i class='fa fa-spinner fa-spin'/&gt;"  class="btn btn-primary btn-block">
+												<i class="fa fa-send"></i>
+												Create
+											</button>
+								    	</div>
+										<div class='col-sm-3'>
+								            <div class="form-group">
+								                <div class='input-group date'>
+								                    <div class="input-group-addon">
+								                    ID
+								                    </div>
+								                    <input type="text" class="form-control" id="resource-create-id" placeholder="(add for update)" th:value="${updateResourceId}"/>
+								                </div>
+								            </div>
+								        </div>											
+										<div class='col-sm-7'>
+								            <div class="form-group">
+								                <div class='input-group date'>
+								                    <div class="input-group-addon">
+								                    Contents
+								                    <span class="loadingStar">*</span>
+								                    </div>
+								                    <textarea class="form-control" id="resource-create-body" style="white-space: nowrap; overflow: auto;" placeholder="(place resource body here)" rows="1">
+								                    	<th:block th:if="${updateResource} != null" th:text="${updateResource}"/>
+								                    </textarea>
+								                </div>
+								            </div>
+								        </div>											
+								        <script type="text/javascript">
+											var buttonChanger = function() {
+								        		var val = $('#resource-create-id').val();
+								        		if (val != "") {
+								        			//$('#resource-create-btn').text("Update");
+								        			$("#resource-create-btn").fadeOut(function() {
+								        				  $(this).html('<i class="fa fa-pencil"></i> Update').fadeIn();
+								        			});
+								        		} else {
+								        			$("#resource-create-btn").fadeOut(function() {
+								        				  $(this).html('<i class="fa fa-send"></i> Create').fadeIn();
+								        			});
+								        			//$('#resource-create-btn').text("Create");
+								        		}
+								        	};
+							        		var textAreaChanger = function() {
+							        			createBodyOriginalHeight = $('#resource-create-body').height();
+							        			$('#resource-create-body').animate({height: "200px"}, 500);
+							        		}								        	
+								        	$('#resource-create-id').change(buttonChanger);
+								        	$('#resource-create-id').keyup(buttonChanger);
+								        	$('#resource-create-body').focus(textAreaChanger);
+								        	/*$('#resource-create-body').blur(
+								        		function() {
+								        			$('#resource-create-body').animate({height: "34px"}, 500);
+								        		});*/
+								            $('#resource-create-btn').click(
+												function() {
+													var btn = $(this);
+													btn.button('loading');
+													var id = $('#resource-create-id').val();
+													if (id != null) btn.append($('<input />', { type: 'hidden', name: 'resource-create-id', value: id }));
+													var body = $('#resource-create-body').val();
+													btn.append($('<input />', { type: 'hidden', name: 'resource-create-body', value: body }));
+													$("#outerForm").attr("action", "create").submit();
+												});		
+											$( document ).ready(function() {
+												if ($('#resource-create-id').val() != "") {
+													buttonChanger();
+													textAreaChanger();
+													$('#resource-create-body').focus();
+												}
+											});
+								        </script>								        
+								    </div>
+									<br clear="all"/>
+
+								<!-- Validate -->
+								
+									<div class="row-fluid">
+										<b>Validate</b> an instance of the resource to check whether it
+										would be acceptable for creating/updating, without actually
+										storing it on the server.
+									</div>
+								    <div class="row-fluid top-buffer">
+								    	<div class="col-sm-2">
+											<button type="button" id="resource-validate-btn"
+												data-loading-text="Loading &lt;i class='fa fa-spinner fa-spin'/&gt;"  class="btn btn-primary btn-block">
+												<i class="fa fa-thumbs-up"></i>
+												Validate
+											</button>
+								    	</div>
+										<div class='col-sm-10'>
+								            <div class="form-group">
+								                <div class='input-group date'>
+								                    <div class="input-group-addon">
+								                    Contents
+								                    <span class="loadingStar">*</span>
+								                    </div>
+								                    <textarea class="form-control" id="resource-validate-body" style="white-space: nowrap; overflow: auto;" placeholder="(place resource body here)" rows="1"></textarea>
+								                </div>
+								            </div>
+								        </div>											
+								        <script type="text/javascript">
+								        	$('#resource-validate-body').focus(
+								        		function() {
+								        			validateBodyOriginalHeight = $('#resource-validate-body').height();
+								        			$('#resource-validate-body').animate({height: "200px"}, 500);
+								        		});
+								            $('#resource-validate-btn').click(
+												function() {
+													var btn = $(this);
+													btn.button('loading');
+													var body = $('#resource-validate-body').val();
+													btn.append($('<input />', { type: 'hidden', name: 'resource-validate-body', value: body }));
+													$("#outerForm").attr("action", "validate").submit();
+												});								            
+								        </script>								        
+								    </div>
+
+								<!-- Get Tags -->
+								
+									<br clear="all"/>
+									<div class="row-fluid">
+										Show all of the tags currently in use on the server for this resource type. If an ID is specified,
+										returns only tags posted to the given version. If an ID and a version are specified, 
+										returns only the tags posted to the given resource version.									
+									</div>
+								    <div class="row-fluid">
+								    	<div class="col-sm-2">
+											<button type="button" id="get-resource-tags-btn"
+												data-loading-text="Loading &lt;i class='fa fa-spinner fa-spin'/&gt;" class="btn btn-primary btn-block">
+												<i class="fa fa-tags"></i>
+												Get Tags
+											</button>
+										</div>
+										<div class='col-sm-3'>
+								            <div class="form-group">
+								                <div class='input-group date'>
+								                    <div class="input-group-addon">
+								                    ID
+								                    </div>
+								                    <input type="text" class="form-control" id="resource-tags-id" placeholder="(instance ID)"/>
+								                </div>
+								            </div>
+								        </div>																					
+										<div class='col-sm-3'>
+								            <div class="form-group">
+								                <div class='input-group date'>
+								                    <div class="input-group-addon">
+								                    VID
+								                    </div>
+								                    <input type="text" class="form-control" id="resource-tags-vid" placeholder="(version)"/>
+								                </div>
+								            </div>
+								        </div>																					
+										<script type="text/javascript">
+											$('#get-resource-tags-btn').click(
+												function() {
+													var btn = $(this);
+													btn.button('loading');
+													var id = $('#resource-tags-id').val();
+													if (id != null) btn.append($('<input />', { type: 'hidden', name: 'resource-tags-id', value: id }));
+													var vid = $('#resource-tags-vid').val();
+													if (vid != null) btn.append($('<input />', { type: 'hvidden', name: 'resource-tags-vid', value: vid }));
+													$("#outerForm").attr("action", "get-tags").submit();
+											});
+										</script>
+									</div>
+
+								</div>								
+							</div>
+						</div>
+						
+
+
+				</div>
+			</div>
+		</div>
+
+	</form>
+	<div th:replace="tmpl-footer :: footer" ></div>
+</body>
+</html>

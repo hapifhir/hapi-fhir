@@ -70,6 +70,7 @@ import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.FhirTerser;
 
@@ -479,7 +480,7 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 		ResourceTable entity = new ResourceTable();
 		entity.setResourceType(toResourceName(theResource));
 
-		updateEntity(theResource, entity, false);
+		updateEntity(theResource, entity, false, false);
 
 		MethodOutcome outcome = toMethodOutcome(entity);
 		return outcome;
@@ -617,6 +618,12 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 		BaseHasResource entity = readEntity(theId);
 
 		T retVal = toResource(myResourceType, entity);
+
+		InstantDt deleted = ResourceMetadataKeyEnum.DELETED_AT.get(retVal);
+		if (deleted != null && !deleted.isEmpty()) {
+			throw new ResourceGoneException("Resource was deleted at " + deleted.getValueAsString());
+		}
+
 		return retVal;
 	}
 
@@ -727,7 +734,7 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 					for (Include next : theParams.getIncludes()) {
 						for (IResource nextResource : retVal) {
 							assert myResourceType.isAssignableFrom(nextResource.getClass());
-							
+
 							List<Object> values = t.getValues(nextResource, next.getValue());
 							for (Object object : values) {
 								if (object == null) {
@@ -764,8 +771,6 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 		};
 	}
 
-
-	
 	private void loadResourcesByPid(Collection<Long> theIncludePids, List<IResource> theResourceListToPopulate) {
 		CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
 		CriteriaQuery<ResourceTable> cq = builder.createQuery(ResourceTable.class);
@@ -952,7 +957,23 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 		// });
 
 		final ResourceTable entity = readEntityLatestVersion(theId);
-		ResourceTable savedEntity = updateEntity(theResource, entity, true);
+		if (theId.hasVersionIdPart() && theId.getVersionIdPartAsLong().longValue() != entity.getVersion()) {
+			throw new InvalidRequestException("Trying to update " + theId + " but this is not the current version");
+		}
+
+		ResourceTable savedEntity = updateEntity(theResource, entity, true, false);
+
+		return toMethodOutcome(savedEntity);
+	}
+
+	@Override
+	public MethodOutcome delete(IdDt theId) {
+		final ResourceTable entity = readEntityLatestVersion(theId);
+		if (theId.hasVersionIdPart() && theId.getVersionIdPartAsLong().longValue() != entity.getVersion()) {
+			throw new InvalidRequestException("Trying to update " + theId + " but this is not the current version");
+		}
+
+		ResourceTable savedEntity = updateEntity(null, entity, true, true);
 
 		return toMethodOutcome(savedEntity);
 	}

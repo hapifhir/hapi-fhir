@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head  th:include="tmpl-head :: head">
+		<title>RESTful Tester</title>
+	</head>
+
+	<body>
+		<form action="" method="get" id="outerForm">
+		<input type="hidden" id="serverId" name="serverId" th:value="${serverId}"/> 
+
+		<div th:replace="tmpl-navbar-top :: top" ></div>
+		
+		<div class="container-fluid">
+			<div class="row">
+
+				<div th:replace="tmpl-navbar-left :: left" ></div>
+
+				<div class="col-sm-9 col-sm-offset-3 col-md-9 col-md-offset-3 main">
+
+					<div th:replace="tmpl-banner :: banner"></div>
+
+					<!-- *************************************************** -->
+					<!-- ** Response                                      ** -->
+					<!-- *************************************************** -->
+
+					<div th:if="${requestUrl} != null">
+						
+						<div class="well" id="resultWell">
+							Executed request against FHIR RESTful server in 
+							<th:block th:text="${latencyMs} + 'ms'"/>
+						</div>
+
+						<table class="table table-bordered table-striped requestTable" id="requestTable">
+							<colgroup>
+								<col class="col-xs-1" />
+								<col class="col-xs-7" />
+							</colgroup>
+							<tbody>
+								<tr>
+									<td style="white-space: nowrap;">
+										<span class="glyphicon glyphicon glyphicon-chevron-right"></span>
+										Request
+									</td>
+									<td>
+										<th:block th:text="${action}"/>
+										<a th:href="${requestUrl}" th:text="${requestUrl}"/>
+									</td>
+								</tr>
+								<tr th:if="${requestHeaders.length} > 0">
+									<td>Request Headers</td>
+									<td class="headerBox">
+										<div th:each="header : ${requestHeaders}">
+											<span class="headerName" th:text="${header.name} + ': '"/>
+											<span class="headerValue" th:text="${header.value}"/>
+										</div>
+									</td>
+								</tr>
+								<tr th:if="${#strings.isEmpty(requestBody)} == false">
+									<td>Request Body</td>
+									<td valign="top" style="margin: 0px; padding: 0px;">
+										<pre class="requestBodyPre resultBodyPlaceholder" id="requestBodyPlaceholder">...loading...</pre>
+										<pre th:utext="${requestBody}" class="resultBodyPre pre" id="requestBodyActual" style="display: none;">{}</pre>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+
+						<table class="table table-bordered table-striped resultTable" id="resultTable">
+							<colgroup>
+								<col class="col-xs-1" />
+								<col class="col-xs-7" />
+							</colgroup>
+							<tbody>
+								<tr>
+									<td style="white-space: nowrap;">
+										<span class="glyphicon glyphicon glyphicon-chevron-left"></span>
+										Response
+									</td>
+									<td th:text="${resultStatus}">HTTP 200 OK</td>
+								</tr>
+								<tr>
+									<td>Response Headers</td>
+									<td class="headerBox">
+										<div th:each="header : ${responseHeaders}">
+											<span class="headerName" th:text="${header.name} + ': '"/>
+											<span class="headerValue" th:text="${header.value}"/>
+										</div>
+									</td>
+								</tr>
+								<tr th:if="${!#strings.isEmpty(resultBody)}">
+									<td rowspan="2">
+										Result Body
+										<small th:text="${resultDescription}" style="font-weight: normal;"/>
+									</td>
+									<td style="border-width: 0px; padding: 0px;">
+														
+										<!-- 
+										If the response is a bundle, this block will contain a collapsible
+										table with a summary of each entry as well as paging buttons and
+										controls for viewing/editing/etc results
+										-->															
+										<div th:if="${bundle} != null" class="panel-group" id="accordion" style="margin-bottom: 0px;">
+											<div class="panel panel-default">
+												<div class="panel-heading">
+													<h4 class="panel-title">
+														<a data-toggle="collapse" data-parent="#accordion" href="#collapseOne">
+															<i id="collapseOneIcon" class="fa fa-minus-square-o"></i>
+															<span th:if="${bundle.totalResults.empty}" th:text="'Bundle contains ' + ${#lists.size(bundle.entries)} + ' entries'"/>
+															<span th:unless="${bundle.totalResults.empty}" th:text="'Bundle contains ' + ${#lists.size(bundle.entries)} + ' / ' + ${bundle.totalResults.value} + ' entries'"/>
+														</a>
+
+														<!-- Prev/Next Page Buttons -->
+														<button	class="btn btn-success btn-sm" type="button" id="page-prev-btn"	
+															style="margin-left: 15px;" data-loading-text="Loading &lt;i class='fa fa-spinner fa-spin'/&gt;">
+															<span class="glyphicon glyphicon-step-backward"></span>
+															Prev Page
+														</button>
+														<script type="text/javascript">
+															if (<th:block th:text="${bundle.linkPrevious.empty}"/>) {
+																$('#page-prev-btn').prop('disabled', true);
+															}
+															$('#page-prev-btn').click(function() {
+																var btn = $(this);
+																btn.button('loading');
+																btn.append($('<input />', { type: 'hidden', name: 'page-url', value: '<th:block th:text="${bundle.linkPrevious}"/>' }));
+																$("#outerForm").attr("action", "page").submit();
+
+															});
+														</script>
+
+														<button	class="btn btn-success btn-sm" type="button" id="page-next-btn"	
+															data-loading-text="Loading &lt;i class='fa fa-spinner fa-spin'/&gt;">
+															<span class="glyphicon glyphicon-step-forward"></span>
+															Next Page
+														</button>
+														<script type="text/javascript">
+															if (<th:block th:text="${bundle.linkNext.empty}"/>) {
+																$('#page-next-btn').prop('disabled', true);
+															}
+															$('#page-next-btn').click(function() {
+																var btn = $(this);
+																btn.button('loading');
+																btn.append($('<input />', { type: 'hidden', name: 'page-url', value: '<th:block th:text="${bundle.linkNext}"/>' }));
+																$("#outerForm").attr("action", "page").submit();
+															});
+														</script>
+														
+													</h4>
+												</div>
+												<div id="collapseOne" class="panel-collapse collapse in">
+													<div class="panel-body" style="padding-bottom: 0px;">
+														<table class="table table-condensed" style="padding-bottom: 0px; margin-bottom: 0px;">
+															<thead>
+																<tr>
+																	<th></th>
+																	<th>Title</th>
+																	<th>Updated</th>
+																</tr>
+															</thead>
+															<tbody>
+															<tr th:each="entry : ${bundle.entries}">
+																<td>
+																	<button class="btn btn-primary btn-xs" th:onclick="'readFromEntriesTable(this, \'' + ${entry.resource.id.resourceType} + '\', \'' + ${entry.resource.id.idPart} + '\', \'' + ${#strings.defaultString(entry.resource.id.versionIdPart,'')} + '\');'" type="submit" name="action" value="read" data-loading-text="Loading &lt;i class='fa fa-spinner fa-spin'/&gt;" ><i class="fa fa-book"></i> Read</button>
+																	<button class="btn btn-primary btn-xs" th:onclick="'updateFromEntriesTable(this, \'' + ${entry.resource.id.resourceType} + '\', \'' + ${entry.resource.id.idPart} + '\', \'' + ${#strings.defaultString(entry.resource.id.versionIdPart, '')} + '\');'" type="submit" name="action" value="home"><i class="fa fa-pencil" data-loading-text="Loading &lt;i class='fa fa-spinner fa-spin'/&gt;" ></i> Update</button>
+																</td>
+																<td th:text="${entry.title}">
+																</td>
+																<td th:if="${entry.updated.value} == null"></td>
+																<td th:if="${entry.updated.value} != null and ${entry.updated.today} == true" th:text="${#dates.format(entry.updated.value, 'HH:mm:ss')}"></td>
+																<td th:if="${entry.updated.value} != null and ${entry.updated.today} == false" th:text="${#dates.format(entry.updated.value, 'yyyy-MM-dd')}"></td>
+															</tr>
+															</tbody>
+														</table>										
+													</div>
+												</div>
+												<script type="text/javascript">
+													$('#collapseOne').on('hidden.bs.collapse', function () {
+													   $("#collapseOneIcon").removeClass("fa-minus-square-o").addClass("fa-plus-square-o");
+													});
+	
+													$('#collapseOne').on('shown.bs.collapse', function () {
+													   $("#collapseOneIcon").removeClass("fa-plus-square-o").addClass("fa-minus-square-o");
+													});
+												</script>
+											</div>
+										</div>										
+										<div class="panel-heading" sstyle="margin: 5px;">
+											<h4 class="panel-title">
+												Raw Message
+											</h4>										
+										</div>										
+									</td>
+								</tr>
+								<tr th:if="${!#strings.isEmpty(resultBody)}">
+									<td valign="top" style="margin: 0px; padding: 0px; font-weight: normal;">
+										<pre class="resultBodyPre resultBodyPlaceholder" id="resultBodyPlaceholder">...loading...</pre>
+										<div id="resultBodyActual" class="resultBodyActual" style="display: none;">
+											<pre id="resultBodyActualPre" th:utext="${resultBody}" class="resultBodyPre pre">{}</pre>
+										</div>
+									</td>
+								</tr>
+								<tr th:if="${!#strings.isEmpty(narrative)}">
+									<td class="propertyKeyCell">Result Narrative</td>
+									<td th:utext="${narrative}"></td>
+								</tr>
+							</tbody>
+						</table>
+						
+						<script type="text/javascript"><!--
+							$( document ).ready(function() {
+								var reswidth = $('#resultBodyPlaceholder').outerWidth(true);
+								var reqwidth = 0;
+								if ($('#requestBodyPlaceholder') != null) {
+									reqwidth = $('#requestBodyPlaceholder').outerWidth(true);
+								}
+								
+								$('#resultBodyPlaceholder').hide();
+								$('#resultBodyActual').width(reswidth);
+								$('#resultBodyActual').show();
+								
+								if ($('#requestBodyPlaceholder') != null) {
+									$('#requestBodyPlaceholder').hide();
+									$('#requestBodyActual').width(reqwidth);
+									$('#requestBodyActual').show();
+								}
+							});
+							
+							function lineWrap(){
+							    var wrap = function () {
+							        var elems = document.getElementsByClassName('syntaxhighlighter');
+							        for (var j = 0; j < elems.length; ++j) {
+							            var sh = elems[j];
+							            var gLines = sh.getElementsByClassName('gutter')[0].getElementsByClassName('line');
+							            var cLines = sh.getElementsByClassName('code')[0].getElementsByClassName('line');
+							            var stand = 15;
+							            for (var i = 0; i < gLines.length; ++i) {
+							                var h = $(cLines[i]).height();
+							                if (h != stand) {
+							                    console.log(i);
+							                    gLines[i].setAttribute('style', 'height: ' + h + 'px !important;');
+							                }
+							            }
+							        }
+							     };
+							    var whenReady = function () {
+							        if ($('.syntaxhighlighter').length === 0) {
+							            setTimeout(whenReady, 800);
+							        } else {
+							            wrap();
+							        }
+							    };
+							    whenReady();
+							};
+							lineWrap();
+							$(window).resize(function(){lineWrap()});							
+						--></script>
+						
+					</div>
+
+
+				</div>
+			</div>
+		</div>
+
+	</form>
+	<div th:replace="tmpl-footer :: footer" ></div>
+</body>
+</html>

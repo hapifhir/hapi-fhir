@@ -20,7 +20,6 @@ package ca.uhn.fhir.rest.method;
  * #L%
  */
 
-import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -48,6 +47,7 @@ public class Request {
 	private HttpServletResponse myServletResponse;
 	private IdDt myVersion;
 	private Map<String,List<String>> myUnqualifiedToQualifiedNames;
+	private boolean myRespondGzip;
 
 	public String getCompleteUrl() {
 		return myCompleteUrl;
@@ -175,6 +175,14 @@ public class Request {
 		}
 		retVal.setParameters(paramNames);
 		return retVal;
+	}
+
+	public void setRespondGzip(boolean theRespondGzip) {
+		myRespondGzip=theRespondGzip;
+	}
+
+	public boolean isRespondGzip() {
+		return myRespondGzip;
 	}
 
 }

@@ -218,10 +218,12 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 
 		Integer count = RestfulServer.extractCountParameter(theRequest.getServletRequest());
 
+		boolean respondGzip=theRequest.isRespondGzip();
+
 		IBundleProvider result = invokeServer(theRequest, params);
 		switch (getReturnType()) {
 		case BUNDLE:
-			RestfulServer.streamResponseAsBundle(theServer, theResponse, result, responseEncoding, theRequest.getFhirServerBase(), theRequest.getCompleteUrl(), prettyPrint, requestIsBrowser, narrativeMode, 0, count, null);
+			RestfulServer.streamResponseAsBundle(theServer, theResponse, result, responseEncoding, theRequest.getFhirServerBase(), theRequest.getCompleteUrl(), prettyPrint, requestIsBrowser, narrativeMode, 0, count, null, respondGzip);
 			break;
 		case RESOURCE:
 			if (result.size() == 0) {
@@ -229,7 +231,7 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 			} else if (result.size() > 1) {
 				throw new InternalErrorException("Method returned multiple resources");
 			}
-			RestfulServer.streamResponseAsResource(theServer, theResponse, result.getResources(0, 1).get(0), responseEncoding, prettyPrint, requestIsBrowser, narrativeMode);
+			RestfulServer.streamResponseAsResource(theServer, theResponse, result.getResources(0, 1).get(0), responseEncoding, prettyPrint, requestIsBrowser, narrativeMode, respondGzip);
 			break;
 		}
 	}

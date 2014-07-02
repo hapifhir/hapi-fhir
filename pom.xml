@@ -12,7 +12,7 @@
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
 	<version>0.4-SNAPSHOT</version>
-	<name>HAPI</name>
+	<name>HAPI-FHIR</name>
 	<url>http://hl7api.sourceforge.net/hapi-fhir/</url>
 
 	<organization>
@@ -42,6 +42,10 @@
 			<name>Josh Mandel</name>
 			<url></url>
 		</developer>
+		<developer>
+			<name>Laura MacDougall Sookraj</name>
+			<url></url>
+		</developer>
 	</developers>
 
 	<licenses>
@@ -59,14 +63,26 @@
 		<module>hapi-fhir-jpaserver-base</module>
 		<module>hapi-fhir-jpaserver-test</module>
 		<module>restful-server-example</module>
+		<module>hapi-fhir-testpage-overlay</module>
 	</modules>
 
 	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<derby_version>10.10.2.0</derby_version>
+		<guava_version>14.0.1</guava_version>
+		<hamcrest_version>1.3</hamcrest_version>
+		<hibernate_version>4.2.12.Final</hibernate_version>
+		<hibernate_validator_version>5.1.0.Final</hibernate_validator_version>
+		<jetty_version>9.1.1.v20140108</jetty_version>
+		<jetty_version>9.1.1.v20140108</jetty_version>
+		<junit_version>4.11</junit_version>
+		<logback-version>1.1.1</logback-version>
 		<maven_javadoc_plugin_version>2.9.1</maven_javadoc_plugin_version>
 		<maven_site_plugin_version>3.3</maven_site_plugin_version>
-		<slf4j_version>1.6.6</slf4j_version>
-		<hamcrest_version>1.3</hamcrest_version>
+		<mockito_version>1.9.5</mockito_version>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<slf4j_version>1.7.2</slf4j_version>
+		<spring_version>4.0.1.RELEASE</spring_version>
+		<thymeleaf-version>2.1.3.RELEASE</thymeleaf-version>
 	</properties>
 
 	<build>

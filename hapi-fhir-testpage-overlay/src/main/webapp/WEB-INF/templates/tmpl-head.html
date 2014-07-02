@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head th:fragment="head">
+		<meta charset="utf-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta name="description" content="" />
+		<meta name="author" content="" />
+		<script src="js/jquery-2.1.0.min.js"></script>
+		<script src="js/bootstrap.min.js"></script>
+			
+		<script type="text/javascript">
+			var conformance = <th:block th:utext="${jsonEncodedConf}"/>;
+			var resourceName = '<th:block th:utext="${resourceName}"/>';
+		</script>
+	
+		<!-- Bootstrap core CSS -->
+		<link href="css/bootstrap.min.css" rel="stylesheet" />
+		
+		<!-- Custom styles for this template -->
+		<link href="css/tester.css" rel="stylesheet" />
+		
+		<script type="text/javascript" src="js/moment.min.js"></script>
+		
+		<!-- Datetimepicker Component -->
+		<link href="css/bootstrap-datetimepicker.min.css" rel="stylesheet" />
+		<script src="js/bootstrap-datetimepicker.min.js"></script>
+	
+		<!-- Select2 component -->
+		<link href="css/select2.css" rel="stylesheet"/>
+    	<script src="js/select2.min.js"></script>
+    
+    	<!-- Fontawesome -->
+		<link href="fa/css/font-awesome.min.css" rel="stylesheet" />
+
+		<script src="js/RestfulTester.js" type="text/javascript" ></script>
+	</head>
+</html>

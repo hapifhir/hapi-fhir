@@ -45,6 +45,7 @@ public class Constants {
 	public static final String HEADER_ACCEPT = "Accept";
 	public static final String HEADER_CATEGORY = "Category";
 	public static final String HEADER_CONTENT_LOCATION = "Content-Location";
+	public static final String HEADER_CONTENT_LOCATION_LC = HEADER_CONTENT_LOCATION.toLowerCase();
 	public static final String HEADER_CONTENT_TYPE = "Content-Type";
 	public static final String HEADER_LAST_MODIFIED = "Last-Modified";
 	public static final String HEADER_LAST_MODIFIED_LOWERCASE = HEADER_LAST_MODIFIED.toLowerCase();
@@ -81,6 +82,9 @@ public class Constants {
 	public static final int STATUS_HTTP_422_UNPROCESSABLE_ENTITY = 422;
 	public static final int STATUS_HTTP_500_INTERNAL_ERROR = 500;
 	public static final String URL_TOKEN_HISTORY = "_history";
+	public static final String HEADER_ACCEPT_ENCODING = "Accept-Encoding";
+	public static final String HEADER_CONTENT_ENCODING = "Content-Encoding";
+	public static final String ENCODING_GZIP = "gzip";
 	
 
 	static {

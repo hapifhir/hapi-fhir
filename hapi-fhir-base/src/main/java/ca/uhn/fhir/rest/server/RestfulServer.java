@@ -23,8 +23,10 @@ package ca.uhn.fhir.rest.server;
 import static org.apache.commons.lang3.StringUtils.*;
 
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.io.Writer;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.net.URLEncoder;
@@ -36,6 +38,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.UUID;
+import java.util.zip.GZIPOutputStream;
 
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
@@ -352,7 +355,8 @@ public class RestfulServer extends HttpServlet {
 		boolean prettyPrint = prettyPrintResponse(theRequest);
 		boolean requestIsBrowser = requestIsBrowser(theRequest.getServletRequest());
 		NarrativeModeEnum narrativeMode = determineNarrativeMode(theRequest);
-		streamResponseAsBundle(this, theResponse, resultList, responseEncoding, theRequest.getFhirServerBase(), theRequest.getCompleteUrl(), prettyPrint, requestIsBrowser, narrativeMode, start, count, thePagingAction);
+		boolean respondGzip=theRequest.isRespondGzip();
+		streamResponseAsBundle(this, theResponse, resultList, responseEncoding, theRequest.getFhirServerBase(), theRequest.getCompleteUrl(), prettyPrint, requestIsBrowser, narrativeMode, start, count, thePagingAction, respondGzip);
 
 	}
 
@@ -488,6 +492,17 @@ public class RestfulServer extends HttpServlet {
 
 			// TODO: look for more tokens for version, compartments, etc...
 
+			String acceptEncoding = theRequest.getHeader(Constants.HEADER_ACCEPT_ENCODING);
+			boolean respondGzip=false;
+			if (acceptEncoding != null) {
+				String[] parts = acceptEncoding.trim().split("\\s*,\\s*");
+				for (String string : parts) {
+					if (string.equals("gzip")) {
+						respondGzip=true;
+					}
+				}
+			}
+			
 			Request r = new Request();
 			r.setResourceName(resourceName);
 			r.setId(id);
@@ -500,6 +515,7 @@ public class RestfulServer extends HttpServlet {
 			r.setCompleteUrl(completeUrl);
 			r.setServletRequest(theRequest);
 			r.setServletResponse(theResponse);
+			r.setRespondGzip(respondGzip);
 
 			String pagingAction = theRequest.getParameter(Constants.PARAM_PAGINGACTION);
 			if (getPagingProvider() != null && isNotBlank(pagingAction)) {
@@ -526,10 +542,14 @@ public class RestfulServer extends HttpServlet {
 			theResponse.setContentType("text/plain");
 			theResponse.setCharacterEncoding("UTF-8");
 			theResponse.getWriter().write(e.getMessage());
-		} catch (BaseServerResponseException e) {
+		} catch (Throwable e) {
 
+			int statusCode = 500;
 			if (e instanceof InternalErrorException) {
 				ourLog.error("Failure during REST processing", e);
+			} else if (e instanceof BaseServerResponseException) {
+				ourLog.warn("Failure during REST processing: {}", e.toString());
+				statusCode=((BaseServerResponseException) e).getStatusCode();
 			} else {
 				ourLog.warn("Failure during REST processing: {}", e.toString());
 			}
@@ -539,19 +559,15 @@ public class RestfulServer extends HttpServlet {
 			issue.getSeverity().setValueAsEnum(IssueSeverityEnum.ERROR);
 			issue.getDetails().setValue(e.toString() + "\n\n" + ExceptionUtils.getStackTrace(e));
 
-			streamResponseAsResource(this, theResponse, oo, determineResponseEncoding(theRequest), true, false, NarrativeModeEnum.NORMAL, e.getStatusCode());
-			
-			theResponse.setStatus(e.getStatusCode());
+			streamResponseAsResource(this, theResponse, oo, determineResponseEncoding(theRequest), true, false, NarrativeModeEnum.NORMAL, statusCode,false);
+
+			theResponse.setStatus(statusCode);
 			addHeadersToResponse(theResponse);
 			theResponse.setContentType("text/plain");
 			theResponse.setCharacterEncoding("UTF-8");
 			theResponse.getWriter().append(e.getMessage());
 			theResponse.getWriter().close();
 
-		} catch (Throwable t) {
-			// TODO: handle this better
-			ourLog.error("Failed to process invocation", t);
-			throw new ServletException(t);
 		}
 
 	}
@@ -666,7 +682,6 @@ public class RestfulServer extends HttpServlet {
 		myPlainProviders = theProviders;
 	}
 
-	
 	/**
 	 * Sets the non-resource specific providers which implement method calls on this server.
 	 * 
@@ -685,7 +700,6 @@ public class RestfulServer extends HttpServlet {
 		myPlainProviders = Arrays.asList(theProviders);
 	}
 
-	
 	/**
 	 * Sets the resource providers for this server
 	 */
@@ -769,7 +783,7 @@ public class RestfulServer extends HttpServlet {
 		return bundle;
 	}
 
-	public static String createPagingLink(String theServerBase, String theSearchId, int theOffset, int theCount) {
+	public static String createPagingLink(String theServerBase, String theSearchId, int theOffset, int theCount, EncodingEnum theResponseEncoding, boolean thePrettyPrint) {
 		StringBuilder b = new StringBuilder();
 		b.append(theServerBase);
 		b.append('?');
@@ -788,6 +802,16 @@ public class RestfulServer extends HttpServlet {
 		b.append(Constants.PARAM_COUNT);
 		b.append('=');
 		b.append(theCount);
+		b.append('&');
+		b.append(Constants.PARAM_FORMAT);
+		b.append('=');
+		b.append(theResponseEncoding.getRequestContentType());
+		if (thePrettyPrint) {
+			b.append('&');
+			b.append(Constants.PARAM_PRETTY);
+			b.append('=');
+			b.append(Constants.PARAM_PRETTY_VALUE_TRUE);
+		}
 		return b.toString();
 	}
 
@@ -911,7 +935,7 @@ public class RestfulServer extends HttpServlet {
 	}
 
 	public static void streamResponseAsBundle(RestfulServer theServer, HttpServletResponse theHttpResponse, IBundleProvider theResult, EncodingEnum theResponseEncoding, String theServerBase, String theCompleteUrl, boolean thePrettyPrint, boolean theRequestIsBrowser,
-			NarrativeModeEnum theNarrativeMode, int theOffset, Integer theLimit, String theSearchId) throws IOException {
+			NarrativeModeEnum theNarrativeMode, int theOffset, Integer theLimit, String theSearchId, boolean theRespondGzip) throws IOException {
 		assert !theServerBase.endsWith("/");
 
 		theHttpResponse.setStatus(200);
@@ -964,18 +988,24 @@ public class RestfulServer extends HttpServlet {
 		Bundle bundle = createBundleFromResourceList(theServer.getFhirContext(), theServer.getServerName(), resourceList, theServerBase, theCompleteUrl, theResult.size());
 
 		bundle.setPublished(theResult.getPublished());
-		
-		if (searchId != null) {
-			if (theOffset + numToReturn < theResult.size()) {
-				bundle.getLinkNext().setValue(createPagingLink(theServerBase, searchId, theOffset + numToReturn, numToReturn));
-			}
-			if (theOffset > 0) {
-				int start = Math.max(0, theOffset - numToReturn);
-				bundle.getLinkPrevious().setValue(createPagingLink(theServerBase, searchId, start, numToReturn));
+
+		if (theServer.getPagingProvider() != null) {
+			int limit;
+			limit = theLimit != null ? theLimit : theServer.getPagingProvider().getDefaultPageSize();
+			limit = Math.min(limit, theServer.getPagingProvider().getMaximumPageSize());
+
+			if (searchId != null) {
+				if (theOffset + numToReturn < theResult.size()) {
+					bundle.getLinkNext().setValue(createPagingLink(theServerBase, searchId, theOffset + numToReturn, numToReturn, theResponseEncoding, thePrettyPrint));
+				}
+				if (theOffset > 0) {
+					int start = Math.max(0, theOffset - limit);
+					bundle.getLinkPrevious().setValue(createPagingLink(theServerBase, searchId, start, limit, theResponseEncoding, thePrettyPrint));
+				}
 			}
 		}
 
-		PrintWriter writer = theHttpResponse.getWriter();
+		Writer writer = getWriter(theHttpResponse, theRespondGzip);
 		try {
 			if (theNarrativeMode == NarrativeModeEnum.ONLY) {
 				for (IResource next : resourceList) {
@@ -990,13 +1020,24 @@ public class RestfulServer extends HttpServlet {
 		}
 	}
 
-	public static void streamResponseAsResource(RestfulServer theServer, HttpServletResponse theHttpResponse, IResource theResource, EncodingEnum theResponseEncoding, boolean thePrettyPrint, boolean theRequestIsBrowser, NarrativeModeEnum theNarrativeMode) throws IOException {
-		int stausCode = 200;
-		streamResponseAsResource(theServer, theHttpResponse, theResource, theResponseEncoding, thePrettyPrint, theRequestIsBrowser, theNarrativeMode, stausCode);
+	private static Writer getWriter(HttpServletResponse theHttpResponse, boolean theRespondGzip) throws UnsupportedEncodingException, IOException {
+		Writer writer;
+		if (theRespondGzip) {
+			theHttpResponse.addHeader(Constants.HEADER_CONTENT_ENCODING, Constants.ENCODING_GZIP);
+			writer = new OutputStreamWriter(new GZIPOutputStream(theHttpResponse.getOutputStream()), "UTF-8");
+		}else {
+			writer = theHttpResponse.getWriter();
+		}
+		return writer;
 	}
 
-	private static void streamResponseAsResource(RestfulServer theServer, HttpServletResponse theHttpResponse, IResource theResource, EncodingEnum theResponseEncoding, boolean thePrettyPrint,
-			boolean theRequestIsBrowser, NarrativeModeEnum theNarrativeMode, int stausCode) throws IOException {
+	public static void streamResponseAsResource(RestfulServer theServer, HttpServletResponse theHttpResponse, IResource theResource, EncodingEnum theResponseEncoding, boolean thePrettyPrint, boolean theRequestIsBrowser, NarrativeModeEnum theNarrativeMode, boolean theRespondGzip) throws IOException {
+		int stausCode = 200;
+		streamResponseAsResource(theServer, theHttpResponse, theResource, theResponseEncoding, thePrettyPrint, theRequestIsBrowser, theNarrativeMode, stausCode, theRespondGzip);
+	}
+
+	private static void streamResponseAsResource(RestfulServer theServer, HttpServletResponse theHttpResponse, IResource theResource, EncodingEnum theResponseEncoding, boolean thePrettyPrint, boolean theRequestIsBrowser, NarrativeModeEnum theNarrativeMode, int stausCode, boolean theRespondGzip)
+			throws IOException {
 		theHttpResponse.setStatus(stausCode);
 
 		if (theResource instanceof Binary) {
@@ -1041,7 +1082,7 @@ public class RestfulServer extends HttpServlet {
 			}
 		}
 
-		PrintWriter writer = theHttpResponse.getWriter();
+		Writer writer = getWriter(theHttpResponse, theRespondGzip);
 		try {
 			if (theNarrativeMode == NarrativeModeEnum.ONLY) {
 				writer.append(theResource.getText().getDiv().getValueAsString());

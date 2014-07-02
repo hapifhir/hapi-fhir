@@ -30,7 +30,6 @@ import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 
 public abstract class ResourceMetadataKeyEnum<T> {
-
 		
 	/**
 	 * If present and populated with a date/time (as an instance of {@link InstantDt}),
@@ -99,8 +98,7 @@ public abstract class ResourceMetadataKeyEnum<T> {
 			theResource.getResourceMetadata().put(PUBLISHED, theObject);
 		}
 	};
-	
-	
+
 	/**
 	 * The value for this key is the list of tags associated with this resource
 	 * <p>
@@ -129,7 +127,7 @@ public abstract class ResourceMetadataKeyEnum<T> {
 		public void put(IResource theResource, TagList theObject) {
 			theResource.getResourceMetadata().put(TAG_LIST, theObject);
 		}
-	}; 
+	};
 	
 	
 	/**
@@ -153,7 +151,8 @@ public abstract class ResourceMetadataKeyEnum<T> {
 		public void put(IResource theResource, InstantDt theObject) {
 			theResource.getResourceMetadata().put(UPDATED, theObject);
 		}
-	};
+	}; 
+	
 	
 	/**
 	 * The value for this key is the version ID of the resource object.
@@ -175,22 +174,14 @@ public abstract class ResourceMetadataKeyEnum<T> {
 			theResource.getResourceMetadata().put(VERSION_ID, theObject);
 		}
 	};
-
-	private final String myValue;
-
 	
+	private final String myValue;
 
 	public ResourceMetadataKeyEnum(String theValue) {
 		myValue = theValue;
 	}
 
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((myValue == null) ? 0 : myValue.hashCode());
-		return result;
-	}
+	
 
 	@Override
 	public boolean equals(Object obj) {
@@ -209,50 +200,63 @@ public abstract class ResourceMetadataKeyEnum<T> {
 		return true;
 	}
 
-	private static IdDt getIdFromMetadataOrNullIfNone(Map<ResourceMetadataKeyEnum<?>, Object> theResourceMetadata, ResourceMetadataKeyEnum<?> theKey) {
-		Object retValObj = theResourceMetadata.get(theKey);
-		if (retValObj == null) {
-			return null;
-		} else if (retValObj instanceof String) {
-			if (isNotBlank((String) retValObj)) {
-				return new IdDt((String) retValObj);
-			} else {
-				return null;
-			}
-		} else if (retValObj instanceof IdDt) {
-			if (((IdDt) retValObj).isEmpty()) {
-				return null;
-			} else {
-				return (IdDt) retValObj;
-			}
-		} else if (retValObj instanceof Number) {
-			return new IdDt(((Number)retValObj).toString());
-		}
-		throw new InternalErrorException("Found an object of type '" + retValObj.getClass().getCanonicalName() + "' in resource metadata for key " + theKey.name() + " - Expected " + IdDt.class.getCanonicalName());
+	public abstract T get(IResource theResource);
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((myValue == null) ? 0 : myValue.hashCode());
+		return result;
+	}
+
+	public abstract void put(IResource theResource, T theObject);
+
+	@Override
+	public String toString() {
+		return myValue;
 	}
 
 	private String name() {
 		return myValue;
 	}
 
-	private static InstantDt getInstantFromMetadataOrNullIfNone(Map<ResourceMetadataKeyEnum<?>, Object> theResourceMetadata, ResourceMetadataKeyEnum<InstantDt> theKey) {
-		Object retValObj = theResourceMetadata.get(theKey);
-		if (retValObj == null) {
-			return null;
-		} else if (retValObj instanceof Date) {
-			return new InstantDt((Date) retValObj);
-		} else if (retValObj instanceof InstantDt) {
-			if (((InstantDt) retValObj).isEmpty()) {
+		private static IdDt getIdFromMetadataOrNullIfNone(Map<ResourceMetadataKeyEnum<?>, Object> theResourceMetadata, ResourceMetadataKeyEnum<?> theKey) {
+			Object retValObj = theResourceMetadata.get(theKey);
+			if (retValObj == null) {
 				return null;
-			} else {
-				return (InstantDt) retValObj;
+			} else if (retValObj instanceof String) {
+				if (isNotBlank((String) retValObj)) {
+					return new IdDt((String) retValObj);
+				} else {
+					return null;
+				}
+			} else if (retValObj instanceof IdDt) {
+				if (((IdDt) retValObj).isEmpty()) {
+					return null;
+				} else {
+					return (IdDt) retValObj;
+				}
+			} else if (retValObj instanceof Number) {
+				return new IdDt(((Number)retValObj).toString());
 			}
+			throw new InternalErrorException("Found an object of type '" + retValObj.getClass().getCanonicalName() + "' in resource metadata for key " + theKey.name() + " - Expected " + IdDt.class.getCanonicalName());
 		}
-		throw new InternalErrorException("Found an object of type '" + retValObj.getClass().getCanonicalName() + "' in resource metadata for key " + theKey.name() + " - Expected " + InstantDt.class.getCanonicalName());
-	}
-
-		public abstract T get(IResource theResource);
 		
-		public abstract void put(IResource theResource, T theObject);
+		private static InstantDt getInstantFromMetadataOrNullIfNone(Map<ResourceMetadataKeyEnum<?>, Object> theResourceMetadata, ResourceMetadataKeyEnum<InstantDt> theKey) {
+			Object retValObj = theResourceMetadata.get(theKey);
+			if (retValObj == null) {
+				return null;
+			} else if (retValObj instanceof Date) {
+				return new InstantDt((Date) retValObj);
+			} else if (retValObj instanceof InstantDt) {
+				if (((InstantDt) retValObj).isEmpty()) {
+					return null;
+				} else {
+					return (InstantDt) retValObj;
+				}
+			}
+			throw new InternalErrorException("Found an object of type '" + retValObj.getClass().getCanonicalName() + "' in resource metadata for key " + theKey.name() + " - Expected " + InstantDt.class.getCanonicalName());
+		}
 		
 }

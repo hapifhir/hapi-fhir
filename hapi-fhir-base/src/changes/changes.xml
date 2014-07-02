@@ -60,6 +60,9 @@
 				Don't fail on narrative blocks in JSON resources with only an XML declaration but no content (these are
 				produced by the Health Intersections server) 
 			</action>
+			<action type="fix">
+				Server now automatically compresses responses if the client indicates support 
+			</action>
         </release>			
 	</body>
 </document>

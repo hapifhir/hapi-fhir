@@ -22,7 +22,7 @@
 		<dependency>
 			<groupId>org.thymeleaf</groupId>
 			<artifactId>thymeleaf</artifactId>
-			<version>2.1.2.RELEASE</version>
+			<version>${thymeleaf-version}</version>
 		</dependency>
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
@@ -71,8 +71,6 @@
 	</dependencies>
 
 	<properties>
-		<junit_version>4.11</junit_version>
-		<jetty_version>9.1.1.v20140108</jetty_version>
 	</properties>
 
 	<build>

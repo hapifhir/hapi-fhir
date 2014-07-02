@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<div th:fragment="top" class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+	<div class="container-fluid">
+		<div class="navbar-header">
+			<button type="button" class="navbar-toggle" data-toggle="collapse"
+				data-target=".navbar-collapse">
+				<span class="sr-only">Toggle navigation</span> <span
+					class="icon-bar"></span> <span class="icon-bar"></span> <span
+					class="icon-bar"></span>
+			</button>
+			<a class="navbar-brand"
+				th:href="'home?encoding=' + ${encoding} + '&amp;pretty=' + ${pretty}">
+				<i class="fa fa-home" /> HAPI FHIR RESTful Server
+			</a> 
+			<a class="navbar-left navbarBreadcrumb"
+				th:if="${resourceName.empty} == false"
+				th:href="'resource?encoding=' + ${encoding} + '&amp;pretty=' + ${pretty} + '&amp;resource=' + ${resourceName}">
+				<span class="glyphicon glyphicon-chevron-right"></span> <span
+				th:text="'Resource[' + ${resourceName} + ']'"></span>
+			</a>
+			<div class="navbar-left navbarBreadcrumb"
+				th:if="${outcomeDescription} != null">
+				<span class="glyphicon glyphicon-chevron-right"></span> <span
+					th:text="${outcomeDescription}"></span>
+			</div>
+		</div>
+		<div class="navbar-collapse collapse">
+			<ul class="nav navbar-nav navbar-right">
+				<li class="dropdown"><a href="#" class="dropdown-toggle"
+					data-toggle="dropdown"> <span id="serverSelectorFhirIcon" class="glyphicon glyphicon-fire" style="color: #66AAFF" /> 
+					<span id="serverSelectorName" th:text="'Server: ' + ${baseName}" /> <span class="caret" />
+				</a>
+					<ul class="dropdown-menu" role="menu">
+						<li th:each="serverEntry : ${serverEntries}">
+							<a th:href="'javascript:selectServer(\'' + ${serverEntry.key} + '\');'">
+								<i class="fa fa-check-square-o" th:if="${serverEntry.key} == ${serverId}" />
+								<i class="fa fa-square-o" style="color: #CCC;" th:unless="${serverEntry.key} == ${serverId}" />
+								&nbsp;&nbsp;
+								<th:block 	th:text="${serverEntry.value}"/>
+							</a>
+						</li>
+					</ul></li>
+				<li><a href="https://github.com/jamesagnew/hapi-fhir"><i
+						class="fa fa-github" />&nbsp;Source Code</a></li>
+				<li><a href="#">About</a></li>
+			</ul>
+		</div>
+	</div>
+</div>
+</html>

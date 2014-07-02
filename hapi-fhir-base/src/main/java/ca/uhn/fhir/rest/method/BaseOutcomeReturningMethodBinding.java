@@ -260,12 +260,15 @@ public abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBindin
 		b.append('/');
 		b.append(getResourceName());
 		b.append('/');
-		b.append(response.getId().getValue());
-		if (response.getVersionId() != null && response.getVersionId().isEmpty() == false) {
-			b.append("/_history/");
+		b.append(response.getId().getIdPart());
+		if (response.getId().hasVersionIdPart()) {
+			b.append("/"+Constants.PARAM_HISTORY+"/");
+			b.append(response.getId().getVersionIdPart());
+		}else if (response.getVersionId() != null && response.getVersionId().isEmpty() == false) {
+			b.append("/"+Constants.PARAM_HISTORY+"/");
 			b.append(response.getVersionId().getValue());
 		}
-		theResponse.addHeader("Location", b.toString());
+		theResponse.addHeader(Constants.HEADER_CONTENT_LOCATION, b.toString());
 	}
 
 	private static void parseTagValue(TagList theTagList, String theCompleteHeaderValue, StringBuilder theBuffer) {
@@ -396,7 +399,7 @@ public abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBindin
 	}
 
 	public static MethodOutcome process2xxResponse(FhirContext theContext, String theResourceName, int theResponseStatusCode, String theResponseMimeType, Reader theResponseReader, Map<String, List<String>> theHeaders) {
-		List<String> locationHeaders = theHeaders.get("location");
+		List<String> locationHeaders = theHeaders.get(Constants.HEADER_CONTENT_LOCATION_LC);
 		MethodOutcome retVal = new MethodOutcome();
 		if (locationHeaders != null && locationHeaders.size() > 0) {
 			String locationHeader = locationHeaders.get(0);
