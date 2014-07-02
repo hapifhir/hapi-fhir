@@ -374,7 +374,10 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 				throw new IllegalArgumentException("Invalid token type: " + params.getClass());
 			}
 
-			Predicate singleCode = builder.equal(from.get("myValueNormalized"), normalizeString(string));
+			String likeExpression = normalizeString(string);
+			likeExpression = likeExpression.replace("%", "[%]") + "%"; 
+			
+			Predicate singleCode = builder.like(from.get("myValueNormalized").as(String.class), likeExpression);
 			if (params instanceof StringParam && ((StringParam) params).isExact()) {
 				Predicate exactCode = builder.equal(from.get("myValueExact"), string);
 				singleCode = builder.and(singleCode, exactCode);
@@ -772,6 +775,10 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 	}
 
 	private void loadResourcesByPid(Collection<Long> theIncludePids, List<IResource> theResourceListToPopulate) {
+		if (theIncludePids.isEmpty()) {
+			return;
+		}
+		
 		CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
 		CriteriaQuery<ResourceTable> cq = builder.createQuery(ResourceTable.class);
 		Root<ResourceTable> from = cq.from(ResourceTable.class);

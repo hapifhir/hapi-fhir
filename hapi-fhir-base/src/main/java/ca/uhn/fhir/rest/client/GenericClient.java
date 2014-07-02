@@ -391,7 +391,8 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 		public ForInternal(Class<? extends IResource> theResourceType) {
 			myResourceType = theResourceType;
-			myResourceName = myContext.getResourceDefinition(theResourceType).getName();
+			RuntimeResourceDefinition definition = myContext.getResourceDefinition(theResourceType);
+			myResourceName = definition.getName();
 		}
 
 		public ForInternal(String theResourceName) {

@@ -23,12 +23,7 @@
 					<!-- ** Default Home                                         ** -->
 					<!-- ********************************************************** -->
 
-					<div th:if="${requestUrl} == null">
-						<div class="well">
-							This is a RESTful server tester, which can be used to send
-							requests to, and receive responses from the server at the
-							following URL: 
-						</div>
+						<div th:replace="tmpl-home-welcome :: banner"/>
 
 						<table class="table table-bordered table-striped" th:if="${resourceName.empty}">
 							<colgroup>
@@ -178,8 +173,6 @@
 								</div>
 							</div>
 						</div>
-
-					</div>
 
 				</div>
 			</div>

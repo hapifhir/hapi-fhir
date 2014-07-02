@@ -16,6 +16,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
@@ -37,6 +38,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.client.exceptions.FhirClientConnectionException;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.QualifiedDateParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -58,7 +60,50 @@ public class FhirResourceDaoTest {
 	private static Date ourTestStarted;
 
 	private static IFhirResourceDao<Encounter> ourEncounterDao;
+	private static FhirContext ourFhirCtx;
 
+	@Test
+	public void testOrganizationName() {
+		
+		//@formatter:off
+		String inputStr = "{\"resourceType\":\"Organization\",\n" + 
+				"                \"extension\":[\n" + 
+				"                    {\n" + 
+				"                        \"url\":\"http://fhir.connectinggta.ca/Profile/organization#providerIdPool\",\n" + 
+				"                        \"valueUri\":\"urn:oid:2.16.840.1.113883.3.239.23.21.1\"\n" + 
+				"                    }\n" + 
+				"                ],\n" + 
+				"                \"text\":{\n" + 
+				"                    \"status\":\"empty\",\n" + 
+				"                    \"div\":\"<div xmlns=\\\"http://www.w3.org/1999/xhtml\\\">No narrative template available for resource profile: http://fhir.connectinggta.ca/Profile/organization</div>\"\n" + 
+				"                },\n" + 
+				"                \"identifier\":[\n" + 
+				"                    {\n" + 
+				"                        \"use\":\"official\",\n" + 
+				"                        \"label\":\"HSP 2.16.840.1.113883.3.239.23.21\",\n" + 
+				"                        \"system\":\"urn:cgta:hsp_ids\",\n" + 
+				"                        \"value\":\"urn:oid:2.16.840.1.113883.3.239.23.21\"\n" + 
+				"                    }\n" + 
+				"                ],\n" + 
+				"                \"name\":\"Peterborough Regional Health Centre\"\n" + 
+				"            }\n" + 
+				"        }";
+		//@formatter:on
+
+		Set<Long> val = ourOrganizationDao.searchForIds("name", new StringParam("P"));
+		int initial = val.size();
+
+		Organization org = ourFhirCtx.newJsonParser().parseResource(Organization.class,inputStr);
+		ourOrganizationDao.create(org);
+		
+		val = ourOrganizationDao.searchForIds("name", new StringParam("P"));
+		assertEquals(initial+1, val.size());
+		
+	}
+	
+	
+	
+	
 	@Test
 	public void testStoreUnversionedResources() {
 		Organization o1 = new Organization();
@@ -207,6 +252,23 @@ public class FhirResourceDaoTest {
 	}
 
 	@Test
+	public void testSearchWithNoResults() {
+		IBundleProvider value = ourObservationDao.search(new SearchParameterMap());
+		
+		/*
+		 * This may fail at some point, which means another test has probably added a device
+		 * resource. This test depends on there being none, so if that happens this test
+		 * should be refactored to use another resource type
+		 */
+		assertEquals(0, value.size());
+
+		List<IResource> res = value.getResources(0, 0);
+		assertTrue(res.isEmpty());
+
+	}
+
+	
+	@Test
 	public void testPersistSearchParamQuantity() {
 		Observation obs = new Observation();
 		obs.getName().addCoding().setSystem("foo").setCode("testPersistSearchParamQuantity");
@@ -222,6 +284,8 @@ public class FhirResourceDaoTest {
 
 	}
 
+	
+	
 	@Test
 	public void testPersistSearchParams() {
 		Patient patient = new Patient();
@@ -878,6 +942,7 @@ public class FhirResourceDaoTest {
 		ourOrganizationDao = ourCtx.getBean("myOrganizationDao", IFhirResourceDao.class);
 		ourLocationDao = ourCtx.getBean("myLocationDao", IFhirResourceDao.class);
 		ourEncounterDao = ourCtx.getBean("myEncounterDao", IFhirResourceDao.class);
+		ourFhirCtx = new FhirContext();
 	}
 
 }

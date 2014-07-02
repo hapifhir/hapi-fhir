@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
-<project xmlns="urn:site" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="urn:site http://maven.apache.org/xsd/decoration-1.1.0.xsd" name="HAPI">
-
+<project xmlns="http://maven.apache.org/DECORATION/1.1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/DECORATION/1.1.0 http://maven.apache.org/xsd/decoration-1.1.0.xsd" name="HAPI">
+	
 	<bannerLeft>
 		<name>HAPI</name>
 		<src>images/hapi_fhir_banner.png</src>
@@ -21,6 +21,23 @@
 	<version position="left" />
 
 	<body>
+		<head>
+			<!-- Syntax Highlighter -->
+			<script type="text/javascript" src="syntaxhighlighter/shCore.js"></script>
+			<script type="text/javascript" src="syntaxhighlighter/shBrushJScript.js"></script>
+			<script type="text/javascript" src="syntaxhighlighter/shBrushJava.js"></script>
+			<script type="text/javascript" src="syntaxhighlighter/shBrushBash.js"></script>
+			<script type="text/javascript" src="syntaxhighlighter/shBrushXml.js"></script>
+			<link href="syntaxhighlighter/shCore.css" rel="stylesheet" type="text/css" />
+			<link href="syntaxhighlighter/shThemeDefault.css" rel="stylesheet" type="text/css" />
+			
+			<!-- 
+			   HAPI stylesheet comes after because it overwrites the Syntax Highlighter
+			   font size
+			 -->
+			<link rel="shortcut icon" href="http://hl7api.sourceforge.net/images/favicon.png" />
+			<link rel="stylesheet" type="text/css" href="hapi.css" />
+		</head>
 
 		<links>
 			<item name="Sourceforge Project Page" href="https://sourceforge.net/projects/hl7api/" />
@@ -57,24 +74,6 @@
 			<item name="Source Code" href="http://sourceforge.net/p/hl7api/fhircode/ci/master/tree/" />
 		</menu>
 
-		<head>
-			<!-- Syntax Highlighter -->
-			<script type="text/javascript" src="syntaxhighlighter/shCore.js"></script>
-			<script type="text/javascript" src="syntaxhighlighter/shBrushJScript.js"></script>
-			<script type="text/javascript" src="syntaxhighlighter/shBrushJava.js"></script>
-			<script type="text/javascript" src="syntaxhighlighter/shBrushBash.js"></script>
-			<script type="text/javascript" src="syntaxhighlighter/shBrushXml.js"></script>
-			<link href="syntaxhighlighter/shCore.css" rel="stylesheet" type="text/css" />
-			<link href="syntaxhighlighter/shThemeDefault.css" rel="stylesheet" type="text/css" />
-			
-			<!-- 
-			   HAPI stylesheet comes after because it overwrites the Syntax Highlighter
-			   font size
-			 -->
-			<link rel="shortcut icon" href="http://hl7api.sourceforge.net/images/favicon.png" />
-			<link rel="stylesheet" type="text/css" href="hapi.css" />
-		</head>
-		
 	</body>
 
 	<skin>
@@ -91,3 +90,4 @@
 	</custom>
 
 </project>
+

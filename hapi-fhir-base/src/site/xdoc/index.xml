@@ -33,7 +33,7 @@
 				to the Maven repos and the Sourceforge download system. This release corrects a large number of 
 				bugs and includes fixes which were implemented in the recent FHIR Connectathon.
 				<br/>
-				&nbsp;&nbsp;&nbsp;&emdash;&nbsp;<a href="mailto:jamesagnew@users.sourceforge.net">James Agnew</a>
+				<![CDATA[&nbsp;&nbsp;&nbsp;&emdash;&nbsp;]]><a href="mailto:jamesagnew@users.sourceforge.net">James Agnew</a>
 			</p>
 			
 		</section>

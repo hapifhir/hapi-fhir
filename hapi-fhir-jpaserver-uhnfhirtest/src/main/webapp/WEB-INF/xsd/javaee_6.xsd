@@ -127,7 +127,6 @@
                    type="javaee:ejb-local-refType"
                    minOccurs="0"
                    maxOccurs="unbounded"/>
-      <xsd:group ref="javaee:service-refGroup"/>
       <xsd:element name="resource-ref"
                    type="javaee:resource-refType"
                    minOccurs="0"

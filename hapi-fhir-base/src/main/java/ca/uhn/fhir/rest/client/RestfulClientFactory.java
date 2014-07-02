@@ -155,11 +155,13 @@ public class RestfulClientFactory implements IRestfulClientFactory {
 		return new GenericClient(myContext, getHttpClient(), theServerBase);
 	}
 
+	@Override
 	public synchronized void setConnectionRequestTimeout(int theConnectionRequestTimeout) {
 		myConnectionRequestTimeout = theConnectionRequestTimeout;
 		myHttpClient=null;
 	}
 
+	@Override
 	public synchronized void setConnectTimeout(int theConnectTimeout) {
 		myConnectTimeout = theConnectTimeout;
 		myHttpClient=null;
@@ -177,6 +179,7 @@ public class RestfulClientFactory implements IRestfulClientFactory {
 		myHttpClient = theHttpClient;
 	}
 
+	@Override
 	public synchronized void setSocketTimeout(int theSocketTimeout) {
 		mySocketTimeout = theSocketTimeout;
 		myHttpClient=null;

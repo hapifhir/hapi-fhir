@@ -121,7 +121,7 @@ public class RestfulServer extends HttpServlet {
 	 * </p>
 	 */
 	public void addHeadersToResponse(HttpServletResponse theHttpResponse) {
-		theHttpResponse.addHeader("X-PoweredBy", "HAPI FHIR " + VersionUtil.getVersion() + " RESTful Server");
+		theHttpResponse.addHeader("X-Powered-By", "HAPI FHIR " + VersionUtil.getVersion() + " RESTful Server");
 	}
 
 	private void assertProviderIsValid(Object theNext) throws ConfigurationException {

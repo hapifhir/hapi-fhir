@@ -656,7 +656,7 @@ public class XmlParser extends BaseParser implements IParser {
 						} else {
 							if (StringUtils.isBlank(se.getName().getPrefix())) {
 								theEventWriter.writeStartElement(se.getName().getLocalPart());
-								theEventWriter.writeDefaultNamespace(se.getName().getNamespaceURI());
+//								theEventWriter.writeDefaultNamespace(se.getName().getNamespaceURI());
 							} else {
 								theEventWriter.writeStartElement(se.getName().getNamespaceURI(), se.getName().getLocalPart());
 							}
