@@ -1,0 +1,277 @@
+/*
+ * Base structure
+ */
+
+.btn.disabled,
+.btn[disabled],
+fieldset[disabled].btn {
+	opacity: .45;
+	filter:alpha(opacity=45);
+}
+
+/* Move down content because we have a fixed navbar that is 50px tall */
+body {
+  padding-top: 50px;
+  overflow-x: hidden;
+}
+
+label {
+	font-size: 1.0em;
+	color: #808080;
+	font-weight: 400;
+	line-height: 0.8em;
+}
+
+TD.headerBox {
+	line-height: 0.8em !important;
+}
+
+SPAN.headerName {
+	color: #505080;
+	font-family: monospace;
+	font-size: 0.8em;
+}
+
+.hlQuot {
+	color: #88F;
+}
+.hlAttr {
+	color: #888;
+}
+.hlTagName {
+	color: #006699;
+}
+.hlControl {
+	color: #660000;
+}
+.hlText {
+	color: #000000;
+}
+
+SPAN.headerValue {
+	color: #70A070;
+	font-family: monospace;
+	font-size: 0.8em;
+}
+
+SPAN.includeCheckContainer {
+	margin-top: 6px;
+	margin-bottom: 6px;
+	margin-right: 0px;
+	margin-left: 15px;
+	white-space: nowrap;
+	line-height: 35px;
+}
+
+SPAN.includeCheckCheck {
+	border: 1px solid #AAA;
+	border-right-width: 0px;
+	border-top-left-radius: 5px;	
+	border-bottom-left-radius: 5px;	
+	padding: 6px;
+	background: #CCC;
+	background-image: -webkit-gradient(linear, left bottom, left top, color-stop(0, #ccc), color-stop(0.6, #eee));
+	background-image: -webkit-linear-gradient(center bottom, #ccc 0%, #eee 60%);
+	background-image: -moz-linear-gradient(center bottom, #ccc 0%, #eee 60%);
+	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr = '#eeeeee', endColorstr = '#cccccc', GradientType = 0);
+	background-image: linear-gradient(to top, #ccc 0%, #eee 60%);
+}
+
+SPAN.includeCheckName {
+	border: 1px solid #AAA;
+	border-top-right-radius: 5px;	
+	border-bottom-right-radius: 5px;	
+	padding: 6px;
+	background: #FFF;
+}
+
+SPAN.loadingStar {
+	color: #C66;
+	display: inline-block !important;
+	margin: 0px !important;
+	padding: 0px !important;
+	width: 3px !important;
+	font-weight: bold;
+}
+
+DIV.navbarBreadcrumb, A.navbarBreadcrumb {
+	color: #999;
+	padding: 15px;
+	padding-left: 0px;
+	font-size: 16px;
+	line-height: 20px;
+	height: 50px;
+}
+DIV.navbarBreadcrumb:HOVER, A.navbarBreadcrumb:HOVER {
+	color: #FFF;
+	text-decoration: none;
+}
+
+DIV.resultBodyActual {
+	/*
+	max-height: 400px;
+	overflow: scroll;
+	*/
+}
+
+PRE.resultBodyPre {
+	line-height: 0.9em;
+	font-size: 0.8em;
+	border: none;
+	background-color: transparent;
+	overflow: visible;
+}
+
+/*
+ * Global add-ons
+ */
+
+.sub-header {
+  padding-bottom: 10px;
+  border-bottom: 1px solid #eee;
+}
+
+body .syntaxhighlighter .line {
+        white-space: pre-wrap !important; /* make code wrap */
+}
+
+.syntaxhighlight {
+    white-space: pre-wrap;
+}
+
+/*
+ * Sidebar
+ */
+
+/* Hide for mobile, show later */
+.sidebar {
+  display: none;
+}
+@media (min-width: 768px) {
+  .sidebar {
+    position: fixed;
+    top: 51px;
+    bottom: 0;
+    left: 0;
+    z-index: 1000;
+    display: block;
+    padding: 5px;
+    overflow-x: hidden;
+    overflow-y: auto; /* Scrollable contents if viewport is shorter than content. */
+    background-color: #f5f5f5;
+    border-right: 1px solid #eee;
+  }
+}
+
+/* Sidebar navigation */
+.nav-sidebar {
+  margin-right: -21px; /* 20px padding + 1px border */
+  margin-bottom: 20px;
+  margin-left: -20px;
+}
+.nav-sidebar > li > a {
+  padding-right: 20px;
+  padding-left: 20px;
+}
+.nav-sidebar > .active > a {
+  color: #fff;
+  background-color: #428bca;
+}
+
+
+/*
+ * Main content
+ */
+
+.main {
+  padding: 20px;
+}
+@media (min-width: 768px) {
+  .main {
+  	padding-top: 10px;
+    padding-right: 10px;
+    padding-left: 10px;
+  }
+}
+.main .page-header {
+  margin-top: 0;
+}
+
+.navBarButtonLabel {
+	width: 80px;
+}
+
+/*
+ * Placeholder dashboard ideas
+ */
+
+.placeholders {
+  margin-bottom: 30px;
+  text-align: center;
+}
+.placeholders h4 {
+  margin-bottom: 0;
+}
+.placeholder {
+  margin-bottom: 20px;
+}
+.placeholder img {
+  display: inline-block;
+  border-radius: 50%;
+}
+
+TABLE.resultTable TR TD:FIRST-CHILD,
+TABLE.requestTable TR TD:FIRST-CHILD {
+	font-weight: bold;
+}
+
+PRE.resultBodyPlaceholder {
+	width:100%; 
+	padding: 0px;
+}
+
+DIV.searchParamDescription {
+	font-size: 0.8em;
+	text-align: right;
+	color: #668;
+	min-height: 34px;
+	display: table;
+	width: 100%;
+}
+
+DIV.searchParamDescription DIV {
+	display: table-cell;
+	vertical-align: middle;
+}
+
+DIV.searchParamSeparator {
+	height: 1px;
+	border-top: 1px solid #CCC;
+	margin: 3px;
+}
+
+.select2-container {
+	width: 100% !important;
+}
+
+.select2-container A {
+	height: 33px !important;
+}
+
+.syntaxhighlighter,
+.syntaxhighlighter .line.alt1,
+.syntaxhighlighter .line.alt2 {
+	background-color: transparent !important;
+}
+
+.syntaxhighlighter {
+	overflow: visible !important;	
+}
+
+.syntaxhighlighter div {
+	font-size: 0.9em !important;
+}
+
+DIV.top-buffer {
+	margin-top: 2px;
+}

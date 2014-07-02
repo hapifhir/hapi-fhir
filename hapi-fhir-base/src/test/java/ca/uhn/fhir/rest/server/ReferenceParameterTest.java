@@ -48,7 +48,9 @@ public class ReferenceParameterTest {
 		{
 			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?" + Patient.SP_PROVIDER+"=123");
 			HttpResponse status = ourClient.execute(httpGet);
-			String responseContent = IOUtils.toString(status.getEntity().getContent());
+			String responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			List<BundleEntry> entries = new FhirContext().newXmlParser().parseBundle(responseContent).getEntries();
 			assertEquals(1, entries.size());
@@ -64,7 +66,8 @@ public class ReferenceParameterTest {
 		{
 			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?" + Patient.SP_PROVIDER+":Organization=123");
 			HttpResponse status = ourClient.execute(httpGet);
-			String responseContent = IOUtils.toString(status.getEntity().getContent());
+			String responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			List<BundleEntry> entries = new FhirContext().newXmlParser().parseBundle(responseContent).getEntries();
 			assertEquals(1, entries.size());
@@ -79,7 +82,8 @@ public class ReferenceParameterTest {
 		{
 			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?" + Patient.SP_PROVIDER+":Organization.name=123");
 			HttpResponse status = ourClient.execute(httpGet);
-			String responseContent = IOUtils.toString(status.getEntity().getContent());
+			String responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			List<BundleEntry> entries = new FhirContext().newXmlParser().parseBundle(responseContent).getEntries();
 			assertEquals(1, entries.size());
@@ -95,7 +99,8 @@ public class ReferenceParameterTest {
 		{
 			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?" + Patient.SP_PROVIDER+".name=123");
 			HttpResponse status = ourClient.execute(httpGet);
-			String responseContent = IOUtils.toString(status.getEntity().getContent());
+			String responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			List<BundleEntry> entries = new FhirContext().newXmlParser().parseBundle(responseContent).getEntries();
 			assertEquals(1, entries.size());

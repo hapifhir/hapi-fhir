@@ -58,7 +58,7 @@ public class FhirSystemDaoTest {
 		Patient patient = new Patient();
 		patient.addIdentifier("urn:system", "testHistory");
 		patient.addName().addFamily("Tester").addGiven("Joe");
-		IdDt pid = ourPatientDao.create(patient).getId();
+		IdDt pid = ourPatientDao.create(patient).getId().toVersionless();
 
 		Thread.sleep(10);
 		IdDt newpid = ourPatientDao.update(patient, pid).getId();
@@ -76,7 +76,7 @@ public class FhirSystemDaoTest {
 		assertEquals(newpid3, res.get(0).getId());
 		assertEquals(newpid2, res.get(1).getId());
 		assertEquals(newpid, res.get(2).getId());
-		assertEquals(pid, res.get(3).getId());
+		assertEquals(pid.toUnqualifiedVersionless(), res.get(3).getId().toUnqualifiedVersionless());
 
 		Location loc = new Location();
 		loc.getAddress().addLine("AAA");

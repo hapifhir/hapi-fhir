@@ -66,7 +66,7 @@ public class FhirContext {
 	private volatile INarrativeGenerator myNarrativeGenerator;
 	private volatile IRestfulClientFactory myRestfulClientFactory;
 	private volatile RuntimeChildUndeclaredExtensionDefinition myRuntimeChildUndeclaredExtensionDefinition;
-
+	
 	/**
 	 * Default constructor. In most cases this is the right constructor to use.
 	 */
@@ -77,7 +77,7 @@ public class FhirContext {
 	public FhirContext(Class<? extends IResource> theResourceType) {
 		this(toCollection(theResourceType));
 	}
-
+	
 	public FhirContext(Class<?>... theResourceTypes) {
 		this(toCollection(theResourceTypes));
 	}
@@ -91,10 +91,6 @@ public class FhirContext {
 	 */
 	public BaseRuntimeElementDefinition<?> getElementDefinition(Class<? extends IElement> theElementType) {
 		return myClassToElementDefinition.get(theElementType);
-	}
-	
-	public FhirTerser newTerser() {
-		return new FhirTerser(this);
 	}
 
 	public INarrativeGenerator getNarrativeGenerator() {
@@ -111,7 +107,7 @@ public class FhirContext {
 		}
 		return retVal;
 	}
-
+	
 	/**
 	 * Returns the scanned runtime model for the given type. This is an advanced feature which is generally only needed for extending the core library.
 	 */
@@ -226,6 +222,10 @@ public class FhirContext {
 		return getRestfulClientFactory().newGenericClient(theServerBase);
 	}
 
+	public FhirTerser newTerser() {
+		return new FhirTerser(this);
+	}
+
 	/**
 	 * Create and return a new JSON parser.
 	 * 
@@ -241,6 +241,10 @@ public class FhirContext {
 		myNarrativeGenerator = theNarrativeGenerator;
 	}
 
+	public void setRestfulClientFactory(IRestfulClientFactory theRestfulClientFactory) {
+		myRestfulClientFactory = theRestfulClientFactory;
+	}
+
 	private RuntimeResourceDefinition scanResourceType(Class<? extends IResource> theResourceType) {
 		ArrayList<Class<? extends IResource>> resourceTypes = new ArrayList<Class<? extends IResource>>();
 		resourceTypes.add(theResourceType);
@@ -249,7 +253,7 @@ public class FhirContext {
 	}
 
 	private Map<Class<? extends IElement>, BaseRuntimeElementDefinition<?>> scanResourceTypes(Collection<Class<? extends IResource>> theResourceTypes) {
-		ModelScanner scanner = new ModelScanner(theResourceTypes);
+		ModelScanner scanner = new ModelScanner(myClassToElementDefinition, theResourceTypes);
 		if (myRuntimeChildUndeclaredExtensionDefinition == null) {
 			myRuntimeChildUndeclaredExtensionDefinition = scanner.getRuntimeChildUndeclaredExtensionDefinition();
 		}
@@ -271,6 +275,11 @@ public class FhirContext {
 		myIdToResourceDefinition = idToElementDefinition;
 
 		return classToElementDefinition;
+	}
+
+	/** For unit tests only */
+	int getElementDefinitionCount() {
+		return myClassToElementDefinition.size();
 	}
 
 	private static Collection<Class<? extends IResource>> toCollection(Class<? extends IResource> theResourceType) {

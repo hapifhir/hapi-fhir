@@ -28,8 +28,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
+
+import org.apache.commons.lang3.StringUtils;
 
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.dstu.resource.Conformance;
 import ca.uhn.fhir.model.dstu.resource.Conformance.Rest;
@@ -70,6 +74,8 @@ public class ServerConformanceProvider {
 		}
 
 		Conformance retVal = new Conformance();
+
+		retVal.getImplementation().setDescription(myRestfulServer.getImplementationDescription());
 		retVal.getSoftware().setName(myRestfulServer.getServerName());
 		retVal.getSoftware().setVersion(myRestfulServer.getServerVersion());
 		retVal.addFormat(Constants.CT_FHIR_XML);
@@ -98,6 +104,8 @@ public class ServerConformanceProvider {
 			resource.getType().setValue(def.getName());
 			resource.getProfile().setId(new IdDt(def.getResourceProfile()));
 
+			TreeSet<String> includes = new TreeSet<String>();
+			
 			Map<String, Conformance.RestResourceSearchParam> nameToSearchParam = new HashMap<String, Conformance.RestResourceSearchParam>();
 			for (BaseMethodBinding<?> nextMethodBinding : next.getMethodBindings()) {
 				RestfulOperationTypeEnum resOp = nextMethodBinding.getResourceOperationType();
@@ -117,7 +125,10 @@ public class ServerConformanceProvider {
 				}
 
 				if (nextMethodBinding instanceof SearchMethodBinding) {
-					List<IParameter> params = ((SearchMethodBinding) nextMethodBinding).getParameters();
+					SearchMethodBinding searchMethodBinding = (SearchMethodBinding) nextMethodBinding;
+					includes.addAll(searchMethodBinding.getIncludes());
+					
+					List<IParameter> params = searchMethodBinding.getParameters();
 					List<SearchParameter> searchParameters = new ArrayList<SearchParameter>();
 					for (IParameter nextParameter : params) {
 						if ((nextParameter instanceof SearchParameter)) {
@@ -128,12 +139,12 @@ public class ServerConformanceProvider {
 						@Override
 						public int compare(SearchParameter theO1, SearchParameter theO2) {
 							if (theO1.isRequired() == theO2.isRequired()) {
-								return 0;
+								return theO1.getName().compareTo(theO2.getName());
 							}
 							if (theO1.isRequired()) {
-								return 1;
+								return -1;
 							}
-							return -1;
+							return 1;
 						}
 					});
 					if (searchParameters.isEmpty()) {
@@ -145,11 +156,33 @@ public class ServerConformanceProvider {
 					ExtensionDt searchParamChain = null;
 					for (SearchParameter nextParameter : searchParameters) {
 
+						String nextParamName = nextParameter.getName();
+						String chain = null;
+						if (nextParamName.contains(".")) {
+							chain = nextParamName.substring(nextParamName.indexOf('.') + 1);
+							nextParamName = nextParamName.substring(0, nextParamName.indexOf('.'));
+						}
+
+						String nextParamDescription = nextParameter.getDescription();
+
+						/*
+						 * If the parameter has no description, default to the one from the resource
+						 */
+						if (StringUtils.isBlank(nextParamDescription)) {
+							RuntimeSearchParam paramDef = def.getSearchParam(nextParamName);
+							if (paramDef != null) {
+								nextParamDescription = paramDef.getDescription();
+							}
+						}
+
 						if (searchParam == null || allOptional) {
 							if (!nameToSearchParam.containsKey(nextParameter.getName())) {
 								RestResourceSearchParam param = resource.addSearchParam();
-								param.setName(nextParameter.getName());
-								param.setDocumentation(nextParameter.getDescription());
+								param.setName(nextParamName);
+								if (StringUtils.isNotBlank(chain)) {
+									param.addChain(chain);
+								}
+								param.setDocumentation(nextParamDescription);
 								param.setType(nextParameter.getParamType());
 								searchParam = param;
 							} else {
@@ -162,22 +195,20 @@ public class ServerConformanceProvider {
 
 						} else {
 
-							searchParamChain = searchParam.addUndeclaredExtension(false, ExtensionConstants.CONF_ADDITIONAL_PARAM);
-
-							// if (searchParamChain == null) {
-							// } else {
-							// searchParamChain = searchParamChain.addUndeclaredExtension(false,
-							// ExtensionConstants.CONF_ADDITIONAL_PARAM);
-							// }
+							if (searchParamChain == null) {
+								searchParamChain = searchParam.addUndeclaredExtension(false, ExtensionConstants.CONF_ADDITIONAL_PARAM);
+							} else {
+								searchParamChain = searchParamChain.addUndeclaredExtension(false, ExtensionConstants.CONF_ADDITIONAL_PARAM);
+							}
 
 							ExtensionDt ext = new ExtensionDt();
 							ext.setUrl(ExtensionConstants.CONF_ADDITIONAL_PARAM_NAME);
-							ext.setValue(new StringDt(nextParameter.getName()));
+							ext.setValue(new StringDt(nextParamName));
 							searchParamChain.getUndeclaredExtensions().add(ext);
 
 							ext = new ExtensionDt();
 							ext.setUrl(ExtensionConstants.CONF_ADDITIONAL_PARAM_DESCRIPTION);
-							ext.setValue(new StringDt(nextParameter.getDescription()));
+							ext.setValue(new StringDt(nextParamDescription));
 							searchParamChain.getUndeclaredExtensions().add(ext);
 
 							ext = new ExtensionDt();
@@ -217,6 +248,10 @@ public class ServerConformanceProvider {
 
 			}
 
+			for (String nextInclude : includes) {
+				resource.addSearchInclude(nextInclude);
+			}
+			
 		}
 
 		myConformance = retVal;
@@ -224,8 +259,7 @@ public class ServerConformanceProvider {
 	}
 
 	/**
-	 * Sets the cache property (default is true). If set to true, the same response will be returned for each
-	 * invocation.
+	 * Sets the cache property (default is true). If set to true, the same response will be returned for each invocation.
 	 */
 	public void setCache(boolean theCache) {
 		myCache = theCache;

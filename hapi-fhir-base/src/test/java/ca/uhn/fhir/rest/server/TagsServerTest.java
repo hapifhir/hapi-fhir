@@ -66,7 +66,8 @@ public class TagsServerTest {
 		httpPost.setEntity(new StringEntity(ourCtx.newJsonParser().encodeTagListToString(tagList), ContentType.create(EncodingEnum.JSON.getResourceContentType(), "UTF-8")));
 		HttpResponse status = ourClient.execute(httpPost);
 
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
@@ -84,7 +85,8 @@ public class TagsServerTest {
 		httpPost.setEntity(new StringEntity(ourCtx.newJsonParser().encodeTagListToString(tagList), ContentType.create(EncodingEnum.JSON.getResourceContentType(), "UTF-8")));
 		HttpResponse status = ourClient.execute(httpPost);
 
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
@@ -110,7 +112,8 @@ public class TagsServerTest {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/_tags");
 		HttpResponse status = ourClient.execute(httpGet);
 
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
@@ -124,7 +127,8 @@ public class TagsServerTest {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/_tags");
 		HttpResponse status = ourClient.execute(httpGet);
 
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
@@ -141,7 +145,8 @@ public class TagsServerTest {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/111/_tags");
 		HttpResponse status = ourClient.execute(httpGet);
 
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
@@ -158,7 +163,8 @@ public class TagsServerTest {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/111/_history/222/_tags");
 		HttpResponse status = ourClient.execute(httpGet);
 
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
@@ -175,7 +181,8 @@ public class TagsServerTest {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Observation/111/_history/222/_tags");
 		HttpResponse status = ourClient.execute(httpGet);
 
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
@@ -196,7 +203,8 @@ public class TagsServerTest {
 		httpPost.setEntity(new StringEntity(ourCtx.newJsonParser().encodeTagListToString(tagList), ContentType.create(EncodingEnum.JSON.getResourceContentType(), "UTF-8")));
 		HttpResponse status = ourClient.execute(httpPost);
 
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
@@ -214,7 +222,8 @@ public class TagsServerTest {
 		httpPost.setEntity(new StringEntity(ourCtx.newJsonParser().encodeTagListToString(tagList), ContentType.create(EncodingEnum.JSON.getResourceContentType(), "UTF-8")));
 		HttpResponse status = ourClient.execute(httpPost);
 
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());

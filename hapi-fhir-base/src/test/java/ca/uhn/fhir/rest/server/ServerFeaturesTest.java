@@ -52,7 +52,8 @@ public class ServerFeaturesTest {
 
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
 		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+
 		assertThat(responseContent, StringContains.containsString("<identifier><use"));
 
 		/*
@@ -61,7 +62,8 @@ public class ServerFeaturesTest {
 
 		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1?_pretty=false");
 		status = ourClient.execute(httpGet);
-		responseContent = IOUtils.toString(status.getEntity().getContent());
+		responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+
 		assertThat(responseContent, StringContains.containsString("<identifier><use"));
 
 		/*
@@ -70,7 +72,8 @@ public class ServerFeaturesTest {
 
 		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1?_pretty=true");
 		status = ourClient.execute(httpGet);
-		responseContent = IOUtils.toString(status.getEntity().getContent());
+		responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+
 		assertThat(responseContent, IsNot.not(StringContains.containsString("<identifier><use")));
 
 	}
@@ -80,19 +83,22 @@ public class ServerFeaturesTest {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
 		httpGet.addHeader("Accept", Constants.CT_FHIR_XML);
 		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+
 		assertThat(responseContent, StringContains.containsString("<identifier><use"));
 
 		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
 		httpGet.addHeader("Accept", Constants.CT_ATOM_XML);
 		status = ourClient.execute(httpGet);
-		responseContent = IOUtils.toString(status.getEntity().getContent());
+		responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+
 		assertThat(responseContent, StringContains.containsString("<identifier><use"));
 
 		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
 		httpGet.addHeader("Accept", Constants.CT_FHIR_JSON);
 		status = ourClient.execute(httpGet);
-		responseContent = IOUtils.toString(status.getEntity().getContent());
+		responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+
 		assertThat(responseContent, StringContains.containsString("\"identifier\":"));
 
 	}
@@ -102,19 +108,22 @@ public class ServerFeaturesTest {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
 		httpGet.addHeader("Accept", "text/plain, " + Constants.CT_FHIR_XML);
 		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+
 		assertThat(responseContent, StringContains.containsString("<identifier><use"));
 
 		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
 		httpGet.addHeader("Accept", "text/plain, " + Constants.CT_ATOM_XML);
 		status = ourClient.execute(httpGet);
-		responseContent = IOUtils.toString(status.getEntity().getContent());
+		responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+
 		assertThat(responseContent, StringContains.containsString("<identifier><use"));
 
 		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
 		httpGet.addHeader("Accept", "text/plain, " + Constants.CT_FHIR_JSON);
 		status = ourClient.execute(httpGet);
-		responseContent = IOUtils.toString(status.getEntity().getContent());
+		responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+
 		assertThat(responseContent, StringContains.containsString("\"identifier\":"));
 
 	}
@@ -125,13 +134,15 @@ public class ServerFeaturesTest {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
 		httpGet.addHeader("Accept", Constants.CT_XML);
 		CloseableHttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+
 		assertThat(responseContent, StringContains.containsString("<identifier><use"));
 
 		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
 		httpGet.addHeader("Accept", Constants.CT_JSON);
 		status = ourClient.execute(httpGet);
-		responseContent = IOUtils.toString(status.getEntity().getContent());
+		responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+
 		assertThat(responseContent, StringContains.containsString("\"identifier\":"));
 
 	}
@@ -142,13 +153,15 @@ public class ServerFeaturesTest {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
 		httpGet.addHeader("Accept", Constants.CT_FHIR_XML+ "; pretty=true");
 		CloseableHttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+
 		assertThat(responseContent, StringContains.containsString("<identifier>\n   "));
 
 		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
 		httpGet.addHeader("Accept", Constants.CT_FHIR_JSON+ "; pretty=true");
 		status = ourClient.execute(httpGet);
-		responseContent = IOUtils.toString(status.getEntity().getContent());
+		responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+
 		assertThat(responseContent, StringContains.containsString("\",\n"));
 
 	}
@@ -160,7 +173,8 @@ public class ServerFeaturesTest {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/?_query=findPatientsWithNoIdSpecified");
 		httpGet.addHeader("Accept", Constants.CT_FHIR_XML+ "; pretty=true");
 		CloseableHttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+
 		assertEquals(500, status.getStatusLine().getStatusCode());
 		assertThat(responseContent, StringContains.containsString("ID"));
 

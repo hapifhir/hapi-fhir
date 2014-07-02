@@ -28,9 +28,9 @@ import ca.uhn.fhir.rest.server.Constants;
 @Inheritance(strategy = InheritanceType.JOINED)
 @org.hibernate.annotations.Table(appliesTo = "HFJ_RESOURCE", indexes = { @Index(name = "IDX_RES_DATE", columnNames = { "RES_UPDATED" }) })
 public class ResourceTable extends BaseHasResource implements Serializable {
-	static final int RESTYPE_LEN = 30;
-
 	private static final long serialVersionUID = 1L;
+
+	static final int RESTYPE_LEN = 30;
 
 	@Column(name = "SP_HAS_LINKS")
 	private boolean myHasLinks;
@@ -256,6 +256,7 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 		retVal.setUpdated(getUpdated());
 		retVal.setEncoding(getEncoding());
 		retVal.setResource(getResource());
+		retVal.setDeleted(getDeleted());
 
 		for (ResourceTag next : getTags()) {
 			retVal.addTag(next);

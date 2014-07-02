@@ -118,8 +118,7 @@ public abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBindin
 			TagList tagList = new TagList();
 			for (Enumeration<String> enumeration = theRequest.getServletRequest().getHeaders(Constants.HEADER_CATEGORY); enumeration.hasMoreElements();) {
 				String nextTagComplete = enumeration.nextElement();
-				StringBuilder next = new StringBuilder(nextTagComplete);
-				parseTagValue(tagList, nextTagComplete, next);
+				parseTagValue(tagList, nextTagComplete);
 			}
 			if (tagList.isEmpty() == false) {
 				resource.getResourceMetadata().put(ResourceMetadataKeyEnum.TAG_LIST, tagList);
@@ -136,12 +135,12 @@ public abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBindin
 			response = (MethodOutcome) invokeServerMethod(params);
 		} catch (InternalErrorException e) {
 			ourLog.error("Internal error during method invocation", e);
-			EncodingEnum encoding = RestfulServer.determineResponseEncoding(theRequest);
+			EncodingEnum encoding = RestfulServer.determineResponseEncoding(theRequest.getServletRequest());
 			streamOperationOutcome(e, theServer, encoding, theResponse, theRequest);
 			return;
 		} catch (BaseServerResponseException e) {
 			ourLog.info("Exception during method invocation: " + e.getMessage());
-			EncodingEnum encoding = RestfulServer.determineResponseEncoding(theRequest);
+			EncodingEnum encoding = RestfulServer.determineResponseEncoding(theRequest.getServletRequest());
 			streamOperationOutcome(e, theServer, encoding, theResponse, theRequest);
 			return;
 		}
@@ -172,7 +171,7 @@ public abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBindin
 		theServer.addHeadersToResponse(theResponse);
 
 		if (response != null && response.getOperationOutcome() != null) {
-			EncodingEnum encoding = RestfulServer.determineResponseEncoding(theRequest);
+			EncodingEnum encoding = RestfulServer.determineResponseEncoding(theRequest.getServletRequest());
 			theResponse.setContentType(encoding.getResourceContentType());
 			Writer writer = theResponse.getWriter();
 			IParser parser = encoding.newParser(getContext());
@@ -189,6 +188,11 @@ public abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBindin
 		}
 
 		// getMethod().in
+	}
+
+	static void parseTagValue(TagList tagList, String nextTagComplete) {
+		StringBuilder next = new StringBuilder(nextTagComplete);
+		parseTagValue(tagList, nextTagComplete, next);
 	}
 
 	/**
@@ -256,15 +260,18 @@ public abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBindin
 		b.append('/');
 		b.append(getResourceName());
 		b.append('/');
-		b.append(response.getId().getValue());
-		if (response.getVersionId() != null && response.getVersionId().isEmpty() == false) {
-			b.append("/_history/");
+		b.append(response.getId().getIdPart());
+		if (response.getId().hasVersionIdPart()) {
+			b.append("/"+Constants.PARAM_HISTORY+"/");
+			b.append(response.getId().getVersionIdPart());
+		}else if (response.getVersionId() != null && response.getVersionId().isEmpty() == false) {
+			b.append("/"+Constants.PARAM_HISTORY+"/");
 			b.append(response.getVersionId().getValue());
 		}
-		theResponse.addHeader("Location", b.toString());
+		theResponse.addHeader(Constants.HEADER_LOCATION, b.toString());
 	}
 
-	private void parseTagValue(TagList theTagList, String theCompleteHeaderValue, StringBuilder theBuffer) {
+	private static void parseTagValue(TagList theTagList, String theCompleteHeaderValue, StringBuilder theBuffer) {
 		int firstSemicolon = theBuffer.indexOf(";");
 		int deleteTo;
 		if (firstSemicolon == -1) {
@@ -392,7 +399,7 @@ public abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBindin
 	}
 
 	public static MethodOutcome process2xxResponse(FhirContext theContext, String theResourceName, int theResponseStatusCode, String theResponseMimeType, Reader theResponseReader, Map<String, List<String>> theHeaders) {
-		List<String> locationHeaders = theHeaders.get("location");
+		List<String> locationHeaders = theHeaders.get(Constants.HEADER_LOCATION_LC);
 		MethodOutcome retVal = new MethodOutcome();
 		if (locationHeaders != null && locationHeaders.size() > 0) {
 			String locationHeader = locationHeaders.get(0);

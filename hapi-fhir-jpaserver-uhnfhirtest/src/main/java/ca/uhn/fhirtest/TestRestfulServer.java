@@ -3,7 +3,11 @@ package ca.uhn.fhirtest;
 import java.sql.DriverManager;
 import java.util.Collection;
 
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.context.support.FileSystemXmlApplicationContext;
+import org.springframework.web.context.ContextLoaderListener;
+import org.springframework.web.context.WebApplicationContext;
 
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.provider.JpaConformanceProvider;
@@ -16,21 +20,30 @@ public class TestRestfulServer extends RestfulServer {
 
 	private static final long serialVersionUID = 1L;
 	
-	private ClassPathXmlApplicationContext myAppCtx;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TestRestfulServer.class);
+
+	private ApplicationContext myAppCtx;
 	
 	@Override
 	protected void initialize() {
 		super.initialize();
 		
-		try {
-			ourLog.info("Creating database");
-			DriverManager.getConnection("jdbc:derby:directory:" + System.getProperty("fhir.db.location") + ";create=true");
-		} catch (Exception e) {
-			ourLog.error("Failed to create database: {}",e);
-		}
+//		try {
+//			ourLog.info("Creating database");
+//			DriverManager.getConnection("jdbc:derby:directory:" + System.getProperty("fhir.db.location") + ";create=true");
+//		} catch (Exception e) {
+//			ourLog.error("Failed to create database: {}",e);
+//		}
 		
-		myAppCtx = new ClassPathXmlApplicationContext("fhir-spring-uhnfhirtest-config.xml", "hapi-jpaserver-springbeans.xml");
+			
+//		myAppCtx = new ClassPathXmlApplicationContext("fhir-spring-uhnfhirtest-config.xml", "hapi-jpaserver-springbeans.xml");
+
+//		myAppCtx = new FileSystemXmlApplicationContext(
+//				"WEB-INF/hapi-fhir-server-database-config.xml",
+//				"WEB-INF/hapi-fhir-server-config.xml"
+//				);
+
+		myAppCtx = ContextLoaderListener.getCurrentWebApplicationContext();
 		
 		Collection<IResourceProvider> beans = myAppCtx.getBeansOfType(IResourceProvider.class).values();
 		for (IResourceProvider nextResourceProvider : beans) {
@@ -55,14 +68,14 @@ public class TestRestfulServer extends RestfulServer {
 	public void destroy() {
 		super.destroy();
 		
-		myAppCtx.close();
-		
-		try {
-			ourLog.info("Shutting down derby");
-			DriverManager.getConnection("jdbc:derby:directory:" + System.getProperty("fhir.db.location") + ";shutdown=true");
-		} catch (Exception e) {
-			ourLog.info("Failed to create database: {}",e.getMessage());
-		}
+//		myAppCtx.close();
+//		
+//		try {
+//			ourLog.info("Shutting down derby");
+//			DriverManager.getConnection("jdbc:derby:directory:" + System.getProperty("fhir.db.location") + ";shutdown=true");
+//		} catch (Exception e) {
+//			ourLog.info("Failed to create database: {}",e.getMessage());
+//		}
 	}
 
 }

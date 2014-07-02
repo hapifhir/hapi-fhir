@@ -19,6 +19,7 @@ public class ResourceHistoryTag extends BaseTag implements Serializable {
 	
 	@GeneratedValue(strategy=GenerationType.AUTO)
 	@Id
+	@Column(name = "PID")
 	private Long myId;
 	
 	@ManyToOne()

@@ -32,6 +32,7 @@ import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.message.BasicHeader;
 
 import ca.uhn.fhir.rest.server.EncodingEnum;
+import ca.uhn.fhir.util.VersionUtil;
 
 public abstract class BaseHttpClientInvocation {
 
@@ -87,6 +88,11 @@ public abstract class BaseHttpClientInvocation {
 				theHttpRequest.addHeader(next);
 			}
 		}
+		
+		theHttpRequest.addHeader("User-Agent", "HAPI-FHIR/" + VersionUtil.getVersion() + " (FHIR Client)");
+		theHttpRequest.addHeader("Accept-Charset", "utf-8");
+		theHttpRequest.addHeader("Accept-Encoding", "gzip");
+		
 	}
 
 }

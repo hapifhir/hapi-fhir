@@ -24,7 +24,6 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.tester.RestfulServerTesterServlet;
 import ca.uhn.test.jpasrv.ObservationResourceProvider;
 import ca.uhn.test.jpasrv.OrganizationResourceProvider;
 import ca.uhn.test.jpasrv.PatientResourceProvider;
@@ -178,13 +177,8 @@ public class CompleteResourceProviderTest {
 		ServletContextHandler proxyHandler = new ServletContextHandler();
 		proxyHandler.setContextPath("/");
 
-		RestfulServerTesterServlet testerServlet = new RestfulServerTesterServlet();
 		String serverBase = "http://localhost:" + myPort + "/fhir/context";
-		testerServlet.setServerBase(serverBase);
 		// testerServlet.setServerBase("http://fhir.healthintersections.com.au/open");
-		ServletHolder handler = new ServletHolder();
-		handler.setServlet(testerServlet);
-		proxyHandler.addServlet(handler, "/fhir/tester/*");
 
 		ServletHolder servletHolder = new ServletHolder();
 		servletHolder.setServlet(restServer);

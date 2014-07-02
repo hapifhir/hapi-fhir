@@ -1,4 +1,5 @@
 myUnitTestDB/
 target/
+fhir/
 /bin
 nohup.out

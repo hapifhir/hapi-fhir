@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head  th:include="tmpl-head :: head">
+		<title>RESTful Tester</title>
+	</head>
+
+	<body>
+		<form action="" method="get" id="outerForm">
+		<input type="hidden" id="serverId" name="serverId" th:value="${serverId}"/> 
+
+		<div th:replace="tmpl-navbar-top :: top" ></div>
+		
+		<div class="container-fluid">
+			<div class="row">
+
+				<div th:replace="tmpl-navbar-left :: left" ></div>
+
+				<div class="col-sm-9 col-sm-offset-3 col-md-9 col-md-offset-3 main">
+
+					<div th:replace="tmpl-banner :: banner"></div>
+
+					<!-- ********************************************************** -->
+					<!-- ** Default Home                                         ** -->
+					<!-- ********************************************************** -->
+
+					<div th:if="${requestUrl} == null">
+						<div class="well">
+							This is a RESTful server tester, which can be used to send
+							requests to, and receive responses from the server at the
+							following URL: 
+						</div>
+
+						<table class="table table-bordered table-striped" th:if="${resourceName.empty}">
+							<colgroup>
+								<col class="col-xs-1" />
+								<col class="col-xs-7" />
+							</colgroup>
+							<tbody>
+								<tr th:if="${conf.implementation.description} != null and #{!string.isEmpty(conf.implementation.description)}">
+									<td>Server</td>
+									<td th:utext="'' + ${conf.implementation.description}">HAPI Restful Server</td>
+								</tr>
+								<tr>
+									<td>FHIR Base</td>
+									<td>
+										<a th:href="${base}" th:text="${base}"></a>
+									</td>
+								</tr>
+								<tr th:if="#{string.isEmpty(conf.software.name)} == false and #{string.isEmpty(conf.software.version)} == false">
+									<td>Software</td>
+									<td>
+										<th:block th:utext="'' + ${conf.software.name}"/> - <th:block th:utext="'' + ${conf.software.version}"/>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+
+						<!-- ************************************************ -->
+						<!-- ** Server Actions (no resource selected)      ** -->
+						<!-- ************************************************ -->
+
+						<div class="panel panel-default" th:if="${resourceName.empty}">
+							<div class="panel-heading">
+								<h3 class="panel-title">Server Actions</h3>
+							</div>
+							<div class="panel-body">
+								<div class="container-fluid">
+							
+								<!-- Conformance -->
+								
+									<div class="row-fluid">
+										Retrieve the server's <b>conformance</b> statement.										
+									</div>
+								    <div class="row-fluid">
+								    	<div class="col-sm-2">
+											<button type="button" id="fetch-conformance-btn"
+												data-loading-text="Loading &lt;i class='fa fa-spinner fa-spin'/&gt;"  class="btn btn-primary btn-block">
+												<i class="fa fa-dot-circle-o"></i>
+												Conformance
+											</button>
+											<script type="text/javascript">
+												$('#fetch-conformance-btn').click(
+														function() {
+															var btn = $(this);
+															btn.button('loading');
+															$("#outerForm").attr("action", "conformance").submit();
+														});
+											</script>
+										</div>
+									</div>
+									
+								<!-- Server History -->
+								
+									<br clear="all"/>
+									<div class="row-fluid">
+										Retrieve the update <b>history</b> across all resource types on
+										the server.										
+									</div>
+								    <div class="row-fluid top-buffer">
+								    	<div class="col-sm-2">
+										<button type="button" id="server-history-btn"
+											data-loading-text="Loading &lt;i class='fa fa-spinner fa-spin'/&gt;"  class="btn btn-primary btn-block">
+											<i class="fa fa-calendar"></i>
+											History
+										</button>
+								    	</div>
+								        <div class='col-sm-5'>
+								            <div class="form-group">
+								                <div class='input-group date' id='server-history-datetime' data-date-format="YYYY-MM-DDTHH:mm:ss">
+								                    <div class="input-group-addon">
+								                    Since
+								                    </div>
+								                    <input type='text' class="form-control" id="server-history-since"/>
+								                    <div class="input-group-addon">
+								                    <span class="glyphicon glyphicon-calendar"></span>
+								                    </div>
+								                </div>
+								            </div>
+								        </div>								        
+										<div class='col-sm-3'>
+								            <div class="form-group">
+								                <div class='input-group'>
+								                    <div class="input-group-addon">
+								                    Limit #
+								                    </div>
+								                    <input type="text" class="form-control" id="server-history-limit" placeholder="(opt)"/>
+								                </div>
+								            </div>
+								        </div>
+								        <script type="text/javascript">
+								            $(function () {
+								                $('#server-history-datetime').datetimepicker({
+								                	sideBySide: true,
+								                	use24hours: true,
+								                	showToday: true
+								                });
+								            });
+								            $('#server-history-btn').click(
+												function() {
+													var btn = $(this);
+													btn.button('loading');
+													var limit = $('#server-history-limit').val();
+													if (limit != null) btn.append($('<input />', { type: 'hidden', name: 'limit', value: limit }));
+													var since = $('#server-history-since').val();
+													if (since != null) btn.append($('<input />', { type: 'hidden', name: 'since', value: since }));
+													$("#outerForm").attr("action", "history-server").submit();
+												});								            
+								        </script>
+								        
+								    </div>
+								    
+								<!-- Get Tags -->
+								
+									<br clear="all"/>
+									<div class="row-fluid">
+										Show all of the tags currently in use on the server										
+									</div>
+								    <div class="row-fluid">
+								    	<div class="col-sm-2">
+											<button type="button" id="get-server-tags-btn"
+												data-loading-text="Loading &lt;i class='fa fa-spinner fa-spin'/&gt;"  class="btn btn-primary btn-block">
+												<i class="fa fa-tags"></i>
+												Get Tags
+											</button>
+											<script type="text/javascript">
+												$('#get-server-tags-btn').click(
+														function() {
+															var btn = $(this);
+															btn.button('loading');
+															$("#outerForm").attr("action", "get-tags").submit();
+														});
+											</script>
+										</div>
+									</div>
+
+								<!-- Next Server Action? -->
+								    
+								</div>
+							</div>
+						</div>
+
+					</div>
+
+				</div>
+			</div>
+		</div>
+
+	</form>
+	
+	<div th:replace="tmpl-footer :: footer" ></div>
+</body>
+</html>

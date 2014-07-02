@@ -5,20 +5,29 @@ import static org.junit.Assert.*;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.Include;
+import ca.uhn.fhir.model.api.PathSpecification;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.resource.Conformance;
+import ca.uhn.fhir.model.dstu.resource.Conformance.RestResource;
+import ca.uhn.fhir.model.dstu.resource.Conformance.RestResourceSearchParam;
+import ca.uhn.fhir.model.dstu.resource.DiagnosticReport;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.rest.annotation.IncludeParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.method.SearchMethodBinding;
+import ca.uhn.fhir.rest.param.CodingListParam;
+import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.SearchParameter;
 import ca.uhn.fhir.rest.server.provider.ServerConformanceProvider;
 
@@ -90,6 +99,31 @@ public class ServerConformanceProviderTest {
 		assertThat(conf, containsString("<type value=\"token\"/>"));
 	}
 
+	@Test
+	public void testProviderWithRequiredAndOptional() throws Exception {
+
+		RestfulServer rs = new RestfulServer();
+		rs.setProviders(new ProviderWithRequiredAndOptional());
+
+		ServerConformanceProvider sc = new ServerConformanceProvider(rs);
+		rs.setServerConformanceProvider(sc);
+
+		rs.init(null);
+		
+		Conformance conformance = sc.getServerConformance();
+		String conf = new FhirContext().newJsonParser().setPrettyPrint(true).encodeResourceToString(conformance);
+		ourLog.info(conf);
+
+		RestResource res = conformance.getRestFirstRep().getResourceFirstRep();
+		assertEquals("DiagnosticReport", res.getType().getValueAsString());
+		
+		RestResourceSearchParam p0 = res.getSearchParam().get(0);
+		assertEquals("subject", p0.getName().getValue());
+		
+		assertEquals(1,res.getSearchInclude().size());
+		assertEquals("DiagnosticReport.result", res.getSearchIncludeFirstRep().getValue());
+	}
+	
 	
 	/**
 	 * Created by dsotnikov on 2/25/2014.
@@ -123,5 +157,22 @@ public class ServerConformanceProviderTest {
 		}
 
 	}
+	
+	
+	public static class ProviderWithRequiredAndOptional {
+		
+		@Search
+		public List<DiagnosticReport> findDiagnosticReportsByPatient (
+				@RequiredParam(name=DiagnosticReport.SP_SUBJECT + '.' + Patient.SP_IDENTIFIER) IdentifierDt thePatientId, 
+				@OptionalParam(name=DiagnosticReport.SP_NAME) CodingListParam theNames,
+				@OptionalParam(name=DiagnosticReport.SP_DATE) DateRangeParam theDateRange,
+				@IncludeParam(allow= {"DiagnosticReport.result"}) Set<Include> theIncludes
+				) throws Exception {
+			return null;
+		}
+
+		
+	}
+	
 
 }

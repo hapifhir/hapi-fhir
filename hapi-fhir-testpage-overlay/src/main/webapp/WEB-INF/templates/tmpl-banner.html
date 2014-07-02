@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<div th:fragment="banner">
+	<div class="row">
+		<div class="col-md-8">
+			<img src="img/hapi_fhir_banner.png" />
+		</div>
+		<div class="col-md-4">
+			<img src="img/hapi_fhir_banner_right.png" align="right" />
+		</div>
+	</div>
+	
+	<!-- Error banner in case anything went wrong -->	
+	<div class="alert  alert-danger alert-dismissable" th:if="${errorMsg} != null">
+		<strong>Warning!</strong>
+		<p th:text="${errorMsg}"></p>
+	</div>
+	
+</div>
+</html>

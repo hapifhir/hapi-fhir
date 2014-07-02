@@ -123,7 +123,7 @@ public class FhirSystemDao extends BaseFhirDao implements IFhirSystemDao {
 		for (int i = 0; i < theResources.size(); i++) {
 			IResource resource = theResources.get(i);
 			ResourceTable table = persistedResources.get(i);
-			updateEntity(resource, table, table.getId() != null);
+			updateEntity(resource, table, table.getId() != null, false);
 		}
 		
 		long delay = System.currentTimeMillis() - start;

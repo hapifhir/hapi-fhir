@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<div th:fragment="left" class="col-sm-3 col-md-3 sidebar">
+
+	<h4>Options</h4>
+
+	<label class="navBarButtonLabel">Encoding</label>
+	<div class="btn-group " data-toggle="buttons" id="encodingBtnGroup">
+		<label class="btn btn-sm btn-default active"> <input
+			type="radio" name="encoding" id="encode-default" value="" />(default)
+		</label> <label class="btn btn-sm btn-default"> <input
+			type="radio" name="encoding" id="encode-xml" value="xml" />XML
+		</label> <label class="btn btn-sm btn-default"> <input
+			type="radio" name="encoding" id="encode-json" value="json" />JSON
+		</label>
+	</div>
+
+	<br /> <label class="navBarButtonLabel">Pretty</label>
+	<div class="btn-group top-buffer" data-toggle="buttons">
+		<label class="btn btn-sm btn-default active"> <input
+			type="radio" name="pretty" id="pretty-default" value="" />(default)
+		</label> <label class="btn btn-sm btn-default"> <input
+			type="radio" name="pretty" id="pretty-true" value="true" />On
+		</label> <label class="btn btn-sm btn-default"> <input
+			type="radio" name="pretty" id="pretty-false" value="false" />Off
+		</label>
+	</div>
+
+	<script type="text/javascript">
+	$( document ).ready(function() {
+		<th:block th:switch="${encoding}">
+			<th:block th:case="'xml'">
+				$('#encode-xml').trigger("click");
+			</th:block>
+			<th:block th:case="'json'">
+				$('#encode-json').trigger("click");
+			</th:block>
+		</th:block>
+		<th:block th:switch="${pretty}">
+			<th:block th:case="'true'">
+				$('#pretty-true').trigger("click");
+			</th:block>
+			<th:block th:case="'false'">
+				$('#pretty-false').trigger("click");
+			</th:block>
+		</th:block>
+	});
+	
+	function doAction(source, action, resourceName) {
+		var target = $(source);
+		setResource(target, resourceName);
+		
+		$("#outerForm").attr("action", action);
+		$('#outerForm').submit();
+	}
+	</script>
+
+	<h4>Server</h4>
+
+	<ul class="nav nav-sidebar">
+		<li th:class="${resourceName.empty} ? 'active' : ''">
+			<a href="#" onclick="doAction(this, 'home', null);">Server Home</a>
+		</li>
+	</ul>
+
+	<h4>Resources</h4>
+	
+	<ul class="nav nav-sidebar">
+		<th:block
+			th:each="resource, resIterStat : ${conf.restFirstRep.resource}">
+			<li th:class="${resourceName} == ${resource.type.valueAsString} ? 'active' : ''">
+				<a href="#" th:onclick="'doAction(this, \'resource\', \'' + ${resource.type.valueAsString} + '\');'">
+					<th:block th:text="${resource.type.valueAsString}" >Patient</th:block>
+					<span class="badge" th:if="${resourceCounts[resource.type.valueAsString]} != null" th:text="${resourceCounts[resource.type.valueAsString]}"/>
+				</a>
+			</li>
+		</th:block>
+	</ul>
+	
+	<input th:if="${resourceName.empty} == false" type="hidden" id="resource" name="resource" th:value="${resourceName}"/>
+
+</div>
+
+
+</html>

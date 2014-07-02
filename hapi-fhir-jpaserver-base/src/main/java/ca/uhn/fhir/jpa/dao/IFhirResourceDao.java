@@ -20,6 +20,8 @@ public interface IFhirResourceDao<T extends IResource> {
 
 	MethodOutcome create(T theResource);
 
+	MethodOutcome delete(IdDt theResource);
+
 	TagList getAllResourceTags();
 
 	Class<T> getResourceType();

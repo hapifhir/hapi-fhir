@@ -157,7 +157,7 @@ public class GetTagsMethodBinding extends BaseMethodBinding<TagList> {
 
 		TagList resp = (TagList) invokeServerMethod(params);
 
-		EncodingEnum responseEncoding = RestfulServer.determineResponseEncoding(theRequest);
+		EncodingEnum responseEncoding = RestfulServer.determineResponseEncoding(theRequest.getServletRequest());
 
 		theResponse.setContentType(responseEncoding.getResourceContentType());
 		theResponse.setStatus(Constants.STATUS_HTTP_200_OK);

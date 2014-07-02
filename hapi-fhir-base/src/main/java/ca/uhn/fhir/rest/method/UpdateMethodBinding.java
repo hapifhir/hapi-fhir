@@ -73,18 +73,17 @@ public class UpdateMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 	@Override
 	protected void addParametersForServerRequest(Request theRequest, Object[] theParams) {
 		/*
-		 * We are being a bit lenient here, since technically the client is
-		 * supposed to include the version in the Content-Location header, but
-		 * we allow it in the PUT URL as well..
+		 * We are being a bit lenient here, since technically the client is supposed to include the version in the
+		 * Content-Location header, but we allow it in the PUT URL as well..
 		 */
 		String locationHeader = theRequest.getServletRequest().getHeader(Constants.HEADER_CONTENT_LOCATION);
 		IdDt id = new IdDt(locationHeader);
 		if (isNotBlank(id.getResourceType())) {
 			if (!getResourceName().equals(id.getResourceType())) {
-				throw new InvalidRequestException("Attempting to update '"+getResourceName()+ "' but content-location header specifies different resource type '"+id.getResourceType()+"' - header value: " + locationHeader);
+				throw new InvalidRequestException("Attempting to update '" + getResourceName() + "' but content-location header specifies different resource type '" + id.getResourceType() + "' - header value: " + locationHeader);
 			}
 		}
-		
+
 		if (isNotBlank(locationHeader)) {
 			MethodOutcome mo = new MethodOutcome();
 			parseContentLocation(mo, getResourceName(), locationHeader);
@@ -126,15 +125,24 @@ public class UpdateMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 	}
 
 	public static HttpPutClientInvocation createUpdateInvocation(IResource theResource, IdDt idDt, IdDt versionIdDt, FhirContext context) {
-		String id = idDt.getValue();
 		String resourceName = context.getResourceDefinition(theResource).getName();
 		StringBuilder urlExtension = new StringBuilder();
 		urlExtension.append(resourceName);
 		urlExtension.append('/');
-		urlExtension.append(id);
+		urlExtension.append(idDt.getIdPart());
 		HttpPutClientInvocation retVal = new HttpPutClientInvocation(context, theResource, urlExtension.toString());
 
-		if (versionIdDt != null) {
+		if (idDt.hasVersionIdPart()) {
+			String versionId = versionIdDt.getValue();
+			if (StringUtils.isNotBlank(versionId)) {
+				StringBuilder b = new StringBuilder();
+				b.append('/');
+				b.append(urlExtension);
+				b.append("/_history/");
+				b.append(versionId);
+				retVal.addHeader(Constants.HEADER_CONTENT_LOCATION, b.toString());
+			}
+		} else if (versionIdDt != null) {
 			String versionId = versionIdDt.getValue();
 			if (StringUtils.isNotBlank(versionId)) {
 				StringBuilder b = new StringBuilder();
@@ -145,7 +153,7 @@ public class UpdateMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 				retVal.addHeader(Constants.HEADER_CONTENT_LOCATION, b.toString());
 			}
 		}
-		
+
 		addTagsToPostOrPut(theResource, retVal);
 
 		return retVal;
@@ -158,7 +166,7 @@ public class UpdateMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 				if (theRequest.getVersionId() == null) {
 					return false;
 				}
-			}else {
+			} else {
 				if (theRequest.getVersionId() != null) {
 					return false;
 				}

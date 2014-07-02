@@ -69,6 +69,7 @@ public class PlainProviderTest {
 
 		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();
+		
 		builder.setConnectionManager(connectionManager);
 		myClient = builder.build();
 
@@ -90,6 +91,7 @@ public class PlainProviderTest {
 		HttpResponse status = myClient.execute(httpGet);
 
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
@@ -102,6 +104,8 @@ public class PlainProviderTest {
 
 		assertEquals(uri, bundle.getLinkSelf().getValue());
 		assertEquals(baseUri, bundle.getLinkBase().getValue());
+		
+		httpGet.releaseConnection();
 	}
 	
 	@Test
@@ -114,6 +118,7 @@ public class PlainProviderTest {
 		HttpResponse status = myClient.execute(new HttpGet(baseUri + "/_history?_since=2012-01-02T00%3A01%3A02&_count=12"));
 
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info("Response was:\n{}", responseContent);
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		Bundle bundle = myCtx.newXmlParser().parseBundle(responseContent);
@@ -124,14 +129,16 @@ public class PlainProviderTest {
 
 		status = myClient.execute(new HttpGet(baseUri + "/_history?&_count=12"));
 		responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		bundle = myCtx.newXmlParser().parseBundle(responseContent);
 		assertEquals(3, bundle.getEntries().size());
 		assertNull(provider.myLastSince.getValueAsString());
 		assertThat(provider.myLastCount.getValueAsString(), IsEqual.equalTo("12"));
-
+		
 		status =myClient.execute(new HttpGet(baseUri + "/_history?_since=2012-01-02T00%3A01%3A02"));
 		responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		bundle = myCtx.newXmlParser().parseBundle(responseContent);
 		assertEquals(3, bundle.getEntries().size());
@@ -140,6 +147,7 @@ public class PlainProviderTest {
 
 		status =myClient.execute(new HttpGet(baseUri + "/_history"));
 		responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		bundle = myCtx.newXmlParser().parseBundle(responseContent);
 		assertEquals(3, bundle.getEntries().size());

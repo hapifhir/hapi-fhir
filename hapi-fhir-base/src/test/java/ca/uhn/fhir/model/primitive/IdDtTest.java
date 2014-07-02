@@ -2,6 +2,8 @@ package ca.uhn.fhir.model.primitive;
 
 import static org.junit.Assert.assertEquals;
 
+import java.math.BigDecimal;
+
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -29,6 +31,15 @@ public class IdDtTest {
 
 	}
 
+	@Test
+	public void testBigDecimalIds() {
+		
+		IdDt id = new IdDt(new BigDecimal("123"));
+		assertEquals(id.asBigDecimal(), new BigDecimal("123"));
+		assertEquals(id.getIdPartAsBigDecimal(), new BigDecimal("123"));
+		
+	}
+	
 	@Test
 	public void testParseValueAbsoluteWithVersion() {
 		Patient patient = new Patient();

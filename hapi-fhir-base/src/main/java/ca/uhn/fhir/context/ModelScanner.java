@@ -35,6 +35,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TreeMap;
@@ -90,11 +91,15 @@ class ModelScanner {
 	ModelScanner(Class<? extends IResource> theResourceTypes) throws ConfigurationException {
 		Set<Class<? extends IElement>> singleton = new HashSet<Class<? extends IElement>>();
 		singleton.add(theResourceTypes);
-		init(singleton);
+		init(null,singleton);
 	}
 
 	ModelScanner(Collection<Class<? extends IResource>> theResourceTypes) throws ConfigurationException {
-		init(new HashSet<Class<? extends IElement>>(theResourceTypes));
+		init(null, new HashSet<Class<? extends IElement>>(theResourceTypes));
+	}
+
+	ModelScanner(Map<Class<? extends IElement>, BaseRuntimeElementDefinition<?>> theExistingDefinitions, Collection<Class<? extends IResource>> theResourceTypes) throws ConfigurationException {
+		init(theExistingDefinitions, new HashSet<Class<? extends IElement>>(theResourceTypes));
 	}
 
 	public Map<Class<? extends IElement>, BaseRuntimeElementDefinition<?>> getClassToElementDefinitions() {
@@ -147,7 +152,12 @@ class ModelScanner {
 		}
 	}
 
-	private void init(Set<Class<? extends IElement>> toScan) {
+	private void init(Map<Class<? extends IElement>, BaseRuntimeElementDefinition<?>> theExistingDefinitions, Set<Class<? extends IElement>> toScan) {
+		if (theExistingDefinitions!=null) {
+			myClassToElementDefinitions.putAll(theExistingDefinitions);
+		}
+		
+		int startSize = myClassToElementDefinitions.size();
 		long start = System.currentTimeMillis();
 
 		InputStream str = ModelScanner.class.getResourceAsStream("/ca/uhn/fhir/model/dstu/model.properties");
@@ -199,7 +209,11 @@ class ModelScanner {
 			myScanAlso.clear();
 		} while (!toScan.isEmpty());
 
-		for (BaseRuntimeElementDefinition<?> next : myClassToElementDefinitions.values()) {
+		for (Entry<Class<? extends IElement>, BaseRuntimeElementDefinition<?>> nextEntry : myClassToElementDefinitions.entrySet()) {
+			if (theExistingDefinitions!=null&&theExistingDefinitions.containsKey(nextEntry.getKey())) {
+				continue;
+			}
+			BaseRuntimeElementDefinition<?> next = nextEntry.getValue();
 			next.sealAndInitialize(myClassToElementDefinitions);
 		}
 
@@ -207,7 +221,8 @@ class ModelScanner {
 		myRuntimeChildUndeclaredExtensionDefinition.sealAndInitialize(myClassToElementDefinitions);
 
 		long time = System.currentTimeMillis() - start;
-		ourLog.info("Done scanning FHIR library, found {} model entries in {}ms", myClassToElementDefinitions.size(), time);
+		int size = myClassToElementDefinitions.size()- startSize;
+		ourLog.info("Done scanning FHIR library, found {} model entries in {}ms", size, time);
 	}
 
 	private void scan(Class<? extends IElement> theClass) throws ConfigurationException {

@@ -43,6 +43,7 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 
 public class FhirResourceDaoTest {
 
@@ -54,9 +55,27 @@ public class FhirResourceDaoTest {
 	private static IFhirResourceDao<DiagnosticReport> ourDiagnosticReportDao;
 	private static IFhirResourceDao<Organization> ourOrganizationDao;
 	private static IFhirResourceDao<Location> ourLocationDao;
-
 	private static Date ourTestStarted;
+
 	private static IFhirResourceDao<Encounter> ourEncounterDao;
+
+	@Test
+	public void testStoreUnversionedResources() {
+		Organization o1 = new Organization();
+		o1.getName().setValue("AAA");
+		IdDt o1id = ourOrganizationDao.create(o1).getId();
+		assertTrue(o1id.hasVersionIdPart());
+
+		Patient p1 = new Patient();
+		p1.addName().addFamily("AAAA");
+		p1.getManagingOrganization().setReference(o1id);
+		IdDt p1id = ourPatientDao.create(p1).getId();
+
+		p1 = ourPatientDao.read(p1id);
+
+		assertFalse(p1.getManagingOrganization().getReference().hasVersionIdPart());
+		assertEquals(o1id.toUnqualifiedVersionless(), p1.getManagingOrganization().getReference().toUnqualifiedVersionless());
+	}
 
 	@Test
 	public void testIdParam() {
@@ -71,19 +90,19 @@ public class FhirResourceDaoTest {
 		Date now = new Date();
 
 		{
-		Patient retrieved = ourPatientDao.read(outcome.getId());
-		InstantDt published = (InstantDt) retrieved.getResourceMetadata().get(ResourceMetadataKeyEnum.PUBLISHED);
-		InstantDt updated = (InstantDt) retrieved.getResourceMetadata().get(ResourceMetadataKeyEnum.UPDATED);
-		assertTrue(published.before(now));
-		assertTrue(updated.before(now));
+			Patient retrieved = ourPatientDao.read(outcome.getId());
+			InstantDt published = (InstantDt) retrieved.getResourceMetadata().get(ResourceMetadataKeyEnum.PUBLISHED);
+			InstantDt updated = (InstantDt) retrieved.getResourceMetadata().get(ResourceMetadataKeyEnum.UPDATED);
+			assertTrue(published.before(now));
+			assertTrue(updated.before(now));
 		}
-		
+
 		// Now search by _id
 		{
 			SearchParameterMap paramMap = new SearchParameterMap();
 			paramMap.add("_id", new StringParam(outcome.getId().getIdPart()));
 			List<Patient> ret = toList(ourPatientDao.search(paramMap));
-			assertEquals(1,ret.size());
+			assertEquals(1, ret.size());
 			Patient p = ret.get(0);
 			assertEquals("Tester", p.getNameFirstRep().getFamilyAsSingleString());
 		}
@@ -92,7 +111,7 @@ public class FhirResourceDaoTest {
 			paramMap.add("_id", new StringParam(outcome.getId().getIdPart()));
 			paramMap.add(Patient.SP_NAME, new StringParam("tester"));
 			List<Patient> ret = toList(ourPatientDao.search(paramMap));
-			assertEquals(1,ret.size());
+			assertEquals(1, ret.size());
 			Patient p = ret.get(0);
 			assertEquals("Tester", p.getNameFirstRep().getFamilyAsSingleString());
 		}
@@ -101,7 +120,7 @@ public class FhirResourceDaoTest {
 			paramMap.add(Patient.SP_NAME, new StringParam("tester"));
 			paramMap.add("_id", new StringParam(outcome.getId().getIdPart()));
 			List<Patient> ret = toList(ourPatientDao.search(paramMap));
-			assertEquals(1,ret.size());
+			assertEquals(1, ret.size());
 			Patient p = ret.get(0);
 			assertEquals("Tester", p.getNameFirstRep().getFamilyAsSingleString());
 		}
@@ -110,7 +129,7 @@ public class FhirResourceDaoTest {
 			paramMap.add(Patient.SP_NAME, new StringParam("tester"));
 			paramMap.add("_id", new StringParam("000"));
 			List<Patient> ret = toList(ourPatientDao.search(paramMap));
-			assertEquals(0,ret.size());
+			assertEquals(0, ret.size());
 		}
 	}
 
@@ -166,7 +185,7 @@ public class FhirResourceDaoTest {
 		assertEquals(1, found.size());
 
 		// If this throws an exception, that would be an acceptable outcome as well..
-		found = toList(ourPatientDao.search(Patient.SP_BIRTHDATE+"AAAA", new QualifiedDateParam(QuantityCompararatorEnum.GREATERTHAN, "2000-01-01")));
+		found = toList(ourPatientDao.search(Patient.SP_BIRTHDATE + "AAAA", new QualifiedDateParam(QuantityCompararatorEnum.GREATERTHAN, "2000-01-01")));
 		assertEquals(0, found.size());
 
 	}
@@ -221,12 +240,12 @@ public class FhirResourceDaoTest {
 		assertEquals(1, found.size());
 		assertEquals(id, found.get(0).getId().getIdPartAsLong().longValue());
 
-//		found = ourPatientDao.search(Patient.SP_GENDER, new IdentifierDt(null, "M"));
-//		assertEquals(1, found.size());
-//		assertEquals(id, found.get(0).getId().asLong().longValue());
-//
-//		found = ourPatientDao.search(Patient.SP_GENDER, new IdentifierDt(null, "F"));
-//		assertEquals(0, found.size());
+		// found = ourPatientDao.search(Patient.SP_GENDER, new IdentifierDt(null, "M"));
+		// assertEquals(1, found.size());
+		// assertEquals(id, found.get(0).getId().asLong().longValue());
+		//
+		// found = ourPatientDao.search(Patient.SP_GENDER, new IdentifierDt(null, "F"));
+		// assertEquals(0, found.size());
 
 		SearchParameterMap map = new SearchParameterMap();
 		map.put(Patient.SP_IDENTIFIER, new ArrayList<List<IQueryParameterType>>());
@@ -235,7 +254,7 @@ public class FhirResourceDaoTest {
 		map.put(Patient.SP_GENDER, new ArrayList<List<IQueryParameterType>>());
 		map.get(Patient.SP_GENDER).add(new ArrayList<IQueryParameterType>());
 		map.get(Patient.SP_GENDER).get(0).add(new IdentifierDt(AdministrativeGenderCodesEnum.M.getSystem(), "M"));
-		found =toList( ourPatientDao.search(map));
+		found = toList(ourPatientDao.search(map));
 		assertEquals(1, found.size());
 		assertEquals(id, found.get(0).getId().getIdPartAsLong().longValue());
 
@@ -246,7 +265,7 @@ public class FhirResourceDaoTest {
 		map.put(Patient.SP_GENDER, new ArrayList<List<IQueryParameterType>>());
 		map.get(Patient.SP_GENDER).add(new ArrayList<IQueryParameterType>());
 		map.get(Patient.SP_GENDER).get(0).add(new IdentifierDt(AdministrativeGenderCodesEnum.M.getSystem(), "F"));
-		found =toList( ourPatientDao.search(map));
+		found = toList(ourPatientDao.search(map));
 		assertEquals(0, found.size());
 
 	}
@@ -311,7 +330,6 @@ public class FhirResourceDaoTest {
 		assertEquals(1, patients.size());
 		assertEquals(id1.getIdPart(), patients.get(0).getId().getIdPart());
 
-		
 		params = new HashMap<String, IQueryParameterType>();
 		params.put(Patient.SP_FAMILY, new StringDt("testSearchNameParam01Foo"));
 		patients = toList(ourPatientDao.search(params));
@@ -437,14 +455,77 @@ public class FhirResourceDaoTest {
 		assertEquals(0, patients.size());
 
 	}
-	
+
+	@Test
+	public void testDelete() {
+		int initialHistory = ourPatientDao.history(null).size();
+
+		IdDt id1;
+		IdDt id2;
+		IdDt id2b;
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier("urn:system", "001");
+			patient.addName().addFamily("Tester_testDelete").addGiven("Joe");
+			id1 = ourPatientDao.create(patient).getId();
+		}
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier("urn:system", "002");
+			patient.addName().addFamily("Tester_testDelete").addGiven("John");
+			id2 = ourPatientDao.create(patient).getId();
+		}
+		{
+			Patient patient = ourPatientDao.read(id2);
+			patient.addIdentifier("ZZZZZZZ", "ZZZZZZZZZ");
+			id2b = ourPatientDao.update(patient, id2).getId();
+		}
+		ourLog.info("ID1:{}   ID2:{}   ID2b:{}", new Object[] { id1, id2, id2b });
+
+		Map<String, IQueryParameterType> params = new HashMap<String, IQueryParameterType>();
+		params.put(Patient.SP_FAMILY, new StringDt("Tester_testDelete"));
+		List<Patient> patients = toList(ourPatientDao.search(params));
+		assertEquals(2, patients.size());
+
+		ourPatientDao.delete(id1);
+
+		patients = toList(ourPatientDao.search(params));
+		assertEquals(1, patients.size());
+
+		ourPatientDao.read(id1);
+		try {
+			ourPatientDao.read(id1.toVersionless());
+			fail();
+		} catch (ResourceGoneException e) {
+			// good
+		}
+
+		IBundleProvider history = ourPatientDao.history(null);
+		assertEquals(4 + initialHistory, history.size());
+		List<IResource> resources = history.getResources(0, 4);
+		assertNotNull(resources.get(0).getResourceMetadata().get(ResourceMetadataKeyEnum.DELETED_AT));
+
+		try {
+			ourPatientDao.delete(id2);
+			fail();
+		} catch (InvalidRequestException e) {
+			// good
+		}
+
+		ourPatientDao.delete(id2.toVersionless());
+
+		patients = toList(ourPatientDao.search(params));
+		assertEquals(0, patients.size());
+
+	}
+
 	@Test
 	public void testSearchWithIncludes() {
 		{
 			Organization org = new Organization();
 			org.getName().setValue("testSearchWithIncludes_O1");
 			IdDt orgId = ourOrganizationDao.create(org).getId();
-			
+
 			Patient patient = new Patient();
 			patient.addIdentifier("urn:system", "001");
 			patient.addName().addFamily("Tester_testSearchWithIncludes_P1").addGiven("Joe");
@@ -473,8 +554,7 @@ public class FhirResourceDaoTest {
 		assertEquals(1, patients.size());
 
 	}
-	
-	
+
 	@Test
 	public void testDatePeriodParamStartOnly() {
 		{
@@ -509,7 +589,7 @@ public class FhirResourceDaoTest {
 		assertEquals(0, encs.size());
 
 		params = new SearchParameterMap();
-		params.add(Encounter.SP_DATE, new DateRangeParam("2001-01-03",null));
+		params.add(Encounter.SP_DATE, new DateRangeParam("2001-01-03", null));
 		params.add(Encounter.SP_IDENTIFIER, new IdentifierDt("testDatePeriodParam", "01"));
 		encs = toList(ourEncounterDao.search(params));
 		assertEquals(0, encs.size());
@@ -550,14 +630,13 @@ public class FhirResourceDaoTest {
 		assertEquals(0, encs.size());
 
 		params = new SearchParameterMap();
-		params.add(Encounter.SP_DATE, new DateRangeParam( "2001-01-03",null));
+		params.add(Encounter.SP_DATE, new DateRangeParam("2001-01-03", null));
 		params.add(Encounter.SP_IDENTIFIER, new IdentifierDt("testDatePeriodParam", "02"));
 		encs = toList(ourEncounterDao.search(params));
 		assertEquals(0, encs.size());
 
 	}
 
-	
 	@SuppressWarnings("unchecked")
 	private <T extends IResource> List<T> toList(IBundleProvider theSearch) {
 		return (List<T>) theSearch.getResources(0, theSearch.size());
@@ -579,10 +658,10 @@ public class FhirResourceDaoTest {
 		List<Encounter> encs = toList(ourEncounterDao.search(params));
 		assertEquals(1, encs.size());
 
-		 params = new SearchParameterMap();
+		params = new SearchParameterMap();
 		params.add(Encounter.SP_DATE, new DateRangeParam("2001-01-02", "2001-01-06"));
 		params.add(Encounter.SP_IDENTIFIER, new IdentifierDt("testDatePeriodParam", "03"));
-		 encs = toList(ourEncounterDao.search(params));
+		encs = toList(ourEncounterDao.search(params));
 		assertEquals(1, encs.size());
 
 		params = new SearchParameterMap();
@@ -610,14 +689,13 @@ public class FhirResourceDaoTest {
 		assertEquals(0, encs.size());
 
 		params = new SearchParameterMap();
-		params.add(Encounter.SP_DATE, new DateRangeParam( "2001-01-05",null));
+		params.add(Encounter.SP_DATE, new DateRangeParam("2001-01-05", null));
 		params.add(Encounter.SP_IDENTIFIER, new IdentifierDt("testDatePeriodParam", "03"));
 		encs = toList(ourEncounterDao.search(params));
 		assertEquals(0, encs.size());
 
 	}
 
-	
 	@Test
 	public void testSearchStringParamWithNonNormalized() {
 		{
@@ -694,7 +772,7 @@ public class FhirResourceDaoTest {
 		assertFalse(outcome.getId().isEmpty());
 
 		assertEquals("1", outcome.getId().getVersionIdPart());
-		
+
 		Date now = new Date();
 		Patient retrieved = ourPatientDao.read(outcome.getId());
 		InstantDt published = (InstantDt) retrieved.getResourceMetadata().get(ResourceMetadataKeyEnum.PUBLISHED);
@@ -730,20 +808,20 @@ public class FhirResourceDaoTest {
 		 * Get history
 		 */
 
-		IBundleProvider historyBundle = ourPatientDao.history(outcome.getId(),null);
+		IBundleProvider historyBundle = ourPatientDao.history(outcome.getId(), null);
 
 		assertEquals(2, historyBundle.size());
-		
+
 		List<IResource> history = historyBundle.getResources(0, 2);
 		assertEquals("1", history.get(1).getId().getVersionIdPart());
 		assertEquals("2", history.get(0).getId().getVersionIdPart());
 		assertEquals(published, history.get(1).getResourceMetadata().get(ResourceMetadataKeyEnum.PUBLISHED));
 		assertEquals(published, history.get(1).getResourceMetadata().get(ResourceMetadataKeyEnum.PUBLISHED));
 		assertEquals(updated, history.get(1).getResourceMetadata().get(ResourceMetadataKeyEnum.UPDATED));
-		assertEquals("001", ((Patient)history.get(1)).getIdentifierFirstRep().getValue().getValue());
+		assertEquals("001", ((Patient) history.get(1)).getIdentifierFirstRep().getValue().getValue());
 		assertEquals(published2, history.get(0).getResourceMetadata().get(ResourceMetadataKeyEnum.PUBLISHED));
 		assertEquals(updated2, history.get(0).getResourceMetadata().get(ResourceMetadataKeyEnum.UPDATED));
-		assertEquals("002", ((Patient)history.get(0)).getIdentifierFirstRep().getValue().getValue());
+		assertEquals("002", ((Patient) history.get(0)).getIdentifierFirstRep().getValue().getValue());
 
 	}
 
