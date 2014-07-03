@@ -222,6 +222,7 @@ public class JsonParser extends BaseParser implements IParser {
 		eventWriter.writeEnd(); // entry array
 
 		eventWriter.writeEnd();
+		eventWriter.flush();
 		eventWriter.close();
 	}
 
@@ -506,6 +507,7 @@ public class JsonParser extends BaseParser implements IParser {
 		RuntimeResourceDefinition resDef = myContext.getResourceDefinition(theResource);
 		encodeResourceToJsonStreamWriter(resDef, theResource, eventWriter, null,false);
 		eventWriter.flush();
+		eventWriter.close();
 	}
 
 	@Override
@@ -536,6 +538,7 @@ public class JsonParser extends BaseParser implements IParser {
 
 		eventWriter.writeEnd();
 		eventWriter.flush();
+		eventWriter.close();
 	}
 
 	/**

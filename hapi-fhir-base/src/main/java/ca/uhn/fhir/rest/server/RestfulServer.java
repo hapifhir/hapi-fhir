@@ -45,6 +45,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -557,7 +558,7 @@ public class RestfulServer extends HttpServlet {
 				statusCode=((BaseServerResponseException) e).getStatusCode();
 				issue.getDetails().setValue(e.getMessage());
 			} else {
-				ourLog.warn("Failure during REST processing: {}", e.toString());
+				ourLog.error("Failure during REST processing: {}"+ e.toString(), e);
 				issue.getDetails().setValue(e.toString() + "\n\n" + ExceptionUtils.getStackTrace(e));
 			}
 
@@ -779,6 +780,14 @@ public class RestfulServer extends HttpServlet {
 		bundle.getLinkSelf().setValue(theCompleteUrl);
 
 		for (IResource next : theResult) {
+			
+			if (theContext.getNarrativeGenerator() != null) {
+				String title = theContext.getNarrativeGenerator().generateTitle(next);
+				if (StringUtils.isNotBlank(title)) {
+					ResourceMetadataKeyEnum.TITLE.put(next, title);
+				}
+			}
+			
 			bundle.addResource(next, theContext, theServerBase);
 		}
 
@@ -1019,6 +1028,7 @@ public class RestfulServer extends HttpServlet {
 				RestfulServer.getNewParser(theServer.getFhirContext(), theResponseEncoding, thePrettyPrint, theNarrativeMode).encodeBundleToWriter(bundle, writer);
 			}
 		} finally {
+			writer.flush();
 			writer.close();
 		}
 	}
@@ -1093,6 +1103,7 @@ public class RestfulServer extends HttpServlet {
 				RestfulServer.getNewParser(theServer.getFhirContext(), theResponseEncoding, thePrettyPrint, theNarrativeMode).encodeResourceToWriter(theResource, writer);
 			}
 		} finally {
+			writer.flush();
 			writer.close();
 		}
 	}

@@ -17,6 +17,8 @@ import ca.uhn.fhir.model.primitive.InstantDt;
 @MappedSuperclass
 public abstract class BaseHasResource {
 
+	private static final int MAX_TITLE_LENGTH = 100;
+
 	@Column(name = "RES_DELETED_AT", nullable = true)
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date myDeleted;
@@ -32,6 +34,9 @@ public abstract class BaseHasResource {
 	@Column(name = "RES_TEXT", length = Integer.MAX_VALUE - 1, nullable = false)
 	@Lob()
 	private byte[] myResource;
+
+	@Column(name = "RES_TITLE", nullable = true, length = MAX_TITLE_LENGTH)
+	private String myTitle;
 
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "RES_UPDATED", nullable = false)
@@ -61,6 +66,10 @@ public abstract class BaseHasResource {
 
 	public abstract Collection<? extends BaseTag> getTags();
 
+	public String getTitle() {
+		return myTitle;
+	}
+
 	public InstantDt getUpdated() {
 		return new InstantDt(myUpdated);
 	}
@@ -85,6 +94,10 @@ public abstract class BaseHasResource {
 
 	public void setResource(byte[] theResource) {
 		myResource = theResource;
+	}
+
+	public void setTitle(String theTitle) {
+		myTitle = theTitle;
 	}
 
 	public void setUpdated(Date theUpdated) {

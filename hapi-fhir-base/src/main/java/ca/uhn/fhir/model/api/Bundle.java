@@ -221,7 +221,12 @@ public class Bundle extends BaseBundle /* implements IElement */{
 		RuntimeResourceDefinition def = theContext.getResourceDefinition(theResource);
 
 		if (theResource.getId() != null && StringUtils.isNotBlank(theResource.getId().getValue())) {
-			entry.getTitle().setValue(def.getName() + " " + theResource.getId().getValue());
+			String title = ResourceMetadataKeyEnum.TITLE.get(theResource);
+			if (title != null) {
+				entry.getTitle().setValue(title);
+			} else {
+				entry.getTitle().setValue(def.getName() + " " + theResource.getId().getValue());
+			}
 
 			StringBuilder b = new StringBuilder();
 			b.append(theServerBase);

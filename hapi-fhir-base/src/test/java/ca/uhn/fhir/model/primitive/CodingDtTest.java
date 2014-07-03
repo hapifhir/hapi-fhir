@@ -4,37 +4,37 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
-import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
+import ca.uhn.fhir.model.dstu.composite.CodingDt;
 
-public class IdentifierDtTest {
+public class CodingDtTest {
 
 	@Test
 	public void testTokenWithPipeInValue() {
-		IdentifierDt dt = new IdentifierDt();
+		CodingDt dt = new CodingDt();
 		dt.setValueAsQueryToken(null, "a|b|c");
 		
 		assertEquals("a", dt.getSystem().getValueAsString());
-		assertEquals("b|c", dt.getValue().getValue());
+		assertEquals("b|c", dt.getCode().getValue());
 		assertEquals("a|b|c", dt.getValueAsQueryToken());
 	}
 
 	@Test
 	public void testTokenWithPipeInValueAndNoSystem() {
-		IdentifierDt dt = new IdentifierDt();
+		CodingDt dt = new CodingDt();
 		dt.setValueAsQueryToken(null, "|b|c");
 		
 		assertEquals("", dt.getSystem().getValueAsString());
-		assertEquals("b|c", dt.getValue().getValue());
+		assertEquals("b|c", dt.getCode().getValue());
 		assertEquals("|b|c", dt.getValueAsQueryToken());
 	}
 
 	@Test
 	public void testTokenNoSystem() {
-		IdentifierDt dt = new IdentifierDt();
+		CodingDt dt = new CodingDt();
 		dt.setValueAsQueryToken(null, "c");
 		
 		assertEquals(null, dt.getSystem().getValueAsString());
-		assertEquals("c", dt.getValue().getValue());
+		assertEquals("c", dt.getCode().getValue());
 		assertEquals("c", dt.getValueAsQueryToken());
 	}
 

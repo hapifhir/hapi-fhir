@@ -11,6 +11,7 @@
 	<bean class="ca.uhn.fhir.to.TesterConfig">
 		<property name="servers">
 			<list>
+				<value>test, TEST, http://uhnvesb01d.uhn.on.ca:25180/uhn-fhir-service-1.2/</value>
 				<value>home     , Localhost Server                , http://localhost:8887/fhir/context </value>
 				<value>hi       , Health Intersections            , http://fhir.healthintersections.com.au/open</value>
 				<value>furore   , Spark - Furore Reference Server , http://spark.furore.com/fhir</value>

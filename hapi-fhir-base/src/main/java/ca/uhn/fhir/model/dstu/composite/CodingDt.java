@@ -407,9 +407,11 @@ public class CodingDt
 	@Override
 	public String getValueAsQueryToken() {
 		if (org.apache.commons.lang3.StringUtils.isNotBlank(getSystem().getValueAsString())) {
-			return getSystem().getValueAsString() + '|' + getCode().getValueAsString(); 
-		} else {
+			return getSystem().getValueAsString() + '|' + getCode().getValueAsString();
+		} else if (getSystem().getValue()==null) {
 			return getCode().getValueAsString();
+		} else {
+			return '|' + getCode().getValueAsString();
 		}
 	}
 

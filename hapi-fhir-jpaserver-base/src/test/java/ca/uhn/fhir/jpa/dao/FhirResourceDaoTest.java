@@ -39,7 +39,9 @@ import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.exceptions.FhirClientConnectionException;
+import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.IdentifierListParam;
 import ca.uhn.fhir.rest.param.QualifiedDateParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
@@ -122,6 +124,50 @@ public class FhirResourceDaoTest {
 		assertEquals(o1id.toUnqualifiedVersionless(), p1.getManagingOrganization().getReference().toUnqualifiedVersionless());
 	}
 
+	@Test
+	public void testSearchTokenParam() {
+		Patient patient = new Patient();
+		patient.addIdentifier("urn:system", "testSearchTokenParam001");
+		patient.addName().addFamily("Tester").addGiven("testSearchTokenParam1");
+		ourPatientDao.create(patient);
+
+		patient = new Patient();
+		patient.addIdentifier("urn:system", "testSearchTokenParam002");
+		patient.addName().addFamily("Tester").addGiven("testSearchTokenParam2");
+		ourPatientDao.create(patient);
+
+		{
+			SearchParameterMap map = new SearchParameterMap();
+			map.add(Patient.SP_IDENTIFIER, new IdentifierDt("urn:system", "testSearchTokenParam001"));
+			IBundleProvider retrieved = ourPatientDao.search(map);
+			assertEquals(1, retrieved.size());
+		}
+		{
+			SearchParameterMap map = new SearchParameterMap();
+			map.add(Patient.SP_IDENTIFIER, new IdentifierDt(null, "testSearchTokenParam001"));
+			IBundleProvider retrieved = ourPatientDao.search(map);
+			assertEquals(1, retrieved.size());
+		}
+		{
+			SearchParameterMap map = new SearchParameterMap();
+			IdentifierListParam listParam = new IdentifierListParam();
+			listParam.addIdentifier(new IdentifierDt("urn:system", "testSearchTokenParam001"));
+			listParam.addIdentifier(new IdentifierDt("urn:system", "testSearchTokenParam002"));
+			map.add(Patient.SP_IDENTIFIER, listParam);
+			IBundleProvider retrieved = ourPatientDao.search(map);
+			assertEquals(2, retrieved.size());
+		}
+		{
+			SearchParameterMap map = new SearchParameterMap();
+			IdentifierListParam listParam = new IdentifierListParam();
+			listParam.addIdentifier(new IdentifierDt(null, "testSearchTokenParam001"));
+			listParam.addIdentifier(new IdentifierDt("urn:system", "testSearchTokenParam002"));
+			map.add(Patient.SP_IDENTIFIER, listParam);
+			IBundleProvider retrieved = ourPatientDao.search(map);
+			assertEquals(2, retrieved.size());
+		}
+	}
+	
 	@Test
 	public void testIdParam() {
 		Patient patient = new Patient();
@@ -360,6 +406,7 @@ public class FhirResourceDaoTest {
 			Patient patient = new Patient();
 			patient.addIdentifier("urn:system", "001");
 			patient.addName().addFamily("testSearchNameParam01Fam").addGiven("testSearchNameParam01Giv");
+			ResourceMetadataKeyEnum.TITLE.put(patient, "P1TITLE");
 			id1 = ourPatientDao.create(patient).getId();
 		}
 		{
@@ -374,6 +421,7 @@ public class FhirResourceDaoTest {
 		List<Patient> patients = toList(ourPatientDao.search(params));
 		assertEquals(1, patients.size());
 		assertEquals(id1.getIdPart(), patients.get(0).getId().getIdPart());
+		assertEquals("P1TITLE", ResourceMetadataKeyEnum.TITLE.get(patients.get(0)));
 
 		// Given name shouldn't return for family param
 		params = new HashMap<String, IQueryParameterType>();
