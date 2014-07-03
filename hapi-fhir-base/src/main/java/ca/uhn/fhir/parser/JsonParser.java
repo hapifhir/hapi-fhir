@@ -971,9 +971,10 @@ public class JsonParser extends BaseParser implements IParser {
 			theEventWriter.writeStartObject();
 			theEventWriter.write("url", ext.getUrl().getValue());
 
-			if (value == null && ext.getAllUndeclaredExtensions().isEmpty()) {
+			boolean noValue = value == null || value.isEmpty();
+			if (noValue && ext.getAllUndeclaredExtensions().isEmpty()) {
 				ourLog.debug("Extension with URL[{}] has no value", ext.getUrl().getValue());
-			} else if (value == null) {
+			} else if (noValue) {
 				theEventWriter.writeStartArray("extension");
 				for (ExtensionDt next : ext.getUndeclaredExtensions()) {
 					writeUndeclaredExt(theResDef, theResource, theEventWriter, next);
