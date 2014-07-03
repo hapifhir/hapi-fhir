@@ -431,7 +431,10 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 			ArrayList<Predicate> singleCodePredicates = (new ArrayList<Predicate>());
 			if (StringUtils.isNotBlank(system)) {
 				singleCodePredicates.add(builder.equal(from.get("mySystem"), system));
+			} else if (system == null) {
+				// don't check the system
 			} else {
+				// If the system is "", we only match on null systems
 				singleCodePredicates.add(builder.isNull(from.get("mySystem")));
 			}
 			if (StringUtils.isNotBlank(code)) {

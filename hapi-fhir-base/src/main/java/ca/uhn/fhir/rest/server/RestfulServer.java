@@ -20,11 +20,10 @@ package ca.uhn.fhir.rest.server;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.lang.reflect.Method;
@@ -46,8 +45,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.lang3.Validate;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -542,22 +542,26 @@ public class RestfulServer extends HttpServlet {
 			theResponse.setContentType("text/plain");
 			theResponse.setCharacterEncoding("UTF-8");
 			theResponse.getWriter().write(e.getMessage());
+			
 		} catch (Throwable e) {
-
-			int statusCode = 500;
-			if (e instanceof InternalErrorException) {
-				ourLog.error("Failure during REST processing", e);
-			} else if (e instanceof BaseServerResponseException) {
-				ourLog.warn("Failure during REST processing: {}", e.toString());
-				statusCode=((BaseServerResponseException) e).getStatusCode();
-			} else {
-				ourLog.warn("Failure during REST processing: {}", e.toString());
-			}
 
 			OperationOutcome oo = new OperationOutcome();
 			Issue issue = oo.addIssue();
 			issue.getSeverity().setValueAsEnum(IssueSeverityEnum.ERROR);
-			issue.getDetails().setValue(e.toString() + "\n\n" + ExceptionUtils.getStackTrace(e));
+			
+			int statusCode = 500;
+			if (e instanceof InternalErrorException) {
+				ourLog.error("Failure during REST processing", e);
+				issue.getDetails().setValue(e.toString() + "\n\n" + ExceptionUtils.getStackTrace(e));
+			} else if (e instanceof BaseServerResponseException) {
+				ourLog.warn("Failure during REST processing: {}", e.toString());
+				statusCode=((BaseServerResponseException) e).getStatusCode();
+				issue.getDetails().setValue(e.getMessage());
+			} else {
+				ourLog.error("Failure during REST processing: {}"+ e.toString(), e);
+				issue.getDetails().setValue(e.toString() + "\n\n" + ExceptionUtils.getStackTrace(e));
+			}
+
 
 			streamResponseAsResource(this, theResponse, oo, determineResponseEncoding(theRequest), true, false, NarrativeModeEnum.NORMAL, statusCode,false);
 
@@ -776,6 +780,14 @@ public class RestfulServer extends HttpServlet {
 		bundle.getLinkSelf().setValue(theCompleteUrl);
 
 		for (IResource next : theResult) {
+			
+			if (theContext.getNarrativeGenerator() != null) {
+				String title = theContext.getNarrativeGenerator().generateTitle(next);
+				if (StringUtils.isNotBlank(title)) {
+					ResourceMetadataKeyEnum.TITLE.put(next, title);
+				}
+			}
+			
 			bundle.addResource(next, theContext, theServerBase);
 		}
 

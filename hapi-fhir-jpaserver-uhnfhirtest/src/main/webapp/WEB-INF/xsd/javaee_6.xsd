@@ -75,8 +75,6 @@
   <xsd:import namespace="http://www.w3.org/XML/1998/namespace"
               schemaLocation="xml.xsd"/>
 
-  <xsd:include schemaLocation="javaee_web_services_client_1_3.xsd"/>
-
   <xsd:group name="descriptionGroup">
     <xsd:annotation>
       <xsd:documentation>

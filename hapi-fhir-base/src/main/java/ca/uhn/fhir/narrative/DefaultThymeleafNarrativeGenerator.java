@@ -64,4 +64,6 @@ public class DefaultThymeleafNarrativeGenerator extends BaseThymeleafNarrativeGe
 		return myUseHapiServerConformanceNarrative;
 	}
 
+
+
 }

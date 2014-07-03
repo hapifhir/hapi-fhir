@@ -35,6 +35,10 @@
 	<servlet>
 		<servlet-name>fhirServlet</servlet-name>
 		<servlet-class>ca.uhn.fhirtest.TestRestfulServer</servlet-class>
+		<init-param>
+			<param-name>ImplementationDescription</param-name>
+			<param-value>UHN Test Server</param-value>
+		</init-param>
 		<load-on-startup>1</load-on-startup>
 	</servlet>
 

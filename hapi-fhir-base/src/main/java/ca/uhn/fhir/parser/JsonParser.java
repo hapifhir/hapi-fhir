@@ -222,7 +222,7 @@ public class JsonParser extends BaseParser implements IParser {
 		eventWriter.writeEnd(); // entry array
 
 		eventWriter.writeEnd();
-		eventWriter.close();
+		eventWriter.flush();
 	}
 
 	private void encodeChildElementToStreamWriter(RuntimeResourceDefinition theResDef, IResource theResource, JsonGenerator theWriter, IElement theValue, BaseRuntimeElementDefinition<?> theChildDef, String theChildName) throws IOException {

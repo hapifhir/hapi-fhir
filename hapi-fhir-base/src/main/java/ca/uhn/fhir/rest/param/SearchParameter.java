@@ -160,6 +160,8 @@ public class SearchParameter extends BaseQueryParameter {
 			myParamType = SearchParamTypeEnum.QUANTITY;
 		} else if (ReferenceParam.class.isAssignableFrom(type)) {
 			myParamType = SearchParamTypeEnum.REFERENCE;
+		} else if (IdentifierListParam.class.isAssignableFrom(type)) {
+			myParamType = SearchParamTypeEnum.TOKEN;
 		} else {
 			throw new ConfigurationException("Unknown search parameter type: " + type);
 		}

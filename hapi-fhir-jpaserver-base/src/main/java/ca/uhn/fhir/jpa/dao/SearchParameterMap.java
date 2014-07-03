@@ -35,6 +35,17 @@ public class SearchParameterMap extends HashMap<String, List<List<IQueryParamete
 		}
 	}
 
+	public void add(String theName, IQueryParameterOr theOr) {
+		if (theOr == null) {
+			return;
+		}
+		if (!containsKey(theName)) {
+			put(theName, new ArrayList<List<IQueryParameterType>>());
+		}
+
+		get(theName).add(theOr.getValuesAsQueryTokens());
+	}
+
 	public void add(String theName, IQueryParameterType theParam) {
 		if (theParam == null) {
 			return;

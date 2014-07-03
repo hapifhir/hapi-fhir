@@ -417,6 +417,9 @@ class ParserState<T> {
 			if (myEntry.getUpdated().isEmpty() == false) {
 				ResourceMetadataKeyEnum.UPDATED.put(myEntry.getResource(), myEntry.getUpdated());
 			}
+			
+			ResourceMetadataKeyEnum.TITLE.put(myEntry.getResource(), myEntry.getTitle().getValue());
+			
 			if (myEntry.getCategories().isEmpty() == false) {
 				TagList tagList = new TagList();
 				for (Tag next : myEntry.getCategories()) {
@@ -608,7 +611,6 @@ class ParserState<T> {
 			myPreResourceState = thePreResourceState;
 		}
 
-		@SuppressWarnings("unused")
 		public void attributeValue(String theName, String theValue) throws DataFormatException {
 			// ignore by default
 		}
@@ -617,7 +619,6 @@ class ParserState<T> {
 			// ignore by default
 		}
 
-		@SuppressWarnings("unused")
 		public void enteringNewElement(String theNamespaceURI, String theLocalPart) throws DataFormatException {
 			// ignore by default
 		}
@@ -657,7 +658,7 @@ class ParserState<T> {
 			myStack = theState;
 		}
 
-		public void string(@SuppressWarnings("unused") String theData) {
+		public void string(String theData) {
 			// ignore by default
 		}
 
@@ -665,7 +666,7 @@ class ParserState<T> {
 			// allow an implementor to override
 		}
 
-		public void xmlEvent(@SuppressWarnings("unused") XMLEvent theNextEvent) {
+		public void xmlEvent(XMLEvent theNextEvent) {
 			// ignore
 		}
 

@@ -31,7 +31,7 @@ import ca.uhn.fhir.rest.method.QualifiedParamList;
 public class IdentifierListParam implements IQueryParameterOr {
 
 	private List<IdentifierDt> myIdentifiers = new ArrayList<IdentifierDt>();
-	
+
 	/**
 	 * Returns all identifiers associated with this list
 	 */
@@ -61,6 +61,12 @@ public class IdentifierListParam implements IQueryParameterOr {
 			IdentifierDt dt = new IdentifierDt();
 			dt.setValueAsQueryToken(null, string);
 			myIdentifiers.add(dt);
+		}
+	}
+
+	public void addIdentifier(IdentifierDt theIdentifierDt) {
+		if (theIdentifierDt != null && theIdentifierDt.isEmpty() == false) {
+			getIdentifiers().add(theIdentifierDt);
 		}
 	}
 

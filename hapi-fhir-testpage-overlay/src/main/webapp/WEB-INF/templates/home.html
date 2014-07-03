@@ -31,20 +31,20 @@
 								<col class="col-xs-7" />
 							</colgroup>
 							<tbody>
-								<tr th:if="${conf.implementation.description} != null and #{!string.isEmpty(conf.implementation.description)}">
+								<tr th:if="#{!strings.isEmpty(conf.implementation.description.value)}">
 									<td>Server</td>
 									<td th:utext="'' + ${conf.implementation.description}">HAPI Restful Server</td>
+								</tr>
+								<tr th:if="#{!strings.isEmpty(conf.software.name.value)} or #{!strings.isEmpty(conf.software.version.value)}">
+									<td>Software</td>
+									<td>
+										<th:block th:utext="'' + ${conf.software.name}"/> - <th:block th:utext="'' + ${conf.software.version}"/>
+									</td>
 								</tr>
 								<tr>
 									<td>FHIR Base</td>
 									<td>
 										<a th:href="${base}" th:text="${base}"></a>
-									</td>
-								</tr>
-								<tr th:if="#{string.isEmpty(conf.software.name)} == false and #{string.isEmpty(conf.software.version)} == false">
-									<td>Software</td>
-									<td>
-										<th:block th:utext="'' + ${conf.software.name}"/> - <th:block th:utext="'' + ${conf.software.version}"/>
 									</td>
 								</tr>
 							</tbody>
@@ -67,7 +67,7 @@
 										Retrieve the server's <b>conformance</b> statement.										
 									</div>
 								    <div class="row-fluid">
-								    	<div class="col-sm-2">
+								    	<div class="col-sm-2 form-group">
 											<button type="button" id="fetch-conformance-btn"
 												data-loading-text="Loading &lt;i class='fa fa-spinner fa-spin'/&gt;"  class="btn btn-primary btn-block">
 												<i class="fa fa-dot-circle-o"></i>
@@ -144,6 +144,61 @@
 								        
 								    </div>
 								    
+								<!-- Transaction -->
+								
+									<br clear="all"/>
+									<div class="row-fluid">
+										Post a bundle containing multiple resources to the server and
+										store all resources within a single atomic transaction.										
+									</div>
+								    <div class="row-fluid">
+								    	<div class="col-sm-2">
+											<button type="button" id="transaction-btn"
+												data-loading-text="Processing &lt;i class='fa fa-spinner fa-spin'/&gt;"  class="btn btn-primary btn-block">
+												<i class="fa fa-files-o"></i>
+												Transaction
+											</button>
+										</div>
+										<div class='col-sm-10'>
+								            <div class="form-group">
+								                <div class='input-group'>
+								                    <div class="input-group-addon">
+								                    Bundle
+								                    <span class="loadingStar">*</span>
+								                    </div>
+								                    <textarea class="form-control" id="transaction-body" style="white-space: nowrap; overflow: auto;" placeholder="(place transaction bundle body here)" rows="1">
+								                    	<th:block th:if="${transactionBundle} != null" th:text="${transactionBundle}"/>
+								                    </textarea>
+								                </div>
+								            </div>
+								        </div>											
+								        <script type="text/javascript">
+							        		var textAreaChanger = function() {
+							        			createBodyOriginalHeight = $('#transaction-body').height();
+							        			$('#transaction-body').animate({height: "200px"}, 500);
+							        		}								        	
+								        	$('#transaction-body').focus(textAreaChanger);
+								            $('#transaction-btn').click(
+												function() {
+													var btn = $(this);
+													btn.button('loading');
+													var id = $('#transaction-id').val();
+													if (id != null) btn.append($('<input />', { type: 'hidden', name: 'resource-create-id', value: id }));
+													var body = $('#transaction-body').val();
+													btn.append($('<input />', { type: 'hidden', name: 'transactionBody', value: body }));
+													$("#outerForm").attr("method", "post");
+													$("#outerForm").attr("action", "create").submit();
+												});		
+											$( document ).ready(function() {
+/* 												if ($('#resource-create-id').val() != "") {
+													buttonChanger();
+													textAreaChanger();
+													$('#transaction-body').focus();
+												}
+ */											});
+								        </script>								        
+								    </div>
+
 								<!-- Get Tags -->
 								
 									<br clear="all"/>
@@ -151,7 +206,7 @@
 										Show all of the tags currently in use on the server										
 									</div>
 								    <div class="row-fluid">
-								    	<div class="col-sm-2">
+								    	<div class="col-sm-2 form-group">
 											<button type="button" id="get-server-tags-btn"
 												data-loading-text="Loading &lt;i class='fa fa-spinner fa-spin'/&gt;"  class="btn btn-primary btn-block">
 												<i class="fa fa-tags"></i>

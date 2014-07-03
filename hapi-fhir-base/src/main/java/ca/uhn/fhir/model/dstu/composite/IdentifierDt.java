@@ -413,7 +413,9 @@ public class IdentifierDt
 	@Override
 	public String getValueAsQueryToken() {
 		if (org.apache.commons.lang3.StringUtils.isNotBlank(getSystem().getValueAsString())) {
-			return getSystem().getValueAsString() + '|' + getValue().getValueAsString(); 
+			return getSystem().getValueAsString() + '|' + getValue().getValueAsString();
+		} else if (getSystem().getValue() == null) {
+			return getValue().getValueAsString();
 		} else {
 			return '|' + getValue().getValueAsString();
 		}

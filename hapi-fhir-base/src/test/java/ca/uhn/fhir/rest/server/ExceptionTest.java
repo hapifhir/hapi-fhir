@@ -43,28 +43,44 @@ public class ExceptionTest {
 	private static RestfulServer servlet;
 
 	@Test
-	public void testSearchNormalMatch() throws Exception {
+	public void testInternalError() throws Exception {
 		{
 			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?throwInternalError=aaa");
 			HttpResponse status = ourClient.execute(httpGet);
 			String responseContent = IOUtils.toString(status.getEntity().getContent());
+			IOUtils.closeQuietly(status.getEntity().getContent());
 			ourLog.info(responseContent);
 			assertEquals(500, status.getStatusLine().getStatusCode());
 			OperationOutcome oo = (OperationOutcome) servlet.getFhirContext().newXmlParser().parseResource(responseContent);
 			assertThat(oo.getIssueFirstRep().getDetails().getValue(), StringContains.containsString("InternalErrorException: Exception Text"));
 		}
+	}
 
+	@Test
+	public void testInternalErrorFormatted() throws Exception {
 		{
-			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?throwInternalError=aaa&_format=json");
+			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?throwInternalError=aaa&_format=true");
 			HttpResponse status = ourClient.execute(httpGet);
 			String responseContent = IOUtils.toString(status.getEntity().getContent());
+			IOUtils.closeQuietly(status.getEntity().getContent());
 			ourLog.info(responseContent);
 			assertEquals(500, status.getStatusLine().getStatusCode());
-			OperationOutcome oo = (OperationOutcome) servlet.getFhirContext().newJsonParser().parseResource(responseContent);
+			OperationOutcome oo = (OperationOutcome) servlet.getFhirContext().newXmlParser().parseResource(responseContent);
 			assertThat(oo.getIssueFirstRep().getDetails().getValue(), StringContains.containsString("InternalErrorException: Exception Text"));
 		}
 	}
 
+	@Test
+	public void testInternalErrorJson() throws Exception {
+			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?throwInternalError=aaa&_format=json");
+			HttpResponse status = ourClient.execute(httpGet);
+			String responseContent = IOUtils.toString(status.getEntity().getContent());
+			IOUtils.closeQuietly(status.getEntity().getContent());
+			ourLog.info(responseContent);
+			assertEquals(500, status.getStatusLine().getStatusCode());
+			OperationOutcome oo = (OperationOutcome) servlet.getFhirContext().newJsonParser().parseResource(responseContent);
+			assertThat(oo.getIssueFirstRep().getDetails().getValue(), StringContains.containsString("InternalErrorException: Exception Text"));
+	}
 
 
 	@AfterClass

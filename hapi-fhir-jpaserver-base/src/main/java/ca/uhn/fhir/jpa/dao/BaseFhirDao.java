@@ -747,6 +747,9 @@ public abstract class BaseFhirDao {
 			}
 		}
 
+		String title = ResourceMetadataKeyEnum.TITLE.get(theResource);
+		theEntity.setTitle(title);
+		
 	}
 
 	protected ResourceTable toEntity(IResource theResource) {
@@ -783,6 +786,10 @@ public abstract class BaseFhirDao {
 		retVal.getResourceMetadata().put(ResourceMetadataKeyEnum.VERSION_ID, theEntity.getVersion());
 		retVal.getResourceMetadata().put(ResourceMetadataKeyEnum.PUBLISHED, theEntity.getPublished());
 		retVal.getResourceMetadata().put(ResourceMetadataKeyEnum.UPDATED, theEntity.getUpdated());
+		
+		if (theEntity.getTitle()!=null) {
+			ResourceMetadataKeyEnum.TITLE.put(retVal, theEntity.getTitle());
+		}
 		
 		if (theEntity.getDeleted()!=null) {
 			ResourceMetadataKeyEnum.DELETED_AT.put(retVal, new InstantDt(theEntity.getDeleted()));
