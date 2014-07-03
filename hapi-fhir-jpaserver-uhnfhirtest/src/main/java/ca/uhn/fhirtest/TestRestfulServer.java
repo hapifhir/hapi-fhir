@@ -55,7 +55,10 @@ public class TestRestfulServer extends RestfulServer {
 		JpaSystemProvider sp = new JpaSystemProvider(systemDao);
 		setPlainProviders(sp);
 		
+		String implDesc = getInitParameter("ImplementationDescription");
+		
 		JpaConformanceProvider confProvider = new JpaConformanceProvider(this, systemDao);
+		confProvider.setImplementationDescription(implDesc);
 		setServerConformanceProvider(confProvider);
 		
 		setUseBrowserFriendlyContentTypes(true);

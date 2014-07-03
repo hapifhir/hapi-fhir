@@ -21,12 +21,5 @@
 	</bean>
 
 	<bean id="fhirContext" class="ca.uhn.fhir.context.FhirContext">
-		<property name="restfulClientFactory" ref="restfulClientFactory"/>
-	</bean>
-
-	<bean id="restfulClientFactory" class="ca.uhn.fhir.rest.client.RestfulClientFactory">
-		<property name="fhirContext" ref="fhirContext"/>
-		<property name="connectTimeout" value="4000"/>
-		<property name="socketTimeout" value="10000"/>
 	</bean>
 </beans>

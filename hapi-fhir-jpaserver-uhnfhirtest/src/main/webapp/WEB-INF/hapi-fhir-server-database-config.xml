@@ -30,7 +30,7 @@
 		<!-- <property name="url" value="jdbc:hsqldb:hsql://localhost/uhnfhirdb"/>-->
 		<!-- <property name="url" value="jdbc:derby:directory:#{systemProperties['fhir.db.location']};create=true" />  -->
 		<property name="driverClassName" value="org.apache.derby.jdbc.ClientDriver"></property>
-		<property name="url" value="jdbc:derby://localhost:1527/fhir" />
+		<property name="url" value="jdbc:derby://localhost:1527#{systemProperties['fhir.db.location']};create=true" />
 		<property name="username" value="SA"/>
 		<property name="password" value="SA"/>
 	</bean>
