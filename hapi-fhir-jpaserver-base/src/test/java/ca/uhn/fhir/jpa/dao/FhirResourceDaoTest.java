@@ -253,13 +253,12 @@ public class FhirResourceDaoTest {
 
 	@Test
 	public void testSearchWithNoResults() {
-		IBundleProvider value = ourObservationDao.search(new SearchParameterMap());
+		IBundleProvider value = ourDeviceDao.search(new SearchParameterMap());
+		for (IResource next : value.getResources(0, value.size())) {
+			ourDeviceDao.delete(next.getId());
+		}
 		
-		/*
-		 * This may fail at some point, which means another test has probably added a device
-		 * resource. This test depends on there being none, so if that happens this test
-		 * should be refactored to use another resource type
-		 */
+		value = ourDeviceDao.search(new SearchParameterMap());
 		assertEquals(0, value.size());
 
 		List<IResource> res = value.getResources(0, 0);

@@ -12,7 +12,7 @@
         <dependent-module archiveName="hapi-fhir-base-0.4-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/hapi-fhir-base/hapi-fhir-base">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module deploy-path="/" handle="module:/overlay/prj/hapi-fhir-tester-overlay?includes=**/**&amp;excludes=META-INF/MANIFEST.MF">
+        <dependent-module deploy-path="/" handle="module:/overlay/prj/hapi-fhir-testpage-overlay?includes=**/**&amp;excludes=META-INF/MANIFEST.MF">
             <dependency-type>consumes</dependency-type>
         </dependent-module>
         <dependent-module deploy-path="/" handle="module:/overlay/slf/?includes=**/**&amp;excludes=META-INF/MANIFEST.MF">
