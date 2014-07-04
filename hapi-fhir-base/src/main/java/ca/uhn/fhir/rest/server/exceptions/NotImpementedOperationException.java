@@ -28,7 +28,7 @@ import ca.uhn.fhir.rest.server.Constants;
  * to fullfill the request. There is a good change that the functionality will 
  * be added in the future
  *  
- * Represents an <b>HTTP 501 Not Implemented</b> response, which means the resource provider currently lacks the ability to fullfill the request.
+ * This Represents an <b>HTTP 501 Not Implemented</b> response, which means the resource provider currently lacks the ability to fullfill the request.
  *  
  * <p>
  * Note that a complete list of RESTful exceptions is available in the
