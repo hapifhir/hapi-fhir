@@ -1,18 +1,18 @@
 package ca.uhn.fhirtest;
 
-import java.sql.DriverManager;
 import java.util.Collection;
 
+import javax.servlet.ServletException;
+
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.context.support.FileSystemXmlApplicationContext;
 import org.springframework.web.context.ContextLoaderListener;
-import org.springframework.web.context.WebApplicationContext;
 
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.provider.JpaConformanceProvider;
 import ca.uhn.fhir.jpa.provider.JpaSystemProvider;
 import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
+import ca.uhn.fhir.rest.server.HardcodedServerAddressStrategy;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 
@@ -25,7 +25,7 @@ public class TestRestfulServer extends RestfulServer {
 	private ApplicationContext myAppCtx;
 	
 	@Override
-	protected void initialize() {
+	protected void initialize() throws ServletException {
 		super.initialize();
 		
 //		try {
@@ -63,6 +63,12 @@ public class TestRestfulServer extends RestfulServer {
 		
 		setUseBrowserFriendlyContentTypes(true);
 		
+		String baseUrl = System.getProperty("fhir.baseurl");
+		if (StringUtils.isBlank(baseUrl)) {
+			throw new ServletException("Missing system property: fhir.baseurl");
+		}
+		
+		setServerAddressStrategy(new HardcodedServerAddressStrategy(baseUrl));
 		setPagingProvider(new FifoMemoryPagingProvider(10));
 		
 	}

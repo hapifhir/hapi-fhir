@@ -91,13 +91,14 @@ public class RestfulServer extends HttpServlet {
 	private Map<String, ResourceBinding> myResourceNameToProvider = new HashMap<String, ResourceBinding>();
 	private Collection<IResourceProvider> myResourceProviders;
 	private ISecurityManager mySecurityManager;
+	private IServerAddressStrategy myServerAddressStrategy= new IncomingRequestAddressStrategy();
 	private BaseMethodBinding<?> myServerConformanceMethod;
 	private Object myServerConformanceProvider;
 	private String myServerName = "HAPI FHIR Server";
 	/** This is configurable but by default we just use HAPI version */
 	private String myServerVersion = VersionUtil.getVersion();
-	private boolean myStarted;
 
+	private boolean myStarted;
 	private boolean myUseBrowserFriendlyContentTypes;
 
 	/**
@@ -288,6 +289,14 @@ public class RestfulServer extends HttpServlet {
 	public ISecurityManager getSecurityManager() {
 		return mySecurityManager;
 	}
+	
+	/**
+	 * Get the server address strategy, which is used to determine what base URL to 
+	 * provide clients to refer to this server. Defaults to an instance of {@link IncomingRequestAddressStrategy}
+	 */
+	public IServerAddressStrategy getServerAddressStrategy() {
+		return myServerAddressStrategy;
+	}
 
 	/**
 	 * Returns the server conformance provider, which is the provider that is used to generate the server's conformance
@@ -393,20 +402,8 @@ public class RestfulServer extends HttpServlet {
 				requestPath = requestPath.substring(1);
 			}
 
-			int contextIndex;
-			if (servletPath.length() == 0) {
-				if (requestPath.length() == 0) {
-					contextIndex = requestUrl.length();
-				} else {
-					contextIndex = requestUrl.indexOf(requestPath);
-				}
-			} else {
-				contextIndex = requestUrl.indexOf(servletPath);
-			}
-
 			String fhirServerBase;
-			int length = contextIndex + servletPath.length();
-			fhirServerBase = requestUrl.substring(0, length);
+			fhirServerBase = myServerAddressStrategy.determineServerBase(theRequest);
 
 			if (fhirServerBase.endsWith("/")) {
 				fhirServerBase = fhirServerBase.substring(0, fhirServerBase.length() - 1);
@@ -635,7 +632,7 @@ public class RestfulServer extends HttpServlet {
 	 * This method may be overridden by subclasses to do perform initialization that needs to be performed prior to the
 	 * server being used.
 	 */
-	protected void initialize() {
+	protected void initialize() throws ServletException {
 		// nothing by default
 	}
 
@@ -650,6 +647,13 @@ public class RestfulServer extends HttpServlet {
 
 	public void setImplementationDescription(String theImplementationDescription) {
 		myImplementationDescription = theImplementationDescription;
+	}
+
+	/**
+	 * Sets the paging provider to use, or <code>null</code> to use no paging (which is the default)
+	 */
+	public void setPagingProvider(IPagingProvider thePagingProvider) {
+		myPagingProvider = thePagingProvider;
 	}
 
 	// /**
@@ -668,13 +672,6 @@ public class RestfulServer extends HttpServlet {
 	// theNarrativeGenerator) {
 	// myNarrativeGenerator = theNarrativeGenerator;
 	// }
-
-	/**
-	 * Sets the paging provider to use, or <code>null</code> to use no paging (which is the default)
-	 */
-	public void setPagingProvider(IPagingProvider thePagingProvider) {
-		myPagingProvider = thePagingProvider;
-	}
 
 	/**
 	 * Sets the non-resource specific providers which implement method calls on this server.
@@ -722,6 +719,15 @@ public class RestfulServer extends HttpServlet {
 	 */
 	public void setSecurityManager(ISecurityManager theSecurityManager) {
 		mySecurityManager = theSecurityManager;
+	}
+
+	/**
+	 * Provide a server address strategy, which is used to determine what base URL to 
+	 * provide clients to refer to this server. Defaults to an instance of {@link IncomingRequestAddressStrategy}
+	 */
+	public void setServerAddressStrategy(IServerAddressStrategy theServerAddressStrategy) {
+		Validate.notNull(theServerAddressStrategy, "Server address strategy can not be null");
+		myServerAddressStrategy = theServerAddressStrategy;
 	}
 
 	/**
@@ -923,6 +929,17 @@ public class RestfulServer extends HttpServlet {
 		return parser.setPrettyPrint(thePrettyPrint).setSuppressNarratives(theNarrativeMode == NarrativeModeEnum.SUPPRESS);
 	}
 
+	private static Writer getWriter(HttpServletResponse theHttpResponse, boolean theRespondGzip) throws UnsupportedEncodingException, IOException {
+		Writer writer;
+		if (theRespondGzip) {
+			theHttpResponse.addHeader(Constants.HEADER_CONTENT_ENCODING, Constants.ENCODING_GZIP);
+			writer = new OutputStreamWriter(new GZIPOutputStream(theHttpResponse.getOutputStream()), "UTF-8");
+		}else {
+			writer = theHttpResponse.getWriter();
+		}
+		return writer;
+	}
+
 	public static boolean prettyPrintResponse(Request theRequest) {
 		Map<String, String[]> requestParams = theRequest.getParameters();
 		String[] pretty = requestParams.remove(Constants.PARAM_PRETTY);
@@ -1032,17 +1049,6 @@ public class RestfulServer extends HttpServlet {
 		} finally {
 			writer.close();
 		}
-	}
-
-	private static Writer getWriter(HttpServletResponse theHttpResponse, boolean theRespondGzip) throws UnsupportedEncodingException, IOException {
-		Writer writer;
-		if (theRespondGzip) {
-			theHttpResponse.addHeader(Constants.HEADER_CONTENT_ENCODING, Constants.ENCODING_GZIP);
-			writer = new OutputStreamWriter(new GZIPOutputStream(theHttpResponse.getOutputStream()), "UTF-8");
-		}else {
-			writer = theHttpResponse.getWriter();
-		}
-		return writer;
 	}
 
 	public static void streamResponseAsResource(RestfulServer theServer, HttpServletResponse theHttpResponse, IResource theResource, EncodingEnum theResponseEncoding, boolean thePrettyPrint, boolean theRequestIsBrowser, NarrativeModeEnum theNarrativeMode, boolean theRespondGzip) throws IOException {

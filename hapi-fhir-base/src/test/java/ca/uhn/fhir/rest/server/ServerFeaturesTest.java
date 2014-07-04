@@ -1,6 +1,7 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -21,6 +22,7 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import org.hamcrest.core.IsNot;
 import org.hamcrest.core.StringContains;
 import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -32,6 +34,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
+import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.testutil.RandomServerPortProvider;
 
@@ -43,6 +46,7 @@ public class ServerFeaturesTest {
 	private static CloseableHttpClient ourClient;
 	private static int ourPort;
 	private static Server ourServer;
+	private static RestfulServer servlet;
 
 	@Test
 	public void testPrettyPrint() throws Exception {
@@ -52,7 +56,8 @@ public class ServerFeaturesTest {
 
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
 		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertThat(responseContent, StringContains.containsString("<identifier><use"));
 
@@ -62,7 +67,8 @@ public class ServerFeaturesTest {
 
 		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1?_pretty=false");
 		status = ourClient.execute(httpGet);
-		responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+		responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertThat(responseContent, StringContains.containsString("<identifier><use"));
 
@@ -72,7 +78,8 @@ public class ServerFeaturesTest {
 
 		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1?_pretty=true");
 		status = ourClient.execute(httpGet);
-		responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+		responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertThat(responseContent, IsNot.not(StringContains.containsString("<identifier><use")));
 
@@ -83,21 +90,24 @@ public class ServerFeaturesTest {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
 		httpGet.addHeader("Accept", Constants.CT_FHIR_XML);
 		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertThat(responseContent, StringContains.containsString("<identifier><use"));
 
 		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
 		httpGet.addHeader("Accept", Constants.CT_ATOM_XML);
 		status = ourClient.execute(httpGet);
-		responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+		responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertThat(responseContent, StringContains.containsString("<identifier><use"));
 
 		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
 		httpGet.addHeader("Accept", Constants.CT_FHIR_JSON);
 		status = ourClient.execute(httpGet);
-		responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+		responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertThat(responseContent, StringContains.containsString("\"identifier\":"));
 
@@ -108,42 +118,61 @@ public class ServerFeaturesTest {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
 		httpGet.addHeader("Accept", "text/plain, " + Constants.CT_FHIR_XML);
 		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertThat(responseContent, StringContains.containsString("<identifier><use"));
 
 		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
 		httpGet.addHeader("Accept", "text/plain, " + Constants.CT_ATOM_XML);
 		status = ourClient.execute(httpGet);
-		responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+		responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertThat(responseContent, StringContains.containsString("<identifier><use"));
 
 		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
 		httpGet.addHeader("Accept", "text/plain, " + Constants.CT_FHIR_JSON);
 		status = ourClient.execute(httpGet);
-		responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+		responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertThat(responseContent, StringContains.containsString("\"identifier\":"));
 
 	}
-	
+
 	@Test
 	public void testAcceptHeaderNonFhirTypes() throws Exception {
 
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
 		httpGet.addHeader("Accept", Constants.CT_XML);
 		CloseableHttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertThat(responseContent, StringContains.containsString("<identifier><use"));
 
 		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
 		httpGet.addHeader("Accept", Constants.CT_JSON);
 		status = ourClient.execute(httpGet);
-		responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+		responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertThat(responseContent, StringContains.containsString("\"identifier\":"));
+
+	}
+
+	@Test
+	public void testHardcodedAddressStrategy() throws Exception {
+
+		servlet.setServerAddressStrategy(new HardcodedServerAddressStrategy("http://foo/bar"));
+
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_id=1");
+		CloseableHttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		assertThat(responseContent, StringContains.containsString("<id>http://foo/bar/Patient/1"));
 
 	}
 
@@ -151,29 +180,31 @@ public class ServerFeaturesTest {
 	public void testAcceptHeaderWithPrettyPrint() throws Exception {
 
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
-		httpGet.addHeader("Accept", Constants.CT_FHIR_XML+ "; pretty=true");
+		httpGet.addHeader("Accept", Constants.CT_FHIR_XML + "; pretty=true");
 		CloseableHttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertThat(responseContent, StringContains.containsString("<identifier>\n   "));
 
 		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
-		httpGet.addHeader("Accept", Constants.CT_FHIR_JSON+ "; pretty=true");
+		httpGet.addHeader("Accept", Constants.CT_FHIR_JSON + "; pretty=true");
 		status = ourClient.execute(httpGet);
-		responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+		responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertThat(responseContent, StringContains.containsString("\",\n"));
 
 	}
-	
-	
+
 	@Test
 	public void testInternalErrorIfNoId() throws Exception {
 
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/?_query=findPatientsWithNoIdSpecified");
-		httpGet.addHeader("Accept", Constants.CT_FHIR_XML+ "; pretty=true");
+		httpGet.addHeader("Accept", Constants.CT_FHIR_XML + "; pretty=true");
 		CloseableHttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertEquals(500, status.getStatusLine().getStatusCode());
 		assertThat(responseContent, StringContains.containsString("ID"));
@@ -185,6 +216,11 @@ public class ServerFeaturesTest {
 		ourServer.stop();
 	}
 
+	@Before
+	public void before() {
+		servlet.setServerAddressStrategy(new IncomingRequestAddressStrategy());
+	}
+
 	@BeforeClass
 	public static void beforeClass() throws Exception {
 		ourPort = RandomServerPortProvider.findFreePort();
@@ -193,7 +229,7 @@ public class ServerFeaturesTest {
 		DummyPatientResourceProvider patientProvider = new DummyPatientResourceProvider();
 
 		ServletHandler proxyHandler = new ServletHandler();
-		RestfulServer servlet = new RestfulServer();
+		servlet = new RestfulServer();
 		servlet.setResourceProviders(patientProvider);
 		ServletHolder servletHolder = new ServletHolder(servlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
@@ -245,8 +281,25 @@ public class ServerFeaturesTest {
 		public Patient getResourceById(@IdParam IdDt theId) {
 			return getIdToPatient().get(theId.getValue());
 		}
-		
-		@Search(queryName="findPatientsWithNoIdSpecified")
+
+		/**
+		 * Retrieve the resource by its identifier
+		 * 
+		 * @param theId
+		 *            The resource identity
+		 * @return The resource
+		 */
+		@Search()
+		public List<Patient> getResourceById(@RequiredParam(name = "_id") String theId) {
+			Patient patient = getIdToPatient().get(theId);
+			if (patient != null) {
+				return Collections.singletonList(patient);
+			} else {
+				return Collections.emptyList();
+			}
+		}
+
+		@Search(queryName = "findPatientsWithNoIdSpecified")
 		public List<Patient> findPatientsWithNoIdSpecified() {
 			Patient p = new Patient();
 			p.addIdentifier().setSystem("foo");
