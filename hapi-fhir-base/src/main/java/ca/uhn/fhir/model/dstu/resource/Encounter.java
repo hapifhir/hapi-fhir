@@ -19,7 +19,7 @@ package ca.uhn.fhir.model.dstu.resource;
 
 import java.util.List;
 
-import ca.uhn.fhir.model.api.BaseElement;
+import ca.uhn.fhir.model.api.BaseIdentifiableElement;
 import ca.uhn.fhir.model.api.BaseResource;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IResource;
@@ -451,11 +451,11 @@ public class Encounter extends BaseResource implements IResource {
      *
      * @return Returns a reference to this object, to allow for simple chaining.
 	 */
-	public Encounter addIdentifier( String theSystem,  String theValue) {
+	public Encounter addIdentifier( IdentifierUseEnum theUse,  String theSystem,  String theValue,  String theLabel) {
 		if (myIdentifier == null) {
 			myIdentifier = new java.util.ArrayList<IdentifierDt>();
 		}
-		myIdentifier.add(new IdentifierDt(theSystem, theValue));
+		myIdentifier.add(new IdentifierDt(theUse, theSystem, theValue, theLabel));
 		return this; 
 	}
 
@@ -469,11 +469,11 @@ public class Encounter extends BaseResource implements IResource {
      *
      * @return Returns a reference to this object, to allow for simple chaining.
 	 */
-	public Encounter addIdentifier( IdentifierUseEnum theUse,  String theSystem,  String theValue,  String theLabel) {
+	public Encounter addIdentifier( String theSystem,  String theValue) {
 		if (myIdentifier == null) {
 			myIdentifier = new java.util.ArrayList<IdentifierDt>();
 		}
-		myIdentifier.add(new IdentifierDt(theUse, theSystem, theValue, theLabel));
+		myIdentifier.add(new IdentifierDt(theSystem, theValue));
 		return this; 
 	}
 
@@ -614,7 +614,10 @@ public class Encounter extends BaseResource implements IResource {
 	}
 
 	/**
-	 * Add a value for <b>type</b> (Specific type of encounter)
+	 * Add a value for <b>type</b> (Specific type of encounter) using an enumerated type. This
+	 * is intended as a convenience method for situations where the FHIR defined ValueSets are mandatory
+	 * or contain the desirable codes. If you wish to use codes other than those which are built-in, 
+	 * you may also use the {@link #addType()} method.
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1077,7 +1080,7 @@ public class Encounter extends BaseResource implements IResource {
      * </p> 
 	 */
 	@Block()	
-	public static class Participant extends BaseElement implements IResourceBlock {
+	public static class Participant extends BaseIdentifiableElement implements IResourceBlock {
 	
 	@Child(name="type", type=CodeableConceptDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)	
 	@Description(
@@ -1136,7 +1139,10 @@ public class Encounter extends BaseResource implements IResource {
 	}
 
 	/**
-	 * Add a value for <b>type</b> (Role of participant in encounter)
+	 * Add a value for <b>type</b> (Role of participant in encounter) using an enumerated type. This
+	 * is intended as a convenience method for situations where the FHIR defined ValueSets are mandatory
+	 * or contain the desirable codes. If you wish to use codes other than those which are built-in, 
+	 * you may also use the {@link #addType()} method.
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1222,7 +1228,7 @@ public class Encounter extends BaseResource implements IResource {
      * </p> 
 	 */
 	@Block()	
-	public static class Hospitalization extends BaseElement implements IResourceBlock {
+	public static class Hospitalization extends BaseIdentifiableElement implements IResourceBlock {
 	
 	@Child(name="preAdmissionIdentifier", type=IdentifierDt.class, order=0, min=0, max=1)	
 	@Description(
@@ -1360,8 +1366,8 @@ public class Encounter extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public Hospitalization setPreAdmissionIdentifier( String theSystem,  String theValue) {
-		myPreAdmissionIdentifier = new IdentifierDt(theSystem, theValue); 
+	public Hospitalization setPreAdmissionIdentifier( IdentifierUseEnum theUse,  String theSystem,  String theValue,  String theLabel) {
+		myPreAdmissionIdentifier = new IdentifierDt(theUse, theSystem, theValue, theLabel); 
 		return this; 
 	}
 
@@ -1373,8 +1379,8 @@ public class Encounter extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public Hospitalization setPreAdmissionIdentifier( IdentifierUseEnum theUse,  String theSystem,  String theValue,  String theLabel) {
-		myPreAdmissionIdentifier = new IdentifierDt(theUse, theSystem, theValue, theLabel); 
+	public Hospitalization setPreAdmissionIdentifier( String theSystem,  String theValue) {
+		myPreAdmissionIdentifier = new IdentifierDt(theSystem, theValue); 
 		return this; 
 	}
 
@@ -1845,7 +1851,7 @@ public class Encounter extends BaseResource implements IResource {
      * </p> 
 	 */
 	@Block()	
-	public static class HospitalizationAccomodation extends BaseElement implements IResourceBlock {
+	public static class HospitalizationAccomodation extends BaseIdentifiableElement implements IResourceBlock {
 	
 	@Child(name="bed", order=0, min=0, max=1, type={
 		ca.uhn.fhir.model.dstu.resource.Location.class	})
@@ -1949,7 +1955,7 @@ public class Encounter extends BaseResource implements IResource {
      * </p> 
 	 */
 	@Block()	
-	public static class Location extends BaseElement implements IResourceBlock {
+	public static class Location extends BaseIdentifiableElement implements IResourceBlock {
 	
 	@Child(name="location", order=0, min=1, max=1, type={
 		ca.uhn.fhir.model.dstu.resource.Location.class	})

@@ -26,11 +26,8 @@ import java.util.List;
 
 import org.apache.commons.lang3.Validate;
 
-import ca.uhn.fhir.model.primitive.IdDt;
+public abstract class BaseElement implements IElement, ISupportsUndeclaredExtensions {
 
-public abstract class BaseElement implements IIdentifiableElement, ISupportsUndeclaredExtensions {
-
-	private IdDt myId;
 	private List<ExtensionDt> myUndeclaredExtensions;
 	private List<ExtensionDt> myUndeclaredModifierExtensions;
 
@@ -52,7 +49,6 @@ public abstract class BaseElement implements IIdentifiableElement, ISupportsUnde
 		return retVal;
 	}
 
-	
 	@Override
 	public void addUndeclaredExtension(ExtensionDt theExtension) {
 		Validate.notNull(theExtension, "Extension can not be null");
@@ -73,14 +69,6 @@ public abstract class BaseElement implements IIdentifiableElement, ISupportsUnde
 			retVal.addAll(myUndeclaredModifierExtensions);
 		}
 		return Collections.unmodifiableList(retVal);
-	}
-
-	@Override
-	public IdDt getId() {
-		if (myId == null) {
-			myId = new IdDt();
-		}
-		return myId;
 	}
 
 	@Override
@@ -111,20 +99,9 @@ public abstract class BaseElement implements IIdentifiableElement, ISupportsUnde
 		return myUndeclaredModifierExtensions;
 	}
 
-	@Override
-	public void setId(IdDt theId) {
-		myId = theId;
-	}
-
-	@Override
-	public void setId(String theId) {
-		myId = new IdDt(theId);
-	}
-
 	/**
-	 * Intended to be called by extending classes {@link #isEmpty()}
-	 * implementations, returns <code>true</code> if all content in this
-	 * superclass instance is empty per the semantics of {@link #isEmpty()}.
+	 * Intended to be called by extending classes {@link #isEmpty()} implementations, returns <code>true</code> if all
+	 * content in this superclass instance is empty per the semantics of {@link #isEmpty()}.
 	 */
 	protected boolean isBaseEmpty() {
 		if (myUndeclaredExtensions != null) {

@@ -24,15 +24,33 @@ import ca.uhn.fhir.model.primitive.IdDt;
 
 public interface IIdentifiableElement extends IElement {
 
-	void setId(IdDt theId);
+	/**
+	 * Used to retrieve an ID for this specific element within a resource. These are used for IDREF referenced between
+	 * elements within a single resource, and do not have any other purpose.
+	 */
+	String getElementSpecificId();
 
+	/**
+	 * @deprecated Use {@link #getElementSpecificId()} instead. This method will be removed because it is easily
+	 *             confused with other ID methods (such as patient#getIdentifier)
+	 */
 	IdDt getId();
 
 	/**
-	 * Convenience method for {@link #setId(IdDt)} which creates a new IdDt and provides the
-	 * given string as the ID.
-	 *   
-	 * @param theId The ID string. Can be a complete URL, a partial URL or even a simple identifier.
+	 * Used to set an ID for this specific element within a resource. These are used for IDREF referenced between
+	 * elements within a single resource, and do not have any other purpose.
+	 */
+	void setElementSpecificId(String theElementSpecificId);
+
+	/**
+	 * @deprecated Use {@link #setElementSpecificId(String)} instead. This method will be removed because it is easily
+	 *             confused with other ID methods (such as patient#getIdentifier)
+	 */
+	void setId(IdDt theId);
+
+	/**
+	 * @deprecated Use {@link #setElementSpecificId(String)} instead. This method will be removed because it is easily
+	 *             confused with other ID methods (such as patient#getIdentifier)
 	 */
 	void setId(String theId);
 

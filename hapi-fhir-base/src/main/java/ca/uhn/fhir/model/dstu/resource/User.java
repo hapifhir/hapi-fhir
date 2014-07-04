@@ -16,26 +16,6 @@
 
 package ca.uhn.fhir.model.dstu.resource;
 
-/*
- * #%L
- * HAPI FHIR Library
- * %%
- * Copyright (C) 2014 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 
 import java.util.List;
 
@@ -50,6 +30,7 @@ import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.dstu.composite.ContactDt;
 import ca.uhn.fhir.model.dstu.composite.HumanNameDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.dstu.valueset.ContactUseEnum;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.model.primitive.StringDt;
@@ -572,7 +553,43 @@ public class User extends BaseResource implements IResource {
 		}
 		return getContact().get(0); 
 	}
-  
+ 	/**
+	 * Adds a new value for <b>contact</b> (Contact details for the user)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * 
+     * </p> 
+     *
+     * @return Returns a reference to this object, to allow for simple chaining.
+	 */
+	public User addContact( ContactUseEnum theContactUse,  String theValue) {
+		if (myContact == null) {
+			myContact = new java.util.ArrayList<ContactDt>();
+		}
+		myContact.add(new ContactDt(theContactUse, theValue));
+		return this; 
+	}
+
+	/**
+	 * Adds a new value for <b>contact</b> (Contact details for the user)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * 
+     * </p> 
+     *
+     * @return Returns a reference to this object, to allow for simple chaining.
+	 */
+	public User addContact( String theValue) {
+		if (myContact == null) {
+			myContact = new java.util.ArrayList<ContactDt>();
+		}
+		myContact.add(new ContactDt(theValue));
+		return this; 
+	}
+
+ 
 	/**
 	 * Gets the value(s) for <b>patient</b> (Patient compartments the user has access to (if level is patient/family)).
 	 * creating it if it does

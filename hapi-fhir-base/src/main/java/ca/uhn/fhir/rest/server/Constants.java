@@ -81,6 +81,7 @@ public class Constants {
 	public static final int STATUS_HTTP_412_PRECONDITION_FAILED = 412;
 	public static final int STATUS_HTTP_422_UNPROCESSABLE_ENTITY = 422;
 	public static final int STATUS_HTTP_500_INTERNAL_ERROR = 500;
+	public static final int STATUS_HTTP_501_NOT_IMPLEMENTED = 501;
 	public static final String URL_TOKEN_HISTORY = "_history";
 	public static final String HEADER_ACCEPT_ENCODING = "Accept-Encoding";
 	public static final String HEADER_CONTENT_ENCODING = "Content-Encoding";

@@ -307,7 +307,7 @@
      * </p> 
 	 */
 	@Block()	
-	public static class ${blockChild.className} extends BaseElement implements IResourceBlock {
+	public static class ${blockChild.className} extends BaseIdentifiableElement implements IResourceBlock {
 	
 #childVars( $blockChild.children )
 #childAccessors( $blockChild.children )

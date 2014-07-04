@@ -150,8 +150,12 @@ public class TransactionMethodBinding extends BaseResourceReturningMethodBinding
 		return createTransactionInvocation(resources, context);
 	}
 
-	public static BaseHttpClientInvocation createTransactionInvocation(List<IResource> resources, FhirContext theContext) {
-		return new HttpPostClientInvocation(theContext, resources);
+	public static BaseHttpClientInvocation createTransactionInvocation(List<IResource> theResources, FhirContext theContext) {
+		return new HttpPostClientInvocation(theContext, theResources);
+	}
+
+	public static BaseHttpClientInvocation createTransactionInvocation(Bundle theBundle, FhirContext theContext) {
+		return new HttpPostClientInvocation(theContext, theBundle);
 	}
 
 }

@@ -29,8 +29,6 @@ import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.annotation.IncludeParam;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
-import ca.uhn.fhir.rest.annotation.Sort;
-import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.testutil.RandomServerPortProvider;
 
 /**

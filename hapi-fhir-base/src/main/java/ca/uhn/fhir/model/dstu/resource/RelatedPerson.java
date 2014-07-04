@@ -16,26 +16,6 @@
 
 package ca.uhn.fhir.model.dstu.resource;
 
-/*
- * #%L
- * HAPI FHIR Library
- * %%
- * Copyright (C) 2014 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 
 import java.util.List;
 
@@ -55,6 +35,7 @@ import ca.uhn.fhir.model.dstu.composite.HumanNameDt;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
+import ca.uhn.fhir.model.dstu.valueset.ContactUseEnum;
 import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
 import ca.uhn.fhir.model.dstu.valueset.PatientRelationshipTypeEnum;
 import ca.uhn.fhir.model.primitive.BoundCodeableConceptDt;
@@ -569,7 +550,43 @@ public class RelatedPerson extends BaseResource implements IResource {
 		}
 		return getTelecom().get(0); 
 	}
-  
+ 	/**
+	 * Adds a new value for <b>telecom</b> (A contact detail for the person)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A contact detail for the person, e.g. a telephone number or an email address.
+     * </p> 
+     *
+     * @return Returns a reference to this object, to allow for simple chaining.
+	 */
+	public RelatedPerson addTelecom( ContactUseEnum theContactUse,  String theValue) {
+		if (myTelecom == null) {
+			myTelecom = new java.util.ArrayList<ContactDt>();
+		}
+		myTelecom.add(new ContactDt(theContactUse, theValue));
+		return this; 
+	}
+
+	/**
+	 * Adds a new value for <b>telecom</b> (A contact detail for the person)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A contact detail for the person, e.g. a telephone number or an email address.
+     * </p> 
+     *
+     * @return Returns a reference to this object, to allow for simple chaining.
+	 */
+	public RelatedPerson addTelecom( String theValue) {
+		if (myTelecom == null) {
+			myTelecom = new java.util.ArrayList<ContactDt>();
+		}
+		myTelecom.add(new ContactDt(theValue));
+		return this; 
+	}
+
+ 
 	/**
 	 * Gets the value(s) for <b>gender</b> (Gender for administrative purposes).
 	 * creating it if it does

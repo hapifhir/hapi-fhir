@@ -19,6 +19,7 @@ package ca.uhn.fhir.testmodel;
 import java.util.List;
 
 import ca.uhn.fhir.model.api.BaseElement;
+import ca.uhn.fhir.model.api.BaseIdentifiableElement;
 import ca.uhn.fhir.model.api.ICompositeDatatype;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -50,7 +51,7 @@ import ca.uhn.fhir.model.primitive.UriDt;
  */
 @DatatypeDef(name="Identifier") 
 public class IdentifierDt 
-        extends  BaseElement         implements ICompositeDatatype  , IQueryParameterType {
+        extends  BaseIdentifiableElement         implements ICompositeDatatype  , IQueryParameterType {
 
 	/**
 	 * Creates a new identifier

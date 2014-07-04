@@ -20,7 +20,7 @@ package ca.uhn.fhir.rest.server;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -45,7 +45,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -1031,7 +1030,6 @@ public class RestfulServer extends HttpServlet {
 				RestfulServer.getNewParser(theServer.getFhirContext(), theResponseEncoding, thePrettyPrint, theNarrativeMode).encodeBundleToWriter(bundle, writer);
 			}
 		} finally {
-			writer.flush();
 			writer.close();
 		}
 	}
@@ -1106,7 +1104,6 @@ public class RestfulServer extends HttpServlet {
 				RestfulServer.getNewParser(theServer.getFhirContext(), theResponseEncoding, thePrettyPrint, theNarrativeMode).encodeResourceToWriter(theResource, writer);
 			}
 		} finally {
-			writer.flush();
 			writer.close();
 		}
 	}

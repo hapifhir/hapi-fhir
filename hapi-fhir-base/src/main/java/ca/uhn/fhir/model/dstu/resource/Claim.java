@@ -16,31 +16,11 @@
 
 package ca.uhn.fhir.model.dstu.resource;
 
-/*
- * #%L
- * HAPI FHIR Library
- * %%
- * Copyright (C) 2014 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 
 import java.util.Date;
 import java.util.List;
 
-import ca.uhn.fhir.model.api.BaseElement;
+import ca.uhn.fhir.model.api.BaseIdentifiableElement;
 import ca.uhn.fhir.model.api.BaseResource;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IResource;
@@ -304,8 +284,8 @@ public class Claim extends BaseResource implements IResource {
      * The date when the enclosed suite of services were performed or completed
      * </p> 
 	 */
-	public Claim setServicedate( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myServicedate = new DateDt(theDate, thePrecision); 
+	public Claim setServicedateWithDayPrecision( Date theDate) {
+		myServicedate = new DateDt(theDate); 
 		return this; 
 	}
 
@@ -317,8 +297,8 @@ public class Claim extends BaseResource implements IResource {
      * The date when the enclosed suite of services were performed or completed
      * </p> 
 	 */
-	public Claim setServicedateWithDayPrecision( Date theDate) {
-		myServicedate = new DateDt(theDate); 
+	public Claim setServicedate( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myServicedate = new DateDt(theDate, thePrecision); 
 		return this; 
 	}
 
@@ -684,7 +664,7 @@ public class Claim extends BaseResource implements IResource {
      * </p> 
 	 */
 	@Block()	
-	public static class Patient extends BaseElement implements IResourceBlock {
+	public static class Patient extends BaseIdentifiableElement implements IResourceBlock {
 	
 	@Child(name="name", type=HumanNameDt.class, order=0, min=0, max=1)	
 	@Description(
@@ -825,8 +805,8 @@ public class Claim extends BaseResource implements IResource {
      * The date of birth of the PolicyHolder
      * </p> 
 	 */
-	public Patient setBirthdate( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myBirthdate = new DateDt(theDate, thePrecision); 
+	public Patient setBirthdateWithDayPrecision( Date theDate) {
+		myBirthdate = new DateDt(theDate); 
 		return this; 
 	}
 
@@ -838,8 +818,8 @@ public class Claim extends BaseResource implements IResource {
      * The date of birth of the PolicyHolder
      * </p> 
 	 */
-	public Patient setBirthdateWithDayPrecision( Date theDate) {
-		myBirthdate = new DateDt(theDate); 
+	public Patient setBirthdate( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myBirthdate = new DateDt(theDate, thePrecision); 
 		return this; 
 	}
 
@@ -888,7 +868,7 @@ public class Claim extends BaseResource implements IResource {
      * </p> 
 	 */
 	@Block()	
-	public static class Coverage extends BaseElement implements IResourceBlock {
+	public static class Coverage extends BaseIdentifiableElement implements IResourceBlock {
 	
 	@Child(name="issuer", order=0, min=0, max=1, type={
 		ca.uhn.fhir.model.dstu.resource.Organization.class	})
@@ -1424,7 +1404,7 @@ public class Claim extends BaseResource implements IResource {
      * </p> 
 	 */
 	@Block()	
-	public static class CoverageSubscriber extends BaseElement implements IResourceBlock {
+	public static class CoverageSubscriber extends BaseIdentifiableElement implements IResourceBlock {
 	
 	@Child(name="name", type=HumanNameDt.class, order=0, min=0, max=1)	
 	@Description(
@@ -1558,8 +1538,8 @@ public class Claim extends BaseResource implements IResource {
      * The date of birth of the PolicyHolder
      * </p> 
 	 */
-	public CoverageSubscriber setBirthdate( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myBirthdate = new DateDt(theDate, thePrecision); 
+	public CoverageSubscriber setBirthdateWithDayPrecision( Date theDate) {
+		myBirthdate = new DateDt(theDate); 
 		return this; 
 	}
 
@@ -1571,8 +1551,8 @@ public class Claim extends BaseResource implements IResource {
      * The date of birth of the PolicyHolder
      * </p> 
 	 */
-	public CoverageSubscriber setBirthdateWithDayPrecision( Date theDate) {
-		myBirthdate = new DateDt(theDate); 
+	public CoverageSubscriber setBirthdate( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myBirthdate = new DateDt(theDate, thePrecision); 
 		return this; 
 	}
 
@@ -1591,7 +1571,7 @@ public class Claim extends BaseResource implements IResource {
      * </p> 
 	 */
 	@Block()	
-	public static class Service extends BaseElement implements IResourceBlock {
+	public static class Service extends BaseIdentifiableElement implements IResourceBlock {
 	
 	@Child(name="service", type=CodeableConceptDt.class, order=0, min=1, max=1)	
 	@Description(
@@ -1896,7 +1876,7 @@ public class Claim extends BaseResource implements IResource {
      * </p> 
 	 */
 	@Block()	
-	public static class ServiceLab extends BaseElement implements IResourceBlock {
+	public static class ServiceLab extends BaseIdentifiableElement implements IResourceBlock {
 	
 	@Child(name="service", type=CodeableConceptDt.class, order=0, min=1, max=1)	
 	@Description(

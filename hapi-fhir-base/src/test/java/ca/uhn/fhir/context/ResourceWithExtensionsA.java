@@ -2,7 +2,7 @@ package ca.uhn.fhir.context;
 
 import java.util.List;
 
-import ca.uhn.fhir.model.api.BaseElement;
+import ca.uhn.fhir.model.api.BaseIdentifiableElement;
 import ca.uhn.fhir.model.api.BaseResource;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IExtension;
@@ -83,7 +83,7 @@ public class ResourceWithExtensionsA extends BaseResource {
 	}
 
 	@Block(name = "Bar1")
-	public static class Bar1 extends BaseElement implements IExtension {
+	public static class Bar1 extends BaseIdentifiableElement implements IExtension {
 
 		public Bar1() {
 			super();
@@ -141,7 +141,7 @@ public class ResourceWithExtensionsA extends BaseResource {
 	}
 
 	@Block(name = "Bar2")
-	public static class Bar2 implements IExtension {
+	public static class Bar2 extends BaseIdentifiableElement implements IExtension {
 
 		@Child(name = "bar121", type = DateDt.class, order = 0, min = 0, max = Child.MAX_UNLIMITED)
 		@Extension(url = "http://bar/#b1/2/1", definedLocally=true, isModifier=false)
@@ -151,8 +151,6 @@ public class ResourceWithExtensionsA extends BaseResource {
 		@Extension(url = "http://bar/#b1/2/2", definedLocally=true, isModifier=false)
 		private List<DateDt> myBar122;
 
-		private IdDt myId;
-		
 		@Override
 		public boolean isEmpty() {
 			return false; // not implemented
@@ -180,20 +178,6 @@ public class ResourceWithExtensionsA extends BaseResource {
 			myBar122 = theBar122;
 		}
 
-		@Override
-		public void setId(IdDt theId) {
-			myId=theId;
-		}
-
-		@Override
-		public IdDt getId() {
-			return myId;
-		}
-
-		@Override
-		public void setId(String theId) {
-			myId=new IdDt(theId);
-		}
 
 
 	}

@@ -1,6 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,14 +20,10 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.annotation.History;
-import ca.uhn.fhir.rest.annotation.RequiredParam;
-import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.annotation.Since;
-import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.testutil.RandomServerPortProvider;
 
 /**

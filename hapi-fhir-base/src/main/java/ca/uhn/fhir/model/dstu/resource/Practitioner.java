@@ -16,31 +16,11 @@
 
 package ca.uhn.fhir.model.dstu.resource;
 
-/*
- * #%L
- * HAPI FHIR Library
- * %%
- * Copyright (C) 2014 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 
 import java.util.Date;
 import java.util.List;
 
-import ca.uhn.fhir.model.api.BaseElement;
+import ca.uhn.fhir.model.api.BaseIdentifiableElement;
 import ca.uhn.fhir.model.api.BaseResource;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IResource;
@@ -61,6 +41,7 @@ import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.composite.PeriodDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
+import ca.uhn.fhir.model.dstu.valueset.ContactUseEnum;
 import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
 import ca.uhn.fhir.model.dstu.valueset.PractitionerRoleEnum;
 import ca.uhn.fhir.model.dstu.valueset.PractitionerSpecialtyEnum;
@@ -587,7 +568,43 @@ public class Practitioner extends BaseResource implements IResource {
 		}
 		return getTelecom().get(0); 
 	}
-  
+ 	/**
+	 * Adds a new value for <b>telecom</b> (A contact detail for the practitioner)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A contact detail for the practitioner, e.g. a telephone number or an email address.
+     * </p> 
+     *
+     * @return Returns a reference to this object, to allow for simple chaining.
+	 */
+	public Practitioner addTelecom( ContactUseEnum theContactUse,  String theValue) {
+		if (myTelecom == null) {
+			myTelecom = new java.util.ArrayList<ContactDt>();
+		}
+		myTelecom.add(new ContactDt(theContactUse, theValue));
+		return this; 
+	}
+
+	/**
+	 * Adds a new value for <b>telecom</b> (A contact detail for the practitioner)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A contact detail for the practitioner, e.g. a telephone number or an email address.
+     * </p> 
+     *
+     * @return Returns a reference to this object, to allow for simple chaining.
+	 */
+	public Practitioner addTelecom( String theValue) {
+		if (myTelecom == null) {
+			myTelecom = new java.util.ArrayList<ContactDt>();
+		}
+		myTelecom.add(new ContactDt(theValue));
+		return this; 
+	}
+
+ 
 	/**
 	 * Gets the value(s) for <b>address</b> (Where practitioner can be found/visited).
 	 * creating it if it does
@@ -701,8 +718,8 @@ public class Practitioner extends BaseResource implements IResource {
      * The date and time of birth for the practitioner
      * </p> 
 	 */
-	public Practitioner setBirthDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myBirthDate = new DateTimeDt(theDate, thePrecision); 
+	public Practitioner setBirthDateWithSecondsPrecision( Date theDate) {
+		myBirthDate = new DateTimeDt(theDate); 
 		return this; 
 	}
 
@@ -714,8 +731,8 @@ public class Practitioner extends BaseResource implements IResource {
      * The date and time of birth for the practitioner
      * </p> 
 	 */
-	public Practitioner setBirthDateWithSecondsPrecision( Date theDate) {
-		myBirthDate = new DateTimeDt(theDate); 
+	public Practitioner setBirthDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myBirthDate = new DateTimeDt(theDate, thePrecision); 
 		return this; 
 	}
 
@@ -842,6 +859,23 @@ public class Practitioner extends BaseResource implements IResource {
 	}
 
 	/**
+	 * Add a value for <b>role</b> (Roles which this practitioner may perform) using an enumerated type. This
+	 * is intended as a convenience method for situations where the FHIR defined ValueSets are mandatory
+	 * or contain the desirable codes. If you wish to use codes other than those which are built-in, 
+	 * you may also use the {@link #addType()} method.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Roles which this practitioner is authorized to perform for the organization
+     * </p> 
+	 */
+	public BoundCodeableConceptDt<PractitionerRoleEnum> addRole(PractitionerRoleEnum theValue) {
+		BoundCodeableConceptDt<PractitionerRoleEnum> retVal = new BoundCodeableConceptDt<PractitionerRoleEnum>(PractitionerRoleEnum.VALUESET_BINDER, theValue);
+		getRole().add(retVal);
+		return retVal;
+	}
+
+	/**
 	 * Add a value for <b>role</b> (Roles which this practitioner may perform)
 	 *
      * <p>
@@ -849,8 +883,10 @@ public class Practitioner extends BaseResource implements IResource {
      * Roles which this practitioner is authorized to perform for the organization
      * </p> 
 	 */
-	public void addRole(PractitionerRoleEnum theValue) {
-		getRole().add(new BoundCodeableConceptDt<PractitionerRoleEnum>(PractitionerRoleEnum.VALUESET_BINDER, theValue));
+	public BoundCodeableConceptDt<PractitionerRoleEnum> addRole() {
+		BoundCodeableConceptDt<PractitionerRoleEnum> retVal = new BoundCodeableConceptDt<PractitionerRoleEnum>(PractitionerRoleEnum.VALUESET_BINDER);
+		getRole().add(retVal);
+		return retVal;
 	}
 
 	/**
@@ -899,6 +935,23 @@ public class Practitioner extends BaseResource implements IResource {
 	}
 
 	/**
+	 * Add a value for <b>specialty</b> (Specific specialty of the practitioner) using an enumerated type. This
+	 * is intended as a convenience method for situations where the FHIR defined ValueSets are mandatory
+	 * or contain the desirable codes. If you wish to use codes other than those which are built-in, 
+	 * you may also use the {@link #addType()} method.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Specific specialty of the practitioner
+     * </p> 
+	 */
+	public BoundCodeableConceptDt<PractitionerSpecialtyEnum> addSpecialty(PractitionerSpecialtyEnum theValue) {
+		BoundCodeableConceptDt<PractitionerSpecialtyEnum> retVal = new BoundCodeableConceptDt<PractitionerSpecialtyEnum>(PractitionerSpecialtyEnum.VALUESET_BINDER, theValue);
+		getSpecialty().add(retVal);
+		return retVal;
+	}
+
+	/**
 	 * Add a value for <b>specialty</b> (Specific specialty of the practitioner)
 	 *
      * <p>
@@ -906,8 +959,10 @@ public class Practitioner extends BaseResource implements IResource {
      * Specific specialty of the practitioner
      * </p> 
 	 */
-	public void addSpecialty(PractitionerSpecialtyEnum theValue) {
-		getSpecialty().add(new BoundCodeableConceptDt<PractitionerSpecialtyEnum>(PractitionerSpecialtyEnum.VALUESET_BINDER, theValue));
+	public BoundCodeableConceptDt<PractitionerSpecialtyEnum> addSpecialty() {
+		BoundCodeableConceptDt<PractitionerSpecialtyEnum> retVal = new BoundCodeableConceptDt<PractitionerSpecialtyEnum>(PractitionerSpecialtyEnum.VALUESET_BINDER);
+		getSpecialty().add(retVal);
+		return retVal;
 	}
 
 	/**
@@ -1129,7 +1184,7 @@ public class Practitioner extends BaseResource implements IResource {
      * </p> 
 	 */
 	@Block()	
-	public static class Qualification extends BaseElement implements IResourceBlock {
+	public static class Qualification extends BaseIdentifiableElement implements IResourceBlock {
 	
 	@Child(name="code", type=CodeableConceptDt.class, order=0, min=1, max=1)	
 	@Description(

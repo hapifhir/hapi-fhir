@@ -20,9 +20,7 @@ package ca.uhn.fhir.parser;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.defaultString;
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -709,6 +707,8 @@ public class JsonParser extends BaseParser implements IParser {
 			IElement object = (IElement) theState.getObject();
 			if (object instanceof IIdentifiableElement) {
 				((IIdentifiableElement) object).setId(new IdDt(elementId));
+			} else if (object instanceof IResource) {
+				((IResource) object).setId(new IdDt(elementId));
 			}
 		}
 	}

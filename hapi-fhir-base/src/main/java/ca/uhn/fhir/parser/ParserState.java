@@ -20,8 +20,7 @@ package ca.uhn.fhir.parser;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -52,6 +51,7 @@ import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.api.ICompositeDatatype;
 import ca.uhn.fhir.model.api.ICompositeElement;
 import ca.uhn.fhir.model.api.IElement;
+import ca.uhn.fhir.model.api.IIdentifiableElement;
 import ca.uhn.fhir.model.api.IPrimitiveDatatype;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.IResourceBlock;
@@ -219,7 +219,7 @@ class ParserState<T> {
 		private static final int STATE_NONE = 0;
 		private static final int STATE_SCHEME = 3;
 		private static final int STATE_TERM = 1;
-		
+
 		private int myCatState = STATE_NONE;
 		private Tag myInstance;
 
@@ -417,9 +417,9 @@ class ParserState<T> {
 			if (myEntry.getUpdated().isEmpty() == false) {
 				ResourceMetadataKeyEnum.UPDATED.put(myEntry.getResource(), myEntry.getUpdated());
 			}
-			
+
 			ResourceMetadataKeyEnum.TITLE.put(myEntry.getResource(), myEntry.getTitle().getValue());
-			
+
 			if (myEntry.getCategories().isEmpty() == false) {
 				TagList tagList = new TagList();
 				for (Tag next : myEntry.getCategories()) {
@@ -626,7 +626,7 @@ class ParserState<T> {
 		/**
 		 * Default implementation just handles undeclared extensions
 		 */
-		public void enteringNewElementExtension(@SuppressWarnings("unused") StartElement theElement, String theUrlAttr, boolean theIsModifier) {
+		public void enteringNewElementExtension(StartElement theElement, String theUrlAttr, boolean theIsModifier) {
 			if (myPreResourceState != null && getCurrentElement() instanceof ISupportsUndeclaredExtensions) {
 				ExtensionDt newExtension = new ExtensionDt(theIsModifier, theUrlAttr);
 				ISupportsUndeclaredExtensions elem = (ISupportsUndeclaredExtensions) getCurrentElement();
@@ -699,16 +699,16 @@ class ParserState<T> {
 			if (mySubState == SUBSTATE_CT) {
 				myInstance.setContentType(myData);
 				mySubState = 0;
-				myData=null;
+				myData = null;
 				return;
 			} else if (mySubState == SUBSTATE_CONTENT) {
 				myInstance.setContentAsBase64(myData);
 				mySubState = 0;
-				myData=null;
+				myData = null;
 				return;
 			} else {
 				if (!myJsonMode) {
-				myInstance.setContentAsBase64(myData);
+					myInstance.setContentAsBase64(myData);
 				}
 				pop();
 			}
@@ -864,9 +864,13 @@ class ParserState<T> {
 		@Override
 		public void attributeValue(String theName, String theValue) throws DataFormatException {
 			if ("id".equals(theName)) {
-				myInstance.setId(new IdDt(theValue));
+				if (myInstance instanceof IIdentifiableElement) {
+					((IIdentifiableElement) myInstance).setId(new IdDt(theValue));
+				} else if (myInstance instanceof IResource) {
+					((IResource) myInstance).setId(new IdDt(theValue));
+				}
 			} else if ("url".equals(theName) && myInstance instanceof ExtensionDt) {
-				((ExtensionDt)myInstance).setUrl(theValue);
+				((ExtensionDt) myInstance).setUrl(theValue);
 			}
 		}
 
@@ -955,8 +959,8 @@ class ParserState<T> {
 				return;
 			}
 			case UNDECL_EXT:
-			case RESOURCE: 
-			case EXTENSION_DECLARED:{
+			case RESOURCE:
+			case EXTENSION_DECLARED: {
 				// Throw an exception because this shouldn't happen here
 				break;
 			}
@@ -1118,7 +1122,7 @@ class ParserState<T> {
 		public void endingElement() throws DataFormatException {
 			pop();
 		}
-		
+
 		@Override
 		public void enteringNewElement(String theNamespaceURI, String theLocalPart) throws DataFormatException {
 			BaseRuntimeElementDefinition<?> definition;
@@ -1166,7 +1170,7 @@ class ParserState<T> {
 		private PreResourceState getRootPreResourceState() {
 			if (getPreResourceState() != null) {
 				return getPreResourceState();
-			}else {
+			} else {
 				return this;
 			}
 		}
@@ -1255,7 +1259,11 @@ class ParserState<T> {
 			if ("value".equals(theName)) {
 				myInstance.setValueAsString(theValue);
 			} else if ("id".equals(theName)) {
-				myInstance.setId(new IdDt(theValue));
+				if (myInstance instanceof IIdentifiableElement) {
+					((IIdentifiableElement) myInstance).setElementSpecificId(theValue);
+				} else if (myInstance instanceof IResource) {
+					((IResource) myInstance).setId(new IdDt(theValue));
+				}
 			}
 		}
 

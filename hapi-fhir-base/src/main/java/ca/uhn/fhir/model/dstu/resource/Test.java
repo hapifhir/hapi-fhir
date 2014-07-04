@@ -16,26 +16,6 @@
 
 package ca.uhn.fhir.model.dstu.resource;
 
-/*
- * #%L
- * HAPI FHIR Library
- * %%
- * Copyright (C) 2014 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 
 import java.util.Date;
 import java.util.List;
@@ -1118,11 +1098,11 @@ public class Test extends BaseResource implements IResource {
      *
      * @return Returns a reference to this object, to allow for simple chaining.
 	 */
-	public Test addInstantErr( Date theDate) {
+	public Test addInstantErr( Date theDate,  TemporalPrecisionEnum thePrecision) {
 		if (myInstantErr == null) {
 			myInstantErr = new java.util.ArrayList<InstantDt>();
 		}
-		myInstantErr.add(new InstantDt(theDate));
+		myInstantErr.add(new InstantDt(theDate, thePrecision));
 		return this; 
 	}
 
@@ -1136,11 +1116,11 @@ public class Test extends BaseResource implements IResource {
      *
      * @return Returns a reference to this object, to allow for simple chaining.
 	 */
-	public Test addInstantErr( Date theDate,  TemporalPrecisionEnum thePrecision) {
+	public Test addInstantErr( Date theDate) {
 		if (myInstantErr == null) {
 			myInstantErr = new java.util.ArrayList<InstantDt>();
 		}
-		myInstantErr.add(new InstantDt(theDate, thePrecision));
+		myInstantErr.add(new InstantDt(theDate));
 		return this; 
 	}
 
@@ -1214,11 +1194,11 @@ public class Test extends BaseResource implements IResource {
      *
      * @return Returns a reference to this object, to allow for simple chaining.
 	 */
-	public Test addInstantCorr( Date theDate) {
+	public Test addInstantCorr( Date theDate,  TemporalPrecisionEnum thePrecision) {
 		if (myInstantCorr == null) {
 			myInstantCorr = new java.util.ArrayList<InstantDt>();
 		}
-		myInstantCorr.add(new InstantDt(theDate));
+		myInstantCorr.add(new InstantDt(theDate, thePrecision));
 		return this; 
 	}
 
@@ -1232,11 +1212,11 @@ public class Test extends BaseResource implements IResource {
      *
      * @return Returns a reference to this object, to allow for simple chaining.
 	 */
-	public Test addInstantCorr( Date theDate,  TemporalPrecisionEnum thePrecision) {
+	public Test addInstantCorr( Date theDate) {
 		if (myInstantCorr == null) {
 			myInstantCorr = new java.util.ArrayList<InstantDt>();
 		}
-		myInstantCorr.add(new InstantDt(theDate, thePrecision));
+		myInstantCorr.add(new InstantDt(theDate));
 		return this; 
 	}
 

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 	<div th:fragment="banner" class="well">
-		<th:block th:if="${serverEntry.key} == 'home'">
+		<th:block th:if="${serverId} == 'home'">
 			<p>
 				This is the home for the FHIR test server operated by
 				<a href="http://uhn.ca">University Health Network</a>. This server
@@ -32,16 +32,16 @@
 				</li>
 			</ul>
 		</th:block>
-		<th:block th:if="${serverEntry.key} != 'home'">
+		<th:block th:if="${serverId} != 'home'">
 			<p>
 				You are accessing the public FHIR server
 				<b th:text="${baseName}"/>. This server is hosted elsewhere on the internet
-				but is being accessed using 
+				but is being accessed using the HAPI client implementation.
 			</p>
 		</th:block>
 		<p>
 			<b style="color: red;">
-				<span class="glyphicon glyphicon-warning-sign/> 
+				<span class="glyphicon glyphicon-warning-sign"/> 
 				This is not a production server!
 			</b> 
 			Do not store any information here that contains personal health information

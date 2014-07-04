@@ -26,6 +26,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.AbstractHttpEntity;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.TagList;
 
@@ -43,6 +44,11 @@ public class HttpPostClientInvocation extends BaseHttpClientInvocationWithConten
 
 	public HttpPostClientInvocation(FhirContext theContext, List<IResource> theResources) {
 		super(theContext, theResources);
+	}
+
+
+	public HttpPostClientInvocation(FhirContext theContext, Bundle theBundle) {
+		super(theContext,theBundle);
 	}
 
 

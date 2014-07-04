@@ -16,31 +16,11 @@
 
 package ca.uhn.fhir.model.dstu.resource;
 
-/*
- * #%L
- * HAPI FHIR Library
- * %%
- * Copyright (C) 2014 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 
 import java.util.Date;
 import java.util.List;
 
-import ca.uhn.fhir.model.api.BaseElement;
+import ca.uhn.fhir.model.api.BaseIdentifiableElement;
 import ca.uhn.fhir.model.api.BaseResource;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IResource;
@@ -54,6 +34,7 @@ import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu.composite.CodingDt;
 import ca.uhn.fhir.model.dstu.composite.ContactDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.dstu.valueset.ContactUseEnum;
 import ca.uhn.fhir.model.dstu.valueset.ResponseTypeEnum;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
@@ -269,8 +250,8 @@ public class MessageHeader extends BaseResource implements IResource {
      * The time that the message was sent
      * </p> 
 	 */
-	public MessageHeader setTimestampWithMillisPrecision( Date theDate) {
-		myTimestamp = new InstantDt(theDate); 
+	public MessageHeader setTimestamp( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myTimestamp = new InstantDt(theDate, thePrecision); 
 		return this; 
 	}
 
@@ -282,8 +263,8 @@ public class MessageHeader extends BaseResource implements IResource {
      * The time that the message was sent
      * </p> 
 	 */
-	public MessageHeader setTimestamp( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myTimestamp = new InstantDt(theDate, thePrecision); 
+	public MessageHeader setTimestampWithMillisPrecision( Date theDate) {
+		myTimestamp = new InstantDt(theDate); 
 		return this; 
 	}
 
@@ -514,6 +495,9 @@ public class MessageHeader extends BaseResource implements IResource {
      * </p> 
 	 */
 	public ResourceReferenceDt getReceiver() {  
+		if (myReceiver == null) {
+			myReceiver = new ResourceReferenceDt();
+		}
 		return myReceiver;
 	}
 
@@ -542,6 +526,9 @@ public class MessageHeader extends BaseResource implements IResource {
      * </p> 
 	 */
 	public ResourceReferenceDt getResponsible() {  
+		if (myResponsible == null) {
+			myResponsible = new ResourceReferenceDt();
+		}
 		return myResponsible;
 	}
 
@@ -643,7 +630,7 @@ public class MessageHeader extends BaseResource implements IResource {
      * </p> 
 	 */
 	@Block()	
-	public static class Response extends BaseElement implements IResourceBlock {
+	public static class Response extends BaseIdentifiableElement implements IResourceBlock {
 	
 	@Child(name="identifier", type=IdDt.class, order=0, min=1, max=1)	
 	@Description(
@@ -810,7 +797,7 @@ public class MessageHeader extends BaseResource implements IResource {
      * </p> 
 	 */
 	@Block()	
-	public static class Source extends BaseElement implements IResourceBlock {
+	public static class Source extends BaseIdentifiableElement implements IResourceBlock {
 	
 	@Child(name="name", type=StringDt.class, order=0, min=0, max=1)	
 	@Description(
@@ -1020,7 +1007,33 @@ public class MessageHeader extends BaseResource implements IResource {
 		return this;
 	}
 
-  
+ 	/**
+	 * Sets the value for <b>contact</b> (Human contact for problems)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * An e-mail, phone, website or other contact point to use to resolve issues with message communications.
+     * </p> 
+	 */
+	public Source setContact( ContactUseEnum theContactUse,  String theValue) {
+		myContact = new ContactDt(theContactUse, theValue); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>contact</b> (Human contact for problems)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * An e-mail, phone, website or other contact point to use to resolve issues with message communications.
+     * </p> 
+	 */
+	public Source setContact( String theValue) {
+		myContact = new ContactDt(theValue); 
+		return this; 
+	}
+
+ 
 	/**
 	 * Gets the value(s) for <b>endpoint</b> (Actual message source address or id).
 	 * creating it if it does
@@ -1078,7 +1091,7 @@ public class MessageHeader extends BaseResource implements IResource {
      * </p> 
 	 */
 	@Block()	
-	public static class Destination extends BaseElement implements IResourceBlock {
+	public static class Destination extends BaseIdentifiableElement implements IResourceBlock {
 	
 	@Child(name="name", type=StringDt.class, order=0, min=0, max=1)	
 	@Description(
