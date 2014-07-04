@@ -50,6 +50,7 @@ import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.to.model.HomeRequest;
 import ca.uhn.fhir.to.model.ResourceRequest;
+import ca.uhn.fhir.to.model.TransactionRequest;
 
 @org.springframework.stereotype.Controller()
 public class Controller {
@@ -66,6 +67,40 @@ public class Controller {
 
 	@Autowired
 	private TemplateEngine myTemplateEngine;
+
+	@RequestMapping(value = { "/transaction" })
+	public String actionTransaction(final TransactionRequest theRequest, final BindingResult theBindingResult, final ModelMap theModel) {
+		addCommonParams(theRequest, theModel);
+
+		GenericClient client = theRequest.newClient(myCtx, myConfig);
+		loadAndAddConformance(theRequest, theModel, client);
+
+		String body = preProcessMessageBody(theRequest.getTransactionBody());
+
+		Bundle bundle;
+		try {
+			if (body.startsWith("{")) {
+				bundle = myCtx.newJsonParser().parseBundle(body);
+			} else if (body.startsWith("<")) {
+				bundle = myCtx.newXmlParser().parseBundle(body);
+			} else {
+				theModel.put("errorMsg", "Message body does not appear to be a valid FHIR resource instance document. Body should start with '<' (for XML encoding) or '{' (for JSON encoding).");
+				return "home";
+			}
+		} catch (DataFormatException e) {
+			ourLog.warn("Failed to parse bundle", e);
+			theModel.put("errorMsg", "Failed to parse transaction bundle body. Error was: " + e.getMessage());
+			return "home";
+		}
+
+		long start = System.currentTimeMillis();
+		client.transaction().withBundle(bundle).execute();
+		long delay = System.currentTimeMillis() - start;
+
+		processAndAddLastClientInvocation(client, ResultType.BUNDLE, theModel, delay, "Transaction");
+
+		return "result";
+	}
 
 	@RequestMapping(value = { "/conformance" })
 	public String actionConformance(final HomeRequest theRequest, final BindingResult theBindingResult, final ModelMap theModel) {
@@ -427,18 +462,7 @@ public class Controller {
 			return;
 		}
 
-		body = body.trim();
-
-		StringBuilder b = new StringBuilder();
-		for (int i = 0; i < body.length(); i++) {
-			char nextChar = body.charAt(i);
-			int nextCharI = nextChar;
-			if (nextCharI == 65533) {
-				continue;
-			}
-			b.append(nextChar);
-		}
-		body = b.toString();
+		body = preProcessMessageBody(body);
 
 		IResource resource;
 		try {
@@ -483,6 +507,25 @@ public class Controller {
 
 		processAndAddLastClientInvocation(client, returnsResource, theModel, delay, outcomeDescription);
 
+	}
+
+	private String preProcessMessageBody(String theBody) {
+		if(theBody==null) {
+			return "";
+		}
+		String retVal = theBody.trim();
+
+		StringBuilder b = new StringBuilder();
+		for (int i = 0; i < retVal.length(); i++) {
+			char nextChar = retVal.charAt(i);
+			int nextCharI = nextChar;
+			if (nextCharI == 65533) {
+				continue;
+			}
+			b.append(nextChar);
+		}
+		retVal = b.toString();
+		return retVal;
 	}
 
 	private void doActionHistory(HttpServletRequest theReq, HomeRequest theRequest, BindingResult theBindingResult, ModelMap theModel, String theMethod, String theMethodDescription) {

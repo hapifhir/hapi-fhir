@@ -1,6 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,9 +23,8 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.resource.Patient;
-import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
-import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.testutil.RandomServerPortProvider;
@@ -36,7 +35,6 @@ import ca.uhn.fhir.testutil.RandomServerPortProvider;
 public class SearchTest {
 
 	private static CloseableHttpClient ourClient;
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchTest.class);
 	private static int ourPort;
 	private static Server ourServer;
 	private static FhirContext ourCtx = new FhirContext();
@@ -46,12 +44,14 @@ public class SearchTest {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_id=aaa");
 		HttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		Bundle bundle = ourCtx.newXmlParser().parseBundle(responseContent);
 		assertEquals(1, bundle.getEntries().size());
 		
 		Patient p = bundle.getResources(Patient.class).get(0);
 		assertEquals("idaaa", p.getNameFirstRep().getFamilyAsSingleString());
+		assertEquals("IDAAA (identifier123)", bundle.getEntries().get(0).getTitle().getValue());
 	}
 
 	@AfterClass
@@ -68,6 +68,8 @@ public class SearchTest {
 
 		ServletHandler proxyHandler = new ServletHandler();
 		RestfulServer servlet = new RestfulServer();
+		servlet.getFhirContext().setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
+		
 		servlet.setResourceProviders(patientProvider);
 		ServletHolder servletHolder = new ServletHolder(servlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
@@ -92,6 +94,7 @@ public class SearchTest {
 
 			Patient patient = new Patient();
 			patient.setId("1");
+			patient.addIdentifier("system", "identifier123");
 			patient.addName().addFamily("id"+theParam.getValue());
 			retVal.add(patient);
 			return retVal;

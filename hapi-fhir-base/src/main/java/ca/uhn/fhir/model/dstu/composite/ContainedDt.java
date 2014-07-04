@@ -27,7 +27,6 @@ import ca.uhn.fhir.model.api.IDatatype;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
-import ca.uhn.fhir.model.primitive.IdDt;
 
 @DatatypeDef(name = "duration")
 public class ContainedDt implements IDatatype {
@@ -51,18 +50,4 @@ public class ContainedDt implements IDatatype {
 		return myContainedResources == null || myContainedResources.size() == 0;
 	}
 
-	@Override
-	public void setId(IdDt theId) {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public IdDt getId() {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public void setId(String theId) {
-		throw new UnsupportedOperationException();
-	}
 }

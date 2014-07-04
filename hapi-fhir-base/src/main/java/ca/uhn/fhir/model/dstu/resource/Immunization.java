@@ -16,31 +16,11 @@
 
 package ca.uhn.fhir.model.dstu.resource;
 
-/*
- * #%L
- * HAPI FHIR Library
- * %%
- * Copyright (C) 2014 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 
 import java.util.Date;
 import java.util.List;
 
-import ca.uhn.fhir.model.api.BaseElement;
+import ca.uhn.fhir.model.api.BaseIdentifiableElement;
 import ca.uhn.fhir.model.api.BaseResource;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IResource;
@@ -724,8 +704,8 @@ public class Immunization extends BaseResource implements IResource {
      * Date vaccine administered or was to be administered
      * </p> 
 	 */
-	public Immunization setDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myDate = new DateTimeDt(theDate, thePrecision); 
+	public Immunization setDateWithSecondsPrecision( Date theDate) {
+		myDate = new DateTimeDt(theDate); 
 		return this; 
 	}
 
@@ -737,8 +717,8 @@ public class Immunization extends BaseResource implements IResource {
      * Date vaccine administered or was to be administered
      * </p> 
 	 */
-	public Immunization setDateWithSecondsPrecision( Date theDate) {
-		myDate = new DateTimeDt(theDate); 
+	public Immunization setDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myDate = new DateTimeDt(theDate, thePrecision); 
 		return this; 
 	}
 
@@ -1099,8 +1079,8 @@ public class Immunization extends BaseResource implements IResource {
      * Date vaccine batch expires
      * </p> 
 	 */
-	public Immunization setExpirationDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myExpirationDate = new DateDt(theDate, thePrecision); 
+	public Immunization setExpirationDateWithDayPrecision( Date theDate) {
+		myExpirationDate = new DateDt(theDate); 
 		return this; 
 	}
 
@@ -1112,8 +1092,8 @@ public class Immunization extends BaseResource implements IResource {
      * Date vaccine batch expires
      * </p> 
 	 */
-	public Immunization setExpirationDateWithDayPrecision( Date theDate) {
-		myExpirationDate = new DateDt(theDate); 
+	public Immunization setExpirationDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myExpirationDate = new DateDt(theDate, thePrecision); 
 		return this; 
 	}
 
@@ -1231,8 +1211,21 @@ public class Immunization extends BaseResource implements IResource {
      * The quantity of vaccine product that was administered
      * </p> 
 	 */
-	public Immunization setDoseQuantity( QuantityCompararatorEnum theComparator,  long theValue,  String theUnits) {
-		myDoseQuantity = new QuantityDt(theComparator, theValue, theUnits); 
+	public Immunization setDoseQuantity( QuantityCompararatorEnum theComparator,  double theValue,  String theSystem,  String theUnits) {
+		myDoseQuantity = new QuantityDt(theComparator, theValue, theSystem, theUnits); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>doseQuantity</b> (Amount of vaccine administered)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The quantity of vaccine product that was administered
+     * </p> 
+	 */
+	public Immunization setDoseQuantity( QuantityCompararatorEnum theComparator,  long theValue,  String theSystem,  String theUnits) {
+		myDoseQuantity = new QuantityDt(theComparator, theValue, theSystem, theUnits); 
 		return this; 
 	}
 
@@ -1257,8 +1250,8 @@ public class Immunization extends BaseResource implements IResource {
      * The quantity of vaccine product that was administered
      * </p> 
 	 */
-	public Immunization setDoseQuantity( long theValue) {
-		myDoseQuantity = new QuantityDt(theValue); 
+	public Immunization setDoseQuantity( QuantityCompararatorEnum theComparator,  long theValue,  String theUnits) {
+		myDoseQuantity = new QuantityDt(theComparator, theValue, theUnits); 
 		return this; 
 	}
 
@@ -1271,6 +1264,19 @@ public class Immunization extends BaseResource implements IResource {
      * </p> 
 	 */
 	public Immunization setDoseQuantity( double theValue) {
+		myDoseQuantity = new QuantityDt(theValue); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>doseQuantity</b> (Amount of vaccine administered)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The quantity of vaccine product that was administered
+     * </p> 
+	 */
+	public Immunization setDoseQuantity( long theValue) {
 		myDoseQuantity = new QuantityDt(theValue); 
 		return this; 
 	}
@@ -1436,7 +1442,7 @@ public class Immunization extends BaseResource implements IResource {
      * </p> 
 	 */
 	@Block()	
-	public static class Explanation extends BaseElement implements IResourceBlock {
+	public static class Explanation extends BaseIdentifiableElement implements IResourceBlock {
 	
 	@Child(name="reason", type=CodeableConceptDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)	
 	@Description(
@@ -1494,6 +1500,23 @@ public class Immunization extends BaseResource implements IResource {
 	}
 
 	/**
+	 * Add a value for <b>reason</b> (Why immunization occurred) using an enumerated type. This
+	 * is intended as a convenience method for situations where the FHIR defined ValueSets are mandatory
+	 * or contain the desirable codes. If you wish to use codes other than those which are built-in, 
+	 * you may also use the {@link #addType()} method.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Reasons why a vaccine was administered
+     * </p> 
+	 */
+	public BoundCodeableConceptDt<ImmunizationReasonCodesEnum> addReason(ImmunizationReasonCodesEnum theValue) {
+		BoundCodeableConceptDt<ImmunizationReasonCodesEnum> retVal = new BoundCodeableConceptDt<ImmunizationReasonCodesEnum>(ImmunizationReasonCodesEnum.VALUESET_BINDER, theValue);
+		getReason().add(retVal);
+		return retVal;
+	}
+
+	/**
 	 * Add a value for <b>reason</b> (Why immunization occurred)
 	 *
      * <p>
@@ -1501,8 +1524,10 @@ public class Immunization extends BaseResource implements IResource {
      * Reasons why a vaccine was administered
      * </p> 
 	 */
-	public void addReason(ImmunizationReasonCodesEnum theValue) {
-		getReason().add(new BoundCodeableConceptDt<ImmunizationReasonCodesEnum>(ImmunizationReasonCodesEnum.VALUESET_BINDER, theValue));
+	public BoundCodeableConceptDt<ImmunizationReasonCodesEnum> addReason() {
+		BoundCodeableConceptDt<ImmunizationReasonCodesEnum> retVal = new BoundCodeableConceptDt<ImmunizationReasonCodesEnum>(ImmunizationReasonCodesEnum.VALUESET_BINDER);
+		getReason().add(retVal);
+		return retVal;
 	}
 
 	/**
@@ -1593,7 +1618,7 @@ public class Immunization extends BaseResource implements IResource {
      * </p> 
 	 */
 	@Block()	
-	public static class Reaction extends BaseElement implements IResourceBlock {
+	public static class Reaction extends BaseIdentifiableElement implements IResourceBlock {
 	
 	@Child(name="date", type=DateTimeDt.class, order=0, min=0, max=1)	
 	@Description(
@@ -1666,8 +1691,8 @@ public class Immunization extends BaseResource implements IResource {
      * Date of reaction to the immunization
      * </p> 
 	 */
-	public Reaction setDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myDate = new DateTimeDt(theDate, thePrecision); 
+	public Reaction setDateWithSecondsPrecision( Date theDate) {
+		myDate = new DateTimeDt(theDate); 
 		return this; 
 	}
 
@@ -1679,8 +1704,8 @@ public class Immunization extends BaseResource implements IResource {
      * Date of reaction to the immunization
      * </p> 
 	 */
-	public Reaction setDateWithSecondsPrecision( Date theDate) {
-		myDate = new DateTimeDt(theDate); 
+	public Reaction setDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myDate = new DateTimeDt(theDate, thePrecision); 
 		return this; 
 	}
 
@@ -1696,6 +1721,9 @@ public class Immunization extends BaseResource implements IResource {
      * </p> 
 	 */
 	public ResourceReferenceDt getDetail() {  
+		if (myDetail == null) {
+			myDetail = new ResourceReferenceDt();
+		}
 		return myDetail;
 	}
 
@@ -1770,7 +1798,7 @@ public class Immunization extends BaseResource implements IResource {
      * </p> 
 	 */
 	@Block()	
-	public static class VaccinationProtocol extends BaseElement implements IResourceBlock {
+	public static class VaccinationProtocol extends BaseIdentifiableElement implements IResourceBlock {
 	
 	@Child(name="doseSequence", type=IntegerDt.class, order=0, min=1, max=1)	
 	@Description(

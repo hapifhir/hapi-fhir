@@ -16,31 +16,11 @@
 
 package ca.uhn.fhir.model.dstu.resource;
 
-/*
- * #%L
- * HAPI FHIR Library
- * %%
- * Copyright (C) 2014 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 
 import java.util.Date;
 import java.util.List;
 
-import ca.uhn.fhir.model.api.BaseElement;
+import ca.uhn.fhir.model.api.BaseIdentifiableElement;
 import ca.uhn.fhir.model.api.BaseResource;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IResource;
@@ -65,7 +45,6 @@ import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.gclient.DateParam;
-import ca.uhn.fhir.rest.gclient.NumberParam;
 import ca.uhn.fhir.rest.gclient.ReferenceParam;
 import ca.uhn.fhir.rest.gclient.StringParam;
 import ca.uhn.fhir.rest.gclient.TokenParam;
@@ -162,27 +141,6 @@ public class Appointment extends BaseResource implements IResource {
 	 * the path value of "<b>Appointment.participant.individual</b>".
 	 */
 	public static final Include INCLUDE_PARTICIPANT_INDIVIDUAL = new Include("Appointment.participant.individual");
-
-	/**
-	 * Search parameter constant for <b>!duration</b>
-	 * <p>
-	 * Description: <b>The number of minutes that the appointment is to go for</b><br/>
-	 * Type: <b>number</b><br/>
-	 * Path: <b>Appointment.minutesDuration</b><br/>
-	 * </p>
-	 */
-	@SearchParamDefinition(name="!duration", path="Appointment.minutesDuration", description="The number of minutes that the appointment is to go for", type="number")
-	public static final String SP_DURATION = "!duration";
-
-	/**
-	 * <b>Fluent Client</b> search parameter constant for <b>!duration</b>
-	 * <p>
-	 * Description: <b>The number of minutes that the appointment is to go for</b><br/>
-	 * Type: <b>number</b><br/>
-	 * Path: <b>Appointment.minutesDuration</b><br/>
-	 * </p>
-	 */
-	public static final NumberParam DURATION = new NumberParam(SP_DURATION);
 
 	/**
 	 * Search parameter constant for <b>partstatus</b>
@@ -592,8 +550,8 @@ public class Appointment extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public Appointment setStartWithMillisPrecision( Date theDate) {
-		myStart = new InstantDt(theDate); 
+	public Appointment setStart( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myStart = new InstantDt(theDate, thePrecision); 
 		return this; 
 	}
 
@@ -605,8 +563,8 @@ public class Appointment extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public Appointment setStart( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myStart = new InstantDt(theDate, thePrecision); 
+	public Appointment setStartWithMillisPrecision( Date theDate) {
+		myStart = new InstantDt(theDate); 
 		return this; 
 	}
 
@@ -649,8 +607,8 @@ public class Appointment extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public Appointment setEndWithMillisPrecision( Date theDate) {
-		myEnd = new InstantDt(theDate); 
+	public Appointment setEnd( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myEnd = new InstantDt(theDate, thePrecision); 
 		return this; 
 	}
 
@@ -662,8 +620,8 @@ public class Appointment extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public Appointment setEnd( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myEnd = new InstantDt(theDate, thePrecision); 
+	public Appointment setEndWithMillisPrecision( Date theDate) {
+		myEnd = new InstantDt(theDate); 
 		return this; 
 	}
 
@@ -964,6 +922,9 @@ public class Appointment extends BaseResource implements IResource {
      * </p> 
 	 */
 	public ResourceReferenceDt getRecorder() {  
+		if (myRecorder == null) {
+			myRecorder = new ResourceReferenceDt();
+		}
 		return myRecorder;
 	}
 
@@ -1019,8 +980,8 @@ public class Appointment extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public Appointment setRecordedDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myRecordedDate = new DateTimeDt(theDate, thePrecision); 
+	public Appointment setRecordedDateWithSecondsPrecision( Date theDate) {
+		myRecordedDate = new DateTimeDt(theDate); 
 		return this; 
 	}
 
@@ -1032,8 +993,8 @@ public class Appointment extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public Appointment setRecordedDateWithSecondsPrecision( Date theDate) {
-		myRecordedDate = new DateTimeDt(theDate); 
+	public Appointment setRecordedDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myRecordedDate = new DateTimeDt(theDate, thePrecision); 
 		return this; 
 	}
 
@@ -1047,7 +1008,7 @@ public class Appointment extends BaseResource implements IResource {
      * </p> 
 	 */
 	@Block()	
-	public static class Participant extends BaseElement implements IResourceBlock {
+	public static class Participant extends BaseIdentifiableElement implements IResourceBlock {
 	
 	@Child(name="type", type=CodeableConceptDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)	
 	@Description(
@@ -1128,6 +1089,23 @@ public class Appointment extends BaseResource implements IResource {
 	}
 
 	/**
+	 * Add a value for <b>type</b> (Role of participant in the appointment) using an enumerated type. This
+	 * is intended as a convenience method for situations where the FHIR defined ValueSets are mandatory
+	 * or contain the desirable codes. If you wish to use codes other than those which are built-in, 
+	 * you may also use the {@link #addType()} method.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * 
+     * </p> 
+	 */
+	public BoundCodeableConceptDt<ParticipantTypeEnum> addType(ParticipantTypeEnum theValue) {
+		BoundCodeableConceptDt<ParticipantTypeEnum> retVal = new BoundCodeableConceptDt<ParticipantTypeEnum>(ParticipantTypeEnum.VALUESET_BINDER, theValue);
+		getType().add(retVal);
+		return retVal;
+	}
+
+	/**
 	 * Add a value for <b>type</b> (Role of participant in the appointment)
 	 *
      * <p>
@@ -1135,8 +1113,10 @@ public class Appointment extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public void addType(ParticipantTypeEnum theValue) {
-		getType().add(new BoundCodeableConceptDt<ParticipantTypeEnum>(ParticipantTypeEnum.VALUESET_BINDER, theValue));
+	public BoundCodeableConceptDt<ParticipantTypeEnum> addType() {
+		BoundCodeableConceptDt<ParticipantTypeEnum> retVal = new BoundCodeableConceptDt<ParticipantTypeEnum>(ParticipantTypeEnum.VALUESET_BINDER);
+		getType().add(retVal);
+		return retVal;
 	}
 
 	/**
@@ -1165,6 +1145,9 @@ public class Appointment extends BaseResource implements IResource {
      * </p> 
 	 */
 	public java.util.List<ResourceReferenceDt> getIndividual() {  
+		if (myIndividual == null) {
+			myIndividual = new java.util.ArrayList<ResourceReferenceDt>();
+		}
 		return myIndividual;
 	}
 

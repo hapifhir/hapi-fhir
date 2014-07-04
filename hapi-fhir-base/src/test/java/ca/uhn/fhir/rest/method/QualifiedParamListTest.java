@@ -6,8 +6,6 @@ import java.util.List;
 
 import org.junit.Test;
 
-import ca.uhn.fhir.rest.method.QualifiedParamList;
-
 public class QualifiedParamListTest {
 
 	@Test

@@ -29,12 +29,15 @@ import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.dstu.composite.ContainedDt;
 import ca.uhn.fhir.model.dstu.composite.NarrativeDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.util.ElementUtil;
 
 public abstract class BaseResource extends BaseElement implements IResource {
 
 	@Child(name = "contained", order = 2, min = 0, max = 1)
 	private ContainedDt myContained;
+
+	private IdDt myId;
 
 	@Child(name = "language", order = 0, min = 0, max = Child.MAX_UNLIMITED)
 	private CodeDt myLanguage;
@@ -50,6 +53,13 @@ public abstract class BaseResource extends BaseElement implements IResource {
 			myContained = new ContainedDt();
 		}
 		return myContained;
+	}
+
+	public IdDt getId() {
+		if (myId == null) {
+			myId = new IdDt();
+		}
+		return myId;
 	}
 
 	public CodeDt getLanguage() {
@@ -76,6 +86,18 @@ public abstract class BaseResource extends BaseElement implements IResource {
 		myContained = theContained;
 	}
 
+	public void setId(IdDt theId) {
+		myId = theId;
+	}
+
+	public void setId(String theId) {
+		if (theId == null) {
+			myId = null;
+		} else {
+			myId = new IdDt(theId);
+		}
+	}
+
 	public void setLanguage(CodeDt theLanguage) {
 		myLanguage = theLanguage;
 	}
@@ -91,9 +113,8 @@ public abstract class BaseResource extends BaseElement implements IResource {
 	}
 
 	/**
-	 * Intended to be called by extending classes {@link #isEmpty()}
-	 * implementations, returns <code>true</code> if all content in this
-	 * superclass instance is empty per the semantics of {@link #isEmpty()}.
+	 * Intended to be called by extending classes {@link #isEmpty()} implementations, returns <code>true</code> if all
+	 * content in this superclass instance is empty per the semantics of {@link #isEmpty()}.
 	 */
 	@Override
 	protected boolean isBaseEmpty() {

@@ -16,26 +16,6 @@
 
 package ca.uhn.fhir.model.dstu.resource;
 
-/*
- * #%L
- * HAPI FHIR Library
- * %%
- * Copyright (C) 2014 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 
 import java.util.Date;
 import java.util.List;
@@ -621,6 +601,9 @@ public class DocumentManifest extends BaseResource implements IResource {
      * </p> 
 	 */
 	public java.util.List<ResourceReferenceDt> getSubject() {  
+		if (mySubject == null) {
+			mySubject = new java.util.ArrayList<ResourceReferenceDt>();
+		}
 		return mySubject;
 	}
 
@@ -662,6 +645,9 @@ public class DocumentManifest extends BaseResource implements IResource {
      * </p> 
 	 */
 	public java.util.List<ResourceReferenceDt> getRecipient() {  
+		if (myRecipient == null) {
+			myRecipient = new java.util.ArrayList<ResourceReferenceDt>();
+		}
 		return myRecipient;
 	}
 
@@ -734,6 +720,9 @@ public class DocumentManifest extends BaseResource implements IResource {
      * </p> 
 	 */
 	public java.util.List<ResourceReferenceDt> getAuthor() {  
+		if (myAuthor == null) {
+			myAuthor = new java.util.ArrayList<ResourceReferenceDt>();
+		}
 		return myAuthor;
 	}
 
@@ -802,8 +791,8 @@ public class DocumentManifest extends BaseResource implements IResource {
      * When the document manifest was created for submission to the server (not necessarily the same thing as the actual resource last modified time, since it may be modified, replicated etc)
      * </p> 
 	 */
-	public DocumentManifest setCreated( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myCreated = new DateTimeDt(theDate, thePrecision); 
+	public DocumentManifest setCreatedWithSecondsPrecision( Date theDate) {
+		myCreated = new DateTimeDt(theDate); 
 		return this; 
 	}
 
@@ -815,8 +804,8 @@ public class DocumentManifest extends BaseResource implements IResource {
      * When the document manifest was created for submission to the server (not necessarily the same thing as the actual resource last modified time, since it may be modified, replicated etc)
      * </p> 
 	 */
-	public DocumentManifest setCreatedWithSecondsPrecision( Date theDate) {
-		myCreated = new DateTimeDt(theDate); 
+	public DocumentManifest setCreated( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myCreated = new DateTimeDt(theDate, thePrecision); 
 		return this; 
 	}
 
@@ -1026,6 +1015,9 @@ public class DocumentManifest extends BaseResource implements IResource {
      * </p> 
 	 */
 	public java.util.List<ResourceReferenceDt> getContent() {  
+		if (myContent == null) {
+			myContent = new java.util.ArrayList<ResourceReferenceDt>();
+		}
 		return myContent;
 	}
 

@@ -20,9 +20,7 @@ package ca.uhn.fhir.parser;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.defaultString;
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -222,7 +220,7 @@ public class JsonParser extends BaseParser implements IParser {
 		eventWriter.writeEnd(); // entry array
 
 		eventWriter.writeEnd();
-		eventWriter.close();
+		eventWriter.flush();
 	}
 
 	private void encodeChildElementToStreamWriter(RuntimeResourceDefinition theResDef, IResource theResource, JsonGenerator theWriter, IElement theValue, BaseRuntimeElementDefinition<?> theChildDef, String theChildName) throws IOException {
@@ -709,6 +707,8 @@ public class JsonParser extends BaseParser implements IParser {
 			IElement object = (IElement) theState.getObject();
 			if (object instanceof IIdentifiableElement) {
 				((IIdentifiableElement) object).setId(new IdDt(elementId));
+			} else if (object instanceof IResource) {
+				((IResource) object).setId(new IdDt(elementId));
 			}
 		}
 	}
@@ -968,9 +968,10 @@ public class JsonParser extends BaseParser implements IParser {
 			theEventWriter.writeStartObject();
 			theEventWriter.write("url", ext.getUrl().getValue());
 
-			if (value == null && ext.getAllUndeclaredExtensions().isEmpty()) {
+			boolean noValue = value == null || value.isEmpty();
+			if (noValue && ext.getAllUndeclaredExtensions().isEmpty()) {
 				ourLog.debug("Extension with URL[{}] has no value", ext.getUrl().getValue());
-			} else if (value == null) {
+			} else if (noValue) {
 				theEventWriter.writeStartArray("extension");
 				for (ExtensionDt next : ext.getUndeclaredExtensions()) {
 					writeUndeclaredExt(theResDef, theResource, theEventWriter, next);

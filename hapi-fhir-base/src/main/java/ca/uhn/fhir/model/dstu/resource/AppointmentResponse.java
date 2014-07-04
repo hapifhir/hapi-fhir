@@ -16,26 +16,6 @@
 
 package ca.uhn.fhir.model.dstu.resource;
 
-/*
- * #%L
- * HAPI FHIR Library
- * %%
- * Copyright (C) 2014 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 
 import java.util.Date;
 import java.util.List;
@@ -419,6 +399,23 @@ public class AppointmentResponse extends BaseResource implements IResource {
 	}
 
 	/**
+	 * Add a value for <b>participantType</b> (Role of participant in the appointment) using an enumerated type. This
+	 * is intended as a convenience method for situations where the FHIR defined ValueSets are mandatory
+	 * or contain the desirable codes. If you wish to use codes other than those which are built-in, 
+	 * you may also use the {@link #addType()} method.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * 
+     * </p> 
+	 */
+	public BoundCodeableConceptDt<ParticipantTypeEnum> addParticipantType(ParticipantTypeEnum theValue) {
+		BoundCodeableConceptDt<ParticipantTypeEnum> retVal = new BoundCodeableConceptDt<ParticipantTypeEnum>(ParticipantTypeEnum.VALUESET_BINDER, theValue);
+		getParticipantType().add(retVal);
+		return retVal;
+	}
+
+	/**
 	 * Add a value for <b>participantType</b> (Role of participant in the appointment)
 	 *
      * <p>
@@ -426,8 +423,10 @@ public class AppointmentResponse extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public void addParticipantType(ParticipantTypeEnum theValue) {
-		getParticipantType().add(new BoundCodeableConceptDt<ParticipantTypeEnum>(ParticipantTypeEnum.VALUESET_BINDER, theValue));
+	public BoundCodeableConceptDt<ParticipantTypeEnum> addParticipantType() {
+		BoundCodeableConceptDt<ParticipantTypeEnum> retVal = new BoundCodeableConceptDt<ParticipantTypeEnum>(ParticipantTypeEnum.VALUESET_BINDER);
+		getParticipantType().add(retVal);
+		return retVal;
 	}
 
 	/**
@@ -456,6 +455,9 @@ public class AppointmentResponse extends BaseResource implements IResource {
      * </p> 
 	 */
 	public java.util.List<ResourceReferenceDt> getIndividual() {  
+		if (myIndividual == null) {
+			myIndividual = new java.util.ArrayList<ResourceReferenceDt>();
+		}
 		return myIndividual;
 	}
 
@@ -612,8 +614,8 @@ public class AppointmentResponse extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public AppointmentResponse setStartWithMillisPrecision( Date theDate) {
-		myStart = new InstantDt(theDate); 
+	public AppointmentResponse setStart( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myStart = new InstantDt(theDate, thePrecision); 
 		return this; 
 	}
 
@@ -625,8 +627,8 @@ public class AppointmentResponse extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public AppointmentResponse setStart( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myStart = new InstantDt(theDate, thePrecision); 
+	public AppointmentResponse setStartWithMillisPrecision( Date theDate) {
+		myStart = new InstantDt(theDate); 
 		return this; 
 	}
 
@@ -669,8 +671,8 @@ public class AppointmentResponse extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public AppointmentResponse setEndWithMillisPrecision( Date theDate) {
-		myEnd = new InstantDt(theDate); 
+	public AppointmentResponse setEnd( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myEnd = new InstantDt(theDate, thePrecision); 
 		return this; 
 	}
 
@@ -682,8 +684,8 @@ public class AppointmentResponse extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public AppointmentResponse setEnd( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myEnd = new InstantDt(theDate, thePrecision); 
+	public AppointmentResponse setEndWithMillisPrecision( Date theDate) {
+		myEnd = new InstantDt(theDate); 
 		return this; 
 	}
 
@@ -774,6 +776,9 @@ public class AppointmentResponse extends BaseResource implements IResource {
      * </p> 
 	 */
 	public ResourceReferenceDt getRecorder() {  
+		if (myRecorder == null) {
+			myRecorder = new ResourceReferenceDt();
+		}
 		return myRecorder;
 	}
 
@@ -829,8 +834,8 @@ public class AppointmentResponse extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public AppointmentResponse setRecordedDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myRecordedDate = new DateTimeDt(theDate, thePrecision); 
+	public AppointmentResponse setRecordedDateWithSecondsPrecision( Date theDate) {
+		myRecordedDate = new DateTimeDt(theDate); 
 		return this; 
 	}
 
@@ -842,8 +847,8 @@ public class AppointmentResponse extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public AppointmentResponse setRecordedDateWithSecondsPrecision( Date theDate) {
-		myRecordedDate = new DateTimeDt(theDate); 
+	public AppointmentResponse setRecordedDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myRecordedDate = new DateTimeDt(theDate, thePrecision); 
 		return this; 
 	}
 

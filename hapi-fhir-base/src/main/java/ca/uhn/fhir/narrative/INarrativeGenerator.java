@@ -30,4 +30,8 @@ public interface INarrativeGenerator {
 
 	NarrativeDt generateNarrative(IResource theResource);
 
+	String generateTitle(IResource theResource);
+
+	String generateTitle(String theProfile, IResource theResource);
+
 }

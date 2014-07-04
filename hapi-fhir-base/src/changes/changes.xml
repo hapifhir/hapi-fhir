@@ -19,6 +19,14 @@
 				for more information. 
 			</action>
 			<action type="add">
+				<![CDATA[<b>API CHANGE:</b>]]>: Most elements in the HAPI FHIR model contain
+				a getId() and setId() method. This method is confusing because it is only actually used
+				for IDREF elements (which are rare) but its name makes it easy to confuse with more
+				important identifiers. For this reason, these methods have been deprocated and replaced with
+				get/setElementSpecificId() methods. The old methods will be removed at some point. Resource
+				types are unchanged and retain their get/setId methods.
+			</action>
+			<action type="add">
 				Allow use of QuantityDt as a service parameter to support the "quantity" type. Previously
 				QuantityDt did not implement IQueryParameterType so it was not valid, and there was no way to
 				support quantity search parameters on the server (e.g. Observation.value-quantity)

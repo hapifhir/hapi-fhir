@@ -16,31 +16,11 @@
 
 package ca.uhn.fhir.model.dstu.resource;
 
-/*
- * #%L
- * HAPI FHIR Library
- * %%
- * Copyright (C) 2014 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 
 import java.util.Date;
 import java.util.List;
 
-import ca.uhn.fhir.model.api.BaseElement;
+import ca.uhn.fhir.model.api.BaseIdentifiableElement;
 import ca.uhn.fhir.model.api.BaseResource;
 import ca.uhn.fhir.model.api.IDatatype;
 import ca.uhn.fhir.model.api.IElement;
@@ -425,8 +405,8 @@ public class Questionnaire extends BaseResource implements IResource {
      * The date and/or time that this version of the questionnaire was authored
      * </p> 
 	 */
-	public Questionnaire setAuthored( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myAuthored = new DateTimeDt(theDate, thePrecision); 
+	public Questionnaire setAuthoredWithSecondsPrecision( Date theDate) {
+		myAuthored = new DateTimeDt(theDate); 
 		return this; 
 	}
 
@@ -438,8 +418,8 @@ public class Questionnaire extends BaseResource implements IResource {
      * The date and/or time that this version of the questionnaire was authored
      * </p> 
 	 */
-	public Questionnaire setAuthoredWithSecondsPrecision( Date theDate) {
-		myAuthored = new DateTimeDt(theDate); 
+	public Questionnaire setAuthored( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myAuthored = new DateTimeDt(theDate, thePrecision); 
 		return this; 
 	}
 
@@ -454,8 +434,8 @@ public class Questionnaire extends BaseResource implements IResource {
      * The subject of the questionnaires: this is the patient that the answers apply to, but this person is not necessarily the source of information
      * </p> 
 	 */
-	public ResourceReferenceDt getSubject() {
-		if (mySubject==null) {
+	public ResourceReferenceDt getSubject() {  
+		if (mySubject == null) {
 			mySubject = new ResourceReferenceDt();
 		}
 		return mySubject;
@@ -486,6 +466,9 @@ public class Questionnaire extends BaseResource implements IResource {
      * </p> 
 	 */
 	public ResourceReferenceDt getAuthor() {  
+		if (myAuthor == null) {
+			myAuthor = new ResourceReferenceDt();
+		}
 		return myAuthor;
 	}
 
@@ -514,6 +497,9 @@ public class Questionnaire extends BaseResource implements IResource {
      * </p> 
 	 */
 	public ResourceReferenceDt getSource() {  
+		if (mySource == null) {
+			mySource = new ResourceReferenceDt();
+		}
 		return mySource;
 	}
 
@@ -742,7 +728,7 @@ public class Questionnaire extends BaseResource implements IResource {
      * </p> 
 	 */
 	@Block()	
-	public static class Group extends BaseElement implements IResourceBlock {
+	public static class Group extends BaseIdentifiableElement implements IResourceBlock {
 	
 	@Child(name="name", type=CodeableConceptDt.class, order=0, min=0, max=1)	
 	@Description(
@@ -1093,7 +1079,7 @@ public class Questionnaire extends BaseResource implements IResource {
      * </p> 
 	 */
 	@Block()	
-	public static class GroupQuestion extends BaseElement implements IResourceBlock {
+	public static class GroupQuestion extends BaseIdentifiableElement implements IResourceBlock {
 	
 	@Child(name="name", type=CodeableConceptDt.class, order=0, min=0, max=1)	
 	@Description(

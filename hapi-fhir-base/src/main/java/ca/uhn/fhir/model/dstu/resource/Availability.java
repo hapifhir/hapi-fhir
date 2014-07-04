@@ -16,26 +16,6 @@
 
 package ca.uhn.fhir.model.dstu.resource;
 
-/*
- * #%L
- * HAPI FHIR Library
- * %%
- * Copyright (C) 2014 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 
 import java.util.Date;
 import java.util.List;
@@ -56,7 +36,6 @@ import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.StringDt;
-import ca.uhn.fhir.rest.gclient.DateParam;
 import ca.uhn.fhir.rest.gclient.ReferenceParam;
 import ca.uhn.fhir.rest.gclient.TokenParam;
 
@@ -83,27 +62,6 @@ import ca.uhn.fhir.rest.gclient.TokenParam;
  */
 @ResourceDef(name="Availability", profile="http://hl7.org/fhir/profiles/Availability", id="availability")
 public class Availability extends BaseResource implements IResource {
-
-	/**
-	 * Search parameter constant for <b>!period</b>
-	 * <p>
-	 * Description: <b>Appointment date/time.</b><br/>
-	 * Type: <b>date</b><br/>
-	 * Path: <b>Availability.period</b><br/>
-	 * </p>
-	 */
-	@SearchParamDefinition(name="!period", path="Availability.period", description="Appointment date/time.", type="date")
-	public static final String SP_PERIOD = "!period";
-
-	/**
-	 * <b>Fluent Client</b> search parameter constant for <b>!period</b>
-	 * <p>
-	 * Description: <b>Appointment date/time.</b><br/>
-	 * Type: <b>date</b><br/>
-	 * Path: <b>Availability.period</b><br/>
-	 * </p>
-	 */
-	public static final DateParam PERIOD = new DateParam(SP_PERIOD);
 
 	/**
 	 * Search parameter constant for <b>individual</b>
@@ -354,6 +312,9 @@ public class Availability extends BaseResource implements IResource {
      * </p> 
 	 */
 	public ResourceReferenceDt getIndividual() {  
+		if (myIndividual == null) {
+			myIndividual = new ResourceReferenceDt();
+		}
 		return myIndividual;
 	}
 
@@ -457,6 +418,9 @@ public class Availability extends BaseResource implements IResource {
      * </p> 
 	 */
 	public ResourceReferenceDt getAuthor() {  
+		if (myAuthor == null) {
+			myAuthor = new ResourceReferenceDt();
+		}
 		return myAuthor;
 	}
 
@@ -512,8 +476,8 @@ public class Availability extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public Availability setAuthorDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myAuthorDate = new DateTimeDt(theDate, thePrecision); 
+	public Availability setAuthorDateWithSecondsPrecision( Date theDate) {
+		myAuthorDate = new DateTimeDt(theDate); 
 		return this; 
 	}
 
@@ -525,8 +489,8 @@ public class Availability extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public Availability setAuthorDateWithSecondsPrecision( Date theDate) {
-		myAuthorDate = new DateTimeDt(theDate); 
+	public Availability setAuthorDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myAuthorDate = new DateTimeDt(theDate, thePrecision); 
 		return this; 
 	}
 

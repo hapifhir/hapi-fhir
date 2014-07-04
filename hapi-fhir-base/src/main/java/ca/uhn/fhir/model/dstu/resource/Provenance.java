@@ -16,31 +16,11 @@
 
 package ca.uhn.fhir.model.dstu.resource;
 
-/*
- * #%L
- * HAPI FHIR Library
- * %%
- * Copyright (C) 2014 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 
 import java.util.Date;
 import java.util.List;
 
-import ca.uhn.fhir.model.api.BaseElement;
+import ca.uhn.fhir.model.api.BaseIdentifiableElement;
 import ca.uhn.fhir.model.api.BaseResource;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IResource;
@@ -418,8 +398,8 @@ public class Provenance extends BaseResource implements IResource {
      * The instant of time at which the activity was recorded
      * </p> 
 	 */
-	public Provenance setRecordedWithMillisPrecision( Date theDate) {
-		myRecorded = new InstantDt(theDate); 
+	public Provenance setRecorded( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myRecorded = new InstantDt(theDate, thePrecision); 
 		return this; 
 	}
 
@@ -431,8 +411,8 @@ public class Provenance extends BaseResource implements IResource {
      * The instant of time at which the activity was recorded
      * </p> 
 	 */
-	public Provenance setRecorded( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myRecorded = new InstantDt(theDate, thePrecision); 
+	public Provenance setRecordedWithMillisPrecision( Date theDate) {
+		myRecorded = new InstantDt(theDate); 
 		return this; 
 	}
 
@@ -750,7 +730,7 @@ public class Provenance extends BaseResource implements IResource {
      * </p> 
 	 */
 	@Block()	
-	public static class Agent extends BaseElement implements IResourceBlock {
+	public static class Agent extends BaseIdentifiableElement implements IResourceBlock {
 	
 	@Child(name="role", type=CodingDt.class, order=0, min=1, max=1)	
 	@Description(
@@ -954,7 +934,7 @@ public class Provenance extends BaseResource implements IResource {
      * </p> 
 	 */
 	@Block()	
-	public static class Entity extends BaseElement implements IResourceBlock {
+	public static class Entity extends BaseIdentifiableElement implements IResourceBlock {
 	
 	@Child(name="role", type=CodeDt.class, order=0, min=1, max=1)	
 	@Description(

@@ -16,31 +16,11 @@
 
 package ca.uhn.fhir.model.dstu.resource;
 
-/*
- * #%L
- * HAPI FHIR Library
- * %%
- * Copyright (C) 2014 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 
 import java.util.Date;
 import java.util.List;
 
-import ca.uhn.fhir.model.api.BaseElement;
+import ca.uhn.fhir.model.api.BaseIdentifiableElement;
 import ca.uhn.fhir.model.api.BaseResource;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IResource;
@@ -652,7 +632,7 @@ public class SecurityEvent extends BaseResource implements IResource {
      * </p> 
 	 */
 	@Block()	
-	public static class Event extends BaseElement implements IResourceBlock {
+	public static class Event extends BaseIdentifiableElement implements IResourceBlock {
 	
 	@Child(name="type", type=CodeableConceptDt.class, order=0, min=1, max=1)	
 	@Description(
@@ -880,8 +860,8 @@ public class SecurityEvent extends BaseResource implements IResource {
      * The time when the event occurred on the source
      * </p> 
 	 */
-	public Event setDateTimeWithMillisPrecision( Date theDate) {
-		myDateTime = new InstantDt(theDate); 
+	public Event setDateTime( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myDateTime = new InstantDt(theDate, thePrecision); 
 		return this; 
 	}
 
@@ -893,8 +873,8 @@ public class SecurityEvent extends BaseResource implements IResource {
      * The time when the event occurred on the source
      * </p> 
 	 */
-	public Event setDateTime( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myDateTime = new InstantDt(theDate, thePrecision); 
+	public Event setDateTimeWithMillisPrecision( Date theDate) {
+		myDateTime = new InstantDt(theDate); 
 		return this; 
 	}
 
@@ -1000,7 +980,7 @@ public class SecurityEvent extends BaseResource implements IResource {
      * </p> 
 	 */
 	@Block()	
-	public static class Participant extends BaseElement implements IResourceBlock {
+	public static class Participant extends BaseIdentifiableElement implements IResourceBlock {
 	
 	@Child(name="role", type=CodeableConceptDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)	
 	@Description(
@@ -1141,6 +1121,9 @@ public class SecurityEvent extends BaseResource implements IResource {
      * </p> 
 	 */
 	public ResourceReferenceDt getReference() {  
+		if (myReference == null) {
+			myReference = new ResourceReferenceDt();
+		}
 		return myReference;
 	}
 
@@ -1408,7 +1391,7 @@ public class SecurityEvent extends BaseResource implements IResource {
      * </p> 
 	 */
 	@Block()	
-	public static class ParticipantNetwork extends BaseElement implements IResourceBlock {
+	public static class ParticipantNetwork extends BaseIdentifiableElement implements IResourceBlock {
 	
 	@Child(name="identifier", type=StringDt.class, order=0, min=0, max=1)	
 	@Description(
@@ -1537,7 +1520,7 @@ public class SecurityEvent extends BaseResource implements IResource {
      * </p> 
 	 */
 	@Block()	
-	public static class Source extends BaseElement implements IResourceBlock {
+	public static class Source extends BaseIdentifiableElement implements IResourceBlock {
 	
 	@Child(name="site", type=StringDt.class, order=0, min=0, max=1)	
 	@Description(
@@ -1732,7 +1715,7 @@ public class SecurityEvent extends BaseResource implements IResource {
      * </p> 
 	 */
 	@Block()	
-	public static class Object extends BaseElement implements IResourceBlock {
+	public static class Object extends BaseIdentifiableElement implements IResourceBlock {
 	
 	@Child(name="identifier", type=IdentifierDt.class, order=0, min=0, max=1)	
 	@Description(
@@ -2284,7 +2267,7 @@ public class SecurityEvent extends BaseResource implements IResource {
      * </p> 
 	 */
 	@Block()	
-	public static class ObjectDetail extends BaseElement implements IResourceBlock {
+	public static class ObjectDetail extends BaseIdentifiableElement implements IResourceBlock {
 	
 	@Child(name="type", type=StringDt.class, order=0, min=1, max=1)	
 	@Description(

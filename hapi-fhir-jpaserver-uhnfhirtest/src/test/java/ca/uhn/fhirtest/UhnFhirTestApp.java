@@ -23,7 +23,7 @@ public class UhnFhirTestApp {
 	public static void main(String[] args) throws Exception {
 
 //		new File("target/testdb").mkdirs();
-		System.setProperty("fhir.db.location", "target/testdb");
+		System.setProperty("fhir.db.location", "/target/testdb");
 
 		int myPort = 8888;
 		Server server = new Server(myPort);

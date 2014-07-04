@@ -20,6 +20,6 @@ package ca.uhn.fhir.model.api;
  * #L%
  */
 
-public interface IDatatype extends IIdentifiableElement {
+public interface IDatatype extends IElement {
 
 }

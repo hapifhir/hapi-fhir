@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ca.uhn.fhir.model.api.BaseElement;
+import ca.uhn.fhir.model.api.BaseIdentifiableElement;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IExtension;
 import ca.uhn.fhir.model.api.annotation.Block;
@@ -94,7 +95,7 @@ public class MyOrganization extends Organization {
 	 * It is referenced by the field myEmergencyContact above.
 	 */
 	@Block
-	public static class EmergencyContact extends BaseElement implements IExtension
+	public static class EmergencyContact extends BaseIdentifiableElement implements IExtension
 	{
 		/* *****************************
 		 * Fields

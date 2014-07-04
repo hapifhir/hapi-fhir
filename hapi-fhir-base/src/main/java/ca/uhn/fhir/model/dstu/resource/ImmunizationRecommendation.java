@@ -16,31 +16,11 @@
 
 package ca.uhn.fhir.model.dstu.resource;
 
-/*
- * #%L
- * HAPI FHIR Library
- * %%
- * Copyright (C) 2014 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 
 import java.util.Date;
 import java.util.List;
 
-import ca.uhn.fhir.model.api.BaseElement;
+import ca.uhn.fhir.model.api.BaseIdentifiableElement;
 import ca.uhn.fhir.model.api.BaseResource;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IResource;
@@ -528,7 +508,7 @@ public class ImmunizationRecommendation extends BaseResource implements IResourc
      * </p> 
 	 */
 	@Block()	
-	public static class Recommendation extends BaseElement implements IResourceBlock {
+	public static class Recommendation extends BaseIdentifiableElement implements IResourceBlock {
 	
 	@Child(name="date", type=DateTimeDt.class, order=0, min=1, max=1)	
 	@Description(
@@ -637,8 +617,8 @@ public class ImmunizationRecommendation extends BaseResource implements IResourc
      * The date the immunization recommendation was created.
      * </p> 
 	 */
-	public Recommendation setDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myDate = new DateTimeDt(theDate, thePrecision); 
+	public Recommendation setDateWithSecondsPrecision( Date theDate) {
+		myDate = new DateTimeDt(theDate); 
 		return this; 
 	}
 
@@ -650,8 +630,8 @@ public class ImmunizationRecommendation extends BaseResource implements IResourc
      * The date the immunization recommendation was created.
      * </p> 
 	 */
-	public Recommendation setDateWithSecondsPrecision( Date theDate) {
-		myDate = new DateTimeDt(theDate); 
+	public Recommendation setDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myDate = new DateTimeDt(theDate, thePrecision); 
 		return this; 
 	}
 
@@ -921,6 +901,9 @@ public class ImmunizationRecommendation extends BaseResource implements IResourc
      * </p> 
 	 */
 	public java.util.List<ResourceReferenceDt> getSupportingPatientInformation() {  
+		if (mySupportingPatientInformation == null) {
+			mySupportingPatientInformation = new java.util.ArrayList<ResourceReferenceDt>();
+		}
 		return mySupportingPatientInformation;
 	}
 
@@ -963,7 +946,7 @@ public class ImmunizationRecommendation extends BaseResource implements IResourc
      * </p> 
 	 */
 	@Block()	
-	public static class RecommendationDateCriterion extends BaseElement implements IResourceBlock {
+	public static class RecommendationDateCriterion extends BaseIdentifiableElement implements IResourceBlock {
 	
 	@Child(name="code", type=CodeableConceptDt.class, order=0, min=1, max=1)	
 	@Description(
@@ -1072,8 +1055,8 @@ public class ImmunizationRecommendation extends BaseResource implements IResourc
      * Date recommendation
      * </p> 
 	 */
-	public RecommendationDateCriterion setValue( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myValue = new DateTimeDt(theDate, thePrecision); 
+	public RecommendationDateCriterion setValueWithSecondsPrecision( Date theDate) {
+		myValue = new DateTimeDt(theDate); 
 		return this; 
 	}
 
@@ -1085,8 +1068,8 @@ public class ImmunizationRecommendation extends BaseResource implements IResourc
      * Date recommendation
      * </p> 
 	 */
-	public RecommendationDateCriterion setValueWithSecondsPrecision( Date theDate) {
-		myValue = new DateTimeDt(theDate); 
+	public RecommendationDateCriterion setValue( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myValue = new DateTimeDt(theDate, thePrecision); 
 		return this; 
 	}
 
@@ -1104,7 +1087,7 @@ public class ImmunizationRecommendation extends BaseResource implements IResourc
      * </p> 
 	 */
 	@Block()	
-	public static class RecommendationProtocol extends BaseElement implements IResourceBlock {
+	public static class RecommendationProtocol extends BaseIdentifiableElement implements IResourceBlock {
 	
 	@Child(name="doseSequence", type=IntegerDt.class, order=0, min=0, max=1)	
 	@Description(

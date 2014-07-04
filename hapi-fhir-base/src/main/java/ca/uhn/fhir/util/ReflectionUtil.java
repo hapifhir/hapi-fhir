@@ -58,7 +58,7 @@ public class ReflectionUtil {
 		return type;
 	}
 
-	@SuppressWarnings({ "unused", "rawtypes" })
+	@SuppressWarnings({ "rawtypes" })
 	public static Class<?> getGenericCollectionTypeOfMethodReturnType(Method theMethod) {
 		Class<?> type;
 		Type genericReturnType = theMethod.getGenericReturnType();

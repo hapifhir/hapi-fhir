@@ -2,9 +2,8 @@ package ca.uhn.fhir.parser;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Matchers.*;
+import static org.mockito.Mockito.*;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -23,7 +22,6 @@ import org.hamcrest.core.StringContains;
 import org.hamcrest.text.StringContainsInOrder;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.mockito.internal.matchers.Not;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
@@ -40,9 +38,9 @@ import ca.uhn.fhir.model.dstu.composite.AddressDt;
 import ca.uhn.fhir.model.dstu.composite.HumanNameDt;
 import ca.uhn.fhir.model.dstu.composite.NarrativeDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.dstu.resource.Binary;
 import ca.uhn.fhir.model.dstu.resource.Conformance;
 import ca.uhn.fhir.model.dstu.resource.Conformance.RestResource;
-import ca.uhn.fhir.model.dstu.resource.Binary;
 import ca.uhn.fhir.model.dstu.resource.DiagnosticReport;
 import ca.uhn.fhir.model.dstu.resource.Observation;
 import ca.uhn.fhir.model.dstu.resource.Organization;
@@ -68,12 +66,24 @@ public class JsonParserTest {
 	@Test
 	public void testEncodingNullExtension() {
 		Patient p = new Patient();
-		p.addUndeclaredExtension(new ExtensionDt(false, "http://foo#bar"));
-		String str = new FhirContext().newJsonParser().encodeResourceToString(p);
+		ExtensionDt extension = new ExtensionDt(false, "http://foo#bar");
+		p.addUndeclaredExtension(extension);
+		String str = ourCtx.newJsonParser().encodeResourceToString(p);
 		
+		assertEquals("{\"resourceType\":\"Patient\",\"extension\":[{\"url\":\"http://foo#bar\"}]}", str);
+		
+		extension.setValue(new StringDt());
+
+		str = ourCtx.newJsonParser().encodeResourceToString(p);		
+		assertEquals("{\"resourceType\":\"Patient\",\"extension\":[{\"url\":\"http://foo#bar\"}]}", str);
+
+		extension.setValue(new StringDt(""));
+
+		str = ourCtx.newJsonParser().encodeResourceToString(p);		
 		assertEquals("{\"resourceType\":\"Patient\",\"extension\":[{\"url\":\"http://foo#bar\"}]}", str);
 	}
 
+	
 	@Test
 	public void testEncodeBinaryResource() {
 

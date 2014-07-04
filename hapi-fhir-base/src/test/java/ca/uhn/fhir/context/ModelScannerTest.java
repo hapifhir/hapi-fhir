@@ -10,7 +10,6 @@ import ca.uhn.fhir.parser.DataFormatException;
 public class ModelScannerTest {
 
 	/** This failed at one point */
-	@SuppressWarnings("unused")
 	@Test
 	public void testCarePlan() throws DataFormatException {
 		new ModelScanner(CarePlan.class);

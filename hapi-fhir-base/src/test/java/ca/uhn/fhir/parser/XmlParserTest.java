@@ -74,7 +74,7 @@ public class XmlParserTest {
 
 		patient.getGender().setValueAsEnum(AdministrativeGenderCodesEnum.M);
 
-		String val = new FhirContext().newXmlParser().encodeResourceToString(patient);
+		String val = ourCtx.newXmlParser().encodeResourceToString(patient);
 		ourLog.info(val);
 
 	}
@@ -149,7 +149,7 @@ public class XmlParserTest {
 		parameter.setUrl("http://foo").setValue(new StringDt("bar"));
 		
 		
-		String val = new FhirContext().newXmlParser().encodeResourceToString(q);
+		String val = ourCtx.newXmlParser().encodeResourceToString(q);
 		ourLog.info(val);
 
 		assertEquals("<Query xmlns=\"http://hl7.org/fhir\"><parameter url=\"http://foo\"><valueString value=\"bar\"/></parameter></Query>", val);
@@ -214,7 +214,7 @@ public class XmlParserTest {
 				"</taglist>";
 		//@formatter:on
 		
-		String encoded = new FhirContext().newXmlParser().encodeTagListToString(tagList);
+		String encoded = ourCtx.newXmlParser().encodeTagListToString(tagList);
 		assertEquals(expected,encoded);
 		
 	}
@@ -235,13 +235,13 @@ public class XmlParserTest {
 				"</feed>";
 		//@formatter:off
 
-		Bundle bundleR = new FhirContext().newXmlParser().parseBundle(bundle);
+		Bundle bundleR = ourCtx.newXmlParser().parseBundle(bundle);
 		assertEquals(15, bundleR.getTotalResults().getValue().intValue());
 	}
 
 	@Test
 	public void testEncodeExtensionWithResourceContent() {
-		IParser parser = new FhirContext().newXmlParser();
+		IParser parser = ourCtx.newXmlParser();
 
 		Patient patient = new Patient();
 		patient.addAddress().setUse(AddressUseEnum.HOME);
@@ -262,7 +262,7 @@ public class XmlParserTest {
 
 	@Test
 	public void testEncodeDeclaredExtensionWithResourceContent() {
-		IParser parser = new FhirContext().newXmlParser();
+		IParser parser = ourCtx.newXmlParser();
 
 		MyPatientWithOneDeclaredExtension patient = new MyPatientWithOneDeclaredExtension();
 		patient.addAddress().setUse(AddressUseEnum.HOME);
@@ -281,7 +281,7 @@ public class XmlParserTest {
 
 	@Test
 	public void testEncodeDeclaredExtensionWithAddressContent() {
-		IParser parser = new FhirContext().newXmlParser();
+		IParser parser = ourCtx.newXmlParser();
 
 		MyPatientWithOneDeclaredAddressExtension patient = new MyPatientWithOneDeclaredAddressExtension();
 		patient.addAddress().setUse(AddressUseEnum.HOME);
@@ -300,7 +300,7 @@ public class XmlParserTest {
 
 	@Test
 	public void testEncodeUndeclaredExtensionWithAddressContent() {
-		IParser parser = new FhirContext().newXmlParser();
+		IParser parser = ourCtx.newXmlParser();
 
 		Patient patient = new Patient();
 		patient.addAddress().setUse(AddressUseEnum.HOME);
@@ -323,7 +323,7 @@ public class XmlParserTest {
 		Bundle b = new Bundle();
 		b.getTotalResults().setValue(123);
 
-		String val = new FhirContext().newXmlParser().setPrettyPrint(true).encodeBundleToString(b);
+		String val = ourCtx.newXmlParser().setPrettyPrint(true).encodeBundleToString(b);
 		ourLog.info(val);
 
 		assertThat(val, StringContains.containsString("<os:totalResults xmlns:os=\"http://a9.com/-/spec/opensearch/1.1/\">123</os:totalResults>"));
@@ -338,12 +338,12 @@ public class XmlParserTest {
 		e.setResource(new Patient());
 		e.addCategory().setLabel("label").setTerm("term").setScheme("scheme");
 
-		String val = new FhirContext().newXmlParser().setPrettyPrint(true).encodeBundleToString(b);
+		String val = ourCtx.newXmlParser().setPrettyPrint(true).encodeBundleToString(b);
 		ourLog.info(val);
 
 		assertThat(val, StringContains.containsString("<category term=\"term\" label=\"label\" scheme=\"scheme\"/>"));
 
-		b = new FhirContext().newXmlParser().parseBundle(val);
+		b = ourCtx.newXmlParser().parseBundle(val);
 		assertEquals(1, b.getEntries().size());
 		assertEquals(1, b.getEntries().get(0).getCategories().size());
 		assertEquals("term", b.getEntries().get(0).getCategories().get(0).getTerm());
@@ -398,7 +398,7 @@ public class XmlParserTest {
 		spm.getText().setDiv("AAA");
 		rpt.addSpecimen().setResource(spm);
 
-		IParser p = new FhirContext(DiagnosticReport.class).newXmlParser().setPrettyPrint(true);
+		IParser p = ourCtx.newXmlParser().setPrettyPrint(true);
 		String str = p.encodeResourceToString(rpt);
 
 		ourLog.info(str);
@@ -418,7 +418,7 @@ public class XmlParserTest {
 		Observation obs = new Observation();
 		obs.setValue(new DecimalDt(112.22));
 
-		IParser p = new FhirContext(Observation.class).newJsonParser();
+		IParser p = ourCtx.newJsonParser();
 
 		try {
 			p.encodeResourceToString(obs);
@@ -435,7 +435,7 @@ public class XmlParserTest {
 		patient.addName().addFamily("Family").addGiven("Given");
 		
 		//@formatter:off
-		String encoded = new FhirContext().newXmlParser().setPrettyPrint(false).encodeResourceToString(patient);
+		String encoded = ourCtx.newXmlParser().setPrettyPrint(false).encodeResourceToString(patient);
 		ourLog.info(encoded);
 		/*
 		 * Note at least one space is placed where any whitespace was, as
@@ -447,7 +447,7 @@ public class XmlParserTest {
 				+ "</i> </div></text><name><family value=\"Family\"/><given value=\"Given\"/></name></Patient>";
 		assertEquals(expected, encoded);
 
-		encoded = new FhirContext().newXmlParser().setPrettyPrint(true).encodeResourceToString(patient);
+		encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(patient);
 		ourLog.info(encoded);
 		expected = "<Patient xmlns=\"http://hl7.org/fhir\">\n"
 				+ "   <text>\n"
@@ -476,7 +476,7 @@ public class XmlParserTest {
 		Patient patient = new Patient();
 		patient.setManagingOrganization(new ResourceReferenceDt());
 
-		IParser p = new FhirContext().newXmlParser();
+		IParser p = ourCtx.newXmlParser();
 		String str = p.encodeResourceToString(patient);
 		assertThat(str, IsNot.not(StringContains.containsString("managingOrganization")));
 
@@ -502,7 +502,7 @@ public class XmlParserTest {
 
 		patient.addName().addFamily("Smith");
 
-		IParser p = new FhirContext().newXmlParser();
+		IParser p = ourCtx.newXmlParser();
 		String str = p.encodeResourceToString(patient);
 
 		ourLog.info(str);
@@ -745,7 +745,7 @@ public class XmlParserTest {
 		NarrativeDt nar = new NarrativeDt(xhtmlDt, NarrativeStatusEnum.GENERATED);
 		when(gen.generateNarrative(eq("http://hl7.org/fhir/profiles/Patient"), eq(patient))).thenReturn(nar);
 
-		FhirContext context = new FhirContext();
+		FhirContext context = ourCtx;
 		context.setNarrativeGenerator(gen);
 		IParser p = context.newXmlParser();
 		String str = p.encodeResourceToString(patient);
@@ -946,6 +946,26 @@ public class XmlParserTest {
 		assertEquals("_id", res.getSearchParam().get(1).getName().getValue());
 	}
 
+	@Test
+	public void testParseEncodeNarrative() {
+		
+		String input = "<Patient xmlns=\"http://hl7.org/fhir\"><text><status value=\"generated\"/><div xmlns=\"http://www.w3.org/1999/xhtml\"><div class=\"hapiHeaderText\"> Donald null <b>DUCK </b></div><table class=\"hapiPropertyTable\"><tbody><tr><td>Identifier</td><td>7000135</td></tr><tr><td>Address</td><td><span>10 Duxon Street </span><br/><span>VICTORIA </span><span>BC </span><span>Can </span></td></tr><tr><td>Date of birth</td><td><span>01 June 1980</span></td></tr></tbody></table></div></text><identifier><use value=\"official\"/><label value=\"University Health Network MRN 7000135\"/><system value=\"urn:oid:2.16.840.1.113883.3.239.18.148\"/><value value=\"7000135\"/><assigner><reference value=\"Organization/1.3.6.1.4.1.12201\"/></assigner></identifier><name><family value=\"Duck\"/><given value=\"Donald\"/></name><telecom><system value=\"phone\"/><use value=\"home\"/></telecom><telecom><system value=\"phone\"/><use value=\"work\"/></telecom><telecom><system value=\"phone\"/><use value=\"mobile\"/></telecom><telecom><system value=\"email\"/><use value=\"home\"/></telecom><gender><coding><system value=\"http://hl7.org/fhir/v3/AdministrativeGender\"/><code value=\"M\"/></coding></gender><birthDate value=\"1980-06-01T00:00:00\"/><address><use value=\"home\"/><line value=\"10 Duxon Street\"/><city value=\"VICTORIA\"/><state value=\"BC\"/><zip value=\"V8N 1Y4\"/><country value=\"Can\"/></address><managingOrganization><reference value=\"Organization/1.3.6.1.4.1.12201\"/></managingOrganization></Patient>";
+		IResource res = ourCtx.newXmlParser().parseResource(input);
+		
+		String output = ourCtx.newXmlParser().encodeResourceToString(res);
+		
+		// Should occur exactly twice (once for the resource, once for the DIV
+		assertThat(output, (StringContainsInOrder.stringContainsInOrder(Arrays.asList("Patient xmlns", "div xmlns"))));
+		assertThat(output, not(StringContainsInOrder.stringContainsInOrder(Arrays.asList("b xmlns"))));
+
+		output = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(res);
+
+		// Should occur exactly twice (once for the resource, once for the DIV
+		assertThat(output, (StringContainsInOrder.stringContainsInOrder(Arrays.asList("Patient xmlns", "div xmlns"))));
+		assertThat(output, not(StringContainsInOrder.stringContainsInOrder(Arrays.asList("b xmlns"))));
+
+	}
+	
 	@BeforeClass
 	public static void beforeClass() {
 		XMLUnit.setIgnoreAttributeOrder(true);
@@ -989,10 +1009,10 @@ public class XmlParserTest {
 		parent.addUndeclaredExtension(child2);
 		// END SNIPPET: subExtension
 
-		String output = new FhirContext().newXmlParser().setPrettyPrint(true).encodeResourceToString(patient);
+		String output = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(patient);
 		ourLog.info(output);
 
-		String enc = new FhirContext().newXmlParser().encodeResourceToString(patient);
+		String enc = ourCtx.newXmlParser().encodeResourceToString(patient);
 		assertThat(enc, containsString("<Patient xmlns=\"http://hl7.org/fhir\"><extension url=\"http://example.com/extensions#someext\"><valueDateTime value=\"2011-01-02T11:13:15\"/></extension>"));
 		assertThat(enc, containsString("<extension url=\"http://example.com#parent\"><extension url=\"http://example.com#child\"><valueString value=\"value1\"/></extension><extension url=\"http://example.com#child\"><valueString value=\"value1\"/></extension></extension>"));
 		assertThat(enc, containsString("<given value=\"Joe\"><extension url=\"http://examples.com#givenext\"><valueString value=\"given\"/></extension></given>"));
@@ -1008,13 +1028,13 @@ public class XmlParserTest {
 		HumanNameDt given = name.addGiven("Joe");
 		ExtensionDt ext2 = new ExtensionDt(false, "http://examples.com#givenext", new StringDt("Hello"));
 		given.addUndeclaredExtension(ext2);
-		String output = new FhirContext().newXmlParser().setPrettyPrint(true).encodeResourceToString(patient);
+		String output = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(patient);
 		ourLog.info(output);
 
-		String enc = new FhirContext().newXmlParser().encodeResourceToString(patient);
+		String enc = ourCtx.newXmlParser().encodeResourceToString(patient);
 		assertThat(enc, containsString("<name><extension url=\"http://examples.com#givenext\"><valueString value=\"Hello\"/></extension><family value=\"Shmoe\"/><given value=\"Joe\"/></name>"));
 
-		Patient parsed = new FhirContext().newXmlParser().parseResource(Patient.class, new StringReader(enc));
+		Patient parsed = ourCtx.newXmlParser().parseResource(Patient.class, new StringReader(enc));
 		assertEquals(1, parsed.getNameFirstRep().getUndeclaredExtensionsByUrl("http://examples.com#givenext").size());
 		ExtensionDt ext = parsed.getNameFirstRep().getUndeclaredExtensionsByUrl("http://examples.com#givenext").get(0);
 		assertEquals("Hello", ext.getValueAsPrimitive().getValue());
@@ -1032,13 +1052,13 @@ public class XmlParserTest {
 
 		ExtensionDt ext2 = new ExtensionDt(false, "http://examples.com#givenext", new StringDt("Hello"));
 		family.addUndeclaredExtension(ext2);
-		String output = new FhirContext().newXmlParser().setPrettyPrint(true).encodeResourceToString(patient);
+		String output = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(patient);
 		ourLog.info(output);
 
-		String enc = new FhirContext().newXmlParser().encodeResourceToString(patient);
+		String enc = ourCtx.newXmlParser().encodeResourceToString(patient);
 		assertThat(enc, containsString("<name><family value=\"Shmoe\"><extension url=\"http://examples.com#givenext\"><valueString value=\"Hello\"/></extension></family></name>"));
 
-		Patient parsed = new FhirContext().newXmlParser().parseResource(Patient.class, new StringReader(enc));
+		Patient parsed = ourCtx.newXmlParser().parseResource(Patient.class, new StringReader(enc));
 		assertEquals(1, parsed.getNameFirstRep().getFamilyFirstRep().getUndeclaredExtensionsByUrl("http://examples.com#givenext").size());
 		ExtensionDt ext = parsed.getNameFirstRep().getFamilyFirstRep().getUndeclaredExtensionsByUrl("http://examples.com#givenext").get(0);
 		assertEquals("Hello", ext.getValueAsPrimitive().getValue());

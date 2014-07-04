@@ -34,7 +34,7 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.client.BaseClient;
 import ca.uhn.fhir.rest.client.api.IRestfulClient;
 
-public abstract class BaseResourceReference extends BaseElement {
+public abstract class BaseResourceReference extends BaseIdentifiableElement {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseResourceReference.class);
 	private IResource myResource;

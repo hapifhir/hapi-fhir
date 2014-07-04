@@ -241,10 +241,6 @@ public class FhirContext {
 		myNarrativeGenerator = theNarrativeGenerator;
 	}
 
-	public void setRestfulClientFactory(IRestfulClientFactory theRestfulClientFactory) {
-		myRestfulClientFactory = theRestfulClientFactory;
-	}
-
 	private RuntimeResourceDefinition scanResourceType(Class<? extends IResource> theResourceType) {
 		ArrayList<Class<? extends IResource>> resourceTypes = new ArrayList<Class<? extends IResource>>();
 		resourceTypes.add(theResourceType);

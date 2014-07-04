@@ -46,9 +46,12 @@ public class DefaultThymeleafNarrativeGeneratorTest {
 
 		value.setBirthDate(new Date(), TemporalPrecisionEnum.DAY);
 
-		String output = gen.generateNarrative("http://hl7.org/fhir/profiles/Patient", value).getDiv().getValueAsString();
-
-		ourLog.info(output);
+		String output = gen.generateNarrative(value).getDiv().getValueAsString();
+		assertThat(output, StringContains.containsString("<div class=\"hapiHeaderText\"> joe john <b>BLOW </b></div>"));
+		
+		String title = gen.generateTitle(value);
+		assertEquals("joe john BLOW (123456)", title);
+		ourLog.info(title);
 	}
 
 	@Test
@@ -105,6 +108,11 @@ public class DefaultThymeleafNarrativeGeneratorTest {
 		ourLog.info(output);
 		assertThat(output, StringContains.containsString("<div class=\"hapiHeaderText\"> Some Diagnostic Report </div>"));
 
+		String title = gen.generateTitle(value);
+		ourLog.info(title);
+		assertEquals("Some Diagnostic Report - final - 2 observations", title);
+
+		
 		// Now try it with the parser
 
 		FhirContext context = new FhirContext();

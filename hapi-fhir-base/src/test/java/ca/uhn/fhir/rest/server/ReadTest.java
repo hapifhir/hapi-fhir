@@ -32,7 +32,6 @@ import ca.uhn.fhir.testutil.RandomServerPortProvider;
 public class ReadTest {
 
 	private static CloseableHttpClient ourClient;
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ReadTest.class);
 	private static int ourPort;
 	private static Server ourServer;
 	private static FhirContext ourCtx;

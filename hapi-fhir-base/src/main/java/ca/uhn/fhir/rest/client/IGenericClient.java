@@ -31,8 +31,8 @@ import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.gclient.IGetPage;
-import ca.uhn.fhir.rest.gclient.IGetPageTyped;
 import ca.uhn.fhir.rest.gclient.IGetTags;
+import ca.uhn.fhir.rest.gclient.ITransaction;
 import ca.uhn.fhir.rest.gclient.IUntypedQuery;
 
 public interface IGenericClient {
@@ -58,6 +58,8 @@ public interface IGenericClient {
 	 *            The resources to create/update in a single transaction
 	 * @return A list of resource stubs (<b>these will not be fully populated</b>) containing IDs and other
 	 *         {@link IResource#getResourceMetadata() metadata}
+	 * @deprecated Use {@link #transaction()}
+	 *         
 	 */
 	List<IResource> transaction(List<IResource> theResources);
 
@@ -235,5 +237,10 @@ public interface IGenericClient {
 	 * @see Bundle#getLinkNext()
 	 */
 	IGetPage loadPage();
+
+	/**
+	 * Send a transaction (collection of resources) to the server to be executed as a single unit
+	 */
+	ITransaction transaction();
 
 }

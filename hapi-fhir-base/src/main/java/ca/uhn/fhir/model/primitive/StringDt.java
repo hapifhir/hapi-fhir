@@ -126,7 +126,7 @@ public class StringDt extends BasePrimitive<String> implements IQueryParameterTy
 	 */
 	@Override
 	public boolean isEmpty() {
-		return super.isEmpty() && StringUtils.isBlank(getValue());
+		return super.isBaseEmpty() && StringUtils.isBlank(getValue());
 	}
 
 	@Override

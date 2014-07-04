@@ -25,6 +25,7 @@ import java.util.Map;
 import ca.uhn.fhir.model.dstu.composite.ContainedDt;
 import ca.uhn.fhir.model.dstu.composite.NarrativeDt;
 import ca.uhn.fhir.model.dstu.resource.Patient;
+import ca.uhn.fhir.model.primitive.IdDt;
 
 public interface IResource extends ICompositeElement {
 
@@ -73,4 +74,20 @@ public interface IResource extends ICompositeElement {
 	 */
 	void setResourceMetadata(Map<ResourceMetadataKeyEnum<?>, Object> theMap);
 
+	/**
+	 * Returns the ID of this resource. Note that this identifier is the URL (or a portion
+	 * of the URL) used to access this resource, and is not the same thing as any business
+	 * identifiers stored within the resource. For example, a Patient resource might
+	 * have any number of medical record numbers but these are not stored here.
+	 */
+	IdDt getId();
+	
+	/**
+	 * Sets the ID of this resource. Note that this identifier is the URL (or a portion
+	 * of the URL) used to access this resource, and is not the same thing as any business
+	 * identifiers stored within the resource. For example, a Patient resource might
+	 * have any number of medical record numbers but these are not stored here.
+	 */
+	void setId(IdDt theId);
+	
 }

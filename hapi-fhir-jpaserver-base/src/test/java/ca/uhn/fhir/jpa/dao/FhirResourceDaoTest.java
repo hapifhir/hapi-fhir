@@ -16,6 +16,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
@@ -37,7 +38,10 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.client.exceptions.FhirClientConnectionException;
+import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.IdentifierListParam;
 import ca.uhn.fhir.rest.param.QualifiedDateParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
@@ -58,7 +62,50 @@ public class FhirResourceDaoTest {
 	private static Date ourTestStarted;
 
 	private static IFhirResourceDao<Encounter> ourEncounterDao;
+	private static FhirContext ourFhirCtx;
 
+	@Test
+	public void testOrganizationName() {
+		
+		//@formatter:off
+		String inputStr = "{\"resourceType\":\"Organization\",\n" + 
+				"                \"extension\":[\n" + 
+				"                    {\n" + 
+				"                        \"url\":\"http://fhir.connectinggta.ca/Profile/organization#providerIdPool\",\n" + 
+				"                        \"valueUri\":\"urn:oid:2.16.840.1.113883.3.239.23.21.1\"\n" + 
+				"                    }\n" + 
+				"                ],\n" + 
+				"                \"text\":{\n" + 
+				"                    \"status\":\"empty\",\n" + 
+				"                    \"div\":\"<div xmlns=\\\"http://www.w3.org/1999/xhtml\\\">No narrative template available for resource profile: http://fhir.connectinggta.ca/Profile/organization</div>\"\n" + 
+				"                },\n" + 
+				"                \"identifier\":[\n" + 
+				"                    {\n" + 
+				"                        \"use\":\"official\",\n" + 
+				"                        \"label\":\"HSP 2.16.840.1.113883.3.239.23.21\",\n" + 
+				"                        \"system\":\"urn:cgta:hsp_ids\",\n" + 
+				"                        \"value\":\"urn:oid:2.16.840.1.113883.3.239.23.21\"\n" + 
+				"                    }\n" + 
+				"                ],\n" + 
+				"                \"name\":\"Peterborough Regional Health Centre\"\n" + 
+				"            }\n" + 
+				"        }";
+		//@formatter:on
+
+		Set<Long> val = ourOrganizationDao.searchForIds("name", new StringParam("P"));
+		int initial = val.size();
+
+		Organization org = ourFhirCtx.newJsonParser().parseResource(Organization.class,inputStr);
+		ourOrganizationDao.create(org);
+		
+		val = ourOrganizationDao.searchForIds("name", new StringParam("P"));
+		assertEquals(initial+1, val.size());
+		
+	}
+	
+	
+	
+	
 	@Test
 	public void testStoreUnversionedResources() {
 		Organization o1 = new Organization();
@@ -77,6 +124,50 @@ public class FhirResourceDaoTest {
 		assertEquals(o1id.toUnqualifiedVersionless(), p1.getManagingOrganization().getReference().toUnqualifiedVersionless());
 	}
 
+	@Test
+	public void testSearchTokenParam() {
+		Patient patient = new Patient();
+		patient.addIdentifier("urn:system", "testSearchTokenParam001");
+		patient.addName().addFamily("Tester").addGiven("testSearchTokenParam1");
+		ourPatientDao.create(patient);
+
+		patient = new Patient();
+		patient.addIdentifier("urn:system", "testSearchTokenParam002");
+		patient.addName().addFamily("Tester").addGiven("testSearchTokenParam2");
+		ourPatientDao.create(patient);
+
+		{
+			SearchParameterMap map = new SearchParameterMap();
+			map.add(Patient.SP_IDENTIFIER, new IdentifierDt("urn:system", "testSearchTokenParam001"));
+			IBundleProvider retrieved = ourPatientDao.search(map);
+			assertEquals(1, retrieved.size());
+		}
+		{
+			SearchParameterMap map = new SearchParameterMap();
+			map.add(Patient.SP_IDENTIFIER, new IdentifierDt(null, "testSearchTokenParam001"));
+			IBundleProvider retrieved = ourPatientDao.search(map);
+			assertEquals(1, retrieved.size());
+		}
+		{
+			SearchParameterMap map = new SearchParameterMap();
+			IdentifierListParam listParam = new IdentifierListParam();
+			listParam.addIdentifier(new IdentifierDt("urn:system", "testSearchTokenParam001"));
+			listParam.addIdentifier(new IdentifierDt("urn:system", "testSearchTokenParam002"));
+			map.add(Patient.SP_IDENTIFIER, listParam);
+			IBundleProvider retrieved = ourPatientDao.search(map);
+			assertEquals(2, retrieved.size());
+		}
+		{
+			SearchParameterMap map = new SearchParameterMap();
+			IdentifierListParam listParam = new IdentifierListParam();
+			listParam.addIdentifier(new IdentifierDt(null, "testSearchTokenParam001"));
+			listParam.addIdentifier(new IdentifierDt("urn:system", "testSearchTokenParam002"));
+			map.add(Patient.SP_IDENTIFIER, listParam);
+			IBundleProvider retrieved = ourPatientDao.search(map);
+			assertEquals(2, retrieved.size());
+		}
+	}
+	
 	@Test
 	public void testIdParam() {
 		Patient patient = new Patient();
@@ -207,6 +298,22 @@ public class FhirResourceDaoTest {
 	}
 
 	@Test
+	public void testSearchWithNoResults() {
+		IBundleProvider value = ourDeviceDao.search(new SearchParameterMap());
+		for (IResource next : value.getResources(0, value.size())) {
+			ourDeviceDao.delete(next.getId());
+		}
+		
+		value = ourDeviceDao.search(new SearchParameterMap());
+		assertEquals(0, value.size());
+
+		List<IResource> res = value.getResources(0, 0);
+		assertTrue(res.isEmpty());
+
+	}
+
+	
+	@Test
 	public void testPersistSearchParamQuantity() {
 		Observation obs = new Observation();
 		obs.getName().addCoding().setSystem("foo").setCode("testPersistSearchParamQuantity");
@@ -222,6 +329,8 @@ public class FhirResourceDaoTest {
 
 	}
 
+	
+	
 	@Test
 	public void testPersistSearchParams() {
 		Patient patient = new Patient();
@@ -297,6 +406,7 @@ public class FhirResourceDaoTest {
 			Patient patient = new Patient();
 			patient.addIdentifier("urn:system", "001");
 			patient.addName().addFamily("testSearchNameParam01Fam").addGiven("testSearchNameParam01Giv");
+			ResourceMetadataKeyEnum.TITLE.put(patient, "P1TITLE");
 			id1 = ourPatientDao.create(patient).getId();
 		}
 		{
@@ -311,6 +421,7 @@ public class FhirResourceDaoTest {
 		List<Patient> patients = toList(ourPatientDao.search(params));
 		assertEquals(1, patients.size());
 		assertEquals(id1.getIdPart(), patients.get(0).getId().getIdPart());
+		assertEquals("P1TITLE", ResourceMetadataKeyEnum.TITLE.get(patients.get(0)));
 
 		// Given name shouldn't return for family param
 		params = new HashMap<String, IQueryParameterType>();
@@ -878,6 +989,7 @@ public class FhirResourceDaoTest {
 		ourOrganizationDao = ourCtx.getBean("myOrganizationDao", IFhirResourceDao.class);
 		ourLocationDao = ourCtx.getBean("myLocationDao", IFhirResourceDao.class);
 		ourEncounterDao = ourCtx.getBean("myEncounterDao", IFhirResourceDao.class);
+		ourFhirCtx = new FhirContext();
 	}
 
 }

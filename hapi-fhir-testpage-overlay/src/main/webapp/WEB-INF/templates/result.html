@@ -100,7 +100,7 @@
 										controls for viewing/editing/etc results
 										-->															
 										<div th:if="${bundle} != null" class="panel-group" id="accordion" style="margin-bottom: 0px;">
-											<div class="panel panel-default">
+											<div class="panel panel-default" style="border: none; border-bottom: 1px solid #ddd; border-radius: 0px;">
 												<div class="panel-heading">
 													<h4 class="panel-title">
 														<a data-toggle="collapse" data-parent="#accordion" href="#collapseOne">
@@ -150,21 +150,28 @@
 												<div id="collapseOne" class="panel-collapse collapse in">
 													<div class="panel-body" style="padding-bottom: 0px;">
 														<table class="table table-condensed" style="padding-bottom: 0px; margin-bottom: 0px;">
+															<colgroup>
+																<col style="width: 100px;"/>
+																<col style="width: 100px;"/>
+																<col/>
+																<col style="width: 100px;"/>
+															</colgroup>															
 															<thead>
 																<tr>
 																	<th></th>
+																	<th>ID</th>
 																	<th>Title</th>
 																	<th>Updated</th>
 																</tr>
 															</thead>
 															<tbody>
 															<tr th:each="entry : ${bundle.entries}">
-																<td>
+																<td style="white-space: nowrap;">
 																	<button class="btn btn-primary btn-xs" th:onclick="'readFromEntriesTable(this, \'' + ${entry.resource.id.resourceType} + '\', \'' + ${entry.resource.id.idPart} + '\', \'' + ${#strings.defaultString(entry.resource.id.versionIdPart,'')} + '\');'" type="submit" name="action" value="read" data-loading-text="Loading &lt;i class='fa fa-spinner fa-spin'/&gt;" ><i class="fa fa-book"></i> Read</button>
 																	<button class="btn btn-primary btn-xs" th:onclick="'updateFromEntriesTable(this, \'' + ${entry.resource.id.resourceType} + '\', \'' + ${entry.resource.id.idPart} + '\', \'' + ${#strings.defaultString(entry.resource.id.versionIdPart, '')} + '\');'" type="submit" name="action" value="home"><i class="fa fa-pencil" data-loading-text="Loading &lt;i class='fa fa-spinner fa-spin'/&gt;" ></i> Update</button>
 																</td>
-																<td th:text="${entry.title}">
-																</td>
+																<td><th:block th:text="${entry.resource.id.toUnqualified()}"/></td>
+																<td><small th:text="${entry.title}"/></td>
 																<td th:if="${entry.updated.value} == null"></td>
 																<td th:if="${entry.updated.value} != null and ${entry.updated.today} == true" th:text="${#dates.format(entry.updated.value, 'HH:mm:ss')}"></td>
 																<td th:if="${entry.updated.value} != null and ${entry.updated.today} == false" th:text="${#dates.format(entry.updated.value, 'yyyy-MM-dd')}"></td>

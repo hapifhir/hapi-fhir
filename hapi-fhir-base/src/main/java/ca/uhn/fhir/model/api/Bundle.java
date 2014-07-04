@@ -20,14 +20,14 @@ package ca.uhn.fhir.model.api;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-import org.apache.commons.lang3.StringUtils;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
@@ -221,7 +221,12 @@ public class Bundle extends BaseBundle /* implements IElement */{
 		RuntimeResourceDefinition def = theContext.getResourceDefinition(theResource);
 
 		if (theResource.getId() != null && StringUtils.isNotBlank(theResource.getId().getValue())) {
-			entry.getTitle().setValue(def.getName() + " " + theResource.getId().getValue());
+			String title = ResourceMetadataKeyEnum.TITLE.get(theResource);
+			if (title != null) {
+				entry.getTitle().setValue(title);
+			} else {
+				entry.getTitle().setValue(def.getName() + " " + theResource.getId().getValue());
+			}
 
 			StringBuilder b = new StringBuilder();
 			b.append(theServerBase);

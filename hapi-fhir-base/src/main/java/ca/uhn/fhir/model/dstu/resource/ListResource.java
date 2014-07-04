@@ -16,31 +16,11 @@
 
 package ca.uhn.fhir.model.dstu.resource;
 
-/*
- * #%L
- * HAPI FHIR Library
- * %%
- * Copyright (C) 2014 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 
 import java.util.Date;
 import java.util.List;
 
-import ca.uhn.fhir.model.api.BaseElement;
+import ca.uhn.fhir.model.api.BaseIdentifiableElement;
 import ca.uhn.fhir.model.api.BaseResource;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IResource;
@@ -67,7 +47,7 @@ import ca.uhn.fhir.rest.gclient.TokenParam;
 
 
 /**
- * HAPI/FHIR <b>ListResource</b> Resource
+ * HAPI/FHIR <b>List</b> Resource
  * (Information summarized from a list of other resources)
  *
  * <p>
@@ -86,7 +66,7 @@ import ca.uhn.fhir.rest.gclient.TokenParam;
  * </p>
  *
  */
-@ResourceDef(name="ListResource", profile="http://hl7.org/fhir/profiles/List", id="list")
+@ResourceDef(name="List", profile="http://hl7.org/fhir/profiles/List", id="list")
 public class ListResource extends BaseResource implements IResource {
 
 	/**
@@ -448,6 +428,9 @@ public class ListResource extends BaseResource implements IResource {
      * </p> 
 	 */
 	public ResourceReferenceDt getSubject() {  
+		if (mySubject == null) {
+			mySubject = new ResourceReferenceDt();
+		}
 		return mySubject;
 	}
 
@@ -476,6 +459,9 @@ public class ListResource extends BaseResource implements IResource {
      * </p> 
 	 */
 	public ResourceReferenceDt getSource() {  
+		if (mySource == null) {
+			mySource = new ResourceReferenceDt();
+		}
 		return mySource;
 	}
 
@@ -531,8 +517,8 @@ public class ListResource extends BaseResource implements IResource {
      * The date that the list was prepared
      * </p> 
 	 */
-	public ListResource setDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myDate = new DateTimeDt(theDate, thePrecision); 
+	public ListResource setDateWithSecondsPrecision( Date theDate) {
+		myDate = new DateTimeDt(theDate); 
 		return this; 
 	}
 
@@ -544,8 +530,8 @@ public class ListResource extends BaseResource implements IResource {
      * The date that the list was prepared
      * </p> 
 	 */
-	public ListResource setDateWithSecondsPrecision( Date theDate) {
-		myDate = new DateTimeDt(theDate); 
+	public ListResource setDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myDate = new DateTimeDt(theDate, thePrecision); 
 		return this; 
 	}
 
@@ -738,7 +724,7 @@ public class ListResource extends BaseResource implements IResource {
      * </p> 
 	 */
 	@Block()	
-	public static class Entry extends BaseElement implements IResourceBlock {
+	public static class Entry extends BaseIdentifiableElement implements IResourceBlock {
 	
 	@Child(name="flag", type=CodeableConceptDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)	
 	@Description(
@@ -922,8 +908,8 @@ public class ListResource extends BaseResource implements IResource {
      * When this item was added to the list
      * </p> 
 	 */
-	public Entry setDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myDate = new DateTimeDt(theDate, thePrecision); 
+	public Entry setDateWithSecondsPrecision( Date theDate) {
+		myDate = new DateTimeDt(theDate); 
 		return this; 
 	}
 
@@ -935,8 +921,8 @@ public class ListResource extends BaseResource implements IResource {
      * When this item was added to the list
      * </p> 
 	 */
-	public Entry setDateWithSecondsPrecision( Date theDate) {
-		myDate = new DateTimeDt(theDate); 
+	public Entry setDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myDate = new DateTimeDt(theDate, thePrecision); 
 		return this; 
 	}
 

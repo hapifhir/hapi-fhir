@@ -20,11 +20,7 @@ package ca.uhn.fhir.model.primitive;
  * #L%
  */
 
-import static ca.uhn.fhir.model.api.TemporalPrecisionEnum.DAY;
-import static ca.uhn.fhir.model.api.TemporalPrecisionEnum.MILLI;
-import static ca.uhn.fhir.model.api.TemporalPrecisionEnum.MONTH;
-import static ca.uhn.fhir.model.api.TemporalPrecisionEnum.SECOND;
-import static ca.uhn.fhir.model.api.TemporalPrecisionEnum.YEAR;
+import static ca.uhn.fhir.model.api.TemporalPrecisionEnum.*;
 
 import java.text.ParseException;
 import java.util.Calendar;

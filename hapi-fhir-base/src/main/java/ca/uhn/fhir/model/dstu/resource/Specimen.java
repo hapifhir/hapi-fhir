@@ -16,31 +16,11 @@
 
 package ca.uhn.fhir.model.dstu.resource;
 
-/*
- * #%L
- * HAPI FHIR Library
- * %%
- * Copyright (C) 2014 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 
 import java.util.Date;
 import java.util.List;
 
-import ca.uhn.fhir.model.api.BaseElement;
+import ca.uhn.fhir.model.api.BaseIdentifiableElement;
 import ca.uhn.fhir.model.api.BaseResource;
 import ca.uhn.fhir.model.api.IDatatype;
 import ca.uhn.fhir.model.api.IElement;
@@ -395,6 +375,9 @@ public class Specimen extends BaseResource implements IResource {
      * </p> 
 	 */
 	public ResourceReferenceDt getSubject() {  
+		if (mySubject == null) {
+			mySubject = new ResourceReferenceDt();
+		}
 		return mySubject;
 	}
 
@@ -507,8 +490,8 @@ public class Specimen extends BaseResource implements IResource {
      * Time when specimen was received for processing or testing
      * </p> 
 	 */
-	public Specimen setReceivedTime( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myReceivedTime = new DateTimeDt(theDate, thePrecision); 
+	public Specimen setReceivedTimeWithSecondsPrecision( Date theDate) {
+		myReceivedTime = new DateTimeDt(theDate); 
 		return this; 
 	}
 
@@ -520,8 +503,8 @@ public class Specimen extends BaseResource implements IResource {
      * Time when specimen was received for processing or testing
      * </p> 
 	 */
-	public Specimen setReceivedTimeWithSecondsPrecision( Date theDate) {
-		myReceivedTime = new DateTimeDt(theDate); 
+	public Specimen setReceivedTime( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myReceivedTime = new DateTimeDt(theDate, thePrecision); 
 		return this; 
 	}
 
@@ -686,7 +669,7 @@ public class Specimen extends BaseResource implements IResource {
      * </p> 
 	 */
 	@Block()	
-	public static class Source extends BaseElement implements IResourceBlock {
+	public static class Source extends BaseIdentifiableElement implements IResourceBlock {
 	
 	@Child(name="relationship", type=CodeDt.class, order=0, min=1, max=1)	
 	@Description(
@@ -815,7 +798,7 @@ public class Specimen extends BaseResource implements IResource {
      * </p> 
 	 */
 	@Block()	
-	public static class Collection extends BaseElement implements IResourceBlock {
+	public static class Collection extends BaseIdentifiableElement implements IResourceBlock {
 	
 	@Child(name="collector", order=0, min=0, max=1, type={
 		ca.uhn.fhir.model.dstu.resource.Practitioner.class	})
@@ -1047,8 +1030,21 @@ public class Specimen extends BaseResource implements IResource {
      * The quantity of specimen collected; for instance the volume of a blood sample, or the physical measurement of an anatomic pathology sample
      * </p> 
 	 */
-	public Collection setQuantity( QuantityCompararatorEnum theComparator,  long theValue,  String theUnits) {
-		myQuantity = new QuantityDt(theComparator, theValue, theUnits); 
+	public Collection setQuantity( QuantityCompararatorEnum theComparator,  double theValue,  String theSystem,  String theUnits) {
+		myQuantity = new QuantityDt(theComparator, theValue, theSystem, theUnits); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>quantity</b> (The quantity of specimen collected)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The quantity of specimen collected; for instance the volume of a blood sample, or the physical measurement of an anatomic pathology sample
+     * </p> 
+	 */
+	public Collection setQuantity( QuantityCompararatorEnum theComparator,  long theValue,  String theSystem,  String theUnits) {
+		myQuantity = new QuantityDt(theComparator, theValue, theSystem, theUnits); 
 		return this; 
 	}
 
@@ -1073,8 +1069,8 @@ public class Specimen extends BaseResource implements IResource {
      * The quantity of specimen collected; for instance the volume of a blood sample, or the physical measurement of an anatomic pathology sample
      * </p> 
 	 */
-	public Collection setQuantity( long theValue) {
-		myQuantity = new QuantityDt(theValue); 
+	public Collection setQuantity( QuantityCompararatorEnum theComparator,  long theValue,  String theUnits) {
+		myQuantity = new QuantityDt(theComparator, theValue, theUnits); 
 		return this; 
 	}
 
@@ -1087,6 +1083,19 @@ public class Specimen extends BaseResource implements IResource {
      * </p> 
 	 */
 	public Collection setQuantity( double theValue) {
+		myQuantity = new QuantityDt(theValue); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>quantity</b> (The quantity of specimen collected)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The quantity of specimen collected; for instance the volume of a blood sample, or the physical measurement of an anatomic pathology sample
+     * </p> 
+	 */
+	public Collection setQuantity( long theValue) {
 		myQuantity = new QuantityDt(theValue); 
 		return this; 
 	}
@@ -1180,7 +1189,7 @@ public class Specimen extends BaseResource implements IResource {
      * </p> 
 	 */
 	@Block()	
-	public static class Treatment extends BaseElement implements IResourceBlock {
+	public static class Treatment extends BaseIdentifiableElement implements IResourceBlock {
 	
 	@Child(name="description", type=StringDt.class, order=0, min=0, max=1)	
 	@Description(
@@ -1360,7 +1369,7 @@ public class Specimen extends BaseResource implements IResource {
      * </p> 
 	 */
 	@Block()	
-	public static class Container extends BaseElement implements IResourceBlock {
+	public static class Container extends BaseIdentifiableElement implements IResourceBlock {
 	
 	@Child(name="identifier", type=IdentifierDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)	
 	@Description(
@@ -1625,8 +1634,21 @@ public class Specimen extends BaseResource implements IResource {
      * The capacity (volume or other measure) the container may contain.
      * </p> 
 	 */
-	public Container setCapacity( QuantityCompararatorEnum theComparator,  long theValue,  String theUnits) {
-		myCapacity = new QuantityDt(theComparator, theValue, theUnits); 
+	public Container setCapacity( QuantityCompararatorEnum theComparator,  double theValue,  String theSystem,  String theUnits) {
+		myCapacity = new QuantityDt(theComparator, theValue, theSystem, theUnits); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>capacity</b> (Container volume or size)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The capacity (volume or other measure) the container may contain.
+     * </p> 
+	 */
+	public Container setCapacity( QuantityCompararatorEnum theComparator,  long theValue,  String theSystem,  String theUnits) {
+		myCapacity = new QuantityDt(theComparator, theValue, theSystem, theUnits); 
 		return this; 
 	}
 
@@ -1651,8 +1673,8 @@ public class Specimen extends BaseResource implements IResource {
      * The capacity (volume or other measure) the container may contain.
      * </p> 
 	 */
-	public Container setCapacity( long theValue) {
-		myCapacity = new QuantityDt(theValue); 
+	public Container setCapacity( QuantityCompararatorEnum theComparator,  long theValue,  String theUnits) {
+		myCapacity = new QuantityDt(theComparator, theValue, theUnits); 
 		return this; 
 	}
 
@@ -1665,6 +1687,19 @@ public class Specimen extends BaseResource implements IResource {
      * </p> 
 	 */
 	public Container setCapacity( double theValue) {
+		myCapacity = new QuantityDt(theValue); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>capacity</b> (Container volume or size)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The capacity (volume or other measure) the container may contain.
+     * </p> 
+	 */
+	public Container setCapacity( long theValue) {
 		myCapacity = new QuantityDt(theValue); 
 		return this; 
 	}
@@ -1708,8 +1743,21 @@ public class Specimen extends BaseResource implements IResource {
      * The quantity of specimen in the container; may be volume, dimensions, or other appropriate measurements, depending on the specimen type
      * </p> 
 	 */
-	public Container setSpecimenQuantity( QuantityCompararatorEnum theComparator,  long theValue,  String theUnits) {
-		mySpecimenQuantity = new QuantityDt(theComparator, theValue, theUnits); 
+	public Container setSpecimenQuantity( QuantityCompararatorEnum theComparator,  double theValue,  String theSystem,  String theUnits) {
+		mySpecimenQuantity = new QuantityDt(theComparator, theValue, theSystem, theUnits); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>specimenQuantity</b> (Quantity of specimen within container)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The quantity of specimen in the container; may be volume, dimensions, or other appropriate measurements, depending on the specimen type
+     * </p> 
+	 */
+	public Container setSpecimenQuantity( QuantityCompararatorEnum theComparator,  long theValue,  String theSystem,  String theUnits) {
+		mySpecimenQuantity = new QuantityDt(theComparator, theValue, theSystem, theUnits); 
 		return this; 
 	}
 
@@ -1734,8 +1782,8 @@ public class Specimen extends BaseResource implements IResource {
      * The quantity of specimen in the container; may be volume, dimensions, or other appropriate measurements, depending on the specimen type
      * </p> 
 	 */
-	public Container setSpecimenQuantity( long theValue) {
-		mySpecimenQuantity = new QuantityDt(theValue); 
+	public Container setSpecimenQuantity( QuantityCompararatorEnum theComparator,  long theValue,  String theUnits) {
+		mySpecimenQuantity = new QuantityDt(theComparator, theValue, theUnits); 
 		return this; 
 	}
 
@@ -1748,6 +1796,19 @@ public class Specimen extends BaseResource implements IResource {
      * </p> 
 	 */
 	public Container setSpecimenQuantity( double theValue) {
+		mySpecimenQuantity = new QuantityDt(theValue); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>specimenQuantity</b> (Quantity of specimen within container)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The quantity of specimen in the container; may be volume, dimensions, or other appropriate measurements, depending on the specimen type
+     * </p> 
+	 */
+	public Container setSpecimenQuantity( long theValue) {
 		mySpecimenQuantity = new QuantityDt(theValue); 
 		return this; 
 	}

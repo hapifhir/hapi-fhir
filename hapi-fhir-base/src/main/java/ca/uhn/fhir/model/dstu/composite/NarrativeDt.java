@@ -38,7 +38,7 @@ package ca.uhn.fhir.model.dstu.composite;
 
 import java.util.List;
 
-import ca.uhn.fhir.model.api.BaseElement;
+import ca.uhn.fhir.model.api.BaseIdentifiableElement;
 import ca.uhn.fhir.model.api.ICompositeDatatype;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.annotation.Child;
@@ -63,7 +63,7 @@ import ca.uhn.fhir.model.primitive.XhtmlDt;
  * </p> 
  */
 @DatatypeDef(name="Narrative") 
-public class NarrativeDt extends BaseElement implements ICompositeDatatype {
+public class NarrativeDt extends BaseIdentifiableElement implements ICompositeDatatype {
 
 	@Child(name="status", type=CodeDt.class, order=0, min=1, max=1)	
 	private BoundCodeDt<NarrativeStatusEnum> myStatus;

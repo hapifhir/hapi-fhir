@@ -32,7 +32,6 @@ public class CompleteResourceProviderTest {
 
 	private static ClassPathXmlApplicationContext ourAppCtx;
 	private static FhirContext ourCtx;
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(CompleteResourceProviderTest.class);
 
 	private static Server ourServer;
 	private static IFhirResourceDao<Patient> patientDao;

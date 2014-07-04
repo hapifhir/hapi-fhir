@@ -16,31 +16,11 @@
 
 package ca.uhn.fhir.model.dstu.resource;
 
-/*
- * #%L
- * HAPI FHIR Library
- * %%
- * Copyright (C) 2014 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 
 import java.util.Date;
 import java.util.List;
 
-import ca.uhn.fhir.model.api.BaseElement;
+import ca.uhn.fhir.model.api.BaseIdentifiableElement;
 import ca.uhn.fhir.model.api.BaseResource;
 import ca.uhn.fhir.model.api.IDatatype;
 import ca.uhn.fhir.model.api.IElement;
@@ -716,6 +696,9 @@ public class Condition extends BaseResource implements IResource {
      * </p> 
 	 */
 	public ResourceReferenceDt getAsserter() {  
+		if (myAsserter == null) {
+			myAsserter = new ResourceReferenceDt();
+		}
 		return myAsserter;
 	}
 
@@ -771,8 +754,8 @@ public class Condition extends BaseResource implements IResource {
      * Estimated or actual date the condition/problem/diagnosis was first detected/suspected
      * </p> 
 	 */
-	public Condition setDateAsserted( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myDateAsserted = new DateDt(theDate, thePrecision); 
+	public Condition setDateAssertedWithDayPrecision( Date theDate) {
+		myDateAsserted = new DateDt(theDate); 
 		return this; 
 	}
 
@@ -784,8 +767,8 @@ public class Condition extends BaseResource implements IResource {
      * Estimated or actual date the condition/problem/diagnosis was first detected/suspected
      * </p> 
 	 */
-	public Condition setDateAssertedWithDayPrecision( Date theDate) {
-		myDateAsserted = new DateDt(theDate); 
+	public Condition setDateAsserted( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myDateAsserted = new DateDt(theDate, thePrecision); 
 		return this; 
 	}
 
@@ -1278,7 +1261,7 @@ public class Condition extends BaseResource implements IResource {
      * </p> 
 	 */
 	@Block()	
-	public static class Stage extends BaseElement implements IResourceBlock {
+	public static class Stage extends BaseIdentifiableElement implements IResourceBlock {
 	
 	@Child(name="summary", type=CodeableConceptDt.class, order=0, min=0, max=1)	
 	@Description(
@@ -1394,7 +1377,7 @@ public class Condition extends BaseResource implements IResource {
      * </p> 
 	 */
 	@Block()	
-	public static class Evidence extends BaseElement implements IResourceBlock {
+	public static class Evidence extends BaseIdentifiableElement implements IResourceBlock {
 	
 	@Child(name="code", type=CodeableConceptDt.class, order=0, min=0, max=1)	
 	@Description(
@@ -1510,7 +1493,7 @@ public class Condition extends BaseResource implements IResource {
      * </p> 
 	 */
 	@Block()	
-	public static class Location extends BaseElement implements IResourceBlock {
+	public static class Location extends BaseIdentifiableElement implements IResourceBlock {
 	
 	@Child(name="code", type=CodeableConceptDt.class, order=0, min=0, max=1)	
 	@Description(
@@ -1625,7 +1608,7 @@ public class Condition extends BaseResource implements IResource {
      * </p> 
 	 */
 	@Block()	
-	public static class RelatedItem extends BaseElement implements IResourceBlock {
+	public static class RelatedItem extends BaseIdentifiableElement implements IResourceBlock {
 	
 	@Child(name="type", type=CodeDt.class, order=0, min=1, max=1)	
 	@Description(
@@ -1746,6 +1729,9 @@ public class Condition extends BaseResource implements IResource {
      * </p> 
 	 */
 	public ResourceReferenceDt getTarget() {  
+		if (myTarget == null) {
+			myTarget = new ResourceReferenceDt();
+		}
 		return myTarget;
 	}
 

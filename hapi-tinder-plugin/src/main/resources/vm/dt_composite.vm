@@ -29,7 +29,7 @@ import ${import};
  */
 @DatatypeDef(name="${className}") 
 public class ${className}
-        extends #{if}(${className}=="ResourceReferenceDt") BaseResourceReference #{else} BaseElement #{end} 
+        extends #{if}(${className}=="ResourceReferenceDt") BaseResourceReference #{else} BaseIdentifiableElement #{end} 
         implements ICompositeDatatype  #{if}( ${className} == "IdentifierDt" || ${className} == "CodingDt" || ${className} == 'QuantityDt'), IQueryParameterType #{end}
 {
 

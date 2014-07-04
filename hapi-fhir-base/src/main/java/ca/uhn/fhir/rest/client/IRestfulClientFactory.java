@@ -66,4 +66,13 @@ public interface IRestfulClientFactory {
 	 */
 	IGenericClient newGenericClient(String theServerBase);
 
+
+	void setSocketTimeout(int theSocketTimeout);
+
+
+	void setConnectTimeout(int theConnectTimeout);
+
+
+	void setConnectionRequestTimeout(int theConnectionRequestTimeout);
+
 }

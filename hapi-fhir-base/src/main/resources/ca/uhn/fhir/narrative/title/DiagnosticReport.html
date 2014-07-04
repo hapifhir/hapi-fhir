@@ -1,0 +1,9 @@
+<div>
+	<th:block th:if="${not resource.name.text.empty}" th:text="${resource.name.text.value}"/>
+	<th:block th:if="    ${resource.name.text.empty} and ${not resource.name.codingFirstRep.display.empty}" th:text="${resource.name.codingFirstRep.display}"/>
+	<th:block th:if=    "${resource.name.text.empty} and     ${resource.name.codingFirstRep.display.empty}" th:text="Untitled Diagnostic Report"/>
+	
+	<th:block th:if="${not resource.status.empty}" th:text="' - ' + ${resource.status.value}"/>
+	<th:block th:text="' - ' + ${resource.result.size} + ' observations'"/>
+	
+</div>

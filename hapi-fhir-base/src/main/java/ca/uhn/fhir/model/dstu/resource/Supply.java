@@ -16,30 +16,10 @@
 
 package ca.uhn.fhir.model.dstu.resource;
 
-/*
- * #%L
- * HAPI FHIR Library
- * %%
- * Copyright (C) 2014 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 
 import java.util.List;
 
-import ca.uhn.fhir.model.api.BaseElement;
+import ca.uhn.fhir.model.api.BaseIdentifiableElement;
 import ca.uhn.fhir.model.api.BaseResource;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IResource;
@@ -462,6 +442,9 @@ public class Supply extends BaseResource implements IResource {
      * </p> 
 	 */
 	public ResourceReferenceDt getOrderedItem() {  
+		if (myOrderedItem == null) {
+			myOrderedItem = new ResourceReferenceDt();
+		}
 		return myOrderedItem;
 	}
 
@@ -579,7 +562,7 @@ public class Supply extends BaseResource implements IResource {
      * </p> 
 	 */
 	@Block()	
-	public static class Dispense extends BaseElement implements IResourceBlock {
+	public static class Dispense extends BaseIdentifiableElement implements IResourceBlock {
 	
 	@Child(name="identifier", type=IdentifierDt.class, order=0, min=0, max=1)	
 	@Description(
@@ -849,8 +832,21 @@ public class Supply extends BaseResource implements IResource {
      * The amount of supply that has been dispensed. Includes unit of measure.
      * </p> 
 	 */
-	public Dispense setQuantity( QuantityCompararatorEnum theComparator,  long theValue,  String theUnits) {
-		myQuantity = new QuantityDt(theComparator, theValue, theUnits); 
+	public Dispense setQuantity( QuantityCompararatorEnum theComparator,  double theValue,  String theSystem,  String theUnits) {
+		myQuantity = new QuantityDt(theComparator, theValue, theSystem, theUnits); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>quantity</b> (Amount dispensed)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The amount of supply that has been dispensed. Includes unit of measure.
+     * </p> 
+	 */
+	public Dispense setQuantity( QuantityCompararatorEnum theComparator,  long theValue,  String theSystem,  String theUnits) {
+		myQuantity = new QuantityDt(theComparator, theValue, theSystem, theUnits); 
 		return this; 
 	}
 
@@ -875,8 +871,8 @@ public class Supply extends BaseResource implements IResource {
      * The amount of supply that has been dispensed. Includes unit of measure.
      * </p> 
 	 */
-	public Dispense setQuantity( long theValue) {
-		myQuantity = new QuantityDt(theValue); 
+	public Dispense setQuantity( QuantityCompararatorEnum theComparator,  long theValue,  String theUnits) {
+		myQuantity = new QuantityDt(theComparator, theValue, theUnits); 
 		return this; 
 	}
 
@@ -893,6 +889,19 @@ public class Supply extends BaseResource implements IResource {
 		return this; 
 	}
 
+	/**
+	 * Sets the value for <b>quantity</b> (Amount dispensed)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The amount of supply that has been dispensed. Includes unit of measure.
+     * </p> 
+	 */
+	public Dispense setQuantity( long theValue) {
+		myQuantity = new QuantityDt(theValue); 
+		return this; 
+	}
+
  
 	/**
 	 * Gets the value(s) for <b>suppliedItem</b> (Medication, Substance, or Device supplied).
@@ -905,6 +914,9 @@ public class Supply extends BaseResource implements IResource {
      * </p> 
 	 */
 	public ResourceReferenceDt getSuppliedItem() {  
+		if (mySuppliedItem == null) {
+			mySuppliedItem = new ResourceReferenceDt();
+		}
 		return mySuppliedItem;
 	}
 

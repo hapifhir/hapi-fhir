@@ -34,7 +34,7 @@ public class ${className}ResourceProvider extends JpaResourceProvider<${classNam
 #if (${param.type} == 'string' )
 			StringParam the${param.nameCapitalized}, 
 #elseif (${param.type} == 'token' )
-			IdentifierDt the${param.nameCapitalized}, 
+			IdentifierListParam the${param.nameCapitalized}, 
 #elseif (${param.type} == 'date' )
 			DateRangeParam the${param.nameCapitalized}, 
 #elseif (${param.type} == 'quantity' )

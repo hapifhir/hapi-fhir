@@ -16,31 +16,11 @@
 
 package ca.uhn.fhir.model.dstu.resource;
 
-/*
- * #%L
- * HAPI FHIR Library
- * %%
- * Copyright (C) 2014 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 
 import java.util.Date;
 import java.util.List;
 
-import ca.uhn.fhir.model.api.BaseElement;
+import ca.uhn.fhir.model.api.BaseIdentifiableElement;
 import ca.uhn.fhir.model.api.BaseResource;
 import ca.uhn.fhir.model.api.IDatatype;
 import ca.uhn.fhir.model.api.IElement;
@@ -58,6 +38,7 @@ import ca.uhn.fhir.model.dstu.composite.ContactDt;
 import ca.uhn.fhir.model.dstu.valueset.AggregationModeEnum;
 import ca.uhn.fhir.model.dstu.valueset.BindingConformanceEnum;
 import ca.uhn.fhir.model.dstu.valueset.ConstraintSeverityEnum;
+import ca.uhn.fhir.model.dstu.valueset.ContactUseEnum;
 import ca.uhn.fhir.model.dstu.valueset.DataTypeEnum;
 import ca.uhn.fhir.model.dstu.valueset.ExtensionContextEnum;
 import ca.uhn.fhir.model.dstu.valueset.FHIRDefinedTypeEnum;
@@ -699,7 +680,43 @@ public class Profile extends BaseResource implements IResource {
 		}
 		return getTelecom().get(0); 
 	}
-  
+ 	/**
+	 * Adds a new value for <b>telecom</b> (Contact information of the publisher)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Contact details to assist a user in finding and communicating with the publisher
+     * </p> 
+     *
+     * @return Returns a reference to this object, to allow for simple chaining.
+	 */
+	public Profile addTelecom( ContactUseEnum theContactUse,  String theValue) {
+		if (myTelecom == null) {
+			myTelecom = new java.util.ArrayList<ContactDt>();
+		}
+		myTelecom.add(new ContactDt(theContactUse, theValue));
+		return this; 
+	}
+
+	/**
+	 * Adds a new value for <b>telecom</b> (Contact information of the publisher)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Contact details to assist a user in finding and communicating with the publisher
+     * </p> 
+     *
+     * @return Returns a reference to this object, to allow for simple chaining.
+	 */
+	public Profile addTelecom( String theValue) {
+		if (myTelecom == null) {
+			myTelecom = new java.util.ArrayList<ContactDt>();
+		}
+		myTelecom.add(new ContactDt(theValue));
+		return this; 
+	}
+
+ 
 	/**
 	 * Gets the value(s) for <b>description</b> (Natural language description of the profile).
 	 * creating it if it does
@@ -930,8 +947,8 @@ public class Profile extends BaseResource implements IResource {
      * The date that this version of the profile was published
      * </p> 
 	 */
-	public Profile setDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myDate = new DateTimeDt(theDate, thePrecision); 
+	public Profile setDateWithSecondsPrecision( Date theDate) {
+		myDate = new DateTimeDt(theDate); 
 		return this; 
 	}
 
@@ -943,8 +960,8 @@ public class Profile extends BaseResource implements IResource {
      * The date that this version of the profile was published
      * </p> 
 	 */
-	public Profile setDateWithSecondsPrecision( Date theDate) {
-		myDate = new DateTimeDt(theDate); 
+	public Profile setDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myDate = new DateTimeDt(theDate, thePrecision); 
 		return this; 
 	}
 
@@ -1286,7 +1303,7 @@ public class Profile extends BaseResource implements IResource {
      * </p> 
 	 */
 	@Block()	
-	public static class Mapping extends BaseElement implements IResourceBlock {
+	public static class Mapping extends BaseIdentifiableElement implements IResourceBlock {
 	
 	@Child(name="identity", type=IdDt.class, order=0, min=1, max=1)	
 	@Description(
@@ -1516,7 +1533,7 @@ public class Profile extends BaseResource implements IResource {
      * </p> 
 	 */
 	@Block()	
-	public static class Structure extends BaseElement implements IResourceBlock {
+	public static class Structure extends BaseIdentifiableElement implements IResourceBlock {
 	
 	@Child(name="type", type=CodeDt.class, order=0, min=1, max=1)	
 	@Description(
@@ -1879,7 +1896,7 @@ public class Profile extends BaseResource implements IResource {
      * </p> 
 	 */
 	@Block()	
-	public static class StructureElement extends BaseElement implements IResourceBlock {
+	public static class StructureElement extends BaseIdentifiableElement implements IResourceBlock {
 	
 	@Child(name="path", type=StringDt.class, order=0, min=1, max=1)	
 	@Description(
@@ -2002,6 +2019,23 @@ public class Profile extends BaseResource implements IResource {
 	}
 
 	/**
+	 * Add a value for <b>representation</b> (How this element is represented in instances) using an enumerated type. This
+	 * is intended as a convenience method for situations where the FHIR defined ValueSets are mandatory
+	 * or contain the desirable codes. If you wish to use codes other than those which are built-in, 
+	 * you may also use the {@link #addType()} method.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Codes that define how this element is represented in instances, when the deviation varies from the normal case
+     * </p> 
+	 */
+	public BoundCodeDt<PropertyRepresentationEnum> addRepresentation(PropertyRepresentationEnum theValue) {
+		BoundCodeDt<PropertyRepresentationEnum> retVal = new BoundCodeDt<PropertyRepresentationEnum>(PropertyRepresentationEnum.VALUESET_BINDER, theValue);
+		getRepresentation().add(retVal);
+		return retVal;
+	}
+
+	/**
 	 * Add a value for <b>representation</b> (How this element is represented in instances)
 	 *
      * <p>
@@ -2009,8 +2043,10 @@ public class Profile extends BaseResource implements IResource {
      * Codes that define how this element is represented in instances, when the deviation varies from the normal case
      * </p> 
 	 */
-	public void addRepresentation(PropertyRepresentationEnum theValue) {
-		getRepresentation().add(new BoundCodeDt<PropertyRepresentationEnum>(PropertyRepresentationEnum.VALUESET_BINDER, theValue));
+	public BoundCodeDt<PropertyRepresentationEnum> addRepresentation() {
+		BoundCodeDt<PropertyRepresentationEnum> retVal = new BoundCodeDt<PropertyRepresentationEnum>(PropertyRepresentationEnum.VALUESET_BINDER);
+		getRepresentation().add(retVal);
+		return retVal;
 	}
 
 	/**
@@ -2146,7 +2182,7 @@ public class Profile extends BaseResource implements IResource {
      * </p> 
 	 */
 	@Block()	
-	public static class StructureElementSlicing extends BaseElement implements IResourceBlock {
+	public static class StructureElementSlicing extends BaseIdentifiableElement implements IResourceBlock {
 	
 	@Child(name="discriminator", type=IdDt.class, order=0, min=1, max=1)	
 	@Description(
@@ -2325,7 +2361,7 @@ public class Profile extends BaseResource implements IResource {
      * </p> 
 	 */
 	@Block()	
-	public static class StructureElementDefinition extends BaseElement implements IResourceBlock {
+	public static class StructureElementDefinition extends BaseIdentifiableElement implements IResourceBlock {
 	
 	@Child(name="short", type=StringDt.class, order=0, min=1, max=1)	
 	@Description(
@@ -3339,7 +3375,7 @@ public class Profile extends BaseResource implements IResource {
      * </p> 
 	 */
 	@Block()	
-	public static class StructureElementDefinitionType extends BaseElement implements IResourceBlock {
+	public static class StructureElementDefinitionType extends BaseIdentifiableElement implements IResourceBlock {
 	
 	@Child(name="code", type=CodeDt.class, order=0, min=1, max=1)	
 	@Description(
@@ -3492,6 +3528,23 @@ public class Profile extends BaseResource implements IResource {
 	}
 
 	/**
+	 * Add a value for <b>aggregation</b> (contained | referenced | bundled - how aggregated) using an enumerated type. This
+	 * is intended as a convenience method for situations where the FHIR defined ValueSets are mandatory
+	 * or contain the desirable codes. If you wish to use codes other than those which are built-in, 
+	 * you may also use the {@link #addType()} method.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * If the type is a reference to another resource, how the resource is or can be aggreated - is it a contained resource, or a reference, and if the context is a bundle, is it included in the bundle
+     * </p> 
+	 */
+	public BoundCodeDt<AggregationModeEnum> addAggregation(AggregationModeEnum theValue) {
+		BoundCodeDt<AggregationModeEnum> retVal = new BoundCodeDt<AggregationModeEnum>(AggregationModeEnum.VALUESET_BINDER, theValue);
+		getAggregation().add(retVal);
+		return retVal;
+	}
+
+	/**
 	 * Add a value for <b>aggregation</b> (contained | referenced | bundled - how aggregated)
 	 *
      * <p>
@@ -3499,8 +3552,10 @@ public class Profile extends BaseResource implements IResource {
      * If the type is a reference to another resource, how the resource is or can be aggreated - is it a contained resource, or a reference, and if the context is a bundle, is it included in the bundle
      * </p> 
 	 */
-	public void addAggregation(AggregationModeEnum theValue) {
-		getAggregation().add(new BoundCodeDt<AggregationModeEnum>(AggregationModeEnum.VALUESET_BINDER, theValue));
+	public BoundCodeDt<AggregationModeEnum> addAggregation() {
+		BoundCodeDt<AggregationModeEnum> retVal = new BoundCodeDt<AggregationModeEnum>(AggregationModeEnum.VALUESET_BINDER);
+		getAggregation().add(retVal);
+		return retVal;
 	}
 
 	/**
@@ -3531,7 +3586,7 @@ public class Profile extends BaseResource implements IResource {
      * </p> 
 	 */
 	@Block()	
-	public static class StructureElementDefinitionConstraint extends BaseElement implements IResourceBlock {
+	public static class StructureElementDefinitionConstraint extends BaseIdentifiableElement implements IResourceBlock {
 	
 	@Child(name="key", type=IdDt.class, order=0, min=1, max=1)	
 	@Description(
@@ -3812,7 +3867,7 @@ public class Profile extends BaseResource implements IResource {
      * </p> 
 	 */
 	@Block()	
-	public static class StructureElementDefinitionBinding extends BaseElement implements IResourceBlock {
+	public static class StructureElementDefinitionBinding extends BaseIdentifiableElement implements IResourceBlock {
 	
 	@Child(name="name", type=StringDt.class, order=0, min=1, max=1)	
 	@Description(
@@ -4078,7 +4133,7 @@ public class Profile extends BaseResource implements IResource {
      * </p> 
 	 */
 	@Block()	
-	public static class StructureElementDefinitionMapping extends BaseElement implements IResourceBlock {
+	public static class StructureElementDefinitionMapping extends BaseIdentifiableElement implements IResourceBlock {
 	
 	@Child(name="identity", type=IdDt.class, order=0, min=1, max=1)	
 	@Description(
@@ -4208,7 +4263,7 @@ public class Profile extends BaseResource implements IResource {
      * </p> 
 	 */
 	@Block()	
-	public static class StructureSearchParam extends BaseElement implements IResourceBlock {
+	public static class StructureSearchParam extends BaseIdentifiableElement implements IResourceBlock {
 	
 	@Child(name="name", type=StringDt.class, order=0, min=1, max=1)	
 	@Description(
@@ -4463,6 +4518,23 @@ public class Profile extends BaseResource implements IResource {
 	}
 
 	/**
+	 * Add a value for <b>target</b> (Types of resource (if a resource reference)) using an enumerated type. This
+	 * is intended as a convenience method for situations where the FHIR defined ValueSets are mandatory
+	 * or contain the desirable codes. If you wish to use codes other than those which are built-in, 
+	 * you may also use the {@link #addType()} method.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Types of resource (if a resource is referenced)
+     * </p> 
+	 */
+	public BoundCodeDt<ResourceTypeEnum> addTarget(ResourceTypeEnum theValue) {
+		BoundCodeDt<ResourceTypeEnum> retVal = new BoundCodeDt<ResourceTypeEnum>(ResourceTypeEnum.VALUESET_BINDER, theValue);
+		getTarget().add(retVal);
+		return retVal;
+	}
+
+	/**
 	 * Add a value for <b>target</b> (Types of resource (if a resource reference))
 	 *
      * <p>
@@ -4470,8 +4542,10 @@ public class Profile extends BaseResource implements IResource {
      * Types of resource (if a resource is referenced)
      * </p> 
 	 */
-	public void addTarget(ResourceTypeEnum theValue) {
-		getTarget().add(new BoundCodeDt<ResourceTypeEnum>(ResourceTypeEnum.VALUESET_BINDER, theValue));
+	public BoundCodeDt<ResourceTypeEnum> addTarget() {
+		BoundCodeDt<ResourceTypeEnum> retVal = new BoundCodeDt<ResourceTypeEnum>(ResourceTypeEnum.VALUESET_BINDER);
+		getTarget().add(retVal);
+		return retVal;
 	}
 
 	/**
@@ -4503,7 +4577,7 @@ public class Profile extends BaseResource implements IResource {
      * </p> 
 	 */
 	@Block()	
-	public static class ExtensionDefn extends BaseElement implements IResourceBlock {
+	public static class ExtensionDefn extends BaseIdentifiableElement implements IResourceBlock {
 	
 	@Child(name="code", type=CodeDt.class, order=0, min=1, max=1)	
 	@Description(
@@ -4805,7 +4879,7 @@ public class Profile extends BaseResource implements IResource {
      * </p> 
 	 */
 	@Block()	
-	public static class Query extends BaseElement implements IResourceBlock {
+	public static class Query extends BaseIdentifiableElement implements IResourceBlock {
 	
 	@Child(name="name", type=StringDt.class, order=0, min=1, max=1)	
 	@Description(

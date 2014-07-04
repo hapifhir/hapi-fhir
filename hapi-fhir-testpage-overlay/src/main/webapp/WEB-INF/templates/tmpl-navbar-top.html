@@ -11,15 +11,15 @@
 			</button>
 			<a class="navbar-brand"
 				th:href="'home?encoding=' + ${encoding} + '&amp;pretty=' + ${pretty}">
-				<i class="fa fa-home" /> HAPI FHIR RESTful Server
+				<i class="fa fa-home" /> HAPI FHIR
 			</a> 
-			<a class="navbar-left navbarBreadcrumb"
+			<a class="navbar-left navbarBreadcrumb hidden-xs hidden-sm"
 				th:if="${resourceName.empty} == false"
 				th:href="'resource?encoding=' + ${encoding} + '&amp;pretty=' + ${pretty} + '&amp;resource=' + ${resourceName}">
 				<span class="glyphicon glyphicon-chevron-right"></span> <span
 				th:text="'Resource[' + ${resourceName} + ']'"></span>
 			</a>
-			<div class="navbar-left navbarBreadcrumb"
+			<div class="navbar-left navbarBreadcrumb hidden-xs hidden-sm"
 				th:if="${outcomeDescription} != null">
 				<span class="glyphicon glyphicon-chevron-right"></span> <span
 					th:text="${outcomeDescription}"></span>

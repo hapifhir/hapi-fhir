@@ -60,9 +60,11 @@ public class RuntimeChildAny extends RuntimeChildChoiceDefinition {
 				if (o1res && o2res) {
 					return theO1.getSimpleName().compareTo(theO2.getSimpleName());
 				} else if (o1res) {
-					return 1;
-				}else {
 					return -1;
+				} else if (o1res == false && o2res == false) {
+					return 0;
+				}else {
+					return 1;
 				}
 			}});
 		

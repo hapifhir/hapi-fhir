@@ -11,7 +11,7 @@
 	<bean class="ca.uhn.fhir.to.TesterConfig">
 		<property name="servers">
 			<list>
-				<value>home     , Localhost Server                , http://localhost:8888/base</value>
+				<value>home     , UHN/HAPI Server                 , http://fhirtest.uhn.ca/base</value>
 				<value>hi       , Health Intersections            , http://fhir.healthintersections.com.au/open</value>
 				<value>furore   , Spark - Furore Reference Server , http://spark.furore.com/fhir</value>
 				<value>blaze    , Blaze (Orion Health)            , https://his-medicomp-gateway.orionhealth.com/blaze/fhir</value>
@@ -20,12 +20,7 @@
 		</property>
 	</bean>
 
-	<bean id="fhirContext" class="ca.uhn.fhir.context.FhirContext">
-		<property name="restfulClientFactory" ref="restfulClientFactory"/>
-	</bean>
-
-	<bean id="restfulClientFactory" class="ca.uhn.fhir.rest.client.RestfulClientFactory">
-		<property name="fhirContext" ref="fhirContext"/>
+	<bean id="fhirContext" class="ca.uhn.fhirtest.FhirContextFactory">
 		<property name="connectTimeout" value="4000"/>
 		<property name="socketTimeout" value="10000"/>
 	</bean>
