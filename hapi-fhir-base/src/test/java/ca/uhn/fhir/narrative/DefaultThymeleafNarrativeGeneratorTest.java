@@ -10,20 +10,27 @@ import org.junit.Before;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.dstu.composite.NarrativeDt;
+import ca.uhn.fhir.model.dstu.composite.PeriodDt;
 import ca.uhn.fhir.model.dstu.composite.QuantityDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.resource.Conformance;
 import ca.uhn.fhir.model.dstu.resource.DiagnosticReport;
+import ca.uhn.fhir.model.dstu.resource.Encounter;
 import ca.uhn.fhir.model.dstu.resource.Observation;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.dstu.valueset.DiagnosticReportStatusEnum;
+import ca.uhn.fhir.model.dstu.valueset.EncounterClassEnum;
+import ca.uhn.fhir.model.dstu.valueset.EncounterTypeEnum;
 import ca.uhn.fhir.model.dstu.valueset.ObservationStatusEnum;
+import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.parser.DataFormatException;
 
 public class DefaultThymeleafNarrativeGeneratorTest {
+	private FhirContext myCtx;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(DefaultThymeleafNarrativeGeneratorTest.class);
 	private DefaultThymeleafNarrativeGenerator gen;
 
@@ -33,14 +40,20 @@ public class DefaultThymeleafNarrativeGeneratorTest {
 		gen.setUseHapiServerConformanceNarrative(true);
 		gen.setIgnoreFailures(false);
 		gen.setIgnoreMissingTemplates(false);
+		
+		myCtx=new FhirContext();
+		myCtx.setNarrativeGenerator(gen);
 	}
 
+	
+	
+	
 	@Test
 	public void testGeneratePatient() throws DataFormatException {
 		Patient value = new Patient();
 
 		value.addIdentifier().setSystem("urn:names").setValue("123456");
-		value.addName().addFamily("blow").addGiven("joe").addGiven("john");
+		value.addName().addFamily("blow").addGiven("joe").addGiven(null).addGiven("john");
 		value.getAddressFirstRep().addLine("123 Fake Street").addLine("Unit 1");
 		value.getAddressFirstRep().setCity("Toronto").setState("ON").setCountry("Canada");
 
@@ -52,11 +65,33 @@ public class DefaultThymeleafNarrativeGeneratorTest {
 		String title = gen.generateTitle(value);
 		assertEquals("joe john BLOW (123456)", title);
 		ourLog.info(title);
+
+		value.getIdentifierFirstRep().setLabel("FOO MRN 123");
+		title = gen.generateTitle(value);
+		assertEquals("joe john BLOW (FOO MRN 123)", title);
+		ourLog.info(title);
+
+	}
+
+
+	@Test
+	public void testGenerateEncounter() throws DataFormatException {
+		Encounter enc = new Encounter();
+
+		enc.addIdentifier("urn:visits", "1234567");
+		enc.setClassElement(EncounterClassEnum.AMBULATORY);
+		enc.setPeriod(new PeriodDt().setStart(new DateTimeDt("2001-01-02T11:11:00")));
+		enc.setType(EncounterTypeEnum.ANNUAL_DIABETES_MELLITUS_SCREENING);
+
+		String title = gen.generateTitle(enc);
+		assertEquals("1234567 / ADMS / ambulatory / Tue Jan 02 11:11:00 EST 2001 - ?", title);
+		ourLog.info(title);
+
 	}
 
 	@Test
 	public void testGenerateServerConformance() throws DataFormatException {
-		Conformance value = new FhirContext().newXmlParser().parseResource(Conformance.class, new InputStreamReader(getClass().getResourceAsStream("/server-conformance-statement.xml")));
+		Conformance value = myCtx.newXmlParser().parseResource(Conformance.class, new InputStreamReader(getClass().getResourceAsStream("/server-conformance-statement.xml")));
 		
 		String output = gen.generateNarrative(value).getDiv().getValueAsString();
 
@@ -76,6 +111,7 @@ public class DefaultThymeleafNarrativeGeneratorTest {
 		String output = gen.generateNarrative("http://hl7.org/fhir/profiles/DiagnosticReport", value).getDiv().getValueAsString();
 
 		ourLog.info(output);
+		assertThat(output,StringContains.containsString(value.getName().getText().getValue()));
 	}
 
 	@Test
@@ -85,7 +121,7 @@ public class DefaultThymeleafNarrativeGeneratorTest {
 		value.getIssued().setValueAsString("2011-02-22T11:13:00");
 		value.setStatus(DiagnosticReportStatusEnum.FINAL);
 
-		value.getName().setText("Some Diagnostic Report");
+		value.getName().setText("Some & Diagnostic Report");
 		{
 			Observation obs = new Observation();
 			obs.getName().addCoding().setCode("1938HB").setDisplay("Hemoglobin");
@@ -106,7 +142,7 @@ public class DefaultThymeleafNarrativeGeneratorTest {
 		String output = generateNarrative.getDiv().getValueAsString();
 
 		ourLog.info(output);
-		assertThat(output, StringContains.containsString("<div class=\"hapiHeaderText\"> Some Diagnostic Report </div>"));
+		assertThat(output, StringContains.containsString("<div class=\"hapiHeaderText\"> Some &amp; Diagnostic Report </div>"));
 
 		String title = gen.generateTitle(value);
 		ourLog.info(title);
@@ -115,11 +151,9 @@ public class DefaultThymeleafNarrativeGeneratorTest {
 		
 		// Now try it with the parser
 
-		FhirContext context = new FhirContext();
-		context.setNarrativeGenerator(gen);
-		output = context.newXmlParser().setPrettyPrint(true).encodeResourceToString(value);
+		output = myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(value);
 		ourLog.info(output);
-		assertThat(output, StringContains.containsString("<div class=\"hapiHeaderText\"> Some Diagnostic Report </div>"));
+		assertThat(output, StringContains.containsString("<div class=\"hapiHeaderText\"> Some &amp; Diagnostic Report </div>"));
 
 	}
 

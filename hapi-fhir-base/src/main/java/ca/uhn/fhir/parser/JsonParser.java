@@ -223,7 +223,6 @@ public class JsonParser extends BaseParser implements IParser {
 
 		eventWriter.writeEnd();
 		eventWriter.flush();
-		eventWriter.close();
 	}
 
 	private void encodeChildElementToStreamWriter(RuntimeResourceDefinition theResDef, IResource theResource, JsonGenerator theWriter, IElement theValue, BaseRuntimeElementDefinition<?> theChildDef, String theChildName) throws IOException {
@@ -507,7 +506,6 @@ public class JsonParser extends BaseParser implements IParser {
 		RuntimeResourceDefinition resDef = myContext.getResourceDefinition(theResource);
 		encodeResourceToJsonStreamWriter(resDef, theResource, eventWriter, null,false);
 		eventWriter.flush();
-		eventWriter.close();
 	}
 
 	@Override
@@ -538,7 +536,6 @@ public class JsonParser extends BaseParser implements IParser {
 
 		eventWriter.writeEnd();
 		eventWriter.flush();
-		eventWriter.close();
 	}
 
 	/**

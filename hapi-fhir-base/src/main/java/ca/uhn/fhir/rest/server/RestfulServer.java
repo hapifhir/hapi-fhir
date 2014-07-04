@@ -783,9 +783,12 @@ public class RestfulServer extends HttpServlet {
 			
 			if (theContext.getNarrativeGenerator() != null) {
 				String title = theContext.getNarrativeGenerator().generateTitle(next);
+				ourLog.info("Narrative generator created title: {}", title);
 				if (StringUtils.isNotBlank(title)) {
 					ResourceMetadataKeyEnum.TITLE.put(next, title);
 				}
+			} else {
+				ourLog.info("No narrative generator specified");
 			}
 			
 			bundle.addResource(next, theContext, theServerBase);

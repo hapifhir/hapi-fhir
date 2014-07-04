@@ -1,0 +1,15 @@
+<div>
+	<th:block  th:if="${!resource.identifierFirstRep.empty}"  th:narrative="${resource.identifierFirstRep}" />
+	<th:block th:if="${not resource.status.empty}">
+		/ <th:block th:narrative="${resource.status}"/>
+	</th:block>
+	<th:block th:if="${not resource.typeFirstRep.empty}">
+		/ <th:block th:narrative="${resource.typeFirstRep}"/>
+	</th:block>
+	<th:block th:if="${not resource.classElement.empty}">
+		/ <th:block th:narrative="${resource.classElement}"/>
+	</th:block>
+	<th:block th:if="${not resource.period.empty}">
+		/ <th:block th:narrative="${resource.period}"/>
+	</th:block>
+</div>

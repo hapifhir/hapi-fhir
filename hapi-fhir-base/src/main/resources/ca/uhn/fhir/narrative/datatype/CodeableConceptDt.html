@@ -1,0 +1,13 @@
+<div>
+	<th:block th:if="${not resource.text.empty}" th:text="${resource.text.value}"/>
+	<th:block th:if="${resource.text.empty}">
+		<th:block th:if="${!resource.codingFirstRep.empty}">
+			<th:block th:if="${!resource.codingFirstRep.display.empty}" th:text="${!resource.codingFirstRep.display.value}"/>
+			<th:block th:if="${resource.codingFirstRep.display.empty}">
+				<th:block th:if="${!resource.codingFirstRep.code.empty}">
+					<th:block th:text="${resource.codingFirstRep.code.value}"/>
+				</th:block>
+			</th:block>
+		</th:block>
+	</th:block>
+</div>

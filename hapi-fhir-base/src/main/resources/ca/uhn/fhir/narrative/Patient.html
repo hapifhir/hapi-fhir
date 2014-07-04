@@ -16,7 +16,7 @@ a browser.
 		<tbody>
 			<tr th:if="${not resource.identifierFirstRep.empty}">
 				<td>Identifier</td>
-				<td th:text="${resource.identifierFirstRep.value.value}">8708660</td>
+				<td th:narrative="${resource.identifierFirstRep}">8708660</td>
 			</tr>
 			<tr th:if="${not resource.addressFirstRep.empty}">
 				<td>Address</td>

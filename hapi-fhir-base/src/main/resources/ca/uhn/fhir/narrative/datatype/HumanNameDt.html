@@ -1,0 +1,6 @@
+<div>
+	<th:block th:each="prefix : ${resource.prefix}"   th:if="${!prefix.empty}"     th:text="${prefix.value} + ' '">Dr</th:block>
+	<th:block th:each="givenName : ${resource.given}" th:if="${!givenName.empty}"  th:text="${givenName.value} + ' '">John</th:block>
+	<b th:each="familyName : ${resource.family}"      th:if="${!familyName.empty}" th:text="${#strings.toUpperCase(familyName.value)} + ' '">SMITH</b>
+	<th:block th:each="suffix : ${resource.suffix}"   th:if="${!suffix.empty}"     th:text="${suffix.value} + ' '">Jr</th:block>
+</div>

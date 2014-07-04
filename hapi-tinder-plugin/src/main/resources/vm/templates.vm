@@ -152,6 +152,22 @@
 	}
 
 	/**
+	 * Gets the first repetition for <b>${child.elementName}</b> (${child.shortName}),
+	 * creating it if it does not already exist.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * ${child.definition}
+     * </p> 
+	 */
+	public ${child.boundDatatype}<${child.bindingClass}> get${child.methodName}FirstRep() {
+		if (get${child.methodName}().size() == 0) {
+			add${child.methodName}();
+		}
+		return get${child.methodName}().get(0);
+	}
+
+	/**
 	 * Add a value for <b>${child.elementName}</b> (${child.shortName})
 	 *
      * <p>

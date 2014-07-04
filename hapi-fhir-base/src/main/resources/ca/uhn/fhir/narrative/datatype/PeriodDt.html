@@ -1,0 +1,5 @@
+<div>
+	<th:block th:if="${!resource.start.empty} and ${!resource.end.empty}" th:text="${resource.start.value} + ' - ' + ${resource.end.value}"/>
+	<th:block th:if="${!resource.start.empty} and ${resource.end.empty}" th:text="${resource.start.value} + ' - ?'"/>
+	<th:block th:if="${resource.start.empty} and ${!resource.end.empty}" th:text="'? - ' + ${resource.end.value}"/>
+</div>

@@ -1,9 +1,6 @@
 <div>
-	<th:block th:each="prefix : ${resource.nameFirstRep.prefix}" th:text="${prefix.value} + ' '">Dr</th:block>
-	<th:block th:each="givenName : ${resource.nameFirstRep.given}" th:text="${givenName.value} + ' '">John</th:block>
-	<th:block th:each="familyName : ${resource.nameFirstRep.family}" th:text="${#strings.toUpperCase(familyName.value)} + ' '">SMITH</th:block>
-	<th:block th:each="suffix : ${resource.nameFirstRep.suffix}" th:text="${suffix.value} + ' '">Jr</th:block>
+	<th:block  th:narrative="${resource.nameFirstRep}" />
 	<th:block th:if="${not resource.identifierFirstRep.empty}">
-		(<th:block th:text="${resource.identifierFirstRep.value.value}">8708660</th:block>)
+		(<th:block th:narrative="${resource.identifierFirstRep}">8708660</th:block>)
 	</th:block>
 </div>

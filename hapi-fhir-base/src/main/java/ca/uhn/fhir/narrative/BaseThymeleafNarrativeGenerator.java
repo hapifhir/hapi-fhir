@@ -53,8 +53,10 @@ import org.thymeleaf.standard.expression.IStandardExpressionParser;
 import org.thymeleaf.standard.expression.StandardExpressions;
 import org.thymeleaf.templateresolver.TemplateResolver;
 import org.thymeleaf.util.DOMUtils;
+import org.w3c.dom.Text;
 
 import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.composite.NarrativeDt;
 import ca.uhn.fhir.model.dstu.valueset.NarrativeStatusEnum;
@@ -94,6 +96,8 @@ public abstract class BaseThymeleafNarrativeGenerator implements INarrativeGener
 			initialize();
 		}
 
+		ourLog.trace("Generating resource title {}", theResource);
+		
 		String name = null;
 		if (StringUtils.isNotBlank(theProfile)) {
 			name = myProfileToName.get(theProfile);
@@ -101,6 +105,8 @@ public abstract class BaseThymeleafNarrativeGenerator implements INarrativeGener
 		if (name == null) {
 			name = myClassToName.get(theResource.getClass());
 		}
+
+		ourLog.trace("Template name is {}", name);
 
 		if (name == null) {
 			if (myIgnoreMissingTemplates) {
@@ -116,6 +122,9 @@ public abstract class BaseThymeleafNarrativeGenerator implements INarrativeGener
 			context.setVariable("resource", theResource);
 
 			String result = myTitleTemplateEngine.process(name, context);
+
+			ourLog.trace("Produced {}", result);
+			
 			StringBuilder b = new StringBuilder();
 			boolean inTag = false;
 			for (int i = 0; i < result.length(); i++) {
@@ -152,6 +161,8 @@ public abstract class BaseThymeleafNarrativeGenerator implements INarrativeGener
 				result = result.substring(0, result.lastIndexOf('<'));
 			}
 
+			result = result.replace("&gt;", ">").replace("&lt;", "<").replace("&amp;", "&");
+			
 			return result;
 		} catch (Exception e) {
 			if (myIgnoreFailures) {
@@ -214,6 +225,9 @@ public abstract class BaseThymeleafNarrativeGenerator implements INarrativeGener
 		if (myInitialized) {
 			return;
 		}
+		
+		ourLog.info("Initializing narrative generator");
+		
 		myProfileToName = new HashMap<String, String>();
 		myClassToName = new HashMap<Class<?>, String>();
 		myNameToNarrativeTemplate = new HashMap<String, String>();
@@ -250,6 +264,9 @@ public abstract class BaseThymeleafNarrativeGenerator implements INarrativeGener
 			resolver.setResourceResolver(new TitleResourceResolver());
 			myTitleTemplateEngine.setTemplateResolver(resolver);
 			StandardDialect dialect = new StandardDialect();
+			HashSet<IProcessor> additionalProcessors = new HashSet<IProcessor>();
+			additionalProcessors.add(new NarrativeAttributeProcessor());
+			dialect.setAdditionalProcessors(additionalProcessors);
 			myTitleTemplateEngine.setDialect(dialect);
 			myTitleTemplateEngine.initialize();
 		}
@@ -486,7 +503,13 @@ public abstract class BaseThymeleafNarrativeGenerator implements INarrativeGener
 			Context context = new Context();
 			context.setVariable("resource", value);
 
-			String name = myClassToName.get(value.getClass());
+			String name = null;
+			Class<? extends Object> nextClass = value.getClass();
+			do {
+				name = myClassToName.get(nextClass);
+				nextClass=nextClass.getSuperclass();
+			} while (name == null && nextClass.equals(Object.class)==false);
+			
 			if (name == null) {
 				if (myIgnoreMissingTemplates) {
 					ourLog.debug("No narrative template available for type: {}", value.getClass());
@@ -497,10 +520,18 @@ public abstract class BaseThymeleafNarrativeGenerator implements INarrativeGener
 			}
 
 			String result = myProfileTemplateEngine.process(name, context);
-			Document dom = DOMUtils.getXhtmlDOMFor(new StringReader(result));
+			String trim = result.trim();
+			Document dom = DOMUtils.getXhtmlDOMFor(new StringReader(trim));
 
 			Element firstChild = (Element) dom.getFirstChild();
-			for (Node next : firstChild.getChildren()) {
+			for (int i = 0; i < firstChild.getChildren().size(); i++) {
+				Node next = firstChild.getChildren().get(i);
+				if (i == 0 && firstChild.getChildren().size() == 1) {
+					if (next instanceof org.thymeleaf.dom.Text) {
+						org.thymeleaf.dom.Text nextText = (org.thymeleaf.dom.Text) next;
+						nextText.setContent(nextText.getContent().trim());
+					}
+				}
 				theElement.addChild(next);
 			}
 

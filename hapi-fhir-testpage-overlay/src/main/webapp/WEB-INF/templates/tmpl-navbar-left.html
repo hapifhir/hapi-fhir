@@ -16,7 +16,7 @@
 	</div>
 
 	<br /> <label class="navBarButtonLabel">Pretty</label>
-	<div class="btn-group top-buffer" data-toggle="buttons">
+	<div class="btn-group top-buffer" data-toggle="buttons" id="prettyBtnGroup">
 		<label class="btn btn-sm btn-default active"> <input
 			type="radio" name="pretty" id="pretty-default" value="" />(default)
 		</label> <label class="btn btn-sm btn-default"> <input
@@ -28,6 +28,11 @@
 
 	<script type="text/javascript">
 	$( document ).ready(function() {
+		
+		// Encoding buttons are wider, so set the shorter group to the same width
+		// so that they wrap at the same time if the page is narrow
+		$('#prettyBtnGroup').width($('#encodingBtnGroup').width());
+		
 		<th:block th:switch="${encoding}">
 			<th:block th:case="'xml'">
 				$('#encode-xml').trigger("click");

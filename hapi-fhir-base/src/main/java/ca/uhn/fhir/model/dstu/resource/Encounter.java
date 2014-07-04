@@ -584,6 +584,23 @@ public class Encounter extends BaseResource implements IResource {
 	}
 
 	/**
+	 * Gets the value(s) for <b>type</b> (Specific type of encounter).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Specific type of encounter (e.g. e-mail consultation, surgical day-care, skilled nursing, rehabilitation)
+     * </p> 
+	 */
+	public BoundCodeableConceptDt<EncounterTypeEnum> getTypeFirstRep() {
+		if (getType().size()==0) {
+			addType();
+		}
+		return getType().get(0);
+	}
+
+	/**
 	 * Sets the value(s) for <b>type</b> (Specific type of encounter)
 	 *
      * <p>
