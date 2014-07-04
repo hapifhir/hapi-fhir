@@ -11,6 +11,26 @@
 				a 100% open-source Java implementation of the
 				<a href="http://hl7.org/implement/standards/fhir/">FHIR specification</a>.
 			</p>
+			<p>
+				Here are some things you might wish to try:
+			</p>
+			<ul>
+				<li>
+					View a
+					<a href="http://fhirtest.uhn.ca/search?serverId=home&amp;encoding=json&amp;pretty=true&amp;resource=Patient&amp;param.0.type=string&amp;param.0.name=_id&amp;param.0.0=&amp;resource-search-limit=">list of patients</a>
+					on this server.
+				</li>
+				<li>
+					Construct a
+					<a href="http://fhirtest.uhn.ca/resource?serverId=home&amp;encoding=json&amp;pretty=true&amp;resource=Patient">search query</a>
+					on this server.
+				</li>
+				<li>
+					Access a 
+					<a href="http://fhirtest.uhn.ca/home?serverId=furore">different server</a>
+					(use the <b>Server</b> menu at the top of the page to see a list of public FHIR servers)
+				</li>
+			</ul>
 		</th:block>
 		<th:block th:if="${serverId} != 'home'">
 			<p>
@@ -28,25 +48,5 @@
 			or any other confidential information. This server will be regularly purged 
 			and reloaded with fixed test data. 
 		</p>
-		<p>
-			Here are some things you might wish to try:
-		</p>
-		<ul>
-			<li>
-				View a
-				<a href="http://fhirtest.uhn.ca/search?serverId=home&amp;encoding=json&amp;pretty=true&amp;resource=Patient&amp;param.0.type=string&amp;param.0.name=_id&amp;param.0.0=&amp;resource-search-limit=">list of patients</a>
-				on this server.
-			</li>
-			<li>
-				Construct a
-				<a href="http://fhirtest.uhn.ca/resource?serverId=home&amp;encoding=json&amp;pretty=true&amp;resource=Patient">search query</a>
-				on this server.
-			</li>
-			<li>
-				Access a 
-				<a href="http://fhirtest.uhn.ca/home?serverId=furore">different server</a>
-				(use the <b>Server</b> menu at the top of the page to see a list of public FHIR servers)
-			</li>
-		</ul>
 	</div>
 </html>

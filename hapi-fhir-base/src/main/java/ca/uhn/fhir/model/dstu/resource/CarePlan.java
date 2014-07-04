@@ -16,31 +16,11 @@
 
 package ca.uhn.fhir.model.dstu.resource;
 
-/*
- * #%L
- * HAPI FHIR Library
- * %%
- * Copyright (C) 2014 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 
 import java.util.Date;
 import java.util.List;
 
-import ca.uhn.fhir.model.api.BaseElement;
+import ca.uhn.fhir.model.api.BaseIdentifiableElement;
 import ca.uhn.fhir.model.api.BaseResource;
 import ca.uhn.fhir.model.api.IDatatype;
 import ca.uhn.fhir.model.api.IElement;
@@ -594,8 +574,8 @@ public class CarePlan extends BaseResource implements IResource {
      * Identifies the most recent date on which the plan has been revised.
      * </p> 
 	 */
-	public CarePlan setModified( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myModified = new DateTimeDt(theDate, thePrecision); 
+	public CarePlan setModifiedWithSecondsPrecision( Date theDate) {
+		myModified = new DateTimeDt(theDate); 
 		return this; 
 	}
 
@@ -607,8 +587,8 @@ public class CarePlan extends BaseResource implements IResource {
      * Identifies the most recent date on which the plan has been revised.
      * </p> 
 	 */
-	public CarePlan setModifiedWithSecondsPrecision( Date theDate) {
-		myModified = new DateTimeDt(theDate); 
+	public CarePlan setModified( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myModified = new DateTimeDt(theDate, thePrecision); 
 		return this; 
 	}
 
@@ -890,7 +870,7 @@ public class CarePlan extends BaseResource implements IResource {
      * </p> 
 	 */
 	@Block()	
-	public static class Participant extends BaseElement implements IResourceBlock {
+	public static class Participant extends BaseIdentifiableElement implements IResourceBlock {
 	
 	@Child(name="role", type=CodeableConceptDt.class, order=0, min=0, max=1)	
 	@Description(
@@ -960,6 +940,9 @@ public class CarePlan extends BaseResource implements IResource {
      * </p> 
 	 */
 	public ResourceReferenceDt getMember() {  
+		if (myMember == null) {
+			myMember = new ResourceReferenceDt();
+		}
 		return myMember;
 	}
 
@@ -990,7 +973,7 @@ public class CarePlan extends BaseResource implements IResource {
      * </p> 
 	 */
 	@Block()	
-	public static class Goal extends BaseElement implements IResourceBlock {
+	public static class Goal extends BaseIdentifiableElement implements IResourceBlock {
 	
 	@Child(name="description", type=StringDt.class, order=0, min=1, max=1)	
 	@Description(
@@ -1221,7 +1204,7 @@ public class CarePlan extends BaseResource implements IResource {
      * </p> 
 	 */
 	@Block()	
-	public static class Activity extends BaseElement implements IResourceBlock {
+	public static class Activity extends BaseIdentifiableElement implements IResourceBlock {
 	
 	@Child(name="goal", type=IdrefDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)	
 	@Description(
@@ -1532,6 +1515,9 @@ public class CarePlan extends BaseResource implements IResource {
      * </p> 
 	 */
 	public ResourceReferenceDt getDetail() {  
+		if (myDetail == null) {
+			myDetail = new ResourceReferenceDt();
+		}
 		return myDetail;
 	}
 
@@ -1592,7 +1578,7 @@ public class CarePlan extends BaseResource implements IResource {
      * </p> 
 	 */
 	@Block()	
-	public static class ActivitySimple extends BaseElement implements IResourceBlock {
+	public static class ActivitySimple extends BaseIdentifiableElement implements IResourceBlock {
 	
 	@Child(name="category", type=CodeDt.class, order=0, min=1, max=1)	
 	@Description(
@@ -1817,6 +1803,9 @@ public class CarePlan extends BaseResource implements IResource {
      * </p> 
 	 */
 	public java.util.List<ResourceReferenceDt> getPerformer() {  
+		if (myPerformer == null) {
+			myPerformer = new java.util.ArrayList<ResourceReferenceDt>();
+		}
 		return myPerformer;
 	}
 
@@ -1858,6 +1847,9 @@ public class CarePlan extends BaseResource implements IResource {
      * </p> 
 	 */
 	public ResourceReferenceDt getProduct() {  
+		if (myProduct == null) {
+			myProduct = new ResourceReferenceDt();
+		}
 		return myProduct;
 	}
 
@@ -1913,8 +1905,21 @@ public class CarePlan extends BaseResource implements IResource {
      * Identifies the quantity expected to be consumed in a given day.
      * </p> 
 	 */
-	public ActivitySimple setDailyAmount( QuantityCompararatorEnum theComparator,  long theValue,  String theUnits) {
-		myDailyAmount = new QuantityDt(theComparator, theValue, theUnits); 
+	public ActivitySimple setDailyAmount( QuantityCompararatorEnum theComparator,  double theValue,  String theSystem,  String theUnits) {
+		myDailyAmount = new QuantityDt(theComparator, theValue, theSystem, theUnits); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>dailyAmount</b> (How much consumed/day?)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Identifies the quantity expected to be consumed in a given day.
+     * </p> 
+	 */
+	public ActivitySimple setDailyAmount( QuantityCompararatorEnum theComparator,  long theValue,  String theSystem,  String theUnits) {
+		myDailyAmount = new QuantityDt(theComparator, theValue, theSystem, theUnits); 
 		return this; 
 	}
 
@@ -1939,8 +1944,8 @@ public class CarePlan extends BaseResource implements IResource {
      * Identifies the quantity expected to be consumed in a given day.
      * </p> 
 	 */
-	public ActivitySimple setDailyAmount( long theValue) {
-		myDailyAmount = new QuantityDt(theValue); 
+	public ActivitySimple setDailyAmount( QuantityCompararatorEnum theComparator,  long theValue,  String theUnits) {
+		myDailyAmount = new QuantityDt(theComparator, theValue, theUnits); 
 		return this; 
 	}
 
@@ -1953,6 +1958,19 @@ public class CarePlan extends BaseResource implements IResource {
      * </p> 
 	 */
 	public ActivitySimple setDailyAmount( double theValue) {
+		myDailyAmount = new QuantityDt(theValue); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>dailyAmount</b> (How much consumed/day?)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Identifies the quantity expected to be consumed in a given day.
+     * </p> 
+	 */
+	public ActivitySimple setDailyAmount( long theValue) {
 		myDailyAmount = new QuantityDt(theValue); 
 		return this; 
 	}
@@ -1996,8 +2014,21 @@ public class CarePlan extends BaseResource implements IResource {
      * Identifies the quantity expected to be supplied.
      * </p> 
 	 */
-	public ActivitySimple setQuantity( QuantityCompararatorEnum theComparator,  long theValue,  String theUnits) {
-		myQuantity = new QuantityDt(theComparator, theValue, theUnits); 
+	public ActivitySimple setQuantity( QuantityCompararatorEnum theComparator,  double theValue,  String theSystem,  String theUnits) {
+		myQuantity = new QuantityDt(theComparator, theValue, theSystem, theUnits); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>quantity</b> (How much is administered/supplied/consumed)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Identifies the quantity expected to be supplied.
+     * </p> 
+	 */
+	public ActivitySimple setQuantity( QuantityCompararatorEnum theComparator,  long theValue,  String theSystem,  String theUnits) {
+		myQuantity = new QuantityDt(theComparator, theValue, theSystem, theUnits); 
 		return this; 
 	}
 
@@ -2022,8 +2053,8 @@ public class CarePlan extends BaseResource implements IResource {
      * Identifies the quantity expected to be supplied.
      * </p> 
 	 */
-	public ActivitySimple setQuantity( long theValue) {
-		myQuantity = new QuantityDt(theValue); 
+	public ActivitySimple setQuantity( QuantityCompararatorEnum theComparator,  long theValue,  String theUnits) {
+		myQuantity = new QuantityDt(theComparator, theValue, theUnits); 
 		return this; 
 	}
 
@@ -2036,6 +2067,19 @@ public class CarePlan extends BaseResource implements IResource {
      * </p> 
 	 */
 	public ActivitySimple setQuantity( double theValue) {
+		myQuantity = new QuantityDt(theValue); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>quantity</b> (How much is administered/supplied/consumed)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Identifies the quantity expected to be supplied.
+     * </p> 
+	 */
+	public ActivitySimple setQuantity( long theValue) {
 		myQuantity = new QuantityDt(theValue); 
 		return this; 
 	}

@@ -20,10 +20,7 @@ package ca.uhn.fhir.rest.method;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.*;
-
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.io.Reader;
 import java.lang.reflect.Method;
 import java.util.Collection;
@@ -34,7 +31,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
@@ -45,10 +41,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
-import ca.uhn.fhir.model.api.Tag;
-import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.model.dstu.resource.Binary;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.client.exceptions.InvalidResponseException;
@@ -243,7 +236,7 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 	 * @throws IOException
 	 *             Subclasses may throw this in the event of an IO exception
 	 */
-	protected Object parseRequestObject(@SuppressWarnings("unused") Request theRequest) throws IOException {
+	protected Object parseRequestObject(Request theRequest) throws IOException {
 		return null;
 	}
 

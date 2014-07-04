@@ -16,31 +16,11 @@
 
 package ca.uhn.fhir.model.dstu.resource;
 
-/*
- * #%L
- * HAPI FHIR Library
- * %%
- * Copyright (C) 2014 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 
 import java.util.Date;
 import java.util.List;
 
-import ca.uhn.fhir.model.api.BaseElement;
+import ca.uhn.fhir.model.api.BaseIdentifiableElement;
 import ca.uhn.fhir.model.api.BaseResource;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IResource;
@@ -535,8 +515,8 @@ public class Composition extends BaseResource implements IResource {
      * The composition editing time, when the composition was last logically changed by the author
      * </p> 
 	 */
-	public Composition setDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myDate = new DateTimeDt(theDate, thePrecision); 
+	public Composition setDateWithSecondsPrecision( Date theDate) {
+		myDate = new DateTimeDt(theDate); 
 		return this; 
 	}
 
@@ -548,8 +528,8 @@ public class Composition extends BaseResource implements IResource {
      * The composition editing time, when the composition was last logically changed by the author
      * </p> 
 	 */
-	public Composition setDateWithSecondsPrecision( Date theDate) {
-		myDate = new DateTimeDt(theDate); 
+	public Composition setDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myDate = new DateTimeDt(theDate, thePrecision); 
 		return this; 
 	}
 
@@ -746,6 +726,9 @@ public class Composition extends BaseResource implements IResource {
      * </p> 
 	 */
 	public ResourceReferenceDt getSubject() {  
+		if (mySubject == null) {
+			mySubject = new ResourceReferenceDt();
+		}
 		return mySubject;
 	}
 
@@ -774,6 +757,9 @@ public class Composition extends BaseResource implements IResource {
      * </p> 
 	 */
 	public java.util.List<ResourceReferenceDt> getAuthor() {  
+		if (myAuthor == null) {
+			myAuthor = new java.util.ArrayList<ResourceReferenceDt>();
+		}
 		return myAuthor;
 	}
 
@@ -1026,7 +1012,7 @@ public class Composition extends BaseResource implements IResource {
      * </p> 
 	 */
 	@Block()	
-	public static class Attester extends BaseElement implements IResourceBlock {
+	public static class Attester extends BaseIdentifiableElement implements IResourceBlock {
 	
 	@Child(name="mode", type=CodeDt.class, order=0, min=1, max=Child.MAX_UNLIMITED)	
 	@Description(
@@ -1092,6 +1078,23 @@ public class Composition extends BaseResource implements IResource {
 	}
 
 	/**
+	 * Add a value for <b>mode</b> (personal | professional | legal | official) using an enumerated type. This
+	 * is intended as a convenience method for situations where the FHIR defined ValueSets are mandatory
+	 * or contain the desirable codes. If you wish to use codes other than those which are built-in, 
+	 * you may also use the {@link #addType()} method.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The type of attestation the authenticator offers
+     * </p> 
+	 */
+	public BoundCodeDt<CompositionAttestationModeEnum> addMode(CompositionAttestationModeEnum theValue) {
+		BoundCodeDt<CompositionAttestationModeEnum> retVal = new BoundCodeDt<CompositionAttestationModeEnum>(CompositionAttestationModeEnum.VALUESET_BINDER, theValue);
+		getMode().add(retVal);
+		return retVal;
+	}
+
+	/**
 	 * Add a value for <b>mode</b> (personal | professional | legal | official)
 	 *
      * <p>
@@ -1099,8 +1102,10 @@ public class Composition extends BaseResource implements IResource {
      * The type of attestation the authenticator offers
      * </p> 
 	 */
-	public void addMode(CompositionAttestationModeEnum theValue) {
-		getMode().add(new BoundCodeDt<CompositionAttestationModeEnum>(CompositionAttestationModeEnum.VALUESET_BINDER, theValue));
+	public BoundCodeDt<CompositionAttestationModeEnum> addMode() {
+		BoundCodeDt<CompositionAttestationModeEnum> retVal = new BoundCodeDt<CompositionAttestationModeEnum>(CompositionAttestationModeEnum.VALUESET_BINDER);
+		getMode().add(retVal);
+		return retVal;
 	}
 
 	/**
@@ -1156,8 +1161,8 @@ public class Composition extends BaseResource implements IResource {
      * When composition was attested by the party
      * </p> 
 	 */
-	public Attester setTime( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myTime = new DateTimeDt(theDate, thePrecision); 
+	public Attester setTimeWithSecondsPrecision( Date theDate) {
+		myTime = new DateTimeDt(theDate); 
 		return this; 
 	}
 
@@ -1169,8 +1174,8 @@ public class Composition extends BaseResource implements IResource {
      * When composition was attested by the party
      * </p> 
 	 */
-	public Attester setTimeWithSecondsPrecision( Date theDate) {
-		myTime = new DateTimeDt(theDate); 
+	public Attester setTime( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myTime = new DateTimeDt(theDate, thePrecision); 
 		return this; 
 	}
 
@@ -1186,6 +1191,9 @@ public class Composition extends BaseResource implements IResource {
      * </p> 
 	 */
 	public ResourceReferenceDt getParty() {  
+		if (myParty == null) {
+			myParty = new ResourceReferenceDt();
+		}
 		return myParty;
 	}
 
@@ -1216,7 +1224,7 @@ public class Composition extends BaseResource implements IResource {
      * </p> 
 	 */
 	@Block()	
-	public static class Event extends BaseElement implements IResourceBlock {
+	public static class Event extends BaseIdentifiableElement implements IResourceBlock {
 	
 	@Child(name="code", type=CodeableConceptDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)	
 	@Description(
@@ -1399,7 +1407,7 @@ public class Composition extends BaseResource implements IResource {
      * </p> 
 	 */
 	@Block()	
-	public static class Section extends BaseElement implements IResourceBlock {
+	public static class Section extends BaseIdentifiableElement implements IResourceBlock {
 	
 	@Child(name="title", type=StringDt.class, order=0, min=0, max=1)	
 	@Description(
@@ -1535,6 +1543,9 @@ public class Composition extends BaseResource implements IResource {
      * </p> 
 	 */
 	public ResourceReferenceDt getSubject() {  
+		if (mySubject == null) {
+			mySubject = new ResourceReferenceDt();
+		}
 		return mySubject;
 	}
 

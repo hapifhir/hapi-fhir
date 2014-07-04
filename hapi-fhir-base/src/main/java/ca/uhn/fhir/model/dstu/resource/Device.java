@@ -16,26 +16,6 @@
 
 package ca.uhn.fhir.model.dstu.resource;
 
-/*
- * #%L
- * HAPI FHIR Library
- * %%
- * Copyright (C) 2014 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 
 import java.util.Date;
 import java.util.List;
@@ -53,6 +33,7 @@ import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu.composite.ContactDt;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.dstu.valueset.ContactUseEnum;
 import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
 import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.model.primitive.StringDt;
@@ -674,8 +655,8 @@ public class Device extends BaseResource implements IResource {
      * Date of expiry of this device (if applicable)
      * </p> 
 	 */
-	public Device setExpiry( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myExpiry = new DateDt(theDate, thePrecision); 
+	public Device setExpiryWithDayPrecision( Date theDate) {
+		myExpiry = new DateDt(theDate); 
 		return this; 
 	}
 
@@ -687,8 +668,8 @@ public class Device extends BaseResource implements IResource {
      * Date of expiry of this device (if applicable)
      * </p> 
 	 */
-	public Device setExpiryWithDayPrecision( Date theDate) {
-		myExpiry = new DateDt(theDate); 
+	public Device setExpiry( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myExpiry = new DateDt(theDate, thePrecision); 
 		return this; 
 	}
 
@@ -933,7 +914,43 @@ public class Device extends BaseResource implements IResource {
 		}
 		return getContact().get(0); 
 	}
-  
+ 	/**
+	 * Adds a new value for <b>contact</b> (Details for human/organization for support)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Contact details for an organization or a particular human that is responsible for the device
+     * </p> 
+     *
+     * @return Returns a reference to this object, to allow for simple chaining.
+	 */
+	public Device addContact( ContactUseEnum theContactUse,  String theValue) {
+		if (myContact == null) {
+			myContact = new java.util.ArrayList<ContactDt>();
+		}
+		myContact.add(new ContactDt(theContactUse, theValue));
+		return this; 
+	}
+
+	/**
+	 * Adds a new value for <b>contact</b> (Details for human/organization for support)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Contact details for an organization or a particular human that is responsible for the device
+     * </p> 
+     *
+     * @return Returns a reference to this object, to allow for simple chaining.
+	 */
+	public Device addContact( String theValue) {
+		if (myContact == null) {
+			myContact = new java.util.ArrayList<ContactDt>();
+		}
+		myContact.add(new ContactDt(theValue));
+		return this; 
+	}
+
+ 
 	/**
 	 * Gets the value(s) for <b>url</b> (Network address to contact device).
 	 * creating it if it does

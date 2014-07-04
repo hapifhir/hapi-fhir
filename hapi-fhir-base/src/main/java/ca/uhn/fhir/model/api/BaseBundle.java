@@ -20,13 +20,15 @@ package ca.uhn.fhir.model.api;
  * #L%
  */
 
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.util.ElementUtil;
 
-public class BaseBundle  extends BaseElement implements IElement {
+public class BaseBundle extends BaseElement implements IElement {
 
 	private StringDt myAuthorName;
 	private StringDt myAuthorUri;
+	private IdDt myId;
 
 	public StringDt getAuthorName() {
 		if (myAuthorName == null) {
@@ -42,11 +44,20 @@ public class BaseBundle  extends BaseElement implements IElement {
 		return myAuthorUri;
 	}
 
+	public IdDt getId() {
+		if (myId==null) {
+			myId=new IdDt();
+		}
+		return myId;
+	}
+
 	@Override
 	public boolean isEmpty() {
 		return ElementUtil.isEmpty(myAuthorName, myAuthorUri);
 	}
-	
-	
+
+	public void setId(IdDt theId) {
+		myId = theId;
+	}
 
 }

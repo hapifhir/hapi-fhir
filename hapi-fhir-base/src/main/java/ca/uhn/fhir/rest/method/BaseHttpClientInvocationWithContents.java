@@ -49,6 +49,7 @@ public abstract class BaseHttpClientInvocationWithContents extends BaseHttpClien
 	private final String myUrlExtension;
 	private final TagList myTagList;
 	private final List<IResource> myResources;
+	private final Bundle myBundle;
 
 	public BaseHttpClientInvocationWithContents(FhirContext theContext, IResource theResource, String theUrlExtension) {
 		super();
@@ -57,6 +58,7 @@ public abstract class BaseHttpClientInvocationWithContents extends BaseHttpClien
 		myUrlExtension = theUrlExtension;
 		myTagList = null;
 		myResources = null;
+		myBundle = null;
 	}
 
 	public BaseHttpClientInvocationWithContents(FhirContext theContext, TagList theTagList, String... theUrlExtension) {
@@ -69,6 +71,7 @@ public abstract class BaseHttpClientInvocationWithContents extends BaseHttpClien
 		myContext = theContext;
 		myTagList = theTagList;
 		myResources = null;
+		myBundle = null;
 
 		myUrlExtension = StringUtils.join(theUrlExtension, '/');
 	}
@@ -79,6 +82,16 @@ public abstract class BaseHttpClientInvocationWithContents extends BaseHttpClien
 		myTagList = null;
 		myUrlExtension = null;
 		myResources = theResources;
+		myBundle = null;
+	}
+
+	public BaseHttpClientInvocationWithContents(FhirContext theContext, Bundle theBundle) {
+		myContext = theContext;
+		myResource = null;
+		myTagList = null;
+		myUrlExtension = null;
+		myResources = null;
+		myBundle = theBundle;
 	}
 
 	@Override
@@ -113,6 +126,8 @@ public abstract class BaseHttpClientInvocationWithContents extends BaseHttpClien
 		String contents;
 		if (myTagList != null) {
 			contents = parser.encodeTagListToString(myTagList);
+		} else if (myBundle != null) {
+			contents = parser.encodeBundleToString(myBundle);
 		} else if (myResources != null) {
 			Bundle bundle = RestfulServer.createBundleFromResourceList(myContext, "", myResources, "", "", myResources.size());
 			contents = parser.encodeBundleToString(bundle);

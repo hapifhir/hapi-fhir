@@ -20,7 +20,7 @@ package ca.uhn.fhir.rest.gclient;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.apache.commons.lang3.StringUtils.*;
 import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
 import ca.uhn.fhir.rest.gclient.NumberParam.IMatches;
 

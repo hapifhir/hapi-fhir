@@ -16,31 +16,11 @@
 
 package ca.uhn.fhir.model.dstu.resource;
 
-/*
- * #%L
- * HAPI FHIR Library
- * %%
- * Copyright (C) 2014 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 
 import java.util.Date;
 import java.util.List;
 
-import ca.uhn.fhir.model.api.BaseElement;
+import ca.uhn.fhir.model.api.BaseIdentifiableElement;
 import ca.uhn.fhir.model.api.BaseResource;
 import ca.uhn.fhir.model.api.IDatatype;
 import ca.uhn.fhir.model.api.IElement;
@@ -733,7 +713,7 @@ public class MedicationDispense extends BaseResource implements IResource {
      * </p> 
 	 */
 	@Block()	
-	public static class Dispense extends BaseElement implements IResourceBlock {
+	public static class Dispense extends BaseIdentifiableElement implements IResourceBlock {
 	
 	@Child(name="identifier", type=IdentifierDt.class, order=0, min=0, max=1)	
 	@Description(
@@ -989,8 +969,21 @@ public class MedicationDispense extends BaseResource implements IResource {
      * The amount of medication that has been dispensed. Includes unit of measure.
      * </p> 
 	 */
-	public Dispense setQuantity( QuantityCompararatorEnum theComparator,  long theValue,  String theUnits) {
-		myQuantity = new QuantityDt(theComparator, theValue, theUnits); 
+	public Dispense setQuantity( QuantityCompararatorEnum theComparator,  double theValue,  String theSystem,  String theUnits) {
+		myQuantity = new QuantityDt(theComparator, theValue, theSystem, theUnits); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>quantity</b> (Amount dispensed)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The amount of medication that has been dispensed. Includes unit of measure.
+     * </p> 
+	 */
+	public Dispense setQuantity( QuantityCompararatorEnum theComparator,  long theValue,  String theSystem,  String theUnits) {
+		myQuantity = new QuantityDt(theComparator, theValue, theSystem, theUnits); 
 		return this; 
 	}
 
@@ -1015,8 +1008,8 @@ public class MedicationDispense extends BaseResource implements IResource {
      * The amount of medication that has been dispensed. Includes unit of measure.
      * </p> 
 	 */
-	public Dispense setQuantity( long theValue) {
-		myQuantity = new QuantityDt(theValue); 
+	public Dispense setQuantity( QuantityCompararatorEnum theComparator,  long theValue,  String theUnits) {
+		myQuantity = new QuantityDt(theComparator, theValue, theUnits); 
 		return this; 
 	}
 
@@ -1029,6 +1022,19 @@ public class MedicationDispense extends BaseResource implements IResource {
      * </p> 
 	 */
 	public Dispense setQuantity( double theValue) {
+		myQuantity = new QuantityDt(theValue); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>quantity</b> (Amount dispensed)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The amount of medication that has been dispensed. Includes unit of measure.
+     * </p> 
+	 */
+	public Dispense setQuantity( long theValue) {
 		myQuantity = new QuantityDt(theValue); 
 		return this; 
 	}
@@ -1103,8 +1109,8 @@ public class MedicationDispense extends BaseResource implements IResource {
      * The time when the dispensed product was packaged and reviewed.
      * </p> 
 	 */
-	public Dispense setWhenPrepared( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myWhenPrepared = new DateTimeDt(theDate, thePrecision); 
+	public Dispense setWhenPreparedWithSecondsPrecision( Date theDate) {
+		myWhenPrepared = new DateTimeDt(theDate); 
 		return this; 
 	}
 
@@ -1116,8 +1122,8 @@ public class MedicationDispense extends BaseResource implements IResource {
      * The time when the dispensed product was packaged and reviewed.
      * </p> 
 	 */
-	public Dispense setWhenPreparedWithSecondsPrecision( Date theDate) {
-		myWhenPrepared = new DateTimeDt(theDate); 
+	public Dispense setWhenPrepared( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myWhenPrepared = new DateTimeDt(theDate, thePrecision); 
 		return this; 
 	}
 
@@ -1160,8 +1166,8 @@ public class MedicationDispense extends BaseResource implements IResource {
      * The time the dispensed product was provided to the patient or their representative.
      * </p> 
 	 */
-	public Dispense setWhenHandedOver( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myWhenHandedOver = new DateTimeDt(theDate, thePrecision); 
+	public Dispense setWhenHandedOverWithSecondsPrecision( Date theDate) {
+		myWhenHandedOver = new DateTimeDt(theDate); 
 		return this; 
 	}
 
@@ -1173,8 +1179,8 @@ public class MedicationDispense extends BaseResource implements IResource {
      * The time the dispensed product was provided to the patient or their representative.
      * </p> 
 	 */
-	public Dispense setWhenHandedOverWithSecondsPrecision( Date theDate) {
-		myWhenHandedOver = new DateTimeDt(theDate); 
+	public Dispense setWhenHandedOver( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myWhenHandedOver = new DateTimeDt(theDate, thePrecision); 
 		return this; 
 	}
 
@@ -1221,6 +1227,9 @@ public class MedicationDispense extends BaseResource implements IResource {
      * </p> 
 	 */
 	public java.util.List<ResourceReferenceDt> getReceiver() {  
+		if (myReceiver == null) {
+			myReceiver = new java.util.ArrayList<ResourceReferenceDt>();
+		}
 		return myReceiver;
 	}
 
@@ -1323,7 +1332,7 @@ public class MedicationDispense extends BaseResource implements IResource {
      * </p> 
 	 */
 	@Block()	
-	public static class DispenseDosage extends BaseElement implements IResourceBlock {
+	public static class DispenseDosage extends BaseIdentifiableElement implements IResourceBlock {
 	
 	@Child(name="additionalInstructions", type=CodeableConceptDt.class, order=0, min=0, max=1)	
 	@Description(
@@ -1619,8 +1628,21 @@ public class MedicationDispense extends BaseResource implements IResource {
      * The amount of therapeutic or other substance given at one administration event.
      * </p> 
 	 */
-	public DispenseDosage setQuantity( QuantityCompararatorEnum theComparator,  long theValue,  String theUnits) {
-		myQuantity = new QuantityDt(theComparator, theValue, theUnits); 
+	public DispenseDosage setQuantity( QuantityCompararatorEnum theComparator,  double theValue,  String theSystem,  String theUnits) {
+		myQuantity = new QuantityDt(theComparator, theValue, theSystem, theUnits); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>quantity</b> (Amount of medication per dose)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The amount of therapeutic or other substance given at one administration event.
+     * </p> 
+	 */
+	public DispenseDosage setQuantity( QuantityCompararatorEnum theComparator,  long theValue,  String theSystem,  String theUnits) {
+		myQuantity = new QuantityDt(theComparator, theValue, theSystem, theUnits); 
 		return this; 
 	}
 
@@ -1645,8 +1667,8 @@ public class MedicationDispense extends BaseResource implements IResource {
      * The amount of therapeutic or other substance given at one administration event.
      * </p> 
 	 */
-	public DispenseDosage setQuantity( long theValue) {
-		myQuantity = new QuantityDt(theValue); 
+	public DispenseDosage setQuantity( QuantityCompararatorEnum theComparator,  long theValue,  String theUnits) {
+		myQuantity = new QuantityDt(theComparator, theValue, theUnits); 
 		return this; 
 	}
 
@@ -1659,6 +1681,19 @@ public class MedicationDispense extends BaseResource implements IResource {
      * </p> 
 	 */
 	public DispenseDosage setQuantity( double theValue) {
+		myQuantity = new QuantityDt(theValue); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>quantity</b> (Amount of medication per dose)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The amount of therapeutic or other substance given at one administration event.
+     * </p> 
+	 */
+	public DispenseDosage setQuantity( long theValue) {
 		myQuantity = new QuantityDt(theValue); 
 		return this; 
 	}
@@ -1740,7 +1775,7 @@ public class MedicationDispense extends BaseResource implements IResource {
      * </p> 
 	 */
 	@Block()	
-	public static class Substitution extends BaseElement implements IResourceBlock {
+	public static class Substitution extends BaseIdentifiableElement implements IResourceBlock {
 	
 	@Child(name="type", type=CodeableConceptDt.class, order=0, min=1, max=1)	
 	@Description(

@@ -20,8 +20,7 @@ package ca.uhn.fhir.context;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.apache.commons.lang3.StringUtils.join;
+import static org.apache.commons.lang3.StringUtils.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -48,6 +47,7 @@ import ca.uhn.fhir.model.dstu.resource.Profile.StructureElement;
 import ca.uhn.fhir.model.dstu.resource.Profile.StructureElementDefinitionType;
 import ca.uhn.fhir.model.dstu.valueset.DataTypeEnum;
 import ca.uhn.fhir.model.dstu.valueset.SlicingRulesEnum;
+import ca.uhn.fhir.model.primitive.IdDt;
 
 public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefinition<IResource> {
 
@@ -319,7 +319,7 @@ public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefini
 		RuntimeResourceDefinition def = this;
 
 		if (StringUtils.isNotBlank(myId)) {
-			retVal.setId(myId);
+			retVal.setId(new IdDt(myId));
 		}else {
 			throw new ConfigurationException("Resource class " + getImplementingClass().getCanonicalName() + " has no ID specified");
 		}

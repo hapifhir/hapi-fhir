@@ -31,7 +31,6 @@ import org.apache.http.message.BasicNameValuePair;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.hamcrest.core.IsNot;
 import org.hamcrest.core.StringContains;
 import org.hamcrest.core.StringEndsWith;
 import org.junit.AfterClass;
@@ -83,7 +82,6 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.provider.ServerProfileProvider;
 import ca.uhn.fhir.testutil.RandomServerPortProvider;
-import ca.uhn.fhir.util.ExtensionConstants;
 
 /**
  * Created by dsotnikov on 2/25/2014.
@@ -1290,7 +1288,6 @@ public class ResfulServerMethodTest {
 			throw new ResourceNotFoundException("AAAABBBB");
 		}
 
-		@SuppressWarnings("unused")
 		@Create()
 		public MethodOutcome createDiagnosticReport(@ResourceParam DiagnosticReport thePatient) {
 			OperationOutcome outcome = new OperationOutcome();
@@ -1298,7 +1295,6 @@ public class ResfulServerMethodTest {
 			throw new UnprocessableEntityException(outcome);
 		}
 
-		@SuppressWarnings("unused")
 		@Delete()
 		public void deleteDiagnosticReport(@IdParam IdDt theId) {
 			// do nothing
@@ -1351,7 +1347,6 @@ public class ResfulServerMethodTest {
 			return retVal;
 		}
 
-		@SuppressWarnings("unused")
 		public List<Patient> findDiagnosticReportsByPatient(@RequiredParam(name = "Patient.identifier") IdentifierDt thePatientId, @RequiredParam(name = DiagnosticReport.SP_NAME) CodingListParam theNames, @OptionalParam(name = DiagnosticReport.SP_DATE) DateRangeParam theDateRange)
 				throws Exception {
 			return Collections.emptyList();
@@ -1574,7 +1569,6 @@ public class ResfulServerMethodTest {
 			return Patient.class;
 		}
 
-		@SuppressWarnings("unused")
 		@Update()
 		public MethodOutcome updateDiagnosticReportWithVersion(@IdParam IdDt theId, @VersionIdParam IdDt theVersionId, @ResourceParam DiagnosticOrder thePatient) {
 			/*

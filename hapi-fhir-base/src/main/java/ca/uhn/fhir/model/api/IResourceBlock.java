@@ -20,6 +20,6 @@ package ca.uhn.fhir.model.api;
  * #L%
  */
 
-public interface IResourceBlock extends ICompositeElement {
+public interface IResourceBlock extends ICompositeElement, IIdentifiableElement {
 	// nothing yet
 }

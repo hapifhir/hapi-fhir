@@ -16,31 +16,11 @@
 
 package ca.uhn.fhir.model.dstu.resource;
 
-/*
- * #%L
- * HAPI FHIR Library
- * %%
- * Copyright (C) 2014 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 
 import java.util.Date;
 import java.util.List;
 
-import ca.uhn.fhir.model.api.BaseElement;
+import ca.uhn.fhir.model.api.BaseIdentifiableElement;
 import ca.uhn.fhir.model.api.BaseResource;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IResource;
@@ -484,8 +464,8 @@ public class ImagingStudy extends BaseResource implements IResource {
      * Date and Time the study took place
      * </p> 
 	 */
-	public ImagingStudy setDateTime( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myDateTime = new DateTimeDt(theDate, thePrecision); 
+	public ImagingStudy setDateTimeWithSecondsPrecision( Date theDate) {
+		myDateTime = new DateTimeDt(theDate); 
 		return this; 
 	}
 
@@ -497,8 +477,8 @@ public class ImagingStudy extends BaseResource implements IResource {
      * Date and Time the study took place
      * </p> 
 	 */
-	public ImagingStudy setDateTimeWithSecondsPrecision( Date theDate) {
-		myDateTime = new DateTimeDt(theDate); 
+	public ImagingStudy setDateTime( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myDateTime = new DateTimeDt(theDate, thePrecision); 
 		return this; 
 	}
 
@@ -793,6 +773,23 @@ public class ImagingStudy extends BaseResource implements IResource {
 	}
 
 	/**
+	 * Add a value for <b>modality</b> (All series.modality if actual acquisition modalities) using an enumerated type. This
+	 * is intended as a convenience method for situations where the FHIR defined ValueSets are mandatory
+	 * or contain the desirable codes. If you wish to use codes other than those which are built-in, 
+	 * you may also use the {@link #addType()} method.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A list of all the Series.ImageModality values that are actual acquisition modalities, i.e. those in the DICOM Context Group 29 (value set OID 1.2.840.10008.6.1.19)
+     * </p> 
+	 */
+	public BoundCodeDt<ImagingModalityEnum> addModality(ImagingModalityEnum theValue) {
+		BoundCodeDt<ImagingModalityEnum> retVal = new BoundCodeDt<ImagingModalityEnum>(ImagingModalityEnum.VALUESET_BINDER, theValue);
+		getModality().add(retVal);
+		return retVal;
+	}
+
+	/**
 	 * Add a value for <b>modality</b> (All series.modality if actual acquisition modalities)
 	 *
      * <p>
@@ -800,8 +797,10 @@ public class ImagingStudy extends BaseResource implements IResource {
      * A list of all the Series.ImageModality values that are actual acquisition modalities, i.e. those in the DICOM Context Group 29 (value set OID 1.2.840.10008.6.1.19)
      * </p> 
 	 */
-	public void addModality(ImagingModalityEnum theValue) {
-		getModality().add(new BoundCodeDt<ImagingModalityEnum>(ImagingModalityEnum.VALUESET_BINDER, theValue));
+	public BoundCodeDt<ImagingModalityEnum> addModality() {
+		BoundCodeDt<ImagingModalityEnum> retVal = new BoundCodeDt<ImagingModalityEnum>(ImagingModalityEnum.VALUESET_BINDER);
+		getModality().add(retVal);
+		return retVal;
 	}
 
 	/**
@@ -1274,7 +1273,7 @@ public class ImagingStudy extends BaseResource implements IResource {
      * </p> 
 	 */
 	@Block()	
-	public static class Series extends BaseElement implements IResourceBlock {
+	public static class Series extends BaseIdentifiableElement implements IResourceBlock {
 	
 	@Child(name="number", type=IntegerDt.class, order=0, min=0, max=1)	
 	@Description(
@@ -1721,8 +1720,8 @@ public class ImagingStudy extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public Series setDateTime( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myDateTime = new DateTimeDt(theDate, thePrecision); 
+	public Series setDateTimeWithSecondsPrecision( Date theDate) {
+		myDateTime = new DateTimeDt(theDate); 
 		return this; 
 	}
 
@@ -1734,8 +1733,8 @@ public class ImagingStudy extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public Series setDateTimeWithSecondsPrecision( Date theDate) {
-		myDateTime = new DateTimeDt(theDate); 
+	public Series setDateTime( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myDateTime = new DateTimeDt(theDate, thePrecision); 
 		return this; 
 	}
 
@@ -1812,7 +1811,7 @@ public class ImagingStudy extends BaseResource implements IResource {
      * </p> 
 	 */
 	@Block()	
-	public static class SeriesInstance extends BaseElement implements IResourceBlock {
+	public static class SeriesInstance extends BaseIdentifiableElement implements IResourceBlock {
 	
 	@Child(name="number", type=IntegerDt.class, order=0, min=0, max=1)	
 	@Description(

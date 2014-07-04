@@ -3,7 +3,7 @@ package ca.uhn.fhir.parser;
 import java.util.Collections;
 import java.util.List;
 
-import ca.uhn.fhir.model.api.BaseElement;
+import ca.uhn.fhir.model.api.BaseIdentifiableElement;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IResourceBlock;
 import ca.uhn.fhir.model.api.annotation.Block;
@@ -68,7 +68,7 @@ public class MyObservationWithExtensions extends Patient {
 	 * </p>
 	 */
 	@Block(name = "Observation.someExtensions")
-	public static class MoreExt extends BaseElement implements IResourceBlock {
+	public static class MoreExt extends BaseIdentifiableElement implements IResourceBlock {
 
 		@Extension(url = "urn:patientext:moreext:1", definedLocally = false, isModifier = false)
 		@Child(name = "str1", order = 0)

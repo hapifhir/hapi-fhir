@@ -16,31 +16,11 @@
 
 package ca.uhn.fhir.model.dstu.resource;
 
-/*
- * #%L
- * HAPI FHIR Library
- * %%
- * Copyright (C) 2014 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 
 import java.util.Date;
 import java.util.List;
 
-import ca.uhn.fhir.model.api.BaseElement;
+import ca.uhn.fhir.model.api.BaseIdentifiableElement;
 import ca.uhn.fhir.model.api.BaseResource;
 import ca.uhn.fhir.model.api.IDatatype;
 import ca.uhn.fhir.model.api.IElement;
@@ -786,8 +766,8 @@ public class Observation extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public Observation setIssuedWithMillisPrecision( Date theDate) {
-		myIssued = new InstantDt(theDate); 
+	public Observation setIssued( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myIssued = new InstantDt(theDate, thePrecision); 
 		return this; 
 	}
 
@@ -799,8 +779,8 @@ public class Observation extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public Observation setIssued( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myIssued = new InstantDt(theDate, thePrecision); 
+	public Observation setIssuedWithMillisPrecision( Date theDate) {
+		myIssued = new InstantDt(theDate); 
 		return this; 
 	}
 
@@ -1023,6 +1003,9 @@ public class Observation extends BaseResource implements IResource {
      * </p> 
 	 */
 	public ResourceReferenceDt getSubject() {  
+		if (mySubject == null) {
+			mySubject = new ResourceReferenceDt();
+		}
 		return mySubject;
 	}
 
@@ -1244,7 +1227,7 @@ public class Observation extends BaseResource implements IResource {
      * </p> 
 	 */
 	@Block()	
-	public static class ReferenceRange extends BaseElement implements IResourceBlock {
+	public static class ReferenceRange extends BaseIdentifiableElement implements IResourceBlock {
 	
 	@Child(name="low", type=QuantityDt.class, order=0, min=0, max=1)	
 	@Description(
@@ -1323,8 +1306,21 @@ public class Observation extends BaseResource implements IResource {
      * The value of the low bound of the reference range. If this is omitted, the low bound of the reference range is assumed to be meaningless. E.g. <2.3
      * </p> 
 	 */
-	public ReferenceRange setLow( QuantityCompararatorEnum theComparator,  long theValue,  String theUnits) {
-		myLow = new QuantityDt(theComparator, theValue, theUnits); 
+	public ReferenceRange setLow( QuantityCompararatorEnum theComparator,  double theValue,  String theSystem,  String theUnits) {
+		myLow = new QuantityDt(theComparator, theValue, theSystem, theUnits); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>low</b> (Low Range, if relevant)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The value of the low bound of the reference range. If this is omitted, the low bound of the reference range is assumed to be meaningless. E.g. <2.3
+     * </p> 
+	 */
+	public ReferenceRange setLow( QuantityCompararatorEnum theComparator,  long theValue,  String theSystem,  String theUnits) {
+		myLow = new QuantityDt(theComparator, theValue, theSystem, theUnits); 
 		return this; 
 	}
 
@@ -1349,8 +1345,8 @@ public class Observation extends BaseResource implements IResource {
      * The value of the low bound of the reference range. If this is omitted, the low bound of the reference range is assumed to be meaningless. E.g. <2.3
      * </p> 
 	 */
-	public ReferenceRange setLow( long theValue) {
-		myLow = new QuantityDt(theValue); 
+	public ReferenceRange setLow( QuantityCompararatorEnum theComparator,  long theValue,  String theUnits) {
+		myLow = new QuantityDt(theComparator, theValue, theUnits); 
 		return this; 
 	}
 
@@ -1363,6 +1359,19 @@ public class Observation extends BaseResource implements IResource {
      * </p> 
 	 */
 	public ReferenceRange setLow( double theValue) {
+		myLow = new QuantityDt(theValue); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>low</b> (Low Range, if relevant)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The value of the low bound of the reference range. If this is omitted, the low bound of the reference range is assumed to be meaningless. E.g. <2.3
+     * </p> 
+	 */
+	public ReferenceRange setLow( long theValue) {
 		myLow = new QuantityDt(theValue); 
 		return this; 
 	}
@@ -1406,8 +1415,21 @@ public class Observation extends BaseResource implements IResource {
      * The value of the high bound of the reference range. If this is omitted, the high bound of the reference range is assumed to be meaningless. E.g. >5
      * </p> 
 	 */
-	public ReferenceRange setHigh( QuantityCompararatorEnum theComparator,  long theValue,  String theUnits) {
-		myHigh = new QuantityDt(theComparator, theValue, theUnits); 
+	public ReferenceRange setHigh( QuantityCompararatorEnum theComparator,  double theValue,  String theSystem,  String theUnits) {
+		myHigh = new QuantityDt(theComparator, theValue, theSystem, theUnits); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>high</b> (High Range, if relevant)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The value of the high bound of the reference range. If this is omitted, the high bound of the reference range is assumed to be meaningless. E.g. >5
+     * </p> 
+	 */
+	public ReferenceRange setHigh( QuantityCompararatorEnum theComparator,  long theValue,  String theSystem,  String theUnits) {
+		myHigh = new QuantityDt(theComparator, theValue, theSystem, theUnits); 
 		return this; 
 	}
 
@@ -1432,8 +1454,8 @@ public class Observation extends BaseResource implements IResource {
      * The value of the high bound of the reference range. If this is omitted, the high bound of the reference range is assumed to be meaningless. E.g. >5
      * </p> 
 	 */
-	public ReferenceRange setHigh( long theValue) {
-		myHigh = new QuantityDt(theValue); 
+	public ReferenceRange setHigh( QuantityCompararatorEnum theComparator,  long theValue,  String theUnits) {
+		myHigh = new QuantityDt(theComparator, theValue, theUnits); 
 		return this; 
 	}
 
@@ -1446,6 +1468,19 @@ public class Observation extends BaseResource implements IResource {
      * </p> 
 	 */
 	public ReferenceRange setHigh( double theValue) {
+		myHigh = new QuantityDt(theValue); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>high</b> (High Range, if relevant)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The value of the high bound of the reference range. If this is omitted, the high bound of the reference range is assumed to be meaningless. E.g. >5
+     * </p> 
+	 */
+	public ReferenceRange setHigh( long theValue) {
 		myHigh = new QuantityDt(theValue); 
 		return this; 
 	}
@@ -1526,7 +1561,7 @@ public class Observation extends BaseResource implements IResource {
      * </p> 
 	 */
 	@Block()	
-	public static class Related extends BaseElement implements IResourceBlock {
+	public static class Related extends BaseIdentifiableElement implements IResourceBlock {
 	
 	@Child(name="type", type=CodeDt.class, order=0, min=0, max=1)	
 	@Description(

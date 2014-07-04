@@ -187,7 +187,7 @@
 													var body = $('#transaction-body').val();
 													btn.append($('<input />', { type: 'hidden', name: 'transactionBody', value: body }));
 													$("#outerForm").attr("method", "post");
-													$("#outerForm").attr("action", "create").submit();
+													$("#outerForm").attr("action", "transaction").submit();
 												});		
 											$( document ).ready(function() {
 /* 												if ($('#resource-create-id').val() != "") {

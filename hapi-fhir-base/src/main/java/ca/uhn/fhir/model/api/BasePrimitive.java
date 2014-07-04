@@ -23,7 +23,7 @@ package ca.uhn.fhir.model.api;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
-public abstract class BasePrimitive<T> extends BaseElement implements IPrimitiveDatatype<T> {
+public abstract class BasePrimitive<T> extends BaseIdentifiableElement implements IPrimitiveDatatype<T> {
 
 	@Override
 	public boolean isEmpty() {

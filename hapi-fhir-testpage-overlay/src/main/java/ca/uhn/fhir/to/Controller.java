@@ -73,6 +73,7 @@ public class Controller {
 		addCommonParams(theRequest, theModel);
 
 		GenericClient client = theRequest.newClient(myCtx, myConfig);
+		loadAndAddConformance(theRequest, theModel, client);
 
 		String body = preProcessMessageBody(theRequest.getTransactionBody());
 
@@ -93,10 +94,10 @@ public class Controller {
 		}
 
 		long start = System.currentTimeMillis();
-//		client.tr
+		client.transaction().withBundle(bundle).execute();
 		long delay = System.currentTimeMillis() - start;
 
-		processAndAddLastClientInvocation(client, ResultType.RESOURCE, theModel, delay, "Loaded conformance");
+		processAndAddLastClientInvocation(client, ResultType.BUNDLE, theModel, delay, "Transaction");
 
 		return "result";
 	}

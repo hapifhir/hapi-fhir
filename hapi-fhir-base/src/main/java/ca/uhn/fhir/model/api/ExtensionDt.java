@@ -30,7 +30,7 @@ import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.primitive.StringDt;
 
 @DatatypeDef(name="Extension") 
-public class ExtensionDt extends BaseElement implements ICompositeDatatype {
+public class ExtensionDt extends BaseIdentifiableElement implements ICompositeDatatype {
 
 	private boolean myModifier;
 	

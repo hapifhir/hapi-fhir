@@ -16,30 +16,10 @@
 
 package ca.uhn.fhir.model.dstu.resource;
 
-/*
- * #%L
- * HAPI FHIR Library
- * %%
- * Copyright (C) 2014 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 
 import java.util.List;
 
-import ca.uhn.fhir.model.api.BaseElement;
+import ca.uhn.fhir.model.api.BaseIdentifiableElement;
 import ca.uhn.fhir.model.api.BaseResource;
 import ca.uhn.fhir.model.api.IDatatype;
 import ca.uhn.fhir.model.api.IElement;
@@ -689,7 +669,7 @@ public class MedicationStatement extends BaseResource implements IResource {
      * </p> 
 	 */
 	@Block()	
-	public static class Dosage extends BaseElement implements IResourceBlock {
+	public static class Dosage extends BaseIdentifiableElement implements IResourceBlock {
 	
 	@Child(name="timing", type=ScheduleDt.class, order=0, min=0, max=1)	
 	@Description(
@@ -949,8 +929,21 @@ public class MedicationStatement extends BaseResource implements IResource {
      * The amount of therapeutic or other substance given at one administration event.
      * </p> 
 	 */
-	public Dosage setQuantity( QuantityCompararatorEnum theComparator,  long theValue,  String theUnits) {
-		myQuantity = new QuantityDt(theComparator, theValue, theUnits); 
+	public Dosage setQuantity( QuantityCompararatorEnum theComparator,  double theValue,  String theSystem,  String theUnits) {
+		myQuantity = new QuantityDt(theComparator, theValue, theSystem, theUnits); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>quantity</b> (Amount administered in one dose)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The amount of therapeutic or other substance given at one administration event.
+     * </p> 
+	 */
+	public Dosage setQuantity( QuantityCompararatorEnum theComparator,  long theValue,  String theSystem,  String theUnits) {
+		myQuantity = new QuantityDt(theComparator, theValue, theSystem, theUnits); 
 		return this; 
 	}
 
@@ -975,8 +968,8 @@ public class MedicationStatement extends BaseResource implements IResource {
      * The amount of therapeutic or other substance given at one administration event.
      * </p> 
 	 */
-	public Dosage setQuantity( long theValue) {
-		myQuantity = new QuantityDt(theValue); 
+	public Dosage setQuantity( QuantityCompararatorEnum theComparator,  long theValue,  String theUnits) {
+		myQuantity = new QuantityDt(theComparator, theValue, theUnits); 
 		return this; 
 	}
 
@@ -989,6 +982,19 @@ public class MedicationStatement extends BaseResource implements IResource {
      * </p> 
 	 */
 	public Dosage setQuantity( double theValue) {
+		myQuantity = new QuantityDt(theValue); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>quantity</b> (Amount administered in one dose)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The amount of therapeutic or other substance given at one administration event.
+     * </p> 
+	 */
+	public Dosage setQuantity( long theValue) {
 		myQuantity = new QuantityDt(theValue); 
 		return this; 
 	}

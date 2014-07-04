@@ -57,6 +57,8 @@ import ca.uhn.fhir.rest.gclient.IGetTags;
 import ca.uhn.fhir.rest.gclient.IParam;
 import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.gclient.ISort;
+import ca.uhn.fhir.rest.gclient.ITransaction;
+import ca.uhn.fhir.rest.gclient.ITransactionTyped;
 import ca.uhn.fhir.rest.gclient.IUntypedQuery;
 import ca.uhn.fhir.rest.method.BaseOutcomeReturningMethodBinding;
 import ca.uhn.fhir.rest.method.ConformanceMethodBinding;
@@ -146,6 +148,11 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	@Override
 	public IGetTags getTags() {
 		return new GetTagsInternal();
+	}
+
+	@Override
+	public ITransaction transaction() {
+		return new TransactionInternal();
 	}
 
 	@Override
@@ -372,6 +379,20 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			}
 			IParser parser = respType.newParser(myContext);
 			return parser.parseBundle(myType, theResponseReader);
+		}
+	}
+	
+	private final class ResourceListResponseHandler implements IClientResponseHandler<List<IResource>> {
+
+		private Class<? extends IResource> myType;
+
+		public ResourceListResponseHandler(Class<? extends IResource> theType) {
+			myType = theType;
+		}
+
+		@Override
+		public List<IResource> invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException, BaseServerResponseException {
+			return new BundleResponseHandler(myType).invokeClient(theResponseMimeType, theResponseReader, theResponseStatusCode, theHeaders).toListOfResources();
 		}
 	}
 
@@ -661,6 +682,53 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	}
 
+	private final class TransactionInternal implements ITransaction {
+
+		@Override
+		public ITransactionTyped<List<IResource>> withResources(List<IResource> theResources) {
+			return new TransactionExecutable<List<IResource>>(theResources);
+		}
+
+		@Override
+		public ITransactionTyped<Bundle> withBundle(Bundle theResources) {
+			return new TransactionExecutable<Bundle>(theResources);
+		}
+
+
+	}
+	
+	
+	private final class TransactionExecutable<T>  extends BaseClientExecutable<ITransactionTyped<T>, T> implements ITransactionTyped<T>{
+
+		private List<IResource> myResources;
+		private Bundle myBundle;
+
+		public TransactionExecutable(List<IResource> theResources) {
+			myResources=theResources;
+		}
+
+		public TransactionExecutable(Bundle theResources) {
+			myBundle=theResources;
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public T execute() {
+			if (myResources!=null) {
+				ResourceListResponseHandler binding = new ResourceListResponseHandler(null);
+				BaseHttpClientInvocation invocation = TransactionMethodBinding.createTransactionInvocation(myResources, myContext);
+				Map<String, List<String>> params = null;
+				return (T) invoke(params, binding, invocation);
+			}else {
+				BundleResponseHandler binding = new BundleResponseHandler(null);
+				BaseHttpClientInvocation invocation = TransactionMethodBinding.createTransactionInvocation(myBundle, myContext);
+				Map<String, List<String>> params = null;
+				return (T) invoke(params, binding, invocation);
+			}
+		}
+		
+	}
+	
 	private class GetPageInternal extends BaseClientExecutable<IGetPageTyped, Bundle> implements IGetPageTyped {
 
 		private String myUrl;

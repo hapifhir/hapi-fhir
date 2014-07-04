@@ -20,7 +20,7 @@ package ca.uhn.fhir.context;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -49,6 +49,7 @@ import ca.uhn.fhir.model.api.ICompositeDatatype;
 import ca.uhn.fhir.model.api.ICompositeElement;
 import ca.uhn.fhir.model.api.IDatatype;
 import ca.uhn.fhir.model.api.IElement;
+import ca.uhn.fhir.model.api.IExtension;
 import ca.uhn.fhir.model.api.IPrimitiveDatatype;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.IResourceBlock;
@@ -91,7 +92,7 @@ class ModelScanner {
 	ModelScanner(Class<? extends IResource> theResourceTypes) throws ConfigurationException {
 		Set<Class<? extends IElement>> singleton = new HashSet<Class<? extends IElement>>();
 		singleton.add(theResourceTypes);
-		init(null,singleton);
+		init(null, singleton);
 	}
 
 	ModelScanner(Collection<Class<? extends IResource>> theResourceTypes) throws ConfigurationException {
@@ -153,10 +154,10 @@ class ModelScanner {
 	}
 
 	private void init(Map<Class<? extends IElement>, BaseRuntimeElementDefinition<?>> theExistingDefinitions, Set<Class<? extends IElement>> toScan) {
-		if (theExistingDefinitions!=null) {
+		if (theExistingDefinitions != null) {
 			myClassToElementDefinitions.putAll(theExistingDefinitions);
 		}
-		
+
 		int startSize = myClassToElementDefinitions.size();
 		long start = System.currentTimeMillis();
 
@@ -210,7 +211,7 @@ class ModelScanner {
 		} while (!toScan.isEmpty());
 
 		for (Entry<Class<? extends IElement>, BaseRuntimeElementDefinition<?>> nextEntry : myClassToElementDefinitions.entrySet()) {
-			if (theExistingDefinitions!=null&&theExistingDefinitions.containsKey(nextEntry.getKey())) {
+			if (theExistingDefinitions != null && theExistingDefinitions.containsKey(nextEntry.getKey())) {
 				continue;
 			}
 			BaseRuntimeElementDefinition<?> next = nextEntry.getValue();
@@ -221,7 +222,7 @@ class ModelScanner {
 		myRuntimeChildUndeclaredExtensionDefinition.sealAndInitialize(myClassToElementDefinitions);
 
 		long time = System.currentTimeMillis() - start;
-		int size = myClassToElementDefinitions.size()- startSize;
+		int size = myClassToElementDefinitions.size() - startSize;
 		ourLog.info("Done scanning FHIR library, found {} model entries in {}ms", size, time);
 	}
 
@@ -297,6 +298,8 @@ class ModelScanner {
 
 		scanCompositeElementForChildren(theClass, resourceDef);
 	}
+
+
 
 	private String scanCodeTable(Class<? extends ICodeEnum> theCodeType, CodeTableDef theCodeTableDefinition) {
 		return null; // TODO: implement

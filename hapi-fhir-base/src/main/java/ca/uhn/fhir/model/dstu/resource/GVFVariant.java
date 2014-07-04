@@ -16,30 +16,10 @@
 
 package ca.uhn.fhir.model.dstu.resource;
 
-/*
- * #%L
- * HAPI FHIR Library
- * %%
- * Copyright (C) 2014 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 
 import java.util.List;
 
-import ca.uhn.fhir.model.api.BaseElement;
+import ca.uhn.fhir.model.api.BaseIdentifiableElement;
 import ca.uhn.fhir.model.api.BaseResource;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IResource;
@@ -1698,7 +1678,7 @@ public class GVFVariant extends BaseResource implements IResource {
      * </p> 
 	 */
 	@Block()	
-	public static class Subject extends BaseElement implements IResourceBlock {
+	public static class Subject extends BaseIdentifiableElement implements IResourceBlock {
 	
 	@Child(name="patient", order=0, min=1, max=1, type={
 		ca.uhn.fhir.model.dstu.resource.Patient.class	})
@@ -1814,7 +1794,7 @@ public class GVFVariant extends BaseResource implements IResource {
      * </p> 
 	 */
 	@Block()	
-	public static class Dbxref extends BaseElement implements IResourceBlock {
+	public static class Dbxref extends BaseIdentifiableElement implements IResourceBlock {
 	
 	@Child(name="database", type=CodeDt.class, order=0, min=1, max=1)	
 	@Description(
@@ -1942,7 +1922,7 @@ public class GVFVariant extends BaseResource implements IResource {
      * </p> 
 	 */
 	@Block()	
-	public static class VariantEffect extends BaseElement implements IResourceBlock {
+	public static class VariantEffect extends BaseIdentifiableElement implements IResourceBlock {
 	
 	@Child(name="sequenceVariant", type=CodeDt.class, order=0, min=1, max=1)	
 	@Description(
@@ -2206,7 +2186,7 @@ public class GVFVariant extends BaseResource implements IResource {
      * </p> 
 	 */
 	@Block()	
-	public static class StartRange extends BaseElement implements IResourceBlock {
+	public static class StartRange extends BaseIdentifiableElement implements IResourceBlock {
 	
 	@Child(name="start", type=IntegerDt.class, order=0, min=1, max=1)	
 	@Description(
@@ -2334,7 +2314,7 @@ public class GVFVariant extends BaseResource implements IResource {
      * </p> 
 	 */
 	@Block()	
-	public static class EndRange extends BaseElement implements IResourceBlock {
+	public static class EndRange extends BaseIdentifiableElement implements IResourceBlock {
 	
 	@Child(name="start", type=IntegerDt.class, order=0, min=1, max=1)	
 	@Description(
@@ -2462,7 +2442,7 @@ public class GVFVariant extends BaseResource implements IResource {
      * </p> 
 	 */
 	@Block()	
-	public static class BreakpointDetail extends BaseElement implements IResourceBlock {
+	public static class BreakpointDetail extends BaseIdentifiableElement implements IResourceBlock {
 	
 	@Child(name="seqid", type=StringDt.class, order=0, min=1, max=1)	
 	@Description(
@@ -2692,7 +2672,7 @@ public class GVFVariant extends BaseResource implements IResource {
      * </p> 
 	 */
 	@Block()	
-	public static class SequenceContext extends BaseElement implements IResourceBlock {
+	public static class SequenceContext extends BaseIdentifiableElement implements IResourceBlock {
 	
 	@Child(name="fivePrime", type=StringDt.class, order=0, min=1, max=1)	
 	@Description(
@@ -2820,7 +2800,7 @@ public class GVFVariant extends BaseResource implements IResource {
      * </p> 
 	 */
 	@Block()	
-	public static class Sample extends BaseElement implements IResourceBlock {
+	public static class Sample extends BaseIdentifiableElement implements IResourceBlock {
 	
 	@Child(name="phased", type=StringDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)	
 	@Description(
