@@ -27,6 +27,7 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import ca.uhn.fhir.context.ConfigurationException;
@@ -423,7 +424,8 @@ public abstract class BaseFhirDao {
 
 				if (nextObject instanceof QuantityDt) {
 					QuantityDt nextValue = (QuantityDt) nextObject;
-					ResourceIndexedSearchParamNumber nextEntity = new ResourceIndexedSearchParamNumber(resourceName, nextValue.getValue().getValue(), nextValue.getSystem().getValueAsString(), nextValue.getUnits().getValue());
+					ResourceIndexedSearchParamNumber nextEntity = new ResourceIndexedSearchParamNumber(resourceName, nextValue.getValue().getValue(), nextValue.getSystem().getValueAsString(),
+							nextValue.getUnits().getValue());
 					nextEntity.setResource(theEntity);
 					retVal.add(nextEntity);
 				} else {
@@ -472,9 +474,9 @@ public abstract class BaseFhirDao {
 					IPrimitiveDatatype<?> nextValue = (IPrimitiveDatatype<?>) nextObject;
 					String searchTerm = nextValue.getValueAsString();
 					if (searchTerm.length() > ResourceIndexedSearchParamString.MAX_LENGTH) {
-						searchTerm=searchTerm.substring(0, ResourceIndexedSearchParamString.MAX_LENGTH);
+						searchTerm = searchTerm.substring(0, ResourceIndexedSearchParamString.MAX_LENGTH);
 					}
-					
+
 					ResourceIndexedSearchParamString nextEntity = new ResourceIndexedSearchParamString(resourceName, normalizeString(searchTerm), searchTerm);
 					nextEntity.setResource(theEntity);
 					retVal.add(nextEntity);
@@ -511,7 +513,8 @@ public abstract class BaseFhirDao {
 					} else if (nextObject instanceof ContactDt) {
 						ContactDt nextContact = (ContactDt) nextObject;
 						if (nextContact.getValue().isEmpty() == false) {
-							ResourceIndexedSearchParamString nextEntity = new ResourceIndexedSearchParamString(resourceName, normalizeString(nextContact.getValue().getValueAsString()), nextContact.getValue().getValueAsString());
+							ResourceIndexedSearchParamString nextEntity = new ResourceIndexedSearchParamString(resourceName, normalizeString(nextContact.getValue().getValueAsString()), nextContact
+									.getValue().getValueAsString());
 							nextEntity.setResource(theEntity);
 							retVal.add(nextEntity);
 						}
@@ -558,23 +561,39 @@ public abstract class BaseFhirDao {
 					if (nextValue.isEmpty()) {
 						continue;
 					}
-					systems.add( nextValue.getSystem().getValueAsString());
-					codes.add( nextValue.getValue().getValue());
+					systems.add(nextValue.getSystem().getValueAsString());
+					codes.add(nextValue.getValue().getValue());
 				} else if (nextObject instanceof IPrimitiveDatatype<?>) {
 					IPrimitiveDatatype<?> nextValue = (IPrimitiveDatatype<?>) nextObject;
 					if (nextValue.isEmpty()) {
 						continue;
 					}
 					systems.add(null);
-					codes .add (nextValue.getValueAsString());
+					codes.add(nextValue.getValueAsString());
 				} else if (nextObject instanceof CodeableConceptDt) {
 					CodeableConceptDt nextCC = (CodeableConceptDt) nextObject;
+					if (!nextCC.getText().isEmpty()) {
+						systems.add(null);
+						codes.add(nextCC.getText().getValue());
+					}
+
 					for (CodingDt nextCoding : nextCC.getCoding()) {
 						if (nextCoding.isEmpty()) {
 							continue;
 						}
-						systems.add(nextCoding.getSystem().getValueAsString());
-						codes.add( nextCoding.getCode().getValue());
+
+						String nextSystem = nextCoding.getSystem().getValueAsString();
+						String nextCode = nextCoding.getCode().getValue();
+						if (isNotBlank(nextSystem) || isNotBlank(nextCode)) {
+							systems.add(nextSystem);
+							codes.add(nextCode);
+						}
+
+						if (!nextCoding.getDisplay().isEmpty()) {
+							systems.add(null);
+							codes.add(nextCoding.getDisplay().getValue());
+						}
+
 					}
 				} else {
 					if (!multiType) {
@@ -584,26 +603,37 @@ public abstract class BaseFhirDao {
 					}
 				}
 			}
+
+			assert systems.size() == codes.size() : "Systems contains " + systems + ", codes contains: " + codes;
 			
-			assert systems.size() == codes.size();
+			Set<Pair<String, String>> haveValues = new HashSet<Pair<String,String>>();
 			for (int i = 0; i < systems.size(); i++) {
 				String system = systems.get(i);
 				String code = codes.get(i);
-				
+				if (isBlank(system) && isBlank(code)) {
+					continue;
+				}
+
 				if (system != null && system.length() > ResourceIndexedSearchParamToken.MAX_LENGTH) {
 					system = system.substring(0, ResourceIndexedSearchParamToken.MAX_LENGTH);
 				}
 				if (code != null && code.length() > ResourceIndexedSearchParamToken.MAX_LENGTH) {
 					code = code.substring(0, ResourceIndexedSearchParamToken.MAX_LENGTH);
 				}
+
+				Pair<String, String> nextPair = Pair.of(system,code);
+				if (haveValues.contains(nextPair)) {
+					continue;
+				}
+				haveValues.add(nextPair);
 				
 				ResourceIndexedSearchParamToken nextEntity;
 				nextEntity = new ResourceIndexedSearchParamToken(nextSpDef.getName(), system, code);
-					nextEntity.setResource(theEntity);
-					retVal.add(nextEntity);
+				nextEntity.setResource(theEntity);
+				retVal.add(nextEntity);
 
 			}
-			
+
 		}
 
 		theEntity.setParamsTokenPopulated(retVal.size() > 0);
@@ -740,13 +770,13 @@ public abstract class BaseFhirDao {
 
 		List<ResourceReferenceDt> refs = myContext.newTerser().getAllPopulatedChildElementsOfType(theResource, ResourceReferenceDt.class);
 		for (ResourceReferenceDt nextRef : refs) {
-			if (nextRef.getReference().isEmpty()==false) {
+			if (nextRef.getReference().isEmpty() == false) {
 				if (nextRef.getReference().hasVersionIdPart()) {
 					nextRef.setReference(nextRef.getReference().toUnqualifiedVersionless());
 				}
 			}
 		}
-		
+
 		String encoded = myConfig.getResourceEncoding().newParser(myContext).encodeResourceToString(theResource);
 		ResourceEncodingEnum encoding = myConfig.getResourceEncoding();
 		theEntity.setEncoding(encoding);
@@ -772,11 +802,11 @@ public abstract class BaseFhirDao {
 		}
 
 		String title = ResourceMetadataKeyEnum.TITLE.get(theResource);
-		if (title != null && title.length()>BaseHasResource.MAX_TITLE_LENGTH) {
+		if (title != null && title.length() > BaseHasResource.MAX_TITLE_LENGTH) {
 			title = title.substring(0, BaseHasResource.MAX_TITLE_LENGTH);
 		}
 		theEntity.setTitle(title);
-		
+
 	}
 
 	protected ResourceTable toEntity(IResource theResource) {
@@ -813,15 +843,15 @@ public abstract class BaseFhirDao {
 		retVal.getResourceMetadata().put(ResourceMetadataKeyEnum.VERSION_ID, theEntity.getVersion());
 		retVal.getResourceMetadata().put(ResourceMetadataKeyEnum.PUBLISHED, theEntity.getPublished());
 		retVal.getResourceMetadata().put(ResourceMetadataKeyEnum.UPDATED, theEntity.getUpdated());
-		
-		if (theEntity.getTitle()!=null) {
+
+		if (theEntity.getTitle() != null) {
 			ResourceMetadataKeyEnum.TITLE.put(retVal, theEntity.getTitle());
 		}
-		
-		if (theEntity.getDeleted()!=null) {
+
+		if (theEntity.getDeleted() != null) {
 			ResourceMetadataKeyEnum.DELETED_AT.put(retVal, new InstantDt(theEntity.getDeleted()));
 		}
-		
+
 		Collection<? extends BaseTag> tags = theEntity.getTags();
 		if (tags.size() > 0) {
 			TagList tagList = new TagList();
@@ -865,7 +895,7 @@ public abstract class BaseFhirDao {
 		final List<ResourceIndexedSearchParamDate> dateParams;
 		final List<ResourceLink> links;
 		if (theDelete) {
-			
+
 			stringParams = Collections.emptyList();
 			tokenParams = Collections.emptyList();
 			numberParams = Collections.emptyList();
@@ -873,7 +903,7 @@ public abstract class BaseFhirDao {
 			links = Collections.emptyList();
 			entity.setDeleted(new Date());
 			entity.setUpdated(new Date());
-			
+
 		} else {
 
 			stringParams = extractSearchParamStrings(entity, theResource);
@@ -949,11 +979,11 @@ public abstract class BaseFhirDao {
 		}
 
 		myEntityManager.flush();
-		
-		if (theResource!=null) {
+
+		if (theResource != null) {
 			theResource.setId(new IdDt(entity.getResourceType(), entity.getId().toString(), Long.toString(entity.getVersion())));
 		}
-		
+
 		return entity;
 	}
 

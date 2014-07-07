@@ -32,6 +32,10 @@ public abstract class BaseIdentifiableElement extends BaseElement implements IId
 		return myElementSpecificId;
 	}
 
+	/**
+	 * @deprecated Use {@link #getElementSpecificId()} instead. This method will be removed because it is easily
+	 *             confused with other ID methods (such as patient#getIdentifier)
+	 */
 	@Override
 	public IdDt getId() {
 		if (myElementSpecificId == null) {
@@ -46,6 +50,10 @@ public abstract class BaseIdentifiableElement extends BaseElement implements IId
 		myElementSpecificId = theElementSpecificId;
 	}
 
+	/**
+	 * @deprecated Use {@link #setElementSpecificId(String)} instead. This method will be removed because it is easily
+	 *             confused with other ID methods (such as patient#getIdentifier)
+	 */
 	@Override
 	public void setId(IdDt theId) {
 		if (theId == null) {
@@ -55,6 +63,10 @@ public abstract class BaseIdentifiableElement extends BaseElement implements IId
 		}
 	}
 
+	/**
+	 * @deprecated Use {@link #setElementSpecificId(String)} instead. This method will be removed because it is easily
+	 *             confused with other ID methods (such as patient#getIdentifier)
+	 */
 	@Override
 	public void setId(String theId) {
 		myElementSpecificId = theId;
