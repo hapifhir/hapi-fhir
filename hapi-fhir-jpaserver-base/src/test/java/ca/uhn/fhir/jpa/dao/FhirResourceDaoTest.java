@@ -447,6 +447,37 @@ public class FhirResourceDaoTest {
 		assertEquals(0, patients.size());
 
 	}
+	
+	
+	
+	@Test
+	public void testSearchByIdParam() {
+		IdDt id1;
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier("urn:system", "001");
+			id1 = ourPatientDao.create(patient).getId();
+		}
+		IdDt id2;
+		{
+			Organization patient = new Organization();
+			patient.addIdentifier("urn:system", "001");
+			id2 = ourOrganizationDao.create(patient).getId();
+		}
+
+		
+		Map<String, IQueryParameterType> params = new HashMap<String, IQueryParameterType>();
+		params.put("_id", new StringDt(id1.getIdPart()));
+		assertEquals(1, toList(ourPatientDao.search(params)).size());
+
+		params.put("_id", new StringDt("9999999999999999"));
+		assertEquals(0, toList(ourPatientDao.search(params)).size());
+
+		params.put("_id", new StringDt(id2.getIdPart()));
+		assertEquals(0, toList(ourPatientDao.search(params)).size());
+
+	}
+	
 
 	@Test
 	public void testSearchResourceLinkWithChain() {

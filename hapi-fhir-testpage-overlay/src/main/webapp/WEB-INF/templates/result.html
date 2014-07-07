@@ -76,7 +76,11 @@
 										<span class="glyphicon glyphicon glyphicon-chevron-left"></span>
 										Response
 									</td>
-									<td th:text="${resultStatus}">HTTP 200 OK</td>
+									<td>
+										<i th:if="${resultStatus.contains(' 2')}" class="fa fa-check" style="color:#4E4;"/>
+										<i th:if="${!resultStatus.contains(' 2')}" class="fa fa-warning" style="color:#E44;"/>
+										<th:block th:text="${resultStatus}"/>
+									</td>
 								</tr>
 								<tr>
 									<td>Response Headers</td>
@@ -167,10 +171,14 @@
 															<tbody>
 															<tr th:each="entry : ${bundle.entries}">
 																<td style="white-space: nowrap;">
-																	<button class="btn btn-primary btn-xs" th:onclick="'readFromEntriesTable(this, \'' + ${entry.resource.id.resourceType} + '\', \'' + ${entry.resource.id.idPart} + '\', \'' + ${#strings.defaultString(entry.resource.id.versionIdPart,'')} + '\');'" type="submit" name="action" value="read" data-loading-text="Loading &lt;i class='fa fa-spinner fa-spin'/&gt;" ><i class="fa fa-book"></i> Read</button>
-																	<button class="btn btn-primary btn-xs" th:onclick="'updateFromEntriesTable(this, \'' + ${entry.resource.id.resourceType} + '\', \'' + ${entry.resource.id.idPart} + '\', \'' + ${#strings.defaultString(entry.resource.id.versionIdPart, '')} + '\');'" type="submit" name="action" value="home"><i class="fa fa-pencil" data-loading-text="Loading &lt;i class='fa fa-spinner fa-spin'/&gt;" ></i> Update</button>
+																	<th:block th:if="${entry.resource} != null">
+																		<button class="btn btn-primary btn-xs" th:onclick="'readFromEntriesTable(this, \'' + ${entry.resource.id.resourceType} + '\', \'' + ${entry.resource.id.idPart} + '\', \'' + ${#strings.defaultString(entry.resource.id.versionIdPart,'')} + '\');'" type="submit" name="action" value="read" data-loading-text="Loading &lt;i class='fa fa-spinner fa-spin'/&gt;" ><i class="fa fa-book"></i> Read</button>
+																		<button class="btn btn-primary btn-xs" th:onclick="'updateFromEntriesTable(this, \'' + ${entry.resource.id.resourceType} + '\', \'' + ${entry.resource.id.idPart} + '\', \'' + ${#strings.defaultString(entry.resource.id.versionIdPart, '')} + '\');'" type="submit" name="action" value="home"><i class="fa fa-pencil" data-loading-text="Loading &lt;i class='fa fa-spinner fa-spin'/&gt;" ></i> Update</button>
+																	</th:block>
 																</td>
-																<td><th:block th:text="${entry.resource.id.toUnqualified()}"/></td>
+																<td>
+																	<th:block th:if="${entry.resource} != null" th:text="${entry.resource.id.toUnqualified()}"/>
+																</td>
 																<td><small th:text="${entry.title}"/></td>
 																<td th:if="${entry.updated.value} == null"></td>
 																<td th:if="${entry.updated.value} != null and ${entry.updated.today} == true" th:text="${#dates.format(entry.updated.value, 'HH:mm:ss')}"></td>

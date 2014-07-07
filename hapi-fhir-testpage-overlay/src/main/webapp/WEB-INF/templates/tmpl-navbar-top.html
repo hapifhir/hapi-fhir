@@ -11,26 +11,29 @@
 			</button>
 			<a class="navbar-brand"
 				th:href="'home?encoding=' + ${encoding} + '&amp;pretty=' + ${pretty}">
-				<i class="fa fa-home" /> HAPI FHIR
+				<i class="fa fa-home topbarIcon" /> HAPI FHIR
 			</a> 
 			<a class="navbar-left navbarBreadcrumb hidden-xs hidden-sm"
-				th:if="${resourceName.empty} == false"
+				th:if="${resourceName} != null and ${resourceName.empty} == false"
 				th:href="'resource?encoding=' + ${encoding} + '&amp;pretty=' + ${pretty} + '&amp;resource=' + ${resourceName}">
 				<span class="glyphicon glyphicon-chevron-right"></span> <span
-				th:text="'Resource[' + ${resourceName} + ']'"></span>
+				th:text="${resourceName}"></span>
 			</a>
 			<div class="navbar-left navbarBreadcrumb hidden-xs hidden-sm"
 				th:if="${outcomeDescription} != null">
 				<span class="glyphicon glyphicon-chevron-right"></span> <span
 					th:text="${outcomeDescription}"></span>
 			</div>
+			<div class="navbar-left navbarBreadcrumb hidden-xs hidden-sm"
+				th:if="${extraBreadcrumb} != null">
+				<span class="glyphicon glyphicon-chevron-right"></span>&nbsp;<span
+					th:text="${extraBreadcrumb}"></span>
+			</div>
 		</div>
 		<div class="navbar-collapse collapse">
 			<ul class="nav navbar-nav navbar-right">
-				<li class="dropdown"><a href="#" class="dropdown-toggle"
-					data-toggle="dropdown"> <span id="serverSelectorFhirIcon" class="glyphicon glyphicon-fire" style="color: #66AAFF" /> 
-					<span id="serverSelectorName" th:text="'Server: ' + ${baseName}" /> <span class="caret" />
-				</a>
+				<li class="dropdown">
+					<a href="#" class="dropdown-toggle"	data-toggle="dropdown"><span id="serverSelectorFhirIcon" class="glyphicon glyphicon-fire topbarIcon" />&nbsp;<span id="serverSelectorName" th:text="'Server: ' + ${baseName}" />&nbsp;<span class="caret" /></a>
 					<ul class="dropdown-menu" role="menu">
 						<li th:each="serverEntry : ${serverEntries}">
 							<a th:href="'javascript:selectServer(\'' + ${serverEntry.key} + '\');'">
@@ -40,10 +43,9 @@
 								<th:block 	th:text="${serverEntry.value}"/>
 							</a>
 						</li>
-					</ul></li>
-				<li><a href="https://github.com/jamesagnew/hapi-fhir"><i
-						class="fa fa-github" />&nbsp;Source Code</a></li>
-				<li><a href="#">About</a></li>
+					</ul>
+				</li>
+				<th:block th:include="tmpl-navbar-top-farright :: farright"/>
 			</ul>
 		</div>
 	</div>

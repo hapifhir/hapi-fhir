@@ -97,6 +97,9 @@ public class ExtensionDt extends BaseIdentifiableElement implements ICompositeDa
 	 *             If the value of this extension is not a primitive datatype
 	 */
 	public IPrimitiveDatatype<?> getValueAsPrimitive() {
+		if (!(getValue() instanceof IPrimitiveDatatype)) {
+			throw new ClassCastException("Extension with URL["+myUrl+"] can not be cast to primitive type, type is: "+ getClass().getCanonicalName());
+		}
 		return (IPrimitiveDatatype<?>) getValue();
 	}
 	

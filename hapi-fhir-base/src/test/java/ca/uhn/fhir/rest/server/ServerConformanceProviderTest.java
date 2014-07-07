@@ -3,6 +3,7 @@ package ca.uhn.fhir.rest.server;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
+import java.lang.annotation.Documented;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -14,6 +15,8 @@ import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.resource.Conformance;
+import ca.uhn.fhir.model.dstu.resource.Conformance.Rest;
+import ca.uhn.fhir.model.dstu.resource.Conformance.RestQuery;
 import ca.uhn.fhir.model.dstu.resource.Conformance.RestResource;
 import ca.uhn.fhir.model.dstu.resource.Conformance.RestResourceSearchParam;
 import ca.uhn.fhir.model.dstu.resource.DiagnosticReport;
@@ -110,14 +113,15 @@ public class ServerConformanceProviderTest {
 		rs.init(null);
 		
 		Conformance conformance = sc.getServerConformance();
-		String conf = new FhirContext().newJsonParser().setPrettyPrint(true).encodeResourceToString(conformance);
+		String conf = new FhirContext().newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
 
-		RestResource res = conformance.getRestFirstRep().getResourceFirstRep();
+		Rest rest = conformance.getRestFirstRep();
+		RestResource res = rest.getResourceFirstRep();
 		assertEquals("DiagnosticReport", res.getType().getValueAsString());
 		
-		RestResourceSearchParam p0 = res.getSearchParam().get(0);
-		assertEquals("subject", p0.getName().getValue());
+		RestQuery p0 = rest.getQueryFirstRep();
+		assertEquals("subject", p0.getParameterFirstRep().getName().getValue());
 		
 		assertEquals(1,res.getSearchInclude().size());
 		assertEquals("DiagnosticReport.result", res.getSearchIncludeFirstRep().getValue());
@@ -160,6 +164,7 @@ public class ServerConformanceProviderTest {
 	
 	public static class ProviderWithRequiredAndOptional {
 		
+		@Description(shortDefinition="This is a search for stuff!")
 		@Search
 		public List<DiagnosticReport> findDiagnosticReportsByPatient (
 				@RequiredParam(name=DiagnosticReport.SP_SUBJECT + '.' + Patient.SP_IDENTIFIER) IdentifierDt thePatientId, 

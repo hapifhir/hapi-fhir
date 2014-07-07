@@ -1,0 +1,115 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="383px" height="369px" version="1.1">
+	<defs />
+	<g transform="translate(0.5,0.5)">
+		<rect x="1" y="177" width="170" height="50" rx="8" ry="8" fill="#ffffff" stroke="#000000" pointer-events="none" />
+		<g transform="translate(3,187)">
+			<switch>
+				<foreignObject pointer-events="all" width="166" height="30" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility">
+					<div xmlns="http://www.w3.org/1999/xhtml"
+						style="display: inline-block; font-size: 12px; font-family: Helvetica; color: rgb(0, 0, 0); line-height: 1.26; vertical-align: top; width: 166px; white-space: normal; text-align: center;">
+						<a href="https://github.com/jamesagnew/hapi-fhir/tree/master/hapi-fhir-base">hapi-fhir-base</a>
+						<br />
+						(RESTful Server)
+					</div>
+				</foreignObject>
+				<text x="83" y="21" fill="#000000" text-anchor="middle" font-size="12px" font-family="Helvetica">[Not supported by viewer]</text>
+			</switch>
+		</g>
+		<rect x="1" y="247" width="170" height="50" rx="8" ry="8" fill="#ffffff" stroke="#000000" pointer-events="none" />
+		<g transform="translate(3,250)">
+			<switch>
+				<foreignObject pointer-events="all" width="166" height="45" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility">
+					<div xmlns="http://www.w3.org/1999/xhtml"
+						style="display: inline-block; font-size: 12px; font-family: Helvetica; color: rgb(0, 0, 0); line-height: 1.26; vertical-align: top; width: 166px; white-space: normal; text-align: center;">
+						<a href="https://github.com/jamesagnew/hapi-fhir/tree/master/hapi-fhir-jpaserver-base">hapi-fhir-jpaserver-base</a>
+						<br />
+						Hibernate + Spring
+						<br />
+						(Database Abstraction)
+					</div>
+				</foreignObject>
+				<text x="83" y="29" fill="#000000" text-anchor="middle" font-size="12px" font-family="Helvetica">[Not supported by viewer]</text>
+			</switch>
+		</g>
+		<rect x="1" y="317" width="170" height="50" rx="8" ry="8" fill="#ffffff" stroke="#000000" pointer-events="none" />
+		<g transform="translate(3,327)">
+			<switch>
+				<foreignObject pointer-events="all" width="166" height="30" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility">
+					<div xmlns="http://www.w3.org/1999/xhtml"
+						style="display: inline-block; font-size: 12px; font-family: Helvetica; color: rgb(0, 0, 0); line-height: 1.26; vertical-align: top; width: 166px; white-space: normal; text-align: center;">
+						Apache Derby
+						<br />
+						(Database)
+					</div>
+				</foreignObject>
+				<text x="83" y="21" fill="#000000" text-anchor="middle" font-size="12px" font-family="Helvetica">[Not supported by viewer]</text>
+			</switch>
+		</g>
+		<rect x="211" y="177" width="170" height="50" rx="8" ry="8" fill="#ffffff" stroke="#000000" pointer-events="none" />
+		<g transform="translate(213,179)">
+			<switch>
+				<foreignObject pointer-events="all" width="166" height="45" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility">
+					<div xmlns="http://www.w3.org/1999/xhtml"
+						style="display: inline-block; font-size: 12px; font-family: Helvetica; color: rgb(0, 0, 0); line-height: 1.26; vertical-align: top; width: 166px; white-space: normal; text-align: center;">
+						<a href="https://github.com/jamesagnew/hapi-fhir/tree/master/hapi-fhir-testpage-overlay">hapi-fhir-testpage-overlay</a>
+						<br />
+						Thymeleaf + Spring
+						<br />
+						(Testing Application)
+					</div>
+				</foreignObject>
+				<text x="83" y="21" fill="#000000" text-anchor="middle" font-size="12px" font-family="Helvetica">[Not supported by viewer]</text>
+			</switch>
+		</g>
+		<path d="M 86 247 Q 86 247 86 233" fill="none" stroke="#000000" stroke-miterlimit="10" pointer-events="none" />
+		<path d="M 86 228 L 90 235 L 86 233 L 83 235 Z" fill="#000000" stroke="#000000" stroke-miterlimit="10" pointer-events="none" />
+		<path d="M 86 317 Q 86 317 86 303" fill="none" stroke="#000000" stroke-miterlimit="10" pointer-events="none" />
+		<path d="M 86 298 L 90 305 L 86 303 L 83 305 Z" fill="#000000" stroke="#000000" stroke-miterlimit="10" pointer-events="none" />
+		<path d="M 171 202 Q 171 202 205 202" fill="none" stroke="#000000" stroke-miterlimit="10" pointer-events="none" />
+		<path d="M 210 202 L 203 206 L 205 202 L 203 199 Z" fill="#000000" stroke="#000000" stroke-miterlimit="10" pointer-events="none" />
+		<image x="111" y="32" width="40" height="40" xlink:href="https://cdn1.iconfinder.com/data/icons/professional-toolbar-icons-2/64/Web_server_internet_vector.png"
+			preserveAspectRatio="none" pointer-events="none" />
+		<g fill="#000000" font-family="Helvetica" text-anchor="middle" font-size="12px">
+			<text x="131" y="12">FHIR Clients and</text>
+			<text x="131" y="26">Applications</text>
+		</g>
+		<image x="221" y="32" width="40" height="40" xlink:href="https://cdn2.iconfinder.com/data/icons/crystalproject/128x128/filesystems/Globe2.png" preserveAspectRatio="none"
+			pointer-events="none" />
+		<g fill="#000000" font-family="Helvetica" text-anchor="middle" font-size="12px">
+			<text x="241" y="26">Browsers</text>
+		</g>
+		<path d="M 86 177 L 86 132 Q 86 122 96 122 L 111 122 Q 121 122 121 112 L 121 78" fill="none" stroke="#000000" stroke-miterlimit="10" pointer-events="none" />
+		<path d="M 121 73 L 125 80 L 121 78 L 118 80 Z" fill="#000000" stroke="#000000" stroke-miterlimit="10" pointer-events="none" />
+		<path d="M 296 177 L 296 132 Q 296 122 286 122 L 251 122 Q 241 122 241 112 L 241 78" fill="none" stroke="#000000" stroke-miterlimit="10" pointer-events="none" />
+		<path d="M 241 73 L 245 80 L 241 78 L 238 80 Z" fill="#000000" stroke="#000000" stroke-miterlimit="10" pointer-events="none" />
+		<rect x="71" y="97" width="240" height="50" rx="8" ry="8" fill-opacity="0.35" fill="#ababab" stroke="#000000" stroke-opacity="0.35" pointer-events="none" />
+		<g transform="translate(73,107)">
+			<switch>
+				<foreignObject pointer-events="all" width="236" height="30" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility">
+					<div xmlns="http://www.w3.org/1999/xhtml"
+						style="display: inline-block; font-size: 12px; font-family: Helvetica; color: rgb(0, 0, 0); line-height: 1.26; vertical-align: top; width: 236px; white-space: normal; font-weight: bold; text-align: center;">
+						Apache
+						<br />
+						HTTPd
+					</div>
+				</foreignObject>
+				<text x="118" y="21" fill="#000000" text-anchor="middle" font-size="12px" font-family="Helvetica" font-weight="bold">[Not supported by viewer]</text>
+			</switch>
+		</g>
+		<image x="276" y="292" width="40" height="40" xlink:href="https://cdn2.iconfinder.com/data/icons/seo-web-optomization-ultimate-set/512/web_hosting-128.png"
+			preserveAspectRatio="none" pointer-events="none" />
+		<g fill="#000000" font-family="Helvetica" text-anchor="middle" font-size="12px">
+			<text x="296" y="350">Other Public</text>
+			<text x="296" y="364">FHIR Servers</text>
+		</g>
+		<path d="M 296 292 L 296 233" fill="none" stroke="#000000" stroke-miterlimit="10" pointer-events="none" />
+		<path d="M 296 228 L 300 235 L 296 233 L 293 235 Z" fill="#000000" stroke="#000000" stroke-miterlimit="10" pointer-events="none" />
+		<image x="316" y="33" width="35" height="37" xlink:href="https://cdn2.iconfinder.com/data/icons/ios-7-icons/50/user_male4-128.png" preserveAspectRatio="none"
+			pointer-events="none" />
+		<g fill="#000000" font-family="Helvetica" text-anchor="middle" font-size="12px">
+			<text x="334" y="27">(You are here)</text>
+		</g>
+		<path d="M 316 52 L 267 52" fill="none" stroke="#000000" stroke-miterlimit="10" pointer-events="none" />
+		<path d="M 262 52 L 269 48 L 267 52 L 269 55 Z" fill="#000000" stroke="#000000" stroke-miterlimit="10" pointer-events="none" />
+	</g>
+</svg>

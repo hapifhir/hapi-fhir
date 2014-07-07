@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.test;
 
+import java.lang.annotation.Documented;
 import java.util.List;
 import java.util.Set;
 
@@ -18,6 +19,7 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.TagList;
+import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.resource.DiagnosticReport;
 import ca.uhn.fhir.model.dstu.resource.Organization;
@@ -164,6 +166,7 @@ public class OverlayTestApp {
 	
 	public static class ProviderWithRequiredAndOptional implements IResourceProvider {
 		
+		@Description(shortDefinition="This is a query by date!")
 		@Search
 		public List<DiagnosticReport> findDiagnosticReportsByPatient (
 				@RequiredParam(name=DiagnosticReport.SP_SUBJECT + '.' + Patient.SP_IDENTIFIER) IdentifierDt thePatientId, 
@@ -174,6 +177,7 @@ public class OverlayTestApp {
 			return null;
 		}
 
+		@Description(shortDefinition="This is a query by issued.. blah blah foo bar blah blah")
 		@Search
 		public List<DiagnosticReport> findDiagnosticReportsByPatientIssued (
 				@RequiredParam(name=DiagnosticReport.SP_SUBJECT + '.' + Patient.SP_IDENTIFIER) IdentifierDt thePatientId, 

@@ -1,23 +1,4 @@
 
-function addChildParam(searchParam, nextExt) {
-	var childParam = new Object();
-	for (var extIdx = 0; extIdx < nextExt.extension.length; extIdx++) {
-		var childExt = nextExt.extension[extIdx];
-		if (childExt.url == "http://hl7api.sourceforge.net/hapi-fhir/extensions.xml#additionalParamName") {
-			childParam.name = childExt.valueString;
-		}
-		if (childExt.url == "http://hl7api.sourceforge.net/hapi-fhir/extensions.xml#additionalParamDescription") {
-			childParam.documentation = childExt.valueString;
-		}
-		if (childExt.url == "http://hl7api.sourceforge.net/hapi-fhir/extensions.xml#additionalParamType") {
-			childParam.type = childExt.valueCode;
-		}
-		if (childExt.url == "http://hl7api.sourceforge.net/hapi-fhir/extensions.xml#additionalParam") {
-			addChildParam(childParam, childExt);
-		}
-	}
-	searchParam.childParam = childParam;
-}
 
 var numRows = 0;
 function addSearchParamRow() {
@@ -51,17 +32,6 @@ function addSearchParamRow() {
 							$('<option />', { value: nextName }).text(searchParam.name + ' - ' + searchParam.documentation)														
 						);
 						
-						if (restResource._searchParam && restResource._searchParam[i] != null) {
-							if (restResource._searchParam[i].extension) {
-								for (var j = 0; j < restResource._searchParam[i].extension.length; j++) {
-									var nextExt = restResource._searchParam[i].extension[j];
-									if (nextExt.url == "http://hl7api.sourceforge.net/hapi-fhir/extensions.xml#additionalParam") {
-										addChildParam(searchParam, nextExt);
-									}
-								}
-							}
-						}
-						
 					}
 					/*
 					restResource.searchParam.forEach(function(searchParam){
@@ -89,49 +59,38 @@ function updateSearchDateQualifier(qualifierBtn, qualifierInput, qualifier) {
 	}
 }
 
-function addSearchControls(searchParam, searchParamName, containerRowNum, rowNum, isChild) {
-    if (searchParam.childParam || isChild) {
-		$('#search-param-rowopts-' + containerRowNum).append(
-			$('<br clear="all"/>'),
-			$('<div class="searchParamSeparator"/>'),
-			$('<div />', { 'class': 'col-sm-6' }).append(
-				$('<div class="searchParamDescription"/>').append(
-					$('<div />').text(searchParam.documentation)
-				)
-			)
-		);
-    }
+function addSearchControls(theSearchParamType, theSearchParamName, theSearchParamChain, theContainerRowNum, theRowNum) {
     
-	if (searchParam.chain && searchParam.chain.length > 0) {
-		$('#search-param-rowopts-' + containerRowNum).append(
-				$('<input />', { name: 'param.' + rowNum + '.qualifier', type: 'hidden', value: '.' + searchParam.chain[0] })
+	if (theSearchParamChain && theSearchParamChain.length > 0) {
+		$('#search-param-rowopts-' + theContainerRowNum).append(
+				$('<input />', { id: 'param.' + theRowNum + '.qualifier', type: 'hidden', value: '.' + theSearchParamChain[0] })
 		);
 	}
 	
-	$('#search-param-rowopts-' + containerRowNum).append(
-		$('<input />', { name: 'param.' + rowNum + '.name', type: 'hidden', value: searchParam.name })
+	$('#search-param-rowopts-' + theContainerRowNum).append(
+		$('<input />', { id: 'param.' + theRowNum + '.name', type: 'hidden', value: theSearchParamName })
 	);
 
-    if (searchParam.type == 'token') {
-    	$('#search-param-rowopts-' + containerRowNum).append(
+    if (theSearchParamType == 'token') {
+    	$('#search-param-rowopts-' + theContainerRowNum).append(
     		$('<div />', { 'class': 'col-sm-3' }).append(
-		    	$('<input />', { name: 'param.' + rowNum + '.0', placeholder: 'system/namespace', type: 'text', 'class': 'form-control' })
+		    	$('<input />', { id: 'param.' + theRowNum + '.0', placeholder: 'system/namespace', type: 'text', 'class': 'form-control' })
 		    ),
     		$('<div />', { 'class': 'col-sm-3' }).append(
-		    	$('<input />', { name: 'param.' + rowNum + '.1', type: 'hidden', value: '|' }),
-		    	$('<input />', { name: 'param.' + rowNum + '.2', placeholder: 'value', type: 'text', 'class': 'form-control' })
+		    	$('<input />', { id: 'param.' + theRowNum + '.1', type: 'hidden', value: '|' }),
+		    	$('<input />', { id: 'param.' + theRowNum + '.2', placeholder: 'value', type: 'text', 'class': 'form-control' })
 		    )
     	);
-    } else if (searchParam.type == 'string' || searchParam.type == 'number') {
-    	$('#search-param-rowopts-' + containerRowNum).append(
+    } else if (theSearchParamType == 'string' || theSearchParamType == 'number') {
+    	$('#search-param-rowopts-' + theContainerRowNum).append(
     		$('<div />', { 'class': 'col-sm-3' }).append(
-		    	$('<input />', { name: 'param.' + rowNum + '.0', placeholder: 'value', type: 'text', 'class': 'form-control' })
+		    	$('<input />', { id: 'param.' + theRowNum + '.0', placeholder: 'value', type: 'text', 'class': 'form-control' })
 	    	)
 	    );
-    } else if (searchParam.type == 'date') {
-    	var qualifier = $('<input />', {type:'hidden', name:'param.'+rowNum+'.0', id:'param.'+rowNum+'.0'});
+    } else if (theSearchParamType == 'date') {
+    	var qualifier = $('<input />', {type:'hidden', id:'param.'+theRowNum+'.0', id:'param.'+theRowNum+'.0'});
     	
-    	if (/date$/.test(searchParam.name)) {
+    	if (/date$/.test(theSearchParamName)) {
 			var input = $('<div />', { 'class':'input-group date', 'data-date-format':'YYYY-MM-DD' });
     	} else {
 			var input = $('<div />', { 'class':'input-group date', 'data-date-format':'YYYY-MM-DDTHH:mm:ss' });
@@ -139,7 +98,7 @@ function addSearchControls(searchParam, searchParamName, containerRowNum, rowNum
     	var qualifierDiv = $('<div />');
     	input.append(
     		qualifierDiv,
-			$('<input />', { type:'text', 'class':'form-control', name: 'param.' + rowNum + '.1' }),
+			$('<input />', { type:'text', 'class':'form-control', id: 'param.' + theRowNum + '.1' }),
 			$('<div />', { 'class':'input-group-addon', 'style':'padding:6px;'} ).append(
 				$('<i />', { 'class':'fa fa-chevron-circle-down'})
 			)
@@ -168,28 +127,13 @@ function addSearchControls(searchParam, searchParamName, containerRowNum, rowNum
 			)
 		);
     
-    	$('#search-param-rowopts-' + containerRowNum).append(
+    	$('#search-param-rowopts-' + theContainerRowNum).append(
     		qualifier,
     		$('<div />', { 'class': 'col-sm-4' }).append(
 		    	input
 	    	)
 	    );
     }	
-    
-    if (searchParam.childParam) {
-    	$('#search-param-rowopts-' + containerRowNum).append(
-    		/*
-    		$('<br clear="all"/>'),
-    		$('<div style="height: 5px;"/>'),
-			$('<div />', { 'class': 'col-sm-6' }).append(
-				$('<span>' + searchParam.childParam.documentation + '</span>')
-			),
-			*/
-			$('<input />', { name: 'param.' + rowNum + '.0.type', type: 'hidden', value: searchParam.childParam.type })
-    	);
-    	addSearchControls(searchParam.childParam, searchParamName, containerRowNum, rowNum + '.0', true);
-    }
-    
     
 }
 
@@ -205,7 +149,7 @@ function handleSearchParamTypeChange(select, params, rowNum) {
 		$('<input />', { name: 'param.' + rowNum + '.type', type: 'hidden', value: searchParam.type })
 	);
 	
-	addSearchControls(searchParam, searchParam.name, rowNum, rowNum, false);
+	addSearchControls(searchParam.type, searchParam.name, searchParam.chain, rowNum, rowNum);
 	
 	select.prevVal = newVal;
 }

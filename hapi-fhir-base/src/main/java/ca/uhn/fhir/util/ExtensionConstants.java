@@ -21,6 +21,9 @@ package ca.uhn.fhir.util;
  */
 
 public class ExtensionConstants {
+	public static final String PARAM_IS_REQUIRED = "http://hl7api.sourceforge.net/hapi-fhir/extensions.xml#paramIsRequired";
+
+	public static final String QUERY_RETURN_TYPE = "http://hl7api.sourceforge.net/hapi-fhir/extensions.xml#queryReturnType";
 
 	public static final String CONF_ADDITIONAL_PARAM = "http://hl7api.sourceforge.net/hapi-fhir/extensions.xml#additionalParam";
 	
@@ -31,5 +34,5 @@ public class ExtensionConstants {
 	public static final String CONF_ADDITIONAL_PARAM_TYPE = "http://hl7api.sourceforge.net/hapi-fhir/extensions.xml#additionalParamType";
 
 	public static final String CONF_ADDITIONAL_PARAM_REQUIRED = "http://hl7api.sourceforge.net/hapi-fhir/extensions.xml#additionalParamRequired";
-
+	
 }

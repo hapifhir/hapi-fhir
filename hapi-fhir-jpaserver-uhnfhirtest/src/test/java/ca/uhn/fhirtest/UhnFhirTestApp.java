@@ -22,10 +22,13 @@ public class UhnFhirTestApp {
 
 	public static void main(String[] args) throws Exception {
 
-//		new File("target/testdb").mkdirs();
-		System.setProperty("fhir.db.location", "/target/testdb");
-
 		int myPort = 8888;
+		String base = "http://localhost:" + myPort + "/base";
+
+		//		new File("target/testdb").mkdirs();
+		System.setProperty("fhir.db.location", "./target/testdb");
+		System.setProperty("fhir.baseurl", base);
+		
 		Server server = new Server(myPort);
 
 		WebAppContext root = new WebAppContext();
@@ -40,7 +43,6 @@ public class UhnFhirTestApp {
 
 		server.start();
 
-		String base = "http://localhost:" + myPort + "/base";
 		// base = "http://fhir.healthintersections.com.au/open";
 		// base = "http://spark.furore.com/fhir";
 

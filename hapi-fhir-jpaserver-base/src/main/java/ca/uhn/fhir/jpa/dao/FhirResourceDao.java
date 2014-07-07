@@ -375,8 +375,8 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 			}
 
 			String likeExpression = normalizeString(string);
-			likeExpression = likeExpression.replace("%", "[%]") + "%"; 
-			
+			likeExpression = likeExpression.replace("%", "[%]") + "%";
+
 			Predicate singleCode = builder.like(from.get("myValueNormalized").as(String.class), likeExpression);
 			if (params instanceof StringParam && ((StringParam) params).isExact()) {
 				Predicate exactCode = builder.equal(from.get("myValueExact"), string);
@@ -461,6 +461,32 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 		return new HashSet<Long>(q.getResultList());
 	}
 
+	private Set<Long> addPredicateId(String theParamName, Set<Long> theExistingPids, Set<Long> thePids) {
+		if (thePids == null || thePids.isEmpty()) {
+			return Collections.emptySet();
+		}
+
+		CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
+		CriteriaQuery<Long> cq = builder.createQuery(Long.class);
+		Root<ResourceTable> from = cq.from(ResourceTable.class);
+		cq.select(from.get("myId").as(Long.class));
+		
+		Predicate typePredicate = builder.equal(from.get("myResourceType"), myResourceName);
+		Predicate idPrecidate = from.get("myId").in(thePids);
+		
+		cq.where(builder.and(typePredicate, idPrecidate));
+
+		TypedQuery<Long> q = myEntityManager.createQuery(cq);
+		HashSet<Long> found = new HashSet<Long>(q.getResultList());
+		if (!theExistingPids.isEmpty()) {
+			theExistingPids.retainAll(found);
+		}
+
+		return found;
+	}
+
+
+	
 	@Override
 	public void addTag(IdDt theId, String theScheme, String theTerm, String theLabel) {
 		BaseHasResource entity = readEntity(theId);
@@ -781,7 +807,7 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 		if (theIncludePids.isEmpty()) {
 			return;
 		}
-		
+
 		CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
 		CriteriaQuery<ResourceTable> cq = builder.createQuery(ResourceTable.class);
 		Root<ResourceTable> from = cq.from(ResourceTable.class);
@@ -843,7 +869,8 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 					} else {
 						for (IQueryParameterType next : nextValue) {
 							String value = next.getValueAsQueryToken();
-							long valueLong = Long.parseLong(value);
+							IdDt valueId = new IdDt(value);
+							long valueLong = valueId.getIdPartAsLong();
 							joinPids.add(valueLong);
 						}
 						if (joinPids.isEmpty()) {
@@ -851,6 +878,11 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 						}
 					}
 
+					pids = addPredicateId(nextParamName, pids, joinPids);
+					if (pids.isEmpty()) {
+						return new HashSet<Long>();
+					}
+					
 					if (pids.isEmpty()) {
 						pids.addAll(joinPids);
 					} else {
@@ -858,47 +890,48 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 					}
 
 				}
-			}
+			} else {
 
-			RuntimeSearchParam nextParamDef = resourceDef.getSearchParam(nextParamName);
-			if (nextParamDef != null) {
-				if (nextParamDef.getParamType() == SearchParamTypeEnum.TOKEN) {
-					for (List<IQueryParameterType> nextAnd : nextParamEntry.getValue()) {
-						pids = addPredicateToken(nextParamName, pids, nextAnd);
-						if (pids.isEmpty()) {
-							return new HashSet<Long>();
+				RuntimeSearchParam nextParamDef = resourceDef.getSearchParam(nextParamName);
+				if (nextParamDef != null) {
+					if (nextParamDef.getParamType() == SearchParamTypeEnum.TOKEN) {
+						for (List<IQueryParameterType> nextAnd : nextParamEntry.getValue()) {
+							pids = addPredicateToken(nextParamName, pids, nextAnd);
+							if (pids.isEmpty()) {
+								return new HashSet<Long>();
+							}
 						}
-					}
-				} else if (nextParamDef.getParamType() == SearchParamTypeEnum.STRING) {
-					for (List<IQueryParameterType> nextAnd : nextParamEntry.getValue()) {
-						pids = addPredicateString(nextParamName, pids, nextAnd);
-						if (pids.isEmpty()) {
-							return new HashSet<Long>();
+					} else if (nextParamDef.getParamType() == SearchParamTypeEnum.STRING) {
+						for (List<IQueryParameterType> nextAnd : nextParamEntry.getValue()) {
+							pids = addPredicateString(nextParamName, pids, nextAnd);
+							if (pids.isEmpty()) {
+								return new HashSet<Long>();
+							}
 						}
-					}
-				} else if (nextParamDef.getParamType() == SearchParamTypeEnum.QUANTITY) {
-					for (List<IQueryParameterType> nextAnd : nextParamEntry.getValue()) {
-						pids = addPredicateQuantity(nextParamName, pids, nextAnd);
-						if (pids.isEmpty()) {
-							return new HashSet<Long>();
+					} else if (nextParamDef.getParamType() == SearchParamTypeEnum.QUANTITY) {
+						for (List<IQueryParameterType> nextAnd : nextParamEntry.getValue()) {
+							pids = addPredicateQuantity(nextParamName, pids, nextAnd);
+							if (pids.isEmpty()) {
+								return new HashSet<Long>();
+							}
 						}
-					}
-				} else if (nextParamDef.getParamType() == SearchParamTypeEnum.DATE) {
-					for (List<IQueryParameterType> nextAnd : nextParamEntry.getValue()) {
-						pids = addPredicateDate(nextParamName, pids, nextAnd);
-						if (pids.isEmpty()) {
-							return new HashSet<Long>();
+					} else if (nextParamDef.getParamType() == SearchParamTypeEnum.DATE) {
+						for (List<IQueryParameterType> nextAnd : nextParamEntry.getValue()) {
+							pids = addPredicateDate(nextParamName, pids, nextAnd);
+							if (pids.isEmpty()) {
+								return new HashSet<Long>();
+							}
 						}
-					}
-				} else if (nextParamDef.getParamType() == SearchParamTypeEnum.REFERENCE) {
-					for (List<IQueryParameterType> nextAnd : nextParamEntry.getValue()) {
-						pids = addPredicateReference(nextParamName, pids, nextAnd);
-						if (pids.isEmpty()) {
-							return new HashSet<Long>();
+					} else if (nextParamDef.getParamType() == SearchParamTypeEnum.REFERENCE) {
+						for (List<IQueryParameterType> nextAnd : nextParamEntry.getValue()) {
+							pids = addPredicateReference(nextParamName, pids, nextAnd);
+							if (pids.isEmpty()) {
+								return new HashSet<Long>();
+							}
 						}
+					} else {
+						throw new IllegalArgumentException("Don't know how to handle parameter of type: " + nextParamDef.getParamType());
 					}
-				} else {
-					throw new IllegalArgumentException("Don't know how to handle parameter of type: " + nextParamDef.getParamType());
 				}
 			}
 		}

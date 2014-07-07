@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<div th:fragment="queries-list" class="container-fluid">
+	<div th:each="query,queryIterStat : ${queries}" class="panel panel-default" th:id="'search-div-' + ${queryIterStat.index}" >
+		<div  class="panel-heading">
+			<div class="pull-right">
+				<button type="button" th:id="'search-btn-' + ${queryIterStat.index}" class="btn btn-primary btn-block" 
+					data-loading-text="Searching &lt;i class='fa fa-spinner fa-spin'/&gt;">
+					&nbsp;<span class="glyphicon glyphicon-search"></span>
+					Execute
+					&nbsp;
+				</button>
+				<script type="text/javascript">
+					var searchButtonName = '<th:block th:text="'search-btn-' + ${queryIterStat.index}"/>';
+					$('#' + searchButtonName).click(function() {
+						var btn = $(this);
+						btn.button('loading');
+						var searchDiv = '<th:block th:text="'search-div-' + ${queryIterStat.index}"/>';
+						var sd = $('#' + searchDiv).find('input').each(function() {
+							this.name = this.id;
+						});					
+						$("#outerForm").attr("action", "search").submit();
+					});
+				</script>
+			</div>
+			<h4>
+				Query
+				<small th:if="${!query.name.empty}" th:text="${query.name.value}"/>
+			</h4>
+		</div>
+		<div class="panel-body">
+			<p th:if="${!query.documentation.empty}" th:text="${query.documentation.value}"></p>
+			<div th:each="param,paramIterStat : ${query.parameter}" 
+			     th:id="'search-param-rowopts-' + ${queryIterStat.index} + '-' + ${paramIterStat.index}" 
+			     th:class="'row queryParameter ' + (${paramIterStat.odd} ? 'queryParameterOdd')">
+				<div class="col-sm-6">
+					<div class="searchParamDescription">
+						<div>
+							<th:block th:text="${param.documentation}" />
+							<th:block th:if="${!param.getUndeclaredExtensionsByUrl(requiredParamExtension).empty}">
+								<span style="color:#F88;" th:if="${param.getUndeclaredExtensionsByUrl(requiredParamExtension).get(0).value.value}">
+									(required)
+								</span>
+								<span th:if="${!param.getUndeclaredExtensionsByUrl(requiredParamExtension).get(0).value.value}">
+									(optional)
+								</span>
+							</th:block>
+						</div>
+					</div>
+				</div>
+				<script type="text/javascript">
+					var type = '<th:block th:text="${param.type.value}"/>';
+					var name = '<th:block th:text="${param.name}"/>';
+					var chain = new Array();
+					<th:block th:each="chain : ${param.chain}">
+						chain.push('<th:block th:text="${chain}"/>');
+					</th:block>
+					var rowNum = <th:block th:text="${paramIterStat.index}"/>;
+					var containerRowNum = <th:block th:text="${queryIterStat.index}"/> + '-' + rowNum;
+					addSearchControls(type, name, chain, containerRowNum, rowNum);
+				</script>
+				<br clear="all"/>
+			</div>
+		</div>
+	</div>
+</div>
+</html>

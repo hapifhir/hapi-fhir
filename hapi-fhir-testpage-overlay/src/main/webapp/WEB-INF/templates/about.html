@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head  th:include="tmpl-head :: head">
+		<title>About This Server</title>
+	</head>
+
+	<body>
+		<div th:replace="tmpl-navbar-top :: top" ></div>
+		
+		<div class="container-fluid">
+			<div class="row">
+				<div th:replace="tmpl-navbar-left :: left" ></div>
+
+				<div class="col-sm-9 col-sm-offset-3 col-md-9 col-md-offset-3 main">
+
+					<div th:replace="tmpl-banner :: banner"></div>
+
+					<div class="panel panel-default">
+						<div class="panel-heading">
+							<h3 class="panel-title">About This Server</h3>
+						</div>
+						<div class="panel-body">
+							About...
+						</div>
+					</div>
+					
+				</div>
+			</div>
+		</div>
+
+		<div th:replace="tmpl-footer :: footer" ></div>
+	</body>
+</html>

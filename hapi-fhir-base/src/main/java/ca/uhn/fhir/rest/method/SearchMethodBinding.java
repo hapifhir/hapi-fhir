@@ -20,6 +20,8 @@ package ca.uhn.fhir.rest.method;
  * #L%
  */
 
+import static org.apache.commons.lang3.StringUtils.*;
+
 import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.HashSet;
@@ -32,6 +34,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
 import ca.uhn.fhir.rest.param.BaseQueryParameter;
@@ -47,17 +50,34 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchMethodBinding.class);
 
-	private Class<?> myDeclaredResourceType;
+	private Class<? extends IResource> myDeclaredResourceType;
 	private String myQueryName;
 
+	private String myDescription;
+
+	@SuppressWarnings("unchecked")
 	public SearchMethodBinding(Class<? extends IResource> theReturnResourceType, Method theMethod, String theQueryName, FhirContext theContext, Object theProvider) {
 		super(theReturnResourceType, theMethod, theContext, theProvider);
 		this.myQueryName = StringUtils.defaultIfBlank(theQueryName, null);
-		this.myDeclaredResourceType = theMethod.getReturnType();
+		this.myDeclaredResourceType = (Class<? extends IResource>) theMethod.getReturnType();
+
+		Description desc = theMethod.getAnnotation(Description.class);
+		if (desc != null) {
+			if (isNotBlank(desc.formalDefinition())) {
+				myDescription = StringUtils.defaultIfBlank(desc.formalDefinition(), null);
+			} else {
+				myDescription = StringUtils.defaultIfBlank(desc.shortDefinition(), null);
+			}
+
+		}
 	}
 
-	public Class<?> getDeclaredResourceType() {
-		return myDeclaredResourceType.getClass();
+	public String getDescription() {
+		return myDescription;
+	}
+
+	public Class<? extends IResource> getDeclaredResourceType() {
+		return myDeclaredResourceType;
 	}
 
 	@Override
@@ -136,10 +156,10 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 			return false;
 		}
 
-		// This is used to track all the parameters so we can reject queries that 
+		// This is used to track all the parameters so we can reject queries that
 		// have additional params we don't understand
 		Set<String> methodParamsTemp = new HashSet<String>();
-		
+
 		Set<String> unqualifiedNames = theRequest.getUnqualifiedToQualifiedNames().keySet();
 		Set<String> qualifiedParamNames = theRequest.getParameters().keySet();
 		for (int i = 0; i < this.getParameters().size(); i++) {
@@ -196,7 +216,7 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 		return true;
 	}
 
-	public void setResourceType(Class<?> resourceType) {
+	public void setResourceType(Class<? extends IResource> resourceType) {
 		this.myDeclaredResourceType = resourceType;
 	}
 

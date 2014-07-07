@@ -36,6 +36,7 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.dstu.resource.Conformance;
 import ca.uhn.fhir.model.dstu.resource.Conformance.Rest;
+import ca.uhn.fhir.model.dstu.resource.Conformance.RestQuery;
 import ca.uhn.fhir.model.dstu.resource.Conformance.RestResource;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.DecimalDt;
@@ -51,6 +52,7 @@ import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.to.model.HomeRequest;
 import ca.uhn.fhir.to.model.ResourceRequest;
 import ca.uhn.fhir.to.model.TransactionRequest;
+import ca.uhn.fhir.util.ExtensionConstants;
 
 @org.springframework.stereotype.Controller()
 public class Controller {
@@ -68,6 +70,18 @@ public class Controller {
 	@Autowired
 	private TemplateEngine myTemplateEngine;
 
+	@RequestMapping(value = { "/about" })
+	public String about( final HomeRequest theRequest, final ModelMap theModel) {
+		addCommonParams(theRequest, theModel);
+		GenericClient client = theRequest.newClient(myCtx, myConfig);
+		loadAndAddConformance(theRequest, theModel, client);
+		
+		theModel.put("notHome", true);
+		theModel.put("extraBreadcrumb", "About");
+		
+		return "about";
+	}
+	
 	@RequestMapping(value = { "/transaction" })
 	public String actionTransaction(final TransactionRequest theRequest, final BindingResult theBindingResult, final ModelMap theModel) {
 		addCommonParams(theRequest, theModel);
@@ -170,35 +184,40 @@ public class Controller {
 		loadAndAddConformance(theRequest, theModel, client);
 
 		Class<? extends IResource> resType = null;
-		long start = System.currentTimeMillis();
-		if (isNotBlank(theReq.getParameter(PARAM_RESOURCE))) {
-			RuntimeResourceDefinition def;
-			try {
-				def = getResourceType(theReq);
-			} catch (ServletException e) {
-				theModel.put("errorMsg", e.toString());
-				return "resource";
-			}
-
-			resType = def.getImplementingClass();
-			String id = theReq.getParameter("resource-tags-id");
-			if (isNotBlank(id)) {
-				String vid = theReq.getParameter("resource-tags-vid");
-				if (isNotBlank(vid)) {
-					client.getTags().forResource(resType, id, vid).execute();
-				} else {
-					client.getTags().forResource(resType, id).execute();
-				}
-			} else {
-				client.getTags().forResource(resType).execute();
-			}
-		} else {
-			client.getTags().execute();
-		}
-		long delay = System.currentTimeMillis() - start;
-
 		ResultType returnsResource = ResultType.TAGLIST;
 		String outcomeDescription = "Tag List";
+
+		long start = System.currentTimeMillis();
+		try {
+			if (isNotBlank(theReq.getParameter(PARAM_RESOURCE))) {
+				RuntimeResourceDefinition def;
+				try {
+					def = getResourceType(theReq);
+				} catch (ServletException e) {
+					theModel.put("errorMsg", e.toString());
+					return "resource";
+				}
+
+				resType = def.getImplementingClass();
+				String id = theReq.getParameter("resource-tags-id");
+				if (isNotBlank(id)) {
+					String vid = theReq.getParameter("resource-tags-vid");
+					if (isNotBlank(vid)) {
+						client.getTags().forResource(resType, id, vid).execute();
+					} else {
+						client.getTags().forResource(resType, id).execute();
+					}
+				} else {
+					client.getTags().forResource(resType).execute();
+				}
+			} else {
+				client.getTags().execute();
+			}
+		} catch (Exception e) {
+			returnsResource = ResultType.NONE;
+			ourLog.warn("Failed to invoke server", e);
+		}
+		long delay = System.currentTimeMillis() - start;
 
 		processAndAddLastClientInvocation(client, returnsResource, theModel, delay, outcomeDescription);
 
@@ -311,6 +330,8 @@ public class Controller {
 		RuntimeResourceDefinition def = myCtx.getResourceDefinition(theRequest.getResource());
 
 		TreeSet<String> includes = new TreeSet<String>();
+		List<RestQuery> queries = new ArrayList<Conformance.RestQuery>();
+		boolean haveSearchParams = false;
 		for (Rest nextRest : conformance.getRest()) {
 			for (RestResource nextRes : nextRest.getResource()) {
 				if (nextRes.getType().getValue().equals(resourceName)) {
@@ -319,10 +340,25 @@ public class Controller {
 							includes.add(next.getValue());
 						}
 					}
+					if (nextRes.getSearchParam().size() > 0) {
+						haveSearchParams = true;
+					}
+				}
+			}
+			for (RestQuery nextQuery : nextRest.getQuery()) {
+				List<ExtensionDt> returnTypeExt = nextQuery.getUndeclaredExtensionsByUrl(ExtensionConstants.QUERY_RETURN_TYPE);
+				if (returnTypeExt != null) {
+					for (ExtensionDt nextExt : returnTypeExt) {
+						if (resourceName.equals(nextExt.getValueAsPrimitive().getValueAsString())) {
+							queries.add(nextQuery);
+						}
+					}
 				}
 			}
 		}
 		theModel.put("includes", includes);
+		theModel.put("queries", queries);
+		theModel.put("haveSearchParams", haveSearchParams);
 
 		if (isNotBlank(theRequest.getUpdateId())) {
 			String updateId = theRequest.getUpdateId();
@@ -510,7 +546,7 @@ public class Controller {
 	}
 
 	private String preProcessMessageBody(String theBody) {
-		if(theBody==null) {
+		if (theBody == null) {
 			return "";
 		}
 		String retVal = theBody.trim();
@@ -774,7 +810,10 @@ public class Controller {
 				});
 			}
 		}
+
 		theModel.put("conf", conformance);
+		theModel.put("requiredParamExtension", ExtensionConstants.PARAM_IS_REQUIRED);
+
 		return conformance;
 	}
 

@@ -43,16 +43,56 @@
 							</div>
 						</div>
 						
-						<div class="panel panel-default" th:if="${resourceName.empty} == false">
-							<div class="panel-heading">
-								<h3 class="panel-title">Search</h3>
-							</div>
-							<div class="panel-body">
+						<!-- Nav tabs -->
+						<ul class="nav nav-tabs" role="tablist" id="resource-nav-tabs">
+							<!-- Search Tab -->
+							<li th:if="${haveSearchParams}" >
+								<a href="#tab-search" role="tab" data-toggle="tab">Search</a>
+							</li>
+							<li th:if="${!haveSearchParams}" class="disabled">
+								<a href="#tab-search" role="tab">Search</a>
+							</li>
+							<!-- Queries Tab -->
+							<li th:if="${!queries.empty}">
+								<a href="#tab-queries" role="tab" data-toggle="tab">Queries</a>
+							</li>
+							<li th:if="${queries.empty}" class="disabled">
+								<a href="#tab-queries" role="tab">Queries</a>
+							</li>
+							<!-- CRUD Tab -->
+							<li th:class="(${!haveSearchParams} and ${queries.empty}) ? 'active'">
+								<a href="#tab-otheractions" role="tab" data-toggle="tab">CRUD Operations</a>
+							</li>
+							<!-- Tags Tab -->
+							<li>
+								<a href="#tab-tags" role="tab" data-toggle="tab">Tags</a>
+							</li>
+						</ul>
+						<script type="text/javascript">
+							$( document ).ready(function() {
+								for (var i = 0; i != 4; i++){
+									if (!$('#resource-nav-tabs li:eq('+i+')').hasClass('disabled')) {
+										$('#resource-nav-tabs li:eq('+i+') a').tab('show');
+										break;
+									}									
+								}
+							});
+						</script>
+						
+						<!-- Tab panes -->
+						<div class="tab-content">
+
+							<!-- *************************************************** -->
+							<!-- Search Tab -->
+							<!-- *************************************************** -->
+							<div class="tab-pane active" id="tab-search">
+	
+								<!-- Search contents -->
 								<div class="container-fluid">
 									<div class="row-fluid">
-								    	<div class="col-sm-2">
+								    	<div class="col-sm-2" style="padding-left: 0px;">
 											<button type="button" id="search-btn" class="btn btn-primary btn-block" 
-												data-loading-text="Searching &lt;i class='fa fa-spinner fa-spin'/&gt;" >
+												data-loading-text="Searching &lt;i class='fa fa-spinner fa-spin'/&gt;">
 												<span class="glyphicon glyphicon-search"></span>
 												Search
 											</button>
@@ -62,6 +102,15 @@
 										$('#search-btn').click(function() {
 											var btn = $(this);
 											btn.button('loading');
+											var sd = $('#tab-search').find('input').each(function() {
+												if (this.id) {
+													if (this.id.substring(0,4) == 'inc_') {
+														this.name = '_include';
+													} else {
+														this.name = this.id;
+													}	
+												}
+											});					
 											$("#outerForm").attr("action", "search").submit();
 										});
 									</script>
@@ -82,7 +131,7 @@
 									<div class="row-fluid">
 										<span th:each="include : ${includes}" class="includeCheckContainer">
 											<span class="includeCheckCheck">
-				                    			<input type="checkbox" name="_include" th:value="${include}" th:id="'inc_' + ${include}" />
+				                    			<input type="checkbox" th:value="${include}" th:id="'inc_' + ${include}" />
 				                    		</span>
 											<span class="includeCheckName" th:text="${include}"/>
 				                    	</span>
@@ -99,30 +148,30 @@
 								                    <div class="input-group-addon">
 								                    Limit
 								                    </div>
-								                    <input type="text" class="form-control" name="resource-search-limit" placeholder="max # returned"/>
+								                    <input type="text" class="form-control" id="resource-search-limit" placeholder="max # returned"/>
 								                </div>
 								            </div>
 								        </div>
 									</div>
-																		
-									<!-- 
-							    	<div class="col-sm-1">
-										<button type="button" class="btn btn-success btn-block">Add
-											<span class="glyphicon glyphicon-plus"></span>
-										</button>
-									</div>
-									 -->
 									<br clear="all"/>
 									 
-								</div>						
+								</div>
+							
 							</div>
-						</div>
-						
-						<div class="panel panel-default" th:if="${resourceName.empty} == false">
-							<div class="panel-heading">
-								<h3 class="panel-title">Operations</h3>
+							<!-- End of search Tab -->
+							
+							<!-- *************************************************** -->
+							<!-- Queries Tab -->
+							<!-- *************************************************** -->
+							<div class="tab-pane" id="tab-queries">
+								<div th:replace="tmpl-queries :: queries-list" ></div>
 							</div>
-							<div class="panel-body">
+							<!-- End of queries tab -->
+							
+							<!-- *************************************************** -->
+							<!-- Other Operations Tab -->
+							<!-- *************************************************** -->
+							<div class="tab-pane" id="tab-otheractions">
 								<div class="container-fluid">
 
 								<!-- Read/VRead -->
@@ -416,9 +465,18 @@
 								        </script>								        
 								    </div>
 
+								</div>
+							</div>
+							<!-- End of other operations tab -->
+							
+							<!-- *************************************************** -->
+							<!-- Queries Tab -->
+							<!-- *************************************************** -->
+							<div class="tab-pane" id="tab-tags">
+								<div class="container-fluid">
+
 								<!-- Get Tags -->
-								
-									<br clear="all"/>
+
 									<div class="row-fluid">
 										Show all of the tags currently in use on the server for this resource type. If an ID is specified,
 										returns only tags posted to the given version. If an ID and a version are specified, 
@@ -465,13 +523,14 @@
 											});
 										</script>
 									</div>
-
-								</div>								
+							
+								</div>							
 							</div>
+							<!-- End of queries tab -->
+							
 						</div>
+						<!-- End of tab pane -->
 						
-
-
 				</div>
 			</div>
 		</div>

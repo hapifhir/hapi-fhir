@@ -147,6 +147,7 @@ body .syntaxhighlighter .line {
 .sidebar {
   display: none;
 }
+
 @media (min-width: 768px) {
   .sidebar {
     position: fixed;
@@ -178,6 +179,10 @@ body .syntaxhighlighter .line {
   background-color: #428bca;
 }
 
+.nav-tabs li.active A {
+	background: #f5f5f5;
+	font-weight: bold;
+}
 
 /*
  * Main content
@@ -218,6 +223,18 @@ body .syntaxhighlighter .line {
 .placeholder img {
   display: inline-block;
   border-radius: 50%;
+}
+
+DIV.queryParameter {
+	padding-top: 3px;
+	padding-bottom: 3px;
+	border-radius: 6px;
+	margin-left: 5px;	
+	margin-right: 5px;	
+}
+
+DIV.queryParameterOdd {
+	background: #EEE;
 }
 
 TABLE.resultTable TR TD:FIRST-CHILD,
@@ -270,6 +287,14 @@ DIV.searchParamSeparator {
 
 .syntaxhighlighter div {
 	font-size: 0.9em !important;
+}
+
+DIV.tab-pane DIV.container-fluid {
+	padding-top: 15px;
+}
+
+.topbarIcon {
+	color: #66AAFF;
 }
 
 DIV.top-buffer {

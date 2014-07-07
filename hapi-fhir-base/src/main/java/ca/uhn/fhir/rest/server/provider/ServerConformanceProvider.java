@@ -35,8 +35,10 @@ import org.apache.commons.lang3.StringUtils;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.model.api.ExtensionDt;
+import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.resource.Conformance;
 import ca.uhn.fhir.model.dstu.resource.Conformance.Rest;
+import ca.uhn.fhir.model.dstu.resource.Conformance.RestQuery;
 import ca.uhn.fhir.model.dstu.resource.Conformance.RestResource;
 import ca.uhn.fhir.model.dstu.resource.Conformance.RestResourceOperation;
 import ca.uhn.fhir.model.dstu.resource.Conformance.RestResourceSearchParam;
@@ -105,8 +107,9 @@ public class ServerConformanceProvider {
 			resource.getProfile().setId(new IdDt(def.getResourceProfile()));
 
 			TreeSet<String> includes = new TreeSet<String>();
-			
-			Map<String, Conformance.RestResourceSearchParam> nameToSearchParam = new HashMap<String, Conformance.RestResourceSearchParam>();
+
+			// Map<String, Conformance.RestResourceSearchParam> nameToSearchParam = new HashMap<String,
+			// Conformance.RestResourceSearchParam>();
 			for (BaseMethodBinding<?> nextMethodBinding : next.getMethodBindings()) {
 				RestfulOperationTypeEnum resOp = nextMethodBinding.getResourceOperationType();
 				if (resOp != null) {
@@ -127,7 +130,7 @@ public class ServerConformanceProvider {
 				if (nextMethodBinding instanceof SearchMethodBinding) {
 					SearchMethodBinding searchMethodBinding = (SearchMethodBinding) nextMethodBinding;
 					includes.addAll(searchMethodBinding.getIncludes());
-					
+
 					List<IParameter> params = searchMethodBinding.getParameters();
 					List<SearchParameter> searchParameters = new ArrayList<SearchParameter>();
 					for (IParameter nextParameter : params) {
@@ -152,8 +155,13 @@ public class ServerConformanceProvider {
 					}
 					boolean allOptional = searchParameters.get(0).isRequired() == false;
 
-					RestResourceSearchParam searchParam = null;
-					ExtensionDt searchParamChain = null;
+					RestQuery query = null;
+					if (!allOptional) {
+						query = rest.addQuery();
+						query.getDocumentation().setValue(searchMethodBinding.getDescription());
+						query.addUndeclaredExtension(false, ExtensionConstants.QUERY_RETURN_TYPE, new CodeDt(resourceName));
+					}
+
 					for (SearchParameter nextParameter : searchParameters) {
 
 						String nextParamName = nextParameter.getName();
@@ -175,55 +183,20 @@ public class ServerConformanceProvider {
 							}
 						}
 
-						if (searchParam == null || allOptional) {
-							if (!nameToSearchParam.containsKey(nextParameter.getName())) {
-								RestResourceSearchParam param = resource.addSearchParam();
-								param.setName(nextParamName);
-								if (StringUtils.isNotBlank(chain)) {
-									param.addChain(chain);
-								}
-								param.setDocumentation(nextParamDescription);
-								param.setType(nextParameter.getParamType());
-								searchParam = param;
-							} else {
-								searchParam = nameToSearchParam.get(nextParameter.getName());
-							}
-
-							if (searchParam != null) {
-								searchParam.setType(nextParameter.getParamType());
-							}
-
+						RestResourceSearchParam param;
+						if (query == null) {
+							param = resource.addSearchParam();
 						} else {
-
-							if (searchParamChain == null) {
-								searchParamChain = searchParam.addUndeclaredExtension(false, ExtensionConstants.CONF_ADDITIONAL_PARAM);
-							} else {
-								searchParamChain = searchParamChain.addUndeclaredExtension(false, ExtensionConstants.CONF_ADDITIONAL_PARAM);
-							}
-
-							ExtensionDt ext = new ExtensionDt();
-							ext.setUrl(ExtensionConstants.CONF_ADDITIONAL_PARAM_NAME);
-							ext.setValue(new StringDt(nextParamName));
-							searchParamChain.getUndeclaredExtensions().add(ext);
-
-							ext = new ExtensionDt();
-							ext.setUrl(ExtensionConstants.CONF_ADDITIONAL_PARAM_DESCRIPTION);
-							ext.setValue(new StringDt(nextParamDescription));
-							searchParamChain.getUndeclaredExtensions().add(ext);
-
-							ext = new ExtensionDt();
-							ext.setUrl(ExtensionConstants.CONF_ADDITIONAL_PARAM_TYPE);
-							if (nextParameter.getParamType() != null) {
-								ext.setValue(new CodeDt(nextParameter.getParamType().getCode()));
-							}
-							searchParamChain.getUndeclaredExtensions().add(ext);
-
-							ext = new ExtensionDt();
-							ext.setUrl(ExtensionConstants.CONF_ADDITIONAL_PARAM_REQUIRED);
-							ext.setValue(new BooleanDt(nextParameter.isRequired()));
-							searchParamChain.getUndeclaredExtensions().add(ext);
-
+							param = query.addParameter();
+							param.addUndeclaredExtension(false, ExtensionConstants.PARAM_IS_REQUIRED, new BooleanDt(nextParameter.isRequired()));
 						}
+
+						param.setName(nextParamName);
+						if (StringUtils.isNotBlank(chain)) {
+							param.addChain(chain);
+						}
+						param.setDocumentation(nextParamDescription);
+						param.setType(nextParameter.getParamType());
 
 					}
 				}
@@ -251,7 +224,7 @@ public class ServerConformanceProvider {
 			for (String nextInclude : includes) {
 				resource.addSearchInclude(nextInclude);
 			}
-			
+
 		}
 
 		myConformance = retVal;
@@ -259,7 +232,8 @@ public class ServerConformanceProvider {
 	}
 
 	/**
-	 * Sets the cache property (default is true). If set to true, the same response will be returned for each invocation.
+	 * Sets the cache property (default is true). If set to true, the same response will be returned for each
+	 * invocation.
 	 */
 	public void setCache(boolean theCache) {
 		myCache = theCache;

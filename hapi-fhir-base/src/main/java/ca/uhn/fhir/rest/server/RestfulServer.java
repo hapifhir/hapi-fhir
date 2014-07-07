@@ -523,7 +523,15 @@ public class RestfulServer extends HttpServlet {
 				resourceMethod = resourceBinding.getMethod(r);
 			}
 			if (null == resourceMethod) {
-				throw new InvalidRequestException("No resource method available for the supplied parameters " + params);
+				StringBuilder b = new StringBuilder();
+				b.append("No resource method available for ");
+				b.append(theRequestType.name());
+				b.append(" operation[");
+				b.append(requestPath);
+				b.append("]");
+				b.append(" with parameters ");
+				b.append(params.keySet());
+				throw new InvalidRequestException(b.toString());
 			}
 
 			resourceMethod.invokeServer(this, r, theResponse);
