@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.hamcrest.core.StringContains;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -17,6 +18,7 @@ import org.junit.Test;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
@@ -40,6 +42,7 @@ import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.exceptions.FhirClientConnectionException;
 import ca.uhn.fhir.rest.gclient.IQuery;
+import ca.uhn.fhir.rest.gclient.TokenParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.IdentifierListParam;
 import ca.uhn.fhir.rest.param.QualifiedDateParam;
@@ -66,7 +69,7 @@ public class FhirResourceDaoTest {
 
 	@Test
 	public void testOrganizationName() {
-		
+
 		//@formatter:off
 		String inputStr = "{\"resourceType\":\"Organization\",\n" + 
 				"                \"extension\":[\n" + 
@@ -95,17 +98,78 @@ public class FhirResourceDaoTest {
 		Set<Long> val = ourOrganizationDao.searchForIds("name", new StringParam("P"));
 		int initial = val.size();
 
-		Organization org = ourFhirCtx.newJsonParser().parseResource(Organization.class,inputStr);
+		Organization org = ourFhirCtx.newJsonParser().parseResource(Organization.class, inputStr);
 		ourOrganizationDao.create(org);
-		
+
 		val = ourOrganizationDao.searchForIds("name", new StringParam("P"));
-		assertEquals(initial+1, val.size());
-		
+		assertEquals(initial + 1, val.size());
+
 	}
-	
-	
-	
-	
+
+	@Test
+	public void testStringParamWhichIsTooLong() {
+
+		Organization org = new Organization();
+		String str = "testStringParamLong__lvdaoy843s89tll8gvs89l4s3gelrukveilufyebrew8r87bv4b77feli7fsl4lv3vb7rexloxe7olb48vov4o78ls7bvo7vb48o48l4bb7vbvx";
+		str = str + str;
+		org.getName().setValue(str);
+
+		assertThat(str.length(), greaterThan(ResourceIndexedSearchParamString.MAX_LENGTH));
+
+		Set<Long> val = ourOrganizationDao.searchForIds("name", new StringParam("P"));
+		int initial = val.size();
+
+		ourOrganizationDao.create(org);
+
+		val = ourOrganizationDao.searchForIds("name", new StringParam("P"));
+		assertEquals(initial + 0, val.size());
+
+		val = ourOrganizationDao.searchForIds("name", new StringParam(str.substring(0, ResourceIndexedSearchParamString.MAX_LENGTH)));
+		assertEquals(initial + 1, val.size());
+
+		try {
+			ourOrganizationDao.searchForIds("name", new StringParam(str.substring(0, ResourceIndexedSearchParamString.MAX_LENGTH + 1)));
+			fail();
+		} catch (InvalidRequestException e) {
+			// ok
+		}
+	}
+
+	@Test
+	public void testTokenParamWhichIsTooLong() {
+
+		String longStr1 = RandomStringUtils.randomAlphanumeric(ResourceIndexedSearchParamString.MAX_LENGTH + 100);
+		String longStr2 = RandomStringUtils.randomAlphanumeric(ResourceIndexedSearchParamString.MAX_LENGTH + 100);
+
+		Organization org = new Organization();
+		org.getName().setValue("testTokenParamWhichIsTooLong");
+		org.getType().addCoding().setSystem(longStr1).setCode(longStr2);
+
+		String subStr1 = longStr1.substring(0, ResourceIndexedSearchParamString.MAX_LENGTH);
+		String subStr2 = longStr2.substring(0, ResourceIndexedSearchParamString.MAX_LENGTH);
+		Set<Long> val = ourOrganizationDao.searchForIds("type", new IdentifierDt(subStr1, subStr2));
+		int initial = val.size();
+
+		ourOrganizationDao.create(org);
+
+		val = ourOrganizationDao.searchForIds("type", new IdentifierDt(subStr1, subStr2));
+		assertEquals(initial + 1, val.size());
+
+		try {
+			ourOrganizationDao.searchForIds("type", new IdentifierDt(longStr1, subStr2));
+			fail();
+		} catch (InvalidRequestException e) {
+			// ok
+		}
+
+		try {
+			ourOrganizationDao.searchForIds("type", new IdentifierDt(subStr1, longStr2));
+			fail();
+		} catch (InvalidRequestException e) {
+			// ok
+		}
+}
+
 	@Test
 	public void testStoreUnversionedResources() {
 		Organization o1 = new Organization();
@@ -167,7 +231,7 @@ public class FhirResourceDaoTest {
 			assertEquals(2, retrieved.size());
 		}
 	}
-	
+
 	@Test
 	public void testIdParam() {
 		Patient patient = new Patient();
@@ -303,7 +367,7 @@ public class FhirResourceDaoTest {
 		for (IResource next : value.getResources(0, value.size())) {
 			ourDeviceDao.delete(next.getId());
 		}
-		
+
 		value = ourDeviceDao.search(new SearchParameterMap());
 		assertEquals(0, value.size());
 
@@ -312,7 +376,6 @@ public class FhirResourceDaoTest {
 
 	}
 
-	
 	@Test
 	public void testPersistSearchParamQuantity() {
 		Observation obs = new Observation();
@@ -329,8 +392,6 @@ public class FhirResourceDaoTest {
 
 	}
 
-	
-	
 	@Test
 	public void testPersistSearchParams() {
 		Patient patient = new Patient();
@@ -447,9 +508,7 @@ public class FhirResourceDaoTest {
 		assertEquals(0, patients.size());
 
 	}
-	
-	
-	
+
 	@Test
 	public void testSearchByIdParam() {
 		IdDt id1;
@@ -465,7 +524,6 @@ public class FhirResourceDaoTest {
 			id2 = ourOrganizationDao.create(patient).getId();
 		}
 
-		
 		Map<String, IQueryParameterType> params = new HashMap<String, IQueryParameterType>();
 		params.put("_id", new StringDt(id1.getIdPart()));
 		assertEquals(1, toList(ourPatientDao.search(params)).size());
@@ -477,7 +535,6 @@ public class FhirResourceDaoTest {
 		assertEquals(0, toList(ourPatientDao.search(params)).size());
 
 	}
-	
 
 	@Test
 	public void testSearchResourceLinkWithChain() {

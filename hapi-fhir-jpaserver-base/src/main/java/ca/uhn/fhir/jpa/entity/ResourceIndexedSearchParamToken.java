@@ -14,9 +14,11 @@ import org.apache.commons.lang3.StringUtils;
 })
 public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchParam {
 
+	public static final int MAX_LENGTH = 100;
+
 	private static final long serialVersionUID = 1L;
 
-	@Column(name = "SP_SYSTEM", nullable = true, length = 100)
+	@Column(name = "SP_SYSTEM", nullable = true, length = MAX_LENGTH)
 	public String mySystem;
 
 	@Column(name = "SP_VALUE", nullable = true, length = 100)

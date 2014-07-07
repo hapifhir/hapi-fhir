@@ -469,7 +469,12 @@ public abstract class BaseFhirDao {
 
 				if (nextObject instanceof IPrimitiveDatatype<?>) {
 					IPrimitiveDatatype<?> nextValue = (IPrimitiveDatatype<?>) nextObject;
-					ResourceIndexedSearchParamString nextEntity = new ResourceIndexedSearchParamString(resourceName, normalizeString(nextValue.getValueAsString()), nextValue.getValueAsString());
+					String searchTerm = nextValue.getValueAsString();
+					if (searchTerm.length() > ResourceIndexedSearchParamString.MAX_LENGTH) {
+						searchTerm=searchTerm.substring(0, ResourceIndexedSearchParamString.MAX_LENGTH);
+					}
+					
+					ResourceIndexedSearchParamString nextEntity = new ResourceIndexedSearchParamString(resourceName, normalizeString(searchTerm), searchTerm);
 					nextEntity.setResource(theEntity);
 					retVal.add(nextEntity);
 				} else {
@@ -544,31 +549,32 @@ public abstract class BaseFhirDao {
 			}
 
 			List<Object> values = t.getValues(theResource, nextPath);
+			List<String> systems = new ArrayList<String>();
+			List<String> codes = new ArrayList<String>();
 			for (Object nextObject : values) {
-				ResourceIndexedSearchParamToken nextEntity;
 				if (nextObject instanceof IdentifierDt) {
 					IdentifierDt nextValue = (IdentifierDt) nextObject;
 					if (nextValue.isEmpty()) {
 						continue;
 					}
-					nextEntity = new ResourceIndexedSearchParamToken(nextSpDef.getName(), nextValue.getSystem().getValueAsString(), nextValue.getValue().getValue());
+					systems.add( nextValue.getSystem().getValueAsString());
+					codes.add( nextValue.getValue().getValue());
 				} else if (nextObject instanceof IPrimitiveDatatype<?>) {
 					IPrimitiveDatatype<?> nextValue = (IPrimitiveDatatype<?>) nextObject;
 					if (nextValue.isEmpty()) {
 						continue;
 					}
-					nextEntity = new ResourceIndexedSearchParamToken(nextSpDef.getName(), null, nextValue.getValueAsString());
+					systems.add(null);
+					codes .add (nextValue.getValueAsString());
 				} else if (nextObject instanceof CodeableConceptDt) {
 					CodeableConceptDt nextCC = (CodeableConceptDt) nextObject;
 					for (CodingDt nextCoding : nextCC.getCoding()) {
 						if (nextCoding.isEmpty()) {
 							continue;
 						}
-						nextEntity = new ResourceIndexedSearchParamToken(nextSpDef.getName(), nextCoding.getSystem().getValueAsString(), nextCoding.getCode().getValue());
-						nextEntity.setResource(theEntity);
-						retVal.add(nextEntity);
+						systems.add(nextCoding.getSystem().getValueAsString());
+						codes.add( nextCoding.getCode().getValue());
 					}
-					nextEntity = null;
 				} else {
 					if (!multiType) {
 						throw new ConfigurationException("Search param " + nextSpDef.getName() + " is of unexpected datatype: " + nextObject.getClass());
@@ -576,11 +582,27 @@ public abstract class BaseFhirDao {
 						continue;
 					}
 				}
-				if (nextEntity != null) {
+			}
+			
+			assert systems.size() == codes.size();
+			for (int i = 0; i < systems.size(); i++) {
+				String system = systems.get(i);
+				String code = codes.get(i);
+				
+				if (system != null && system.length() > ResourceIndexedSearchParamToken.MAX_LENGTH) {
+					system = system.substring(0, ResourceIndexedSearchParamToken.MAX_LENGTH);
+				}
+				if (code != null && code.length() > ResourceIndexedSearchParamToken.MAX_LENGTH) {
+					code = code.substring(0, ResourceIndexedSearchParamToken.MAX_LENGTH);
+				}
+				
+				ResourceIndexedSearchParamToken nextEntity;
+				nextEntity = new ResourceIndexedSearchParamToken(nextSpDef.getName(), system, code);
 					nextEntity.setResource(theEntity);
 					retVal.add(nextEntity);
-				}
+
 			}
+			
 		}
 
 		theEntity.setParamsTokenPopulated(retVal.size() > 0);
