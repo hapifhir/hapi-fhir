@@ -1,0 +1,46 @@
+
+BODY {
+	font-family: sans-serif;
+}
+
+DIV.hapiHeaderText {
+	font-size: 1.3em;
+}
+
+/********************************************************
+* The following section is used for tables of values
+* with multiple columns (e.g. the table of Observations
+* in a Diagnostic Report for a lab test)
+********************************************************/
+TABLE.hapiTableOfValues THEAD TR TD {
+	background: #A0A0F0;
+	color: #000080;
+	font-size: 1.2em;
+	font-weight: bold;
+	padding: 5px;
+}
+
+TABLE.hapiTableOfValues TBODY TR TD {
+	padding-left: 5px;
+	padding-right: 5px;
+}
+
+/* Even and odd row formatting */
+TR.hapiTableOfValuesRowOdd TD {
+	background: #C0C0C0;
+}
+TR.hapiTableOfValuesRowEven TD {
+	background: #F0F0F0;
+}
+
+/********************************************************
+* The following section is used for property tables. These
+* tables have two columns, one for the property name, and
+* one for the property value
+********************************************************/
+
+TABLE.hapiPropertyTable TBODY TR TD:FIRST-CHILD {
+	background: #C0C0C0;
+	text-align: right;
+}
+

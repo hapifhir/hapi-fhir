@@ -54,6 +54,22 @@ public class SearchTest {
 		assertEquals("IDAAA (identifier123)", bundle.getEntries().get(0).getTitle().getValue());
 	}
 
+	@Test
+	public void testOmitEmptyOptionalParam() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_id=");
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		Bundle bundle = ourCtx.newXmlParser().parseBundle(responseContent);
+		assertEquals(1, bundle.getEntries().size());
+		
+		Patient p = bundle.getResources(Patient.class).get(0);
+		assertEquals(null, p.getNameFirstRep().getFamilyFirstRep().getValue());
+	}
+
+	
+	
 	@AfterClass
 	public static void afterClass() throws Exception {
 		ourServer.stop();
@@ -95,7 +111,9 @@ public class SearchTest {
 			Patient patient = new Patient();
 			patient.setId("1");
 			patient.addIdentifier("system", "identifier123");
-			patient.addName().addFamily("id"+theParam.getValue());
+			if (theParam!=null) {
+				patient.addName().addFamily("id"+theParam.getValue());
+			}
 			retVal.add(patient);
 			return retVal;
 		}

@@ -43,7 +43,7 @@
 									</td>
 									<td>
 										<th:block th:text="${action}"/>
-										<a th:href="${requestUrl}" th:text="${requestUrl}"/>
+										<a th:href="${requestUrl}" th:utext="${requestUrlText}"/>
 									</td>
 								</tr>
 								<tr th:if="${requestHeaders.length} > 0">

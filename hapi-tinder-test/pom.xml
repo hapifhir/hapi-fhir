@@ -8,7 +8,6 @@
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
-	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-tinder-test</artifactId>
 	<packaging>jar</packaging>
 

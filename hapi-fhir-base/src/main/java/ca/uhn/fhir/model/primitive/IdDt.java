@@ -401,7 +401,7 @@ public class IdDt extends BasePrimitive<String> {
 	}
 
 	/**
-	 * @deprecated Use {@link #getIdPartAsBigDecimal()} instead
+	 * @deprecated Use {@link #getIdPartAsBigDecimal()} instead (this method was deprocated because its name is ambiguous)
 	 */
 	public BigDecimal asBigDecimal() {
 		return getIdPartAsBigDecimal();

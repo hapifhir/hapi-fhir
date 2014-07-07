@@ -71,49 +71,15 @@ public class Controller {
 	private TemplateEngine myTemplateEngine;
 
 	@RequestMapping(value = { "/about" })
-	public String about( final HomeRequest theRequest, final ModelMap theModel) {
+	public String actionAbout(final HomeRequest theRequest, final ModelMap theModel) {
 		addCommonParams(theRequest, theModel);
 		GenericClient client = theRequest.newClient(myCtx, myConfig);
 		loadAndAddConformance(theRequest, theModel, client);
-		
+
 		theModel.put("notHome", true);
 		theModel.put("extraBreadcrumb", "About");
-		
+
 		return "about";
-	}
-	
-	@RequestMapping(value = { "/transaction" })
-	public String actionTransaction(final TransactionRequest theRequest, final BindingResult theBindingResult, final ModelMap theModel) {
-		addCommonParams(theRequest, theModel);
-
-		GenericClient client = theRequest.newClient(myCtx, myConfig);
-		loadAndAddConformance(theRequest, theModel, client);
-
-		String body = preProcessMessageBody(theRequest.getTransactionBody());
-
-		Bundle bundle;
-		try {
-			if (body.startsWith("{")) {
-				bundle = myCtx.newJsonParser().parseBundle(body);
-			} else if (body.startsWith("<")) {
-				bundle = myCtx.newXmlParser().parseBundle(body);
-			} else {
-				theModel.put("errorMsg", "Message body does not appear to be a valid FHIR resource instance document. Body should start with '<' (for XML encoding) or '{' (for JSON encoding).");
-				return "home";
-			}
-		} catch (DataFormatException e) {
-			ourLog.warn("Failed to parse bundle", e);
-			theModel.put("errorMsg", "Failed to parse transaction bundle body. Error was: " + e.getMessage());
-			return "home";
-		}
-
-		long start = System.currentTimeMillis();
-		client.transaction().withBundle(bundle).execute();
-		long delay = System.currentTimeMillis() - start;
-
-		processAndAddLastClientInvocation(client, ResultType.BUNDLE, theModel, delay, "Transaction");
-
-		return "result";
 	}
 
 	@RequestMapping(value = { "/conformance" })
@@ -262,11 +228,17 @@ public class Controller {
 
 		url = url.replace("&amp;", "&");
 
+		ResultType returnsResource = ResultType.BUNDLE;
+
 		long start = System.currentTimeMillis();
-		client.loadPage().url(url).execute();
+		try {
+			client.loadPage().url(url).execute();
+		} catch (Exception e) {
+			returnsResource = ResultType.NONE;
+			ourLog.warn("Failed to invoke server", e);
+		}
 		long delay = System.currentTimeMillis() - start;
 
-		ResultType returnsResource = ResultType.BUNDLE;
 		String outcomeDescription = "Bundle Page";
 
 		processAndAddLastClientInvocation(client, returnsResource, theModel, delay, outcomeDescription);
@@ -440,6 +412,40 @@ public class Controller {
 		return "result";
 	}
 
+	@RequestMapping(value = { "/transaction" })
+	public String actionTransaction(final TransactionRequest theRequest, final BindingResult theBindingResult, final ModelMap theModel) {
+		addCommonParams(theRequest, theModel);
+
+		GenericClient client = theRequest.newClient(myCtx, myConfig);
+		loadAndAddConformance(theRequest, theModel, client);
+
+		String body = preProcessMessageBody(theRequest.getTransactionBody());
+
+		Bundle bundle;
+		try {
+			if (body.startsWith("{")) {
+				bundle = myCtx.newJsonParser().parseBundle(body);
+			} else if (body.startsWith("<")) {
+				bundle = myCtx.newXmlParser().parseBundle(body);
+			} else {
+				theModel.put("errorMsg", "Message body does not appear to be a valid FHIR resource instance document. Body should start with '<' (for XML encoding) or '{' (for JSON encoding).");
+				return "home";
+			}
+		} catch (DataFormatException e) {
+			ourLog.warn("Failed to parse bundle", e);
+			theModel.put("errorMsg", "Failed to parse transaction bundle body. Error was: " + e.getMessage());
+			return "home";
+		}
+
+		long start = System.currentTimeMillis();
+		client.transaction().withBundle(bundle).execute();
+		long delay = System.currentTimeMillis() - start;
+
+		processAndAddLastClientInvocation(client, ResultType.BUNDLE, theModel, delay, "Transaction");
+
+		return "result";
+	}
+
 	@RequestMapping(value = { "/validate" })
 	public String actionValidate(final HttpServletRequest theReq, final HomeRequest theRequest, final BindingResult theBindingResult, final ModelMap theModel) {
 		doActionCreateOrValidate(theReq, theRequest, theBindingResult, theModel, "validate");
@@ -543,25 +549,6 @@ public class Controller {
 
 		processAndAddLastClientInvocation(client, returnsResource, theModel, delay, outcomeDescription);
 
-	}
-
-	private String preProcessMessageBody(String theBody) {
-		if (theBody == null) {
-			return "";
-		}
-		String retVal = theBody.trim();
-
-		StringBuilder b = new StringBuilder();
-		for (int i = 0; i < retVal.length(); i++) {
-			char nextChar = retVal.charAt(i);
-			int nextCharI = nextChar;
-			if (nextCharI == 65533) {
-				continue;
-			}
-			b.append(nextChar);
-		}
-		retVal = b.toString();
-		return retVal;
 	}
 
 	private void doActionHistory(HttpServletRequest theReq, HomeRequest theRequest, BindingResult theBindingResult, ModelMap theModel, String theMethod, String theMethodDescription) {
@@ -710,6 +697,41 @@ public class Controller {
 		return b.toString();
 	}
 
+	private String formatUrl(String theResultBody) {
+		String str = theResultBody;
+		if (str == null) {
+			return str;
+		}
+
+		StringBuilder b = new StringBuilder();
+
+		boolean inParams = false;
+		for (int i = 0; i < str.length(); i++) {
+			char nextChar = str.charAt(i);
+			if (!inParams) {
+				if (nextChar == '?') {
+					inParams = true;
+					b.append("<wbr /><span class='hlControl'>?</span><span class='hlTagName'>");
+				} else {
+					b.append(nextChar);
+				}
+			} else {
+				if (nextChar == '&') {
+					b.append("</span><wbr /><span class='hlControl'>&amp;</span><span class='hlTagName'>");
+				} else if (nextChar == '=') {
+					b.append("</span><span class='hlControl'>=</span><span class='hlAttr'>");
+				} else {
+					b.append(nextChar);
+				}
+			}
+		}
+
+		if (inParams) {
+			b.append("</span>");
+		}
+		return b.toString();
+	}
+
 	private RuntimeResourceDefinition getResourceType(HttpServletRequest theReq) throws ServletException {
 		String resourceName = StringUtils.defaultString(theReq.getParameter(PARAM_RESOURCE));
 		RuntimeResourceDefinition def = myCtx.getResourceDefinition(resourceName);
@@ -828,6 +850,25 @@ public class Controller {
 		}
 	}
 
+	private String preProcessMessageBody(String theBody) {
+		if (theBody == null) {
+			return "";
+		}
+		String retVal = theBody.trim();
+
+		StringBuilder b = new StringBuilder();
+		for (int i = 0; i < retVal.length(); i++) {
+			char nextChar = retVal.charAt(i);
+			int nextCharI = nextChar;
+			if (nextCharI == 65533) {
+				continue;
+			}
+			b.append(nextChar);
+		}
+		retVal = b.toString();
+		return retVal;
+	}
+
 	private void processAndAddLastClientInvocation(GenericClient theClient, ResultType theResultType, ModelMap theModelMap, long theLatency, String outcomeDescription) {
 		try {
 			HttpRequestBase lastRequest = theClient.getLastRequest();
@@ -889,11 +930,16 @@ public class Controller {
 			theModelMap.put("action", action);
 			theModelMap.put("bundle", bundle);
 			theModelMap.put("resultStatus", resultStatus);
+
 			theModelMap.put("requestUrl", requestUrl);
+			theModelMap.put("requestUrlText", formatUrl(requestUrl));
+
 			String requestBodyText = format(requestBody, ctEnum);
 			theModelMap.put("requestBody", requestBodyText);
+
 			String resultBodyText = format(resultBody, ctEnum);
 			theModelMap.put("resultBody", resultBodyText);
+
 			theModelMap.put("resultBodyIsLong", resultBodyText.length() > 1000);
 			theModelMap.put("requestHeaders", requestHeaders);
 			theModelMap.put("responseHeaders", responseHeaders);

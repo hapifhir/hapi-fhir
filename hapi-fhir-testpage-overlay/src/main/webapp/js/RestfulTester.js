@@ -68,7 +68,8 @@ function addSearchControls(theSearchParamType, theSearchParamName, theSearchPara
 	}
 	
 	$('#search-param-rowopts-' + theContainerRowNum).append(
-		$('<input />', { id: 'param.' + theRowNum + '.name', type: 'hidden', value: theSearchParamName })
+		$('<input />', { id: 'param.' + theRowNum + '.name', type: 'hidden', value: theSearchParamName }),
+		$('<input />', { id: 'param.' + theRowNum + '.type', type: 'hidden', value: theSearchParamType })
 	);
 
     if (theSearchParamType == 'token') {
@@ -145,10 +146,11 @@ function handleSearchParamTypeChange(select, params, rowNum) {
 	}
 	$('#search-param-rowopts-' + rowNum).empty();
 	var searchParam = params[newVal];
+	/*
 	$('#search-param-rowopts-' + rowNum).append(
 		$('<input />', { name: 'param.' + rowNum + '.type', type: 'hidden', value: searchParam.type })
 	);
-	
+	*/
 	addSearchControls(searchParam.type, searchParam.name, searchParam.chain, rowNum, rowNum);
 	
 	select.prevVal = newVal;

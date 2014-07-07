@@ -23,6 +23,8 @@ package ca.uhn.fhir.rest.param;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -45,6 +47,11 @@ final class QueryParameterTypeBinder implements IParamBinder {
 
 	@Override
 	public Object parse(List<QualifiedParamList> theParams) throws InternalErrorException, InvalidRequestException {
+		String value = theParams.get(0).get(0);
+		if (StringUtils.isBlank(value)) {
+			return null;
+		}
+		
 		IQueryParameterType dt;
 		try {
 			dt = myType.newInstance();
@@ -55,7 +62,7 @@ final class QueryParameterTypeBinder implements IParamBinder {
 				throw new InvalidRequestException("Multiple values detected");
 			}
 			
-			dt.setValueAsQueryToken(theParams.get(0).getQualifier(), theParams.get(0).get(0));
+			dt.setValueAsQueryToken(theParams.get(0).getQualifier(), value);
 		} catch (InstantiationException e) {
 			throw new InternalErrorException(e);
 		} catch (IllegalAccessException e) {
