@@ -146,7 +146,7 @@ public class DefaultThymeleafNarrativeGeneratorTest {
 
 		String title = gen.generateTitle(value);
 		ourLog.info(title);
-		assertEquals("Some Diagnostic Report - final - 2 observations", title);
+		assertEquals("Some & Diagnostic Report - final - 2 observations", title);
 
 		
 		// Now try it with the parser

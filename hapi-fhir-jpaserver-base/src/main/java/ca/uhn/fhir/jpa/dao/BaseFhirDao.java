@@ -69,6 +69,7 @@ import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.server.IBundleProvider;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.FhirTerser;
 
@@ -759,6 +760,7 @@ public abstract class BaseFhirDao {
 				break;
 			}
 		} catch (UnsupportedEncodingException e) {
+			throw new InternalErrorException(e);
 		}
 
 		TagList tagList = (TagList) theResource.getResourceMetadata().get(ResourceMetadataKeyEnum.TAG_LIST);
@@ -770,6 +772,9 @@ public abstract class BaseFhirDao {
 		}
 
 		String title = ResourceMetadataKeyEnum.TITLE.get(theResource);
+		if (title != null && title.length()>BaseHasResource.MAX_TITLE_LENGTH) {
+			title = title.substring(0, BaseHasResource.MAX_TITLE_LENGTH);
+		}
 		theEntity.setTitle(title);
 		
 	}

@@ -17,7 +17,7 @@ import ca.uhn.fhir.model.primitive.InstantDt;
 @MappedSuperclass
 public abstract class BaseHasResource {
 
-	private static final int MAX_TITLE_LENGTH = 100;
+	public static final int MAX_TITLE_LENGTH = 100;
 
 	@Column(name = "RES_DELETED_AT", nullable = true)
 	@Temporal(TemporalType.TIMESTAMP)

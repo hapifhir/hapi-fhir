@@ -394,7 +394,7 @@ public class ResfulServerMethodTest {
 			p = ourCtx.newXmlParser().setPrettyPrint(false);
 			enc = p.encodeResourceToString(bundle);
 			ourLog.info("Response:\n{}", enc);
-			assertThat(enc, StringContains.containsString("<searchParam><name value=\"quantityParam\"/><type value=\"quantity\"/></searchParam>"));
+			assertThat(enc, StringContains.containsString("<name value=\"quantityParam\"/><type value=\"quantity\"/>"));
 		}
 		// {
 		// IParser p = ourCtx.newJsonParser().setPrettyPrint(true);
