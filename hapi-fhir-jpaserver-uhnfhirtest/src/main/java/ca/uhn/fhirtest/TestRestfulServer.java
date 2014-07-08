@@ -8,6 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.web.context.ContextLoaderListener;
 
+import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.provider.JpaConformanceProvider;
 import ca.uhn.fhir.jpa.provider.JpaSystemProvider;
@@ -57,7 +58,10 @@ public class TestRestfulServer extends RestfulServer {
 		
 		String implDesc = getInitParameter("ImplementationDescription");
 		
-		JpaConformanceProvider confProvider = new JpaConformanceProvider(this, systemDao);
+		@SuppressWarnings("rawtypes")
+		Collection<IFhirResourceDao> resourceDaos = myAppCtx.getBeansOfType(IFhirResourceDao.class).values();
+
+		JpaConformanceProvider confProvider = new JpaConformanceProvider(this, systemDao, resourceDaos);
 		confProvider.setImplementationDescription(implDesc);
 		setServerConformanceProvider(confProvider);
 		

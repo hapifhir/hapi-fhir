@@ -82,10 +82,16 @@ function addSearchControls(theSearchParamType, theSearchParamName, theSearchPara
 		    	$('<input />', { id: 'param.' + theRowNum + '.2', placeholder: 'value', type: 'text', 'class': 'form-control' })
 		    )
     	);
-    } else if (theSearchParamType == 'string' || theSearchParamType == 'number') {
+    } else if (theSearchParamType == 'string' || theSearchParamType == 'number' || theSearchParamType == 'reference') {
+    	var placeholderText = 'value';
+    	if (theSearchParamType == 'number') {
+    		placeholderText = 'Number';
+    	} else if (theSearchParamType == 'reference') {
+    		placeholderText = 'Resource ID';
+    	}
     	$('#search-param-rowopts-' + theContainerRowNum).append(
     		$('<div />', { 'class': 'col-sm-3' }).append(
-		    	$('<input />', { id: 'param.' + theRowNum + '.0', placeholder: 'value', type: 'text', 'class': 'form-control' })
+		    	$('<input />', { id: 'param.' + theRowNum + '.0', placeholder: placeholderText, type: 'text', 'class': 'form-control' })
 	    	)
 	    );
     } else if (theSearchParamType == 'date') {

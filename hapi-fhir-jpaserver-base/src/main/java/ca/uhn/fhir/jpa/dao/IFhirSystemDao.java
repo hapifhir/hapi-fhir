@@ -8,7 +8,7 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 
-public interface IFhirSystemDao {
+public interface IFhirSystemDao extends IDao {
 
 	void transaction(List<IResource> theResources);
 

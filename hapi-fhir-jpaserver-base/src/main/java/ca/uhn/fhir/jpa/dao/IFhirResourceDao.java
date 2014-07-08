@@ -14,7 +14,7 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 
-public interface IFhirResourceDao<T extends IResource> {
+public interface IFhirResourceDao<T extends IResource> extends IDao {
 
 	void addTag(IdDt theId, String theScheme, String theTerm, String theLabel);
 
@@ -33,7 +33,7 @@ public interface IFhirResourceDao<T extends IResource> {
 	IBundleProvider history(IdDt theId,Date theSince);
 
 	IBundleProvider history(Long theId, Date theSince);
-
+	
 	/**
 	 * 
 	 * @param theId

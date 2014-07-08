@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.test;
 
 import java.lang.annotation.Documented;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -85,6 +86,9 @@ public class OverlayTestApp {
 		
 		
 		IFhirSystemDao systemDao = appCtx.getBean("mySystemDao", IFhirSystemDao.class);
+		
+		@SuppressWarnings("rawtypes")
+		Collection<IFhirResourceDao> resourceDaos = appCtx.getBeansOfType(IFhirResourceDao.class).values();
 		JpaSystemProvider systemProvider = new JpaSystemProvider(systemDao);
 
 		RestfulServer restServer = new RestfulServer();
@@ -97,7 +101,7 @@ public class OverlayTestApp {
 		restServer.setPagingProvider(new FifoMemoryPagingProvider(10));
 		restServer.setImplementationDescription("This is a great server!!!!");
 		
-		JpaConformanceProvider confProvider = new JpaConformanceProvider(restServer, systemDao);
+		JpaConformanceProvider confProvider = new JpaConformanceProvider(restServer, systemDao,resourceDaos);
 		restServer.setServerConformanceProvider(confProvider);
 		
 		myPort = 8887;

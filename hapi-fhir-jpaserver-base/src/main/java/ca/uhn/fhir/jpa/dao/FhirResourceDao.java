@@ -517,6 +517,7 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 
 		myEntityManager.persist(newEntity);
 		myEntityManager.merge(entity);
+		notifyWriteCompleted();
 	}
 
 	@Override
@@ -527,6 +528,7 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 		updateEntity(theResource, entity, false, false);
 
 		MethodOutcome outcome = toMethodOutcome(entity);
+		notifyWriteCompleted();
 		return outcome;
 	}
 
@@ -1021,6 +1023,7 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 
 		ResourceTable savedEntity = updateEntity(theResource, entity, true, false);
 
+		notifyWriteCompleted();
 		return toMethodOutcome(savedEntity);
 	}
 
@@ -1033,6 +1036,7 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 
 		ResourceTable savedEntity = updateEntity(null, entity, true, true);
 
+		notifyWriteCompleted();
 		return toMethodOutcome(savedEntity);
 	}
 

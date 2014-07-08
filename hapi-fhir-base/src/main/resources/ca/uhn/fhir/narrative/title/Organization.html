@@ -1,0 +1,4 @@
+<div>
+	<th:block th:if="${not resource.name.empty}" th:text="${resource.name.value}"/>
+	<th:block th:if="${resource.name.empty}">Unknown Organization</th:block>
+</div>

@@ -20,6 +20,7 @@ import ca.uhn.fhir.model.dstu.resource.Conformance;
 import ca.uhn.fhir.model.dstu.resource.DiagnosticReport;
 import ca.uhn.fhir.model.dstu.resource.Encounter;
 import ca.uhn.fhir.model.dstu.resource.Observation;
+import ca.uhn.fhir.model.dstu.resource.Organization;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.dstu.valueset.DiagnosticReportStatusEnum;
 import ca.uhn.fhir.model.dstu.valueset.EncounterClassEnum;
@@ -89,6 +90,21 @@ public class DefaultThymeleafNarrativeGeneratorTest {
 
 	}
 
+	@Test
+	public void testGenerateOrganization() throws DataFormatException {
+		Organization enc = new Organization();
+
+		enc.addIdentifier("urn:visits", "1234567");
+		enc.setName("Some Test Org");
+		enc.addAddress().addLine("123 Fake St").setCity("Toronto").setState("ON").setCountry("Canada").setZip("12345");
+		
+		String title = gen.generateTitle(enc);
+		assertEquals("Some Test Org", title);
+		ourLog.info(title);
+
+	}
+
+	
 	@Test
 	public void testGenerateServerConformance() throws DataFormatException {
 		Conformance value = myCtx.newXmlParser().parseResource(Conformance.class, new InputStreamReader(getClass().getResourceAsStream("/server-conformance-statement.xml")));

@@ -128,7 +128,8 @@ public class FhirSystemDao extends BaseFhirDao implements IFhirSystemDao {
 		
 		long delay = System.currentTimeMillis() - start;
 		ourLog.info("Transaction completed in {}ms with {} creations and {} updates", new Object[] {delay, creations, updates});
-
+		
+		notifyWriteCompleted();
 	}
 
 	@Override
