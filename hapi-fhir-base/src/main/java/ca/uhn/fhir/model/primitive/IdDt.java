@@ -35,12 +35,11 @@ import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.server.Constants;
 
 /**
- * Represents the FHIR ID type. This is the actual resource ID, meaning the ID that will be used in RESTful URLs,
- * Resource References, etc. to represent a specific instance of a resource.
+ * Represents the FHIR ID type. This is the actual resource ID, meaning the ID that will be used in RESTful URLs, Resource References, etc. to represent a specific instance of a resource.
  * 
  * <p>
- * <b>Description</b>: A whole number in the range 0 to 2^64-1 (optionally represented in hex), a uuid, an oid, or any
- * other combination of lowercase letters, numerals, "-" and ".", with a length limit of 36 characters.
+ * <b>Description</b>: A whole number in the range 0 to 2^64-1 (optionally represented in hex), a uuid, an oid, or any other combination of lowercase letters, numerals, "-" and ".", with a length
+ * limit of 36 characters.
  * </p>
  * <p>
  * regex: [a-z0-9\-\.]{1,36}
@@ -63,12 +62,11 @@ public class IdDt extends BasePrimitive<String> {
 	}
 
 	/**
-	 * Create a new ID, using a BigDecimal input. Uses {@link BigDecimal#toPlainString()} to generate the string
-	 * representation.
+	 * Create a new ID, using a BigDecimal input. Uses {@link BigDecimal#toPlainString()} to generate the string representation.
 	 */
 	public IdDt(BigDecimal thePid) {
 		if (thePid != null) {
-			setValue(thePid.toPlainString());
+			setValue(toPlainStringWithNpeThrowIfNeeded(thePid));
 		} else {
 			setValue(null);
 		}
@@ -82,12 +80,11 @@ public class IdDt extends BasePrimitive<String> {
 	}
 
 	/**
-	 * Create a new ID using a string. This String may contain a simple ID (e.g. "1234") or it may contain a complete
-	 * URL (http://example.com/fhir/Patient/1234).
+	 * Create a new ID using a string. This String may contain a simple ID (e.g. "1234") or it may contain a complete URL (http://example.com/fhir/Patient/1234).
 	 * 
 	 * <p>
-	 * <b>Description</b>: A whole number in the range 0 to 2^64-1 (optionally represented in hex), a uuid, an oid, or
-	 * any other combination of lowercase letters, numerals, "-" and ".", with a length limit of 36 characters.
+	 * <b>Description</b>: A whole number in the range 0 to 2^64-1 (optionally represented in hex), a uuid, an oid, or any other combination of lowercase letters, numerals, "-" and ".", with a length
+	 * limit of 36 characters.
 	 * </p>
 	 * <p>
 	 * regex: [a-z0-9\-\.]{1,36}
@@ -107,7 +104,14 @@ public class IdDt extends BasePrimitive<String> {
 	 *            The ID (e.g. "123")
 	 */
 	public IdDt(String theResourceType, BigDecimal theIdPart) {
-		this(theResourceType, theIdPart.toPlainString());
+		this(theResourceType, toPlainStringWithNpeThrowIfNeeded(theIdPart));
+	}
+
+	private static String toPlainStringWithNpeThrowIfNeeded(BigDecimal theIdPart) {
+		if (theIdPart==null) {
+			throw new NullPointerException("BigDecimal ID can not be null");
+		}
+		return theIdPart.toPlainString();
 	}
 
 	/**
@@ -133,7 +137,6 @@ public class IdDt extends BasePrimitive<String> {
 	 *            The version ID ("e.g. "456")
 	 */
 	public IdDt(String theResourceType, String theId, String theVersionId) {
-		Validate.notBlank(theResourceType, "Resource type must not be blank");
 		Validate.notBlank(theId, "ID must not be blank");
 
 		myResourceType = theResourceType;
@@ -144,14 +147,6 @@ public class IdDt extends BasePrimitive<String> {
 
 	/**
 	 * @deprecated Use {@link #getIdPartAsBigDecimal()} instead (this method was deprocated because its name is ambiguous)
-	 */
-	public BigDecimal asBigDecimal() {
-		return getIdPartAsBigDecimal();
-	}
-
-	/**
-	 * @deprecated Use {@link #getIdPartAsBigDecimal()} instead (this method was deprocated because its name is
-	 *             ambiguous)
 	 */
 	public BigDecimal asBigDecimal() {
 		return getIdPartAsBigDecimal();
@@ -172,8 +167,7 @@ public class IdDt extends BasePrimitive<String> {
 	}
 
 	/**
-	 * Returns a reference to <code>this</code> IdDt. It is generally not neccesary to use this method but it is
-	 * provided for consistency with the rest of the API.
+	 * Returns a reference to <code>this</code> IdDt. It is generally not neccesary to use this method but it is provided for consistency with the rest of the API.
 	 */
 	@Override
 	public IdDt getId() {
@@ -217,19 +211,18 @@ public class IdDt extends BasePrimitive<String> {
 	}
 
 	/**
-	 * Returns the value of this ID. Note that this value may be a fully qualified URL, a relative/partial URL, or a
-	 * simple ID. Use {@link #getIdPart()} to get just the ID portion.
+	 * Returns the value of this ID. Note that this value may be a fully qualified URL, a relative/partial URL, or a simple ID. Use {@link #getIdPart()} to get just the ID portion.
 	 * 
 	 * @see #getIdPart()
 	 */
 	@Override
 	public String getValue() {
 		if (myValue == null && myHaveComponentParts) {
-		if (myUnqualifiedVersionId != null) {
-			myValue = myResourceType + '/' + myUnqualifiedId + '/' + Constants.PARAM_HISTORY + '/' + myUnqualifiedVersionId;
-		} else {
-			myValue = myResourceType + '/' + myUnqualifiedId;
-		}
+			if (myUnqualifiedVersionId != null) {
+				myValue = myResourceType + '/' + myUnqualifiedId + '/' + Constants.PARAM_HISTORY + '/' + myUnqualifiedVersionId;
+			} else {
+				myValue = myResourceType + '/' + myUnqualifiedId;
+			}
 		}
 		return myValue;
 	}
@@ -259,16 +252,12 @@ public class IdDt extends BasePrimitive<String> {
 		return isNotBlank(myResourceType);
 	}
 
-<<<<<<< HEAD
-=======
 	public boolean hasVersionIdPart() {
 		return isNotBlank(getVersionIdPart());
 	}
 
->>>>>>> 4d517aa76fc28af9fc4f0fa298ea3ee313a533a7
 	/**
-	 * Returns <code>true</code> if the unqualified ID is a valid {@link Long} value (in other words, it consists only
-	 * of digits)
+	 * Returns <code>true</code> if the unqualified ID is a valid {@link Long} value (in other words, it consists only of digits)
 	 */
 	public boolean isIdPartValidLong() {
 		String id = getIdPart();
@@ -291,8 +280,7 @@ public class IdDt extends BasePrimitive<String> {
 	}
 
 	/**
-	 * Copies the value from the given IdDt to <code>this</code> IdDt. It is generally not neccesary to use this method
-	 * but it is provided for consistency with the rest of the API.
+	 * Copies the value from the given IdDt to <code>this</code> IdDt. It is generally not neccesary to use this method but it is provided for consistency with the rest of the API.
 	 */
 	@Override
 	public void setId(IdDt theId) {
@@ -303,8 +291,8 @@ public class IdDt extends BasePrimitive<String> {
 	 * Set the value
 	 * 
 	 * <p>
-	 * <b>Description</b>: A whole number in the range 0 to 2^64-1 (optionally represented in hex), a uuid, an oid, or
-	 * any other combination of lowercase letters, numerals, "-" and ".", with a length limit of 36 characters.
+	 * <b>Description</b>: A whole number in the range 0 to 2^64-1 (optionally represented in hex), a uuid, an oid, or any other combination of lowercase letters, numerals, "-" and ".", with a length
+	 * limit of 36 characters.
 	 * </p>
 	 * <p>
 	 * regex: [a-z0-9\-\.]{1,36}
@@ -314,6 +302,7 @@ public class IdDt extends BasePrimitive<String> {
 	public void setValue(String theValue) throws DataFormatException {
 		// TODO: add validation
 		myValue = theValue;
+		myHaveComponentParts=false;
 		if (StringUtils.isBlank(theValue)) {
 			myValue = null;
 			myUnqualifiedId = null;
@@ -350,8 +339,8 @@ public class IdDt extends BasePrimitive<String> {
 	 * Set the value
 	 * 
 	 * <p>
-	 * <b>Description</b>: A whole number in the range 0 to 2^64-1 (optionally represented in hex), a uuid, an oid, or
-	 * any other combination of lowercase letters, numerals, "-" and ".", with a length limit of 36 characters.
+	 * <b>Description</b>: A whole number in the range 0 to 2^64-1 (optionally represented in hex), a uuid, an oid, or any other combination of lowercase letters, numerals, "-" and ".", with a length
+	 * limit of 36 characters.
 	 * </p>
 	 * <p>
 	 * regex: [a-z0-9\-\.]{1,36}
@@ -364,7 +353,7 @@ public class IdDt extends BasePrimitive<String> {
 
 	@Override
 	public String toString() {
-		return myValue;
+		return getValue();
 	}
 
 	public IdDt toUnqualified() {
@@ -376,19 +365,18 @@ public class IdDt extends BasePrimitive<String> {
 	}
 
 	public IdDt toVersionless() {
-		int i = myValue.indexOf(Constants.PARAM_HISTORY);
+		String value = getValue();
+		int i = value.indexOf(Constants.PARAM_HISTORY);
 		if (i > 1) {
-			return new IdDt(myValue.substring(0, i - 1));
+			return new IdDt(value.substring(0, i - 1));
 		} else {
 			return this;
 		}
 	}
 
 	/**
-	 * Returns a view of this ID as a fully qualified URL, given a server base and resource name (which will only be
-	 * used if the ID does not already contain those respective parts). Essentially, because IdDt can contain either a
-	 * complete URL or a partial one (or even jut a simple ID), this method may be used to translate into a complete
-	 * URL.
+	 * Returns a view of this ID as a fully qualified URL, given a server base and resource name (which will only be used if the ID does not already contain those respective parts). Essentially,
+	 * because IdDt can contain either a complete URL or a partial one (or even jut a simple ID), this method may be used to translate into a complete URL.
 	 * 
 	 * @param theServerBase
 	 *            The server base (e.g. "http://example.com/fhir")
@@ -416,29 +404,26 @@ public class IdDt extends BasePrimitive<String> {
 	}
 
 	/**
-	 * Creates a new instance of this ID which is identical, but refers to the specific version of this resource ID
-	 * noted by theVersion.
+	 * Creates a new instance of this ID which is identical, but refers to the specific version of this resource ID noted by theVersion.
 	 * 
 	 * @param theVersion
 	 *            The actual version string, e.g. "1"
-	 * @return A new instance of IdDt which is identical, but refers to the specific version of this resource ID noted
-	 *         by theVersion.
+	 * @return A new instance of IdDt which is identical, but refers to the specific version of this resource ID noted by theVersion.
 	 */
 	public IdDt withVersion(String theVersion) {
 		Validate.notBlank(theVersion, "Version may not be null or empty");
 
-		int i = myValue.indexOf(Constants.PARAM_HISTORY);
+		String existingValue = getValue();
+		
+		int i = existingValue.indexOf(Constants.PARAM_HISTORY);
 		String value;
 		if (i > 1) {
-			value = myValue.substring(0, i - 1);
+			value = existingValue.substring(0, i - 1);
 		} else {
-			value = myValue;
+			value = existingValue;
 		}
 
-<<<<<<< HEAD
-=======
 		return new IdDt(value + '/' + Constants.PARAM_HISTORY + '/' + theVersion);
 	}
 
->>>>>>> 4d517aa76fc28af9fc4f0fa298ea3ee313a533a7
 }

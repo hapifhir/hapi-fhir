@@ -279,7 +279,9 @@ public class ServerFeaturesTest {
 		 */
 		@Read()
 		public Patient getResourceById(@IdParam IdDt theId) {
-			return getIdToPatient().get(theId.getValue());
+			String key = theId.getIdPart();
+			Patient retVal = getIdToPatient().get(key);
+			return retVal;
 		}
 
 		/**

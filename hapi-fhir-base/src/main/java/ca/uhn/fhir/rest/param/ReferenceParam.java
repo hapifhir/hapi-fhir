@@ -29,7 +29,6 @@ import ca.uhn.fhir.model.primitive.IdDt;
 public class ReferenceParam extends IdDt implements IQueryParameterType {
 
 	private String myChain;
-	private String myResourceType;
 
 	public ReferenceParam() {
 	}
@@ -44,8 +43,11 @@ public class ReferenceParam extends IdDt implements IQueryParameterType {
 	}
 
 	public ReferenceParam(String theResourceType, String theChain, String theValue) {
-		setResourceType(theResourceType);
-		setValueAsQueryToken(null, theValue);
+		if (isNotBlank(theResourceType)) {
+			setValue(theResourceType + "/" + theValue);
+		} else {
+			setValue(theValue);
+		}
 		setChain(theChain);
 	}
 
@@ -56,9 +58,9 @@ public class ReferenceParam extends IdDt implements IQueryParameterType {
 	@Override
 	public String getQueryParameterQualifier() {
 		StringBuilder b = new StringBuilder();
-		if (isNotBlank(myResourceType)) {
+		if (isNotBlank(getResourceType())) {
 			b.append(':');
-			b.append(myResourceType);
+			b.append(getResourceType());
 		}
 		if (isNotBlank(myChain)) {
 			b.append('.');
@@ -70,13 +72,9 @@ public class ReferenceParam extends IdDt implements IQueryParameterType {
 		return null;
 	}
 
-	public String getResourceType() {
-		return myResourceType;
-	}
-
 	@Override
 	public String getValueAsQueryToken() {
-		return getValue();
+		return getIdPart();
 	}
 
 	public void setChain(String theChain) {
@@ -84,35 +82,35 @@ public class ReferenceParam extends IdDt implements IQueryParameterType {
 	}
 
 	public Class<? extends IResource> getResourceType(FhirContext theCtx) {
-		if (isBlank(myResourceType)) {
+		if (isBlank(getResourceType())) {
 			return null;
 		}
-		return theCtx.getResourceDefinition(myResourceType).getImplementingClass();
-	}
-
-	public void setResourceType(String theResourceType) {
-		myResourceType = theResourceType;
+		return theCtx.getResourceDefinition(getResourceType()).getImplementingClass();
 	}
 
 	@Override
 	public void setValueAsQueryToken(String theQualifier, String theValue) {
 		String q = theQualifier;
+		String resourceType=null;
 		if (isNotBlank(q)) {
 			if (q.startsWith(":")) {
 				int nextIdx = q.indexOf('.');
 				if (nextIdx != -1) {
-					myResourceType = q.substring(1, nextIdx);
+					resourceType = q.substring(1, nextIdx);
 					myChain = q.substring(nextIdx + 1);
 				} else {
-					myResourceType = q.substring(1);
+					resourceType = q.substring(1);
 				}
 			} else if (q.startsWith(".")) {
 				myChain = q.substring(1);
 			}
 		}
 
-		setValue(theValue);
+		if (isNotBlank(resourceType)) {
+			setValue(resourceType + '/' + theValue);
+		} else {
+			setValue(theValue);
+		}
 	}
-
 
 }

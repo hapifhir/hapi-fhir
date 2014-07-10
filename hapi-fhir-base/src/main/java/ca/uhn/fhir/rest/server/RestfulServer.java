@@ -434,7 +434,7 @@ public class RestfulServer extends HttpServlet {
 				if (nextString.startsWith("_")) {
 					operation = nextString;
 				} else {
-					id = new IdDt(nextString);
+					id = new IdDt(resourceName, nextString);
 				}
 			}
 
