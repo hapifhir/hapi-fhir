@@ -3,6 +3,8 @@ package ca.uhn.fhir.jpa.provider;
 import java.util.Date;
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.beans.factory.annotation.Required;
 
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
@@ -15,7 +17,7 @@ import ca.uhn.fhir.rest.annotation.Transaction;
 import ca.uhn.fhir.rest.annotation.TransactionParam;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 
-public class JpaSystemProvider {
+public class JpaSystemProvider extends BaseJpaProvider {
 
 	private IFhirSystemDao myDao;
 
@@ -33,19 +35,34 @@ public class JpaSystemProvider {
 	}
 
 	@Transaction
-	public List<IResource> transaction(@TransactionParam List<IResource> theResources) {
-		myDao.transaction(theResources);
-		return theResources;
+	public List<IResource> transaction(HttpServletRequest theRequest, @TransactionParam List<IResource> theResources) {
+		startRequest(theRequest);
+		try {
+			myDao.transaction(theResources);
+			return theResources;
+		} finally {
+			endRequest(theRequest);
+		}
 	}
 
 	@History
-	public IBundleProvider historyServer(@Since Date theDate) {
-		return myDao.history(theDate);
+	public IBundleProvider historyServer(HttpServletRequest theRequest, @Since Date theDate) {
+		startRequest(theRequest);
+		try {
+			return myDao.history(theDate);
+		} finally {
+			endRequest(theRequest);
+		}
 	}
-	
+
 	@GetTags
-	public TagList getAllTagsOnServer() {
+	public TagList getAllTagsOnServer(HttpServletRequest theRequest) {
+		startRequest(theRequest);
+		try {
 		return myDao.getAllTags();
+		} finally {
+			endRequest(theRequest);
+		}
 	}
-	
+
 }

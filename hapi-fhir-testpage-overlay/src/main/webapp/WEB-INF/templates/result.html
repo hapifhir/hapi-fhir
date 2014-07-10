@@ -65,7 +65,7 @@
 							</tbody>
 						</table>
 
-						<table class="table table-bordered table-striped resultTable" id="resultTable">
+						<table class="table table-bordered table-striped resultTable" id="resultTable" th:if="${resultStatus} != null">
 							<colgroup>
 								<col class="col-xs-1" />
 								<col class="col-xs-7" />
@@ -177,9 +177,11 @@
 																	</th:block>
 																</td>
 																<td>
-																	<th:block th:if="${entry.resource} != null" th:text="${entry.resource.id.toUnqualified()}"/>
+																	<small th:if="${entry.resource} != null" th:text="${entry.resource.id.toUnqualified()}"/>
 																</td>
-																<td><small th:text="${entry.title}"/></td>
+																<td>
+																	<small th:text="${entry.title}"/>
+																</td>
 																<td th:if="${entry.updated.value} == null"></td>
 																<td th:if="${entry.updated.value} != null and ${entry.updated.today} == true" th:text="${#dates.format(entry.updated.value, 'HH:mm:ss')}"></td>
 																<td th:if="${entry.updated.value} != null and ${entry.updated.today} == false" th:text="${#dates.format(entry.updated.value, 'yyyy-MM-dd')}"></td>

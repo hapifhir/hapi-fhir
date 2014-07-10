@@ -40,7 +40,13 @@ TR.hapiTableOfValuesRowEven TD {
 ********************************************************/
 
 TABLE.hapiPropertyTable TBODY TR TD:FIRST-CHILD {
-	background: #C0C0C0;
-	text-align: right;
+        text-align: right;
+        background: #C0C0C0;
+        border-top: 1px solid #EEE;
 }
 
+TABLE.hapiPropertyTable TBODY TR TD {
+        vertical-align: top;
+        padding: 4px;
+        margin: 1px;
+}

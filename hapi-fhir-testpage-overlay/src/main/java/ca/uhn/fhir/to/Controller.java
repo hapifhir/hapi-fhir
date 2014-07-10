@@ -44,6 +44,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.client.GenericClient;
+import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.gclient.IUntypedQuery;
 import ca.uhn.fhir.rest.gclient.StringParam;
@@ -73,8 +74,6 @@ public class Controller {
 	@RequestMapping(value = { "/about" })
 	public String actionAbout(final HomeRequest theRequest, final ModelMap theModel) {
 		addCommonParams(theRequest, theModel);
-		GenericClient client = theRequest.newClient(myCtx, myConfig);
-		loadAndAddConformance(theRequest, theModel, client);
 
 		theModel.put("notHome", true);
 		theModel.put("extraBreadcrumb", "About");
@@ -87,12 +86,17 @@ public class Controller {
 		addCommonParams(theRequest, theModel);
 
 		GenericClient client = theRequest.newClient(myCtx, myConfig);
+		ResultType returnsResource = ResultType.RESOURCE;
 
 		long start = System.currentTimeMillis();
-		loadAndAddConformance(theRequest, theModel, client);
+		try {
+			client.conformance();
+		} catch (Exception e) {
+			returnsResource = handleClientException(client, e, theModel);
+		}
 		long delay = System.currentTimeMillis() - start;
 
-		processAndAddLastClientInvocation(client, ResultType.RESOURCE, theModel, delay, "Loaded conformance");
+		processAndAddLastClientInvocation(client, returnsResource, theModel, delay, "Loaded conformance");
 
 		return "result";
 	}
@@ -108,8 +112,6 @@ public class Controller {
 		addCommonParams(theRequest, theModel);
 
 		GenericClient client = theRequest.newClient(myCtx, myConfig);
-
-		loadAndAddConformance(theRequest, theModel, client);
 
 		RuntimeResourceDefinition def;
 		try {
@@ -132,8 +134,7 @@ public class Controller {
 		try {
 			client.delete(def.getImplementingClass(), new IdDt(id));
 		} catch (Exception e) {
-			returnsResource = ResultType.NONE;
-			ourLog.warn("Failed to invoke server", e);
+			returnsResource = handleClientException(client,e, theModel);
 		}
 		long delay = System.currentTimeMillis() - start;
 		processAndAddLastClientInvocation(client, returnsResource, theModel, delay, outcomeDescription);
@@ -141,13 +142,23 @@ public class Controller {
 		return "result";
 	}
 
+	private ResultType handleClientException(GenericClient theClient, Exception e, ModelMap theModel) {
+		ResultType returnsResource;
+		returnsResource = ResultType.NONE;
+		ourLog.warn("Failed to invoke server", e);
+		
+		if (theClient.getLastResponse() == null) {
+			theModel.put("errorMsg", "Error: " + e.getMessage());
+		}
+		
+		return returnsResource;
+	}
+
 	@RequestMapping(value = { "/get-tags" })
 	public String actionGetTags(HttpServletRequest theReq, HomeRequest theRequest, BindingResult theBindingResult, ModelMap theModel) {
 		addCommonParams(theRequest, theModel);
 
 		GenericClient client = theRequest.newClient(myCtx, myConfig);
-
-		loadAndAddConformance(theRequest, theModel, client);
 
 		Class<? extends IResource> resType = null;
 		ResultType returnsResource = ResultType.TAGLIST;
@@ -180,8 +191,7 @@ public class Controller {
 				client.getTags().execute();
 			}
 		} catch (Exception e) {
-			returnsResource = ResultType.NONE;
-			ourLog.warn("Failed to invoke server", e);
+			returnsResource = handleClientException(client, e, theModel);
 		}
 		long delay = System.currentTimeMillis() - start;
 
@@ -205,10 +215,6 @@ public class Controller {
 	@RequestMapping(value = { "/", "/home" })
 	public String actionHome(final HomeRequest theRequest, final BindingResult theBindingResult, final ModelMap theModel) {
 		addCommonParams(theRequest, theModel);
-
-		GenericClient client = theRequest.newClient(myCtx, myConfig);
-		loadAndAddConformance(theRequest, theModel, client);
-
 		return "home";
 	}
 
@@ -217,8 +223,6 @@ public class Controller {
 		addCommonParams(theRequest, theModel);
 
 		GenericClient client = theRequest.newClient(myCtx, myConfig);
-
-		loadAndAddConformance(theRequest, theModel, client);
 
 		String url = defaultString(theReq.getParameter("page-url"));
 		if (!url.startsWith(theModel.get("base").toString())) {
@@ -234,8 +238,7 @@ public class Controller {
 		try {
 			client.loadPage().url(url).execute();
 		} catch (Exception e) {
-			returnsResource = ResultType.NONE;
-			ourLog.warn("Failed to invoke server", e);
+			returnsResource = handleClientException(client, e, theModel);
 		}
 		long delay = System.currentTimeMillis() - start;
 
@@ -251,8 +254,6 @@ public class Controller {
 		addCommonParams(theRequest, theModel);
 
 		GenericClient client = theRequest.newClient(myCtx, myConfig);
-
-		loadAndAddConformance(theRequest, theModel, client);
 
 		RuntimeResourceDefinition def;
 		try {
@@ -281,8 +282,7 @@ public class Controller {
 		try {
 			client.read(def.getImplementingClass(), new IdDt(def.getName(), id, versionId));
 		} catch (Exception e) {
-			returnsResource = ResultType.NONE;
-			ourLog.warn("Failed to invoke server", e);
+			returnsResource = handleClientException(client, e, theModel);
 		}
 		long delay = System.currentTimeMillis() - start;
 
@@ -293,10 +293,9 @@ public class Controller {
 
 	@RequestMapping({ "/resource" })
 	public String actionResource(final ResourceRequest theRequest, final BindingResult theBindingResult, final ModelMap theModel) {
-		addCommonParams(theRequest, theModel);
+		Conformance conformance =  addCommonParams(theRequest, theModel);
 
 		GenericClient client = theRequest.newClient(myCtx, myConfig);
-		Conformance conformance = loadAndAddConformance(theRequest, theModel, client);
 
 		String resourceName = theRequest.getResource();
 		RuntimeResourceDefinition def = myCtx.getResourceDefinition(theRequest.getResource());
@@ -350,8 +349,6 @@ public class Controller {
 
 		GenericClient client = theRequest.newClient(myCtx, myConfig);
 
-		loadAndAddConformance(theRequest, theModel, client);
-
 		IUntypedQuery search = client.search();
 		IQuery query;
 		if (isNotBlank(theReq.getParameter("resource"))) {
@@ -402,8 +399,7 @@ public class Controller {
 			query.execute();
 			returnsResource = ResultType.BUNDLE;
 		} catch (Exception e) {
-			returnsResource = ResultType.NONE;
-			ourLog.warn("Failed to invoke server", e);
+			returnsResource = handleClientException(client, e, theModel);
 		}
 		long delay = System.currentTimeMillis() - start;
 
@@ -417,7 +413,6 @@ public class Controller {
 		addCommonParams(theRequest, theModel);
 
 		GenericClient client = theRequest.newClient(myCtx, myConfig);
-		loadAndAddConformance(theRequest, theModel, client);
 
 		String body = preProcessMessageBody(theRequest.getTransactionBody());
 
@@ -452,7 +447,7 @@ public class Controller {
 		return "result";
 	}
 
-	private void addCommonParams(final HomeRequest theRequest, final ModelMap theModel) {
+	private Conformance addCommonParams(final HomeRequest theRequest, final ModelMap theModel) {
 		if (myConfig.getDebugTemplatesMode()) {
 			myTemplateEngine.getCacheManager().clearAllCaches();
 		}
@@ -468,6 +463,7 @@ public class Controller {
 		theModel.put("pretty", theRequest.getPretty());
 		theModel.put("serverEntries", myConfig.getIdToServerName());
 
+		return loadAndAddConf(theRequest, theModel);
 	}
 
 	private Header[] applyHeaderFilters(Header[] theAllHeaders) {
@@ -489,8 +485,6 @@ public class Controller {
 		addCommonParams(theRequest, theModel);
 
 		GenericClient client = theRequest.newClient(myCtx, myConfig);
-
-		loadAndAddConformance(theRequest, theModel, client);
 
 		Class<? extends IResource> type = null; // def.getImplementingClass();
 		if ("history-type".equals(theMethod)) {
@@ -542,8 +536,7 @@ public class Controller {
 				}
 			}
 		} catch (Exception e) {
-			returnsResource = ResultType.NONE;
-			ourLog.warn("Failed to invoke server", e);
+			returnsResource = handleClientException(client, e, theModel);
 		}
 		long delay = System.currentTimeMillis() - start;
 
@@ -555,8 +548,6 @@ public class Controller {
 		addCommonParams(theRequest, theModel);
 
 		GenericClient client = theRequest.newClient(myCtx, myConfig);
-
-		loadAndAddConformance(theRequest, theModel, client);
 
 		String id = null;
 		Class<? extends IResource> type = null; // def.getImplementingClass();
@@ -697,22 +688,26 @@ public class Controller {
 		return b.toString();
 	}
 
-	private String formatUrl(String theResultBody) {
+	private String formatUrl(String theUrlBase, String theResultBody) {
 		String str = theResultBody;
 		if (str == null) {
 			return str;
 		}
 
 		StringBuilder b = new StringBuilder();
-
+		b.append("<span class='hlUrlBase'>");
+		
 		boolean inParams = false;
 		for (int i = 0; i < str.length(); i++) {
 			char nextChar = str.charAt(i);
 			if (!inParams) {
 				if (nextChar == '?') {
 					inParams = true;
-					b.append("<wbr /><span class='hlControl'>?</span><span class='hlTagName'>");
+					b.append("</span><wbr /><span class='hlControl'>?</span><span class='hlTagName'>");
 				} else {
+					if (i == theUrlBase.length()) {
+						b.append("</span><wbr /><span class='hlText'>");
+					}
 					b.append(nextChar);
 				}
 			} else {
@@ -782,10 +777,12 @@ public class Controller {
 		return true;
 	}
 
-	private Conformance loadAndAddConformance(final HomeRequest theRequest, final ModelMap theModel, GenericClient theClient) {
+	private Conformance loadAndAddConf(final HomeRequest theRequest, final ModelMap theModel) {
+		IGenericClient client = myCtx.newRestfulGenericClient(theRequest.getServerBase(myConfig));
+		
 		Conformance conformance;
 		try {
-			conformance = theClient.conformance();
+			conformance = client.conformance();
 		} catch (Exception e) {
 			ourLog.warn("Failed to load conformance statement", e);
 			theModel.put("errorMsg", "Failed to load conformance statement, error was: " + e.toString());
@@ -876,7 +873,7 @@ public class Controller {
 			String requestUrl = lastRequest != null ? lastRequest.getURI().toASCIIString() : null;
 			String action = theClient.getLastRequest() != null ? theClient.getLastRequest().getMethod() : null;
 			String resultStatus = theClient.getLastResponse() != null ? theClient.getLastResponse().getStatusLine().toString() : null;
-			String resultBody = theClient.getLastResponseBody();
+			String resultBody = StringUtils.defaultString(theClient.getLastResponseBody());
 
 			if (lastRequest instanceof HttpEntityEnclosingRequest) {
 				HttpEntity entity = ((HttpEntityEnclosingRequest) lastRequest).getEntity();
@@ -932,7 +929,7 @@ public class Controller {
 			theModelMap.put("resultStatus", resultStatus);
 
 			theModelMap.put("requestUrl", requestUrl);
-			theModelMap.put("requestUrlText", formatUrl(requestUrl));
+			theModelMap.put("requestUrlText", formatUrl(theClient.getUrlBase(), requestUrl));
 
 			String requestBodyText = format(requestBody, ctEnum);
 			theModelMap.put("requestBody", requestBodyText);

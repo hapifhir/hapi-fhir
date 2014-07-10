@@ -24,6 +24,8 @@ public class ${className}ResourceProvider extends JpaResourceProvider<${classNam
 
 	@Search()
 	public ca.uhn.fhir.rest.server.IBundleProvider search(
+			javax.servlet.http.HttpServletRequest theServletRequest,
+	
 			@Description(shortDefinition="The resource identity")
 			@OptionalParam(name="_id")
 			StringParam theId, 
@@ -58,16 +60,22 @@ public class ${className}ResourceProvider extends JpaResourceProvider<${classNam
 			}) 
 			Set<Include> theIncludes			
 	) {
-		SearchParameterMap paramMap = new SearchParameterMap();
-		paramMap.add("_id", theId);					
+		startRequest(theServletRequest);
+		try {
+			SearchParameterMap paramMap = new SearchParameterMap();
+			paramMap.add("_id", theId);					
 #foreach ( $param in $searchParamsWithoutComposite ) 
-		paramMap.add("${param.name}", the${param.nameCapitalized});	
+			paramMap.add("${param.name}", the${param.nameCapitalized});	
 #end
 
-		paramMap.setIncludes(theIncludes);
+			paramMap.setIncludes(theIncludes);
 
 
 		
-		return getDao().search(paramMap);
+			ca.uhn.fhir.rest.server.IBundleProvider retVal = getDao().search(paramMap);
+			return retVal;
+		} finally {
+			endRequest(theServletRequest);
+		}
 	}
 }

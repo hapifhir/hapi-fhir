@@ -36,6 +36,7 @@ import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpEntityEnclosingRequest;
@@ -57,12 +58,36 @@ public abstract class BaseClient {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseClient.class);
 
 	private final HttpClient myClient;
+	private EncodingEnum myEncoding = null; // default unspecified (will be XML)
+	private List<IClientInterceptor> myInterceptors = new ArrayList<IClientInterceptor>();
 	private boolean myKeepResponses = false;
 	private HttpResponse myLastResponse;
 	private String myLastResponseBody;
-	private final String myUrlBase;
-	private EncodingEnum myEncoding = null; // default unspecified (will be XML)
 	private boolean myPrettyPrint = false;
+
+	private final String myUrlBase;
+
+	BaseClient(HttpClient theClient, String theUrlBase) {
+		super();
+		myClient = theClient;
+		myUrlBase = theUrlBase;
+	}
+
+	protected Map<String, List<String>> createExtraParams() {
+		HashMap<String, List<String>> retVal = new LinkedHashMap<String, List<String>>();
+
+		if (getEncoding() == EncodingEnum.XML) {
+			retVal.put(Constants.PARAM_FORMAT, Collections.singletonList("xml"));
+		} else if (getEncoding() == EncodingEnum.JSON) {
+			retVal.put(Constants.PARAM_FORMAT, Collections.singletonList("json"));
+		}
+
+		if (isPrettyPrint()) {
+			retVal.put(Constants.PARAM_PRETTY, Collections.singletonList(Constants.PARAM_PRETTY_VALUE_TRUE));
+		}
+
+		return retVal;
+	}
 
 	/**
 	 * Returns the encoding that will be used on requests. Default is <code>null</code>, which means the client will not explicitly request an encoding. (This is standard behaviour according to the
@@ -70,21 +95,6 @@ public abstract class BaseClient {
 	 */
 	public EncodingEnum getEncoding() {
 		return myEncoding;
-	}
-
-	/**
-	 * Sets the encoding that will be used on requests. Default is <code>null</code>, which means the client will not explicitly request an encoding. (This is standard behaviour according to the FHIR
-	 * specification)
-	 */
-	public BaseClient setEncoding(EncodingEnum theEncoding) {
-		myEncoding = theEncoding;
-		return this;
-	}
-
-	BaseClient(HttpClient theClient, String theUrlBase) {
-		super();
-		myClient = theClient;
-		myUrlBase = theUrlBase;
 	}
 
 	/**
@@ -102,6 +112,10 @@ public abstract class BaseClient {
 	}
 
 	String getServerBase() {
+		return myUrlBase;
+	}
+
+	public String getUrlBase() {
 		return myUrlBase;
 	}
 
@@ -128,7 +142,16 @@ public abstract class BaseClient {
 				}
 			}
 
+			for (IClientInterceptor nextInterceptor : myInterceptors) {
+				nextInterceptor.interceptRequest(httpRequest);
+			}
+
 			response = myClient.execute(httpRequest);
+
+			for (IClientInterceptor nextInterceptor : myInterceptors) {
+				nextInterceptor.interceptResponse(response);
+			}
+
 		} catch (DataFormatException e) {
 			throw new FhirClientConnectionException(e);
 		} catch (IOException e) {
@@ -151,11 +174,10 @@ public abstract class BaseClient {
 					list.add(next.getValue());
 				}
 			}
-			
 
 			if (response.getStatusLine().getStatusCode() < 200 || response.getStatusLine().getStatusCode() > 299) {
-				String body=null;
-				Reader reader=null;
+				String body = null;
+				Reader reader = null;
 				try {
 					reader = createReaderFromResponse(response);
 					body = IOUtils.toString(reader);
@@ -164,17 +186,17 @@ public abstract class BaseClient {
 				} finally {
 					IOUtils.closeQuietly(reader);
 				}
-				
-				String message = "HTTP " + response.getStatusLine().getStatusCode()+" " +response.getStatusLine().getReasonPhrase();
+
+				String message = "HTTP " + response.getStatusLine().getStatusCode() + " " + response.getStatusLine().getReasonPhrase();
 				if (Constants.CT_TEXT.equals(mimeType)) {
-					message = message+": " + body;
+					message = message + ": " + body;
 				}
-				
+
 				keepResponseAndLogIt(theLogRequestAndResponse, response, body);
 
 				BaseServerResponseException exception = BaseServerResponseException.newInstance(response.getStatusLine().getStatusCode(), message);
 
-				if(body!=null) {
+				if (body != null) {
 					exception.setResponseBody(body);
 				}
 
@@ -185,21 +207,21 @@ public abstract class BaseClient {
 				if (handlesBinary.isBinary()) {
 					InputStream reader = response.getEntity().getContent();
 					try {
-					
-					if (ourLog.isTraceEnabled() || myKeepResponses || theLogRequestAndResponse) {
-						byte[] responseBytes = IOUtils.toByteArray(reader);
-						if (myKeepResponses) {
-							myLastResponse = response;
-							myLastResponseBody = null;
+
+						if (ourLog.isTraceEnabled() || myKeepResponses || theLogRequestAndResponse) {
+							byte[] responseBytes = IOUtils.toByteArray(reader);
+							if (myKeepResponses) {
+								myLastResponse = response;
+								myLastResponseBody = null;
+							}
+							String message = "HTTP " + response.getStatusLine().getStatusCode() + " " + response.getStatusLine().getReasonPhrase();
+							if (theLogRequestAndResponse) {
+								ourLog.info("Client response: {} - {} bytes", message, responseBytes.length);
+							} else {
+								ourLog.trace("Client response: {} - {} bytes", message, responseBytes.length);
+							}
+							reader = new ByteArrayInputStream(responseBytes);
 						}
-						String message = "HTTP " + response.getStatusLine().getStatusCode()+" " +response.getStatusLine().getReasonPhrase();
-						if (theLogRequestAndResponse) {
-							ourLog.info("Client response: {} - {} bytes", message, responseBytes.length);
-						}else {
-							ourLog.trace("Client response: {} - {} bytes", message, responseBytes.length);
-						}
-						reader = new ByteArrayInputStream(responseBytes);
-					}
 
 						return handlesBinary.invokeClient(mimeType, reader, response.getStatusLine().getStatusCode(), headers);
 					} finally {
@@ -207,7 +229,7 @@ public abstract class BaseClient {
 					}
 				}
 			}
-			
+
 			Reader reader = createReaderFromResponse(response);
 
 			if (ourLog.isTraceEnabled() || myKeepResponses || theLogRequestAndResponse) {
@@ -237,44 +259,50 @@ public abstract class BaseClient {
 		}
 	}
 
+	/**
+	 * For now, this is a part of the internal API of HAPI - Use with caution as this method may change!
+	 */
+	public boolean isKeepResponses() {
+		return myKeepResponses;
+	}
+
+	/**
+	 * Returns the pretty print flag, which is a request to the server for it to return "pretty printed" responses. Note that this is currently a non-standard flag (_pretty) which is supported only by
+	 * HAPI based servers (and any other servers which might implement it).
+	 */
+	public boolean isPrettyPrint() {
+		return myPrettyPrint;
+	}
+
 	private void keepResponseAndLogIt(boolean theLogRequestAndResponse, HttpResponse response, String responseString) {
 		if (myKeepResponses) {
 			myLastResponse = response;
 			myLastResponseBody = responseString;
 		}
 		if (theLogRequestAndResponse) {
-			String message = "HTTP " + response.getStatusLine().getStatusCode()+" " +response.getStatusLine().getReasonPhrase();
+			String message = "HTTP " + response.getStatusLine().getStatusCode() + " " + response.getStatusLine().getReasonPhrase();
 			if (StringUtils.isNotBlank(responseString)) {
 				ourLog.info("Client response: {}\n{}", message, responseString);
-			}else {
+			} else {
 				ourLog.info("Client response: {}", message, responseString);
 			}
-		}else {
+		} else {
 			ourLog.trace("FHIR response:\n{}\n{}", response, responseString);
 		}
 	}
 
-	protected Map<String, List<String>> createExtraParams() {
-		HashMap<String, List<String>> retVal = new LinkedHashMap<String, List<String>>();
-
-		if (getEncoding() == EncodingEnum.XML) {
-			retVal.put(Constants.PARAM_FORMAT, Collections.singletonList("xml"));
-		} else if (getEncoding() == EncodingEnum.JSON) {
-			retVal.put(Constants.PARAM_FORMAT, Collections.singletonList("json"));
-		}
-
-		if (isPrettyPrint()) {
-			retVal.put(Constants.PARAM_PRETTY, Collections.singletonList(Constants.PARAM_PRETTY_VALUE_TRUE));
-		}
-
-		return retVal;
+	public void registerInterceptor(IClientInterceptor theInterceptor) {
+		Validate.notNull(theInterceptor, "Interceptor can not be null");
+		myInterceptors.add(theInterceptor);
 	}
 
 	/**
-	 * For now, this is a part of the internal API of HAPI - Use with caution as this method may change!
+	 * Sets the encoding that will be used on requests. Default is <code>null</code>, which means the client will not explicitly request an encoding. (This is standard behaviour according to the FHIR
+	 * specification)
 	 */
-	public boolean isKeepResponses() {
-		return myKeepResponses;
+	public BaseClient setEncoding(EncodingEnum theEncoding) {
+		myEncoding = theEncoding;
+		return this;
 	}
 
 	/**
@@ -298,6 +326,20 @@ public abstract class BaseClient {
 		myLastResponseBody = theLastResponseBody;
 	}
 
+	/**
+	 * Sets the pretty print flag, which is a request to the server for it to return "pretty printed" responses. Note that this is currently a non-standard flag (_pretty) which is supported only by
+	 * HAPI based servers (and any other servers which might implement it).
+	 */
+	public BaseClient setPrettyPrint(boolean thePrettyPrint) {
+		myPrettyPrint = thePrettyPrint;
+		return this;
+	}
+
+	public void unregisterInterceptor(IClientInterceptor theInterceptor) {
+		Validate.notNull(theInterceptor, "Interceptor can not be null");
+		myInterceptors.remove(theInterceptor);
+	}
+
 	public static Reader createReaderFromResponse(HttpResponse theResponse) throws IllegalStateException, IOException {
 		HttpEntity entity = theResponse.getEntity();
 		if (entity == null) {
@@ -315,23 +357,6 @@ public abstract class BaseClient {
 
 		Reader reader = new InputStreamReader(theResponse.getEntity().getContent(), charset);
 		return reader;
-	}
-
-	/**
-	 * Returns the pretty print flag, which is a request to the server for it to return "pretty printed" responses. Note that this is currently a non-standard flag (_pretty) which is supported only by
-	 * HAPI based servers (and any other servers which might implement it).
-	 */
-	public boolean isPrettyPrint() {
-		return myPrettyPrint;
-	}
-
-	/**
-	 * Sets the pretty print flag, which is a request to the server for it to return "pretty printed" responses. Note that this is currently a non-standard flag (_pretty) which is supported only by
-	 * HAPI based servers (and any other servers which might implement it).
-	 */
-	public BaseClient setPrettyPrint(boolean thePrettyPrint) {
-		myPrettyPrint = thePrettyPrint;
-		return this;
 	}
 
 }

@@ -1,4 +1,5 @@
-<beans xmlns="http://www.springframework.org/schema/beans" xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<beans xmlns="http://www.springframework.org/schema/beans" 
+	xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:context="http://www.springframework.org/schema/context" xmlns:security="http://www.springframework.org/schema/security"
 	xmlns:oauth="http://www.springframework.org/schema/security/oauth2"
 	xsi:schemaLocation="http://www.springframework.org/schema/security/oauth2 http://www.springframework.org/schema/security/spring-security-oauth2-2.0.xsd
@@ -16,6 +17,7 @@
 				<value>furore   , Spark - Furore Reference Server , http://spark.furore.com/fhir</value>
 				<value>blaze    , Blaze (Orion Health)            , https://his-medicomp-gateway.orionhealth.com/blaze/fhir</value>
 				<value>oridashi , Oridashi                        , http://demo.oridashi.com.au:8190</value>
+				<value>fhirbase , FHIRPlace (Health Samurai)      , http://try-fhirplace.hospital-systems.com/ </value>
 			</list>
 		</property>
 	</bean>
@@ -25,6 +27,11 @@
 		<property name="socketTimeout" value="10000"/>
 	</bean>
 	
-	
+	<mvc:interceptors>
+        <mvc:interceptor>
+        	<mvc:mapping path="/**"/>
+            <bean class="ca.uhn.fhirtest.RequestInterceptor"></bean>
+        </mvc:interceptor>
+    </mvc:interceptors>
 	
 </beans>

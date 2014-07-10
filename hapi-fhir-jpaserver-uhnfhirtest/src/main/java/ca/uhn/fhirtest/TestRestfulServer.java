@@ -8,10 +8,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.web.context.ContextLoaderListener;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.provider.JpaConformanceProvider;
 import ca.uhn.fhir.jpa.provider.JpaSystemProvider;
+import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
 import ca.uhn.fhir.rest.server.HardcodedServerAddressStrategy;
 import ca.uhn.fhir.rest.server.IResourceProvider;
@@ -46,6 +48,10 @@ public class TestRestfulServer extends RestfulServer {
 
 		myAppCtx = ContextLoaderListener.getCurrentWebApplicationContext();
 		
+		FhirContext ctx = myAppCtx.getBean(FhirContext.class);
+		ctx.setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
+		setFhirContext(ctx);
+		
 		Collection<IResourceProvider> beans = myAppCtx.getBeansOfType(IResourceProvider.class).values();
 		for (IResourceProvider nextResourceProvider : beans) {
 			ourLog.info(" * Have resource provider for: {}", nextResourceProvider.getResourceType().getSimpleName());
@@ -58,10 +64,7 @@ public class TestRestfulServer extends RestfulServer {
 		
 		String implDesc = getInitParameter("ImplementationDescription");
 		
-		@SuppressWarnings("rawtypes")
-		Collection<IFhirResourceDao> resourceDaos = myAppCtx.getBeansOfType(IFhirResourceDao.class).values();
-
-		JpaConformanceProvider confProvider = new JpaConformanceProvider(this, systemDao, resourceDaos);
+		JpaConformanceProvider confProvider = new JpaConformanceProvider(this, systemDao);
 		confProvider.setImplementationDescription(implDesc);
 		setServerConformanceProvider(confProvider);
 		

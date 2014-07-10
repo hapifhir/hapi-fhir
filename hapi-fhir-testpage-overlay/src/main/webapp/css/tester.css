@@ -47,6 +47,8 @@ SPAN.headerName {
 .hlText {
 	color: #000000;
 }
+.hlUrlBase {
+}
 
 SPAN.headerValue {
 	color: #70A070;

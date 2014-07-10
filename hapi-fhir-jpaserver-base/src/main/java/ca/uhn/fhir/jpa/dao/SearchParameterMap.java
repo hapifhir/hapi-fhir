@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 import ca.uhn.fhir.model.api.IQueryParameterAnd;
 import ca.uhn.fhir.model.api.IQueryParameterOr;
@@ -75,7 +76,7 @@ public class SearchParameterMap extends HashMap<String, List<List<IQueryParamete
 
 	@Override
 	public String toString() {
-		ToStringBuilder b = new ToStringBuilder(this);
+		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
 		if (isEmpty() == false) {
 			b.append("params", super.toString());
 		}

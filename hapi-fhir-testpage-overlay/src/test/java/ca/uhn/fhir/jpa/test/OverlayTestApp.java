@@ -101,7 +101,7 @@ public class OverlayTestApp {
 		restServer.setPagingProvider(new FifoMemoryPagingProvider(10));
 		restServer.setImplementationDescription("This is a great server!!!!");
 		
-		JpaConformanceProvider confProvider = new JpaConformanceProvider(restServer, systemDao,resourceDaos);
+		JpaConformanceProvider confProvider = new JpaConformanceProvider(restServer, systemDao);
 		restServer.setServerConformanceProvider(confProvider);
 		
 		myPort = 8887;

@@ -12,6 +12,7 @@ import ca.uhn.fhir.model.dstu.resource.Conformance.RestResource;
 import ca.uhn.fhir.model.primitive.DecimalDt;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.provider.ServerConformanceProvider;
+import ca.uhn.fhir.util.ExtensionConstants;
 
 public class JpaConformanceProvider extends ServerConformanceProvider {
 
@@ -19,27 +20,27 @@ public class JpaConformanceProvider extends ServerConformanceProvider {
 	private IFhirSystemDao mySystemDao;
 	private volatile Conformance myCachedValue;
 
-	public JpaConformanceProvider(RestfulServer theRestfulServer, IFhirSystemDao theSystemDao, @SuppressWarnings("rawtypes") Collection<IFhirResourceDao> theResourceDaos) {
+	public JpaConformanceProvider(RestfulServer theRestfulServer, IFhirSystemDao theSystemDao) {
 		super(theRestfulServer);
 		mySystemDao = theSystemDao;
 		super.setCache(false);
 
-		for (IFhirResourceDao<?> nextResourceDao : theResourceDaos) {
-			nextResourceDao.registerDaoListener(new IDaoListener() {
-				@Override
-				public void writeCompleted() {
-					myCachedValue = null;
-				}
-			});
-		}
+//		for (IFhirResourceDao<?> nextResourceDao : theResourceDaos) {
+//			nextResourceDao.registerDaoListener(new IDaoListener() {
+//				@Override
+//				public void writeCompleted() {
+//					myCachedValue = null;
+//				}
+//			});
+//		}
 	}
 
 	@Override
 	public Conformance getServerConformance() {
 		Conformance retVal = myCachedValue;
-		if (retVal != null) {
-			return retVal;
-		}
+//		if (retVal != null) {
+//			return retVal;
+//		}
 
 		Map<String, Long> counts = mySystemDao.getResourceCounts();
 
@@ -48,7 +49,7 @@ public class JpaConformanceProvider extends ServerConformanceProvider {
 			for (RestResource nextResource : nextRest.getResource()) {
 				Long count = counts.get(nextResource.getType().getValueAsString());
 				if (count != null) {
-					nextResource.addUndeclaredExtension(false, "http://hl7api.sourceforge.net/hapi-fhir/res/extdefs.html#resourceCount", new DecimalDt(count));
+					nextResource.addUndeclaredExtension(false, ExtensionConstants.CONF_RESOURCE_COUNT, new DecimalDt(count));
 				}
 			}
 		}

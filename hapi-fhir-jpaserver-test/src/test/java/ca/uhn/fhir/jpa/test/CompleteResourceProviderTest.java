@@ -3,6 +3,9 @@ package ca.uhn.fhir.jpa.test;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
+import java.util.Collections;
+import java.util.List;
+
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
@@ -13,17 +16,26 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
+import ca.uhn.fhir.jpa.provider.JpaConformanceProvider;
 import ca.uhn.fhir.jpa.testutil.RandomServerPortProvider;
 import ca.uhn.fhir.model.api.Bundle;
+import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.dstu.resource.Conformance;
+import ca.uhn.fhir.model.dstu.resource.Conformance.Rest;
+import ca.uhn.fhir.model.dstu.resource.Conformance.RestResource;
 import ca.uhn.fhir.model.dstu.resource.Observation;
 import ca.uhn.fhir.model.dstu.resource.Organization;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.dstu.resource.Questionnaire;
+import ca.uhn.fhir.model.dstu.valueset.ResourceTypeEnum;
+import ca.uhn.fhir.model.primitive.DecimalDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.util.ExtensionConstants;
 import ca.uhn.test.jpasrv.ObservationResourceProvider;
 import ca.uhn.test.jpasrv.OrganizationResourceProvider;
 import ca.uhn.test.jpasrv.PatientResourceProvider;
@@ -38,6 +50,7 @@ public class CompleteResourceProviderTest {
 	private static IFhirResourceDao<Questionnaire> questionnaireDao;
 	private static IGenericClient ourClient;
 	private static IFhirResourceDao<Observation> observationDao;
+//	private static JpaConformanceProvider ourConfProvider;
 
 	// @Test
 	// public void test01UploadTestResources() throws Exception {
@@ -123,7 +136,48 @@ public class CompleteResourceProviderTest {
 		assertEquals(p1Id.getIdPart(), actual.getEntries().get(0).getId().getIdPart());
 
 	}
+private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(CompleteResourceProviderTest.class);
+	@Test
+	public void testInsertUpdatesConformance() {
+//		Conformance conf = ourConfProvider.getServerConformance();
+//		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conf));
+//		
+//		RestResource res=null;
+//		for (Rest nextRest : conf.getRest()) {
+//			for (RestResource nextRes : nextRest.getResource()) {
+//				if (nextRes.getType().getValueAsEnum()==ResourceTypeEnum.PATIENT) {
+//					res = nextRes;
+//				}
+//			}
+//		}
+//		List<ExtensionDt> resCounts = res.getUndeclaredExtensionsByUrl(ExtensionConstants.CONF_RESOURCE_COUNT);
+//		
+//		int initial = 0;
+		
+		Patient p1 = new Patient();
+		p1.addIdentifier().setSystem("urn:system").setValue("testSearchByResourceChain01");
+		p1.addName().addFamily("testSearchByResourceChainFamily01").addGiven("testSearchByResourceChainGiven01");
 
+		ourClient.create(p1).getId();
+
+//		conf = ourConfProvider.getServerConformance();
+//		res=null;
+//		for (Rest nextRest : conf.getRest()) {
+//			for (RestResource nextRes : nextRest.getResource()) {
+//				if (nextRes.getType().getValueAsEnum()==ResourceTypeEnum.PATIENT) {
+//					res = nextRes;
+//				}
+//			}
+//		}
+//		resCounts = res.getUndeclaredExtensionsByUrl(ExtensionConstants.CONF_RESOURCE_COUNT);
+//		assertNotNull(resCounts);
+//		assertEquals(1, resCounts.size());
+//		DecimalDt number = (DecimalDt) resCounts.get(0).getValue();
+//		assertEquals(initial+1, number.getValueAsInteger());
+	}
+
+	
+	
 	@Test
 	public void testInsertBadReference() {
 		Patient p1 = new Patient();
@@ -170,6 +224,10 @@ public class CompleteResourceProviderTest {
 		RestfulServer restServer = new RestfulServer();
 		restServer.setResourceProviders(patientRp, questionnaireRp, observationRp, organizationRp);
 
+		IFhirSystemDao systemDao = (IFhirSystemDao) ourAppCtx.getBean("mySystemDao", IFhirSystemDao.class);
+
+//		ourConfProvider = new JpaConformanceProvider(restServer, systemDao, Collections.singletonList((IFhirResourceDao)patientDao));
+		
 		int myPort = RandomServerPortProvider.findFreePort();
 		ourServer = new Server(myPort);
 

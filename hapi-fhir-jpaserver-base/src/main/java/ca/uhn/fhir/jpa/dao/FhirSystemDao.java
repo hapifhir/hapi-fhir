@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import ca.uhn.fhir.jpa.entity.ResourceTable;
+import ca.uhn.fhir.jpa.util.StopWatch;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
@@ -134,12 +135,18 @@ public class FhirSystemDao extends BaseFhirDao implements IFhirSystemDao {
 
 	@Override
 	public IBundleProvider history(Date theSince) {
-		return super.history(null, null, theSince);
+		StopWatch w = new StopWatch();
+		IBundleProvider retVal = super.history(null, null, theSince);
+		ourLog.info("Processed global history in {}ms", w.getMillisAndRestart());
+		return retVal;
 	}
 
 	@Override
 	public TagList getAllTags() {
-		return super.getTags(null, null);
+		StopWatch w = new StopWatch();
+		TagList retVal = super.getTags(null, null);
+		ourLog.info("Processed getAllTags in {}ms", w.getMillisAndRestart());
+		return retVal;
 	}
 
 	@Override

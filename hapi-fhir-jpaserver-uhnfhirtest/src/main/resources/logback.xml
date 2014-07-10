@@ -13,15 +13,15 @@
 		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
 			<level>INFO</level>
 		</filter>
-		<file>${fhir.logdir}/logFile.log</file>
+		<file>${fhir.logdir}/fhirtest.log</file>
 		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-			<fileNamePattern>${fhir.logdir}/logFile.%d{yyyy-MM-dd}.log.gz</fileNamePattern>
+			<fileNamePattern>${fhir.logdir}/fhirtest.%d{yyyy-MM-dd}.log.gz</fileNamePattern>
 			<maxHistory>30</maxHistory>
 		</rollingPolicy>
 
 		<encoder>
 			<!-- [%file:%line] -->
-			<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} %msg%n</pattern>
+			<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] [%X{req.remoteAddr}] [%X{req.userAgent}] %-5level %logger{36} %msg%n</pattern>
 		</encoder>
 	</appender>
 

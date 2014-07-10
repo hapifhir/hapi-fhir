@@ -91,13 +91,12 @@ public class RestfulServer extends HttpServlet {
 	private Map<String, ResourceBinding> myResourceNameToProvider = new HashMap<String, ResourceBinding>();
 	private Collection<IResourceProvider> myResourceProviders;
 	private ISecurityManager mySecurityManager;
-	private IServerAddressStrategy myServerAddressStrategy= new IncomingRequestAddressStrategy();
+	private IServerAddressStrategy myServerAddressStrategy = new IncomingRequestAddressStrategy();
 	private BaseMethodBinding<?> myServerConformanceMethod;
 	private Object myServerConformanceProvider;
 	private String myServerName = "HAPI FHIR Server";
 	/** This is configurable but by default we just use HAPI version */
 	private String myServerVersion = VersionUtil.getVersion();
-
 	private boolean myStarted;
 	private boolean myUseBrowserFriendlyContentTypes;
 
@@ -116,8 +115,7 @@ public class RestfulServer extends HttpServlet {
 	/**
 	 * This method is called prior to sending a response to incoming requests. It is used to add custom headers.
 	 * <p>
-	 * Use caution if overriding this method: it is recommended to call <code>super.addHeadersToResponse</code> to avoid
-	 * inadvertantly disabling functionality.
+	 * Use caution if overriding this method: it is recommended to call <code>super.addHeadersToResponse</code> to avoid inadvertantly disabling functionality.
 	 * </p>
 	 */
 	public void addHeadersToResponse(HttpServletResponse theHttpResponse) {
@@ -248,8 +246,8 @@ public class RestfulServer extends HttpServlet {
 	}
 
 	/**
-	 * Gets the {@link FhirContext} associated with this server. For efficient processing, resource providers and plain
-	 * providers should generally use this context if one is needed, as opposed to creating their own.
+	 * Gets the {@link FhirContext} associated with this server. For efficient processing, resource providers and plain providers should generally use this context if one is needed, as opposed to
+	 * creating their own.
 	 */
 	public FhirContext getFhirContext() {
 		return myFhirContext;
@@ -289,21 +287,18 @@ public class RestfulServer extends HttpServlet {
 	public ISecurityManager getSecurityManager() {
 		return mySecurityManager;
 	}
-	
+
 	/**
-	 * Get the server address strategy, which is used to determine what base URL to 
-	 * provide clients to refer to this server. Defaults to an instance of {@link IncomingRequestAddressStrategy}
+	 * Get the server address strategy, which is used to determine what base URL to provide clients to refer to this server. Defaults to an instance of {@link IncomingRequestAddressStrategy}
 	 */
 	public IServerAddressStrategy getServerAddressStrategy() {
 		return myServerAddressStrategy;
 	}
 
 	/**
-	 * Returns the server conformance provider, which is the provider that is used to generate the server's conformance
-	 * (metadata) statement.
+	 * Returns the server conformance provider, which is the provider that is used to generate the server's conformance (metadata) statement.
 	 * <p>
-	 * By default, the {@link ServerConformanceProvider} is used, but this can be changed, or set to <code>null</code>
-	 * if you do not wish to export a conformance statement.
+	 * By default, the {@link ServerConformanceProvider} is used, but this can be changed, or set to <code>null</code> if you do not wish to export a conformance statement.
 	 * </p>
 	 */
 	public Object getServerConformanceProvider() {
@@ -311,8 +306,7 @@ public class RestfulServer extends HttpServlet {
 	}
 
 	/**
-	 * Gets the server's name, as exported in conformance profiles exported by the server. This is informational only,
-	 * but can be helpful to set with something appropriate.
+	 * Gets the server's name, as exported in conformance profiles exported by the server. This is informational only, but can be helpful to set with something appropriate.
 	 * 
 	 * @see RestfulServer#setServerName(StringDt)
 	 */
@@ -325,8 +319,7 @@ public class RestfulServer extends HttpServlet {
 	}
 
 	/**
-	 * Gets the server's version, as exported in conformance profiles exported by the server. This is informational
-	 * only, but can be helpful to set with something appropriate.
+	 * Gets the server's version, as exported in conformance profiles exported by the server. This is informational only, but can be helpful to set with something appropriate.
 	 */
 	public String getServerVersion() {
 		return myServerVersion;
@@ -363,8 +356,9 @@ public class RestfulServer extends HttpServlet {
 		boolean prettyPrint = prettyPrintResponse(theRequest);
 		boolean requestIsBrowser = requestIsBrowser(theRequest.getServletRequest());
 		NarrativeModeEnum narrativeMode = determineNarrativeMode(theRequest);
-		boolean respondGzip=theRequest.isRespondGzip();
-		streamResponseAsBundle(this, theResponse, resultList, responseEncoding, theRequest.getFhirServerBase(), theRequest.getCompleteUrl(), prettyPrint, requestIsBrowser, narrativeMode, start, count, thePagingAction, respondGzip);
+		boolean respondGzip = theRequest.isRespondGzip();
+		streamResponseAsBundle(this, theResponse, resultList, responseEncoding, theRequest.getFhirServerBase(), theRequest.getCompleteUrl(), prettyPrint, requestIsBrowser, narrativeMode, start,
+				count, thePagingAction, respondGzip);
 
 	}
 
@@ -489,16 +483,16 @@ public class RestfulServer extends HttpServlet {
 			// TODO: look for more tokens for version, compartments, etc...
 
 			String acceptEncoding = theRequest.getHeader(Constants.HEADER_ACCEPT_ENCODING);
-			boolean respondGzip=false;
+			boolean respondGzip = false;
 			if (acceptEncoding != null) {
 				String[] parts = acceptEncoding.trim().split("\\s*,\\s*");
 				for (String string : parts) {
 					if (string.equals("gzip")) {
-						respondGzip=true;
+						respondGzip = true;
 					}
 				}
 			}
-			
+
 			Request r = new Request();
 			r.setResourceName(resourceName);
 			r.setId(id);
@@ -546,28 +540,27 @@ public class RestfulServer extends HttpServlet {
 			theResponse.setContentType("text/plain");
 			theResponse.setCharacterEncoding("UTF-8");
 			theResponse.getWriter().write(e.getMessage());
-			
+
 		} catch (Throwable e) {
 
 			OperationOutcome oo = new OperationOutcome();
 			Issue issue = oo.addIssue();
 			issue.getSeverity().setValueAsEnum(IssueSeverityEnum.ERROR);
-			
+
 			int statusCode = 500;
 			if (e instanceof InternalErrorException) {
 				ourLog.error("Failure during REST processing", e);
 				issue.getDetails().setValue(e.toString() + "\n\n" + ExceptionUtils.getStackTrace(e));
 			} else if (e instanceof BaseServerResponseException) {
 				ourLog.warn("Failure during REST processing: {}", e.toString());
-				statusCode=((BaseServerResponseException) e).getStatusCode();
+				statusCode = ((BaseServerResponseException) e).getStatusCode();
 				issue.getDetails().setValue(e.getMessage());
 			} else {
 				ourLog.error("Failure during REST processing", e);
 				issue.getDetails().setValue(e.toString() + "\n\n" + ExceptionUtils.getStackTrace(e));
 			}
 
-
-			streamResponseAsResource(this, theResponse, oo, determineResponseEncoding(theRequest), true, false, NarrativeModeEnum.NORMAL, statusCode,false);
+			streamResponseAsResource(this, theResponse, oo, determineResponseEncoding(theRequest), true, false, NarrativeModeEnum.NORMAL, statusCode, false);
 
 			theResponse.setStatus(statusCode);
 			addHeadersToResponse(theResponse);
@@ -581,9 +574,8 @@ public class RestfulServer extends HttpServlet {
 	}
 
 	/**
-	 * Initializes the server. Note that this method is final to avoid accidentally introducing bugs in implementations,
-	 * but subclasses may put initialization code in {@link #initialize()}, which is called immediately before beginning
-	 * initialization of the restful server's internal init.
+	 * Initializes the server. Note that this method is final to avoid accidentally introducing bugs in implementations, but subclasses may put initialization code in {@link #initialize()}, which is
+	 * called immediately before beginning initialization of the restful server's internal init.
 	 */
 	@Override
 	public final void init() throws ServletException {
@@ -637,8 +629,7 @@ public class RestfulServer extends HttpServlet {
 	}
 
 	/**
-	 * This method may be overridden by subclasses to do perform initialization that needs to be performed prior to the
-	 * server being used.
+	 * This method may be overridden by subclasses to do perform initialization that needs to be performed prior to the server being used.
 	 */
 	protected void initialize() throws ServletException {
 		// nothing by default
@@ -651,6 +642,11 @@ public class RestfulServer extends HttpServlet {
 	private boolean requestIsBrowser(HttpServletRequest theRequest) {
 		String userAgent = theRequest.getHeader("User-Agent");
 		return userAgent != null && userAgent.contains("Mozilla");
+	}
+
+	public void setFhirContext(FhirContext theFhirContext) {
+		Validate.notNull(theFhirContext, "FhirContext must not be null");
+		myFhirContext = theFhirContext;
 	}
 
 	public void setImplementationDescription(String theImplementationDescription) {
@@ -730,8 +726,7 @@ public class RestfulServer extends HttpServlet {
 	}
 
 	/**
-	 * Provide a server address strategy, which is used to determine what base URL to 
-	 * provide clients to refer to this server. Defaults to an instance of {@link IncomingRequestAddressStrategy}
+	 * Provide a server address strategy, which is used to determine what base URL to provide clients to refer to this server. Defaults to an instance of {@link IncomingRequestAddressStrategy}
 	 */
 	public void setServerAddressStrategy(IServerAddressStrategy theServerAddressStrategy) {
 		Validate.notNull(theServerAddressStrategy, "Server address strategy can not be null");
@@ -739,17 +734,14 @@ public class RestfulServer extends HttpServlet {
 	}
 
 	/**
-	 * Returns the server conformance provider, which is the provider that is used to generate the server's conformance
-	 * (metadata) statement.
+	 * Returns the server conformance provider, which is the provider that is used to generate the server's conformance (metadata) statement.
 	 * <p>
-	 * By default, the {@link ServerConformanceProvider} is used, but this can be changed, or set to <code>null</code>
-	 * if you do not wish to export a conformance statement.
+	 * By default, the {@link ServerConformanceProvider} is used, but this can be changed, or set to <code>null</code> if you do not wish to export a conformance statement.
 	 * </p>
 	 * Note that this method can only be called before the server is initialized.
 	 * 
 	 * @throws IllegalStateException
-	 *             Note that this method can only be called prior to {@link #init() initialization} and will throw an
-	 *             {@link IllegalStateException} if called after that.
+	 *             Note that this method can only be called prior to {@link #init() initialization} and will throw an {@link IllegalStateException} if called after that.
 	 */
 	public void setServerConformanceProvider(Object theServerConformanceProvider) {
 		if (myStarted) {
@@ -759,8 +751,7 @@ public class RestfulServer extends HttpServlet {
 	}
 
 	/**
-	 * Gets the server's name, as exported in conformance profiles exported by the server. This is informational only,
-	 * but can be helpful to set with something appropriate.
+	 * Gets the server's name, as exported in conformance profiles exported by the server. This is informational only, but can be helpful to set with something appropriate.
 	 * 
 	 * @see RestfulServer#setServerName(StringDt)
 	 */
@@ -769,16 +760,15 @@ public class RestfulServer extends HttpServlet {
 	}
 
 	/**
-	 * Gets the server's version, as exported in conformance profiles exported by the server. This is informational
-	 * only, but can be helpful to set with something appropriate.
+	 * Gets the server's version, as exported in conformance profiles exported by the server. This is informational only, but can be helpful to set with something appropriate.
 	 */
 	public void setServerVersion(String theServerVersion) {
 		myServerVersion = theServerVersion;
 	}
 
 	/**
-	 * If set to <code>true</code> (default is false), the server will use browser friendly content-types (instead of
-	 * standard FHIR ones) when it detects that the request is coming from a browser instead of a FHIR
+	 * If set to <code>true</code> (default is false), the server will use browser friendly content-types (instead of standard FHIR ones) when it detects that the request is coming from a browser
+	 * instead of a FHIR
 	 */
 	public void setUseBrowserFriendlyContentTypes(boolean theUseBrowserFriendlyContentTypes) {
 		myUseBrowserFriendlyContentTypes = theUseBrowserFriendlyContentTypes;
@@ -793,7 +783,7 @@ public class RestfulServer extends HttpServlet {
 		bundle.getLinkSelf().setValue(theCompleteUrl);
 
 		for (IResource next : theResult) {
-			
+
 			if (theContext.getNarrativeGenerator() != null) {
 				String title = theContext.getNarrativeGenerator().generateTitle(next);
 				ourLog.trace("Narrative generator created title: {}", title);
@@ -803,7 +793,7 @@ public class RestfulServer extends HttpServlet {
 			} else {
 				ourLog.trace("No narrative generator specified");
 			}
-			
+
 			bundle.addResource(next, theContext, theServerBase);
 		}
 
@@ -942,7 +932,7 @@ public class RestfulServer extends HttpServlet {
 		if (theRespondGzip) {
 			theHttpResponse.addHeader(Constants.HEADER_CONTENT_ENCODING, Constants.ENCODING_GZIP);
 			writer = new OutputStreamWriter(new GZIPOutputStream(theHttpResponse.getOutputStream()), "UTF-8");
-		}else {
+		} else {
 			writer = theHttpResponse.getWriter();
 		}
 		return writer;
@@ -973,8 +963,9 @@ public class RestfulServer extends HttpServlet {
 		return prettyPrint;
 	}
 
-	public static void streamResponseAsBundle(RestfulServer theServer, HttpServletResponse theHttpResponse, IBundleProvider theResult, EncodingEnum theResponseEncoding, String theServerBase, String theCompleteUrl, boolean thePrettyPrint, boolean theRequestIsBrowser,
-			NarrativeModeEnum theNarrativeMode, int theOffset, Integer theLimit, String theSearchId, boolean theRespondGzip) throws IOException {
+	public static void streamResponseAsBundle(RestfulServer theServer, HttpServletResponse theHttpResponse, IBundleProvider theResult, EncodingEnum theResponseEncoding, String theServerBase,
+			String theCompleteUrl, boolean thePrettyPrint, boolean theRequestIsBrowser, NarrativeModeEnum theNarrativeMode, int theOffset, Integer theLimit, String theSearchId, boolean theRespondGzip)
+			throws IOException {
 		assert !theServerBase.endsWith("/");
 
 		theHttpResponse.setStatus(200);
@@ -1059,13 +1050,14 @@ public class RestfulServer extends HttpServlet {
 		}
 	}
 
-	public static void streamResponseAsResource(RestfulServer theServer, HttpServletResponse theHttpResponse, IResource theResource, EncodingEnum theResponseEncoding, boolean thePrettyPrint, boolean theRequestIsBrowser, NarrativeModeEnum theNarrativeMode, boolean theRespondGzip) throws IOException {
+	public static void streamResponseAsResource(RestfulServer theServer, HttpServletResponse theHttpResponse, IResource theResource, EncodingEnum theResponseEncoding, boolean thePrettyPrint,
+			boolean theRequestIsBrowser, NarrativeModeEnum theNarrativeMode, boolean theRespondGzip) throws IOException {
 		int stausCode = 200;
 		streamResponseAsResource(theServer, theHttpResponse, theResource, theResponseEncoding, thePrettyPrint, theRequestIsBrowser, theNarrativeMode, stausCode, theRespondGzip);
 	}
 
-	private static void streamResponseAsResource(RestfulServer theServer, HttpServletResponse theHttpResponse, IResource theResource, EncodingEnum theResponseEncoding, boolean thePrettyPrint, boolean theRequestIsBrowser, NarrativeModeEnum theNarrativeMode, int stausCode, boolean theRespondGzip)
-			throws IOException {
+	private static void streamResponseAsResource(RestfulServer theServer, HttpServletResponse theHttpResponse, IResource theResource, EncodingEnum theResponseEncoding, boolean thePrettyPrint,
+			boolean theRequestIsBrowser, NarrativeModeEnum theNarrativeMode, int stausCode, boolean theRespondGzip) throws IOException {
 		theHttpResponse.setStatus(stausCode);
 
 		if (theResource instanceof Binary) {

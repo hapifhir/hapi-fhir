@@ -2,11 +2,14 @@ package ca.uhn.fhir.to.model;
 
 import static org.apache.commons.lang3.StringUtils.*;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpRequestBase;
 import org.springframework.web.bind.annotation.ModelAttribute;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.client.GenericClient;
+import ca.uhn.fhir.rest.client.IClientInterceptor;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.to.TesterConfig;
 
@@ -93,6 +96,23 @@ public class HomeRequest {
 			retVal.setEncoding( EncodingEnum.JSON);
 		} 
 
+		final String remoteAddr = org.slf4j.MDC.get("req.remoteAddr");
+		retVal.registerInterceptor(new IClientInterceptor() {
+			
+			@Override
+			public void interceptResponse(HttpResponse theRequest) {
+				// nothing
+			}
+			
+			@Override
+			public void interceptRequest(HttpRequestBase theRequest) {
+				if (isNotBlank(remoteAddr)) {
+					theRequest.addHeader("x-forwarded-for", remoteAddr);
+				}
+			}
+		});
+		
+		
 		return retVal;
 	}
 	

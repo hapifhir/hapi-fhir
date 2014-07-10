@@ -2,6 +2,8 @@ package ca.uhn.fhir.jpa.provider;
 
 import java.util.Date;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Required;
 
@@ -26,11 +28,11 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 
-public class JpaResourceProvider<T extends IResource> implements IResourceProvider {
+public class JpaResourceProvider<T extends IResource> extends BaseJpaProvider implements IResourceProvider {
 
-	@Autowired(required=true)
+	@Autowired(required = true)
 	private FhirContext myContext;
-	
+
 	private IFhirResourceDao<T> myDao;
 
 	public JpaResourceProvider() {
@@ -42,13 +44,23 @@ public class JpaResourceProvider<T extends IResource> implements IResourceProvid
 	}
 
 	@Create
-	public MethodOutcome create(@ResourceParam T theResource) {
-		return myDao.create(theResource);
+	public MethodOutcome create(HttpServletRequest theRequest, @ResourceParam T theResource) {
+		startRequest(theRequest);
+		try {
+			return myDao.create(theResource);
+		} finally {
+			endRequest(theRequest);
+		}
 	}
 
 	@Delete
-	public MethodOutcome delete(@IdParam IdDt theResource) {
-		return myDao.delete(theResource);
+	public MethodOutcome delete(HttpServletRequest theRequest, @IdParam IdDt theResource) {
+		startRequest(theRequest);
+		try {
+			return myDao.delete(theResource);
+		} finally {
+			endRequest(theRequest);
+		}
 	}
 
 	public FhirContext getContext() {
@@ -60,13 +72,23 @@ public class JpaResourceProvider<T extends IResource> implements IResourceProvid
 	}
 
 	@History
-	public IBundleProvider getHistoryForResourceInstance(@IdParam IdDt theId, @Since Date theDate) {
-		return myDao.history(theId.getIdPartAsLong(), theDate);
+	public IBundleProvider getHistoryForResourceInstance(HttpServletRequest theRequest, @IdParam IdDt theId, @Since Date theDate) {
+		startRequest(theRequest);
+		try {
+			return myDao.history(theId.getIdPartAsLong(), theDate);
+		} finally {
+			endRequest(theRequest);
+		}
 	}
 
 	@History
-	public IBundleProvider getHistoryForResourceType(@Since Date theDate) {
-		return myDao.history(theDate);
+	public IBundleProvider getHistoryForResourceType(HttpServletRequest theRequest, @Since Date theDate) {
+		startRequest(theRequest);
+		try {
+			return myDao.history(theDate);
+		} finally {
+			endRequest(theRequest);
+		}
 	}
 
 	@Override
@@ -75,18 +97,33 @@ public class JpaResourceProvider<T extends IResource> implements IResourceProvid
 	}
 
 	@GetTags
-	public TagList getTagsForResourceInstance(@IdParam IdDt theResourceId) {
-		return myDao.getTags(theResourceId);
+	public TagList getTagsForResourceInstance(HttpServletRequest theRequest, @IdParam IdDt theResourceId) {
+		startRequest(theRequest);
+		try {
+			return myDao.getTags(theResourceId);
+		} finally {
+			endRequest(theRequest);
+		}
 	}
 
 	@GetTags
-	public TagList getTagsForResourceType() {
-		return myDao.getAllResourceTags();
+	public TagList getTagsForResourceType(HttpServletRequest theRequest) {
+		startRequest(theRequest);
+		try {
+			return myDao.getAllResourceTags();
+		} finally {
+			endRequest(theRequest);
+		}
 	}
 
-	@Read(version=true)
-	public T read(@IdParam IdDt theId) {
-		return myDao.read(theId);
+	@Read(version = true)
+	public T read(HttpServletRequest theRequest, @IdParam IdDt theId) {
+		startRequest(theRequest);
+		try {
+			return myDao.read(theId);
+		} finally {
+			endRequest(theRequest);
+		}
 	}
 
 	public void setContext(FhirContext theContext) {
@@ -99,16 +136,26 @@ public class JpaResourceProvider<T extends IResource> implements IResourceProvid
 	}
 
 	@Update
-	public MethodOutcome update(@ResourceParam T theResource, @IdParam IdDt theId) {
-		return myDao.update(theResource, theId);
+	public MethodOutcome update(HttpServletRequest theRequest, @ResourceParam T theResource, @IdParam IdDt theId) {
+		startRequest(theRequest);
+		try {
+			return myDao.update(theResource, theId);
+		} finally {
+			endRequest(theRequest);
+		}
 	}
 
 	@Validate
-	public MethodOutcome validate(@ResourceParam T theResource) {
-		MethodOutcome retVal = new MethodOutcome();
-		retVal.setOperationOutcome(new OperationOutcome());
-		retVal.getOperationOutcome().addIssue().setSeverity(IssueSeverityEnum.INFORMATION).setDetails("Resource validates successfully");
-		return retVal;
+	public MethodOutcome validate(HttpServletRequest theRequest, @ResourceParam T theResource) {
+		startRequest(theRequest);
+		try {
+			MethodOutcome retVal = new MethodOutcome();
+			retVal.setOperationOutcome(new OperationOutcome());
+			retVal.getOperationOutcome().addIssue().setSeverity(IssueSeverityEnum.INFORMATION).setDetails("Resource validates successfully");
+			return retVal;
+		} finally {
+			endRequest(theRequest);
+		}
 	}
 
 }

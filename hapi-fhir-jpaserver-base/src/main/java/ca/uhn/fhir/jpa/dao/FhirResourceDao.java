@@ -47,6 +47,7 @@ import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.entity.ResourceLink;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.jpa.entity.TagDefinition;
+import ca.uhn.fhir.jpa.util.StopWatch;
 import ca.uhn.fhir.model.api.IPrimitiveDatatype;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.IResource;
@@ -168,6 +169,30 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 		} else {
 			codePredicates.add(ub);
 		}
+	}
+
+	private Set<Long> addPredicateId(String theParamName, Set<Long> theExistingPids, Set<Long> thePids) {
+		if (thePids == null || thePids.isEmpty()) {
+			return Collections.emptySet();
+		}
+
+		CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
+		CriteriaQuery<Long> cq = builder.createQuery(Long.class);
+		Root<ResourceTable> from = cq.from(ResourceTable.class);
+		cq.select(from.get("myId").as(Long.class));
+
+		Predicate typePredicate = builder.equal(from.get("myResourceType"), myResourceName);
+		Predicate idPrecidate = from.get("myId").in(thePids);
+
+		cq.where(builder.and(typePredicate, idPrecidate));
+
+		TypedQuery<Long> q = myEntityManager.createQuery(cq);
+		HashSet<Long> found = new HashSet<Long>(q.getResultList());
+		if (!theExistingPids.isEmpty()) {
+			theExistingPids.retainAll(found);
+		}
+
+		return found;
 	}
 
 	private Set<Long> addPredicateQuantity(String theParamName, Set<Long> thePids, List<IQueryParameterType> theOrParams) {
@@ -475,32 +500,9 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 		return new HashSet<Long>(q.getResultList());
 	}
 
-	private Set<Long> addPredicateId(String theParamName, Set<Long> theExistingPids, Set<Long> thePids) {
-		if (thePids == null || thePids.isEmpty()) {
-			return Collections.emptySet();
-		}
-
-		CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
-		CriteriaQuery<Long> cq = builder.createQuery(Long.class);
-		Root<ResourceTable> from = cq.from(ResourceTable.class);
-		cq.select(from.get("myId").as(Long.class));
-
-		Predicate typePredicate = builder.equal(from.get("myResourceType"), myResourceName);
-		Predicate idPrecidate = from.get("myId").in(thePids);
-
-		cq.where(builder.and(typePredicate, idPrecidate));
-
-		TypedQuery<Long> q = myEntityManager.createQuery(cq);
-		HashSet<Long> found = new HashSet<Long>(q.getResultList());
-		if (!theExistingPids.isEmpty()) {
-			theExistingPids.retainAll(found);
-		}
-
-		return found;
-	}
-
 	@Override
 	public void addTag(IdDt theId, String theScheme, String theTerm, String theLabel) {
+		StopWatch w = new StopWatch();
 		BaseHasResource entity = readEntity(theId);
 		if (entity == null) {
 			throw new ResourceNotFoundException(theId);
@@ -518,10 +520,12 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 		myEntityManager.persist(newEntity);
 		myEntityManager.merge(entity);
 		notifyWriteCompleted();
+		ourLog.info("Processed addTag {}/{} on {} in {}ms", new Object[] { theScheme, theTerm, theId, w.getMillisAndRestart() });
 	}
 
 	@Override
 	public MethodOutcome create(final T theResource) {
+		StopWatch w = new StopWatch();
 		ResourceTable entity = new ResourceTable();
 		entity.setResourceType(toResourceName(theResource));
 
@@ -529,12 +533,32 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 
 		MethodOutcome outcome = toMethodOutcome(entity);
 		notifyWriteCompleted();
+		ourLog.info("Processed create on {} in {}ms", myResourceName, w.getMillisAndRestart());
 		return outcome;
 	}
 
 	@Override
+	public MethodOutcome delete(IdDt theId) {
+		StopWatch w = new StopWatch();
+		final ResourceTable entity = readEntityLatestVersion(theId);
+		if (theId.hasVersionIdPart() && theId.getVersionIdPartAsLong().longValue() != entity.getVersion()) {
+			throw new InvalidRequestException("Trying to update " + theId + " but this is not the current version");
+		}
+
+		ResourceTable savedEntity = updateEntity(null, entity, true, true);
+
+		notifyWriteCompleted();
+
+		ourLog.info("Processed delete on {} in {}ms", theId.getValue(), w.getMillisAndRestart());
+		return toMethodOutcome(savedEntity);
+	}
+
+	@Override
 	public TagList getAllResourceTags() {
-		return super.getTags(myResourceType, null);
+		StopWatch w = new StopWatch();
+		TagList tags = super.getTags(myResourceType, null);
+		ourLog.info("Processed getTags on {} in {}ms", myResourceName, w.getMillisAndRestart());
+		return tags;
 	}
 
 	public Class<T> getResourceType() {
@@ -543,16 +567,23 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 
 	@Override
 	public TagList getTags(IdDt theResourceId) {
-		return super.getTags(myResourceType, theResourceId);
+		StopWatch w = new StopWatch();
+		TagList retVal = super.getTags(myResourceType, theResourceId);
+		ourLog.info("Processed getTags on {} in {}ms", theResourceId, w.getMillisAndRestart());
+		return retVal;
 	}
 
 	@Override
 	public IBundleProvider history(Date theSince) {
-		return super.history(myResourceName, null, theSince);
+		StopWatch w = new StopWatch();
+		IBundleProvider retVal = super.history(myResourceName, null, theSince);
+		ourLog.info("Processed history on {} in {}ms", myResourceName, w.getMillisAndRestart());
+		return retVal;
 	}
 
 	@Override
 	public IBundleProvider history(final IdDt theId, final Date theSince) {
+		StopWatch w = new StopWatch();
 		final InstantDt end = createHistoryToTimestamp();
 		final String resourceType = getContext().getResourceDefinition(myResourceType).getName();
 
@@ -596,8 +627,8 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 		return new IBundleProvider() {
 
 			@Override
-			public int size() {
-				return count;
+			public InstantDt getPublished() {
+				return end;
 			}
 
 			@Override
@@ -632,8 +663,8 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 			}
 
 			@Override
-			public InstantDt getPublished() {
-				return end;
+			public int size() {
+				return count;
 			}
 		};
 
@@ -641,7 +672,30 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 
 	@Override
 	public IBundleProvider history(Long theId, Date theSince) {
-		return super.history(myResourceName, theId, theSince);
+		StopWatch w = new StopWatch();
+		IBundleProvider retVal = super.history(myResourceName, theId, theSince);
+		ourLog.info("Processed history on {} in {}ms", theId, w.getMillisAndRestart());
+		return retVal;
+	}
+
+	private void loadResourcesByPid(Collection<Long> theIncludePids, List<IResource> theResourceListToPopulate) {
+		if (theIncludePids.isEmpty()) {
+			return;
+		}
+
+		CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
+		CriteriaQuery<ResourceTable> cq = builder.createQuery(ResourceTable.class);
+		Root<ResourceTable> from = cq.from(ResourceTable.class);
+		cq.where(builder.equal(from.get("myResourceType"), getContext().getResourceDefinition(myResourceType).getName()));
+		if (theIncludePids != null) {
+			cq.where(from.get("myId").in(theIncludePids));
+		}
+		TypedQuery<ResourceTable> q = myEntityManager.createQuery(cq);
+
+		for (ResourceTable next : q.getResultList()) {
+			T resource = toResource(myResourceType, next);
+			theResourceListToPopulate.add(resource);
+		}
 	}
 
 	@PostConstruct
@@ -664,6 +718,7 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 
 	@Override
 	public T read(IdDt theId) {
+		StopWatch w = new StopWatch();
 		BaseHasResource entity = readEntity(theId);
 
 		T retVal = toResource(myResourceType, entity);
@@ -673,6 +728,7 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 			throw new ResourceGoneException("Resource was deleted at " + deleted.getValueAsString());
 		}
 
+		ourLog.info("Processed read on {} in {}ms", theId.getValue(), w.getMillisAndRestart());
 		return retVal;
 	}
 
@@ -698,6 +754,7 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 				throw new ResourceNotFoundException(theId);
 			}
 		}
+
 		return entity;
 	}
 
@@ -711,6 +768,7 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 
 	@Override
 	public void removeTag(IdDt theId, String theScheme, String theTerm) {
+		StopWatch w = new StopWatch();
 		BaseHasResource entity = readEntity(theId);
 		if (entity == null) {
 			throw new ResourceNotFoundException(theId);
@@ -724,6 +782,8 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 		}
 
 		myEntityManager.merge(entity);
+
+		ourLog.info("Processed remove tag {}/{} on {} in {}ms", new Object[] { theScheme, theTerm, theId.getValue(), w.getMillisAndRestart() });
 	}
 
 	@Override
@@ -738,6 +798,7 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 
 	@Override
 	public IBundleProvider search(final SearchParameterMap theParams) {
+		StopWatch w = new StopWatch();
 		final InstantDt now = InstantDt.withCurrentTime();
 
 		Set<Long> loadPids;
@@ -762,11 +823,11 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 
 		final ArrayList<Long> pids = new ArrayList<Long>(loadPids);
 
-		return new IBundleProvider() {
+		IBundleProvider retVal = new IBundleProvider() {
 
 			@Override
-			public int size() {
-				return pids.size();
+			public InstantDt getPublished() {
+				return now;
 			}
 
 			@Override
@@ -815,30 +876,14 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 			}
 
 			@Override
-			public InstantDt getPublished() {
-				return now;
+			public int size() {
+				return pids.size();
 			}
 		};
-	}
 
-	private void loadResourcesByPid(Collection<Long> theIncludePids, List<IResource> theResourceListToPopulate) {
-		if (theIncludePids.isEmpty()) {
-			return;
-		}
+		ourLog.info("Processed search for {} on {} in {}ms", new Object[] {myResourceName, theParams, w.getMillisAndRestart()});
 
-		CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
-		CriteriaQuery<ResourceTable> cq = builder.createQuery(ResourceTable.class);
-		Root<ResourceTable> from = cq.from(ResourceTable.class);
-		cq.where(builder.equal(from.get("myResourceType"), getContext().getResourceDefinition(myResourceType).getName()));
-		if (theIncludePids != null) {
-			cq.where(from.get("myId").in(theIncludePids));
-		}
-		TypedQuery<ResourceTable> q = myEntityManager.createQuery(cq);
-
-		for (ResourceTable next : q.getResultList()) {
-			T resource = toResource(myResourceType, next);
-			theResourceListToPopulate.add(resource);
-		}
+		return retVal;
 	}
 
 	@Override
@@ -1006,6 +1051,7 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 
 	@Override
 	public MethodOutcome update(final T theResource, final IdDt theId) {
+		StopWatch w = new StopWatch();
 
 		// TransactionTemplate template = new TransactionTemplate(myPlatformTransactionManager);
 		// ResourceTable savedEntity = template.execute(new TransactionCallback<ResourceTable>() {
@@ -1024,19 +1070,7 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 		ResourceTable savedEntity = updateEntity(theResource, entity, true, false);
 
 		notifyWriteCompleted();
-		return toMethodOutcome(savedEntity);
-	}
-
-	@Override
-	public MethodOutcome delete(IdDt theId) {
-		final ResourceTable entity = readEntityLatestVersion(theId);
-		if (theId.hasVersionIdPart() && theId.getVersionIdPartAsLong().longValue() != entity.getVersion()) {
-			throw new InvalidRequestException("Trying to update " + theId + " but this is not the current version");
-		}
-
-		ResourceTable savedEntity = updateEntity(null, entity, true, true);
-
-		notifyWriteCompleted();
+		ourLog.info("Processed update on {} in {}ms", theId.getValue(), w.getMillisAndRestart());
 		return toMethodOutcome(savedEntity);
 	}
 

@@ -21,14 +21,14 @@ package ca.uhn.fhir.narrative;
  */
 
 import java.io.IOException;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.lang3.Validate;
 
 public class CustomThymeleafNarrativeGenerator extends BaseThymeleafNarrativeGenerator {
 
-	private String myPropertyFile;
+	private List<String> myPropertyFile;
 
 	/**
 	 * Create a new narrative generator
@@ -42,7 +42,7 @@ public class CustomThymeleafNarrativeGenerator extends BaseThymeleafNarrativeGen
 	 * @throws IOException
 	 *             If the file can not be found/read
 	 */
-	public CustomThymeleafNarrativeGenerator(String thePropertyFile) throws IOException {
+	public CustomThymeleafNarrativeGenerator(String... thePropertyFile) throws IOException {
 		setPropertyFile(thePropertyFile);
 	}
 
@@ -58,14 +58,14 @@ public class CustomThymeleafNarrativeGenerator extends BaseThymeleafNarrativeGen
 	 * @throws IOException
 	 *             If the file can not be found/read
 	 */
-	public void setPropertyFile(String thePropertyFile) {
+	public void setPropertyFile(String... thePropertyFile) {
 		Validate.notNull(thePropertyFile, "Property file can not be null");
-		myPropertyFile = thePropertyFile;
+		myPropertyFile = Arrays.asList(thePropertyFile);
 	}
 
 	@Override
 	public List<String> getPropertyFile() {
-		return Collections.singletonList(myPropertyFile);
+		return myPropertyFile;
 	}
 
 }

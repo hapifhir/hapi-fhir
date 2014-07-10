@@ -602,6 +602,9 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		@Override
 		public T invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException, BaseServerResponseException {
 			EncodingEnum respType = EncodingEnum.forContentType(theResponseMimeType);
+			if (respType == null) {
+				throw NonFhirResponseException.newInstance(theResponseStatusCode, theResponseMimeType, theResponseReader);
+			}
 			IParser parser = respType.newParser(myContext);
 			return parser.parseResource(myType, theResponseReader);
 		}
@@ -653,6 +656,9 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		@Override
 		public TagList invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException, BaseServerResponseException {
 			EncodingEnum respType = EncodingEnum.forContentType(theResponseMimeType);
+			if (respType == null) {
+				throw NonFhirResponseException.newInstance(theResponseStatusCode, theResponseMimeType, theResponseReader);
+			}
 			IParser parser = respType.newParser(myContext);
 			return parser.parseTagList(theResponseReader);
 		}

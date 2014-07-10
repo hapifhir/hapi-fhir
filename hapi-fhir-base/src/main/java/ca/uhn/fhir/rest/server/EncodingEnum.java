@@ -27,7 +27,7 @@ import ca.uhn.fhir.parser.IParser;
 
 public enum EncodingEnum {
 
-	XML(Constants.CT_FHIR_XML, Constants.CT_ATOM_XML, Constants.CT_XML, Constants.FORMAT_XML) {
+	XML(Constants.CT_FHIR_XML, Constants.CT_ATOM_XML, "text/xml", Constants.FORMAT_XML) {
 		@Override
 		public IParser newParser(FhirContext theContext) {
 			return theContext.newXmlParser();

@@ -49,6 +49,7 @@ import ca.uhn.fhir.rest.server.Constants;
 @DatatypeDef(name = "id")
 public class IdDt extends BasePrimitive<String> {
 
+	private boolean myHaveComponentParts;
 	private String myResourceType;
 	private String myUnqualifiedId;
 	private String myUnqualifiedVersionId;
@@ -105,6 +106,18 @@ public class IdDt extends BasePrimitive<String> {
 	 * @param theId
 	 *            The ID (e.g. "123")
 	 */
+	public IdDt(String theResourceType, BigDecimal theIdPart) {
+		this(theResourceType, theIdPart.toPlainString());
+	}
+
+	/**
+	 * Constructor
+	 * 
+	 * @param theResourceType
+	 *            The resource type (e.g. "Patient")
+	 * @param theId
+	 *            The ID (e.g. "123")
+	 */
 	public IdDt(String theResourceType, String theId) {
 		this(theResourceType,theId,null);
 	}
@@ -126,11 +139,14 @@ public class IdDt extends BasePrimitive<String> {
 		myResourceType = theResourceType;
 		myUnqualifiedId = theId;
 		myUnqualifiedVersionId = StringUtils.defaultIfBlank(theVersionId, null);
-		if (myUnqualifiedVersionId != null) {
-			myValue = myResourceType + '/' + myUnqualifiedId + '/' + Constants.PARAM_HISTORY + '/' + myUnqualifiedVersionId;
-		} else {
-			myValue = myResourceType + '/' + myUnqualifiedId;
-		}
+		myHaveComponentParts = true;
+	}
+
+	/**
+	 * @deprecated Use {@link #getIdPartAsBigDecimal()} instead (this method was deprocated because its name is ambiguous)
+	 */
+	public BigDecimal asBigDecimal() {
+		return getIdPartAsBigDecimal();
 	}
 
 	/**
@@ -200,12 +216,19 @@ public class IdDt extends BasePrimitive<String> {
 	 */
 	@Override
 	public String getValue() {
+		if (myValue == null && myHaveComponentParts) {
+		if (myUnqualifiedVersionId != null) {
+			myValue = myResourceType + '/' + myUnqualifiedId + '/' + Constants.PARAM_HISTORY + '/' + myUnqualifiedVersionId;
+		} else {
+			myValue = myResourceType + '/' + myUnqualifiedId;
+		}
+		}
 		return myValue;
 	}
 
 	@Override
 	public String getValueAsString() {
-		return myValue;
+		return getValue();
 	}
 
 	public String getVersionIdPart() {
@@ -229,13 +252,6 @@ public class IdDt extends BasePrimitive<String> {
 	}
 
 	/**
-	 * Returns <code>true</code> if the ID is a local reference (in other words, it begins with the '#' character)
-	 */
-	public boolean isLocal() {
-		return myUnqualifiedId != null && myUnqualifiedId.isEmpty() == false && myUnqualifiedId.charAt(0) == '#';
-	}
-
-	/**
 	 * Returns <code>true</code> if the unqualified ID is a valid {@link Long} value (in other words, it consists only
 	 * of digits)
 	 */
@@ -250,6 +266,13 @@ public class IdDt extends BasePrimitive<String> {
 			}
 		}
 		return true;
+	}
+
+	/**
+	 * Returns <code>true</code> if the ID is a local reference (in other words, it begins with the '#' character)
+	 */
+	public boolean isLocal() {
+		return myUnqualifiedId != null && myUnqualifiedId.isEmpty() == false && myUnqualifiedId.charAt(0) == '#';
 	}
 
 	/**
@@ -398,13 +421,6 @@ public class IdDt extends BasePrimitive<String> {
 		}
 		
 		return new IdDt(value + '/' + Constants.PARAM_HISTORY + '/' + theVersion);
-	}
-
-	/**
-	 * @deprecated Use {@link #getIdPartAsBigDecimal()} instead (this method was deprocated because its name is ambiguous)
-	 */
-	public BigDecimal asBigDecimal() {
-		return getIdPartAsBigDecimal();
 	}
 
 }

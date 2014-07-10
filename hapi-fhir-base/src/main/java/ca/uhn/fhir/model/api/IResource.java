@@ -79,6 +79,10 @@ public interface IResource extends ICompositeElement {
 	 * of the URL) used to access this resource, and is not the same thing as any business
 	 * identifiers stored within the resource. For example, a Patient resource might
 	 * have any number of medical record numbers but these are not stored here.
+	 * <p>
+	 * This ID is specified as the "Logical ID" and "Version ID" in the FHIR specification, see 
+	 * <a href="http://www.hl7.org/implement/standards/fhir/resources.html#metadata">here</a>
+	 * </p>
 	 */
 	IdDt getId();
 	
@@ -87,6 +91,10 @@ public interface IResource extends ICompositeElement {
 	 * of the URL) used to access this resource, and is not the same thing as any business
 	 * identifiers stored within the resource. For example, a Patient resource might
 	 * have any number of medical record numbers but these are not stored here.
+	 * <p>
+	 * This ID is specified as the "Logical ID" and "Version ID" in the FHIR specification, see 
+	 * <a href="http://www.hl7.org/implement/standards/fhir/resources.html#metadata">here</a>
+	 * </p>
 	 */
 	void setId(IdDt theId);
 	
