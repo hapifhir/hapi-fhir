@@ -30,6 +30,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.TransactionCallback;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
@@ -37,6 +41,7 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.entity.BaseHasResource;
 import ca.uhn.fhir.jpa.entity.BaseTag;
+import ca.uhn.fhir.jpa.entity.ForcedId;
 import ca.uhn.fhir.jpa.entity.ResourceEncodingEnum;
 import ca.uhn.fhir.jpa.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.entity.ResourceHistoryTag;
@@ -73,6 +78,7 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.FhirTerser;
 
 import com.google.common.base.Function;
@@ -128,7 +134,7 @@ public abstract class BaseFhirDao implements IDao {
 			if (theResourceName != null) {
 				Predicate typePredicate = builder.equal(from.get("myResourceType"), theResourceName);
 				if (theResourceId != null) {
-					cq.where(typePredicate, builder.equal(from.get("myResourceId"), theResourceId.getIdPartAsLong()));
+					cq.where(typePredicate, builder.equal(from.get("myResourceId"), translateForcedIdToPid(theResourceId)));
 				} else {
 					cq.where(typePredicate);
 				}
@@ -327,7 +333,7 @@ public abstract class BaseFhirDao implements IDao {
 					}
 					Long valueOf;
 					try {
-						valueOf = Long.valueOf(id);
+						valueOf = translateForcedIdToPid(nextValue.getReference());
 					} catch (Exception e) {
 						String resName = getContext().getResourceDefinition(type).getName();
 						throw new InvalidRequestException("Resource " + resName + "/" + id + " not found, specified in path: " + nextPath + " (this is an invalid ID, must be numeric on this server)");
@@ -726,6 +732,9 @@ public abstract class BaseFhirDao implements IDao {
 		}
 	}
 
+	@Autowired
+	private PlatformTransactionManager myPlatformTransactionManager;
+
 	protected IBundleProvider history(String theResourceName, Long theId, Date theSince) {
 		final List<HistoryTuple> tuples = new ArrayList<HistoryTuple>();
 
@@ -756,34 +765,40 @@ public abstract class BaseFhirDao implements IDao {
 			}
 
 			@Override
-			public List<IResource> getResources(int theFromIndex, int theToIndex) {
-				StopWatch timer = new StopWatch();
-				List<BaseHasResource> resEntities = Lists.newArrayList();
-
-				List<HistoryTuple> tupleSubList = tuples.subList(theFromIndex, theToIndex);
-				searchHistoryCurrentVersion(tupleSubList, resEntities);
-				ourLog.info("Loaded history from current versions in {} ms", timer.getMillisAndRestart());
-
-				searchHistoryHistory(tupleSubList, resEntities);
-				ourLog.info("Loaded history from previous versions in {} ms", timer.getMillisAndRestart());
-
-				Collections.sort(resEntities, new Comparator<BaseHasResource>() {
+			public List<IResource> getResources(final int theFromIndex, final int theToIndex) {
+				final StopWatch timer = new StopWatch();
+				TransactionTemplate template = new TransactionTemplate(myPlatformTransactionManager);
+				return template.execute(new TransactionCallback<List<IResource>>() {
 					@Override
-					public int compare(BaseHasResource theO1, BaseHasResource theO2) {
-						return theO2.getUpdated().getValue().compareTo(theO1.getUpdated().getValue());
+					public List<IResource> doInTransaction(TransactionStatus theStatus) {
+						List<BaseHasResource> resEntities = Lists.newArrayList();
+
+						List<HistoryTuple> tupleSubList = tuples.subList(theFromIndex, theToIndex);
+						searchHistoryCurrentVersion(tupleSubList, resEntities);
+						ourLog.info("Loaded history from current versions in {} ms", timer.getMillisAndRestart());
+
+						searchHistoryHistory(tupleSubList, resEntities);
+						ourLog.info("Loaded history from previous versions in {} ms", timer.getMillisAndRestart());
+
+						Collections.sort(resEntities, new Comparator<BaseHasResource>() {
+							@Override
+							public int compare(BaseHasResource theO1, BaseHasResource theO2) {
+								return theO2.getUpdated().getValue().compareTo(theO1.getUpdated().getValue());
+							}
+						});
+
+						int limit = theToIndex - theFromIndex;
+						if (resEntities.size() > limit) {
+							resEntities = resEntities.subList(0, limit);
+						}
+
+						ArrayList<IResource> retVal = new ArrayList<IResource>();
+						for (BaseHasResource next : resEntities) {
+							retVal.add(toResource(next));
+						}
+						return retVal;
 					}
-				});
-
-				int limit = theToIndex - theFromIndex;
-				if (resEntities.size() > limit) {
-					resEntities = resEntities.subList(0, limit);
-				}
-
-				ArrayList<IResource> retVal = new ArrayList<IResource>();
-				for (BaseHasResource next : resEntities) {
-					retVal.add(toResource(next));
-				}
-				return retVal;
+			});
 			}
 
 			@Override
@@ -867,6 +882,7 @@ public abstract class BaseFhirDao implements IDao {
 			for (Tag next : tagList) {
 				TagDefinition tag = getTag(next.getScheme(), next.getTerm(), next.getLabel());
 				theEntity.addTag(tag);
+				theEntity.setHasTags(true);
 			}
 		}
 
@@ -886,9 +902,46 @@ public abstract class BaseFhirDao implements IDao {
 		return retVal;
 	}
 
+	protected void createForcedIdIfNeeded(ResourceTable entity, IdDt id) {
+		if (id.isEmpty() == false && id.hasIdPart()) {
+			if (isValidPid(id)) {
+				return;
+			}
+			ForcedId fid = new ForcedId();
+			fid.setForcedId(id.getIdPart());
+			fid.setResource(entity);
+			entity.setForcedId(fid);
+		}
+	}
+
 	protected IResource toResource(BaseHasResource theEntity) {
 		RuntimeResourceDefinition type = myContext.getResourceDefinition(theEntity.getResourceType());
 		return toResource(type.getImplementingClass(), theEntity);
+	}
+
+	protected Long translateForcedIdToPid(IdDt theId) {
+		if (isValidPid(theId)) {
+			return theId.getIdPartAsLong();
+		} else {
+			TypedQuery<ForcedId> q = myEntityManager.createNamedQuery("Q_GET_FORCED_ID", ForcedId.class);
+			q.setParameter("ID", theId.getIdPart());
+			try {
+				return q.getSingleResult().getResourcePid();
+			} catch (NoResultException e) {
+				throw new ResourceNotFoundException(theId);
+			}
+		}
+	}
+
+	protected boolean isValidPid(IdDt theId) {
+		String idPart = theId.getIdPart();
+		for (int i = 0; i < idPart.length(); i++) {
+			char nextChar = idPart.charAt(i);
+			if (nextChar < '0' || nextChar > '9') {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	protected <T extends IResource> T toResource(Class<T> theResourceType, BaseHasResource theEntity) {
@@ -908,7 +961,9 @@ public abstract class BaseFhirDao implements IDao {
 
 		IParser parser = theEntity.getEncoding().newParser(getContext());
 		T retVal = parser.parseResource(theResourceType, resourceText);
+
 		retVal.setId(theEntity.getIdDt());
+
 		retVal.getResourceMetadata().put(ResourceMetadataKeyEnum.VERSION_ID, theEntity.getVersion());
 		retVal.getResourceMetadata().put(ResourceMetadataKeyEnum.PUBLISHED, theEntity.getPublished());
 		retVal.getResourceMetadata().put(ResourceMetadataKeyEnum.UPDATED, theEntity.getUpdated());
@@ -922,7 +977,7 @@ public abstract class BaseFhirDao implements IDao {
 		}
 
 		Collection<? extends BaseTag> tags = theEntity.getTags();
-		if (tags.size() > 0) {
+		if (theEntity.isHasTags()) {
 			TagList tagList = new TagList();
 			for (BaseTag next : tags) {
 				tagList.add(new Tag(next.getTag().getScheme(), next.getTag().getTerm(), next.getTag().getLabel()));
@@ -1050,7 +1105,7 @@ public abstract class BaseFhirDao implements IDao {
 		myEntityManager.flush();
 
 		if (theResource != null) {
-			theResource.setId(new IdDt(entity.getResourceType(), entity.getId().toString(), Long.toString(entity.getVersion())));
+			theResource.setId(entity.getIdDt());
 		}
 
 		return entity;

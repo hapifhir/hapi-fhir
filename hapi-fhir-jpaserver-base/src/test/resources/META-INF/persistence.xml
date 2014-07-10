@@ -8,6 +8,7 @@
 		<provider>org.hibernate.ejb.HibernatePersistence</provider>
 		<!-- <class>ca.uhn.fhir.jpa.entity.PatientResourceTable</class>  -->
 		
+		<class>ca.uhn.fhir.jpa.entity.ForcedId</class>
 		<class>ca.uhn.fhir.jpa.entity.ResourceTable</class>
 		<class>ca.uhn.fhir.jpa.entity.ResourceHistoryTable</class>
 		<class>ca.uhn.fhir.jpa.entity.ResourceHistoryTag</class>

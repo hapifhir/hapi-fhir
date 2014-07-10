@@ -6,6 +6,8 @@
 
 	<persistence-unit name="FHIR_UT" transaction-type="RESOURCE_LOCAL">
 		<provider>org.hibernate.ejb.HibernatePersistence</provider>
+
+		<class>ca.uhn.fhir.jpa.entity.ForcedId</class>
 		<class>ca.uhn.fhir.jpa.entity.ResourceHistoryTable</class>
 		<class>ca.uhn.fhir.jpa.entity.ResourceHistoryTag</class>
 		<class>ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamDate</class>

@@ -14,7 +14,7 @@
 				<value>home     , UHN/HAPI Server                 , http://fhirtest.uhn.ca/base</value>
 				<value>hi       , Health Intersections            , http://fhir.healthintersections.com.au/open</value>
 				<value>furore   , Spark - Furore Reference Server , http://spark.furore.com/fhir</value>
-				<value>blaze    , Blaze (Orion Health)            , https://his-medicomp-gateway.orionhealth.com/blaze/fhir</value>
+				<value>blaze    , Blaze (Orion Health)            , https://fhir.orionhealth.com</value>
 				<value>oridashi , Oridashi                        , http://demo.oridashi.com.au:8190</value>
 			</list>
 		</property>

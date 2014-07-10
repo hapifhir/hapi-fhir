@@ -96,7 +96,7 @@ public class IdDt extends BasePrimitive<String> {
 	public IdDt(@SimpleSetter.Parameter(name = "theId") String theValue) {
 		setValue(theValue);
 	}
-	
+
 	/**
 	 * Constructor
 	 * 
@@ -106,7 +106,7 @@ public class IdDt extends BasePrimitive<String> {
 	 *            The ID (e.g. "123")
 	 */
 	public IdDt(String theResourceType, String theId) {
-		this(theResourceType,theId,null);
+		this(theResourceType, theId, null);
 	}
 
 	/**
@@ -131,6 +131,14 @@ public class IdDt extends BasePrimitive<String> {
 		} else {
 			myValue = myResourceType + '/' + myUnqualifiedId;
 		}
+	}
+
+	/**
+	 * @deprecated Use {@link #getIdPartAsBigDecimal()} instead (this method was deprocated because its name is
+	 *             ambiguous)
+	 */
+	public BigDecimal asBigDecimal() {
+		return getIdPartAsBigDecimal();
 	}
 
 	/**
@@ -224,15 +232,12 @@ public class IdDt extends BasePrimitive<String> {
 		return isNotBlank(getIdPart());
 	}
 
-	public boolean hasVersionIdPart() {
-		return isNotBlank(getVersionIdPart());
+	public boolean hasResourceType() {
+		return isNotBlank(myResourceType);
 	}
 
-	/**
-	 * Returns <code>true</code> if the ID is a local reference (in other words, it begins with the '#' character)
-	 */
-	public boolean isLocal() {
-		return myUnqualifiedId != null && myUnqualifiedId.isEmpty() == false && myUnqualifiedId.charAt(0) == '#';
+	public boolean hasVersionIdPart() {
+		return isNotBlank(getVersionIdPart());
 	}
 
 	/**
@@ -250,6 +255,13 @@ public class IdDt extends BasePrimitive<String> {
 			}
 		}
 		return true;
+	}
+
+	/**
+	 * Returns <code>true</code> if the ID is a local reference (in other words, it begins with the '#' character)
+	 */
+	public boolean isLocal() {
+		return myUnqualifiedId != null && myUnqualifiedId.isEmpty() == false && myUnqualifiedId.charAt(0) == '#';
 	}
 
 	/**
@@ -388,7 +400,7 @@ public class IdDt extends BasePrimitive<String> {
 	 */
 	public IdDt withVersion(String theVersion) {
 		Validate.notBlank(theVersion, "Version may not be null or empty");
-		
+
 		int i = myValue.indexOf(Constants.PARAM_HISTORY);
 		String value;
 		if (i > 1) {
@@ -396,15 +408,8 @@ public class IdDt extends BasePrimitive<String> {
 		} else {
 			value = myValue;
 		}
-		
-		return new IdDt(value + '/' + Constants.PARAM_HISTORY + '/' + theVersion);
-	}
 
-	/**
-	 * @deprecated Use {@link #getIdPartAsBigDecimal()} instead (this method was deprocated because its name is ambiguous)
-	 */
-	public BigDecimal asBigDecimal() {
-		return getIdPartAsBigDecimal();
+		return new IdDt(value + '/' + Constants.PARAM_HISTORY + '/' + theVersion);
 	}
 
 }

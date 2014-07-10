@@ -42,7 +42,7 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 	@Column(name = "RES_VER", nullable = false)
 	private Long myResourceVersion;
 
-	@OneToMany(mappedBy = "myResourceHistory", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+	@OneToMany(mappedBy = "myResourceHistory", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
 	private Collection<ResourceHistoryTag> myTags;
 
 	public void addTag(ResourceHistoryTag theTag) {
@@ -69,7 +69,8 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 
 	@Override
 	public IdDt getIdDt() {
-		return new IdDt(getResourceType() + '/' + getResourceId() + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
+		Object id = getForcedId()==null? getResourceId() : getForcedId().getForcedId();
+		return new IdDt(getResourceType() + '/' + id + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
 	}
 
 	public Long getResourceId() {

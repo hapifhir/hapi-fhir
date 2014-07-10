@@ -73,7 +73,7 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 	@Column(name = "RES_TYPE", length = RESTYPE_LEN)
 	private String myResourceType;
 
-	@OneToMany(mappedBy = "myResource", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+	@OneToMany(mappedBy = "myResource", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
 	private Collection<ResourceTag> myTags;
 
 	@Column(name = "RES_VER")
@@ -91,7 +91,8 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 	}
 
 	public IdDt getIdDt() {
-		return new IdDt(myResourceType + '/' + myId + '/' + Constants.PARAM_HISTORY + '/' + myVersion);
+		Object id = getForcedId() == null ? myId : getForcedId().getForcedId();
+		return new IdDt(myResourceType + '/' + id + '/' + Constants.PARAM_HISTORY + '/' + myVersion);
 	}
 
 	public Collection<ResourceIndexedSearchParamDate> getParamsDate() {
@@ -258,6 +259,7 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 		retVal.setEncoding(getEncoding());
 		retVal.setResource(getResource());
 		retVal.setDeleted(getDeleted());
+		retVal.setForcedId(getForcedId());
 
 		for (ResourceTag next : getTags()) {
 			retVal.addTag(next);

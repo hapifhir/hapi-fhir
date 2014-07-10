@@ -29,8 +29,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Required;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionCallback;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.ConfigurationException;
@@ -66,12 +69,12 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.QualifiedDateParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
-import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.FhirTerser;
 
 @Transactional(propagation = Propagation.REQUIRED)
@@ -375,8 +378,7 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 			}
 
 			if (rawSearchTerm.length() > ResourceIndexedSearchParamString.MAX_LENGTH) {
-				throw new InvalidRequestException("Parameter[" + theParamName + "] has length (" + rawSearchTerm.length() + ") that is longer than maximum allowed ("
-						+ ResourceIndexedSearchParamString.MAX_LENGTH + "): " + rawSearchTerm);
+				throw new InvalidRequestException("Parameter[" + theParamName + "] has length (" + rawSearchTerm.length() + ") that is longer than maximum allowed (" + ResourceIndexedSearchParamString.MAX_LENGTH + "): " + rawSearchTerm);
 			}
 
 			String likeExpression = normalizeString(rawSearchTerm);
@@ -434,12 +436,10 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 			}
 
 			if (system != null && system.length() > ResourceIndexedSearchParamToken.MAX_LENGTH) {
-				throw new InvalidRequestException("Parameter[" + theParamName + "] has system (" + system.length() + ") that is longer than maximum allowed ("
-						+ ResourceIndexedSearchParamToken.MAX_LENGTH + "): " + system);
+				throw new InvalidRequestException("Parameter[" + theParamName + "] has system (" + system.length() + ") that is longer than maximum allowed (" + ResourceIndexedSearchParamToken.MAX_LENGTH + "): " + system);
 			}
 			if (code != null && code.length() > ResourceIndexedSearchParamToken.MAX_LENGTH) {
-				throw new InvalidRequestException("Parameter[" + theParamName + "] has code (" + code.length() + ") that is longer than maximum allowed (" + ResourceIndexedSearchParamToken.MAX_LENGTH
-						+ "): " + code);
+				throw new InvalidRequestException("Parameter[" + theParamName + "] has code (" + code.length() + ") that is longer than maximum allowed (" + ResourceIndexedSearchParamToken.MAX_LENGTH + "): " + code);
 			}
 
 			ArrayList<Predicate> singleCodePredicates = (new ArrayList<Predicate>());
@@ -512,6 +512,8 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 			}
 		}
 
+		entity.setHasTags(true);
+		
 		TagDefinition def = getTag(theScheme, theTerm, theLabel);
 		BaseTag newEntity = entity.addTag(def);
 
@@ -524,6 +526,13 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 	public MethodOutcome create(final T theResource) {
 		ResourceTable entity = new ResourceTable();
 		entity.setResourceType(toResourceName(theResource));
+
+		if (theResource.getId().isEmpty() == false) {
+			if (isValidPid(theResource.getId())) {
+				throw new UnprocessableEntityException("This server cannot create an entity with a numeric ID - Numeric IDs are server assigned");
+			}
+			createForcedIdIfNeeded(entity, theResource.getId());
+		}
 
 		updateEntity(theResource, entity, false, false);
 
@@ -568,8 +577,7 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 
 		final T current = currentTmp;
 
-		String querySring = "SELECT count(h) FROM ResourceHistoryTable h " + "WHERE h.myResourceId = :PID AND h.myResourceType = :RESTYPE" + " AND h.myUpdated < :END"
-				+ (theSince != null ? " AND h.myUpdated >= :SINCE" : "");
+		String querySring = "SELECT count(h) FROM ResourceHistoryTable h " + "WHERE h.myResourceId = :PID AND h.myResourceType = :RESTYPE" + " AND h.myUpdated < :END" + (theSince != null ? " AND h.myUpdated >= :SINCE" : "");
 		TypedQuery<Long> countQuery = myEntityManager.createQuery(querySring, Long.class);
 		countQuery.setParameter("PID", theId.getIdPartAsLong());
 		countQuery.setParameter("RESTYPE", resourceType);
@@ -607,9 +615,8 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 					retVal.add(current);
 				}
 
-				TypedQuery<ResourceHistoryTable> q = myEntityManager.createQuery(
-						"SELECT h FROM ResourceHistoryTable h WHERE h.myResourceId = :PID AND h.myResourceType = :RESTYPE AND h.myUpdated < :END "
-								+ (theSince != null ? " AND h.myUpdated >= :SINCE" : "") + " ORDER BY h.myUpdated ASC", ResourceHistoryTable.class);
+				TypedQuery<ResourceHistoryTable> q = myEntityManager.createQuery("SELECT h FROM ResourceHistoryTable h WHERE h.myResourceId = :PID AND h.myResourceType = :RESTYPE AND h.myUpdated < :END " + (theSince != null ? " AND h.myUpdated >= :SINCE" : "")
+						+ " ORDER BY h.myUpdated ASC", ResourceHistoryTable.class);
 				q.setParameter("PID", theId.getIdPartAsLong());
 				q.setParameter("RESTYPE", resourceType);
 				q.setParameter("END", end.getValue(), TemporalType.TIMESTAMP);
@@ -655,8 +662,7 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 				throw new ConfigurationException("Unknown search param on resource[" + myResourceName + "] for secondary key[" + mySecondaryPrimaryKeyParamName + "]");
 			}
 			if (sp.getParamType() != SearchParamTypeEnum.TOKEN) {
-				throw new ConfigurationException("Search param on resource[" + myResourceName + "] for secondary key[" + mySecondaryPrimaryKeyParamName
-						+ "] is not a token type, only token is supported");
+				throw new ConfigurationException("Search param on resource[" + myResourceName + "] for secondary key[" + mySecondaryPrimaryKeyParamName + "] is not a token type, only token is supported");
 			}
 		}
 
@@ -678,7 +684,8 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 
 	@Override
 	public BaseHasResource readEntity(IdDt theId) {
-		BaseHasResource entity = myEntityManager.find(ResourceTable.class, theId.getIdPartAsLong());
+		Long pid = translateForcedIdToPid(theId);
+		BaseHasResource entity = myEntityManager.find(ResourceTable.class, pid);
 		if (theId.hasVersionIdPart()) {
 			if (entity.getVersion() != theId.getVersionIdPartAsLong()) {
 				entity = null;
@@ -687,8 +694,7 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 
 		if (entity == null) {
 			if (theId.hasVersionIdPart()) {
-				TypedQuery<ResourceHistoryTable> q = myEntityManager.createQuery(
-						"SELECT t from ResourceHistoryTable t WHERE t.myResourceId = :RID AND t.myResourceType = :RTYP AND t.myResourceVersion = :RVER", ResourceHistoryTable.class);
+				TypedQuery<ResourceHistoryTable> q = myEntityManager.createQuery("SELECT t from ResourceHistoryTable t WHERE t.myResourceId = :RID AND t.myResourceType = :RTYP AND t.myResourceVersion = :RVER", ResourceHistoryTable.class);
 				q.setParameter("RID", theId.getIdPartAsLong());
 				q.setParameter("RTYP", myResourceName);
 				q.setParameter("RVER", theId.getVersionIdPartAsLong());
@@ -702,7 +708,7 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 	}
 
 	private ResourceTable readEntityLatestVersion(IdDt theId) {
-		ResourceTable entity = myEntityManager.find(ResourceTable.class, theId.getIdPartAsLong());
+		ResourceTable entity = myEntityManager.find(ResourceTable.class, translateForcedIdToPid(theId));
 		if (entity == null) {
 			throw new ResourceNotFoundException(theId);
 		}
@@ -723,6 +729,10 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 			}
 		}
 
+		if (entity.getTags().isEmpty()) {
+			entity.setHasTags(false);
+		}
+			
 		myEntityManager.merge(entity);
 	}
 
@@ -770,48 +780,54 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 			}
 
 			@Override
-			public List<IResource> getResources(int theFromIndex, int theToIndex) {
-				List<Long> pidsSubList = pids.subList(theFromIndex, theToIndex);
+			public List<IResource> getResources(final int theFromIndex, final int theToIndex) {
+				TransactionTemplate template = new TransactionTemplate(myPlatformTransactionManager);
+				return template.execute(new TransactionCallback<List<IResource>>() {
+					@Override
+					public List<IResource> doInTransaction(TransactionStatus theStatus) {
+						List<Long> pidsSubList = pids.subList(theFromIndex, theToIndex);
 
-				// Execute the query and make sure we return distinct results
-				List<IResource> retVal = new ArrayList<IResource>();
-				loadResourcesByPid(pidsSubList, retVal);
+						// Execute the query and make sure we return distinct results
+						List<IResource> retVal = new ArrayList<IResource>();
+						loadResourcesByPid(pidsSubList, retVal);
 
-				// Load _include resources
-				if (theParams.getIncludes() != null && theParams.getIncludes().isEmpty() == false) {
-					Set<IdDt> includePids = new HashSet<IdDt>();
-					FhirTerser t = getContext().newTerser();
-					for (Include next : theParams.getIncludes()) {
-						for (IResource nextResource : retVal) {
-							assert myResourceType.isAssignableFrom(nextResource.getClass());
+						// Load _include resources
+						if (theParams.getIncludes() != null && theParams.getIncludes().isEmpty() == false) {
+							Set<IdDt> includePids = new HashSet<IdDt>();
+							FhirTerser t = getContext().newTerser();
+							for (Include next : theParams.getIncludes()) {
+								for (IResource nextResource : retVal) {
+									assert myResourceType.isAssignableFrom(nextResource.getClass());
 
-							List<Object> values = t.getValues(nextResource, next.getValue());
-							for (Object object : values) {
-								if (object == null) {
-									continue;
+									List<Object> values = t.getValues(nextResource, next.getValue());
+									for (Object object : values) {
+										if (object == null) {
+											continue;
+										}
+										if (!(object instanceof ResourceReferenceDt)) {
+											throw new InvalidRequestException("Path '" + next.getValue() + "' produced non ResourceReferenceDt value: " + object.getClass());
+										}
+										ResourceReferenceDt rr = (ResourceReferenceDt) object;
+										if (rr.getReference().isEmpty()) {
+											continue;
+										}
+										if (rr.getReference().isLocal()) {
+											continue;
+										}
+										includePids.add(rr.getReference().toUnqualified());
+									}
 								}
-								if (!(object instanceof ResourceReferenceDt)) {
-									throw new InvalidRequestException("Path '" + next.getValue() + "' produced non ResourceReferenceDt value: " + object.getClass());
-								}
-								ResourceReferenceDt rr = (ResourceReferenceDt) object;
-								if (rr.getReference().isEmpty()) {
-									continue;
-								}
-								if (rr.getReference().isLocal()) {
-									continue;
-								}
-								includePids.add(rr.getReference().toUnqualified());
+							}
+
+							if (!includePids.isEmpty()) {
+								ourLog.info("Loading {} included resources", includePids.size());
+								loadResourcesById(includePids, retVal);
 							}
 						}
-					}
 
-					if (!includePids.isEmpty()) {
-						ourLog.info("Loading {} included resources", includePids.size());
-						loadResourcesById(includePids, retVal);
+						return retVal;
 					}
-				}
-
-				return retVal;
+				});
 			}
 
 			@Override
@@ -888,7 +904,7 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 						for (IQueryParameterType next : nextValue) {
 							String value = next.getValueAsQueryToken();
 							IdDt valueId = new IdDt(value);
-							long valueLong = valueId.getIdPartAsLong();
+							long valueLong = translateForcedIdToPid(valueId);
 							joinPids.add(valueLong);
 						}
 						if (joinPids.isEmpty()) {
@@ -964,7 +980,8 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 	}
 
 	/**
-	 * If set, the given param will be treated as a secondary primary key, and multiple resources will not be able to share the same value.
+	 * If set, the given param will be treated as a secondary primary key, and multiple resources will not be able to
+	 * share the same value.
 	 */
 	public void setSecondaryPrimaryKeyParamName(String theSecondaryPrimaryKeyParamName) {
 		mySecondaryPrimaryKeyParamName = theSecondaryPrimaryKeyParamName;
@@ -972,7 +989,7 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 
 	private MethodOutcome toMethodOutcome(final ResourceTable entity) {
 		MethodOutcome outcome = new MethodOutcome();
-		outcome.setId(new IdDt(entity.getResourceType() + '/' + entity.getId() + '/' + Constants.PARAM_HISTORY + '/' + entity.getVersion()));
+		outcome.setId(entity.getIdDt());
 		outcome.setVersionId(new IdDt(entity.getVersion()));
 		return outcome;
 	}
