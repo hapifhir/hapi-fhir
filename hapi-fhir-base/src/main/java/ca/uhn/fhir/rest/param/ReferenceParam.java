@@ -24,12 +24,12 @@ import static org.apache.commons.lang3.StringUtils.*;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.primitive.IdDt;
 
-public class ReferenceParam implements IQueryParameterType {
+public class ReferenceParam extends IdDt implements IQueryParameterType {
 
 	private String myChain;
 	private String myResourceType;
-	private String myValue;
 
 	public ReferenceParam() {
 	}
@@ -76,7 +76,7 @@ public class ReferenceParam implements IQueryParameterType {
 
 	@Override
 	public String getValueAsQueryToken() {
-		return myValue;
+		return getValue();
 	}
 
 	public void setChain(String theChain) {
@@ -111,11 +111,8 @@ public class ReferenceParam implements IQueryParameterType {
 			}
 		}
 
-		myValue = theValue;
+		setValue(theValue);
 	}
 
-	public String getValue() {
-		return myValue;
-	}
 
 }

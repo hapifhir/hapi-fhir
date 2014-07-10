@@ -97,7 +97,7 @@ public class IdDt extends BasePrimitive<String> {
 	public IdDt(@SimpleSetter.Parameter(name = "theId") String theValue) {
 		setValue(theValue);
 	}
-	
+
 	/**
 	 * Constructor
 	 * 
@@ -119,7 +119,7 @@ public class IdDt extends BasePrimitive<String> {
 	 *            The ID (e.g. "123")
 	 */
 	public IdDt(String theResourceType, String theId) {
-		this(theResourceType,theId,null);
+		this(theResourceType, theId, null);
 	}
 
 	/**
@@ -144,6 +144,14 @@ public class IdDt extends BasePrimitive<String> {
 
 	/**
 	 * @deprecated Use {@link #getIdPartAsBigDecimal()} instead (this method was deprocated because its name is ambiguous)
+	 */
+	public BigDecimal asBigDecimal() {
+		return getIdPartAsBigDecimal();
+	}
+
+	/**
+	 * @deprecated Use {@link #getIdPartAsBigDecimal()} instead (this method was deprocated because its name is
+	 *             ambiguous)
 	 */
 	public BigDecimal asBigDecimal() {
 		return getIdPartAsBigDecimal();
@@ -247,10 +255,17 @@ public class IdDt extends BasePrimitive<String> {
 		return isNotBlank(getIdPart());
 	}
 
+	public boolean hasResourceType() {
+		return isNotBlank(myResourceType);
+	}
+
+<<<<<<< HEAD
+=======
 	public boolean hasVersionIdPart() {
 		return isNotBlank(getVersionIdPart());
 	}
 
+>>>>>>> 4d517aa76fc28af9fc4f0fa298ea3ee313a533a7
 	/**
 	 * Returns <code>true</code> if the unqualified ID is a valid {@link Long} value (in other words, it consists only
 	 * of digits)
@@ -411,7 +426,7 @@ public class IdDt extends BasePrimitive<String> {
 	 */
 	public IdDt withVersion(String theVersion) {
 		Validate.notBlank(theVersion, "Version may not be null or empty");
-		
+
 		int i = myValue.indexOf(Constants.PARAM_HISTORY);
 		String value;
 		if (i > 1) {
@@ -419,8 +434,11 @@ public class IdDt extends BasePrimitive<String> {
 		} else {
 			value = myValue;
 		}
-		
+
+<<<<<<< HEAD
+=======
 		return new IdDt(value + '/' + Constants.PARAM_HISTORY + '/' + theVersion);
 	}
 
+>>>>>>> 4d517aa76fc28af9fc4f0fa298ea3ee313a533a7
 }

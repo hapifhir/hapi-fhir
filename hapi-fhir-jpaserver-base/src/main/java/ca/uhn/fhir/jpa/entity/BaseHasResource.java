@@ -6,8 +6,11 @@ import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
 import javax.persistence.MappedSuperclass;
+import javax.persistence.OneToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
@@ -26,6 +29,13 @@ public abstract class BaseHasResource {
 	@Column(name = "RES_ENCODING", nullable = false, length = 5)
 	@Enumerated(EnumType.STRING)
 	private ResourceEncodingEnum myEncoding;
+	
+	@OneToOne(optional = true, fetch = FetchType.EAGER, cascade = {}, orphanRemoval = false)
+	@JoinColumn(name = "FORCED_ID_PID")
+	private ForcedId myForcedId;
+
+	@Column(name = "HAS_TAGS", nullable = false)
+	private boolean myHasTags;
 
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "RES_PUBLISHED", nullable = false)
@@ -52,6 +62,10 @@ public abstract class BaseHasResource {
 		return myEncoding;
 	}
 
+	public ForcedId getForcedId() {
+		return myForcedId;
+	}
+
 	public abstract IdDt getIdDt();
 
 	public InstantDt getPublished() {
@@ -76,12 +90,24 @@ public abstract class BaseHasResource {
 
 	public abstract long getVersion();
 
+	public boolean isHasTags() {
+		return myHasTags;
+	}
+
 	public void setDeleted(Date theDate) {
 		myDeleted = theDate;
 	}
 
 	public void setEncoding(ResourceEncodingEnum theEncoding) {
 		myEncoding = theEncoding;
+	}
+
+	public void setForcedId(ForcedId theForcedId) {
+		myForcedId = theForcedId;
+	}
+
+	public void setHasTags(boolean theHasTags) {
+		myHasTags = theHasTags;
 	}
 
 	public void setPublished(Date thePublished) {
