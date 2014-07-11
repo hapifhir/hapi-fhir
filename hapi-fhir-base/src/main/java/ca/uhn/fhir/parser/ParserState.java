@@ -157,8 +157,7 @@ class ParserState<T> {
 	}
 
 	/**
-	 * Invoked after any new XML event is individually processed, containing a copy of the XML event. This is basically
-	 * intended for embedded XHTML content
+	 * Invoked after any new XML event is individually processed, containing a copy of the XML event. This is basically intended for embedded XHTML content
 	 */
 	public void xmlEvent(XMLEvent theNextEvent) {
 		myState.xmlEvent(theNextEvent);
@@ -238,8 +237,7 @@ class ParserState<T> {
 				myInstance.setScheme(theValue);
 			} else if ("value".equals(theName)) {
 				/*
-				 * This handles XML parsing, which is odd for this quasi-resource type, since the tag has three values
-				 * instead of one like everything else.
+				 * This handles XML parsing, which is odd for this quasi-resource type, since the tag has three values instead of one like everything else.
 				 */
 				switch (myCatState) {
 				case STATE_LABEL:
@@ -300,9 +298,53 @@ class ParserState<T> {
 		}
 
 		@Override
+		public void enteringNewElement(String theNamespaceURI, String theLocalPart) throws DataFormatException {
+			if ("by".equals(theLocalPart) && verifyNamespace(XmlParser.TOMBSTONES_NS, theNamespaceURI)) {
+				push(new AtomDeletedEntryByState(getEntry()));
+			} else if ("comment".equals(theLocalPart)) {
+				push(new AtomPrimitiveState(getEntry().getDeletedComment()));
+			} else if ("link".equals(theLocalPart)) {
+				push(new AtomLinkState(getEntry()));
+			} else {
+				if (theNamespaceURI != null) {
+					throw new DataFormatException("Unexpected element: {" + theNamespaceURI + "}" + theLocalPart);
+				} else {
+					throw new DataFormatException("Unexpected element: " + theLocalPart);
+				}
+			}
+		}
+
+		@Override
 		public void endingElement() throws DataFormatException {
 			putPlacerResourceInDeletedEntry(getEntry());
 			super.endingElement();
+		}
+
+	}
+
+	public class AtomDeletedEntryByState extends BaseState {
+
+		private BundleEntry myEntry;
+
+		public AtomDeletedEntryByState(BundleEntry theEntry) {
+			super(null);
+			myEntry = theEntry;
+		}
+
+		@Override
+		public void enteringNewElement(String theNamespaceURI, String theLocalPart) throws DataFormatException {
+			if ("name".equals(theLocalPart)) {
+				push(new AtomPrimitiveState(myEntry.getDeletedByName()));
+			} else if ("email".equals(theLocalPart)) {
+				push(new AtomPrimitiveState(myEntry.getDeletedByEmail()));
+			} else {
+				throw new DataFormatException("Unexpected element in entry: " + theLocalPart);
+			}
+		}
+
+		@Override
+		public void endingElement() throws DataFormatException {
+			pop();
 		}
 
 	}

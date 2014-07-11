@@ -143,13 +143,32 @@ public class XmlParser extends BaseParser implements IParser {
 			}
 
 			for (BundleEntry nextEntry : theBundle.getEntries()) {
-				boolean deleted=false;
-				if (nextEntry.getDeletedAt() != null && nextEntry.getDeletedAt().isEmpty()==false) {
-					deleted=true;
-					eventWriter.writeStartElement("at","deleted-entry",TOMBSTONES_NS);
+				boolean deleted = false;
+				if (nextEntry.getDeletedAt() != null && nextEntry.getDeletedAt().isEmpty() == false) {
+					deleted = true;
+					eventWriter.writeStartElement("at", "deleted-entry", TOMBSTONES_NS);
 					eventWriter.writeNamespace("at", TOMBSTONES_NS);
 					eventWriter.writeAttribute("ref", nextEntry.getId().getValueAsString());
 					eventWriter.writeAttribute("when", nextEntry.getDeletedAt().getValueAsString());
+					if (nextEntry.getDeletedByEmail().isEmpty() == false || nextEntry.getDeletedByName().isEmpty()) {
+						eventWriter.writeStartElement(TOMBSTONES_NS, "by");
+						if (nextEntry.getDeletedByName().isEmpty()==false) {
+							eventWriter.writeStartElement(TOMBSTONES_NS, "name");
+							eventWriter.writeCharacters(nextEntry.getDeletedByName().getValue());
+							eventWriter.writeEndElement();
+						}
+						if (nextEntry.getDeletedByEmail().isEmpty() == false) {
+							eventWriter.writeStartElement(TOMBSTONES_NS, "email");
+							eventWriter.writeCharacters(nextEntry.getDeletedByEmail().getValue());
+							eventWriter.writeEndElement();
+						}
+						eventWriter.writeEndElement();
+					}
+					if (nextEntry.getDeletedComment().isEmpty()==false) {
+						eventWriter.writeStartElement(TOMBSTONES_NS, "comment");
+						eventWriter.writeCharacters(nextEntry.getDeletedComment().getValue());
+						eventWriter.writeEndElement();
+					}
 				} else {
 					eventWriter.writeStartElement("entry");
 				}
@@ -377,8 +396,8 @@ public class XmlParser extends BaseParser implements IParser {
 		}
 	}
 
-	private void encodeChildElementToStreamWriter(RuntimeResourceDefinition theResDef, IResource theResource, XMLStreamWriter theEventWriter, IElement nextValue, String childName, BaseRuntimeElementDefinition<?> childDef, String theExtensionUrl, boolean theIncludedResource)
-			throws XMLStreamException, DataFormatException {
+	private void encodeChildElementToStreamWriter(RuntimeResourceDefinition theResDef, IResource theResource, XMLStreamWriter theEventWriter, IElement nextValue, String childName,
+			BaseRuntimeElementDefinition<?> childDef, String theExtensionUrl, boolean theIncludedResource) throws XMLStreamException, DataFormatException {
 		if (nextValue.isEmpty()) {
 			return;
 		}
@@ -442,8 +461,8 @@ public class XmlParser extends BaseParser implements IParser {
 
 	}
 
-	private void encodeCompositeElementChildrenToStreamWriter(RuntimeResourceDefinition theResDef, IResource theResource, IElement theElement, XMLStreamWriter theEventWriter, List<? extends BaseRuntimeChildDefinition> children, boolean theIncludedResource)
-			throws XMLStreamException, DataFormatException {
+	private void encodeCompositeElementChildrenToStreamWriter(RuntimeResourceDefinition theResDef, IResource theResource, IElement theElement, XMLStreamWriter theEventWriter,
+			List<? extends BaseRuntimeChildDefinition> children, boolean theIncludedResource) throws XMLStreamException, DataFormatException {
 		for (BaseRuntimeChildDefinition nextChild : children) {
 			if (nextChild instanceof RuntimeChildNarrativeDefinition && !theIncludedResource) {
 				INarrativeGenerator gen = myContext.getNarrativeGenerator();
@@ -475,13 +494,13 @@ public class XmlParser extends BaseParser implements IParser {
 				if (childDef == null) {
 					super.throwExceptionForUnknownChildType(nextChild, type);
 				}
-				
+
 				if (nextValue instanceof ExtensionDt) {
-					
+
 					extensionUrl = ((ExtensionDt) nextValue).getUrlAsString();
 					encodeChildElementToStreamWriter(theResDef, theResource, theEventWriter, nextValue, childName, childDef, extensionUrl, theIncludedResource);
-					
-				} else	if (extensionUrl != null && childName.equals("extension") == false) {
+
+				} else if (extensionUrl != null && childName.equals("extension") == false) {
 					RuntimeChildDeclaredExtensionDefinition extDef = (RuntimeChildDeclaredExtensionDefinition) nextChild;
 					if (extDef.isModifier()) {
 						theEventWriter.writeStartElement("modifierExtension");
@@ -499,14 +518,15 @@ public class XmlParser extends BaseParser implements IParser {
 		}
 	}
 
-	private void encodeCompositeElementToStreamWriter(RuntimeResourceDefinition theResDef, IResource theResource, IElement theElement, XMLStreamWriter theEventWriter, BaseRuntimeElementCompositeDefinition<?> resDef, boolean theIncludedResource) throws XMLStreamException,
-			DataFormatException {
+	private void encodeCompositeElementToStreamWriter(RuntimeResourceDefinition theResDef, IResource theResource, IElement theElement, XMLStreamWriter theEventWriter,
+			BaseRuntimeElementCompositeDefinition<?> resDef, boolean theIncludedResource) throws XMLStreamException, DataFormatException {
 		encodeExtensionsIfPresent(theResDef, theResource, theEventWriter, theElement, theIncludedResource);
 		encodeCompositeElementChildrenToStreamWriter(theResDef, theResource, theElement, theEventWriter, resDef.getExtensions(), theIncludedResource);
 		encodeCompositeElementChildrenToStreamWriter(theResDef, theResource, theElement, theEventWriter, resDef.getChildren(), theIncludedResource);
 	}
 
-	private void encodeExtensionsIfPresent(RuntimeResourceDefinition theResDef, IResource theResource, XMLStreamWriter theWriter, IElement theElement, boolean theIncludedResource) throws XMLStreamException, DataFormatException {
+	private void encodeExtensionsIfPresent(RuntimeResourceDefinition theResDef, IResource theResource, XMLStreamWriter theWriter, IElement theElement, boolean theIncludedResource)
+			throws XMLStreamException, DataFormatException {
 		if (theElement instanceof ISupportsUndeclaredExtensions) {
 			ISupportsUndeclaredExtensions res = (ISupportsUndeclaredExtensions) theElement;
 			encodeUndeclaredExtensions(theResDef, theResource, theWriter, res.getUndeclaredExtensions(), "extension", theIncludedResource);
@@ -516,11 +536,11 @@ public class XmlParser extends BaseParser implements IParser {
 
 	private void encodeResourceReferenceToStreamWriter(XMLStreamWriter theEventWriter, ResourceReferenceDt theRef) throws XMLStreamException {
 		String reference = theRef.getReference().getValue();
-//		if (StringUtils.isBlank(reference)) {
-//			if (theRef.getResourceType() != null && StringUtils.isNotBlank(theRef.getResourceId())) {
-//				reference = myContext.getResourceDefinition(theRef.getResourceType()).getName() + '/' + theRef.getResourceId();
-//			}
-//		}
+		// if (StringUtils.isBlank(reference)) {
+		// if (theRef.getResourceType() != null && StringUtils.isNotBlank(theRef.getResourceId())) {
+		// reference = myContext.getResourceDefinition(theRef.getResourceType()).getName() + '/' + theRef.getResourceId();
+		// }
+		// }
 
 		if (!(theRef.getDisplay().isEmpty())) {
 			theEventWriter.writeStartElement("display");
@@ -536,9 +556,7 @@ public class XmlParser extends BaseParser implements IParser {
 
 	/**
 	 * @param theIncludedResource
-	 *            Set to true only if this resource is an "included" resource,
-	 *            as opposed to a "root level" resource by itself or in a bundle
-	 *            entry
+	 *            Set to true only if this resource is an "included" resource, as opposed to a "root level" resource by itself or in a bundle entry
 	 * 
 	 */
 	private void encodeResourceToXmlStreamWriter(IResource theResource, XMLStreamWriter theEventWriter, boolean theIncludedResource) throws XMLStreamException, DataFormatException {
@@ -569,7 +587,8 @@ public class XmlParser extends BaseParser implements IParser {
 		theEventWriter.writeEndElement();
 	}
 
-	private void encodeUndeclaredExtensions(RuntimeResourceDefinition theResDef, IResource theResource, XMLStreamWriter theWriter, List<ExtensionDt> extensions, String tagName, boolean theIncludedResource) throws XMLStreamException, DataFormatException {
+	private void encodeUndeclaredExtensions(RuntimeResourceDefinition theResDef, IResource theResource, XMLStreamWriter theWriter, List<ExtensionDt> extensions, String tagName,
+			boolean theIncludedResource) throws XMLStreamException, DataFormatException {
 		for (ExtensionDt next : extensions) {
 			theWriter.writeStartElement(tagName);
 			theWriter.writeAttribute("url", next.getUrl().getValue());
@@ -654,7 +673,7 @@ public class XmlParser extends BaseParser implements IParser {
 						} else {
 							if (StringUtils.isBlank(se.getName().getPrefix())) {
 								theEventWriter.writeStartElement(se.getName().getLocalPart());
-//								theEventWriter.writeDefaultNamespace(se.getName().getNamespaceURI());
+								// theEventWriter.writeDefaultNamespace(se.getName().getNamespaceURI());
 							} else {
 								theEventWriter.writeStartElement(se.getName().getNamespaceURI(), se.getName().getLocalPart());
 							}

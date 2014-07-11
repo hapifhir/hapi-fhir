@@ -38,6 +38,9 @@ public class BundleEntry extends BaseBundle {
 	//@formatter:on
 	private TagList myCategories;
 	private InstantDt myDeletedAt;
+	private StringDt myDeletedByEmail;
+	private StringDt myDeletedByName;
+	private StringDt myDeletedComment;
 	private StringDt myLinkAlternate;
 	private StringDt myLinkSelf;
 	private InstantDt myPublished;
@@ -50,18 +53,6 @@ public class BundleEntry extends BaseBundle {
 		Tag retVal = new Tag();
 		getCategories().add(retVal);
 		return retVal;
-	}
-
-	@Override
-	public String toString() {
-		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
-		if (getResource() != null) {
-			b.append("type", getResource().getClass().getSimpleName());
-		} else {
-			b.append("No resource");
-		}
-		b.append("id", getId());
-		return b.toString();
 	}
 
 	public void addCategory(Tag theTag) {
@@ -83,6 +74,27 @@ public class BundleEntry extends BaseBundle {
 			myDeletedAt = new InstantDt();
 		}
 		return myDeletedAt;
+	}
+
+	public StringDt getDeletedByEmail() {
+		if (myDeletedByEmail == null) {
+			myDeletedByEmail = new StringDt();
+		}
+		return myDeletedByEmail;
+	}
+
+	public StringDt getDeletedByName() {
+		if (myDeletedByName == null) {
+			myDeletedByName = new StringDt();
+		}
+		return myDeletedByName;
+	}
+
+	public StringDt getDeletedComment() {
+		if (myDeletedComment == null) {
+			myDeletedComment = new StringDt();
+		}
+		return myDeletedComment;
 	}
 
 	public StringDt getLinkAlternate() {
@@ -135,7 +147,7 @@ public class BundleEntry extends BaseBundle {
 	public boolean isEmpty() {
 		//@formatter:off
 		return super.isEmpty() && 
-				ElementUtil.isEmpty(myCategories, myDeletedAt, myLinkAlternate, myLinkSelf, myPublished, myResource, mySummary, myTitle, myUpdated);
+				ElementUtil.isEmpty(myCategories, myDeletedAt, myLinkAlternate, myLinkSelf, myPublished, myResource, mySummary, myTitle, myUpdated, myDeletedByEmail, myDeletedByName, myDeletedComment);
 		//@formatter:on
 	}
 
@@ -144,6 +156,21 @@ public class BundleEntry extends BaseBundle {
 	 */
 	public void setDeleted(InstantDt theDeletedAt) {
 		myDeletedAt = theDeletedAt;
+	}
+
+	public void setDeletedByEmail(StringDt theDeletedByEmail) {
+		myDeletedByEmail = theDeletedByEmail;
+	}
+
+	public void setDeletedByName(StringDt theDeletedByName) {
+		if (myDeletedByName == null) {
+			myDeletedByName = new StringDt();
+		}
+		myDeletedByName = theDeletedByName;
+	}
+
+	public void setDeletedComment(StringDt theDeletedComment) {
+		myDeletedComment = theDeletedComment;
 	}
 
 	public void setLinkAlternate(StringDt theLinkAlternate) {
@@ -169,6 +196,18 @@ public class BundleEntry extends BaseBundle {
 	public void setUpdated(InstantDt theUpdated) {
 		Validate.notNull(theUpdated, "Updated may not be null");
 		myUpdated = theUpdated;
+	}
+
+	@Override
+	public String toString() {
+		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
+		if (getResource() != null) {
+			b.append("type", getResource().getClass().getSimpleName());
+		} else {
+			b.append("No resource");
+		}
+		b.append("id", getId());
+		return b.toString();
 	}
 
 }

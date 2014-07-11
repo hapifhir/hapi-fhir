@@ -878,7 +878,12 @@ public class XmlParserTest {
 				"<link rel=\"self\" href=\"http://hl7.org/implement/standards/fhir/valuesets.xml\"/>" + 
 				"<updated>2014-02-10T04:11:24.435+00:00</updated>" +
 				"<at:deleted-entry xmlns:at=\"http://purl.org/atompub/tombstones/1.0\" ref=\"http://foo/Patient/1\" when=\"2013-02-10T04:11:24.435+00:00\">" + 
-				"<link rel=\"self\" href=\"http://foo/Patient/1/_history/2\"/>" + 
+				"<at:by>" + 
+				"<at:name>John Doe</at:name>" + 
+				"<at:email>jdoe@example.org</at:email>" + 
+				"</at:by>" + 
+				"<at:comment>Removed comment spam</at:comment>" +
+				"<link rel=\"self\" href=\"http://foo/Patient/1/_history/2\"/>" +
 				"</at:deleted-entry>" +
 				"</feed>";
 		//@formatter:on
@@ -893,6 +898,9 @@ public class XmlParserTest {
 		assertEquals("1", entry.getResource().getId().getIdPart());
 		assertEquals("2", entry.getResource().getId().getVersionIdPart());
 		assertEquals("2", ((IdDt)entry.getResource().getResourceMetadata().get(ResourceMetadataKeyEnum.VERSION_ID)).getVersionIdPart());
+		assertEquals("John Doe", entry.getDeletedByName().getValue());
+		assertEquals("jdoe@example.org", entry.getDeletedByEmail().getValue());
+		assertEquals("Removed comment spam", entry.getDeletedComment().getValue());
 		assertEquals(new InstantDt("2013-02-10T04:11:24.435+00:00"), entry.getResource().getResourceMetadata().get(ResourceMetadataKeyEnum.DELETED_AT));
 		
 		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeBundleToString(bundle));

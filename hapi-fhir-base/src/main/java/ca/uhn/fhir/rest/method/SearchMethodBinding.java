@@ -177,10 +177,16 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 				} else {
 					ourLog.trace("Method {} doesn't match param '{}' is not present", getMethod().getName(), name);
 					return false;
-
 				}
+				
 			} else {
-				methodParamsTemp.add(name);
+				if (qualifiedParamNames.contains(name)) {
+					methodParamsTemp.add(name);
+				} else if (unqualifiedNames.contains(name)) {
+					methodParamsTemp.addAll(theRequest.getUnqualifiedToQualifiedNames().get(name));
+				} else {
+					methodParamsTemp.add(name);
+				}
 			}
 		}
 		if (myQueryName != null) {

@@ -82,7 +82,13 @@ public class Controller {
 		theModel.put("notHome", true);
 		theModel.put("extraBreadcrumb", "About");
 
+		ourLog.info(logPrefix(theModel) + "Displayed about page");
+
 		return "about";
+	}
+
+	private String logPrefix(ModelMap theModel) {
+		return "[server=" + theModel.get("serverId") + "] - ";
 	}
 
 	@RequestMapping(value = { "/conformance" })
@@ -101,6 +107,8 @@ public class Controller {
 		long delay = System.currentTimeMillis() - start;
 
 		processAndAddLastClientInvocation(client, returnsResource, theModel, delay, "Loaded conformance");
+
+		ourLog.info(logPrefix(theModel) + "Displayed conformance profile");
 
 		return "result";
 	}
@@ -142,6 +150,8 @@ public class Controller {
 		}
 		long delay = System.currentTimeMillis() - start;
 		processAndAddLastClientInvocation(client, returnsResource, theModel, delay, outcomeDescription);
+
+		ourLog.info(logPrefix(theModel) + "Deleted resource of type " + def.getName());
 
 		return "result";
 	}
@@ -185,14 +195,18 @@ public class Controller {
 					String vid = theReq.getParameter("resource-tags-vid");
 					if (isNotBlank(vid)) {
 						client.getTags().forResource(resType, id, vid).execute();
+						ourLog.info(logPrefix(theModel) + "Got tags for type " + def.getName() + " ID " + id + " version" + vid);
 					} else {
 						client.getTags().forResource(resType, id).execute();
+						ourLog.info(logPrefix(theModel) + "Got tags for type " + def.getName() + " ID " + id);
 					}
 				} else {
 					client.getTags().forResource(resType).execute();
+					ourLog.info(logPrefix(theModel) + "Got tags for type " + def.getName());
 				}
 			} else {
 				client.getTags().execute();
+				ourLog.info(logPrefix(theModel) + "Got tags for server");
 			}
 		} catch (Exception e) {
 			returnsResource = handleClientException(client, e, theModel);
@@ -230,6 +244,7 @@ public class Controller {
 
 		String url = defaultString(theReq.getParameter("page-url"));
 		if (!url.startsWith(theModel.get("base").toString())) {
+			ourLog.warn(logPrefix(theModel) + "Refusing to load page URL: {}", url);
 			theModel.put("errorMsg", "Invalid page URL: " + url);
 			return "result";
 		}
@@ -240,6 +255,7 @@ public class Controller {
 
 		long start = System.currentTimeMillis();
 		try {
+			ourLog.info(logPrefix(theModel) + "Loading paging URL: {}", url);
 			client.loadPage().url(url).execute();
 		} catch (Exception e) {
 			returnsResource = handleClientException(client, e, theModel);
@@ -284,7 +300,9 @@ public class Controller {
 
 		long start = System.currentTimeMillis();
 		try {
-			client.read(def.getImplementingClass(), new IdDt(def.getName(), id, versionId));
+			IdDt resid = new IdDt(def.getName(), id, versionId);
+			ourLog.info(logPrefix(theModel) + "Reading resource: {}", resid);
+			client.read(def.getImplementingClass(), resid);
 		} catch (Exception e) {
 			returnsResource = handleClientException(client, e, theModel);
 		}
@@ -360,6 +378,8 @@ public class Controller {
 			theModel.put("updateResourceId", updateId);
 		}
 
+		ourLog.info(logPrefix(theModel) + "Showing resource page: {}", resourceName);
+
 		return "resource";
 	}
 
@@ -371,8 +391,8 @@ public class Controller {
 		JsonGenerator clientCodeJsonWriter = Json.createGenerator(clientCodeJsonStringWriter);
 		clientCodeJsonWriter.writeStartObject();
 		clientCodeJsonWriter.write("action", "search");
-		clientCodeJsonWriter.write("base", (String)theModel.get("base"));
-		
+		clientCodeJsonWriter.write("base", (String) theModel.get("base"));
+
 		GenericClient client = theRequest.newClient(myCtx, myConfig);
 
 		IUntypedQuery search = client.search();
@@ -389,29 +409,45 @@ public class Controller {
 			query = search.forAllResources();
 			clientCodeJsonWriter.writeNull("resource");
 		}
-		
+
+		if (client.getPrettyPrint() != null) {
+			clientCodeJsonWriter.write("pretty", client.getPrettyPrint().toString());
+		} else {
+			clientCodeJsonWriter.writeNull("pretty");
+		}
+
+		if (client.getEncoding() != null) {
+			clientCodeJsonWriter.write("format", client.getEncoding().getRequestContentType());
+		} else {
+			clientCodeJsonWriter.writeNull("format");
+		}
 
 		String outcomeDescription = "Search for Resources";
 
+		clientCodeJsonWriter.writeStartArray("params");
 		int paramIdx = -1;
 		while (true) {
 			paramIdx++;
 
 			String paramIdxString = Integer.toString(paramIdx);
-			boolean shouldContinue = handleSearchParam(paramIdxString, theReq, query);
+			boolean shouldContinue = handleSearchParam(paramIdxString, theReq, query, clientCodeJsonWriter);
 			if (!shouldContinue) {
 				break;
 			}
 		}
+		clientCodeJsonWriter.writeEnd();
 
+		clientCodeJsonWriter.writeStartArray("includes");
 		String[] incValues = theReq.getParameterValues(Constants.PARAM_INCLUDE);
 		if (incValues != null) {
 			for (String next : incValues) {
 				if (isNotBlank(next)) {
 					query.include(new Include(next));
+					clientCodeJsonWriter.write(next);
 				}
 			}
 		}
+		clientCodeJsonWriter.writeEnd();
 
 		String limit = theReq.getParameter("resource-search-limit");
 		if (isNotBlank(limit)) {
@@ -419,12 +455,18 @@ public class Controller {
 				theModel.put("errorMsg", "Search limit must be a numeric value.");
 				return "resource";
 			}
-			query.limitTo(Integer.parseInt(limit));
+			int limitInt = Integer.parseInt(limit);
+			query.limitTo(limitInt);
+			clientCodeJsonWriter.write("limit", limit);
+		} else {
+			clientCodeJsonWriter.writeNull("limit");
 		}
 
 		long start = System.currentTimeMillis();
 		ResultType returnsResource;
 		try {
+			ourLog.info(logPrefix(theModel) + "Executing a search");
+
 			query.execute();
 			returnsResource = ResultType.BUNDLE;
 		} catch (Exception e) {
@@ -438,7 +480,7 @@ public class Controller {
 		clientCodeJsonWriter.close();
 		String clientCodeJson = clientCodeJsonStringWriter.toString();
 		theModel.put("clientCodeJson", clientCodeJson);
-		
+
 		return "result";
 	}
 
@@ -466,11 +508,17 @@ public class Controller {
 			return "home";
 		}
 
+		ResultType returnsResource = ResultType.BUNDLE;
 		long start = System.currentTimeMillis();
-		client.transaction().withBundle(bundle).execute();
+		try {
+			ourLog.info(logPrefix(theModel) + "Executing transaction with {} resources", bundle.size());
+			client.transaction().withBundle(bundle).execute();
+		} catch (Exception e) {
+			returnsResource = handleClientException(client, e, theModel);
+		}
 		long delay = System.currentTimeMillis() - start;
 
-		processAndAddLastClientInvocation(client, ResultType.BUNDLE, theModel, delay, "Transaction");
+		processAndAddLastClientInvocation(client, returnsResource, theModel, delay, "Transaction");
 
 		return "result";
 	}
@@ -555,6 +603,7 @@ public class Controller {
 		long start = System.currentTimeMillis();
 		ResultType returnsResource = ResultType.RESOURCE;
 		outcomeDescription = "";
+		boolean update = false;
 		try {
 			if (validate) {
 				outcomeDescription = "Validate Resource";
@@ -564,6 +613,7 @@ public class Controller {
 				if (isNotBlank(id)) {
 					outcomeDescription = "Update Resource";
 					client.update(id, resource);
+					update = true;
 				} else {
 					outcomeDescription = "Create Resource";
 					client.create(resource);
@@ -575,6 +625,18 @@ public class Controller {
 		long delay = System.currentTimeMillis() - start;
 
 		processAndAddLastClientInvocation(client, returnsResource, theModel, delay, outcomeDescription);
+
+		try {
+			if (validate) {
+				ourLog.info(logPrefix(theModel) + "Validated resource of type " + getResourceType(theReq).getName());
+			} else if (update) {
+				ourLog.info(logPrefix(theModel) + "Updated resource of type " + getResourceType(theReq).getName());
+			} else {
+				ourLog.info(logPrefix(theModel) + "Created resource of type " + getResourceType(theReq).getName());
+			}
+		} catch (Exception e) {
+			ourLog.warn("Failed to determine resource type from request", e);
+		}
 
 	}
 
@@ -603,11 +665,18 @@ public class Controller {
 			limit = Integer.parseInt(limitStr);
 		}
 
+		ResultType returnsResource = ResultType.BUNDLE;
+
 		long start = System.currentTimeMillis();
-		client.history(type, id, since, limit);
+		try {
+			ourLog.info(logPrefix(theModel) + "Retrieving history for type {} ID {} since {}", new Object[] { type, id, since });
+			client.history(type, id, since, limit);
+		} catch (Exception e) {
+			returnsResource = handleClientException(client, e, theModel);
+		}
 		long delay = System.currentTimeMillis() - start;
 
-		processAndAddLastClientInvocation(client, ResultType.BUNDLE, theModel, delay, theMethodDescription);
+		processAndAddLastClientInvocation(client, returnsResource, theModel, delay, theMethodDescription);
 
 	}
 
@@ -770,42 +839,59 @@ public class Controller {
 		return def;
 	}
 
-	private boolean handleSearchParam(String paramIdxString, HttpServletRequest theReq, IQuery theQuery) {
+	private boolean handleSearchParam(String paramIdxString, HttpServletRequest theReq, IQuery theQuery, JsonGenerator theClientCodeJsonWriter) {
 		String nextName = theReq.getParameter("param." + paramIdxString + ".name");
 		if (isBlank(nextName)) {
 			return false;
 		}
 
 		String nextQualifier = StringUtils.defaultString(theReq.getParameter("param." + paramIdxString + ".qualifier"));
-
 		String nextType = theReq.getParameter("param." + paramIdxString + ".type");
 
-		StringBuilder b = new StringBuilder();
-		for (int i = 0; i < 100; i++) {
-			b.append(defaultString(theReq.getParameter("param." + paramIdxString + "." + i)));
+		List<String> parts = new ArrayList<String>();
+		for (int i = 0; i < 5; i++) {
+			parts.add(defaultString(theReq.getParameter("param." + paramIdxString + "." + i)));
 		}
 
-		String paramValue = b.toString();
-		if (isBlank(paramValue)) {
-			return true;
-		}
-
+		List<String> values;
 		if ("token".equals(nextType)) {
-			if (paramValue.length() < 2) {
+			if (isBlank(parts.get(2))) {
+				return true;
+			}
+			values = Collections.singletonList(StringUtils.join(parts, ""));
+		} else if ("date".equals(nextType)) {
+			values = new ArrayList<String>();
+			if (isNotBlank(parts.get(1))) {
+				values.add(StringUtils.join(parts.get(0), parts.get(1)));
+			}
+			if (isNotBlank(parts.get(3))) {
+				values.add(StringUtils.join(parts.get(2), parts.get(3)));
+			}
+			if (values.isEmpty()) {
+				return true;
+			}
+		} else {
+			values = Collections.singletonList(StringUtils.join(parts, ""));
+			if (isBlank(values.get(0))) {
 				return true;
 			}
 		}
 
-		// if ("xml".equals(theReq.getParameter("encoding"))) {
-		// query.encodedXml();
-		// }else if ("json".equals(theReq.getParameter("encoding"))) {
-		// query.encodedJson();
-		// }
+		for (String nextValue : values) {
 
-		theQuery.where(new StringParam(nextName + nextQualifier).matches().value(paramValue));
+			theClientCodeJsonWriter.writeStartObject();
+			theClientCodeJsonWriter.write("type", nextType);
+			theClientCodeJsonWriter.write("name", nextName);
+			theClientCodeJsonWriter.write("qualifier", nextQualifier);
+			theClientCodeJsonWriter.write("value", nextValue);
+			theClientCodeJsonWriter.writeEnd();
+
+			theQuery.where(new StringParam(nextName + nextQualifier).matches().value(nextValue));
+
+		}
 
 		if (StringUtils.isNotBlank(theReq.getParameter("param." + paramIdxString + ".0.name"))) {
-			handleSearchParam(paramIdxString + ".0", theReq, theQuery);
+			handleSearchParam(paramIdxString + ".0", theReq, theQuery, theClientCodeJsonWriter);
 		}
 
 		return true;

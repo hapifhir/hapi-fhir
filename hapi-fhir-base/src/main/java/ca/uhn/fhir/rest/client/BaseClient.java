@@ -63,7 +63,7 @@ public abstract class BaseClient {
 	private boolean myKeepResponses = false;
 	private HttpResponse myLastResponse;
 	private String myLastResponseBody;
-	private boolean myPrettyPrint = false;
+	private Boolean myPrettyPrint = false;
 
 	private final String myUrlBase;
 
@@ -271,9 +271,17 @@ public abstract class BaseClient {
 	 * HAPI based servers (and any other servers which might implement it).
 	 */
 	public boolean isPrettyPrint() {
-		return myPrettyPrint;
+		return Boolean.TRUE.equals(myPrettyPrint);
 	}
 
+	/**
+	 * Returns the pretty print flag, which is a request to the server for it to return "pretty printed" responses. Note that this is currently a non-standard flag (_pretty) which is supported only by
+	 * HAPI based servers (and any other servers which might implement it).
+	 */
+	public Boolean getPrettyPrint() {
+		return myPrettyPrint;
+	}
+	
 	private void keepResponseAndLogIt(boolean theLogRequestAndResponse, HttpResponse response, String responseString) {
 		if (myKeepResponses) {
 			myLastResponse = response;
@@ -330,7 +338,7 @@ public abstract class BaseClient {
 	 * Sets the pretty print flag, which is a request to the server for it to return "pretty printed" responses. Note that this is currently a non-standard flag (_pretty) which is supported only by
 	 * HAPI based servers (and any other servers which might implement it).
 	 */
-	public BaseClient setPrettyPrint(boolean thePrettyPrint) {
+	public BaseClient setPrettyPrint(Boolean thePrettyPrint) {
 		myPrettyPrint = thePrettyPrint;
 		return this;
 	}

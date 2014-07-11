@@ -58,13 +58,12 @@ public class Bundle extends BaseBundle /* implements IElement */{
 	private IntegerDt myTotalResults;
 	private InstantDt myUpdated;
 
+	/**
+	 * Returns true if this bundle contains zero entries
+	 */
 	@Override
 	public boolean isEmpty() {
-		//@formatter:off
-		return super.isEmpty() && 
-				ElementUtil.isEmpty(myBundleId, myLinkBase, myLinkFirst, myLinkLast, myLinkNext, myLinkPrevious, myLinkSelf, myPublished, myTitle, myTotalResults) &&
-				ElementUtil.isEmpty(myEntries);
-		//@formatter:on
+		return getEntries().isEmpty();
 	}
 
 	/**

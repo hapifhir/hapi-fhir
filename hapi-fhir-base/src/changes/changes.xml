@@ -71,6 +71,15 @@
 			<action type="fix">
 				Server now automatically compresses responses if the client indicates support 
 			</action>
+			<action type="fix">
+				Server failed to support optional parameters when type is String and :exact qualifier is used 
+			</action>
+			<action type="fix">
+				Read method in client correctly populated resource ID in returned object 
+			</action>
+			<action type="add">
+				Support added for deleted-entry by/name, by/email, and comment from Tombstones spec
+			</action>
         </release>			
 	</body>
 </document>

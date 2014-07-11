@@ -44,6 +44,7 @@
 				<div class="col-sm-6">
 					<div class="searchParamDescription">
 						<div>
+							<b th:if="${param.name} != null and ${!param.name.empty}" th:text="${param.name} + ' - '" />
 							<th:block th:text="${param.documentation}" />
 							<th:block th:if="${!param.getUndeclaredExtensionsByUrl(requiredParamExtension).empty}">
 								<span style="color:#F88;" th:if="${param.getUndeclaredExtensionsByUrl(requiredParamExtension).get(0).value.value}">

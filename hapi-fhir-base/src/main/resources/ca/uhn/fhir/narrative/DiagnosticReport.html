@@ -52,7 +52,7 @@
 					<td>
 						<th:block th:if="${not result.resource.name.text.empty}" th:text="${result.resource.name.text.value}"/>
 						<th:block th:if="${result.resource.name.text.empty} and ${not #lists.isEmpty(result.resource.name.coding)} and ${not result.resource.name.coding[0].empty} and ${not result.resource.name.coding[0].display.empty}" th:text="${result.resource.name.coding[0].display}"/>
-						<th:block th:if="${result.resource.name.text.empty} and ${not #lists.isEmpty(result.resource.name.coding)} and ${not result.resource.name.coding[0].empty} and ${result.resource.name.coding[0].display.empty}" th:text="?"/>
+						<th:block th:if="${result.resource.name.text.empty} and ${not #lists.isEmpty(result.resource.name.coding)} and ${not result.resource.name.coding[0].empty} and ${result.resource.name.coding[0].display.empty}" th:text="'?'"/>
 						<!--/*--> Hb <!--*/-->
 					</td>
 					<td th:narrative="${result.resource.value}">2.2 g/L</td>

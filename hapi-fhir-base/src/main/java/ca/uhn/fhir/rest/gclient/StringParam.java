@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.gclient;
  * #L%
  */
 
+import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.server.Constants;
 
 public class StringParam implements IParam {
@@ -54,6 +55,8 @@ public class StringParam implements IParam {
 
 		ICriterion value(String theValue);
 
+		ICriterion value(StringDt theValue);
+
 	}
 
 	private class StringExactly implements IStringMatch {
@@ -61,12 +64,22 @@ public class StringParam implements IParam {
 		public ICriterion value(String theValue) {
 			return new StringCriterion(getParamName() + Constants.PARAMQUALIFIER_STRING_EXACT, theValue);
 		}
+
+		@Override
+		public ICriterion value(StringDt theValue) {
+			return new StringCriterion(getParamName() + Constants.PARAMQUALIFIER_STRING_EXACT, theValue.getValue());
+		}
 	}
 
 	private class StringMatches implements IStringMatch {
 		@Override
 		public ICriterion value(String theValue) {
 			return new StringCriterion(getParamName(), theValue);
+		}
+
+		@Override
+		public ICriterion value(StringDt theValue) {
+			return new StringCriterion(getParamName(), theValue.getValue());
 		}
 	}
 

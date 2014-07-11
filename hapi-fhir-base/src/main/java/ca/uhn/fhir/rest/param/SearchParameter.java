@@ -24,6 +24,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IQueryParameterAnd;
@@ -55,6 +58,14 @@ public class SearchParameter extends BaseQueryParameter {
 	public SearchParameter(String theName, boolean theRequired) {
 		this.myName = theName;
 		this.myRequired = theRequired;
+	}
+
+	@Override
+	public String toString() {
+		ToStringBuilder retVal = new ToStringBuilder(this);
+		retVal.append("name", myName);
+		retVal.append("required", myRequired);
+		return retVal.toString();
 	}
 
 	/*

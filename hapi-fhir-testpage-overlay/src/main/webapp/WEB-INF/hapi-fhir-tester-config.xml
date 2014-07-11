@@ -15,8 +15,9 @@
 				<value>home     , Localhost Server                , http://localhost:8887/fhir/context </value>
 				<value>hi       , Health Intersections            , http://fhir.healthintersections.com.au/open</value>
 				<value>furore   , Spark - Furore Reference Server , http://spark.furore.com/fhir</value>
-				<value>blaze    , Blaze (Orion Health)            , https://his-medicomp-gateway.orionhealth.com/blaze/fhir</value>
+				<value>blaze    , Blaze (Orion Health)            , https://fhir.orionhealth.com/blaze/fhir</value>
 				<value>oridashi , Oridashi                        , http://demo.oridashi.com.au:8190</value>
+				<value>fhirbase , FHIRPlace (Health Samurai)      , http://try-fhirplace.hospital-systems.com/ </value>
 			</list>
 		</property>
 	</bean>

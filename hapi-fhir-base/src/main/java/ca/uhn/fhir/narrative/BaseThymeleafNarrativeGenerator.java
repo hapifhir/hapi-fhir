@@ -525,9 +525,13 @@ public abstract class BaseThymeleafNarrativeGenerator implements INarrativeGener
 
 			final IStandardExpression expression = expressionParser.parseExpression(configuration, theArguments, attributeValue);
 			final Object value = expression.execute(configuration, theArguments);
-
+			
 			theElement.removeAttribute(theAttributeName);
 			theElement.clearChildren();
+
+			if (value == null) {
+				return ProcessorResult.ok();
+			}
 
 			Context context = new Context();
 			context.setVariable("resource", value);

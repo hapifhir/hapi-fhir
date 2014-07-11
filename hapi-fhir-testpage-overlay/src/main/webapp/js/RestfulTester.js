@@ -95,53 +95,68 @@ function addSearchControls(theSearchParamType, theSearchParamName, theSearchPara
 	    	)
 	    );
     } else if (theSearchParamType == 'date') {
-    	var qualifier = $('<input />', {type:'hidden', id:'param.'+theRowNum+'.0', id:'param.'+theRowNum+'.0'});
-    	
-    	if (/date$/.test(theSearchParamName)) {
-			var input = $('<div />', { 'class':'input-group date', 'data-date-format':'YYYY-MM-DD' });
-    	} else {
-			var input = $('<div />', { 'class':'input-group date', 'data-date-format':'YYYY-MM-DDTHH:mm:ss' });
-    	}
-    	var qualifierDiv = $('<div />');
-    	input.append(
-    		qualifierDiv,
-			$('<input />', { type:'text', 'class':'form-control', id: 'param.' + theRowNum + '.1' }),
-			$('<div />', { 'class':'input-group-addon', 'style':'padding:6px;'} ).append(
-				$('<i />', { 'class':'fa fa-chevron-circle-down'})
-			)
-		);
-        input.datetimepicker({
-        	pickTime: false,
-        	showToday: true
-        });
-        // Set up the qualifier dropdown after we've initialized the datepicker, since it
-        // overrides all addon buttons while it inits..
-        qualifierDiv.addClass('input-group-btn');
-        var qualifierBtn = $('<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">=</button>');
-        var qualifierBtnEq = $('<a>=</a>').click(function() { updateSearchDateQualifier(qualifierBtn, qualifier, '='); });
-        var qualifierBtnGt = $('<a>&gt;</a>').click(function() { updateSearchDateQualifier(qualifierBtn, qualifier, '>');  });
-        var qualifierBtnGe = $('<a>&gt;=</a>').click(function() { updateSearchDateQualifier(qualifierBtn, qualifier, '>=');  });
-        var qualifierBtnLt = $('<a>&lt;</a>').click(function() { updateSearchDateQualifier(qualifierBtn, qualifier, '<');  });
-        var qualifierBtnLe = $('<a>&lt;=</a>').click(function() { updateSearchDateQualifier(qualifierBtn, qualifier, '<=');  });
-        qualifierDiv.append(
-			qualifierBtn,
-			$('<ul class="dropdown-menu" role="menu">').append(
-				$('<li />').append(qualifierBtnEq),
-				$('<li />').append(qualifierBtnGt),
-				$('<li />').append(qualifierBtnGe),
-				$('<li />').append(qualifierBtnLt),
-				$('<li />').append(qualifierBtnLe)
-			)
-		);
-    
-    	$('#search-param-rowopts-' + theContainerRowNum).append(
-    		qualifier,
-    		$('<div />', { 'class': 'col-sm-4' }).append(
-		    	input
-	    	)
-	    );
+    	addSearchControlDate(theSearchParamName, theContainerRowNum, theRowNum, true);
+    	addSearchControlDate(theSearchParamName, theContainerRowNum, theRowNum, false);
     }	
     
+}
+
+function addSearchControlDate(theSearchParamName, theContainerRowNum, theRowNum, theLower) {
+	var inputId0 = theRowNum + '.' + (theLower ? 0 : 2);  
+	var inputId1 = theRowNum + '.' + (theLower ? 1 : 3);  
+	
+	var qualifier = $('<input />', {type:'hidden', id:'param.'+inputId0, id:'param.'+inputId0});
+	
+	if (/date$/.test(theSearchParamName)) {
+		var input = $('<div />', { 'class':'input-group date', 'data-date-format':'YYYY-MM-DD' });
+	} else {
+		var input = $('<div />', { 'class':'input-group date', 'data-date-format':'YYYY-MM-DDTHH:mm:ss' });
+	}
+	var qualifierDiv = $('<div />');
+	
+	input.append(
+		qualifierDiv,
+		$('<input />', { type:'text', 'class':'form-control', id: 'param.' + inputId1 }),
+		$('<div />', { 'class':'input-group-addon', 'style':'padding:6px;'} ).append(
+			$('<i />', { 'class':'fa fa-chevron-circle-down'})
+		)
+	);
+    input.datetimepicker({
+    	pickTime: false,
+    	showToday: true
+    });
+    // Set up the qualifier dropdown after we've initialized the datepicker, since it
+    // overrides all addon buttons while it inits..
+    qualifierDiv.addClass('input-group-btn');
+    var qualifierTooltip = "Set a qualifier and a date to specify a boundary date. Set two qualifiers and dates to specify a range.";
+    var qualifierBtn = $('<button />', {type:'button', 'class':'btn btn-default dropdown-toggle', 'data-toggle':'dropdown', 'data-placement':'top', 'title':qualifierTooltip}).text('=');
+    qualifierBtn.tooltip({
+        'selector': '',
+        'placement': 'top',
+        'container':'body'
+      });
+    var qualifierBtnEq = $('<a>=</a>').click(function() { updateSearchDateQualifier(qualifierBtn, qualifier, '='); });
+    var qualifierBtnGt = $('<a>&gt;</a>').click(function() { updateSearchDateQualifier(qualifierBtn, qualifier, '>');  });
+    var qualifierBtnGe = $('<a>&gt;=</a>').click(function() { updateSearchDateQualifier(qualifierBtn, qualifier, '>=');  });
+    var qualifierBtnLt = $('<a>&lt;</a>').click(function() { updateSearchDateQualifier(qualifierBtn, qualifier, '<');  });
+    var qualifierBtnLe = $('<a>&lt;=</a>').click(function() { updateSearchDateQualifier(qualifierBtn, qualifier, '<=');  });
+    qualifierDiv.append(
+		qualifierBtn,
+		$('<ul class="dropdown-menu" role="menu">').append(
+			$('<li />').append(qualifierBtnEq),
+			$('<li />').append(qualifierBtnGt),
+			$('<li />').append(qualifierBtnGe),
+			$('<li />').append(qualifierBtnLt),
+			$('<li />').append(qualifierBtnLe)
+		)
+	);
+
+	$('#search-param-rowopts-' + theContainerRowNum).append(
+		qualifier,
+		$('<div />', { 'class': 'col-sm-3' }).append(
+	    	input
+    	)
+    );
 }
 
 function handleSearchParamTypeChange(select, params, rowNum) {

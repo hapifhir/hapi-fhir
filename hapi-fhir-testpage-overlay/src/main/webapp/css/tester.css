@@ -22,9 +22,18 @@ body {
 	line-height: 0.85em;
 }
 
+.clientCodeComment {
+	color: #4A4;
+	font-style: italic;
+}
+
 .clientCodePreamble {
 	color: #888;
 	font-style: italic;
+}
+
+.clientCodeIndent {
+	margin-left: 15px;
 }
 
 label {

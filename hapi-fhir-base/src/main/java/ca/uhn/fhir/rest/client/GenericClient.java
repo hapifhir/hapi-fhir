@@ -101,7 +101,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			myLastRequest = invocation.asHttpRequest(getServerBase(), createExtraParams(), getEncoding());
 		}
 
-		ResourceResponseHandler<Conformance> binding = new ResourceResponseHandler<Conformance>(Conformance.class);
+		ResourceResponseHandler<Conformance> binding = new ResourceResponseHandler<Conformance>(Conformance.class, null);
 		Conformance resp = invokeClient(binding, invocation, myLogRequestAndResponse);
 		return resp;
 	}
@@ -181,12 +181,16 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	@Override
 	public <T extends IResource> T read(final Class<T> theType, IdDt theId) {
+		if (theId == null || theId.hasIdPart() == false) {
+			throw new IllegalArgumentException("theId does not contain a valid ID, is: " + theId);
+		}
+		
 		HttpGetClientInvocation invocation = ReadMethodBinding.createReadInvocation(theId, toResourceName(theType));
 		if (isKeepResponses()) {
 			myLastRequest = invocation.asHttpRequest(getServerBase(), createExtraParams(), getEncoding());
 		}
 
-		ResourceResponseHandler<T> binding = new ResourceResponseHandler<T>(theType);
+		ResourceResponseHandler<T> binding = new ResourceResponseHandler<T>(theType, theId);
 		T resp = invokeClient(binding, invocation, myLogRequestAndResponse);
 		return resp;
 	}
@@ -291,7 +295,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			myLastRequest = invocation.asHttpRequest(getServerBase(), createExtraParams(), getEncoding());
 		}
 
-		ResourceResponseHandler<T> binding = new ResourceResponseHandler<T>(theType);
+		ResourceResponseHandler<T> binding = new ResourceResponseHandler<T>(theType, theId);
 		T resp = invokeClient(binding, invocation, myLogRequestAndResponse);
 		return resp;
 	}
@@ -594,9 +598,11 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	private final class ResourceResponseHandler<T extends IResource> implements IClientResponseHandler<T> {
 
 		private Class<T> myType;
+		private IdDt myId;
 
-		public ResourceResponseHandler(Class<T> theType) {
+		public ResourceResponseHandler(Class<T> theType, IdDt theId) {
 			myType = theType;
+			myId=theId;
 		}
 
 		@Override
@@ -606,7 +612,13 @@ public class GenericClient extends BaseClient implements IGenericClient {
 				throw NonFhirResponseException.newInstance(theResponseStatusCode, theResponseMimeType, theResponseReader);
 			}
 			IParser parser = respType.newParser(myContext);
-			return parser.parseResource(myType, theResponseReader);
+			T retVal = parser.parseResource(myType, theResponseReader);
+			
+			if (myId != null) {
+				retVal.setId(myId);
+			}
+			
+			return retVal;
 		}
 	}
 

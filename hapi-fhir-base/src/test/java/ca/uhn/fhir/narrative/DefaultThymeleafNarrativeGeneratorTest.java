@@ -12,6 +12,7 @@ import org.junit.Test;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu.composite.NarrativeDt;
 import ca.uhn.fhir.model.dstu.composite.PeriodDt;
 import ca.uhn.fhir.model.dstu.composite.QuantityDt;
@@ -154,6 +155,11 @@ public class DefaultThymeleafNarrativeGeneratorTest {
 			obs.setValue(new StringDt("HELLO!"));
 			value.addResult().setResource(obs);
 		}
+		{
+			Observation obs = new Observation();
+			obs.setName(new CodeableConceptDt("AA", "BB"));
+			value.addResult().setResource(obs);
+		}
 		NarrativeDt generateNarrative = gen.generateNarrative("http://hl7.org/fhir/profiles/DiagnosticReport", value);
 		String output = generateNarrative.getDiv().getValueAsString();
 
@@ -161,8 +167,8 @@ public class DefaultThymeleafNarrativeGeneratorTest {
 		assertThat(output, StringContains.containsString("<div class=\"hapiHeaderText\"> Some &amp; Diagnostic Report </div>"));
 
 		String title = gen.generateTitle(value);
-		ourLog.info(title);
-		assertEquals("Some & Diagnostic Report - final - 2 observations", title);
+//		ourLog.info(title);
+		assertEquals("Some & Diagnostic Report - final - 3 observations", title);
 
 		
 		// Now try it with the parser

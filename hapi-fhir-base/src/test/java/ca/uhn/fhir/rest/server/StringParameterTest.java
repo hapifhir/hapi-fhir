@@ -1,6 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +22,7 @@ import org.junit.Test;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.resource.Patient;
+import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.param.StringParam;
@@ -127,6 +128,19 @@ public class StringParameterTest {
 		}
 	}
 
+	@Test
+	public void testSearchExactMatchOptional() throws Exception {
+		{
+			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?ccc:exact=aaa");
+			HttpResponse status = ourClient.execute(httpGet);
+			String responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+
+			assertEquals(200, status.getStatusLine().getStatusCode());
+			assertEquals(1, new FhirContext().newXmlParser().parseBundle(responseContent).getEntries().size());
+		}
+	}
+
+	
 	@AfterClass
 	public static void afterClass() throws Exception {
 		ourServer.stop();
@@ -190,6 +204,25 @@ public class StringParameterTest {
 			return retVal;
 		}
 
+		@Search
+		public List<Patient> findPatientWithOptional(@OptionalParam(name = "ccc") StringParam theParam) {
+			ArrayList<Patient> retVal = new ArrayList<Patient>();
+
+			if (theParam.isExact() && theParam.getValue().equals("aaa")) {
+				Patient patient = new Patient();
+				patient.setId("1");
+				retVal.add(patient);
+			}
+			if (!theParam.isExact() && theParam.getValue().toLowerCase().equals("aaa")) {
+				Patient patient = new Patient();
+				patient.setId("2");
+				retVal.add(patient);
+			}
+
+			return retVal;
+		}
+
+		
 		@Override
 		public Class<? extends IResource> getResourceType() {
 			return Patient.class;
