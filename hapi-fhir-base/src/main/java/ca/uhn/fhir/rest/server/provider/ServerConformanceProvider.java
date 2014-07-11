@@ -23,10 +23,8 @@ package ca.uhn.fhir.rest.server.provider;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -34,8 +32,6 @@ import org.apache.commons.lang3.StringUtils;
 
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
-import ca.uhn.fhir.model.api.ExtensionDt;
-import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.resource.Conformance;
 import ca.uhn.fhir.model.dstu.resource.Conformance.Rest;
 import ca.uhn.fhir.model.dstu.resource.Conformance.RestQuery;
@@ -104,7 +100,7 @@ public class ServerConformanceProvider {
 			String resourceName = next.getResourceName();
 			RuntimeResourceDefinition def = myRestfulServer.getFhirContext().getResourceDefinition(resourceName);
 			resource.getType().setValue(def.getName());
-			resource.getProfile().setId(new IdDt(def.getResourceProfile()));
+			resource.getProfile().setReference(new IdDt(def.getResourceProfile()));
 
 			TreeSet<String> includes = new TreeSet<String>();
 
@@ -160,6 +156,9 @@ public class ServerConformanceProvider {
 						query = rest.addQuery();
 						query.getDocumentation().setValue(searchMethodBinding.getDescription());
 						query.addUndeclaredExtension(false, ExtensionConstants.QUERY_RETURN_TYPE, new CodeDt(resourceName));
+						for (String nextInclude : searchMethodBinding.getIncludes()) {
+							query.addUndeclaredExtension(false, ExtensionConstants.QUERY_ALLOWED_INCLUDE, new StringDt(nextInclude));
+						}
 					}
 
 					for (SearchParameter nextParameter : searchParameters) {

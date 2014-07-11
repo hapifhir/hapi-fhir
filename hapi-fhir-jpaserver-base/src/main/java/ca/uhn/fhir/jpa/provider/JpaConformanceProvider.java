@@ -1,10 +1,7 @@
 package ca.uhn.fhir.jpa.provider;
 
-import java.util.Collection;
 import java.util.Map;
 
-import ca.uhn.fhir.jpa.dao.IDaoListener;
-import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
 import ca.uhn.fhir.model.dstu.resource.Conformance;
 import ca.uhn.fhir.model.dstu.resource.Conformance.Rest;

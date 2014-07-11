@@ -22,13 +22,31 @@
 					<!-- *************************************************** -->
 					<!-- ** Response                                      ** -->
 					<!-- *************************************************** -->
+					<div class="well" id="resultWell">
+						Executed request against FHIR RESTful server in 
+						<th:block th:text="${latencyMs} + 'ms'"/>
+					</div>
 
-					<div th:if="${requestUrl} != null">
-						
-						<div class="well" id="resultWell">
-							Executed request against FHIR RESTful server in 
-							<th:block th:text="${latencyMs} + 'ms'"/>
+					<!-- 
+					<div th:if="${clientCodeJson} != null" class="panel panel-default">
+						<div class="panel-heading">
+							Client Code - 
+							<small style="color: #888;">
+								Use the following code snippet to execute this action in your
+								own client.
+							</small>
 						</div>
+						<div class="panel-body clientCodeBox" id="clientCodeBody">
+						</div>
+						<script type="text/javascript" src="js/ClientCodeGeneratorHapi.js"></script>
+						<script type="text/javascript">
+							var jsonClientCode = <th:block th:utext="${clientCodeJson}"/>;
+							generateHapi(jsonClientCode, $('#clientCodeBody'));
+						</script>
+					</div>
+					 -->
+					 
+					<div th:if="${requestUrl} != null">
 
 						<table class="table table-bordered table-striped requestTable" id="requestTable">
 							<colgroup>

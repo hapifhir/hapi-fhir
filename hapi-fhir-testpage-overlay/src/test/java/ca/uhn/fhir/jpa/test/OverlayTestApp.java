@@ -87,8 +87,6 @@ public class OverlayTestApp {
 		
 		IFhirSystemDao systemDao = appCtx.getBean("mySystemDao", IFhirSystemDao.class);
 		
-		@SuppressWarnings("rawtypes")
-		Collection<IFhirResourceDao> resourceDaos = appCtx.getBeansOfType(IFhirResourceDao.class).values();
 		JpaSystemProvider systemProvider = new JpaSystemProvider(systemDao);
 
 		RestfulServer restServer = new RestfulServer();

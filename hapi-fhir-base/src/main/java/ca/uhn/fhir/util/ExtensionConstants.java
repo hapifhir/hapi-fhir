@@ -36,5 +36,7 @@ public class ExtensionConstants {
 	public static final String CONF_ADDITIONAL_PARAM_REQUIRED = "http://hl7api.sourceforge.net/hapi-fhir/extensions.xml#additionalParamRequired";
 
 	public static final String CONF_RESOURCE_COUNT = "http://hl7api.sourceforge.net/hapi-fhir/res/extdefs.html#resourceCount";
+
+	public static final String QUERY_ALLOWED_INCLUDE = "http://hl7api.sourceforge.net/hapi-fhir/res/extdefs.html#allowedInclude";
 	
 }

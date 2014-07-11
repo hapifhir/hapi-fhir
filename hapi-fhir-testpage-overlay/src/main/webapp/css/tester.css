@@ -15,6 +15,18 @@ body {
   overflow-x: hidden;
 }
 
+.clientCodeBox
+{
+	font-family: monospace;
+	font-size: 0.8em;
+	line-height: 0.85em;
+}
+
+.clientCodePreamble {
+	color: #888;
+	font-style: italic;
+}
+
 label {
 	font-size: 1.0em;
 	color: #808080;

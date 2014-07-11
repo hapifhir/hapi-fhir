@@ -2,6 +2,7 @@ package ca.uhn.fhir.to;
 
 import static org.apache.commons.lang3.StringUtils.*;
 
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -10,6 +11,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
 
+import javax.json.Json;
+import javax.json.JsonWriter;
+import javax.json.stream.JsonGenerator;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 
@@ -134,7 +138,7 @@ public class Controller {
 		try {
 			client.delete(def.getImplementingClass(), new IdDt(id));
 		} catch (Exception e) {
-			returnsResource = handleClientException(client,e, theModel);
+			returnsResource = handleClientException(client, e, theModel);
 		}
 		long delay = System.currentTimeMillis() - start;
 		processAndAddLastClientInvocation(client, returnsResource, theModel, delay, outcomeDescription);
@@ -146,11 +150,11 @@ public class Controller {
 		ResultType returnsResource;
 		returnsResource = ResultType.NONE;
 		ourLog.warn("Failed to invoke server", e);
-		
+
 		if (theClient.getLastResponse() == null) {
 			theModel.put("errorMsg", "Error: " + e.getMessage());
 		}
-		
+
 		return returnsResource;
 	}
 
@@ -293,7 +297,7 @@ public class Controller {
 
 	@RequestMapping({ "/resource" })
 	public String actionResource(final ResourceRequest theRequest, final BindingResult theBindingResult, final ModelMap theModel) {
-		Conformance conformance =  addCommonParams(theRequest, theModel);
+		Conformance conformance = addCommonParams(theRequest, theModel);
 
 		GenericClient client = theRequest.newClient(myCtx, myConfig);
 
@@ -303,6 +307,7 @@ public class Controller {
 		TreeSet<String> includes = new TreeSet<String>();
 		List<RestQuery> queries = new ArrayList<Conformance.RestQuery>();
 		boolean haveSearchParams = false;
+		List<List<String>> queryIncludes = new ArrayList<List<String>>();
 		for (Rest nextRest : conformance.getRest()) {
 			for (RestResource nextRes : nextRest.getResource()) {
 				if (nextRes.getType().getValue().equals(resourceName)) {
@@ -317,11 +322,25 @@ public class Controller {
 				}
 			}
 			for (RestQuery nextQuery : nextRest.getQuery()) {
+				boolean queryMatchesResource = false;
 				List<ExtensionDt> returnTypeExt = nextQuery.getUndeclaredExtensionsByUrl(ExtensionConstants.QUERY_RETURN_TYPE);
 				if (returnTypeExt != null) {
 					for (ExtensionDt nextExt : returnTypeExt) {
 						if (resourceName.equals(nextExt.getValueAsPrimitive().getValueAsString())) {
 							queries.add(nextQuery);
+							queryMatchesResource = true;
+							break;
+						}
+					}
+				}
+
+				if (queryMatchesResource) {
+					ArrayList<String> nextQueryIncludes = new ArrayList<String>();
+					queryIncludes.add(nextQueryIncludes);
+					List<ExtensionDt> includesExt = nextQuery.getUndeclaredExtensionsByUrl(ExtensionConstants.QUERY_ALLOWED_INCLUDE);
+					if (includesExt != null) {
+						for (ExtensionDt nextExt : includesExt) {
+							nextQueryIncludes.add(nextExt.getValueAsPrimitive().getValueAsString());
 						}
 					}
 				}
@@ -330,6 +349,7 @@ public class Controller {
 		theModel.put("includes", includes);
 		theModel.put("queries", queries);
 		theModel.put("haveSearchParams", haveSearchParams);
+		theModel.put("queryIncludes", queryIncludes);
 
 		if (isNotBlank(theRequest.getUpdateId())) {
 			String updateId = theRequest.getUpdateId();
@@ -347,6 +367,12 @@ public class Controller {
 	public String actionSearch(HttpServletRequest theReq, HomeRequest theRequest, BindingResult theBindingResult, ModelMap theModel) {
 		addCommonParams(theRequest, theModel);
 
+		StringWriter clientCodeJsonStringWriter = new StringWriter();
+		JsonGenerator clientCodeJsonWriter = Json.createGenerator(clientCodeJsonStringWriter);
+		clientCodeJsonWriter.writeStartObject();
+		clientCodeJsonWriter.write("action", "search");
+		clientCodeJsonWriter.write("base", (String)theModel.get("base"));
+		
 		GenericClient client = theRequest.newClient(myCtx, myConfig);
 
 		IUntypedQuery search = client.search();
@@ -358,9 +384,12 @@ public class Controller {
 				theModel.put("errorMsg", e.toString());
 				return "resource";
 			}
+			clientCodeJsonWriter.write("resource", theReq.getParameter("resource"));
 		} else {
 			query = search.forAllResources();
+			clientCodeJsonWriter.writeNull("resource");
 		}
+		
 
 		String outcomeDescription = "Search for Resources";
 
@@ -405,6 +434,11 @@ public class Controller {
 
 		processAndAddLastClientInvocation(client, returnsResource, theModel, delay, outcomeDescription);
 
+		clientCodeJsonWriter.writeEnd();
+		clientCodeJsonWriter.close();
+		String clientCodeJson = clientCodeJsonStringWriter.toString();
+		theModel.put("clientCodeJson", clientCodeJson);
+		
 		return "result";
 	}
 
@@ -696,7 +730,7 @@ public class Controller {
 
 		StringBuilder b = new StringBuilder();
 		b.append("<span class='hlUrlBase'>");
-		
+
 		boolean inParams = false;
 		for (int i = 0; i < str.length(); i++) {
 			char nextChar = str.charAt(i);
@@ -779,7 +813,7 @@ public class Controller {
 
 	private Conformance loadAndAddConf(final HomeRequest theRequest, final ModelMap theModel) {
 		IGenericClient client = myCtx.newRestfulGenericClient(theRequest.getServerBase(myConfig));
-		
+
 		Conformance conformance;
 		try {
 			conformance = client.conformance();

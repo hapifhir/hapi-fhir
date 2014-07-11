@@ -102,7 +102,7 @@
 										$('#search-btn').click(function() {
 											var btn = $(this);
 											btn.button('loading');
-											var sd = $('#tab-search').find('input').each(function() {
+											$('#tab-search').find('input').each(function() {
 												if (this.id) {
 													if (this.id.substring(0,4) == 'inc_') {
 														this.name = '_include';

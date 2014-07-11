@@ -2,6 +2,7 @@
 <html lang="en">
 <div th:fragment="queries-list" class="container-fluid">
 	<div th:each="query,queryIterStat : ${queries}" class="panel panel-default" th:id="'search-div-' + ${queryIterStat.index}" >
+		
 		<div  class="panel-heading">
 			<div class="pull-right">
 				<button type="button" th:id="'search-btn-' + ${queryIterStat.index}" class="btn btn-primary btn-block" 
@@ -16,8 +17,14 @@
 						var btn = $(this);
 						btn.button('loading');
 						var searchDiv = '<th:block th:text="'search-div-' + ${queryIterStat.index}"/>';
-						var sd = $('#' + searchDiv).find('input').each(function() {
-							this.name = this.id;
+						$('#' + searchDiv).find('input').each(function() {
+							if (this.id) {
+								if (this.id.substring(0,4) == 'inc_') {
+									this.name = '_include';
+								} else {
+									this.name = this.id;
+								}	
+							}
 						});					
 						$("#outerForm").attr("action", "search").submit();
 					});
@@ -33,6 +40,7 @@
 			<div th:each="param,paramIterStat : ${query.parameter}" 
 			     th:id="'search-param-rowopts-' + ${queryIterStat.index} + '-' + ${paramIterStat.index}" 
 			     th:class="'row queryParameter ' + (${paramIterStat.odd} ? 'queryParameterOdd')">
+			     
 				<div class="col-sm-6">
 					<div class="searchParamDescription">
 						<div>
@@ -61,6 +69,21 @@
 				</script>
 				<br clear="all"/>
 			</div>
+			
+			<div class="row-fluid" th:unless="${queryIncludes[queryIterStat.index].empty}">
+				<h4>Includes <small>Also load and include referenced resources in results</small></h4>
+			</div>
+			
+			<div class="row-fluid" th:unless="${queryIncludes[queryIterStat.index].empty}">
+				<span th:each="include : ${queryIncludes[queryIterStat.index]}" class="includeCheckContainer">
+					<span class="includeCheckCheck">
+                  			<input type="checkbox" th:value="${include}" th:id="'inc_' + ${include}" />
+                  		</span>
+					<span class="includeCheckName" th:text="${include}"/>
+            	</span>
+			</div>
+			
+			
 		</div>
 	</div>
 </div>
