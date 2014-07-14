@@ -279,7 +279,19 @@
 <th>Description</th></tr>
 <tr class="b">
 <td><a href="changes-report.html">Changes Report</a></td>
-<td>Changes Report on Releases of the Project.</td></tr></table></div></div>
+<td>Changes Report on Releases of the Project.</td></tr>
+<tr class="a">
+<td><a href="surefire-report.html">Surefire Report</a></td>
+<td>Report on the test results of the project.</td></tr>
+<tr class="b">
+<td><a href="apidocs/index.html">JavaDocs</a></td>
+<td>JavaDoc API documentation.</td></tr>
+<tr class="a">
+<td><a href="findbugs.html">FindBugs Report</a></td>
+<td>Generates a source code report with the FindBugs Library.</td></tr>
+<tr class="b">
+<td><a href="xref/index.html">Source Xref</a></td>
+<td>HTML based, cross-reference version of Java source code.</td></tr></table></div></div>
                   </div>
             </div>
           </div>
@@ -330,7 +342,9 @@
   m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
   })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
 
-  ga('create', 'UA-1395874-5', 'sourceforge.net');
+  ga('create', 'UA-1395874-5', 'auto');
+  ga('require', 'displayfeatures');
+  ga('require', 'linkid', 'linkid.js');
   ga('send', 'pageview');
 
 </script>
