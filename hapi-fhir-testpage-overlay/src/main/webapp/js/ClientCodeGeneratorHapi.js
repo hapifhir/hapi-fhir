@@ -41,7 +41,9 @@ function generateHapiSearch(json, container) {
 		var nextParam = json.params[i];
 		var paramLine = null;
 		if (nextParam.type == 'string') {
-			paramLine = '.where(new StringParam("' + nextParam.name + '").matches().value("' + nextParam.value + '"))';
+			paramLine = '.where(new StringParam("' + nextParam.name + '")';
+			paramLine += nextParam.qualifier = ':exact' ? '.matchesExactly()' : '.matches()';
+			paramLine += '.value("' + nextParam.value + '"))';
 		} else if (nextParam.type == 'token') {
 			var idx = nextParam.value.indexOf('|');
 			if (idx == -1) {

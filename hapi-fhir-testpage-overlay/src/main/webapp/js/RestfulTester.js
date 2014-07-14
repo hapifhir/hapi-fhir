@@ -82,7 +82,47 @@ function addSearchControls(theSearchParamType, theSearchParamName, theSearchPara
 		    	$('<input />', { id: 'param.' + theRowNum + '.2', placeholder: 'value', type: 'text', 'class': 'form-control' })
 		    )
     	);
-    } else if (theSearchParamType == 'string' || theSearchParamType == 'number' || theSearchParamType == 'reference') {
+    } else if (theSearchParamType == 'string') {
+    	var placeholderText = 'value';
+    	var qualifiers = new Array();
+    	qualifiers.push(new Object());
+    	qualifiers[0].name='Matches';
+    	qualifiers[0].value='';
+    	qualifiers.push(new Object());
+    	qualifiers[1].name='Exactly';
+    	qualifiers[1].value=':exact';
+    	
+    	var qualifierInput = $('<input />', { id: 'param.' + theRowNum + '.qualifier', type: 'hidden' });
+    	$('#search-param-rowopts-' + theContainerRowNum).append(
+    		qualifierInput
+    	);
+
+    	var matchesLabel = $('<span>' + qualifiers[0].name + '</span>');
+    	var qualifierDropdown = $('<ul />', {'class':'dropdown-menu', role:'menu'});
+    	for (var i = 0; i < qualifiers.length; i++) {
+    		var nextLink = $('<a>' + qualifiers[i].name+'</a>');
+    		var nextName = qualifiers[i].name;
+    		var nextValue = qualifiers[i].value;
+    		qualifierDropdown.append($('<li />').append(nextLink));
+    		nextLink.click(function(){ 
+    			qualifierInput.val(nextValue);
+    			matchesLabel.text(nextName);
+    		});
+    	}
+
+    	$('#search-param-rowopts-' + theContainerRowNum).append(
+    		$('<div />', { 'class': 'col-sm-5 input-group' }).append(
+    			$('<div />', {'class':'input-group-btn'}).append(
+    				$('<button />', {'class':'btn btn-default dropdown-toggle', 'data-toggle':'dropdown'}).append(
+    					matchesLabel,
+    					$('<span class="caret" style="margin-left: 5px;"></span>')
+    				),
+    				qualifierDropdown
+    			),
+		    	$('<input />', { id: 'param.' + theRowNum + '.0', placeholder: placeholderText, type: 'text', 'class': 'form-control' })
+	    	)
+	    );
+    } else if (theSearchParamType == 'number' || theSearchParamType == 'reference') {
     	var placeholderText = 'value';
     	if (theSearchParamType == 'number') {
     		placeholderText = 'Number';
@@ -90,8 +130,11 @@ function addSearchControls(theSearchParamType, theSearchParamName, theSearchPara
     		placeholderText = 'Resource ID';
     	}
     	$('#search-param-rowopts-' + theContainerRowNum).append(
+    			$('<input />', { id: 'param.' + theRowNum + '.0', placeholder: placeholderText, type: 'hidden' })
+    	);
+    	$('#search-param-rowopts-' + theContainerRowNum).append(
     		$('<div />', { 'class': 'col-sm-3' }).append(
-		    	$('<input />', { id: 'param.' + theRowNum + '.0', placeholder: placeholderText, type: 'text', 'class': 'form-control' })
+		    	$('<input />', { id: 'param.' + theRowNum + '.1', placeholder: placeholderText, type: 'text', 'class': 'form-control' })
 	    	)
 	    );
     } else if (theSearchParamType == 'date') {
@@ -210,6 +253,30 @@ function updateFromEntriesTable(source, type, id, vid) {
 	setResource(btn, type);
 	$("#outerForm").attr("action", "resource").submit();
 }															
+
+
+/**
+ * http://stackoverflow.com/a/10997390/11236
+ */
+function updateURLParameter(url, param, paramVal){
+    var newAdditionalURL = "";
+    var tempArray = url.split("?");
+    var baseURL = tempArray[0];
+    var additionalURL = tempArray[1];
+    var temp = "";
+    if (additionalURL) {
+        tempArray = additionalURL.split("&");
+        for (i=0; i<tempArray.length; i++){
+            if(tempArray[i].split('=')[0] != param){
+                newAdditionalURL += temp + tempArray[i];
+                temp = "&";
+            }
+        }
+    }
+
+    var rows_txt = temp + "" + param + "=" + paramVal;
+    return baseURL + "?" + newAdditionalURL + rows_txt;
+}
 
 
 function selectServer(serverId) {

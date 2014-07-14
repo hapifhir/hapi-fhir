@@ -11,7 +11,7 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>0.4-SNAPSHOT</version>
+	<version>0.4</version>
 	<name>HAPI-FHIR</name>
 	<url>http://hl7api.sourceforge.net/hapi-fhir/</url>
 
@@ -64,6 +64,7 @@
 		<module>hapi-fhir-jpaserver-test</module>
 		<module>restful-server-example</module>
 		<module>hapi-fhir-testpage-overlay</module>
+		<module>hapi-fhir-jpaserver-uhnfhirtest</module>
 	</modules>
 
 	<properties>

@@ -303,14 +303,8 @@ class ParserState<T> {
 				push(new AtomDeletedEntryByState(getEntry()));
 			} else if ("comment".equals(theLocalPart)) {
 				push(new AtomPrimitiveState(getEntry().getDeletedComment()));
-			} else if ("link".equals(theLocalPart)) {
-				push(new AtomLinkState(getEntry()));
 			} else {
-				if (theNamespaceURI != null) {
-					throw new DataFormatException("Unexpected element: {" + theNamespaceURI + "}" + theLocalPart);
-				} else {
-					throw new DataFormatException("Unexpected element: " + theLocalPart);
-				}
+				super.enteringNewElement(theNamespaceURI, theLocalPart);
 			}
 		}
 

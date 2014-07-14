@@ -387,6 +387,7 @@ public class XmlParserTest {
 		strings.addAll(Arrays.asList("<entry>", "<id>2</id>", "<link rel=\"alternate\" href=\"http://foo/bar\"/>", "</entry>"));
 		strings.addAll(Arrays.asList("<at:deleted-entry", "ref=\"Patient/3", "/>"));
 		assertThat(bundleString, StringContainsInOrder.stringContainsInOrder(strings));
+		assertThat(bundleString, not(containsString("at:by")));
 		
 	}
 	

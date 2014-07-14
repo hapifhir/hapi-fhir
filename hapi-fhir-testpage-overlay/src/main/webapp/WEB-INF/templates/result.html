@@ -123,51 +123,54 @@
 											<div class="panel panel-default" style="border: none; border-bottom: 1px solid #ddd; border-radius: 0px;">
 												<div class="panel-heading">
 													<h4 class="panel-title">
-														<a data-toggle="collapse" data-parent="#accordion" href="#collapseOne">
+														<th:block th:if="${#lists.isEmpty(bundle.entries)}">Bundle contains no entries</th:block>
+														<a th:unless="${#lists.isEmpty(bundle.entries)}" data-toggle="collapse" data-parent="#accordion" href="#collapseOne">
 															<i id="collapseOneIcon" class="fa fa-minus-square-o"></i>
 															<span th:if="${bundle.totalResults.empty}" th:text="'Bundle contains ' + ${#lists.size(bundle.entries)} + ' entries'"/>
 															<span th:unless="${bundle.totalResults.empty}" th:text="'Bundle contains ' + ${#lists.size(bundle.entries)} + ' / ' + ${bundle.totalResults.value} + ' entries'"/>
 														</a>
 
-														<!-- Prev/Next Page Buttons -->
-														<button	class="btn btn-success btn-sm" type="button" id="page-prev-btn"	
-															style="margin-left: 15px;" data-loading-text="Loading &lt;i class='fa fa-spinner fa-spin'/&gt;">
-															<span class="glyphicon glyphicon-step-backward"></span>
-															Prev Page
-														</button>
-														<script type="text/javascript">
-															if (<th:block th:text="${bundle.linkPrevious.empty}"/>) {
-																$('#page-prev-btn').prop('disabled', true);
-															}
-															$('#page-prev-btn').click(function() {
-																var btn = $(this);
-																btn.button('loading');
-																btn.append($('<input />', { type: 'hidden', name: 'page-url', value: '<th:block th:text="${bundle.linkPrevious}"/>' }));
-																$("#outerForm").attr("action", "page").submit();
-
-															});
-														</script>
-
-														<button	class="btn btn-success btn-sm" type="button" id="page-next-btn"	
-															data-loading-text="Loading &lt;i class='fa fa-spinner fa-spin'/&gt;">
-															<span class="glyphicon glyphicon-step-forward"></span>
-															Next Page
-														</button>
-														<script type="text/javascript">
-															if (<th:block th:text="${bundle.linkNext.empty}"/>) {
-																$('#page-next-btn').prop('disabled', true);
-															}
-															$('#page-next-btn').click(function() {
-																var btn = $(this);
-																btn.button('loading');
-																btn.append($('<input />', { type: 'hidden', name: 'page-url', value: '<th:block th:text="${bundle.linkNext}"/>' }));
-																$("#outerForm").attr("action", "page").submit();
-															});
-														</script>
+														<th:block th:if="${!bundle.linkNext.empty} or ${!bundle.linkPrevious.empty}">
 														
+															<!-- Prev/Next Page Buttons -->
+															<button	class="btn btn-success btn-xs" type="button" id="page-prev-btn"	
+																style="margin-left: 15px;" data-loading-text="Loading &lt;i class='fa fa-spinner fa-spin'/&gt;">
+																<span class="glyphicon glyphicon-step-backward"></span>
+																Prev Page
+															</button>
+															<script type="text/javascript">
+																if (<th:block th:text="${bundle.linkPrevious.empty}"/>) {
+																	$('#page-prev-btn').prop('disabled', true);
+																}
+																$('#page-prev-btn').click(function() {
+																	var btn = $(this);
+																	btn.button('loading');
+																	btn.append($('<input />', { type: 'hidden', name: 'page-url', value: '<th:block th:text="${bundle.linkPrevious}"/>' }));
+																	$("#outerForm").attr("action", "page").submit();
+	
+																});
+															</script>
+	
+															<button	class="btn btn-success btn-xs" type="button" id="page-next-btn"	
+																data-loading-text="Loading &lt;i class='fa fa-spinner fa-spin'/&gt;">
+																<span class="glyphicon glyphicon-step-forward"></span>
+																Next Page
+															</button>
+															<script type="text/javascript">
+																if (<th:block th:text="${bundle.linkNext.empty}"/>) {
+																	$('#page-next-btn').prop('disabled', true);
+																}
+																$('#page-next-btn').click(function() {
+																	var btn = $(this);
+																	btn.button('loading');
+																	btn.append($('<input />', { type: 'hidden', name: 'page-url', value: '<th:block th:text="${bundle.linkNext}"/>' }));
+																	$("#outerForm").attr("action", "page").submit();
+																});
+															</script>
+														</th:block>														
 													</h4>
 												</div>
-												<div id="collapseOne" class="panel-collapse collapse in">
+												<div id="collapseOne" class="panel-collapse collapse in" th:unless="${#lists.isEmpty(bundle.entries)}">
 													<div class="panel-body" style="padding-bottom: 0px;">
 														<table class="table table-condensed" style="padding-bottom: 0px; margin-bottom: 0px;">
 															<colgroup>

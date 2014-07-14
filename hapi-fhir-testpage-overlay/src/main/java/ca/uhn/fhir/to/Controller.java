@@ -3,6 +3,8 @@ package ca.uhn.fhir.to;
 import static org.apache.commons.lang3.StringUtils.*;
 
 import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -31,6 +33,9 @@ import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.thymeleaf.TemplateEngine;
+
+import com.google.common.escape.Escaper;
+import com.google.common.escape.Escapers;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
@@ -797,12 +802,20 @@ public class Controller {
 			return str;
 		}
 
+		try {
+			str=URLDecoder.decode(str, "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			ourLog.error("Should not happen",e);
+		}
+		
 		StringBuilder b = new StringBuilder();
 		b.append("<span class='hlUrlBase'>");
 
 		boolean inParams = false;
 		for (int i = 0; i < str.length(); i++) {
 			char nextChar = str.charAt(i);
+//			char nextChar2 = i < str.length()-2 ? str.charAt(i+1):' ';
+//			char nextChar3 = i < str.length()-2 ? str.charAt(i+2):' ';
 			if (!inParams) {
 				if (nextChar == '?') {
 					inParams = true;
@@ -818,6 +831,8 @@ public class Controller {
 					b.append("</span><wbr /><span class='hlControl'>&amp;</span><span class='hlTagName'>");
 				} else if (nextChar == '=') {
 					b.append("</span><span class='hlControl'>=</span><span class='hlAttr'>");
+//				}else if (nextChar=='%' && Character.isLetterOrDigit(nextChar2)&& Character.isLetterOrDigit(nextChar3)) {
+//					URLDecoder.decode(s, enc)
 				} else {
 					b.append(nextChar);
 				}

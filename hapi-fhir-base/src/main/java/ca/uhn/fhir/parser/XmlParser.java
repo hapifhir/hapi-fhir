@@ -150,7 +150,7 @@ public class XmlParser extends BaseParser implements IParser {
 					eventWriter.writeNamespace("at", TOMBSTONES_NS);
 					eventWriter.writeAttribute("ref", nextEntry.getId().getValueAsString());
 					eventWriter.writeAttribute("when", nextEntry.getDeletedAt().getValueAsString());
-					if (nextEntry.getDeletedByEmail().isEmpty() == false || nextEntry.getDeletedByName().isEmpty()) {
+					if (nextEntry.getDeletedByEmail().isEmpty() == false || nextEntry.getDeletedByName().isEmpty()==false) {
 						eventWriter.writeStartElement(TOMBSTONES_NS, "by");
 						if (nextEntry.getDeletedByName().isEmpty()==false) {
 							eventWriter.writeStartElement(TOMBSTONES_NS, "name");

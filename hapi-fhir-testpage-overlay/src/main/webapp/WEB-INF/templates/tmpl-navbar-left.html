@@ -6,12 +6,14 @@
 
 	<label class="navBarButtonLabel">Encoding</label>
 	<div class="btn-group " data-toggle="buttons" id="encodingBtnGroup">
-		<label class="btn btn-sm btn-default active"> <input
-			type="radio" name="encoding" id="encode-default" value="" />(default)
-		</label> <label class="btn btn-sm btn-default"> <input
-			type="radio" name="encoding" id="encode-xml" value="xml" />XML
-		</label> <label class="btn btn-sm btn-default"> <input
-			type="radio" name="encoding" id="encode-json" value="json" />JSON
+		<label class="btn btn-sm btn-default active">
+			<input type="radio" name="encoding" id="encode-default" value="" />(default)
+		</label> 
+		<label class="btn btn-sm btn-default"> 
+			<input type="radio" name="encoding" id="encode-xml" value="xml" />XML
+		</label>
+		<label class="btn btn-sm btn-default"> 
+			<input type="radio" name="encoding" id="encode-json" value="json" />JSON
 		</label>
 	</div>
 
@@ -27,12 +29,14 @@
 	</div>
 
 	<script type="text/javascript">
+		
 	$( document ).ready(function() {
 		
 		// Encoding buttons are wider, so set the shorter group to the same width
 		// so that they wrap at the same time if the page is narrow
 		$('#prettyBtnGroup').width($('#encodingBtnGroup').width());
 		
+		// Set the buttons' initial state correctly
 		<th:block th:switch="${encoding}">
 			<th:block th:case="'xml'">
 				$('#encode-xml').trigger("click");
@@ -49,6 +53,18 @@
 				$('#pretty-false').trigger("click");
 			</th:block>
 		</th:block>
+		
+		<th:block th:if="${!#strings.isEmpty(resultBody)}">
+			// When we're displaying a result page, the options buttons should
+			// actually apply their values to the current search/action
+			$('#encode-default').change( function(){ location.href=updateURLParameter(location.href, 'encoding', '') });
+			$('#encode-xml').change( function(){ location.href=updateURLParameter(location.href, 'encoding', 'xml') });
+			$('#encode-json').change( function(){ location.href=updateURLParameter(location.href, 'encoding', 'json') });
+			$('#pretty-default').change( function(){ location.href=updateURLParameter(location.href, 'pretty', '') });
+			$('#pretty-true').change( function(){ location.href=updateURLParameter(location.href, 'pretty', 'true') });
+			$('#pretty-false').change( function(){ location.href=updateURLParameter(location.href, 'pretty', 'false') });
+		</th:block>
+		
 	});
 	
 	function doAction(source, action, resourceName) {
