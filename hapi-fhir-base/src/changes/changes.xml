@@ -8,7 +8,7 @@
 	<body>
 		<release version="0.3" date="2014-May-12" description="This release corrects lots of bugs and introduces the fluent client mode">
         </release>			
-		<release version="0.4" date="TBD">
+		<release version="0.4" date="2014-Jul-13">
 			<action type="add">
 				<![CDATA[<b>BREAKING CHANGE:</b>]]>: IdDt has been modified so that it 
 				contains a partial or complete resource identity. Previously it contained

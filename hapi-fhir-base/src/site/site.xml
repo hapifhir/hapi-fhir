@@ -40,7 +40,7 @@
 		</head>
 
 		<links>
-			<item name="Sourceforge Project Page" href="https://sourceforge.net/projects/hl7api/" />
+			<item name="GitHub Page" href="https://github.com/jamesagnew/hapi-fhir/" />
 			<item name="hl7.org" href="http://hl7.org/" />
 			<item name="University Health Network" href="http://www.uhn.ca/" />
 		</links>
@@ -48,6 +48,7 @@
 		<menu name="Welcome">
 			<item name="Welcome" href="index.html" />
 			<item name="Download" href="./download.html" />
+			<item name="Changelog" href="./changes-report.html" />
 		</menu>
 
 		<menu name="Documentation">
