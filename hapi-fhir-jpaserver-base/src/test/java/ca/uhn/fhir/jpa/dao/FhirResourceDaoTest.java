@@ -1,7 +1,14 @@
 package ca.uhn.fhir.jpa.dao;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -40,9 +47,6 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.client.exceptions.FhirClientConnectionException;
-import ca.uhn.fhir.rest.gclient.IQuery;
-import ca.uhn.fhir.rest.gclient.TokenParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.IdentifierListParam;
 import ca.uhn.fhir.rest.param.QualifiedDateParam;
@@ -51,6 +55,7 @@ import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 
 public class FhirResourceDaoTest {
 
@@ -62,7 +67,6 @@ public class FhirResourceDaoTest {
 	private static IFhirResourceDao<DiagnosticReport> ourDiagnosticReportDao;
 	private static IFhirResourceDao<Organization> ourOrganizationDao;
 	private static IFhirResourceDao<Location> ourLocationDao;
-	private static Date ourTestStarted;
 
 	private static IFhirResourceDao<Encounter> ourEncounterDao;
 	private static FhirContext ourFhirCtx;
@@ -250,6 +254,23 @@ public class FhirResourceDaoTest {
 			InstantDt updated = (InstantDt) retrieved.getResourceMetadata().get(ResourceMetadataKeyEnum.UPDATED);
 			assertTrue(published.before(now));
 			assertTrue(updated.before(now));
+		}
+
+		/*
+		 * This ID points to a patient, so we should not be able to return
+		 * othe types with it
+		 */
+		try {
+			ourEncounterDao.read(outcome.getId());
+			fail();
+		} catch (IllegalArgumentException e){
+			//expected
+		}
+		try {
+			ourEncounterDao.read(new IdDt(outcome.getId().getIdPart()));
+			fail();
+		} catch (ResourceNotFoundException e){
+			//expected
 		}
 
 		// Now search by _id
@@ -1068,7 +1089,6 @@ public class FhirResourceDaoTest {
 	@SuppressWarnings("unchecked")
 	@BeforeClass
 	public static void beforeClass() {
-		ourTestStarted = new Date();
 		ourCtx = new ClassPathXmlApplicationContext("fhir-jpabase-spring-test-config.xml");
 		ourPatientDao = ourCtx.getBean("myPatientDao", IFhirResourceDao.class);
 		ourObservationDao = ourCtx.getBean("myObservationDao", IFhirResourceDao.class);

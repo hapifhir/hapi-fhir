@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-fhir</artifactId>
-		<version>0.4</version>
+		<version>0.5-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
@@ -12,8 +12,8 @@
 	<artifactId>hapi-fhir-base</artifactId>
 	<packaging>jar</packaging>
 	<url>http://hl7api.sourceforge.net/hapi-fhir/</url>
-
-	<name>HAPI FHIR Library</name>
+ 
+	<name>HAPI FHIR - Core Library</name>
 
 	<distributionManagement>
 		<site>

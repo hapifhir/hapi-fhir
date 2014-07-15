@@ -6,7 +6,10 @@
 		<title>HAPI FHIR Changelog</title>
 	</properties>
 	<body>
-		<release version="0.3" date="2014-May-12" description="This release corrects lots of bugs and introduces the fluent client mode">
+		<release version="0.5" date="TBD">
+			<action type="add">
+				Allow server methods to return wildcard genrric types (e.g. List&lt;? extends IResource&gt;)
+			</action>
         </release>			
 		<release version="0.4" date="2014-Jul-13">
 			<action type="add">
@@ -80,6 +83,8 @@
 			<action type="add">
 				Support added for deleted-entry by/name, by/email, and comment from Tombstones spec
 			</action>
+        </release>			
+		<release version="0.3" date="2014-May-12" description="This release corrects lots of bugs and introduces the fluent client mode">
         </release>			
 	</body>
 </document>

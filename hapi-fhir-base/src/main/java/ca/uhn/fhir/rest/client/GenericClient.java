@@ -331,7 +331,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		@Override
 		public T encodedXml() {
 			myParamEncoding = EncodingEnum.XML;
-			return null;
+			return (T) this;
 		}
 
 		@SuppressWarnings("unchecked")

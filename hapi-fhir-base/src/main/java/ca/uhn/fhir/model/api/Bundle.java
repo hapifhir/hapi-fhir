@@ -20,10 +20,12 @@ package ca.uhn.fhir.model.api;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -36,9 +38,10 @@ import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.server.Constants;
-import ca.uhn.fhir.util.ElementUtil;
 
 public class Bundle extends BaseBundle /* implements IElement */{
+
+	private volatile transient Map<IdDt, IResource> myIdToEntries;
 
 	//@formatter:off
 	/* ****************************************************
@@ -73,6 +76,31 @@ public class Bundle extends BaseBundle /* implements IElement */{
 		BundleEntry retVal = new BundleEntry();
 		getEntries().add(retVal);
 		return retVal;
+	}
+
+	/**
+	 * Retrieves a resource from a bundle given its logical ID.
+	 * <p>
+	 * <b>Important usage notes</b>: This method ignores base URLs (so passing in an ID of <code>http://foo/Patient/123</code> will return a resource if it has the logical ID of
+	 * <code>http://bar/Patient/123</code>. Also, this method is intended to be used for bundles which have already been populated. It will cache its results for fast performance, but that means that
+	 * modifications to the bundle after this method is called may not be accurately reflected.
+	 * </p>
+	 * 
+	 * @param theId The resource ID
+	 * @return Returns the resource with the given ID, or <code>null</code> if none is found
+	 */
+	public IResource getResourceById(IdDt theId) {
+		Map<IdDt, IResource> map = myIdToEntries;
+		if (map == null) {
+			map = new HashMap<IdDt, IResource>();
+			for (BundleEntry next : this.getEntries()) {
+				if (next.getId().isEmpty() == false) {
+					map.put(next.getId().toUnqualified(), next.getResource());
+				}
+			}
+			myIdToEntries = map;
+		}
+		return map.get(theId.toUnqualified());
 	}
 
 	public List<BundleEntry> getEntries() {

@@ -1,6 +1,9 @@
 package ca.uhn.fhir.to;
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.defaultIfEmpty;
+import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
@@ -14,7 +17,6 @@ import java.util.Map;
 import java.util.TreeSet;
 
 import javax.json.Json;
-import javax.json.JsonWriter;
 import javax.json.stream.JsonGenerator;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -33,9 +35,6 @@ import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.thymeleaf.TemplateEngine;
-
-import com.google.common.escape.Escaper;
-import com.google.common.escape.Escapers;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;

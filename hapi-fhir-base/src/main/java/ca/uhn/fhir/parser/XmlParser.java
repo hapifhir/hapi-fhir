@@ -466,15 +466,16 @@ public class XmlParser extends BaseParser implements IParser {
 		for (BaseRuntimeChildDefinition nextChild : children) {
 			if (nextChild instanceof RuntimeChildNarrativeDefinition && !theIncludedResource) {
 				INarrativeGenerator gen = myContext.getNarrativeGenerator();
-				if (gen != null) {
-					NarrativeDt narr = gen.generateNarrative(theResDef.getResourceProfile(), theResource);
-					if (narr != null) {
-						RuntimeChildNarrativeDefinition child = (RuntimeChildNarrativeDefinition) nextChild;
-						String childName = nextChild.getChildNameByDatatype(child.getDatatype());
-						BaseRuntimeElementDefinition<?> type = child.getChildByName(childName);
-						encodeChildElementToStreamWriter(theResDef, theResource, theEventWriter, narr, childName, type, null, theIncludedResource);
-						continue;
-					}
+				NarrativeDt narr = theResource.getText();
+				if (gen != null && narr.isEmpty()) {
+					narr = gen.generateNarrative(theResDef.getResourceProfile(), theResource);
+				}
+				if (narr != null) {
+					RuntimeChildNarrativeDefinition child = (RuntimeChildNarrativeDefinition) nextChild;
+					String childName = nextChild.getChildNameByDatatype(child.getDatatype());
+					BaseRuntimeElementDefinition<?> type = child.getChildByName(childName);
+					encodeChildElementToStreamWriter(theResDef, theResource, theEventWriter, narr, childName, type, null, theIncludedResource);
+					continue;
 				}
 			}
 

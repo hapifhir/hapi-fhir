@@ -25,6 +25,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
+import java.lang.reflect.WildcardType;
 
 public class ReflectionUtil {
 
@@ -72,6 +73,9 @@ public class ReflectionUtil {
 			type = (Class<?>) pt.getRawType();
 		} else if (firstArg instanceof TypeVariable<?>) {
 			Type decl = ((TypeVariable) firstArg).getBounds()[0];
+			return (Class<?>) decl;
+		} else if (firstArg instanceof WildcardType) {
+			Type decl = ((WildcardType) firstArg).getUpperBounds()[0];
 			return (Class<?>) decl;
 		} else {
 			type = (Class<?>) firstArg;

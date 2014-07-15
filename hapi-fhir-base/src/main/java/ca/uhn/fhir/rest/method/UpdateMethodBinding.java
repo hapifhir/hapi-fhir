@@ -159,6 +159,7 @@ public class UpdateMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 		return retVal;
 	}
 
+	/*
 	@Override
 	public boolean incomingServerRequestMatchesMethod(Request theRequest) {
 		if (super.incomingServerRequestMatchesMethod(theRequest)) {
@@ -176,7 +177,8 @@ public class UpdateMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 			return false;
 		}
 	}
-
+	*/
+	
 	@Override
 	protected Set<RequestType> provideAllowableRequestTypes() {
 		return Collections.singleton(RequestType.PUT);

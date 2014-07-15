@@ -26,6 +26,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.composite.HumanNameDt;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.resource.Patient;
@@ -196,7 +197,7 @@ public class ServerFeaturesTest {
 		assertThat(responseContent, StringContains.containsString("\",\n"));
 
 	}
-
+	
 	@Test
 	public void testInternalErrorIfNoId() throws Exception {
 
@@ -211,6 +212,21 @@ public class ServerFeaturesTest {
 
 	}
 
+	@Test
+	public void testSearchWithWildcardRetVal() throws Exception {
+
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/?_query=searchWithWildcardRetVal");
+		httpGet.addHeader("Accept", Constants.CT_FHIR_XML + "; pretty=true");
+		CloseableHttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertThat(responseContent, StringContains.containsString("searchWithWildcardRetVal"));
+
+	}
+
+	
 	@AfterClass
 	public static void afterClass() throws Exception {
 		ourServer.stop();
@@ -284,6 +300,15 @@ public class ServerFeaturesTest {
 			return retVal;
 		}
 
+		
+		@Search(queryName="searchWithWildcardRetVal")
+		public List<? extends IResource> searchWithWildcardRetVal() {
+			Patient p = new Patient();
+			p.setId("1234");
+			p.addName().addFamily("searchWithWildcardRetVal");
+			return Collections.singletonList(p);
+		}
+		
 		/**
 		 * Retrieve the resource by its identifier
 		 * 

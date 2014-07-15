@@ -36,11 +36,22 @@ public class MethodOutcome {
 		myId = theId;
 	}
 
+	public MethodOutcome(IdDt theId, OperationOutcome theOperationOutcome) {
+		myId = theId;
+		myOperationOutcome = theOperationOutcome;
+	}
+
+	/**
+	 * @deprecated Use the constructor which accepts a single IdDt parameter, and include the logical ID and version ID in that IdDt instance
+	 */
 	public MethodOutcome(IdDt theId, IdDt theVersionId) {
 		myId = theId;
 		myVersionId = theVersionId;
 	}
 
+	/**
+	 * @deprecated Use the constructor which accepts a single IdDt parameter, and include the logical ID and version ID in that IdDt instance
+	 */
 	public MethodOutcome(IdDt theId, IdDt theVersionId, OperationOutcome theOperationOutcome) {
 		myId = theId;
 		myVersionId = theVersionId;

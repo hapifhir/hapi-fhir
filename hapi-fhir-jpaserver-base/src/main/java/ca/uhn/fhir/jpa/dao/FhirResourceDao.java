@@ -724,9 +724,12 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 
 	@Override
 	public T read(IdDt theId) {
+		validateResourceTypeAndThrowIllegalArgumentException(theId);
+
 		StopWatch w = new StopWatch();
 		BaseHasResource entity = readEntity(theId);
-
+		validateResourceType(entity);
+		
 		T retVal = toResource(myResourceType, entity);
 
 		InstantDt deleted = ResourceMetadataKeyEnum.DELETED_AT.get(retVal);
@@ -738,8 +741,22 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 		return retVal;
 	}
 
+	private void validateResourceType(BaseHasResource entity) {
+		if (!myResourceName.equals(entity.getResourceType())) {
+			throw new ResourceNotFoundException("Resource with ID " + entity.getIdDt().getIdPart() + " exists but it is not of type " + myResourceName + ", found resource of type " + entity.getResourceType());
+		}
+	}
+
+	private void validateResourceTypeAndThrowIllegalArgumentException(IdDt theId) {
+		if (theId.hasResourceType() && !theId.getResourceType().equals(myResourceName)) {
+			throw new IllegalArgumentException("Incorrect resource type (" + theId.getResourceType()+ ") for this DAO, wanted: " + myResourceName);
+		}
+	}
+
 	@Override
 	public BaseHasResource readEntity(IdDt theId) {
+		validateResourceTypeAndThrowIllegalArgumentException(theId);
+		
 		Long pid = translateForcedIdToPid(theId);
 		BaseHasResource entity = myEntityManager.find(ResourceTable.class, pid);
 		if (theId.hasVersionIdPart()) {
@@ -761,6 +778,8 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 			}
 		}
 
+		validateResourceType(entity);
+		
 		return entity;
 	}
 

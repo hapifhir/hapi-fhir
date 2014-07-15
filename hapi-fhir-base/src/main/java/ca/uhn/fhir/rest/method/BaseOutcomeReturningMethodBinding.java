@@ -145,6 +145,12 @@ public abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBindin
 			return;
 		}
 
+		if (response != null && response.getId() != null && response.getId().hasResourceType()) {
+			if (getContext().getResourceDefinition(response.getId().getResourceType()) == null) {
+				throw new InternalErrorException("Server method returned invalid resource ID: " + response.getId().getValue());
+			}
+		}
+		
 		if (getResourceOperationType() == RestfulOperationTypeEnum.CREATE) {
 			if (response == null) {
 				throw new InternalErrorException("Method " + getMethod().getName() + " in type " + getMethod().getDeclaringClass().getCanonicalName() + " returned null, which is not allowed for create operation");

@@ -26,17 +26,7 @@ function generateHapiSearch(json, container) {
 	
 	var indented = $('<div />', {'class': 'clientCodeIndent'});
 	container.append(indented);
-	
-	if (json.pretty) {
-		indented.append($('<span />', {'class': 'clientCodeMain'}).text('.setPrettyPrint(' + json.pretty + ')'));
-		indented.append($('<br/>'));
-	}
-	
-	if (json.format) {
-		indented.append($('<span />', {'class': 'clientCodeMain'}).text('.setEncoding(EncodingEnum.' + json.format.toUpperCase() + ')'));
-		indented.append($('<br/>'));
-	}
-	
+		
 	for (var i = 0; i < json.params.length; i++) {
 		var nextParam = json.params[i];
 		var paramLine = null;
@@ -53,15 +43,22 @@ function generateHapiSearch(json, container) {
 			}
 		} else if (nextParam.type == 'number') {
 			paramLine = '.where(new NumberParam("' + nextParam.name + '").exactly().value("' + nextParam.value + '"))';
+		} else if (nextParam.type == 'reference') {
+			if (nextParam.qualifier == '') {
+				if (nextParam.name.indexOf('.') == -1) {
+					paramLine = '.where(new ReferenceParam("' + nextParam.name + '").hasId("' + nextParam.value + '"))';
+				}
+			}
 		} else if (nextParam.type == 'date') {
+			var dateQual = nextParam.value.indexOf('T') == -1 ? 'day' : 'second';
 			if (nextParam.value.substring(0,2) == '>=') {
-				paramLine = '.where(new DateParam("' + nextParam.name + '").afterOrEquals().value("' + nextParam.value.substring(2) + '"))';
+				paramLine = '.where(new DateParam("' + nextParam.name + '").afterOrEquals().' + dateQual + '("' + nextParam.value.substring(2) + '"))';
 			} else if (nextParam.value.substring(0,1) == '>') {
-				paramLine = '.where(new DateParam("' + nextParam.name + '").after().value("' + nextParam.value.substring(1) + '"))';
+				paramLine = '.where(new DateParam("' + nextParam.name + '").after().' + dateQual + '("' + nextParam.value.substring(1) + '"))';
 			} else if (nextParam.value.substring(0,2) == '<=') {
-				paramLine = '.where(new DateParam("' + nextParam.name + '").beforeOrEquals().value("' + nextParam.value.substring(2) + '"))';
+				paramLine = '.where(new DateParam("' + nextParam.name + '").beforeOrEquals().' + dateQual + '("' + nextParam.value.substring(2) + '"))';
 			} else if (nextParam.value.substring(0,1) == '<') {
-				paramLine = '.where(new DateParam("' + nextParam.name + '").before().value("' + nextParam.value.substring(1) + '"))';
+				paramLine = '.where(new DateParam("' + nextParam.name + '").before().' + dateQual + '("' + nextParam.value.substring(1) + '"))';
 			} 
 		}
 		if (paramLine != null) {
@@ -74,6 +71,16 @@ function generateHapiSearch(json, container) {
 		indented.append($('<span />', {'class': 'clientCodeMain'}).text('.include(new Include("' + json.includes[i] + '"))'));
 		indented.append($('<br/>'));
 	}	
+
+	if (json.pretty && json.pretty == 'true') {
+		indented.append($('<span />', {'class': 'clientCodeMain'}).text('.prettyPrint()'));
+		indented.append($('<br/>'));
+	}
+	
+	if (json.format) {
+		indented.append($('<span />', {'class': 'clientCodeMain'}).text('.encoded' + json.format.substring(0,1).toUpperCase() + json.format.substring(1).toLowerCase() + '()'));
+		indented.append($('<br/>'));
+	}
 
 	if (json.limit) {
 		indented.append($('<span />', {'class': 'clientCodeMain'}).text('.limitTo(' + json.limit + ')'));

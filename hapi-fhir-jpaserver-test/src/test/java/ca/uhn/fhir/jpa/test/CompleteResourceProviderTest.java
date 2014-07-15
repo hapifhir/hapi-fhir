@@ -32,6 +32,7 @@ import ca.uhn.fhir.model.dstu.resource.Questionnaire;
 import ca.uhn.fhir.model.dstu.valueset.ResourceTypeEnum;
 import ca.uhn.fhir.model.primitive.DecimalDt;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -194,6 +195,30 @@ private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger
 
 	}
 
+	
+	@Test
+	public void testSaveAndRetrieveExistingNarrative() {
+		Patient p1 = new Patient();
+		p1.getText().getDiv().setValueAsString("<div>HELLO WORLD</div>");
+		p1.addIdentifier().setSystem("urn:system").setValue("testSearchByResourceChain01");
+
+		IdDt newId = ourClient.create(p1).getId();
+
+		Patient actual = ourClient.read(Patient.class, newId);
+		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">HELLO WORLD</div>", actual.getText().getDiv().getValueAsString());
+	}
+
+	@Test
+	public void testSaveAndRetrieveWithoutNarrative() {
+		Patient p1 = new Patient();
+		p1.addIdentifier().setSystem("urn:system").setValue("testSearchByResourceChain01");
+
+		IdDt newId = ourClient.create(p1).getId();
+
+		Patient actual = ourClient.read(Patient.class, newId);
+		assertThat(actual.getText().getDiv().getValueAsString(), containsString("<td>Identifier</td><td>testSearchByResourceChain01</td>"));
+	}
+	
 	@AfterClass
 	public static void afterClass() throws Exception {
 		ourServer.stop();
@@ -223,6 +248,7 @@ private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger
 
 		RestfulServer restServer = new RestfulServer();
 		restServer.setResourceProviders(patientRp, questionnaireRp, observationRp, organizationRp);
+		restServer.getFhirContext().setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
 
 		IFhirSystemDao systemDao = (IFhirSystemDao) ourAppCtx.getBean("mySystemDao", IFhirSystemDao.class);
 

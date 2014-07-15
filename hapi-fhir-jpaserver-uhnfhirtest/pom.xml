@@ -4,24 +4,24 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-fhir</artifactId>
-		<version>0.4</version>
+		<version>0.5-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
 	<artifactId>hapi-fhir-jpaserver-uhnfhirtest</artifactId>
 
-	<name>HAPI FHIR JPA Server - Test Project</name>
+	<name>HAPI FHIR - fhirtest.uhn.ca Deployable WAR</name>
 
 	<dependencies>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-jpaserver-base</artifactId>
-			<version>0.4</version>
+			<version>0.5-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-testpage-overlay</artifactId>
-			<version>0.4</version>
+			<version>0.5-SNAPSHOT</version>
 			<type>war</type>
 			<scope>provided</scope>		
 		</dependency>
@@ -29,7 +29,7 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-jpaserver-test</artifactId>
-			<version>0.4</version>
+			<version>0.5-SNAPSHOT</version>
 			<scope>test</scope>
 		</dependency>
 		
@@ -179,7 +179,7 @@
 			<plugin>
 				<groupId>ca.uhn.hapi.fhir</groupId>
 				<artifactId>hapi-tinder-plugin</artifactId>
-				<version>0.4</version>
+				<version>0.5-SNAPSHOT</version>
 				<executions>
 					<execution>
 						<id>buildclient</id>
