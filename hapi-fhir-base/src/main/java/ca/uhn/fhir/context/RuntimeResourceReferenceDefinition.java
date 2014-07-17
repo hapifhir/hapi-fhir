@@ -24,17 +24,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import ca.uhn.fhir.model.api.BaseResourceReference;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
 
-public class RuntimeResourceReferenceDefinition extends BaseRuntimeElementDefinition<BaseResourceReference> {
+public class RuntimeResourceReferenceDefinition extends BaseRuntimeElementDefinition<BaseResourceReferenceDt> {
 
 	private final List<Class<? extends IResource>> myResourceTypes;
 	private HashMap<Class<? extends IResource>, RuntimeResourceDefinition> myResourceTypeToDefinition;
 
 	public RuntimeResourceReferenceDefinition(String theName, List<Class<? extends IResource>> theResourceTypes) {
-		super(theName, BaseResourceReference.class);
+		super(theName, BaseResourceReferenceDt.class);
 		if (theResourceTypes == null || theResourceTypes.isEmpty()) {
 			throw new ConfigurationException("Element '" + theName + "' has no resource types noted");
 		}

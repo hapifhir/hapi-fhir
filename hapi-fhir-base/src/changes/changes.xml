@@ -10,6 +10,10 @@
 			<action type="add">
 				Allow server methods to return wildcard genrric types (e.g. List&lt;? extends IResource&gt;)
 			</action>
+			<action type="add">
+				Search parameters are not properly escaped and unescaped. E.g. for a token parameter such as
+				"&amp;identifier=system|codepart1\|codepart2"
+			</action>
         </release>			
 		<release version="0.4" date="2014-Jul-13">
 			<action type="add">

@@ -38,12 +38,12 @@ package ca.uhn.fhir.model.dstu.composite;
 
 import java.util.List;
 
-import ca.uhn.fhir.model.api.BaseIdentifiableElement;
 import ca.uhn.fhir.model.api.ICompositeDatatype;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.base.composite.BaseHumanNameDt;
 import ca.uhn.fhir.model.dstu.valueset.NameUseEnum;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
@@ -66,7 +66,7 @@ import ca.uhn.fhir.util.DatatypeUtil;
  */
 @DatatypeDef(name="HumanNameDt") 
 public class HumanNameDt
-        extends  BaseIdentifiableElement         implements ICompositeDatatype  {
+        extends  BaseHumanNameDt        implements ICompositeDatatype  {
 
 	/**
 	 * Constructor

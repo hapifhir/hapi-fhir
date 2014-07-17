@@ -8,6 +8,7 @@ import java.util.*;
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.primitive.*;
 import ca.uhn.fhir.model.api.annotation.*;
+import ca.uhn.fhir.model.base.composite.*;
 
 #foreach ( $import in $imports )
 import ${import};
@@ -29,8 +30,8 @@ import ${import};
  */
 @DatatypeDef(name="${className}") 
 public class ${className}
-        extends #{if}(${className}=="ResourceReferenceDt") BaseResourceReference #{else} BaseIdentifiableElement #{end} 
-        implements ICompositeDatatype  #{if}( ${className} == "IdentifierDt" || ${className} == "CodingDt" || ${className} == 'QuantityDt'), IQueryParameterType #{end}
+        extends #{if}( ${className}=="ResourceReferenceDt" || ${className}=="IdentifierDt" || ${className}=="CodingDt" || ${className}=='QuantityDt') Base${className} #{else} BaseIdentifiableElement #{end} 
+        implements ICompositeDatatype
 {
 
 	/**
@@ -166,70 +167,6 @@ public class ${className}
 		setUnits(theUnits);
 	}
 
-	@Override
-	public void setValueAsQueryToken(String theQualifier, String theValue) {
-		setComparator((BoundCodeDt<QuantityCompararatorEnum>) null);
-		setCode((CodeDt) null);
-		setSystem((UriDt) null);
-		setUnits((StringDt) null);
-		setValue((DecimalDt) null);
-
-		if (theValue == null) {
-			return;
-		}
-		String[] parts = theValue.split("\\|");
-		if (parts.length > 0 && StringUtils.isNotBlank(parts[0])) {
-			if (parts[0].startsWith("<=")) {
-				setComparator(QuantityCompararatorEnum.LESSTHAN_OR_EQUALS);
-				setValue(new BigDecimal(parts[0].substring(2)));
-			} else if (parts[0].startsWith("<")) {
-				setComparator(QuantityCompararatorEnum.LESSTHAN);
-				setValue(new BigDecimal(parts[0].substring(1)));
-			} else if (parts[0].startsWith(">=")) {
-				setComparator(QuantityCompararatorEnum.GREATERTHAN_OR_EQUALS);
-				setValue(new BigDecimal(parts[0].substring(2)));
-			} else if (parts[0].startsWith(">")) {
-				setComparator(QuantityCompararatorEnum.GREATERTHAN);
-				setValue(new BigDecimal(parts[0].substring(1)));
-			} else {
-				setValue(new BigDecimal(parts[0]));
-			}
-		}
-		if (parts.length > 1 && StringUtils.isNotBlank(parts[1])) {
-			setSystem(parts[1]);
-		}
-		if (parts.length > 2 && StringUtils.isNotBlank(parts[2])) {
-			setUnits(parts[2]);
-		}
-
-	}
-
-	@Override
-	public String getValueAsQueryToken() {
-		StringBuilder b= new StringBuilder();
-		if (getComparator() != null) {
-			b.append(getComparator().getValue());
-		}
-		if (!getValue().isEmpty()) {
-			b.append(getValue().getValueAsString());
-		}
-		b.append('|');
-		if (!getSystem().isEmpty()) {
-		b.append(getSystem().getValueAsString());
-		}
-		b.append('|');
-		if (!getUnits().isEmpty()) {
-		b.append(getUnits().getValueAsString());
-		}
-		
-		return b.toString();
-	}
-	
-
-	@Override
-	public String getQueryParameterQualifier() {
-		return null;
-	}	
 #end
 #if ( ${className} == "ResourceReferenceDt" )
 	/**
@@ -279,140 +216,7 @@ public class ${className}
 #########################
 ### Type-specific methods
 #########################
-#if ( ${className} == "CodingDt" )
-	/**
-	 * Returns true if <code>this</code> Coding has the same {@link CodingDt#[[#]]#getCode() Code}
-	 * and {@link CodingDt#[[#]]#getSystem() system} (as compared by simple equals comparison).
-	 * Does not compare other Codes (e.g. {@link CodingDt#[[#]]#getUse() use}) or any extensions. 
-	 */
-	public boolean matchesSystemAndCode(CodingDt theCoding) {
-		if (theCoding == null) {
-			return false;
-		}
-		return getCode().equals(theCoding.getCode()) && getSystem().equals(theCoding.getSystem());
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public String getValueAsQueryToken() {
-		if (org.apache.commons.lang3.StringUtils.isNotBlank(getSystem().getValueAsString())) {
-			return getSystem().getValueAsString() + '|' + getCode().getValueAsString(); 
-		} else {
-			return getCode().getValueAsString();
-		}
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void setValueAsQueryToken(String theQualifier, String theParameter) {
-		int barIndex = theParameter.indexOf('|');
-		if (barIndex != -1) {
-			setSystem(new UriDt(theParameter.substring(0, barIndex)));
-			setCode(theParameter.substring(barIndex + 1));
-		} else {
-			setCode(theParameter);
-		}
-	}	
-
-	@Override
-	public String getQueryParameterQualifier() {
-		return null;
-	}	
-#end
 #if ( ${className} == "HumanNameDt" )
-	/**
-	 * Returns all repetitions of {@link ${hash}getFamily() family name} as a space separated string
-	 * 
-	 * @see DatatypeUtil${hash}joinStringsSpaceSeparated(List)
-	 */
-	public String getFamilyAsSingleString() {
-		return ca.uhn.fhir.util.DatatypeUtil.joinStringsSpaceSeparated(getFamily());
-	}
-
-	/**
-	 * Returns all repetitions of {@link ${hash}getGiven() given name} as a space separated string
-	 * 
-	 * @see DatatypeUtil${hash}joinStringsSpaceSeparated(List)
-	 */
-	public String getGivenAsSingleString() {
-		return ca.uhn.fhir.util.DatatypeUtil.joinStringsSpaceSeparated(getGiven());
-	}
-
-	/**
-	 * Returns all repetitions of {@link ${hash}getPrefix() prefix name} as a space separated string
-	 * 
-	 * @see DatatypeUtil${hash}joinStringsSpaceSeparated(List)
-	 */
-	public String getPrefixAsSingleString() {
-		return ca.uhn.fhir.util.DatatypeUtil.joinStringsSpaceSeparated(getPrefix());
-	}
-
-	/**
-	 * Returns all repetitions of {@link ${hash}Suffix() suffix} as a space separated string
-	 * 
-	 * @see DatatypeUtil${hash}joinStringsSpaceSeparated(List)
-	 */
-	public String getSuffixAsSingleString() {
-		return ca.uhn.fhir.util.DatatypeUtil.joinStringsSpaceSeparated(getSuffix());
-	}
-#end
-#if ( ${className} == "IdentifierDt" )
-	/**
-	 * Returns true if <code>this</code> identifier has the same {@link IdentifierDt#[[#]]#getValue() value}
-	 * and {@link IdentifierDt#[[#]]#getSystem() system} (as compared by simple equals comparison).
-	 * Does not compare other values (e.g. {@link IdentifierDt#[[#]]#getUse() use}) or any extensions. 
-	 */
-	public boolean matchesSystemAndValue(IdentifierDt theIdentifier) {
-		if (theIdentifier == null) {
-			return false;
-		}
-		return getValue().equals(theIdentifier.getValue()) && getSystem().equals(theIdentifier.getSystem());
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public String getValueAsQueryToken() {
-		if (org.apache.commons.lang3.StringUtils.isNotBlank(getSystem().getValueAsString())) {
-			return getSystem().getValueAsString() + '|' + getValue().getValueAsString(); 
-		} else {
-			return getValue().getValueAsString();
-		}
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void setValueAsQueryToken(String theQualifier, String theParameter) {
-		int barIndex = theParameter.indexOf('|');
-		if (barIndex != -1) {
-			setSystem(new UriDt(theParameter.substring(0, barIndex)));
-			setValue(theParameter.substring(barIndex + 1));
-		} else {
-			setValue(theParameter);
-		}
-	}	
-
-	@Override
-	public String getQueryParameterQualifier() {
-		return null;
-	}	
-#end
-#if ( ${className} == "ResourceReferenceDt" )
-	@Override
-	public String toString() {
-		org.apache.commons.lang3.builder.ToStringBuilder b = new org.apache.commons.lang3.builder.ToStringBuilder(this, org.apache.commons.lang3.builder.ToStringStyle.SHORT_PREFIX_STYLE);
-		b.append("reference", getReference().getValueAsString());
-		b.append("loaded", getResource()!=null);
-		return b.toString();
-	}
-
 #end
 #childExtensionTypes( $childExtensionTypes )
 

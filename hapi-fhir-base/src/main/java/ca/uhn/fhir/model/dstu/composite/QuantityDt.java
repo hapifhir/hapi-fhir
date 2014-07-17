@@ -41,7 +41,6 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
-import ca.uhn.fhir.model.api.BaseIdentifiableElement;
 import ca.uhn.fhir.model.api.ICompositeDatatype;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -49,6 +48,7 @@ import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.SimpleSetter;
+import ca.uhn.fhir.model.base.composite.BaseQuantityDt;
 import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
@@ -72,7 +72,7 @@ import ca.uhn.fhir.model.primitive.UriDt;
  */
 @DatatypeDef(name="QuantityDt") 
 public class QuantityDt
-        extends  BaseIdentifiableElement         implements ICompositeDatatype  , IQueryParameterType {
+        extends  BaseQuantityDt       implements ICompositeDatatype  , IQueryParameterType {
 
 	/**
 	 * Constructor

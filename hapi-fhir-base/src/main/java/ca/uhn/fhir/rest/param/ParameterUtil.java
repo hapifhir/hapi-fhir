@@ -20,7 +20,7 @@ package ca.uhn.fhir.rest.param;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -51,6 +51,7 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.TagListParam;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
+import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.annotation.Count;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.IncludeParam;
@@ -96,6 +97,17 @@ public class ParameterUtil {
 		return findParamAnnotationIndex(theMethod, TagListParam.class);
 	}
 
+	public static int nonEscapedIndexOf(String theString, char theCharacter) {
+		for (int i =0; i < theString.length(); i++) {
+			if (theString.charAt(i)==theCharacter) {
+				if (i == 0 || theString.charAt(i-1) != '\\') {
+					return i;
+				}
+			}
+		}
+		return -1;
+	}
+	
 	public static Integer findVersionIdParameterIndex(Method theMethod) {
 		return findParamAnnotationIndex(theMethod, VersionIdParam.class);
 	}
@@ -320,6 +332,69 @@ public class ParameterUtil {
 				return Collections.singletonList(theParam);
 			}
 		};
+	}
+
+	/**
+	 * Escapes a string according to the rules for parameter escaping specified
+	 * in the <a href="http://www.hl7.org/implement/standards/fhir/search.html#escaping">FHIR Specification Escaping Section</a>
+	 */
+	public static String escape(String theValue) {
+		if (theValue == null) {
+			return theValue;
+		}
+		StringBuilder b = new StringBuilder();
+		
+		for (int i = 0; i < theValue.length();i++) {
+			char next = theValue.charAt(i);
+			switch (next) {
+			case '$':
+			case ',':
+			case '|':
+				b.append('\\');
+				// fall through
+			default:
+				b.append(next);
+			}
+		}
+		
+		return b.toString();
+	}
+
+	/**
+	 * Unescapes a string according to the rules for parameter escaping specified
+	 * in the <a href="http://www.hl7.org/implement/standards/fhir/search.html#escaping">FHIR Specification Escaping Section</a>
+	 */
+	public static String unescape(String theValue) {
+		if (theValue == null) {
+			return theValue;
+		}
+		if (theValue.indexOf('\\')==-1) {
+			return theValue;
+		}
+
+		StringBuilder b = new StringBuilder();
+		
+		for (int i = 0; i < theValue.length();i++) {
+			char next = theValue.charAt(i);
+			if (next == '\\') {
+				if (i == theValue.length()-1) {
+					b.append(next);
+				} else {
+					switch (theValue.charAt(i+1)) {
+					case '$':
+					case ',':
+					case '|':
+						continue;
+					default:
+						b.append(next);
+					}
+				}
+			} else {
+				b.append(next);
+			}
+		}
+		
+		return b.toString();
 	}
 
 }
