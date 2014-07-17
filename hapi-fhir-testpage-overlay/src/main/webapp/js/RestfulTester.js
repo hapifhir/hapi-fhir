@@ -16,6 +16,7 @@ function addSearchParamRow() {
 	$("#search-param-rows").append(rowDiv);
 	
 	plusBtn.click(function() {
+		plusBtn.hide();
 		addSearchParamRow();
 	});
 	
@@ -46,8 +47,8 @@ function addSearchParamRow() {
 		});
 	});	
 	select.select2();
-	handleSearchParamTypeChange(select, params, nextRow);
-	select.change(function(){ handleSearchParamTypeChange(select, params, nextRow); });
+	handleSearchParamTypeChange(select, params, nextRow, nextRow);
+	select.change(function(){ handleSearchParamTypeChange(select, params, nextRow, nextRow); });
 }
 
 function updateSearchDateQualifier(qualifierBtn, qualifierInput, qualifier) {
@@ -59,19 +60,9 @@ function updateSearchDateQualifier(qualifierBtn, qualifierInput, qualifier) {
 	}
 }
 
-function addSearchControls(theSearchParamType, theSearchParamName, theSearchParamChain, theContainerRowNum, theRowNum) {
+function addSearchControls(theConformance, theSearchParamType, theSearchParamName, theSearchParamChain, theSearchParamTarget, theContainerRowNum, theRowNum) {
     
-	if (theSearchParamChain && theSearchParamChain.length > 0) {
-		$('#search-param-rowopts-' + theContainerRowNum).append(
-				$('<input />', { id: 'param.' + theRowNum + '.qualifier', type: 'hidden', value: '.' + theSearchParamChain[0] })
-		);
-	}
-	
-	$('#search-param-rowopts-' + theContainerRowNum).append(
-		$('<input />', { id: 'param.' + theRowNum + '.name', type: 'hidden', value: theSearchParamName }),
-		$('<input />', { id: 'param.' + theRowNum + '.type', type: 'hidden', value: theSearchParamType })
-	);
-
+	var addNameAndType = true;
     if (theSearchParamType == 'token') {
     	$('#search-param-rowopts-' + theContainerRowNum).append(
     		$('<div />', { 'class': 'col-sm-3' }).append(
@@ -122,7 +113,24 @@ function addSearchControls(theSearchParamType, theSearchParamName, theSearchPara
 		    	$('<input />', { id: 'param.' + theRowNum + '.0', placeholder: placeholderText, type: 'text', 'class': 'form-control' })
 	    	)
 	    );
-    } else if (theSearchParamType == 'number' || theSearchParamType == 'reference') {
+    } else if (theSearchParamType == 'number') {
+    	var placeholderText = 'Number';
+    	$('#search-param-rowopts-' + theContainerRowNum).append(
+    			$('<input />', { id: 'param.' + theRowNum + '.0', placeholder: placeholderText, type: 'hidden' })
+    	);
+    	$('#search-param-rowopts-' + theContainerRowNum).append(
+    		$('<div />', { 'class': 'col-sm-3' }).append(
+		    	$('<input />', { id: 'param.' + theRowNum + '.1', placeholder: placeholderText, type: 'text', 'class': 'form-control' })
+	    	)
+	    );
+    } else if (theSearchParamType == 'date') {
+    	addSearchControlDate(theSearchParamName, theContainerRowNum, theRowNum, true);
+    	addSearchControlDate(theSearchParamName, theContainerRowNum, theRowNum, false);
+    } else if (theSearchParamType == 'reference' && theSearchParamChain.length == 0) {
+    	/*
+    	 * This is a reference parameter with no chain options, so just display a simple 
+    	 * text box for the ID of the referenced resource
+    	 */
     	var placeholderText = 'value';
     	if (theSearchParamType == 'number') {
     		placeholderText = 'Number';
@@ -137,10 +145,72 @@ function addSearchControls(theSearchParamType, theSearchParamName, theSearchPara
 		    	$('<input />', { id: 'param.' + theRowNum + '.1', placeholder: placeholderText, type: 'text', 'class': 'form-control' })
 	    	)
 	    );
-    } else if (theSearchParamType == 'date') {
-    	addSearchControlDate(theSearchParamName, theContainerRowNum, theRowNum, true);
-    	addSearchControlDate(theSearchParamName, theContainerRowNum, theRowNum, false);
-    }	
+    } else if (theSearchParamType == 'reference' && theSearchParamChain.length > 0) {
+    	/*
+    	 * This is a reference parameter with possible chain options, so we need
+    	 * to display a secondary combobox to let the user choose which chained
+    	 * parameter they are filling out
+    	 */
+    	var select = $('<select/>', {/*style:'margin-left:30px;'*/});
+
+    	var newContainerRowNum = theContainerRowNum + "-0";
+		var newContainer = $('<div />', { id: 'search-param-rowopts-' + newContainerRowNum })
+
+    	$('#search-param-rowopts-' + theContainerRowNum).append(
+    		$('<br clear="all" />'), 
+    		$('<div />', { 'class': 'col-sm-1' }),
+    		$('<div />', { 'class': 'col-sm-1' }).append(
+            	$('<i class="glyphicon glyphicon-link" style="margin-left: 20px; margin-top: 10px;"/>')
+        	),
+    		$('<div />', { 'class': 'col-sm-4' }).append(
+    			select
+    		),
+    		newContainer
+    	);
+
+//		select.append(
+//			$('<option />', { value: '' }).text('Resource ID')														
+//		);
+
+		var params = new Array();
+    	for (var chainIdx = 0; chainIdx < theSearchParamChain.length; chainIdx++) {
+    		var nextChain = theSearchParamChain[chainIdx];
+    		var found = false;
+    		for (var resIdx = 0; resIdx < theConformance.rest[0].resource.length && !found; resIdx++) {
+    			var nextRes = theConformance.rest[0].resource[resIdx];
+    			if (!(nextRes.searchParam)) {
+    				continue;
+    			}
+    			for (var paramIdx = 0; paramIdx < nextRes.searchParam.length && !found; paramIdx++) {
+    				var nextParam = nextRes.searchParam[paramIdx];
+    				if (nextParam.name == nextChain) {
+    					if (theSearchParamTarget.length == 0 || theSearchParamTarget.indexOf(nextRes.type) != -1) {
+    						var nextName = nextParam.name + '_' + i;
+    						nextParam = jQuery.extend({}, nextParam); // clone it so we can add the chain to the name
+    						nextParam.name = theSearchParamName + '.' + nextParam.name;
+    						params[nextName] = nextParam;
+    						select.append(
+    							$('<option />', { value: nextName }).text(nextParam.name + ' - ' + nextParam.documentation)														
+    						);
+    						found = true;
+    					}
+    				}
+    			}
+    		}
+    	}
+		
+		select.select2();
+		handleSearchParamTypeChange(select, params, newContainerRowNum, theRowNum);
+		select.change(function(){ handleSearchParamTypeChange(select, params, newContainerRowNum, theRowNum); });
+		addNameAndType = false;
+    }
+    
+    if (addNameAndType) {
+		$('#search-param-rowopts-' + theContainerRowNum).append(
+			$('<input />', { id: 'param.' + theRowNum + '.name', type: 'hidden', value: theSearchParamName }),
+			$('<input />', { id: 'param.' + theRowNum + '.type', type: 'hidden', value: theSearchParamType })
+		);
+    }
     
 }
 
@@ -202,20 +272,20 @@ function addSearchControlDate(theSearchParamName, theContainerRowNum, theRowNum,
     );
 }
 
-function handleSearchParamTypeChange(select, params, rowNum) {
+function handleSearchParamTypeChange(select, params, theContainerRowNum, theParamRowNum) {
 	var oldVal = select.prevVal;
 	var newVal = select.val();
 	if (oldVal == newVal) {
 		return;
 	}
-	$('#search-param-rowopts-' + rowNum).empty();
+	$('#search-param-rowopts-' + theContainerRowNum).empty();
 	var searchParam = params[newVal];
 	/*
 	$('#search-param-rowopts-' + rowNum).append(
 		$('<input />', { name: 'param.' + rowNum + '.type', type: 'hidden', value: searchParam.type })
 	);
 	*/
-	addSearchControls(searchParam.type, searchParam.name, searchParam.chain, rowNum, rowNum);
+	addSearchControls(conformance, searchParam.type, searchParam.name, searchParam.chain, searchParam.target, theContainerRowNum, theParamRowNum);
 	
 	select.prevVal = newVal;
 }

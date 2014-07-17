@@ -64,9 +64,13 @@
 					<th:block th:each="chain : ${param.chain}">
 						chain.push('<th:block th:text="${chain}"/>');
 					</th:block>
+					var target = new Array();
+					<th:block th:each="target : ${param.target}">
+						target.push('<th:block th:text="${target}"/>');
+					</th:block>
 					var rowNum = <th:block th:text="${paramIterStat.index}"/>;
 					var containerRowNum = <th:block th:text="${queryIterStat.index}"/> + '-' + rowNum;
-					addSearchControls(type, name, chain, containerRowNum, rowNum);
+					addSearchControls(conformance, type, name, chain, target, containerRowNum, rowNum);
 				</script>
 				<br clear="all"/>
 			</div>

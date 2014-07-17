@@ -680,7 +680,7 @@
 				<p>
 					Example URL to invoke this method:
 					<br />
-					<code>http://fhir.example.com/Observation?value-quantity=%lt;=123.2||mg</code>
+					<code>http://fhir.example.com/Observation?value-quantity=&lt;=123.2||mg</code>
 				</p>
 
 			</subsection>
