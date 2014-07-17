@@ -32,15 +32,18 @@ import org.apache.commons.lang3.StringUtils;
 
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.resource.Conformance;
 import ca.uhn.fhir.model.dstu.resource.Conformance.Rest;
 import ca.uhn.fhir.model.dstu.resource.Conformance.RestQuery;
 import ca.uhn.fhir.model.dstu.resource.Conformance.RestResource;
 import ca.uhn.fhir.model.dstu.resource.Conformance.RestResourceOperation;
 import ca.uhn.fhir.model.dstu.resource.Conformance.RestResourceSearchParam;
+import ca.uhn.fhir.model.dstu.valueset.ResourceTypeEnum;
 import ca.uhn.fhir.model.dstu.valueset.RestfulConformanceModeEnum;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.SearchParamTypeEnum;
 import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -164,10 +167,12 @@ public class ServerConformanceProvider {
 					for (SearchParameter nextParameter : searchParameters) {
 
 						String nextParamName = nextParameter.getName();
-						String chain = null;
+
+//						String chain = null;
+						String nextParamUnchainedName = nextParamName;
 						if (nextParamName.contains(".")) {
-							chain = nextParamName.substring(nextParamName.indexOf('.') + 1);
-							nextParamName = nextParamName.substring(0, nextParamName.indexOf('.'));
+//							chain = nextParamName.substring(nextParamName.indexOf('.') + 1);
+							nextParamUnchainedName = nextParamName.substring(0, nextParamName.indexOf('.'));
 						}
 
 						String nextParamDescription = nextParameter.getDescription();
@@ -176,7 +181,7 @@ public class ServerConformanceProvider {
 						 * If the parameter has no description, default to the one from the resource
 						 */
 						if (StringUtils.isBlank(nextParamDescription)) {
-							RuntimeSearchParam paramDef = def.getSearchParam(nextParamName);
+							RuntimeSearchParam paramDef = def.getSearchParam(nextParamUnchainedName);
 							if (paramDef != null) {
 								nextParamDescription = paramDef.getDescription();
 							}
@@ -191,12 +196,21 @@ public class ServerConformanceProvider {
 						}
 
 						param.setName(nextParamName);
-						if (StringUtils.isNotBlank(chain)) {
-							param.addChain(chain);
-						}
+//						if (StringUtils.isNotBlank(chain)) {
+//							param.addChain(chain);
+//						}
 						param.setDocumentation(nextParamDescription);
 						param.setType(nextParameter.getParamType());
-
+						for (Class<? extends IResource> nextTarget : nextParameter.getDeclaredTypes()) {
+							RuntimeResourceDefinition targetDef = myRestfulServer.getFhirContext().getResourceDefinition(nextTarget);
+							if (targetDef != null) {
+								ResourceTypeEnum code = ResourceTypeEnum.VALUESET_BINDER.fromCodeString(targetDef.getName());
+								if (code != null) {
+									param.addTarget(code);
+								}
+							}
+						}
+						
 					}
 				}
 

@@ -515,7 +515,7 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 		}
 
 		entity.setHasTags(true);
-		
+
 		TagDefinition def = getTag(theScheme, theTerm, theLabel);
 		BaseTag newEntity = entity.addTag(def);
 
@@ -729,7 +729,7 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 		StopWatch w = new StopWatch();
 		BaseHasResource entity = readEntity(theId);
 		validateResourceType(entity);
-		
+
 		T retVal = toResource(myResourceType, entity);
 
 		InstantDt deleted = ResourceMetadataKeyEnum.DELETED_AT.get(retVal);
@@ -749,14 +749,14 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 
 	private void validateResourceTypeAndThrowIllegalArgumentException(IdDt theId) {
 		if (theId.hasResourceType() && !theId.getResourceType().equals(myResourceName)) {
-			throw new IllegalArgumentException("Incorrect resource type (" + theId.getResourceType()+ ") for this DAO, wanted: " + myResourceName);
+			throw new IllegalArgumentException("Incorrect resource type (" + theId.getResourceType() + ") for this DAO, wanted: " + myResourceName);
 		}
 	}
 
 	@Override
 	public BaseHasResource readEntity(IdDt theId) {
 		validateResourceTypeAndThrowIllegalArgumentException(theId);
-		
+
 		Long pid = translateForcedIdToPid(theId);
 		BaseHasResource entity = myEntityManager.find(ResourceTable.class, pid);
 		if (theId.hasVersionIdPart()) {
@@ -779,7 +779,7 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 		}
 
 		validateResourceType(entity);
-		
+
 		return entity;
 	}
 
@@ -809,7 +809,7 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 		if (entity.getTags().isEmpty()) {
 			entity.setHasTags(false);
 		}
-			
+
 		myEntityManager.merge(entity);
 
 		ourLog.info("Processed remove tag {}/{} on {} in {}ms", new Object[] { theScheme, theTerm, theId.getValue(), w.getMillisAndRestart() });
@@ -916,7 +916,7 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 			}
 		};
 
-		ourLog.info("Processed search for {} on {} in {}ms", new Object[] {myResourceName, theParams, w.getMillisAndRestart()});
+		ourLog.info("Processed search for {} on {} in {}ms", new Object[] { myResourceName, theParams, w.getMillisAndRestart() });
 
 		return retVal;
 	}
@@ -968,8 +968,12 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 						for (IQueryParameterType next : nextValue) {
 							String value = next.getValueAsQueryToken();
 							IdDt valueId = new IdDt(value);
-							long valueLong = translateForcedIdToPid(valueId);
-							joinPids.add(valueLong);
+							try {
+								long valueLong = translateForcedIdToPid(valueId);
+								joinPids.add(valueLong);
+							} catch (ResourceNotFoundException e) {
+								// This isn't an error, just means no result found
+							}
 						}
 						if (joinPids.isEmpty()) {
 							continue;

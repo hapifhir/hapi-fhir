@@ -192,6 +192,17 @@ public class FhirResourceDaoTest {
 		assertEquals(o1id.toUnqualifiedVersionless(), p1.getManagingOrganization().getReference().toUnqualifiedVersionless());
 	}
 
+
+	@Test
+	public void testSearchForUnknownAlphanumericId() {
+		{
+			SearchParameterMap map = new SearchParameterMap();
+			map.add("_id", new StringParam("testSearchForUnknownAlphanumericId"));
+			IBundleProvider retrieved = ourPatientDao.search(map);
+			assertEquals(0, retrieved.size());
+		}
+	}
+	
 	@Test
 	public void testSearchTokenParam() {
 		Patient patient = new Patient();

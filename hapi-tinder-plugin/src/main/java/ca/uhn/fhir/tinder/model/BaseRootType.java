@@ -3,6 +3,8 @@ package ca.uhn.fhir.tinder.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import edu.emory.mathcs.backport.java.util.Collections;
+
 public abstract class BaseRootType extends BaseElement {
 
 	private String myId;
@@ -22,7 +24,7 @@ public abstract class BaseRootType extends BaseElement {
 		if (mySearchParameters == null) {
 			mySearchParameters = new ArrayList<SearchParameter>();
 		}
-		return mySearchParameters;
+		return java.util.Collections.unmodifiableList(mySearchParameters);
 	}
 
 	public List<SearchParameter> getSearchParametersWithoutComposite() {
@@ -56,6 +58,10 @@ public abstract class BaseRootType extends BaseElement {
 			}
 		}
 		return retVal;
+	}
+	public void addSearchParameter(SearchParameter theParam) {
+		getSearchParameters();
+		mySearchParameters.add(theParam);
 	}
 
 }

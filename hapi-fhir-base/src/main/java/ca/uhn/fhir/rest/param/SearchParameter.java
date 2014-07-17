@@ -25,13 +25,13 @@ import java.util.Collection;
 import java.util.List;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IQueryParameterAnd;
 import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.composite.QuantityDt;
 import ca.uhn.fhir.model.dstu.valueset.SearchParamTypeEnum;
@@ -45,6 +45,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
  */
 public class SearchParameter extends BaseQueryParameter {
 
+	private Class<? extends IResource>[] myDeclaredTypes;
 	private String myDescription;
 	private String myName;
 	private IParamBinder myParamBinder;
@@ -58,14 +59,6 @@ public class SearchParameter extends BaseQueryParameter {
 	public SearchParameter(String theName, boolean theRequired) {
 		this.myName = theName;
 		this.myRequired = theRequired;
-	}
-
-	@Override
-	public String toString() {
-		ToStringBuilder retVal = new ToStringBuilder(this);
-		retVal.append("name", myName);
-		retVal.append("required", myRequired);
-		return retVal.toString();
 	}
 
 	/*
@@ -83,6 +76,10 @@ public class SearchParameter extends BaseQueryParameter {
 		}
 
 		return retVal;
+	}
+
+	public Class<? extends IResource>[] getDeclaredTypes() {
+		return myDeclaredTypes;
 	}
 
 	public String getDescription() {
@@ -126,6 +123,10 @@ public class SearchParameter extends BaseQueryParameter {
 	@Override
 	public Object parse(List<QualifiedParamList> theString) throws InternalErrorException, InvalidRequestException {
 		return myParamBinder.parse(theString);
+	}
+
+	public void setDeclaredTypes(Class<? extends IResource>[] theTypes) {
+		myDeclaredTypes=theTypes;
 	}
 
 	public void setDescription(String theDescription) {
@@ -187,6 +188,14 @@ public class SearchParameter extends BaseQueryParameter {
 		// this.parser = new CollectionBinder(this.parser, theOuterCollectionType);
 		// }
 
+	}
+
+	@Override
+	public String toString() {
+		ToStringBuilder retVal = new ToStringBuilder(this);
+		retVal.append("name", myName);
+		retVal.append("required", myRequired);
+		return retVal.toString();
 	}
 
 }

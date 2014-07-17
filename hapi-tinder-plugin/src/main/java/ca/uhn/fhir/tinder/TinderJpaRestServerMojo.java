@@ -150,7 +150,7 @@ public class TinderJpaRestServerMojo extends AbstractMojo {
 
 		TinderJpaRestServerMojo mojo = new TinderJpaRestServerMojo();
 		mojo.packageBase = "ca.uhn.test";
-		mojo.baseResourceNames = java.util.Collections.singletonList("patient");
+		mojo.baseResourceNames = java.util.Collections.singletonList("observation");
 		mojo.targetDirectory = new File("target/gen");
 		mojo.execute();
 	}

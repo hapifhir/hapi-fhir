@@ -121,7 +121,7 @@ public class ServerConformanceProviderTest {
 		assertEquals("DiagnosticReport", res.getType().getValueAsString());
 		
 		RestQuery p0 = rest.getQueryFirstRep();
-		assertEquals("subject", p0.getParameterFirstRep().getName().getValue());
+		assertEquals("subject.identifier", p0.getParameterFirstRep().getName().getValue());
 		
 		assertEquals(1,res.getSearchInclude().size());
 		assertEquals("DiagnosticReport.result", res.getSearchIncludeFirstRep().getValue());

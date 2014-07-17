@@ -23,8 +23,13 @@ import org.junit.Test;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.dstu.resource.Conformance;
+import ca.uhn.fhir.model.dstu.resource.Conformance.RestResource;
+import ca.uhn.fhir.model.dstu.resource.Conformance.RestResourceSearchParam;
+import ca.uhn.fhir.model.dstu.resource.Organization;
 import ca.uhn.fhir.model.dstu.resource.Patient;
-import ca.uhn.fhir.rest.annotation.RequiredParam;
+import ca.uhn.fhir.model.dstu.valueset.ResourceTypeEnum;
+import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.testutil.RandomServerPortProvider;
@@ -111,7 +116,29 @@ public class ReferenceParameterTest {
 			assertEquals("2name", p.getName().get(2).getFamilyFirstRep().getValue());
 		}
 	}
+private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ReferenceParameterTest.class);
+	@Test
+	public void testParamTypesInConformanceStatement() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/metadata?_pretty=true");
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
 
+		ourLog.info(responseContent);
+		
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		Conformance conf = ourCtx.newXmlParser().parseResource(Conformance.class,responseContent);
+		
+		RestResource res = conf.getRestFirstRep().getResourceFirstRep();
+		assertEquals("Patient", res.getType().getValue());
+		
+		RestResourceSearchParam param = res.getSearchParamFirstRep();
+		assertEquals(Patient.SP_PROVIDER, param.getName().getValue());
+		
+		assertEquals(1, param.getTarget().size());
+		assertEquals(ResourceTypeEnum.ORGANIZATION, param.getTarget().get(0).getValueAsEnum());
+	}
+	
 	@AfterClass
 	public static void afterClass() throws Exception {
 		ourServer.stop();
@@ -147,7 +174,7 @@ public class ReferenceParameterTest {
 	public static class DummyPatientResourceProvider implements IResourceProvider {
 
 		@Search
-		public List<Patient> findPatient(@RequiredParam(name = Patient.SP_PROVIDER) ReferenceParam theParam) {
+		public List<Patient> findPatient(@OptionalParam(name = Patient.SP_PROVIDER, targetTypes= {Organization.class}) ReferenceParam theParam) {
 			ArrayList<Patient> retVal = new ArrayList<Patient>();
 
 			Patient p = new Patient();

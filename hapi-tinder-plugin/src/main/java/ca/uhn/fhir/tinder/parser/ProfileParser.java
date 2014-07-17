@@ -150,7 +150,7 @@ public class ProfileParser extends BaseStructureParser {
 						
 						param.setType(nextParam.getType().getValue());
 						param.setDescription(nextParam.getDocumentation().getValue());
-						retVal.getSearchParameters().add(param);
+						retVal.addSearchParameter(param);
 					}
 
 					addResource(retVal);

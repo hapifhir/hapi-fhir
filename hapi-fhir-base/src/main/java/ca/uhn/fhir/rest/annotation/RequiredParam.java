@@ -23,8 +23,18 @@ package ca.uhn.fhir.rest.annotation;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
+import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.rest.param.ReferenceParam;
+
 @Retention(RetentionPolicy.RUNTIME)
 
 public @interface RequiredParam {
     String name();
+    
+    /**
+     * For resource reference parameters ({@link ReferenceParam}) this parameter may be
+     * used to indicate the resource type(s) which may be referenced by this param
+     */
+    Class<? extends IResource>[] targetTypes() default {};
+
 }

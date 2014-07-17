@@ -187,6 +187,7 @@ public class ParameterUtil {
 						SearchParameter parameter = new SearchParameter();
 						parameter.setName(((RequiredParam) nextAnnotation).name());
 						parameter.setRequired(true);
+						parameter.setDeclaredTypes(((RequiredParam) nextAnnotation).targetTypes());
 						parameter.setType(parameterType, innerCollectionType, outerCollectionType);
 						extractDescription(parameter, annotations);
 						param = parameter;
@@ -194,6 +195,7 @@ public class ParameterUtil {
 						SearchParameter parameter = new SearchParameter();
 						parameter.setName(((OptionalParam) nextAnnotation).name());
 						parameter.setRequired(false);
+						parameter.setDeclaredTypes(((OptionalParam) nextAnnotation).targetTypes());
 						parameter.setType(parameterType, innerCollectionType, outerCollectionType);
 						extractDescription(parameter, annotations);
 						param = parameter;

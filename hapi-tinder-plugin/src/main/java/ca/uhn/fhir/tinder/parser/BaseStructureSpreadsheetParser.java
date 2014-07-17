@@ -1,8 +1,10 @@
 package ca.uhn.fhir.tinder.parser;
 
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -75,6 +77,7 @@ public abstract class BaseStructureSpreadsheetParser extends BaseStructureParser
 			// Map<String,String> blockFullNameToShortName = new
 			// HashMap<String,String>();
 
+			Map<String, List<String>> pathToResourceTypes = new HashMap<String, List<String>>();
 			for (int i = 2; i < rows.getLength(); i++) {
 				Element nextRow = (Element) rows.item(i);
 				String name = cellValue(nextRow, 0);
@@ -112,11 +115,30 @@ public abstract class BaseStructureSpreadsheetParser extends BaseStructureParser
 					scanForSimpleSetters(elem);
 				}
 
+				pathToResourceTypes.put(name, elem.getType());
+			}
+			
+			for (SearchParameter nextParam : resource.getSearchParameters()) {
+				if (nextParam.getType().equals("reference")) {
+					String path = nextParam.getPath();
+					List<String> targetTypes = pathToResourceTypes.get(path);
+					if (targetTypes != null) {
+						targetTypes = new ArrayList<String>(targetTypes);
+						for (Iterator<String> iter = targetTypes.iterator();iter.hasNext();) {
+							String next = iter.next();
+							if (next.equals("Any") || next.endsWith("Dt")) {
+								iter.remove();
+							}
+						}
+					}
+					nextParam.setTargetTypes(targetTypes);
+				}
 			}
 
 			index++;
 		}
 
+		
 		ourLog.info("Parsed {} spreadsheet structures", getResources().size());
 
 	}
@@ -166,7 +188,7 @@ public abstract class BaseStructureSpreadsheetParser extends BaseStructureParser
 					sp.setPath(cellValue(nextRow, colPath));
 
 					if (StringUtils.isNotBlank(sp.getName()) && !sp.getName().startsWith("!")) {
-						theResource.getSearchParameters().add(sp);
+						theResource.addSearchParameter(sp);
 					}
 				}
 
