@@ -20,9 +20,12 @@ package ca.uhn.fhir.rest.method;
  * #L%
  */
 
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.Set;
+
+import org.apache.commons.lang3.StringUtils;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
@@ -56,11 +59,23 @@ public class CreateMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 	}
 
 	@Override
+	protected IResource parseIncomingServerResource(Request theRequest) throws IOException {
+		IResource retVal = super.parseIncomingServerResource(theRequest);
+		
+		if (theRequest.getId() != null && theRequest.getId().hasIdPart()) {
+			retVal.setId(theRequest.getId());
+		}
+		
+		return retVal;
+	}
+
+	
+	@Override
 	protected BaseHttpClientInvocation createClientInvocation(Object[] theArgs, IResource theResource) {
 		FhirContext context = getContext();
 
 		BaseHttpClientInvocation retVal = createCreateInvocation(theResource, context);
-		
+
 		if (theArgs != null) {
 			for (int idx = 0; idx < theArgs.length; idx++) {
 				IParameter nextParam = getParameters().get(idx);
@@ -72,16 +87,28 @@ public class CreateMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 	}
 
 	public static HttpPostClientInvocation createCreateInvocation(IResource theResource, FhirContext theContext) {
+		return createCreateInvocation(theResource, null,null, theContext);
+	}
+
+	public static HttpPostClientInvocation createCreateInvocation(IResource theResource, String theResourceBody, String theId, FhirContext theContext) {
 		RuntimeResourceDefinition def = theContext.getResourceDefinition(theResource);
 		String resourceName = def.getName();
 
-
 		StringBuilder urlExtension = new StringBuilder();
 		urlExtension.append(resourceName);
+		if (StringUtils.isNotBlank(theId)) {
+			urlExtension.append('/');
+			urlExtension.append(theId);
+		}
 
-		HttpPostClientInvocation retVal = new HttpPostClientInvocation(theContext, theResource, urlExtension.toString());
+		HttpPostClientInvocation retVal;
+		if (StringUtils.isBlank(theResourceBody)) {
+			retVal = new HttpPostClientInvocation(theContext, theResource, urlExtension.toString());
+		}else {
+			retVal = new HttpPostClientInvocation(theContext, theResourceBody, urlExtension.toString());
+		}
 		addTagsToPostOrPut(theResource, retVal);
-		
+
 		return retVal;
 	}
 

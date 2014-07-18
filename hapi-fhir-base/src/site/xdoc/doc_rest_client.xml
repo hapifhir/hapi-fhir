@@ -165,6 +165,28 @@
 
 			</subsection>
 
+			<subsection name="Configuring Encoding (JSON/XML)">
+
+				<p>
+					Restful client interfaces that you create will also extend
+					the interface 
+					<a href="./apidocs/ca/uhn/fhir/rest/client/api/IRestfulClient.html">IRestfulClient</a>,
+					which comes with some helpful methods for configuring the way that
+					the client will interact with the server.
+				</p>
+				<p>
+					The following snippet shows how to configure the cliet to explicitly 
+					request JSON or XML responses, and how to request "pretty printed" responses
+					on servers that support this (HAPI based servers currently).				
+				</p>
+				
+				<macro name="snippet">
+					<param name="id" value="clientConfig" />
+					<param name="file" value="src/site/example/java/example/ClientExamples.java" />
+				</macro>
+
+			</subsection>
+			
 			<subsection name="A Complete Example">
 	
 				<p>
@@ -205,6 +227,21 @@
 				on the RestfulClientFactory. 
 			</p>
 
+			<subsection name="Interceptors">
+			
+				<p>
+					Both generic clients and annotation-driven clients support
+					<a href="./apidocs/ca/uhn/fhir/rest/client/IClientInterceptor.html">Client Interceptors</a>,
+					which may be registered in order to provide specific behaviour to each
+					client request.
+				</p>
+				
+				<p>
+					The following section shows some sample interceptors which may be used.
+				</p>
+			
+			</subsection>
+
 			<subsection name="HTTP Basic Authorization">
 
 				<p>
@@ -219,23 +256,15 @@
 
 			</subsection>
 
-			<subsection name="Configuring Encoding (JSON/XML)">
+			<subsection name="Logging Requests and Responses">
 
 				<p>
-					Restful client interfaces that you create will also extend
-					the interface 
-					<a href="./apidocs/ca/uhn/fhir/rest/client/api/IRestfulClient.html">IRestfulClient</a>,
-					which comes with some helpful methods for configuring the way that
-					the client will interact with the server.
+					The following example shows how to configure your client to
+					use a specific username and password in every request.
 				</p>
-				<p>
-					The following snippet shows how to configure the cliet to explicitly 
-					request JSON or XML responses, and how to request "pretty printed" responses
-					on servers that support this (HAPI based servers currently).				
-				</p>
-				
+
 				<macro name="snippet">
-					<param name="id" value="clientConfig" />
+					<param name="id" value="logging" />
 					<param name="file" value="src/site/example/java/example/ClientExamples.java" />
 				</macro>
 

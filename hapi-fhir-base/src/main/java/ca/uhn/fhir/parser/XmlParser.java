@@ -199,7 +199,7 @@ public class XmlParser extends BaseParser implements IParser {
 				}
 
 				IResource resource = nextEntry.getResource();
-				if (resource != null && !resource.isEmpty()) {
+				if (resource != null && !resource.isEmpty() && !deleted) {
 					eventWriter.writeStartElement("content");
 					eventWriter.writeAttribute("type", "text/xml");
 					encodeResourceToXmlStreamWriter(resource, eventWriter, false);

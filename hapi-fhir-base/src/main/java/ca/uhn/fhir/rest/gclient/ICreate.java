@@ -1,4 +1,4 @@
-package ca.uhn.fhir.rest.client;
+package ca.uhn.fhir.rest.gclient;
 
 /*
  * #%L
@@ -20,21 +20,12 @@ package ca.uhn.fhir.rest.client;
  * #L%
  */
 
-import java.io.IOException;
+import ca.uhn.fhir.model.api.IResource;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpRequestBase;
+public interface ICreate {
 
-public interface IClientInterceptor {
-
-	/**
-	 * Fired by the client just before invoking the HTTP client request
-	 */
-	void interceptRequest(HttpRequestBase theRequest);
+	ICreateTyped resource(IResource theResource);
 	
-	/**
-	 * Fired by the client upon receiving an HTTP response, prior to processing that response
-	 */
-	void interceptResponse(HttpResponse theResponse) throws IOException;
-
+	ICreateTyped resource(String theResourceAsText);
+	
 }

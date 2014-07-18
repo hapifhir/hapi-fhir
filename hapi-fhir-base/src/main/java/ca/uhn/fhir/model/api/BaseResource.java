@@ -127,7 +127,7 @@ public abstract class BaseResource extends BaseElement implements IResource {
 	 */
 	@Override
 	protected boolean isBaseEmpty() {
-		return super.isBaseEmpty() && ElementUtil.isEmpty(myLanguage, myText);
+		return super.isBaseEmpty() && ElementUtil.isEmpty(myLanguage, myText, myId);
 	}
 
 }

@@ -1053,6 +1053,11 @@ public abstract class BaseFhirDao implements IDao {
 
 		if (entity.getId() == null) {
 			myEntityManager.persist(entity);
+			
+			if (entity.getForcedId() != null) {
+				myEntityManager.persist(entity.getForcedId());
+			}
+			
 		} else {
 			entity = myEntityManager.merge(entity);
 		}

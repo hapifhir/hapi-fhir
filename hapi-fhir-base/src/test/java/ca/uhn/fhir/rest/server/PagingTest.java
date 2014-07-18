@@ -52,35 +52,38 @@ public class PagingTest {
 		String link;
 		String base = "http://localhost:" + ourPort;
 		{
-			HttpGet httpGet = new HttpGet(base+ "/Patient?_format=xml&_pretty=true");
+			HttpGet httpGet = new HttpGet(base + "/Patient?_format=xml&_pretty=true");
 			HttpResponse status = ourClient.execute(httpGet);
-			String responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+			String responseContent = IOUtils.toString(status.getEntity().getContent());
+			IOUtils.closeQuietly(status.getEntity().getContent());
 
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			Bundle bundle = ourContext.newXmlParser().parseBundle(responseContent);
 			assertEquals(5, bundle.getEntries().size());
 			assertEquals("0", bundle.getEntries().get(0).getId().getIdPart());
 			assertEquals("4", bundle.getEntries().get(4).getId().getIdPart());
-			assertEquals(base + '?'+Constants.PARAM_PAGINGACTION + "=ABCD&" + Constants.PARAM_PAGINGOFFSET + "=5&" + Constants.PARAM_COUNT + "=5&_format=xml&_pretty=true", bundle.getLinkNext().getValue());
+			assertEquals(base + '?' + Constants.PARAM_PAGINGACTION + "=ABCD&" + Constants.PARAM_PAGINGOFFSET + "=5&" + Constants.PARAM_COUNT + "=5&_format=xml&_pretty=true", bundle.getLinkNext()
+					.getValue());
 			assertNull(bundle.getLinkPrevious().getValue());
-			link=bundle.getLinkNext().getValue();
+			link = bundle.getLinkNext().getValue();
 		}
 		{
-			HttpGet httpGet = new HttpGet(link);
+			HttpGet httpGet = new HttpGet(link.replace("=xml", "=json"));
 			HttpResponse status = ourClient.execute(httpGet);
-			String responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+			String responseContent = IOUtils.toString(status.getEntity().getContent());
+			IOUtils.closeQuietly(status.getEntity().getContent());
 
 			assertEquals(200, status.getStatusLine().getStatusCode());
-			Bundle bundle = ourContext.newXmlParser().parseBundle(responseContent);
+			Bundle bundle = ourContext.newJsonParser().parseBundle(responseContent);
 			assertEquals(5, bundle.getEntries().size());
 			assertEquals("5", bundle.getEntries().get(0).getId().getIdPart());
 			assertEquals("9", bundle.getEntries().get(4).getId().getIdPart());
 			assertNull(bundle.getLinkNext().getValue());
-			assertEquals(base + '?'+Constants.PARAM_PAGINGACTION + "=ABCD&" + Constants.PARAM_PAGINGOFFSET + "=0&" + Constants.PARAM_COUNT + "=5&_format=xml&_pretty=true", bundle.getLinkPrevious().getValue());
+			assertEquals(base + '?' + Constants.PARAM_PAGINGACTION + "=ABCD&" + Constants.PARAM_PAGINGOFFSET + "=0&" + Constants.PARAM_COUNT + "=5&_format=json&_pretty=true", bundle.getLinkPrevious()
+					.getValue());
 		}
 	}
-	
-	
+
 	@Test
 	public void testSearchInexactOffset() throws Exception {
 		when(myPagingProvider.getDefaultPageSize()).thenReturn(5);
@@ -90,9 +93,10 @@ public class PagingTest {
 
 		String base = "http://localhost:" + ourPort;
 		{
-			HttpGet httpGet = new HttpGet(base + '?'+Constants.PARAM_PAGINGACTION + "=ABCD&" + Constants.PARAM_PAGINGOFFSET + "=8&" + Constants.PARAM_COUNT + "=5&_format=xml&_pretty=true");
+			HttpGet httpGet = new HttpGet(base + '?' + Constants.PARAM_PAGINGACTION + "=ABCD&" + Constants.PARAM_PAGINGOFFSET + "=8&" + Constants.PARAM_COUNT + "=5&_format=xml&_pretty=true");
 			HttpResponse status = ourClient.execute(httpGet);
-			String responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+			String responseContent = IOUtils.toString(status.getEntity().getContent());
+			IOUtils.closeQuietly(status.getEntity().getContent());
 
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			Bundle bundle = ourContext.newXmlParser().parseBundle(responseContent);
@@ -100,7 +104,8 @@ public class PagingTest {
 			assertEquals("8", bundle.getEntries().get(0).getId().getIdPart());
 			assertEquals("9", bundle.getEntries().get(1).getId().getIdPart());
 			assertNull(bundle.getLinkNext().getValue());
-			assertEquals(base + '?'+Constants.PARAM_PAGINGACTION + "=ABCD&" + Constants.PARAM_PAGINGOFFSET + "=3&" + Constants.PARAM_COUNT + "=5&_format=xml&_pretty=true", bundle.getLinkPrevious().getValue());
+			assertEquals(base + '?' + Constants.PARAM_PAGINGACTION + "=ABCD&" + Constants.PARAM_PAGINGOFFSET + "=3&" + Constants.PARAM_COUNT + "=5&_format=xml&_pretty=true", bundle.getLinkPrevious()
+					.getValue());
 		}
 
 	}
@@ -115,37 +120,38 @@ public class PagingTest {
 		String link;
 		String base = "http://localhost:" + ourPort;
 		{
-			HttpGet httpGet = new HttpGet(base+ "/Patient?_count=2");
+			HttpGet httpGet = new HttpGet(base + "/Patient?_count=2");
 			HttpResponse status = ourClient.execute(httpGet);
-			String responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+			String responseContent = IOUtils.toString(status.getEntity().getContent());
+			IOUtils.closeQuietly(status.getEntity().getContent());
 
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			Bundle bundle = ourContext.newXmlParser().parseBundle(responseContent);
 			assertEquals(2, bundle.getEntries().size());
 			assertEquals("0", bundle.getEntries().get(0).getId().getIdPart());
 			assertEquals("1", bundle.getEntries().get(1).getId().getIdPart());
-			assertEquals(base + '?'+Constants.PARAM_PAGINGACTION + "=ABCD&" + Constants.PARAM_PAGINGOFFSET + "=2&" + Constants.PARAM_COUNT + "=2&_format=xml", bundle.getLinkNext().getValue());
+			assertEquals(base + '?' + Constants.PARAM_PAGINGACTION + "=ABCD&" + Constants.PARAM_PAGINGOFFSET + "=2&" + Constants.PARAM_COUNT + "=2&_format=xml", bundle.getLinkNext().getValue());
 			assertNull(bundle.getLinkPrevious().getValue());
-			link=bundle.getLinkNext().getValue();
+			link = bundle.getLinkNext().getValue();
 		}
 		{
 			HttpGet httpGet = new HttpGet(link);
 			HttpResponse status = ourClient.execute(httpGet);
-			String responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+			String responseContent = IOUtils.toString(status.getEntity().getContent());
+			IOUtils.closeQuietly(status.getEntity().getContent());
 
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			Bundle bundle = ourContext.newXmlParser().parseBundle(responseContent);
 			assertEquals(2, bundle.getEntries().size());
 			assertEquals("2", bundle.getEntries().get(0).getId().getIdPart());
 			assertEquals("3", bundle.getEntries().get(1).getId().getIdPart());
-			assertEquals(base + '?'+Constants.PARAM_PAGINGACTION + "=ABCD&" + Constants.PARAM_PAGINGOFFSET + "=4&" + Constants.PARAM_COUNT + "=2&_format=xml", bundle.getLinkNext().getValue());
-			assertEquals(base + '/'+'?'+Constants.PARAM_PAGINGACTION + "=ABCD&" + Constants.PARAM_PAGINGOFFSET + "=2&" + Constants.PARAM_COUNT + "=2&_format=xml", bundle.getLinkSelf().getValue());
-			assertEquals(base + '?'+Constants.PARAM_PAGINGACTION + "=ABCD&" + Constants.PARAM_PAGINGOFFSET + "=0&" + Constants.PARAM_COUNT + "=2&_format=xml", bundle.getLinkPrevious().getValue());
+			assertEquals(base + '?' + Constants.PARAM_PAGINGACTION + "=ABCD&" + Constants.PARAM_PAGINGOFFSET + "=4&" + Constants.PARAM_COUNT + "=2&_format=xml", bundle.getLinkNext().getValue());
+			assertEquals(base + '/' + '?' + Constants.PARAM_PAGINGACTION + "=ABCD&" + Constants.PARAM_PAGINGOFFSET + "=2&" + Constants.PARAM_COUNT + "=2&_format=xml", bundle.getLinkSelf().getValue());
+			assertEquals(base + '?' + Constants.PARAM_PAGINGACTION + "=ABCD&" + Constants.PARAM_PAGINGOFFSET + "=0&" + Constants.PARAM_COUNT + "=2&_format=xml", bundle.getLinkPrevious().getValue());
 		}
 
 	}
 
-	
 	@AfterClass
 	public static void afterClass() throws Exception {
 		ourServer.stop();

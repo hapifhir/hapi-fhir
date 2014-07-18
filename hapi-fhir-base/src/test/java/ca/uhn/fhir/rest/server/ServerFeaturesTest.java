@@ -10,9 +10,11 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpOptions;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
@@ -114,6 +116,39 @@ public class ServerFeaturesTest {
 
 	}
 
+	
+	@Test
+	public void testCors() throws Exception {
+		servlet.setCorsAllowDomain("http://foo.com");
+		
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
+		httpGet.addHeader("Accept", Constants.CT_FHIR_XML);
+		HttpResponse status = ourClient.execute(httpGet);
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		Header origin = status.getFirstHeader(Constants.HEADER_CORS_ALLOW_ORIGIN);
+		assertEquals("http://foo.com", origin.getValue());
+	}
+
+	
+	@Test
+	public void testOptions() throws Exception {
+		servlet.setCorsAllowDomain("http://foo.com");
+		
+		HttpOptions httpGet = new HttpOptions("http://localhost:" + ourPort + "/");
+		httpGet.addHeader("Accept", Constants.CT_FHIR_XML);
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		Header origin = status.getFirstHeader(Constants.HEADER_CORS_ALLOW_ORIGIN);
+		assertEquals("http://foo.com", origin.getValue());
+		
+		assertThat(responseContent,StringContains.containsString("<Conformance"));
+		
+	}
+
+	
 	@Test
 	public void testAcceptHeaderWithMultiple() throws Exception {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
@@ -235,8 +270,10 @@ public class ServerFeaturesTest {
 	@Before
 	public void before() {
 		servlet.setServerAddressStrategy(new IncomingRequestAddressStrategy());
+		servlet.setCorsAllowDomain(null);
 	}
 
+	
 	@BeforeClass
 	public static void beforeClass() throws Exception {
 		ourPort = RandomServerPortProvider.findFreePort();

@@ -21,9 +21,11 @@ package ca.uhn.fhir.rest.client.api;
  */
 
 
+import org.apache.commons.lang3.Validate;
 import org.apache.http.client.HttpClient;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.client.IClientInterceptor;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 
 public interface IRestfulClient {
@@ -64,6 +66,15 @@ public interface IRestfulClient {
 	 */
 	String getServerBase();
 	
-	
+	/**
+	 * Register a new interceptor for this client. An interceptor can be used to add additional
+	 * logging, or add security headers, or pre-process responses, etc. 
+	 */
+	void registerInterceptor(IClientInterceptor theInterceptor);
+
+	/**
+	 * Remove an intercaptor that was previously registered using {@link IRestfulClient#registerInterceptor(IClientInterceptor)}
+	 */
+	void unregisterInterceptor(IClientInterceptor theInterceptor);
 
 }

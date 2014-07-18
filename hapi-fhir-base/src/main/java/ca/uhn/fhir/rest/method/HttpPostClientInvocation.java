@@ -51,6 +51,10 @@ public class HttpPostClientInvocation extends BaseHttpClientInvocationWithConten
 		super(theContext,theBundle);
 	}
 
+	public HttpPostClientInvocation(FhirContext theContext, String theContents, String theUrlExtension) {
+		super(theContext,theContents, theUrlExtension);
+	}
+
 
 	@Override
 	protected HttpPost createRequest(String url, AbstractHttpEntity theEntity) {

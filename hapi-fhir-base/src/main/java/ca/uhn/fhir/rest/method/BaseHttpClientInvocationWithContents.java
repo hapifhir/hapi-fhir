@@ -50,7 +50,8 @@ public abstract class BaseHttpClientInvocationWithContents extends BaseHttpClien
 	private final TagList myTagList;
 	private final List<IResource> myResources;
 	private final Bundle myBundle;
-
+	private final String myContents;
+	
 	public BaseHttpClientInvocationWithContents(FhirContext theContext, IResource theResource, String theUrlExtension) {
 		super();
 		myContext = theContext;
@@ -59,6 +60,7 @@ public abstract class BaseHttpClientInvocationWithContents extends BaseHttpClien
 		myTagList = null;
 		myResources = null;
 		myBundle = null;
+		myContents = null;
 	}
 
 	public BaseHttpClientInvocationWithContents(FhirContext theContext, TagList theTagList, String... theUrlExtension) {
@@ -72,6 +74,7 @@ public abstract class BaseHttpClientInvocationWithContents extends BaseHttpClien
 		myTagList = theTagList;
 		myResources = null;
 		myBundle = null;
+		myContents = null;
 
 		myUrlExtension = StringUtils.join(theUrlExtension, '/');
 	}
@@ -83,6 +86,7 @@ public abstract class BaseHttpClientInvocationWithContents extends BaseHttpClien
 		myUrlExtension = null;
 		myResources = theResources;
 		myBundle = null;
+		myContents = null;
 	}
 
 	public BaseHttpClientInvocationWithContents(FhirContext theContext, Bundle theBundle) {
@@ -92,7 +96,19 @@ public abstract class BaseHttpClientInvocationWithContents extends BaseHttpClien
 		myUrlExtension = null;
 		myResources = null;
 		myBundle = theBundle;
+		myContents = null;
 	}
+
+	public BaseHttpClientInvocationWithContents(FhirContext theContext, String theContents, String theUrlExtension) {
+		myContext = theContext;
+		myResource = null;
+		myTagList = null;
+		myUrlExtension = theUrlExtension;
+		myResources = null;
+		myBundle = null;
+		myContents = theContents;
+	}
+
 
 	@Override
 	public HttpRequestBase asHttpRequest(String theUrlBase, Map<String, List<String>> theExtraParams, EncodingEnum theEncoding) throws DataFormatException {
@@ -131,6 +147,8 @@ public abstract class BaseHttpClientInvocationWithContents extends BaseHttpClien
 		} else if (myResources != null) {
 			Bundle bundle = RestfulServer.createBundleFromResourceList(myContext, "", myResources, "", "", myResources.size());
 			contents = parser.encodeBundleToString(bundle);
+		} else if (myContents != null) {
+			contents = myContents;
 		} else {
 			contents = parser.encodeResourceToString(myResource);
 		}

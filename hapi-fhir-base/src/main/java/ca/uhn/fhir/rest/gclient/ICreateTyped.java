@@ -1,4 +1,4 @@
-package ca.uhn.fhir.rest.client;
+package ca.uhn.fhir.rest.gclient;
 
 /*
  * #%L
@@ -20,21 +20,21 @@ package ca.uhn.fhir.rest.client;
  * #L%
  */
 
-import java.io.IOException;
+import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.api.MethodOutcome;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpRequestBase;
-
-public interface IClientInterceptor {
-
-	/**
-	 * Fired by the client just before invoking the HTTP client request
-	 */
-	void interceptRequest(HttpRequestBase theRequest);
+public interface ICreateTyped extends IClientExecutable<ICreateTyped, MethodOutcome> {
 	
 	/**
-	 * Fired by the client upon receiving an HTTP response, prior to processing that response
+	 * If you want the explicitly state an ID for your created resource, put that ID here. You generally do not
+	 * need to invoke this method, so that the server will assign the ID itself.
 	 */
-	void interceptResponse(HttpResponse theResponse) throws IOException;
+	ICreateTyped withId(String theId);
+
+	/**
+	 * If you want the explicitly state an ID for your created resource, put that ID here. You generally do not
+	 * need to invoke this method, so that the server will assign the ID itself.
+	 */
+	ICreateTyped withId(IdDt theId);
 
 }

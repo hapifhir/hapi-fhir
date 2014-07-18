@@ -30,13 +30,25 @@ import ca.uhn.fhir.model.dstu.resource.Conformance;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.client.api.IRestfulClient;
+import ca.uhn.fhir.rest.gclient.ICreate;
 import ca.uhn.fhir.rest.gclient.IGetPage;
 import ca.uhn.fhir.rest.gclient.IGetTags;
 import ca.uhn.fhir.rest.gclient.ITransaction;
 import ca.uhn.fhir.rest.gclient.IUntypedQuery;
 
 public interface IGenericClient {
+	/**
+	 * Register a new interceptor for this client. An interceptor can be used to add additional
+	 * logging, or add security headers, or pre-process responses, etc. 
+	 */
+	void registerInterceptor(IClientInterceptor theInterceptor);
 
+	/**
+	 * Remove an intercaptor that was previously registered using {@link IRestfulClient#registerInterceptor(IClientInterceptor)}
+	 */
+	void unregisterInterceptor(IClientInterceptor theInterceptor);
+	
 	/**
 	 * Retrieves and returns the server conformance statement
 	 */
@@ -242,5 +254,10 @@ public interface IGenericClient {
 	 * Send a transaction (collection of resources) to the server to be executed as a single unit
 	 */
 	ITransaction transaction();
+
+	/**
+	 * Fluent method for the "create" operation, which creates a new resource instance on the server
+	 */
+	ICreate create();
 
 }

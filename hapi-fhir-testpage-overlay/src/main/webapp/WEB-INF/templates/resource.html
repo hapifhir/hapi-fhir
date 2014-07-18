@@ -337,12 +337,11 @@
 								    </div>
 									<br clear="all"/>
 																	
-								<!-- Create/Update -->
+								<!-- Create -->
 								
 									<div class="row-fluid">
-										<b>Create/Update</b> an instance of the resource. If no ID is specified, 
-										a new resource will be created. If an ID is specified, the existing
-										resource with that ID will be updated.
+										<b>Create</b> an instance of the resource. Generally you do not need to specify an ID
+										but you may force the server to use a specific ID by including one. 
 									</div>
 								    <div class="row-fluid top-buffer">
 								    	<div class="col-sm-2">
@@ -358,7 +357,7 @@
 								                    <div class="input-group-addon">
 								                    ID
 								                    </div>
-								                    <input type="text" class="form-control" id="resource-create-id" placeholder="(add for update)" th:value="${updateResourceId}"/>
+								                    <input type="text" class="form-control" id="resource-create-id" placeholder="(optional)"/>
 								                </div>
 								            </div>
 								        </div>											
@@ -370,37 +369,16 @@
 								                    <span class="loadingStar">*</span>
 								                    </div>
 								                    <textarea class="form-control" id="resource-create-body" style="white-space: nowrap; overflow: auto;" placeholder="(place resource body here)" rows="1">
-								                    	<th:block th:if="${updateResource} != null" th:text="${updateResource}"/>
 								                    </textarea>
 								                </div>
 								            </div>
 								        </div>											
 								        <script type="text/javascript">
-											var buttonChanger = function() {
-								        		var val = $('#resource-create-id').val();
-								        		if (val != "") {
-								        			//$('#resource-create-btn').text("Update");
-								        			$("#resource-create-btn").fadeOut(function() {
-								        				  $(this).html('<i class="fa fa-pencil"></i> Update').fadeIn();
-								        			});
-								        		} else {
-								        			$("#resource-create-btn").fadeOut(function() {
-								        				  $(this).html('<i class="fa fa-send"></i> Create').fadeIn();
-								        			});
-								        			//$('#resource-create-btn').text("Create");
-								        		}
-								        	};
 							        		var textAreaChanger = function() {
 							        			createBodyOriginalHeight = $('#resource-create-body').height();
 							        			$('#resource-create-body').animate({height: "200px"}, 500);
 							        		}								        	
-								        	$('#resource-create-id').change(buttonChanger);
-								        	$('#resource-create-id').keyup(buttonChanger);
 								        	$('#resource-create-body').focus(textAreaChanger);
-								        	/*$('#resource-create-body').blur(
-								        		function() {
-								        			$('#resource-create-body').animate({height: "34px"}, 500);
-								        		});*/
 								            $('#resource-create-btn').click(
 												function() {
 													var btn = $(this);
@@ -416,6 +394,72 @@
 													buttonChanger();
 													textAreaChanger();
 													$('#resource-create-body').focus();
+												}
+											});
+								        </script>								        
+								    </div>
+									<br clear="all"/>
+
+								<!-- Update -->
+								
+									<div class="row-fluid">
+										<b>Update</b> an existing instance of the resource by ID.
+									</div>
+								    <div class="row-fluid top-buffer">
+								    	<div class="col-sm-2">
+											<button type="button" id="resource-update-btn"
+												data-loading-text="Loading &lt;i class='fa fa-spinner fa-spin'/&gt;"  class="btn btn-primary btn-block">
+												<i class="fa fa-send"></i>
+												Update
+											</button>
+								    	</div>
+										<div class='col-sm-3'>
+								            <div class="form-group">
+								                <div class='input-group date'>
+								                    <div class="input-group-addon">
+									                    ID
+														<span class="loadingStar">*</span>
+								                    </div>
+								                    <input type="text" class="form-control" id="resource-update-id" placeholder="(resource ID)" th:value="${updateResourceId}"/>
+								                </div>
+								            </div>
+								        </div>											
+										<div class='col-sm-7'>
+								            <div class="form-group">
+								                <div class='input-group date'>
+								                    <div class="input-group-addon">
+								                    Contents
+								                    <span class="loadingStar">*</span>
+								                    </div>
+								                    <textarea class="form-control" id="resource-update-body" style="white-space: nowrap; overflow: auto;" placeholder="(place resource body here)" rows="1">
+								                    	<th:block th:if="${updateResource} != null" th:text="${updateResource}"/>
+								                    </textarea>
+								                </div>
+								            </div>
+								        </div>											
+								        <script type="text/javascript">
+							        		var textAreaChanger = function() {
+							        			updateBodyOriginalHeight = $('#resource-update-body').height();
+							        			$('#resource-update-body').animate({height: "200px"}, 500);
+							        		}								        	
+								        	$('#resource-update-body').focus(textAreaChanger);
+								            $('#resource-update-btn').click(
+												function() {
+													var btn = $(this);
+													btn.button('loading');
+													var id = $('#resource-update-id').val();
+													// Note we're using resource-create-id even though this is an update because
+													// the controller expects that...
+													if (id != null) btn.append($('<input />', { type: 'hidden', name: 'resource-create-id', value: id }));
+													var body = $('#resource-update-body').val();
+													btn.append($('<input />', { type: 'hidden', name: 'resource-create-body', value: body }));
+													$("#outerForm").attr("action", "update").submit();
+												});		
+											$( document ).ready(function() {
+												if ($('#resource-update-id').val() != "") {
+													buttonChanger();
+													textAreaChanger();
+													$('#resource-update-body').focus();
 												}
 											});
 								        </script>								        

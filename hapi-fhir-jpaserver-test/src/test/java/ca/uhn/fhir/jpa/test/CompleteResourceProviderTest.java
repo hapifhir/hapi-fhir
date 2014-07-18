@@ -18,8 +18,10 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.provider.JpaConformanceProvider;
+import ca.uhn.fhir.jpa.provider.JpaSystemProvider;
 import ca.uhn.fhir.jpa.testutil.RandomServerPortProvider;
 import ca.uhn.fhir.model.api.Bundle;
+import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.resource.Conformance;
@@ -36,6 +38,7 @@ import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.ExtensionConstants;
 import ca.uhn.test.jpasrv.ObservationResourceProvider;
 import ca.uhn.test.jpasrv.OrganizationResourceProvider;
@@ -51,7 +54,8 @@ public class CompleteResourceProviderTest {
 	private static IFhirResourceDao<Questionnaire> questionnaireDao;
 	private static IGenericClient ourClient;
 	private static IFhirResourceDao<Observation> observationDao;
-//	private static JpaConformanceProvider ourConfProvider;
+
+	// private static JpaConformanceProvider ourConfProvider;
 
 	// @Test
 	// public void test01UploadTestResources() throws Exception {
@@ -92,20 +96,46 @@ public class CompleteResourceProviderTest {
 
 	}
 
-	
+	@Test
+	public void testCreateWithId() {
+		Patient p1 = new Patient();
+		p1.addIdentifier().setSystem("urn:system").setValue("testCreateWithId01");
+		IdDt p1Id = ourClient.create().resource(p1).withId("testCreateWithId").execute().getId();
+
+		assertThat(p1Id.getValue(), containsString("Patient/testCreateWithId/_history"));
+
+		Bundle actual = ourClient.search().forResource(Patient.class).where(Patient.IDENTIFIER.exactly().systemAndCode("urn:system", "testCreateWithId01")).encodedJson().prettyPrint().execute();
+		assertEquals(1, actual.size());
+		assertEquals(p1Id.getIdPart(), actual.getEntries().get(0).getId().getIdPart());
+
+		/*
+		 * ensure that trying to create the same ID again fails appropriately
+		 */
+		try {
+			ourClient.create().resource(p1).withId("testCreateWithId").execute().getId();
+			fail();
+		} catch (UnprocessableEntityException e) {
+			// good
+		}
+
+		Bundle history = ourClient.history(null, (String)null, null, null);
+		assertEquals(p1Id.getIdPart(), history.getEntries().get(0).getId().getIdPart());
+		assertNotNull(history.getEntries().get(0).getResource());
+	}
+
 	@Test
 	public void testSearchByIdentifierWithoutSystem() {
 		Patient p1 = new Patient();
 		p1.addIdentifier().setValue("testSearchByIdentifierWithoutSystem01");
 		IdDt p1Id = ourClient.create(p1).getId();
 
-		Bundle actual = ourClient.search().forResource(Patient.class).where(Patient.IDENTIFIER.exactly().systemAndCode(null, "testSearchByIdentifierWithoutSystem01")).encodedJson().prettyPrint().execute();
+		Bundle actual = ourClient.search().forResource(Patient.class).where(Patient.IDENTIFIER.exactly().systemAndCode(null, "testSearchByIdentifierWithoutSystem01")).encodedJson().prettyPrint()
+				.execute();
 		assertEquals(1, actual.size());
 		assertEquals(p1Id.getIdPart(), actual.getEntries().get(0).getId().getIdPart());
 
 	}
 
-	
 	@Test
 	public void testSearchByResourceChain() {
 		Organization o1 = new Organization();
@@ -137,48 +167,48 @@ public class CompleteResourceProviderTest {
 		assertEquals(p1Id.getIdPart(), actual.getEntries().get(0).getId().getIdPart());
 
 	}
-private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(CompleteResourceProviderTest.class);
+
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(CompleteResourceProviderTest.class);
+
 	@Test
 	public void testInsertUpdatesConformance() {
-//		Conformance conf = ourConfProvider.getServerConformance();
-//		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conf));
-//		
-//		RestResource res=null;
-//		for (Rest nextRest : conf.getRest()) {
-//			for (RestResource nextRes : nextRest.getResource()) {
-//				if (nextRes.getType().getValueAsEnum()==ResourceTypeEnum.PATIENT) {
-//					res = nextRes;
-//				}
-//			}
-//		}
-//		List<ExtensionDt> resCounts = res.getUndeclaredExtensionsByUrl(ExtensionConstants.CONF_RESOURCE_COUNT);
-//		
-//		int initial = 0;
-		
+		// Conformance conf = ourConfProvider.getServerConformance();
+		// ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conf));
+		//
+		// RestResource res=null;
+		// for (Rest nextRest : conf.getRest()) {
+		// for (RestResource nextRes : nextRest.getResource()) {
+		// if (nextRes.getType().getValueAsEnum()==ResourceTypeEnum.PATIENT) {
+		// res = nextRes;
+		// }
+		// }
+		// }
+		// List<ExtensionDt> resCounts = res.getUndeclaredExtensionsByUrl(ExtensionConstants.CONF_RESOURCE_COUNT);
+		//
+		// int initial = 0;
+
 		Patient p1 = new Patient();
 		p1.addIdentifier().setSystem("urn:system").setValue("testSearchByResourceChain01");
 		p1.addName().addFamily("testSearchByResourceChainFamily01").addGiven("testSearchByResourceChainGiven01");
 
 		ourClient.create(p1).getId();
 
-//		conf = ourConfProvider.getServerConformance();
-//		res=null;
-//		for (Rest nextRest : conf.getRest()) {
-//			for (RestResource nextRes : nextRest.getResource()) {
-//				if (nextRes.getType().getValueAsEnum()==ResourceTypeEnum.PATIENT) {
-//					res = nextRes;
-//				}
-//			}
-//		}
-//		resCounts = res.getUndeclaredExtensionsByUrl(ExtensionConstants.CONF_RESOURCE_COUNT);
-//		assertNotNull(resCounts);
-//		assertEquals(1, resCounts.size());
-//		DecimalDt number = (DecimalDt) resCounts.get(0).getValue();
-//		assertEquals(initial+1, number.getValueAsInteger());
+		// conf = ourConfProvider.getServerConformance();
+		// res=null;
+		// for (Rest nextRest : conf.getRest()) {
+		// for (RestResource nextRes : nextRest.getResource()) {
+		// if (nextRes.getType().getValueAsEnum()==ResourceTypeEnum.PATIENT) {
+		// res = nextRes;
+		// }
+		// }
+		// }
+		// resCounts = res.getUndeclaredExtensionsByUrl(ExtensionConstants.CONF_RESOURCE_COUNT);
+		// assertNotNull(resCounts);
+		// assertEquals(1, resCounts.size());
+		// DecimalDt number = (DecimalDt) resCounts.get(0).getValue();
+		// assertEquals(initial+1, number.getValueAsInteger());
 	}
 
-	
-	
 	@Test
 	public void testInsertBadReference() {
 		Patient p1 = new Patient();
@@ -195,7 +225,6 @@ private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger
 
 	}
 
-	
 	@Test
 	public void testSaveAndRetrieveExistingNarrative() {
 		Patient p1 = new Patient();
@@ -218,7 +247,7 @@ private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger
 		Patient actual = ourClient.read(Patient.class, newId);
 		assertThat(actual.getText().getDiv().getValueAsString(), containsString("<td>Identifier</td><td>testSearchByResourceChain01</td>"));
 	}
-	
+
 	@AfterClass
 	public static void afterClass() throws Exception {
 		ourServer.stop();
@@ -251,9 +280,11 @@ private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger
 		restServer.getFhirContext().setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
 
 		IFhirSystemDao systemDao = (IFhirSystemDao) ourAppCtx.getBean("mySystemDao", IFhirSystemDao.class);
-
-//		ourConfProvider = new JpaConformanceProvider(restServer, systemDao, Collections.singletonList((IFhirResourceDao)patientDao));
+		JpaSystemProvider systemProv = new JpaSystemProvider(systemDao);
+		restServer.setPlainProviders(systemProv);
 		
+		// ourConfProvider = new JpaConformanceProvider(restServer, systemDao, Collections.singletonList((IFhirResourceDao)patientDao));
+
 		int myPort = RandomServerPortProvider.findFreePort();
 		ourServer = new Server(myPort);
 

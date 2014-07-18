@@ -179,7 +179,8 @@ public class JsonParser extends BaseParser implements IParser {
 		for (BundleEntry nextEntry : theBundle.getEntries()) {
 			eventWriter.writeStartObject();
 
-			if (nextEntry.getDeletedAt() !=null&&nextEntry.getDeletedAt().isEmpty()==false) {
+			boolean deleted = nextEntry.getDeletedAt() !=null&&nextEntry.getDeletedAt().isEmpty()==false;
+			if (deleted) {
 				writeTagWithTextNode(eventWriter, "deleted", nextEntry.getDeletedAt());
 			}
 			writeTagWithTextNode(eventWriter, "title", nextEntry.getTitle());
@@ -210,7 +211,7 @@ public class JsonParser extends BaseParser implements IParser {
 			writeAuthor(nextEntry, eventWriter);
 
 			IResource resource = nextEntry.getResource();
-			if (resource != null && !resource.isEmpty()) {
+			if (resource != null && !resource.isEmpty() && !deleted) {
 				RuntimeResourceDefinition resDef = myContext.getResourceDefinition(resource);
 				encodeResourceToJsonStreamWriter(resDef, resource, eventWriter, "content", false);
 			}

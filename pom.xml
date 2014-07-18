@@ -81,7 +81,7 @@
 		<maven_site_plugin_version>3.3</maven_site_plugin_version>
 		<mockito_version>1.9.5</mockito_version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<slf4j_version>1.7.2</slf4j_version>
+		<slf4j_version>1.7.7</slf4j_version>
 		<spring_version>4.0.1.RELEASE</spring_version>
 		<thymeleaf-version>2.1.3.RELEASE</thymeleaf-version>
 	</properties>
