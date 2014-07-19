@@ -47,6 +47,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.gclient.TokenParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.IdentifierListParam;
 import ca.uhn.fhir.rest.param.QualifiedDateParam;
@@ -206,8 +207,9 @@ public class FhirResourceDaoTest {
 	@Test
 	public void testSearchTokenParam() {
 		Patient patient = new Patient();
-		patient.addIdentifier("urn:system", "testSearchTokenParam001");
+		patient.addIdentifier().setSystem("urn:system").setValue("testSearchTokenParam001");
 		patient.addName().addFamily("Tester").addGiven("testSearchTokenParam1");
+		patient.addCommunication().setText("testSearchTokenParamComText").addCoding().setCode("testSearchTokenParamCode").setSystem("testSearchTokenParamSystem").setDisplay("testSearchTokenParamDisplay");
 		ourPatientDao.create(patient);
 
 		patient = new Patient();
@@ -226,6 +228,17 @@ public class FhirResourceDaoTest {
 			map.add(Patient.SP_IDENTIFIER, new IdentifierDt(null, "testSearchTokenParam001"));
 			IBundleProvider retrieved = ourPatientDao.search(map);
 			assertEquals(1, retrieved.size());
+		}
+		{
+			SearchParameterMap map = new SearchParameterMap();
+			map.add(Patient.SP_LANGUAGE, new IdentifierDt("testSearchTokenParamSystem", "testSearchTokenParamCode"));
+			assertEquals(1, ourPatientDao.search(map).size());
+		}
+		{
+			SearchParameterMap map = new SearchParameterMap();
+//			map.add(Patient.SP_LANGUAGE, new TokenParam(Patient.SP_LANGUAGE).exactly().systemAndCode("testSearchTokenParamSystem", "testSearchTokenParamCode"));
+//			map.add(Patient.SP_LANGUAGE, new IdentifierDt("testSearchTokenParamSystem", "testSearchTokenParamCode"));
+			assertEquals(1, ourPatientDao.search(map).size());
 		}
 		{
 			SearchParameterMap map = new SearchParameterMap();

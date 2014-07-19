@@ -20,15 +20,58 @@ package ca.uhn.fhir.rest.gclient;
  * #L%
  */
 
+import static org.apache.commons.lang3.StringUtils.*;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.Constants;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 public class StringParam implements IParam {
 
-	private String myParamName;
+	private final String myParamName;
+	private final boolean myExact;
+	private List<String> myValues;
 
 	public StringParam(String theParamName) {
 		myParamName = theParamName;
+		myExact=false;
+		myValues = null;
+	}
+
+	/**
+	 * Provides the list of string tokens supplied for this 
+	 * @return
+	 */
+	public List<String> getValues() {
+		return myValues;
+	}
+
+	public void setValues(List<String> theValues) {
+		myValues = theValues;
+	}
+
+	public boolean isExact() {
+		return myExact;
+	}
+
+	public StringParam(String theParamName, String theQualifier, String theParamValue) {
+		myParamName = theParamName;
+		
+		if (Constants.PARAMQUALIFIER_STRING_EXACT.equals(theQualifier)) {
+			myExact = true;
+		}else if (isNotBlank(theQualifier)) {
+			throw new InvalidRequestException("Illegal parameter qualifier: " + theParamName + theQualifier);
+		}else {
+			myExact = false;
+		}
+		
+		myValues = Collections.unmodifiableList(ParameterUtil.splitParameterString(theParamValue));
+		
 	}
 
 	/**

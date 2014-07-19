@@ -324,4 +324,30 @@ public class ParameterUtil {
 		};
 	}
 
+	
+	public static List<String> splitParameterString(String theInput){
+		ArrayList<String> retVal = new ArrayList<String>();
+		if (theInput!=null) {
+			StringBuilder b = new StringBuilder();
+			for (int i = 0; i < theInput.length(); i++) {
+				char next = theInput.charAt(i);
+				if (next == ',') {
+					if (i == 0 || theInput.charAt(i-1) != '\\') {
+						b.append(next);
+					} else {
+						if (b.length() > 0) {
+							retVal.add(b.toString());
+							b.setLength(0);
+						}
+					}
+				}
+			}
+			if (b.length() > 0) {
+				retVal.add(b.toString());
+			}
+		}
+		return retVal;
+	}
+	
+	
 }
