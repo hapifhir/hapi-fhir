@@ -43,6 +43,7 @@ import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.method.SearchMethodBinding.RequestType;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.IBundleProvider;
+import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -104,6 +105,9 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding implem
 		}
 		if (Constants.PARAM_HISTORY.equals(theRequest.getOperation())) {
 			if (mySupportsVersion == false && myVersionIdIndex == null) {
+				return false;
+			}
+			if (theRequest.getVersionId() == null) {
 				return false;
 			}
 		} else if (!StringUtils.isBlank(theRequest.getOperation())) {
@@ -189,6 +193,8 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding implem
 			return Collections.singletonList(resource);
 		case RESOURCE:
 			return resource;
+		case BUNDLE_PROVIDER:
+			return new SimpleBundleProvider(resource);
 		}
 
 		throw new IllegalStateException("" + getMethodReturnType()); // should not happen

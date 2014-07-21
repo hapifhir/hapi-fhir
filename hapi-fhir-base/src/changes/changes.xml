@@ -27,6 +27,14 @@
 				Add interceptor framework for clients (annotation based and generic), and add interceptors
 				for configurable logging, capturing requests and responses, and HTTP basic auth.
 			</action>
+			<action type="fix">
+				Transaction client invocations with XML encoding were using the wrong content type ("application/xml+fhir" instead 
+				of the correct "application/atom+xml"). Thanks to David Hay of Orion Health for surfacing this one!
+			</action>
+			<action type="fix" issue="3">
+				Fix issue where vread invocations on server incorrectly get routed to instance history method if one is 
+				defined. Thanks to Neal Acharya from UHN for surfacing this one! 
+			</action>
         </release>			
 		<release version="0.4" date="2014-Jul-13">
 			<action type="add">

@@ -59,6 +59,7 @@
 			<item name="RESTful Operations" href="./doc_rest_operations.html" />
 			<item name="Extensions" href="./doc_extensions.html" />
 			<item name="Narrative Generator" href="./doc_narrative.html" />
+			<item name="Logging" href="./doc_logging.html" />
 			<item name="Tinder Plugin" href="./doc_tinder.html" />
 		</menu>
 

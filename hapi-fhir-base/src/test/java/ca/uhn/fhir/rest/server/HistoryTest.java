@@ -20,9 +20,14 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.Bundle;
+import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.resource.Patient;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.annotation.History;
+import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.Since;
 import ca.uhn.fhir.testutil.RandomServerPortProvider;
 
@@ -32,21 +37,80 @@ import ca.uhn.fhir.testutil.RandomServerPortProvider;
 public class HistoryTest {
 
 	private static CloseableHttpClient ourClient;
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(HistoryTest.class);
 	private static int ourPort;
 	private static Server ourServer;
 
+	/**
+	 * We test this here because of bug 3- At one point VRead would "steal" instance history calls and handle them 
+	 */
 	@Test
-	public void testHistory() throws Exception {
+	public void testVread() throws Exception {
+		{
+			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/123/_history/456");
+			HttpResponse status = ourClient.execute(httpGet);
+			String responseContent = IOUtils.toString(status.getEntity().getContent());
+			IOUtils.closeQuietly(status.getEntity().getContent());
+			
+			assertEquals(200, status.getStatusLine().getStatusCode());
+			
+			Patient bundle = new FhirContext().newXmlParser().parseResource(Patient.class, responseContent);
+			assertEquals("vread", bundle.getNameFirstRep().getFamilyFirstRep().getValue());
+		}
+	}
+
+	@Test
+	public void testServerHistory() throws Exception {
 		{
 			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/_history");
 			HttpResponse status = ourClient.execute(httpGet);
 			String responseContent = IOUtils.toString(status.getEntity().getContent());
+			IOUtils.closeQuietly(status.getEntity().getContent());
+
 			assertEquals(200, status.getStatusLine().getStatusCode());
-			assertEquals(2, new FhirContext().newXmlParser().parseBundle(responseContent).getEntries().size());
+			
+			Bundle bundle = new FhirContext().newXmlParser().parseBundle(responseContent);
+			assertEquals(2, bundle.getEntries().size());
+			assertEquals("http://localhost:" + ourPort +"/Patient/h1/_history/1", bundle.getEntries().get(0).getLinkSelf().getValue());
+			assertEquals("http://localhost:" + ourPort +"/Patient/h1/_history/2", bundle.getEntries().get(1).getLinkSelf().getValue());
+			
 		}
 	}
 
+	@Test
+	public void testInstanceHistory() throws Exception {
+		{
+			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/123/_history");
+			HttpResponse status = ourClient.execute(httpGet);
+			String responseContent = IOUtils.toString(status.getEntity().getContent());
+			IOUtils.closeQuietly(status.getEntity().getContent());
+
+			assertEquals(200, status.getStatusLine().getStatusCode());
+			
+			Bundle bundle = new FhirContext().newXmlParser().parseBundle(responseContent);
+			assertEquals(2, bundle.getEntries().size());
+			assertEquals("http://localhost:" + ourPort +"/Patient/ih1/_history/1", bundle.getEntries().get(0).getLinkSelf().getValue());
+			assertEquals("http://localhost:" + ourPort +"/Patient/ih1/_history/2", bundle.getEntries().get(1).getLinkSelf().getValue());
+			
+		}
+	}
+
+	@Test
+	public void testTypeHistory() throws Exception {
+		{
+			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/_history");
+			HttpResponse status = ourClient.execute(httpGet);
+			String responseContent = IOUtils.toString(status.getEntity().getContent());
+			IOUtils.closeQuietly(status.getEntity().getContent());
+
+			assertEquals(200, status.getStatusLine().getStatusCode());
+			
+			Bundle bundle = new FhirContext().newXmlParser().parseBundle(responseContent);
+			assertEquals(2, bundle.getEntries().size());
+			assertEquals("http://localhost:" + ourPort +"/Patient/th1/_history/1", bundle.getEntries().get(0).getLinkSelf().getValue());
+			assertEquals("http://localhost:" + ourPort +"/Patient/th1/_history/2", bundle.getEntries().get(1).getLinkSelf().getValue());
+			
+		}
+	}
 
 	@AfterClass
 	public static void afterClass() throws Exception {
@@ -58,11 +122,13 @@ public class HistoryTest {
 		ourPort = RandomServerPortProvider.findFreePort();
 		ourServer = new Server(ourPort);
 
-		DummyProvider patientProvider = new DummyProvider();
+		DummyPlainProvider plainProvider = new DummyPlainProvider();
+		DummyResourceProvider patientProvider = new DummyResourceProvider();
 
 		ServletHandler proxyHandler = new ServletHandler();
 		RestfulServer servlet = new RestfulServer();
-		servlet.setPlainProviders(patientProvider);
+		servlet.setPlainProviders(plainProvider);
+		servlet.setResourceProviders(patientProvider);
 		ServletHolder servletHolder = new ServletHolder(servlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
@@ -75,25 +141,82 @@ public class HistoryTest {
 
 	}
 
-	/**
-	 * Created by dsotnikov on 2/25/2014.
-	 */
-	public static class DummyProvider {
+	public static class DummyResourceProvider implements IResourceProvider {
+
+		@Override
+		public Class<? extends IResource> getResourceType() {
+			return Patient.class;
+		}
+		
+		@Read(version=true)
+		public Patient vread(@IdParam IdDt theId) {
+			Patient retVal = new Patient();
+			retVal.addName().addFamily("vread");
+			retVal.setId(theId);
+			return retVal;
+		}
 
 		@History
-		public List<Patient> findPatient(@Since InstantDt theSince) {
+		public List<Patient> instanceHistory(@IdParam IdDt theId) {
 			ArrayList<Patient> retVal = new ArrayList<Patient>();
 
 				Patient patient = new Patient();
-				patient.setId("Patient/1/_history/1");
+				patient.setId("Patient/ih1/_history/1");
+				patient.addName().addFamily("history");
 				retVal.add(patient);
 
 				Patient patient2 = new Patient();
-				patient2.setId("Patient/1/_history/2");
+				patient2.setId("Patient/ih1/_history/2");
+				patient2.addName().addFamily("history");
 				retVal.add(patient2);
 
 			return retVal;
 		}
+		
+		@History
+		public List<Patient> typeHistory() {
+			ArrayList<Patient> retVal = new ArrayList<Patient>();
+
+				Patient patient = new Patient();
+				patient.setId("Patient/th1/_history/1");
+				patient.addName().addFamily("history");
+				retVal.add(patient);
+
+				Patient patient2 = new Patient();
+				patient2.setId("Patient/th1/_history/2");
+				patient2.addName().addFamily("history");
+				retVal.add(patient2);
+
+			return retVal;
+		}
+
+	
+	}
+	
+	
+	/**
+	 * Created by dsotnikov on 2/25/2014.
+	 */
+	public static class DummyPlainProvider {
+		
+		@History
+		public List<Patient> history(@Since InstantDt theSince) {
+			ArrayList<Patient> retVal = new ArrayList<Patient>();
+
+				Patient patient = new Patient();
+				patient.setId("Patient/h1/_history/1");
+				patient.addName().addFamily("history");
+				retVal.add(patient);
+
+				Patient patient2 = new Patient();
+				patient2.setId("Patient/h1/_history/2");
+				patient2.addName().addFamily("history");
+				retVal.add(patient2);
+
+			return retVal;
+		}
+
+		
 
 
 	}

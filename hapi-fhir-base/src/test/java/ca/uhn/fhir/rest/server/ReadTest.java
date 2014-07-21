@@ -42,8 +42,11 @@ public class ReadTest {
 			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
 			HttpResponse status = ourClient.execute(httpGet);
 			String responseContent = IOUtils.toString(status.getEntity().getContent());
+			IOUtils.closeQuietly(status.getEntity().getContent());
+
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			IdentifierDt dt = ourCtx.newXmlParser().parseResource(Patient.class,responseContent).getIdentifierFirstRep();
+			
 			assertEquals("1", dt.getSystem().getValueAsString());
 			assertEquals(null, dt.getValue().getValueAsString());
 		}
@@ -56,6 +59,8 @@ public class ReadTest {
 			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1/_history/2");
 			HttpResponse status = ourClient.execute(httpGet);
 			String responseContent = IOUtils.toString(status.getEntity().getContent());
+			IOUtils.closeQuietly(status.getEntity().getContent());
+
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			IdentifierDt dt = ourCtx.newXmlParser().parseResource(Patient.class,responseContent).getIdentifierFirstRep();
 			assertEquals("1", dt.getSystem().getValueAsString());
