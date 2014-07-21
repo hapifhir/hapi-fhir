@@ -30,7 +30,7 @@
 		<repository>
             <id>maven-geotoolkit.org</id>
             <name>GeoToolkit Repository for Maven</name>
-            <url>http://maven.geotoolkit.org/</url>
+            <url>http://maven.geotoolkit.org/</url> 
         </repository>
          -->
 	</repositories>
@@ -47,10 +47,6 @@
 			<version>0.5-SNAPSHOT</version>
 			<exclusions>
 				<exclusion>
-					<artifactId>commons-codec</artifactId>
-					<groupId>commons-codec</groupId>
-				</exclusion>
-				<exclusion>
 					<artifactId>commons-logging</artifactId>
 					<groupId>commons-logging</groupId>
 				</exclusion>
@@ -58,9 +54,15 @@
 		</dependency>
 
 		<dependency>
+		    <groupId>org.slf4j</groupId>
+		    <artifactId>jcl-over-slf4j</artifactId>
+		    <version>${slf4j_version}</version>
+		</dependency>
+
+		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
-			<version>${logback-version}</version>
+			<version>${logback_version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -81,12 +83,12 @@
 		FHIR RI is pulled in for UCUM support, but we don't want any
 		of its dependencies.
 		-->
+		    	<!-- 
 		<dependency>
 		    <groupId>me.fhir</groupId>
 		    <artifactId>fhir-dstu1</artifactId>
 		    <version>0.0.81.2489</version>
 		    <exclusions>
-		    	<!-- 
 		    	<exclusion>
 		    		<artifactId>Saxon-HE</artifactId>
 		    		<groupId>net.sf.saxon</groupId>
@@ -119,9 +121,9 @@
 		    		<artifactId>gson</artifactId>
 		    		<groupId>com.google.code.gson</groupId>
 		    	</exclusion>
-		    	 -->
 		    </exclusions>
 		</dependency>
+		    	 -->
 
 				
 		<!-- Test Database -->
