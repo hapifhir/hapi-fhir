@@ -10,6 +10,23 @@
 			<action type="add">
 				Allow server methods to return wildcard genrric types (e.g. List&lt;? extends IResource&gt;)
 			</action>
+			<action type="add">
+				Search parameters are not properly escaped and unescaped. E.g. for a token parameter such as
+				"&amp;identifier=system|codepart1\|codepart2"
+			</action>
+			<action type="add">
+				Add support for OPTIONS verb (which returns the server conformance statement)
+			</action>
+			<action type="add">
+				Add support for CORS headers in server
+			</action>
+			<action type="add">
+				Bump SLF4j dependency to latest version (1.7.7)
+			</action>
+			<action type="add">
+				Add interceptor framework for clients (annotation based and generic), and add interceptors
+				for configurable logging, capturing requests and responses, and HTTP basic auth.
+			</action>
         </release>			
 		<release version="0.4" date="2014-Jul-13">
 			<action type="add">

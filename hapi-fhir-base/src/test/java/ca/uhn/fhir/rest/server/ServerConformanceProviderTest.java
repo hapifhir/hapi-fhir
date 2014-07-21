@@ -28,9 +28,9 @@ import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.method.SearchMethodBinding;
+import ca.uhn.fhir.rest.method.SearchParameter;
 import ca.uhn.fhir.rest.param.CodingListParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.SearchParameter;
 import ca.uhn.fhir.rest.server.provider.ServerConformanceProvider;
 
 public class ServerConformanceProviderTest {

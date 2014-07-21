@@ -19,7 +19,6 @@ import javax.persistence.Table;
 
 import org.hibernate.annotations.Index;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.Constants;
 
@@ -54,6 +53,12 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 
 	@Column(name = "SP_NUMBER_PRESENT")
 	private boolean myParamsNumberPopulated;
+
+	@OneToMany(mappedBy = "myResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
+	private Collection<ResourceIndexedSearchParamQuantity> myParamsQuantity;
+
+	@Column(name = "SP_QUANTITY_PRESENT")
+	private boolean myParamsQuantityPopulated;
 
 	@OneToMany(mappedBy = "myResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
 	private Collection<ResourceIndexedSearchParamString> myParamsString;
@@ -109,6 +114,14 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 		return myParamsNumber;
 	}
 
+
+	public Collection<ResourceIndexedSearchParamQuantity> getParamsQuantity() {
+		if(myParamsQuantity==null) {
+			myParamsQuantity=new ArrayList<ResourceIndexedSearchParamQuantity>();
+		}
+		return myParamsQuantity;
+	}
+
 	public Collection<ResourceIndexedSearchParamString> getParamsString() {
 		if (myParamsString == null) {
 			myParamsString = new ArrayList<ResourceIndexedSearchParamString>();
@@ -145,7 +158,7 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 		return myVersion;
 	}
 
-	public boolean hasTag(String theTerm, String theLabel, String theScheme) {
+	public boolean hasTag(String theTerm) {
 		for (ResourceTag next : getTags()) {
 			if (next.getTag().getTerm().equals(theTerm)) {
 				return true;
@@ -164,6 +177,10 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 
 	public boolean isParamsNumberPopulated() {
 		return myParamsNumberPopulated;
+	}
+
+	public boolean isParamsQuantityPopulated() {
+		return myParamsQuantityPopulated;
 	}
 
 	public boolean isParamsStringPopulated() {
@@ -206,6 +223,18 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 		myParamsNumberPopulated = theParamsNumberPopulated;
 	}
 
+	public void setParamsQuantity(Collection<ResourceIndexedSearchParamQuantity> theQuantityParams) {
+		if (!isParamsQuantityPopulated() && theQuantityParams.isEmpty()) {
+			return;
+		}
+		getParamsQuantity().clear();
+		getParamsQuantity().addAll(theQuantityParams);
+	}
+
+	public void setParamsQuantityPopulated(boolean theParamsQuantityPopulated) {
+		myParamsQuantityPopulated = theParamsQuantityPopulated;
+	}
+
 	public void setParamsString(Collection<ResourceIndexedSearchParamString> theParamsString) {
 		if (!isParamsStringPopulated() && theParamsString.isEmpty()) {
 			return;
@@ -246,7 +275,7 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 		myVersion = theVersion;
 	}
 
-	public ResourceHistoryTable toHistory(FhirContext theCtx) {
+	public ResourceHistoryTable toHistory() {
 		ResourceHistoryTable retVal = new ResourceHistoryTable();
 
 		retVal.setResourceId(myId);

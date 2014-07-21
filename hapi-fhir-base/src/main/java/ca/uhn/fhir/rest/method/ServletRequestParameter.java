@@ -1,8 +1,8 @@
-package ca.uhn.fhir.rest.param;
+package ca.uhn.fhir.rest.method;
 
 /*
  * #%L
- * HAPI FHIR Library
+ * HAPI FHIR - Core Library
  * %%
  * Copyright (C) 2014 University Health Network
  * %%
@@ -27,26 +27,28 @@ import java.util.Map;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
-import ca.uhn.fhir.rest.method.Request;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
-class NullParameter implements IParameter {
+class ServletRequestParameter implements IParameter {
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ServletRequestParameter.class);
 
 	@Override
 	public void translateClientArgumentIntoQueryArgument(FhirContext theContext, Object theSourceClientArgument, Map<String, List<String>> theTargetQueryArguments, BaseHttpClientInvocation theClientInvocation) throws InternalErrorException {
-		//nothing
+		/*
+		 * Does nothing, since we just ignore HttpServletRequest arguments
+		 */
+		ourLog.trace("Ignoring HttpServletRequest argument: {}", theSourceClientArgument);
 	}
 
 	@Override
 	public Object translateQueryParametersIntoServerArgument(Request theRequest, Object theRequestContents) throws InternalErrorException, InvalidRequestException {
-		// nothing
-		return null;
+		return theRequest.getServletRequest();
 	}
 
 	@Override
 	public void initializeTypes(Method theMethod, Class<? extends Collection<?>> theOuterCollectionType, Class<? extends Collection<?>> theInnerCollectionType, Class<?> theParameterType) {
-		// nothing
+		// ignore
 	}
 
 }

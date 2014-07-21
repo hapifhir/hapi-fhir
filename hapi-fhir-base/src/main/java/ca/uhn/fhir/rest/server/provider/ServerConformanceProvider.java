@@ -2,7 +2,7 @@ package ca.uhn.fhir.rest.server.provider;
 
 /*
  * #%L
- * HAPI FHIR Library
+ * HAPI FHIR - Core Library
  * %%
  * Copyright (C) 2014 University Health Network
  * %%
@@ -50,9 +50,9 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.annotation.Metadata;
 import ca.uhn.fhir.rest.method.BaseMethodBinding;
+import ca.uhn.fhir.rest.method.IParameter;
 import ca.uhn.fhir.rest.method.SearchMethodBinding;
-import ca.uhn.fhir.rest.param.IParameter;
-import ca.uhn.fhir.rest.param.SearchParameter;
+import ca.uhn.fhir.rest.method.SearchParameter;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.ResourceBinding;
 import ca.uhn.fhir.rest.server.RestfulServer;

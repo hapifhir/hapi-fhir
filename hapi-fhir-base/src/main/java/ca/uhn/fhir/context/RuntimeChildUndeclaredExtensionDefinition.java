@@ -2,7 +2,7 @@ package ca.uhn.fhir.context;
 
 /*
  * #%L
- * HAPI FHIR Library
+ * HAPI FHIR - Core Library
  * %%
  * Copyright (C) 2014 University Health Network
  * %%
@@ -30,11 +30,11 @@ import java.util.Set;
 
 import org.apache.commons.lang3.text.WordUtils;
 
-import ca.uhn.fhir.model.api.BaseResourceReference;
 import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.api.IDatatype;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 
 public class RuntimeChildUndeclaredExtensionDefinition extends BaseRuntimeChildDefinition {
@@ -104,7 +104,7 @@ public class RuntimeChildUndeclaredExtensionDefinition extends BaseRuntimeChildD
 		RuntimeResourceReferenceDefinition def = new RuntimeResourceReferenceDefinition("valueResource", types);
 		def.sealAndInitialize(theClassToElementDefinitions);
 		myAttributeNameToDefinition.put("valueResource", def);
-		myDatatypeToDefinition.put(BaseResourceReference.class, def);
+		myDatatypeToDefinition.put(BaseResourceReferenceDt.class, def);
 		myDatatypeToDefinition.put(ResourceReferenceDt.class, def);
 	}
 

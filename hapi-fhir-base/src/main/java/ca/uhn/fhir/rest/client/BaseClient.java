@@ -2,7 +2,7 @@ package ca.uhn.fhir.rest.client;
 
 /*
  * #%L
- * HAPI FHIR Library
+ * HAPI FHIR - Core Library
  * %%
  * Copyright (C) 2014 University Health Network
  * %%
@@ -124,12 +124,23 @@ public abstract class BaseClient {
 	}
 
 	<T> T invokeClient(IClientResponseHandler<T> binding, BaseHttpClientInvocation clientInvocation, boolean theLogRequestAndResponse) {
+		return invokeClient(binding, clientInvocation, null, null, theLogRequestAndResponse);
+	}
+	
+	<T> T invokeClient(IClientResponseHandler<T> binding, BaseHttpClientInvocation clientInvocation, EncodingEnum theEncoding, Boolean thePrettyPrint, boolean theLogRequestAndResponse) {
 		// TODO: handle non 2xx status codes by throwing the correct exception,
 		// and ensure it's passed upwards
 		HttpRequestBase httpRequest;
 		HttpResponse response;
 		try {
-			httpRequest = clientInvocation.asHttpRequest(myUrlBase, createExtraParams(), getEncoding());
+			Map<String, List<String>> params = createExtraParams();
+			
+			EncodingEnum encoding = getEncoding();
+			if (theEncoding != null) {
+				encoding=theEncoding;
+			}
+			
+			httpRequest = clientInvocation.asHttpRequest(myUrlBase, params, encoding);
 
 			if (theLogRequestAndResponse) {
 				ourLog.info("Client invoking: {}", httpRequest);

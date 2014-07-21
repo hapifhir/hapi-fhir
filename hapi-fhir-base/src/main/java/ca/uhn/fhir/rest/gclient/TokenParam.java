@@ -4,7 +4,7 @@ import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 
 /*
  * #%L
- * HAPI FHIR Library
+ * HAPI FHIR - Core Library
  * %%
  * Copyright (C) 2014 University Health Network
  * %%

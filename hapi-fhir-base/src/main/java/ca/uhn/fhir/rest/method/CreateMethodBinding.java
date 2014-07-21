@@ -2,7 +2,7 @@ package ca.uhn.fhir.rest.method;
 
 /*
  * #%L
- * HAPI FHIR Library
+ * HAPI FHIR - Core Library
  * %%
  * Copyright (C) 2014 University Health Network
  * %%
@@ -20,19 +20,18 @@ package ca.uhn.fhir.rest.method;
  * #L%
  */
 
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.Set;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.method.SearchMethodBinding.RequestType;
-import ca.uhn.fhir.rest.param.IParameter;
 
 public class CreateMethodBinding extends BaseOutcomeReturningMethodBindingWithResourceParam {
 
@@ -56,11 +55,23 @@ public class CreateMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 	}
 
 	@Override
+	protected IResource parseIncomingServerResource(Request theRequest) throws IOException {
+		IResource retVal = super.parseIncomingServerResource(theRequest);
+		
+		if (theRequest.getId() != null && theRequest.getId().hasIdPart()) {
+			retVal.setId(theRequest.getId());
+		}
+		
+		return retVal;
+	}
+
+	
+	@Override
 	protected BaseHttpClientInvocation createClientInvocation(Object[] theArgs, IResource theResource) {
 		FhirContext context = getContext();
 
-		BaseHttpClientInvocation retVal = createCreateInvocation(theResource, context);
-		
+		BaseHttpClientInvocation retVal = MethodUtil.createCreateInvocation(theResource, context);
+
 		if (theArgs != null) {
 			for (int idx = 0; idx < theArgs.length; idx++) {
 				IParameter nextParam = getParameters().get(idx);
@@ -68,20 +79,6 @@ public class CreateMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 			}
 		}
 
-		return retVal;
-	}
-
-	public static HttpPostClientInvocation createCreateInvocation(IResource theResource, FhirContext theContext) {
-		RuntimeResourceDefinition def = theContext.getResourceDefinition(theResource);
-		String resourceName = def.getName();
-
-
-		StringBuilder urlExtension = new StringBuilder();
-		urlExtension.append(resourceName);
-
-		HttpPostClientInvocation retVal = new HttpPostClientInvocation(theContext, theResource, urlExtension.toString());
-		addTagsToPostOrPut(theResource, retVal);
-		
 		return retVal;
 	}
 

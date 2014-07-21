@@ -2,7 +2,7 @@ package ca.uhn.fhir.rest.method;
 
 /*
  * #%L
- * HAPI FHIR Library
+ * HAPI FHIR - Core Library
  * %%
  * Copyright (C) 2014 University Health Network
  * %%
@@ -25,7 +25,7 @@ import java.lang.reflect.Method;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.AddTags;
 
-public class AddTagsMethodBinding extends BaseAddOrDeleteTagsMethodBinding {
+class AddTagsMethodBinding extends BaseAddOrDeleteTagsMethodBinding {
 
 	public AddTagsMethodBinding(Method theMethod, FhirContext theConetxt, Object theProvider, AddTags theAnnotation) {
 		super(theMethod, theConetxt, theProvider, theAnnotation.type());

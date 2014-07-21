@@ -2,7 +2,7 @@ package ca.uhn.fhir.rest.param;
 
 /*
  * #%L
- * HAPI FHIR Library
+ * HAPI FHIR - Core Library
  * %%
  * Copyright (C) 2014 University Health Network
  * %%
@@ -20,15 +20,19 @@ package ca.uhn.fhir.rest.param;
  * #L%
  */
 
+import static org.apache.commons.lang3.StringUtils.*;
+
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
-import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.server.Constants;
 
-public class StringParam extends StringDt {
+public class StringParam implements IQueryParameterType {
 
 	private boolean myExact;
+	private String myValue;
 
 	public StringParam() {
 	}
@@ -43,16 +47,6 @@ public class StringParam extends StringDt {
 	}
 
 	@Override
-	public void setValueAsQueryToken(String theQualifier, String theValue) {
-		if (Constants.PARAMQUALIFIER_STRING_EXACT.equals(theQualifier)) {
-			setExact(true);
-		} else {
-			setExact(false);
-		}
-		super.setValueAsQueryToken(theQualifier, theValue);
-	}
-
-	@Override
 	public String getQueryParameterQualifier() {
 		if (isExact()) {
 			return Constants.PARAMQUALIFIER_STRING_EXACT;
@@ -61,8 +55,43 @@ public class StringParam extends StringDt {
 		}
 	}
 
+	public String getValue() {
+		return myValue;
+	}
+
+	@Override
+	public String getValueAsQueryToken() {
+		return myValue;
+	}
+
+	public String getValueNotNull() {
+		return defaultString(myValue);
+	}
+
+	public boolean isEmpty() {
+		return StringUtils.isEmpty(myValue);
+	}
+
 	public boolean isExact() {
 		return myExact;
+	}
+
+	public void setExact(boolean theExact) {
+		myExact = theExact;
+	}
+
+	public void setValue(String theValue) {
+		myValue = theValue;
+	}
+
+	@Override
+	public void setValueAsQueryToken(String theQualifier, String theValue) {
+		if (Constants.PARAMQUALIFIER_STRING_EXACT.equals(theQualifier)) {
+			setExact(true);
+		} else {
+			setExact(false);
+		}
+		myValue = theValue;
 	}
 
 	@Override
@@ -73,10 +102,6 @@ public class StringParam extends StringDt {
 			builder.append("exact", myExact);
 		}
 		return builder.toString();
-	}
-
-	public void setExact(boolean theExact) {
-		myExact = theExact;
 	}
 
 }

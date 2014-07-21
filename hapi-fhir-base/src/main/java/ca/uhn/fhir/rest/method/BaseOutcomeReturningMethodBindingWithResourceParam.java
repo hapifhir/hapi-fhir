@@ -2,7 +2,7 @@ package ca.uhn.fhir.rest.method;
 
 /*
  * #%L
- * HAPI FHIR Library
+ * HAPI FHIR - Core Library
  * %%
  * Copyright (C) 2014 University Health Network
  * %%
@@ -24,20 +24,15 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
-import ca.uhn.fhir.model.api.Tag;
-import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.dstu.resource.Binary;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
-import ca.uhn.fhir.rest.param.IParameter;
 import ca.uhn.fhir.rest.param.ResourceParameter;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.IResourceProvider;
@@ -58,17 +53,17 @@ abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOu
 			if (next instanceof ResourceParameter) {
 				resourceParameter = (ResourceParameter) next;
 				Class<? extends IResource> resourceType = resourceParameter.getResourceType();
-				
+
 				if (theProvider instanceof IResourceProvider) {
-					resourceType=((IResourceProvider) theProvider).getResourceType();
+					resourceType = ((IResourceProvider) theProvider).getResourceType();
 				}
-				
+
 				if (resourceType.isAssignableFrom(Binary.class)) {
 					myBinary = true;
 				}
-				
+
 				myResourceName = theContext.getResourceDefinition(resourceType).getName();
-				
+
 				myResourceParameterIndex = index;
 			}
 			index++;
@@ -86,7 +81,7 @@ abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOu
 			String ct = theRequest.getServletRequest().getHeader(Constants.HEADER_CONTENT_TYPE);
 			byte[] contents = IOUtils.toByteArray(theRequest.getServletRequest().getInputStream());
 			return new Binary(ct, contents);
-		}else {
+		} else {
 			return super.parseIncomingServerResource(theRequest);
 		}
 	}
@@ -111,10 +106,6 @@ abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOu
 		// nothing
 	}
 
-	
-
-	
-
 	@Override
 	public String getResourceName() {
 		return myResourceName;
@@ -129,17 +120,6 @@ abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOu
 
 		BaseHttpClientInvocation retVal = createClientInvocation(theArgs, resource);
 		return retVal;
-	}
-
-	static void addTagsToPostOrPut(IResource resource, BaseHttpClientInvocation retVal) {
-		TagList list = (TagList) resource.getResourceMetadata().get(ResourceMetadataKeyEnum.TAG_LIST);
-		if (list != null) {
-			for (Tag tag : list) {
-				if (StringUtils.isNotBlank(tag.getTerm())) {
-					retVal.addHeader(Constants.HEADER_CATEGORY, tag.toHeaderValue());
-				}
-			}
-		}
 	}
 
 }

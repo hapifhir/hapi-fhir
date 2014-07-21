@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.dao;
 
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -56,8 +55,8 @@ public interface IFhirResourceDao<T extends IResource> extends IDao {
 
 	Set<Long> searchForIds(String theParameterName, IQueryParameterType theValue);
 
-	Set<Long> searchForIdsWithAndOr(Map<String, List<List<IQueryParameterType>>> theMap);
-
 	MethodOutcome update(T theResource, IdDt theId);
+
+	Set<Long> searchForIdsWithAndOr(SearchParameterMap theParams);
 	
 }

@@ -2,7 +2,7 @@ package ca.uhn.fhir.rest.method;
 
 /*
  * #%L
- * HAPI FHIR Library
+ * HAPI FHIR - Core Library
  * %%
  * Copyright (C) 2014 University Health Network
  * %%
@@ -29,7 +29,6 @@ import ca.uhn.fhir.model.dstu.resource.Conformance;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
 import ca.uhn.fhir.rest.method.SearchMethodBinding.RequestType;
-import ca.uhn.fhir.rest.param.IParameter;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
@@ -53,7 +52,7 @@ public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding
 
 	@Override
 	public HttpGetClientInvocation invokeClient(Object[] theArgs) throws InternalErrorException {
-		HttpGetClientInvocation retVal = createConformanceInvocation();
+		HttpGetClientInvocation retVal = MethodUtil.createConformanceInvocation();
 
 		if (theArgs != null) {
 			for (int idx = 0; idx < theArgs.length; idx++) {
@@ -63,10 +62,6 @@ public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding
 		}
 
 		return retVal;
-	}
-
-	public static HttpGetClientInvocation createConformanceInvocation() {
-		return new HttpGetClientInvocation("metadata");
 	}
 
 	@Override

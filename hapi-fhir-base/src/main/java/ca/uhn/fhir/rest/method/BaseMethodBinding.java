@@ -2,7 +2,7 @@ package ca.uhn.fhir.rest.method;
 
 /*
  * #%L
- * HAPI FHIR Library
+ * HAPI FHIR - Core Library
  * %%
  * Copyright (C) 2014 University Health Network
  * %%
@@ -61,9 +61,7 @@ import ca.uhn.fhir.rest.annotation.Validate;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.client.exceptions.NonFhirResponseException;
-import ca.uhn.fhir.rest.param.IParameter;
 import ca.uhn.fhir.rest.param.IncludeParameter;
-import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.BundleProviders;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
@@ -97,7 +95,7 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 		myMethod = theMethod;
 		myContext = theContext;
 		myProvider = theProvider;
-		myParameters = ParameterUtil.getResourceParameters(theMethod);
+		myParameters = MethodUtil.getResourceParameters(theMethod);
 	}
 
 	public Set<String> getIncludes() {

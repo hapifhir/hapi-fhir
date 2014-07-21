@@ -13,11 +13,11 @@ import org.junit.Test;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.dstu.resource.Patient;
+import ca.uhn.fhir.rest.method.IParameter;
 import ca.uhn.fhir.rest.method.Request;
 import ca.uhn.fhir.rest.method.SearchMethodBinding;
+import ca.uhn.fhir.rest.method.SearchParameter;
 import ca.uhn.fhir.rest.method.SearchMethodBinding.RequestType;
-import ca.uhn.fhir.rest.param.IParameter;
-import ca.uhn.fhir.rest.param.SearchParameter;
 
 public class ResourceMethodTest {
 

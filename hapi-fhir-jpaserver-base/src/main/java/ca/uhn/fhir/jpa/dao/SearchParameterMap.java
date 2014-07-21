@@ -14,21 +14,21 @@ import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.Include;
 
-public class SearchParameterMap extends HashMap<String, List<List<IQueryParameterType>>> {
+public class SearchParameterMap extends HashMap<String, List<List<? extends IQueryParameterType>>> {
 
 	private static final long serialVersionUID = 1L;
 
 	private Set<Include> myIncludes;
 
-	public void add(String theName, IQueryParameterAnd theAnd) {
+	public void add(String theName, IQueryParameterAnd<?> theAnd) {
 		if (theAnd == null) {
 			return;
 		}
 		if (!containsKey(theName)) {
-			put(theName, new ArrayList<List<IQueryParameterType>>());
+			put(theName, new ArrayList<List<? extends IQueryParameterType>>());
 		}
 
-		for (IQueryParameterOr next : theAnd.getValuesAsQueryTokens()) {
+		for (IQueryParameterOr<?> next : theAnd.getValuesAsQueryTokens()) {
 			if (next == null) {
 				continue;
 			}
@@ -36,12 +36,12 @@ public class SearchParameterMap extends HashMap<String, List<List<IQueryParamete
 		}
 	}
 
-	public void add(String theName, IQueryParameterOr theOr) {
+	public void add(String theName, IQueryParameterOr<?> theOr) {
 		if (theOr == null) {
 			return;
 		}
 		if (!containsKey(theName)) {
-			put(theName, new ArrayList<List<IQueryParameterType>>());
+			put(theName, new ArrayList<List<? extends IQueryParameterType>>());
 		}
 
 		get(theName).add(theOr.getValuesAsQueryTokens());
@@ -52,7 +52,7 @@ public class SearchParameterMap extends HashMap<String, List<List<IQueryParamete
 			return;
 		}
 		if (!containsKey(theName)) {
-			put(theName, new ArrayList<List<IQueryParameterType>>());
+			put(theName, new ArrayList<List<? extends IQueryParameterType>>());
 		}
 		ArrayList<IQueryParameterType> list = new ArrayList<IQueryParameterType>();
 		list.add(theParam);

@@ -2,7 +2,7 @@ package ca.uhn.fhir.rest.method;
 
 /*
  * #%L
- * HAPI FHIR Library
+ * HAPI FHIR - Core Library
  * %%
  * Copyright (C) 2014 University Health Network
  * %%
@@ -41,8 +41,6 @@ import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.method.SearchMethodBinding.RequestType;
-import ca.uhn.fhir.rest.param.IParameter;
-import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
@@ -61,8 +59,8 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding implem
 
 		Validate.notNull(theMethod, "Method must not be null");
 
-		Integer idIndex = ParameterUtil.findIdParameterIndex(theMethod);
-		Integer versionIdIndex = ParameterUtil.findVersionIdParameterIndex(theMethod);
+		Integer idIndex = MethodUtil.findIdParameterIndex(theMethod);
+		Integer versionIdIndex = MethodUtil.findVersionIdParameterIndex(theMethod);
 
 		mySupportsVersion = theMethod.getAnnotation(Read.class).version();		
 		myIdIndex = idIndex;

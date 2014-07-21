@@ -2,7 +2,7 @@ package ca.uhn.fhir.model.api.annotation;
 
 /*
  * #%L
- * HAPI FHIR Library
+ * HAPI FHIR - Core Library
  * %%
  * Copyright (C) 2014 University Health Network
  * %%
@@ -36,5 +36,11 @@ public @interface SearchParamDefinition {
 	String description() default "";
 	
 	String type() default "string";
+	
+	/**
+	 * If the parameter is of type "composite", this parameter lists the names of the parameters 
+	 * which this parameter is a composite of. E.g. "name-value-token" is a composite of "name" and "value-token"
+	 */
+	String[] compositeOf() default {};
 	
 }

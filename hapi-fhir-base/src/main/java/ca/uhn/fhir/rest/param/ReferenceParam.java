@@ -2,7 +2,7 @@ package ca.uhn.fhir.rest.param;
 
 /*
  * #%L
- * HAPI FHIR Library
+ * HAPI FHIR - Core Library
  * %%
  * Copyright (C) 2014 University Health Network
  * %%
@@ -91,7 +91,7 @@ public class ReferenceParam extends IdDt implements IQueryParameterType {
 	@Override
 	public void setValueAsQueryToken(String theQualifier, String theValue) {
 		String q = theQualifier;
-		String resourceType=null;
+		String resourceType = null;
 		if (isNotBlank(q)) {
 			if (q.startsWith(":")) {
 				int nextIdx = q.indexOf('.');
@@ -106,10 +106,10 @@ public class ReferenceParam extends IdDt implements IQueryParameterType {
 			}
 		}
 
-		if (isNotBlank(resourceType)) {
+		setValue(theValue);
+
+		if (isNotBlank(resourceType) && isBlank(getResourceType())) {
 			setValue(resourceType + '/' + theValue);
-		} else {
-			setValue(theValue);
 		}
 	}
 

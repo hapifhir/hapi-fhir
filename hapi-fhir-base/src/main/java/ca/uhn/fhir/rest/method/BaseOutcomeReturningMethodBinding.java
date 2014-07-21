@@ -2,7 +2,7 @@ package ca.uhn.fhir.rest.method;
 
 /*
  * #%L
- * HAPI FHIR Library
+ * HAPI FHIR - Core Library
  * %%
  * Copyright (C) 2014 University Health Network
  * %%
@@ -23,7 +23,6 @@ package ca.uhn.fhir.rest.method;
 import static org.apache.commons.lang3.StringUtils.*;
 
 import java.io.IOException;
-import java.io.PushbackReader;
 import java.io.Reader;
 import java.io.Writer;
 import java.lang.reflect.Method;
@@ -42,7 +41,6 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.Tag;
 import ca.uhn.fhir.model.api.TagList;
-import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.parser.IParser;
@@ -55,9 +53,9 @@ import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 
-public abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<MethodOutcome> {
+abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<MethodOutcome> {
 	private static final String LABEL = "label=\"";
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseOutcomeReturningMethodBinding.class);
+	static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseOutcomeReturningMethodBinding.class);
 	private static final String SCHEME = "scheme=\"";
 
 	private boolean myReturnVoid;
@@ -102,7 +100,7 @@ public abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBindin
 			if (myReturnVoid) {
 				return null;
 			}
-			MethodOutcome retVal = process2xxResponse(getContext(), getResourceName(), theResponseStatusCode, theResponseMimeType, theResponseReader, theHeaders);
+			MethodOutcome retVal = MethodUtil.process2xxResponse(getContext(), getResourceName(), theResponseStatusCode, theResponseMimeType, theResponseReader, theHeaders);
 			return retVal;
 		default:
 			throw processNon2xxResponseAndReturnExceptionToThrow(theResponseStatusCode, theResponseMimeType, theResponseReader);
@@ -402,46 +400,6 @@ public abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBindin
 				writer.close();
 			}
 		}
-	}
-
-	public static MethodOutcome process2xxResponse(FhirContext theContext, String theResourceName, int theResponseStatusCode, String theResponseMimeType, Reader theResponseReader, Map<String, List<String>> theHeaders) {
-		List<String> locationHeaders = theHeaders.get(Constants.HEADER_LOCATION_LC);
-		MethodOutcome retVal = new MethodOutcome();
-		if (locationHeaders != null && locationHeaders.size() > 0) {
-			String locationHeader = locationHeaders.get(0);
-			parseContentLocation(retVal, theResourceName, locationHeader);
-		}
-		if (theResponseStatusCode != Constants.STATUS_HTTP_204_NO_CONTENT) {
-			EncodingEnum ct = EncodingEnum.forContentType(theResponseMimeType);
-			if (ct != null) {
-				PushbackReader reader = new PushbackReader(theResponseReader);
-
-				try {
-					int firstByte = reader.read();
-					if (firstByte == -1) {
-						ourLog.debug("No content in response, not going to read");
-						reader = null;
-					} else {
-						reader.unread(firstByte);
-					}
-				} catch (IOException e) {
-					ourLog.debug("No content in response, not going to read", e);
-					reader = null;
-				}
-
-				if (reader != null) {
-					IParser parser = ct.newParser(theContext);
-					IResource outcome = parser.parseResource(reader);
-					if (outcome instanceof OperationOutcome) {
-						retVal.setOperationOutcome((OperationOutcome) outcome);
-					}
-				}
-
-			} else {
-				ourLog.debug("Ignoring response content of type: {}", theResponseMimeType);
-			}
-		}
-		return retVal;
 	}
 
 	protected static void parseContentLocation(MethodOutcome theOutcomeToPopulate, String theResourceName, String theLocationHeader) {

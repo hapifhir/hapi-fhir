@@ -2,7 +2,7 @@ package ca.uhn.fhir.model.api;
 
 /*
  * #%L
- * HAPI FHIR Library
+ * HAPI FHIR - Core Library
  * %%
  * Copyright (C) 2014 University Health Network
  * %%
@@ -24,6 +24,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.dstu.composite.ContainedDt;
@@ -60,6 +62,13 @@ public abstract class BaseResource extends BaseElement implements IResource {
 			myId = new IdDt();
 		}
 		return myId;
+	}
+
+	@Override
+	public String toString() {
+		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
+		b.append("id", getId().toUnqualified());
+		return b.toString();
 	}
 
 	public CodeDt getLanguage() {
@@ -118,7 +127,7 @@ public abstract class BaseResource extends BaseElement implements IResource {
 	 */
 	@Override
 	protected boolean isBaseEmpty() {
-		return super.isBaseEmpty() && ElementUtil.isEmpty(myLanguage, myText);
+		return super.isBaseEmpty() && ElementUtil.isEmpty(myLanguage, myText, myId);
 	}
 
 }

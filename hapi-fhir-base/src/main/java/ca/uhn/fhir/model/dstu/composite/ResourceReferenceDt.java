@@ -18,7 +18,7 @@ package ca.uhn.fhir.model.dstu.composite;
 
 /*
  * #%L
- * HAPI FHIR Library
+ * HAPI FHIR - Core Library
  * %%
  * Copyright (C) 2014 University Health Network
  * %%
@@ -38,13 +38,13 @@ package ca.uhn.fhir.model.dstu.composite;
 
 import java.util.List;
 
-import ca.uhn.fhir.model.api.BaseResourceReference;
 import ca.uhn.fhir.model.api.ICompositeDatatype;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 
@@ -64,7 +64,7 @@ import ca.uhn.fhir.model.primitive.StringDt;
  */
 @DatatypeDef(name="ResourceReferenceDt") 
 public class ResourceReferenceDt
-        extends  BaseResourceReference         implements ICompositeDatatype  {
+        extends  BaseResourceReferenceDt         implements ICompositeDatatype  {
 
 	/**
 	 * Constructor

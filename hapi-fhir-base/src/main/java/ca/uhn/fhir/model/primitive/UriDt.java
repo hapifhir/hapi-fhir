@@ -2,7 +2,7 @@ package ca.uhn.fhir.model.primitive;
 
 /*
  * #%L
- * HAPI FHIR Library
+ * HAPI FHIR - Core Library
  * %%
  * Copyright (C) 2014 University Health Network
  * %%
@@ -41,12 +41,12 @@ public class UriDt extends BasePrimitive<URI> {
 	public UriDt() {
 		// nothing
 	}
-	
+
 	/**
 	 * Create a new String
 	 */
 	@SimpleSetter
-	public UriDt(@SimpleSetter.Parameter(name="theUri") String theValue) {
+	public UriDt(@SimpleSetter.Parameter(name = "theUri") String theValue) {
 		setValueAsString(theValue);
 	}
 
@@ -62,9 +62,9 @@ public class UriDt extends BasePrimitive<URI> {
 
 	@Override
 	public void setValueAsString(String theValue) throws DataFormatException {
-		if (theValue==null) {
-			myValue=null;
-		}else {
+		if (theValue == null) {
+			myValue = null;
+		} else {
 			try {
 				myValue = new URI(theValue);
 			} catch (URISyntaxException e) {
@@ -96,14 +96,14 @@ public class UriDt extends BasePrimitive<URI> {
 	}
 
 	/**
-	 * Compares the given string to the string representation of this URI. In many cases it is preferable
-	 * to use this instead of the standard {@link #equals(Object)} method, since that method returns <code>false</code>
-	 * unless it is passed an instance of {@link UriDt}
+	 * Compares the given string to the string representation of this URI. In many cases it is preferable to use this
+	 * instead of the standard {@link #equals(Object)} method, since that method returns <code>false</code> unless it is
+	 * passed an instance of {@link UriDt}
 	 */
 	public boolean equals(String theString) {
 		return StringUtils.equals(getValueAsString(), theString);
 	}
-	
+
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -112,20 +112,42 @@ public class UriDt extends BasePrimitive<URI> {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
+
 		UriDt other = (UriDt) obj;
-		if (myValue == null) {
-			if (other.myValue != null)
-				return false;
-		} else if (!myValue.equals(other.myValue))
+		if (myValue == null && other.myValue == null) {
+			return true;
+		}
+		if (myValue == null || other.myValue == null) {
 			return false;
-		return true;
+		}
+
+		URI normalize = normalize(myValue);
+		URI normalize2 = normalize(other.myValue);
+		return normalize.equals(normalize2);
+	}
+
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(UriDt.class);
+
+	private URI normalize(URI theValue) {
+		URI retVal = (theValue.normalize());
+		String urlString = retVal.toString();
+		if (urlString.endsWith("/") && urlString.length() > 1) {
+			try {
+				retVal = new URI(urlString.substring(0, urlString.length() - 1));
+			} catch (URISyntaxException e) {
+				ourLog.debug("Failed to normalize URL '{}', message was: {}", urlString, e.toString());
+			}
+		}
+		return retVal;
 	}
 
 	/**
-	 * Creates a new UriDt instance which uses the given OID as the content (and prepends "urn:oid:" to the 
-	 * OID string in the value of the newly created UriDt, per the FHIR specification).
-	 *  
-	 * @param theOid The OID to use (<code>null</code> is acceptable and will result in a UriDt instance with a <code>null</code> value)
+	 * Creates a new UriDt instance which uses the given OID as the content (and prepends "urn:oid:" to the OID string
+	 * in the value of the newly created UriDt, per the FHIR specification).
+	 * 
+	 * @param theOid
+	 *            The OID to use (<code>null</code> is acceptable and will result in a UriDt instance with a
+	 *            <code>null</code> value)
 	 * @return A new UriDt instance
 	 */
 	public static UriDt fromOid(String theOid) {

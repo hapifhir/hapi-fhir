@@ -2,7 +2,7 @@ package ca.uhn.fhir.rest.method;
 
 /*
  * #%L
- * HAPI FHIR Library
+ * HAPI FHIR - Core Library
  * %%
  * Copyright (C) 2014 University Health Network
  * %%
@@ -36,8 +36,6 @@ import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.VersionIdParam;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.method.SearchMethodBinding.RequestType;
-import ca.uhn.fhir.rest.param.IParameter;
-import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 
@@ -65,12 +63,12 @@ public class DeleteMethodBinding extends BaseOutcomeReturningMethodBinding {
 			}
 		}
 
-		myIdParameterIndex = ParameterUtil.findIdParameterIndex(theMethod);
+		myIdParameterIndex = MethodUtil.findIdParameterIndex(theMethod);
 		if (myIdParameterIndex == null) {
 			throw new ConfigurationException("Method '" + theMethod.getName() + "' on type '" + theMethod.getDeclaringClass().getCanonicalName() + "' has no parameter annotated with the @" + IdParam.class.getSimpleName() + " annotation");
 		}
 
-		Integer versionIdParameterIndex = ParameterUtil.findVersionIdParameterIndex(theMethod);
+		Integer versionIdParameterIndex = MethodUtil.findVersionIdParameterIndex(theMethod);
 		if (versionIdParameterIndex != null) {
 			throw new ConfigurationException("Method '" + theMethod.getName() + "' on type '" + theMethod.getDeclaringClass().getCanonicalName() + "' has a parameter annotated with the @" + VersionIdParam.class.getSimpleName()
 					+ " annotation but delete methods may not have this annotation");

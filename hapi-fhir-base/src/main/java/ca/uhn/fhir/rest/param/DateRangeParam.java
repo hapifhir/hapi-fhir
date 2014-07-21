@@ -2,7 +2,7 @@ package ca.uhn.fhir.rest.param;
 
 /*
  * #%L
- * HAPI FHIR Library
+ * HAPI FHIR - Core Library
  * %%
  * Copyright (C) 2014 University Health Network
  * %%
@@ -24,23 +24,20 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
-
 import ca.uhn.fhir.model.api.IQueryParameterAnd;
-import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.method.QualifiedParamList;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
-public class DateRangeParam implements IQueryParameterAnd {
+public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 
-	private QualifiedDateParam myLowerBound;
-	private QualifiedDateParam myUpperBound;
+	private DateParam myLowerBound;
+	private DateParam myUpperBound;
 
 	/**
-	 * Basic constructor. Values must be supplied by calling {@link #setLowerBound(QualifiedDateParam)} and
-	 * {@link #setUpperBound(QualifiedDateParam)}
+	 * Basic constructor. Values must be supplied by calling {@link #setLowerBound(DateParam)} and
+	 * {@link #setUpperBound(DateParam)}
 	 */
 	public DateRangeParam() {
 		// nothing
@@ -65,7 +62,7 @@ public class DateRangeParam implements IQueryParameterAnd {
 	 * (e.g. 2011-01-02 would match any time on that day). If theDateParam has a qualifier, treats it as either the
 	 * lower or upper bound, with no opposite bound.
 	 */
-	public DateRangeParam(QualifiedDateParam theDateParam) {
+	public DateRangeParam(DateParam theDateParam) {
 		if (theDateParam == null) {
 			throw new NullPointerException("theDateParam can not be null");
 		}
@@ -108,7 +105,7 @@ public class DateRangeParam implements IQueryParameterAnd {
 		setRangeFromDatesInclusive(theLowerBound, theUpperBound);
 	}
 
-	public QualifiedDateParam getLowerBound() {
+	public DateParam getLowerBound() {
 		return myLowerBound;
 	}
 
@@ -132,7 +129,7 @@ public class DateRangeParam implements IQueryParameterAnd {
 		return retVal;
 	}
 
-	public QualifiedDateParam getUpperBound() {
+	public DateParam getUpperBound() {
 		return myUpperBound;
 	}
 
@@ -159,18 +156,18 @@ public class DateRangeParam implements IQueryParameterAnd {
 	}
 
 	@Override
-	public List<IQueryParameterOr> getValuesAsQueryTokens() {
-		ArrayList<IQueryParameterOr> retVal = new ArrayList<IQueryParameterOr>();
-		if (myLowerBound != null) {
-			retVal.add(ParameterUtil.singleton(myLowerBound));
+	public List<DateParam> getValuesAsQueryTokens() {
+		ArrayList<DateParam> retVal = new ArrayList<DateParam>();
+		if (myLowerBound != null && !myLowerBound.isEmpty()) {
+			retVal.add((myLowerBound));
 		}
-		if (myUpperBound != null) {
-			retVal.add(ParameterUtil.singleton(myUpperBound));
+		if (myUpperBound != null && !myUpperBound.isEmpty()) {
+			retVal.add((myUpperBound));
 		}
 		return retVal;
 	}
 
-	public void setLowerBound(QualifiedDateParam theLowerBound) {
+	public void setLowerBound(DateParam theLowerBound) {
 		myLowerBound = theLowerBound;
 		validateAndThrowDataFormatExceptionIfInvalid();
 	}
@@ -186,12 +183,8 @@ public class DateRangeParam implements IQueryParameterAnd {
 	 *            "2011-02-22" or "2011-02-22T13:12:00". Will be treated inclusively.
 	 */
 	public void setRangeFromDatesInclusive(Date theLowerBound, Date theUpperBound) {
-		if (theLowerBound != null) {
-			myLowerBound = new QualifiedDateParam(QuantityCompararatorEnum.GREATERTHAN_OR_EQUALS, theLowerBound);
-		}
-		if (theUpperBound != null) {
-			myUpperBound = new QualifiedDateParam(QuantityCompararatorEnum.LESSTHAN_OR_EQUALS, theUpperBound);
-		}
+		myLowerBound = new DateParam(QuantityCompararatorEnum.GREATERTHAN_OR_EQUALS, theLowerBound);
+		myUpperBound = new DateParam(QuantityCompararatorEnum.LESSTHAN_OR_EQUALS, theUpperBound);
 		validateAndThrowDataFormatExceptionIfInvalid();
 	}
 
@@ -206,16 +199,12 @@ public class DateRangeParam implements IQueryParameterAnd {
 	 *            "2011-02-22" or "2011-02-22T13:12:00". Will be treated inclusively.
 	 */
 	public void setRangeFromDatesInclusive(String theLowerBound, String theUpperBound) {
-		if (StringUtils.isNotBlank(theLowerBound)) {
-			myLowerBound = new QualifiedDateParam(QuantityCompararatorEnum.GREATERTHAN_OR_EQUALS, theLowerBound);
-		}
-		if (StringUtils.isNotBlank(theUpperBound)) {
-			myUpperBound = new QualifiedDateParam(QuantityCompararatorEnum.LESSTHAN_OR_EQUALS, theUpperBound);
-		}
+		myLowerBound = new DateParam(QuantityCompararatorEnum.GREATERTHAN_OR_EQUALS, theLowerBound);
+		myUpperBound = new DateParam(QuantityCompararatorEnum.LESSTHAN_OR_EQUALS, theUpperBound);
 		validateAndThrowDataFormatExceptionIfInvalid();
 	}
 
-	public void setUpperBound(QualifiedDateParam theUpperBound) {
+	public void setUpperBound(DateParam theUpperBound) {
 		myUpperBound = theUpperBound;
 		validateAndThrowDataFormatExceptionIfInvalid();
 	}
@@ -230,13 +219,13 @@ public class DateRangeParam implements IQueryParameterAnd {
 				throw new InvalidRequestException("DateRange parameter does not suppport OR queries");
 			}
 			String param = paramList.get(0);
-			QualifiedDateParam parsed = new QualifiedDateParam();
+			DateParam parsed = new DateParam();
 			parsed.setValueAsQueryToken(null, param);
 			addParam(parsed);
 		}
 	}
 
-	private void addParam(QualifiedDateParam theParsed) throws InvalidRequestException {
+	private void addParam(DateParam theParsed) throws InvalidRequestException {
 		if (theParsed.getComparator() == null) {
 			if (myLowerBound != null || myUpperBound != null) {
 				throw new InvalidRequestException("Can not have multiple date range parameters for the same param without a qualifier");
@@ -271,8 +260,8 @@ public class DateRangeParam implements IQueryParameterAnd {
 	}
 
 	private void validateAndThrowDataFormatExceptionIfInvalid() {
-		boolean haveLowerBound = myLowerBound != null && myLowerBound.isEmpty() == false;
-		boolean haveUpperBound = myUpperBound != null && myUpperBound.isEmpty() == false;
+		boolean haveLowerBound = haveLowerBound();
+		boolean haveUpperBound = haveUpperBound();
 		if (haveLowerBound && haveUpperBound) {
 			if (myLowerBound.getValue().after(myUpperBound.getValue())) {
 				throw new DataFormatException("Lower bound of " + myLowerBound.getValueAsString() + " is after upper bound of " + myUpperBound.getValueAsString());
@@ -309,6 +298,42 @@ public class DateRangeParam implements IQueryParameterAnd {
 			}
 		}
 
+	}
+
+	private boolean haveUpperBound() {
+		return myUpperBound != null && myUpperBound.isEmpty() == false;
+	}
+
+	private boolean haveLowerBound() {
+		return myLowerBound != null && myLowerBound.isEmpty() == false;
+	}
+
+	@Override
+	public String toString() {
+		StringBuilder b = new StringBuilder();
+		b.append(getClass().getSimpleName());
+		b.append("[");
+		if (haveLowerBound()) {
+			if (myLowerBound.getComparator() != null) {
+				b.append(myLowerBound.getComparator().getCode());
+			}
+			b.append(myLowerBound.getValueAsString());
+		}
+		if (haveUpperBound()) {
+			if(haveLowerBound()) {
+				b.append(" ");
+			}
+			if (myUpperBound.getComparator() != null) {
+				b.append(myUpperBound.getComparator().getCode());
+			}
+			b.append(myUpperBound.getValueAsString());
+		} else {
+			if (!haveLowerBound()) {
+				b.append("empty");
+			}
+		}
+		b.append("]");
+		return b.toString();
 	}
 
 }

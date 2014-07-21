@@ -1,8 +1,8 @@
-package ca.uhn.fhir.model.api;
+package ca.uhn.fhir.model.base.composite;
 
 /*
  * #%L
- * HAPI FHIR Library
+ * HAPI FHIR - Core Library
  * %%
  * Copyright (C) 2014 University Health Network
  * %%
@@ -29,43 +29,43 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.BaseIdentifiableElement;
+import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.client.BaseClient;
 import ca.uhn.fhir.rest.client.api.IRestfulClient;
 
-public abstract class BaseResourceReference extends BaseIdentifiableElement {
+public abstract class BaseResourceReferenceDt extends BaseIdentifiableElement {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseResourceReference.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseResourceReferenceDt.class);
 	private IResource myResource;
 
 	/**
 	 * Constructor
+	 * 
 	 * @param theResource
-	 */ 
-	public BaseResourceReference() {
+	 */
+	public BaseResourceReferenceDt() {
 		// nothing
 	}
 
 	/**
 	 * Constructor
 	 * 
-	 * @param theResource The loaded resource itself 
+	 * @param theResource
+	 *            The loaded resource itself
 	 */
-	public BaseResourceReference(IResource theResource) {
+	public BaseResourceReferenceDt(IResource theResource) {
 		myResource = theResource;
 		setReference(theResource.getId());
 	}
 
+	protected abstract IdDt getReference();
 
-	public abstract BaseResourceReference setReference(IdDt theReference);
-	
-	
 	/**
-	 * Gets the actual loaded and parsed resource instance, <b>if it is already present</b>. This
-	 * method will return the resource instance only if it has previously been loaded using
-	 * {@link #loadResource(IRestfulClient)} or it was contained within the resource containing
-	 * this resource.
+	 * Gets the actual loaded and parsed resource instance, <b>if it is already present</b>. This method will return the resource instance only if it has previously been loaded using
+	 * {@link #loadResource(IRestfulClient)} or it was contained within the resource containing this resource.
 	 *
 	 * @see See {@link #loadResource(IRestfulClient)}
 	 * @see See the FHIR specification section on <a href="http://www.hl7.org/implement/standards/fhir/references.html#id>contained resources</a>
@@ -73,7 +73,6 @@ public abstract class BaseResourceReference extends BaseIdentifiableElement {
 	public IResource getResource() {
 		return myResource;
 	}
-
 
 	@Override
 	protected boolean isBaseEmpty() {
@@ -93,9 +92,9 @@ public abstract class BaseResourceReference extends BaseIdentifiableElement {
 		if (resourceId == null) {
 			throw new IllegalStateException("Reference has no resource ID defined");
 		}
-		
+
 		String resourceUrl = resourceId.getValue();
-		
+
 		ourLog.debug("Loading resource at URL: {}", resourceUrl);
 
 		HttpClient httpClient = theClient.getHttpClient();
@@ -104,7 +103,7 @@ public abstract class BaseResourceReference extends BaseIdentifiableElement {
 		if (!resourceUrl.startsWith("http")) {
 			resourceUrl = theClient.getServerBase() + resourceUrl;
 		}
-		
+
 		HttpGet get = new HttpGet(resourceUrl);
 		HttpResponse response = httpClient.execute(get);
 		try {
@@ -123,10 +122,18 @@ public abstract class BaseResourceReference extends BaseIdentifiableElement {
 		return myResource;
 	}
 
-	protected abstract IdDt getReference();
+	public abstract BaseResourceReferenceDt setReference(IdDt theReference);
 
 	public void setResource(IResource theResource) {
 		myResource = theResource;
+	}
+
+	@Override
+	public String toString() {
+		org.apache.commons.lang3.builder.ToStringBuilder b = new org.apache.commons.lang3.builder.ToStringBuilder(this, org.apache.commons.lang3.builder.ToStringStyle.SHORT_PREFIX_STYLE);
+		b.append("reference", getReference().getValueAsString());
+		b.append("loaded", getResource() != null);
+		return b.toString();
 	}
 
 }

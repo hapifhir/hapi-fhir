@@ -3,10 +3,11 @@ package example;
 import org.apache.http.impl.client.HttpClientBuilder;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.client.HttpBasicAuthInterceptor;
 import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.client.IRestfulClientFactory;
 import ca.uhn.fhir.rest.client.api.IBasicClient;
+import ca.uhn.fhir.rest.client.interceptor.BasicAuthInterceptor;
+import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 
 public class ClientExamples {
@@ -17,28 +18,49 @@ public class ClientExamples {
 
 	@SuppressWarnings("unused")
 	public void createSecurity() {
-{
 //START SNIPPET: security
 // Create a context and get the client factory so it can be configured
 FhirContext ctx = new FhirContext();
 IRestfulClientFactory clientFactory = ctx.getRestfulClientFactory();
 
-// Create an HTTP Client Builder
-HttpClientBuilder builder = HttpClientBuilder.create();
-
-// This interceptor adds HTTP username/password to every request 
+//Create an HTTP basic auth interceptor 
 String username = "foobar";
 String password = "boobear";
-builder.addInterceptorFirst(new HttpBasicAuthInterceptor(username, password));
+BasicAuthInterceptor authInterceptor = new BasicAuthInterceptor(username, password);
 
-// Use the new HTTP client builder
-clientFactory.setHttpClient(builder.build());
-
-// This factory is applied to both styles of client
+// Register the interceptor with your client (either style)
 IPatientClient annotationClient = ctx.newRestfulClient(IPatientClient.class, "http://localhost:9999/fhir");
+annotationClient.registerInterceptor(authInterceptor);
+
 IGenericClient genericClient = ctx.newRestfulGenericClient("http://localhost:9999/fhir");
+annotationClient.registerInterceptor(authInterceptor);
 //END SNIPPET: security
 }
+
+@SuppressWarnings("unused")
+public void createLogging() {
+{
+//START SNIPPET: logging
+//Create a context and get the client factory so it can be configured
+FhirContext ctx = new FhirContext();
+IRestfulClientFactory clientFactory = ctx.getRestfulClientFactory();
+
+//Create a logging interceptor 
+LoggingInterceptor loggingInterceptor = new LoggingInterceptor();
+
+// Optionally you may configure the interceptor (by default only summary info is logged)
+loggingInterceptor.setLogRequestSummary(true);
+loggingInterceptor.setLogRequestBody(true);
+
+//Register the interceptor with your client (either style)
+IPatientClient annotationClient = ctx.newRestfulClient(IPatientClient.class, "http://localhost:9999/fhir");
+annotationClient.registerInterceptor(loggingInterceptor);
+
+IGenericClient genericClient = ctx.newRestfulGenericClient("http://localhost:9999/fhir");
+annotationClient.registerInterceptor(loggingInterceptor);
+//END SNIPPET: logging
+}
+
 
 
 /******************************/

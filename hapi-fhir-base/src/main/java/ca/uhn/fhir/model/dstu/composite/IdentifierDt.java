@@ -18,7 +18,7 @@ package ca.uhn.fhir.model.dstu.composite;
 
 /*
  * #%L
- * HAPI FHIR Library
+ * HAPI FHIR - Core Library
  * %%
  * Copyright (C) 2014 University Health Network
  * %%
@@ -38,6 +38,8 @@ package ca.uhn.fhir.model.dstu.composite;
 
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
+
 import ca.uhn.fhir.model.api.BaseIdentifiableElement;
 import ca.uhn.fhir.model.api.ICompositeDatatype;
 import ca.uhn.fhir.model.api.IElement;
@@ -51,6 +53,7 @@ import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
+import ca.uhn.fhir.rest.param.ParameterUtil;
 
 /**
  * HAPI/FHIR <b>IdentifierDt</b> Datatype
@@ -412,10 +415,10 @@ public class IdentifierDt
 	 */
 	@Override
 	public String getValueAsQueryToken() {
-		if (org.apache.commons.lang3.StringUtils.isNotBlank(getSystem().getValueAsString())) {
-			return getSystem().getValueAsString() + '|' + getValue().getValueAsString(); 
+		if (getSystem().getValueAsString() != null) {
+			return ParameterUtil.escape(StringUtils.defaultString(getSystem().getValueAsString())) + '|' + ParameterUtil.escape(getValue().getValueAsString()); 
 		} else {
-			return getValue().getValueAsString();
+			return ParameterUtil.escape(getValue().getValueAsString());
 		}
 	}
 
@@ -424,12 +427,12 @@ public class IdentifierDt
 	 */
 	@Override
 	public void setValueAsQueryToken(String theQualifier, String theParameter) {
-		int barIndex = theParameter.indexOf('|');
+		int barIndex = ParameterUtil.nonEscapedIndexOf(theParameter,'|');
 		if (barIndex != -1) {
 			setSystem(new UriDt(theParameter.substring(0, barIndex)));
-			setValue(theParameter.substring(barIndex + 1));
+			setValue(ParameterUtil.unescape(theParameter.substring(barIndex + 1)));
 		} else {
-			setValue(theParameter);
+			setValue(ParameterUtil.unescape(theParameter));
 		}
 	}	
 

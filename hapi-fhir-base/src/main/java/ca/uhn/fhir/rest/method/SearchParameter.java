@@ -1,8 +1,8 @@
-package ca.uhn.fhir.rest.param;
+package ca.uhn.fhir.rest.method;
 
 /*
  * #%L
- * HAPI FHIR Library
+ * HAPI FHIR - Core Library
  * %%
  * Copyright (C) 2014 University Health Network
  * %%
@@ -22,6 +22,7 @@ package ca.uhn.fhir.rest.param;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -36,7 +37,18 @@ import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.composite.QuantityDt;
 import ca.uhn.fhir.model.dstu.valueset.SearchParamTypeEnum;
 import ca.uhn.fhir.model.primitive.StringDt;
-import ca.uhn.fhir.rest.method.QualifiedParamList;
+import ca.uhn.fhir.rest.param.BaseQueryParameter;
+import ca.uhn.fhir.rest.param.CodingListParam;
+import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.IdentifierListParam;
+import ca.uhn.fhir.rest.param.QualifiedDateParam;
+import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.StringAndListParam;
+import ca.uhn.fhir.rest.param.StringOrListParam;
+import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
+import ca.uhn.fhir.rest.param.TokenOrListParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
@@ -45,6 +57,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
  */
 public class SearchParameter extends BaseQueryParameter {
 
+	private static HashMap<Class<?>, SearchParamTypeEnum> ourParamTypes;
 	private Class<? extends IResource>[] myDeclaredTypes;
 	private String myDescription;
 	private String myName;
@@ -141,28 +154,45 @@ public class SearchParameter extends BaseQueryParameter {
 		this.myRequired = required;
 	}
 
+	static {
+		ourParamTypes = new HashMap<Class<?>, SearchParamTypeEnum>();
+		
+		ourParamTypes.put(StringParam.class, SearchParamTypeEnum.STRING);
+		ourParamTypes.put(StringOrListParam.class, SearchParamTypeEnum.STRING);
+		ourParamTypes.put(StringAndListParam.class, SearchParamTypeEnum.STRING);
+		
+		ourParamTypes.put(TokenParam.class, SearchParamTypeEnum.TOKEN);
+		ourParamTypes.put(TokenOrListParam.class, SearchParamTypeEnum.TOKEN);
+		ourParamTypes.put(TokenAndListParam.class, SearchParamTypeEnum.TOKEN);
+		
+		ourParamTypes.put(DateRangeParam.class, SearchParamTypeEnum.DATE);
+	}
+	
 	@SuppressWarnings("unchecked")
 	public void setType(final Class<?> type, Class<? extends Collection<?>> theInnerCollectionType, Class<? extends Collection<?>> theOuterCollectionType) {
 		this.myType = type;
 		if (IQueryParameterType.class.isAssignableFrom(type)) {
 			myParamBinder = new QueryParameterTypeBinder((Class<? extends IQueryParameterType>) type);
 		} else if (IQueryParameterOr.class.isAssignableFrom(type)) {
-			myParamBinder = new QueryParameterOrBinder((Class<? extends IQueryParameterOr>) type);
+			myParamBinder = new QueryParameterOrBinder((Class<? extends IQueryParameterOr<?>>) type);
 		} else if (IQueryParameterAnd.class.isAssignableFrom(type)) {
-			myParamBinder = new QueryParameterAndBinder((Class<? extends IQueryParameterAnd>) type);
+			myParamBinder = new QueryParameterAndBinder((Class<? extends IQueryParameterAnd<?>>) type);
 		} else if (String.class.equals(type)) {
 			myParamBinder = new StringBinder();
+			myParamType=SearchParamTypeEnum.STRING;
 		} else {
 			throw new ConfigurationException("Unsupported data type for parameter: " + type.getCanonicalName());
 		}
 
-		if (String.class.equals(type)) {
-			myParamType = SearchParamTypeEnum.STRING;
+		if (myParamType==null) {
+			myParamType=ourParamTypes.get(type);
+		}
+		
+		if (myParamType!=null) {
+			// ok
 		} else if (StringDt.class.isAssignableFrom(type)) {
 			myParamType = SearchParamTypeEnum.STRING;
 		} else if (QualifiedDateParam.class.isAssignableFrom(type)) {
-			myParamType = SearchParamTypeEnum.DATE;
-		} else if (DateRangeParam.class.isAssignableFrom(type)) {
 			myParamType = SearchParamTypeEnum.DATE;
 		} else if (CodingListParam.class.isAssignableFrom(type)) {
 			myParamType = SearchParamTypeEnum.TOKEN;

@@ -19,7 +19,6 @@ import org.apache.maven.project.MavenProject;
 import ca.uhn.fhir.tinder.parser.DatatypeGeneratorUsingSpreadsheet;
 import ca.uhn.fhir.tinder.parser.ProfileParser;
 import ca.uhn.fhir.tinder.parser.ResourceGeneratorUsingSpreadsheet;
-import edu.emory.mathcs.backport.java.util.Collections;
 
 @Mojo(name = "generate-structures", defaultPhase = LifecyclePhase.GENERATE_SOURCES)
 public class TinderStructuresMojo extends AbstractMojo {
@@ -195,7 +194,7 @@ public class TinderStructuresMojo extends AbstractMojo {
 		 dtp.writeAll(new File(dtOutputDir), "ca.uhn.fhir.model.dstu");
 		
 		 ResourceGeneratorUsingSpreadsheet rp = new ResourceGeneratorUsingSpreadsheet();
-		 rp.setBaseResourceNames(Arrays.asList("list", "encounter"));
+		 rp.setBaseResourceNames(Arrays.asList("observation"));
 		 rp.parse();
 //		 rp.bindValueSets(vsp);
 		

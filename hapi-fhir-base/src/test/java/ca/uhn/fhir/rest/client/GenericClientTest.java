@@ -13,6 +13,8 @@ import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.ProtocolVersion;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicStatusLine;
@@ -59,7 +61,7 @@ public class GenericClientTest {
 	}
 
 	@Test
-	public void testCreateWithTag() throws Exception {
+	public void testCreateWithTagNonFluent() throws Exception {
 
 		Patient p1 = new Patient();
 		p1.addIdentifier("foo:bar", "12345");
@@ -88,6 +90,52 @@ public class GenericClientTest {
 		assertEquals("urn:happytag; label=\"This is a happy resource\"; scheme=\"http://hl7.org/fhir/tag\"", catH.getValue());
 	}
 
+	
+	@Test
+	public void testCreateWithTag() throws Exception {
+
+		Patient p1 = new Patient();
+		p1.addIdentifier("foo:bar", "12345");
+		p1.addName().addFamily("Smith").addGiven("John");
+		TagList list = new TagList();
+		list.addTag("http://hl7.org/fhir/tag", "urn:happytag", "This is a happy resource");
+		ResourceMetadataKeyEnum.TAG_LIST.put(p1, list);
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 201, "OK"));
+		when(myHttpResponse.getAllHeaders()).thenReturn(new Header[] { new BasicHeader(Constants.HEADER_LOCATION, "/Patient/44/_history/22") });
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(""), Charset.forName("UTF-8")));
+
+		IGenericClient client = myCtx.newRestfulGenericClient("http://example.com/fhir");
+
+		MethodOutcome outcome = client.create().resource(p1).execute();
+		assertEquals("44", outcome.getId().getIdPart());
+		assertEquals("22", outcome.getId().getVersionIdPart());
+
+		assertEquals("http://example.com/fhir/Patient", capt.getValue().getURI().toString());
+		assertEquals("POST", capt.getValue().getMethod());
+		Header catH = capt.getValue().getFirstHeader("Category");
+		assertNotNull(Arrays.asList(capt.getValue().getAllHeaders()).toString(), catH);
+		assertEquals("urn:happytag; label=\"This is a happy resource\"; scheme=\"http://hl7.org/fhir/tag\"", catH.getValue());
+		
+		/*
+		 * Try fluent options
+		 */
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(""), Charset.forName("UTF-8")));
+		client.create().resource(p1).withId("123").execute();
+		assertEquals("http://example.com/fhir/Patient/123", capt.getAllValues().get(1).getURI().toString());
+		
+		String resourceText = "<Patient xmlns=\"http://hl7.org/fhir\">    </Patient>";
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(""), Charset.forName("UTF-8")));
+		client.create().resource(resourceText).withId("123").execute();
+		assertEquals("http://example.com/fhir/Patient/123", capt.getAllValues().get(2).getURI().toString());
+		assertEquals(resourceText, IOUtils.toString(((HttpPost)capt.getAllValues().get(2)).getEntity().getContent()));
+		
+	}
+
+	
 	private String getPatientFeedWithOneResult() {
 		//@formatter:off
 		String msg = "<feed xmlns=\"http://www.w3.org/2005/Atom\">\n" + 
@@ -340,7 +388,39 @@ public class GenericClientTest {
 				.execute();
 		//@formatter:on
 
-		assertEquals("http://example.com/fhir/", capt.getValue().getURI().toString());
+		assertEquals("http://example.com/fhir", capt.getValue().getURI().toString());
+		assertEquals(bundle.getEntries().get(0).getId(), response.getEntries().get(0).getId());
+	}
+	
+	
+	@Test
+	public void testTransactionJson() throws Exception {
+		String bundleStr = IOUtils.toString(getClass().getResourceAsStream("/bundle.json"));
+		Bundle bundle = myCtx.newJsonParser().parseBundle(bundleStr);
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_JSON + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(bundleStr), Charset.forName("UTF-8")));
+
+		IGenericClient client = myCtx.newRestfulGenericClient("http://example.com/fhir");
+
+		//@formatter:off
+		Bundle response = client.transaction()
+				.withBundle(bundle)
+				.encodedJson()
+				.execute();
+		//@formatter:on
+
+		HttpEntityEnclosingRequestBase value = (HttpEntityEnclosingRequestBase) capt.getValue();
+		
+		Header ct = value.getEntity().getContentType();
+		assertNotNull(ct);
+		assertEquals(Constants.CT_FHIR_JSON + "; charset=UTF-8", ct.getValue());
+		
+		assertEquals("http://example.com/fhir", value.getURI().toString());
+		assertThat(IOUtils.toString(value.getEntity().getContent()), StringContains.containsString("\"resourceType\""));
 		assertEquals(bundle.getEntries().get(0).getId(), response.getEntries().get(0).getId());
 	}
 

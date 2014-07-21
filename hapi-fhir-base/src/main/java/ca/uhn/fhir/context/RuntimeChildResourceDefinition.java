@@ -2,7 +2,7 @@ package ca.uhn.fhir.context;
 
 /*
  * #%L
- * HAPI FHIR Library
+ * HAPI FHIR - Core Library
  * %%
  * Copyright (C) 2014 University Health Network
  * %%
@@ -28,11 +28,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import ca.uhn.fhir.model.api.BaseResourceReference;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
 
 public class RuntimeChildResourceDefinition extends BaseRuntimeDeclaredChildDefinition {
 
@@ -51,7 +51,7 @@ public class RuntimeChildResourceDefinition extends BaseRuntimeDeclaredChildDefi
 
 	@Override
 	public String getChildNameByDatatype(Class<? extends IElement> theDatatype) {
-		if (BaseResourceReference.class.isAssignableFrom(theDatatype)) {
+		if (BaseResourceReferenceDt.class.isAssignableFrom(theDatatype)) {
 			return getElementName();
 		}
 		return null;
@@ -59,7 +59,7 @@ public class RuntimeChildResourceDefinition extends BaseRuntimeDeclaredChildDefi
 
 	@Override
 	public BaseRuntimeElementDefinition<?> getChildElementDefinitionByDatatype(Class<? extends IElement> theDatatype) {
-		if (BaseResourceReference.class.isAssignableFrom(theDatatype)) {
+		if (BaseResourceReferenceDt.class.isAssignableFrom(theDatatype)) {
 			return myRuntimeDef;
 		}
 		return null;

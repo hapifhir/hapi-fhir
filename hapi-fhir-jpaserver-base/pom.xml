@@ -7,7 +7,34 @@
 		<version>0.5-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
-
+	
+	<repositories>
+		<repository>
+			<id>maven.java.net</id>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+			<releases>
+				<enabled>false</enabled>
+			</releases>
+			<url>https://maven.java.net/service/local/repositories/snapshots/content/</url>
+		</repository>
+		<!-- 
+		<repository>
+			<id>UOM</id>
+			<url>https://github.com/unitsofmeasurement/repository</url>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+		</repository>
+		<repository>
+            <id>maven-geotoolkit.org</id>
+            <name>GeoToolkit Repository for Maven</name>
+            <url>http://maven.geotoolkit.org/</url>
+        </repository>
+         -->
+	</repositories>
+	
 	<artifactId>hapi-fhir-jpaserver-base</artifactId>
 	<packaging>jar</packaging>
 
@@ -18,6 +45,16 @@
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-base</artifactId>
 			<version>0.5-SNAPSHOT</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>commons-codec</artifactId>
+					<groupId>commons-codec</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>commons-logging</artifactId>
+					<groupId>commons-logging</groupId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 		<dependency>
@@ -27,19 +64,73 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>${junit_version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
 			<groupId>org.hamcrest</groupId>
 			<artifactId>hamcrest-all</artifactId>
 			<version>${hamcrest_version}</version>
 			<scope>test</scope>
 		</dependency>
 
+		<!-- For UCUM -->
+		<dependency>
+		    <groupId>org.jscience</groupId>
+		    <artifactId>jscience</artifactId>
+		    <version>${jscience_version}</version>
+		</dependency>
+		
+		<!-- 
+		FHIR RI is pulled in for UCUM support, but we don't want any
+		of its dependencies.
+		-->
+		<dependency>
+		    <groupId>me.fhir</groupId>
+		    <artifactId>fhir-dstu1</artifactId>
+		    <version>0.0.81.2489</version>
+		    <exclusions>
+		    	<!-- 
+		    	<exclusion>
+		    		<artifactId>Saxon-HE</artifactId>
+		    		<groupId>net.sf.saxon</groupId>
+		    	</exclusion>
+		    	<exclusion>
+		    		<artifactId>commons-discovery</artifactId>
+		    		<groupId>commons-discovery</groupId>
+		    	</exclusion>
+		    	<exclusion>
+		    		<artifactId>commons-codec</artifactId>
+		    		<groupId>commons-codec</groupId>
+		    	</exclusion>
+		    	<exclusion>
+		    		<artifactId>commons-logging</artifactId>
+		    		<groupId>commons-logging</groupId>
+		    	</exclusion>
+		    	<exclusion>
+		    		<artifactId>xpp3</artifactId>
+		    		<groupId>xpp3</groupId>
+		    	</exclusion>
+		    	<exclusion>
+		    		<artifactId>junit</artifactId>
+		    		<groupId>junit</groupId>
+		    	</exclusion>
+		    	<exclusion>
+		    		<artifactId>jdom</artifactId>
+		    		<groupId>org.jdom</groupId>
+		    	</exclusion>
+		    	<exclusion>
+		    		<artifactId>gson</artifactId>
+		    		<groupId>com.google.code.gson</groupId>
+		    	</exclusion>
+		    	 -->
+		    </exclusions>
+		</dependency>
+
+				
 		<!-- Test Database -->
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>${junit_version}</version>
+			<scope>test</scope>
+		</dependency>
 		<dependency>
 			<groupId>org.apache.derby</groupId>
 			<artifactId>derby</artifactId>
@@ -73,6 +164,12 @@
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-core</artifactId>
 			<version>${spring_version}</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>commons-logging</artifactId>
+					<groupId>commons-logging</groupId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>

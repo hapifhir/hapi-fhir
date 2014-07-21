@@ -1,8 +1,8 @@
-package ca.uhn.fhir.rest.param;
+package ca.uhn.fhir.rest.method;
 
 /*
  * #%L
- * HAPI FHIR Library
+ * HAPI FHIR - Core Library
  * %%
  * Copyright (C) 2014 University Health Network
  * %%
@@ -33,13 +33,12 @@ import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.rest.annotation.TransactionParam;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
-import ca.uhn.fhir.rest.method.Request;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
-public class TransactionParameter implements IParameter {
+class TransactionParamBinder implements IParameter {
 
-	public TransactionParameter() {
+	public TransactionParamBinder() {
 	}
 	
 	@Override

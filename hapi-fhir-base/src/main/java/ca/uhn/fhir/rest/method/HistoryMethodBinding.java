@@ -2,7 +2,7 @@ package ca.uhn.fhir.rest.method;
 
 /*
  * #%L
- * HAPI FHIR Library
+ * HAPI FHIR - Core Library
  * %%
  * Copyright (C) 2014 University Health Network
  * %%
@@ -37,8 +37,6 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.annotation.History;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
-import ca.uhn.fhir.rest.param.IParameter;
-import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
@@ -55,7 +53,7 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 	public HistoryMethodBinding(Method theMethod, FhirContext theConetxt, Object theProvider) {
 		super(toReturnType(theMethod, theProvider), theMethod, theConetxt, theProvider);
 
-		myIdParamIndex = ParameterUtil.findIdParameterIndex(theMethod);
+		myIdParamIndex = MethodUtil.findIdParameterIndex(theMethod);
 
 		History historyAnnotation = theMethod.getAnnotation(History.class);
 		Class<? extends IResource> type = historyAnnotation.type();

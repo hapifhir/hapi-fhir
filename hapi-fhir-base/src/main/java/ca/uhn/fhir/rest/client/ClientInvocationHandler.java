@@ -2,7 +2,7 @@ package ca.uhn.fhir.rest.client;
 
 /*
  * #%L
- * HAPI FHIR Library
+ * HAPI FHIR - Core Library
  * %%
  * Copyright (C) 2014 University Health Network
  * %%
@@ -51,6 +51,8 @@ public class ClientInvocationHandler extends BaseClient implements InvocationHan
 
 			myMethodToLambda.put(theClientType.getMethod("setEncoding", EncodingEnum.class), new SetEncodingLambda());
 			myMethodToLambda.put(theClientType.getMethod("setPrettyPrint", boolean.class), new SetPrettyPrintLambda());
+			myMethodToLambda.put(theClientType.getMethod("registerInterceptor", IClientInterceptor.class), new RegisterInterceptorLambda());
+			myMethodToLambda.put(theClientType.getMethod("unregisterInterceptor", IClientInterceptor.class), new UnregisterInterceptorLambda());
 
 		} catch (NoSuchMethodException e) {
 			throw new ConfigurationException("Failed to find methods on client. This is a HAPI bug!", e);
@@ -102,6 +104,23 @@ public class ClientInvocationHandler extends BaseClient implements InvocationHan
 		public Object handle(Object[] theArgs) {
 			Boolean prettyPrint = (Boolean) theArgs[0];
 			setPrettyPrint(prettyPrint);
+			return null;
+		}
+	}
+	private class UnregisterInterceptorLambda implements ILambda {
+		@Override
+		public Object handle(Object[] theArgs) {
+			IClientInterceptor interceptor = (IClientInterceptor) theArgs[0];
+			unregisterInterceptor(interceptor);
+			return null;
+		}
+	}
+
+	private class RegisterInterceptorLambda implements ILambda {
+		@Override
+		public Object handle(Object[] theArgs) {
+			IClientInterceptor interceptor = (IClientInterceptor) theArgs[0];
+			registerInterceptor(interceptor);
 			return null;
 		}
 	}

@@ -109,71 +109,6 @@ public class ResfulServerMethodTest {
 		assertThat(responseContent, StringContains.containsString("AAAABBBB"));
 	}
 
-	@Test
-	public void testCreate() throws Exception {
-
-		Patient patient = new Patient();
-		patient.addIdentifier().setValue("001");
-		patient.addIdentifier().setValue("002");
-
-		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
-		httpPost.setEntity(new StringEntity(new FhirContext().newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
-
-		HttpResponse status = ourClient.execute(httpPost);
-
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
-		ourLog.info("Response was:\n{}", responseContent);
-
-		assertEquals(201, status.getStatusLine().getStatusCode());
-		assertEquals("http://localhost:" + ourPort + "/Patient/001/_history/002", status.getFirstHeader("location").getValue());
-
-	}
-
-	@Test
-	public void testCreateJson() throws Exception {
-
-		Patient patient = new Patient();
-		patient.addIdentifier().setValue("001");
-		patient.addIdentifier().setValue("002");
-
-		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
-		httpPost.setEntity(new StringEntity(new FhirContext().newJsonParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_JSON, "UTF-8")));
-
-		HttpResponse status = ourClient.execute(httpPost);
-
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
-
-		ourLog.info("Response was:\n{}", responseContent);
-
-		assertEquals(201, status.getStatusLine().getStatusCode());
-		assertEquals("http://localhost:" + ourPort + "/Patient/001/_history/002", status.getFirstHeader("location").getValue());
-
-	}
-
-	@Test
-	public void testCreateWithUnprocessableEntity() throws Exception {
-
-		DiagnosticReport report = new DiagnosticReport();
-		report.getIdentifier().setValue("001");
-
-		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/DiagnosticReport");
-		httpPost.setEntity(new StringEntity(new FhirContext().newXmlParser().encodeResourceToString(report), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
-
-		HttpResponse status = ourClient.execute(httpPost);
-
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
-
-		ourLog.info("Response was:\n{}", responseContent);
-
-		assertEquals(422, status.getStatusLine().getStatusCode());
-
-		OperationOutcome outcome = new FhirContext().newXmlParser().parseResource(OperationOutcome.class, new StringReader(responseContent));
-		assertEquals("FOOBAR", outcome.getIssueFirstRep().getDetails().getValue());
-
-	}
 
 	@Test
 	public void testDateRangeParam() throws Exception {
@@ -1102,18 +1037,6 @@ public class ResfulServerMethodTest {
 	 */
 	public static class DummyAdverseReactionResourceProvider implements IResourceProvider {
 
-		/*
-		 * *********************
-		 * NO NEW METHODS *********************
-		 */
-
-		@Create()
-		public MethodOutcome create(@ResourceParam AdverseReaction thePatient) {
-			IdDt id = new IdDt(thePatient.getIdentifier().get(0).getValue().getValue());
-			IdDt version = new IdDt(thePatient.getIdentifier().get(1).getValue().getValue());
-			return new MethodOutcome(id, version);
-		}
-
 		@Search()
 		public Collection<AdverseReaction> getAllResources() {
 			ArrayList<AdverseReaction> retVal = new ArrayList<AdverseReaction>();
@@ -1148,12 +1071,6 @@ public class ResfulServerMethodTest {
 			throw new ResourceNotFoundException("AAAABBBB");
 		}
 
-		@Create()
-		public MethodOutcome createDiagnosticReport(@ResourceParam DiagnosticReport thePatient) {
-			OperationOutcome outcome = new OperationOutcome();
-			outcome.addIssue().setDetails("FOOBAR");
-			throw new UnprocessableEntityException(outcome);
-		}
 
 		@Delete()
 		public void deleteDiagnosticReport(@IdParam IdDt theId) {
@@ -1176,12 +1093,6 @@ public class ResfulServerMethodTest {
 	 */
 	public static class DummyPatientResourceProvider implements IResourceProvider {
 
-		@Create()
-		public MethodOutcome createPatient(@ResourceParam Patient thePatient) {
-			IdDt id = new IdDt(thePatient.getIdentifier().get(0).getValue().getValue());
-			IdDt version = new IdDt(thePatient.getIdentifier().get(1).getValue().getValue());
-			return new MethodOutcome(id, version);
-		}
 
 		@Delete()
 		public MethodOutcome deletePatient(@IdParam IdDt theId) {

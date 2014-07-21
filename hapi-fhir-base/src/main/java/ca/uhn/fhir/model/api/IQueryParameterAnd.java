@@ -2,7 +2,7 @@ package ca.uhn.fhir.model.api;
 
 /*
  * #%L
- * HAPI FHIR Library
+ * HAPI FHIR - Core Library
  * %%
  * Copyright (C) 2014 University Health Network
  * %%
@@ -25,7 +25,7 @@ import java.util.List;
 import ca.uhn.fhir.rest.method.QualifiedParamList;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
-public interface IQueryParameterAnd {
+public interface IQueryParameterAnd<T extends IQueryParameterOr<?>> {
 
 	/**
 	 * 
@@ -45,7 +45,7 @@ public interface IQueryParameterAnd {
 	 *    for information on the <b>token</b> format
 	 * </p>
 	 */
-	public List<IQueryParameterOr> getValuesAsQueryTokens();
+	public List<T> getValuesAsQueryTokens();
 
 	
 }

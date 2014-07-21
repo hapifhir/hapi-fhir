@@ -2,7 +2,7 @@ package ca.uhn.fhir.model.primitive;
 
 /*
  * #%L
- * HAPI FHIR Library
+ * HAPI FHIR - Core Library
  * %%
  * Copyright (C) 2014 University Health Network
  * %%
@@ -137,8 +137,6 @@ public class IdDt extends BasePrimitive<String> {
 	 *            The version ID ("e.g. "456")
 	 */
 	public IdDt(String theResourceType, String theId, String theVersionId) {
-		Validate.notBlank(theId, "ID must not be blank");
-
 		myResourceType = theResourceType;
 		myUnqualifiedId = theId;
 		myUnqualifiedVersionId = StringUtils.defaultIfBlank(theVersionId, null);

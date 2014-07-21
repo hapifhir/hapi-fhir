@@ -1,8 +1,8 @@
-package ca.uhn.fhir.rest.param;
+package ca.uhn.fhir.rest.method;
 
 /*
  * #%L
- * HAPI FHIR Library
+ * HAPI FHIR - Core Library
  * %%
  * Copyright (C) 2014 University Health Network
  * %%
@@ -25,30 +25,42 @@ import java.util.List;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IQueryParameterOr;
-import ca.uhn.fhir.rest.method.QualifiedParamList;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
-final class StringBinder implements IParamBinder {
-	StringBinder() {
+final class QueryParameterOrBinder implements IParamBinder {
+	private final Class<? extends IQueryParameterOr> myType;
+
+	QueryParameterOrBinder(Class<? extends IQueryParameterOr> theType) {
+		myType = theType;
 	}
 
 	@Override
 	public List<IQueryParameterOr> encode(FhirContext theContext, Object theString) throws InternalErrorException {
-		String retVal = ((String) theString);
-		return Collections.singletonList(ParameterUtil.singleton(new StringParam(retVal)));
+		IQueryParameterOr retVal = ((IQueryParameterOr) theString);
+		return Collections.singletonList(retVal);
 	}
 
 	@Override
-	public Object parse(List<QualifiedParamList> theParams) throws InternalErrorException, InvalidRequestException {
-		if (theParams.size() == 0 || theParams.get(0).size() == 0) {
-			return "";
+	public Object parse(List<QualifiedParamList> theString) throws InternalErrorException, InvalidRequestException {
+		IQueryParameterOr dt;
+		try {
+			dt = myType.newInstance();
+			if (theString.size() == 0 || theString.get(0).size() == 0) {
+				return dt;
+			}
+			if (theString.size() > 1) {
+				throw new InvalidRequestException("Multiple values detected");
+			}
+			
+			dt.setValuesAsQueryTokens(theString.get(0));
+		} catch (InstantiationException e) {
+			throw new InternalErrorException(e);
+		} catch (IllegalAccessException e) {
+			throw new InternalErrorException(e);
+		} catch (SecurityException e) {
+			throw new InternalErrorException(e);
 		}
-		if (theParams.size() > 1 || theParams.get(0).size() > 1) {
-			throw new InvalidRequestException("Multiple values detected");
-		}
-
-		return theParams.get(0).get(0);
+		return dt;
 	}
-
 }

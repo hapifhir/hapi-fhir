@@ -9,7 +9,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.web.context.ContextLoaderListener;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.provider.JpaConformanceProvider;
 import ca.uhn.fhir.jpa.provider.JpaSystemProvider;
@@ -69,6 +68,7 @@ public class TestRestfulServer extends RestfulServer {
 		setServerConformanceProvider(confProvider);
 		
 		setUseBrowserFriendlyContentTypes(true);
+		setCorsAllowDomain("*");
 		
 		String baseUrl = System.getProperty("fhir.baseurl");
 		if (StringUtils.isBlank(baseUrl)) {

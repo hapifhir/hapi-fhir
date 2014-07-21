@@ -1,8 +1,8 @@
-package ca.uhn.fhir.rest.param;
+package ca.uhn.fhir.rest.method;
 
 /*
  * #%L
- * HAPI FHIR Library
+ * HAPI FHIR - Core Library
  * %%
  * Copyright (C) 2014 University Health Network
  * %%
@@ -20,49 +20,33 @@ package ca.uhn.fhir.rest.param;
  * #L%
  */
 
-import java.util.Collections;
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
-
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.IQueryParameterAnd;
 import ca.uhn.fhir.model.api.IQueryParameterOr;
-import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.rest.method.QualifiedParamList;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
-final class QueryParameterTypeBinder implements IParamBinder {
-	private final Class<? extends IQueryParameterType> myType;
+final class QueryParameterAndBinder implements IParamBinder {
+	private final Class<? extends IQueryParameterAnd> myType;
 
-	QueryParameterTypeBinder(Class<? extends IQueryParameterType> theType) {
+	QueryParameterAndBinder(Class<? extends IQueryParameterAnd> theType) {
 		myType = theType;
 	}
 
 	@Override
 	public List<IQueryParameterOr> encode(FhirContext theContext, Object theString) throws InternalErrorException {
-		IQueryParameterType param = (IQueryParameterType) theString;
-		return Collections.singletonList(ParameterUtil.singleton(param));
+		List<IQueryParameterOr> retVal = ((IQueryParameterAnd) theString).getValuesAsQueryTokens();
+		return retVal;
 	}
 
 	@Override
-	public Object parse(List<QualifiedParamList> theParams) throws InternalErrorException, InvalidRequestException {
-		String value = theParams.get(0).get(0);
-		if (StringUtils.isBlank(value)) {
-			return null;
-		}
-		
-		IQueryParameterType dt;
+	public Object parse(List<QualifiedParamList> theString) throws InternalErrorException, InvalidRequestException {
+		IQueryParameterAnd dt;
 		try {
 			dt = myType.newInstance();
-			if (theParams.size() == 0 || theParams.get(0).size() == 0) {
-				return dt;
-			}
-			if (theParams.size() > 1 || theParams.get(0).size() > 1) {
-				throw new InvalidRequestException("Multiple values detected");
-			}
-			
-			dt.setValueAsQueryToken(theParams.get(0).getQualifier(), value);
+			dt.setValuesAsQueryTokens(theString);
 		} catch (InstantiationException e) {
 			throw new InternalErrorException(e);
 		} catch (IllegalAccessException e) {
@@ -72,5 +56,4 @@ final class QueryParameterTypeBinder implements IParamBinder {
 		}
 		return dt;
 	}
-
 }

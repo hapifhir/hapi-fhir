@@ -22,6 +22,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.message.BasicHeader;
+import org.apache.http.message.BasicHttpResponse;
 import org.apache.http.message.BasicStatusLine;
 import org.hamcrest.core.StringContains;
 import org.hamcrest.core.StringEndsWith;
@@ -57,6 +58,8 @@ import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IBasicClient;
+import ca.uhn.fhir.rest.client.interceptor.CapturingInterceptor;
+import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.param.CodingListParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.QualifiedDateParam;
@@ -73,8 +76,6 @@ public class ClientTest {
 	private HttpClient httpClient;
 	private HttpResponse httpResponse;
 
-	// atom-document-large.xml
-
 	@Before
 	public void before() {
 		ctx = new FhirContext(Patient.class, Conformance.class);
@@ -83,6 +84,36 @@ public class ClientTest {
 		ctx.getRestfulClientFactory().setHttpClient(httpClient);
 
 		httpResponse = mock(HttpResponse.class, new ReturnsDeepStubs());
+	}
+
+	// atom-document-large.xml
+
+	private String getPatientFeedWithOneResult() {
+		//@formatter:off
+		String msg = "<feed xmlns=\"http://www.w3.org/2005/Atom\">\n" + 
+				"<title/>\n" + 
+				"<id>d039f91a-cc3c-4013-988e-af4d8d0614bd</id>\n" + 
+				"<os:totalResults xmlns:os=\"http://a9.com/-/spec/opensearch/1.1/\">1</os:totalResults>\n" + 
+				"<published>2014-03-11T16:35:07-04:00</published>\n" + 
+				"<author>\n" + 
+				"<name>ca.uhn.fhir.rest.server.DummyRestfulServer</name>\n" + 
+				"</author>\n" + 
+				"<entry>\n" + 
+				"<content type=\"text/xml\">" 
+				+ "<Patient xmlns=\"http://hl7.org/fhir\">" 
+				+ "<text><status value=\"generated\" /><div xmlns=\"http://www.w3.org/1999/xhtml\">John Cardinal:            444333333        </div></text>"
+				+ "<identifier><label value=\"SSN\" /><system value=\"http://orionhealth.com/mrn\" /><value value=\"PRP1660\" /></identifier>"
+				+ "<name><use value=\"official\" /><family value=\"Cardinal\" /><given value=\"John\" /></name>"
+				+ "<name><family value=\"Kramer\" /><given value=\"Doe\" /></name>"
+				+ "<telecom><system value=\"phone\" /><value value=\"555-555-2004\" /><use value=\"work\" /></telecom>"
+				+ "<gender><coding><system value=\"http://hl7.org/fhir/v3/AdministrativeGender\" /><code value=\"M\" /></coding></gender>"
+				+ "<address><use value=\"home\" /><line value=\"2222 Home Street\" /></address><active value=\"true\" />"
+				+ "</Patient>"
+				+ "</content>\n"  
+				+ "   </entry>\n"  
+				+ "</feed>";
+		//@formatter:on
+		return msg;
 	}
 
 	@Test
@@ -99,7 +130,12 @@ public class ClientTest {
 		when(httpResponse.getAllHeaders()).thenReturn(toHeaderArray("Location", "http://example.com/fhir/Patient/100/_history/200"));
 
 		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
+		CapturingInterceptor interceptor = new CapturingInterceptor();
+		client.registerInterceptor(interceptor);
+
 		MethodOutcome response = client.createPatient(patient);
+
+		assertEquals(interceptor.getLastRequest().getURI().toASCIIString(), "http://foo/Patient");
 
 		assertEquals(HttpPost.class, capt.getValue().getClass());
 		HttpPost post = (HttpPost) capt.getValue();
@@ -129,8 +165,7 @@ public class ClientTest {
 	}
 
 	/**
-	 * Some servers (older ones?) return the resourcde you created instead of an
-	 * OperationOutcome. We just need to ignore it.
+	 * Some servers (older ones?) return the resourcde you created instead of an OperationOutcome. We just need to ignore it.
 	 */
 	@Test
 	public void testCreateWithResourceResponse() throws Exception {
@@ -563,6 +598,29 @@ public class ClientTest {
 	}
 
 	@Test
+	public void testReadFailureInternalError() throws Exception {
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
+		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 500, "INTERNAL"));
+		Header[] headers = new Header[1];
+		headers[0] = new BasicHeader(Constants.HEADER_LAST_MODIFIED, "2011-01-02T22:01:02");
+		when(httpResponse.getAllHeaders()).thenReturn(headers);
+		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_TEXT));
+		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader("Internal Failure"), Charset.forName("UTF-8")));
+
+		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
+		try {
+			client.getPatientById(new IdDt("111"));
+			fail();
+		} catch (InternalErrorException e) {
+			assertThat(e.getMessage(), containsString("INTERNAL"));
+			assertThat(e.getResponseBody(), containsString("Internal Failure"));
+		}
+
+	}
+
+	@Test
 	public void testReadFailureNoCharset() throws Exception {
 
 		//@formatter:off
@@ -588,30 +646,6 @@ public class ClientTest {
 
 	}
 
-	@Test
-	public void testReadFailureInternalError() throws Exception {
-
-		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
-		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
-		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 500, "INTERNAL"));
-		Header[] headers = new Header[1];
-		headers[0] = new BasicHeader(Constants.HEADER_LAST_MODIFIED, "2011-01-02T22:01:02");
-		when(httpResponse.getAllHeaders()).thenReturn(headers);
-		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_TEXT));
-		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader("Internal Failure"), Charset.forName("UTF-8")));
-
-		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
-		try {
-			client.getPatientById(new IdDt("111"));
-			fail();
-		} catch (InternalErrorException e) {
-			assertThat(e.getMessage(), containsString("INTERNAL"));
-			assertThat(e.getResponseBody(), containsString("Internal Failure"));
-		}
-
-	}
-
-	
 	@Test
 	public void testReadNoCharset() throws Exception {
 
@@ -677,16 +711,38 @@ public class ClientTest {
 		String msg = getPatientFeedWithOneResult();
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		
+		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
+
+//		httpResponse = new BasicHttpResponse(statusline, catalog, locale)
+		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
+		
+		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
+		List<Patient> response = client.getPatientByDob(new QualifiedDateParam(QuantityCompararatorEnum.GREATERTHAN_OR_EQUALS, "2011-01-02"));
+
+		assertEquals("http://foo/Patient?birthdate=%3E%3D2011-01-02", capt.getValue().getURI().toString());
+		assertEquals("PRP1660", response.get(0).getIdentifier().get(0).getValue().getValue());
+
+	}
+
+	@Test
+	public void testSearchByQuantity() throws Exception {
+
+		String msg = getPatientFeedWithOneResult();
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
 		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
 		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
 
 		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
-		List<Patient> response = client.getPatientByDob(new QualifiedDateParam(QuantityCompararatorEnum.GREATERTHAN_OR_EQUALS, "2011-01-02"));
+		Patient response = client.findPatientQuantity(new QuantityDt(QuantityCompararatorEnum.GREATERTHAN, 123L, "foo", "bar"));
 
-		assertEquals("http://foo/Patient?birthdate=%3E%3D2011-01-02", capt.getValue().getURI().toString());
-		assertEquals("PRP1660", response.get(0).getIdentifier().get(0).getValue().getValue());
+		assertEquals("http://foo/Patient?quantityParam=%3E123%7Cfoo%7Cbar", capt.getValue().getURI().toString());
+		assertEquals("PRP1660", response.getIdentifier().get(0).getValue().getValue());
 
 	}
 
@@ -709,25 +765,6 @@ public class ClientTest {
 
 	}
 
-	@Test
-	public void testSearchByQuantity() throws Exception {
-
-		String msg = getPatientFeedWithOneResult();
-
-		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
-		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
-		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
-		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
-
-		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
-		Patient response = client.findPatientQuantity(new QuantityDt(QuantityCompararatorEnum.GREATERTHAN,123L,"foo","bar"));
-
-		assertEquals("http://foo/Patient?quantityParam=%3E123%7Cfoo%7Cbar", capt.getValue().getURI().toString());
-		assertEquals("PRP1660", response.getIdentifier().get(0).getValue().getValue());
-
-	}
-	
 	@Test
 	public void testSearchComposite() throws Exception {
 
@@ -946,8 +983,7 @@ public class ClientTest {
 	}
 
 	/**
-	 * Return a FHIR content type, but no content and make sure we handle this
-	 * without crashing
+	 * Return a FHIR content type, but no content and make sure we handle this without crashing
 	 */
 	@Test
 	public void testUpdateWithEmptyResponse() throws Exception {
@@ -1063,36 +1099,12 @@ public class ClientTest {
 
 	}
 
-	private String getPatientFeedWithOneResult() {
-		//@formatter:off
-		String msg = "<feed xmlns=\"http://www.w3.org/2005/Atom\">\n" + 
-				"<title/>\n" + 
-				"<id>d039f91a-cc3c-4013-988e-af4d8d0614bd</id>\n" + 
-				"<os:totalResults xmlns:os=\"http://a9.com/-/spec/opensearch/1.1/\">1</os:totalResults>\n" + 
-				"<published>2014-03-11T16:35:07-04:00</published>\n" + 
-				"<author>\n" + 
-				"<name>ca.uhn.fhir.rest.server.DummyRestfulServer</name>\n" + 
-				"</author>\n" + 
-				"<entry>\n" + 
-				"<content type=\"text/xml\">" 
-				+ "<Patient xmlns=\"http://hl7.org/fhir\">" 
-				+ "<text><status value=\"generated\" /><div xmlns=\"http://www.w3.org/1999/xhtml\">John Cardinal:            444333333        </div></text>"
-				+ "<identifier><label value=\"SSN\" /><system value=\"http://orionhealth.com/mrn\" /><value value=\"PRP1660\" /></identifier>"
-				+ "<name><use value=\"official\" /><family value=\"Cardinal\" /><given value=\"John\" /></name>"
-				+ "<name><family value=\"Kramer\" /><given value=\"Doe\" /></name>"
-				+ "<telecom><system value=\"phone\" /><value value=\"555-555-2004\" /><use value=\"work\" /></telecom>"
-				+ "<gender><coding><system value=\"http://hl7.org/fhir/v3/AdministrativeGender\" /><code value=\"M\" /></coding></gender>"
-				+ "<address><use value=\"home\" /><line value=\"2222 Home Street\" /></address><active value=\"true\" />"
-				+ "</Patient>"
-				+ "</content>\n"  
-				+ "   </entry>\n"  
-				+ "</feed>";
-		//@formatter:on
-		return msg;
-	}
-
 	private Header[] toHeaderArray(String theName, String theValue) {
 		return new Header[] { new BasicHeader(theName, theValue) };
+	}
+
+	private interface ClientWithoutAnnotation extends IBasicClient {
+		Patient read(@IdParam IdDt theId);
 	}
 
 	@ResourceDef(name = "Patient")
@@ -1113,9 +1125,5 @@ public class ClientTest {
 	public interface ITestClientWithStringIncludes extends IBasicClient {
 		@Search()
 		public Patient getPatientWithIncludes(@RequiredParam(name = "withIncludes") StringDt theString, @IncludeParam String theInclude);
-	}
-
-	private interface ClientWithoutAnnotation extends IBasicClient {
-		Patient read(@IdParam IdDt theId);
 	}
 }

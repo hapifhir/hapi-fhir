@@ -1,0 +1,210 @@
+package ca.uhn.fhir.model.base.composite;
+
+/*
+ * #%L
+ * HAPI FHIR - Core Library
+ * %%
+ * Copyright (C) 2014 University Health Network
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
+import java.math.BigDecimal;
+
+import org.apache.commons.lang3.StringUtils;
+
+import ca.uhn.fhir.model.api.BaseIdentifiableElement;
+import ca.uhn.fhir.model.api.ICompositeDatatype;
+import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
+import ca.uhn.fhir.model.primitive.BoundCodeDt;
+import ca.uhn.fhir.model.primitive.CodeDt;
+import ca.uhn.fhir.model.primitive.DecimalDt;
+import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.model.primitive.UriDt;
+
+public abstract class BaseQuantityDt extends BaseIdentifiableElement implements ICompositeDatatype, IQueryParameterType {
+
+	
+	/**
+	 * Sets the value(s) for <b>value</b> (Numerical value (with implicit precision))
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The value of the measured amount. The value includes an implicit precision in the presentation of the value
+     * </p> 
+	 */
+	public abstract BaseQuantityDt setValue(BigDecimal theValue);
+
+	
+	@Override
+	public void setValueAsQueryToken(String theQualifier, String theValue) {
+		getComparator().setValue(null);
+		setCode( null);
+		setSystem(null);
+		setUnits( null);
+		setValue( null);
+
+		if (theValue == null) {
+			return;
+		}
+		String[] parts = theValue.split("\\|");
+		if (parts.length > 0 && StringUtils.isNotBlank(parts[0])) {
+			if (parts[0].startsWith("<=")) {
+				getComparator().setValue(QuantityCompararatorEnum.LESSTHAN_OR_EQUALS.getCode());
+				setValue(new BigDecimal(parts[0].substring(2)));
+			} else if (parts[0].startsWith("<")) {
+				getComparator().setValue(QuantityCompararatorEnum.LESSTHAN.getCode());
+				setValue(new BigDecimal(parts[0].substring(1)));
+			} else if (parts[0].startsWith(">=")) {
+				getComparator().setValue(QuantityCompararatorEnum.GREATERTHAN_OR_EQUALS.getCode());
+				setValue(new BigDecimal(parts[0].substring(2)));
+			} else if (parts[0].startsWith(">")) {
+				getComparator().setValue(QuantityCompararatorEnum.GREATERTHAN.getCode());
+				setValue(new BigDecimal(parts[0].substring(1)));
+			} else {
+				setValue(new BigDecimal(parts[0]));
+			}
+		}
+		if (parts.length > 1 && StringUtils.isNotBlank(parts[1])) {
+			setSystem(parts[1]);
+		}
+		if (parts.length > 2 && StringUtils.isNotBlank(parts[2])) {
+			setUnits(parts[2]);
+		}
+
+	}
+	
+	/**
+	 * Gets the value(s) for <b>comparator</b> (< | <= | >= | > - how to understand the value).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * How the value should be understood and represented - whether the actual value is greater or less than the stated value due to measurement issues. E.g. if the comparator is \"<\" , then the real value is < stated value
+     * </p> 
+	 */
+	public abstract BoundCodeDt<?> getComparator();
+
+	@Override
+	public String getValueAsQueryToken() {
+		StringBuilder b= new StringBuilder();
+		if (getComparator() != null) {
+			b.append(getComparator().getValue());
+		}
+		if (!getValue().isEmpty()) {
+			b.append(getValue().getValueAsString());
+		}
+		b.append('|');
+		if (!getSystem().isEmpty()) {
+		b.append(getSystem().getValueAsString());
+		}
+		b.append('|');
+		if (!getUnits().isEmpty()) {
+		b.append(getUnits().getValueAsString());
+		}
+		
+		return b.toString();
+	}
+	
+
+	@Override
+	public String getQueryParameterQualifier() {
+		return null;
+	}	
+	
+	
+	
+	
+
+ 	/**
+	 * Sets the value for <b>units</b> (Unit representation)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A human-readable form of the units
+     * </p> 
+	 */
+	public abstract BaseQuantityDt setUnits( String theString);
+
+ 
+	/**
+	 * Gets the value(s) for <b>system</b> (System that defines coded unit form).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The identification of the system that provides the coded form of the unit
+     * </p> 
+	 */
+	public abstract UriDt getSystem();
+
+	
+
+ 	/**
+	 * Sets the value for <b>system</b> (System that defines coded unit form)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The identification of the system that provides the coded form of the unit
+     * </p> 
+	 */
+	public abstract BaseQuantityDt setSystem( String theUri);
+ 
+	/**
+	 * Gets the value(s) for <b>code</b> (Coded form of the unit).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A computer processable form of the units in some unit representation system
+     * </p> 
+	 */
+	public abstract CodeDt getCode();
+
+ 	/**
+	 * Sets the value for <b>code</b> (Coded form of the unit)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A computer processable form of the units in some unit representation system
+     * </p> 
+	 */
+	public abstract BaseQuantityDt setCode( String theCode);
+	/**
+	 * Gets the value(s) for <b>units</b> (Unit representation).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A human-readable form of the units
+     * </p> 
+	 */
+	public abstract StringDt getUnits() ;
+	/**
+	 * Gets the value(s) for <b>value</b> (Numerical value (with implicit precision)).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The value of the measured amount. The value includes an implicit precision in the presentation of the value
+     * </p> 
+	 */
+	public abstract DecimalDt getValue();
+}

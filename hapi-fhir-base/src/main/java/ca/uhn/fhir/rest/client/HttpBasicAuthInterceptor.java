@@ -1,8 +1,22 @@
 package ca.uhn.fhir.rest.client;
 
+import java.io.IOException;
+
+import org.apache.http.HttpException;
+import org.apache.http.HttpRequest;
+import org.apache.http.HttpRequestInterceptor;
+import org.apache.http.auth.AuthState;
+import org.apache.http.auth.Credentials;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.protocol.HttpClientContext;
+import org.apache.http.impl.auth.BasicScheme;
+import org.apache.http.protocol.HttpContext;
+
+import ca.uhn.fhir.rest.client.api.IBasicClient;
+
 /*
  * #%L
- * HAPI FHIR Library
+ * HAPI FHIR - Core Library
  * %%
  * Copyright (C) 2014 University Health Network
  * %%
@@ -20,27 +34,11 @@ package ca.uhn.fhir.rest.client;
  * #L%
  */
 
-import java.io.IOException;
-
-import org.apache.http.HttpException;
-import org.apache.http.HttpRequest;
-import org.apache.http.HttpRequestInterceptor;
-import org.apache.http.auth.AuthState;
-import org.apache.http.auth.Credentials;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.protocol.HttpClientContext;
-import org.apache.http.impl.auth.BasicScheme;
-import org.apache.http.protocol.HttpContext;
 
 /**
- * HTTP interceptor to be used for adding HTTP basic auth username/password tokens
- * to requests
- * <p>
- * See the <a href="http://hl7api.sourceforge.net/hapi-fhir/doc_rest_client.html#HTTP_Basic_Authorization">HAPI Documentation</a>
- * for information on how to use this class.
- * </p>
+ * @deprecated Use {@link ca.uhn.fhir.rest.client.interceptor.BasicAuthInterceptor} instead. Note that that class is a HAPI client interceptor instead of being a commons-httpclient interceptor, so you register it to your client instance once it's created using {@link IGenericClient#registerInterceptor(IClientInterceptor)} or {@link IBasicClient#registerInterceptor(IClientInterceptor)} instead 
  */
-public class HttpBasicAuthInterceptor implements HttpRequestInterceptor {
+public class HttpBasicAuthInterceptor  implements HttpRequestInterceptor {
 
 	private String myUsername;
 	private String myPassword;

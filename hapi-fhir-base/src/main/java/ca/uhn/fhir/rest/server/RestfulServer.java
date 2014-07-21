@@ -2,7 +2,7 @@ package ca.uhn.fhir.rest.server;
 
 /*
  * #%L
- * HAPI FHIR Library
+ * HAPI FHIR - Core Library
  * %%
  * Copyright (C) 2014 University Health Network
  * %%
@@ -79,6 +79,7 @@ import ca.uhn.fhir.util.VersionUtil;
 
 public class RestfulServer extends HttpServlet {
 
+
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RestfulServer.class);
 
 	private static final long serialVersionUID = 1L;
@@ -99,6 +100,20 @@ public class RestfulServer extends HttpServlet {
 	private String myServerVersion = VersionUtil.getVersion();
 	private boolean myStarted;
 	private boolean myUseBrowserFriendlyContentTypes;
+	private String myCorsAllowDomain;
+
+	public String getCorsAllowDomain() {
+		return myCorsAllowDomain;
+	}
+
+	/**
+	 * If set to anything other than <code>null</code> (which is the default), the server will return CORS (Cross Origin Resource Sharing) headers with the given domain string.
+	 * <p>
+	 * A value of "*" indicates that the server allows access to all domains (which may be appropriate in development situations but is generally not appropriate in production)
+	 */
+	public void setCorsAllowDomain(String theCorsAllowDomain) {
+		myCorsAllowDomain = theCorsAllowDomain;
+	}
 
 	/**
 	 * Constructor
@@ -120,6 +135,13 @@ public class RestfulServer extends HttpServlet {
 	 */
 	public void addHeadersToResponse(HttpServletResponse theHttpResponse) {
 		theHttpResponse.addHeader("X-Powered-By", "HAPI FHIR " + VersionUtil.getVersion() + " RESTful Server");
+
+		if (isNotBlank(myCorsAllowDomain)) {
+			theHttpResponse.addHeader(Constants.HEADER_CORS_ALLOW_ORIGIN, myCorsAllowDomain);
+			theHttpResponse.addHeader(Constants.HEADER_CORS_ALLOW_METHODS, Constants.HEADERVALUE_CORS_ALLOW_METHODS_ALL);
+			theHttpResponse.addHeader(Constants.HEADER_CORS_EXPOSE_HEADERS, Constants.HEADER_CONTENT_LOCATION);
+		}
+
 	}
 
 	private void assertProviderIsValid(Object theNext) throws ConfigurationException {
@@ -352,7 +374,7 @@ public class RestfulServer extends HttpServlet {
 
 		int start = Math.min(offsetI, resultList.size() - 1);
 
-		EncodingEnum responseEncoding = determineRequestEncoding(theRequest);
+		EncodingEnum responseEncoding = determineResponseEncoding(theRequest.getServletRequest());
 		boolean prettyPrint = prettyPrintResponse(theRequest);
 		boolean requestIsBrowser = requestIsBrowser(theRequest.getServletRequest());
 		NarrativeModeEnum narrativeMode = determineNarrativeMode(theRequest);
@@ -418,7 +440,7 @@ public class RestfulServer extends HttpServlet {
 
 			ResourceBinding resourceBinding = null;
 			BaseMethodBinding<?> resourceMethod = null;
-			if ("metadata".equals(resourceName)) {
+			if ("metadata".equals(resourceName) || theRequestType == RequestType.OPTIONS) {
 				resourceMethod = myServerConformanceMethod;
 			} else if (resourceName == null) {
 				resourceBinding = myNullResourceBinding;

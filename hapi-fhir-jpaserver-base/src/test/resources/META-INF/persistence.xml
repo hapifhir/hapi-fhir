@@ -14,6 +14,7 @@
 		<class>ca.uhn.fhir.jpa.entity.ResourceHistoryTag</class>
 		<class>ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamDate</class>
 		<class>ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamNumber</class>
+		<class>ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamQuantity</class>
 		<class>ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamString</class>
 		<class>ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamToken</class>
 		<class>ca.uhn.fhir.jpa.entity.ResourceLink</class>

@@ -2,7 +2,7 @@ package ca.uhn.fhir.rest.method;
 
 /*
  * #%L
- * HAPI FHIR Library
+ * HAPI FHIR - Core Library
  * %%
  * Copyright (C) 2014 University Health Network
  * %%
@@ -41,7 +41,7 @@ public class QualifiedParamList extends ArrayList<String> {
 		super(theCapacity);
 	}
 
-	public QualifiedParamList(FhirContext theContext, IQueryParameterOr theNextOr) {
+	public QualifiedParamList(FhirContext theContext, IQueryParameterOr<?> theNextOr) {
 		for (IQueryParameterType next : theNextOr.getValuesAsQueryTokens()) {
 			if (myQualifier==null) {
 				myQualifier=next.getQueryParameterQualifier();

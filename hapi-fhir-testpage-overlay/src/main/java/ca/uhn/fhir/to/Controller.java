@@ -53,6 +53,7 @@ import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.client.GenericClient;
 import ca.uhn.fhir.rest.client.IGenericClient;
+import ca.uhn.fhir.rest.gclient.ICreateTyped;
 import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.gclient.IUntypedQuery;
 import ca.uhn.fhir.rest.gclient.StringParam;
@@ -89,10 +90,6 @@ public class Controller {
 		ourLog.info(logPrefix(theModel) + "Displayed about page");
 
 		return "about";
-	}
-
-	private String logPrefix(ModelMap theModel) {
-		return "[server=" + theModel.get("serverId") + "] - ";
 	}
 
 	@RequestMapping(value = { "/conformance" })
@@ -158,18 +155,6 @@ public class Controller {
 		ourLog.info(logPrefix(theModel) + "Deleted resource of type " + def.getName());
 
 		return "result";
-	}
-
-	private ResultType handleClientException(GenericClient theClient, Exception e, ModelMap theModel) {
-		ResultType returnsResource;
-		returnsResource = ResultType.NONE;
-		ourLog.warn("Failed to invoke server", e);
-
-		if (theClient.getLastResponse() == null) {
-			theModel.put("errorMsg", "Error: " + e.getMessage());
-		}
-
-		return returnsResource;
 	}
 
 	@RequestMapping(value = { "/get-tags" })
@@ -527,6 +512,12 @@ public class Controller {
 		return "result";
 	}
 
+	@RequestMapping(value = { "/update" })
+	public String actionUpdate(final HttpServletRequest theReq, final HomeRequest theRequest, final BindingResult theBindingResult, final ModelMap theModel) {
+		doActionCreateOrValidate(theReq, theRequest, theBindingResult, theModel, "update");
+		return "result";
+	}
+
 	@RequestMapping(value = { "/validate" })
 	public String actionValidate(final HttpServletRequest theReq, final HomeRequest theRequest, final BindingResult theBindingResult, final ModelMap theModel) {
 		doActionCreateOrValidate(theReq, theRequest, theBindingResult, theModel, "validate");
@@ -614,13 +605,17 @@ public class Controller {
 				client.validate(resource);
 			} else {
 				String id = theReq.getParameter("resource-create-id");
-				if (isNotBlank(id)) {
+				if ("update".equals(theMethod)) {
 					outcomeDescription = "Update Resource";
 					client.update(id, resource);
 					update = true;
 				} else {
 					outcomeDescription = "Create Resource";
-					client.create(resource);
+					ICreateTyped create = client.create().resource(body);
+					if (isNotBlank(id)) {
+						create.withId(id);
+					}
+					create.execute();
 				}
 			}
 		} catch (Exception e) {
@@ -802,19 +797,19 @@ public class Controller {
 		}
 
 		try {
-			str=URLDecoder.decode(str, "UTF-8");
+			str = URLDecoder.decode(str, "UTF-8");
 		} catch (UnsupportedEncodingException e) {
-			ourLog.error("Should not happen",e);
+			ourLog.error("Should not happen", e);
 		}
-		
+
 		StringBuilder b = new StringBuilder();
 		b.append("<span class='hlUrlBase'>");
 
 		boolean inParams = false;
 		for (int i = 0; i < str.length(); i++) {
 			char nextChar = str.charAt(i);
-//			char nextChar2 = i < str.length()-2 ? str.charAt(i+1):' ';
-//			char nextChar3 = i < str.length()-2 ? str.charAt(i+2):' ';
+			// char nextChar2 = i < str.length()-2 ? str.charAt(i+1):' ';
+			// char nextChar3 = i < str.length()-2 ? str.charAt(i+2):' ';
 			if (!inParams) {
 				if (nextChar == '?') {
 					inParams = true;
@@ -830,8 +825,8 @@ public class Controller {
 					b.append("</span><wbr /><span class='hlControl'>&amp;</span><span class='hlTagName'>");
 				} else if (nextChar == '=') {
 					b.append("</span><span class='hlControl'>=</span><span class='hlAttr'>");
-//				}else if (nextChar=='%' && Character.isLetterOrDigit(nextChar2)&& Character.isLetterOrDigit(nextChar3)) {
-//					URLDecoder.decode(s, enc)
+					// }else if (nextChar=='%' && Character.isLetterOrDigit(nextChar2)&& Character.isLetterOrDigit(nextChar3)) {
+					// URLDecoder.decode(s, enc)
 				} else {
 					b.append(nextChar);
 				}
@@ -851,6 +846,18 @@ public class Controller {
 			throw new ServletException("Invalid resourceName: " + resourceName);
 		}
 		return def;
+	}
+
+	private ResultType handleClientException(GenericClient theClient, Exception e, ModelMap theModel) {
+		ResultType returnsResource;
+		returnsResource = ResultType.NONE;
+		ourLog.warn("Failed to invoke server", e);
+
+		if (theClient.getLastResponse() == null) {
+			theModel.put("errorMsg", "Error: " + e.getMessage());
+		}
+
+		return returnsResource;
 	}
 
 	private boolean handleSearchParam(String paramIdxString, HttpServletRequest theReq, IQuery theQuery, JsonGenerator theClientCodeJsonWriter) {
@@ -968,6 +975,10 @@ public class Controller {
 		theModel.put("requiredParamExtension", ExtensionConstants.PARAM_IS_REQUIRED);
 
 		return conformance;
+	}
+
+	private String logPrefix(ModelMap theModel) {
+		return "[server=" + theModel.get("serverId") + "] - ";
 	}
 
 	private String parseNarrative(EncodingEnum theCtEnum, String theResultBody) {

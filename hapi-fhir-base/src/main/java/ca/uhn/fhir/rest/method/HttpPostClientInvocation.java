@@ -2,7 +2,7 @@ package ca.uhn.fhir.rest.method;
 
 /*
  * #%L
- * HAPI FHIR Library
+ * HAPI FHIR - Core Library
  * %%
  * Copyright (C) 2014 University Health Network
  * %%
@@ -49,6 +49,10 @@ public class HttpPostClientInvocation extends BaseHttpClientInvocationWithConten
 
 	public HttpPostClientInvocation(FhirContext theContext, Bundle theBundle) {
 		super(theContext,theBundle);
+	}
+
+	public HttpPostClientInvocation(FhirContext theContext, String theContents, boolean theIsBundle, String theUrlExtension) {
+		super(theContext,theContents, theIsBundle, theUrlExtension);
 	}
 
 

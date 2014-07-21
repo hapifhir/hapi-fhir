@@ -2,7 +2,7 @@ package ca.uhn.fhir.model.api;
 
 /*
  * #%L
- * HAPI FHIR Library
+ * HAPI FHIR - Core Library
  * %%
  * Copyright (C) 2014 University Health Network
  * %%
@@ -24,7 +24,7 @@ import java.util.List;
 
 import ca.uhn.fhir.rest.method.QualifiedParamList;
 
-public interface IQueryParameterOr {
+public interface IQueryParameterOr<T extends IQueryParameterType> {
 
 	/**
 	 * Sets the value of this type using the <b>token</b> format. This format is used in HTTP queries as a parameter
@@ -47,6 +47,6 @@ public interface IQueryParameterOr {
 	 * SearchParameter Types</a> for information on the <b>token</b> format
 	 * </p>
 	 */
-	public List<IQueryParameterType> getValuesAsQueryTokens();
+	public List<T> getValuesAsQueryTokens();
 
 }

@@ -2,7 +2,7 @@ package ca.uhn.fhir.rest.param;
 
 /*
  * #%L
- * HAPI FHIR Library
+ * HAPI FHIR - Core Library
  * %%
  * Copyright (C) 2014 University Health Network
  * %%
@@ -31,6 +31,7 @@ import org.apache.commons.lang3.StringUtils;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.dstu.valueset.SearchParamTypeEnum;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
+import ca.uhn.fhir.rest.method.IParameter;
 import ca.uhn.fhir.rest.method.QualifiedParamList;
 import ca.uhn.fhir.rest.method.Request;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;

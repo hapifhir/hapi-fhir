@@ -2,7 +2,7 @@ package ca.uhn.fhir.rest.method;
 
 /*
  * #%L
- * HAPI FHIR Library
+ * HAPI FHIR - Core Library
  * %%
  * Copyright (C) 2014 University Health Network
  * %%
@@ -39,8 +39,6 @@ import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.method.SearchMethodBinding.RequestType;
-import ca.uhn.fhir.rest.param.IParameter;
-import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
@@ -53,11 +51,11 @@ public class UpdateMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 	public UpdateMethodBinding(Method theMethod, FhirContext theContext, Object theProvider) {
 		super(theMethod, theContext, Update.class, theProvider);
 
-		myIdParameterIndex = ParameterUtil.findIdParameterIndex(theMethod);
+		myIdParameterIndex = MethodUtil.findIdParameterIndex(theMethod);
 		if (myIdParameterIndex == null) {
 			throw new ConfigurationException("Method '" + theMethod.getName() + "' on type '" + theMethod.getDeclaringClass().getCanonicalName() + "' has no parameter annotated with the @" + IdParam.class.getSimpleName() + " annotation");
 		}
-		myVersionIdParameterIndex = ParameterUtil.findVersionIdParameterIndex(theMethod);
+		myVersionIdParameterIndex = MethodUtil.findVersionIdParameterIndex(theMethod);
 	}
 
 	@Override
@@ -154,7 +152,7 @@ public class UpdateMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 			}
 		}
 
-		addTagsToPostOrPut(theResource, retVal);
+		MethodUtil.addTagsToPostOrPut(theResource, retVal);
 
 		return retVal;
 	}

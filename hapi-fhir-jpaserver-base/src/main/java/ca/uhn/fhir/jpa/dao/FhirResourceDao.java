@@ -2,11 +2,11 @@ package ca.uhn.fhir.jpa.dao;
 
 import static org.apache.commons.lang3.StringUtils.*;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +22,7 @@ import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Expression;
+import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
@@ -45,6 +46,7 @@ import ca.uhn.fhir.jpa.entity.BaseTag;
 import ca.uhn.fhir.jpa.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamNumber;
+import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamQuantity;
 import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.entity.ResourceLink;
@@ -61,15 +63,19 @@ import ca.uhn.fhir.model.dstu.composite.CodingDt;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.composite.QuantityDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
 import ca.uhn.fhir.model.dstu.valueset.SearchParamTypeEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.QualifiedDateParam;
+import ca.uhn.fhir.rest.param.NumberParam;
+import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -93,8 +99,8 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 	private Class<T> myResourceType;
 	private String mySecondaryPrimaryKeyParamName;
 
-	private Set<Long> addPredicateDate(String theParamName, Set<Long> thePids, List<IQueryParameterType> theOrParams) {
-		if (theOrParams == null || theOrParams.isEmpty()) {
+	private Set<Long> addPredicateDate(String theParamName, Set<Long> thePids, List<? extends IQueryParameterType> theList) {
+		if (theList == null || theList.isEmpty()) {
 			return thePids;
 		}
 
@@ -104,13 +110,15 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 		cq.select(from.get("myResourcePid").as(Long.class));
 
 		List<Predicate> codePredicates = new ArrayList<Predicate>();
-		for (IQueryParameterType nextOr : theOrParams) {
+		for (IQueryParameterType nextOr : theList) {
 			IQueryParameterType params = nextOr;
 
-			if (params instanceof QualifiedDateParam) {
-				QualifiedDateParam id = (QualifiedDateParam) params;
-				DateRangeParam range = new DateRangeParam(id);
-				addPredicateDateFromRange(builder, from, codePredicates, range);
+			if (params instanceof DateParam) {
+				DateParam date = (DateParam) params;
+				if (!date.isEmpty()) {
+					DateRangeParam range = new DateRangeParam(date);
+					addPredicateDateFromRange(builder, from, codePredicates, range);
+				}
 			} else if (params instanceof DateRangeParam) {
 				DateRangeParam range = (DateRangeParam) params;
 				addPredicateDateFromRange(builder, from, codePredicates, range);
@@ -149,7 +157,8 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 			Predicate lin = builder.isNull(from.get("myValueHigh"));
 			Predicate hbo = builder.or(lt, lin);
 
-			lb = builder.and(lbo, hbo);
+			lb = builder.or(gt, lt);
+			// lb = builder.and(lbo, hbo);
 		}
 
 		Predicate ub = null;
@@ -162,7 +171,8 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 			Predicate lin = builder.isNull(from.get("myValueHigh"));
 			Predicate ubo = builder.or(lt, lin);
 
-			ub = builder.and(ubo, lbo);
+			ub = builder.or(gt, lt);
+			// ub = builder.and(ubo, lbo);
 		}
 
 		if (lb != null && ub != null) {
@@ -198,73 +208,90 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 		return found;
 	}
 
-	private Set<Long> addPredicateQuantity(String theParamName, Set<Long> thePids, List<IQueryParameterType> theOrParams) {
-		if (theOrParams == null || theOrParams.isEmpty()) {
+	private Set<Long> addPredicateQuantity(String theParamName, Set<Long> thePids, List<? extends IQueryParameterType> theList) {
+		if (theList == null || theList.isEmpty()) {
 			return thePids;
 		}
 
 		CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
 		CriteriaQuery<Long> cq = builder.createQuery(Long.class);
-		Root<ResourceIndexedSearchParamNumber> from = cq.from(ResourceIndexedSearchParamNumber.class);
+		Root<ResourceIndexedSearchParamQuantity> from = cq.from(ResourceIndexedSearchParamQuantity.class);
 		cq.select(from.get("myResourcePid").as(Long.class));
 
 		List<Predicate> codePredicates = new ArrayList<Predicate>();
-		for (IQueryParameterType nextOr : theOrParams) {
+		for (IQueryParameterType nextOr : theList) {
 			IQueryParameterType params = nextOr;
 
+			String systemValue;
+			String unitsValue;
+			QuantityCompararatorEnum cmpValue;
+			BigDecimal valueValue;
+			boolean approx=false;
+
 			if (params instanceof QuantityDt) {
-				QuantityDt id = (QuantityDt) params;
-
-				Predicate system;
-				if (id.getSystem().isEmpty()) {
-					system = builder.isNull(from.get("mySystem"));
-				} else {
-					system = builder.equal(from.get("mySystem"), id.getSystem().getValueAsString());
-				}
-
-				Predicate code;
-				if (id.getCode().isEmpty()) {
-					code = builder.isNull(from.get("myUnits"));
-				} else {
-					code = builder.equal(from.get("myUnits"), id.getUnits().getValueAsString());
-				}
-
-				Predicate num;
-				if (id.getComparator().getValueAsEnum() == null) {
-					num = builder.equal(from.get("myValue"), id.getValue().getValue());
-				} else {
-					switch (id.getComparator().getValueAsEnum()) {
-					case GREATERTHAN:
-						Expression<Number> path = from.get("myValue");
-						Number value = id.getValue().getValue();
-						num = builder.gt(path, value);
-						break;
-					case GREATERTHAN_OR_EQUALS:
-						path = from.get("myValue");
-						value = id.getValue().getValue();
-						num = builder.ge(path, value);
-						break;
-					case LESSTHAN:
-						path = from.get("myValue");
-						value = id.getValue().getValue();
-						num = builder.lt(path, value);
-						break;
-					case LESSTHAN_OR_EQUALS:
-						path = from.get("myValue");
-						value = id.getValue().getValue();
-						num = builder.le(path, value);
-						break;
-					default:
-						throw new IllegalStateException(id.getComparator().getValueAsString());
-					}
-				}
-
-				Predicate singleCode = builder.and(system, code, num);
-				codePredicates.add(singleCode);
-
+				QuantityDt param = (QuantityDt) params;
+				systemValue = param.getSystem().getValueAsString();
+				unitsValue = param.getUnits().getValueAsString();
+				cmpValue = param.getComparator().getValueAsEnum();
+				valueValue = param.getValue().getValue();
+			} else if (params instanceof QuantityParam) {
+				QuantityParam param = (QuantityParam) params;
+				systemValue = param.getSystem().getValueAsString();
+				unitsValue = param.getUnits();
+				cmpValue = param.getComparator();
+				valueValue = param.getValue().getValue();
+				approx = param.isApproximate();
 			} else {
-				throw new IllegalArgumentException("Invalid token type: " + params.getClass());
+				throw new IllegalArgumentException("Invalid quantity type: " + params.getClass());
 			}
+
+			Predicate system;
+			if (isBlank(systemValue)) {
+				system = builder.isNull(from.get("mySystem"));
+			} else {
+				system = builder.equal(from.get("mySystem"), systemValue);
+			}
+
+			Predicate code;
+			if (isBlank(unitsValue)) {
+				code = builder.isNull(from.get("myUnits"));
+			} else {
+				code = builder.equal(from.get("myUnits"), unitsValue);
+			}
+
+			Predicate num;
+			if (cmpValue == null) {
+				BigDecimal mul = approx ? new BigDecimal(0.1) : new BigDecimal(0.01);
+				BigDecimal low = valueValue.subtract(valueValue.multiply(mul));
+				BigDecimal high = valueValue.add(valueValue.multiply(mul));
+				Predicate lowPred = builder.gt(from.get("myValue").as(BigDecimal.class), low);
+				Predicate highPred = builder.lt(from.get("myValue").as(BigDecimal.class), high);
+				num = builder.and(lowPred, highPred);
+			} else {
+				switch (cmpValue) {
+				case GREATERTHAN:
+					Expression<Number> path = from.get("myValue");
+					num = builder.gt(path, valueValue);
+					break;
+				case GREATERTHAN_OR_EQUALS:
+					path = from.get("myValue");
+					num = builder.ge(path, valueValue);
+					break;
+				case LESSTHAN:
+					path = from.get("myValue");
+					num = builder.lt(path, valueValue);
+					break;
+				case LESSTHAN_OR_EQUALS:
+					path = from.get("myValue");
+					num = builder.le(path, valueValue);
+					break;
+				default:
+					throw new IllegalStateException(cmpValue.getCode());
+				}
+			}
+
+			Predicate singleCode = builder.and(system, code, num);
+			codePredicates.add(singleCode);
 
 		}
 
@@ -283,11 +310,11 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 		return new HashSet<Long>(q.getResultList());
 	}
 
-	private Set<Long> addPredicateReference(String theParamName, Set<Long> thePids, List<IQueryParameterType> theOrParams) {
+	private Set<Long> addPredicateReference(String theParamName, Set<Long> thePids, List<? extends IQueryParameterType> theList) {
 		assert theParamName.contains(".") == false;
 
 		Set<Long> pidsToRetain = thePids;
-		if (theOrParams == null || theOrParams.isEmpty()) {
+		if (theList == null || theList.isEmpty()) {
 			return pidsToRetain;
 		}
 
@@ -298,7 +325,7 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 
 		List<Predicate> codePredicates = new ArrayList<Predicate>();
 
-		for (IQueryParameterType nextOr : theOrParams) {
+		for (IQueryParameterType nextOr : theList) {
 			IQueryParameterType params = nextOr;
 
 			if (params instanceof ReferenceParam) {
@@ -380,8 +407,8 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 		return new HashSet<Long>(q.getResultList());
 	}
 
-	private Set<Long> addPredicateString(String theParamName, Set<Long> thePids, List<IQueryParameterType> theOrParams) {
-		if (theOrParams == null || theOrParams.isEmpty()) {
+	private Set<Long> addPredicateString(String theParamName, Set<Long> thePids, List<? extends IQueryParameterType> theList) {
+		if (theList == null || theList.isEmpty()) {
 			return thePids;
 		}
 
@@ -391,11 +418,20 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 		cq.select(from.get("myResourcePid").as(Long.class));
 
 		List<Predicate> codePredicates = new ArrayList<Predicate>();
-		for (IQueryParameterType nextOr : theOrParams) {
+		for (IQueryParameterType nextOr : theList) {
 			IQueryParameterType params = nextOr;
 
 			String rawSearchTerm;
-			if (params instanceof IPrimitiveDatatype<?>) {
+			if (params instanceof TokenParam) {
+				TokenParam id = (TokenParam) params;
+				if (!id.isText()) {
+					throw new IllegalStateException("Trying to process a text search on a non-text token parameter");
+				}
+				rawSearchTerm = id.getValue();
+			} else if (params instanceof StringParam) {
+				StringParam id = (StringParam) params;
+				rawSearchTerm = id.getValue();
+			} else if (params instanceof IPrimitiveDatatype<?>) {
 				IPrimitiveDatatype<?> id = (IPrimitiveDatatype<?>) params;
 				rawSearchTerm = id.getValueAsString();
 			} else {
@@ -432,8 +468,75 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 		return new HashSet<Long>(q.getResultList());
 	}
 
-	private Set<Long> addPredicateToken(String theParamName, Set<Long> thePids, List<IQueryParameterType> theOrParams) {
-		if (theOrParams == null || theOrParams.isEmpty()) {
+	private Set<Long> addPredicateNumber(String theParamName, Set<Long> thePids, List<? extends IQueryParameterType> theList) {
+		if (theList == null || theList.isEmpty()) {
+			return thePids;
+		}
+
+		CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
+		CriteriaQuery<Long> cq = builder.createQuery(Long.class);
+		Root<ResourceIndexedSearchParamNumber> from = cq.from(ResourceIndexedSearchParamNumber.class);
+		cq.select(from.get("myResourcePid").as(Long.class));
+
+		List<Predicate> codePredicates = new ArrayList<Predicate>();
+		for (IQueryParameterType nextOr : theList) {
+			IQueryParameterType params = nextOr;
+
+			if (params instanceof NumberParam) {
+				NumberParam param = (NumberParam) params;
+
+				BigDecimal value = param.getValue();
+				if (value == null) {
+					return thePids;
+				}
+
+				Path<Object> fromObj = from.get("myValue");
+				if (param.getComparator() == null) {
+					double mul = value.doubleValue() * 1.01;
+					double low = value.doubleValue() - mul;
+					double high = value.doubleValue() + mul;
+					Predicate lowPred = builder.ge(fromObj.as(Long.class), low);
+					Predicate highPred = builder.le(fromObj.as(Long.class), high);
+					codePredicates.add(builder.and(lowPred, highPred));
+				} else {
+					switch (param.getComparator()) {
+					case GREATERTHAN:
+						codePredicates.add(builder.greaterThan(fromObj.as(BigDecimal.class), value));
+						break;
+					case GREATERTHAN_OR_EQUALS:
+						codePredicates.add(builder.ge(fromObj.as(BigDecimal.class), value));
+						break;
+					case LESSTHAN:
+						codePredicates.add(builder.lessThan(fromObj.as(BigDecimal.class), value));
+						break;
+					case LESSTHAN_OR_EQUALS:
+						codePredicates.add(builder.le(fromObj.as(BigDecimal.class), value));
+						break;
+					}
+				}
+			} else {
+				throw new IllegalArgumentException("Invalid token type: " + params.getClass());
+			}
+
+		}
+
+		Predicate masterCodePredicate = builder.or(codePredicates.toArray(new Predicate[0]));
+
+		Predicate type = builder.equal(from.get("myResourceType"), myResourceName);
+		Predicate name = builder.equal(from.get("myParamName"), theParamName);
+		if (thePids.size() > 0) {
+			Predicate inPids = (from.get("myResourcePid").in(thePids));
+			cq.where(builder.and(type, name, masterCodePredicate, inPids));
+		} else {
+			cq.where(builder.and(type, name, masterCodePredicate));
+		}
+
+		TypedQuery<Long> q = myEntityManager.createQuery(cq);
+		return new HashSet<Long>(q.getResultList());
+	}
+
+	private Set<Long> addPredicateToken(String theParamName, Set<Long> thePids, List<? extends IQueryParameterType> theList) {
+		if (theList == null || theList.isEmpty()) {
 			return thePids;
 		}
 
@@ -443,12 +546,19 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 		cq.select(from.get("myResourcePid").as(Long.class));
 
 		List<Predicate> codePredicates = new ArrayList<Predicate>();
-		for (IQueryParameterType nextOr : theOrParams) {
+		for (IQueryParameterType nextOr : theList) {
 			IQueryParameterType params = nextOr;
 
 			String code;
 			String system;
-			if (params instanceof IdentifierDt) {
+			if (params instanceof TokenParam) {
+				TokenParam id = (TokenParam) params;
+				if (id.isText()) {
+					return addPredicateString(theParamName, thePids, theList);
+				}
+				system = id.getSystem();
+				code = id.getValue();
+			} else if (params instanceof IdentifierDt) {
 				IdentifierDt id = (IdentifierDt) params;
 				system = id.getSystem().getValueAsString();
 				code = id.getValue().getValue();
@@ -533,9 +643,19 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 
 		if (theResource.getId().isEmpty() == false) {
 			if (isValidPid(theResource.getId())) {
-				throw new UnprocessableEntityException("This server cannot create an entity with a numeric ID - Numeric IDs are server assigned");
+				throw new UnprocessableEntityException("This server cannot create an entity with a user-specified numeric ID - Client should not specify an ID when creating a new resource, or should include at least one letter in the ID to force a client-defined ID");
 			}
 			createForcedIdIfNeeded(entity, theResource.getId());
+
+			if (entity.getForcedId() != null) {
+				try {
+					translateForcedIdToPid(theResource.getId());
+					throw new UnprocessableEntityException("Can not create entity with ID[" + theResource.getId().getValue() + "], constraint violation occurred");
+				} catch (ResourceNotFoundException e) {
+					// good, this ID doesn't exist so we can create it
+				}
+			}
+
 		}
 
 		updateEntity(theResource, entity, false, false);
@@ -592,7 +712,6 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 
 	@Override
 	public IBundleProvider history(final IdDt theId, final Date theSince) {
-		StopWatch w = new StopWatch();
 		final InstantDt end = createHistoryToTimestamp();
 		final String resourceType = getContext().getResourceDefinition(myResourceType).getName();
 
@@ -819,8 +938,7 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 	public IBundleProvider search(Map<String, IQueryParameterType> theParams) {
 		SearchParameterMap map = new SearchParameterMap();
 		for (Entry<String, IQueryParameterType> nextEntry : theParams.entrySet()) {
-			map.put(nextEntry.getKey(), new ArrayList<List<IQueryParameterType>>());
-			map.get(nextEntry.getKey()).add(Collections.singletonList(nextEntry.getValue()));
+			map.add(nextEntry.getKey(), (nextEntry.getValue()));
 		}
 		return search(map);
 	}
@@ -928,10 +1046,9 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 
 	@Override
 	public Set<Long> searchForIds(Map<String, IQueryParameterType> theParams) {
-		Map<String, List<List<IQueryParameterType>>> map = new HashMap<String, List<List<IQueryParameterType>>>();
+		SearchParameterMap map = new SearchParameterMap();
 		for (Entry<String, IQueryParameterType> nextEntry : theParams.entrySet()) {
-			map.put(nextEntry.getKey(), new ArrayList<List<IQueryParameterType>>());
-			map.get(nextEntry.getKey()).add(Collections.singletonList(nextEntry.getValue()));
+			map.add(nextEntry.getKey(), (nextEntry.getValue()));
 		}
 		return searchForIdsWithAndOr(map);
 	}
@@ -942,17 +1059,17 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 	}
 
 	@Override
-	public Set<Long> searchForIdsWithAndOr(Map<String, List<List<IQueryParameterType>>> theParams) {
-		Map<String, List<List<IQueryParameterType>>> params = theParams;
+	public Set<Long> searchForIdsWithAndOr(SearchParameterMap theParams) {
+		SearchParameterMap params = theParams;
 		if (params == null) {
-			params = Collections.emptyMap();
+			params = new SearchParameterMap();
 		}
 
 		RuntimeResourceDefinition resourceDef = getContext().getResourceDefinition(myResourceType);
 
 		Set<Long> pids = new HashSet<Long>();
 
-		for (Entry<String, List<List<IQueryParameterType>>> nextParamEntry : params.entrySet()) {
+		for (Entry<String, List<List<? extends IQueryParameterType>>> nextParamEntry : params.entrySet()) {
 			String nextParamName = nextParamEntry.getKey();
 			if (nextParamName.equals("_id")) {
 				if (nextParamEntry.getValue().isEmpty()) {
@@ -961,7 +1078,7 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 					throw new InvalidRequestException("AND queries not supported for _id (Multiple instances of this param found)");
 				} else {
 					Set<Long> joinPids = new HashSet<Long>();
-					List<IQueryParameterType> nextValue = nextParamEntry.getValue().get(0);
+					List<? extends IQueryParameterType> nextValue = nextParamEntry.getValue().get(0);
 					if (nextValue == null || nextValue.size() == 0) {
 						continue;
 					} else {
@@ -996,42 +1113,56 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 
 				RuntimeSearchParam nextParamDef = resourceDef.getSearchParam(nextParamName);
 				if (nextParamDef != null) {
-					if (nextParamDef.getParamType() == SearchParamTypeEnum.TOKEN) {
-						for (List<IQueryParameterType> nextAnd : nextParamEntry.getValue()) {
-							pids = addPredicateToken(nextParamName, pids, nextAnd);
-							if (pids.isEmpty()) {
-								return new HashSet<Long>();
-							}
-						}
-					} else if (nextParamDef.getParamType() == SearchParamTypeEnum.STRING) {
-						for (List<IQueryParameterType> nextAnd : nextParamEntry.getValue()) {
-							pids = addPredicateString(nextParamName, pids, nextAnd);
-							if (pids.isEmpty()) {
-								return new HashSet<Long>();
-							}
-						}
-					} else if (nextParamDef.getParamType() == SearchParamTypeEnum.QUANTITY) {
-						for (List<IQueryParameterType> nextAnd : nextParamEntry.getValue()) {
-							pids = addPredicateQuantity(nextParamName, pids, nextAnd);
-							if (pids.isEmpty()) {
-								return new HashSet<Long>();
-							}
-						}
-					} else if (nextParamDef.getParamType() == SearchParamTypeEnum.DATE) {
-						for (List<IQueryParameterType> nextAnd : nextParamEntry.getValue()) {
+					switch (nextParamDef.getParamType()) {
+					case DATE:
+						for (List<? extends IQueryParameterType> nextAnd : nextParamEntry.getValue()) {
 							pids = addPredicateDate(nextParamName, pids, nextAnd);
 							if (pids.isEmpty()) {
 								return new HashSet<Long>();
 							}
 						}
-					} else if (nextParamDef.getParamType() == SearchParamTypeEnum.REFERENCE) {
-						for (List<IQueryParameterType> nextAnd : nextParamEntry.getValue()) {
+						break;
+					case QUANTITY:
+						for (List<? extends IQueryParameterType> nextAnd : nextParamEntry.getValue()) {
+							pids = addPredicateQuantity(nextParamName, pids, nextAnd);
+							if (pids.isEmpty()) {
+								return new HashSet<Long>();
+							}
+						}
+						break;
+					case REFERENCE:
+						for (List<? extends IQueryParameterType> nextAnd : nextParamEntry.getValue()) {
 							pids = addPredicateReference(nextParamName, pids, nextAnd);
 							if (pids.isEmpty()) {
 								return new HashSet<Long>();
 							}
 						}
-					} else {
+						break;
+					case STRING:
+						for (List<? extends IQueryParameterType> nextAnd : nextParamEntry.getValue()) {
+							pids = addPredicateString(nextParamName, pids, nextAnd);
+							if (pids.isEmpty()) {
+								return new HashSet<Long>();
+							}
+						}
+						break;
+					case TOKEN:
+						for (List<? extends IQueryParameterType> nextAnd : nextParamEntry.getValue()) {
+							pids = addPredicateToken(nextParamName, pids, nextAnd);
+							if (pids.isEmpty()) {
+								return new HashSet<Long>();
+							}
+						}
+						break;
+					case NUMBER:
+						for (List<? extends IQueryParameterType> nextAnd : nextParamEntry.getValue()) {
+							pids = addPredicateNumber(nextParamName, pids, nextAnd);
+							if (pids.isEmpty()) {
+								return new HashSet<Long>();
+							}
+						}
+						break;
+					case COMPOSITE:
 						throw new IllegalArgumentException("Don't know how to handle parameter of type: " + nextParamDef.getParamType());
 					}
 				}
@@ -1065,7 +1196,7 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 	private IQueryParameterType toParameterType(SearchParamTypeEnum theParamType, String theValueAsQueryToken) {
 		switch (theParamType) {
 		case DATE:
-			return new QualifiedDateParam(theValueAsQueryToken);
+			return new DateParam(theValueAsQueryToken);
 		case NUMBER:
 			QuantityDt qt = new QuantityDt();
 			qt.setValueAsQueryToken(null, theValueAsQueryToken);

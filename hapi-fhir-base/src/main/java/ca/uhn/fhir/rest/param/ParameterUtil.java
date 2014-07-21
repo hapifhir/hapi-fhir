@@ -2,7 +2,7 @@ package ca.uhn.fhir.rest.param;
 
 /*
  * #%L
- * HAPI FHIR Library
+ * HAPI FHIR - Core Library
  * %%
  * Copyright (C) 2014 University Health Network
  * %%
@@ -20,50 +20,18 @@ package ca.uhn.fhir.rest.param;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.*;
-
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.lang3.time.DateUtils;
 
-import ca.uhn.fhir.context.ConfigurationException;
-import ca.uhn.fhir.model.api.IQueryParameterOr;
-import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.api.Include;
-import ca.uhn.fhir.model.api.PathSpecification;
-import ca.uhn.fhir.model.api.TagList;
-import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.TagListParam;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
-import ca.uhn.fhir.rest.annotation.Count;
-import ca.uhn.fhir.rest.annotation.IdParam;
-import ca.uhn.fhir.rest.annotation.IncludeParam;
-import ca.uhn.fhir.rest.annotation.OptionalParam;
-import ca.uhn.fhir.rest.annotation.RequiredParam;
-import ca.uhn.fhir.rest.annotation.ResourceParam;
-import ca.uhn.fhir.rest.annotation.ServerBase;
-import ca.uhn.fhir.rest.annotation.Since;
-import ca.uhn.fhir.rest.annotation.Sort;
-import ca.uhn.fhir.rest.annotation.TransactionParam;
-import ca.uhn.fhir.rest.annotation.VersionIdParam;
-import ca.uhn.fhir.rest.method.QualifiedParamList;
-import ca.uhn.fhir.util.ReflectionUtil;
 
 public class ParameterUtil {
 
@@ -84,22 +52,23 @@ public class ParameterUtil {
 
 	}
 
-	public static Integer findIdParameterIndex(Method theMethod) {
-		return findParamAnnotationIndex(theMethod, IdParam.class);
-	}
+	
 
 	// public static Integer findSinceParameterIndex(Method theMethod) {
 	// return findParamIndex(theMethod, Since.class);
 	// }
 
-	public static Integer findTagListParameterIndex(Method theMethod) {
-		return findParamAnnotationIndex(theMethod, TagListParam.class);
+	public static int nonEscapedIndexOf(String theString, char theCharacter) {
+		for (int i =0; i < theString.length(); i++) {
+			if (theString.charAt(i)==theCharacter) {
+				if (i == 0 || theString.charAt(i-1) != '\\') {
+					return i;
+				}
+			}
+		}
+		return -1;
 	}
-
-	public static Integer findVersionIdParameterIndex(Method theMethod) {
-		return findParamAnnotationIndex(theMethod, VersionIdParam.class);
-	}
-
+	
 	public static Object fromInstant(Class<?> theType, InstantDt theArgument) {
 		if (theType.equals(InstantDt.class)) {
 			if (theArgument == null) {
@@ -146,112 +115,6 @@ public class ParameterUtil {
 		return BINDABLE_INTEGER_TYPES;
 	}
 
-	@SuppressWarnings("unchecked")
-	public static List<IParameter> getResourceParameters(Method theMethod) {
-		List<IParameter> parameters = new ArrayList<IParameter>();
-
-		Class<?>[] parameterTypes = theMethod.getParameterTypes();
-		int paramIndex = 0;
-		for (Annotation[] annotations : theMethod.getParameterAnnotations()) {
-
-			IParameter param = null;
-			Class<?> parameterType = parameterTypes[paramIndex];
-			Class<? extends java.util.Collection<?>> outerCollectionType = null;
-			Class<? extends java.util.Collection<?>> innerCollectionType = null;
-			if (TagList.class.isAssignableFrom(parameterType)) {
-				// TagList is handled directly within the method bindings
-				param = new NullParameter();
-			} else {
-				if (Collection.class.isAssignableFrom(parameterType)) {
-					innerCollectionType = (Class<? extends java.util.Collection<?>>) parameterType;
-					parameterType = ReflectionUtil.getGenericCollectionTypeOfMethodParameter(theMethod, paramIndex);
-				}
-				if (Collection.class.isAssignableFrom(parameterType)) {
-					outerCollectionType = innerCollectionType;
-					innerCollectionType = (Class<? extends java.util.Collection<?>>) parameterType;
-					parameterType = ReflectionUtil.getGenericCollectionTypeOfMethodParameter(theMethod, paramIndex);
-				}
-				if (Collection.class.isAssignableFrom(parameterType)) {
-					throw new ConfigurationException("Argument #" + paramIndex + " of Method '" + theMethod.getName() + "' in type '" + theMethod.getDeclaringClass().getCanonicalName() + "' is of an invalid generic type (can not be a collection of a collection of a collection)");
-				}
-			}
-			if (parameterType.equals(HttpServletRequest.class) || parameterType.equals(ServletRequest.class)) {
-				param = new ServletRequestParameter();
-			} else if (parameterType.equals(HttpServletResponse.class) || parameterType.equals(ServletResponse.class)) {
-				param = new ServletResponseParameter();
-			} else {
-				for (int i = 0; i < annotations.length && param == null; i++) {
-					Annotation nextAnnotation = annotations[i];
-
-					if (nextAnnotation instanceof RequiredParam) {
-						SearchParameter parameter = new SearchParameter();
-						parameter.setName(((RequiredParam) nextAnnotation).name());
-						parameter.setRequired(true);
-						parameter.setDeclaredTypes(((RequiredParam) nextAnnotation).targetTypes());
-						parameter.setType(parameterType, innerCollectionType, outerCollectionType);
-						extractDescription(parameter, annotations);
-						param = parameter;
-					} else if (nextAnnotation instanceof OptionalParam) {
-						SearchParameter parameter = new SearchParameter();
-						parameter.setName(((OptionalParam) nextAnnotation).name());
-						parameter.setRequired(false);
-						parameter.setDeclaredTypes(((OptionalParam) nextAnnotation).targetTypes());
-						parameter.setType(parameterType, innerCollectionType, outerCollectionType);
-						extractDescription(parameter, annotations);
-						param = parameter;
-					} else if (nextAnnotation instanceof IncludeParam) {
-						Class<? extends Collection<Include>> instantiableCollectionType;
-						Class<?> specType;
-
-						if (parameterType == String.class) {
-							instantiableCollectionType = null;
-							specType = String.class;
-						} else if ((parameterType != Include.class && parameterType != PathSpecification.class) || innerCollectionType == null || outerCollectionType != null) {
-							throw new ConfigurationException("Method '" + theMethod.getName() + "' is annotated with @" + IncludeParam.class.getSimpleName() + " but has a type other than Collection<" + Include.class.getSimpleName() + ">");
-						} else {
-							instantiableCollectionType = (Class<? extends Collection<Include>>) CollectionBinder.getInstantiableCollectionType(innerCollectionType, "Method '" + theMethod.getName() + "'");
-							specType = parameterType;
-						}
-
-						param = new IncludeParameter((IncludeParam) nextAnnotation, instantiableCollectionType, specType);
-					} else if (nextAnnotation instanceof ResourceParam) {
-						if (!IResource.class.isAssignableFrom(parameterType)) {
-							throw new ConfigurationException("Method '" + theMethod.getName() + "' is annotated with @" + ResourceParam.class.getSimpleName() + " but has a type that is not an implemtation of " + IResource.class.getCanonicalName());
-						}
-						param = new ResourceParameter((Class<? extends IResource>) parameterType);
-					} else if (nextAnnotation instanceof IdParam || nextAnnotation instanceof VersionIdParam) {
-						param = new NullParameter();
-					} else if (nextAnnotation instanceof ServerBase) {
-						param = new ServerBaseParameter();
-					} else if (nextAnnotation instanceof Since) {
-						param = new SinceParameter();
-					} else if (nextAnnotation instanceof Count) {
-						param = new CountParameter();
-					} else if (nextAnnotation instanceof Sort) {
-						param = new SortParameter();
-					} else if (nextAnnotation instanceof TransactionParam) {
-						param = new TransactionParameter();
-					} else {
-						continue;
-					}
-
-				}
-
-			}
-
-			if (param == null) {
-				throw new ConfigurationException("Parameter #" + ((paramIndex+1))+"/" + (parameterTypes.length) + " of method '" + theMethod.getName() + "' on type '" + theMethod.getDeclaringClass().getCanonicalName()
-						+ "' has no recognized FHIR interface parameter annotations. Don't know how to handle this parameter");
-			}
-
-			param.initializeTypes(theMethod, outerCollectionType, innerCollectionType, parameterType);
-			parameters.add(param);
-
-			paramIndex++;
-		}
-		return parameters;
-	}
-
 	public static InstantDt toInstant(Object theArgument) {
 		if (theArgument instanceof InstantDt) {
 			return (InstantDt) theArgument;
@@ -275,57 +138,7 @@ public class ParameterUtil {
 		return null;
 	}
 
-	private static void extractDescription(SearchParameter theParameter, Annotation[] theAnnotations) {
-		for (Annotation annotation : theAnnotations) {
-			if (annotation instanceof Description) {
-				Description desc = (Description) annotation;
-				if (isNotBlank(desc.formalDefinition())) {
-					theParameter.setDescription(desc.formalDefinition());
-				} else {
-					theParameter.setDescription(desc.shortDefinition());
-				}
-			}
-		}
-	}
-
-	private static Integer findParamAnnotationIndex(Method theMethod, Class<?> toFind) {
-		int paramIndex = 0;
-		for (Annotation[] annotations : theMethod.getParameterAnnotations()) {
-			for (int annotationIndex = 0; annotationIndex < annotations.length; annotationIndex++) {
-				Annotation nextAnnotation = annotations[annotationIndex];
-				Class<? extends Annotation> class1 = nextAnnotation.getClass();
-				if (toFind.isAssignableFrom(class1)) {
-					return paramIndex;
-				}
-			}
-			paramIndex++;
-		}
-		return null;
-	}
-
-	public static IQueryParameterOr singleton(final IQueryParameterType theParam) {
-		return new IQueryParameterOr() {
-
-			@Override
-			public void setValuesAsQueryTokens(QualifiedParamList theParameters) {
-				if (theParameters.isEmpty()) {
-					return;
-				}
-				if (theParameters.size() > 1) {
-					throw new IllegalArgumentException("Type " + theParam.getClass().getCanonicalName() + " does not support multiple values");
-				}
-				theParam.setValueAsQueryToken(theParameters.getQualifier(), theParameters.get(0));
-			}
-
-			@Override
-			public List<IQueryParameterType> getValuesAsQueryTokens() {
-				return Collections.singletonList(theParam);
-			}
-		};
-	}
-
-	
-	public static List<String> splitParameterString(String theInput){
+	public static List<String> splitParameterString(String theInput, boolean theUnescapeComponents){
 		ArrayList<String> retVal = new ArrayList<String>();
 		if (theInput!=null) {
 			StringBuilder b = new StringBuilder();
@@ -340,14 +153,86 @@ public class ParameterUtil {
 							b.setLength(0);
 						}
 					}
+				} else {
+					b.append(next);
 				}
 			}
 			if (b.length() > 0) {
 				retVal.add(b.toString());
 			}
 		}
+		
+		if (theUnescapeComponents) {
+			for (int i = 0; i < retVal.size();i++) {
+				retVal.set(i,unescape(retVal.get(i)));
+			}
+		}
+		
 		return retVal;
 	}
 	
 	
+	/**
+	 * Escapes a string according to the rules for parameter escaping specified
+	 * in the <a href="http://www.hl7.org/implement/standards/fhir/search.html#escaping">FHIR Specification Escaping Section</a>
+	 */
+	public static String escape(String theValue) {
+		if (theValue == null) {
+			return theValue;
+		}
+		StringBuilder b = new StringBuilder();
+		
+		for (int i = 0; i < theValue.length();i++) {
+			char next = theValue.charAt(i);
+			switch (next) {
+			case '$':
+			case ',':
+			case '|':
+				b.append('\\');
+				// fall through
+			default:
+				b.append(next);
+			}
+		}
+		
+		return b.toString();
+	}
+
+	/**
+	 * Unescapes a string according to the rules for parameter escaping specified
+	 * in the <a href="http://www.hl7.org/implement/standards/fhir/search.html#escaping">FHIR Specification Escaping Section</a>
+	 */
+	public static String unescape(String theValue) {
+		if (theValue == null) {
+			return theValue;
+		}
+		if (theValue.indexOf('\\')==-1) {
+			return theValue;
+		}
+
+		StringBuilder b = new StringBuilder();
+		
+		for (int i = 0; i < theValue.length();i++) {
+			char next = theValue.charAt(i);
+			if (next == '\\') {
+				if (i == theValue.length()-1) {
+					b.append(next);
+				} else {
+					switch (theValue.charAt(i+1)) {
+					case '$':
+					case ',':
+					case '|':
+						continue;
+					default:
+						b.append(next);
+					}
+				}
+			} else {
+				b.append(next);
+			}
+		}
+		
+		return b.toString();
+	}
+
 }

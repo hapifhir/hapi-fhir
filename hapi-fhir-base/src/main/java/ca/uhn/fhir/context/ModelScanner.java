@@ -2,7 +2,7 @@ package ca.uhn.fhir.context;
 
 /*
  * #%L
- * HAPI FHIR Library
+ * HAPI FHIR - Core Library
  * %%
  * Copyright (C) 2014 University Health Network
  * %%
@@ -41,7 +41,6 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import ca.uhn.fhir.model.api.BaseResourceReference;
 import ca.uhn.fhir.model.api.CodeableConceptElement;
 import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.api.ICodeEnum;
@@ -62,6 +61,7 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Extension;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.composite.ContainedDt;
 import ca.uhn.fhir.model.dstu.composite.NarrativeDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
@@ -457,7 +457,7 @@ class ModelScanner {
 				if (IElement.class.isAssignableFrom(nextElementType)) {
 					addScanAlso((Class<? extends IElement>) nextElementType);
 				}
-			} else if (BaseResourceReference.class.isAssignableFrom(nextElementType)) {
+			} else if (BaseResourceReferenceDt.class.isAssignableFrom(nextElementType)) {
 				/*
 				 * Child is a resource reference
 				 */

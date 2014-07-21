@@ -2,7 +2,7 @@ package ca.uhn.fhir.rest.method;
 
 /*
  * #%L
- * HAPI FHIR Library
+ * HAPI FHIR - Core Library
  * %%
  * Copyright (C) 2014 University Health Network
  * %%
@@ -41,8 +41,6 @@ import ca.uhn.fhir.rest.annotation.GetTags;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.method.SearchMethodBinding.RequestType;
-import ca.uhn.fhir.rest.param.IParameter;
-import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.IResourceProvider;
@@ -70,8 +68,8 @@ public class GetTagsMethodBinding extends BaseMethodBinding<TagList> {
 			myResourceName = theConetxt.getResourceDefinition(myType).getName();
 		}
 
-		myIdParamIndex = ParameterUtil.findIdParameterIndex(theMethod);
-		myVersionIdParamIndex = ParameterUtil.findVersionIdParameterIndex(theMethod);
+		myIdParamIndex = MethodUtil.findIdParameterIndex(theMethod);
+		myVersionIdParamIndex = MethodUtil.findVersionIdParameterIndex(theMethod);
 
 		if (myIdParamIndex != null && myType.equals(IResource.class)) {
 			throw new ConfigurationException("Method '" + theMethod.getName() + "' does not specify a resource type, but has an @" + IdParam.class.getSimpleName() + " parameter. Please specity a resource type in the @" + GetTags.class.getSimpleName() + " annotation");

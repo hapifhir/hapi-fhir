@@ -2,7 +2,7 @@ package ca.uhn.fhir.rest.method;
 
 /*
  * #%L
- * HAPI FHIR Library
+ * HAPI FHIR - Core Library
  * %%
  * Copyright (C) 2014 University Health Network
  * %%
@@ -39,8 +39,6 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.annotation.TransactionParam;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.method.SearchMethodBinding.RequestType;
-import ca.uhn.fhir.rest.param.IParameter;
-import ca.uhn.fhir.rest.param.TransactionParameter;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
@@ -57,7 +55,7 @@ public class TransactionMethodBinding extends BaseResourceReturningMethodBinding
 		myTransactionParamIndex = -1;
 				int index=0;
 		for (IParameter next : getParameters()) {
-			if (next instanceof TransactionParameter) {
+			if (next instanceof TransactionParamBinder) {
 				myTransactionParamIndex = index;
 			}
 			index++;

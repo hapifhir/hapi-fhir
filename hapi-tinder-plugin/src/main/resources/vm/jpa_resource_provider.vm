@@ -34,10 +34,10 @@ public class ${className}ResourceProvider extends JpaResourceProvider<${classNam
 			@Description(shortDefinition="${param.description}")
 #if (${param.type} == 'string' )
 			@OptionalParam(name="${param.name}")
-			StringParam the${param.nameCapitalized}, 
+			StringAndListParam the${param.nameCapitalized}, 
 #elseif (${param.type} == 'token' )
 			@OptionalParam(name="${param.name}")
-			IdentifierListParam the${param.nameCapitalized}, 
+			TokenAndListParam the${param.nameCapitalized}, 
 #elseif (${param.type} == 'date' )
 			@OptionalParam(name="${param.name}")
 			DateRangeParam the${param.nameCapitalized}, 

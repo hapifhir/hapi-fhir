@@ -18,7 +18,7 @@ package ca.uhn.fhir.model.dstu.composite;
 
 /*
  * #%L
- * HAPI FHIR Library
+ * HAPI FHIR - Core Library
  * %%
  * Copyright (C) 2014 University Health Network
  * %%
@@ -45,6 +45,7 @@ import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.StringDt;
@@ -66,7 +67,7 @@ import ca.uhn.fhir.model.primitive.UriDt;
  */
 @DatatypeDef(name="CodingDt") 
 public class CodingDt
-        extends  BaseIdentifiableElement         implements ICompositeDatatype  , IQueryParameterType {
+        extends  BaseCodingDt         implements ICompositeDatatype  , IQueryParameterType {
 
 	/**
 	 * Constructor
@@ -389,43 +390,6 @@ public class CodingDt
 
   
 
-	/**
-	 * Returns true if <code>this</code> Coding has the same {@link CodingDt#getCode() Code}
-	 * and {@link CodingDt#getSystem() system} (as compared by simple equals comparison).
-	 * Does not compare other Codes (e.g. {@link CodingDt#getUse() use}) or any extensions. 
-	 */
-	public boolean matchesSystemAndCode(CodingDt theCoding) {
-		if (theCoding == null) {
-			return false;
-		}
-		return getCode().equals(theCoding.getCode()) && getSystem().equals(theCoding.getSystem());
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public String getValueAsQueryToken() {
-		if (org.apache.commons.lang3.StringUtils.isNotBlank(getSystem().getValueAsString())) {
-			return getSystem().getValueAsString() + '|' + getCode().getValueAsString(); 
-		} else {
-			return getCode().getValueAsString();
-		}
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void setValueAsQueryToken(String theQualifier, String theParameter) {
-		int barIndex = theParameter.indexOf('|');
-		if (barIndex != -1) {
-			setSystem(new UriDt(theParameter.substring(0, barIndex)));
-			setCode(theParameter.substring(barIndex + 1));
-		} else {
-			setCode(theParameter);
-		}
-	}	
 
 	@Override
 	public String getQueryParameterQualifier() {

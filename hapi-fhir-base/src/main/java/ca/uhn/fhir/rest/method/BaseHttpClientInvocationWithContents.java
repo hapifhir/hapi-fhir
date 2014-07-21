@@ -2,7 +2,7 @@ package ca.uhn.fhir.rest.method;
 
 /*
  * #%L
- * HAPI FHIR Library
+ * HAPI FHIR - Core Library
  * %%
  * Copyright (C) 2014 University Health Network
  * %%
@@ -19,6 +19,8 @@ package ca.uhn.fhir.rest.method;
  * limitations under the License.
  * #L%
  */
+
+import static org.apache.commons.lang3.StringUtils.*;
 
 import java.util.List;
 import java.util.Map;
@@ -42,7 +44,7 @@ import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.RestfulServer;
 
-public abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvocation {
+abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvocation {
 
 	private final FhirContext myContext;
 	private final IResource myResource;
@@ -50,6 +52,8 @@ public abstract class BaseHttpClientInvocationWithContents extends BaseHttpClien
 	private final TagList myTagList;
 	private final List<IResource> myResources;
 	private final Bundle myBundle;
+	private final String myContents;
+	private boolean myContentsIsBundle;
 
 	public BaseHttpClientInvocationWithContents(FhirContext theContext, IResource theResource, String theUrlExtension) {
 		super();
@@ -59,6 +63,7 @@ public abstract class BaseHttpClientInvocationWithContents extends BaseHttpClien
 		myTagList = null;
 		myResources = null;
 		myBundle = null;
+		myContents = null;
 	}
 
 	public BaseHttpClientInvocationWithContents(FhirContext theContext, TagList theTagList, String... theUrlExtension) {
@@ -72,6 +77,7 @@ public abstract class BaseHttpClientInvocationWithContents extends BaseHttpClien
 		myTagList = theTagList;
 		myResources = null;
 		myBundle = null;
+		myContents = null;
 
 		myUrlExtension = StringUtils.join(theUrlExtension, '/');
 	}
@@ -83,6 +89,7 @@ public abstract class BaseHttpClientInvocationWithContents extends BaseHttpClien
 		myUrlExtension = null;
 		myResources = theResources;
 		myBundle = null;
+		myContents = null;
 	}
 
 	public BaseHttpClientInvocationWithContents(FhirContext theContext, Bundle theBundle) {
@@ -92,16 +99,30 @@ public abstract class BaseHttpClientInvocationWithContents extends BaseHttpClien
 		myUrlExtension = null;
 		myResources = null;
 		myBundle = theBundle;
+		myContents = null;
+	}
+
+	public BaseHttpClientInvocationWithContents(FhirContext theContext, String theContents, boolean theIsBundle, String theUrlExtension) {
+		myContext = theContext;
+		myResource = null;
+		myTagList = null;
+		myUrlExtension = theUrlExtension;
+		myResources = null;
+		myBundle = null;
+		myContents = theContents;
+		myContentsIsBundle = theIsBundle;
 	}
 
 	@Override
 	public HttpRequestBase asHttpRequest(String theUrlBase, Map<String, List<String>> theExtraParams, EncodingEnum theEncoding) throws DataFormatException {
 		StringBuilder b = new StringBuilder();
 		b.append(theUrlBase);
-		if (!theUrlBase.endsWith("/")) {
-			b.append('/');
+		if (isNotBlank(myUrlExtension)) {
+			if (!theUrlBase.endsWith("/")) {
+				b.append('/');
+			}
+			b.append(myUrlExtension);
 		}
-		b.append(StringUtils.defaultString(myUrlExtension));
 
 		appendExtraParamsWithQuestionMark(theExtraParams, b, b.indexOf("?") == -1);
 		String url = b.toString();
@@ -115,30 +136,46 @@ public abstract class BaseHttpClientInvocationWithContents extends BaseHttpClien
 
 		IParser parser;
 		String contentType;
-		if (theEncoding == EncodingEnum.JSON) {
+		EncodingEnum encoding = null;
+		encoding = theEncoding;
+
+		if (encoding == EncodingEnum.JSON) {
 			parser = myContext.newJsonParser();
-			contentType = Constants.CT_FHIR_JSON;
 		} else {
+			encoding = EncodingEnum.XML;
 			parser = myContext.newXmlParser();
-			contentType = Constants.CT_FHIR_XML;
 		}
 
 		String contents;
 		if (myTagList != null) {
 			contents = parser.encodeTagListToString(myTagList);
+			contentType = encoding.getResourceContentType();
 		} else if (myBundle != null) {
 			contents = parser.encodeBundleToString(myBundle);
+			contentType = encoding.getBundleContentType();
 		} else if (myResources != null) {
 			Bundle bundle = RestfulServer.createBundleFromResourceList(myContext, "", myResources, "", "", myResources.size());
 			contents = parser.encodeBundleToString(bundle);
+			contentType = encoding.getBundleContentType();
+		} else if (myContents != null) {
+			contents = myContents;
+			if (myContentsIsBundle) {
+				contentType = encoding.getBundleContentType();
+			} else {
+				contentType = encoding.getResourceContentType();
+			}
 		} else {
 			contents = parser.encodeResourceToString(myResource);
+			contentType = encoding.getResourceContentType();
 		}
 
 		StringEntity entity = new StringEntity(contents, ContentType.create(contentType, "UTF-8"));
 
 		HttpRequestBase retVal = createRequest(url, entity);
 		super.addHeadersToRequest(retVal);
+
+		// retVal.addHeader(Constants.HEADER_CONTENT_TYPE, con);
+
 		return retVal;
 	}
 

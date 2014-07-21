@@ -2,7 +2,7 @@ package ca.uhn.fhir.rest.client;
 
 /*
  * #%L
- * HAPI FHIR Library
+ * HAPI FHIR - Core Library
  * %%
  * Copyright (C) 2014 University Health Network
  * %%
@@ -20,13 +20,21 @@ package ca.uhn.fhir.rest.client;
  * #L%
  */
 
+import java.io.IOException;
+
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpRequestBase;
 
 public interface IClientInterceptor {
 
+	/**
+	 * Fired by the client just before invoking the HTTP client request
+	 */
 	void interceptRequest(HttpRequestBase theRequest);
 	
-	void interceptResponse(HttpResponse theRequest);
+	/**
+	 * Fired by the client upon receiving an HTTP response, prior to processing that response
+	 */
+	void interceptResponse(HttpResponse theResponse) throws IOException;
 
 }

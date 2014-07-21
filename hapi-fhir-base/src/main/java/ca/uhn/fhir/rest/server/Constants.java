@@ -2,7 +2,7 @@ package ca.uhn.fhir.rest.server;
 
 /*
  * #%L
- * HAPI FHIR Library
+ * HAPI FHIR - Core Library
  * %%
  * Copyright (C) 2014 University Health Network
  * %%
@@ -27,6 +27,10 @@ import java.util.Map;
 import java.util.Set;
 
 public class Constants {
+
+	public static final String HEADER_CORS_EXPOSE_HEADERS = "Access-Control-Expose-Headers";
+	public static final String HEADER_CORS_ALLOW_METHODS = "Access-Control-Allow-Methods";
+	public static final String HEADER_CORS_ALLOW_ORIGIN = "Access-Control-Allow-Origin";
 
 	public static final String CHARSET_UTF_8 = "UTF-8";
 	public static final String CT_ATOM_XML = "application/atom+xml";
@@ -88,6 +92,9 @@ public class Constants {
 	public static final String ENCODING_GZIP = "gzip";
 	public static final String HEADER_LOCATION = "Location";
 	public static final String HEADER_LOCATION_LC = HEADER_LOCATION.toLowerCase();
+	public static final String HEADERVALUE_CORS_ALLOW_METHODS_ALL = "GET, POST, PUT, DELETE";
+	public static final String HEADER_AUTHORIZATION = "Authorization";
+	public static final String PARAMQUALIFIER_TOKEN_TEXT = ":text";
 	
 
 	static {

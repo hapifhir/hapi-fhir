@@ -2,7 +2,7 @@ package ca.uhn.fhir.rest.method;
 
 /*
  * #%L
- * HAPI FHIR Library
+ * HAPI FHIR - Core Library
  * %%
  * Copyright (C) 2014 University Health Network
  * %%
@@ -41,8 +41,6 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.method.SearchMethodBinding.RequestType;
-import ca.uhn.fhir.rest.param.IParameter;
-import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.IResourceProvider;
@@ -51,7 +49,7 @@ import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
-public abstract class BaseAddOrDeleteTagsMethodBinding extends BaseMethodBinding<Void> {
+abstract class BaseAddOrDeleteTagsMethodBinding extends BaseMethodBinding<Void> {
 
 	private Class<? extends IResource> myType;
 	private Integer myIdParamIndex;
@@ -73,9 +71,9 @@ public abstract class BaseAddOrDeleteTagsMethodBinding extends BaseMethodBinding
 		}
 		myResourceName = theConetxt.getResourceDefinition(myType).getName();
 
-		myIdParamIndex = ParameterUtil.findIdParameterIndex(theMethod);
-		myVersionIdParamIndex = ParameterUtil.findVersionIdParameterIndex(theMethod);
-		myTagListParamIndex = ParameterUtil.findTagListParameterIndex(theMethod);
+		myIdParamIndex = MethodUtil.findIdParameterIndex(theMethod);
+		myVersionIdParamIndex = MethodUtil.findVersionIdParameterIndex(theMethod);
+		myTagListParamIndex = MethodUtil.findTagListParameterIndex(theMethod);
 
 		if (myIdParamIndex == null) {
 			throw new ConfigurationException("Method '" + theMethod.getName() + "' does not have an @" + IdParam.class.getSimpleName() + " parameter.");

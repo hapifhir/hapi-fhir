@@ -1,18 +1,26 @@
 package ca.uhn.fhir.tinder.parser;
 
+import static org.apache.commons.lang3.StringUtils.*;
+
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.maven.plugin.MojoExecutionException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.tinder.model.AnyChild;
 import ca.uhn.fhir.tinder.model.BaseElement;
 import ca.uhn.fhir.tinder.model.BaseRootType;
@@ -61,10 +69,10 @@ public abstract class BaseStructureSpreadsheetParser extends BaseStructureParser
 			BaseRootType resource = createRootType();
 			addResource(resource);
 
-			parseParameters(file, resource);
-
 			parseBasicElements(resourceRow, resource);
 
+			parseParameters(file, resource);
+			
 			resource.setId(resource.getName().toLowerCase());
 
 			if (this instanceof ResourceGeneratorUsingSpreadsheet) {
@@ -145,7 +153,7 @@ public abstract class BaseStructureSpreadsheetParser extends BaseStructureParser
 
 	protected abstract BaseRootType createRootType();
 
-	private void parseParameters(Document theFile, BaseRootType theResource) {
+	private void parseParameters(Document theFile, BaseRootType theResource) throws MojoExecutionException {
 		NodeList sheets = theFile.getElementsByTagName("Worksheet");
 		for (int i = 0; i < sheets.getLength(); i++) {
 			Element sheet = (Element) sheets.item(i);
@@ -178,6 +186,8 @@ public abstract class BaseStructureSpreadsheetParser extends BaseStructureParser
 					}
 				}
 
+				List<SearchParameter> compositeParams = new ArrayList<SearchParameter>();
+				
 				for (int j = 1; j < rows.getLength(); j++) {
 					Element nextRow = (Element) rows.item(j);
 					SearchParameter sp = new SearchParameter();
@@ -188,10 +198,75 @@ public abstract class BaseStructureSpreadsheetParser extends BaseStructureParser
 					sp.setPath(cellValue(nextRow, colPath));
 
 					if (StringUtils.isNotBlank(sp.getName()) && !sp.getName().startsWith("!")) {
+						if (sp.getType().equals("composite")) {
+							compositeParams.add(sp);
+						}else {
 						theResource.addSearchParameter(sp);
+						}
 					}
 				}
 
+				for (SearchParameter nextCompositeParam : compositeParams) {
+//					if(true)continue;
+					
+					if (isBlank(nextCompositeParam.getPath())) {
+						throw new MojoExecutionException("Composite param " + nextCompositeParam.getName() + " has no path");
+					}
+					
+					if (nextCompositeParam.getPath().indexOf('&')==-1) {
+						throw new MojoExecutionException("Composite param " + nextCompositeParam.getName() + " has path with no '&': " + nextCompositeParam.getPath());
+					}
+					
+					String[] parts = nextCompositeParam.getPath().split("\\&");
+					List<List<SearchParameter>> compositeOf = new ArrayList<List<SearchParameter>>();
+					
+					for (String nextPart : parts) {
+						nextPart = nextPart.trim();
+						if (isBlank(nextPart)) {
+							continue;
+						}
+						
+						List<SearchParameter> part = new ArrayList<SearchParameter>();
+						compositeOf.add(part);
+						
+						Set<String> possibleMatches = new HashSet<String>();
+						possibleMatches.add(nextPart);
+						possibleMatches.add(theResource.getName() + "." + nextPart);
+						possibleMatches.add(nextPart.replace("[x]", "-[x]"));
+						possibleMatches.add(theResource.getName() + "." + nextPart.replace("[x]", "-[x]"));
+						possibleMatches.add(nextPart.replace("-[x]", "[x]"));
+						possibleMatches.add(theResource.getName() + "." + nextPart.replace("-[x]", "[x]"));
+						
+						for (SearchParameter nextParam : theResource.getSearchParameters()) {
+							if (possibleMatches.contains(nextParam.getPath()) || possibleMatches.contains(nextParam.getName())) {
+								part.add(nextParam);
+							}
+						}
+						
+						if (part.isEmpty()) {
+							throw new MojoExecutionException("Composite param " + nextCompositeParam.getName() + " has path that doesn't seem to correspond to any other params: " + nextPart);
+						}
+						
+					}
+					
+					if (compositeOf.size() > 2) {
+						throw new MojoExecutionException("Composite param " + nextCompositeParam.getName() + " has >2 parts, this isn't supported yet");
+					}
+					
+					for (SearchParameter part1 : compositeOf.get(0)) {
+						for (SearchParameter part2 : compositeOf.get(1)) {
+							SearchParameter composite = new SearchParameter();
+							theResource.addSearchParameter(composite);
+							composite.setName(part1.getName() + "-" + part2.getName());
+							composite.setDescription(nextCompositeParam.getDescription());
+							composite.setPath(nextCompositeParam.getPath());
+							composite.setType("composite");
+							composite.setCompositeOf(Arrays.asList(part1.getPath(), part2.getPath()));
+						}
+					}
+					
+					
+				}
 			}
 		}
 	}

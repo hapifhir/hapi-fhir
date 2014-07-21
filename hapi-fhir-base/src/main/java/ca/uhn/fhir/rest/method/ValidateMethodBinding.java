@@ -2,7 +2,7 @@ package ca.uhn.fhir.rest.method;
 
 /*
  * #%L
- * HAPI FHIR Library
+ * HAPI FHIR - Core Library
  * %%
  * Copyright (C) 2014 University Health Network
  * %%
@@ -32,8 +32,6 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.Validate;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.method.SearchMethodBinding.RequestType;
-import ca.uhn.fhir.rest.param.IParameter;
-import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.Constants;
 
 public class ValidateMethodBinding extends BaseOutcomeReturningMethodBindingWithResourceParam {
@@ -43,7 +41,7 @@ public class ValidateMethodBinding extends BaseOutcomeReturningMethodBindingWith
 	public ValidateMethodBinding(Method theMethod, FhirContext theContext, Object theProvider) {
 		super(theMethod, theContext, Validate.class, theProvider);
 
-		myIdParameterIndex = ParameterUtil.findIdParameterIndex(theMethod);
+		myIdParameterIndex = MethodUtil.findIdParameterIndex(theMethod);
 	}
 
 	@Override

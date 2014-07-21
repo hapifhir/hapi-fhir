@@ -2,7 +2,7 @@ package ca.uhn.fhir.rest.param;
 
 /*
  * #%L
- * HAPI FHIR Library
+ * HAPI FHIR - Core Library
  * %%
  * Copyright (C) 2014 University Health Network
  * %%
@@ -30,7 +30,10 @@ import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.dstu.composite.CodingDt;
 import ca.uhn.fhir.rest.method.QualifiedParamList;
 
-public class CodingListParam implements IQueryParameterOr, Iterable<CodingDt> {
+/**
+ * @deprecated Use {@link TokenOrListParam} instead
+ */
+public class CodingListParam implements IQueryParameterOr<IQueryParameterType>, Iterable<CodingDt> {
 
 	private List<CodingDt> myCodings = new ArrayList<CodingDt>();
 
