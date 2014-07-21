@@ -38,13 +38,70 @@ import ca.uhn.fhir.model.primitive.UriDt;
 
 public class QuantityParam implements IQueryParameterType {
 
-	private QuantityDt myQuantity = new QuantityDt();
 	private boolean myApproximate;
+	private QuantityDt myQuantity = new QuantityDt();
 
 	/**
 	 * Constructor
 	 */
 	public QuantityParam() {
+	}
+
+	/**
+	 * Constructor
+	 * 
+	 * @param theComparator
+	 *            The comparator, or <code>null</code> for an equals comparator
+	 * @param theQuantity
+	 *            A quantity value
+	 * @param theSystem
+	 *            The unit system
+	 * @param theUnits
+	 *            The unit code
+	 */
+	public QuantityParam(QuantityCompararatorEnum theComparator, BigDecimal theValue, String theSystem, String theUnits) {
+		setComparator(theComparator);
+		setValue(theValue);
+		setSystem(theSystem);
+		setUnits(theUnits);
+	}
+
+	/**
+	 * Constructor
+	 * 
+	 * @param theComparator
+	 *            The comparator, or <code>null</code> for an equals comparator
+	 * @param theQuantity
+	 *            A quantity value
+	 * @param theSystem
+	 *            The unit system
+	 * @param theUnits
+	 *            The unit code
+	 */
+	public QuantityParam(QuantityCompararatorEnum theComparator, double theValue, String theSystem, String theUnits) {
+		setComparator(theComparator);
+		setValue(theValue);
+		setSystem(theSystem);
+		setUnits(theUnits);
+	}
+
+	/**
+	 * Constructor
+	 * 
+	 * @param theComparator
+	 *            The comparator, or <code>null</code> for an equals comparator
+	 * @param theQuantity
+	 *            A quantity value
+	 * @param theSystem
+	 *            The unit system
+	 * @param theUnits
+	 *            The unit code
+	 */
+	public QuantityParam(QuantityCompararatorEnum theComparator, long theValue, String theSystem, String theUnits) {
+		setComparator(theComparator);
+		setValue(theValue);
+		setSystem(theSystem);
+		setUnits(theUnits);
 	}
 
 	/**
@@ -73,8 +130,67 @@ public class QuantityParam implements IQueryParameterType {
 		setUnits(theUnits);
 	}
 
+	private void clear() {
+		myQuantity.setComparator((BoundCodeDt<QuantityCompararatorEnum>) null);
+		myQuantity.setCode((CodeDt) null);
+		myQuantity.setSystem((UriDt) null);
+		myQuantity.setUnits((StringDt) null);
+		myQuantity.setValue((DecimalDt) null);
+		myApproximate = false;
+	}
+
 	public QuantityCompararatorEnum getComparator() {
 		return myQuantity.getComparator().getValueAsEnum();
+	}
+
+	@Override
+	public String getQueryParameterQualifier() {
+		return null;
+	}
+
+	public UriDt getSystem() {
+		return myQuantity.getSystem();
+	}
+
+	public String getUnits() {
+		return myQuantity.getUnits().getValue();
+	}
+
+	public DecimalDt getValue() {
+		return myQuantity.getValue();
+	}
+
+	@Override
+	public String getValueAsQueryToken() {
+		StringBuilder b = new StringBuilder();
+		if (myQuantity.getComparator() != null) {
+			b.append(ParameterUtil.escape(myQuantity.getComparator().getValue()));
+		} else if (myApproximate) {
+			b.append('~');
+		}
+
+		if (!myQuantity.getValue().isEmpty()) {
+			b.append(ParameterUtil.escape(myQuantity.getValue().getValueAsString()));
+		}
+		b.append('|');
+		if (!myQuantity.getSystem().isEmpty()) {
+			b.append(ParameterUtil.escape(myQuantity.getSystem().getValueAsString()));
+		}
+		b.append('|');
+		if (!myQuantity.getUnits().isEmpty()) {
+			b.append(ParameterUtil.escape(myQuantity.getUnits().getValueAsString()));
+		}
+
+		return b.toString();
+	}
+
+	public boolean isApproximate() {
+		return myApproximate;
+	}
+
+	public void setApproximate(boolean theApproximate) {
+		myApproximate = theApproximate;
+		myQuantity.setComparator((QuantityCompararatorEnum) null);
 	}
 
 	public QuantityParam setComparator(QuantityCompararatorEnum theComparator) {
@@ -93,8 +209,19 @@ public class QuantityParam implements IQueryParameterType {
 		return this;
 	}
 
-	public DecimalDt getValue() {
-		return myQuantity.getValue();
+	public QuantityParam setSystem(String theSystem) {
+		myQuantity.setSystem(theSystem);
+		return this;
+	}
+
+	public QuantityParam setSystem(UriDt theSystem) {
+		myQuantity.setSystem(theSystem);
+		return this;
+	}
+
+	public QuantityParam setUnits(String theUnits) {
+		myQuantity.setUnits(theUnits);
+		return this;
 	}
 
 	public QuantityParam setValue(BigDecimal theValue) {
@@ -107,47 +234,14 @@ public class QuantityParam implements IQueryParameterType {
 		return this;
 	}
 
-	public QuantityParam setValue(long theValue) {
-		myQuantity.setValue(theValue);
-		return this;
-	}
-
 	public QuantityParam setValue(double theValue) {
 		myQuantity.setValue(theValue);
 		return this;
 	}
 
-	public UriDt getSystem() {
-		return myQuantity.getSystem();
-	}
-
-	public QuantityParam setSystem(String theSystem) {
-		myQuantity.setSystem(theSystem);
+	public QuantityParam setValue(long theValue) {
+		myQuantity.setValue(theValue);
 		return this;
-	}
-
-	public QuantityParam setSystem(UriDt theSystem) {
-		myQuantity.setSystem(theSystem);
-		return this;
-	}
-
-	public String getUnits() {
-		return myQuantity.getUnits().getValue();
-	}
-
-	public QuantityParam setUnits(String theUnits) {
-		myQuantity.setUnits(theUnits);
-		return this;
-	}
-
-	@Override
-	public String toString() {
-		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
-		b.append("cmp", myQuantity.getComparator().getValueAsString());
-		b.append("value", myQuantity.getValue().getValueAsString());
-		b.append("system", myQuantity.getSystem().getValueAsString());
-		b.append("units", myQuantity.getUnits().getValueAsString());
-		return b.toString();
 	}
 
 	@Override
@@ -189,51 +283,14 @@ public class QuantityParam implements IQueryParameterType {
 
 	}
 
-	private void clear() {
-		myQuantity.setComparator((BoundCodeDt<QuantityCompararatorEnum>) null);
-		myQuantity.setCode((CodeDt) null);
-		myQuantity.setSystem((UriDt) null);
-		myQuantity.setUnits((StringDt) null);
-		myQuantity.setValue((DecimalDt) null);
-		myApproximate = false;
-	}
-
-	public boolean isApproximate() {
-		return myApproximate;
-	}
-
-	public void setApproximate(boolean theApproximate) {
-		myApproximate = theApproximate;
-		myQuantity.setComparator((QuantityCompararatorEnum)null);
-	}
-
 	@Override
-	public String getValueAsQueryToken() {
-		StringBuilder b = new StringBuilder();
-		if (myQuantity.getComparator() != null) {
-			b.append(ParameterUtil.escape(myQuantity.getComparator().getValue()));
-		} else if (myApproximate) {
-			b.append('~');
-		}
-		
-		if (!myQuantity.getValue().isEmpty()) {
-			b.append(ParameterUtil.escape(myQuantity.getValue().getValueAsString()));
-		}
-		b.append('|');
-		if (!myQuantity.getSystem().isEmpty()) {
-			b.append(ParameterUtil.escape(myQuantity.getSystem().getValueAsString()));
-		}
-		b.append('|');
-		if (!myQuantity.getUnits().isEmpty()) {
-			b.append(ParameterUtil.escape(myQuantity.getUnits().getValueAsString()));
-		}
-
+	public String toString() {
+		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
+		b.append("cmp", myQuantity.getComparator().getValueAsString());
+		b.append("value", myQuantity.getValue().getValueAsString());
+		b.append("system", myQuantity.getSystem().getValueAsString());
+		b.append("units", myQuantity.getUnits().getValueAsString());
 		return b.toString();
-	}
-
-	@Override
-	public String getQueryParameterQualifier() {
-		return null;
 	}
 
 }

@@ -27,6 +27,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.model.dstu.composite.CodingDt;
 import ca.uhn.fhir.rest.server.Constants;
 
 public class TokenParam implements IQueryParameterType {
@@ -52,6 +53,16 @@ public class TokenParam implements IQueryParameterType {
 		setText(theText);
 	}
 
+
+	/**
+	 * Constructor which copies the {@link CodingDt#getSystem() system} and {@link CodingDt#getCode() code} from a {@link CodingDt} 
+	 * instance and adds it as a parameter
+	 * 
+	 * @param theCodingDt The coding
+	 */
+	public TokenParam(CodingDt theCodingDt) {
+		this(theCodingDt.getSystem().getValue().toASCIIString(), theCodingDt.getCode().getValue());
+	}
 
 	@Override
 	public String getQueryParameterQualifier() {
@@ -132,6 +143,10 @@ public class TokenParam implements IQueryParameterType {
 			builder.append("text", myText);
 		}
 		return builder.toString();
+	}
+
+	public CodingDt getValueAsCoding() {
+		return new CodingDt(mySystem, myValue);
 	}
 
 }

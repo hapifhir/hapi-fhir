@@ -82,6 +82,12 @@ public class UpdateMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 			}
 		}
 
+		if (theRequest.getId() != null && theRequest.getId().hasVersionIdPart() == false) {
+			if (id != null && id.hasVersionIdPart()) {
+				theRequest.setId(id);
+			}
+		}
+		
 		if (isNotBlank(locationHeader)) {
 			MethodOutcome mo = new MethodOutcome();
 			parseContentLocation(mo, getResourceName(), locationHeader);
@@ -131,10 +137,10 @@ public class UpdateMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 		HttpPutClientInvocation retVal = new HttpPutClientInvocation(context, theResource, urlExtension.toString());
 
 		if (idDt.hasVersionIdPart()) {
-			String versionId = versionIdDt.getValue();
+			String versionId = idDt.getVersionIdPart();
 			if (StringUtils.isNotBlank(versionId)) {
 				StringBuilder b = new StringBuilder();
-				b.append('/');
+//				b.append('/');
 				b.append(urlExtension);
 				b.append("/_history/");
 				b.append(versionId);
@@ -144,7 +150,7 @@ public class UpdateMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 			String versionId = versionIdDt.getValue();
 			if (StringUtils.isNotBlank(versionId)) {
 				StringBuilder b = new StringBuilder();
-				b.append('/');
+//				b.append('/');
 				b.append(urlExtension);
 				b.append("/_history/");
 				b.append(versionId);

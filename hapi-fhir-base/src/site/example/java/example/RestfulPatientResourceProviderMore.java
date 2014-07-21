@@ -19,8 +19,6 @@ import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.api.annotation.TagListParam;
 import ca.uhn.fhir.model.dstu.composite.CodingDt;
-import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
-import ca.uhn.fhir.model.dstu.composite.QuantityDt;
 import ca.uhn.fhir.model.dstu.resource.Conformance;
 import ca.uhn.fhir.model.dstu.resource.DiagnosticReport;
 import ca.uhn.fhir.model.dstu.resource.Observation;
@@ -33,7 +31,6 @@ import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
 import ca.uhn.fhir.model.primitive.DecimalDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
-import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.annotation.AddTags;
 import ca.uhn.fhir.rest.annotation.Count;
@@ -55,18 +52,19 @@ import ca.uhn.fhir.rest.annotation.Transaction;
 import ca.uhn.fhir.rest.annotation.TransactionParam;
 import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.annotation.Validate;
-import ca.uhn.fhir.rest.annotation.VersionIdParam;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.client.ITestClient;
 import ca.uhn.fhir.rest.client.api.IBasicClient;
 import ca.uhn.fhir.rest.client.api.IRestfulClient;
-import ca.uhn.fhir.rest.param.CodingListParam;
+import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.QualifiedDateParam;
+import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.param.TokenOrListParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
@@ -232,9 +230,9 @@ public List<Patient> searchByNamedQuery(@RequiredParam(name="someparam") StringP
 
 //START SNIPPET: searchIdentifierParam
 @Search()
-public List<Patient> searchByIdentifier(@RequiredParam(name=Patient.SP_IDENTIFIER) IdentifierDt theId) {
-   String identifierSystem = theId.getSystem().getValueAsString();
-   String identifier = theId.getValue().getValue();
+public List<Patient> searchByIdentifier(@RequiredParam(name=Patient.SP_IDENTIFIER) TokenParam theId) {
+   String identifierSystem = theId.getSystem();
+   String identifier = theId.getValue();
    
    List<Patient> retVal = new ArrayList<Patient>();
    // ...populate...
@@ -257,10 +255,10 @@ public List<Patient> searchByNames( @RequiredParam(name=Patient.SP_FAMILY) Strin
 
 //START SNIPPET: searchMultiple
 @Search()
-public List<Observation> searchByObservationNames( @RequiredParam(name=Observation.SP_NAME) CodingListParam theCodings ) {
-   // This search should return any observations matching one or more
-   // of the codings here.
-   List<CodingDt> wantedCodings = theCodings.getCodings();
+public List<Observation> searchByObservationNames( @RequiredParam(name=Observation.SP_NAME) TokenOrListParam theCodings ) {
+   // The list here will contain 0..* codings, and any observations which match any of the 
+   // given codings should be returned
+   List<CodingDt> wantedCodings = theCodings.getListAsCodings();
    
    List<Observation> retVal = new ArrayList<Observation>();
    // ...populate...
@@ -270,7 +268,7 @@ public List<Observation> searchByObservationNames( @RequiredParam(name=Observati
 
 //START SNIPPET: dates
 @Search()
-public List<Patient> searchByObservationNames( @RequiredParam(name=Patient.SP_BIRTHDATE) QualifiedDateParam theDate ) {
+public List<Patient> searchByObservationNames( @RequiredParam(name=Patient.SP_BIRTHDATE) DateParam theDate ) {
    QuantityCompararatorEnum comparator = theDate.getComparator(); // e.g. <=
    Date date = theDate.getValue(); // e.g. 2011-01-02
    TemporalPrecisionEnum precision = theDate.getPrecision(); // e.g. DAY
@@ -284,7 +282,7 @@ public List<Patient> searchByObservationNames( @RequiredParam(name=Patient.SP_BI
 public void dateClientExample() {
 ITestClient client = provideTc();
 //START SNIPPET: dateClient
-QualifiedDateParam param = new QualifiedDateParam(QuantityCompararatorEnum.GREATERTHAN_OR_EQUALS, "2011-01-02");
+DateParam param = new DateParam(QuantityCompararatorEnum.GREATERTHAN_OR_EQUALS, "2011-01-02");
 List<Patient> response = client.getPatientByDob(param);
 //END SNIPPET: dateClient
 }
@@ -318,9 +316,11 @@ public Class<? extends IResource> getResourceType() {
 @Search()
 public List<DiagnosticReport> getDiagnosticReport( 
                @RequiredParam(name=DiagnosticReport.SP_IDENTIFIER) 
-               IdentifierDt theIdentifier,
+               TokenParam theIdentifier,
+               
                @IncludeParam(allow= {"DiagnosticReport.subject"}) 
                Set<Include> theIncludes ) {
+	
   List<DiagnosticReport> retVal = new ArrayList<DiagnosticReport>();
  
   // Assume this method exists and loads the report from the DB
@@ -330,7 +330,7 @@ public List<DiagnosticReport> getDiagnosticReport(
   if (theIncludes.contains(new Include("DiagnosticReport.subject"))) {
 	 
     // The resource reference should contain the ID of the patient
-    IdDt subjectId = report.getSubject().getId();
+    IdDt subjectId = report.getSubject().getReference();
 	
     // So load the patient ID and return it
     Patient subject = loadSomePatientFromDatabase(subjectId);
@@ -348,9 +348,11 @@ public List<DiagnosticReport> getDiagnosticReport(
 @Search()
 public List<DiagnosticReport> getDiagnosticReport( 
              @RequiredParam(name=DiagnosticReport.SP_IDENTIFIER) 
-             IdentifierDt theIdentifier,
+             TokenParam theIdentifier,
+             
              @IncludeParam(allow= {"DiagnosticReport.subject"}) 
              String theInclude ) {
+	
   List<DiagnosticReport> retVal = new ArrayList<DiagnosticReport>();
 
   // Assume this method exists and loads the report from the DB
@@ -360,7 +362,7 @@ public List<DiagnosticReport> getDiagnosticReport(
   if ("DiagnosticReport.subject".equals(theInclude)) {
 	 
     // The resource reference should contain the ID of the patient
-    IdDt subjectId = report.getSubject().getId();
+    IdDt subjectId = report.getSubject().getReference();
 	
     // So load the patient ID and return it
     Patient subject = loadSomePatientFromDatabase(subjectId);
@@ -376,13 +378,13 @@ public List<DiagnosticReport> getDiagnosticReport(
 //START SNIPPET: quantity
 @Search()
 public List<Observation> getObservationsByQuantity(
-        @RequiredParam(name=Observation.SP_VALUE_QUANTITY) QuantityDt theQuantity) {
+        @RequiredParam(name=Observation.SP_VALUE_QUANTITY) QuantityParam theQuantity) {
   
   List<Observation> retVal = new ArrayList<Observation>();
   
-  QuantityCompararatorEnum comparator = theQuantity.getComparator().getValueAsEnum();
+  QuantityCompararatorEnum comparator = theQuantity.getComparator();
   DecimalDt value = theQuantity.getValue();
-  StringDt units = theQuantity.getUnits();
+  String units = theQuantity.getUnits();
   // .. Apply these parameters ..
   
   // ... populate ...
@@ -390,7 +392,7 @@ public List<Observation> getObservationsByQuantity(
 }
 //END SNIPPET: quantity
 
-private DiagnosticReport loadSomeDiagnosticReportFromDatabase(IdentifierDt theIdentifier) {
+private DiagnosticReport loadSomeDiagnosticReportFromDatabase(TokenParam theIdentifier) {
 	return null;
 }
 
@@ -420,10 +422,10 @@ public MethodOutcome createPatient(@ResourceParam Patient thePatient) {
   savePatientToDatabase(thePatient);
 
   // This method returns a MethodOutcome object which contains
-  // the ID and Version ID for the newly saved resource
+  // the ID (composed of the type Patient, the logical ID 3746, and the
+  // version ID 1)
   MethodOutcome retVal = new MethodOutcome();
-  retVal.setId(new IdDt("3746"));
-  retVal.setVersionId(new IdDt("1"));
+  retVal.setId(new IdDt("Patient", "3746", "1"));
   
   // You can also add an OperationOutcome resource to return
   // This part is optional though:
@@ -457,15 +459,25 @@ public MethodOutcome updatePatient(@IdParam IdDt theId, @ResourceParam Patient t
      */
     throw new UnprocessableEntityException("No identifier supplied");
   }
-	
+
+  String versionId = theId.getVersionIdPart();
+  if (versionId != null) {
+    // If the client passed in a version number in the request URL, which means they are
+    // doing a version-aware update. You may wish to throw an exception if the supplied
+    // version is not the latest version.
+    if (detectedVersionConflict) {
+      throw new ResourceVersionConflictException("Invalid version");
+    }
+  }
+  
   // Save this patient to the database...
   savePatientToDatabase(theId, thePatient);
 
   // This method returns a MethodOutcome object which contains
   // the ID and Version ID for the newly saved resource
   MethodOutcome retVal = new MethodOutcome();
-  retVal.setId(theId);
-  retVal.setVersionId(new IdDt("2")); // Leave this blank if the server doesn't version
+  String newVersion = "2"; // may be null if the server is not version aware
+  retVal.setId(theId.withVersion(newVersion));
   
   // You can also add an OperationOutcome resource to return
   // This part is optional though:
@@ -481,21 +493,6 @@ public MethodOutcome updatePatient(@IdParam IdDt theId, @ResourceParam Patient t
 @Update
 public abstract MethodOutcome updateSomePatient(@IdParam IdDt theId, @ResourceParam Patient thePatient);
 //END SNIPPET: updateClient
-
-//START SNIPPET: updateVersion
-@Update
-public MethodOutcome updatePatient(@IdParam IdDt theId, @VersionIdParam IdDt theVersionId, @ResourceParam Patient thePatient) {
-  // ..Process..
-  if (detectedVersionConflict) {
-	  throw new ResourceVersionConflictException("Invalid version");
-  }
-  MethodOutcome retVal = new MethodOutcome();
-return retVal;
-}
-//END SNIPPET: updateVersion
-
-
-
 
 //START SNIPPET: validate
 @Validate
@@ -705,8 +702,7 @@ public class TagMethodProvider
   /** Return a list of all tags that exist on a specific version
    *  of the given resource type */
   @GetTags(type=Patient.class)
-  public TagList getTagsForResourceVersion(@IdParam IdDt theId, 
-                                           @VersionIdParam IdDt theVersion) {
+  public TagList getTagsForResourceVersion(@IdParam IdDt theId) {
     return new TagList(); // populate this
   }
 
@@ -720,7 +716,6 @@ public class TagMethodProvider
   /** Add tags to a resource version */
   @AddTags(type=Patient.class)
   public void addTagsToResourceVersion(@IdParam IdDt theId,
-                                       @VersionIdParam IdDt theVersion,
                                        @TagListParam TagList theTagList) {
     // add tags
   }
@@ -728,14 +723,6 @@ public class TagMethodProvider
   /** Remove tags from a resource */
   @DeleteTags(type=Patient.class)
   public void deleteTagsFromResourceVersion(@IdParam IdDt theId,
-                                            @TagListParam TagList theTagList) {
-    // add tags
-  }
-
-  /** Remove tags from a resource version */
-  @DeleteTags(type=Patient.class)
-  public void deleteTagsFromResourceVersion(@IdParam IdDt theId,
-                                            @VersionIdParam IdDt theVersion,
                                             @TagListParam TagList theTagList) {
     // add tags
   }

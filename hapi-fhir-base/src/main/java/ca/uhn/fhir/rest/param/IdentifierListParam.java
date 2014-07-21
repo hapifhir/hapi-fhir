@@ -28,7 +28,10 @@ import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.rest.method.QualifiedParamList;
 
-public class IdentifierListParam implements IQueryParameterOr {
+/**
+ * @deprecated Use {@link TokenOrListParam} instead. That class provides similar functionality but is named to be consistent with other types
+ */
+public class IdentifierListParam implements IQueryParameterOr<IQueryParameterType> {
 
 	private List<IdentifierDt> myIdentifiers = new ArrayList<IdentifierDt>();
 

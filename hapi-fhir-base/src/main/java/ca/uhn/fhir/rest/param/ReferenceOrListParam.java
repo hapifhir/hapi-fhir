@@ -20,36 +20,12 @@ package ca.uhn.fhir.rest.param;
  * #L%
  */
 
-import java.util.ArrayList;
-import java.util.List;
 
-import org.apache.commons.lang3.Validate;
-
-import ca.uhn.fhir.model.api.IQueryParameterOr;
-import ca.uhn.fhir.rest.method.QualifiedParamList;
-
-public class ReferenceOrListParam implements IQueryParameterOr<ReferenceParam> {
-
-	private List<ReferenceParam> myList = new ArrayList<ReferenceParam>();
-
-	public void addToken(ReferenceParam theParam) {
-		Validate.notNull(theParam, "Param can not be null");
-		myList.add(theParam);
-	}
+public class ReferenceOrListParam  extends BaseOrListParam<ReferenceParam> {
 
 	@Override
-	public void setValuesAsQueryTokens(QualifiedParamList theParameters) {
-		myList.clear();
-		for (String next : theParameters) {
-			ReferenceParam nextParam = new ReferenceParam();
-			nextParam.setValueAsQueryToken(theParameters.getQualifier(), next);
-			myList.add(nextParam);
-		}
-	}
-
-	@Override
-	public List<ReferenceParam> getValuesAsQueryTokens() {
-		return myList;
+	ReferenceParam newInstance() {
+		return new ReferenceParam();
 	}
 
 }

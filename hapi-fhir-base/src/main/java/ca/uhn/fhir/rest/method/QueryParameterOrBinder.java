@@ -29,21 +29,23 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 final class QueryParameterOrBinder implements IParamBinder {
-	private final Class<? extends IQueryParameterOr> myType;
+	private final Class<? extends IQueryParameterOr<?>> myType;
 
-	QueryParameterOrBinder(Class<? extends IQueryParameterOr> theType) {
+	QueryParameterOrBinder(Class<? extends IQueryParameterOr<?>> theType) {
 		myType = theType;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public List<IQueryParameterOr> encode(FhirContext theContext, Object theString) throws InternalErrorException {
-		IQueryParameterOr retVal = ((IQueryParameterOr) theString);
-		return Collections.singletonList(retVal);
+	public List<IQueryParameterOr<?>> encode(FhirContext theContext, Object theString) throws InternalErrorException {
+		IQueryParameterOr<?> retVal = ((IQueryParameterOr<?>) theString);
+		List<?> retVal2 = Collections.singletonList((IQueryParameterOr<?>)retVal);
+		return (List<IQueryParameterOr<?>>) retVal2;
 	}
 
 	@Override
 	public Object parse(List<QualifiedParamList> theString) throws InternalErrorException, InvalidRequestException {
-		IQueryParameterOr dt;
+		IQueryParameterOr<?> dt;
 		try {
 			dt = myType.newInstance();
 			if (theString.size() == 0 || theString.get(0).size() == 0) {

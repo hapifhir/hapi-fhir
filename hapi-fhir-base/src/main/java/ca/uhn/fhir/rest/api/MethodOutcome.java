@@ -92,6 +92,9 @@ public class MethodOutcome {
 		myOperationOutcome = theOperationOutcome;
 	}
 
+	/**
+	 * @deprecated Put the ID and version ID into the same IdDt instance and pass it to {@link #setId(IdDt)}
+	 */
 	public void setVersionId(IdDt theVersionId) {
 		myVersionId = theVersionId;
 	}

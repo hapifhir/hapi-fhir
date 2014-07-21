@@ -105,7 +105,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 
 		ResourceResponseHandler<Conformance> binding = new ResourceResponseHandler<Conformance>(Conformance.class, null);
-		Conformance resp = invokeClient(binding, invocation, myLogRequestAndResponse);
+		Conformance resp = invokeClient(myContext, binding, invocation, myLogRequestAndResponse);
 		return resp;
 	}
 
@@ -126,7 +126,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 		OutcomeResponseHandler binding = new OutcomeResponseHandler(resourceName);
 
-		MethodOutcome resp = invokeClient(binding, invocation, myLogRequestAndResponse);
+		MethodOutcome resp = invokeClient(myContext, binding, invocation, myLogRequestAndResponse);
 		return resp;
 
 	}
@@ -140,7 +140,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 		final String resourceName = myContext.getResourceDefinition(theType).getName();
 		OutcomeResponseHandler binding = new OutcomeResponseHandler(resourceName);
-		MethodOutcome resp = invokeClient(binding, invocation, myLogRequestAndResponse);
+		MethodOutcome resp = invokeClient(myContext, binding, invocation, myLogRequestAndResponse);
 		return resp;
 	}
 
@@ -168,7 +168,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 
 		BundleResponseHandler binding = new BundleResponseHandler(theType);
-		Bundle resp = invokeClient(binding, invocation, myLogRequestAndResponse);
+		Bundle resp = invokeClient(myContext, binding, invocation, myLogRequestAndResponse);
 		return resp;
 
 	}
@@ -199,7 +199,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 
 		ResourceResponseHandler<T> binding = new ResourceResponseHandler<T>(theType, theId);
-		T resp = invokeClient(binding, invocation, myLogRequestAndResponse);
+		T resp = invokeClient(myContext, binding, invocation, myLogRequestAndResponse);
 		return resp;
 	}
 
@@ -233,7 +233,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 
 		BundleResponseHandler binding = new BundleResponseHandler(theType);
-		Bundle resp = invokeClient(binding, invocation, myLogRequestAndResponse);
+		Bundle resp = invokeClient(myContext, binding, invocation, myLogRequestAndResponse);
 		return resp;
 	}
 
@@ -265,7 +265,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			myLastRequest = invocation.asHttpRequest(getServerBase(), createExtraParams(), getEncoding());
 		}
 
-		Bundle resp = invokeClient(new BundleResponseHandler(null), invocation, myLogRequestAndResponse);
+		Bundle resp = invokeClient(myContext, new BundleResponseHandler(null), invocation, myLogRequestAndResponse);
 
 		return resp.toListOfResources();
 	}
@@ -281,7 +281,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		final String resourceName = def.getName();
 
 		OutcomeResponseHandler binding = new OutcomeResponseHandler(resourceName);
-		MethodOutcome resp = invokeClient(binding, invocation, myLogRequestAndResponse);
+		MethodOutcome resp = invokeClient(myContext, binding, invocation, myLogRequestAndResponse);
 		return resp;
 	}
 
@@ -301,7 +301,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		final String resourceName = def.getName();
 
 		OutcomeResponseHandler binding = new OutcomeResponseHandler(resourceName);
-		MethodOutcome resp = invokeClient(binding, invocation, myLogRequestAndResponse);
+		MethodOutcome resp = invokeClient(myContext, binding, invocation, myLogRequestAndResponse);
 		return resp;
 	}
 
@@ -313,7 +313,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 
 		ResourceResponseHandler<T> binding = new ResourceResponseHandler<T>(theType, theId);
-		T resp = invokeClient(binding, invocation, myLogRequestAndResponse);
+		T resp = invokeClient(myContext, binding, invocation, myLogRequestAndResponse);
 		return resp;
 	}
 
@@ -368,7 +368,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 				myLastRequest = theInvocation.asHttpRequest(getServerBase(), theParams, getEncoding());
 			}
 
-			Z resp = invokeClient(theHandler, theInvocation, myParamEncoding, myPrettyPrint, myQueryLogRequestAndResponse || myLogRequestAndResponse);
+			Z resp = invokeClient(myContext, theHandler, theInvocation, myParamEncoding, myPrettyPrint, myQueryLogRequestAndResponse || myLogRequestAndResponse);
 			return resp;
 		}
 

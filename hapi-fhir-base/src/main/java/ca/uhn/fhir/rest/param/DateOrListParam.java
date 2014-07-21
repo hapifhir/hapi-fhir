@@ -21,11 +21,11 @@ package ca.uhn.fhir.rest.param;
  */
 
 
-public class StringOrListParam  extends BaseOrListParam<StringParam> {
+public class DateOrListParam  extends BaseOrListParam<DateParam> {
 
 	@Override
-	StringParam newInstance() {
-		return new StringParam();
+	DateParam newInstance() {
+		return new DateParam();
 	}
 
 }

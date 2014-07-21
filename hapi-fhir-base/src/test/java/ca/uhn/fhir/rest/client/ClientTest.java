@@ -1,8 +1,11 @@
 package ca.uhn.fhir.rest.client;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.InputStream;
 import java.io.StringReader;
@@ -22,7 +25,6 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.message.BasicHeader;
-import org.apache.http.message.BasicHttpResponse;
 import org.apache.http.message.BasicStatusLine;
 import org.hamcrest.core.StringContains;
 import org.hamcrest.core.StringEndsWith;
@@ -36,14 +38,12 @@ import org.mockito.stubbing.Answer;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.BundleEntry;
-import ca.uhn.fhir.model.api.PathSpecification;
+import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.Tag;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.dstu.composite.CodingDt;
-import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
-import ca.uhn.fhir.model.dstu.composite.QuantityDt;
 import ca.uhn.fhir.model.dstu.resource.Conformance;
 import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
 import ca.uhn.fhir.model.dstu.resource.Patient;
@@ -51,7 +51,6 @@ import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
-import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.IncludeParam;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
@@ -59,10 +58,12 @@ import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IBasicClient;
 import ca.uhn.fhir.rest.client.interceptor.CapturingInterceptor;
-import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
-import ca.uhn.fhir.rest.param.CodingListParam;
+import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.QualifiedDateParam;
+import ca.uhn.fhir.rest.param.QuantityParam;
+import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.param.TokenOrListParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -141,7 +142,7 @@ public class ClientTest {
 		HttpPost post = (HttpPost) capt.getValue();
 		assertThat(IOUtils.toString(post.getEntity().getContent()), StringContains.containsString("<Patient"));
 		assertEquals("http://example.com/fhir/Patient/100/_history/200", response.getId().getValue());
-		assertEquals("200", response.getVersionId().getValue());
+		assertEquals("200", response.getId().getVersionIdPart());
 	}
 
 	@Test
@@ -187,7 +188,7 @@ public class ClientTest {
 		HttpPost post = (HttpPost) capt.getValue();
 		assertThat(IOUtils.toString(post.getEntity().getContent()), StringContains.containsString("<Patient"));
 		assertEquals("http://example.com/fhir/Patient/100/_history/200", response.getId().getValue());
-		assertEquals("200", response.getVersionId().getValue());
+		assertEquals("200", response.getId().getVersionIdPart());
 	}
 
 	@Test
@@ -215,7 +216,7 @@ public class ClientTest {
 		HttpPost post = (HttpPost) capt.getValue();
 		assertThat(IOUtils.toString(post.getEntity().getContent()), StringContains.containsString("<Patient"));
 		assertEquals("http://example.com/fhir/Patient/100/_history/200", response.getId().getValue());
-		assertEquals("200", response.getVersionId().getValue());
+		assertEquals("200", response.getId().getVersionIdPart());
 
 		Header[] headers = post.getHeaders("Category");
 		assertEquals(2, headers.length);
@@ -701,8 +702,8 @@ public class ClientTest {
 
 		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
 		DateRangeParam param = new DateRangeParam();
-		param.setLowerBound(new QualifiedDateParam(QuantityCompararatorEnum.GREATERTHAN_OR_EQUALS, "2011-01-01"));
-		param.setUpperBound(new QualifiedDateParam(QuantityCompararatorEnum.LESSTHAN_OR_EQUALS, "2021-01-01"));
+		param.setLowerBound(new DateParam(QuantityCompararatorEnum.GREATERTHAN_OR_EQUALS, "2011-01-01"));
+		param.setUpperBound(new DateParam(QuantityCompararatorEnum.LESSTHAN_OR_EQUALS, "2021-01-01"));
 		client.getPatientByDateRange(param);
 
 		assertEquals("http://foo/Patient?dateRange=%3E%3D2011-01-01&dateRange=%3C%3D2021-01-01", capt.getValue().getURI().toString());
@@ -724,7 +725,7 @@ public class ClientTest {
 		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
 		
 		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
-		List<Patient> response = client.getPatientByDob(new QualifiedDateParam(QuantityCompararatorEnum.GREATERTHAN_OR_EQUALS, "2011-01-02"));
+		List<Patient> response = client.getPatientByDob(new DateParam(QuantityCompararatorEnum.GREATERTHAN_OR_EQUALS, "2011-01-02"));
 
 		assertEquals("http://foo/Patient?birthdate=%3E%3D2011-01-02", capt.getValue().getURI().toString());
 		assertEquals("PRP1660", response.get(0).getIdentifier().get(0).getValue().getValue());
@@ -743,7 +744,7 @@ public class ClientTest {
 		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
 
 		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
-		Patient response = client.findPatientQuantity(new QuantityDt(QuantityCompararatorEnum.GREATERTHAN, 123L, "foo", "bar"));
+		Patient response = client.findPatientQuantity(new QuantityParam(QuantityCompararatorEnum.GREATERTHAN, 123L, "foo", "bar"));
 
 		assertEquals("http://foo/Patient?quantityParam=%3E123%7Cfoo%7Cbar", capt.getValue().getURI().toString());
 		assertEquals("PRP1660", response.getIdentifier().get(0).getValue().getValue());
@@ -762,7 +763,7 @@ public class ClientTest {
 		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
 
 		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
-		Patient response = client.findPatientByMrn(new IdentifierDt("urn:foo", "123"));
+		Patient response = client.findPatientByMrn(new TokenParam("urn:foo", "123"));
 
 		assertEquals("http://foo/Patient?identifier=urn%3Afoo%7C123", capt.getValue().getURI().toString());
 		assertEquals("PRP1660", response.getIdentifier().get(0).getValue().getValue());
@@ -781,7 +782,7 @@ public class ClientTest {
 		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
 
 		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
-		CodingListParam identifiers = new CodingListParam();
+		TokenOrListParam identifiers = new TokenOrListParam();
 		identifiers.add(new CodingDt("foo", "bar"));
 		identifiers.add(new CodingDt("baz", "boz"));
 		client.getPatientMultipleIdentifiers(identifiers);
@@ -820,7 +821,7 @@ public class ClientTest {
 		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
 
 		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
-		client.getPatientOneParam(new StringDt("BB"));
+		client.getPatientOneParam(new StringParam("BB"));
 
 		assertEquals("http://foo/Patient?_query=someQueryOneParam&param1=BB", capt.getValue().getURI().toString());
 
@@ -838,7 +839,7 @@ public class ClientTest {
 		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
 
 		ITestClientWithCustomType client = ctx.newRestfulClient(ITestClientWithCustomType.class, "http://foo");
-		CustomPatient response = client.getPatientByDob(new QualifiedDateParam(QuantityCompararatorEnum.GREATERTHAN_OR_EQUALS, "2011-01-02"));
+		CustomPatient response = client.getPatientByDob(new DateParam(QuantityCompararatorEnum.GREATERTHAN_OR_EQUALS, "2011-01-02"));
 
 		assertEquals("http://foo/Patient?birthdate=%3E%3D2011-01-02", capt.getValue().getURI().toString());
 		assertEquals("PRP1660", response.getIdentifier().get(0).getValue().getValue());
@@ -857,7 +858,7 @@ public class ClientTest {
 		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
 
 		ITestClientWithCustomTypeList client = ctx.newRestfulClient(ITestClientWithCustomTypeList.class, "http://foo");
-		List<CustomPatient> response = client.getPatientByDob(new QualifiedDateParam(QuantityCompararatorEnum.GREATERTHAN_OR_EQUALS, "2011-01-02"));
+		List<CustomPatient> response = client.getPatientByDob(new DateParam(QuantityCompararatorEnum.GREATERTHAN_OR_EQUALS, "2011-01-02"));
 
 		assertEquals("http://foo/Patient?birthdate=%3E%3D2011-01-02", capt.getValue().getURI().toString());
 		assertEquals("PRP1660", response.get(0).getIdentifier().get(0).getValue().getValue());
@@ -878,18 +879,18 @@ public class ClientTest {
 		// TODO: document this
 
 		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
-		client.getPatientByDob(new QualifiedDateParam(QuantityCompararatorEnum.GREATERTHAN_OR_EQUALS, "2011-01-02"));
+		client.getPatientByDob(new DateParam(QuantityCompararatorEnum.GREATERTHAN_OR_EQUALS, "2011-01-02"));
 		assertEquals("http://foo/Patient?birthdate=%3E%3D2011-01-02", capt.getAllValues().get(0).getURI().toString());
 
 		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
 		client.setEncoding(EncodingEnum.JSON); // this needs to be actually
 												// implemented
-		client.getPatientByDob(new QualifiedDateParam(QuantityCompararatorEnum.GREATERTHAN_OR_EQUALS, "2011-01-02"));
+		client.getPatientByDob(new DateParam(QuantityCompararatorEnum.GREATERTHAN_OR_EQUALS, "2011-01-02"));
 		assertEquals("http://foo/Patient?birthdate=%3E%3D2011-01-02&_format=json", capt.getAllValues().get(1).getURI().toString());
 
 		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
 		client.setPrettyPrint(true);
-		client.getPatientByDob(new QualifiedDateParam(QuantityCompararatorEnum.GREATERTHAN_OR_EQUALS, "2011-01-02"));
+		client.getPatientByDob(new DateParam(QuantityCompararatorEnum.GREATERTHAN_OR_EQUALS, "2011-01-02"));
 		assertEquals("http://foo/Patient?birthdate=%3E%3D2011-01-02&_format=json&_pretty=true", capt.getAllValues().get(2).getURI().toString());
 
 	}
@@ -906,7 +907,7 @@ public class ClientTest {
 		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
 
 		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
-		client.getPatientWithIncludes(new StringDt("aaa"), Arrays.asList(new PathSpecification[] { new PathSpecification("inc1"), new PathSpecification("inc2") }));
+		client.getPatientWithIncludes(new StringParam("aaa"), Arrays.asList(new Include[] { new Include("inc1"), new Include("inc2") }));
 
 		assertEquals("http://foo/Patient?withIncludes=aaa&_include=inc1&_include=inc2", capt.getValue().getURI().toString());
 
@@ -924,7 +925,7 @@ public class ClientTest {
 		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
 
 		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
-		Bundle response = client.findPatientByName(new StringDt("AAA"), null);
+		Bundle response = client.findPatientByName(new StringParam("AAA"), null);
 
 		assertEquals("http://foo/Patient?family=AAA", capt.getValue().getURI().toString());
 		Patient resource = (Patient) response.getEntries().get(0).getResource();
@@ -936,7 +937,7 @@ public class ClientTest {
 
 		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
 		client = ctx.newRestfulClient(ITestClient.class, "http://foo");
-		response = client.findPatientByName(new StringDt("AAA"), new StringDt("BBB"));
+		response = client.findPatientByName(new StringParam("AAA"), new StringParam("BBB"));
 
 		assertEquals("http://foo/Patient?family=AAA&given=BBB", capt.getValue().getURI().toString());
 		resource = (Patient) response.getEntries().get(0).getResource();
@@ -956,7 +957,7 @@ public class ClientTest {
 		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
 
 		ITestClientWithStringIncludes client = ctx.newRestfulClient(ITestClientWithStringIncludes.class, "http://foo");
-		client.getPatientWithIncludes(new StringDt("aaa"), "inc1");
+		client.getPatientWithIncludes(new StringParam("aaa"), "inc1");
 
 		assertEquals("http://foo/Patient?withIncludes=aaa&_include=inc1", capt.getValue().getURI().toString());
 
@@ -983,7 +984,7 @@ public class ClientTest {
 		assertThat(post.getURI().toASCIIString(), StringEndsWith.endsWith("/Patient/100"));
 		assertThat(IOUtils.toString(post.getEntity().getContent()), StringContains.containsString("<Patient"));
 		assertEquals("http://example.com/fhir/Patient/100/_history/200", response.getId().getValue());
-		assertEquals("200", response.getVersionId().getValue());
+		assertEquals("200", response.getId().getVersionIdPart());
 	}
 
 	/**
@@ -1000,10 +1001,18 @@ public class ClientTest {
 		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 201, "OK"));
 		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(""), Charset.forName("UTF-8")));
-		when(httpResponse.getAllHeaders()).thenReturn(toHeaderArray("Location", "http://example.com/fhir/Patient/100/_history/200"));
+		when(httpResponse.getAllHeaders()).thenReturn(toHeaderArray("Content-Location", "http://example.com/fhir/Patient/100/_history/200"));
 
 		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
-		client.updatePatient(new IdDt("100"), new IdDt("200"), patient);
+		client.updatePatient(new IdDt("Patient/100/_history/200"), patient);
+		
+		assertEquals(HttpPut.class, capt.getValue().getClass());
+		HttpPut post = (HttpPut) capt.getValue();
+		assertEquals("http://foo/Patient/100", post.getURI().toASCIIString());
+		
+		Header h = post.getFirstHeader("content-location");
+		assertEquals("Patient/100/_history/200", h.getValue());
+
 	}
 
 	@Test(expected = ResourceVersionConflictException.class)
@@ -1019,7 +1028,7 @@ public class ClientTest {
 		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), Constants.STATUS_HTTP_409_CONFLICT, "Conflict"));
 
 		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
-		client.updatePatient(new IdDt("100"), new IdDt("200"), patient);
+		client.updatePatient(new IdDt("Patient/100/_history/200"), patient);
 	}
 
 	@Test
@@ -1036,15 +1045,15 @@ public class ClientTest {
 		when(httpResponse.getAllHeaders()).thenReturn(toHeaderArray("Location", "http://example.com/fhir/Patient/100/_history/200"));
 
 		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
-		MethodOutcome response = client.updatePatient(new IdDt("100"), new IdDt("200"), patient);
+		MethodOutcome response = client.updatePatient(new IdDt("Patient/100/_history/200"), patient);
 
 		assertEquals(HttpPut.class, capt.getValue().getClass());
 		HttpPut post = (HttpPut) capt.getValue();
 		assertThat(post.getURI().toASCIIString(), StringEndsWith.endsWith("/Patient/100"));
 		assertThat(IOUtils.toString(post.getEntity().getContent()), StringContains.containsString("<Patient"));
-		assertThat(post.getFirstHeader("Content-Location").getValue(), StringEndsWith.endsWith("/Patient/100/_history/200"));
+		assertThat(post.getFirstHeader("Content-Location").getValue(), StringEndsWith.endsWith("Patient/100/_history/200"));
 		assertEquals("http://example.com/fhir/Patient/100/_history/200", response.getId().getValue());
-		assertEquals("200", response.getVersionId().getValue());
+		assertEquals("200", response.getId().getVersionIdPart());
 	}
 
 	@Test
@@ -1068,7 +1077,7 @@ public class ClientTest {
 		assertThat(post.getURI().toASCIIString(), StringEndsWith.endsWith("/Patient/_validate"));
 		assertThat(IOUtils.toString(post.getEntity().getContent()), StringContains.containsString("<Patient"));
 		assertEquals("http://example.com/fhir/Patient/100/_history/200", response.getId().getValue());
-		assertEquals("200", response.getVersionId().getValue());
+		assertEquals("200", response.getId().getVersionIdPart());
 
 	}
 
@@ -1096,7 +1105,7 @@ public class ClientTest {
 		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
 		// Patient response = client.findPatientByMrn(new
 		// IdentifierDt("urn:foo", "123"));
-		Patient response = client.getPatientByVersionId(new IdDt("111"), new IdDt("999"));
+		Patient response = client.getPatientById(new IdDt("Patient/111/_history/999"));
 
 		assertEquals("http://foo/Patient/111/_history/999", capt.getValue().getURI().toString());
 		assertEquals("PRP1660", response.getIdentifier().get(0).getValue().getValue());
@@ -1118,16 +1127,16 @@ public class ClientTest {
 
 	public interface ITestClientWithCustomType extends IBasicClient {
 		@Search()
-		public CustomPatient getPatientByDob(@RequiredParam(name = Patient.SP_BIRTHDATE) QualifiedDateParam theBirthDate);
+		public CustomPatient getPatientByDob(@RequiredParam(name = Patient.SP_BIRTHDATE) DateParam theBirthDate);
 	}
 
 	public interface ITestClientWithCustomTypeList extends IBasicClient {
 		@Search()
-		public List<CustomPatient> getPatientByDob(@RequiredParam(name = Patient.SP_BIRTHDATE) QualifiedDateParam theBirthDate);
+		public List<CustomPatient> getPatientByDob(@RequiredParam(name = Patient.SP_BIRTHDATE) DateParam theBirthDate);
 	}
 
 	public interface ITestClientWithStringIncludes extends IBasicClient {
 		@Search()
-		public Patient getPatientWithIncludes(@RequiredParam(name = "withIncludes") StringDt theString, @IncludeParam String theInclude);
+		public Patient getPatientWithIncludes(@RequiredParam(name = "withIncludes") StringParam theString, @IncludeParam String theInclude);
 	}
 }

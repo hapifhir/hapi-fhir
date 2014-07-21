@@ -314,16 +314,6 @@
 				<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
 			</macro>
 
-			<p>
-				In the case of a server which is able to do version conflict checking, an
-				extra parameter would be added:
-			</p>
-
-			<macro name="snippet">
-				<param name="id" value="updateVersion" />
-				<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
-			</macro>
-
 			<a name="instance_delete" />
 		</section>
 

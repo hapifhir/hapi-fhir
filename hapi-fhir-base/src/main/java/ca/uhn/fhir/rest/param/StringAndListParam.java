@@ -20,30 +20,12 @@ package ca.uhn.fhir.rest.param;
  * #L%
  */
 
-import java.util.ArrayList;
-import java.util.List;
 
-import ca.uhn.fhir.model.api.IQueryParameterAnd;
-import ca.uhn.fhir.rest.method.QualifiedParamList;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+public class StringAndListParam  extends BaseAndListParam<StringOrListParam> {
 
-public class StringAndListParam implements IQueryParameterAnd<StringOrListParam> {
-
-	private List<StringOrListParam> myValues=new ArrayList<StringOrListParam>(); 
+	@Override
+	StringOrListParam newInstance() {
+		return new StringOrListParam();
+	}
 	
-	@Override
-	public void setValuesAsQueryTokens(List<QualifiedParamList> theParameters) throws InvalidRequestException {
-		myValues.clear();
-		for (QualifiedParamList nextParam : theParameters) {
-			StringOrListParam nextList = new StringOrListParam();
-			nextList.setValuesAsQueryTokens(nextParam);
-			myValues.add(nextList);
-		}
-	}
-
-	@Override
-	public List<StringOrListParam> getValuesAsQueryTokens() {
-		return myValues;
-	}
-
 }

@@ -33,10 +33,12 @@ final class StringBinder implements IParamBinder {
 	StringBinder() {
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public List<IQueryParameterOr> encode(FhirContext theContext, Object theString) throws InternalErrorException {
+	public List<IQueryParameterOr<?>> encode(FhirContext theContext, Object theString) throws InternalErrorException {
 		String retVal = ((String) theString);
-		return Collections.singletonList(MethodUtil.singleton(new StringParam(retVal)));
+		List<?> retValList = Collections.singletonList(MethodUtil.singleton(new StringParam(retVal)));
+		return (List<IQueryParameterOr<?>>) retValList;
 	}
 
 	@Override

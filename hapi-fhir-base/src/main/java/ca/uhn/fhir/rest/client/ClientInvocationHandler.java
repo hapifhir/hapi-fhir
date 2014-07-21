@@ -41,9 +41,13 @@ public class ClientInvocationHandler extends BaseClient implements InvocationHan
 
 	private final Map<Method, Object> myMethodToReturnValue = new HashMap<Method, Object>();
 
+	private FhirContext myContext;
+
 	public ClientInvocationHandler(HttpClient theClient, FhirContext theContext, String theUrlBase, Class<? extends IRestfulClient> theClientType) {
 		super(theClient, theUrlBase);
 
+		myContext =theContext;
+		
 		try {
 			myMethodToReturnValue.put(theClientType.getMethod("getFhirContext"), theContext);
 			myMethodToReturnValue.put(theClientType.getMethod("getHttpClient"), theClient);
@@ -75,7 +79,7 @@ public class ClientInvocationHandler extends BaseClient implements InvocationHan
 		BaseMethodBinding<?> binding = myBindings.get(theMethod);
 		if (binding != null) {
 			BaseHttpClientInvocation clientInvocation = binding.invokeClient(theArgs);
-			return invokeClient(binding, clientInvocation);
+			return invokeClient(myContext, binding, clientInvocation);
 		}
 
 		ILambda lambda = myMethodToLambda.get(theMethod);

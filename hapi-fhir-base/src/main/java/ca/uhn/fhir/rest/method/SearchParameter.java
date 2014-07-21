@@ -39,9 +39,20 @@ import ca.uhn.fhir.model.dstu.valueset.SearchParamTypeEnum;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.param.BaseQueryParameter;
 import ca.uhn.fhir.rest.param.CodingListParam;
+import ca.uhn.fhir.rest.param.DateAndListParam;
+import ca.uhn.fhir.rest.param.DateOrListParam;
+import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.IdentifierListParam;
+import ca.uhn.fhir.rest.param.NumberAndListParam;
+import ca.uhn.fhir.rest.param.NumberOrListParam;
+import ca.uhn.fhir.rest.param.NumberParam;
 import ca.uhn.fhir.rest.param.QualifiedDateParam;
+import ca.uhn.fhir.rest.param.QuantityAndListParam;
+import ca.uhn.fhir.rest.param.QuantityOrListParam;
+import ca.uhn.fhir.rest.param.QuantityParam;
+import ca.uhn.fhir.rest.param.ReferenceAndListParam;
+import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.StringOrListParam;
@@ -55,6 +66,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 /**
  * Created by dsotnikov on 2/25/2014.
  */
+@SuppressWarnings("deprecation")
 public class SearchParameter extends BaseQueryParameter {
 
 	private static HashMap<Class<?>, SearchParamTypeEnum> ourParamTypes;
@@ -83,8 +95,8 @@ public class SearchParameter extends BaseQueryParameter {
 	public List<QualifiedParamList> encode(FhirContext theContext, Object theObject) throws InternalErrorException {
 		ArrayList<QualifiedParamList> retVal = new ArrayList<QualifiedParamList>();
 
-		List<IQueryParameterOr> val = myParamBinder.encode(theContext, theObject);
-		for (IQueryParameterOr nextOr : val) {
+		List<IQueryParameterOr<?>> val = myParamBinder.encode(theContext, theObject);
+		for (IQueryParameterOr<?> nextOr : val) {
 			retVal.add(new QualifiedParamList(theContext, nextOr));
 		}
 
@@ -165,10 +177,26 @@ public class SearchParameter extends BaseQueryParameter {
 		ourParamTypes.put(TokenOrListParam.class, SearchParamTypeEnum.TOKEN);
 		ourParamTypes.put(TokenAndListParam.class, SearchParamTypeEnum.TOKEN);
 		
+		ourParamTypes.put(DateParam.class, SearchParamTypeEnum.DATE);
+		ourParamTypes.put(DateOrListParam.class, SearchParamTypeEnum.DATE);
+		ourParamTypes.put(DateAndListParam.class, SearchParamTypeEnum.DATE);
 		ourParamTypes.put(DateRangeParam.class, SearchParamTypeEnum.DATE);
+
+		ourParamTypes.put(QuantityParam.class, SearchParamTypeEnum.QUANTITY);
+		ourParamTypes.put(QuantityOrListParam.class, SearchParamTypeEnum.QUANTITY);
+		ourParamTypes.put(QuantityAndListParam.class, SearchParamTypeEnum.QUANTITY);
+
+		ourParamTypes.put(NumberParam.class, SearchParamTypeEnum.NUMBER);
+		ourParamTypes.put(NumberOrListParam.class, SearchParamTypeEnum.NUMBER);
+		ourParamTypes.put(NumberAndListParam.class, SearchParamTypeEnum.NUMBER);
+
+		ourParamTypes.put(ReferenceParam.class, SearchParamTypeEnum.REFERENCE);
+		ourParamTypes.put(ReferenceOrListParam.class, SearchParamTypeEnum.REFERENCE);
+		ourParamTypes.put(ReferenceAndListParam.class, SearchParamTypeEnum.REFERENCE);
+
 	}
 	
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked" })
 	public void setType(final Class<?> type, Class<? extends Collection<?>> theInnerCollectionType, Class<? extends Collection<?>> theOuterCollectionType) {
 		this.myType = type;
 		if (IQueryParameterType.class.isAssignableFrom(type)) {

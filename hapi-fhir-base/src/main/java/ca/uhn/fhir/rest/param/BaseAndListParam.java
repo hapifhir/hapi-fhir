@@ -1,4 +1,4 @@
-package ca.uhn.fhir.rest.method;
+package ca.uhn.fhir.rest.param;
 
 /*
  * #%L
@@ -20,17 +20,34 @@ package ca.uhn.fhir.rest.method;
  * #L%
  */
 
+import java.util.ArrayList;
 import java.util.List;
 
-import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.IQueryParameterAnd;
 import ca.uhn.fhir.model.api.IQueryParameterOr;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.method.QualifiedParamList;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
-interface IParamBinder {
-	
-	List<IQueryParameterOr<?>> encode(FhirContext theContext, Object theString) throws InternalErrorException;
+abstract class BaseAndListParam<T extends IQueryParameterOr<?>> implements IQueryParameterAnd<T> {
 
-	Object parse(List<QualifiedParamList> theList) throws InternalErrorException, InvalidRequestException;
+	private List<T> myValues=new ArrayList<T>(); 
+	
+	@Override
+	public void setValuesAsQueryTokens(List<QualifiedParamList> theParameters) throws InvalidRequestException {
+		myValues.clear();
+		for (QualifiedParamList nextParam : theParameters) {
+			T nextList = newInstance();
+			nextList.setValuesAsQueryTokens(nextParam);
+			myValues.add(nextList);
+		}
+	}
+
+	abstract T newInstance();
+
+	@Override
+	public List<T> getValuesAsQueryTokens() {
+		return myValues;
+	}
+
 
 }

@@ -46,7 +46,10 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.ContentType;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
 import ca.uhn.fhir.parser.DataFormatException;
+import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.client.exceptions.FhirClientConnectionException;
 import ca.uhn.fhir.rest.method.IClientResponseHandler;
 import ca.uhn.fhir.rest.method.IClientResponseHandlerHandlesBinary;
@@ -119,15 +122,15 @@ public abstract class BaseClient {
 		return myUrlBase;
 	}
 
-	<T> T invokeClient(IClientResponseHandler<T> binding, BaseHttpClientInvocation clientInvocation) {
-		return invokeClient(binding, clientInvocation, false);
+	<T> T invokeClient(FhirContext theContext, IClientResponseHandler<T> binding, BaseHttpClientInvocation clientInvocation) {
+		return invokeClient(theContext, binding, clientInvocation, false);
 	}
 
-	<T> T invokeClient(IClientResponseHandler<T> binding, BaseHttpClientInvocation clientInvocation, boolean theLogRequestAndResponse) {
-		return invokeClient(binding, clientInvocation, null, null, theLogRequestAndResponse);
+	<T> T invokeClient(FhirContext theContext, IClientResponseHandler<T> binding, BaseHttpClientInvocation clientInvocation, boolean theLogRequestAndResponse) {
+		return invokeClient(theContext, binding, clientInvocation, null, null, theLogRequestAndResponse);
 	}
 	
-	<T> T invokeClient(IClientResponseHandler<T> binding, BaseHttpClientInvocation clientInvocation, EncodingEnum theEncoding, Boolean thePrettyPrint, boolean theLogRequestAndResponse) {
+	<T> T invokeClient(FhirContext theContext, IClientResponseHandler<T> binding, BaseHttpClientInvocation clientInvocation, EncodingEnum theEncoding, Boolean thePrettyPrint, boolean theLogRequestAndResponse) {
 		// TODO: handle non 2xx status codes by throwing the correct exception,
 		// and ensure it's passed upwards
 		HttpRequestBase httpRequest;
@@ -201,6 +204,19 @@ public abstract class BaseClient {
 				String message = "HTTP " + response.getStatusLine().getStatusCode() + " " + response.getStatusLine().getReasonPhrase();
 				if (Constants.CT_TEXT.equals(mimeType)) {
 					message = message + ": " + body;
+				} else {
+					EncodingEnum enc = EncodingEnum.forContentType(mimeType);
+					if (enc != null) {
+						IParser p = enc.newParser(theContext);
+						try {
+							OperationOutcome oo = p.parseResource(OperationOutcome.class, body);
+							if (oo.getIssueFirstRep().getDetails().isEmpty()==false) {
+								message = message + ": " + oo.getIssueFirstRep().getDetails().getValue();
+							}
+						} catch (Exception e) {
+							ourLog.debug("Failed to process OperationOutcome response");
+						}
+					}
 				}
 
 				keepResponseAndLogIt(theLogRequestAndResponse, response, body);

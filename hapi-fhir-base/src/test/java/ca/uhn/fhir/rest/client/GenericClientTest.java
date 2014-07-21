@@ -507,7 +507,6 @@ public class GenericClientTest {
 	}
 	
 	
-
 	
 	@Test
 	public void testRead() throws Exception {

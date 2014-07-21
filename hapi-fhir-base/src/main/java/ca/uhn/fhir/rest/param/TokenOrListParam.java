@@ -1,5 +1,10 @@
 package ca.uhn.fhir.rest.param;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import ca.uhn.fhir.model.dstu.composite.CodingDt;
+
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -20,48 +25,27 @@ package ca.uhn.fhir.rest.param;
  * #L%
  */
 
-import java.util.ArrayList;
-import java.util.List;
 
-import org.apache.commons.lang3.Validate;
+public class TokenOrListParam  extends BaseOrListParam<TokenParam> {
 
-import ca.uhn.fhir.model.api.IQueryParameterOr;
-import ca.uhn.fhir.model.dstu.composite.CodingDt;
-import ca.uhn.fhir.rest.method.QualifiedParamList;
-
-public class TokenOrListParam implements IQueryParameterOr<TokenParam> {
-
-	private List<TokenParam> myList = new ArrayList<TokenParam>();
-
-	public void addToken(TokenParam theParam) {
-		Validate.notNull(theParam, "Param can not be null");
-		myList.add(theParam);
+	@Override
+	TokenParam newInstance() {
+		return new TokenParam();
 	}
-
-	/**
-	 * Returns a copy of all tokens in this list as {@link CodingDt} instances
-	 */
-	public List<CodingDt> toCodings() {
+	
+	public List<CodingDt> getListAsCodings() {
 		ArrayList<CodingDt> retVal = new ArrayList<CodingDt>();
-		for (TokenParam next : myList) {
-			retVal.add(new CodingDt(next.getSystem(), next.getValue()));
+		for (TokenParam next : getValuesAsQueryTokens()) {
+			CodingDt nextCoding = next.getValueAsCoding();
+			if (!nextCoding.isEmpty()) {
+				retVal.add(nextCoding);
+			}
 		}
 		return retVal;
 	}
 
-	@Override
-	public void setValuesAsQueryTokens(QualifiedParamList theParameters) {
-		myList.clear();
-		for (String next : theParameters) {
-			TokenParam nextParam = new TokenParam();
-			nextParam.setValueAsQueryToken(theParameters.getQualifier(), next);
-			myList.add(nextParam);
-		}
-	}
-
-	@Override
-	public List<TokenParam> getValuesAsQueryTokens() {
-		return myList;
+	public void add(CodingDt theCodingDt) {
+		add(new TokenParam(theCodingDt));
 	}
 
 }
