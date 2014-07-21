@@ -25,7 +25,6 @@ import java.io.Reader;
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -33,16 +32,11 @@ import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.lang3.StringUtils;
-import org.apache.http.client.utils.DateUtils;
-
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.client.exceptions.InvalidResponseException;
 import ca.uhn.fhir.rest.server.Constants;
@@ -56,7 +50,6 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 
 abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Object> {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseResourceReturningMethodBinding.class);
 	protected static final Set<String> ALLOWED_PARAMS;
 	static {
 		HashSet<String> set = new HashSet<String>();
@@ -146,18 +139,7 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 				resource = parser.parseResource(theResponseReader);
 			}
 
-			List<String> lmHeaders = theHeaders.get(Constants.HEADER_LAST_MODIFIED_LOWERCASE);
-			if (lmHeaders != null && lmHeaders.size() > 0 && StringUtils.isNotBlank(lmHeaders.get(0))) {
-				String headerValue = lmHeaders.get(0);
-				Date headerDateValue;
-				try {
-					headerDateValue = DateUtils.parseDate(headerValue);
-					InstantDt lmValue = new InstantDt(headerDateValue);
-					resource.getResourceMetadata().put(ResourceMetadataKeyEnum.UPDATED, lmValue);
-				} catch (Exception e) {
-					ourLog.warn("Unable to parse date string '{}'. Error is: {}", headerValue, e.toString());
-				}
-			}
+			MethodUtil.parseClientRequestResourceHeaders(theHeaders, resource);
 
 			switch (getMethodReturnType()) {
 			case BUNDLE:
@@ -223,7 +205,7 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 			} else if (result.size() > 1) {
 				throw new InternalErrorException("Method returned multiple resources");
 			}
-			RestfulServer.streamResponseAsResource(theServer, theResponse, result.getResources(0, 1).get(0), responseEncoding, prettyPrint, requestIsBrowser, narrativeMode, respondGzip);
+			RestfulServer.streamResponseAsResource(theServer, theResponse, result.getResources(0, 1).get(0), responseEncoding, prettyPrint, requestIsBrowser, narrativeMode, respondGzip, theRequest.getFhirServerBase());
 			break;
 		}
 	}

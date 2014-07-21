@@ -398,6 +398,14 @@ public class IdDt extends BasePrimitive<String> {
 		}
 		retVal.append('/');
 		retVal.append(getIdPart());
+		
+		if (hasVersionIdPart()) {
+			retVal.append('/');
+			retVal.append(Constants.PARAM_HISTORY);
+			retVal.append('/');
+			retVal.append(getVersionIdPart());		
+		}
+		
 		return retVal.toString();
 	}
 

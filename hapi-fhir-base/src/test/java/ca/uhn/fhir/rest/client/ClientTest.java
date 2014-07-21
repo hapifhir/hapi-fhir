@@ -577,8 +577,10 @@ public class ClientTest {
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
 		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		Header[] headers = new Header[1];
+		Header[] headers = new Header[2];
 		headers[0] = new BasicHeader(Constants.HEADER_LAST_MODIFIED, "Wed, 15 Nov 1995 04:58:08 GMT");
+		headers[1] = new BasicHeader(Constants.HEADER_CONTENT_LOCATION, "http://foo.com/Patient/123/_history/2333");
+	
 		when(httpResponse.getAllHeaders()).thenReturn(headers);
 		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
@@ -590,6 +592,8 @@ public class ClientTest {
 
 		assertEquals("http://foo/Patient/111", capt.getValue().getURI().toString());
 		assertEquals("PRP1660", response.getIdentifier().get(0).getValue().getValue());
+		
+		assertEquals("http://foo.com/Patient/123/_history/2333", response.getId().getValue());
 
 		InstantDt lm = (InstantDt) response.getResourceMetadata().get(ResourceMetadataKeyEnum.UPDATED);
 		lm.setTimeZoneZulu(true);

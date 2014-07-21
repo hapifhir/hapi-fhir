@@ -35,6 +35,7 @@ import ca.uhn.fhir.model.dstu.resource.Observation;
 import ca.uhn.fhir.model.dstu.resource.Organization;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.exceptions.NonFhirResponseException;
 import ca.uhn.fhir.rest.server.Constants;
@@ -518,7 +519,11 @@ public class GenericClientTest {
 		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
-
+		Header[] headers = new Header[2];
+		headers[0] = new BasicHeader(Constants.HEADER_LAST_MODIFIED, "Wed, 15 Nov 1995 04:58:08 GMT");
+		headers[1] = new BasicHeader(Constants.HEADER_CONTENT_LOCATION, "http://foo.com/Patient/123/_history/2333");
+		when(myHttpResponse.getAllHeaders()).thenReturn(headers);
+	
 		IGenericClient client = myCtx.newRestfulGenericClient("http://example.com/fhir");
 
 		//@formatter:off
@@ -526,7 +531,12 @@ public class GenericClientTest {
 		//@formatter:on
 
 		assertThat(response.getNameFirstRep().getFamilyAsSingleString(), StringContains.containsString("Cardinal"));
-		assertEquals("Patient/1234", response.getId().getValue());
+
+		assertEquals("http://foo.com/Patient/123/_history/2333", response.getId().getValue());
+
+		InstantDt lm = (InstantDt) response.getResourceMetadata().get(ResourceMetadataKeyEnum.UPDATED);
+		lm.setTimeZoneZulu(true);
+		assertEquals("1995-11-15T04:58:08.000Z", lm.getValueAsString());
 
 	}
 	

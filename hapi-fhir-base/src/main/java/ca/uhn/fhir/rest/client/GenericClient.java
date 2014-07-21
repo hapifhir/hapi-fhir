@@ -741,6 +741,8 @@ public class GenericClient extends BaseClient implements IGenericClient {
 				retVal.setId(myId);
 			}
 
+			MethodUtil.parseClientRequestResourceHeaders(theHeaders, retVal);
+			
 			return retVal;
 		}
 	}

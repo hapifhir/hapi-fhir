@@ -372,6 +372,7 @@ public class XmlParserTest {
 		entry = b.addEntry();
 		entry.getId().setValue("2");
 		entry.setLinkAlternate(new StringDt("http://foo/bar"));
+		entry.setLinkSearch(new StringDt("http://foo/bar/search"));
 		entry.setResource(p2);
 		
 		BundleEntry deletedEntry = b.addEntry();
@@ -384,7 +385,7 @@ public class XmlParserTest {
 		List<String> strings = new ArrayList<String>();
 		strings.addAll(Arrays.asList("<published>", pub.getValueAsString(), "</published>"));
 		strings.addAll(Arrays.asList("<entry>", "<id>1</id>", "</entry>"));
-		strings.addAll(Arrays.asList("<entry>", "<id>2</id>", "<link rel=\"alternate\" href=\"http://foo/bar\"/>", "</entry>"));
+		strings.addAll(Arrays.asList("<entry>", "<id>2</id>", "<link rel=\"alternate\" href=\"http://foo/bar\"/>", "<link rel=\"search\" href=\"http://foo/bar/search\"/>","</entry>"));
 		strings.addAll(Arrays.asList("<at:deleted-entry", "ref=\"Patient/3", "/>"));
 		assertThat(bundleString, StringContainsInOrder.stringContainsInOrder(strings));
 		assertThat(bundleString, not(containsString("at:by")));
@@ -787,6 +788,7 @@ public class XmlParserTest {
 				"    <id>http://hl7.org/fhir/valueset/256a5231-a2bb-49bd-9fea-f349d428b70d</id>\n" + 
 				"    <link href=\"http://hl7.org/implement/standards/fhir/valueset/256a5231-a2bb-49bd-9fea-f349d428b70d\" rel=\"self\"/>\n" + 
 				"    <link href=\"http://hl7.org/foo\" rel=\"alternate\"/>\n" + 
+				"    <link href=\"http://hl7.org/foo/search\" rel=\"search\"/>\n" + 
 				"    <updated>2014-02-10T04:10:46.987-00:00</updated>\n" + 
 				"    <author>\n" + 
 				"      <name>HL7, Inc (FHIR Project)</name>\n" + 
@@ -842,6 +844,7 @@ public class XmlParserTest {
 		assertEquals("HL7, Inc (FHIR Project)", entry.getAuthorName().getValue());
 		assertEquals("http://hl7.org/fhir/valueset/256a5231-a2bb-49bd-9fea-f349d428b70d", entry.getId().getValue());
 		assertEquals("http://hl7.org/foo", entry.getLinkAlternate().getValue());
+		assertEquals("http://hl7.org/foo/search", entry.getLinkSearch().getValue());
 		assertEquals(1, entry.getCategories().size());
 		assertEquals("term", entry.getCategories().get(0).getTerm());
 		assertEquals("label", entry.getCategories().get(0).getLabel());

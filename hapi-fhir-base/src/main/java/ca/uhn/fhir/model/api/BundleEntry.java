@@ -42,6 +42,7 @@ public class BundleEntry extends BaseBundle {
 	private StringDt myDeletedByName;
 	private StringDt myDeletedComment;
 	private StringDt myLinkAlternate;
+	private StringDt myLinkSearch;
 	private StringDt myLinkSelf;
 	private InstantDt myPublished;
 	private IResource myResource;
@@ -102,6 +103,13 @@ public class BundleEntry extends BaseBundle {
 			myLinkAlternate = new StringDt();
 		}
 		return myLinkAlternate;
+	}
+
+	public StringDt getLinkSearch() {
+		if (myLinkSearch == null) {
+			myLinkSearch = new StringDt();
+		}
+		return myLinkSearch;
 	}
 
 	public StringDt getLinkSelf() {
@@ -175,6 +183,10 @@ public class BundleEntry extends BaseBundle {
 
 	public void setLinkAlternate(StringDt theLinkAlternate) {
 		myLinkAlternate = theLinkAlternate;
+	}
+
+	public void setLinkSearch(StringDt theLinkSearch) {
+		myLinkSearch = theLinkSearch;
 	}
 
 	public void setLinkSelf(StringDt theLinkSelf) {

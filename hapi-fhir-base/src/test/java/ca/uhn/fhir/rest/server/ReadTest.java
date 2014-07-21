@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -49,6 +50,11 @@ public class ReadTest {
 			
 			assertEquals("1", dt.getSystem().getValueAsString());
 			assertEquals(null, dt.getValue().getValueAsString());
+			
+			Header cl = status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION_LC);
+			assertNotNull(cl);
+			assertEquals("http://localhost:" + ourPort + "/Patient/1/_history/1", cl.getValue());
+			
 		}
 		
 	}
@@ -65,6 +71,10 @@ public class ReadTest {
 			IdentifierDt dt = ourCtx.newXmlParser().parseResource(Patient.class,responseContent).getIdentifierFirstRep();
 			assertEquals("1", dt.getSystem().getValueAsString());
 			assertEquals("2", dt.getValue().getValueAsString());
+
+			Header cl = status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION_LC);
+			assertNotNull(cl);
+			assertEquals("http://localhost:" + ourPort + "/Patient/1/_history/1", cl.getValue());
 		}
 	}
 

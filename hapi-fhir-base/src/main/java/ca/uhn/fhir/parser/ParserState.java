@@ -521,6 +521,8 @@ class ParserState<T> {
 			} else {
 				if ("self".equals(myRel)) {
 					myEntry.getLinkSelf().setValueAsString(myHref);
+				} else if ("search".equals(myRel)) {
+					myEntry.getLinkSearch().setValueAsString(myHref);
 				} else if ("alternate".equals(myRel)) {
 					myEntry.getLinkAlternate().setValueAsString(myHref);
 				}

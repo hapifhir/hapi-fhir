@@ -31,6 +31,13 @@
 				Transaction client invocations with XML encoding were using the wrong content type ("application/xml+fhir" instead 
 				of the correct "application/atom+xml"). Thanks to David Hay of Orion Health for surfacing this one!
 			</action>
+			<action type="add">
+				Bundle entries now support a link type of "search". Thanks to David Hay for the suggestion.
+			</action>
+			<action type="add" issue="2">
+				 Read invocations in the client now process the "Content-Location" header and use it to 
+				 populate the ID of the returned resource.
+			</action>
 			<action type="fix" issue="3">
 				Fix issue where vread invocations on server incorrectly get routed to instance history method if one is 
 				defined. Thanks to Neal Acharya from UHN for surfacing this one! 

@@ -238,8 +238,9 @@ public class Bundle extends BaseBundle /* implements IElement */{
 	 * 
 	 * @param theResource
 	 *            The resource to add
+	 *  @return Returns the newly created bundle entry that was added to the bundle
 	 */
-	public void addResource(IResource theResource, FhirContext theContext, String theServerBase) {
+	public BundleEntry addResource(IResource theResource, FhirContext theContext, String theServerBase) {
 		BundleEntry entry = addEntry();
 		entry.setResource(theResource);
 
@@ -282,7 +283,9 @@ public class Bundle extends BaseBundle /* implements IElement */{
 				}
 			}
 
-			entry.getLinkSelf().setValue(b.toString());
+			String qualifiedId = b.toString();
+			entry.getLinkSelf().setValue(qualifiedId);
+			
 		}
 
 		InstantDt published = ResourceMetadataKeyEnum.PUBLISHED.get(theResource);
@@ -314,6 +317,7 @@ public class Bundle extends BaseBundle /* implements IElement */{
 			}
 		}
 
+		return entry;
 	}
 
 	public static Bundle withResources(ArrayList<IResource> theUploadBundle, FhirContext theContext, String theServerBase) {

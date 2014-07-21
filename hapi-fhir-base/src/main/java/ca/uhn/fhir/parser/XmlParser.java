@@ -198,6 +198,10 @@ public class XmlParser extends BaseParser implements IParser {
 					writeAtomLink(eventWriter, "alternate", nextEntry.getLinkAlternate());
 				}
 
+				if (!nextEntry.getLinkSearch().isEmpty()) {
+					writeAtomLink(eventWriter, "search", nextEntry.getLinkSearch());
+				}
+
 				IResource resource = nextEntry.getResource();
 				if (resource != null && !resource.isEmpty() && !deleted) {
 					eventWriter.writeStartElement("content");

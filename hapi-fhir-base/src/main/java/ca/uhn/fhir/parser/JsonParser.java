@@ -189,6 +189,7 @@ public class JsonParser extends BaseParser implements IParser {
 			linkStarted = false;
 			linkStarted = writeAtomLink(eventWriter, "self", nextEntry.getLinkSelf(), linkStarted);
 			linkStarted = writeAtomLink(eventWriter, "alternate", nextEntry.getLinkAlternate(), linkStarted);
+			linkStarted = writeAtomLink(eventWriter, "search", nextEntry.getLinkSearch(), linkStarted);
 			if (linkStarted) {
 				eventWriter.writeEnd();
 			}

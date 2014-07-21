@@ -385,6 +385,7 @@ public class RestfulServer extends HttpServlet {
 	}
 
 	protected void handleRequest(SearchMethodBinding.RequestType theRequestType, HttpServletRequest theRequest, HttpServletResponse theResponse) throws ServletException, IOException {
+		String fhirServerBase = null;
 		try {
 
 			if (null != mySecurityManager) {
@@ -418,7 +419,6 @@ public class RestfulServer extends HttpServlet {
 				requestPath = requestPath.substring(1);
 			}
 
-			String fhirServerBase;
 			fhirServerBase = myServerAddressStrategy.determineServerBase(theRequest);
 
 			if (fhirServerBase.endsWith("/")) {
@@ -582,7 +582,7 @@ public class RestfulServer extends HttpServlet {
 				issue.getDetails().setValue(e.toString() + "\n\n" + ExceptionUtils.getStackTrace(e));
 			}
 
-			streamResponseAsResource(this, theResponse, oo, determineResponseEncoding(theRequest), true, false, NarrativeModeEnum.NORMAL, statusCode, false);
+			streamResponseAsResource(this, theResponse, oo, determineResponseEncoding(theRequest), true, false, NarrativeModeEnum.NORMAL, statusCode, false, fhirServerBase);
 
 			theResponse.setStatus(statusCode);
 			addHeadersToResponse(theResponse);
@@ -1073,15 +1073,22 @@ public class RestfulServer extends HttpServlet {
 	}
 
 	public static void streamResponseAsResource(RestfulServer theServer, HttpServletResponse theHttpResponse, IResource theResource, EncodingEnum theResponseEncoding, boolean thePrettyPrint,
-			boolean theRequestIsBrowser, NarrativeModeEnum theNarrativeMode, boolean theRespondGzip) throws IOException {
+			boolean theRequestIsBrowser, NarrativeModeEnum theNarrativeMode, boolean theRespondGzip, String theServerBase) throws IOException {
 		int stausCode = 200;
-		streamResponseAsResource(theServer, theHttpResponse, theResource, theResponseEncoding, thePrettyPrint, theRequestIsBrowser, theNarrativeMode, stausCode, theRespondGzip);
+		streamResponseAsResource(theServer, theHttpResponse, theResource, theResponseEncoding, thePrettyPrint, theRequestIsBrowser, theNarrativeMode, stausCode, theRespondGzip, theServerBase);
 	}
 
 	private static void streamResponseAsResource(RestfulServer theServer, HttpServletResponse theHttpResponse, IResource theResource, EncodingEnum theResponseEncoding, boolean thePrettyPrint,
-			boolean theRequestIsBrowser, NarrativeModeEnum theNarrativeMode, int stausCode, boolean theRespondGzip) throws IOException {
+			boolean theRequestIsBrowser, NarrativeModeEnum theNarrativeMode, int stausCode, boolean theRespondGzip, String theServerBase) throws IOException {
 		theHttpResponse.setStatus(stausCode);
 
+		if (theResource.getId() != null && theResource.getId().hasIdPart() && isNotBlank(theServerBase)) {
+			String resName = theServer.getFhirContext().getResourceDefinition(theResource).getName();
+			String fullId = theResource.getId().withServerBase(theServerBase, resName);
+			theHttpResponse.addHeader(Constants.HEADER_CONTENT_LOCATION, fullId);
+		}
+		
+		
 		if (theResource instanceof Binary) {
 			Binary bin = (Binary) theResource;
 			if (isNotBlank(bin.getContentType())) {

@@ -10,6 +10,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -19,6 +20,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.client.utils.DateUtils;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
@@ -34,6 +36,7 @@ import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.TagListParam;
 import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
+import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.annotation.Count;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -76,6 +79,29 @@ import ca.uhn.fhir.util.ReflectionUtil;
  */
 
 public class MethodUtil {
+
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(MethodUtil.class);
+
+	public static void parseClientRequestResourceHeaders(Map<String, List<String>> theHeaders, IResource resource) {
+		List<String> lmHeaders = theHeaders.get(Constants.HEADER_LAST_MODIFIED_LOWERCASE);
+		if (lmHeaders != null && lmHeaders.size() > 0 && StringUtils.isNotBlank(lmHeaders.get(0))) {
+			String headerValue = lmHeaders.get(0);
+			Date headerDateValue;
+			try {
+				headerDateValue = DateUtils.parseDate(headerValue);
+				InstantDt lmValue = new InstantDt(headerDateValue);
+				resource.getResourceMetadata().put(ResourceMetadataKeyEnum.UPDATED, lmValue);
+			} catch (Exception e) {
+				ourLog.warn("Unable to parse date string '{}'. Error is: {}", headerValue, e.toString());
+			}
+		}
+	
+		List<String> clHeaders = theHeaders.get(Constants.HEADER_CONTENT_LOCATION_LC);
+		if (clHeaders != null && clHeaders.size() > 0 && StringUtils.isNotBlank(clHeaders.get(0))) {
+			String headerValue = clHeaders.get(0);
+			resource.getId().setValue(headerValue);
+		}
+	}
 
 	static void addTagsToPostOrPut(IResource resource, BaseHttpClientInvocation retVal) {
 		TagList list = (TagList) resource.getResourceMetadata().get(ResourceMetadataKeyEnum.TAG_LIST);
