@@ -8,7 +8,7 @@
 	<body>
 		<release version="0.5" date="TBD">
 			<action type="add">
-				Allow server methods to return wildcard genrric types (e.g. List&lt;? extends IResource&gt;)
+				Allow server methods to return wildcard generic types (e.g. List&lt;? extends IResource&gt;)
 			</action>
 			<action type="add">
 				Search parameters are not properly escaped and unescaped. E.g. for a token parameter such as
@@ -46,6 +46,12 @@
 			<action type="fix" issue="3">
 				Fix issue where vread invocations on server incorrectly get routed to instance history method if one is 
 				defined. Thanks to Neal Acharya from UHN for surfacing this one! 
+			</action>
+			<action type="add">
+				Binary reads on a server not include the Content-Disposition header, to prevent HTML in binary 
+				blobs from being used for nefarious purposes. See
+				<![CDATA[<a href="http://gforge.hl7.org/gf/project/fhir/tracker/?action=TrackerItemEdit&tracker_id=677&tracker_item_id=3298">FHIR Tracker Bug 3298</a>]]>
+				for more information.
 			</action>
         </release>			
 		<release version="0.4" date="2014-Jul-13">

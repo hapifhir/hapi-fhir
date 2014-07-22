@@ -95,6 +95,7 @@ public class Constants {
 	public static final String HEADERVALUE_CORS_ALLOW_METHODS_ALL = "GET, POST, PUT, DELETE";
 	public static final String HEADER_AUTHORIZATION = "Authorization";
 	public static final String PARAMQUALIFIER_TOKEN_TEXT = ":text";
+	public static final String HEADER_CONTENT_DISPOSITION = "Content-Disposition";
 	
 
 	static {

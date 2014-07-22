@@ -1099,6 +1099,9 @@ public class RestfulServer extends HttpServlet {
 			if (bin.getContent() == null || bin.getContent().length == 0) {
 				return;
 			}
+			
+			theHttpResponse.addHeader(Constants.HEADER_CONTENT_DISPOSITION, "Attachment;");
+			
 			theHttpResponse.setContentLength(bin.getContent().length);
 			ServletOutputStream oos = theHttpResponse.getOutputStream();
 			oos.write(bin.getContent());

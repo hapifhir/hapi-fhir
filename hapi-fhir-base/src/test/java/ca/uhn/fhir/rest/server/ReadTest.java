@@ -21,6 +21,7 @@ import org.junit.Test;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
+import ca.uhn.fhir.model.dstu.resource.Binary;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -54,6 +55,36 @@ public class ReadTest {
 			Header cl = status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION_LC);
 			assertNotNull(cl);
 			assertEquals("http://localhost:" + ourPort + "/Patient/1/_history/1", cl.getValue());
+			
+		}
+		
+	}
+	
+	
+	@Test
+	public void testBinaryRead() throws Exception {
+		{
+			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Binary/1");
+			HttpResponse status = ourClient.execute(httpGet);
+			byte[] responseContent = IOUtils.toByteArray(status.getEntity().getContent());
+			IOUtils.closeQuietly(status.getEntity().getContent());
+
+			
+			assertEquals(200, status.getStatusLine().getStatusCode());
+			assertEquals("application/x-foo", status.getEntity().getContentType().getValue());
+			
+			Header cl = status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION_LC);
+			assertNotNull(cl);
+			assertEquals("http://localhost:" + ourPort + "/Binary/1/_history/1", cl.getValue());
+			
+			Header cd = status.getFirstHeader("content-disposition");
+			assertNotNull(cd);
+			assertEquals("Attachment;", cd.getValue());
+			
+			assertEquals(4,responseContent.length);
+			for (int i = 0; i < 4; i++) {
+				assertEquals(i+1, responseContent[i]); // should be 1,2,3,4
+			}
 			
 		}
 		
@@ -93,7 +124,7 @@ public class ReadTest {
 		ServletHandler proxyHandler = new ServletHandler();
 		RestfulServer servlet = new RestfulServer();
 		ourCtx = servlet.getFhirContext();
-		servlet.setResourceProviders(patientProvider);
+		servlet.setResourceProviders(patientProvider, new DummyBinaryProvider());
 		ServletHolder servletHolder = new ServletHolder(servlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
@@ -126,4 +157,27 @@ public class ReadTest {
 
 	}
 
+	
+	/**
+	 * Created by dsotnikov on 2/25/2014.
+	 */
+	public static class DummyBinaryProvider implements IResourceProvider {
+
+		@Read(version = true)
+		public Binary findPatient(@IdParam IdDt theId) {
+			Binary bin = new Binary();
+			bin.setContentType("application/x-foo");
+			bin.setContent(new byte[] {1,2,3,4});
+			bin.setId("Binary/1/_history/1");
+			return bin;
+		}
+
+		@Override
+		public Class<? extends IResource> getResourceType() {
+			return Binary.class;
+		}
+
+	}
+
+	
 }
