@@ -45,7 +45,13 @@ public @interface IncludeParam {
 	/**
 	 * Optional parameter, if provided the server will only allow the values
 	 * within the given set. If an _include parameter is passed to the server
-	 * which does not match any allowed values the server will return an error. 
+	 * which does not match any allowed values the server will return an error.
+	 * <p>
+	 * You may also pass in a value of "*" which indicates to the server
+	 * that any value is allowable and will be passed to this parameter. This is
+	 * helpful if you want to explicitly declare support for some includes, but also
+	 * allow others implicitly (e.g. imports from other resources)
+	 * </p> 
 	 */
 	String[] allow() default {};
 	

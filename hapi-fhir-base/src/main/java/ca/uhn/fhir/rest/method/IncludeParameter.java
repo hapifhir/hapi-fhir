@@ -1,4 +1,4 @@
-package ca.uhn.fhir.rest.param;
+package ca.uhn.fhir.rest.method;
 
 /*
  * #%L
@@ -34,11 +34,11 @@ import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.PathSpecification;
 import ca.uhn.fhir.model.dstu.valueset.SearchParamTypeEnum;
 import ca.uhn.fhir.rest.annotation.IncludeParam;
-import ca.uhn.fhir.rest.method.QualifiedParamList;
+import ca.uhn.fhir.rest.param.BaseQueryParameter;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
-public class IncludeParameter extends BaseQueryParameter {
+class IncludeParameter extends BaseQueryParameter {
 
 	private Set<String> myAllow;
 	private Class<? extends Collection<Include>> myInstantiableCollectionType;
@@ -133,7 +133,9 @@ public class IncludeParameter extends BaseQueryParameter {
 			String value = nextParamList.get(0);
 			if (myAllow != null) {
 				if (!myAllow.contains(value)) {
-					throw new InvalidRequestException("Invalid _include parameter value: '" + value + "'. Valid values are: " + new TreeSet<String>(myAllow));
+					if (!myAllow.contains("*")) {
+						throw new InvalidRequestException("Invalid _include parameter value: '" + value + "'. Valid values are: " + new TreeSet<String>(myAllow));
+					}
 				}
 			}
 			if (retValCollection == null) {

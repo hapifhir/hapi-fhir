@@ -64,6 +64,8 @@ import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.StringAndListParam;
+import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -180,6 +182,10 @@ public Patient getResourceById(@IdParam IdDt theId) {
    retVal.addName().addFamily("Smith").addGiven("Tester").addGiven("Q");
    // ...etc...
    
+   // if you know the version ID of the resource, you should set it and HAPI will 
+   // include it in a Content-Location header
+   retVal.setId(new IdDt("Patient", "123", "2"));
+   
    return retVal;
 }
 //END SNIPPET: read
@@ -251,10 +257,8 @@ public List<Patient> searchByLastName(@RequiredParam(name=Patient.SP_FAMILY) Str
    patient.addName().addFamily("Smith").addGiven("Tester").addGiven("Q");
    // ...etc...
 
-   /*
-    *  Every returned resource must have its logical ID set. If the server
-    *  supports versioning, that should be set too
-    */
+   //  Every returned resource must have its logical ID set. If the server
+   //  supports versioning, that should be set too
    String logicalId = "4325";
    String versionId = "2"; // optional
    patient.setId(new IdDt("Patient", logicalId, versionId));
@@ -325,7 +329,9 @@ public List<Patient> searchWithDocs(
 
 //START SNIPPET: searchMultiple
 @Search()
-public List<Observation> searchByObservationNames( @RequiredParam(name=Observation.SP_NAME) TokenOrListParam theCodings ) {
+public List<Observation> searchByObservationNames( 
+		@RequiredParam(name=Observation.SP_NAME) TokenOrListParam theCodings ) {
+
    // The list here will contain 0..* codings, and any observations which match any of the 
    // given codings should be returned
    List<CodingDt> wantedCodings = theCodings.getListAsCodings();
@@ -335,6 +341,32 @@ public List<Observation> searchByObservationNames( @RequiredParam(name=Observati
    return retVal;
 }
 //END SNIPPET: searchMultiple
+
+
+//START SNIPPET: searchMultipleAnd
+@Search()
+public List<Patient> searchByPatientAddress( 
+		@RequiredParam(name=Patient.SP_ADDRESS) StringAndListParam theAddressParts ) {
+
+  // StringAndListParam is a container for 0..* StringOrListParam, which is in turn a
+  // container for 0..* strings. It is a little bit weird to understand at first, but think of the
+  // StringAndListParam to be an AND list with multiple OR lists inside it. So you will need 
+  // to return results which match at least one string within every OR list. 
+  List<StringOrListParam> wantedCodings = theAddressParts.getValuesAsQueryTokens();
+  for (StringOrListParam nextOrList : wantedCodings) {
+    List<StringParam> queryTokens = nextOrList.getValuesAsQueryTokens();
+	// Only return results that match at least one of the tokens in the list below
+    for (StringParam nextString : queryTokens) {
+    	   // ....check for match...
+    }
+  }
+  
+  List<Patient> retVal = new ArrayList<Patient>();
+  // ...populate...
+  return retVal;
+}
+//END SNIPPET: searchMultipleAnd
+
 
 //START SNIPPET: dates
 @Search()

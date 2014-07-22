@@ -466,14 +466,14 @@
 				</p>
 
 			</subsection>
-			<subsection name="Search Parameters: Introduction (String)">
+			<subsection name="Search Parameters: String Introduction">
 
 				<p>
 					To allow a search using given search parameters, add one or more parameters
 					to your search method and tag these parameters as either
-					<a href="./apidocs/ca/uhn/fhir/rest/server/parameters/RequiredParam.html">@RequiredParam</a>
+					<a href="./apidocs/ca/uhn/fhir/rest/annotation/RequiredParam.html">@RequiredParam</a>
 					or
-					<a href="./apidocs/ca/uhn/fhir/rest/server/parameters/OptionalParam.html">@OptionalParam</a>
+					<a href="./apidocs/ca/uhn/fhir/rest/annotation/OptionalParam.html">@OptionalParam</a>
 					.
 				</p>
 
@@ -734,13 +734,13 @@
 					may (or may not) be optional.
 					To add a second required parameter, annotate the
 					parameter with
-					<a href="./apidocs/ca/uhn/fhir/rest/server/parameters/RequiredParam.html">@RequiredParam</a>
+					<a href="./apidocs/ca/uhn/fhir/rest/annotation/RequiredParam.html">@RequiredParam</a>
 					.
 					To add an optional parameter (which will be passed in as
 					<code>null</code>
 					if no value
 					is supplied), annotate the method with
-					<a href="./apidocs/ca/uhn/fhir/rest/server/parameters/OptionalParam.html">@OptionalParam</a>
+					<a href="./apidocs/ca/uhn/fhir/rest/annotation/OptionalParam.html">@OptionalParam</a>
 					.
 				</p>
 
@@ -821,13 +821,31 @@
 					</li>
 				</ul>
 
+				<p>
+					It is worth noting that according to the FHIR specification, you can have an
+					AND relationship combining multiple OR relationships, but not vice-versa. In
+					other words, it's possible to support a search like 
+					<code>("name" = ("joe" or "john")) AND ("age" = (11 or 12))</code> but not
+					a search like
+					<code>("language" = ("en" AND "fr") OR ("address" = ("Canada" AND "Quebec"))</code>
+				</p>
+
 				<h4>OR Relationship Query Parameters</h4>
 
 				<p>
 					To accept a composite parameter, use a parameter type which implements the
 					<a href="./apidocs/ca/uhn/fhir/model/api/IQueryParameterOr.html">IQueryParameterOr</a>
-					interface. For example, to accept searches for
-					Observations matching any of a collection of names:
+					interface. 
+				</p>
+				<p>
+					Each parameter type (StringParam, TokenParam, etc.) has a corresponding parameter
+					which accepts an OR list of parameters. These types are called "[type]OrListParam", for example:
+					StringOrListParam and TokenOrListParam.
+				</p>
+				<p>
+					The following example shows a search for Observation by name, where a list of
+					names may be passed in (and the expectation is that the server will return Observations
+					that match any of these names):
 				</p>
 
 				<macro name="snippet">
@@ -848,12 +866,32 @@
 					<a href="./apidocs/ca/uhn/fhir/model/api/IQueryParameterAnd.html">IQueryParameterAnd</a>
 					interface.
 				</p>
-
 				<p>
-					See the section below on
-					<a href="#DATE_RANGES">date ranges</a>
-					for
-					one example of an AND parameter.
+					An example follows which shows a search for Patients by address, where multiple string 
+					lists may be supplied by the client. For example, the client might request that the
+					address match <code>("Montreal" OR "Sherbrooke") AND ("Quebec" OR "QC")</code> using
+					the following query:
+					<br/>
+					<code>http://fhir.example.com/Patient?address=Montreal,Sherbrooke&amp;address=Quebec,QC</code>
+				</p>
+				<p>
+					The following code shows how to receive this parameter using a 
+					<a href="./apidocs/ca/uhn/fhir/rest/param/StringAndListParam.html">StringAndListParameter</a>,
+					which can handle an AND list of multiple OR lists of strings.
+				</p>
+				
+				<macro name="snippet">
+					<param name="id" value="searchMultipleAnd" />
+					<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
+				</macro>
+				
+				<h4>AND Relationship Query Parameters for Dates</h4>
+				
+				<p>
+					Dates are a bit of a special case, since it is a common scenario to want to match
+					a date range (which is really just an AND query on two qualified date parameters).
+					See the section below on <a href="#DATE_RANGES">date ranges</a>
+					for	an example of a DateRangeParameter.
 				</p>
 
 			</subsection>

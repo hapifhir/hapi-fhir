@@ -910,7 +910,7 @@ public abstract class BaseFhirDao implements IDao {
 		};
 	}
 
-	protected void loadResourcesById(Set<IdDt> theIncludePids, List<IResource> theResourceListToPopulate) {
+	protected List<IResource> loadResourcesById(Set<IdDt> theIncludePids) {
 		Set<Long> pids = new HashSet<Long>();
 		for (IdDt next : theIncludePids) {
 			pids.add(next.getIdPartAsLong());
@@ -926,10 +926,13 @@ public abstract class BaseFhirDao implements IDao {
 		// }
 		TypedQuery<ResourceTable> q = myEntityManager.createQuery(cq);
 
+		ArrayList<IResource> retVal = new ArrayList<IResource>();
 		for (ResourceTable next : q.getResultList()) {
 			IResource resource = toResource(next);
-			theResourceListToPopulate.add(resource);
+			retVal.add(resource);
 		}
+		
+		return retVal;
 	}
 
 	protected String normalizeString(String theString) {

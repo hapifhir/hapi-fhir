@@ -57,9 +57,8 @@
 				are very inexpensive to create so you can create a new one for each request if needed 
 				(although there is no requirement to do so, clients are reusable and thread-safe as well).  
 			</p>
-			
-			<subsection name="Search/Query">
-			
+
+			<subsection name="Fluent Operations">
 				<p>
 					The generic client supports queries using a fluent interface
 					which is inspired by the fantastic 
@@ -69,22 +68,76 @@
 					you to take advantage of intellisense/code completion in your favourite
 					IDE.
 				</p>
-				
 				<p>
-					The following example shows how to query using this interface:
+					Note that most fluent operations end with an <code>execute()</code>
+					statement which actually performs the invocation. You may also invoke
+					several configuration operations just prior to the execute() statement,
+					such as <code>encodedJson()</code> or <code>encodedXml()</code>.
 				</p>
+			</subsection>
 
+			<subsection name="Type - Create">
+				<p>
+					The following example shows how to perform a create
+					operation using the generic client:
+				</p>
 				<macro name="snippet">
-					<param name="id" value="fluentExample" />
+					<param name="id" value="create" />
 					<param name="file"
 						value="src/site/example/java/example/GenericClientExample.java" />
 				</macro>
-				
+			</subsection>			
+						
+			<subsection name="Type - Search/Query">
+				<p>
+					The following example shows how to query using the generic client:
+				</p>
+				<macro name="snippet">
+					<param name="id" value="search" />
+					<param name="file"
+						value="src/site/example/java/example/GenericClientExample.java" />
+				</macro>
+				<p>
+					If the server supports paging results, the client has a page method
+					which can be used to load subsequent pages.
+				</p>
+				<macro name="snippet">
+					<param name="id" value="searchPaging" />
+					<param name="file"
+						value="src/site/example/java/example/GenericClientExample.java" />
+				</macro>
+			</subsection>			
+
+			<subsection name="Server - Conformance">
+				<p>
+					To retrieve the server's conformance statement, simply call the <code>conformance()</code>
+					method as shown below.
+				</p>
+				<macro name="snippet">
+					<param name="id" value="conformance" />
+					<param name="file"
+						value="src/site/example/java/example/GenericClientExample.java" />
+				</macro>
+			</subsection>			
+			
+			<subsection name="Server - Transaction">
+				<p>
+					The following example shows how to execute a transaction using the generic client:
+				</p>
+				<macro name="snippet">
+					<param name="id" value="transaction" />
+					<param name="file"
+						value="src/site/example/java/example/GenericClientExample.java" />
+				</macro>
 			</subsection>			
 			
 		</section>
 		
 		<section name="The Annotation-Driven Client">
+
+			<p>
+				HAPI also provides a second style of client caled the annotation-driven client.
+			</p>
 
 			<p>
 				The design of the annotation-driven client
@@ -95,10 +148,24 @@
 				annotated methods which HAPI binds to calls against a server.
 			</p>
 
+			<p>
+				The annotation-driven client is particularly useful if you have a server that
+				exposes a set of specific operations (search parameter combinations, named queries, etc.)
+				and you want to let developers have a stongly/statically typed interface to that
+				server.
+			</p>
+			<p>
+				There is no difference in terms of capability between the two styles of 
+				client. There is simply a difference in programming style and complexity. It
+				is probably safe to say that the generic client is easier to use and leads to
+				more readable code, at the expense of not giving any visibility into the 
+				specific capabilities of the server you are interacting with.  
+			</p>
+			
 			<subsection name="Defining A Restful Client Interface">
 
 				<p>
-					The first step in creating a FHIR RESTful Client is to define a
+					The first step in creating an annotation-driven client is to define a
 					restful client interface.
 				</p>
 
@@ -134,7 +201,7 @@
 				<macro name="snippet">
 					<param name="id" value="provider" />
 					<param name="file"
-						value="src/site/example/java/example/RestfulClientImpl.java" />
+						value="src/site/example/java/example/IRestfulClient.java" />
 				</macro>
 
 				<p>

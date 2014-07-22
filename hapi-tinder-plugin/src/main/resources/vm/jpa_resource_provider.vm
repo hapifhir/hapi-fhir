@@ -63,6 +63,7 @@ public class ${className}ResourceProvider extends JpaResourceProvider<${classNam
 				"${include.path}" #{if}($foreach.hasNext || $haveMore), #{end}
 #end				 
 #end
+				#{if}($searchParamsReference.empty == false), #{end}"*"
 			}) 
 			Set<Include> theIncludes			
 	) {
