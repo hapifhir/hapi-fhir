@@ -63,7 +63,7 @@ import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.model.primitive.DecimalDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.model.primitive.StringDt;
-import ca.uhn.fhir.rest.gclient.TokenParam;
+import ca.uhn.fhir.rest.gclient.TokenClientParam;
 
 
 /**
@@ -108,7 +108,7 @@ public class Claim extends BaseResource implements IResource {
 	 * Path: <b>Claim.number</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam NUMBER = new TokenParam(SP_NUMBER);
+	public static final TokenClientParam NUMBER = new TokenClientParam(SP_NUMBER);
 
 
 	@Child(name="number", type=IdentifierDt.class, order=0, min=0, max=1)	

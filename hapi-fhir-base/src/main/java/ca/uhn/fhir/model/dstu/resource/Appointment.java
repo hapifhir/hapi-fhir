@@ -64,10 +64,10 @@ import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.model.primitive.StringDt;
-import ca.uhn.fhir.rest.gclient.DateParam;
-import ca.uhn.fhir.rest.gclient.ReferenceParam;
-import ca.uhn.fhir.rest.gclient.StringParam;
-import ca.uhn.fhir.rest.gclient.TokenParam;
+import ca.uhn.fhir.rest.gclient.DateClientParam;
+import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
+import ca.uhn.fhir.rest.gclient.StringClientParam;
+import ca.uhn.fhir.rest.gclient.TokenClientParam;
 
 
 /**
@@ -112,7 +112,7 @@ public class Appointment extends BaseResource implements IResource {
 	 * Path: <b>Appointment.start</b><br/>
 	 * </p>
 	 */
-	public static final DateParam DATE = new DateParam(SP_DATE);
+	public static final DateClientParam DATE = new DateClientParam(SP_DATE);
 
 	/**
 	 * Search parameter constant for <b>status</b>
@@ -133,7 +133,7 @@ public class Appointment extends BaseResource implements IResource {
 	 * Path: <b>Appointment.status</b><br/>
 	 * </p>
 	 */
-	public static final StringParam STATUS = new StringParam(SP_STATUS);
+	public static final StringClientParam STATUS = new StringClientParam(SP_STATUS);
 
 	/**
 	 * Search parameter constant for <b>subject</b>
@@ -154,7 +154,7 @@ public class Appointment extends BaseResource implements IResource {
 	 * Path: <b>Appointment.participant.individual</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam SUBJECT = new ReferenceParam(SP_SUBJECT);
+	public static final ReferenceClientParam SUBJECT = new ReferenceClientParam(SP_SUBJECT);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies
@@ -181,7 +181,7 @@ public class Appointment extends BaseResource implements IResource {
 	 * Path: <b>Appointment.participant.status</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam PARTSTATUS = new TokenParam(SP_PARTSTATUS);
+	public static final TokenClientParam PARTSTATUS = new TokenClientParam(SP_PARTSTATUS);
 
 
 	@Child(name="identifier", type=IdentifierDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)	

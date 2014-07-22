@@ -57,9 +57,9 @@ import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.StringDt;
-import ca.uhn.fhir.rest.gclient.DateParam;
-import ca.uhn.fhir.rest.gclient.ReferenceParam;
-import ca.uhn.fhir.rest.gclient.TokenParam;
+import ca.uhn.fhir.rest.gclient.DateClientParam;
+import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
+import ca.uhn.fhir.rest.gclient.TokenClientParam;
 
 
 /**
@@ -104,7 +104,7 @@ public class Slot extends BaseResource implements IResource {
 	 * Path: <b>Slot.type</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam SLOTTYPE = new TokenParam(SP_SLOTTYPE);
+	public static final TokenClientParam SLOTTYPE = new TokenClientParam(SP_SLOTTYPE);
 
 	/**
 	 * Search parameter constant for <b>availability</b>
@@ -125,7 +125,7 @@ public class Slot extends BaseResource implements IResource {
 	 * Path: <b>Slot.availability</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam AVAILABILITY = new ReferenceParam(SP_AVAILABILITY);
+	public static final ReferenceClientParam AVAILABILITY = new ReferenceClientParam(SP_AVAILABILITY);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies
@@ -152,7 +152,7 @@ public class Slot extends BaseResource implements IResource {
 	 * Path: <b>Slot.start</b><br/>
 	 * </p>
 	 */
-	public static final DateParam START = new DateParam(SP_START);
+	public static final DateClientParam START = new DateClientParam(SP_START);
 
 	/**
 	 * Search parameter constant for <b>fbtype</b>
@@ -173,7 +173,7 @@ public class Slot extends BaseResource implements IResource {
 	 * Path: <b>Slot.freeBusyType</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam FBTYPE = new TokenParam(SP_FBTYPE);
+	public static final TokenClientParam FBTYPE = new TokenClientParam(SP_FBTYPE);
 
 
 	@Child(name="identifier", type=IdentifierDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)	

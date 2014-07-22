@@ -58,9 +58,9 @@ import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
 import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
-import ca.uhn.fhir.rest.gclient.ReferenceParam;
-import ca.uhn.fhir.rest.gclient.StringParam;
-import ca.uhn.fhir.rest.gclient.TokenParam;
+import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
+import ca.uhn.fhir.rest.gclient.StringClientParam;
+import ca.uhn.fhir.rest.gclient.TokenClientParam;
 
 
 /**
@@ -105,7 +105,7 @@ public class Device extends BaseResource implements IResource {
 	 * Path: <b>Device.type</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam TYPE = new TokenParam(SP_TYPE);
+	public static final TokenClientParam TYPE = new TokenClientParam(SP_TYPE);
 
 	/**
 	 * Search parameter constant for <b>manufacturer</b>
@@ -126,7 +126,7 @@ public class Device extends BaseResource implements IResource {
 	 * Path: <b>Device.manufacturer</b><br/>
 	 * </p>
 	 */
-	public static final StringParam MANUFACTURER = new StringParam(SP_MANUFACTURER);
+	public static final StringClientParam MANUFACTURER = new StringClientParam(SP_MANUFACTURER);
 
 	/**
 	 * Search parameter constant for <b>model</b>
@@ -147,7 +147,7 @@ public class Device extends BaseResource implements IResource {
 	 * Path: <b>Device.model</b><br/>
 	 * </p>
 	 */
-	public static final StringParam MODEL = new StringParam(SP_MODEL);
+	public static final StringClientParam MODEL = new StringClientParam(SP_MODEL);
 
 	/**
 	 * Search parameter constant for <b>organization</b>
@@ -168,7 +168,7 @@ public class Device extends BaseResource implements IResource {
 	 * Path: <b>Device.owner</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam ORGANIZATION = new ReferenceParam(SP_ORGANIZATION);
+	public static final ReferenceClientParam ORGANIZATION = new ReferenceClientParam(SP_ORGANIZATION);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies
@@ -195,7 +195,7 @@ public class Device extends BaseResource implements IResource {
 	 * Path: <b>Device.identifier</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam IDENTIFIER = new TokenParam(SP_IDENTIFIER);
+	public static final TokenClientParam IDENTIFIER = new TokenClientParam(SP_IDENTIFIER);
 
 	/**
 	 * Search parameter constant for <b>location</b>
@@ -216,7 +216,7 @@ public class Device extends BaseResource implements IResource {
 	 * Path: <b>Device.location</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam LOCATION = new ReferenceParam(SP_LOCATION);
+	public static final ReferenceClientParam LOCATION = new ReferenceClientParam(SP_LOCATION);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies
@@ -243,7 +243,7 @@ public class Device extends BaseResource implements IResource {
 	 * Path: <b>Device.patient</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam PATIENT = new ReferenceParam(SP_PATIENT);
+	public static final ReferenceClientParam PATIENT = new ReferenceClientParam(SP_PATIENT);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies
@@ -270,7 +270,7 @@ public class Device extends BaseResource implements IResource {
 	 * Path: <b>Device.udi</b><br/>
 	 * </p>
 	 */
-	public static final StringParam UDI = new StringParam(SP_UDI);
+	public static final StringClientParam UDI = new StringClientParam(SP_UDI);
 
 
 	@Child(name="identifier", type=IdentifierDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)	

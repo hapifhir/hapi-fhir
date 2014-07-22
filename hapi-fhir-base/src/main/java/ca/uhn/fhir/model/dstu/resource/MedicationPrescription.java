@@ -70,9 +70,9 @@ import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.model.primitive.StringDt;
-import ca.uhn.fhir.rest.gclient.DateParam;
-import ca.uhn.fhir.rest.gclient.ReferenceParam;
-import ca.uhn.fhir.rest.gclient.TokenParam;
+import ca.uhn.fhir.rest.gclient.DateClientParam;
+import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
+import ca.uhn.fhir.rest.gclient.TokenClientParam;
 
 
 /**
@@ -117,7 +117,7 @@ public class MedicationPrescription extends BaseResource implements IResource {
 	 * Path: <b>MedicationPrescription.dateWritten</b><br/>
 	 * </p>
 	 */
-	public static final DateParam DATEWRITTEN = new DateParam(SP_DATEWRITTEN);
+	public static final DateClientParam DATEWRITTEN = new DateClientParam(SP_DATEWRITTEN);
 
 	/**
 	 * Search parameter constant for <b>encounter</b>
@@ -138,7 +138,7 @@ public class MedicationPrescription extends BaseResource implements IResource {
 	 * Path: <b>MedicationPrescription.encounter</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam ENCOUNTER = new ReferenceParam(SP_ENCOUNTER);
+	public static final ReferenceClientParam ENCOUNTER = new ReferenceClientParam(SP_ENCOUNTER);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies
@@ -165,7 +165,7 @@ public class MedicationPrescription extends BaseResource implements IResource {
 	 * Path: <b>MedicationPrescription.identifier</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam IDENTIFIER = new TokenParam(SP_IDENTIFIER);
+	public static final TokenClientParam IDENTIFIER = new TokenClientParam(SP_IDENTIFIER);
 
 	/**
 	 * Search parameter constant for <b>medication</b>
@@ -186,7 +186,7 @@ public class MedicationPrescription extends BaseResource implements IResource {
 	 * Path: <b>MedicationPrescription.medication</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam MEDICATION = new ReferenceParam(SP_MEDICATION);
+	public static final ReferenceClientParam MEDICATION = new ReferenceClientParam(SP_MEDICATION);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies
@@ -213,7 +213,7 @@ public class MedicationPrescription extends BaseResource implements IResource {
 	 * Path: <b>MedicationPrescription.patient</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam PATIENT = new ReferenceParam(SP_PATIENT);
+	public static final ReferenceClientParam PATIENT = new ReferenceClientParam(SP_PATIENT);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies
@@ -240,7 +240,7 @@ public class MedicationPrescription extends BaseResource implements IResource {
 	 * Path: <b>MedicationPrescription.status</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam STATUS = new TokenParam(SP_STATUS);
+	public static final TokenClientParam STATUS = new TokenClientParam(SP_STATUS);
 
 
 	@Child(name="identifier", type=IdentifierDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)	

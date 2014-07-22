@@ -1,7 +1,5 @@
 package ca.uhn.fhir.rest.gclient;
 
-import ca.uhn.fhir.model.primitive.IdDt;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -23,59 +21,15 @@ import ca.uhn.fhir.model.primitive.IdDt;
  */
 
 
-public class ReferenceParam implements IParam {
+/**
+ * @deprecated Use {@link ReferenceClientParam} instead. That class is identical to this one but was renamed to reduct
+ *             confusing duplicate names in the API. This class will be removed in a future release.
+ */
+public class ReferenceParam extends ReferenceClientParam {
 
-	private String myName;
-
-	public ReferenceParam(String theName) {
-		myName = theName;
+	public ReferenceParam(String theParamName) {
+		super(theParamName);
 	}
 
-	@Override
-	public String getParamName() {
-		return myName;
-	}
-	
-	public ICriterion hasChainedProperty(ICriterion theICriterion) {
-		return new ReferenceChainCriterion(getParamName(), theICriterion);
-	}
-
-	/**
-	 * Match the referenced resource if the resource has the given ID (this can be
-	 * the logical ID or the absolute URL of the resource)
-	 */
-	public ICriterion hasId(IdDt theId) {
-		return new StringCriterion(getParamName(), theId.getValue());
-	}
-
-	/**
-	 * Match the referenced resource if the resource has the given ID (this can be
-	 * the logical ID or the absolute URL of the resource)
-	 */
-	public ICriterion hasId(String theId) {
-		return new StringCriterion(getParamName(), theId);
-	}
-
-	private static class ReferenceChainCriterion implements ICriterion, ICriterionInternal {
-
-		private String myParamName;
-		private ICriterionInternal myWrappedCriterion;
-
-		public ReferenceChainCriterion(String theParamName, ICriterion theWrappedCriterion) {
-			myParamName = theParamName;
-			myWrappedCriterion = (ICriterionInternal) theWrappedCriterion;
-		}
-
-		@Override
-		public String getParameterName() {
-			return myParamName + "." + myWrappedCriterion.getParameterName();
-		}
-
-		@Override
-		public String getParameterValue() {
-			return myWrappedCriterion.getParameterValue();
-		}
-
-	}
 
 }

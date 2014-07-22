@@ -56,7 +56,7 @@ import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.gclient.ICreateTyped;
 import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.gclient.IUntypedQuery;
-import ca.uhn.fhir.rest.gclient.StringParam;
+import ca.uhn.fhir.rest.gclient.StringClientParam;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.to.model.HomeRequest;
@@ -907,7 +907,7 @@ public class Controller {
 			theClientCodeJsonWriter.write("value", nextValue);
 			theClientCodeJsonWriter.writeEnd();
 
-			theQuery.where(new StringParam(nextName + nextQualifier).matches().value(nextValue));
+			theQuery.where(new StringClientParam(nextName + nextQualifier).matches().value(nextValue));
 
 		}
 

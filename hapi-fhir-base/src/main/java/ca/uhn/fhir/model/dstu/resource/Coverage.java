@@ -61,8 +61,8 @@ import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
 import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
-import ca.uhn.fhir.rest.gclient.ReferenceParam;
-import ca.uhn.fhir.rest.gclient.TokenParam;
+import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
+import ca.uhn.fhir.rest.gclient.TokenClientParam;
 
 
 /**
@@ -107,7 +107,7 @@ public class Coverage extends BaseResource implements IResource {
 	 * Path: <b>Coverage.issuer</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam ISSUER = new ReferenceParam(SP_ISSUER);
+	public static final ReferenceClientParam ISSUER = new ReferenceClientParam(SP_ISSUER);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies
@@ -134,7 +134,7 @@ public class Coverage extends BaseResource implements IResource {
 	 * Path: <b>Coverage.identifier</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam IDENTIFIER = new TokenParam(SP_IDENTIFIER);
+	public static final TokenClientParam IDENTIFIER = new TokenClientParam(SP_IDENTIFIER);
 
 	/**
 	 * Search parameter constant for <b>type</b>
@@ -155,7 +155,7 @@ public class Coverage extends BaseResource implements IResource {
 	 * Path: <b>Coverage.type</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam TYPE = new TokenParam(SP_TYPE);
+	public static final TokenClientParam TYPE = new TokenClientParam(SP_TYPE);
 
 	/**
 	 * Search parameter constant for <b>plan</b>
@@ -176,7 +176,7 @@ public class Coverage extends BaseResource implements IResource {
 	 * Path: <b>Coverage.plan</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam PLAN = new TokenParam(SP_PLAN);
+	public static final TokenClientParam PLAN = new TokenClientParam(SP_PLAN);
 
 	/**
 	 * Search parameter constant for <b>subplan</b>
@@ -197,7 +197,7 @@ public class Coverage extends BaseResource implements IResource {
 	 * Path: <b>Coverage.subplan</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam SUBPLAN = new TokenParam(SP_SUBPLAN);
+	public static final TokenClientParam SUBPLAN = new TokenClientParam(SP_SUBPLAN);
 
 	/**
 	 * Search parameter constant for <b>group</b>
@@ -218,7 +218,7 @@ public class Coverage extends BaseResource implements IResource {
 	 * Path: <b>Coverage.group</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam GROUP = new TokenParam(SP_GROUP);
+	public static final TokenClientParam GROUP = new TokenClientParam(SP_GROUP);
 
 	/**
 	 * Search parameter constant for <b>dependent</b>
@@ -239,7 +239,7 @@ public class Coverage extends BaseResource implements IResource {
 	 * Path: <b>Coverage.dependent</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam DEPENDENT = new TokenParam(SP_DEPENDENT);
+	public static final TokenClientParam DEPENDENT = new TokenClientParam(SP_DEPENDENT);
 
 	/**
 	 * Search parameter constant for <b>sequence</b>
@@ -260,7 +260,7 @@ public class Coverage extends BaseResource implements IResource {
 	 * Path: <b>Coverage.sequence</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam SEQUENCE = new TokenParam(SP_SEQUENCE);
+	public static final TokenClientParam SEQUENCE = new TokenClientParam(SP_SEQUENCE);
 
 	/**
 	 * Search parameter constant for <b>name</b>
@@ -281,7 +281,7 @@ public class Coverage extends BaseResource implements IResource {
 	 * Path: <b>Coverage.subscriber.name</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam NAME = new TokenParam(SP_NAME);
+	public static final TokenClientParam NAME = new TokenClientParam(SP_NAME);
 
 
 	@Child(name="issuer", order=0, min=0, max=1, type={

@@ -74,12 +74,12 @@ import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.StringDt;
-import ca.uhn.fhir.rest.gclient.CompositeParam;
-import ca.uhn.fhir.rest.gclient.DateParam;
-import ca.uhn.fhir.rest.gclient.QuantityParam;
-import ca.uhn.fhir.rest.gclient.ReferenceParam;
-import ca.uhn.fhir.rest.gclient.StringParam;
-import ca.uhn.fhir.rest.gclient.TokenParam;
+import ca.uhn.fhir.rest.gclient.CompositeClientParam;
+import ca.uhn.fhir.rest.gclient.DateClientParam;
+import ca.uhn.fhir.rest.gclient.QuantityClientParam;
+import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
+import ca.uhn.fhir.rest.gclient.StringClientParam;
+import ca.uhn.fhir.rest.gclient.TokenClientParam;
 
 
 /**
@@ -124,7 +124,7 @@ public class Observation extends BaseResource implements IResource {
 	 * Path: <b>Observation.name</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam NAME = new TokenParam(SP_NAME);
+	public static final TokenClientParam NAME = new TokenClientParam(SP_NAME);
 
 	/**
 	 * Search parameter constant for <b>value-quantity</b>
@@ -145,7 +145,7 @@ public class Observation extends BaseResource implements IResource {
 	 * Path: <b>Observation.value[x]</b><br/>
 	 * </p>
 	 */
-	public static final QuantityParam VALUE_QUANTITY = new QuantityParam(SP_VALUE_QUANTITY);
+	public static final QuantityClientParam VALUE_QUANTITY = new QuantityClientParam(SP_VALUE_QUANTITY);
 
 	/**
 	 * Search parameter constant for <b>value-concept</b>
@@ -166,7 +166,7 @@ public class Observation extends BaseResource implements IResource {
 	 * Path: <b>Observation.value[x]</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam VALUE_CONCEPT = new TokenParam(SP_VALUE_CONCEPT);
+	public static final TokenClientParam VALUE_CONCEPT = new TokenClientParam(SP_VALUE_CONCEPT);
 
 	/**
 	 * Search parameter constant for <b>value-date</b>
@@ -187,7 +187,7 @@ public class Observation extends BaseResource implements IResource {
 	 * Path: <b>Observation.value[x]</b><br/>
 	 * </p>
 	 */
-	public static final DateParam VALUE_DATE = new DateParam(SP_VALUE_DATE);
+	public static final DateClientParam VALUE_DATE = new DateClientParam(SP_VALUE_DATE);
 
 	/**
 	 * Search parameter constant for <b>value-string</b>
@@ -208,7 +208,7 @@ public class Observation extends BaseResource implements IResource {
 	 * Path: <b>Observation.value[x]</b><br/>
 	 * </p>
 	 */
-	public static final StringParam VALUE_STRING = new StringParam(SP_VALUE_STRING);
+	public static final StringClientParam VALUE_STRING = new StringClientParam(SP_VALUE_STRING);
 
 	/**
 	 * Search parameter constant for <b>name-value-[x]</b>
@@ -229,7 +229,7 @@ public class Observation extends BaseResource implements IResource {
 	 * Path: <b>name & value-[x]</b><br/>
 	 * </p>
 	 */
-	public static final CompositeParam NAME_VALUE_X = new CompositeParam(SP_NAME_VALUE_X);
+	public static final CompositeClientParam NAME_VALUE_X = new CompositeClientParam(SP_NAME_VALUE_X);
 
 	/**
 	 * Search parameter constant for <b>date</b>
@@ -250,7 +250,7 @@ public class Observation extends BaseResource implements IResource {
 	 * Path: <b>Observation.applies[x]</b><br/>
 	 * </p>
 	 */
-	public static final DateParam DATE = new DateParam(SP_DATE);
+	public static final DateClientParam DATE = new DateClientParam(SP_DATE);
 
 	/**
 	 * Search parameter constant for <b>status</b>
@@ -271,7 +271,7 @@ public class Observation extends BaseResource implements IResource {
 	 * Path: <b>Observation.status</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam STATUS = new TokenParam(SP_STATUS);
+	public static final TokenClientParam STATUS = new TokenClientParam(SP_STATUS);
 
 	/**
 	 * Search parameter constant for <b>reliability</b>
@@ -292,7 +292,7 @@ public class Observation extends BaseResource implements IResource {
 	 * Path: <b>Observation.reliability</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam RELIABILITY = new TokenParam(SP_RELIABILITY);
+	public static final TokenClientParam RELIABILITY = new TokenClientParam(SP_RELIABILITY);
 
 	/**
 	 * Search parameter constant for <b>subject</b>
@@ -313,7 +313,7 @@ public class Observation extends BaseResource implements IResource {
 	 * Path: <b>Observation.subject</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam SUBJECT = new ReferenceParam(SP_SUBJECT);
+	public static final ReferenceClientParam SUBJECT = new ReferenceClientParam(SP_SUBJECT);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies
@@ -340,7 +340,7 @@ public class Observation extends BaseResource implements IResource {
 	 * Path: <b>Observation.performer</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam PERFORMER = new ReferenceParam(SP_PERFORMER);
+	public static final ReferenceClientParam PERFORMER = new ReferenceClientParam(SP_PERFORMER);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies
@@ -367,7 +367,7 @@ public class Observation extends BaseResource implements IResource {
 	 * Path: <b>Observation.specimen</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam SPECIMEN = new ReferenceParam(SP_SPECIMEN);
+	public static final ReferenceClientParam SPECIMEN = new ReferenceClientParam(SP_SPECIMEN);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies
@@ -394,7 +394,7 @@ public class Observation extends BaseResource implements IResource {
 	 * Path: <b>Observation.related.type</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam RELATED_TYPE = new TokenParam(SP_RELATED_TYPE);
+	public static final TokenClientParam RELATED_TYPE = new TokenClientParam(SP_RELATED_TYPE);
 
 	/**
 	 * Search parameter constant for <b>related-target</b>
@@ -415,7 +415,7 @@ public class Observation extends BaseResource implements IResource {
 	 * Path: <b>Observation.related.target</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam RELATED_TARGET = new ReferenceParam(SP_RELATED_TARGET);
+	public static final ReferenceClientParam RELATED_TARGET = new ReferenceClientParam(SP_RELATED_TARGET);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies
@@ -442,7 +442,7 @@ public class Observation extends BaseResource implements IResource {
 	 * Path: <b>related-target & related-type</b><br/>
 	 * </p>
 	 */
-	public static final CompositeParam RELATED = new CompositeParam(SP_RELATED);
+	public static final CompositeClientParam RELATED = new CompositeClientParam(SP_RELATED);
 
 
 	@Child(name="name", type=CodeableConceptDt.class, order=0, min=1, max=1)	

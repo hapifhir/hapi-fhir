@@ -56,7 +56,7 @@ import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.model.primitive.UriDt;
-import ca.uhn.fhir.rest.gclient.TokenParam;
+import ca.uhn.fhir.rest.gclient.TokenClientParam;
 
 
 /**
@@ -101,7 +101,7 @@ public class Query extends BaseResource implements IResource {
 	 * Path: <b>Query.identifier</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam IDENTIFIER = new TokenParam(SP_IDENTIFIER);
+	public static final TokenClientParam IDENTIFIER = new TokenClientParam(SP_IDENTIFIER);
 
 	/**
 	 * Search parameter constant for <b>response</b>
@@ -122,7 +122,7 @@ public class Query extends BaseResource implements IResource {
 	 * Path: <b>Query.response.identifier</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam RESPONSE = new TokenParam(SP_RESPONSE);
+	public static final TokenClientParam RESPONSE = new TokenClientParam(SP_RESPONSE);
 
 
 	@Child(name="identifier", type=UriDt.class, order=0, min=1, max=1)	

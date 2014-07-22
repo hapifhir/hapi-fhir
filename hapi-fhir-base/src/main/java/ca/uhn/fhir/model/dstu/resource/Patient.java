@@ -72,10 +72,10 @@ import ca.uhn.fhir.model.primitive.BoundCodeableConceptDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
-import ca.uhn.fhir.rest.gclient.DateParam;
-import ca.uhn.fhir.rest.gclient.ReferenceParam;
-import ca.uhn.fhir.rest.gclient.StringParam;
-import ca.uhn.fhir.rest.gclient.TokenParam;
+import ca.uhn.fhir.rest.gclient.DateClientParam;
+import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
+import ca.uhn.fhir.rest.gclient.StringClientParam;
+import ca.uhn.fhir.rest.gclient.TokenClientParam;
 
 
 /**
@@ -120,7 +120,7 @@ public class Patient extends BaseResource implements IResource {
 	 * Path: <b>Patient.identifier</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam IDENTIFIER = new TokenParam(SP_IDENTIFIER);
+	public static final TokenClientParam IDENTIFIER = new TokenClientParam(SP_IDENTIFIER);
 
 	/**
 	 * Search parameter constant for <b>name</b>
@@ -141,7 +141,7 @@ public class Patient extends BaseResource implements IResource {
 	 * Path: <b>Patient.name</b><br/>
 	 * </p>
 	 */
-	public static final StringParam NAME = new StringParam(SP_NAME);
+	public static final StringClientParam NAME = new StringClientParam(SP_NAME);
 
 	/**
 	 * Search parameter constant for <b>family</b>
@@ -162,7 +162,7 @@ public class Patient extends BaseResource implements IResource {
 	 * Path: <b>Patient.name.family</b><br/>
 	 * </p>
 	 */
-	public static final StringParam FAMILY = new StringParam(SP_FAMILY);
+	public static final StringClientParam FAMILY = new StringClientParam(SP_FAMILY);
 
 	/**
 	 * Search parameter constant for <b>given</b>
@@ -183,7 +183,7 @@ public class Patient extends BaseResource implements IResource {
 	 * Path: <b>Patient.name.given</b><br/>
 	 * </p>
 	 */
-	public static final StringParam GIVEN = new StringParam(SP_GIVEN);
+	public static final StringClientParam GIVEN = new StringClientParam(SP_GIVEN);
 
 	/**
 	 * Search parameter constant for <b>phonetic</b>
@@ -204,7 +204,7 @@ public class Patient extends BaseResource implements IResource {
 	 * Path: <b></b><br/>
 	 * </p>
 	 */
-	public static final StringParam PHONETIC = new StringParam(SP_PHONETIC);
+	public static final StringClientParam PHONETIC = new StringClientParam(SP_PHONETIC);
 
 	/**
 	 * Search parameter constant for <b>telecom</b>
@@ -225,7 +225,7 @@ public class Patient extends BaseResource implements IResource {
 	 * Path: <b>Patient.telecom</b><br/>
 	 * </p>
 	 */
-	public static final StringParam TELECOM = new StringParam(SP_TELECOM);
+	public static final StringClientParam TELECOM = new StringClientParam(SP_TELECOM);
 
 	/**
 	 * Search parameter constant for <b>address</b>
@@ -246,7 +246,7 @@ public class Patient extends BaseResource implements IResource {
 	 * Path: <b>Patient.address</b><br/>
 	 * </p>
 	 */
-	public static final StringParam ADDRESS = new StringParam(SP_ADDRESS);
+	public static final StringClientParam ADDRESS = new StringClientParam(SP_ADDRESS);
 
 	/**
 	 * Search parameter constant for <b>gender</b>
@@ -267,7 +267,7 @@ public class Patient extends BaseResource implements IResource {
 	 * Path: <b>Patient.gender</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam GENDER = new TokenParam(SP_GENDER);
+	public static final TokenClientParam GENDER = new TokenClientParam(SP_GENDER);
 
 	/**
 	 * Search parameter constant for <b>language</b>
@@ -288,7 +288,7 @@ public class Patient extends BaseResource implements IResource {
 	 * Path: <b>Patient.communication</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam LANGUAGE = new TokenParam(SP_LANGUAGE);
+	public static final TokenClientParam LANGUAGE = new TokenClientParam(SP_LANGUAGE);
 
 	/**
 	 * Search parameter constant for <b>birthdate</b>
@@ -309,7 +309,7 @@ public class Patient extends BaseResource implements IResource {
 	 * Path: <b>Patient.birthDate</b><br/>
 	 * </p>
 	 */
-	public static final DateParam BIRTHDATE = new DateParam(SP_BIRTHDATE);
+	public static final DateClientParam BIRTHDATE = new DateClientParam(SP_BIRTHDATE);
 
 	/**
 	 * Search parameter constant for <b>provider</b>
@@ -330,7 +330,7 @@ public class Patient extends BaseResource implements IResource {
 	 * Path: <b>Patient.managingOrganization</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam PROVIDER = new ReferenceParam(SP_PROVIDER);
+	public static final ReferenceClientParam PROVIDER = new ReferenceClientParam(SP_PROVIDER);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies
@@ -357,7 +357,7 @@ public class Patient extends BaseResource implements IResource {
 	 * Path: <b>Patient.active</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam ACTIVE = new TokenParam(SP_ACTIVE);
+	public static final TokenClientParam ACTIVE = new TokenClientParam(SP_ACTIVE);
 
 	/**
 	 * Search parameter constant for <b>animal-species</b>
@@ -378,7 +378,7 @@ public class Patient extends BaseResource implements IResource {
 	 * Path: <b>Patient.animal.species</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam ANIMAL_SPECIES = new TokenParam(SP_ANIMAL_SPECIES);
+	public static final TokenClientParam ANIMAL_SPECIES = new TokenClientParam(SP_ANIMAL_SPECIES);
 
 	/**
 	 * Search parameter constant for <b>animal-breed</b>
@@ -399,7 +399,7 @@ public class Patient extends BaseResource implements IResource {
 	 * Path: <b>Patient.animal.breed</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam ANIMAL_BREED = new TokenParam(SP_ANIMAL_BREED);
+	public static final TokenClientParam ANIMAL_BREED = new TokenClientParam(SP_ANIMAL_BREED);
 
 	/**
 	 * Search parameter constant for <b>link</b>
@@ -420,7 +420,7 @@ public class Patient extends BaseResource implements IResource {
 	 * Path: <b>Patient.link.other</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam LINK = new ReferenceParam(SP_LINK);
+	public static final ReferenceClientParam LINK = new ReferenceClientParam(SP_LINK);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies

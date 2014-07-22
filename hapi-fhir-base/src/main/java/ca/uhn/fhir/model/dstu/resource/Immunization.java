@@ -66,11 +66,11 @@ import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.model.primitive.StringDt;
-import ca.uhn.fhir.rest.gclient.DateParam;
-import ca.uhn.fhir.rest.gclient.NumberParam;
-import ca.uhn.fhir.rest.gclient.ReferenceParam;
-import ca.uhn.fhir.rest.gclient.StringParam;
-import ca.uhn.fhir.rest.gclient.TokenParam;
+import ca.uhn.fhir.rest.gclient.DateClientParam;
+import ca.uhn.fhir.rest.gclient.NumberClientParam;
+import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
+import ca.uhn.fhir.rest.gclient.StringClientParam;
+import ca.uhn.fhir.rest.gclient.TokenClientParam;
 
 
 /**
@@ -115,7 +115,7 @@ public class Immunization extends BaseResource implements IResource {
 	 * Path: <b>Immunization.date</b><br/>
 	 * </p>
 	 */
-	public static final DateParam DATE = new DateParam(SP_DATE);
+	public static final DateClientParam DATE = new DateClientParam(SP_DATE);
 
 	/**
 	 * Search parameter constant for <b>dose-sequence</b>
@@ -136,7 +136,7 @@ public class Immunization extends BaseResource implements IResource {
 	 * Path: <b>Immunization.vaccinationProtocol.doseSequence</b><br/>
 	 * </p>
 	 */
-	public static final NumberParam DOSE_SEQUENCE = new NumberParam(SP_DOSE_SEQUENCE);
+	public static final NumberClientParam DOSE_SEQUENCE = new NumberClientParam(SP_DOSE_SEQUENCE);
 
 	/**
 	 * Search parameter constant for <b>identifier</b>
@@ -157,7 +157,7 @@ public class Immunization extends BaseResource implements IResource {
 	 * Path: <b>Immunization.identifier</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam IDENTIFIER = new TokenParam(SP_IDENTIFIER);
+	public static final TokenClientParam IDENTIFIER = new TokenClientParam(SP_IDENTIFIER);
 
 	/**
 	 * Search parameter constant for <b>location</b>
@@ -178,7 +178,7 @@ public class Immunization extends BaseResource implements IResource {
 	 * Path: <b>Immunization.location</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam LOCATION = new ReferenceParam(SP_LOCATION);
+	public static final ReferenceClientParam LOCATION = new ReferenceClientParam(SP_LOCATION);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies
@@ -205,7 +205,7 @@ public class Immunization extends BaseResource implements IResource {
 	 * Path: <b>Immunization.lotNumber</b><br/>
 	 * </p>
 	 */
-	public static final StringParam LOT_NUMBER = new StringParam(SP_LOT_NUMBER);
+	public static final StringClientParam LOT_NUMBER = new StringClientParam(SP_LOT_NUMBER);
 
 	/**
 	 * Search parameter constant for <b>manufacturer</b>
@@ -226,7 +226,7 @@ public class Immunization extends BaseResource implements IResource {
 	 * Path: <b>Immunization.manufacturer</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam MANUFACTURER = new ReferenceParam(SP_MANUFACTURER);
+	public static final ReferenceClientParam MANUFACTURER = new ReferenceClientParam(SP_MANUFACTURER);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies
@@ -253,7 +253,7 @@ public class Immunization extends BaseResource implements IResource {
 	 * Path: <b>Immunization.performer</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam PERFORMER = new ReferenceParam(SP_PERFORMER);
+	public static final ReferenceClientParam PERFORMER = new ReferenceClientParam(SP_PERFORMER);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies
@@ -280,7 +280,7 @@ public class Immunization extends BaseResource implements IResource {
 	 * Path: <b>Immunization.reaction.detail</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam REACTION = new ReferenceParam(SP_REACTION);
+	public static final ReferenceClientParam REACTION = new ReferenceClientParam(SP_REACTION);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies
@@ -307,7 +307,7 @@ public class Immunization extends BaseResource implements IResource {
 	 * Path: <b>Immunization.reaction.date</b><br/>
 	 * </p>
 	 */
-	public static final DateParam REACTION_DATE = new DateParam(SP_REACTION_DATE);
+	public static final DateClientParam REACTION_DATE = new DateClientParam(SP_REACTION_DATE);
 
 	/**
 	 * Search parameter constant for <b>reason</b>
@@ -328,7 +328,7 @@ public class Immunization extends BaseResource implements IResource {
 	 * Path: <b>Immunization.explanation.reason</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam REASON = new TokenParam(SP_REASON);
+	public static final TokenClientParam REASON = new TokenClientParam(SP_REASON);
 
 	/**
 	 * Search parameter constant for <b>refusal-reason</b>
@@ -349,7 +349,7 @@ public class Immunization extends BaseResource implements IResource {
 	 * Path: <b>Immunization.explanation.refusalReason</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam REFUSAL_REASON = new TokenParam(SP_REFUSAL_REASON);
+	public static final TokenClientParam REFUSAL_REASON = new TokenClientParam(SP_REFUSAL_REASON);
 
 	/**
 	 * Search parameter constant for <b>refused</b>
@@ -370,7 +370,7 @@ public class Immunization extends BaseResource implements IResource {
 	 * Path: <b>Immunization.refusedIndicator</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam REFUSED = new TokenParam(SP_REFUSED);
+	public static final TokenClientParam REFUSED = new TokenClientParam(SP_REFUSED);
 
 	/**
 	 * Search parameter constant for <b>requester</b>
@@ -391,7 +391,7 @@ public class Immunization extends BaseResource implements IResource {
 	 * Path: <b>Immunization.requester</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam REQUESTER = new ReferenceParam(SP_REQUESTER);
+	public static final ReferenceClientParam REQUESTER = new ReferenceClientParam(SP_REQUESTER);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies
@@ -418,7 +418,7 @@ public class Immunization extends BaseResource implements IResource {
 	 * Path: <b>Immunization.subject</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam SUBJECT = new ReferenceParam(SP_SUBJECT);
+	public static final ReferenceClientParam SUBJECT = new ReferenceClientParam(SP_SUBJECT);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies
@@ -445,7 +445,7 @@ public class Immunization extends BaseResource implements IResource {
 	 * Path: <b>Immunization.vaccineType</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam VACCINE_TYPE = new TokenParam(SP_VACCINE_TYPE);
+	public static final TokenClientParam VACCINE_TYPE = new TokenClientParam(SP_VACCINE_TYPE);
 
 
 	@Child(name="identifier", type=IdentifierDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)	

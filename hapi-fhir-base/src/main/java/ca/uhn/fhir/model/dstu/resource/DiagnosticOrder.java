@@ -62,10 +62,10 @@ import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.StringDt;
-import ca.uhn.fhir.rest.gclient.CompositeParam;
-import ca.uhn.fhir.rest.gclient.DateParam;
-import ca.uhn.fhir.rest.gclient.ReferenceParam;
-import ca.uhn.fhir.rest.gclient.TokenParam;
+import ca.uhn.fhir.rest.gclient.CompositeClientParam;
+import ca.uhn.fhir.rest.gclient.DateClientParam;
+import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
+import ca.uhn.fhir.rest.gclient.TokenClientParam;
 
 
 /**
@@ -110,7 +110,7 @@ public class DiagnosticOrder extends BaseResource implements IResource {
 	 * Path: <b>DiagnosticOrder.event.actor | DiagnosticOrder.item.event.actor</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam ACTOR = new ReferenceParam(SP_ACTOR);
+	public static final ReferenceClientParam ACTOR = new ReferenceClientParam(SP_ACTOR);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies
@@ -143,7 +143,7 @@ public class DiagnosticOrder extends BaseResource implements IResource {
 	 * Path: <b>DiagnosticOrder.item.bodySite</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam BODYSITE = new TokenParam(SP_BODYSITE);
+	public static final TokenClientParam BODYSITE = new TokenClientParam(SP_BODYSITE);
 
 	/**
 	 * Search parameter constant for <b>code</b>
@@ -164,7 +164,7 @@ public class DiagnosticOrder extends BaseResource implements IResource {
 	 * Path: <b>DiagnosticOrder.item.code</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam CODE = new TokenParam(SP_CODE);
+	public static final TokenClientParam CODE = new TokenClientParam(SP_CODE);
 
 	/**
 	 * Search parameter constant for <b>event-date</b>
@@ -185,7 +185,7 @@ public class DiagnosticOrder extends BaseResource implements IResource {
 	 * Path: <b>DiagnosticOrder.event.dateTime</b><br/>
 	 * </p>
 	 */
-	public static final DateParam EVENT_DATE = new DateParam(SP_EVENT_DATE);
+	public static final DateClientParam EVENT_DATE = new DateClientParam(SP_EVENT_DATE);
 
 	/**
 	 * Search parameter constant for <b>encounter</b>
@@ -206,7 +206,7 @@ public class DiagnosticOrder extends BaseResource implements IResource {
 	 * Path: <b>DiagnosticOrder.encounter</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam ENCOUNTER = new ReferenceParam(SP_ENCOUNTER);
+	public static final ReferenceClientParam ENCOUNTER = new ReferenceClientParam(SP_ENCOUNTER);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies
@@ -233,7 +233,7 @@ public class DiagnosticOrder extends BaseResource implements IResource {
 	 * Path: <b>DiagnosticOrder.identifier</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam IDENTIFIER = new TokenParam(SP_IDENTIFIER);
+	public static final TokenClientParam IDENTIFIER = new TokenClientParam(SP_IDENTIFIER);
 
 	/**
 	 * Search parameter constant for <b>item-date</b>
@@ -254,7 +254,7 @@ public class DiagnosticOrder extends BaseResource implements IResource {
 	 * Path: <b>DiagnosticOrder.item.event.dateTime</b><br/>
 	 * </p>
 	 */
-	public static final DateParam ITEM_DATE = new DateParam(SP_ITEM_DATE);
+	public static final DateClientParam ITEM_DATE = new DateClientParam(SP_ITEM_DATE);
 
 	/**
 	 * Search parameter constant for <b>item-past-status</b>
@@ -275,7 +275,7 @@ public class DiagnosticOrder extends BaseResource implements IResource {
 	 * Path: <b>DiagnosticOrder.item.event.status</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam ITEM_PAST_STATUS = new TokenParam(SP_ITEM_PAST_STATUS);
+	public static final TokenClientParam ITEM_PAST_STATUS = new TokenClientParam(SP_ITEM_PAST_STATUS);
 
 	/**
 	 * Search parameter constant for <b>item-status</b>
@@ -296,7 +296,7 @@ public class DiagnosticOrder extends BaseResource implements IResource {
 	 * Path: <b>DiagnosticOrder.item.status</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam ITEM_STATUS = new TokenParam(SP_ITEM_STATUS);
+	public static final TokenClientParam ITEM_STATUS = new TokenClientParam(SP_ITEM_STATUS);
 
 	/**
 	 * Search parameter constant for <b>item-status-date</b>
@@ -317,7 +317,7 @@ public class DiagnosticOrder extends BaseResource implements IResource {
 	 * Path: <b>item-past-status & item-date</b><br/>
 	 * </p>
 	 */
-	public static final CompositeParam ITEM_STATUS_DATE = new CompositeParam(SP_ITEM_STATUS_DATE);
+	public static final CompositeClientParam ITEM_STATUS_DATE = new CompositeClientParam(SP_ITEM_STATUS_DATE);
 
 	/**
 	 * Search parameter constant for <b>orderer</b>
@@ -338,7 +338,7 @@ public class DiagnosticOrder extends BaseResource implements IResource {
 	 * Path: <b>DiagnosticOrder.orderer</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam ORDERER = new ReferenceParam(SP_ORDERER);
+	public static final ReferenceClientParam ORDERER = new ReferenceClientParam(SP_ORDERER);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies
@@ -365,7 +365,7 @@ public class DiagnosticOrder extends BaseResource implements IResource {
 	 * Path: <b>DiagnosticOrder.event.status</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam EVENT_STATUS = new TokenParam(SP_EVENT_STATUS);
+	public static final TokenClientParam EVENT_STATUS = new TokenClientParam(SP_EVENT_STATUS);
 
 	/**
 	 * Search parameter constant for <b>specimen</b>
@@ -386,7 +386,7 @@ public class DiagnosticOrder extends BaseResource implements IResource {
 	 * Path: <b>DiagnosticOrder.specimen | DiagnosticOrder.item.specimen</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam SPECIMEN = new ReferenceParam(SP_SPECIMEN);
+	public static final ReferenceClientParam SPECIMEN = new ReferenceClientParam(SP_SPECIMEN);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies
@@ -419,7 +419,7 @@ public class DiagnosticOrder extends BaseResource implements IResource {
 	 * Path: <b>DiagnosticOrder.status</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam STATUS = new TokenParam(SP_STATUS);
+	public static final TokenClientParam STATUS = new TokenClientParam(SP_STATUS);
 
 	/**
 	 * Search parameter constant for <b>event-status-date</b>
@@ -440,7 +440,7 @@ public class DiagnosticOrder extends BaseResource implements IResource {
 	 * Path: <b>event-status & event-date</b><br/>
 	 * </p>
 	 */
-	public static final CompositeParam EVENT_STATUS_DATE = new CompositeParam(SP_EVENT_STATUS_DATE);
+	public static final CompositeClientParam EVENT_STATUS_DATE = new CompositeClientParam(SP_EVENT_STATUS_DATE);
 
 	/**
 	 * Search parameter constant for <b>subject</b>
@@ -461,7 +461,7 @@ public class DiagnosticOrder extends BaseResource implements IResource {
 	 * Path: <b>DiagnosticOrder.subject</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam SUBJECT = new ReferenceParam(SP_SUBJECT);
+	public static final ReferenceClientParam SUBJECT = new ReferenceClientParam(SP_SUBJECT);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies

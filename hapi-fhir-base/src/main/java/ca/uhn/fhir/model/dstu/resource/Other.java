@@ -54,9 +54,9 @@ import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
 import ca.uhn.fhir.model.primitive.DateDt;
-import ca.uhn.fhir.rest.gclient.DateParam;
-import ca.uhn.fhir.rest.gclient.ReferenceParam;
-import ca.uhn.fhir.rest.gclient.TokenParam;
+import ca.uhn.fhir.rest.gclient.DateClientParam;
+import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
+import ca.uhn.fhir.rest.gclient.TokenClientParam;
 
 
 /**
@@ -101,7 +101,7 @@ public class Other extends BaseResource implements IResource {
 	 * Path: <b>Other.subject</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam SUBJECT = new ReferenceParam(SP_SUBJECT);
+	public static final ReferenceClientParam SUBJECT = new ReferenceClientParam(SP_SUBJECT);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies
@@ -128,7 +128,7 @@ public class Other extends BaseResource implements IResource {
 	 * Path: <b>Other.created</b><br/>
 	 * </p>
 	 */
-	public static final DateParam CREATED = new DateParam(SP_CREATED);
+	public static final DateClientParam CREATED = new DateClientParam(SP_CREATED);
 
 	/**
 	 * Search parameter constant for <b>code</b>
@@ -149,7 +149,7 @@ public class Other extends BaseResource implements IResource {
 	 * Path: <b>Other.code</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam CODE = new TokenParam(SP_CODE);
+	public static final TokenClientParam CODE = new TokenClientParam(SP_CODE);
 
 
 	@Child(name="identifier", type=IdentifierDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)	

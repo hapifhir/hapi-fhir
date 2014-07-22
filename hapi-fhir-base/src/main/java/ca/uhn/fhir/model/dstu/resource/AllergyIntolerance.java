@@ -58,9 +58,9 @@ import ca.uhn.fhir.model.dstu.valueset.SensitivityTypeEnum;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
-import ca.uhn.fhir.rest.gclient.DateParam;
-import ca.uhn.fhir.rest.gclient.ReferenceParam;
-import ca.uhn.fhir.rest.gclient.TokenParam;
+import ca.uhn.fhir.rest.gclient.DateClientParam;
+import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
+import ca.uhn.fhir.rest.gclient.TokenClientParam;
 
 
 /**
@@ -105,7 +105,7 @@ public class AllergyIntolerance extends BaseResource implements IResource {
 	 * Path: <b>AllergyIntolerance.sensitivityType</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam TYPE = new TokenParam(SP_TYPE);
+	public static final TokenClientParam TYPE = new TokenClientParam(SP_TYPE);
 
 	/**
 	 * Search parameter constant for <b>substance</b>
@@ -126,7 +126,7 @@ public class AllergyIntolerance extends BaseResource implements IResource {
 	 * Path: <b>AllergyIntolerance.substance</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam SUBSTANCE = new ReferenceParam(SP_SUBSTANCE);
+	public static final ReferenceClientParam SUBSTANCE = new ReferenceClientParam(SP_SUBSTANCE);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies
@@ -153,7 +153,7 @@ public class AllergyIntolerance extends BaseResource implements IResource {
 	 * Path: <b>AllergyIntolerance.recordedDate</b><br/>
 	 * </p>
 	 */
-	public static final DateParam DATE = new DateParam(SP_DATE);
+	public static final DateClientParam DATE = new DateClientParam(SP_DATE);
 
 	/**
 	 * Search parameter constant for <b>status</b>
@@ -174,7 +174,7 @@ public class AllergyIntolerance extends BaseResource implements IResource {
 	 * Path: <b>AllergyIntolerance.status</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam STATUS = new TokenParam(SP_STATUS);
+	public static final TokenClientParam STATUS = new TokenClientParam(SP_STATUS);
 
 	/**
 	 * Search parameter constant for <b>subject</b>
@@ -195,7 +195,7 @@ public class AllergyIntolerance extends BaseResource implements IResource {
 	 * Path: <b>AllergyIntolerance.subject</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam SUBJECT = new ReferenceParam(SP_SUBJECT);
+	public static final ReferenceClientParam SUBJECT = new ReferenceClientParam(SP_SUBJECT);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies
@@ -222,7 +222,7 @@ public class AllergyIntolerance extends BaseResource implements IResource {
 	 * Path: <b>AllergyIntolerance.recorder</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam RECORDER = new ReferenceParam(SP_RECORDER);
+	public static final ReferenceClientParam RECORDER = new ReferenceClientParam(SP_RECORDER);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies

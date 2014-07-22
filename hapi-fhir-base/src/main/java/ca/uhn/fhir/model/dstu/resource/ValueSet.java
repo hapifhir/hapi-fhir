@@ -64,9 +64,9 @@ import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
-import ca.uhn.fhir.rest.gclient.DateParam;
-import ca.uhn.fhir.rest.gclient.StringParam;
-import ca.uhn.fhir.rest.gclient.TokenParam;
+import ca.uhn.fhir.rest.gclient.DateClientParam;
+import ca.uhn.fhir.rest.gclient.StringClientParam;
+import ca.uhn.fhir.rest.gclient.TokenClientParam;
 
 
 /**
@@ -111,7 +111,7 @@ public class ValueSet extends BaseResource implements IResource {
 	 * Path: <b>ValueSet.identifier</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam IDENTIFIER = new TokenParam(SP_IDENTIFIER);
+	public static final TokenClientParam IDENTIFIER = new TokenClientParam(SP_IDENTIFIER);
 
 	/**
 	 * Search parameter constant for <b>version</b>
@@ -132,7 +132,7 @@ public class ValueSet extends BaseResource implements IResource {
 	 * Path: <b>ValueSet.version</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam VERSION = new TokenParam(SP_VERSION);
+	public static final TokenClientParam VERSION = new TokenClientParam(SP_VERSION);
 
 	/**
 	 * Search parameter constant for <b>name</b>
@@ -153,7 +153,7 @@ public class ValueSet extends BaseResource implements IResource {
 	 * Path: <b>ValueSet.name</b><br/>
 	 * </p>
 	 */
-	public static final StringParam NAME = new StringParam(SP_NAME);
+	public static final StringClientParam NAME = new StringClientParam(SP_NAME);
 
 	/**
 	 * Search parameter constant for <b>publisher</b>
@@ -174,7 +174,7 @@ public class ValueSet extends BaseResource implements IResource {
 	 * Path: <b>ValueSet.publisher</b><br/>
 	 * </p>
 	 */
-	public static final StringParam PUBLISHER = new StringParam(SP_PUBLISHER);
+	public static final StringClientParam PUBLISHER = new StringClientParam(SP_PUBLISHER);
 
 	/**
 	 * Search parameter constant for <b>description</b>
@@ -195,7 +195,7 @@ public class ValueSet extends BaseResource implements IResource {
 	 * Path: <b>ValueSet.description</b><br/>
 	 * </p>
 	 */
-	public static final StringParam DESCRIPTION = new StringParam(SP_DESCRIPTION);
+	public static final StringClientParam DESCRIPTION = new StringClientParam(SP_DESCRIPTION);
 
 	/**
 	 * Search parameter constant for <b>status</b>
@@ -216,7 +216,7 @@ public class ValueSet extends BaseResource implements IResource {
 	 * Path: <b>ValueSet.status</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam STATUS = new TokenParam(SP_STATUS);
+	public static final TokenClientParam STATUS = new TokenClientParam(SP_STATUS);
 
 	/**
 	 * Search parameter constant for <b>date</b>
@@ -237,7 +237,7 @@ public class ValueSet extends BaseResource implements IResource {
 	 * Path: <b>ValueSet.date</b><br/>
 	 * </p>
 	 */
-	public static final DateParam DATE = new DateParam(SP_DATE);
+	public static final DateClientParam DATE = new DateClientParam(SP_DATE);
 
 	/**
 	 * Search parameter constant for <b>system</b>
@@ -258,7 +258,7 @@ public class ValueSet extends BaseResource implements IResource {
 	 * Path: <b>ValueSet.define.system</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam SYSTEM = new TokenParam(SP_SYSTEM);
+	public static final TokenClientParam SYSTEM = new TokenClientParam(SP_SYSTEM);
 
 	/**
 	 * Search parameter constant for <b>code</b>
@@ -279,7 +279,7 @@ public class ValueSet extends BaseResource implements IResource {
 	 * Path: <b>ValueSet.define.concept.code</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam CODE = new TokenParam(SP_CODE);
+	public static final TokenClientParam CODE = new TokenClientParam(SP_CODE);
 
 	/**
 	 * Search parameter constant for <b>reference</b>
@@ -300,7 +300,7 @@ public class ValueSet extends BaseResource implements IResource {
 	 * Path: <b>ValueSet.compose.include.system</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam REFERENCE = new TokenParam(SP_REFERENCE);
+	public static final TokenClientParam REFERENCE = new TokenClientParam(SP_REFERENCE);
 
 
 	@Child(name="identifier", type=StringDt.class, order=0, min=0, max=1)	

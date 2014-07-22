@@ -65,9 +65,9 @@ import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.model.primitive.StringDt;
-import ca.uhn.fhir.rest.gclient.DateParam;
-import ca.uhn.fhir.rest.gclient.ReferenceParam;
-import ca.uhn.fhir.rest.gclient.TokenParam;
+import ca.uhn.fhir.rest.gclient.DateClientParam;
+import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
+import ca.uhn.fhir.rest.gclient.TokenClientParam;
 
 
 /**
@@ -112,7 +112,7 @@ public class Condition extends BaseResource implements IResource {
 	 * Path: <b>Condition.code</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam CODE = new TokenParam(SP_CODE);
+	public static final TokenClientParam CODE = new TokenClientParam(SP_CODE);
 
 	/**
 	 * Search parameter constant for <b>status</b>
@@ -133,7 +133,7 @@ public class Condition extends BaseResource implements IResource {
 	 * Path: <b>Condition.status</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam STATUS = new TokenParam(SP_STATUS);
+	public static final TokenClientParam STATUS = new TokenClientParam(SP_STATUS);
 
 	/**
 	 * Search parameter constant for <b>severity</b>
@@ -154,7 +154,7 @@ public class Condition extends BaseResource implements IResource {
 	 * Path: <b>Condition.severity</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam SEVERITY = new TokenParam(SP_SEVERITY);
+	public static final TokenClientParam SEVERITY = new TokenClientParam(SP_SEVERITY);
 
 	/**
 	 * Search parameter constant for <b>category</b>
@@ -175,7 +175,7 @@ public class Condition extends BaseResource implements IResource {
 	 * Path: <b>Condition.category</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam CATEGORY = new TokenParam(SP_CATEGORY);
+	public static final TokenClientParam CATEGORY = new TokenClientParam(SP_CATEGORY);
 
 	/**
 	 * Search parameter constant for <b>onset</b>
@@ -196,7 +196,7 @@ public class Condition extends BaseResource implements IResource {
 	 * Path: <b>Condition.onset[x]</b><br/>
 	 * </p>
 	 */
-	public static final DateParam ONSET = new DateParam(SP_ONSET);
+	public static final DateClientParam ONSET = new DateClientParam(SP_ONSET);
 
 	/**
 	 * Search parameter constant for <b>subject</b>
@@ -217,7 +217,7 @@ public class Condition extends BaseResource implements IResource {
 	 * Path: <b>Condition.subject</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam SUBJECT = new ReferenceParam(SP_SUBJECT);
+	public static final ReferenceClientParam SUBJECT = new ReferenceClientParam(SP_SUBJECT);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies
@@ -244,7 +244,7 @@ public class Condition extends BaseResource implements IResource {
 	 * Path: <b>Condition.encounter</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam ENCOUNTER = new ReferenceParam(SP_ENCOUNTER);
+	public static final ReferenceClientParam ENCOUNTER = new ReferenceClientParam(SP_ENCOUNTER);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies
@@ -271,7 +271,7 @@ public class Condition extends BaseResource implements IResource {
 	 * Path: <b>Condition.asserter</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam ASSERTER = new ReferenceParam(SP_ASSERTER);
+	public static final ReferenceClientParam ASSERTER = new ReferenceClientParam(SP_ASSERTER);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies
@@ -298,7 +298,7 @@ public class Condition extends BaseResource implements IResource {
 	 * Path: <b>Condition.dateAsserted</b><br/>
 	 * </p>
 	 */
-	public static final DateParam DATE_ASSERTED = new DateParam(SP_DATE_ASSERTED);
+	public static final DateClientParam DATE_ASSERTED = new DateClientParam(SP_DATE_ASSERTED);
 
 	/**
 	 * Search parameter constant for <b>evidence</b>
@@ -319,7 +319,7 @@ public class Condition extends BaseResource implements IResource {
 	 * Path: <b>Condition.evidence.code</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam EVIDENCE = new TokenParam(SP_EVIDENCE);
+	public static final TokenClientParam EVIDENCE = new TokenClientParam(SP_EVIDENCE);
 
 	/**
 	 * Search parameter constant for <b>location</b>
@@ -340,7 +340,7 @@ public class Condition extends BaseResource implements IResource {
 	 * Path: <b>Condition.location.code</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam LOCATION = new TokenParam(SP_LOCATION);
+	public static final TokenClientParam LOCATION = new TokenClientParam(SP_LOCATION);
 
 	/**
 	 * Search parameter constant for <b>related-item</b>
@@ -361,7 +361,7 @@ public class Condition extends BaseResource implements IResource {
 	 * Path: <b>Condition.relatedItem.target</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam RELATED_ITEM = new ReferenceParam(SP_RELATED_ITEM);
+	public static final ReferenceClientParam RELATED_ITEM = new ReferenceClientParam(SP_RELATED_ITEM);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies
@@ -388,7 +388,7 @@ public class Condition extends BaseResource implements IResource {
 	 * Path: <b>Condition.stage.summary</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam STAGE = new TokenParam(SP_STAGE);
+	public static final TokenClientParam STAGE = new TokenClientParam(SP_STAGE);
 
 	/**
 	 * Search parameter constant for <b>related-code</b>
@@ -409,7 +409,7 @@ public class Condition extends BaseResource implements IResource {
 	 * Path: <b>Condition.relatedItem.code</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam RELATED_CODE = new TokenParam(SP_RELATED_CODE);
+	public static final TokenClientParam RELATED_CODE = new TokenClientParam(SP_RELATED_CODE);
 
 
 	@Child(name="identifier", type=IdentifierDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)	

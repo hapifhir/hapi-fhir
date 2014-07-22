@@ -75,10 +75,10 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
-import ca.uhn.fhir.rest.gclient.DateParam;
-import ca.uhn.fhir.rest.gclient.ReferenceParam;
-import ca.uhn.fhir.rest.gclient.StringParam;
-import ca.uhn.fhir.rest.gclient.TokenParam;
+import ca.uhn.fhir.rest.gclient.DateClientParam;
+import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
+import ca.uhn.fhir.rest.gclient.StringClientParam;
+import ca.uhn.fhir.rest.gclient.TokenClientParam;
 
 
 /**
@@ -123,7 +123,7 @@ public class Profile extends BaseResource implements IResource {
 	 * Path: <b>Profile.identifier</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam IDENTIFIER = new TokenParam(SP_IDENTIFIER);
+	public static final TokenClientParam IDENTIFIER = new TokenClientParam(SP_IDENTIFIER);
 
 	/**
 	 * Search parameter constant for <b>version</b>
@@ -144,7 +144,7 @@ public class Profile extends BaseResource implements IResource {
 	 * Path: <b>Profile.version</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam VERSION = new TokenParam(SP_VERSION);
+	public static final TokenClientParam VERSION = new TokenClientParam(SP_VERSION);
 
 	/**
 	 * Search parameter constant for <b>name</b>
@@ -165,7 +165,7 @@ public class Profile extends BaseResource implements IResource {
 	 * Path: <b>Profile.name</b><br/>
 	 * </p>
 	 */
-	public static final StringParam NAME = new StringParam(SP_NAME);
+	public static final StringClientParam NAME = new StringClientParam(SP_NAME);
 
 	/**
 	 * Search parameter constant for <b>publisher</b>
@@ -186,7 +186,7 @@ public class Profile extends BaseResource implements IResource {
 	 * Path: <b>Profile.publisher</b><br/>
 	 * </p>
 	 */
-	public static final StringParam PUBLISHER = new StringParam(SP_PUBLISHER);
+	public static final StringClientParam PUBLISHER = new StringClientParam(SP_PUBLISHER);
 
 	/**
 	 * Search parameter constant for <b>description</b>
@@ -207,7 +207,7 @@ public class Profile extends BaseResource implements IResource {
 	 * Path: <b>Profile.description</b><br/>
 	 * </p>
 	 */
-	public static final StringParam DESCRIPTION = new StringParam(SP_DESCRIPTION);
+	public static final StringClientParam DESCRIPTION = new StringClientParam(SP_DESCRIPTION);
 
 	/**
 	 * Search parameter constant for <b>status</b>
@@ -228,7 +228,7 @@ public class Profile extends BaseResource implements IResource {
 	 * Path: <b>Profile.status</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam STATUS = new TokenParam(SP_STATUS);
+	public static final TokenClientParam STATUS = new TokenClientParam(SP_STATUS);
 
 	/**
 	 * Search parameter constant for <b>date</b>
@@ -249,7 +249,7 @@ public class Profile extends BaseResource implements IResource {
 	 * Path: <b>Profile.date</b><br/>
 	 * </p>
 	 */
-	public static final DateParam DATE = new DateParam(SP_DATE);
+	public static final DateClientParam DATE = new DateClientParam(SP_DATE);
 
 	/**
 	 * Search parameter constant for <b>code</b>
@@ -270,7 +270,7 @@ public class Profile extends BaseResource implements IResource {
 	 * Path: <b>Profile.code</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam CODE = new TokenParam(SP_CODE);
+	public static final TokenClientParam CODE = new TokenClientParam(SP_CODE);
 
 	/**
 	 * Search parameter constant for <b>extension</b>
@@ -291,7 +291,7 @@ public class Profile extends BaseResource implements IResource {
 	 * Path: <b>Profile.extensionDefn.code</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam EXTENSION = new TokenParam(SP_EXTENSION);
+	public static final TokenClientParam EXTENSION = new TokenClientParam(SP_EXTENSION);
 
 	/**
 	 * Search parameter constant for <b>valueset</b>
@@ -312,7 +312,7 @@ public class Profile extends BaseResource implements IResource {
 	 * Path: <b>Profile.structure.element.definition.binding.reference[x]</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam VALUESET = new ReferenceParam(SP_VALUESET);
+	public static final ReferenceClientParam VALUESET = new ReferenceClientParam(SP_VALUESET);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies
@@ -339,7 +339,7 @@ public class Profile extends BaseResource implements IResource {
 	 * Path: <b>Profile.structure.type</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam TYPE = new TokenParam(SP_TYPE);
+	public static final TokenClientParam TYPE = new TokenClientParam(SP_TYPE);
 
 
 	@Child(name="identifier", type=StringDt.class, order=0, min=0, max=1)	

@@ -54,8 +54,8 @@ import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.primitive.DecimalDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.model.primitive.StringDt;
-import ca.uhn.fhir.rest.gclient.ReferenceParam;
-import ca.uhn.fhir.rest.gclient.StringParam;
+import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
+import ca.uhn.fhir.rest.gclient.StringClientParam;
 
 
 /**
@@ -100,7 +100,7 @@ public class GeneExpression extends BaseResource implements IResource {
 	 * Path: <b>GeneExpression.subject</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam SUBJECT = new ReferenceParam(SP_SUBJECT);
+	public static final ReferenceClientParam SUBJECT = new ReferenceClientParam(SP_SUBJECT);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies
@@ -127,7 +127,7 @@ public class GeneExpression extends BaseResource implements IResource {
 	 * Path: <b>GeneExpression.gene.identifier</b><br/>
 	 * </p>
 	 */
-	public static final StringParam GENE = new StringParam(SP_GENE);
+	public static final StringClientParam GENE = new StringClientParam(SP_GENE);
 
 	/**
 	 * Search parameter constant for <b>coordinate</b>
@@ -148,7 +148,7 @@ public class GeneExpression extends BaseResource implements IResource {
 	 * Path: <b>GeneExpression.gene.coordinate</b><br/>
 	 * </p>
 	 */
-	public static final StringParam COORDINATE = new StringParam(SP_COORDINATE);
+	public static final StringClientParam COORDINATE = new StringClientParam(SP_COORDINATE);
 
 
 	@Child(name="subject", order=0, min=0, max=1, type={

@@ -60,8 +60,8 @@ import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.StringDt;
-import ca.uhn.fhir.rest.gclient.ReferenceParam;
-import ca.uhn.fhir.rest.gclient.StringParam;
+import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
+import ca.uhn.fhir.rest.gclient.StringClientParam;
 
 
 /**
@@ -106,7 +106,7 @@ public class AppointmentResponse extends BaseResource implements IResource {
 	 * Path: <b>AppointmentResponse.participantStatus</b><br/>
 	 * </p>
 	 */
-	public static final StringParam PARTSTATUS = new StringParam(SP_PARTSTATUS);
+	public static final StringClientParam PARTSTATUS = new StringClientParam(SP_PARTSTATUS);
 
 	/**
 	 * Search parameter constant for <b>subject</b>
@@ -127,7 +127,7 @@ public class AppointmentResponse extends BaseResource implements IResource {
 	 * Path: <b>AppointmentResponse.individual</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam SUBJECT = new ReferenceParam(SP_SUBJECT);
+	public static final ReferenceClientParam SUBJECT = new ReferenceClientParam(SP_SUBJECT);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies
@@ -154,7 +154,7 @@ public class AppointmentResponse extends BaseResource implements IResource {
 	 * Path: <b>AppointmentResponse.appointment</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam APPOINTMENT = new ReferenceParam(SP_APPOINTMENT);
+	public static final ReferenceClientParam APPOINTMENT = new ReferenceClientParam(SP_APPOINTMENT);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies

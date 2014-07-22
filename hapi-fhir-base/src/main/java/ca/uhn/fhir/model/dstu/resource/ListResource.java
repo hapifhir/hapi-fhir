@@ -61,9 +61,9 @@ import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
-import ca.uhn.fhir.rest.gclient.DateParam;
-import ca.uhn.fhir.rest.gclient.ReferenceParam;
-import ca.uhn.fhir.rest.gclient.TokenParam;
+import ca.uhn.fhir.rest.gclient.DateClientParam;
+import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
+import ca.uhn.fhir.rest.gclient.TokenClientParam;
 
 
 /**
@@ -108,7 +108,7 @@ public class ListResource extends BaseResource implements IResource {
 	 * Path: <b>List.source</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam SOURCE = new ReferenceParam(SP_SOURCE);
+	public static final ReferenceClientParam SOURCE = new ReferenceClientParam(SP_SOURCE);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies
@@ -135,7 +135,7 @@ public class ListResource extends BaseResource implements IResource {
 	 * Path: <b>List.entry.item</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam ITEM = new ReferenceParam(SP_ITEM);
+	public static final ReferenceClientParam ITEM = new ReferenceClientParam(SP_ITEM);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies
@@ -162,7 +162,7 @@ public class ListResource extends BaseResource implements IResource {
 	 * Path: <b>List.emptyReason</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam EMPTY_REASON = new TokenParam(SP_EMPTY_REASON);
+	public static final TokenClientParam EMPTY_REASON = new TokenClientParam(SP_EMPTY_REASON);
 
 	/**
 	 * Search parameter constant for <b>date</b>
@@ -183,7 +183,7 @@ public class ListResource extends BaseResource implements IResource {
 	 * Path: <b>List.date</b><br/>
 	 * </p>
 	 */
-	public static final DateParam DATE = new DateParam(SP_DATE);
+	public static final DateClientParam DATE = new DateClientParam(SP_DATE);
 
 	/**
 	 * Search parameter constant for <b>code</b>
@@ -204,7 +204,7 @@ public class ListResource extends BaseResource implements IResource {
 	 * Path: <b>List.code</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam CODE = new TokenParam(SP_CODE);
+	public static final TokenClientParam CODE = new TokenClientParam(SP_CODE);
 
 	/**
 	 * Search parameter constant for <b>subject</b>
@@ -225,7 +225,7 @@ public class ListResource extends BaseResource implements IResource {
 	 * Path: <b>List.subject</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam SUBJECT = new ReferenceParam(SP_SUBJECT);
+	public static final ReferenceClientParam SUBJECT = new ReferenceClientParam(SP_SUBJECT);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies

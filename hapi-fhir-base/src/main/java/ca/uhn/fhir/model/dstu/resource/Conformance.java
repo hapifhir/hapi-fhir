@@ -77,10 +77,10 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
-import ca.uhn.fhir.rest.gclient.DateParam;
-import ca.uhn.fhir.rest.gclient.ReferenceParam;
-import ca.uhn.fhir.rest.gclient.StringParam;
-import ca.uhn.fhir.rest.gclient.TokenParam;
+import ca.uhn.fhir.rest.gclient.DateClientParam;
+import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
+import ca.uhn.fhir.rest.gclient.StringClientParam;
+import ca.uhn.fhir.rest.gclient.TokenClientParam;
 
 
 /**
@@ -125,7 +125,7 @@ public class Conformance extends BaseResource implements IResource {
 	 * Path: <b>Conformance.identifier</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam IDENTIFIER = new TokenParam(SP_IDENTIFIER);
+	public static final TokenClientParam IDENTIFIER = new TokenClientParam(SP_IDENTIFIER);
 
 	/**
 	 * Search parameter constant for <b>version</b>
@@ -146,7 +146,7 @@ public class Conformance extends BaseResource implements IResource {
 	 * Path: <b>Conformance.version</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam VERSION = new TokenParam(SP_VERSION);
+	public static final TokenClientParam VERSION = new TokenClientParam(SP_VERSION);
 
 	/**
 	 * Search parameter constant for <b>name</b>
@@ -167,7 +167,7 @@ public class Conformance extends BaseResource implements IResource {
 	 * Path: <b>Conformance.name</b><br/>
 	 * </p>
 	 */
-	public static final StringParam NAME = new StringParam(SP_NAME);
+	public static final StringClientParam NAME = new StringClientParam(SP_NAME);
 
 	/**
 	 * Search parameter constant for <b>publisher</b>
@@ -188,7 +188,7 @@ public class Conformance extends BaseResource implements IResource {
 	 * Path: <b>Conformance.publisher</b><br/>
 	 * </p>
 	 */
-	public static final StringParam PUBLISHER = new StringParam(SP_PUBLISHER);
+	public static final StringClientParam PUBLISHER = new StringClientParam(SP_PUBLISHER);
 
 	/**
 	 * Search parameter constant for <b>description</b>
@@ -209,7 +209,7 @@ public class Conformance extends BaseResource implements IResource {
 	 * Path: <b>Conformance.description</b><br/>
 	 * </p>
 	 */
-	public static final StringParam DESCRIPTION = new StringParam(SP_DESCRIPTION);
+	public static final StringClientParam DESCRIPTION = new StringClientParam(SP_DESCRIPTION);
 
 	/**
 	 * Search parameter constant for <b>status</b>
@@ -230,7 +230,7 @@ public class Conformance extends BaseResource implements IResource {
 	 * Path: <b>Conformance.status</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam STATUS = new TokenParam(SP_STATUS);
+	public static final TokenClientParam STATUS = new TokenClientParam(SP_STATUS);
 
 	/**
 	 * Search parameter constant for <b>date</b>
@@ -251,7 +251,7 @@ public class Conformance extends BaseResource implements IResource {
 	 * Path: <b>Conformance.date</b><br/>
 	 * </p>
 	 */
-	public static final DateParam DATE = new DateParam(SP_DATE);
+	public static final DateClientParam DATE = new DateClientParam(SP_DATE);
 
 	/**
 	 * Search parameter constant for <b>software</b>
@@ -272,7 +272,7 @@ public class Conformance extends BaseResource implements IResource {
 	 * Path: <b>Conformance.software.name</b><br/>
 	 * </p>
 	 */
-	public static final StringParam SOFTWARE = new StringParam(SP_SOFTWARE);
+	public static final StringClientParam SOFTWARE = new StringClientParam(SP_SOFTWARE);
 
 	/**
 	 * Search parameter constant for <b>fhirversion</b>
@@ -293,7 +293,7 @@ public class Conformance extends BaseResource implements IResource {
 	 * Path: <b>Conformance.version</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam FHIRVERSION = new TokenParam(SP_FHIRVERSION);
+	public static final TokenClientParam FHIRVERSION = new TokenClientParam(SP_FHIRVERSION);
 
 	/**
 	 * Search parameter constant for <b>resource</b>
@@ -314,7 +314,7 @@ public class Conformance extends BaseResource implements IResource {
 	 * Path: <b>Conformance.rest.resource.type</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam RESOURCE = new TokenParam(SP_RESOURCE);
+	public static final TokenClientParam RESOURCE = new TokenClientParam(SP_RESOURCE);
 
 	/**
 	 * Search parameter constant for <b>event</b>
@@ -335,7 +335,7 @@ public class Conformance extends BaseResource implements IResource {
 	 * Path: <b>Conformance.messaging.event.code</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam EVENT = new TokenParam(SP_EVENT);
+	public static final TokenClientParam EVENT = new TokenClientParam(SP_EVENT);
 
 	/**
 	 * Search parameter constant for <b>mode</b>
@@ -356,7 +356,7 @@ public class Conformance extends BaseResource implements IResource {
 	 * Path: <b>Conformance.rest.mode</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam MODE = new TokenParam(SP_MODE);
+	public static final TokenClientParam MODE = new TokenClientParam(SP_MODE);
 
 	/**
 	 * Search parameter constant for <b>profile</b>
@@ -377,7 +377,7 @@ public class Conformance extends BaseResource implements IResource {
 	 * Path: <b>Conformance.rest.resource.profile</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam PROFILE = new ReferenceParam(SP_PROFILE);
+	public static final ReferenceClientParam PROFILE = new ReferenceClientParam(SP_PROFILE);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies
@@ -404,7 +404,7 @@ public class Conformance extends BaseResource implements IResource {
 	 * Path: <b>Conformance.format</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam FORMAT = new TokenParam(SP_FORMAT);
+	public static final TokenClientParam FORMAT = new TokenClientParam(SP_FORMAT);
 
 	/**
 	 * Search parameter constant for <b>security</b>
@@ -425,7 +425,7 @@ public class Conformance extends BaseResource implements IResource {
 	 * Path: <b>Conformance.rest.security</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam SECURITY = new TokenParam(SP_SECURITY);
+	public static final TokenClientParam SECURITY = new TokenClientParam(SP_SECURITY);
 
 	/**
 	 * Search parameter constant for <b>supported-profile</b>
@@ -446,7 +446,7 @@ public class Conformance extends BaseResource implements IResource {
 	 * Path: <b>Conformance.profile</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam SUPPORTED_PROFILE = new ReferenceParam(SP_SUPPORTED_PROFILE);
+	public static final ReferenceClientParam SUPPORTED_PROFILE = new ReferenceClientParam(SP_SUPPORTED_PROFILE);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies

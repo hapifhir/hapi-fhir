@@ -63,9 +63,9 @@ import ca.uhn.fhir.model.dstu.valueset.OrganizationTypeEnum;
 import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.model.primitive.BoundCodeableConceptDt;
 import ca.uhn.fhir.model.primitive.StringDt;
-import ca.uhn.fhir.rest.gclient.ReferenceParam;
-import ca.uhn.fhir.rest.gclient.StringParam;
-import ca.uhn.fhir.rest.gclient.TokenParam;
+import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
+import ca.uhn.fhir.rest.gclient.StringClientParam;
+import ca.uhn.fhir.rest.gclient.TokenClientParam;
 
 
 /**
@@ -110,7 +110,7 @@ public class Organization extends BaseResource implements IResource {
 	 * Path: <b>Organization.name</b><br/>
 	 * </p>
 	 */
-	public static final StringParam NAME = new StringParam(SP_NAME);
+	public static final StringClientParam NAME = new StringClientParam(SP_NAME);
 
 	/**
 	 * Search parameter constant for <b>phonetic</b>
@@ -131,7 +131,7 @@ public class Organization extends BaseResource implements IResource {
 	 * Path: <b></b><br/>
 	 * </p>
 	 */
-	public static final StringParam PHONETIC = new StringParam(SP_PHONETIC);
+	public static final StringClientParam PHONETIC = new StringClientParam(SP_PHONETIC);
 
 	/**
 	 * Search parameter constant for <b>type</b>
@@ -152,7 +152,7 @@ public class Organization extends BaseResource implements IResource {
 	 * Path: <b>Organization.type</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam TYPE = new TokenParam(SP_TYPE);
+	public static final TokenClientParam TYPE = new TokenClientParam(SP_TYPE);
 
 	/**
 	 * Search parameter constant for <b>identifier</b>
@@ -173,7 +173,7 @@ public class Organization extends BaseResource implements IResource {
 	 * Path: <b>Organization.identifier</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam IDENTIFIER = new TokenParam(SP_IDENTIFIER);
+	public static final TokenClientParam IDENTIFIER = new TokenClientParam(SP_IDENTIFIER);
 
 	/**
 	 * Search parameter constant for <b>partof</b>
@@ -194,7 +194,7 @@ public class Organization extends BaseResource implements IResource {
 	 * Path: <b>Organization.partOf</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam PARTOF = new ReferenceParam(SP_PARTOF);
+	public static final ReferenceClientParam PARTOF = new ReferenceClientParam(SP_PARTOF);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies
@@ -221,7 +221,7 @@ public class Organization extends BaseResource implements IResource {
 	 * Path: <b>Organization.active</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam ACTIVE = new TokenParam(SP_ACTIVE);
+	public static final TokenClientParam ACTIVE = new TokenClientParam(SP_ACTIVE);
 
 
 	@Child(name="identifier", type=IdentifierDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)	

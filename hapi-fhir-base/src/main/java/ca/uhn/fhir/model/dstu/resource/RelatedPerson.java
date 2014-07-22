@@ -59,9 +59,9 @@ import ca.uhn.fhir.model.dstu.valueset.ContactUseEnum;
 import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
 import ca.uhn.fhir.model.dstu.valueset.PatientRelationshipTypeEnum;
 import ca.uhn.fhir.model.primitive.BoundCodeableConceptDt;
-import ca.uhn.fhir.rest.gclient.ReferenceParam;
-import ca.uhn.fhir.rest.gclient.StringParam;
-import ca.uhn.fhir.rest.gclient.TokenParam;
+import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
+import ca.uhn.fhir.rest.gclient.StringClientParam;
+import ca.uhn.fhir.rest.gclient.TokenClientParam;
 
 
 /**
@@ -106,7 +106,7 @@ public class RelatedPerson extends BaseResource implements IResource {
 	 * Path: <b>RelatedPerson.identifier</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam IDENTIFIER = new TokenParam(SP_IDENTIFIER);
+	public static final TokenClientParam IDENTIFIER = new TokenClientParam(SP_IDENTIFIER);
 
 	/**
 	 * Search parameter constant for <b>name</b>
@@ -127,7 +127,7 @@ public class RelatedPerson extends BaseResource implements IResource {
 	 * Path: <b>RelatedPerson.name</b><br/>
 	 * </p>
 	 */
-	public static final StringParam NAME = new StringParam(SP_NAME);
+	public static final StringClientParam NAME = new StringClientParam(SP_NAME);
 
 	/**
 	 * Search parameter constant for <b>phonetic</b>
@@ -148,7 +148,7 @@ public class RelatedPerson extends BaseResource implements IResource {
 	 * Path: <b></b><br/>
 	 * </p>
 	 */
-	public static final StringParam PHONETIC = new StringParam(SP_PHONETIC);
+	public static final StringClientParam PHONETIC = new StringClientParam(SP_PHONETIC);
 
 	/**
 	 * Search parameter constant for <b>telecom</b>
@@ -169,7 +169,7 @@ public class RelatedPerson extends BaseResource implements IResource {
 	 * Path: <b>RelatedPerson.telecom</b><br/>
 	 * </p>
 	 */
-	public static final StringParam TELECOM = new StringParam(SP_TELECOM);
+	public static final StringClientParam TELECOM = new StringClientParam(SP_TELECOM);
 
 	/**
 	 * Search parameter constant for <b>address</b>
@@ -190,7 +190,7 @@ public class RelatedPerson extends BaseResource implements IResource {
 	 * Path: <b>RelatedPerson.address</b><br/>
 	 * </p>
 	 */
-	public static final StringParam ADDRESS = new StringParam(SP_ADDRESS);
+	public static final StringClientParam ADDRESS = new StringClientParam(SP_ADDRESS);
 
 	/**
 	 * Search parameter constant for <b>gender</b>
@@ -211,7 +211,7 @@ public class RelatedPerson extends BaseResource implements IResource {
 	 * Path: <b>RelatedPerson.gender</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam GENDER = new TokenParam(SP_GENDER);
+	public static final TokenClientParam GENDER = new TokenClientParam(SP_GENDER);
 
 	/**
 	 * Search parameter constant for <b>patient</b>
@@ -232,7 +232,7 @@ public class RelatedPerson extends BaseResource implements IResource {
 	 * Path: <b>RelatedPerson.patient</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam PATIENT = new ReferenceParam(SP_PATIENT);
+	public static final ReferenceClientParam PATIENT = new ReferenceClientParam(SP_PATIENT);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies

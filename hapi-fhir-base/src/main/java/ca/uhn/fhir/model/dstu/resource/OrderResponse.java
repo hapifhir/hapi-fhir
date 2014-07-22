@@ -59,9 +59,9 @@ import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.StringDt;
-import ca.uhn.fhir.rest.gclient.DateParam;
-import ca.uhn.fhir.rest.gclient.ReferenceParam;
-import ca.uhn.fhir.rest.gclient.TokenParam;
+import ca.uhn.fhir.rest.gclient.DateClientParam;
+import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
+import ca.uhn.fhir.rest.gclient.TokenClientParam;
 
 
 /**
@@ -106,7 +106,7 @@ public class OrderResponse extends BaseResource implements IResource {
 	 * Path: <b>OrderResponse.request</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam REQUEST = new ReferenceParam(SP_REQUEST);
+	public static final ReferenceClientParam REQUEST = new ReferenceClientParam(SP_REQUEST);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies
@@ -133,7 +133,7 @@ public class OrderResponse extends BaseResource implements IResource {
 	 * Path: <b>OrderResponse.date</b><br/>
 	 * </p>
 	 */
-	public static final DateParam DATE = new DateParam(SP_DATE);
+	public static final DateClientParam DATE = new DateClientParam(SP_DATE);
 
 	/**
 	 * Search parameter constant for <b>who</b>
@@ -154,7 +154,7 @@ public class OrderResponse extends BaseResource implements IResource {
 	 * Path: <b>OrderResponse.who</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam WHO = new ReferenceParam(SP_WHO);
+	public static final ReferenceClientParam WHO = new ReferenceClientParam(SP_WHO);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies
@@ -181,7 +181,7 @@ public class OrderResponse extends BaseResource implements IResource {
 	 * Path: <b>OrderResponse.code</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam CODE = new TokenParam(SP_CODE);
+	public static final TokenClientParam CODE = new TokenClientParam(SP_CODE);
 
 	/**
 	 * Search parameter constant for <b>fulfillment</b>
@@ -202,7 +202,7 @@ public class OrderResponse extends BaseResource implements IResource {
 	 * Path: <b>OrderResponse.fulfillment</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam FULFILLMENT = new ReferenceParam(SP_FULFILLMENT);
+	public static final ReferenceClientParam FULFILLMENT = new ReferenceClientParam(SP_FULFILLMENT);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies

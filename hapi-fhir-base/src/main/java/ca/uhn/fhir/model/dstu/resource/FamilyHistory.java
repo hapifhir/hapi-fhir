@@ -61,7 +61,7 @@ import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
 import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.model.primitive.StringDt;
-import ca.uhn.fhir.rest.gclient.ReferenceParam;
+import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
 
 
 /**
@@ -106,7 +106,7 @@ public class FamilyHistory extends BaseResource implements IResource {
 	 * Path: <b>FamilyHistory.subject</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam SUBJECT = new ReferenceParam(SP_SUBJECT);
+	public static final ReferenceClientParam SUBJECT = new ReferenceClientParam(SP_SUBJECT);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies

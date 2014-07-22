@@ -59,10 +59,10 @@ import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
-import ca.uhn.fhir.rest.gclient.DateParam;
-import ca.uhn.fhir.rest.gclient.ReferenceParam;
-import ca.uhn.fhir.rest.gclient.StringParam;
-import ca.uhn.fhir.rest.gclient.TokenParam;
+import ca.uhn.fhir.rest.gclient.DateClientParam;
+import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
+import ca.uhn.fhir.rest.gclient.StringClientParam;
+import ca.uhn.fhir.rest.gclient.TokenClientParam;
 
 
 /**
@@ -107,7 +107,7 @@ public class DocumentManifest extends BaseResource implements IResource {
 	 * Path: <b>DocumentManifest.masterIdentifier | DocumentManifest.identifier</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam IDENTIFIER = new TokenParam(SP_IDENTIFIER);
+	public static final TokenClientParam IDENTIFIER = new TokenClientParam(SP_IDENTIFIER);
 
 	/**
 	 * Search parameter constant for <b>subject</b>
@@ -128,7 +128,7 @@ public class DocumentManifest extends BaseResource implements IResource {
 	 * Path: <b>DocumentManifest.subject</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam SUBJECT = new ReferenceParam(SP_SUBJECT);
+	public static final ReferenceClientParam SUBJECT = new ReferenceClientParam(SP_SUBJECT);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies
@@ -155,7 +155,7 @@ public class DocumentManifest extends BaseResource implements IResource {
 	 * Path: <b>DocumentManifest.type</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam TYPE = new TokenParam(SP_TYPE);
+	public static final TokenClientParam TYPE = new TokenClientParam(SP_TYPE);
 
 	/**
 	 * Search parameter constant for <b>recipient</b>
@@ -176,7 +176,7 @@ public class DocumentManifest extends BaseResource implements IResource {
 	 * Path: <b>DocumentManifest.recipient</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam RECIPIENT = new ReferenceParam(SP_RECIPIENT);
+	public static final ReferenceClientParam RECIPIENT = new ReferenceClientParam(SP_RECIPIENT);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies
@@ -203,7 +203,7 @@ public class DocumentManifest extends BaseResource implements IResource {
 	 * Path: <b>DocumentManifest.author</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam AUTHOR = new ReferenceParam(SP_AUTHOR);
+	public static final ReferenceClientParam AUTHOR = new ReferenceClientParam(SP_AUTHOR);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies
@@ -230,7 +230,7 @@ public class DocumentManifest extends BaseResource implements IResource {
 	 * Path: <b>DocumentManifest.created</b><br/>
 	 * </p>
 	 */
-	public static final DateParam CREATED = new DateParam(SP_CREATED);
+	public static final DateClientParam CREATED = new DateClientParam(SP_CREATED);
 
 	/**
 	 * Search parameter constant for <b>status</b>
@@ -251,7 +251,7 @@ public class DocumentManifest extends BaseResource implements IResource {
 	 * Path: <b>DocumentManifest.status</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam STATUS = new TokenParam(SP_STATUS);
+	public static final TokenClientParam STATUS = new TokenClientParam(SP_STATUS);
 
 	/**
 	 * Search parameter constant for <b>supersedes</b>
@@ -272,7 +272,7 @@ public class DocumentManifest extends BaseResource implements IResource {
 	 * Path: <b>DocumentManifest.supercedes</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam SUPERSEDES = new ReferenceParam(SP_SUPERSEDES);
+	public static final ReferenceClientParam SUPERSEDES = new ReferenceClientParam(SP_SUPERSEDES);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies
@@ -299,7 +299,7 @@ public class DocumentManifest extends BaseResource implements IResource {
 	 * Path: <b>DocumentManifest.description</b><br/>
 	 * </p>
 	 */
-	public static final StringParam DESCRIPTION = new StringParam(SP_DESCRIPTION);
+	public static final StringClientParam DESCRIPTION = new StringClientParam(SP_DESCRIPTION);
 
 	/**
 	 * Search parameter constant for <b>confidentiality</b>
@@ -320,7 +320,7 @@ public class DocumentManifest extends BaseResource implements IResource {
 	 * Path: <b>DocumentManifest.confidentiality</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam CONFIDENTIALITY = new TokenParam(SP_CONFIDENTIALITY);
+	public static final TokenClientParam CONFIDENTIALITY = new TokenClientParam(SP_CONFIDENTIALITY);
 
 	/**
 	 * Search parameter constant for <b>content</b>
@@ -341,7 +341,7 @@ public class DocumentManifest extends BaseResource implements IResource {
 	 * Path: <b>DocumentManifest.content</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam CONTENT = new ReferenceParam(SP_CONTENT);
+	public static final ReferenceClientParam CONTENT = new ReferenceClientParam(SP_CONTENT);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies

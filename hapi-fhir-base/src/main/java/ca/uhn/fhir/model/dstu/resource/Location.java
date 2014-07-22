@@ -65,9 +65,9 @@ import ca.uhn.fhir.model.primitive.BoundCodeableConceptDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.DecimalDt;
 import ca.uhn.fhir.model.primitive.StringDt;
-import ca.uhn.fhir.rest.gclient.ReferenceParam;
-import ca.uhn.fhir.rest.gclient.StringParam;
-import ca.uhn.fhir.rest.gclient.TokenParam;
+import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
+import ca.uhn.fhir.rest.gclient.StringClientParam;
+import ca.uhn.fhir.rest.gclient.TokenClientParam;
 
 
 /**
@@ -112,7 +112,7 @@ public class Location extends BaseResource implements IResource {
 	 * Path: <b>Location.identifier</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam IDENTIFIER = new TokenParam(SP_IDENTIFIER);
+	public static final TokenClientParam IDENTIFIER = new TokenClientParam(SP_IDENTIFIER);
 
 	/**
 	 * Search parameter constant for <b>name</b>
@@ -133,7 +133,7 @@ public class Location extends BaseResource implements IResource {
 	 * Path: <b>Location.name</b><br/>
 	 * </p>
 	 */
-	public static final StringParam NAME = new StringParam(SP_NAME);
+	public static final StringClientParam NAME = new StringClientParam(SP_NAME);
 
 	/**
 	 * Search parameter constant for <b>type</b>
@@ -154,7 +154,7 @@ public class Location extends BaseResource implements IResource {
 	 * Path: <b>Location.type</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam TYPE = new TokenParam(SP_TYPE);
+	public static final TokenClientParam TYPE = new TokenClientParam(SP_TYPE);
 
 	/**
 	 * Search parameter constant for <b>address</b>
@@ -175,7 +175,7 @@ public class Location extends BaseResource implements IResource {
 	 * Path: <b>Location.address</b><br/>
 	 * </p>
 	 */
-	public static final StringParam ADDRESS = new StringParam(SP_ADDRESS);
+	public static final StringClientParam ADDRESS = new StringClientParam(SP_ADDRESS);
 
 	/**
 	 * Search parameter constant for <b>status</b>
@@ -196,7 +196,7 @@ public class Location extends BaseResource implements IResource {
 	 * Path: <b>Location.status</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam STATUS = new TokenParam(SP_STATUS);
+	public static final TokenClientParam STATUS = new TokenClientParam(SP_STATUS);
 
 	/**
 	 * Search parameter constant for <b>partof</b>
@@ -217,7 +217,7 @@ public class Location extends BaseResource implements IResource {
 	 * Path: <b>Location.partOf</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam PARTOF = new ReferenceParam(SP_PARTOF);
+	public static final ReferenceClientParam PARTOF = new ReferenceClientParam(SP_PARTOF);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies
@@ -244,7 +244,7 @@ public class Location extends BaseResource implements IResource {
 	 * Path: <b></b><br/>
 	 * </p>
 	 */
-	public static final TokenParam NEAR = new TokenParam(SP_NEAR);
+	public static final TokenClientParam NEAR = new TokenClientParam(SP_NEAR);
 
 	/**
 	 * Search parameter constant for <b>near-distance</b>
@@ -265,7 +265,7 @@ public class Location extends BaseResource implements IResource {
 	 * Path: <b></b><br/>
 	 * </p>
 	 */
-	public static final TokenParam NEAR_DISTANCE = new TokenParam(SP_NEAR_DISTANCE);
+	public static final TokenClientParam NEAR_DISTANCE = new TokenClientParam(SP_NEAR_DISTANCE);
 
 
 	@Child(name="identifier", type=IdentifierDt.class, order=0, min=0, max=1)	

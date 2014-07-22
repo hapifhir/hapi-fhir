@@ -60,7 +60,7 @@ public class ${className} extends BaseResource implements IResource {
 	 * Path: <b>${param.path}</b><br/>
 	 * </p>
 	 */
-	public static final ${param.typeCapitalized}Param ${param.fluentConstantName} = new ${param.typeCapitalized}Param(${param.constantName});
+	public static final ${param.typeCapitalized}ClientParam ${param.fluentConstantName} = new ${param.typeCapitalized}ClientParam(${param.constantName});
 
 #if( ${param.typeCapitalized} == 'Reference' )
 #foreach ( $include in $param.paths )

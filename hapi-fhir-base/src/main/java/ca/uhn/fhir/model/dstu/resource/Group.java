@@ -63,9 +63,9 @@ import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.model.primitive.StringDt;
-import ca.uhn.fhir.rest.gclient.CompositeParam;
-import ca.uhn.fhir.rest.gclient.ReferenceParam;
-import ca.uhn.fhir.rest.gclient.TokenParam;
+import ca.uhn.fhir.rest.gclient.CompositeClientParam;
+import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
+import ca.uhn.fhir.rest.gclient.TokenClientParam;
 
 
 /**
@@ -110,7 +110,7 @@ public class Group extends BaseResource implements IResource {
 	 * Path: <b>Group.type</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam TYPE = new TokenParam(SP_TYPE);
+	public static final TokenClientParam TYPE = new TokenClientParam(SP_TYPE);
 
 	/**
 	 * Search parameter constant for <b>code</b>
@@ -131,7 +131,7 @@ public class Group extends BaseResource implements IResource {
 	 * Path: <b>Group.code</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam CODE = new TokenParam(SP_CODE);
+	public static final TokenClientParam CODE = new TokenClientParam(SP_CODE);
 
 	/**
 	 * Search parameter constant for <b>actual</b>
@@ -152,7 +152,7 @@ public class Group extends BaseResource implements IResource {
 	 * Path: <b>Group.actual</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam ACTUAL = new TokenParam(SP_ACTUAL);
+	public static final TokenClientParam ACTUAL = new TokenClientParam(SP_ACTUAL);
 
 	/**
 	 * Search parameter constant for <b>identifier</b>
@@ -173,7 +173,7 @@ public class Group extends BaseResource implements IResource {
 	 * Path: <b>Group.identifier</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam IDENTIFIER = new TokenParam(SP_IDENTIFIER);
+	public static final TokenClientParam IDENTIFIER = new TokenClientParam(SP_IDENTIFIER);
 
 	/**
 	 * Search parameter constant for <b>member</b>
@@ -194,7 +194,7 @@ public class Group extends BaseResource implements IResource {
 	 * Path: <b>Group.member</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam MEMBER = new ReferenceParam(SP_MEMBER);
+	public static final ReferenceClientParam MEMBER = new ReferenceClientParam(SP_MEMBER);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies
@@ -221,7 +221,7 @@ public class Group extends BaseResource implements IResource {
 	 * Path: <b>Group.characteristic.code</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam CHARACTERISTIC = new TokenParam(SP_CHARACTERISTIC);
+	public static final TokenClientParam CHARACTERISTIC = new TokenClientParam(SP_CHARACTERISTIC);
 
 	/**
 	 * Search parameter constant for <b>value</b>
@@ -242,7 +242,7 @@ public class Group extends BaseResource implements IResource {
 	 * Path: <b>Group.characteristic.value[x]</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam VALUE = new TokenParam(SP_VALUE);
+	public static final TokenClientParam VALUE = new TokenClientParam(SP_VALUE);
 
 	/**
 	 * Search parameter constant for <b>exclude</b>
@@ -263,7 +263,7 @@ public class Group extends BaseResource implements IResource {
 	 * Path: <b>Group.characteristic.exclude</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam EXCLUDE = new TokenParam(SP_EXCLUDE);
+	public static final TokenClientParam EXCLUDE = new TokenClientParam(SP_EXCLUDE);
 
 	/**
 	 * Search parameter constant for <b>characteristic-value</b>
@@ -284,7 +284,7 @@ public class Group extends BaseResource implements IResource {
 	 * Path: <b>characteristic & value</b><br/>
 	 * </p>
 	 */
-	public static final CompositeParam CHARACTERISTIC_VALUE = new CompositeParam(SP_CHARACTERISTIC_VALUE);
+	public static final CompositeClientParam CHARACTERISTIC_VALUE = new CompositeClientParam(SP_CHARACTERISTIC_VALUE);
 
 
 	@Child(name="identifier", type=IdentifierDt.class, order=0, min=0, max=1)	

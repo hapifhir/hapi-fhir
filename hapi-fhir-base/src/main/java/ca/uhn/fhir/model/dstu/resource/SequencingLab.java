@@ -58,9 +58,9 @@ import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.model.primitive.StringDt;
-import ca.uhn.fhir.rest.gclient.DateParam;
-import ca.uhn.fhir.rest.gclient.ReferenceParam;
-import ca.uhn.fhir.rest.gclient.StringParam;
+import ca.uhn.fhir.rest.gclient.DateClientParam;
+import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
+import ca.uhn.fhir.rest.gclient.StringClientParam;
 
 
 /**
@@ -105,7 +105,7 @@ public class SequencingLab extends BaseResource implements IResource {
 	 * Path: <b>SequencingLab.subject</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam SUBJECT = new ReferenceParam(SP_SUBJECT);
+	public static final ReferenceClientParam SUBJECT = new ReferenceClientParam(SP_SUBJECT);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies
@@ -132,7 +132,7 @@ public class SequencingLab extends BaseResource implements IResource {
 	 * Path: <b>SequencingLab.specimen.type</b><br/>
 	 * </p>
 	 */
-	public static final StringParam SPECIMEN = new StringParam(SP_SPECIMEN);
+	public static final StringClientParam SPECIMEN = new StringClientParam(SP_SPECIMEN);
 
 	/**
 	 * Search parameter constant for <b>date</b>
@@ -153,7 +153,7 @@ public class SequencingLab extends BaseResource implements IResource {
 	 * Path: <b>SequencingLab.date</b><br/>
 	 * </p>
 	 */
-	public static final DateParam DATE = new DateParam(SP_DATE);
+	public static final DateClientParam DATE = new DateClientParam(SP_DATE);
 
 	/**
 	 * Search parameter constant for <b>organization</b>
@@ -174,7 +174,7 @@ public class SequencingLab extends BaseResource implements IResource {
 	 * Path: <b>SequencingLab.organization</b><br/>
 	 * </p>
 	 */
-	public static final StringParam ORGANIZATION = new StringParam(SP_ORGANIZATION);
+	public static final StringClientParam ORGANIZATION = new StringClientParam(SP_ORGANIZATION);
 
 	/**
 	 * Search parameter constant for <b>system-class</b>
@@ -195,7 +195,7 @@ public class SequencingLab extends BaseResource implements IResource {
 	 * Path: <b>SequencingLab.system.class</b><br/>
 	 * </p>
 	 */
-	public static final StringParam SYSTEM_CLASS = new StringParam(SP_SYSTEM_CLASS);
+	public static final StringClientParam SYSTEM_CLASS = new StringClientParam(SP_SYSTEM_CLASS);
 
 	/**
 	 * Search parameter constant for <b>system-name</b>
@@ -216,7 +216,7 @@ public class SequencingLab extends BaseResource implements IResource {
 	 * Path: <b>SequencingLab.system.name</b><br/>
 	 * </p>
 	 */
-	public static final StringParam SYSTEM_NAME = new StringParam(SP_SYSTEM_NAME);
+	public static final StringClientParam SYSTEM_NAME = new StringClientParam(SP_SYSTEM_NAME);
 
 
 	@Child(name="subject", order=0, min=0, max=1, type={

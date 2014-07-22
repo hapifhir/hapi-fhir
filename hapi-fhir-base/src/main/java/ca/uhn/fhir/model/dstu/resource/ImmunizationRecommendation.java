@@ -62,10 +62,10 @@ import ca.uhn.fhir.model.primitive.BoundCodeableConceptDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.model.primitive.StringDt;
-import ca.uhn.fhir.rest.gclient.DateParam;
-import ca.uhn.fhir.rest.gclient.NumberParam;
-import ca.uhn.fhir.rest.gclient.ReferenceParam;
-import ca.uhn.fhir.rest.gclient.TokenParam;
+import ca.uhn.fhir.rest.gclient.DateClientParam;
+import ca.uhn.fhir.rest.gclient.NumberClientParam;
+import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
+import ca.uhn.fhir.rest.gclient.TokenClientParam;
 
 
 /**
@@ -110,7 +110,7 @@ public class ImmunizationRecommendation extends BaseResource implements IResourc
 	 * Path: <b>ImmunizationRecommendation.subject</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam SUBJECT = new ReferenceParam(SP_SUBJECT);
+	public static final ReferenceClientParam SUBJECT = new ReferenceClientParam(SP_SUBJECT);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies
@@ -137,7 +137,7 @@ public class ImmunizationRecommendation extends BaseResource implements IResourc
 	 * Path: <b>ImmunizationRecommendation.recommendation.vaccineType</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam VACCINE_TYPE = new TokenParam(SP_VACCINE_TYPE);
+	public static final TokenClientParam VACCINE_TYPE = new TokenClientParam(SP_VACCINE_TYPE);
 
 	/**
 	 * Search parameter constant for <b>identifier</b>
@@ -158,7 +158,7 @@ public class ImmunizationRecommendation extends BaseResource implements IResourc
 	 * Path: <b>ImmunizationRecommendation.identifier</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam IDENTIFIER = new TokenParam(SP_IDENTIFIER);
+	public static final TokenClientParam IDENTIFIER = new TokenClientParam(SP_IDENTIFIER);
 
 	/**
 	 * Search parameter constant for <b>date</b>
@@ -179,7 +179,7 @@ public class ImmunizationRecommendation extends BaseResource implements IResourc
 	 * Path: <b>ImmunizationRecommendation.recommendation.date</b><br/>
 	 * </p>
 	 */
-	public static final DateParam DATE = new DateParam(SP_DATE);
+	public static final DateClientParam DATE = new DateClientParam(SP_DATE);
 
 	/**
 	 * Search parameter constant for <b>dose-number</b>
@@ -200,7 +200,7 @@ public class ImmunizationRecommendation extends BaseResource implements IResourc
 	 * Path: <b>ImmunizationRecommendation.recommendation.doseNumber</b><br/>
 	 * </p>
 	 */
-	public static final NumberParam DOSE_NUMBER = new NumberParam(SP_DOSE_NUMBER);
+	public static final NumberClientParam DOSE_NUMBER = new NumberClientParam(SP_DOSE_NUMBER);
 
 	/**
 	 * Search parameter constant for <b>status</b>
@@ -221,7 +221,7 @@ public class ImmunizationRecommendation extends BaseResource implements IResourc
 	 * Path: <b>ImmunizationRecommendation.recommendation.forecastStatus</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam STATUS = new TokenParam(SP_STATUS);
+	public static final TokenClientParam STATUS = new TokenClientParam(SP_STATUS);
 
 	/**
 	 * Search parameter constant for <b>dose-sequence</b>
@@ -242,7 +242,7 @@ public class ImmunizationRecommendation extends BaseResource implements IResourc
 	 * Path: <b>ImmunizationRecommendation.recommendation.protocol.doseSequence</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam DOSE_SEQUENCE = new TokenParam(SP_DOSE_SEQUENCE);
+	public static final TokenClientParam DOSE_SEQUENCE = new TokenClientParam(SP_DOSE_SEQUENCE);
 
 	/**
 	 * Search parameter constant for <b>support</b>
@@ -263,7 +263,7 @@ public class ImmunizationRecommendation extends BaseResource implements IResourc
 	 * Path: <b>ImmunizationRecommendation.recommendation.supportingImmunization</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam SUPPORT = new ReferenceParam(SP_SUPPORT);
+	public static final ReferenceClientParam SUPPORT = new ReferenceClientParam(SP_SUPPORT);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies
@@ -290,7 +290,7 @@ public class ImmunizationRecommendation extends BaseResource implements IResourc
 	 * Path: <b>ImmunizationRecommendation.recommendation.supportingPatientInformation</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam INFORMATION = new ReferenceParam(SP_INFORMATION);
+	public static final ReferenceClientParam INFORMATION = new ReferenceClientParam(SP_INFORMATION);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies
