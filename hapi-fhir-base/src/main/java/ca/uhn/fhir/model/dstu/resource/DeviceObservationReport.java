@@ -57,8 +57,8 @@ import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
 import ca.uhn.fhir.model.primitive.InstantDt;
-import ca.uhn.fhir.rest.gclient.ReferenceParam;
-import ca.uhn.fhir.rest.gclient.TokenParam;
+import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
+import ca.uhn.fhir.rest.gclient.TokenClientParam;
 
 
 /**
@@ -103,7 +103,7 @@ public class DeviceObservationReport extends BaseResource implements IResource {
 	 * Path: <b>DeviceObservationReport.source</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam SOURCE = new ReferenceParam(SP_SOURCE);
+	public static final ReferenceClientParam SOURCE = new ReferenceClientParam(SP_SOURCE);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies
@@ -130,7 +130,7 @@ public class DeviceObservationReport extends BaseResource implements IResource {
 	 * Path: <b>DeviceObservationReport.virtualDevice.code</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam CODE = new TokenParam(SP_CODE);
+	public static final TokenClientParam CODE = new TokenClientParam(SP_CODE);
 
 	/**
 	 * Search parameter constant for <b>channel</b>
@@ -151,7 +151,7 @@ public class DeviceObservationReport extends BaseResource implements IResource {
 	 * Path: <b>DeviceObservationReport.virtualDevice.channel.code</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam CHANNEL = new TokenParam(SP_CHANNEL);
+	public static final TokenClientParam CHANNEL = new TokenClientParam(SP_CHANNEL);
 
 	/**
 	 * Search parameter constant for <b>observation</b>
@@ -172,7 +172,7 @@ public class DeviceObservationReport extends BaseResource implements IResource {
 	 * Path: <b>DeviceObservationReport.virtualDevice.channel.metric.observation</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam OBSERVATION = new ReferenceParam(SP_OBSERVATION);
+	public static final ReferenceClientParam OBSERVATION = new ReferenceClientParam(SP_OBSERVATION);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies
@@ -199,7 +199,7 @@ public class DeviceObservationReport extends BaseResource implements IResource {
 	 * Path: <b>DeviceObservationReport.subject</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam SUBJECT = new ReferenceParam(SP_SUBJECT);
+	public static final ReferenceClientParam SUBJECT = new ReferenceClientParam(SP_SUBJECT);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies

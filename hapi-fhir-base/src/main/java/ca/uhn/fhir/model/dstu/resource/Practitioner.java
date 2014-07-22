@@ -67,9 +67,9 @@ import ca.uhn.fhir.model.dstu.valueset.PractitionerRoleEnum;
 import ca.uhn.fhir.model.dstu.valueset.PractitionerSpecialtyEnum;
 import ca.uhn.fhir.model.primitive.BoundCodeableConceptDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
-import ca.uhn.fhir.rest.gclient.ReferenceParam;
-import ca.uhn.fhir.rest.gclient.StringParam;
-import ca.uhn.fhir.rest.gclient.TokenParam;
+import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
+import ca.uhn.fhir.rest.gclient.StringClientParam;
+import ca.uhn.fhir.rest.gclient.TokenClientParam;
 
 
 /**
@@ -114,7 +114,7 @@ public class Practitioner extends BaseResource implements IResource {
 	 * Path: <b>Practitioner.identifier</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam IDENTIFIER = new TokenParam(SP_IDENTIFIER);
+	public static final TokenClientParam IDENTIFIER = new TokenClientParam(SP_IDENTIFIER);
 
 	/**
 	 * Search parameter constant for <b>name</b>
@@ -135,7 +135,7 @@ public class Practitioner extends BaseResource implements IResource {
 	 * Path: <b>Practitioner.name</b><br/>
 	 * </p>
 	 */
-	public static final StringParam NAME = new StringParam(SP_NAME);
+	public static final StringClientParam NAME = new StringClientParam(SP_NAME);
 
 	/**
 	 * Search parameter constant for <b>family</b>
@@ -156,7 +156,7 @@ public class Practitioner extends BaseResource implements IResource {
 	 * Path: <b>Practitioner.name</b><br/>
 	 * </p>
 	 */
-	public static final StringParam FAMILY = new StringParam(SP_FAMILY);
+	public static final StringClientParam FAMILY = new StringClientParam(SP_FAMILY);
 
 	/**
 	 * Search parameter constant for <b>given</b>
@@ -177,7 +177,7 @@ public class Practitioner extends BaseResource implements IResource {
 	 * Path: <b>Practitioner.name</b><br/>
 	 * </p>
 	 */
-	public static final StringParam GIVEN = new StringParam(SP_GIVEN);
+	public static final StringClientParam GIVEN = new StringClientParam(SP_GIVEN);
 
 	/**
 	 * Search parameter constant for <b>phonetic</b>
@@ -198,7 +198,7 @@ public class Practitioner extends BaseResource implements IResource {
 	 * Path: <b>Practitioner.name</b><br/>
 	 * </p>
 	 */
-	public static final StringParam PHONETIC = new StringParam(SP_PHONETIC);
+	public static final StringClientParam PHONETIC = new StringClientParam(SP_PHONETIC);
 
 	/**
 	 * Search parameter constant for <b>telecom</b>
@@ -219,7 +219,7 @@ public class Practitioner extends BaseResource implements IResource {
 	 * Path: <b>Practitioner.telecom</b><br/>
 	 * </p>
 	 */
-	public static final StringParam TELECOM = new StringParam(SP_TELECOM);
+	public static final StringClientParam TELECOM = new StringClientParam(SP_TELECOM);
 
 	/**
 	 * Search parameter constant for <b>address</b>
@@ -240,7 +240,7 @@ public class Practitioner extends BaseResource implements IResource {
 	 * Path: <b>Practitioner.address</b><br/>
 	 * </p>
 	 */
-	public static final StringParam ADDRESS = new StringParam(SP_ADDRESS);
+	public static final StringClientParam ADDRESS = new StringClientParam(SP_ADDRESS);
 
 	/**
 	 * Search parameter constant for <b>gender</b>
@@ -261,7 +261,7 @@ public class Practitioner extends BaseResource implements IResource {
 	 * Path: <b>Practitioner.gender</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam GENDER = new TokenParam(SP_GENDER);
+	public static final TokenClientParam GENDER = new TokenClientParam(SP_GENDER);
 
 	/**
 	 * Search parameter constant for <b>organization</b>
@@ -282,7 +282,7 @@ public class Practitioner extends BaseResource implements IResource {
 	 * Path: <b>Practitioner.organization</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam ORGANIZATION = new ReferenceParam(SP_ORGANIZATION);
+	public static final ReferenceClientParam ORGANIZATION = new ReferenceClientParam(SP_ORGANIZATION);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies

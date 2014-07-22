@@ -56,8 +56,8 @@ import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.StringDt;
-import ca.uhn.fhir.rest.gclient.ReferenceParam;
-import ca.uhn.fhir.rest.gclient.TokenParam;
+import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
+import ca.uhn.fhir.rest.gclient.TokenClientParam;
 
 
 /**
@@ -102,7 +102,7 @@ public class Availability extends BaseResource implements IResource {
 	 * Path: <b>Availability.individual</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam INDIVIDUAL = new ReferenceParam(SP_INDIVIDUAL);
+	public static final ReferenceClientParam INDIVIDUAL = new ReferenceClientParam(SP_INDIVIDUAL);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies
@@ -129,7 +129,7 @@ public class Availability extends BaseResource implements IResource {
 	 * Path: <b>Availability.type</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam SLOTTYPE = new TokenParam(SP_SLOTTYPE);
+	public static final TokenClientParam SLOTTYPE = new TokenClientParam(SP_SLOTTYPE);
 
 
 	@Child(name="identifier", type=IdentifierDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)	

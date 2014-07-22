@@ -488,8 +488,8 @@
 				
 				<p>
 					Parameters which take a string as their format should use the 
-					<a href="./apidocs/ca/uhn/fhir/rest/param/StringParameter.html">StringParameter</a>
-					type. They may also use normal java Strings (or HAPI's StringDt), although it is
+					<a href="./apidocs/ca/uhn/fhir/rest/param/StringParam.html">StringParam</a>
+					type. They may also use normal java Strings, although it is
 					not possible to use the ":exact" qualifier in that case.
 				</p>
 
@@ -507,11 +507,6 @@
 			</subsection>
 			<subsection name="Search Parameters: Token/Identifier">
 
-				<p>
-					Searches method parameters may be of any type that implements the
-					<a href="./apidocs/ca/uhn/fhir/model/api/IQueryParameterType.html">IQueryParameterType</a>
-					interface.
-				</p>
 				<p>
 					The "token" type is used for parameters which have two parts, such as
 					an idnetifier (which has a system URI, as well as the actual identifier)
@@ -537,7 +532,7 @@
 
 				<p>
 					The FHIR specification provides a sytax for specifying
-					dates (and date/times as well, but for simplicity we will just say dates here)
+					dates+times (but for simplicity we will just say dates here)
 					as search criteria.
 				</p>
 
@@ -550,8 +545,7 @@
 
 				<p>
 					To accept a qualified date parameter, use the
-					QualifiedDateParam
-					parameter type.
+					DateParam parameter type.
 				</p>
 
 				<macro name="snippet">
@@ -716,6 +710,21 @@
 					Resource by chained parameter value: <code>http://fhir.example.com/Patient?provider:Organization.name=FooOrg</code>
 				</p>
 
+				<h4>Static Chains</h4>
+
+				<p>
+					It is also possible to explicitly state a chained value right in the parameter name.
+					This is useful if you want to only support a search by a specific given chained
+					parameter. It has the added bonus that you can use the correct parameter type of
+					the chained parameter (in this case a TokenParameter because the Patient.identifier
+					parameter is a token)
+				</p>
+
+				<macro name="snippet">
+					<param name="id" value="referenceChain" />
+					<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
+				</macro>
+
 			</subsection>
 
 			<subsection name="Combining Multiple Parameters">
@@ -723,7 +732,6 @@
 				<p>
 					Search methods may take multiple parameters, and these parameters
 					may (or may not) be optional.
-					aaaa
 					To add a second required parameter, annotate the
 					parameter with
 					<a href="./apidocs/ca/uhn/fhir/rest/server/parameters/RequiredParam.html">@RequiredParam</a>
@@ -743,6 +751,25 @@
 					only @OptionalParam parameters, or any combination of the two.
 				</p>
 
+				<p>
+					If you wish to create a server that can accept any combination of a large number
+					of parameters, (this is how the various reference servers behave, as well as the 
+					<a href="http://fhirtest.uhn.ca">public HAPI server</a>) 
+					the easiest way to accomplish this is to simply create one method
+					with all allowable parameters, each annotated as @OptionalParam.
+				</p>
+
+				<p>
+					On the other hand, if you have specific combinations of parameters you wish to 
+					support (a common scenario if you are building FHIR on top of existing data sources
+					and only have certain indexes you can use) you could create multiple search methods,
+					each with specific required and optional parameters matching the database indexes.
+				</p>
+				
+				<p>
+					The following example shows a method with two parameters.
+				</p>
+				
 				<macro name="snippet">
 					<param name="id" value="searchOptionalParam" />
 					<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
@@ -758,7 +785,7 @@
 
 			</subsection>
 
-			<subsection name="Composite (Multi-Valued) Parameters">
+			<subsection name="Multi-Valued (AND/OR) Parameters">
 
 				<p>
 					It is possible to accept multiple values of a single parameter
@@ -853,7 +880,7 @@
 				<p>
 					Example URL to invoke this method:
 					<br />
-					<code>http://fhir.example.com/DiagnosticReport?subject.identifier=7000135&amp;_include=DiagnosticReport.subject</code>
+					<code>http://fhir.example.com/DiagnosticReport?identifier=7000135&amp;_include=DiagnosticReport.subject</code>
 				</p>
 
 				<p>
@@ -864,6 +891,25 @@
 
 				<macro name="snippet">
 					<param name="id" value="pathSpecSimple" />
+					<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
+				</macro>
+
+			</subsection>
+
+			<subsection name="Adding Descriptions">
+
+				<p>
+					It is also possible to annotate search methods and/or parameters with
+					the 
+					<a href="./apidocs/ca/uhn/fhir/model/api/annotation/Description.html">@Description</a>
+					annotation. This annotation allows you to add a description of the method 
+					and the individual parameters. These descriptions will be placed in the
+					server's metadata statement, which cam be helpful to anyone who is developing
+					software against your server.
+				</p>
+
+				<macro name="snippet">
+					<param name="id" value="searchWithDocs" />
 					<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
 				</macro>
 
@@ -948,7 +994,7 @@
 				<a href="http://hl7.org/implement/standards/fhir/http.html#validate">
 					<b>validate</b>
 				</a>
-				tests whether a resource passes business validation, and would be
+				operation tests whether a resource passes business validation, and would be
 				acceptable for saving to a server (e.g. by a create or update method).
 			</p>
 			<p>

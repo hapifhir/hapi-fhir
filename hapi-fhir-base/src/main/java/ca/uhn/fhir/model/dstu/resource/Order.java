@@ -59,9 +59,9 @@ import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.composite.ScheduleDt;
 import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
-import ca.uhn.fhir.rest.gclient.DateParam;
-import ca.uhn.fhir.rest.gclient.ReferenceParam;
-import ca.uhn.fhir.rest.gclient.TokenParam;
+import ca.uhn.fhir.rest.gclient.DateClientParam;
+import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
+import ca.uhn.fhir.rest.gclient.TokenClientParam;
 
 
 /**
@@ -106,7 +106,7 @@ public class Order extends BaseResource implements IResource {
 	 * Path: <b>Order.date</b><br/>
 	 * </p>
 	 */
-	public static final DateParam DATE = new DateParam(SP_DATE);
+	public static final DateClientParam DATE = new DateClientParam(SP_DATE);
 
 	/**
 	 * Search parameter constant for <b>subject</b>
@@ -127,7 +127,7 @@ public class Order extends BaseResource implements IResource {
 	 * Path: <b>Order.subject</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam SUBJECT = new ReferenceParam(SP_SUBJECT);
+	public static final ReferenceClientParam SUBJECT = new ReferenceClientParam(SP_SUBJECT);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies
@@ -154,7 +154,7 @@ public class Order extends BaseResource implements IResource {
 	 * Path: <b>Order.source</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam SOURCE = new ReferenceParam(SP_SOURCE);
+	public static final ReferenceClientParam SOURCE = new ReferenceClientParam(SP_SOURCE);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies
@@ -181,7 +181,7 @@ public class Order extends BaseResource implements IResource {
 	 * Path: <b>Order.target</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam TARGET = new ReferenceParam(SP_TARGET);
+	public static final ReferenceClientParam TARGET = new ReferenceClientParam(SP_TARGET);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies
@@ -208,7 +208,7 @@ public class Order extends BaseResource implements IResource {
 	 * Path: <b>Order.authority</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam AUTHORITY = new ReferenceParam(SP_AUTHORITY);
+	public static final ReferenceClientParam AUTHORITY = new ReferenceClientParam(SP_AUTHORITY);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies
@@ -235,7 +235,7 @@ public class Order extends BaseResource implements IResource {
 	 * Path: <b>Order.when.code</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam WHEN_CODE = new TokenParam(SP_WHEN_CODE);
+	public static final TokenClientParam WHEN_CODE = new TokenClientParam(SP_WHEN_CODE);
 
 	/**
 	 * Search parameter constant for <b>when</b>
@@ -256,7 +256,7 @@ public class Order extends BaseResource implements IResource {
 	 * Path: <b>Order.when.schedule</b><br/>
 	 * </p>
 	 */
-	public static final DateParam WHEN = new DateParam(SP_WHEN);
+	public static final DateClientParam WHEN = new DateClientParam(SP_WHEN);
 
 	/**
 	 * Search parameter constant for <b>detail</b>
@@ -277,7 +277,7 @@ public class Order extends BaseResource implements IResource {
 	 * Path: <b>Order.detail</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam DETAIL = new ReferenceParam(SP_DETAIL);
+	public static final ReferenceClientParam DETAIL = new ReferenceClientParam(SP_DETAIL);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies

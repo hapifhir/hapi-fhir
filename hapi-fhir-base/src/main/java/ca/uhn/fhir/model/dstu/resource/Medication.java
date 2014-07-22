@@ -58,9 +58,9 @@ import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.StringDt;
-import ca.uhn.fhir.rest.gclient.ReferenceParam;
-import ca.uhn.fhir.rest.gclient.StringParam;
-import ca.uhn.fhir.rest.gclient.TokenParam;
+import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
+import ca.uhn.fhir.rest.gclient.StringClientParam;
+import ca.uhn.fhir.rest.gclient.TokenClientParam;
 
 
 /**
@@ -105,7 +105,7 @@ public class Medication extends BaseResource implements IResource {
 	 * Path: <b>Medication.code</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam CODE = new TokenParam(SP_CODE);
+	public static final TokenClientParam CODE = new TokenClientParam(SP_CODE);
 
 	/**
 	 * Search parameter constant for <b>name</b>
@@ -126,7 +126,7 @@ public class Medication extends BaseResource implements IResource {
 	 * Path: <b>Medication.name</b><br/>
 	 * </p>
 	 */
-	public static final StringParam NAME = new StringParam(SP_NAME);
+	public static final StringClientParam NAME = new StringClientParam(SP_NAME);
 
 	/**
 	 * Search parameter constant for <b>manufacturer</b>
@@ -147,7 +147,7 @@ public class Medication extends BaseResource implements IResource {
 	 * Path: <b>Medication.manufacturer</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam MANUFACTURER = new ReferenceParam(SP_MANUFACTURER);
+	public static final ReferenceClientParam MANUFACTURER = new ReferenceClientParam(SP_MANUFACTURER);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies
@@ -174,7 +174,7 @@ public class Medication extends BaseResource implements IResource {
 	 * Path: <b>Medication.product.form</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam FORM = new TokenParam(SP_FORM);
+	public static final TokenClientParam FORM = new TokenClientParam(SP_FORM);
 
 	/**
 	 * Search parameter constant for <b>ingredient</b>
@@ -195,7 +195,7 @@ public class Medication extends BaseResource implements IResource {
 	 * Path: <b>Medication.product.ingredient.item</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam INGREDIENT = new ReferenceParam(SP_INGREDIENT);
+	public static final ReferenceClientParam INGREDIENT = new ReferenceClientParam(SP_INGREDIENT);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies
@@ -222,7 +222,7 @@ public class Medication extends BaseResource implements IResource {
 	 * Path: <b>Medication.package.container</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam CONTAINER = new TokenParam(SP_CONTAINER);
+	public static final TokenClientParam CONTAINER = new TokenClientParam(SP_CONTAINER);
 
 	/**
 	 * Search parameter constant for <b>content</b>
@@ -243,7 +243,7 @@ public class Medication extends BaseResource implements IResource {
 	 * Path: <b>Medication.package.content.item</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam CONTENT = new ReferenceParam(SP_CONTENT);
+	public static final ReferenceClientParam CONTENT = new ReferenceClientParam(SP_CONTENT);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies

@@ -63,10 +63,10 @@ import ca.uhn.fhir.model.dstu.valueset.SubstanceTypeEnum;
 import ca.uhn.fhir.model.primitive.BoundCodeableConceptDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.StringDt;
-import ca.uhn.fhir.rest.gclient.DateParam;
-import ca.uhn.fhir.rest.gclient.NumberParam;
-import ca.uhn.fhir.rest.gclient.ReferenceParam;
-import ca.uhn.fhir.rest.gclient.TokenParam;
+import ca.uhn.fhir.rest.gclient.DateClientParam;
+import ca.uhn.fhir.rest.gclient.NumberClientParam;
+import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
+import ca.uhn.fhir.rest.gclient.TokenClientParam;
 
 
 /**
@@ -111,7 +111,7 @@ public class Substance extends BaseResource implements IResource {
 	 * Path: <b>Substance.type</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam TYPE = new TokenParam(SP_TYPE);
+	public static final TokenClientParam TYPE = new TokenClientParam(SP_TYPE);
 
 	/**
 	 * Search parameter constant for <b>identifier</b>
@@ -132,7 +132,7 @@ public class Substance extends BaseResource implements IResource {
 	 * Path: <b>Substance.instance.identifier</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam IDENTIFIER = new TokenParam(SP_IDENTIFIER);
+	public static final TokenClientParam IDENTIFIER = new TokenClientParam(SP_IDENTIFIER);
 
 	/**
 	 * Search parameter constant for <b>expiry</b>
@@ -153,7 +153,7 @@ public class Substance extends BaseResource implements IResource {
 	 * Path: <b>Substance.instance.expiry</b><br/>
 	 * </p>
 	 */
-	public static final DateParam EXPIRY = new DateParam(SP_EXPIRY);
+	public static final DateClientParam EXPIRY = new DateClientParam(SP_EXPIRY);
 
 	/**
 	 * Search parameter constant for <b>quantity</b>
@@ -174,7 +174,7 @@ public class Substance extends BaseResource implements IResource {
 	 * Path: <b>Substance.instance.quantity</b><br/>
 	 * </p>
 	 */
-	public static final NumberParam QUANTITY = new NumberParam(SP_QUANTITY);
+	public static final NumberClientParam QUANTITY = new NumberClientParam(SP_QUANTITY);
 
 	/**
 	 * Search parameter constant for <b>substance</b>
@@ -195,7 +195,7 @@ public class Substance extends BaseResource implements IResource {
 	 * Path: <b>Substance.ingredient.substance</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam SUBSTANCE = new ReferenceParam(SP_SUBSTANCE);
+	public static final ReferenceClientParam SUBSTANCE = new ReferenceClientParam(SP_SUBSTANCE);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies

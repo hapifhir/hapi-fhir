@@ -66,10 +66,10 @@ import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.BoundCodeableConceptDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
-import ca.uhn.fhir.rest.gclient.DateParam;
-import ca.uhn.fhir.rest.gclient.NumberParam;
-import ca.uhn.fhir.rest.gclient.ReferenceParam;
-import ca.uhn.fhir.rest.gclient.TokenParam;
+import ca.uhn.fhir.rest.gclient.DateClientParam;
+import ca.uhn.fhir.rest.gclient.NumberClientParam;
+import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
+import ca.uhn.fhir.rest.gclient.TokenClientParam;
 
 
 /**
@@ -114,7 +114,7 @@ public class Encounter extends BaseResource implements IResource {
 	 * Path: <b>Encounter.identifier</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam IDENTIFIER = new TokenParam(SP_IDENTIFIER);
+	public static final TokenClientParam IDENTIFIER = new TokenClientParam(SP_IDENTIFIER);
 
 	/**
 	 * Search parameter constant for <b>status</b>
@@ -135,7 +135,7 @@ public class Encounter extends BaseResource implements IResource {
 	 * Path: <b>Encounter.status</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam STATUS = new TokenParam(SP_STATUS);
+	public static final TokenClientParam STATUS = new TokenClientParam(SP_STATUS);
 
 	/**
 	 * Search parameter constant for <b>date</b>
@@ -156,7 +156,7 @@ public class Encounter extends BaseResource implements IResource {
 	 * Path: <b>Encounter.period</b><br/>
 	 * </p>
 	 */
-	public static final DateParam DATE = new DateParam(SP_DATE);
+	public static final DateClientParam DATE = new DateClientParam(SP_DATE);
 
 	/**
 	 * Search parameter constant for <b>subject</b>
@@ -177,7 +177,7 @@ public class Encounter extends BaseResource implements IResource {
 	 * Path: <b>Encounter.subject</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam SUBJECT = new ReferenceParam(SP_SUBJECT);
+	public static final ReferenceClientParam SUBJECT = new ReferenceClientParam(SP_SUBJECT);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies
@@ -204,7 +204,7 @@ public class Encounter extends BaseResource implements IResource {
 	 * Path: <b>Encounter.length</b><br/>
 	 * </p>
 	 */
-	public static final NumberParam LENGTH = new NumberParam(SP_LENGTH);
+	public static final NumberClientParam LENGTH = new NumberClientParam(SP_LENGTH);
 
 	/**
 	 * Search parameter constant for <b>indication</b>
@@ -225,7 +225,7 @@ public class Encounter extends BaseResource implements IResource {
 	 * Path: <b>Encounter.indication</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam INDICATION = new ReferenceParam(SP_INDICATION);
+	public static final ReferenceClientParam INDICATION = new ReferenceClientParam(SP_INDICATION);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies
@@ -252,7 +252,7 @@ public class Encounter extends BaseResource implements IResource {
 	 * Path: <b>Encounter.location.location</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam LOCATION = new ReferenceParam(SP_LOCATION);
+	public static final ReferenceClientParam LOCATION = new ReferenceClientParam(SP_LOCATION);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies
@@ -279,7 +279,7 @@ public class Encounter extends BaseResource implements IResource {
 	 * Path: <b>Encounter.location.period</b><br/>
 	 * </p>
 	 */
-	public static final DateParam LOCATION_PERIOD = new DateParam(SP_LOCATION_PERIOD);
+	public static final DateClientParam LOCATION_PERIOD = new DateClientParam(SP_LOCATION_PERIOD);
 
 
 	@Child(name="identifier", type=IdentifierDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)	

@@ -64,9 +64,9 @@ import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.StringDt;
-import ca.uhn.fhir.rest.gclient.DateParam;
-import ca.uhn.fhir.rest.gclient.ReferenceParam;
-import ca.uhn.fhir.rest.gclient.TokenParam;
+import ca.uhn.fhir.rest.gclient.DateClientParam;
+import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
+import ca.uhn.fhir.rest.gclient.TokenClientParam;
 
 
 /**
@@ -111,7 +111,7 @@ public class DiagnosticReport extends BaseResource implements IResource {
 	 * Path: <b>DiagnosticReport.status</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam STATUS = new TokenParam(SP_STATUS);
+	public static final TokenClientParam STATUS = new TokenClientParam(SP_STATUS);
 
 	/**
 	 * Search parameter constant for <b>issued</b>
@@ -132,7 +132,7 @@ public class DiagnosticReport extends BaseResource implements IResource {
 	 * Path: <b>DiagnosticReport.issued</b><br/>
 	 * </p>
 	 */
-	public static final DateParam ISSUED = new DateParam(SP_ISSUED);
+	public static final DateClientParam ISSUED = new DateClientParam(SP_ISSUED);
 
 	/**
 	 * Search parameter constant for <b>subject</b>
@@ -153,7 +153,7 @@ public class DiagnosticReport extends BaseResource implements IResource {
 	 * Path: <b>DiagnosticReport.subject</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam SUBJECT = new ReferenceParam(SP_SUBJECT);
+	public static final ReferenceClientParam SUBJECT = new ReferenceClientParam(SP_SUBJECT);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies
@@ -180,7 +180,7 @@ public class DiagnosticReport extends BaseResource implements IResource {
 	 * Path: <b>DiagnosticReport.performer</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam PERFORMER = new ReferenceParam(SP_PERFORMER);
+	public static final ReferenceClientParam PERFORMER = new ReferenceClientParam(SP_PERFORMER);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies
@@ -207,7 +207,7 @@ public class DiagnosticReport extends BaseResource implements IResource {
 	 * Path: <b>DiagnosticReport.identifier</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam IDENTIFIER = new TokenParam(SP_IDENTIFIER);
+	public static final TokenClientParam IDENTIFIER = new TokenClientParam(SP_IDENTIFIER);
 
 	/**
 	 * Search parameter constant for <b>service</b>
@@ -228,7 +228,7 @@ public class DiagnosticReport extends BaseResource implements IResource {
 	 * Path: <b>DiagnosticReport.serviceCategory</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam SERVICE = new TokenParam(SP_SERVICE);
+	public static final TokenClientParam SERVICE = new TokenClientParam(SP_SERVICE);
 
 	/**
 	 * Search parameter constant for <b>date</b>
@@ -249,7 +249,7 @@ public class DiagnosticReport extends BaseResource implements IResource {
 	 * Path: <b>DiagnosticReport.diagnostic[x]</b><br/>
 	 * </p>
 	 */
-	public static final DateParam DATE = new DateParam(SP_DATE);
+	public static final DateClientParam DATE = new DateClientParam(SP_DATE);
 
 	/**
 	 * Search parameter constant for <b>specimen</b>
@@ -270,7 +270,7 @@ public class DiagnosticReport extends BaseResource implements IResource {
 	 * Path: <b>DiagnosticReport.specimen</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam SPECIMEN = new ReferenceParam(SP_SPECIMEN);
+	public static final ReferenceClientParam SPECIMEN = new ReferenceClientParam(SP_SPECIMEN);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies
@@ -297,7 +297,7 @@ public class DiagnosticReport extends BaseResource implements IResource {
 	 * Path: <b>DiagnosticReport.name</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam NAME = new TokenParam(SP_NAME);
+	public static final TokenClientParam NAME = new TokenClientParam(SP_NAME);
 
 	/**
 	 * Search parameter constant for <b>result</b>
@@ -318,7 +318,7 @@ public class DiagnosticReport extends BaseResource implements IResource {
 	 * Path: <b>DiagnosticReport.result</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam RESULT = new ReferenceParam(SP_RESULT);
+	public static final ReferenceClientParam RESULT = new ReferenceClientParam(SP_RESULT);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies
@@ -345,7 +345,7 @@ public class DiagnosticReport extends BaseResource implements IResource {
 	 * Path: <b>DiagnosticReport.codedDiagnosis</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam DIAGNOSIS = new TokenParam(SP_DIAGNOSIS);
+	public static final TokenClientParam DIAGNOSIS = new TokenClientParam(SP_DIAGNOSIS);
 
 	/**
 	 * Search parameter constant for <b>image</b>
@@ -366,7 +366,7 @@ public class DiagnosticReport extends BaseResource implements IResource {
 	 * Path: <b>DiagnosticReport.image.link</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam IMAGE = new ReferenceParam(SP_IMAGE);
+	public static final ReferenceClientParam IMAGE = new ReferenceClientParam(SP_IMAGE);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies
@@ -393,7 +393,7 @@ public class DiagnosticReport extends BaseResource implements IResource {
 	 * Path: <b>DiagnosticReport.requestDetail</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam REQUEST = new ReferenceParam(SP_REQUEST);
+	public static final ReferenceClientParam REQUEST = new ReferenceClientParam(SP_REQUEST);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies

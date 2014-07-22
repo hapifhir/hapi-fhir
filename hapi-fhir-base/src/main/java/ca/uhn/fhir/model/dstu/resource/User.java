@@ -55,9 +55,9 @@ import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
-import ca.uhn.fhir.rest.gclient.ReferenceParam;
-import ca.uhn.fhir.rest.gclient.StringParam;
-import ca.uhn.fhir.rest.gclient.TokenParam;
+import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
+import ca.uhn.fhir.rest.gclient.StringClientParam;
+import ca.uhn.fhir.rest.gclient.TokenClientParam;
 
 
 /**
@@ -102,7 +102,7 @@ public class User extends BaseResource implements IResource {
 	 * Path: <b>User.name</b><br/>
 	 * </p>
 	 */
-	public static final StringParam NAME = new StringParam(SP_NAME);
+	public static final StringClientParam NAME = new StringClientParam(SP_NAME);
 
 	/**
 	 * Search parameter constant for <b>provider</b>
@@ -123,7 +123,7 @@ public class User extends BaseResource implements IResource {
 	 * Path: <b>User.provider</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam PROVIDER = new TokenParam(SP_PROVIDER);
+	public static final TokenClientParam PROVIDER = new TokenClientParam(SP_PROVIDER);
 
 	/**
 	 * Search parameter constant for <b>login</b>
@@ -144,7 +144,7 @@ public class User extends BaseResource implements IResource {
 	 * Path: <b>User.login</b><br/>
 	 * </p>
 	 */
-	public static final StringParam LOGIN = new StringParam(SP_LOGIN);
+	public static final StringClientParam LOGIN = new StringClientParam(SP_LOGIN);
 
 	/**
 	 * Search parameter constant for <b>level</b>
@@ -165,7 +165,7 @@ public class User extends BaseResource implements IResource {
 	 * Path: <b>User.level</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam LEVEL = new TokenParam(SP_LEVEL);
+	public static final TokenClientParam LEVEL = new TokenClientParam(SP_LEVEL);
 
 	/**
 	 * Search parameter constant for <b>patient</b>
@@ -186,7 +186,7 @@ public class User extends BaseResource implements IResource {
 	 * Path: <b>User.patient</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam PATIENT = new ReferenceParam(SP_PATIENT);
+	public static final ReferenceClientParam PATIENT = new ReferenceClientParam(SP_PATIENT);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies

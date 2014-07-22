@@ -64,9 +64,9 @@ import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
-import ca.uhn.fhir.rest.gclient.DateParam;
-import ca.uhn.fhir.rest.gclient.ReferenceParam;
-import ca.uhn.fhir.rest.gclient.TokenParam;
+import ca.uhn.fhir.rest.gclient.DateClientParam;
+import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
+import ca.uhn.fhir.rest.gclient.TokenClientParam;
 
 
 /**
@@ -111,7 +111,7 @@ public class MedicationAdministration extends BaseResource implements IResource 
 	 * Path: <b>MedicationAdministration.device</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam DEVICE = new ReferenceParam(SP_DEVICE);
+	public static final ReferenceClientParam DEVICE = new ReferenceClientParam(SP_DEVICE);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies
@@ -138,7 +138,7 @@ public class MedicationAdministration extends BaseResource implements IResource 
 	 * Path: <b>MedicationAdministration.encounter</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam ENCOUNTER = new ReferenceParam(SP_ENCOUNTER);
+	public static final ReferenceClientParam ENCOUNTER = new ReferenceClientParam(SP_ENCOUNTER);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies
@@ -165,7 +165,7 @@ public class MedicationAdministration extends BaseResource implements IResource 
 	 * Path: <b>MedicationAdministration.identifier</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam IDENTIFIER = new TokenParam(SP_IDENTIFIER);
+	public static final TokenClientParam IDENTIFIER = new TokenClientParam(SP_IDENTIFIER);
 
 	/**
 	 * Search parameter constant for <b>medication</b>
@@ -186,7 +186,7 @@ public class MedicationAdministration extends BaseResource implements IResource 
 	 * Path: <b>MedicationAdministration.medication</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam MEDICATION = new ReferenceParam(SP_MEDICATION);
+	public static final ReferenceClientParam MEDICATION = new ReferenceClientParam(SP_MEDICATION);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies
@@ -213,7 +213,7 @@ public class MedicationAdministration extends BaseResource implements IResource 
 	 * Path: <b>MedicationAdministration.wasNotGiven</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam NOTGIVEN = new TokenParam(SP_NOTGIVEN);
+	public static final TokenClientParam NOTGIVEN = new TokenClientParam(SP_NOTGIVEN);
 
 	/**
 	 * Search parameter constant for <b>patient</b>
@@ -234,7 +234,7 @@ public class MedicationAdministration extends BaseResource implements IResource 
 	 * Path: <b>MedicationAdministration.patient</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam PATIENT = new ReferenceParam(SP_PATIENT);
+	public static final ReferenceClientParam PATIENT = new ReferenceClientParam(SP_PATIENT);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies
@@ -261,7 +261,7 @@ public class MedicationAdministration extends BaseResource implements IResource 
 	 * Path: <b>MedicationAdministration.prescription</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam PRESCRIPTION = new ReferenceParam(SP_PRESCRIPTION);
+	public static final ReferenceClientParam PRESCRIPTION = new ReferenceClientParam(SP_PRESCRIPTION);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies
@@ -288,7 +288,7 @@ public class MedicationAdministration extends BaseResource implements IResource 
 	 * Path: <b>MedicationAdministration.status</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam STATUS = new TokenParam(SP_STATUS);
+	public static final TokenClientParam STATUS = new TokenClientParam(SP_STATUS);
 
 	/**
 	 * Search parameter constant for <b>whengiven</b>
@@ -309,7 +309,7 @@ public class MedicationAdministration extends BaseResource implements IResource 
 	 * Path: <b>MedicationAdministration.whenGiven</b><br/>
 	 * </p>
 	 */
-	public static final DateParam WHENGIVEN = new DateParam(SP_WHENGIVEN);
+	public static final DateClientParam WHENGIVEN = new DateClientParam(SP_WHENGIVEN);
 
 
 	@Child(name="identifier", type=IdentifierDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)	

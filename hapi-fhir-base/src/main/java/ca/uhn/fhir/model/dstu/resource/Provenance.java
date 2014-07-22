@@ -62,9 +62,9 @@ import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
-import ca.uhn.fhir.rest.gclient.DateParam;
-import ca.uhn.fhir.rest.gclient.ReferenceParam;
-import ca.uhn.fhir.rest.gclient.TokenParam;
+import ca.uhn.fhir.rest.gclient.DateClientParam;
+import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
+import ca.uhn.fhir.rest.gclient.TokenClientParam;
 
 
 /**
@@ -109,7 +109,7 @@ public class Provenance extends BaseResource implements IResource {
 	 * Path: <b>Provenance.target</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam TARGET = new ReferenceParam(SP_TARGET);
+	public static final ReferenceClientParam TARGET = new ReferenceClientParam(SP_TARGET);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies
@@ -136,7 +136,7 @@ public class Provenance extends BaseResource implements IResource {
 	 * Path: <b>Provenance.period.start</b><br/>
 	 * </p>
 	 */
-	public static final DateParam START = new DateParam(SP_START);
+	public static final DateClientParam START = new DateClientParam(SP_START);
 
 	/**
 	 * Search parameter constant for <b>end</b>
@@ -157,7 +157,7 @@ public class Provenance extends BaseResource implements IResource {
 	 * Path: <b>Provenance.period.end</b><br/>
 	 * </p>
 	 */
-	public static final DateParam END = new DateParam(SP_END);
+	public static final DateClientParam END = new DateClientParam(SP_END);
 
 	/**
 	 * Search parameter constant for <b>location</b>
@@ -178,7 +178,7 @@ public class Provenance extends BaseResource implements IResource {
 	 * Path: <b>Provenance.location</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam LOCATION = new ReferenceParam(SP_LOCATION);
+	public static final ReferenceClientParam LOCATION = new ReferenceClientParam(SP_LOCATION);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies
@@ -205,7 +205,7 @@ public class Provenance extends BaseResource implements IResource {
 	 * Path: <b>Provenance.agent.reference</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam PARTY = new TokenParam(SP_PARTY);
+	public static final TokenClientParam PARTY = new TokenClientParam(SP_PARTY);
 
 	/**
 	 * Search parameter constant for <b>partytype</b>
@@ -226,7 +226,7 @@ public class Provenance extends BaseResource implements IResource {
 	 * Path: <b>Provenance.agent.type</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam PARTYTYPE = new TokenParam(SP_PARTYTYPE);
+	public static final TokenClientParam PARTYTYPE = new TokenClientParam(SP_PARTYTYPE);
 
 
 	@Child(name="target", order=0, min=1, max=Child.MAX_UNLIMITED, type={

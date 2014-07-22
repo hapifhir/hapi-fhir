@@ -71,9 +71,9 @@ import ca.uhn.fhir.model.primitive.DecimalDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.model.primitive.StringDt;
-import ca.uhn.fhir.rest.gclient.DateParam;
-import ca.uhn.fhir.rest.gclient.ReferenceParam;
-import ca.uhn.fhir.rest.gclient.TokenParam;
+import ca.uhn.fhir.rest.gclient.DateClientParam;
+import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
+import ca.uhn.fhir.rest.gclient.TokenClientParam;
 
 
 /**
@@ -118,7 +118,7 @@ public class Questionnaire extends BaseResource implements IResource {
 	 * Path: <b>Questionnaire.status</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam STATUS = new TokenParam(SP_STATUS);
+	public static final TokenClientParam STATUS = new TokenClientParam(SP_STATUS);
 
 	/**
 	 * Search parameter constant for <b>authored</b>
@@ -139,7 +139,7 @@ public class Questionnaire extends BaseResource implements IResource {
 	 * Path: <b>Questionnaire.authored</b><br/>
 	 * </p>
 	 */
-	public static final DateParam AUTHORED = new DateParam(SP_AUTHORED);
+	public static final DateClientParam AUTHORED = new DateClientParam(SP_AUTHORED);
 
 	/**
 	 * Search parameter constant for <b>subject</b>
@@ -160,7 +160,7 @@ public class Questionnaire extends BaseResource implements IResource {
 	 * Path: <b>Questionnaire.subject</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam SUBJECT = new ReferenceParam(SP_SUBJECT);
+	public static final ReferenceClientParam SUBJECT = new ReferenceClientParam(SP_SUBJECT);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies
@@ -187,7 +187,7 @@ public class Questionnaire extends BaseResource implements IResource {
 	 * Path: <b>Questionnaire.author</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam AUTHOR = new ReferenceParam(SP_AUTHOR);
+	public static final ReferenceClientParam AUTHOR = new ReferenceClientParam(SP_AUTHOR);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies
@@ -214,7 +214,7 @@ public class Questionnaire extends BaseResource implements IResource {
 	 * Path: <b>Questionnaire.identifier</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam IDENTIFIER = new TokenParam(SP_IDENTIFIER);
+	public static final TokenClientParam IDENTIFIER = new TokenClientParam(SP_IDENTIFIER);
 
 	/**
 	 * Search parameter constant for <b>name</b>
@@ -235,7 +235,7 @@ public class Questionnaire extends BaseResource implements IResource {
 	 * Path: <b>Questionnaire.name</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam NAME = new TokenParam(SP_NAME);
+	public static final TokenClientParam NAME = new TokenClientParam(SP_NAME);
 
 	/**
 	 * Search parameter constant for <b>encounter</b>
@@ -256,7 +256,7 @@ public class Questionnaire extends BaseResource implements IResource {
 	 * Path: <b>Questionnaire.encounter</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam ENCOUNTER = new ReferenceParam(SP_ENCOUNTER);
+	public static final ReferenceClientParam ENCOUNTER = new ReferenceClientParam(SP_ENCOUNTER);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies

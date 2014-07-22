@@ -150,29 +150,28 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 		Predicate lb = null;
 		if (lowerBound != null) {
 			Predicate gt = builder.greaterThanOrEqualTo(from.<Date> get("myValueLow"), lowerBound);
-			Predicate gin = builder.isNull(from.get("myValueLow"));
-			Predicate lbo = builder.or(gt, gin);
-
 			Predicate lt = builder.greaterThanOrEqualTo(from.<Date> get("myValueHigh"), lowerBound);
-			Predicate lin = builder.isNull(from.get("myValueHigh"));
-			Predicate hbo = builder.or(lt, lin);
-
 			lb = builder.or(gt, lt);
+
+//			Predicate gin = builder.isNull(from.get("myValueLow"));
+//			Predicate lbo = builder.or(gt, gin);
+//			Predicate lin = builder.isNull(from.get("myValueHigh"));
+//			Predicate hbo = builder.or(lt, lin);
 			// lb = builder.and(lbo, hbo);
 		}
 
 		Predicate ub = null;
 		if (upperBound != null) {
 			Predicate gt = builder.lessThanOrEqualTo(from.<Date> get("myValueLow"), upperBound);
-			Predicate gin = builder.isNull(from.get("myValueLow"));
-			Predicate lbo = builder.or(gt, gin);
-
 			Predicate lt = builder.lessThanOrEqualTo(from.<Date> get("myValueHigh"), upperBound);
-			Predicate lin = builder.isNull(from.get("myValueHigh"));
-			Predicate ubo = builder.or(lt, lin);
-
 			ub = builder.or(gt, lt);
+			
+//			Predicate gin = builder.isNull(from.get("myValueLow"));
+//			Predicate lbo = builder.or(gt, gin);
+//			Predicate lin = builder.isNull(from.get("myValueHigh"));
+//			Predicate ubo = builder.or(lt, lin);
 			// ub = builder.and(ubo, lbo);
+
 		}
 
 		if (lb != null && ub != null) {
@@ -208,6 +207,9 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 		return found;
 	}
 
+//	private Set<Long> addPredicateComposite(String theParamName, Set<Long> thePids, List<? extends IQueryParameterType> theList) {
+//	}
+	
 	private Set<Long> addPredicateQuantity(String theParamName, Set<Long> thePids, List<? extends IQueryParameterType> theList) {
 		if (theList == null || theList.isEmpty()) {
 			return thePids;
@@ -1189,7 +1191,6 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 	private MethodOutcome toMethodOutcome(final ResourceTable entity) {
 		MethodOutcome outcome = new MethodOutcome();
 		outcome.setId(entity.getIdDt());
-		outcome.setVersionId(new IdDt(entity.getVersion()));
 		return outcome;
 	}
 

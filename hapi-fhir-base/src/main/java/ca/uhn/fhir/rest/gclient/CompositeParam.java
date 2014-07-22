@@ -20,24 +20,16 @@ package ca.uhn.fhir.rest.gclient;
  * #L%
  */
 
+
 /**
- * Composite params are not yet supported - This is a placeholder. Help welcome!
- *
- * TODO: implement
+ * @deprecated Use {@link CompositeClientParam} instead. That class is identical to this one but was renamed to reduct
+ *             confusing duplicate names in the API. This class will be removed in a future release.
  */
-public class CompositeParam {
+public class CompositeParam extends CompositeClientParam {
 
-	public CompositeParam(@SuppressWarnings("unused") String theName) {
-		// TODO Auto-generated constructor stub
+	public CompositeParam(String theParamName) {
+		super(theParamName);
 	}
 
-	/**
-	 * Composite params are not yet supported - This is a placeholder. Help welcome!
-	 *
-	 * TODO: implement
-	 */
-	public void notYetSupported() {
-		//nothig
-	}
-	
+
 }

@@ -64,9 +64,9 @@ import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.StringDt;
-import ca.uhn.fhir.rest.gclient.DateParam;
-import ca.uhn.fhir.rest.gclient.ReferenceParam;
-import ca.uhn.fhir.rest.gclient.TokenParam;
+import ca.uhn.fhir.rest.gclient.DateClientParam;
+import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
+import ca.uhn.fhir.rest.gclient.TokenClientParam;
 
 
 /**
@@ -111,7 +111,7 @@ public class Composition extends BaseResource implements IResource {
 	 * Path: <b>Composition.type</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam TYPE = new TokenParam(SP_TYPE);
+	public static final TokenClientParam TYPE = new TokenClientParam(SP_TYPE);
 
 	/**
 	 * Search parameter constant for <b>class</b>
@@ -132,7 +132,7 @@ public class Composition extends BaseResource implements IResource {
 	 * Path: <b>Composition.class</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam CLASS = new TokenParam(SP_CLASS);
+	public static final TokenClientParam CLASS = new TokenClientParam(SP_CLASS);
 
 	/**
 	 * Search parameter constant for <b>date</b>
@@ -153,7 +153,7 @@ public class Composition extends BaseResource implements IResource {
 	 * Path: <b>Composition.date</b><br/>
 	 * </p>
 	 */
-	public static final DateParam DATE = new DateParam(SP_DATE);
+	public static final DateClientParam DATE = new DateClientParam(SP_DATE);
 
 	/**
 	 * Search parameter constant for <b>subject</b>
@@ -174,7 +174,7 @@ public class Composition extends BaseResource implements IResource {
 	 * Path: <b>Composition.subject</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam SUBJECT = new ReferenceParam(SP_SUBJECT);
+	public static final ReferenceClientParam SUBJECT = new ReferenceClientParam(SP_SUBJECT);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies
@@ -201,7 +201,7 @@ public class Composition extends BaseResource implements IResource {
 	 * Path: <b>Composition.author</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam AUTHOR = new ReferenceParam(SP_AUTHOR);
+	public static final ReferenceClientParam AUTHOR = new ReferenceClientParam(SP_AUTHOR);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies
@@ -228,7 +228,7 @@ public class Composition extends BaseResource implements IResource {
 	 * Path: <b>Composition.attester.party</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam ATTESTER = new ReferenceParam(SP_ATTESTER);
+	public static final ReferenceClientParam ATTESTER = new ReferenceClientParam(SP_ATTESTER);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies
@@ -255,7 +255,7 @@ public class Composition extends BaseResource implements IResource {
 	 * Path: <b>Composition.event.code</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam CONTEXT = new TokenParam(SP_CONTEXT);
+	public static final TokenClientParam CONTEXT = new TokenClientParam(SP_CONTEXT);
 
 	/**
 	 * Search parameter constant for <b>section-type</b>
@@ -276,7 +276,7 @@ public class Composition extends BaseResource implements IResource {
 	 * Path: <b>Composition.section.code</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam SECTION_TYPE = new TokenParam(SP_SECTION_TYPE);
+	public static final TokenClientParam SECTION_TYPE = new TokenClientParam(SP_SECTION_TYPE);
 
 	/**
 	 * Search parameter constant for <b>section-content</b>
@@ -297,7 +297,7 @@ public class Composition extends BaseResource implements IResource {
 	 * Path: <b>Composition.section.content</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam SECTION_CONTENT = new ReferenceParam(SP_SECTION_CONTENT);
+	public static final ReferenceClientParam SECTION_CONTENT = new ReferenceClientParam(SP_SECTION_CONTENT);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies
@@ -324,7 +324,7 @@ public class Composition extends BaseResource implements IResource {
 	 * Path: <b>Composition.identifier</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam IDENTIFIER = new TokenParam(SP_IDENTIFIER);
+	public static final TokenClientParam IDENTIFIER = new TokenClientParam(SP_IDENTIFIER);
 
 
 	@Child(name="identifier", type=IdentifierDt.class, order=0, min=0, max=1)	

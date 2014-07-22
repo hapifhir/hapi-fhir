@@ -57,9 +57,9 @@ import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.model.primitive.StringDt;
-import ca.uhn.fhir.rest.gclient.DateParam;
-import ca.uhn.fhir.rest.gclient.ReferenceParam;
-import ca.uhn.fhir.rest.gclient.StringParam;
+import ca.uhn.fhir.rest.gclient.DateClientParam;
+import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
+import ca.uhn.fhir.rest.gclient.StringClientParam;
 
 
 /**
@@ -104,7 +104,7 @@ public class SequencingAnalysis extends BaseResource implements IResource {
 	 * Path: <b>SequencingAnalysis.subject</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam SUBJECT = new ReferenceParam(SP_SUBJECT);
+	public static final ReferenceClientParam SUBJECT = new ReferenceClientParam(SP_SUBJECT);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies
@@ -131,7 +131,7 @@ public class SequencingAnalysis extends BaseResource implements IResource {
 	 * Path: <b>SequencingAnalysis.date</b><br/>
 	 * </p>
 	 */
-	public static final DateParam DATE = new DateParam(SP_DATE);
+	public static final DateClientParam DATE = new DateClientParam(SP_DATE);
 
 	/**
 	 * Search parameter constant for <b>genome</b>
@@ -152,7 +152,7 @@ public class SequencingAnalysis extends BaseResource implements IResource {
 	 * Path: <b>SequencingAnalysis.genome.name</b><br/>
 	 * </p>
 	 */
-	public static final StringParam GENOME = new StringParam(SP_GENOME);
+	public static final StringClientParam GENOME = new StringClientParam(SP_GENOME);
 
 
 	@Child(name="subject", order=0, min=0, max=1, type={

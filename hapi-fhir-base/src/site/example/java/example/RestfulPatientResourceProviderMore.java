@@ -1,6 +1,7 @@
 package example;
 
 import java.io.IOException;
+import java.lang.annotation.Documented;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -17,6 +18,7 @@ import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.Tag;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.TagListParam;
 import ca.uhn.fhir.model.dstu.composite.CodingDt;
 import ca.uhn.fhir.model.dstu.resource.Conformance;
@@ -150,11 +152,34 @@ return retVal;
 //END SNIPPET: reference
 
 
+//START SNIPPET: referenceChain
+@Search
+public List<Patient> findObservations(
+		@RequiredParam(name=Observation.SP_SUBJECT+'.'+Patient.SP_IDENTIFIER) TokenParam theProvider
+		) {
+
+  String system = theProvider.getSystem();
+  String identifier = theProvider.getValue();
+
+  // ...Do a search for all observations for the given subject...
+  
+  List<Patient> retVal=new ArrayList<Patient>(); // populate this
+  return retVal;
+
+}
+//END SNIPPET: referenceChain
+
+
 //START SNIPPET: read
 @Read()
 public Patient getResourceById(@IdParam IdDt theId) {
    Patient retVal = new Patient();
+   
    // ...populate...
+   retVal.addIdentifier().setSystem("urn:mrns").setValue("12345").setLabel("MRN 12345");
+   retVal.addName().addFamily("Smith").addGiven("Tester").addGiven("Q");
+   // ...etc...
+   
    return retVal;
 }
 //END SNIPPET: read
@@ -196,7 +221,15 @@ public List<Patient> getPatientHistory(@IdParam IdDt theId) {
 @Read(version=true)
 public Patient readOrVread(@IdParam IdDt theId) {
    Patient retVal = new Patient();
+
+   if (theId.hasVersionIdPart()) {
+      // this is a vread   
+   } else {
+      // this is a read
+   }
+
    // ...populate...
+   
    return retVal;
 }
 //END SNIPPET: vread
@@ -204,8 +237,6 @@ public Patient readOrVread(@IdParam IdDt theId) {
 //START SNIPPET: searchStringParam
 @Search()
 public List<Patient> searchByLastName(@RequiredParam(name=Patient.SP_FAMILY) StringParam theFamily) {
-   List<Patient> retVal = new ArrayList<Patient>();
-   
    String valueToMatch = theFamily.getValue();
    
    if (theFamily.isExact()) {
@@ -215,6 +246,28 @@ public List<Patient> searchByLastName(@RequiredParam(name=Patient.SP_FAMILY) Str
    }
    
    // ...populate...
+   Patient patient = new Patient();
+   patient.addIdentifier().setSystem("urn:mrns").setValue("12345").setLabel("MRN 12345");
+   patient.addName().addFamily("Smith").addGiven("Tester").addGiven("Q");
+   // ...etc...
+
+   /*
+    *  Every returned resource must have its logical ID set. If the server
+    *  supports versioning, that should be set too
+    */
+   String logicalId = "4325";
+   String versionId = "2"; // optional
+   patient.setId(new IdDt("Patient", logicalId, versionId));
+   
+   /*
+    * This is obviously a fairly contrived example since we are always
+    * just returning the same hardcoded patient, but in a real scenario
+    * you could return as many resources as you wanted, and they
+    * should actually match the given search criteria.
+    */
+   List<Patient> retVal = new ArrayList<Patient>();
+   retVal.add(patient);
+   
    return retVal;
 }
 //END SNIPPET: searchStringParam
@@ -252,6 +305,23 @@ public List<Patient> searchByNames( @RequiredParam(name=Patient.SP_FAMILY) Strin
    return retVal;
 }
 //END SNIPPET: searchOptionalParam
+
+//START SNIPPET: searchWithDocs
+@Description(shortDefinition="This search finds all patient resources matching a given name combination")
+@Search()
+public List<Patient> searchWithDocs( 
+          @Description(shortDefinition="This is the patient's last name - Supports partial matches")
+          @RequiredParam(name=Patient.SP_FAMILY) StringParam theFamilyName,
+
+          @Description(shortDefinition="This is the patient's given names")
+          @OptionalParam(name=Patient.SP_GIVEN)  StringParam theGivenName ) {
+	
+  List<Patient> retVal = new ArrayList<Patient>();
+  // ...populate...
+  return retVal;
+}
+//END SNIPPET: searchWithDocs
+
 
 //START SNIPPET: searchMultiple
 @Search()
@@ -498,10 +568,8 @@ public abstract MethodOutcome updateSomePatient(@IdParam IdDt theId, @ResourcePa
 @Validate
 public MethodOutcome validatePatient(@ResourceParam Patient thePatient) {
 
-  /* 
-   * Actually do our validation: The UnprocessableEntityException
-   * results in an HTTP 422, which is appropriate for business rule failure
-   */
+  // Actually do our validation: The UnprocessableEntityException
+  // results in an HTTP 422, which is appropriate for business rule failure
   if (thePatient.getIdentifierFirstRep().isEmpty()) {
     /* It is also possible to pass an OperationOutcome resource
      * to the UnprocessableEntityException if you want to return

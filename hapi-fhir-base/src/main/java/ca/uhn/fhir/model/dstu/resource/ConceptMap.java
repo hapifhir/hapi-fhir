@@ -63,10 +63,10 @@ import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
-import ca.uhn.fhir.rest.gclient.DateParam;
-import ca.uhn.fhir.rest.gclient.ReferenceParam;
-import ca.uhn.fhir.rest.gclient.StringParam;
-import ca.uhn.fhir.rest.gclient.TokenParam;
+import ca.uhn.fhir.rest.gclient.DateClientParam;
+import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
+import ca.uhn.fhir.rest.gclient.StringClientParam;
+import ca.uhn.fhir.rest.gclient.TokenClientParam;
 
 
 /**
@@ -111,7 +111,7 @@ public class ConceptMap extends BaseResource implements IResource {
 	 * Path: <b>ConceptMap.identifier</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam IDENTIFIER = new TokenParam(SP_IDENTIFIER);
+	public static final TokenClientParam IDENTIFIER = new TokenClientParam(SP_IDENTIFIER);
 
 	/**
 	 * Search parameter constant for <b>version</b>
@@ -132,7 +132,7 @@ public class ConceptMap extends BaseResource implements IResource {
 	 * Path: <b>ConceptMap.version</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam VERSION = new TokenParam(SP_VERSION);
+	public static final TokenClientParam VERSION = new TokenClientParam(SP_VERSION);
 
 	/**
 	 * Search parameter constant for <b>name</b>
@@ -153,7 +153,7 @@ public class ConceptMap extends BaseResource implements IResource {
 	 * Path: <b>ConceptMap.name</b><br/>
 	 * </p>
 	 */
-	public static final StringParam NAME = new StringParam(SP_NAME);
+	public static final StringClientParam NAME = new StringClientParam(SP_NAME);
 
 	/**
 	 * Search parameter constant for <b>publisher</b>
@@ -174,7 +174,7 @@ public class ConceptMap extends BaseResource implements IResource {
 	 * Path: <b>ConceptMap.publisher</b><br/>
 	 * </p>
 	 */
-	public static final StringParam PUBLISHER = new StringParam(SP_PUBLISHER);
+	public static final StringClientParam PUBLISHER = new StringClientParam(SP_PUBLISHER);
 
 	/**
 	 * Search parameter constant for <b>description</b>
@@ -195,7 +195,7 @@ public class ConceptMap extends BaseResource implements IResource {
 	 * Path: <b>ConceptMap.description</b><br/>
 	 * </p>
 	 */
-	public static final StringParam DESCRIPTION = new StringParam(SP_DESCRIPTION);
+	public static final StringClientParam DESCRIPTION = new StringClientParam(SP_DESCRIPTION);
 
 	/**
 	 * Search parameter constant for <b>status</b>
@@ -216,7 +216,7 @@ public class ConceptMap extends BaseResource implements IResource {
 	 * Path: <b>ConceptMap.status</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam STATUS = new TokenParam(SP_STATUS);
+	public static final TokenClientParam STATUS = new TokenClientParam(SP_STATUS);
 
 	/**
 	 * Search parameter constant for <b>date</b>
@@ -237,7 +237,7 @@ public class ConceptMap extends BaseResource implements IResource {
 	 * Path: <b>ConceptMap.date</b><br/>
 	 * </p>
 	 */
-	public static final DateParam DATE = new DateParam(SP_DATE);
+	public static final DateClientParam DATE = new DateClientParam(SP_DATE);
 
 	/**
 	 * Search parameter constant for <b>source</b>
@@ -258,7 +258,7 @@ public class ConceptMap extends BaseResource implements IResource {
 	 * Path: <b>ConceptMap.source</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam SOURCE = new ReferenceParam(SP_SOURCE);
+	public static final ReferenceClientParam SOURCE = new ReferenceClientParam(SP_SOURCE);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies
@@ -285,7 +285,7 @@ public class ConceptMap extends BaseResource implements IResource {
 	 * Path: <b>ConceptMap.target</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam TARGET = new ReferenceParam(SP_TARGET);
+	public static final ReferenceClientParam TARGET = new ReferenceClientParam(SP_TARGET);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies
@@ -312,7 +312,7 @@ public class ConceptMap extends BaseResource implements IResource {
 	 * Path: <b>ConceptMap.concept.map.system</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam SYSTEM = new TokenParam(SP_SYSTEM);
+	public static final TokenClientParam SYSTEM = new TokenClientParam(SP_SYSTEM);
 
 	/**
 	 * Search parameter constant for <b>dependson</b>
@@ -333,7 +333,7 @@ public class ConceptMap extends BaseResource implements IResource {
 	 * Path: <b>ConceptMap.concept.dependsOn.concept</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam DEPENDSON = new TokenParam(SP_DEPENDSON);
+	public static final TokenClientParam DEPENDSON = new TokenClientParam(SP_DEPENDSON);
 
 	/**
 	 * Search parameter constant for <b>product</b>
@@ -354,7 +354,7 @@ public class ConceptMap extends BaseResource implements IResource {
 	 * Path: <b>ConceptMap.concept.map.product.concept</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam PRODUCT = new TokenParam(SP_PRODUCT);
+	public static final TokenClientParam PRODUCT = new TokenClientParam(SP_PRODUCT);
 
 
 	@Child(name="identifier", type=StringDt.class, order=0, min=0, max=1)	

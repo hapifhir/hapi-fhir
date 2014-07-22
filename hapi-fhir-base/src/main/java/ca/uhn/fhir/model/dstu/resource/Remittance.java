@@ -54,7 +54,7 @@ import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
 import ca.uhn.fhir.model.primitive.DecimalDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
-import ca.uhn.fhir.rest.gclient.TokenParam;
+import ca.uhn.fhir.rest.gclient.TokenClientParam;
 
 
 /**
@@ -99,7 +99,7 @@ public class Remittance extends BaseResource implements IResource {
 	 * Path: <b>Remittance.identifier</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam IDENTIFIER = new TokenParam(SP_IDENTIFIER);
+	public static final TokenClientParam IDENTIFIER = new TokenClientParam(SP_IDENTIFIER);
 
 	/**
 	 * Search parameter constant for <b>service</b>
@@ -120,7 +120,7 @@ public class Remittance extends BaseResource implements IResource {
 	 * Path: <b>Remittance.service.code</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam SERVICE = new TokenParam(SP_SERVICE);
+	public static final TokenClientParam SERVICE = new TokenClientParam(SP_SERVICE);
 
 
 	@Child(name="identifier", type=IdentifierDt.class, order=0, min=0, max=1)	

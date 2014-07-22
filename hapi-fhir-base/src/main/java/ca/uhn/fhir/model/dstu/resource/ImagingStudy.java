@@ -66,10 +66,10 @@ import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.model.primitive.OidDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
-import ca.uhn.fhir.rest.gclient.DateParam;
-import ca.uhn.fhir.rest.gclient.NumberParam;
-import ca.uhn.fhir.rest.gclient.ReferenceParam;
-import ca.uhn.fhir.rest.gclient.TokenParam;
+import ca.uhn.fhir.rest.gclient.DateClientParam;
+import ca.uhn.fhir.rest.gclient.NumberClientParam;
+import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
+import ca.uhn.fhir.rest.gclient.TokenClientParam;
 
 
 /**
@@ -114,7 +114,7 @@ public class ImagingStudy extends BaseResource implements IResource {
 	 * Path: <b>ImagingStudy.subject</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam SUBJECT = new ReferenceParam(SP_SUBJECT);
+	public static final ReferenceClientParam SUBJECT = new ReferenceClientParam(SP_SUBJECT);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies
@@ -141,7 +141,7 @@ public class ImagingStudy extends BaseResource implements IResource {
 	 * Path: <b>ImagingStudy.dateTime</b><br/>
 	 * </p>
 	 */
-	public static final DateParam DATE = new DateParam(SP_DATE);
+	public static final DateClientParam DATE = new DateClientParam(SP_DATE);
 
 	/**
 	 * Search parameter constant for <b>accession</b>
@@ -162,7 +162,7 @@ public class ImagingStudy extends BaseResource implements IResource {
 	 * Path: <b>ImagingStudy.accessionNo</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam ACCESSION = new TokenParam(SP_ACCESSION);
+	public static final TokenClientParam ACCESSION = new TokenClientParam(SP_ACCESSION);
 
 	/**
 	 * Search parameter constant for <b>study</b>
@@ -183,7 +183,7 @@ public class ImagingStudy extends BaseResource implements IResource {
 	 * Path: <b>ImagingStudy.uid</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam STUDY = new TokenParam(SP_STUDY);
+	public static final TokenClientParam STUDY = new TokenClientParam(SP_STUDY);
 
 	/**
 	 * Search parameter constant for <b>series</b>
@@ -204,7 +204,7 @@ public class ImagingStudy extends BaseResource implements IResource {
 	 * Path: <b>ImagingStudy.series.uid</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam SERIES = new TokenParam(SP_SERIES);
+	public static final TokenClientParam SERIES = new TokenClientParam(SP_SERIES);
 
 	/**
 	 * Search parameter constant for <b>modality</b>
@@ -225,7 +225,7 @@ public class ImagingStudy extends BaseResource implements IResource {
 	 * Path: <b>ImagingStudy.series.modality</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam MODALITY = new TokenParam(SP_MODALITY);
+	public static final TokenClientParam MODALITY = new TokenClientParam(SP_MODALITY);
 
 	/**
 	 * Search parameter constant for <b>size</b>
@@ -246,7 +246,7 @@ public class ImagingStudy extends BaseResource implements IResource {
 	 * Path: <b></b><br/>
 	 * </p>
 	 */
-	public static final NumberParam SIZE = new NumberParam(SP_SIZE);
+	public static final NumberClientParam SIZE = new NumberClientParam(SP_SIZE);
 
 	/**
 	 * Search parameter constant for <b>bodysite</b>
@@ -267,7 +267,7 @@ public class ImagingStudy extends BaseResource implements IResource {
 	 * Path: <b>ImagingStudy.series.bodySite</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam BODYSITE = new TokenParam(SP_BODYSITE);
+	public static final TokenClientParam BODYSITE = new TokenClientParam(SP_BODYSITE);
 
 	/**
 	 * Search parameter constant for <b>uid</b>
@@ -288,7 +288,7 @@ public class ImagingStudy extends BaseResource implements IResource {
 	 * Path: <b>ImagingStudy.series.instance.uid</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam UID = new TokenParam(SP_UID);
+	public static final TokenClientParam UID = new TokenClientParam(SP_UID);
 
 	/**
 	 * Search parameter constant for <b>dicom-class</b>
@@ -309,7 +309,7 @@ public class ImagingStudy extends BaseResource implements IResource {
 	 * Path: <b>ImagingStudy.series.instance.sopclass</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam DICOM_CLASS = new TokenParam(SP_DICOM_CLASS);
+	public static final TokenClientParam DICOM_CLASS = new TokenClientParam(SP_DICOM_CLASS);
 
 
 	@Child(name="dateTime", type=DateTimeDt.class, order=0, min=0, max=1)	

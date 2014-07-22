@@ -59,8 +59,8 @@ import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.model.primitive.DecimalDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.model.primitive.StringDt;
-import ca.uhn.fhir.rest.gclient.ReferenceParam;
-import ca.uhn.fhir.rest.gclient.StringParam;
+import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
+import ca.uhn.fhir.rest.gclient.StringClientParam;
 
 
 /**
@@ -105,7 +105,7 @@ public class Microarray extends BaseResource implements IResource {
 	 * Path: <b>Microarray.subject.patient</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam PATIENT = new ReferenceParam(SP_PATIENT);
+	public static final ReferenceClientParam PATIENT = new ReferenceClientParam(SP_PATIENT);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies
@@ -132,7 +132,7 @@ public class Microarray extends BaseResource implements IResource {
 	 * Path: <b>Microarray.sample.gene.identity</b><br/>
 	 * </p>
 	 */
-	public static final StringParam GENE = new StringParam(SP_GENE);
+	public static final StringClientParam GENE = new StringClientParam(SP_GENE);
 
 	/**
 	 * Search parameter constant for <b>coordinate</b>
@@ -153,7 +153,7 @@ public class Microarray extends BaseResource implements IResource {
 	 * Path: <b>Microarray.sample.gene.coordinate</b><br/>
 	 * </p>
 	 */
-	public static final StringParam COORDINATE = new StringParam(SP_COORDINATE);
+	public static final StringClientParam COORDINATE = new StringClientParam(SP_COORDINATE);
 
 
 	@Child(name="subject", order=0, min=0, max=Child.MAX_UNLIMITED)	

@@ -64,8 +64,8 @@ import ca.uhn.fhir.model.dstu.valueset.SupplyTypeEnum;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.BoundCodeableConceptDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
-import ca.uhn.fhir.rest.gclient.ReferenceParam;
-import ca.uhn.fhir.rest.gclient.TokenParam;
+import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
+import ca.uhn.fhir.rest.gclient.TokenClientParam;
 
 
 /**
@@ -110,7 +110,7 @@ public class Supply extends BaseResource implements IResource {
 	 * Path: <b>Supply.kind</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam KIND = new TokenParam(SP_KIND);
+	public static final TokenClientParam KIND = new TokenClientParam(SP_KIND);
 
 	/**
 	 * Search parameter constant for <b>identifier</b>
@@ -131,7 +131,7 @@ public class Supply extends BaseResource implements IResource {
 	 * Path: <b>Supply.identifier</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam IDENTIFIER = new TokenParam(SP_IDENTIFIER);
+	public static final TokenClientParam IDENTIFIER = new TokenClientParam(SP_IDENTIFIER);
 
 	/**
 	 * Search parameter constant for <b>status</b>
@@ -152,7 +152,7 @@ public class Supply extends BaseResource implements IResource {
 	 * Path: <b>Supply.status</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam STATUS = new TokenParam(SP_STATUS);
+	public static final TokenClientParam STATUS = new TokenClientParam(SP_STATUS);
 
 	/**
 	 * Search parameter constant for <b>patient</b>
@@ -173,7 +173,7 @@ public class Supply extends BaseResource implements IResource {
 	 * Path: <b>Supply.patient</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam PATIENT = new ReferenceParam(SP_PATIENT);
+	public static final ReferenceClientParam PATIENT = new ReferenceClientParam(SP_PATIENT);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies
@@ -200,7 +200,7 @@ public class Supply extends BaseResource implements IResource {
 	 * Path: <b>Supply.dispense.supplier</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam SUPPLIER = new ReferenceParam(SP_SUPPLIER);
+	public static final ReferenceClientParam SUPPLIER = new ReferenceClientParam(SP_SUPPLIER);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies
@@ -227,7 +227,7 @@ public class Supply extends BaseResource implements IResource {
 	 * Path: <b>Supply.dispense.identifier</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam DISPENSEID = new TokenParam(SP_DISPENSEID);
+	public static final TokenClientParam DISPENSEID = new TokenClientParam(SP_DISPENSEID);
 
 	/**
 	 * Search parameter constant for <b>dispensestatus</b>
@@ -248,7 +248,7 @@ public class Supply extends BaseResource implements IResource {
 	 * Path: <b>Supply.dispense.status</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam DISPENSESTATUS = new TokenParam(SP_DISPENSESTATUS);
+	public static final TokenClientParam DISPENSESTATUS = new TokenClientParam(SP_DISPENSESTATUS);
 
 
 	@Child(name="kind", type=CodeableConceptDt.class, order=0, min=0, max=1)	

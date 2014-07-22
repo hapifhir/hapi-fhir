@@ -71,9 +71,9 @@ import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.IdrefDt;
 import ca.uhn.fhir.model.primitive.StringDt;
-import ca.uhn.fhir.rest.gclient.DateParam;
-import ca.uhn.fhir.rest.gclient.ReferenceParam;
-import ca.uhn.fhir.rest.gclient.TokenParam;
+import ca.uhn.fhir.rest.gclient.DateClientParam;
+import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
+import ca.uhn.fhir.rest.gclient.TokenClientParam;
 
 
 /**
@@ -118,7 +118,7 @@ public class CarePlan extends BaseResource implements IResource {
 	 * Path: <b>CarePlan.patient</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam PATIENT = new ReferenceParam(SP_PATIENT);
+	public static final ReferenceClientParam PATIENT = new ReferenceClientParam(SP_PATIENT);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies
@@ -145,7 +145,7 @@ public class CarePlan extends BaseResource implements IResource {
 	 * Path: <b>CarePlan.concern</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam CONDITION = new ReferenceParam(SP_CONDITION);
+	public static final ReferenceClientParam CONDITION = new ReferenceClientParam(SP_CONDITION);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies
@@ -172,7 +172,7 @@ public class CarePlan extends BaseResource implements IResource {
 	 * Path: <b>CarePlan.period</b><br/>
 	 * </p>
 	 */
-	public static final DateParam DATE = new DateParam(SP_DATE);
+	public static final DateClientParam DATE = new DateClientParam(SP_DATE);
 
 	/**
 	 * Search parameter constant for <b>participant</b>
@@ -193,7 +193,7 @@ public class CarePlan extends BaseResource implements IResource {
 	 * Path: <b>CarePlan.participant.member</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam PARTICIPANT = new ReferenceParam(SP_PARTICIPANT);
+	public static final ReferenceClientParam PARTICIPANT = new ReferenceClientParam(SP_PARTICIPANT);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies
@@ -220,7 +220,7 @@ public class CarePlan extends BaseResource implements IResource {
 	 * Path: <b>CarePlan.activity.simple.code</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam ACTIVITYCODE = new TokenParam(SP_ACTIVITYCODE);
+	public static final TokenClientParam ACTIVITYCODE = new TokenClientParam(SP_ACTIVITYCODE);
 
 	/**
 	 * Search parameter constant for <b>activitydate</b>
@@ -241,7 +241,7 @@ public class CarePlan extends BaseResource implements IResource {
 	 * Path: <b>CarePlan.activity.simple.timing[x]</b><br/>
 	 * </p>
 	 */
-	public static final DateParam ACTIVITYDATE = new DateParam(SP_ACTIVITYDATE);
+	public static final DateClientParam ACTIVITYDATE = new DateClientParam(SP_ACTIVITYDATE);
 
 	/**
 	 * Search parameter constant for <b>activitydetail</b>
@@ -262,7 +262,7 @@ public class CarePlan extends BaseResource implements IResource {
 	 * Path: <b>CarePlan.activity.detail</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam ACTIVITYDETAIL = new ReferenceParam(SP_ACTIVITYDETAIL);
+	public static final ReferenceClientParam ACTIVITYDETAIL = new ReferenceClientParam(SP_ACTIVITYDETAIL);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies

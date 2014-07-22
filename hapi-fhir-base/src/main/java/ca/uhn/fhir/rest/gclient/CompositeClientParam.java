@@ -20,16 +20,24 @@ package ca.uhn.fhir.rest.gclient;
  * #L%
  */
 
-
 /**
- * @deprecated Use {@link NumberClientParam} instead. That class is identical to this one but was renamed to reduct
- *             confusing duplicate names in the API. This class will be removed in a future release.
+ * Composite params are not yet supported - This is a placeholder. Help welcome!
+ *
+ * TODO: implement
  */
-public class NumberParam extends NumberClientParam {
+public class CompositeClientParam {
 
-	public NumberParam(String theParamName) {
-		super(theParamName);
+	public CompositeClientParam(String theName) {
+		// TODO Auto-generated constructor stub
 	}
 
-
+	/**
+	 * Composite params are not yet supported - This is a placeholder. Help welcome!
+	 *
+	 * TODO: implement
+	 */
+	public void notYetSupported() {
+		//nothig
+	}
+	
 }

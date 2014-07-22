@@ -71,10 +71,10 @@ import ca.uhn.fhir.model.primitive.BoundCodeableConceptDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.StringDt;
-import ca.uhn.fhir.rest.gclient.DateParam;
-import ca.uhn.fhir.rest.gclient.ReferenceParam;
-import ca.uhn.fhir.rest.gclient.StringParam;
-import ca.uhn.fhir.rest.gclient.TokenParam;
+import ca.uhn.fhir.rest.gclient.DateClientParam;
+import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
+import ca.uhn.fhir.rest.gclient.StringClientParam;
+import ca.uhn.fhir.rest.gclient.TokenClientParam;
 
 
 /**
@@ -119,7 +119,7 @@ public class SecurityEvent extends BaseResource implements IResource {
 	 * Path: <b>SecurityEvent.event.type</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam TYPE = new TokenParam(SP_TYPE);
+	public static final TokenClientParam TYPE = new TokenClientParam(SP_TYPE);
 
 	/**
 	 * Search parameter constant for <b>action</b>
@@ -140,7 +140,7 @@ public class SecurityEvent extends BaseResource implements IResource {
 	 * Path: <b>SecurityEvent.event.action</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam ACTION = new TokenParam(SP_ACTION);
+	public static final TokenClientParam ACTION = new TokenClientParam(SP_ACTION);
 
 	/**
 	 * Search parameter constant for <b>date</b>
@@ -161,7 +161,7 @@ public class SecurityEvent extends BaseResource implements IResource {
 	 * Path: <b>SecurityEvent.event.dateTime</b><br/>
 	 * </p>
 	 */
-	public static final DateParam DATE = new DateParam(SP_DATE);
+	public static final DateClientParam DATE = new DateClientParam(SP_DATE);
 
 	/**
 	 * Search parameter constant for <b>subtype</b>
@@ -182,7 +182,7 @@ public class SecurityEvent extends BaseResource implements IResource {
 	 * Path: <b>SecurityEvent.event.subtype</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam SUBTYPE = new TokenParam(SP_SUBTYPE);
+	public static final TokenClientParam SUBTYPE = new TokenClientParam(SP_SUBTYPE);
 
 	/**
 	 * Search parameter constant for <b>user</b>
@@ -203,7 +203,7 @@ public class SecurityEvent extends BaseResource implements IResource {
 	 * Path: <b>SecurityEvent.participant.userId</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam USER = new TokenParam(SP_USER);
+	public static final TokenClientParam USER = new TokenClientParam(SP_USER);
 
 	/**
 	 * Search parameter constant for <b>name</b>
@@ -224,7 +224,7 @@ public class SecurityEvent extends BaseResource implements IResource {
 	 * Path: <b>SecurityEvent.participant.name</b><br/>
 	 * </p>
 	 */
-	public static final StringParam NAME = new StringParam(SP_NAME);
+	public static final StringClientParam NAME = new StringClientParam(SP_NAME);
 
 	/**
 	 * Search parameter constant for <b>address</b>
@@ -245,7 +245,7 @@ public class SecurityEvent extends BaseResource implements IResource {
 	 * Path: <b>SecurityEvent.participant.network.identifier</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam ADDRESS = new TokenParam(SP_ADDRESS);
+	public static final TokenClientParam ADDRESS = new TokenClientParam(SP_ADDRESS);
 
 	/**
 	 * Search parameter constant for <b>source</b>
@@ -266,7 +266,7 @@ public class SecurityEvent extends BaseResource implements IResource {
 	 * Path: <b>SecurityEvent.source.identifier</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam SOURCE = new TokenParam(SP_SOURCE);
+	public static final TokenClientParam SOURCE = new TokenClientParam(SP_SOURCE);
 
 	/**
 	 * Search parameter constant for <b>site</b>
@@ -287,7 +287,7 @@ public class SecurityEvent extends BaseResource implements IResource {
 	 * Path: <b>SecurityEvent.source.site</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam SITE = new TokenParam(SP_SITE);
+	public static final TokenClientParam SITE = new TokenClientParam(SP_SITE);
 
 	/**
 	 * Search parameter constant for <b>object-type</b>
@@ -308,7 +308,7 @@ public class SecurityEvent extends BaseResource implements IResource {
 	 * Path: <b>SecurityEvent.object.type</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam OBJECT_TYPE = new TokenParam(SP_OBJECT_TYPE);
+	public static final TokenClientParam OBJECT_TYPE = new TokenClientParam(SP_OBJECT_TYPE);
 
 	/**
 	 * Search parameter constant for <b>identity</b>
@@ -329,7 +329,7 @@ public class SecurityEvent extends BaseResource implements IResource {
 	 * Path: <b>SecurityEvent.object.identifier</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam IDENTITY = new TokenParam(SP_IDENTITY);
+	public static final TokenClientParam IDENTITY = new TokenClientParam(SP_IDENTITY);
 
 	/**
 	 * Search parameter constant for <b>reference</b>
@@ -350,7 +350,7 @@ public class SecurityEvent extends BaseResource implements IResource {
 	 * Path: <b>SecurityEvent.object.reference</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam REFERENCE = new ReferenceParam(SP_REFERENCE);
+	public static final ReferenceClientParam REFERENCE = new ReferenceClientParam(SP_REFERENCE);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies
@@ -377,7 +377,7 @@ public class SecurityEvent extends BaseResource implements IResource {
 	 * Path: <b>SecurityEvent.object.name</b><br/>
 	 * </p>
 	 */
-	public static final StringParam DESC = new StringParam(SP_DESC);
+	public static final StringClientParam DESC = new StringClientParam(SP_DESC);
 
 	/**
 	 * Search parameter constant for <b>patientid</b>
@@ -398,7 +398,7 @@ public class SecurityEvent extends BaseResource implements IResource {
 	 * Path: <b></b><br/>
 	 * </p>
 	 */
-	public static final TokenParam PATIENTID = new TokenParam(SP_PATIENTID);
+	public static final TokenClientParam PATIENTID = new TokenClientParam(SP_PATIENTID);
 
 	/**
 	 * Search parameter constant for <b>altid</b>
@@ -419,7 +419,7 @@ public class SecurityEvent extends BaseResource implements IResource {
 	 * Path: <b>SecurityEvent.participant.altId</b><br/>
 	 * </p>
 	 */
-	public static final TokenParam ALTID = new TokenParam(SP_ALTID);
+	public static final TokenClientParam ALTID = new TokenClientParam(SP_ALTID);
 
 
 	@Child(name="event", order=0, min=1, max=1)	

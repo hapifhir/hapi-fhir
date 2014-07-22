@@ -8,6 +8,24 @@
 	<body>
 		<release version="0.5" date="TBD">
 			<action type="add">
+<<<<<<< HEAD
+=======
+				RESTful search method parameters have been overhauled to reduce confusing duplicate names and
+				having multiple ways of accomplishing the same thing. This means that a number of existing classes
+				have been deprocated in favour of new naming schemes.
+				<![CDATA[<br/><br/>]]>
+				All annotation-based clients and all server search method parameters are now named
+				(type)Param, for example: StringParam, TokenParam, etc.
+				<![CDATA[<br/><br/>]]>
+				All generic/fluent client method parameters are now named
+				(type)ClientParam, for example: StringClientParam, TokenClientParam, etc.
+				<![CDATA[<br/><br/>]]>
+				All renamed classes have been retained and deprocated, so this change should not cause any issues
+				for existing applications but those applications should be refactored to use the 
+				new parameters when possible.
+			</action>
+			<action type="add">
+>>>>>>> af3c35cbc07df69c760e200b4a80f4bcc3d183e9
 				Allow server methods to return wildcard generic types (e.g. List&lt;? extends IResource&gt;)
 			</action>
 			<action type="add">

@@ -20,73 +20,16 @@ package ca.uhn.fhir.rest.gclient;
  * #L%
  */
 
-import ca.uhn.fhir.model.primitive.StringDt;
-import ca.uhn.fhir.rest.server.Constants;
 
 /**
- * 
- * @author james
- *
+ * @deprecated Use {@link StringClientParam} instead. That class is identical to this one but was renamed to reduct
+ *             confusing duplicate names in the API. This class will be removed in a future release.
  */
-public class StringParam implements IParam {
-
-	private final String myParamName;
+public class StringParam extends StringClientParam {
 
 	public StringParam(String theParamName) {
-		myParamName = theParamName;
+		super(theParamName);
 	}
 
-	@Override
-	public String getParamName() {
-		return myParamName;
-	}
-
-
-	/**
-	 * The string matches the given value (servers will often, but are not required to) implement this as a left match,
-	 * meaning that a value of "smi" would match "smi" and "smith".
-	 */
-	public IStringMatch matches() {
-		return new StringMatches();
-	}
-
-	/**
-	 * The string matches exactly the given value
-	 */
-	public IStringMatch matchesExactly() {
-		return new StringExactly();
-	}
-
-	public interface IStringMatch {
-
-		ICriterion value(String theValue);
-
-		ICriterion value(StringDt theValue);
-
-	}
-
-	private class StringExactly implements IStringMatch {
-		@Override
-		public ICriterion value(String theValue) {
-			return new StringCriterion(getParamName() + Constants.PARAMQUALIFIER_STRING_EXACT, theValue);
-		}
-
-		@Override
-		public ICriterion value(StringDt theValue) {
-			return new StringCriterion(getParamName() + Constants.PARAMQUALIFIER_STRING_EXACT, theValue.getValue());
-		}
-	}
-
-	private class StringMatches implements IStringMatch {
-		@Override
-		public ICriterion value(String theValue) {
-			return new StringCriterion(getParamName(), theValue);
-		}
-
-		@Override
-		public ICriterion value(StringDt theValue) {
-			return new StringCriterion(getParamName(), theValue.getValue());
-		}
-	}
 
 }

@@ -57,8 +57,8 @@ import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.model.primitive.StringDt;
-import ca.uhn.fhir.rest.gclient.DateParam;
-import ca.uhn.fhir.rest.gclient.ReferenceParam;
+import ca.uhn.fhir.rest.gclient.DateClientParam;
+import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
 
 
 /**
@@ -103,7 +103,7 @@ public class GeneticAnalysis extends BaseResource implements IResource {
 	 * Path: <b>GeneticAnalysis.subject</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam SUBJECT = new ReferenceParam(SP_SUBJECT);
+	public static final ReferenceClientParam SUBJECT = new ReferenceClientParam(SP_SUBJECT);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies
@@ -130,7 +130,7 @@ public class GeneticAnalysis extends BaseResource implements IResource {
 	 * Path: <b>GeneticAnalysis.author</b><br/>
 	 * </p>
 	 */
-	public static final ReferenceParam AUTHOR = new ReferenceParam(SP_AUTHOR);
+	public static final ReferenceClientParam AUTHOR = new ReferenceClientParam(SP_AUTHOR);
 
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies
@@ -157,7 +157,7 @@ public class GeneticAnalysis extends BaseResource implements IResource {
 	 * Path: <b>GeneticAnalysis.date</b><br/>
 	 * </p>
 	 */
-	public static final DateParam DATE = new DateParam(SP_DATE);
+	public static final DateClientParam DATE = new DateClientParam(SP_DATE);
 
 
 	@Child(name="subject", order=0, min=0, max=1, type={
