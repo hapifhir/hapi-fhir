@@ -75,4 +75,12 @@ public interface IRestfulClientFactory {
 
 	void setConnectionRequestTimeout(int theConnectionRequestTimeout);
 
+	/**
+	 * Sets the HTTP proxy to use for outgoing connections
+	 * 
+	 * @param theHost The host (or null to disable proxying, as is the default)
+	 * @param thePort The port (or null to disable proxying, as is the default)
+	 */
+	void setProxy(String theHost, Integer thePort);
+
 }

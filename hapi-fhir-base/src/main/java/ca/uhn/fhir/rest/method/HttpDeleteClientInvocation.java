@@ -23,10 +23,10 @@ package ca.uhn.fhir.rest.method;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpRequestBase;
 
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 
@@ -34,9 +34,9 @@ public class HttpDeleteClientInvocation extends BaseHttpClientInvocation {
 
 	private String myUrlPath;
 
-	public HttpDeleteClientInvocation(String... theUrlFragments) {
+	public HttpDeleteClientInvocation(IdDt theId) {
 		super();
-		myUrlPath = StringUtils.join(theUrlFragments, '/');
+		myUrlPath = theId.toUnqualifiedVersionless().getValue();
 	}
 
 	@Override

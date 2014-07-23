@@ -106,6 +106,27 @@
 					<param name="file"
 						value="src/site/example/java/example/GenericClientExample.java" />
 				</macro>
+				<p>
+					The fluent search also has methods for sorting, limiting, specifying
+					JSON encoding, etc.
+				</p>
+				<macro name="snippet">
+					<param name="id" value="searchAdv" />
+					<param name="file"
+						value="src/site/example/java/example/GenericClientExample.java" />
+				</macro>
+			</subsection>			
+
+			<subsection name="Instance - Delete">
+				<p>
+					The following example shows how to perform a delete
+					operation using the generic client:
+				</p>
+				<macro name="snippet">
+					<param name="id" value="delete" />
+					<param name="file"
+						value="src/site/example/java/example/GenericClientExample.java" />
+				</macro>
 			</subsection>			
 
 			<subsection name="Server - Conformance">
@@ -289,9 +310,9 @@
 			</p>
 			
 			<p>
-				The underlying client configuration is provided by setting an
-				<a href="./apidocs/ca/uhn/fhir/rest/client/IRestfulClientFactory.html#setHttpClient(org.apache.http.client.HttpClient)">HttpClient</a>
-				on the RestfulClientFactory. 
+				The underlying client configuration is provided by accessing the
+				<a href="./apidocs/ca/uhn/fhir/rest/client/IRestfulClientFactory.html">IRestfulClientFactory</a>
+				class from the FhirContext.
 			</p>
 
 			<subsection name="Interceptors">
@@ -336,6 +357,20 @@
 					<param name="file" value="src/site/example/java/example/ClientExamples.java" />
 				</macro>
 
+			</subsection>
+
+			<subsection name="Configuring an HTTP Proxy">
+			
+				<p>
+					An HTTP proxy may be configured directly on the 
+					restful client factory, as shown below.
+				</p>
+				
+				<macro name="snippet">
+					<param name="id" value="logging" />
+					<param name="file" value="src/site/example/java/example/ClientExamples.java" />
+				</macro>
+			
 			</subsection>
 
 		</section>

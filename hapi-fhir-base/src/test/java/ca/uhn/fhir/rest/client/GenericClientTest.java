@@ -32,6 +32,7 @@ import ca.uhn.fhir.model.api.Tag;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.dstu.resource.Encounter;
 import ca.uhn.fhir.model.dstu.resource.Observation;
+import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
 import ca.uhn.fhir.model.dstu.resource.Organization;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -133,6 +134,37 @@ public class GenericClientTest {
 		client.create().resource(resourceText).withId("123").execute();
 		assertEquals("http://example.com/fhir/Patient/123", capt.getAllValues().get(2).getURI().toString());
 		assertEquals(resourceText, IOUtils.toString(((HttpPost)capt.getAllValues().get(2)).getEntity().getContent()));
+		
+	}
+	
+	
+	@Test
+	public void testDelete() throws Exception {
+		OperationOutcome oo = new OperationOutcome();
+		oo.addIssue().addLocation().setValue("testDelete01");
+		String ooStr = myCtx.newXmlParser().encodeResourceToString(oo);
+		
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 201, "OK"));
+		when(myHttpResponse.getAllHeaders()).thenReturn(new Header[] { new BasicHeader(Constants.HEADER_LOCATION, "/Patient/44/_history/22") });
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(ooStr), Charset.forName("UTF-8")));
+
+		IGenericClient client = myCtx.newRestfulGenericClient("http://example.com/fhir");
+
+		OperationOutcome outcome = client.delete().resourceById("Patient", "123").execute();
+		
+		assertEquals("http://example.com/fhir/Patient/123", capt.getValue().getURI().toString());
+		assertEquals("DELETE", capt.getValue().getMethod());
+		assertEquals("testDelete01",outcome.getIssueFirstRep().getLocationFirstRep().getValue());
+		
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader("LKJHLKJGLKJKLL"), Charset.forName("UTF-8")));
+		outcome = client.delete().resourceById(new IdDt("Location", "123","456")).prettyPrint().encodedJson().execute();
+
+		assertEquals("http://example.com/fhir/Location/123?_format=json&_pretty=true", capt.getAllValues().get(1).getURI().toString());
+		assertEquals("DELETE", capt.getValue().getMethod());
+		assertEquals(null,outcome);
 		
 	}
 
@@ -420,7 +452,7 @@ public class GenericClientTest {
 		assertNotNull(ct);
 		assertEquals(Constants.CT_FHIR_JSON + "; charset=UTF-8", ct.getValue());
 		
-		assertEquals("http://example.com/fhir", value.getURI().toString());
+		assertEquals("http://example.com/fhir?_format=json", value.getURI().toString());
 		assertThat(IOUtils.toString(value.getEntity().getContent()), StringContains.containsString("\"resourceType\""));
 		assertEquals(bundle.getEntries().get(0).getId(), response.getEntries().get(0).getId());
 	}

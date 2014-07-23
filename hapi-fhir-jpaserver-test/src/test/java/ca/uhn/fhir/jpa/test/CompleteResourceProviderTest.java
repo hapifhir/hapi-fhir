@@ -1,10 +1,7 @@
 package ca.uhn.fhir.jpa.test;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 import java.util.Date;
 
@@ -22,6 +19,7 @@ import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.provider.JpaSystemProvider;
 import ca.uhn.fhir.jpa.testutil.RandomServerPortProvider;
 import ca.uhn.fhir.model.api.Bundle;
+import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.composite.PeriodDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.resource.Encounter;
@@ -32,10 +30,13 @@ import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.dstu.resource.Questionnaire;
 import ca.uhn.fhir.model.dstu.valueset.EncounterClassEnum;
 import ca.uhn.fhir.model.dstu.valueset.EncounterStateEnum;
+import ca.uhn.fhir.model.dstu.valueset.NarrativeStatusEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
+import ca.uhn.fhir.rest.gclient.StringClientParam;
+import ca.uhn.fhir.rest.gclient.TokenClientParam;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
@@ -82,7 +83,9 @@ public class CompleteResourceProviderTest {
 	private static IFhirResourceDao<Questionnaire> questionnaireDao;
 
 	@Test
-	public void testCreateWithId() {
+	public void testCreateWithClientSuppliedId() {
+		deleteToken("Patient", Patient.SP_IDENTIFIER, "urn:system", "testCreateWithId01");
+
 		Patient p1 = new Patient();
 		p1.addIdentifier().setSystem("urn:system").setValue("testCreateWithId01");
 		IdDt p1Id = ourClient.create().resource(p1).withId("testCreateWithId").execute().getId();
@@ -103,71 +106,37 @@ public class CompleteResourceProviderTest {
 			// good
 		}
 
-		Bundle history = ourClient.history(null, (String)null, null, null);
+		Bundle history = ourClient.history(null, (String) null, null, null);
 		assertEquals(p1Id.getIdPart(), history.getEntries().get(0).getId().getIdPart());
 		assertNotNull(history.getEntries().get(0).getResource());
 	}
 
 	@Test
-	public void testInsertBadReference() {
+	public void testTryToCreateResourceWithReferenceThatDoesntExist() {
+		deleteToken("Patient", Patient.SP_IDENTIFIER, "urn:system", "testTryToCreateResourceWithReferenceThatDoesntExist01");
+
 		Patient p1 = new Patient();
-		p1.addIdentifier().setSystem("urn:system").setValue("testSearchByResourceChain01");
-		p1.addName().addFamily("testSearchByResourceChainFamily01").addGiven("testSearchByResourceChainGiven01");
-		p1.setManagingOrganization(new ResourceReferenceDt("Organization/132312323"));
+		p1.addIdentifier().setSystem("urn:system").setValue("testTryToCreateResourceWithReferenceThatDoesntExist01");
+		p1.addName().addFamily("testTryToCreateResourceWithReferenceThatDoesntExistFamily01").addGiven("testTryToCreateResourceWithReferenceThatDoesntExistGiven01");
+		p1.setManagingOrganization(new ResourceReferenceDt("Organization/1323123232349875324987529835"));
 
 		try {
 			ourClient.create(p1).getId();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), containsString("Organization/132312323"));
+			assertThat(e.getMessage(), containsString("Organization/1323123232349875324987529835"));
 		}
 
 	}
 
 	@Test
-	public void testInsertUpdatesConformance() {
-		// Conformance conf = ourConfProvider.getServerConformance();
-		// ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conf));
-		//
-		// RestResource res=null;
-		// for (Rest nextRest : conf.getRest()) {
-		// for (RestResource nextRes : nextRest.getResource()) {
-		// if (nextRes.getType().getValueAsEnum()==ResourceTypeEnum.PATIENT) {
-		// res = nextRes;
-		// }
-		// }
-		// }
-		// List<ExtensionDt> resCounts = res.getUndeclaredExtensionsByUrl(ExtensionConstants.CONF_RESOURCE_COUNT);
-		//
-		// int initial = 0;
-
-		Patient p1 = new Patient();
-		p1.addIdentifier().setSystem("urn:system").setValue("testSearchByResourceChain01");
-		p1.addName().addFamily("testSearchByResourceChainFamily01").addGiven("testSearchByResourceChainGiven01");
-
-		ourClient.create(p1).getId();
-
-		// conf = ourConfProvider.getServerConformance();
-		// res=null;
-		// for (Rest nextRest : conf.getRest()) {
-		// for (RestResource nextRes : nextRest.getResource()) {
-		// if (nextRes.getType().getValueAsEnum()==ResourceTypeEnum.PATIENT) {
-		// res = nextRes;
-		// }
-		// }
-		// }
-		// resCounts = res.getUndeclaredExtensionsByUrl(ExtensionConstants.CONF_RESOURCE_COUNT);
-		// assertNotNull(resCounts);
-		// assertEquals(1, resCounts.size());
-		// DecimalDt number = (DecimalDt) resCounts.get(0).getValue();
-		// assertEquals(initial+1, number.getValueAsInteger());
-	}
-
-	@Test
 	public void testSaveAndRetrieveExistingNarrative() {
+		deleteToken("Patient", Patient.SP_IDENTIFIER, "urn:system", "testSaveAndRetrieveExistingNarrative01");
+
 		Patient p1 = new Patient();
+		p1.getText().setStatus(NarrativeStatusEnum.GENERATED);
 		p1.getText().getDiv().setValueAsString("<div>HELLO WORLD</div>");
-		p1.addIdentifier().setSystem("urn:system").setValue("testSearchByResourceChain01");
+		p1.addIdentifier().setSystem("urn:system").setValue("testSaveAndRetrieveExistingNarrative01");
 
 		IdDt newId = ourClient.create(p1).getId();
 
@@ -188,6 +157,9 @@ public class CompleteResourceProviderTest {
 
 	@Test
 	public void testSearchByIdentifier() {
+		deleteToken("Patient", Patient.SP_IDENTIFIER, "urn:system", "testSearchByIdentifier01");
+		deleteToken("Patient", Patient.SP_IDENTIFIER, "urn:system", "testSearchByIdentifier02");
+
 		Patient p1 = new Patient();
 		p1.addIdentifier().setSystem("urn:system").setValue("testSearchByIdentifier01");
 		p1.addName().addFamily("testSearchByIdentifierFamily01").addGiven("testSearchByIdentifierGiven01");
@@ -205,12 +177,13 @@ public class CompleteResourceProviderTest {
 
 	@Test
 	public void testSearchByIdentifierWithoutSystem() {
+		deleteToken("Patient", Patient.SP_IDENTIFIER, "", "testSearchByIdentifierWithoutSystem01");
+
 		Patient p1 = new Patient();
 		p1.addIdentifier().setValue("testSearchByIdentifierWithoutSystem01");
 		IdDt p1Id = ourClient.create(p1).getId();
 
-		Bundle actual = ourClient.search().forResource(Patient.class).where(Patient.IDENTIFIER.exactly().systemAndCode(null, "testSearchByIdentifierWithoutSystem01")).encodedJson().prettyPrint()
-				.execute();
+		Bundle actual = ourClient.search().forResource(Patient.class).where(Patient.IDENTIFIER.exactly().systemAndCode(null, "testSearchByIdentifierWithoutSystem01")).encodedJson().prettyPrint().execute();
 		assertEquals(1, actual.size());
 		assertEquals(p1Id.getIdPart(), actual.getEntries().get(0).getId().getIdPart());
 
@@ -218,20 +191,19 @@ public class CompleteResourceProviderTest {
 
 	@Test
 	public void testDeepChaining() {
-//		ourClient = ourCtx.newRestfulGenericClient("http://fhir.healthintersections.com.au/open");
-//		ourClient = ourCtx.newRestfulGenericClient("https://fhir.orionhealth.com/blaze/fhir");
-//		ourClient = ourCtx.newRestfulGenericClient("http://spark.furore.com/fhir");
-//		ourClient.registerInterceptor(new LoggingInterceptor(true));
-		
+		delete("Location", Location.SP_NAME, "testDeepChainingL1");
+		delete("Location", Location.SP_NAME, "testDeepChainingL2");
+		deleteToken("Encounter", Encounter.SP_IDENTIFIER, "urn:foo", "testDeepChainingE1");
+
 		Location l1 = new Location();
 		l1.getName().setValue("testDeepChainingL1");
 		IdDt l1id = ourClient.create().resource(l1).execute().getId();
-		
+
 		Location l2 = new Location();
 		l2.getName().setValue("testDeepChainingL2");
 		l2.getPartOf().setReference(l1id.toVersionless().toUnqualified());
 		IdDt l2id = ourClient.create().resource(l2).execute().getId();
-		
+
 		Encounter e1 = new Encounter();
 		e1.addIdentifier().setSystem("urn:foo").setValue("testDeepChainingE1");
 		e1.getStatus().setValueAsEnum(EncounterStateEnum.IN_PROGRESS);
@@ -240,7 +212,7 @@ public class CompleteResourceProviderTest {
 		location.getLocation().setReference(l2id.toUnqualifiedVersionless());
 		location.setPeriod(new PeriodDt().setStartWithSecondsPrecision(new Date()).setEndWithSecondsPrecision(new Date()));
 		IdDt e1id = ourClient.create().resource(e1).execute().getId();
-		
+
 		//@formatter:off
 		Bundle res = ourClient.search()
 			.forResource(Encounter.class)
@@ -249,15 +221,34 @@ public class CompleteResourceProviderTest {
 			.include(Location.INCLUDE_PARTOF)
 			.execute();
 		//@formatter:on
-		
+
 		assertEquals(3, res.size());
 		assertEquals(1, res.getResources(Encounter.class).size());
 		assertEquals(e1id.toUnqualifiedVersionless(), res.getResources(Encounter.class).get(0).getId().toUnqualifiedVersionless());
-		
+
 	}
-	
+
+	private void delete(String theResourceType, String theParamName, String theParamValue) {
+		Bundle resources = ourClient.search().forResource(theResourceType).where(new StringClientParam(theParamName).matches().value(theParamValue)).execute();
+		for (IResource next : resources.toListOfResources()) {
+			ourLog.info("Deleting resource: {}", next.getId());
+			ourClient.delete().resource(next).execute();
+		}
+	}
+
+	private void deleteToken(String theResourceType, String theParamName, String theParamSystem, String theParamValue) {
+		Bundle resources = ourClient.search().forResource(theResourceType).where(new TokenClientParam(theParamName).exactly().systemAndCode(theParamSystem, theParamValue)).execute();
+		for (IResource next : resources.toListOfResources()) {
+			ourLog.info("Deleting resource: {}", next.getId());
+			ourClient.delete().resource(next).execute();
+		}
+	}
+
 	@Test
 	public void testSearchByResourceChain() {
+		delete("Organization", Organization.SP_NAME, "testSearchByResourceChainName01");
+		deleteToken("Patient", Patient.SP_IDENTIFIER, "urn:system", "testSearchByResourceChain01");
+
 		Organization o1 = new Organization();
 		o1.setName("testSearchByResourceChainName01");
 		IdDt o1id = ourClient.create(o1).getId();
@@ -297,63 +288,71 @@ public class CompleteResourceProviderTest {
 	@SuppressWarnings("unchecked")
 	@BeforeClass
 	public static void beforeClass() throws Exception {
-		ourAppCtx = new ClassPathXmlApplicationContext("fhir-spring-test-config.xml");
-
-		patientDao = (IFhirResourceDao<Patient>) ourAppCtx.getBean("myPatientDao", IFhirResourceDao.class);
-		PatientResourceProvider patientRp = new PatientResourceProvider();
-		patientRp.setDao(patientDao);
-
-		questionnaireDao = (IFhirResourceDao<Questionnaire>) ourAppCtx.getBean("myQuestionnaireDao", IFhirResourceDao.class);
-		QuestionnaireResourceProvider questionnaireRp = new QuestionnaireResourceProvider();
-		questionnaireRp.setDao(questionnaireDao);
-
-		observationDao = (IFhirResourceDao<Observation>) ourAppCtx.getBean("myObservationDao", IFhirResourceDao.class);
-		ObservationResourceProvider observationRp = new ObservationResourceProvider();
-		observationRp.setDao(observationDao);
-
-		IFhirResourceDao<Location> locationDao = (IFhirResourceDao<Location>) ourAppCtx.getBean("myLocationDao", IFhirResourceDao.class);
-		LocationResourceProvider locationRp = new LocationResourceProvider();
-		locationRp.setDao(locationDao);
-
-		IFhirResourceDao<Encounter> encounterDao = (IFhirResourceDao<Encounter>) ourAppCtx.getBean("myEncounterDao", IFhirResourceDao.class);
-		EncounterResourceProvider encounterRp = new EncounterResourceProvider();
-		encounterRp.setDao(encounterDao);
-
-		IFhirResourceDao<Organization> organizationDao = (IFhirResourceDao<Organization>) ourAppCtx.getBean("myOrganizationDao", IFhirResourceDao.class);
-		OrganizationResourceProvider organizationRp = new OrganizationResourceProvider();
-		organizationRp.setDao(organizationDao);
-
+		int port = RandomServerPortProvider.findFreePort();
 		RestfulServer restServer = new RestfulServer();
-		
-		restServer.setResourceProviders(encounterRp, locationRp, patientRp, questionnaireRp, observationRp, organizationRp);
-		restServer.getFhirContext().setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
+		String serverBase = "http://localhost:" + port + "/fhir/context";
 
-		IFhirSystemDao systemDao = (IFhirSystemDao) ourAppCtx.getBean("mySystemDao", IFhirSystemDao.class);
-		JpaSystemProvider systemProv = new JpaSystemProvider(systemDao);
-		restServer.setPlainProviders(systemProv);
-		
-		// ourConfProvider = new JpaConformanceProvider(restServer, systemDao, Collections.singletonList((IFhirResourceDao)patientDao));
+		if (true) {
+			ourAppCtx = new ClassPathXmlApplicationContext("fhir-spring-test-config.xml");
 
-		int myPort = RandomServerPortProvider.findFreePort();
-		ourServer = new Server(myPort);
+			patientDao = (IFhirResourceDao<Patient>) ourAppCtx.getBean("myPatientDao", IFhirResourceDao.class);
+			PatientResourceProvider patientRp = new PatientResourceProvider();
+			patientRp.setDao(patientDao);
 
-		ServletContextHandler proxyHandler = new ServletContextHandler();
-		proxyHandler.setContextPath("/");
+			questionnaireDao = (IFhirResourceDao<Questionnaire>) ourAppCtx.getBean("myQuestionnaireDao", IFhirResourceDao.class);
+			QuestionnaireResourceProvider questionnaireRp = new QuestionnaireResourceProvider();
+			questionnaireRp.setDao(questionnaireDao);
 
-		String serverBase = "http://localhost:" + myPort + "/fhir/context";
-		// testerServlet.setServerBase("http://fhir.healthintersections.com.au/open");
+			observationDao = (IFhirResourceDao<Observation>) ourAppCtx.getBean("myObservationDao", IFhirResourceDao.class);
+			ObservationResourceProvider observationRp = new ObservationResourceProvider();
+			observationRp.setDao(observationDao);
 
-		ServletHolder servletHolder = new ServletHolder();
-		servletHolder.setServlet(restServer);
-		proxyHandler.addServlet(servletHolder, "/fhir/context/*");
+			IFhirResourceDao<Location> locationDao = (IFhirResourceDao<Location>) ourAppCtx.getBean("myLocationDao", IFhirResourceDao.class);
+			LocationResourceProvider locationRp = new LocationResourceProvider();
+			locationRp.setDao(locationDao);
 
-		ourServer.setHandler(proxyHandler);
-		ourServer.start();
+			IFhirResourceDao<Encounter> encounterDao = (IFhirResourceDao<Encounter>) ourAppCtx.getBean("myEncounterDao", IFhirResourceDao.class);
+			EncounterResourceProvider encounterRp = new EncounterResourceProvider();
+			encounterRp.setDao(encounterDao);
+
+			IFhirResourceDao<Organization> organizationDao = (IFhirResourceDao<Organization>) ourAppCtx.getBean("myOrganizationDao", IFhirResourceDao.class);
+			OrganizationResourceProvider organizationRp = new OrganizationResourceProvider();
+			organizationRp.setDao(organizationDao);
+
+			restServer.setResourceProviders(encounterRp, locationRp, patientRp, questionnaireRp, observationRp, organizationRp);
+			restServer.getFhirContext().setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
+
+			IFhirSystemDao systemDao = (IFhirSystemDao) ourAppCtx.getBean("mySystemDao", IFhirSystemDao.class);
+			JpaSystemProvider systemProv = new JpaSystemProvider(systemDao);
+			restServer.setPlainProviders(systemProv);
+
+			// ourConfProvider = new JpaConformanceProvider(restServer, systemDao,
+			// Collections.singletonList((IFhirResourceDao)patientDao));
+
+			ourServer = new Server(port);
+
+			ServletContextHandler proxyHandler = new ServletContextHandler();
+			proxyHandler.setContextPath("/");
+
+			// testerServlet.setServerBase("http://fhir.healthintersections.com.au/open");
+
+			ServletHolder servletHolder = new ServletHolder();
+			servletHolder.setServlet(restServer);
+			proxyHandler.addServlet(servletHolder, "/fhir/context/*");
+
+			ourServer.setHandler(proxyHandler);
+			ourServer.start();
+		}
 
 		ourCtx = restServer.getFhirContext();
+//		ourCtx.getRestfulClientFactory().setProxy("localhost", 8888);
 
 		ourClient = ourCtx.newRestfulGenericClient(serverBase);
+		// ourClient = ourCtx.newRestfulGenericClient("http://fhir.healthintersections.com.au/open");
+		// ourClient = ourCtx.newRestfulGenericClient("https://fhir.orionhealth.com/blaze/fhir");
+		// ourClient = ourCtx.newRestfulGenericClient("http://spark.furore.com/fhir");
 		ourClient.registerInterceptor(new LoggingInterceptor(true));
+
 	}
 
 }

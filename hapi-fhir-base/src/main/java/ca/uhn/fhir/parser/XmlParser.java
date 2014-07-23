@@ -489,7 +489,7 @@ public class XmlParser extends BaseParser implements IParser {
 			}
 
 			for (IElement nextValue : values) {
-				if (nextValue == null) {
+				if (nextValue == null || nextValue.isEmpty()) {
 					continue;
 				}
 				Class<? extends IElement> type = nextValue.getClass();

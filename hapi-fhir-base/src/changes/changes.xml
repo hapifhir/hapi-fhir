@@ -67,6 +67,14 @@
 				<![CDATA[<a href="http://gforge.hl7.org/gf/project/fhir/tracker/?action=TrackerItemEdit&tracker_id=677&tracker_item_id=3298">FHIR Tracker Bug 3298</a>]]>
 				for more information.
 			</action>
+			<action type="add">
+				Support has been added for using an HTTP proxy for outgoing requests.
+			</action>
+			<action type="fix">
+				Fix: Primitive extensions declared against custom resource types 
+				are encoded even if they have no value. Thanks to David Hay of Orion for
+				reporting this!
+			</action>
         </release>			
 		<release version="0.4" date="2014-Jul-13">
 			<action type="add">

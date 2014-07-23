@@ -1,7 +1,5 @@
 package ca.uhn.fhir.rest.gclient;
 
-import ca.uhn.fhir.model.api.IResource;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -22,8 +20,10 @@ import ca.uhn.fhir.model.api.IResource;
  * #L%
  */
 
-public interface ICreate  {
-	ICreateTyped resource(IResource theResource);
+import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
+
+public interface IDeleteTyped extends IClientExecutable<IDeleteTyped, OperationOutcome> {
 	
-	ICreateTyped resource(String theResourceAsText);
+	// nothing for now
+
 }

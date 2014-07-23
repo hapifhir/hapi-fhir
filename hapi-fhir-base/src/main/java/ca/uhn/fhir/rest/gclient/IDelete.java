@@ -1,6 +1,7 @@
 package ca.uhn.fhir.rest.gclient;
 
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.primitive.IdDt;
 
 /*
  * #%L
@@ -22,8 +23,12 @@ import ca.uhn.fhir.model.api.IResource;
  * #L%
  */
 
-public interface ICreate  {
-	ICreateTyped resource(IResource theResource);
+public interface IDelete {
+
+	IDeleteTyped resource(IResource theResource);
 	
-	ICreateTyped resource(String theResourceAsText);
+	IDeleteTyped resourceById(IdDt theId);
+	
+	IDeleteTyped resourceById(String theResourceType, String theLogicalId);
+	
 }

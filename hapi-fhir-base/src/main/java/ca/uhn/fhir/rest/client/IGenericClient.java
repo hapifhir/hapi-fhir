@@ -32,6 +32,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IRestfulClient;
 import ca.uhn.fhir.rest.gclient.ICreate;
+import ca.uhn.fhir.rest.gclient.IDelete;
 import ca.uhn.fhir.rest.gclient.IGetPage;
 import ca.uhn.fhir.rest.gclient.IGetTags;
 import ca.uhn.fhir.rest.gclient.ITransaction;
@@ -83,6 +84,7 @@ public interface IGenericClient {
 	 * @param theId
 	 *            the ID of the resource to delete
 	 * @return An outcome
+	 * @deprecated Use {@link #delete()) instead
 	 */
 	MethodOutcome delete(Class<? extends IResource> theType, IdDt theId);
 
@@ -94,6 +96,7 @@ public interface IGenericClient {
 	 * @param theId
 	 *            the ID of the resource to delete
 	 * @return An outcome
+	 * @deprecated Use {@link #delete()) instead
 	 */
 	MethodOutcome delete(Class<? extends IResource> theType, String theId);
 
@@ -259,5 +262,10 @@ public interface IGenericClient {
 	 * Fluent method for the "create" operation, which creates a new resource instance on the server
 	 */
 	ICreate create();
+
+	/**
+	 * Fluent method for the "delete" operation, which performs a logical delete on a server resource
+	 */
+	IDelete delete();
 
 }

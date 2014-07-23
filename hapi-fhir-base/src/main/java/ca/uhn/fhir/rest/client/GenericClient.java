@@ -25,7 +25,6 @@ import static org.apache.commons.lang3.StringUtils.*;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -45,8 +44,10 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.dstu.resource.Conformance;
+import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.exceptions.NonFhirResponseException;
@@ -55,6 +56,8 @@ import ca.uhn.fhir.rest.gclient.ICreate;
 import ca.uhn.fhir.rest.gclient.ICreateTyped;
 import ca.uhn.fhir.rest.gclient.ICriterion;
 import ca.uhn.fhir.rest.gclient.ICriterionInternal;
+import ca.uhn.fhir.rest.gclient.IDelete;
+import ca.uhn.fhir.rest.gclient.IDeleteTyped;
 import ca.uhn.fhir.rest.gclient.IGetPage;
 import ca.uhn.fhir.rest.gclient.IGetPageTyped;
 import ca.uhn.fhir.rest.gclient.IGetTags;
@@ -82,6 +85,8 @@ import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 public class GenericClient extends BaseClient implements IGenericClient {
+
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(GenericClient.class);
 
 	private FhirContext myContext;
 
@@ -132,8 +137,13 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	}
 
 	@Override
+	public IDelete delete() {
+		return new DeleteInternal();
+	}
+
+	@Override
 	public MethodOutcome delete(final Class<? extends IResource> theType, IdDt theId) {
-		HttpDeleteClientInvocation invocation = DeleteMethodBinding.createDeleteInvocation(toResourceName(theType), theId);
+		HttpDeleteClientInvocation invocation = DeleteMethodBinding.createDeleteInvocation(theId.withResourceType(toResourceName(theType)));
 		if (isKeepResponses()) {
 			myLastRequest = invocation.asHttpRequest(getServerBase(), createExtraParams(), getEncoding());
 		}
@@ -210,7 +220,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	@Override
 	public IUntypedQuery search() {
-		return new QueryInternal();
+		return new SearchInternal();
 	}
 
 	@Override
@@ -247,10 +257,6 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	@Override
 	public void setLogRequestAndResponse(boolean theLogRequestAndResponse) {
 		myLogRequestAndResponse = theLogRequestAndResponse;
-	}
-
-	private String toResourceName(Class<? extends IResource> theType) {
-		return myContext.getResourceDefinition(theType).getName();
 	}
 
 	@Override
@@ -322,17 +328,14 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		return vread(theType, new IdDt(theId), new IdDt(theVersionId));
 	}
 
+	private String toResourceName(Class<? extends IResource> theType) {
+		return myContext.getResourceDefinition(theType).getName();
+	}
+
 	private abstract class BaseClientExecutable<T extends IClientExecutable<?, ?>, Y> implements IClientExecutable<T, Y> {
 		private EncodingEnum myParamEncoding;
 		private Boolean myPrettyPrint;
 		private boolean myQueryLogRequestAndResponse;
-
-		protected void addParam(Map<String, List<String>> params, String parameterName, String parameterValue) {
-			if (!params.containsKey(parameterName)) {
-				params.put(parameterName, new ArrayList<String>());
-			}
-			params.get(parameterName).add(parameterValue);
-		}
 
 		@SuppressWarnings("unchecked")
 		@Override
@@ -355,14 +358,28 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			return (T) this;
 		}
 
-		protected <Z> Z invoke(Map<String, List<String>> theParams, IClientResponseHandler<Z> theHandler, BaseHttpClientInvocation theInvocation) {
-			if (myParamEncoding != null) {
-				theParams.put(Constants.PARAM_FORMAT, Collections.singletonList(myParamEncoding.getFormatContentType()));
-			}
+		@SuppressWarnings("unchecked")
+		@Override
+		public T prettyPrint() {
+			myPrettyPrint = true;
+			return (T) this;
+		}
 
-			if (myPrettyPrint != null) {
-				theParams.put(Constants.PARAM_PRETTY, Collections.singletonList(myPrettyPrint.toString()));
+		protected void addParam(Map<String, List<String>> params, String parameterName, String parameterValue) {
+			if (!params.containsKey(parameterName)) {
+				params.put(parameterName, new ArrayList<String>());
 			}
+			params.get(parameterName).add(parameterValue);
+		}
+
+		protected <Z> Z invoke(Map<String, List<String>> theParams, IClientResponseHandler<Z> theHandler, BaseHttpClientInvocation theInvocation) {
+			// if (myParamEncoding != null) {
+			// theParams.put(Constants.PARAM_FORMAT, Collections.singletonList(myParamEncoding.getFormatContentType()));
+			// }
+			//
+			// if (myPrettyPrint != null) {
+			// theParams.put(Constants.PARAM_PRETTY, Collections.singletonList(myPrettyPrint.toString()));
+			// }
 
 			if (isKeepResponses()) {
 				myLastRequest = theInvocation.asHttpRequest(getServerBase(), theParams, getEncoding());
@@ -370,13 +387,6 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 			Z resp = invokeClient(myContext, theHandler, theInvocation, myParamEncoding, myPrettyPrint, myQueryLogRequestAndResponse || myLogRequestAndResponse);
 			return resp;
-		}
-
-		@SuppressWarnings("unchecked")
-		@Override
-		public T prettyPrint() {
-			myPrettyPrint = true;
-			return (T) this;
 		}
 
 	}
@@ -390,8 +400,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 
 		@Override
-		public Bundle invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException,
-				BaseServerResponseException {
+		public Bundle invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException, BaseServerResponseException {
 			EncodingEnum respType = EncodingEnum.forContentType(theResponseMimeType);
 			if (respType == null) {
 				throw NonFhirResponseException.newInstance(theResponseStatusCode, theResponseMimeType, theResponseReader);
@@ -427,7 +436,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 				myResource = encoding.newParser(myContext).parseResource(myResourceBody);
 			}
 
-			BaseHttpClientInvocation invocation = MethodUtil.createCreateInvocation(myResource,myResourceBody, myId,  myContext);
+			BaseHttpClientInvocation invocation = MethodUtil.createCreateInvocation(myResource, myResourceBody, myId, myContext);
 
 			RuntimeResourceDefinition def = myContext.getResourceDefinition(myResource);
 			final String resourceName = def.getName();
@@ -467,100 +476,53 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	}
 
-	private class ForInternal extends BaseClientExecutable<IQuery, Bundle> implements IQuery {
+	private class DeleteInternal extends BaseClientExecutable<IDeleteTyped, OperationOutcome> implements IDelete, IDeleteTyped {
 
-		private List<ICriterionInternal> myCriterion = new ArrayList<ICriterionInternal>();
-		private List<Include> myInclude = new ArrayList<Include>();
-		private Integer myParamLimit;
-		private final String myResourceName;
-		private final Class<? extends IResource> myResourceType;
-		private List<SortInternal> mySort = new ArrayList<SortInternal>();
-
-		public ForInternal() {
-			myResourceType = null;
-			myResourceName = null;
-		}
-
-		public ForInternal(Class<? extends IResource> theResourceType) {
-			myResourceType = theResourceType;
-			RuntimeResourceDefinition definition = myContext.getResourceDefinition(theResourceType);
-			myResourceName = definition.getName();
-		}
-
-		public ForInternal(String theResourceName) {
-			myResourceType = myContext.getResourceDefinition(theResourceName).getImplementingClass();
-			myResourceName = theResourceName;
-		}
+		private IdDt myId;
 
 		@Override
-		public IQuery and(ICriterion theCriterion) {
-			myCriterion.add((ICriterionInternal) theCriterion);
-			return this;
-		}
-
-		@Override
-		public Bundle execute() {
-
-			Map<String, List<String>> params = new LinkedHashMap<String, List<String>>();
-			Map<String, List<String>> initial = createExtraParams();
-			if (initial != null) {
-				params.putAll(initial);
-			}
-
-			for (ICriterionInternal next : myCriterion) {
-				String parameterName = next.getParameterName();
-				String parameterValue = next.getParameterValue();
-				addParam(params, parameterName, parameterValue);
-			}
-
-			for (Include next : myInclude) {
-				addParam(params, Constants.PARAM_INCLUDE, next.getValue());
-			}
-
-			for (SortInternal next : mySort) {
-				addParam(params, next.getParamName(), next.getParamValue());
-			}
-
-			if (myParamLimit != null) {
-				addParam(params, Constants.PARAM_COUNT, Integer.toString(myParamLimit));
-			}
-
-			BundleResponseHandler binding = new BundleResponseHandler(myResourceType);
-			HttpGetClientInvocation invocation = new HttpGetClientInvocation(params, myResourceName);
-
+		public OperationOutcome execute() {
+			HttpDeleteClientInvocation invocation = DeleteMethodBinding.createDeleteInvocation(myId);
+			OperationOutcomeResponseHandler binding = new OperationOutcomeResponseHandler();
+			Map<String, List<String>> params = new HashMap<String, List<String>>();
 			return invoke(params, binding, invocation);
-
 		}
 
 		@Override
-		public IQuery include(Include theInclude) {
-			myInclude.add(theInclude);
-			return this;
-		}
-
-		@Override
-		public IQuery limitTo(int theLimitTo) {
-			if (theLimitTo > 0) {
-				myParamLimit = theLimitTo;
-			} else {
-				myParamLimit = null;
+		public IDeleteTyped resource(IResource theResource) {
+			Validate.notNull(theResource, "theResource can not be null");
+			IdDt id = theResource.getId();
+			Validate.notNull(id, "theResource.getId() can not be null");
+			if (id.hasResourceType() == false || id.hasIdPart() == false) {
+				throw new IllegalArgumentException("theResource.getId() must contain a resource type and logical ID at a minimum (e.g. Patient/1234), found: " + id.getValue());
 			}
+			myId = id;
 			return this;
 		}
 
 		@Override
-		public ISort sort() {
-			SortInternal retVal = new SortInternal(this);
-			mySort.add(retVal);
-			return retVal;
-		}
-
-		@Override
-		public IQuery where(ICriterion theCriterion) {
-			myCriterion.add((ICriterionInternal) theCriterion);
+		public IDeleteTyped resourceById(IdDt theId) {
+			Validate.notNull(theId, "theId can not be null");
+			if (theId.hasResourceType() == false || theId.hasIdPart() == false) {
+				throw new IllegalArgumentException("theId must contain a resource type and logical ID at a minimum (e.g. Patient/1234)found: " + theId.getValue());
+			}
+			myId = theId;
 			return this;
 		}
 
+		@Override
+		public IDeleteTyped resourceById(String theResourceType, String theLogicalId) {
+			Validate.notBlank(theResourceType, "theResourceType can not be blank/null");
+			if (myContext.getResourceDefinition(theResourceType) == null) {
+				throw new IllegalArgumentException("Unknown resource type");
+			}
+			Validate.notBlank(theLogicalId, "theLogicalId can not be blank/null");
+			if (theLogicalId.contains("/")) {
+				throw new IllegalArgumentException("LogicalId can not contain '/' (should only be the logical ID portion, not a qualified ID)");
+			}
+			myId = new IdDt(theResourceType, theLogicalId);
+			return this;
+		}
 	}
 
 	private class GetPageInternal extends BaseClientExecutable<IGetPageTyped, Bundle> implements IGetPageTyped {
@@ -669,6 +631,28 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	}
 
+	private final class OperationOutcomeResponseHandler implements IClientResponseHandler<OperationOutcome> {
+
+		@Override
+		public OperationOutcome invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException, BaseServerResponseException {
+			EncodingEnum respType = EncodingEnum.forContentType(theResponseMimeType);
+			if (respType == null) {
+				return null;
+			}
+			IParser parser = respType.newParser(myContext);
+			OperationOutcome retVal;
+			try {
+				retVal = parser.parseResource(OperationOutcome.class, theResponseReader);
+			} catch (DataFormatException e) {
+				ourLog.warn("Failed to parse OperationOutcome response", e);
+				return null;
+			}
+			MethodUtil.parseClientRequestResourceHeaders(theHeaders, retVal);
+
+			return retVal;
+		}
+	}
+
 	private final class OutcomeResponseHandler implements IClientResponseHandler<MethodOutcome> {
 		private final String myResourceName;
 
@@ -677,30 +661,10 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 
 		@Override
-		public MethodOutcome invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException,
-				BaseServerResponseException {
+		public MethodOutcome invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException, BaseServerResponseException {
 			MethodOutcome response = MethodUtil.process2xxResponse(myContext, myResourceName, theResponseStatusCode, theResponseMimeType, theResponseReader, theHeaders);
 			return response;
 		}
-	}
-
-	private class QueryInternal implements IUntypedQuery {
-
-		@Override
-		public IQuery forAllResources() {
-			return new ForInternal();
-		}
-
-		@Override
-		public IQuery forResource(Class<? extends IResource> theResourceType) {
-			return new ForInternal(theResourceType);
-		}
-
-		@Override
-		public IQuery forResource(String theResourceName) {
-			return new ForInternal(theResourceName);
-		}
-
 	}
 
 	private final class ResourceListResponseHandler implements IClientResponseHandler<List<IResource>> {
@@ -712,8 +676,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 
 		@Override
-		public List<IResource> invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException,
-				BaseServerResponseException {
+		public List<IResource> invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException, BaseServerResponseException {
 			return new BundleResponseHandler(myType).invokeClient(theResponseMimeType, theResponseReader, theResponseStatusCode, theHeaders).toListOfResources();
 		}
 	}
@@ -742,18 +705,133 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			}
 
 			MethodUtil.parseClientRequestResourceHeaders(theHeaders, retVal);
-			
+
 			return retVal;
 		}
 	}
 
+	private class SearchInternal extends BaseClientExecutable<IQuery, Bundle> implements IQuery, IUntypedQuery {
+
+		private List<ICriterionInternal> myCriterion = new ArrayList<ICriterionInternal>();
+
+		private List<Include> myInclude = new ArrayList<Include>();
+
+		private Integer myParamLimit;
+		private String myResourceName;
+		private Class<? extends IResource> myResourceType;
+		private List<SortInternal> mySort = new ArrayList<SortInternal>();
+
+		public SearchInternal() {
+			myResourceType = null;
+			myResourceName = null;
+		}
+
+		@Override
+		public IQuery and(ICriterion theCriterion) {
+			myCriterion.add((ICriterionInternal) theCriterion);
+			return this;
+		}
+
+		@Override
+		public Bundle execute() {
+
+			Map<String, List<String>> params = new LinkedHashMap<String, List<String>>();
+			Map<String, List<String>> initial = createExtraParams();
+			if (initial != null) {
+				params.putAll(initial);
+			}
+
+			for (ICriterionInternal next : myCriterion) {
+				String parameterName = next.getParameterName();
+				String parameterValue = next.getParameterValue();
+				addParam(params, parameterName, parameterValue);
+			}
+
+			for (Include next : myInclude) {
+				addParam(params, Constants.PARAM_INCLUDE, next.getValue());
+			}
+
+			for (SortInternal next : mySort) {
+				addParam(params, next.getParamName(), next.getParamValue());
+			}
+
+			if (myParamLimit != null) {
+				addParam(params, Constants.PARAM_COUNT, Integer.toString(myParamLimit));
+			}
+
+			BundleResponseHandler binding = new BundleResponseHandler(myResourceType);
+			HttpGetClientInvocation invocation = new HttpGetClientInvocation(params, myResourceName);
+
+			return invoke(params, binding, invocation);
+
+		}
+
+		@Override
+		public IQuery forAllResources() {
+			return this;
+		}
+
+		private void setType(Class<? extends IResource> theResourceType) {
+			myResourceType = theResourceType;
+			RuntimeResourceDefinition definition = myContext.getResourceDefinition(theResourceType);
+			myResourceName = definition.getName();
+		}
+
+		private void setType(String theResourceName) {
+			myResourceType = myContext.getResourceDefinition(theResourceName).getImplementingClass();
+			myResourceName = theResourceName;
+		}
+
+		@Override
+		public IQuery forResource(Class<? extends IResource> theResourceType) {
+			setType(theResourceType);
+			return this;
+		}
+
+		@Override
+		public IQuery forResource(String theResourceName) {
+			setType(theResourceName);
+			return this;
+		}
+
+		@Override
+		public IQuery include(Include theInclude) {
+			myInclude.add(theInclude);
+			return this;
+		}
+
+		@Override
+		public IQuery limitTo(int theLimitTo) {
+			if (theLimitTo > 0) {
+				myParamLimit = theLimitTo;
+			} else {
+				myParamLimit = null;
+			}
+			return this;
+		}
+
+		@Override
+		public ISort sort() {
+			SortInternal retVal = new SortInternal(this);
+			mySort.add(retVal);
+			return retVal;
+		}
+
+		@Override
+		public IQuery where(ICriterion theCriterion) {
+			myCriterion.add((ICriterionInternal) theCriterion);
+			return this;
+		}
+
+	}
+
 	private class SortInternal implements ISort {
 
-		private ForInternal myFor;
+		private SearchInternal myFor;
 		private String myParamName;
 		private String myParamValue;
 
-		public SortInternal(ForInternal theFor) {
+		public SortInternal(SearchInternal theFor) {
 			myFor = theFor;
 		}
 
@@ -791,8 +869,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	private final class TagListResponseHandler implements IClientResponseHandler<TagList> {
 
 		@Override
-		public TagList invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException,
-				BaseServerResponseException {
+		public TagList invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException, BaseServerResponseException {
 			EncodingEnum respType = EncodingEnum.forContentType(theResponseMimeType);
 			if (respType == null) {
 				throw NonFhirResponseException.newInstance(theResponseStatusCode, theResponseMimeType, theResponseReader);

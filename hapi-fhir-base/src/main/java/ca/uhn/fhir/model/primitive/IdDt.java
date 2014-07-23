@@ -432,4 +432,8 @@ public class IdDt extends BasePrimitive<String> {
 		return new IdDt(value + '/' + Constants.PARAM_HISTORY + '/' + theVersion);
 	}
 
+	public IdDt withResourceType(String theResourceName) {
+		return new IdDt(theResourceName, getIdPart(), getVersionIdPart());
+	}
+
 }

@@ -38,6 +38,7 @@ import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.method.SearchMethodBinding.RequestType;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 public class DeleteMethodBinding extends BaseOutcomeReturningMethodBinding {
 
@@ -120,9 +121,14 @@ public class DeleteMethodBinding extends BaseOutcomeReturningMethodBinding {
 		if (idDt == null) {
 			throw new NullPointerException("ID can not be null");
 		}
-		String resourceName = getResourceName();
 		
-		HttpDeleteClientInvocation retVal = createDeleteInvocation(resourceName, idDt);
+		if (idDt.hasResourceType()==false) {
+			idDt = idDt.withResourceType(getResourceName());
+		}else if (getResourceName().equals(idDt.getResourceType())==false) {
+			throw new InvalidRequestException("ID parameter has the wrong resource type, expected '" + getResourceName() + "', found: " + idDt.getResourceType());
+		}
+		
+		HttpDeleteClientInvocation retVal = createDeleteInvocation(idDt);
 
 		for (int idx = 0; idx < theArgs.length; idx++) {
 			IParameter nextParam = getParameters().get(idx);
@@ -132,9 +138,8 @@ public class DeleteMethodBinding extends BaseOutcomeReturningMethodBinding {
 		return retVal;
 	}
 
-	public static HttpDeleteClientInvocation createDeleteInvocation(String theResourceName, IdDt idDt) {
-		String id = idDt.getValue();
-		HttpDeleteClientInvocation retVal = new HttpDeleteClientInvocation(theResourceName, id);
+	public static HttpDeleteClientInvocation createDeleteInvocation(IdDt theId) {
+		HttpDeleteClientInvocation retVal = new HttpDeleteClientInvocation(theId);
 		return retVal;
 	}
 

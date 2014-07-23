@@ -70,17 +70,18 @@ public class JsonParserTest {
 		p.addUndeclaredExtension(extension);
 		String str = ourCtx.newJsonParser().encodeResourceToString(p);
 		
-		assertEquals("{\"resourceType\":\"Patient\",\"extension\":[{\"url\":\"http://foo#bar\"}]}", str);
+		assertEquals("{\"resourceType\":\"Patient\"}", str);
 		
 		extension.setValue(new StringDt());
 
 		str = ourCtx.newJsonParser().encodeResourceToString(p);		
-		assertEquals("{\"resourceType\":\"Patient\",\"extension\":[{\"url\":\"http://foo#bar\"}]}", str);
+		assertEquals("{\"resourceType\":\"Patient\"}", str);
 
 		extension.setValue(new StringDt(""));
 
 		str = ourCtx.newJsonParser().encodeResourceToString(p);		
-		assertEquals("{\"resourceType\":\"Patient\",\"extension\":[{\"url\":\"http://foo#bar\"}]}", str);
+		assertEquals("{\"resourceType\":\"Patient\"}", str);
+		
 	}
 
 	

@@ -560,6 +560,9 @@ public class JsonParser extends BaseParser implements IParser {
 		for (RuntimeChildDeclaredExtensionDefinition nextDef : resDef.getExtensionsNonModifier()) {
 			for (IElement nextValue : nextDef.getAccessor().getValues(theResource)) {
 				if (nextValue != null) {
+					if (nextValue == null || nextValue.isEmpty()) {
+						continue;
+					}
 					extensions.add(new HeldExtension(nextDef, nextValue));
 				}
 			}
@@ -567,6 +570,9 @@ public class JsonParser extends BaseParser implements IParser {
 		for (RuntimeChildDeclaredExtensionDefinition nextDef : resDef.getExtensionsModifier()) {
 			for (IElement nextValue : nextDef.getAccessor().getValues(theResource)) {
 				if (nextValue != null) {
+					if (nextValue == null || nextValue.isEmpty()) {
+						continue;
+					}
 					modifierExtensions.add(new HeldExtension(nextDef, nextValue));
 				}
 			}
@@ -577,11 +583,17 @@ public class JsonParser extends BaseParser implements IParser {
 		if (theResource instanceof ISupportsUndeclaredExtensions) {
 			List<ExtensionDt> ext = ((ISupportsUndeclaredExtensions) theResource).getUndeclaredExtensions();
 			for (ExtensionDt next : ext) {
+				if (next == null || next.isEmpty()) {
+					continue;
+				}
 				extensions.add(new HeldExtension(next));
 			}
 
 			ext = ((ISupportsUndeclaredExtensions) theResource).getUndeclaredModifierExtensions();
 			for (ExtensionDt next : ext) {
+				if (next == null || next.isEmpty()) {
+					continue;
+				}
 				modifierExtensions.add(new HeldExtension(next));
 			}
 		}
@@ -708,7 +720,7 @@ public class JsonParser extends BaseParser implements IParser {
 		if (elementId != null) {
 			IElement object = (IElement) theState.getObject();
 			if (object instanceof IIdentifiableElement) {
-				((IIdentifiableElement) object).setId(new IdDt(elementId));
+				((IIdentifiableElement) object).setElementSpecificId(elementId);
 			} else if (object instanceof IResource) {
 				((IResource) object).setId(new IdDt(elementId));
 			}

@@ -318,11 +318,11 @@ public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefini
 		
 		RuntimeResourceDefinition def = this;
 
-		if (StringUtils.isNotBlank(myId)) {
-			retVal.setId(new IdDt(myId));
-		}else {
-			throw new ConfigurationException("Resource class " + getImplementingClass().getCanonicalName() + " has no ID specified");
+		if (StringUtils.isBlank(myId)) {
+			myId = getName().toLowerCase();
 		}
+		
+		retVal.setId(new IdDt(myId));
 		
 		// Scan for extensions
 		scanForExtensions(retVal, def);

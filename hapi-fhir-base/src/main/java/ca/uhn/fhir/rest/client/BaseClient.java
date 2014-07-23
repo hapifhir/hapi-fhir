@@ -138,6 +138,15 @@ public abstract class BaseClient {
 		try {
 			Map<String, List<String>> params = createExtraParams();
 			
+			if (theEncoding == EncodingEnum.XML) {
+				params.put(Constants.PARAM_FORMAT, Collections.singletonList("xml"));
+			} else if (theEncoding == EncodingEnum.JSON) {
+				params.put(Constants.PARAM_FORMAT, Collections.singletonList("json"));
+			}
+			if (thePrettyPrint == Boolean.TRUE) {
+				params.put(Constants.PARAM_PRETTY, Collections.singletonList(Constants.PARAM_PRETTY_VALUE_TRUE));
+			}
+
 			EncodingEnum encoding = getEncoding();
 			if (theEncoding != null) {
 				encoding=theEncoding;

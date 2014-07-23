@@ -1,7 +1,5 @@
 package example;
 
-import org.apache.http.impl.client.HttpClientBuilder;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.client.IRestfulClientFactory;
@@ -16,6 +14,16 @@ public class ClientExamples {
 		// nothing yet
 	}
 
+	@SuppressWarnings("unused")
+	public void createProxy() {
+//START SNIPPET: proxy
+FhirContext ctx = new FhirContext();
+ctx.getRestfulClientFactory().setProxy("example.com", 8888);
+
+IGenericClient genericClient = ctx.newRestfulGenericClient("http://localhost:9999/fhir");
+//START SNIPPET: end
+	}
+	
 	@SuppressWarnings("unused")
 	public void createSecurity() {
 //START SNIPPET: security

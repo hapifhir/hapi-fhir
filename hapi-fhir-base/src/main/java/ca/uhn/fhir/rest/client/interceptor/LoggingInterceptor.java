@@ -144,6 +144,7 @@ public class LoggingInterceptor implements IClientInterceptor {
 
 		if (myLogResponseBody) {
 			HttpEntity respEntity = theResponse.getEntity();
+			if (respEntity != null) {
 			final byte[] bytes;
 			try {
 				bytes = IOUtils.toByteArray(respEntity.getContent());
@@ -152,8 +153,10 @@ public class LoggingInterceptor implements IClientInterceptor {
 			}
 
 			myLog.info("Client response body:\n{}", new String(bytes));
-
 			theResponse.setEntity(new MyEntityWrapper(respEntity, bytes));
+			} else {
+				myLog.info("Client response body: (none)");
+			}
 		}
 	}
 

@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.http.HttpHost;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.impl.client.HttpClients;
@@ -39,12 +40,22 @@ import ca.uhn.fhir.rest.method.BaseMethodBinding;
 
 public class RestfulClientFactory implements IRestfulClientFactory {
 
-	private int myConnectionRequestTimeout=10000;
-	private int myConnectTimeout=10000;
+	private int myConnectionRequestTimeout = 10000;
+	private int myConnectTimeout = 10000;
 	private FhirContext myContext;
 	private HttpClient myHttpClient;
 	private Map<Class<? extends IRestfulClient>, ClientInvocationHandler> myInvocationHandlers = new HashMap<Class<? extends IRestfulClient>, ClientInvocationHandler>();
 	private int mySocketTimeout = 10000;
+	private HttpHost myProxy;
+
+	@Override
+	public void setProxy(String theHost, Integer thePort) {
+		if (theHost != null) {
+			myProxy = new HttpHost(theHost, thePort, "http");
+		} else {
+			myProxy = null;
+		}
+	}
 
 	/**
 	 * Constructor
@@ -53,7 +64,7 @@ public class RestfulClientFactory implements IRestfulClientFactory {
 	 *            The context
 	 */
 	public RestfulClientFactory(FhirContext theFhirContext) {
-		myContext=theFhirContext;
+		myContext = theFhirContext;
 	}
 
 	/**
@@ -63,11 +74,10 @@ public class RestfulClientFactory implements IRestfulClientFactory {
 	}
 
 	/**
-	 * Sets the context associated with this client factory. Must not be called
-	 * more than once.
+	 * Sets the context associated with this client factory. Must not be called more than once.
 	 */
 	public void setFhirContext(FhirContext theContext) {
-		if(myContext!=null&&myContext!=theContext) {
+		if (myContext != null && myContext != theContext) {
 			throw new IllegalStateException("RestfulClientFactory instance is already associated with one FhirContext. RestfulClientFactory instances can not be shared.");
 		}
 		myContext = theContext;
@@ -86,13 +96,14 @@ public class RestfulClientFactory implements IRestfulClientFactory {
 		if (myHttpClient == null) {
 
 			PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
-						
+
 			//@formatter:off
 			RequestConfig defaultRequestConfig = RequestConfig.custom()
 				    .setSocketTimeout(mySocketTimeout)
 				    .setConnectTimeout(myConnectTimeout)
 				    .setConnectionRequestTimeout(myConnectionRequestTimeout)
 				    .setStaleConnectionCheckEnabled(true)
+				    .setProxy(myProxy)
 				    .build();
 			
 			myHttpClient = HttpClients.custom()
@@ -103,7 +114,7 @@ public class RestfulClientFactory implements IRestfulClientFactory {
 			//@formatter:on
 
 		}
-		
+
 		return myHttpClient;
 	}
 
@@ -144,7 +155,7 @@ public class RestfulClientFactory implements IRestfulClientFactory {
 			}
 			myInvocationHandlers.put(theClientType, invocationHandler);
 		}
-		
+
 		T proxy = instantiateProxy(theClientType, invocationHandler);
 
 		return proxy;
@@ -158,18 +169,18 @@ public class RestfulClientFactory implements IRestfulClientFactory {
 	@Override
 	public synchronized void setConnectionRequestTimeout(int theConnectionRequestTimeout) {
 		myConnectionRequestTimeout = theConnectionRequestTimeout;
-		myHttpClient=null;
+		myHttpClient = null;
 	}
 
 	@Override
 	public synchronized void setConnectTimeout(int theConnectTimeout) {
 		myConnectTimeout = theConnectTimeout;
-		myHttpClient=null;
+		myHttpClient = null;
 	}
 
 	/**
-	 * Sets the Apache HTTP client instance to be used by any new restful clients created by this factory. If set to <code>null</code>, which is the default, a new HTTP client with default settings
-	 * will be created.
+	 * Sets the Apache HTTP client instance to be used by any new restful clients created by this factory. If set to
+	 * <code>null</code>, which is the default, a new HTTP client with default settings will be created.
 	 * 
 	 * @param theHttpClient
 	 *            An HTTP client instance to use, or <code>null</code>
@@ -182,7 +193,7 @@ public class RestfulClientFactory implements IRestfulClientFactory {
 	@Override
 	public synchronized void setSocketTimeout(int theSocketTimeout) {
 		mySocketTimeout = theSocketTimeout;
-		myHttpClient=null;
+		myHttpClient = null;
 	}
 
 	@SuppressWarnings("unchecked")

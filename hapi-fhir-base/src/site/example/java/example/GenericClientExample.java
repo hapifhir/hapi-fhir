@@ -7,8 +7,10 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.resource.Conformance;
+import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
 import ca.uhn.fhir.model.dstu.resource.Organization;
 import ca.uhn.fhir.model.dstu.resource.Patient;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.client.IGenericClient;
 
 public class GenericClientExample {
@@ -60,6 +62,19 @@ System.out.println(conf.getDescription().getValue());
 //END SNIPPET: conformance
 }
 {
+//START SNIPPET: delete
+// Retrieve the server's conformance statement and print its description
+OperationOutcome outcome = client.delete()
+   .resourceById(new IdDt("Patient", "1234"))
+   .execute();
+
+// outcome may be null if the server didn't return one
+if (outcome != null) {
+   System.out.println(outcome.getIssueFirstRep().getDetails().getValue());
+}
+//END SNIPPET: delete
+}
+{
 //START SNIPPET: search
 Bundle response = client.search()
   .forResource(Patient.class)
@@ -68,6 +83,20 @@ Bundle response = client.search()
   .andLogRequestAndResponse(true)
   .execute();
 //END SNIPPET: search
+
+//START SNIPPET: searchAdv
+response = client.search()
+   .forResource(Patient.class)
+   .encodedJson()
+   .where(Patient.BIRTHDATE.beforeOrEquals().day("2012-01-22"))
+   .and(Patient.BIRTHDATE.after().day("2011-01-01"))
+   .include(Patient.INCLUDE_MANAGINGORGANIZATION)
+   .sort().ascending(Patient.BIRTHDATE)
+   .sort().descending(Patient.NAME)
+   .limitTo(123)
+   .execute();
+//END SNIPPET: searchAdv
+
 //START SNIPPET: searchPaging
 if (response.getLinkNext().isEmpty() == false) {
 
