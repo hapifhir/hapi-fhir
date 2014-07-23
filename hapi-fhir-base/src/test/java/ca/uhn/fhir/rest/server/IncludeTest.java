@@ -1,8 +1,9 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -23,8 +24,10 @@ import org.junit.Test;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.api.PathSpecification;
+import ca.uhn.fhir.model.api.Include;
+import ca.uhn.fhir.model.dstu.resource.Organization;
 import ca.uhn.fhir.model.dstu.resource.Patient;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.annotation.IncludeParam;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
@@ -45,7 +48,8 @@ public class IncludeTest {
 	public void testNoIncludes() throws Exception {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?name=Hello");
 		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		Bundle bundle = new FhirContext().newXmlParser().parseBundle(responseContent);
@@ -60,7 +64,8 @@ public class IncludeTest {
 	public void testOneInclude() throws Exception {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?name=Hello&_include=foo");
 		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		Bundle bundle = new FhirContext().newXmlParser().parseBundle(responseContent);
@@ -73,10 +78,37 @@ public class IncludeTest {
 	}
 
 	@Test
+	public void testIIncludedResourcesNonContained() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_query=normalInclude&_pretty=true");
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		Bundle bundle = new FhirContext().newXmlParser().parseBundle(responseContent);
+		
+		ourLog.info(responseContent);
+		
+		assertEquals(3, bundle.size());
+		assertEquals(new IdDt("Patient/p1"), bundle.toListOfResources().get(0).getId().toUnqualifiedVersionless());
+		assertEquals(new IdDt("Patient/p2"), bundle.toListOfResources().get(1).getId().toUnqualifiedVersionless());
+		assertEquals(new IdDt("Organization/o1"), bundle.toListOfResources().get(2).getId().toUnqualifiedVersionless());
+		
+		Patient p1 = (Patient) bundle.toListOfResources().get(0);
+		assertEquals(0,p1.getContained().getContainedResources().size());
+		
+		Patient p2 = (Patient) bundle.toListOfResources().get(1);
+		assertEquals(0,p2.getContained().getContainedResources().size());
+
+		
+	}
+
+	@Test
 	public void testTwoInclude() throws Exception {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?name=Hello&_include=foo&_include=bar");
 		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		Bundle bundle = new FhirContext().newXmlParser().parseBundle(responseContent);
@@ -128,17 +160,54 @@ public class IncludeTest {
 	 */
 	public static class DummyPatientResourceProvider implements IResourceProvider {
 
+		@Search(queryName = "normalInclude")
+		public List<Patient> normalInclude() {
+			Organization o1 = new Organization();
+			o1.getName().setValue("o1");
+			o1.setId("o1");
+
+			Patient p1 = new Patient();
+			p1.setId("p1");
+			p1.addIdentifier().setLabel("p1");
+			p1.getManagingOrganization().setResource(o1);
+
+			Patient p2 = new Patient();
+			p2.setId("p2");
+			p2.addIdentifier().setLabel("p2");
+			p2.getManagingOrganization().setResource(o1);
+
+			return Arrays.asList(p1, p2);
+		}
+
+		@Search(queryName = "containedInclude")
+		public List<Patient> containedInclude() {
+			Organization o1 = new Organization();
+			o1.getName().setValue("o1");
+
+			Patient p1 = new Patient();
+			p1.setId("p1");
+			p1.addIdentifier().setLabel("p1");
+			p1.getManagingOrganization().setResource(o1);
+
+			Patient p2 = new Patient();
+			p2.setId("p2");
+			p2.addIdentifier().setLabel("p2");
+			p2.getManagingOrganization().setResource(o1);
+
+			return Arrays.asList(p1, p2);
+		}
+		
 		@Search
-		public List<Patient> findPatient(@RequiredParam(name = Patient.SP_NAME) StringDt theName, @IncludeParam(allow = { "foo", "bar" }) Set<PathSpecification> theIncludes) {
+		public List<Patient> findPatient(@RequiredParam(name = Patient.SP_NAME) StringDt theName, @IncludeParam(allow = { "foo", "bar" }) Set<Include> theIncludes) {
 			ArrayList<Patient> retVal = new ArrayList<Patient>();
 
 			Patient p = new Patient();
 			p.addIdentifier("foo", "bar");
-			
+
 			p.setId(theName.getValue());
 
 			if (theIncludes != null) {
-				for (PathSpecification next : theIncludes) {
+				for (Include next : theIncludes) {
 					p.addName().addFamily().setValue(next.getValue());
 				}
 			}

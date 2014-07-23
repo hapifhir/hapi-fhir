@@ -20,7 +20,7 @@ package ca.uhn.fhir.rest.server;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -29,12 +29,15 @@ import java.io.Writer;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.UUID;
 import java.util.zip.GZIPOutputStream;
@@ -56,6 +59,7 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.Tag;
 import ca.uhn.fhir.model.api.TagList;
+import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.resource.Binary;
 import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
 import ca.uhn.fhir.model.dstu.resource.OperationOutcome.Issue;
@@ -804,6 +808,8 @@ public class RestfulServer extends HttpServlet {
 		bundle.getLinkBase().setValue(theServerBase);
 		bundle.getLinkSelf().setValue(theCompleteUrl);
 
+		List<IResource> addedResources = new ArrayList<IResource>();
+		Set<IdDt> addedResourceIds = new HashSet<IdDt>();
 		for (IResource next : theResult) {
 
 			if (theContext.getNarrativeGenerator() != null) {
@@ -816,9 +822,35 @@ public class RestfulServer extends HttpServlet {
 				ourLog.trace("No narrative generator specified");
 			}
 
+			List<ResourceReferenceDt> references = theContext.newTerser().getAllPopulatedChildElementsOfType(next, ResourceReferenceDt.class);
+			for (ResourceReferenceDt nextRef : references) {
+				IResource nextRes = nextRef.getResource();
+				if (nextRes != null) {
+					if (nextRes.getId().hasIdPart()) {
+						IdDt id = nextRes.getId().toVersionless();
+						if (id.hasResourceType()==false) {
+							String resName = theContext.getResourceDefinition(nextRes).getName();
+							id = id.withResourceType(resName);
+						}
+						
+						if (!addedResourceIds.contains(id)) {
+							addedResourceIds.add(id);
+							addedResources.add(nextRes);
+						}
+						
+						nextRef.setResource(null);
+						nextRef.setReference(id);
+					}
+				}
+			}
+			
 			bundle.addResource(next, theContext, theServerBase);
 		}
 
+		for (IResource next : addedResources) {
+			bundle.addResource(next, theContext, theServerBase);
+		}
+		
 		bundle.getTotalResults().setValue(theTotalResults);
 		return bundle;
 	}

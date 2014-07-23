@@ -391,6 +391,27 @@ public class XmlParserTest {
 		assertThat(bundleString, not(containsString("at:by")));
 		
 	}
+
+	
+	@Test
+	public void testEncodeContainedAndIncludedResources() {
+
+		DiagnosticReport rpt = new DiagnosticReport();
+		rpt.getName().setText("Report");
+		
+		Specimen spm = new Specimen();
+		spm.addIdentifier().setLabel("Report1ContainedSpecimen1");
+		rpt.addSpecimen().setResource(spm);
+
+		IParser p = ourCtx.newXmlParser().setPrettyPrint(true);
+		String str = p.encodeResourceToString(rpt);
+
+		ourLog.info(str);
+		
+		
+	}
+
+	
 	
 	@Test
 	public void testEncodeContainedResources() {
