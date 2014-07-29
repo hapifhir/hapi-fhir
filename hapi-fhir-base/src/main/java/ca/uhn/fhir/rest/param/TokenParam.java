@@ -28,6 +28,8 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.dstu.composite.CodingDt;
+import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
+import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.rest.server.Constants;
 
 public class TokenParam implements IQueryParameterType {
@@ -61,7 +63,21 @@ public class TokenParam implements IQueryParameterType {
 	 * @param theCodingDt The coding
 	 */
 	public TokenParam(CodingDt theCodingDt) {
-		this(theCodingDt.getSystem().getValue().toASCIIString(), theCodingDt.getCode().getValue());
+		this(toSystemValue(theCodingDt.getSystem()), theCodingDt.getCode().getValue());
+	}
+
+	/**
+	 * Constructor which copies the {@link IdentifierDt#getSystem() system} and {@link IdentifierDt#getValue() value} from a {@link IdentifierDt} 
+	 * instance and adds it as a parameter
+	 * 
+	 * @param theCodingDt The coding
+	 */
+	public TokenParam(IdentifierDt theIdentifierDt) {
+		this(toSystemValue(theIdentifierDt.getSystem()), theIdentifierDt.getValue().getValue());
+	}
+
+	private static String toSystemValue(UriDt theSystem) {
+		return theSystem.getValueAsString();
 	}
 
 	@Override

@@ -1,6 +1,6 @@
-package ca.uhn.fhir.rest.gclient;
+package ca.uhn.fhir.rest.param;
 
-import ca.uhn.fhir.rest.param.ParameterUtil;
+import ca.uhn.fhir.model.api.IQueryParameterType;
 
 /*
  * #%L
@@ -22,24 +22,22 @@ import ca.uhn.fhir.rest.param.ParameterUtil;
  * #L%
  */
 
-class StringCriterion<A extends IParam> implements ICriterion<A>, ICriterionInternal {
 
-	private String myValue;
-	private String myName;
+public class CompositeAndListParam<A extends IQueryParameterType, B extends IQueryParameterType> extends BaseAndListParam<CompositeOrListParam<A,B>> {
 
-	public StringCriterion(String theName, String theValue) {
-		myValue = theValue;
-		myName=theName;
+	private Class<A> myLeftType;
+	private Class<B> myRightType;
+
+	public CompositeAndListParam(Class<A> theLeftType, Class<B> theRightType) {
+		super();
+		myLeftType = theLeftType;
+		myRightType = theRightType;
 	}
 
 	@Override
-	public String getParameterName() {
-		return myName;
+	CompositeOrListParam<A,B> newInstance() {
+		return new CompositeOrListParam<A,B>(myLeftType, myRightType);
 	}
-
-	@Override
-	public String getParameterValue() {
-		return ParameterUtil.escape(myValue);
-	}
-
+	
+	
 }

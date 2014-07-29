@@ -37,6 +37,7 @@ import ca.uhn.fhir.rest.gclient.IGetPage;
 import ca.uhn.fhir.rest.gclient.IGetTags;
 import ca.uhn.fhir.rest.gclient.ITransaction;
 import ca.uhn.fhir.rest.gclient.IUntypedQuery;
+import ca.uhn.fhir.rest.gclient.IUpdate;
 
 public interface IGenericClient {
 	/**
@@ -267,5 +268,10 @@ public interface IGenericClient {
 	 * Fluent method for the "delete" operation, which performs a logical delete on a server resource
 	 */
 	IDelete delete();
+
+	/**
+	 * Fluent method for the "update" operation, which performs a logical delete on a server resource
+	 */
+	IUpdate update();
 
 }

@@ -31,16 +31,16 @@ public class NumberClientParam implements IParam {
 		myParamName = theParamName;
 	}
 
-	public IMatches<ICriterion> exactly() {
-		return new IMatches<ICriterion>() {
+	public IMatches<ICriterion<NumberClientParam>> exactly() {
+		return new IMatches<ICriterion<NumberClientParam>>() {
 			@Override
-			public ICriterion number(long theNumber) {
-				return new StringCriterion(getParamName(), Long.toString(theNumber));
+			public ICriterion<NumberClientParam> number(long theNumber) {
+				return new StringCriterion<NumberClientParam>(getParamName(), Long.toString(theNumber));
 			}
 
 			@Override
-			public ICriterion number(String theNumber) {
-				return new StringCriterion(getParamName(), (theNumber));
+			public ICriterion<NumberClientParam> number(String theNumber) {
+				return new StringCriterion<NumberClientParam>(getParamName(), (theNumber));
 			}
 		};
 	}
@@ -50,58 +50,58 @@ public class NumberClientParam implements IParam {
 		return myParamName;
 	}
 
-	public IMatches<ICriterion> greaterThan() {
-		return new IMatches<ICriterion>() {
+	public IMatches<ICriterion<NumberClientParam>> greaterThan() {
+		return new IMatches<ICriterion<NumberClientParam>>() {
 			@Override
-			public ICriterion number(long theNumber) {
-				return new StringCriterion(getParamName(), ">" + Long.toString(theNumber));
+			public ICriterion<NumberClientParam> number(long theNumber) {
+				return new StringCriterion<NumberClientParam>(getParamName(), ">" + Long.toString(theNumber));
 			}
 
 			@Override
-			public ICriterion number(String theNumber) {
-				return new StringCriterion(getParamName(), ">" + (theNumber));
-			}
-		};
-	}
-
-	public IMatches<ICriterion> greaterThanOrEqual() {
-		return new IMatches<ICriterion>() {
-			@Override
-			public ICriterion number(long theNumber) {
-				return new StringCriterion(getParamName(), ">=" + Long.toString(theNumber));
-			}
-
-			@Override
-			public ICriterion number(String theNumber) {
-				return new StringCriterion(getParamName(), ">=" + (theNumber));
+			public ICriterion<NumberClientParam> number(String theNumber) {
+				return new StringCriterion<NumberClientParam>(getParamName(), ">" + (theNumber));
 			}
 		};
 	}
 
-	public IMatches<ICriterion> lessThan() {
-		return new IMatches<ICriterion>() {
+	public IMatches<ICriterion<NumberClientParam>> greaterThanOrEqual() {
+		return new IMatches<ICriterion<NumberClientParam>>() {
 			@Override
-			public ICriterion number(long theNumber) {
-				return new StringCriterion(getParamName(), "<" + Long.toString(theNumber));
+			public ICriterion<NumberClientParam> number(long theNumber) {
+				return new StringCriterion<NumberClientParam>(getParamName(), ">=" + Long.toString(theNumber));
 			}
 
 			@Override
-			public ICriterion number(String theNumber) {
-				return new StringCriterion(getParamName(), "<" + (theNumber));
+			public ICriterion<NumberClientParam> number(String theNumber) {
+				return new StringCriterion<NumberClientParam>(getParamName(), ">=" + (theNumber));
 			}
 		};
 	}
 
-	public IMatches<ICriterion> lessThanOrEqual() {
-		return new IMatches<ICriterion>() {
+	public IMatches<ICriterion<NumberClientParam>> lessThan() {
+		return new IMatches<ICriterion<NumberClientParam>>() {
 			@Override
-			public ICriterion number(long theNumber) {
-				return new StringCriterion(getParamName(), "<=" + Long.toString(theNumber));
+			public ICriterion<NumberClientParam> number(long theNumber) {
+				return new StringCriterion<NumberClientParam>(getParamName(), "<" + Long.toString(theNumber));
 			}
 
 			@Override
-			public ICriterion number(String theNumber) {
-				return new StringCriterion(getParamName(), "<=" + (theNumber));
+			public ICriterion<NumberClientParam> number(String theNumber) {
+				return new StringCriterion<NumberClientParam>(getParamName(), "<" + (theNumber));
+			}
+		};
+	}
+
+	public IMatches<ICriterion<NumberClientParam>> lessThanOrEqual() {
+		return new IMatches<ICriterion<NumberClientParam>>() {
+			@Override
+			public ICriterion<NumberClientParam> number(long theNumber) {
+				return new StringCriterion<NumberClientParam>(getParamName(), "<=" + Long.toString(theNumber));
+			}
+
+			@Override
+			public ICriterion<NumberClientParam> number(String theNumber) {
+				return new StringCriterion<NumberClientParam>(getParamName(), "<=" + (theNumber));
 			}
 		};
 	}

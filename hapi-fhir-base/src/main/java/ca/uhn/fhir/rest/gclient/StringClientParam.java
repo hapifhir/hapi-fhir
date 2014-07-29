@@ -59,33 +59,33 @@ public class StringClientParam implements IParam {
 
 	public interface IStringMatch {
 
-		ICriterion value(String theValue);
+		ICriterion<StringClientParam> value(String theValue);
 
-		ICriterion value(StringDt theValue);
+		ICriterion<StringClientParam> value(StringDt theValue);
 
 	}
 
 	private class StringExactly implements IStringMatch {
 		@Override
-		public ICriterion value(String theValue) {
-			return new StringCriterion(getParamName() + Constants.PARAMQUALIFIER_STRING_EXACT, theValue);
+		public ICriterion<StringClientParam> value(String theValue) {
+			return new StringCriterion<StringClientParam>(getParamName() + Constants.PARAMQUALIFIER_STRING_EXACT, theValue);
 		}
 
 		@Override
-		public ICriterion value(StringDt theValue) {
-			return new StringCriterion(getParamName() + Constants.PARAMQUALIFIER_STRING_EXACT, theValue.getValue());
+		public ICriterion<StringClientParam> value(StringDt theValue) {
+			return new StringCriterion<StringClientParam>(getParamName() + Constants.PARAMQUALIFIER_STRING_EXACT, theValue.getValue());
 		}
 	}
 
 	private class StringMatches implements IStringMatch {
 		@Override
-		public ICriterion value(String theValue) {
-			return new StringCriterion(getParamName(), theValue);
+		public ICriterion<StringClientParam> value(String theValue) {
+			return new StringCriterion<StringClientParam>(getParamName(), theValue);
 		}
 
 		@Override
-		public ICriterion value(StringDt theValue) {
-			return new StringCriterion(getParamName(), theValue.getValue());
+		public ICriterion<StringClientParam> value(StringDt theValue) {
+			return new StringCriterion<StringClientParam>(getParamName(), theValue.getValue());
 		}
 	}
 

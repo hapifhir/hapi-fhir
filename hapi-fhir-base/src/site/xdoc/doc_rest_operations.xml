@@ -727,6 +727,34 @@
 
 			</subsection>
 
+			<subsection name="Search Parameters: Composite">
+
+				<p>
+					Composite search parameters incorporate two parameters in a single
+					value. Each of those parameters will themselves have a parameter type.
+				</p>
+
+				<p>
+					In the following example, Observation.name-value-date is shown. This parameter
+					is a composite of a string and a date. Note that the composite parameter types
+					(StringParam and DateParam) must be specified in both the annotation's 
+					<code>compositeTypes</code> field, as well as the generic types for the
+					<code>CompositeParam</code> method parameter itself.
+				</p>
+				
+				<macro name="snippet">
+					<param name="id" value="searchComposite" />
+					<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
+				</macro>
+
+				<p>
+					Example URL to invoke this method:
+					<br />
+					<code>http://fhir.example.com/Observation?name-value-date=PROCTIME$2001-02-02</code>
+				</p>
+
+			</subsection>
+
 			<subsection name="Combining Multiple Parameters">
 
 				<p>

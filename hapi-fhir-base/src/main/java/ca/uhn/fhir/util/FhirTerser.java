@@ -22,7 +22,9 @@ package ca.uhn.fhir.util;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
+import java.util.TreeSet;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
@@ -153,7 +155,21 @@ public class FhirTerser {
 						}
 						BaseRuntimeElementDefinition<?> childElementDef = nextChild.getChildElementDefinitionByDatatype(nextValue.getClass());
 						if (childElementDef == null) {
-							throw new DataFormatException("Found value of type[" + nextValue.getClass().getSimpleName() + "] which is not valid for field[" + nextChild.getElementName() + "] in " + childDef.getName());
+							StringBuilder b = new StringBuilder();
+							b.append("Found value of type[");
+							b.append(nextValue.getClass().getSimpleName());
+							b.append("] which is not valid for field[");
+							b.append(nextChild.getElementName());
+							b.append("] in ");
+							b.append(childDef.getName());
+							b.append(" - Valid types: ");
+							for (Iterator<String> iter = new TreeSet<String>(nextChild.getValidChildNames()).iterator(); iter.hasNext();) {
+								b.append(nextChild.getChildByName(iter.next()).getImplementingClass().getSimpleName());
+								if (iter.hasNext()) {
+									b.append(", ");
+								}
+							}
+							throw new DataFormatException(b.toString());
 						}
 						getAllChildElementsOfType(nextValue, childElementDef, theType, theList);
 					}

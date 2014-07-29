@@ -7,6 +7,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.resource.Conformance;
+import ca.uhn.fhir.model.dstu.resource.Observation;
 import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
 import ca.uhn.fhir.model.dstu.resource.Organization;
 import ca.uhn.fhir.model.dstu.resource.Patient;
@@ -55,6 +56,25 @@ client.create()
 //END SNIPPET: create
 }
 {
+//START SNIPPET: update
+Patient patient = new Patient();
+// ..populate the patient object..
+patient.addIdentifier("urn:system", "12345");
+patient.addName().addFamily("Smith").addGiven("John");
+
+// To update a resource, it should have an ID set (if the resource object
+// comes from the results of a previous read or search, it will already
+// have one though) 
+patient.setId("Patient/123");
+
+// Invoke the server create method (and send pretty-printed JSON encoding to the server
+// instead of the default which is non-pretty printed XML)
+client.update()
+   .resource(patient)
+   .execute();
+//END SNIPPET: update
+}
+{
 //START SNIPPET: conformance
 // Retrieve the server's conformance statement and print its description
 Conformance conf = client.conformance();
@@ -96,6 +116,16 @@ response = client.search()
    .limitTo(123)
    .execute();
 //END SNIPPET: searchAdv
+
+//START SNIPPET: searchComposite
+response = client.search()
+   .forResource("Observation")
+   .where(Observation.NAME_VALUE_DATE
+      .withLeft(Observation.NAME.exactly().code("FOO$BAR"))
+      .withRight(Observation.VALUE_DATE.exactly().day("2001-01-01"))
+      )
+   .execute();
+//END SNIPPET: searchComposite
 
 //START SNIPPET: searchPaging
 if (response.getLinkNext().isEmpty() == false) {

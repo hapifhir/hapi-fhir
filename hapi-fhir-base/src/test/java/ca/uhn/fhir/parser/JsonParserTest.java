@@ -28,7 +28,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.api.ExtensionDt;
-import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.api.annotation.Child;
@@ -113,8 +112,11 @@ public class JsonParserTest {
 				"    }" + 
 				"}";
 		//@formatter:on
-		IResource res = ourCtx.newJsonParser().parseResource(text);
 		
+		Patient res = (Patient) ourCtx.newJsonParser().parseResource(text);
+		String value = res.getText().getDiv().getValueAsString();
+		
+		assertNull(value);
 	}
 
 	

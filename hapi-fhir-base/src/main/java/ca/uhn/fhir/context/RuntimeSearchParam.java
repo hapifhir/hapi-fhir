@@ -1,5 +1,7 @@
 package ca.uhn.fhir.context;
 
+import java.util.List;
+
 import ca.uhn.fhir.model.dstu.valueset.SearchParamTypeEnum;
 
 /*
@@ -22,30 +24,29 @@ import ca.uhn.fhir.model.dstu.valueset.SearchParamTypeEnum;
  * #L%
  */
 
-
 public class RuntimeSearchParam {
 
 	private String myDescription;
 	private String myName;
-	private String myPath;
 	private SearchParamTypeEnum myParamType;
-//	private List<String> myPathParts;
+	private String myPath;
+	private List<RuntimeSearchParam> myCompositeOf;
 
 	public RuntimeSearchParam(String theName, String theDescription, String thePath, SearchParamTypeEnum theParamType) {
+		this(theName, theDescription, thePath, theParamType, null);
+	}
+
+	public RuntimeSearchParam(String theName, String theDescription, String thePath, SearchParamTypeEnum theParamType, List<RuntimeSearchParam> theCompositeOf) {
 		super();
 		myName = theName;
 		myDescription = theDescription;
-		myPath=thePath;
-		myParamType=theParamType;
-//		myPathParts = Arrays.asList(thePath.split("\\."));
+		myPath = thePath;
+		myParamType = theParamType;
+		myCompositeOf = theCompositeOf;
 	}
 
-	public SearchParamTypeEnum getParamType() {
-		return myParamType;
-	}
-
-	public String getPath() {
-		return myPath;
+	public List<RuntimeSearchParam> getCompositeOf() {
+		return myCompositeOf;
 	}
 
 	public String getDescription() {
@@ -56,5 +57,12 @@ public class RuntimeSearchParam {
 		return myName;
 	}
 
+	public SearchParamTypeEnum getParamType() {
+		return myParamType;
+	}
+
+	public String getPath() {
+		return myPath;
+	}
 
 }

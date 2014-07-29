@@ -75,6 +75,11 @@
 				are encoded even if they have no value. Thanks to David Hay of Orion for
 				reporting this!
 			</action>
+			<action type="fix">
+				Fix: RESTful server deployed to a location where the URL to access it contained a
+				space (e.g. a WAR file with a space in the name) failed to work correctly.
+				Thanks to David Hay of Orion for reporting this!
+			</action>
         </release>			
 		<release version="0.4" date="2014-Jul-13">
 			<action type="add">

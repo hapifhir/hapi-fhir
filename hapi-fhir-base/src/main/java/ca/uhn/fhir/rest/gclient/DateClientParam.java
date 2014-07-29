@@ -61,7 +61,7 @@ public class DateClientParam implements IParam {
 		return new DateWithPrefix("");
 	}
 
-	private class Criterion implements ICriterion, ICriterionInternal {
+	private class Criterion implements ICriterion<DateClientParam>, ICriterionInternal {
 
 		private String myValue;
 
@@ -89,35 +89,35 @@ public class DateClientParam implements IParam {
 		}
 
 		@Override
-		public ICriterion day(Date theValue) {
+		public ICriterion<DateClientParam> day(Date theValue) {
 			DateTimeDt dt = new DateTimeDt(theValue);
 			dt.setPrecision(TemporalPrecisionEnum.DAY);
 			return new Criterion(myPrefix + dt.getValueAsString());
 		}
 
 		@Override
-		public ICriterion day(String theValue) {
+		public ICriterion<DateClientParam> day(String theValue) {
 			DateTimeDt dt = new DateTimeDt(theValue);
 			dt.setPrecision(TemporalPrecisionEnum.DAY);
 			return new Criterion(myPrefix + dt.getValueAsString());
 		}
 
 		@Override
-		public ICriterion now() {
+		public ICriterion<DateClientParam> now() {
 			DateTimeDt dt = new DateTimeDt();
 			dt.setPrecision(TemporalPrecisionEnum.DAY);
 			return new Criterion(myPrefix + dt.getValueAsString());
 		}
 
 		@Override
-		public ICriterion second(Date theValue) {
+		public ICriterion<DateClientParam> second(Date theValue) {
 			DateTimeDt dt = new DateTimeDt(theValue);
 			dt.setPrecision(TemporalPrecisionEnum.DAY);
 			return new Criterion(myPrefix + dt.getValueAsString());
 		}
 
 		@Override
-		public ICriterion second(String theValue) {
+		public ICriterion<DateClientParam> second(String theValue) {
 			DateTimeDt dt = new DateTimeDt(theValue);
 			dt.setPrecision(TemporalPrecisionEnum.DAY);
 			return new Criterion(myPrefix + dt.getValueAsString());
@@ -127,15 +127,15 @@ public class DateClientParam implements IParam {
 
 	public interface IDateSpecifier {
 
-		ICriterion day(Date theValue);
+		ICriterion<DateClientParam> day(Date theValue);
 
-		ICriterion day(String theValue);
+		ICriterion<DateClientParam> day(String theValue);
 
-		ICriterion now();
+		ICriterion<DateClientParam> now();
 
-		ICriterion second(Date theValue);
+		ICriterion<DateClientParam> second(Date theValue);
 
-		ICriterion second(String theValue);
+		ICriterion<DateClientParam> second(String theValue);
 
 	}
 

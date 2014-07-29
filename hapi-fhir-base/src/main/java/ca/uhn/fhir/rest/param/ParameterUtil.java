@@ -52,23 +52,21 @@ public class ParameterUtil {
 
 	}
 
-	
-
 	// public static Integer findSinceParameterIndex(Method theMethod) {
 	// return findParamIndex(theMethod, Since.class);
 	// }
 
 	public static int nonEscapedIndexOf(String theString, char theCharacter) {
-		for (int i =0; i < theString.length(); i++) {
-			if (theString.charAt(i)==theCharacter) {
-				if (i == 0 || theString.charAt(i-1) != '\\') {
+		for (int i = 0; i < theString.length(); i++) {
+			if (theString.charAt(i) == theCharacter) {
+				if (i == 0 || theString.charAt(i - 1) != '\\') {
 					return i;
 				}
 			}
 		}
 		return -1;
 	}
-	
+
 	public static Object fromInstant(Class<?> theType, InstantDt theArgument) {
 		if (theType.equals(InstantDt.class)) {
 			if (theArgument == null) {
@@ -138,19 +136,28 @@ public class ParameterUtil {
 		return null;
 	}
 
-	public static List<String> splitParameterString(String theInput, boolean theUnescapeComponents){
+	static List<String> splitParameterString(String theInput, boolean theUnescapeComponents) {
+		return splitParameterString(theInput, ',', theUnescapeComponents);
+	}
+
+	static List<String> splitParameterString(String theInput, char theDelimiter, boolean theUnescapeComponents) {
 		ArrayList<String> retVal = new ArrayList<String>();
-		if (theInput!=null) {
+		if (theInput != null) {
 			StringBuilder b = new StringBuilder();
 			for (int i = 0; i < theInput.length(); i++) {
 				char next = theInput.charAt(i);
-				if (next == ',') {
-					if (i == 0 || theInput.charAt(i-1) != '\\') {
+				if (next == theDelimiter) {
+					if (i == 0) {
 						b.append(next);
 					} else {
-						if (b.length() > 0) {
-							retVal.add(b.toString());
-							b.setLength(0);
+						char prevChar = theInput.charAt(i - 1);
+						if (prevChar == '\\') {
+							b.append(next);
+						} else {
+							if (b.length() > 0) {
+								retVal.add(b.toString());
+								b.setLength(0);
+							}
 						}
 					}
 				} else {
@@ -161,28 +168,27 @@ public class ParameterUtil {
 				retVal.add(b.toString());
 			}
 		}
-		
+
 		if (theUnescapeComponents) {
-			for (int i = 0; i < retVal.size();i++) {
-				retVal.set(i,unescape(retVal.get(i)));
+			for (int i = 0; i < retVal.size(); i++) {
+				retVal.set(i, unescape(retVal.get(i)));
 			}
 		}
-		
+
 		return retVal;
 	}
-	
-	
+
 	/**
-	 * Escapes a string according to the rules for parameter escaping specified
-	 * in the <a href="http://www.hl7.org/implement/standards/fhir/search.html#escaping">FHIR Specification Escaping Section</a>
+	 * Escapes a string according to the rules for parameter escaping specified in the <a
+	 * href="http://www.hl7.org/implement/standards/fhir/search.html#escaping">FHIR Specification Escaping Section</a>
 	 */
 	public static String escape(String theValue) {
 		if (theValue == null) {
 			return theValue;
 		}
 		StringBuilder b = new StringBuilder();
-		
-		for (int i = 0; i < theValue.length();i++) {
+
+		for (int i = 0; i < theValue.length(); i++) {
 			char next = theValue.charAt(i);
 			switch (next) {
 			case '$':
@@ -194,31 +200,31 @@ public class ParameterUtil {
 				b.append(next);
 			}
 		}
-		
+
 		return b.toString();
 	}
 
 	/**
-	 * Unescapes a string according to the rules for parameter escaping specified
-	 * in the <a href="http://www.hl7.org/implement/standards/fhir/search.html#escaping">FHIR Specification Escaping Section</a>
+	 * Unescapes a string according to the rules for parameter escaping specified in the <a
+	 * href="http://www.hl7.org/implement/standards/fhir/search.html#escaping">FHIR Specification Escaping Section</a>
 	 */
 	public static String unescape(String theValue) {
 		if (theValue == null) {
 			return theValue;
 		}
-		if (theValue.indexOf('\\')==-1) {
+		if (theValue.indexOf('\\') == -1) {
 			return theValue;
 		}
 
 		StringBuilder b = new StringBuilder();
-		
-		for (int i = 0; i < theValue.length();i++) {
+
+		for (int i = 0; i < theValue.length(); i++) {
 			char next = theValue.charAt(i);
 			if (next == '\\') {
-				if (i == theValue.length()-1) {
+				if (i == theValue.length() - 1) {
 					b.append(next);
 				} else {
-					switch (theValue.charAt(i+1)) {
+					switch (theValue.charAt(i + 1)) {
 					case '$':
 					case ',':
 					case '|':
@@ -231,7 +237,7 @@ public class ParameterUtil {
 				b.append(next);
 			}
 		}
-		
+
 		return b.toString();
 	}
 

@@ -418,7 +418,7 @@ public class RestfulServer extends HttpServlet {
 			IdDt versionId = null;
 			String operation = null;
 
-			String requestPath = requestFullPath.substring(servletContextPath.length() + servletPath.length());
+			String requestPath = requestFullPath.substring(escapedLength(servletContextPath) + escapedLength(servletPath));
 			if (requestPath.length() > 0 && requestPath.charAt(0) == '/') {
 				requestPath = requestPath.substring(1);
 			}
@@ -597,6 +597,20 @@ public class RestfulServer extends HttpServlet {
 
 		}
 
+	}
+
+	/**
+	 * Count length of URL string, but treating unescaped sequences (e.g. ' ') as their unescaped equivalent (%20)
+	 */
+	private int escapedLength(String theServletPath) {
+		int delta = 0;
+		for(int i =0;i<theServletPath.length();i++) {
+			char next = theServletPath.charAt(i);
+			if (next == ' ') {
+				delta = delta + 2;
+			}
+		}
+		return theServletPath.length()+delta;
 	}
 
 	/**

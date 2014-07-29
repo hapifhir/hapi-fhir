@@ -29,7 +29,7 @@ public class ${className}ResourceProvider extends JpaResourceProvider<${classNam
 			@Description(shortDefinition="The resource identity")
 			@OptionalParam(name="_id")
 			StringParam theId, 
-#foreach ( $param in $searchParamsWithoutComposite ) #{if}(true) #{end} 
+#foreach ( $param in $searchParams ) #{if}(true) #{end} 
 
 			@Description(shortDefinition="${param.description}")
 #if (${param.type} == 'string' )
@@ -43,16 +43,16 @@ public class ${className}ResourceProvider extends JpaResourceProvider<${classNam
 			DateRangeParam the${param.nameCapitalized}, 
 #elseif (${param.type} == 'quantity' )
 			@OptionalParam(name="${param.name}")
-			QuantityDt the${param.nameCapitalized}, 
+			QuantityAndListParam the${param.nameCapitalized}, 
 #elseif (${param.type} == 'number' )
 			@OptionalParam(name="${param.name}")
-			QuantityDt the${param.nameCapitalized}, 
+			NumberAndListParam the${param.nameCapitalized}, 
 #elseif (${param.type} == 'reference' )
 			@OptionalParam(name="${param.name}", targetTypes={ #{foreach}($nextType in ${param.targetTypes}) ${nextType}.class #{if}($foreach.hasNext), #{end} #{end} } )
-			ReferenceParam the${param.nameCapitalized}, 
+			ReferenceAndListParam the${param.nameCapitalized}, 
 #elseif (${param.type} == 'composite' )
-			@OptionalParam(name="${param.name}")
-			ReferenceParam the${param.nameCapitalized}, 
+			@OptionalParam(name="${param.name}", compositeTypes= { ${param.compositeTypes[0]}Param.class, ${param.compositeTypes[1]}Param.class })
+			CompositeAndListParam<${param.compositeTypes[0]}Param, ${param.compositeTypes[1]}Param> the${param.nameCapitalized},
 #end
 #end	
 
@@ -71,7 +71,7 @@ public class ${className}ResourceProvider extends JpaResourceProvider<${classNam
 		try {
 			SearchParameterMap paramMap = new SearchParameterMap();
 			paramMap.add("_id", theId);					
-#foreach ( $param in $searchParamsWithoutComposite ) 
+#foreach ( $param in $searchParams ) 
 			paramMap.add("${param.name}", the${param.nameCapitalized});	
 #end
 

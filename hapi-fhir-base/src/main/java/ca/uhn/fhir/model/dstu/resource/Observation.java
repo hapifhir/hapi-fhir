@@ -16,26 +16,6 @@
 
 package ca.uhn.fhir.model.dstu.resource;
 
-/*
- * #%L
- * HAPI FHIR - Core Library
- * %%
- * Copyright (C) 2014 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 
 import java.util.Date;
 import java.util.List;
@@ -63,13 +43,8 @@ import ca.uhn.fhir.model.dstu.composite.RatioDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.composite.SampledDataDt;
 import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
-import ca.uhn.fhir.model.dstu.valueset.ObservationInterpretationCodesEnum;
-import ca.uhn.fhir.model.dstu.valueset.ObservationRelationshipTypeEnum;
-import ca.uhn.fhir.model.dstu.valueset.ObservationReliabilityEnum;
 import ca.uhn.fhir.model.dstu.valueset.ObservationStatusEnum;
 import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
-import ca.uhn.fhir.model.primitive.BoundCodeDt;
-import ca.uhn.fhir.model.primitive.BoundCodeableConceptDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
@@ -113,7 +88,7 @@ public class Observation extends BaseResource implements IResource {
 	 * Path: <b>Observation.name</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="name", path="Observation.name", description="The name of the observation type", type="token")
+	@SearchParamDefinition(name="name", path="Observation.name", description="The name of the observation type", type="token"  )
 	public static final String SP_NAME = "name";
 
 	/**
@@ -134,7 +109,7 @@ public class Observation extends BaseResource implements IResource {
 	 * Path: <b>Observation.value[x]</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="value-quantity", path="Observation.value[x]", description="The value of the observation, if the value is a Quantity, or a SampledData (just search on the bounds of the values in sampled data)", type="quantity")
+	@SearchParamDefinition(name="value-quantity", path="Observation.value[x]", description="The value of the observation, if the value is a Quantity, or a SampledData (just search on the bounds of the values in sampled data)", type="quantity"  )
 	public static final String SP_VALUE_QUANTITY = "value-quantity";
 
 	/**
@@ -155,7 +130,7 @@ public class Observation extends BaseResource implements IResource {
 	 * Path: <b>Observation.value[x]</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="value-concept", path="Observation.value[x]", description="The value of the observation, if the value is a CodeableConcept", type="token")
+	@SearchParamDefinition(name="value-concept", path="Observation.value[x]", description="The value of the observation, if the value is a CodeableConcept", type="token"  )
 	public static final String SP_VALUE_CONCEPT = "value-concept";
 
 	/**
@@ -176,7 +151,7 @@ public class Observation extends BaseResource implements IResource {
 	 * Path: <b>Observation.value[x]</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="value-date", path="Observation.value[x]", description="The value of the observation, if the value is a Period", type="date")
+	@SearchParamDefinition(name="value-date", path="Observation.value[x]", description="The value of the observation, if the value is a Period", type="date"  )
 	public static final String SP_VALUE_DATE = "value-date";
 
 	/**
@@ -197,7 +172,7 @@ public class Observation extends BaseResource implements IResource {
 	 * Path: <b>Observation.value[x]</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="value-string", path="Observation.value[x]", description="The value of the observation, if the value is a string, and also searches in CodeableConcept.text", type="string")
+	@SearchParamDefinition(name="value-string", path="Observation.value[x]", description="The value of the observation, if the value is a string, and also searches in CodeableConcept.text", type="string"  )
 	public static final String SP_VALUE_STRING = "value-string";
 
 	/**
@@ -211,27 +186,6 @@ public class Observation extends BaseResource implements IResource {
 	public static final StringClientParam VALUE_STRING = new StringClientParam(SP_VALUE_STRING);
 
 	/**
-	 * Search parameter constant for <b>name-value-[x]</b>
-	 * <p>
-	 * Description: <b>Both name and one of the value parameters</b><br/>
-	 * Type: <b>composite</b><br/>
-	 * Path: <b>name & value-[x]</b><br/>
-	 * </p>
-	 */
-	@SearchParamDefinition(name="name-value-[x]", path="name & value-[x]", description="Both name and one of the value parameters", type="composite")
-	public static final String SP_NAME_VALUE_X = "name-value-[x]";
-
-	/**
-	 * <b>Fluent Client</b> search parameter constant for <b>name-value-[x]</b>
-	 * <p>
-	 * Description: <b>Both name and one of the value parameters</b><br/>
-	 * Type: <b>composite</b><br/>
-	 * Path: <b>name & value-[x]</b><br/>
-	 * </p>
-	 */
-	public static final CompositeClientParam NAME_VALUE_X = new CompositeClientParam(SP_NAME_VALUE_X);
-
-	/**
 	 * Search parameter constant for <b>date</b>
 	 * <p>
 	 * Description: <b>Obtained date/time. If the obtained element is a period, a date that falls in the period</b><br/>
@@ -239,7 +193,7 @@ public class Observation extends BaseResource implements IResource {
 	 * Path: <b>Observation.applies[x]</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="date", path="Observation.applies[x]", description="Obtained date/time. If the obtained element is a period, a date that falls in the period", type="date")
+	@SearchParamDefinition(name="date", path="Observation.applies[x]", description="Obtained date/time. If the obtained element is a period, a date that falls in the period", type="date"  )
 	public static final String SP_DATE = "date";
 
 	/**
@@ -260,7 +214,7 @@ public class Observation extends BaseResource implements IResource {
 	 * Path: <b>Observation.status</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="status", path="Observation.status", description="The status of the observation", type="token")
+	@SearchParamDefinition(name="status", path="Observation.status", description="The status of the observation", type="token"  )
 	public static final String SP_STATUS = "status";
 
 	/**
@@ -281,7 +235,7 @@ public class Observation extends BaseResource implements IResource {
 	 * Path: <b>Observation.reliability</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="reliability", path="Observation.reliability", description="The reliability of the observation", type="token")
+	@SearchParamDefinition(name="reliability", path="Observation.reliability", description="The reliability of the observation", type="token"  )
 	public static final String SP_RELIABILITY = "reliability";
 
 	/**
@@ -302,7 +256,7 @@ public class Observation extends BaseResource implements IResource {
 	 * Path: <b>Observation.subject</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="subject", path="Observation.subject", description="The subject that the observation is about", type="reference")
+	@SearchParamDefinition(name="subject", path="Observation.subject", description="The subject that the observation is about", type="reference"  )
 	public static final String SP_SUBJECT = "subject";
 
 	/**
@@ -329,7 +283,7 @@ public class Observation extends BaseResource implements IResource {
 	 * Path: <b>Observation.performer</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="performer", path="Observation.performer", description="Who and/or what performed the observation", type="reference")
+	@SearchParamDefinition(name="performer", path="Observation.performer", description="Who and/or what performed the observation", type="reference"  )
 	public static final String SP_PERFORMER = "performer";
 
 	/**
@@ -356,7 +310,7 @@ public class Observation extends BaseResource implements IResource {
 	 * Path: <b>Observation.specimen</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="specimen", path="Observation.specimen", description="", type="reference")
+	@SearchParamDefinition(name="specimen", path="Observation.specimen", description="", type="reference"  )
 	public static final String SP_SPECIMEN = "specimen";
 
 	/**
@@ -383,7 +337,7 @@ public class Observation extends BaseResource implements IResource {
 	 * Path: <b>Observation.related.type</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="related-type", path="Observation.related.type", description="", type="token")
+	@SearchParamDefinition(name="related-type", path="Observation.related.type", description="", type="token"  )
 	public static final String SP_RELATED_TYPE = "related-type";
 
 	/**
@@ -404,7 +358,7 @@ public class Observation extends BaseResource implements IResource {
 	 * Path: <b>Observation.related.target</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="related-target", path="Observation.related.target", description="", type="reference")
+	@SearchParamDefinition(name="related-target", path="Observation.related.target", description="", type="reference"  )
 	public static final String SP_RELATED_TARGET = "related-target";
 
 	/**
@@ -424,25 +378,109 @@ public class Observation extends BaseResource implements IResource {
 	public static final Include INCLUDE_RELATED_TARGET = new Include("Observation.related.target");
 
 	/**
-	 * Search parameter constant for <b>related</b>
+	 * Search parameter constant for <b>name-value-quantity</b>
 	 * <p>
-	 * Description: <b>Related Observations - search on related-type and related-target together</b><br/>
+	 * Description: <b>Both name and one of the value parameters</b><br/>
 	 * Type: <b>composite</b><br/>
-	 * Path: <b>related-target & related-type</b><br/>
+	 * Path: <b>name & value-[x]</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="related", path="related-target & related-type", description="Related Observations - search on related-type and related-target together", type="composite")
-	public static final String SP_RELATED = "related";
+	@SearchParamDefinition(name="name-value-quantity", path="name & value-[x]", description="Both name and one of the value parameters", type="composite"  , compositeOf={  "name",  "value-quantity" }  )
+	public static final String SP_NAME_VALUE_QUANTITY = "name-value-quantity";
 
 	/**
-	 * <b>Fluent Client</b> search parameter constant for <b>related</b>
+	 * <b>Fluent Client</b> search parameter constant for <b>name-value-quantity</b>
+	 * <p>
+	 * Description: <b>Both name and one of the value parameters</b><br/>
+	 * Type: <b>composite</b><br/>
+	 * Path: <b>name & value-[x]</b><br/>
+	 * </p>
+	 */
+	public static final CompositeClientParam<TokenClientParam, QuantityClientParam> NAME_VALUE_QUANTITY = new CompositeClientParam<TokenClientParam, QuantityClientParam>(SP_NAME_VALUE_QUANTITY);
+
+	/**
+	 * Search parameter constant for <b>name-value-concept</b>
+	 * <p>
+	 * Description: <b>Both name and one of the value parameters</b><br/>
+	 * Type: <b>composite</b><br/>
+	 * Path: <b>name & value-[x]</b><br/>
+	 * </p>
+	 */
+	@SearchParamDefinition(name="name-value-concept", path="name & value-[x]", description="Both name and one of the value parameters", type="composite"  , compositeOf={  "name",  "value-concept" }  )
+	public static final String SP_NAME_VALUE_CONCEPT = "name-value-concept";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>name-value-concept</b>
+	 * <p>
+	 * Description: <b>Both name and one of the value parameters</b><br/>
+	 * Type: <b>composite</b><br/>
+	 * Path: <b>name & value-[x]</b><br/>
+	 * </p>
+	 */
+	public static final CompositeClientParam<TokenClientParam, TokenClientParam> NAME_VALUE_CONCEPT = new CompositeClientParam<TokenClientParam, TokenClientParam>(SP_NAME_VALUE_CONCEPT);
+
+	/**
+	 * Search parameter constant for <b>name-value-date</b>
+	 * <p>
+	 * Description: <b>Both name and one of the value parameters</b><br/>
+	 * Type: <b>composite</b><br/>
+	 * Path: <b>name & value-[x]</b><br/>
+	 * </p>
+	 */
+	@SearchParamDefinition(name="name-value-date", path="name & value-[x]", description="Both name and one of the value parameters", type="composite"  , compositeOf={  "name",  "value-date" }  )
+	public static final String SP_NAME_VALUE_DATE = "name-value-date";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>name-value-date</b>
+	 * <p>
+	 * Description: <b>Both name and one of the value parameters</b><br/>
+	 * Type: <b>composite</b><br/>
+	 * Path: <b>name & value-[x]</b><br/>
+	 * </p>
+	 */
+	public static final CompositeClientParam<TokenClientParam, DateClientParam> NAME_VALUE_DATE = new CompositeClientParam<TokenClientParam, DateClientParam>(SP_NAME_VALUE_DATE);
+
+	/**
+	 * Search parameter constant for <b>name-value-string</b>
+	 * <p>
+	 * Description: <b>Both name and one of the value parameters</b><br/>
+	 * Type: <b>composite</b><br/>
+	 * Path: <b>name & value-[x]</b><br/>
+	 * </p>
+	 */
+	@SearchParamDefinition(name="name-value-string", path="name & value-[x]", description="Both name and one of the value parameters", type="composite"  , compositeOf={  "name",  "value-string" }  )
+	public static final String SP_NAME_VALUE_STRING = "name-value-string";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>name-value-string</b>
+	 * <p>
+	 * Description: <b>Both name and one of the value parameters</b><br/>
+	 * Type: <b>composite</b><br/>
+	 * Path: <b>name & value-[x]</b><br/>
+	 * </p>
+	 */
+	public static final CompositeClientParam<TokenClientParam, StringClientParam> NAME_VALUE_STRING = new CompositeClientParam<TokenClientParam, StringClientParam>(SP_NAME_VALUE_STRING);
+
+	/**
+	 * Search parameter constant for <b>related-target-related-type</b>
 	 * <p>
 	 * Description: <b>Related Observations - search on related-type and related-target together</b><br/>
 	 * Type: <b>composite</b><br/>
 	 * Path: <b>related-target & related-type</b><br/>
 	 * </p>
 	 */
-	public static final CompositeClientParam RELATED = new CompositeClientParam(SP_RELATED);
+	@SearchParamDefinition(name="related-target-related-type", path="related-target & related-type", description="Related Observations - search on related-type and related-target together", type="composite"  , compositeOf={  "related-target",  "related-type" }  )
+	public static final String SP_RELATED_TARGET_RELATED_TYPE = "related-target-related-type";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>related-target-related-type</b>
+	 * <p>
+	 * Description: <b>Related Observations - search on related-type and related-target together</b><br/>
+	 * Type: <b>composite</b><br/>
+	 * Path: <b>related-target & related-type</b><br/>
+	 * </p>
+	 */
+	public static final CompositeClientParam<ReferenceClientParam, TokenClientParam> RELATED_TARGET_RELATED_TYPE = new CompositeClientParam<ReferenceClientParam, TokenClientParam>(SP_RELATED_TARGET_RELATED_TYPE);
 
 
 	@Child(name="name", type=CodeableConceptDt.class, order=0, min=1, max=1)	
@@ -465,7 +503,7 @@ public class Observation extends BaseResource implements IResource {
 		shortDefinition="High, low, normal, etc.",
 		formalDefinition="The assessment made based on the result of the observation."
 	)
-	private BoundCodeableConceptDt<ObservationInterpretationCodesEnum> myInterpretation;
+	private CodeableConceptDt myInterpretation;
 	
 	@Child(name="comments", type=StringDt.class, order=3, min=0, max=1)	
 	@Description(
@@ -494,14 +532,14 @@ public class Observation extends BaseResource implements IResource {
 		shortDefinition="registered | preliminary | final | amended +",
 		formalDefinition="The status of the result value"
 	)
-	private BoundCodeDt<ObservationStatusEnum> myStatus;
+	private CodeDt myStatus;
 	
 	@Child(name="reliability", type=CodeDt.class, order=7, min=1, max=1)	
 	@Description(
 		shortDefinition="ok | ongoing | early | questionable | calibrating | error +",
 		formalDefinition="An estimate of the degree to which quality issues have impacted on the value reported"
 	)
-	private BoundCodeDt<ObservationReliabilityEnum> myReliability;
+	private CodeDt myReliability;
 	
 	@Child(name="bodySite", type=CodeableConceptDt.class, order=8, min=0, max=1)	
 	@Description(
@@ -642,9 +680,9 @@ public class Observation extends BaseResource implements IResource {
      * The assessment made based on the result of the observation.
      * </p> 
 	 */
-	public BoundCodeableConceptDt<ObservationInterpretationCodesEnum> getInterpretation() {  
+	public CodeableConceptDt getInterpretation() {  
 		if (myInterpretation == null) {
-			myInterpretation = new BoundCodeableConceptDt<ObservationInterpretationCodesEnum>(ObservationInterpretationCodesEnum.VALUESET_BINDER);
+			myInterpretation = new CodeableConceptDt();
 		}
 		return myInterpretation;
 	}
@@ -657,21 +695,8 @@ public class Observation extends BaseResource implements IResource {
      * The assessment made based on the result of the observation.
      * </p> 
 	 */
-	public Observation setInterpretation(BoundCodeableConceptDt<ObservationInterpretationCodesEnum> theValue) {
+	public Observation setInterpretation(CodeableConceptDt theValue) {
 		myInterpretation = theValue;
-		return this;
-	}
-
-	/**
-	 * Sets the value(s) for <b>interpretation</b> (High, low, normal, etc.)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * The assessment made based on the result of the observation.
-     * </p> 
-	 */
-	public Observation setInterpretation(ObservationInterpretationCodesEnum theValue) {
-		getInterpretation().setValueAsEnum(theValue);
 		return this;
 	}
 
@@ -786,8 +811,8 @@ public class Observation extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public Observation setIssued( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myIssued = new InstantDt(theDate, thePrecision); 
+	public Observation setIssuedWithMillisPrecision( Date theDate) {
+		myIssued = new InstantDt(theDate); 
 		return this; 
 	}
 
@@ -799,8 +824,8 @@ public class Observation extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public Observation setIssuedWithMillisPrecision( Date theDate) {
-		myIssued = new InstantDt(theDate); 
+	public Observation setIssued( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myIssued = new InstantDt(theDate, thePrecision); 
 		return this; 
 	}
 
@@ -815,9 +840,9 @@ public class Observation extends BaseResource implements IResource {
      * The status of the result value
      * </p> 
 	 */
-	public BoundCodeDt<ObservationStatusEnum> getStatus() {  
+	public CodeDt getStatus() {  
 		if (myStatus == null) {
-			myStatus = new BoundCodeDt<ObservationStatusEnum>(ObservationStatusEnum.VALUESET_BINDER);
+			myStatus = new CodeDt();
 		}
 		return myStatus;
 	}
@@ -830,25 +855,25 @@ public class Observation extends BaseResource implements IResource {
      * The status of the result value
      * </p> 
 	 */
-	public Observation setStatus(BoundCodeDt<ObservationStatusEnum> theValue) {
+	public Observation setStatus(CodeDt theValue) {
 		myStatus = theValue;
 		return this;
 	}
 
-	/**
-	 * Sets the value(s) for <b>status</b> (registered | preliminary | final | amended +)
+ 	/**
+	 * Sets the value for <b>status</b> (registered | preliminary | final | amended +)
 	 *
      * <p>
      * <b>Definition:</b>
      * The status of the result value
      * </p> 
 	 */
-	public Observation setStatus(ObservationStatusEnum theValue) {
-		getStatus().setValueAsEnum(theValue);
-		return this;
+	public Observation setStatus( String theCode) {
+		myStatus = new CodeDt(theCode); 
+		return this; 
 	}
 
-  
+ 
 	/**
 	 * Gets the value(s) for <b>reliability</b> (ok | ongoing | early | questionable | calibrating | error +).
 	 * creating it if it does
@@ -859,9 +884,9 @@ public class Observation extends BaseResource implements IResource {
      * An estimate of the degree to which quality issues have impacted on the value reported
      * </p> 
 	 */
-	public BoundCodeDt<ObservationReliabilityEnum> getReliability() {  
+	public CodeDt getReliability() {  
 		if (myReliability == null) {
-			myReliability = new BoundCodeDt<ObservationReliabilityEnum>(ObservationReliabilityEnum.VALUESET_BINDER);
+			myReliability = new CodeDt();
 		}
 		return myReliability;
 	}
@@ -874,25 +899,25 @@ public class Observation extends BaseResource implements IResource {
      * An estimate of the degree to which quality issues have impacted on the value reported
      * </p> 
 	 */
-	public Observation setReliability(BoundCodeDt<ObservationReliabilityEnum> theValue) {
+	public Observation setReliability(CodeDt theValue) {
 		myReliability = theValue;
 		return this;
 	}
 
-	/**
-	 * Sets the value(s) for <b>reliability</b> (ok | ongoing | early | questionable | calibrating | error +)
+ 	/**
+	 * Sets the value for <b>reliability</b> (ok | ongoing | early | questionable | calibrating | error +)
 	 *
      * <p>
      * <b>Definition:</b>
      * An estimate of the degree to which quality issues have impacted on the value reported
      * </p> 
 	 */
-	public Observation setReliability(ObservationReliabilityEnum theValue) {
-		getReliability().setValueAsEnum(theValue);
-		return this;
+	public Observation setReliability( String theCode) {
+		myReliability = new CodeDt(theCode); 
+		return this; 
 	}
 
-  
+ 
 	/**
 	 * Gets the value(s) for <b>bodySite</b> (Observed body part).
 	 * creating it if it does
@@ -993,8 +1018,8 @@ public class Observation extends BaseResource implements IResource {
      * A unique identifier for the simple observation
      * </p> 
 	 */
-	public Observation setIdentifier( IdentifierUseEnum theUse,  String theSystem,  String theValue,  String theLabel) {
-		myIdentifier = new IdentifierDt(theUse, theSystem, theValue, theLabel); 
+	public Observation setIdentifier( String theSystem,  String theValue) {
+		myIdentifier = new IdentifierDt(theSystem, theValue); 
 		return this; 
 	}
 
@@ -1006,8 +1031,8 @@ public class Observation extends BaseResource implements IResource {
      * A unique identifier for the simple observation
      * </p> 
 	 */
-	public Observation setIdentifier( String theSystem,  String theValue) {
-		myIdentifier = new IdentifierDt(theSystem, theValue); 
+	public Observation setIdentifier( IdentifierUseEnum theUse,  String theSystem,  String theValue,  String theLabel) {
+		myIdentifier = new IdentifierDt(theUse, theSystem, theValue, theLabel); 
 		return this; 
 	}
 
@@ -1326,46 +1351,7 @@ public class Observation extends BaseResource implements IResource {
      * The value of the low bound of the reference range. If this is omitted, the low bound of the reference range is assumed to be meaningless. E.g. <2.3
      * </p> 
 	 */
-	public ReferenceRange setLow( QuantityCompararatorEnum theComparator,  double theValue,  String theSystem,  String theUnits) {
-		myLow = new QuantityDt(theComparator, theValue, theSystem, theUnits); 
-		return this; 
-	}
-
-	/**
-	 * Sets the value for <b>low</b> (Low Range, if relevant)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * The value of the low bound of the reference range. If this is omitted, the low bound of the reference range is assumed to be meaningless. E.g. <2.3
-     * </p> 
-	 */
-	public ReferenceRange setLow( QuantityCompararatorEnum theComparator,  long theValue,  String theSystem,  String theUnits) {
-		myLow = new QuantityDt(theComparator, theValue, theSystem, theUnits); 
-		return this; 
-	}
-
-	/**
-	 * Sets the value for <b>low</b> (Low Range, if relevant)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * The value of the low bound of the reference range. If this is omitted, the low bound of the reference range is assumed to be meaningless. E.g. <2.3
-     * </p> 
-	 */
 	public ReferenceRange setLow( QuantityCompararatorEnum theComparator,  double theValue,  String theUnits) {
-		myLow = new QuantityDt(theComparator, theValue, theUnits); 
-		return this; 
-	}
-
-	/**
-	 * Sets the value for <b>low</b> (Low Range, if relevant)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * The value of the low bound of the reference range. If this is omitted, the low bound of the reference range is assumed to be meaningless. E.g. <2.3
-     * </p> 
-	 */
-	public ReferenceRange setLow( QuantityCompararatorEnum theComparator,  long theValue,  String theUnits) {
 		myLow = new QuantityDt(theComparator, theValue, theUnits); 
 		return this; 
 	}
@@ -1393,6 +1379,45 @@ public class Observation extends BaseResource implements IResource {
 	 */
 	public ReferenceRange setLow( long theValue) {
 		myLow = new QuantityDt(theValue); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>low</b> (Low Range, if relevant)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The value of the low bound of the reference range. If this is omitted, the low bound of the reference range is assumed to be meaningless. E.g. <2.3
+     * </p> 
+	 */
+	public ReferenceRange setLow( QuantityCompararatorEnum theComparator,  long theValue,  String theUnits) {
+		myLow = new QuantityDt(theComparator, theValue, theUnits); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>low</b> (Low Range, if relevant)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The value of the low bound of the reference range. If this is omitted, the low bound of the reference range is assumed to be meaningless. E.g. <2.3
+     * </p> 
+	 */
+	public ReferenceRange setLow( QuantityCompararatorEnum theComparator,  double theValue,  String theSystem,  String theUnits) {
+		myLow = new QuantityDt(theComparator, theValue, theSystem, theUnits); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>low</b> (Low Range, if relevant)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The value of the low bound of the reference range. If this is omitted, the low bound of the reference range is assumed to be meaningless. E.g. <2.3
+     * </p> 
+	 */
+	public ReferenceRange setLow( QuantityCompararatorEnum theComparator,  long theValue,  String theSystem,  String theUnits) {
+		myLow = new QuantityDt(theComparator, theValue, theSystem, theUnits); 
 		return this; 
 	}
 
@@ -1435,46 +1460,7 @@ public class Observation extends BaseResource implements IResource {
      * The value of the high bound of the reference range. If this is omitted, the high bound of the reference range is assumed to be meaningless. E.g. >5
      * </p> 
 	 */
-	public ReferenceRange setHigh( QuantityCompararatorEnum theComparator,  double theValue,  String theSystem,  String theUnits) {
-		myHigh = new QuantityDt(theComparator, theValue, theSystem, theUnits); 
-		return this; 
-	}
-
-	/**
-	 * Sets the value for <b>high</b> (High Range, if relevant)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * The value of the high bound of the reference range. If this is omitted, the high bound of the reference range is assumed to be meaningless. E.g. >5
-     * </p> 
-	 */
-	public ReferenceRange setHigh( QuantityCompararatorEnum theComparator,  long theValue,  String theSystem,  String theUnits) {
-		myHigh = new QuantityDt(theComparator, theValue, theSystem, theUnits); 
-		return this; 
-	}
-
-	/**
-	 * Sets the value for <b>high</b> (High Range, if relevant)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * The value of the high bound of the reference range. If this is omitted, the high bound of the reference range is assumed to be meaningless. E.g. >5
-     * </p> 
-	 */
 	public ReferenceRange setHigh( QuantityCompararatorEnum theComparator,  double theValue,  String theUnits) {
-		myHigh = new QuantityDt(theComparator, theValue, theUnits); 
-		return this; 
-	}
-
-	/**
-	 * Sets the value for <b>high</b> (High Range, if relevant)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * The value of the high bound of the reference range. If this is omitted, the high bound of the reference range is assumed to be meaningless. E.g. >5
-     * </p> 
-	 */
-	public ReferenceRange setHigh( QuantityCompararatorEnum theComparator,  long theValue,  String theUnits) {
 		myHigh = new QuantityDt(theComparator, theValue, theUnits); 
 		return this; 
 	}
@@ -1502,6 +1488,45 @@ public class Observation extends BaseResource implements IResource {
 	 */
 	public ReferenceRange setHigh( long theValue) {
 		myHigh = new QuantityDt(theValue); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>high</b> (High Range, if relevant)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The value of the high bound of the reference range. If this is omitted, the high bound of the reference range is assumed to be meaningless. E.g. >5
+     * </p> 
+	 */
+	public ReferenceRange setHigh( QuantityCompararatorEnum theComparator,  long theValue,  String theUnits) {
+		myHigh = new QuantityDt(theComparator, theValue, theUnits); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>high</b> (High Range, if relevant)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The value of the high bound of the reference range. If this is omitted, the high bound of the reference range is assumed to be meaningless. E.g. >5
+     * </p> 
+	 */
+	public ReferenceRange setHigh( QuantityCompararatorEnum theComparator,  double theValue,  String theSystem,  String theUnits) {
+		myHigh = new QuantityDt(theComparator, theValue, theSystem, theUnits); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>high</b> (High Range, if relevant)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The value of the high bound of the reference range. If this is omitted, the high bound of the reference range is assumed to be meaningless. E.g. >5
+     * </p> 
+	 */
+	public ReferenceRange setHigh( QuantityCompararatorEnum theComparator,  long theValue,  String theSystem,  String theUnits) {
+		myHigh = new QuantityDt(theComparator, theValue, theSystem, theUnits); 
 		return this; 
 	}
 
@@ -1588,7 +1613,7 @@ public class Observation extends BaseResource implements IResource {
 		shortDefinition="has-component | has-member | derived-from | sequel-to | replaces | qualified-by | interfered-by",
 		formalDefinition="A code specifying the kind of relationship that exists with the target observation"
 	)
-	private BoundCodeDt<ObservationRelationshipTypeEnum> myType;
+	private CodeDt myType;
 	
 	@Child(name="target", order=1, min=1, max=1, type={
 		ca.uhn.fhir.model.dstu.resource.Observation.class	})
@@ -1619,9 +1644,9 @@ public class Observation extends BaseResource implements IResource {
      * A code specifying the kind of relationship that exists with the target observation
      * </p> 
 	 */
-	public BoundCodeDt<ObservationRelationshipTypeEnum> getType() {  
+	public CodeDt getType() {  
 		if (myType == null) {
-			myType = new BoundCodeDt<ObservationRelationshipTypeEnum>(ObservationRelationshipTypeEnum.VALUESET_BINDER);
+			myType = new CodeDt();
 		}
 		return myType;
 	}
@@ -1634,25 +1659,25 @@ public class Observation extends BaseResource implements IResource {
      * A code specifying the kind of relationship that exists with the target observation
      * </p> 
 	 */
-	public Related setType(BoundCodeDt<ObservationRelationshipTypeEnum> theValue) {
+	public Related setType(CodeDt theValue) {
 		myType = theValue;
 		return this;
 	}
 
-	/**
-	 * Sets the value(s) for <b>type</b> (has-component | has-member | derived-from | sequel-to | replaces | qualified-by | interfered-by)
+ 	/**
+	 * Sets the value for <b>type</b> (has-component | has-member | derived-from | sequel-to | replaces | qualified-by | interfered-by)
 	 *
      * <p>
      * <b>Definition:</b>
      * A code specifying the kind of relationship that exists with the target observation
      * </p> 
 	 */
-	public Related setType(ObservationRelationshipTypeEnum theValue) {
-		getType().setValueAsEnum(theValue);
-		return this;
+	public Related setType( String theCode) {
+		myType = new CodeDt(theCode); 
+		return this; 
 	}
 
-  
+ 
 	/**
 	 * Gets the value(s) for <b>target</b> (Observation that is related to this one).
 	 * creating it if it does
@@ -1686,6 +1711,14 @@ public class Observation extends BaseResource implements IResource {
   
 
 	}
+
+	   public void setStatus(ObservationStatusEnum theFinal) {
+		      if (theFinal==null) {
+		         getStatus().setValue(null);
+		      }else {
+		         getStatus().setValue(theFinal.getCode());
+		      }
+		   }
 
 
 

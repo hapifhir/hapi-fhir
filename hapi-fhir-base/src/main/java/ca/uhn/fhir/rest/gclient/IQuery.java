@@ -25,9 +25,9 @@ import ca.uhn.fhir.model.api.Include;
 
 public interface IQuery extends IClientExecutable<IQuery,Bundle> {
 
-	IQuery where(ICriterion theCriterion);
+	IQuery where(ICriterion<?> theCriterion);
 
-	IQuery and(ICriterion theCriterion);
+	IQuery and(ICriterion<?> theCriterion);
 
 	IQuery include(Include theIncludeManagingorganization);
 

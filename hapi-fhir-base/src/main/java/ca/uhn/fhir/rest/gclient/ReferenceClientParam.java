@@ -36,32 +36,32 @@ public class ReferenceClientParam implements IParam {
 		return myName;
 	}
 	
-	public ICriterion hasChainedProperty(ICriterion theICriterion) {
-		return new ReferenceChainCriterion(getParamName(), theICriterion);
+	public ICriterion<ReferenceClientParam> hasChainedProperty(ICriterion<?> theCriterion) {
+		return new ReferenceChainCriterion(getParamName(), theCriterion);
 	}
 
 	/**
 	 * Match the referenced resource if the resource has the given ID (this can be
 	 * the logical ID or the absolute URL of the resource)
 	 */
-	public ICriterion hasId(IdDt theId) {
-		return new StringCriterion(getParamName(), theId.getValue());
+	public ICriterion<ReferenceClientParam> hasId(IdDt theId) {
+		return new StringCriterion<ReferenceClientParam>(getParamName(), theId.getValue());
 	}
 
 	/**
 	 * Match the referenced resource if the resource has the given ID (this can be
 	 * the logical ID or the absolute URL of the resource)
 	 */
-	public ICriterion hasId(String theId) {
-		return new StringCriterion(getParamName(), theId);
+	public ICriterion<ReferenceClientParam> hasId(String theId) {
+		return new StringCriterion<ReferenceClientParam>(getParamName(), theId);
 	}
 
-	private static class ReferenceChainCriterion implements ICriterion, ICriterionInternal {
+	private static class ReferenceChainCriterion implements ICriterion<ReferenceClientParam>, ICriterionInternal {
 
 		private String myParamName;
 		private ICriterionInternal myWrappedCriterion;
 
-		public ReferenceChainCriterion(String theParamName, ICriterion theWrappedCriterion) {
+		public ReferenceChainCriterion(String theParamName, ICriterion<?> theWrappedCriterion) {
 			myParamName = theParamName;
 			myWrappedCriterion = (ICriterionInternal) theWrappedCriterion;
 		}

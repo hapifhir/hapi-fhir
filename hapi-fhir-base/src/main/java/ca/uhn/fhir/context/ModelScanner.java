@@ -32,6 +32,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -48,7 +49,6 @@ import ca.uhn.fhir.model.api.ICompositeDatatype;
 import ca.uhn.fhir.model.api.ICompositeElement;
 import ca.uhn.fhir.model.api.IDatatype;
 import ca.uhn.fhir.model.api.IElement;
-import ca.uhn.fhir.model.api.IExtension;
 import ca.uhn.fhir.model.api.IPrimitiveDatatype;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.IResourceBlock;
@@ -298,8 +298,6 @@ class ModelScanner {
 
 		scanCompositeElementForChildren(theClass, resourceDef);
 	}
-
-
 
 	private String scanCodeTable(Class<? extends ICodeEnum> theCodeType, CodeTableDef theCodeTableDefinition) {
 		return null; // TODO: implement
@@ -602,6 +600,9 @@ class ModelScanner {
 
 	private void scanResourceForSearchParams(Class<? extends IResource> theClass, RuntimeResourceDefinition theResourceDef) {
 
+		Map<String, RuntimeSearchParam> nameToParam = new HashMap<String, RuntimeSearchParam>();
+		Map<Field, SearchParamDefinition> compositeFields = new LinkedHashMap<Field, SearchParamDefinition>();
+
 		for (Field nextField : theClass.getFields()) {
 			SearchParamDefinition searchParam = nextField.getAnnotation(SearchParamDefinition.class);
 			if (searchParam != null) {
@@ -609,11 +610,34 @@ class ModelScanner {
 				if (paramType == null) {
 					throw new ConfigurationException("Searc param " + searchParam.name() + " has an invalid type: " + searchParam.type());
 				}
+				if(paramType==SearchParamTypeEnum.COMPOSITE) {
+					compositeFields.put(nextField, searchParam);
+					continue;
+				}
 				RuntimeSearchParam param = new RuntimeSearchParam(searchParam.name(), searchParam.description(), searchParam.path(), paramType);
 				theResourceDef.addSearchParam(param);
+				nameToParam.put(param.getName(), param);
 			}
 		}
 
+		for (Entry<Field, SearchParamDefinition> nextEntry : compositeFields.entrySet()) {
+			Field nextField = nextEntry.getKey();
+			SearchParamDefinition searchParam = nextEntry.getValue();
+			
+			List<RuntimeSearchParam> compositeOf = new ArrayList<RuntimeSearchParam>();
+			for (String nextName:searchParam.compositeOf()) {
+				RuntimeSearchParam param = nameToParam.get(nextName);
+				if (param==null) {
+					ourLog.warn("Search parameter {}.{} declares that it is a composite with compositeOf value '{}' but that is not a valid parametr name itself. Valid values are: {}",
+							new Object[] {theResourceDef.getName(), searchParam.name(), nextName, nameToParam.keySet()});
+					continue;
+				}
+				compositeOf.add(param);
+			}
+
+			RuntimeSearchParam param = new RuntimeSearchParam(searchParam.name(), searchParam.description(), searchParam.path(), SearchParamTypeEnum.COMPOSITE, compositeOf);
+			theResourceDef.addSearchParam(param);
+		}
 	}
 
 	public Map<String, RuntimeResourceDefinition> getIdToResourceDefinition() {

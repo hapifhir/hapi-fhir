@@ -22,14 +22,18 @@ import ca.uhn.fhir.rest.param.ParameterUtil;
  * #L%
  */
 
-class StringCriterion<A extends IParam> implements ICriterion<A>, ICriterionInternal {
+class QuantityCriterion implements ICriterion<QuantityClientParam>, ICriterionInternal {
 
 	private String myValue;
 	private String myName;
+	private String mySystem;
+	private String myUnits;
 
-	public StringCriterion(String theName, String theValue) {
+	public QuantityCriterion(String theParamName, String theValue, String theSystem, String theUnits) {
 		myValue = theValue;
-		myName=theName;
+		myName = theParamName;
+		mySystem = theSystem;
+		myUnits = theUnits;
 	}
 
 	@Override
@@ -39,7 +43,7 @@ class StringCriterion<A extends IParam> implements ICriterion<A>, ICriterionInte
 
 	@Override
 	public String getParameterValue() {
-		return ParameterUtil.escape(myValue);
+		return ParameterUtil.escape(myValue) + '|' + ParameterUtil.escape(mySystem) + '|' + ParameterUtil.escape(myUnits);
 	}
 
 }

@@ -20,6 +20,6 @@ package ca.uhn.fhir.rest.gclient;
  * #L%
  */
 
-public interface ICriterion {
+public interface ICriterion<T extends IParam> {
 
 }

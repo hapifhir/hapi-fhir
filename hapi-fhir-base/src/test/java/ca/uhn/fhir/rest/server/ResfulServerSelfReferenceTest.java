@@ -2,8 +2,6 @@ package ca.uhn.fhir.rest.server;
 
 import static org.junit.Assert.*;
 
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -15,9 +13,10 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.handler.ContextHandlerCollection;
+import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -42,89 +41,103 @@ import ca.uhn.fhir.testutil.RandomServerPortProvider;
 public class ResfulServerSelfReferenceTest {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResfulServerSelfReferenceTest.class);
-	private static int ourPort;
-	private static Server ourServer;
 	private static CloseableHttpClient ourClient;
 	private static FhirContext ourCtx;
 
 	@BeforeClass
 	public static void beforeClass() throws Exception {
-		ourPort = RandomServerPortProvider.findFreePort();
-		ourServer = new Server(ourPort);
 		ourCtx = new FhirContext(Patient.class);
-
-		DummyPatientResourceProvider patientProvider = new DummyPatientResourceProvider();
-		ServerProfileProvider profProvider=new ServerProfileProvider(ourCtx);
-
-		ServletHandler proxyHandler = new ServletHandler();
-		ServletHolder servletHolder = new ServletHolder(new DummyRestfulServer(patientProvider,profProvider));
-		proxyHandler.addServletWithMapping(servletHolder, "/fhir/context/*");
-		ourServer.setHandler(proxyHandler);
-		ourServer.start();
 
 		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();
 		builder.setConnectionManager(connectionManager);
 		ourClient = builder.build();
-
-
 	}
 
-	@AfterClass
-	public static void afterClass() throws Exception {
-		ourServer.stop();
-	}
+	@Test
+	public void testContextWithSpace() throws Exception {
+		int port = RandomServerPortProvider.findFreePort();
+		Server server = new Server(port);
 
+		RestfulServer restServer = new RestfulServer();
+		restServer.setFhirContext(ourCtx);
+		restServer.setResourceProviders(new DummyPatientResourceProvider());
+
+		// ServletHandler proxyHandler = new ServletHandler();
+		ServletHolder servletHolder = new ServletHolder(restServer);
+
+		ServletContextHandler ch = new ServletContextHandler();
+		ch.setContextPath("/root ctx/rcp2");
+		ch.addServlet(servletHolder, "/fhir ctx/fcp2/*");
+
+		ContextHandlerCollection contexts = new ContextHandlerCollection();
+		server.setHandler(contexts);
+
+		server.setHandler(ch);
+		server.start();
+		try {
+
+			String baseUri = "http://localhost:" + port + "/root%20ctx/rcp2/fhir%20ctx/fcp2";
+			String uri = baseUri + "/Patient?identifier=urn:hapitest:mrns%7C00001";
+			HttpGet httpGet = new HttpGet(uri);
+			HttpResponse status = ourClient.execute(httpGet);
+
+			String responseContent = IOUtils.toString(status.getEntity().getContent());
+			IOUtils.closeQuietly(status.getEntity().getContent());
+			ourLog.info("Response was:\n{}", responseContent);
+
+			assertEquals(200, status.getStatusLine().getStatusCode());
+			Bundle bundle = ourCtx.newXmlParser().parseBundle(responseContent);
+
+			assertEquals(1, bundle.getEntries().size());
+
+		} finally {
+			server.stop();
+		}
+
+	}
 
 	@Test
 	public void testSearchByParamIdentifier() throws Exception {
+		int port = RandomServerPortProvider.findFreePort();
+		Server hServer = new Server(port);
 
-		String baseUri = "http://localhost:" + ourPort + "/fhir/context";
-		String uri = baseUri + "/Patient?identifier=urn:hapitest:mrns%7C00001";
-		HttpGet httpGet = new HttpGet(uri);
-		HttpResponse status = ourClient.execute(httpGet);
+		DummyPatientResourceProvider patientProvider = new DummyPatientResourceProvider();
+		ServerProfileProvider profProvider = new ServerProfileProvider(ourCtx);
 
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		ourLog.info("Response was:\n{}", responseContent);
+		ServletHandler proxyHandler = new ServletHandler();
+		RestfulServer server = new RestfulServer();
+		server.setFhirContext(ourCtx);
+		server.setResourceProviders(patientProvider, profProvider);
+		ServletHolder servletHolder = new ServletHolder(server);
+		proxyHandler.addServletWithMapping(servletHolder, "/fhir/context/*");
+		hServer.setHandler(proxyHandler);
+		hServer.start();
+		try {
+			String baseUri = "http://localhost:" + port + "/fhir/context";
+			String uri = baseUri + "/Patient?identifier=urn:hapitest:mrns%7C00001";
+			HttpGet httpGet = new HttpGet(uri);
+			HttpResponse status = ourClient.execute(httpGet);
 
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		Bundle bundle = ourCtx.newXmlParser().parseBundle(responseContent);
+			String responseContent = IOUtils.toString(status.getEntity().getContent());
+			IOUtils.closeQuietly(status.getEntity().getContent());
+			ourLog.info("Response was:\n{}", responseContent);
 
-		assertEquals(1, bundle.getEntries().size());
+			assertEquals(200, status.getStatusLine().getStatusCode());
+			Bundle bundle = ourCtx.newXmlParser().parseBundle(responseContent);
 
-		Patient patient = (Patient) bundle.getEntries().get(0).getResource();
-		assertEquals("PatientOne", patient.getName().get(0).getGiven().get(0).getValue());
+			assertEquals(1, bundle.getEntries().size());
 
-		assertEquals(uri, bundle.getLinkSelf().getValue());
-		assertEquals(baseUri, bundle.getLinkBase().getValue());
+			Patient patient = (Patient) bundle.getEntries().get(0).getResource();
+			assertEquals("PatientOne", patient.getName().get(0).getGiven().get(0).getValue());
+
+			assertEquals(uri, bundle.getLinkSelf().getValue());
+			assertEquals(baseUri, bundle.getLinkBase().getValue());
+		} finally {
+			hServer.stop();
+		}
 	}
 
-
-
-	
-	public static class DummyRestfulServer extends RestfulServer {
-
-		private static final long serialVersionUID = 1L;
-		
-		private Collection<IResourceProvider> myResourceProviders;
-
-		public DummyRestfulServer(IResourceProvider... theResourceProviders) {
-			myResourceProviders = Arrays.asList(theResourceProviders);
-		}
-
-		@Override
-		public Collection<IResourceProvider> getResourceProviders() {
-			return myResourceProviders;
-		}
-
-	    @Override
-	    public ISecurityManager getSecurityManager() {
-	        return null;
-	    }
-
-	}
-	
-	
 	/**
 	 * Created by dsotnikov on 2/25/2014.
 	 */
@@ -161,8 +174,6 @@ public class ResfulServerSelfReferenceTest {
 			return idToPatient;
 		}
 
-		
-
 		@Search()
 		public Patient getPatient(@RequiredParam(name = Patient.SP_IDENTIFIER) IdentifierDt theIdentifier) {
 			for (Patient next : getIdToPatient().values()) {
@@ -174,8 +185,7 @@ public class ResfulServerSelfReferenceTest {
 			}
 			return null;
 		}
-		
-		
+
 		/**
 		 * Retrieve the resource by its identifier
 		 * 
@@ -195,6 +205,4 @@ public class ResfulServerSelfReferenceTest {
 
 	}
 
-
-	
 }

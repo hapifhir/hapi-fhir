@@ -31,34 +31,34 @@ function generateHapiSearch(json, container) {
 		var nextParam = json.params[i];
 		var paramLine = null;
 		if (nextParam.type == 'string') {
-			paramLine = '.where(new StringParam("' + nextParam.name + '")';
+			paramLine = '.where(new StringClientParam("' + nextParam.name + '")';
 			paramLine += nextParam.qualifier = ':exact' ? '.matchesExactly()' : '.matches()';
 			paramLine += '.value("' + nextParam.value + '"))';
 		} else if (nextParam.type == 'token') {
 			var idx = nextParam.value.indexOf('|');
 			if (idx == -1) {
-				paramLine = '.where(new TokenParam("' + nextParam.name + '").exactly().code("' + nextParam.value + '"))';
+				paramLine = '.where(new TokenClientParam("' + nextParam.name + '").exactly().code("' + nextParam.value + '"))';
 			} else {
-				paramLine = '.where(new TokenParam("' + nextParam.name + '").exactly().systemAndCode("' + nextParam.value.substring(0,idx) + '", "' + nextParam.value.substring(idx+1) + '"))';
+				paramLine = '.where(new TokenClientParam("' + nextParam.name + '").exactly().systemAndCode("' + nextParam.value.substring(0,idx) + '", "' + nextParam.value.substring(idx+1) + '"))';
 			}
 		} else if (nextParam.type == 'number') {
-			paramLine = '.where(new NumberParam("' + nextParam.name + '").exactly().value("' + nextParam.value + '"))';
+			paramLine = '.where(new NumberClientParam("' + nextParam.name + '").exactly().value("' + nextParam.value + '"))';
 		} else if (nextParam.type == 'reference') {
 			if (nextParam.qualifier == '') {
 				if (nextParam.name.indexOf('.') == -1) {
-					paramLine = '.where(new ReferenceParam("' + nextParam.name + '").hasId("' + nextParam.value + '"))';
+					paramLine = '.where(new ReferenceClientParam("' + nextParam.name + '").hasId("' + nextParam.value + '"))';
 				}
 			}
 		} else if (nextParam.type == 'date') {
 			var dateQual = nextParam.value.indexOf('T') == -1 ? 'day' : 'second';
 			if (nextParam.value.substring(0,2) == '>=') {
-				paramLine = '.where(new DateParam("' + nextParam.name + '").afterOrEquals().' + dateQual + '("' + nextParam.value.substring(2) + '"))';
+				paramLine = '.where(new DateClientParam("' + nextParam.name + '").afterOrEquals().' + dateQual + '("' + nextParam.value.substring(2) + '"))';
 			} else if (nextParam.value.substring(0,1) == '>') {
-				paramLine = '.where(new DateParam("' + nextParam.name + '").after().' + dateQual + '("' + nextParam.value.substring(1) + '"))';
+				paramLine = '.where(new DateClientParam("' + nextParam.name + '").after().' + dateQual + '("' + nextParam.value.substring(1) + '"))';
 			} else if (nextParam.value.substring(0,2) == '<=') {
-				paramLine = '.where(new DateParam("' + nextParam.name + '").beforeOrEquals().' + dateQual + '("' + nextParam.value.substring(2) + '"))';
+				paramLine = '.where(new DateClientParam("' + nextParam.name + '").beforeOrEquals().' + dateQual + '("' + nextParam.value.substring(2) + '"))';
 			} else if (nextParam.value.substring(0,1) == '<') {
-				paramLine = '.where(new DateParam("' + nextParam.name + '").before().' + dateQual + '("' + nextParam.value.substring(1) + '"))';
+				paramLine = '.where(new DateClientParam("' + nextParam.name + '").before().' + dateQual + '("' + nextParam.value.substring(1) + '"))';
 			} 
 		}
 		if (paramLine != null) {

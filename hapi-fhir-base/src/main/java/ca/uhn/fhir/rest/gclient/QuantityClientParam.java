@@ -141,11 +141,11 @@ public class QuantityClientParam implements IParam {
 
 	public interface IAndUnits {
 
-		ICriterion andNoUnits();
+		ICriterion<QuantityClientParam> andNoUnits();
 
-		ICriterion andUnits(String theUnits);
+		ICriterion<QuantityClientParam> andUnits(String theUnits);
 
-		ICriterion andUnits(String theSystem, String theUnits);
+		ICriterion<QuantityClientParam> andUnits(String theSystem, String theUnits);
 	}
 
 	private class AndUnits implements IAndUnits {
@@ -157,18 +157,18 @@ public class QuantityClientParam implements IParam {
 		}
 
 		@Override
-		public ICriterion andNoUnits() {
+		public ICriterion<QuantityClientParam> andNoUnits() {
 			return andUnits(null, null);
 		}
 
 		@Override
-		public ICriterion andUnits(String theUnits) {
+		public ICriterion<QuantityClientParam> andUnits(String theUnits) {
 			return andUnits(theUnits, null);
 		}
 
 		@Override
-		public ICriterion andUnits(String theSystem, String theUnits) {
-			return new StringCriterion(getParamName(), myToken1 + "|" + defaultString(theSystem) + "|" + defaultString(theUnits));
+		public ICriterion<QuantityClientParam> andUnits(String theSystem, String theUnits) {
+			return new QuantityCriterion(getParamName(), myToken1 , defaultString(theSystem) , defaultString(theUnits));
 		}
 
 	}

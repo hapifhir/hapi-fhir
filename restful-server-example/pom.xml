@@ -3,7 +3,7 @@
 
 	<groupId>ca.uhn.hapi.example</groupId>
 	<artifactId>restful-server-example</artifactId>
-	<version>0.3</version>
+	<version>0.5-SNAPSHOT</version>
 	<packaging>war</packaging>
 
 	<name>Sample RESTful Server (HAPI-FHIR)</name>
@@ -15,6 +15,15 @@
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-base</artifactId>
 			<version>0.5-SNAPSHOT</version>
+		</dependency>
+
+		<!-- This dependency is used for the "test page" web app overlay -->
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-testpage-overlay</artifactId>
+			<version>0.5-SNAPSHOT</version>
+			<type>war</type>
+			<scope>provided</scope>		
 		</dependency>
 
 		<!-- HAPI-FHIR uses Logback for logging support. The logback library is included automatically by Maven as a part of the hapi-fhir-base dependency, but you also need to include a
@@ -48,6 +57,9 @@
 
 	<build>
 		<plugins>
+			<!-- 
+			Tell Maven which Java source version you want to use
+			-->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
@@ -57,13 +69,33 @@
 					<target>1.6</target>
 				</configuration>
 			</plugin>
-
-
+			
+			<!-- 
+			The configuration here tells the WAR plugin to include the test
+			page overlay. You can omit it if you are not using that feature.
+			-->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-war-plugin</artifactId>
+				<configuration>
+					<overlays>
+						<overlay>
+							<groupId>ca.uhn.hapi.fhir</groupId>
+							<artifactId>hapi-fhir-testpage-overlay</artifactId>
+						</overlay>
+					</overlays>
+				</configuration>
+			</plugin>
+			
+			<!-- 
+			This plugin is just a part of the HAPI internal build process, you do not
+			need to incude it in your own projects
+			-->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-deploy-plugin</artifactId>
 				<configuration>
-					<skip>true</skip>
+					<skip>false</skip>
 				</configuration>
 			</plugin>
 

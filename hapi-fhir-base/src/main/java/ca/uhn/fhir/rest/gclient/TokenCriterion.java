@@ -22,17 +22,23 @@ package ca.uhn.fhir.rest.gclient;
 
 import org.apache.commons.lang3.StringUtils;
 
-class TokenCriterion implements ICriterion, ICriterionInternal {
+import ca.uhn.fhir.rest.param.ParameterUtil;
+
+class TokenCriterion implements ICriterion<TokenClientParam>, ICriterionInternal {
 
 	private String myValue;
 	private String myName;
 
 	public TokenCriterion(String theName, String theSystem, String theCode) {
 		myName = theName;
-		if (StringUtils.isNotBlank(theSystem)) {
-			myValue = theSystem + "|" + StringUtils.defaultString(theCode);
+		String system = ParameterUtil.escape(theSystem);
+		String code = ParameterUtil.escape(theCode);
+		if (StringUtils.isNotBlank(system)) {
+			myValue = system + "|" + StringUtils.defaultString(code);
+		} else if (system == null) {
+			myValue = StringUtils.defaultString(code);
 		} else {
-			myValue = "|" + StringUtils.defaultString(theCode);
+			myValue = "|" + StringUtils.defaultString(code);
 		}
 	}
 

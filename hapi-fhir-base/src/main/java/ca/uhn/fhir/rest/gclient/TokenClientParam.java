@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.gclient;
 
+import static org.apache.commons.lang3.StringUtils.*;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 
 /*
@@ -42,27 +43,27 @@ public class TokenClientParam implements IParam {
 	public IMatches exactly() {
 		return new IMatches() {
 			@Override
-			public ICriterion systemAndCode(String theSystem, String theCode) {
-				return new TokenCriterion(getParamName(), theSystem, theCode);
+			public ICriterion<TokenClientParam> systemAndCode(String theSystem, String theCode) {
+				return new TokenCriterion(getParamName(), defaultString(theSystem), theCode);
 			}
 
 			@Override
-			public ICriterion systemAndIdentifier(String theSystem, String theCode) {
-				return new TokenCriterion(getParamName(), theSystem, theCode);
+			public ICriterion<TokenClientParam> systemAndIdentifier(String theSystem, String theCode) {
+				return new TokenCriterion(getParamName(), defaultString(theSystem), theCode);
 			}
 
 			@Override
-			public ICriterion code(String theCode) {
+			public ICriterion<TokenClientParam> code(String theCode) {
 				return new TokenCriterion(getParamName(), null, theCode);
 			}
 
 			@Override
-			public ICriterion identifier(String theIdentifier) {
+			public ICriterion<TokenClientParam> identifier(String theIdentifier) {
 				return new TokenCriterion(getParamName(), null, theIdentifier);
 			}
 
 			@Override
-			public ICriterion identifier(IdentifierDt theIdentifier) {
+			public ICriterion<TokenClientParam> identifier(IdentifierDt theIdentifier) {
 				return new TokenCriterion(getParamName(), theIdentifier.getSystem().getValueAsString(), theIdentifier.getValue().getValue());
 			}
 		};
@@ -78,7 +79,7 @@ public class TokenClientParam implements IParam {
 		 *            The code
 		 * @return A criterion
 		 */
-		ICriterion systemAndCode(String theSystem, String theCode);
+		ICriterion<TokenClientParam> systemAndCode(String theSystem, String theCode);
 
 		/**
 		 * Creates a search criterion that matches against the given system and identifier
@@ -89,7 +90,7 @@ public class TokenClientParam implements IParam {
 		 *            The identifier
 		 * @return A criterion
 		 */
-		ICriterion systemAndIdentifier(String theSystem, String theIdentifier);
+		ICriterion<TokenClientParam> systemAndIdentifier(String theSystem, String theIdentifier);
 
 		/**
 		 * Creates a search criterion that matches against the given identifier, with no system specified
@@ -98,7 +99,7 @@ public class TokenClientParam implements IParam {
 		 *            The identifier
 		 * @return A criterion
 		 */
-		ICriterion identifier(String theIdentifier);
+		ICriterion<TokenClientParam> identifier(String theIdentifier);
 
 		/**
 		 * Creates a search criterion that matches against the given code, with no code system specified
@@ -107,7 +108,7 @@ public class TokenClientParam implements IParam {
 		 *            The identifier
 		 * @return A criterion
 		 */
-		ICriterion code(String theIdentifier);
+		ICriterion<TokenClientParam> code(String theIdentifier);
 
 		/**
 		 * Creates a search criterion that matches against the given identifier (system and code if both are present, or whatever is present)
@@ -116,7 +117,7 @@ public class TokenClientParam implements IParam {
 		 *            The identifier
 		 * @return A criterion
 		 */
-		ICriterion identifier(IdentifierDt theIdentifier);
+		ICriterion<TokenClientParam> identifier(IdentifierDt theIdentifier);
 	}
 
 }

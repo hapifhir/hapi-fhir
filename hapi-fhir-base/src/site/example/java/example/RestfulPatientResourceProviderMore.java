@@ -60,6 +60,7 @@ import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.client.ITestClient;
 import ca.uhn.fhir.rest.client.api.IBasicClient;
 import ca.uhn.fhir.rest.client.api.IRestfulClient;
+import ca.uhn.fhir.rest.param.CompositeParam;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.QuantityParam;
@@ -284,6 +285,24 @@ public List<Patient> searchByNamedQuery(@RequiredParam(name="someparam") StringP
  return retVal;
 }
 //END SNIPPET: searchNamedQuery
+
+//START SNIPPET: searchComposite
+@Search()
+public List<Observation> searchByComposite(
+		@RequiredParam(name=Observation.SP_NAME_VALUE_DATE, compositeTypes= {TokenParam.class, DateParam.class}) 
+		CompositeParam<TokenParam, DateParam> theParam) {
+  // Each of the two values in the composite param are accessible separately.
+  // In the case of Observation's name-value-date, the left is a string and
+  // the right is a date.
+  TokenParam observationName = theParam.getLeftValue();
+  DateParam observationValue = theParam.getRightValue();
+	
+  List<Observation> retVal = new ArrayList<Observation>();
+  // ...populate...
+  return retVal;
+}
+//END SNIPPET: searchComposite
+
 
 //START SNIPPET: searchIdentifierParam
 @Search()

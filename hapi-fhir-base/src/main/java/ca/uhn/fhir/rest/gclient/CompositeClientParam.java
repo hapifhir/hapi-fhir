@@ -21,23 +21,25 @@ package ca.uhn.fhir.rest.gclient;
  */
 
 /**
- * Composite params are not yet supported - This is a placeholder. Help welcome!
- *
- * TODO: implement
+ * Composite parameter type for use in fluent client interfaces
  */
-public class CompositeClientParam {
+public class CompositeClientParam<A extends IParam, B extends IParam> implements IParam {
+
+	private String myName;
 
 	public CompositeClientParam(String theName) {
-		// TODO Auto-generated constructor stub
+		myName=theName;
 	}
 
-	/**
-	 * Composite params are not yet supported - This is a placeholder. Help welcome!
-	 *
-	 * TODO: implement
-	 */
-	public void notYetSupported() {
-		//nothig
+
+	@Override
+	public String getParamName() {
+		return myName;
 	}
+	
+	public ICompositeWithLeft<B> withLeft(ICriterion<A> theLeft) {
+		return new CompositeCriterion<A,B>(myName, theLeft);
+	}
+	
 	
 }

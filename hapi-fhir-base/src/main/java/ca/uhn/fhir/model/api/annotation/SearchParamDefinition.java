@@ -39,7 +39,10 @@ public @interface SearchParamDefinition {
 	
 	/**
 	 * If the parameter is of type "composite", this parameter lists the names of the parameters 
-	 * which this parameter is a composite of. E.g. "name-value-token" is a composite of "name" and "value-token"
+	 * which this parameter is a composite of. E.g. "name-value-token" is a composite of "name" and "value-token".
+	 * <p>
+	 * If the parameter is not a composite, this parameter must be empty
+	 * </p>
 	 */
 	String[] compositeOf() default {};
 	

@@ -15,6 +15,7 @@ public class SearchParameter {
 	private List<String> myTargetTypes;
 	private String myType;
 	private List<String> myCompositeOf;
+	private List<String> myCompositeTypes;
 
 	public SearchParameter() {
 
@@ -122,6 +123,17 @@ public class SearchParameter {
 			myCompositeOf = new ArrayList<String>();
 		}
 		return myCompositeOf;
+	}
+
+	public void setCompositeTypes(List<String> theCompositeTypes) {
+		myCompositeTypes = theCompositeTypes;
+	}
+
+	public List<String> getCompositeTypes() {
+		if (myCompositeTypes == null) {
+			myCompositeTypes = new ArrayList<String>();
+		}
+		return myCompositeTypes;
 	}
 
 }

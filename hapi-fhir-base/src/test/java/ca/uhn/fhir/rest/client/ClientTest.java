@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 
 import java.io.InputStream;
 import java.io.StringReader;
+import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Date;
@@ -45,6 +46,7 @@ import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.dstu.composite.CodingDt;
 import ca.uhn.fhir.model.dstu.resource.Conformance;
+import ca.uhn.fhir.model.dstu.resource.Observation;
 import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
@@ -58,6 +60,7 @@ import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IBasicClient;
 import ca.uhn.fhir.rest.client.interceptor.CapturingInterceptor;
+import ca.uhn.fhir.rest.param.CompositeParam;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.QuantityParam;
@@ -771,7 +774,7 @@ public class ClientTest {
 	}
 
 	@Test
-	public void testSearchComposite() throws Exception {
+	public void testSearchOrList() throws Exception {
 
 		String msg = getPatientFeedWithOneResult();
 
@@ -942,6 +945,28 @@ public class ClientTest {
 		assertEquals("http://foo/Patient?family=AAA&given=BBB", capt.getValue().getURI().toString());
 		resource = (Patient) response.getEntries().get(0).getResource();
 		assertEquals("PRP1660", resource.getIdentifier().get(0).getValue().getValue());
+
+	}
+	
+	
+	
+	@Test
+	public void testSearchByCompositeParam() throws Exception {
+
+		String msg = getPatientFeedWithOneResult();
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
+		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
+
+		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
+		StringParam str = new StringParam("FOO$BAR");
+		DateParam date = new DateParam("2001-01-01");
+		client.getObservationByNameValueDate(new CompositeParam<StringParam, DateParam>(str, date));
+
+		assertEquals("http://foo/Observation?" + Observation.SP_NAME_VALUE_DATE + "=" + URLEncoder.encode("FOO\\$BAR$2001-01-01","UTF-8"), capt.getValue().getURI().toString());
 
 	}
 

@@ -14,13 +14,12 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.text.WordUtils;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.tinder.model.AnyChild;
 import ca.uhn.fhir.tinder.model.BaseElement;
 import ca.uhn.fhir.tinder.model.BaseRootType;
@@ -261,7 +260,8 @@ public abstract class BaseStructureSpreadsheetParser extends BaseStructureParser
 							composite.setDescription(nextCompositeParam.getDescription());
 							composite.setPath(nextCompositeParam.getPath());
 							composite.setType("composite");
-							composite.setCompositeOf(Arrays.asList(part1.getPath(), part2.getPath()));
+							composite.setCompositeOf(Arrays.asList(part1.getName(), part2.getName()));
+							composite.setCompositeTypes(Arrays.asList(WordUtils.capitalize(part1.getType()), WordUtils.capitalize(part2.getType())));
 						}
 					}
 					

@@ -60,7 +60,11 @@ public class ${className} extends BaseResource implements IResource {
 	 * Path: <b>${param.path}</b><br/>
 	 * </p>
 	 */
+#if( ${param.typeCapitalized} == 'Composite' )
+	public static final CompositeClientParam<${param.compositeTypes[0]}ClientParam, ${param.compositeTypes[1]}ClientParam> ${param.fluentConstantName} = new CompositeClientParam<${param.compositeTypes[0]}ClientParam, ${param.compositeTypes[1]}ClientParam>(${param.constantName});
+#else
 	public static final ${param.typeCapitalized}ClientParam ${param.fluentConstantName} = new ${param.typeCapitalized}ClientParam(${param.constantName});
+#end
 
 #if( ${param.typeCapitalized} == 'Reference' )
 #foreach ( $include in $param.paths )

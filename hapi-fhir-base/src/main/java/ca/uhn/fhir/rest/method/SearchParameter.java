@@ -39,6 +39,9 @@ import ca.uhn.fhir.model.dstu.valueset.SearchParamTypeEnum;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.param.BaseQueryParameter;
 import ca.uhn.fhir.rest.param.CodingListParam;
+import ca.uhn.fhir.rest.param.CompositeAndListParam;
+import ca.uhn.fhir.rest.param.CompositeOrListParam;
+import ca.uhn.fhir.rest.param.CompositeParam;
 import ca.uhn.fhir.rest.param.DateAndListParam;
 import ca.uhn.fhir.rest.param.DateOrListParam;
 import ca.uhn.fhir.rest.param.DateParam;
@@ -70,12 +73,46 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 public class SearchParameter extends BaseQueryParameter {
 
 	private static HashMap<Class<?>, SearchParamTypeEnum> ourParamTypes;
+	static {
+		ourParamTypes = new HashMap<Class<?>, SearchParamTypeEnum>();
+
+		ourParamTypes.put(StringParam.class, SearchParamTypeEnum.STRING);
+		ourParamTypes.put(StringOrListParam.class, SearchParamTypeEnum.STRING);
+		ourParamTypes.put(StringAndListParam.class, SearchParamTypeEnum.STRING);
+
+		ourParamTypes.put(TokenParam.class, SearchParamTypeEnum.TOKEN);
+		ourParamTypes.put(TokenOrListParam.class, SearchParamTypeEnum.TOKEN);
+		ourParamTypes.put(TokenAndListParam.class, SearchParamTypeEnum.TOKEN);
+
+		ourParamTypes.put(DateParam.class, SearchParamTypeEnum.DATE);
+		ourParamTypes.put(DateOrListParam.class, SearchParamTypeEnum.DATE);
+		ourParamTypes.put(DateAndListParam.class, SearchParamTypeEnum.DATE);
+		ourParamTypes.put(DateRangeParam.class, SearchParamTypeEnum.DATE);
+
+		ourParamTypes.put(QuantityParam.class, SearchParamTypeEnum.QUANTITY);
+		ourParamTypes.put(QuantityOrListParam.class, SearchParamTypeEnum.QUANTITY);
+		ourParamTypes.put(QuantityAndListParam.class, SearchParamTypeEnum.QUANTITY);
+
+		ourParamTypes.put(NumberParam.class, SearchParamTypeEnum.NUMBER);
+		ourParamTypes.put(NumberOrListParam.class, SearchParamTypeEnum.NUMBER);
+		ourParamTypes.put(NumberAndListParam.class, SearchParamTypeEnum.NUMBER);
+
+		ourParamTypes.put(ReferenceParam.class, SearchParamTypeEnum.REFERENCE);
+		ourParamTypes.put(ReferenceOrListParam.class, SearchParamTypeEnum.REFERENCE);
+		ourParamTypes.put(ReferenceAndListParam.class, SearchParamTypeEnum.REFERENCE);
+
+		ourParamTypes.put(CompositeParam.class, SearchParamTypeEnum.COMPOSITE);
+		ourParamTypes.put(CompositeOrListParam.class, SearchParamTypeEnum.COMPOSITE);
+		ourParamTypes.put(CompositeAndListParam.class, SearchParamTypeEnum.COMPOSITE);
+	}
+	private Class<? extends IQueryParameterType>[] myCompositeTypes;
 	private Class<? extends IResource>[] myDeclaredTypes;
 	private String myDescription;
 	private String myName;
 	private IParamBinder myParamBinder;
 	private SearchParamTypeEnum myParamType;
 	private boolean myRequired;
+
 	private Class<?> myType;
 
 	public SearchParameter() {
@@ -150,8 +187,12 @@ public class SearchParameter extends BaseQueryParameter {
 		return myParamBinder.parse(theString);
 	}
 
+	public void setCompositeTypes(Class<? extends IQueryParameterType>[] theCompositeTypes) {
+		myCompositeTypes = theCompositeTypes;
+	}
+
 	public void setDeclaredTypes(Class<? extends IResource>[] theTypes) {
-		myDeclaredTypes=theTypes;
+		myDeclaredTypes = theTypes;
 	}
 
 	public void setDescription(String theDescription) {
@@ -166,57 +207,27 @@ public class SearchParameter extends BaseQueryParameter {
 		this.myRequired = required;
 	}
 
-	static {
-		ourParamTypes = new HashMap<Class<?>, SearchParamTypeEnum>();
-		
-		ourParamTypes.put(StringParam.class, SearchParamTypeEnum.STRING);
-		ourParamTypes.put(StringOrListParam.class, SearchParamTypeEnum.STRING);
-		ourParamTypes.put(StringAndListParam.class, SearchParamTypeEnum.STRING);
-		
-		ourParamTypes.put(TokenParam.class, SearchParamTypeEnum.TOKEN);
-		ourParamTypes.put(TokenOrListParam.class, SearchParamTypeEnum.TOKEN);
-		ourParamTypes.put(TokenAndListParam.class, SearchParamTypeEnum.TOKEN);
-		
-		ourParamTypes.put(DateParam.class, SearchParamTypeEnum.DATE);
-		ourParamTypes.put(DateOrListParam.class, SearchParamTypeEnum.DATE);
-		ourParamTypes.put(DateAndListParam.class, SearchParamTypeEnum.DATE);
-		ourParamTypes.put(DateRangeParam.class, SearchParamTypeEnum.DATE);
-
-		ourParamTypes.put(QuantityParam.class, SearchParamTypeEnum.QUANTITY);
-		ourParamTypes.put(QuantityOrListParam.class, SearchParamTypeEnum.QUANTITY);
-		ourParamTypes.put(QuantityAndListParam.class, SearchParamTypeEnum.QUANTITY);
-
-		ourParamTypes.put(NumberParam.class, SearchParamTypeEnum.NUMBER);
-		ourParamTypes.put(NumberOrListParam.class, SearchParamTypeEnum.NUMBER);
-		ourParamTypes.put(NumberAndListParam.class, SearchParamTypeEnum.NUMBER);
-
-		ourParamTypes.put(ReferenceParam.class, SearchParamTypeEnum.REFERENCE);
-		ourParamTypes.put(ReferenceOrListParam.class, SearchParamTypeEnum.REFERENCE);
-		ourParamTypes.put(ReferenceAndListParam.class, SearchParamTypeEnum.REFERENCE);
-
-	}
-	
 	@SuppressWarnings({ "unchecked" })
 	public void setType(final Class<?> type, Class<? extends Collection<?>> theInnerCollectionType, Class<? extends Collection<?>> theOuterCollectionType) {
 		this.myType = type;
 		if (IQueryParameterType.class.isAssignableFrom(type)) {
-			myParamBinder = new QueryParameterTypeBinder((Class<? extends IQueryParameterType>) type);
+			myParamBinder = new QueryParameterTypeBinder((Class<? extends IQueryParameterType>) type, myCompositeTypes);
 		} else if (IQueryParameterOr.class.isAssignableFrom(type)) {
-			myParamBinder = new QueryParameterOrBinder((Class<? extends IQueryParameterOr<?>>) type);
+			myParamBinder = new QueryParameterOrBinder((Class<? extends IQueryParameterOr<?>>) type,myCompositeTypes);
 		} else if (IQueryParameterAnd.class.isAssignableFrom(type)) {
-			myParamBinder = new QueryParameterAndBinder((Class<? extends IQueryParameterAnd<?>>) type);
+			myParamBinder = new QueryParameterAndBinder((Class<? extends IQueryParameterAnd<?>>) type, myCompositeTypes);
 		} else if (String.class.equals(type)) {
 			myParamBinder = new StringBinder();
-			myParamType=SearchParamTypeEnum.STRING;
+			myParamType = SearchParamTypeEnum.STRING;
 		} else {
 			throw new ConfigurationException("Unsupported data type for parameter: " + type.getCanonicalName());
 		}
 
-		if (myParamType==null) {
-			myParamType=ourParamTypes.get(type);
+		if (myParamType == null) {
+			myParamType = ourParamTypes.get(type);
 		}
-		
-		if (myParamType!=null) {
+
+		if (myParamType != null) {
 			// ok
 		} else if (StringDt.class.isAssignableFrom(type)) {
 			myParamType = SearchParamTypeEnum.STRING;

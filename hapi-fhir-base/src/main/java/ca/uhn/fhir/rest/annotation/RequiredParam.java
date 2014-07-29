@@ -23,18 +23,56 @@ package ca.uhn.fhir.rest.annotation;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
+import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.dstu.resource.Observation;
+import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 
 @Retention(RetentionPolicy.RUNTIME)
-
+/**
+ * Parameter annotation which specifies a search parameter for a {@link Search} method. 
+ */
 public @interface RequiredParam {
-    String name();
+	/**
+	 * This is the name for the parameter. Generally this should be a 
+	 * simple string (e.g. "name", or "identifier") which will be the name
+	 * of the URL parameter used to populate this method parameter.
+	 * <p>
+	 * Most resource model classes have constants which may be used to
+	 * supply values for this field, e.g. {@link Patient#SP_NAME} or
+	 * {@link Observation#SP_DATE}
+	 * </p>  
+	 * <p>
+	 * If you wish to specify a parameter for a resource reference which
+	 * only accepts a specific chained value, it is also valid to supply
+	 * a chained name here, such as "patient.name". It is recommended to
+	 * supply this using constants where possible, e.g.
+	 * <code>{@link Observation#SP_SUBJECT} + '.' + {@link Patient#SP_IDENTIFIER}</code>
+	 * </p>
+	 */
+	String name();
     
     /**
      * For resource reference parameters ({@link ReferenceParam}) this parameter may be
-     * used to indicate the resource type(s) which may be referenced by this param
+     * used to indicate the resource type(s) which may be referenced by this param.
+     * <p>
+     * If the parameter annotated with this annotation is not a {@link ReferenceParam},
+     * this value must not be populated.
+     * </p>
      */
     Class<? extends IResource>[] targetTypes() default {};
+    
+    
+    /**
+     * For composite parameters ({@link CompositeParam}) this parameter may be
+     * used to indicate the parameter type(s) which may be referenced by this param.
+     * <p>
+     * If the parameter annotated with this annotation is not a {@link CompositeParam},
+     * this value must not be populated.
+     * </p>
+     */
+    Class<? extends IQueryParameterType>[] compositeTypes() default {};
+
 
 }

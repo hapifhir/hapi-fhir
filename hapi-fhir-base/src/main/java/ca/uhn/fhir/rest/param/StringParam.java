@@ -27,6 +27,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.server.Constants;
 
 public class StringParam implements IQueryParameterType {
@@ -61,7 +62,7 @@ public class StringParam implements IQueryParameterType {
 
 	@Override
 	public String getValueAsQueryToken() {
-		return myValue;
+		return ParameterUtil.escape(myValue);
 	}
 
 	public String getValueNotNull() {
@@ -91,7 +92,7 @@ public class StringParam implements IQueryParameterType {
 		} else {
 			setExact(false);
 		}
-		myValue = theValue;
+		myValue = ParameterUtil.unescape(theValue);
 	}
 
 	@Override
@@ -102,6 +103,10 @@ public class StringParam implements IQueryParameterType {
 			builder.append("exact", myExact);
 		}
 		return builder.toString();
+	}
+
+	public StringDt getValueAsStringDt() {
+		return new StringDt(myValue);
 	}
 
 }

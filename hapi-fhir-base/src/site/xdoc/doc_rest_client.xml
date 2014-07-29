@@ -89,6 +89,7 @@
 			</subsection>			
 						
 			<subsection name="Type - Search/Query">
+				
 				<p>
 					The following example shows how to query using the generic client:
 				</p>
@@ -97,6 +98,8 @@
 					<param name="file"
 						value="src/site/example/java/example/GenericClientExample.java" />
 				</macro>
+				
+				<h4>Search - Paging</h4>
 				<p>
 					If the server supports paging results, the client has a page method
 					which can be used to load subsequent pages.
@@ -106,6 +109,21 @@
 					<param name="file"
 						value="src/site/example/java/example/GenericClientExample.java" />
 				</macro>
+				
+				<h4>Search - Composite Parameters</h4>
+				<p>
+					If a composite parameter is being searched on, the parameter
+					takes a "left" and "right" operand, each of which is
+					a parameter from the resource being seached. The following example shows the
+					syntax.
+				</p>
+				<macro name="snippet">
+					<param name="id" value="searchComposite" />
+					<param name="file"
+						value="src/site/example/java/example/GenericClientExample.java" />
+				</macro>
+				
+				<h4>Search - Query Options</h4>
 				<p>
 					The fluent search also has methods for sorting, limiting, specifying
 					JSON encoding, etc.
@@ -115,6 +133,7 @@
 					<param name="file"
 						value="src/site/example/java/example/GenericClientExample.java" />
 				</macro>
+				
 			</subsection>			
 
 			<subsection name="Instance - Delete">
@@ -124,6 +143,23 @@
 				</p>
 				<macro name="snippet">
 					<param name="id" value="delete" />
+					<param name="file"
+						value="src/site/example/java/example/GenericClientExample.java" />
+				</macro>
+			</subsection>			
+
+			<subsection name="Instance - Update">
+				<p>
+					Updating a resource is similar to creating one, except that
+					an ID must be supplied since you are updating a previously
+					existing resource instance.
+				</p>
+				<p>
+					The following example shows how to perform an update
+					operation using the generic client:
+				</p>
+				<macro name="snippet">
+					<param name="id" value="update" />
 					<param name="file"
 						value="src/site/example/java/example/GenericClientExample.java" />
 				</macro>
@@ -157,7 +193,7 @@
 		<section name="The Annotation-Driven Client">
 
 			<p>
-				HAPI also provides a second style of client caled the annotation-driven client.
+				HAPI also provides a second style of client, called the <b>annotation-driven</b> client.
 			</p>
 
 			<p>

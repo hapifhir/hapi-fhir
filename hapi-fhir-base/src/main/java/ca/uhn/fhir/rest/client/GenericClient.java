@@ -67,6 +67,8 @@ import ca.uhn.fhir.rest.gclient.ISort;
 import ca.uhn.fhir.rest.gclient.ITransaction;
 import ca.uhn.fhir.rest.gclient.ITransactionTyped;
 import ca.uhn.fhir.rest.gclient.IUntypedQuery;
+import ca.uhn.fhir.rest.gclient.IUpdate;
+import ca.uhn.fhir.rest.gclient.IUpdateTyped;
 import ca.uhn.fhir.rest.method.DeleteMethodBinding;
 import ca.uhn.fhir.rest.method.HistoryMethodBinding;
 import ca.uhn.fhir.rest.method.HttpDeleteClientInvocation;
@@ -77,7 +79,6 @@ import ca.uhn.fhir.rest.method.MethodUtil;
 import ca.uhn.fhir.rest.method.ReadMethodBinding;
 import ca.uhn.fhir.rest.method.SearchMethodBinding;
 import ca.uhn.fhir.rest.method.TransactionMethodBinding;
-import ca.uhn.fhir.rest.method.UpdateMethodBinding;
 import ca.uhn.fhir.rest.method.ValidateMethodBinding;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
@@ -278,7 +279,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	@Override
 	public MethodOutcome update(IdDt theIdDt, IResource theResource) {
-		BaseHttpClientInvocation invocation = UpdateMethodBinding.createUpdateInvocation(theResource, theIdDt, null, myContext);
+		BaseHttpClientInvocation invocation = MethodUtil.createUpdateInvocation(theResource, null, theIdDt, myContext);
 		if (isKeepResponses()) {
 			myLastRequest = invocation.asHttpRequest(getServerBase(), createExtraParams(), getEncoding());
 		}
@@ -342,6 +343,24 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		public T andLogRequestAndResponse(boolean theLogRequestAndResponse) {
 			myQueryLogRequestAndResponse = theLogRequestAndResponse;
 			return (T) this;
+		}
+
+		protected IResource parseResourceBody(String theResourceBody) {
+			EncodingEnum encoding = null;
+			for (int i = 0; i < theResourceBody.length() && encoding == null; i++) {
+				switch (theResourceBody.charAt(i)) {
+				case '<':
+					encoding = EncodingEnum.XML;
+					break;
+				case '{':
+					encoding = EncodingEnum.JSON;
+					break;
+				}
+			}
+			if (encoding == null) {
+				throw new InvalidRequestException("FHIR client can't determine resource encoding");
+			}
+			return encoding.newParser(myContext).parseResource(theResourceBody);
 		}
 
 		@SuppressWarnings("unchecked")
@@ -419,23 +438,10 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		@Override
 		public MethodOutcome execute() {
 			if (myResource == null) {
-				EncodingEnum encoding = null;
-				for (int i = 0; i < myResourceBody.length() && encoding == null; i++) {
-					switch (myResourceBody.charAt(i)) {
-					case '<':
-						encoding = EncodingEnum.XML;
-						break;
-					case '{':
-						encoding = EncodingEnum.JSON;
-						break;
-					}
-				}
-				if (encoding == null) {
-					throw new InvalidRequestException("FHIR client can't determine resource encoding");
-				}
-				myResource = encoding.newParser(myContext).parseResource(myResourceBody);
+				myResource = parseResourceBody(myResourceBody);
 			}
-
+			myId = getPreferredId(myResource, myId);
+			
 			BaseHttpClientInvocation invocation = MethodUtil.createCreateInvocation(myResource, myResourceBody, myId, myContext);
 
 			RuntimeResourceDefinition def = myContext.getResourceDefinition(myResource);
@@ -447,6 +453,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			return invoke(params, binding, invocation);
 
 		}
+
 
 		@Override
 		public ICreateTyped resource(IResource theResource) {
@@ -471,6 +478,76 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		@Override
 		public CreateInternal withId(String theId) {
 			myId = theId;
+			return this;
+		}
+
+	}
+	
+	private class UpdateInternal extends BaseClientExecutable<IUpdateTyped, MethodOutcome> implements IUpdate, IUpdateTyped {
+
+		private IdDt myId;
+		private String myResourceBody;
+		private IResource myResource;
+
+		@Override
+		public MethodOutcome execute() {
+			if (myResource == null) {
+				myResource = parseResourceBody(myResourceBody);
+			}
+			if (myId == null) {
+				myId = myResource.getId();
+			}
+			if (myId==null || myId.hasIdPart() == false) {
+				throw new InvalidRequestException("No ID supplied for resource to update, can not invoke server");
+			}
+			
+			BaseHttpClientInvocation invocation = MethodUtil.createUpdateInvocation(myResource, myResourceBody, myId, myContext);
+
+			RuntimeResourceDefinition def = myContext.getResourceDefinition(myResource);
+			final String resourceName = def.getName();
+
+			OutcomeResponseHandler binding = new OutcomeResponseHandler(resourceName);
+
+			Map<String, List<String>> params = new HashMap<String, List<String>>();
+			return invoke(params, binding, invocation);
+
+		}
+
+		@Override
+		public IUpdateTyped resource(IResource theResource) {
+			Validate.notNull(theResource, "Resource can not be null");
+			myResource = theResource;
+			return this;
+		}
+
+		@Override
+		public IUpdateTyped resource(String theResourceBody) {
+			Validate.notBlank(theResourceBody, "Body can not be null or blank");
+			myResourceBody = theResourceBody;
+			return this;
+		}
+
+		@Override
+		public IUpdateTyped withId(IdDt theId) {
+			if (theId == null) {
+				throw new NullPointerException("theId can not be null");
+			}
+			if (theId.hasIdPart()==false) {
+				throw new NullPointerException("theId must not be blank and must contain an ID, found: "+theId.getValue());
+			}
+			myId = theId;
+			return this;
+		}
+
+		@Override
+		public IUpdateTyped withId(String theId) {
+			if (theId == null) {
+				throw new NullPointerException("theId can not be null");
+			}
+			if (isBlank(theId)) {
+				throw new NullPointerException("theId must not be blank and must contain an ID, found: "+theId);
+			}
+			myId=new IdDt(theId);
 			return this;
 		}
 
@@ -923,5 +1000,18 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 
 	}
+
+	protected String getPreferredId(IResource theResource, String theId) {
+		if (isNotBlank(theId)) {
+			return theId;
+		}
+		return theResource.getId().getIdPart();
+	}
+
+	@Override
+	public IUpdate update() {
+		return new UpdateInternal();
+	}
+
 
 }

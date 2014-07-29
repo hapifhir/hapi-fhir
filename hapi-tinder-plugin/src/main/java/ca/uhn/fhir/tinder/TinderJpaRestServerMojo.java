@@ -1,17 +1,12 @@
 package ca.uhn.fhir.tinder;
 
-import static org.apache.commons.lang.StringUtils.defaultString;
-
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.http.ParseException;
 import org.apache.maven.model.Resource;
 import org.apache.maven.plugin.AbstractMojo;
@@ -25,8 +20,6 @@ import org.apache.maven.project.MavenProject;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 
-import ca.uhn.fhir.tinder.model.BaseRootType;
-import ca.uhn.fhir.tinder.model.Extension;
 import ca.uhn.fhir.tinder.parser.ResourceGeneratorUsingSpreadsheet;
 
 @Mojo(name = "generate-jparest-server", defaultPhase = LifecyclePhase.GENERATE_SOURCES)
@@ -151,7 +144,7 @@ public class TinderJpaRestServerMojo extends AbstractMojo {
 		TinderJpaRestServerMojo mojo = new TinderJpaRestServerMojo();
 		mojo.packageBase = "ca.uhn.test";
 		mojo.baseResourceNames = java.util.Collections.singletonList("observation");
-		mojo.targetDirectory = new File("target/gen");
+		mojo.targetDirectory = new File("target/generated/valuesets");
 		mojo.execute();
 	}
 

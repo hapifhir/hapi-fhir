@@ -60,6 +60,18 @@ public class InstantDt extends BaseDateTimeDt {
 	}
 
 	/**
+	 * Create a new DateTimeDt using an existing value. <b>Use this constructor with caution</b>,
+	 * as it may create more precision than warranted (since for example it is possible to pass in
+	 * a DateTime with only a year, and this constructor will convert to an InstantDt with 
+	 * milliseconds precision).  
+	 */
+	public InstantDt(BaseDateTimeDt theDateTime) {
+		setValue(theDateTime.getValue());
+		setPrecision(DEFAULT_PRECISION);
+		setTimeZone(theDateTime.getTimeZone());
+	}
+
+	/**
 	 * Create a new DateTimeDt
 	 */
 	@SimpleSetter(suffix = "WithMillisPrecision")

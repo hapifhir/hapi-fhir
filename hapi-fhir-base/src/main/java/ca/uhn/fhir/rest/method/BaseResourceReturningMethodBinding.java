@@ -79,13 +79,15 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 			throw new ConfigurationException("Invalid return type '" + methodReturnType.getCanonicalName() + "' on method '" + theMethod.getName() + "' on type: " + theMethod.getDeclaringClass().getCanonicalName());
 		}
 
-		myResourceType = theReturnResourceType;
 		if (theReturnResourceType != null) {
-			ResourceDef resourceDefAnnotation = theReturnResourceType.getAnnotation(ResourceDef.class);
-			if (resourceDefAnnotation == null) {
-				throw new ConfigurationException(theReturnResourceType.getCanonicalName() + " has no @" + ResourceDef.class.getSimpleName() + " annotation");
+			if (IResource.class.isAssignableFrom(theReturnResourceType)) {
+				myResourceType = theReturnResourceType;
+				ResourceDef resourceDefAnnotation = theReturnResourceType.getAnnotation(ResourceDef.class);
+				if (resourceDefAnnotation == null) {
+					throw new ConfigurationException(theReturnResourceType.getCanonicalName() + " has no @" + ResourceDef.class.getSimpleName() + " annotation");
+				}
+				myResourceName = resourceDefAnnotation.name();
 			}
-			myResourceName = resourceDefAnnotation.name();
 		}
 	}
 
@@ -192,7 +194,7 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 
 		Integer count = RestfulServer.extractCountParameter(theRequest.getServletRequest());
 
-		boolean respondGzip=theRequest.isRespondGzip();
+		boolean respondGzip = theRequest.isRespondGzip();
 
 		IBundleProvider result = invokeServer(theRequest, params);
 		switch (getReturnType()) {
@@ -209,7 +211,6 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 			break;
 		}
 	}
-
 
 	/**
 	 * Subclasses may override

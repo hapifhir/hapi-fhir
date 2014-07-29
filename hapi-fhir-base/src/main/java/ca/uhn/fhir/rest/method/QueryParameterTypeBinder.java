@@ -31,11 +31,10 @@ import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
-final class QueryParameterTypeBinder implements IParamBinder {
-	private final Class<? extends IQueryParameterType> myType;
+final class QueryParameterTypeBinder extends BaseBinder<IQueryParameterType> implements IParamBinder {
 
-	QueryParameterTypeBinder(Class<? extends IQueryParameterType> theType) {
-		myType = theType;
+	QueryParameterTypeBinder(Class<? extends IQueryParameterType> theType, Class<? extends IQueryParameterType>[] theCompositeTypes) {
+		super(theType, theCompositeTypes);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -53,24 +52,16 @@ final class QueryParameterTypeBinder implements IParamBinder {
 			return null;
 		}
 		
-		IQueryParameterType dt;
-		try {
-			dt = myType.newInstance();
-			if (theParams.size() == 0 || theParams.get(0).size() == 0) {
-				return dt;
-			}
-			if (theParams.size() > 1 || theParams.get(0).size() > 1) {
-				throw new InvalidRequestException("Multiple values detected");
-			}
-			
-			dt.setValueAsQueryToken(theParams.get(0).getQualifier(), value);
-		} catch (InstantiationException e) {
-			throw new InternalErrorException(e);
-		} catch (IllegalAccessException e) {
-			throw new InternalErrorException(e);
-		} catch (SecurityException e) {
-			throw new InternalErrorException(e);
+		IQueryParameterType dt = super.newInstance();
+
+		if (theParams.size() == 0 || theParams.get(0).size() == 0) {
+			return dt;
 		}
+		if (theParams.size() > 1 || theParams.get(0).size() > 1) {
+			throw new InvalidRequestException("Multiple values detected");
+		}
+
+		dt.setValueAsQueryToken(theParams.get(0).getQualifier(), value);
 		return dt;
 	}
 

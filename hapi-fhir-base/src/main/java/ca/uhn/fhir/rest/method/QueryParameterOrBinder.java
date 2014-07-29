@@ -25,14 +25,14 @@ import java.util.List;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IQueryParameterOr;
+import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
-final class QueryParameterOrBinder implements IParamBinder {
-	private final Class<? extends IQueryParameterOr<?>> myType;
+final class QueryParameterOrBinder extends BaseBinder<IQueryParameterOr<?>> implements IParamBinder {
 
-	QueryParameterOrBinder(Class<? extends IQueryParameterOr<?>> theType) {
-		myType = theType;
+	QueryParameterOrBinder(Class<? extends IQueryParameterOr<?>> theType, Class<? extends IQueryParameterType>[] theCompositeTypes) {
+		super(theType, theCompositeTypes);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -47,7 +47,7 @@ final class QueryParameterOrBinder implements IParamBinder {
 	public Object parse(List<QualifiedParamList> theString) throws InternalErrorException, InvalidRequestException {
 		IQueryParameterOr<?> dt;
 		try {
-			dt = myType.newInstance();
+			dt = newInstance();
 			if (theString.size() == 0 || theString.get(0).size() == 0) {
 				return dt;
 			}
@@ -56,10 +56,6 @@ final class QueryParameterOrBinder implements IParamBinder {
 			}
 			
 			dt.setValuesAsQueryTokens(theString.get(0));
-		} catch (InstantiationException e) {
-			throw new InternalErrorException(e);
-		} catch (IllegalAccessException e) {
-			throw new InternalErrorException(e);
 		} catch (SecurityException e) {
 			throw new InternalErrorException(e);
 		}

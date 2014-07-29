@@ -28,6 +28,7 @@ import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
+import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.method.QualifiedParamList;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -160,6 +161,14 @@ public class DateParam extends DateTimeDt implements IQueryParameterType, IQuery
 		b.append(getValueAsString());
 		b.append("]");
 		return b.toString();
+	}
+
+	public InstantDt getValueAsInstantDt() {
+		return new InstantDt(getValue());
+	}
+
+	public DateTimeDt getValueAsDateTimeDt() {
+		return new DateTimeDt(getValueAsString());
 	}
 
 }

@@ -1,6 +1,6 @@
 package ca.uhn.fhir.rest.method;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 import java.io.IOException;
 import java.io.PushbackReader;
@@ -36,6 +36,7 @@ import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.TagListParam;
 import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.annotation.Count;
@@ -80,6 +81,37 @@ import ca.uhn.fhir.util.ReflectionUtil;
 public class MethodUtil {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(MethodUtil.class);
+
+	public static HttpPutClientInvocation createUpdateInvocation(IResource theResource, String theResourceBody, IdDt theId, FhirContext theContext) {
+		String resourceName = theContext.getResourceDefinition(theResource).getName();
+		StringBuilder urlBuilder = new StringBuilder();
+		urlBuilder.append(resourceName);
+		urlBuilder.append('/');
+		urlBuilder.append(theId.getIdPart());
+	
+		HttpPutClientInvocation retVal;
+		String urlExtension = urlBuilder.toString();
+		if (StringUtils.isBlank(theResourceBody)) {
+			retVal = new HttpPutClientInvocation(theContext, theResource, urlExtension);
+		} else {
+			retVal = new HttpPutClientInvocation(theContext, theResourceBody, false, urlExtension);
+		}
+
+		if (theId.hasVersionIdPart()) {
+			String versionId = theId.getVersionIdPart();
+			if (StringUtils.isNotBlank(versionId)) {
+				urlBuilder.append('/');
+				urlBuilder.append(Constants.PARAM_HISTORY);
+				urlBuilder.append('/');
+				urlBuilder.append(versionId);
+				retVal.addHeader(Constants.HEADER_CONTENT_LOCATION, urlBuilder.toString());
+			}
+		} 
+		
+		addTagsToPostOrPut(theResource, retVal);
+	
+		return retVal;
+	}
 
 	public static void parseClientRequestResourceHeaders(Map<String, List<String>> theHeaders, IResource resource) {
 		List<String> lmHeaders = theHeaders.get(Constants.HEADER_LAST_MODIFIED_LOWERCASE);
@@ -298,6 +330,7 @@ public class MethodUtil {
 						parameter.setName(((RequiredParam) nextAnnotation).name());
 						parameter.setRequired(true);
 						parameter.setDeclaredTypes(((RequiredParam) nextAnnotation).targetTypes());
+						parameter.setCompositeTypes(((RequiredParam) nextAnnotation).compositeTypes());
 						parameter.setType(parameterType, innerCollectionType, outerCollectionType);
 						MethodUtil.extractDescription(parameter, annotations);
 						param = parameter;
@@ -306,6 +339,7 @@ public class MethodUtil {
 						parameter.setName(((OptionalParam) nextAnnotation).name());
 						parameter.setRequired(false);
 						parameter.setDeclaredTypes(((OptionalParam) nextAnnotation).targetTypes());
+						parameter.setCompositeTypes(((OptionalParam) nextAnnotation).compositeTypes());
 						parameter.setType(parameterType, innerCollectionType, outerCollectionType);
 						MethodUtil.extractDescription(parameter, annotations);
 						param = parameter;

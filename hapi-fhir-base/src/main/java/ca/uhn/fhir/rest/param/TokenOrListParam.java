@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ca.uhn.fhir.model.dstu.composite.CodingDt;
+import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 
 /*
  * #%L
@@ -44,8 +45,20 @@ public class TokenOrListParam  extends BaseOrListParam<TokenParam> {
 		return retVal;
 	}
 
+	/**
+	 * Convenience method which adds a token to this OR list
+	 * using the system and code from a coding
+	 */
 	public void add(CodingDt theCodingDt) {
 		add(new TokenParam(theCodingDt));
+	}
+
+	/**
+	 * Convenience method which adds a token to this OR list
+	 * using the system and value from an identifier
+	 */
+	public void add(IdentifierDt theIdentifierDt) {
+		add(new TokenParam(theIdentifierDt));
 	}
 
 }

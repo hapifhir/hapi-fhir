@@ -26,8 +26,6 @@ import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.Set;
 
-import org.apache.commons.lang3.StringUtils;
-
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
@@ -42,10 +40,9 @@ import ca.uhn.fhir.rest.method.SearchMethodBinding.RequestType;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
-public class UpdateMethodBinding extends BaseOutcomeReturningMethodBindingWithResourceParam {
+class UpdateMethodBinding extends BaseOutcomeReturningMethodBindingWithResourceParam {
 
 	private Integer myIdParameterIndex;
-
 	private Integer myVersionIdParameterIndex;
 
 	public UpdateMethodBinding(Method theMethod, FhirContext theContext, Object theProvider) {
@@ -112,13 +109,15 @@ public class UpdateMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 			throw new NullPointerException("ID can not be null");
 		}
 
-		IdDt versionIdDt = null;
 		if (myVersionIdParameterIndex != null) {
-			versionIdDt = (IdDt) theArgs[myVersionIdParameterIndex];
+			IdDt versionIdDt = (IdDt) theArgs[myVersionIdParameterIndex];
+			if (idDt.hasVersionIdPart() == false) {
+				idDt = idDt.withVersion(versionIdDt.getIdPart());
+			}
 		}
 		FhirContext context = getContext();
 
-		HttpPutClientInvocation retVal = createUpdateInvocation(theResource, idDt, versionIdDt, context);
+		HttpPutClientInvocation retVal = MethodUtil.createUpdateInvocation(theResource, null,idDt, context);
 
 		for (int idx = 0; idx < theArgs.length; idx++) {
 			IParameter nextParam = getParameters().get(idx);
@@ -128,40 +127,7 @@ public class UpdateMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 		return retVal;
 	}
 
-	public static HttpPutClientInvocation createUpdateInvocation(IResource theResource, IdDt idDt, IdDt versionIdDt, FhirContext context) {
-		String resourceName = context.getResourceDefinition(theResource).getName();
-		StringBuilder urlExtension = new StringBuilder();
-		urlExtension.append(resourceName);
-		urlExtension.append('/');
-		urlExtension.append(idDt.getIdPart());
-		HttpPutClientInvocation retVal = new HttpPutClientInvocation(context, theResource, urlExtension.toString());
-
-		if (idDt.hasVersionIdPart()) {
-			String versionId = idDt.getVersionIdPart();
-			if (StringUtils.isNotBlank(versionId)) {
-				StringBuilder b = new StringBuilder();
-//				b.append('/');
-				b.append(urlExtension);
-				b.append("/_history/");
-				b.append(versionId);
-				retVal.addHeader(Constants.HEADER_CONTENT_LOCATION, b.toString());
-			}
-		} else if (versionIdDt != null) {
-			String versionId = versionIdDt.getValue();
-			if (StringUtils.isNotBlank(versionId)) {
-				StringBuilder b = new StringBuilder();
-//				b.append('/');
-				b.append(urlExtension);
-				b.append("/_history/");
-				b.append(versionId);
-				retVal.addHeader(Constants.HEADER_CONTENT_LOCATION, b.toString());
-			}
-		}
-
-		MethodUtil.addTagsToPostOrPut(theResource, retVal);
-
-		return retVal;
-	}
+	
 
 	/*
 	@Override

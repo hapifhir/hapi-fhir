@@ -4,6 +4,7 @@ import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 import java.io.StringReader;
+import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 
@@ -15,6 +16,7 @@ import org.apache.http.ProtocolVersion;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicStatusLine;
@@ -41,6 +43,7 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.exceptions.NonFhirResponseException;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 public class GenericClientTest {
 
@@ -137,6 +140,68 @@ public class GenericClientTest {
 		
 	}
 	
+	
+	@Test
+	public void testUpdate() throws Exception {
+
+		Patient p1 = new Patient();
+		p1.addIdentifier("foo:bar", "12345");
+		p1.addName().addFamily("Smith").addGiven("John");
+		TagList list = new TagList();
+		list.addTag("http://hl7.org/fhir/tag", "urn:happytag", "This is a happy resource");
+		ResourceMetadataKeyEnum.TAG_LIST.put(p1, list);
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 201, "OK"));
+		when(myHttpResponse.getAllHeaders()).thenReturn(new Header[] { new BasicHeader(Constants.HEADER_LOCATION, "/Patient/44/_history/22") });
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(""), Charset.forName("UTF-8")));
+
+		IGenericClient client = myCtx.newRestfulGenericClient("http://example.com/fhir");
+
+		try {
+			client.update().resource(p1).execute();
+			fail();
+		} catch (InvalidRequestException e) {
+			// should happen because no ID set
+		}
+		
+		assertEquals(0, capt.getAllValues().size());
+
+		p1.setId("44");
+		client.update().resource(p1).execute();
+		
+		assertEquals(1, capt.getAllValues().size());
+
+		MethodOutcome outcome = client.update().resource(p1).execute();
+		assertEquals("44", outcome.getId().getIdPart());
+		assertEquals("22", outcome.getId().getVersionIdPart());
+
+		assertEquals(2, capt.getAllValues().size());
+
+		assertEquals("http://example.com/fhir/Patient/44", capt.getValue().getURI().toString());
+		assertEquals("PUT", capt.getValue().getMethod());
+		Header catH = capt.getValue().getFirstHeader("Category");
+		assertNotNull(Arrays.asList(capt.getValue().getAllHeaders()).toString(), catH);
+		assertEquals("urn:happytag; label=\"This is a happy resource\"; scheme=\"http://hl7.org/fhir/tag\"", catH.getValue());
+		
+		/*
+		 * Try fluent options
+		 */
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(""), Charset.forName("UTF-8")));
+		client.update().resource(p1).withId("123").execute();
+		assertEquals(3, capt.getAllValues().size());
+		assertEquals("http://example.com/fhir/Patient/123", capt.getAllValues().get(2).getURI().toString());
+		
+		String resourceText = "<Patient xmlns=\"http://hl7.org/fhir\">    </Patient>";
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(""), Charset.forName("UTF-8")));
+		client.update().resource(resourceText).withId("123").execute();
+		assertEquals("http://example.com/fhir/Patient/123", capt.getAllValues().get(3).getURI().toString());
+		assertEquals(resourceText, IOUtils.toString(((HttpPut)capt.getAllValues().get(3)).getEntity().getContent()));
+		assertEquals(4, capt.getAllValues().size());
+		
+	}
 	
 	@Test
 	public void testDelete() throws Exception {
@@ -361,6 +426,45 @@ public class GenericClientTest {
 		//@formatter:on
 
 		assertEquals("http://example.com/fhir/Patient?identifier=http%3A%2F%2Fexample.com%2Ffhir%7CZZZ", capt.getValue().getURI().toString());
+
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
+
+		//@formatter:off
+		response = client.search()
+				.forResource("Patient")
+				.where(Patient.IDENTIFIER.exactly().code("ZZZ"))
+				.execute();
+		//@formatter:on
+
+		assertEquals("http://example.com/fhir/Patient?identifier=ZZZ", capt.getAllValues().get(1).getURI().toString());
+
+	}
+	
+	@SuppressWarnings("unused")
+	@Test
+	public void testSearchByComposite() throws Exception {
+
+		String msg = getPatientFeedWithOneResult();
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
+
+		IGenericClient client = myCtx.newRestfulGenericClient("http://foo");
+
+		//@formatter:off
+		Bundle response = client.search()
+				.forResource("Observation")
+				.where(Observation.NAME_VALUE_DATE
+						.withLeft(Observation.NAME.exactly().code("FOO$BAR"))
+						.withRight(Observation.VALUE_DATE.exactly().day("2001-01-01"))
+					  )
+				.execute();
+		//@formatter:on
+
+		assertEquals("http://foo/Observation?" + Observation.SP_NAME_VALUE_DATE + "=" + URLEncoder.encode("FOO\\$BAR$2001-01-01","UTF-8"), capt.getValue().getURI().toString());
 
 	}
 
